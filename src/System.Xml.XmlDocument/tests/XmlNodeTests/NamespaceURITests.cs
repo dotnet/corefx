@@ -113,7 +113,7 @@ namespace XmlDocumentTests.XmlNodeTests
             Assert.Equal(xmlnsName, cloned.NamespaceURI);
         }
 
-        /*[Fact] TODO*/
+        [Fact]
         public static void CreateAttributeXlmnsWithWrongNamespace()
         {
             var xmlDocument = new XmlDocument();

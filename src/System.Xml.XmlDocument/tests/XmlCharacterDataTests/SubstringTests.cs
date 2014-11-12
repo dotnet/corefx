@@ -4,7 +4,7 @@ using System.Xml;
 
 namespace XmlDocumentTests.XmlCharacterDataTests
 {
-    class SubstringTests
+    public class SubstringTests
     {
 
         [Fact]
