@@ -18,16 +18,9 @@ namespace System.Collections.Immutable.Test
         private static readonly ImmutableArray<GenericParameterHelper> oneElementRefType = ImmutableArray.Create(new GenericParameterHelper(1));
         private static readonly ImmutableArray<string> twoElementRefTypeWithNull = ImmutableArray.Create("1", null);
 
-        private static readonly ImmutableArray<int>.Builder emptyBuilder = CreateBuilder<int>();
-        private static readonly ImmutableArray<int>.Builder oneElementBuilder = CreateBuilder<int>(1);
-        private static readonly ImmutableArray<int>.Builder manyElementsBuilder = CreateBuilder<int>(1, 2, 3);
-
-        private static ImmutableArray<T>.Builder CreateBuilder<T>(params T[] items)
-        {
-            ImmutableArray<T>.Builder builder = ImmutableArray.CreateBuilder<T>(items.Length);
-            builder.AddRange(items);
-            return builder;
-        }
+        private static readonly ImmutableArray<int>.Builder emptyBuilder = ImmutableArray<int>.Empty.ToBuilder();
+        private static readonly ImmutableArray<int>.Builder oneElementBuilder = ImmutableArray.Create<int>(1).ToBuilder();
+        private static readonly ImmutableArray<int>.Builder manyElementsBuilder = ImmutableArray.Create<int>(1, 2, 3).ToBuilder();
 
         [Fact]
         public void Select()
