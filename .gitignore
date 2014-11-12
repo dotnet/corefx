@@ -8,3 +8,4 @@ packages
 *.sln.ide
 *.metaproj
 *.metaproj.tmp
+TestResults
