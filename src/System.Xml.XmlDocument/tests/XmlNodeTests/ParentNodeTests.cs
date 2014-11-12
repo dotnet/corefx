@@ -52,7 +52,7 @@ namespace XmlDocumentTests.XmlNodeTests
             Assert.Same(xmlDocument, xmlDocument.DocumentElement.ParentNode);
         }
 
-        /*[Fact] TODO*/
+        [Fact]
         public static void OnDocumentNode()
         {
             var xmlDocument = new XmlDocument();

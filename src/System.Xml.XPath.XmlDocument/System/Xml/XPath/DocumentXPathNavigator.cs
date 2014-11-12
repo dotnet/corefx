@@ -904,7 +904,7 @@ namespace System.Xml
 
         public override void MoveToRoot()
         {
-            for (;;)
+            for (; ;)
             {
                 XmlNode parent = source.ParentNode;
                 if (parent == null)
@@ -1040,7 +1040,7 @@ namespace System.Xml
                 }
                 else
                 {
-                    for (;;)
+                    for (; ;)
                     {
                         XmlNode nextSibling = following.NextSibling;
                         if (nextSibling != null)
@@ -1129,7 +1129,7 @@ namespace System.Xml
                 }
                 else
                 {
-                    for (;;)
+                    for (; ;)
                     {
                         XmlNode nextSibling = following.NextSibling;
                         if (nextSibling != null)
@@ -2044,7 +2044,7 @@ namespace System.Xml
 
         internal static bool IsFollowingSibling(XmlNode left, XmlNode right)
         {
-            for (;;)
+            for (; ;)
             {
                 left = left.NextSibling;
                 if (left == null)
@@ -2061,7 +2061,7 @@ namespace System.Xml
 
         private static bool IsDescendant(XmlNode top, XmlNode bottom)
         {
-            for (;;)
+            for (; ;)
             {
                 XmlNode parent = bottom.ParentNode;
                 if (parent == null)
@@ -2202,7 +2202,7 @@ namespace System.Xml
 
         public override bool MoveNext()
         {
-            for (;;)
+            for (; ;)
             {
                 if (nav.MoveToFirstChild())
                 {
