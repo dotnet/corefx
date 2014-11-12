@@ -82,6 +82,7 @@ namespace System.Collections.Immutable.Test
         public static void LastIndexOfTest<TCollection>(
             Func<IEnumerable<int>, TCollection> factory,
             Func<TCollection, int, int> lastIndexOfItem,
+            Func<TCollection, int, IEqualityComparer<int>, int> lastIndexOfItemEQ,
             Func<TCollection, int, int, int> lastIndexOfItemIndex,
             Func<TCollection, int, int, int, int> lastIndexOfItemIndexCount,
             Func<TCollection, int, int, int, IEqualityComparer<int>, int> lastIndexOfItemIndexCountEQ)
@@ -99,13 +100,16 @@ namespace System.Collections.Immutable.Test
             Assert.Throws<ArgumentOutOfRangeException>(() => lastIndexOfItemIndexCountEQ(collection1256, 100, 1, -1, new CustomComparer(1)));
 
             Assert.Equal(-1, lastIndexOfItem(emptyCollection, 5));
+            Assert.Equal(-1, lastIndexOfItemEQ(emptyCollection, 5, EqualityComparer<int>.Default));
             Assert.Equal(-1, lastIndexOfItemIndex(emptyCollection, 5, 0));
             Assert.Equal(-1, lastIndexOfItemIndexCount(emptyCollection, 5, 0, 0));
+            Assert.Equal(-1, lastIndexOfItemIndexCountEQ(emptyCollection, 5, 0, 0, EqualityComparer<int>.Default));
 
             // Create a list with contents: 100,101,102,103,104,100,101,102,103,104
             var list = ImmutableList<int>.Empty.AddRange(Enumerable.Range(100, 5).Concat(Enumerable.Range(100, 5)));
             var bclList = list.ToList();
             Assert.Equal(-1, lastIndexOfItem(factory(list), 6));
+            Assert.Equal(-1, lastIndexOfItemEQ(factory(list), 6, EqualityComparer<int>.Default));
 
             for (int idx = 0; idx < list.Count; idx++)
             {
@@ -115,6 +119,10 @@ namespace System.Collections.Immutable.Test
                     {
                         int expected = bclList.LastIndexOf(match, idx, count);
                         int actual = lastIndexOfItemIndexCount(factory(list), match, idx, count);
+                        Assert.Equal(expected, actual);
+
+                        expected = bclList.LastIndexOf(match);
+                        actual = lastIndexOfItemEQ(factory(list), match, EqualityComparer<int>.Default);
                         Assert.Equal(expected, actual);
 
                         actual = lastIndexOfItemIndexCountEQ(factory(list), match, idx, count, new CustomComparer(count));
