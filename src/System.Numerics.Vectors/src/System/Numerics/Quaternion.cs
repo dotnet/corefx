@@ -3,6 +3,7 @@
 
 using System;
 using System.Globalization;
+using System.Runtime.CompilerServices;
 
 namespace System.Numerics
 {
@@ -419,6 +420,7 @@ namespace System.Numerics
         /// </summary>
         /// <param name="value">The source Quaternion.</param>
         /// <returns>The negated Quaternion.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Quaternion Negate(Quaternion value)
         {
             Quaternion ans;
@@ -437,6 +439,7 @@ namespace System.Numerics
         /// <param name="value1">The first source Quaternion.</param>
         /// <param name="value2">The second source Quaternion.</param>
         /// <returns>The result of adding the Quaternions.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Quaternion Add(Quaternion value1, Quaternion value2)
         {
             Quaternion ans;
@@ -455,6 +458,7 @@ namespace System.Numerics
         /// <param name="value1">The first source Quaternion.</param>
         /// <param name="value2">The second Quaternion, to be subtracted from the first.</param>
         /// <returns>The result of the subtraction.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Quaternion Subtract(Quaternion value1, Quaternion value2)
         {
             Quaternion ans;
@@ -473,6 +477,7 @@ namespace System.Numerics
         /// <param name="value1">The Quaternion on the left side of the multiplication.</param>
         /// <param name="value2">The Quaternion on the right side of the multiplication.</param>
         /// <returns>The result of the multiplication.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Quaternion Multiply(Quaternion value1, Quaternion value2)
         {
             Quaternion ans;
@@ -508,6 +513,7 @@ namespace System.Numerics
         /// <param name="value1">The source Quaternion.</param>
         /// <param name="value2">The scalar value.</param>
         /// <returns>The result of the multiplication.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Quaternion Multiply(Quaternion value1, float value2)
         {
             Quaternion ans;
@@ -526,6 +532,7 @@ namespace System.Numerics
         /// <param name="value1">The source Quaternion.</param>
         /// <param name="value2">The divisor.</param>
         /// <returns>The result of the division.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Quaternion Divide(Quaternion value1, Quaternion value2)
         {
             Quaternion ans;
@@ -571,14 +578,7 @@ namespace System.Numerics
         /// <returns>The negated Quaternion.</returns>
         public static Quaternion operator -(Quaternion value)
         {
-            Quaternion ans;
-
-            ans.X = -value.X;
-            ans.Y = -value.Y;
-            ans.Z = -value.Z;
-            ans.W = -value.W;
-
-            return ans;
+            return Negate(value);
         }
 
         /// <summary>
@@ -589,14 +589,7 @@ namespace System.Numerics
         /// <returns>The result of adding the Quaternions.</returns>
         public static Quaternion operator +(Quaternion value1, Quaternion value2)
         {
-            Quaternion ans;
-
-            ans.X = value1.X + value2.X;
-            ans.Y = value1.Y + value2.Y;
-            ans.Z = value1.Z + value2.Z;
-            ans.W = value1.W + value2.W;
-
-            return ans;
+            return Add(value1, value2);
         }
 
         /// <summary>
@@ -607,14 +600,7 @@ namespace System.Numerics
         /// <returns>The result of the subtraction.</returns>
         public static Quaternion operator -(Quaternion value1, Quaternion value2)
         {
-            Quaternion ans;
-
-            ans.X = value1.X - value2.X;
-            ans.Y = value1.Y - value2.Y;
-            ans.Z = value1.Z - value2.Z;
-            ans.W = value1.W - value2.W;
-
-            return ans;
+            return Subtract(value1, value2);
         }
 
         /// <summary>
@@ -625,31 +611,7 @@ namespace System.Numerics
         /// <returns>The result of the multiplication.</returns>
         public static Quaternion operator *(Quaternion value1, Quaternion value2)
         {
-            Quaternion ans;
-
-            float q1x = value1.X;
-            float q1y = value1.Y;
-            float q1z = value1.Z;
-            float q1w = value1.W;
-
-            float q2x = value2.X;
-            float q2y = value2.Y;
-            float q2z = value2.Z;
-            float q2w = value2.W;
-
-            // cross(av, bv)
-            float cx = q1y * q2z - q1z * q2y;
-            float cy = q1z * q2x - q1x * q2z;
-            float cz = q1x * q2y - q1y * q2x;
-
-            float dot = q1x * q2x + q1y * q2y + q1z * q2z;
-
-            ans.X = q1x * q2w + q2x * q1w + cx;
-            ans.Y = q1y * q2w + q2y * q1w + cy;
-            ans.Z = q1z * q2w + q2z * q1w + cz;
-            ans.W = q1w * q2w - dot;
-
-            return ans;
+            return Multiply(value1, value2);
         }
 
         /// <summary>
@@ -660,14 +622,7 @@ namespace System.Numerics
         /// <returns>The result of the multiplication.</returns>
         public static Quaternion operator *(Quaternion value1, float value2)
         {
-            Quaternion ans;
-
-            ans.X = value1.X * value2;
-            ans.Y = value1.Y * value2;
-            ans.Z = value1.Z * value2;
-            ans.W = value1.W * value2;
-
-            return ans;
+            return Multiply(value1, value2);
         }
 
         /// <summary>
@@ -678,40 +633,7 @@ namespace System.Numerics
         /// <returns>The result of the division.</returns>
         public static Quaternion operator /(Quaternion value1, Quaternion value2)
         {
-            Quaternion ans;
-
-            float q1x = value1.X;
-            float q1y = value1.Y;
-            float q1z = value1.Z;
-            float q1w = value1.W;
-
-            //-------------------------------------
-            // Inverse part.
-            float ls = value2.X * value2.X + value2.Y * value2.Y +
-                       value2.Z * value2.Z + value2.W * value2.W;
-            float invNorm = 1.0f / ls;
-
-            float q2x = -value2.X * invNorm;
-            float q2y = -value2.Y * invNorm;
-            float q2z = -value2.Z * invNorm;
-            float q2w = value2.W * invNorm;
-
-            //-------------------------------------
-            // Multiply part.
-
-            // cross(av, bv)
-            float cx = q1y * q2z - q1z * q2y;
-            float cy = q1z * q2x - q1x * q2z;
-            float cz = q1x * q2y - q1y * q2x;
-
-            float dot = q1x * q2x + q1y * q2y + q1z * q2z;
-
-            ans.X = q1x * q2w + q2x * q1w + cx;
-            ans.Y = q1y * q2w + q2y * q1w + cy;
-            ans.Z = q1z * q2w + q2z * q1w + cz;
-            ans.W = q1w * q2w - dot;
-
-            return ans;
+            return Divide(value1, value2);
         }
 
         /// <summary>
