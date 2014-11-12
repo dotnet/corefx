@@ -19,4 +19,4 @@ General information on contributing to dotnet projects is in the [Contributing G
 * By default, the core tests are run as part of the build. A test report for the build will be output on the console at the end of a successful build.
 * To view and run the tests for a solution in Visual Studio you need to install **xUnit.net runner for Visual Studio**.
 	* In Visual Studio under `Tools->Extensions and Updates`, select `Online` on the left side and search for `xUnit`. Download the **xUnit.net runner for Visual Studio**.
-	* After downloading and restarting Visual Studio and building the test assemblies, the tests should start to show up in Test Explorer.  
+	* After downloading and restarting Visual Studio and building the test assemblies, the tests should start to show up in Test Explorer.   
