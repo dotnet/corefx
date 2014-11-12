@@ -36,24 +36,6 @@ namespace Validation
         }
 
         /// <summary>
-        /// Throws an exception if the specified parameter's value is IntPtr.Zero.
-        /// </summary>
-        /// <param name="value">The value of the argument.</param>
-        /// <param name="parameterName">The name of the parameter to include in any thrown exception.</param>
-        /// <returns>The value of the parameter.</returns>
-        /// <exception cref="ArgumentNullException">Thrown if <paramref name="value"/> is <c>null</c></exception>
-        [DebuggerStepThrough]
-        public static IntPtr NotNull([ValidatedNotNull]IntPtr value, string parameterName)
-        {
-            if (value == IntPtr.Zero)
-            {
-                throw new ArgumentNullException(parameterName);
-            }
-
-            return value;
-        }
-
-        /// <summary>
         /// Throws an exception if the specified parameter's value is null.
         /// </summary>
         /// <typeparam name="T">The type of the parameter.</typeparam>
@@ -89,11 +71,10 @@ namespace Validation
         }
 
         /// <summary>
-        /// Throws an <see cref="ArgumentOutOfRangeException"/> if a condition does not evaluate to true.
+        /// Throws an <see cref="ArgumentOutOfRangeException"/>.
         /// </summary>
-        /// <returns>Nothing.  This method always throws.</returns>
         [DebuggerStepThrough]
-        public static Exception FailRange(string parameterName, string message = null)
+        public static void FailRange(string parameterName, string message = null)
         {
             if (string.IsNullOrEmpty(message))
             {
