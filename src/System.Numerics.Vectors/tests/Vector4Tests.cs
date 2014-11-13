@@ -72,7 +72,7 @@ namespace System.Numerics.Tests
             Assert.Equal("<$2.50, $2.00, $3.00, $3.30>", v1strformatted);
 
             string v2strformatted = v1.ToString("c");
-            Assert.Equal("<$2.50, $2.00, $3.00, $3.30>", v1strformatted);
+            Assert.Equal(string.Format("<{0:C}, {1:C}, {2:C}, {3:C}>", 2.5, 2, 3, 3.3), v2strformatted);
         }
 
         // A test for DistanceSquared (Vector4f, Vector4f)
