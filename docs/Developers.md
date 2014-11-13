@@ -7,7 +7,7 @@ We currently only support building and running on Windows. Other platforms will
 come later.
 
 The command line build is invoked in  
-[Visual Studio Command Prompt](http://msdn.microsoft.com/en-us/library/ms229859(v=vs.110).aspx) 
+[Visual Studio Command Prompt](http://msdn.microsoft.com/en-us/library/ms229859(v=vs.110).aspx)
 via
 
 ```
