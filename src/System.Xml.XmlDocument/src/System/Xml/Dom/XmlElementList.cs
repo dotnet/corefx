@@ -260,7 +260,7 @@ namespace System.Xml
         public override IEnumerator GetEnumerator()
         {
             if (this.empty == true)
-                return new XmlEmptyElementListEnumerator(this);;
+                return new XmlEmptyElementListEnumerator(this); ;
             return new XmlElementListEnumerator(this);
         }
 
