@@ -52,4 +52,4 @@ more generally in the [.NET Foundation forums](http://www.dotnetfoundation.org/)
 
 ## Building and Testing
 
-To find out how you can build and test .NET Core, see the [Developer Guide](docs/Developers.md).
+To find out how you can build and test .NET Core, see the [Developer Guide](https://github.com/dotnet/corefx/wiki/Developers).
