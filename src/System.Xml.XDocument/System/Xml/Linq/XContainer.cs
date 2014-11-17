@@ -7,6 +7,8 @@ using Debug = System.Diagnostics.Debug;
 using IEnumerable = System.Collections.IEnumerable;
 using StringBuilder = System.Text.StringBuilder;
 using Interlocked = System.Threading.Interlocked;
+using System.Threading.Tasks;
+using System.Threading;
 
 namespace System.Xml.Linq
 {
@@ -851,10 +853,74 @@ namespace System.Xml.Linq
         internal void ReadContentFrom(XmlReader r)
         {
             if (r.ReadState != ReadState.Interactive) throw new InvalidOperationException(SR.InvalidOperation_ExpectedInteractive);
-            XContainer c = this;
+
+            ContentReader cr = new ContentReader(this);
+            while (cr.ReadContentFrom(this, r) && r.Read()) ;
+        }
+
+        internal void ReadContentFrom(XmlReader r, LoadOptions o)
+        {
+            if ((o & (LoadOptions.SetBaseUri | LoadOptions.SetLineInfo)) == 0)
+            {
+                ReadContentFrom(r);
+                return;
+            }
+            if (r.ReadState != ReadState.Interactive) throw new InvalidOperationException(SR.InvalidOperation_ExpectedInteractive);
+
+            ContentReader cr = new ContentReader(this);
+            while (cr.ReadContentFrom(this, r, o) && r.Read()) ;
+        }
+
+        internal async Task ReadContentFromAsync(XmlReader r, CancellationToken token)
+        {
+            if (r.ReadState != ReadState.Interactive) throw new InvalidOperationException(SR.InvalidOperation_ExpectedInteractive);
+
+            ContentReader cr = new ContentReader(this);
+            while (!token.IsCancellationRequested && cr.ReadContentFrom(this, r) && await r.ReadAsync().ConfigureAwait(false)) ;
+
+            token.ThrowIfCancellationRequested();
+        }
+
+        internal async Task ReadContentFromAsync(XmlReader r, LoadOptions o, CancellationToken token)
+        {
+            if ((o & (LoadOptions.SetBaseUri | LoadOptions.SetLineInfo)) == 0)
+            {
+                await ReadContentFromAsync(r, token).ConfigureAwait(false);
+                return;
+            }
+            if (r.ReadState != ReadState.Interactive) throw new InvalidOperationException(SR.InvalidOperation_ExpectedInteractive);
+
+            ContentReader cr = new ContentReader(this);
+            while (!token.IsCancellationRequested && cr.ReadContentFrom(this, r, o) && await r.ReadAsync().ConfigureAwait(false)) ;
+
+            token.ThrowIfCancellationRequested();
+        }
+        
+        /// <summary>
+        /// Contains the inner loop shared between ReadContentFrom / ReadContentFromAsync.
+        /// </summary>
+        sealed class ContentReader
+        {
+            XContainer c;
+            XNode n;
             NamespaceCache eCache = new NamespaceCache();
             NamespaceCache aCache = new NamespaceCache();
-            do
+            string baseUri;
+            IXmlLineInfo li;
+
+            public ContentReader(XContainer c)
+            {
+                this.c = c;
+            }
+
+            public ContentReader(XContainer @this, XmlReader r, LoadOptions o)
+            {
+                c = @this;
+                baseUri = (o & LoadOptions.SetBaseUri) != 0 ? r.BaseURI : null;
+                li = (o & LoadOptions.SetLineInfo) != 0 ? r as IXmlLineInfo : null;
+            }
+
+            public bool ReadContentFrom(XContainer @this, XmlReader r)
             {
                 switch (r.NodeType)
                 {
@@ -879,7 +945,7 @@ namespace System.Xml.Linq
                         {
                             c.content = string.Empty;
                         }
-                        if (c == this) return;
+                        if (c == @this) return false;
                         c = c.parent;
                         break;
                     case XmlNodeType.Text:
@@ -908,24 +974,11 @@ namespace System.Xml.Linq
                     default:
                         throw new InvalidOperationException(SR.Format(SR.InvalidOperation_UnexpectedNodeType, r.NodeType));
                 }
-            } while (r.Read());
-        }
 
-        internal void ReadContentFrom(XmlReader r, LoadOptions o)
-        {
-            if ((o & (LoadOptions.SetBaseUri | LoadOptions.SetLineInfo)) == 0)
-            {
-                ReadContentFrom(r);
-                return;
+                return true;
             }
-            if (r.ReadState != ReadState.Interactive) throw new InvalidOperationException(SR.InvalidOperation_ExpectedInteractive);
-            XContainer c = this;
-            XNode n = null;
-            NamespaceCache eCache = new NamespaceCache();
-            NamespaceCache aCache = new NamespaceCache();
-            string baseUri = (o & LoadOptions.SetBaseUri) != 0 ? r.BaseURI : null;
-            IXmlLineInfo li = (o & LoadOptions.SetLineInfo) != 0 ? r as IXmlLineInfo : null;
-            do
+
+            public bool ReadContentFrom(XContainer @this, XmlReader r, LoadOptions o)
             {
                 string uri = r.BaseURI;
                 switch (r.NodeType)
@@ -979,7 +1032,7 @@ namespace System.Xml.Linq
                             {
                                 e.SetEndElementLineInfo(li.LineNumber, li.LinePosition);
                             }
-                            if (c == this) return;
+                            if (c == @this) return false;
                             if (baseUri != null && c.HasBaseUri)
                             {
                                 baseUri = c.parent.BaseUri;
@@ -1034,7 +1087,9 @@ namespace System.Xml.Linq
                     c.AddNodeSkipNotify(n);
                     n = null;
                 }
-            } while (r.Read());
+
+                return true;
+            }
         }
 
         internal void RemoveNode(XNode n)
