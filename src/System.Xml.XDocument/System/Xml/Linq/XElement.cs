@@ -138,9 +138,17 @@ namespace System.Xml.Linq
         {
         }
 
+        internal XElement(AsyncConstructionSentry s)
+        {
+        }
+
         internal XElement(XmlReader r, LoadOptions o)
         {
             ReadElementFrom(r, o);
+        }
+
+        internal struct AsyncConstructionSentry
+        {
         }
 
         /// <summary>
@@ -703,7 +711,8 @@ namespace System.Xml.Linq
             token.ThrowIfCancellationRequested();
             if (await reader.MoveToContentAsync().ConfigureAwait(false) != XmlNodeType.Element) throw new InvalidOperationException(SR.Format(SR.InvalidOperation_ExpectedNodeType, XmlNodeType.Element, reader.NodeType));
 
-            XElement e = new XElement(reader, options);
+            XElement e = new XElement(new AsyncConstructionSentry());
+            await e.ReadElementFromAsync(reader, options, token).ConfigureAwait(false);
 
             token.ThrowIfCancellationRequested();
             await reader.MoveToContentAsync().ConfigureAwait(false);
