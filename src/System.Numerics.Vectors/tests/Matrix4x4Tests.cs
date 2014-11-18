@@ -1485,7 +1485,7 @@ namespace System.Numerics.Tests
                     21.0f, 22.0f, 23.0f, 24.0f,
                     31.0f, 32.0f, 33.0f, 34.0f,
                     41.0f, 42.0f, 43.0f, 44.0f);
-            
+
             string actual = a.ToString();
             Assert.Equal(expected, actual);
         }
@@ -2251,6 +2251,150 @@ namespace System.Numerics.Tests
                 a.M21 == b.M21 && a.M22 == b.M22 && a.M23 == b.M23 && a.M24 == b.M24 &&
                 a.M31 == b.M31 && a.M32 == b.M32 && a.M33 == b.M33 && a.M34 == b.M34 &&
                 a.M41 != b.M41 && a.M42 != b.M42 && a.M43 != b.M43 && a.M44 == b.M44);
+        }
+
+        // A test for Forward
+        [Fact]
+        public void Matrix4x4ForwardTest()
+        {
+            Matrix4x4 a = GenerateTestMatrix();
+            Matrix4x4 b = a;
+
+            // Get test
+            Vector3 val = new Vector3(-a.M31, -a.M32, -a.M33);
+            Assert.Equal(val, a.Forward);
+
+            // Set test
+            val = new Vector3(1.0f, 2.0f, 3.0f);
+            a.Forward = val;
+            Assert.Equal(val, a.Forward);
+
+            // Make sure it only modifies expected value of matrix.
+            Assert.True(
+                a.M11 == b.M11 && a.M12 == b.M12 && a.M13 == b.M13 && a.M14 == b.M14 &&
+                a.M21 == b.M21 && a.M22 == b.M22 && a.M23 == b.M23 && a.M24 == b.M24 &&
+                a.M31 != b.M31 && a.M32 != b.M32 && a.M33 != b.M33 && a.M34 == b.M34 &&
+                a.M41 == b.M41 && a.M42 == b.M42 && a.M43 == b.M43 && a.M44 == b.M44);
+        }
+
+        // A test for Backward
+        [Fact]
+        public void Matrix4x4BackwardTest()
+        {
+            Matrix4x4 a = GenerateTestMatrix();
+            Matrix4x4 b = a;
+
+            // Get test
+            Vector3 val = new Vector3(a.M31, a.M32, a.M33);
+            Assert.Equal(val, a.Backward);
+
+            // Set test
+            val = new Vector3(1.0f, 2.0f, 3.0f);
+            a.Backward = val;
+            Assert.Equal(val, a.Backward);
+
+            // Make sure it only modifies expected value of matrix.
+            Assert.True(
+                a.M11 == b.M11 && a.M12 == b.M12 && a.M13 == b.M13 && a.M14 == b.M14 &&
+                a.M21 == b.M21 && a.M22 == b.M22 && a.M23 == b.M23 && a.M24 == b.M24 &&
+                a.M31 != b.M31 && a.M32 != b.M32 && a.M33 != b.M33 && a.M34 == b.M34 &&
+                a.M41 == b.M41 && a.M42 == b.M42 && a.M43 == b.M43 && a.M44 == b.M44);
+        }
+
+        // A test for Up
+        [Fact]
+        public void Matrix4x4UpTest()
+        {
+            Matrix4x4 a = GenerateTestMatrix();
+            Matrix4x4 b = a;
+
+            // Get test
+            Vector3 val = new Vector3(a.M21, a.M22, a.M23);
+            Assert.Equal(val, a.Up);
+
+            // Set test
+            val = new Vector3(1.0f, 2.0f, 3.0f);
+            a.Up = val;
+            Assert.Equal(val, a.Up);
+
+            // Make sure it only modifies expected value of matrix.
+            Assert.True(
+                a.M11 == b.M11 && a.M12 == b.M12 && a.M13 == b.M13 && a.M14 == b.M14 &&
+                a.M21 != b.M21 && a.M22 != b.M22 && a.M23 != b.M23 && a.M24 == b.M24 &&
+                a.M31 == b.M31 && a.M32 == b.M32 && a.M33 == b.M33 && a.M34 == b.M34 &&
+                a.M41 == b.M41 && a.M42 == b.M42 && a.M43 == b.M43 && a.M44 == b.M44);
+        }
+
+        // A test for Down
+        [Fact]
+        public void Matrix4x4DownTest()
+        {
+            Matrix4x4 a = GenerateTestMatrix();
+            Matrix4x4 b = a;
+
+            // Get test
+            Vector3 val = new Vector3(-a.M21, -a.M22, -a.M23);
+            Assert.Equal(val, a.Down);
+
+            // Set test
+            val = new Vector3(1.0f, 2.0f, 3.0f);
+            a.Down = val;
+            Assert.Equal(val, a.Down);
+
+            // Make sure it only modifies expected value of matrix.
+            Assert.True(
+                a.M11 == b.M11 && a.M12 == b.M12 && a.M13 == b.M13 && a.M14 == b.M14 &&
+                a.M21 != b.M21 && a.M22 != b.M22 && a.M23 != b.M23 && a.M24 == b.M24 &&
+                a.M31 == b.M31 && a.M32 == b.M32 && a.M33 == b.M33 && a.M34 == b.M34 &&
+                a.M41 == b.M41 && a.M42 == b.M42 && a.M43 == b.M43 && a.M44 == b.M44);
+        }
+
+        // A test for Right
+        [Fact]
+        public void Matrix4x4RightTest()
+        {
+            Matrix4x4 a = GenerateTestMatrix();
+            Matrix4x4 b = a;
+
+            // Get test
+            Vector3 val = new Vector3(a.M11, a.M12, a.M13);
+            Assert.Equal(val, a.Right);
+
+            // Set test
+            val = new Vector3(1.0f, 2.0f, 3.0f);
+            a.Right = val;
+            Assert.Equal(val, a.Right);
+
+            // Make sure it only modifies expected value of matrix.
+            Assert.True(
+                a.M11 != b.M11 && a.M12 != b.M12 && a.M13 != b.M13 && a.M14 == b.M14 &&
+                a.M21 == b.M21 && a.M22 == b.M22 && a.M23 == b.M23 && a.M24 == b.M24 &&
+                a.M31 == b.M31 && a.M32 == b.M32 && a.M33 == b.M33 && a.M34 == b.M34 &&
+                a.M41 == b.M41 && a.M42 == b.M42 && a.M43 == b.M43 && a.M44 == b.M44);
+        }
+
+        // A test for Left
+        [Fact]
+        public void Matrix4x4LeftTest()
+        {
+            Matrix4x4 a = GenerateTestMatrix();
+            Matrix4x4 b = a;
+
+            // Get test
+            Vector3 val = new Vector3(-a.M11, -a.M12, -a.M13);
+            Assert.Equal(val, a.Left);
+
+            // Set test
+            val = new Vector3(1.0f, 2.0f, 3.0f);
+            a.Left = val;
+            Assert.Equal(val, a.Left);
+
+            // Make sure it only modifies expected value of matrix.
+            Assert.True(
+                a.M11 != b.M11 && a.M12 != b.M12 && a.M13 != b.M13 && a.M14 == b.M14 &&
+                a.M21 == b.M21 && a.M22 == b.M22 && a.M23 == b.M23 && a.M24 == b.M24 &&
+                a.M31 == b.M31 && a.M32 == b.M32 && a.M33 == b.M33 && a.M34 == b.M34 &&
+                a.M41 == b.M41 && a.M42 == b.M42 && a.M43 == b.M43 && a.M44 == b.M44);
         }
 
         // A test for Equals (Matrix4x4)
