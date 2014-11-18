@@ -5,6 +5,8 @@ using System.IO;
 
 using SuppressMessageAttribute = System.Diagnostics.CodeAnalysis.SuppressMessageAttribute;
 using Encoding = System.Text.Encoding;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace System.Xml.Linq
 {
@@ -350,6 +352,55 @@ namespace System.Xml.Linq
         {
             if (reader == null) throw new ArgumentNullException("reader");
             if (reader.ReadState == ReadState.Initial) reader.Read();
+
+            XDocument d = InitLoad(reader, options);
+            d.ReadContentFrom(reader, options);
+
+            if (!reader.EOF) throw new InvalidOperationException(SR.InvalidOperation_ExpectedEndOfFile);
+            if (d.Root == null) throw new InvalidOperationException(SR.InvalidOperation_MissingRoot);
+            return d;
+        }
+
+        /// <summary>
+        /// Create a new <see cref="XDocument"/> containing the contents of the
+        /// passed in <see cref="XmlReader"/>.
+        /// </summary>
+        /// <param name="reader">
+        /// An <see cref="XmlReader"/> containing the XML to be read into the new
+        /// <see cref="XDocument"/>.
+        /// </param>
+        /// <param name="options">
+        /// A set of <see cref="LoadOptions"/>.
+        /// </param>
+        /// <param name="token">
+        /// A cancellation token.
+        /// </param>
+        /// <returns>
+        /// A new <see cref="XDocument"/> containing the contents of the passed
+        /// in <see cref="XmlReader"/>.
+        /// </returns>
+        public static async Task<XDocument> LoadAsync(XmlReader reader, LoadOptions options, CancellationToken token)
+        {
+            if (reader == null) throw new ArgumentNullException("reader");
+            if (reader.ReadState == ReadState.Initial)
+            {
+                token.ThrowIfCancellationRequested();
+                await reader.ReadAsync().ConfigureAwait(false);
+            }
+
+            XDocument d = InitLoad(reader, options);
+            await d.ReadContentFromAsync(reader, options, token);
+
+            if (!reader.EOF) throw new InvalidOperationException(SR.InvalidOperation_ExpectedEndOfFile);
+            if (d.Root == null) throw new InvalidOperationException(SR.InvalidOperation_MissingRoot);
+            return d;
+        }
+
+        /// <summary>
+        /// Performs shared initialization between Load and LoadAsync.
+        /// </summary>
+        static XDocument InitLoad(XmlReader reader, LoadOptions options)
+        {
             XDocument d = new XDocument();
             if ((options & LoadOptions.SetBaseUri) != 0)
             {
@@ -371,9 +422,6 @@ namespace System.Xml.Linq
             {
                 d.Declaration = new XDeclaration(reader);
             }
-            d.ReadContentFrom(reader, options);
-            if (!reader.EOF) throw new InvalidOperationException(SR.InvalidOperation_ExpectedEndOfFile);
-            if (d.Root == null) throw new InvalidOperationException(SR.InvalidOperation_MissingRoot);
             return d;
         }
 

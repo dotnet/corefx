@@ -8,6 +8,8 @@ using CultureInfo = System.Globalization.CultureInfo;
 using IEnumerable = System.Collections.IEnumerable;
 using SuppressMessageAttribute = System.Diagnostics.CodeAnalysis.SuppressMessageAttribute;
 using StringBuilder = System.Text.StringBuilder;
+using System.Threading.Tasks;
+using System.Threading;
 
 namespace System.Xml.Linq
 {
@@ -136,9 +138,17 @@ namespace System.Xml.Linq
         {
         }
 
+        internal XElement(AsyncConstructionSentry s)
+        {
+        }
+
         internal XElement(XmlReader r, LoadOptions o)
         {
             ReadElementFrom(r, o);
+        }
+
+        internal struct AsyncConstructionSentry
+        {
         }
 
         /// <summary>
@@ -673,6 +683,40 @@ namespace System.Xml.Linq
             if (reader.MoveToContent() != XmlNodeType.Element) throw new InvalidOperationException(SR.Format(SR.InvalidOperation_ExpectedNodeType, XmlNodeType.Element, reader.NodeType));
             XElement e = new XElement(reader, options);
             reader.MoveToContent();
+            if (!reader.EOF) throw new InvalidOperationException(SR.InvalidOperation_ExpectedEndOfFile);
+            return e;
+        }
+
+        /// <summary>
+        /// Create a new <see cref="XElement"/> containing the contents of the
+        /// passed in <see cref="XmlReader"/>.
+        /// </summary>
+        /// <param name="reader">
+        /// An <see cref="XmlReader"/> containing the XML to be read into the new
+        /// <see cref="XElement"/>.
+        /// </param>
+        /// <param name="options">
+        /// A set of <see cref="LoadOptions"/>.
+        /// </param>
+        /// <param name="token">
+        /// A cancellation token.</param>
+        /// <returns>
+        /// A new <see cref="XElement"/> containing the contents of the passed
+        /// in <see cref="XmlReader"/>.
+        /// </returns>
+        public static async Task<XElement> LoadAsync(XmlReader reader, LoadOptions options, CancellationToken token)
+        {
+            if (reader == null) throw new ArgumentNullException("reader");
+
+            token.ThrowIfCancellationRequested();
+            if (await reader.MoveToContentAsync().ConfigureAwait(false) != XmlNodeType.Element) throw new InvalidOperationException(SR.Format(SR.InvalidOperation_ExpectedNodeType, XmlNodeType.Element, reader.NodeType));
+
+            XElement e = new XElement(new AsyncConstructionSentry());
+            await e.ReadElementFromAsync(reader, options, token).ConfigureAwait(false);
+
+            token.ThrowIfCancellationRequested();
+            await reader.MoveToContentAsync().ConfigureAwait(false);
+
             if (!reader.EOF) throw new InvalidOperationException(SR.InvalidOperation_ExpectedEndOfFile);
             return e;
         }
@@ -1705,6 +1749,38 @@ namespace System.Xml.Linq
 
         void ReadElementFrom(XmlReader r, LoadOptions o)
         {
+            ReadElementFromImpl(r, o);
+
+            if (!r.IsEmptyElement)
+            {
+                r.Read();
+                ReadContentFrom(r, o);
+            }
+
+            r.Read();
+        }
+
+        async Task ReadElementFromAsync(XmlReader r, LoadOptions o, CancellationToken token)
+        {
+            ReadElementFromImpl(r, o);
+
+            if (!r.IsEmptyElement)
+            {
+                token.ThrowIfCancellationRequested();
+                await r.ReadAsync().ConfigureAwait(false);
+
+                await ReadContentFromAsync(r, o, token).ConfigureAwait(false);
+            }
+
+            token.ThrowIfCancellationRequested();
+            await r.ReadAsync().ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Shared implementation between ReadElementFrom / ReadElementFromAsync.
+        /// </summary>
+        void ReadElementFromImpl(XmlReader r, LoadOptions o)
+        {
             if (r.ReadState != ReadState.Interactive) throw new InvalidOperationException(SR.InvalidOperation_ExpectedInteractive);
             name = XNamespace.Get(r.NamespaceURI).GetName(r.LocalName);
             if ((o & LoadOptions.SetBaseUri) != 0)
@@ -1737,12 +1813,6 @@ namespace System.Xml.Linq
                 } while (r.MoveToNextAttribute());
                 r.MoveToElement();
             }
-            if (!r.IsEmptyElement)
-            {
-                r.Read();
-                ReadContentFrom(r, o);
-            }
-            r.Read();
         }
 
         internal void RemoveAttribute(XAttribute a)
