@@ -223,6 +223,42 @@ namespace System.Xml.Linq
         }
 
         /// <summary>
+        /// Create a new <see cref="XDocument"/> based on the contents of the file 
+        /// referenced by the URI parameter passed in.  Optionally, whitespace can be preserved.  
+        /// <see cref="XmlReader.Create(string)"/>
+        /// </summary>
+        /// <remarks>
+        /// This method uses the <see cref="XmlReader.Create(string)"/> method to create
+        /// an <see cref="XmlReader"/> to read the raw XML into an underlying
+        /// XML tree.  If LoadOptions.PreserveWhitespace is enabled then
+        /// the <see cref="XmlReaderSettings"/> property <see cref="XmlReaderSettings.IgnoreWhitespace"/>
+        /// is set to false.
+        /// </remarks>
+        /// <param name="uri">
+        /// A string representing the URI of the file to be loaded into a new <see cref="XDocument"/>.
+        /// </param>
+        /// <param name="options">
+        /// A set of <see cref="LoadOptions"/>.
+        /// </param>
+        /// <param name="token">
+        /// A cancellation token.
+        /// </param>
+        /// <returns>
+        /// An <see cref="XDocument"/> initialized with the contents of the file referenced
+        /// in the passed uri parameter.  If LoadOptions.PreserveWhitespace is enabled then
+        /// all whitespace will be preserved.
+        /// </returns>
+        [SuppressMessage("Microsoft.Design", "CA1054:UriParametersShouldNotBeStrings", MessageId = "0#", Justification = "Back-compat with System.Xml.")]
+        public static async Task<XDocument> LoadAsync(string uri, LoadOptions options, CancellationToken token)
+        {
+            XmlReaderSettings rs = GetXmlReaderSettings(options);
+            using (XmlReader r = XmlReader.Create(uri, rs))
+            {
+                return await LoadAsync(r, options, token).ConfigureAwait(false);
+            }
+        }
+
+        /// <summary>
         /// Create a new <see cref="XDocument"/> and initialize its underlying XML tree using
         /// the passed <see cref="Stream"/> parameter.  
         /// </summary>
@@ -271,6 +307,39 @@ namespace System.Xml.Linq
 
         /// <summary>
         /// Create a new <see cref="XDocument"/> and initialize its underlying XML tree using
+        /// the passed <see cref="Stream"/> parameter.  Optionally whitespace handling
+        /// can be preserved.
+        /// </summary>
+        /// <remarks>
+        /// If LoadOptions.PreserveWhitespace is enabled then
+        /// the underlying <see cref="XmlReaderSettings"/> property <see cref="XmlReaderSettings.IgnoreWhitespace"/>
+        /// is set to false.
+        /// </remarks>
+        /// <param name="stream">
+        /// A <see cref="Stream"/> containing the raw XML to read into the newly
+        /// created <see cref="XDocument"/>.
+        /// </param>
+        /// <param name="options">
+        /// A set of <see cref="LoadOptions"/>.
+        /// </param>
+        /// <param name="token">
+        /// A cancellation token.
+        /// </param>
+        /// <returns>
+        /// A new <see cref="XDocument"/> containing the contents of the passed in
+        /// <see cref="Stream"/>.
+        /// </returns>
+        public static async Task<XDocument> LoadAsync(Stream stream, LoadOptions options, CancellationToken token)
+        {
+            XmlReaderSettings rs = GetXmlReaderSettings(options);
+            using (XmlReader r = XmlReader.Create(stream, rs))
+            {
+                return await LoadAsync(r, options, token).ConfigureAwait(false);
+            }
+        }
+
+        /// <summary>
+        /// Create a new <see cref="XDocument"/> and initialize its underlying XML tree using
         /// the passed <see cref="TextReader"/> parameter.  
         /// </summary>
         /// <param name="textReader">
@@ -313,6 +382,39 @@ namespace System.Xml.Linq
             using (XmlReader r = XmlReader.Create(textReader, rs))
             {
                 return Load(r, options);
+            }
+        }
+
+        /// <summary>
+        /// Create a new <see cref="XDocument"/> and initialize its underlying XML tree using
+        /// the passed <see cref="TextReader"/> parameter.  Optionally whitespace handling
+        /// can be preserved.
+        /// </summary>
+        /// <remarks>
+        /// If LoadOptions.PreserveWhitespace is enabled then
+        /// the <see cref="XmlReaderSettings"/> property <see cref="XmlReaderSettings.IgnoreWhitespace"/>
+        /// is set to false.
+        /// </remarks>
+        /// <param name="textReader">
+        /// A <see cref="TextReader"/> containing the raw XML to read into the newly
+        /// created <see cref="XDocument"/>.
+        /// </param>
+        /// <param name="options">
+        /// A set of <see cref="LoadOptions"/>.
+        /// </param>
+        /// <param name="token">
+        /// A cancellation token.
+        /// </param>
+        /// <returns>
+        /// A new <see cref="XDocument"/> containing the contents of the passed in
+        /// <see cref="TextReader"/>.
+        /// </returns>
+        public static async Task<XDocument> LoadAsync(TextReader textReader, LoadOptions options, CancellationToken token)
+        {
+            XmlReaderSettings rs = GetXmlReaderSettings(options);
+            using (XmlReader r = XmlReader.Create(textReader, rs))
+            {
+                return await LoadAsync(r, options, token).ConfigureAwait(false);
             }
         }
 
