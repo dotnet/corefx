@@ -134,7 +134,7 @@ namespace System.Numerics
         /// Returns an array containing the vector data (X at index 0 and Y at index 1).
         /// </summary>
         /// <returns>An array containing the vector data.</returns>
-        [MethodImpl(MethodOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public float[] ToArray()
         {
             return new float[2] { X, Y };
