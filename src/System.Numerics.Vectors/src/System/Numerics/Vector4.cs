@@ -434,7 +434,7 @@ namespace System.Numerics
         {
             if (values.Length != 4)
             {
-                throw new ArgumentException("Vector4.FromArray only accepts a float array with 3 elements.");
+                throw new ArgumentException("Vector4.FromArray only accepts a float array with 4 elements.");
             }
             return new Vector4(values[0], values[1], values[2], values[3]);
         }
