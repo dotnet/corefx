@@ -129,6 +129,16 @@ namespace System.Numerics
                 return X * X + Y * Y;
             }
         }
+
+        /// <summary>
+        /// Returns an array containing the vector data (X at index 0 and Y at index 1).
+        /// </summary>
+        /// <returns>An array containing the vector data.</returns>
+        [MethodImpl(MethodOptions.AggressiveInlining)]
+        public float[] ToArray()
+        {
+            return new float[2] { X, Y };
+        }
         #endregion Public Instance Methods
 
         #region Public Static Methods
@@ -344,6 +354,22 @@ namespace System.Numerics
             return new Vector2(
                 value.X * (1.0f - yy2 - zz2) + value.Y * (xy2 - wz2),
                 value.X * (xy2 + wz2) + value.Y * (1.0f - xx2 - zz2));
+        }
+
+        /// <summary>
+        /// Creates a vector from the given array.
+        /// The element at index 0 will become Vector2.X and the element at index 1 will become Vector2.Y.
+        /// </summary>
+        /// <param name="values">The source array.</param>
+        /// <returns>The <see cref="Vector2"/> created from the array.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Vector2 FromArray(float[] values)
+        {
+            if (values.Length != 2)
+            {
+                throw new ArgumentException("Vector2.FromArray only accepts a float array with 2 elements.");
+            }
+            return new Vector2(values[0], values[1]);
         }
         #endregion Public Static Methods
 

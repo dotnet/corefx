@@ -137,6 +137,16 @@ namespace System.Numerics
                 return X * X + Y * Y + Z * Z;
             }
         }
+
+        /// <summary>
+        /// Returns an array containing the vector data (X at index 0, Y at index 1, ...)
+        /// </summary>
+        /// <returns>An array containing the vector data.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public float[] ToArray()
+        {
+            return new float[3] { X, Y, Z };
+        }
         #endregion Public Instance Methods
 
         #region Public Static Methods
@@ -362,6 +372,22 @@ namespace System.Numerics
                 value.X * (1.0f - yy2 - zz2) + value.Y * (xy2 - wz2) + value.Z * (xz2 + wy2),
                 value.X * (xy2 + wz2) + value.Y * (1.0f - xx2 - zz2) + value.Z * (yz2 - wx2),
                 value.X * (xz2 - wy2) + value.Y * (yz2 + wx2) + value.Z * (1.0f - xx2 - yy2));
+        }
+
+        /// <summary>
+        /// Creates a vector from the given array.
+        /// The element at index 0 will become Vector3.X, the element at index 1 will become Vector3.Y and so on.
+        /// </summary>
+        /// <param name="values">The source array.</param>
+        /// <returns>The <see cref="Vector3"/> created from the array.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Vector3 FromArray(float[] values)
+        {
+            if (values.Length != 3)
+            {
+                throw new ArgumentException("Vector3.FromArray only accepts a float array with 3 elements.");
+            }
+            return new Vector3(values[0], values[1], values[2]);
         }
         #endregion Public Static Methods
 

@@ -1360,6 +1360,31 @@ namespace System.Numerics.Tests
             Assert.Equal(40, sizeof(Vector4PlusFloat_2x));
         }
 
+        // A test for Vector4.FromArray()
+        [Fact]
+        public void Vector4FromArrayTest()
+        {
+            float[] arr = new float[] { 1.5f, 2.5f, 3.5f, 4.5f };
+            Vector4 v = Vector4.FromArray(arr);
+            Assert.Equal(1.5f, v.X);
+            Assert.Equal(2.5f, v.Y);
+            Assert.Equal(3.5f, v.Z);
+            Assert.Equal(4.5f, v.W);
+        }
+
+        // A test for Vector4.ToArray()
+        [Fact]
+        public void Vector4ToArrayTest()
+        {
+            Vector4 v = new Vector4(1.5f, 2.5f, 3.5f, 4.5f);
+            float[] arr = v.ToArray();
+            Assert.Equal(4, arr.Length);
+            Assert.Equal(1.5f, arr[0]);
+            Assert.Equal(2.5f, arr[1]);
+            Assert.Equal(3.5f, arr[2]);
+            Assert.Equal(4.5f, arr[3]);
+        }
+
         [StructLayout(LayoutKind.Sequential)]
         struct Vector4_2x
         {
