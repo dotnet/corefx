@@ -1372,7 +1372,7 @@ namespace System.Numerics.Tests
             Assert.Equal(4.5f, v.W);
 
             float[] arr1 = new float[] { 1.5f, 2.5f, 3.5f, 4.5f, 5.5f, 6.5f };
-            Vector4 v1 = Vector.FromArray(arr1, 1);
+            Vector4 v1 = Vector4.FromArray(arr1, 1);
             Assert.Equal(2.5f, v1.X);
             Assert.Equal(3.5f, v1.Y);
             Assert.Equal(4.5f, v1.Z);
