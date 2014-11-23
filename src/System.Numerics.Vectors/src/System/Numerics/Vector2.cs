@@ -359,17 +359,31 @@ namespace System.Numerics
         /// <summary>
         /// Creates a vector from the given array.
         /// The element at index 0 will become Vector2.X and the element at index 1 will become Vector2.Y.
+        /// If there are more than 2 elements in the array, the elements after index 1 will be ignored.
         /// </summary>
         /// <param name="values">The source array.</param>
         /// <returns>The <see cref="Vector2"/> created from the array.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Vector2 FromArray(float[] values)
         {
-            if (values.Length != 2)
+            return Vector2.FromArray(values, 0);
+        }
+
+        /// <summary>
+        /// Creates a vector from the given array and the given offset.
+        /// The element at index offset + 0 will become Vector2.X and the element at index offset + 1 will become Vector2.Y.
+        /// </summary>
+        /// <param name="values">The source array.</param>
+        /// <param name="offset">The offset.</param>
+        /// <returns>The <see cref="Vector2"/> created from the array.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Vector2 FromArray(float[] values, int offset)
+        {
+            if (values.Length < offset + 2)
             {
-                throw new ArgumentException("Vector2.FromArray only accepts a float array with 2 elements.");
+                throw new ArgumentException("Array is too small or offset is too large.");
             }
-            return new Vector2(values[0], values[1]);
+            return new Vector2(values[offset], values[offset + 1]);
         }
         #endregion Public Static Methods
 

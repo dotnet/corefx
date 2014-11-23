@@ -426,17 +426,31 @@ namespace System.Numerics
         /// <summary>
         /// Creates a vector from the given array.
         /// The element at index 0 will become Vector4.X, the element at index 1 will become Vector4.Y and so on.
+        /// If there are more than 4 elements in the array, the elements after index 3 will be ignored.
         /// </summary>
         /// <param name="values">The source array.</param>
         /// <returns>The <see cref="Vector4"/> created from the array.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Vector4 FromArray(float[] values)
         {
-            if (values.Length != 4)
+            return Vector4.FromArray(values, 0);
+        }
+
+        /// <summary>
+        /// Creates a vector from the given array and the given offset.
+        /// The element at index offset + 0 will become Vector4.X, the element at index offset + 1 will become Vector4.Y and so on.
+        /// </summary>
+        /// <param name="values">The source array.</param>
+        /// <param name="offset">The offset.</param>
+        /// <returns>The <see cref="Vector4"/> created from the array.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Vector4 FromArray(float[] values, int offset)
+        {
+            if (values.Length < offset + 4)
             {
-                throw new ArgumentException("Vector4.FromArray only accepts a float array with 4 elements.");
+                throw new ArgumentException("Array is too small or offset is too large.");
             }
-            return new Vector4(values[0], values[1], values[2], values[3]);
+            return new Vector4(values[offset], values[offset + 1], values[offset + 2], values[offset + 3]);
         }
         #endregion Public Static Methods
 

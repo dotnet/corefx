@@ -1106,7 +1106,7 @@ namespace System.Numerics.Tests
             Assert.Equal(24, sizeof(Vector2PlusFloat_2x));
         }
 
-        // A test for Vector3.FromArray()
+        // A test for Vector2.FromArray()
         [Fact]
         public void Vector2FromArrayTest()
         {
@@ -1114,6 +1114,11 @@ namespace System.Numerics.Tests
             Vector2 v = Vector2.FromArray(arr);
             Assert.Equal(1.5f, v.X);
             Assert.Equal(2.5f, v.Y);
+
+            float[] arr1 = new float[] { 1.5f, 2.5f, 3.5f, 4.5f };
+            Vector2 v1 = Vector2.FromArray(arr1, 1);
+            Assert.Equal(2.5f, v1.X);
+            Assert.Equal(3.5f, v1.Y);
         }
 
         // A test for Vector2.ToArray()
