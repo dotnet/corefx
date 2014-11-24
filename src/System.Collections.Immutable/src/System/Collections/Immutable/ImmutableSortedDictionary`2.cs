@@ -47,6 +47,16 @@ namespace System.Collections.Immutable
         private readonly IEqualityComparer<TValue> valueComparer;
 
         /// <summary>
+        /// the collection of keys, lazily computed and then cached.
+        /// </summary>
+        private IEnumerable<TKey> m_keysCollection;
+
+        /// <summary>
+        /// the collection of values, lazily computed and then cached.
+        /// </summary>
+        private IEnumerable<TValue> m_valuesCollection;
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="ImmutableSortedDictionary&lt;TKey, TValue&gt;"/> class.
         /// </summary>
         /// <param name="keyComparer">The key comparer.</param>
@@ -121,7 +131,14 @@ namespace System.Collections.Immutable
         /// </summary>
         public IEnumerable<TKey> Keys
         {
-            get { return this.root.Keys; }
+            get 
+            {
+                if (m_keysCollection == null)
+                {
+                    m_keysCollection = Count == 0 ? Enumerable.Empty<TKey>() : this.root.Keys;
+                }
+                return m_keysCollection;
+            }
         }
 
         /// <summary>
@@ -129,7 +146,15 @@ namespace System.Collections.Immutable
         /// </summary>
         public IEnumerable<TValue> Values
         {
-            get { return this.root.Values; }
+            get
+            {
+                if (m_valuesCollection == null)
+                {
+                    m_valuesCollection = Count == 0 ? Enumerable.Empty<TValue>() : this.root.Values;
+                }
+                return m_valuesCollection;
+            }
+
         }
 
         /// <summary>

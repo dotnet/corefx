@@ -47,6 +47,16 @@ namespace System.Collections.Immutable
         private readonly Comparers comparers;
 
         /// <summary>
+        /// the collection of keys, lazily computed and then cached.
+        /// </summary>
+        private IEnumerable<TKey> m_keysCollection;
+
+        /// <summary>
+        /// the collection of values, lazily computed and then cached.
+        /// </summary>
+        private IEnumerable<TValue> m_valuesCollection;
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="ImmutableDictionary&lt;TKey, TValue&gt;"/> class.
         /// </summary>
         /// <param name="root">The root.</param>
@@ -70,6 +80,34 @@ namespace System.Collections.Immutable
         {
             this.comparers = comparers ?? Comparers.Get(EqualityComparer<TKey>.Default, EqualityComparer<TValue>.Default);
             this.root = ImmutableSortedDictionary<int, HashBucket>.Node.EmptyNode;
+        }
+
+        /// <summary>
+        /// Generates the enumeration of keys
+        /// </summary>
+        IEnumerable<TKey> GenerateKeysEnumeration()
+        {
+            foreach (var bucket in this.root)
+            {
+                foreach (var item in bucket.Value)
+                {
+                    yield return item.Key;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Generates the enumeration of values
+        /// </summary>
+        IEnumerable<TValue> GenerateValuesEnumeration()
+        {
+            foreach (var bucket in this.root)
+            {
+                foreach (var item in bucket.Value)
+                {
+                    yield return item.Value;
+                }
+            }
         }
 
         /// <summary>
@@ -171,13 +209,11 @@ namespace System.Collections.Immutable
         {
             get
             {
-                foreach (var bucket in this.root)
+                if (m_keysCollection == null)
                 {
-                    foreach (var item in bucket.Value)
-                    {
-                        yield return item.Key;
-                    }
+                    m_keysCollection = Count == 0 ? Enumerable.Empty<TKey>() : GenerateKeysEnumeration();
                 }
+                return m_keysCollection;
             }
         }
 
@@ -188,13 +224,11 @@ namespace System.Collections.Immutable
         {
             get
             {
-                foreach (var bucket in this.root)
+                if (m_valuesCollection == null)
                 {
-                    foreach (var item in bucket.Value)
-                    {
-                        yield return item.Value;
-                    }
+                    m_valuesCollection = Count == 0 ? Enumerable.Empty<TValue>() : GenerateValuesEnumeration();
                 }
+                return m_valuesCollection;
             }
         }
 

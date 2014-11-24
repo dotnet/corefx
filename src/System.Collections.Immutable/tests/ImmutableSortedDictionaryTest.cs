@@ -20,6 +20,30 @@ namespace System.Collections.Immutable.Test
         }
 
         [Fact]
+        public void KeyAndValuesCollectionsAreRecycled()
+        {
+            var empty = Empty<int, string>();
+            var empty2 = Empty<int, string>();
+            var k1 = empty.Keys;
+            var v1 = empty.Values;
+            Assert.Same(k1, empty.Keys);
+            Assert.Same(v1, empty.Values);
+
+            // for the empty case, we actually use the same (empty) collection
+            Assert.Same(empty.Keys, empty2.Keys);
+            Assert.Same(empty.Values, empty2.Values);
+
+            var withOneElement = empty.Add(1, "one");
+            var k2 = withOneElement.Keys;
+            var v2 = withOneElement.Values;
+
+            Assert.Same(k2, withOneElement.Keys);
+            Assert.Same(v2, withOneElement.Values);
+            Assert.NotSame(k1, k2);
+            Assert.NotSame(v1, v2);
+        }
+
+        [Fact]
         public void RandomOperationsTest()
         {
             int operationCount = this.RandomOperationsCount;
