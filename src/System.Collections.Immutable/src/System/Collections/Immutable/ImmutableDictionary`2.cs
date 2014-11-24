@@ -49,12 +49,12 @@ namespace System.Collections.Immutable
         /// <summary>
         /// the collection of keys, lazily computed and then cached.
         /// </summary>
-        private IEnumerable<TKey> m_keysCollection;
+        private IEnumerable<TKey> keysCollection;
 
         /// <summary>
         /// the collection of values, lazily computed and then cached.
         /// </summary>
-        private IEnumerable<TValue> m_valuesCollection;
+        private IEnumerable<TValue> valuesCollection;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ImmutableDictionary&lt;TKey, TValue&gt;"/> class.
@@ -85,7 +85,7 @@ namespace System.Collections.Immutable
         /// <summary>
         /// Generates the enumeration of keys
         /// </summary>
-        IEnumerable<TKey> GenerateKeysEnumeration()
+        private IEnumerable<TKey> GenerateKeysEnumeration()
         {
             foreach (var bucket in this.root)
             {
@@ -99,7 +99,7 @@ namespace System.Collections.Immutable
         /// <summary>
         /// Generates the enumeration of values
         /// </summary>
-        IEnumerable<TValue> GenerateValuesEnumeration()
+        private IEnumerable<TValue> GenerateValuesEnumeration()
         {
             foreach (var bucket in this.root)
             {
@@ -209,11 +209,12 @@ namespace System.Collections.Immutable
         {
             get
             {
-                if (m_keysCollection == null)
+                if (keysCollection == null)
                 {
-                    m_keysCollection = Count == 0 ? Enumerable.Empty<TKey>() : GenerateKeysEnumeration();
+                    keysCollection = Count == 0 ? Enumerable.Empty<TKey>() : GenerateKeysEnumeration();
                 }
-                return m_keysCollection;
+                
+                return keysCollection;
             }
         }
 
@@ -224,11 +225,12 @@ namespace System.Collections.Immutable
         {
             get
             {
-                if (m_valuesCollection == null)
+                if (valuesCollection == null)
                 {
-                    m_valuesCollection = Count == 0 ? Enumerable.Empty<TValue>() : GenerateValuesEnumeration();
+                    valuesCollection = Count == 0 ? Enumerable.Empty<TValue>() : GenerateValuesEnumeration();
                 }
-                return m_valuesCollection;
+                
+                return valuesCollection;
             }
         }
 

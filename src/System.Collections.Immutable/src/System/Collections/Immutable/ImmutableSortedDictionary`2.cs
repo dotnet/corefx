@@ -49,12 +49,12 @@ namespace System.Collections.Immutable
         /// <summary>
         /// the collection of keys, lazily computed and then cached.
         /// </summary>
-        private IEnumerable<TKey> m_keysCollection;
+        private IEnumerable<TKey> keysCollection;
 
         /// <summary>
         /// the collection of values, lazily computed and then cached.
         /// </summary>
-        private IEnumerable<TValue> m_valuesCollection;
+        private IEnumerable<TValue> valuesCollection;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ImmutableSortedDictionary&lt;TKey, TValue&gt;"/> class.
@@ -133,11 +133,12 @@ namespace System.Collections.Immutable
         {
             get 
             {
-                if (m_keysCollection == null)
+                if (keysCollection == null)
                 {
-                    m_keysCollection = Count == 0 ? Enumerable.Empty<TKey>() : this.root.Keys;
+                    keysCollection = Count == 0 ? Enumerable.Empty<TKey>() : this.root.Keys;
                 }
-                return m_keysCollection;
+                
+                return keysCollection;
             }
         }
 
@@ -148,11 +149,12 @@ namespace System.Collections.Immutable
         {
             get
             {
-                if (m_valuesCollection == null)
+                if (valuesCollection == null)
                 {
-                    m_valuesCollection = Count == 0 ? Enumerable.Empty<TValue>() : this.root.Values;
+                    valuesCollection = Count == 0 ? Enumerable.Empty<TValue>() : this.root.Values;
                 }
-                return m_valuesCollection;
+                
+                return valuesCollection;
             }
 
         }
