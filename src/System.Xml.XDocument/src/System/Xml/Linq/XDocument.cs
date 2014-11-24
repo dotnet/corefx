@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft. All rights reserved.
+﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.IO;
@@ -24,7 +24,7 @@ namespace System.Xml.Linq
     /// </remarks>
     public class XDocument : XContainer
     {
-        XDeclaration declaration;
+        private XDeclaration _declaration;
 
         ///<overloads>
         /// Initializes a new instance of the <see cref="XDocument"/> class.
@@ -88,7 +88,7 @@ namespace System.Xml.Linq
         public XDocument(XDeclaration declaration, params object[] content)
             : this(content)
         {
-            this.declaration = declaration;
+            this._declaration = declaration;
         }
 
         /// <summary>
@@ -101,9 +101,9 @@ namespace System.Xml.Linq
         public XDocument(XDocument other)
             : base(other)
         {
-            if (other.declaration != null)
+            if (other._declaration != null)
             {
-                declaration = new XDeclaration(other.declaration);
+                _declaration = new XDeclaration(other._declaration);
             }
         }
 
@@ -112,8 +112,8 @@ namespace System.Xml.Linq
         /// </summary>
         public XDeclaration Declaration
         {
-            get { return declaration; }
-            set { declaration = value; }
+            get { return _declaration; }
+            set { _declaration = value; }
         }
 
         /// <summary>
@@ -462,11 +462,11 @@ namespace System.Xml.Linq
         public void Save(Stream stream, SaveOptions options)
         {
             XmlWriterSettings ws = GetXmlWriterSettings(options);
-            if (declaration != null && !string.IsNullOrEmpty(declaration.Encoding))
+            if (_declaration != null && !string.IsNullOrEmpty(_declaration.Encoding))
             {
                 try
                 {
-                    ws.Encoding = Encoding.GetEncoding(declaration.Encoding);
+                    ws.Encoding = Encoding.GetEncoding(_declaration.Encoding);
                 }
                 catch (ArgumentException)
                 {
@@ -540,11 +540,11 @@ namespace System.Xml.Linq
         public override void WriteTo(XmlWriter writer)
         {
             if (writer == null) throw new ArgumentNullException("writer");
-            if (declaration != null && declaration.Standalone == "yes")
+            if (_declaration != null && _declaration.Standalone == "yes")
             {
                 writer.WriteStartDocument(true);
             }
-            else if (declaration != null && declaration.Standalone == "no")
+            else if (_declaration != null && _declaration.Standalone == "no")
             {
                 writer.WriteStartDocument(false);
             }

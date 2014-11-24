@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft. All rights reserved.
+﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Collections.Generic;
@@ -27,7 +27,7 @@ namespace System.Xml.Linq
     /// </remarks>
     public class XElement : XContainer
     {
-        static IEnumerable<XElement> emptySequence;
+        private static IEnumerable<XElement> _emptySequence;
 
         /// <summary>
         /// Gets an empty collection of elements.
@@ -36,8 +36,8 @@ namespace System.Xml.Linq
         {
             get
             {
-                if (emptySequence == null) emptySequence = new XElement[0];
-                return emptySequence;
+                if (_emptySequence == null) _emptySequence = new XElement[0];
+                return _emptySequence;
             }
         }
 

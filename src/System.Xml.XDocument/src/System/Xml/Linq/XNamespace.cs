@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft. All rights reserved.
+﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Debug = System.Diagnostics.Debug;
@@ -15,26 +15,26 @@ namespace System.Xml.Linq
         internal const string xmlPrefixNamespace = "http://www.w3.org/XML/1998/namespace";
         internal const string xmlnsPrefixNamespace = "http://www.w3.org/2000/xmlns/";
 
-        static XHashtable<WeakReference> namespaces;
-        static WeakReference refNone;
-        static WeakReference refXml;
-        static WeakReference refXmlns;
+        private static XHashtable<WeakReference> _namespaces;
+        private static WeakReference _refNone;
+        private static WeakReference _refXml;
+        private static WeakReference _refXmlns;
 
-        string namespaceName;
-        int hashCode;
-        XHashtable<XName> names;
+        private string _namespaceName;
+        private int _hashCode;
+        private XHashtable<XName> _names;
 
-        const int NamesCapacity = 8;           // Starting capacity of XName table, which must be power of 2
-        const int NamespacesCapacity = 32;     // Starting capacity of XNamespace table, which must be power of 2
+        private const int NamesCapacity = 8;           // Starting capacity of XName table, which must be power of 2
+        private const int NamespacesCapacity = 32;     // Starting capacity of XNamespace table, which must be power of 2
 
         /// <summary>
         /// Constructor, internal so that external users must go through the Get() method to create an XNamespace.
         /// </summary>
         internal XNamespace(string namespaceName)
         {
-            this.namespaceName = namespaceName;
-            this.hashCode = namespaceName.GetHashCode();
-            names = new XHashtable<XName>(ExtractLocalName, NamesCapacity);
+            this._namespaceName = namespaceName;
+            this._hashCode = namespaceName.GetHashCode();
+            _names = new XHashtable<XName>(ExtractLocalName, NamesCapacity);
         }
 
         /// <summary>
@@ -42,7 +42,7 @@ namespace System.Xml.Linq
         /// </summary>
         public string NamespaceName
         {
-            get { return namespaceName; }
+            get { return _namespaceName; }
         }
 
         /// <summary>
@@ -64,7 +64,7 @@ namespace System.Xml.Linq
         /// <returns>A string value containing the namespace name.</returns>
         public override string ToString()
         {
-            return namespaceName;
+            return _namespaceName;
         }
 
         /// <summary>
@@ -78,7 +78,7 @@ namespace System.Xml.Linq
         {
             get
             {
-                return EnsureNamespace(ref refNone, string.Empty);
+                return EnsureNamespace(ref _refNone, string.Empty);
             }
         }
 
@@ -89,7 +89,7 @@ namespace System.Xml.Linq
         {
             get
             {
-                return EnsureNamespace(ref refXml, xmlPrefixNamespace);
+                return EnsureNamespace(ref _refXml, xmlPrefixNamespace);
             }
         }
 
@@ -100,7 +100,7 @@ namespace System.Xml.Linq
         {
             get
             {
-                return EnsureNamespace(ref refXmlns, xmlnsPrefixNamespace);
+                return EnsureNamespace(ref _refXmlns, xmlnsPrefixNamespace);
             }
         }
 
@@ -163,7 +163,7 @@ namespace System.Xml.Linq
         /// </summary>
         public override int GetHashCode()
         {
-            return hashCode;
+            return _hashCode;
         }
 
 
@@ -215,11 +215,11 @@ namespace System.Xml.Linq
 
             // Attempt to get the local name from the hash table
             XName name;
-            if (names.TryGetValue(localName, index, count, out name))
+            if (_names.TryGetValue(localName, index, count, out name))
                 return name;
 
             // No local name has yet been added, so add it now
-            return names.Add(new XName(this, localName.Substring(index, count)));
+            return _names.Add(new XName(this, localName.Substring(index, count)));
         }
 
         /// <summary>
@@ -234,8 +234,8 @@ namespace System.Xml.Linq
             if (count == 0) return None;
 
             // Use CompareExchange to ensure that exactly one XHashtable<WeakReference> is used to store namespaces
-            if (namespaces == null)
-                Interlocked.CompareExchange(ref namespaces, new XHashtable<WeakReference>(ExtractNamespace, NamespacesCapacity), null);
+            if (_namespaces == null)
+                Interlocked.CompareExchange(ref _namespaces, new XHashtable<WeakReference>(ExtractNamespace, NamespacesCapacity), null);
 
             WeakReference refNamespace;
             XNamespace ns;
@@ -244,14 +244,14 @@ namespace System.Xml.Linq
             do
             {
                 // Attempt to get the WeakReference for the namespace from the hash table
-                if (!namespaces.TryGetValue(namespaceName, index, count, out refNamespace))
+                if (!_namespaces.TryGetValue(namespaceName, index, count, out refNamespace))
                 {
                     // If it is not there, first determine whether it's a special namespace
                     if (count == xmlPrefixNamespace.Length && string.CompareOrdinal(namespaceName, index, xmlPrefixNamespace, 0, count) == 0) return Xml;
                     if (count == xmlnsPrefixNamespace.Length && string.CompareOrdinal(namespaceName, index, xmlnsPrefixNamespace, 0, count) == 0) return Xmlns;
 
                     // Go ahead and create the namespace and add it to the table
-                    refNamespace = namespaces.Add(new WeakReference(new XNamespace(namespaceName.Substring(index, count))));
+                    refNamespace = _namespaces.Add(new WeakReference(new XNamespace(namespaceName.Substring(index, count))));
                 }
 
                 ns = (refNamespace != null) ? (XNamespace)refNamespace.Target : null;

@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft. All rights reserved.
+﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Diagnostics;
@@ -10,9 +10,9 @@ namespace MS.Internal.Xml.XPath
 {
     internal sealed class BooleanExpr : ValueQuery
     {
-        private Query opnd1;
-        private Query opnd2;
-        private bool isOr;
+        private Query _opnd1;
+        private Query _opnd2;
+        private bool _isOr;
 
         public BooleanExpr(Operator.Op op, Query opnd1, Query opnd2)
         {
@@ -26,31 +26,31 @@ namespace MS.Internal.Xml.XPath
             {
                 opnd2 = new BooleanFunctions(Function.FunctionType.FuncBoolean, opnd2);
             }
-            this.opnd1 = opnd1;
-            this.opnd2 = opnd2;
-            isOr = (op == Operator.Op.OR);
+            this._opnd1 = opnd1;
+            this._opnd2 = opnd2;
+            _isOr = (op == Operator.Op.OR);
         }
         private BooleanExpr(BooleanExpr other) : base(other)
         {
-            this.opnd1 = Clone(other.opnd1);
-            this.opnd2 = Clone(other.opnd2);
-            this.isOr = other.isOr;
+            this._opnd1 = Clone(other._opnd1);
+            this._opnd2 = Clone(other._opnd2);
+            this._isOr = other._isOr;
         }
 
         public override void SetXsltContext(XsltContext context)
         {
-            opnd1.SetXsltContext(context);
-            opnd2.SetXsltContext(context);
+            _opnd1.SetXsltContext(context);
+            _opnd2.SetXsltContext(context);
         }
 
         public override object Evaluate(XPathNodeIterator nodeIterator)
         {
-            object n1 = opnd1.Evaluate(nodeIterator);
-            if (((bool)n1) == isOr)
+            object n1 = _opnd1.Evaluate(nodeIterator);
+            if (((bool)n1) == _isOr)
             {
                 return n1;
             }
-            return opnd2.Evaluate(nodeIterator);
+            return _opnd2.Evaluate(nodeIterator);
         }
 
         public override XPathNodeIterator Clone() { return new BooleanExpr(this); }
@@ -59,9 +59,9 @@ namespace MS.Internal.Xml.XPath
         public override void PrintQuery(XmlWriter w)
         {
             w.WriteStartElement(this.GetType().Name);
-            w.WriteAttributeString("op", (isOr ? Operator.Op.OR : Operator.Op.AND).ToString());
-            opnd1.PrintQuery(w);
-            opnd2.PrintQuery(w);
+            w.WriteAttributeString("op", (_isOr ? Operator.Op.OR : Operator.Op.AND).ToString());
+            _opnd1.PrintQuery(w);
+            _opnd2.PrintQuery(w);
             w.WriteEndElement();
         }
     }

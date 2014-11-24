@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft. All rights reserved.
+﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Xml.XPath;
@@ -7,19 +7,19 @@ namespace MS.Internal.Xml.XPath
 {
     internal class Variable : AstNode
     {
-        private string localname;
-        private string prefix;
+        private string _localname;
+        private string _prefix;
 
         public Variable(string name, string prefix)
         {
-            this.localname = name;
-            this.prefix = prefix;
+            this._localname = name;
+            this._prefix = prefix;
         }
 
         public override AstType Type { get { return AstType.Variable; } }
         public override XPathResultType ReturnType { get { return XPathResultType.Any; } }
 
-        public string Localname { get { return localname; } }
-        public string Prefix { get { return prefix; } }
+        public string Localname { get { return _localname; } }
+        public string Prefix { get { return _prefix; } }
     }
 }

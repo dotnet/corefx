@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft. All rights reserved.
+﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
@@ -13,23 +13,23 @@ namespace MS.Internal.Xml.XPath
 {
     internal sealed class SortQuery : Query
     {
-        private List<SortKey> results;
-        private XPathSortComparer comparer;
-        private Query qyInput;
+        private List<SortKey> _results;
+        private XPathSortComparer _comparer;
+        private Query _qyInput;
 
         public SortQuery(Query qyInput)
         {
             Debug.Assert(qyInput != null, "Sort Query needs an input query tree to work on");
-            this.results = new List<SortKey>();
-            this.comparer = new XPathSortComparer();
-            this.qyInput = qyInput;
+            this._results = new List<SortKey>();
+            this._comparer = new XPathSortComparer();
+            this._qyInput = qyInput;
             count = 0;
         }
         private SortQuery(SortQuery other) : base(other)
         {
-            this.results = new List<SortKey>(other.results);
-            this.comparer = other.comparer.Clone();
-            this.qyInput = Clone(other.qyInput);
+            this._results = new List<SortKey>(other._results);
+            this._comparer = other._comparer.Clone();
+            this._qyInput = Clone(other._qyInput);
             count = 0;
         }
 
@@ -37,10 +37,10 @@ namespace MS.Internal.Xml.XPath
 
         public override void SetXsltContext(XsltContext xsltContext)
         {
-            qyInput.SetXsltContext(xsltContext);
+            _qyInput.SetXsltContext(xsltContext);
             if (
-                qyInput.StaticType != XPathResultType.NodeSet &&
-                qyInput.StaticType != XPathResultType.Any
+                _qyInput.StaticType != XPathResultType.NodeSet &&
+                _qyInput.StaticType != XPathResultType.Any
             )
             {
                 throw XPathException.Create(SR.Xp_NodeSetExpected);
@@ -49,29 +49,29 @@ namespace MS.Internal.Xml.XPath
 
         private void BuildResultsList()
         {
-            Int32 numSorts = this.comparer.NumSorts;
+            Int32 numSorts = this._comparer.NumSorts;
 
             Debug.Assert(numSorts > 0, "Why was the sort query created?");
 
             XPathNavigator eNext;
-            while ((eNext = qyInput.Advance()) != null)
+            while ((eNext = _qyInput.Advance()) != null)
             {
-                SortKey key = new SortKey(numSorts, /*originalPosition:*/this.results.Count, eNext.Clone());
+                SortKey key = new SortKey(numSorts, /*originalPosition:*/this._results.Count, eNext.Clone());
 
                 for (Int32 j = 0; j < numSorts; j++)
                 {
-                    key[j] = this.comparer.Expression(j).Evaluate(qyInput);
+                    key[j] = this._comparer.Expression(j).Evaluate(_qyInput);
                 }
 
-                results.Add(key);
+                _results.Add(key);
             }
-            results.Sort(this.comparer);
+            _results.Sort(this._comparer);
         }
 
         public override object Evaluate(XPathNodeIterator context)
         {
-            qyInput.Evaluate(context);
-            this.results.Clear();
+            _qyInput.Evaluate(context);
+            this._results.Clear();
             BuildResultsList();
             count = 0;
             return this;
@@ -79,10 +79,10 @@ namespace MS.Internal.Xml.XPath
 
         public override XPathNavigator Advance()
         {
-            Debug.Assert(0 <= count && count <= results.Count);
-            if (count < this.results.Count)
+            Debug.Assert(0 <= count && count <= _results.Count);
+            if (count < this._results.Count)
             {
-                return this.results[count++].Node;
+                return this._results[count++].Node;
             }
             return null;
         }
@@ -91,31 +91,31 @@ namespace MS.Internal.Xml.XPath
         {
             get
             {
-                Debug.Assert(0 <= count && count <= results.Count);
+                Debug.Assert(0 <= count && count <= _results.Count);
                 if (count == 0)
                 {
                     return null;
                 }
-                return results[count - 1].Node;
+                return _results[count - 1].Node;
             }
         }
 
         internal void AddSort(Query evalQuery, IComparer comparer)
         {
-            this.comparer.AddSort(evalQuery, comparer);
+            this._comparer.AddSort(evalQuery, comparer);
         }
 
         public override XPathNodeIterator Clone() { return new SortQuery(this); }
 
         public override XPathResultType StaticType { get { return XPathResultType.NodeSet; } }
         public override int CurrentPosition { get { return count; } }
-        public override int Count { get { return results.Count; } }
+        public override int Count { get { return _results.Count; } }
         public override QueryProps Properties { get { return QueryProps.Cached | QueryProps.Position | QueryProps.Count; } }
 
         public override void PrintQuery(XmlWriter w)
         {
             w.WriteStartElement(this.GetType().Name);
-            qyInput.PrintQuery(w);
+            _qyInput.PrintQuery(w);
             w.WriteElementString("XPathSortComparer", "... PrintTree() not implemented ...");
             w.WriteEndElement();
         }
@@ -123,64 +123,64 @@ namespace MS.Internal.Xml.XPath
 
     internal sealed class SortKey
     {
-        private Int32 numKeys;
-        private object[] keys;
-        private int originalPosition;
-        private XPathNavigator node;
+        private Int32 _numKeys;
+        private object[] _keys;
+        private int _originalPosition;
+        private XPathNavigator _node;
 
         public SortKey(int numKeys, int originalPosition, XPathNavigator node)
         {
-            this.numKeys = numKeys;
-            this.keys = new object[numKeys];
-            this.originalPosition = originalPosition;
-            this.node = node;
+            this._numKeys = numKeys;
+            this._keys = new object[numKeys];
+            this._originalPosition = originalPosition;
+            this._node = node;
         }
 
         public object this[int index]
         {
-            get { return this.keys[index]; }
-            set { this.keys[index] = value; }
+            get { return this._keys[index]; }
+            set { this._keys[index] = value; }
         }
 
-        public int NumKeys { get { return this.numKeys; } }
-        public int OriginalPosition { get { return this.originalPosition; } }
-        public XPathNavigator Node { get { return this.node; } }
+        public int NumKeys { get { return this._numKeys; } }
+        public int OriginalPosition { get { return this._originalPosition; } }
+        public XPathNavigator Node { get { return this._node; } }
     } // class SortKey
 
     internal sealed class XPathSortComparer : IComparer<SortKey>
     {
         private const int minSize = 3;
-        private Query[] expressions;
-        private IComparer[] comparers;
-        private int numSorts;
+        private Query[] _expressions;
+        private IComparer[] _comparers;
+        private int _numSorts;
 
         public XPathSortComparer(int size)
         {
             if (size <= 0) size = minSize;
-            this.expressions = new Query[size];
-            this.comparers = new IComparer[size];
+            this._expressions = new Query[size];
+            this._comparers = new IComparer[size];
         }
         public XPathSortComparer() : this(minSize) { }
 
         public void AddSort(Query evalQuery, IComparer comparer)
         {
-            Debug.Assert(this.expressions.Length == this.comparers.Length);
-            Debug.Assert(0 < this.expressions.Length);
-            Debug.Assert(0 <= numSorts && numSorts <= this.expressions.Length);
+            Debug.Assert(this._expressions.Length == this._comparers.Length);
+            Debug.Assert(0 < this._expressions.Length);
+            Debug.Assert(0 <= _numSorts && _numSorts <= this._expressions.Length);
             // Ajust array sizes if needed.
-            if (numSorts == this.expressions.Length)
+            if (_numSorts == this._expressions.Length)
             {
-                Query[] newExpressions = new Query[numSorts * 2];
-                IComparer[] newComparers = new IComparer[numSorts * 2];
-                for (int i = 0; i < numSorts; i++)
+                Query[] newExpressions = new Query[_numSorts * 2];
+                IComparer[] newComparers = new IComparer[_numSorts * 2];
+                for (int i = 0; i < _numSorts; i++)
                 {
-                    newExpressions[i] = this.expressions[i];
-                    newComparers[i] = this.comparers[i];
+                    newExpressions[i] = this._expressions[i];
+                    newComparers[i] = this._comparers[i];
                 }
-                this.expressions = newExpressions;
-                this.comparers = newComparers;
+                this._expressions = newExpressions;
+                this._comparers = newComparers;
             }
-            Debug.Assert(numSorts < this.expressions.Length);
+            Debug.Assert(_numSorts < this._expressions.Length);
 
             // Fixup expression to handle node-set return type:
             if (evalQuery.StaticType == XPathResultType.NodeSet || evalQuery.StaticType == XPathResultType.Any)
@@ -188,16 +188,16 @@ namespace MS.Internal.Xml.XPath
                 evalQuery = new StringFunctions(Function.FunctionType.FuncString, new Query[] { evalQuery });
             }
 
-            this.expressions[numSorts] = evalQuery;
-            this.comparers[numSorts] = comparer;
-            numSorts++;
+            this._expressions[_numSorts] = evalQuery;
+            this._comparers[_numSorts] = comparer;
+            _numSorts++;
         }
 
-        public int NumSorts { get { return numSorts; } }
+        public int NumSorts { get { return _numSorts; } }
 
         public Query Expression(int i)
         {
-            return this.expressions[i];
+            return this._expressions[i];
         }
 
         int IComparer<SortKey>.Compare(SortKey x, SortKey y)
@@ -206,7 +206,7 @@ namespace MS.Internal.Xml.XPath
             int result = 0;
             for (int i = 0; i < x.NumKeys; i++)
             {
-                result = this.comparers[i].Compare(x[i], y[i]);
+                result = this._comparers[i].Compare(x[i], y[i]);
                 if (result != 0)
                 {
                     return result;
@@ -219,14 +219,14 @@ namespace MS.Internal.Xml.XPath
 
         internal XPathSortComparer Clone()
         {
-            XPathSortComparer clone = new XPathSortComparer(this.numSorts);
+            XPathSortComparer clone = new XPathSortComparer(this._numSorts);
 
-            for (int i = 0; i < this.numSorts; i++)
+            for (int i = 0; i < this._numSorts; i++)
             {
-                clone.comparers[i] = this.comparers[i];
-                clone.expressions[i] = (Query)this.expressions[i].Clone(); // Expressions should be cloned because Query should be cloned
+                clone._comparers[i] = this._comparers[i];
+                clone._expressions[i] = (Query)this._expressions[i].Clone(); // Expressions should be cloned because Query should be cloned
             }
-            clone.numSorts = this.numSorts;
+            clone._numSorts = this._numSorts;
             return clone;
         }
     } // class XPathSortComparer

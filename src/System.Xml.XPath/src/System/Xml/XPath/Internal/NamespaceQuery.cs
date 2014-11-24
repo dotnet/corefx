@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft. All rights reserved.
+﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Diagnostics;
@@ -8,17 +8,17 @@ namespace MS.Internal.Xml.XPath
 {
     internal sealed class NamespaceQuery : BaseAxisQuery
     {
-        private bool onNamespace;
+        private bool _onNamespace;
 
         public NamespaceQuery(Query qyParent, string Name, string Prefix, XPathNodeType Type) : base(qyParent, Name, Prefix, Type) { }
         private NamespaceQuery(NamespaceQuery other) : base(other)
         {
-            this.onNamespace = other.onNamespace;
+            this._onNamespace = other._onNamespace;
         }
 
         public override void Reset()
         {
-            onNamespace = false;
+            _onNamespace = false;
             base.Reset();
         }
 
@@ -26,7 +26,7 @@ namespace MS.Internal.Xml.XPath
         {
             while (true)
             {
-                if (!onNamespace)
+                if (!_onNamespace)
                 {
                     currentNode = qyInput.Advance();
                     if (currentNode == null)
@@ -35,14 +35,14 @@ namespace MS.Internal.Xml.XPath
                     }
                     position = 0;
                     currentNode = currentNode.Clone();
-                    onNamespace = currentNode.MoveToFirstNamespace();
+                    _onNamespace = currentNode.MoveToFirstNamespace();
                 }
                 else
                 {
-                    onNamespace = currentNode.MoveToNextNamespace();
+                    _onNamespace = currentNode.MoveToNextNamespace();
                 }
 
-                if (onNamespace)
+                if (_onNamespace)
                 {
                     if (matches(currentNode))
                     {

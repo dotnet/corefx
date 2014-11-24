@@ -7,10 +7,10 @@ namespace System.Numerics.Tests
 {
     public static class Util
     {
-        static Random random = new Random();
+        private static Random _random = new Random();
         public static void SetRandomSeed(int seed)
         {
-            random = new Random(seed);
+            _random = new Random(seed);
         }
 
         /// <summary>
@@ -23,7 +23,7 @@ namespace System.Numerics.Tests
             float[] values = new float[numValues];
             for (int g = 0; g < numValues; g++)
             {
-                values[g] = (float)(random.NextDouble() * 99 + 1);
+                values[g] = (float)(_random.NextDouble() * 99 + 1);
             }
             return values;
         }
@@ -38,7 +38,7 @@ namespace System.Numerics.Tests
             int[] values = new int[numValues];
             for (int g = 0; g < numValues; g++)
             {
-                values[g] = random.Next(1, 100);
+                values[g] = _random.Next(1, 100);
             }
             return values;
         }
@@ -53,7 +53,7 @@ namespace System.Numerics.Tests
             double[] values = new double[numValues];
             for (int g = 0; g < numValues; g++)
             {
-                values[g] = random.NextDouble() * 99 + 1;
+                values[g] = _random.NextDouble() * 99 + 1;
             }
             return values;
         }
@@ -68,7 +68,7 @@ namespace System.Numerics.Tests
             long[] values = new long[numValues];
             for (int g = 0; g < numValues; g++)
             {
-                values[g] = random.Next(1, 100) * (long.MaxValue / int.MaxValue);
+                values[g] = _random.Next(1, 100) * (long.MaxValue / int.MaxValue);
             }
             return values;
         }
@@ -86,7 +86,7 @@ namespace System.Numerics.Tests
 
         public static T GenerateSingleValue<T>(int min = 1, int max = 100) where T : struct
         {
-            var randomRange = random.Next(min, max);
+            var randomRange = _random.Next(min, max);
             T value = (T)(dynamic)randomRange;
             return value;
         }

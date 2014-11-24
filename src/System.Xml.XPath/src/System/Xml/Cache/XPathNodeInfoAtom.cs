@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft. All rights reserved.
+﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Diagnostics;
@@ -14,19 +14,19 @@ namespace MS.Internal.Xml.Cache
     /// </summary>
     sealed internal class XPathNodePageInfo
     {
-        private int pageNum;
-        private int nodeCount;
-        private XPathNode[] pagePrev;
-        private XPathNode[] pageNext;
+        private int _pageNum;
+        private int _nodeCount;
+        private XPathNode[] _pagePrev;
+        private XPathNode[] _pageNext;
 
         /// <summary>
         /// Constructor.
         /// </summary>
         public XPathNodePageInfo(XPathNode[] pagePrev, int pageNum)
         {
-            this.pagePrev = pagePrev;
-            this.pageNum = pageNum;
-            this.nodeCount = 1;         // Every node page contains PageInfo at 0th position
+            this._pagePrev = pagePrev;
+            this._pageNum = pageNum;
+            this._nodeCount = 1;         // Every node page contains PageInfo at 0th position
         }
 
         /// <summary>
@@ -34,7 +34,7 @@ namespace MS.Internal.Xml.Cache
         /// </summary>
         public int PageNumber
         {
-            get { return this.pageNum; }
+            get { return this._pageNum; }
         }
 
         /// <summary>
@@ -42,8 +42,8 @@ namespace MS.Internal.Xml.Cache
         /// </summary>
         public int NodeCount
         {
-            get { return this.nodeCount; }
-            set { this.nodeCount = value; }
+            get { return this._nodeCount; }
+            set { this._nodeCount = value; }
         }
 
         /// <summary>
@@ -51,7 +51,7 @@ namespace MS.Internal.Xml.Cache
         /// </summary>
         public XPathNode[] PreviousPage
         {
-            get { return this.pagePrev; }
+            get { return this._pagePrev; }
         }
 
         /// <summary>
@@ -59,8 +59,8 @@ namespace MS.Internal.Xml.Cache
         /// </summary>
         public XPathNode[] NextPage
         {
-            get { return this.pageNext; }
-            set { this.pageNext = value; }
+            get { return this._pageNext; }
+            set { this._pageNext = value; }
         }
     }
 
@@ -76,20 +76,20 @@ namespace MS.Internal.Xml.Cache
     /// </summary>
     sealed internal class XPathNodeInfoAtom
     {
-        private string localName;
-        private string namespaceUri;
-        private string prefix;
-        private string baseUri;
-        private XPathNode[] pageParent;
-        private XPathNode[] pageSibling;
-        private XPathNode[] pageSimilar;
-        private XPathDocument doc;
-        private int lineNumBase;
-        private int linePosBase;
-        private int hashCode;
-        private int localNameHash;
-        private XPathNodeInfoAtom next;
-        private XPathNodePageInfo pageInfo;
+        private string _localName;
+        private string _namespaceUri;
+        private string _prefix;
+        private string _baseUri;
+        private XPathNode[] _pageParent;
+        private XPathNode[] _pageSibling;
+        private XPathNode[] _pageSimilar;
+        private XPathDocument _doc;
+        private int _lineNumBase;
+        private int _linePosBase;
+        private int _hashCode;
+        private int _localNameHash;
+        private XPathNodeInfoAtom _next;
+        private XPathNodePageInfo _pageInfo;
 
 
         /// <summary>
@@ -98,7 +98,7 @@ namespace MS.Internal.Xml.Cache
         /// </summary>
         public XPathNodeInfoAtom(XPathNodePageInfo pageInfo)
         {
-            this.pageInfo = pageInfo;
+            this._pageInfo = pageInfo;
         }
 
         /// <summary>
@@ -120,23 +120,23 @@ namespace MS.Internal.Xml.Cache
         {
             Debug.Assert(localName != null && namespaceUri != null && prefix != null && doc != null);
 
-            this.localName = localName;
-            this.namespaceUri = namespaceUri;
-            this.prefix = prefix;
-            this.baseUri = baseUri;
-            this.pageParent = pageParent;
-            this.pageSibling = pageSibling;
-            this.pageSimilar = pageSimilar;
-            this.doc = doc;
-            this.lineNumBase = lineNumBase;
-            this.linePosBase = linePosBase;
-            this.next = null;
-            this.pageInfo = null;
+            this._localName = localName;
+            this._namespaceUri = namespaceUri;
+            this._prefix = prefix;
+            this._baseUri = baseUri;
+            this._pageParent = pageParent;
+            this._pageSibling = pageSibling;
+            this._pageSimilar = pageSimilar;
+            this._doc = doc;
+            this._lineNumBase = lineNumBase;
+            this._linePosBase = linePosBase;
+            this._next = null;
+            this._pageInfo = null;
 
-            this.hashCode = 0;
-            this.localNameHash = 0;
-            for (int i = 0; i < this.localName.Length; i++)
-                this.localNameHash += (this.localNameHash << 7) ^ this.localName[i];
+            this._hashCode = 0;
+            this._localNameHash = 0;
+            for (int i = 0; i < this._localName.Length; i++)
+                this._localNameHash += (this._localNameHash << 7) ^ this._localName[i];
         }
 
         /// <summary>
@@ -144,7 +144,7 @@ namespace MS.Internal.Xml.Cache
         /// </summary>
         public XPathNodePageInfo PageInfo
         {
-            get { return this.pageInfo; }
+            get { return this._pageInfo; }
         }
 
         /// <summary>
@@ -152,7 +152,7 @@ namespace MS.Internal.Xml.Cache
         /// </summary>
         public string LocalName
         {
-            get { return this.localName; }
+            get { return this._localName; }
         }
 
         /// <summary>
@@ -160,7 +160,7 @@ namespace MS.Internal.Xml.Cache
         /// </summary>
         public string NamespaceUri
         {
-            get { return this.namespaceUri; }
+            get { return this._namespaceUri; }
         }
 
         /// <summary>
@@ -168,7 +168,7 @@ namespace MS.Internal.Xml.Cache
         /// </summary>
         public string Prefix
         {
-            get { return this.prefix; }
+            get { return this._prefix; }
         }
 
         /// <summary>
@@ -176,7 +176,7 @@ namespace MS.Internal.Xml.Cache
         /// </summary>
         public string BaseUri
         {
-            get { return this.baseUri; }
+            get { return this._baseUri; }
         }
 
         /// <summary>
@@ -184,7 +184,7 @@ namespace MS.Internal.Xml.Cache
         /// </summary>
         public XPathNode[] SiblingPage
         {
-            get { return this.pageSibling; }
+            get { return this._pageSibling; }
         }
 
         /// <summary>
@@ -192,7 +192,7 @@ namespace MS.Internal.Xml.Cache
         /// </summary>
         public XPathNode[] SimilarElementPage
         {
-            get { return this.pageSimilar; }
+            get { return this._pageSimilar; }
         }
 
         /// <summary>
@@ -200,7 +200,7 @@ namespace MS.Internal.Xml.Cache
         /// </summary>
         public XPathNode[] ParentPage
         {
-            get { return this.pageParent; }
+            get { return this._pageParent; }
         }
 
         /// <summary>
@@ -208,7 +208,7 @@ namespace MS.Internal.Xml.Cache
         /// </summary>
         public XPathDocument Document
         {
-            get { return this.doc; }
+            get { return this._doc; }
         }
 
         /// <summary>
@@ -216,7 +216,7 @@ namespace MS.Internal.Xml.Cache
         /// </summary>
         public int LineNumberBase
         {
-            get { return this.lineNumBase; }
+            get { return this._lineNumBase; }
         }
 
         /// <summary>
@@ -224,7 +224,7 @@ namespace MS.Internal.Xml.Cache
         /// </summary>
         public int LinePositionBase
         {
-            get { return this.linePosBase; }
+            get { return this._linePosBase; }
         }
 
         /// <summary>
@@ -232,7 +232,7 @@ namespace MS.Internal.Xml.Cache
         /// </summary>
         public int LocalNameHashCode
         {
-            get { return this.localNameHash; }
+            get { return this._localNameHash; }
         }
 
         /// <summary>
@@ -240,8 +240,8 @@ namespace MS.Internal.Xml.Cache
         /// </summary>
         public XPathNodeInfoAtom Next
         {
-            get { return this.next; }
-            set { this.next = value; }
+            get { return this._next; }
+            set { this._next = value; }
         }
 
         /// <summary>
@@ -249,28 +249,28 @@ namespace MS.Internal.Xml.Cache
         /// </summary>
         public override int GetHashCode()
         {
-            if (this.hashCode == 0)
+            if (this._hashCode == 0)
             {
                 int hashCode;
 
                 // Start with local name
-                hashCode = this.localNameHash;
+                hashCode = this._localNameHash;
 
                 // Add page indexes
-                if (this.pageSibling != null)
-                    hashCode += (hashCode << 7) ^ this.pageSibling[0].PageInfo.PageNumber;
+                if (this._pageSibling != null)
+                    hashCode += (hashCode << 7) ^ this._pageSibling[0].PageInfo.PageNumber;
 
-                if (this.pageParent != null)
-                    hashCode += (hashCode << 7) ^ this.pageParent[0].PageInfo.PageNumber;
+                if (this._pageParent != null)
+                    hashCode += (hashCode << 7) ^ this._pageParent[0].PageInfo.PageNumber;
 
-                if (this.pageSimilar != null)
-                    hashCode += (hashCode << 7) ^ this.pageSimilar[0].PageInfo.PageNumber;
+                if (this._pageSimilar != null)
+                    hashCode += (hashCode << 7) ^ this._pageSimilar[0].PageInfo.PageNumber;
 
                 // Save hashcode.  Don't save 0, so that it won't ever be recomputed.
-                this.hashCode = ((hashCode == 0) ? 1 : hashCode);
+                this._hashCode = ((hashCode == 0) ? 1 : hashCode);
             }
 
-            return this.hashCode;
+            return this._hashCode;
         }
 
         /// <summary>
@@ -280,21 +280,21 @@ namespace MS.Internal.Xml.Cache
         {
             XPathNodeInfoAtom that = other as XPathNodeInfoAtom;
             Debug.Assert(that != null);
-            Debug.Assert((object)this.doc == (object)that.doc);
-            Debug.Assert(this.pageInfo == null);
+            Debug.Assert((object)this._doc == (object)that._doc);
+            Debug.Assert(this._pageInfo == null);
 
             // Assume that name parts are atomized
             if (this.GetHashCode() == that.GetHashCode())
             {
-                if ((object)this.localName == (object)that.localName &&
-                    (object)this.pageSibling == (object)that.pageSibling &&
-                    (object)this.namespaceUri == (object)that.namespaceUri &&
-                    (object)this.pageParent == (object)that.pageParent &&
-                    (object)this.pageSimilar == (object)that.pageSimilar &&
-                    (object)this.prefix == (object)that.prefix &&
-                    (object)this.baseUri == (object)that.baseUri &&
-                    this.lineNumBase == that.lineNumBase &&
-                    this.linePosBase == that.linePosBase)
+                if ((object)this._localName == (object)that._localName &&
+                    (object)this._pageSibling == (object)that._pageSibling &&
+                    (object)this._namespaceUri == (object)that._namespaceUri &&
+                    (object)this._pageParent == (object)that._pageParent &&
+                    (object)this._pageSimilar == (object)that._pageSimilar &&
+                    (object)this._prefix == (object)that._prefix &&
+                    (object)this._baseUri == (object)that._baseUri &&
+                    this._lineNumBase == that._lineNumBase &&
+                    this._linePosBase == that._linePosBase)
                 {
                     return true;
                 }
@@ -314,49 +314,49 @@ namespace MS.Internal.Xml.Cache
             bldr.Append(GetHashCode());
             bldr.Append(", ");
 
-            if (this.localName.Length != 0)
+            if (this._localName.Length != 0)
             {
                 bldr.Append('{');
-                bldr.Append(this.namespaceUri);
+                bldr.Append(this._namespaceUri);
                 bldr.Append('}');
 
-                if (this.prefix.Length != 0)
+                if (this._prefix.Length != 0)
                 {
-                    bldr.Append(this.prefix);
+                    bldr.Append(this._prefix);
                     bldr.Append(':');
                 }
 
-                bldr.Append(this.localName);
+                bldr.Append(this._localName);
                 bldr.Append(", ");
             }
 
-            if (this.pageParent != null)
+            if (this._pageParent != null)
             {
                 bldr.Append("parent=");
-                bldr.Append(this.pageParent[0].PageInfo.PageNumber);
+                bldr.Append(this._pageParent[0].PageInfo.PageNumber);
                 bldr.Append(", ");
             }
 
-            if (this.pageSibling != null)
+            if (this._pageSibling != null)
             {
                 bldr.Append("sibling=");
-                bldr.Append(this.pageSibling[0].PageInfo.PageNumber);
+                bldr.Append(this._pageSibling[0].PageInfo.PageNumber);
                 bldr.Append(", ");
             }
 
-            if (this.pageSimilar != null)
+            if (this._pageSimilar != null)
             {
                 bldr.Append("similar=");
-                bldr.Append(this.pageSimilar[0].PageInfo.PageNumber);
+                bldr.Append(this._pageSimilar[0].PageInfo.PageNumber);
                 bldr.Append(", ");
             }
 
             bldr.Append("lineNum=");
-            bldr.Append(this.lineNumBase);
+            bldr.Append(this._lineNumBase);
             bldr.Append(", ");
 
             bldr.Append("linePos=");
-            bldr.Append(this.linePosBase);
+            bldr.Append(this._linePosBase);
 
             return bldr.ToString();
         }
@@ -368,9 +368,9 @@ namespace MS.Internal.Xml.Cache
     /// </summary>
     sealed internal class XPathNodeInfoTable
     {
-        private XPathNodeInfoAtom[] hashTable;
-        private int sizeTable;
-        private XPathNodeInfoAtom infoCached;
+        private XPathNodeInfoAtom[] _hashTable;
+        private int _sizeTable;
+        private XPathNodeInfoAtom _infoCached;
 
 #if DEBUG
         private const int DefaultTableSize = 2;
@@ -383,8 +383,8 @@ namespace MS.Internal.Xml.Cache
         /// </summary>
         public XPathNodeInfoTable()
         {
-            this.hashTable = new XPathNodeInfoAtom[DefaultTableSize];
-            this.sizeTable = 0;
+            this._hashTable = new XPathNodeInfoAtom[DefaultTableSize];
+            this._sizeTable = 0;
         }
 
         /// <summary>
@@ -397,7 +397,7 @@ namespace MS.Internal.Xml.Cache
             XPathNodeInfoAtom info;
 
             // If this.infoCached already exists, then reuse it; else create new InfoAtom
-            if (this.infoCached == null)
+            if (this._infoCached == null)
             {
                 info = new XPathNodeInfoAtom(localName, namespaceUri, prefix, baseUri,
                                              pageParent, pageSibling, pageSimilar,
@@ -405,8 +405,8 @@ namespace MS.Internal.Xml.Cache
             }
             else
             {
-                info = this.infoCached;
-                this.infoCached = info.Next;
+                info = this._infoCached;
+                this._infoCached = info.Next;
 
                 info.Init(localName, namespaceUri, prefix, baseUri,
                           pageParent, pageSibling, pageSimilar,
@@ -429,24 +429,24 @@ namespace MS.Internal.Xml.Cache
             XPathNodeInfoAtom infoNew, infoNext;
 
             // Search for existing XNodeInfoAtom in the table
-            infoNew = this.hashTable[info.GetHashCode() & (this.hashTable.Length - 1)];
+            infoNew = this._hashTable[info.GetHashCode() & (this._hashTable.Length - 1)];
             while (infoNew != null)
             {
                 if (info.Equals(infoNew))
                 {
                     // Found existing atom, so return that.  Reuse "info".
-                    info.Next = this.infoCached;
-                    this.infoCached = info;
+                    info.Next = this._infoCached;
+                    this._infoCached = info;
                     return infoNew;
                 }
                 infoNew = infoNew.Next;
             }
 
             // Expand table and rehash if necessary
-            if (this.sizeTable >= this.hashTable.Length)
+            if (this._sizeTable >= this._hashTable.Length)
             {
-                XPathNodeInfoAtom[] oldTable = this.hashTable;
-                this.hashTable = new XPathNodeInfoAtom[oldTable.Length * 2];
+                XPathNodeInfoAtom[] oldTable = this._hashTable;
+                this._hashTable = new XPathNodeInfoAtom[oldTable.Length * 2];
 
                 for (int i = 0; i < oldTable.Length; i++)
                 {
@@ -472,10 +472,10 @@ namespace MS.Internal.Xml.Cache
         /// </summary>
         private void AddInfo(XPathNodeInfoAtom info)
         {
-            int idx = info.GetHashCode() & (this.hashTable.Length - 1);
-            info.Next = this.hashTable[idx];
-            this.hashTable[idx] = info;
-            this.sizeTable++;
+            int idx = info.GetHashCode() & (this._hashTable.Length - 1);
+            info.Next = this._hashTable[idx];
+            this._hashTable[idx] = info;
+            this._sizeTable++;
         }
 
         /// <summary>
@@ -486,15 +486,15 @@ namespace MS.Internal.Xml.Cache
             StringBuilder bldr = new StringBuilder();
             XPathNodeInfoAtom infoAtom;
 
-            for (int i = 0; i < this.hashTable.Length; i++)
+            for (int i = 0; i < this._hashTable.Length; i++)
             {
                 bldr.AppendFormat("{0,4}: ", i);
 
-                infoAtom = this.hashTable[i];
+                infoAtom = this._hashTable[i];
 
                 while (infoAtom != null)
                 {
-                    if ((object)infoAtom != (object)this.hashTable[i])
+                    if ((object)infoAtom != (object)this._hashTable[i])
                         bldr.Append("\n      ");
 
                     bldr.Append(infoAtom);

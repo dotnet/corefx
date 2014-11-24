@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft. All rights reserved.
+﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
@@ -27,13 +27,13 @@ namespace MS.Internal.Xml.Cache
     /// </summary>
     internal struct XPathNode
     {
-        private XPathNodeInfoAtom info;                           // Atomized node information
-        private ushort idxSibling;                     // Page index of sibling node
-        private ushort idxParent;                      // Page index of parent node
-        private ushort idxSimilar;                     // Page index of next node in document order that has local name with same hashcode
-        private ushort posOffset;                      // Line position offset of node (added to LinePositionBase)
-        private uint props;                          // Node properties (broken down into bits below)
-        private string value;                          // String value of node
+        private XPathNodeInfoAtom _info;                           // Atomized node information
+        private ushort _idxSibling;                     // Page index of sibling node
+        private ushort _idxParent;                      // Page index of parent node
+        private ushort _idxSimilar;                     // Page index of next node in document order that has local name with same hashcode
+        private ushort _posOffset;                      // Line position offset of node (added to LinePositionBase)
+        private uint _props;                          // Node properties (broken down into bits below)
+        private string _value;                          // String value of node
 
         private const uint NodeTypeMask = 0xF;
         private const uint HasAttributeBit = 0x10;
@@ -62,7 +62,7 @@ namespace MS.Internal.Xml.Cache
         /// </summary>
         public XPathNodeType NodeType
         {
-            get { return (XPathNodeType)(this.props & NodeTypeMask); }
+            get { return (XPathNodeType)(this._props & NodeTypeMask); }
         }
 
         /// <summary>
@@ -71,7 +71,7 @@ namespace MS.Internal.Xml.Cache
         /// </summary>
         public string Prefix
         {
-            get { return this.info.Prefix; }
+            get { return this._info.Prefix; }
         }
 
         /// <summary>
@@ -80,7 +80,7 @@ namespace MS.Internal.Xml.Cache
         /// </summary>
         public string LocalName
         {
-            get { return this.info.LocalName; }
+            get { return this._info.LocalName; }
         }
 
         /// <summary>
@@ -108,7 +108,7 @@ namespace MS.Internal.Xml.Cache
         /// </summary>
         public string NamespaceUri
         {
-            get { return this.info.NamespaceUri; }
+            get { return this._info.NamespaceUri; }
         }
 
         /// <summary>
@@ -116,7 +116,7 @@ namespace MS.Internal.Xml.Cache
         /// </summary>
         public XPathDocument Document
         {
-            get { return this.info.Document; }
+            get { return this._info.Document; }
         }
 
         /// <summary>
@@ -124,7 +124,7 @@ namespace MS.Internal.Xml.Cache
         /// </summary>
         public string BaseUri
         {
-            get { return this.info.BaseUri; }
+            get { return this._info.BaseUri; }
         }
 
         /// <summary>
@@ -132,7 +132,7 @@ namespace MS.Internal.Xml.Cache
         /// </summary>
         public int LineNumber
         {
-            get { return this.info.LineNumberBase + (int)((this.props & LineNumberMask) >> LineNumberShift); }
+            get { return this._info.LineNumberBase + (int)((this._props & LineNumberMask) >> LineNumberShift); }
         }
 
         /// <summary>
@@ -140,7 +140,7 @@ namespace MS.Internal.Xml.Cache
         /// </summary>
         public int LinePosition
         {
-            get { return this.info.LinePositionBase + (int)this.posOffset; }
+            get { return this._info.LinePositionBase + (int)this._posOffset; }
         }
 
         /// <summary>
@@ -152,7 +152,7 @@ namespace MS.Internal.Xml.Cache
             get
             {
                 Debug.Assert(HasCollapsedText, "Do not call CollapsedLinePosition unless HasCollapsedText is true.");
-                return LinePosition + (int)(this.props >> CollapsedPositionShift);
+                return LinePosition + (int)(this._props >> CollapsedPositionShift);
             }
         }
 
@@ -161,7 +161,7 @@ namespace MS.Internal.Xml.Cache
         /// </summary>
         public XPathNodePageInfo PageInfo
         {
-            get { return this.info.PageInfo; }
+            get { return this._info.PageInfo; }
         }
 
         /// <summary>
@@ -169,7 +169,7 @@ namespace MS.Internal.Xml.Cache
         /// </summary>
         public int GetRoot(out XPathNode[] pageNode)
         {
-            return this.info.Document.GetRootNode(out pageNode);
+            return this._info.Document.GetRootNode(out pageNode);
         }
 
         /// <summary>
@@ -177,8 +177,8 @@ namespace MS.Internal.Xml.Cache
         /// </summary>
         public int GetParent(out XPathNode[] pageNode)
         {
-            pageNode = this.info.ParentPage;
-            return this.idxParent;
+            pageNode = this._info.ParentPage;
+            return this._idxParent;
         }
 
         /// <summary>
@@ -186,8 +186,8 @@ namespace MS.Internal.Xml.Cache
         /// </summary>
         public int GetSibling(out XPathNode[] pageNode)
         {
-            pageNode = this.info.SiblingPage;
-            return this.idxSibling;
+            pageNode = this._info.SiblingPage;
+            return this._idxSibling;
         }
 
         /// <summary>
@@ -196,8 +196,8 @@ namespace MS.Internal.Xml.Cache
         /// </summary>
         public int GetSimilarElement(out XPathNode[] pageNode)
         {
-            pageNode = this.info.SimilarElementPage;
-            return this.idxSimilar;
+            pageNode = this._info.SimilarElementPage;
+            return this._idxSimilar;
         }
 
         /// <summary>
@@ -208,8 +208,8 @@ namespace MS.Internal.Xml.Cache
         {
             Debug.Assert(localName == null || (object)Document.NameTable.Get(localName) == (object)localName, "localName must be atomized.");
 
-            return (object)this.info.LocalName == (object)localName &&
-                   this.info.NamespaceUri == namespaceName;
+            return (object)this._info.LocalName == (object)localName &&
+                   this._info.NamespaceUri == namespaceName;
         }
 
         /// <summary>
@@ -221,8 +221,8 @@ namespace MS.Internal.Xml.Cache
             Debug.Assert(localName == null || (object)Document.NameTable.Get(localName) == (object)localName, "localName must be atomized.");
 
             return NodeType == XPathNodeType.Element &&
-                   (object)this.info.LocalName == (object)localName &&
-                   this.info.NamespaceUri == namespaceName;
+                   (object)this._info.LocalName == (object)localName &&
+                   this._info.NamespaceUri == namespaceName;
         }
 
         /// <summary>
@@ -232,7 +232,7 @@ namespace MS.Internal.Xml.Cache
         {
             get
             {
-                string localName = this.info.LocalName;
+                string localName = this._info.LocalName;
                 return NodeType == XPathNodeType.Namespace && localName.Length == 3 && localName == "xml";
             }
         }
@@ -242,7 +242,7 @@ namespace MS.Internal.Xml.Cache
         /// </summary>
         public bool HasSibling
         {
-            get { return this.idxSibling != 0; }
+            get { return this._idxSibling != 0; }
         }
 
         /// <summary>
@@ -250,7 +250,7 @@ namespace MS.Internal.Xml.Cache
         /// </summary>
         public bool HasCollapsedText
         {
-            get { return (this.props & HasCollapsedTextBit) != 0; }
+            get { return (this._props & HasCollapsedTextBit) != 0; }
         }
 
         /// <summary>
@@ -258,7 +258,7 @@ namespace MS.Internal.Xml.Cache
         /// </summary>
         public bool HasAttribute
         {
-            get { return (this.props & HasAttributeBit) != 0; }
+            get { return (this._props & HasAttributeBit) != 0; }
         }
 
         /// <summary>
@@ -267,7 +267,7 @@ namespace MS.Internal.Xml.Cache
         /// </summary>
         public bool HasContentChild
         {
-            get { return (this.props & HasContentChildBit) != 0; }
+            get { return (this._props & HasContentChildBit) != 0; }
         }
 
         /// <summary>
@@ -275,7 +275,7 @@ namespace MS.Internal.Xml.Cache
         /// </summary>
         public bool HasElementChild
         {
-            get { return (this.props & HasElementChildBit) != 0; }
+            get { return (this._props & HasElementChildBit) != 0; }
         }
 
         /// <summary>
@@ -306,11 +306,11 @@ namespace MS.Internal.Xml.Cache
         /// </summary>
         public bool HasNamespaceDecls
         {
-            get { return (this.props & HasNmspDeclsBit) != 0; }
+            get { return (this._props & HasNmspDeclsBit) != 0; }
             set
             {
-                if (value) this.props |= HasNmspDeclsBit;
-                else unchecked { this.props &= (byte)~((uint)HasNmspDeclsBit); }
+                if (value) this._props |= HasNmspDeclsBit;
+                else unchecked { this._props &= (byte)~((uint)HasNmspDeclsBit); }
             }
         }
 
@@ -319,7 +319,7 @@ namespace MS.Internal.Xml.Cache
         /// </summary>
         public bool AllowShortcutTag
         {
-            get { return (this.props & AllowShortcutTagBit) != 0; }
+            get { return (this._props & AllowShortcutTagBit) != 0; }
         }
 
         /// <summary>
@@ -327,7 +327,7 @@ namespace MS.Internal.Xml.Cache
         /// </summary>
         public int LocalNameHashCode
         {
-            get { return this.info.LocalNameHashCode; }
+            get { return this._info.LocalNameHashCode; }
         }
 
         /// <summary>
@@ -335,7 +335,7 @@ namespace MS.Internal.Xml.Cache
         /// </summary>
         public string Value
         {
-            get { return this.value; }
+            get { return this._value; }
         }
 
 
@@ -348,7 +348,7 @@ namespace MS.Internal.Xml.Cache
         /// </summary>
         public void Create(XPathNodePageInfo pageInfo)
         {
-            this.info = new XPathNodeInfoAtom(pageInfo);
+            this._info = new XPathNodeInfoAtom(pageInfo);
         }
 
         /// <summary>
@@ -357,9 +357,9 @@ namespace MS.Internal.Xml.Cache
         public void Create(XPathNodeInfoAtom info, XPathNodeType xptyp, int idxParent)
         {
             Debug.Assert(info != null && idxParent <= UInt16.MaxValue);
-            this.info = info;
-            this.props = (uint)xptyp;
-            this.idxParent = (ushort)idxParent;
+            this._info = info;
+            this._props = (uint)xptyp;
+            this._idxParent = (ushort)idxParent;
         }
 
         /// <summary>
@@ -369,8 +369,8 @@ namespace MS.Internal.Xml.Cache
         {
             Debug.Assert(lineNumOffset >= 0 && lineNumOffset <= MaxLineNumberOffset, "Line number offset too large or small: " + lineNumOffset);
             Debug.Assert(linePosOffset >= 0 && linePosOffset <= MaxLinePositionOffset, "Line position offset too large or small: " + linePosOffset);
-            this.props |= ((uint)lineNumOffset << LineNumberShift);
-            this.posOffset = (ushort)linePosOffset;
+            this._props |= ((uint)lineNumOffset << LineNumberShift);
+            this._posOffset = (ushort)linePosOffset;
         }
 
         /// <summary>
@@ -379,7 +379,7 @@ namespace MS.Internal.Xml.Cache
         public void SetCollapsedLineInfoOffset(int posOffset)
         {
             Debug.Assert(posOffset >= 0 && posOffset <= MaxCollapsedPositionOffset, "Collapsed text line position offset too large or small: " + posOffset);
-            this.props |= ((uint)posOffset << CollapsedPositionShift);
+            this._props |= ((uint)posOffset << CollapsedPositionShift);
         }
 
         /// <summary>
@@ -387,7 +387,7 @@ namespace MS.Internal.Xml.Cache
         /// </summary>
         public void SetValue(string value)
         {
-            this.value = value;
+            this._value = value;
         }
 
         /// <summary>
@@ -396,9 +396,9 @@ namespace MS.Internal.Xml.Cache
         public void SetEmptyValue(bool allowShortcutTag)
         {
             Debug.Assert(NodeType == XPathNodeType.Element);
-            this.value = string.Empty;
+            this._value = string.Empty;
             if (allowShortcutTag)
-                this.props |= AllowShortcutTagBit;
+                this._props |= AllowShortcutTagBit;
         }
 
         /// <summary>
@@ -407,8 +407,8 @@ namespace MS.Internal.Xml.Cache
         public void SetCollapsedValue(string value)
         {
             Debug.Assert(NodeType == XPathNodeType.Element);
-            this.value = value;
-            this.props |= HasContentChildBit | HasCollapsedTextBit;
+            this._value = value;
+            this._props |= HasContentChildBit | HasCollapsedTextBit;
         }
 
         /// <summary>
@@ -419,13 +419,13 @@ namespace MS.Internal.Xml.Cache
         {
             if (xptyp == XPathNodeType.Attribute)
             {
-                this.props |= HasAttributeBit;
+                this._props |= HasAttributeBit;
             }
             else
             {
-                this.props |= HasContentChildBit;
+                this._props |= HasContentChildBit;
                 if (xptyp == XPathNodeType.Element)
-                    this.props |= HasElementChildBit;
+                    this._props |= HasElementChildBit;
             }
         }
 
@@ -435,15 +435,15 @@ namespace MS.Internal.Xml.Cache
         public void SetSibling(XPathNodeInfoTable infoTable, XPathNode[] pageSibling, int idxSibling)
         {
             Debug.Assert(pageSibling != null && idxSibling != 0 && idxSibling <= UInt16.MaxValue, "Bad argument");
-            Debug.Assert(this.idxSibling == 0, "SetSibling should not be called more than once.");
-            this.idxSibling = (ushort)idxSibling;
+            Debug.Assert(this._idxSibling == 0, "SetSibling should not be called more than once.");
+            this._idxSibling = (ushort)idxSibling;
 
-            if (pageSibling != this.info.SiblingPage)
+            if (pageSibling != this._info.SiblingPage)
             {
                 // Re-atomize the InfoAtom
-                this.info = infoTable.Create(this.info.LocalName, this.info.NamespaceUri, this.info.Prefix, this.info.BaseUri,
-                                             this.info.ParentPage, pageSibling, this.info.SimilarElementPage,
-                                             this.info.Document, this.info.LineNumberBase, this.info.LinePositionBase);
+                this._info = infoTable.Create(this._info.LocalName, this._info.NamespaceUri, this._info.Prefix, this._info.BaseUri,
+                                             this._info.ParentPage, pageSibling, this._info.SimilarElementPage,
+                                             this._info.Document, this._info.LineNumberBase, this._info.LinePositionBase);
             }
         }
 
@@ -454,15 +454,15 @@ namespace MS.Internal.Xml.Cache
         public void SetSimilarElement(XPathNodeInfoTable infoTable, XPathNode[] pageSimilar, int idxSimilar)
         {
             Debug.Assert(pageSimilar != null && idxSimilar != 0 && idxSimilar <= UInt16.MaxValue, "Bad argument");
-            Debug.Assert(this.idxSimilar == 0, "SetSimilarElement should not be called more than once.");
-            this.idxSimilar = (ushort)idxSimilar;
+            Debug.Assert(this._idxSimilar == 0, "SetSimilarElement should not be called more than once.");
+            this._idxSimilar = (ushort)idxSimilar;
 
-            if (pageSimilar != this.info.SimilarElementPage)
+            if (pageSimilar != this._info.SimilarElementPage)
             {
                 // Re-atomize the InfoAtom
-                this.info = infoTable.Create(this.info.LocalName, this.info.NamespaceUri, this.info.Prefix, this.info.BaseUri,
-                                             this.info.ParentPage, this.info.SiblingPage, pageSimilar,
-                                             this.info.Document, this.info.LineNumberBase, this.info.LinePositionBase);
+                this._info = infoTable.Create(this._info.LocalName, this._info.NamespaceUri, this._info.Prefix, this._info.BaseUri,
+                                             this._info.ParentPage, this._info.SiblingPage, pageSimilar,
+                                             this._info.Document, this._info.LineNumberBase, this._info.LinePositionBase);
             }
         }
     }
@@ -474,28 +474,28 @@ namespace MS.Internal.Xml.Cache
     /// </summary>
     internal struct XPathNodeRef
     {
-        private XPathNode[] page;
-        private int idx;
+        private XPathNode[] _page;
+        private int _idx;
 
         public XPathNodeRef(XPathNode[] page, int idx)
         {
-            this.page = page;
-            this.idx = idx;
+            this._page = page;
+            this._idx = idx;
         }
 
         public XPathNode[] Page
         {
-            get { return this.page; }
+            get { return this._page; }
         }
 
         public int Index
         {
-            get { return this.idx; }
+            get { return this._idx; }
         }
 
         public override int GetHashCode()
         {
-            return XPathNodeHelper.GetLocation(this.page, this.idx);
+            return XPathNodeHelper.GetLocation(this._page, this._idx);
         }
     }
 }

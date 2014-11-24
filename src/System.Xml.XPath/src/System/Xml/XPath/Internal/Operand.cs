@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft. All rights reserved.
+﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Xml.XPath;
@@ -7,24 +7,24 @@ namespace MS.Internal.Xml.XPath
 {
     internal class Operand : AstNode
     {
-        private XPathResultType type;
-        private object val;
+        private XPathResultType _type;
+        private object _val;
 
         public Operand(string val)
         {
-            this.type = XPathResultType.String;
-            this.val = val;
+            this._type = XPathResultType.String;
+            this._val = val;
         }
 
         public Operand(double val)
         {
-            this.type = XPathResultType.Number;
-            this.val = val;
+            this._type = XPathResultType.Number;
+            this._val = val;
         }
 
         public override AstType Type { get { return AstType.ConstantOperand; } }
-        public override XPathResultType ReturnType { get { return type; } }
+        public override XPathResultType ReturnType { get { return _type; } }
 
-        public object OperandValue { get { return val; } }
+        public object OperandValue { get { return _val; } }
     }
 }

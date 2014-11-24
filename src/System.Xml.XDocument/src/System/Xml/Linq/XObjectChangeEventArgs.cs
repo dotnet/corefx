@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft. All rights reserved.
+﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using SuppressMessageAttribute = System.Diagnostics.CodeAnalysis.SuppressMessageAttribute;
@@ -10,7 +10,7 @@ namespace System.Xml.Linq
     /// </summary>
     public class XObjectChangeEventArgs : EventArgs
     {
-        XObjectChange objectChange;
+        private XObjectChange _objectChange;
 
         /// <summary>
         /// Event argument for a <see cref="XObjectChange.Add"/> change event.
@@ -41,7 +41,7 @@ namespace System.Xml.Linq
         /// </summary>
         public XObjectChangeEventArgs(XObjectChange objectChange)
         {
-            this.objectChange = objectChange;
+            this._objectChange = objectChange;
         }
 
         /// <summary>
@@ -49,7 +49,7 @@ namespace System.Xml.Linq
         /// </summary>
         public XObjectChange ObjectChange
         {
-            get { return objectChange; }
+            get { return _objectChange; }
         }
     }
 }

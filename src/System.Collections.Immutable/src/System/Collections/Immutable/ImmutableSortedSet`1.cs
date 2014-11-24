@@ -39,12 +39,12 @@ namespace System.Collections.Immutable
         /// <summary>
         /// The root node of the AVL tree that stores this set.
         /// </summary>
-        private readonly Node root;
+        private readonly Node _root;
 
         /// <summary>
         /// The comparer used to sort elements in this set.
         /// </summary>
-        private readonly IComparer<T> comparer;
+        private readonly IComparer<T> _comparer;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ImmutableSortedSet&lt;T&gt;"/> class.
@@ -52,8 +52,8 @@ namespace System.Collections.Immutable
         /// <param name="comparer">The comparer.</param>
         internal ImmutableSortedSet(IComparer<T> comparer = null)
         {
-            this.root = Node.EmptyNode;
-            this.comparer = comparer ?? Comparer<T>.Default;
+            this._root = Node.EmptyNode;
+            this._comparer = comparer ?? Comparer<T>.Default;
         }
 
         /// <summary>
@@ -67,8 +67,8 @@ namespace System.Collections.Immutable
             Requires.NotNull(comparer, "comparer");
 
             root.Freeze();
-            this.root = root;
-            this.comparer = comparer;
+            this._root = root;
+            this._comparer = comparer;
         }
 
         /// <summary>
@@ -78,7 +78,7 @@ namespace System.Collections.Immutable
         {
             Contract.Ensures(Contract.Result<ImmutableSortedSet<T>>() != null);
             Contract.Ensures(Contract.Result<ImmutableSortedSet<T>>().IsEmpty);
-            return this.root.IsEmpty ? this : Empty.WithComparer(this.comparer);
+            return this._root.IsEmpty ? this : Empty.WithComparer(this._comparer);
         }
 
         /// <summary>
@@ -87,7 +87,7 @@ namespace System.Collections.Immutable
         /// <value>The maximum value in the set.</value>
         public T Max
         {
-            get { return this.root.Max; }
+            get { return this._root.Max; }
         }
 
         /// <summary>
@@ -96,7 +96,7 @@ namespace System.Collections.Immutable
         /// <value>The minimum value in the set.</value>
         public T Min
         {
-            get { return this.root.Min; }
+            get { return this._root.Min; }
         }
 
         #region IImmutableSet<T> Properties
@@ -106,7 +106,7 @@ namespace System.Collections.Immutable
         /// </summary>
         public bool IsEmpty
         {
-            get { return this.root.IsEmpty; }
+            get { return this._root.IsEmpty; }
         }
 
         /// <summary>
@@ -114,7 +114,7 @@ namespace System.Collections.Immutable
         /// </summary>
         public int Count
         {
-            get { return this.root.Count; }
+            get { return this._root.Count; }
         }
 
         #endregion
@@ -126,7 +126,7 @@ namespace System.Collections.Immutable
         /// </summary>
         public IComparer<T> KeyComparer
         {
-            get { return this.comparer; }
+            get { return this._comparer; }
         }
 
         #endregion
@@ -136,7 +136,7 @@ namespace System.Collections.Immutable
         /// </summary>
         internal IBinaryTree Root
         {
-            get { return this.root; }
+            get { return this._root; }
         }
 
         #region IReadOnlyList<T> Indexers
@@ -150,7 +150,7 @@ namespace System.Collections.Immutable
         {
             get
             {
-                return this.root[index];
+                return this._root[index];
             }
         }
 
@@ -185,7 +185,7 @@ namespace System.Collections.Immutable
             Requires.NotNullAllowStructs(value, "value");
             Contract.Ensures(Contract.Result<ImmutableSortedSet<T>>() != null);
             bool mutated;
-            return this.Wrap(this.root.Add(value, this.comparer, out mutated));
+            return this.Wrap(this._root.Add(value, this._comparer, out mutated));
         }
 
         /// <summary>
@@ -197,7 +197,7 @@ namespace System.Collections.Immutable
             Requires.NotNullAllowStructs(value, "value");
             Contract.Ensures(Contract.Result<ImmutableSortedSet<T>>() != null);
             bool mutated;
-            return this.Wrap(this.root.Remove(value, this.comparer, out mutated));
+            return this.Wrap(this._root.Remove(value, this._comparer, out mutated));
         }
 
         /// <summary>
@@ -217,7 +217,7 @@ namespace System.Collections.Immutable
         {
             Requires.NotNullAllowStructs(equalValue, "equalValue");
 
-            Node searchResult = this.root.Search(equalValue, this.comparer);
+            Node searchResult = this._root.Search(equalValue, this._comparer);
             if (searchResult.IsEmpty)
             {
                 actualValue = equalValue;
@@ -258,11 +258,11 @@ namespace System.Collections.Immutable
         {
             Requires.NotNull(other, "other");
 
-            var result = this.root;
+            var result = this._root;
             foreach (T item in other)
             {
                 bool mutated;
-                result = result.Remove(item, this.comparer, out mutated);
+                result = result.Remove(item, this._comparer, out mutated);
             }
 
             return this.Wrap(result);
@@ -354,7 +354,7 @@ namespace System.Collections.Immutable
                 comparer = Comparer<T>.Default;
             }
 
-            if (comparer == this.comparer)
+            if (comparer == this._comparer)
             {
                 return this;
             }
@@ -574,7 +574,7 @@ namespace System.Collections.Immutable
         [Pure]
         public IEnumerable<T> Reverse()
         {
-            return new ReverseEnumerable(this.root);
+            return new ReverseEnumerable(this._root);
         }
 
         /// <summary>
@@ -594,7 +594,7 @@ namespace System.Collections.Immutable
         public int IndexOf(T item)
         {
             Requires.NotNullAllowStructs(item, "item");
-            return this.root.IndexOf(item, this.comparer);
+            return this._root.IndexOf(item, this._comparer);
         }
 
         #endregion
@@ -607,7 +607,7 @@ namespace System.Collections.Immutable
         public bool Contains(T value)
         {
             Requires.NotNullAllowStructs(value, "value");
-            return this.root.Contains(value, this.comparer);
+            return this._root.Contains(value, this._comparer);
         }
 
         /// <summary>
@@ -736,7 +736,7 @@ namespace System.Collections.Immutable
         /// </summary>
         void ICollection<T>.CopyTo(T[] array, int arrayIndex)
         {
-            this.root.CopyTo(array, arrayIndex);
+            this._root.CopyTo(array, arrayIndex);
         }
 
         /// <summary>
@@ -947,7 +947,7 @@ namespace System.Collections.Immutable
         /// <param name="index">The zero-based index in <paramref name="array" /> at which copying begins.</param>
         void ICollection.CopyTo(Array array, int index)
         {
-            this.root.CopyTo(array, index);
+            this._root.CopyTo(array, index);
         }
 
         #endregion
@@ -999,7 +999,7 @@ namespace System.Collections.Immutable
         /// </remarks>
         public Enumerator GetEnumerator()
         {
-            return this.root.GetEnumerator();
+            return this._root.GetEnumerator();
         }
 
         /// <summary>
@@ -1056,11 +1056,11 @@ namespace System.Collections.Immutable
 
             // Let's not implement in terms of ImmutableSortedSet.Add so that we're
             // not unnecessarily generating a new wrapping set object for each item.
-            var result = this.root;
+            var result = this._root;
             foreach (var item in items)
             {
                 bool mutated;
-                result = result.Add(item, this.comparer, out mutated);
+                result = result.Add(item, this._comparer, out mutated);
             }
 
             return this.Wrap(result);
@@ -1074,9 +1074,9 @@ namespace System.Collections.Immutable
         [Pure]
         private ImmutableSortedSet<T> Wrap(Node root)
         {
-            if (root != this.root)
+            if (root != this._root)
             {
-                return root.IsEmpty ? this.Clear() : new ImmutableSortedSet<T>(root, this.comparer);
+                return root.IsEmpty ? this.Clear() : new ImmutableSortedSet<T>(root, this._comparer);
             }
             else
             {
@@ -1131,29 +1131,29 @@ namespace System.Collections.Immutable
             /// <remarks>
             /// We utilize this resource pool to make "allocation free" enumeration achievable.
             /// </remarks>
-            private static readonly SecureObjectPool<Stack<RefAsValueType<Node>>, Enumerator> enumeratingStacks = 
+            private static readonly SecureObjectPool<Stack<RefAsValueType<Node>>, Enumerator> _enumeratingStacks =
                 new SecureObjectPool<Stack<RefAsValueType<Node>>, Enumerator>();
 
             /// <summary>
             /// The builder being enumerated, if applicable.
             /// </summary>
-            private readonly Builder builder;
+            private readonly Builder _builder;
 
             /// <summary>
             /// A unique ID for this instance of this enumerator.
             /// Used to protect pooled objects from use after they are recycled.
             /// </summary>
-            private readonly int poolUserId;
+            private readonly int _poolUserId;
 
             /// <summary>
             /// A flag indicating whether this enumerator works in reverse sort order.
             /// </summary>
-            private readonly bool reverse;
+            private readonly bool _reverse;
 
             /// <summary>
             /// The set being enumerated.
             /// </summary>
-            private Node root;
+            private Node _root;
 
             /// <summary>
             /// The stack to use for enumerating the binary tree.
@@ -1166,17 +1166,17 @@ namespace System.Collections.Immutable
             ///   clr!ArrayStoreCheck
             ///     clr!ObjIsInstanceOf
             /// </remarks>
-            private SecurePooledObject<Stack<RefAsValueType<Node>>> stack;
+            private SecurePooledObject<Stack<RefAsValueType<Node>>> _stack;
 
             /// <summary>
             /// The node currently selected.
             /// </summary>
-            private Node current;
+            private Node _current;
 
             /// <summary>
             /// The version of the builder (when applicable) that is being enumerated.
             /// </summary>
-            private int enumeratingBuilderVersion;
+            private int _enumeratingBuilderVersion;
 
             /// <summary>
             /// Initializes an Enumerator structure.
@@ -1188,25 +1188,25 @@ namespace System.Collections.Immutable
             {
                 Requires.NotNull(root, "root");
 
-                this.root = root;
-                this.builder = builder;
-                this.current = null;
-                this.reverse = reverse;
-                this.enumeratingBuilderVersion = builder != null ? builder.Version : -1;
-                this.poolUserId = SecureObjectPool.NewId();
-                this.stack = null;
-                if (!enumeratingStacks.TryTake(this, out this.stack))
+                this._root = root;
+                this._builder = builder;
+                this._current = null;
+                this._reverse = reverse;
+                this._enumeratingBuilderVersion = builder != null ? builder.Version : -1;
+                this._poolUserId = SecureObjectPool.NewId();
+                this._stack = null;
+                if (!_enumeratingStacks.TryTake(this, out this._stack))
                 {
-                    this.stack = enumeratingStacks.PrepNew(this, new Stack<RefAsValueType<Node>>(root.Height));
+                    this._stack = _enumeratingStacks.PrepNew(this, new Stack<RefAsValueType<Node>>(root.Height));
                 }
 
-                this.PushNext(this.root);
+                this.PushNext(this._root);
             }
 
             /// <inheritdoc/>
             int ISecurePooledObjectUser.PoolUserId
             {
-                get { return this.poolUserId; }
+                get { return this._poolUserId; }
             }
 
             /// <summary>
@@ -1217,9 +1217,9 @@ namespace System.Collections.Immutable
                 get
                 {
                     this.ThrowIfDisposed();
-                    if (this.current != null)
+                    if (this._current != null)
                     {
-                        return this.current.Value;
+                        return this._current.Value;
                     }
 
                     throw new InvalidOperationException();
@@ -1239,14 +1239,14 @@ namespace System.Collections.Immutable
             /// </summary>
             public void Dispose()
             {
-                this.root = null;
-                this.current = null;
+                this._root = null;
+                this._current = null;
                 Stack<RefAsValueType<Node>> stack;
-                if (this.stack != null && this.stack.TryUse(ref this, out stack))
+                if (this._stack != null && this._stack.TryUse(ref this, out stack))
                 {
                     stack.ClearFastWhenEmpty();
-                    enumeratingStacks.TryAdd(this, this.stack);
-                    this.stack = null;
+                    _enumeratingStacks.TryAdd(this, this._stack);
+                    this._stack = null;
                 }
             }
 
@@ -1259,17 +1259,17 @@ namespace System.Collections.Immutable
                 this.ThrowIfDisposed();
                 this.ThrowIfChanged();
 
-                var stack = this.stack.Use(ref this);
+                var stack = this._stack.Use(ref this);
                 if (stack.Count > 0)
                 {
                     Node n = stack.Pop().Value;
-                    this.current = n;
-                    this.PushNext(this.reverse ? n.Left : n.Right);
+                    this._current = n;
+                    this.PushNext(this._reverse ? n.Left : n.Right);
                     return true;
                 }
                 else
                 {
-                    this.current = null;
+                    this._current = null;
                     return false;
                 }
             }
@@ -1281,11 +1281,11 @@ namespace System.Collections.Immutable
             {
                 this.ThrowIfDisposed();
 
-                this.enumeratingBuilderVersion = builder != null ? builder.Version : -1;
-                this.current = null;
-                var stack = this.stack.Use(ref this);
+                this._enumeratingBuilderVersion = _builder != null ? _builder.Version : -1;
+                this._current = null;
+                var stack = this._stack.Use(ref this);
                 stack.ClearFastWhenEmpty();
-                this.PushNext(this.root);
+                this.PushNext(this._root);
             }
 
             /// <summary>
@@ -1293,8 +1293,8 @@ namespace System.Collections.Immutable
             /// </summary>
             private void ThrowIfDisposed()
             {
-                Contract.Ensures(this.root != null);
-                Contract.EnsuresOnThrow<ObjectDisposedException>(this.root == null);
+                Contract.Ensures(this._root != null);
+                Contract.EnsuresOnThrow<ObjectDisposedException>(this._root == null);
 
                 // Since this is a struct, copies might not have been marked as disposed.
                 // But the stack we share across those copies would know.
@@ -1302,7 +1302,7 @@ namespace System.Collections.Immutable
                 // For enumerators of empty collections, there isn't any natural
                 // way to know when a copy of the struct has been disposed of.
 
-                if (this.root == null || (this.stack != null && !this.stack.IsOwned(ref this)))
+                if (this._root == null || (this._stack != null && !this._stack.IsOwned(ref this)))
                 {
                     Validation.Requires.FailObjectDisposed(this);
                 }
@@ -1314,7 +1314,7 @@ namespace System.Collections.Immutable
             /// <exception cref="System.InvalidOperationException">Thrown if the collection has changed.</exception>
             private void ThrowIfChanged()
             {
-                if (this.builder != null && this.builder.Version != this.enumeratingBuilderVersion)
+                if (this._builder != null && this._builder.Version != this._enumeratingBuilderVersion)
                 {
                     throw new InvalidOperationException(Strings.CollectionModifiedDuringEnumeration);
                 }
@@ -1327,11 +1327,11 @@ namespace System.Collections.Immutable
             private void PushNext(Node node)
             {
                 Requires.NotNull(node, "node");
-                var stack = this.stack.Use(ref this);
+                var stack = this._stack.Use(ref this);
                 while (!node.IsEmpty)
                 {
                     stack.Push(new RefAsValueType<Node>(node));
-                    node = this.reverse ? node.Right : node.Left;
+                    node = this._reverse ? node.Right : node.Left;
                 }
             }
         }
@@ -1344,7 +1344,7 @@ namespace System.Collections.Immutable
             /// <summary>
             /// The root node to enumerate.
             /// </summary>
-            private readonly Node root;
+            private readonly Node _root;
 
             /// <summary>
             /// Initializes a new instance of the <see cref="ImmutableSortedSet&lt;T&gt;.ReverseEnumerable"/> class.
@@ -1353,7 +1353,7 @@ namespace System.Collections.Immutable
             internal ReverseEnumerable(Node root)
             {
                 Requires.NotNull(root, "root");
-                this.root = root;
+                this._root = root;
             }
 
             /// <summary>
@@ -1364,7 +1364,7 @@ namespace System.Collections.Immutable
             /// </returns>
             public IEnumerator<T> GetEnumerator()
             {
-                return this.root.Reverse();
+                return this._root.Reverse();
             }
 
             /// <summary>
@@ -1393,7 +1393,7 @@ namespace System.Collections.Immutable
             /// <summary>
             /// The key associated with this node.
             /// </summary>
-            private readonly T key;
+            private readonly T _key;
 
             /// <summary>
             /// A value indicating whether this node has been frozen (made immutable).
@@ -1402,12 +1402,12 @@ namespace System.Collections.Immutable
             /// Nodes must be frozen before ever being observed by a wrapping collection type
             /// to protect collections from further mutations.
             /// </remarks>
-            private bool frozen;
+            private bool _frozen;
 
             /// <summary>
             /// The depth of the tree beneath this node.
             /// </summary>
-            private int height;
+            private int _height;
 
             /// <summary>
             /// The number of elements contained by this subtree starting at this node.
@@ -1418,17 +1418,17 @@ namespace System.Collections.Immutable
             /// Those without the count could query their descendents, which would often short-circuit
             /// when they hit a node that *does* include a count field.
             /// </remarks>
-            private int count;
+            private int _count;
 
             /// <summary>
             /// The left tree.
             /// </summary>
-            private Node left;
+            private Node _left;
 
             /// <summary>
             /// The right tree.
             /// </summary>
-            private Node right;
+            private Node _right;
 
             /// <summary>
             /// Initializes a new instance of the <see cref="ImmutableSortedSet&lt;T&gt;.Node"/> class
@@ -1437,7 +1437,7 @@ namespace System.Collections.Immutable
             private Node()
             {
                 Contract.Ensures(this.IsEmpty);
-                this.frozen = true; // the empty node is *always* frozen.
+                this._frozen = true; // the empty node is *always* frozen.
             }
 
             /// <summary>
@@ -1453,14 +1453,14 @@ namespace System.Collections.Immutable
                 Requires.NotNullAllowStructs(key, "key");
                 Requires.NotNull(left, "left");
                 Requires.NotNull(right, "right");
-                Debug.Assert(!frozen || (left.frozen && right.frozen));
+                Debug.Assert(!frozen || (left._frozen && right._frozen));
 
-                this.key = key;
-                this.left = left;
-                this.right = right;
-                this.height = 1 + Math.Max(left.height, right.height);
-                this.count = 1 + left.count + right.count;
-                this.frozen = frozen;
+                this._key = key;
+                this._left = left;
+                this._right = right;
+                this._height = 1 + Math.Max(left._height, right._height);
+                this._count = 1 + left._count + right._count;
+                this._frozen = frozen;
             }
 
             /// <summary>
@@ -1471,23 +1471,23 @@ namespace System.Collections.Immutable
             /// </value>
             public bool IsEmpty
             {
-                get { return this.left == null; }
+                get { return this._left == null; }
             }
 
             /// <summary>
             /// Gets the height of the tree beneath this node.
             /// </summary>
-            public int Height 
-            { 
-                get { return this.height; } 
+            public int Height
+            {
+                get { return this._height; }
             }
 
             /// <summary>
             /// Gets the left branch of this node.
             /// </summary>
-            public Node Left 
-            { 
-                get { return this.left; }
+            public Node Left
+            {
+                get { return this._left; }
             }
 
             /// <summary>
@@ -1495,15 +1495,15 @@ namespace System.Collections.Immutable
             /// </summary>
             IBinaryTree IBinaryTree.Left
             {
-                get { return this.left; }
+                get { return this._left; }
             }
 
             /// <summary>
             /// Gets the right branch of this node.
             /// </summary>
-            public Node Right 
-            { 
-                get { return this.right; } 
+            public Node Right
+            {
+                get { return this._right; }
             }
 
             /// <summary>
@@ -1511,7 +1511,7 @@ namespace System.Collections.Immutable
             /// </summary>
             IBinaryTree IBinaryTree.Right
             {
-                get { return this.right; }
+                get { return this._right; }
             }
 
             /// <summary>
@@ -1519,7 +1519,7 @@ namespace System.Collections.Immutable
             /// </summary>
             IBinaryTree<T> IBinaryTree<T>.Left
             {
-                get { return this.left; }
+                get { return this._left; }
             }
 
             /// <summary>
@@ -1527,20 +1527,20 @@ namespace System.Collections.Immutable
             /// </summary>
             IBinaryTree<T> IBinaryTree<T>.Right
             {
-                get { return this.right; }
+                get { return this._right; }
             }
 
             /// <summary>
             /// Gets the value represented by the current node.
             /// </summary>
-            public T Value { get { return this.key; } }
+            public T Value { get { return this._key; } }
 
             /// <summary>
             /// Gets the number of elements contained by this subtree starting at this node.
             /// </summary>
             public int Count
             {
-                get { return this.count; }
+                get { return this._count; }
             }
 
             /// <summary>
@@ -1548,7 +1548,7 @@ namespace System.Collections.Immutable
             /// </summary>
             internal T Key
             {
-                get { return this.key; }
+                get { return this._key; }
             }
 
             /// <summary>
@@ -1565,12 +1565,12 @@ namespace System.Collections.Immutable
                     }
 
                     Node n = this;
-                    while (!n.right.IsEmpty)
+                    while (!n._right.IsEmpty)
                     {
-                        n = n.right;
+                        n = n._right;
                     }
 
-                    return n.key;
+                    return n._key;
                 }
             }
 
@@ -1588,12 +1588,12 @@ namespace System.Collections.Immutable
                     }
 
                     Node n = this;
-                    while (!n.left.IsEmpty)
+                    while (!n._left.IsEmpty)
                     {
-                        n = n.left;
+                        n = n._left;
                     }
 
-                    return n.key;
+                    return n._key;
                 }
             }
 
@@ -1608,17 +1608,17 @@ namespace System.Collections.Immutable
                 {
                     Requires.Range(index >= 0 && index < this.Count, "index");
 
-                    if (index < this.left.count)
+                    if (index < this._left._count)
                     {
-                        return this.left[index];
+                        return this._left[index];
                     }
 
-                    if (index > this.left.count)
+                    if (index > this._left._count)
                     {
-                        return this.right[index - this.left.count - 1];
+                        return this._right[index - this._left._count - 1];
                     }
 
-                    return this.key;
+                    return this._key;
                 }
             }
 
@@ -1749,10 +1749,10 @@ namespace System.Collections.Immutable
                 else
                 {
                     Node result = this;
-                    int compareResult = comparer.Compare(key, this.key);
+                    int compareResult = comparer.Compare(key, this._key);
                     if (compareResult > 0)
                     {
-                        var newRight = this.right.Add(key, comparer, out mutated);
+                        var newRight = this._right.Add(key, comparer, out mutated);
                         if (mutated)
                         {
                             result = this.Mutate(right: newRight);
@@ -1760,7 +1760,7 @@ namespace System.Collections.Immutable
                     }
                     else if (compareResult < 0)
                     {
-                        var newLeft = this.left.Add(key, comparer, out mutated);
+                        var newLeft = this._left.Add(key, comparer, out mutated);
                         if (mutated)
                         {
                             result = this.Mutate(left: newLeft);
@@ -1796,7 +1796,7 @@ namespace System.Collections.Immutable
                 else
                 {
                     Node result = this;
-                    int compare = comparer.Compare(key, this.key);
+                    int compare = comparer.Compare(key, this._key);
                     if (compare == 0)
                     {
                         // We have a match.
@@ -1805,36 +1805,36 @@ namespace System.Collections.Immutable
                         // If this is a leaf, just remove it 
                         // by returning Empty.  If we have only one child,
                         // replace the node with the child.
-                        if (this.right.IsEmpty && this.left.IsEmpty)
+                        if (this._right.IsEmpty && this._left.IsEmpty)
                         {
                             result = EmptyNode;
                         }
-                        else if (this.right.IsEmpty && !this.left.IsEmpty)
+                        else if (this._right.IsEmpty && !this._left.IsEmpty)
                         {
-                            result = this.left;
+                            result = this._left;
                         }
-                        else if (!this.right.IsEmpty && this.left.IsEmpty)
+                        else if (!this._right.IsEmpty && this._left.IsEmpty)
                         {
-                            result = this.right;
+                            result = this._right;
                         }
                         else
                         {
                             // We have two children. Remove the next-highest node and replace
                             // this node with it.
-                            var successor = this.right;
-                            while (!successor.left.IsEmpty)
+                            var successor = this._right;
+                            while (!successor._left.IsEmpty)
                             {
-                                successor = successor.left;
+                                successor = successor._left;
                             }
 
                             bool dummyMutated;
-                            var newRight = this.right.Remove(successor.key, comparer, out dummyMutated);
-                            result = successor.Mutate(left: this.left, right: newRight);
+                            var newRight = this._right.Remove(successor._key, comparer, out dummyMutated);
+                            result = successor.Mutate(left: this._left, right: newRight);
                         }
                     }
                     else if (compare < 0)
                     {
-                        var newLeft = this.left.Remove(key, comparer, out mutated);
+                        var newLeft = this._left.Remove(key, comparer, out mutated);
                         if (mutated)
                         {
                             result = this.Mutate(left: newLeft);
@@ -1842,7 +1842,7 @@ namespace System.Collections.Immutable
                     }
                     else
                     {
-                        var newRight = this.right.Remove(key, comparer, out mutated);
+                        var newRight = this._right.Remove(key, comparer, out mutated);
                         if (mutated)
                         {
                             result = this.Mutate(right: newRight);
@@ -1875,11 +1875,11 @@ namespace System.Collections.Immutable
             internal void Freeze()
             {
                 // If this node is frozen, all its descendents must already be frozen.
-                if (!this.frozen)
+                if (!this._frozen)
                 {
-                    this.left.Freeze();
-                    this.right.Freeze();
-                    this.frozen = true;
+                    this._left.Freeze();
+                    this._right.Freeze();
+                    this._frozen = true;
                 }
             }
 
@@ -1901,18 +1901,18 @@ namespace System.Collections.Immutable
                 }
                 else
                 {
-                    int compare = comparer.Compare(key, this.key);
+                    int compare = comparer.Compare(key, this._key);
                     if (compare == 0)
                     {
                         return this;
                     }
                     else if (compare > 0)
                     {
-                        return this.right.Search(key, comparer);
+                        return this._right.Search(key, comparer);
                     }
                     else
                     {
-                        return this.left.Search(key, comparer);
+                        return this._left.Search(key, comparer);
                     }
                 }
             }
@@ -1935,21 +1935,21 @@ namespace System.Collections.Immutable
                 }
                 else
                 {
-                    int compare = comparer.Compare(key, this.key);
+                    int compare = comparer.Compare(key, this._key);
                     if (compare == 0)
                     {
-                        return this.left.Count;
+                        return this._left.Count;
                     }
                     else if (compare > 0)
                     {
-                        int result = this.right.IndexOf(key, comparer);
+                        int result = this._right.IndexOf(key, comparer);
                         bool missing = result < 0;
                         if (missing)
                         {
                             result = ~result;
                         }
 
-                        result = this.left.Count + 1 + result;
+                        result = this._left.Count + 1 + result;
                         if (missing)
                         {
                             result = ~result;
@@ -1959,7 +1959,7 @@ namespace System.Collections.Immutable
                     }
                     else
                     {
-                        return this.left.IndexOf(key, comparer);
+                        return this._left.IndexOf(key, comparer);
                     }
                 }
             }
@@ -1991,13 +1991,13 @@ namespace System.Collections.Immutable
                 Debug.Assert(!tree.IsEmpty);
                 Contract.Ensures(Contract.Result<Node>() != null);
 
-                if (tree.right.IsEmpty)
+                if (tree._right.IsEmpty)
                 {
                     return tree;
                 }
 
-                var right = tree.right;
-                return right.Mutate(left: tree.Mutate(right: right.left));
+                var right = tree._right;
+                return right.Mutate(left: tree.Mutate(right: right._left));
             }
 
             /// <summary>
@@ -2011,13 +2011,13 @@ namespace System.Collections.Immutable
                 Debug.Assert(!tree.IsEmpty);
                 Contract.Ensures(Contract.Result<Node>() != null);
 
-                if (tree.left.IsEmpty)
+                if (tree._left.IsEmpty)
                 {
                     return tree;
                 }
 
-                var left = tree.left;
-                return left.Mutate(right: tree.Mutate(left: left.right));
+                var left = tree._left;
+                return left.Mutate(right: tree.Mutate(left: left._right));
             }
 
             /// <summary>
@@ -2031,12 +2031,12 @@ namespace System.Collections.Immutable
                 Debug.Assert(!tree.IsEmpty);
                 Contract.Ensures(Contract.Result<Node>() != null);
 
-                if (tree.right.IsEmpty)
+                if (tree._right.IsEmpty)
                 {
                     return tree;
                 }
 
-                Node rotatedRightChild = tree.Mutate(right: RotateRight(tree.right));
+                Node rotatedRightChild = tree.Mutate(right: RotateRight(tree._right));
                 return RotateLeft(rotatedRightChild);
             }
 
@@ -2051,12 +2051,12 @@ namespace System.Collections.Immutable
                 Debug.Assert(!tree.IsEmpty);
                 Contract.Ensures(Contract.Result<Node>() != null);
 
-                if (tree.left.IsEmpty)
+                if (tree._left.IsEmpty)
                 {
                     return tree;
                 }
 
-                Node rotatedLeftChild = tree.Mutate(left: RotateLeft(tree.left));
+                Node rotatedLeftChild = tree.Mutate(left: RotateLeft(tree._left));
                 return RotateRight(rotatedLeftChild);
             }
 
@@ -2071,7 +2071,7 @@ namespace System.Collections.Immutable
                 Requires.NotNull(tree, "tree");
                 Debug.Assert(!tree.IsEmpty);
 
-                return tree.right.height - tree.left.height;
+                return tree._right._height - tree._left._height;
             }
 
             /// <summary>
@@ -2114,12 +2114,12 @@ namespace System.Collections.Immutable
 
                 if (IsRightHeavy(tree))
                 {
-                    return Balance(tree.right) < 0 ? DoubleLeft(tree) : RotateLeft(tree);
+                    return Balance(tree._right) < 0 ? DoubleLeft(tree) : RotateLeft(tree);
                 }
 
                 if (IsLeftHeavy(tree))
                 {
-                    return Balance(tree.left) > 0 ? DoubleRight(tree) : RotateRight(tree);
+                    return Balance(tree._left) > 0 ? DoubleRight(tree) : RotateRight(tree);
                 }
 
                 return tree;
@@ -2162,24 +2162,24 @@ namespace System.Collections.Immutable
             /// <returns>The mutated (or created) node.</returns>
             private Node Mutate(Node left = null, Node right = null)
             {
-                if (this.frozen)
+                if (this._frozen)
                 {
-                    return new Node(this.key, left ?? this.left, right ?? this.right);
+                    return new Node(this._key, left ?? this._left, right ?? this._right);
                 }
                 else
                 {
                     if (left != null)
                     {
-                        this.left = left;
+                        this._left = left;
                     }
 
                     if (right != null)
                     {
-                        this.right = right;
+                        this._right = right;
                     }
 
-                    this.height = 1 + Math.Max(this.left.height, this.right.height);
-                    this.count = 1 + this.left.count + this.right.count;
+                    this._height = 1 + Math.Max(this._left._height, this._right._height);
+                    this._count = 1 + this._left._count + this._right._count;
                     return this;
                 }
             }
@@ -2195,12 +2195,12 @@ namespace System.Collections.Immutable
         /// <summary>
         /// The collection to be enumerated.
         /// </summary>
-        private readonly ImmutableSortedSet<T> set;
+        private readonly ImmutableSortedSet<T> _set;
 
         /// <summary>
         /// The simple view of the collection.
         /// </summary>
-        private T[] contents;
+        private T[] _contents;
 
         /// <summary>   
         /// Initializes a new instance of the <see cref="ImmutableSortedSetDebuggerProxy&lt;T&gt;"/> class.
@@ -2209,7 +2209,7 @@ namespace System.Collections.Immutable
         public ImmutableSortedSetDebuggerProxy(ImmutableSortedSet<T> set)
         {
             Requires.NotNull(set, "set");
-            this.set = set;
+            this._set = set;
         }
 
         /// <summary>
@@ -2220,12 +2220,12 @@ namespace System.Collections.Immutable
         {
             get
             {
-                if (this.contents == null)
+                if (this._contents == null)
                 {
-                    this.contents = this.set.ToArray(this.set.Count);
+                    this._contents = this._set.ToArray(this._set.Count);
                 }
 
-                return this.contents;
+                return this._contents;
             }
         }
     }

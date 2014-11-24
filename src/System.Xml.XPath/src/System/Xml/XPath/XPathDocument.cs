@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft. All rights reserved.
+﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using MS.Internal.Xml.Cache;
@@ -15,12 +15,12 @@ namespace System.Xml.XPath
     /// </summary>
     public class XPathDocument : IXPathNavigable
     {
-        private XPathNode[] pageText, pageRoot, pageXmlNmsp;
-        private int idxText, idxRoot, idxXmlNmsp;
-        private XmlNameTable nameTable;
-        private bool hasLineInfo;
-        private Dictionary<XPathNodeRef, XPathNodeRef> mapNmsp;
-        private Dictionary<string, XPathNodeRef> idValueMap = null;
+        private XPathNode[] _pageText, _pageRoot, _pageXmlNmsp;
+        private int _idxText, _idxRoot, _idxXmlNmsp;
+        private XmlNameTable _nameTable;
+        private bool _hasLineInfo;
+        private Dictionary<XPathNodeRef, XPathNodeRef> _mapNmsp;
+        private Dictionary<string, XPathNodeRef> _idValueMap = null;
 
         /// <summary>
         /// Flags that control Load behavior.
@@ -42,7 +42,7 @@ namespace System.Xml.XPath
         /// </summary>
         internal XPathDocument()
         {
-            this.nameTable = new NameTable();
+            this._nameTable = new NameTable();
         }
 
         /// <summary>
@@ -122,9 +122,9 @@ namespace System.Xml.XPath
             lineInfo = reader as IXmlLineInfo;
             if (lineInfo == null || !lineInfo.HasLineInfo())
                 lineInfo = null;
-            this.hasLineInfo = (lineInfo != null);
+            this._hasLineInfo = (lineInfo != null);
 
-            this.nameTable = reader.NameTable;
+            this._nameTable = reader.NameTable;
             builder = new XPathDocumentBuilder(this, lineInfo, reader.BaseURI, LoadFlags.None);
 
             try
@@ -134,8 +134,8 @@ namespace System.Xml.XPath
                 initialDepth = reader.Depth;
 
                 // Get atomized xmlns uri
-                Debug.Assert((object)this.nameTable.Get(string.Empty) == (object)string.Empty, "NameTable must contain atomized string.Empty");
-                xmlnsUri = this.nameTable.Get(XmlConst.ReservedNsXmlNs);
+                Debug.Assert((object)this._nameTable.Get(string.Empty) == (object)string.Empty, "NameTable must contain atomized string.Empty");
+                xmlnsUri = this._nameTable.Get(XmlConst.ReservedNsXmlNs);
 
                 // Read past Initial state; if there are no more events then load is complete
                 if (topLevelReader && !reader.Read())
@@ -249,7 +249,7 @@ namespace System.Xml.XPath
         /// </summary>
         public XPathNavigator CreateNavigator()
         {
-            return new XPathDocumentNavigator(this.pageRoot, this.idxRoot, null, 0);
+            return new XPathDocumentNavigator(this._pageRoot, this._idxRoot, null, 0);
         }
 
 
@@ -262,7 +262,7 @@ namespace System.Xml.XPath
         /// </summary>
         internal XmlNameTable NameTable
         {
-            get { return this.nameTable; }
+            get { return this._nameTable; }
         }
 
         /// <summary>
@@ -270,7 +270,7 @@ namespace System.Xml.XPath
         /// </summary>
         internal bool HasLineInfo
         {
-            get { return this.hasLineInfo; }
+            get { return this._hasLineInfo; }
         }
 
         /// <summary>
@@ -280,8 +280,8 @@ namespace System.Xml.XPath
         /// </summary>
         internal int GetCollapsedTextNode(out XPathNode[] pageText)
         {
-            pageText = this.pageText;
-            return this.idxText;
+            pageText = this._pageText;
+            return this._idxText;
         }
 
         /// <summary>
@@ -289,8 +289,8 @@ namespace System.Xml.XPath
         /// </summary>
         internal void SetCollapsedTextNode(XPathNode[] pageText, int idxText)
         {
-            this.pageText = pageText;
-            this.idxText = idxText;
+            this._pageText = pageText;
+            this._idxText = idxText;
         }
 
         /// <summary>
@@ -299,8 +299,8 @@ namespace System.Xml.XPath
         /// </summary>
         internal int GetRootNode(out XPathNode[] pageRoot)
         {
-            pageRoot = this.pageRoot;
-            return this.idxRoot;
+            pageRoot = this._pageRoot;
+            return this._idxRoot;
         }
 
         /// <summary>
@@ -308,8 +308,8 @@ namespace System.Xml.XPath
         /// </summary>
         internal void SetRootNode(XPathNode[] pageRoot, int idxRoot)
         {
-            this.pageRoot = pageRoot;
-            this.idxRoot = idxRoot;
+            this._pageRoot = pageRoot;
+            this._idxRoot = idxRoot;
         }
 
         /// <summary>
@@ -317,8 +317,8 @@ namespace System.Xml.XPath
         /// </summary>
         internal int GetXmlNamespaceNode(out XPathNode[] pageXmlNmsp)
         {
-            pageXmlNmsp = this.pageXmlNmsp;
-            return this.idxXmlNmsp;
+            pageXmlNmsp = this._pageXmlNmsp;
+            return this._idxXmlNmsp;
         }
 
         /// <summary>
@@ -326,8 +326,8 @@ namespace System.Xml.XPath
         /// </summary>
         internal void SetXmlNamespaceNode(XPathNode[] pageXmlNmsp, int idxXmlNmsp)
         {
-            this.pageXmlNmsp = pageXmlNmsp;
-            this.idxXmlNmsp = idxXmlNmsp;
+            this._pageXmlNmsp = pageXmlNmsp;
+            this._idxXmlNmsp = idxXmlNmsp;
         }
 
         /// <summary>
@@ -337,10 +337,10 @@ namespace System.Xml.XPath
         {
             Debug.Assert(pageElem[idxElem].NodeType == XPathNodeType.Element && pageNmsp[idxNmsp].NodeType == XPathNodeType.Namespace);
 
-            if (this.mapNmsp == null)
-                this.mapNmsp = new Dictionary<XPathNodeRef, XPathNodeRef>();
+            if (this._mapNmsp == null)
+                this._mapNmsp = new Dictionary<XPathNodeRef, XPathNodeRef>();
 
-            this.mapNmsp.Add(new XPathNodeRef(pageElem, idxElem), new XPathNodeRef(pageNmsp, idxNmsp));
+            this._mapNmsp.Add(new XPathNodeRef(pageElem, idxElem), new XPathNodeRef(pageNmsp, idxNmsp));
         }
 
         /// <summary>
@@ -352,14 +352,14 @@ namespace System.Xml.XPath
             Debug.Assert(pageElem[idxElem].NodeType == XPathNodeType.Element);
 
             // Check whether this element has any local namespaces
-            if (this.mapNmsp == null || !this.mapNmsp.ContainsKey(nodeRef))
+            if (this._mapNmsp == null || !this._mapNmsp.ContainsKey(nodeRef))
             {
                 pageNmsp = null;
                 return 0;
             }
 
             // Yes, so return the page and index of the first local namespace node
-            nodeRef = this.mapNmsp[nodeRef];
+            nodeRef = this._mapNmsp[nodeRef];
 
             pageNmsp = nodeRef.Page;
             return nodeRef.Index;
@@ -372,14 +372,14 @@ namespace System.Xml.XPath
         {
             XPathNodeRef nodeRef;
 
-            if (this.idValueMap == null || !this.idValueMap.ContainsKey(id))
+            if (this._idValueMap == null || !this._idValueMap.ContainsKey(id))
             {
                 pageElem = null;
                 return 0;
             }
 
             // Extract page and index from XPathNodeRef
-            nodeRef = this.idValueMap[id];
+            nodeRef = this._idValueMap[id];
             pageElem = nodeRef.Page;
             return nodeRef.Index;
         }

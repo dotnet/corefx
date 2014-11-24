@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft. All rights reserved.
+﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Collections.Generic;
@@ -18,7 +18,7 @@ namespace System.Xml.Linq
     [SuppressMessage("Microsoft.Naming", "CA1711:IdentifiersShouldNotHaveIncorrectSuffix", Justification = "Reviewed.")]
     public class XAttribute : XObject
     {
-        static IEnumerable<XAttribute> emptySequence;
+        private static IEnumerable<XAttribute> _emptySequence;
 
         /// <summary>
         /// Gets an empty collection of attributes.
@@ -27,8 +27,8 @@ namespace System.Xml.Linq
         {
             get
             {
-                if (emptySequence == null) emptySequence = new XAttribute[0];
-                return emptySequence;
+                if (_emptySequence == null) _emptySequence = new XAttribute[0];
+                return _emptySequence;
             }
         }
 
