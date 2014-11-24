@@ -292,7 +292,7 @@ namespace System.Collections.Immutable
             /// <summary>
             /// The list being exposed.
             /// </summary>
-            private readonly IList<T> collection;
+            private readonly IList<T> _collection;
 
             /// <summary>
             /// Initializes a new instance of the <see cref="ListOfTWrapper&lt;T&gt;"/> class.
@@ -301,7 +301,7 @@ namespace System.Collections.Immutable
             internal ListOfTWrapper(IList<T> collection)
             {
                 Requires.NotNull(collection, "collection");
-                this.collection = collection;
+                _collection = collection;
             }
 
             /// <summary>
@@ -309,7 +309,7 @@ namespace System.Collections.Immutable
             /// </summary>
             public int Count
             {
-                get { return this.collection.Count; }
+                get { return _collection.Count; }
             }
 
             /// <summary>
@@ -317,7 +317,7 @@ namespace System.Collections.Immutable
             /// </summary>
             public T this[int index]
             {
-                get { return this.collection[index]; }
+                get { return _collection[index]; }
             }
 
             /// <summary>
@@ -328,7 +328,7 @@ namespace System.Collections.Immutable
             /// </returns>
             public IEnumerator<T> GetEnumerator()
             {
-                return this.collection.GetEnumerator();
+                return _collection.GetEnumerator();
             }
 
             /// <summary>
@@ -352,12 +352,12 @@ namespace System.Collections.Immutable
             /// <summary>
             /// The original sequence.
             /// </summary>
-            private readonly IEnumerable<T> sequence;
+            private readonly IEnumerable<T> _sequence;
 
             /// <summary>
             /// The list-ified sequence.
             /// </summary>
-            private IList<T> collection;
+            private IList<T> _collection;
 
             /// <summary>
             /// Initializes a new instance of the <see cref="FallbackWrapper&lt;T&gt;"/> class.
@@ -366,7 +366,7 @@ namespace System.Collections.Immutable
             internal FallbackWrapper(IEnumerable<T> sequence)
             {
                 Requires.NotNull(sequence, "sequence");
-                this.sequence = sequence;
+                _sequence = sequence;
             }
 
             /// <summary>
@@ -376,18 +376,18 @@ namespace System.Collections.Immutable
             {
                 get
                 {
-                    if (this.collection == null)
+                    if (_collection == null)
                     {
                         int count;
-                        if (this.sequence.TryGetCount(out count))
+                        if (_sequence.TryGetCount(out count))
                         {
                             return count;
                         }
 
-                        this.collection = this.sequence.ToArray();
+                        _collection = _sequence.ToArray();
                     }
 
-                    return this.collection.Count;
+                    return _collection.Count;
                 }
             }
 
@@ -398,12 +398,12 @@ namespace System.Collections.Immutable
             {
                 get
                 {
-                    if (this.collection == null)
+                    if (_collection == null)
                     {
-                        this.collection = this.sequence.ToArray();
+                        _collection = _sequence.ToArray();
                     }
 
-                    return this.collection[index];
+                    return _collection[index];
                 }
             }
 
@@ -415,7 +415,7 @@ namespace System.Collections.Immutable
             /// </returns>
             public IEnumerator<T> GetEnumerator()
             {
-                return this.sequence.GetEnumerator();
+                return _sequence.GetEnumerator();
             }
 
             /// <summary>

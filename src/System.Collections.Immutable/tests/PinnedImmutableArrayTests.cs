@@ -1,4 +1,4 @@
-﻿namespace System.Collections.Immutable.UnitTests
+namespace System.Collections.Immutable.UnitTests
 {
     using System;
     using System.Collections.Generic;
