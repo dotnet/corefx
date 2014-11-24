@@ -47,12 +47,12 @@ namespace System.Collections.Immutable
         private readonly IEqualityComparer<TValue> valueComparer;
 
         /// <summary>
-        /// the collection of keys, lazily computed and then cached.
+        /// The collection of keys, lazily computed and then cached.
         /// </summary>
         private IEnumerable<TKey> keysCollection;
 
         /// <summary>
-        /// the collection of values, lazily computed and then cached.
+        /// The collection of values, lazily computed and then cached.
         /// </summary>
         private IEnumerable<TValue> valuesCollection;
 
