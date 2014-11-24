@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft. All rights reserved.
+﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Xunit;
@@ -36,8 +36,7 @@ namespace XmlDocumentTests.XmlNamedNodeMapTests
             // providing a null parameter does not throw an exception; returns null
             var oldNode = new object();
             Assert.DoesNotThrow(() => oldNode = namedNodeMap.SetNamedItem(null));
-            Assert.Null(oldNode);           
+            Assert.Null(oldNode);
         }
-
     }
 }

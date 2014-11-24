@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft. All rights reserved.
+﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Text;
@@ -9,12 +9,12 @@ namespace System.Xml
     // Represents the xml declaration nodes: <?xml version='1.0' ...?>
     public class XmlDeclaration : XmlLinkedNode
     {
-        const string YES = "yes";
-        const string NO = "no";
+        private const string YES = "yes";
+        private const string NO = "no";
 
-        private string version;
-        private string encoding;
-        private string standalone;
+        private string _version;
+        private string _encoding;
+        private string _standalone;
 
         protected internal XmlDeclaration(string version, string encoding, string standalone, XmlDocument doc) : base(doc)
         {
@@ -32,28 +32,28 @@ namespace System.Xml
         // The version attribute for <?xml version= '1.0' ... ?>
         public string Version
         {
-            get { return this.version; }
-            internal set { this.version = value; }
+            get { return this._version; }
+            internal set { this._version = value; }
         }
 
         // Specifies the value of the encoding attribute, as for
         // <?xml version= '1.0' encoding= 'UTF-8' ?>
         public string Encoding
         {
-            get { return this.encoding; }
-            set { this.encoding = ((value == null) ? String.Empty : value); }
+            get { return this._encoding; }
+            set { this._encoding = ((value == null) ? String.Empty : value); }
         }
 
         // Specifies the value of the standalone attribute.
         public string Standalone
         {
-            get { return this.standalone; }
+            get { return this._standalone; }
             set
             {
                 if (value == null)
-                    this.standalone = String.Empty;
+                    this._standalone = String.Empty;
                 else if (value.Length == 0 || value == YES || value == NO)
-                    this.standalone = value;
+                    this._standalone = value;
                 else
                     throw new ArgumentException(SR.Format(SR.Xdom_standalone, value));
             }

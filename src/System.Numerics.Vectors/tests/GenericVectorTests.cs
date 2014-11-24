@@ -15,10 +15,10 @@ namespace System.Numerics.Tests
     public class GenericVectorTests
     {
         // Static constructor in top-level class\
-        static System.Numerics.Vector<float> dummy;
+        private static System.Numerics.Vector<float> _dummy;
         static GenericVectorTests()
         {
-            dummy = System.Numerics.Vector<float>.One;
+            _dummy = System.Numerics.Vector<float>.One;
         }
 
         #region Constructor Tests

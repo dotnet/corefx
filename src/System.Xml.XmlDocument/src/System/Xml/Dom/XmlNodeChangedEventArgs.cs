@@ -1,37 +1,37 @@
-// Copyright (c) Microsoft. All rights reserved.
+﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 namespace System.Xml
 {
     public class XmlNodeChangedEventArgs : EventArgs
     {
-        private XmlNodeChangedAction action;
-        private XmlNode node;
-        private XmlNode oldParent;
-        private XmlNode newParent;
-        private string oldValue;
-        private string newValue;
+        private XmlNodeChangedAction _action;
+        private XmlNode _node;
+        private XmlNode _oldParent;
+        private XmlNode _newParent;
+        private string _oldValue;
+        private string _newValue;
 
         public XmlNodeChangedEventArgs(XmlNode node, XmlNode oldParent, XmlNode newParent, string oldValue, string newValue, XmlNodeChangedAction action)
         {
-            this.node = node;
-            this.oldParent = oldParent;
-            this.newParent = newParent;
-            this.action = action;
-            this.oldValue = oldValue;
-            this.newValue = newValue;
+            this._node = node;
+            this._oldParent = oldParent;
+            this._newParent = newParent;
+            this._action = action;
+            this._oldValue = oldValue;
+            this._newValue = newValue;
         }
 
-        public XmlNodeChangedAction Action { get { return action; } }
+        public XmlNodeChangedAction Action { get { return _action; } }
 
-        public XmlNode Node { get { return node; } }
+        public XmlNode Node { get { return _node; } }
 
-        public XmlNode OldParent { get { return oldParent; } }
+        public XmlNode OldParent { get { return _oldParent; } }
 
-        public XmlNode NewParent { get { return newParent; } }
+        public XmlNode NewParent { get { return _newParent; } }
 
-        public string OldValue { get { return oldValue; } }
+        public string OldValue { get { return _oldValue; } }
 
-        public string NewValue { get { return newValue; } }
+        public string NewValue { get { return _newValue; } }
     }
 }

@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft. All rights reserved.
+﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Diagnostics;
@@ -8,11 +8,11 @@ namespace MS.Internal.Xml.XPath
 {
     internal class Axis : AstNode
     {
-        private AxisType axisType;
-        private AstNode input;
-        private string prefix;
-        private string name;
-        private XPathNodeType nodeType;
+        private AxisType _axisType;
+        private AstNode _input;
+        private string _prefix;
+        private string _name;
+        private XPathNodeType _nodeType;
         protected bool abbrAxis;
 
         public enum AxisType
@@ -38,11 +38,11 @@ namespace MS.Internal.Xml.XPath
         {
             Debug.Assert(prefix != null);
             Debug.Assert(name != null);
-            this.axisType = axisType;
-            this.input = input;
-            this.prefix = prefix;
-            this.name = name;
-            this.nodeType = nodetype;
+            this._axisType = axisType;
+            this._input = input;
+            this._prefix = prefix;
+            this._name = name;
+            this._nodeType = nodetype;
         }
 
         // constructor
@@ -58,13 +58,13 @@ namespace MS.Internal.Xml.XPath
 
         public AstNode Input
         {
-            get { return input; }
+            get { return _input; }
         }
 
-        public string Prefix { get { return prefix; } }
-        public string Name { get { return name; } }
-        public XPathNodeType NodeType { get { return nodeType; } }
-        public AxisType TypeOfAxis { get { return axisType; } }
+        public string Prefix { get { return _prefix; } }
+        public string Name { get { return _name; } }
+        public XPathNodeType NodeType { get { return _nodeType; } }
+        public AxisType TypeOfAxis { get { return _axisType; } }
         public bool AbbrAxis { get { return abbrAxis; } }
     }
 }

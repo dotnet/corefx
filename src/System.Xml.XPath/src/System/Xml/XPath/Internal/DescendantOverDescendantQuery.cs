@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft. All rights reserved.
+﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Diagnostics;
@@ -12,19 +12,19 @@ namespace MS.Internal.Xml.XPath
     // It doesn't garate DOD of the output even when input is DOD. 
     internal sealed class DescendantOverDescendantQuery : DescendantBaseQuery
     {
-        private int level = 0;
+        private int _level = 0;
 
         public DescendantOverDescendantQuery(Query qyParent, bool matchSelf, string name, string prefix, XPathNodeType typeTest, bool abbrAxis) :
             base(qyParent, name, prefix, typeTest, matchSelf, abbrAxis)
         { }
         private DescendantOverDescendantQuery(DescendantOverDescendantQuery other) : base(other)
         {
-            this.level = other.level;
+            this._level = other._level;
         }
 
         public override void Reset()
         {
-            level = 0;
+            _level = 0;
             base.Reset();
         }
 
@@ -32,7 +32,7 @@ namespace MS.Internal.Xml.XPath
         {
             while (true)
             {
-                if (level == 0)
+                if (_level == 0)
                 {
                     currentNode = qyInput.Advance();
                     position = 0;
@@ -73,7 +73,7 @@ namespace MS.Internal.Xml.XPath
         {
             if (currentNode.MoveToFirstChild())
             {
-                level++;
+                _level++;
                 return true;
             }
             return false;
@@ -83,8 +83,8 @@ namespace MS.Internal.Xml.XPath
         { // move up untill we can move next
             while (!currentNode.MoveToNext())
             {
-                --level;
-                if (level == 0)
+                --_level;
+                if (_level == 0)
                 {
                     return false;
                 }

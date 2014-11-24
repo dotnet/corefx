@@ -8,28 +8,28 @@ namespace System.Collections.Immutable
 {
     internal class DictionaryEnumerator<TKey, TValue> : IDictionaryEnumerator
     {
-        private readonly IEnumerator<KeyValuePair<TKey, TValue>> inner;
+        private readonly IEnumerator<KeyValuePair<TKey, TValue>> _inner;
 
         internal DictionaryEnumerator(IEnumerator<KeyValuePair<TKey, TValue>> inner)
         {
             Requires.NotNull(inner, "inner");
 
-            this.inner = inner;
+            this._inner = inner;
         }
 
         public DictionaryEntry Entry
         {
-            get { return new DictionaryEntry(this.inner.Current.Key, this.inner.Current.Value); }
+            get { return new DictionaryEntry(this._inner.Current.Key, this._inner.Current.Value); }
         }
 
         public object Key
         {
-            get { return this.inner.Current.Key; }
+            get { return this._inner.Current.Key; }
         }
 
         public object Value
         {
-            get { return this.inner.Current.Value; }
+            get { return this._inner.Current.Value; }
         }
 
         public object Current
@@ -39,12 +39,12 @@ namespace System.Collections.Immutable
 
         public bool MoveNext()
         {
-            return this.inner.MoveNext();
+            return this._inner.MoveNext();
         }
 
         public void Reset()
         {
-            this.inner.Reset();
+            this._inner.Reset();
         }
     }
 }

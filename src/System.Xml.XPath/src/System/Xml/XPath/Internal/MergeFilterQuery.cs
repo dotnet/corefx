@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft. All rights reserved.
+﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Xml;
@@ -9,21 +9,21 @@ namespace MS.Internal.Xml.XPath
 {
     internal sealed class MergeFilterQuery : CacheOutputQuery
     {
-        private Query child;
+        private Query _child;
 
         public MergeFilterQuery(Query input, Query child) : base(input)
         {
-            this.child = child;
+            this._child = child;
         }
         private MergeFilterQuery(MergeFilterQuery other) : base(other)
         {
-            this.child = Clone(other.child);
+            this._child = Clone(other._child);
         }
 
         public override void SetXsltContext(XsltContext xsltContext)
         {
             base.SetXsltContext(xsltContext);
-            child.SetXsltContext(xsltContext);
+            _child.SetXsltContext(xsltContext);
         }
 
         public override object Evaluate(XPathNodeIterator nodeIterator)
@@ -32,9 +32,9 @@ namespace MS.Internal.Xml.XPath
 
             while (input.Advance() != null)
             {
-                child.Evaluate(input);
+                _child.Evaluate(input);
                 XPathNavigator node;
-                while ((node = child.Advance()) != null)
+                while ((node = _child.Advance()) != null)
                 {
                     Insert(outputBuffer, node);
                 }
@@ -44,7 +44,7 @@ namespace MS.Internal.Xml.XPath
 
         public override XPathNavigator MatchNode(XPathNavigator current)
         {
-            XPathNavigator context = child.MatchNode(current);
+            XPathNavigator context = _child.MatchNode(current);
             if (context == null)
             {
                 return null;
@@ -73,7 +73,7 @@ namespace MS.Internal.Xml.XPath
         {
             w.WriteStartElement(this.GetType().Name);
             input.PrintQuery(w);
-            child.PrintQuery(w);
+            _child.PrintQuery(w);
             w.WriteEndElement();
         }
     }

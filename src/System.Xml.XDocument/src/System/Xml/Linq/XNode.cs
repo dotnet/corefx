@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft. All rights reserved.
+﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Collections.Generic;
@@ -26,8 +26,8 @@ namespace System.Xml.Linq
     /// </remarks>
     public abstract class XNode : XObject
     {
-        static XNodeDocumentOrderComparer documentOrderComparer;
-        static XNodeEqualityComparer equalityComparer;
+        private static XNodeDocumentOrderComparer _documentOrderComparer;
+        private static XNodeEqualityComparer _equalityComparer;
 
         internal XNode next;
 
@@ -78,8 +78,8 @@ namespace System.Xml.Linq
         {
             get
             {
-                if (documentOrderComparer == null) documentOrderComparer = new XNodeDocumentOrderComparer();
-                return documentOrderComparer;
+                if (_documentOrderComparer == null) _documentOrderComparer = new XNodeDocumentOrderComparer();
+                return _documentOrderComparer;
             }
         }
 
@@ -90,8 +90,8 @@ namespace System.Xml.Linq
         {
             get
             {
-                if (equalityComparer == null) equalityComparer = new XNodeEqualityComparer();
-                return equalityComparer;
+                if (_equalityComparer == null) _equalityComparer = new XNodeEqualityComparer();
+                return _equalityComparer;
             }
         }
 

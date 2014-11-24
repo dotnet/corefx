@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft. All rights reserved.
+﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Collections;
@@ -8,36 +8,36 @@ namespace System.Xml
 {
     internal class XmlElementList : XmlNodeList
     {
-        string asterisk;
-        int changeCount; //recording the total number that the dom tree has been changed ( insertion and deletetion )
+        private string _asterisk;
+        private int _changeCount; //recording the total number that the dom tree has been changed ( insertion and deletetion )
         //the member vars below are saved for further reconstruction        
-        string name;         //only one of 2 string groups will be initialized depends on which constructor is called.
-        string localName;
-        string namespaceURI;
-        XmlNode rootNode;
+        private string _name;         //only one of 2 string groups will be initialized depends on which constructor is called.
+        private string _localName;
+        private string _namespaceURI;
+        private XmlNode _rootNode;
         // the memeber vars belwo serves the optimization of accessing of the elements in the list
-        int curInd;       // -1 means the starting point for a new search round
-        XmlNode curElem;      // if sets to rootNode, means the starting point for a new search round
-        bool empty;        // whether the list is empty
-        bool atomized;     //whether the localname and namespaceuri are aomized
-        int matchCount;   // cached list count. -1 means it needs reconstruction
+        private int _curInd;       // -1 means the starting point for a new search round
+        private XmlNode _curElem;      // if sets to rootNode, means the starting point for a new search round
+        private bool _empty;        // whether the list is empty
+        private bool _atomized;     //whether the localname and namespaceuri are aomized
+        private int _matchCount;   // cached list count. -1 means it needs reconstruction
 
-        WeakReference listener;   // XmlElementListListener
+        private WeakReference _listener;   // XmlElementListListener
 
         private XmlElementList(XmlNode parent)
         {
             Debug.Assert(parent != null);
             Debug.Assert(parent.NodeType == XmlNodeType.Element || parent.NodeType == XmlNodeType.Document);
-            this.rootNode = parent;
+            this._rootNode = parent;
             Debug.Assert(parent.Document != null);
-            this.curInd = -1;
-            this.curElem = rootNode;
-            this.changeCount = 0;
-            this.empty = false;
-            this.atomized = true;
-            this.matchCount = -1;
+            this._curInd = -1;
+            this._curElem = _rootNode;
+            this._changeCount = 0;
+            this._empty = false;
+            this._atomized = true;
+            this._matchCount = -1;
             // This can be a regular reference, but it would cause some kind of loop inside the GC
-            this.listener = new WeakReference(new XmlElementListListener(parent.Document, this));
+            this._listener = new WeakReference(new XmlElementListListener(parent.Document, this));
         }
 
         ~XmlElementList()
@@ -47,22 +47,22 @@ namespace System.Xml
 
         internal void ConcurrencyCheck(XmlNodeChangedEventArgs args)
         {
-            if (atomized == false)
+            if (_atomized == false)
             {
-                XmlNameTable nameTable = this.rootNode.Document.NameTable;
-                this.localName = nameTable.Add(this.localName);
-                this.namespaceURI = nameTable.Add(this.namespaceURI);
-                this.atomized = true;
+                XmlNameTable nameTable = this._rootNode.Document.NameTable;
+                this._localName = nameTable.Add(this._localName);
+                this._namespaceURI = nameTable.Add(this._namespaceURI);
+                this._atomized = true;
             }
             if (IsMatch(args.Node))
             {
-                this.changeCount++;
-                this.curInd = -1;
-                this.curElem = rootNode;
+                this._changeCount++;
+                this._curInd = -1;
+                this._curElem = _rootNode;
                 if (args.Action == XmlNodeChangedAction.Insert)
-                    this.empty = false;
+                    this._empty = false;
             }
-            this.matchCount = -1;
+            this._matchCount = -1;
         }
 
         internal XmlElementList(XmlNode parent, string name) : this(parent)
@@ -70,10 +70,10 @@ namespace System.Xml
             Debug.Assert(parent.Document != null);
             XmlNameTable nt = parent.Document.NameTable;
             Debug.Assert(nt != null);
-            asterisk = nt.Add("*");
-            this.name = nt.Add(name);
-            this.localName = null;
-            this.namespaceURI = null;
+            _asterisk = nt.Add("*");
+            this._name = nt.Add(name);
+            this._localName = null;
+            this._namespaceURI = null;
         }
 
         internal XmlElementList(XmlNode parent, string localName, string namespaceURI) : this(parent)
@@ -81,22 +81,22 @@ namespace System.Xml
             Debug.Assert(parent.Document != null);
             XmlNameTable nt = parent.Document.NameTable;
             Debug.Assert(nt != null);
-            asterisk = nt.Add("*");
-            this.localName = nt.Get(localName);
-            this.namespaceURI = nt.Get(namespaceURI);
-            if ((this.localName == null) || (this.namespaceURI == null))
+            _asterisk = nt.Add("*");
+            this._localName = nt.Get(localName);
+            this._namespaceURI = nt.Get(namespaceURI);
+            if ((this._localName == null) || (this._namespaceURI == null))
             {
-                this.empty = true;
-                this.atomized = false;
-                this.localName = localName;
-                this.namespaceURI = namespaceURI;
+                this._empty = true;
+                this._atomized = false;
+                this._localName = localName;
+                this._namespaceURI = namespaceURI;
             }
-            this.name = null;
+            this._name = null;
         }
 
         internal int ChangeCount
         {
-            get { return changeCount; }
+            get { return _changeCount; }
         }
 
         // return the next element node that is in PreOrder
@@ -111,16 +111,16 @@ namespace System.Xml
                 //so, first while-loop find out such an ancestor (until no more ancestor or the ancestor is the rootNode
                 retNode = curNode;
                 while (retNode != null
-                        && retNode != rootNode
+                        && retNode != _rootNode
                         && retNode.NextSibling == null)
                 {
                     retNode = retNode.ParentNode;
                 }
                 //then if such ancestor exists, set the retNode to its NextSibling
-                if (retNode != null && retNode != rootNode)
+                if (retNode != null && retNode != _rootNode)
                     retNode = retNode.NextSibling;
             }
-            if (retNode == this.rootNode)
+            if (retNode == this._rootNode)
                 //if reach the rootNode, consider having walked through the whole tree and no more element after the curNode
                 retNode = null;
             return retNode;
@@ -143,7 +143,7 @@ namespace System.Xml
             if (retNode == null)
                 retNode = curNode.ParentNode;
             // if the final retNode is rootNode, consider having walked through the tree and no more previous node
-            if (retNode == this.rootNode)
+            if (retNode == this._rootNode)
                 retNode = null;
             return retNode;
         }
@@ -153,16 +153,16 @@ namespace System.Xml
         {
             if (curNode.NodeType == XmlNodeType.Element)
             {
-                if (this.name != null)
+                if (this._name != null)
                 {
-                    if (Ref.Equal(this.name, asterisk) || Ref.Equal(curNode.Name, this.name))
+                    if (Ref.Equal(this._name, _asterisk) || Ref.Equal(curNode.Name, this._name))
                         return true;
                 }
                 else
                 {
                     if (
-                        (Ref.Equal(this.localName, asterisk) || Ref.Equal(curNode.LocalName, this.localName)) &&
-                        (Ref.Equal(this.namespaceURI, asterisk) || curNode.NamespaceURI == this.namespaceURI)
+                        (Ref.Equal(this._localName, _asterisk) || Ref.Equal(curNode.LocalName, this._localName)) &&
+                        (Ref.Equal(this._namespaceURI, _asterisk) || curNode.NamespaceURI == this._namespaceURI)
                     )
                     {
                         return true;
@@ -202,31 +202,31 @@ namespace System.Xml
         //the function is for the enumerator to find out the next available matching element node
         public XmlNode GetNextNode(XmlNode n)
         {
-            if (this.empty == true)
+            if (this._empty == true)
                 return null;
-            XmlNode node = (n == null) ? rootNode : n;
+            XmlNode node = (n == null) ? _rootNode : n;
             return GetMatchingNode(node, true);
         }
 
         public override XmlNode Item(int index)
         {
-            if (rootNode == null || index < 0)
+            if (_rootNode == null || index < 0)
                 return null;
 
-            if (this.empty == true)
+            if (this._empty == true)
                 return null;
-            if (curInd == index)
-                return curElem;
-            int nDiff = index - curInd;
+            if (_curInd == index)
+                return _curElem;
+            int nDiff = index - _curInd;
             bool bForward = (nDiff > 0);
             if (nDiff < 0)
                 nDiff = -nDiff;
             XmlNode node;
-            if ((node = GetNthMatchingNode(curElem, bForward, nDiff)) != null)
+            if ((node = GetNthMatchingNode(_curElem, bForward, nDiff)) != null)
             {
-                curInd = index;
-                curElem = node;
-                return curElem;
+                _curInd = index;
+                _curElem = node;
+                return _curElem;
             }
             return null;
         }
@@ -235,30 +235,30 @@ namespace System.Xml
         {
             get
             {
-                if (this.empty == true)
+                if (this._empty == true)
                     return 0;
-                if (this.matchCount < 0)
+                if (this._matchCount < 0)
                 {
                     int currMatchCount = 0;
-                    int currChangeCount = this.changeCount;
-                    XmlNode node = rootNode;
+                    int currChangeCount = this._changeCount;
+                    XmlNode node = _rootNode;
                     while ((node = GetMatchingNode(node, true)) != null)
                     {
                         currMatchCount++;
                     }
-                    if (currChangeCount != this.changeCount)
+                    if (currChangeCount != this._changeCount)
                     {
                         return currMatchCount;
                     }
-                    this.matchCount = currMatchCount;
+                    this._matchCount = currMatchCount;
                 }
-                return this.matchCount;
+                return this._matchCount;
             }
         }
 
         public override IEnumerator GetEnumerator()
         {
-            if (this.empty == true)
+            if (this._empty == true)
                 return new XmlEmptyElementListEnumerator(this); ;
             return new XmlElementListEnumerator(this);
         }
@@ -271,55 +271,55 @@ namespace System.Xml
 
         protected virtual void Dispose(bool disposing)
         {
-            if (this.listener != null)
+            if (this._listener != null)
             {
-                XmlElementListListener listener = (XmlElementListListener)this.listener.Target;
+                XmlElementListListener listener = (XmlElementListListener)this._listener.Target;
                 if (listener != null)
                 {
                     listener.Unregister();
                 }
-                this.listener = null;
+                this._listener = null;
             }
         }
     }
 
     internal class XmlElementListEnumerator : IEnumerator
     {
-        XmlElementList list;
-        XmlNode curElem;
-        int changeCount; //save the total number that the dom tree has been changed ( insertion and deletetion ) when this enumerator is created
+        private XmlElementList _list;
+        private XmlNode _curElem;
+        private int _changeCount; //save the total number that the dom tree has been changed ( insertion and deletetion ) when this enumerator is created
 
         public XmlElementListEnumerator(XmlElementList list)
         {
-            this.list = list;
-            this.curElem = null;
-            this.changeCount = list.ChangeCount;
+            this._list = list;
+            this._curElem = null;
+            this._changeCount = list.ChangeCount;
         }
 
         public bool MoveNext()
         {
-            if (list.ChangeCount != this.changeCount)
+            if (_list.ChangeCount != this._changeCount)
             {
                 //the number mismatch, there is new change(s) happened since last MoveNext() is called.
                 throw new InvalidOperationException(SR.Xdom_Enum_ElementList);
             }
             else
             {
-                curElem = list.GetNextNode(curElem);
+                _curElem = _list.GetNextNode(_curElem);
             }
-            return curElem != null;
+            return _curElem != null;
         }
 
         public void Reset()
         {
-            curElem = null;
+            _curElem = null;
             //reset the number of changes to be synced with current dom tree as well
-            this.changeCount = list.ChangeCount;
+            this._changeCount = _list.ChangeCount;
         }
 
         public object Current
         {
-            get { return curElem; }
+            get { return _curElem; }
         }
     }
 
@@ -346,35 +346,35 @@ namespace System.Xml
 
     internal class XmlElementListListener
     {
-        WeakReference elemList;
-        XmlDocument doc;
-        XmlNodeChangedEventHandler nodeChangeHandler = null;
+        private WeakReference _elemList;
+        private XmlDocument _doc;
+        private XmlNodeChangedEventHandler _nodeChangeHandler = null;
 
         internal XmlElementListListener(XmlDocument doc, XmlElementList elemList)
         {
-            this.doc = doc;
-            this.elemList = new WeakReference(elemList);
-            this.nodeChangeHandler = new XmlNodeChangedEventHandler(this.OnListChanged);
-            doc.NodeInserted += this.nodeChangeHandler;
-            doc.NodeRemoved += this.nodeChangeHandler;
+            this._doc = doc;
+            this._elemList = new WeakReference(elemList);
+            this._nodeChangeHandler = new XmlNodeChangedEventHandler(this.OnListChanged);
+            doc.NodeInserted += this._nodeChangeHandler;
+            doc.NodeRemoved += this._nodeChangeHandler;
         }
 
         private void OnListChanged(object sender, XmlNodeChangedEventArgs args)
         {
             lock (this)
             {
-                if (this.elemList != null)
+                if (this._elemList != null)
                 {
-                    XmlElementList el = (XmlElementList)this.elemList.Target;
+                    XmlElementList el = (XmlElementList)this._elemList.Target;
                     if (null != el)
                     {
                         el.ConcurrencyCheck(args);
                     }
                     else
                     {
-                        this.doc.NodeInserted -= this.nodeChangeHandler;
-                        this.doc.NodeRemoved -= this.nodeChangeHandler;
-                        this.elemList = null;
+                        this._doc.NodeInserted -= this._nodeChangeHandler;
+                        this._doc.NodeRemoved -= this._nodeChangeHandler;
+                        this._elemList = null;
                     }
                 }
             }
@@ -385,11 +385,11 @@ namespace System.Xml
         {
             lock (this)
             {
-                if (elemList != null)
+                if (_elemList != null)
                 {
-                    this.doc.NodeInserted -= this.nodeChangeHandler;
-                    this.doc.NodeRemoved -= this.nodeChangeHandler;
-                    this.elemList = null;
+                    this._doc.NodeInserted -= this._nodeChangeHandler;
+                    this._doc.NodeRemoved -= this._nodeChangeHandler;
+                    this._elemList = null;
                 }
             }
         }

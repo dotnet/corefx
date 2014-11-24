@@ -8,62 +8,62 @@ namespace System.Reflection.Metadata.Tests
 {
     public class MetadataTokensTests
     {
-        private static readonly Handle assemblyRefHandle = AssemblyReferenceHandle.FromRowId(1);
-        private static readonly Handle virtualAssemblyRefHandle = AssemblyReferenceHandle.FromVirtualIndex(AssemblyReferenceHandle.VirtualIndex.System_Runtime);
-        private static readonly Handle virtualBlobHandle = BlobHandle.FromVirtualIndex(BlobHandle.VirtualIndex.AttributeUsage_AllowSingle, 0);
-        private static readonly Handle userStringHandle = UserStringHandle.FromIndex(1);
-        private static readonly Handle stringHandle = StringHandle.FromIndex(1);
-        private static readonly Handle winrtPrefixedStringHandle = StringHandle.FromIndex(1).WithWinRTPrefix();
-        private static readonly Handle blobHandle = BlobHandle.FromIndex(1);
-        private static readonly Handle guidHandle = GuidHandle.FromIndex(16);
+        private static readonly Handle _assemblyRefHandle = AssemblyReferenceHandle.FromRowId(1);
+        private static readonly Handle _virtualAssemblyRefHandle = AssemblyReferenceHandle.FromVirtualIndex(AssemblyReferenceHandle.VirtualIndex.System_Runtime);
+        private static readonly Handle _virtualBlobHandle = BlobHandle.FromVirtualIndex(BlobHandle.VirtualIndex.AttributeUsage_AllowSingle, 0);
+        private static readonly Handle _userStringHandle = UserStringHandle.FromIndex(1);
+        private static readonly Handle _stringHandle = StringHandle.FromIndex(1);
+        private static readonly Handle _winrtPrefixedStringHandle = StringHandle.FromIndex(1).WithWinRTPrefix();
+        private static readonly Handle _blobHandle = BlobHandle.FromIndex(1);
+        private static readonly Handle _guidHandle = GuidHandle.FromIndex(16);
 
         [Fact]
         public void GetRowNumber()
         {
-            Assert.Equal(1, MetadataTokens.GetRowNumber(assemblyRefHandle));
-            Assert.Equal(-1, MetadataTokens.GetRowNumber(virtualAssemblyRefHandle));
+            Assert.Equal(1, MetadataTokens.GetRowNumber(_assemblyRefHandle));
+            Assert.Equal(-1, MetadataTokens.GetRowNumber(_virtualAssemblyRefHandle));
 
-            Assert.Throws<ArgumentException>(() => MetadataTokens.GetRowNumber(virtualBlobHandle));
-            Assert.Throws<ArgumentException>(() => MetadataTokens.GetRowNumber(userStringHandle));
-            Assert.Throws<ArgumentException>(() => MetadataTokens.GetRowNumber(stringHandle));
-            Assert.Throws<ArgumentException>(() => MetadataTokens.GetRowNumber(winrtPrefixedStringHandle));
-            Assert.Throws<ArgumentException>(() => MetadataTokens.GetRowNumber(blobHandle));
-            Assert.Throws<ArgumentException>(() => MetadataTokens.GetRowNumber(guidHandle));
+            Assert.Throws<ArgumentException>(() => MetadataTokens.GetRowNumber(_virtualBlobHandle));
+            Assert.Throws<ArgumentException>(() => MetadataTokens.GetRowNumber(_userStringHandle));
+            Assert.Throws<ArgumentException>(() => MetadataTokens.GetRowNumber(_stringHandle));
+            Assert.Throws<ArgumentException>(() => MetadataTokens.GetRowNumber(_winrtPrefixedStringHandle));
+            Assert.Throws<ArgumentException>(() => MetadataTokens.GetRowNumber(_blobHandle));
+            Assert.Throws<ArgumentException>(() => MetadataTokens.GetRowNumber(_guidHandle));
         }
 
         [Fact]
         public void GetHeapOffset()
         {
-            Assert.Equal(-1, MetadataTokens.GetHeapOffset(virtualBlobHandle));
-            Assert.Equal(1, MetadataTokens.GetHeapOffset(userStringHandle));
-            Assert.Equal(1, MetadataTokens.GetHeapOffset(stringHandle));
-            Assert.Equal(-1, MetadataTokens.GetHeapOffset(winrtPrefixedStringHandle));
-            Assert.Equal(1, MetadataTokens.GetHeapOffset(blobHandle));
-            Assert.Equal(16, MetadataTokens.GetHeapOffset(guidHandle));
+            Assert.Equal(-1, MetadataTokens.GetHeapOffset(_virtualBlobHandle));
+            Assert.Equal(1, MetadataTokens.GetHeapOffset(_userStringHandle));
+            Assert.Equal(1, MetadataTokens.GetHeapOffset(_stringHandle));
+            Assert.Equal(-1, MetadataTokens.GetHeapOffset(_winrtPrefixedStringHandle));
+            Assert.Equal(1, MetadataTokens.GetHeapOffset(_blobHandle));
+            Assert.Equal(16, MetadataTokens.GetHeapOffset(_guidHandle));
 
-            Assert.Throws<ArgumentException>(() => MetadataTokens.GetHeapOffset(assemblyRefHandle));
-            Assert.Throws<ArgumentException>(() => MetadataTokens.GetHeapOffset(virtualAssemblyRefHandle));
+            Assert.Throws<ArgumentException>(() => MetadataTokens.GetHeapOffset(_assemblyRefHandle));
+            Assert.Throws<ArgumentException>(() => MetadataTokens.GetHeapOffset(_virtualAssemblyRefHandle));
         }
 
         [Fact]
         public void GetToken()
         {
-            Assert.Equal(0x23000001, MetadataTokens.GetToken(assemblyRefHandle));
-            Assert.Equal(0, MetadataTokens.GetToken(virtualAssemblyRefHandle));
-            Assert.Equal(0x70000001, MetadataTokens.GetToken(userStringHandle));
+            Assert.Equal(0x23000001, MetadataTokens.GetToken(_assemblyRefHandle));
+            Assert.Equal(0, MetadataTokens.GetToken(_virtualAssemblyRefHandle));
+            Assert.Equal(0x70000001, MetadataTokens.GetToken(_userStringHandle));
 
-            Assert.Throws<ArgumentException>(() => MetadataTokens.GetToken(virtualBlobHandle));
-            Assert.Throws<ArgumentException>(() => MetadataTokens.GetToken(stringHandle));
-            Assert.Throws<ArgumentException>(() => MetadataTokens.GetToken(winrtPrefixedStringHandle));
-            Assert.Throws<ArgumentException>(() => MetadataTokens.GetToken(blobHandle));
-            Assert.Throws<ArgumentException>(() => MetadataTokens.GetToken(guidHandle));
+            Assert.Throws<ArgumentException>(() => MetadataTokens.GetToken(_virtualBlobHandle));
+            Assert.Throws<ArgumentException>(() => MetadataTokens.GetToken(_stringHandle));
+            Assert.Throws<ArgumentException>(() => MetadataTokens.GetToken(_winrtPrefixedStringHandle));
+            Assert.Throws<ArgumentException>(() => MetadataTokens.GetToken(_blobHandle));
+            Assert.Throws<ArgumentException>(() => MetadataTokens.GetToken(_guidHandle));
         }
 
         [Fact]
         public void CreateHandle()
         {
-            Assert.Equal(assemblyRefHandle, MetadataTokens.Handle(0x23000001));
-            Assert.Equal(userStringHandle, MetadataTokens.Handle(0x70000001));
+            Assert.Equal(_assemblyRefHandle, MetadataTokens.Handle(0x23000001));
+            Assert.Equal(_userStringHandle, MetadataTokens.Handle(0x70000001));
 
             Assert.Throws<ArgumentException>(() => MetadataTokens.Handle(-1));
             Assert.Throws<ArgumentException>(() => MetadataTokens.Handle(0x71000001));

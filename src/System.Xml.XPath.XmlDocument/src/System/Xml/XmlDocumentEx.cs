@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft. All rights reserved.
+﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Collections.Generic;
@@ -14,15 +14,15 @@ namespace System.Xml
                 : base(prefix, localName, namespaceURI, doc)
             { }
         }
-        private static Dictionary<XmlDocument, XmlAttribute> namespaceXmlOfDocument = new Dictionary<XmlDocument, XmlAttribute>();
+        private static Dictionary<XmlDocument, XmlAttribute> _namespaceXmlOfDocument = new Dictionary<XmlDocument, XmlAttribute>();
         public static XmlAttribute GetNamespaceXml(this XmlDocument xmlDocument)
         {
             XmlAttribute ret;
-            if (!namespaceXmlOfDocument.TryGetValue(xmlDocument, out ret))
+            if (!_namespaceXmlOfDocument.TryGetValue(xmlDocument, out ret))
             {
                 ret = new FakeXmlAttribute(XmlConst.NsXmlNs, XmlConst.NsXml, XmlConst.ReservedNsXmlNs, xmlDocument);
                 ret.Value = XmlConst.ReservedNsXml;
-                namespaceXmlOfDocument[xmlDocument] = ret;
+                _namespaceXmlOfDocument[xmlDocument] = ret;
             }
             return ret;
         }

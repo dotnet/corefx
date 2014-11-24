@@ -20,17 +20,17 @@ namespace System.Collections.Immutable
             /// <summary>
             /// The root of the data structure for the collection.
             /// </summary>
-            private readonly ImmutableSortedDictionary<int, HashBucket>.Node root;
+            private readonly ImmutableSortedDictionary<int, HashBucket>.Node _root;
 
             /// <summary>
             /// The equality comparer.
             /// </summary>
-            private readonly IEqualityComparer<T> equalityComparer;
+            private readonly IEqualityComparer<T> _equalityComparer;
 
             /// <summary>
             /// The current number of elements in the collection.
             /// </summary>
-            private readonly int count;
+            private readonly int _count;
 
             /// <summary>
             /// Initializes a new instance of the <see cref="ImmutableHashSet&lt;T&gt;.MutationInput"/> struct.
@@ -39,9 +39,9 @@ namespace System.Collections.Immutable
             internal MutationInput(ImmutableHashSet<T> set)
             {
                 Requires.NotNull(set, "set");
-                this.root = set.root;
-                this.equalityComparer = set.equalityComparer;
-                this.count = set.count;
+                this._root = set._root;
+                this._equalityComparer = set._equalityComparer;
+                this._count = set._count;
             }
 
             /// <summary>
@@ -55,9 +55,9 @@ namespace System.Collections.Immutable
                 Requires.NotNull(root, "root");
                 Requires.NotNull(equalityComparer, "equalityComparer");
                 Requires.Range(count >= 0, "count");
-                this.root = root;
-                this.equalityComparer = equalityComparer;
-                this.count = count;
+                this._root = root;
+                this._equalityComparer = equalityComparer;
+                this._count = count;
             }
 
             /// <summary>
@@ -65,7 +65,7 @@ namespace System.Collections.Immutable
             /// </summary>
             internal ImmutableSortedDictionary<int, HashBucket>.Node Root
             {
-                get { return this.root; }
+                get { return this._root; }
             }
 
             /// <summary>
@@ -73,7 +73,7 @@ namespace System.Collections.Immutable
             /// </summary>
             internal IEqualityComparer<T> EqualityComparer
             {
-                get { return this.equalityComparer; }
+                get { return this._equalityComparer; }
             }
 
             /// <summary>
@@ -81,7 +81,7 @@ namespace System.Collections.Immutable
             /// </summary>
             internal int Count
             {
-                get { return this.count; }
+                get { return this._count; }
             }
         }
     }

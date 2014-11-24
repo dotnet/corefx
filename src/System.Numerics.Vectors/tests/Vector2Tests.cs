@@ -1109,22 +1109,22 @@ namespace System.Numerics.Tests
         [StructLayout(LayoutKind.Sequential)]
         struct Vector2_2x
         {
-            Vector2 a;
-            Vector2 b;
+            private Vector2 _a;
+            private Vector2 _b;
         }
 
         [StructLayout(LayoutKind.Sequential)]
         struct Vector2PlusFloat
         {
-            Vector2 v;
-            float f;
+            private Vector2 _v;
+            private float _f;
         }
 
         [StructLayout(LayoutKind.Sequential)]
         struct Vector2PlusFloat_2x
         {
-            Vector2PlusFloat a;
-            Vector2PlusFloat b;
+            private Vector2PlusFloat _a;
+            private Vector2PlusFloat _b;
         }
 
         [Fact]

@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft. All rights reserved.
+﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Xunit;
@@ -8,8 +8,8 @@ namespace XmlDocumentTests.XmlNodeTests.InsertTests
 {
     public static class TwoTextNodeTests
     {
-        private static readonly InsertType[] InsertTypes = new[] { InsertType.Prepend, InsertType.Append, InsertType.InsertBefore };
-        private static readonly XmlNodeType[] XmlNodeTypes = new XmlNodeType[] { XmlNodeType.Whitespace, XmlNodeType.SignificantWhitespace, XmlNodeType.CDATA, XmlNodeType.Element /*, XmlNodeType.EntityReference*/ };
+        private static readonly InsertType[] _InsertTypes = new[] { InsertType.Prepend, InsertType.Append, InsertType.InsertBefore };
+        private static readonly XmlNodeType[] _XmlNodeTypes = new XmlNodeType[] { XmlNodeType.Whitespace, XmlNodeType.SignificantWhitespace, XmlNodeType.CDATA, XmlNodeType.Element /*, XmlNodeType.EntityReference*/ };
 
         private static void TwoTextNodeBase(XmlDocument xmlDocument, InsertType insertType, XmlNodeType nodeType)
         {
@@ -68,8 +68,8 @@ namespace XmlDocumentTests.XmlNodeTests.InsertTests
         {
             var xml = @" <WC> 	<![CDATA[ &lt; &amp; <tag> < ! > & </tag> 	 ]]></WC>";
 
-            foreach (var insertType in InsertTypes)
-                foreach (var nodeType in XmlNodeTypes)
+            foreach (var insertType in _InsertTypes)
+                foreach (var nodeType in _XmlNodeTypes)
                     TwoTextNodeBase(xml, insertType, nodeType);
         }
 
@@ -78,40 +78,40 @@ namespace XmlDocumentTests.XmlNodeTests.InsertTests
         {
             var xml = @"<CT><![CDATA[ &lt; &amp; <tag> < ! > & </tag> 	 ]]>text</CT>";
 
-            foreach (var insertType in InsertTypes)
-                foreach (var nodeType in XmlNodeTypes)
+            foreach (var insertType in _InsertTypes)
+                foreach (var nodeType in _XmlNodeTypes)
                     TwoTextNodeBase(xml, insertType, nodeType);
         }
 
         [Fact]
         public static void Whitespace_Whitespace()
         {
-            foreach (var insertType in InsertTypes)
-                foreach (var nodeType in XmlNodeTypes)
+            foreach (var insertType in _InsertTypes)
+                foreach (var nodeType in _XmlNodeTypes)
                     TwoTextNodeBase(new XmlNodeType[] { XmlNodeType.Whitespace, XmlNodeType.Whitespace }, insertType, nodeType);
         }
 
         [Fact]
         public static void SignificantWhitespace_SignificantWhitespace()
         {
-            foreach (var insertType in InsertTypes)
-                foreach (var nodeType in XmlNodeTypes)
+            foreach (var insertType in _InsertTypes)
+                foreach (var nodeType in _XmlNodeTypes)
                     TwoTextNodeBase(new XmlNodeType[] { XmlNodeType.SignificantWhitespace, XmlNodeType.SignificantWhitespace }, insertType, nodeType);
         }
 
         [Fact]
         public static void Text_Text()
         {
-            foreach (var insertType in InsertTypes)
-                foreach (var nodeType in XmlNodeTypes)
+            foreach (var insertType in _InsertTypes)
+                foreach (var nodeType in _XmlNodeTypes)
                     TwoTextNodeBase(new XmlNodeType[] { XmlNodeType.Text, XmlNodeType.Text }, insertType, nodeType);
         }
 
         [Fact]
         public static void Text_SignificantWhitespace()
         {
-            foreach (var insertType in InsertTypes)
-                foreach (var nodeType in XmlNodeTypes)
+            foreach (var insertType in _InsertTypes)
+                foreach (var nodeType in _XmlNodeTypes)
                     TwoTextNodeBase(new XmlNodeType[] { XmlNodeType.Text, XmlNodeType.SignificantWhitespace }, insertType, nodeType);
         }
     }
