@@ -80,7 +80,7 @@ namespace System.Collections.Immutable
                 Requires.Range(capacity >= 0, "capacity");
                 if (capacity == 0)
                 {
-                    _elements = ImmutableArray<T>.EmptyArray;
+                    _elements = ImmutableArray<T>.Empty.array;
                 }
                 else if (_elements != null && _elements.Length == capacity)
                 {

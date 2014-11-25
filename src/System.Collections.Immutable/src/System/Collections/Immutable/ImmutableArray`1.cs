@@ -35,14 +35,9 @@ namespace System.Collections.Immutable
     public partial struct ImmutableArray<T> : IReadOnlyList<T>, IList<T>, IEquatable<ImmutableArray<T>>, IImmutableList<T>, IList, IImmutableArray, IStructuralComparable, IStructuralEquatable
     {
         /// <summary>
-        /// An empty T[] 
-        /// </summary>
-        internal static readonly T[] EmptyArray = new T[0];
-
-        /// <summary>
         /// An empty (initialized) instance of ImmutableArray{T}.
         /// </summary>
-        public static readonly ImmutableArray<T> Empty = new ImmutableArray<T>(EmptyArray);
+        public static readonly ImmutableArray<T> Empty = new ImmutableArray<T>(new T[0]);
 
         /// <summary>
         /// The backing field for this instance. References to this value should never be shared with outside code. 
