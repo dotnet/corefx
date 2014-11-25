@@ -17,7 +17,7 @@ namespace System.Collections.Immutable
         /// </summary>
         [DebuggerTypeProxy(typeof(ImmutableArrayFixedSizeBuilderDebuggerProxy<>))]
         [DebuggerDisplay("Capacity = {Capacity}")]
-        public sealed class FixedSizeBuilder
+        public sealed class FixedSizeBuilder : IReadOnlyList<T>
         {
             /// <summary>
             /// The backing array for the builder.
@@ -42,7 +42,7 @@ namespace System.Collections.Immutable
             }
 
             /// <summary>
-            /// True when this builder has a valid array value.
+            /// Gets a value indicating whether this instance has not yet created an ImmutableArray{T} since it was last Reset or created.
             /// </summary>
             public bool IsInitialized
             {
@@ -59,13 +59,21 @@ namespace System.Collections.Immutable
             {
                 get
                 {
-                    CheckInvalidState();
+                    if (_elements == null)
+                    {
+                        ThrowInvalidOperation();
+                    }
+
                     return _elements[index];
                 }
 
                 set
                 {
-                    CheckInvalidState();
+                    if (_elements == null)
+                    {
+                        ThrowInvalidOperation();
+                    }
+
                     _elements[index] = value;
                 }
             }
@@ -93,24 +101,57 @@ namespace System.Collections.Immutable
             }
 
             /// <summary>
-            /// Returns an immutable array that represents the data in the builder.  
+            /// Returns an immutable array that represents the data in the builder.
             /// </summary>
             /// <returns>An immutable array.</returns>
             /// <remarks>The builder can be reinitialized with the Reset method.</remarks>
-            public ImmutableArray<T> Freeze()
+            public ImmutableArray<T> ToImmutable()
             {
-                CheckInvalidState();
+                if (_elements == null)
+                {
+                    ThrowInvalidOperation();
+                }
+
                 var temp = _elements;
                 _elements = null;
                 return new ImmutableArray<T>(temp);
             }
 
-            private void CheckInvalidState()
+            /// <summary>
+            /// Returns an enumerator for the contents of the array.
+            /// </summary>
+            /// <returns>An enumerator.</returns>
+            public IEnumerator<T> GetEnumerator()
             {
                 if (_elements == null)
                 {
-                    throw new InvalidOperationException("This operation is not legal on an uninitialized FixedSizeBuilder");
+                    ThrowInvalidOperation();
                 }
+
+                return GetEnumeratorCore();
+            }
+
+            private IEnumerator<T> GetEnumeratorCore()
+            {
+                for (int i = 0; i < Capacity; i++)
+                {
+                    yield return this[i];
+                }
+            }
+
+            private void ThrowInvalidOperation()
+            {
+                throw new InvalidOperationException("This operation is not legal on an uninitialized FixedSizeBuilder");
+            }
+
+            int IReadOnlyCollection<T>.Count
+            {
+                get { return Capacity; }
+            }
+
+            IEnumerator IEnumerable.GetEnumerator()
+            {
+                return GetEnumerator();
             }
         }
     }
