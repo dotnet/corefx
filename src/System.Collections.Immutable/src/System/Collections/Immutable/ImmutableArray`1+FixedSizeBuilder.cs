@@ -59,21 +59,13 @@ namespace System.Collections.Immutable
             {
                 get
                 {
-                    if (_elements == null)
-                    {
-                        ThrowInvalidOperation();
-                    }
-
+                    CheckIsInitialized();
                     return _elements[index];
                 }
 
                 set
                 {
-                    if (_elements == null)
-                    {
-                        ThrowInvalidOperation();
-                    }
-
+                    CheckIsInitialized();
                     _elements[index] = value;
                 }
             }
@@ -105,13 +97,9 @@ namespace System.Collections.Immutable
             /// </summary>
             /// <returns>An immutable array.</returns>
             /// <remarks>The builder can be reinitialized with the Reset method.</remarks>
-            public ImmutableArray<T> ToImmutable()
+            public ImmutableArray<T> ToImmutableAndClear()
             {
-                if (_elements == null)
-                {
-                    ThrowInvalidOperation();
-                }
-
+                CheckIsInitialized();
                 var temp = _elements;
                 _elements = null;
                 return new ImmutableArray<T>(temp);
@@ -123,19 +111,15 @@ namespace System.Collections.Immutable
             /// <returns>An enumerator.</returns>
             public IEnumerator<T> GetEnumerator()
             {
-                if (_elements == null)
-                {
-                    ThrowInvalidOperation();
-                }
-
-                return GetEnumeratorCore();
+                CheckIsInitialized();
+                return ((IList<T>)_elements).GetEnumerator();
             }
 
-            private IEnumerator<T> GetEnumeratorCore()
+            private void CheckIsInitialized()
             {
-                for (int i = 0; i < Capacity; i++)
+                if (!IsInitialized)
                 {
-                    yield return this[i];
+                    ThrowInvalidOperation();
                 }
             }
 
