@@ -10,7 +10,7 @@ namespace System.Collections.Immutable.Test
     public class ImmutableArrayFixedSizeBuilderTest 
     {
         [Fact]
-        public void ToImmutableAndClearClears()
+        public void ToImmutableAndClearDoesClear()
         {
             var builder = ImmutableArray.CreateFixedSizeBuilder<short>(1);
             builder[0] = 42;
@@ -32,6 +32,31 @@ namespace System.Collections.Immutable.Test
             var builder = ImmutableArray.CreateFixedSizeBuilder<int>(0);
             var array = builder.ToImmutableAndClear();
             Assert.True(array.IsEmpty);
+            Assert.Equal(0, array.Length);
+        }
+
+        [Fact]
+        public void ToArrayAndClearDoesClear()
+        {
+            var builder = ImmutableArray.CreateFixedSizeBuilder<short>(1);
+            builder[0] = 42;
+            var array = builder.ToArrayAndClear();
+            Assert.Equal(0, builder.Capacity);
+        }
+
+        [Fact]
+        public void ToArrayAndClearManyTimesIllegal()
+        {
+            var builder = ImmutableArray.CreateFixedSizeBuilder<string>(1);
+            Assert.Equal(1, builder.ToArrayAndClear().Length);
+            Assert.Throws(typeof(InvalidOperationException), () => builder.ToArrayAndClear());
+        }
+
+        [Fact]
+        public void ToArrayAndClearZeroLengthIsEmpty()
+        {
+            var builder = ImmutableArray.CreateFixedSizeBuilder<int>(0);
+            var array = builder.ToArrayAndClear();
             Assert.Equal(0, array.Length);
         }
 

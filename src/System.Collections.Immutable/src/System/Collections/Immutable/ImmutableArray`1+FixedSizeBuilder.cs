@@ -96,7 +96,13 @@ namespace System.Collections.Immutable
             /// Returns an immutable array that represents the data in the builder.
             /// </summary>
             /// <returns>An immutable array.</returns>
-            /// <remarks>The builder can be reinitialized with the Reset method.</remarks>
+            /// <remarks>
+            /// The builder can be reinitialized with the Reset method.  
+            /// 
+            /// Be careful not to use this method in parallel with the indexer set method.  Such a race
+            /// has the potential to create an ImmutableArray{T} value where the elements can be observed
+            /// to change.
+            /// </remarks>
             public ImmutableArray<T> ToImmutableAndClear()
             {
                 CheckIsInitialized();
@@ -106,13 +112,34 @@ namespace System.Collections.Immutable
             }
 
             /// <summary>
+            /// Returns an array that represents the data in the builder.
+            /// </summary>
+            /// <returns>An array.</returns>
+            /// <remarks>The builder can be reinitialized with the Reset method.</remarks>
+            public T[] ToArrayAndClear()
+            {
+                CheckIsInitialized();
+                var temp = _elements;
+                _elements = null;
+                return temp;
+            }
+
+            internal T[] ToArray()
+            {
+                CheckIsInitialized();
+                var temp = new T[_elements.Length];
+                Array.Copy(_elements, temp, _elements.Length);
+                return temp;
+            }
+
+            /// <summary>
             /// Returns an enumerator for the contents of the array.
             /// </summary>
             /// <returns>An enumerator.</returns>
             public IEnumerator<T> GetEnumerator()
             {
                 CheckIsInitialized();
-                return ((IList<T>)_elements).GetEnumerator();
+                return ((IEnumerable<T>)_elements).GetEnumerator();
             }
 
             private void CheckIsInitialized()
@@ -125,7 +152,7 @@ namespace System.Collections.Immutable
 
             private void ThrowInvalidOperation()
             {
-                throw new InvalidOperationException("This operation is not legal on an uninitialized FixedSizeBuilder");
+                throw new InvalidOperationException(Strings.InvalidOperationOnUninitializedFixedSizeBuilder);
             }
 
             int IReadOnlyCollection<T>.Count
@@ -166,16 +193,7 @@ namespace System.Collections.Immutable
         [DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
         public T[] A
         {
-            get
-            {
-                var array = new T[_builder.Capacity];
-                for (int i = 0; i < _builder.Capacity; i++)
-                {
-                    array[i] = _builder[i];
-                }
-
-                return array;
-            }
+            get { return _builder.ToArray(); }
         }
     }
 }
