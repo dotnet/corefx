@@ -12,23 +12,28 @@ namespace System.Numerics
     /// </summary>
     public partial struct Vector2 : IEquatable<Vector2>, IFormattable
     {
+        private static readonly Vector2 zero = new Vector2();
+        private static readonly Vector2 one = new Vector2(1.0f, 1.0f);
+        private static readonly Vector2 unitX = new Vector2(1.0f, 0.0f);
+        private static readonly Vector2 unitY = new Vector2(0.0f, 1.0f);
+
         #region Public Static Properties
         /// <summary>
         /// Returns the vector (0,0).
         /// </summary>
-        public static Vector2 Zero { get { return new Vector2(); } }
+        public static Vector2 Zero { get { return zero; } }
         /// <summary>
         /// Returns the vector (1,1).
         /// </summary>
-        public static Vector2 One { get { return new Vector2(1.0f, 1.0f); } }
+        public static Vector2 One { get { return one; } }
         /// <summary>
         /// Returns the vector (1,0).
         /// </summary>
-        public static Vector2 UnitX { get { return new Vector2(1.0f, 0.0f); } }
+        public static Vector2 UnitX { get { return unitX; } }
         /// <summary>
         /// Returns the vector (0,1).
         /// </summary>
-        public static Vector2 UnitY { get { return new Vector2(0.0f, 1.0f); } }
+        public static Vector2 UnitY { get { return unitY; } }
         #endregion Public Static Properties
 
         #region Public instance methods

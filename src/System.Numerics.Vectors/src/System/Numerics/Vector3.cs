@@ -12,27 +12,33 @@ namespace System.Numerics
     /// </summary>
     public partial struct Vector3 : IEquatable<Vector3>, IFormattable
     {
+        private static readonly Vector3 zero = new Vector3();
+        private static readonly Vector3 one = new Vector3(1.0f, 1.0f, 1.0f);
+        private static readonly Vector3 unitX = new Vector3(1.0f, 0.0f, 0.0f);
+        private static readonly Vector3 unitY = new Vector3(0.0f, 1.0f, 0.0f);
+        private static readonly Vector3 unitZ = new Vector3(0.0f, 0.0f, 1.0f);
+
         #region Public Static Properties
         /// <summary>
         /// Returns the vector (0,0,0).
         /// </summary>
-        public static Vector3 Zero { get { return new Vector3(); } }
+        public static Vector3 Zero { get { return zero; } }
         /// <summary>
         /// Returns the vector (1,1,1).
         /// </summary>
-        public static Vector3 One { get { return new Vector3(1.0f, 1.0f, 1.0f); } }
+        public static Vector3 One { get { return one; } }
         /// <summary>
         /// Returns the vector (1,0,0).
         /// </summary>
-        public static Vector3 UnitX { get { return new Vector3(1.0f, 0.0f, 0.0f); } }
+        public static Vector3 UnitX { get { return unitX; } }
         /// <summary>
         /// Returns the vector (0,1,0).
         /// </summary>
-        public static Vector3 UnitY { get { return new Vector3(0.0f, 1.0f, 0.0f); } }
+        public static Vector3 UnitY { get { return unitY; } }
         /// <summary>
         /// Returns the vector (0,0,1).
         /// </summary>
-        public static Vector3 UnitZ { get { return new Vector3(0.0f, 0.0f, 1.0f); } }
+        public static Vector3 UnitZ { get { return unitZ; } }
         #endregion Public Static Properties
 
         #region Public Instance Methods

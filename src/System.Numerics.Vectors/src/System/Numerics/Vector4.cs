@@ -12,31 +12,38 @@ namespace System.Numerics
     /// </summary>
     public partial struct Vector4 : IEquatable<Vector4>, IFormattable
     {
+        private static readonly Vector4 zero = new Vector4();
+        private static readonly Vector4 one = new Vector4(1.0f, 1.0f, 1.0f, 1.0f);
+        private static readonly Vector4 unitX = new Vector4(1.0f, 0.0f, 0.0f, 0.0f);
+        private static readonly Vector4 unitY = new Vector4(0.0f, 1.0f, 0.0f, 0.0f);
+        private static readonly Vector4 unitZ = new Vector4(0.0f, 0.0f, 1.0f, 0.0f);
+        private static readonly Vector4 unitW = new Vector4(0.0f, 0.0f, 0.0f, 1.0f);
+
         #region Public Static Properties
         /// <summary>
         /// Returns the vector (0,0,0,0).
         /// </summary>
-        public static Vector4 Zero { get { return new Vector4(); } }
+        public static Vector4 Zero { get { return zero; } }
         /// <summary>
         /// Returns the vector (1,1,1,1).
         /// </summary>
-        public static Vector4 One { get { return new Vector4(1.0f, 1.0f, 1.0f, 1.0f); } }
+        public static Vector4 One { get { return one; } }
         /// <summary>
         /// Returns the vector (1,0,0,0).
         /// </summary>
-        public static Vector4 UnitX { get { return new Vector4(1.0f, 0.0f, 0.0f, 0.0f); } }
+        public static Vector4 UnitX { get { return unitX; } }
         /// <summary>
         /// Returns the vector (0,1,0,0).
         /// </summary>
-        public static Vector4 UnitY { get { return new Vector4(0.0f, 1.0f, 0.0f, 0.0f); } }
+        public static Vector4 UnitY { get { return unitY; } }
         /// <summary>
         /// Returns the vector (0,0,1,0).
         /// </summary>
-        public static Vector4 UnitZ { get { return new Vector4(0.0f, 0.0f, 1.0f, 0.0f); } }
+        public static Vector4 UnitZ { get { return unitZ; } }
         /// <summary>
         /// Returns the vector (0,0,0,1).
         /// </summary>
-        public static Vector4 UnitW { get { return new Vector4(0.0f, 0.0f, 0.0f, 1.0f); } }
+        public static Vector4 UnitW { get { return unitW; } }
         #endregion Public Static Properties
 
         #region Public instance methods
