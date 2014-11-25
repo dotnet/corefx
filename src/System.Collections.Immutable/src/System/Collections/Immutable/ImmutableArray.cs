@@ -400,7 +400,7 @@ namespace System.Collections.Immutable
         /// Initializes a new instance of the <see cref="ImmutableArray&lt;T&gt;.FixedSizeBuilder"/> class.
         /// </summary>
         /// <typeparam name="T">The type of elements stored in the array.</typeparam>
-        /// <param name="initialCapacity">The size of the array backing the builder.</param>
+        /// <param name="initialCapacity">The size of the array the builder creates.</param>
         /// <returns>A new builder.</returns>
         [Pure]
         public static ImmutableArray<T>.FixedSizeBuilder CreateFixedSizeBuilder<T>(int initialCapacity)

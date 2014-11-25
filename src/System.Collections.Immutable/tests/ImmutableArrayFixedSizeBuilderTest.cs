@@ -16,18 +16,14 @@ namespace System.Collections.Immutable.Test
             builder[0] = 42;
             var array = builder.Freeze();
             Assert.Equal(0, builder.Capacity);
-            Assert.True(builder.Freeze().IsDefault);
         }
 
         [Fact]
-        public void FreezeManyTimesLegal()
+        public void FreezeManyTimesIllegal()
         {
             var builder = ImmutableArray.CreateFixedSizeBuilder<string>(1);
             Assert.Equal(1, builder.Freeze().Length);
-            for (int i = 0; i < 10; i++)
-            {
-                Assert.True(builder.Freeze().IsDefault);
-            }
+            Assert.Throws(typeof(InvalidOperationException), () => builder.Freeze());
         }
 
         [Fact]
@@ -37,6 +33,17 @@ namespace System.Collections.Immutable.Test
             var array = builder.Freeze();
             Assert.True(array.IsEmpty);
             Assert.Equal(0, array.Length);
+        }
+
+        [Fact]
+        public void IsInitialized()
+        {
+            var builder = ImmutableArray.CreateFixedSizeBuilder<int>(0);
+            Assert.True(builder.IsInitialized);
+            builder.Freeze();
+            Assert.False(builder.IsInitialized);
+            builder.Reset(42);
+            Assert.True(builder.IsInitialized);
         }
 
         [Fact]
@@ -114,7 +121,7 @@ namespace System.Collections.Immutable.Test
         }
 
         [Fact]
-        public void ResetWithoutFreez()
+        public void ResetWithoutFreeze()
         {
             var builder = ImmutableArray.CreateFixedSizeBuilder<int>(0);
             builder.Reset(2);
@@ -122,6 +129,52 @@ namespace System.Collections.Immutable.Test
             builder[1] = 13;
             var array = builder.Freeze();
             Assert.Equal(new[] { 42, 13 }, array);
+        }
+
+        [Fact]
+        public void ResetMultiple()
+        {
+            var builder = ImmutableArray.CreateFixedSizeBuilder<string>(1);
+            builder.Reset(1);
+            Assert.Equal(1, builder.Capacity);
+            builder.Reset(2);
+            Assert.Equal(2, builder.Capacity);
+        }
+
+        [Fact]
+        public void ResetClearsEntries()
+        {
+            var builder = ImmutableArray.CreateFixedSizeBuilder<string>(2);
+            builder[0] = "a";
+            builder[1] = "b";
+            builder.Reset(3);
+            for (int i = 0; i < builder.Capacity; i++)
+            {
+                Assert.Null(builder[i]);
+            }
+        }
+
+        [Fact]
+        public void ResetSameSizeClearsEntries()
+        {
+            var size = 2;
+            var builder = ImmutableArray.CreateFixedSizeBuilder<string>(size);
+            builder[0] = "a";
+            builder[1] = "b";
+            builder.Reset(size);
+            for (int i = 0; i < builder.Capacity; i++)
+            {
+                Assert.Null(builder[i]);
+            }
+        }
+
+        [Fact]
+        public void ResetZeroIsValid()
+        {
+            var builder = ImmutableArray.CreateFixedSizeBuilder<string>(42);
+            builder.Reset(0);
+            Assert.True(builder.IsInitialized);
+            Assert.Equal(0, builder.Capacity);
         }
 
         [Fact]

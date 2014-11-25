@@ -22,7 +22,7 @@ namespace System.Collections.Immutable
             /// <summary>
             /// The backing array for the builder.
             /// </summary>
-            private T[] elements;
+            private T[] _elements;
 
             /// <summary>
             /// Initializes a new instance of the <see cref="FixedSizeBuilder"/> class.
@@ -38,7 +38,15 @@ namespace System.Collections.Immutable
             /// </summary>
             public int Capacity 
             {
-                get { return this.elements == null ? 0 : this.elements.Length; }
+                get { return _elements == null ? 0 : _elements.Length; }
+            }
+
+            /// <summary>
+            /// True when this builder has a valid array value.
+            /// </summary>
+            public bool IsInitialized
+            {
+                get { return _elements != null; }
             }
 
             /// <summary>
@@ -51,44 +59,58 @@ namespace System.Collections.Immutable
             {
                 get
                 {
-                    if (elements == null)
-                    {
-                        throw new InvalidOperationException();
-                    }
-
-                    return this.elements[index];
+                    CheckInvalidState();
+                    return _elements[index];
                 }
 
                 set
                 {
-                    if (elements == null)
-                    {
-                        throw new InvalidOperationException();
-                    }
-
-                    this.elements[index] = value;
+                    CheckInvalidState();
+                    _elements[index] = value;
                 }
             }
 
             /// <summary>
-            /// Initializes the internal array of the builder to the specified capacity
+            /// Initializes the internal array of the builder to the specified capacity.  Any existing 
+            /// content in the builder will be erased as a part of this method.
             /// </summary>
             /// <param name="capacity">The capacity of the internal array.</param>
             public void Reset(int capacity)
             {
                 Requires.Range(capacity >= 0, "capacity");
-                this.elements = new T[capacity];
+                if (capacity == 0)
+                {
+                    _elements = ImmutableArray<T>.EmptyArray;
+                }
+                else if (_elements != null && _elements.Length == capacity)
+                {
+                    Array.Clear(_elements, 0, _elements.Length);
+                }
+                else
+                {
+                    _elements = new T[capacity];
+                }
             }
 
             /// <summary>
-            /// Clears the internal array and returns it as an immutable array instance
+            /// Returns an immutable array that represents the data in the builder.  
             /// </summary>
             /// <returns>An immutable array.</returns>
+            /// <remarks>The builder can be reinitialized with the Reset method.</remarks>
             public ImmutableArray<T> Freeze()
             {
-                var temp = this.elements;
-                this.elements = null;
+                CheckInvalidState();
+                var temp = _elements;
+                _elements = null;
                 return new ImmutableArray<T>(temp);
+            }
+
+            private void CheckInvalidState()
+            {
+                if (_elements == null)
+                {
+                    throw new InvalidOperationException("This operation is not legal on an uninitialized FixedSizeBuilder");
+                }
             }
         }
     }
@@ -102,7 +124,7 @@ namespace System.Collections.Immutable
         /// <summary>
         /// The builder to be displayed
         /// </summary>
-        private readonly ImmutableArray<T>.FixedSizeBuilder builder;
+        private readonly ImmutableArray<T>.FixedSizeBuilder _builder;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ImmutableArrayFixedSizeBuilderDebuggerProxy{T}"/> class.
@@ -110,7 +132,7 @@ namespace System.Collections.Immutable
         /// <param name="builder">The builder to display in the debugger</param>
         public ImmutableArrayFixedSizeBuilderDebuggerProxy(ImmutableArray<T>.FixedSizeBuilder builder)
         {
-            this.builder = builder;
+            _builder = builder;
         }
 
         /// <summary>
@@ -121,10 +143,10 @@ namespace System.Collections.Immutable
         {
             get
             {
-                var array = new T[this.builder.Capacity];
-                for (int i = 0; i < this.builder.Capacity; i++)
+                var array = new T[_builder.Capacity];
+                for (int i = 0; i < _builder.Capacity; i++)
                 {
-                    array[i] = this.builder[i];
+                    array[i] = _builder[i];
                 }
 
                 return array;
