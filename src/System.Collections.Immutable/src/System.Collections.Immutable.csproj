@@ -60,6 +60,7 @@
     <Compile Include="System\Collections\Immutable\IStrongEnumerable`2.cs" />
     <Compile Include="System\Collections\Immutable\IStrongEnumerator`1.cs" />
     <Compile Include="System\Collections\Immutable\SortedInt32KeyNode.cs" />
+    <Compile Include="System\Collections\Immutable\ImmutableArray`1+FixedSizeBuilder.cs" />
     <Compile Include="System\Collections\Immutable\IOrderedCollection.cs" />
     <Compile Include="System\Collections\Immutable\ImmutableArray.cs" />
     <Compile Include="System\Collections\Immutable\ImmutableArray`1+Builder.cs" />

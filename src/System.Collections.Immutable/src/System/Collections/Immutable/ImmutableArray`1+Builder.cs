@@ -717,6 +717,7 @@ namespace System.Collections.Immutable
         /// The collection to be enumerated.
         /// </summary>
         private readonly ImmutableArray<T>.Builder _builder;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="ImmutableArrayBuilderDebuggerProxy&lt;T&gt;"/> class.
         /// </summary>
