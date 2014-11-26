@@ -15,9 +15,9 @@ namespace System.Collections.Immutable
         /// A writable array accessor that can be converted into an <see cref="ImmutableArray{T}"/>
         /// instance without allocating memory.
         /// </summary>
-        [DebuggerTypeProxy(typeof(ImmutableArrayFixedSizeBuilderDebuggerProxy<>))]
-        [DebuggerDisplay("Capacity = {Capacity}")]
-        public sealed class FixedSizeBuilder : IReadOnlyList<T>
+        [DebuggerTypeProxy(typeof(ImmutableArrayFixedLengthBuilderDebuggerProxy<>))]
+        [DebuggerDisplay("Length = {Length}")]
+        public sealed class FixedLengthBuilder : IReadOnlyList<T>
         {
             /// <summary>
             /// The backing array for the builder.
@@ -25,18 +25,18 @@ namespace System.Collections.Immutable
             private T[] _elements;
 
             /// <summary>
-            /// Initializes a new instance of the <see cref="FixedSizeBuilder"/> class.
+            /// Initializes a new instance of the <see cref="FixedLengthBuilder"/> class.
             /// </summary>
-            /// <param name="capacity">The capacity of the internal array.</param>
-            internal FixedSizeBuilder(int capacity)
+            /// <param name="length">The length of the internal array.</param>
+            internal FixedLengthBuilder(int length)
             {
-                Reset(capacity);
+                Reset(length);
             }
 
             /// <summary>
-            /// Gets the capacity of the internal array 
+            /// Gets the length of the internal array 
             /// </summary>
-            public int Capacity 
+            public int Length
             {
                 get { return _elements == null ? 0 : _elements.Length; }
             }
@@ -71,24 +71,24 @@ namespace System.Collections.Immutable
             }
 
             /// <summary>
-            /// Initializes the internal array of the builder to the specified capacity.  Any existing 
+            /// Initializes the internal array of the builder to the specified length.  Any existing 
             /// content in the builder will be erased as a part of this method.
             /// </summary>
-            /// <param name="capacity">The capacity of the internal array.</param>
-            public void Reset(int capacity)
+            /// <param name="length">The length of the internal array.</param>
+            public void Reset(int length)
             {
-                Requires.Range(capacity >= 0, "capacity");
-                if (capacity == 0)
+                Requires.Range(length >= 0, "length");
+                if (length == 0)
                 {
                     _elements = ImmutableArray<T>.Empty.array;
                 }
-                else if (_elements != null && _elements.Length == capacity)
+                else if (_elements != null && _elements.Length == length)
                 {
                     Array.Clear(_elements, 0, _elements.Length);
                 }
                 else
                 {
-                    _elements = new T[capacity];
+                    _elements = new T[length];
                 }
             }
 
@@ -157,7 +157,7 @@ namespace System.Collections.Immutable
 
             int IReadOnlyCollection<T>.Count
             {
-                get { return Capacity; }
+                get { return Length; }
             }
 
             IEnumerator IEnumerable.GetEnumerator()
@@ -171,18 +171,18 @@ namespace System.Collections.Immutable
     /// A simple view of the builder that the debugger can show to the developer.
     /// </summary>
     [ExcludeFromCodeCoverage]
-    internal sealed class ImmutableArrayFixedSizeBuilderDebuggerProxy<T>
+    internal sealed class ImmutableArrayFixedLengthBuilderDebuggerProxy<T>
     {
         /// <summary>
         /// The builder to be displayed
         /// </summary>
-        private readonly ImmutableArray<T>.FixedSizeBuilder _builder;
+        private readonly ImmutableArray<T>.FixedLengthBuilder _builder;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="ImmutableArrayFixedSizeBuilderDebuggerProxy{T}"/> class.
+        /// Initializes a new instance of the <see cref="ImmutableArrayFixedLengthBuilderDebuggerProxy{T}"/> class.
         /// </summary>
         /// <param name="builder">The builder to display in the debugger</param>
-        public ImmutableArrayFixedSizeBuilderDebuggerProxy(ImmutableArray<T>.FixedSizeBuilder builder)
+        public ImmutableArrayFixedLengthBuilderDebuggerProxy(ImmutableArray<T>.FixedLengthBuilder builder)
         {
             _builder = builder;
         }
