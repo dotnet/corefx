@@ -162,11 +162,13 @@ namespace System.Collections.Immutable
 
             IEnumerator<T> IEnumerable<T>.GetEnumerator()
             {
+                CheckIsInitialized();
                 return EnumeratorObject.Create(_elements);
             }
 
             IEnumerator IEnumerable.GetEnumerator()
             {
+                CheckIsInitialized();
                 return EnumeratorObject.Create(_elements);
             }
         }
