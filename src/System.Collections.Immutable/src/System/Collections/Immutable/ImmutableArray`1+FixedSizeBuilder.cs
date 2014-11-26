@@ -136,10 +136,10 @@ namespace System.Collections.Immutable
             /// Returns an enumerator for the contents of the array.
             /// </summary>
             /// <returns>An enumerator.</returns>
-            public IEnumerator<T> GetEnumerator()
+            public Enumerator GetEnumerator()
             {
                 CheckIsInitialized();
-                return ((IEnumerable<T>)_elements).GetEnumerator();
+                return new Enumerator(_elements);
             }
 
             private void CheckIsInitialized()
@@ -160,9 +160,14 @@ namespace System.Collections.Immutable
                 get { return Length; }
             }
 
+            IEnumerator<T> IEnumerable<T>.GetEnumerator()
+            {
+                return EnumeratorObject.Create(_elements);
+            }
+
             IEnumerator IEnumerable.GetEnumerator()
             {
-                return GetEnumerator();
+                return EnumeratorObject.Create(_elements);
             }
         }
     }
