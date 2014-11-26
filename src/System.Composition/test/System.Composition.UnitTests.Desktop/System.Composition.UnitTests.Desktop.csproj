@@ -1,0 +1,102 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>
+    </ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{4852A19F-C05C-478D-BFA0-59FD03DE0E3F}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>System.Composition.Lightweight.UnitTests</RootNamespace>
+    <AssemblyName>System.Composition.UnitTests.Desktop</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <ProjectTypeGuids>{3AC096D0-A1C2-E12C-1390-A8335801FDAB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <ReferencePath>$(ProgramFiles)\Common Files\microsoft shared\VSTT\11.0\UITestExtensionPackages</ReferencePath>
+    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\..\..\oob\</SolutionDir>
+    <RestorePackages>true</RestorePackages>
+    <SccProjectName>SAK</SccProjectName>
+    <SccLocalPath>SAK</SccLocalPath>
+    <SccAuxPath>SAK</SccAuxPath>
+    <SccProvider>SAK</SccProvider>
+    <ExternallyShipping>false</ExternallyShipping>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Microsoft.VisualStudio.QualityTools.UnitTestFramework, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
+    <Reference Include="System" />
+    <Reference Include="System.ComponentModel.Composition" />
+    <Reference Include="System.Linq.Expressions" />
+    <Reference Include="System.Reflection" />
+    <Reference Include="System.Runtime" />
+  </ItemGroup>
+  <ItemGroup>
+    <CodeAnalysisDependentAssemblyPaths Condition=" '$(VS100COMNTOOLS)' != '' " Include="$(VS100COMNTOOLS)..\IDE\PrivateAssemblies">
+      <Visible>False</Visible>
+    </CodeAnalysisDependentAssemblyPaths>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Properties\AssemblyInfo.cs">
+      <SharedSource>false</SharedSource>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\demo\Microsoft.Composition.Demos.ExtendedCollectionImports\Microsoft.Composition.Demos.ExtendedCollectionImports.csproj">
+      <Project>{44c7e52c-3873-4c64-875c-8a23a8376d60}</Project>
+      <Name>Microsoft.Composition.Demos.ExtendedCollectionImports</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\src\System.Composition.AttributedModel\System.Composition.AttributedModel.csproj">
+      <Project>{c6257381-c624-494a-a9d9-5586e60856ea}</Project>
+      <Name>System.Composition.AttributedModel</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\src\System.Composition.Convention\System.Composition.Convention.csproj">
+      <Project>{e6592fad-10b5-4b56-9287-d72dd136992f}</Project>
+      <Name>System.Composition.Convention</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\src\System.Composition.Hosting\System.Composition.Hosting.csproj">
+      <Project>{2b8fecc6-34a1-48fe-ba75-99572d2d6db2}</Project>
+      <Name>System.Composition.Hosting</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\src\System.Composition.Runtime\System.Composition.Runtime.csproj">
+      <Project>{2711dfd2-8541-4628-bc53-eb784a14cdcf}</Project>
+      <Name>System.Composition.Runtime</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\src\System.Composition.TypedParts\System.Composition.TypedParts.csproj">
+      <Project>{b4b5e15c-e6b9-48ea-94c2-f067484d4d3e}</Project>
+      <Name>System.Composition.TypedParts</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\scenarios\TestLibrary\TestLibrary.csproj">
+      <Project>{da6841a5-0344-4cc7-98b0-89cbee18dee3}</Project>
+      <Name>TestLibrary</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <Import Project="..\UnitTest.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

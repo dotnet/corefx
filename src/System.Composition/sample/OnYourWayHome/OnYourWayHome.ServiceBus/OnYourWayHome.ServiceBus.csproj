@@ -1,0 +1,111 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{6A285399-2326-4CDD-9156-1576F356D4CD}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>OnYourWayHome</RootNamespace>
+    <AssemblyName>OnYourWayHome.ServiceBus</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkProfile>Profile104</TargetFrameworkProfile>
+    <FileAlignment>512</FileAlignment>
+    <ProjectTypeGuids>{786C830F-07A1-408B-BD7F-6EE04809D6DB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <SccProjectName>SAK</SccProjectName>
+    <SccLocalPath>SAK</SccLocalPath>
+    <SccAuxPath>SAK</SccAuxPath>
+    <SccProvider>SAK</SccProvider>
+    <ExternallyShipping>false</ExternallyShipping>
+    <MinimumVisualStudioVersion>10.0</MinimumVisualStudioVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ServiceBus\Serialization\IDataContractSerializer.cs" />
+    <Compile Include="ServiceBus\ServiceBusAdapter.cs" />
+    <Compile Include="ServiceBus\AccessControl\AccessControlServiceTokenRequestAsyncResult.cs" />
+    <Compile Include="ServiceBus\AccessControl\SimpleWebToken.cs" />
+    <Compile Include="ServiceBus\AccessControl\TokenProvider.cs" />
+    <Compile Include="ServiceBus\AccessControl\TokenRequest.cs" />
+    <Compile Include="ServiceBus\AccessControl\TokenRequestFormat.cs" />
+    <Compile Include="ServiceBus\AccessControl\TokenResponse.cs" />
+    <Compile Include="ServiceBus\AsyncResult.cs" />
+    <Compile Include="ServiceBus\HttpFormUtility.cs" />
+    <Compile Include="ServiceBus\HttpWebException.cs" />
+    <Compile Include="ServiceBus\IAzureEntityFactory.cs" />
+    <Compile Include="ServiceBus\Messaging\AbandonMessageAsyncResult.cs" />
+    <Compile Include="ServiceBus\Messaging\BrokeredMessage.cs" />
+    <Compile Include="ServiceBus\Messaging\BrokerProperties.cs" />
+    <Compile Include="ServiceBus\Messaging\CompleteMessageAsyncResult.cs" />
+    <Compile Include="ServiceBus\Messaging\CorrelationFilter.cs" />
+    <Compile Include="ServiceBus\Messaging\CreateEntityAsyncResult.cs" />
+    <Compile Include="ServiceBus\Messaging\DeleteEntityAsyncResult.cs" />
+    <Compile Include="ServiceBus\Messaging\EmptyRuleAction.cs" />
+    <Compile Include="ServiceBus\Messaging\Entity.cs" />
+    <Compile Include="ServiceBus\Messaging\FalseFilter.cs" />
+    <Compile Include="ServiceBus\Messaging\Filter.cs" />
+    <Compile Include="ServiceBus\Messaging\GetEntityAsyncResult.cs" />
+    <Compile Include="ServiceBus\Messaging\GetEntityCollectionAsyncResult.cs" />
+    <Compile Include="ServiceBus\Messaging\ISubscriptionClient.cs" />
+    <Compile Include="ServiceBus\Messaging\ITopicClient.cs" />
+    <Compile Include="ServiceBus\Messaging\MessageReceiver.cs" />
+    <Compile Include="ServiceBus\Messaging\MessageSender.cs" />
+    <Compile Include="ServiceBus\Messaging\PeekLockMessageAsyncResult.cs" />
+    <Compile Include="ServiceBus\Messaging\QueueClient.cs" />
+    <Compile Include="ServiceBus\Messaging\QueueDescription.cs" />
+    <Compile Include="ServiceBus\Messaging\ReceiveAndDeleteMessageAsyncResult.cs" />
+    <Compile Include="ServiceBus\Messaging\ReceiveMode.cs" />
+    <Compile Include="ServiceBus\Messaging\RuleAction.cs" />
+    <Compile Include="ServiceBus\Messaging\RuleDescription.cs" />
+    <Compile Include="ServiceBus\Messaging\SendMessageAsyncResult.cs" />
+    <Compile Include="ServiceBus\Messaging\ServiceBusEnvironment.cs" />
+    <Compile Include="ServiceBus\Messaging\ServiceBusRequestAsyncResult.cs" />
+    <Compile Include="ServiceBus\Messaging\SqlFilter.cs" />
+    <Compile Include="ServiceBus\Messaging\SqlRuleAction.cs" />
+    <Compile Include="ServiceBus\Messaging\SubscriptionClient.cs" />
+    <Compile Include="ServiceBus\Messaging\SubscriptionDescription.cs" />
+    <Compile Include="ServiceBus\Messaging\SyndicationFeed.cs" />
+    <Compile Include="ServiceBus\Messaging\SyndicationItem.cs" />
+    <Compile Include="ServiceBus\Messaging\SyndicationItemBase.cs" />
+    <Compile Include="ServiceBus\Messaging\SyndicationSerializer.cs" />
+    <Compile Include="ServiceBus\Messaging\TopicClient.cs" />
+    <Compile Include="ServiceBus\Messaging\TopicDescription.cs" />
+    <Compile Include="ServiceBus\Messaging\TrueFilter.cs" />
+    <Compile Include="ServiceBus\RestAsyncResult.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Net" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.ServiceModel" />
+    <Reference Include="System.Windows" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Xml.Serialization" />
+  </ItemGroup>
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

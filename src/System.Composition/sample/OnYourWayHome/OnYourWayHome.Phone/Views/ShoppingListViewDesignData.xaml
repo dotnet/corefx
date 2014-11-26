@@ -1,0 +1,14 @@
+﻿<!-- Contains sample designer data for the ShoppingListView -->
+<local:ShoppingListViewModel 
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"       
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="clr-namespace:OnYourWayHome.ViewModels;assembly=OnYourWayHome.Core"
+    xmlns:applicationmodel="clr-namespace:OnYourWayHome.ApplicationModel;assembly=OnYourWayHome.Core">
+
+    <local:ShoppingListViewModel.GroceryItems>
+        <applicationmodel:GroceryItem Name="Cheese" IsInCart="true" />
+        <applicationmodel:GroceryItem Name="Ice Cream" IsInCart="false" />
+        <applicationmodel:GroceryItem Name="Bread" IsInCart="true" />
+    </local:ShoppingListViewModel.GroceryItems>
+    
+</local:ShoppingListViewModel>

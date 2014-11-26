@@ -1,0 +1,34 @@
+﻿@model IEnumerable<FabrikamBooks.Models.BookModel>
+@{
+    ViewBag.Title = "Home Page";
+}
+
+@if (Model.Any())
+{
+    <h3>Our catalogue</h3>
+
+    <ol class="round">
+        @foreach (var book in Model)
+        {
+            <li>
+                <h5>@book.Title</h5>
+                <form method="post" action="home/remove">
+                    <input type="hidden" name="bookToRemoveId" value="@book.Id" />
+                    <input type="submit" value="Remove" />
+                </form>
+            </li>
+        }
+    </ol>
+}
+else
+{
+    <p>We don't have any books at this time.</p>
+}
+    
+<h3>Add a book to the catalogue...</h3>
+
+<form method="post" action="home/add">
+    <label for="title" />
+    <input type="text" id="title" name="title" />
+    <input type="submit" value="Add" />
+</form>

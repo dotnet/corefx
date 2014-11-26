@@ -1,0 +1,115 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{B4B5E15C-E6B9-48EA-94C2-F067484D4D3E}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>System.Composition</RootNamespace>
+    <AssemblyName>System.Composition.TypedParts</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkProfile>Profile78</TargetFrameworkProfile>
+    <FileAlignment>512</FileAlignment>
+    <ProjectTypeGuids>{786C830F-07A1-408B-BD7F-6EE04809D6DB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\..\</SolutionDir>
+    <RestorePackages>true</RestorePackages>
+    <SccProjectName>SAK</SccProjectName>
+    <SccLocalPath>SAK</SccLocalPath>
+    <SccAuxPath>SAK</SccAuxPath>
+    <SccProvider>SAK</SccProvider>
+    <MinimumVisualStudioVersion>11.0</MinimumVisualStudioVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <DocumentationFile>bin\Debug\System.Composition.TypedParts.XML</DocumentationFile>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <DocumentationFile>bin\Release\System.Composition.TypedParts.XML</DocumentationFile>
+  </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>true</SignAssembly>
+    <ExternallyShipping>true</ExternallyShipping>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AssemblyOriginatorKeyFile>..\..\CodePlexKey.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- A reference to the entire .NET Framework is automatically included -->
+    <ProjectReference Include="..\System.Composition.AttributedModel\System.Composition.AttributedModel.csproj">
+      <Project>{c6257381-c624-494a-a9d9-5586e60856ea}</Project>
+      <Name>System.Composition.AttributedModel</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\System.Composition.Hosting\System.Composition.Hosting.csproj">
+      <Project>{2b8fecc6-34a1-48fe-ba75-99572d2d6db2}</Project>
+      <Name>System.Composition.Hosting</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\System.Composition.Runtime\System.Composition.Runtime.csproj">
+      <Project>{2711dfd2-8541-4628-bc53-eb784a14cdcf}</Project>
+      <Name>System.Composition.Runtime</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Hosting\ContainerConfiguration.cs" />
+    <Compile Include="CompositionContextExtensions.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="TypedParts\ActivationFeatures\ActivationFeature.cs" />
+    <Compile Include="TypedParts\ActivationFeatures\DisposalFeature.cs" />
+    <Compile Include="TypedParts\ActivationFeatures\LifetimeFeature.cs" />
+    <Compile Include="TypedParts\ActivationFeatures\OnImportsSatisfiedFeature.cs" />
+    <Compile Include="TypedParts\ActivationFeatures\PropertyImportSite.cs" />
+    <Compile Include="TypedParts\ActivationFeatures\PropertyInjectionFeature.cs" />
+    <Compile Include="TypedParts\ContractHelpers.cs" />
+    <Compile Include="Debugging\ContainerConfigurationDebuggerProxy.cs" />
+    <Compile Include="Debugging\DiscoveredPartDebuggerProxy.cs" />
+    <Compile Include="TypedParts\Discovery\DiscoveredExport.cs" />
+    <Compile Include="TypedParts\Discovery\DiscoveredInstanceExport.cs" />
+    <Compile Include="TypedParts\Discovery\DiscoveredPart.cs" />
+    <Compile Include="TypedParts\Discovery\DiscoveredPropertyExport.cs" />
+    <Compile Include="TypedParts\Discovery\ParameterImportSite.cs" />
+    <Compile Include="TypedParts\Discovery\TypeInspector.cs" />
+    <Compile Include="TypedParts\ImportInfo.cs" />
+    <Compile Include="TypedParts\TypedPartExportDescriptorProvider.cs" />
+    <Compile Include="TypedParts\Util\DirectAttributeContext.cs" />
+    <Compile Include="TypedParts\Util\AttributedModelProviderExtensions.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\CodePlexKey.snk">
+      <Link>CodePlexKey.snk</Link>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
