@@ -9,7 +9,6 @@ using System.Composition.Runtime;
 using System.Linq;
 using System.Text;
 using Microsoft.Internal;
-using System.Composition.Hosting.Properties;
 
 namespace System.Composition.Hosting.Core
 {
@@ -97,7 +96,7 @@ namespace System.Composition.Hosting.Core
                     if (step.Target.Equals(dependency.Target))
                     {
                         var message = new StringBuilder();
-                        message.AppendFormat(Resources.ExportDescriptor_UnsupportedCycle, dependency.Target.Origin);
+                        message.AppendFormat(Properties.Resources.ExportDescriptor_UnsupportedCycle, dependency.Target.Origin);
                         message.AppendLine();
                         message.Append(DescribeCompositionStack(dependency, checking));
                         throw ThrowHelper.CompositionException(message.ToString());
@@ -121,12 +120,12 @@ namespace System.Composition.Hosting.Core
 
             foreach (var step in dependencies)
             {
-                result.AppendFormat(Resources.ExportDescriptor_DependencyErrorLine, import.Site, step.Target.Origin);
+                result.AppendFormat(Properties.Resources.ExportDescriptor_DependencyErrorLine, import.Site, step.Target.Origin);
                 result.AppendLine();
                 import = step;
             }
 
-            result.AppendFormat(Resources.ExportDescriptor_DependencyErrorContract, import.Contract);
+            result.AppendFormat(Properties.Resources.ExportDescriptor_DependencyErrorContract, import.Contract);
             return result;
         }
 
