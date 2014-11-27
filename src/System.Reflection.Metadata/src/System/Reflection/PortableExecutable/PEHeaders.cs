@@ -22,6 +22,11 @@ namespace System.Reflection.PortableExecutable
         private readonly int coffHeaderStartOffset = -1;
         private readonly int corHeaderStartOffset = -1;
         private readonly int peHeaderStartOffset = -1;
+		
+		// Added to implement getDosStub()
+		private bool haveDosStub = false;
+		private int dosOffset = 0;
+		private byte[] dosStub = null;
 
         /// <summary>
         /// Reads PE headers from the current location in the stream.
@@ -229,6 +234,12 @@ namespace System.Reflection.PortableExecutable
         {
             // Look for DOS Signature "MZ"
             ushort dosSig = reader.ReadUInt16();
+			
+			// Added to handle the newly implemented getDosStub()
+			if ( !haveDosStub ) {
+			
+			   dosOffset = reader.CurrentOffset;
+			}
 
             if (dosSig != PEFileConstants.DosSignature)
             {
@@ -258,7 +269,19 @@ namespace System.Reflection.PortableExecutable
                 reader.Seek(PEFileConstants.PESignatureOffsetLocation);
 
                 int ntHeaderOffset = reader.ReadInt32();
-                reader.Seek(ntHeaderOffset);
+				// Commented the following statement to handle the newly implemented getDosStub()                							
+                //reader.Seek(ntHeaderOffset);
+				
+				// Added to handle the getDostStub() implementation
+			    if ( !haveDosStub && dosOffset != 0 ) {
+				
+				   haveDosStub = true;
+				   reader.Seek(dosOffset - 2);
+			       dosStub = reader.ReadBytes(ntHeaderOffset - dosOffset - 2);				   
+				}
+				
+				// Moved here the statement, which was commented above for the getDosStub() implementation 
+				reader.Seek(ntHeaderOffset);
 
                 // Look for PESignature "PE\0\0"
                 uint ntSignature = reader.ReadUInt32();
@@ -286,6 +309,16 @@ namespace System.Reflection.PortableExecutable
 
             return builder.ToImmutable();
         }
+		
+		public byte[] getDosStub() {
+		
+		   if ( haveDosStub ) {
+		   
+		      return dosStub;
+		   }
+		   
+           return null;
+		}
 
         /// <summary>
         /// Gets the offset (in bytes) from the start of the image to the given directory entry.
