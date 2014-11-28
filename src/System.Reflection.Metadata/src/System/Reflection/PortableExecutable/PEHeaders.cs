@@ -23,10 +23,9 @@ namespace System.Reflection.PortableExecutable
         private readonly int corHeaderStartOffset = -1;
         private readonly int peHeaderStartOffset = -1;
 		
-		// Added to facilitate the implementation of GetDosStub()		
-		private bool haveDosStub = false;		
+		// Added to facilitate the implementation of get DOS header
+		private readonly byte[] dosHeader = null;				
 		private int dosStubSize = 0;
-		private byte[] dosStub = null;
 
         /// <summary>
         /// Reads PE headers from the current location in the stream.
@@ -74,12 +73,12 @@ namespace System.Reflection.PortableExecutable
             bool isCoffOnly;
             SkipDosHeader(ref reader, out isCoffOnly);
 			
-			// Added to facilitate the implementation of GetDosStub()
-			if (haveDosStub)  
+			// Added to facilitate the implementation of get DOS header
+			if (dosStubSize != 0)  
 			{
 			    int currentOffset = reader.CurrentOffset;
-			    reader.Seek(0);
-			    dosStub = reader.ReadBytes(dosStubSize);
+			    reader.Seek(0);			 
+				this.dosHeader = reader.ReadBytes(dosStubSize);
 			    reader.Seek(currentOffset);
 			}
 								
@@ -156,7 +155,15 @@ namespace System.Reflection.PortableExecutable
         {
             get { return peHeader; }
         }
-
+		
+        /// <summary>
+        /// Gets the DOS header of the image or null if the image is COFF only.
+        /// </summary>
+        public byte[] DOSHeader
+        {
+            get { return dosHeader; }
+        }
+		
         /// <summary>
         /// Gets the byte offset from the start of the image to 
         /// </summary>
@@ -263,10 +270,7 @@ namespace System.Reflection.PortableExecutable
             }
             else
             {
-                isCOFFOnly = false;
-				
-				// Added to facilitate the implementation of GetDosHeader		
-			    haveDosStub = true;  			    		
+                isCOFFOnly = false;				 			    		
             }
 
             if (!isCOFFOnly)
@@ -277,12 +281,9 @@ namespace System.Reflection.PortableExecutable
                 int ntHeaderOffset = reader.ReadInt32();												 
 				reader.Seek(ntHeaderOffset);
 				
-				// Added to facilitate the implementation of GetDostStub()
-			    if (haveDosStub && dosStub == null) 
-				{								 
-				    dosStubSize = ntHeaderOffset;
-				}				
-
+				// Added to facilitate the implementation of get DOS header			    		 
+				dosStubSize = ntHeaderOffset;
+				
                 // Look for PESignature "PE\0\0"
                 uint ntSignature = reader.ReadUInt32();
                 if (ntSignature != PEFileConstants.PESignature)
@@ -309,20 +310,7 @@ namespace System.Reflection.PortableExecutable
 
             return builder.ToImmutable();
         }
-		
-		/// <summary>
-        /// It returns DOS header and DOS stub or null.
-        /// </summary>
-		public byte[] GetDosStub() 
-		{		
-		   if (haveDosStub) 
-		   {		   
-		      return dosStub;		   		      
-		   }
-		   
-           return null;
-		}
-		
+				
         /// <summary>
         /// Gets the offset (in bytes) from the start of the image to the given directory entry.
         /// </summary>
