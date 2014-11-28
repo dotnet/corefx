@@ -35,7 +35,7 @@ namespace TestCorefx
            PEHeaders pe = new PEHeaders(s);
 		   		   		   
 		   /* Get DOS header and DOS stub */
-		   byte[] dosStub = pe.getDosStub();
+		   byte[] dosStub = pe.GetDosStub();
 		   CoffHeader ntCoff = pe.CoffHeader;
            PEHeader ntPE = pe.PEHeader;		   
 		   
