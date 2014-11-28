@@ -42,7 +42,8 @@ namespace System.Collections.Immutable
             }
 
             /// <summary>
-            /// Gets a value indicating whether this instance has not yet created an ImmutableArray{T} since it was last Reset or created.
+            /// Gets a value indicating whether this instance has a backing array.  The internal array is 
+            /// removed on calls to ToImmutableAndClear or ToArrayAndClear.
             /// </summary>
             public bool IsInitialized
             {
@@ -124,7 +125,10 @@ namespace System.Collections.Immutable
                 return temp;
             }
 
-            internal T[] ToArray()
+            /// <summary>
+            /// Creates a new array with the current contents of the builder.
+            /// </summary>
+            public T[] ToArray()
             {
                 CheckIsInitialized();
                 var temp = new T[_elements.Length];

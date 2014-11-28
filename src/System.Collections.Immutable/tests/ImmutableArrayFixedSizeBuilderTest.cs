@@ -61,6 +61,29 @@ namespace System.Collections.Immutable.Test
         }
 
         [Fact]
+        public void ToArrayNormal()
+        {
+            var builder = ImmutableArray.CreateFixedLengthBuilder<int>(2);
+            builder[0] = 42;
+            builder[1] = 13;
+            Assert.Equal(new[] { 42, 13 }, builder.ToArray());
+            Assert.True(builder.IsInitialized);
+        }
+
+        [Fact]
+        public void ToArrayRepeated()
+        {
+            var builder = ImmutableArray.CreateFixedLengthBuilder<int>(2);
+            builder[0] = 42;
+            builder[1] = 13;
+            Assert.Equal(new[] { 42, 13 }, builder.ToArray());
+            Assert.Equal(new[] { 42, 13 }, builder.ToArray());
+            Assert.True(builder.IsInitialized);
+            Assert.Equal(new[] { 42, 13 }, builder.ToImmutableAndClear());
+            Assert.False(builder.IsInitialized);
+        }
+
+        [Fact]
         public void IsInitialized()
         {
             var builder = ImmutableArray.CreateFixedLengthBuilder<int>(0);
