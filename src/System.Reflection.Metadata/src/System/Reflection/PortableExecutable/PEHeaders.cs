@@ -15,6 +15,7 @@ namespace System.Reflection.PortableExecutable
     {
         private readonly CoffHeader coffHeader;
         private readonly PEHeader peHeader;
+		private readonly DosHeader dosHeader = null;
         private readonly ImmutableArray<SectionHeader> sectionHeaders;
         private readonly CorHeader corHeader;
         private readonly int metadataStartOffset = -1;
@@ -23,10 +24,6 @@ namespace System.Reflection.PortableExecutable
         private readonly int corHeaderStartOffset = -1;
         private readonly int peHeaderStartOffset = -1;
 		
-		// Added to facilitate the implementation of get DOS header
-		private readonly byte[] dosHeader = null;				
-		private int dosStubSize = 0;
-
         /// <summary>
         /// Reads PE headers from the current location in the stream.
         /// </summary>
@@ -72,21 +69,18 @@ namespace System.Reflection.PortableExecutable
 						
             bool isCoffOnly;
             SkipDosHeader(ref reader, out isCoffOnly);
-			
-			// Added to facilitate the implementation of get DOS header
-			if (dosStubSize != 0)  
-			{
-			    int currentOffset = reader.CurrentOffset;
-			    reader.Seek(0);			 
-				this.dosHeader = reader.ReadBytes(dosStubSize);
-			    reader.Seek(currentOffset);
-			}
-								
+											
             this.coffHeaderStartOffset = reader.CurrentOffset;
             this.coffHeader = new CoffHeader(ref reader);
 
             if (!isCoffOnly)
-            {
+            {	
+                // Get DOS header 			
+				int currentOffset = reader.CurrentOffset;
+				reader.Seek(0);
+				this.dosHeader = new DosHeader(ref reader);
+				reader.Seek(currentOffset);
+			    
                 this.peHeaderStartOffset = reader.CurrentOffset;
                 this.peHeader = new PEHeader(ref reader);
             }
@@ -155,11 +149,11 @@ namespace System.Reflection.PortableExecutable
         {
             get { return peHeader; }
         }
-		
+				
         /// <summary>
         /// Gets the DOS header of the image or null if the image is COFF only.
         /// </summary>
-        public byte[] DosHeader
+        public DosHeader DosHeader
         {
             get { return dosHeader; }
         }
@@ -270,7 +264,7 @@ namespace System.Reflection.PortableExecutable
             }
             else
             {
-                isCOFFOnly = false;				 			    		
+                isCOFFOnly = false;                				
             }
 
             if (!isCOFFOnly)
@@ -280,10 +274,7 @@ namespace System.Reflection.PortableExecutable
 
                 int ntHeaderOffset = reader.ReadInt32();												 
 				reader.Seek(ntHeaderOffset);
-				
-				// Added to facilitate the implementation of get DOS header			    		 
-				dosStubSize = ntHeaderOffset;
-				
+								
                 // Look for PESignature "PE\0\0"
                 uint ntSignature = reader.ReadUInt32();
                 if (ntSignature != PEFileConstants.PESignature)
