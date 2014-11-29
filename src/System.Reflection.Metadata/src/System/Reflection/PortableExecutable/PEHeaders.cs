@@ -159,7 +159,7 @@ namespace System.Reflection.PortableExecutable
         /// <summary>
         /// Gets the DOS header of the image or null if the image is COFF only.
         /// </summary>
-        public byte[] DOSHeader
+        public byte[] DosHeader
         {
             get { return dosHeader; }
         }
