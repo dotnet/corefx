@@ -48,7 +48,7 @@ To contribute to .NET Core, see the [Contributing Guide](https://github.com/Micr
 
 You are also encouraged to start a discussion by filing an issue or creating a
 gist. See the contributing guides for more details. You can discuss .NET OSS
-more generally in the [.NET Foundation forums](http://www.dotnetfoundation.org/).
+more generally in the [.NET Foundation forums](http://forums.dotnetfoundation.org/).
 
 ## Building and Testing
 
