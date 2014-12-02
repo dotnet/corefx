@@ -11,12 +11,12 @@ using System.Text;
 namespace System.Reflection.Internal
 {
     [DebuggerDisplay("{GetDebuggerDisplay(),nq}")]
-    internal unsafe struct MemoryBlock
+    internal struct MemoryBlock
     {
-        internal readonly byte* Pointer;
+        internal unsafe readonly byte* Pointer;
         internal readonly int Length;
 
-        internal MemoryBlock(byte* buffer, int length)
+        internal unsafe MemoryBlock(byte* buffer, int length)
         {
             Debug.Assert(length >= 0 && (buffer != null || length == 0));
             this.Pointer = buffer;
@@ -44,12 +44,12 @@ namespace System.Reflection.Internal
             throw new BadImageFormatException(MetadataResources.RowIdOrHeapOffsetTooLarge);
         }
 
-        internal byte[] ToArray()
+        internal unsafe byte[] ToArray()
         {
             return Pointer == null ? null : PeekBytes(0, Length);
         }
 
-        private string GetDebuggerDisplay()
+        private unsafe string GetDebuggerDisplay()
         {
             if (Pointer == null)
             {
@@ -72,25 +72,25 @@ namespace System.Reflection.Internal
             return result;
         }
 
-        internal MemoryBlock GetMemoryBlockAt(int offset, int length)
+        internal unsafe MemoryBlock GetMemoryBlockAt(int offset, int length)
         {
             CheckBounds(offset, length);
             return new MemoryBlock(Pointer + offset, length);
         }
 
-        internal Byte PeekByte(int offset)
+        internal unsafe Byte PeekByte(int offset)
         {
             CheckBounds(offset, sizeof(Byte));
             return Pointer[offset];
         }
 
-        internal Int32 PeekInt32(int offset)
+        internal unsafe Int32 PeekInt32(int offset)
         {
             CheckBounds(offset, sizeof(Int32));
             return *(Int32*)(Pointer + offset);
         }
 
-        internal UInt32 PeekUInt32(int offset)
+        internal unsafe UInt32 PeekUInt32(int offset)
         {
             CheckBounds(offset, sizeof(UInt32));
             return *(UInt32*)(Pointer + offset);
@@ -105,7 +105,7 @@ namespace System.Reflection.Internal
         /// <returns>
         /// Value between 0 and 0x1fffffff, or <see cref="BlobReader.InvalidCompressedInteger"/> if the value encoding is invalid.
         /// </returns>
-        internal int PeekCompressedInteger(int offset, out int numberOfBytesRead)
+        internal unsafe int PeekCompressedInteger(int offset, out int numberOfBytesRead)
         {
             CheckBounds(offset, 0);
 
@@ -145,7 +145,7 @@ namespace System.Reflection.Internal
             return BlobReader.InvalidCompressedInteger;
         }
 
-        internal UInt16 PeekUInt16(int offset)
+        internal unsafe UInt16 PeekUInt16(int offset)
         {
             CheckBounds(offset, sizeof(UInt16));
             return *(UInt16*)(Pointer + offset);
@@ -175,13 +175,13 @@ namespace System.Reflection.Internal
             return value;
         }
 
-        internal Guid PeekGuid(int offset)
+        internal unsafe Guid PeekGuid(int offset)
         {
             CheckBounds(offset, sizeof(Guid));
             return *(Guid*)(Pointer + offset);
         }
 
-        internal string PeekUtf16(int offset, int byteCount)
+        internal unsafe string PeekUtf16(int offset, int byteCount)
         {
             CheckBounds(offset, byteCount);
 
@@ -189,7 +189,7 @@ namespace System.Reflection.Internal
             return new string((char*)(Pointer + offset), 0, byteCount / sizeof(char));
         }
 
-        internal string PeekUtf8(int offset, int byteCount)
+        internal unsafe string PeekUtf8(int offset, int byteCount)
         {
             CheckBounds(offset, byteCount);
             return Encoding.UTF8.GetString(Pointer + offset, byteCount);
@@ -205,7 +205,7 @@ namespace System.Reflection.Internal
         /// <param name="terminator">A character in the ASCII range that marks the end of the string. 
         /// If a value other than '\0' is passed we still stop at the null terminator if encountered first.</param>
         /// <returns>The decoded string.</returns>
-        internal string PeekUtf8NullTerminated(int offset, byte[] prefix, MetadataStringDecoder utf8Decoder, out int numberOfBytesRead, char terminator = '\0')
+        internal unsafe string PeekUtf8NullTerminated(int offset, byte[] prefix, MetadataStringDecoder utf8Decoder, out int numberOfBytesRead, char terminator = '\0')
         {
             Debug.Assert(terminator <= 0x7F);
             CheckBounds(offset, 0);
@@ -223,7 +223,7 @@ namespace System.Reflection.Internal
         /// If a value other than '\0' is passed we still stop at the null terminator if encountered first.</param>
         /// <param name="numberOfBytesRead">The number of bytes read, which includes the terminator if we did not hit the end of the block.</param>
         /// <returns>Length (byte count) not including terminator.</returns>
-        internal int GetUtf8NullTerminatedLength(int offset, out int numberOfBytesRead, char terminator = '\0')
+        internal unsafe int GetUtf8NullTerminatedLength(int offset, out int numberOfBytesRead, char terminator = '\0')
         {
             CheckBounds(offset, 0);
 
@@ -255,7 +255,7 @@ namespace System.Reflection.Internal
             return length;
         }
 
-        internal int Utf8NullTerminatedOffsetOfAsciiChar(int startOffset, char asciiChar)
+        internal unsafe int Utf8NullTerminatedOffsetOfAsciiChar(int startOffset, char asciiChar)
         {
             CheckBounds(startOffset, 0);
 
@@ -287,7 +287,7 @@ namespace System.Reflection.Internal
         }
 
         // comparison stops at null terminator, terminator parameter, or end-of-block -- whichever comes first.
-        private bool Utf8NullTerminatedEquals(int offset, string text, out bool isPrefix, char terminator = '\0')
+        private unsafe bool Utf8NullTerminatedEquals(int offset, string text, out bool isPrefix, char terminator = '\0')
         {
             CheckBounds(offset, 0);
 
@@ -415,7 +415,7 @@ namespace System.Reflection.Internal
         }
 
         // comparison stops at null terminator, terminator parameter, or end-of-block -- whichever comes first.
-        internal bool Utf8NullTermintatedStringStartsWithAsciiPrefix(int offset, string asciiPrefix)
+        internal unsafe bool Utf8NullTermintatedStringStartsWithAsciiPrefix(int offset, string asciiPrefix)
         {
             // Assumes stringAscii conly contains ASCII characters and no nil characters.
 
@@ -444,7 +444,7 @@ namespace System.Reflection.Internal
             return true;
         }
 
-        internal int CompareUtf8NullTerminatedStringWithAsciiString(int offset, string asciiString)
+        internal unsafe int CompareUtf8NullTerminatedStringWithAsciiString(int offset, string asciiString)
         {
             // Assumes stringAscii conly contains ASCII characters and no nil characters.
 
@@ -478,7 +478,7 @@ namespace System.Reflection.Internal
             return (*p == 0) ? 0 : +1;
         }
 
-        internal byte[] PeekBytes(int offset, int byteCount)
+        internal unsafe byte[] PeekBytes(int offset, int byteCount)
         {
             CheckBounds(offset, byteCount);
 
@@ -492,7 +492,7 @@ namespace System.Reflection.Internal
             return result;
         }
 
-        internal int IndexOf(byte b, int start)
+        internal unsafe int IndexOf(byte b, int start)
         {
             CheckBounds(start, 0);
 

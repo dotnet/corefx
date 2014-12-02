@@ -276,7 +276,7 @@ namespace System.Reflection.Metadata.Ecma335
         }
     }
 
-    internal unsafe struct BlobStreamReader
+    internal struct BlobStreamReader
     {
         private struct VirtualHeapBlob
         {
@@ -412,7 +412,7 @@ namespace System.Reflection.Metadata.Ecma335
             return this.Block.PeekBytes(offset + bytesRead, numberOfBytes);
         }
 
-        internal BlobReader GetBlobReader(BlobHandle handle)
+        internal unsafe BlobReader GetBlobReader(BlobHandle handle)
         {
             if (handle.IsVirtual)
             {
