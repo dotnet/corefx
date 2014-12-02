@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.Collections.Immutable;
+
 namespace System.Reflection.PortableExecutable
 {
     // DOS .EXE header(Referenced WinNT.h for structure IMAGE_DOS_HEADER) 
@@ -87,8 +89,8 @@ namespace System.Reflection.PortableExecutable
         /// <summary>
         /// Reserved words.
         /// </summary>
-        public ushort[] ERes { get; private set; }
-
+        public ImmutableArray<ushort> ERes { get; private set; }
+                
         /// <summary>
         /// OEM identifier(for EOemInfo).
         /// </summary>
@@ -101,8 +103,8 @@ namespace System.Reflection.PortableExecutable
 
         /// <summary>
         /// Reserved words.
-        /// </summary>
-        public ushort[] ERes2 { get; private set; }		
+        /// </summary>        
+        public ImmutableArray<ushort> ERes2 { get; private set; }		
 						
 		/// <summary>
         /// File address of new exe header.
@@ -111,9 +113,12 @@ namespace System.Reflection.PortableExecutable
 										
         #endregion
 
-        #region DOS stub
+        #region MS-DOS stub
         
-		public byte[] DosStub { get; private set; }
+        /// <summary>
+        /// An MS-DOS stub program, a stub program is invoked if the file is executed in MS-DOS. It usually displays an appropriate message; however, any valid MS-DOS application can be a stub program.
+        /// </summary>
+        public ImmutableArray<byte> DosStub { get; private set; }
 
         #endregion 		
 		
@@ -134,21 +139,51 @@ namespace System.Reflection.PortableExecutable
 			ElFARlc = reader.ReadUInt16();
 			EOVNO = reader.ReadUInt16();
 			
-			ERes = new ushort[4];
-			Buffer.BlockCopy(reader.ReadBytes(4*sizeof(ushort)), 0, ERes, 0, 4*sizeof(ushort));
+            // To collect 4 reserved bytes
+            {             
+                var eResBToUArray = new ushort[4];
+                var builder = ImmutableArray.CreateBuilder<ushort>(4);
+                Buffer.BlockCopy(reader.ReadBytes(4*sizeof(ushort)), 0, eResBToUArray, 0, 4*sizeof(ushort));
+                for (int i = 0; i < 4; i++)
+                {
+                    builder.Add(eResBToUArray[i]);
+                }
+                eResBToUArray = null;
+                ERes = builder.ToImmutable();
+            }
+                        
 			EOemID = reader.ReadUInt16();
 			EOemInfo = reader.ReadUInt16();
-			ERes2 = new ushort[10];
-			Buffer.BlockCopy(reader.ReadBytes(10*sizeof(ushort)), 0, ERes2, 0, 10*sizeof(ushort));
+            
+            // To collect 10 reserved bytes
+            {             
+                var eResBToUArray = new ushort[10];
+                var builder = ImmutableArray.CreateBuilder<ushort>(10);
+                Buffer.BlockCopy(reader.ReadBytes(10*sizeof(ushort)), 0, eResBToUArray, 0, 10*sizeof(ushort));
+                for (int i = 0; i < 10; i++)
+                {
+                    builder.Add(eResBToUArray[i]);
+                }
+                eResBToUArray = null;
+                ERes2 = builder.ToImmutable();
+            }
+            
 			ElFANew = reader.ReadInt32();
 			
+            // To collect DOS header and DOS stub
 			if (ElFARlc == 0x40 && ECRlc == 0)
-			{
-			    DosStub = reader.ReadBytes(ElFANew - ECParHdr*16);
+			{			    
+                var builder = ImmutableArray.CreateBuilder<byte>(ElFANew - ECParHdr*16);                 
+                for (int i = 0; i < ElFANew - ECParHdr*16/*builder.Count; We cannot use Count now for this purpose it is still zero, look at the respective source code*/;/*ElFANew - ECParHdr*16;*/ i++) 
+                {
+                    builder.Add(reader.ReadByte());
+                }
+                DosStub = builder.ToImmutable();
 			}
             else
             {
-			     DosStub = null;
+                var builder = ImmutableArray.CreateBuilder<byte>(0);
+                DosStub = builder.ToImmutable();			    
             }			
 	    }
 	}

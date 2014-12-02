@@ -75,7 +75,7 @@ namespace System.Reflection.PortableExecutable
 
             if (!isCoffOnly)
             {	
-                // Get DOS header 			
+                // Get DOS header and DOS stub 			
 				int currentOffset = reader.CurrentOffset;
 				reader.Seek(0);
 				this.dosHeader = new DosHeader(ref reader);
