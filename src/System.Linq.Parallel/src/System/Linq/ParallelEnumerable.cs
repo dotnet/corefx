@@ -364,7 +364,7 @@ namespace System.Linq
             CancellationTokenRegistration dummyRegistration = new CancellationTokenRegistration();
             try
             {
-                dummyRegistration = cancellationToken.Register(() => { });
+                dummyRegistration = cancellationToken.Register(EmptyAction.Instance);
             }
             catch (ObjectDisposedException)
             {
