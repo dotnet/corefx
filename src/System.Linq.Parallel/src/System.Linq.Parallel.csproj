@@ -71,6 +71,7 @@
     <Compile Include="System\Linq\Parallel\Channels\AsynchronousChannel.cs" />
     <Compile Include="System\Linq\Parallel\Channels\SynchronousChannel.cs" />
     <Compile Include="System\Linq\Parallel\Enumerables\AggregationMinMaxHelpers.cs" />
+    <Compile Include="System\Linq\Parallel\Enumerables\CompatibleFunction.cs" />
     <Compile Include="System\Linq\Parallel\Enumerables\EmptyEnumerable.cs" />
     <Compile Include="System\Linq\Parallel\Enumerables\EnumerableWrapperWeakToStrong.cs" />
     <Compile Include="System\Linq\Parallel\Enumerables\IParallelPartitionable.cs" />
