@@ -4017,7 +4017,7 @@ namespace System.Linq
         {
             if (source == null) throw new ArgumentNullException("source");
 
-            return Any(source, x => true);
+            return Any(source, AnyFunction<TSource>.Instance);
         }
 
         //-----------------------------------------------------------------------------------
