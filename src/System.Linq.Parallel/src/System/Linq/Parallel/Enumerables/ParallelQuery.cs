@@ -105,7 +105,7 @@ namespace System.Linq
             // @PERF: Currently defined in terms of other operators. This isn't the most performant
             //      solution (because it results in two operators) but is simple to implement.
             return this
-                .Where<TSource>(elem => elem is TCastTo)
+                .Where<TSource>(CompatibleFunction<TSource, TCastTo>.Instance)
                 .Select<TSource, TCastTo>(elem => (TCastTo)(object)elem);
         }
 
