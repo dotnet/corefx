@@ -15,9 +15,8 @@
     <ProjectTypeGuids>{786C830F-07A1-408B-BD7F-6EE04809D6DB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
-    <SignAssembly>true</SignAssembly>
+    <SignAssembly>false</SignAssembly>
     <ExternallyShipping>true</ExternallyShipping>
-    <AssemblyOriginatorKeyFile>..\..\CodePlexKey.snk</AssemblyOriginatorKeyFile>
     <SccProjectName>SAK</SccProjectName>
     <SccLocalPath>SAK</SccLocalPath>
     <SccAuxPath>SAK</SccAuxPath>
@@ -71,15 +70,10 @@
     <Compile Include="Strings.Designer.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\CodePlexKey.snk">
-      <Link>CodePlexKey.snk</Link>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
     <EmbeddedResource Include="Strings.resx" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\System.Composition.AttributedModel\System.Composition.AttributedModel.csproj">
+    <ProjectReference Include="..\..\System.Composition.AttributedModel\src\System.Composition.AttributedModel.csproj">
       <Project>{c6257381-c624-494a-a9d9-5586e60856ea}</Project>
       <Name>System.Composition.AttributedModel</Name>
     </ProjectReference>

@@ -43,11 +43,8 @@
     <DocumentationFile>bin\Release\System.Composition.AttributedModel.XML</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup>
-    <SignAssembly>true</SignAssembly>
+    <SignAssembly>false</SignAssembly>
     <ExternallyShipping>true</ExternallyShipping>
-  </PropertyGroup>
-  <PropertyGroup>
-    <AssemblyOriginatorKeyFile>..\..\CodePlexKey.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
     <!-- A reference to the entire .NET Framework is automatically included -->
@@ -67,11 +64,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SharedAttribute.cs" />
     <Compile Include="SharingBoundaryAttribute.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="..\..\CodePlexKey.snk">
-      <Link>CodePlexKey.snk</Link>
-    </None>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

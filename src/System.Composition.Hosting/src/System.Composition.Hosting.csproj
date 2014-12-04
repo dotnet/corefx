@@ -43,15 +43,12 @@
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
   <PropertyGroup>
-    <SignAssembly>true</SignAssembly>
+    <SignAssembly>false</SignAssembly>
     <ExternallyShipping>true</ExternallyShipping>
-  </PropertyGroup>
-  <PropertyGroup>
-    <AssemblyOriginatorKeyFile>..\..\CodePlexKey.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
     <!-- A reference to the entire .NET Framework is automatically included -->
-    <ProjectReference Include="..\System.Composition.Runtime\System.Composition.Runtime.csproj">
+    <ProjectReference Include="..\..\System.Composition.Runtime\src\System.Composition.Runtime.csproj">
       <Project>{2711dfd2-8541-4628-bc53-eb784a14cdcf}</Project>
       <Name>System.Composition.Runtime</Name>
     </ProjectReference>
@@ -93,11 +90,6 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="..\..\CodePlexKey.snk">
-      <Link>CodePlexKey.snk</Link>
-    </None>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Properties\Resources.resx">
