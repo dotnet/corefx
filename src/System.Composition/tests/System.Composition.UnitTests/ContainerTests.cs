@@ -8,15 +8,8 @@ using System.Composition.Hosting;
 using System.Composition.Hosting.Providers;
 using System.Composition.Convention;
 using System.Reflection;
+using Xunit;
 
-#if NETFX_CORE
-using Microsoft.VisualStudio.TestPlatform.UnitTestFramework;
-#elif PORTABLE_TESTS
-using Microsoft.Bcl.Testing;
-#else
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-
-#endif
 namespace System.Composition.UnitTests
 {
     public class ContainerTests

@@ -7,17 +7,10 @@ using System.Composition.Convention.UnitTests;
 using System.Linq;
 using System.Composition.Convention;
 using System.Reflection;
-#if NETFX_CORE
-using Microsoft.VisualStudio.TestPlatform.UnitTestFramework;
-#elif PORTABLE_TESTS
-using Microsoft.Bcl.Testing;
-#else
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
-#endif
 namespace System.Composition.Convention
 {
-    [TestClass]
     public class ExportBuilderTests
     {
         interface IFoo { }
@@ -25,117 +18,117 @@ namespace System.Composition.Convention
         class FooImpl : IFoo { }
 
 
-        [TestMethod]
+        [Fact]
         public void ExportInterfaceWithTypeOf1()
         {
             var builder = new ConventionBuilder();
             builder.ForType<FooImpl>().Export<IFoo>();
 
             var exports = builder.GetCustomAttributes(typeof(FooImpl), typeof(FooImpl).GetTypeInfo()).Where<Attribute>(e => e is ExportAttribute).Cast<ExportAttribute>();
-            Assert.AreEqual(1, exports.Count());
-            Assert.AreEqual(exports.First().ContractType, typeof(IFoo));
+            Assert.Equal(1, exports.Count());
+            Assert.Equal(exports.First().ContractType, typeof(IFoo));
         }
 
-        [TestMethod]
+        [Fact]
         public void ExportInterfaceWithTypeOf2()
         {
             var builder = new ConventionBuilder();
             builder.ForType(typeof(FooImpl)).Export((c) => c.AsContractType(typeof(IFoo)));
 
             var exports = builder.GetDeclaredAttributes(typeof(FooImpl), typeof(FooImpl).GetTypeInfo()).Where<Attribute>(e => e is ExportAttribute).Cast<ExportAttribute>();
-            Assert.AreEqual(1, exports.Count());
-            Assert.AreEqual(exports.First().ContractType, typeof(IFoo));
+            Assert.Equal(1, exports.Count());
+            Assert.Equal(exports.First().ContractType, typeof(IFoo));
         }
 
 
-        [TestMethod]
+        [Fact]
         public void AsContractTypeOfT_SetsContractType()
         {
             var builder = new ConventionBuilder();
             builder.ForTypesDerivedFrom<IFoo>().Export((e) => e.AsContractType<IFoo>());
 
             ExportAttribute exportAtt = GetExportAttribute(builder);
-            Assert.AreEqual(typeof(IFoo), exportAtt.ContractType);
-            Assert.IsNull(exportAtt.ContractName);
+            Assert.Equal(typeof(IFoo), exportAtt.ContractType);
+            Assert.Null(exportAtt.ContractName);
         }
 
-        [TestMethod]
+        [Fact]
         public void AsContractType_SetsContractType()
         {
             var builder = new ConventionBuilder();
             builder.ForTypesDerivedFrom<IFoo>().Export((e) => e.AsContractType(typeof(IFoo)));
 
             ExportAttribute exportAtt = GetExportAttribute(builder);
-            Assert.AreEqual(typeof(IFoo), exportAtt.ContractType);
-            Assert.IsNull(exportAtt.ContractName);
+            Assert.Equal(typeof(IFoo), exportAtt.ContractType);
+            Assert.Null(exportAtt.ContractName);
         }
 
-        [TestMethod]
+        [Fact]
         public void AsContractName_SetsContractName()
         {
             var builder = new ConventionBuilder();
             builder.ForTypesDerivedFrom<IFoo>().Export((e) => e.AsContractName("hey"));
 
             ExportAttribute exportAtt = GetExportAttribute(builder);
-            Assert.AreEqual("hey", exportAtt.ContractName);
-            Assert.IsNull(exportAtt.ContractType);
+            Assert.Equal("hey", exportAtt.ContractName);
+            Assert.Null(exportAtt.ContractType);
         }
 
-        [TestMethod]
+        [Fact]
         public void AsContractName_AndContractType_SetsContractNameAndType()
         {
             var builder = new ConventionBuilder();
             builder.ForTypesDerivedFrom<IFoo>().Export((e) => e.AsContractName("hey").AsContractType(typeof(IFoo)));
 
             ExportAttribute exportAtt = GetExportAttribute(builder);
-            Assert.AreEqual("hey", exportAtt.ContractName);
-            Assert.AreEqual(typeof(IFoo), exportAtt.ContractType);
+            Assert.Equal("hey", exportAtt.ContractName);
+            Assert.Equal(typeof(IFoo), exportAtt.ContractType);
         }
 
-        [TestMethod]
+        [Fact]
         public void AsContractName_AndContractType_ComputeContractNameFromType()
         {
             var builder = new ConventionBuilder();
             builder.ForTypesDerivedFrom<IFoo>().Export(e => e.AsContractName(t => "Contract:" + t.FullName).AsContractType<IFoo>());
 
             ExportAttribute exportAtt = GetExportAttribute(builder);
-            Assert.AreEqual("Contract:" + typeof(FooImpl).FullName, exportAtt.ContractName);
-            Assert.AreEqual(typeof(IFoo), exportAtt.ContractType);
+            Assert.Equal("Contract:" + typeof(FooImpl).FullName, exportAtt.ContractName);
+            Assert.Equal(typeof(IFoo), exportAtt.ContractType);
         }
 
-        [TestMethod]
+        [Fact]
         public void AddMetadata_AddsExportMetadataAttribute()
         {
             var builder = new ConventionBuilder();
             builder.ForTypesDerivedFrom<IFoo>().Export(e => e.AddMetadata("name", "val"));
 
             ExportMetadataAttribute exportAtt = GetExportMetadataAttribute(builder);
-            Assert.AreEqual("name", exportAtt.Name);
-            Assert.AreEqual("val", exportAtt.Value);
+            Assert.Equal("name", exportAtt.Name);
+            Assert.Equal("val", exportAtt.Value);
         }
 
-        [TestMethod]
+        [Fact]
         public void AddMetadataFuncVal_AddsExportMetadataAttribute()
         {
             var builder = new ConventionBuilder();
             builder.ForTypesDerivedFrom<IFoo>().Export(e => e.AddMetadata("name", t => t.Name));
 
             ExportMetadataAttribute exportAtt = GetExportMetadataAttribute(builder);
-            Assert.AreEqual("name", exportAtt.Name);
-            Assert.AreEqual(typeof(FooImpl).Name, exportAtt.Value);
+            Assert.Equal("name", exportAtt.Name);
+            Assert.Equal(typeof(FooImpl).Name, exportAtt.Value);
         }
 
         private static ExportAttribute GetExportAttribute(ConventionBuilder builder)
         {
             var list = builder.GetDeclaredAttributes(typeof(FooImpl), typeof(FooImpl).GetTypeInfo());
-            Assert.AreEqual(1, list.Length);
+            Assert.Equal(1, list.Length);
             return list[0] as ExportAttribute;
         }
 
         private static ExportMetadataAttribute GetExportMetadataAttribute(ConventionBuilder builder)
         {
             var list = builder.GetDeclaredAttributes(typeof(FooImpl), typeof(FooImpl).GetTypeInfo());
-            Assert.AreEqual(2, list.Length);
+            Assert.Equal(2, list.Length);
             return list[1] as ExportMetadataAttribute;
         }
     }

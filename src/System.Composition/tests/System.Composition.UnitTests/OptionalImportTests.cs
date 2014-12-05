@@ -6,17 +6,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-#if NETFX_CORE
-using Microsoft.VisualStudio.TestPlatform.UnitTestFramework;
-#elif PORTABLE_TESTS
-using Microsoft.Bcl.Testing;
-#else
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
-#endif
 namespace System.Composition.UnitTests
 {
-    [TestClass]
     public class OptionalImportTests : ContainerTests
     {
         class Missing { }
@@ -60,23 +53,23 @@ namespace System.Composition.UnitTests
             public Supplied Supplied { get; set; }
         }
 
-        [TestMethod]
+        [Fact]
         public void MissingOptionalConstructorParametersAreSuppliedTheirDefaultValue()
         {
             var cc = CreateContainer(typeof(Supplied), typeof(HasOptionalConstructorParameter));
             var ocp = cc.GetExport<HasOptionalConstructorParameter>();
-            Assert.IsNull(ocp.Missing);
-            Assert.IsNotNull(ocp.Supplied);
+            Assert.Null(ocp.Missing);
+            Assert.NotNull(ocp.Supplied);
         }
 
-        [TestMethod]
+        [Fact]
         public void MissingOptionalPropertyImportsAreIgnored()
         {
             var cc = CreateContainer(typeof(Supplied), typeof(HasOptionalProperty));
             var op = cc.GetExport<HasOptionalProperty>();
-            Assert.IsNotNull(op.Supplied);
-            Assert.IsNull(op.Missing);
-            Assert.IsFalse(op.WasMissingSetterCalled);
+            Assert.NotNull(op.Supplied);
+            Assert.Null(op.Missing);
+            Assert.False(op.WasMissingSetterCalled);
         }
     }
 }

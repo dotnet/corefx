@@ -7,17 +7,10 @@ using System.Composition.Hosting;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-#if NETFX_CORE
-using Microsoft.VisualStudio.TestPlatform.UnitTestFramework;
-#elif PORTABLE_TESTS
-using Microsoft.Bcl.Testing;
-#else
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
-#endif
 namespace System.Composition.Lightweight.UnitTests
 {
-    [TestClass]
     public class CustomerReportedMetadataBug
     {
         public class ServiceMetadata
@@ -43,7 +36,7 @@ namespace System.Composition.Lightweight.UnitTests
             public IList<Lazy<IService, ServiceMetadata>> Services { get; set; }
         }
 
-        [TestMethod]
+        [Fact]
         public void SampleServicesCorrectlyImported()
         {
             var container = new ContainerConfiguration()
@@ -53,7 +46,7 @@ namespace System.Composition.Lightweight.UnitTests
             var importer = new LooseImporter();
             container.SatisfyImports(importer);
 
-            Assert.AreEqual(1, importer.Services.Count);
+            Assert.Equal(1, importer.Services.Count);
         }
     }
 }

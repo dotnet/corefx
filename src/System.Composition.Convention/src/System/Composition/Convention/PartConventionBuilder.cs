@@ -527,7 +527,6 @@ namespace System.Composition.Convention
                             }
                         }
                     }
-
                 }
             }
             return attributes;

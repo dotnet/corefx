@@ -4,17 +4,11 @@
 using System;
 using System.Text;
 using System.Collections.Generic;
-#if NETFX_CORE
-using Microsoft.VisualStudio.TestPlatform.UnitTestFramework;
-#elif PORTABLE_TESTS
-using Microsoft.Bcl.Testing;
-#else
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-#endif
 using System.Composition;
 using System.Composition.Hosting;
 using System.Composition.Hosting.Providers;
 using System.Linq;
+using Xunit;
 
 namespace System.Composition.UnitTests
 {
@@ -185,7 +179,6 @@ namespace System.Composition.UnitTests
     [Shared("Boundary")]
     public class CirC
     {
-
         public CirA DepA { get; private set; }
         [ImportingConstructor]
         public CirC(CirA a)
@@ -316,8 +309,6 @@ namespace System.Composition.UnitTests
 
     [Export(typeof(IX)), Export(typeof(IY)), Shared]
     public class XY : IX, IY { }
-
-    [TestClass]
     public class SharingTest : ContainerTests
     {
         /// <summary>
@@ -326,7 +317,7 @@ namespace System.Composition.UnitTests
         /// Second is we don`t fail when we getExport for CPrime
         /// we fail only when we create instance of B.. is that correct.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void BoundaryExposedBoundaryButNoneImported()
         {
             try
@@ -337,7 +328,7 @@ namespace System.Composition.UnitTests
             }
             catch (Exception ex)
             {
-                Assert.IsTrue(ex.Message.Contains("The component (unknown) cannot be created outside the Boundary sharing boundary"));
+                Assert.True(ex.Message.Contains("The component (unknown) cannot be created outside the Boundary sharing boundary"));
             }
         }
 
@@ -345,7 +336,7 @@ namespace System.Composition.UnitTests
         /// Need a partcreationpolicy currently. 
         /// Needs to be fixed so that specifying boundary would automatically create the shared
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void BoundarySharingTest()
         {
             var cc = CreateContainer(typeof(A), typeof(B), typeof(C), typeof(D));
@@ -358,31 +349,31 @@ namespace System.Composition.UnitTests
             bIn2.InstanceA.SharedState = 5;
             var val2 = bIn2.InstanceD.InstanceA;
 
-            Assert.IsTrue(val1.SharedState == 1);
-            Assert.IsTrue(val2.SharedState == 5);
+            Assert.True(val1.SharedState == 1);
+            Assert.True(val2.SharedState == 5);
         }
 
 
         /// <summary>
         /// CirA root of the composition has to be shared explcitly.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void CircularBoundarySharingTest()
         {
             var cc = CreateContainer(typeof(CirA), typeof(CirB), typeof(CirC));
             var cInstance = cc.GetExport<CirA>();
             cInstance.SharedState = 1;
             var bInstance1 = cInstance.CreateInstance();
-            Assert.AreEqual<int>(bInstance1.DepC.DepA.SharedState, 1);
+            Assert.Equal(bInstance1.DepC.DepA.SharedState, 1);
             bInstance1.DepC.DepA.SharedState = 10;
             cInstance.CreateInstance();
-            Assert.AreEqual<int>(bInstance1.DepC.DepA.SharedState, 10);
+            Assert.Equal(bInstance1.DepC.DepA.SharedState, 10);
         }
 
         /// <summary>
         /// Something is badly busted here.. I am getting a null ref exception
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void MultipleBoundarySpecified()
         {
             var cc = CreateContainer(typeof(ProjA), typeof(ProjB), typeof(SolA), typeof(DocA), typeof(DocB), typeof(ColA), typeof(ColB));
@@ -391,31 +382,31 @@ namespace System.Composition.UnitTests
         }
 
 
-        [TestMethod]
+        [Fact]
         public void SharedPartExportingMultipleContractsSharesAnInstance()
         {
             var cc = CreateContainer(typeof(XY));
             var x = cc.GetExport<IX>();
             var y = cc.GetExport<IY>();
-            Assert.AreSame(x, y);
+            Assert.Same(x, y);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExportsCreatesInstancedObjectByDefault()
         {
             var cc = CreateContainer(typeof(NonSharedClass));
             var val1 = cc.GetExport<ISharedTestingClass>();
             var val2 = cc.GetExport<ISharedTestingClass>();
-            Assert.AreNotSame(val1, val2);
+            Assert.NotSame(val1, val2);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExportsCreatesSharedObjectsWhenSpecified()
         {
             var cc = CreateContainer(typeof(SharedClass));
             var val1 = cc.GetExport<ISharedTestingClass>();
             var val2 = cc.GetExport<ISharedTestingClass>();
-            Assert.AreSame(val1, val2);
+            Assert.Same(val1, val2);
         }
 
         /// <summary>
@@ -423,7 +414,7 @@ namespace System.Composition.UnitTests
         /// verify that GetExport returns only one instance regardless of times it is called
         /// verify that On Method call different instances are returned.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ExportFactoryCreatesNewInstances()
         {
             var cc = CreateContainer(typeof(ClassWithExportFactoryShared), typeof(NonSharedClass));
@@ -431,22 +422,22 @@ namespace System.Composition.UnitTests
             var b2 = cc.GetExport<ClassWithExportFactoryShared>();
             var inst1 = b1.Method();
             var inst2 = b1.Method();
-            Assert.AreSame(b1, b2);
-            Assert.AreNotSame(inst1, inst2);
+            Assert.Same(b1, b2);
+            Assert.NotSame(inst1, inst2);
         }
 
         /// <summary>
         /// ExportFactory should be importable as a property
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ClassWithExportFactoryAsAProperty()
         {
             var cc = CreateContainer(typeof(ClassWithExportFactoryAsAProperty), typeof(NonSharedClass));
             var b1 = cc.GetExport<ClassWithExportFactoryAsAProperty>();
             var inst1 = b1.Method();
             var inst2 = b1.Method();
-            Assert.IsNotNull(b1._fact);
-            Assert.AreNotSame(inst1, inst2);
+            Assert.NotNull(b1._fact);
+            Assert.NotSame(inst1, inst2);
         }
 
         /// <summary>
@@ -454,7 +445,7 @@ namespace System.Composition.UnitTests
         /// will still respect the CreationPolicyAttribute on a part.  If the export factory 
         /// is creating a part which is shared, it will return back the same instance of the part.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ClassWithExportFactoryAndSharedExport()
         {
             var cc = CreateContainer(typeof(ClassWithExportFactoryShared), typeof(SharedClass));
@@ -462,15 +453,15 @@ namespace System.Composition.UnitTests
             var b2 = cc.GetExport<ClassWithExportFactoryShared>();
             var inst1 = b1.Method();
             var inst2 = b2.Method();
-            Assert.AreSame(b1, b2);
-            Assert.AreSame(inst1, inst2);
+            Assert.Same(b1, b2);
+            Assert.Same(inst1, inst2);
         }
 
         /// <summary>
         /// Class which is nonShared has an exportFactory in it for a shared part. 
         /// Two instances of the root class are created , the part created using export factory should not be shared
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ClassWithNonSharedExportFactoryCreatesSharedInstances()
         {
             var cc = CreateContainer(typeof(ClassWithExportFactoryNonShared), typeof(SharedClass));
@@ -478,14 +469,14 @@ namespace System.Composition.UnitTests
             var b2 = cc.GetExport<ClassWithExportFactoryNonShared>();
             var inst1 = b1.Method();
             var inst2 = b2.Method();
-            Assert.AreNotSame(b1, b2);
-            Assert.AreSame(inst1, inst2);
+            Assert.NotSame(b1, b2);
+            Assert.Same(inst1, inst2);
         }
 
         [Shared, Export]
         public class ASharedPart { }
 
-        [TestMethod]
+        [Fact]
         public void ConsistentResultsAreReturneWhenResolvingLargeNumbersOfSharedParts()
         {
             var config = new ContainerConfiguration();
@@ -494,12 +485,12 @@ namespace System.Composition.UnitTests
             for (var i = 0; i < 1000; ++i)
                 config.WithPart<ASharedPart>();
 
-            Assert.AreNotEqual(new ASharedPart(), new ASharedPart());
+            Assert.NotEqual(new ASharedPart(), new ASharedPart());
 
             var container = config.CreateContainer();
             var first = container.GetExports<ASharedPart>().ToList();
             var second = container.GetExports<ASharedPart>().ToList();
-            CollectionAssert.AreEqual(first, second);
+            Assert.Equal(first, second);
         }
     }
 }

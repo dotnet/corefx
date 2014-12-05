@@ -7,17 +7,10 @@ using System.Composition.Convention;
 using System.Composition.Hosting;
 using System.Linq;
 using System.Reflection;
-#if NETFX_CORE
-using Microsoft.VisualStudio.TestPlatform.UnitTestFramework;
-#elif PORTABLE_TESTS
-using Microsoft.Bcl.Testing;
-#else
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
-#endif
 namespace System.ComponentModel.Composition
 {
-    [TestClass]
     public class PartBuilderInterfaceTests
     {
         public interface IFirst { }
@@ -68,7 +61,7 @@ namespace System.ComponentModel.Composition
             public BareClass BareClass { get; set; }
         }
 
-        [TestMethod]
+        [Fact]
         public void StandardExportInterfacesShouldWork()
         {
             // Export all interfaces except IDisposable, Export contracts on types without interfaces. except for disposable types
@@ -86,27 +79,27 @@ namespace System.ComponentModel.Composition
             var importer = new Importer();
             container.SatisfyImports(importer);
 
-            Assert.IsNotNull(importer.First);
-            Assert.IsTrue(importer.First.Count() == 3);
-            Assert.IsNotNull(importer.Second);
-            Assert.IsTrue(importer.Second.Count() == 3);
-            Assert.IsNotNull(importer.Third);
-            Assert.IsTrue(importer.Third.Count() == 3);
-            Assert.IsNotNull(importer.Fourth);
-            Assert.IsTrue(importer.Fourth.Count() == 3);
-            Assert.IsNotNull(importer.Fifth);
-            Assert.IsTrue(importer.Fifth.Count() == 3);
+            Assert.NotNull(importer.First);
+            Assert.True(importer.First.Count() == 3);
+            Assert.NotNull(importer.Second);
+            Assert.True(importer.Second.Count() == 3);
+            Assert.NotNull(importer.Third);
+            Assert.True(importer.Third.Count() == 3);
+            Assert.NotNull(importer.Fourth);
+            Assert.True(importer.Fourth.Count() == 3);
+            Assert.NotNull(importer.Fifth);
+            Assert.True(importer.Fifth.Count() == 3);
 
-            Assert.IsNull(importer.Base);
-            Assert.IsNull(importer.Derived);
-            Assert.IsNull(importer.Dippy);
-            Assert.IsNull(importer.Standard);
-            Assert.IsNull(importer.Disposable);
-            Assert.IsNotNull(importer.BareClass);
+            Assert.Null(importer.Base);
+            Assert.Null(importer.Derived);
+            Assert.Null(importer.Dippy);
+            Assert.Null(importer.Standard);
+            Assert.Null(importer.Disposable);
+            Assert.NotNull(importer.BareClass);
         }
 
 
-        [TestMethod]
+        [Fact]
         public void StandardExportInterfacesInterfaceFilterDefaultContractShouldWork()
         {
             //Same test as above only using default export builder
@@ -124,26 +117,26 @@ namespace System.ComponentModel.Composition
             var importer = new Importer();
             container.SatisfyImports(importer);
 
-            Assert.IsNotNull(importer.First);
-            Assert.IsTrue(importer.First.Count() == 3);
-            Assert.IsNotNull(importer.Second);
-            Assert.IsTrue(importer.Second.Count() == 3);
-            Assert.IsNotNull(importer.Third);
-            Assert.IsTrue(importer.Third.Count() == 3);
-            Assert.IsNotNull(importer.Fourth);
-            Assert.IsTrue(importer.Fourth.Count() == 3);
-            Assert.IsNotNull(importer.Fifth);
-            Assert.IsTrue(importer.Fifth.Count() == 3);
+            Assert.NotNull(importer.First);
+            Assert.True(importer.First.Count() == 3);
+            Assert.NotNull(importer.Second);
+            Assert.True(importer.Second.Count() == 3);
+            Assert.NotNull(importer.Third);
+            Assert.True(importer.Third.Count() == 3);
+            Assert.NotNull(importer.Fourth);
+            Assert.True(importer.Fourth.Count() == 3);
+            Assert.NotNull(importer.Fifth);
+            Assert.True(importer.Fifth.Count() == 3);
 
-            Assert.IsNull(importer.Base);
-            Assert.IsNull(importer.Derived);
-            Assert.IsNull(importer.Dippy);
-            Assert.IsNull(importer.Standard);
-            Assert.IsNull(importer.Disposable);
-            Assert.IsNotNull(importer.BareClass);
+            Assert.Null(importer.Base);
+            Assert.Null(importer.Derived);
+            Assert.Null(importer.Dippy);
+            Assert.Null(importer.Standard);
+            Assert.Null(importer.Disposable);
+            Assert.NotNull(importer.BareClass);
         }
 
-        [TestMethod]
+        [Fact]
         public void StandardExportInterfacesInterfaceFilterConfiguredContractShouldWork()
         {
             //Same test as above only using default export builder
@@ -161,23 +154,23 @@ namespace System.ComponentModel.Composition
             var importer = new Importer();
             container.SatisfyImports(importer);
 
-            Assert.IsNotNull(importer.First);
-            Assert.IsTrue(importer.First.Count() == 3);
-            Assert.IsNotNull(importer.Second);
-            Assert.IsTrue(importer.Second.Count() == 3);
-            Assert.IsNotNull(importer.Third);
-            Assert.IsTrue(importer.Third.Count() == 3);
-            Assert.IsNotNull(importer.Fourth);
-            Assert.IsTrue(importer.Fourth.Count() == 3);
-            Assert.IsNotNull(importer.Fifth);
-            Assert.IsTrue(importer.Fifth.Count() == 3);
+            Assert.NotNull(importer.First);
+            Assert.True(importer.First.Count() == 3);
+            Assert.NotNull(importer.Second);
+            Assert.True(importer.Second.Count() == 3);
+            Assert.NotNull(importer.Third);
+            Assert.True(importer.Third.Count() == 3);
+            Assert.NotNull(importer.Fourth);
+            Assert.True(importer.Fourth.Count() == 3);
+            Assert.NotNull(importer.Fifth);
+            Assert.True(importer.Fifth.Count() == 3);
 
-            Assert.IsNull(importer.Base);
-            Assert.IsNull(importer.Derived);
-            Assert.IsNull(importer.Dippy);
-            Assert.IsNull(importer.Standard);
-            Assert.IsNull(importer.Disposable);
-            Assert.IsNotNull(importer.BareClass);
+            Assert.Null(importer.Base);
+            Assert.Null(importer.Derived);
+            Assert.Null(importer.Dippy);
+            Assert.Null(importer.Standard);
+            Assert.Null(importer.Disposable);
+            Assert.NotNull(importer.BareClass);
         }
     }
 }

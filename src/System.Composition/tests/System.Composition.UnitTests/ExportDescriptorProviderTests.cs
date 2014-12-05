@@ -8,17 +8,10 @@ using System.Composition.Hosting.Core;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-#if NETFX_CORE
-using Microsoft.VisualStudio.TestPlatform.UnitTestFramework;
-#elif PORTABLE_TESTS
-using Microsoft.Bcl.Testing;
-#else
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
-#endif
 namespace System.Composition.Lightweight.UnitTests
 {
-    [TestClass]
     public class ExportDescriptorProviderTests
     {
         public class DefaultObjectExportDescriptorProvider : ExportDescriptorProvider
@@ -46,7 +39,7 @@ namespace System.Composition.Lightweight.UnitTests
             public object AnObject { get { return "Not the default"; } }
         }
 
-        [TestMethod]
+        [Fact]
         public void ProvidersCanLocateImplementationsOfAContractItSupports()
         {
             var container = new ContainerConfiguration()
@@ -55,10 +48,10 @@ namespace System.Composition.Lightweight.UnitTests
                 .CreateContainer();
 
             var o = container.GetExport<object>();
-            Assert.AreNotEqual(DefaultObjectExportDescriptorProvider.DefaultObject, o);
+            Assert.NotEqual(DefaultObjectExportDescriptorProvider.DefaultObject, o);
         }
 
-        [TestMethod]
+        [Fact]
         public void ProvidersCanDetectAbsenceOfAContractItSupports()
         {
             var container = new ContainerConfiguration()
@@ -66,7 +59,7 @@ namespace System.Composition.Lightweight.UnitTests
                 .CreateContainer();
 
             var o = container.GetExport<object>();
-            Assert.AreEqual(DefaultObjectExportDescriptorProvider.DefaultObject, o);
+            Assert.Equal(DefaultObjectExportDescriptorProvider.DefaultObject, o);
         }
     }
 }

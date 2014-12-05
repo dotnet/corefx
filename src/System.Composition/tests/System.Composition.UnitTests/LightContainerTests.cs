@@ -5,23 +5,16 @@ using System;
 using System.Linq;
 using System.Text;
 using System.Collections.Generic;
-#if NETFX_CORE
-using Microsoft.VisualStudio.TestPlatform.UnitTestFramework;
-#elif PORTABLE_TESTS
-using Microsoft.Bcl.Testing;
-#else
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-#endif
 using System.Diagnostics;
 using System.Composition;
 using System.Composition.Hosting;
 using System.Composition.Convention;
 using System.Reflection;
 using TestLibrary;
+using Xunit;
 
 namespace System.Composition.UnitTests
 {
-    [TestClass]
     public class LightContainerTests : ContainerTests
     {
         public interface IA { }
@@ -59,42 +52,42 @@ namespace System.Composition.UnitTests
             public IA A { get; set; }
         }
 
-        [TestMethod]
+        [Fact]
         public void CreatesInstanceWithNoDependencies()
         {
             var cc = CreateContainer(typeof(A));
             var x = cc.GetExport<IA>();
-            Assert.IsInstanceOfType(x, typeof(A));
+            Assert.IsAssignableFrom(typeof(A), x);
         }
 
-        [TestMethod]
+        [Fact]
         public void DefaultLifetimeIsNonShared()
         {
             var cc = CreateContainer(typeof(A));
             var x = cc.GetExport<IA>();
             var y = cc.GetExport<IA>();
-            Assert.AreNotSame(x, y);
+            Assert.NotSame(x, y);
         }
 
-        [TestMethod]
+        [Fact]
         public void Composes()
         {
             var cc = CreateContainer(typeof(A), typeof(B));
             var x = cc.GetExport<B>();
-            Assert.IsInstanceOfType(x.A, typeof(A));
+            Assert.IsAssignableFrom(typeof(A), x.A);
         }
 
-        [TestMethod]
+        [Fact]
         public void CanSpecifyExportsWithConventionBuilder()
         {
             var rb = new ConventionBuilder();
             rb.ForType<BarePart>().Export();
             var cc = CreateContainer(rb, typeof(BarePart));
             var x = cc.GetExport<BarePart>();
-            Assert.IsNotNull(x);
+            Assert.NotNull(x);
         }
 
-        [TestMethod]
+        [Fact]
         public void CanSpecifyLifetimeWithConventionBuilder()
         {
             var rb = new ConventionBuilder();
@@ -102,40 +95,40 @@ namespace System.Composition.UnitTests
             var cc = CreateContainer(rb, typeof(BarePart));
             var x = cc.GetExport<BarePart>();
             var y = cc.GetExport<BarePart>();
-            Assert.AreSame(x, y);
+            Assert.Same(x, y);
         }
 
-        [TestMethod]
+        [Fact]
         public void InjectsPropertyImports()
         {
             var rb = new ConventionBuilder();
             rb.ForType<HasPropertyA>().ImportProperty(a => a.A).Export();
             var cc = CreateContainer(rb, typeof(HasPropertyA), typeof(A));
             var x = cc.GetExport<HasPropertyA>();
-            Assert.IsInstanceOfType(x.A, typeof(A));
+            Assert.IsAssignableFrom(typeof(A), x.A);
         }
 
-        [TestMethod]
+        [Fact]
         public void VerifyAssemblyNameCanBeUsedWithContainer()
         {
             var test = new ContainerConfiguration()
                 .WithAssembly(typeof(ClassWithDependecy).GetTypeInfo().Assembly)
                 .CreateContainer();
             var b = test.GetExport<ClassWithDependecy>();
-            Assert.IsNotNull(b);
-            Assert.IsNotNull(b._dep);
+            Assert.NotNull(b);
+            Assert.NotNull(b._dep);
         }
 
-        [TestMethod]
+        [Fact]
         public void VerifyAssemblyWithTwoBaseTypeWithOnlyOneExportedWorks()
         {
             var test = new ContainerConfiguration()
                 .WithAssembly(typeof(ClassWithDependecy).GetTypeInfo().Assembly)
                 .CreateContainer();
             var b = test.GetExport<ClassWithDependecyAndSameBaseType>();
-            Assert.IsNotNull(b);
-            Assert.IsNotNull(b._dep);
-            Assert.AreEqual<Type>(b._dep.GetType(), typeof(TestDependency));
+            Assert.NotNull(b);
+            Assert.NotNull(b._dep);
+            Assert.Equal(b._dep.GetType(), typeof(TestDependency));
         }
     }
 }

@@ -4,20 +4,14 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Composition.UnitTests.Util;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-#if NETFX_CORE
-using Microsoft.VisualStudio.TestPlatform.UnitTestFramework;
-#elif PORTABLE_TESTS
-using Microsoft.Bcl.Testing;
-#else
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
-#endif
 namespace System.Composition.UnitTests
 {
-    [TestClass]
     public class ExportMetadataDiscoveryTests : ContainerTests
     {
         [MetadataAttribute]
@@ -56,56 +50,56 @@ namespace System.Composition.UnitTests
          ExportMetadata("Name", "B")]
         public class MultipleNames { }
 
-        [TestMethod]
+        [Fact]
         public void DiscoversMetadataSpecifiedUsingMetadataAttributeOnExportAttribute()
         {
             var cc = CreateContainer(typeof(SingleNamedExport));
             var ne = cc.GetExport<Lazy<SingleNamedExport, Named>>();
-            Assert.AreEqual("Foo", ne.Metadata.Name);
+            Assert.Equal("Foo", ne.Metadata.Name);
         }
 
-        [TestMethod]
+        [Fact]
         public void IfMetadataIsSpecifiedOnAnExportAttributeOtherExportsDoNotHaveIt()
         {
             var cc = CreateContainer(typeof(MultipleExportsOneNamedAndBothPrioritized));
             var ne = cc.GetExports<Lazy<MultipleExportsOneNamedAndBothPrioritized, Named>>();
-            Assert.AreEqual(2, ne.Count());
-            Assert.IsTrue(ne.Where(e => e.Metadata.Name != null).Count() == 1);
+            Assert.Equal(2, ne.Count());
+            Assert.True(ne.Where(e => e.Metadata.Name != null).Count() == 1);
         }
 
-        [TestMethod]
+        [Fact]
         public void DiscoversStandaloneExportMetadata()
         {
             var cc = CreateContainer(typeof(NamedAndPrioritized));
             var ne = cc.GetExport<Lazy<NamedAndPrioritized, Prioritized>>();
-            Assert.AreEqual(10, ne.Metadata.Priority);
+            Assert.Equal(10, ne.Metadata.Priority);
         }
 
-        [TestMethod]
+        [Fact]
         public void DiscoversStandaloneExportMetadataUsingMetadataAttributes()
         {
             var cc = CreateContainer(typeof(NamedWithCustomMetadata));
             var ne = cc.GetExport<Lazy<NamedWithCustomMetadata, Named>>();
-            Assert.AreEqual("Foo", ne.Metadata.Name);
+            Assert.Equal("Foo", ne.Metadata.Name);
         }
 
-        [TestMethod]
+        [Fact]
         public void StandaloneExportMetadataAppliesToAllExportsOnAMember()
         {
             var cc = CreateContainer(typeof(MultipleExportsOneNamedAndBothPrioritized));
             var ne = cc.GetExports<Lazy<MultipleExportsOneNamedAndBothPrioritized, Prioritized>>();
-            Assert.AreEqual(2, ne.Count());
-            Assert.IsTrue(ne.All(e => e.Metadata.Priority == 10));
+            Assert.Equal(2, ne.Count());
+            Assert.True(ne.All(e => e.Metadata.Priority == 10));
         }
 
-        [TestMethod]
+        [Fact]
         public void MultiplePiecesOfMetadataAreCombinedIntoAnArray()
         {
             var cc = CreateContainer(typeof(MultipleNames));
 
             var withNames = cc.GetExport<Lazy<MultipleNames, MultiValuedName>>();
 
-            CollectionAssert.AreEquivalent(new[] { "A", "B", "B" }, withNames.Metadata.Name);
+            AssertX.Equivalent(new[] { "A", "B", "B" }, withNames.Metadata.Name);
         }
 
         [Export]
@@ -118,7 +112,7 @@ namespace System.Composition.UnitTests
             public MultipleExportsNonDefaultConstructor(ConstructorImported c) { }
         }
 
-        [TestMethod]
+        [Fact]
         public void MultipleExportsCanBeRetrievedWhenANonDefaultConstructorExists()
         {
             var c = CreateContainer(typeof(ConstructorImported), typeof(MultipleExportsNonDefaultConstructor));

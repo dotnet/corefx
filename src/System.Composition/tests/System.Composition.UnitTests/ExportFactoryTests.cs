@@ -10,17 +10,10 @@ using System.Composition.UnitTests.Util;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-#if NETFX_CORE
-using Microsoft.VisualStudio.TestPlatform.UnitTestFramework;
-#elif PORTABLE_TESTS
-using Microsoft.Bcl.Testing;
-#else
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
-#endif
 namespace System.Composition.UnitTests
 {
-    [TestClass]
     public class ExportFactoryTests : ContainerTests
     {
         static class Boundaries
@@ -111,17 +104,17 @@ namespace System.Composition.UnitTests
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void SharedPartsAreSharedBetweenAllScopes()
         {
             var cc = CreateContainer(typeof(SharedUnbounded), typeof(DataConsistencyBoundaryProvider));
             var bp = cc.GetExport<DataConsistencyBoundaryProvider>().SharingScopeFactory;
             var x = bp.CreateExport().Value.GetExport<SharedUnbounded>();
             var y = bp.CreateExport().Value.GetExport<SharedUnbounded>();
-            Assert.AreSame(x, y);
+            Assert.Same(x, y);
         }
 
-        [TestMethod]
+        [Fact]
         public void TheSameSharedInstanceIsReusedWithinItsSharingBoundary()
         {
             var cc = CreateContainer(typeof(SharedBoundedByDC), typeof(SharedPartConsumer), typeof(DataConsistencyBoundaryProvider));
@@ -130,23 +123,23 @@ namespace System.Composition.UnitTests
             var s2 = sf.CreateExport();
             var x = s.Value.GetExport<SharedPartConsumer>();
             var y = s2.Value.GetExport<SharedPartConsumer>();
-            Assert.AreSame(x.Sc1, x.Sc2);
-            Assert.AreNotSame(x.Sc1, y.Sc1);
+            Assert.Same(x.Sc1, x.Sc2);
+            Assert.NotSame(x.Sc1, y.Sc1);
         }
 
-        [TestMethod]
+        [Fact]
         public void NonSharedInstancesCreatedByAnExportFactoryAreControlledByTheirExportLifetimeContext()
         {
             var cc = CreateContainer(typeof(A), typeof(UseExportFactory));
             var bef = cc.GetExport<UseExportFactory>();
             var a = bef.AFactory.CreateExport();
-            Assert.IsInstanceOfType(a.Value, typeof(A));
-            Assert.IsFalse(((A)a.Value).IsDisposed);
+            Assert.IsAssignableFrom(typeof(A), a.Value);
+            Assert.False(((A)a.Value).IsDisposed);
             a.Dispose();
-            Assert.IsTrue(((A)a.Value).IsDisposed);
+            Assert.True(((A)a.Value).IsDisposed);
         }
 
-        [TestMethod]
+        [Fact]
         public void DependenciesOfSharedPartsAreResolvedInTheGlobalScope()
         {
             var cc = new ContainerConfiguration()
@@ -156,19 +149,19 @@ namespace System.Composition.UnitTests
             var g = s.Value.GetExport<GloballySharedWithDependency>();
             s.Dispose();
             var a = (A)g.A;
-            Assert.IsFalse(a.IsDisposed);
+            Assert.False(a.IsDisposed);
             cc.Dispose();
-            Assert.IsTrue(a.IsDisposed);
+            Assert.True(a.IsDisposed);
         }
 
-        [TestMethod]
+        [Fact]
         public void WhenABoundaryIsPresentBoundedPartsCannotBeCreatedOutsideIt()
         {
             var container = CreateContainer(typeof(DataConsistencyBoundaryProvider), typeof(SharedBoundedByDC));
             var x = AssertX.Throws<CompositionFailedException>(() => container.GetExport<SharedBoundedByDC>());
         }
 
-        [TestMethod]
+        [Fact]
         public void TheProductOfAnExportFactoryCanBeDisposedDuringDisposalOfTheParent()
         {
             var container = new ContainerConfiguration()
@@ -183,7 +176,7 @@ namespace System.Composition.UnitTests
 
             container.Dispose();
 
-            Assert.IsTrue(a.IsDisposed);
+            Assert.True(a.IsDisposed);
         }
 
         [Export("Special", typeof(IA))]
@@ -199,12 +192,12 @@ namespace System.Composition.UnitTests
             public ExportFactory<IA>[] AFactories { get; set; }
         }
 
-        [TestMethod]
+        [Fact]
         public void ExportFactoryCanBeComposedWithImportManyAndNames()
         {
             var cc = CreateContainer(typeof(AConsumer), typeof(A1), typeof(A2));
             var cons = cc.GetExport<AConsumer>();
-            Assert.AreEqual(2, cons.AFactories.Length);
+            Assert.Equal(2, cons.AFactories.Length);
         }
 
         [Export]
@@ -232,7 +225,7 @@ namespace System.Composition.UnitTests
             public ExportFactory<HasDisposableDependency> Factory { get; set; }
         }
 
-        [TestMethod]
+        [Fact]
         public void WhenReleasingAnExportFromAnExportFactoryItsNonSharedDependenciesAreDisposed()
         {
             var cc = CreateContainer(typeof(Disposable), typeof(HasDisposableDependency), typeof(HasFactory));
@@ -240,7 +233,7 @@ namespace System.Composition.UnitTests
             var hddx = hf.Factory.CreateExport();
             var hdd = hddx.Value;
             hddx.Dispose();
-            Assert.IsTrue(hdd.Dependency.IsDisposed);
+            Assert.True(hdd.Dependency.IsDisposed);
         }
     }
 }

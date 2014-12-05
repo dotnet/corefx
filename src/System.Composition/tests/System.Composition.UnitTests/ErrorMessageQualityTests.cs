@@ -10,17 +10,10 @@ using System.Composition.UnitTests.Util;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-#if NETFX_CORE
-using Microsoft.VisualStudio.TestPlatform.UnitTestFramework;
-#elif PORTABLE_TESTS
-using Microsoft.Bcl.Testing;
-#else
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
-#endif
 namespace System.Composition.UnitTests
 {
-    [TestClass]
     public class ErrorMessageQualityTests : ContainerTests
     {
         public class Unregistered { }
@@ -69,38 +62,38 @@ namespace System.Composition.UnitTests
             public ShouldBeOne One { get; set; }
         }
 
-        [TestMethod]
+        [Fact]
         public void MissingTopLevelExportMessageIsInformative()
         {
             var cc = CreateContainer();
             var x = AssertX.Throws<CompositionFailedException>(() => cc.GetExport<Unregistered>());
-            Assert.AreEqual("No export was found for the contract 'Unregistered'.", x.Message);
+            Assert.Equal("No export was found for the contract 'Unregistered'.", x.Message);
         }
 
-        [TestMethod]
+        [Fact]
         public void MissingTopLevelNamedExportMessageIsInformative()
         {
             var cc = CreateContainer();
             var x = AssertX.Throws<CompositionFailedException>(() => cc.GetExport<Unregistered>("unregistered"));
-            Assert.AreEqual("No export was found for the contract 'Unregistered \"unregistered\"'.", x.Message);
+            Assert.Equal("No export was found for the contract 'Unregistered \"unregistered\"'.", x.Message);
         }
 
-        [TestMethod]
+        [Fact]
         public void MissingDependencyMessageIsInformative()
         {
             var cc = CreateContainer(typeof(UserOfUnregistered));
             var x = AssertX.Throws<CompositionFailedException>(() => cc.GetExport<UserOfUnregistered>());
-            Assert.AreEqual("No export was found for the contract 'Unregistered'" + Environment.NewLine +
+            Assert.Equal("No export was found for the contract 'Unregistered'" + Environment.NewLine +
                             " -> required by import 'Unregistered' of part 'UserOfUnregistered'" + Environment.NewLine +
                             " -> required by initial request for contract 'UserOfUnregistered'", x.Message);
         }
 
-        [TestMethod]
+        [Fact]
         public void CycleMessageIsInformative()
         {
             var cc = CreateContainer(typeof(CycleA), typeof(CycleB), typeof(CycleC));
             var x = AssertX.Throws<CompositionFailedException>(() => cc.GetExport<CycleA>());
-            Assert.AreEqual("Detected an unsupported cycle for part 'CycleA'." +
+            Assert.Equal("Detected an unsupported cycle for part 'CycleA'." +
                             " To construct a valid cycle, at least one part in the cycle must be shared, and at least one import in the cycle must be non-prerequisite (e.g. a property)." + Environment.NewLine +
                             " -> required by import 'A' of part 'CycleC'" + Environment.NewLine +
                             " -> required by import 'C' of part 'CycleB'" + Environment.NewLine +
@@ -108,12 +101,12 @@ namespace System.Composition.UnitTests
                             " -> required by initial request for contract 'CycleA'", x.Message);
         }
 
-        [TestMethod]
+        [Fact]
         public void CardinalityViolationMessageIsInformative()
         {
             var cc = CreateContainer(typeof(ShouldBeOne), typeof(ButThereIsAnother), typeof(RequiresOnlyOne));
             var x = AssertX.Throws<CompositionFailedException>(() => cc.GetExport<RequiresOnlyOne>());
-            Assert.AreEqual("Only one export for the contract 'ShouldBeOne' is allowed, but the following parts: 'ButThereIsAnother', 'ShouldBeOne' export it." + Environment.NewLine +
+            Assert.Equal("Only one export for the contract 'ShouldBeOne' is allowed, but the following parts: 'ButThereIsAnother', 'ShouldBeOne' export it." + Environment.NewLine +
                             " -> required by import 'One' of part 'RequiresOnlyOne'" + Environment.NewLine +
                             " -> required by initial request for contract 'RequiresOnlyOne'", x.Message);
         }

@@ -7,17 +7,10 @@ using System.Composition.Convention;
 using System.Linq;
 using System.Reflection;
 using System.Composition.Convention.UnitTests;
-#if NETFX_CORE
-using Microsoft.VisualStudio.TestPlatform.UnitTestFramework;
-#elif PORTABLE_TESTS
-using Microsoft.Bcl.Testing;
-#else
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
-#endif
 namespace System.Composition.Convention
 {
-    [TestClass]
     public class PartBuilderTests
     {
         class MyDoNotIncludeAttribute : Attribute { }
@@ -161,46 +154,46 @@ namespace System.Composition.Convention
             public FooImplWithConstructorsAmbiguous(int id, string name) { }
         }
 
-        [TestMethod]
+        [Fact]
         public void NoOperations_ShouldGenerateNoAttributes()
         {
             var builder = new ConventionBuilder();
             builder.ForType(typeof(FooImpl));
 
             var attributes = GetAttributesFromMember(builder, typeof(FooImpl), null);
-            Assert.AreEqual(0, attributes.Count());
+            Assert.Equal(0, attributes.Count());
 
             attributes = GetAttributesFromMember(builder, typeof(FooImpl), "P1");
-            Assert.AreEqual(0, attributes.Count());
+            Assert.Equal(0, attributes.Count());
 
             attributes = GetAttributesFromMember(builder, typeof(FooImpl), "P2");
-            Assert.AreEqual(0, attributes.Count());
+            Assert.Equal(0, attributes.Count());
 
             attributes = GetAttributesFromMember(builder, typeof(FooImpl), "P3");
-            Assert.AreEqual(0, attributes.Count());
+            Assert.Equal(0, attributes.Count());
         }
 
-        [TestMethod]
+        [Fact]
         public void ExportSelf_ShouldGenerateSingleExportAttribute()
         {
             var builder = new ConventionBuilder();
             builder.ForType(typeof(FooImpl)).Export();
 
             var attributes = GetAttributesFromMember(builder, typeof(FooImpl), null);
-            Assert.AreEqual(1, attributes.Count());
-            Assert.IsNotNull(attributes[0] as ExportAttribute);
+            Assert.Equal(1, attributes.Count());
+            Assert.NotNull(attributes[0] as ExportAttribute);
 
             attributes = GetAttributesFromMember(builder, typeof(FooImpl), "P1");
-            Assert.AreEqual(0, attributes.Count());
+            Assert.Equal(0, attributes.Count());
 
             attributes = GetAttributesFromMember(builder, typeof(FooImpl), "P2");
-            Assert.AreEqual(0, attributes.Count());
+            Assert.Equal(0, attributes.Count());
 
             attributes = GetAttributesFromMember(builder, typeof(FooImpl), "P3");
-            Assert.AreEqual(0, attributes.Count());
+            Assert.Equal(0, attributes.Count());
         }
 
-        [TestMethod]
+        [Fact]
         public void ExportOfT_ShouldGenerateSingleExportAttributeWithContractType()
         {
             var builder = new ConventionBuilder();
@@ -208,248 +201,248 @@ namespace System.Composition.Convention
 
             var attributes = GetAttributesFromMember(builder, typeof(FooImpl), null);
 
-            Assert.AreEqual(1, attributes.Count());
+            Assert.Equal(1, attributes.Count());
 
             var exportAttribute = attributes[0] as ExportAttribute;
-            Assert.IsNotNull(exportAttribute);
-            Assert.AreEqual(typeof(IFoo), exportAttribute.ContractType);
-            Assert.IsNull(exportAttribute.ContractName);
+            Assert.NotNull(exportAttribute);
+            Assert.Equal(typeof(IFoo), exportAttribute.ContractType);
+            Assert.Null(exportAttribute.ContractName);
 
 
             attributes = GetAttributesFromMember(builder, typeof(FooImpl), "P1");
-            Assert.AreEqual(0, attributes.Count());
+            Assert.Equal(0, attributes.Count());
 
             attributes = GetAttributesFromMember(builder, typeof(FooImpl), "P2");
-            Assert.AreEqual(0, attributes.Count());
+            Assert.Equal(0, attributes.Count());
 
             attributes = GetAttributesFromMember(builder, typeof(FooImpl), "P3");
-            Assert.AreEqual(0, attributes.Count());
+            Assert.Equal(0, attributes.Count());
         }
 
-        [TestMethod]
+        [Fact]
         public void AddMetadata_ShouldGeneratePartMetadataAttribute()
         {
             var builder = new ConventionBuilder();
             builder.ForType(typeof(FooImpl)).Export<IFoo>().AddPartMetadata("name", "value");
 
             var attributes = GetAttributesFromMember(builder, typeof(FooImpl), null);
-            Assert.AreEqual(2, attributes.Count());
+            Assert.Equal(2, attributes.Count());
 
             var exportAttribute = attributes.First((t) => t.GetType() == typeof(ExportAttribute)) as ExportAttribute;
-            Assert.AreEqual(typeof(IFoo), exportAttribute.ContractType);
-            Assert.IsNull(exportAttribute.ContractName);
+            Assert.Equal(typeof(IFoo), exportAttribute.ContractType);
+            Assert.Null(exportAttribute.ContractName);
 
             var mdAttribute = attributes.First((t) => t.GetType() == typeof(PartMetadataAttribute)) as PartMetadataAttribute;
-            Assert.AreEqual("name", mdAttribute.Name);
-            Assert.AreEqual("value", mdAttribute.Value);
+            Assert.Equal("name", mdAttribute.Name);
+            Assert.Equal("value", mdAttribute.Value);
 
             attributes = GetAttributesFromMember(builder, typeof(FooImpl), "P1");
-            Assert.AreEqual(0, attributes.Count());
+            Assert.Equal(0, attributes.Count());
 
             attributes = GetAttributesFromMember(builder, typeof(FooImpl), "P2");
-            Assert.AreEqual(0, attributes.Count());
+            Assert.Equal(0, attributes.Count());
 
             attributes = GetAttributesFromMember(builder, typeof(FooImpl), "P3");
-            Assert.AreEqual(0, attributes.Count());
+            Assert.Equal(0, attributes.Count());
         }
 
-        [TestMethod]
+        [Fact]
         public void AddMetadataWithFunc_ShouldGeneratePartMetadataAttribute()
         {
             var builder = new ConventionBuilder();
             builder.ForType(typeof(FooImpl)).Export<IFoo>().AddPartMetadata("name", t => t.Name);
 
             var attributes = GetAttributesFromMember(builder, typeof(FooImpl), null);
-            Assert.AreEqual(2, attributes.Count());
+            Assert.Equal(2, attributes.Count());
 
             var exportAttribute = attributes.First((t) => t.GetType() == typeof(ExportAttribute)) as ExportAttribute;
-            Assert.AreEqual(typeof(IFoo), exportAttribute.ContractType);
-            Assert.IsNull(exportAttribute.ContractName);
+            Assert.Equal(typeof(IFoo), exportAttribute.ContractType);
+            Assert.Null(exportAttribute.ContractName);
 
             var mdAttribute = attributes.First((t) => t.GetType() == typeof(PartMetadataAttribute)) as PartMetadataAttribute;
-            Assert.AreEqual("name", mdAttribute.Name);
-            Assert.AreEqual(typeof(FooImpl).Name, mdAttribute.Value);
+            Assert.Equal("name", mdAttribute.Name);
+            Assert.Equal(typeof(FooImpl).Name, mdAttribute.Value);
 
             attributes = GetAttributesFromMember(builder, typeof(FooImpl), "P1");
-            Assert.AreEqual(0, attributes.Count());
+            Assert.Equal(0, attributes.Count());
 
             attributes = GetAttributesFromMember(builder, typeof(FooImpl), "P2");
-            Assert.AreEqual(0, attributes.Count());
+            Assert.Equal(0, attributes.Count());
 
             attributes = GetAttributesFromMember(builder, typeof(FooImpl), "P3");
-            Assert.AreEqual(0, attributes.Count());
+            Assert.Equal(0, attributes.Count());
         }
 
-        [TestMethod]
+        [Fact]
         public void ExportProperty_ShouldGenerateExportForPropertySelected()
         {
             var builder = new ConventionBuilder();
             builder.ForType(typeof(FooImpl)).ExportProperties(p => p.Name == "P1");
 
             var attributes = GetAttributesFromMember(builder, typeof(FooImpl), null);
-            Assert.AreEqual(0, attributes.Count());
+            Assert.Equal(0, attributes.Count());
 
             attributes = GetAttributesFromMember(builder, typeof(FooImpl), "P1");
-            Assert.AreEqual(1, attributes.Count());
+            Assert.Equal(1, attributes.Count());
 
             var exportAttribute = attributes.First((t) => t.GetType() == typeof(ExportAttribute)) as ExportAttribute;
-            Assert.IsNull(exportAttribute.ContractName);
-            Assert.IsNull(exportAttribute.ContractType);
+            Assert.Null(exportAttribute.ContractName);
+            Assert.Null(exportAttribute.ContractType);
 
             attributes = GetAttributesFromMember(builder, typeof(FooImpl), "P2");
-            Assert.AreEqual(0, attributes.Count());
+            Assert.Equal(0, attributes.Count());
 
             attributes = GetAttributesFromMember(builder, typeof(FooImpl), "P3");
-            Assert.AreEqual(0, attributes.Count());
+            Assert.Equal(0, attributes.Count());
         }
 
-        [TestMethod]
+        [Fact]
         public void ImportProperty_ShouldGenerateImportForPropertySelected()
         {
             var builder = new ConventionBuilder();
             builder.ForType(typeof(FooImpl)).ImportProperties(p => p.Name == "P1");
 
             var attributes = GetAttributesFromMember(builder, typeof(FooImpl), null);
-            Assert.AreEqual(0, attributes.Count());
+            Assert.Equal(0, attributes.Count());
 
             attributes = GetAttributesFromMember(builder, typeof(FooImpl), "P1");
-            Assert.AreEqual(1, attributes.Count());
+            Assert.Equal(1, attributes.Count());
 
             var importAttribute = attributes.First((t) => t.GetType() == typeof(ImportAttribute)) as ImportAttribute;
-            Assert.IsNull(importAttribute.ContractName);
+            Assert.Null(importAttribute.ContractName);
 
             attributes = GetAttributesFromMember(builder, typeof(FooImpl), "P2");
-            Assert.AreEqual(0, attributes.Count());
+            Assert.Equal(0, attributes.Count());
 
             attributes = GetAttributesFromMember(builder, typeof(FooImpl), "P3");
-            Assert.AreEqual(0, attributes.Count());
+            Assert.Equal(0, attributes.Count());
         }
 
-        [TestMethod]
+        [Fact]
         public void ImportProperties_ShouldGenerateImportForPropertySelected_And_ApplyImportMany()
         {
             var builder = new ConventionBuilder();
             builder.ForType(typeof(FooImpl)).ImportProperties(p => p.Name == "P3");
 
             var attributes = GetAttributesFromMember(builder, typeof(FooImpl), null);
-            Assert.AreEqual(0, attributes.Count());
+            Assert.Equal(0, attributes.Count());
 
             attributes = GetAttributesFromMember(builder, typeof(FooImpl), "P1");
-            Assert.AreEqual(0, attributes.Count());
+            Assert.Equal(0, attributes.Count());
 
             attributes = GetAttributesFromMember(builder, typeof(FooImpl), "P2");
-            Assert.AreEqual(0, attributes.Count());
+            Assert.Equal(0, attributes.Count());
 
             attributes = GetAttributesFromMember(builder, typeof(FooImpl), "P3");
-            Assert.AreEqual(1, attributes.Count());
+            Assert.Equal(1, attributes.Count());
 
             var importAttribute = attributes.First((t) => t.GetType() == typeof(ImportManyAttribute)) as ImportManyAttribute;
-            Assert.IsNull(importAttribute.ContractName);
+            Assert.Null(importAttribute.ContractName);
         }
 
-        [TestMethod]
+        [Fact]
         public void ExportPropertyWithConfiguration_ShouldGenerateExportForPropertySelected()
         {
             var builder = new ConventionBuilder();
             builder.ForType(typeof(FooImpl)).ExportProperties(p => p.Name == "P1", (pi, c) => c.AsContractName("hey").AsContractType<IFoo>());
 
             var attributes = GetAttributesFromMember(builder, typeof(FooImpl), null);
-            Assert.AreEqual(0, attributes.Count());
+            Assert.Equal(0, attributes.Count());
 
             attributes = GetAttributesFromMember(builder, typeof(FooImpl), "P1");
-            Assert.AreEqual(1, attributes.Count());
+            Assert.Equal(1, attributes.Count());
 
             var exportAttribute = attributes.First((t) => t.GetType() == typeof(ExportAttribute)) as ExportAttribute;
-            Assert.AreSame("hey", exportAttribute.ContractName);
-            Assert.AreSame(typeof(IFoo), exportAttribute.ContractType);
+            Assert.Same("hey", exportAttribute.ContractName);
+            Assert.Same(typeof(IFoo), exportAttribute.ContractType);
 
             attributes = GetAttributesFromMember(builder, typeof(FooImpl), "P2");
-            Assert.AreEqual(0, attributes.Count());
+            Assert.Equal(0, attributes.Count());
 
             attributes = GetAttributesFromMember(builder, typeof(FooImpl), "P3");
-            Assert.AreEqual(0, attributes.Count());
+            Assert.Equal(0, attributes.Count());
         }
 
-        [TestMethod]
+        [Fact]
         public void ExportPropertyOfT_ShouldGenerateExportForPropertySelectedWithTAsContractType()
         {
             var builder = new ConventionBuilder();
             builder.ForType(typeof(FooImpl)).ExportProperties(p => p.Name == "P1", (p, c) => c.AsContractType<IFoo>());
 
             var attributes = GetAttributesFromMember(builder, typeof(FooImpl), null);
-            Assert.AreEqual(0, attributes.Count());
+            Assert.Equal(0, attributes.Count());
 
             attributes = GetAttributesFromMember(builder, typeof(FooImpl), "P1");
-            Assert.AreEqual(1, attributes.Count());
+            Assert.Equal(1, attributes.Count());
 
             var exportAttribute = attributes.First((t) => t.GetType() == typeof(ExportAttribute)) as ExportAttribute;
-            Assert.IsNull(exportAttribute.ContractName);
-            Assert.AreSame(typeof(IFoo), exportAttribute.ContractType);
+            Assert.Null(exportAttribute.ContractName);
+            Assert.Same(typeof(IFoo), exportAttribute.ContractType);
 
             attributes = GetAttributesFromMember(builder, typeof(FooImpl), "P2");
-            Assert.AreEqual(0, attributes.Count());
+            Assert.Equal(0, attributes.Count());
 
             attributes = GetAttributesFromMember(builder, typeof(FooImpl), "P3");
-            Assert.AreEqual(0, attributes.Count());
+            Assert.Equal(0, attributes.Count());
         }
 
-        [TestMethod]
+        [Fact]
         public void ConventionSelectsConstructor_SelectsTheOneWithMostParameters()
         {
             var builder = new ConventionBuilder();
             builder.ForType(typeof(FooImplWithConstructors));
 
             var selectedConstructor = GetSelectedConstructor(builder, typeof(FooImplWithConstructors));
-            Assert.IsNotNull(selectedConstructor);
-            Assert.AreEqual(2, selectedConstructor.GetParameters().Length);         // Should select public FooImplWithConstructors(int id, string name) { }
+            Assert.NotNull(selectedConstructor);
+            Assert.Equal(2, selectedConstructor.GetParameters().Length);         // Should select public FooImplWithConstructors(int id, string name) { }
 
             var attributes = GetAttributesFromMember(builder, typeof(FooImpl), null);
-            Assert.AreEqual(0, attributes.Count());
+            Assert.Equal(0, attributes.Count());
         }
 
-        [TestMethod]
+        [Fact]
         public void ManuallySelectingConstructor_SelectsTheExplicitOne()
         {
             var builder = new ConventionBuilder();
             builder.ForType(typeof(FooImplWithConstructors)).SelectConstructor(cis => cis.ElementAt(1));
 
             var selectedConstructor = GetSelectedConstructor(builder, typeof(FooImplWithConstructors));
-            Assert.IsNotNull(selectedConstructor);
-            Assert.AreEqual(1, selectedConstructor.GetParameters().Length);     // Should select public FooImplWithConstructors(int) { }
+            Assert.NotNull(selectedConstructor);
+            Assert.Equal(1, selectedConstructor.GetParameters().Length);     // Should select public FooImplWithConstructors(int) { }
 
             var pi = selectedConstructor.GetParameters()[0];
-            Assert.AreEqual(typeof(int), pi.ParameterType);
+            Assert.Equal(typeof(int), pi.ParameterType);
 
             var attributes = builder.GetDeclaredAttributes(typeof(FooImplWithConstructors), pi);
-            Assert.AreEqual(1, attributes.Count());
-            Assert.IsNotNull(attributes[0] as ImportAttribute);
+            Assert.Equal(1, attributes.Count());
+            Assert.NotNull(attributes[0] as ImportAttribute);
 
             attributes = GetAttributesFromMember(builder, typeof(FooImplWithConstructors), null);
-            Assert.AreEqual(0, attributes.Count());
+            Assert.Equal(0, attributes.Count());
         }
 
-        [TestMethod]
+        [Fact]
         public void ManuallySelectingConstructor_SelectsTheExplicitOne_IEnumerableParameterBecomesImportMany()
         {
             var builder = new ConventionBuilder();
             builder.ForType(typeof(FooImplWithConstructors)).SelectConstructor(cis => cis.ElementAt(2));
 
             var selectedConstructor = GetSelectedConstructor(builder, typeof(FooImplWithConstructors));
-            Assert.IsNotNull(selectedConstructor);
-            Assert.AreEqual(1, selectedConstructor.GetParameters().Length);     // Should select public FooImplWithConstructors(IEnumerable<IFoo>) { }
+            Assert.NotNull(selectedConstructor);
+            Assert.Equal(1, selectedConstructor.GetParameters().Length);     // Should select public FooImplWithConstructors(IEnumerable<IFoo>) { }
 
             var pi = selectedConstructor.GetParameters()[0];
-            Assert.AreEqual(typeof(IEnumerable<IFoo>), pi.ParameterType);
+            Assert.Equal(typeof(IEnumerable<IFoo>), pi.ParameterType);
 
             var attributes = builder.GetDeclaredAttributes(typeof(FooImplWithConstructors), pi);
-            Assert.AreEqual(1, attributes.Count());
-            Assert.IsNotNull(attributes[0] as ImportManyAttribute);
+            Assert.Equal(1, attributes.Count());
+            Assert.NotNull(attributes[0] as ImportManyAttribute);
 
             attributes = GetAttributesFromMember(builder, typeof(FooImplWithConstructors), null);
-            Assert.AreEqual(0, attributes.Count());
+            Assert.Equal(0, attributes.Count());
         }
 
-        [TestMethod]
+        [Fact]
         public void ExportInterfaceSelectorNull_ShouldThrowArgumentNull()
         {
             var builder = new ConventionBuilder();
@@ -457,7 +450,7 @@ namespace System.Composition.Convention
             ExceptionAssert.ThrowsArgumentNull("interfaceFilter", () => builder.ForTypesMatching((t) => true).ExportInterfaces(null, null));
         }
 
-        [TestMethod]
+        [Fact]
         public void ImportSelectorNull_ShouldThrowArgumentNull()
         {
             var builder = new ConventionBuilder();
@@ -467,7 +460,7 @@ namespace System.Composition.Convention
             ExceptionAssert.ThrowsArgumentNull("propertyFilter", () => builder.ForTypesMatching((t) => true).ImportProperties<IFirst>(null, null));
         }
 
-        [TestMethod]
+        [Fact]
         public void ExportSelectorNull_ShouldThrowArgumentNull()
         {
             var builder = new ConventionBuilder();
@@ -477,7 +470,7 @@ namespace System.Composition.Convention
             ExceptionAssert.ThrowsArgumentNull("propertyFilter", () => builder.ForTypesMatching((t) => true).ExportProperties<IFirst>(null, null));
         }
 
-        [TestMethod]
+        [Fact]
         public void InsideTheLambdaCallGetCustomAttributesShouldSucceed()
         {
             var builder = new ConventionBuilder();
@@ -490,12 +483,12 @@ namespace System.Composition.Convention
             var importer = new ImporterOfMyNotTobeIncludedClass();
             container.SatisfyImports(importer);
 
-            Assert.IsNull(importer.MyNotToBeIncludedClass);
-            Assert.IsNotNull(importer.MyToBeIncludedClass);
+            Assert.Null(importer.MyNotToBeIncludedClass);
+            Assert.NotNull(importer.MyToBeIncludedClass);
         }
 
 
-        [TestMethod]
+        [Fact]
         public void NotifyImportsSatisfiedAttributeAlreadyApplied_ShouldSucceed()
         {
             var builder = new ConventionBuilder();
@@ -506,13 +499,13 @@ namespace System.Composition.Convention
                 .CreateContainer();
             var test = container.GetExport<OnImportsSatisfiedConfiguredClass>();
 
-            Assert.IsNotNull(test.P1);
-            Assert.IsNotNull(test.P2);
-            Assert.AreEqual(1, test.OnImportsSatisfiedInvoked);
+            Assert.NotNull(test.P1);
+            Assert.NotNull(test.P2);
+            Assert.Equal(1, test.OnImportsSatisfiedInvoked);
         }
 
 
-        [TestMethod]
+        [Fact]
         public void NotifyImportsSatisfiedAttributeAppliedToBaseClass_ShouldSucceed()
         {
             var builder = new ConventionBuilder();
@@ -523,13 +516,13 @@ namespace System.Composition.Convention
                 .CreateContainer();
             var test = container.GetExport<OnImportsSatisfiedDerivedClass>();
 
-            Assert.IsNotNull(test.P1);
-            Assert.IsNotNull(test.P2);
-            Assert.AreEqual(1, test.OnImportsSatisfiedInvoked);
+            Assert.NotNull(test.P1);
+            Assert.NotNull(test.P2);
+            Assert.Equal(1, test.OnImportsSatisfiedInvoked);
         }
 
 
-        [TestMethod]
+        [Fact]
         public void NotifyImportsSatisfiedMultipleNotifications_ShouldSucceed()
         {
             var builder = new ConventionBuilder();
@@ -540,12 +533,12 @@ namespace System.Composition.Convention
                 .CreateContainer();
             var test = container.GetExport<OnImportsSatisfiedMultipleClass>();
 
-            Assert.IsNotNull(test.P1);
-            Assert.IsNotNull(test.P2);
-            Assert.AreEqual(2, test.OnImportsSatisfiedInvoked);
+            Assert.NotNull(test.P1);
+            Assert.NotNull(test.P2);
+            Assert.Equal(2, test.OnImportsSatisfiedInvoked);
         }
 
-        [TestMethod]
+        [Fact]
         public void NotifyImportsSatisfiedTwice_ShouldSucceed()
         {
             var builder = new ConventionBuilder();
@@ -556,13 +549,13 @@ namespace System.Composition.Convention
                 .CreateContainer();
             var test = container.GetExport<OnImportsSatisfiedMultipleClass>();
 
-            Assert.IsNotNull(test.P1);
-            Assert.IsNotNull(test.P2);
-            Assert.AreEqual(6, test.OnImportsSatisfiedInvoked);
+            Assert.NotNull(test.P1);
+            Assert.NotNull(test.P2);
+            Assert.Equal(6, test.OnImportsSatisfiedInvoked);
         }
 
 
-        [TestMethod]
+        [Fact]
         public void NotifyImportsSatisfiedInvalidMethod_ShouldSucceed()
         {
             var builder = new ConventionBuilder();
@@ -573,12 +566,12 @@ namespace System.Composition.Convention
                 .CreateContainer();
             var test = container.GetExport<OnImportsSatisfiedTestClassPropertiesAndFields>();
 
-            Assert.IsNotNull(test.P1);
-            Assert.IsNotNull(test.P2);
-            Assert.AreEqual(0, test.OnImportsSatisfiedInvoked);
+            Assert.NotNull(test.P1);
+            Assert.NotNull(test.P2);
+            Assert.Equal(0, test.OnImportsSatisfiedInvoked);
         }
 
-        [TestMethod]
+        [Fact]
         public void NotifyImportsSatisfiedPropertiesAndFields_ShouldSucceed()
         {
             var builder = new ConventionBuilder();
@@ -589,9 +582,9 @@ namespace System.Composition.Convention
                 .CreateContainer();
             var test = container.GetExport<OnImportsSatisfiedTestClassPropertiesAndFields>();
 
-            Assert.IsNotNull(test.P1);
-            Assert.IsNotNull(test.P2);
-            Assert.AreEqual(0, test.OnImportsSatisfiedInvoked);
+            Assert.NotNull(test.P1);
+            Assert.NotNull(test.P2);
+            Assert.Equal(0, test.OnImportsSatisfiedInvoked);
         }
 
         private static Attribute[] GetAttributesFromMember(ConventionBuilder builder, Type type, string member)
@@ -617,7 +610,7 @@ namespace System.Composition.Convention
                 var li = builder.GetDeclaredAttributes(type, ci);
                 if (li.Length > 0)
                 {
-                    Assert.IsTrue(reply == null);                   // Fail if we got more than one constructor
+                    Assert.True(reply == null);                   // Fail if we got more than one constructor
                     reply = ci;
                 }
             }

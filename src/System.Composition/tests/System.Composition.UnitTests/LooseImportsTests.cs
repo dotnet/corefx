@@ -7,17 +7,10 @@ using System.Composition.UnitTests;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-#if NETFX_CORE
-using Microsoft.VisualStudio.TestPlatform.UnitTestFramework;
-#elif PORTABLE_TESTS
-using Microsoft.Bcl.Testing;
-#else
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
-#endif
 namespace System.Composition.Lightweight.UnitTests
 {
-    [TestClass]
     public class LooseImportsTests : ContainerTests
     {
         [Export]
@@ -29,13 +22,13 @@ namespace System.Composition.Lightweight.UnitTests
             public Transaction Transaction { get; set; }
         }
 
-        [TestMethod]
+        [Fact]
         public void SatisfyImportsSetsLooseImportsOnAttributedPart()
         {
             var container = CreateContainer(typeof(Transaction));
             var hasLoose = new SaveChangesAttribute();
             container.SatisfyImports(hasLoose);
-            Assert.IsNotNull(hasLoose.Transaction);
+            Assert.NotNull(hasLoose.Transaction);
         }
     }
 }

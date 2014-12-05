@@ -6,21 +6,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-#if NETFX_CORE
-using Microsoft.VisualStudio.TestPlatform.UnitTestFramework;
-#elif PORTABLE_TESTS
-using Microsoft.Bcl.Testing;
-#else
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-#endif
 using System.Composition.Hosting;
 using System.Composition.Hosting.Core;
 using System.Composition.UnitTests.Util;
 using System.Composition.Runtime;
+using Xunit;
 
 namespace System.Composition.UnitTests
 {
-    [TestClass]
     public class CircularityTests : ContainerTests
     {
         public interface IA { }
@@ -122,74 +115,74 @@ namespace System.Composition.UnitTests
             public PrDepB(PrDepA a) { }
         }
 
-        [TestMethod]
+        [Fact]
         public void CanHandleDefinitionCircularity()
         {
             var cc = CreateContainer(typeof(ACircular), typeof(BLazy));
             var x = cc.GetExport<BLazy>();
-            Assert.IsInstanceOfType(x.A.Value, typeof(ACircular));
-            Assert.IsInstanceOfType(((ACircular)x.A.Value).B, typeof(BLazy));
+            Assert.IsAssignableFrom(typeof(ACircular), x.A.Value);
+            Assert.IsAssignableFrom(typeof(BLazy), ((ACircular)x.A.Value).B);
         }
 
-        [TestMethod]
+        [Fact]
         public void CanHandleDefinitionCircularity2()
         {
             var cc = CreateContainer(typeof(ACircular), typeof(BLazy));
             var x = cc.GetExport<IA>();
-            Assert.IsInstanceOfType(((ACircular)((ACircular)x).B.A.Value).B, typeof(BLazy));
+            Assert.IsAssignableFrom(typeof(BLazy), ((ACircular)((ACircular)x).B.A.Value).B);
         }
 
-        [TestMethod]
+        [Fact]
         public void HandlesPropertyPropertyCircularity()
         {
             var cc = CreateContainer(typeof(PropertyPropertyA), typeof(PropertyPropertyB));
             var a = cc.GetExport<PropertyPropertyA>();
-            Assert.AreSame(a.B.A, a);
+            Assert.Same(a.B.A, a);
         }
 
-        [TestMethod]
+        [Fact]
         public void HandlesPropertyPropertyCircularityReversed()
         {
             var cc = CreateContainer(typeof(PropertyPropertyA), typeof(PropertyPropertyB));
             var b = cc.GetExport<PropertyPropertyB>();
-            Assert.AreSame(b.A.B, b.A.B.A.B);
+            Assert.Same(b.A.B, b.A.B.A.B);
         }
 
-        [TestMethod]
+        [Fact]
         public void HandlesConstructorPropertyCircularity()
         {
             var cc = CreateContainer(typeof(ConstructorPropertyA), typeof(ConstructorPropertyB));
             var a = cc.GetExport<ConstructorPropertyA>();
-            Assert.AreSame(a.B.A.B.A, a.B.A);
+            Assert.Same(a.B.A.B.A, a.B.A);
         }
 
-        [TestMethod]
+        [Fact]
         public void HandlesConstructorPropertyCircularityReversed()
         {
             var cc = CreateContainer(typeof(ConstructorPropertyA), typeof(ConstructorPropertyB));
             var b = cc.GetExport<ConstructorPropertyB>();
-            Assert.AreSame(b, b.A.B);
+            Assert.Same(b, b.A.B);
         }
 
-        [TestMethod]
+        [Fact]
         public void HandlesMetadataCircularity()
         {
             var cc = CreateContainer(typeof(MetadataCircularityA), typeof(MetadataCircularityB));
             var a = cc.GetExport<MetadataCircularityA>();
 
-            Assert.AreEqual(a.B.Metadata.Name, "B");
-            Assert.AreEqual(a.B.Value.A.Metadata.Name, "A");
+            Assert.Equal(a.B.Metadata.Name, "B");
+            Assert.Equal(a.B.Value.A.Metadata.Name, "A");
         }
 
-        [TestMethod]
+        [Fact]
         public void SharedPartCanHaveNonPrereqDependencyOnSelf()
         {
             var cc = CreateContainer(typeof(NonPrereqSelfDependency));
             var npsd = cc.GetExport<NonPrereqSelfDependency>();
-            Assert.AreSame(npsd, npsd.Self);
+            Assert.Same(npsd, npsd.Self);
         }
 
-        [TestMethod]
+        [Fact]
         public void PrerequisiteCircularitiesAreDetected()
         {
             var cc = CreateContainer(typeof(PrDepA), typeof(PrDepB));

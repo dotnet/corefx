@@ -7,14 +7,9 @@ using System.Composition.Convention.UnitTests;
 using System.Linq;
 using System.Text;
 using System.Reflection;
-#if NETFX_CORE
-using Microsoft.VisualStudio.TestPlatform.UnitTestFramework;
-#elif PORTABLE_TESTS
-using Microsoft.Bcl.Testing;
-#else
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
+using System.Composition.UnitTests.Util;
 
-#endif
 namespace System.Composition.Convention
 {
     public interface IContract1 { }
@@ -36,13 +31,11 @@ namespace System.Composition.Convention
     {
         public static PartConventionBuilder ExportInterfaces(this PartConventionBuilder pb) { return null; }
     }
-
-    [TestClass]
     public class ExportInterfacesContractExclusionTests
     {
         private static readonly Type[] _ContractInterfaces = new[] { typeof(IContract1), typeof(IContract2) };
 
-        [TestMethod]
+        [Fact]
         public void WhenExportingInterfaces_NoPredicate_OnlyContractInterfacesAreExported()
         {
             var builder = new ConventionBuilder();
@@ -50,10 +43,10 @@ namespace System.Composition.Convention
 
             var attributes = GetExportAttributes(builder, typeof(ClassWithLifetimeConcerns));
             var exportedContracts = attributes.Select(e => e.ContractType).ToArray();
-            CollectionAssert.AreEquivalent(_ContractInterfaces, exportedContracts);
+            AssertX.Equivalent(_ContractInterfaces, exportedContracts);
         }
 
-        [TestMethod]
+        [Fact]
         public void WhenExportingInterfaces_PredicateSpecified_OnlyContractInterfacesAreSeenByThePredicate()
         {
             var seenInterfaces = new List<Type>();
@@ -62,7 +55,7 @@ namespace System.Composition.Convention
             builder.ForType<ClassWithLifetimeConcerns>().ExportInterfaces(i => { seenInterfaces.Add(i); return true; });
 
             var attributes = GetExportAttributes(builder, typeof(ClassWithLifetimeConcerns));
-            CollectionAssert.AreEquivalent(_ContractInterfaces, seenInterfaces);
+            AssertX.Equivalent(_ContractInterfaces, seenInterfaces);
         }
 
         private static IEnumerable<ExportAttribute> GetExportAttributes(ConventionBuilder builder, Type type)

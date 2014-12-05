@@ -6,13 +6,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-#if NETFX_CORE
-using Microsoft.VisualStudio.TestPlatform.UnitTestFramework;
-#elif PORTABLE_TESTS
-using Microsoft.Bcl.Testing;
-#else
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-#endif
 using System.Composition;
 using System.Composition.Hosting;
 using System.Composition.Hosting.Core;
@@ -21,6 +14,7 @@ using System.Composition.UnitTests.Util;
 using System.Composition.Runtime;
 using Microsoft.Composition.Demos.ExtendedCollectionImports;
 using Microsoft.Composition.Demos.ExtendedCollectionImports.Dictionaries;
+using Xunit;
 
 namespace System.Composition.UnitTests
 {
@@ -62,8 +56,6 @@ namespace System.Composition.UnitTests
             Values = values;
         }
     }
-
-    [TestClass]
     public class DictionaryImportTests
     {
         CompositionContext CreateContainer(params Type[] types)
@@ -75,19 +67,19 @@ namespace System.Composition.UnitTests
             return configuration.CreateContainer();
         }
 
-        [TestMethod]
+        [Fact]
         public void DictionaryImportsKeyedByMetadata()
         {
             var container = CreateContainer(new[] { typeof(ValueA), typeof(ValueB), typeof(Consumer) });
 
             var consumer = container.GetExport<Consumer>();
 
-            Assert.IsInstanceOfType(consumer.Values["A"], typeof(ValueA));
-            Assert.IsInstanceOfType(consumer.Values["B"], typeof(ValueB));
-            Assert.AreEqual(2, consumer.Values.Count());
+            Assert.IsAssignableFrom(typeof(ValueA), consumer.Values["A"]);
+            Assert.IsAssignableFrom(typeof(ValueB), consumer.Values["B"]);
+            Assert.Equal(2, consumer.Values.Count());
         }
 
-        [TestMethod]
+        [Fact]
         public void DictionaryImportsRecieveMetadataFromNestedAdapters()
         {
             var container = CreateContainer(new[] { typeof(ValueA), typeof(ValueB), typeof(LazyConsumer) });
@@ -95,34 +87,34 @@ namespace System.Composition.UnitTests
             var consumer = container.GetExport<LazyConsumer>();
 
             var a = (Lazy<IValued>)consumer.Values["A"];
-            Assert.IsFalse(a.IsValueCreated);
+            Assert.False(a.IsValueCreated);
         }
 
-        [TestMethod]
+        [Fact]
         public void WhenAMetadataKeyIsDuplicatedAnInformativeExceptionIsThrown()
         {
             var container = CreateContainer(typeof(ValueA), typeof(ValueA), typeof(Consumer));
             var x = AssertX.Throws<CompositionFailedException>(() => container.GetExport<Consumer>());
-            Assert.AreEqual("The metadata 'Value' cannot be used as a dictionary import key because the value 'A' is associated with exports from parts 'ValueA' and 'ValueA'.", x.Message);
+            Assert.Equal("The metadata 'Value' cannot be used as a dictionary import key because the value 'A' is associated with exports from parts 'ValueA' and 'ValueA'.", x.Message);
         }
 
-        [TestMethod]
+        [Fact]
         public void WhenAMetadataKeyIsMissingAnInformativeExceptionIsThrown()
         {
             var container = CreateContainer(typeof(ValueA), typeof(ValueMissing), typeof(Consumer));
             var x = AssertX.Throws<CompositionFailedException>(() => container.GetExport<Consumer>());
-            Assert.AreEqual("The metadata 'Value' cannot be used as a dictionary import key because it is missing from exports on part(s) 'ValueMissing'.", x.Message);
+            Assert.Equal("The metadata 'Value' cannot be used as a dictionary import key because it is missing from exports on part(s) 'ValueMissing'.", x.Message);
         }
 
-        [TestMethod]
+        [Fact]
         public void WhenAMetadataValueIsOfTheWrongTypeAnInformativeExceptionIsThrown()
         {
             var container = CreateContainer(typeof(ValueA), typeof(NonStringValue), typeof(Consumer));
             var x = AssertX.Throws<CompositionFailedException>(() => container.GetExport<Consumer>());
-            Assert.AreEqual("The metadata 'Value' cannot be used as a dictionary import key of type 'String' because the value(s) supplied by 'NonStringValue' are of the wrong type.", x.Message);
+            Assert.Equal("The metadata 'Value' cannot be used as a dictionary import key of type 'String' because the value(s) supplied by 'NonStringValue' are of the wrong type.", x.Message);
         }
 
-        [TestMethod]
+        [Fact]
         public void DictionaryImportsCompatibleWithConventionBuilder()
         {
             var rb = new ConventionBuilder();
@@ -135,7 +127,7 @@ namespace System.Composition.UnitTests
 
             var consumer = container.GetExport<ConventionConsumer>();
 
-            Assert.AreEqual(2, consumer.Values.Count());
+            Assert.Equal(2, consumer.Values.Count());
         }
     }
 }

@@ -12,17 +12,10 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Composition.Demos.ExtendedCollectionImports;
 using Microsoft.Composition.Demos.ExtendedCollectionImports.OrderedCollections;
-#if NETFX_CORE
-using Microsoft.VisualStudio.TestPlatform.UnitTestFramework;
-#elif PORTABLE_TESTS
-using Microsoft.Bcl.Testing;
-#else
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
-#endif
 namespace System.Composition.UnitTests
 {
-    [TestClass]
     public class ImportOrderingTests
     {
         public interface IItem
@@ -54,7 +47,7 @@ namespace System.Composition.UnitTests
             public IItem[] UnorderedItems { get; set; }
         }
 
-        [TestMethod]
+        [Fact]
         public void CollectionsImportedWithAnOrderingAttributeComeInOrder()
         {
             var container = CreateExtendedContainer(typeof(HasImportedItems), typeof(Item1), typeof(Item4), typeof(Item2), typeof(Item3));
@@ -63,16 +56,16 @@ namespace System.Composition.UnitTests
 
             var ordered = hasImportedItems.UnorderedItems.OrderBy(i => i.GetType().Name).ToArray();
 
-            CollectionAssert.AreEqual(ordered, hasImportedItems.OrderedItems);
-            CollectionAssert.AreNotEqual(ordered, hasImportedItems.UnorderedItems);
+            Assert.Equal(ordered, hasImportedItems.OrderedItems);
+            Assert.NotEqual(ordered, hasImportedItems.UnorderedItems);
         }
 
-        [TestMethod]
+        [Fact]
         public void IfAnItemIsMissingMetadataAnInformativeExceptionIsThrown()
         {
             var container = CreateExtendedContainer(typeof(HasImportedItems), typeof(Item1), typeof(ItemWithoutOrder));
             var x = AssertX.Throws<CompositionFailedException>(() => container.GetExport<HasImportedItems>());
-            Assert.AreEqual("The metadata 'Order' cannot be used for ordering because it is missing from exports on part(s) 'ItemWithoutOrder'.", x.Message);
+            Assert.Equal("The metadata 'Order' cannot be used for ordering because it is missing from exports on part(s) 'ItemWithoutOrder'.", x.Message);
         }
 
         private CompositionContext CreateExtendedContainer(params Type[] partTypes)

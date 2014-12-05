@@ -7,7 +7,6 @@
 using System.Diagnostics;
 using System.Composition.Hosting.Properties;
 
-
 namespace Microsoft.Internal
 {
     static class Requires

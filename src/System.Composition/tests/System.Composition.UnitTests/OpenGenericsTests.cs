@@ -10,17 +10,10 @@ using System.Composition.UnitTests.Util;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-#if NETFX_CORE
-using Microsoft.VisualStudio.TestPlatform.UnitTestFramework;
-#elif PORTABLE_TESTS
-using Microsoft.Bcl.Testing;
-#else
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
-#endif
 namespace System.Composition.UnitTests
 {
-    [TestClass]
     public class OpenGenericsTests : ContainerTests
     {
         interface IRepository<T> { }
@@ -70,43 +63,43 @@ namespace System.Composition.UnitTests
         [Export(typeof(SomeGenericType<>))]
         class ExportsBase<T> : SomeGenericType<T> { }
 
-        [TestMethod]
+        [Fact]
         public void CanExportBasicOpenGeneric()
         {
             var cc = CreateContainer(typeof(BasicRepository<>));
             var r = cc.GetExport<IRepository<string>>();
-            Assert.IsInstanceOfType(r, typeof(BasicRepository<string>));
+            Assert.IsAssignableFrom(typeof(BasicRepository<string>), r);
         }
 
-        [TestMethod]
+        [Fact]
         public void OpenGenericProvidesMultipleInstantiations()
         {
             var cc = CreateContainer(typeof(BasicRepository<>));
             var r = cc.GetExport<IRepository<string>>();
             var r2 = cc.GetExport<IRepository<int>>();
-            Assert.IsInstanceOfType(r2, typeof(BasicRepository<int>));
+            Assert.IsAssignableFrom(typeof(BasicRepository<int>), r2);
         }
 
-        [TestMethod]
+        [Fact]
         public void CanExportOpenGenericProperty()
         {
             var cc = CreateContainer(typeof(RepositoryProperty<>));
             var r = cc.GetExport<IRepository<string>>();
-            Assert.IsInstanceOfType(r, typeof(BasicRepository<string>));
+            Assert.IsAssignableFrom(typeof(BasicRepository<string>), r);
         }
 
-        [TestMethod]
+        [Fact]
         public void ASharedOpenGenericWithTwoExportsIsProvidedByASingleInstance()
         {
             var cc = CreateContainer(typeof(TwoGenericExports<>));
             var r = cc.GetExport<IRepository<string>>();
             var r2 = cc.GetExport<BasicRepository<string>>();
 
-            Assert.IsNotNull(r);
-            Assert.AreSame(r, r2);
+            Assert.NotNull(r);
+            Assert.Same(r, r2);
         }
 
-        [TestMethod]
+        [Fact]
         public void APartWithMultipleGenericExportsIsOnlyDiscoveredOnce()
         {
             var cc = CreateContainer(typeof(BasicRepository<>), typeof(TwoGenericExports<>));
@@ -116,47 +109,47 @@ namespace System.Composition.UnitTests
 
             // Provided by both
             var others = cc.GetExports<IRepository<string>>();
-            Assert.AreEqual(2, others.Count());
+            Assert.Equal(2, others.Count());
         }
 
-        [TestMethod]
+        [Fact]
         public void MultipleGenericExportsCanBeSpecifiedAtTheClassLevel()
         {
             var cc = CreateContainer(typeof(FirstAndSecond<>));
             var first = cc.GetExport<IFirst<string>>();
-            Assert.IsInstanceOfType(first, typeof(FirstAndSecond<string>));
+            Assert.IsAssignableFrom(typeof(FirstAndSecond<string>), first);
         }
 
         // In future, the set of allowable generic type mappings will be expanded (see
         // ignored tests above).
-        [TestMethod]
+        [Fact]
         public void TypesWithMismatchedGenericParameterListsAreDetectedDuringDiscovery()
         {
             var x = AssertX.Throws<CompositionFailedException>(() => CreateContainer(typeof(RepositoryWithKey<,>)));
-            Assert.AreEqual("Exported contract 'IRepository`1' of open generic part 'RepositoryWithKey`2' does not match the generic arguments of the class.", x.Message);
+            Assert.Equal("Exported contract 'IRepository`1' of open generic part 'RepositoryWithKey`2' does not match the generic arguments of the class.", x.Message);
         }
 
-        [TestMethod]
+        [Fact]
         public void TypesWithNonGenericExportsAreDetectedDuringDiscovery()
         {
             var x = AssertX.Throws<CompositionFailedException>(() => CreateContainer(typeof(RepositoryWithNonGenericExport<>)));
-            Assert.AreEqual("Open generic part 'RepositoryWithNonGenericExport`1' cannot export non-generic contract 'IRepository'.", x.Message);
+            Assert.Equal("Open generic part 'RepositoryWithNonGenericExport`1' cannot export non-generic contract 'IRepository'.", x.Message);
         }
 
-        [TestMethod]
+        [Fact]
         public void OpenGenericsCanExportSelf()
         {
             var cc = CreateContainer(typeof(ExportSelf<>));
             var es = cc.GetExport<ExportSelf<string>>();
-            Assert.IsInstanceOfType(es, typeof(ExportSelf<string>));
+            Assert.IsAssignableFrom(typeof(ExportSelf<string>), es);
         }
 
-        [TestMethod]
+        [Fact]
         public void OpenGenericsCanExportBase()
         {
             var cc = CreateContainer(typeof(ExportsBase<>));
             var es = cc.GetExport<SomeGenericType<string>>();
-            Assert.IsInstanceOfType(es, typeof(ExportsBase<string>));
+            Assert.IsAssignableFrom(typeof(ExportsBase<string>), es);
         }
     }
 }

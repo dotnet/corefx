@@ -6,29 +6,22 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-#if NETFX_CORE
-using Microsoft.VisualStudio.TestPlatform.UnitTestFramework;
-#elif PORTABLE_TESTS
-using Microsoft.Bcl.Testing;
-#else
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
-#endif
 namespace System.Composition.UnitTests
 {
-    [TestClass]
     public class CompositionContextExtensionsTests : ContainerTests
     {
         public interface IUnregistered { }
 
-        [TestMethod]
+        [Fact]
         public void GettingAnOptionalExportThatDoesntExistReturnsNull()
         {
             var c = CreateContainer();
 
             IUnregistered unregistered;
-            Assert.IsFalse(c.TryGetExport<IUnregistered>(null, out unregistered));
-            Assert.IsNull(unregistered);
+            Assert.False(c.TryGetExport<IUnregistered>(null, out unregistered));
+            Assert.Null(unregistered);
         }
     }
 }

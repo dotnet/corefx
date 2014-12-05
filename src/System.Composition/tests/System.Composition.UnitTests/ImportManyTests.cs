@@ -6,17 +6,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-#if NETFX_CORE
-using Microsoft.VisualStudio.TestPlatform.UnitTestFramework;
-#elif PORTABLE_TESTS
-using Microsoft.Bcl.Testing;
-#else
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
-#endif
 namespace System.Composition.UnitTests
 {
-    [TestClass]
     public class ImportManyTests : ContainerTests
     {
         public interface IA { }
@@ -47,20 +40,20 @@ namespace System.Composition.UnitTests
             {
             }
         }
-        [TestMethod]
+        [Fact]
         public void ImportsMany()
         {
             var cc = CreateContainer(typeof(A), typeof(A2), typeof(ImportManyIA));
             var im = cc.GetExport<ImportManyIA>();
-            Assert.AreEqual(2, im.Items.Count());
+            Assert.Equal(2, im.Items.Count());
         }
 
-        [TestMethod]
+        [Fact]
         public void ImportsManyProperties()
         {
             var cc = CreateContainer(typeof(A), typeof(A2), typeof(ImportManyPropsOfA));
             var im = cc.GetExport<ImportManyPropsOfA>();
-            Assert.AreEqual(2, im.AllA.Count());
+            Assert.Equal(2, im.AllA.Count());
         }
     }
 }

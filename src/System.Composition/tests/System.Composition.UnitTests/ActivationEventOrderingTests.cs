@@ -6,14 +6,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-#if NETFX_CORE
-using Microsoft.VisualStudio.TestPlatform.UnitTestFramework;
-#elif PORTABLE_TESTS
-using Microsoft.Bcl.Testing;
-#else
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-#endif
 using System.Composition.Hosting;
+using Xunit;
 
 namespace System.Composition.UnitTests
 {
@@ -34,18 +28,16 @@ namespace System.Composition.UnitTests
             SetOnImportsSatisfied = Imported;
         }
     }
-
-    [TestClass]
     public class ActivationEventOrderingTests : ContainerTests
     {
-        [TestMethod]
+        [Fact]
         public void OnImportsSatisfiedIsCalledAfterPropertyInjection()
         {
             var cc = CreateContainer(typeof(TracksImportSatisfaction), typeof(Imported));
 
             var tis = cc.GetExport<TracksImportSatisfaction>();
 
-            Assert.IsNotNull(tis.SetOnImportsSatisfied);
+            Assert.NotNull(tis.SetOnImportsSatisfied);
         }
     }
 }

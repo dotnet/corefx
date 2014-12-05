@@ -6,17 +6,10 @@ using System.Composition.Convention;
 using System.Linq;
 using System.Reflection;
 using System.Composition.Convention.UnitTests;
-#if NETFX_CORE
-using Microsoft.VisualStudio.TestPlatform.UnitTestFramework;
-#elif PORTABLE_TESTS
-using Microsoft.Bcl.Testing;
-#else
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
-#endif
 namespace System.Composition.Convention
 {
-    [TestClass]
     public class PartBuilderOfTInheritanceTests
     {
         abstract class BaseClass
@@ -32,7 +25,7 @@ namespace System.Composition.Convention
             public string P5 { get; set; }
         }
 
-        [TestMethod]
+        [Fact]
         public void ImportPropertyTargetingBaseClass_ShouldGenerateImportForPropertySelected()
         {
             var builder = new ConventionBuilder();
@@ -40,22 +33,22 @@ namespace System.Composition.Convention
 
             var importAttribute = GetAttributeFromMember(builder, typeof(DerClass), "P2") as ImportAttribute;
 
-            Assert.IsNotNull(importAttribute);
-            Assert.IsNull(importAttribute.ContractName);
+            Assert.NotNull(importAttribute);
+            Assert.Null(importAttribute.ContractName);
         }
 
-        [TestMethod]
+        [Fact]
         public void ImportPropertyTargetingBaseClass_ShouldGenerateImportManyForPropertySelected()
         {
             var builder = new ConventionBuilder();
             builder.ForType<DerClass>().ImportProperty(p => p.P3); // P3 is IEnumerable<int>
 
             var importManyAttribute = GetAttributeFromMember(builder, typeof(DerClass), "P3") as ImportManyAttribute;
-            Assert.IsNotNull(importManyAttribute);
-            Assert.IsNull(importManyAttribute.ContractName);
+            Assert.NotNull(importManyAttribute);
+            Assert.Null(importManyAttribute.ContractName);
         }
 
-        [TestMethod]
+        [Fact]
         public void ImportPropertyTargetingDerivedClass_ShouldGenerateImportForPropertySelected()
         {
             var builder = new ConventionBuilder();
@@ -63,11 +56,11 @@ namespace System.Composition.Convention
 
             var importAttribute = GetAttributeFromMember(builder, typeof(DerClass), "P4") as ImportAttribute;
 
-            Assert.IsNotNull(importAttribute);
-            Assert.IsNull(importAttribute.ContractName);
+            Assert.NotNull(importAttribute);
+            Assert.Null(importAttribute.ContractName);
         }
 
-        [TestMethod]
+        [Fact]
         public void ExportPropertyTargetingDerivedClass_ShouldGenerateExportForPropertySelected()
         {
             var builder = new ConventionBuilder();
@@ -75,12 +68,12 @@ namespace System.Composition.Convention
 
             var exportAttribute = GetAttributeFromMember(builder, typeof(DerClass), "P4") as ExportAttribute;
 
-            Assert.IsNotNull(exportAttribute);
-            Assert.IsNull(exportAttribute.ContractName);
-            Assert.IsNull(exportAttribute.ContractType);
+            Assert.NotNull(exportAttribute);
+            Assert.Null(exportAttribute.ContractName);
+            Assert.Null(exportAttribute.ContractType);
         }
 
-        [TestMethod]
+        [Fact]
         public void ExportPropertyTargetingBaseClass_ShouldGenerateExportForPropertySelected()
         {
             var builder = new ConventionBuilder();
@@ -88,9 +81,9 @@ namespace System.Composition.Convention
 
             var exportAttribute = GetAttributeFromMember(builder, typeof(DerClass), "P2") as ExportAttribute;
 
-            Assert.IsNotNull(exportAttribute);
-            Assert.IsNull(exportAttribute.ContractName);
-            Assert.IsNull(exportAttribute.ContractType);
+            Assert.NotNull(exportAttribute);
+            Assert.Null(exportAttribute.ContractName);
+            Assert.Null(exportAttribute.ContractType);
         }
 
         private static Attribute GetAttributeFromMember(ConventionBuilder builder, Type type, string member)

@@ -6,17 +6,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-#if NETFX_CORE
-using Microsoft.VisualStudio.TestPlatform.UnitTestFramework;
-#elif PORTABLE_TESTS
-using Microsoft.Bcl.Testing;
-#else
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
-#endif
 namespace System.Composition.UnitTests
 {
-    [TestClass]
     public class PropertyExportTests : ContainerTests
     {
         public class Messenger
@@ -25,14 +18,14 @@ namespace System.Composition.UnitTests
             public string Message { get { return "Helo!"; } }
         }
 
-        [TestMethod]
+        [Fact]
         public void CanExportProperty()
         {
             var cc = CreateContainer(typeof(Messenger));
 
             var x = cc.GetExport<string>();
 
-            Assert.AreEqual("Helo!", x);
+            Assert.Equal("Helo!", x);
         }
 
         [Export, Shared]
@@ -49,12 +42,12 @@ namespace System.Composition.UnitTests
             public IList<SelfObsessed> Values { get; set; }
         }
 
-        [TestMethod]
+        [Fact]
         public void ExportedPropertiesShareTheSameSharedPartInstance()
         {
             var cc = CreateContainer(typeof(SelfObsessed), typeof(Selfless));
             var sl = cc.GetExport<Selfless>();
-            Assert.AreSame(sl.Values[0], sl.Values[1]);
+            Assert.Same(sl.Values[0], sl.Values[1]);
         }
     }
 }

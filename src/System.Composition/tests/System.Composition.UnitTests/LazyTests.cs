@@ -6,17 +6,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-#if NETFX_CORE
-using Microsoft.VisualStudio.TestPlatform.UnitTestFramework;
-#elif PORTABLE_TESTS
-using Microsoft.Bcl.Testing;
-#else
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
-#endif
 namespace System.Composition.UnitTests
 {
-    [TestClass]
     public class LazyTests : ContainerTests
     {
         public interface IA { }
@@ -41,28 +34,28 @@ namespace System.Composition.UnitTests
 
         public class Named { public string Name { get; set; } }
 
-        [TestMethod]
+        [Fact]
         public void ComposesLazily()
         {
             var cc = CreateContainer(typeof(A), typeof(BLazy));
             var x = cc.GetExport<BLazy>();
-            Assert.IsInstanceOfType(x.A.Value, typeof(A));
+            Assert.IsAssignableFrom(typeof(A), x.A.Value);
         }
 
-        [TestMethod]
+        [Fact]
         public void SupportsExportMetadata()
         {
             var cc = CreateContainer(typeof(NamedFred));
             var fred = cc.GetExport<Lazy<NamedFred, Named>>();
-            Assert.AreEqual("Fred", fred.Metadata.Name);
+            Assert.Equal("Fred", fred.Metadata.Name);
         }
 
-        [TestMethod]
+        [Fact]
         public void ReturnsExportMetadataAsADictionary()
         {
             var cc = CreateContainer(typeof(NamedFred));
             var fred = cc.GetExport<Lazy<NamedFred, IDictionary<string, object>>>();
-            Assert.AreEqual("Fred", fred.Metadata["Name"]);
+            Assert.Equal("Fred", fred.Metadata["Name"]);
         }
 
         [Export("Special", typeof(IA))]
@@ -78,12 +71,12 @@ namespace System.Composition.UnitTests
             public Lazy<IA>[] ALazies { get; set; }
         }
 
-        [TestMethod]
+        [Fact]
         public void LazyCanBeComposedWithImportManyAndNames()
         {
             var cc = CreateContainer(typeof(AConsumer), typeof(A1), typeof(A2));
             var cons = cc.GetExport<AConsumer>();
-            Assert.AreEqual(2, cons.ALazies.Length);
+            Assert.Equal(2, cons.ALazies.Length);
         }
     }
 }

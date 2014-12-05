@@ -68,6 +68,9 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="..\System.Composition.UnitTests\Util\AssertX.cs">
+      <Link>Util\AssertX.cs</Link>
+    </Compile>
     <Compile Include="AttributedModelConventionExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SharedSource>false</SharedSource>

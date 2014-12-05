@@ -10,18 +10,11 @@ using System.Composition.UnitTests.Util;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-#if NETFX_CORE
-using Microsoft.VisualStudio.TestPlatform.UnitTestFramework;
-#elif PORTABLE_TESTS
-using Microsoft.Bcl.Testing;
-#else
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-#endif
 using System.Composition.Hosting;
+using Xunit;
 
 namespace System.Composition.UnitTests
 {
-    [TestClass]
     public class DiscoveryTests : ContainerTests
     {
         public interface IRule { }
@@ -46,42 +39,42 @@ namespace System.Composition.UnitTests
         [Export, PartNotDiscoverable]
         public class NotDiscoverable { }
 
-        [TestMethod]
+        [Fact]
         public void DiscoversCustomExportAttributes()
         {
             var container = CreateContainer(typeof(UnfairRule));
             var rule = container.GetExport<IRule>();
-            Assert.IsInstanceOfType(rule, typeof(UnfairRule));
+            Assert.IsAssignableFrom(typeof(UnfairRule), rule);
         }
 
-        [TestMethod]
+        [Fact]
         public void DiscoversCustomExportAttributesUnderConventions()
         {
             var container = CreateContainer(new ConventionBuilder(), typeof(UnfairRule));
             var rule = container.GetExport<IRule>();
-            Assert.IsInstanceOfType(rule, typeof(UnfairRule));
+            Assert.IsAssignableFrom(typeof(UnfairRule), rule);
         }
 
-        [TestMethod]
+        [Fact]
         public void InstanceExportsOfIncompatibleContractsAreDetected()
         {
             var x = AssertX.Throws<CompositionFailedException>(() => CreateContainer(typeof(IncompatibleRule)));
-            Assert.AreEqual("Exported contract type 'IRule' is not assignable from part 'IncompatibleRule'.", x.Message);
+            Assert.Equal("Exported contract type 'IRule' is not assignable from part 'IncompatibleRule'.", x.Message);
         }
 
-        [TestMethod]
+        [Fact]
         public void PropertyExportsOfIncompatibleContractsAreDetected()
         {
             var x = AssertX.Throws<CompositionFailedException>(() => CreateContainer(typeof(IncompatibleRuleProperty)));
-            Assert.AreEqual("Exported contract type 'IRule' is not assignable from property 'Rule' of part 'IncompatibleRuleProperty'.", x.Message);
+            Assert.Equal("Exported contract type 'IRule' is not assignable from property 'Rule' of part 'IncompatibleRuleProperty'.", x.Message);
         }
 
-        [TestMethod]
+        [Fact]
         public void ANonDiscoverablePartIsIgnored()
         {
             var container = CreateContainer(typeof(NotDiscoverable));
             NotDiscoverable unused;
-            Assert.IsFalse(container.TryGetExport(null, out unused));
+            Assert.False(container.TryGetExport(null, out unused));
         }
 
         public interface IBus { }
@@ -91,13 +84,13 @@ namespace System.Composition.UnitTests
 
         public class SpecialCloudBus : CloudBus { }
 
-        [TestMethod]
+        [Fact]
         public void DoesNotDiscoverExportAttributesFromBase()
         {
             var container = CreateContainer(typeof(SpecialCloudBus));
 
             IBus bus;
-            Assert.IsFalse(container.TryGetExport(null, out bus));
+            Assert.False(container.TryGetExport(null, out bus));
         }
 
         public abstract class BaseController
@@ -111,12 +104,12 @@ namespace System.Composition.UnitTests
         {
         }
 
-        [TestMethod]
+        [Fact]
         public void SatisfiesImportsAppliedToBase()
         {
             var container = CreateContainer(typeof(HomeController), typeof(CloudBus));
             var hc = container.GetExport<HomeController>();
-            Assert.IsInstanceOfType(hc.Bus, typeof(CloudBus));
+            Assert.IsAssignableFrom(typeof(CloudBus), hc.Bus);
         }
 
         class CustomImportAttribute : ImportAttribute { }
@@ -128,7 +121,7 @@ namespace System.Composition.UnitTests
             public string MultiImport { get; set; }
         }
 
-        [TestMethod]
+        [Fact]
         public void MultipleImportAttributesAreDetected()
         {
             var c = new ContainerConfiguration()
@@ -136,7 +129,7 @@ namespace System.Composition.UnitTests
                 .CreateContainer();
 
             var x = AssertX.Throws<CompositionFailedException>(() => c.GetExport<MultipleImportsOnProperty>());
-            Assert.AreEqual("Multiple imports have been configured for 'MultiImport'. At most one import can be applied to a single site.", x.Message);
+            Assert.Equal("Multiple imports have been configured for 'MultiImport'. At most one import can be applied to a single site.", x.Message);
         }
     }
 }

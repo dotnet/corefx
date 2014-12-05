@@ -7,17 +7,10 @@ using System.Composition.Convention;
 using System.Composition.Convention.UnitTests;
 using System.Linq;
 using System.Reflection;
-#if NETFX_CORE
-using Microsoft.VisualStudio.TestPlatform.UnitTestFramework;
-#elif PORTABLE_TESTS
-using Microsoft.Bcl.Testing;
-#else
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
-#endif
 namespace System.ComponentModel.Composition
 {
-    [TestClass]
     public class ImportBuilderTests
     {
         public interface IFoo { }
@@ -27,110 +20,110 @@ namespace System.ComponentModel.Composition
             public IFoo IFooProperty { get; private set; }
         }
 
-        [TestMethod]
+        [Fact]
         public void AsContractName_SetsContractName()
         {
             var builder = new ConventionBuilder();
             builder.ForType<FooImpl>().ImportProperty((p) => p.IFooProperty, (c) => c.AsContractName("hey"));
 
             ImportAttribute importAtt = GetImportAttribute(builder);
-            Assert.AreEqual("hey", importAtt.ContractName);
-            Assert.IsFalse(importAtt.AllowDefault);
+            Assert.Equal("hey", importAtt.ContractName);
+            Assert.False(importAtt.AllowDefault);
         }
 
-        [TestMethod]
+        [Fact]
         public void AsContractName_AndContractType_ComputeContractNameFromType()
         {
             var builder = new ConventionBuilder();
             builder.ForType<FooImpl>().ImportProperty((p) => p.IFooProperty, c => c.AsContractName(t => "Contract:" + t.FullName));
 
             ImportAttribute importAtt = GetImportAttribute(builder);
-            Assert.AreEqual("Contract:" + typeof(IFoo).FullName, importAtt.ContractName);
+            Assert.Equal("Contract:" + typeof(IFoo).FullName, importAtt.ContractName);
         }
 
-        [TestMethod]
+        [Fact]
         public void AllowDefault_SetsAllowDefaultProperty()
         {
             var builder = new ConventionBuilder();
             builder.ForType<FooImpl>().ImportProperty((p) => p.IFooProperty, (c) => c.AllowDefault());
 
             ImportAttribute importAtt = GetImportAttribute(builder);
-            Assert.IsTrue(importAtt.AllowDefault);
-            Assert.IsNull(importAtt.ContractName);
+            Assert.True(importAtt.AllowDefault);
+            Assert.Null(importAtt.ContractName);
         }
 
-        [TestMethod]
+        [Fact]
         public void AsContractName_AndContractType_SetsContractNameAndType()
         {
             var builder = new ConventionBuilder();
             builder.ForType<FooImpl>().ImportProperty((p) => p.IFooProperty, (c) => c.AsContractName("hey"));
 
             ImportAttribute importAtt = GetImportAttribute(builder);
-            Assert.AreEqual("hey", importAtt.ContractName);
+            Assert.Equal("hey", importAtt.ContractName);
         }
 
-        [TestMethod]
+        [Fact]
         public void AsMany_ChangesGeneratedAttributeToImportMany()
         {
             var builder = new ConventionBuilder();
             builder.ForType<FooImpl>().ImportProperty((p) => p.IFooProperty, (c) => c.AsMany());
 
             ImportManyAttribute importAtt = GetImportManyAttribute(builder);
-            Assert.IsNotNull(importAtt);
-            Assert.IsNull(importAtt.ContractName);
+            Assert.NotNull(importAtt);
+            Assert.Null(importAtt.ContractName);
         }
 
-        [TestMethod]
+        [Fact]
         public void AsMany_And_ContractName_ChangesGeneratedAttributeToImportMany()
         {
             var builder = new ConventionBuilder();
             builder.ForType<FooImpl>().ImportProperty((p) => p.IFooProperty, (c) => c.AsContractName("hey").AsMany());
 
             ImportManyAttribute importAtt = GetImportManyAttribute(builder);
-            Assert.IsNotNull(importAtt);
-            Assert.AreEqual("hey", importAtt.ContractName);
+            Assert.NotNull(importAtt);
+            Assert.Equal("hey", importAtt.ContractName);
         }
 
-        [TestMethod]
+        [Fact]
         public void AddImportConstraint_AddsImportConstraintMetadataAttribute()
         {
             var builder = new ConventionBuilder();
             builder.ForType<FooImpl>().ImportProperty((p) => p.IFooProperty, (c) => c.AddMetadataConstraint("name", "val"));
 
             ImportMetadataConstraintAttribute importMetadataConstraint = GetImportMetadataConstraintAttribute(builder);
-            Assert.AreEqual("name", importMetadataConstraint.Name);
-            Assert.AreEqual("val", importMetadataConstraint.Value);
+            Assert.Equal("name", importMetadataConstraint.Name);
+            Assert.Equal("val", importMetadataConstraint.Value);
         }
 
-        [TestMethod]
+        [Fact]
         public void AddImportConstraintFuncVal_AddsImportConstraintMetadataAttribute()
         {
             var builder = new ConventionBuilder();
             builder.ForType<FooImpl>().ImportProperty((p) => p.IFooProperty, (c) => c.AddMetadataConstraint("name", t => t.Name));
 
             ImportMetadataConstraintAttribute importMetadataConstraint = GetImportMetadataConstraintAttribute(builder);
-            Assert.AreEqual("name", importMetadataConstraint.Name);
-            Assert.AreEqual(typeof(IFoo).Name, importMetadataConstraint.Value);
+            Assert.Equal("name", importMetadataConstraint.Name);
+            Assert.Equal(typeof(IFoo).Name, importMetadataConstraint.Value);
         }
 
         private static ImportAttribute GetImportAttribute(ConventionBuilder builder)
         {
             var list = builder.GetDeclaredAttributes(typeof(FooImpl), typeof(FooImpl).GetRuntimeProperties().Where((m) => m.Name == "IFooProperty").First());
-            Assert.AreEqual(1, list.Length);
+            Assert.Equal(1, list.Length);
             return list.OfType<ImportAttribute>().FirstOrDefault();
         }
 
         private static ImportManyAttribute GetImportManyAttribute(ConventionBuilder builder)
         {
             var list = builder.GetDeclaredAttributes(typeof(FooImpl), typeof(FooImpl).GetRuntimeProperties().Where((m) => m.Name == "IFooProperty").First());
-            Assert.AreEqual(1, list.Length);
+            Assert.Equal(1, list.Length);
             return list.OfType<ImportManyAttribute>().FirstOrDefault();
         }
 
         private static ImportMetadataConstraintAttribute GetImportMetadataConstraintAttribute(ConventionBuilder builder)
         {
             var list = builder.GetDeclaredAttributes(typeof(FooImpl), typeof(FooImpl).GetRuntimeProperties().Where((m) => m.Name == "IFooProperty").First());
-            Assert.AreEqual(2, list.Length);
+            Assert.Equal(2, list.Length);
             return list.OfType<ImportMetadataConstraintAttribute>().FirstOrDefault();
         }
     }

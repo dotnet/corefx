@@ -7,17 +7,10 @@ using System.Composition.Convention;
 using System.Composition.Convention.UnitTests;
 using System.Linq;
 using System.Reflection;
-#if NETFX_CORE
-using Microsoft.VisualStudio.TestPlatform.UnitTestFramework;
-#elif PORTABLE_TESTS
-using Microsoft.Bcl.Testing;
-#else
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
-#endif
 namespace System.Composition.Convention.UnitTests
 {
-    [TestClass]
     public class ConventionBuilderTests
     {
         interface IFoo { }
@@ -34,7 +27,7 @@ namespace System.Composition.Convention.UnitTests
             public FooImplWithConstructors(int id, string name) { }
         }
 
-        [TestMethod]
+        [Fact]
         public void MapType_ShouldReturnProjectedAttributesForType()
         {
             var builder = new ConventionBuilder();
@@ -50,16 +43,16 @@ namespace System.Composition.Convention.UnitTests
 
             exports.AddRange(fooImplAttributes);
             exports.AddRange(fooImplWithConstructorsAttributes);
-            Assert.AreEqual(2, exports.Count);
+            Assert.Equal(2, exports.Count);
 
             foreach (var exportAttribute in exports)
             {
-                Assert.AreEqual(typeof(IFoo), ((ExportAttribute)exportAttribute).ContractType);
-                Assert.IsNull(((ExportAttribute)exportAttribute).ContractName);
+                Assert.Equal(typeof(IFoo), ((ExportAttribute)exportAttribute).ContractType);
+                Assert.Null(((ExportAttribute)exportAttribute).ContractName);
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void MapType_ConventionSelectedConstructor()
         {
             var builder = new ConventionBuilder();
@@ -75,16 +68,16 @@ namespace System.Composition.Convention.UnitTests
             var constructor2 = fooImplWithConstructorsTypeInfo.DeclaredConstructors.Where(c => c.GetParameters().Length == 1).Single();
             var constructor3 = fooImplWithConstructorsTypeInfo.DeclaredConstructors.Where(c => c.GetParameters().Length == 2).Single();
 
-            Assert.AreEqual(0, builder.GetCustomAttributes(typeof(FooImplWithConstructors), constructor1).Count());
-            Assert.AreEqual(0, builder.GetCustomAttributes(typeof(FooImplWithConstructors), constructor2).Count());
+            Assert.Equal(0, builder.GetCustomAttributes(typeof(FooImplWithConstructors), constructor1).Count());
+            Assert.Equal(0, builder.GetCustomAttributes(typeof(FooImplWithConstructors), constructor2).Count());
 
             var ci = constructor3;
             var attrs = builder.GetCustomAttributes(typeof(FooImplWithConstructors), ci);
-            Assert.AreEqual(1, attrs.Count());
-            Assert.AreEqual(typeof(ImportingConstructorAttribute), attrs.FirstOrDefault().GetType());
+            Assert.Equal(1, attrs.Count());
+            Assert.Equal(typeof(ImportingConstructorAttribute), attrs.FirstOrDefault().GetType());
         }
 
-        [TestMethod]
+        [Fact]
         public void MapType_OverridingSelectionOfConventionSelectedConstructor()
         {
             var builder = new ConventionBuilder();
@@ -104,16 +97,16 @@ namespace System.Composition.Convention.UnitTests
 
 
             // necessary as BuildConventionConstructorAttributes is only called for type level query for attributes
-            Assert.AreEqual(0, builder.GetCustomAttributes(typeof(FooImplWithConstructors), constructor1).Count());
-            Assert.AreEqual(0, builder.GetCustomAttributes(typeof(FooImplWithConstructors), constructor3).Count());
+            Assert.Equal(0, builder.GetCustomAttributes(typeof(FooImplWithConstructors), constructor1).Count());
+            Assert.Equal(0, builder.GetCustomAttributes(typeof(FooImplWithConstructors), constructor3).Count());
 
             var ci = constructor2;
             var attrs = builder.GetCustomAttributes(typeof(FooImplWithConstructors), ci);
-            Assert.AreEqual(1, attrs.Count());
-            Assert.AreEqual(typeof(ImportingConstructorAttribute), attrs.FirstOrDefault().GetType());
+            Assert.Equal(1, attrs.Count());
+            Assert.Equal(typeof(ImportingConstructorAttribute), attrs.FirstOrDefault().GetType());
         }
 
-        [TestMethod]
+        [Fact]
         public void MapType_OverridingSelectionOfConventionSelectedConstructor_WithPartBuilderOfT()
         {
             var builder = new ConventionBuilder();
@@ -132,13 +125,13 @@ namespace System.Composition.Convention.UnitTests
             var constructor3 = fooImplWithConstructors.DeclaredConstructors.Where(c => c.GetParameters().Length == 2).Single();
 
             // necessary as BuildConventionConstructorAttributes is only called for type level query for attributes
-            Assert.AreEqual(0, builder.GetCustomAttributes(typeof(FooImplWithConstructors), constructor1).Count());
-            Assert.AreEqual(0, builder.GetCustomAttributes(typeof(FooImplWithConstructors), constructor3).Count());
+            Assert.Equal(0, builder.GetCustomAttributes(typeof(FooImplWithConstructors), constructor1).Count());
+            Assert.Equal(0, builder.GetCustomAttributes(typeof(FooImplWithConstructors), constructor3).Count());
 
             var ci = constructor2;
             var attrs = builder.GetCustomAttributes(typeof(FooImplWithConstructors), ci);
-            Assert.AreEqual(1, attrs.Count());
-            Assert.AreEqual(typeof(ImportingConstructorAttribute), attrs.FirstOrDefault().GetType());
+            Assert.Equal(1, attrs.Count());
+            Assert.Equal(typeof(ImportingConstructorAttribute), attrs.FirstOrDefault().GetType());
         }
 
         interface IGenericInterface<T> { }

@@ -9,17 +9,10 @@ using System.Composition.UnitTests.Util;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-#if NETFX_CORE
-using Microsoft.VisualStudio.TestPlatform.UnitTestFramework;
-#elif PORTABLE_TESTS
-using Microsoft.Bcl.Testing;
-#else
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
-#endif
 namespace System.Composition.Lightweight.UnitTests
 {
-    [TestClass]
     public class MetadataViewGenerationTests
     {
         [Export, ExportMetadata("Name", "A")]
@@ -27,7 +20,7 @@ namespace System.Composition.Lightweight.UnitTests
 
         public class Named { public string Name { get; set; } }
 
-        [TestMethod]
+        [Fact]
         public void AConcreteTypeWithWritablePropertiesIsAMetadataView()
         {
             var cc = new ContainerConfiguration()
@@ -36,7 +29,7 @@ namespace System.Composition.Lightweight.UnitTests
 
             var hn = cc.GetExport<Lazy<HasNameA, Named>>();
 
-            Assert.AreEqual("A", hn.Metadata.Name);
+            Assert.Equal("A", hn.Metadata.Name);
         }
 
         [Export]
@@ -44,7 +37,7 @@ namespace System.Composition.Lightweight.UnitTests
 
         public class OptionallyNamed {[DefaultValue("B")] public string Name { get; set; } }
 
-        [TestMethod]
+        [Fact]
         public void MetadataViewsCanCarryDefaultValues()
         {
             var cc = new ContainerConfiguration()
@@ -53,7 +46,7 @@ namespace System.Composition.Lightweight.UnitTests
 
             var hn = cc.GetExport<Lazy<HasNoName, OptionallyNamed>>();
 
-            Assert.AreEqual("B", hn.Metadata.Name);
+            Assert.Equal("B", hn.Metadata.Name);
         }
 
         public class DictionaryName
@@ -66,7 +59,7 @@ namespace System.Composition.Lightweight.UnitTests
             public string RetrievedName { get; set; }
         }
 
-        [TestMethod]
+        [Fact]
         public void AConcreteTypeWithDictionaryConstructorIsAMetadataView()
         {
             var cc = new ContainerConfiguration()
@@ -75,7 +68,7 @@ namespace System.Composition.Lightweight.UnitTests
 
             var hn = cc.GetExport<Lazy<HasNameA, DictionaryName>>();
 
-            Assert.AreEqual("A", hn.Metadata.RetrievedName);
+            Assert.Equal("A", hn.Metadata.RetrievedName);
         }
 
         public class InvalidConcreteView
@@ -83,7 +76,7 @@ namespace System.Composition.Lightweight.UnitTests
             public InvalidConcreteView(string unsupported) { }
         }
 
-        [TestMethod]
+        [Fact]
         public void AConcreteTypeWithUnsupportedConstructorsCannotBeUsedAsAMetadataView()
         {
             var cc = new ContainerConfiguration()
@@ -92,7 +85,7 @@ namespace System.Composition.Lightweight.UnitTests
 
             var x = AssertX.Throws<CompositionFailedException>(() => cc.GetExport<Lazy<HasNoName, InvalidConcreteView>>());
 
-            Assert.AreEqual("The type 'InvalidConcreteView' cannot be used as a metadata view. A metadata view must be a concrete class with a parameterless or dictionary constructor.", x.Message);
+            Assert.Equal("The type 'InvalidConcreteView' cannot be used as a metadata view. A metadata view must be a concrete class with a parameterless or dictionary constructor.", x.Message);
         }
 
         [Export, ExportMetadata("Name", "A")]
@@ -107,12 +100,12 @@ namespace System.Composition.Lightweight.UnitTests
             public Lazy<ExportsWithMetadata, INamed> Imported { get; set; }
         }
 
-        [TestMethod]
+        [Fact]
         public void UnsupportedMetadataViewMessageIsInformative()
         {
             var cc = new ContainerConfiguration().WithParts(typeof(ImportsWithMetadataInterface), typeof(ExportsWithMetadata)).CreateContainer();
             var x = AssertX.Throws<CompositionFailedException>(() => cc.GetExport<ImportsWithMetadataInterface>());
-            Assert.AreEqual("The type 'INamed' cannot be used as a metadata view. A metadata view must be a concrete class with a parameterless or dictionary constructor.", x.Message);
+            Assert.Equal("The type 'INamed' cannot be used as a metadata view. A metadata view must be a concrete class with a parameterless or dictionary constructor.", x.Message);
         }
 
         public class ReadonlyNameOrderMetadata
@@ -124,7 +117,7 @@ namespace System.Composition.Lightweight.UnitTests
         [Export, ExportMetadata("Order", 1)]
         public class HasOrder { }
 
-        [TestMethod]
+        [Fact]
         public void ReadOnlyPropertiesOnMetadataViewsAreIgnored()
         {
             var c = new ContainerConfiguration()
@@ -132,7 +125,7 @@ namespace System.Composition.Lightweight.UnitTests
                 .CreateContainer();
 
             var l = c.GetExport<Lazy<HasOrder, ReadonlyNameOrderMetadata>>();
-            Assert.AreEqual(1, l.Metadata.Order);
+            Assert.Equal(1, l.Metadata.Order);
         }
     }
 }

@@ -5,17 +5,10 @@ using System.Collections.Generic;
 using System.Composition.Convention.UnitTests;
 using System.Linq;
 using System.Reflection;
-#if NETFX_CORE
-using Microsoft.VisualStudio.TestPlatform.UnitTestFramework;
-#elif PORTABLE_TESTS
-using Microsoft.Bcl.Testing;
-#else
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
-#endif
 namespace System.Composition.Convention
 {
-    [TestClass]
     public class PartBuilderInheritanceTests
     {
         abstract class BaseClass
@@ -31,7 +24,7 @@ namespace System.Composition.Convention
             public string P5 { get; set; }
         }
 
-        [TestMethod]
+        [Fact]
         public void ImportPropertyTargetingBaseClass_ShouldGenerateImportAttributeForP1Selected()
         {
             var builder = new ConventionBuilder();
@@ -39,11 +32,11 @@ namespace System.Composition.Convention
 
             var pAttr = GetAttributeFromMember(builder, typeof(DerClass), "P1") as ImportAttribute;
 
-            Assert.IsNotNull(pAttr);                   // Ensure P1 has ImportAttribute (default configured)
-            Assert.IsNull(pAttr.ContractName);
+            Assert.NotNull(pAttr);                   // Ensure P1 has ImportAttribute (default configured)
+            Assert.Null(pAttr.ContractName);
         }
 
-        [TestMethod]
+        [Fact]
         public void ImportPropertyTargetingBaseClass_ShouldGenerateImportManyForP3Selected()
         {
             var builder = new ConventionBuilder();
@@ -51,12 +44,12 @@ namespace System.Composition.Convention
 
             var pAttr = GetAttributeFromMember(builder, typeof(DerClass), "P3") as ImportManyAttribute;
 
-            Assert.IsNotNull(pAttr);                   // Ensure P3 has ImportManyAttribute (default configured)
-            Assert.IsNull(pAttr.ContractName);
+            Assert.NotNull(pAttr);                   // Ensure P3 has ImportManyAttribute (default configured)
+            Assert.Null(pAttr.ContractName);
         }
 
 
-        [TestMethod]
+        [Fact]
         public void ImportPropertyTargetingDerivedClass_ShouldGenerateImportAttributeForP4Selected()
         {
             var builder = new ConventionBuilder();
@@ -64,12 +57,12 @@ namespace System.Composition.Convention
 
             var pAttr = GetAttributeFromMember(builder, typeof(DerClass), "P4") as ImportAttribute;
 
-            Assert.IsNotNull(pAttr);                   // Ensure P1 has ImportAttribute (default configured)
-            Assert.IsNull(pAttr.ContractName);
+            Assert.NotNull(pAttr);                   // Ensure P1 has ImportAttribute (default configured)
+            Assert.Null(pAttr.ContractName);
         }
 
 
-        [TestMethod]
+        [Fact]
         public void ExportPropertyTargetingDerivedClass_ShouldGenerateExportForPropertySelected()
         {
             var builder = new ConventionBuilder();
@@ -77,12 +70,12 @@ namespace System.Composition.Convention
 
             var pAttr = GetAttributeFromMember(builder, typeof(DerClass), "P4") as ExportAttribute;
 
-            Assert.IsNotNull(pAttr);
-            Assert.IsNull(pAttr.ContractName);
-            Assert.IsNull(pAttr.ContractType);
+            Assert.NotNull(pAttr);
+            Assert.Null(pAttr.ContractName);
+            Assert.Null(pAttr.ContractType);
         }
 
-        [TestMethod]
+        [Fact]
         public void ExportPropertyTargetingBaseClass_ShouldGenerateExportForPropertySelected()
         {
             var builder = new ConventionBuilder();
@@ -90,9 +83,9 @@ namespace System.Composition.Convention
 
             var exportAttribute = GetAttributeFromMember(builder, typeof(DerClass), "P2") as ExportAttribute;
 
-            Assert.IsNotNull(exportAttribute);
-            Assert.IsNull(exportAttribute.ContractName);
-            Assert.IsNull(exportAttribute.ContractType);
+            Assert.NotNull(exportAttribute);
+            Assert.Null(exportAttribute.ContractName);
+            Assert.Null(exportAttribute.ContractType);
         }
 
         private static Attribute GetAttributeFromMember(ConventionBuilder builder, Type type, string member)

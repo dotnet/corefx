@@ -9,46 +9,39 @@ using System.Composition.Convention.UnitTests;
 using System.Reflection;
 using System.Linq;
 using System.Text;
-#if NETFX_CORE
-using Microsoft.VisualStudio.TestPlatform.UnitTestFramework;
-#elif PORTABLE_TESTS
-using Microsoft.Bcl.Testing;
-#else
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
-#endif
 namespace System.Composition.Convention
 {
-    [TestClass]
     public class ExportBuilderUnitTests
     {
         public interface IFoo { }
 
         public class CFoo : IFoo { }
 
-        [TestMethod]
+        [Fact]
         public void ExportInterfaceWithTypeOf1()
         {
             var builder = new ConventionBuilder();
             builder.ForType<CFoo>().Export<IFoo>();
 
             var exports = builder.GetDeclaredAttributes(typeof(CFoo), typeof(CFoo).GetTypeInfo()).Where<Attribute>(e => e is ExportAttribute).Cast<ExportAttribute>();
-            Assert.AreEqual(1, exports.Count());
-            Assert.AreEqual(exports.First().ContractType, typeof(IFoo));
+            Assert.Equal(1, exports.Count());
+            Assert.Equal(exports.First().ContractType, typeof(IFoo));
         }
 
-        [TestMethod]
+        [Fact]
         public void ExportInterfaceWithTypeOf2()
         {
             var builder = new ConventionBuilder();
             builder.ForType(typeof(CFoo)).Export((c) => c.AsContractType(typeof(IFoo)));
 
             var exports = builder.GetDeclaredAttributes(typeof(CFoo), typeof(CFoo).GetTypeInfo()).Where<Attribute>(e => e is ExportAttribute).Cast<ExportAttribute>();
-            Assert.AreEqual(1, exports.Count());
-            Assert.AreEqual(exports.First().ContractType, typeof(IFoo));
+            Assert.Equal(1, exports.Count());
+            Assert.Equal(exports.First().ContractType, typeof(IFoo));
         }
 
-        [TestMethod]
+        [Fact]
         public void ExportBuilderApiTestsNull_ShouldThrowArgumentNull()
         {
             var builder = new ConventionBuilder();

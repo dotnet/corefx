@@ -7,94 +7,87 @@ using System.Composition.Hosting.Core;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-#if NETFX_CORE
-using Microsoft.VisualStudio.TestPlatform.UnitTestFramework;
-#elif PORTABLE_TESTS
-using Microsoft.Bcl.Testing;
-#else
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
-#endif
 namespace System.Composition.UnitTests
 {
-    [TestClass]
     public class ContractTests
     {
         class AType { }
 
         private static readonly Type _DefaultContractType = typeof(AType);
 
-        [TestMethod]
+        [Fact]
         public void FormattingAContractWithNoDiscriminatorShowsTheSimpleTypeName()
         {
             var c = new CompositionContract(typeof(AType));
             var s = c.ToString();
-            Assert.AreEqual("AType", s);
+            Assert.Equal("AType", s);
         }
 
-        [TestMethod]
+        [Fact]
         public void FormattingAContractWithAStringDiscriminatorShowsTheDiscriminatorInQuotes()
         {
             var c = new CompositionContract(typeof(AType), "at");
             var s = c.ToString();
-            Assert.AreEqual("AType \"at\"", s);
+            Assert.Equal("AType \"at\"", s);
         }
 
-        [TestMethod]
+        [Fact]
         public void ChangingTheTypeOfAContractPreservesTheContractName()
         {
             var name = "a";
             var c = new CompositionContract(typeof(object), name);
             var d = c.ChangeType(typeof(AType));
-            Assert.AreEqual(name, d.ContractName);
+            Assert.Equal(name, d.ContractName);
         }
 
-        [TestMethod]
+        [Fact]
         public void ChangingTheTypeOfAContractChangesTheContractType()
         {
             var c = new CompositionContract(typeof(object));
             var d = c.ChangeType(typeof(AType));
-            Assert.AreEqual(typeof(AType), d.ContractType);
+            Assert.Equal(typeof(AType), d.ContractType);
         }
 
-        [TestMethod]
+        [Fact]
         public void ConstraintsWithEquivalentKeysAndValuesAreEqual()
         {
             var mcd1 = new CompositionContract(_DefaultContractType, null, new Dictionary<string, object> { { "A", new[] { "B" } } });
             var mcd2 = new CompositionContract(_DefaultContractType, null, new Dictionary<string, object> { { "A", new[] { "B" } } });
-            Assert.IsTrue(mcd1.Equals(mcd2));
+            Assert.True(mcd1.Equals(mcd2));
         }
 
-        [TestMethod]
+        [Fact]
         public void ConstraintsWithEquivalentKeysAndValuesHaveTheSameHashCode()
         {
             var mcd1 = new CompositionContract(_DefaultContractType, null, new Dictionary<string, object> { { "A", new[] { "B" } } });
             var mcd2 = new CompositionContract(_DefaultContractType, null, new Dictionary<string, object> { { "A", new[] { "B" } } });
-            Assert.AreEqual(mcd1.GetHashCode(), mcd2.GetHashCode());
+            Assert.Equal(mcd1.GetHashCode(), mcd2.GetHashCode());
         }
 
-        [TestMethod]
+        [Fact]
         public void FormattingTheContractPrintsConstraintKeysAndValues()
         {
             var mcd = new CompositionContract(typeof(AType), null, new Dictionary<string, object> { { "A", 1 }, { "B", "C" } });
             var s = mcd.ToString();
-            Assert.AreEqual("AType { A = 1, B = \"C\" }", s);
+            Assert.Equal("AType { A = 1, B = \"C\" }", s);
         }
 
-        [TestMethod]
+        [Fact]
         public void FormattingTheContractPrintsNameAndDiscriminator()
         {
             var mcd = new CompositionContract(typeof(AType), "inner", new Dictionary<string, object> { { "A", 1 } });
             var s = mcd.ToString();
-            Assert.AreEqual("AType \"inner\" { A = 1 }", s);
+            Assert.Equal("AType \"inner\" { A = 1 }", s);
         }
 
-        [TestMethod]
+        [Fact]
         public void AContractWithConstraintIsNotEqualToAContractWithoutConstraint()
         {
             var first = new CompositionContract(typeof(string), null, new Dictionary<string, object> { { "A", 1 } });
             var second = new CompositionContract(typeof(string));
-            Assert.IsFalse(first.Equals(second));
+            Assert.False(first.Equals(second));
         }
     }
 }

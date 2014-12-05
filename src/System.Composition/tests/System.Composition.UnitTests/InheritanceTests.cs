@@ -7,17 +7,10 @@ using System.Composition.UnitTests;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-#if NETFX_CORE
-using Microsoft.VisualStudio.TestPlatform.UnitTestFramework;
-#elif PORTABLE_TESTS
-using Microsoft.Bcl.Testing;
-#else
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
-#endif
 namespace System.Composition.Lightweight.UnitTests
 {
-    [TestClass]
     public class InheritanceTests : ContainerTests
     {
         [Export]
@@ -31,33 +24,33 @@ namespace System.Composition.Lightweight.UnitTests
 
         public class Derived : Base { }
 
-        [TestMethod]
+        [Fact]
         public void ClassExportsAreNotInherited()
         {
             var cc = CreateContainer(typeof(Derived));
             Base export;
-            Assert.IsFalse(cc.TryGetExport(out export));
+            Assert.False(cc.TryGetExport(out export));
         }
 
-        [TestMethod]
+        [Fact]
         public void PropertyExportsAreNotInherited()
         {
             var cc = CreateContainer(typeof(Derived));
             string export;
-            Assert.IsFalse(cc.TryGetExport(out export));
+            Assert.False(cc.TryGetExport(out export));
         }
 
         [Export]
         public class ExportingDerived : Base { }
 
-        [TestMethod]
+        [Fact]
         public void ExportsAtTheClassLevelAreAppliedIgnoringBaseExports()
         {
             var cc = CreateContainer(typeof(ExportingDerived));
             Base baseExport;
-            Assert.IsFalse(cc.TryGetExport(out baseExport));
+            Assert.False(cc.TryGetExport(out baseExport));
             ExportingDerived derivedExport;
-            Assert.IsTrue(cc.TryGetExport(out derivedExport));
+            Assert.True(cc.TryGetExport(out derivedExport));
         }
 
         public class Exporter
@@ -90,17 +83,17 @@ namespace System.Composition.Lightweight.UnitTests
         [Export]
         public class NonOverridingImporter : BaseImporter { }
 
-        [TestMethod]
+        [Fact]
         public void ImportsOnOverriddenPropertiesOverrideImportsOnTheBase()
         {
             var c = CreateContainer(typeof(Exporter), typeof(OverridingImporter), typeof(NonOverridingImporter));
             var bi = c.GetExport<NonOverridingImporter>();
             var di = c.GetExport<OverridingImporter>();
-            Assert.AreEqual("a", bi.Imported);
-            Assert.AreEqual("b", di.Imported);
+            Assert.Equal("a", bi.Imported);
+            Assert.Equal("b", di.Imported);
         }
 
-        [TestMethod]
+        [Fact]
         public void LooseImportsOnDerivedPropertiesOverrideImportsOnTheBase()
         {
             var c = CreateContainer(typeof(Exporter));
@@ -108,26 +101,26 @@ namespace System.Composition.Lightweight.UnitTests
             c.SatisfyImports(bi);
             var di = new OverridingImporter();
             c.SatisfyImports(di);
-            Assert.AreEqual("a", bi.Imported);
-            Assert.AreEqual("b", di.Imported);
+            Assert.Equal("a", bi.Imported);
+            Assert.Equal("b", di.Imported);
         }
 
-        [TestMethod]
+        [Fact]
         public void ImportsOnBaseAreInherited()
         {
             var c = CreateContainer(typeof(Exporter), typeof(NonOverridingImporter));
             var di = c.GetExport<NonOverridingImporter>();
             c.SatisfyImports(di);
-            Assert.AreEqual("a", di.Imported);
+            Assert.Equal("a", di.Imported);
         }
 
-        [TestMethod]
+        [Fact]
         public void LooseImportsOnBaseAreInherited()
         {
             var c = CreateContainer(typeof(Exporter));
             var di = new NonOverridingImporter();
             c.SatisfyImports(di);
-            Assert.AreEqual("a", di.Imported);
+            Assert.Equal("a", di.Imported);
         }
 
         [Export, PartNotDiscoverable]
@@ -136,12 +129,12 @@ namespace System.Composition.Lightweight.UnitTests
         [Export]
         public class DiscoverableDerived : NotDiscoverableBase { }
 
-        [TestMethod]
+        [Fact]
         public void PartNotDiscoverableAttributeIsNotInherited()
         {
             var c = CreateContainer(typeof(DiscoverableDerived));
             DiscoverableDerived derived;
-            Assert.IsTrue(c.TryGetExport(out derived));
+            Assert.True(c.TryGetExport(out derived));
         }
 
         [Shared]
@@ -150,13 +143,13 @@ namespace System.Composition.Lightweight.UnitTests
         [Export]
         public class SharedDerived : SharedBase { }
 
-        [TestMethod]
+        [Fact]
         public void PartMetadataIsNotInherited()
         {
             var c = CreateContainer(typeof(SharedDerived));
             var ns = c.GetExport<SharedDerived>();
             var ns2 = c.GetExport<SharedDerived>();
-            Assert.AreNotSame(ns, ns2);
+            Assert.NotSame(ns, ns2);
         }
 
         public class HasImportsSatisfied
@@ -170,12 +163,12 @@ namespace System.Composition.Lightweight.UnitTests
         [Export]
         public class InheritsImportsSatisfied : HasImportsSatisfied { }
 
-        [TestMethod]
+        [Fact]
         public void OnImportsSatisfiedAttributeIsInherited()
         {
             var c = CreateContainer(typeof(InheritsImportsSatisfied));
             var x = c.GetExport<InheritsImportsSatisfied>();
-            Assert.IsTrue(x.ImportsSatisfied);
+            Assert.True(x.ImportsSatisfied);
         }
 
         public interface IHandler { }
@@ -188,13 +181,13 @@ namespace System.Composition.Lightweight.UnitTests
         [Export(typeof(IHandler)), ExportMetadata("HandledMessage", "B")]
         public class ABHandler : AHandler { }
 
-        [TestMethod]
+        [Fact]
         public void MetadataIsOnlyDrawnFromTheTypeToWhichItIsApplied()
         {
             var c = CreateContainer(typeof(ABHandler));
             var handlers = c.GetExports<Lazy<IHandler, HandlerMetadata>>().ToArray();
-            Assert.AreEqual(1, handlers.Length);
-            Assert.IsTrue(handlers.Any(h => h.Metadata.HandledMessage == "B"));
+            Assert.Equal(1, handlers.Length);
+            Assert.True(handlers.Any(h => h.Metadata.HandledMessage == "B"));
         }
 
         public class BaseVirtualExporter
@@ -209,13 +202,13 @@ namespace System.Composition.Lightweight.UnitTests
             public override string Exported { get; set; }
         }
 
-        [TestMethod]
+        [Fact]
         public void ExportsOnOverridePropertiesOverrideExportsOnTheBase()
         {
             var c = CreateContainer(typeof(DerivedOverrideExporter));
             string value;
-            Assert.IsFalse(c.TryGetExport("a", out value));
-            Assert.IsTrue(c.TryGetExport("b", out value));
+            Assert.False(c.TryGetExport("a", out value));
+            Assert.True(c.TryGetExport("b", out value));
         }
     }
 }

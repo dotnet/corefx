@@ -4,15 +4,10 @@
 // -----------------------------------------------------------------------
 
 using System;
+using System.Composition.UnitTests.Util;
 using System.Runtime.Serialization;
-#if NETFX_CORE
-using Microsoft.VisualStudio.TestPlatform.UnitTestFramework;
-#elif PORTABLE_TESTS
-using Microsoft.Bcl.Testing;
-#else
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
-#endif
 namespace System.Composition.Convention
 {
     public static class ExceptionAssert
@@ -26,11 +21,11 @@ namespace System.Composition.Convention
         /// </summary>
         public static void HasDefaultMessage(Exception exception)
         {
-            Assert.IsNotNull(exception);
+            Assert.NotNull(exception);
 
             // Exception of type '[typename]' was thrown
             // However, don't check for single-quotes as they can be localized
-            StringAssert.Contains(exception.Message, exception.GetType().FullName);
+            Assert.Contains(exception.GetType().FullName, exception.Message);
         }
 
         /// <summary>
@@ -283,49 +278,49 @@ namespace System.Composition.Convention
 
             // Member '[memberName]' was not found.
             // However, don't check for single-quotes as they can be localized
-            StringAssert.Contains(actual.Message, memberName, "Retry Count {0}: Expected SerializationException MemberName to be '{1}'", retryCount, memberName);
+            AssertX.Contains(actual.Message, memberName, "Retry Count {0}: Expected SerializationException MemberName to be '{1}'", retryCount, memberName);
         }
 
         private static void AssertObjectDisposed(object instance, ObjectDisposedException actual, int retryCount)
         {
             string objectName = instance.GetType().FullName;
 
-            Assert.AreEqual(objectName, actual.ObjectName, "Retry Count {0}: Expected {1}.ObjectName to be '{2}', however, '{3}' is.", retryCount, actual.GetType().Name, objectName, actual.ObjectName);
+            AssertX.Equal(objectName, actual.ObjectName, "Retry Count {0}: Expected {1}.ObjectName to be '{2}', however, '{3}' is.", retryCount, actual.GetType().Name, objectName, actual.ObjectName);
         }
 
         private static void AssertSameParameterName(string parameterName, ArgumentException actual, int retryCount)
         {
-            StringAssert.Contains(actual.Message, parameterName, "Retry Count {0}: Expected {1}.ParamName to be '{2}'", retryCount, actual.GetType().Name, parameterName);
+            AssertX.Contains(parameterName, actual.Message, "Retry Count {0}: Expected {1}.ParamName to be '{2}'", retryCount, actual.GetType().Name, parameterName);
         }
 
         private static void AssertSame(Exception expected, Exception actual, int retryCount)
         {
-            Assert.AreSame(expected, actual, "Retry Count {0}: Expected '{1}' to be thrown, however, '{2}' was thrown.", retryCount, expected, actual);
+            AssertX.Same(expected, actual, "Retry Count {0}: Expected '{1}' to be thrown, however, '{2}' was thrown.", retryCount, expected, actual);
         }
 
         private static void AssertSameInner(Exception innerException, Exception actual, int retryCount)
         {
-            Assert.AreSame(innerException, actual.InnerException, "Retry Count {0}: Expected '{1}' to be the inner exception, however, '{2}' is.", retryCount, innerException, actual.InnerException);
+            AssertX.Same(innerException, actual.InnerException, "Retry Count {0}: Expected '{1}' to be the inner exception, however, '{2}' is.", retryCount, innerException, actual.InnerException);
         }
 
         private static void AssertIsExactInstanceOf(Type expectedType, Exception actual, int retryCount)
         {
             if (actual == null)
-                Assert.Fail("Retry Count {0}: Expected '{1}' to be thrown", retryCount, expectedType);
+                AssertX.Fail("Retry Count {0}: Expected '{1}' to be thrown", retryCount, expectedType);
 
             Type actualType = actual.GetType();
 
-            Assert.AreSame(expectedType, actualType, "Retry Count {0}: Expected '{1}' to be thrown, however, '{2}' was thrown.", retryCount, expectedType, actualType);
+            AssertX.Same(expectedType, actualType, "Retry Count {0}: Expected '{1}' to be thrown, however, '{2}' was thrown.", retryCount, expectedType, actualType);
         }
 
         private static void AssertIsExactInstanceOfInner(Type expectedType, Exception actual, int retryCount)
         {
             if (actual.InnerException == null)
-                Assert.Fail("Retry Count {0}: Expected '{1}' be the inner exception, however, it is null.", retryCount, expectedType);
+                AssertX.Fail("Retry Count {0}: Expected '{1}' be the inner exception, however, it is null.", retryCount, expectedType);
 
             Type actualType = actual.InnerException.GetType();
 
-            Assert.AreSame(expectedType, actualType, "Retry Count {0}: Expected '{1}' to be the inner exception, however, '{2}' is.", retryCount, expectedType, actualType);
+            AssertX.Same(expectedType, actualType, "Retry Count {0}: Expected '{1}' to be the inner exception, however, '{2}' is.", retryCount, expectedType, actualType);
         }
     }
 }

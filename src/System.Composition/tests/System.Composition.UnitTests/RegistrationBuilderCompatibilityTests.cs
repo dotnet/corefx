@@ -8,19 +8,12 @@ using System.Composition.Convention;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-#if NETFX_CORE
-using Microsoft.VisualStudio.TestPlatform.UnitTestFramework;
-#elif PORTABLE_TESTS
-using Microsoft.Bcl.Testing;
-#else
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-#endif
 
 using System.Composition.UnitTests.Util;
+using Xunit;
 
 namespace System.Composition.UnitTests
 {
-    [TestClass]
     public class ConventionBuilderCompatibilityTests
     {
         public class Base
@@ -34,7 +27,7 @@ namespace System.Composition.UnitTests
             new public string Prop { get; set; }
         }
 
-        [TestMethod]
+        [Fact]
         public void WhenConventionsAreInUseDuplicatePropertyNamesDoNotBreakDiscovery()
         {
             var rb = new ConventionBuilder();
@@ -48,7 +41,7 @@ namespace System.Composition.UnitTests
         public class EFRepository<T> : IRepository<T> { }
 
 
-        [TestMethod]
+        [Fact]
         public void ConventionBuilderExportsOpenGenerics()
         {
             var rb = new ConventionBuilder();
@@ -74,7 +67,7 @@ namespace System.Composition.UnitTests
         {
         }
 
-        [TestMethod]
+        [Fact]
         public void ConventionsCanApplyImportsToInheritedProperties()
         {
             var conventions = new ConventionBuilder();
@@ -89,7 +82,7 @@ namespace System.Composition.UnitTests
                 .CreateContainer();
 
             var dfb = container.GetExport<DerivedFromBaseWithImport>();
-            Assert.IsInstanceOfType(dfb.Imported, typeof(Imported));
+            Assert.IsAssignableFrom(typeof(Imported), dfb.Imported);
         }
 
         public class BaseWithExport
@@ -101,7 +94,7 @@ namespace System.Composition.UnitTests
         {
         }
 
-        [TestMethod]
+        [Fact]
         public void ConventionsCanApplyExportsToInheritedProperties()
         {
             var conventions = new ConventionBuilder();
@@ -114,7 +107,7 @@ namespace System.Composition.UnitTests
                 .CreateContainer();
 
             var s = container.GetExport<string>();
-            Assert.AreEqual("A", s);
+            Assert.Equal("A", s);
         }
 
         public class BaseWithExport2
@@ -127,7 +120,7 @@ namespace System.Composition.UnitTests
         {
         }
 
-        [TestMethod]
+        [Fact]
         public void ConventionsCanApplyExportsToInheritedPropertiesWithoutInterferingWithBase()
         {
             var conventions = new ConventionBuilder();
@@ -141,7 +134,7 @@ namespace System.Composition.UnitTests
                 .CreateContainer();
 
             var s = container.GetExports<string>();
-            Assert.AreEqual(2, s.Count());
+            Assert.Equal(2, s.Count());
         }
 
         [Export]
@@ -155,7 +148,7 @@ namespace System.Composition.UnitTests
 
         public class DerivedFromBaseWithDeclaredExports : BaseWithDeclaredExports { }
 
-        [TestMethod]
+        [Fact]
         public void InThePresenceOfConventionsClassExportsAreNotInherited()
         {
             var cc = new ContainerConfiguration()
@@ -163,10 +156,10 @@ namespace System.Composition.UnitTests
                 .CreateContainer();
 
             BaseWithDeclaredExports export;
-            Assert.IsFalse(cc.TryGetExport(out export));
+            Assert.False(cc.TryGetExport(out export));
         }
 
-        [TestMethod]
+        [Fact]
         public void InThePresenceOfConventionsPropertyExportsAreNotInherited()
         {
             var cc = new ContainerConfiguration()
@@ -174,7 +167,7 @@ namespace System.Composition.UnitTests
                 .CreateContainer();
 
             string export;
-            Assert.IsFalse(cc.TryGetExport(out export));
+            Assert.False(cc.TryGetExport(out export));
         }
 
         public class CustomExport : ExportAttribute { }
@@ -184,7 +177,7 @@ namespace System.Composition.UnitTests
 
         public class DerivedFromBaseWithCustomExport : BaseWithCustomExport { }
 
-        [TestMethod]
+        [Fact]
         public void CustomAttributesDoNotBecomeInheritedInThePresenceOfConventions()
         {
             var cc = new ContainerConfiguration()
@@ -192,7 +185,7 @@ namespace System.Composition.UnitTests
                 .CreateContainer();
 
             BaseWithCustomExport bce;
-            Assert.IsFalse(cc.TryGetExport(out bce));
+            Assert.False(cc.TryGetExport(out bce));
         }
     }
 }
