@@ -47,7 +47,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\src\System.Composition.AttributedModel\System.Composition.AttributedModel.csproj">
+    <ProjectReference Include="..\..\..\..\System.Composition.AttributedModel\src\System.Composition.AttributedModel.csproj">
       <Project>{c6257381-c624-494a-a9d9-5586e60856ea}</Project>
       <Name>System.Composition.AttributedModel</Name>
     </ProjectReference>
