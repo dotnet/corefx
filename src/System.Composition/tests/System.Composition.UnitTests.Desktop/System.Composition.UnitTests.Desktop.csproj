@@ -46,9 +46,6 @@
     <Reference Include="Microsoft.VisualStudio.QualityTools.UnitTestFramework, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.Composition" />
-    <Reference Include="System.Linq.Expressions" />
-    <Reference Include="System.Reflection" />
-    <Reference Include="System.Runtime" />
   </ItemGroup>
   <ItemGroup>
     <CodeAnalysisDependentAssemblyPaths Condition=" '$(VS100COMNTOOLS)' != '' " Include="$(VS100COMNTOOLS)..\IDE\PrivateAssemblies">
@@ -56,9 +53,38 @@
     </CodeAnalysisDependentAssemblyPaths>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ActivationEventOrderingTests.cs" />
+    <Compile Include="CardinalityTests.cs" />
+    <Compile Include="CircularityTests.cs" />
+    <Compile Include="CompositionContextExtensionsTests.cs" />
+    <Compile Include="ConcurrencyTests.cs" />
+    <Compile Include="ContainerTests.cs" />
+    <Compile Include="ContractTests.cs" />
+    <Compile Include="CustomerReportedMetadataBug.cs" />
+    <Compile Include="DictionaryImportTests.cs" />
+    <Compile Include="DiscoveryTests.cs" />
+    <Compile Include="ErrorMessageQualityTests.cs" />
+    <Compile Include="ExportDescriptorProviderTests.cs" />
+    <Compile Include="ExportFactoryTests.cs" />
+    <Compile Include="ExportMetadataDiscoveryTests.cs" />
+    <Compile Include="ImportManyTests.cs" />
+    <Compile Include="ImportOrderingTests.cs" />
+    <Compile Include="InheritanceTests.cs" />
+    <Compile Include="LazyTests.cs" />
+    <Compile Include="LightContainerTests.cs" />
+    <Compile Include="LooseImportsTests.cs" />
+    <Compile Include="MetadataConstraintTests.cs" />
+    <Compile Include="MetadataTests.cs" />
+    <Compile Include="MetadataViewGenerationTests.cs" />
+    <Compile Include="OpenGenericsTests.cs" />
+    <Compile Include="OptionalImportTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SharedSource>false</SharedSource>
     </Compile>
+    <Compile Include="PropertyExportTests.cs" />
+    <Compile Include="RegistrationBuilderCompatibilityTests.cs" />
+    <Compile Include="SharingTests.cs" />
+    <Compile Include="Util\AssertX.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\demo\Microsoft.Composition.Demos.ExtendedCollectionImports\Microsoft.Composition.Demos.ExtendedCollectionImports.csproj">
@@ -91,7 +117,6 @@
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
-  <Import Project="..\UnitTest.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

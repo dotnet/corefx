@@ -27,6 +27,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Composition.Conventi
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestLibrary", "System.Composition\tests\scenarios\TestLibrary\TestLibrary.csproj", "{DA6841A5-0344-4CC7-98B0-89CBEE18DEE3}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.Composition.Demos.ExtendedCollectionImports", "System.Composition\demo\Microsoft.Composition.Demos.ExtendedCollectionImports\Microsoft.Composition.Demos.ExtendedCollectionImports.csproj", "{44C7E52C-3873-4C64-875C-8A23A8376D60}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -65,6 +67,10 @@ Global
 		{DA6841A5-0344-4CC7-98B0-89CBEE18DEE3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DA6841A5-0344-4CC7-98B0-89CBEE18DEE3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DA6841A5-0344-4CC7-98B0-89CBEE18DEE3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{44C7E52C-3873-4C64-875C-8A23A8376D60}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{44C7E52C-3873-4C64-875C-8A23A8376D60}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{44C7E52C-3873-4C64-875C-8A23A8376D60}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{44C7E52C-3873-4C64-875C-8A23A8376D60}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -79,5 +85,6 @@ Global
 		{4852A19F-C05C-478D-BFA0-59FD03DE0E3F} = {3F14EC0F-7A2B-484B-9DE2-A942C8845EC0}
 		{853BB14F-8A5B-42B4-A053-21DE1AEBB335} = {3F14EC0F-7A2B-484B-9DE2-A942C8845EC0}
 		{DA6841A5-0344-4CC7-98B0-89CBEE18DEE3} = {C9727A91-A104-4DF7-B293-DD9522D71E60}
+		{44C7E52C-3873-4C64-875C-8A23A8376D60} = {898AA699-A116-436B-B5AE-6C68C4629AA3}
 	EndGlobalSection
 EndGlobal
