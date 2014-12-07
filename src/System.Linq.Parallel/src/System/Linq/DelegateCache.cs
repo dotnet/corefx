@@ -66,8 +66,8 @@ namespace System.Linq
 
     internal static class DelegateCache<T1, T2>
     {
-        public static readonly Func<T1, bool> CompatibleFunction = CompatibleFunctionMethod;
         private static Func<T1, T2> castFunction;
+        private static Func<T1, bool> compatibleFunction;
 
         public static Func<T1, T2> CastFunction
         {
@@ -79,6 +79,19 @@ namespace System.Linq
                 }
 
                 return castFunction;
+            }
+        }
+
+        public static Func<T1, bool> CompatibleFunction
+        {
+            get
+            {
+                if (compatibleFunction == null)
+                {
+                    compatibleFunction = CompatibleFunctionMethod;
+                }
+
+                return compatibleFunction;
             }
         }
 
