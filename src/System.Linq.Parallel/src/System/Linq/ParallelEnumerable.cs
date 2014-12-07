@@ -1580,7 +1580,7 @@ namespace System.Linq
             Contract.Assert(options.IsValidQueryAggregationOption(), "enum is out of range");
 
             AssociativeAggregationOperator<T, T, T> op = new AssociativeAggregationOperator<T, T, T>(
-                source, seed, null, seedIsSpecified, reduce, reduce, IdentityFunction<T>.Instance, throwIfEmpty, options);
+                source, seed, null, seedIsSpecified, reduce, reduce, DelegateCache<T>.IdentityFunction, throwIfEmpty, options);
             return op.Aggregate();
         }
 

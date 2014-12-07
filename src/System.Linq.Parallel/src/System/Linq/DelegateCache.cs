@@ -13,9 +13,16 @@ namespace System.Linq
     {
         public static readonly Func<T, bool> AnyFunction = AnyFunctionMethod;
 
+        public static readonly Func<T, T> IdentityFunction = IdentityFunctionMethod;
+
         private static bool AnyFunctionMethod(T arg)
         {
             return true;
+        }
+
+        private static T IdentityFunctionMethod(T arg)
+        {
+            return arg;
         }
     }
 
