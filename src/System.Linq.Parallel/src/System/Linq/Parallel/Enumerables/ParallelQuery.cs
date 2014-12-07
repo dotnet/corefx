@@ -97,7 +97,7 @@ namespace System.Linq
 
         internal sealed override ParallelQuery<TCastTo> Cast<TCastTo>()
         {
-            return ParallelEnumerable.Select<TSource, TCastTo>(this, CastFunction<TSource, TCastTo>.Instance);
+            return ParallelEnumerable.Select<TSource, TCastTo>(this, DelegateCache<TSource, TCastTo>.CastFunction);
         }
 
         internal sealed override ParallelQuery<TCastTo> OfType<TCastTo>()
@@ -106,7 +106,7 @@ namespace System.Linq
             //      solution (because it results in two operators) but is simple to implement.
             return this
                 .Where<TSource>(CompatibleFunction<TSource, TCastTo>.Instance)
-                .Select<TSource, TCastTo>(CastFunction<TSource, TCastTo>.Instance);
+                .Select<TSource, TCastTo>(DelegateCache<TSource, TCastTo>.CastFunction);
         }
 
         internal override IEnumerator GetEnumeratorUntyped()
