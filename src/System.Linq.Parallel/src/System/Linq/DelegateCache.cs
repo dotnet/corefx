@@ -2,7 +2,20 @@ namespace System.Linq
 {
     internal static class DelegateCache
     {
-        public static readonly Action EmptyAction = EmptyActionMethod;
+        private static Action emptyAction;
+
+        public static Action EmptyAction
+        {
+            get
+            {
+                if (emptyAction == null)
+                {
+                    emptyAction = EmptyActionMethod;
+                }
+
+                return emptyAction;
+            }
+        }
 
         private static void EmptyActionMethod()
         {
