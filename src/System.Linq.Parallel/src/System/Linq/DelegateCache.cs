@@ -24,8 +24,8 @@ namespace System.Linq
 
     internal static class DelegateCache<T>
     {
-        public static readonly Func<T, T> IdentityFunction = IdentityFunctionMethod;
         private static Func<T, bool> anyFunction;
+        private static Func<T, T> identityFunction;
 
         public static Func<T, bool> AnyFunction
         {
@@ -37,6 +37,19 @@ namespace System.Linq
                 }
 
                 return anyFunction;
+            }
+        }
+
+        public static Func<T, T> IdentityFunction
+        {
+            get
+            {
+                if (identityFunction == null)
+                {
+                    identityFunction = IdentityFunctionMethod;
+                }
+
+                return identityFunction;
             }
         }
 
