@@ -66,9 +66,21 @@ namespace System.Linq
 
     internal static class DelegateCache<T1, T2>
     {
-        public static readonly Func<T1, T2> CastFunction = CastFunctionMethod;
-
         public static readonly Func<T1, bool> CompatibleFunction = CompatibleFunctionMethod;
+        private static Func<T1, T2> castFunction;
+
+        public static Func<T1, T2> CastFunction
+        {
+            get
+            {
+                if (castFunction == null)
+                {
+                    castFunction = CastFunctionMethod;
+                }
+
+                return castFunction;
+            }
+        }
 
         private static T2 CastFunctionMethod(T1 arg)
         {
