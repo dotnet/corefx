@@ -30,9 +30,16 @@ namespace System.Linq
     {
         public static readonly Func<T1, T2> CastFunction = CastFunctionMethod;
 
+        public static readonly Func<T1, bool> CompatibleFunction = CompatibleFunctionMethod;
+
         private static T2 CastFunctionMethod(T1 arg)
         {
             return (T2)(object)arg;
+        }
+
+        private static bool CompatibleFunctionMethod(T1 arg)
+        {
+            return arg is T2;
         }
     }
 }
