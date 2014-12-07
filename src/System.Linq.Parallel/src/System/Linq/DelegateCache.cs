@@ -24,9 +24,21 @@ namespace System.Linq
 
     internal static class DelegateCache<T>
     {
-        public static readonly Func<T, bool> AnyFunction = AnyFunctionMethod;
-
         public static readonly Func<T, T> IdentityFunction = IdentityFunctionMethod;
+        private static Func<T, bool> anyFunction;
+
+        public static Func<T, bool> AnyFunction
+        {
+            get
+            {
+                if (anyFunction == null)
+                {
+                    anyFunction = AnyFunctionMethod;
+                }
+
+                return anyFunction;
+            }
+        }
 
         private static bool AnyFunctionMethod(T arg)
         {
