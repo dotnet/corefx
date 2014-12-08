@@ -6,15 +6,7 @@ namespace System.Linq
 
         public static Action EmptyAction
         {
-            get
-            {
-                if (s_emptyAction == null)
-                {
-                    s_emptyAction = EmptyActionMethod;
-                }
-
-                return s_emptyAction;
-            }
+            get { return s_emptyAction ?? (s_emptyAction = EmptyActionMethod); }
         }
 
         private static void EmptyActionMethod()
@@ -29,28 +21,12 @@ namespace System.Linq
 
         public static Func<T, bool> AnyFunction
         {
-            get
-            {
-                if (s_anyFunction == null)
-                {
-                    s_anyFunction = AnyFunctionMethod;
-                }
-
-                return s_anyFunction;
-            }
+            get { return s_anyFunction ?? (s_anyFunction = AnyFunctionMethod); }
         }
 
         public static Func<T, T> IdentityFunction
         {
-            get
-            {
-                if (s_identityFunction == null)
-                {
-                    s_identityFunction = IdentityFunctionMethod;
-                }
-
-                return s_identityFunction;
-            }
+            get { return s_identityFunction ?? (s_identityFunction = IdentityFunctionMethod); }
         }
 
         private static bool AnyFunctionMethod(T arg)
@@ -71,28 +47,12 @@ namespace System.Linq
 
         public static Func<T1, T2> CastFunction
         {
-            get
-            {
-                if (s_castFunction == null)
-                {
-                    s_castFunction = CastFunctionMethod;
-                }
-
-                return s_castFunction;
-            }
+            get { return s_castFunction ?? (s_castFunction = CastFunctionMethod); }
         }
 
         public static Func<T1, bool> CompatibleFunction
         {
-            get
-            {
-                if (s_compatibleFunction == null)
-                {
-                    s_compatibleFunction = CompatibleFunctionMethod;
-                }
-
-                return s_compatibleFunction;
-            }
+            get { return s_compatibleFunction ?? (s_compatibleFunction = CompatibleFunctionMethod); }
         }
 
         private static T2 CastFunctionMethod(T1 arg)
