@@ -16,12 +16,12 @@ namespace System.Linq
 
     internal static class DelegateCache<T>
     {
-        private static Func<T, bool> s_anyFunction;
+        private static Func<T, bool> s_alwaysTrueFunction;
         private static Func<T, T> s_identityFunction;
 
-        public static Func<T, bool> AnyFunction
+        public static Func<T, bool> AlwaysTrueFunction
         {
-            get { return s_anyFunction ?? (s_anyFunction = AnyFunctionMethod); }
+            get { return s_alwaysTrueFunction ?? (s_alwaysTrueFunction = AlwaysTrueFunctionMethod); }
         }
 
         public static Func<T, T> IdentityFunction
@@ -29,7 +29,7 @@ namespace System.Linq
             get { return s_identityFunction ?? (s_identityFunction = IdentityFunctionMethod); }
         }
 
-        private static bool AnyFunctionMethod(T arg)
+        private static bool AlwaysTrueFunctionMethod(T arg)
         {
             return true;
         }
