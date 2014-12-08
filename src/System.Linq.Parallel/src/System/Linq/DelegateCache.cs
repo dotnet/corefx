@@ -2,18 +2,18 @@ namespace System.Linq
 {
     internal static class DelegateCache
     {
-        private static Action emptyAction;
+        private static Action s_emptyAction;
 
         public static Action EmptyAction
         {
             get
             {
-                if (emptyAction == null)
+                if (s_emptyAction == null)
                 {
-                    emptyAction = EmptyActionMethod;
+                    s_emptyAction = EmptyActionMethod;
                 }
 
-                return emptyAction;
+                return s_emptyAction;
             }
         }
 
@@ -24,19 +24,19 @@ namespace System.Linq
 
     internal static class DelegateCache<T>
     {
-        private static Func<T, bool> anyFunction;
-        private static Func<T, T> identityFunction;
+        private static Func<T, bool> s_anyFunction;
+        private static Func<T, T> s_identityFunction;
 
         public static Func<T, bool> AnyFunction
         {
             get
             {
-                if (anyFunction == null)
+                if (s_anyFunction == null)
                 {
-                    anyFunction = AnyFunctionMethod;
+                    s_anyFunction = AnyFunctionMethod;
                 }
 
-                return anyFunction;
+                return s_anyFunction;
             }
         }
 
@@ -44,12 +44,12 @@ namespace System.Linq
         {
             get
             {
-                if (identityFunction == null)
+                if (s_identityFunction == null)
                 {
-                    identityFunction = IdentityFunctionMethod;
+                    s_identityFunction = IdentityFunctionMethod;
                 }
 
-                return identityFunction;
+                return s_identityFunction;
             }
         }
 
@@ -66,19 +66,19 @@ namespace System.Linq
 
     internal static class DelegateCache<T1, T2>
     {
-        private static Func<T1, T2> castFunction;
-        private static Func<T1, bool> compatibleFunction;
+        private static Func<T1, T2> s_castFunction;
+        private static Func<T1, bool> s_compatibleFunction;
 
         public static Func<T1, T2> CastFunction
         {
             get
             {
-                if (castFunction == null)
+                if (s_castFunction == null)
                 {
-                    castFunction = CastFunctionMethod;
+                    s_castFunction = CastFunctionMethod;
                 }
 
-                return castFunction;
+                return s_castFunction;
             }
         }
 
@@ -86,12 +86,12 @@ namespace System.Linq
         {
             get
             {
-                if (compatibleFunction == null)
+                if (s_compatibleFunction == null)
                 {
-                    compatibleFunction = CompatibleFunctionMethod;
+                    s_compatibleFunction = CompatibleFunctionMethod;
                 }
 
-                return compatibleFunction;
+                return s_compatibleFunction;
             }
         }
 
