@@ -263,6 +263,7 @@ namespace System.Collections.Immutable.Test
         [Fact]
         public void WithComparersEmptyCollection()
         {
+            Assert.False(true);
             var map = ImmutableDictionary.Create<string, string>();
             Assert.Same(EqualityComparer<string>.Default, map.KeyComparer);
             map = map.WithComparers(StringComparer.OrdinalIgnoreCase);
