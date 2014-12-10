@@ -255,7 +255,7 @@ namespace System.Xml
             nsTop = -1;
             // element stack
             stack = new TagInfo[10];
-            top = 0;// 0 is an empty sentanial element
+            top = 0;// 0 is an empty sentential element
             stack[top].Init(-1);
             quoteChar = '"';
 
@@ -408,23 +408,27 @@ namespace System.Xml
                 textWriter.Write(name);
                 if (pubid != null)
                 {
-                    textWriter.Write(" PUBLIC " + quoteChar);
+                    textWriter.Write(" PUBLIC ");
+                    textWriter.Write(quoteChar);
                     textWriter.Write(pubid);
-                    textWriter.Write(quoteChar + " " + quoteChar);
+                    textWriter.Write(quoteChar);
+                    textWriter.Write(' ');
+                    textWriter.Write(quoteChar);
                     textWriter.Write(sysid);
                     textWriter.Write(quoteChar);
                 }
                 else if (sysid != null)
                 {
-                    textWriter.Write(" SYSTEM " + quoteChar);
+                    textWriter.Write(" SYSTEM ");
+                    textWriter.Write(quoteChar);
                     textWriter.Write(sysid);
                     textWriter.Write(quoteChar);
                 }
                 if (subset != null)
                 {
-                    textWriter.Write("[");
+                    textWriter.Write('[');
                     textWriter.Write(subset);
-                    textWriter.Write("]");
+                    textWriter.Write(']');
                 }
                 textWriter.Write('>');
             }
@@ -1122,7 +1126,10 @@ namespace System.Xml
                 this.currentState = State.Prolog;
 
                 StringBuilder bufBld = new StringBuilder(128);
-                bufBld.Append("version=" + quoteChar + "1.0" + quoteChar);
+                bufBld.Append("version=");
+                bufBld.Append(quoteChar);
+                bufBld.Append("1.0");
+                bufBld.Append(quoteChar);
                 if (this.encoding != null)
                 {
                     bufBld.Append(" encoding=");
@@ -1599,8 +1606,8 @@ namespace System.Xml
 
         // This method is used for validation of the DOCTYPE, processing instruction and entity names plus names 
         // written out by the user via WriteName and WriteQualifiedName.
-        // Unfortunatelly the names of elements and attributes are not validated by the XmlTextWriter.
-        // Also this method does not check wheather the character after ':' is a valid start name character. It accepts
+        // Unfortunately the names of elements and attributes are not validated by the XmlTextWriter.
+        // Also this method does not check whether the character after ':' is a valid start name character. It accepts
         // all valid name characters at that position. This can't be changed because of backwards compatibility.
         private unsafe void ValidateName(string name, bool isNCName)
         {

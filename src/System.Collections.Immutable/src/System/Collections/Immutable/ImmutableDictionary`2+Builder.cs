@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
-using System.Linq;
 using Validation;
 
 namespace System.Collections.Immutable
@@ -39,7 +38,7 @@ namespace System.Collections.Immutable
             /// <summary>
             /// The root of the binary tree that stores the collection.  Contents are typically not entirely frozen.
             /// </summary>
-            private ImmutableSortedDictionary<int, HashBucket>.Node root = ImmutableSortedDictionary<int, HashBucket>.Node.EmptyNode;
+            private SortedInt32KeyNode<HashBucket> root = SortedInt32KeyNode<HashBucket>.EmptyNode;
 
             /// <summary>
             /// The comparers.
@@ -99,7 +98,7 @@ namespace System.Collections.Immutable
                     if (value != this.KeyComparer)
                     {
                         var comparers = Comparers.Get(value, this.ValueComparer);
-                        var input = new MutationInput(ImmutableSortedDictionary<int, HashBucket>.Node.EmptyNode, comparers, 0);
+                        var input = new MutationInput(SortedInt32KeyNode<HashBucket>.EmptyNode, comparers, 0);
                         var result = ImmutableDictionary<TKey, TValue>.AddRange(this, input);
 
                         this.immutable = null;
@@ -162,7 +161,13 @@ namespace System.Collections.Immutable
             /// </summary>
             public IEnumerable<TKey> Keys
             {
-                get { return this.root.Values.SelectMany(b => b).Select(kv => kv.Key); }
+                get 
+                {
+                    foreach (KeyValuePair<TKey, TValue> item in this)
+                    {
+                        yield return item.Key;
+                    }
+                }
             }
 
             /// <summary>
@@ -179,7 +184,13 @@ namespace System.Collections.Immutable
             /// </summary>
             public IEnumerable<TValue> Values
             {
-                get { return this.root.Values.SelectMany(b => b).Select(kv => kv.Value).ToArray(this.Count); }
+                get
+                {
+                    foreach (KeyValuePair<TKey, TValue> item in this)
+                    {
+                        yield return item.Value;
+                    }
+                }
             }
 
             /// <summary>
@@ -219,7 +230,7 @@ namespace System.Collections.Immutable
             /// </summary>
             /// <returns>
             /// An <see cref="T:System.Collections.Generic.ICollection`1" /> containing the keys of the object that implements <see cref="T:System.Collections.Generic.IDictionary`2" />.
-            ///   </returns>
+            /// </returns>
             ICollection IDictionary.Keys
             {
                 get { return this.Keys.ToArray(this.Count); }
@@ -230,7 +241,7 @@ namespace System.Collections.Immutable
             /// </summary>
             /// <returns>
             /// An <see cref="T:System.Collections.Generic.ICollection`1" /> containing the values in the object that implements <see cref="T:System.Collections.Generic.IDictionary`2" />.
-            ///   </returns>
+            /// </returns>
             ICollection IDictionary.Values
             {
                 get { return this.Values.ToArray(this.Count); }
@@ -375,7 +386,7 @@ namespace System.Collections.Immutable
             /// <summary>
             /// Gets or sets the root of this data structure.
             /// </summary>
-            private ImmutableSortedDictionary<int, HashBucket>.Node Root
+            private SortedInt32KeyNode<HashBucket> Root
             {
                 get
                 {
@@ -564,7 +575,14 @@ namespace System.Collections.Immutable
             [Pure]
             public bool ContainsValue(TValue value)
             {
-                return this.Values.Contains(value, this.ValueComparer);
+                foreach (KeyValuePair<TKey, TValue> item in this)
+                {
+                    if (this.ValueComparer.Equals(value, item.Value))
+                    {
+                        return true;
+                    }
+                }
+                return false;
             }
 
             /// <summary>
@@ -621,7 +639,7 @@ namespace System.Collections.Immutable
             /// <exception cref="T:System.NotSupportedException">The <see cref="T:System.Collections.Generic.ICollection`1"/> is read-only. </exception>
             public void Clear()
             {
-                this.Root = ImmutableSortedDictionary<int, HashBucket>.Node.EmptyNode;
+                this.Root = SortedInt32KeyNode<HashBucket>.EmptyNode;
                 this.count = 0;
             }
 
