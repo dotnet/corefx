@@ -364,7 +364,7 @@ namespace System.Linq
             CancellationTokenRegistration dummyRegistration = new CancellationTokenRegistration();
             try
             {
-                dummyRegistration = cancellationToken.Register(() => { });
+                dummyRegistration = cancellationToken.Register(DelegateCache.EmptyAction);
             }
             catch (ObjectDisposedException)
             {
@@ -1580,7 +1580,7 @@ namespace System.Linq
             Contract.Assert(options.IsValidQueryAggregationOption(), "enum is out of range");
 
             AssociativeAggregationOperator<T, T, T> op = new AssociativeAggregationOperator<T, T, T>(
-                source, seed, null, seedIsSpecified, reduce, reduce, delegate (T obj) { return obj; }, throwIfEmpty, options);
+                source, seed, null, seedIsSpecified, reduce, reduce, DelegateCache<T>.IdentityFunction, throwIfEmpty, options);
             return op.Aggregate();
         }
 
@@ -4017,7 +4017,7 @@ namespace System.Linq
         {
             if (source == null) throw new ArgumentNullException("source");
 
-            return Any(source, x => true);
+            return Any(source, DelegateCache<TSource>.AlwaysTrueFunction);
         }
 
         //-----------------------------------------------------------------------------------
