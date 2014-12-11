@@ -84,6 +84,22 @@ namespace System
             set { ConsolePal.ForegroundColor = value; }
         }
 
+        public static IDisposable UseBackgroundColor(ConsoleColor backgroundColor)
+        {
+            var previousColor = BackgroundColor;
+            BackgroundColor = backgroundColor;
+
+            return new DisposableConsoleColor(() => BackgroundColor = previousColor);
+        }
+
+        public static IDisposable UseForegroundColor(ConsoleColor foregroundColor)
+        {
+            var previousColor = ForegroundColor;
+            ForegroundColor = foregroundColor;
+
+            return new DisposableConsoleColor(() => ForegroundColor = previousColor);
+        }
+
         public static void ResetColor()
         {
             ConsolePal.ResetColor();

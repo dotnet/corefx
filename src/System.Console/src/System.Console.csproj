@@ -50,7 +50,7 @@
     <Reference Include="System.Diagnostics.Contracts">
       <HintPath>..\..\packages\System.Diagnostics.Contracts.4.0.0-beta-22405\lib\portable-wpa80+win80+net45+aspnetcore50\System.Diagnostics.Contracts.dll</HintPath>
       <Private>False</Private>
-      <SpecificVersion>False</SpecificVersion>     
+      <SpecificVersion>False</SpecificVersion>
     </Reference>
     <Reference Include="System.Diagnostics.Debug">
       <HintPath>..\..\packages\System.Diagnostics.Debug.4.0.10-beta-22405\lib\portable-wpa80+win80+net45+aspnetcore50\System.Diagnostics.Debug.dll</HintPath>
@@ -143,6 +143,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="System\Console.cs" />
     <Compile Include="System\ConsoleColor.cs" />
+    <Compile Include="System\DisposableConsoleColor.cs" />
     <Compile Include="System\IO\ConsoleStream.cs" />
     <Compile Include="System\IO\SyncTextReader.cs" />
     <Compile Include="System\IO\SyncTextWriter.cs" />
