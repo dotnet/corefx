@@ -15,7 +15,7 @@ namespace System.Text.RegularExpressions
     public class Group : Capture
     {
         // the empty group object
-        internal static Group _emptygroup = new Group(String.Empty, Array.Empty<int>(), 0);
+        internal static Group _emptygroup = new Group(String.Empty, new int[] {}, 0);
 
         internal int[] _caps;
         internal int _capcount;
