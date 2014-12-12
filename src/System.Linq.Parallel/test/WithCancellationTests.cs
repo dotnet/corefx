@@ -42,6 +42,7 @@ namespace Test
         }
 
         [Fact]
+        [ActiveIssue(240)]
         public static void PreCanceledToken_SimpleEnumerator()
         {
             OperationCanceledException caughtException = null;
