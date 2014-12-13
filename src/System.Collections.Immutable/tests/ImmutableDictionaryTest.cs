@@ -261,6 +261,15 @@ namespace System.Collections.Immutable.Test
         }
 
         [Fact]
+        public void CollisionExceptionMessageContainsKey()
+        {
+            var map = ImmutableDictionary.Create<string, string>()
+                .Add("firstKey", "1").Add("secondKey", "2");
+            var exception = Assert.Throws<ArgumentException>(() => map.Add("firstKey", "3"));
+            Assert.Contains("firstKey", exception.Message);
+        }
+
+        [Fact]
         public void WithComparersEmptyCollection()
         {
             var map = ImmutableDictionary.Create<string, string>();
@@ -331,6 +340,11 @@ namespace System.Collections.Immutable.Test
         protected override IEqualityComparer<TValue> GetValueComparer<TKey, TValue>(IImmutableDictionary<TKey, TValue> dictionary)
         {
             return ((ImmutableDictionary<TKey, TValue>)dictionary).ValueComparer;
+        }
+
+        internal override IBinaryTree GetRootNode<TKey, TValue>(IImmutableDictionary<TKey, TValue> dictionary)
+        {
+            return ((ImmutableDictionary<TKey, TValue>)dictionary).Root;
         }
 
         protected void ContainsValueTestHelper<TKey, TValue>(ImmutableDictionary<TKey, TValue> map, TKey key, TValue value)
