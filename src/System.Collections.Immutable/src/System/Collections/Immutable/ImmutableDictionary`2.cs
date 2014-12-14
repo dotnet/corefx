@@ -166,34 +166,44 @@ namespace System.Collections.Immutable
         /// <summary>
         /// Gets the keys in the map.
         /// </summary>
-        public IEnumerable<TKey> Keys
+        public KeyCollection Keys
         {
             get
             {
-                foreach (var bucket in this.root)
-                {
-                    foreach (var item in bucket.Value)
-                    {
-                        yield return item.Key;
-                    }
-                }
+                return new KeyCollection(this);
+            }
+        }
+
+        /// <summary>
+        /// Gets the keys in the map.
+        /// </summary>
+        IEnumerable<TKey> IReadOnlyDictionary<TKey, TValue>.Keys
+        {
+            get
+            {
+                return Keys;
             }
         }
 
         /// <summary>
         /// Gets the values in the map.
         /// </summary>
-        public IEnumerable<TValue> Values
+        public ValueCollection Values
         {
             get
             {
-                foreach (var bucket in this.root)
-                {
-                    foreach (var item in bucket.Value)
-                    {
-                        yield return item.Value;
-                    }
-                }
+                return new ValueCollection(this);
+            }
+        }
+
+        /// <summary>
+        /// Gets the values in the map.
+        /// </summary>
+        IEnumerable<TValue> IReadOnlyDictionary<TKey, TValue>.Values
+        {
+            get
+            {
+                return Values;
             }
         }
 
