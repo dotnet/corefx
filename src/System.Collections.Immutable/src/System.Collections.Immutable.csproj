@@ -84,8 +84,10 @@
     <Compile Include="System\Collections\Immutable\ImmutableDictionary`2+DebuggerProxy.cs" />
     <Compile Include="System\Collections\Immutable\ImmutableDictionary`2+Enumerator.cs" />
     <Compile Include="System\Collections\Immutable\ImmutableDictionary`2+HashBucket.cs" />
+    <Compile Include="System\Collections\Immutable\ImmutableDictionary`2+KeyCollection.cs" />
     <Compile Include="System\Collections\Immutable\ImmutableDictionary`2+MutationInput.cs" />
     <Compile Include="System\Collections\Immutable\ImmutableDictionary`2+MutationResult.cs" />
+    <Compile Include="System\Collections\Immutable\ImmutableDictionary`2+ValueCollection.cs" />
     <Compile Include="System\Collections\Immutable\ImmutableDictionary`2.cs" />
     <Compile Include="System\Collections\Immutable\ImmutableExtensions.cs" />
     <Compile Include="System\Collections\Immutable\ImmutableHashSet.cs" />
