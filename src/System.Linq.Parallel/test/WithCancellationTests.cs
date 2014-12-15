@@ -514,6 +514,7 @@ namespace Test
 
         // Regression test for an issue causing ODE if a queryEnumator is disposed before moveNext is called.
         [Fact]
+        [ActiveIssue(240)]
         public static void ImmediateDispose()
         {
             var queryEnumerator = Enumerable.Range(1, 10).AsParallel().Select(x => x).GetEnumerator();
