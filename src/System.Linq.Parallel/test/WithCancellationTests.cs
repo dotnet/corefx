@@ -573,6 +573,7 @@ namespace Test
 
         // throwing a fake OCE(ct) when the ct isn't canceled should produce an AggregateException.
         [Fact]
+        [ActiveIssue(240)]
         public static void SetOperationsThrowAggregateOnCancelOrDispose_2()
         {
             try
