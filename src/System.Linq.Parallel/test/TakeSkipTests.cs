@@ -26,6 +26,7 @@ namespace Test
         }
 
         [Fact]
+        [ActiveIssue(240)]
         public static void RunTakeTest2_Range()
         {
             // TakeWhile:
