@@ -362,19 +362,17 @@ namespace System.Text.RegularExpressions
 
                 return String.Empty;
             }
-            else
+            
+            if (_caps != null)
             {
-                if (_caps != null)
-                {
-                    if (!_caps.TryGetValue(i, out i))
-                        return String.Empty;
-                }
-
-                if (i >= 0 && i < _capslist.Length)
-                    return _capslist[i];
-
-                return String.Empty;
+                if (!_caps.TryGetValue(i, out i))
+                    return String.Empty;
             }
+
+            if (i >= 0 && i < _capslist.Length)
+                return _capslist[i];
+
+            return String.Empty;
         }
 
         /*
