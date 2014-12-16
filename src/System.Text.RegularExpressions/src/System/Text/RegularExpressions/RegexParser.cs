@@ -56,7 +56,6 @@ namespace System.Text.RegularExpressions
         {
             RegexParser p;
             RegexNode root;
-            String[] capnamelist;
 
             p = new RegexParser((op & RegexOptions.CultureInvariant) != 0 ? CultureInfo.InvariantCulture : CultureInfo.CurrentCulture);
 
@@ -67,12 +66,7 @@ namespace System.Text.RegularExpressions
             p.Reset(op);
             root = p.ScanRegex();
 
-            if (p._capnamelist == null)
-                capnamelist = null;
-            else
-                capnamelist = p._capnamelist.ToArray();
-
-            return new RegexTree(root, p._caps, p._capnumlist, p._captop, p._capnames, capnamelist, op);
+            return new RegexTree(root, p._caps, p._capnumlist, p._captop, p._capnames, p._capnamelist, op);
         }
 
         /*

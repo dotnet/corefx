@@ -53,7 +53,7 @@ namespace System.Text.RegularExpressions
         internal Dictionary<Int32, Int32> _caps;            // if captures are sparse, this is the hashtable capnum->index
         internal Dictionary<String, Int32> _capnames;       // if named captures are used, this maps names->index
 
-        internal String[] _capslist;                        // if captures are sparse or named captures are used, this is the sorted list of names
+        internal List<String> _capslist;                    // if captures are sparse or named captures are used, this is the sorted list of names
         internal int _capsize;                              // the size of the capture array
 
         internal ExclusiveReference _runnerref;             // cached runner
@@ -298,9 +298,7 @@ namespace System.Text.RegularExpressions
             }
             else
             {
-                result = new String[_capslist.Length];
-
-                System.Array.Copy(_capslist, 0, result, 0, _capslist.Length);
+                result = _capslist.ToArray();
             }
 
             return result;
@@ -372,7 +370,7 @@ namespace System.Text.RegularExpressions
                     i = _caps[i];
                 }
 
-                if (i >= 0 && i < _capslist.Length)
+                if (i >= 0 && i < _capslist.Count)
                     return _capslist[i];
 
                 return String.Empty;
@@ -1054,12 +1052,12 @@ namespace System.Text.RegularExpressions
         internal RegexCode _code;
         internal Dictionary<Int32, Int32> _caps;
         internal Dictionary<String, Int32> _capnames;
-        internal String[] _capslist;
+        internal List<String> _capslist;
         internal int _capsize;
         internal ExclusiveReference _runnerref;
         internal SharedReference _replref;
 
-        internal CachedCodeEntry(CachedCodeEntryKey key, Dictionary<String, Int32> capnames, String[] capslist, RegexCode code, Dictionary<Int32, Int32> caps, int capsize, ExclusiveReference runner, SharedReference repl)
+        internal CachedCodeEntry(CachedCodeEntryKey key, Dictionary<String, Int32> capnames, List<String> capslist, RegexCode code, Dictionary<Int32, Int32> caps, int capsize, ExclusiveReference runner, SharedReference repl)
         {
             _key = key;
             _capnames = capnames;
