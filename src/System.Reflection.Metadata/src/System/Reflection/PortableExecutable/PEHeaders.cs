@@ -15,6 +15,7 @@ namespace System.Reflection.PortableExecutable
     {
         private readonly CoffHeader coffHeader;
         private readonly PEHeader peHeader;
+		private readonly DosHeader dosHeader = null;
         private readonly ImmutableArray<SectionHeader> sectionHeaders;
         private readonly CorHeader corHeader;
         private readonly int metadataStartOffset = -1;
@@ -22,7 +23,7 @@ namespace System.Reflection.PortableExecutable
         private readonly int coffHeaderStartOffset = -1;
         private readonly int corHeaderStartOffset = -1;
         private readonly int peHeaderStartOffset = -1;
-
+		
         /// <summary>
         /// Reads PE headers from the current location in the stream.
         /// </summary>
@@ -65,15 +66,21 @@ namespace System.Reflection.PortableExecutable
 
             int size = PEBinaryReader.GetAndValidateSize(peStream, sizeOpt);
             var reader = new PEBinaryReader(peStream, size);
-
+						
             bool isCoffOnly;
             SkipDosHeader(ref reader, out isCoffOnly);
-
+											
             this.coffHeaderStartOffset = reader.CurrentOffset;
             this.coffHeader = new CoffHeader(ref reader);
 
             if (!isCoffOnly)
-            {
+            {	
+                // Get DOS header and DOS stub 			
+				int currentOffset = reader.CurrentOffset;
+				reader.Seek(0);
+				this.dosHeader = new DosHeader(ref reader);
+				reader.Seek(currentOffset);
+			    
                 this.peHeaderStartOffset = reader.CurrentOffset;
                 this.peHeader = new PEHeader(ref reader);
             }
@@ -142,7 +149,15 @@ namespace System.Reflection.PortableExecutable
         {
             get { return peHeader; }
         }
-
+				
+        /// <summary>
+        /// Gets the DOS header of the image or null if the image is COFF only.
+        /// </summary>
+        public DosHeader DosHeader
+        {
+            get { return dosHeader; }
+        }
+		
         /// <summary>
         /// Gets the byte offset from the start of the image to 
         /// </summary>
@@ -229,7 +244,7 @@ namespace System.Reflection.PortableExecutable
         {
             // Look for DOS Signature "MZ"
             ushort dosSig = reader.ReadUInt16();
-
+			
             if (dosSig != PEFileConstants.DosSignature)
             {
                 // If image doesn't start with DOS signature, let's assume it is a 
@@ -249,7 +264,7 @@ namespace System.Reflection.PortableExecutable
             }
             else
             {
-                isCOFFOnly = false;
+                isCOFFOnly = false;                				
             }
 
             if (!isCOFFOnly)
@@ -257,9 +272,9 @@ namespace System.Reflection.PortableExecutable
                 // Skip the DOS Header
                 reader.Seek(PEFileConstants.PESignatureOffsetLocation);
 
-                int ntHeaderOffset = reader.ReadInt32();
-                reader.Seek(ntHeaderOffset);
-
+                int ntHeaderOffset = reader.ReadInt32();												 
+				reader.Seek(ntHeaderOffset);
+								
                 // Look for PESignature "PE\0\0"
                 uint ntSignature = reader.ReadUInt32();
                 if (ntSignature != PEFileConstants.PESignature)
@@ -286,7 +301,7 @@ namespace System.Reflection.PortableExecutable
 
             return builder.ToImmutable();
         }
-
+				
         /// <summary>
         /// Gets the offset (in bytes) from the start of the image to the given directory entry.
         /// </summary>
