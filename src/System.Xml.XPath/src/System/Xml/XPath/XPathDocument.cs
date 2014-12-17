@@ -352,15 +352,13 @@ namespace System.Xml.XPath
             Debug.Assert(pageElem[idxElem].NodeType == XPathNodeType.Element);
 
             // Check whether this element has any local namespaces
-            if (this.mapNmsp == null || !this.mapNmsp.ContainsKey(nodeRef))
+            if (this.mapNmsp == null || !this.mapNmsp.TryGetValue(nodeRef, out nodeRef))
             {
                 pageNmsp = null;
                 return 0;
             }
 
             // Yes, so return the page and index of the first local namespace node
-            nodeRef = this.mapNmsp[nodeRef];
-
             pageNmsp = nodeRef.Page;
             return nodeRef.Index;
         }

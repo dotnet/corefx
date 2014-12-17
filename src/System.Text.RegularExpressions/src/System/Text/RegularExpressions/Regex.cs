@@ -362,21 +362,17 @@ namespace System.Text.RegularExpressions
 
                 return String.Empty;
             }
-            else
+            
+            if (_caps != null)
             {
-                if (_caps != null)
-                {
-                    if (!_caps.ContainsKey(i))
-                        return String.Empty;
-
-                    i = _caps[i];
-                }
-
-                if (i >= 0 && i < _capslist.Length)
-                    return _capslist[i];
-
-                return String.Empty;
+                if (!_caps.TryGetValue(i, out i))
+                    return String.Empty;
             }
+
+            if (i >= 0 && i < _capslist.Length)
+                return _capslist[i];
+
+            return String.Empty;
         }
 
         /*
@@ -399,10 +395,10 @@ namespace System.Text.RegularExpressions
             // look up name if we have a hashtable of names
             if (_capnames != null)
             {
-                if (!_capnames.ContainsKey(name))
+                if (!_capnames.TryGetValue(name, out result))
                     return -1;
 
-                return _capnames[name];
+                return result;
             }
 
             // convert to an int if it looks like a number
