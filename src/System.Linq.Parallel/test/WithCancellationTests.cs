@@ -42,6 +42,7 @@ namespace Test
         }
 
         [Fact]
+        [ActiveIssue(240)]
         public static void PreCanceledToken_SimpleEnumerator()
         {
             OperationCanceledException caughtException = null;
@@ -90,9 +91,8 @@ namespace Test
             Assert.NotNull(caughtException);
         }
 
-        // This test is failing on our CI machines, probably due to the VM's limited CPU.
-        // To-do: Re-enable this test when we resolve the build machine issues.
-        // [Fact(Skip="Issue #176")]
+        [Fact]
+        [ActiveIssue(176)]
         public static void CTT_Sorting_ToArray()
         {
             int size = 10000;
@@ -130,9 +130,8 @@ namespace Test
             Assert.Equal(tokenSource.Token, caughtException.CancellationToken);
         }
 
-        // This test is failing on our CI machines, probably due to the VM's limited CPU.
-        // To-do: Re-enable this test when we resolve the build machine issues.
-        // [Fact(Skip="Issue #176")]
+        [Fact]
+        [ActiveIssue(176)]
         public static void CTT_NonSorting_AsynchronousMergerEnumeratorDispose()
         {
             int size = 10000;
@@ -218,9 +217,8 @@ namespace Test
             Assert.NotNull(caughtException);
         }
 
-        // This test is failing on our CI machines, probably due to the VM's limited CPU.
-        // To-do: Re-enable this test when we resolve the build machine issues.
-        // [Fact(Skip="Issue #176")]
+        [Fact]
+        [ActiveIssue(176)]
         public static void CTT_NonSorting_ToArray_ExternalCancel()
         {
             int size = 10000;
@@ -516,6 +514,7 @@ namespace Test
 
         // Regression test for an issue causing ODE if a queryEnumator is disposed before moveNext is called.
         [Fact]
+        [ActiveIssue(240)]
         public static void ImmediateDispose()
         {
             var queryEnumerator = Enumerable.Range(1, 10).AsParallel().Select(x => x).GetEnumerator();
@@ -524,6 +523,7 @@ namespace Test
 
         // REPRO 1 -- cancellation
         [Fact]
+        [ActiveIssue(176)]
         public static void SetOperationsThrowAggregateOnCancelOrDispose_1()
         {
             var mre = new ManualResetEvent(false);
@@ -573,6 +573,7 @@ namespace Test
 
         // throwing a fake OCE(ct) when the ct isn't canceled should produce an AggregateException.
         [Fact]
+        [ActiveIssue(240)]
         public static void SetOperationsThrowAggregateOnCancelOrDispose_2()
         {
             try
@@ -679,6 +680,7 @@ namespace Test
         }
 
         [Fact]
+        [ActiveIssue(240)]
         public static void CancellationCausingNoDataMustThrow()
         {
             OperationCanceledException oce = null;

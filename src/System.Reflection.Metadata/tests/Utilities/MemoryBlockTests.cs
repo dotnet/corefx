@@ -180,7 +180,7 @@ namespace System.Reflection.Metadata.Tests
                     Assert.True(ptr != null);
                     Assert.True(prefixed != (ptr == bytes));
                     Assert.Equal(prefixed ? "PrefixTest".Length : "Test".Length, byteCount);
-                    string s = new string((sbyte*)bytes, 0, byteCount, Encoding.UTF8);
+                    string s = Encoding.UTF8.GetString(bytes, byteCount);
                     Assert.Equal(s, prefixed ? "PrefixTest" : "Test");
                     return "Intercepted";
                 }
@@ -234,9 +234,8 @@ namespace System.Reflection.Metadata.Tests
             }
         }
 
-        // TODO: Issue #26: MetadataStringComparer needs to use the user-supplied encoding.
-        //       Add more test cases when fixing this and re-enabling the test.
-        /*[Fact]*/
+        [Fact]
+        [ActiveIssue(26)]
         public unsafe void ComparisonToInvalidByteSequenceMatchesFallback()
         {
             // dangling lead byte
