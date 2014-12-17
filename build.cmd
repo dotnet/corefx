@@ -28,5 +28,5 @@ call :build %*
 goto :eof
 
 :build
-%_buildprefix% %_msbuildexe% "%~dp0build.proj" /nologo /maxcpucount /verbosity:minimal /nodeReuse:false /fileloggerparameters:Verbosity=diag;LogFile="%~dp0msbuild.log";Append %* %_buildpostfix%
+%_buildprefix% %_msbuildexe% "%~dp0build.proj" /nologo /maxcpucount /verbosity:diag /nodeReuse:false /fileloggerparameters:Verbosity=diag;LogFile="%~dp0msbuild.log";Append %* %_buildpostfix%
 goto :eof
