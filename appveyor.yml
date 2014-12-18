@@ -1,4 +1,4 @@
 build_script:
   - '"%VS120COMNTOOLS%VsDevCmd.bat"'
-  - build.cmd
+  - build.cmd /p:SkipTestAssemblies=System.Threading.Tasks.Dataflow.Tests;System.Linq.Parallel.Tests
 test: off  # disable automatic test discovery, xUnit already runs as part of build.cmd
