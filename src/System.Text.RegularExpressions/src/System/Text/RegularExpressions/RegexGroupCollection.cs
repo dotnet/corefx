@@ -13,7 +13,7 @@ namespace System.Text.RegularExpressions
     /// Represents a sequence of capture substrings. The object is used
     /// to return the set of captures done by a single capturing group.
     /// </summary>
-    public class GroupCollection : ICollection
+    public class GroupCollection : ICollection, IReadOnlyList<Group>
     {
         internal Match _match;
         internal Dictionary<Int32, Int32> _captureMap;
@@ -148,6 +148,11 @@ namespace System.Text.RegularExpressions
         {
             return new GroupEnumerator(this);
         }
+
+        IEnumerator<Group> IEnumerable<Group>.GetEnumerator()
+        {
+            return new GroupEnumerator(this);
+        }
     }
 
 
@@ -155,7 +160,7 @@ namespace System.Text.RegularExpressions
      * This non-public enumerator lists all the captures
      * Should it be public?
      */
-    internal class GroupEnumerator : IEnumerator
+    internal class GroupEnumerator : IEnumerator<Group>
     {
         internal GroupCollection _rgc;
         internal int _curindex;
@@ -192,6 +197,11 @@ namespace System.Text.RegularExpressions
             get { return Capture; }
         }
 
+        Group IEnumerator<Group>.Current
+        {
+            get { return (Group)Capture; }
+        }
+
         /*
          * Returns the current capture
          */
@@ -212,6 +222,10 @@ namespace System.Text.RegularExpressions
         public void Reset()
         {
             _curindex = -1;
+        }
+
+        void IDisposable.Dispose()
+        {
         }
     }
 }

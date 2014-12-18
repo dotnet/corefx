@@ -5,6 +5,7 @@
 // contained in a compiled Regex.
 
 using System.Collections;
+using System.Collections.Generic;
 
 namespace System.Text.RegularExpressions
 {
@@ -17,7 +18,7 @@ namespace System.Text.RegularExpressions
     /// Represents a sequence of capture substrings. The object is used
     /// to return the set of captures done by a single capturing group.
     /// </summary>
-    public class CaptureCollection : ICollection
+    public class CaptureCollection : ICollection, IReadOnlyList<Capture>
     {
         internal Group _group;
         internal int _capcount;
@@ -93,6 +94,11 @@ namespace System.Text.RegularExpressions
             return new CaptureEnumerator(this);
         }
 
+        IEnumerator<Capture> IEnumerable<Capture>.GetEnumerator()
+        {
+            return new CaptureEnumerator(this);
+        }
+
         /*
          * Nonpublic code to return set of captures for the group
          */
@@ -124,7 +130,7 @@ namespace System.Text.RegularExpressions
      * Should it be public?
      */
 
-    internal class CaptureEnumerator : IEnumerator
+    internal class CaptureEnumerator : IEnumerator<Capture>
     {
         internal CaptureCollection _rcc;
         internal int _curindex;
@@ -161,6 +167,11 @@ namespace System.Text.RegularExpressions
             get { return Capture; }
         }
 
+        Capture IEnumerator<Capture>.Current
+        {
+            get { return Capture; }
+        }
+
         /*
          * Returns the current capture
          */
@@ -181,6 +192,10 @@ namespace System.Text.RegularExpressions
         public void Reset()
         {
             _curindex = -1;
+        }
+
+        void IDisposable.Dispose()
+        {
         }
     }
 }

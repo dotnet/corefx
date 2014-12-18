@@ -18,7 +18,7 @@ namespace System.Text.RegularExpressions
     /// Represents the set of names appearing as capturing group
     /// names in a regular expression.
     /// </summary>
-    public class MatchCollection : ICollection
+    public class MatchCollection : ICollection, IReadOnlyList<Match>
     {
         internal Regex _regex;
         internal List<Match> _matches;
@@ -159,13 +159,18 @@ namespace System.Text.RegularExpressions
         {
             return new MatchEnumerator(this);
         }
+
+        IEnumerator<Match> IEnumerable<Match>.GetEnumerator()
+        {
+            return new MatchEnumerator(this);
+        }
     }
 
     /*
      * This non-public enumerator lists all the group matches.
      * Should it be public?
      */
-    internal class MatchEnumerator : IEnumerator
+    internal class MatchEnumerator : IEnumerator<Match>
     {
         internal MatchCollection _matchcoll;
         internal Match _match = null;
@@ -213,6 +218,14 @@ namespace System.Text.RegularExpressions
             }
         }
 
+        Match IEnumerator<Match>.Current
+        {
+            get
+            {
+                return (Match)Current;
+            }
+        }
+
         /*
          * Position before the first item
          */
@@ -221,6 +234,10 @@ namespace System.Text.RegularExpressions
             _curindex = 0;
             _done = false;
             _match = null;
+        }
+
+        void IDisposable.Dispose()
+        {
         }
     }
 }
