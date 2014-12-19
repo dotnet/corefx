@@ -3,13 +3,13 @@
 
 using System.Collections.Generic;
 using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
 
 using CultureInfo = System.Globalization.CultureInfo;
 using IEnumerable = System.Collections.IEnumerable;
 using SuppressMessageAttribute = System.Diagnostics.CodeAnalysis.SuppressMessageAttribute;
 using StringBuilder = System.Text.StringBuilder;
-using System.Threading.Tasks;
-using System.Threading;
 
 namespace System.Xml.Linq
 {
@@ -577,7 +577,7 @@ namespace System.Xml.Linq
         /// significant whitespace will be preserved.
         /// </returns>
         [SuppressMessage("Microsoft.Design", "CA1054:UriParametersShouldNotBeStrings", Justification = "Back-compat with System.Xml.")]
-        public static async Task<XElement> Load(string uri, LoadOptions options, CancellationToken token)
+        public static async Task<XElement> LoadAsync(string uri, LoadOptions options, CancellationToken token)
         {
             XmlReaderSettings rs = GetXmlReaderSettings(options);
             using (XmlReader r = XmlReader.Create(uri, rs))
@@ -656,7 +656,7 @@ namespace System.Xml.Linq
         /// A new <see cref="XElement"/> containing the contents of the passed in
         /// <see cref="Stream"/>.
         /// </returns>
-        public static async Task<XElement> Load(Stream stream, LoadOptions options, CancellationToken token)
+        public static async Task<XElement> LoadAsync(Stream stream, LoadOptions options, CancellationToken token)
         {
             XmlReaderSettings rs = GetXmlReaderSettings(options);
             using (XmlReader r = XmlReader.Create(stream, rs))
