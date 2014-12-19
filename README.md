@@ -1,7 +1,47 @@
 #
 ##
 #
+#
+##
+#
 
+
+[jenkins-build-status-image]: http://corefx-ci.cloudapp.net/jenkins/job/CoreFX_Windows_Build/badge/icon
+[jenkins-build-status]: http://corefx-ci.cloudapp.net/jenkins/job/CoreFX_Windows_Build/
+[build-status-image]: https://ci.appveyor.com/api/projects/status/xje8bkekyu130e9y/branch/master?svg=true
+[build-status]: https://ci.appveyor.com/project/dotnet-bot/corefx/branch/master
+[pull-requests-image]: http://www.issuestats.com/github/dotne
+# .NET Core
+
+[![Build status][build-status-image]][build-status]  [![Issue Stats][pull-requests-image]][pull-requests]  [![Issue Stats][issues-closed-image]][issues-closed]
+
+Beta Jenkins-CI
+
+[![Jenkins CI Build Status][jenkins-build-status-image]][jenkins-build-status]
+t/corefx/badge/pr
+[pull-requests]: http://www.issuestats.com/github/dotnet/corefx
+[issues-closed-image]: http://www.issuestats.com/github/dotnet/corefx/badge/issue
+[issues-closed]: http://www.issuestats.com/github/dotnet/corefx#
+##
+#
+
+
+[jenkins-build-status-image]: http://corefx-ci.cloudapp.net/jenkins/job/CoreFX_Windows_Build/badge/icon
+[jenkins-build-status]: http://corefx-ci.cloudapp.net/jenkins/job/CoreFX_Windows_Build/
+[build-status-image]: https://ci.appveyor.com/api/projects/status/xje8bkekyu130e9y/branch/master?svg=true
+[build-status]: https://ci.appveyor.com/project/dotnet-bot/corefx/branch/master
+[pull-requests-image]: http://www.issuestats.com/github/dotne
+# .NET Core
+
+[![Build status][build-status-image]][build-status]  [![Issue Stats][pull-requests-image]][pull-requests]  [![Issue Stats][issues-closed-image]][issues-closed]
+
+Beta Jenkins-CI
+
+[![Jenkins CI Build Status][jenkins-build-status-image]][jenkins-build-status]
+t/corefx/badge/pr
+[pull-requests]: http://www.issuestats.com/github/dotnet/corefx
+[issues-closed-image]: http://www.issuestats.com/github/dotnet/corefx/badge/issue
+[issues-closed]: http://www.issuestats.com/github/dotnet/corefx
 
 [jenkins-build-status-image]: http://corefx-ci.cloudapp.net/jenkins/job/CoreFX_Windows_Build/badge/icon
 [jenkins-build-status]: http://corefx-ci.cloudapp.net/jenkins/job/CoreFX_Windows_Build/
