@@ -18,7 +18,7 @@ namespace System.Text.RegularExpressions
     /// Represents the set of names appearing as capturing group
     /// names in a regular expression.
     /// </summary>
-    public class MatchCollection : ICollection
+    public class MatchCollection : IList<Match>, IReadOnlyList<Match>, IList
     {
         internal Regex _regex;
         internal List<Match> _matches;
@@ -149,13 +149,132 @@ namespace System.Text.RegularExpressions
         {
             return new MatchEnumerator(this);
         }
+
+        IEnumerator<Match> IEnumerable<Match>.GetEnumerator()
+        {
+            return new MatchEnumerator(this);
+        }
+
+        int IList<Match>.IndexOf(Match item)
+        {
+            var comparer = EqualityComparer<Match>.Default;
+            for (int i = 0; i < Count; i++)
+            {
+                if (comparer.Equals(this[i], item))
+                    return i;
+            }
+            return -1;
+        }
+
+        void IList<Match>.Insert(int index, Match item)
+        {
+            throw new NotSupportedException();
+        }
+
+        void IList<Match>.RemoveAt(int index)
+        {
+            throw new NotSupportedException();
+        }
+
+        Match IList<Match>.this[int index]
+        {
+            get { return this[index]; }
+            set { throw new NotSupportedException(); }
+        }
+
+        void ICollection<Match>.Add(Match item)
+        {
+            throw new NotSupportedException();
+        }
+
+        void ICollection<Match>.Clear()
+        {
+            throw new NotSupportedException();
+        }
+
+        bool ICollection<Match>.Contains(Match item)
+        {
+            var comparer = EqualityComparer<Match>.Default;
+            for (int i = 0; i < Count; i++)
+            {
+                if (comparer.Equals(this[i], item))
+                    return true;
+            }
+            return false;
+        }
+
+        void ICollection<Match>.CopyTo(Match[] array, int arrayIndex)
+        {
+            ((ICollection)this).CopyTo(array, arrayIndex);
+        }
+
+        bool ICollection<Match>.IsReadOnly
+        {
+            get { return true; }
+        }
+
+        bool ICollection<Match>.Remove(Match item)
+        {
+            throw new NotSupportedException();
+        }
+
+        int IList.Add(object value)
+        {
+            throw new NotSupportedException();
+        }
+
+        void IList.Clear()
+        {
+            throw new NotSupportedException();
+        }
+
+        bool IList.Contains(object value)
+        {
+            return value is Match && ((ICollection<Match>)this).Contains((Match)value);
+        }
+
+        int IList.IndexOf(object value)
+        {
+            return value is Match ? ((IList<Match>)this).IndexOf((Match)value) : -1;
+        }
+
+        void IList.Insert(int index, object value)
+        {
+            throw new NotSupportedException();
+        }
+
+        bool IList.IsFixedSize
+        {
+            get { return true; }
+        }
+
+        bool IList.IsReadOnly
+        {
+            get { return true; }
+        }
+
+        void IList.Remove(object value)
+        {
+            throw new NotSupportedException();
+        }
+
+        void IList.RemoveAt(int index)
+        {
+            throw new NotSupportedException();
+        }
+
+        object IList.this[int index]
+        {
+            get { return this[index]; }
+            set { throw new NotSupportedException(); }
+        }
     }
 
     /*
      * This non-public enumerator lists all the group matches.
      * Should it be public?
      */
-    internal class MatchEnumerator : IEnumerator
+    internal class MatchEnumerator : IEnumerator<Match>
     {
         internal MatchCollection _matchcoll;
         internal Match _match = null;
@@ -195,6 +314,16 @@ namespace System.Text.RegularExpressions
          */
         public Object Current
         {
+            get { return Match; }
+        }
+
+        Match IEnumerator<Match>.Current
+        {
+            get { return Match; }
+        }
+
+        private Match Match
+        {
             get
             {
                 if (_match == null)
@@ -211,6 +340,10 @@ namespace System.Text.RegularExpressions
             _curindex = 0;
             _done = false;
             _match = null;
+        }
+
+        void IDisposable.Dispose()
+        {
         }
     }
 }

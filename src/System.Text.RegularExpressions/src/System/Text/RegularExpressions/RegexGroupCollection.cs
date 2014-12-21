@@ -13,7 +13,7 @@ namespace System.Text.RegularExpressions
     /// Represents a sequence of capture substrings. The object is used
     /// to return the set of captures done by a single capturing group.
     /// </summary>
-    public class GroupCollection : ICollection
+    public class GroupCollection : IList<Group>, IReadOnlyList<Group>, IList
     {
         internal Match _match;
         internal Dictionary<Int32, Int32> _captureMap;
@@ -148,6 +148,125 @@ namespace System.Text.RegularExpressions
         {
             return new GroupEnumerator(this);
         }
+
+        IEnumerator<Group> IEnumerable<Group>.GetEnumerator()
+        {
+            return new GroupEnumerator(this);
+        }
+
+        int IList<Group>.IndexOf(Group item)
+        {
+            var comparer = EqualityComparer<Group>.Default;
+            for (int i = 0; i < Count; i++)
+            {
+                if (comparer.Equals(this[i], item))
+                    return i;
+            }
+            return -1;
+        }
+
+        void IList<Group>.Insert(int index, Group item)
+        {
+            throw new NotSupportedException();
+        }
+
+        void IList<Group>.RemoveAt(int index)
+        {
+            throw new NotSupportedException();
+        }
+
+        Group IList<Group>.this[int index]
+        {
+            get { return this[index]; }
+            set { throw new NotSupportedException(); }
+        }
+
+        void ICollection<Group>.Add(Group item)
+        {
+            throw new NotSupportedException();
+        }
+
+        void ICollection<Group>.Clear()
+        {
+            throw new NotSupportedException();
+        }
+
+        bool ICollection<Group>.Contains(Group item)
+        {
+            var comparer = EqualityComparer<Group>.Default;
+            for (int i = 0; i < Count; i++)
+            {
+                if (comparer.Equals(this[i], item))
+                    return true;
+            }
+            return false;
+        }
+
+        void ICollection<Group>.CopyTo(Group[] array, int arrayIndex)
+        {
+            ((ICollection)this).CopyTo(array, arrayIndex);
+        }
+
+        bool ICollection<Group>.IsReadOnly
+        {
+            get { return true; }
+        }
+
+        bool ICollection<Group>.Remove(Group item)
+        {
+            throw new NotSupportedException();
+        }
+
+        int IList.Add(object value)
+        {
+            throw new NotSupportedException();
+        }
+
+        void IList.Clear()
+        {
+            throw new NotSupportedException();
+        }
+
+        bool IList.Contains(object value)
+        {
+            return value is Group && ((ICollection<Group>)this).Contains((Group)value);
+        }
+
+        int IList.IndexOf(object value)
+        {
+            return value is Group ? ((IList<Group>)this).IndexOf((Group)value) : -1;
+        }
+
+        void IList.Insert(int index, object value)
+        {
+            throw new NotSupportedException();
+        }
+
+        bool IList.IsFixedSize
+        {
+            get { return true; }
+        }
+
+        bool IList.IsReadOnly
+        {
+            get { return true; }
+        }
+
+        void IList.Remove(object value)
+        {
+            throw new NotSupportedException();
+        }
+
+        void IList.RemoveAt(int index)
+        {
+            throw new NotSupportedException();
+        }
+
+        object IList.this[int index]
+        {
+            get { return this[index]; }
+            set { throw new NotSupportedException(); }
+        }
     }
 
 
@@ -155,7 +274,7 @@ namespace System.Text.RegularExpressions
      * This non-public enumerator lists all the captures
      * Should it be public?
      */
-    internal class GroupEnumerator : IEnumerator
+    internal class GroupEnumerator : IEnumerator<Group>
     {
         internal GroupCollection _rgc;
         internal int _curindex;
@@ -192,6 +311,11 @@ namespace System.Text.RegularExpressions
             get { return Capture; }
         }
 
+        Group IEnumerator<Group>.Current
+        {
+            get { return (Group)Capture; }
+        }
+
         /*
          * Returns the current capture
          */
@@ -212,6 +336,10 @@ namespace System.Text.RegularExpressions
         public void Reset()
         {
             _curindex = -1;
+        }
+
+        void IDisposable.Dispose()
+        {
         }
     }
 }

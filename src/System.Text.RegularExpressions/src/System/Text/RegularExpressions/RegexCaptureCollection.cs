@@ -5,6 +5,7 @@
 // contained in a compiled Regex.
 
 using System.Collections;
+using System.Collections.Generic;
 
 namespace System.Text.RegularExpressions
 {
@@ -17,7 +18,7 @@ namespace System.Text.RegularExpressions
     /// Represents a sequence of capture substrings. The object is used
     /// to return the set of captures done by a single capturing group.
     /// </summary>
-    public class CaptureCollection : ICollection
+    public class CaptureCollection : IList<Capture>, IReadOnlyList<Capture>, IList
     {
         internal Group _group;
         internal int _capcount;
@@ -93,6 +94,11 @@ namespace System.Text.RegularExpressions
             return new CaptureEnumerator(this);
         }
 
+        IEnumerator<Capture> IEnumerable<Capture>.GetEnumerator()
+        {
+            return new CaptureEnumerator(this);
+        }
+
         /*
          * Nonpublic code to return set of captures for the group
          */
@@ -116,6 +122,120 @@ namespace System.Text.RegularExpressions
 
             return _captures[i];
         }
+
+        int IList<Capture>.IndexOf(Capture item)
+        {
+            var comparer = EqualityComparer<Capture>.Default;
+            for (int i = 0; i < Count; i++)
+            {
+                if (comparer.Equals(this[i], item))
+                    return i;
+            }
+            return -1;
+        }
+
+        void IList<Capture>.Insert(int index, Capture item)
+        {
+            throw new NotSupportedException();
+        }
+
+        void IList<Capture>.RemoveAt(int index)
+        {
+            throw new NotSupportedException();
+        }
+
+        Capture IList<Capture>.this[int index]
+        {
+            get { return this[index]; }
+            set { throw new NotSupportedException(); }
+        }
+
+        void ICollection<Capture>.Add(Capture item)
+        {
+            throw new NotSupportedException();
+        }
+
+        void ICollection<Capture>.Clear()
+        {
+            throw new NotSupportedException();
+        }
+
+        bool ICollection<Capture>.Contains(Capture item)
+        {
+            var comparer = EqualityComparer<Capture>.Default;
+            for (int i = 0; i < Count; i++)
+            {
+                if (comparer.Equals(this[i], item))
+                    return true;
+            }
+            return false;
+        }
+
+        void ICollection<Capture>.CopyTo(Capture[] array, int arrayIndex)
+        {
+            ((ICollection)this).CopyTo(array, arrayIndex);
+        }
+
+        bool ICollection<Capture>.IsReadOnly
+        {
+            get { return true; }
+        }
+
+        bool ICollection<Capture>.Remove(Capture item)
+        {
+            throw new NotSupportedException();
+        }
+
+        int IList.Add(object value)
+        {
+            throw new NotSupportedException();
+        }
+
+        void IList.Clear()
+        {
+            throw new NotSupportedException();
+        }
+
+        bool IList.Contains(object value)
+        {
+            return value is Capture && ((ICollection<Capture>)this).Contains((Capture)value);
+        }
+
+        int IList.IndexOf(object value)
+        {
+            return value is Capture ? ((IList<Capture>)this).IndexOf((Capture)value) : -1;
+        }
+
+        void IList.Insert(int index, object value)
+        {
+            throw new NotSupportedException();
+        }
+
+        bool IList.IsFixedSize
+        {
+            get { return true; }
+        }
+
+        bool IList.IsReadOnly
+        {
+            get { return true; }
+        }
+
+        void IList.Remove(object value)
+        {
+            throw new NotSupportedException();
+        }
+
+        void IList.RemoveAt(int index)
+        {
+            throw new NotSupportedException();
+        }
+
+        object IList.this[int index]
+        {
+            get { return this[index]; }
+            set { throw new NotSupportedException(); }
+        }
     }
 
 
@@ -124,7 +244,7 @@ namespace System.Text.RegularExpressions
      * Should it be public?
      */
 
-    internal class CaptureEnumerator : IEnumerator
+    internal class CaptureEnumerator : IEnumerator<Capture>
     {
         internal CaptureCollection _rcc;
         internal int _curindex;
@@ -161,6 +281,11 @@ namespace System.Text.RegularExpressions
             get { return Capture; }
         }
 
+        Capture IEnumerator<Capture>.Current
+        {
+            get { return Capture; }
+        }
+
         /*
          * Returns the current capture
          */
@@ -181,6 +306,10 @@ namespace System.Text.RegularExpressions
         public void Reset()
         {
             _curindex = -1;
+        }
+
+        void IDisposable.Dispose()
+        {
         }
     }
 }
