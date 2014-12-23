@@ -5,6 +5,7 @@
 // contained in a compiled Regex.
 
 using System.Collections;
+using System.Collections.Generic;
 
 namespace System.Text.RegularExpressions
 {
@@ -17,11 +18,11 @@ namespace System.Text.RegularExpressions
     /// Represents a sequence of capture substrings. The object is used
     /// to return the set of captures done by a single capturing group.
     /// </summary>
-    public class CaptureCollection : ICollection
+    public class CaptureCollection : ICollection, IEnumerable<Capture>
     {
-        internal Group _group;
-        internal int _capcount;
-        internal Capture[] _captures;
+        private Group _group;
+        private int _capcount;
+        private Capture[] _captures;
 
         internal CaptureCollection(Group group)
         {
@@ -32,7 +33,7 @@ namespace System.Text.RegularExpressions
         /// <summary>
         /// The object on which to synchronize.
         /// </summary>
-        Object ICollection.SyncRoot
+        object ICollection.SyncRoot
         {
             get
             {
@@ -85,18 +86,10 @@ namespace System.Text.RegularExpressions
             }
         }
 
-        /// <summary>
-        /// Provides an enumerator in the same order as Item[].
-        /// </summary>
-        public IEnumerator GetEnumerator()
-        {
-            return new CaptureEnumerator(this);
-        }
-
         /*
          * Nonpublic code to return set of captures for the group
          */
-        internal Capture GetCapture(int i)
+        private Capture GetCapture(int i)
         {
             if (i == _capcount - 1 && i >= 0)
                 return _group;
@@ -116,71 +109,19 @@ namespace System.Text.RegularExpressions
 
             return _captures[i];
         }
-    }
 
-
-    /*
-     * This non-public enumerator lists all the captures
-     * Should it be public?
-     */
-
-    internal class CaptureEnumerator : IEnumerator
-    {
-        internal CaptureCollection _rcc;
-        internal int _curindex;
-
-        /*
-         * Nonpublic constructor
-         */
-        internal CaptureEnumerator(CaptureCollection rcc)
+        /// <summary>
+        /// Provides an enumerator in the same order as Item[].
+        /// </summary>
+        public IEnumerator<Capture> GetEnumerator()
         {
-            _curindex = -1;
-            _rcc = rcc;
+            for (int i = 0; i < Count; i++)
+                yield return GetCapture(i);
         }
 
-        /*
-         * As required by IEnumerator
-         */
-        public bool MoveNext()
+        IEnumerator IEnumerable.GetEnumerator()
         {
-            int size = _rcc.Count;
-
-            if (_curindex >= size)
-                return false;
-
-            _curindex++;
-
-            return (_curindex < size);
-        }
-
-        /*
-         * As required by IEnumerator
-         */
-        public Object Current
-        {
-            get { return Capture; }
-        }
-
-        /*
-         * Returns the current capture
-         */
-        public Capture Capture
-        {
-            get
-            {
-                if (_curindex < 0 || _curindex >= _rcc.Count)
-                    throw new InvalidOperationException(SR.EnumNotStarted);
-
-                return _rcc[_curindex];
-            }
-        }
-
-        /*
-         * Reset to before the first item
-         */
-        public void Reset()
-        {
-            _curindex = -1;
+            return GetEnumerator();
         }
     }
 }

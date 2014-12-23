@@ -13,18 +13,18 @@ namespace System.Text.RegularExpressions
     /// Represents a sequence of capture substrings. The object is used
     /// to return the set of captures done by a single capturing group.
     /// </summary>
-    public class GroupCollection : ICollection
+    public class GroupCollection : ICollection, IEnumerable<Group>
     {
-        internal Match _match;
-        internal Dictionary<Int32, Int32> _captureMap;
+        private Match _match;
+        private Dictionary<int, int> _captureMap;
 
         // cache of Group objects fed to the user
-        internal Group[] _groups;
+        private Group[] _groups;
 
         /*
          * Nonpublic constructor
          */
-        internal GroupCollection(Match match, Dictionary<Int32, Int32> caps)
+        internal GroupCollection(Match match, Dictionary<int, int> caps)
         {
             _match = match;
             _captureMap = caps;
@@ -33,7 +33,7 @@ namespace System.Text.RegularExpressions
         /// <summary>
         /// The object on which to synchronize
         /// </summary>
-        Object ICollection.SyncRoot
+        object ICollection.SyncRoot
         {
             get
             {
@@ -68,7 +68,7 @@ namespace System.Text.RegularExpressions
             }
         }
 
-        public Group this[String groupname]
+        public Group this[string groupname]
         {
             get
             {
@@ -79,7 +79,7 @@ namespace System.Text.RegularExpressions
             }
         }
 
-        internal Group GetGroup(int groupnum)
+        private Group GetGroup(int groupnum)
         {
             if (_captureMap != null)
             {
@@ -88,14 +88,11 @@ namespace System.Text.RegularExpressions
                 o = _captureMap[groupnum];
                 if (o == null)
                     return Group._emptygroup;
-                //throw new ArgumentOutOfRangeException("groupnum");
 
                 return GetGroupImpl((int)o);
             }
             else
             {
-                //if (groupnum >= _match._regex.CapSize || groupnum < 0)
-                //   throw new ArgumentOutOfRangeException("groupnum");
                 if (groupnum >= _match._matchcount.Length || groupnum < 0)
                     return Group._emptygroup;
 
@@ -107,7 +104,7 @@ namespace System.Text.RegularExpressions
         /*
          * Caches the group objects
          */
-        internal Group GetGroupImpl(int groupnum)
+        private Group GetGroupImpl(int groupnum)
         {
             if (groupnum == 0)
                 return _match;
@@ -144,74 +141,15 @@ namespace System.Text.RegularExpressions
         /// <summary>
         /// Provides an enumerator in the same order as Item[].
         /// </summary>
-        public IEnumerator GetEnumerator()
+        public IEnumerator<Group> GetEnumerator()
         {
-            return new GroupEnumerator(this);
-        }
-    }
-
-
-    /*
-     * This non-public enumerator lists all the captures
-     * Should it be public?
-     */
-    internal class GroupEnumerator : IEnumerator
-    {
-        internal GroupCollection _rgc;
-        internal int _curindex;
-
-        /*
-         * Nonpublic constructor
-         */
-        internal GroupEnumerator(GroupCollection rgc)
-        {
-            _curindex = -1;
-            _rgc = rgc;
+            for (int i = 0; i < Count; i++)
+                yield return GetGroup(i);
         }
 
-        /*
-         * As required by IEnumerator
-         */
-        public bool MoveNext()
+        IEnumerator IEnumerable.GetEnumerator()
         {
-            int size = _rgc.Count;
-
-            if (_curindex >= size)
-                return false;
-
-            _curindex++;
-
-            return (_curindex < size);
-        }
-
-        /*
-         * As required by IEnumerator
-         */
-        public Object Current
-        {
-            get { return Capture; }
-        }
-
-        /*
-         * Returns the current capture
-         */
-        public Capture Capture
-        {
-            get
-            {
-                if (_curindex < 0 || _curindex >= _rgc.Count)
-                    throw new InvalidOperationException(SR.EnumNotStarted);
-
-                return _rgc[_curindex];
-            }
-        }
-
-        /*
-         * Reset to before the first item
-         */
-        public void Reset()
-        {
-            _curindex = -1;
+            return GetEnumerator();
         }
     }
 }

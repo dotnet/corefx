@@ -18,23 +18,23 @@ namespace System.Text.RegularExpressions
     /// Represents the set of names appearing as capturing group
     /// names in a regular expression.
     /// </summary>
-    public class MatchCollection : ICollection
+    public class MatchCollection : ICollection, IEnumerable<Match>
     {
-        internal Regex _regex;
-        internal List<Match> _matches;
-        internal bool _done;
-        internal String _input;
-        internal int _beginning;
-        internal int _length;
-        internal int _startat;
-        internal int _prevlen;
+        private Regex _regex;
+        private List<Match> _matches;
+        private bool _done;
+        private string _input;
+        private int _beginning;
+        private int _length;
+        private int _startat;
+        private int _prevlen;
 
         private static int s_infinite = 0x7FFFFFFF;
 
-        internal MatchCollection(Regex regex, String input, int beginning, int length, int startat)
+        internal MatchCollection(Regex regex, string input, int beginning, int length, int startat)
         {
             if (startat < 0 || startat > input.Length)
-                throw new ArgumentOutOfRangeException("startat", SR.BeginIndexNotNegative);
+                throw new ArgumentOutOfRangeException("startat", global::Resources.Strings.BeginIndexNotNegative);
 
             _regex = regex;
             _input = input;
@@ -46,13 +46,13 @@ namespace System.Text.RegularExpressions
             _done = false;
         }
 
-        internal Match GetMatch(int i)
+        private Match GetMatch(int i)
         {
             if (i < 0)
                 return null;
 
             if (_matches.Count > i)
-                return (Match)_matches[i];
+                return _matches[i];
 
             if (_done)
                 return null;
@@ -94,7 +94,7 @@ namespace System.Text.RegularExpressions
             }
         }
 
-        Object ICollection.SyncRoot
+        object ICollection.SyncRoot
         {
             get
             {
@@ -136,7 +136,7 @@ namespace System.Text.RegularExpressions
         {
             if ((array != null) && (array.Rank != 1))
             {
-                throw new ArgumentException(SR.Arg_RankMultiDimNotSupported);
+                throw new ArgumentException(global::Resources.Strings.Arg_RankMultiDimNotSupported);
             }
 
             // property access to force computation of whole array
@@ -148,79 +148,22 @@ namespace System.Text.RegularExpressions
             }
             catch (ArrayTypeMismatchException ex)
             {
-                throw new ArgumentException(SR.Arg_InvalidArrayType, ex);
+                throw new ArgumentException(global::Resources.Strings.Arg_InvalidArrayType, ex);
             }
         }
 
         /// <summary>
         /// Provides an enumerator in the same order as Item[i].
         /// </summary>
-        public IEnumerator GetEnumerator()
+        public IEnumerator<Match> GetEnumerator()
         {
-            return new MatchEnumerator(this);
-        }
-    }
-
-    /*
-     * This non-public enumerator lists all the group matches.
-     * Should it be public?
-     */
-    internal class MatchEnumerator : IEnumerator
-    {
-        internal MatchCollection _matchcoll;
-        internal Match _match = null;
-        internal int _curindex;
-        internal bool _done;
-
-        /*
-         * Nonpublic constructor
-         */
-        internal MatchEnumerator(MatchCollection matchcoll)
-        {
-            _matchcoll = matchcoll;
+            for (int i = 0; i < Count; i++)
+                yield return GetMatch(i);
         }
 
-        /*
-         * Advance to the next match
-         */
-        public bool MoveNext()
+        IEnumerator IEnumerable.GetEnumerator()
         {
-            if (_done)
-                return false;
-
-            _match = _matchcoll.GetMatch(_curindex);
-            _curindex++;
-
-            if (_match == null)
-            {
-                _done = true;
-                return false;
-            }
-
-            return true;
-        }
-
-        /*
-         * The current match
-         */
-        public Object Current
-        {
-            get
-            {
-                if (_match == null)
-                    throw new InvalidOperationException(SR.EnumNotStarted);
-                return _match;
-            }
-        }
-
-        /*
-         * Position before the first item
-         */
-        public void Reset()
-        {
-            _curindex = 0;
-            _done = false;
-            _match = null;
+            return GetEnumerator();
         }
     }
 }
