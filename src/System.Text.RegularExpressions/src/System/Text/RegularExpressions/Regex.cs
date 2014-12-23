@@ -4,12 +4,9 @@
 // The Regex class represents a single compiled instance of a regular
 // expression.
 
-using System;
 using System.Threading;
 using System.Collections;
-using System.Reflection;
 using System.Globalization;
-using System.Runtime.CompilerServices;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 
@@ -29,7 +26,7 @@ namespace System.Text.RegularExpressions
 
         // We need this because time is queried using Environment.TickCount for performance reasons
         // (Environment.TickCount returns millisecs as an int and cycles):
-        private static readonly TimeSpan MaximumMatchTimeout = TimeSpan.FromMilliseconds(Int32.MaxValue - 1);
+        private static readonly TimeSpan MaximumMatchTimeout = TimeSpan.FromMilliseconds(int.MaxValue - 1);
 
         // InfiniteMatchTimeout specifies that match timeout is switched OFF. It allows for faster code paths
         // compared to simply having a very large timeout.
@@ -50,8 +47,8 @@ namespace System.Text.RegularExpressions
         // *********** } match timeout fields ***********
 
 
-        internal Dictionary<Int32, Int32> _caps;            // if captures are sparse, this is the hashtable capnum->index
-        internal Dictionary<string, Int32> _capnames;       // if named captures are used, this maps names->index
+        internal Dictionary<int, int> _caps;            // if captures are sparse, this is the hashtable capnum->index
+        internal Dictionary<string, int> _capnames;       // if named captures are used, this maps names->index
 
         internal string[] _capslist;                        // if captures are sparse or named captures are used, this is the sorted list of names
         internal int _capsize;                              // the size of the capture array
@@ -300,7 +297,7 @@ namespace System.Text.RegularExpressions
             {
                 result = new string[_capslist.Length];
 
-                System.Array.Copy(_capslist, 0, result, 0, _capslist.Length);
+                Array.Copy(_capslist, 0, result, 0, _capslist.Length);
             }
 
             return result;
@@ -1004,14 +1001,14 @@ namespace System.Text.RegularExpressions
     {
         internal CachedCodeEntryKey _key;
         internal RegexCode _code;
-        internal Dictionary<Int32, Int32> _caps;
-        internal Dictionary<string, Int32> _capnames;
+        internal Dictionary<int, int> _caps;
+        internal Dictionary<string, int> _capnames;
         internal string[] _capslist;
         internal int _capsize;
         internal ExclusiveReference _runnerref;
         internal SharedReference _replref;
 
-        internal CachedCodeEntry(CachedCodeEntryKey key, Dictionary<string, Int32> capnames, string[] capslist, RegexCode code, Dictionary<Int32, Int32> caps, int capsize, ExclusiveReference runner, SharedReference repl)
+        internal CachedCodeEntry(CachedCodeEntryKey key, Dictionary<string, int> capnames, string[] capslist, RegexCode code, Dictionary<int, int> caps, int capsize, ExclusiveReference runner, SharedReference repl)
         {
             _key = key;
             _capnames = capnames;
@@ -1032,7 +1029,7 @@ namespace System.Text.RegularExpressions
     internal sealed class ExclusiveReference
     {
         private RegexRunner _ref;
-        private Object _obj;
+        private object _obj;
         private int _locked;
 
         /*
@@ -1042,7 +1039,7 @@ namespace System.Text.RegularExpressions
          * if the object can't be returned, the lock is released.
          *
          */
-        internal Object Get()
+        internal object Get()
         {
             // try to obtain the lock
 
@@ -1051,7 +1048,7 @@ namespace System.Text.RegularExpressions
                 // grab reference
 
 
-                Object obj = _ref;
+                object obj = _ref;
 
                 // release the lock and return null if no reference
 
@@ -1080,7 +1077,7 @@ namespace System.Text.RegularExpressions
          * and the object is placed in the cache.
          *
          */
-        internal void Release(Object obj)
+        internal void Release(object obj)
         {
             if (obj == null)
                 throw new ArgumentNullException("obj");
@@ -1132,11 +1129,11 @@ namespace System.Text.RegularExpressions
          * Note that _ref.Target is referenced only under the protection
          * of the lock. (Is this necessary?)
          */
-        internal Object Get()
+        internal object Get()
         {
             if (0 == Interlocked.Exchange(ref _locked, 1))
             {
-                Object obj = _ref.Target;
+                object obj = _ref.Target;
                 _locked = 0;
                 return obj;
             }
@@ -1150,7 +1147,7 @@ namespace System.Text.RegularExpressions
          * Note that _ref.Target is referenced only under the protection
          * of the lock. (Is this necessary?)
          */
-        internal void Cache(Object obj)
+        internal void Cache(object obj)
         {
             if (0 == Interlocked.Exchange(ref _locked, 1))
             {
