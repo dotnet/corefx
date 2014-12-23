@@ -14,7 +14,6 @@
 //
 // Strings and sets are indices into a string table.
 
-using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
@@ -93,7 +92,7 @@ namespace System.Text.RegularExpressions
         // the code
 
         internal int[] _codes;                 // the code
-        internal String[] _strings;               // the string/set table
+        internal string[] _strings;               // the string/set table
         // not used! internal int[]           _sparseIndex;           // a list of the groups that are used
         internal int _trackcount;            // how many instructions use backtracking
 
@@ -109,13 +108,13 @@ namespace System.Text.RegularExpressions
 
         // constructor
 
-        internal RegexCode(int[] codes, List<String> stringlist, int trackcount,
+        internal RegexCode(int[] codes, List<string> stringlist, int trackcount,
                            Dictionary<Int32, Int32> caps, int capsize,
                            RegexBoyerMoore bmPrefix, RegexPrefix fcPrefix,
                            int anchors, bool rightToLeft)
         {
             _codes = codes;
-            _strings = new String[stringlist.Count];
+            _strings = new string[stringlist.Count];
             _trackcount = trackcount;
             _caps = caps;
             _capsize = capsize;
@@ -223,17 +222,17 @@ namespace System.Text.RegularExpressions
 
                 default:
 
-                    throw MakeException(SR.Format(SR.UnexpectedOpcode, Opcode.ToString(CultureInfo.CurrentCulture)));
+                    throw MakeException(string.Format(global::Resources.Strings.UnexpectedOpcode, Opcode.ToString(CultureInfo.CurrentCulture)));
             }
         }
 
-        internal static ArgumentException MakeException(String message)
+        internal static ArgumentException MakeException(string message)
         {
             return new ArgumentException(message);
         }
 
 #if DEBUG
-        internal static String[] CodeStr = new String[]
+        internal static string[] CodeStr = new string[]
         {
             "Onerep", "Notonerep", "Setrep",
             "Oneloop", "Notoneloop", "Setloop",
@@ -252,7 +251,7 @@ namespace System.Text.RegularExpressions
 #endif
         };
 
-        internal static String OperatorDescription(int Opcode)
+        internal static string OperatorDescription(int Opcode)
         {
             bool isCi = ((Opcode & Ci) != 0);
             bool isRtl = ((Opcode & Rtl) != 0);
@@ -263,7 +262,7 @@ namespace System.Text.RegularExpressions
             (isCi ? "-Ci" : "") + (isRtl ? "-Rtl" : "") + (isBack ? "-Back" : "") + (isBack2 ? "-Back2" : "");
         }
 
-        internal String OpcodeDescription(int offset)
+        internal string OpcodeDescription(int offset)
         {
             StringBuilder sb = new StringBuilder();
             int opcode = _codes[offset];
@@ -298,7 +297,7 @@ namespace System.Text.RegularExpressions
                     break;
 
                 case Multi:
-                    sb.Append("String = ");
+                    sb.Append("string = ");
                     sb.Append(_strings[_codes[offset + 1]]);
                     break;
 
