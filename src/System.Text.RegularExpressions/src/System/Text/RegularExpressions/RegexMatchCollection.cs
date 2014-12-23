@@ -18,7 +18,7 @@ namespace System.Text.RegularExpressions
     /// Represents the set of names appearing as capturing group
     /// names in a regular expression.
     /// </summary>
-    public class MatchCollection : ICollection, IEnumerable<Match>
+    public class MatchCollection : ICollection, IReadOnlyList<Match>
     {
         private Regex _regex;
         private List<Match> _matches;

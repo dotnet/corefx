@@ -5,7 +5,6 @@
 // It executes a block of regular expression codes while consuming
 // input.
 
-using System.Collections;
 using System.Diagnostics;
 using System.Globalization;
 
@@ -13,17 +12,17 @@ namespace System.Text.RegularExpressions
 {
     internal sealed class RegexInterpreter : RegexRunner
     {
-        internal int _runoperator;
-        internal int[] _runcodes;
-        internal int _runcodepos;
-        internal String[] _runstrings;
-        internal RegexCode _runcode;
-        internal RegexPrefix _runfcPrefix;
-        internal RegexBoyerMoore _runbmPrefix;
-        internal int _runanchors;
-        internal bool _runrtl;
-        internal bool _runci;
-        internal CultureInfo _runculture;
+        private int _runoperator;
+        private int[] _runcodes;
+        private int _runcodepos;
+        private string[] _runstrings;
+        private RegexCode _runcode;
+        private RegexPrefix _runfcPrefix;
+        private RegexBoyerMoore _runbmPrefix;
+        private int _runanchors;
+        private bool _runrtl;
+        private bool _runci;
+        private CultureInfo _runculture;
 
         internal RegexInterpreter(RegexCode code, CultureInfo culture)
         {
@@ -265,7 +264,7 @@ namespace System.Text.RegularExpressions
             return (_runci ? _runculture.TextInfo.ToLower(ch) : ch);
         }
 
-        private bool Stringmatch(String str)
+        private bool Stringmatch(string str)
         {
             int c;
             int pos;
@@ -368,7 +367,7 @@ namespace System.Text.RegularExpressions
         protected override bool FindFirstChar()
         {
             int i;
-            String set;
+            string set;
 
             if (0 != (_runanchors & (RegexFCD.Beginning | RegexFCD.Start | RegexFCD.EndZ | RegexFCD.End)))
             {
@@ -968,7 +967,7 @@ namespace System.Text.RegularExpressions
                             if (Forwardchars() < c)
                                 break;
 
-                            String set = _runstrings[Operand(0)];
+                            string set = _runstrings[Operand(0)];
 
                             while (c-- > 0)
                                 if (!RegexCharClass.CharInClass(Forwardcharnext(), set))
@@ -1037,7 +1036,7 @@ namespace System.Text.RegularExpressions
                             if (c > Forwardchars())
                                 c = Forwardchars();
 
-                            String set = _runstrings[Operand(0)];
+                            string set = _runstrings[Operand(0)];
                             int i;
 
                             for (i = c; i > 0; i--)

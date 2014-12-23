@@ -18,7 +18,7 @@ namespace System.Text.RegularExpressions
     /// Represents a sequence of capture substrings. The object is used
     /// to return the set of captures done by a single capturing group.
     /// </summary>
-    public class CaptureCollection : ICollection, IEnumerable<Capture>
+    public class CaptureCollection : ICollection, IReadOnlyList<Capture>
     {
         private Group _group;
         private int _capcount;

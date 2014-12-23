@@ -13,7 +13,7 @@ namespace System.Text.RegularExpressions
     /// Represents a sequence of capture substrings. The object is used
     /// to return the set of captures done by a single capturing group.
     /// </summary>
-    public class GroupCollection : ICollection, IEnumerable<Group>
+    public class GroupCollection : ICollection, IReadOnlyList<Group>
     {
         private Match _match;
         private Dictionary<int, int> _captureMap;
