@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
 using System.Security;
 
 namespace System.Text.RegularExpressions
@@ -25,7 +24,7 @@ namespace System.Text.RegularExpressions
         /// <param name="regexPattern">Matching timeout occured during mathing to the specified pattern.</param>
         /// <param name="matchTimeout">Matching timeout occured becasue matching took longer than the specified timeout.</param>
         public RegexMatchTimeoutException(string regexInput, string regexPattern, TimeSpan matchTimeout) :
-            base(SR.RegexMatchTimeoutException_Occurred)
+            base(global::Resources.Strings.RegexMatchTimeoutException_Occurred)
         {
             Init(regexInput, regexPattern, matchTimeout);
         }

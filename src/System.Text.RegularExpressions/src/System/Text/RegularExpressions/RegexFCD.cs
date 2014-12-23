@@ -10,7 +10,6 @@
 // This step is as simple as walking the tree and emitting
 // sequences of codes.
 
-using System.Collections;
 using System.Globalization;
 
 namespace System.Text.RegularExpressions
@@ -89,7 +88,7 @@ namespace System.Text.RegularExpressions
                     case RegexNode.Onelazy:
                         if (curNode._m > 0)
                         {
-                            string pref = String.Empty.PadRight(curNode._m, curNode._ch);
+                            string pref = string.Empty.PadRight(curNode._m, curNode._ch);
                             return new RegexPrefix(pref, 0 != (curNode._options & RegexOptions.IgnoreCase));
                         }
                         else
@@ -202,7 +201,7 @@ namespace System.Text.RegularExpressions
         }
 
 #if DEBUG
-        internal static String AnchorDescription(int anchors)
+        internal static string AnchorDescription(int anchors)
         {
             StringBuilder sb = new StringBuilder();
 
@@ -521,7 +520,7 @@ namespace System.Text.RegularExpressions
                     break;
 
                 default:
-                    throw new ArgumentException(SR.Format(SR.UnexpectedOpcode, NodeType.ToString(CultureInfo.CurrentCulture)));
+                    throw new ArgumentException(string.Format(global::Resources.Strings.UnexpectedOpcode, NodeType.ToString(CultureInfo.CurrentCulture)));
             }
         }
     }
@@ -558,7 +557,7 @@ namespace System.Text.RegularExpressions
             _nullable = nullable;
         }
 
-        internal RegexFC(String charClass, bool nullable, bool caseInsensitive)
+        internal RegexFC(string charClass, bool nullable, bool caseInsensitive)
         {
             _cc = RegexCharClass.Parse(charClass);
 
@@ -592,7 +591,7 @@ namespace System.Text.RegularExpressions
             return true;
         }
 
-        internal String GetFirstChars(CultureInfo culture)
+        internal string GetFirstChars(CultureInfo culture)
         {
             if (_caseInsensitive)
                 _cc.AddLowercase(culture);
@@ -608,18 +607,18 @@ namespace System.Text.RegularExpressions
 
     internal sealed class RegexPrefix
     {
-        internal String _prefix;
+        internal string _prefix;
         internal bool _caseInsensitive;
 
-        internal static RegexPrefix _empty = new RegexPrefix(String.Empty, false);
+        internal static RegexPrefix _empty = new RegexPrefix(string.Empty, false);
 
-        internal RegexPrefix(String prefix, bool ci)
+        internal RegexPrefix(string prefix, bool ci)
         {
             _prefix = prefix;
             _caseInsensitive = ci;
         }
 
-        internal String Prefix
+        internal string Prefix
         {
             get
             {

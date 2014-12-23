@@ -1171,7 +1171,7 @@ namespace System.Text.RegularExpressions
                         }
 
                     default:
-                        throw NotImplemented.ByDesignWithMessage(SR.UnimplementedState);
+                        throw NotImplemented.ByDesignWithMessage(global::Resources.Strings.UnimplementedState);
                 }
 
             BreakBackward:
