@@ -6,6 +6,7 @@
 
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace System.Text.RegularExpressions
 {
@@ -18,6 +19,8 @@ namespace System.Text.RegularExpressions
     /// Represents the set of names appearing as capturing group
     /// names in a regular expression.
     /// </summary>
+    [DebuggerDisplay("Count = {Count}")]
+    [DebuggerTypeProxy(typeof(RegexCollectionDebuggerProxy<>))]
     public class MatchCollection : IList<Match>, IReadOnlyList<Match>, IList
     {
         internal Regex _regex;

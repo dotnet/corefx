@@ -6,6 +6,7 @@
 
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace System.Text.RegularExpressions
 {
@@ -13,6 +14,8 @@ namespace System.Text.RegularExpressions
     /// Represents a sequence of capture substrings. The object is used
     /// to return the set of captures done by a single capturing group.
     /// </summary>
+    [DebuggerDisplay("Count = {Count}")]
+    [DebuggerTypeProxy(typeof(RegexCollectionDebuggerProxy<>))]
     public class GroupCollection : IList<Group>, IReadOnlyList<Group>, IList
     {
         internal Match _match;
