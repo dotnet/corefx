@@ -11,12 +11,13 @@
     <BinDir>$(ProjectDir)bin\</BinDir>
     <TestWorkingDir>$(BinDir)tests\</TestWorkingDir>
     <PackagesDir>$(SourceDir)packages\</PackagesDir>
-    <ToolsDir>$(PackagesDir)Microsoft.DotNet.BuildTools.$(BuildToolsVersion)\lib\</ToolsDir>
+    <ToolsPackageDir>$(PackagesDir)Microsoft.DotNet.BuildTools.$(BuildToolsVersion)\</ToolsPackageDir>
+    <ToolsDir>$(ToolsPackageDir)lib\</ToolsDir>
   </PropertyGroup>
 
   <!-- Common nuget properties -->
   <PropertyGroup>
-    <NuGetToolPath>$(ToolsDir)NuGet.exe</NuGetToolPath>
+    <NuGetToolPath>$(PackagesDir)NuGet.exe</NuGetToolPath>
     <NuGetConfigFile>$(SourceDir)NuGet.Config</NuGetConfigFile>
     <NuGetConfigCommandLine
       Condition="Exists('$(NuGetConfigFile)')">-ConfigFile &quot;$(NuGetConfigFile)&quot;</NuGetConfigCommandLine>
@@ -24,9 +25,16 @@
 
   <!-- Common build tool properties -->
   <PropertyGroup>
-    <BuildToolsInstallSempahore>$(ToolsDir)BuildTools.$(BuildToolsVersion).installed.semaphore</BuildToolsInstallSempahore>
+    <!-- If we specified an alternate source for the build tools, we can assume that the version number is not getting updated
+         with each build (this is typically for testing).  We set the semaphore file to a different name, then avoid
+         touching that file when the build tools are installed.  This ensures a forced install each time. -->
+    <BuildToolsUseAlternateSource>false</BuildToolsUseAlternateSource>
+    <BuildToolsUseAlternateSource Condition="'$(BuildToolsAlternateSource)' != ''">true</BuildToolsUseAlternateSource>
+    
+    <BuildToolsInstallSemaphore>$(ToolsDir)BuildTools.$(BuildToolsVersion).installed.semaphore</BuildToolsInstallSemaphore>
+    <BuildToolsInstallAlternateSemaphore Condition="$(BuildToolsUseAlternateSource)">$(ToolsDir)BuildTools.Alternate.installed.semaphore</BuildToolsInstallAlternateSemaphore>
 
-    <BuildToolsTargetInputs>$(MSBuildThisFileFullPath);$(MSBuildThisFileDirectory)build.proj</BuildToolsTargetInputs>
-    <BuildToolsTargetOutputs>$(BuildToolsInstallSempahore)</BuildToolsTargetOutputs>
+    <BuildToolsTargetInputs>$(MSBuildThisFileFullPath);$(MSBuildThisFileDirectory)build.proj;</BuildToolsTargetInputs>
+    <BuildToolsTargetOutputs>$(BuildToolsInstallSemaphore);$(BuildToolsInstallAlternateSemaphore)</BuildToolsTargetOutputs>
   </PropertyGroup>
 </Project>

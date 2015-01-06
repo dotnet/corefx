@@ -40,7 +40,17 @@
       StandardOutputImportance="Low"
       Command="&quot;$(NuGetToolPath)&quot; install &quot; $(SourceDir).nuget\packages.config &quot;  -o &quot; $(PackagesDir) &quot; $(NuGetConfigCommandLine)" />
 
-    <Touch Files="$(BuildToolsInstallSempahore)" AlwaysCreate="true" />
+    <!-- Testing build tools packages before deployment is an interesting scenario.  There isn't an easy way to do this in the
+         nuget workflow (especially outside vs/powershell).  For now, we'll delete the BuildTools package directory, then reinstall with
+         an alternate source for the build tools directory. The alternate source is specified by BuildToolsAlternateSource. -->
+    
+    <RemoveDir Directories="$(ToolsPackageDir)" Condition="$(BuildToolsUseAlternateSource)" />
+    <Exec
+      StandardOutputImportance="Low"
+      Command="&quot;$(NuGetToolPath)&quot; install &quot; $(SourceDir).nuget\packages.config &quot;  -o &quot; $(PackagesDir) &quot; -Source  &quot; $(BuildToolsAlternateSource) &quot; -NoCache $(NuGetConfigCommandLine)"
+      Condition="$(BuildToolsUseAlternateSource)" />
+      
+    <Touch Files="$(BuildToolsInstallSemaphore)" AlwaysCreate="true" />
   </Target>
 
   <ItemGroup>
