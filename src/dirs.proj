@@ -5,11 +5,12 @@
     Inputs="$(BuildToolsTargetInputs)"
     Outputs="$(BuildToolsTargetOutputs)"
     >
-    <Error Condition="!Exists('$(BuildToolsInstallSempahore)')" 
+    <Error Condition="!Exists('$(BuildToolsInstallSemaphore)')" 
       Text="The build tools have not been installed. Please run build.cmd from the root of the repo at least once to get the tools installed." />
 
     <!-- If we enter this target at all then the inputs are newer then the outputs so give a warning. -->
-    <Warning Text="Looks like there may be an update to the build tools. Please run build.cmd from the root of the repo to refresh the build tools." /> 
+    <Warning Condition="!$(BuildToolsUseAlternateSource)"
+      Text="Looks like there may be an update to the build tools. Please run build.cmd from the root of the repo to refresh the build tools." /> 
   </Target>
 
   <Import Project="$(ToolsDir)depending.targets" Condition="Exists('$(ToolsDir)depending.targets')" />
