@@ -65,7 +65,8 @@ namespace System
                     stream: outputStream,
                     encoding: ConsolePal.OutputEncoding,
                     bufferSize: DefaultConsoleBufferSize,
-                    leaveOpen: true) { AutoFlush = true });
+                    leaveOpen: true)
+                { AutoFlush = true });
         }
 
         public static ConsoleColor BackgroundColor
@@ -365,5 +366,61 @@ namespace System
         {
             Out.Write(value);
         }
+
+        #region ctrlc
+
+        static ConsoleCancelEventHandler cancel_event;
+        public static event ConsoleCancelEventHandler CancelKeyPress
+        {
+            add
+            {
+                cancel_event += value;
+                if (!ConsolePal.ctrlHandlerAdded)
+                    ConsolePal.AddCtrlHandler();
+            }
+
+            remove
+            {
+                cancel_event -= value;
+                if (cancel_event == null)
+                {
+                    // Need to remove our hook if there's nothing left in the event
+                    if (ConsolePal.ctrlHandlerAdded)
+                        ConsolePal.RemoveCtrlHandler();
+                }
+            }
+        }
+
+        internal static void DoConsoleCancelEvent()
+        {
+
+            bool exit = true;
+            if (cancel_event != null)
+            {
+                ConsoleCancelEventArgs args = new ConsoleCancelEventArgs(ConsoleSpecialKey.ControlC);
+                Delegate[] delegates = cancel_event.GetInvocationList();
+                foreach (ConsoleCancelEventHandler d in delegates)
+                {
+                    try
+                    {
+                        // Sender is always null here.
+                        d(null, args);
+                    }
+                    catch { } // Ignore any exception.
+                }
+                exit = !args.Cancel;
+            }
+
+
+            /* Exit method has not been imported yet.
+            if (exit)
+                Environment.Exit(58);
+             **/
+
+        }
+
+
+
+        #endregion
     }
 }
