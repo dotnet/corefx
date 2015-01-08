@@ -29,6 +29,11 @@ internal partial class Interop
 
     internal const int FILE_TYPE_PIPE = 0x0003;
 
+    internal const int CTRL_C_EVENT = 0;
+    internal const int CTRL_BREAK_EVENT = 1;
+
+    internal delegate bool WindowsCancelHandler(int keyCode);
+
     [StructLayoutAttribute(LayoutKind.Sequential)]
     internal struct CONSOLE_SCREEN_BUFFER_INFO
     {
@@ -137,5 +142,9 @@ internal partial class Interop
                     char[] lpBuffer,
                     uint nSize,
                     IntPtr Arguments);
+
+        [DllImport("api-ms-win-core-console-l1-1-0.dll", SetLastError = true)]
+        internal static extern bool SetConsoleCtrlHandler(WindowsCancelHandler handler, bool addOrRemove);
+
     }
 }

@@ -408,5 +408,34 @@ namespace System
                 return errorCode;
             }
         }
+
+        #region ctrl+c
+
+        public static bool ctrlHandlerAdded = false;
+
+        private static Interop.WindowsCancelHandler cancelHandler = new Interop.WindowsCancelHandler(DoWindowsConsoleCancelEvent);
+
+        // Only call the event handler if Control-C was pressed (code == 0), nothing else
+        private static bool DoWindowsConsoleCancelEvent(int keyCode)
+        {
+            if (keyCode == 0)
+                Console.DoConsoleCancelEvent();
+            return keyCode == 0;
+        }
+
+        public static void AddCtrlHandler()
+        {
+            Interop.mincore.SetConsoleCtrlHandler(cancelHandler, true);
+            ctrlHandlerAdded = true;
+        }
+
+        public static void RemoveCtrlHandler()
+        {
+            Interop.mincore.SetConsoleCtrlHandler(cancelHandler, false);
+            ctrlHandlerAdded = false;
+        }
+
+
+        #endregion
     }
 }
