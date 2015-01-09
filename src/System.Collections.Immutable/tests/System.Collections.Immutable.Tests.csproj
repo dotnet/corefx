@@ -32,6 +32,7 @@
   <ItemGroup>
     <Compile Include="BadHasher.cs" />
     <Compile Include="EverythingEqual.cs" />
+    <Compile Include="ImmutableArrayFixedSizeBuilderTest.cs" />
     <Compile Include="ImmutableArrayBuilderTest.cs" />
     <Compile Include="ImmutableArrayExtensionsTest.cs" />
     <Compile Include="ImmutableArrayTest.cs" />

@@ -138,4 +138,7 @@
   <data name="InvalidOperationOnDefaultArray" xml:space="preserve">
     <value>This operation cannot be performed on a default instance of ImmutableArray&lt;T&gt;.  Consider initializing the array, or checking the ImmutableArray&lt;T&gt;.IsDefault property.</value>
   </data>
+  <data name="InvalidOperationOnUninitializedFixedSizeBuilder" xml:space="preserve">
+    <value>This operation is not legal on an uninitialized FixedSizeBuilder.</value>
+  </data>
 </root>

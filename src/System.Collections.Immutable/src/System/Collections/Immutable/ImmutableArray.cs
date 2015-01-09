@@ -397,6 +397,18 @@ namespace System.Collections.Immutable
         }
 
         /// <summary>
+        /// Initializes a new instance of the <see cref="ImmutableArray&lt;T&gt;.FixedLengthBuilder"/> class.
+        /// </summary>
+        /// <typeparam name="T">The type of elements stored in the array.</typeparam>
+        /// <param name="length">The length of the array the builder creates.</param>
+        /// <returns>A new builder.</returns>
+        [Pure]
+        public static ImmutableArray<T>.FixedLengthBuilder CreateFixedLengthBuilder<T>(int length)
+        {
+            return new ImmutableArray<T>.FixedLengthBuilder(length);
+        }
+
+        /// <summary>
         /// Enumerates a sequence exactly once and produces an immutable array of its contents.
         /// </summary>
         /// <typeparam name="TSource">The type of element in the sequence.</typeparam>
