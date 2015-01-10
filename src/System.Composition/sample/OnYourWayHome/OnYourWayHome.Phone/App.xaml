@@ -1,0 +1,21 @@
+﻿<Application 
+    x:Class="OnYourWayHome.OnYourWayHomePhoneHost"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"       
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:phone="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone"
+    xmlns:shell="clr-namespace:Microsoft.Phone.Shell;assembly=Microsoft.Phone"
+    xmlns:system="clr-namespace:System;assembly=mscorlib">
+
+    <Application.Resources>
+        <ResourceDictionary>
+            <system:String x:Key="AppName">ON YOUR WAY HOME...</system:String>
+        </ResourceDictionary>
+    </Application.Resources>
+
+    <Application.ApplicationLifetimeObjects>
+        <!--Required object that handles lifetime events for the application-->
+        <shell:PhoneApplicationService/>
+    </Application.ApplicationLifetimeObjects>
+
+
+</Application>

@@ -1,0 +1,29 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Package xmlns="http://schemas.microsoft.com/appx/2010/manifest">
+  <Identity Name="1af94312-a0c9-40e8-acf9-9379400c0d1f" Publisher="CN=Fabrikam" Version="1.0.0.0" />
+  <Properties>
+    <DisplayName>OnYourWayHome.WindowsStore</DisplayName>
+    <PublisherDisplayName>Fabrikam</PublisherDisplayName>
+    <Logo>Assets\StoreLogo.png</Logo>
+    <Description>OnYourWayHome.WindowsStore</Description>
+  </Properties>
+  <Prerequisites>
+    <OSMinVersion>6.2</OSMinVersion>
+    <OSMaxVersionTested>6.2</OSMaxVersionTested>
+  </Prerequisites>
+  <Resources>
+    <Resource Language="x-generate" />
+  </Resources>
+  <Applications>
+    <Application Id="App" Executable="$targetnametoken$.exe" EntryPoint="OnYourWayHome.WindowsStore.App">
+      <VisualElements DisplayName="OnYourWayHome.WindowsStore" Logo="Assets\Logo.png" SmallLogo="Assets\SmallLogo.png" Description="OnYourWayHome.WindowsStore" ForegroundText="light" BackgroundColor="#222222">
+        <DefaultTile ShowName="allLogos" />
+        <SplashScreen Image="Assets\SplashScreen.png" />
+      </VisualElements>
+    </Application>
+  </Applications>
+  <Capabilities>
+    <Capability Name="internetClientServer" />
+    <Capability Name="internetClient" />
+  </Capabilities>
+</Package>

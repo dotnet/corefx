@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <SourcePath>$(MSBuildProjectDirectory)</SourcePath>
+    <SourcePath Condition="$(MSBuildProjectDirectory.Contains(&quot;WindowsStore&quot;))">$(MSBuildProjectDirectory.Replace(&quot;WindowsStore&quot;, &quot;Desktop&quot;))</SourcePath>
+  </PropertyGroup>
+  
+  <ItemGroup>    
+    <Compile Include="$(SourcePath)\**\*.cs"
+             Exclude="$(SourcePath)\obj\**\*.cs;$(SourcePath)\Properties\*.cs">
+      <SharedSource>true</SharedSource>
+      <Visible>true</Visible>
+    </Compile>
+  </ItemGroup>
+
+  <PropertyGroup>
+    <CompileDependsOn>
+      VerifyCompileItems;
+      $(CompileDependsOn)
+    </CompileDependsOn>
+  </PropertyGroup>
+
+  <Target Name="VerifyCompileItems">
+    <Error Condition="'%(Compile.SharedSource)' == ''"
+           Text="Compile item &quot;%(Compile.Identity)&quot; did not specify SharedSource.  If this item is inteded to be shared between Desktop and Metro unit tests do not explicitly add it to the project." />
+  </Target>  
+</Project>
