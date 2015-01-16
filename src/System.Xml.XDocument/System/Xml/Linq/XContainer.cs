@@ -1163,6 +1163,41 @@ namespace System.Xml.Linq
             }
         }
 
+        internal async Task WriteContentToAsync(XmlWriter writer, CancellationToken cancellationToken)
+        {
+            if (content != null)
+            {
+                string sContent = content as string;
+
+                if (sContent != null)
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+
+                    Task tWrite;
+
+                    if (this is XDocument)
+                    {
+                        tWrite = writer.WriteWhitespaceAsync(sContent);
+                    }
+                    else
+                    {
+                        tWrite = writer.WriteStringAsync(sContent);
+                    }
+
+                    await tWrite.ConfigureAwait(false);
+                }
+                else
+                {
+                    XNode n = (XNode)content;
+                    do
+                    {
+                        n = n.next;
+                        await n.WriteToAsync(writer, cancellationToken).ConfigureAwait(false);
+                    } while (n != content);
+                }
+            }
+        }
+
         static void AddContentToList(List<object> list, object content)
         {
             IEnumerable e = content is string ? null : content as IEnumerable;

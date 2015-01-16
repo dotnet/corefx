@@ -582,6 +582,9 @@ namespace System.Xml.Linq
         public static async Task<XElement> LoadAsync(string uri, LoadOptions options, CancellationToken cancellationToken)
         {
             XmlReaderSettings rs = GetXmlReaderSettings(options);
+
+            rs.Async = true;
+
             using (XmlReader r = XmlReader.Create(uri, rs))
             {
                 return await LoadAsync(r, options, cancellationToken).ConfigureAwait(false);
@@ -661,6 +664,9 @@ namespace System.Xml.Linq
         public static async Task<XElement> LoadAsync(Stream stream, LoadOptions options, CancellationToken cancellationToken)
         {
             XmlReaderSettings rs = GetXmlReaderSettings(options);
+
+            rs.Async = true;
+
             using (XmlReader r = XmlReader.Create(stream, rs))
             {
                 return await LoadAsync(r, options, cancellationToken).ConfigureAwait(false);
@@ -740,6 +746,9 @@ namespace System.Xml.Linq
         public static async Task<XElement> LoadAsync(TextReader textReader, LoadOptions options, CancellationToken cancellationToken)
         {
             XmlReaderSettings rs = GetXmlReaderSettings(options);
+
+            rs.Async = true;
+
             using (XmlReader r = XmlReader.Create(textReader, rs))
             {
                 return await LoadAsync(r, options, cancellationToken).ConfigureAwait(false);
@@ -1034,6 +1043,29 @@ namespace System.Xml.Linq
         }
 
         /// <summary>
+        /// Output this <see cref="XElement"/> to a <see cref="Stream"/>.
+        /// </summary>
+        /// <param name="stream">
+        /// The <see cref="Stream"/> to output the XML to.  
+        /// </param>
+        /// <param name="options">
+        /// If SaveOptions.DisableFormatting is enabled the output is not indented.
+        /// If SaveOptions.OmitDuplicateNamespaces is enabled duplicate namespace declarations will be removed.
+        /// </param>
+        /// <param name="cancellationToken">A cancellation token.</param>
+        public async Task SaveAsync(Stream stream, SaveOptions options, CancellationToken cancellationToken)
+        {
+            XmlWriterSettings ws = GetXmlWriterSettings(options);
+
+            ws.Async = true;
+
+            using (XmlWriter w = XmlWriter.Create(stream, ws))
+            {
+                await SaveAsync(w, cancellationToken).ConfigureAwait(false);
+            }
+        }
+
+        /// <summary>
         /// Output this <see cref="XElement"/> to the passed in <see cref="TextWriter"/>.
         /// </summary>
         /// <remarks>
@@ -1072,6 +1104,29 @@ namespace System.Xml.Linq
         }
 
         /// <summary>
+        /// Output this <see cref="XElement"/> to a <see cref="TextWriter"/>.
+        /// </summary>
+        /// <param name="textWriter">
+        /// The <see cref="TextWriter"/> to output the XML to.  
+        /// </param>
+        /// <param name="options">
+        /// If SaveOptions.DisableFormatting is enabled the output is not indented.
+        /// If SaveOptions.OmitDuplicateNamespaces is enabled duplicate namespace declarations will be removed.
+        /// </param>
+        /// <param name="cancellationToken">A cancellation token.</param>
+        public async Task SaveAsync(TextWriter textWriter, SaveOptions options, CancellationToken cancellationToken)
+        {
+            XmlWriterSettings ws = GetXmlWriterSettings(options);
+
+            ws.Async = true;
+
+            using (XmlWriter w = XmlWriter.Create(textWriter, ws))
+            {
+                await SaveAsync(w, cancellationToken).ConfigureAwait(false);
+            }
+        }
+
+        /// <summary>
         /// Output this <see cref="XElement"/> to an <see cref="XmlWriter"/>.
         /// </summary>
         /// <param name="writer">
@@ -1083,6 +1138,26 @@ namespace System.Xml.Linq
             writer.WriteStartDocument();
             WriteTo(writer);
             writer.WriteEndDocument();
+        }
+
+        /// <summary>
+        /// Output this <see cref="XElement"/> to an <see cref="XmlWriter"/>.
+        /// </summary>
+        /// <param name="writer">
+        /// The <see cref="XmlWriter"/> to output the XML to.
+        /// </param>
+        /// <param name="cancellationToken">A cancellation token.</param>
+        public async Task SaveAsync(XmlWriter writer, CancellationToken cancellationToken)
+        {
+            if (writer == null) throw new ArgumentNullException("writer");
+
+            cancellationToken.ThrowIfCancellationRequested();
+            await writer.WriteStartDocumentAsync().ConfigureAwait(false);
+
+            await WriteToAsync(writer, cancellationToken).ConfigureAwait(false);
+
+            cancellationToken.ThrowIfCancellationRequested();
+            await writer.WriteEndDocumentAsync().ConfigureAwait(false);
         }
 
         /// <summary>
@@ -1193,6 +1268,19 @@ namespace System.Xml.Linq
         {
             if (writer == null) throw new ArgumentNullException("writer");
             new ElementWriter(writer).WriteElement(this);
+        }
+
+        /// <summary>
+        /// Write this <see cref="XElement"/> to the passed in <see cref="XmlTextWriter"/>.
+        /// </summary>
+        /// <param name="writer">
+        /// The <see cref="XmlTextWriter"/> to write this <see cref="XElement"/> to.
+        /// </param>
+        /// <param name="cancellationToken">A cancellation token.</param>
+        public override async Task WriteToAsync(XmlWriter writer, CancellationToken cancellationToken)
+        {
+            if (writer == null) throw new ArgumentNullException("writer");
+            await new ElementWriter(writer).WriteElementAsync(this, cancellationToken).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -1861,19 +1949,19 @@ namespace System.Xml.Linq
             r.Read();
         }
 
-        async Task ReadElementFromAsync(XmlReader r, LoadOptions o, CancellationToken token)
+        async Task ReadElementFromAsync(XmlReader r, LoadOptions o, CancellationToken cancellationTokentoken)
         {
             ReadElementFromImpl(r, o);
 
             if (!r.IsEmptyElement)
             {
-                token.ThrowIfCancellationRequested();
+                cancellationTokentoken.ThrowIfCancellationRequested();
                 await r.ReadAsync().ConfigureAwait(false);
 
-                await ReadContentFromAsync(r, o, token).ConfigureAwait(false);
+                await ReadContentFromAsync(r, o, cancellationTokentoken).ConfigureAwait(false);
             }
 
-            token.ThrowIfCancellationRequested();
+            cancellationTokentoken.ThrowIfCancellationRequested();
             await r.ReadAsync().ConfigureAwait(false);
         }
 

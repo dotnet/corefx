@@ -7,6 +7,8 @@ using System.IO;
 using CultureInfo = System.Globalization.CultureInfo;
 using SuppressMessageAttribute = System.Diagnostics.CodeAnalysis.SuppressMessageAttribute;
 using StringBuilder = System.Text.StringBuilder;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace System.Xml.Linq
 {
@@ -557,6 +559,13 @@ namespace System.Xml.Linq
         /// </summary>
         /// <param name="writer">The <see cref="XmlWriter"/> to write the current node into.</param>
         public abstract void WriteTo(XmlWriter writer);
+
+        /// <summary>
+        /// Write the current node to an <see cref="XmlWriter"/>.
+        /// </summary>
+        /// <param name="writer">The <see cref="XmlWriter"/> to write the current node into.</param>
+        /// <param name="cancellationToken">A cancellation token.</param>
+        public abstract Task WriteToAsync(XmlWriter writer, CancellationToken cancellationToken);
 
         internal virtual void AppendText(StringBuilder sb)
         {

@@ -2,7 +2,8 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Collections.Generic;
-
+using System.Threading;
+using System.Threading.Tasks;
 using IEnumerable = System.Collections.IEnumerable;
 using SuppressMessageAttribute = System.Diagnostics.CodeAnalysis.SuppressMessageAttribute;
 
@@ -243,6 +244,52 @@ namespace System.Xml.Linq
             }
         }
 
+        public async Task WriteElementAsync(XElement e, CancellationToken cancellationToken)
+        {
+            PushAncestors(e);
+            XElement root = e;
+            XNode n = e;
+            while (true)
+            {
+                e = n as XElement;
+                if (e != null)
+                {
+                    await WriteStartElementAsync(e, cancellationToken).ConfigureAwait(false);
+                    if (e.content == null)
+                    {
+                        await WriteEndElementAsync(cancellationToken).ConfigureAwait(false);
+                    }
+                    else
+                    {
+                        string s = e.content as string;
+                        if (s != null)
+                        {
+                            cancellationToken.ThrowIfCancellationRequested();
+                            await writer.WriteStringAsync(s).ConfigureAwait(false);
+
+                            await WriteFullEndElementAsync(cancellationToken).ConfigureAwait(false);
+                        }
+                        else
+                        {
+                            n = ((XNode)e.content).next;
+                            continue;
+                        }
+                    }
+                }
+                else
+                {
+                    await n.WriteToAsync(writer, cancellationToken).ConfigureAwait(false);
+                }
+                while (n != root && n == n.parent.content)
+                {
+                    n = n.parent;
+                    await WriteFullEndElementAsync(cancellationToken).ConfigureAwait(false);
+                }
+                if (n == root) break;
+                n = n.next;
+            }
+        }
+
         string GetPrefixOfNamespace(XNamespace ns, bool allowDefaultNamespace)
         {
             string namespaceName = ns.NamespaceName;
@@ -298,10 +345,24 @@ namespace System.Xml.Linq
             resolver.PopScope();
         }
 
+        Task WriteEndElementAsync(CancellationToken cancellationToken)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            resolver.PopScope();
+            return writer.WriteEndElementAsync();
+        }
+
         void WriteFullEndElement()
         {
             writer.WriteFullEndElement();
             resolver.PopScope();
+        }
+
+        Task WriteFullEndElementAsync(CancellationToken cancellationToken)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            resolver.PopScope();
+            return writer.WriteFullEndElementAsync();
         }
 
         void WriteStartElement(XElement e)
@@ -319,6 +380,25 @@ namespace System.Xml.Linq
                     string localName = a.Name.LocalName;
                     string namespaceName = ns.NamespaceName;
                     writer.WriteAttributeString(GetPrefixOfNamespace(ns, false), localName, namespaceName.Length == 0 && localName == "xmlns" ? XNamespace.xmlnsPrefixNamespace : namespaceName, a.Value);
+                } while (a != e.lastAttr);
+            }
+        }
+
+        async Task WriteStartElementAsync(XElement e, CancellationToken cancellationToken)
+        {
+            PushElement(e);
+            XNamespace ns = e.Name.Namespace;
+            await writer.WriteStartElementAsync(GetPrefixOfNamespace(ns, true), e.Name.LocalName, ns.NamespaceName).ConfigureAwait(false);
+            XAttribute a = e.lastAttr;
+            if (a != null)
+            {
+                do
+                {
+                    a = a.next;
+                    ns = a.Name.Namespace;
+                    string localName = a.Name.LocalName;
+                    string namespaceName = ns.NamespaceName;
+                    await writer.WriteAttributeStringAsync(GetPrefixOfNamespace(ns, false), localName, namespaceName.Length == 0 && localName == "xmlns" ? XNamespace.xmlnsPrefixNamespace : namespaceName, a.Value).ConfigureAwait(false);
                 } while (a != e.lastAttr);
             }
         }
