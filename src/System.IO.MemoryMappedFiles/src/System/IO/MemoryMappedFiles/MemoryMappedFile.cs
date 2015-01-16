@@ -14,9 +14,9 @@ namespace System.IO.MemoryMappedFiles
 {
     public class MemoryMappedFile : IDisposable
     {
-        private SafeMemoryMappedFileHandle _handle;
-        private bool _leaveOpen;
-        private FileStream _fileStream;
+        private readonly SafeMemoryMappedFileHandle _handle;
+        private readonly bool _leaveOpen;
+        private readonly FileStream _fileStream;
         internal const int DefaultSize = 0;
 
         // Private constructors to be used by the factory methods.
