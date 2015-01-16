@@ -871,29 +871,27 @@ namespace System.Xml.Linq
             while (cr.ReadContentFrom(this, r, o) && r.Read()) ;
         }
 
-        internal async Task ReadContentFromAsync(XmlReader r, CancellationToken token)
+        internal async Task ReadContentFromAsync(XmlReader r, CancellationToken cancellationToken)
         {
             if (r.ReadState != ReadState.Interactive) throw new InvalidOperationException(SR.InvalidOperation_ExpectedInteractive);
 
             ContentReader cr = new ContentReader(this);
-            while (!token.IsCancellationRequested && cr.ReadContentFrom(this, r) && await r.ReadAsync().ConfigureAwait(false)) ;
-
-            token.ThrowIfCancellationRequested();
+            while (!cancellationToken.IsCancellationRequested && cr.ReadContentFrom(this, r) && await r.ReadAsync().ConfigureAwait(false)) ;
         }
 
-        internal async Task ReadContentFromAsync(XmlReader r, LoadOptions o, CancellationToken token)
+        internal async Task ReadContentFromAsync(XmlReader r, LoadOptions o, CancellationToken cancellationToken)
         {
             if ((o & (LoadOptions.SetBaseUri | LoadOptions.SetLineInfo)) == 0)
             {
-                await ReadContentFromAsync(r, token).ConfigureAwait(false);
+                await ReadContentFromAsync(r, cancellationToken).ConfigureAwait(false);
                 return;
             }
             if (r.ReadState != ReadState.Interactive) throw new InvalidOperationException(SR.InvalidOperation_ExpectedInteractive);
 
             ContentReader cr = new ContentReader(this);
-            while (!token.IsCancellationRequested && cr.ReadContentFrom(this, r, o) && await r.ReadAsync().ConfigureAwait(false)) ;
+            while (!cancellationToken.IsCancellationRequested && cr.ReadContentFrom(this, r, o) && await r.ReadAsync().ConfigureAwait(false)) ;
 
-            token.ThrowIfCancellationRequested();
+            cancellationToken.ThrowIfCancellationRequested();
         }
         
         /// <summary>

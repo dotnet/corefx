@@ -571,18 +571,20 @@ namespace System.Xml.Linq
         /// <param name="options">
         /// A set of <see cref="LoadOptions"/>.
         /// </param>
+        /// <param name="cancellationToken">
+        /// A cancellation token.</param>
         /// <returns>
         /// An <see cref="XElement"/> initialized with the contents of the file referenced
         /// in the passed uri parameter.  If LoadOptions.PreserveWhitespace is enabled then
         /// significant whitespace will be preserved.
         /// </returns>
         [SuppressMessage("Microsoft.Design", "CA1054:UriParametersShouldNotBeStrings", Justification = "Back-compat with System.Xml.")]
-        public static async Task<XElement> LoadAsync(string uri, LoadOptions options, CancellationToken token)
+        public static async Task<XElement> LoadAsync(string uri, LoadOptions options, CancellationToken cancellationToken)
         {
             XmlReaderSettings rs = GetXmlReaderSettings(options);
             using (XmlReader r = XmlReader.Create(uri, rs))
             {
-                return await LoadAsync(r, options, token).ConfigureAwait(false);
+                return await LoadAsync(r, options, cancellationToken).ConfigureAwait(false);
             }
         }
 
@@ -650,18 +652,18 @@ namespace System.Xml.Linq
         /// <param name="options">
         /// A set of <see cref="LoadOptions"/>.
         /// </param>
-        /// <param name="token">
+        /// <param name="cancellationToken">
         /// A cancellation token.</param>
         /// <returns>
         /// A new <see cref="XElement"/> containing the contents of the passed in
         /// <see cref="Stream"/>.
         /// </returns>
-        public static async Task<XElement> LoadAsync(Stream stream, LoadOptions options, CancellationToken token)
+        public static async Task<XElement> LoadAsync(Stream stream, LoadOptions options, CancellationToken cancellationToken)
         {
             XmlReaderSettings rs = GetXmlReaderSettings(options);
             using (XmlReader r = XmlReader.Create(stream, rs))
             {
-                return await LoadAsync(r, options, token).ConfigureAwait(false);
+                return await LoadAsync(r, options, cancellationToken).ConfigureAwait(false);
             }
         }
 
@@ -729,18 +731,18 @@ namespace System.Xml.Linq
         /// <param name="options">
         /// A set of <see cref="LoadOptions"/>.
         /// </param>
-        /// <param name="token">
+        /// <param name="cancellationToken">
         /// A cancellation token.</param>
         /// <returns>
         /// A new <see cref="XElement"/> containing the contents of the passed in
         /// <see cref="TextReader"/>.
         /// </returns>
-        public static async Task<XElement> LoadAsync(TextReader textReader, LoadOptions options, CancellationToken token)
+        public static async Task<XElement> LoadAsync(TextReader textReader, LoadOptions options, CancellationToken cancellationToken)
         {
             XmlReaderSettings rs = GetXmlReaderSettings(options);
             using (XmlReader r = XmlReader.Create(textReader, rs))
             {
-                return await LoadAsync(r, options, token).ConfigureAwait(false);
+                return await LoadAsync(r, options, cancellationToken).ConfigureAwait(false);
             }
         }
 
@@ -797,23 +799,23 @@ namespace System.Xml.Linq
         /// <param name="options">
         /// A set of <see cref="LoadOptions"/>.
         /// </param>
-        /// <param name="token">
+        /// <param name="cancellationToken">
         /// A cancellation token.</param>
         /// <returns>
         /// A new <see cref="XElement"/> containing the contents of the passed
         /// in <see cref="XmlReader"/>.
         /// </returns>
-        public static async Task<XElement> LoadAsync(XmlReader reader, LoadOptions options, CancellationToken token)
+        public static async Task<XElement> LoadAsync(XmlReader reader, LoadOptions options, CancellationToken cancellationToken)
         {
             if (reader == null) throw new ArgumentNullException("reader");
 
-            token.ThrowIfCancellationRequested();
+            cancellationToken.ThrowIfCancellationRequested();
             if (await reader.MoveToContentAsync().ConfigureAwait(false) != XmlNodeType.Element) throw new InvalidOperationException(SR.Format(SR.InvalidOperation_ExpectedNodeType, XmlNodeType.Element, reader.NodeType));
 
             XElement e = new XElement(new AsyncConstructionSentry());
-            await e.ReadElementFromAsync(reader, options, token).ConfigureAwait(false);
+            await e.ReadElementFromAsync(reader, options, cancellationToken).ConfigureAwait(false);
 
-            token.ThrowIfCancellationRequested();
+            cancellationToken.ThrowIfCancellationRequested();
             await reader.MoveToContentAsync().ConfigureAwait(false);
 
             if (!reader.EOF) throw new InvalidOperationException(SR.InvalidOperation_ExpectedEndOfFile);
