@@ -9,7 +9,7 @@ namespace System.IO.MemoryMappedFiles
 {
     public sealed class MemoryMappedViewAccessor : UnmanagedMemoryAccessor
     {
-        private MemoryMappedView _view;
+        private readonly MemoryMappedView _view;
 
         [SecurityCritical]
         internal MemoryMappedViewAccessor(MemoryMappedView view)

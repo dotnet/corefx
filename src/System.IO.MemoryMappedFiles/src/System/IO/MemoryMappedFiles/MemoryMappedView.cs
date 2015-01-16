@@ -12,10 +12,10 @@ namespace System.IO.MemoryMappedFiles
 {
     internal class MemoryMappedView : IDisposable
     {
-        private SafeMemoryMappedViewHandle _viewHandle;
-        private Int64 _pointerOffset;
-        private Int64 _size;
-        private MemoryMappedFileAccess _access;
+        private readonly SafeMemoryMappedViewHandle _viewHandle;
+        private readonly Int64 _pointerOffset;
+        private readonly Int64 _size;
+        private readonly MemoryMappedFileAccess _access;
 
         // These control the retry behaviour when lock violation errors occur during Flush:
         private const Int32 MaxFlushWaits = 15;  // must be <=30
