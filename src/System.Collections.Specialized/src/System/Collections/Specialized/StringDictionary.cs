@@ -64,22 +64,17 @@ namespace System.Collections.Specialized
         /// </devdoc>
         public virtual string this[string key]
         {
+            if (key == null)
+            {
+                throw new ArgumentNullException("key");
+            }
+            
             get
             {
-                if (key == null)
-                {
-                    throw new ArgumentNullException("key");
-                }
-
                 return (string)_contents[key.ToLowerInvariant()];
             }
             set
             {
-                if (key == null)
-                {
-                    throw new ArgumentNullException("key");
-                }
-
                 _contents[key.ToLowerInvariant()] = value;
             }
         }
