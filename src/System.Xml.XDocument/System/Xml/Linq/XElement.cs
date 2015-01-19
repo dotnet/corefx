@@ -138,7 +138,7 @@ namespace System.Xml.Linq
         {
         }
 
-        internal XElement(AsyncConstructionSentry s)
+        XElement(AsyncConstructionSentry s)
         {
         }
 
@@ -147,7 +147,14 @@ namespace System.Xml.Linq
             ReadElementFrom(r, o);
         }
 
-        internal struct AsyncConstructionSentry
+        internal static async Task<XElement> CreateAsync(XmlReader r, CancellationToken cancellationToken)
+        {
+            XElement xe = new XElement(new AsyncConstructionSentry());
+            await xe.ReadElementFromAsync(r, LoadOptions.None, cancellationToken).ConfigureAwait(false);
+            return xe;
+        }
+
+        struct AsyncConstructionSentry
         {
         }
 
