@@ -560,45 +560,6 @@ namespace System.Xml.Linq
         }
 
         /// <summary>
-        /// Create a new <see cref="XElement"/> based on the contents of the file 
-        /// referenced by the URI parameter passed in.  Optionally, whitespace can be preserved.  
-        /// <see cref="XmlReader.Create(string)"/>
-        /// <seealso cref="XDocument.Load(string, LoadOptions)"/> 
-        /// </summary>
-        /// <remarks>
-        /// This method uses the <see cref="XmlReader.Create(string)"/> method to create
-        /// an <see cref="XmlReader"/> to read the raw XML into an underlying
-        /// XML tree. If LoadOptions.PreserveWhitespace is enabled then
-        /// the <see cref="XmlReaderSettings"/> property <see cref="XmlReaderSettings.IgnoreWhitespace"/>
-        /// is set to false.
-        /// </remarks>
-        /// <param name="uri">
-        /// A string representing the URI of the file to be loaded into a new <see cref="XElement"/>.
-        /// </param>
-        /// <param name="options">
-        /// A set of <see cref="LoadOptions"/>.
-        /// </param>
-        /// <param name="cancellationToken">
-        /// A cancellation token.</param>
-        /// <returns>
-        /// An <see cref="XElement"/> initialized with the contents of the file referenced
-        /// in the passed uri parameter.  If LoadOptions.PreserveWhitespace is enabled then
-        /// significant whitespace will be preserved.
-        /// </returns>
-        [SuppressMessage("Microsoft.Design", "CA1054:UriParametersShouldNotBeStrings", Justification = "Back-compat with System.Xml.")]
-        public static async Task<XElement> LoadAsync(string uri, LoadOptions options, CancellationToken cancellationToken)
-        {
-            XmlReaderSettings rs = GetXmlReaderSettings(options);
-
-            rs.Async = true;
-
-            using (XmlReader r = XmlReader.Create(uri, rs))
-            {
-                return await LoadAsync(r, options, cancellationToken).ConfigureAwait(false);
-            }
-        }
-
-        /// <summary>
         /// Create a new <see cref="XElement"/> and initialize its underlying XML tree using
         /// the passed <see cref="Stream"/> parameter.  
         /// </summary>
