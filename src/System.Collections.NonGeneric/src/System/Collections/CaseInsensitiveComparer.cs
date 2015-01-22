@@ -18,7 +18,7 @@ namespace System.Collections
     [System.Runtime.InteropServices.ComVisible(true)]
     public class CaseInsensitiveComparer : IComparer
     {
-        private CompareInfo _compareInfo;
+        private readonly CompareInfo _compareInfo;
         private static volatile CaseInsensitiveComparer s_InvariantCaseInsensitiveComparer;
 
         public CaseInsensitiveComparer()

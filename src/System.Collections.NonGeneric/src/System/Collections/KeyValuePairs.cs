@@ -18,10 +18,10 @@ namespace System.Collections
     internal class KeyValuePairs
     {
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        private object _key;
+        private readonly object _key;
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        private object _value;
+        private readonly object _value;
 
         public KeyValuePairs(object key, object value)
         {

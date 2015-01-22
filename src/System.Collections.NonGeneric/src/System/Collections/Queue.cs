@@ -26,7 +26,7 @@ namespace System.Collections
         private int _head;       // First valid element in the queue
         private int _tail;       // Last valid element in the queue
         private int _size;       // Number of elements.
-        private int _growFactor; // 100 == 1.0, 130 == 1.3, 200 == 2.0
+        private readonly int _growFactor; // 100 == 1.0, 130 == 1.3, 200 == 2.0
         private int _version;
         private Object _syncRoot;
 
@@ -317,8 +317,8 @@ namespace System.Collections
         // Implements a synchronization wrapper around a queue.
         private class SynchronizedQueue : Queue
         {
-            private Queue _q;
-            private Object _root;
+            private readonly Queue _q;
+            private readonly Object _root;
 
             internal SynchronizedQueue(Queue q)
             {
@@ -439,9 +439,9 @@ namespace System.Collections
         // made to the list while an enumeration is in progress.
         private class QueueEnumerator : IEnumerator
         {
-            private Queue _q;
+            private readonly Queue _q;
             private int _index;
-            private int _version;
+            private readonly int _version;
             private Object _currentElement;
 
             internal QueueEnumerator(Queue q)
@@ -500,7 +500,7 @@ namespace System.Collections
 
         internal class QueueDebugView
         {
-            private Queue _queue;
+            private readonly Queue _queue;
 
             public QueueDebugView(Queue queue)
             {

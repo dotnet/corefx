@@ -18,7 +18,7 @@ namespace System.Collections
     [System.Runtime.InteropServices.ComVisible(true)]
     public sealed class Comparer : IComparer
     {
-        private CompareInfo _compareInfo;
+        private readonly CompareInfo _compareInfo;
         public static readonly Comparer Default = new Comparer(CultureInfo.CurrentCulture);
         public static readonly Comparer DefaultInvariant = new Comparer(CultureInfo.InvariantCulture);
 
