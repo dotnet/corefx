@@ -144,9 +144,9 @@ namespace System.Collections
             Contract.EndContractBlock();
 
             int i = 0;
-            if (array is Object[])
+            Object[] objArray = array as Object[];
+            if (objArray != null)
             {
-                Object[] objArray = (Object[])array;
                 while (i < _size)
                 {
                     objArray[i + index] = _array[_size - i - 1];
