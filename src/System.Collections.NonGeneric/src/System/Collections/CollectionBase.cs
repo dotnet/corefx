@@ -9,7 +9,6 @@
 **
 =============================================================================*/
 
-using System;
 using System.Diagnostics.Contracts;
 
 namespace System.Collections

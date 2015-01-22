@@ -10,9 +10,8 @@
 **
 ===========================================================*/
 
-using System;
-using System.Globalization;
 using System.Diagnostics.Contracts;
+using System.Globalization;
 
 namespace System.Collections
 {

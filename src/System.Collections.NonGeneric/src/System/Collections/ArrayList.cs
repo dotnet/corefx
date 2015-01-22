@@ -11,15 +11,13 @@
 **
 ===========================================================*/
 
-using System;
-using System.Runtime;
-using System.Security;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics.Contracts;
 #if FEATURE_NETCORE
 using System.Runtime.CompilerServices;
 #endif
-using System.Diagnostics.CodeAnalysis;
-using System.Diagnostics.Contracts;
+using System.Security;
 
 namespace System.Collections
 {
