@@ -57,7 +57,7 @@ namespace System.Collections
     // has a constructor that allows a specific IComparer implementation to
     // be specified.
     // 
-    [DebuggerTypeProxy(typeof(System.Collections.SortedList.SortedListDebugView))]
+    [DebuggerTypeProxy(typeof(SortedListDebugView))]
     [DebuggerDisplay("Count = {Count}")]
     [System.Runtime.InteropServices.ComVisible(true)]
 #if FEATURE_CORECLR

@@ -19,7 +19,7 @@ namespace System.Collections
 {
     // A simple stack of objects.  Internally it is implemented as an array,
     // so Push can be O(n).  Pop is O(1).
-    [DebuggerTypeProxy(typeof(System.Collections.Stack.StackDebugView))]
+    [DebuggerTypeProxy(typeof(StackDebugView))]
     [DebuggerDisplay("Count = {Count}")]
     [System.Runtime.InteropServices.ComVisible(true)]
     public class Stack : ICollection

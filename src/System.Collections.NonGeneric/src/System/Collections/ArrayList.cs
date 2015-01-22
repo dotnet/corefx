@@ -30,7 +30,7 @@ namespace System.Collections
 #if FEATURE_NETCORE
     [FriendAccessAllowed]
 #endif
-    [DebuggerTypeProxy(typeof(System.Collections.ArrayList.ArrayListDebugView))]
+    [DebuggerTypeProxy(typeof(ArrayListDebugView))]
     [DebuggerDisplay("Count = {Count}")]
     [System.Runtime.InteropServices.ComVisible(true)]
     public class ArrayList : IList
