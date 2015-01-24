@@ -12,6 +12,37 @@ namespace System.Threading.Tasks.Dataflow.Tests
         internal static bool[] BooleanValues = { true, false };
         internal static Func<int, IEnumerable<int>> ToEnumerable = item => Enumerable.Repeat(item, 1);
 
+        internal static ITargetBlock<int> PostRange(this ITargetBlock<int> target, int lowerBoundInclusive, int upperBoundExclusive)
+        {
+            return PostRange(target, lowerBoundInclusive, upperBoundExclusive, i => i);
+        }
+
+        internal static ITargetBlock<T> PostRange<T>(this ITargetBlock<T> target, int lowerBoundInclusive, int upperBoundExclusive, Func<int, T> selector)
+        {
+            Assert.NotNull(target);
+            for (int i = lowerBoundInclusive; i < upperBoundExclusive; i++)
+            {
+                Assert.True(target.Post(selector(i)));
+            }
+            return target;
+        }
+
+        internal static ITargetBlock<T> PostItems<T>(this ITargetBlock<T> target, params T[] items)
+        {
+            return PostAll(target, items);
+        }
+
+        internal static ITargetBlock<T> PostAll<T>(this ITargetBlock<T> target, IEnumerable<T> items)
+        {
+            Assert.NotNull(target);
+            Assert.NotNull(items);
+            foreach (var item in items)
+            {
+                Assert.True(target.Post(item));
+            }
+            return target;
+        }
+
         internal static void TestArgumentsExceptions<T>(ISourceBlock<T> source)
         {
             var validMessageHeader = new DataflowMessageHeader(1);
@@ -80,10 +111,7 @@ namespace System.Threading.Tasks.Dataflow.Tests
                 expected: DataflowMessageStatus.NotAvailable,
                 actual: target.OfferMessage(new DataflowMessageHeader(1), default(T), stingySource, consumeToAccept: true));
 
-            for (int i = 1; i <= messages; i++)
-            {
-                Assert.True(src.Post(default(T)));
-            }
+            src.PostRange(1, messages + 1, i => default(T));
             Assert.Equal(expected: messages, actual: src.Count);
             src.LinkTo(target);
             src.Complete();

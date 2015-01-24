@@ -150,10 +150,7 @@ namespace System.Threading.Tasks.Dataflow.Tests
 
                             case 1:
                                 var source = new BufferBlock<char>();
-                                for (int i = 0; i < 26; i++)
-                                {
-                                    source.Post((char)('a' + i));
-                                }
+                                source.PostAll(Enumerable.Range(0, 26).Select(i => (char)('a' + i)));
                                 source.Complete();
                                 source.LinkTo(target, new DataflowLinkOptions { PropagateCompletion = true });
                                 break;
@@ -180,7 +177,7 @@ namespace System.Threading.Tasks.Dataflow.Tests
                         TaskScheduler = scheduler,
                         SingleProducerConstrained = singleProducerConstrained
                     });
-                for (int i = 0; i < 10; i++) sync.Post(i);
+                sync.PostRange(0, 10);
                 sync.Complete();
                 await sync.Completion;
 
@@ -192,7 +189,7 @@ namespace System.Threading.Tasks.Dataflow.Tests
                         TaskScheduler = scheduler,
                         SingleProducerConstrained = singleProducerConstrained
                     });
-                for (int i = 0; i < 10; i++) async.Post(i);
+                async.PostRange(0, 10);
                 async.Complete();
                 await async.Completion;
             }
@@ -218,11 +215,7 @@ namespace System.Threading.Tasks.Dataflow.Tests
 
                 for (int iter = 0; iter < 2; iter++)
                 {
-                    for (int i = 1; i <= 2; i++)
-                    {
-                        ab.Post(i);
-                    }
-
+                    ab.PostItems(1, 2);
                     for (int i = 1; i >= 0; i--)
                     {
                         barrier1.SignalAndWait();
@@ -253,11 +246,7 @@ namespace System.Threading.Tasks.Dataflow.Tests
                 ActionBlock<int> ab = sync ?
                     new ActionBlock<int>(body, options) :
                     new ActionBlock<int>(i => Task.Run(() => body(i)), options);
-
-                for (int i = 0; i < 100; i++)
-                {
-                    ab.Post(i);
-                }
+                ab.PostRange(0, 100);
                 ab.Complete();
                 await ab.Completion;
             }
@@ -304,10 +293,7 @@ namespace System.Threading.Tasks.Dataflow.Tests
                 bb.LinkTo(ab, new DataflowLinkOptions { PropagateCompletion = true });
 
                 const int Messages = 100;
-                for (int i = 1; i <= Messages; i++)
-                {
-                    bb.Post(i);
-                }
+                bb.PostRange(1, Messages + 1);
                 bb.Complete();
 
                 await ab.Completion;
@@ -333,9 +319,7 @@ namespace System.Threading.Tasks.Dataflow.Tests
                     new ActionBlock<int>(async i => { await Task.Yield(); body(i); }, options);
 
                 const int MaxValue = 10;
-                for (int i = 0; i < MaxValue; i++) {
-                    ab.Post(i);
-                }
+                ab.PostRange(0, MaxValue);
                 ab.Complete();
                 await ab.Completion;
                 Assert.Equal(
@@ -396,11 +380,7 @@ namespace System.Threading.Tasks.Dataflow.Tests
                     case 1: ab = new ActionBlock<int>(i => { thrower(); return Task.FromResult(0); }, options); break;
                     case 2: ab = new ActionBlock<int>(i => Task.Run(thrower), options); break;
                 }
-
-                for (int i = 0; i < 4; i++)
-                {
-                    ab.Post(i);
-                }
+                ab.PostRange(0, 4);
 
                 try
                 {
@@ -425,10 +405,7 @@ namespace System.Threading.Tasks.Dataflow.Tests
             });
 
             const int MaxValue = 10;
-            for (int i = 0; i < MaxValue; i++)
-            {
-                ab.Post(i);
-            }
+            ab.PostRange(0, MaxValue);
             ab.Complete();
             await ab.Completion;
 
@@ -451,10 +428,7 @@ namespace System.Threading.Tasks.Dataflow.Tests
                     new ActionBlock<int>(_ => Task.Run(() => barrier.SignalAndWait()), options);
 
                 int iters = dop * 4;
-                for (int i = 0; i < iters; i++)
-                {
-                    ab.Post(i);
-                }
+                ab.PostRange(0, iters);
                 ab.Complete();
                 await ab.Completion;
             }

@@ -12,7 +12,7 @@ namespace System.Threading.Tasks.Dataflow.Tests
     public class ConcurrentTests
     {
         static readonly int s_dop = Environment.ProcessorCount * 2;
-        const int IterationCount = 1000000;
+        const int IterationCount = 10000;
 
         [Fact]
         [OuterLoop] // should be a stress test that runs for a while, but needs cleanup
@@ -121,10 +121,7 @@ namespace System.Threading.Tasks.Dataflow.Tests
         private static BufferBlock<int> ConstructBufferNewWithNMessages(int messagesCount)
         {
             var block = new BufferBlock<int>();
-            for (int i = 0; i < messagesCount; i++)
-            {
-                block.Post(i);
-            }
+            block.PostRange(0, messagesCount);
             SpinWait.SpinUntil(() => block.Count == messagesCount); // spin until messages available
             return block;
         }
@@ -132,10 +129,7 @@ namespace System.Threading.Tasks.Dataflow.Tests
         private static TransformBlock<int, string> ConstructTransformWithNMessages(int messagesCount)
         {
             var block = new TransformBlock<int, string>(i => i.ToString());
-            for (int i = 0; i < messagesCount; i++)
-            {
-                block.Post(i);
-            }
+            block.PostRange(0, messagesCount);
             SpinWait.SpinUntil(() => block.OutputCount == messagesCount);
             return block;
         }
@@ -143,10 +137,7 @@ namespace System.Threading.Tasks.Dataflow.Tests
         private static TransformManyBlock<int, int> ConstructTransformManyWithNMessages(int messagesCount)
         {
             var block = new TransformManyBlock<int, int>(i => new int[] { i });
-            for (int i = 0; i < messagesCount; i++)
-            {
-                block.Post(i);
-            }
+            block.PostRange(0, messagesCount);
             SpinWait.SpinUntil(() => block.OutputCount == messagesCount); // spin until messages available
             return block;
         }
@@ -154,10 +145,7 @@ namespace System.Threading.Tasks.Dataflow.Tests
         private static BatchBlock<int> ConstructBatchNewWithNMessages(int messagesCount)
         {
             var block = new BatchBlock<int>(1);
-            for (int i = 0; i < messagesCount; i++)
-            {
-                block.Post(i);
-            }
+            block.PostRange(0, messagesCount);
             SpinWait.SpinUntil(() => block.OutputCount == messagesCount); // spin until messages available
             return block;
         }
@@ -192,11 +180,8 @@ namespace System.Threading.Tasks.Dataflow.Tests
         private static JoinBlock<int, int> ConstructJoinNewWithNMessages(int messagesCount)
         {
             var block = new JoinBlock<int, int>();
-            for (int i = 0; i < messagesCount; i++)
-            {
-                block.Target1.Post(i);
-                block.Target2.Post(i);
-            }
+            block.Target1.PostRange(0, messagesCount);
+            block.Target2.PostRange(0, messagesCount);
             SpinWait.SpinUntil(() => block.OutputCount == messagesCount); // spin until messages available
             return block;
         }

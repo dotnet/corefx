@@ -141,7 +141,7 @@ namespace System.Threading.Tasks.Dataflow.Tests
             // Test that preset data flows correctly
             {
                 var bb = new BufferBlock<int>();
-                for (int i = 0; i < 2; i++) bb.Post(i);
+                bb.PostRange(0, 2);
                 bb.Complete();
 
                 int nextValueExpected = 0;
@@ -165,7 +165,7 @@ namespace System.Threading.Tasks.Dataflow.Tests
                 var bb = new BufferBlock<int>();
                 bb.AsObservable().Subscribe(ab.AsObserver());
 
-                for (int i = -2; i < 0; i++) bb.Post(i);
+                bb.PostRange(-2, 0);
                 bb.Complete();
 
                 await ab.Completion;
@@ -178,8 +178,7 @@ namespace System.Threading.Tasks.Dataflow.Tests
 
                 using (source.AsObservable().Subscribe(target.AsObserver()))
                 {
-                    source.Post(1);
-                    source.Post(2);
+                    source.PostItems(1, 2);
                     Assert.Equal(expected: 1, actual: await target.ReceiveAsync());
                     Assert.Equal(expected: 2, actual: await target.ReceiveAsync());
                 }
@@ -252,7 +251,7 @@ namespace System.Threading.Tasks.Dataflow.Tests
         public void TestAsObservableAndAsObserver_AsObservableDoesntConsume()
         {
             var b = new BufferBlock<int>();
-            for (int i = 0; i < 2; i++) b.Post(i);
+            b.PostRange(0, 2);
 
             Assert.Equal(expected: 2, actual: b.Count);
             Assert.NotNull(b.AsObservable());
@@ -492,10 +491,7 @@ namespace System.Threading.Tasks.Dataflow.Tests
 
                 using (source.LinkTo(target, new DataflowLinkOptions { PropagateCompletion = propagateCompletion }))
                 {
-                    for (int i = 0; i < 2; i++)
-                    {
-                        source.Post(i);
-                    }
+                    source.PostRange(0, 2);
                     source.Complete();
                     await source.Completion;
 
@@ -530,7 +526,7 @@ namespace System.Threading.Tasks.Dataflow.Tests
             using (source.LinkTo(target, i => i % 2 == 0))
             using (source.LinkTo(DataflowBlock.NullTarget<int>()))
             {
-                for (int i = 0; i < 6; i++) source.Post(i);
+                source.PostRange(0, 6);
                 source.Complete();
                 await source.Completion.ContinueWith(delegate { target.Complete(); }, TaskScheduler.Default);
                 await target.Completion;
@@ -565,10 +561,7 @@ namespace System.Threading.Tasks.Dataflow.Tests
                 }
                 source.LinkTo(otherTarget);
 
-                for (int i = 0; i < MaxMessages + ExtraMessages; i++)
-                {
-                    source.Post(i);
-                }
+                source.PostRange(0, MaxMessages + ExtraMessages);
                 source.Complete();
                 await source.Completion;
 
@@ -615,10 +608,7 @@ namespace System.Threading.Tasks.Dataflow.Tests
                 }
             }
 
-            for (int i = 0; i < targets.Length; i++) // one message for each source
-            {
-                source.Post(i);
-            }
+            source.PostRange(0, targets.Length); // one message for each source
             source.Complete();
             await source.Completion;
             await Task.WhenAll(from target in targets select target.Completion);
@@ -813,10 +803,7 @@ namespace System.Threading.Tasks.Dataflow.Tests
         {
             var buffer = new BufferBlock<int>();
 
-            buffer.Post(1);
-            buffer.Post(2);
-            buffer.Post(3);
-            buffer.Post(4);
+            buffer.PostItems(1, 2, 3, 4);
             Assert.Equal(expected: 1, actual: buffer.Receive());
             Assert.Equal(expected: 3, actual: buffer.Count);
             Assert.Equal(expected: 2, actual: buffer.Receive(new CancellationTokenSource().Token));
@@ -826,10 +813,7 @@ namespace System.Threading.Tasks.Dataflow.Tests
             Assert.Equal(expected: 4, actual: buffer.Receive(TimeSpan.FromDays(1), new CancellationTokenSource().Token));
             Assert.Equal(expected: 0, actual: buffer.Count);
 
-            buffer.Post(1);
-            buffer.Post(2);
-            buffer.Post(3);
-            buffer.Post(4);
+            buffer.PostItems(1, 2, 3, 4);
             Assert.Equal(expected: 1, actual: await buffer.ReceiveAsync());
             Assert.Equal(expected: 3, actual: buffer.Count);
             Assert.Equal(expected: 2, actual: await buffer.ReceiveAsync(new CancellationTokenSource().Token));
@@ -867,10 +851,7 @@ namespace System.Threading.Tasks.Dataflow.Tests
             Assert.False(t2.IsCompleted);
             Assert.False(t3.IsCompleted);
             Assert.False(t4.IsCompleted);
-            buffer.Post(3);
-            buffer.Post(4);
-            buffer.Post(5);
-            buffer.Post(6);
+            buffer.PostItems(3, 4, 5, 6);
             Assert.Equal(expected: 3, actual: await t1);
             Assert.Equal(expected: 4, actual: await t2);
             Assert.Equal(expected: 5, actual: await t3);
@@ -975,10 +956,7 @@ namespace System.Threading.Tasks.Dataflow.Tests
             Task<int>[] tasks = Enumerable.Range(0, 100).Select(_ => bb.ReceiveAsync()).ToArray();
             Assert.All(tasks, t => Assert.False(t.IsCompleted));
 
-            for (int i = 0; i < tasks.Length; i++)
-            {
-                bb.Post(i);
-            }
+            bb.PostRange(0, tasks.Length);
 
             for (int i = 0; i < tasks.Length; i++)
             {
@@ -1000,10 +978,7 @@ namespace System.Threading.Tasks.Dataflow.Tests
                     CancellationToken.None, TaskContinuationOptions.ExecuteSynchronously, TaskScheduler.Default).Unwrap();
             }
 
-            for (int i = 0; i < Length; i++)
-            {
-                bb.Post(i);
-            }
+            bb.PostRange(0, Length);
 
             await t;
         }
@@ -1064,8 +1039,7 @@ namespace System.Threading.Tasks.Dataflow.Tests
                 switch (chooseTestCase)
                 {
                     case 0: // Test data on the first source
-                        source1.Post(42);
-                        source1.Post(43);
+                        source1.PostItems(42, 43);
                         Assert.Equal(expected: 0, actual: await t);
                         Assert.Equal(expected: 42, actual: intValue);
                         Assert.Null(stringValue);
@@ -1073,8 +1047,7 @@ namespace System.Threading.Tasks.Dataflow.Tests
                         break;
 
                     case 1: // Test data on the second source
-                        source2.Post("44");
-                        source2.Post("45");
+                        source2.PostItems("44", "45");
                         Assert.Equal(expected: 1, actual: await t);
                         Assert.Equal(expected: 0, actual: intValue);
                         Assert.Equal(expected: "44", actual: stringValue);
@@ -1277,8 +1250,7 @@ namespace System.Threading.Tasks.Dataflow.Tests
                 switch (chooseTestCase)
                 {
                     case 0: // Test data on the first source
-                        source1.Post(42);
-                        source1.Post(43);
+                        source1.PostItems(42, 43);
                         Assert.Equal(expected: 0, actual: await t);
                         Assert.Equal(expected: 42, actual: intValue);
                         Assert.Null(stringValue);
@@ -1287,8 +1259,7 @@ namespace System.Threading.Tasks.Dataflow.Tests
                         break;
 
                     case 1: // Test data on the second source
-                        source2.Post("42");
-                        source2.Post("43");
+                        source2.PostItems("42", "43");
                         Assert.Equal(expected: 1, actual: await t);
                         Assert.Equal(expected: "42", actual: stringValue);
                         Assert.Equal(expected: 0, actual: intValue);
@@ -1297,8 +1268,7 @@ namespace System.Threading.Tasks.Dataflow.Tests
                         break;
 
                     case 2: // Test data on the third source
-                        source3.Post(42.0);
-                        source3.Post(43.0);
+                        source3.PostItems(42.0, 43.0);
                         Assert.Equal(expected: 2, actual: await t);
                         Assert.Equal(expected: 42.0, actual: doubleValue);
                         Assert.Equal(expected: 0, actual: intValue);
@@ -1518,10 +1488,9 @@ namespace System.Threading.Tasks.Dataflow.Tests
         [Fact]
         public async Task TestEncapsulate_EncapsulateBoundedTarget()
         {
-            int messagesSent = 0, messagesReceived = 0;
-
             // source->||BoundedTransform->buffer||->sink
 
+            int messagesReceived = 0;
             var transform = new TransformBlock<int, int>(x => {
                 messagesReceived++;
                 return x;
@@ -1539,7 +1508,8 @@ namespace System.Threading.Tasks.Dataflow.Tests
             ignored = source.Completion.ContinueWith(completion => encapsulated.Complete(), TaskScheduler.Default);
 
             // Feed
-            for (messagesSent = 0; messagesSent < 10; messagesSent++) source.Post(messagesSent);
+            const int messagesSent = 10;
+            source.PostRange(0, messagesSent);
             source.Complete();
 
             await encapsulated.Completion;
@@ -1581,9 +1551,7 @@ namespace System.Threading.Tasks.Dataflow.Tests
             IPropagatorBlock<int, int> encapsulated1 = DataflowBlock.Encapsulate(action1, buffer);
             IPropagatorBlock<int, int> encapsulated2 = DataflowBlock.Encapsulate(action2, buffer);
 
-            action1.Post(1);
-            action1.Post(2);
-            action1.Post(3);
+            action1.PostItems(1, 2, 3);
             action1.Complete();
             await action1.Completion;
 
@@ -1594,9 +1562,7 @@ namespace System.Threading.Tasks.Dataflow.Tests
             Assert.Equal(expected: 2, actual: items[1]);
             Assert.Equal(expected: 3, actual: items[2]);
 
-            action2.Post(4);
-            action2.Post(5);
-            action2.Post(6);
+            action2.PostItems(4, 5, 6);
             action2.Complete();
             await action2.Completion;
 

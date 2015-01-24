@@ -90,10 +90,7 @@ namespace System.Threading.Tasks.Dataflow.Tests
             }
 
             const int Messages = 3;
-            for (int i = 0; i < Messages; i++)
-            {
-                bb.Post(i);
-            }
+            bb.PostRange(0, Messages);
             for (int i = 0; i < Messages; i++)
             {
                 foreach (var target in targets)

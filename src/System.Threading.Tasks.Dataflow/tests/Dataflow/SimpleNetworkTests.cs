@@ -25,7 +25,7 @@ namespace System.Threading.Tasks.Dataflow.Tests
             });
             t.LinkTo(c, new DataflowLinkOptions { PropagateCompletion = true });
 
-            for (int i = 0; i < Iterations; i++) t.Post(i);
+            t.PostRange(0, Iterations);
             t.Complete();
 
             await c.Completion;
@@ -41,7 +41,7 @@ namespace System.Threading.Tasks.Dataflow.Tests
             var c = new ActionBlock<int>(i => completedCount++);
             t.LinkTo(c, new DataflowLinkOptions { PropagateCompletion = true }, i => true);
 
-            for (int i = 0; i < Iterations; i++) t.Post(i);
+            t.PostRange(0, Iterations);
             t.Complete();
 
             await c.Completion;
@@ -59,7 +59,7 @@ namespace System.Threading.Tasks.Dataflow.Tests
             t.LinkTo(c, new DataflowLinkOptions { PropagateCompletion = true }, i => i % 2 == 0);
             t.LinkTo(DataflowBlock.NullTarget<int>());
 
-            for (int i = 0; i < Iterations; i++) t.Post(i);
+            t.PostRange(0, Iterations);
             t.Complete();
 
             await c.Completion;
@@ -82,7 +82,7 @@ namespace System.Threading.Tasks.Dataflow.Tests
             var last = new ActionBlock<int>(i => completedCount++);
             t.LinkTo(last, new DataflowLinkOptions { PropagateCompletion = true });
 
-            for (int i = 0; i < Iterations; i++) first.Post(i);
+            first.PostRange(0, Iterations);
             first.Complete();
 
             await last.Completion;
@@ -97,7 +97,7 @@ namespace System.Threading.Tasks.Dataflow.Tests
             var c = new ActionBlock<int[]>(i => completedCount++);
             b.LinkTo(c, new DataflowLinkOptions { PropagateCompletion = true });
 
-            for (int i = 0; i < Iterations; i++) b.Post(i);
+            b.PostRange(0, Iterations);
             b.Complete();
 
             await c.Completion;
@@ -181,7 +181,7 @@ namespace System.Threading.Tasks.Dataflow.Tests
             }).ToArray();
 
             var posts = Iterations / tasks.Length;
-            for (int i = 0; i < posts; i++) b.Post(i);
+            b.PostRange(0, posts);
             b.Complete();
 
             await Task.WhenAll(tasks);
@@ -198,7 +198,7 @@ namespace System.Threading.Tasks.Dataflow.Tests
             var c = new ActionBlock<int>(i => completedCount++);
             tm.LinkTo(c, new DataflowLinkOptions { PropagateCompletion = true });
 
-            for (int i = 0; i < Iterations; i++) tm.Post(i);
+            tm.PostRange(0, Iterations);
             tm.Complete();
 
             await c.Completion;

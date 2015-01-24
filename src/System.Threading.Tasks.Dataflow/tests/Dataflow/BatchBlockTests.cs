@@ -108,12 +108,7 @@ namespace System.Threading.Tasks.Dataflow.Tests
                     targets[i] = new ActionBlock<int[]>(item => values[slot] = item);
                     bb.LinkTo(targets[i], new DataflowLinkOptions { MaxMessages = 1, Append = append });
                 }
-
-                for (int i = 0; i < Messages; i++)
-                {
-                    bb.Post(i);
-                }
-
+                bb.PostRange(0, Messages);
                 bb.Complete();
                 await bb.Completion;
 
@@ -134,10 +129,7 @@ namespace System.Threading.Tasks.Dataflow.Tests
             for (int test = 0; test < 3; test++)
             {
                 var bb = new BatchBlock<int>(1);
-                for (int i = 0; i < 5; i++)
-                {
-                    bb.Post(i);
-                }
+                bb.PostRange(0, 5);
 
                 int[] item;
                 switch (test)
@@ -218,13 +210,11 @@ namespace System.Threading.Tasks.Dataflow.Tests
         public async Task TestReserveReleaseConsume()
         {
             var bb = new BatchBlock<int>(2);
-            bb.Post(1);
-            bb.Post(2);
+            bb.PostItems(1, 2);
             await DataflowTestHelpers.TestReserveAndRelease(bb);
 
             bb = new BatchBlock<int>(2);
-            bb.Post(1);
-            bb.Post(2);
+            bb.PostItems(1, 2);
             await DataflowTestHelpers.TestReserveAndConsume(bb);
         }
 
@@ -458,10 +448,7 @@ namespace System.Threading.Tasks.Dataflow.Tests
             {
                 var cts = new CancellationTokenSource();
                 var bb = new BatchBlock<int>(1, new GroupingDataflowBlockOptions { CancellationToken = cts.Token });
-                for (int i = 0; i < 4; i++)
-                {
-                    bb.Post(i);
-                }
+                bb.PostRange(0, 4);
                 Assert.Equal(expected: 0, actual: (await bb.ReceiveAsync())[0]);
                 Assert.Equal(expected: 1, actual: (await bb.ReceiveAsync())[0]);
 
@@ -485,10 +472,7 @@ namespace System.Threading.Tasks.Dataflow.Tests
         public async Task TestCompletionWithBufferedItems()
         {
             var b = new BatchBlock<int>(5);
-            for (int i = 0; i < 3; i++)
-            {
-                b.Post(i);
-            }
+            b.PostRange(0, 3);
             b.Complete();
 
             await b.OutputAvailableAsync();
@@ -628,10 +612,7 @@ namespace System.Threading.Tasks.Dataflow.Tests
             foreach (var queuedBeforeTrigger in new[] { 1, batchSize - 1 })
             {
                 var b = new BatchBlock<int>(batchSize);
-                for (int p = 1; p <= queuedBeforeTrigger; p++)
-                {
-                    b.Post(p);
-                }
+                b.PostRange(1, queuedBeforeTrigger + 1);
 
                 Assert.Equal(expected: 0, actual: b.OutputCount);
                 b.TriggerBatch();

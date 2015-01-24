@@ -120,7 +120,7 @@ namespace System.Threading.Tasks.Dataflow.Tests
                     tb.LinkTo(targets[i], new DataflowLinkOptions { MaxMessages = 1, Append = append });
                 }
 
-                for (int i = 0; i < Messages; i++) tb.Post(i);
+                tb.PostRange(0, Messages);
                 tb.Complete();
                 await tb.Completion;
 
@@ -142,10 +142,7 @@ namespace System.Threading.Tasks.Dataflow.Tests
                     new TransformManyBlock<int, int>(i => Enumerable.Repeat(i * 2, 1)),
                     new TransformManyBlock<int, int>(i => Task.Run(() => Enumerable.Repeat(i * 2, 1))) })
                 {
-                    for (int i = 0; i < 5; i++)
-                    {
-                        tb.Post(i);
-                    }
+                    tb.PostRange(0, 5);
 
                     for (int i = 0; i < 5; i++)
                     {
@@ -332,11 +329,7 @@ namespace System.Threading.Tasks.Dataflow.Tests
 
                 for (int iter = 0; iter < 2; iter++)
                 {
-                    for (int i = 1; i <= 2; i++)
-                    {
-                        tb.Post(i);
-                    }
-
+                    tb.PostItems(1, 2);
                     for (int i = 1; i >= 0; i--)
                     {
                         barrier1.SignalAndWait();
@@ -355,10 +348,7 @@ namespace System.Threading.Tasks.Dataflow.Tests
             Assert.Equal(expected: 0, actual: tb.InputCount);
             Assert.Equal(expected: 0, actual: tb.OutputCount);
 
-            for (int i = 1; i <= 10; i++)
-            {
-                tb.Post(i);
-            }
+            tb.PostRange(1, 11);
             await Task.Run(() => SpinWait.SpinUntil(() => tb.OutputCount == 10));
             for (int i = 10; i > 0; i--)
             {
@@ -410,10 +400,7 @@ namespace System.Threading.Tasks.Dataflow.Tests
                 const int Iters = 10;
                 if (post)
                 {
-                    for (int i = 0; i < Iters; i++)
-                    {
-                        network.Post(i);
-                    }
+                    network.PostRange(0, Iters);
                 }
                 else
                 {
@@ -481,10 +468,7 @@ namespace System.Threading.Tasks.Dataflow.Tests
             {
                 var cts = new CancellationTokenSource();
                 var tb = new TransformManyBlock<int, int>(DataflowTestHelpers.ToEnumerable, new ExecutionDataflowBlockOptions { CancellationToken = cts.Token });
-                for (int i = 0; i < 4; i++)
-                {
-                    tb.Post(i);
-                }
+                tb.PostRange(0, 4);
                 Assert.Equal(expected: 0, actual: await tb.ReceiveAsync());
                 Assert.Equal(expected: 1, actual: await tb.ReceiveAsync());
 
@@ -519,10 +503,7 @@ namespace System.Threading.Tasks.Dataflow.Tests
                     new TransformManyBlock<int, int>(body) :
                     new TransformManyBlock<int, int>(async i => await Task.Run(() => body(i)));
 
-                for (int i = 0; i < 2; i++)
-                {
-                    t.Post(i);
-                }
+                t.PostRange(0, 2);
                 t.Complete();
                 for (int i = 0; i < 2; i++)
                 {
@@ -547,10 +528,7 @@ namespace System.Threading.Tasks.Dataflow.Tests
                 }, new ExecutionDataflowBlockOptions { MaxDegreeOfParallelism = dop });
  
                 const int Iters = 100;
-                for (int i = 0; i < Iters; i++)
-                {
-                    tb.Post(i);
-                }
+                tb.PostRange(0, Iters);
                 tb.Complete();
 
                 for (int i = 0; i < Iters; i++)
@@ -585,10 +563,7 @@ namespace System.Threading.Tasks.Dataflow.Tests
                 }, new ExecutionDataflowBlockOptions { MaxDegreeOfParallelism = dop, BoundedCapacity = boundedCapacity });
 
                 var source = new BufferBlock<int>();
-                for (int i = 0; i < Modes * Iters; i++)
-                {
-                    source.Post(i);
-                }
+                source.PostRange(0, Modes * Iters);
                 source.Complete();
                 source.LinkTo(tb, new DataflowLinkOptions { PropagateCompletion = true });
 

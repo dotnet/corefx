@@ -470,10 +470,7 @@ namespace System.Threading.Tasks.Dataflow.Tests
             const int MaxGroups = 2;
 
             var b2 = new BatchedJoinBlock<int, int>(1, new GroupingDataflowBlockOptions { MaxNumberOfGroups = MaxGroups });
-            for (int i = 0; i < MaxGroups; i++)
-            {
-                Assert.True(b2.Target1.Post(i));
-            }
+            b2.Target1.PostRange(0, MaxGroups);
             Assert.False(b2.Target1.Post(42));
             Assert.False(b2.Target2.Post(42));
             IList<Tuple<IList<int>, IList<int>>> items2;
@@ -482,10 +479,7 @@ namespace System.Threading.Tasks.Dataflow.Tests
             await b2.Completion;
 
             var b3 = new BatchedJoinBlock<int, int, int>(1, new GroupingDataflowBlockOptions { MaxNumberOfGroups = MaxGroups });
-            for (int i = 0; i < MaxGroups; i++)
-            {
-                Assert.True(b3.Target1.Post(i));
-            }
+            b3.Target1.PostRange(0, MaxGroups);
             Assert.False(b3.Target1.Post(42));
             Assert.False(b3.Target2.Post(42));
             Assert.False(b3.Target3.Post(42));

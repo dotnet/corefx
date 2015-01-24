@@ -448,10 +448,7 @@ namespace System.Threading.Tasks.Dataflow.Tests
         private static void CreateFillLink<T>(int messages, ITargetBlock<T> target)
         {
             var b = new BufferBlock<T>();
-            for (int i = 0; i < messages; i++)
-            {
-                b.Post(default(T));
-            }
+            b.PostRange(0, messages, i => default(T));
             b.Complete();
             b.LinkTo(target, new DataflowLinkOptions { PropagateCompletion = true });
         }

@@ -102,7 +102,7 @@ namespace System.Threading.Tasks.Dataflow.Tests
                     bb.LinkTo(targets[i], new DataflowLinkOptions { MaxMessages = 1, Append = append });
                 }
 
-                for (int i = 0; i < Messages; i++) bb.Post(i);
+                bb.PostRange(0, Messages);
                 bb.Complete();
                 await bb.Completion;
 
@@ -121,10 +121,7 @@ namespace System.Threading.Tasks.Dataflow.Tests
             for (int test = 0; test < 3; test++)
             {
                 var bb = new BufferBlock<int>();
-                for (int i = 0; i < 5; i++)
-                {
-                    bb.Post(i);
-                }
+                bb.PostRange(0, 5);
 
                 int item;
                 switch (test)
@@ -169,10 +166,7 @@ namespace System.Threading.Tasks.Dataflow.Tests
             for (int boundedCapacity = 1; boundedCapacity <= 3; boundedCapacity++)
             {
                 var b = new BufferBlock<int>(new DataflowBlockOptions { BoundedCapacity = boundedCapacity });
-                for (int i = 0; i < boundedCapacity; i++)
-                {
-                    b.Post(i);
-                }
+                b.PostRange(0, boundedCapacity);
                 using (b.LinkTo(b))
                 {
                     await Task.Delay(200);
@@ -363,10 +357,7 @@ namespace System.Threading.Tasks.Dataflow.Tests
 
                 if (post)
                 {
-                    for (int i = 0; i < Iters; i++)
-                    {
-                        network.Post(i);
-                    }
+                    network.PostRange(0, Iters);
                 }
                 else
                 {
