@@ -2,11 +2,11 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
 
 using SuppressMessageAttribute = System.Diagnostics.CodeAnalysis.SuppressMessageAttribute;
 using Encoding = System.Text.Encoding;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace System.Xml.Linq
 {

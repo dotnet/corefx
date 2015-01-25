@@ -2,13 +2,13 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 
 using Debug = System.Diagnostics.Debug;
 using IEnumerable = System.Collections.IEnumerable;
 using StringBuilder = System.Text.StringBuilder;
 using Interlocked = System.Threading.Interlocked;
-using System.Threading.Tasks;
-using System.Threading;
 
 namespace System.Xml.Linq
 {
