@@ -1,6 +1,8 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.Collections.Generic;
+
 namespace System.Threading.Tasks.Dataflow.Tests
 {
     internal sealed class DelegateDisposable : IDisposable
@@ -14,7 +16,7 @@ namespace System.Threading.Tasks.Dataflow.Tests
         }
     }
 
-    internal sealed class DelegatePropagator<TInput, TOutput> : IPropagatorBlock<TInput, TOutput>
+    internal class DelegatePropagator<TInput, TOutput> : IPropagatorBlock<TInput, TOutput>
     {
         public delegate TOutput ConsumeMessageFunc(DataflowMessageHeader messageHeader, ITargetBlock<TOutput> target, out bool messageConsumed);
 
@@ -86,6 +88,35 @@ namespace System.Threading.Tasks.Dataflow.Tests
         }
     }
 
+    internal sealed class DelegateReceivablePropagator<TInput, TOutput> : DelegatePropagator<TInput, TOutput>, IReceivableSourceBlock<TOutput>
+    {
+        public delegate bool TryReceiveFunc(Predicate<TOutput> filter, out TOutput item);
+        public delegate bool TryReceiveAllFunc(out IList<TOutput> items);
+
+        public TryReceiveFunc TryReceiveDelegate = null;
+        public TryReceiveAllFunc TryReceiveAllDelegate = null;
+
+        public bool TryReceive(Predicate<TOutput> filter, out TOutput item)
+        {
+            if (TryReceiveDelegate != null)
+            {
+                return TryReceiveDelegate(filter, out item);
+            }
+            item = default(TOutput);
+            return false;
+        }
+
+        public bool TryReceiveAll(out IList<TOutput> items)
+        {
+            if (TryReceiveAllDelegate != null)
+            {
+                return TryReceiveAllDelegate(out items);
+            }
+            items = default(IList<TOutput>);
+            return false;
+        }
+    }
+
     internal sealed class DelegateObserver<T> : IObserver<T>
     {
         public Action<T> OnNextDelegate = null;
@@ -121,5 +152,26 @@ namespace System.Threading.Tasks.Dataflow.Tests
                 SubscribeDelegate(observer) : 
                 null;
         }
+    }
+
+    internal sealed class DelegateTaskScheduler : TaskScheduler
+    {
+        public Action<Task> QueueTaskDelegate = null; 
+        public Func<Task, bool, bool> TryExecuteTaskInlineDelegate = null;
+
+        protected override void QueueTask(Task task)
+        {
+            if (QueueTaskDelegate != null)
+                QueueTaskDelegate(task);
+        }
+
+        protected override bool TryExecuteTaskInline(Task task, bool taskWasPreviouslyQueued)
+        {
+            return TryExecuteTaskInlineDelegate != null ?
+                TryExecuteTaskInlineDelegate(task, taskWasPreviouslyQueued) :
+                false;
+        }
+
+        protected override Collections.Generic.IEnumerable<Task> GetScheduledTasks() { return null; }
     }
 }

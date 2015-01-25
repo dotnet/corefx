@@ -122,11 +122,12 @@ namespace System.Threading.Tasks.Dataflow.Tests
         public void TestLinkingAfterCompletion()
         {
             var b = new BroadcastBlock<int>(i => i * 2);
+            b.Post(1);
             b.Complete();
             using (b.LinkTo(new ActionBlock<int>(i => { })))
             using (b.LinkTo(new ActionBlock<int>(i => { })))
             {
-                Assert.False(b.Post(1));
+                Assert.False(b.Post(2));
             }
         }
 
@@ -274,6 +275,24 @@ namespace System.Threading.Tasks.Dataflow.Tests
 
                 await Task.WhenAll(sends);
             }
+        }
+
+        [Fact]
+        public async Task TestFaultyScheduler()
+        {
+            var bb = new BroadcastBlock<int>(null, new DataflowBlockOptions {
+                BoundedCapacity = 1,
+                TaskScheduler = new DelegateTaskScheduler
+                {
+                    QueueTaskDelegate = delegate { throw new FormatException(); }
+                }
+            });
+            Task<bool> t1 = bb.SendAsync(1);
+            Task<bool> t2 = bb.SendAsync(2);
+            bb.LinkTo(DataflowBlock.NullTarget<int>());
+            await Assert.ThrowsAsync<TaskSchedulerException>(() => bb.Completion);
+            Assert.True(await t1);
+            Assert.False(await t2);
         }
 
     }

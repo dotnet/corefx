@@ -168,6 +168,62 @@ namespace System.Threading.Tasks.Dataflow.Tests
         }
 
         [Fact]
+        public async Task TestBoundedReceives()
+        {
+            for (int test = 0; test < 4; test++)
+            {
+                var bb = new BatchBlock<int>(1, new GroupingDataflowBlockOptions { BoundedCapacity = 1 });
+                Assert.True(bb.Post(0));
+
+                int[] item;
+                const int sends = 5;
+                for (int i = 1; i <= sends; i++)
+                {
+                    Task<bool> send = bb.SendAsync(i);
+                    Assert.True(await bb.OutputAvailableAsync()); // wait for previously posted/sent item
+
+                    switch (test)
+                    {
+                        case 0:
+                            IList<int[]> items;
+                            Assert.True(bb.TryReceiveAll(out items));
+                            Assert.Equal(expected: 1, actual: items.Count);
+                            Assert.Equal(expected: 1, actual: items[0].Length);
+                            Assert.Equal(expected: i - 1, actual: items[0][0]);
+                            break;
+
+                        case 1:
+                            Assert.True(bb.TryReceive(f => true, out item));
+                            Assert.Equal(expected: 1, actual: item.Length);
+                            Assert.Equal(expected: i - 1, actual: item[0]);
+                            break;
+
+                        case 2:
+                            Assert.False(bb.TryReceive(f => f.Length == 1 && f[0] == i, out item));
+                            Assert.True(bb.TryReceive(f => f.Length == 1 && f[0] == i - 1, out item));
+                            Assert.Equal(expected: 1, actual: item.Length);
+                            Assert.Equal(expected: i - 1, actual: item[0]);
+                            break;
+
+                        case 3:
+                            item = await bb.ReceiveAsync();
+                            Assert.Equal(expected: 1, actual: item.Length);
+                            Assert.Equal(expected: i - 1, actual: item[0]);
+                            break;
+                    }
+                }
+
+                // Receive remaining item
+                item = await bb.ReceiveAsync();
+                Assert.Equal(expected: 1, actual: item.Length);
+                Assert.Equal(expected: sends, actual: item[0]);
+
+                bb.Complete();
+                await bb.Completion;
+            }
+        }
+
+        [Fact]
         public async Task TestProducerConsumer()
         {
             foreach (TaskScheduler scheduler in new[] { TaskScheduler.Default, new ConcurrentExclusiveSchedulerPair().ExclusiveScheduler })
@@ -317,6 +373,7 @@ namespace System.Threading.Tasks.Dataflow.Tests
         [Fact]
         public async Task TestNonGreedyFailedConsume()
         {
+            foreach (bool exceptionalConsume in DataflowTestHelpers.BooleanValues)
             foreach (bool linkGoodFirst in DataflowTestHelpers.BooleanValues)
             {
                 const int BatchSize = 2;
@@ -334,7 +391,15 @@ namespace System.Threading.Tasks.Dataflow.Tests
                 {
                     ReserveMessageDelegate = delegate { return true; },
                     ConsumeMessageDelegate = delegate(DataflowMessageHeader header, ITargetBlock<int> target, out bool messageConsumed) {
-                        throw new FormatException();
+                        if (exceptionalConsume)
+                        {
+                            throw new FormatException(); // throw when attempting to consume reserved message
+                        }
+                        else
+                        {
+                            messageConsumed = false; // fail when attempting to consume reserved message
+                            return 0;
+                        }
                     }
                 };
                 Assert.Equal(
@@ -346,7 +411,9 @@ namespace System.Threading.Tasks.Dataflow.Tests
                     goodSource.LinkTo(bb);
                 }
 
-                await Assert.ThrowsAsync<FormatException>(() => bb.Completion);
+                await (exceptionalConsume ?
+                    (Task)Assert.ThrowsAsync<FormatException>(() => bb.Completion) :
+                    (Task)Assert.ThrowsAsync<InvalidOperationException>(() => bb.Completion));
             }
         }
 
@@ -705,6 +772,24 @@ namespace System.Threading.Tasks.Dataflow.Tests
                 b.TriggerBatch();
                 Assert.Equal(expected: 0, actual: b.OutputCount);
             }
+        }
+
+        [Fact]
+        public async Task TestFaultyScheduler()
+        {
+            var bb = new BatchBlock<int>(2, new GroupingDataflowBlockOptions
+            {
+                Greedy = false,
+                TaskScheduler = new DelegateTaskScheduler
+                {
+                    QueueTaskDelegate = delegate { throw new FormatException(); }
+                }
+            });
+            Task<bool> t1 = bb.SendAsync(1);
+            Task<bool> t2 = bb.SendAsync(2);
+            await Assert.ThrowsAsync<TaskSchedulerException>(() => bb.Completion);
+            Assert.False(await t1);
+            Assert.False(await t2);
         }
     }
 }

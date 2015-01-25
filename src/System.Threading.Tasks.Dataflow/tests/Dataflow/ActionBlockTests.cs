@@ -466,13 +466,40 @@ namespace System.Threading.Tasks.Dataflow.Tests
         {
             const string DataKey = "DataflowMessageValue"; // must match key used in dataflow source
 
-            var ab = new ActionBlock<int>((Action<int>)(i => { throw new FormatException(); }));
-            ab.Post(42);
-
-            await Assert.ThrowsAsync<FormatException>(() => ab.Completion);
-            AggregateException e = ab.Completion.Exception;
+            // Validate that a message which causes the ActionBlock to fault
+            // ends up being stored (ToString) in the resulting exception's Data
+            var ab1 = new ActionBlock<int>((Action<int>)(i => { throw new FormatException(); }));
+            ab1.Post(42);
+            await Assert.ThrowsAsync<FormatException>(() => ab1.Completion);
+            AggregateException e = ab1.Completion.Exception;
             Assert.Equal(expected: 1, actual: e.InnerExceptions.Count);
             Assert.Equal(expected: "42", actual: (string)e.InnerException.Data[DataKey]);
+        
+            // Test case where message's ToString throws
+            var ab2 = new ActionBlock<ObjectWithFaultyToString>((Action<ObjectWithFaultyToString>)(i => { throw new FormatException(); }));
+            ab2.Post(new ObjectWithFaultyToString());
+            Exception ex = await Assert.ThrowsAsync<FormatException>(() => ab2.Completion);
+            Assert.False(ex.Data.Contains(DataKey));
+        }
+
+        private class ObjectWithFaultyToString
+        {
+            public override string ToString() { throw new InvalidTimeZoneException(); }
+        }
+
+        [Fact]
+        public async Task TestFaultyScheduler()
+        {
+            var ab = new ActionBlock<int>(i => { },
+                new ExecutionDataflowBlockOptions
+                {
+                    TaskScheduler = new DelegateTaskScheduler
+                    {
+                        QueueTaskDelegate = delegate { throw new FormatException(); }
+                    }
+                });
+            ab.Post(42);
+            await Assert.ThrowsAsync<TaskSchedulerException>(() => ab.Completion);
         }
 
     }

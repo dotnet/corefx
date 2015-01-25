@@ -696,6 +696,10 @@ namespace System.Threading.Tasks.Dataflow.Tests
             cts.Cancel();
             await Assert.ThrowsAnyAsync<OperationCanceledException>(() => t);
 
+            Assert.Equal(expected: 2, actual: await bb.ReceiveAsync());
+            bb.Complete();
+            await bb.Completion;
+
             foreach (bool withCancellation in DataflowTestHelpers.BooleanValues)
             {
                 var target = new DelegatePropagator<int, int>();
@@ -785,6 +789,59 @@ namespace System.Threading.Tasks.Dataflow.Tests
         }
 
         [Fact]
+        public void TestSendAsync_BehavesAsGoodSource()
+        {
+            ISourceBlock<int> sendSource = null;
+            ITargetBlock<int> capturingTarget = new DelegatePropagator<int, int>
+            {
+                OfferMessageDelegate = delegate(DataflowMessageHeader header, int value, ISourceBlock<int> source, bool consumeToAccept) {
+                    if (source == null)
+                    {
+                        return DataflowMessageStatus.Declined;
+                    }
+                    sendSource = source;
+                    return DataflowMessageStatus.Postponed;
+                }
+            };
+
+            Task<bool> sendTask = capturingTarget.SendAsync(42);
+            Assert.False(sendTask.IsCompleted);
+            Assert.NotNull(sendSource);
+
+            DataflowTestHelpers.TestConsumeReserveReleaseArgumentsExceptions(sendSource);
+            Assert.Throws<NotSupportedException>(() => sendSource.LinkTo(DataflowBlock.NullTarget<int>()));
+            Assert.Throws<NotSupportedException>(() => sendSource.Fault(new Exception()));
+            Assert.Throws<NotSupportedException>(() => sendSource.Complete());
+        }
+
+        [Fact]
+        public async Task TestSendAsync_ConsumeCanceled()
+        {
+            var cts = new CancellationTokenSource();
+            DelegatePropagator<int, int> target = null;
+            target = new DelegatePropagator<int, int>
+            {
+                OfferMessageDelegate = delegate(DataflowMessageHeader header, int value, ISourceBlock<int> source, bool consumeToAccept) {
+                    if (source == null)
+                    {
+                        return DataflowMessageStatus.Declined;
+                    }
+
+                    Assert.True(consumeToAccept);
+                    cts.Cancel();
+
+                    bool consumed;
+                    int consumedMessage = source.ConsumeMessage(header, target, out consumed);
+                    Assert.False(consumed);
+                    Assert.Equal(expected: 0, actual: consumedMessage);
+                    return DataflowMessageStatus.Postponed; // should really be NotAvailable, but doing so causes an (expected) assert in the product code
+                }
+            };
+            Task<bool> send = target.SendAsync(42, cts.Token);
+            await Assert.ThrowsAnyAsync<OperationCanceledException>(() => send);
+        }
+
+        [Fact]
         public void TestReceive_ArgumentValidation()
         {
             var buffer = new BufferBlock<int>();
@@ -871,6 +928,15 @@ namespace System.Threading.Tasks.Dataflow.Tests
             Assert.Throws<TimeoutException>(() => bb.Receive(TimeSpan.FromMilliseconds(1), cts.Token));
             await Assert.ThrowsAsync<TimeoutException>(() => bb.ReceiveAsync(TimeSpan.FromMilliseconds(1), cts.Token));
         }
+
+        [Fact]
+        public async Task TestReceive_TimeoutZero()
+        {
+            var bb = new BufferBlock<int>();
+            Assert.Throws<TimeoutException>(() => bb.Receive(TimeSpan.FromMilliseconds(0)));
+            await Assert.ThrowsAsync<TimeoutException>(() => bb.ReceiveAsync(TimeSpan.FromMilliseconds(0)));
+        }
+
 
         [Fact]
         public async Task TestReceive_Cancellation()
@@ -981,6 +1047,57 @@ namespace System.Threading.Tasks.Dataflow.Tests
             bb.PostRange(0, Length);
 
             await t;
+        }
+
+        [Fact]
+        public void TestReceive_WellBehavingTarget()
+        {
+            ITargetBlock<int> receiveTarget = null;
+            var source = new DelegateReceivablePropagator<int, int>
+            {
+                LinkToDelegate = (target, options) => {
+                    receiveTarget = target;
+                    return new DelegateDisposable();
+                }
+            };
+            Task<int> receiveTask = source.ReceiveAsync();
+            Assert.NotNull(receiveTarget);
+            DataflowTestHelpers.TestOfferMessage_ArgumentValidation(receiveTarget);
+            Assert.Throws<NotSupportedException>(() => { var ignored = receiveTarget.Completion; });
+            receiveTarget.Fault(new Exception()); // shouldn't throw
+        }
+
+        [Fact]
+        public async Task TestReceive_FaultySourceConsume()
+        {
+            ITargetBlock<int> receiveTarget = null;
+            var source = new DelegateReceivablePropagator<int, int>
+            {
+                LinkToDelegate = (target, options) => {
+                    receiveTarget = target;
+                    return new DelegateDisposable();
+                },
+                ConsumeMessageDelegate = delegate(DataflowMessageHeader messageHeader, ITargetBlock<int> target, out bool messageConsumed) {
+                    throw new FormatException();
+                }
+            };
+            Task<int> receiveTask = source.ReceiveAsync();
+            Assert.NotNull(receiveTarget);
+            receiveTarget.OfferMessage(new DataflowMessageHeader(1), 1, source, consumeToAccept: true);
+            await Assert.ThrowsAsync<FormatException>(() => receiveTask);
+        }
+
+        [Fact]
+        public async Task TestReceive_FaultySourceTryReceive()
+        {
+            var source = new DelegateReceivablePropagator<int, int>
+            {
+                TryReceiveDelegate = delegate(Predicate<int> filter, out int item) {
+                    throw new InvalidProgramException();
+                }
+            };
+            Task<int> receiveTask = source.ReceiveAsync();
+            await Assert.ThrowsAsync<InvalidProgramException>(() => receiveTask);
         }
 
         [Fact]
@@ -1449,6 +1566,24 @@ namespace System.Threading.Tasks.Dataflow.Tests
         }
 
         [Fact]
+        public void TestChoose_WellBehavingTarget()
+        {
+            ITargetBlock<int> chooseTarget = null;
+            var source = new DelegateReceivablePropagator<int, int>
+            {
+                LinkToDelegate = (target, options) => {
+                    chooseTarget = target;
+                    return new DelegateDisposable();
+                }
+            };
+            Task<int> chooseTask = DataflowBlock.Choose(source, i => { }, source, i => { });
+            Assert.NotNull(chooseTarget);
+            DataflowTestHelpers.TestOfferMessage_ArgumentValidation(chooseTarget);
+            Assert.Throws<NotSupportedException>(() => { var ignored = chooseTarget.Completion; });
+            chooseTarget.Fault(new Exception()); // shouldn't throw
+        }
+
+        [Fact]
         public void TestEncapsulate_ArgumentValidation()
         {
             Assert.Throws<ArgumentNullException>(
@@ -1456,7 +1591,7 @@ namespace System.Threading.Tasks.Dataflow.Tests
             Assert.Throws<ArgumentNullException>(
                 () => DataflowBlock.Encapsulate<int, int>(new BufferBlock<int>(), null));
             Assert.Throws<ArgumentNullException>(
-                () => DataflowBlock.Encapsulate<int, int>(new BufferBlock<int>(), null).Fault(null));
+                () => DataflowBlock.Encapsulate<int, int>(new BufferBlock<int>(), new BufferBlock<int>()).Fault(null));
         }
 
         [Fact]
@@ -1572,6 +1707,22 @@ namespace System.Threading.Tasks.Dataflow.Tests
             Assert.Equal(expected: 4, actual: item);
             Assert.Equal(expected: 5, actual: buffer.Receive());
             Assert.Equal(expected: 6, actual: await buffer.ReceiveAsync());
+        }
+
+        [Fact]
+        public async Task TestEncapsulate_CompleteAndFaultPassthrough()
+        {
+            var source = new BufferBlock<int>();
+            
+            var target = new ActionBlock<int>(i => { });
+            var encapsulated = DataflowBlock.Encapsulate(target, source);
+            encapsulated.Complete();
+            await target.Completion;
+
+            target = new ActionBlock<int>(i => { });
+            encapsulated = DataflowBlock.Encapsulate(target, source);
+            encapsulated.Fault(new FormatException());
+            await Assert.ThrowsAnyAsync<FormatException>(() => target.Completion);
         }
 
         [Fact]

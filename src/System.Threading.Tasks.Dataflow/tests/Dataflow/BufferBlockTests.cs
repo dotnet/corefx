@@ -160,6 +160,55 @@ namespace System.Threading.Tasks.Dataflow.Tests
         }
 
         [Fact]
+        public async Task TestBoundedReceives()
+        {
+            for (int test = 0; test < 4; test++)
+            {
+                var bb = new BufferBlock<int>(new DataflowBlockOptions { BoundedCapacity = 1 });
+                Assert.True(bb.Post(0));
+
+                const int sends = 5;
+                for (int i = 1; i <= sends; i++)
+                {
+                    Task<bool> send = bb.SendAsync(i);
+                    Assert.True(await bb.OutputAvailableAsync()); // wait for previously posted/sent item
+
+                    int item;
+                    switch (test)
+                    {
+                        case 0:
+                            IList<int> items;
+                            Assert.True(bb.TryReceiveAll(out items));
+                            Assert.Equal(expected: 1, actual: items.Count);
+                            Assert.Equal(expected: i - 1, actual: items[0]);
+                            break;
+
+                        case 1:
+                            Assert.True(bb.TryReceive(f => true, out item));
+                            Assert.Equal(expected: i - 1, actual: item);
+                            break;
+
+                        case 2:
+                            Assert.False(bb.TryReceive(f => f == i, out item));
+                            Assert.True(bb.TryReceive(f => f == i - 1, out item));
+                            Assert.Equal(expected: i - 1, actual: item);
+                            break;
+
+                        case 3:
+                            Assert.Equal(expected: i - 1, actual: await bb.ReceiveAsync());
+                            break;
+                    }
+                }
+
+                // Receive remaining item
+                Assert.Equal(expected: sends, actual: await bb.ReceiveAsync());
+
+                bb.Complete();
+                await bb.Completion;
+            }
+        }
+
+        [Fact]
         [OuterLoop] // waits for a period of time
         public async Task TestCircularLinking()
         {
@@ -427,5 +476,36 @@ namespace System.Threading.Tasks.Dataflow.Tests
                 Assert.Equal(expected: 0, actual: bb.Count);
             }
         }
+
+        [Fact]
+        public async Task TestFaultyScheduler()
+        {
+            var bb = new BufferBlock<int>(new DataflowBlockOptions 
+            {
+                TaskScheduler = new DelegateTaskScheduler
+                {
+                    QueueTaskDelegate = delegate { throw new FormatException(); }
+                }
+            });
+            bb.Post(42);
+            bb.LinkTo(DataflowBlock.NullTarget<int>());
+            await Assert.ThrowsAsync<TaskSchedulerException>(() => bb.Completion);
+        }
+
+        [Fact]
+        public async Task TestFaultyTarget()
+        {
+            ISourceBlock<int> bb = new BufferBlock<int>();
+            bb.Fault(new InvalidCastException());
+            await Assert.ThrowsAsync<InvalidCastException>(() => bb.Completion);
+
+            Assert.Throws<FormatException>(() => {
+                bb.LinkTo(new DelegatePropagator<int, int>
+                {
+                    FaultDelegate = delegate { throw new FormatException(); }
+                }, new DataflowLinkOptions { PropagateCompletion = true });
+            });
+        }
+
     }
 }

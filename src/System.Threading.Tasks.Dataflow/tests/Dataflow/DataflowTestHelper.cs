@@ -45,12 +45,20 @@ namespace System.Threading.Tasks.Dataflow.Tests
 
         internal static void TestArgumentsExceptions<T>(ISourceBlock<T> source)
         {
-            var validMessageHeader = new DataflowMessageHeader(1);
-            var invalidMessageHeader = default(DataflowMessageHeader);
-            ITargetBlock<T> validTarget = new BufferBlock<T>();
-            ITargetBlock<T> invalidTarget = null;
-            DataflowLinkOptions invalidLinkOptions = null;
-            DataflowLinkOptions validLinkOptions = new DataflowLinkOptions();
+            TestConsumeReserveReleaseArgumentsExceptions(source);
+
+            ITargetBlock<T> validTarget = new BufferBlock<T>(), invalidTarget = null;
+            DataflowLinkOptions validLinkOptions = new DataflowLinkOptions(), invalidLinkOptions = null;
+
+            Assert.Throws<ArgumentNullException>(() => source.LinkTo(invalidTarget, validLinkOptions));
+            Assert.Throws<ArgumentNullException>(() => source.LinkTo(validTarget, invalidLinkOptions));
+            Assert.Throws<ArgumentNullException>(() => source.LinkTo(invalidTarget, invalidLinkOptions));
+        }
+
+        internal static void TestConsumeReserveReleaseArgumentsExceptions<T>(ISourceBlock<T> source)
+        {
+            DataflowMessageHeader validMessageHeader = new DataflowMessageHeader(1), invalidMessageHeader = default(DataflowMessageHeader);
+            ITargetBlock<T> validTarget = new BufferBlock<T>(), invalidTarget = null;
             bool consumed;
 
             Assert.Throws<ArgumentNullException>(() => source.ConsumeMessage(validMessageHeader, invalidTarget, out consumed));
@@ -62,11 +70,8 @@ namespace System.Threading.Tasks.Dataflow.Tests
             Assert.Throws<ArgumentNullException>(() => source.ReleaseReservation(validMessageHeader, invalidTarget));
             Assert.Throws<ArgumentException>(() => source.ReleaseReservation(invalidMessageHeader, validTarget));
             Assert.Throws<ArgumentException>(() => source.ReleaseReservation(invalidMessageHeader, invalidTarget));
-            Assert.Throws<ArgumentNullException>(() => source.LinkTo(invalidTarget));
-            Assert.Throws<ArgumentNullException>(() => source.LinkTo(invalidTarget, validLinkOptions));
-            Assert.Throws<ArgumentNullException>(() => source.LinkTo(validTarget, invalidLinkOptions));
-            Assert.Throws<ArgumentNullException>(() => source.LinkTo(invalidTarget, invalidLinkOptions));
         }
+
 
         internal static void TestOfferMessage_ArgumentValidation<T>(ITargetBlock<T> target)
         {

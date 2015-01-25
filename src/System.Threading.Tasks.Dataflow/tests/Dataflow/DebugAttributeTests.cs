@@ -79,10 +79,11 @@ namespace System.Threading.Tasks.Dataflow.Tests
                     Tuple.Create<bool,bool,object>(true, false, GetFieldValue(new TransformBlock<int,int>(i => i, dboExBuffering), "_source")),
                     Tuple.Create<bool,bool,object>(true, true, GetFieldValue(new TransformBlock<int,int>(i => i, dboExNoBuffering), "_reorderingBuffer")),
                     Tuple.Create<bool,bool,object>(true, true, GetFieldValue(GetFieldValue(new TransformBlock<int,int>(i => i, dboExBuffering), "_source"), "_targetRegistry")),
-                    Tuple.Create<bool,bool,object>(true, true, GetFieldValue(GetFieldValue(new TransformBlock<int,int>(i => i, dboExNoBuffering), "_source"), "_targetRegistry")),
+                    Tuple.Create<bool,bool,object>(true, true, GetFieldValue(GetFieldValue(WithLinkedTarget<TransformBlock<int,int>,int>(new TransformBlock<int,int>(i => i, dboExNoBuffering)), "_source"), "_targetRegistry")),
                     Tuple.Create<bool,bool,object>(true, true, new JoinBlock<int,int>().Target1),
                     Tuple.Create<bool,bool,object>(true, true, new JoinBlock<int,int>(dboGroupGreedy).Target1),
                     Tuple.Create<bool,bool,object>(true, true, new JoinBlock<int,int>(dboGroupNonGreedy).Target1),
+                    Tuple.Create<bool,bool,object>(true, false, GetFieldValue(new JoinBlock<int,int>().Target1, "_sharedResources")),
                     Tuple.Create<bool,bool,object>(true, true, new BatchedJoinBlock<int,int>(42).Target1),
                     Tuple.Create<bool,bool,object>(true, true, new BatchedJoinBlock<int,int>(42, dboGroupGreedy).Target1),
                     Tuple.Create<bool,bool,object>(true, false, GetFieldValue(new BatchBlock<int>(42), "_target")),
@@ -98,6 +99,7 @@ namespace System.Threading.Tasks.Dataflow.Tests
                     Tuple.Create<bool,bool,object>(true, false, CreateReceiveTarget<int>()),
                     Tuple.Create<bool,bool,object>(true, false, CreateOutputAvailableTarget()),
                     Tuple.Create<bool,bool,object>(true, false, CreateChooseTarget<int>()),
+                    Tuple.Create<bool,bool,object>(true, false, new BufferBlock<int>().AsObservable().Subscribe(DataflowBlock.NullTarget<int>().AsObserver())),
 
                     // Other
                     Tuple.Create<bool,bool,object>(true, false, new DataflowMessageHeader(1)),
@@ -113,6 +115,12 @@ namespace System.Threading.Tasks.Dataflow.Tests
         {
             for (int i = 0; i < numMessages; i++) target.SendAsync(default(T));
             return target;
+        }
+
+        private static TBlock WithLinkedTarget<TBlock, T>(TBlock block) where TBlock : ISourceBlock<T>
+        {
+            block.LinkTo(DataflowBlock.NullTarget<T>());
+            return block;
         }
 
         private static object GetFieldValue(object obj, string fieldName)
