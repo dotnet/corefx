@@ -11,7 +11,6 @@
 **
 =============================================================================*/
 
-using System;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
@@ -20,7 +19,7 @@ namespace System.Collections
 {
     // A simple stack of objects.  Internally it is implemented as an array,
     // so Push can be O(n).  Pop is O(1).
-    [DebuggerTypeProxy(typeof(System.Collections.Stack.StackDebugView))]
+    [DebuggerTypeProxy(typeof(StackDebugView))]
     [DebuggerDisplay("Count = {Count}")]
     [System.Runtime.InteropServices.ComVisible(true)]
     public class Stack : ICollection
@@ -145,9 +144,9 @@ namespace System.Collections
             Contract.EndContractBlock();
 
             int i = 0;
-            if (array is Object[])
+            Object[] objArray = array as Object[];
+            if (objArray != null)
             {
-                Object[] objArray = (Object[])array;
                 while (i < _size)
                 {
                     objArray[i + index] = _array[_size - i - 1];
@@ -242,8 +241,8 @@ namespace System.Collections
 
         private class SyncStack : Stack
         {
-            private Stack _s;
-            private Object _root;
+            private readonly Stack _s;
+            private readonly Object _root;
 
             internal SyncStack(Stack stack)
             {
@@ -353,9 +352,9 @@ namespace System.Collections
 
         private class StackEnumerator : IEnumerator
         {
-            private Stack _stack;
+            private readonly Stack _stack;
             private int _index;
-            private int _version;
+            private readonly int _version;
             private Object _currentElement;
 
             internal StackEnumerator(Stack stack)
@@ -411,7 +410,7 @@ namespace System.Collections
 
         internal class StackDebugView
         {
-            private Stack _stack;
+            private readonly Stack _stack;
 
             public StackDebugView(Stack stack)
             {

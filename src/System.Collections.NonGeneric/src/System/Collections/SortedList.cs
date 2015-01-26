@@ -11,7 +11,6 @@
 **
 ===========================================================*/
 
-using System;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
@@ -58,7 +57,7 @@ namespace System.Collections
     // has a constructor that allows a specific IComparer implementation to
     // be specified.
     // 
-    [DebuggerTypeProxy(typeof(System.Collections.SortedList.SortedListDebugView))]
+    [DebuggerTypeProxy(typeof(SortedListDebugView))]
     [DebuggerDisplay("Count = {Count}")]
     [System.Runtime.InteropServices.ComVisible(true)]
 #if FEATURE_CORECLR
@@ -610,8 +609,8 @@ namespace System.Collections
 
         private class SyncSortedList : SortedList
         {
-            private SortedList _list;
-            private Object _root;
+            private readonly SortedList _list;
+            private readonly Object _root;
 
 
             internal SyncSortedList(SortedList list)
@@ -831,15 +830,15 @@ namespace System.Collections
 
         private class SortedListEnumerator : IDictionaryEnumerator
         {
-            private SortedList _sortedList;
+            private readonly SortedList _sortedList;
             private Object _key;
             private Object _value;
             private int _index;
-            private int _startIndex;        // Store for Reset.
-            private int _endIndex;
-            private int _version;
+            private readonly int _startIndex;        // Store for Reset.
+            private readonly int _endIndex;
+            private readonly int _version;
             private bool _current;       // Is the current element valid?
-            private int _getObjectRetType;  // What should GetObject return?
+            private readonly int _getObjectRetType;  // What should GetObject return?
 
             internal const int Keys = 1;
             internal const int Values = 2;
@@ -931,7 +930,7 @@ namespace System.Collections
 
         private class KeyList : IList
         {
-            private SortedList _sortedList;
+            private readonly SortedList _sortedList;
 
             internal KeyList(SortedList sortedList)
             {
@@ -1036,7 +1035,7 @@ namespace System.Collections
 
         private class ValueList : IList
         {
-            private SortedList _sortedList;
+            private readonly SortedList _sortedList;
 
             internal ValueList(SortedList sortedList)
             {
@@ -1134,7 +1133,7 @@ namespace System.Collections
         // internal debug view class for sorted list
         internal class SortedListDebugView
         {
-            private SortedList _sortedList;
+            private readonly SortedList _sortedList;
 
             public SortedListDebugView(SortedList sortedList)
             {

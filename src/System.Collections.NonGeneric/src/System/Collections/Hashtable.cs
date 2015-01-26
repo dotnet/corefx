@@ -11,12 +11,9 @@
 **
 ===========================================================*/
 
-using System;
-using System.Runtime;
 using System.Diagnostics;
-using System.Threading;
-using System.Runtime.CompilerServices;
 using System.Diagnostics.Contracts;
+using System.Threading;
 
 namespace System.Collections
 {
@@ -54,7 +51,7 @@ namespace System.Collections
     // the Hashtable.  That hash function (and the equals method on the 
     // IEqualityComparer) would be used for all objects in the table.
     //
-    [DebuggerTypeProxy(typeof(System.Collections.Hashtable.HashtableDebugView))]
+    [DebuggerTypeProxy(typeof(HashtableDebugView))]
     [DebuggerDisplay("Count = {Count}")]
     [System.Runtime.InteropServices.ComVisible(true)]
     public class Hashtable : IDictionary
@@ -149,7 +146,7 @@ namespace System.Collections
         private ICollection _keys;
         private ICollection _values;
 
-        private IEqualityComparer _keycomparer;
+        private readonly IEqualityComparer _keycomparer;
         private Object _syncRoot;
 
         protected IEqualityComparer EqualityComparer
@@ -994,7 +991,7 @@ namespace System.Collections
             {
                 if (_syncRoot == null)
                 {
-                    System.Threading.Interlocked.CompareExchange<Object>(ref _syncRoot, new Object(), null);
+                    Interlocked.CompareExchange<Object>(ref _syncRoot, new Object(), null);
                 }
                 return _syncRoot;
             }
@@ -1021,7 +1018,7 @@ namespace System.Collections
         // class is created by the GetKeys method of a hashtable.
         private class KeyCollection : ICollection
         {
-            private Hashtable _hashtable;
+            private readonly Hashtable _hashtable;
 
             internal KeyCollection(Hashtable hashtable)
             {
@@ -1067,7 +1064,7 @@ namespace System.Collections
         // this class is created by the GetValues method of a hashtable.
         private class ValueCollection : ICollection
         {
-            private Hashtable _hashtable;
+            private readonly Hashtable _hashtable;
 
             internal ValueCollection(Hashtable hashtable)
             {
@@ -1112,7 +1109,7 @@ namespace System.Collections
         // Synchronized wrapper for hashtable
         private class SyncHashtable : Hashtable, IEnumerable
         {
-            protected Hashtable _table;
+            protected readonly Hashtable _table;
 
             internal SyncHashtable(Hashtable table) : base(false)
             {
@@ -1266,11 +1263,11 @@ namespace System.Collections
         // are made to the hashtable while an enumeration is in progress.
         private class HashtableEnumerator : IDictionaryEnumerator
         {
-            private Hashtable _hashtable;
+            private readonly Hashtable _hashtable;
             private int _bucket;
-            private int _version;
+            private readonly int _version;
             private bool _current;
-            private int _getObjectRetType;   // What should GetObject return?
+            private readonly int _getObjectRetType;   // What should GetObject return?
             private Object _currentKey;
             private Object _currentValue;
 
@@ -1362,7 +1359,7 @@ namespace System.Collections
         // internal debug view class for hashtable
         internal class HashtableDebugView
         {
-            private Hashtable _hashtable;
+            private readonly Hashtable _hashtable;
 
             public HashtableDebugView(Hashtable hashtable)
             {
