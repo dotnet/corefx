@@ -913,69 +913,68 @@ namespace System.Xml.Linq
         /// </summary>
         sealed class ContentReader
         {
-            XContainer c;
-            XNode n;
-            NamespaceCache eCache = new NamespaceCache();
-            NamespaceCache aCache = new NamespaceCache();
-            string baseUri;
-            IXmlLineInfo li;
+            XContainer _currentContainer;
+            NamespaceCache _eCache = new NamespaceCache();
+            NamespaceCache _aCache = new NamespaceCache();
+            string _baseUri;
+            IXmlLineInfo _lineInfo;
 
-            public ContentReader(XContainer c)
+            public ContentReader(XContainer rootContainer)
             {
-                this.c = c;
+                _currentContainer = rootContainer;
             }
 
-            public ContentReader(XContainer @this, XmlReader r, LoadOptions o)
+            public ContentReader(XContainer rootContainer, XmlReader r, LoadOptions o)
             {
-                c = @this;
-                baseUri = (o & LoadOptions.SetBaseUri) != 0 ? r.BaseURI : null;
-                li = (o & LoadOptions.SetLineInfo) != 0 ? r as IXmlLineInfo : null;
+                _currentContainer = rootContainer;
+                _baseUri = (o & LoadOptions.SetBaseUri) != 0 ? r.BaseURI : null;
+                _lineInfo = (o & LoadOptions.SetLineInfo) != 0 ? r as IXmlLineInfo : null;
             }
 
-            public bool ReadContentFrom(XContainer @this, XmlReader r)
+            public bool ReadContentFrom(XContainer rootContainer, XmlReader r)
             {
                 switch (r.NodeType)
                 {
                     case XmlNodeType.Element:
-                        XElement e = new XElement(eCache.Get(r.NamespaceURI).GetName(r.LocalName));
+                        XElement e = new XElement(_eCache.Get(r.NamespaceURI).GetName(r.LocalName));
                         if (r.MoveToFirstAttribute())
                         {
                             do
                             {
-                                e.AppendAttributeSkipNotify(new XAttribute(aCache.Get(r.Prefix.Length == 0 ? string.Empty : r.NamespaceURI).GetName(r.LocalName), r.Value));
+                                e.AppendAttributeSkipNotify(new XAttribute(_aCache.Get(r.Prefix.Length == 0 ? string.Empty : r.NamespaceURI).GetName(r.LocalName), r.Value));
                             } while (r.MoveToNextAttribute());
                             r.MoveToElement();
                         }
-                        c.AddNodeSkipNotify(e);
+                        _currentContainer.AddNodeSkipNotify(e);
                         if (!r.IsEmptyElement)
                         {
-                            c = e;
+                            _currentContainer = e;
                         }
                         break;
                     case XmlNodeType.EndElement:
-                        if (c.content == null)
+                        if (_currentContainer.content == null)
                         {
-                            c.content = string.Empty;
+                            _currentContainer.content = string.Empty;
                         }
-                        if (c == @this) return false;
-                        c = c.parent;
+                        if (_currentContainer == rootContainer) return false;
+                        _currentContainer = _currentContainer.parent;
                         break;
                     case XmlNodeType.Text:
                     case XmlNodeType.SignificantWhitespace:
                     case XmlNodeType.Whitespace:
-                        c.AddStringSkipNotify(r.Value);
+                        _currentContainer.AddStringSkipNotify(r.Value);
                         break;
                     case XmlNodeType.CDATA:
-                        c.AddNodeSkipNotify(new XCData(r.Value));
+                        _currentContainer.AddNodeSkipNotify(new XCData(r.Value));
                         break;
                     case XmlNodeType.Comment:
-                        c.AddNodeSkipNotify(new XComment(r.Value));
+                        _currentContainer.AddNodeSkipNotify(new XComment(r.Value));
                         break;
                     case XmlNodeType.ProcessingInstruction:
-                        c.AddNodeSkipNotify(new XProcessingInstruction(r.Name, r.Value));
+                        _currentContainer.AddNodeSkipNotify(new XProcessingInstruction(r.Name, r.Value));
                         break;
                     case XmlNodeType.DocumentType:
-                        c.AddNodeSkipNotify(new XDocumentType(r.LocalName, r.GetAttribute("PUBLIC"), r.GetAttribute("SYSTEM"), r.Value));
+                        _currentContainer.AddNodeSkipNotify(new XDocumentType(r.LocalName, r.GetAttribute("PUBLIC"), r.GetAttribute("SYSTEM"), r.Value));
                         break;
                     case XmlNodeType.EntityReference:
                         if (!r.CanResolveEntity) throw new InvalidOperationException(SR.InvalidOperation_UnresolvedEntityReference);
@@ -990,92 +989,94 @@ namespace System.Xml.Linq
                 return true;
             }
 
-            public bool ReadContentFrom(XContainer @this, XmlReader r, LoadOptions o)
+            public bool ReadContentFrom(XContainer rootContainer, XmlReader r, LoadOptions o)
             {
-                string uri = r.BaseURI;
+                XNode newNode = null;
+                string baseUri = r.BaseURI;
+
                 switch (r.NodeType)
                 {
                     case XmlNodeType.Element:
                         {
-                            XElement e = new XElement(eCache.Get(r.NamespaceURI).GetName(r.LocalName));
-                            if (baseUri != null && baseUri != uri)
+                            XElement e = new XElement(_eCache.Get(r.NamespaceURI).GetName(r.LocalName));
+                            if (_baseUri != null && _baseUri != baseUri)
                             {
-                                e.SetBaseUri(uri);
+                                e.SetBaseUri(baseUri);
                             }
-                            if (li != null && li.HasLineInfo())
+                            if (_lineInfo != null && _lineInfo.HasLineInfo())
                             {
-                                e.SetLineInfo(li.LineNumber, li.LinePosition);
+                                e.SetLineInfo(_lineInfo.LineNumber, _lineInfo.LinePosition);
                             }
                             if (r.MoveToFirstAttribute())
                             {
                                 do
                                 {
-                                    XAttribute a = new XAttribute(aCache.Get(r.Prefix.Length == 0 ? string.Empty : r.NamespaceURI).GetName(r.LocalName), r.Value);
-                                    if (li != null && li.HasLineInfo())
+                                    XAttribute a = new XAttribute(_aCache.Get(r.Prefix.Length == 0 ? string.Empty : r.NamespaceURI).GetName(r.LocalName), r.Value);
+                                    if (_lineInfo != null && _lineInfo.HasLineInfo())
                                     {
-                                        a.SetLineInfo(li.LineNumber, li.LinePosition);
+                                        a.SetLineInfo(_lineInfo.LineNumber, _lineInfo.LinePosition);
                                     }
                                     e.AppendAttributeSkipNotify(a);
                                 } while (r.MoveToNextAttribute());
                                 r.MoveToElement();
                             }
-                            c.AddNodeSkipNotify(e);
+                            _currentContainer.AddNodeSkipNotify(e);
                             if (!r.IsEmptyElement)
                             {
-                                c = e;
-                                if (baseUri != null)
+                                _currentContainer = e;
+                                if (_baseUri != null)
                                 {
-                                    baseUri = uri;
+                                    _baseUri = baseUri;
                                 }
                             }
                             break;
                         }
                     case XmlNodeType.EndElement:
                         {
-                            if (c.content == null)
+                            if (_currentContainer.content == null)
                             {
-                                c.content = string.Empty;
+                                _currentContainer.content = string.Empty;
                             }
                             // Store the line info of the end element tag.
                             // Note that since we've got EndElement the current container must be an XElement
-                            XElement e = c as XElement;
+                            XElement e = _currentContainer as XElement;
                             Debug.Assert(e != null, "EndElement recieved but the current container is not an element.");
-                            if (e != null && li != null && li.HasLineInfo())
+                            if (e != null && _lineInfo != null && _lineInfo.HasLineInfo())
                             {
-                                e.SetEndElementLineInfo(li.LineNumber, li.LinePosition);
+                                e.SetEndElementLineInfo(_lineInfo.LineNumber, _lineInfo.LinePosition);
                             }
-                            if (c == @this) return false;
-                            if (baseUri != null && c.HasBaseUri)
+                            if (_currentContainer == rootContainer) return false;
+                            if (_baseUri != null && _currentContainer.HasBaseUri)
                             {
-                                baseUri = c.parent.BaseUri;
+                                _baseUri = _currentContainer.parent.BaseUri;
                             }
-                            c = c.parent;
+                            _currentContainer = _currentContainer.parent;
                             break;
                         }
                     case XmlNodeType.Text:
                     case XmlNodeType.SignificantWhitespace:
                     case XmlNodeType.Whitespace:
-                        if ((baseUri != null && baseUri != uri) ||
-                            (li != null && li.HasLineInfo()))
+                        if ((_baseUri != null && _baseUri != baseUri) ||
+                            (_lineInfo != null && _lineInfo.HasLineInfo()))
                         {
-                            n = new XText(r.Value);
+                            newNode = new XText(r.Value);
                         }
                         else
                         {
-                            c.AddStringSkipNotify(r.Value);
+                            _currentContainer.AddStringSkipNotify(r.Value);
                         }
                         break;
                     case XmlNodeType.CDATA:
-                        n = new XCData(r.Value);
+                        newNode = new XCData(r.Value);
                         break;
                     case XmlNodeType.Comment:
-                        n = new XComment(r.Value);
+                        newNode = new XComment(r.Value);
                         break;
                     case XmlNodeType.ProcessingInstruction:
-                        n = new XProcessingInstruction(r.Name, r.Value);
+                        newNode = new XProcessingInstruction(r.Name, r.Value);
                         break;
                     case XmlNodeType.DocumentType:
-                        n = new XDocumentType(r.LocalName, r.GetAttribute("PUBLIC"), r.GetAttribute("SYSTEM"), r.Value);
+                        newNode = new XDocumentType(r.LocalName, r.GetAttribute("PUBLIC"), r.GetAttribute("SYSTEM"), r.Value);
                         break;
                     case XmlNodeType.EntityReference:
                         if (!r.CanResolveEntity) throw new InvalidOperationException(SR.InvalidOperation_UnresolvedEntityReference);
@@ -1086,18 +1087,21 @@ namespace System.Xml.Linq
                     default:
                         throw new InvalidOperationException(SR.Format(SR.InvalidOperation_UnexpectedNodeType, r.NodeType));
                 }
-                if (n != null)
+
+                if (newNode != null)
                 {
-                    if (baseUri != null && baseUri != uri)
+                    if (_baseUri != null && _baseUri != baseUri)
                     {
-                        n.SetBaseUri(uri);
+                        newNode.SetBaseUri(baseUri);
                     }
-                    if (li != null && li.HasLineInfo())
+
+                    if (_lineInfo != null && _lineInfo.HasLineInfo())
                     {
-                        n.SetLineInfo(li.LineNumber, li.LinePosition);
+                        newNode.SetLineInfo(_lineInfo.LineNumber, _lineInfo.LinePosition);
                     }
-                    c.AddNodeSkipNotify(n);
-                    n = null;
+
+                    _currentContainer.AddNodeSkipNotify(newNode);
+                    newNode = null;
                 }
 
                 return true;
