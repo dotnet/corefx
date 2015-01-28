@@ -108,14 +108,6 @@ namespace System.Threading.Tasks.Dataflow.Internal
 #endif
         }
 
-        /// <summary>Gets whether the registry contains a particular target.</summary>
-        /// <param name="target">The target.</param>
-        /// <returns>true if the registry contains the target; otherwise, false.</returns>
-        internal bool Contains(ITargetBlock<T> target)
-        {
-            return _targetInformation.ContainsKey(target);
-        }
-
         /// <summary>Removes the target from the registry.</summary>
         /// <param name="target">The target to remove.</param>
         /// <param name="onlyIfReachedMaxMessages">

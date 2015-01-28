@@ -1159,9 +1159,6 @@ namespace System.Threading.Tasks.Dataflow
                 return count;
             }
 
-            /// <summary>Gets the number of messages waiting to be processed.  This must only be used from the debugger as it avoids taking necessary locks.</summary>
-            private int InputCountForDebugger { get { return _messages.Count; } }
-
             /// <summary>Gets information about this helper to be used for display in a debugger.</summary>
             /// <returns>Debugging information about this target.</returns>
             internal DebuggingInformation GetDebuggingInformation() { return new DebuggingInformation(this); }
