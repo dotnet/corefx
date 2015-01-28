@@ -83,9 +83,12 @@
     <Compile Include="System\Reflection\Metadata\Decoding\AssemblyNameParsing\AssemblyNameParser.AssemblyNameBuilder.cs" />
     <Compile Include="System\Reflection\Metadata\Decoding\AssemblyNameParsing\AssemblyNameParser.cs" />
     <Compile Include="System\Reflection\Metadata\Decoding\AssemblyNameParsing\AssemblyNameParser.ParseMode.cs" />
+    <Compile Include="System\Reflection\Metadata\Decoding\CustomAttributeDecoder.cs" />
+    <Compile Include="System\Reflection\Metadata\Decoding\ICustomAttributeTypeProvider.cs" />
+    <Compile Include="System\Reflection\Metadata\Decoding\ISignatureTypeProvider.cs" />
     <Compile Include="System\Reflection\Metadata\Decoding\ITypeProvider.cs" />
+    <Compile Include="System\Reflection\Metadata\Decoding\SignatureDecoder.cs" />
     <Compile Include="System\Reflection\Metadata\Decoding\StringComparers.cs" />
-    <Compile Include="System\Reflection\Metadata\Decoding\BlobDecoder.cs" />
     <Compile Include="System\Reflection\Metadata\Decoding\CustomAttributeNamedArgument.cs" />
     <Compile Include="System\Reflection\Metadata\Decoding\CustomAttributeTypedArgument.cs" />
     <Compile Include="System\Reflection\Metadata\Decoding\CustomAttributeValue.cs" />
