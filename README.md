@@ -9,13 +9,37 @@
 [issues-closed-image]: http://www.issuestats.com/github/dotnet/corefx/badge/issue
 [issues-closed]: http://www.issuestats.com/github/dotnet/corefx
 
-This repository contains the class libraries for .NET Core. This is a
+The corefx repository contains the class libraries for .NET Core. It is a
 work in progress, and does not currently contain the entire set of libraries
 that we plan on open sourcing. Make sure to watch this repository in order to be
-notified as we make changes to and expand it. Check out this [blog post] that
-explains our OSS strategy and road map in more detail.
+notified as we make changes to and expand it. Check out the [.NET Core is Open Source][blog post] blog post that explains our OSS strategy and road map in more detail.
 
-Today, the repository contains the following components:
+## How to Engage, Contribute and Provide Feedback
+
+Some of the best ways to contribute are to try things out, file bugs, and join in design conversations. 
+
+Want to get more familiar with what's going on in the code?
+* [Pull requests](https://github.com/dotnet/corefx/pulls): [Open](https://github.com/dotnet/corefx/pulls?q=is%3Aopen+is%3Apr)/[Closed](https://github.com/dotnet/corefx/pulls?q=is%3Apr+is%3Aclosed)
+
+Looking for something to work on? The list of [up-for-grabs issues](https://github.com/dotnet/corefx/issues?q=is%3Aopen+is%3Aissue+label%3Aup-for-grabs) is a great place to start.
+
+* [How to Contribute][Contributing Guide]
+    * [Contributing Guide][Contributing Guide]
+    * [Developer Guide]
+
+You are also encouraged to start a discussion by filing an issue or creating a
+gist. See the [contributing guides][Contributing Guide] for more details. 
+
+[Contributing Guide]: https://github.com/dotnet/corefx/wiki/Contributing
+[Developer Guide]: https://github.com/dotnet/corefx/wiki/Developer-Guide
+
+You can discuss .NET OSS more generally in the [.NET Foundation forums].
+
+[.NET Foundation forums]: http://forums.dotnetfoundation.org/
+
+## .NET Core Components
+
+The repository contains the following components. More libraries are coming soon. Stay tuned!
 
 * **Microsoft.Win32.Primitives**. Provides common types supporting the implementation of Win32-based libraries.
 
@@ -87,38 +111,6 @@ Today, the repository contains the following components:
 * **System.Xml**. Provides DOM APIs such as the `XDocument` and `XmlDocument`
   types, XLinq, and the corresponding XPath extension methods.
 
-
-More libraries are coming soon. Stay tuned!
-
-[blog post]: http://blogs.msdn.com/b/dotnet/archive/2014/11/12/net-core-is-open-source.aspx
-[roslyn]: https://roslyn.codeplex.com/
-[immutable-msdn]: http://msdn.microsoft.com/en-us/library/dn385366(v=vs.110).aspx
-[simd-post-1]: http://blogs.msdn.com/b/dotnet/archive/2014/04/07/the-jit-finally-proposed-jit-and-simd-are-getting-married.aspx
-[simd-post-2]: http://blogs.msdn.com/b/dotnet/archive/2014/05/13/update-to-simd-support.aspx
-
-## How to Engage, Contribute and Provide Feedback
-
-Some of the best ways to contribute are to try things out, file bugs, and join in design conversations. 
-
-Want to get more familiar with what's going on in the code?
-* [Pull requests](https://github.com/dotnet/corefx/pulls): [Open](https://github.com/dotnet/corefx/pulls?q=is%3Aopen+is%3Apr)/[Closed](https://github.com/dotnet/corefx/pulls?q=is%3Apr+is%3Aclosed)
-
-Looking for something to work on? The list of [up-for-grabs issues](https://github.com/dotnet/corefx/issues?q=is%3Aopen+is%3Aissue+label%3Aup-for-grabs) is a great place to start.
-
-* [How to Contribute][Contributing Guide]
-    * [Contributing Guide][Contributing Guide]
-    * [Developer Guide]
-
-You are also encouraged to start a discussion by filing an issue or creating a
-gist. See the [contributing guides][Contributing Guide] for more details. 
-
-[Contributing Guide]: https://github.com/dotnet/corefx/wiki/Contributing
-[Developer Guide]: https://github.com/dotnet/corefx/wiki/Developer-Guide
-
-You can discuss .NET OSS more generally in the [.NET Foundation forums].
-
-[.NET Foundation forums]: http://forums.dotnetfoundation.org/
-
 ## Related Projects
 
 For an overview of all the .NET related projects, have a look at the
@@ -126,8 +118,14 @@ For an overview of all the .NET related projects, have a look at the
 
 ## License
 
-This project is licensed under the [MIT license](LICENSE).
+.NET Core (including the corefx repo) is licensed under the [MIT license](LICENSE).
 
 ## .NET Foundation
 
-This project is part of the [.NET Foundation](http://www.dotnetfoundation.org/projects).
+.NET Core is a [.NET Foundation](http://www.dotnetfoundation.org/projects) project.
+
+[blog post]: http://blogs.msdn.com/b/dotnet/archive/2014/11/12/net-core-is-open-source.aspx
+[roslyn]: https://roslyn.codeplex.com/
+[immutable-msdn]: http://msdn.microsoft.com/en-us/library/dn385366(v=vs.110).aspx
+[simd-post-1]: http://blogs.msdn.com/b/dotnet/archive/2014/04/07/the-jit-finally-proposed-jit-and-simd-are-getting-married.aspx
+[simd-post-2]: http://blogs.msdn.com/b/dotnet/archive/2014/05/13/update-to-simd-support.aspx
