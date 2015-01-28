@@ -78,6 +78,42 @@
     <Compile Include="System\Reflection\Metadata\CustomAttribute.cs" />
     <Compile Include="System\Reflection\Metadata\CustomAttributeNamedArgumentKind.cs" />
     <Compile Include="System\Reflection\Metadata\DeclarativeSecurityAttribute.cs" />
+    <Compile Include="System\Reflection\Metadata\Decoding\ArrayShape.cs" />
+    <Compile Include="System\Reflection\Metadata\Decoding\AssemblyNameParsing\AssemblyNameComponents.cs" />
+    <Compile Include="System\Reflection\Metadata\Decoding\AssemblyNameParsing\AssemblyNameParser.AssemblyNameBuilder.cs" />
+    <Compile Include="System\Reflection\Metadata\Decoding\AssemblyNameParsing\AssemblyNameParser.cs" />
+    <Compile Include="System\Reflection\Metadata\Decoding\AssemblyNameParsing\AssemblyNameParser.ParseMode.cs" />
+    <Compile Include="System\Reflection\Metadata\Decoding\ITypeProvider.cs" />
+    <Compile Include="System\Reflection\Metadata\Decoding\StringComparers.cs" />
+    <Compile Include="System\Reflection\Metadata\Decoding\BlobDecoder.cs" />
+    <Compile Include="System\Reflection\Metadata\Decoding\CustomAttributeNamedArgument.cs" />
+    <Compile Include="System\Reflection\Metadata\Decoding\CustomAttributeTypedArgument.cs" />
+    <Compile Include="System\Reflection\Metadata\Decoding\CustomAttributeValue.cs" />
+    <Compile Include="System\Reflection\Metadata\Decoding\CustomModifier.cs" />
+    <Compile Include="System\Reflection\Metadata\Decoding\MethodSignature.cs" />
+    <Compile Include="System\Reflection\Metadata\Decoding\PrimitiveTypeCode.cs" />
+    <Compile Include="System\Reflection\Metadata\Decoding\Strings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Strings.resx</DependentUpon>
+    </Compile>
+    <Compile Include="System\Reflection\Metadata\Decoding\TypeNameParsing\Delimiters.cs" />
+    <Compile Include="System\Reflection\Metadata\Decoding\TypeNameParsing\IdentifierOptions.cs" />
+    <Compile Include="System\Reflection\Metadata\Decoding\TypeNameParsing\ITypeNameParserTypeProvider.cs" />
+    <Compile Include="System\Reflection\Metadata\Decoding\TypeNameParsing\QuotedIdentifierParser.cs" />
+    <Compile Include="System\Reflection\Metadata\Decoding\TypeNameParsing\StringReader.cs" />
+    <Compile Include="System\Reflection\Metadata\Decoding\TypeNameParsing\Tokenizer.cs" />
+    <Compile Include="System\Reflection\Metadata\Decoding\TypeNameParsing\Tokenizer.ParseOptions.cs" />
+    <Compile Include="System\Reflection\Metadata\Decoding\TypeNameParsing\Tokenizer.Token.cs" />
+    <Compile Include="System\Reflection\Metadata\Decoding\TypeNameParsing\TokenType.cs" />
+    <Compile Include="System\Reflection\Metadata\Decoding\TypeNameParsing\TypeModifier.cs" />
+    <Compile Include="System\Reflection\Metadata\Decoding\TypeNameParsing\TypeModifierType.cs" />
+    <Compile Include="System\Reflection\Metadata\Decoding\TypeNameParsing\TypeNameFormatErrorId.cs" />
+    <Compile Include="System\Reflection\Metadata\Decoding\TypeNameParsing\TypeNameFormatException.cs" />
+    <Compile Include="System\Reflection\Metadata\Decoding\TypeNameParsing\TypeNameParser.cs" />
+    <Compile Include="System\Reflection\Metadata\Decoding\TypeNameParsing\TypeNameParserOfT.cs" />
+    <Compile Include="System\Reflection\Metadata\Decoding\TypeNameParsing\TypeNameParserOfT.ParseMode.cs" />
+    <Compile Include="System\Reflection\Metadata\Decoding\TypeNameParsing\TypeNameParserOfT.TypeBuilder.cs" />
     <Compile Include="System\Reflection\Metadata\Ecma335\EditAndContinueLogEntry.cs" />
     <Compile Include="System\Reflection\Metadata\Ecma335\EditAndContinueOperation.cs" />
     <Compile Include="System\Reflection\Metadata\Ecma335\ExportedTypeExtensions.cs" />
@@ -176,6 +212,12 @@
       <SubType>Designer</SubType>
       <LastGenOutput>MetadataResources.Designer.cs</LastGenOutput>
       <CustomToolNamespace>System.Reflection.Metadata</CustomToolNamespace>
+    </EmbeddedResource>
+    <EmbeddedResource Include="System\Reflection\Metadata\Decoding\Strings.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Strings.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+      <CustomToolNamespace>System.Reflection.Metadata.Decoding</CustomToolNamespace>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
