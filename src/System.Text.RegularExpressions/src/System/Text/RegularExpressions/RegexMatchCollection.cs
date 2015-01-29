@@ -108,9 +108,7 @@ namespace System.Text.RegularExpressions
         {
             get
             {
-                Match match;
-
-                match = GetMatch(i);
+                Match match = GetMatch(i);
 
                 if (match == null)
                     throw new ArgumentOutOfRangeException("i");
