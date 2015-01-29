@@ -132,12 +132,12 @@ namespace System.Text.RegularExpressions
         /// </summary>
         public IEnumerator GetEnumerator()
         {
-            return new MatchEnumerator(this);
+            return new Enumerator(this);
         }
 
         IEnumerator<Match> IEnumerable<Match>.GetEnumerator()
         {
-            return new MatchEnumerator(this);
+            return new Enumerator(this);
         }
 
         int IList<Match>.IndexOf(Match item)
@@ -264,82 +264,62 @@ namespace System.Text.RegularExpressions
             EnsureInitialized();
             ((ICollection)_matches).CopyTo(array, arrayIndex);
         }
-    }
 
-    /*
-     * This non-public enumerator lists all the group matches.
-     * Should it be public?
-     */
-    internal class MatchEnumerator : IEnumerator<Match>
-    {
-        internal MatchCollection _matchcoll;
-        internal Match _match = null;
-        internal int _curindex;
-        internal bool _done;
-
-        /*
-         * Nonpublic constructor
-         */
-        internal MatchEnumerator(MatchCollection matchcoll)
+        private class Enumerator : IEnumerator<Match>
         {
-            _matchcoll = matchcoll;
-        }
+            private readonly MatchCollection _collection;
+            private Match _match;
+            private int _index;
+            private bool _done;
 
-        /*
-         * Advance to the next match
-         */
-        public bool MoveNext()
-        {
-            if (_done)
-                return false;
-
-            _match = _matchcoll.GetMatch(_curindex);
-            _curindex++;
-
-            if (_match == null)
+            internal Enumerator(MatchCollection collection)
             {
-                _done = true;
-                return false;
+                _collection = collection;
             }
 
-            return true;
-        }
-
-        /*
-         * The current match
-         */
-        public Object Current
-        {
-            get { return Match; }
-        }
-
-        Match IEnumerator<Match>.Current
-        {
-            get { return Match; }
-        }
-
-        private Match Match
-        {
-            get
+            public bool MoveNext()
             {
+                if (_done)
+                    return false;
+
+                _match = _collection.GetMatch(_index);
+                _index++;
+
                 if (_match == null)
-                    throw new InvalidOperationException(SR.EnumNotStarted);
-                return _match;
+                {
+                    _done = true;
+                    return false;
+                }
+
+                return true;
             }
-        }
 
-        /*
-         * Position before the first item
-         */
-        public void Reset()
-        {
-            _curindex = 0;
-            _done = false;
-            _match = null;
-        }
+            public Match Current
+            {
+                get
+                {
+                    if (_match == null)
+                        throw new InvalidOperationException(SR.EnumNotStarted);
 
-        void IDisposable.Dispose()
-        {
+                    return _match;
+                }
+            }
+
+            object IEnumerator.Current
+            {
+                get { return Current; }
+            }
+
+            void IEnumerator.Reset()
+            {
+                _index = 0;
+                _done = false;
+                _match = null;
+            }
+
+            void IDisposable.Dispose()
+            {
+            }
         }
     }
 }
