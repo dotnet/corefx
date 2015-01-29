@@ -225,9 +225,15 @@ namespace System.Text.RegularExpressions
             if (array == null)
                 throw new ArgumentNullException("array");
 
+            if (Count == 0)
+                return;
+
+            int[] indices = new int[1]; // SetValue takes a params array; lifting out the implicit allocation from the loop
+
             for (int i = arrayIndex, j = 0; j < Count; i++, j++)
             {
-                array.SetValue(this[j], i);
+                indices[0] = i;
+                array.SetValue(this[j], indices);
             }
         }
 
