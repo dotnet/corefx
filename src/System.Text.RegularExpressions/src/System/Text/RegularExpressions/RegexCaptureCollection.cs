@@ -34,25 +34,6 @@ namespace System.Text.RegularExpressions
         }
 
         /// <summary>
-        /// The object on which to synchronize.
-        /// </summary>
-        Object ICollection.SyncRoot
-        {
-            get
-            {
-                return _group;
-            }
-        }
-
-        bool ICollection.IsSynchronized
-        {
-            get
-            {
-                return false;
-            }
-        }
-
-        /// <summary>
         /// Returns the number of captures.
         /// </summary>
         public int Count
@@ -78,15 +59,9 @@ namespace System.Text.RegularExpressions
         /// Copies all the elements of the collection to the given array
         /// beginning at the given index.
         /// </summary>
-        void ICollection.CopyTo(Array array, int arrayIndex)
+        public void CopyTo(Capture[] array, int arrayIndex)
         {
-            if (array == null)
-                throw new ArgumentNullException("array");
-
-            for (int i = arrayIndex, j = 0; j < Count; i++, j++)
-            {
-                array.SetValue(this[j], i);
-            }
+            ((ICollection)this).CopyTo(array, arrayIndex);
         }
 
         /// <summary>
@@ -174,11 +149,6 @@ namespace System.Text.RegularExpressions
             return false;
         }
 
-        void ICollection<Capture>.CopyTo(Capture[] array, int arrayIndex)
-        {
-            ((ICollection)this).CopyTo(array, arrayIndex);
-        }
-
         bool ICollection<Capture>.IsReadOnly
         {
             get { return true; }
@@ -238,6 +208,27 @@ namespace System.Text.RegularExpressions
         {
             get { return this[index]; }
             set { throw new NotSupportedException(SR.NotSupported_ReadOnlyCollection); }
+        }
+
+        bool ICollection.IsSynchronized
+        {
+            get { return false; }
+        }
+
+        object ICollection.SyncRoot
+        {
+            get { return _group; }
+        }
+
+        void ICollection.CopyTo(Array array, int arrayIndex)
+        {
+            if (array == null)
+                throw new ArgumentNullException("array");
+
+            for (int i = arrayIndex, j = 0; j < Count; i++, j++)
+            {
+                array.SetValue(this[j], i);
+            }
         }
     }
 

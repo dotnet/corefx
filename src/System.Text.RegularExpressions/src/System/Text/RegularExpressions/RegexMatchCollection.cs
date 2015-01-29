@@ -101,22 +101,6 @@ namespace System.Text.RegularExpressions
             }
         }
 
-        Object ICollection.SyncRoot
-        {
-            get
-            {
-                return this;
-            }
-        }
-
-        bool ICollection.IsSynchronized
-        {
-            get
-            {
-                return false;
-            }
-        }
-
         /// <summary>
         /// Returns the ith Match in the collection.
         /// </summary>
@@ -139,10 +123,10 @@ namespace System.Text.RegularExpressions
         /// Copies all the elements of the collection to the given array
         /// starting at the given index.
         /// </summary>
-        void ICollection.CopyTo(Array array, int arrayIndex)
+        public void CopyTo(Match[] array, int arrayIndex)
         {
             EnsureInitialized();
-            ((ICollection)_matches).CopyTo(array, arrayIndex);
+            _matches.CopyTo(array, arrayIndex);
         }
 
         /// <summary>
@@ -206,11 +190,6 @@ namespace System.Text.RegularExpressions
             return false;
         }
 
-        void ICollection<Match>.CopyTo(Match[] array, int arrayIndex)
-        {
-            ((ICollection)this).CopyTo(array, arrayIndex);
-        }
-
         bool ICollection<Match>.IsReadOnly
         {
             get { return true; }
@@ -270,6 +249,22 @@ namespace System.Text.RegularExpressions
         {
             get { return this[index]; }
             set { throw new NotSupportedException(SR.NotSupported_ReadOnlyCollection); }
+        }
+
+        bool ICollection.IsSynchronized
+        {
+            get { return false; }
+        }
+
+        object ICollection.SyncRoot
+        {
+            get { return this; }
+        }
+
+        void ICollection.CopyTo(Array array, int arrayIndex)
+        {
+            EnsureInitialized();
+            ((ICollection)_matches).CopyTo(array, arrayIndex);
         }
     }
 
