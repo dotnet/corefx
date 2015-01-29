@@ -32,7 +32,7 @@ namespace System.Text.RegularExpressions
         internal int _startat;
         internal int _prevlen;
 
-        private static int s_infinite = 0x7FFFFFFF;
+        private const int Infinite = 0x7FFFFFFF;
 
         internal MatchCollection(Regex regex, String input, int beginning, int length, int startat)
         {
@@ -85,7 +85,7 @@ namespace System.Text.RegularExpressions
         {
             if (!_done)
             {
-                GetMatch(s_infinite);
+                GetMatch(Infinite);
             }
         }
 
