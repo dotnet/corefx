@@ -231,9 +231,15 @@ namespace System.Collections.Specialized
             if (array.Length - index < _count)
                 throw new ArgumentException(SR.Arg_InsufficientSpace);
 
+            if (_count == 0)
+                return;
+
+            int[] indices = new int[1]; // SetValue takes a params array; lifting out the implicit allocation from the loop
+
             for (DictionaryNode node = _head; node != null; node = node.next)
             {
-                array.SetValue(new DictionaryEntry(node.key, node.value), index);
+                indices[0] = index;
+                array.SetValue(new DictionaryEntry(node.key, node.value), indices);
                 index++;
             }
         }
@@ -388,9 +394,16 @@ namespace System.Collections.Specialized
                     throw new ArgumentNullException("array");
                 if (index < 0)
                     throw new ArgumentOutOfRangeException("index", SR.ArgumentOutOfRange_NeedNonNegNum);
+
+                if (_list.Count == 0)
+                    return;
+
+                int[] indices = new int[1]; // SetValue takes a params array; lifting out the implicit allocation from the loop
+
                 for (DictionaryNode node = _list._head; node != null; node = node.next)
                 {
-                    array.SetValue(_isKeys ? node.key : node.value, index);
+                    indices[0] = index;
+                    array.SetValue(_isKeys ? node.key : node.value, indices);
                     index++;
                 }
             }
@@ -399,12 +412,7 @@ namespace System.Collections.Specialized
             {
                 get
                 {
-                    int count = 0;
-                    for (DictionaryNode node = _list._head; node != null; node = node.next)
-                    {
-                        count++;
-                    }
-                    return count;
+                    return _list.Count;
                 }
             }
 

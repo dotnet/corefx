@@ -434,12 +434,19 @@ namespace System.Collections
             Contract.Requires(array.Rank == 1);
 
             bucket[] lbuckets = _buckets;
+
+            if (lbuckets.Length == 0)
+                return;
+
+            int[] indices = new int[1]; // SetValue takes a params array; lifting out the implicit allocation from the loop
+
             for (int i = lbuckets.Length; --i >= 0;)
             {
                 Object keyv = lbuckets[i].key;
                 if ((keyv != null) && (keyv != _buckets))
                 {
-                    array.SetValue(keyv, arrayIndex++);
+                    indices[0] = arrayIndex++;
+                    array.SetValue(keyv, indices);
                 }
             }
         }
@@ -453,13 +460,20 @@ namespace System.Collections
             Contract.Requires(array.Rank == 1);
 
             bucket[] lbuckets = _buckets;
+
+            if (lbuckets.Length == 0)
+                return;
+
+            int[] indices = new int[1]; // SetValue takes a params array; lifting out the implicit allocation from the loop
+
             for (int i = lbuckets.Length; --i >= 0;)
             {
                 Object keyv = lbuckets[i].key;
                 if ((keyv != null) && (keyv != _buckets))
                 {
                     DictionaryEntry entry = new DictionaryEntry(keyv, lbuckets[i].val);
-                    array.SetValue(entry, arrayIndex++);
+                    indices[0] = arrayIndex++;
+                    array.SetValue(entry, indices);
                 }
             }
         }
@@ -511,12 +525,19 @@ namespace System.Collections
             Contract.Requires(array.Rank == 1);
 
             bucket[] lbuckets = _buckets;
+
+            if (lbuckets.Length == 0)
+                return;
+
+            int[] indices = new int[1]; // SetValue takes a params array; lifting out the implicit allocation from the loop
+
             for (int i = lbuckets.Length; --i >= 0;)
             {
                 Object keyv = lbuckets[i].key;
                 if ((keyv != null) && (keyv != _buckets))
                 {
-                    array.SetValue(lbuckets[i].val, arrayIndex++);
+                    indices[0] = arrayIndex++;
+                    array.SetValue(lbuckets[i].val, indices);
                 }
             }
         }

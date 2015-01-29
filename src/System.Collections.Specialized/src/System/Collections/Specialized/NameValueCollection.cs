@@ -203,13 +203,20 @@ namespace System.Collections.Specialized
             }
 
             int n = Count;
+
+            if (n == 0)
+                return;
+
+            int[] indices = new int[1]; // SetValue takes a params array; lifting out the implicit allocation from the loop
+
             if (_all == null)
             {
                 String[] all = new String[n];
                 for (int i = 0; i < n; i++)
                 {
                     all[i] = Get(i);
-                    dest.SetValue(all[i], i + index);
+                    indices[0] = i + index;
+                    dest.SetValue(all[i], indices);
                 }
                 _all = all; // wait until end of loop to set _all reference in case Get throws
             }
@@ -217,7 +224,8 @@ namespace System.Collections.Specialized
             {
                 for (int i = 0; i < n; i++)
                 {
-                    dest.SetValue(_all[i], i + index);
+                    indices[0] = i + index;
+                    dest.SetValue(_all[i], indices);
                 }
             }
         }

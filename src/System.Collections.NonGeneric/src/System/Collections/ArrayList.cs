@@ -1007,8 +1007,16 @@ namespace System.Collections
                 if (_list.Count - index < count)
                     throw new ArgumentException(SR.Argument_InvalidOffLen);
 
+                if (_list.Count == 0 || count == 0)
+                    return;
+
+                int[] indices = new int[1]; // SetValue takes a params array; lifting out the implicit allocation from the loop
+
                 for (int i = index; i < index + count; i++)
-                    array.SetValue(_list[i], arrayIndex++);
+                {
+                    indices[0] = arrayIndex++;
+                    array.SetValue(_list[i], indices);
+                }
             }
 
             public override IEnumerator GetEnumerator()

@@ -470,9 +470,16 @@ namespace System.Collections.Specialized
                     throw new ArgumentNullException("array");
                 if (index < 0)
                     throw new ArgumentOutOfRangeException("index");
+
+                if (_objects.Count == 0)
+                    return;
+
+                int[] indices = new int[1]; // SetValue takes a params array; lifting out the implicit allocation from the loop
+
                 foreach (object o in _objects)
                 {
-                    array.SetValue(_isKeys ? ((DictionaryEntry)o).Key : ((DictionaryEntry)o).Value, index);
+                    indices[0] = index;
+                    array.SetValue(_isKeys ? ((DictionaryEntry)o).Key : ((DictionaryEntry)o).Value, indices);
                     index++;
                 }
             }
