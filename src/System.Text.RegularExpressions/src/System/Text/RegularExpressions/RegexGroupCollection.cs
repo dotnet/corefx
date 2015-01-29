@@ -67,26 +67,20 @@ namespace System.Text.RegularExpressions
         {
             if (_captureMap != null)
             {
-                Object o;
-
-                o = _captureMap[groupnum];
-                if (o == null)
+                int index;
+                if (!_captureMap.TryGetValue(groupnum, out index))
                     return Group._emptygroup;
-                //throw new ArgumentOutOfRangeException("groupnum");
 
-                return GetGroupImpl((int)o);
+                return GetGroupImpl(index);
             }
             else
             {
-                //if (groupnum >= _match._regex.CapSize || groupnum < 0)
-                //   throw new ArgumentOutOfRangeException("groupnum");
                 if (groupnum >= _match._matchcount.Length || groupnum < 0)
                     return Group._emptygroup;
 
                 return GetGroupImpl(groupnum);
             }
         }
-
 
         /*
          * Caches the group objects
