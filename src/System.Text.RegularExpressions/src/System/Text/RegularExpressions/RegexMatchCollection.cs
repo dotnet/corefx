@@ -171,28 +171,28 @@ namespace System.Text.RegularExpressions
 
         void IList<Match>.Insert(int index, Match item)
         {
-            throw new NotSupportedException();
+            throw new NotSupportedException(SR.NotSupported_ReadOnlyCollection);
         }
 
         void IList<Match>.RemoveAt(int index)
         {
-            throw new NotSupportedException();
+            throw new NotSupportedException(SR.NotSupported_ReadOnlyCollection);
         }
 
         Match IList<Match>.this[int index]
         {
             get { return this[index]; }
-            set { throw new NotSupportedException(); }
+            set { throw new NotSupportedException(SR.NotSupported_ReadOnlyCollection); }
         }
 
         void ICollection<Match>.Add(Match item)
         {
-            throw new NotSupportedException();
+            throw new NotSupportedException(SR.NotSupported_ReadOnlyCollection);
         }
 
         void ICollection<Match>.Clear()
         {
-            throw new NotSupportedException();
+            throw new NotSupportedException(SR.NotSupported_ReadOnlyCollection);
         }
 
         bool ICollection<Match>.Contains(Match item)
@@ -218,17 +218,17 @@ namespace System.Text.RegularExpressions
 
         bool ICollection<Match>.Remove(Match item)
         {
-            throw new NotSupportedException();
+            throw new NotSupportedException(SR.NotSupported_ReadOnlyCollection);
         }
 
         int IList.Add(object value)
         {
-            throw new NotSupportedException();
+            throw new NotSupportedException(SR.NotSupported_ReadOnlyCollection);
         }
 
         void IList.Clear()
         {
-            throw new NotSupportedException();
+            throw new NotSupportedException(SR.NotSupported_ReadOnlyCollection);
         }
 
         bool IList.Contains(object value)
@@ -243,7 +243,7 @@ namespace System.Text.RegularExpressions
 
         void IList.Insert(int index, object value)
         {
-            throw new NotSupportedException();
+            throw new NotSupportedException(SR.NotSupported_ReadOnlyCollection);
         }
 
         bool IList.IsFixedSize
@@ -258,18 +258,18 @@ namespace System.Text.RegularExpressions
 
         void IList.Remove(object value)
         {
-            throw new NotSupportedException();
+            throw new NotSupportedException(SR.NotSupported_ReadOnlyCollection);
         }
 
         void IList.RemoveAt(int index)
         {
-            throw new NotSupportedException();
+            throw new NotSupportedException(SR.NotSupported_ReadOnlyCollection);
         }
 
         object IList.this[int index]
         {
             get { return this[index]; }
-            set { throw new NotSupportedException(); }
+            set { throw new NotSupportedException(SR.NotSupported_ReadOnlyCollection); }
         }
     }
 
