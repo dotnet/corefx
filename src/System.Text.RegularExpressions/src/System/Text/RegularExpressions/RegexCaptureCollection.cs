@@ -23,9 +23,9 @@ namespace System.Text.RegularExpressions
     [DebuggerTypeProxy(typeof(RegexCollectionDebuggerProxy<>))]
     public class CaptureCollection : IList<Capture>, IReadOnlyList<Capture>, IList
     {
-        internal Group _group;
-        internal int _capcount;
-        internal Capture[] _captures;
+        private readonly Group _group;
+        private readonly int _capcount;
+        private Capture[] _captures;
 
         internal CaptureCollection(Group group)
         {

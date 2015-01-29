@@ -18,16 +18,16 @@ namespace System.Text.RegularExpressions
     [DebuggerTypeProxy(typeof(RegexCollectionDebuggerProxy<>))]
     public class GroupCollection : IList<Group>, IReadOnlyList<Group>, IList
     {
-        internal Match _match;
-        internal Dictionary<Int32, Int32> _captureMap;
+        private readonly Match _match;
+        private readonly Dictionary<int, int> _captureMap;
 
         // cache of Group objects fed to the user
-        internal Group[] _groups;
+        private Group[] _groups;
 
         /*
          * Nonpublic constructor
          */
-        internal GroupCollection(Match match, Dictionary<Int32, Int32> caps)
+        internal GroupCollection(Match match, Dictionary<int, int> caps)
         {
             _match = match;
             _captureMap = caps;

@@ -23,18 +23,18 @@ namespace System.Text.RegularExpressions
     [DebuggerTypeProxy(typeof(RegexCollectionDebuggerProxy<>))]
     public class MatchCollection : IList<Match>, IReadOnlyList<Match>, IList
     {
-        internal Regex _regex;
-        internal List<Match> _matches;
-        internal bool _done;
-        internal String _input;
-        internal int _beginning;
-        internal int _length;
-        internal int _startat;
-        internal int _prevlen;
+        private readonly Regex _regex;
+        private readonly List<Match> _matches;
+        private bool _done;
+        private readonly string _input;
+        private readonly int _beginning;
+        private readonly int _length;
+        private int _startat;
+        private int _prevlen;
 
         private const int Infinite = 0x7FFFFFFF;
 
-        internal MatchCollection(Regex regex, String input, int beginning, int length, int startat)
+        internal MatchCollection(Regex regex, string input, int beginning, int length, int startat)
         {
             if (startat < 0 || startat > input.Length)
                 throw new ArgumentOutOfRangeException("startat", SR.BeginIndexNotNegative);
