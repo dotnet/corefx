@@ -69,12 +69,12 @@ namespace System.Text.RegularExpressions
         /// </summary>
         public IEnumerator GetEnumerator()
         {
-            return new CaptureEnumerator(this);
+            return new Enumerator(this);
         }
 
         IEnumerator<Capture> IEnumerable<Capture>.GetEnumerator()
         {
-            return new CaptureEnumerator(this);
+            return new Enumerator(this);
         }
 
         /*
@@ -230,80 +230,54 @@ namespace System.Text.RegularExpressions
                 array.SetValue(this[j], i);
             }
         }
-    }
 
-
-    /*
-     * This non-public enumerator lists all the captures
-     * Should it be public?
-     */
-
-    internal class CaptureEnumerator : IEnumerator<Capture>
-    {
-        internal CaptureCollection _rcc;
-        internal int _curindex;
-
-        /*
-         * Nonpublic constructor
-         */
-        internal CaptureEnumerator(CaptureCollection rcc)
+        private class Enumerator : IEnumerator<Capture>
         {
-            _curindex = -1;
-            _rcc = rcc;
-        }
+            private readonly CaptureCollection _collection;
+            private int _index;
 
-        /*
-         * As required by IEnumerator
-         */
-        public bool MoveNext()
-        {
-            int size = _rcc.Count;
-
-            if (_curindex >= size)
-                return false;
-
-            _curindex++;
-
-            return (_curindex < size);
-        }
-
-        /*
-         * As required by IEnumerator
-         */
-        public Object Current
-        {
-            get { return Capture; }
-        }
-
-        Capture IEnumerator<Capture>.Current
-        {
-            get { return Capture; }
-        }
-
-        /*
-         * Returns the current capture
-         */
-        public Capture Capture
-        {
-            get
+            internal Enumerator(CaptureCollection collection)
             {
-                if (_curindex < 0 || _curindex >= _rcc.Count)
-                    throw new InvalidOperationException(SR.EnumNotStarted);
-
-                return _rcc[_curindex];
+                _collection = collection;
+                _index = -1;
             }
-        }
 
-        /*
-         * Reset to before the first item
-         */
-        public void Reset()
-        {
-            _curindex = -1;
-        }
+            public bool MoveNext()
+            {
+                int size = _collection.Count;
 
-        void IDisposable.Dispose()
-        {
+                if (_index >= size)
+                    return false;
+
+                _index++;
+
+                return (_index < size);
+            }
+
+            public Capture Current
+            {
+                get
+                {
+                    if (_index < 0 || _index >= _collection.Count)
+                        throw new InvalidOperationException(SR.EnumNotStarted);
+
+                    return _collection[_index];
+                }
+            }
+
+            object IEnumerator.Current
+            {
+                get { return Current; }
+            }
+
+            void IEnumerator.Reset()
+            {
+                _index = -1;
+            }
+
+            void IDisposable.Dispose()
+            {
+            }
         }
     }
 }
