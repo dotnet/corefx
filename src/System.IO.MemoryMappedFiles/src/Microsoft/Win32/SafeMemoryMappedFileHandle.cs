@@ -7,33 +7,18 @@ using System.Security;
 
 namespace Microsoft.Win32.SafeHandles
 {
-    // Reliability notes:
-    // ReleaseHandle has reliability guarantee of Cer.Success, as defined by SafeHandle.
-    // It gets prepared as a CER at instance construction time.
-
     [SecurityCritical]
-    public sealed class SafeMemoryMappedFileHandle : SafeHandle
+    public sealed partial class SafeMemoryMappedFileHandle : SafeHandle
     {
-        internal SafeMemoryMappedFileHandle() : base(IntPtr.Zero, true) { }
+        internal SafeMemoryMappedFileHandle()
+            : base(new IntPtr(DefaultInvalidHandleValue), true)
+        {
+        }
 
         internal SafeMemoryMappedFileHandle(IntPtr handle, bool ownsHandle)
-            : base(IntPtr.Zero, ownsHandle)
+            : base(new IntPtr(DefaultInvalidHandleValue), ownsHandle)
         {
             SetHandle(handle);
-        }
-
-        override protected bool ReleaseHandle()
-        {
-            return Interop.mincore.CloseHandle(handle);
-        }
-
-        public override bool IsInvalid
-        {
-            [SecurityCritical]
-            get
-            {
-                return handle == new IntPtr(0) || handle == new IntPtr(-1);
-            }
         }
     }
 }
