@@ -15,6 +15,7 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="AssemblyInfo.cs" />
     <Compile Include="CaseInsensitiveComparer\CaseInsensitiveComparer_ctor.cs" />
     <Compile Include="CaseInsensitiveComparer\CaseInsensitiveComparer_CultureInfo.cs" />
     <Compile Include="CaseInsensitiveComparer\CaseInsensitiveComparer_Default.cs" />
