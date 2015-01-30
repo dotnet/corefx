@@ -50,8 +50,8 @@ namespace System.IO
 
             // Copy the contents of the file from the source to the destination, creating the destination in the process
             const int bufferSize = 0x1000;
-            using (UnixFileStream src = new UnixFileStream(sourceFullPath, FileMode.Open, FileAccess.Read, FileShare.Read, bufferSize, FileOptions.None))
-            using (UnixFileStream dst = new UnixFileStream(destFullPath, overwrite ? FileMode.CreateNew : FileMode.Create, FileAccess.Read, FileShare.Read, bufferSize, FileOptions.None))
+            using (UnixFileStream src = new UnixFileStream(sourceFullPath, FileMode.Open, FileAccess.Read, FileShare.Read, bufferSize, FileOptions.None, null))
+            using (UnixFileStream dst = new UnixFileStream(destFullPath, overwrite ? FileMode.CreateNew : FileMode.Create, FileAccess.Read, FileShare.Read, bufferSize, FileOptions.None, null))
             {
                 src.CopyTo(dst);
             }
