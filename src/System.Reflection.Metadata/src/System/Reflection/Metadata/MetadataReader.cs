@@ -381,6 +381,16 @@ namespace System.Reflection.Metadata
         internal MethodSpecTableReader MethodSpecTable;
         internal GenericParamConstraintTableReader GenericParamConstraintTable;
 
+        // debug tables
+        internal DocumentTableReader DocumentTable;
+        internal MethodBodyTableReader MethodBodyTable; 
+        internal LocalScopeTableReader LocalScopeTable;
+        internal LocalVariableTableReader LocalVariableTable;
+        internal LocalConstantTableReader LocalConstantTable;
+        internal ImportScopeTableReader ImportScopeTable;
+        internal AsyncMethodTableReader AsyncMethodTable;
+        internal CustomDebugInformationTableReader CustomDebugInformationTable;
+
         private void ReadMetadataTableHeader(ref BlobReader memReader, out uint[] metadataTableRowCounts)
         {
             if (memReader.RemainingBytes < MetadataStreamConstants.SizeOfMetadataTableHeader)
@@ -399,10 +409,10 @@ namespace System.Reflection.Metadata
 
             // According to ECMA-335, MajorVersion and MinorVersion have fixed values and, 
             // based on recommendation in 24.1 Fixed fields: When writing these fields it 
-            // is best that they be set to the value indicated, on reading they should be ignored.?
-            // we will not be checking version values. We will continue checking that the set of 
+            // is best that they be set to the value indicated, on reading they should be ignored.
+            // We will not be checking version values. We will continue checking that the set of 
             // present tables is within the set we understand.
-            ulong validTables = (ulong)TableMask.V2_0_TablesMask;
+            ulong validTables = (ulong)TableMask.V3_0_TablesMask;
 
             if ((presentTables & ~validTables) != 0)
             {
@@ -492,6 +502,7 @@ namespace System.Reflection.Metadata
             int customAttributeTypeRefSize = ComputeCodedTokenSize(CustomAttributeTypeTag.LargeRowSize, rowCounts, CustomAttributeTypeTag.TablesReferenced);
             int resolutionScopeRefSize = ComputeCodedTokenSize(ResolutionScopeTag.LargeRowSize, rowCounts, ResolutionScopeTag.TablesReferenced);
             int typeOrMethodDefRefSize = ComputeCodedTokenSize(TypeOrMethodDefTag.LargeRowSize, rowCounts, TypeOrMethodDefTag.TablesReferenced);
+            int hasCustomDebugInformationRefSize = ComputeCodedTokenSize(HasCustomDebugInformationTag.LargeRowSize, rowCounts, HasCustomDebugInformationTag.TablesReferenced);
 
             // Compute HeapRef Sizes
             int stringHeapRefSize = (_MetadataTableHeader.HeapSizeFlags & HeapSizeFlag.StringHeapLarge) == HeapSizeFlag.StringHeapLarge ? LargeIndexSize : SmallIndexSize;
@@ -640,6 +651,32 @@ namespace System.Reflection.Metadata
 
             this.GenericParamConstraintTable = new GenericParamConstraintTableReader(rowCounts[(int)TableIndex.GenericParamConstraint], IsDeclaredSorted(TableMask.GenericParamConstraint), referenceSizes[(int)TableIndex.GenericParam], typeDefOrRefRefSize, metadataTablesMemoryBlock, totalRequiredSize);
             totalRequiredSize += this.GenericParamConstraintTable.Block.Length;
+
+            // debug tables:
+
+            this.DocumentTable = new DocumentTableReader(rowCounts[(int)TableIndex.Document], guidHeapRefSize, blobHeapRefSize, metadataTablesMemoryBlock, totalRequiredSize);
+            totalRequiredSize += this.DocumentTable.Block.Length;
+
+            this.MethodBodyTable = new MethodBodyTableReader(rowCounts[(int)TableIndex.MethodBody], blobHeapRefSize, metadataTablesMemoryBlock, totalRequiredSize);
+            totalRequiredSize += this.MethodBodyTable.Block.Length;
+
+            this.LocalScopeTable = new LocalScopeTableReader(rowCounts[(int)TableIndex.LocalScope], methodRefSize, referenceSizes[(int)TableIndex.ImportScope], referenceSizes[(int)TableIndex.LocalVariable], referenceSizes[(int)TableIndex.LocalConstant], metadataTablesMemoryBlock, totalRequiredSize);
+            totalRequiredSize += this.LocalScopeTable.Block.Length;
+
+            this.LocalVariableTable = new LocalVariableTableReader(rowCounts[(int)TableIndex.LocalVariable], stringHeapRefSize, metadataTablesMemoryBlock, totalRequiredSize);
+            totalRequiredSize += this.LocalVariableTable.Block.Length;
+
+            this.LocalConstantTable = new LocalConstantTableReader(rowCounts[(int)TableIndex.LocalConstant], stringHeapRefSize, blobHeapRefSize, metadataTablesMemoryBlock, totalRequiredSize);
+            totalRequiredSize += this.LocalConstantTable.Block.Length;
+
+            this.ImportScopeTable = new ImportScopeTableReader(rowCounts[(int)TableIndex.ImportScope], referenceSizes[(int)TableIndex.ImportScope], blobHeapRefSize, metadataTablesMemoryBlock, totalRequiredSize);
+            totalRequiredSize += this.ImportScopeTable.Block.Length;
+
+            this.AsyncMethodTable = new AsyncMethodTableReader(rowCounts[(int)TableIndex.AsyncMethod], methodRefSize, blobHeapRefSize, metadataTablesMemoryBlock, totalRequiredSize);
+            totalRequiredSize += this.AsyncMethodTable.Block.Length;
+
+            this.CustomDebugInformationTable = new CustomDebugInformationTableReader(rowCounts[(int)TableIndex.CustomDebugInformation], hasCustomDebugInformationRefSize, guidHeapRefSize, blobHeapRefSize, metadataTablesMemoryBlock, totalRequiredSize);
+            totalRequiredSize += this.CustomDebugInformationTable.Block.Length;
 
             if (totalRequiredSize > metadataTablesMemoryBlock.Length)
             {
@@ -810,6 +847,46 @@ namespace System.Reflection.Metadata
             }
         }
 
+        internal void GetLocalVariableRange(LocalScopeHandle scope, out int firstVariableRowId, out int lastVariableRowId)
+        {
+            uint scopeRowId = scope.RowId;
+
+            firstVariableRowId = (int)this.LocalScopeTable.GetVariableStart(scopeRowId);
+            if (firstVariableRowId == 0)
+            {
+                firstVariableRowId = 1;
+                lastVariableRowId = 0;
+            }
+            else if (scopeRowId == this.LocalScopeTable.NumberOfRows)
+            {
+                lastVariableRowId = (int)this.LocalVariableTable.NumberOfRows;
+            }
+            else
+            {
+                lastVariableRowId = (int)this.LocalScopeTable.GetVariableStart(scopeRowId + 1) - 1;
+        }
+        }
+
+        internal void GetLocalConstantRange(LocalScopeHandle scope, out int firstConstantRowId, out int lastConstantRowId)
+        {
+            uint scopeRowId = scope.RowId;
+
+            firstConstantRowId = (int)this.LocalScopeTable.GetConstantStart(scopeRowId);
+            if (firstConstantRowId == 0)
+            {
+                firstConstantRowId = 1;
+                lastConstantRowId = 0;
+            }
+            else if (scopeRowId == this.LocalScopeTable.NumberOfRows)
+            {
+                lastConstantRowId = (int)this.LocalConstantTable.NumberOfRows;
+            }
+            else
+            {
+                lastConstantRowId = (int)this.LocalScopeTable.GetConstantStart(scopeRowId + 1) - 1;
+            }
+        }
+
         // TODO: move throw helpers to common place.
         [MethodImpl(MethodImplOptions.NoInlining)]
         private static void ThrowValueArgumentNull()
@@ -917,6 +994,46 @@ namespace System.Reflection.Metadata
             get { return new PropertyDefinitionHandleCollection(this); }
         }
 
+        public DocumentHandleCollection Documents
+        {
+            get { return new DocumentHandleCollection(this); }
+        }
+
+        public MethodBodyHandleCollection MethodBodies
+        {
+            get { return new MethodBodyHandleCollection(this); }
+        }
+
+        public LocalScopeHandleCollection LocalScopes
+        {
+            get { return new LocalScopeHandleCollection(this); }
+        }
+
+        public LocalVariableHandleCollection LocalVariables
+        {
+            get { return new LocalVariableHandleCollection(this, default(LocalScopeHandle)); }
+        }
+
+        public LocalConstantHandleCollection LocalConstants
+        {
+            get { return new LocalConstantHandleCollection(this, default(LocalScopeHandle)); }
+        }
+
+        public AsyncMethodHandleCollection AsyncMethods
+        {
+            get { return new AsyncMethodHandleCollection(this); }
+        }
+
+        public ImportScopeCollection ImportScopes
+        {
+            get { return new ImportScopeCollection(this); }
+        }
+
+        public CustomDebugInformationHandleCollection CustomDebugInformation
+        {
+            get { return new CustomDebugInformationHandleCollection(this); }
+        }
+
         public AssemblyDefinition GetAssemblyDefinition()
         {
             if (!IsAssembly)
@@ -956,7 +1073,7 @@ namespace System.Reflection.Metadata
 
         public BlobReader GetBlobReader(BlobHandle handle)
         {
-            return BlobStream.GetBlobReader(handle);
+            return new BlobReader(BlobStream.GetMemoryBlock(handle));
         }
 
         public string GetUserString(UserStringHandle handle)
@@ -1208,6 +1325,83 @@ namespace System.Reflection.Metadata
             }
 
             return TypeDefTable.FindTypeContainingField(fieldRowId, (int)FieldTable.NumberOfRows);
+        }
+
+        public SequencePointBlobReader GetSequencePointsReader(BlobHandle handle)
+        {
+            return new SequencePointBlobReader(BlobStream.GetMemoryBlock(handle));
+        }
+
+        public string ReadDocumentName(BlobHandle handle)
+        {
+            // TODO: optimize
+
+            var blobReader = GetBlobReader(handle);
+
+            // TODO: should be UTF8
+            char separator = (char)blobReader.ReadByte();
+
+            // TODO: pool
+            var result = new StringBuilder();
+            while (blobReader.RemainingBytes > 0)
+            {
+                if (separator != 0 && result.Length > 0)
+                {
+                    result.Append(separator);
+                }
+
+                // TODO: range checks
+                var partHandle = BlobHandle.FromIndex((uint)blobReader.ReadCompressedInteger());
+                var partBytes = GetBlobBytes(partHandle);
+                result.Append(Encoding.UTF8.GetString(partBytes, 0, partBytes.Length));
+            }
+
+            return result.ToString();
+        }
+
+        public Document GetDocument(DocumentHandle handle)
+        {
+            return new Document(this, handle);
+        }
+
+        public MethodBody GetMethodBody(MethodBodyHandle handle)
+        {
+            return new MethodBody(this, handle);
+        }
+
+        public MethodBody GetMethodBody(MethodDefinitionHandle handle)
+        {
+            return new MethodBody(this, MethodBodyHandle.FromRowId(handle.RowId));
+        }
+
+        public LocalScope GetLocalScope(LocalScopeHandle handle)
+        {
+            return new LocalScope(this, handle);
+        }
+
+        public LocalVariable GetLocalVariable(LocalVariableHandle handle)
+        {
+            return new LocalVariable(this, handle);
+        }
+
+        public LocalConstant GetLocalConstant(LocalConstantHandle handle)
+        {
+            return new LocalConstant(this, handle);
+        }
+
+        public AsyncMethod GetAsyncMethod(AsyncMethodHandle handle)
+        {
+            return new AsyncMethod(this, handle);
+        }
+
+        public ImportScope GetImportScope(ImportScopeHandle handle)
+        {
+            return new ImportScope(this, handle);
+        }
+
+        public CustomDebugInformation GetCustomDebugInformation(CustomDebugInformationHandle handle)
+        {
+            return new CustomDebugInformation(this, handle);
         }
 
         #endregion

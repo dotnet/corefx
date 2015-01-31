@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft. All rights reserved.
+﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Runtime.CompilerServices;
@@ -370,6 +370,45 @@ namespace System.Reflection.Metadata.Ecma335
         {
             return Metadata.AssemblyFileHandle.FromRowId((uint)(rowNumber & TokenTypeIds.RIDMask));
         }
+
+        // debug
+
+        public static DocumentHandle DocumentHandle(int rowNumber)
+        {
+            return Metadata.DocumentHandle.FromRowId((uint)(rowNumber & TokenTypeIds.RIDMask));
+        }
+
+        public static LocalScopeHandle LocalScopeHandle(int rowNumber)
+        {
+            return Metadata.LocalScopeHandle.FromRowId((uint)(rowNumber & TokenTypeIds.RIDMask));
+        }
+
+        public static LocalVariableHandle LocalVariableHandle(int rowNumber)
+        {
+            return Metadata.LocalVariableHandle.FromRowId((uint)(rowNumber & TokenTypeIds.RIDMask));
+        }
+
+        public static LocalConstantHandle LocalConstantHandle(int rowNumber)
+        {
+            return Metadata.LocalConstantHandle.FromRowId((uint)(rowNumber & TokenTypeIds.RIDMask));
+        }
+
+        public static ImportScopeHandle ImportScopeHandle(int rowNumber)
+        {
+            return Metadata.ImportScopeHandle.FromRowId((uint)(rowNumber & TokenTypeIds.RIDMask));
+        }
+
+        public static AsyncMethodHandle AsyncMethodHandle(int rowNumber)
+        {
+            return Metadata.AsyncMethodHandle.FromRowId((uint)(rowNumber & TokenTypeIds.RIDMask));
+        }
+
+        public static CustomDebugInformationHandle CustomDebugInformationHandle(int rowNumber)
+        {
+            return Metadata.CustomDebugInformationHandle.FromRowId((uint)(rowNumber & TokenTypeIds.RIDMask));
+        }
+
+        // heaps
 
         public static UserStringHandle UserStringHandle(int offset)
         {

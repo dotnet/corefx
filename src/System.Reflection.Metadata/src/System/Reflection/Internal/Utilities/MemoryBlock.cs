@@ -23,6 +23,27 @@ namespace System.Reflection.Internal
             this.Length = length;
         }
 
+        internal static MemoryBlock CreateChecked(byte* buffer, int length)
+        {
+            if (length < 0)
+            {
+                throw new ArgumentOutOfRangeException("length");
+            }
+
+            if (buffer == null && length != 0)
+            {
+                throw new ArgumentNullException("buffer");
+            }
+
+            // the reader performs little-endian specific operations
+            if (!BitConverter.IsLittleEndian)
+            {
+                throw new PlatformNotSupportedException(MetadataResources.LitteEndianArchitectureRequired);
+            }
+
+            return new MemoryBlock(buffer, length);
+        }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void CheckBounds(int offset, int byteCount)
         {
@@ -70,6 +91,31 @@ namespace System.Reflection.Internal
             }
 
             return result;
+        }
+
+        internal string GetDebuggerDisplay(int offset)
+        {
+            if (Pointer == null)
+            {
+                return "<null>";
+            }
+
+            int displayedBytes;
+            string display = GetDebuggerDisplay(out displayedBytes);
+            if (offset < displayedBytes)
+            {
+                display = display.Insert(offset * 3, "*");
+            }
+            else if (displayedBytes == Length)
+            {
+                display += "*";
+            }
+            else
+            {
+                display += "*...";
+            }
+
+            return display;
         }
 
         internal MemoryBlock GetMemoryBlockAt(int offset, int length)

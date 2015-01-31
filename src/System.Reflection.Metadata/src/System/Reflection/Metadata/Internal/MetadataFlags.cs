@@ -59,6 +59,15 @@ namespace System.Reflection.Metadata.Ecma335
         MethodSpec = 1UL << TableIndex.MethodSpec,
         GenericParamConstraint = 1UL << TableIndex.GenericParamConstraint,
 
+        Document = 1UL << TableIndex.Document,
+        MethodBody = 1UL << TableIndex.MethodBody,
+        LocalScope = 1UL << TableIndex.LocalScope,
+        LocalVariable = 1UL << TableIndex.LocalVariable,
+        LocalConstant = 1UL << TableIndex.LocalConstant,
+        ImportScope = 1UL << TableIndex.ImportScope,
+        AsyncMethod = 1UL << TableIndex.AsyncMethod,
+        CustomDebugInformation = 1UL << TableIndex.CustomDebugInformation,
+
         PtrTables =
             FieldPtr
           | MethodPtr
@@ -107,6 +116,20 @@ namespace System.Reflection.Metadata.Ecma335
           | GenericParam
           | MethodSpec
           | GenericParamConstraint,
+
+        PortablePdb_TablesMask =
+            Document
+          | MethodBody
+          | LocalScope
+          | LocalVariable
+          | LocalConstant
+          | ImportScope
+          | AsyncMethod
+          | CustomDebugInformation,
+
+        V3_0_TablesMask =
+            V2_0_TablesMask 
+          | PortablePdb_TablesMask,
     }
 
     internal enum HeapSizeFlag : byte
@@ -162,6 +185,16 @@ namespace System.Reflection.Metadata.Ecma335
         internal const uint GenericParam = 0x2a000000;
         internal const uint MethodSpec = 0x2b000000;
         internal const uint GenericParamConstraint = 0x2c000000;
+
+        // debug tables:
+        internal const uint Document = (int)TableIndex.Document << 24;
+        internal const uint MethodBody = (int)TableIndex.MethodBody << 24;
+        internal const uint LocalScope = (int)TableIndex.LocalScope << 24;
+        internal const uint LocalVariable = (int)TableIndex.LocalVariable << 24;
+        internal const uint LocalConstant = (int)TableIndex.LocalConstant << 24;
+        internal const uint ImportScope = (int)TableIndex.ImportScope << 24;
+        internal const uint AsyncMethod = (int)TableIndex.AsyncMethod << 24;
+        internal const uint CustomDebugInformation = (int)TableIndex.CustomDebugInformation << 24;
 
         internal const uint UserString = 0x70000000;     // #UserString heap
 

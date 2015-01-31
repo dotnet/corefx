@@ -24,24 +24,8 @@ namespace System.Reflection.Metadata
         private byte* _currentPointer;
 
         public unsafe BlobReader(byte* buffer, int length)
+            : this(MemoryBlock.CreateChecked(buffer, length))
         {
-            if (length < 0)
-            {
-                throw new ArgumentOutOfRangeException("length");
-            }
-
-            if (buffer == null && length != 0)
-            {
-                throw new ArgumentNullException("buffer");
-            }
-
-            // the reader performs little-endian specific operations
-            if (!BitConverter.IsLittleEndian)
-            {
-                throw new PlatformNotSupportedException(MetadataResources.LitteEndianArchitectureRequired);
-            }
-
-            this = new BlobReader(new MemoryBlock(buffer, length));
         }
 
         internal BlobReader(MemoryBlock block)
@@ -52,7 +36,7 @@ namespace System.Reflection.Metadata
             _endPointer = block.Pointer + block.Length;
         }
 
-        private string GetDebuggerDisplay()
+        internal string GetDebuggerDisplay()
         {
             if (_block.Pointer == null)
             {
