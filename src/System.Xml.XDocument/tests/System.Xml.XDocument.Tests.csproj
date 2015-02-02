@@ -21,6 +21,7 @@
     <Compile Include="axes\AxisOrderValidation.cs" />
     <Compile Include="axes\TestData.cs" />
     <Compile Include="axes\InvalidParamValidation.cs" />
+    <Compile Include="System\Xml\XObjectTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Common\tests\XunitTraitsDiscoverers\XunitTraitsDiscoverers.csproj">
