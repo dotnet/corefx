@@ -64,6 +64,9 @@ namespace System.Diagnostics
 
         private static object s_createProcessLock = new object();
 
+        // lockable object only instance is knowledgeable about
+        private readonly object _lockable = new object();
+
         private StreamReadMode _outputStreamReadMode;
         private StreamReadMode _errorStreamReadMode;
 
@@ -832,7 +835,7 @@ namespace System.Diagnostics
         {
             if (!_watchingForExit)
             {
-                lock (this)
+                lock (_lockable)
                 {
                     if (!_watchingForExit)
                     {
@@ -1023,7 +1026,7 @@ namespace System.Diagnostics
         {
             if (!_raisedOnExited)
             {
-                lock (this)
+                lock (_lockable)
                 {
                     if (!_raisedOnExited)
                     {
@@ -1200,7 +1203,7 @@ namespace System.Diagnostics
         {
             if (_watchingForExit)
             {
-                lock (this)
+                lock (_lockable)
                 {
                     if (_watchingForExit)
                     {
