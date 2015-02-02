@@ -73,6 +73,8 @@ Today, the repository contains the following components:
 * **System.Reflection.Metadata**. Provides a highly-tuned, low-level ECMA-335 metadata reader.  This is the same
   reader used by "[Roslyn]" C# and Visual Basic compilers to parse assemblies.
 
+* **System.Runtime**. Provides a set of unit tests for basic run-time types such as String and Int32.
+
 * **System.Text.Encoding.CodePages**. Provides the ability to access existing encoding types for string manipulation 
   across common cultural standards, as well as support to create custom Encoding Providers.
 
