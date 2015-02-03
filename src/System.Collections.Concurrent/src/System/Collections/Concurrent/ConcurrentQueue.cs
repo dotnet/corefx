@@ -142,7 +142,7 @@ namespace System.Collections.Concurrent
         bool ICollection.IsSynchronized
         {
             // Gets a value indicating whether access to this collection is synchronized. Always returns
-            // false. The reason is subtle. While access is in face thread safe, it's not the case that
+            // false. The reason is subtle. While access is in fact thread safe, it's not the case that
             // locking on the SyncRoot would have prevented concurrent pushes and pops, as this property
             // would typically indicate; that's because we internally use CAS operations vs. true locks.
             get { return false; }
