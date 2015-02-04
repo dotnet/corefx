@@ -63,6 +63,9 @@ namespace System.Xml.Linq
 
         private const int StartingHash = (5381 << 16) + 5381;   // Starting hash code value for string keys to be hashed
 
+        // lockable object only instance is knowledgeable about
+        private readonly object _lockable = new object();
+
         /// <summary>
         /// Prototype of function which is called to extract a string key value from a hashed value.
         /// Returns null if the hashed value is invalid (e.g. value has been released due to a WeakReference TValue being cleaned up).
@@ -105,7 +108,7 @@ namespace System.Xml.Linq
                 // We only want one thread to perform a resize, as it is an expensive operation
                 // First thread will perform resize; waiting threads will call Resize(), but should immediately
                 // return since there will almost always be space in the hash table resized by the first thread.
-                lock (this)
+                lock (_lockable)
                 {
                     XHashtableState newState = _state.Resize();
 

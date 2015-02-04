@@ -350,6 +350,9 @@ namespace System.Xml
         private XmlDocument _doc;
         private XmlNodeChangedEventHandler _nodeChangeHandler = null;
 
+        // lockable object only instance is knowledgeable about
+        private readonly object _lockable = new object();
+
         internal XmlElementListListener(XmlDocument doc, XmlElementList elemList)
         {
             _doc = doc;
@@ -361,7 +364,7 @@ namespace System.Xml
 
         private void OnListChanged(object sender, XmlNodeChangedEventArgs args)
         {
-            lock (this)
+            lock (_lockable)
             {
                 if (_elemList != null)
                 {
@@ -383,7 +386,7 @@ namespace System.Xml
         // This method is called from the finalizer of XmlElementList
         internal void Unregister()
         {
-            lock (this)
+            lock (_lockable)
             {
                 if (_elemList != null)
                 {

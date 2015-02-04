@@ -88,6 +88,9 @@ namespace System.Linq.Parallel
         private volatile int _consumerIsWaiting;
         private CancellationToken _cancellationToken;
 
+        // lockable object only instance is knowledgeable about
+        private readonly object _lockable = new object();
+
         //-----------------------------------------------------------------------------------
         // Initializes a new channel with the specific capacity and chunk size.
         //
@@ -231,7 +234,7 @@ namespace System.Linq.Parallel
             // Update 8/2/2011: Dispose() should never be called with SetDone() concurrently,
             // but in order to reduce churn late in the product cycle, we decided not to 
             // remove the lock.
-            lock (this)
+            lock (_lockable)
             {
                 if (_consumerEvent != null)
                 {
@@ -659,7 +662,7 @@ namespace System.Linq.Parallel
             // Update 8/2/2011: Dispose() should never be called with SetDone() concurrently,
             // but in order to reduce churn late in the product cycle, we decided not to 
             // remove the lock.
-            lock (this)
+            lock (_lockable)
             {
                 Contract.Assert(_done, "Expected channel to be done before disposing");
                 Contract.Assert(_producerEvent != null);
