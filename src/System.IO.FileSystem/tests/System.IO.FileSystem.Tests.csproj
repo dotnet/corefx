@@ -11,11 +11,9 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
     <DebugSymbols>true</DebugSymbols>
     <PlatformTarget>AnyCPU</PlatformTarget>
-    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
     <PlatformTarget>AnyCPU</PlatformTarget>
-    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -27,6 +25,10 @@
     <ProjectReference Include="..\..\Common\tests\XunitTraitsDiscoverers\XunitTraitsDiscoverers.csproj">
       <Project>{be8ed8c1-c314-4c4e-a929-64c9c8b3552a}</Project>
       <Name>XunitTraitsDiscoverers</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\System.IO.FileSystem.Watcher\src\System.IO.FileSystem.Watcher.csproj">
+      <Project>{77E702D9-C6D8-4CE4-9941-D3056C3CCBED}</Project>
+      <Name>System.IO.FileSystem.Watcher</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\System.IO.FileSystem.Primitives\src\System.IO.FileSystem.Primitives.csproj">
       <Project>{6c05678e-394c-4cff-b453-a18e28c8f2c3}</Project>
