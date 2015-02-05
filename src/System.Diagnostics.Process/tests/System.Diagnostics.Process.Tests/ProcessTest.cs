@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.Threading;
 using Microsoft.Win32.SafeHandles;
 using Xunit;
+using System.Text;
 
 namespace System.Diagnostics.ProcessTests
 {
@@ -65,14 +66,20 @@ namespace System.Diagnostics.ProcessTests
             return p;
         }
 
-        [Fact]
+        [Fact, ActiveIssue(541)]
         public static void Process_BasePriority()
         {
             Process p = CreateProcessInfinite();
             p.Start();
-            Assert.Equal(p.BasePriority, 8 /*Normal*/);
-            p.Kill();
-            p.WaitForExit();
+            try
+            {
+                Assert.Equal(8, p.BasePriority);
+            }
+            finally
+            {
+                p.Kill();
+                p.WaitForExit();
+            }
         }
 
         private static bool s_Process_EnableRaiseEvents_isExitedEventHandlerCalled = false;
@@ -155,9 +162,15 @@ namespace System.Diagnostics.ProcessTests
         {
             Process p = CreateProcessInfinite();
             p.Start();
-            Assert.Equal(p.Id, Interop.GetProcessId(p.SafeHandle));
-            p.Kill();
-            p.WaitForExit();
+            try
+            {
+                Assert.Equal(p.Id, Interop.GetProcessId(p.SafeHandle));
+            }
+            finally
+            {
+                p.Kill();
+                p.WaitForExit();
+            }
         }
 
         [Fact]
@@ -170,10 +183,16 @@ namespace System.Diagnostics.ProcessTests
 
             p = CreateProcessInfinite();
             p.Start();
-            Assert.False(p.HasExited, "Process_HasExited002 failed");
-
-            p.Kill();
-            p.WaitForExit();
+            try
+            {
+                Assert.False(p.HasExited, "Process_HasExited002 failed");
+            }
+            finally
+            {
+                p.Kill();
+                p.WaitForExit();
+            }
+            
             Assert.True(p.HasExited, "Process_HasExited003 failed");
         }
 
@@ -203,10 +222,13 @@ namespace System.Diagnostics.ProcessTests
             try
             {
                 ProcessModule pMainModule = p.MainModule;
+                Assert.Equal(s_ProcessName, pMainModule.ModuleName);
+                Assert.True(pMainModule.FileName.Contains(pMainModule.ModuleName), "MainModule FileName invalid. " + GetModuleDescription(pMainModule));
 
                 // Check that the mainModule is present in the modules list.
+                ProcessModuleCollection allModules = p.Modules;
                 bool foundMainModule = false;
-                foreach (ProcessModule pModule in p.Modules)
+                foreach (ProcessModule pModule in allModules)
                 {
                     if ((pModule.BaseAddress == pMainModule.BaseAddress) && pModule.FileName.Equals(pMainModule.FileName))
                     {
@@ -214,20 +236,30 @@ namespace System.Diagnostics.ProcessTests
                         break;
                     }
                 }
-
-                Assert.True(foundMainModule, "Process_MainModule set to incorrect module");
-                Assert.Equal("ProcessTest_ConsoleApp.exe", pMainModule.ModuleName);
-                Assert.True(pMainModule.FileName.Contains(pMainModule.ModuleName), "MainModule.FileName failed");
-            }
-            catch (Exception)
-            {
-                Assert.True(false, "Process_MainModule failed");
+                Assert.True(foundMainModule, "MainModule incorrect: " + GetModuleDescription(pMainModule) + Environment.NewLine + GetModulesDescription(allModules));
             }
             finally
             {
                 p.Kill();
                 p.WaitForExit();
             }
+        }
+
+        private static string GetModuleDescription(ProcessModule module)
+        {
+            return string.Format("Module: Base:{0} FileName:{1} ModuleName:{2}", module.BaseAddress, module.FileName, module.ModuleName);
+        }
+
+        private static string GetModulesDescription(ProcessModuleCollection modules)
+        {
+            var text = new StringBuilder();
+            text.AppendLine("Modules Collection:");
+            foreach (ProcessModule module in modules)
+            {
+                text.Append("    ");
+                text.AppendLine(GetModuleDescription(module));
+            }
+            return text.ToString();
         }
 
         [Fact]
@@ -292,13 +324,19 @@ namespace System.Diagnostics.ProcessTests
         {
             Process p = CreateProcessInfinite();
             p.Start();
-            IntPtr minWorkingSet, maxWorkingset;
-            uint flags;
-            Interop.GetProcessWorkingSetSizeEx(p.SafeHandle, out minWorkingSet, out maxWorkingset, out flags);
-            Assert.Equal(p.MinWorkingSet, minWorkingSet);
-            Assert.Equal(p.MaxWorkingSet, maxWorkingset);
-            p.Kill();
-            p.WaitForExit();
+            try
+            {
+                IntPtr minWorkingSet, maxWorkingset;
+                uint flags;
+                Interop.GetProcessWorkingSetSizeEx(p.SafeHandle, out minWorkingSet, out maxWorkingset, out flags);
+                Assert.Equal(p.MinWorkingSet, minWorkingSet);
+                Assert.Equal(p.MaxWorkingSet, maxWorkingset);
+            }
+            finally
+            {
+                p.Kill();
+                p.WaitForExit();
+            }
         }
 
 
@@ -467,23 +505,35 @@ namespace System.Diagnostics.ProcessTests
         {
             Process p = CreateProcessInfinite();
             p.Start();
-            Assert.True(p.PriorityBoostEnabled, "Process_PriorityBoostEnabled001 failed");
-            p.PriorityBoostEnabled = false;
-            Assert.False(p.PriorityBoostEnabled, "Process_PriorityBoostEnabled002 failed");
-            p.Kill();
-            p.WaitForExit();
+            try
+            {
+                Assert.True(p.PriorityBoostEnabled, "Process_PriorityBoostEnabled001 failed");
+                p.PriorityBoostEnabled = false;
+                Assert.False(p.PriorityBoostEnabled, "Process_PriorityBoostEnabled002 failed");
+            }
+            finally
+            {
+                p.Kill();
+                p.WaitForExit();
+            }
         }
 
-        [Fact]
+        [Fact, ActiveIssue(541)]
         public static void Process_PriorityClass()
         {
             Process p = CreateProcessInfinite();
             p.Start();
-            Assert.Equal(p.PriorityClass, ProcessPriorityClass.Normal);
-            p.PriorityClass = ProcessPriorityClass.High;
-            Assert.Equal(p.PriorityClass, ProcessPriorityClass.High);
-            p.Kill();
-            p.WaitForExit();
+            try
+            {
+                Assert.Equal(p.PriorityClass, ProcessPriorityClass.Normal);
+                p.PriorityClass = ProcessPriorityClass.High;
+                Assert.Equal(p.PriorityClass, ProcessPriorityClass.High);
+            }
+            finally
+            {
+                p.Kill();
+                p.WaitForExit();
+            }
         }
 
         [Fact]
@@ -498,9 +548,15 @@ namespace System.Diagnostics.ProcessTests
         {
             Process p = CreateProcessInfinite();
             p.Start();
-            Assert.Equal(p.ProcessName, "ProcessTest_ConsoleApp");
-            p.Kill();
-            p.WaitForExit();
+            try
+            {
+                Assert.Equal(p.ProcessName, "ProcessTest_ConsoleApp");
+            }
+            finally
+            {
+                p.Kill();
+                p.WaitForExit();
+            }
         }
 
         [Fact]

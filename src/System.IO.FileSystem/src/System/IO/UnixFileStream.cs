@@ -69,7 +69,8 @@ namespace System.IO
         /// <param name="share">What other access to the file should be allowed.  This is currently ignored.</param>
         /// <param name="bufferSize">The size of the buffer to use when buffering.</param>
         /// <param name="options">Additional options for working with the file.</param>
-        internal UnixFileStream(String path, FileMode mode, FileAccess access, FileShare share, int bufferSize, FileOptions options)
+        internal UnixFileStream(String path, FileMode mode, FileAccess access, FileShare share, int bufferSize, FileOptions options, FileStream parent)
+            : base(parent)
         {
             // FileStream performs most of the general argument validation.  We can assume here that the arguments
             // are all checked and consistent (e.g. non-null-or-empty path; valid enums in mode, access, share, and options; etc.)
@@ -82,11 +83,11 @@ namespace System.IO
             _useAsyncIO = (options & FileOptions.Asynchronous) != 0;
 
             // Translate the arguments into arguments for an open call
-            Interop.OpenFlags openFlags = PreOpenConfigurationFromOptions(mode, access, options); // FileShare currently ignored
-            Interop.Permissions openPermissions = Interop.Permissions.S_IRWXU; // creator has read/write/execute permissions; no permissions for anyone else
+            Interop.libc.OpenFlags openFlags = PreOpenConfigurationFromOptions(mode, access, options); // FileShare currently ignored
+            Interop.libc.Permissions openPermissions = Interop.libc.Permissions.S_IRWXU; // creator has read/write/execute permissions; no permissions for anyone else
 
             // Open the file and store the safe handle. Subsequent code in this method expects the safe handle to be initialized.
-            _fileHandle = SafeFileHandle.Open(path, (int)openFlags, (int)openPermissions);
+            _fileHandle = SafeFileHandle.Open(path, openFlags, (int)openPermissions);
             _fileHandle.IsAsync = _useAsyncIO;
 
             // Lock the file if requested via FileShare.  This is only advisory locking. FileShare.None implies an exclusive 
@@ -94,8 +95,8 @@ namespace System.IO
             // and not atomic with file opening, it's better than nothing.
             try
             {
-                Interop.LockOperations lockOperation = (share == FileShare.None) ? Interop.LockOperations.LOCK_EX : Interop.LockOperations.LOCK_SH;
-                SysCall<int, int>((fd, op, _) => Interop.flock(fd, op), (int)(lockOperation | Interop.LockOperations.LOCK_NB));
+                Interop.libc.LockOperations lockOperation = (share == FileShare.None) ? Interop.libc.LockOperations.LOCK_EX : Interop.libc.LockOperations.LOCK_SH;
+                SysCall<Interop.libc.LockOperations, int>((fd, op, _) => Interop.libc.flock(fd, op), lockOperation | Interop.libc.LockOperations.LOCK_NB);
             }
             catch
             {
@@ -105,19 +106,19 @@ namespace System.IO
 
             // Support additional options after the file has been opened.
             // These provide hints around how the file will be accessed.
-            Interop.Advice fadv =
-                _options == FileOptions.RandomAccess ? Interop.Advice.POSIX_FADV_RANDOM :
-                _options == FileOptions.SequentialScan ? Interop.Advice.POSIX_FADV_SEQUENTIAL :
+            Interop.libc.Advice fadv =
+                _options == FileOptions.RandomAccess ? Interop.libc.Advice.POSIX_FADV_RANDOM :
+                _options == FileOptions.SequentialScan ? Interop.libc.Advice.POSIX_FADV_SEQUENTIAL :
                 0;
             if (fadv != 0)
             {
-                SysCall<int, int>((fd, advice, _) => Interop.posix_fadvise(fd, IntPtr.Zero, IntPtr.Zero, advice), (int)fadv);
+                SysCall<Interop.libc.Advice, int>((fd, advice, _) => Interop.libc.posix_fadvise(fd, IntPtr.Zero, IntPtr.Zero, advice), fadv);
             }
 
             // Jump to the end of the file if opened as Append.
             if (_mode == FileMode.Append)
             {
-                _appendStart = Seek(0, SeekOrigin.End);
+                _appendStart = SeekCore(0, SeekOrigin.End);
             }
         }
 
@@ -126,7 +127,8 @@ namespace System.IO
         /// <param name="access">Whether the file will be read, written, or both.</param>
         /// <param name="bufferSize">The size of the buffer to use when buffering.</param>
         /// <param name="useAsyncIO">Whether access to the stream is performed asynchronously.</param>
-        internal UnixFileStream(SafeFileHandle handle, FileAccess access, int bufferSize, bool useAsyncIO)
+        internal UnixFileStream(SafeFileHandle handle, FileAccess access, int bufferSize, bool useAsyncIO, FileStream parent)
+            : base(parent)
         {
             // Make sure the handle is open
             if (handle.IsInvalid)
@@ -142,7 +144,7 @@ namespace System.IO
             _bufferLength = bufferSize;
             _useAsyncIO = useAsyncIO;
 
-            if (CanSeek)
+            if (_parent.CanSeek)
             {
                 SeekCore(0, SeekOrigin.Current);
             }
@@ -161,10 +163,10 @@ namespace System.IO
         /// <param name="access">The FileAccess provided to the stream's constructor</param>
         /// <param name="options">The FileOptions provided to the stream's constructor</param>
         /// <returns>The flags value to be passed to the open system call.</returns>
-        private static Interop.OpenFlags PreOpenConfigurationFromOptions(FileMode mode, FileAccess access, FileOptions options)
+        private static Interop.libc.OpenFlags PreOpenConfigurationFromOptions(FileMode mode, FileAccess access, FileOptions options)
         {
             // Translate FileMode.  Most of the values map cleanly to one or more options for open/open64.
-            Interop.OpenFlags flags = 0;
+            Interop.libc.OpenFlags flags = 0;
             switch (mode)
             {
                 default:
@@ -173,19 +175,19 @@ namespace System.IO
 
                 case FileMode.Append: // Append is the same as OpenOrCreate, except that we'll also separately jump to the end later
                 case FileMode.OpenOrCreate:
-                    flags |= Interop.OpenFlags.O_CREAT;
+                    flags |= Interop.libc.OpenFlags.O_CREAT;
                     break;
 
                 case FileMode.Create:
-                    flags |= (Interop.OpenFlags.O_CREAT | Interop.OpenFlags.O_TRUNC);
+                    flags |= (Interop.libc.OpenFlags.O_CREAT | Interop.libc.OpenFlags.O_TRUNC);
                     break;
 
                 case FileMode.CreateNew:
-                    flags |= (Interop.OpenFlags.O_CREAT | Interop.OpenFlags.O_EXCL);
+                    flags |= (Interop.libc.OpenFlags.O_CREAT | Interop.libc.OpenFlags.O_EXCL);
                     break;
 
                 case FileMode.Truncate:
-                    flags |= Interop.OpenFlags.O_TRUNC;
+                    flags |= Interop.libc.OpenFlags.O_TRUNC;
                     break;
             }
 
@@ -193,15 +195,15 @@ namespace System.IO
             switch (access)
             {
                 case FileAccess.Read:
-                    flags |= Interop.OpenFlags.O_RDONLY;
+                    flags |= Interop.libc.OpenFlags.O_RDONLY;
                     break;
 
                 case FileAccess.ReadWrite:
-                    flags |= Interop.OpenFlags.O_RDWR;
+                    flags |= Interop.libc.OpenFlags.O_RDWR;
                     break;
 
                 case FileAccess.Write:
-                    flags |= Interop.OpenFlags.O_WRONLY;
+                    flags |= Interop.libc.OpenFlags.O_WRONLY;
                     break;
             }
 
@@ -216,7 +218,7 @@ namespace System.IO
                     break;
 
                 case FileOptions.WriteThrough:
-                    flags |= Interop.OpenFlags.O_SYNC;
+                    flags |= Interop.libc.OpenFlags.O_SYNC;
                     break;
             }
 
@@ -250,7 +252,7 @@ namespace System.IO
                 if (!_canSeek.HasValue)
                 {
                     // Lazily-initialize whether we're able to seek, tested by seeking to our current location.
-                    _canSeek = SysCall<int, int>((fd, _, __) => Interop.lseek64(fd, 0, (int)Interop.SeekWhence.SEEK_CUR), throwOnError: false) >= 0;
+                    _canSeek = SysCall<int, int>((fd, _, __) => Interop.libc.lseek64(fd, 0, Interop.libc.SeekWhence.SEEK_CUR), throwOnError: false) >= 0;
                 }
                 return _canSeek.Value;
             }
@@ -271,7 +273,7 @@ namespace System.IO
                 {
                     throw __Error.GetFileNotOpen();
                 }
-                if (!CanSeek)
+                if (!_parent.CanSeek)
                 {
                     throw __Error.GetSeekNotSupported();
                 }
@@ -279,8 +281,8 @@ namespace System.IO
                 // Get the length of the file as reported by the OS
                 long length = SysCall<int, int>((fd, _, __) =>
                 {
-                    Interop.structStat stat;
-                    int result = Interop.fstat(fd, out stat);
+                    Interop.libc.structStat stat;
+                    int result = Interop.libc.fstat(fd, out stat);
                     return result >= 0 ? stat.st_size : result;
                 });
 
@@ -303,7 +305,7 @@ namespace System.IO
         {
             get
             {
-                Flush();
+                _parent.Flush();
                 _exposedHandle = true;
                 return _fileHandle;
             }
@@ -332,7 +334,7 @@ namespace System.IO
                 {
                     throw new ArgumentOutOfRangeException("value", SR.ArgumentOutOfRange_NeedNonNegNum);
                 }
-                Seek(value, SeekOrigin.Begin);
+                _parent.Seek(value, SeekOrigin.Begin);
             }
         }
 
@@ -361,7 +363,7 @@ namespace System.IO
 #if DEBUG
             verifyPosition = true; // in debug, always make sure our position matches what the OS says it should be
 #endif
-            if (verifyPosition && CanSeek)
+            if (verifyPosition && _parent.CanSeek)
             {
                 long oldPos = _filePosition; // SeekCore will override the current _position, so save it now
                 long curPos = SeekCore(0, SeekOrigin.Current);
@@ -396,7 +398,7 @@ namespace System.IO
                     {
                         // Since we still have the file open, this will end up deleting
                         // it (assuming we're the only link to it) once it's closed.
-                        Interop.unlink(_path); // ignore any error
+                        Interop.libc.unlink(_path); // ignore any error
                     }
                 }
             }
@@ -420,7 +422,7 @@ namespace System.IO
         /// <summary>Clears buffers for this stream and causes any buffered data to be written to the file.</summary>
         public override void Flush()
         {
-            Flush(flushToDisk: false);
+            _parent.Flush(flushToDisk: false);
         }
 
         /// <summary>
@@ -435,7 +437,7 @@ namespace System.IO
             }
 
             FlushInternalBuffer();
-            if (flushToDisk && CanWrite)
+            if (flushToDisk && _parent.CanWrite)
             {
                 FlushOSBuffer();
             }
@@ -444,7 +446,7 @@ namespace System.IO
         /// <summary>Flushes the OS buffer.  This does not flush the internal read/write buffer.</summary>
         private void FlushOSBuffer()
         {
-            SysCall<int, int>((fd, _, __) => Interop.fsync(fd));
+            SysCall<int, int>((fd, _, __) => Interop.libc.fsync(fd));
         }
 
         /// <summary>
@@ -460,7 +462,7 @@ namespace System.IO
             {
                 FlushWriteBuffer();
             }
-            else if (_readPos < _readLength && CanSeek)
+            else if (_readPos < _readLength && _parent.CanSeek)
             {
                 FlushReadBuffer();
             }
@@ -515,7 +517,7 @@ namespace System.IO
 
             // We then separately flush to disk asynchronously.  This is only 
             // necessary if we support writing; otherwise, we're done.
-            if (CanWrite)
+            if (_parent.CanWrite)
             {
                 return Task.Factory.StartNew(
                     state => ((UnixFileStream)state).FlushOSBuffer(),
@@ -542,11 +544,11 @@ namespace System.IO
             {
                 throw __Error.GetFileNotOpen();
             }
-            if (!CanSeek)
+            if (!_parent.CanSeek)
             {
                 throw __Error.GetSeekNotSupported();
             }
-            if (!CanWrite)
+            if (!_parent.CanWrite)
             {
                 throw __Error.GetWriteNotSupported();
             }
@@ -567,7 +569,7 @@ namespace System.IO
                 SeekCore(value, SeekOrigin.Begin);
             }
 
-            SysCall<long, int>((fd, length, _) => Interop.ftruncate64(fd, length), value);
+            SysCall<long, int>((fd, length, _) => Interop.libc.ftruncate64(fd, length), value);
 
             // Return file pointer to where it was before setting length
             if (origPos != value)
@@ -612,7 +614,7 @@ namespace System.IO
                 // If we're not able to seek, then we're not able to rewind the stream (i.e. flushing
                 // a read buffer), in which case we don't want to use a read buffer.  Similarly, if
                 // the user has ssked for more data than we can buffer, we also want to skip the buffer.
-                if (!CanSeek || (count >= _bufferLength))
+                if (!_parent.CanSeek || (count >= _bufferLength))
                 {
                     // Read directly into the user's buffer
                     int bytesRead = ReadCore(array, offset, count);
@@ -662,7 +664,7 @@ namespace System.IO
             {
                 bytesRead = (int)SysCall((fd, ptr, len) =>
                 {
-                    long result = (long)Interop.read(fd, (byte*)ptr, (IntPtr)len);
+                    long result = (long)Interop.libc.read(fd, (byte*)ptr, (IntPtr)len);
                     Contract.Assert(result <= len);
                     return result;
                 }, (IntPtr)(bufPtr + offset), count);
@@ -719,7 +721,7 @@ namespace System.IO
             {
                 throw __Error.GetFileNotOpen();
             }
-            if (_readLength == 0 && !CanRead)
+            if (_readLength == 0 && !_parent.CanRead)
             {
                 throw __Error.GetReadNotSupported();
             }
@@ -798,7 +800,7 @@ namespace System.IO
             {
                 bytesWritten = SysCall((fd, ptr, len) =>
                 {
-                    long result = (long)Interop.write(fd, (byte*)ptr, (IntPtr)len);
+                    long result = (long)Interop.libc.write(fd, (byte*)ptr, (IntPtr)len);
                     Contract.Assert(result <= len);
                     return result;
                 }, (IntPtr)(bufPtr + offset), count);
@@ -860,7 +862,7 @@ namespace System.IO
             // this checking and flushing.
             if (_writePos == 0)
             {
-                if (!CanWrite) throw __Error.GetWriteNotSupported();
+                if (!_parent.CanWrite) throw __Error.GetWriteNotSupported();
                 FlushReadBuffer();
             }
         }
@@ -910,7 +912,7 @@ namespace System.IO
             {
                 throw __Error.GetFileNotOpen();
             }
-            if (!CanSeek)
+            if (!_parent.CanSeek)
             {
                 throw __Error.GetSeekNotSupported();
             }
@@ -958,7 +960,7 @@ namespace System.IO
             Contract.Assert(!_fileHandle.IsClosed && CanSeek);
             Contract.Assert(origin >= SeekOrigin.Begin && origin <= SeekOrigin.End);
 
-            long pos = SysCall((fd, off, or) => Interop.lseek64(fd, off, or), offset, (int)origin); // SeekOrigin values are the same as Interop.SeekWhence values
+            long pos = SysCall((fd, off, or) => Interop.libc.lseek64(fd, off, or), offset, (Interop.libc.SeekWhence)(int)origin); // SeekOrigin values are the same as Interop.libc.SeekWhence values
             _filePosition = pos;
             return pos;
         }
@@ -1002,7 +1004,7 @@ namespace System.IO
                     if (result < 0)
                     {
                         int errno = Marshal.GetLastWin32Error();
-                        if (errno == (int)Interop.Errors.EINTR)
+                        if (errno == Interop.Errors.EINTR)
                         {
                             continue;
                         }

@@ -1,13 +1,9 @@
 # .NET Core
 
-[![Build status][build-status-image]][build-status]  [![Issue Stats][pull-requests-image]][pull-requests]  [![Issue Stats][issues-closed-image]][issues-closed]
+[![Build status][build-status-image]][build-status]
 
-[build-status-image]: http://corefx-ci.cloudapp.net/jenkins/job/dotnet_corefx/badge/icon
-[build-status]: http://corefx-ci.cloudapp.net/jenkins/job/dotnet_corefx/
-[pull-requests-image]: http://www.issuestats.com/github/dotnet/corefx/badge/pr
-[pull-requests]: http://www.issuestats.com/github/dotnet/corefx
-[issues-closed-image]: http://www.issuestats.com/github/dotnet/corefx/badge/issue
-[issues-closed]: http://www.issuestats.com/github/dotnet/corefx
+[build-status-image]: http://dotnet-ci.cloudapp.net/job/dotnet_corefx/badge/icon
+[build-status]: http://dotnet-ci.cloudapp.net/job/dotnet_corefx/
 
 This repository contains the class libraries for .NET Core. This is a
 work in progress, and does not currently contain the entire set of libraries
@@ -48,6 +44,8 @@ Today, the repository contains the following components:
 * **System.Diagnostics.Process**. Provides access to local and remote processes, and enables the starting and
   stopping of local system processes.
 
+* **System.Globalization.Extensions**. Provides classes for performing unicode string normalization, culture-specific string comparisons and support the use of non-ASCII characters for Internet domain names.
+
 * **System.IO.FileSystem**. Provides access to the file system, including support for enumerating and manipulating 
   file system objects and for reading and writing files via streams.
 
@@ -73,6 +71,8 @@ Today, the repository contains the following components:
 
 * **System.Text.Encoding.CodePages**. Provides the ability to access existing encoding types for string manipulation 
   across common cultural standards, as well as support to create custom Encoding Providers.
+
+* **System.Runtime**. Provides a set of unit tests for basic run-time types such as String and Int32.
 
 * **System.Text.RegularExpressions**. Provides a regular expression engine. The types in this library provide useful 
   functionality for running common operations using regular expressions.
