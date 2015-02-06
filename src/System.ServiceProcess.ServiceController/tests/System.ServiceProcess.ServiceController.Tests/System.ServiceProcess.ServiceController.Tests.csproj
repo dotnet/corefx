@@ -27,9 +27,13 @@
       <Project>{f4821cb6-91a3-4546-bc4f-e00dbfbdaa05}</Project>
       <Name>System.ServiceProcess.ServiceController</Name>
     </ProjectReference>
+    <ProjectReference Include="..\NativeTestService\NativeTestService.vcxproj">
+      <Project>{ceb0775c-4273-4ac4-b50e-4492718051ae}</Project>
+      <Name>NativeTestService</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="NativeTestService.exe">
+    <Content Include="..\NativeTestService\$(Configuration)\NativeTestService.exe">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
