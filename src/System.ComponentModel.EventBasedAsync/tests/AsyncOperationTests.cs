@@ -58,7 +58,7 @@ namespace System.ComponentModel.EventBasedAsync
                }).Wait();
         }
 
-        [Fact]
+        [Fact(Skip = "#666")]
         public static void Cancel()
         {
             // Test that cancellation gets passed all the way through PostOperationCompleted(callback, AsyncCompletedEventArgs)
