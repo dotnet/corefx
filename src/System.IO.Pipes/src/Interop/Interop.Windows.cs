@@ -309,9 +309,6 @@ internal static partial class Interop
 
         [DllImport(IODLL, SetLastError = true)]
         internal static unsafe extern bool CancelIoEx(SafeHandle handle, NativeOverlapped* lpOverlapped);
-
-        [DllImport(LOCALIZATIONDLL, EntryPoint = "FormatMessageW", SetLastError = true, CharSet = CharSet.Unicode)]
-        internal unsafe static extern uint FormatMessage(uint dwFlags, IntPtr lpSource, uint dwMessageId, uint dwLanguageId, char[] lpBuffer, uint nSize, IntPtr Arguments);
     }
 
     [StructLayout(LayoutKind.Sequential)]

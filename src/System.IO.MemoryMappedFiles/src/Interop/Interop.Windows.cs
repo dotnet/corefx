@@ -182,16 +182,6 @@ internal static partial class Interop
 
     internal static partial class mincore
     {
-        [DllImport(LOCALIZATIONDLL, EntryPoint = "FormatMessageW", CharSet = CharSet.Unicode)]
-        internal extern static uint FormatMessage(
-                    uint dwFlags,
-                    IntPtr lpSource,
-                    uint dwMessageId,
-                    uint dwLanguageId,
-                    char[] lpBuffer,
-                    uint nSize,
-                    IntPtr Arguments);
-
         [DllImport(MEMORYDLL)]
         internal extern static int FlushViewOfFile(IntPtr lpBaseAddress, UIntPtr dwNumberOfBytesToFlush);
 

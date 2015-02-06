@@ -73,29 +73,18 @@ internal static partial class Interop
     internal const int ERROR_MORE_DATA = 0xEA;
     internal const int ERROR_DLL_INIT_FAILED = 0x45A;
     internal const int ERROR_BAD_IMPERSONATION_LEVEL = 0x542;
+    internal const int ERROR_PATH_NOT_FOUND = 0x3;
+    internal const int ERROR_SHARING_VIOLATION = 0x20;
+    internal const int ERROR_FILE_EXISTS = 0x50;
+    internal const int ERROR_INVALID_PARAMETER = 0x57;
+    internal const int ERROR_ALREADY_EXISTS = 0xB7;
+    internal const int ERROR_OPERATION_ABORTED = 0x3E3;  // 995; For IO Cancellation
 
     // Error codes from ntstatus.h
     internal const uint STATUS_ACCESS_DENIED = 0xC0000022;
 
     internal static partial class mincore
     {
-        // Gets an error message for a Win32 error code.
-        internal static String GetMessage(int errorCode)
-        {
-            char[] buffer = new char[512];
-            uint result = Interop.mincore.FormatMessage(FORMAT_MESSAGE_IGNORE_INSERTS |
-                FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_ARGUMENT_ARRAY,
-                IntPtr.Zero, (uint)errorCode, 0, buffer, (uint)buffer.Length, IntPtr.Zero);
-            if (result != 0)
-            {
-                return new string(buffer, 0, (int)result);
-            }
-            else
-            {
-                return SR.Format(SR.UnknownError_Num, errorCode);
-            }
-        }
-
         [DllImport(REGISTRY_L2_APISET, CharSet = CharSet.Unicode, BestFitMapping = false, EntryPoint = "RegConnectRegistryW")]
         internal static extern int RegConnectRegistry(String machineName,
                     SafeRegistryHandle key, out SafeRegistryHandle result);
@@ -197,17 +186,6 @@ internal static partial class Interop
 
         [DllImport(REGISTRY_L1_APISET)]
         internal extern static int RegCloseKey(IntPtr hKey);
-
-
-        [DllImport(LOCALIZATION_L1_APISET, EntryPoint = "FormatMessageW", SetLastError = true, CharSet = CharSet.Unicode)]
-        internal extern static uint FormatMessage(
-                    uint dwFlags,
-                    IntPtr lpSource,
-                    uint dwMessageId,
-                    uint dwLanguageId,
-                    char[] lpBuffer,
-                    uint nSize,
-                    IntPtr Arguments);
     }
 
     internal struct SECURITY_ATTRIBUTES

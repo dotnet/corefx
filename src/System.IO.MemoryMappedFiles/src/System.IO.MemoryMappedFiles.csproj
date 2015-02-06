@@ -16,10 +16,10 @@
   <!-- References are resolved from packages.config -->
   <!-- Compiled Source Files -->
   <ItemGroup>
-    <Compile Include="..\..\Common\src\System\IO\__Error.cs">
+    <Compile Include="$(CommonPath)\System\IO\__Error.cs">
       <Link>System\IO\__Error.cs</Link>
     </Compile>
-    <Compile Include="..\..\Common\src\System\SR.cs">
+    <Compile Include="$(CommonPath)\System\SR.cs">
       <Link>System\SR.cs</Link>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -40,8 +40,14 @@
   </ItemGroup>
 
   <ItemGroup Condition=" '$(OS)' == 'Windows_NT' ">
-    <Compile Include="..\..\Common\src\System\IO\Win32Marshal.cs">
+    <Compile Include="$(CommonPath)\System\IO\Win32Marshal.cs">
       <Link>System\IO\Win32Marshal.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\Interop.Libraries.cs">
+      <Link>Common\Interop\Windows\Interop.Libraries.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.FormatMessage.cs">
+      <Link>Common\Interop\Windows\Interop.FormatMessage.cs</Link>
     </Compile>
     <Compile Include="Interop\Interop.Windows.cs" />
     <Compile Include="Microsoft\Win32\SafeMemoryMappedFileHandle.Windows.cs" />
@@ -51,7 +57,7 @@
   </ItemGroup>
 
   <ItemGroup Condition=" '$(OS)' == 'Unix' ">
-    <Compile Include="..\..\Common\src\System\NotImplemented.cs"> <!-- TODO: Remove once implemented -->
+    <Compile Include="$(CommonPath)\System\NotImplemented.cs"> <!-- TODO: Remove once implemented -->
       <Link>System\NotImplemented.cs</Link>
     </Compile>
     <Compile Include="Microsoft\Win32\SafeMemoryMappedFileHandle.Unix.cs" />
