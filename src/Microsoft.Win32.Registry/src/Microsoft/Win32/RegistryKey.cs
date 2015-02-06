@@ -792,7 +792,7 @@ namespace Microsoft.Win32
                 {
                     return hkey;
                 }
-                throw new IOException(Interop.mincore.GetMessage(ret), ret);
+                throw new IOException(Win32Marshal.GetMessage(ret), ret);
             }
         }
 
@@ -1573,7 +1573,7 @@ namespace Microsoft.Win32
                     throw new IOException(SR.Arg_RegKeyNotFound, errorCode);
 
                 default:
-                    throw new IOException(Interop.mincore.GetMessage(errorCode), errorCode);
+                    throw new IOException(Win32Marshal.GetMessage(errorCode), errorCode);
             }
         }
 
@@ -1589,7 +1589,7 @@ namespace Microsoft.Win32
                         throw new UnauthorizedAccessException();
 
                 default:
-                    throw new IOException(Interop.mincore.GetMessage(errorCode), errorCode);
+                    throw new IOException(Win32Marshal.GetMessage(errorCode), errorCode);
             }
         }
 
