@@ -6,7 +6,7 @@ using System.Diagnostics;
 
 namespace System.Reflection.Metadata.Decoding
 {
-    partial class TypeNameParser<TType>
+    internal partial class TypeNameParser<TType>
     {
         private class TypeBuilder
         {

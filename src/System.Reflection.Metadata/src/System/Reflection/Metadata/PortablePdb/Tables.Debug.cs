@@ -9,13 +9,13 @@ namespace System.Reflection.Metadata.Ecma335
     {
         internal readonly uint NumberOfRows;
 
-        private readonly bool IsGuidHeapRefSizeSmall;
-        private readonly bool IsBlobHeapRefSizeSmall;
+        private readonly bool _isGuidHeapRefSizeSmall;
+        private readonly bool _isBlobHeapRefSizeSmall;
 
         private const int NameOffset = 0;
-        private readonly int HashAlgorithmOffset;
-        private readonly int HashOffset;
-        private readonly int LanguageOffset;
+        private readonly int _hashAlgorithmOffset;
+        private readonly int _hashOffset;
+        private readonly int _languageOffset;
 
         internal readonly int RowSize;
         internal readonly MemoryBlock Block;
@@ -28,13 +28,13 @@ namespace System.Reflection.Metadata.Ecma335
             int containingBlockOffset)
         {
             this.NumberOfRows = numberOfRows;
-            this.IsGuidHeapRefSizeSmall = guidHeapRefSize == 2;
-            this.IsBlobHeapRefSizeSmall = blobHeapRefSize == 2;
+            _isGuidHeapRefSizeSmall = guidHeapRefSize == 2;
+            _isBlobHeapRefSizeSmall = blobHeapRefSize == 2;
 
-            this.HashAlgorithmOffset = NameOffset + blobHeapRefSize;
-            this.HashOffset = HashAlgorithmOffset + guidHeapRefSize;
-            this.LanguageOffset = HashOffset + blobHeapRefSize;
-            this.RowSize = LanguageOffset + guidHeapRefSize;
+            _hashAlgorithmOffset = NameOffset + blobHeapRefSize;
+            _hashOffset = _hashAlgorithmOffset + guidHeapRefSize;
+            _languageOffset = _hashOffset + blobHeapRefSize;
+            this.RowSize = _languageOffset + guidHeapRefSize;
 
             this.Block = containingBlock.GetMemoryBlockAt(containingBlockOffset, (int)(this.RowSize * numberOfRows));
         }
@@ -42,25 +42,25 @@ namespace System.Reflection.Metadata.Ecma335
         internal BlobHandle GetName(DocumentHandle handle)
         {
             int rowOffset = (int)(handle.RowId - 1) * this.RowSize;
-            return BlobHandle.FromIndex(this.Block.PeekReference(rowOffset + NameOffset, this.IsBlobHeapRefSizeSmall));
+            return BlobHandle.FromIndex(this.Block.PeekReference(rowOffset + NameOffset, _isBlobHeapRefSizeSmall));
         }
 
         internal GuidHandle GetHashAlgorithm(DocumentHandle handle)
         {
             int rowOffset = (int)(handle.RowId - 1) * this.RowSize;
-            return GuidHandle.FromIndex(this.Block.PeekReference(rowOffset + HashAlgorithmOffset, this.IsGuidHeapRefSizeSmall));
+            return GuidHandle.FromIndex(this.Block.PeekReference(rowOffset + _hashAlgorithmOffset, _isGuidHeapRefSizeSmall));
         }
 
         internal BlobHandle GetHash(DocumentHandle handle)
         {
             int rowOffset = (int)(handle.RowId - 1) * this.RowSize;
-            return BlobHandle.FromIndex(this.Block.PeekReference(rowOffset + HashOffset, this.IsBlobHeapRefSizeSmall));
+            return BlobHandle.FromIndex(this.Block.PeekReference(rowOffset + _hashOffset, _isBlobHeapRefSizeSmall));
         }
 
         internal GuidHandle GetLanguage(DocumentHandle handle)
         {
             int rowOffset = (int)(handle.RowId - 1) * this.RowSize;
-            return GuidHandle.FromIndex(this.Block.PeekReference(rowOffset + LanguageOffset, this.IsGuidHeapRefSizeSmall));
+            return GuidHandle.FromIndex(this.Block.PeekReference(rowOffset + _languageOffset, _isGuidHeapRefSizeSmall));
         }
     }
 
@@ -68,7 +68,7 @@ namespace System.Reflection.Metadata.Ecma335
     {
         internal readonly uint NumberOfRows;
 
-        private readonly bool IsBlobHeapRefSizeSmall;
+        private readonly bool _isBlobHeapRefSizeSmall;
 
         private const int SequencePointsOffset = 0;
 
@@ -82,7 +82,7 @@ namespace System.Reflection.Metadata.Ecma335
             int containingBlockOffset)
         {
             this.NumberOfRows = numberOfRows;
-            this.IsBlobHeapRefSizeSmall = blobHeapRefSize == 2;
+            _isBlobHeapRefSizeSmall = blobHeapRefSize == 2;
 
             this.RowSize = SequencePointsOffset + blobHeapRefSize;
 
@@ -92,7 +92,7 @@ namespace System.Reflection.Metadata.Ecma335
         internal BlobHandle GetSequencePoints(MethodBodyHandle handle)
         {
             int rowOffset = (int)(handle.RowId - 1) * this.RowSize;
-            return BlobHandle.FromIndex(this.Block.PeekReference(rowOffset + SequencePointsOffset, this.IsBlobHeapRefSizeSmall));
+            return BlobHandle.FromIndex(this.Block.PeekReference(rowOffset + SequencePointsOffset, _isBlobHeapRefSizeSmall));
         }
     }
 
@@ -100,17 +100,17 @@ namespace System.Reflection.Metadata.Ecma335
     {
         internal readonly uint NumberOfRows;
 
-        private readonly bool IsMethodRefSmall;
-        private readonly bool IsImportScopeRefSmall;
-        private readonly bool IsLocalConstantRefSmall;
-        private readonly bool IsLocalVariableRefSmall;
+        private readonly bool _isMethodRefSmall;
+        private readonly bool _isImportScopeRefSmall;
+        private readonly bool _isLocalConstantRefSmall;
+        private readonly bool _isLocalVariableRefSmall;
 
         private const int MethodOffset = 0;
-        private readonly int ImportScopeOffset;
-        private readonly int VariableListOffset;
-        private readonly int ConstantListOffset;
-        private readonly int StartOffsetOffset;
-        private readonly int LengthOffset;
+        private readonly int _importScopeOffset;
+        private readonly int _variableListOffset;
+        private readonly int _constantListOffset;
+        private readonly int _startOffsetOffset;
+        private readonly int _lengthOffset;
 
         internal readonly int RowSize;
         internal readonly MemoryBlock Block;
@@ -125,17 +125,17 @@ namespace System.Reflection.Metadata.Ecma335
             int containingBlockOffset)
         {
             this.NumberOfRows = numberOfRows;
-            this.IsMethodRefSmall = methodRefSize == 2;
-            this.IsImportScopeRefSmall = importScopeRefSize == 2;
-            this.IsLocalVariableRefSmall = localVariableRefSize == 2;
-            this.IsLocalConstantRefSmall = localConstantRefSize == 2;
+            _isMethodRefSmall = methodRefSize == 2;
+            _isImportScopeRefSmall = importScopeRefSize == 2;
+            _isLocalVariableRefSmall = localVariableRefSize == 2;
+            _isLocalConstantRefSmall = localConstantRefSize == 2;
 
-            this.ImportScopeOffset = MethodOffset + methodRefSize;
-            this.VariableListOffset = ImportScopeOffset + importScopeRefSize;
-            this.ConstantListOffset = this.VariableListOffset + localVariableRefSize;
-            this.StartOffsetOffset = this.ConstantListOffset + localConstantRefSize;
-            this.LengthOffset = this.StartOffsetOffset + sizeof(uint);
-            this.RowSize = LengthOffset + sizeof(uint);
+            _importScopeOffset = MethodOffset + methodRefSize;
+            _variableListOffset = _importScopeOffset + importScopeRefSize;
+            _constantListOffset = _variableListOffset + localVariableRefSize;
+            _startOffsetOffset = _constantListOffset + localConstantRefSize;
+            _lengthOffset = _startOffsetOffset + sizeof(uint);
+            this.RowSize = _lengthOffset + sizeof(uint);
 
             this.Block = containingBlock.GetMemoryBlockAt(containingBlockOffset, (int)(this.RowSize * numberOfRows));
         }
@@ -143,49 +143,49 @@ namespace System.Reflection.Metadata.Ecma335
         internal MethodDefinitionHandle GetMethod(LocalScopeHandle handle)
         {
             int rowOffset = (int)(handle.RowId - 1) * this.RowSize;
-            return MethodDefinitionHandle.FromRowId(this.Block.PeekReference(rowOffset + MethodOffset, this.IsMethodRefSmall));
+            return MethodDefinitionHandle.FromRowId(this.Block.PeekReference(rowOffset + MethodOffset, _isMethodRefSmall));
         }
 
         internal ImportScopeHandle GetImportScope(LocalScopeHandle handle)
         {
             int rowOffset = (int)(handle.RowId - 1) * this.RowSize;
-            return ImportScopeHandle.FromRowId(this.Block.PeekReference(rowOffset + ImportScopeOffset, this.IsImportScopeRefSmall));
+            return ImportScopeHandle.FromRowId(this.Block.PeekReference(rowOffset + _importScopeOffset, _isImportScopeRefSmall));
         }
 
         internal uint GetVariableStart(uint rowId)
         {
             int rowOffset = (int)(rowId - 1) * this.RowSize;
-            return this.Block.PeekReference(rowOffset + this.VariableListOffset, IsLocalVariableRefSmall);
+            return this.Block.PeekReference(rowOffset + _variableListOffset, _isLocalVariableRefSmall);
         }
 
         internal uint GetConstantStart(uint rowId)
         {
             int rowOffset = (int)(rowId - 1) * this.RowSize;
-            return this.Block.PeekReference(rowOffset + this.ConstantListOffset, IsLocalConstantRefSmall);
+            return this.Block.PeekReference(rowOffset + _constantListOffset, _isLocalConstantRefSmall);
         }
 
         internal int GetStartOffset(LocalScopeHandle handle)
         {
             int rowOffset = (int)(handle.RowId - 1) * this.RowSize;
             // TODO: overflow
-            return (int)this.Block.PeekUInt32(rowOffset + StartOffsetOffset);
+            return (int)this.Block.PeekUInt32(rowOffset + _startOffsetOffset);
         }
 
         internal int GetLength(LocalScopeHandle handle)
         {
             int rowOffset = (int)(handle.RowId - 1) * this.RowSize;
             // TODO: overflow
-            return (int)this.Block.PeekUInt32(rowOffset + LengthOffset);
+            return (int)this.Block.PeekUInt32(rowOffset + _lengthOffset);
         }
     }
 
     internal struct LocalVariableTableReader
     {
         internal readonly uint NumberOfRows;
-        private readonly bool IsStringHeapRefSizeSmall;
-        private readonly int AttributesOffset;
-        private readonly int IndexOffset;
-        private readonly int NameOffset;
+        private readonly bool _isStringHeapRefSizeSmall;
+        private readonly int _attributesOffset;
+        private readonly int _indexOffset;
+        private readonly int _nameOffset;
         internal readonly int RowSize;
         internal readonly MemoryBlock Block;
 
@@ -197,12 +197,12 @@ namespace System.Reflection.Metadata.Ecma335
         )
         {
             this.NumberOfRows = numberOfRows;
-            this.IsStringHeapRefSizeSmall = stringHeapRefSize == 2;
+            _isStringHeapRefSizeSmall = stringHeapRefSize == 2;
 
-            this.AttributesOffset = 0;
-            this.IndexOffset = this.AttributesOffset + sizeof(ushort);
-            this.NameOffset = this.IndexOffset + sizeof(ushort);
-            this.RowSize = this.NameOffset + stringHeapRefSize;
+            _attributesOffset = 0;
+            _indexOffset = _attributesOffset + sizeof(ushort);
+            _nameOffset = _indexOffset + sizeof(ushort);
+            this.RowSize = _nameOffset + stringHeapRefSize;
 
             this.Block = containingBlock.GetMemoryBlockAt(containingBlockOffset, (int)(this.RowSize * numberOfRows));
         }
@@ -210,31 +210,31 @@ namespace System.Reflection.Metadata.Ecma335
         internal LocalVariableAttributes GetAttributes(LocalVariableHandle handle)
         {
             int rowOffset = (int)(handle.RowId - 1) * this.RowSize;
-            return (LocalVariableAttributes)this.Block.PeekUInt16(rowOffset + this.AttributesOffset);
+            return (LocalVariableAttributes)this.Block.PeekUInt16(rowOffset + _attributesOffset);
         }
 
         internal ushort GetIndex(LocalVariableHandle handle)
         {
             int rowOffset = (int)(handle.RowId - 1) * this.RowSize;
-            return this.Block.PeekUInt16(rowOffset + this.IndexOffset);
+            return this.Block.PeekUInt16(rowOffset + _indexOffset);
         }
 
         internal StringHandle GetName(LocalVariableHandle handle)
         {
             int rowOffset = (int)(handle.RowId - 1) * this.RowSize;
-            return StringHandle.FromIndex(this.Block.PeekReference(rowOffset + this.NameOffset, this.IsStringHeapRefSizeSmall));
+            return StringHandle.FromIndex(this.Block.PeekReference(rowOffset + _nameOffset, _isStringHeapRefSizeSmall));
         }
     }
 
     internal struct LocalConstantTableReader
     {
         internal readonly uint NumberOfRows;
-        private readonly bool IsStringHeapRefSizeSmall;
-        private readonly bool IsBlobHeapRefSizeSmall;
+        private readonly bool _isStringHeapRefSizeSmall;
+        private readonly bool _isBlobHeapRefSizeSmall;
 
         private const int NameOffset = 0;
-        private readonly int ValueOffset;
-        private readonly int TypeCodeOffset;
+        private readonly int _valueOffset;
+        private readonly int _typeCodeOffset;
 
         internal readonly int RowSize;
         internal readonly MemoryBlock Block;
@@ -247,12 +247,12 @@ namespace System.Reflection.Metadata.Ecma335
             int containingBlockOffset)
         {
             this.NumberOfRows = numberOfRows;
-            this.IsStringHeapRefSizeSmall = stringHeapRefSize == 2;
-            this.IsBlobHeapRefSizeSmall = blobHeapRefSize == 2;
+            _isStringHeapRefSizeSmall = stringHeapRefSize == 2;
+            _isBlobHeapRefSizeSmall = blobHeapRefSize == 2;
 
-            this.ValueOffset = NameOffset + stringHeapRefSize;
-            this.TypeCodeOffset = ValueOffset + blobHeapRefSize;
-            this.RowSize = TypeCodeOffset + sizeof(byte);
+            _valueOffset = NameOffset + stringHeapRefSize;
+            _typeCodeOffset = _valueOffset + blobHeapRefSize;
+            this.RowSize = _typeCodeOffset + sizeof(byte);
 
             this.Block = containingBlock.GetMemoryBlockAt(containingBlockOffset, (int)(this.RowSize * numberOfRows));
         }
@@ -260,19 +260,19 @@ namespace System.Reflection.Metadata.Ecma335
         internal StringHandle GetName(LocalConstantHandle handle)
         {
             int rowOffset = (int)(handle.RowId - 1) * this.RowSize;
-            return StringHandle.FromIndex(this.Block.PeekReference(rowOffset + NameOffset, this.IsStringHeapRefSizeSmall));
+            return StringHandle.FromIndex(this.Block.PeekReference(rowOffset + NameOffset, _isStringHeapRefSizeSmall));
         }
 
         internal BlobHandle GetValue(LocalConstantHandle handle)
         {
             int rowOffset = (int)(handle.RowId - 1) * this.RowSize;
-            return BlobHandle.FromIndex(this.Block.PeekReference(rowOffset + ValueOffset, this.IsBlobHeapRefSizeSmall));
+            return BlobHandle.FromIndex(this.Block.PeekReference(rowOffset + _valueOffset, _isBlobHeapRefSizeSmall));
         }
 
         internal ConstantTypeCode GetTypeCode(LocalConstantHandle handle)
         {
             int rowOffset = (int)(handle.RowId - 1) * this.RowSize;
-            return (ConstantTypeCode)this.Block.PeekByte(rowOffset + TypeCodeOffset);
+            return (ConstantTypeCode)this.Block.PeekByte(rowOffset + _typeCodeOffset);
         }
     }
 
@@ -280,12 +280,12 @@ namespace System.Reflection.Metadata.Ecma335
     {
         internal readonly uint NumberOfRows;
 
-        private readonly bool IsMethodRefSizeSmall;
-        private readonly bool IsBlobHeapRefSizeSmall;
+        private readonly bool _isMethodRefSizeSmall;
+        private readonly bool _isBlobHeapRefSizeSmall;
 
-        private readonly int KickoffMethodOffset;
-        private readonly int CatchHandlerOffsetOffset;
-        private readonly int AwaitsOffset;
+        private readonly int _kickoffMethodOffset;
+        private readonly int _catchHandlerOffsetOffset;
+        private readonly int _awaitsOffset;
 
         internal readonly int RowSize;
         internal readonly MemoryBlock Block;
@@ -299,13 +299,13 @@ namespace System.Reflection.Metadata.Ecma335
         )
         {
             this.NumberOfRows = numberOfRows;
-            this.IsMethodRefSizeSmall = methodRefSize == 2;
-            this.IsBlobHeapRefSizeSmall = blobHeapRefSize == 2;
+            _isMethodRefSizeSmall = methodRefSize == 2;
+            _isBlobHeapRefSizeSmall = blobHeapRefSize == 2;
 
-            this.KickoffMethodOffset = 0;
-            this.CatchHandlerOffsetOffset = this.KickoffMethodOffset + methodRefSize;
-            this.AwaitsOffset = this.CatchHandlerOffsetOffset + sizeof(uint);
-            this.RowSize = this.AwaitsOffset + blobHeapRefSize;
+            _kickoffMethodOffset = 0;
+            _catchHandlerOffsetOffset = _kickoffMethodOffset + methodRefSize;
+            _awaitsOffset = _catchHandlerOffsetOffset + sizeof(uint);
+            this.RowSize = _awaitsOffset + blobHeapRefSize;
 
             this.Block = containingBlock.GetMemoryBlockAt(containingBlockOffset, (int)(this.RowSize * numberOfRows));
         }
@@ -313,20 +313,20 @@ namespace System.Reflection.Metadata.Ecma335
         internal MethodDefinitionHandle GetKickoffMethod(AsyncMethodHandle handle)
         {
             int rowOffset = (int)(handle.RowId - 1) * this.RowSize;
-            return MethodDefinitionHandle.FromRowId(this.Block.PeekReference(rowOffset + this.KickoffMethodOffset, this.IsMethodRefSizeSmall));
+            return MethodDefinitionHandle.FromRowId(this.Block.PeekReference(rowOffset + _kickoffMethodOffset, _isMethodRefSizeSmall));
         }
 
         internal int GetCatchHandlerOffset(AsyncMethodHandle handle)
         {
             int rowOffset = (int)(handle.RowId - 1) * this.RowSize;
             // TODO: overflow
-            return (int)this.Block.PeekUInt32(rowOffset + this.CatchHandlerOffsetOffset);
+            return (int)this.Block.PeekUInt32(rowOffset + _catchHandlerOffsetOffset);
         }
 
         internal BlobHandle GetAwaits(AsyncMethodHandle handle)
         {
             int rowOffset = (int)(handle.RowId - 1) * this.RowSize;
-            return BlobHandle.FromIndex(this.Block.PeekReference(rowOffset + this.AwaitsOffset, this.IsBlobHeapRefSizeSmall));
+            return BlobHandle.FromIndex(this.Block.PeekReference(rowOffset + _awaitsOffset, _isBlobHeapRefSizeSmall));
         }
     }
 
@@ -334,11 +334,11 @@ namespace System.Reflection.Metadata.Ecma335
     {
         internal readonly uint NumberOfRows;
 
-        private readonly bool IsImportScopeRefSizeSmall;
-        private readonly bool IsBlobHeapRefSizeSmall;
+        private readonly bool _isImportScopeRefSizeSmall;
+        private readonly bool _isBlobHeapRefSizeSmall;
 
         private const int ParentOffset = 0;
-        private readonly int ImportsOffset;
+        private readonly int _importsOffset;
 
         internal readonly int RowSize;
         internal readonly MemoryBlock Block;
@@ -351,11 +351,11 @@ namespace System.Reflection.Metadata.Ecma335
             int containingBlockOffset)
         {
             this.NumberOfRows = numberOfRows;
-            this.IsImportScopeRefSizeSmall = importScopeRefSize == 2;
-            this.IsBlobHeapRefSizeSmall = blobHeapRefSize == 2;
+            _isImportScopeRefSizeSmall = importScopeRefSize == 2;
+            _isBlobHeapRefSizeSmall = blobHeapRefSize == 2;
 
-            this.ImportsOffset = ParentOffset + importScopeRefSize;
-            this.RowSize = ImportsOffset + blobHeapRefSize;
+            _importsOffset = ParentOffset + importScopeRefSize;
+            this.RowSize = _importsOffset + blobHeapRefSize;
 
             this.Block = containingBlock.GetMemoryBlockAt(containingBlockOffset, (int)(this.RowSize * numberOfRows));
         }
@@ -363,13 +363,13 @@ namespace System.Reflection.Metadata.Ecma335
         internal ImportScopeHandle GetParent(ImportScopeHandle handle)
         {
             int rowOffset = (int)(handle.RowId - 1) * this.RowSize;
-            return ImportScopeHandle.FromRowId(this.Block.PeekReference(rowOffset + ParentOffset, this.IsImportScopeRefSizeSmall));
+            return ImportScopeHandle.FromRowId(this.Block.PeekReference(rowOffset + ParentOffset, _isImportScopeRefSizeSmall));
         }
 
         internal BlobHandle GetImports(ImportScopeHandle handle)
         {
             int rowOffset = (int)(handle.RowId - 1) * this.RowSize;
-            return BlobHandle.FromIndex(this.Block.PeekReference(rowOffset + ImportsOffset, this.IsBlobHeapRefSizeSmall));
+            return BlobHandle.FromIndex(this.Block.PeekReference(rowOffset + _importsOffset, _isBlobHeapRefSizeSmall));
         }
     }
 
@@ -377,13 +377,13 @@ namespace System.Reflection.Metadata.Ecma335
     {
         internal readonly uint NumberOfRows;
 
-        private readonly bool IsHasCustomDebugInformationRefSizeSmall;
-        private readonly bool IsGuidHeapRefSizeSmall;
-        private readonly bool IsBlobHeapRefSizeSmall;
+        private readonly bool _isHasCustomDebugInformationRefSizeSmall;
+        private readonly bool _isGuidHeapRefSizeSmall;
+        private readonly bool _isBlobHeapRefSizeSmall;
 
         private const int ParentOffset = 0;
-        private readonly int KindOffset;
-        private readonly int ValueOffset;
+        private readonly int _kindOffset;
+        private readonly int _valueOffset;
 
         internal readonly int RowSize;
         internal readonly MemoryBlock Block;
@@ -397,13 +397,13 @@ namespace System.Reflection.Metadata.Ecma335
             int containingBlockOffset)
         {
             this.NumberOfRows = numberOfRows;
-            this.IsHasCustomDebugInformationRefSizeSmall = hasCustomDebugInformationRefSize == 2;
-            this.IsGuidHeapRefSizeSmall = guidHeapRefSize == 2;
-            this.IsBlobHeapRefSizeSmall = blobHeapRefSize == 2;
+            _isHasCustomDebugInformationRefSizeSmall = hasCustomDebugInformationRefSize == 2;
+            _isGuidHeapRefSizeSmall = guidHeapRefSize == 2;
+            _isBlobHeapRefSizeSmall = blobHeapRefSize == 2;
 
-            this.KindOffset = ParentOffset + hasCustomDebugInformationRefSize;
-            this.ValueOffset = KindOffset + guidHeapRefSize;
-            this.RowSize = ValueOffset + blobHeapRefSize;
+            _kindOffset = ParentOffset + hasCustomDebugInformationRefSize;
+            _valueOffset = _kindOffset + guidHeapRefSize;
+            this.RowSize = _valueOffset + blobHeapRefSize;
 
             this.Block = containingBlock.GetMemoryBlockAt(containingBlockOffset, (int)(this.RowSize * numberOfRows));
         }
@@ -411,19 +411,19 @@ namespace System.Reflection.Metadata.Ecma335
         internal Handle GetParent(CustomDebugInformationHandle handle)
         {
             int rowOffset = (int)(handle.RowId - 1) * this.RowSize;
-            return HasCustomDebugInformationTag.ConvertToToken(this.Block.PeekTaggedReference(rowOffset + ParentOffset, this.IsHasCustomDebugInformationRefSizeSmall));
+            return HasCustomDebugInformationTag.ConvertToToken(this.Block.PeekTaggedReference(rowOffset + ParentOffset, _isHasCustomDebugInformationRefSizeSmall));
         }
 
         internal GuidHandle GetKind(CustomDebugInformationHandle handle)
         {
             int rowOffset = (int)(handle.RowId - 1) * this.RowSize;
-            return GuidHandle.FromIndex(this.Block.PeekReference(rowOffset + KindOffset, this.IsGuidHeapRefSizeSmall));
+            return GuidHandle.FromIndex(this.Block.PeekReference(rowOffset + _kindOffset, _isGuidHeapRefSizeSmall));
         }
 
         internal BlobHandle GetValue(CustomDebugInformationHandle handle)
         {
             int rowOffset = (int)(handle.RowId - 1) * this.RowSize;
-            return BlobHandle.FromIndex(this.Block.PeekReference(rowOffset + ValueOffset, this.IsBlobHeapRefSizeSmall));
+            return BlobHandle.FromIndex(this.Block.PeekReference(rowOffset + _valueOffset, _isBlobHeapRefSizeSmall));
         }
     }
 }

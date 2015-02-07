@@ -204,7 +204,7 @@ namespace System.Reflection.Metadata.Decoding
             {
                 return Token.EscapeSequence(c);
             }
-            
+
             // Otherwise, must be a literal
             return Token.Literal(c);
         }

@@ -383,7 +383,7 @@ namespace System.Reflection.Metadata
 
         // debug tables
         internal DocumentTableReader DocumentTable;
-        internal MethodBodyTableReader MethodBodyTable; 
+        internal MethodBodyTableReader MethodBodyTable;
         internal LocalScopeTableReader LocalScopeTable;
         internal LocalVariableTableReader LocalVariableTable;
         internal LocalConstantTableReader LocalConstantTable;
@@ -864,7 +864,7 @@ namespace System.Reflection.Metadata
             else
             {
                 lastVariableRowId = (int)this.LocalScopeTable.GetVariableStart(scopeRowId + 1) - 1;
-        }
+            }
         }
 
         internal void GetLocalConstantRange(LocalScopeHandle scope, out int firstConstantRowId, out int lastConstantRowId)

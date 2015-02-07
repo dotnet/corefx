@@ -5,7 +5,7 @@ using System.Diagnostics;
 
 namespace System.Reflection.Metadata.Decoding
 {
-    partial class Tokenizer
+    internal partial class Tokenizer
     {
         // Represents a self-contained unit within a tokenized string
         private class Token

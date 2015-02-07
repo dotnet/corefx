@@ -7,30 +7,30 @@ namespace System.Reflection.Metadata
 {
     public struct LocalConstant
     {
-        private readonly MetadataReader reader;
+        private readonly MetadataReader _reader;
 
         // Workaround: JIT doesn't generate good code for nested structures, so use RowId.
-        private readonly uint rowId;
+        private readonly uint _rowId;
 
         internal LocalConstant(MetadataReader reader, LocalConstantHandle handle)
         {
             Debug.Assert(reader != null);
             Debug.Assert(!handle.IsNil);
 
-            this.reader = reader;
-            this.rowId = handle.RowId;
+            _reader = reader;
+            _rowId = handle.RowId;
         }
 
         private LocalConstantHandle Handle
         {
-            get { return LocalConstantHandle.FromRowId(rowId); }
+            get { return LocalConstantHandle.FromRowId(_rowId); }
         }
 
         public StringHandle Name
         {
             get
             {
-                return reader.LocalConstantTable.GetName(Handle);
+                return _reader.LocalConstantTable.GetName(Handle);
             }
         }
 
@@ -41,7 +41,7 @@ namespace System.Reflection.Metadata
         {
             get
             {
-                return reader.LocalConstantTable.GetTypeCode(Handle);
+                return _reader.LocalConstantTable.GetTypeCode(Handle);
             }
         }
 
@@ -52,7 +52,7 @@ namespace System.Reflection.Metadata
         {
             get
             {
-                return reader.LocalConstantTable.GetValue(Handle);
+                return _reader.LocalConstantTable.GetValue(Handle);
             }
         }
     }

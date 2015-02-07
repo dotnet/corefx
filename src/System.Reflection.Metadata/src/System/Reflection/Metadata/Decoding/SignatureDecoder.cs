@@ -258,7 +258,7 @@ namespace System.Reflection.Metadata.Decoding
             {
                 throw new BadImageFormatException();
             }
-         
+
             return DecodeTypes(ref blobReader, provider);
         }
 

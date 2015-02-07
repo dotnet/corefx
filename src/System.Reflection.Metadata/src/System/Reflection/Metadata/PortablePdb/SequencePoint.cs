@@ -29,7 +29,7 @@ namespace System.Reflection.Metadata
         }
 
         internal SequencePoint(DocumentHandle document, int offset, int startLine, ushort startColumn, int endLine, ushort endColumn)
-        {            
+        {
             this.Document = document;
             this.Offset = offset;
             this.StartLine = startLine;

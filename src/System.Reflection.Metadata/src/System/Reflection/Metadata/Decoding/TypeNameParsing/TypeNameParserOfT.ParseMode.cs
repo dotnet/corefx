@@ -3,7 +3,7 @@
 
 namespace System.Reflection.Metadata.Decoding
 {
-    partial class TypeNameParser<TType>
+    internal partial class TypeNameParser<TType>
     {
         private enum ParseMode : int
         {

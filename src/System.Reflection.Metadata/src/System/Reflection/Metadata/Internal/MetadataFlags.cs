@@ -128,7 +128,7 @@ namespace System.Reflection.Metadata.Ecma335
           | CustomDebugInformation,
 
         V3_0_TablesMask =
-            V2_0_TablesMask 
+            V2_0_TablesMask
           | PortablePdb_TablesMask,
     }
 

@@ -8,23 +8,23 @@ namespace System.Reflection.Metadata
 {
     public struct MethodBody
     {
-        private readonly MetadataReader reader;
+        private readonly MetadataReader _reader;
 
         // Workaround: JIT doesn't generate good code for nested structures, so use RowId.
-        private readonly uint rowId;
+        private readonly uint _rowId;
 
         internal MethodBody(MetadataReader reader, MethodBodyHandle handle)
         {
             Debug.Assert(reader != null);
             Debug.Assert(!handle.IsNil);
 
-            this.reader = reader;
-            this.rowId = handle.RowId;
+            _reader = reader;
+            _rowId = handle.RowId;
         }
 
         private MethodBodyHandle Handle
         {
-            get { return MethodBodyHandle.FromRowId(rowId); }
+            get { return MethodBodyHandle.FromRowId(_rowId); }
         }
 
         /// <summary>
@@ -34,7 +34,7 @@ namespace System.Reflection.Metadata
         {
             get
             {
-                return reader.MethodBodyTable.GetSequencePoints(Handle);
+                return _reader.MethodBodyTable.GetSequencePoints(Handle);
             }
         }
     }

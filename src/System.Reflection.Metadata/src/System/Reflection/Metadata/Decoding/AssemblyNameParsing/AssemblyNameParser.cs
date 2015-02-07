@@ -162,7 +162,7 @@ namespace System.Reflection.Metadata.Decoding
             if (_tokenizer.Peek() != TokenType.Quote)
                 return null;
 
-            return QuotedIdentifierParser.Parse(_tokenizer.UnderlyingReader, required);            
+            return QuotedIdentifierParser.Parse(_tokenizer.UnderlyingReader, required);
         }
 
         // <identifier>

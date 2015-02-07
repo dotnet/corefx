@@ -10,7 +10,7 @@ namespace System.Reflection.Metadata
 {
     public struct DocumentHandleCollection : IReadOnlyCollection<DocumentHandle>
     {
-        private readonly MetadataReader reader;
+        private readonly MetadataReader _reader;
 
         private readonly int _firstRowId;
         private readonly int _lastRowId;
@@ -18,7 +18,7 @@ namespace System.Reflection.Metadata
         internal DocumentHandleCollection(MetadataReader reader)
         {
             Debug.Assert(reader != null);
-            this.reader = reader;
+            _reader = reader;
 
             _firstRowId = 1;
             _lastRowId = (int)reader.DocumentTable.NumberOfRows;
@@ -34,7 +34,7 @@ namespace System.Reflection.Metadata
 
         public Enumerator GetEnumerator()
         {
-            return new Enumerator(reader, _firstRowId, _lastRowId);
+            return new Enumerator(_reader, _firstRowId, _lastRowId);
         }
 
         IEnumerator<DocumentHandle> IEnumerable<DocumentHandle>.GetEnumerator()
@@ -109,7 +109,7 @@ namespace System.Reflection.Metadata
 
     public struct MethodBodyHandleCollection : IReadOnlyCollection<MethodBodyHandle>
     {
-        private readonly MetadataReader reader;
+        private readonly MetadataReader _reader;
 
         private readonly int _firstRowId;
         private readonly int _lastRowId;
@@ -117,7 +117,7 @@ namespace System.Reflection.Metadata
         internal MethodBodyHandleCollection(MetadataReader reader)
         {
             Debug.Assert(reader != null);
-            this.reader = reader;
+            _reader = reader;
 
             _firstRowId = 1;
             _lastRowId = (int)reader.MethodBodyTable.NumberOfRows;
@@ -133,7 +133,7 @@ namespace System.Reflection.Metadata
 
         public Enumerator GetEnumerator()
         {
-            return new Enumerator(reader, _firstRowId, _lastRowId);
+            return new Enumerator(_reader, _firstRowId, _lastRowId);
         }
 
         IEnumerator<MethodBodyHandle> IEnumerable<MethodBodyHandle>.GetEnumerator()
@@ -208,7 +208,7 @@ namespace System.Reflection.Metadata
 
     public struct LocalScopeHandleCollection : IReadOnlyCollection<LocalScopeHandle>
     {
-        private readonly MetadataReader reader;
+        private readonly MetadataReader _reader;
 
         private readonly int _firstRowId;
         private readonly int _lastRowId;
@@ -216,7 +216,7 @@ namespace System.Reflection.Metadata
         internal LocalScopeHandleCollection(MetadataReader reader)
         {
             Debug.Assert(reader != null);
-            this.reader = reader;
+            _reader = reader;
 
             _firstRowId = 1;
             _lastRowId = (int)reader.LocalScopeTable.NumberOfRows;
@@ -232,7 +232,7 @@ namespace System.Reflection.Metadata
 
         public Enumerator GetEnumerator()
         {
-            return new Enumerator(reader, _firstRowId, _lastRowId);
+            return new Enumerator(_reader, _firstRowId, _lastRowId);
         }
 
         IEnumerator<LocalScopeHandle> IEnumerable<LocalScopeHandle>.GetEnumerator()
@@ -307,7 +307,7 @@ namespace System.Reflection.Metadata
 
     public struct LocalVariableHandleCollection : IReadOnlyCollection<LocalVariableHandle>
     {
-        private readonly MetadataReader reader;
+        private readonly MetadataReader _reader;
 
         private readonly int _firstRowId;
         private readonly int _lastRowId;
@@ -315,7 +315,7 @@ namespace System.Reflection.Metadata
         internal LocalVariableHandleCollection(MetadataReader reader, LocalScopeHandle scope)
         {
             Debug.Assert(reader != null);
-            this.reader = reader;
+            _reader = reader;
 
             if (scope.IsNil)
             {
@@ -338,7 +338,7 @@ namespace System.Reflection.Metadata
 
         public Enumerator GetEnumerator()
         {
-            return new Enumerator(reader, _firstRowId, _lastRowId);
+            return new Enumerator(_reader, _firstRowId, _lastRowId);
         }
 
         IEnumerator<LocalVariableHandle> IEnumerable<LocalVariableHandle>.GetEnumerator()
@@ -413,7 +413,7 @@ namespace System.Reflection.Metadata
 
     public struct LocalConstantHandleCollection : IReadOnlyCollection<LocalConstantHandle>
     {
-        private readonly MetadataReader reader;
+        private readonly MetadataReader _reader;
 
         private readonly int _firstRowId;
         private readonly int _lastRowId;
@@ -421,7 +421,7 @@ namespace System.Reflection.Metadata
         internal LocalConstantHandleCollection(MetadataReader reader, LocalScopeHandle scope)
         {
             Debug.Assert(reader != null);
-            this.reader = reader;
+            _reader = reader;
 
             _firstRowId = 1;
             _lastRowId = (int)reader.LocalConstantTable.NumberOfRows;
@@ -437,7 +437,7 @@ namespace System.Reflection.Metadata
 
         public Enumerator GetEnumerator()
         {
-            return new Enumerator(reader, _firstRowId, _lastRowId);
+            return new Enumerator(_reader, _firstRowId, _lastRowId);
         }
 
         IEnumerator<LocalConstantHandle> IEnumerable<LocalConstantHandle>.GetEnumerator()
@@ -512,7 +512,7 @@ namespace System.Reflection.Metadata
 
     public struct AsyncMethodHandleCollection : IReadOnlyCollection<AsyncMethodHandle>
     {
-        private readonly MetadataReader reader;
+        private readonly MetadataReader _reader;
 
         private readonly int _firstRowId;
         private readonly int _lastRowId;
@@ -520,7 +520,7 @@ namespace System.Reflection.Metadata
         internal AsyncMethodHandleCollection(MetadataReader reader)
         {
             Debug.Assert(reader != null);
-            this.reader = reader;
+            _reader = reader;
 
             _firstRowId = 1;
             _lastRowId = (int)reader.AsyncMethodTable.NumberOfRows;
@@ -536,7 +536,7 @@ namespace System.Reflection.Metadata
 
         public Enumerator GetEnumerator()
         {
-            return new Enumerator(reader, _firstRowId, _lastRowId);
+            return new Enumerator(_reader, _firstRowId, _lastRowId);
         }
 
         IEnumerator<AsyncMethodHandle> IEnumerable<AsyncMethodHandle>.GetEnumerator()
@@ -611,7 +611,7 @@ namespace System.Reflection.Metadata
 
     public struct ImportScopeCollection : IReadOnlyCollection<ImportScopeHandle>
     {
-        private readonly MetadataReader reader;
+        private readonly MetadataReader _reader;
 
         private readonly int _firstRowId;
         private readonly int _lastRowId;
@@ -619,7 +619,7 @@ namespace System.Reflection.Metadata
         internal ImportScopeCollection(MetadataReader reader)
         {
             Debug.Assert(reader != null);
-            this.reader = reader;
+            _reader = reader;
 
             _firstRowId = 1;
             _lastRowId = (int)reader.ImportScopeTable.NumberOfRows;
@@ -635,7 +635,7 @@ namespace System.Reflection.Metadata
 
         public Enumerator GetEnumerator()
         {
-            return new Enumerator(reader, _firstRowId, _lastRowId);
+            return new Enumerator(_reader, _firstRowId, _lastRowId);
         }
 
         IEnumerator<ImportScopeHandle> IEnumerable<ImportScopeHandle>.GetEnumerator()
@@ -710,7 +710,7 @@ namespace System.Reflection.Metadata
 
     public struct CustomDebugInformationHandleCollection : IReadOnlyCollection<CustomDebugInformationHandle>
     {
-        private readonly MetadataReader reader;
+        private readonly MetadataReader _reader;
 
         private readonly int _firstRowId;
         private readonly int _lastRowId;
@@ -718,7 +718,7 @@ namespace System.Reflection.Metadata
         internal CustomDebugInformationHandleCollection(MetadataReader reader)
         {
             Debug.Assert(reader != null);
-            this.reader = reader;
+            _reader = reader;
 
             _firstRowId = 1;
             _lastRowId = (int)reader.CustomDebugInformationTable.NumberOfRows;
@@ -734,7 +734,7 @@ namespace System.Reflection.Metadata
 
         public Enumerator GetEnumerator()
         {
-            return new Enumerator(reader, _firstRowId, _lastRowId);
+            return new Enumerator(_reader, _firstRowId, _lastRowId);
         }
 
         IEnumerator<CustomDebugInformationHandle> IEnumerable<CustomDebugInformationHandle>.GetEnumerator()

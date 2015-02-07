@@ -42,7 +42,7 @@ namespace System.Reflection.Metadata.Ecma335
         internal const uint TagMask = 0x0000001F;
 
         // Arbitrary value not equal to any of the token types in the array. This includes 0 which is TokenTypeIds.Module.
-        internal const uint InvalidTokenType = uint.MaxValue; 
+        internal const uint InvalidTokenType = uint.MaxValue;
 
         internal static uint[] TagToTokenTypeArray =
         {
@@ -64,7 +64,7 @@ namespace System.Reflection.Metadata.Ecma335
             TokenTypeIds.AssemblyRef,
             TokenTypeIds.File,
             TokenTypeIds.ExportedType,
-            TokenTypeIds.ManifestResource, 
+            TokenTypeIds.ManifestResource,
             TokenTypeIds.GenericParam,
             TokenTypeIds.GenericParamConstraint,
             TokenTypeIds.MethodSpec,
@@ -73,12 +73,12 @@ namespace System.Reflection.Metadata.Ecma335
             TokenTypeIds.LocalScope,
             TokenTypeIds.LocalVariable,
             TokenTypeIds.LocalConstant,
-            TokenTypeIds.ImportScope, 
+            TokenTypeIds.ImportScope,
 
-            InvalidTokenType, 
-            InvalidTokenType, 
-            InvalidTokenType, 
-            InvalidTokenType, 
+            InvalidTokenType,
+            InvalidTokenType,
+            InvalidTokenType,
+            InvalidTokenType,
             InvalidTokenType
         };
 
@@ -116,7 +116,7 @@ namespace System.Reflection.Metadata.Ecma335
         {
             uint tokenType = TagToTokenTypeArray[taggedReference & TagMask];
             uint rowId = (taggedReference >> NumberOfBits);
-            
+
             if (tokenType == InvalidTokenType || ((rowId & ~TokenTypeIds.RIDMask) != 0))
             {
                 Handle.ThrowInvalidCodedIndex();

@@ -6,7 +6,7 @@ using System.Diagnostics;
 
 namespace System.Reflection.Metadata.Decoding
 {
-    partial class AssemblyNameParser
+    internal partial class AssemblyNameParser
     {
         private class AssemblyNameBuilder
         {
@@ -36,7 +36,7 @@ namespace System.Reflection.Metadata.Decoding
             {
                 Debug.Assert(!String.IsNullOrEmpty(componentName));
 
-                _components.Add(componentName, componentValue);                
+                _components.Add(componentName, componentValue);
             }
 
             public AssemblyNameComponents ToAssemblyName()

@@ -7,30 +7,30 @@ namespace System.Reflection.Metadata
 {
     public struct LocalVariable
     {
-        private readonly MetadataReader reader;
+        private readonly MetadataReader _reader;
 
         // Workaround: JIT doesn't generate good code for nested structures, so use RowId.
-        private readonly uint rowId;
+        private readonly uint _rowId;
 
         internal LocalVariable(MetadataReader reader, LocalVariableHandle handle)
         {
             Debug.Assert(reader != null);
             Debug.Assert(!handle.IsNil);
 
-            this.reader = reader;
-            this.rowId = handle.RowId;
+            _reader = reader;
+            _rowId = handle.RowId;
         }
 
         private LocalVariableHandle Handle
         {
-            get { return LocalVariableHandle.FromRowId(rowId); }
+            get { return LocalVariableHandle.FromRowId(_rowId); }
         }
 
         public LocalVariableAttributes Attributes
         {
             get
             {
-                return reader.LocalVariableTable.GetAttributes(Handle);
+                return _reader.LocalVariableTable.GetAttributes(Handle);
             }
         }
 
@@ -38,7 +38,7 @@ namespace System.Reflection.Metadata
         {
             get
             {
-                return reader.LocalVariableTable.GetIndex(Handle);
+                return _reader.LocalVariableTable.GetIndex(Handle);
             }
         }
 
@@ -46,7 +46,7 @@ namespace System.Reflection.Metadata
         {
             get
             {
-                return reader.LocalVariableTable.GetName(Handle);
+                return _reader.LocalVariableTable.GetName(Handle);
             }
         }
     }

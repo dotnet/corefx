@@ -7,44 +7,44 @@ namespace System.Reflection.Metadata
 {
     public struct MethodSignature<TType>
     {
-        private readonly SignatureHeader header;
-        private readonly TType returnType;
-        private readonly int requiredParameterCount;
-        private readonly int genericParameterCount;
-        private readonly ImmutableArray<TType> parameterTypes;
+        private readonly SignatureHeader _header;
+        private readonly TType _returnType;
+        private readonly int _requiredParameterCount;
+        private readonly int _genericParameterCount;
+        private readonly ImmutableArray<TType> _parameterTypes;
 
         public MethodSignature(SignatureHeader header, TType returnType, int requiredParameterCount, int genericParameterCount, ImmutableArray<TType> parameterTypes)
         {
-            this.header = header;
-            this.returnType = returnType;
-            this.genericParameterCount = 0;
-            this.requiredParameterCount = requiredParameterCount;
-            this.parameterTypes = parameterTypes;
+            _header = header;
+            _returnType = returnType;
+            _genericParameterCount = 0;
+            _requiredParameterCount = requiredParameterCount;
+            _parameterTypes = parameterTypes;
         }
 
         public SignatureHeader Header
         {
-            get { return this.header; }
+            get { return _header; }
         }
 
         public TType ReturnType
         {
-            get { return returnType; }
+            get { return _returnType; }
         }
 
         public int RequiredParameterCount
         {
-            get { return requiredParameterCount; }
+            get { return _requiredParameterCount; }
         }
 
         public int GenericParameterCount
         {
-            get { return genericParameterCount; }
+            get { return _genericParameterCount; }
         }
 
         public ImmutableArray<TType> ParameterTypes
         {
-            get { return parameterTypes; }
+            get { return _parameterTypes; }
         }
     }
 }

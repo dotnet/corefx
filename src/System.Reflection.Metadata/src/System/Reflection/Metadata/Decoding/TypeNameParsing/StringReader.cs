@@ -29,7 +29,7 @@ namespace System.Reflection.Metadata.Decoding
 
         public bool CanRead
         {
-            get 
+            get
             {
                 if (_position < _input.Length)
                 {

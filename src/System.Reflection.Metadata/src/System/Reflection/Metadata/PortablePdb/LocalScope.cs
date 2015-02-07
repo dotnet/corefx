@@ -7,30 +7,30 @@ namespace System.Reflection.Metadata
 {
     public struct LocalScope
     {
-        private readonly MetadataReader reader;
+        private readonly MetadataReader _reader;
 
         // Workaround: JIT doesn't generate good code for nested structures, so use RowId.
-        private readonly uint rowId;
+        private readonly uint _rowId;
 
         internal LocalScope(MetadataReader reader, LocalScopeHandle handle)
         {
             Debug.Assert(reader != null);
             Debug.Assert(!handle.IsNil);
 
-            this.reader = reader;
-            this.rowId = handle.RowId;
+            _reader = reader;
+            _rowId = handle.RowId;
         }
 
         private LocalScopeHandle Handle
         {
-            get { return LocalScopeHandle.FromRowId(rowId); }
+            get { return LocalScopeHandle.FromRowId(_rowId); }
         }
 
         public MethodDefinitionHandle Method
         {
             get
             {
-                return reader.LocalScopeTable.GetMethod(Handle);
+                return _reader.LocalScopeTable.GetMethod(Handle);
             }
         }
 
@@ -38,7 +38,7 @@ namespace System.Reflection.Metadata
         {
             get
             {
-                return reader.LocalScopeTable.GetImportScope(Handle);
+                return _reader.LocalScopeTable.GetImportScope(Handle);
             }
         }
 
@@ -46,7 +46,7 @@ namespace System.Reflection.Metadata
         {
             get
             {
-                return reader.LocalScopeTable.GetStartOffset(Handle);
+                return _reader.LocalScopeTable.GetStartOffset(Handle);
             }
         }
 
@@ -54,18 +54,18 @@ namespace System.Reflection.Metadata
         {
             get
             {
-                return reader.LocalScopeTable.GetLength(Handle);
+                return _reader.LocalScopeTable.GetLength(Handle);
             }
         }
 
         public LocalVariableHandleCollection GetLocalVariables()
         {
-            return new LocalVariableHandleCollection(reader, Handle);
+            return new LocalVariableHandleCollection(_reader, Handle);
         }
 
         public LocalConstantHandleCollection GetLocalConstants()
         {
-            return new LocalConstantHandleCollection(reader, Handle);
+            return new LocalConstantHandleCollection(_reader, Handle);
         }
     }
 }

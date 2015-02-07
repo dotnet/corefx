@@ -8,7 +8,7 @@ namespace System.Reflection.Metadata.Decoding
     internal class TypeNameFormatException : FormatException
     {
         private readonly TypeNameFormatErrorId _errorId;
-        private readonly int _position;        
+        private readonly int _position;
 
         public TypeNameFormatException(string message, TypeNameFormatErrorId errorId, int position)
             : base(message)
@@ -16,7 +16,7 @@ namespace System.Reflection.Metadata.Decoding
             Debug.Assert(position > 0);
 
             _errorId = errorId;
-            _position = position;            
+            _position = position;
         }
 
         public TypeNameFormatErrorId ErrorId

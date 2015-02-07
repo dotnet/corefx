@@ -7,30 +7,30 @@ namespace System.Reflection.Metadata
 {
     public struct ImportScope
     {
-        private readonly MetadataReader reader;
+        private readonly MetadataReader _reader;
 
         // Workaround: JIT doesn't generate good code for nested structures, so use RowId.
-        private readonly uint rowId;
+        private readonly uint _rowId;
 
         internal ImportScope(MetadataReader reader, ImportScopeHandle handle)
         {
             Debug.Assert(reader != null);
             Debug.Assert(!handle.IsNil);
 
-            this.reader = reader;
-            this.rowId = handle.RowId;
+            _reader = reader;
+            _rowId = handle.RowId;
         }
 
         private ImportScopeHandle Handle
         {
-            get { return ImportScopeHandle.FromRowId(rowId); }
+            get { return ImportScopeHandle.FromRowId(_rowId); }
         }
 
         public ImportScopeHandle Parent
         {
             get
             {
-                return reader.ImportScopeTable.GetParent(Handle);
+                return _reader.ImportScopeTable.GetParent(Handle);
             }
         }
 
@@ -38,7 +38,7 @@ namespace System.Reflection.Metadata
         {
             get
             {
-                return reader.ImportScopeTable.GetImports(Handle);
+                return _reader.ImportScopeTable.GetImports(Handle);
             }
         }
     }

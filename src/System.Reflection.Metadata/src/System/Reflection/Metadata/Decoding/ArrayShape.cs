@@ -7,30 +7,30 @@ namespace System.Reflection.Metadata
 {
     public struct ArrayShape
     {
-        private readonly int rank;
-        private readonly ImmutableArray<int> sizes;
-        private readonly ImmutableArray<int> lowerBounds;
+        private readonly int _rank;
+        private readonly ImmutableArray<int> _sizes;
+        private readonly ImmutableArray<int> _lowerBounds;
 
         public ArrayShape(int rank, ImmutableArray<int> sizes, ImmutableArray<int> lowerBounds)
         {
-            this.rank = rank;
-            this.sizes = sizes;
-            this.lowerBounds = lowerBounds;
+            _rank = rank;
+            _sizes = sizes;
+            _lowerBounds = lowerBounds;
         }
 
         public int Rank
         {
-            get { return rank; }
+            get { return _rank; }
         }
 
         public ImmutableArray<int> Sizes
         {
-            get { return sizes; }
+            get { return _sizes; }
         }
 
         public ImmutableArray<int> LowerBounds
         {
-            get { return lowerBounds; }
+            get { return _lowerBounds; }
         }
     }
 }

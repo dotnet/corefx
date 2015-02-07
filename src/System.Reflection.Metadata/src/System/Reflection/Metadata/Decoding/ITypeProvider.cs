@@ -10,8 +10,8 @@ namespace System.Reflection.Metadata.Decoding
     {
         TType GetGenericInstance(TType genericType, ImmutableArray<TType> typeArguments);
         TType GetArrayType(TType elementType, ArrayShape shape);
-        TType GetByReferenceType(TType elementType);        
+        TType GetByReferenceType(TType elementType);
         TType GetSZArrayType(TType elementType);
-        TType GetPointerType(TType elementType);        
+        TType GetPointerType(TType elementType);
     }
 }

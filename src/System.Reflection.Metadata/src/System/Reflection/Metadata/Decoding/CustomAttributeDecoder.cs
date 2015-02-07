@@ -86,7 +86,7 @@ namespace System.Reflection.Metadata.Decoding
                 return ImmutableArray<CustomAttributeNamedArgument<TType>>.Empty;
             }
 
-            var arguments = new CustomAttributeNamedArgument<TType>[count]; 
+            var arguments = new CustomAttributeNamedArgument<TType>[count];
             for (int i = 0; i < count; i++)
             {
                 CustomAttributeNamedArgumentKind kind = (CustomAttributeNamedArgumentKind)valueReader.ReadSerializationTypeCode();

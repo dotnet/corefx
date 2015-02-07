@@ -7,23 +7,23 @@ namespace System.Reflection.Metadata
 {
     public struct CustomAttributeValue<TType>
     {
-        private readonly ImmutableArray<CustomAttributeTypedArgument<TType>> fixedArguments;
-        private readonly ImmutableArray<CustomAttributeNamedArgument<TType>> namedArguments;
+        private readonly ImmutableArray<CustomAttributeTypedArgument<TType>> _fixedArguments;
+        private readonly ImmutableArray<CustomAttributeNamedArgument<TType>> _namedArguments;
 
         public CustomAttributeValue(ImmutableArray<CustomAttributeTypedArgument<TType>> fixedArguments, ImmutableArray<CustomAttributeNamedArgument<TType>> namedArguments)
         {
-            this.fixedArguments = fixedArguments;
-            this.namedArguments = namedArguments;
+            _fixedArguments = fixedArguments;
+            _namedArguments = namedArguments;
         }
 
         public ImmutableArray<CustomAttributeTypedArgument<TType>> FixedArguments
         {
-            get { return fixedArguments; }
+            get { return _fixedArguments; }
         }
 
         public ImmutableArray<CustomAttributeNamedArgument<TType>> NamedArguments
         {
-            get { return namedArguments; }
+            get { return _namedArguments; }
         }
     }
 }

@@ -136,7 +136,7 @@ namespace System.Reflection.Metadata.Decoding
 
             TypeNameParser<TType> parser = new TypeNameParser<TType>(typeProvider, tokenizer, ParseMode.AssemblyQualifiedName);
             TType type = parser.Parse();
-            
+
             // Make sure there's no trailing chars
             tokenizer.Close();
 
@@ -219,7 +219,6 @@ namespace System.Reflection.Metadata.Decoding
             do
             {
                 ParseGenericTypeArgument();
-
             } while (_tokenizer.SkipIf(TokenType.Comma));
         }
 
@@ -252,7 +251,7 @@ namespace System.Reflection.Metadata.Decoding
             ParseGenericTypeArgumentFullName();
         }
 
-        
+
         // Parses '[System.Int32, mscorlib]' in 'System.Func`1[[System.Int32, mscorlib]]'
         // 
         // <genericTypeArgumentAssemblyQualifiedName>
@@ -262,7 +261,7 @@ namespace System.Reflection.Metadata.Decoding
                 return false;
 
             ParseGenericTypeArgumentName(ParseMode.AssemblyQualifiedNameWithinGenericTypeArgument);
-            
+
             // Consume the extra ']'
             _tokenizer.Skip(TokenType.RightBracket);
 
@@ -403,7 +402,7 @@ namespace System.Reflection.Metadata.Decoding
             if (!_tokenizer.SkipIf(TokenType.Comma))
                 return;
 
-            _builder.AssemblyName = AssemblyNameParser.Parse(_tokenizer.UnderlyingReader, withinGenericTypeArgument:_mode == ParseMode.AssemblyQualifiedNameWithinGenericTypeArgument);
+            _builder.AssemblyName = AssemblyNameParser.Parse(_tokenizer.UnderlyingReader, withinGenericTypeArgument: _mode == ParseMode.AssemblyQualifiedNameWithinGenericTypeArgument);
         }
     }
 }

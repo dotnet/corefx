@@ -14,8 +14,8 @@ namespace System.Reflection.Metadata.Decoding
         public readonly static TypeModifier Reference = new TypeModifier(TypeModifierType.ByReference, new ArrayShape());
 
         private readonly TypeModifierType _modifierType;
-        private readonly ArrayShape _arrayShape;        
-        
+        private readonly ArrayShape _arrayShape;
+
         private TypeModifier(TypeModifierType modifierType, ArrayShape arrayShape)
         {
             _modifierType = modifierType;
@@ -24,11 +24,11 @@ namespace System.Reflection.Metadata.Decoding
 
         public ArrayShape ArrayShape
         {
-            get 
-            { 
+            get
+            {
                 Debug.Assert(_modifierType == TypeModifierType.Array);
 
-                return _arrayShape;  
+                return _arrayShape;
             }
         }
 

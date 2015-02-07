@@ -3,7 +3,7 @@
 
 namespace System.Reflection.Metadata.Decoding
 {
-    partial class AssemblyNameParser
+    internal partial class AssemblyNameParser
     {
         private enum ParseMode : int
         {

@@ -5,23 +5,23 @@ namespace System.Reflection.Metadata
 {
     public struct CustomAttributeTypedArgument<TType>
     {
-        private readonly TType type;
-        private readonly object value;
+        private readonly TType _type;
+        private readonly object _value;
 
         public CustomAttributeTypedArgument(TType type, object value)
         {
-            this.type = type;
-            this.value = value;
+            _type = type;
+            _value = value;
         }
 
         public TType Type
         {
-            get { return type; }
+            get { return _type; }
         }
 
         public object Value
         {
-            get { return value; }
+            get { return _value; }
         }
     }
 }

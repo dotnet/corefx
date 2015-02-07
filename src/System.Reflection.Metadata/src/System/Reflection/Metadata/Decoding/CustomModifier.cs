@@ -5,23 +5,23 @@ namespace System.Reflection.Metadata
 {
     public struct CustomModifier<TType>
     {
-        private readonly TType type;
-        private readonly bool isRequired;
+        private readonly TType _type;
+        private readonly bool _isRequired;
 
         public CustomModifier(TType type, bool isRequired)
         {
-            this.type = type;
-            this.isRequired = isRequired;
+            _type = type;
+            _isRequired = isRequired;
         }
 
         public TType Type
         {
-            get { return type; }
+            get { return _type; }
         }
 
         public bool IsRequired
         {
-            get { return isRequired; }
+            get { return _isRequired; }
         }
     }
 }
