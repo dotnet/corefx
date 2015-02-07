@@ -588,9 +588,10 @@ namespace System.Xml.Linq
             }
             else if (s.Length > 0)
             {
-                if (content is string)
+                string stringContent = content as string;
+                if (stringContent != null)
                 {
-                    content = (string)content + s;
+                    content = stringContent + s;
                 }
                 else
                 {
@@ -652,7 +653,7 @@ namespace System.Xml.Linq
             }
         }
 
-        string GetTextOnly()
+        private string GetTextOnly()
         {
             if (content == null) return null;
             string s = content as string;
@@ -669,7 +670,7 @@ namespace System.Xml.Linq
             return s;
         }
 
-        string CollectText(ref XNode n)
+        private string CollectText(ref XNode n)
         {
             string s = "";
             while (n != null && n.NodeType == XmlNodeType.Text)
@@ -729,7 +730,7 @@ namespace System.Xml.Linq
         internal void ConvertTextToNode()
         {
             string s = content as string;
-            if (s != null && s.Length > 0)
+            if (!string.IsNullOrEmpty(s))
             {
                 XText t = new XText(s);
                 t.parent = this;
@@ -787,7 +788,7 @@ namespace System.Xml.Linq
             }
         }
 
-        IEnumerable<XElement> GetElements(XName name)
+        private IEnumerable<XElement> GetElements(XName name)
         {
             XNode n = content as XNode;
             if (n != null)
@@ -803,10 +804,10 @@ namespace System.Xml.Linq
 
         internal static string GetStringValue(object value)
         {
-            string s;
-            if (value is string)
+            string s = value as string;
+            if (s != null)
             {
-                s = (string)value;
+                return s;
             }
             else if (value is double)
             {
@@ -1057,7 +1058,7 @@ namespace System.Xml.Linq
             if (notify) NotifyChanged(n, XObjectChangeEventArgs.Remove);
         }
 
-        void RemoveNodesSkipNotify()
+        private void RemoveNodesSkipNotify()
         {
             XNode n = content as XNode;
             if (n != null)
@@ -1087,15 +1088,16 @@ namespace System.Xml.Linq
         {
             if (content != null)
             {
-                if (content is string)
+                string stringContent = content as string;
+                if (stringContent != null)
                 {
                     if (this is XDocument)
                     {
-                        writer.WriteWhitespace((string)content);
+                        writer.WriteWhitespace(stringContent);
                     }
                     else
                     {
-                        writer.WriteString((string)content);
+                        writer.WriteString(stringContent);
                     }
                 }
                 else
@@ -1110,7 +1112,7 @@ namespace System.Xml.Linq
             }
         }
 
-        static void AddContentToList(List<object> list, object content)
+        private static void AddContentToList(List<object> list, object content)
         {
             IEnumerable e = content is string ? null : content as IEnumerable;
             if (e == null)

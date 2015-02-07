@@ -4,14 +4,11 @@
 // The Regex class represents a single compiled instance of a regular
 // expression.
 
-using System;
-using System.Threading;
 using System.Collections;
-using System.Reflection;
-using System.Globalization;
-using System.Runtime.CompilerServices;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
+using System.Threading;
 
 namespace System.Text.RegularExpressions
 {
@@ -118,7 +115,7 @@ namespace System.Text.RegularExpressions
             ValidateMatchTimeout(matchTimeout);
 
             // Try to look up this regex in the cache.  We do this regardless of whether useCache is true since there's
-            // really no reason not to. 
+            // really no reason not to.
             if ((options & RegexOptions.CultureInvariant) != 0)
                 cultureKey = CultureInfo.InvariantCulture.ToString(); // "English (United States)"
             else
@@ -169,7 +166,7 @@ namespace System.Text.RegularExpressions
         /// The valid range is <code>TimeSpan.Zero &lt; matchTimeout &lt;= Regex.MaximumMatchTimeout</code>.
         /// </summary>
         /// <param name="matchTimeout">The timeout value to validate.</param>
-        /// <exception cref="System.ArgumentOutOfRangeException">If the specified timeout is not within a valid range.        
+        /// <exception cref="System.ArgumentOutOfRangeException">If the specified timeout is not within a valid range.
         /// </exception>
         internal static void ValidateMatchTimeout(TimeSpan matchTimeout)
         {
@@ -280,7 +277,7 @@ namespace System.Text.RegularExpressions
          */
         /// <summary>
         /// Returns the GroupNameCollection for the regular expression. This collection contains the
-        /// set of strings used to name capturing groups in the expression. 
+        /// set of strings used to name capturing groups in the expression.
         /// </summary>
         public String[] GetGroupNames()
         {
@@ -313,7 +310,7 @@ namespace System.Text.RegularExpressions
          * but supplied for completeness.)
          */
         /// <summary>
-        /// Returns the integer group number corresponding to a group name. 
+        /// Returns the integer group number corresponding to a group name.
         /// </summary>
         public int[] GetGroupNumbers()
         {
@@ -344,7 +341,7 @@ namespace System.Text.RegularExpressions
         }
 
         /*
-         * Given a group number, maps it to a group name. Note that nubmered
+         * Given a group number, maps it to a group name. Note that numbered
          * groups automatically get a group name that is the decimal string
          * equivalent of its number.
          *
@@ -380,7 +377,7 @@ namespace System.Text.RegularExpressions
         }
 
         /*
-         * Given a group name, maps it to a group number. Note that nubmered
+         * Given a group name, maps it to a group number. Note that numbered
          * groups automatically get a group name that is the decimal string
          * equivalent of its number.
          *
@@ -440,7 +437,7 @@ namespace System.Text.RegularExpressions
          * Static version of simple IsMatch call
          */
         /// <summary>
-        /// Searches the input string for one or more occurrences of the text 
+        /// Searches the input string for one or more occurrences of the text
         /// supplied in the pattern parameter with matching options supplied in the options
         /// parameter.
         /// </summary>
@@ -489,7 +486,7 @@ namespace System.Text.RegularExpressions
          * Static version of simple Match call
          */
         /// <summary>
-        /// Searches the input string for one or more occurrences of the text 
+        /// Searches the input string for one or more occurrences of the text
         /// supplied in the pattern parameter.
         /// </summary>
         public static Match Match(String input, String pattern)
@@ -501,7 +498,7 @@ namespace System.Text.RegularExpressions
          * Static version of simple Match call
          */
         /// <summary>
-        /// Searches the input string for one or more occurrences of the text 
+        /// Searches the input string for one or more occurrences of the text
         /// supplied in the pattern parameter. Matching is modified with an option
         /// string.
         /// </summary>
@@ -619,25 +616,19 @@ namespace System.Text.RegularExpressions
             return new MatchCollection(this, input, 0, input.Length, startat);
         }
 
-        /*
-         * Static version of simple Replace call
-         */
         /// <summary>
         /// Replaces all occurrences of the pattern with the <paramref name="replacement"/> pattern, starting at
-        /// the first character in the input string. 
+        /// the first character in the input string.
         /// </summary>
         public static String Replace(String input, String pattern, String replacement)
         {
             return Replace(input, pattern, replacement, RegexOptions.None, DefaultMatchTimeout);
         }
 
-        /*
-         * Static version of simple Replace call
-         */
         /// <summary>
-        /// Replaces all occurrences of 
+        /// Replaces all occurrences of
         /// the <paramref name="pattern "/>with the <paramref name="replacement "/>
-        /// pattern, starting at the first character in the input string. 
+        /// pattern, starting at the first character in the input string.
         /// </summary>
         public static String Replace(String input, String pattern, String replacement, RegexOptions options)
         {
@@ -649,13 +640,10 @@ namespace System.Text.RegularExpressions
             return new Regex(pattern, options, matchTimeout, true).Replace(input, replacement);
         }
 
-        /*
-         * Does the replacement
-         */
         /// <summary>
-        /// Replaces all occurrences of the <paramref name="pattern "/> with the
-        /// <paramref name="replacement"/> pattern, starting at the
-        /// first character in the input string, using the previous patten. 
+        /// Replaces all occurrences of the previously defined pattern with the
+        /// <paramref name="replacement"/> pattern, starting at the first character in the
+        /// input string.
         /// </summary>
         public String Replace(String input, String replacement)
         {
@@ -665,12 +653,10 @@ namespace System.Text.RegularExpressions
             return Replace(input, replacement, -1, UseOptionR() ? input.Length : 0);
         }
 
-        /*
-         * Does the replacement
-         */
         /// <summary>
-        /// Replaces all occurrences of the (previously defined) <paramref name="pattern "/>with the 
-        /// <paramref name="replacement"/> pattern, starting at the first character in the input string. 
+        /// Replaces all occurrences of the previously defined pattern with the
+        /// <paramref name="replacement"/> pattern, starting at the first character in the
+        /// input string.
         /// </summary>
         public String Replace(String input, String replacement, int count)
         {
@@ -680,13 +666,10 @@ namespace System.Text.RegularExpressions
             return Replace(input, replacement, count, UseOptionR() ? input.Length : 0);
         }
 
-        /*
-         * Does the replacement
-         */
         /// <summary>
-        /// Replaces all occurrences of the <paramref name="pattern "/>with the recent 
-        /// <paramref name="replacement"/> pattern, starting at the character position 
-        /// <paramref name="startat."/>
+        /// Replaces all occurrences of the previously defined pattern with the
+        /// <paramref name="replacement"/> pattern, starting at the character position
+        /// <paramref name="startat"/>.
         /// </summary>
         public String Replace(String input, String replacement, int count, int startat)
         {
@@ -708,24 +691,18 @@ namespace System.Text.RegularExpressions
             return repl.Replace(this, input, count, startat);
         }
 
-        /*
-         * Static version of simple Replace call
-         */
         /// <summary>
-        /// Replaces all occurrences of the <paramref name="pattern "/> with the 
-        /// <paramref name="replacement"/> pattern.
+        /// Replaces all occurrences of the <paramref name="pattern"/> with the recent
+        /// replacement pattern.
         /// </summary>
         public static String Replace(String input, String pattern, MatchEvaluator evaluator)
         {
             return Replace(input, pattern, evaluator, RegexOptions.None, DefaultMatchTimeout);
         }
 
-        /*
-         * Static version of simple Replace call
-         */
         /// <summary>
-        /// Replaces all occurrences of the <paramref name="pattern "/> with the recent 
-        /// <paramref name="replacement"/> pattern, starting at the first character.
+        /// Replaces all occurrences of the <paramref name="pattern"/> with the recent
+        /// replacement pattern, starting at the first character.
         /// </summary>
         public static String Replace(String input, String pattern, MatchEvaluator evaluator, RegexOptions options)
         {
@@ -737,14 +714,9 @@ namespace System.Text.RegularExpressions
             return new Regex(pattern, options, matchTimeout, true).Replace(input, evaluator);
         }
 
-        /*
-         * Does the replacement
-         */
         /// <summary>
-        /// Replaces all occurrences of the <paramref name="pattern "/> with the recent 
-        /// <paramref name="replacement"/> pattern, starting at the first character 
-        /// position.
-        /// </para>
+        /// Replaces all occurrences of the previously defined pattern with the recent
+        /// replacement pattern, starting at the first character position.
         /// </summary>
         public String Replace(String input, MatchEvaluator evaluator)
         {
@@ -754,13 +726,9 @@ namespace System.Text.RegularExpressions
             return Replace(input, evaluator, -1, UseOptionR() ? input.Length : 0);
         }
 
-        /*
-         * Does the replacement
-         */
         /// <summary>
-        /// Replaces all occurrences of the <paramref name="pattern "/>with the recent 
-        /// <paramref name="replacement"/> pattern, starting at the first character 
-        /// position.
+        /// Replaces all occurrences of the previously defined pattern with the recent
+        /// replacement pattern, starting at the first character position.
         /// </summary>
         public String Replace(String input, MatchEvaluator evaluator, int count)
         {
@@ -770,13 +738,10 @@ namespace System.Text.RegularExpressions
             return Replace(input, evaluator, count, UseOptionR() ? input.Length : 0);
         }
 
-        /*
-         * Does the replacement
-         */
         /// <summary>
-        /// Replaces all occurrences of the (previouly defined) <paramref name="pattern "/>with 
-        /// the recent <paramref name="replacement"/> pattern, starting at the character
-        /// position<paramref name=" startat"/>. 
+        /// Replaces all occurrences of the previously defined pattern with the recent
+        /// replacement pattern, starting at the character position
+        /// <paramref name="startat"/>.
         /// </summary>
         public String Replace(String input, MatchEvaluator evaluator, int count, int startat)
         {
@@ -786,9 +751,6 @@ namespace System.Text.RegularExpressions
             return RegexReplacement.Replace(evaluator, this, input, count, startat);
         }
 
-        /*
-         * Static version of simple Split call
-         */
         /// <summary>
         /// Splits the <paramref name="input "/>string at the position defined
         /// by <paramref name="pattern"/>.
@@ -798,9 +760,6 @@ namespace System.Text.RegularExpressions
             return Split(input, pattern, RegexOptions.None, DefaultMatchTimeout);
         }
 
-        /*
-         * Static version of simple Split call
-         */
         /// <summary>
         /// Splits the <paramref name="input "/>string at the position defined by <paramref name="pattern"/>.
         /// </summary>
@@ -814,12 +773,9 @@ namespace System.Text.RegularExpressions
             return new Regex(pattern, options, matchTimeout, true).Split(input);
         }
 
-        /*
-         * Does a split
-         */
         /// <summary>
-        /// Splits the <paramref name="input "/>string at the position defined by
-        /// a previous <paramref name="pattern"/>.
+        /// Splits the <paramref name="input"/> string at the position defined by a
+        /// previous pattern.
         /// </summary>
         public String[] Split(String input)
         {
@@ -829,12 +785,9 @@ namespace System.Text.RegularExpressions
             return Split(input, 0, UseOptionR() ? input.Length : 0);
         }
 
-        /*
-         * Does a split
-         */
         /// <summary>
-        /// Splits the <paramref name="input "/>string at the position defined by a previous
-        /// <paramref name="pattern"/>. 
+        /// Splits the <paramref name="input"/> string at the position defined by a
+        /// previous pattern.
         /// </summary>
         public String[] Split(String input, int count)
         {
@@ -844,12 +797,9 @@ namespace System.Text.RegularExpressions
             return RegexReplacement.Split(this, input, count, UseOptionR() ? input.Length : 0);
         }
 
-        /*
-         * Does a split
-         */
         /// <summary>
-        /// Splits the <paramref name="input "/>string at the position defined by a previous
-        /// <paramref name="pattern"/> . 
+        /// Splits the <paramref name="input"/> string at the position defined by a
+        /// previous pattern.
         /// </summary>
         public String[] Split(String input, int count, int startat)
         {
@@ -897,7 +847,7 @@ namespace System.Text.RegularExpressions
 
             try
             {
-                // Do the scan starting at the requested position            
+                // Do the scan starting at the requested position
                 match = runner.Scan(this, input, beginning, beginning + length, startat, prevlen, quick, _internalMatchTimeout);
             }
             finally
@@ -924,7 +874,7 @@ namespace System.Text.RegularExpressions
                 {
                     if (current.Value._key == key)
                     {
-                        // If we find an entry in the cache, move it to the head at the same time. 
+                        // If we find an entry in the cache, move it to the head at the same time.
                         s_livecode.Remove(current);
                         s_livecode.AddFirst(current);
                         return current.Value;

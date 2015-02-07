@@ -3,7 +3,7 @@
   <Import Project="dir.props" />
 
   <!-- Inline task to bootstrap the build to enable downloading nuget.exe -->
-  <UsingTask TaskName="DownloadFile" TaskFactory="CodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.v4.0.dll">
+  <UsingTask TaskName="DownloadFile" TaskFactory="CodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.v12.0.dll">
     <ParameterGroup>
       <Address ParameterType="System.String" Required="true"/>
       <FileName ParameterType="System.String" Required="true" />
@@ -24,10 +24,11 @@
   </UsingTask>
 
   <Target Name="_RestoreBuildTools"
-    BeforeTargets="Build"
+    BeforeTargets="BuildAllProjects"
     Inputs="$(BuildToolsTargetInputs)"
     Outputs="$(BuildToolsTargetOutputs)"
     >
+    <Message Importance="High" Text="Restoring build tools..." />
 
     <!-- Download latest nuget.exe -->
     <DownloadFile
@@ -38,15 +39,9 @@
     <!-- Restore build tools -->
     <Exec
       StandardOutputImportance="Low"
-      Command="&quot;$(NuGetToolPath)&quot; install Microsoft.DotNet.BuildTools -Prerelease -NoCache -Version $(BuildToolsVersion) -o &quot; $(PackagesDir) &quot; $(NuGetConfigCommandLine)" />
+      Command="&quot;$(NuGetToolPath)&quot; install &quot; $(SourceDir).nuget\packages.config &quot;  -o &quot; $(PackagesDir) &quot; $(NuGetConfigCommandLine)" />
 
-    <!-- Copy build tools to tools directory -->
-    <ItemGroup>
-      <BuildToolFiles Include="$(PackagesDir)Microsoft.DotNet.BuildTools.$(BuildToolsVersion)\lib\**\*" />
-    </ItemGroup>
-    <Copy SourceFiles="@(BuildToolFiles)" DestinationFolder="$(ToolsDir)" />
-
-    <Touch Files="$(BuildToolsInstallSempahore)" AlwaysCreate="true" />
+    <Touch Files="$(BuildToolsInstallSemaphore)" AlwaysCreate="true" />
   </Target>
 
   <ItemGroup>
@@ -59,4 +54,23 @@
   <Target Name="Clean">
     <RemoveDir Directories="$(BinDir);$(PackagesDir)" />
   </Target>
+  
+  <Target Name="GenerateCoverageReport"
+    AfterTargets="Build"
+    Inputs="$(CoverageReportDir)\*.coverage.xml"
+    Outputs="$(CoverageReportDir)*.*"
+    Condition="$(_CoverageEnabled)">
+    
+    <PropertyGroup>
+      <ReportGeneratorVersion>2.0.4.0</ReportGeneratorVersion>
+      <ReportGeneratorCommandLine>$(PackagesDir)ReportGenerator.$(ReportGeneratorVersion)\ReportGenerator.exe</ReportGeneratorCommandLine>
+      <ReportGeneratorOptions>-reports:$(CoverageReportDir)\*.coverage.xml -targetdir:$(CoverageReportDir) -reporttypes:Html</ReportGeneratorOptions>
+    </PropertyGroup>
+    
+    <Exec
+      Command="$(ReportGeneratorCommandLine) $(ReportGeneratorOptions)"
+      ContinueOnError="ErrorAndContinue" />
+    
+  </Target>
+  
 </Project>
