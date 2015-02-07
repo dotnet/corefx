@@ -1,5 +1,7 @@
 # .NET Core
 
+[![Join the chat at https://gitter.im/dotnet/corefx](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/dotnet/corefx?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 [![Build status][build-status-image]][build-status]
 
 [build-status-image]: http://dotnet-ci.cloudapp.net/job/dotnet_corefx/badge/icon
