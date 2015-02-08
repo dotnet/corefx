@@ -118,17 +118,17 @@ namespace System.Reflection.Metadata.Ecma335
         DeletedMarks = 0x80,    // Indicates metadata might contain items marked deleted
     }
 
-    internal enum StringKind : byte
+    internal enum StringKind
     {
-        Plain = 0,
-        WinRTPrefixed = 1,
-        DotTerminated = 2,
+        Plain = 0 << TokenTypeIds.RowIdBitCount,
+        WinRTPrefixed = 1 << TokenTypeIds.RowIdBitCount,
+        DotTerminated = 2 << TokenTypeIds.RowIdBitCount,
     }
 
-    internal enum NamespaceKind : byte
+    internal enum NamespaceKind
     {
-        Plain = 0,
-        Synthetic = 1,
+        Plain = 0 << TokenTypeIds.RowIdBitCount,
+        Synthetic = 1 << TokenTypeIds.RowIdBitCount,
     }
 
     internal static class TokenTypeIds
@@ -185,6 +185,7 @@ namespace System.Reflection.Metadata.Ecma335
         internal const uint MaxNamespace = SyntheticNamespace;
 
         internal const uint StringOrNamespaceKindMask = 0x03000000;
+        internal const uint StringOrNamespaceValueMask = VirtualBitAndRowIdMask | StringOrNamespaceKindMask;
 
         internal const uint HeapMask = 0x70000000;
         internal const uint RIDMask = 0x00FFFFFF;
