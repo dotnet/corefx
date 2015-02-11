@@ -351,11 +351,11 @@ namespace System.Threading.Tasks.Dataflow
 
 #if DEBUG
                     case DataflowMessageStatus.Postponed:
-                        Debug.Assert(false, "A message should never be postponed when no source has been provided");
+                        Debug.Fail("A message should never be postponed when no source has been provided");
                         break;
 
                     case DataflowMessageStatus.NotAvailable:
-                        Debug.Assert(false, "The message should never be missed, as it's offered to only this one target");
+                        Debug.Fail("The message should never be missed, as it's offered to only this one target");
                         break;
 #endif
                 }
@@ -633,7 +633,7 @@ namespace System.Threading.Tasks.Dataflow
                             break;
 #if DEBUG
                         case DataflowMessageStatus.NotAvailable:
-                            Debug.Assert(false, "The message should never be missed, as it's offered to only this one target");
+                            Debug.Fail("The message should never be missed, as it's offered to only this one target");
                             break;
                             // If the message was postponed, the source may or may not be complete yet.  Nothing to validate.
                             // Treat an improper DataflowMessageStatus as postponed and do nothing.
@@ -1363,7 +1363,7 @@ namespace System.Threading.Tasks.Dataflow
                         }, this, CancellationToken.None, TaskCreationOptions.None, TaskScheduler.Default);
                         break;
                     default:
-                        Debug.Assert(false, "Invalid linking cleanup reason specified.");
+                        Debug.Fail("Invalid linking cleanup reason specified.");
                         goto case ReceiveCoreByLinkingCleanupReason.Cancellation;
 
                     // Task final state: Faulted

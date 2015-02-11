@@ -164,7 +164,7 @@ namespace System.Reflection.Metadata.Ecma335
                         break;
 
                     default:
-                        Debug.Assert(false, "We should not get here");
+                        Debug.Fail("We should not get here");
                         return null;
                 }
             }

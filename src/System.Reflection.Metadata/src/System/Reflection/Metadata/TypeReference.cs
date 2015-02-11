@@ -109,7 +109,7 @@ namespace System.Reflection.Metadata
                     return MetadataReader.GetProjectedAssemblyRef((int)RowId);
             }
 
-            Debug.Assert(false, "Unknown TypeRef treatment");
+            Debug.Fail("Unknown TypeRef treatment");
             return default(AssemblyReferenceHandle);
         }
 
@@ -137,7 +137,7 @@ namespace System.Reflection.Metadata
                     return MetadataReader.GetProjectedNamespace((int)RowId);
             }
 
-            Debug.Assert(false, "Unknown TypeRef treatment");
+            Debug.Fail("Unknown TypeRef treatment");
             return default(StringHandle);
         }
         #endregion

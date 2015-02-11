@@ -1166,7 +1166,7 @@ namespace System.Collections.Concurrent
                 }
                 set
                 {
-                    Debug.Assert(false);
+                    Debug.Fail("HasNoElementsLeft_Set should not be called");
                 }
             }
 

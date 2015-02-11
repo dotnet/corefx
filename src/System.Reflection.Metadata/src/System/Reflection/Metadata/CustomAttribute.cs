@@ -129,7 +129,7 @@ namespace System.Reflection.Metadata
                     break;
 
                 default:
-                    Debug.Assert(false);
+                    Debug.Fail("Unmatched treatment type in switch");
                     return default(BlobHandle);
             }
 

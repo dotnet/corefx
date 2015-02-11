@@ -1015,7 +1015,7 @@ namespace System.Xml.XPath
                 }
             }
 
-            System.Diagnostics.Debug.Assert(false, "Parent node doesn't contain itself.");
+            System.Diagnostics.Debug.Fail("Parent node doesn't contain itself.");
             return null;
         }
     }
