@@ -156,9 +156,15 @@ namespace System.Collections
             }
             else
             {
+                if (_size == 0)
+                    return;
+
+                int[] indices = new int[1]; // SetValue takes a params array; lifting out the implicit allocation from the loop
+
                 while (i < _size)
                 {
-                    array.SetValue(_array[_size - i - 1], i + index);
+                    indices[0] = i + index;
+                    array.SetValue(_array[_size - i - 1], indices);
                     i++;
                 }
             }

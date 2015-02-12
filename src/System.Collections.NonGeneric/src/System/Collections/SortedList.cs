@@ -367,10 +367,17 @@ namespace System.Collections
             if (array.Length - arrayIndex < Count)
                 throw new ArgumentException(SR.Arg_ArrayPlusOffTooSmall);
             Contract.EndContractBlock();
+
+            if (Count == 0)
+                return;
+
+            int[] indices = new int[1]; // SetValue takes a params array; lifting out the implicit allocation from the loop
+
             for (int i = 0; i < Count; i++)
             {
                 DictionaryEntry entry = new DictionaryEntry(_keys[i], _values[i]);
-                array.SetValue(entry, i + arrayIndex);
+                indices[0] = i + arrayIndex;
+                array.SetValue(entry, indices);
             }
         }
 

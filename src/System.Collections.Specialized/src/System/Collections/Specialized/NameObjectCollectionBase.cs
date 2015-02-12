@@ -351,8 +351,16 @@ namespace System.Collections.Specialized
                 throw new ArgumentException(SR.Arg_InsufficientSpace);
             }
 
+            if (_entriesArray.Count == 0)
+                return;
+
+            int[] indices = new int[1]; // SetValue takes a params array; lifting out the implicit allocation from the loop
+
             for (IEnumerator e = this.GetEnumerator(); e.MoveNext();)
-                array.SetValue(e.Current, index++);
+            {
+                indices[0] = index++;
+                array.SetValue(e.Current, indices);
+            }
         }
 
         Object ICollection.SyncRoot
@@ -599,8 +607,16 @@ namespace System.Collections.Specialized
                     throw new ArgumentException(SR.Arg_InsufficientSpace);
                 }
 
+                if (_coll.Count == 0)
+                    return;
+
+                int[] indices = new int[1]; // SetValue takes a params array; lifting out the implicit allocation from the loop
+
                 for (IEnumerator e = this.GetEnumerator(); e.MoveNext();)
-                    array.SetValue(e.Current, index++);
+                {
+                    indices[0] = index++;
+                    array.SetValue(e.Current, indices);
+                }
             }
 
             Object ICollection.SyncRoot
