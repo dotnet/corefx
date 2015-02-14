@@ -46,7 +46,8 @@
   >
     <ItemGroup>
       <PossibleTargetFrameworks Include="$(_TargetFrameworkDirectories)" />
-      <ReferencePath Include="%(PossibleTargetFrameworks.Identity)mscorlib.dll" />
+      <ReferencePath Include="%(PossibleTargetFrameworks.Identity)mscorlib.dll" 
+                     Condition="'%(PossibleTargetFrameworks.Identity)' != '' and Exists('%(PossibleTargetFrameworks.Identity)mscorlib.dll')" />
     </ItemGroup>
   </Target>
 
@@ -74,6 +75,17 @@
 
   <Import Project="$(ToolsDir)packageresolve.targets" Condition="Exists('$(ToolsDir)packageresolve.targets')" />
 
+  <!-- Version assemblies -->
+  <PropertyGroup>
+    <!-- Setup the file version info -->
+    <!-- defauilt assembly versions to 4.0.0.0 -->
+    <AssemblyVersion>4.0.0.0</AssemblyVersion>
+    <GenerateAssemblyInfo Condition="'$(GenerateAssemblyInfo)'==''">true</GenerateAssemblyInfo>
+    <CLSCompliant Condition="'$(CLSCompliant)'==''">true</CLSCompliant>
+  </PropertyGroup>
+
+  <Import Project="$(ToolsDir)versioning.targets" Condition="Exists('$(ToolsDir)versioning.targets')" />
+
   <Import Project="$(ToolsDir)sign.targets" Condition="Exists('$(ToolsDir)sign.targets')" />
 
   <Import Project="$(ToolsDir)publishtest.targets" Condition="Exists('$(ToolsDir)publishtest.targets')" />
@@ -85,6 +97,8 @@
     
     <!-- Don't run unit tests as post-build in VS, use F5 on test project instead (see below). -->
     <RunTestsForProject Condition="'$(BuildingInsideVisualStudio)' == 'True'">False</RunTestsForProject>
+
+    <CLSCompliant Condition="'$(IsTestProject)'=='true'">false</CLSCompliant>
   </PropertyGroup>
 
   <PropertyGroup>
