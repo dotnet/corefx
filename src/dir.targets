@@ -38,6 +38,7 @@
     -->
   </PropertyGroup>
 
+
   <!-- Need to add references to the mscorlib design-time facade for some old-style portable dependencies like xunit -->
   <Target Name="AddDesignTimeFacadeReferences"
       Condition="'$(TargetingDefaultPlatform)' == 'true'"
@@ -77,9 +78,11 @@
 
   <!-- Version assemblies -->
   <PropertyGroup>
-    <!-- Setup the file version info -->
-    <!-- defauilt assembly versions to 4.0.0.0 -->
-    <AssemblyVersion>4.0.0.0</AssemblyVersion>
+    <!--
+      For now to avoid conflicts with files coming from packages default assembly version to 999.999.999.999
+      until we correctly add the AssemblyVersion property to each of the projects.
+    -->
+    <AssemblyVersion Condition="'$(AssemblyVersion)'==''">999.999.999.999</AssemblyVersion>
     <GenerateAssemblyInfo Condition="'$(GenerateAssemblyInfo)'==''">true</GenerateAssemblyInfo>
     <CLSCompliant Condition="'$(CLSCompliant)'==''">true</CLSCompliant>
   </PropertyGroup>
