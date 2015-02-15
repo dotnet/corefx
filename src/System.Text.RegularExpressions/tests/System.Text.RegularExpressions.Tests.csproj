@@ -28,6 +28,7 @@
     <Compile Include="R2LGetGroupNamesMatchTests.cs" />
     <Compile Include="RegexComponentsSplitTests.cs" />
     <Compile Include="RegexConstructorTests.cs" />
+    <Compile Include="RegexGroupCollectionTests.cs" />
     <Compile Include="RegexMatchTests0.cs" />
     <Compile Include="RegexMatchTests1.cs" />
     <Compile Include="RegexMatchTests2.cs" />
