@@ -9,6 +9,7 @@
     <OutputType>Library</OutputType>
     <AssemblyName>ModuleCore</AssemblyName>
     <RootNamespace>OLEDB.Test.ModuleCore</RootNamespace>
+    <CoverageEnabledForProject>false</CoverageEnabledForProject>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
   </PropertyGroup>

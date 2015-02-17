@@ -9,6 +9,7 @@
     <OutputType>Library</OutputType>
     <AssemblyName>XmlDiff</AssemblyName>
     <RootNamespace>System.Xml.XmlDiff</RootNamespace>
+    <CoverageEnabledForProject>false</CoverageEnabledForProject>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
   </PropertyGroup>

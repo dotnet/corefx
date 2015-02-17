@@ -9,6 +9,7 @@
     <OutputType>Library</OutputType>
     <AssemblyName>XmlCoreTest</AssemblyName>
     <RootNamespace>XmlCoreTest.Common</RootNamespace>
+    <CoverageEnabledForProject>false</CoverageEnabledForProject>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
   </PropertyGroup>

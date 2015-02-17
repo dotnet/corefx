@@ -10,6 +10,7 @@
     <AssemblyName>XunitTraitsDiscoverers</AssemblyName>
     <RootNamespace>Xunit.TraitDiscoverers</RootNamespace>
     <CLSCompliant>false</CLSCompliant>
+    <CoverageEnabledForProject>false</CoverageEnabledForProject>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
   </PropertyGroup>
