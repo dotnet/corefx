@@ -23,7 +23,7 @@ namespace System.Collections.Immutable
         /// An empty immutable dictionary with default equality comparers.
         /// </summary>
         [SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
-        public static readonly ImmutableDictionary<TKey, TValue> Empty = new ImmutableDictionary<TKey, TValue>();
+        public static readonly ImmutableDictionary<TKey, TValue> Empty = new ImmutableDictionary<TKey, TValue>(Comparers.Get(Utilities.GetDefaultEqualityComparer<TKey>(), Utilities.GetDefaultEqualityComparer<TValue>()));
 
         /// <summary>
         /// The singleton delegate that freezes the contents of hash buckets when the root of the data structure is frozen.

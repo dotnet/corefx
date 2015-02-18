@@ -24,7 +24,7 @@ namespace System.Collections.Immutable
             /// <summary>
             /// The default instance to use when all the comparers used are their default values.
             /// </summary>
-            internal static readonly Comparers Default = new Comparers(EqualityComparer<TKey>.Default, EqualityComparer<TValue>.Default);
+            internal static readonly Comparers Default = new Comparers(Utilities.GetDefaultEqualityComparer<TKey>(), Utilities.GetDefaultEqualityComparer<TValue>());
 
             /// <summary>
             /// The equality comparer to use for the key.

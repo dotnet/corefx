@@ -28,7 +28,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
-  <CodeAnalysisRuleSet>System.Collections.Immutable.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSet>System.Collections.Immutable.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -100,6 +100,7 @@
     <Compile Include="System\Collections\Immutable\KeysOrValuesCollectionAccessor.cs" />
     <Compile Include="System\Collections\Immutable\RefAsValueType.cs" />
     <Compile Include="System\Collections\Immutable\SecureObjectPool.cs" />
+    <Compile Include="System\Collections\Immutable\Utilities.cs" />
     <Compile Include="System\Diagnostics\CodeAnalysis\ExcludeFromCodeCoverageAttribute.cs" />
     <Compile Include="System\Linq\ImmutableArrayExtensions.cs" />
     <Compile Include="Strings.Designer.cs">
