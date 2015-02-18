@@ -25,7 +25,7 @@ namespace System.Collections.Immutable
         /// An empty sorted dictionary with default sort and equality comparers.
         /// </summary>
         [SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
-        public static readonly ImmutableSortedDictionary<TKey, TValue> Empty = new ImmutableSortedDictionary<TKey, TValue>();
+        public static readonly ImmutableSortedDictionary<TKey, TValue> Empty = new ImmutableSortedDictionary<TKey, TValue>(Utilities.GetDefaultComparer<TKey>(), Utilities.GetDefaultEqualityComparer<TValue>());
 
         /// <summary>
         /// The root node of the AVL tree that stores this map.

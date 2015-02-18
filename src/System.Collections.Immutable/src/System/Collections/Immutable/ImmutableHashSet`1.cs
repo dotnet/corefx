@@ -22,7 +22,7 @@ namespace System.Collections.Immutable
         /// An empty immutable hash set with the default comparer for <typeparamref name="T"/>.
         /// </summary>
         [SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
-        public static readonly ImmutableHashSet<T> Empty = new ImmutableHashSet<T>(SortedInt32KeyNode<HashBucket>.EmptyNode, EqualityComparer<T>.Default, 0);
+        public static readonly ImmutableHashSet<T> Empty = new ImmutableHashSet<T>(SortedInt32KeyNode<HashBucket>.EmptyNode, Utilities.GetDefaultEqualityComparer<T>(), 0);
 
         /// <summary>
         /// The singleton delegate that freezes the contents of hash buckets when the root of the data structure is frozen.
