@@ -186,6 +186,9 @@
   <data name="NotEnoughParens" xml:space="preserve">
     <value>Not enough )'s.</value>
   </data>
+  <data name="NotSupported_ReadOnlyCollection" xml:space="preserve">
+    <value>Collection is read-only.</value>
+  </data>
   <data name="OnlyAllowedOnce" xml:space="preserve">
     <value>This operation is only allowed once per object.</value>
   </data>

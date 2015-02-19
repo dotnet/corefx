@@ -5,6 +5,8 @@
 // contained in a compiled Regex.
 
 using System.Collections;
+using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace System.Text.RegularExpressions
 {
@@ -17,35 +19,18 @@ namespace System.Text.RegularExpressions
     /// Represents a sequence of capture substrings. The object is used
     /// to return the set of captures done by a single capturing group.
     /// </summary>
-    public class CaptureCollection : ICollection
+    [DebuggerDisplay("Count = {Count}")]
+    [DebuggerTypeProxy(typeof(RegexCollectionDebuggerProxy<>))]
+    public class CaptureCollection : IList<Capture>, IReadOnlyList<Capture>, IList
     {
-        internal Group _group;
-        internal int _capcount;
-        internal Capture[] _captures;
+        private readonly Group _group;
+        private readonly int _capcount;
+        private Capture[] _captures;
 
         internal CaptureCollection(Group group)
         {
             _group = group;
             _capcount = _group._capcount;
-        }
-
-        /// <summary>
-        /// The object on which to synchronize.
-        /// </summary>
-        Object ICollection.SyncRoot
-        {
-            get
-            {
-                return _group;
-            }
-        }
-
-        bool ICollection.IsSynchronized
-        {
-            get
-            {
-                return false;
-            }
         }
 
         /// <summary>
@@ -74,15 +59,9 @@ namespace System.Text.RegularExpressions
         /// Copies all the elements of the collection to the given array
         /// beginning at the given index.
         /// </summary>
-        void ICollection.CopyTo(Array array, int arrayIndex)
+        public void CopyTo(Capture[] array, int arrayIndex)
         {
-            if (array == null)
-                throw new ArgumentNullException("array");
-
-            for (int i = arrayIndex, j = 0; j < Count; i++, j++)
-            {
-                array.SetValue(this[j], i);
-            }
+            ((ICollection)this).CopyTo(array, arrayIndex);
         }
 
         /// <summary>
@@ -90,7 +69,12 @@ namespace System.Text.RegularExpressions
         /// </summary>
         public IEnumerator GetEnumerator()
         {
-            return new CaptureEnumerator(this);
+            return new Enumerator(this);
+        }
+
+        IEnumerator<Capture> IEnumerable<Capture>.GetEnumerator()
+        {
+            return new Enumerator(this);
         }
 
         /*
@@ -116,71 +100,190 @@ namespace System.Text.RegularExpressions
 
             return _captures[i];
         }
-    }
 
-
-    /*
-     * This non-public enumerator lists all the captures
-     * Should it be public?
-     */
-
-    internal class CaptureEnumerator : IEnumerator
-    {
-        internal CaptureCollection _rcc;
-        internal int _curindex;
-
-        /*
-         * Nonpublic constructor
-         */
-        internal CaptureEnumerator(CaptureCollection rcc)
+        int IList<Capture>.IndexOf(Capture item)
         {
-            _curindex = -1;
-            _rcc = rcc;
-        }
-
-        /*
-         * As required by IEnumerator
-         */
-        public bool MoveNext()
-        {
-            int size = _rcc.Count;
-
-            if (_curindex >= size)
-                return false;
-
-            _curindex++;
-
-            return (_curindex < size);
-        }
-
-        /*
-         * As required by IEnumerator
-         */
-        public Object Current
-        {
-            get { return Capture; }
-        }
-
-        /*
-         * Returns the current capture
-         */
-        public Capture Capture
-        {
-            get
+            var comparer = EqualityComparer<Capture>.Default;
+            for (int i = 0; i < Count; i++)
             {
-                if (_curindex < 0 || _curindex >= _rcc.Count)
-                    throw new InvalidOperationException(SR.EnumNotStarted);
+                if (comparer.Equals(this[i], item))
+                    return i;
+            }
+            return -1;
+        }
 
-                return _rcc[_curindex];
+        void IList<Capture>.Insert(int index, Capture item)
+        {
+            throw new NotSupportedException(SR.NotSupported_ReadOnlyCollection);
+        }
+
+        void IList<Capture>.RemoveAt(int index)
+        {
+            throw new NotSupportedException(SR.NotSupported_ReadOnlyCollection);
+        }
+
+        Capture IList<Capture>.this[int index]
+        {
+            get { return this[index]; }
+            set { throw new NotSupportedException(SR.NotSupported_ReadOnlyCollection); }
+        }
+
+        void ICollection<Capture>.Add(Capture item)
+        {
+            throw new NotSupportedException(SR.NotSupported_ReadOnlyCollection);
+        }
+
+        void ICollection<Capture>.Clear()
+        {
+            throw new NotSupportedException(SR.NotSupported_ReadOnlyCollection);
+        }
+
+        bool ICollection<Capture>.Contains(Capture item)
+        {
+            var comparer = EqualityComparer<Capture>.Default;
+            for (int i = 0; i < Count; i++)
+            {
+                if (comparer.Equals(this[i], item))
+                    return true;
+            }
+            return false;
+        }
+
+        bool ICollection<Capture>.IsReadOnly
+        {
+            get { return true; }
+        }
+
+        bool ICollection<Capture>.Remove(Capture item)
+        {
+            throw new NotSupportedException(SR.NotSupported_ReadOnlyCollection);
+        }
+
+        int IList.Add(object value)
+        {
+            throw new NotSupportedException(SR.NotSupported_ReadOnlyCollection);
+        }
+
+        void IList.Clear()
+        {
+            throw new NotSupportedException(SR.NotSupported_ReadOnlyCollection);
+        }
+
+        bool IList.Contains(object value)
+        {
+            return value is Capture && ((ICollection<Capture>)this).Contains((Capture)value);
+        }
+
+        int IList.IndexOf(object value)
+        {
+            return value is Capture ? ((IList<Capture>)this).IndexOf((Capture)value) : -1;
+        }
+
+        void IList.Insert(int index, object value)
+        {
+            throw new NotSupportedException(SR.NotSupported_ReadOnlyCollection);
+        }
+
+        bool IList.IsFixedSize
+        {
+            get { return true; }
+        }
+
+        bool IList.IsReadOnly
+        {
+            get { return true; }
+        }
+
+        void IList.Remove(object value)
+        {
+            throw new NotSupportedException(SR.NotSupported_ReadOnlyCollection);
+        }
+
+        void IList.RemoveAt(int index)
+        {
+            throw new NotSupportedException(SR.NotSupported_ReadOnlyCollection);
+        }
+
+        object IList.this[int index]
+        {
+            get { return this[index]; }
+            set { throw new NotSupportedException(SR.NotSupported_ReadOnlyCollection); }
+        }
+
+        bool ICollection.IsSynchronized
+        {
+            get { return false; }
+        }
+
+        object ICollection.SyncRoot
+        {
+            get { return _group; }
+        }
+
+        void ICollection.CopyTo(Array array, int arrayIndex)
+        {
+            if (array == null)
+                throw new ArgumentNullException("array");
+
+            if (Count == 0)
+                return;
+
+            int[] indices = new int[1]; // SetValue takes a params array; lifting out the implicit allocation from the loop
+
+            for (int i = arrayIndex, j = 0; j < Count; i++, j++)
+            {
+                indices[0] = i;
+                array.SetValue(this[j], indices);
             }
         }
 
-        /*
-         * Reset to before the first item
-         */
-        public void Reset()
+        private class Enumerator : IEnumerator<Capture>
         {
-            _curindex = -1;
+            private readonly CaptureCollection _collection;
+            private int _index;
+
+            internal Enumerator(CaptureCollection collection)
+            {
+                _collection = collection;
+                _index = -1;
+            }
+
+            public bool MoveNext()
+            {
+                int size = _collection.Count;
+
+                if (_index >= size)
+                    return false;
+
+                _index++;
+
+                return (_index < size);
+            }
+
+            public Capture Current
+            {
+                get
+                {
+                    if (_index < 0 || _index >= _collection.Count)
+                        throw new InvalidOperationException(SR.EnumNotStarted);
+
+                    return _collection[_index];
+                }
+            }
+
+            object IEnumerator.Current
+            {
+                get { return Current; }
+            }
+
+            void IEnumerator.Reset()
+            {
+                _index = -1;
+            }
+
+            void IDisposable.Dispose()
+            {
+            }
         }
     }
 }

@@ -6,6 +6,7 @@
 
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace System.Text.RegularExpressions
 {
@@ -18,20 +19,22 @@ namespace System.Text.RegularExpressions
     /// Represents the set of names appearing as capturing group
     /// names in a regular expression.
     /// </summary>
-    public class MatchCollection : ICollection
+    [DebuggerDisplay("Count = {Count}")]
+    [DebuggerTypeProxy(typeof(RegexCollectionDebuggerProxy<>))]
+    public class MatchCollection : IList<Match>, IReadOnlyList<Match>, IList
     {
-        internal Regex _regex;
-        internal List<Match> _matches;
-        internal bool _done;
-        internal String _input;
-        internal int _beginning;
-        internal int _length;
-        internal int _startat;
-        internal int _prevlen;
+        private readonly Regex _regex;
+        private readonly List<Match> _matches;
+        private bool _done;
+        private readonly string _input;
+        private readonly int _beginning;
+        private readonly int _length;
+        private int _startat;
+        private int _prevlen;
 
-        private static int s_infinite = 0x7FFFFFFF;
+        private const int Infinite = 0x7FFFFFFF;
 
-        internal MatchCollection(Regex regex, String input, int beginning, int length, int startat)
+        internal MatchCollection(Regex regex, string input, int beginning, int length, int startat)
         {
             if (startat < 0 || startat > input.Length)
                 throw new ArgumentOutOfRangeException("startat", SR.BeginIndexNotNegative);
@@ -82,7 +85,7 @@ namespace System.Text.RegularExpressions
         {
             if (!_done)
             {
-                GetMatch(s_infinite);
+                GetMatch(Infinite);
             }
         }
 
@@ -98,22 +101,6 @@ namespace System.Text.RegularExpressions
             }
         }
 
-        Object ICollection.SyncRoot
-        {
-            get
-            {
-                return this;
-            }
-        }
-
-        bool ICollection.IsSynchronized
-        {
-            get
-            {
-                return false;
-            }
-        }
-
         /// <summary>
         /// Returns the ith Match in the collection.
         /// </summary>
@@ -121,9 +108,7 @@ namespace System.Text.RegularExpressions
         {
             get
             {
-                Match match;
-
-                match = GetMatch(i);
+                Match match = GetMatch(i);
 
                 if (match == null)
                     throw new ArgumentOutOfRangeException("i");
@@ -136,10 +121,10 @@ namespace System.Text.RegularExpressions
         /// Copies all the elements of the collection to the given array
         /// starting at the given index.
         /// </summary>
-        void ICollection.CopyTo(Array array, int arrayIndex)
+        public void CopyTo(Match[] array, int arrayIndex)
         {
             EnsureInitialized();
-            ((ICollection)_matches).CopyTo(array, arrayIndex);
+            _matches.CopyTo(array, arrayIndex);
         }
 
         /// <summary>
@@ -147,70 +132,194 @@ namespace System.Text.RegularExpressions
         /// </summary>
         public IEnumerator GetEnumerator()
         {
-            return new MatchEnumerator(this);
-        }
-    }
-
-    /*
-     * This non-public enumerator lists all the group matches.
-     * Should it be public?
-     */
-    internal class MatchEnumerator : IEnumerator
-    {
-        internal MatchCollection _matchcoll;
-        internal Match _match = null;
-        internal int _curindex;
-        internal bool _done;
-
-        /*
-         * Nonpublic constructor
-         */
-        internal MatchEnumerator(MatchCollection matchcoll)
-        {
-            _matchcoll = matchcoll;
+            return new Enumerator(this);
         }
 
-        /*
-         * Advance to the next match
-         */
-        public bool MoveNext()
+        IEnumerator<Match> IEnumerable<Match>.GetEnumerator()
         {
-            if (_done)
-                return false;
+            return new Enumerator(this);
+        }
 
-            _match = _matchcoll.GetMatch(_curindex);
-            _curindex++;
-
-            if (_match == null)
+        int IList<Match>.IndexOf(Match item)
+        {
+            var comparer = EqualityComparer<Match>.Default;
+            for (int i = 0; i < Count; i++)
             {
-                _done = true;
-                return false;
+                if (comparer.Equals(this[i], item))
+                    return i;
+            }
+            return -1;
+        }
+
+        void IList<Match>.Insert(int index, Match item)
+        {
+            throw new NotSupportedException(SR.NotSupported_ReadOnlyCollection);
+        }
+
+        void IList<Match>.RemoveAt(int index)
+        {
+            throw new NotSupportedException(SR.NotSupported_ReadOnlyCollection);
+        }
+
+        Match IList<Match>.this[int index]
+        {
+            get { return this[index]; }
+            set { throw new NotSupportedException(SR.NotSupported_ReadOnlyCollection); }
+        }
+
+        void ICollection<Match>.Add(Match item)
+        {
+            throw new NotSupportedException(SR.NotSupported_ReadOnlyCollection);
+        }
+
+        void ICollection<Match>.Clear()
+        {
+            throw new NotSupportedException(SR.NotSupported_ReadOnlyCollection);
+        }
+
+        bool ICollection<Match>.Contains(Match item)
+        {
+            var comparer = EqualityComparer<Match>.Default;
+            for (int i = 0; i < Count; i++)
+            {
+                if (comparer.Equals(this[i], item))
+                    return true;
+            }
+            return false;
+        }
+
+        bool ICollection<Match>.IsReadOnly
+        {
+            get { return true; }
+        }
+
+        bool ICollection<Match>.Remove(Match item)
+        {
+            throw new NotSupportedException(SR.NotSupported_ReadOnlyCollection);
+        }
+
+        int IList.Add(object value)
+        {
+            throw new NotSupportedException(SR.NotSupported_ReadOnlyCollection);
+        }
+
+        void IList.Clear()
+        {
+            throw new NotSupportedException(SR.NotSupported_ReadOnlyCollection);
+        }
+
+        bool IList.Contains(object value)
+        {
+            return value is Match && ((ICollection<Match>)this).Contains((Match)value);
+        }
+
+        int IList.IndexOf(object value)
+        {
+            return value is Match ? ((IList<Match>)this).IndexOf((Match)value) : -1;
+        }
+
+        void IList.Insert(int index, object value)
+        {
+            throw new NotSupportedException(SR.NotSupported_ReadOnlyCollection);
+        }
+
+        bool IList.IsFixedSize
+        {
+            get { return true; }
+        }
+
+        bool IList.IsReadOnly
+        {
+            get { return true; }
+        }
+
+        void IList.Remove(object value)
+        {
+            throw new NotSupportedException(SR.NotSupported_ReadOnlyCollection);
+        }
+
+        void IList.RemoveAt(int index)
+        {
+            throw new NotSupportedException(SR.NotSupported_ReadOnlyCollection);
+        }
+
+        object IList.this[int index]
+        {
+            get { return this[index]; }
+            set { throw new NotSupportedException(SR.NotSupported_ReadOnlyCollection); }
+        }
+
+        bool ICollection.IsSynchronized
+        {
+            get { return false; }
+        }
+
+        object ICollection.SyncRoot
+        {
+            get { return this; }
+        }
+
+        void ICollection.CopyTo(Array array, int arrayIndex)
+        {
+            EnsureInitialized();
+            ((ICollection)_matches).CopyTo(array, arrayIndex);
+        }
+
+        private class Enumerator : IEnumerator<Match>
+        {
+            private readonly MatchCollection _collection;
+            private Match _match;
+            private int _index;
+            private bool _done;
+
+            internal Enumerator(MatchCollection collection)
+            {
+                _collection = collection;
             }
 
-            return true;
-        }
-
-        /*
-         * The current match
-         */
-        public Object Current
-        {
-            get
+            public bool MoveNext()
             {
+                if (_done)
+                    return false;
+
+                _match = _collection.GetMatch(_index);
+                _index++;
+
                 if (_match == null)
-                    throw new InvalidOperationException(SR.EnumNotStarted);
-                return _match;
-            }
-        }
+                {
+                    _done = true;
+                    return false;
+                }
 
-        /*
-         * Position before the first item
-         */
-        public void Reset()
-        {
-            _curindex = 0;
-            _done = false;
-            _match = null;
+                return true;
+            }
+
+            public Match Current
+            {
+                get
+                {
+                    if (_match == null)
+                        throw new InvalidOperationException(SR.EnumNotStarted);
+
+                    return _match;
+                }
+            }
+
+            object IEnumerator.Current
+            {
+                get { return Current; }
+            }
+
+            void IEnumerator.Reset()
+            {
+                _index = 0;
+                _done = false;
+                _match = null;
+            }
+
+            void IDisposable.Dispose()
+            {
+            }
         }
     }
 }
