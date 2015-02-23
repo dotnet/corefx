@@ -172,4 +172,23 @@
 
     <Error Condition="'$(TestRunExitCode)' != '0'" Text="One or more tests failed while running tests from '$(MSBuildProjectName)' please check log for details!" />
   </Target>
+
+  <!-- Generate coverage for individual projects. -->
+  <Target Name="GenerateIndividualCoverageReport"
+    AfterTargets="BuildAndTest"
+    Inputs="$(CoverageReportDir)\*.coverage.xml"
+    Outputs="$(CoverageReportDir)*.*"
+    Condition="$(_CoverageEnabled) and $(MSBuildProjectFile.Contains('Tests.csproj'))">
+
+    <PropertyGroup>
+      <ReportGeneratorVersion>2.0.4.0</ReportGeneratorVersion>
+      <ReportGeneratorCommandLine>$(PackagesDir)ReportGenerator.$(ReportGeneratorVersion)\ReportGenerator.exe</ReportGeneratorCommandLine>
+      <ReportGeneratorOptions>-reports:$(CoverageReportDir)\$(MSBuildProjectFile.Replace(".csproj","")).dll.coverage.xml -targetdir:$(CoverageReportDir) -reporttypes:Html</ReportGeneratorOptions>
+    </PropertyGroup>
+
+    <Exec
+      Command="$(ReportGeneratorCommandLine) $(ReportGeneratorOptions)"
+      ContinueOnError="ErrorAndContinue" />
+
+  </Target>
 </Project>
