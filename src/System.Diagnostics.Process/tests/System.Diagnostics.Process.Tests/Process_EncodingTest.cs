@@ -32,44 +32,43 @@ namespace System.Diagnostics.ProcessTests
 
             try
             {
-                SetConsoleCP(s_ConsoleEncoding);
-                SetConsoleOutputCP(s_ConsoleEncoding);
+                {
+                    SetConsoleCP(s_ConsoleEncoding);
+                    SetConsoleOutputCP(s_ConsoleEncoding);
 
-                Process p = CreateProcessInfinite();
-                p.StartInfo.RedirectStandardInput = true;
-                p.StartInfo.RedirectStandardOutput = true;
-                p.StartInfo.RedirectStandardError = true;
-                p.Start();
+                    Process p = CreateProcessInfinite();
+                    p.StartInfo.RedirectStandardInput = true;
+                    p.StartInfo.RedirectStandardOutput = true;
+                    p.StartInfo.RedirectStandardError = true;
+                    p.Start();
 
-                Assert.Equal(p.StandardInput.Encoding.CodePage, Encoding.UTF8.CodePage);
-                Assert.Equal(p.StandardOutput.CurrentEncoding.CodePage, Encoding.UTF8.CodePage);
-                Assert.Equal(p.StandardError.CurrentEncoding.CodePage, Encoding.UTF8.CodePage);
+                    Assert.Equal(p.StandardInput.Encoding.CodePage, Encoding.UTF8.CodePage);
+                    Assert.Equal(p.StandardOutput.CurrentEncoding.CodePage, Encoding.UTF8.CodePage);
+                    Assert.Equal(p.StandardError.CurrentEncoding.CodePage, Encoding.UTF8.CodePage);
 
-                p.Kill();
-                p.WaitForExit();
-            }
-            finally
-            {
-                SetConsoleCP(inputEncoding);
-                SetConsoleOutputCP(outputEncoding);
-            }
+                    p.Kill();
+                    p.WaitForExit();
+                }
 
-            try
-            {
-                // Register the codeprovider which will ensure 437 is enabled.
-                Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
-                Process p = CreateProcessInfinite();
-                p.StartInfo.RedirectStandardInput = true;
-                p.StartInfo.RedirectStandardOutput = true;
-                p.StartInfo.RedirectStandardError = true;
-                p.Start();
+                {
+                    SetConsoleCP(s_ConsoleEncoding);
+                    SetConsoleOutputCP(s_ConsoleEncoding);
 
-                Assert.Equal(p.StandardInput.Encoding.CodePage, inputEncoding);
-                Assert.Equal(p.StandardOutput.CurrentEncoding.CodePage, outputEncoding);
-                Assert.Equal(p.StandardError.CurrentEncoding.CodePage, outputEncoding);
+                    // Register the codeprovider which will ensure 437 is enabled.
+                    Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+                    Process p = CreateProcessInfinite();
+                    p.StartInfo.RedirectStandardInput = true;
+                    p.StartInfo.RedirectStandardOutput = true;
+                    p.StartInfo.RedirectStandardError = true;
+                    p.Start();
 
-                p.Kill();
-                p.WaitForExit();
+                    Assert.Equal(p.StandardInput.Encoding.CodePage, s_ConsoleEncoding);
+                    Assert.Equal(p.StandardOutput.CurrentEncoding.CodePage, s_ConsoleEncoding);
+                    Assert.Equal(p.StandardError.CurrentEncoding.CodePage, s_ConsoleEncoding);
+
+                    p.Kill();
+                    p.WaitForExit();
+                }
             }
             finally
             {
