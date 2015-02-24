@@ -2,7 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Security;
-using System.Threading;
+using System.Threading.Tasks;
 
 namespace System.Diagnostics
 {
@@ -100,8 +100,6 @@ namespace System.Diagnostics
                 private readonly string _body;
                 private readonly string _title;
                 private readonly int _flags;
-                private int _returnValue;
-
 
                 [SecurityCritical]
                 public MessageBoxPopup(string body, string title, int flags)
@@ -113,16 +111,13 @@ namespace System.Diagnostics
 
                 public int ShowMessageBox()
                 {
-                    Thread t = new Thread(DoPopup);
-                    t.Start();
-                    t.Join();
-                    return _returnValue;
+                    return Task.Run(new Func<int>(DoPopup)).Result;
                 }
 
                 [SecuritySafeCritical]
-                public void DoPopup()
+                private int DoPopup()
                 {
-                    _returnValue = Interop.User32.MessageBox(IntPtr.Zero, _body, _title, _flags);
+                    return Interop.User32.MessageBox(IntPtr.Zero, _body, _title, _flags);
                 }
             }
         }
