@@ -74,6 +74,7 @@ namespace System.Reflection.Metadata.Decoding
     //      ","
     //      "="
     //      """
+    //      "\"
     //
     internal partial class AssemblyNameParser
     {

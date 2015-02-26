@@ -109,7 +109,7 @@ namespace System.Reflection.Metadata.Decoding
     //      "["
     //      "]"
     //      "," 
-    //      "*"
+    //      "\"
     //      "&"
     //      "+"
     //
