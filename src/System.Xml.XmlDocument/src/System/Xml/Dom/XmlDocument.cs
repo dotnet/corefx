@@ -34,7 +34,6 @@ namespace System.Xml
         internal bool fCDataNodesPresent;
 
         private bool _preserveWhitespace;
-        private bool _isLoading;
 
         // special name strings for
         internal string strDocumentName;
@@ -736,11 +735,7 @@ namespace System.Xml
             }
         }
 
-        internal bool IsLoading
-        {
-            get { return _isLoading; }
-            set { _isLoading = value; }
-        }
+        internal bool IsLoading { get; set; }
 
         internal bool ActualLoadingStatus
         {
