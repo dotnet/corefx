@@ -1006,34 +1006,34 @@ namespace System.Xml
         // 
         //Saves out the file with xmldeclaration which has encoding value equal to
         //that of textwriter's encoding
-        public virtual void Save(XmlWriter w)
+        public virtual void Save(XmlWriter xmlWriter)
         {
-            XmlNode n = this.FirstChild;
-            if (n == null)
+            XmlNode xmlNode = this.FirstChild;
+            if (xmlNode == null)
                 return;
-            if (w.WriteState == WriteState.Start)
+            if (xmlWriter.WriteState == WriteState.Start)
             {
-                if (n is XmlDeclaration)
+                if (xmlNode is XmlDeclaration)
                 {
                     if (Standalone.Length == 0)
-                        w.WriteStartDocument();
+                        xmlWriter.WriteStartDocument();
                     else if (Standalone == "yes")
-                        w.WriteStartDocument(true);
+                        xmlWriter.WriteStartDocument(true);
                     else if (Standalone == "no")
-                        w.WriteStartDocument(false);
-                    n = n.NextSibling;
+                        xmlWriter.WriteStartDocument(false);
+                    xmlNode = xmlNode.NextSibling;
                 }
                 else
                 {
-                    w.WriteStartDocument();
+                    xmlWriter.WriteStartDocument();
                 }
             }
-            while (n != null)
+            while (xmlNode != null)
             {
-                n.WriteTo(w);
-                n = n.NextSibling;
+                xmlNode.WriteTo(xmlWriter);
+                xmlNode = xmlNode.NextSibling;
             }
-            w.Flush();
+            xmlWriter.Flush();
         }
 
         // Saves the node to the specified XmlWriter.
