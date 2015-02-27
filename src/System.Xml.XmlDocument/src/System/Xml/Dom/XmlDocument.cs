@@ -984,7 +984,7 @@ namespace System.Xml
         public virtual void Save(Stream outStream)
         {
             XmlDOMTextWriter xw = new XmlDOMTextWriter(outStream, TextEncoding);
-            if (PreserveWhitespace == false)
+            if (!PreserveWhitespace)
                 xw.Formatting = Formatting.Indented;
             WriteTo(xw);
             xw.Flush();
@@ -997,7 +997,7 @@ namespace System.Xml
         public virtual void Save(TextWriter writer)
         {
             XmlDOMTextWriter xw = new XmlDOMTextWriter(writer);
-            if (PreserveWhitespace == false)
+            if (!PreserveWhitespace)
                 xw.Formatting = Formatting.Indented;
             Save(xw);
         }
