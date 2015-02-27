@@ -20,7 +20,6 @@ namespace System.Xml
         //This variable represents the actual loading status. Since, IsLoading will
         //be manipulated sometimes for adding content to EntityReference this variable
         //has been added which would always represent the loading status of document.
-        private bool _actualLoadingStatus;
 
         private XmlNodeChangedEventHandler _onNodeInsertingDelegate;
         private XmlNodeChangedEventHandler _onNodeInsertedDelegate;
@@ -737,10 +736,7 @@ namespace System.Xml
 
         internal bool IsLoading { get; set; }
 
-        internal bool ActualLoadingStatus
-        {
-            get { return _actualLoadingStatus; }
-        }
+        internal bool ActualLoadingStatus { get; private set; }
 
 
         // Creates a XmlNode with the specified XmlNodeType, Prefix, Name, and NamespaceURI.
@@ -924,7 +920,7 @@ namespace System.Xml
             try
             {
                 IsLoading = true;
-                _actualLoadingStatus = true;
+                ActualLoadingStatus = true;
                 RemoveAll();
                 fEntRefNodesPresent = false;
                 fCDataNodesPresent = false;
@@ -935,7 +931,7 @@ namespace System.Xml
             finally
             {
                 IsLoading = false;
-                _actualLoadingStatus = false;
+                ActualLoadingStatus = false;
             }
         }
 
