@@ -40,7 +40,12 @@
   -->
   <Target Name="_RestoreBuildToolsWrapper" DependsOnTargets="_RestoreBuildTools" />
 
+  <!--
+    Skip if we're being hit while doing VS implicit builds (IntelliSense, etc.) - errors won't surface correctly otherwise.
+    (Implicit builds set BuildingInsideVisualStudio to true and BuildingOutOfProcess to false)
+  -->
   <Target Name="_RestoreBuildTools"
+          Condition="!('$(BuildingInsideVisualStudio)'=='true' and '$(BuildingOutOfProcess)'=='false')"
           Inputs="$(MSBuildThisFileDirectory)dir.props;$(SourceDir).nuget\packages.config"
           Outputs="$(ToolsDir)Microsoft.DotNet.Build.Tasks.dll;$(NugetToolPath)">
     <Message Importance="High" Text="Restoring build tools..." />
@@ -52,15 +57,21 @@
 
     <!-- Restore build tools -->
     <Exec Command="$(NugetRestoreCommand) &quot;$(SourceDir).nuget\packages.config&quot;" StandardOutputImportance="Low" />
-    
-    <Error Condition="'$(ErrorIfBuildToolsRestoredFromIndividualProject)'=='true'"
-           Text="The build tools package was just restored and so we cannot continue the build of an individual project because targets from the build tools package were not able to be imported. Please retry the build the individual project again." />
+
+    <Error Condition="'$(ErrorIfBuildToolsRestoredFromIndividualProject)'=='true' and '$(BuildingInsideVisualStudio)'=='true'"
+      Text="The build can not be completed as the build tools package was just restored. Please reload the solution to allow targets from the build tools package to be imported." />
+
+    <Error Condition="'$(ErrorIfBuildToolsRestoredFromIndividualProject)'=='true' and '$(BuildingInsideVisualStudio)'!='true' and '$(SolutionExt)'=='.sln'"
+      Text="The build can not be completed as the build tools package was just restored. Please build $(SolutionFileName) again to allow targets from the build tools package to be imported." />
+
+    <Error Condition="'$(ErrorIfBuildToolsRestoredFromIndividualProject)'=='true' and '$(BuildingInsideVisualStudio)'!='true' and '$(SolutionExt)'!='.sln'"
+      Text="The build can not be completed as the build tools package was just restored. Please build $(MSBuildProjectFile) again to allow targets from the build tools package to be imported." />
 
     <!--
       There are cases where the inputs could be newer than the outputs but the
       download or restore may not need to update. In such cases we need to touch
       these files otherwise we continually run this target over and over for
-      every project until these files are cleaned (if the are ever cleaned).
+      every project until these files are cleaned (if they are ever cleaned).
     -->
     <Touch Files="$(ToolsDir)Microsoft.DotNet.Build.Tasks.dll;$(NugetToolPath)" />
   </Target>
