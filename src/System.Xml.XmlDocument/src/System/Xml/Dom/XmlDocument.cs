@@ -12,8 +12,8 @@ namespace System.Xml
     // Represents an entire document. An XmlDocument contains XML data.
     public class XmlDocument : XmlNode
     {
-        private XmlImplementation _implementation;
-        private DomNameTable _domNameTable; // hash table of XmlName
+        private readonly XmlImplementation _implementation;
+        private readonly DomNameTable _domNameTable; // hash table of XmlName
         private XmlLinkedNode _lastChild;
         private XmlNamedNodeMap _entities;
         private Dictionary<string, List<WeakReference<XmlElement>>> _htElementIdMap;
