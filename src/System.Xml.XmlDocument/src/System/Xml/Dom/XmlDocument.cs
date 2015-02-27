@@ -189,8 +189,8 @@ namespace System.Xml
             {
                 if (_htElementIdMap == null)
                     _htElementIdMap = new Dictionary<string, List<WeakReference<XmlElement>>>();
-                elementList = new List<WeakReference<XmlElement>>();
-                elementList.Add(new WeakReference<XmlElement>(elem));
+
+                elementList = new List<WeakReference<XmlElement>> {new WeakReference<XmlElement>(elem)};
                 _htElementIdMap.Add(id, elementList);
             }
         }
