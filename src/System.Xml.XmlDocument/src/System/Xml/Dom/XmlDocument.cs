@@ -58,17 +58,20 @@ namespace System.Xml
         static internal EmptyEnumerator EmptyEnumerator = new EmptyEnumerator();
 
         // Initializes a new instance of the XmlDocument class.
-        public XmlDocument() : this(new XmlImplementation())
+        public XmlDocument()
+            : this(new XmlImplementation())
         {
         }
 
         // Initializes a new instance
         // of the XmlDocument class with the specified XmlNameTable.
-        public XmlDocument(XmlNameTable nt) : this(new XmlImplementation(nt))
+        public XmlDocument(XmlNameTable nt)
+            : this(new XmlImplementation(nt))
         {
         }
 
-        protected internal XmlDocument(XmlImplementation imp) : base()
+        protected internal XmlDocument(XmlImplementation imp)
+            : base()
         {
             _implementation = imp;
             _domNameTable = new DomNameTable(this);
@@ -132,7 +135,7 @@ namespace System.Xml
             Debug.Assert(xmlName.LocalName == localName);
             Debug.Assert((namespaceURI == null) ? (xmlName.NamespaceURI.Length == 0) : (xmlName.NamespaceURI == namespaceURI));
 
-            if (!this.IsLoading)
+            if (!IsLoading)
             {
                 // Use atomized versions instead of prefix, localName and nsURI
                 object oPrefix = xmlName.Prefix;
@@ -186,7 +189,7 @@ namespace System.Xml
                 if (_elementIdMap == null)
                     _elementIdMap = new Dictionary<string, List<WeakReference<XmlElement>>>();
 
-                elementList = new List<WeakReference<XmlElement>> {new WeakReference<XmlElement>(element)};
+                elementList = new List<WeakReference<XmlElement>> { new WeakReference<XmlElement>(element) };
                 _elementIdMap.Add(id, elementList);
             }
         }
@@ -210,7 +213,7 @@ namespace System.Xml
         public override XmlNode CloneNode(bool deep)
         {
             XmlDocument clone = Implementation.CreateDocument();
-            clone.SetBaseURI(this.baseURI);
+            clone.SetBaseURI(baseURI);
             if (deep)
                 clone.ImportChildren(this, clone, deep);
 
@@ -598,66 +601,65 @@ namespace System.Xml
             {
                 throw new InvalidOperationException(SR.Xdom_Import_NullNode);
             }
-            else
+
+            switch (node.NodeType)
             {
-                switch (node.NodeType)
-                {
-                    case XmlNodeType.Element:
-                        newNode = CreateElement(node.Prefix, node.LocalName, node.NamespaceURI);
-                        ImportAttributes(node, newNode);
-                        if (deep)
-                            ImportChildren(node, newNode, deep);
-                        break;
+                case XmlNodeType.Element:
+                    newNode = CreateElement(node.Prefix, node.LocalName, node.NamespaceURI);
+                    ImportAttributes(node, newNode);
+                    if (deep)
+                        ImportChildren(node, newNode, deep);
+                    break;
 
-                    case XmlNodeType.Attribute:
-                        Debug.Assert(((XmlAttribute)node).Specified);
-                        newNode = CreateAttribute(node.Prefix, node.LocalName, node.NamespaceURI);
-                        ImportChildren(node, newNode, true);
-                        break;
+                case XmlNodeType.Attribute:
+                    Debug.Assert(((XmlAttribute)node).Specified);
+                    newNode = CreateAttribute(node.Prefix, node.LocalName, node.NamespaceURI);
+                    ImportChildren(node, newNode, true);
+                    break;
 
-                    case XmlNodeType.Text:
-                        newNode = CreateTextNode(node.Value);
-                        break;
-                    case XmlNodeType.Comment:
-                        newNode = CreateComment(node.Value);
-                        break;
-                    case XmlNodeType.ProcessingInstruction:
-                        newNode = CreateProcessingInstruction(node.Name, node.Value);
-                        break;
-                    case XmlNodeType.XmlDeclaration:
-                        XmlDeclaration decl = (XmlDeclaration)node;
-                        newNode = CreateXmlDeclaration(decl.Version, decl.Encoding, decl.Standalone);
-                        break;
-                    case XmlNodeType.CDATA:
-                        newNode = CreateCDataSection(node.Value);
-                        break;
-                    case XmlNodeType.DocumentType:
-                        XmlDocumentType docType = (XmlDocumentType)node;
-                        newNode = CreateDocumentType(docType.Name, docType.PublicId, docType.SystemId, docType.InternalSubset);
-                        break;
-                    case XmlNodeType.DocumentFragment:
-                        newNode = CreateDocumentFragment();
-                        if (deep)
-                            ImportChildren(node, newNode, deep);
-                        break;
+                case XmlNodeType.Text:
+                    newNode = CreateTextNode(node.Value);
+                    break;
+                case XmlNodeType.Comment:
+                    newNode = CreateComment(node.Value);
+                    break;
+                case XmlNodeType.ProcessingInstruction:
+                    newNode = CreateProcessingInstruction(node.Name, node.Value);
+                    break;
+                case XmlNodeType.XmlDeclaration:
+                    XmlDeclaration decl = (XmlDeclaration)node;
+                    newNode = CreateXmlDeclaration(decl.Version, decl.Encoding, decl.Standalone);
+                    break;
+                case XmlNodeType.CDATA:
+                    newNode = CreateCDataSection(node.Value);
+                    break;
+                case XmlNodeType.DocumentType:
+                    XmlDocumentType docType = (XmlDocumentType)node;
+                    newNode = CreateDocumentType(docType.Name, docType.PublicId, docType.SystemId, docType.InternalSubset);
+                    break;
+                case XmlNodeType.DocumentFragment:
+                    newNode = CreateDocumentFragment();
+                    if (deep)
+                        ImportChildren(node, newNode, deep);
+                    break;
 
-                    case XmlNodeType.EntityReference:
-                        newNode = CreateEntityReference(node.Name);
-                        // we don't import the children of entity reference because they might result in different
-                        // children nodes given different namespace context in the new document.
-                        break;
+                case XmlNodeType.EntityReference:
+                    newNode = CreateEntityReference(node.Name);
+                    // we don't import the children of entity reference because they might result in different
+                    // children nodes given different namespace context in the new document.
+                    break;
 
-                    case XmlNodeType.Whitespace:
-                        newNode = CreateWhitespace(node.Value);
-                        break;
+                case XmlNodeType.Whitespace:
+                    newNode = CreateWhitespace(node.Value);
+                    break;
 
-                    case XmlNodeType.SignificantWhitespace:
-                        newNode = CreateSignificantWhitespace(node.Value);
-                        break;
+                case XmlNodeType.SignificantWhitespace:
+                    newNode = CreateSignificantWhitespace(node.Value);
+                    break;
 
-                    default:
-                        throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, SR.Xdom_Import, node.NodeType.ToString()));
-                }
+                default:
+                    throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, SR.Xdom_Import, node.NodeType.ToString()));
+
             }
 
             return newNode;
@@ -953,7 +955,7 @@ namespace System.Xml
                     string value = Declaration.Encoding;
                     if (value.Length > 0)
                     {
-                        return System.Text.Encoding.GetEncoding(value);
+                        return Encoding.GetEncoding(value);
                     }
                 }
                 return null;
@@ -1008,7 +1010,7 @@ namespace System.Xml
         //that of textwriter's encoding
         public virtual void Save(XmlWriter xmlWriter)
         {
-            XmlNode xmlNode = this.FirstChild;
+            XmlNode xmlNode = FirstChild;
             if (xmlNode == null)
                 return;
             if (xmlWriter.WriteState == WriteState.Start)
