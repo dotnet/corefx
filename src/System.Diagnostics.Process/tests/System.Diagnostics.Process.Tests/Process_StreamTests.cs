@@ -13,7 +13,7 @@ namespace System.Diagnostics.ProcessTests
         Process CreateProcessError()
         {
             Process p = new Process();
-            p.StartInfo.FileName = s_ProcessName;
+            p.StartInfo.FileName = ProcessName;
             p.StartInfo.Arguments = "error";
             return p;
         }
@@ -21,7 +21,7 @@ namespace System.Diagnostics.ProcessTests
         Process CreateProcessInput()
         {
             Process p = new Process();
-            p.StartInfo.FileName = s_ProcessName;
+            p.StartInfo.FileName = ProcessName;
             p.StartInfo.Arguments = "input";
             return p;
         }
@@ -29,7 +29,7 @@ namespace System.Diagnostics.ProcessTests
         Process CreateProcessStream()
         {
             Process p = new Process();
-            p.StartInfo.FileName = s_ProcessName;
+            p.StartInfo.FileName = ProcessName;
             p.StartInfo.Arguments = "stream";
             return p;
         }
@@ -41,26 +41,27 @@ namespace System.Diagnostics.ProcessTests
             p.StartInfo.RedirectStandardError = true;
             p.Start();
             Assert.Equal(p.StandardError.ReadToEnd(), "ProcessTest_ConsoleApp.exe error stream\r\n");
+            p.WaitForExit();
         }
 
-        private static StringBuilder s_process_AsyncErrorStream_sb = new StringBuilder();
+        private static StringBuilder process_AsyncErrorStream_sb = new StringBuilder();
 
         [Fact]
         public void Process_AsyncErrorStream()
         {
-            s_process_AsyncErrorStream_sb.Clear();
+            process_AsyncErrorStream_sb.Clear();
             Process p = CreateProcessError();
             p.StartInfo.RedirectStandardError = true;
             p.ErrorDataReceived += process_AsyncErrorStream_ErrorDataReceived;
             p.Start();
             p.BeginErrorReadLine();
             p.WaitForExit();
-            Assert.Equal("ProcessTest_ConsoleApp.exe error stream", s_process_AsyncErrorStream_sb.ToString());
+            Assert.Equal("ProcessTest_ConsoleApp.exe error stream", process_AsyncErrorStream_sb.ToString());
         }
 
         public void process_AsyncErrorStream_ErrorDataReceived(object sender, DataReceivedEventArgs e)
         {
-            s_process_AsyncErrorStream_sb.Append(e.Data);
+            process_AsyncErrorStream_sb.Append(e.Data);
         }
 
         [Fact]
@@ -74,40 +75,40 @@ namespace System.Diagnostics.ProcessTests
             Assert.Equal(s, "ProcessTest_ConsoleApp.exe started\r\nProcessTest_ConsoleApp.exe closed\r\n");
         }
 
-        private StringBuilder s_process_AsyncOutputStream_sb = new StringBuilder();
+        private StringBuilder process_AsyncOutputStream_sb = new StringBuilder();
 
         [Fact]
         public void Process_AsyncOutputStream()
         {
-            s_process_AsyncOutputStream_sb.Clear();
+            process_AsyncOutputStream_sb.Clear();
             Process p = CreateProcessStream();
             p.StartInfo.RedirectStandardOutput = true;
             p.OutputDataReceived += process_AsyncOutputStream_OutputDataReceived;
             p.Start();
             p.BeginOutputReadLine();
             p.WaitForExit();
-            Assert.Equal(s_process_AsyncOutputStream_sb.ToString(), "ProcessTest_ConsoleApp.exe startedProcessTest_ConsoleApp.exe closed");
+            Assert.Equal(process_AsyncOutputStream_sb.ToString(), "ProcessTest_ConsoleApp.exe startedProcessTest_ConsoleApp.exe closed");
 
 
             // Now add the CancelAsyncAPI as well.
-            s_process_AsyncOutputStream_sb.Clear();
+            process_AsyncOutputStream_sb.Clear();
             p = CreateProcessStream();
             p.StartInfo.RedirectStandardOutput = true;
             p.OutputDataReceived += process_AsyncOutputStream_OutputDataReceived2;
             p.Start();
             p.BeginOutputReadLine();
             p.WaitForExit();
-            Assert.Equal(s_process_AsyncOutputStream_sb.ToString(), "ProcessTest_ConsoleApp.exe started");
+            Assert.Equal(process_AsyncOutputStream_sb.ToString(), "ProcessTest_ConsoleApp.exe started");
         }
 
         void process_AsyncOutputStream_OutputDataReceived(object sender, DataReceivedEventArgs e)
         {
-            s_process_AsyncOutputStream_sb.Append(e.Data);
+            process_AsyncOutputStream_sb.Append(e.Data);
         }
 
         void process_AsyncOutputStream_OutputDataReceived2(object sender, DataReceivedEventArgs e)
         {
-            s_process_AsyncOutputStream_sb.Append(e.Data);
+            process_AsyncOutputStream_sb.Append(e.Data);
             Process p = sender as Process;
             p.CancelOutputRead();
         }
