@@ -16,7 +16,7 @@ namespace System.Xml
         private readonly DomNameTable _domNameTable; // hash table of XmlName
         private XmlLinkedNode _lastChild;
         private XmlNamedNodeMap _entities;
-        private Dictionary<string, List<WeakReference<XmlElement>>> _htElementIdMap;
+        private Dictionary<string, List<WeakReference<XmlElement>>> _elementIdMap;
         //This variable represents the actual loading status. Since, IsLoading will
         //be manipulated sometimes for adding content to EntityReference this variable
         //has been added which would always represent the loading status of document.
@@ -176,36 +176,36 @@ namespace System.Xml
             return null;
         }
 
-        internal void AddElementWithId(string id, XmlElement elem)
+        internal void AddElementWithId(string id, XmlElement element)
         {
             List<WeakReference<XmlElement>> elementList;
-            if (_htElementIdMap != null && _htElementIdMap.TryGetValue(id, out elementList))
+            if (_elementIdMap != null && _elementIdMap.TryGetValue(id, out elementList))
             {
                 // there are other elements that have the same id
-                if (GetElement(elementList, elem) == null)
-                    elementList.Add(new WeakReference<XmlElement>(elem));
+                if (GetElement(elementList, element) == null)
+                    elementList.Add(new WeakReference<XmlElement>(element));
             }
             else
             {
-                if (_htElementIdMap == null)
-                    _htElementIdMap = new Dictionary<string, List<WeakReference<XmlElement>>>();
+                if (_elementIdMap == null)
+                    _elementIdMap = new Dictionary<string, List<WeakReference<XmlElement>>>();
 
-                elementList = new List<WeakReference<XmlElement>> {new WeakReference<XmlElement>(elem)};
-                _htElementIdMap.Add(id, elementList);
+                elementList = new List<WeakReference<XmlElement>> {new WeakReference<XmlElement>(element)};
+                _elementIdMap.Add(id, elementList);
             }
         }
 
         internal void RemoveElementWithId(string id, XmlElement elem)
         {
             List<WeakReference<XmlElement>> elementList;
-            if (_htElementIdMap != null && _htElementIdMap.TryGetValue(id, out elementList))
+            if (_elementIdMap != null && _elementIdMap.TryGetValue(id, out elementList))
             {
-                WeakReference<XmlElement> elemRef = GetElement(elementList, elem);
-                if (elemRef != null)
+                WeakReference<XmlElement> elementReference = GetElement(elementList, elem);
+                if (elementReference != null)
                 {
-                    elementList.Remove(elemRef);
+                    elementList.Remove(elementReference);
                     if (elementList.Count == 0)
-                        _htElementIdMap.Remove(id);
+                        _elementIdMap.Remove(id);
                 }
             }
         }
@@ -568,10 +568,10 @@ namespace System.Xml
         // Returns the XmlElement with the specified ID.
         internal virtual XmlElement GetElementById(string elementId)
         {
-            if (_htElementIdMap != null)
+            if (_elementIdMap != null)
             {
                 List<WeakReference<XmlElement>> elementList;
-                if (_htElementIdMap.TryGetValue(elementId, out elementList))
+                if (_elementIdMap.TryGetValue(elementId, out elementList))
                 {
                     foreach (WeakReference<XmlElement> elemRef in elementList)
                     {
