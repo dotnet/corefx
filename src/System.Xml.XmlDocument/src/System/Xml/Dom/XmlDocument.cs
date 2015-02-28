@@ -154,24 +154,28 @@ namespace System.Xml
             return null;
         }
 
-        private WeakReference<XmlElement> GetElement(List<WeakReference<XmlElement>> elementList, XmlElement elem)
+        private WeakReference<XmlElement> GetElement(List<WeakReference<XmlElement>> elementList, XmlElement element)
         {
-            List<WeakReference<XmlElement>> gcElemRefs = new List<WeakReference<XmlElement>>();
-            foreach (WeakReference<XmlElement> elemRef in elementList)
+            List<WeakReference<XmlElement>> gargbageCollectedElements = new List<WeakReference<XmlElement>>();
+            foreach (WeakReference<XmlElement> elementReference in elementList)
             {
                 XmlElement target;
-                if (!elemRef.TryGetTarget(out target))
+                if (!elementReference.TryGetTarget(out target))
+                {
                     //take notes on the garbage collected nodes
-                    gcElemRefs.Add(elemRef);
+                    gargbageCollectedElements.Add(elementReference);
+                }
                 else
                 {
-                    if (target == elem)
-                        return elemRef;
+                    if (target == element)
+                        return elementReference;
                 }
             }
-            //Clear out the gced elements
-            foreach (WeakReference<XmlElement> elemRef in gcElemRefs)
-                elementList.Remove(elemRef);
+            //Clear out the garbage collected elements
+            foreach (WeakReference<XmlElement> elementReference in gargbageCollectedElements)
+            {
+                elementList.Remove(elementReference);
+            }
             return null;
         }
 
