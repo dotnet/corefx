@@ -828,61 +828,36 @@ namespace System.Xml
 
         internal XmlNodeType ConvertToNodeType(string nodeTypeString)
         {
-            if (nodeTypeString == "element")
+            switch (nodeTypeString)
             {
-                return XmlNodeType.Element;
-            }
-            else if (nodeTypeString == "attribute")
-            {
-                return XmlNodeType.Attribute;
-            }
-            else if (nodeTypeString == "text")
-            {
-                return XmlNodeType.Text;
-            }
-            else if (nodeTypeString == "cdatasection")
-            {
-                return XmlNodeType.CDATA;
-            }
-            else if (nodeTypeString == "entityreference")
-            {
-                return XmlNodeType.EntityReference;
-            }
-            else if (nodeTypeString == "entity")
-            {
-                return XmlNodeType.Entity;
-            }
-            else if (nodeTypeString == "processinginstruction")
-            {
-                return XmlNodeType.ProcessingInstruction;
-            }
-            else if (nodeTypeString == "comment")
-            {
-                return XmlNodeType.Comment;
-            }
-            else if (nodeTypeString == "document")
-            {
-                return XmlNodeType.Document;
-            }
-            else if (nodeTypeString == "documenttype")
-            {
-                return XmlNodeType.DocumentType;
-            }
-            else if (nodeTypeString == "documentfragment")
-            {
-                return XmlNodeType.DocumentFragment;
-            }
-            else if (nodeTypeString == "notation")
-            {
-                return XmlNodeType.Notation;
-            }
-            else if (nodeTypeString == "significantwhitespace")
-            {
-                return XmlNodeType.SignificantWhitespace;
-            }
-            else if (nodeTypeString == "whitespace")
-            {
-                return XmlNodeType.Whitespace;
+                case "element":
+                    return XmlNodeType.Element;
+                case "attribute":
+                    return XmlNodeType.Attribute;
+                case "text":
+                    return XmlNodeType.Text;
+                case "cdatasection":
+                    return XmlNodeType.CDATA;
+                case "entityreference":
+                    return XmlNodeType.EntityReference;
+                case "entity":
+                    return XmlNodeType.Entity;
+                case "processinginstruction":
+                    return XmlNodeType.ProcessingInstruction;
+                case "comment":
+                    return XmlNodeType.Comment;
+                case "document":
+                    return XmlNodeType.Document;
+                case "documenttype":
+                    return XmlNodeType.DocumentType;
+                case "documentfragment":
+                    return XmlNodeType.DocumentFragment;
+                case "notation":
+                    return XmlNodeType.Notation;
+                case "significantwhitespace":
+                    return XmlNodeType.SignificantWhitespace;
+                case "whitespace":
+                    return XmlNodeType.Whitespace;
             }
             throw new ArgumentException(SR.Format(SR.Xdom_Invalid_NT_String, nodeTypeString));
         }
