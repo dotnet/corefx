@@ -26,7 +26,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Strings.resx</DependentUpon>
     </Compile>
-    <Compile Include="$(CommonPath)\System\SR.cs">
+    <Compile Include="$(CommonPath)\System\SR.Open.cs">
       <Link>Common\System\SR.cs</Link>
     </Compile>
     <Compile Include="System\Diagnostics\Debug.cs" />
@@ -73,6 +73,9 @@
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\libc\Interop.strerror.cs">
       <Link>Common\Interop\Unix\libc\Interop.strerror.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\libc\Interop.syslog.cs">
+      <Link>Common\Interop\Unix\libc\Interop.syslog.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\libc\Interop.write.cs">
       <Link>Common\Interop\Unix\libc\Interop.write.cs</Link>
