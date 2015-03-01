@@ -65,36 +65,36 @@ namespace System.Xml
 
         // Initializes a new instance
         // of the XmlDocument class with the specified XmlNameTable.
-        public XmlDocument(XmlNameTable nt)
-            : this(new XmlImplementation(nt))
+        public XmlDocument(XmlNameTable nameTable)
+            : this(new XmlImplementation(nameTable))
         {
         }
 
-        protected internal XmlDocument(XmlImplementation imp)
+        protected internal XmlDocument(XmlImplementation implementation)
             : base()
         {
-            _implementation = imp;
+            _implementation = implementation;
             _domNameTable = new DomNameTable(this);
 
             // force the following string instances to be default in the nametable
-            XmlNameTable nt = this.NameTable;
-            nt.Add(string.Empty);
-            strDocumentName = nt.Add("#document");
-            strDocumentFragmentName = nt.Add("#document-fragment");
-            strCommentName = nt.Add("#comment");
-            strTextName = nt.Add("#text");
-            strCDataSectionName = nt.Add("#cdata-section");
-            strEntityName = nt.Add("#entity");
-            strID = nt.Add("id");
-            strNonSignificantWhitespaceName = nt.Add("#whitespace");
-            strSignificantWhitespaceName = nt.Add("#significant-whitespace");
-            strXmlns = nt.Add("xmlns");
-            strXml = nt.Add("xml");
-            strSpace = nt.Add("space");
-            strLang = nt.Add("lang");
-            strReservedXmlns = nt.Add(XmlConst.ReservedNsXmlNs);
-            strReservedXml = nt.Add(XmlConst.ReservedNsXml);
-            strEmpty = nt.Add(string.Empty);
+            XmlNameTable nameTable = NameTable;
+            nameTable.Add(string.Empty);
+            strDocumentName = nameTable.Add("#document");
+            strDocumentFragmentName = nameTable.Add("#document-fragment");
+            strCommentName = nameTable.Add("#comment");
+            strTextName = nameTable.Add("#text");
+            strCDataSectionName = nameTable.Add("#cdata-section");
+            strEntityName = nameTable.Add("#entity");
+            strID = nameTable.Add("id");
+            strNonSignificantWhitespaceName = nameTable.Add("#whitespace");
+            strSignificantWhitespaceName = nameTable.Add("#significant-whitespace");
+            strXmlns = nameTable.Add("xmlns");
+            strXml = nameTable.Add("xml");
+            strSpace = nameTable.Add("space");
+            strLang = nameTable.Add("lang");
+            strReservedXmlns = nameTable.Add(XmlConst.ReservedNsXmlNs);
+            strReservedXml = nameTable.Add(XmlConst.ReservedNsXml);
+            strEmpty = nameTable.Add(string.Empty);
             baseURI = string.Empty;
 
             objLock = new object();
