@@ -1,0 +1,41 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{96AA2060-C846-4E56-9509-E8CB9C114C8F}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AssemblyName>System.Collections.Concurrent</AssemblyName>
+    <RootNamespace>System.Collections.Concurrent</RootNamespace>
+    <DefineConstants>FEATURE_TRACING</DefineConstants>
+  </PropertyGroup>
+  <!-- Default configurations to help VS understand the configurations -->
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' "></PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' "></PropertyGroup>
+  <ItemGroup>
+    <Compile Include="System\Collections\Concurrent\BlockingCollection.cs" />
+    <Compile Include="System\Collections\Concurrent\CDSCollectionETWBCLProvider.cs" />
+    <Compile Include="System\Collections\Concurrent\ConcurrentBag.cs" />
+    <Compile Include="System\Collections\Concurrent\ConcurrentDictionary.cs" />
+    <Compile Include="System\Collections\Concurrent\ConcurrentQueue.cs" />
+    <Compile Include="System\Collections\Concurrent\ConcurrentStack.cs" />
+    <Compile Include="System\Collections\Concurrent\IProducerConsumerCollection.cs" />
+    <Compile Include="System\Collections\Concurrent\OrderablePartitioner.cs" />
+    <Compile Include="System\Collections\Concurrent\Partitioner.cs" />
+    <Compile Include="System\Collections\Concurrent\PartitionerStatic.cs" />
+    <Compile Include="System\Collections\Concurrent\PlatformHelper.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="$(CommonPath)\System\ArrayT.cs">
+      <Link>Common\System\ArrayT.cs</Link>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
+  <ItemGroup>
+    <!--Resource.targets adds the resources associated with the project.-->
+  </ItemGroup>
+</Project>

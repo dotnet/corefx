@@ -1,0 +1,61 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Windows_Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <OutputType>Library</OutputType>
+    <RootNamespace>System.Globalization.Extensions</RootNamespace>
+    <AssemblyName>System.Globalization.Extensions</AssemblyName>
+    <ProjectGuid>{2B96AA10-84C0-4927-8611-8D2474B990E8}</ProjectGuid>
+  </PropertyGroup>
+  <!-- Help VS understand available configurations -->
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Windows_Debug|AnyCPU' " />
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Windows_Release|AnyCPU' " />
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Unix_Debug|AnyCPU' " />
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Unix_Release|AnyCPU' " />
+  <!-- References are resolved from packages.config -->
+  <ItemGroup>
+    <Compile Include="$(CommonPath)\System\StringNormalizationExtensions.cs">
+      <Link>Common\System\StringNormalizationExtensions.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\Globalization\IdnMapping.cs">
+      <Link>Common\System\Globalization\IdnMapping.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\Text\NormalizationForm.cs">
+      <Link>Common\System\Text\NormalizationForm.cs</Link>
+    </Compile>
+    <Compile Include="System\Globalization\Extensions.cs" />
+  </ItemGroup>
+  <ItemGroup Condition=" '$(OS)' == 'Windows_NT' ">
+    <Compile Include="Interop\Interop.Manual.cs" />
+    <Compile Include="$(CommonPath)\Interop\Interop.Globalization.Extensions.manual.cs">
+      <Link>Common\Interop\Interop.Globalization.Extensions.manual.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\Globalization\IdnMapping.Windows.cs">
+      <Link>Common\System\Globalization\IdnMapping.Windows.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\StringNormalizationExtensions.Windows.cs">
+      <Link>Common\System\StringNormalizationExtensions.Windows.cs</Link>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup Condition=" '$(OS)' == 'Unix' ">
+    <Compile Include="$(CommonPath)\System\Globalization\IdnMapping.Unix.cs">
+      <Link>Common\System\Globalization\IdnMapping.Unix.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\StringNormalizationExtensions.Unix.cs">
+      <Link>Common\System\StringNormalizationExtensions.Unix.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\NotImplemented.cs">
+      <!-- TODO: Remove once implemented -->
+      <Link>Common\System\NotImplemented.cs</Link>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
+  <ItemGroup>
+    <!--Resource.targets adds the resources associated with the project.-->
+  </ItemGroup>
+</Project>

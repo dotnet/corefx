@@ -1,18 +1,6 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
-  <PropertyGroup>
-    <!-- Work around known Dev14 bug - see
-         https://connect.microsoft.com/VisualStudio/feedback/details/1000796/connect-file-uap-props-not-found-cant-build-a-portable-lib-on-vs14
-    -->
-    <_WindowsKitBinPath>$(MSBuildProgramFiles32)\Windows Kits\8.1\bin\x86</_WindowsKitBinPath>
-    <_WindowsPhoneKitBinPath>$(MSBuildProgramFiles32)\Windows Phone Kits\8.1\bin</_WindowsPhoneKitBinPath>
-    <MakePriExeFullPath>$(_WindowsKitBinPath)\makepri.exe</MakePriExeFullPath>
-    <MakeAppxExeFullPath>$(_WindowsKitBinPath)\makeappx.exe</MakeAppxExeFullPath>
-    <SignAppxPackageExeFullPath>$(_WindowsKitBinPath)\signtool.exe</SignAppxPackageExeFullPath>
-    <MakePriExtensionPath>$(_WindowsPhoneKitBinPath)\x86\MrmEnvironmentExtDl.dll</MakePriExtensionPath>
-    <MakePriExtensionPath_x64>$(_WindowsPhoneKitBinPath)\x64\MrmEnvironmentExtDl.dll</MakePriExtensionPath_x64>
-  </PropertyGroup>
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <PropertyGroup>
     <MinimumVisualStudioVersion>10.0</MinimumVisualStudioVersion>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -25,14 +13,13 @@
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <TargetFrameworkProfile>Profile259</TargetFrameworkProfile>
     <FileAlignment>512</FileAlignment>
-    <ProjectTypeGuids>{786C830F-07A1-408B-BD7F-6EE04809D6DB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
-    <OutputPath Condition="'$(OutputPath)'==''">$(BaseOutputPath)bin\$(Configuration)\$(AssemblyName)\</OutputPath>
     <DocumentationFile>$(OutputPath)System.Collections.Immutable.xml</DocumentationFile>
     <SccProjectName>SAK</SccProjectName>
     <SccLocalPath>SAK</SccLocalPath>
     <SccAuxPath>SAK</SccAuxPath>
     <SccProvider>SAK</SccProvider>
     <GenerateAppxPackageOnBuild>False</GenerateAppxPackageOnBuild>
+    <AssemblyVersion>1.1.34</AssemblyVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -43,7 +30,6 @@
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
     <CodeAnalysisRuleSet>System.Collections.Immutable.ruleset</CodeAnalysisRuleSet>
-    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -52,15 +38,15 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\InternalsVisibleTo.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="System\Collections\Generic\IHashKeyCollection.cs" />
     <Compile Include="System\Collections\Generic\ISortKeyCollection.cs" />
     <Compile Include="System\Collections\Immutable\AllocFreeConcurrentStack.cs" />
     <Compile Include="System\Collections\Immutable\DictionaryEnumerator.cs" />
+    <Compile Include="System\Collections\Immutable\DisposableEnumeratorAdapter`2.cs" />
     <Compile Include="System\Collections\Immutable\IBinaryTree.cs" />
     <Compile Include="System\Collections\Immutable\IImmutableArray.cs" />
     <Compile Include="System\Collections\Immutable\IImmutableDictionary.cs" />
@@ -70,6 +56,9 @@
     <Compile Include="System\Collections\Immutable\IImmutableQueue.cs" />
     <Compile Include="System\Collections\Immutable\IImmutableSet.cs" />
     <Compile Include="System\Collections\Immutable\IImmutableStack.cs" />
+    <Compile Include="System\Collections\Immutable\IStrongEnumerable`2.cs" />
+    <Compile Include="System\Collections\Immutable\IStrongEnumerator`1.cs" />
+    <Compile Include="System\Collections\Immutable\SortedInt32KeyNode.cs" />
     <Compile Include="System\Collections\Immutable\IOrderedCollection.cs" />
     <Compile Include="System\Collections\Immutable\ImmutableArray.cs" />
     <Compile Include="System\Collections\Immutable\ImmutableArray`1+Builder.cs" />
@@ -113,7 +102,6 @@
     <Compile Include="System\Collections\Immutable\SecureObjectPool.cs" />
     <Compile Include="System\Diagnostics\CodeAnalysis\ExcludeFromCodeCoverageAttribute.cs" />
     <Compile Include="System\Linq\ImmutableArrayExtensions.cs" />
-    <Compile Include="System\Runtime\InteropServices\ImmutableArrayInterop.cs" />
     <Compile Include="Strings.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -131,12 +119,5 @@
   <ItemGroup>
     <None Include="Interfaces.cd" />
   </ItemGroup>
-  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

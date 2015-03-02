@@ -1,91 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-
-  <PropertyGroup>
-    <BuildToolsVersion>1.0.13-prerelease</BuildToolsVersion>
-  </PropertyGroup>
-
-  <PropertyGroup>
-    <ProjectDir>$(MSBuildThisFileDirectory)</ProjectDir>
-    <SourceDir>$(ProjectDir)src\</SourceDir>
-    <BinDir>$(ProjectDir)bin\</BinDir>
-    <ToolsDir>$(BinDir)tools\</ToolsDir>
-
-    <NuGetToolPath>$(ToolsDir)NuGet.exe</NuGetToolPath>
-
-    <NuGetConfigFile>$(SourceDir)nuget\NuGet.Config</NuGetConfigFile>
-    <NuGetConfigCommandLine
-      Condition="Exists($(NuGetConfigFile))">-ConfigFile &quot;$(NuGetConfigFile)&quot;</NuGetConfigCommandLine>
-    <PackagesDir>$(SourceDir)packages\</PackagesDir>
-  </PropertyGroup>
+<Project ToolsVersion="12.0" DefaultTargets="BuildAndTest" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="dir.props" />
 
   <ItemGroup>
-    <PackageConfigs Include="$(SourceDir)*\packages.config" />
+    <Project Include="src\dirs.proj" />
   </ItemGroup>
 
-  <UsingTask TaskName="DownloadFile" TaskFactory="CodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.v4.0.dll">
-    <ParameterGroup>
-      <Address ParameterType="System.String" Required="true"/>
-      <FileName ParameterType="System.String" Required="true" />
-    </ParameterGroup>
-    <Task>
-      <Reference Include="System" />
-      <Code Type="Fragment" Language="cs">
-        <![CDATA[
-           var directory = System.IO.Path.GetDirectoryName(FileName);
-           System.IO.Directory.CreateDirectory(directory);
-           var client = new System.Net.WebClient();
-           client.Proxy = System.Net.WebRequest.DefaultWebProxy;
-           client.Proxy.Credentials = System.Net.CredentialCache.DefaultCredentials;
-           client.DownloadFile(Address, FileName);
-        ]]>
-      </Code>
-    </Task>
-  </UsingTask>
+  <Import Project="dir.targets" />
 
+  <Import Project="dir.traversal.targets" />
+
+  <!-- Override clean from dir.traversal.targets and just remove the full BinDir -->
   <Target Name="Clean">
-    <!-- Execute build tools -->
-    <MSBuild
-      Projects="$(ToolsDir)fxbuild.proj"
-      SkipNonexistentProjects="true"
-      Targets="Clean" />
+    <RemoveDir Directories="$(BinDir)" />
   </Target>
 
-  <Target Name="Build" DependsOnTargets="_RestoreBuildTools">
-    <!-- Execute build tools -->
-    <MSBuild
-      Projects="$(ToolsDir)fxbuild.proj"
-      Targets="Build" />
+  <Target Name="GenerateCoverageReport"
+          AfterTargets="Test"
+          Inputs="$(CoverageReportDir)\*.coverage.xml"
+          Outputs="$(CoverageReportDir)index.htm"
+          Condition="$(_CoverageEnabled)">
+       
+    <Exec Command="$(CoverageReportGeneratorCommandLine) -reports:$(CoverageReportDir)\*.coverage.xml"
+          ContinueOnError="ErrorAndContinue" />
   </Target>
-
-  <Target Name="Rebuild" DependsOnTargets="Clean;Build" />
-
-  <Target Name="BuildFxLocalDependency" DependsOnTargets="_RestoreBuildTools" Returns="$(ProducedPackages)">
-    <!-- Execute build tools -->
-    <MSBuild
-      Projects="$(ToolsDir)fxbuild.proj"
-      Targets="BuildFxLocalDependency">
-      <Output TaskParameter="TargetOutputs" ItemName="ProducedPackages" />
-    </MSBuild>
-  </Target>
-
-  <Target
-    Name="_RestoreBuildTools"
-    Condition="!Exists('$(PackagesDir)Microsoft.DotNet.BuildTools.$(BuildToolsVersion)') Or !Exists('$(ToolsDir)fxbuild.proj')">
-    <!-- Download latest nuget.exe -->
-    <DownloadFile
-      Condition="!Exists($(NuGetToolPath))"
-      Address="http://nuget.org/nuget.exe"
-      FileName="$(NuGetToolPath)" />
-
-    <!-- Restore build tools -->
-    <Exec
-      StandardOutputImportance="Low"
-      Command="&quot;$(NuGetToolPath)&quot; install Microsoft.DotNet.BuildTools -Prerelease -Version $(BuildToolsVersion) -o &quot; $(PackagesDir) &quot; $(NuGetConfigCommandLine)" />
-
-    <!-- Copy build tools to tools directory -->
-    <Exec
-      Command="xcopy /e /y &quot;$(PackagesDir)Microsoft.DotNet.BuildTools.$(BuildToolsVersion)\lib\*&quot; &quot;$(ToolsDir)&quot; > &quot;$(ToolsDir)BuildTools.xcopy.log&quot;" />
-  </Target>
-
+  
 </Project>

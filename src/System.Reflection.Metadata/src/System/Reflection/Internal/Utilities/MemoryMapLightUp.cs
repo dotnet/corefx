@@ -11,124 +11,118 @@ namespace System.Reflection.Internal
 {
     internal static class MemoryMapLightUp
     {
-        private static Type lazyMemoryMappedFileType;
-        private static Type lazyMemoryMappedViewAccessorType;
-        private static Type lazyMemoryMappedFileAccessType;
-        private static Type lazyMemoryMappedFileSecurityType;
-        private static Type lazyHandleInheritabilityType;
-        private static MethodInfo lazyCreateFromFile;
-        private static MethodInfo lazyCreateViewAccessor;
-        private static PropertyInfo lazySafeMemoryMappedViewHandle;
-        private static PropertyInfo lazyPointerOffset;
-        private static FieldInfo lazyInternalViewField;
-        private static PropertyInfo lazyInternalPointerOffset;
+        private static Type s_lazyMemoryMappedFileType;
+        private static Type s_lazyMemoryMappedViewAccessorType;
+        private static Type s_lazyMemoryMappedFileAccessType;
+        private static Type s_lazyMemoryMappedFileSecurityType;
+        private static Type s_lazyHandleInheritabilityType;
+        private static MethodInfo s_lazyCreateFromFile;
+        private static MethodInfo s_lazyCreateFromFileClassic;
+        private static MethodInfo s_lazyCreateViewAccessor;
+        private static PropertyInfo s_lazySafeMemoryMappedViewHandle;
+        private static PropertyInfo s_lazyPointerOffset;
 
-        private static readonly object MemoryMappedFileAccess_Read = 1;
-        private static readonly object HandleInheritability_None = 0;
-        private static readonly object LongZero = (long)0;
-        private static readonly object True = true;
+        private static readonly object s_MemoryMappedFileAccess_Read = 1;
+        private static readonly object s_HandleInheritability_None = 0;
+        private static readonly object s_LongZero = (long)0;
+        private static readonly object s_True = true;
 
-        // test only:
-        internal static bool Test450Compat;
-
-        private static bool? lazyIsAvailable;
+        private static bool? s_lazyIsAvailable;
 
         internal static bool IsAvailable
         {
             get
             {
-                if (!lazyIsAvailable.HasValue)
+                if (!s_lazyIsAvailable.HasValue)
                 {
-                    lazyIsAvailable = TryLoadTypes();
+                    s_lazyIsAvailable = TryLoadTypes();
                 }
 
-                return lazyIsAvailable.Value;
+                return s_lazyIsAvailable.Value;
             }
         }
 
-        private static bool TryLoadType(string assemblyQualifiedName, out Type type)
+        private static bool TryLoadType(string typeName, string modernAssembly, string classicAssembly, out Type type)
         {
-            try
-            {
-                type = Type.GetType(assemblyQualifiedName, throwOnError: false);
-            }
-            catch
-            {
-                type = null;
-            }
-
+            type = LightUpHelper.GetType(typeName, modernAssembly, classicAssembly);
             return type != null;
         }
 
         private static bool TryLoadTypes()
         {
-            const string SystemCoreRef = "System.Core, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089";
+            const string systemIOMemoryMappedFiles = "System.IO.MemoryMappedFiles, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a";
+            const string systemRuntimeHandles = "System.Runtime.Handles, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a";
+            const string systemCore = "System.Core, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089";
+
+            TryLoadType("System.IO.MemoryMappedFiles.MemoryMappedFileSecurity", systemIOMemoryMappedFiles, systemCore, out s_lazyMemoryMappedFileSecurityType);
 
             return FileStreamReadLightUp.FileStreamType.Value != null
-                && TryLoadType("System.IO.MemoryMappedFiles.MemoryMappedFile, " + SystemCoreRef, out lazyMemoryMappedFileType)
-                && TryLoadType("System.IO.MemoryMappedFiles.MemoryMappedViewAccessor, " + SystemCoreRef, out lazyMemoryMappedViewAccessorType)
-                && TryLoadType("System.IO.MemoryMappedFiles.MemoryMappedFileAccess, " + SystemCoreRef, out lazyMemoryMappedFileAccessType)
-                && TryLoadType("System.IO.MemoryMappedFiles.MemoryMappedFileSecurity, " + SystemCoreRef, out lazyMemoryMappedFileSecurityType)
-                && TryLoadType("System.IO.HandleInheritability, " + SystemCoreRef, out lazyHandleInheritabilityType)
+                && TryLoadType("System.IO.MemoryMappedFiles.MemoryMappedFile", systemIOMemoryMappedFiles, systemCore, out s_lazyMemoryMappedFileType)
+                && TryLoadType("System.IO.MemoryMappedFiles.MemoryMappedViewAccessor", systemIOMemoryMappedFiles, systemCore, out s_lazyMemoryMappedViewAccessorType)
+                && TryLoadType("System.IO.MemoryMappedFiles.MemoryMappedFileAccess", systemIOMemoryMappedFiles, systemCore, out s_lazyMemoryMappedFileAccessType)
+                && TryLoadType("System.IO.HandleInheritability", systemRuntimeHandles, systemCore, out s_lazyHandleInheritabilityType)
                 && TryLoadMembers();
         }
 
         private static bool TryLoadMembers()
         {
-            lazyCreateFromFile =
-                (from m in lazyMemoryMappedFileType.GetTypeInfo().GetDeclaredMethods("CreateFromFile")
-                 let ps = m.GetParameters()
-                 where ps.Length == 7 &&
-                     ps[0].ParameterType == FileStreamReadLightUp.FileStreamType.Value &&
-                     ps[1].ParameterType == typeof(string) &&
-                     ps[2].ParameterType == typeof(long) &&
-                     ps[3].ParameterType == lazyMemoryMappedFileAccessType &&
-                     ps[4].ParameterType == lazyMemoryMappedFileSecurityType &&
-                     ps[5].ParameterType == lazyHandleInheritabilityType &&
-                     ps[6].ParameterType == typeof(bool)
-                 select m).SingleOrDefault();
+            // .NET Core, .NET 4.6+ 
+            s_lazyCreateFromFile = LightUpHelper.GetMethod(
+                s_lazyMemoryMappedFileType,
+                "CreateFromFile",
+                FileStreamReadLightUp.FileStreamType.Value,
+                typeof(string),
+                typeof(long),
+                s_lazyMemoryMappedFileAccessType,
+                s_lazyHandleInheritabilityType,
+                typeof(bool)
+                );
 
-            if (lazyCreateFromFile == null)
+            // .NET < 4.6
+            if (s_lazyCreateFromFile == null)
             {
-                return false;
-            }
+                if (s_lazyMemoryMappedFileSecurityType != null)
+                {
+                    s_lazyCreateFromFileClassic = LightUpHelper.GetMethod(
+                        s_lazyMemoryMappedFileType,
+                        "CreateFromFile",
+                        FileStreamReadLightUp.FileStreamType.Value,
+                        typeof(string),
+                        typeof(long),
+                        s_lazyMemoryMappedFileAccessType,
+                        s_lazyHandleInheritabilityType,
+                        s_lazyMemoryMappedFileSecurityType,
+                        typeof(bool));
+                }
 
-            lazyCreateViewAccessor =
-                (from m in lazyMemoryMappedFileType.GetTypeInfo().GetDeclaredMethods("CreateViewAccessor")
-                 let ps = m.GetParameters()
-                 where ps.Length == 3 &&
-                     ps[0].ParameterType == typeof(long) &&
-                     ps[1].ParameterType == typeof(long) &&
-                     ps[2].ParameterType == lazyMemoryMappedFileAccessType
-                 select m).SingleOrDefault();
-
-            if (lazyCreateViewAccessor == null)
-            {
-                return false;
-            }
-
-            lazySafeMemoryMappedViewHandle = lazyMemoryMappedViewAccessorType.GetTypeInfo().GetDeclaredProperty("SafeMemoryMappedViewHandle");
-            if (lazySafeMemoryMappedViewHandle == null)
-            {
-                return false;
-            }
-
-            // Available on FW >= 4.5.1:
-            lazyPointerOffset = Test450Compat ? null : lazyMemoryMappedViewAccessorType.GetTypeInfo().GetDeclaredProperty("PointerOffset");
-            if (lazyPointerOffset == null)
-            {
-                // FW < 4.5.1
-                lazyInternalViewField = lazyMemoryMappedViewAccessorType.GetTypeInfo().GetDeclaredField("m_view");
-                if (lazyInternalViewField == null)
+                if (s_lazyCreateFromFileClassic == null)
                 {
                     return false;
                 }
+            }
 
-                lazyInternalPointerOffset = lazyInternalViewField.FieldType.GetTypeInfo().GetDeclaredProperty("PointerOffset");
-                if (lazyInternalPointerOffset == null)
-                {
-                    return false;
-                }
+            s_lazyCreateViewAccessor = LightUpHelper.GetMethod(
+                s_lazyMemoryMappedFileType,
+                "CreateViewAccessor",
+                typeof(long),
+                typeof(long),
+                s_lazyMemoryMappedFileAccessType);
+
+            if (s_lazyCreateViewAccessor == null)
+            {
+                return false;
+            }
+
+            s_lazySafeMemoryMappedViewHandle = s_lazyMemoryMappedViewAccessorType.GetTypeInfo().GetDeclaredProperty("SafeMemoryMappedViewHandle");
+            if (s_lazySafeMemoryMappedViewHandle == null)
+            {
+                return false;
+            }
+
+            s_lazyPointerOffset = s_lazyMemoryMappedViewAccessorType.GetTypeInfo().GetDeclaredProperty("PointerOffset");
+            if (s_lazyPointerOffset == null)
+            {
+                return false;
             }
 
             return true;
@@ -136,24 +130,40 @@ namespace System.Reflection.Internal
 
         internal static IDisposable CreateMemoryMap(Stream stream)
         {
-            Debug.Assert(lazyIsAvailable.GetValueOrDefault());
+            Debug.Assert(s_lazyIsAvailable.GetValueOrDefault());
 
             try
             {
-                return (IDisposable)lazyCreateFromFile.Invoke(null, new object[7]
+                if (s_lazyCreateFromFile != null)
                 {
-                    stream,                      // fileStream
-                    null,                        // mapName
-                    LongZero,                    // capacity
-                    MemoryMappedFileAccess_Read, // access
-                    null,                        // memoryMappedFileSecurity
-                    HandleInheritability_None,   // inheritability
-                    True,                        // leaveOpen
-                });
+                    return (IDisposable)s_lazyCreateFromFile.Invoke(null, new object[6]
+                    {
+                        stream,                        // fileStream
+                        null,                          // mapName
+                        s_LongZero,                    // capacity
+                        s_MemoryMappedFileAccess_Read, // access
+                        s_HandleInheritability_None,   // inheritability
+                        s_True,                        // leaveOpen
+                    });
+                }
+                else
+                {
+                    Debug.Assert(s_lazyCreateFromFileClassic != null);
+                    return (IDisposable)s_lazyCreateFromFileClassic.Invoke(null, new object[7]
+                    {
+                        stream,                        // fileStream
+                        null,                          // mapName
+                        s_LongZero,                    // capacity
+                        s_MemoryMappedFileAccess_Read, // access
+                        null,                          // memoryMappedFileSecurity
+                        s_HandleInheritability_None,   // inheritability
+                        s_True,                        // leaveOpen
+                    });
+                }
             }
             catch (MemberAccessException)
             {
-                lazyIsAvailable = false;
+                s_lazyIsAvailable = false;
                 return null;
             }
             catch (TargetInvocationException ex)
@@ -165,19 +175,19 @@ namespace System.Reflection.Internal
 
         internal static IDisposable CreateViewAccessor(object memoryMap, long start, int size)
         {
-            Debug.Assert(lazyIsAvailable.GetValueOrDefault());
+            Debug.Assert(s_lazyIsAvailable.GetValueOrDefault());
             try
             {
-                return (IDisposable)lazyCreateViewAccessor.Invoke(memoryMap, new object[3]
+                return (IDisposable)s_lazyCreateViewAccessor.Invoke(memoryMap, new object[3]
                 {
                     start,                       // start
                     (long)size,                  // size
-                    MemoryMappedFileAccess_Read, // access
+                    s_MemoryMappedFileAccess_Read, // access
                 });
             }
             catch (MemberAccessException)
             {
-                lazyIsAvailable = false;
+                s_lazyIsAvailable = false;
                 return null;
             }
             catch (TargetInvocationException ex)
@@ -189,24 +199,14 @@ namespace System.Reflection.Internal
 
         internal unsafe static byte* AcquirePointer(object accessor, out SafeBuffer safeBuffer)
         {
-            Debug.Assert(lazyIsAvailable.GetValueOrDefault());
+            Debug.Assert(s_lazyIsAvailable.GetValueOrDefault());
 
-            safeBuffer = (SafeBuffer)lazySafeMemoryMappedViewHandle.GetValue(accessor);
+            safeBuffer = (SafeBuffer)s_lazySafeMemoryMappedViewHandle.GetValue(accessor);
 
             byte* ptr = null;
             safeBuffer.AcquirePointer(ref ptr);
 
-            long offset;
-            if (lazyPointerOffset != null)
-            {
-                offset = (long)lazyPointerOffset.GetValue(accessor);
-            }
-            else
-            {
-                object internalView = lazyInternalViewField.GetValue(accessor);
-                offset = (long)lazyInternalPointerOffset.GetValue(internalView);
-            }
-
+            long offset = (long)s_lazyPointerOffset.GetValue(accessor);
             return ptr + offset;
         }
     }

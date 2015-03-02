@@ -871,7 +871,8 @@ namespace XPathTests.FunctionalTests.CoreFunctionLibrary
         /// Data file has no DTD, so no element has an ID, expected empty node-set
         /// id("1")
         /// </summary>
-        //[Fact(Skip = "Issue #20: XPath.XDocument does not support MoveToId(string)")]
+        [Fact]
+        [ActiveIssue(20)]
         public static void NodeSetFunctionsTest2267()
         {
             var xml = "id4.xml";
@@ -883,7 +884,7 @@ namespace XPathTests.FunctionalTests.CoreFunctionLibrary
         }
 
         /// <summary>
-        /// Expected: empty namesapce uri
+        /// Expected: empty namespace uri
         /// namespace-uri() (namespace node)
         /// </summary>
         [Fact]
@@ -902,7 +903,7 @@ namespace XPathTests.FunctionalTests.CoreFunctionLibrary
         }
 
         /// <summary>
-        /// Expected: empty namesapce uri
+        /// Expected: empty namespace uri
         /// namespace-uri() (namespace node = xml)
         /// </summary>
         [Fact]
@@ -921,7 +922,7 @@ namespace XPathTests.FunctionalTests.CoreFunctionLibrary
         }
 
         /// <summary>
-        /// Expected: empty namesapce uri
+        /// Expected: empty namespace uri
         /// namespace-uri() (namespace node = default ns)
         /// </summary>
         [Fact]
@@ -940,7 +941,7 @@ namespace XPathTests.FunctionalTests.CoreFunctionLibrary
         }
 
         /// <summary>
-        /// Expected: empty namesapce uri
+        /// Expected: empty namespace uri
         /// namespace-uri() (namespace node)
         /// </summary>
         [Fact]
@@ -957,7 +958,7 @@ namespace XPathTests.FunctionalTests.CoreFunctionLibrary
         }
 
         /// <summary>
-        /// Expected: empty namesapce uri
+        /// Expected: empty namespace uri
         /// name() (namespace node)
         /// </summary>
         [Fact]
@@ -976,7 +977,7 @@ namespace XPathTests.FunctionalTests.CoreFunctionLibrary
         }
 
         /// <summary>
-        /// Expected: empty namesapce uri
+        /// Expected: empty namespace uri
         /// name() (namespace node = xml)
         /// </summary>
         [Fact]
@@ -995,7 +996,7 @@ namespace XPathTests.FunctionalTests.CoreFunctionLibrary
         }
 
         /// <summary>
-        /// Expected: empty namesapce uri
+        /// Expected: empty namespace uri
         /// name() (namespace node = default ns)
         /// </summary>
         [Fact]
@@ -1014,7 +1015,7 @@ namespace XPathTests.FunctionalTests.CoreFunctionLibrary
         }
 
         /// <summary>
-        /// Expected: empty namesapce uri
+        /// Expected: empty namespace uri
         /// name() (namespace node)
         /// </summary>
         [Fact]

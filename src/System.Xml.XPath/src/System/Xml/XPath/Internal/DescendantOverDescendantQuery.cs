@@ -7,24 +7,24 @@ using System.Xml.XPath;
 namespace MS.Internal.Xml.XPath
 {
     // DescendantOverDescendantQuery: for each input it looks for the topmost descendents that matches to ns:name
-    // This is posible when query which has this query as its input (child query) is descendent as well.
+    // This is possible when query which has this query as its input (child query) is descendent as well.
     // Work of this query doesn't depend on DOD of its input. 
-    // It doesn't garate DOD of the output even when input is DOD. 
+    // It doesn't generate DOD of the output even when input is DOD. 
     internal sealed class DescendantOverDescendantQuery : DescendantBaseQuery
     {
-        private int level = 0;
+        private int _level = 0;
 
         public DescendantOverDescendantQuery(Query qyParent, bool matchSelf, string name, string prefix, XPathNodeType typeTest, bool abbrAxis) :
             base(qyParent, name, prefix, typeTest, matchSelf, abbrAxis)
         { }
         private DescendantOverDescendantQuery(DescendantOverDescendantQuery other) : base(other)
         {
-            this.level = other.level;
+            _level = other._level;
         }
 
         public override void Reset()
         {
-            level = 0;
+            _level = 0;
             base.Reset();
         }
 
@@ -32,7 +32,7 @@ namespace MS.Internal.Xml.XPath
         {
             while (true)
             {
-                if (level == 0)
+                if (_level == 0)
                 {
                     currentNode = qyInput.Advance();
                     position = 0;
@@ -53,7 +53,7 @@ namespace MS.Internal.Xml.XPath
                 }
                 else
                 {
-                    if (!MoveUpUntillNext())
+                    if (!MoveUpUntilNext())
                     {
                         continue;
                     }
@@ -73,18 +73,18 @@ namespace MS.Internal.Xml.XPath
         {
             if (currentNode.MoveToFirstChild())
             {
-                level++;
+                _level++;
                 return true;
             }
             return false;
         }
 
-        private bool MoveUpUntillNext()
-        { // move up untill we can move next
+        private bool MoveUpUntilNext()
+        { // move up until we can move next
             while (!currentNode.MoveToNext())
             {
-                --level;
-                if (level == 0)
+                --_level;
+                if (_level == 0)
                 {
                     return false;
                 }

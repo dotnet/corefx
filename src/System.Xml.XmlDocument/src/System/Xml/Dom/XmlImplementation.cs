@@ -7,7 +7,7 @@ namespace System.Xml
     // particular instance of the document object model.
     public class XmlImplementation
     {
-        private XmlNameTable nameTable;
+        private XmlNameTable _nameTable;
 
         // Initializes a new instance of the XmlImplementation class.
         public XmlImplementation() : this(new NameTable())
@@ -16,13 +16,13 @@ namespace System.Xml
 
         public XmlImplementation(XmlNameTable nt)
         {
-            nameTable = nt;
+            _nameTable = nt;
         }
 
         // Test if the DOM implementation implements a specific feature.
         public bool HasFeature(string strFeature, string strVersion)
         {
-            if (String.Compare("XML", strFeature, StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals("XML", strFeature, StringComparison.OrdinalIgnoreCase))
             {
                 if (strVersion == null || strVersion == "1.0" || strVersion == "2.0")
                     return true;
@@ -39,7 +39,7 @@ namespace System.Xml
 
         internal XmlNameTable NameTable
         {
-            get { return nameTable; }
+            get { return _nameTable; }
         }
     }
 }

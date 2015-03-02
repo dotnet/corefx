@@ -97,7 +97,7 @@ namespace System.Reflection.Internal
         }
 
         /// <summary>
-        /// Decodes an compressed integer value starting at offset. 
+        /// Decodes a compressed integer value starting at offset. 
         /// See Metadata Specification section II.23.2: Blobs and signatures.
         /// </summary>
         /// <param name="offset">Offset to the start of the compressed data.</param>
@@ -196,11 +196,11 @@ namespace System.Reflection.Internal
         }
 
         /// <summary>
-        /// Read UTF8 at the given offset up to the given terminator, null terminator or end-of-block.
+        /// Read UTF8 at the given offset up to the given terminator, null terminator, or end-of-block.
         /// </summary>
         /// <param name="offset">Offset in to the block where the UTF8 bytes start.</param>
-        /// <param name="prefix">UTF-8 encoded prefix to prepend to the bytes at the offset before decoding.</param>
-        /// <param name="utf8Decoder">The UTF8 decoder to use that allows user to adjust fallback and/or reuse existing strings without allocatiing a new one.</param>
+        /// <param name="prefix">UTF8 encoded prefix to prepend to the bytes at the offset before decoding.</param>
+        /// <param name="utf8Decoder">The UTF8 decoder to use that allows user to adjust fallback and/or reuse existing strings without allocating a new one.</param>
         /// <param name="numberOfBytesRead">The number of bytes read, which includes the terminator if we did not hit the end of the block.</param>
         /// <param name="terminator">A character in the ASCII range that marks the end of the string. 
         /// If a value other than '\0' is passed we still stop at the null terminator if encountered first.</param>
@@ -214,9 +214,8 @@ namespace System.Reflection.Internal
         }
 
         /// <summary>
-        /// Get number of bytes from offset to given terminator, null terminator, or end-of-block.
-        /// (whichever comes first). returned length does not include the terminator, but numberOfBytesRead
-        /// out paramater does.
+        /// Get number of bytes from offset to given terminator, null terminator, or end-of-block (whichever comes first).
+        /// Returned length does not include the terminator, but numberOfBytesRead out parameter does.
         /// </summary>
         /// <param name="offset">Offset in to the block where the UTF8 bytes start.</param>
         /// <param name="terminator">A character in the ASCII range that marks the end of the string. 
@@ -280,144 +279,117 @@ namespace System.Reflection.Internal
         }
 
         // comparison stops at null terminator, terminator parameter, or end-of-block -- whichever comes first.
-        internal bool Utf8NullTerminatedEquals(int offset, string text, char terminator = '\0')
+        internal bool Utf8NullTerminatedEquals(int offset, string text, MetadataStringDecoder utf8Decoder, char terminator = '\0')
         {
-            bool isPrefix;
-            return Utf8NullTerminatedEquals(offset, text, out isPrefix, terminator);
+            FastComparisonResult result = Utf8NullTerminatedFastCompare(offset, text, terminator);
+
+            switch (result)
+            {
+                case FastComparisonResult.Equal:
+                    return true;
+
+                case FastComparisonResult.IsPrefix:
+                case FastComparisonResult.Unequal:
+                    return false;
+
+                default:
+                    Debug.Assert(result == FastComparisonResult.Inconclusive);
+                    int bytesRead;
+                    string decoded = PeekUtf8NullTerminated(offset, null, utf8Decoder, out bytesRead, terminator);
+                    return decoded.Equals(text, StringComparison.Ordinal);
+            }
         }
 
         // comparison stops at null terminator, terminator parameter, or end-of-block -- whichever comes first.
-        private bool Utf8NullTerminatedEquals(int offset, string text, out bool isPrefix, char terminator = '\0')
+        internal bool Utf8NullTerminatedStartsWith(int offset, string text, MetadataStringDecoder utf8Decoder, char terminator = '\0')
+        {
+            FastComparisonResult result = Utf8NullTerminatedFastCompare(offset, text, terminator);
+
+            switch (result)
+            {
+                case FastComparisonResult.Equal:
+                case FastComparisonResult.IsPrefix:
+                    return true;
+
+                case FastComparisonResult.Unequal:
+                    return false;
+
+                default:
+                    Debug.Assert(result == FastComparisonResult.Inconclusive);
+                    int bytesRead;
+                    string decoded = PeekUtf8NullTerminated(offset, null, utf8Decoder, out bytesRead, terminator);
+                    return decoded.StartsWith(text, StringComparison.Ordinal);
+            }
+        }
+
+        internal enum FastComparisonResult
+        {
+            Equal,
+            IsPrefix,
+            Unequal,
+            Inconclusive
+        }
+
+        // comparison stops at null terminator, terminator parameter, or end-of-block -- whichever comes first.
+        private FastComparisonResult Utf8NullTerminatedFastCompare(int offset, string text, char terminator = '\0')
         {
             CheckBounds(offset, 0);
 
             Debug.Assert(terminator <= 0x7F);
 
-            isPrefix = false;
             byte* startPointer = Pointer + offset;
             byte* endPointer = Pointer + Length;
-            byte* iteratorPointer = startPointer;
+            byte* currentPointer = startPointer;
 
-            int cur = 0;
-
-            while (cur < text.Length)
+            int currentIndex = 0;
+            while (currentIndex < text.Length && currentPointer != endPointer)
             {
-                byte b;
-                if (iteratorPointer == endPointer || ((b = *iteratorPointer++) == 0) || b == terminator)
+                byte currentByte = *currentPointer++;
+                if (currentByte == 0 || currentByte == terminator)
                 {
                     break;
                 }
 
-                if ((b & 0x80) == 0)
+                char currentChar = text[currentIndex++];
+                if ((currentByte & 0x80) == 0)
                 {
-                    if (text[cur++] != b)
+                    // current byte is in ascii range.
+                    //  --> strings are unequal if current char and current byte are unequal
+                    if (currentChar != currentByte)
                     {
-                        return false;
+                        return FastComparisonResult.Unequal;
                     }
-                    continue;
                 }
-
-                char ch;
-                byte b1;
-                if (iteratorPointer == endPointer || ((b1 = *iteratorPointer++) == 0) || b1 == terminator)
+                else if (currentChar <= 0x7F)
                 {
-                    // Dangling lead byte, do not decompose
-                    if (text[cur++] != b)
-                    {
-                        return false;
-                    }
-                    break;
-                }
-
-                if ((b & 0x20) == 0)
-                {
-                    ch = (char)(((b & 0x1F) << 6) | (b1 & 0x3F));
+                    // current byte is not in ascii range, but current char is.
+                    // --> strings are unequal.
+                    return FastComparisonResult.Unequal;
                 }
                 else
                 {
-                    byte b2;
-                    if (iteratorPointer == endPointer || ((b2 = *iteratorPointer++) == 0) || b2 == terminator)
-                    {
-                        // Dangling lead bytes, do not decompose
-                        if (text[cur++] != (char)((b << 8) | b1))
-                        {
-                            return false;
-                        }
-                        break;
-                    }
-
-                    uint char32;
-                    if ((b & 0x10) == 0)
-                    {
-                        char32 = (uint)(((b & 0x0F) << 12) | ((b1 & 0x3F) << 6) | (b2 & 0x3F));
-                    }
-                    else
-                    {
-                        byte b3;
-                        if (iteratorPointer == endPointer || ((b3 = *iteratorPointer++) == 0) || b3 == terminator)
-                        {
-                            // Dangling lead bytes, do not decompose
-                            if (text[cur++] != (char)((b << 8) | b1))
-                            {
-                                return false;
-                            }
-                            if (cur == text.Length)
-                            {
-                                return false;
-                            }
-                            if (text[cur++] != b2)
-                            {
-                                return false;
-                            }
-                            break;
-                        }
-
-                        char32 = (uint)(((b & 0x07) << 18) | ((b1 & 0x3F) << 12) | ((b2 & 0x3F) << 6) | (b3 & 0x3F));
-                    }
-
-                    if ((char32 & 0xFFFF0000) == 0)
-                    {
-                        ch = (char)char32;
-                    }
-                    else
-                    {
-                        char32 -= 0x10000;
-
-                        // break up into UTF16 surrogate pair
-                        if (text[cur++] != (char)((char32 >> 10) | 0xD800))
-                        {
-                            return false;
-                        }
-                        ch = (char)((char32 & 0x3FF) | 0xDC00);
-                    }
-                }
-
-                if (cur == text.Length)
-                {
-                    return false;
-                }
-
-                if (text[cur++] != ch)
-                {
-                    return false;
+                    // uncommon non-ascii case --> fall back to slow allocating comparison.
+                    return FastComparisonResult.Inconclusive;
                 }
             }
 
-            return (isPrefix = cur == text.Length) && (iteratorPointer == endPointer || *iteratorPointer == 0 || *iteratorPointer == terminator);
+            if (currentIndex != text.Length)
+            {
+                return FastComparisonResult.Unequal;
+            }
+
+            if (currentPointer != endPointer && *currentPointer != 0 && *currentPointer != terminator)
+            {
+                return FastComparisonResult.IsPrefix;
+            }
+
+            return FastComparisonResult.Equal;
         }
 
         // comparison stops at null terminator, terminator parameter, or end-of-block -- whichever comes first.
-        internal bool Utf8NullTerminatedStartsWith(int offset, string text, char terminator = '\0')
+        internal bool Utf8NullTerminatedStringStartsWithAsciiPrefix(int offset, string asciiPrefix)
         {
-            bool isPrefix;
-            Utf8NullTerminatedEquals(offset, text, out isPrefix, terminator);
-            return isPrefix;
-        }
-
-        // comparison stops at null terminator, terminator parameter, or end-of-block -- whichever comes first.
-        internal bool Utf8NullTermintatedStringStartsWithAsciiPrefix(int offset, string asciiPrefix)
-        {
-            // Assumes stringAscii conly contains ASCII characters and no nil characters.
+            // Assumes stringAscii only contains ASCII characters and no nil characters.
 
             CheckBounds(offset, 0);
 
@@ -446,7 +418,7 @@ namespace System.Reflection.Internal
 
         internal int CompareUtf8NullTerminatedStringWithAsciiString(int offset, string asciiString)
         {
-            // Assumes stringAscii conly contains ASCII characters and no nil characters.
+            // Assumes stringAscii only contains ASCII characters and no nil characters.
 
             CheckBounds(offset, 0);
 

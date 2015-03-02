@@ -708,7 +708,7 @@ namespace System.Xml.XPath
                 {
                     if (n1.GetType().ToString() != "Microsoft.VisualStudio.Modeling.StoreNavigator")
                     {
-                        Debug.Assert(CompareSiblings(n1.Clone(), n2.Clone()) != CompareSiblings(n2.Clone(), n1.Clone()), "IsSamePosition() on custom navigator returns incosistent results");
+                        Debug.Assert(CompareSiblings(n1.Clone(), n2.Clone()) != CompareSiblings(n2.Clone(), n1.Clone()), "IsSamePosition() on custom navigator returns inconsistent results");
                     }
                     return CompareSiblings(n1, n2);
                 }
@@ -816,8 +816,8 @@ namespace System.Xml.XPath
                 throw XPathException.Create(SR.Xp_BadQueryObject);
 
             // We should clone query because some Query.MatchNode() alter expression state and this may brake
-            // SelectionIterators that are runing using this Query
-            // Example of MatchNode() that alret the state is FilterQuery.MatchNode()
+            // SelectionIterators that are running using this Query
+            // Example of MatchNode() that alert the state is FilterQuery.MatchNode()
             Query query = Query.Clone(cexpr.QueryTree);
 
             try
@@ -1341,7 +1341,7 @@ namespace System.Xml.XPath
         //  3. same id is generated for the same node
         //  4. ids are unique
         //
-        //  id = node type letter + reverse path to root in terms of encoded IndexInParent integers from node to root seperated by 0's if needed
+        //  id = node type letter + reverse path to root in terms of encoded IndexInParent integers from node to root separated by 0's if needed
         internal virtual string UniqueId
         {
             get
@@ -1684,30 +1684,30 @@ namespace System.Xml.XPath
         [DebuggerDisplay("{ToString()}")]
         internal struct DebuggerDisplayProxy
         {
-            XPathNavigator nav;
+            private XPathNavigator _nav;
             public DebuggerDisplayProxy(XPathNavigator nav)
             {
-                this.nav = nav;
+                _nav = nav;
             }
             public override string ToString()
             {
-                string result = nav.NodeType.ToString();
-                switch (nav.NodeType)
+                string result = _nav.NodeType.ToString();
+                switch (_nav.NodeType)
                 {
                     case XPathNodeType.Element:
-                        result += ", Name=\"" + nav.Name + '"';
+                        result += ", Name=\"" + _nav.Name + "\"";
                         break;
                     case XPathNodeType.Attribute:
                     case XPathNodeType.Namespace:
                     case XPathNodeType.ProcessingInstruction:
-                        result += ", Name=\"" + nav.Name + '"';
-                        result += ", Value=\"" + XmlConvertEx.EscapeValueForDebuggerDisplay(nav.Value) + '"';
+                        result += ", Name=\"" + _nav.Name + "\"";
+                        result += ", Value=\"" + XmlConvertEx.EscapeValueForDebuggerDisplay(_nav.Value) + "\"";
                         break;
                     case XPathNodeType.Text:
                     case XPathNodeType.Whitespace:
                     case XPathNodeType.SignificantWhitespace:
                     case XPathNodeType.Comment:
-                        result += ", Value=\"" + XmlConvertEx.EscapeValueForDebuggerDisplay(nav.Value) + '"';
+                        result += ", Value=\"" + XmlConvertEx.EscapeValueForDebuggerDisplay(_nav.Value) + "\"";
                         break;
                 }
                 return result;

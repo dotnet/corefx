@@ -1,0 +1,41 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Windows_Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{D3F18ACC-D327-4ABB-BA6C-E9C34A041B2F}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>Microsoft.Win32.Registry</RootNamespace>
+    <AssemblyName>Microsoft.Win32.Registry</AssemblyName>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <!-- Help VS understand available configurations -->
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Windows_Debug|AnyCPU' " />
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Windows_Release|AnyCPU' " />
+  <!-- References are resolved from packages.config -->
+  <ItemGroup>
+    <Compile Include="$(CommonPath)\Interop\Windows\Interop.Libraries.cs">
+      <Link>Common\Interop\Windows\Interop.Libraries.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.FormatMessage.cs">
+      <Link>Common\Interop\Windows\Interop.FormatMessage.cs</Link>
+    </Compile>
+    <Compile Include="Interop\Interop.Manual.cs" />
+    <Compile Include="Microsoft\Win32\Registry.cs" />
+    <Compile Include="Microsoft\Win32\RegistryKey.cs" />
+    <Compile Include="Microsoft\Win32\RegistryOptions.cs" />
+    <Compile Include="Microsoft\Win32\RegistryValueKind.cs" />
+    <Compile Include="Microsoft\Win32\RegistryView.cs" />
+    <Compile Include="Microsoft\Win32\SafeHandles\SafeRegistryHandle.cs" />
+    <Compile Include="Microsoft\Win32\ThrowHelper.cs" />
+    <Compile Include="System\Security\AccessControl\RegistryRights.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
+  <ItemGroup>
+    <!--Resource.targets adds the resources associated with the project.-->
+  </ItemGroup>
+</Project>

@@ -15,7 +15,7 @@ namespace System.Xml
     // document by moving fragments around. It is desirable to have an object 
     // which can hold such fragments and it is quite natural to use a Node for 
     // this purpose. While it is true that a <code>Document</code> object could 
-    // fulfil this role,  a <code>Document</code> object can potentially be a 
+    // fulfill this role,  a <code>Document</code> object can potentially be a 
     // heavyweight  object, depending on the underlying implementation. What is 
     // really needed for this is a very lightweight object.  
     // <code>DocumentFragment</code> is such an object.
@@ -43,7 +43,7 @@ namespace System.Xml
     // such as <code>insertBefore()</code> and  <code>appendChild()</code>.  
     public class XmlDocumentFragment : XmlNode
     {
-        XmlLinkedNode lastChild;
+        private XmlLinkedNode _lastChild;
 
         protected internal XmlDocumentFragment(XmlDocument ownerDocument) : base()
         {
@@ -120,8 +120,8 @@ namespace System.Xml
 
         internal override XmlLinkedNode LastNode
         {
-            get { return lastChild; }
-            set { lastChild = value; }
+            get { return _lastChild; }
+            set { _lastChild = value; }
         }
 
         internal override bool IsValidChildType(XmlNodeType type)

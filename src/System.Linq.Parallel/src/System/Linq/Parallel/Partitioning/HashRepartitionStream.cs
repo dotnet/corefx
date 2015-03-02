@@ -8,7 +8,7 @@
 // =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
+using System.Diagnostics;
 using System.Threading;
 
 namespace System.Linq.Parallel
@@ -23,7 +23,7 @@ namespace System.Linq.Parallel
     /// Each partition will "pull" data on-demand instead of partitions "pushing" data, which
     /// allows us to reduce some amount of synchronization overhead.
     ///
-    /// We currently only offer one form of reparitioning via hashing.  This used to be an
+    /// We currently only offer one form of repartitioning via hashing.  This used to be an
     /// abstract base class, but we have eliminated that to get rid of some virtual calls on
     /// hot code paths.  Uses a key selection algorithm with mod'ding to determine destination.
     ///
@@ -51,8 +51,8 @@ namespace System.Linq.Parallel
             _keyComparer = hashKeyComparer;
             _elementComparer = elementComparer;
 
-            Contract.Assert(_keyComparer == null || _elementComparer == null);
-            Contract.Assert(_elementComparer == null || typeof(THashKey) == typeof(NoKeyMemoizationRequired));
+            Debug.Assert(_keyComparer == null || _elementComparer == null);
+            Debug.Assert(_elementComparer == null || typeof(THashKey) == typeof(NoKeyMemoizationRequired));
 
             // We use the following constant when distributing hash-codes into partition streams.
             // It's an (arbitrary) prime number to account for poor hashing functions, e.g. those
@@ -84,10 +84,12 @@ namespace System.Linq.Parallel
         // The hash-code used for null elements.
         private const int NULL_ELEMENT_HASH_CODE = 0;
 
+        private const int HashCodeMask = 0x7fffffff;
+
         internal int GetHashCode(TInputOutput element)
         {
             return
-                (0x7fffffff &
+                (HashCodeMask &
                     (_elementComparer == null ?
                         (element == null ? NULL_ELEMENT_HASH_CODE : element.GetHashCode()) :
                         _elementComparer.GetHashCode(element)))
@@ -97,7 +99,7 @@ namespace System.Linq.Parallel
         internal int GetHashCode(THashKey key)
         {
             return
-                (0x7fffffff &
+                (HashCodeMask &
                     (_keyComparer == null ?
                         (key == null ? NULL_ELEMENT_HASH_CODE : key.GetHashCode()) :
                         _keyComparer.GetHashCode(key))) % _distributionMod;

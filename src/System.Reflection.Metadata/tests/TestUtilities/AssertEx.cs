@@ -6,6 +6,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using Xunit;
 
@@ -19,13 +20,14 @@ namespace TestUtilities
         #region AssertEqualityComparer<T>
         private class AssertEqualityComparer<T> : IEqualityComparer<T>
         {
-            private readonly static IEqualityComparer<T> instance = new AssertEqualityComparer<T>();
+            private readonly static IEqualityComparer<T> s_instance = new AssertEqualityComparer<T>();
 
             private static bool CanBeNull()
             {
                 var type = typeof(T);
-                return !type.IsValueType ||
-                    (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>));
+                var typeInfo = type.GetTypeInfo();
+                return !typeInfo.IsValueType ||
+                    (typeInfo.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>));
             }
 
             public static bool IsNull(T @object)
@@ -40,7 +42,7 @@ namespace TestUtilities
 
             public static bool Equals(T left, T right)
             {
-                return instance.Equals(left, right);
+                return s_instance.Equals(left, right);
             }
 
             bool IEqualityComparer<T>.Equals(T x, T y)
@@ -385,7 +387,7 @@ namespace TestUtilities
                     return;
                 }
 
-                if (allowDerived && typeof(T).IsAssignableFrom(type))
+                if (allowDerived && typeof(T).GetTypeInfo().IsAssignableFrom(type.GetTypeInfo()))
                 {
                     // We got a derived type
                     return;

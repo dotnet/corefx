@@ -255,7 +255,7 @@ namespace System.Xml
             nsTop = -1;
             // element stack
             stack = new TagInfo[10];
-            top = 0;// 0 is an empty sentanial element
+            top = 0;// 0 is an empty sentential element
             stack[top].Init(-1);
             quoteChar = '"';
 
@@ -458,7 +458,7 @@ namespace System.Xml
                     if (ns == null)
                     {
                         // use defined prefix
-                        if (prefix != null && prefix.Length != 0 && (LookupNamespace(prefix) == -1))
+                        if (!string.IsNullOrEmpty(prefix) && (LookupNamespace(prefix) == -1))
                         {
                             throw new ArgumentException(SR.Xml_UndefPrefix);
                         }
@@ -492,7 +492,7 @@ namespace System.Xml
                         }
                     }
                     stack[top].prefix = null;
-                    if (prefix != null && prefix.Length != 0)
+                    if (!string.IsNullOrEmpty(prefix))
                     {
                         stack[top].prefix = prefix;
                         textWriter.Write(prefix);
@@ -501,7 +501,7 @@ namespace System.Xml
                 }
                 else
                 {
-                    if ((ns != null && ns.Length != 0) || (prefix != null && prefix.Length != 0))
+                    if (!string.IsNullOrEmpty(ns) || !string.IsNullOrEmpty(prefix))
                     {
                         throw new ArgumentException(SR.Xml_NoNamespaces);
                     }
@@ -565,7 +565,7 @@ namespace System.Xml
                         {
                             throw new ArgumentException(SR.Xml_XmlnsBelongsToReservedNs);
                         }
-                        if (localName == null || localName.Length == 0)
+                        if (string.IsNullOrEmpty(localName))
                         {
                             localName = prefix;
                             prefix = null;
@@ -625,7 +625,7 @@ namespace System.Xml
                             }
                         }
                     }
-                    if (prefix != null && prefix.Length != 0)
+                    if (!string.IsNullOrEmpty(prefix))
                     {
                         textWriter.Write(prefix);
                         textWriter.Write(':');
@@ -633,7 +633,7 @@ namespace System.Xml
                 }
                 else
                 {
-                    if ((ns != null && ns.Length != 0) || (prefix != null && prefix.Length != 0))
+                    if (!string.IsNullOrEmpty(ns) || !string.IsNullOrEmpty(prefix))
                     {
                         throw new ArgumentException(SR.Xml_NoNamespaces);
                     }
@@ -736,7 +736,7 @@ namespace System.Xml
                 {
                     throw new ArgumentException(SR.Xml_InvalidPiChars);
                 }
-                if (0 == String.Compare(name, "xml", StringComparison.OrdinalIgnoreCase) && this.stateTable == stateTableDocument)
+                if (String.Equals(name, "xml", StringComparison.OrdinalIgnoreCase) && this.stateTable == stateTableDocument)
                 {
                     throw new ArgumentException(SR.Xml_DupXmlDecl);
                 }
@@ -952,7 +952,7 @@ namespace System.Xml
                     case State.Closed:
                         return WriteState.Closed;
                     default:
-                        Debug.Assert(false);
+                        Debug.Fail("Unmatched state in switch");
                         return WriteState.Error;
                 }
             }
@@ -1009,7 +1009,7 @@ namespace System.Xml
                 AutoComplete(Token.Content);
                 if (this.namespaces)
                 {
-                    if (ns != null && ns.Length != 0 && ns != stack[top].defaultNs)
+                    if (!string.IsNullOrEmpty(ns) && ns != stack[top].defaultNs)
                     {
                         string prefix = FindPrefix(ns);
                         if (prefix == null)
@@ -1028,7 +1028,7 @@ namespace System.Xml
                         }
                     }
                 }
-                else if (ns != null && ns.Length != 0)
+                else if (!string.IsNullOrEmpty(ns))
                 {
                     throw new ArgumentException(SR.Xml_NoNamespaces);
                 }
@@ -1044,7 +1044,7 @@ namespace System.Xml
         // Returns the closest prefix defined in the current namespace scope for the specified namespace URI.
         public override string LookupPrefix(string ns)
         {
-            if (ns == null || ns.Length == 0)
+            if (string.IsNullOrEmpty(ns))
             {
                 throw new ArgumentException(SR.Xml_EmptyName);
             }
@@ -1094,7 +1094,7 @@ namespace System.Xml
             {
                 AutoComplete(Token.Content);
 
-                if (name == null || name.Length == 0)
+                if (string.IsNullOrEmpty(name))
                 {
                     throw new ArgumentException(SR.Xml_EmptyName);
                 }
@@ -1419,7 +1419,7 @@ namespace System.Xml
                         stack[top].defaultNs = ns;
                         break;
                     default:
-                        Debug.Assert(false, "Should have never come here");
+                        Debug.Fail("Should have never come here");
                         return;
                 }
                 stack[top].defaultNsState = (declared ? NamespaceState.DeclaredAndWrittenOut : NamespaceState.DeclaredButNotWrittenOut);
@@ -1606,12 +1606,12 @@ namespace System.Xml
 
         // This method is used for validation of the DOCTYPE, processing instruction and entity names plus names 
         // written out by the user via WriteName and WriteQualifiedName.
-        // Unfortunatelly the names of elements and attributes are not validated by the XmlTextWriter.
-        // Also this method does not check wheather the character after ':' is a valid start name character. It accepts
+        // Unfortunately the names of elements and attributes are not validated by the XmlTextWriter.
+        // Also this method does not check whether the character after ':' is a valid start name character. It accepts
         // all valid name characters at that position. This can't be changed because of backwards compatibility.
         private unsafe void ValidateName(string name, bool isNCName)
         {
-            if (name == null || name.Length == 0)
+            if (string.IsNullOrEmpty(name))
             {
                 throw new ArgumentException(SR.Xml_EmptyName);
             }

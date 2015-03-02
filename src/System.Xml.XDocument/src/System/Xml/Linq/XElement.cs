@@ -3,6 +3,8 @@
 
 using System.Collections.Generic;
 using System.IO;
+using System.Xml.Serialization;
+using System.Xml.Schema;
 
 using CultureInfo = System.Globalization.CultureInfo;
 using IEnumerable = System.Collections.IEnumerable;
@@ -25,9 +27,9 @@ namespace System.Xml.Linq
     ///     <item><see cref="XProcessingInstruction"/></item>
     ///   </list>
     /// </remarks>
-    public class XElement : XContainer
+    public class XElement : XContainer, IXmlSerializable
     {
-        static IEnumerable<XElement> emptySequence;
+        private static IEnumerable<XElement> s_emptySequence;
 
         /// <summary>
         /// Gets an empty collection of elements.
@@ -36,8 +38,8 @@ namespace System.Xml.Linq
         {
             get
             {
-                if (emptySequence == null) emptySequence = new XElement[0];
-                return emptySequence;
+                if (s_emptySequence == null) s_emptySequence = new XElement[0];
+                return s_emptySequence;
             }
         }
 
@@ -117,7 +119,7 @@ namespace System.Xml.Linq
         /// </summary>
         /// <param name="other">
         /// The <see cref="XStreamingElement"/> object whose value will be used
-        /// to initialise the new element.
+        /// to initialize the new element.
         /// </param>
         public XElement(XStreamingElement other)
         {
@@ -239,9 +241,9 @@ namespace System.Xml.Linq
                 if (content == null) return string.Empty;
                 string s = content as string;
                 if (s != null) return s;
-                StringBuilder sb = new StringBuilder();
+                StringBuilder sb = StringBuilderCache.Acquire();
                 AppendText(sb);
-                return sb.ToString();
+                return StringBuilderCache.GetStringAndRelease(sb);
             }
             set
             {
@@ -275,7 +277,7 @@ namespace System.Xml.Linq
         /// <summary>
         /// Returns the ancestor(s) of this <see cref="XElement"/> with the matching
         /// <see cref="XName"/>. If this <see cref="XElement"/>'s <see cref="XName"/>
-        /// matches the <see cref="XName"/> passed in then it will be invluded in the 
+        /// matches the <see cref="XName"/> passed in then it will be included in the 
         /// resulting <see cref="IEnumerable"/> or <see cref="XElement"/>.
         /// <seealso cref="XNode.Ancestors()"/>
         /// </summary>
@@ -699,8 +701,8 @@ namespace System.Xml.Linq
         }
 
         /// <summary>
-        /// Parses a string containing XML into an <see cref="XElement"/> and 
-        /// optionally preserves the Whitespace.  See <see cref="XmlReaderSetting.IgnoreWhitespace"/>.
+        /// Parses a string containing XML into an <see cref="XElement"/> and optionally
+        /// preserves the Whitespace. See <see cref="XmlReaderSettings.IgnoreWhitespace"/>.
         /// </summary>
         /// <remarks>
         /// <list>
@@ -1039,10 +1041,10 @@ namespace System.Xml.Linq
         }
 
         /// <summary>
-        /// Write this <see cref="XElement"/> to the passed in <see cref="XmlTextWriter"/>.
+        /// Write this <see cref="XElement"/> to the passed in <see cref="XmlWriter"/>.
         /// </summary>
         /// <param name="writer">
-        /// The <see cref="XmlTextWriter"/> to write this <see cref="XElement"/> to.
+        /// The <see cref="XmlWriter"/> to write this <see cref="XElement"/> to.
         /// </param>
         public override void WriteTo(XmlWriter writer)
         {
@@ -1093,7 +1095,7 @@ namespace System.Xml.Linq
         public static explicit operator bool (XElement element)
         {
             if (element == null) throw new ArgumentNullException("element");
-            return XmlConvert.ToBoolean(XHelper.ToLower_InvariantCulture(element.Value));
+            return XmlConvert.ToBoolean(element.Value.ToLowerInvariant());
         }
 
         /// <summary>
@@ -1113,7 +1115,7 @@ namespace System.Xml.Linq
         public static explicit operator bool? (XElement element)
         {
             if (element == null) return null;
-            return XmlConvert.ToBoolean(XHelper.ToLower_InvariantCulture(element.Value));
+            return XmlConvert.ToBoolean(element.Value.ToLowerInvariant());
         }
 
         /// <summary>
@@ -1589,6 +1591,41 @@ namespace System.Xml.Linq
             return XmlConvert.ToGuid(element.Value);
         }
 
+        /// <summary>
+        /// This method is obsolete for the IXmlSerializable contract.
+        /// </summary>
+        XmlSchema IXmlSerializable.GetSchema()
+        {
+            return null;
+        }
+
+        /// <summary>
+        /// Generates a <see cref="XElement"/> from its XML respresentation.
+        /// </summary>
+        /// <param name="reader">
+        /// The <see cref="XmlReader"/> stream from which the <see cref="XElement"/>
+        /// is deserialized.
+        /// </param>
+        void IXmlSerializable.ReadXml(XmlReader reader)
+        {
+            if (reader == null) throw new ArgumentNullException("reader");
+            if (parent != null || annotations != null || content != null || lastAttr != null) throw new InvalidOperationException(SR.InvalidOperation_DeserializeInstance);
+            if (reader.MoveToContent() != XmlNodeType.Element) throw new InvalidOperationException(SR.Format(SR.InvalidOperation_ExpectedNodeType, XmlNodeType.Element, reader.NodeType));
+            ReadElementFrom(reader, LoadOptions.None);
+        }
+
+        /// <summary>
+        /// Converts a <see cref="XElement"/> into its XML representation.
+        /// </summary>
+        /// <param name="writer">
+        /// The <see cref="XmlWriter"/> stream to which the <see cref="XElement"/>
+        /// is serialized.
+        /// </param>
+        void IXmlSerializable.WriteXml(XmlWriter writer)
+        {
+            WriteTo(writer);
+        }
+
         internal override void AddAttribute(XAttribute a)
         {
             if (Attribute(a.Name) != null) throw new InvalidOperationException(SR.InvalidOperation_DuplicateAttribute);
@@ -1626,7 +1663,7 @@ namespace System.Xml.Linq
             lastAttr = a;
         }
 
-        bool AttributesEqual(XElement e)
+        private bool AttributesEqual(XElement e)
         {
             XAttribute a1 = lastAttr;
             XAttribute a2 = e.lastAttr;
@@ -1654,7 +1691,7 @@ namespace System.Xml.Linq
             return e != null && name == e.name && ContentsEqual(e) && AttributesEqual(e);
         }
 
-        IEnumerable<XAttribute> GetAttributes(XName name)
+        private IEnumerable<XAttribute> GetAttributes(XName name)
         {
             XAttribute a = lastAttr;
             if (a != null)
@@ -1667,7 +1704,7 @@ namespace System.Xml.Linq
             }
         }
 
-        string GetNamespaceOfPrefixInScope(string prefix, XElement outOfScope)
+        private string GetNamespaceOfPrefixInScope(string prefix, XElement outOfScope)
         {
             XElement e = this;
             while (e != outOfScope)
@@ -1703,14 +1740,14 @@ namespace System.Xml.Linq
             return h;
         }
 
-        void ReadElementFrom(XmlReader r, LoadOptions o)
+        private void ReadElementFrom(XmlReader r, LoadOptions o)
         {
             if (r.ReadState != ReadState.Interactive) throw new InvalidOperationException(SR.InvalidOperation_ExpectedInteractive);
             name = XNamespace.Get(r.NamespaceURI).GetName(r.LocalName);
             if ((o & LoadOptions.SetBaseUri) != 0)
             {
                 string baseUri = r.BaseURI;
-                if (baseUri != null && baseUri.Length != 0)
+                if (!string.IsNullOrEmpty(baseUri))
                 {
                     SetBaseUri(baseUri);
                 }
@@ -1765,7 +1802,7 @@ namespace System.Xml.Linq
             if (notify) NotifyChanged(a, XObjectChangeEventArgs.Remove);
         }
 
-        void RemoveAttributesSkipNotify()
+        private void RemoveAttributesSkipNotify()
         {
             if (lastAttr != null)
             {

@@ -26,8 +26,8 @@ namespace System.Xml.Linq
     /// </remarks>
     public abstract class XNode : XObject
     {
-        static XNodeDocumentOrderComparer documentOrderComparer;
-        static XNodeEqualityComparer equalityComparer;
+        private static XNodeDocumentOrderComparer s_documentOrderComparer;
+        private static XNodeEqualityComparer s_equalityComparer;
 
         internal XNode next;
 
@@ -78,8 +78,8 @@ namespace System.Xml.Linq
         {
             get
             {
-                if (documentOrderComparer == null) documentOrderComparer = new XNodeDocumentOrderComparer();
-                return documentOrderComparer;
+                if (s_documentOrderComparer == null) s_documentOrderComparer = new XNodeDocumentOrderComparer();
+                return s_documentOrderComparer;
             }
         }
 
@@ -90,8 +90,8 @@ namespace System.Xml.Linq
         {
             get
             {
-                if (equalityComparer == null) equalityComparer = new XNodeEqualityComparer();
-                return equalityComparer;
+                if (s_equalityComparer == null) s_equalityComparer = new XNodeEqualityComparer();
+                return s_equalityComparer;
             }
         }
 
@@ -576,7 +576,7 @@ namespace System.Xml.Linq
             }
         }
 
-        IEnumerable<XElement> GetElementsAfterSelf(XName name)
+        private IEnumerable<XElement> GetElementsAfterSelf(XName name)
         {
             XNode n = this;
             while (n.parent != null && n != n.parent.content)
@@ -587,7 +587,7 @@ namespace System.Xml.Linq
             }
         }
 
-        IEnumerable<XElement> GetElementsBeforeSelf(XName name)
+        private IEnumerable<XElement> GetElementsBeforeSelf(XName name)
         {
             if (parent != null)
             {
@@ -628,7 +628,7 @@ namespace System.Xml.Linq
             return ws;
         }
 
-        string GetXmlString(SaveOptions o)
+        private string GetXmlString(SaveOptions o)
         {
             using (StringWriter sw = new StringWriter(CultureInfo.InvariantCulture))
             {

@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Reflection;
@@ -107,7 +108,7 @@ namespace System.Collections.Immutable.Test
 
             int seed = unchecked((int)DateTime.Now.Ticks);
 
-            Console.WriteLine("Random seed {0}", seed);
+            Debug.WriteLine("Random seed {0}", seed);
 
             var random = new Random(seed);
             var inputs = new double[length];
@@ -127,7 +128,7 @@ namespace System.Collections.Immutable.Test
         }
 
         /// <summary>
-        /// Tests the EqualsStructurally public method and the IStructrualEquatable.Equals method.
+        /// Tests the EqualsStructurally public method and the IStructuralEquatable.Equals method.
         /// </summary>
         /// <typeparam name="TCollection">The type of tested collection.</typeparam>
         /// <typeparam name="TElement">The type of element stored in the collection.</typeparam>
@@ -182,33 +183,33 @@ namespace System.Collections.Immutable.Test
 
         private class DeferredToString
         {
-            private readonly Func<string> generator;
+            private readonly Func<string> _generator;
 
             internal DeferredToString(Func<string> generator)
             {
                 Contract.Requires(generator != null);
-                this.generator = generator;
+                _generator = generator;
             }
 
             public override string ToString()
             {
-                return this.generator();
+                return _generator();
             }
         }
 
         private class NonGenericEnumerableWrapper : IEnumerable
         {
-            private readonly IEnumerable enumerable;
+            private readonly IEnumerable _enumerable;
 
             internal NonGenericEnumerableWrapper(IEnumerable enumerable)
             {
                 Requires.NotNull(enumerable, "enumerable");
-                this.enumerable = enumerable;
+                _enumerable = enumerable;
             }
 
             public IEnumerator GetEnumerator()
             {
-                return this.enumerable.GetEnumerator();
+                return _enumerable.GetEnumerator();
             }
         }
     }

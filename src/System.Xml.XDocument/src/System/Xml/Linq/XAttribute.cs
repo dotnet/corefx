@@ -18,7 +18,7 @@ namespace System.Xml.Linq
     [SuppressMessage("Microsoft.Naming", "CA1711:IdentifiersShouldNotHaveIncorrectSuffix", Justification = "Reviewed.")]
     public class XAttribute : XObject
     {
-        static IEnumerable<XAttribute> emptySequence;
+        private static IEnumerable<XAttribute> s_emptySequence;
 
         /// <summary>
         /// Gets an empty collection of attributes.
@@ -27,8 +27,8 @@ namespace System.Xml.Linq
         {
             get
             {
-                if (emptySequence == null) emptySequence = new XAttribute[0];
-                return emptySequence;
+                if (s_emptySequence == null) s_emptySequence = new XAttribute[0];
+                return s_emptySequence;
             }
         }
 
@@ -251,7 +251,7 @@ namespace System.Xml.Linq
         public static explicit operator bool (XAttribute attribute)
         {
             if (attribute == null) throw new ArgumentNullException("attribute");
-            return XmlConvert.ToBoolean(XHelper.ToLower_InvariantCulture(attribute.value));
+            return XmlConvert.ToBoolean(attribute.value.ToLowerInvariant());
         }
 
         /// <summary>
@@ -267,7 +267,7 @@ namespace System.Xml.Linq
         public static explicit operator bool? (XAttribute attribute)
         {
             if (attribute == null) return null;
-            return XmlConvert.ToBoolean(XHelper.ToLower_InvariantCulture(attribute.value));
+            return XmlConvert.ToBoolean(attribute.value.ToLowerInvariant());
         }
 
         /// <summary>
@@ -670,7 +670,7 @@ namespace System.Xml.Linq
             return null;
         }
 
-        static void ValidateAttribute(XName name, string value)
+        private static void ValidateAttribute(XName name, string value)
         {
             // The following constraints apply for namespace declarations:
             string namespaceName = name.NamespaceName;

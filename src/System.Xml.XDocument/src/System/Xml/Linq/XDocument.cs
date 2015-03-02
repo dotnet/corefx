@@ -24,7 +24,7 @@ namespace System.Xml.Linq
     /// </remarks>
     public class XDocument : XContainer
     {
-        XDeclaration declaration;
+        private XDeclaration _declaration;
 
         ///<overloads>
         /// Initializes a new instance of the <see cref="XDocument"/> class.
@@ -88,7 +88,7 @@ namespace System.Xml.Linq
         public XDocument(XDeclaration declaration, params object[] content)
             : this(content)
         {
-            this.declaration = declaration;
+            _declaration = declaration;
         }
 
         /// <summary>
@@ -101,9 +101,9 @@ namespace System.Xml.Linq
         public XDocument(XDocument other)
             : base(other)
         {
-            if (other.declaration != null)
+            if (other._declaration != null)
             {
-                declaration = new XDeclaration(other.declaration);
+                _declaration = new XDeclaration(other._declaration);
             }
         }
 
@@ -112,8 +112,8 @@ namespace System.Xml.Linq
         /// </summary>
         public XDeclaration Declaration
         {
-            get { return declaration; }
-            set { declaration = value; }
+            get { return _declaration; }
+            set { _declaration = value; }
         }
 
         /// <summary>
@@ -354,7 +354,7 @@ namespace System.Xml.Linq
             if ((options & LoadOptions.SetBaseUri) != 0)
             {
                 string baseUri = reader.BaseURI;
-                if (baseUri != null && baseUri.Length != 0)
+                if (!string.IsNullOrEmpty(baseUri))
                 {
                     d.SetBaseUri(baseUri);
                 }
@@ -402,11 +402,12 @@ namespace System.Xml.Linq
         /// XML.  Optionally whitespace can be preserved.
         /// </summary>
         /// <remarks>
-        /// This method uses <see cref="XmlReader.Create"/> method passing it a StringReader
-        /// constructed from the passed in XML String.  If LoadOptions.PreserveWhitespace
-        /// is enabled then <see cref="XmlReaderSettings.IgnoreWhitespace"/> is
-        /// set to false.  See <see cref="XmlReaderSettings.IgnoreWhitespace"/>
-        /// for more information on whitespace handling.
+        /// This method uses <see cref="XmlReader.Create(TextReader, XmlReaderSettings)"/>,
+        /// passing it a StringReader constructed from the passed in XML String. If
+        /// <see cref="LoadOptions.PreserveWhitespace"/> is enabled then
+        /// <see cref="XmlReaderSettings.IgnoreWhitespace"/> is set to false. See
+        /// <see cref="XmlReaderSettings.IgnoreWhitespace"/> for more information on
+        /// whitespace handling.
         /// </remarks>
         /// <param name="text">
         /// A string containing XML.
@@ -462,11 +463,11 @@ namespace System.Xml.Linq
         public void Save(Stream stream, SaveOptions options)
         {
             XmlWriterSettings ws = GetXmlWriterSettings(options);
-            if (declaration != null && !string.IsNullOrEmpty(declaration.Encoding))
+            if (_declaration != null && !string.IsNullOrEmpty(_declaration.Encoding))
             {
                 try
                 {
-                    ws.Encoding = Encoding.GetEncoding(declaration.Encoding);
+                    ws.Encoding = Encoding.GetEncoding(_declaration.Encoding);
                 }
                 catch (ArgumentException)
                 {
@@ -540,11 +541,11 @@ namespace System.Xml.Linq
         public override void WriteTo(XmlWriter writer)
         {
             if (writer == null) throw new ArgumentNullException("writer");
-            if (declaration != null && declaration.Standalone == "yes")
+            if (_declaration != null && _declaration.Standalone == "yes")
             {
                 writer.WriteStartDocument(true);
             }
-            else if (declaration != null && declaration.Standalone == "no")
+            else if (_declaration != null && _declaration.Standalone == "no")
             {
                 writer.WriteStartDocument(false);
             }
@@ -582,7 +583,7 @@ namespace System.Xml.Linq
             return ContentsHashCode();
         }
 
-        T GetFirstNode<T>() where T : XNode
+        private T GetFirstNode<T>() where T : XNode
         {
             XNode n = content as XNode;
             if (n != null)
@@ -626,7 +627,7 @@ namespace System.Xml.Linq
             }
         }
 
-        void ValidateDocument(XNode previous, XmlNodeType allowBefore, XmlNodeType allowAfter)
+        private void ValidateDocument(XNode previous, XmlNodeType allowBefore, XmlNodeType allowAfter)
         {
             XNode n = content as XNode;
             if (n != null)

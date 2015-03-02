@@ -661,7 +661,7 @@ namespace System.Xml
         public virtual void Normalize()
         {
             XmlNode firstChildTextLikeNode = null;
-            StringBuilder sb = new StringBuilder();
+            StringBuilder sb = StringBuilderCache.Acquire();
             for (XmlNode crtChild = this.FirstChild; crtChild != null;)
             {
                 XmlNode nextChild = crtChild.NextSibling;
@@ -705,6 +705,8 @@ namespace System.Xml
             }
             if (firstChildTextLikeNode != null && sb.Length > 0)
                 firstChildTextLikeNode.Value = sb.ToString();
+
+            StringBuilderCache.Release(sb);
         }
 
         private XmlNode NormalizeWinner(XmlNode firstNode, XmlNode secondNode)
@@ -737,7 +739,7 @@ namespace System.Xml
         // Test if the DOM implementation implements a specific feature.
         public virtual bool Supports(string feature, string version)
         {
-            if (String.Compare("XML", feature, StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals("XML", feature, StringComparison.OrdinalIgnoreCase))
             {
                 if (version == null || version == "1.0" || version == "2.0")
                     return true;
@@ -850,9 +852,9 @@ namespace System.Xml
                             return fc.Value;
                     }
                 }
-                StringBuilder builder = new StringBuilder();
+                StringBuilder builder = StringBuilderCache.Acquire();
                 AppendChildText(builder);
-                return builder.ToString();
+                return StringBuilderCache.GetStringAndRelease(builder);
             }
 
             set
@@ -1326,26 +1328,26 @@ namespace System.Xml
     [DebuggerDisplay("{ToString()}")]
     internal struct DebuggerDisplayXmlNodeProxy
     {
-        private XmlNode node;
+        private XmlNode _node;
 
         public DebuggerDisplayXmlNodeProxy(XmlNode node)
         {
-            this.node = node;
+            _node = node;
         }
 
         public override string ToString()
         {
-            XmlNodeType nodeType = node.NodeType;
+            XmlNodeType nodeType = _node.NodeType;
             string result = nodeType.ToString();
             switch (nodeType)
             {
                 case XmlNodeType.Element:
                 case XmlNodeType.EntityReference:
-                    result += ", Name=\"" + node.Name + "\"";
+                    result += ", Name=\"" + _node.Name + "\"";
                     break;
                 case XmlNodeType.Attribute:
                 case XmlNodeType.ProcessingInstruction:
-                    result += ", Name=\"" + node.Name + "\", Value=\"" + XmlConvertEx.EscapeValueForDebuggerDisplay(node.Value) + "\"";
+                    result += ", Name=\"" + _node.Name + "\", Value=\"" + XmlConvertEx.EscapeValueForDebuggerDisplay(_node.Value) + "\"";
                     break;
                 case XmlNodeType.Text:
                 case XmlNodeType.CDATA:
@@ -1353,10 +1355,10 @@ namespace System.Xml
                 case XmlNodeType.Whitespace:
                 case XmlNodeType.SignificantWhitespace:
                 case XmlNodeType.XmlDeclaration:
-                    result += ", Value=\"" + XmlConvertEx.EscapeValueForDebuggerDisplay(node.Value) + "\"";
+                    result += ", Value=\"" + XmlConvertEx.EscapeValueForDebuggerDisplay(_node.Value) + "\"";
                     break;
                 case XmlNodeType.DocumentType:
-                    XmlDocumentType documentType = (XmlDocumentType)node;
+                    XmlDocumentType documentType = (XmlDocumentType)_node;
                     result += ", Name=\"" + documentType.Name + "\", SYSTEM=\"" + documentType.SystemId + "\", PUBLIC=\"" + documentType.PublicId + "\", Value=\"" + XmlConvertEx.EscapeValueForDebuggerDisplay(documentType.InternalSubset) + "\"";
                     break;
                 default:

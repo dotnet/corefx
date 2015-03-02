@@ -329,32 +329,33 @@ namespace System.Numerics.Tests
         [StructLayout(LayoutKind.Sequential)]
         struct Plane_2x
         {
-            Plane a;
-            Plane b;
+            private Plane _a;
+            private Plane _b;
         }
 
         [StructLayout(LayoutKind.Sequential)]
         struct PlanePlusFloat
         {
-            Plane v;
-            float f;
+            private Plane _v;
+            private float _f;
         }
 
         [StructLayout(LayoutKind.Sequential)]
         struct PlanePlusFloat_2x
         {
-            PlanePlusFloat a;
-            PlanePlusFloat b;
+            private PlanePlusFloat _a;
+            private PlanePlusFloat _b;
         }
 
-        //// A test to make sure the fields are laid out how we expect
-        //[Fact]
-        //public unsafe void PlaneFieldOffsetTest()
-        //{
-        //    Plane* ptr = (Plane*)0;
+        // A test to make sure the fields are laid out how we expect
+        [Fact]
+        [ActiveIssue(1002)]
+        public unsafe void PlaneFieldOffsetTest()
+        {
+            Plane* ptr = (Plane*)0;
 
-        //    Assert.Equal(new IntPtr(0), new IntPtr(&ptr->Normal));
-        //    Assert.Equal(new IntPtr(12), new IntPtr(&ptr->D));
-        //}
+            Assert.Equal(new IntPtr(0), new IntPtr(&ptr->Normal));
+            Assert.Equal(new IntPtr(12), new IntPtr(&ptr->D));
+        }
     }
 }

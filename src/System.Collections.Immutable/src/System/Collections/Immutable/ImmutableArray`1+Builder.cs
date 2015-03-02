@@ -22,12 +22,12 @@ namespace System.Collections.Immutable
             /// <summary>
             /// The backing array for the builder.
             /// </summary>
-            private RefAsValueType<T>[] elements;
+            private T[] _elements;
 
             /// <summary>
             /// The number of initialized elements in the array.
             /// </summary>
-            private int count;
+            private int _count;
 
             /// <summary>
             /// Initializes a new instance of the <see cref="Builder"/> class.
@@ -36,8 +36,8 @@ namespace System.Collections.Immutable
             internal Builder(int capacity)
             {
                 Requires.Range(capacity >= 0, "capacity");
-                this.elements = new RefAsValueType<T>[capacity];
-                this.Count = 0;
+                _elements = new T[capacity];
+                _count = 0;
             }
 
             /// <summary>
@@ -49,7 +49,41 @@ namespace System.Collections.Immutable
             }
 
             /// <summary>
-            /// Gets or sets the length of the array.
+            /// Get and sets the length of the internal array.  When set the internal array is
+            /// reallocated to the given capacity if it is not already the specified length.
+            /// </summary>
+            public int Capacity
+            {
+                get { return _elements.Length; }
+                set
+                {
+                    if (value < _count)
+                    {
+                        throw new ArgumentException(Strings.CapacityMustBeGreaterThanOrEqualToCount, paramName: "value");
+                    }
+
+                    if (value != _elements.Length)
+                    {
+                        if (value > 0)
+                        {
+                            var temp = new T[value];
+                            if (_count > 0)
+                            {
+                                Array.Copy(_elements, 0, temp, 0, _count);
+                            }
+
+                            _elements = temp;
+                        }
+                        else
+                        {
+                            _elements = ImmutableArray<T>.Empty.array;
+                        }
+                    }
+                }
+            }
+
+            /// <summary>
+            /// Gets or sets the length of the builder.
             /// </summary>
             /// <remarks>
             /// If the value is decreased, the array contents are truncated.
@@ -59,39 +93,38 @@ namespace System.Collections.Immutable
             {
                 get
                 {
-                    return this.count;
+                    return _count;
                 }
 
                 set
                 {
                     Requires.Range(value >= 0, "value");
-                    if (value < this.count)
+                    if (value < _count)
                     {
                         // truncation mode
                         // Clear the elements of the elements that are effectively removed.
-                        var e = this.elements;
 
                         // PERF: Array.Clear works well for big arrays, 
                         //       but may have too much overhead with small ones (which is the common case here)
-                        if (this.count - value > 64)
+                        if (_count - value > 64)
                         {
-                            Array.Clear(this.elements, value, this.count - value);
+                            Array.Clear(_elements, value, _count - value);
                         }
                         else
                         {
                             for (int i = value; i < this.Count; i++)
                             {
-                                this.elements[i].Value = default(T);
+                                _elements[i] = default(T);
                             }
                         }
                     }
-                    else if (value > this.count)
+                    else if (value > _count)
                     {
                         // expansion
                         this.EnsureCapacity(value);
                     }
 
-                    this.count = value;
+                    _count = value;
                 }
             }
 
@@ -111,7 +144,7 @@ namespace System.Collections.Immutable
                         throw new IndexOutOfRangeException();
                     }
 
-                    return this.elements[index].Value;
+                    return _elements[index];
                 }
 
                 set
@@ -121,7 +154,7 @@ namespace System.Collections.Immutable
                         throw new IndexOutOfRangeException();
                     }
 
-                    this.elements[index].Value = value;
+                    _elements[index] = value;
                 }
             }
 
@@ -141,12 +174,31 @@ namespace System.Collections.Immutable
             /// <returns>An immutable array.</returns>
             public ImmutableArray<T> ToImmutable()
             {
-                if (this.Count == 0)
+                if (Count == 0)
                 {
                     return Empty;
                 }
 
                 return new ImmutableArray<T>(this.ToArray());
+            }
+
+            /// <summary>
+            /// Extracts the internal array as an <see cref="ImmutableArray{T}"/> and replaces it 
+            /// with a zero length array.
+            /// </summary>
+            /// <exception cref="InvalidOperationException">When <see cref="ImmutableArray{T}.Builder.Count"/> doesn't 
+            /// equal <see cref="ImmutableArray{T}.Builder.Capacity"/>.</exception>
+            public ImmutableArray<T> MoveToImmutable()
+            {
+                if (Capacity != Count)
+                {
+                    throw new InvalidOperationException(Strings.CapacityMustEqualCountOnMove);
+                }
+
+                T[] temp = _elements;
+                _elements = ImmutableArray<T>.Empty.array;
+                _count = 0;
+                return new ImmutableArray<T>(temp);
             }
 
             /// <summary>
@@ -169,11 +221,11 @@ namespace System.Collections.Immutable
 
                 if (index < this.Count)
                 {
-                    Array.Copy(this.elements, index, this.elements, index + 1, this.Count - index);
+                    Array.Copy(_elements, index, _elements, index + 1, this.Count - index);
                 }
 
-                this.count++;
-                this.elements[index].Value = item;
+                _count++;
+                _elements[index] = item;
             }
 
             /// <summary>
@@ -183,7 +235,7 @@ namespace System.Collections.Immutable
             public void Add(T item)
             {
                 this.EnsureCapacity(this.Count + 1);
-                this.elements[this.count++].Value = item;
+                _elements[_count++] = item;
             }
 
             /// <summary>
@@ -217,10 +269,10 @@ namespace System.Collections.Immutable
                 var offset = this.Count;
                 this.Count += items.Length;
 
-                var nodes = this.elements;
+                var nodes = _elements;
                 for (int i = 0; i < items.Length; i++)
                 {
-                    nodes[offset + i].Value = items[i];
+                    nodes[offset + i] = items[i];
                 }
             }
 
@@ -235,10 +287,10 @@ namespace System.Collections.Immutable
                 var offset = this.Count;
                 this.Count += items.Length;
 
-                var nodes = this.elements;
+                var nodes = _elements;
                 for (int i = 0; i < items.Length; i++)
                 {
-                    nodes[offset + i].Value = items[i];
+                    nodes[offset + i] = items[i];
                 }
             }
 
@@ -255,10 +307,10 @@ namespace System.Collections.Immutable
                 var offset = this.Count;
                 this.Count += length;
 
-                var nodes = this.elements;
+                var nodes = _elements;
                 for (int i = 0; i < length; i++)
                 {
-                    nodes[offset + i].Value = items[i];
+                    nodes[offset + i] = items[i];
                 }
             }
 
@@ -305,7 +357,7 @@ namespace System.Collections.Immutable
             public void AddRange(Builder items)
             {
                 Requires.NotNull(items, "items");
-                this.AddRange(items.elements, items.Count);
+                this.AddRange(items._elements, items.Count);
             }
 
             /// <summary>
@@ -315,7 +367,7 @@ namespace System.Collections.Immutable
             public void AddRange<TDerived>(ImmutableArray<TDerived>.Builder items) where TDerived : T
             {
                 Requires.NotNull(items, "items");
-                this.AddRange(items.elements, items.Count);
+                this.AddRange(items._elements, items.Count);
             }
 
             /// <summary>
@@ -345,7 +397,7 @@ namespace System.Collections.Immutable
 
                 if (index < this.Count - 1)
                 {
-                    Array.Copy(this.elements, index + 1, this.elements, index, this.Count - index - 1);
+                    Array.Copy(_elements, index + 1, _elements, index, this.Count - index - 1);
                 }
 
                 this.Count--;
@@ -369,10 +421,10 @@ namespace System.Collections.Immutable
             public T[] ToArray()
             {
                 var tmp = new T[this.Count];
-                var elements = this.elements;
+                var elements = _elements;
                 for (int i = 0; i < tmp.Length; i++)
                 {
-                    tmp[i] = elements[i].Value;
+                    tmp[i] = elements[i];
                 }
 
                 return tmp;
@@ -387,23 +439,19 @@ namespace System.Collections.Immutable
             {
                 Requires.NotNull(array, "array");
                 Requires.Range(index >= 0 && index + this.Count <= array.Length, "start");
-
-                foreach (var item in this)
-                {
-                    array[index++] = item;
-                }
+                Array.Copy(_elements, 0, array, index, this.Count);
             }
 
             /// <summary>
             /// Resizes the array to accommodate the specified capacity requirement.
             /// </summary>
             /// <param name="capacity">The required capacity.</param>
-            public void EnsureCapacity(int capacity)
+            private void EnsureCapacity(int capacity)
             {
-                if (this.elements.Length < capacity)
+                if (_elements.Length < capacity)
                 {
-                    int newCapacity = Math.Max(this.elements.Length * 2, capacity);
-                    Array.Resize(ref this.elements, newCapacity);
+                    int newCapacity = Math.Max(_elements.Length * 2, capacity);
+                    Array.Resize(ref _elements, newCapacity);
                 }
             }
 
@@ -417,7 +465,7 @@ namespace System.Collections.Immutable
             [Pure]
             public int IndexOf(T item)
             {
-                return this.IndexOf(item, 0, this.count, EqualityComparer<T>.Default);
+                return this.IndexOf(item, 0, _count, EqualityComparer<T>.Default);
             }
 
             /// <summary>
@@ -468,13 +516,13 @@ namespace System.Collections.Immutable
 
                 if (equalityComparer == EqualityComparer<T>.Default)
                 {
-                    return Array.IndexOf(this.elements, new RefAsValueType<T>(item), startIndex, count);
+                    return Array.IndexOf(_elements, item, startIndex, count);
                 }
                 else
                 {
                     for (int i = startIndex; i < startIndex + count; i++)
                     {
-                        if (equalityComparer.Equals(this.elements[i].Value, item))
+                        if (equalityComparer.Equals(_elements[i], item))
                         {
                             return i;
                         }
@@ -555,13 +603,13 @@ namespace System.Collections.Immutable
 
                 if (equalityComparer == EqualityComparer<T>.Default)
                 {
-                    return Array.LastIndexOf(this.elements, new RefAsValueType<T>(item), startIndex, count);
+                    return Array.LastIndexOf(_elements, item, startIndex, count);
                 }
                 else
                 {
                     for (int i = startIndex; i >= startIndex - count + 1; i--)
                     {
-                        if (equalityComparer.Equals(item, this.elements[i].Value))
+                        if (equalityComparer.Equals(item, _elements[i]))
                         {
                             return i;
                         }
@@ -574,15 +622,9 @@ namespace System.Collections.Immutable
             /// <summary>
             /// Reverses the order of elements in the collection.
             /// </summary>
-            public void ReverseContents()
+            public void Reverse()
             {
-                int end = this.Count - 1;
-                for (int i = 0, j = end; i < j; i++, j--)
-                {
-                    var tmp = this.elements[i].Value;
-                    this.elements[i] = this.elements[j];
-                    this.elements[j].Value = tmp;
-                }
+                Array.Reverse(_elements, 0, _count);
             }
 
             /// <summary>
@@ -592,7 +634,7 @@ namespace System.Collections.Immutable
             {
                 if (Count > 1)
                 {
-                    Array.Sort(this.elements, 0, this.Count, Comparer.Default);
+                    Array.Sort(_elements, 0, this.Count, Comparer<T>.Default);
                 }
             }
 
@@ -604,7 +646,7 @@ namespace System.Collections.Immutable
             {
                 if (Count > 1)
                 {
-                    Array.Sort(this.elements, 0, this.Count, Comparer.Create(comparer));
+                    Array.Sort(_elements, 0, _count, comparer);
                 }
             }
 
@@ -617,13 +659,13 @@ namespace System.Collections.Immutable
             public void Sort(int index, int count, IComparer<T> comparer)
             {
                 // Don't rely on Array.Sort's argument validation since our internal array may exceed
-                // the bounds of the publically addressible region.
+                // the bounds of the publically addressable region.
                 Requires.Range(index >= 0, "index");
                 Requires.Range(count >= 0 && index + count <= this.Count, "count");
 
-                if (Count > 1)
+                if (count > 1)
                 {
-                    Array.Sort(this.elements, index, count, Comparer.Create(comparer));
+                    Array.Sort(_elements, index, count, comparer);
                 }
             }
 
@@ -663,45 +705,17 @@ namespace System.Collections.Immutable
             /// <typeparam name="TDerived">The type of source elements.</typeparam>
             /// <param name="items">The source array.</param>
             /// <param name="length">The number of elements to add to this array.</param>
-            private void AddRange<TDerived>(RefAsValueType<TDerived>[] items, int length) where TDerived : T
+            private void AddRange<TDerived>(TDerived[] items, int length) where TDerived : T
             {
                 this.EnsureCapacity(this.Count + length);
 
                 var offset = this.Count;
                 this.Count += length;
 
-                var nodes = this.elements;
+                var nodes = _elements;
                 for (int i = 0; i < length; i++)
                 {
-                    nodes[offset + i].Value = items[i].Value;
-                }
-            }
-
-            private sealed class Comparer : IComparer<RefAsValueType<T>>
-            {
-                private readonly IComparer<T> comparer;
-
-                public static readonly Comparer Default = new Comparer(Comparer<T>.Default);
-
-                public static Comparer Create(IComparer<T> comparer)
-                {
-                    if (comparer == null || comparer == Comparer<T>.Default) 
-                    {
-                        return Default;
-                    }
-
-                    return new Comparer(comparer);
-                }
-
-                private Comparer(IComparer<T> comparer)
-                {
-                    Requires.NotNull(comparer, "comparer"); // use Comparer.Default instead of passing null
-                    this.comparer = comparer;
-                }
-
-                public int Compare(RefAsValueType<T> x, RefAsValueType<T> y)
-                {
-                    return this.comparer.Compare(x.Value, y.Value);
+                    nodes[offset + i] = items[i];
                 }
             }
         }
@@ -716,14 +730,14 @@ namespace System.Collections.Immutable
         /// <summary>
         /// The collection to be enumerated.
         /// </summary>
-        private readonly ImmutableArray<T>.Builder builder;
+        private readonly ImmutableArray<T>.Builder _builder;
         /// <summary>
         /// Initializes a new instance of the <see cref="ImmutableArrayBuilderDebuggerProxy&lt;T&gt;"/> class.
         /// </summary>
         /// <param name="builder">The collection to display in the debugger</param>
         public ImmutableArrayBuilderDebuggerProxy(ImmutableArray<T>.Builder builder)
         {
-            this.builder = builder;
+            _builder = builder;
         }
 
         /// <summary>
@@ -734,7 +748,7 @@ namespace System.Collections.Immutable
         {
             get
             {
-                return this.builder.ToArray();
+                return _builder.ToArray();
             }
         }
     }

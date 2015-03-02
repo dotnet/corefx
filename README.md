@@ -1,78 +1,162 @@
-# .NET Core
+# .NET Core Libraries (CoreFX)
 
-[![Build status][build-status-image]][build-status]  [![Issue Stats][pull-requests-image]][pull-requests]  [![Issue Stats][issues-closed-image]][issues-closed]
+|   |Linux|Windows|
+|:-:|:-:|:-:|
+|**Debug**|[![Build status](http://dotnet-ci.cloudapp.net/job/dotnet_corefx_linux_debug/badge/icon)](http://dotnet-ci.cloudapp.net/job/dotnet_corefx_linux_debug/)|[![Build status](http://dotnet-ci.cloudapp.net/job/dotnet_corefx_windows_debug/badge/icon)](http://dotnet-ci.cloudapp.net/job/dotnet_corefx_windows_debug/)|
+|**Release**|[![Build status](http://dotnet-ci.cloudapp.net/job/dotnet_corefx_linux_release/badge/icon)](http://dotnet-ci.cloudapp.net/job/dotnet_corefx_linux_release/)|[![Build status](http://dotnet-ci.cloudapp.net/job/dotnet_corefx_windows_release/badge/icon)](http://dotnet-ci.cloudapp.net/job/dotnet_corefx_windows_release/)|
+|**Coverage Report**||[![Coverage status](https://img.shields.io/badge/coverage-report-blue.svg)](http://dotnet-ci.cloudapp.net/job/dotnet_corefx_coverage_windows/lastBuild/Code_Coverage_Report/)|
 
-[build-status-image]: https://ci.appveyor.com/api/projects/status/xje8bkekyu130e9y/branch/master?svg=true
-[build-status]: https://ci.appveyor.com/project/dotnet-bot/corefx/branch/master
-[pull-requests-image]: http://www.issuestats.com/github/dotnet/corefx/badge/pr
-[pull-requests]: http://www.issuestats.com/github/dotnet/corefx
-[issues-closed-image]: http://www.issuestats.com/github/dotnet/corefx/badge/issue
-[issues-closed]: http://www.issuestats.com/github/dotnet/corefx
+The corefx repo contains the library implementation (called "CoreFX") for [.NET Core](http://github.com/dotnet/core). It includes System.Collections, System.IO, System.Xml and many other components. It builds and runs on Windows. You can ['watch'](https://github.com/dotnet/corefx/subscription) the repo to see Linux and Mac support being added over the next few months.
 
-This repository contains the class libraries for .NET Core. This is currently a
-work in progress, and does not currently contain the entire set of libraries
-that we plan on open sourcing. Make sure to watch this repository in order to be
-notified as we make changes to and expand it. Check out this [blog post] that
-explains our OSS strategy and road map in more detail.
+.NET Core is a modular implementation of .NET that can be used as the base stack for a wide variety of scenarios, today scaling from console utilities to web apps in the cloud.  You can learn more about .NET Core and how and where you can use it in the [.NET Core is open source][.NET Core oss] and [Introducing .NET Core][Introducing .NET Core] blog posts. 
 
-Today, it contains the following components:
+The [.NET Core Runtime repo](https://github.com/dotnet/coreclr) contains the  runtime implementation (called "CoreCLR") for .NET Core. It includes RyuJIT, the .NET GC, native interop and many other components. 
 
-* **Immutable Collections**. A set of collection types that make it easy to keep
+Runtime-specific library code - namely [mscorlib][mscorlib] - lives in the CoreCLR repo. It needs to be built and versioned in tandem with the runtime. The rest of CoreFX is agnostic of runtime-implementation and can be run on any compatible .NET runtime. These characteristics were the primary motivation for the 2-repo structure.
+
+[.NET Core oss]: http://blogs.msdn.com/b/dotnet/archive/2014/11/12/net-core-is-open-source.aspx
+[Introducing .NET Core]: http://blogs.msdn.com/b/dotnet/archive/2014/12/04/introducing-net-core.aspx
+[mscorlib]: https://github.com/dotnet/coreclr/tree/master/src/mscorlib
+
+## How to Engage, Contribute and Provide Feedback
+
+Some of the best ways to contribute are to try things out, file bugs, and join in design conversations. 
+
+Want to get more familiar with what's going on in the code?
+* [Pull requests](https://github.com/dotnet/corefx/pulls): [Open](https://github.com/dotnet/corefx/pulls?q=is%3Aopen+is%3Apr)/[Closed](https://github.com/dotnet/corefx/pulls?q=is%3Apr+is%3Aclosed)
+* [![Backlog](https://cloud.githubusercontent.com/assets/1302850/6260412/38987b1e-b793-11e4-9ade-d3fef4c6bf48.png)](https://github.com/dotnet/corefx/issues?q=is%3Aopen+is%3Aissue+label%3A%220+-+Backlog%22), [![Up Next](https://cloud.githubusercontent.com/assets/1302850/6260418/4c2c7a54-b793-11e4-8ce1-a27ff5378d08.png)](https://github.com/dotnet/corefx/issues?q=is%3Aopen+is%3Aissue+label%3A%221+-+Up+Next%22) and [![In Progress](https://cloud.githubusercontent.com/assets/1302850/6260414/41b0fc30-b793-11e4-9d50-d09563cd138a.png)](https://github.com/dotnet/corefx/issues?q=is%3Aopen+is%3Aissue+label%3A%222+-+In+Progress%22) changes
+
+Looking for something to work on? The list of [up-for-grabs issues](https://github.com/dotnet/corefx/labels/up%20for%20grabs) is a great place to start or for larger items see the list of [feature aproved](https://github.com/dotnet/corefx/labels/feature%20approved). See some of our guides for more details:
+
+* [Contributing Guide](https://github.com/dotnet/corefx/wiki/Contributing)
+* [Developer Guide](https://github.com/dotnet/corefx/wiki/Developer-Guide)
+* [Issue Guide](https://github.com/dotnet/corefx/wiki/Issue-Guide)
+
+You are also encouraged to start a discussion by filing an issue or creating a
+gist.
+
+You can discuss .NET OSS more generally in the [.NET Foundation forums].
+
+Want to chat with other members of the CoreFX community?
+
+[![Join the chat at https://gitter.im/dotnet/corefx](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/dotnet/corefx?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
+[.NET Foundation forums]: http://forums.dotnetfoundation.org/
+
+## .NET Core Library Components
+
+The repo contains the following components. More libraries are coming soon. ['Watch'](https://github.com/dotnet/corefx/subscription) the repo to be notified.
+
+* **System.Collections.Concurrent**.  Provides a set of thread-safe collection types, instances of which may be used 
+  concurrently from multiple threads.
+
+* **System.Collections.Immutable**. Provides a set of immutable collection types that make it easy to keep
   mutable state under control without sacrificing performance or memory
   footprint. You can read more about them on [MSDN][immutable-msdn].
 
-* **ECMA-335 Metadata Reader**. This is a highly tuned low-level metadata reader
-  that allows [Roslyn] to parse assemblies.
+* **System.Collections.NonGeneric**.  Provides classes that define various collections of objects, such as ArrayList, 
+  Hashtable, SortedList, Stack, and Queue. These collections exist in .NET Core primarily for backwards compatibility
+  and generally should be avoided when writing new code.
 
-* **SIMD enabled vector types**. We've recently added a set of basic vector
-  types that leverage single instruction, multiple data (SIMD) CPU instructions.
-  See our [recent][simd-post-1] [announcements][simd-post-2] for more details.
+* **System.Collections.Specialized**. Provides classes that define specialized collections of objects, for example, 
+  a linked list dictionary, a bit vector, and collections that contain only strings. These collections exist in 
+  .NET Core primarily for backwards compatibility and generally should be avoided when writing new code.
 
-* **XML**. This includes the DOM APIs such as the `XDocument` and `XmlDocument`
-  types, XLinq as well the corresponding XPath extension methods.
+* **System.ComponentModel**. Provides types used to implement the run-time and design-time behavior of components 
+  and controls.
 
-* **Parallel LINQ**.  Parallel LINQ (PLINQ) is a parallel implementation of LINQ
-  to Objects. PLINQ implements the full set of LINQ standard query operators as 
-  extension methods for the System.Linq namespace and has additional operators
-  for parallel operations.
+* **System.Console**. Provides the Console class, which enables access to the standard input, 
+  output, and error streams for console-based applications.
 
-More is coming soon. Stay tuned!
+* **System.Diagnostics.Debug**. Provides a class to interact with the debugger as well as methods for performing runtime assertions.
 
-[blog post]: http://blogs.msdn.com/b/dotnet/archive/2014/11/12/net-core-is-open-source.aspx
+* **System.Diagnostics.FileVersionInfo**. Provides useful functionality for querying
+  and examining the version information of physical files on disk.
+
+* **System.Diagnostics.Process**. Provides access to local and remote processes, and enables the starting and
+  stopping of local system processes.
+
+* **System.Diagnostics.TextWriterTraceListener**. Provides trace listeners for directing tracing output to a text writer, such as System.IO.StreamWriter.
+
+* **System.Diagnostics.TraceSource**. Provides classes that help you trace the execution of your code.
+
+* **System.Globalization.Extensions**. Provides classes for performing unicode string normalization, culture-specific string comparisons and support the use of non-ASCII characters for Internet domain names.
+
+* **System.IO.FileSystem**. Provides access to the file system, including support for enumerating and manipulating 
+  file system objects and for reading and writing files via streams.
+
+* **System.IO.FileSystem.DriveInfo**. Provides the System.IO.DriveInfo class, which enables developers to query local drive    information.
+
+* **System.IO.MemoryMappedFiles**. Provides access to memory-mapped files, enabling code to read and write files by
+  reading and writing memory.
+
+* **System.IO.Pipes**. Provides types that enable a means for interprocess communication through anonymous 
+  and/or named pipes.
+
+* **System.IO.UnmanagedMemoryStream**. Provides a stream for accessing unmanaged memory as represented by a pointer, 
+  as well as an accessor for reading and writing primitive types from unmanaged memory.
+
+* **System.Linq.Parallel**.  Provides a parallelized implementation of LINQ to Objects. "Parallel LINQ" (PLINQ) 
+  implements the full set of LINQ standard query operators as well as additional operators specific to parallel operations.
+
+* **System.Numerics.Vectors**. Provides a set of basic vector types that leverage single instruction, 
+  multiple data (SIMD) CPU instructions. See our [recent][simd-post-1] [announcements][simd-post-2] for more details.
+
+* **System.Reflection.Metadata**. Provides a highly-tuned, low-level ECMA-335 metadata reader.  This is the same
+  reader used by "[Roslyn]" C# and Visual Basic compilers to parse assemblies.
+
+* **System.Runtime**. Provides a set of unit tests for basic run-time types such as String and Int32.
+
+* **System.Runtime.Extensions**. Provides a set of unit tests for extensions to the basic runtime functionality
+  such as System.Convert and System.IO.Path.
+ 
+* **System.Runtime.Numerics**. Provides two useful numeric structures, BigInteger and Complex.
+
+* **System.ServiceProcess.ServiceController**. Provides the ServiceController class that represents a Windows service
+  and allows you to connect to a running or stopped service, manipulate it, or get information about it.
+
+* **System.Text.Encoding.CodePages**. Provides the ability to access existing encoding types for string manipulation 
+  across common cultural standards, as well as support to create custom Encoding Providers.
+
+* **System.Text.RegularExpressions**. Provides a regular expression engine. The types in this library provide useful 
+  functionality for running common operations using regular expressions.
+
+* **System.Threading.Tasks.Dataflow**.  Provides a set of types that support actor/agent-oriented designs through 
+  primitives for in-process message passing, dataflow, and pipelining. "TPL Dataflow" builds 
+  upon the APIs and scheduling infrastructure provided by the Task Parallel Library
+  (TPL), and integrates with the language support for asynchrony provided by C#, Visual Basic, and F#.
+  
+* **System.Threading.Tasks.Parallel**.  Provides library-based data parallel replacements for common
+  operations such as for loops, for each loops, and execution of a set of statements.
+
+* **System.Xml**. Provides low level XML types such as `XmlReader` and `XmlWriter` and also DOM APIs such as the `XDocument` and `XmlDocument`
+  types, XLinq, and the corresponding XPath extension methods.
+
+* **Microsoft.Win32.Primitives**. Provides common types supporting the implementation of Win32-based libraries.
+
+* **Microsoft.Win32.Registry**. Provides support for accessing and modifying the Windows Registry.
+
+* The overall list of items we currently plan to move onto GitHub is [here][typelist].
+
 [roslyn]: https://roslyn.codeplex.com/
 [immutable-msdn]: http://msdn.microsoft.com/en-us/library/dn385366(v=vs.110).aspx
 [simd-post-1]: http://blogs.msdn.com/b/dotnet/archive/2014/04/07/the-jit-finally-proposed-jit-and-simd-are-getting-married.aspx
 [simd-post-2]: http://blogs.msdn.com/b/dotnet/archive/2014/05/13/update-to-simd-support.aspx
-
-## Related Projects
-
-For an overview of all the .NET related projects, have a look at the
-[.NET home repository](https://github.com/Microsoft/dotnet).
+[typelist]: http://blogs.msdn.com/cfs-file.ashx/__key/communityserver-components-postattachments/00-10-58-94-19/NetCore_5F00_OpenSourceUpdate.xlsx
 
 ## License
 
-This project is licensed under the [MIT license](LICENSE).
+.NET Core (including the corefx repo) is licensed under the [MIT license](LICENSE).
 
 ## .NET Foundation
 
-This project is a part of the [.NET Foundation].
+.NET Core is a [.NET Foundation](http://www.dotnetfoundation.org/projects) project.
 
-[.NET Foundation]: http://www.dotnetfoundation.org/projects
+## Related Projects
+There are many .NET related projects on GitHub.
 
-## How to Engage, Contribute and Provide Feedback
-
-To contribute to .NET Core, see the [Contributing Guide].
-
-[Contributing Guide]: https://github.com/dotnet/corefx/wiki/Contributing
-
-You are also encouraged to start a discussion by filing an issue or creating a
-gist. See the contributing guides for more details. You can discuss .NET OSS
-more generally in the [.NET Foundation forums].
-
-[.NET Foundation forums]: http://forums.dotnetfoundation.org/
-
-## Building and Testing
-
-To find out how you can build and test .NET Core, see the [Developer Guide].
-
-[Developer Guide]: https://github.com/dotnet/corefx/wiki/Developer-Guide
+- The
+[.NET home repo](https://github.com/Microsoft/dotnet) links to 100s of .NET projects, from Microsoft and the community.
+- The [.NET Core repo](https://github.com/dotnet/core) links to .NET Core related projects from Microsoft.
+- The [ASP.NET home repo](https://github.com/aspnet/home) is the best place to start learning about ASP.NET 5.
+- [dotnet.github.io](http://dotnet.github.io) is a good place to discover .NET Foundation projects.

@@ -19,7 +19,7 @@ namespace System.Reflection.Internal
     ///       method. 
     ///
     ///       This is a new API that will provide API convergence across all platforms for 
-    ///       this scenario. It is already on .NET 4.5.3+ and ASP.NET vNext, but not yet available 
+    ///       this scenario. It is already on .NET 4.6+ and ASP.NET vNext, but not yet available 
     ///       on every platform we support. See below for how we fall back.
     ///
     ///   (2) Deal with WinRT prefixes. 
@@ -32,9 +32,9 @@ namespace System.Reflection.Internal
     ///
     ///   (3) Deal with platforms that don't yet have Encoding.GetString(byte*, int). 
     ///   
-    ///      If we're running on a full framework earlier than 4.5.3, we will bind to the internal 
+    ///      If we're running on a full framework earlier than 4.6, we will bind to the internal
     ///      String.CreateStringFromEncoding which is equivalent and Encoding.GetString is just a trivial 
-    ///      wrapper around it in .NET 4.5.3. This means that we always have the fast path on every
+    ///      wrapper around it in .NET 4.6. This means that we always have the fast path on every
     ///      full framework version we support.
     ///
     ///      If we can't bind to it via reflection, then we emulate it using what is effectively (2) and 
@@ -55,7 +55,7 @@ namespace System.Reflection.Internal
 
         // The pooled buffers for (2) and (3) above. Use AcquireBuffer(int) and ReleaseBuffer(byte[])
         // instead of the pool directly to implement the size check.
-        private static readonly ObjectPool<byte[]> pool = new ObjectPool<byte[]>(() => new byte[PooledBufferSize]);
+        private static readonly ObjectPool<byte[]> s_pool = new ObjectPool<byte[]>(() => new byte[PooledBufferSize]);
 
         public static string DecodeUtf8(byte* bytes, int byteCount, byte[] prefix, MetadataStringDecoder utf8Decoder)
         {
@@ -107,14 +107,14 @@ namespace System.Reflection.Internal
                 return new byte[byteCount];
             }
 
-            return pool.Allocate();
+            return s_pool.Allocate();
         }
 
         private static void ReleaseBuffer(byte[] buffer)
         {
             if (buffer.Length == PooledBufferSize)
             {
-                pool.Free(buffer);
+                s_pool.Free(buffer);
             }
         }
 
@@ -125,18 +125,18 @@ namespace System.Reflection.Internal
         internal delegate string Encoding_GetString(Encoding encoding, byte* bytes, int byteCount); // only internal for test hook
         private delegate string String_CreateStringFromEncoding(byte* bytes, int byteCount, Encoding encoding);
 
-        private static Encoding_GetString getStringPlatform = LoadGetStringPlatform(); // only non-readonly for test hook
+        private static Encoding_GetString s_getStringPlatform = LoadGetStringPlatform(); // only non-readonly for test hook
 
         public static string GetString(this Encoding encoding, byte* bytes, int byteCount)
         {
             Debug.Assert(encoding != null);
 
-            if (getStringPlatform == null)
+            if (s_getStringPlatform == null)
             {
                 return GetStringPortable(encoding, bytes, byteCount);
             }
 
-            return getStringPlatform(encoding, bytes, byteCount);
+            return s_getStringPlatform(encoding, bytes, byteCount);
         }
 
         private static unsafe string GetStringPortable(Encoding encoding, byte* bytes, int byteCount)
@@ -165,19 +165,11 @@ namespace System.Reflection.Internal
 
         private static Encoding_GetString LoadGetStringPlatform()
         {
-            // .NET Framework 4.5.3+ and recent versions of other .NET platforms.
+            // .NET Framework 4.6+ and recent versions of other .NET platforms.
             //
             // Try to bind to Encoding.GetString(byte*, int);
 
-            MethodInfo getStringInfo = null;
-
-            try
-            {
-                getStringInfo = typeof(Encoding).GetRuntimeMethod("GetString", new[] { typeof(byte*), typeof(int) });
-            }
-            catch (AmbiguousMatchException)
-            {
-            }
+            MethodInfo getStringInfo = LightUpHelper.GetMethod(typeof(Encoding), "GetString", typeof(byte*), typeof(int));
 
             if (getStringInfo != null && getStringInfo.ReturnType == typeof(String))
             {
@@ -190,7 +182,7 @@ namespace System.Reflection.Internal
                 }
             }
 
-            // .NET Framework < 4.5.3
+            // .NET Framework < 4.6
             //
             // Try to bind to String.CreateStringFromEncoding(byte*, int, Encoding)
             //
@@ -209,7 +201,7 @@ namespace System.Reflection.Internal
             //       return null and let us find the best decoding approach for the current platform.
             //
             //       Yet another approach is to use new string('\0', GetCharCount) and use unsafe GetChars to fill it.
-            //       However, on .NET < 4.5.3, there isn't no-op fast path for zero-initialization case so we'd slow down.
+            //       However, on .NET < 4.6, there isn't no-op fast path for zero-initialization case so we'd slow down.
             //       Plus, mutating a System.String is no better than the reflection here.
 
             IEnumerable<MethodInfo> createStringInfos = typeof(String).GetTypeInfo().GetDeclaredMethods("CreateStringFromEncoding");
@@ -266,8 +258,8 @@ namespace System.Reflection.Internal
         // Test hook to force portable implementation and ensure light is functioning.
         internal static bool TestOnly_LightUpEnabled
         {
-            get { return getStringPlatform != null; }
-            set { getStringPlatform = value ? LoadGetStringPlatform() : null; }
+            get { return s_getStringPlatform != null; }
+            set { s_getStringPlatform = value ? LoadGetStringPlatform() : null; }
         }
         #endregion
     }

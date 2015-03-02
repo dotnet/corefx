@@ -1,0 +1,78 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build">
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
+  <PropertyGroup>
+    <Configuration Condition="'$(Configuration)' == ''">Windows_Debug</Configuration>
+    <Platform Condition="'$(Platform)' == ''">AnyCPU</Platform>
+    <ProjectGuid>{16EE5522-F387-4C9E-9EF2-B5134B043F37}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AssemblyName>System.IO.Pipes</AssemblyName>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <DefineConstants>$(DefineConstants)</DefineConstants>
+  </PropertyGroup>
+  <!-- Help VS understand available configurations -->
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Windows_Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Windows_Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Unix_Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Unix_Release|AnyCPU'" />
+  <!-- References are resolved from packages.config -->
+  <!-- Compiled Source Files -->
+  <ItemGroup>
+    <Compile Include="$(CommonPath)\System\IO\StreamAsyncHelper.cs">
+      <Link>Common\System\IO\StreamAsyncHelper.cs</Link>
+    </Compile>
+    <Compile Include="Microsoft\Win32\SafeHandles\SafePipeHandle.cs" />
+    <Compile Include="System\IO\__Error.cs" />
+    <Compile Include="System\IO\Pipes\AnonymousPipeClientStream.cs" />
+    <Compile Include="System\IO\Pipes\AnonymousPipeServerStream.cs" />
+    <Compile Include="System\IO\Pipes\PipeDirection.cs" />
+    <Compile Include="System\IO\Pipes\PipeOptions.cs" />
+    <Compile Include="System\IO\Pipes\PipeTransmissionMode.cs" />
+    <Compile Include="System\IO\Pipes\NamedPipeClientStream.cs" />
+    <Compile Include="System\IO\Pipes\NamedPipeServerStream.cs" />
+    <Compile Include="System\IO\Pipes\PipeState.cs" />
+    <Compile Include="System\IO\Pipes\PipeStream.cs" />
+  </ItemGroup>
+  <ItemGroup Condition=" '$(OS)' == 'Windows_NT' ">
+    <Compile Include="$(CommonPath)\Interop\Windows\Interop.Libraries.cs">
+      <Link>Common\Interop\Windows\Interop.Libraries.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.CloseHandle.cs">
+      <Link>Common\Interop\Windows\Interop.CloseHandle.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.FormatMessage.cs">
+      <Link>Common\Interop\Windows\Interop.FormatMessage.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\IO\Win32Marshal.cs">
+      <Link>Common\System\IO\Win32Marshal.cs</Link>
+    </Compile>
+    <Compile Include="Interop\Interop.Windows.cs" />
+    <Compile Include="Microsoft\Win32\SafeHandles\SafePipeHandle.Windows.cs" />
+    <Compile Include="System\IO\Pipes\AnonymousPipeServerStream.Windows.cs" />
+    <Compile Include="System\IO\Pipes\IOCancellationHelper.Windows.cs" />
+    <Compile Include="System\IO\Pipes\NamedPipeClientStream.Windows.cs" />
+    <Compile Include="System\IO\Pipes\NamedPipeServerStream.Windows.cs" />
+    <Compile Include="System\IO\Pipes\PipeAsyncResult.cs" />
+    <Compile Include="System\IO\Pipes\PipeStream.Windows.cs" />
+    <Compile Include="System\IO\Pipes\PipeStreamAsyncResult.cs" />
+  </ItemGroup>
+  <ItemGroup Condition=" '$(OS)' == 'Unix' ">
+    <Compile Include="$(CommonPath)\System\NotImplemented.cs">
+      <!-- TODO: Remove once implemented -->
+      <Link>Common\System\NotImplemented.cs</Link>
+    </Compile>
+    <Compile Include="Microsoft\Win32\SafeHandles\SafePipeHandle.Unix.cs" />
+    <Compile Include="System\IO\Pipes\AnonymousPipeServerStream.Unix.cs" />
+    <Compile Include="System\IO\Pipes\NamedPipeClientStream.Unix.cs" />
+    <Compile Include="System\IO\Pipes\NamedPipeServerStream.Unix.cs" />
+    <Compile Include="System\IO\Pipes\PipeStream.Unix.cs" />
+  </ItemGroup>
+  <!-- Resource files -->
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
+  <ItemGroup>
+    <!--Resource.targets adds the resources associated with the project.-->
+  </ItemGroup>
+</Project>

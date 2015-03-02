@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
+// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Globalization;
@@ -95,16 +95,19 @@ namespace System.Numerics
         public string ToString(string format, IFormatProvider formatProvider)
         {
             StringBuilder sb = new StringBuilder();
-            string separator = NumberFormatInfo.GetInstance(formatProvider).NumberGroupSeparator + " ";
-            sb.Append("<");
+            string separator = NumberFormatInfo.GetInstance(formatProvider).NumberGroupSeparator;
+            sb.Append('<');
             sb.Append(this.X.ToString(format, formatProvider));
             sb.Append(separator);
+            sb.Append(' ');
             sb.Append(this.Y.ToString(format, formatProvider));
             sb.Append(separator);
+            sb.Append(' ');
             sb.Append(this.Z.ToString(format, formatProvider));
             sb.Append(separator);
+            sb.Append(' ');
             sb.Append(this.W.ToString(format, formatProvider));
-            sb.Append(">");
+            sb.Append('>');
             return sb.ToString();
         }
 
@@ -237,7 +240,7 @@ namespace System.Numerics
         public static Vector4 Clamp(Vector4 value1, Vector4 min, Vector4 max)
         {
             // This compare order is very important!!!
-            // We must follow HLSL behavior in the case user specfied min value is bigger than max value.
+            // We must follow HLSL behavior in the case user specified min value is bigger than max value.
 
             float x = value1.X;
             x = (x > max.X) ? max.X : x;

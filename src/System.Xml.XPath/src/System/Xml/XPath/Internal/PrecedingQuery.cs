@@ -16,33 +16,33 @@ namespace MS.Internal.Xml.XPath
     // Create descendent iterator from the root. -- "workIterator"
     // Advancing workIterator we meet all nodes from the ancestorStk in stack order. Nodes in ancestorStk do no belong to the
     // the 'preceding' axis and must be ignored.
-    // Last node in ancestorStk is a centinel node; when we pop it from ancestorStk, we should stop iterations.
+    // Last node in ancestorStk is a sentinel node; when we pop it from ancestorStk, we should stop iterations.
 
     internal sealed class PrecedingQuery : BaseAxisQuery
     {
-        private XPathNodeIterator workIterator;
-        private StackNav ancestorStk;
+        private XPathNodeIterator _workIterator;
+        private StackNav _ancestorStk;
 
         public PrecedingQuery(Query qyInput, string name, string prefix, XPathNodeType typeTest) : base(qyInput, name, prefix, typeTest)
         {
-            ancestorStk = new StackNav();
+            _ancestorStk = new StackNav();
         }
         private PrecedingQuery(PrecedingQuery other) : base(other)
         {
-            this.workIterator = Clone(other.workIterator);
-            this.ancestorStk = other.ancestorStk.Clone();
+            _workIterator = Clone(other._workIterator);
+            _ancestorStk = other._ancestorStk.Clone();
         }
 
         public override void Reset()
         {
-            workIterator = null;
-            ancestorStk.Clear();
+            _workIterator = null;
+            _ancestorStk.Clear();
             base.Reset();
         }
 
         public override XPathNavigator Advance()
         {
-            if (workIterator == null)
+            if (_workIterator == null)
             {
                 XPathNavigator last;
                 {
@@ -65,23 +65,23 @@ namespace MS.Internal.Xml.XPath
                 // Fill ancestorStk :
                 do
                 {
-                    ancestorStk.Push(last.Clone());
+                    _ancestorStk.Push(last.Clone());
                 } while (last.MoveToParent());
                 // Create workIterator :
                 // last.MoveToRoot(); We are on root already
-                workIterator = last.SelectDescendants(XPathNodeType.All, true);
+                _workIterator = last.SelectDescendants(XPathNodeType.All, true);
             }
 
-            while (workIterator.MoveNext())
+            while (_workIterator.MoveNext())
             {
-                currentNode = workIterator.Current;
-                if (currentNode.IsSamePosition(ancestorStk.Peek()))
+                currentNode = _workIterator.Current;
+                if (currentNode.IsSamePosition(_ancestorStk.Peek()))
                 {
-                    ancestorStk.Pop();
-                    if (ancestorStk.Count == 0)
+                    _ancestorStk.Pop();
+                    if (_ancestorStk.Count == 0)
                     {
                         currentNode = null;
-                        workIterator = null;
+                        _workIterator = null;
                         Debug.Assert(qyInput.Advance() == null, "we read all qyInput.Advance() already");
                         return null;
                     }
@@ -93,7 +93,7 @@ namespace MS.Internal.Xml.XPath
                     return currentNode;
                 }
             }
-            Debug.Assert(false, "Algorithm error: we missed the centinel node");
+            Debug.Fail("Algorithm error: we missed the sentinel node");
             return null;
         }
 

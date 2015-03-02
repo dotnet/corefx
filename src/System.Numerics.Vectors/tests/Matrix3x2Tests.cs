@@ -782,7 +782,7 @@ namespace System.Numerics.Tests
             Matrix3x2 a = GenerateTestMatrix();
             Matrix3x2 b = a;
 
-            // Transfomed vector that has same semantics of property must be same.
+            // Transformed vector that has same semantics of property must be same.
             Vector2 val = new Vector2(a.M31, a.M32);
             Assert.Equal(val, a.Translation);
 
@@ -989,38 +989,39 @@ namespace System.Numerics.Tests
         [StructLayout(LayoutKind.Sequential)]
         struct Matrix3x2_2x
         {
-            Matrix3x2 a;
-            Matrix3x2 b;
+            private Matrix3x2 _a;
+            private Matrix3x2 _b;
         }
 
         [StructLayout(LayoutKind.Sequential)]
         struct Matrix3x2PlusFloat
         {
-            Matrix3x2 v;
-            float f;
+            private Matrix3x2 _v;
+            private float _f;
         }
 
         [StructLayout(LayoutKind.Sequential)]
         struct Matrix3x2PlusFloat_2x
         {
-            Matrix3x2PlusFloat a;
-            Matrix3x2PlusFloat b;
+            private Matrix3x2PlusFloat _a;
+            private Matrix3x2PlusFloat _b;
         }
 
-        //// A test to make sure the fields are laid out how we expect
-        //[Fact]
-        //public unsafe void Matrix3x2FieldOffsetTest()
-        //{
-        //    Matrix3x2* ptr = (Matrix3x2*)0;
+        // A test to make sure the fields are laid out how we expect
+        [Fact]
+        [ActiveIssue(1002)]
+        public unsafe void Matrix3x2FieldOffsetTest()
+        {
+            Matrix3x2* ptr = (Matrix3x2*)0;
 
-        //    Assert.Equal(new IntPtr(0), new IntPtr(&ptr->M11));
-        //    Assert.Equal(new IntPtr(4), new IntPtr(&ptr->M12));
+            Assert.Equal(new IntPtr(0), new IntPtr(&ptr->M11));
+            Assert.Equal(new IntPtr(4), new IntPtr(&ptr->M12));
 
-        //    Assert.Equal(new IntPtr(8), new IntPtr(&ptr->M21));
-        //    Assert.Equal(new IntPtr(12), new IntPtr(&ptr->M22));
+            Assert.Equal(new IntPtr(8), new IntPtr(&ptr->M21));
+            Assert.Equal(new IntPtr(12), new IntPtr(&ptr->M22));
 
-        //    Assert.Equal(new IntPtr(16), new IntPtr(&ptr->M31));
-        //    Assert.Equal(new IntPtr(20), new IntPtr(&ptr->M32));
-        //}
+            Assert.Equal(new IntPtr(16), new IntPtr(&ptr->M31));
+            Assert.Equal(new IntPtr(20), new IntPtr(&ptr->M32));
+        }
     }
 }

@@ -1,0 +1,83 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build">
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
+  <PropertyGroup>
+    <Configuration Condition="'$(Configuration)' == ''">Debug</Configuration>
+    <Platform Condition="'$(Platform)' == ''">AnyCPU</Platform>
+    <ProjectGuid>{57E8F8D4-0766-4CC7-B3F9-B243B81DB6A5}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AssemblyName>System.IO.FileSystem.Tests</AssemblyName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
+    <DebugSymbols>true</DebugSymbols>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="$(CommonTestPath)\XunitTraitsDiscoverers\XunitTraitsDiscoverers.csproj">
+      <Project>{be8ed8c1-c314-4c4e-a929-64c9c8b3552a}</Project>
+      <Name>XunitTraitsDiscoverers</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\src\System.IO.FileSystem.csproj">
+      <Project>{879c23dc-d828-4dfb-8e92-abbc11b71035}</Project>
+      <Name>System.IO.FileSystem</Name>
+      <Private>True</Private>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="DirectoryInfo\Exists.cs" />
+    <Compile Include="FileStream\Flush.Sharing.cs" />
+    <Compile Include="FileStream\Flush_toDisk.cs" />
+    <Compile Include="FileStream\SafeFileHandle.cs" />
+    <Compile Include="FileStream\IsAsync.cs" />
+    <Compile Include="FileStream\CanTimeout.cs" />
+    <Compile Include="FileStream\CanSeek.Windows.cs" />
+    <Compile Include="FileStream\CanSeek.cs" />
+    <Compile Include="FileStream\Name.cs" />
+    <Compile Include="FileStream\CanWrite.cs" />
+    <Compile Include="FileStream\CanRead.cs" />
+    <Compile Include="FileStream\Buffering_regression.cs" />
+    <Compile Include="FileStream\Flush.cs" />
+    <Compile Include="FileStream\Dispose.cs" />
+    <Compile Include="FileStream\WriteAsync.cs" />
+    <Compile Include="FileStream\Write.cs" />
+    <Compile Include="FileStream\ToString.cs" />
+    <Compile Include="FileStream\WriteByte.cs" />
+    <Compile Include="FileStream\ReadAsync.cs" />
+    <Compile Include="FileStream\Read.cs" />
+    <Compile Include="FileStream\ReadByte.cs" />
+    <Compile Include="FileStream\SetLength.cs" />
+    <Compile Include="FileStream\Length.cs" />
+    <Compile Include="FileStream\Position.cs" />
+    <Compile Include="FileStream\Seek.cs" />
+    <Compile Include="FileStream\ctor_sfh_fa_buffer_async.cs" />
+    <Compile Include="FileStream\ctor_sfh_fa_buffer.cs" />
+    <Compile Include="FileStream\ctor_sfh_fa.cs" />
+    <Compile Include="FileStream\ctor_str_fm_fa_fs.write.cs" />
+    <Compile Include="FileStream\ctor_str_fm_fa_fs.read.cs" />
+    <Compile Include="FileStream\ctor_str_fm_fa_fs.delete.cs" />
+    <Compile Include="FileStream\ctor_str_fm_fa_fs_buffer_fo.cs" />
+    <Compile Include="FileStream\ctor_str_fm_fa_fs_buffer_async.cs" />
+    <Compile Include="FileStream\ctor_str_fm_fa_fs_buffer.cs" />
+    <Compile Include="FileStream\ctor_str_fm_fa_fs.cs" />
+    <Compile Include="FileStream\ctor_str_fm_fa.cs" />
+    <Compile Include="FileStream\ctor_str_fm.cs" />
+    <Compile Include="UnseekableFileStream.cs" />
+    <Compile Include="FSAssert.cs" />
+    <Compile Include="FileSystemTest.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Directory\" />
+    <Folder Include="FileInfo\" />
+    <Folder Include="File\" />
+  </ItemGroup>
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
+</Project>

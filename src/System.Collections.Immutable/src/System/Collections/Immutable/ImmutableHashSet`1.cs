@@ -16,40 +16,40 @@ namespace System.Collections.Immutable
     /// <typeparam name="T">The type of elements in the set.</typeparam>
     [DebuggerDisplay("Count = {Count}")]
     [DebuggerTypeProxy(typeof(ImmutableHashSetDebuggerProxy<>))]
-    public sealed partial class ImmutableHashSet<T> : IImmutableSet<T>, IHashKeyCollection<T>, IReadOnlyCollection<T>, ICollection<T>, ISet<T>, ICollection
+    public sealed partial class ImmutableHashSet<T> : IImmutableSet<T>, IHashKeyCollection<T>, IReadOnlyCollection<T>, ICollection<T>, ISet<T>, ICollection, IStrongEnumerable<T, ImmutableHashSet<T>.Enumerator>
     {
         /// <summary>
         /// An empty immutable hash set with the default comparer for <typeparamref name="T"/>.
         /// </summary>
         [SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
-        public static readonly ImmutableHashSet<T> Empty = new ImmutableHashSet<T>(ImmutableSortedDictionary<int, HashBucket>.Node.EmptyNode, EqualityComparer<T>.Default, 0);
+        public static readonly ImmutableHashSet<T> Empty = new ImmutableHashSet<T>(SortedInt32KeyNode<HashBucket>.EmptyNode, EqualityComparer<T>.Default, 0);
 
         /// <summary>
         /// The singleton delegate that freezes the contents of hash buckets when the root of the data structure is frozen.
         /// </summary>
-        private static readonly Action<KeyValuePair<int, HashBucket>> FreezeBucketAction = (kv) => kv.Value.Freeze();
+        private static readonly Action<KeyValuePair<int, HashBucket>> s_FreezeBucketAction = (kv) => kv.Value.Freeze();
 
         /// <summary>
         /// The equality comparer used to hash the elements in the collection.
         /// </summary>
-        private readonly IEqualityComparer<T> equalityComparer;
+        private readonly IEqualityComparer<T> _equalityComparer;
 
         /// <summary>
         /// The number of elements in this collection.
         /// </summary>
-        private readonly int count;
+        private readonly int _count;
 
         /// <summary>
         /// The sorted dictionary that this hash set wraps.  The key is the hash code and the value is the bucket of all items that hashed to it.
         /// </summary>
-        private readonly ImmutableSortedDictionary<int, HashBucket>.Node root;
+        private readonly SortedInt32KeyNode<HashBucket> _root;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ImmutableHashSet&lt;T&gt;"/> class.
         /// </summary>
         /// <param name="equalityComparer">The equality comparer.</param>
         internal ImmutableHashSet(IEqualityComparer<T> equalityComparer)
-            : this(ImmutableSortedDictionary<int, HashBucket>.Node.EmptyNode, equalityComparer, 0)
+            : this(SortedInt32KeyNode<HashBucket>.EmptyNode, equalityComparer, 0)
         {
         }
 
@@ -59,15 +59,15 @@ namespace System.Collections.Immutable
         /// <param name="root">The sorted set that this set wraps.</param>
         /// <param name="equalityComparer">The equality comparer used by this instance.</param>
         /// <param name="count">The number of elements in this collection.</param>
-        private ImmutableHashSet(ImmutableSortedDictionary<int, HashBucket>.Node root, IEqualityComparer<T> equalityComparer, int count)
+        private ImmutableHashSet(SortedInt32KeyNode<HashBucket> root, IEqualityComparer<T> equalityComparer, int count)
         {
             Requires.NotNull(root, "root");
             Requires.NotNull(equalityComparer, "equalityComparer");
 
-            root.Freeze(FreezeBucketAction);
-            this.root = root;
-            this.count = count;
-            this.equalityComparer = equalityComparer;
+            root.Freeze(s_FreezeBucketAction);
+            _root = root;
+            _count = count;
+            _equalityComparer = equalityComparer;
         }
 
         /// <summary>
@@ -77,7 +77,7 @@ namespace System.Collections.Immutable
         {
             Contract.Ensures(Contract.Result<ImmutableHashSet<T>>() != null);
             Contract.Ensures(Contract.Result<ImmutableHashSet<T>>().IsEmpty);
-            return this.IsEmpty ? this : ImmutableHashSet<T>.Empty.WithComparer(this.equalityComparer);
+            return this.IsEmpty ? this : ImmutableHashSet<T>.Empty.WithComparer(_equalityComparer);
         }
 
         /// <summary>
@@ -85,7 +85,7 @@ namespace System.Collections.Immutable
         /// </summary>
         public int Count
         {
-            get { return this.count; }
+            get { return _count; }
         }
 
         /// <summary>
@@ -103,7 +103,7 @@ namespace System.Collections.Immutable
         /// </summary>
         public IEqualityComparer<T> KeyComparer
         {
-            get { return this.equalityComparer; }
+            get { return _equalityComparer; }
         }
 
         #endregion
@@ -152,7 +152,7 @@ namespace System.Collections.Immutable
         /// </summary>
         internal IBinaryTree Root
         {
-            get { return this.root; }
+            get { return _root; }
         }
 
         /// <summary>
@@ -225,11 +225,11 @@ namespace System.Collections.Immutable
         {
             Requires.NotNullAllowStructs(equalValue, "value");
 
-            int hashCode = this.equalityComparer.GetHashCode(equalValue);
+            int hashCode = _equalityComparer.GetHashCode(equalValue);
             HashBucket bucket;
-            if (this.root.TryGetValue(hashCode, Comparer<int>.Default, out bucket))
+            if (_root.TryGetValue(hashCode, out bucket))
             {
-                return bucket.TryExchange(equalValue, this.equalityComparer, out actualValue);
+                return bucket.TryExchange(equalValue, _equalityComparer, out actualValue);
             }
 
             actualValue = equalValue;
@@ -268,7 +268,7 @@ namespace System.Collections.Immutable
         {
             Requires.NotNull(other, "other");
 
-            var result = Except(other, this.equalityComparer, this.root);
+            var result = Except(other, _equalityComparer, _root);
             return result.Finalize(this);
         }
 
@@ -451,7 +451,7 @@ namespace System.Collections.Immutable
                 equalityComparer = EqualityComparer<T>.Default;
             }
 
-            if (equalityComparer == this.equalityComparer)
+            if (equalityComparer == _equalityComparer)
             {
                 return this;
             }
@@ -573,16 +573,9 @@ namespace System.Collections.Immutable
             Requires.Range(arrayIndex >= 0, "arrayIndex");
             Requires.Range(array.Length >= arrayIndex + this.Count, "arrayIndex");
 
-            if (this.count == 0)
-            {
-                return;
-            }
-
-            int[] indices = new int[1]; // SetValue takes a params array; lifting out the implicit allocation from the loop
             foreach (T item in this)
             {
-                indices[0] = arrayIndex++;
-                array.SetValue(item, indices);
+                array.SetValue(item, arrayIndex++);
             }
         }
 
@@ -598,7 +591,7 @@ namespace System.Collections.Immutable
         /// </returns>
         public Enumerator GetEnumerator()
         {
-            return new Enumerator(this.root);
+            return new Enumerator(_root);
         }
 
         /// <summary>
@@ -635,7 +628,7 @@ namespace System.Collections.Immutable
         {
             Requires.NotNull(other, "other");
 
-            foreach (T item in other)
+            foreach (T item in other.GetEnumerableDisposable<T, Enumerator>())
             {
                 if (!Contains(item, origin))
                 {
@@ -655,7 +648,7 @@ namespace System.Collections.Immutable
 
             OperationResult result;
             int hashCode = origin.EqualityComparer.GetHashCode(item);
-            HashBucket bucket = origin.Root.GetValueOrDefault(hashCode, Comparer<int>.Default);
+            HashBucket bucket = origin.Root.GetValueOrDefault(hashCode);
             var newBucket = bucket.Add(item, origin.EqualityComparer, out result);
             if (result == OperationResult.NoChangeRequired)
             {
@@ -678,7 +671,7 @@ namespace System.Collections.Immutable
             int hashCode = origin.EqualityComparer.GetHashCode(item);
             HashBucket bucket;
             var newRoot = origin.Root;
-            if (origin.Root.TryGetValue(hashCode, Comparer<int>.Default, out bucket))
+            if (origin.Root.TryGetValue(hashCode, out bucket))
             {
                 var newBucket = bucket.Remove(item, origin.EqualityComparer, out result);
                 if (result == OperationResult.NoChangeRequired)
@@ -699,7 +692,7 @@ namespace System.Collections.Immutable
         {
             int hashCode = origin.EqualityComparer.GetHashCode(item);
             HashBucket bucket;
-            if (origin.Root.TryGetValue(hashCode, Comparer<int>.Default, out bucket))
+            if (origin.Root.TryGetValue(hashCode, out bucket))
             {
                 return bucket.Contains(item, origin.EqualityComparer);
             }
@@ -716,10 +709,10 @@ namespace System.Collections.Immutable
 
             int count = 0;
             var newRoot = origin.Root;
-            foreach (var item in other)
+            foreach (var item in other.GetEnumerableDisposable<T, Enumerator>())
             {
                 int hashCode = origin.EqualityComparer.GetHashCode(item);
-                HashBucket bucket = newRoot.GetValueOrDefault(hashCode, Comparer<int>.Default);
+                HashBucket bucket = newRoot.GetValueOrDefault(hashCode);
                 OperationResult result;
                 var newBucket = bucket.Add(item, origin.EqualityComparer, out result);
                 if (result == OperationResult.SizeChanged)
@@ -744,7 +737,7 @@ namespace System.Collections.Immutable
                 return false;
             }
 
-            foreach (T item in other)
+            foreach (T item in other.GetEnumerableDisposable<T, Enumerator>())
             {
                 if (Contains(item, origin))
                 {
@@ -785,17 +778,17 @@ namespace System.Collections.Immutable
         /// <summary>
         /// Performs the set operation on a given data structure.
         /// </summary>
-        private static ImmutableSortedDictionary<int, HashBucket>.Node UpdateRoot(ImmutableSortedDictionary<int, HashBucket>.Node root, int hashCode, HashBucket newBucket)
+        private static SortedInt32KeyNode<HashBucket> UpdateRoot(SortedInt32KeyNode<HashBucket> root, int hashCode, HashBucket newBucket)
         {
             bool mutated;
             if (newBucket.IsEmpty)
             {
-                return root.Remove(hashCode, Comparer<int>.Default, out mutated);
+                return root.Remove(hashCode, out mutated);
             }
             else
             {
                 bool replacedExistingValue;
-                return root.SetItem(hashCode, newBucket, Comparer<int>.Default, EqualityComparer<HashBucket>.Default, out replacedExistingValue, out mutated);
+                return root.SetItem(hashCode, newBucket, EqualityComparer<HashBucket>.Default, out replacedExistingValue, out mutated);
             }
         }
 
@@ -806,9 +799,9 @@ namespace System.Collections.Immutable
         {
             Requires.NotNull(other, "other");
 
-            var newSet = ImmutableSortedDictionary<int, HashBucket>.Node.EmptyNode;
+            var newSet = SortedInt32KeyNode<HashBucket>.EmptyNode;
             int count = 0;
-            foreach (var item in other)
+            foreach (var item in other.GetEnumerableDisposable<T, Enumerator>())
             {
                 if (Contains(item, origin))
                 {
@@ -824,7 +817,7 @@ namespace System.Collections.Immutable
         /// <summary>
         /// Performs the set operation on a given data structure.
         /// </summary>
-        private static MutationResult Except(IEnumerable<T> other, IEqualityComparer<T> equalityComparer, ImmutableSortedDictionary<int, HashBucket>.Node root)
+        private static MutationResult Except(IEnumerable<T> other, IEqualityComparer<T> equalityComparer, SortedInt32KeyNode<HashBucket> root)
         {
             Requires.NotNull(other, "other");
             Requires.NotNull(equalityComparer, "equalityComparer");
@@ -832,11 +825,11 @@ namespace System.Collections.Immutable
 
             int count = 0;
             var newRoot = root;
-            foreach (var item in other)
+            foreach (var item in other.GetEnumerableDisposable<T, Enumerator>())
             {
                 int hashCode = equalityComparer.GetHashCode(item);
                 HashBucket bucket;
-                if (newRoot.TryGetValue(hashCode, Comparer<int>.Default, out bucket))
+                if (newRoot.TryGetValue(hashCode, out bucket))
                 {
                     OperationResult result;
                     HashBucket newBucket = bucket.Remove(item, equalityComparer, out result);
@@ -862,7 +855,7 @@ namespace System.Collections.Immutable
             var otherAsSet = Empty.Union(other);
 
             int count = 0;
-            var result = ImmutableSortedDictionary<int, HashBucket>.Node.EmptyNode;
+            var result = SortedInt32KeyNode<HashBucket>.EmptyNode;
             foreach (T item in new NodeEnumerable(origin.Root))
             {
                 if (!otherAsSet.Contains(item))
@@ -947,7 +940,7 @@ namespace System.Collections.Immutable
             }
 
             int matchCount = 0;
-            foreach (T item in other)
+            foreach (T item in other.GetEnumerableDisposable<T, Enumerator>())
             {
                 matchCount++;
                 if (!Contains(item, origin))
@@ -1001,7 +994,7 @@ namespace System.Collections.Immutable
         /// <param name="equalityComparer">The equality comparer.</param>
         /// <param name="count">The number of elements in the data structure.</param>
         /// <returns>The immutable collection.</returns>
-        private static ImmutableHashSet<T> Wrap(ImmutableSortedDictionary<int, HashBucket>.Node root, IEqualityComparer<T> equalityComparer, int count)
+        private static ImmutableHashSet<T> Wrap(SortedInt32KeyNode<HashBucket> root, IEqualityComparer<T> equalityComparer, int count)
         {
             Requires.NotNull(root, "root");
             Requires.NotNull(equalityComparer, "equalityComparer");
@@ -1015,9 +1008,9 @@ namespace System.Collections.Immutable
         /// <param name="root">The root of the data structure.</param>
         /// <param name="adjustedCountIfDifferentRoot">The adjusted count if the root has changed.</param>
         /// <returns>The immutable collection.</returns>
-        private ImmutableHashSet<T> Wrap(ImmutableSortedDictionary<int, HashBucket>.Node root, int adjustedCountIfDifferentRoot)
+        private ImmutableHashSet<T> Wrap(SortedInt32KeyNode<HashBucket> root, int adjustedCountIfDifferentRoot)
         {
-            return (root != this.root) ? new ImmutableHashSet<T>(root, this.equalityComparer, adjustedCountIfDifferentRoot) : this;
+            return (root != _root) ? new ImmutableHashSet<T>(root, _equalityComparer, adjustedCountIfDifferentRoot) : this;
         }
 
         /// <summary>
