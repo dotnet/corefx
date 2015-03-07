@@ -41,7 +41,7 @@ namespace System.Reflection.Metadata
 
         public object Value
         {
-            get { return _type; }
+            get { return _value; }
         }
     }
 }
