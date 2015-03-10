@@ -37,7 +37,7 @@
   <!-- Coverage options -->
   <PropertyGroup>
     <_CoverageEnabled>false</_CoverageEnabled>
-    <_CoverageEnabled Condition="'$(SkipTests)' != 'true' and '$(OS)' == 'Windows_NT' and '$(Coverage)' == 'true'">true</_CoverageEnabled>
+    <_CoverageEnabled Condition="'$(SkipTests)' != 'true' and '$(OS)' == 'Windows_NT'">true</_CoverageEnabled>
     <CoverageReportDir Condition="'$(CoverageReportDir)' == ''">$(BinDir)\tests\coverage\</CoverageReportDir>
     <CoverageVersion>4.5.3809-rc94</CoverageVersion>
     <CoverageToolPath>$(PackagesDir)OpenCover.$(CoverageVersion)\OpenCover.Console.exe</CoverageToolPath>
