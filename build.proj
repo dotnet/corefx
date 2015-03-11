@@ -25,15 +25,15 @@
           ContinueOnError="ErrorAndContinue" />
           
     <PropertyGroup>
-      <CoverallsUploaderVersion>1.2</CoverallsUploaderVersion>
+      <CoverallsUploaderVersion>1.3</CoverallsUploaderVersion>
       <CoverallsUploaderCommandLine>$(PackagesDir)coveralls.io.$(CoverallsUploaderVersion)\tools\coveralls.net.exe</CoverallsUploaderCommandLine>
-      <CoverallsUploaderOptions>--opencover $(CoverageReportDir)\*.coverage.xml -t $(CoverallsToken)</CoverallsUploaderOptions>
+      <CoverallsUploaderOptions>--opencover $(CoverageReportDir)\*.coverage.xml --repo-token $(CoverallsToken)</CoverallsUploaderOptions>
     </PropertyGroup>
     
     <Exec
       Command="$(CoverallsUploaderCommandLine) $(CoverallsUploaderOptions)"
       ContinueOnError="ErrorAndContinue"
-      Condition="'$(UploadCoverallsData)'" />
+      Condition="'$(UploadCoverallsData)' == 'true'" />
   </Target>
   
 </Project>
