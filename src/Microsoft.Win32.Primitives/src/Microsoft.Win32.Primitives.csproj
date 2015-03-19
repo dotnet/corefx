@@ -20,7 +20,6 @@
 
   <!-- References are resolved from packages.config -->
   <ItemGroup>
-    <Compile Include="Interop\Interop.cs" />
     <Compile Include="System\ComponentModel\Win32Exception.cs" />
   </ItemGroup>
   <ItemGroup Condition=" '$(OS)' == 'Windows_NT' ">
@@ -36,6 +35,9 @@
     <Compile Include="System\ComponentModel\Win32Exception.Unix.cs" />
     <Compile Include="$(CommonPath)\Interop\Unix\Interop.Libraries.cs">
       <Link>Common\Interop\Unix\Interop.Libraries.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\libc\Interop.gnu_get_libc_version.cs">
+      <Link>Common\Interop\Unix\Interop.gnu_get_libc_version.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\libc\Interop.strerror.cs">
       <Link>Common\Interop\Unix\Interop.strerror.cs</Link>

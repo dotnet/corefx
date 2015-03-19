@@ -68,6 +68,8 @@ The repo contains the following components. More libraries are coming soon. ['Wa
 * **System.Console**. Provides the Console class, which enables access to the standard input, 
   output, and error streams for console-based applications.
 
+* **System.Diagnostics.Debug**. Provides a class to interact with the debugger as well as methods for performing runtime assertions.
+
 * **System.Diagnostics.FileVersionInfo**. Provides useful functionality for querying
   and examining the version information of physical files on disk.
 
@@ -84,6 +86,9 @@ The repo contains the following components. More libraries are coming soon. ['Wa
   file system objects and for reading and writing files via streams.
 
 * **System.IO.FileSystem.DriveInfo**. Provides the System.IO.DriveInfo class, which enables developers to query local drive    information.
+
+* **System.IO.FileSystem.Watcher**. Provides the System.IO.Watcher class, which listens to the system directory change 
+  notifications and raises events when a directory or file within a directory changes.
 
 * **System.IO.MemoryMappedFiles**. Provides access to memory-mapped files, enabling code to read and write files by
   reading and writing memory.
@@ -127,7 +132,7 @@ The repo contains the following components. More libraries are coming soon. ['Wa
 * **System.Threading.Tasks.Parallel**.  Provides library-based data parallel replacements for common
   operations such as for loops, for each loops, and execution of a set of statements.
 
-* **System.Xml**. Provides DOM APIs such as the `XDocument` and `XmlDocument`
+* **System.Xml**. Provides low level XML types such as `XmlReader` and `XmlWriter` and also DOM APIs such as the `XDocument` and `XmlDocument`
   types, XLinq, and the corresponding XPath extension methods.
 
 * **Microsoft.Win32.Primitives**. Provides common types supporting the implementation of Win32-based libraries.

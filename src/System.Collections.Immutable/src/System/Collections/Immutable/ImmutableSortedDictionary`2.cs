@@ -909,7 +909,7 @@ namespace System.Collections.Immutable
                         {
                             if (!_valueComparer.Equals(value, item.Value))
                             {
-                                throw new ArgumentException(String.Format(CultureInfo.CurrentCulture, Strings.DuplicateKey, item.Key));
+                                throw new ArgumentException(String.Format(CultureInfo.CurrentCulture, SR.DuplicateKey, item.Key));
                             }
                         }
                         else
@@ -1126,7 +1126,7 @@ namespace System.Collections.Immutable
             {
                 if (_builder != null && _builder.Version != _enumeratingBuilderVersion)
                 {
-                    throw new InvalidOperationException(Strings.CollectionModifiedDuringEnumeration);
+                    throw new InvalidOperationException(SR.CollectionModifiedDuringEnumeration);
                 }
             }
 
@@ -1867,7 +1867,7 @@ namespace System.Collections.Immutable
                         }
                         else
                         {
-                            throw new ArgumentException(String.Format(CultureInfo.CurrentCulture, Strings.DuplicateKey, key));
+                            throw new ArgumentException(String.Format(CultureInfo.CurrentCulture, SR.DuplicateKey, key));
                         }
                     }
 
@@ -2017,7 +2017,6 @@ namespace System.Collections.Immutable
     /// <summary>
     /// A simple view of the immutable collection that the debugger can show to the developer.
     /// </summary>
-    [ExcludeFromCodeCoverage]
     internal class ImmutableSortedDictionaryDebuggerProxy<TKey, TValue>
     {
         /// <summary>

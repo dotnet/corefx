@@ -21,6 +21,15 @@
     <Compile Include="ReadOnlyDictionary\ReadOnlyDictionaryTests.cs" />
     <Compile Include="ReadOnlyObservableCollection\ReadOnlyObservableCollection_EventsTests.cs" />
     <Compile Include="ReadOnlyObservableCollection\ReadOnlyObservableCollectionTests.cs" />
+    <Compile Include="$(CommonTestPath)\System\Diagnostics\DebuggerAttributes.cs">
+      <Link>Common\System\Diagnostics\DebuggerAttributes.cs</Link>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\src\System.ObjectModel.csproj">
+      <Project>{F24D3391-2928-4E83-AADE-A4461E5CAE50}</Project>
+      <Name>System.ObjectModel</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

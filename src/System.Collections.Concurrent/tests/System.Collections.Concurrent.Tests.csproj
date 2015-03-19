@@ -8,6 +8,7 @@
     <OutputType>Library</OutputType>
     <AssemblyName>System.Collections.Concurrent.Tests</AssemblyName>
     <RootNamespace>System.Collections.Concurrent.Tests</RootNamespace>
+    <TestCategories>InnerLoop;OuterLoop</TestCategories>
   </PropertyGroup>
   <!-- Default configurations to help VS understand the configurations -->
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -15,17 +16,24 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="$(CommonTestPath)\System\Diagnostics\Tracing\TestEventListener.cs">
+      <Link>Common\System\Diagnostics\Tracing\TestEventListener.cs</Link>
+    </Compile>
     <Compile Include="BlockingCollectionCancellationTests.cs" />
     <Compile Include="BlockingCollectionTests.cs" />
     <Compile Include="ConcurrentBagTests.cs" />
     <Compile Include="ConcurrentDictionaryTests.cs" />
     <Compile Include="ConcurrentQueueTests.cs" />
     <Compile Include="ConcurrentStackTests.cs" />
+    <Compile Include="EtwTests.cs" />
     <Compile Include="IntRangePartitionerTests.cs" />
     <Compile Include="LongRangePartitionerTests.cs" />
     <Compile Include="PartitionerStaticTests.cs" />
     <Compile Include="RangePartitionerNegativeTests.cs" />
     <Compile Include="PartitionerHelpers.cs" />
+    <Compile Include="$(CommonTestPath)\System\Diagnostics\DebuggerAttributes.cs">
+      <Link>Common\System\Diagnostics\DebuggerAttributes.cs</Link>
+    </Compile>
   </ItemGroup>
   <!-- References are resolved from packages.config -->
   <ItemGroup>

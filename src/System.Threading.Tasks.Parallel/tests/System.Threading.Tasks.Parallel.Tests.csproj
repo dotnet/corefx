@@ -9,6 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>System.Threading.Tasks.Parallel.Tests</RootNamespace>
     <AssemblyName>System.Threading.Tasks.Parallel.Tests</AssemblyName>
+    <TestCategories>InnerLoop;OuterLoop</TestCategories>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
   </PropertyGroup>
@@ -18,7 +19,11 @@
     <StartupObject />
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="$(CommonTestPath)\System\Diagnostics\Tracing\TestEventListener.cs">
+      <Link>Common\System\Diagnostics\Tracing\TestEventListener.cs</Link>
+    </Compile>
     <Compile Include="BreakTests.cs" />
+    <Compile Include="EtwTests.cs" />
     <Compile Include="Logger.cs" />
     <Compile Include="ParallelFor.cs" />
     <Compile Include="ParallelForBoundary.cs" />
@@ -32,9 +37,10 @@
     <Compile Include="RangePartitionerTests.cs" />
     <Compile Include="RangePartitionerThreadSafetyTests.cs" />
     <Compile Include="RespectParentCancellationTest.cs" />
+    <Compile Include="XunitAssemblyAttributes.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Common\tests\XunitTraitsDiscoverers\XunitTraitsDiscoverers.csproj">
+    <ProjectReference Include="$(CommonTestPath)\XunitTraitsDiscoverers\XunitTraitsDiscoverers.csproj">
       <Project>{be8ed8c1-c314-4c4e-a929-64c9c8b3552a}</Project>
       <Name>XunitTraitsDiscoverers</Name>
     </ProjectReference>

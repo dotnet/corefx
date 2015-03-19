@@ -255,10 +255,6 @@ internal static partial class Interop
         [DllImport("api-ms-win-core-wow64-l1-1-0", SetLastError = true)]
         public static extern bool IsWow64Process(SafeProcessHandle hProcess, ref bool Wow64Process);
 
-        [SecurityCritical]
-        [DllImport("api-ms-win-core-handle-l1-1-0", ExactSpelling = true, CharSet = System.Runtime.InteropServices.CharSet.Unicode, SetLastError = true)]
-        public static extern bool CloseHandle(IntPtr handle);
-
         public static string GetComputerName()
         {
             char[] buffer = new char[256];
@@ -424,6 +420,22 @@ internal static partial class Interop
 
         [DllImport("api-ms-win-core-console-l1-1-0.dll")]
         internal extern static uint GetConsoleOutputCP();
+
+        [DllImport("api-ms-win-security-cpwl-l1-1-0.dll", CharSet = CharSet.Unicode, ExactSpelling = true, SetLastError = true, BestFitMapping = false)]
+        internal static extern bool CreateProcessWithLogonW(
+            string userName,
+            string domain,
+            IntPtr password,
+            LogonFlags logonFlags,
+            [MarshalAs(UnmanagedType.LPTStr)]            
+            string appName,
+            StringBuilder cmdLine,
+            int creationFlags,
+            IntPtr environmentBlock,
+            [MarshalAs(UnmanagedType.LPTStr)]           
+            string lpCurrentDirectory,                  // LPCTSTR            
+            STARTUPINFO lpStartupInfo,
+            PROCESS_INFORMATION lpProcessInformation);
     }
 
     [StructLayout(LayoutKind.Sequential)]
@@ -456,5 +468,12 @@ internal static partial class Interop
     {
         public int LowPart;
         public int HighPart;
+    }
+
+    [Flags]
+    internal enum LogonFlags
+    {
+        LOGON_WITH_PROFILE = 0x00000001,
+        LOGON_NETCREDENTIALS_ONLY = 0x00000002
     }
 }
