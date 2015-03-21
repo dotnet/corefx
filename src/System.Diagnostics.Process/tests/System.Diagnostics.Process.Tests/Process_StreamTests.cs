@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Text;
+using System.Threading;
 using System.IO;
 using Xunit;
 
@@ -63,25 +64,31 @@ namespace System.Diagnostics.ProcessTests
         public void Process_AsyncOutputStream()
         {
             {
+                AutoResetEvent are = new AutoResetEvent(false);
+                int expectedLines = 2;
                 StringBuilder sb = new StringBuilder();
                 Process p = CreateProcessStream();
                 p.StartInfo.RedirectStandardOutput = true;
-                p.OutputDataReceived += (s, e) => sb.Append(e.Data);
+                p.OutputDataReceived += (s, e) => { sb.Append(e.Data); if (--expectedLines == 0) are.Set(); };
                 p.Start();
                 p.BeginOutputReadLine();
+                are.WaitOne(WaitInMS); // Wait for all the lines to be read.                
                 p.WaitForExit(WaitInMS);
-                Assert.Equal(sb.ToString(), "ProcessTest_ConsoleApp.exe startedProcessTest_ConsoleApp.exe closed");
+
+                Assert.Equal("ProcessTest_ConsoleApp.exe startedProcessTest_ConsoleApp.exe closed", sb.ToString());
             }
 
             {
                 // Now add the CancelAsyncAPI as well.
+                AutoResetEvent are = new AutoResetEvent(false);
                 StringBuilder sb = new StringBuilder();
                 Process p = CreateProcessStream();
                 p.StartInfo.RedirectStandardOutput = true;
-                p.OutputDataReceived += (s, e) => { sb.Append(e.Data); ((Process)s).CancelOutputRead(); };
+                p.OutputDataReceived += (s, e) => { sb.Append(e.Data); are.Set(); ((Process)s).CancelOutputRead(); };
                 p.Start();
                 p.BeginOutputReadLine();
-                p.WaitForExit(WaitInMS);
+                are.WaitOne(WaitInMS); // Wait for all the lines to be read. 
+                p.WaitForExit(WaitInMS); 
                 Assert.Equal(sb.ToString(), "ProcessTest_ConsoleApp.exe started");
             }
         }
