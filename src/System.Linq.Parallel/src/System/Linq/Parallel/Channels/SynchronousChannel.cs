@@ -32,6 +32,14 @@ namespace System.Linq.Parallel
 #endif        
 
         //-----------------------------------------------------------------------------------
+        // Instantiates a new queue.
+        //
+
+        internal SynchronousChannel()
+        {
+        }
+
+        //-----------------------------------------------------------------------------------
         // Initializes the queue for this channel.
         //
 
