@@ -18,7 +18,11 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AggregateTests.cs" />
+    <Compile Include="AllAnyTests.cs" />
     <Compile Include="CachedEnumerator.cs" />
+    <Compile Include="ContainsTests.cs" />
+    <Compile Include="CountTests.cs" />
     <Compile Include="EnumerableTests.cs" />
     <Compile Include="EmptyEnumerable.cs" />
   </ItemGroup>
