@@ -3,7 +3,7 @@
 
 internal static partial class Interop
 {
-    private static class Libraries
+    private static partial class Libraries
     {
         internal const string Libc = "libc";             // C library
         internal const string LibCoreClr = "libcoreclr"; // CoreCLR runtime
