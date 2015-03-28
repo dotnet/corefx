@@ -24,6 +24,7 @@ namespace Microsoft.Win32.RegistryTests
             _testKeyName2 += counter.ToString();
             _rk1 = Microsoft.Win32.Registry.CurrentUser;
             CleanRegistryKeys();
+            _rk2 = _rk1.CreateSubKey(_testKeyName2);
         }
 
         public RegistryKey_GetValue_str_obj_regvalopt()
@@ -35,32 +36,21 @@ namespace Microsoft.Win32.RegistryTests
         public void Test01()
         {
             // [] Null arguments should be ignored
-            try
-            {
-                Object obj = _rk1.GetValue(null, null, RegistryValueOptions.DoNotExpandEnvironmentNames);
-                if (obj != null)
-                {
-                    Assert.False(true, "Error Key value is incorrect...");
-                }
-            }
-            catch (Exception e)
-            {
-                Assert.False(true, "Error Unexpected exception occured , got exc==" + e.ToString());
-            }
+            Assert.Null(_rk2.GetValue(null, null, RegistryValueOptions.DoNotExpandEnvironmentNames));
         }
 
         [Fact]
         public void Test02()
         {
             //passing negative value for the enum should throw
-            Action a = () => { Object obj = _rk1.GetValue(null, null, (RegistryValueOptions)(-1)); };
+            Action a = () => { Object obj = _rk2.GetValue(null, null, (RegistryValueOptions)(-1)); };
             Assert.Throws<ArgumentException>(() => { a(); });
         }
 
         [Fact]
         public void Test03()
         {
-            Action a = () => { Object obj = _rk1.GetValue(null, null, (RegistryValueOptions)2); };
+            Action a = () => { Object obj = _rk2.GetValue(null, null, (RegistryValueOptions)2); };
             Assert.Throws<ArgumentException>(() => { a(); });
         }
 
@@ -68,36 +58,15 @@ namespace Microsoft.Win32.RegistryTests
         public void Test04()
         {
             // [] Passing in null object not throw. You should be able to specify null as default object to return
-            try
-            {
-                if (_rk1.GetValue("tt", null, RegistryValueOptions.DoNotExpandEnvironmentNames) != null)
-                {
-                    Assert.False(true, "Error null return expected");
-                }
-            }
-            catch (Exception e)
-            {
-                Assert.False(true, "Error Unexpected exception occured.... exception message...:" + e.ToString());
-            }
+            Assert.Null(_rk2.GetValue("tt", null, RegistryValueOptions.DoNotExpandEnvironmentNames));
         }
 
         [Fact]
         public void Test05()
         {
             // [] Pass name=string.Empty 
-            String strTest = "This is a test string";
-            try
-            {
-                Object obj1 = _rk1.GetValue(String.Empty, strTest, RegistryValueOptions.DoNotExpandEnvironmentNames);
-                if (obj1.ToString() != strTest)
-                {
-                    Assert.False(true, "Error null return expected");
-                }
-            }
-            catch (Exception e)
-            {
-                Assert.False(true, "Error Unexpected exception occured.... exception message...:" + e.ToString());
-            }
+            const string expected = "This is a test string";
+            Assert.Equal(expected, _rk2.GetValue(string.Empty, expected, RegistryValueOptions.DoNotExpandEnvironmentNames).ToString());
         }
 
         [Fact]
@@ -105,7 +74,6 @@ namespace Microsoft.Win32.RegistryTests
         {
             // [] Pass name=Existing key, default value = null 
             String strTest = "This is a test string";
-            _rk2 = _rk1.CreateSubKey(_testKeyName2);
             try
             {
                 string strKey = "MyTestKey";
@@ -139,7 +107,6 @@ namespace Microsoft.Win32.RegistryTests
         [Fact]
         public void Test07()
         {
-            _rk2 = _rk1.CreateSubKey(_testKeyName2);
             // [] Make sure NoExpand = false works with some valid values.
             string[] strTestValues = new string[] { @"%Systemroot%\mydrive\mydirectory\myfile.xxx", @"%tmp%\gfdhghdfgk\fsdfds\dsd.yyy", @"%path%\rwerew.zzz", @"%Systemroot%\mydrive\%path%\myfile.xxx" };
             string[] strExpectedTestValues = new string[] { Environment.ExpandEnvironmentVariables("%Systemroot%") + @"\mydrive\mydirectory\myfile.xxx", Environment.ExpandEnvironmentVariables("%tmp%") + @"\gfdhghdfgk\fsdfds\dsd.yyy", Environment.ExpandEnvironmentVariables("%path%") + @"\rwerew.zzz", Environment.ExpandEnvironmentVariables("%Systemroot%") + @"\mydrive\" + Environment.ExpandEnvironmentVariables("%path%") + @"\myfile.xxx" };
@@ -166,7 +133,6 @@ namespace Microsoft.Win32.RegistryTests
         [Fact]
         public void Test09()
         {
-            _rk2 = _rk1.CreateSubKey(_testKeyName2);
             //Set some new environment variables and make sure the
             string[] strMyNewEnvVariables = new string[] { "MyEnv", "PathPath", "Name", "blah", "TestKEyyyyyyyyyyyyyy" };
             try
@@ -221,7 +187,6 @@ namespace Microsoft.Win32.RegistryTests
             al.Add(@"%Systemroot%\myblah\%username%\mydrive\mydirectory\myfile.xxx");
             al.Add(@"%path%\mydrive\%tmp%\myfile.xxx");
 
-            _rk2 = _rk1.CreateSubKey(_testKeyName2);
             try
             {
                 IDictionary strEnvVariables = Environment.GetEnvironmentVariables();
