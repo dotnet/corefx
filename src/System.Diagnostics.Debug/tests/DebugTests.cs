@@ -12,15 +12,13 @@ namespace System.Diagnostics.Tests
         {
             VerifyLogged(() => { Debug.Assert(true); }, "");
             VerifyLogged(() => { Debug.Assert(true, "assert passed"); }, "");
-            VerifyLogged(() => { Debug.Assert(true, "assert passed"); }, "");
             VerifyLogged(() => { Debug.Assert(true, "assert passed", "nothing is wrong"); }, "");
             VerifyLogged(() => { Debug.Assert(true, "assert passed", "nothing is wrong {0} {1}", 'a', 'b'); }, "");
 
             VerifyAssert(() => { Debug.Assert(false); }, "");
-            VerifyAssert(() => { Debug.Assert(false, "assert passed"); }, "");
-            VerifyAssert(() => { Debug.Assert(false, "assert passed"); }, "");
-            VerifyAssert(() => { Debug.Assert(false, "assert passed", "nothing is wrong"); }, "");
-            VerifyAssert(() => { Debug.Assert(false, "assert passed", "nothing is wrong {0} {1}", 'a', 'b'); }, "");        
+            VerifyAssert(() => { Debug.Assert(false, "assert passed"); }, "assert passed");
+            VerifyAssert(() => { Debug.Assert(false, "assert passed", "nothing is wrong"); }, "assert passed", "nothing is wrong");
+            VerifyAssert(() => { Debug.Assert(false, "assert passed", "nothing is wrong {0} {1}", 'a', 'b'); }, "assert passed", "nothing is wrong a b");      
         }
 
         [Fact]
@@ -34,6 +32,7 @@ namespace System.Diagnostics.Tests
         public void Write()
         {
             VerifyLogged(() => { Debug.Write(5); }, "5");
+            VerifyLogged(() => { Debug.Write((string)null); }, "");
             VerifyLogged(() => { Debug.Write((object)null); }, "");
             VerifyLogged(() => { Debug.Write(5, "category"); }, "category:5");
             VerifyLogged(() => { Debug.Write((object)null, "category"); }, "category:");
@@ -49,6 +48,7 @@ namespace System.Diagnostics.Tests
         public void WriteLine()
         {
             VerifyLogged(() => { Debug.WriteLine(5); }, "5" + Environment.NewLine);
+            VerifyLogged(() => { Debug.WriteLine((string)null); }, Environment.NewLine);
             VerifyLogged(() => { Debug.WriteLine((object)null); }, Environment.NewLine);
             VerifyLogged(() => { Debug.WriteLine(5, "category"); }, "category:5" + Environment.NewLine);
             VerifyLogged(() => { Debug.WriteLine((object)null, "category"); }, "category:" + Environment.NewLine);
@@ -178,6 +178,7 @@ namespace System.Diagnostics.Tests
 
             public void WriteCore(string message)
             {
+                Assert.NotNull(message);
                 LoggedOutput += message;
             }
         }
