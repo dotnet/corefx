@@ -17,14 +17,11 @@ namespace System.Linq.Tests.Performance
             time = LinqPerformanceCore.Measure<int>(1000000, 1000, LinqPerformanceCore.WrapperType.NoWrap, linqApply);
             LinqPerformanceCore.WriteLine(description + "_OnRawArray_Performance: {0}ms", time.TotalMilliseconds);
 
-            time = LinqPerformanceCore.Measure<int>(1000000, 1000, LinqPerformanceCore.WrapperType.IEnumerable, linqApply);
-            LinqPerformanceCore.WriteLine(description + "_OnEnumerable_Performance: {0}ms", time.TotalMilliseconds);
-
-            time = LinqPerformanceCore.Measure<int>(1000000, 1000, LinqPerformanceCore.WrapperType.IReadOnlyCollection, linqApply);
-            LinqPerformanceCore.WriteLine(description + "_OnReadOnlyCollection_Performance: {0}ms", time.TotalMilliseconds);
-
             time = LinqPerformanceCore.Measure<int>(1000000, 1000, LinqPerformanceCore.WrapperType.ICollection, linqApply);
             LinqPerformanceCore.WriteLine(description + "_OnCollection_Performance: {0}ms", time.TotalMilliseconds);
+
+            time = LinqPerformanceCore.Measure<int>(1000000, 1000, LinqPerformanceCore.WrapperType.IEnumerable, linqApply);
+            LinqPerformanceCore.WriteLine(description + "_OnEnumerable_Performance: {0}ms", time.TotalMilliseconds);
         }
 
 

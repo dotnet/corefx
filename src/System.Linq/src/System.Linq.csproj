@@ -16,6 +16,13 @@
   </PropertyGroup>
   <ItemGroup>
     <None Include="packages.config" />
+    <Compile Include="System\Linq\Enumerable.Select.cs" />
+    <Compile Include="System\Linq\Enumerable.SelectIterator.cs" />
+    <Compile Include="System\Linq\Enumerable.SelectEnumerableIterator.cs" />
+    <Compile Include="System\Linq\Enumerable.SelectListIterator.cs" />
+    <Compile Include="System\Linq\Enumerable.SelectArrayIterator.cs" />
+    <Compile Include="System\Linq\Enumerable.SelectCollectionIterator.cs" />
+    <Compile Include="System\Linq\Enumerable.SelectWithCountIterator.cs" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="$(CommonPath)\System\ArrayT.cs">
@@ -27,9 +34,6 @@
     <Compile Include="System\Linq\Enumerable.cs" />
     <Compile Include="System\Linq\Errors.cs" />
     <Compile Include="Var.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Resources\" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>
