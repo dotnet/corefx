@@ -1,0 +1,36 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.22725.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Build Files", "Build Files", "{B5C48943-48F5-46D4-8EA4-00343C35CCDE}"
+	ProjectSection(SolutionItems) = preProject
+		build.cmd = build.cmd
+		build.proj = build.proj
+		CONTRIBUTING.md = CONTRIBUTING.md
+		dir.props = dir.props
+		dir.targets = dir.targets
+		dir.traversal.targets = dir.traversal.targets
+		LICENSE = LICENSE
+		PATENTS.TXT = PATENTS.TXT
+		README.md = README.md
+		run-test.sh = run-test.sh
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{F99BCFA1-4BE9-401A-AD61-7D24DBE09641}"
+	ProjectSection(SolutionItems) = preProject
+		src\BuildValues.props = src\BuildValues.props
+		src\dir.props = src\dir.props
+		src\dir.targets = src\dir.targets
+		src\dirs.proj = src\dirs.proj
+		src\NuGet.Config = src\NuGet.Config
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{F99BCFA1-4BE9-401A-AD61-7D24DBE09641} = {B5C48943-48F5-46D4-8EA4-00343C35CCDE}
+	EndGlobalSection
+EndGlobal
