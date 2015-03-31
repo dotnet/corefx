@@ -263,7 +263,8 @@ namespace System.Linq.Tests.Performance
             IReadOnlyCollection,
             IReadOnlyList,
             ICollection,
-            IList
+            IList,
+            List
         }
 
         /// <summary>
@@ -285,6 +286,8 @@ namespace System.Linq.Tests.Performance
                     return new ReadOnlyListWrapper<T>(source);
                 case WrapperType.IList:
                     return new ListWrapper<T>(source);
+                case WrapperType.List:
+                    return new List<T>(source);
             }
 
             return source;
