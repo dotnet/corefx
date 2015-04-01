@@ -24,6 +24,7 @@ namespace Microsoft.Win32.RegistryTests
                 _rk1.DeleteSubKeyTree(_testKeyName);
             if (_rk1.GetValue(_testKeyName) != null)
                 _rk1.DeleteValue(_testKeyName);
+            _rk2 = _rk1.CreateSubKey(_testKeyName);
         }
 
         public RegistryKey_GetValue_str_obj()
@@ -35,11 +36,7 @@ namespace Microsoft.Win32.RegistryTests
         public void Test01()
         {
             // [] Null arguments should be ignored
-
-            _rk1 = Microsoft.Win32.Registry.CurrentUser;
-            Action a = () => { _rk1.GetValue(null, null); };
-            try { a(); }
-            catch (Exception ex) { Assert.False(true, string.Format("Test threw {0} exception", ex.GetType().Name)); }
+            Assert.Null(_rk2.GetValue(null, null));
         }
 
         [Fact]
@@ -47,12 +44,7 @@ namespace Microsoft.Win32.RegistryTests
         {
             // [] Passing in null object not throw. You should be able to specify null as default
             //    object to return
-
-            _rk1 = Microsoft.Win32.Registry.CurrentUser;
-            if (_rk1.GetValue("tt", null) != null)
-            {
-                Assert.False(true, "Error null return expected");
-            }
+            Assert.Null(_rk2.GetValue("tt", null));
         }
 
         [Fact]
@@ -60,7 +52,6 @@ namespace Microsoft.Win32.RegistryTests
         {
             // [] Vanilla case , add a  bunch different objects (sampling all value types)
 
-            _rk2 = _rk1.CreateSubKey(_testKeyName);
 
             Random rand = new Random(-55);
 
