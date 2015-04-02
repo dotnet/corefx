@@ -474,7 +474,7 @@ namespace System.Collections.Immutable
             int index = this.IndexOf(oldValue, equalityComparer);
             if (index < 0)
             {
-                throw new ArgumentException(Strings.CannotFindOldValue, "oldValue");
+                throw new ArgumentException(SR.CannotFindOldValue, "oldValue");
             }
 
             return this.SetItem(index, newValue);
@@ -1741,7 +1741,7 @@ namespace System.Collections.Immutable
             {
                 if (_builder != null && _builder.Version != _enumeratingBuilderVersion)
                 {
-                    throw new InvalidOperationException(Strings.CollectionModifiedDuringEnumeration);
+                    throw new InvalidOperationException(SR.CollectionModifiedDuringEnumeration);
                 }
             }
 
@@ -3251,7 +3251,6 @@ namespace System.Collections.Immutable
     /// <summary>
     /// A simple view of the immutable list that the debugger can show to the developer.
     /// </summary>
-    [ExcludeFromCodeCoverage]
     internal class ImmutableListDebuggerProxy<T>
     {
         /// <summary>

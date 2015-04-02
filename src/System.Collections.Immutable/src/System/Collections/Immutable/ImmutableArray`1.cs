@@ -262,7 +262,6 @@ namespace System.Collections.Immutable
         /// <summary>
         /// Gets the string to display in the debugger watches window for this instance.
         /// </summary>
-        [ExcludeFromCodeCoverage]
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private string DebuggerDisplay
         {
@@ -695,7 +694,7 @@ namespace System.Collections.Immutable
             int index = self.IndexOf(oldValue, equalityComparer);
             if (index < 0)
             {
-                throw new ArgumentException(Strings.CannotFindOldValue, "oldValue");
+                throw new ArgumentException(SR.CannotFindOldValue, "oldValue");
             }
 
             return self.SetItem(index, newValue);
@@ -1554,7 +1553,7 @@ namespace System.Collections.Immutable
                     }
                     else if (self.array == null ^ theirs.Array == null)
                     {
-                        throw new ArgumentException(Strings.ArrayInitializedStateNotEqual, "other");
+                        throw new ArgumentException(SR.ArrayInitializedStateNotEqual, "other");
                     }
 
                     otherArray = theirs.Array;
@@ -1567,7 +1566,7 @@ namespace System.Collections.Immutable
                 return ours.CompareTo(otherArray, comparer);
             }
 
-            throw new ArgumentException(Strings.ArrayLengthsNotEqual, "other");
+            throw new ArgumentException(SR.ArrayLengthsNotEqual, "other");
         }
 
         #endregion
@@ -1606,7 +1605,7 @@ namespace System.Collections.Immutable
         {
             if (this.IsDefault)
             {
-                throw new InvalidOperationException(Strings.InvalidOperationOnDefaultArray);
+                throw new InvalidOperationException(SR.InvalidOperationOnDefaultArray);
             }
         }
 

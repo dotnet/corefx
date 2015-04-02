@@ -482,7 +482,12 @@ namespace System.Diagnostics
             {
                 if (_startInfo == null)
                 {
-                    _startInfo = new ProcessStartInfo(this);
+                    if (Associated)
+                    {
+                        throw new InvalidOperationException(SR.CantGetProcessStartInfo);
+                    }
+
+                    _startInfo = new ProcessStartInfo();
                 }
                 return _startInfo;
             }
@@ -492,6 +497,12 @@ namespace System.Diagnostics
                 {
                     throw new ArgumentNullException("value");
                 }
+                
+                if (Associated)
+                {
+                    throw new InvalidOperationException(SR.CantSetProcessStartInfo);
+                }
+
                 _startInfo = value;
             }
         }

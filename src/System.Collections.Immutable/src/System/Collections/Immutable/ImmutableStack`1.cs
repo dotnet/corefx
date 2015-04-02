@@ -115,7 +115,7 @@ namespace System.Collections.Immutable
         {
             if (this.IsEmpty)
             {
-                throw new InvalidOperationException(Strings.InvalidEmptyOperation);
+                throw new InvalidOperationException(SR.InvalidEmptyOperation);
             }
 
             return _head;
@@ -156,7 +156,7 @@ namespace System.Collections.Immutable
             Contract.Ensures(Contract.Result<ImmutableStack<T>>() != null);
             if (this.IsEmpty)
             {
-                throw new InvalidOperationException(Strings.InvalidEmptyOperation);
+                throw new InvalidOperationException(SR.InvalidEmptyOperation);
             }
 
             return _tail;
@@ -420,7 +420,6 @@ namespace System.Collections.Immutable
     /// <summary>
     /// A simple view of the immutable collection that the debugger can show to the developer.
     /// </summary>
-    [ExcludeFromCodeCoverage]
     internal class ImmutableStackDebuggerProxy<T>
     {
         /// <summary>

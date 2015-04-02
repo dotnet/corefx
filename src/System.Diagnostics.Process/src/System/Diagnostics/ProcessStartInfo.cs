@@ -25,7 +25,6 @@ namespace System.Diagnostics
         private Encoding _standardErrorEncoding;
 
         private bool _createNoWindow = false;
-        private WeakReference _weakParentProcess;
         internal Dictionary<string, string> _environmentVariables;
 
         /// <devdoc>
@@ -34,11 +33,6 @@ namespace System.Diagnostics
         /// </devdoc>
         public ProcessStartInfo()
         {
-        }
-
-        internal ProcessStartInfo(Process parent)
-        {
-            _weakParentProcess = new WeakReference(parent);
         }
 
         /// <devdoc>
@@ -90,14 +84,17 @@ namespace System.Diagnostics
             {
                 if (_environmentVariables == null)
                 {
-                    _environmentVariables = new Dictionary<string, string>();
+                    IDictionary envVars = System.Environment.GetEnvironmentVariables();
 
-                    // if not in design mode, initialize the child environment block with all the parent variables
-                    if (!(_weakParentProcess != null &&
-                          _weakParentProcess.IsAlive))
+#pragma warning disable 0429 // CaseSensitiveEnvironmentVaribles is constant but varies depending on if we build for Unix or Windows
+                    _environmentVariables = new Dictionary<string, string>(
+                        envVars.Count,
+                        CaseSensitiveEnvironmentVariables ? StringComparer.Ordinal : StringComparer.OrdinalIgnoreCase);
+#pragma warning restore 0429
+
+                    foreach (DictionaryEntry entry in envVars)
                     {
-                        foreach (DictionaryEntry entry in System.Environment.GetEnvironmentVariables())
-                            _environmentVariables.Add((string)entry.Key, (string)entry.Value);
+                        _environmentVariables.Add((string)entry.Key, (string)entry.Value);
                     }
                 }
                 return _environmentVariables;
