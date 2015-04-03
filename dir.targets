@@ -82,7 +82,8 @@
     </ItemGroup>
     <Error Condition="'@(MatchedOSs)' == ''" Text="OS=$(OS) not allowed, valid values are: @(AllowableOSs)" />
     <Error Condition="'@(MatchedConfigurations)' == ''" Text="Configuration=$(Configuration) not allowed, valid values are: @(AllowableConfigurations)" />
-    <Error Condition="'@(MatchedPlatforms)' == ''" Text="Platform=$(Platform) not allowed, valid values are: @(AllowablePlatforms)" />
+    <!-- Internal builds had issues with this restriction.  Reenable when this is resolved -->
+    <!-- <Error Condition="'@(MatchedPlatforms)' == ''" Text="Platform=$(Platform) not allowed, valid values are: @(AllowablePlatforms)" /> -->
   </Target>
 
 </Project>
