@@ -11,6 +11,7 @@ using System.Xml.Linq;
 using System.Xml.Schema;
 using System.Xml.Serialization;
 using System.ComponentModel;
+using System.Xml;
 
 namespace SerializationTypes
 {
@@ -2091,4 +2092,15 @@ public class TestableDerivedException : System.Exception
     { }
 
     public string TestProperty { get; set; }
+}
+
+public class TypeWithXmlElementProperty
+{
+    [XmlAnyElement]
+    public XmlElement[] Elements;
+}
+
+public class TypeWithXmlDocumentProperty
+{
+    public XmlDocument Document;
 }
