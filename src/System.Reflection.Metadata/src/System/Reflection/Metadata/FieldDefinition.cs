@@ -88,13 +88,13 @@ namespace System.Reflection.Metadata
 
         public int GetRelativeVirtualAddress()
         {
-            uint fieldRvaRowId = _reader.FieldRvaTable.FindFieldRVARowId(Handle.RowId);
+            uint fieldRvaRowId = _reader.FieldRvaTable.FindFieldRvaRowId(Handle.RowId);
             if (fieldRvaRowId == 0)
             {
                 return 0;
             }
 
-            return _reader.FieldRvaTable.GetRVA(fieldRvaRowId);
+            return _reader.FieldRvaTable.GetRva(fieldRvaRowId);
         }
 
         /// <summary>

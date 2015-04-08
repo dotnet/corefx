@@ -213,13 +213,20 @@ namespace System.Reflection.Metadata
         private readonly int _firstRowId;
         private readonly int _lastRowId;
 
-        internal LocalScopeHandleCollection(MetadataReader reader)
+        internal LocalScopeHandleCollection(MetadataReader reader, uint methodDefinitionRowId)
         {
             Debug.Assert(reader != null);
             _reader = reader;
 
-            _firstRowId = 1;
-            _lastRowId = (int)reader.LocalScopeTable.NumberOfRows;
+            if (methodDefinitionRowId == 0)
+            {
+                _firstRowId = 1;
+                _lastRowId = (int)reader.LocalScopeTable.NumberOfRows;
+            }
+            else
+            {
+                reader.LocalScopeTable.GetLocalScopeRange(methodDefinitionRowId, out _firstRowId, out _lastRowId);
+            }
         }
 
         public int Count
@@ -286,6 +293,91 @@ namespace System.Reflection.Metadata
                 {
                     _currentRowId++;
                     return true;
+                }
+            }
+
+            object IEnumerator.Current
+            {
+                get { return Current; }
+            }
+
+            void IEnumerator.Reset()
+            {
+                throw new NotSupportedException();
+            }
+
+            void IDisposable.Dispose()
+            {
+            }
+        }
+
+        public struct ChildrenEnumerator : IEnumerator<LocalScopeHandle>, IEnumerator
+        {
+            private readonly MetadataReader _reader;
+            private readonly int _parentEndOffset;
+
+            // parent rid: initial state
+            // EnumEnded: enumeration ended
+            private int _currentRowId;
+
+            // greater than any RowId and with last 24 bits clear, so that Current returns nil token
+            private const int EnumEnded = (int)TokenTypeIds.RIDMask + 1;
+
+            internal ChildrenEnumerator(MetadataReader reader, int parentRowId)
+            {
+                _reader = reader;
+                _parentEndOffset = reader.LocalScopeTable.GetEndOffset(parentRowId);
+                _currentRowId = parentRowId;
+            }
+
+            public LocalScopeHandle Current
+            {
+                get
+                {
+                    // PERF: keep this code small to enable inlining.
+                    return LocalScopeHandle.FromRowId((uint)_currentRowId & TokenTypeIds.RIDMask);
+                }
+            }
+
+            public bool MoveNext()
+            {
+                if (_currentRowId == EnumEnded)
+                {
+                    return false;
+                }
+
+                int currentEndOffset = _reader.LocalScopeTable.GetEndOffset(_currentRowId);
+                int rowCount = (int)_reader.LocalScopeTable.NumberOfRows;
+
+                int nextRowId = _currentRowId + 1;
+                while (true)
+                {
+                    if (nextRowId > rowCount)
+                    {
+                        _currentRowId = EnumEnded;
+                        return false;
+                    }
+
+                    int nextEndOffset = _reader.LocalScopeTable.GetEndOffset(nextRowId);
+
+                    // If the end of the next scope is lesser than or equal the current end 
+                    // then it's nested into the current scope and thus not a child of 
+                    // the current scope parent.
+                    if (nextEndOffset > currentEndOffset)
+                    {
+                        // If the end of the next scope is greater than the parent end,
+                        // then we ran out of the children.
+                        if (nextEndOffset > _parentEndOffset)
+                        {
+                            _currentRowId = EnumEnded;
+                            return false;
+                        }
+
+                        _currentRowId = nextRowId;
+                        return true;
+                    }
+
+                    nextRowId++;
                 }
             }
 

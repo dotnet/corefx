@@ -386,7 +386,7 @@ namespace System.Reflection.Metadata.Ecma335
         private readonly bool _IsParamRefSizeSmall;
         private readonly bool _IsStringHeapRefSizeSmall;
         private readonly bool _IsBlobHeapRefSizeSmall;
-        private readonly int _RVAOffset;
+        private readonly int _RvaOffset;
         private readonly int _ImplFlagsOffset;
         private readonly int _FlagsOffset;
         private readonly int _NameOffset;
@@ -408,8 +408,8 @@ namespace System.Reflection.Metadata.Ecma335
             _IsParamRefSizeSmall = paramRefSize == 2;
             _IsStringHeapRefSizeSmall = stringHeapRefSize == 2;
             _IsBlobHeapRefSizeSmall = blobHeapRefSize == 2;
-            _RVAOffset = 0;
-            _ImplFlagsOffset = _RVAOffset + sizeof(UInt32);
+            _RvaOffset = 0;
+            _ImplFlagsOffset = _RvaOffset + sizeof(UInt32);
             _FlagsOffset = _ImplFlagsOffset + sizeof(UInt16);
             _NameOffset = _FlagsOffset + sizeof(UInt16);
             _SignatureOffset = _NameOffset + stringHeapRefSize;
@@ -433,7 +433,7 @@ namespace System.Reflection.Metadata.Ecma335
         internal int GetRva(MethodDefinitionHandle handle)
         {
             int rowOffset = (int)(handle.RowId - 1) * this.RowSize;
-            return this.Block.PeekInt32(rowOffset + _RVAOffset);
+            return this.Block.PeekInt32(rowOffset + _RvaOffset);
         }
 
         internal StringHandle GetName(MethodDefinitionHandle handle)
@@ -452,24 +452,6 @@ namespace System.Reflection.Metadata.Ecma335
         {
             int rowOffset = (int)(handle.RowId - 1) * this.RowSize;
             return (MethodImplAttributes)this.Block.PeekUInt16(rowOffset + _ImplFlagsOffset);
-        }
-
-        internal int GetNextRVA(
-          int rva
-        )
-        {
-            int nextRVA = int.MaxValue;
-            int endOffset = (int)this.NumberOfRows * this.RowSize;
-            for (int iterOffset = _RVAOffset; iterOffset < endOffset; iterOffset += this.RowSize)
-            {
-                int currentRVA = this.Block.PeekInt32(iterOffset);
-                if (currentRVA > rva && currentRVA < nextRVA)
-                {
-                    nextRVA = currentRVA;
-                }
-            }
-
-            return nextRVA == int.MaxValue ? -1 : nextRVA;
         }
     }
 
@@ -1761,7 +1743,7 @@ namespace System.Reflection.Metadata.Ecma335
     {
         internal readonly uint NumberOfRows;
         private readonly bool _IsFieldTableRowRefSizeSmall;
-        private readonly int _RVAOffset;
+        private readonly int _RvaOffset;
         private readonly int _FieldOffset;
         internal readonly int RowSize;
         internal readonly MemoryBlock Block;
@@ -1776,8 +1758,8 @@ namespace System.Reflection.Metadata.Ecma335
         {
             this.NumberOfRows = numberOfRows;
             _IsFieldTableRowRefSizeSmall = fieldTableRowRefSize == 2;
-            _RVAOffset = 0;
-            _FieldOffset = _RVAOffset + sizeof(UInt32);
+            _RvaOffset = 0;
+            _FieldOffset = _RvaOffset + sizeof(UInt32);
             this.RowSize = _FieldOffset + fieldTableRowRefSize;
             this.Block = containingBlock.GetMemoryBlockAt(containingBlockOffset, (int)(this.RowSize * numberOfRows));
 
@@ -1787,13 +1769,13 @@ namespace System.Reflection.Metadata.Ecma335
             }
         }
 
-        internal int GetRVA(uint rowId)
+        internal int GetRva(uint rowId)
         {
             int rowOffset = (int)(rowId - 1) * this.RowSize;
-            return Block.PeekInt32(rowOffset + _RVAOffset);
+            return Block.PeekInt32(rowOffset + _RvaOffset);
         }
 
-        internal uint FindFieldRVARowId(uint fieldDefRowId)
+        internal uint FindFieldRvaRowId(uint fieldDefRowId)
         {
             int foundRowNumber = Block.BinarySearchReference(
                 this.NumberOfRows,

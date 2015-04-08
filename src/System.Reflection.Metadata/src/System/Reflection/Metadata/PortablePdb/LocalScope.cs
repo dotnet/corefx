@@ -46,7 +46,7 @@ namespace System.Reflection.Metadata
         {
             get
             {
-                return _reader.LocalScopeTable.GetStartOffset(Handle);
+                return _reader.LocalScopeTable.GetStartOffset((int)_rowId);
             }
         }
 
@@ -54,7 +54,15 @@ namespace System.Reflection.Metadata
         {
             get
             {
-                return _reader.LocalScopeTable.GetLength(Handle);
+                return _reader.LocalScopeTable.GetLength((int)_rowId);
+            }
+        }
+
+        public int EndOffset
+        {
+            get
+            {
+                return _reader.LocalScopeTable.GetEndOffset((int)_rowId);
             }
         }
 
@@ -66,6 +74,11 @@ namespace System.Reflection.Metadata
         public LocalConstantHandleCollection GetLocalConstants()
         {
             return new LocalConstantHandleCollection(_reader, Handle);
+        }
+
+        public LocalScopeHandleCollection.ChildrenEnumerator GetChildren()
+        {
+            return new LocalScopeHandleCollection.ChildrenEnumerator(_reader, (int)_rowId);
         }
     }
 }
