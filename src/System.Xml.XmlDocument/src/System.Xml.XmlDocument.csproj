@@ -7,6 +7,7 @@
     <ProjectGuid>{16EE5522-F387-4C9E-9EF2-B5134B043F37}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AssemblyName>System.Xml.XmlDocument</AssemblyName>
+    <AssemblyVersion>4.0.0.0</AssemblyVersion>
     <RootNamespace>System.Xml.XmlDocument</RootNamespace>
     <FileAlignment>512</FileAlignment>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -77,7 +78,4 @@
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
-  <ItemGroup>
-    <!--Resource.targets adds the resources associated with the project.-->
-  </ItemGroup>
 </Project>

@@ -53,9 +53,9 @@ namespace System.IO
             }
 
             // Now copy over relevant read/write/execute permissions from the source to the destination
-            Interop.libc.structStat stat;
-            while (Interop.CheckIo(Interop.libc.stat(sourceFullPath, out stat), sourceFullPath)) ;
-            int newMode = stat.st_mode & (int)Interop.libc.Permissions.Mask;
+            Interop.libcoreclr.fileinfo fileinfo;
+            while (Interop.CheckIo(Interop.libcoreclr.GetFileInformationFromPath(sourceFullPath, out fileinfo), sourceFullPath)) ;
+            int newMode = fileinfo.mode & (int)Interop.libc.Permissions.Mask;
             while (Interop.CheckIo(Interop.libc.chmod(destFullPath, newMode), destFullPath)) ;
         }
 
@@ -99,19 +99,6 @@ namespace System.IO
                     throw Interop.GetExceptionForIoErrno(errno, fullPath);
                 }
             }
-        }
-
-        public override bool FileExists(string fullPath)
-        {
-            while (Interop.libc.access(fullPath, Interop.libc.AccessModes.F_OK) < 0)
-            {
-                if (Marshal.GetLastWin32Error() == Interop.Errors.EINTR)
-                {
-                    continue;
-                }
-                return false;
-            }
-            return true;
         }
 
         public override void CreateDirectory(string fullPath)
@@ -318,11 +305,22 @@ namespace System.IO
 
         private bool DirectoryExists(string fullPath, out int errno)
         {
-            Interop.libc.structStat stat;
+            return FileExists(fullPath, Interop.libcoreclr.FileTypes.S_IFDIR, out errno);
+        }
+
+        public override bool FileExists(string fullPath)
+        {
+            int errno;
+            return FileExists(fullPath, Interop.libcoreclr.FileTypes.S_IFREG, out errno);
+        }
+
+        private bool FileExists(string fullPath, int fileType, out int errno)
+        {
+            Interop.libcoreclr.fileinfo fileinfo;
             while (true)
             {
                 errno = 0;
-                int result = Interop.libc.stat(fullPath, out stat);
+                int result = Interop.libcoreclr.GetFileInformationFromPath(fullPath, out fileinfo);
                 if (result < 0)
                 {
                     errno = Marshal.GetLastWin32Error();
@@ -332,7 +330,7 @@ namespace System.IO
                     }
                     return false;
                 }
-                return (stat.st_mode & (int)Interop.libc.FileTypes.S_IFMT) == (int)Interop.libc.FileTypes.S_IFDIR;
+                return (fileinfo.mode & Interop.libcoreclr.FileTypes.S_IFMT) == fileType;
             }
         }
 
@@ -389,21 +387,34 @@ namespace System.IO
                     IntPtr curEntry;
                     while ((curEntry = Interop.libc.readdir(pdir)) != IntPtr.Zero) // no validation needed for readdir
                     {
-                        // Get the name and full name of the entry
-                        string name = GetDirEntName(curEntry);
-                        string fullNewName = dirPath + "/" + name;
+                        string name = Interop.libc.GetDirEntName(curEntry);
+                        string fullNewName = Path.Combine(dirPath, name);
 
-                        // Determine whether the entry is a file or a directory and whether it matches the supplied pattern
-                        Interop.libc.structStat stat;
-                        while (Interop.CheckIo(Interop.libc.stat(fullNewName, out stat), fullNewName)) ;
-                        bool isDir = (stat.st_mode & (int)Interop.libc.FileTypes.S_IFMT) == (int)Interop.libc.FileTypes.S_IFDIR && !ShouldIgnoreDirectory(name);
-                        bool isFile = (stat.st_mode & (int)Interop.libc.FileTypes.S_IFMT) == (int)Interop.libc.FileTypes.S_IFREG;
+                        // Get from the dir entry whether the entry is a file or directory.
+                        // If we're not sure from the dir entry itself, stat to the entry.
+                        bool isDir = false, isFile = false;
+                        switch (Interop.libc.GetDirEntType(curEntry))
+                        {
+                            case Interop.libc.DType.DT_DIR:
+                                isDir = true;
+                                break;
+                            case Interop.libc.DType.DT_REG:
+                                isFile = true;
+                                break;
+                            case Interop.libc.DType.DT_LNK:
+                            case Interop.libc.DType.DT_UNKNOWN:
+                                Interop.libcoreclr.fileinfo fileinfo;
+                                while (Interop.CheckIo(Interop.libcoreclr.GetFileInformationFromPath(fullNewName, out fileinfo), fullNewName)) ;
+                                isDir = (fileinfo.mode & Interop.libcoreclr.FileTypes.S_IFMT) == Interop.libcoreclr.FileTypes.S_IFDIR;
+                                isFile = (fileinfo.mode & Interop.libcoreclr.FileTypes.S_IFMT) == Interop.libcoreclr.FileTypes.S_IFREG;
+                                break;
+                        }
                         bool matchesSearchPattern = Interop.libc.fnmatch(searchPattern, name, Interop.libc.FnmatchFlags.None) == 0;
 
                         // Yield the result if the user has asked for it.  In the case of directories,
                         // always explore it by pushing it onto the stack, regardless of whether
                         // we're returning directories.
-                        if (isDir)
+                        if (isDir && !ShouldIgnoreDirectory(name))
                         {
                             if (includeDirectories && matchesSearchPattern)
                             {
@@ -427,34 +438,10 @@ namespace System.IO
                 finally
                 {
                     // Close the directory enumerator
-                    while (Interop.CheckIo(Interop.libc.closedir(pdir), dirPath)) ;
+                    while (Interop.CheckIo(Interop.libc.closedir(pdir), dirPath, isDirectory: true)) ;
                 }
             }
             while (toExplore != null && toExplore.Count > 0); // only loop again if we're recursively processing directories and have more to process
-        }
-
-        /// <summary>Gets the name of a directory from a dirent*.</summary>
-        /// <param name="dirEnt">
-        /// The pointer to the dirent.  It's represented as an IntPtr, as unsafe code
-        /// can't be used in iterators.
-        /// </param>
-        /// <returns>
-        /// The name extracted from the directory entry.
-        /// </returns>
-        private static unsafe string GetDirEntName(IntPtr dirEnt)
-        {
-            Interop.libc.dirent* curEntryPtr = (Interop.libc.dirent*)dirEnt;
-            return PtrToString(curEntryPtr->d_name);
-        }
-
-        /// <summary>Creates a string from a pointer to a sequence of null-terminated bytes.</summary>
-        /// <param name="buffer">A pointer to the first character in the string.  It must be null terminated.</param>
-        /// <returns>The string.</returns>
-        private static unsafe string PtrToString(byte* buffer)
-        {
-            int length = 0;
-            for (byte* ptr = buffer; *ptr != 0; ptr++, length++) ;
-            return Encoding.UTF8.GetString(buffer, length);
         }
 
         /// <summary>Determines whether the specified directory name should be ignored.</summary>
@@ -471,7 +458,7 @@ namespace System.IO
             fixed (byte* ptr = pathBuffer)
             {
                 while (Interop.CheckIoPtr((IntPtr)Interop.libc.getcwd(ptr, (IntPtr)pathBuffer.Length))) ;
-                return PtrToString(ptr);
+                return Marshal.PtrToStringAnsi((IntPtr)ptr);
             }
         }
 

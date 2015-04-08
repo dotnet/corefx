@@ -136,8 +136,10 @@ namespace System.IO
                 throw new ArgumentException(SR.Arg_InvalidHandle, "handle");
             if (access < FileAccess.Read || access > FileAccess.ReadWrite)
                 throw new ArgumentOutOfRangeException("access", SR.ArgumentOutOfRange_Enum);
-            if (bufferSize < 0) // allow bufferSize == 0 for no buffering
+            if (bufferSize <= 0)
                 throw new ArgumentOutOfRangeException("bufferSize", SR.ArgumentOutOfRange_NeedNonNegNum);
+            if (handle.IsAsync.HasValue && useAsyncIO != handle.IsAsync.Value)
+                throw new ArgumentException(SR.Arg_HandleNotAsync);
 
             _fileHandle = handle;
             _access = access;
@@ -145,7 +147,7 @@ namespace System.IO
             _bufferLength = bufferSize;
             _useAsyncIO = useAsyncIO;
 
-            if (_parent.CanSeek)
+            if (CanSeek)
             {
                 SeekCore(0, SeekOrigin.Current);
             }
@@ -282,9 +284,9 @@ namespace System.IO
                 // Get the length of the file as reported by the OS
                 long length = SysCall<int, int>((fd, _, __) =>
                 {
-                    Interop.libc.structStat stat;
-                    int result = Interop.libc.fstat(fd, out stat);
-                    return result >= 0 ? stat.st_size : result;
+                    Interop.libcoreclr.fileinfo fileinfo;
+                    int result = Interop.libcoreclr.GetFileInformationFromFd(fd, out fileinfo);
+                    return result >= 0 ? fileinfo.size : result;
                 });
 
                 // But we may have buffered some data to be written that puts our length
@@ -299,7 +301,7 @@ namespace System.IO
         }
 
         /// <summary>Gets the path that was passed to the constructor.</summary>
-        public override String Name { get { return _path; } }
+        public override String Name { get { return _path ?? SR.IO_UnknownFileName; } }
 
         /// <summary>Gets the SafeFileHandle for the file descriptor encapsulated in this stream.</summary>
         public override SafeFileHandle SafeFileHandle
@@ -317,6 +319,15 @@ namespace System.IO
         {
             get
             {
+                if (_fileHandle.IsClosed)
+                {
+                    throw __Error.GetFileNotOpen();
+                }
+                if (!_parent.CanSeek)
+                {
+                    throw __Error.GetSeekNotSupported();
+                }
+
                 VerifyBufferInvariants();
                 VerifyOSHandlePosition();
 
@@ -685,6 +696,12 @@ namespace System.IO
         /// <returns>A task that represents the asynchronous read operation.</returns>
         public override Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
         {
+            if (cancellationToken.IsCancellationRequested)
+                return Task.FromCanceled<int>(cancellationToken);
+
+            if (_fileHandle.IsClosed)
+                throw __Error.GetFileNotOpen();
+
             if (_useAsyncIO)
             {
                 // TODO: Use async I/O instead of sync I/O
@@ -796,17 +813,21 @@ namespace System.IO
         {
             VerifyOSHandlePosition();
 
-            long bytesWritten;
             fixed (byte* bufPtr = array)
             {
-                bytesWritten = SysCall((fd, ptr, len) =>
+                while (count > 0)
                 {
-                    long result = (long)Interop.libc.write(fd, (byte*)ptr, (IntPtr)len);
-                    Debug.Assert(result <= len);
-                    return result;
-                }, (IntPtr)(bufPtr + offset), count);
+                    int bytesWritten = (int)SysCall((fd, ptr, len) =>
+                    {
+                        long result = (long)Interop.libc.write(fd, (byte*)ptr, (IntPtr)len);
+                        Debug.Assert(result <= len);
+                        return result;
+                    }, (IntPtr)(bufPtr + offset), count);
+                    _filePosition += bytesWritten;
+                    count -= bytesWritten;
+                    offset += bytesWritten;
+                }
             }
-            _filePosition += bytesWritten;
         }
 
         /// <summary>
@@ -821,6 +842,12 @@ namespace System.IO
         /// <returns>A task that represents the asynchronous write operation.</returns>
         public override Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
         {
+            if (cancellationToken.IsCancellationRequested)
+                return Task.FromCanceled(cancellationToken);
+
+            if (_fileHandle.IsClosed)
+                throw __Error.GetFileNotOpen();
+
             if (_useAsyncIO)
             {
                 // TODO: Use async I/O instead of sync I/O
@@ -907,7 +934,7 @@ namespace System.IO
         {
             if (origin < SeekOrigin.Begin || origin > SeekOrigin.End)
             {
-                throw new ArgumentException(SR.Argument_InvalidSeekOrigin);
+                throw new ArgumentException(SR.Argument_InvalidSeekOrigin, "origin");
             }
             if (_fileHandle.IsClosed)
             {

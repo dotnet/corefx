@@ -18,6 +18,10 @@ namespace System.Diagnostics
 
         internal sealed class UnixDebugLogger : IDebugLogger
         {
+            private const string EnvVar_DebugWriteToStdErr = "COMPlus_DebugWriteToStdErr";
+            private static readonly bool s_shouldWriteToStdErr = 
+                Environment.GetEnvironmentVariable(EnvVar_DebugWriteToStdErr) == "1";
+
             public void ShowAssertDialog(string stackTrace, string message, string detailMessage)
             {
                 // TODO: Implement this
@@ -26,8 +30,14 @@ namespace System.Diagnostics
 
             public void WriteCore(string message)
             {
+                Assert(message != null);
+
                 WriteToSyslog(message);
-                WriteToFile(Interop.Devices.stderr, message);
+
+                if (s_shouldWriteToStdErr)
+                {
+                    WriteToFile(Interop.Devices.stderr, message);
+                }
             }
 
             private static void WriteToSyslog(string message)
@@ -63,9 +73,13 @@ namespace System.Diagnostics
                                 }
                             }
 
-                            if (bufCount != 0)
+                            int totalBytesWritten = 0;
+                            while (bufCount > 0)
                             {
-                                while (Interop.CheckIo((long)Interop.libc.write((int)fileHandle.DangerousGetHandle(), buf, new IntPtr(bufCount)))) ;
+                                int bytesWritten;
+                                while (Interop.CheckIo(bytesWritten = (int)Interop.libc.write((int)fileHandle.DangerousGetHandle(), buf + totalBytesWritten, new IntPtr(bufCount)))) ;
+                                bufCount -= bytesWritten;
+                                totalBytesWritten += bytesWritten;
                             }
                         }
                     }

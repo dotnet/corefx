@@ -11,6 +11,7 @@
     <AssemblyName>Microsoft.Win32.Primitives.Tests</AssemblyName>
     <DefaultLanguage>en-US</DefaultLanguage>
     <FileAlignment>512</FileAlignment>
+    <UnsupportedOperatingSystems>Linux</UnsupportedOperatingSystems>
   </PropertyGroup>
   <!-- Default configurations to help VS understand the configurations -->
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -25,6 +26,10 @@
     <ProjectReference Include="..\src\Microsoft.Win32.Primitives.csproj">
       <Project>{8ffe99c0-22f8-4462-b839-970eac1b3472}</Project>
       <Name>Microsoft.Win32.Primitives</Name>
+    </ProjectReference>
+    <ProjectReference Include="$(CommonTestPath)\XunitTraitsDiscoverers\XunitTraitsDiscoverers.csproj">
+      <Project>{be8ed8c1-c314-4c4e-a929-64c9c8b3552a}</Project>
+      <Name>XunitTraitsDiscoverers</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
