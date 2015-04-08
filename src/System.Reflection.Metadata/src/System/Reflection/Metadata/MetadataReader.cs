@@ -849,7 +849,7 @@ namespace System.Reflection.Metadata
 
         internal void GetLocalVariableRange(LocalScopeHandle scope, out int firstVariableRowId, out int lastVariableRowId)
         {
-            uint scopeRowId = scope.RowId;
+            int scopeRowId = (int)scope.RowId;
 
             firstVariableRowId = (int)this.LocalScopeTable.GetVariableStart(scopeRowId);
             if (firstVariableRowId == 0)
@@ -869,7 +869,7 @@ namespace System.Reflection.Metadata
 
         internal void GetLocalConstantRange(LocalScopeHandle scope, out int firstConstantRowId, out int lastConstantRowId)
         {
-            uint scopeRowId = scope.RowId;
+            int scopeRowId = (int)scope.RowId;
 
             firstConstantRowId = (int)this.LocalScopeTable.GetConstantStart(scopeRowId);
             if (firstConstantRowId == 0)
@@ -1006,7 +1006,7 @@ namespace System.Reflection.Metadata
 
         public LocalScopeHandleCollection LocalScopes
         {
-            get { return new LocalScopeHandleCollection(this); }
+            get { return new LocalScopeHandleCollection(this, 0); }
         }
 
         public LocalVariableHandleCollection LocalVariables
@@ -1332,6 +1332,12 @@ namespace System.Reflection.Metadata
             return new SequencePointBlobReader(BlobStream.GetMemoryBlock(handle));
         }
 
+        public ImportsBlobReader GetImportsReader(BlobHandle handle)
+        {
+            return new ImportsBlobReader(BlobStream.GetMemoryBlock(handle));
+        }
+
+        // TODO: DocumentNameBlobReader?
         public string ReadDocumentName(BlobHandle handle)
         {
             // TODO: optimize
@@ -1402,6 +1408,16 @@ namespace System.Reflection.Metadata
         public CustomDebugInformation GetCustomDebugInformation(CustomDebugInformationHandle handle)
         {
             return new CustomDebugInformation(this, handle);
+        }
+
+        public LocalScopeHandleCollection GetLocalScopes(MethodDefinitionHandle handle)
+        {
+            return new LocalScopeHandleCollection(this, handle.RowId);
+        }
+
+        public LocalScopeHandleCollection GetLocalScopes(MethodBodyHandle handle)
+        {
+            return new LocalScopeHandleCollection(this, handle.RowId);
         }
 
         #endregion

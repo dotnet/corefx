@@ -35,24 +35,13 @@ namespace System.Reflection.Metadata
         }
 
         /// <summary>
-        /// The type of the constant value.
+        /// The constant signature.
         /// </summary>
-        public ConstantTypeCode TypeCode
+        public BlobHandle Signature
         {
             get
             {
-                return _reader.LocalConstantTable.GetTypeCode(Handle);
-            }
-        }
-
-        /// <summary>
-        /// The constant value.
-        /// </summary>
-        public BlobHandle Value
-        {
-            get
-            {
-                return _reader.LocalConstantTable.GetValue(Handle);
+                return _reader.LocalConstantTable.GetSignature(Handle);
             }
         }
     }

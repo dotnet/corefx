@@ -65,6 +65,12 @@ namespace System.Reflection.Internal
             throw new BadImageFormatException(MetadataResources.RowIdOrHeapOffsetTooLarge);
         }
 
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        internal static void ThrowValueOverflow()
+        {
+            throw new BadImageFormatException(MetadataResources.ValueTooLarge);
+        }
+
         internal byte[] ToArray()
         {
             return Pointer == null ? null : PeekBytes(0, Length);
@@ -124,22 +130,27 @@ namespace System.Reflection.Internal
             return new MemoryBlock(Pointer + offset, length);
         }
 
-        internal Byte PeekByte(int offset)
+        internal byte PeekByte(int offset)
         {
-            CheckBounds(offset, sizeof(Byte));
+            CheckBounds(offset, sizeof(byte));
             return Pointer[offset];
         }
 
-        internal Int32 PeekInt32(int offset)
+        internal int PeekInt32(int offset)
         {
-            CheckBounds(offset, sizeof(Int32));
-            return *(Int32*)(Pointer + offset);
+            uint result = PeekUInt32(offset);
+            if (unchecked((int)result != result))
+            {
+                ThrowValueOverflow();
+            }
+
+            return (int)result;
         }
 
-        internal UInt32 PeekUInt32(int offset)
+        internal uint PeekUInt32(int offset)
         {
-            CheckBounds(offset, sizeof(UInt32));
-            return *(UInt32*)(Pointer + offset);
+            CheckBounds(offset, sizeof(uint));
+            return *(uint*)(Pointer + offset);
         }
 
         /// <summary>
@@ -559,18 +570,22 @@ namespace System.Reflection.Internal
             return ~low;
         }
 
-        // Returns row number [0..RowCount) or -1 if not found.
+        /// <summary>
+        /// In a table that specifies children via a list field (e.g. TypeDef.FieldList, TypeDef.MethodList), 
+        /// seaches for the parent given a reference to a child.
+        /// </summary>
+        /// <returns>Returns row number [0..RowCount).</returns>
         internal int BinarySearchForSlot(
             uint rowCount,
             int rowSize,
-            int referenceOffset,
+            int referenceListOffset,
             uint referenceValue,
             bool isReferenceSmall)
         {
             int startRowNumber = 0;
             int endRowNumber = (int)rowCount - 1;
-            uint startValue = PeekReference(startRowNumber * rowSize + referenceOffset, isReferenceSmall);
-            uint endValue = PeekReference(endRowNumber * rowSize + referenceOffset, isReferenceSmall);
+            uint startValue = PeekReference(startRowNumber * rowSize + referenceListOffset, isReferenceSmall);
+            uint endValue = PeekReference(endRowNumber * rowSize + referenceListOffset, isReferenceSmall);
             if (endRowNumber == 1)
             {
                 if (referenceValue >= endValue)
@@ -581,19 +596,20 @@ namespace System.Reflection.Internal
                 return startRowNumber;
             }
 
-            while ((endRowNumber - startRowNumber) > 1)
+            while (endRowNumber - startRowNumber > 1)
             {
                 if (referenceValue <= startValue)
                 {
                     return referenceValue == startValue ? startRowNumber : startRowNumber - 1;
                 }
-                else if (referenceValue >= endValue)
+
+                if (referenceValue >= endValue)
                 {
                     return referenceValue == endValue ? endRowNumber : endRowNumber + 1;
                 }
 
                 int midRowNumber = (startRowNumber + endRowNumber) / 2;
-                uint midReferenceValue = PeekReference(midRowNumber * rowSize + referenceOffset, isReferenceSmall);
+                uint midReferenceValue = PeekReference(midRowNumber * rowSize + referenceListOffset, isReferenceSmall);
                 if (referenceValue > midReferenceValue)
                 {
                     startRowNumber = midRowNumber;
@@ -613,7 +629,10 @@ namespace System.Reflection.Internal
             return startRowNumber;
         }
 
-        // Returns row number [0..RowCount) or -1 if not found.
+        /// <summary>
+        /// In a table ordered by a column containing entity references seaches for a row with the specified reference.
+        /// </summary>
+        /// <returns>Returns row number [0..RowCount) or -1 if not found.</returns>
         internal int BinarySearchReference(
             uint rowCount,
             int rowSize,
