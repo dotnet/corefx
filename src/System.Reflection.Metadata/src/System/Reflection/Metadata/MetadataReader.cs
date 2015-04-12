@@ -1410,6 +1410,12 @@ namespace System.Reflection.Metadata
             return new CustomDebugInformation(this, handle);
         }
 
+        public CustomDebugInformationHandleCollection GetCustomDebugInformation(Handle handle)
+        {
+            Debug.Assert(!handle.IsNil);
+            return new CustomDebugInformationHandleCollection(this, handle);
+        }
+
         public LocalScopeHandleCollection GetLocalScopes(MethodDefinitionHandle handle)
         {
             return new LocalScopeHandleCollection(this, handle.RowId);

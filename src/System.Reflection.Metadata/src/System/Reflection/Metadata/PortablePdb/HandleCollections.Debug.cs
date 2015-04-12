@@ -315,6 +315,8 @@ namespace System.Reflection.Metadata
         {
             private readonly MetadataReader _reader;
             private readonly int _parentEndOffset;
+            private readonly int _parentRowId;
+            private readonly MethodDefinitionHandle _parentMethodRowId;
 
             // parent rid: initial state
             // EnumEnded: enumeration ended
@@ -327,7 +329,9 @@ namespace System.Reflection.Metadata
             {
                 _reader = reader;
                 _parentEndOffset = reader.LocalScopeTable.GetEndOffset(parentRowId);
-                _currentRowId = parentRowId;
+                _parentMethodRowId = reader.LocalScopeTable.GetMethod(parentRowId);
+                _currentRowId = 0;
+                _parentRowId = parentRowId;
             }
 
             public LocalScopeHandle Current
@@ -341,18 +345,31 @@ namespace System.Reflection.Metadata
 
             public bool MoveNext()
             {
-                if (_currentRowId == EnumEnded)
+                int currentRowId = _currentRowId;
+                if (currentRowId == EnumEnded)
                 {
                     return false;
                 }
 
-                int currentEndOffset = _reader.LocalScopeTable.GetEndOffset(_currentRowId);
+                int currentEndOffset;
+                int nextRowId;
+                if (currentRowId == 0)
+                {
+                    currentEndOffset = -1;
+                    nextRowId = _parentRowId + 1;
+                }
+                else
+                {
+                    currentEndOffset = _reader.LocalScopeTable.GetEndOffset(currentRowId);
+                    nextRowId = currentRowId + 1;
+                }
+
                 int rowCount = (int)_reader.LocalScopeTable.NumberOfRows;
 
-                int nextRowId = _currentRowId + 1;
                 while (true)
                 {
-                    if (nextRowId > rowCount)
+                    if (nextRowId > rowCount ||
+                        _parentMethodRowId != _reader.LocalScopeTable.GetMethod(nextRowId))
                     {
                         _currentRowId = EnumEnded;
                         return false;
@@ -515,8 +532,15 @@ namespace System.Reflection.Metadata
             Debug.Assert(reader != null);
             _reader = reader;
 
-            _firstRowId = 1;
-            _lastRowId = (int)reader.LocalConstantTable.NumberOfRows;
+            if (scope.IsNil)
+            {
+                _firstRowId = 1;
+                _lastRowId = (int)reader.LocalConstantTable.NumberOfRows;
+            }
+            else
+            {
+                reader.GetLocalConstantRange(scope, out _firstRowId, out _lastRowId);
+            }
         }
 
         public int Count
@@ -814,6 +838,15 @@ namespace System.Reflection.Metadata
 
             _firstRowId = 1;
             _lastRowId = (int)reader.CustomDebugInformationTable.NumberOfRows;
+        }
+
+        internal CustomDebugInformationHandleCollection(MetadataReader reader, Handle handle)
+        {
+            Debug.Assert(reader != null);
+            Debug.Assert(!handle.IsNil);
+
+            _reader = reader;
+            reader.CustomDebugInformationTable.GetRange(handle, out _firstRowId, out _lastRowId);
         }
 
         public int Count
