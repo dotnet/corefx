@@ -3,8 +3,9 @@
 
 using System;
 using System.Diagnostics;
+using System.Text.Encodings.Web;
 
-namespace System.Text.Encodings.Web
+namespace System.Text.Internal
 {
     internal struct AllowedCharsBitmap
     {
