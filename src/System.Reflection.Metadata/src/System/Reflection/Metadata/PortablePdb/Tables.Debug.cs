@@ -421,6 +421,7 @@ namespace System.Reflection.Metadata.Ecma335
 
         internal CustomDebugInformationTableReader(
             uint numberOfRows,
+            bool declaredSorted,
             int hasCustomDebugInformationRefSize,
             int guidHeapRefSize,
             int blobHeapRefSize,
@@ -437,6 +438,11 @@ namespace System.Reflection.Metadata.Ecma335
             this.RowSize = _valueOffset + blobHeapRefSize;
 
             this.Block = containingBlock.GetMemoryBlockAt(containingBlockOffset, (int)(this.RowSize * numberOfRows));
+
+            if (!declaredSorted && !CheckSorted())
+            {
+                MetadataReader.ThrowTableNotSorted(TableIndex.CustomDebugInformation);
+            }
         }
 
         internal Handle GetParent(CustomDebugInformationHandle handle)
@@ -465,7 +471,7 @@ namespace System.Reflection.Metadata.Ecma335
                 this.NumberOfRows,
                 this.RowSize,
                 ParentOffset,
-                HasCustomAttributeTag.ConvertToTag(parentHandle),
+                HasCustomDebugInformationTag.ConvertToTag(parentHandle),
                 _isHasCustomDebugInformationRefSizeSmall,
                 out startRowNumber,
                 out endRowNumber
@@ -481,6 +487,11 @@ namespace System.Reflection.Metadata.Ecma335
                 firstImplRowId = startRowNumber + 1;
                 lastImplRowId = endRowNumber + 1;
             }
+        }
+
+        private bool CheckSorted()
+        {
+            return this.Block.IsOrderedByReferenceAscending(this.RowSize, ParentOffset, _isHasCustomDebugInformationRefSizeSmall);
         }
     }
 }
