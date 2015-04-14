@@ -56,7 +56,7 @@ namespace System.Reflection.Metadata.Decoding
         /// <param name="provider">The type provider.</param>
         /// <returns>The decoded type.</returns>
         /// <exception cref="System.BadImageFormatException">The reader was not positioned at a valid signature type.</exception>
-        private static TType DecodeType<TType>(ref BlobReader blobReader, ISignatureTypeProvider<TType> provider)
+        public static TType DecodeType<TType>(ref BlobReader blobReader, ISignatureTypeProvider<TType> provider)
         {
             return DecodeType(ref blobReader, blobReader.ReadSignatureTypeCode(), provider);
         }

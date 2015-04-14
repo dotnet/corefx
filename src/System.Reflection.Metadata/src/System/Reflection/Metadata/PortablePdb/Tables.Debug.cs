@@ -140,9 +140,9 @@ namespace System.Reflection.Metadata.Ecma335
             this.Block = containingBlock.GetMemoryBlockAt(containingBlockOffset, (int)(this.RowSize * numberOfRows));
         }
 
-        internal MethodDefinitionHandle GetMethod(LocalScopeHandle handle)
+        internal MethodDefinitionHandle GetMethod(int rowId)
         {
-            int rowOffset = ((int)handle.RowId - 1) * this.RowSize;
+            int rowOffset = ((int)rowId - 1) * this.RowSize;
             return MethodDefinitionHandle.FromRowId(this.Block.PeekReference(rowOffset + MethodOffset, _isMethodRefSmall));
         }
 
@@ -421,6 +421,7 @@ namespace System.Reflection.Metadata.Ecma335
 
         internal CustomDebugInformationTableReader(
             uint numberOfRows,
+            bool declaredSorted,
             int hasCustomDebugInformationRefSize,
             int guidHeapRefSize,
             int blobHeapRefSize,
@@ -437,6 +438,11 @@ namespace System.Reflection.Metadata.Ecma335
             this.RowSize = _valueOffset + blobHeapRefSize;
 
             this.Block = containingBlock.GetMemoryBlockAt(containingBlockOffset, (int)(this.RowSize * numberOfRows));
+
+            if (!declaredSorted && !CheckSorted())
+            {
+                MetadataReader.ThrowTableNotSorted(TableIndex.CustomDebugInformation);
+            }
         }
 
         internal Handle GetParent(CustomDebugInformationHandle handle)
@@ -455,6 +461,37 @@ namespace System.Reflection.Metadata.Ecma335
         {
             int rowOffset = (int)(handle.RowId - 1) * this.RowSize;
             return BlobHandle.FromIndex(this.Block.PeekReference(rowOffset + _valueOffset, _isBlobHeapRefSizeSmall));
+        }
+
+        internal void GetRange(Handle parentHandle, out int firstImplRowId, out int lastImplRowId)
+        {
+            int startRowNumber, endRowNumber;
+
+            this.Block.BinarySearchReferenceRange(
+                this.NumberOfRows,
+                this.RowSize,
+                ParentOffset,
+                HasCustomDebugInformationTag.ConvertToTag(parentHandle),
+                _isHasCustomDebugInformationRefSizeSmall,
+                out startRowNumber,
+                out endRowNumber
+            );
+
+            if (startRowNumber == -1)
+            {
+                firstImplRowId = 1;
+                lastImplRowId = 0;
+            }
+            else
+            {
+                firstImplRowId = startRowNumber + 1;
+                lastImplRowId = endRowNumber + 1;
+            }
+        }
+
+        private bool CheckSorted()
+        {
+            return this.Block.IsOrderedByReferenceAscending(this.RowSize, ParentOffset, _isHasCustomDebugInformationRefSizeSmall);
         }
     }
 }

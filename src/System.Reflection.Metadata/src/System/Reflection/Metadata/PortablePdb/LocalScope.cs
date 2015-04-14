@@ -30,7 +30,7 @@ namespace System.Reflection.Metadata
         {
             get
             {
-                return _reader.LocalScopeTable.GetMethod(Handle);
+                return _reader.LocalScopeTable.GetMethod((int)_rowId);
             }
         }
 

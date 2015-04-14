@@ -675,7 +675,7 @@ namespace System.Reflection.Metadata
             this.AsyncMethodTable = new AsyncMethodTableReader(rowCounts[(int)TableIndex.AsyncMethod], methodRefSize, blobHeapRefSize, metadataTablesMemoryBlock, totalRequiredSize);
             totalRequiredSize += this.AsyncMethodTable.Block.Length;
 
-            this.CustomDebugInformationTable = new CustomDebugInformationTableReader(rowCounts[(int)TableIndex.CustomDebugInformation], hasCustomDebugInformationRefSize, guidHeapRefSize, blobHeapRefSize, metadataTablesMemoryBlock, totalRequiredSize);
+            this.CustomDebugInformationTable = new CustomDebugInformationTableReader(rowCounts[(int)TableIndex.CustomDebugInformation], IsDeclaredSorted(TableMask.CustomDebugInformation), hasCustomDebugInformationRefSize, guidHeapRefSize, blobHeapRefSize, metadataTablesMemoryBlock, totalRequiredSize);
             totalRequiredSize += this.CustomDebugInformationTable.Block.Length;
 
             if (totalRequiredSize > metadataTablesMemoryBlock.Length)
@@ -1408,6 +1408,12 @@ namespace System.Reflection.Metadata
         public CustomDebugInformation GetCustomDebugInformation(CustomDebugInformationHandle handle)
         {
             return new CustomDebugInformation(this, handle);
+        }
+
+        public CustomDebugInformationHandleCollection GetCustomDebugInformation(Handle handle)
+        {
+            Debug.Assert(!handle.IsNil);
+            return new CustomDebugInformationHandleCollection(this, handle);
         }
 
         public LocalScopeHandleCollection GetLocalScopes(MethodDefinitionHandle handle)
