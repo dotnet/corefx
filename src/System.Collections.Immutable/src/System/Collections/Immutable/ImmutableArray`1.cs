@@ -1416,11 +1416,10 @@ namespace System.Collections.Immutable
         {
             get
             {
-                // As a struct, this instance will be boxed in order to call this property getter.
-                // We will return the boxed instance. If the caller boxes and reboxes repeatedly,
-                // they'll get a different SyncRoot each time.
-                // No real alternative, but we don't anticipate this will be much problem anyway.
-                return this;
+				// We have to throw here to prevent scenarios where locking the SyncRoot of an ImmutableArray
+				// instance would end up locking different instances each time this getter is called.
+				// This could lead to race conditions, as well as matches the behaviour of Concurrent collections.
+				throw new NotSupportedException();
             }
         }
 
