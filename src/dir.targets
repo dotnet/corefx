@@ -10,6 +10,15 @@
   <Target Name="GetAssemblyVersion"
           Returns="$(AssemblyVersion)"/>
 
+  <!-- These gets overwritten when we restore the build tools and import the below targets -->
+  <Target Name="Build" Condition="!Exists('$(ToolsDir)Build.Common.targets')" >
+    <CallTarget Targets="_RestoreBuildTools" />
+  </Target>
+  <!-- Set a default clean target -->
+  <Target Name="Clean">
+    <RemoveDir Directories="$(BinDir)" />
+  </Target>
+
   <Import Project="$(ToolsDir)Build.Common.targets" Condition="Exists('$(ToolsDir)Build.Common.targets')" />
 
 </Project>
