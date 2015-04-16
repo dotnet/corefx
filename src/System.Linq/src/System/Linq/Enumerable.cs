@@ -8,7 +8,7 @@ using System.Threading;
 
 namespace System.Linq
 {
-    public static class Enumerable
+    public static partial class Enumerable
     {
         public static IEnumerable<TSource> Where<TSource>(this IEnumerable<TSource> source, Func<TSource, bool> predicate)
         {
@@ -34,33 +34,6 @@ namespace System.Linq
             {
                 checked { index++; }
                 if (predicate(element, index)) yield return element;
-            }
-        }
-
-        public static IEnumerable<TResult> Select<TSource, TResult>(this IEnumerable<TSource> source, Func<TSource, TResult> selector)
-        {
-            if (source == null) throw Error.ArgumentNull("source");
-            if (selector == null) throw Error.ArgumentNull("selector");
-            if (source is Iterator<TSource>) return ((Iterator<TSource>)source).Select(selector);
-            if (source is TSource[]) return new WhereSelectArrayIterator<TSource, TResult>((TSource[])source, null, selector);
-            if (source is List<TSource>) return new WhereSelectListIterator<TSource, TResult>((List<TSource>)source, null, selector);
-            return new WhereSelectEnumerableIterator<TSource, TResult>(source, null, selector);
-        }
-
-        public static IEnumerable<TResult> Select<TSource, TResult>(this IEnumerable<TSource> source, Func<TSource, int, TResult> selector)
-        {
-            if (source == null) throw Error.ArgumentNull("source");
-            if (selector == null) throw Error.ArgumentNull("selector");
-            return SelectIterator<TSource, TResult>(source, selector);
-        }
-
-        private static IEnumerable<TResult> SelectIterator<TSource, TResult>(IEnumerable<TSource> source, Func<TSource, int, TResult> selector)
-        {
-            int index = -1;
-            foreach (TSource element in source)
-            {
-                checked { index++; }
-                yield return selector(element, index);
             }
         }
 
@@ -118,6 +91,9 @@ namespace System.Linq
                 // Once we have generic virtual's supported in the toolset, we can make this back into an abstract.
                 //
                 // This is a workaround implementation that does the "virtual dispatch" manually.
+
+                if (this is SelectIterator<TSource>)
+                    return ((SelectIterator<TSource>)this).SelectImpl<TResult>(selector);
 
                 if (this is WhereEnumerableIterator<TSource>)
                     return ((WhereEnumerableIterator<TSource>)this).SelectImpl<TResult>(selector);
