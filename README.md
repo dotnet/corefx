@@ -26,7 +26,7 @@ Want to get more familiar with what's going on in the code?
 * [Pull requests](https://github.com/dotnet/corefx/pulls): [Open](https://github.com/dotnet/corefx/pulls?q=is%3Aopen+is%3Apr)/[Closed](https://github.com/dotnet/corefx/pulls?q=is%3Apr+is%3Aclosed)
 * [![Backlog](https://cloud.githubusercontent.com/assets/1302850/6260412/38987b1e-b793-11e4-9ade-d3fef4c6bf48.png)](https://github.com/dotnet/corefx/issues?q=is%3Aopen+is%3Aissue+label%3A%220+-+Backlog%22), [![Up Next](https://cloud.githubusercontent.com/assets/1302850/6260418/4c2c7a54-b793-11e4-8ce1-a27ff5378d08.png)](https://github.com/dotnet/corefx/issues?q=is%3Aopen+is%3Aissue+label%3A%221+-+Up+Next%22) and [![In Progress](https://cloud.githubusercontent.com/assets/1302850/6260414/41b0fc30-b793-11e4-9d50-d09563cd138a.png)](https://github.com/dotnet/corefx/issues?q=is%3Aopen+is%3Aissue+label%3A%222+-+In+Progress%22) changes
 
-Looking for something to work on? The list of [up-for-grabs issues](https://github.com/dotnet/corefx/labels/up%20for%20grabs) is a great place to start or for larger items see the list of [feature aproved](https://github.com/dotnet/corefx/labels/feature%20approved). See some of our guides for more details:
+Looking for something to work on? The list of [up-for-grabs issues](https://github.com/dotnet/corefx/labels/up%20for%20grabs) is a great place to start or for larger items see the list of [feature approved](https://github.com/dotnet/corefx/labels/feature%20approved). See some of our guides for more details:
 
 * [Contributing Guide](https://github.com/dotnet/corefx/wiki/Contributing)
 * [Developer Guide](https://github.com/dotnet/corefx/wiki/Developer-Guide)
@@ -46,6 +46,9 @@ Want to chat with other members of the CoreFX community?
 ## .NET Core Library Components
 
 The repo contains the following components. More libraries are coming soon. ['Watch'](https://github.com/dotnet/corefx/subscription) the repo to be notified.
+
+* **System.Collections**. Provides classes that define generic collections, which allow developers to create 
+  strongly-typed collections.
 
 * **System.Collections.Concurrent**.  Provides a set of thread-safe collection types, instances of which may be used 
   concurrently from multiple threads.
@@ -95,6 +98,8 @@ The repo contains the following components. More libraries are coming soon. ['Wa
 * **System.Globalization.Extensions**. Provides classes for performing unicode string normalization, culture-specific string 
   comparisons and support the use of non-ASCII characters for Internet domain names.
 
+* **System.IO.Compression**. Provides classes that support the compression and decompression of streams.
+
 * **System.IO.FileSystem**. Provides access to the file system, including support for enumerating and manipulating 
   file system objects and for reading and writing files via streams.
 
@@ -132,11 +137,13 @@ The repo contains the following components. More libraries are coming soon. ['Wa
 * **System.ObjectModel**. Provides types and interfaces that enable the creation of observable types that provide
   notifications to clients when changes are made.
 
+* **System.Reflection.DispatchProxy**. Provides a mechanism for dynamically creating proxy types that implement a 
+  specified interface and derive from a specified DispatchProxy type.
+
 * **System.Reflection.Metadata**. Provides a highly-tuned, low-level ECMA-335 metadata reader.  This is the same
   reader used by "[Roslyn]" C# and Visual Basic compilers to parse assemblies.
 
-* **System.Resources.ResourceWriter**. Provides the System.Resources.ResourceWriter class, which writes resources in the 
-  system-default format to an output stream.
+* **System.Resources.ReaderWriter**. Provides classes for reading and writing resources in the system-default format.
 
 * **System.Runtime**. Provides a set of unit tests for basic run-time types such as String and Int32.
 
@@ -153,6 +160,8 @@ The repo contains the following components. More libraries are coming soon. ['Wa
 
 * **System.Runtime.Serialization.Xml**. Provides classes for serializing objects to the Extensible Markup Language (XML) 
   and deserializing XML data to objects.
+
+* **System.Security.SecureString**. Provides support for accessing and modifying text that should be kept confidential.
 
 * **System.ServiceProcess.ServiceController**. Provides the ServiceController class that represents a Windows service
   and allows you to connect to a running or stopped service, manipulate it, or get information about it.
@@ -185,6 +194,8 @@ The repo contains the following components. More libraries are coming soon. ['Wa
 * **System.Xml.XmlSerializer**. Provides classes for serializing objects to XML and for deserializing XML data to objects.
 
 * **Microsoft.CSharp**. Provides support for compilation and code generation, including dynamic, using the C# language.
+
+* **Microsoft.VisualBasic**. Provides types that support the Visual Basic runtime.
 
 * **Microsoft.Win32.Primitives**. Provides common types supporting the implementation of Win32-based libraries.
 
