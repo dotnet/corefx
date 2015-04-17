@@ -88,6 +88,7 @@
     </TraversalCleanDependsOn>
 
     <TraversalRestorePackagesDependsOn>
+      _RestoreBuildTools;
       RestoreAllProjectPackages;
       $(TraversalRestorePackagesDependsOn)
     </TraversalRestorePackagesDependsOn>
