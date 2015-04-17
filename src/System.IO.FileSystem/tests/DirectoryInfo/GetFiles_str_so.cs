@@ -8,11 +8,8 @@ We test this API's functionality comprehensively via Directory.GetFiles(String, 
  - security
 **/
 using System;
-using System.Runtime.CompilerServices;
 using System.IO;
 using System.Collections.Generic;
-using System.Security;
-using System.Globalization;
 using Xunit;
 
 public class DirectoryInfo_GetFiles_str_so
@@ -89,14 +86,7 @@ public class DirectoryInfo_GetFiles_str_so
                         foreach (String fileName in list)
                             Console.WriteLine(fileName);
                     }
-                    CheckException<ArgumentNullException>(delegate { files = dirInfo.GetFiles(null, SearchOption.TopDirectoryOnly); }, "Err_751mwu! worng exception thrown");
-                    CheckException<ArgumentOutOfRangeException>(delegate { files = dirInfo.GetFiles("*.*", (SearchOption)100); }, "Err_589kvu! worng exception thrown - see bug #386545");
-                    CheckException<ArgumentOutOfRangeException>(delegate { files = dirInfo.GetFiles("*.*", (SearchOption)(-1)); }, "Err_359vcj! worng exception thrown - see bug #386545");
-                    String[] invalidValuesForSearch = { "..", @".." + Path.DirectorySeparatorChar };
-                    for (int i = 0; i < invalidValuesForSearch.Length; i++)
-                    {
-                        CheckException<ArgumentException>(delegate { files = dirInfo.GetFiles(invalidValuesForSearch[i], SearchOption.TopDirectoryOnly); }, String.Format("Err_631bwy! worng exception thrown: {1}", i, invalidValuesForSearch[i]));
-                    }
+
                     Char[] invalidFileNames = Interop.IsWindows ? Path.GetInvalidFileNameChars() : new[] { '\0' };
                     for (int i = 0; i < invalidFileNames.Length; i++)
                     {
@@ -198,20 +188,7 @@ public class DirectoryInfo_GetFiles_str_so
             Console.WriteLine("Err_234rsgf! Uncaught exception in RunTest: {0}", ex);
         }
 
-
         Assert.True(s_pass);
-    }
-
-    private void DeleteFile(String fileName)
-    {
-        if (File.Exists(fileName))
-            File.Delete(fileName);
-    }
-
-    private void DeleteDir(String dirName)
-    {
-        if (Directory.Exists(dirName))
-            Directory.Delete(dirName);
     }
 
     //Checks for error
@@ -274,7 +251,3 @@ public class DirectoryInfo_GetFiles_str_so
         Eval(exception, error);
     }
 }
-
-
-
-

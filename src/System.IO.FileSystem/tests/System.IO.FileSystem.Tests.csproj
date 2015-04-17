@@ -42,7 +42,9 @@
     <Compile Include="DirectoryInfo\ctor_str.cs" />
     <Compile Include="DirectoryInfo\Delete.cs" />
     <Compile Include="DirectoryInfo\Delete_bool.cs" />
+    <Compile Include="DirectoryInfo\DirectoryInfo_EnumerableAPIs_TestWhileEnumerating.cs" />
     <Compile Include="DirectoryInfo\Exists.cs" />
+    <Compile Include="Directory\Directory_EnumerableAPIs_TestWhileEnumerating.cs" />
     <Compile Include="FileStream\Flush.Sharing.cs" />
     <Compile Include="FileStream\Flush_toDisk.cs" />
     <Compile Include="FileStream\SafeFileHandle.cs" />
@@ -84,7 +86,7 @@
     <!-- Ported -->
     <Compile Include="PortedCommon\CommonUtilities.cs" />
     <Compile Include="PortedCommon\DllImports.cs" />
-    <Compile Include="PortedCommon\EnumerableUtils.cs" />
+    <Compile Include="PortedCommon\TestFileSystemEntries.cs" />
     <Compile Include="PortedCommon\IOInputs.cs" />
     <Compile Include="PortedCommon\IOServices.cs" />
     <Compile Include="PortedCommon\PathInfo.cs" />

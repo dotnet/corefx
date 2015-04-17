@@ -4,8 +4,6 @@
 using System;
 using System.IO;
 using System.Collections.Generic;
-using System.Security;
-using System.Globalization;
 using Xunit;
 
 public class Directory_GetFiles_str_str_so
@@ -289,10 +287,6 @@ public class Directory_GetFiles_str_str_so
             {
                 String[] invalidValuesForPath = Interop.IsWindows ? new[]{ "", " ", ">" } : new[]{ "", "\0" };
                 String[] invalidValuesForSearch = { "..", @".." + Path.DirectorySeparatorChar };
-                CheckException<ArgumentNullException>(delegate { files = Directory.GetFiles(null, "*.*", SearchOption.TopDirectoryOnly); }, "Err_347g! worng exception thrown");
-                CheckException<ArgumentNullException>(delegate { files = Directory.GetFiles(Directory.GetCurrentDirectory(), null, SearchOption.TopDirectoryOnly); }, "Err_326pgt! worng exception thrown");
-                CheckException<ArgumentOutOfRangeException>(delegate { files = Directory.GetFiles(Directory.GetCurrentDirectory(), "*.*", (SearchOption)100); }, "Err_589kvu! worng exception thrown - see bug #386545");
-                CheckException<ArgumentOutOfRangeException>(delegate { files = Directory.GetFiles(Directory.GetCurrentDirectory(), "*.*", (SearchOption)(-1)); }, "Err_359vcj! worng exception thrown - see bug #386545");
                 for (int i = 0; i < invalidValuesForPath.Length; i++)
                 {
                     CheckException<ArgumentException>(delegate { files = Directory.GetFiles(invalidValuesForPath[i], "*.*", SearchOption.TopDirectoryOnly); }, String.Format("Err_347sd_{0}! worng exception thrown: {1}", i, invalidValuesForPath[i]));
@@ -697,6 +691,3 @@ public class Directory_GetFiles_str_str_so
         Eval(exception, error);
     }
 }
-
-
-

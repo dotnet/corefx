@@ -3,9 +3,6 @@
 
 using System;
 using System.IO;
-using System.Collections;
-using System.Globalization;
-using System.Text;
 using System.Runtime.CompilerServices;
 using Xunit;
 
@@ -36,57 +33,6 @@ public class Directory_GetFileSystemEntries_str
                 Directory.Delete(dirName, true);
 
             strLoc = "Loc_4y982";
-
-            // [] With null string
-            iCountTestcases++;
-            try
-            {
-                Directory.GetFileSystemEntries(null);
-                iCountErrors++;
-                printerr("Error_0002! Expected exception not thrown");
-            }
-            catch (ArgumentNullException)
-            {
-            }
-            catch (Exception exc)
-            {
-                iCountErrors++;
-                printerr("Error_0003! Unexpected exceptiont thrown: " + exc.ToString());
-            }
-
-            // [] With an empty string.
-            iCountTestcases++;
-            try
-            {
-                Directory.GetFileSystemEntries("");
-                iCountErrors++;
-                printerr("Error_0004! Expected exception not thrown");
-            }
-            catch (ArgumentException)
-            {
-            }
-            catch (Exception exc)
-            {
-                iCountErrors++;
-                printerr("Error_0005! Unexpected exceptiont thrown: " + exc.ToString());
-            }
-
-            // [] With white spaces....
-            iCountTestcases++;
-            try
-            {
-                Directory.GetFileSystemEntries("            ");
-                iCountErrors++;
-                printerr("Error_0008! Expected exception not thrown");
-            }
-            catch (ArgumentException)
-            {
-            }
-            catch (Exception exc)
-            {
-                iCountErrors++;
-                printerr("Error_0009! Unexpected exceptiont thrown: " + exc.ToString());
-            }
 
             //Directory that doesn't exist
             iCountTestcases++;
@@ -266,7 +212,3 @@ public class Directory_GetFileSystemEntries_str
         Console.WriteLine("ERROR: ({0}, {1}, {2}) {3}", memberName, filePath, lineNumber, err);
     }
 }
-
-
-
-

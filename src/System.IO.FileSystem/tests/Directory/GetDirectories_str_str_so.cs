@@ -4,8 +4,6 @@
 using System;
 using System.IO;
 using System.Collections.Generic;
-using System.Security;
-using System.Globalization;
 using Xunit;
 
 public class Directory_GetDirectories_str_str_so
@@ -312,20 +310,6 @@ public class Directory_GetDirectories_str_str_so
             //characters. The same for searchPattern parm as well
             try
             {
-                String[] invalidValuesForPath = Interop.IsWindows ? new[]{ "", " ", ">" } : new[]{ "", "\0" };
-                String[] invalidValuesForSearch = { "..", @".." + Path.DirectorySeparatorChar };
-                CheckException<ArgumentNullException>(delegate { dirs = Directory.GetDirectories(null, "*", SearchOption.TopDirectoryOnly); }, "Err_347g! worng exception thrown");
-                CheckException<ArgumentNullException>(delegate { dirs = Directory.GetDirectories(Directory.GetCurrentDirectory(), null, SearchOption.TopDirectoryOnly); }, "Err_326pgt! worng exception thrown");
-                CheckException<ArgumentOutOfRangeException>(delegate { dirs = Directory.GetDirectories(Directory.GetCurrentDirectory(), "*", (SearchOption)100); }, "Err_589kvu! worng exception thrown - see bug #386545");
-                CheckException<ArgumentOutOfRangeException>(delegate { dirs = Directory.GetDirectories(Directory.GetCurrentDirectory(), "*", (SearchOption)(-1)); }, "Err_359vcj! worng exception thrown - see bug #386545");
-                for (int i = 0; i < invalidValuesForPath.Length; i++)
-                {
-                    CheckException<ArgumentException>(delegate { dirs = Directory.GetDirectories(invalidValuesForPath[i], "*", SearchOption.TopDirectoryOnly); }, String.Format("Err_347sd_{0}! worng exception thrown: {1}", i, invalidValuesForPath[i]));
-                }
-                for (int i = 0; i < invalidValuesForSearch.Length; i++)
-                {
-                    CheckException<ArgumentException>(delegate { dirs = Directory.GetDirectories(Directory.GetCurrentDirectory(), invalidValuesForSearch[i], SearchOption.TopDirectoryOnly); }, String.Format("Err_631bwy! worng exception thrown: {1}", i, invalidValuesForSearch[i]));
-                }
                 Char[] invalidPaths = Path.GetInvalidPathChars();
                 for (int i = 0; i < invalidPaths.Length; i++)
                 {
@@ -702,10 +686,3 @@ public class Directory_GetDirectories_str_str_so
         Eval(exception, error);
     }
 }
-
-
-
-
-
-
-
