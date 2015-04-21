@@ -17,7 +17,7 @@ namespace System.Reflection.Metadata
         {
             _header = header;
             _returnType = returnType;
-            _genericParameterCount = 0;
+            _genericParameterCount = genericParameterCount;
             _requiredParameterCount = requiredParameterCount;
             _parameterTypes = parameterTypes;
         }
