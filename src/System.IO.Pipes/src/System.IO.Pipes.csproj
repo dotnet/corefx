@@ -91,7 +91,7 @@
     <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.GetNamedPipeHandleState.cs">
       <Link>Common\Interop\Windows\Interop.GetNamedPipeHandleState.cs</Link>
     </Compile>
-	<Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.GetNamedPipeInfo.cs">
+    <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.GetNamedPipeInfo.cs">
       <Link>Common\Interop\Windows\Interop.GetNamedPipeInfo.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.CreateNamedPipeClient.cs">
@@ -115,20 +115,18 @@
     <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.WriteFile_SafeHandle_IntPtr.cs">
       <Link>Common\Interop\Windows\Interop.WriteFile_IntPtr.cs</Link>
     </Compile>
-	<Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.WriteFile_SafeHandle_NativeOverlapped.cs">
+    <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.WriteFile_SafeHandle_NativeOverlapped.cs">
       <Link>Common\Interop\Windows\Interop.WriteFile_NativeOverlapped.cs</Link>
     </Compile>
-		<Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.DisconnectNamedPipe.cs">
+    <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.DisconnectNamedPipe.cs">
       <Link>Common\Interop\Windows\Interop.DisconnectNamedPipe.cs</Link>
     </Compile>
-		<Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.CreateNamedPipe.cs">
+    <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.CreateNamedPipe.cs">
       <Link>Common\Interop\Windows\Interop.CreateNamedPipe.cs</Link>
-    </Compile>	
-			<Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.MaxLengths.cs">
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.MaxLengths.cs">
       <Link>Common\Interop\Windows\Interop.MaxLengths.cs</Link>
-    </Compile>	
-	
-	
+    </Compile>
     <Compile Include="$(CommonPath)\System\IO\Win32Marshal.cs">
       <Link>Common\System\IO\Win32Marshal.cs</Link>
     </Compile>
@@ -151,7 +149,6 @@
     <Compile Include="System\IO\Pipes\NamedPipeClientStream.Unix.cs" />
     <Compile Include="System\IO\Pipes\NamedPipeServerStream.Unix.cs" />
     <Compile Include="System\IO\Pipes\PipeStream.Unix.cs" />
-
     <Compile Include="$(CommonPath)\Microsoft\Win32\SafeHandles\SafeFileHandle.Unix.cs">
       <Link>Common\Microsoft\Win32\SafeHandles\SafeFileHandle.Unix.cs</Link>
     </Compile>
@@ -185,6 +182,9 @@
     <Compile Include="$(CommonPath)\Interop\Unix\libc\Interop.open.cs">
       <Link>Common\Interop\Unix\Interop.open.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\libc\Interop.OpenFlags.cs">
+      <Link>Common\Interop\Unix\Interop.OpenFlags.cs</Link>
+    </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\libc\Interop.Permissions.cs">
       <Link>Common\Interop\Unix\Interop.Permissions.cs</Link>
     </Compile>
@@ -203,13 +203,13 @@
     <Compile Include="$(CommonPath)\Interop\Unix\libc\Interop.write.cs">
       <Link>Common\Interop\Unix\Interop.write.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Unix\libcoreclr\Interop.GetFileInformation.cs">
+    <Compile Include="$(CommonPath)\Interop\Unix\libcoreclrpal\Interop.GetFileInformation.cs">
       <Link>Common\Interop\Unix\Interop.GetInformation.cs</Link>
     </Compile>
   </ItemGroup>
   <!-- Resource files -->
   <ItemGroup>
-    <None Include="packages.config" />
+    <None Include="project.json" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

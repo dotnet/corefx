@@ -137,7 +137,7 @@ namespace System.Diagnostics
             get
             {
                 EnsureState(State.HaveProcessInfo);
-                return _processInfo._basePriority;
+                return _processInfo.BasePriority;
             }
         }
 
@@ -210,7 +210,7 @@ namespace System.Diagnostics
             get
             {
                 EnsureState(State.HaveProcessInfo);
-                return _processInfo._handleCount;
+                return _processInfo.HandleCount;
             }
         }
 
@@ -307,7 +307,7 @@ namespace System.Diagnostics
             get
             {
                 EnsureState(State.HaveProcessInfo);
-                return _processInfo._poolNonpagedBytes;
+                return _processInfo.PoolNonPagedBytes;
             }
         }
 
@@ -316,7 +316,7 @@ namespace System.Diagnostics
             get
             {
                 EnsureState(State.HaveProcessInfo);
-                return _processInfo._pageFileBytes;
+                return _processInfo.PageFileBytes;
             }
         }
 
@@ -325,7 +325,7 @@ namespace System.Diagnostics
             get
             {
                 EnsureState(State.HaveProcessInfo);
-                return _processInfo._poolPagedBytes;
+                return _processInfo.PoolPagedBytes;
             }
         }
 
@@ -334,7 +334,7 @@ namespace System.Diagnostics
             get
             {
                 EnsureState(State.HaveProcessInfo);
-                return _processInfo._pageFileBytesPeak;
+                return _processInfo.PageFileBytesPeak;
             }
         }
 
@@ -343,7 +343,7 @@ namespace System.Diagnostics
             get
             {
                 EnsureState(State.HaveProcessInfo);
-                return _processInfo._workingSetPeak;
+                return _processInfo.WorkingSetPeak;
             }
         }
 
@@ -352,7 +352,7 @@ namespace System.Diagnostics
             get
             {
                 EnsureState(State.HaveProcessInfo);
-                return _processInfo._virtualBytesPeak;
+                return _processInfo.VirtualBytesPeak;
             }
         }
 
@@ -417,7 +417,7 @@ namespace System.Diagnostics
             get
             {
                 EnsureState(State.HaveProcessInfo);
-                return _processInfo._privateBytes;
+                return _processInfo.PrivateBytes;
             }
         }
 
@@ -432,7 +432,7 @@ namespace System.Diagnostics
             get
             {
                 EnsureState(State.HaveProcessInfo);
-                return _processInfo._processName;
+                return _processInfo.ProcessName;
             }
         }
 
@@ -466,7 +466,7 @@ namespace System.Diagnostics
             get
             {
                 EnsureState(State.HaveProcessInfo);
-                return _processInfo._sessionId;
+                return _processInfo.SessionId;
             }
         }
 
@@ -538,7 +538,7 @@ namespace System.Diagnostics
             get
             {
                 EnsureState(State.HaveProcessInfo);
-                return _processInfo._virtualBytes;
+                return _processInfo.VirtualBytes;
             }
         }
 
@@ -648,7 +648,7 @@ namespace System.Diagnostics
             get
             {
                 EnsureState(State.HaveProcessInfo);
-                return _processInfo._workingSet;
+                return _processInfo.WorkingSet;
             }
         }
 
@@ -961,7 +961,7 @@ namespace System.Diagnostics
             for (int i = 0; i < processInfos.Length; i++)
             {
                 ProcessInfo processInfo = processInfos[i];
-                processes[i] = new Process(machineName, isRemoteMachine, processInfo._processId, processInfo);
+                processes[i] = new Process(machineName, isRemoteMachine, processInfo.ProcessId, processInfo);
             }
 #if FEATURE_TRACESWITCH
             Debug.WriteLineIf(_processTracing.TraceVerbose, "Process.GetProcesses(" + machineName + ")");
@@ -1123,21 +1123,9 @@ namespace System.Diagnostics
             return StartCore(startInfo);
         }
 
-        // In most scenario 437 is the codepage used for Console encoding. However this encoding is not available by default and so we use the try{} catch{} pattern and use UTF8 in case of failure.
-        // This ensures that if the user uses Encoding.RegisterProvider to register the encoding the Process class can automatically get the codepage as well.
         private static Encoding GetEncoding(int codePage)
         {
-            Encoding enc = null;
-            try
-            {
-                enc = Encoding.GetEncoding(codePage);
-            }
-            catch (NotSupportedException)
-            {
-                // There is no data available for the above codePage so we will use UTF8 instead with emitPrefix set to false.
-                enc = new UTF8Encoding(false);
-            }
-            return enc;
+            return EncodingHelper.GetSupportedConsoleEncoding(codePage);
         }
 
         public static Process Start(string fileName, string userName, SecureString password, string domain)
