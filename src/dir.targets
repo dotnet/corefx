@@ -17,7 +17,8 @@
   </Target>
   <!-- Set a default empty clean target -->
   <Target Name="Clean" >
-    <Message Importance="High" Text="'Clean' target is empty. Restore build tools to enable 'Clean' target." />
+    <Message Importance="High" Text="'Clean' target is empty. A restore of build tools is required to enable the 'Clean' target." />
+    <CallTarget Targets="_RestoreBuildTools" />
   </Target>
 
   <Import Project="$(ToolsDir)Build.Common.targets" Condition="Exists('$(ToolsDir)Build.Common.targets')" />
