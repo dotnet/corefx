@@ -3,19 +3,12 @@
 
 using System;
 using System.IO;
-using System.Collections;
-using System.Globalization;
-using System.Text;
-using System.Threading;
 using System.Runtime.CompilerServices;
 using Xunit;
 
 public class Directory_GetFiles_str
 {
-    public static String s_strDtTmVer = "2000/04/28 14:00";
-    public static String s_strClassMethod = "Directory.GetFiles()";
     public static String s_strTFName = "GetFiles_str.cs";
-    public static String s_strTFPath = Directory.GetCurrentDirectory();
 
     [Fact]
     public static void runTest()
@@ -37,81 +30,6 @@ public class Directory_GetFiles_str
 
             if (Directory.Exists(dirName))
                 Directory.Delete(dirName, true);
-
-
-            // [] Should throw ArgumentNullException for null argument
-            //-----------------------------------------------------------------
-            strLoc = "Loc_477g8";
-
-            dir2 = new DirectoryInfo(".");
-            iCountTestcases++;
-            try
-            {
-                dir2.GetFiles(null);
-                iCountErrors++;
-                printerr("Error_2988b! Expected exception not thrown");
-            }
-            catch (ArgumentNullException)
-            {
-            }
-            catch (Exception exc)
-            {
-                iCountErrors++;
-                printerr("Error_0707t! Incorrect exception thrown, exc==" + exc.ToString());
-            }
-            //-----------------------------------------------------------------
-
-
-            // [] Pass String.Empty as the search pattern
-            //-----------------------------------------------------------------
-            strLoc = "Loc_4yg7b";
-
-            dir2 = new DirectoryInfo(".");
-            iCountTestcases++;
-            try
-            {
-                FileInfo[] fInfos = dir2.GetFiles(String.Empty);
-                // To avoid OS differences we have decided not to throw an argument exception when empty
-                // string passed. But we should return 0 FileInfo objects.
-                if (fInfos.Length != 0)
-                {
-                    iCountErrors++;
-                    printerr("Error_8ytbm! Invalid number of file infos are returned");
-                }
-            }
-            catch (Exception exc)
-            {
-                iCountErrors++;
-                printerr("Error_2908y! Incorrect exception thrown, exc==" + exc.ToString());
-            }
-            //-----------------------------------------------------------------
-
-            // [] ArgumentException for all whitespace
-            //-----------------------------------------------------------------
-            strLoc = "Loc_1190x";
-
-            dir2 = new DirectoryInfo(".");
-            iCountTestcases++;
-            try
-            {
-                FileInfo[] strFiles = dir2.GetFiles("\n");
-                if (strFiles.Length != 0)
-                {
-                    iCountErrors++;
-                    printerr("Error_2198y!Unexpected files retrieved..");
-                }
-            }
-            catch (IOException)
-            {
-            }
-            catch (Exception exc)
-            {
-                iCountErrors++;
-                printerr("Error_17888! Incorrect exception thrown, exc==" + exc.ToString());
-            }
-            //-----------------------------------------------------------------
-
-
 
             // [] Should return zero length array for an empty directory
             //-----------------------------------------------------------------
@@ -382,11 +300,8 @@ public class Directory_GetFiles_str
         Assert.Equal(0, iCountErrors);
     }
 
-
     public static void printerr(String err, [CallerMemberName] string memberName = "", [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0)
     {
         Console.WriteLine("ERROR: ({0}, {1}, {2}) {3}", memberName, filePath, lineNumber, err);
     }
 }
-
-

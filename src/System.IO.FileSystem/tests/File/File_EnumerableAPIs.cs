@@ -3,49 +3,26 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.IO;
-using System.Security;
+using System.Linq;
 using Xunit;
 
 namespace EnumerableTests
 {
-    class File_FileEnumerableTests
+    public class File_FileEnumerableTests : IClassFixture<TestFileSystemEntries>
     {
-        private static EnumerableUtils utils;
+        private static TestFileSystemEntries s_fixture;
+
+        public File_FileEnumerableTests(TestFileSystemEntries fixture)
+        {
+            s_fixture = fixture;
+        }
 
         [Fact]
-        public static void RunTests()
+        public void TestFileReadAllLinesIterator()
         {
-            utils = new EnumerableUtils();
-
-            utils.CreateTestDirs();
-
-            TestFileAPIs();
-
-            TestFileExceptions();
-
-            utils.DeleteTestDirs();
-            
-            Assert.True(utils.Passed);
-        }
-
-        // file tests
-        private static void TestFileAPIs()
-        {
-            TestFileReadAllLinesFast(false);
-            TestFileReadAllLinesFast(true);
-            TestFileWriteAllLines(false, false);
-            TestFileWriteAllLines(true, false);
-            TestFileWriteAllLines(false, true);
-            TestFileWriteAllLines(true, true);
-            TestFileReadAllLinesIterator();
-        }
-        
-        private static void TestFileReadAllLinesIterator()
-        {
-            IEnumerable<string> lines = File.ReadLines(Path.Combine(utils.testDir, "file1"));
+            IEnumerable<string> lines = File.ReadLines(s_fixture.TestFilePath);
             foreach (var line in lines)
             {
             }
@@ -65,360 +42,207 @@ namespace EnumerableTests
             
         }
 
-        private static void TestFileWriteAllLines(bool useEncodingOverload, bool append)
+        [Theory]
+        [InlineData(false, false)]
+        [InlineData(true, false)]
+        [InlineData(false, true)]
+        [InlineData(true, true)]
+        public void TestFileWriteAllLines(bool useEncodingOverload, bool append)
         {
-            String chkptFlag = "chkpt_wal_";
-            int failCount = 0;
+            const string lineContent = "This is another line";
+            const string firstLineContent = "This is the first line";
+            string[] expectedContents = Enumerable.Repeat(lineContent, 10).ToArray();
 
-            String encodingPart = useEncodingOverload ? ", Encoding" : "";
-            String writePart = append ? "Append" : "Write";
-            String testname = String.Format("File.{0}AllLines(path{1})", writePart, encodingPart);
-
-
-            String lineContent = "This is another line";
-            String firstLineContent = "This is the first line";
-            String[] contents = new String[10];
-            for (int i=0; i<contents.Length; i++) 
-            {
-                contents[i] = lineContent;
-            }
-
-            String file1 = Path.Combine(utils.testDir, "file1.out");
-            if (append)
-            {
-                File.WriteAllLines(file1, new String[] {firstLineContent});
-            }
-
+            string file1 = Path.Combine(s_fixture.TestDirectoryPath, "file1.out");
 
             if (useEncodingOverload)
             {
                 if (append)
                 {
-                    File.AppendAllLines(file1, (IEnumerable<String>)contents, Encoding.UTF8);
+                    File.WriteAllLines(file1, new string[] { firstLineContent }, Encoding.UTF8);
+                    File.AppendAllLines(file1, expectedContents, Encoding.UTF8);
                 }
                 else
                 {
-
-                    File.WriteAllLines(file1, (IEnumerable<String>)contents, Encoding.UTF8);
+                    File.WriteAllLines(file1, expectedContents, Encoding.UTF8);
                 }
             }
             else
             {
                 if (append)
                 {
-                    File.AppendAllLines(file1, (IEnumerable<String>)contents);
+                    File.WriteAllLines(file1, new string[] { firstLineContent });
+                    File.AppendAllLines(file1, expectedContents);
                 }
                 else
                 {
-                    File.WriteAllLines(file1, (IEnumerable<String>)contents);
+                    File.WriteAllLines(file1, expectedContents);
                 }
             }
 
-
-            int expectedCount = append ? 11 : 10;
-
-            IEnumerable<String> fileContents = null;
-            if (useEncodingOverload)
+            try
             {
-                fileContents = File.ReadLines(file1, Encoding.UTF8);
-            }
-            else
-            {
-                fileContents = File.ReadLines(file1);
-            }
-
-            int count = 0;
-            foreach (String line in fileContents)
-            {
-                if (append && count == 0)
+                IEnumerable<string> actualContents = null;
+                if (useEncodingOverload)
                 {
-                    if (!firstLineContent.Equals(line))
-                    {
-                        failCount++;
-                        Console.WriteLine(chkptFlag + "1: {0} FAILED at first line", testname);
-                        Console.WriteLine("got unexpected line: " + line);
-                    }
-                    count++;
-                    continue;
+                    actualContents = File.ReadLines(file1, Encoding.UTF8);
                 }
-
-                count++;
-                if (!lineContent.Equals(line))
+                else
                 {
-                    failCount++;
-                    Console.WriteLine(chkptFlag + "2: {0} FAILED", testname);
-                    Console.WriteLine("got unexpected line: " + line);
+                    actualContents = File.ReadLines(file1);
+                }
 
+                if (append)
+                {
+                    Assert.Equal(firstLineContent, actualContents.First());
+                    Assert.Equal(expectedContents, actualContents.Skip(1));
+                }
+                else
+                {
+                    Assert.Equal(expectedContents, actualContents);
                 }
             }
-            if (count != expectedCount)
+            finally
             {
-                failCount++;
-                Console.WriteLine(chkptFlag + "3: {0} FAILED. Line count didn't equal expected", testname);
-                Console.WriteLine("expected {0} but got {1}", expectedCount, count);
+                File.Delete(file1);
             }
-
-            utils.PrintTestStatus(testname, "WriteAllLines", failCount);
-
-            File.Delete(file1);
-
         }
 
-        private static void TestFileReadAllLinesFast(bool useEncodingOverload)
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void TestFileReadAllLinesFast(bool useEncodingOverload)
         {
-            String chkptFlag = "chkpt_ralf_";
-            int failCount = 0;
-
-            string testname = null;
-            if (useEncodingOverload)
-            {
-                testname = "File.ReadLines(path, Encoding)"; 
-            }
-            else
-            {
-                testname = "File.ReadLines(path)"; 
-            }
-            String file1 = Path.Combine(utils.testDir, "file1.out");
-            String lineContent = "This is a line of test file content";
-            String[] contents = new String[10];
-            for (int i=0; i<contents.Length; i++) 
-            {
-                contents[i] = lineContent;
-            }
+            string file1 = Path.Combine(s_fixture.TestDirectoryPath, "file1.out");
+            const string lineContent = "This is a line of test file content";
+            string[] expectedContents = Enumerable.Repeat(lineContent, 10).ToArray();
 
             if (useEncodingOverload)
             {
-                File.WriteAllLines(file1, contents, Encoding.UTF8);
+                File.WriteAllLines(file1, expectedContents, Encoding.UTF8);
             }
             else
             {
-
-                File.WriteAllLines(file1, contents);
+                File.WriteAllLines(file1, expectedContents);
             }
 
-            IEnumerable<String> fileContents = null;
-            if (useEncodingOverload)
+            try
             {
-                fileContents = File.ReadLines(file1, Encoding.UTF8);
-            }
-            else
-            {
-                fileContents = File.ReadLines(file1);
-            }
-
-            int count = 0;
-            foreach (String line in fileContents)
-            {
-                count++;
-                if (!lineContent.Equals(line))
+                string[] actualContents = null;
+                if (useEncodingOverload)
                 {
-                    failCount++;
-                    Console.WriteLine(chkptFlag + "1: {0} FAILED", testname);
-                    Console.WriteLine("got unexpected line: " + line);
+                    actualContents = File.ReadLines(file1, Encoding.UTF8).ToArray();
                 }
-            }
+                else
+                {
+                    actualContents = File.ReadLines(file1).ToArray();
+                }
 
-            if (count != 10)
+                Assert.Equal(expectedContents, actualContents);
+            }
+            finally
             {
-                failCount++;
-                Console.WriteLine(chkptFlag + "2: {0} FAILED. Line count didn't equal expected", testname);
-                Console.WriteLine("expected {0} but got {1}", 10, count);
+                File.Delete(file1);
             }
-
-            File.Delete(file1);
 
             // empty file
-            file1 = Path.Combine(utils.testDir, "empty.out");
+            file1 = Path.Combine(s_fixture.TestDirectoryPath, "empty.out");
             FileStream fs = File.Create(file1);
             fs.Dispose();
 
-            fileContents = null;
-            if (useEncodingOverload)
+            try
             {
-                fileContents = File.ReadLines(file1, Encoding.UTF8);
-            }
-            else
-            {
-                fileContents = File.ReadLines(file1);
-            }
-
-            foreach (String line in fileContents)
-            {
-                failCount++;
-                Console.WriteLine(chkptFlag + "3: {0} FAILED", testname);
-                Console.WriteLine("got unexpected line: " + line);
-            }
-
-            File.Delete(file1);
-
-            utils.PrintTestStatus(testname, "ReadLines", failCount);
-
-        }
-
-        private static void TestFileExceptions()
-        {
-            // Create common file and dir names
-            String nullFileName = null;
-            String emptyFileName1 = "";
-            String emptyFileName2 = " ";
-            String longPath = Path.Combine(new String('a', IOInputs.MaxDirectory), "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb", "test.txt");
-
-            String notExistsFileName = null;
-            if (Interop.IsWindows) // drive labels
-            {
-                String unusedDrive = EnumerableUtils.GetUnusedDrive();
-                if (unusedDrive != null)
+                if (useEncodingOverload)
                 {
-                    notExistsFileName = Path.Combine(unusedDrive, Path.Combine("temp", "notExists", "temp.txt")); // just skip otherwise
+                    Assert.Empty(File.ReadLines(file1, Encoding.UTF8));
+                }
+                else
+                {
+                    Assert.Empty(File.ReadLines(file1));
                 }
             }
-            String[] lines = { "test line 1", "test line 2" };
-            IEnumerable<String> contents = (IEnumerable<String>)lines;
+            finally
+            {
+                File.Delete(file1);
+            }
+        }
+
+        [Fact]
+        [PlatformSpecific(PlatformID.Windows)]
+        public void TestReadFileWithWeirdPath()
+        {
+            string notExistsFileName = null;
+            string unusedDrive = TestFileSystemEntries.GetUnusedDrive();
+            if (unusedDrive != null)
+            {
+                notExistsFileName = Path.Combine(unusedDrive, Path.Combine("temp", "notExists", "temp.txt")); // just skip otherwise
+            }
 
             // Read exceptions
-            TestReadFileExceptions(nullFileName, "null path", Encoding.UTF8, new ArgumentNullException());
-            TestReadFileExceptions(emptyFileName1, "empty path 1", Encoding.UTF8, new ArgumentException());
-            TestReadFileExceptions(emptyFileName2, "empty path 2", Encoding.UTF8, new ArgumentException());
-            TestReadFileExceptions(longPath, "long path", Encoding.UTF8, new PathTooLongException());
             if (notExistsFileName != null)
             {
-                TestReadFileExceptions(notExistsFileName, "not exists", Encoding.UTF8, new DirectoryNotFoundException());
+                TestReadFileWithWeirdPath(notExistsFileName, typeof(DirectoryNotFoundException));
             }
-            TestReadFileExceptionsWithEncoding("temp.txt", "null encoding", null, new ArgumentNullException(), File.ReadLines, File.ReadLines, "File.ReadLines");
 
             // Write exceptions
-            TestWriteFileExceptions(nullFileName, "null path", contents, Encoding.UTF8, new ArgumentNullException());
-            TestWriteFileExceptions(emptyFileName1, "empty path 1", contents, Encoding.UTF8, new ArgumentException());
-            TestWriteFileExceptions(emptyFileName2, "empty path 2", contents, Encoding.UTF8, new ArgumentException());
-            TestWriteFileExceptions(longPath, "long path", contents, Encoding.UTF8, new PathTooLongException());
             if (notExistsFileName != null)
             {
-                TestWriteFileExceptions(notExistsFileName, "not exists", contents, Encoding.UTF8, new DirectoryNotFoundException());
+                TestWriteFileExceptions(notExistsFileName, typeof(DirectoryNotFoundException));
             }
-            TestWriteFileExceptions("temp.txt", "null contents", null, Encoding.UTF8, new ArgumentNullException());
-
-            TestWriteFileExceptionsWithEncoding("temp.txt", "null encoding", contents, null, new ArgumentNullException(), File.WriteAllLines, File.WriteAllLines, "File.WriteAllLines");
-            TestWriteFileExceptionsWithEncoding("temp.txt", "null encoding", contents, null, new ArgumentNullException(), File.AppendAllLines, File.AppendAllLines, "File.AppendAllLines");
-
         }
 
-        private static void TestReadFileExceptions(String fileName, String fileNameDescription, Encoding encoding, Exception expectedException)
+        public static IEnumerable<object[]> WeirdPaths
         {
-            TestReadFileExceptionsDefaultEncoding(fileName, fileNameDescription, expectedException, File.ReadLines, File.ReadLines, "File.ReadLines");
-            TestReadFileExceptionsWithEncoding(fileName, fileNameDescription, encoding, expectedException, File.ReadLines, File.ReadLines, "File.ReadLines");
-        }
-
-        private static void TestReadFileExceptionsDefaultEncoding(String path, String pathDescription, Exception expectedException, 
-                                                                    EnumerableUtils.ReadFastDelegate1 readDelegate, EnumerableUtils.ReadFastDelegate2 readDelegate2, String methodName )
-        {
-            int failCount = 0;
-            String chkptFlag = "chkpt_rfede_";
-
-            try
+            get
             {
-                IEnumerable<String> lines = readDelegate(path);
-                Console.WriteLine(chkptFlag + "1: didn't throw");
-                failCount++;
-            }
-            catch (Exception e)
-            {
-                if (e.GetType() != expectedException.GetType())
+                string longPath = Path.Combine(new String('a', IOInputs.MaxDirectory), "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb");
+
+                return new[]
                 {
-                    failCount++;
-                    Console.WriteLine(chkptFlag + "2: threw wrong exception");
-                    Console.WriteLine(e);
-                }
+                    new object[] { null,         typeof(ArgumentNullException) }, // null path
+                    new object[] { string.Empty, typeof(ArgumentException) }, // empty path
+                    new object[] { " ",          typeof(ArgumentException) }, // whitespace-only path
+                    new object[] { longPath,     typeof(PathTooLongException) }, // PathTooLong
+                };
             }
-
-            String testName = String.Format("TestReadFileExceptions({0})", pathDescription);
-            utils.PrintTestStatus(testName, methodName, failCount);
         }
-      
-        private static void TestReadFileExceptionsWithEncoding(String path, String pathDescription, Encoding encoding, Exception expectedException, 
-                                                                    EnumerableUtils.ReadFastDelegate1 readDelegate, EnumerableUtils.ReadFastDelegate2 readDelegate2, String methodName )
+
+        [Theory]
+        [MemberData("WeirdPaths")]
+        public void TestReadFileWithWeirdPath(string path, Type expectedExceptionType)
         {
-            int failCount = 0;
-            String chkptFlag = "chkpt_rfewe_";
-
-            try
-            {
-                IEnumerable<String> lines = readDelegate2(path, encoding);
-                Console.WriteLine(chkptFlag + "1: didn't throw");
-                failCount++;
-            }
-            catch (Exception e)
-            {
-                if (e.GetType() != expectedException.GetType())
-                {
-                    failCount++;
-                    Console.WriteLine(chkptFlag + "2: threw wrong exception");
-                    Console.WriteLine(e);
-                }
-            }
-
-            String testName = String.Format("TestReadFileExceptions_Encoding({0})", pathDescription);
-            utils.PrintTestStatus(testName, methodName, failCount);
+            Assert.Throws(expectedExceptionType, () => File.ReadLines(path));
+            Assert.Throws(expectedExceptionType, () => File.ReadLines(path, Encoding.UTF8));
         }
 
-        private static void TestWriteFileExceptions(String fileName, String fileNameDescription, IEnumerable<String> contents, Encoding encoding, Exception expectedException)
+        [Theory]
+        [MemberData("WeirdPaths")]
+        public void TestWriteFileExceptions(string path, Type expectedExceptionType)
         {
-            TestWriteFileExceptionsDefaultEncoding(fileName, fileNameDescription, contents, expectedException, File.WriteAllLines, File.WriteAllLines, "File.WriteAllLines");
-            TestWriteFileExceptionsWithEncoding(fileName, fileNameDescription, contents, encoding, expectedException, File.WriteAllLines, File.WriteAllLines, "File.WriteAllLines");
-            TestWriteFileExceptionsDefaultEncoding(fileName, fileNameDescription, contents, expectedException, File.AppendAllLines, File.AppendAllLines, "File.AppendAllLines");
-            TestWriteFileExceptionsWithEncoding(fileName, fileNameDescription, contents, encoding, expectedException, File.AppendAllLines, File.AppendAllLines, "File.AppendAllLines");
+            string[] contents = { "test line 1", "test line 2" };
+            Encoding encoding = Encoding.UTF8;
+
+            Assert.Throws(expectedExceptionType, () => File.WriteAllLines(path, contents));
+            Assert.Throws(expectedExceptionType, () => File.WriteAllLines(path, contents, encoding));
+
+            Assert.Throws(expectedExceptionType, () => File.AppendAllLines(path, contents));
+            Assert.Throws(expectedExceptionType, () => File.AppendAllLines(path, contents, encoding));
         }
-        
-        private static void TestWriteFileExceptionsDefaultEncoding(String path, String pathDescription, IEnumerable<String> contents, Exception expectedException, 
-                                                                    EnumerableUtils.WriteFastDelegate1 writeDelegate, EnumerableUtils.WriteFastDelegate2 writeDelegate2, String methodName )
+
+        [Fact]
+        public void TestWithNullContentOrEncoding()
         {
-            int failCount = 0;
-            String chkptFlag = "chkpt_wfede_";
-            
-            try
-            {
-                writeDelegate(path, contents);
-                Console.WriteLine(chkptFlag + "1: didn't throw");
-                failCount++;
-            }
-            catch (Exception e)
-            {
-                if (e.GetType() != expectedException.GetType())
-                {
-                    failCount++;
-                    Console.WriteLine(chkptFlag + "2: threw wrong exception");
-                    Console.WriteLine(e);
-                }
-            }
+            string[] contents = { "test line 1", "test line 2" };
 
-            String testName = String.Format("TestWriteFileExceptions({0})", pathDescription);
-            utils.PrintTestStatus(testName, methodName, failCount);
+            Assert.Throws<ArgumentNullException>(() => File.ReadLines(s_fixture.TestFilePath, encoding: null));
+
+            Assert.Throws<ArgumentNullException>(() => File.WriteAllLines(s_fixture.TestFilePath, contents: null));
+            Assert.Throws<ArgumentNullException>(() => File.WriteAllLines(s_fixture.TestFilePath, contents: null, encoding: Encoding.UTF8));
+            Assert.Throws<ArgumentNullException>(() => File.WriteAllLines(s_fixture.TestFilePath, contents, encoding: null));
+
+            Assert.Throws<ArgumentNullException>(() => File.AppendAllLines(s_fixture.TestFilePath, contents: null));
+            Assert.Throws<ArgumentNullException>(() => File.AppendAllLines(s_fixture.TestFilePath, contents: null, encoding: Encoding.UTF8));
+            Assert.Throws<ArgumentNullException>(() => File.AppendAllLines(s_fixture.TestFilePath, contents, encoding: null));
         }
-
-        private static void TestWriteFileExceptionsWithEncoding(String path, String pathDescription, IEnumerable<String> contents, Encoding encoding, Exception expectedException, 
-                                                                    EnumerableUtils.WriteFastDelegate1 writeDelegate, EnumerableUtils.WriteFastDelegate2 writeDelegate2, String methodName )
-        {
-            int failCount = 0;
-            String chkptFlag = "chkpt_wfewe_";
-
-            try
-            {
-                writeDelegate2(path, contents, encoding);
-                Console.WriteLine(chkptFlag + "1: didn't throw");
-                failCount++;
-            }
-            catch (Exception e)
-            {
-                if (e.GetType() != expectedException.GetType())
-                {
-                    failCount++;
-                    Console.WriteLine(chkptFlag + "2: threw wrong exception");
-                    Console.WriteLine(e);
-                }
-            }
-
-            String testName = String.Format("TestWriteFileExceptions_Encoding({0})", pathDescription);
-            utils.PrintTestStatus(testName, methodName, failCount);
-        }
-
     }
 }

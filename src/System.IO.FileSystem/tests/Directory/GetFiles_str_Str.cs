@@ -3,20 +3,12 @@
 
 using System;
 using System.IO;
-using System.Collections;
-using System.Globalization;
-using System.Text;
-using System.Threading;
-using System.Runtime.InteropServices;
 using System.Runtime.CompilerServices;
 using Xunit;
 
 public class Directory_GetFiles_str_str
 {
-    public static String s_strDtTmVer = "2000/04/28 14:00";
-    public static String s_strClassMethod = "Directory.GetFiles()";
     public static String s_strTFName = "GetFiles_str_str.cs";
-    public static String s_strTFPath = Directory.GetCurrentDirectory();
 
     [Fact]
     public static void runTest()
@@ -39,72 +31,9 @@ public class Directory_GetFiles_str_str
             if (Directory.Exists(dirName))
                 Directory.Delete(dirName, true);
 
-
-            // [] Should throw ArgumentNullException for null argument
-            //-----------------------------------------------------------------
-            strLoc = "Loc_477g8";
-
-            dir2 = new DirectoryInfo(".");
-            iCountTestcases++;
-            try
-            {
-                Directory.GetFiles(null, "*");
-                iCountErrors++;
-                printerr("Error_2988b! Expected exception not thrown");
-            }
-            catch (ArgumentNullException)
-            {
-            }
-            catch (Exception exc)
-            {
-                iCountErrors++;
-                printerr("Error_0707t! Incorrect exception thrown, exc==" + exc.ToString());
-            }
-
-            iCountTestcases++;
-            try
-            {
-                Directory.GetFiles(".", null);
-                iCountErrors++;
-                printerr("Error_2y867! Expected exception not thrown");
-            }
-            catch (ArgumentNullException)
-            {
-            }
-            catch (Exception exc)
-            {
-                iCountErrors++;
-                printerr("Error_39yb7! Incorrect exception thrown, exc==" + exc.ToString());
-            }
-
-
-            //-----------------------------------------------------------------
-
-
-
-
-
             // [] ArgumentException for String.Empty
             //-----------------------------------------------------------------
             strLoc = "Loc_4yg7b";
-
-            dir2 = new DirectoryInfo(".");
-            iCountTestcases++;
-            try
-            {
-                Directory.GetFiles(String.Empty, "*");
-                iCountErrors++;
-                printerr("Error_8ytbm! Expected exception not thrown");
-            }
-            catch (ArgumentException)
-            {
-            }
-            catch (Exception exc)
-            {
-                iCountErrors++;
-                printerr("Error_2908y! Incorrect exception thrown, exc==" + exc.ToString());
-            }
-
 
             iCountTestcases++;
             try
@@ -121,49 +50,6 @@ public class Directory_GetFiles_str_str
                 iCountErrors++;
                 printerr("Error_21999! Incorrect exception thrown, exc==" + exc.ToString());
             }
-
-
-            //-----------------------------------------------------------------
-
-            // [] ArgumentException for all whitespace for filename and searchstring
-            //-----------------------------------------------------------------
-            strLoc = "Loc_1190x";
-
-            iCountTestcases++;
-            try
-            {
-                String[] str = Directory.GetFiles(".", "       ");
-                if (str.Length != 0)
-                {
-                    Console.WriteLine("Number of files :: " + str.Length);
-                    iCountErrors++;
-                    printerr("Error_43432! Incorrect number of files");
-                }
-            }
-            catch (Exception exc)
-            {
-                iCountErrors++;
-                printerr("Error_17888! Incorrect exception thrown, exc==" + exc.ToString());
-            }
-
-            iCountTestcases++;
-            try
-            {
-                Directory.GetFiles("     ", ".");
-                iCountErrors++;
-                printerr("Error_29019! Expected exception not thrown");
-            }
-            catch (ArgumentException)
-            {
-            }
-            catch (Exception exc)
-            {
-                iCountErrors++;
-                printerr("Error_9678g! Incorrect exception thrown, exc==" + exc.ToString());
-            }
-            //-----------------------------------------------------------------
-
-
 
             // [] Should return zero length array for an empty directory
             //-----------------------------------------------------------------
@@ -526,7 +412,3 @@ public class Directory_GetFiles_str_str
         Console.WriteLine("ERROR: ({0}, {1}, {2}) {3}", memberName, filePath, lineNumber, err);
     }
 }
-
-
-
-

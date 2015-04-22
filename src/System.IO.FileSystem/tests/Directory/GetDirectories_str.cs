@@ -3,19 +3,12 @@
 
 using System;
 using System.IO;
-using System.Collections;
-using System.Globalization;
-using System.Text;
-using System.Threading;
 using System.Runtime.CompilerServices;
 using Xunit;
 
 public class Directory_GetDirectories_str
 {
-    public static String s_strDtTmVer = "2000/04/27 17:00";
-    public static String s_strClassMethod = "Directory.GetDirectories()";
     public static String s_strTFName = "GetDirectories_str.cs";
-    public static String s_strTFPath = Directory.GetCurrentDirectory();
 
     [Fact]
     public static void runTest()
@@ -23,8 +16,6 @@ public class Directory_GetDirectories_str
         int iCountErrors = 0;
         int iCountTestcases = 0;
         String strLoc = "Loc_000oo";
-        String strValue = String.Empty;
-
 
         try
         {
@@ -37,72 +28,6 @@ public class Directory_GetDirectories_str
 
             if (Directory.Exists(dirName))
                 Directory.Delete(dirName, true);
-
-
-            // [] Should throw ArgumentNullException for null argument
-            //-----------------------------------------------------------------
-            strLoc = "Loc_477g8";
-
-            iCountTestcases++;
-            try
-            {
-                Directory.GetDirectories(null);
-                iCountErrors++;
-                printerr("Error_2988b! Expected exception not thrown");
-            }
-            catch (ArgumentNullException)
-            {
-            }
-            catch (Exception exc)
-            {
-                iCountErrors++;
-                printerr("Error_0707t! Incorrect exception thrown, exc==" + exc.ToString());
-            }
-            //-----------------------------------------------------------------
-
-
-            // [] ArgumentException for String.Empty
-            //-----------------------------------------------------------------
-            strLoc = "Loc_4yg7b";
-
-            iCountTestcases++;
-            try
-            {
-                Directory.GetDirectories(String.Empty);
-                iCountErrors++;
-                printerr("Error_8ytbm! Expected exception not thrown");
-            }
-            catch (ArgumentException)
-            {
-            }
-            catch (Exception exc)
-            {
-                iCountErrors++;
-                printerr("Error_2908y! Incorrect exception thrown, exc==" + exc.ToString());
-            }
-            //-----------------------------------------------------------------
-
-            // [] ArgumentException for invalid path
-            //-----------------------------------------------------------------
-            strLoc = "Loc_1190x";
-
-            iCountTestcases++;
-            try
-            {
-                Directory.GetDirectories("\0");
-                iCountErrors++;
-                printerr("Error_2198y! Expected exception not thrown");
-            }
-            catch (ArgumentException)
-            {
-            }
-            catch (Exception exc)
-            {
-                iCountErrors++;
-                printerr("Error_17888! Incorrect exception thrown, exc==" + exc.ToString());
-            }
-            //-----------------------------------------------------------------
-
 
 
             // [] Should return zero length array for an empty directory
@@ -348,5 +273,3 @@ public class Directory_GetDirectories_str
         Console.WriteLine("ERROR: ({0}, {1}, {2}) {3}", memberName, filePath, lineNumber, err);
     }
 }
-
-

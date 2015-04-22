@@ -4,18 +4,11 @@
 using System;
 using System.Runtime.CompilerServices;
 using System.IO;
-using System.Collections;
-using System.Globalization;
-using System.Text;
-using System.Threading;
 using Xunit;
 
 public class DirectoryInfo_GetFileSystemInfos_str
 {
-    public static String s_strActiveBugNums = "28509";
-    public static String s_strClassMethod = "Directory.GetFiles()";
     public static String s_strTFName = "GetFileSystemInfos _str.cs";
-    public static String s_strTFPath = Directory.GetCurrentDirectory();
 
     [Fact]
     public static void runTest()
@@ -38,76 +31,6 @@ public class DirectoryInfo_GetFileSystemInfos_str
 
             if (Directory.Exists(dirName))
                 Directory.Delete(dirName, true);
-
-
-            // [] Should throw ArgumentNullException for null argument
-            //-----------------------------------------------------------------
-            strLoc = "Loc_477g8";
-
-            dir2 = new DirectoryInfo(".");
-            iCountTestcases++;
-            try
-            {
-                dir2.GetFileSystemInfos(null);
-                iCountErrors++;
-                printerr("Error_2988b! Expected exception not thrown");
-            }
-            catch (ArgumentNullException)
-            {
-            }
-            catch (Exception exc)
-            {
-                iCountErrors++;
-                printerr("Error_0707t! Incorrect exception thrown, exc==" + exc.ToString());
-            }
-            //-----------------------------------------------------------------
-
-
-            // [] ArgumentException for String.Empty
-            //-----------------------------------------------------------------
-            strLoc = "Loc_4yg7b";
-
-            dir2 = new DirectoryInfo(".");
-            iCountTestcases++;
-            try
-            {
-                FileSystemInfo[] strInfos = dir2.GetFileSystemInfos(String.Empty);
-                if (strInfos.Length != 0)
-                {
-                    iCountErrors++;
-                    printerr("Error_8ytbm! Unexpected number of file infos returned" + strInfos.Length);
-                }
-            }
-            catch (Exception exc)
-            {
-                iCountErrors++;
-                printerr("Error_2908y! Incorrect exception thrown, exc==" + exc.ToString());
-            }
-            //-----------------------------------------------------------------
-
-            // [] ArgumentException for all whitespace
-            //-----------------------------------------------------------------
-            strLoc = "Loc_1190x";
-
-            dir2 = new DirectoryInfo(".");
-            iCountTestcases++;
-            try
-            {
-                dir2.GetFileSystemInfos(Path.Combine("..ab ab.. .. abc..d", "abc.."));
-                iCountErrors++;
-                printerr("Error_2198y! Expected exception not thrown");
-            }
-            catch (ArgumentException)
-            {
-            }
-            catch (Exception exc)
-            {
-                iCountErrors++;
-                printerr("Error_17888! Incorrect exception thrown, exc==" + exc.ToString());
-            }
-            //-----------------------------------------------------------------
-
-
 
             // [] Should return zero length array for an empty directory
             //-----------------------------------------------------------------
@@ -401,4 +324,3 @@ public class DirectoryInfo_GetFileSystemInfos_str
         Console.WriteLine("ERROR: ({0}, {1}, {2}) {3}", memberName, filePath, lineNumber, err);
     }
 }
-

@@ -3,16 +3,11 @@
 
 using System;
 using System.IO;
-using System.Collections;
-using System.Globalization;
-using System.Text;
 using System.Runtime.CompilerServices;
 using Xunit;
 
 public class Directory_GetFileSystemEntries_str_str
 {
-    public static String s_strDtTmVer = "2001/02/12 22:00";
-    public static String s_strClassMethod = "Directory.GetFileSystemEntries()";
     public static String s_strTFName = "GetFileSystemEntries_str_str.cs";
     public static String s_strTFPath = Directory.GetCurrentDirectory();
 
@@ -33,40 +28,6 @@ public class Directory_GetFileSystemEntries_str_str
             FailSafeDirectoryOperations.DeleteDirectory(dirName, true);
 
             strLoc = "Loc_4y982";
-
-            // [] With null file name
-            iCountTestcases++;
-            try
-            {
-                Directory.GetFileSystemEntries(null, "*");
-                iCountErrors++;
-                printerr("Error_0002! Expected exception not thrown");
-            }
-            catch (ArgumentNullException)
-            {
-            }
-            catch (Exception exc)
-            {
-                iCountErrors++;
-                printerr("Error_0003! Unexpected exceptiont thrown: " + exc.ToString());
-            }
-
-            // [] With empty file name
-            iCountTestcases++;
-            try
-            {
-                Directory.GetFileSystemEntries("", "*");
-                iCountErrors++;
-                printerr("Error_0004! Expected exception not thrown");
-            }
-            catch (ArgumentException)
-            {
-            }
-            catch (Exception exc)
-            {
-                iCountErrors++;
-                printerr("Error_0005! Unexpected exceptiont thrown: " + exc.ToString());
-            }
 
             //Directory that doesn't exist
             iCountTestcases++;
@@ -103,43 +64,8 @@ public class Directory_GetFileSystemEntries_str_str
                 printerr("Error_1004! Unexpected exceptiont thrown: " + exc.ToString());
             }
 
-            //With spaces as file name
-            iCountTestcases++;
-            try
-            {
-                String strTempDir = "             ";
-                Directory.GetFileSystemEntries(strTempDir, "*");
-                iCountErrors++;
-                printerr("Error_1044! Expected exception not thrown");
-            }
-            catch (ArgumentException)
-            {
-            }
-            catch (Exception exc)
-            {
-                iCountErrors++;
-                printerr("Error_1023! Unexpected exceptiont thrown: " + exc.ToString());
-            }
-
             dir2 = new DirectoryInfo(dirName);
             dir2.Create();
-
-            // [] With null search pattern 
-            iCountTestcases++;
-            try
-            {
-                Directory.GetFileSystemEntries(dirName, null);
-                iCountErrors++;
-                printerr("Error_02002! Expected exception not thrown");
-            }
-            catch (ArgumentNullException)
-            {
-            }
-            catch (Exception exc)
-            {
-                iCountErrors++;
-                printerr("Error_00023! Unexpected exceptiont thrown: " + exc.ToString());
-            }
 
             // [] With empty search pattern
             iCountTestcases++;
@@ -495,6 +421,3 @@ public class Directory_GetFileSystemEntries_str_str
         Console.WriteLine("ERROR: ({0}, {1}, {2}) {3}", memberName, filePath, lineNumber, err);
     }
 }
-
-
-

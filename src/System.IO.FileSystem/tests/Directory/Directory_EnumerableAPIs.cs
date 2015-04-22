@@ -3,742 +3,234 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.IO;
-using System.Security;
+using System.Linq;
 using Xunit;
 
 namespace EnumerableTests
 {
-    public class Directory_EnumerableTests
+    public class Directory_EnumerableTests : IClassFixture<TestFileSystemEntries>
     {
-        private static EnumerableUtils s_utils;
+        private static TestFileSystemEntries s_fixture;
+
+        public Directory_EnumerableTests(TestFileSystemEntries fixture)
+        {
+            s_fixture = fixture;
+        }
+
+        public static IEnumerable<object[]> EnumerateDirectoriesInvariants
+        {
+            get
+            {
+                return new[]
+                {
+                    new object[] { "*", SearchOption.AllDirectories, TestFileSystemEntries.ExpectedDirs_Deep },
+                    new object[] { "*", SearchOption.TopDirectoryOnly, TestFileSystemEntries.ExpectedDirs_Shallow },
+                    new object[] { ".", SearchOption.TopDirectoryOnly, TestFileSystemEntries.ExpectedDirs_Shallow },
+                    new object[] { "", SearchOption.AllDirectories, new HashSet<String>() },
+                    new object[] { "lev2_*", SearchOption.AllDirectories, TestFileSystemEntries.ExpectedDirs_Lev2SearchPattern },
+                    new object[] { "lev2_*", SearchOption.TopDirectoryOnly, new HashSet<String>() },
+                    new object[] { "lev2_f", SearchOption.AllDirectories, TestFileSystemEntries.ExpectedDirs_ExactSearchPattern },
+                    new object[] { "lev2_f", SearchOption.TopDirectoryOnly, new HashSet<String>() },
+                    new object[] { Path.Combine("lev1_a", "*"), SearchOption.TopDirectoryOnly, TestFileSystemEntries.ExpectedDirs_SubDir }
+                };
+            }
+        }
+            
+        [Theory]
+        [MemberData("EnumerateDirectoriesInvariants")]
+        public void DoDirectoryGetDirectoriesTest(string searchPattern, SearchOption searchOption, HashSet<string> expected)
+        {
+            IEnumerable<string> dirs = Directory.EnumerateDirectories(s_fixture.TestDirectoryPath, searchPattern, searchOption);
+            HashSet<String> dirsHs = new HashSet<string>(dirs);
+            foreach (string dir in expected)
+            {
+                string dirPath = Path.Combine(s_fixture.TestDirectoryPath, dir);
+                Assert.True(dirsHs.Contains(dirPath), string.Format("Didn't get expected subdirectory: \"{0}\"", dir));
+            }
+        }
+
+        public static IEnumerable<object[]> EnumerateFilesInvariants
+        {
+            get
+            {
+                return new[]
+                {
+                    new object[] { "*", SearchOption.AllDirectories, TestFileSystemEntries.ExpectedFiles_Deep },
+                    new object[] { "*", SearchOption.TopDirectoryOnly, TestFileSystemEntries.ExpectedFiles_Shallow },
+                    new object[] { ".", SearchOption.TopDirectoryOnly, TestFileSystemEntries.ExpectedFiles_Shallow },
+                    new object[] { "", SearchOption.AllDirectories, new HashSet<String>() },
+                    new object[] { "lev2_f", SearchOption.AllDirectories, new HashSet<String>() },
+                    new object[] { "lev2_f", SearchOption.TopDirectoryOnly, new HashSet<String>() }
+                };
+            }
+        }
+
+        [Theory]
+        [MemberData("EnumerateFilesInvariants")]
+        public void DoDirectoryGetFilesTest(string searchPattern, SearchOption searchOption, HashSet<string> expected)
+        {
+            IEnumerable<String> dirs = Directory.EnumerateFiles(s_fixture.TestDirectoryPath, searchPattern, searchOption);
+            HashSet<String> dirsHs = new HashSet<string>(dirs);
+            foreach (string file in expected)
+            {
+                string dirPath = Path.Combine(s_fixture.TestDirectoryPath, file);
+                Assert.True(dirsHs.Contains(dirPath), string.Format("Didn't get expected subdirectory: \"{0}\"", file));
+            }
+        }
+
+        public static IEnumerable<object[]> EnumerateFileSystemEntriesInvariants
+        {
+            get
+            {
+                return new[]
+                {
+                    new object[] { "*", SearchOption.AllDirectories, new HashSet<String>(TestFileSystemEntries.ExpectedFiles_Deep.Union(TestFileSystemEntries.ExpectedDirs_Deep)) },
+                    new object[] { "*", SearchOption.TopDirectoryOnly, new HashSet<String>(TestFileSystemEntries.ExpectedFiles_Shallow.Union(TestFileSystemEntries.ExpectedDirs_Shallow)) },
+                    new object[] { ".", SearchOption.TopDirectoryOnly, new HashSet<String>(TestFileSystemEntries.ExpectedFiles_Shallow.Union(TestFileSystemEntries.ExpectedDirs_Shallow)) },
+                    new object[] { "", SearchOption.AllDirectories, new HashSet<String>() },
+                    new object[] { "lev2_f", SearchOption.AllDirectories, TestFileSystemEntries.ExpectedDirs_ExactSearchPattern },
+                    new object[] { "lev2_f", SearchOption.TopDirectoryOnly, new HashSet<String>() },
+                    new object[] { "file1", SearchOption.AllDirectories, TestFileSystemEntries.ExpectedFiles_Shallow }
+                };
+            }
+        }
+
+        [Theory]
+        [MemberData("EnumerateFileSystemEntriesInvariants")]
+        public void DoDirectoryGetFileSystemEntriesTest(string searchPattern, SearchOption searchOption, HashSet<string> expected)
+        {
+
+            IEnumerable<String> dirs = Directory.EnumerateFileSystemEntries(s_fixture.TestDirectoryPath, searchPattern, searchOption);
+            HashSet<String> dirsHs = new HashSet<string>(dirs);
+            foreach (string file in expected)
+            {
+                string dirPath = Path.Combine(s_fixture.TestDirectoryPath, file);
+                Assert.True(dirsHs.Contains(dirPath), string.Format("Didn't get expected filesystem entry: \"{0}\"", file));
+            }
+        }
 
         [Fact]
-        public static void runTest()
+        public void SearchOptionOutOfRangeTest()
         {
-            s_utils = new EnumerableUtils();
+            string path = s_fixture.TestDirectoryPath;
+            const string pattern = "*";
 
-            s_utils.CreateTestDirs();
+            Assert.Throws<ArgumentOutOfRangeException>(() => Directory.GetDirectories(path, pattern, (SearchOption)42));
+            Assert.Throws<ArgumentOutOfRangeException>(() => Directory.GetFiles(path, pattern, (SearchOption)42));
+            Assert.Throws<ArgumentOutOfRangeException>(() => Directory.GetFileSystemEntries(path, pattern, (SearchOption)42));
 
-            TestDirectoryAPIs();
-
-            TestExceptions();
-
-            if (Interop.IsWindows) // test relies on the explicit order being returned on Windows
-            {
-                TestWhileEnumerating();
-            }
-
-            s_utils.DeleteTestDirs();
-
-            Assert.True(s_utils.Passed);
+            Assert.Throws<ArgumentOutOfRangeException>(() => Directory.EnumerateDirectories(path, pattern, (SearchOption)42));
+            Assert.Throws<ArgumentOutOfRangeException>(() => Directory.EnumerateFiles(path, pattern, (SearchOption)42));
+            Assert.Throws<ArgumentOutOfRangeException>(() => Directory.EnumerateFileSystemEntries(path, pattern, (SearchOption)42));
         }
 
-        // Directory tests
-        private static void TestDirectoryAPIs()
+        [Fact]
+        [PlatformSpecific(PlatformID.Windows)]
+        public void TestWeirdPaths()
         {
-            DoDirectoryGetXTests(s_utils.testDir);
-        }
-
-        private static void DoDirectoryGetXTests(String name)
-        {
-            DoDirectoryGetDirectoriesTest(name, "*", SearchOption.AllDirectories, s_utils.expected_Dirs_Deep);
-            DoDirectoryGetDirectoriesTest(name, "*", SearchOption.TopDirectoryOnly, s_utils.expected_Dirs_Shallow);
-            DoDirectoryGetDirectoriesTest(name, ".", SearchOption.TopDirectoryOnly, s_utils.expected_Dirs_Shallow);
-            DoDirectoryGetDirectoriesTest(name, "", SearchOption.AllDirectories, new HashSet<String>());
-
-            DoDirectoryGetDirectoriesTest(name, "lev2_*", SearchOption.AllDirectories, s_utils.expected_Dirs_Lev2SearchPattern);
-            DoDirectoryGetDirectoriesTest(name, "lev2_*", SearchOption.TopDirectoryOnly, new HashSet<String>());
-
-            DoDirectoryGetDirectoriesTest(name, "lev2_f", SearchOption.AllDirectories, s_utils.expected_Dirs_ExactSearchPattern);
-            DoDirectoryGetDirectoriesTest(name, "lev2_f", SearchOption.TopDirectoryOnly, new HashSet<String>());
-
-            DoDirectoryGetDirectoriesTest(name, Path.Combine("lev1_a", "*"), SearchOption.TopDirectoryOnly, s_utils.expected_Dirs_Subdir);
-
-            DoDirectoryGetFilesTest(name, "*", SearchOption.AllDirectories, s_utils.expected_Files_Deep);
-            DoDirectoryGetFilesTest(name, "*", SearchOption.TopDirectoryOnly, s_utils.expected_Files_Shallow);
-            DoDirectoryGetFilesTest(name, ".", SearchOption.TopDirectoryOnly, s_utils.expected_Files_Shallow);
-            DoDirectoryGetFilesTest(name, "", SearchOption.AllDirectories, new HashSet<String>());
-            DoDirectoryGetFilesTest(name, "lev2_f", SearchOption.AllDirectories, new HashSet<String>());
-            DoDirectoryGetFilesTest(name, "lev2_f", SearchOption.TopDirectoryOnly, new HashSet<String>());
-
-            DoDirectoryGetFileSystemEntriesTest(name, "*", SearchOption.AllDirectories, new HashSet<String>(s_utils.expected_Files_Deep.Union(s_utils.expected_Dirs_Deep)));
-            DoDirectoryGetFileSystemEntriesTest(name, "*", SearchOption.TopDirectoryOnly, new HashSet<String>(s_utils.expected_Files_Shallow.Union(s_utils.expected_Dirs_Shallow)));
-            DoDirectoryGetFileSystemEntriesTest(name, ".", SearchOption.TopDirectoryOnly, new HashSet<String>(s_utils.expected_Files_Shallow.Union(s_utils.expected_Dirs_Shallow)));
-            DoDirectoryGetFileSystemEntriesTest(name, "", SearchOption.AllDirectories, new HashSet<String>());
-            DoDirectoryGetFileSystemEntriesTest(name, "lev2_f", SearchOption.AllDirectories, s_utils.expected_Dirs_ExactSearchPattern);
-            DoDirectoryGetFileSystemEntriesTest(name, "lev2_f", SearchOption.TopDirectoryOnly, new HashSet<String>());
-            DoDirectoryGetFileSystemEntriesTest(name, "file1", SearchOption.AllDirectories, s_utils.expected_Files_Shallow);
-        }
-
-        private static void DoDirectoryGetDirectoriesTest(String path, String searchPattern, SearchOption searchOption, HashSet<String> expected)
-        {
-            String chkptFlag = "chkpt_dgd1_";
-
-            IEnumerable<String> dirs = Directory.EnumerateDirectories(path, searchPattern, searchOption);
-            HashSet<String> dirsAsHS = new HashSet<string>(dirs);
-            int failCount = 0;
-            if (!dirsAsHS.SetEquals(expected))
-            {
-                failCount++;
-                Console.WriteLine(chkptFlag + "1: didn't get expected directories....");
-                foreach (String d in dirs)
-                {
-                    Console.WriteLine(d);
-                }
-            }
-
-            String testName = String.Format("SP={0}, SO={1}", searchPattern, searchOption);
-            s_utils.PrintTestStatus(testName, "Directory.EnumerateDirectories", failCount);
-        }
-
-        private static void DoDirectoryGetFilesTest(String path, String searchPattern, SearchOption searchOption, HashSet<String> expected)
-        {
-            String chkptFlag = "chkpt_dgf1_";
-
-            IEnumerable<String> dirs = Directory.EnumerateFiles(path, searchPattern, searchOption);
-            HashSet<String> dirsAsHS = new HashSet<string>(dirs);
-            int failCount = 0;
-            if (!dirsAsHS.SetEquals(expected))
-            {
-                failCount++;
-                Console.WriteLine(chkptFlag + "1: didn't get expected directories....");
-                foreach (String d in dirs)
-                {
-                    Console.WriteLine(d);
-                }
-            }
-
-            String testName = String.Format("SP={0}, SO={1}", searchPattern, searchOption);
-            s_utils.PrintTestStatus(testName, "Directory.EnumerateFiles", failCount);
-        }
-
-        private static void DoDirectoryGetFileSystemEntriesTest(String path, String searchPattern, SearchOption searchOption, HashSet<String> expected)
-        {
-            String chkptFlag = "chkpt_dgi1_";
-
-            IEnumerable<String> dirs = Directory.EnumerateFileSystemEntries(path, searchPattern, searchOption);
-            HashSet<String> dirsAsHS = new HashSet<string>(dirs);
-            int failCount = 0;
-            if (!dirsAsHS.SetEquals(expected))
-            {
-                failCount++;
-                Console.WriteLine(chkptFlag + "1: didn't get expected filesysteminfos....");
-                foreach (String d in dirs)
-                {
-                    Console.WriteLine(d);
-                }
-            }
-
-            String testName = String.Format("SP={0}, SO={1}", searchPattern, searchOption);
-            s_utils.PrintTestStatus(testName, "Directory.EnumerateFileSystemEntries", failCount);
-        }
-
-        // Exception tests
-        private static void TestExceptions()
-        {
-            TestSearchPatterns();
-            TestSearchOptionOutOfRange();
-            TestWeirdPaths();
-        }
-
-
-        private static void TestSearchPatterns()
-        {
-            TestSearchPatternIter(s_utils.testDir, null, "null SP", new ArgumentNullException());
-            TestSearchPatternIter(s_utils.testDir, "..", "invalid SP", new ArgumentException());
-        }
-
-        private static void TestSearchOptionOutOfRange()
-        {
-            TestSearchOptionOutOfRange(Directory.GetDirectories, "Directory.GetDirectories");
-            TestSearchOptionOutOfRange(Directory.GetFiles, "Directory.GetFiles");
-            TestSearchOptionOutOfRangeFast(Directory.EnumerateDirectories, "Directory.EnumerateDirectories");
-            TestSearchOptionOutOfRangeFast(Directory.EnumerateFiles, "Directory.EnumerateFiles");
-        }
-
-        private static void TestWeirdPaths()
-        {
-            // null path
-            String nullPath = null;
-            TestWeirdPathIter(nullPath, "nullPath", new ArgumentNullException());
-
-            // empty path
-            String emptyPath = "";
-            TestWeirdPathIter(emptyPath, "emptyPath", new ArgumentException());
-
-            // whitespace-only path
-            char[] whitespacePathChars = { (char)0x9, (char)0xA };
-            String whitespacePath = new String(whitespacePathChars);
-            TestWeirdPathIter(whitespacePath, "whitespacePath", new ArgumentException());
-
             // try to test a path that doesn't exist. Skip if can't find an unused drive
-            if (Interop.IsWindows)
+            string pathNotExists = null;
+            string unusedDrive = TestFileSystemEntries.GetUnusedDrive();
+            if (unusedDrive != null)
             {
-                String pathNotExists = null;
-                String unusedDrive = EnumerableUtils.GetUnusedDrive();
-                if (unusedDrive != null)
-                {
-                    pathNotExists = Path.Combine(unusedDrive, "temp", "dir");
-                }
-                if (pathNotExists != null)
-                {
-                    TestWeirdPathIter(pathNotExists, "pathNotExists", new DirectoryNotFoundException());
-                }
+                pathNotExists = Path.Combine(unusedDrive, "temp", "dir");
             }
-
-            // file (not dir) name. If we try to do GetFiles, GetDirs, etc in a file (not dir) we get IOException
-            String filePath = null;
-            foreach (String s in s_utils.expected_Files_Deep)
+            if (pathNotExists != null)
             {
-                if (s != null)
-                {
-                    filePath = s;
-                    break;
-                }
+                TestWeirdPaths(pathNotExists, typeof(DirectoryNotFoundException));
             }
-            TestWeirdPathIter(filePath, "pathIsFile", new IOException());
-
-            // PathTooLong
-            String longPath = Path.Combine(new String('a', IOInputs.MaxDirectory), "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb");
-            TestWeirdPathIter(longPath, "pathTooLong", new PathTooLongException());
-
-            // path invalid chars
-            String invalidCharPath = "temp" + Path.DirectorySeparatorChar + "fsd\0sdsds";
-            TestWeirdPathIter(invalidCharPath, "invalidCharPath", new ArgumentException());
         }
 
-        private static void TestWeirdPathIter(String path, String pathDescription, Exception expectedException)
+        public static IEnumerable<object[]> WeirdPaths
         {
-            TestWeirdPath(path, pathDescription, expectedException, Directory.GetDirectories, Directory.GetDirectories, Directory.GetDirectories, "Directory.GetDirectories");
-            TestWeirdPath(path, pathDescription, expectedException, Directory.GetFiles, Directory.GetFiles, Directory.GetFiles, "Directory.GetFiles");
-            TestWeirdPath(path, pathDescription, expectedException, Directory.GetFileSystemEntries, Directory.GetFileSystemEntries, Directory.GetFileSystemEntries, "Directory.GetFileSystemEntries");
-            TestWeirdPathFast(path, pathDescription, expectedException, Directory.EnumerateDirectories, Directory.EnumerateDirectories, Directory.EnumerateDirectories, "Directory.EnumerateDirectories");
-            TestWeirdPathFast(path, pathDescription, expectedException, Directory.EnumerateFiles, Directory.EnumerateFiles, Directory.EnumerateFiles, "Directory.EnumerateFiles");
-            TestWeirdPathFast(path, pathDescription, expectedException, Directory.EnumerateFileSystemEntries, Directory.EnumerateFileSystemEntries, Directory.EnumerateFileSystemEntries, "Directory.EnumerateFileSystemEntries");
+            get
+            {
+                string whitespace = new string(new[] { (char)0x9, (char)0xA });
+                string filePath = s_fixture.TestFilePath;
+                string longPath = Path.Combine(new String('a', IOInputs.MaxDirectory), "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb");
+                string invalidChars = "temp" + Path.DirectorySeparatorChar + "fsd\0sdsds";
+
+                return new[]
+                {
+                    new object[] { null,         typeof(ArgumentNullException) }, // null path
+                    new object[] { string.Empty, typeof(ArgumentException) }, // empty path
+                    new object[] { whitespace,   typeof(ArgumentException) }, // whitespace-only path
+                    new object[] { filePath,     typeof(IOException) }, // file (not dir) name
+                    new object[] { longPath,     typeof(PathTooLongException) }, // PathTooLong
+                    new object[] { invalidChars, typeof(ArgumentException) }, // path invalid chars
+                };
+            }
         }
 
-        private static void TestSearchPatternIter(String path, String pattern, String patternDescription, Exception expectedException)
+        [Theory]
+        [MemberData("WeirdPaths")]
+        public void TestWeirdPaths(string path, Type expectedExceptionType)
         {
-            TestSearchPattern(path, pattern, patternDescription, expectedException, Directory.GetDirectories, Directory.GetDirectories, "Directory.GetDirectories");
-            TestSearchPattern(path, pattern, patternDescription, expectedException, Directory.GetFiles, Directory.GetFiles, "Directory.GetFiles");
-            TestSearchPattern(path, pattern, patternDescription, expectedException, Directory.GetFileSystemEntries, Directory.GetFileSystemEntries, "Directory.GetFileSystemEntries");
-            TestSearchPatternFast(path, pattern, patternDescription, expectedException, Directory.EnumerateDirectories, Directory.EnumerateDirectories, "Directory.EnumerateDirectories");
-            TestSearchPatternFast(path, pattern, patternDescription, expectedException, Directory.EnumerateFiles, Directory.EnumerateFiles, "Directory.EnumerateFiles");
-            TestSearchPatternFast(path, pattern, patternDescription, expectedException, Directory.EnumerateFileSystemEntries, Directory.EnumerateFileSystemEntries, "Directory.EnumerateFileSystemEntries");
+            const string pattern = "*";
+            const SearchOption option = SearchOption.AllDirectories;
+
+            Assert.Throws(expectedExceptionType, () => Directory.GetDirectories(path));
+            Assert.Throws(expectedExceptionType, () => Directory.GetDirectories(path, pattern));
+            Assert.Throws(expectedExceptionType, () => Directory.GetDirectories(path, pattern, option));
+
+            Assert.Throws(expectedExceptionType, () => Directory.GetFiles(path));
+            Assert.Throws(expectedExceptionType, () => Directory.GetFiles(path, pattern));
+            Assert.Throws(expectedExceptionType, () => Directory.GetFiles(path, pattern, option));
+
+            Assert.Throws(expectedExceptionType, () => Directory.GetFileSystemEntries(path));
+            Assert.Throws(expectedExceptionType, () => Directory.GetFileSystemEntries(path, pattern));
+            Assert.Throws(expectedExceptionType, () => Directory.GetFileSystemEntries(path, pattern, option));
+
+            Assert.Throws(expectedExceptionType, () => Directory.EnumerateDirectories(path));
+            Assert.Throws(expectedExceptionType, () => Directory.EnumerateDirectories(path, pattern));
+            Assert.Throws(expectedExceptionType, () => Directory.EnumerateDirectories(path, pattern, option));
+
+            Assert.Throws(expectedExceptionType, () => Directory.EnumerateFiles(path));
+            Assert.Throws(expectedExceptionType, () => Directory.EnumerateFiles(path, pattern));
+            Assert.Throws(expectedExceptionType, () => Directory.EnumerateFiles(path, pattern, option));
+
+            Assert.Throws(expectedExceptionType, () => Directory.EnumerateFileSystemEntries(path));
+            Assert.Throws(expectedExceptionType, () => Directory.EnumerateFileSystemEntries(path, pattern));
+            Assert.Throws(expectedExceptionType, () => Directory.EnumerateFileSystemEntries(path, pattern, option));
         }
 
-        private static void TestSearchPattern(String path, String pattern, String patternDescription, Exception expectedException,
-                                                EnumerableUtils.GetFSEs1 fseMethod1, EnumerableUtils.GetFSEs2 fseMethod2, String methodName)
+        public static IEnumerable<object[]> SearchPatternTests
         {
-            int failCount = 0;
-            String chkptFlag = "chkpt_nspat_";
-            try
+            get
             {
-                String[] dirs1 = fseMethod1(path, pattern);
-                Console.WriteLine(chkptFlag + "1: didn't throw");
-                failCount++;
-            }
-            catch (Exception e)
-            {
-                if (e.GetType() != expectedException.GetType())
+                return new[]
                 {
-                    failCount++;
-                    Console.WriteLine(chkptFlag + "2: threw wrong exception");
-                    Console.WriteLine(e);
-                }
+                    new object[] { null,                               typeof(ArgumentNullException) },
+                    new object[] { "..",                               typeof(ArgumentException) },
+                    new object[] { ".." + Path.DirectorySeparatorChar, typeof(ArgumentException) }
+                };
             }
-
-            if (fseMethod2 != null)
-            {
-                try
-                {
-                    String[] dirs2 = fseMethod2(path, pattern, SearchOption.AllDirectories);
-                    Console.WriteLine(chkptFlag + "3: didn't throw");
-                    failCount++;
-                }
-                catch (Exception e)
-                {
-                    if (e.GetType() != expectedException.GetType())
-                    {
-                        failCount++;
-                        Console.WriteLine(chkptFlag + "4: threw wrong exception");
-                        Console.WriteLine(e);
-                    }
-                }
-            }
-
-            String testName = String.Format("TestSearchPattern({0})", patternDescription);
-            s_utils.PrintTestStatus(testName, methodName, failCount);
         }
 
-        private static void TestSearchPatternFast(String path, String pattern, String patternDescription, Exception expectedException, EnumerableUtils.GetFSEsFast1 fseMethod1, EnumerableUtils.GetFSEsFast2 fseMethod2, String methodName)
+        [Theory]
+        [MemberData("SearchPatternTests")]
+        public void SearchPatternNegativeTests(string searchPattern, Type expectedExceptionType)
         {
-            int failCount = 0;
-            String chkptFlag = "chkpt_nspatf_";
-            try
-            {
-                IEnumerable<String> dirs1 = fseMethod1(path, pattern);
-                Console.WriteLine(chkptFlag + "1: didn't throw");
-                failCount++;
-            }
-            catch (Exception e)
-            {
-                if (e.GetType() != expectedException.GetType())
-                {
-                    failCount++;
-                    Console.WriteLine(chkptFlag + "2: threw wrong exception");
-                    Console.WriteLine(e);
-                }
-            }
+            string path = s_fixture.TestDirectoryPath;
 
-            if (fseMethod2 != null)
-            {
-                try
-                {
-                    IEnumerable<String> dirs2 = fseMethod2(path, pattern, SearchOption.AllDirectories);
-                    Console.WriteLine(chkptFlag + "3: didn't throw");
-                    failCount++;
-                }
-                catch (Exception e)
-                {
-                    if (e.GetType() != expectedException.GetType())
-                    {
-                        failCount++;
-                        Console.WriteLine(chkptFlag + "4: threw wrong exception");
-                        Console.WriteLine(e);
-                    }
-                }
-            }
-            String testName = String.Format("TestSearchPatternFast({0})", patternDescription);
-            s_utils.PrintTestStatus(testName, methodName, failCount);
-        }
+            Assert.Throws(expectedExceptionType, () => Directory.GetDirectories(path, searchPattern));
+            Assert.Throws(expectedExceptionType, () => Directory.GetDirectories(path, searchPattern, SearchOption.AllDirectories));
 
-        private static void TestSearchOptionOutOfRange(EnumerableUtils.GetFSEs2 fseMethod, String methodName)
-        {
-            int failCount = 0;
-            String chkptFlag = "chkpt_soor_";
-            try
-            {
-                String[] dirs1 = fseMethod(s_utils.testDir, "*", (SearchOption)5);
-                Console.WriteLine(chkptFlag + "1: didn't throw");
-                failCount++;
-            }
-            catch (ArgumentOutOfRangeException) { } // expected
-            catch (Exception e)
-            {
-                failCount++;
-                Console.WriteLine(chkptFlag + "2: threw wrong exception");
-                Console.WriteLine(e);
-            }
+            Assert.Throws(expectedExceptionType, () => Directory.GetFiles(path, searchPattern));
+            Assert.Throws(expectedExceptionType, () => Directory.GetFiles(path, searchPattern, SearchOption.AllDirectories));
 
-            s_utils.PrintTestStatus("TestSearchOptionOutOfRange", methodName, failCount);
-        }
+            Assert.Throws(expectedExceptionType, () => Directory.GetFileSystemEntries(path, searchPattern));
+            Assert.Throws(expectedExceptionType, () => Directory.GetFileSystemEntries(path, searchPattern, SearchOption.AllDirectories));
 
-        private static void TestSearchOptionOutOfRangeFast(EnumerableUtils.GetFSEsFast2 fseMethod, String methodName)
-        {
-            int failCount = 0;
-            String chkptFlag = "chkpt_soorf_";
-            try
-            {
-                IEnumerable<String> dirs1 = fseMethod(s_utils.testDir, "*", (SearchOption)5);
-                Console.WriteLine(chkptFlag + "1: didn't throw");
-                failCount++;
-            }
-            catch (ArgumentOutOfRangeException) { } // expected
-            catch (Exception e)
-            {
-                failCount++;
-                Console.WriteLine(chkptFlag + "2: threw wrong exception");
-                Console.WriteLine(e);
-            }
+            Assert.Throws(expectedExceptionType, () => Directory.EnumerateDirectories(path, searchPattern));
+            Assert.Throws(expectedExceptionType, () => Directory.EnumerateDirectories(path, searchPattern, SearchOption.AllDirectories));
 
-            s_utils.PrintTestStatus("TestSearchOptionOutOfRangeFast", methodName, failCount);
-        }
+            Assert.Throws(expectedExceptionType, () => Directory.EnumerateFiles(path, searchPattern));
+            Assert.Throws(expectedExceptionType, () => Directory.EnumerateFiles(path, searchPattern, SearchOption.AllDirectories));
 
-        private static void TestWeirdPath(String path, String pathDescription, Exception expectedException, EnumerableUtils.GetFSEs0 fseMethod0, EnumerableUtils.GetFSEs1 fseMethod1, EnumerableUtils.GetFSEs2 fseMethod2, String methodName)
-        {
-            int failCount = 0;
-            String chkptFlag = "chkpt_wp_";
-
-            try
-            {
-                String[] dirs1 = fseMethod0(path);
-                Console.WriteLine(chkptFlag + "1: didn't throw");
-                failCount++;
-            }
-            catch (Exception e)
-            {
-                if (e.GetType() != expectedException.GetType())
-                {
-                    failCount++;
-                    Console.WriteLine(chkptFlag + "2: threw wrong exception");
-                    Console.WriteLine(e);
-                }
-            }
-
-            try
-            {
-                String[] dirs1 = fseMethod1(path, "*");
-                Console.WriteLine(chkptFlag + "3: didn't throw");
-                failCount++;
-            }
-            catch (Exception e)
-            {
-                if (e.GetType() != expectedException.GetType())
-                {
-                    failCount++;
-                    Console.WriteLine(chkptFlag + "4: threw wrong exception");
-                    Console.WriteLine(e);
-                }
-            }
-
-            if (fseMethod2 != null)
-            {
-                try
-                {
-                    String[] dirs2 = fseMethod2(path, "*", SearchOption.AllDirectories);
-                    Console.WriteLine(chkptFlag + "5: didn't throw");
-                    failCount++;
-                }
-                catch (Exception e)
-                {
-                    if (e.GetType() != expectedException.GetType())
-                    {
-                        Console.WriteLine("e.GetType = " + e.GetType());
-                        Console.WriteLine("expectedException.GetType = " + expectedException.GetType());
-                        failCount++;
-                        Console.WriteLine(chkptFlag + "6: threw wrong exception");
-                        Console.WriteLine(e);
-                    }
-                }
-            }
-            String testName = String.Format("TestWeirdPath({0})", pathDescription);
-            s_utils.PrintTestStatus(testName, methodName, failCount);
-        }
-
-        private static void TestWeirdPathFast(String path, String pathDescription, Exception expectedException, EnumerableUtils.GetFSEsFast0 fseMethod0, EnumerableUtils.GetFSEsFast1 fseMethod1, EnumerableUtils.GetFSEsFast2 fseMethod2, String methodName)
-        {
-            int failCount = 0;
-            String chkptFlag = "chkpt_wpf_";
-            try
-            {
-                IEnumerable<String> dirs1 = fseMethod0(path);
-                Console.WriteLine(chkptFlag + "1: didn't throw");
-                failCount++;
-            }
-            catch (Exception e)
-            {
-                if (e.GetType() != expectedException.GetType())
-                {
-                    failCount++;
-                    Console.WriteLine(chkptFlag + "2: threw wrong exception");
-                    Console.WriteLine(e);
-                }
-            }
-
-
-            try
-            {
-                IEnumerable<String> dirs1 = fseMethod1(path, "*");
-                Console.WriteLine(chkptFlag + "3: didn't throw");
-                failCount++;
-            }
-            catch (Exception e)
-            {
-                if (e.GetType() != expectedException.GetType())
-                {
-                    failCount++;
-                    Console.WriteLine(chkptFlag + "4: threw wrong exception");
-                    Console.WriteLine(e);
-                }
-            }
-
-            if (fseMethod2 != null)
-            {
-                try
-                {
-                    IEnumerable<String> dirs2 = fseMethod2(path, "*", SearchOption.AllDirectories);
-                    Console.WriteLine(chkptFlag + "5: didn't throw");
-                    failCount++;
-                }
-                catch (Exception e)
-                {
-                    if (e.GetType() != expectedException.GetType())
-                    {
-                        failCount++;
-                        Console.WriteLine(chkptFlag + "6: threw wrong exception");
-                        Console.WriteLine(e);
-                    }
-                }
-            }
-
-            String testName = String.Format("TestWeirdPathFast({0})", pathDescription);
-            s_utils.PrintTestStatus(testName, methodName, failCount);
-        }
-
-        private static void TestWhileEnumerating()
-        {
-            TestChangeWhileEnumerating();
-        }
-
-
-        private static void TestChangeWhileEnumerating()
-        {
-            DoGetDirectories_Add();
-            DoGetFiles_Add();
-            DoGetFileSystemInfos_Add();
-            DoGetDirectories_Delete();
-            DoGetFiles_Delete();
-            DoGetFileSystemInfos_Delete();
-        }
-
-        private static void DoGetDirectories_Add()
-        {
-            String chkptFlag = "chkpt_dgdm_";
-            int failCount = 0;
-
-            s_utils.CreateTestDirs();
-
-            IEnumerable<String> dis = Directory.EnumerateDirectories(s_utils.testDir, "*", SearchOption.AllDirectories);
-            HashSet<String> disAsHS = new HashSet<string>();
-            int count = 0;
-
-            try
-            {
-                foreach (String d in dis)
-                {
-                    disAsHS.Add(d);
-                    count++;
-                    if (count == 2)
-                        s_utils.ChangeFSAdd();
-                }
-                if (!disAsHS.SetEquals(s_utils.expected_Dirs_Changed))
-                {
-                    failCount++;
-                    Console.WriteLine(chkptFlag + "1: didn't get expected directories....");
-                    foreach (String d in dis)
-                    {
-                        Console.WriteLine(d);
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                failCount++;
-                Console.WriteLine(chkptFlag + "2: got wrong exception");
-                Console.WriteLine(ex);
-            }
-
-            String testName = "addFilesWhileEnumerating"; ;
-            s_utils.PrintTestStatus(testName, "Directory.EnumerateDirectories", failCount);
-        }
-
-        private static void DoGetDirectories_Delete()
-        {
-            String chkptFlag = "chkpt_dgdm_";
-            int failCount = 0;
-
-            s_utils.CreateTestDirs();
-
-            IEnumerable<String> dis = Directory.EnumerateDirectories(s_utils.testDir, "*", SearchOption.AllDirectories);
-            HashSet<String> disAsHS = new HashSet<string>();
-            int count = 0;
-
-            try
-            {
-                foreach (String d in dis)
-                {
-                    disAsHS.Add(d);
-                    count++;
-                    if (count == 2)
-                        s_utils.ChangeFSDelete();
-                }
-                if (!disAsHS.SetEquals(s_utils.expected_Dirs_Changed))
-                {
-                    failCount++;
-                    Console.WriteLine(chkptFlag + "1: didn't get expected directories....");
-                    foreach (String d in dis)
-                    {
-                        Console.WriteLine(d);
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                failCount++;
-                Console.WriteLine(chkptFlag + "2: got wrong exception");
-                Console.WriteLine(ex);
-            }
-
-            String testName = "deleteFilesWhileEnumerating"; ;
-            s_utils.PrintTestStatus(testName, "Directory.EnumerateDirectories", failCount);
-        }
-
-        private static void DoGetFiles_Add()
-        {
-            String chkptFlag = "chkpt_dgfm_";
-            int failCount = 0;
-
-            s_utils.CreateTestDirs();
-
-            IEnumerable<String> fis = Directory.EnumerateFiles(s_utils.testDir, "*", SearchOption.AllDirectories);
-            HashSet<String> disAsHS = new HashSet<string>();
-            int count = 0;
-
-            try
-            {
-                foreach (String d in fis)
-                {
-                    disAsHS.Add(d);
-                    count++;
-                    if (count == 2)
-                        s_utils.ChangeFSAdd();
-                }
-                if (!disAsHS.SetEquals(s_utils.expected_Files_Changed))
-                {
-                    failCount++;
-                    Console.WriteLine(chkptFlag + "1: didn't get expected files....");
-                    foreach (String f in fis)
-                    {
-                        Console.WriteLine(f);
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                failCount++;
-                Console.WriteLine(chkptFlag + "2: got wrong exception");
-                Console.WriteLine(ex);
-            }
-
-            String testName = "addFilesWhileEnumerating"; ;
-            s_utils.PrintTestStatus(testName, "Directory.EnumerateFiles", failCount);
-        }
-
-        private static void DoGetFiles_Delete()
-        {
-            String chkptFlag = "chkpt_dgfm_";
-            int failCount = 0;
-
-            s_utils.CreateTestDirs();
-
-            IEnumerable<String> fis = Directory.EnumerateFiles(s_utils.testDir, "*", SearchOption.AllDirectories);
-            HashSet<String> disAsHS = new HashSet<string>();
-            int count = 0;
-
-            try
-            {
-                foreach (String d in fis)
-                {
-                    disAsHS.Add(d);
-                    count++;
-                    if (count == 2)
-                        s_utils.ChangeFSDelete();
-                }
-                if (!disAsHS.SetEquals(s_utils.expected_Files_Changed))
-                {
-                    failCount++;
-                    Console.WriteLine(chkptFlag + "1: didn't get expected files....");
-                    foreach (String f in fis)
-                    {
-                        Console.WriteLine(f);
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                failCount++;
-                Console.WriteLine(chkptFlag + "2: got wrong exception");
-                Console.WriteLine(ex);
-            }
-
-            String testName = "deleteFilesWhileEnumerating"; ;
-            s_utils.PrintTestStatus(testName, "Directory.EnumerateFiles", failCount);
-        }
-
-        private static void DoGetFileSystemInfos_Add()
-        {
-            String chkptFlag = "chkpt_dgim_";
-            int failCount = 0;
-
-            s_utils.CreateTestDirs();
-
-            IEnumerable<String> fis = Directory.EnumerateFileSystemEntries(s_utils.testDir, "*", SearchOption.AllDirectories);
-            HashSet<String> disAsHS = new HashSet<string>();
-            int count = 0;
-
-            try
-            {
-                foreach (String d in fis)
-                {
-                    disAsHS.Add(d);
-                    count++;
-                    if (count == 2)
-                        s_utils.ChangeFSAdd();
-                }
-                if (!disAsHS.SetEquals(new HashSet<String>(s_utils.expected_Dirs_Changed.Union(s_utils.expected_Files_Changed))))
-                {
-                    failCount++;
-                    Console.WriteLine(chkptFlag + "1: didn't get expected files....");
-                    foreach (String f in fis)
-                    {
-                        Console.WriteLine(f);
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                failCount++;
-                Console.WriteLine(chkptFlag + "2: got wrong exception");
-                Console.WriteLine(ex);
-            }
-
-            String testName = "addFilesWhileEnumerating";
-            s_utils.PrintTestStatus(testName, "Directory.EnumerateFileSystemEntries", failCount);
-        }
-
-        private static void DoGetFileSystemInfos_Delete()
-        {
-            String chkptFlag = "chkpt_dgim_";
-            int failCount = 0;
-
-            s_utils.CreateTestDirs();
-
-            IEnumerable<String> fis = Directory.EnumerateFileSystemEntries(s_utils.testDir, "*", SearchOption.AllDirectories);
-            HashSet<String> disAsHS = new HashSet<string>();
-            int count = 0;
-
-            try
-            {
-                foreach (String d in fis)
-                {
-                    disAsHS.Add(d);
-                    count++;
-                    if (count == 2)
-                        s_utils.ChangeFSDelete();
-                }
-                if (!disAsHS.SetEquals(new HashSet<String>(s_utils.expected_Dirs_Changed.Union(s_utils.expected_Files_Changed))))
-                {
-                    failCount++;
-                    Console.WriteLine(chkptFlag + "1: didn't get expected files....");
-                    foreach (String f in fis)
-                    {
-                        Console.WriteLine(f);
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                failCount++;
-                Console.WriteLine(chkptFlag + "2: got wrong exception");
-                Console.WriteLine(ex);
-            }
-
-            String testName = "deleteFilesWhileEnumerating";
-            s_utils.PrintTestStatus(testName, "Directory.EnumerateFileSystemEntries", failCount);
+            Assert.Throws(expectedExceptionType, () => Directory.EnumerateFileSystemEntries(path, searchPattern));
+            Assert.Throws(expectedExceptionType, () => Directory.EnumerateFileSystemEntries(path, searchPattern, SearchOption.AllDirectories));
         }
     }
 }
