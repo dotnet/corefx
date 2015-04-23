@@ -3,13 +3,11 @@
 
 namespace System.Runtime.InteropServices
 {
-    public static class RuntimeInfo
+    public static class RuntimeInformation
     {
         public static bool IsOSPlatform(OSName osName)
         {
-            if (osName.Equals(OSName.OSX))
-                return true;
-            return false;
+            return OSName.OSX == osName;
         }
     }
 }

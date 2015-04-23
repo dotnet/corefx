@@ -11,11 +11,6 @@ namespace System.Runtime.InteropServices
         private const string LinuxName = "LINUX";
         private const string OSXName = "OSX";
 
-        public OSName()
-        {
-            _name = string.Empty;
-        }
-
         public OSName(string name)
         {
             _name = name;
@@ -27,14 +22,15 @@ namespace System.Runtime.InteropServices
 
         public bool Equals(OSName osName)
         {
-            return osName._name == _name;
+            return (string.IsNullOrEmpty(_name) && string.IsNullOrEmpty(osName._name)) ?
+                true : osName._name == _name;
         }
 
         public override bool Equals(object obj)
         {
             if (obj is OSName)
             {
-                return ((OSName)obj)._name == _name;
+                return Equals((OSName)obj);
             }
 
             return false;
@@ -42,12 +38,22 @@ namespace System.Runtime.InteropServices
 
         public override int GetHashCode()
         {
-            return _name.GetHashCode();
+            return _name == null ? string.Empty.GetHashCode() : _name.GetHashCode();
         }
 
         public override string ToString()
         {
             return _name;
+        }
+
+        public static bool operator ==(OSName left, OSName right)
+        {
+            return left.Equals(right);
+        }
+
+        public static bool operator !=(OSName left, OSName right)
+        {
+            return !(left == right);
         }
     }
 }
