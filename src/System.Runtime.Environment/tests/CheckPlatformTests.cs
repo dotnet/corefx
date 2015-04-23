@@ -8,35 +8,35 @@ namespace System.Runtime.Environment.Tests
         [Fact, PlatformSpecific(PlatformID.Windows)]
         public void CheckWindows()
         {
-            Assert.True(RuntimeInformation.IsOSPlatform(OSName.Windows));
-            Assert.True(RuntimeInformation.IsOSPlatform(new OSName("WINDOWS")));
-            Assert.False(RuntimeInformation.IsOSPlatform(new OSName("windows")));
-            Assert.False(RuntimeInformation.IsOSPlatform(new OSName("Windows NT")));
-            Assert.False(RuntimeInformation.IsOSPlatform(OSName.Linux));
-            Assert.False(RuntimeInformation.IsOSPlatform(OSName.OSX));
+            Assert.True(RuntimeInformation.IsOperatingSystem(OSName.Windows));
+            Assert.True(RuntimeInformation.IsOperatingSystem(new OSName("WINDOWS")));
+            Assert.False(RuntimeInformation.IsOperatingSystem(new OSName("windows")));
+            Assert.False(RuntimeInformation.IsOperatingSystem(new OSName("Windows NT")));
+            Assert.False(RuntimeInformation.IsOperatingSystem(OSName.Linux));
+            Assert.False(RuntimeInformation.IsOperatingSystem(OSName.OSX));
         }
 
         [Fact, PlatformSpecific(PlatformID.Linux)]
         public void CheckLinux()
         {
-            Assert.True(RuntimeInformation.IsOSPlatform(OSName.Linux));
-            Assert.False(RuntimeInformation.IsOSPlatform(new OSName("linux")));
-            Assert.True(RuntimeInformation.IsOSPlatform(new OSName("UNIX")));
-            Assert.False(RuntimeInformation.IsOSPlatform(new OSName("ubuntu")));
-            Assert.False(RuntimeInformation.IsOSPlatform(OSName.Windows));
-            Assert.False(RuntimeInformation.IsOSPlatform(OSName.OSX));
+            Assert.True(RuntimeInformation.IsOperatingSystem(OSName.Linux));
+            Assert.False(RuntimeInformation.IsOperatingSystem(new OSName("linux")));
+            Assert.True(RuntimeInformation.IsOperatingSystem(new OSName("UNIX")));
+            Assert.False(RuntimeInformation.IsOperatingSystem(new OSName("ubuntu")));
+            Assert.False(RuntimeInformation.IsOperatingSystem(OSName.Windows));
+            Assert.False(RuntimeInformation.IsOperatingSystem(OSName.OSX));
         }
 
         [Fact, PlatformSpecific(PlatformID.OSX)]
         public void CheckOSX()
         {
-            Assert.True(RuntimeInformation.IsOSPlatform(OSName.OSX));
-            Assert.True(RuntimeInformation.IsOSPlatform(new OSName("OSX")));
-            Assert.False(RuntimeInformation.IsOSPlatform(new OSName("osx")));
-            Assert.False(RuntimeInformation.IsOSPlatform(new OSName("mac")));
-            Assert.False(RuntimeInformation.IsOSPlatform(new OSName("MACOSX")));
-            Assert.False(RuntimeInformation.IsOSPlatform(OSName.Linux));
-            Assert.False(RuntimeInformation.IsOSPlatform(OSName.OSX));
+            Assert.True(RuntimeInformation.IsOperatingSystem(OSName.OSX));
+            Assert.True(RuntimeInformation.IsOperatingSystem(new OSName("OSX")));
+            Assert.False(RuntimeInformation.IsOperatingSystem(new OSName("osx")));
+            Assert.False(RuntimeInformation.IsOperatingSystem(new OSName("mac")));
+            Assert.False(RuntimeInformation.IsOperatingSystem(new OSName("MACOSX")));
+            Assert.False(RuntimeInformation.IsOperatingSystem(OSName.Linux));
+            Assert.False(RuntimeInformation.IsOperatingSystem(OSName.OSX));
         }
 
         [Fact]

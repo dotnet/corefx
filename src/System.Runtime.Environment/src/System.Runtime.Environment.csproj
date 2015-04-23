@@ -8,6 +8,7 @@
     <RootNamespace>System.Runtime.InteropServices</RootNamespace>
     <AssemblyName>System.Runtime.Environment</AssemblyName>
     <AssemblyVersion>4.0.0.0</AssemblyVersion>
+    <ProjectGuid>{F9DF2357-81B4-4317-908E-512DA9395583}</ProjectGuid>
   </PropertyGroup>
   <!-- Help VS understand available configurations -->
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Linux_Debug|AnyCPU' " />
@@ -18,13 +19,13 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Windows_Release|AnyCPU' " />
   <!-- References are resolved from packages.config -->
   <ItemGroup Condition=" '$(TargetsWindows)' == 'true' ">
-    <Compile Include="RuntimeInfo.Windows.cs" />
+    <Compile Include="RuntimeInformation.Windows.cs" />
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetsLinux)' == 'true' ">
-    <Compile Include="RuntimeInfo.Linux.cs" />
+    <Compile Include="RuntimeInformation.Linux.cs" />
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetsOSX)' == 'true' ">
-    <Compile Include="RuntimeInfo.OSX.cs" />
+    <Compile Include="RuntimeInformation.OSX.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
