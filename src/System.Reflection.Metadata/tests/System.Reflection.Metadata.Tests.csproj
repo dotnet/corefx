@@ -45,6 +45,7 @@
   <ItemGroup>
     <Compile Include="Metadata\ClassLayoutRow.cs" />
     <Compile Include="Metadata\Decoding\MethodSignatureTests.cs" />
+    <Compile Include="Metadata\Decoding\SignatureDecoderTests.cs" />
     <Compile Include="Metadata\Ecma335\MetadataAggregatorTests.cs" />
     <Compile Include="Metadata\Ecma335\MetadataTokensTests.cs" />
     <Compile Include="Metadata\HandleComparerTests.cs" />

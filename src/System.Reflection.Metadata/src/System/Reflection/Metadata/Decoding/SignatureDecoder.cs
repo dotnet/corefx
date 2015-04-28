@@ -391,7 +391,7 @@ namespace System.Reflection.Metadata.Decoding
 
                 do
                 {
-                    type = DecodeType(ref blobReader, typeCode, provider);
+                    type = DecodeTypeHandle(ref blobReader, provider);
                     modifier = new CustomModifier<TType>(type, isRequired);
                     builder.Add(modifier);
                     typeCode = blobReader.ReadSignatureTypeCode();
