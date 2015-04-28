@@ -34,13 +34,13 @@
     <Compile Include="ZipArchive\zip_ManualAndCompatibilityTests.cs" />
     <Compile Include="ZipArchive\zip_ReadTests.cs" />
     <Compile Include="ZipArchive\zip_UpdateTests.cs" />
-    <Compile Include="Utilities\CRC.cs" />
-    <Compile Include="Utilities\FileData.cs" />
-    <Compile Include="Utilities\LocalMemoryStream.cs" />
-    <Compile Include="Utilities\StreamHelpers.cs" />
     <Compile Include="Utilities\StripHeaderAndFooter.cs" />
     <Compile Include="Utilities\WrappedStream.cs" />
-    <Compile Include="Utilities\ZipTestHelper.cs" />
+    <Compile Include="$(CommonTestPath)\Compression\Utilities\CRC.cs" />
+    <Compile Include="$(CommonTestPath)\Compression\Utilities\FileData.cs" />
+    <Compile Include="$(CommonTestPath)\Compression\Utilities\LocalMemoryStream.cs" />
+    <Compile Include="$(CommonTestPath)\Compression\Utilities\StreamHelpers.cs" />
+    <Compile Include="$(CommonTestPath)\Compression\Utilities\ZipTestHelper.cs" />
     <Compile Include="$(CommonPath)\Interop\Interop.PlatformDetection.cs" />
   </ItemGroup>
   <ItemGroup>

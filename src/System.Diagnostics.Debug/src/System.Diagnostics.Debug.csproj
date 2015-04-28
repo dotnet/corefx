@@ -7,7 +7,10 @@
     <ProjectGuid>{E7E8DE8A-9EC1-46A8-A6EE-727DB32DBEB8}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AssemblyName>System.Diagnostics.Debug</AssemblyName>
-    <RootNamespace>System.Diagnostics.Debug</RootNamespace>
+    <AssemblyVersion>4.0.10.0</AssemblyVersion>
+    <DefineConstants>$(DefineConstants);PUBLIC_DEBUG</DefineConstants>
+    <IsPartialFacadeAssembly>true</IsPartialFacadeAssembly>
+    <NuGetTargetFrameworkMoniker>ASP.NetCore, version=v5.0</NuGetTargetFrameworkMoniker>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(TargetsUnix)' == 'true' ">
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -21,30 +24,25 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Windows_Release|AnyCPU' " />
   <ItemGroup>
     <Compile Include="Properties\InternalsVisibleTo.cs" />
-    <Compile Include="System\Diagnostics\Debug.cs" />
-    <Compile Include="System\Diagnostics\Debugger.cs" />
-    <Compile Include="System\Diagnostics\DebuggerBrowsableAttribute.cs" />
-    <Compile Include="System\Diagnostics\DebuggerBrowsableState.cs" />
-    <Compile Include="System\Diagnostics\DebuggerDisplayAttribute.cs" />
-    <Compile Include="System\Diagnostics\DebuggerHiddenAttribute.cs" />
-    <Compile Include="System\Diagnostics\DebuggerNonUserCodeAttribute.cs" />
-    <Compile Include="System\Diagnostics\DebuggerStepThroughAttribute.cs" />
-    <Compile Include="System\Diagnostics\DebuggerTypeProxyAttribute.cs" />
+    <Compile Include="$(CommonPath)\System\Diagnostics\Debug.cs">
+      <Link>System\Diagnostics\Debug.cs</Link>
+    </Compile>
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetsWindows)' == 'true' ">
-    <Compile Include="System\Diagnostics\Debug.Windows.cs" />
+    <Compile Include="$(CommonPath)\System\Diagnostics\Debug.Windows.cs">
+      <Link>System\Diagnostics\Debug.Windows.cs</Link>
+    </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\Interop.Libraries.cs">
       <Link>Common\Interop\Windows\Interop.Libraries.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.OutputDebugString.cs">
       <Link>Common\Interop\Windows\mincore\Interop.OutputDebugString.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\user32\Interop.MessageBox.cs">
-      <Link>Common\Interop\Windows\user32\Interop.MessageBox.cs</Link>
-    </Compile>
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetsUnix)' == 'true' ">
-    <Compile Include="System\Diagnostics\Debug.Unix.cs" />
+    <Compile Include="$(CommonPath)\System\Diagnostics\Debug.Unix.cs">
+      <Link>System\Diagnostics\Debug.Unix.cs</Link>
+    </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\Interop.Devices.cs">
       <Link>Common\Interop\Unix\Interop.Devices.cs</Link>
     </Compile>
