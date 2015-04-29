@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
+using Microsoft.Framework.WebEncoders;
 using System;
 using System.IO;
 using Xunit;
@@ -19,11 +20,11 @@ namespace System.Text.Encodings.Web
         public void HtmlEncode_PositiveTestCase()
         {
             // Arrange
-            IHtmlEncoder encoder = new HtmlEncoder(UnicodeRanges.All);
+            HtmlEncoder encoder = HtmlEncoder.Create(UnicodeRanges.All);
             StringWriter writer = new StringWriter();
 
             // Act
-            encoder.HtmlEncode("Hello+there!", writer);
+            encoder.Encode("Hello+there!", writer);
 
             // Assert
             Assert.Equal("Hello&#x2B;there!", writer.ToString());
@@ -59,11 +60,11 @@ namespace System.Text.Encodings.Web
         public void UrlEncode_PositiveTestCase()
         {
             // Arrange
-            IUrlEncoder encoder = new UrlEncoder(UnicodeRanges.All);
+            UrlEncoder encoder = UrlEncoder.Create(UnicodeRanges.All);
             StringWriter writer = new StringWriter();
 
             // Act
-            encoder.UrlEncode("Hello+there!", writer);
+            encoder.Encode("Hello+there!", writer);
 
             // Assert
             Assert.Equal("Hello%2Bthere!", writer.ToString());

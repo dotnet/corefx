@@ -83,6 +83,64 @@ namespace System.Text.Encodings.Web
         /// Set 'endOfString' to true if 'pChar' points to the last character in the stream.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static int GetScalarValueFromUtf16(char first, char? second, out bool wasSurrogatePair)
+        {
+            if (!Char.IsSurrogate(first))
+            {
+                wasSurrogatePair = false;
+                return first;
+            }
+            return GetScalarValueFromUtf16Slow(first, second, out wasSurrogatePair);
+        }
+
+        private static int GetScalarValueFromUtf16Slow(char first, char? second, out bool wasSurrogatePair)
+        {
+#if DEBUG
+            if (!Char.IsSurrogate(first))
+            {
+                Debug.Assert(false, "This case should've been handled by the fast path.");
+                wasSurrogatePair = false;
+                return first;
+            }
+#endif
+            if (Char.IsHighSurrogate(first))
+            {
+                if (second != null)
+                {
+                    if (Char.IsLowSurrogate(second.Value))
+                    {
+                        // valid surrogate pair - extract codepoint
+                        wasSurrogatePair = true;
+                        return GetScalarValueFromUtf16SurrogatePair(first, second.Value);
+                    }
+                    else
+                    {
+                        // unmatched surrogate - substitute
+                        wasSurrogatePair = false;
+                        return UNICODE_REPLACEMENT_CHAR;
+                    }
+                }
+                else
+                {
+                    // unmatched surrogate - substitute
+                    wasSurrogatePair = false;
+                    return UNICODE_REPLACEMENT_CHAR;
+                }
+            }
+            else
+            {
+                // unmatched surrogate - substitute
+                Debug.Assert(Char.IsLowSurrogate(first));
+                wasSurrogatePair = false;
+                return UNICODE_REPLACEMENT_CHAR;
+            }
+        }
+
+        /// <summary>
+        /// Given a UTF-16 character stream, reads the next scalar value from the stream.
+        /// Set 'endOfString' to true if 'pChar' points to the last character in the stream.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static int GetScalarValueFromUtf16(char* pChar, bool endOfString)
         {
             // This method is marked as AggressiveInlining to handle the common case of a non-surrogate

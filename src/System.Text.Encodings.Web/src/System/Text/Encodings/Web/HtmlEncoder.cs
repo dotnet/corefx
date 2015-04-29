@@ -5,9 +5,10 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.CompilerServices;
+using System.Text.Encodings.Web;
 using System.Threading;
 
-namespace System.Text.Encodings.Web
+namespace Microsoft.Framework.WebEncoders
 {
     /// <summary>
     /// A class which can perform HTML encoding given an allow list of characters which
@@ -18,10 +19,10 @@ namespace System.Text.Encodings.Web
     /// and &gt;), even if the filter provided in the constructor allows such characters.
     /// Once constructed, instances of this class are thread-safe for multiple callers.
     /// </remarks>
-    public unsafe sealed class HtmlEncoder : IHtmlEncoder
+    public unsafe sealed class HtmlEncoderOld : IHtmlEncoder
     {
         // The default HtmlEncoder (Basic Latin), instantiated on demand
-        private static HtmlEncoder _defaultEncoder;
+        private static HtmlEncoderOld _defaultEncoder;
 
         // The inner encoder, responsible for the actual encoding routines
         private readonly HtmlUnicodeEncoder _innerUnicodeEncoder;
@@ -30,7 +31,7 @@ namespace System.Text.Encodings.Web
         /// Instantiates an encoder using <see cref="UnicodeRanges.BasicLatin"/> as its allow list.
         /// Any character not in the <see cref="UnicodeRanges.BasicLatin"/> range will be escaped.
         /// </summary>
-        public HtmlEncoder()
+        public HtmlEncoderOld()
             : this(HtmlUnicodeEncoder.BasicLatin)
         {
         }
@@ -40,7 +41,7 @@ namespace System.Text.Encodings.Web
         /// pass through the encoder unescaped. Any character not in the set of ranges specified
         /// by <paramref name="allowedRanges"/> will be escaped.
         /// </summary>
-        public HtmlEncoder(params UnicodeRange[] allowedRanges)
+        public HtmlEncoderOld(params UnicodeRange[] allowedRanges)
             : this(new HtmlUnicodeEncoder(new CodePointFilter(allowedRanges)))
         {
         }
@@ -50,25 +51,25 @@ namespace System.Text.Encodings.Web
         /// set returned by <paramref name="filter"/>'s <see cref="ICodePointFilter.GetAllowedCodePoints"/>
         /// method will be escaped.
         /// </summary>
-        public HtmlEncoder(ICodePointFilter filter)
+        public HtmlEncoderOld(ICodePointFilter filter)
             : this(new HtmlUnicodeEncoder(CodePointFilter.Wrap(filter)))
         {
         }
 
-        private HtmlEncoder(HtmlUnicodeEncoder innerEncoder)
+        private HtmlEncoderOld(HtmlUnicodeEncoder innerEncoder)
         {
             Debug.Assert(innerEncoder != null);
             _innerUnicodeEncoder = innerEncoder;
         }
 
         /// <summary>
-        /// A default instance of <see cref="HtmlEncoder"/>.
+        /// A default instance of <see cref="HtmlEncoderOld"/>.
         /// </summary>
         /// <remarks>
         /// This normally corresponds to <see cref="UnicodeRanges.BasicLatin"/>. However, this property is
         /// settable so that a developer can change the default implementation application-wide.
         /// </remarks>
-        public static HtmlEncoder Default
+        public static HtmlEncoderOld Default
         {
             get
             {
@@ -85,9 +86,9 @@ namespace System.Text.Encodings.Web
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)] // the JITter can attempt to inline the caller itself without worrying about us
-        private static HtmlEncoder CreateDefaultEncoderSlow()
+        private static HtmlEncoderOld CreateDefaultEncoderSlow()
         {
-            var onDemandEncoder = new HtmlEncoder();
+            var onDemandEncoder = new HtmlEncoderOld();
             return Interlocked.CompareExchange(ref _defaultEncoder, onDemandEncoder, null) ?? onDemandEncoder;
         }
 

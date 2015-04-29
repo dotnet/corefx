@@ -4,7 +4,7 @@
 using System;
 using System.IO;
 
-namespace System.Text.Encodings.Web
+namespace Microsoft.Framework.WebEncoders
 {
     /// <summary>
     /// Helpful extension methods for the encoder classes.

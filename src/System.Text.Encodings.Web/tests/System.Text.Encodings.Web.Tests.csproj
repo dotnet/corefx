@@ -32,6 +32,7 @@
     <Compile Include="Extensions.cs" />
     <Compile Include="HtmlEncoderTests.cs" />
     <Compile Include="JavaScriptStringEncoderTests.cs" />
+    <Compile Include="PerformanceTests.cs" />
     <Compile Include="UnicodeEncoderBaseTests.cs" />
     <Compile Include="UnicodeHelpersTests.cs" />
     <Compile Include="UnicodeRangesTests.cs" />
