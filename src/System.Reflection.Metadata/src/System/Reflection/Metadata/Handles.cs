@@ -1374,10 +1374,10 @@ namespace System.Reflection.Metadata
         private const uint tokenType = TokenTypeIds.AssemblyRef;
 
         // bits:
-        //  0..24: Heap index or Virtual index
-        // 25..30: TokenTypeId: AssemblyRef
+        //  0..24: row id or virtual index
+        // 25..30: zero
         //     31: IsVirtual
-        private readonly uint _token;
+        private readonly uint _virtualBitAndRowId;
 
         internal enum VirtualIndex
         {
@@ -1393,7 +1393,9 @@ namespace System.Reflection.Metadata
 
         private AssemblyReferenceHandle(uint token)
         {
-            _token = token;
+            Debug.Assert((token & TokenTypeIds.TokenTypeMask) == tokenType);
+
+            _virtualBitAndRowId = token & TokenTypeIds.VirtualBitAndRowIdMask;
         }
 
         internal static AssemblyReferenceHandle FromRowId(uint rowId)
@@ -1410,7 +1412,7 @@ namespace System.Reflection.Metadata
 
         public static implicit operator Handle(AssemblyReferenceHandle handle)
         {
-            return new Handle(handle._token);
+            return new Handle(handle._virtualBitAndRowId | tokenType);
         }
 
         public static explicit operator AssemblyReferenceHandle(Handle handle)
@@ -1427,42 +1429,42 @@ namespace System.Reflection.Metadata
         {
             get
             {
-                return (_token & TokenTypeIds.VirtualBitAndRowIdMask) == 0;
+                return _virtualBitAndRowId == 0;
             }
         }
 
         internal bool IsVirtual
         {
-            get { return (_token & TokenTypeIds.VirtualTokenMask) != 0; }
+            get { return (_virtualBitAndRowId & TokenTypeIds.VirtualTokenMask) != 0; }
         }
 
-        internal uint Token { get { return _token; } }
+        internal uint Token { get { return _virtualBitAndRowId | tokenType; } }
 
-        internal uint RowId { get { return _token & TokenTypeIds.RIDMask; } }
+        internal uint RowId { get { return _virtualBitAndRowId & TokenTypeIds.RIDMask; } }
 
         public static bool operator ==(AssemblyReferenceHandle left, AssemblyReferenceHandle right)
         {
-            return left._token == right._token;
+            return left._virtualBitAndRowId == right._virtualBitAndRowId;
         }
 
         public override bool Equals(object obj)
         {
-            return obj is AssemblyReferenceHandle && ((AssemblyReferenceHandle)obj)._token == _token;
+            return obj is AssemblyReferenceHandle && ((AssemblyReferenceHandle)obj)._virtualBitAndRowId == _virtualBitAndRowId;
         }
 
         public bool Equals(AssemblyReferenceHandle other)
         {
-            return _token == other._token;
+            return _virtualBitAndRowId == other._virtualBitAndRowId;
         }
 
         public override int GetHashCode()
         {
-            return _token.GetHashCode();
+            return _virtualBitAndRowId.GetHashCode();
         }
 
         public static bool operator !=(AssemblyReferenceHandle left, AssemblyReferenceHandle right)
         {
-            return left._token != right._token;
+            return left._virtualBitAndRowId != right._virtualBitAndRowId;
         }
     }
 
@@ -1805,12 +1807,12 @@ namespace System.Reflection.Metadata
     public struct UserStringHandle : IEquatable<UserStringHandle>
     {
         private const uint tokenType = TokenTypeIds.UserString;
-        private readonly uint _token;
+        private readonly uint _virtualBitAndIndex;
 
         private UserStringHandle(uint token)
         {
             Debug.Assert((token & TokenTypeIds.TokenTypeMask) == tokenType);
-            _token = token;
+            _virtualBitAndIndex = token & TokenTypeIds.VirtualBitAndRowIdMask;
         }
 
         internal static UserStringHandle FromIndex(uint heapIndex)
@@ -1820,7 +1822,7 @@ namespace System.Reflection.Metadata
 
         public static implicit operator Handle(UserStringHandle handle)
         {
-            return new Handle(handle._token);
+            return new Handle(handle._virtualBitAndIndex | tokenType);
         }
 
         public static explicit operator UserStringHandle(Handle handle)
@@ -1837,7 +1839,7 @@ namespace System.Reflection.Metadata
         {
             get
             {
-                return (_token & TokenTypeIds.RIDMask) == 0;
+                return _virtualBitAndIndex == 0;
             }
         }
 
@@ -1845,33 +1847,33 @@ namespace System.Reflection.Metadata
         {
             get
             {
-                return (int)(_token & TokenTypeIds.RIDMask);
+                return (int)(_virtualBitAndIndex & TokenTypeIds.RIDMask);
             }
         }
 
         public static bool operator ==(UserStringHandle left, UserStringHandle right)
         {
-            return left._token == right._token;
+            return left._virtualBitAndIndex == right._virtualBitAndIndex;
         }
 
         public override bool Equals(object obj)
         {
-            return obj is UserStringHandle && ((UserStringHandle)obj)._token == _token;
+            return obj is UserStringHandle && ((UserStringHandle)obj)._virtualBitAndIndex == _virtualBitAndIndex;
         }
 
         public bool Equals(UserStringHandle other)
         {
-            return _token == other._token;
+            return _virtualBitAndIndex == other._virtualBitAndIndex;
         }
 
         public override int GetHashCode()
         {
-            return _token.GetHashCode();
+            return _virtualBitAndIndex.GetHashCode();
         }
 
         public static bool operator !=(UserStringHandle left, UserStringHandle right)
         {
-            return left._token != right._token;
+            return left._virtualBitAndIndex != right._virtualBitAndIndex;
         }
     }
 
@@ -1880,9 +1882,9 @@ namespace System.Reflection.Metadata
     {
         // bits:
         //  0..24: Heap index or Virtual index
-        // 25..30: TokenTypeId: String, WinRTPrefixedString
+        // 25..30: StringKind: String, WinRTPrefixedString, DotTerminatedString
         //     31: IsVirtual
-        private readonly uint _token;
+        private readonly uint _value;
 
         internal enum VirtualIndex
         {
@@ -1963,47 +1965,50 @@ namespace System.Reflection.Metadata
             Count
         }
 
-        private StringHandle(uint token)
+        private StringHandle(uint value)
         {
-            Debug.Assert((token & TokenTypeIds.TokenTypeMask) == TokenTypeIds.String ||
-                         (token & TokenTypeIds.TokenTypeMask) == TokenTypeIds.WinRTPrefixedString ||
-                         (token & TokenTypeIds.TokenTypeMask) == TokenTypeIds.DotTerminatedString);
-            _token = token;
+            Debug.Assert((value & ~TokenTypeIds.StringOrNamespaceValueMask) == 0);
+
+            Debug.Assert((value & TokenTypeIds.StringOrNamespaceKindMask) == (uint)StringKind.Plain
+                      || (value & TokenTypeIds.StringOrNamespaceKindMask) == (uint)StringKind.WinRTPrefixed
+                      || (value & TokenTypeIds.StringOrNamespaceKindMask) == (uint)StringKind.DotTerminated);
+
+            _value = value;
         }
 
         internal static StringHandle FromIndex(uint heapIndex)
         {
             Debug.Assert(TokenTypeIds.IsValidRowId(heapIndex));
-            return new StringHandle(TokenTypeIds.String | heapIndex);
+            return new StringHandle(heapIndex);
         }
 
         internal static StringHandle FromVirtualIndex(VirtualIndex virtualIndex)
         {
             Debug.Assert(virtualIndex < VirtualIndex.Count);
-            return new StringHandle(TokenTypeIds.VirtualTokenMask | TokenTypeIds.String | (uint)virtualIndex);
+            return new StringHandle(TokenTypeIds.VirtualTokenMask | (uint)virtualIndex);
         }
 
         internal StringHandle WithWinRTPrefix()
         {
-            Debug.Assert(!IsVirtual);
-            return new StringHandle(TokenTypeIds.VirtualTokenMask | TokenTypeIds.WinRTPrefixedString | (uint)Index);
+            Debug.Assert(!IsVirtual && !IsNil);
+            return new StringHandle(TokenTypeIds.VirtualTokenMask | (uint)StringKind.WinRTPrefixed | (uint)Index);
         }
 
         internal StringHandle WithDotTermination()
         {
-            Debug.Assert(!IsVirtual);
-            return new StringHandle(TokenTypeIds.DotTerminatedString | (uint)Index);
+            Debug.Assert(!IsVirtual && !IsNil);
+            return new StringHandle((uint)StringKind.DotTerminated | (uint)Index);
         }
 
         internal StringHandle SuffixRaw(int prefixByteLength)
         {
             Debug.Assert(!IsVirtual);
-            return new StringHandle(TokenTypeIds.String | (uint)(Index + prefixByteLength));
+            return new StringHandle((uint)(Index + prefixByteLength));
         }
 
         public static implicit operator Handle(StringHandle handle)
         {
-            return new Handle(handle._token);
+            return new Handle(handle._value | TokenTypeIds.String);
         }
 
         public static explicit operator StringHandle(Handle handle)
@@ -2013,27 +2018,27 @@ namespace System.Reflection.Metadata
                 Handle.ThrowInvalidCast();
             }
 
-            return new StringHandle(handle.value);
+            return new StringHandle(handle.value & TokenTypeIds.StringOrNamespaceValueMask);
         }
 
         public bool IsNil
         {
             get
             {
-                return (_token & (TokenTypeIds.VirtualTokenMask | TokenTypeIds.RIDMask)) == 0;
+                return _value == 0;
             }
         }
 
         internal bool IsVirtual
         {
-            get { return (_token & TokenTypeIds.VirtualTokenMask) != 0; }
+            get { return (_value & TokenTypeIds.VirtualTokenMask) != 0; }
         }
 
         internal int Index
         {
             get
             {
-                return (int)(_token & TokenTypeIds.RIDMask);
+                return (int)(_value & TokenTypeIds.RIDMask);
             }
         }
 
@@ -2041,33 +2046,33 @@ namespace System.Reflection.Metadata
         {
             get
             {
-                return (StringKind)((_token & TokenTypeIds.StringOrNamespaceKindMask) >> TokenTypeIds.RowIdBitCount);
+                return (StringKind)((_value & TokenTypeIds.StringOrNamespaceKindMask));
             }
         }
 
         public static bool operator ==(StringHandle left, StringHandle right)
         {
-            return left._token == right._token;
+            return left._value == right._value;
         }
 
         public override bool Equals(object obj)
         {
-            return obj is StringHandle && ((StringHandle)obj)._token == _token;
+            return obj is StringHandle && ((StringHandle)obj)._value == _value;
         }
 
         public bool Equals(StringHandle other)
         {
-            return _token == other._token;
+            return _value == other._value;
         }
 
         public override int GetHashCode()
         {
-            return _token.GetHashCode();
+            return _value.GetHashCode();
         }
 
         public static bool operator !=(StringHandle left, StringHandle right)
         {
-            return left._token != right._token;
+            return left._value != right._value;
         }
     }
 
@@ -2079,7 +2084,7 @@ namespace System.Reflection.Metadata
         //
         // bits:
         //  0..24: Heap index or Virtual index
-        // 25..30: TokenTypeId: Namespace or SyntheticNamespace
+        // 25..30: NamespaceKind
         //     31: IsVirtual
         //
         // At this time, IsVirtual is always false because namespace names come from type definitions 
@@ -2092,31 +2097,33 @@ namespace System.Reflection.Metadata
         // in the string heap. This is used to represent namespaces that are parents of other namespaces
         // but no type definitions or forwarders of their own.
         //
-        private readonly uint _token;
+        private readonly uint _value;
 
-        private NamespaceDefinitionHandle(uint token)
+        private NamespaceDefinitionHandle(uint value)
         {
-            Debug.Assert((token & TokenTypeIds.TokenTypeMask) == TokenTypeIds.Namespace ||
-                         (token & TokenTypeIds.TokenTypeMask) == TokenTypeIds.SyntheticNamespace);
+            Debug.Assert((value & ~TokenTypeIds.StringOrNamespaceValueMask) == 0);
 
-            _token = token;
+            Debug.Assert((value & TokenTypeIds.StringOrNamespaceKindMask) == (uint)NamespaceKind.Plain
+                      || (value & TokenTypeIds.StringOrNamespaceKindMask) == (uint)NamespaceKind.Synthetic);
+
+            _value = value;
         }
 
         internal static NamespaceDefinitionHandle FromIndexOfFullName(uint stringHeapIndex)
         {
             Debug.Assert(TokenTypeIds.IsValidRowId(stringHeapIndex));
-            return new NamespaceDefinitionHandle(TokenTypeIds.Namespace | stringHeapIndex);
+            return new NamespaceDefinitionHandle(stringHeapIndex);
         }
 
         internal static NamespaceDefinitionHandle FromIndexOfSimpleName(uint stringHeapIndex)
         {
             Debug.Assert(TokenTypeIds.IsValidRowId(stringHeapIndex));
-            return new NamespaceDefinitionHandle(TokenTypeIds.SyntheticNamespace | stringHeapIndex);
+            return new NamespaceDefinitionHandle((uint)NamespaceKind.Synthetic | stringHeapIndex);
         }
 
         public static implicit operator Handle(NamespaceDefinitionHandle handle)
         {
-            return new Handle(handle._token);
+            return new Handle(handle._value | TokenTypeIds.Namespace);
         }
 
         public static explicit operator NamespaceDefinitionHandle(Handle handle)
@@ -2126,14 +2133,14 @@ namespace System.Reflection.Metadata
                 Handle.ThrowInvalidCast();
             }
 
-            return new NamespaceDefinitionHandle(handle.value);
+            return new NamespaceDefinitionHandle(handle.value & TokenTypeIds.StringOrNamespaceValueMask);
         }
 
         public bool IsNil
         {
             get
             {
-                return (_token & (TokenTypeIds.VirtualTokenMask | TokenTypeIds.RIDMask)) == 0;
+                return (_value & (TokenTypeIds.VirtualTokenMask | TokenTypeIds.RIDMask)) == 0;
             }
         }
 
@@ -2141,7 +2148,7 @@ namespace System.Reflection.Metadata
         {
             get
             {
-                return (int)(_token & TokenTypeIds.RIDMask);
+                return (int)(_value & TokenTypeIds.RIDMask);
             }
         }
 
@@ -2149,7 +2156,7 @@ namespace System.Reflection.Metadata
         {
             get
             {
-                return (_token & TokenTypeIds.VirtualTokenMask) != 0;
+                return (_value & TokenTypeIds.VirtualTokenMask) != 0;
             }
         }
 
@@ -2157,7 +2164,7 @@ namespace System.Reflection.Metadata
         {
             get
             {
-                return (NamespaceKind)((_token & TokenTypeIds.StringOrNamespaceKindMask) >> TokenTypeIds.RowIdBitCount);
+                return (NamespaceKind)(_value & TokenTypeIds.StringOrNamespaceKindMask);
             }
         }
 
@@ -2165,7 +2172,7 @@ namespace System.Reflection.Metadata
         {
             get
             {
-                return (_token & (TokenTypeIds.TokenTypeMask)) != TokenTypeIds.SyntheticNamespace;
+                return NamespaceKind == NamespaceKind.Plain;
             }
         }
 
@@ -2178,32 +2185,32 @@ namespace System.Reflection.Metadata
 
         public static bool operator ==(NamespaceDefinitionHandle left, NamespaceDefinitionHandle right)
         {
-            return left._token == right._token;
+            return left._value == right._value;
         }
 
         public int CompareTo(NamespaceDefinitionHandle other)
         {
-            return TokenTypeIds.CompareTokens(_token, other._token);
+            return TokenTypeIds.CompareTokens(_value, other._value);
         }
 
         public override bool Equals(object obj)
         {
-            return obj is NamespaceDefinitionHandle && ((NamespaceDefinitionHandle)obj)._token == _token;
+            return obj is NamespaceDefinitionHandle && ((NamespaceDefinitionHandle)obj)._value == _value;
         }
 
         public bool Equals(NamespaceDefinitionHandle other)
         {
-            return _token == other._token;
+            return _value == other._value;
         }
 
         public override int GetHashCode()
         {
-            return _token.GetHashCode();
+            return _value.GetHashCode();
         }
 
         public static bool operator !=(NamespaceDefinitionHandle left, NamespaceDefinitionHandle right)
         {
-            return left._token != right._token;
+            return left._value != right._value;
         }
     }
 
@@ -2214,9 +2221,9 @@ namespace System.Reflection.Metadata
 
         // bits:
         //  0..24: Heap index or Virtual Value (16 bits) + Virtual Index (8 bits)
-        // 25..30: TokenTypeId: Blob
+        // 25..30: zero
         //     31: IsVirtual
-        private readonly uint _token;
+        private readonly uint _virtualBitAndIndex;
 
         internal enum VirtualIndex : byte
         {
@@ -2237,22 +2244,22 @@ namespace System.Reflection.Metadata
             Count
         }
 
-        private BlobHandle(uint token)
+        private BlobHandle(uint virtualBitAndIndex)
         {
-            Debug.Assert((token & TokenTypeIds.TokenTypeMask) == tokenType);
-            _token = token;
+            Debug.Assert((virtualBitAndIndex & TokenTypeIds.TokenTypeMask) == 0);
+            _virtualBitAndIndex = virtualBitAndIndex;
         }
 
         internal static BlobHandle FromIndex(uint heapIndex)
         {
             Debug.Assert(TokenTypeIds.IsValidRowId(heapIndex));
-            return new BlobHandle(heapIndex | tokenType);
+            return new BlobHandle(heapIndex);
         }
 
         internal static BlobHandle FromVirtualIndex(VirtualIndex virtualIndex, ushort virtualValue)
         {
             Debug.Assert(virtualIndex < VirtualIndex.Count);
-            return new BlobHandle(TokenTypeIds.VirtualTokenMask | tokenType | (uint)(virtualValue << 8) | (uint)virtualIndex);
+            return new BlobHandle(TokenTypeIds.VirtualTokenMask | (uint)(virtualValue << 8) | (uint)virtualIndex);
         }
 
         internal const int TemplateParameterOffset_AttributeUsageTarget = 2;
@@ -2269,7 +2276,7 @@ namespace System.Reflection.Metadata
 
         public static implicit operator Handle(BlobHandle handle)
         {
-            return new Handle(handle._token);
+            return new Handle(handle._virtualBitAndIndex | tokenType);
         }
 
         public static explicit operator BlobHandle(Handle handle)
@@ -2279,14 +2286,14 @@ namespace System.Reflection.Metadata
                 Handle.ThrowInvalidCast();
             }
 
-            return new BlobHandle(handle.value);
+            return new BlobHandle(handle.value & TokenTypeIds.VirtualBitAndRowIdMask);
         }
 
         public bool IsNil
         {
             get
             {
-                return (_token & (TokenTypeIds.VirtualTokenMask | TokenTypeIds.RIDMask)) == 0;
+                return _virtualBitAndIndex == 0;
             }
         }
 
@@ -2295,7 +2302,7 @@ namespace System.Reflection.Metadata
             get
             {
                 Debug.Assert(!IsVirtual);
-                return (int)(_token & TokenTypeIds.RIDMask);
+                return (int)(_virtualBitAndIndex & TokenTypeIds.RIDMask);
             }
         }
 
@@ -2303,44 +2310,44 @@ namespace System.Reflection.Metadata
         {
             get
             {
-                return (_token & TokenTypeIds.VirtualTokenMask) != 0;
+                return (_virtualBitAndIndex & TokenTypeIds.VirtualTokenMask) != 0;
             }
         }
 
         internal VirtualIndex GetVirtualIndex()
         {
             Debug.Assert(IsVirtual);
-            return (VirtualIndex)(_token & 0xff);
+            return (VirtualIndex)(_virtualBitAndIndex & 0xff);
         }
 
         private ushort VirtualValue
         {
-            get { return unchecked((ushort)(_token >> 8)); }
+            get { return unchecked((ushort)(_virtualBitAndIndex >> 8)); }
         }
 
         public static bool operator ==(BlobHandle left, BlobHandle right)
         {
-            return left._token == right._token;
+            return left._virtualBitAndIndex == right._virtualBitAndIndex;
         }
 
         public override bool Equals(object obj)
         {
-            return obj is BlobHandle && ((BlobHandle)obj)._token == _token;
+            return obj is BlobHandle && ((BlobHandle)obj)._virtualBitAndIndex == _virtualBitAndIndex;
         }
 
         public bool Equals(BlobHandle other)
         {
-            return _token == other._token;
+            return _virtualBitAndIndex == other._virtualBitAndIndex;
         }
 
         public override int GetHashCode()
         {
-            return _token.GetHashCode();
+            return _virtualBitAndIndex.GetHashCode();
         }
 
         public static bool operator !=(BlobHandle left, BlobHandle right)
         {
-            return left._token != right._token;
+            return left._virtualBitAndIndex != right._virtualBitAndIndex;
         }
     }
 
@@ -2348,22 +2355,23 @@ namespace System.Reflection.Metadata
     public struct GuidHandle : IEquatable<GuidHandle>
     {
         private const uint tokenType = TokenTypeIds.Guid;
-        private readonly uint _token;
+        private readonly uint _virtualBitAndIndex;
 
-        private GuidHandle(uint token)
+        private GuidHandle(uint virtualBitAndIndex)
         {
-            Debug.Assert((token & TokenTypeIds.TokenTypeMask) == tokenType);
-            _token = token;
+            Debug.Assert((virtualBitAndIndex & TokenTypeIds.TokenTypeMask) == 0);
+            _virtualBitAndIndex = virtualBitAndIndex;
         }
 
         internal static GuidHandle FromIndex(uint heapIndex)
         {
-            return new GuidHandle(heapIndex | tokenType);
+            Debug.Assert(TokenTypeIds.IsValidRowId(heapIndex));
+            return new GuidHandle(heapIndex);
         }
 
         public static implicit operator Handle(GuidHandle handle)
         {
-            return new Handle(handle._token);
+            return new Handle(handle._virtualBitAndIndex | tokenType);
         }
 
         public static explicit operator GuidHandle(Handle handle)
@@ -2373,14 +2381,14 @@ namespace System.Reflection.Metadata
                 Handle.ThrowInvalidCast();
             }
 
-            return new GuidHandle(handle.value);
+            return new GuidHandle(handle.value & TokenTypeIds.VirtualBitAndRowIdMask);
         }
 
         public bool IsNil
         {
             get
             {
-                return (_token & (TokenTypeIds.VirtualTokenMask | TokenTypeIds.RIDMask)) == 0;
+                return _virtualBitAndIndex == 0;
             }
         }
 
@@ -2388,33 +2396,33 @@ namespace System.Reflection.Metadata
         {
             get
             {
-                return (int)(_token & TokenTypeIds.RIDMask);
+                return (int)(_virtualBitAndIndex & TokenTypeIds.RIDMask);
             }
         }
 
         public static bool operator ==(GuidHandle left, GuidHandle right)
         {
-            return left._token == right._token;
+            return left._virtualBitAndIndex == right._virtualBitAndIndex;
         }
 
         public override bool Equals(object obj)
         {
-            return obj is GuidHandle && ((GuidHandle)obj)._token == _token;
+            return obj is GuidHandle && ((GuidHandle)obj)._virtualBitAndIndex == _virtualBitAndIndex;
         }
 
         public bool Equals(GuidHandle other)
         {
-            return _token == other._token;
+            return _virtualBitAndIndex == other._virtualBitAndIndex;
         }
 
         public override int GetHashCode()
         {
-            return _token.GetHashCode();
+            return _virtualBitAndIndex.GetHashCode();
         }
 
         public static bool operator !=(GuidHandle left, GuidHandle right)
         {
-            return left._token != right._token;
+            return left._virtualBitAndIndex != right._virtualBitAndIndex;
         }
     }
 }

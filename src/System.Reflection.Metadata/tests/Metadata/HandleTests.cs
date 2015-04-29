@@ -16,7 +16,6 @@ namespace System.Reflection.Metadata.Tests
 
             Action<Handle, HandleKind> assert = (handle, expectedKind) =>
             {
-                Assert.False(expectedKinds.Count == 0, "Repeat handle in tests below.");
                 Assert.Equal(expectedKind, handle.Kind);
                 expectedKinds.Remove(expectedKind);
             };
@@ -50,30 +49,18 @@ namespace System.Reflection.Metadata.Tests
             assert(default(ConstantHandle), HandleKind.Constant);
             assert(default(ManifestResourceHandle), HandleKind.ManifestResource);
             assert(default(AssemblyFileHandle), HandleKind.AssemblyFile);
-
             assert(default(MethodImplementationHandle), HandleKind.MethodImplementation);
             assert(default(AssemblyFileHandle), HandleKind.AssemblyFile);
-
-            // Bug #: DevDiv: Bug 1048345: [System.Reflection.Metadata] For select handles, default(THandle) does not preserve type.
-            // Not changing this immediately, because it has been this way for a long time so need to check Roslyn compat.
-            // 
-            //assertEqual(default(StringHandle), HandleKind.String);
-            //assertEqual(default(AssemblyReferenceHandle), HandleKind.AssemblyReference);
-            //assertEqual(default(UserStringHandle), HandleKind.UserString);
-            //assertEqual(default(GuidHandle), HandleKind.Guid);
-            //assertEqual(default(BlobHandle), HandleKind.Blob);
-            //assertEqual(default(NamespaceDefinitionHandle), HandleKind.NamespaceDefinition);
-
-            // In the meantime, check using initialized handles behave as expected
-            assert(MetadataTokens.StringHandle(1), HandleKind.String);
-            assert(MetadataTokens.AssemblyReferenceHandle(1), HandleKind.AssemblyReference);
-            assert(MetadataTokens.UserStringHandle(1), HandleKind.UserString);
-            assert(MetadataTokens.GuidHandle(1), HandleKind.Guid);
-            assert(MetadataTokens.BlobHandle(1), HandleKind.Blob);
-            assert(NamespaceDefinitionHandle.FromIndexOfFullName(1), HandleKind.NamespaceDefinition);
+            assert(default(StringHandle), HandleKind.String);
+            assert(default(AssemblyReferenceHandle), HandleKind.AssemblyReference);
+            assert(default(UserStringHandle), HandleKind.UserString);
+            assert(default(GuidHandle), HandleKind.Guid);
+            assert(default(BlobHandle), HandleKind.Blob);
+            assert(default(NamespaceDefinitionHandle), HandleKind.NamespaceDefinition);
 
             Assert.True(expectedKinds.Count == 0, "Some handles are missing from this test: " + String.Join("," + Environment.NewLine, expectedKinds));
         }
+
         [Fact]
         public void HandleKindHidesSpecialStringAndNamespaces()
         {
@@ -98,7 +85,7 @@ namespace System.Reflection.Metadata.Tests
                         case (uint)HandleKind.String + 3:
                             Assert.Equal(HandleKind.String, handle.Kind);
 
-                            StringKind stringType = (StringKind)(i - (int)HandleKind.String);
+                            StringKind stringType = (StringKind)((i - (int)HandleKind.String) << TokenTypeIds.RowIdBitCount);
                             StringHandle stringHandle;
                             try
                             {
@@ -119,7 +106,7 @@ namespace System.Reflection.Metadata.Tests
                         case (uint)HandleKind.NamespaceDefinition + 3:
                             Assert.Equal(HandleKind.NamespaceDefinition, handle.Kind);
 
-                            NamespaceKind namespaceType = (NamespaceKind)(i - (int)HandleKind.NamespaceDefinition);
+                            NamespaceKind namespaceType = (NamespaceKind)((i - (int)HandleKind.NamespaceDefinition) << TokenTypeIds.RowIdBitCount);
                             NamespaceDefinitionHandle namespaceHandle;
                             try
                             {
