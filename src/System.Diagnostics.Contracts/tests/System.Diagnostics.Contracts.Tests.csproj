@@ -16,6 +16,14 @@
     <None Include="project.json" />
   </ItemGroup>
   <ItemGroup>
+    <!-- Compile tests against the contract, but copy our local-built implementation for testing -->  
+    <ProjectReference Include="..\src\System.Diagnostics.Contracts.csproj">  
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>  
+      <OutputItemType>Content</OutputItemType>  
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Targets>Build;DebugSymbolsProjectOutputGroup</Targets>
+    </ProjectReference>  
+  
     <ProjectReference Include="$(CommonTestPath)\XunitTraitsDiscoverers\XunitTraitsDiscoverers.csproj">
       <Project>{be8ed8c1-c314-4c4e-a929-64c9c8b3552a}</Project>
       <Name>XunitTraitsDiscoverers</Name>
