@@ -282,6 +282,38 @@ namespace System.Linq.Parallel.Tests
         [Theory]
         [MemberData(nameof(UnaryUnorderedOperators))]
         [MemberData(nameof(BinaryUnorderedOperators))]
+        public static void Join_Unordered(LabeledOperation source, LabeledOperation operation)
+        {
+            IntegerRangeSet seen = new IntegerRangeSet(DefaultStart, DefaultSize);
+            ParallelQuery<KeyValuePair<int, int>> query = operation.Item(DefaultStart / GroupFactor, DefaultSize / GroupFactor, source.Item)
+                .Join(operation.Item(DefaultStart, DefaultSize, source.Item), x => x, y => y / GroupFactor, (x, y) => new KeyValuePair<int, int>(x, y));
+            foreach (KeyValuePair<int, int> p in query)
+            {
+                Assert.Equal(p.Key, p.Value / GroupFactor);
+                seen.Add(p.Value);
+            }
+            seen.AssertComplete();
+        }
+
+        [Theory]
+        [MemberData(nameof(UnaryUnorderedOperators))]
+        [MemberData(nameof(BinaryUnorderedOperators))]
+        public static void Join_Unordered_NotPipelined(LabeledOperation source, LabeledOperation operation)
+        {
+            IntegerRangeSet seen = new IntegerRangeSet(DefaultStart, DefaultSize);
+            ParallelQuery<KeyValuePair<int, int>> query = operation.Item(DefaultStart / GroupFactor, DefaultSize / GroupFactor, source.Item)
+                .Join(operation.Item(DefaultStart, DefaultSize, source.Item), x => x, y => y / GroupFactor, (x, y) => new KeyValuePair<int, int>(x, y));
+            foreach (KeyValuePair<int, int> p in query.ToList())
+            {
+                Assert.Equal(p.Key, p.Value / GroupFactor);
+                seen.Add(p.Value);
+            }
+            seen.AssertComplete();
+        }
+
+        [Theory]
+        [MemberData(nameof(UnaryUnorderedOperators))]
+        [MemberData(nameof(BinaryUnorderedOperators))]
         public static void OfType_Unordered(LabeledOperation source, LabeledOperation operation)
         {
             IntegerRangeSet seen = new IntegerRangeSet(DefaultStart, DefaultSize);
