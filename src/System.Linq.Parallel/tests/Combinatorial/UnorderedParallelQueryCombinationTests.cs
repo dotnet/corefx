@@ -221,6 +221,40 @@ namespace System.Linq.Parallel.Tests
         [Theory]
         [MemberData(nameof(UnaryUnorderedOperators))]
         [MemberData(nameof(BinaryUnorderedOperators))]
+        public static void GroupJoin_Unordered(LabeledOperation source, LabeledOperation operation)
+        {
+            IntegerRangeSet seenKey = new IntegerRangeSet(DefaultStart / GroupFactor, DefaultSize / GroupFactor);
+            foreach (KeyValuePair<int, IEnumerable<int>> group in operation.Item(DefaultStart / GroupFactor, DefaultSize / GroupFactor, source.Item)
+                .GroupJoin(operation.Item(DefaultStart, DefaultSize, source.Item), x => x, y => y / GroupFactor, (k, g) => new KeyValuePair<int, IEnumerable<int>>(k, g)))
+            {
+                Assert.True(seenKey.Add(group.Key));
+                IntegerRangeSet seenElement = new IntegerRangeSet(group.Key * GroupFactor, GroupFactor);
+                Assert.All(group.Value, x => seenElement.Add(x));
+                seenElement.AssertComplete();
+            }
+            seenKey.AssertComplete();
+        }
+
+        [Theory]
+        [MemberData(nameof(UnaryUnorderedOperators))]
+        [MemberData(nameof(BinaryUnorderedOperators))]
+        public static void GroupJoin_Unordered_NotPipelined(LabeledOperation source, LabeledOperation operation)
+        {
+            IntegerRangeSet seenKey = new IntegerRangeSet(DefaultStart / GroupFactor, DefaultSize / GroupFactor);
+            foreach (KeyValuePair<int, IEnumerable<int>> group in operation.Item(DefaultStart / GroupFactor, DefaultSize / GroupFactor, source.Item)
+                .GroupJoin(operation.Item(DefaultStart, DefaultSize, source.Item), x => x, y => y / GroupFactor, (k, g) => new KeyValuePair<int, IEnumerable<int>>(k, g)).ToList())
+            {
+                Assert.True(seenKey.Add(group.Key));
+                IntegerRangeSet seenElement = new IntegerRangeSet(group.Key * GroupFactor, GroupFactor);
+                Assert.All(group.Value, x => seenElement.Add(x));
+                seenElement.AssertComplete();
+            }
+            seenKey.AssertComplete();
+        }
+
+        [Theory]
+        [MemberData(nameof(UnaryUnorderedOperators))]
+        [MemberData(nameof(BinaryUnorderedOperators))]
         public static void Intersect_Unordered(LabeledOperation source, LabeledOperation operation)
         {
             IntegerRangeSet seen = new IntegerRangeSet(DefaultStart, DefaultSize);

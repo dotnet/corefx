@@ -444,6 +444,40 @@ namespace System.Linq.Parallel.Tests
         [Theory]
         [MemberData(nameof(UnaryOperators))]
         [MemberData(nameof(BinaryOperators))]
+        public static void GroupJoin(LabeledOperation source, LabeledOperation operation)
+        {
+            int seenKey = DefaultStart / GroupFactor;
+            foreach (KeyValuePair<int, IEnumerable<int>> group in operation.Item(DefaultStart / GroupFactor, DefaultSize / GroupFactor, source.Item)
+                .GroupJoin(operation.Item(DefaultStart, DefaultSize, source.Item), x => x, y => y / GroupFactor, (k, g) => new KeyValuePair<int, IEnumerable<int>>(k, g)))
+            {
+                Assert.Equal(seenKey++, group.Key);
+                IntegerRangeSet elements = new IntegerRangeSet(group.Key * GroupFactor, GroupFactor);
+                Assert.All(group.Value, x => elements.Add(x));
+                elements.AssertComplete();
+            }
+            Assert.Equal((DefaultStart + DefaultSize) / GroupFactor, seenKey);
+        }
+
+        [Theory]
+        [MemberData(nameof(UnaryOperators))]
+        [MemberData(nameof(BinaryOperators))]
+        public static void GroupJoin_NotPipelined(LabeledOperation source, LabeledOperation operation)
+        {
+            int seenKey = DefaultStart / GroupFactor;
+            foreach (KeyValuePair<int, IEnumerable<int>> group in operation.Item(DefaultStart / GroupFactor, DefaultSize / GroupFactor, source.Item)
+                .GroupJoin(operation.Item(DefaultStart, DefaultSize, source.Item), x => x, y => y / GroupFactor, (k, g) => new KeyValuePair<int, IEnumerable<int>>(k, g)).ToList())
+            {
+                Assert.Equal(seenKey++, group.Key);
+                IntegerRangeSet elements = new IntegerRangeSet(group.Key * GroupFactor, GroupFactor);
+                Assert.All(group.Value, x => elements.Add(x));
+                elements.AssertComplete();
+            }
+            Assert.Equal((DefaultStart + DefaultSize) / GroupFactor, seenKey);
+        }
+
+        [Theory]
+        [MemberData(nameof(UnaryOperators))]
+        [MemberData(nameof(BinaryOperators))]
         public static void Intersect(LabeledOperation source, LabeledOperation operation)
         {
             int seen = DefaultStart;
