@@ -4,7 +4,7 @@
 using System;
 using System.IO;
 
-namespace System.Text.Encodings.Web
+namespace Microsoft.Framework.WebEncoders
 {
     /// <summary>
     /// Provides services for HTML-encoding input.

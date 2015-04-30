@@ -29,6 +29,9 @@
     <Compile Include="System\Text\Encodings\Web\IJavaScriptStringEncoder.cs" />
     <Compile Include="System\Text\Encodings\Web\IUrlEncoder.cs" />
     <Compile Include="System\Text\Encodings\Web\JavaScriptStringEncoder.cs" />
+    <Compile Include="System\Text\Encodings\Web\TextEncoderExtensions.cs" />
+    <Compile Include="System\Text\Encodings\Web\TextEncoderAdapters.cs" />
+    <Compile Include="System\Text\Encodings\Web\TextEncoder.cs" />
     <Compile Include="System\Text\Encodings\Web\UnicodeEncoderBase.cs" />
     <Compile Include="System\Text\Encodings\Web\UnicodeHelpers.cs" />
     <Compile Include="System\Text\Encodings\Web\UnicodeRange.cs" />

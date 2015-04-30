@@ -3,6 +3,7 @@
 
 using System;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using System.Text.Encodings.Web;
 
 namespace System.Text.Internal
@@ -72,6 +73,15 @@ namespace System.Text.Internal
             uint codePoint = (uint)c;
             int index = (int)(codePoint >> 5);
             int offset = (int)(codePoint & 0x1FU);
+            return ((_allowedCharsBitmap[index] >> offset) & 0x1U) != 0;
+        }
+
+        // Determines whether the given character can be returned unencoded.
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool IsUnicodeScalarAllowed(int unicodeScalar)
+        {
+            int index = unicodeScalar >> 5;
+            int offset = (int)(unicodeScalar & 0x1FU);
             return ((_allowedCharsBitmap[index] >> offset) & 0x1U) != 0;
         }
     }

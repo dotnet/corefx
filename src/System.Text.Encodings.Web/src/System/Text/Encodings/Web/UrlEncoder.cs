@@ -5,9 +5,10 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.CompilerServices;
+using System.Text.Encodings.Web;
 using System.Threading;
 
-namespace System.Text.Encodings.Web
+namespace Microsoft.Framework.WebEncoders
 {
     /// <summary>
     /// A class which can perform URL string escaping given an allow list of characters which
@@ -18,10 +19,10 @@ namespace System.Text.Encodings.Web
     /// and ?), even if the filter provided in the constructor allows such characters.
     /// Once constructed, instances of this class are thread-safe for multiple callers.
     /// </remarks>
-    public sealed class UrlEncoder : IUrlEncoder
+    public sealed class UrlEncoderOld : IUrlEncoder
     {
         // The default URL string encoder (Basic Latin), instantiated on demand
-        private static UrlEncoder _defaultEncoder;
+        private static UrlEncoderOld _defaultEncoder;
 
         // The inner encoder, responsible for the actual encoding routines
         private readonly UrlUnicodeEncoder _innerUnicodeEncoder;
@@ -30,7 +31,7 @@ namespace System.Text.Encodings.Web
         /// Instantiates an encoder using <see cref="UnicodeRanges.BasicLatin"/> as its allow list.
         /// Any character not in the <see cref="UnicodeRanges.BasicLatin"/> range will be escaped.
         /// </summary>
-        public UrlEncoder()
+        public UrlEncoderOld()
             : this(UrlUnicodeEncoder.BasicLatin)
         {
         }
@@ -40,7 +41,7 @@ namespace System.Text.Encodings.Web
         /// pass through the encoder unescaped. Any character not in the set of ranges specified
         /// by <paramref name="allowedRanges"/> will be escaped.
         /// </summary>
-        public UrlEncoder(params UnicodeRange[] allowedRanges)
+        public UrlEncoderOld(params UnicodeRange[] allowedRanges)
             : this(new UrlUnicodeEncoder(new CodePointFilter(allowedRanges)))
         {
         }
@@ -50,25 +51,25 @@ namespace System.Text.Encodings.Web
         /// set returned by <paramref name="filter"/>'s <see cref="ICodePointFilter.GetAllowedCodePoints"/>
         /// method will be escaped.
         /// </summary>
-        public UrlEncoder(ICodePointFilter filter)
+        public UrlEncoderOld(ICodePointFilter filter)
             : this(new UrlUnicodeEncoder(CodePointFilter.Wrap(filter)))
         {
         }
 
-        private UrlEncoder(UrlUnicodeEncoder innerEncoder)
+        private UrlEncoderOld(UrlUnicodeEncoder innerEncoder)
         {
             Debug.Assert(innerEncoder != null);
             _innerUnicodeEncoder = innerEncoder;
         }
 
         /// <summary>
-        /// A default instance of <see cref="UrlEncoder"/>.
+        /// A default instance of <see cref="UrlEncoderOld"/>.
         /// </summary>
         /// <remarks>
         /// This normally corresponds to <see cref="UnicodeRanges.BasicLatin"/>. However, this property is
         /// settable so that a developer can change the default implementation application-wide.
         /// </remarks>
-        public static UrlEncoder Default
+        public static UrlEncoderOld Default
         {
             get
             {
@@ -85,9 +86,9 @@ namespace System.Text.Encodings.Web
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)] // the JITter can attempt to inline the caller itself without worrying about us
-        private static UrlEncoder CreateDefaultEncoderSlow()
+        private static UrlEncoderOld CreateDefaultEncoderSlow()
         {
-            var onDemandEncoder = new UrlEncoder();
+            var onDemandEncoder = new UrlEncoderOld();
             return Interlocked.CompareExchange(ref _defaultEncoder, onDemandEncoder, null) ?? onDemandEncoder;
         }
 

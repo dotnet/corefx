@@ -5,9 +5,10 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.CompilerServices;
+using System.Text.Encodings.Web;
 using System.Threading;
 
-namespace System.Text.Encodings.Web
+namespace Microsoft.Framework.WebEncoders
 {
     /// <summary>
     /// A class which can perform JavaScript string escaping given an allow list of characters which
@@ -18,10 +19,10 @@ namespace System.Text.Encodings.Web
     /// and "), even if the filter provided in the constructor allows such characters.
     /// Once constructed, instances of this class are thread-safe for multiple callers.
     /// </remarks>
-    public sealed class JavaScriptStringEncoder : IJavaScriptStringEncoder
+    public sealed class JavaScriptStringEncoderOld : IJavaScriptStringEncoder
     {
         // The default JavaScript string encoder (Basic Latin), instantiated on demand
-        private static JavaScriptStringEncoder _defaultEncoder;
+        private static JavaScriptStringEncoderOld _defaultEncoder;
 
         // The inner encoder, responsible for the actual encoding routines
         private readonly JavaScriptStringUnicodeEncoder _innerUnicodeEncoder;
@@ -30,7 +31,7 @@ namespace System.Text.Encodings.Web
         /// Instantiates an encoder using <see cref="UnicodeRanges.BasicLatin"/> as its allow list.
         /// Any character not in the <see cref="UnicodeRanges.BasicLatin"/> range will be escaped.
         /// </summary>
-        public JavaScriptStringEncoder()
+        public JavaScriptStringEncoderOld()
             : this(JavaScriptStringUnicodeEncoder.BasicLatin)
         {
         }
@@ -40,7 +41,7 @@ namespace System.Text.Encodings.Web
         /// pass through the encoder unescaped. Any character not in the set of ranges specified
         /// by <paramref name="allowedRanges"/> will be escaped.
         /// </summary>
-        public JavaScriptStringEncoder(params UnicodeRange[] allowedRanges)
+        public JavaScriptStringEncoderOld(params UnicodeRange[] allowedRanges)
             : this(new JavaScriptStringUnicodeEncoder(new CodePointFilter(allowedRanges)))
         {
         }
@@ -50,25 +51,25 @@ namespace System.Text.Encodings.Web
         /// set returned by <paramref name="filter"/>'s <see cref="ICodePointFilter.GetAllowedCodePoints"/>
         /// method will be escaped.
         /// </summary>
-        public JavaScriptStringEncoder(ICodePointFilter filter)
+        public JavaScriptStringEncoderOld(ICodePointFilter filter)
             : this(new JavaScriptStringUnicodeEncoder(CodePointFilter.Wrap(filter)))
         {
         }
 
-        private JavaScriptStringEncoder(JavaScriptStringUnicodeEncoder innerEncoder)
+        private JavaScriptStringEncoderOld(JavaScriptStringUnicodeEncoder innerEncoder)
         {
             Debug.Assert(innerEncoder != null);
             _innerUnicodeEncoder = innerEncoder;
         }
 
         /// <summary>
-        /// A default instance of <see cref="JavaScriptStringEncoder"/>.
+        /// A default instance of <see cref="JavaScriptStringEncoderOld"/>.
         /// </summary>
         /// <remarks>
         /// This normally corresponds to <see cref="UnicodeRanges.BasicLatin"/>. However, this property is
         /// settable so that a developer can change the default implementation application-wide.
         /// </remarks>
-        public static JavaScriptStringEncoder Default
+        public static JavaScriptStringEncoderOld Default
         {
             get
             {
@@ -85,9 +86,9 @@ namespace System.Text.Encodings.Web
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)] // the JITter can attempt to inline the caller itself without worrying about us
-        private static JavaScriptStringEncoder CreateDefaultEncoderSlow()
+        private static JavaScriptStringEncoderOld CreateDefaultEncoderSlow()
         {
-            var onDemandEncoder = new JavaScriptStringEncoder();
+            var onDemandEncoder = new JavaScriptStringEncoderOld();
             return Interlocked.CompareExchange(ref _defaultEncoder, onDemandEncoder, null) ?? onDemandEncoder;
         }
 
