@@ -36,6 +36,34 @@ namespace System.Linq.Parallel.Tests
         [Theory]
         [MemberData(nameof(UnaryUnorderedOperators))]
         [MemberData(nameof(BinaryUnorderedOperators))]
+        public static void Concat_Unordered(LabeledOperation source, LabeledOperation operation)
+        {
+            IntegerRangeSet seen = new IntegerRangeSet(DefaultStart, DefaultSize);
+            foreach (int i in operation.Item(DefaultStart, DefaultSize / 2, source.Item)
+                .Concat(operation.Item(DefaultStart + DefaultSize / 2, DefaultSize / 2, source.Item)))
+            {
+                seen.Add(i);
+            }
+            seen.AssertComplete();
+        }
+
+        [Theory]
+        [MemberData(nameof(UnaryUnorderedOperators))]
+        [MemberData(nameof(BinaryUnorderedOperators))]
+        public static void Concat_Unordered_NotPipelined(LabeledOperation source, LabeledOperation operation)
+        {
+            IntegerRangeSet seen = new IntegerRangeSet(DefaultStart, DefaultSize);
+            Assert.All(
+                operation.Item(DefaultStart, DefaultSize / 2, source.Item)
+                    .Concat(operation.Item(DefaultStart + DefaultSize / 2, DefaultSize / 2, source.Item)).ToList(),
+                x => seen.Add(x)
+                );
+            seen.AssertComplete();
+        }
+
+        [Theory]
+        [MemberData(nameof(UnaryUnorderedOperators))]
+        [MemberData(nameof(BinaryUnorderedOperators))]
         public static void DefaultIfEmpty_Unordered(LabeledOperation source, LabeledOperation operation)
         {
             IntegerRangeSet seen = new IntegerRangeSet(DefaultStart, DefaultSize);

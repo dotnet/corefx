@@ -133,6 +133,36 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
+        [ActiveIssue(1332)]
+        [MemberData(nameof(UnaryOperators))]
+        [MemberData(nameof(BinaryOperators))]
+        public static void Concat(LabeledOperation source, LabeledOperation operation)
+        {
+            int seen = DefaultStart;
+            foreach (int i in operation.Item(DefaultStart, DefaultSize / 2, source.Item)
+                .Concat(operation.Item(DefaultStart + DefaultSize / 2, DefaultSize / 2, source.Item)))
+            {
+                Assert.Equal(seen++, i);
+            }
+            Assert.Equal(DefaultStart + DefaultSize, seen);
+        }
+
+        [Theory]
+        [ActiveIssue(1332)]
+        [MemberData(nameof(UnaryOperators))]
+        [MemberData(nameof(BinaryOperators))]
+        public static void Concat_NotPipelined(LabeledOperation source, LabeledOperation operation)
+        {
+            int seen = DefaultStart;
+            Assert.All(
+                operation.Item(DefaultStart, DefaultSize / 2, source.Item)
+                    .Concat(operation.Item(DefaultStart + DefaultSize / 2, DefaultSize / 2, source.Item)).ToList(),
+                x => Assert.Equal(seen++, x)
+                );
+            Assert.Equal(DefaultStart + DefaultSize, seen);
+        }
+
+        [Theory]
         [MemberData(nameof(UnaryOperators))]
         [MemberData(nameof(BinaryOperators))]
         public static void Contains_True(LabeledOperation source, LabeledOperation operation)
