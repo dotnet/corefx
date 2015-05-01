@@ -37,6 +37,8 @@
   </ItemGroup>
   <ItemGroup>
     <!-- Rewritten -->
+    <Compile Include="Directory\GetLastAccessTime_str.cs" />
+    <Compile Include="Directory\GetLastWriteTime_str.cs" />
     <Compile Include="Directory\SetLastWriteTime_str_dt.cs" />
     <Compile Include="Directory\SetLastAccessTime_str_dt.cs" />
     <Compile Include="DirectoryInfo\Create.cs" />
@@ -84,6 +86,7 @@
     <Compile Include="FSAssert.cs" />
     <Compile Include="FileSystemTest.cs" />
     <Compile Include="SetTime_str_dt.cs" />
+    <Compile Include="GetTime_str.cs" />
     <!-- Ported -->
     <Compile Include="PortedCommon\CommonUtilities.cs" />
     <Compile Include="PortedCommon\DllImports.cs" />
@@ -124,8 +127,6 @@
     <Compile Include="Directory\GetFiles_str_str_so.cs" />
     <Compile Include="Directory\GetFileSystemEntries_str.cs" />
     <Compile Include="Directory\GetFileSystemEntries_str_str.cs" />
-    <Compile Include="Directory\GetLastAccessTime_str.cs" />
-    <Compile Include="Directory\GetLastWriteTime_str.cs" />
     <Compile Include="Directory\GetSetTimes.cs" />
     <Compile Include="Directory\IEnumerator_IO_EnumerableAPIs.cs" />
     <Compile Include="Directory\Modify_FailSafe.cs" />
