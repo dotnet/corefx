@@ -9,12 +9,12 @@ namespace System.IO.FileSystem.Tests
 {
     public class Directory_SetCreationTime_str_dt : SetTime_str_dt
     {
-        protected override void m_Set(string path, DateTime creationTime)
+        protected override void SetTime(string path, DateTime creationTime)
         {
             Directory.SetCreationTime(path, creationTime);
         }
 
-        protected override DateTime m_Get(string path)
+        protected override DateTime GetTime(string path)
         {
             return Directory.GetCreationTime(path);
         }

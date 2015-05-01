@@ -18,7 +18,7 @@ namespace System.IO.FileSystem.Tests
         private readonly string NonExistantFileName = "nonexistant_file_name";
         private readonly TimeSpan CreateCheckGap = TimeSpan.FromMinutes(8);
 
-        protected abstract DateTime m_Get(string path);
+        protected abstract DateTime GetTime(string path);
 
         [Fact]
         public void FileNotFound()
@@ -26,7 +26,7 @@ namespace System.IO.FileSystem.Tests
             // If the directory described in the path parameter does not exist,
             // this method returns 12:00 midnight, January 1, 1601 A.D. (C.E.)
             // Coordinated Universal Time (UTC), adjusted to local time.
-            DateTime time = m_Get(NonExistantFileName);
+            DateTime time = GetTime(NonExistantFileName);
 
             Assert.Equal(time, new DateTime(1601, 1, 1, 0, 0, 0, DateTimeKind.Utc).ToLocalTime());
         }
@@ -35,7 +35,7 @@ namespace System.IO.FileSystem.Tests
         public void PathArgumentWhitespace()
         {
             // Check ArgumentException is thrown for only whitespace in path
-            Action<string> test = (s) => Assert.Throws<ArgumentException>(() => m_Get(s));
+            Action<string> test = (s) => Assert.Throws<ArgumentException>(() => GetTime(s));
 
             test("");
             test("    ");
@@ -57,7 +57,7 @@ namespace System.IO.FileSystem.Tests
         public void PathInvalidCharacters()
         {
             // Check ArgumentException is thrown for invalid characters in path
-            Action<string> test = (s) => Assert.Throws<ArgumentException>(() => m_Get(s));
+            Action<string> test = (s) => Assert.Throws<ArgumentException>(() => GetTime(s));
 
             foreach (char c in Path.GetInvalidPathChars())
                 test(c.ToString());
@@ -69,7 +69,7 @@ namespace System.IO.FileSystem.Tests
         public void PathArgumentNull()
         {
             // Check ArgumentNullException is thrown for null path argument
-            Assert.Throws<ArgumentNullException>(() => m_Get(null));
+            Assert.Throws<ArgumentNullException>(() => GetTime(null));
         }
 
         [Fact]
@@ -82,7 +82,7 @@ namespace System.IO.FileSystem.Tests
                 sb.Append("a");
             }
 
-            Assert.Throws<PathTooLongException>(() => m_Get(sb.ToString()));
+            Assert.Throws<PathTooLongException>(() => GetTime(sb.ToString()));
         }
 
         [Fact]
@@ -95,7 +95,7 @@ namespace System.IO.FileSystem.Tests
                 sb.Append("a");
             }
 
-            Assert.Throws<PathTooLongException>(() => m_Get(TestDirectory + Path.DirectorySeparatorChar + sb.ToString()));
+            Assert.Throws<PathTooLongException>(() => GetTime(TestDirectory + Path.DirectorySeparatorChar + sb.ToString()));
         }
 
         [Fact]
@@ -109,7 +109,7 @@ namespace System.IO.FileSystem.Tests
                 sb.Append("a");
             }
 
-            m_Get(sb.ToString());
+            GetTime(sb.ToString());
         }
 
         [Fact]
@@ -119,7 +119,7 @@ namespace System.IO.FileSystem.Tests
             // Verify all of the file times are within CreateCheckGap of DateTime.Now
             TestOnValidFileAndDirectory((path) => 
             {
-                DateTime time = m_Get(path);
+                DateTime time = GetTime(path);
                 Assert.True(CreateCheckGap > time.Subtract(DateTime.Now).Duration());
             });
         }

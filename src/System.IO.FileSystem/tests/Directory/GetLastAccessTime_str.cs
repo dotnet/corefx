@@ -9,7 +9,7 @@ namespace System.IO.FileSystem.Tests
 {
     public class Directory_GetLastAccessTime_str : GetTime_str
     {
-        protected override DateTime m_Get(string path)
+        protected override DateTime GetTime(string path)
         {
             return Directory.GetLastAccessTime(path);
         }

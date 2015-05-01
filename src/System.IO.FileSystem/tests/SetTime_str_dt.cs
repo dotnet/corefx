@@ -17,14 +17,14 @@ namespace System.IO.FileSystem.Tests
         private readonly string NonExistantFileName = "nonexistant_file_name";
         private readonly TimeSpan Accuracy = TimeSpan.FromSeconds(3);
 
-        protected abstract void m_Set(string path, DateTime time);
-        protected abstract DateTime m_Get(string path);
+        protected abstract void SetTime(string path, DateTime time);
+        protected abstract DateTime GetTime(string path);
 
         private void CheckPathArgumentException<T>(string path) where T : Exception
         {
-            Assert.Throws<T>(() => m_Set(path, default(DateTime)));
-            Assert.Throws<T>(() => m_Set(path, new DateTime(2000, 1, 1, 1, 1, 1, 1, DateTimeKind.Utc)));
-            Assert.Throws<T>(() => m_Set(path, new DateTime(1, 1, 1, 1, 1, 1, 1, DateTimeKind.Utc)));
+            Assert.Throws<T>(() => SetTime(path, default(DateTime)));
+            Assert.Throws<T>(() => SetTime(path, new DateTime(2000, 1, 1, 1, 1, 1, 1, DateTimeKind.Utc)));
+            Assert.Throws<T>(() => SetTime(path, new DateTime(1, 1, 1, 1, 1, 1, 1, DateTimeKind.Utc)));
         }
 
         [Fact]
@@ -131,8 +131,8 @@ namespace System.IO.FileSystem.Tests
             // Positive tests ensure that the last write time we read is within Accuracy of the last write time we set
             Action<DateTime> test = (time) => TestOnValidFileAndDirectory((path) =>
             {
-                m_Set(path, time);
-                Assert.True(Accuracy > m_Get(path).Subtract(time).Duration());
+                SetTime(path, time);
+                Assert.True(Accuracy > GetTime(path).Subtract(time).Duration());
             });
 
             test(new DateTime(1601, 1, 1, 1, 1, 1, 1, DateTimeKind.Unspecified));
@@ -148,8 +148,8 @@ namespace System.IO.FileSystem.Tests
             // Positive tests ensure that the last write time we read is within Accuracy of the last write time we set
             Action<DateTime> test = (time) => TestOnValidFileAndDirectory((path) =>
             {
-                m_Set(path, time);
-                Assert.True(Accuracy > m_Get(path).Subtract(time).Duration());
+                SetTime(path, time);
+                Assert.True(Accuracy > GetTime(path).Subtract(time).Duration());
             });
 
             test(DateTime.Today);
