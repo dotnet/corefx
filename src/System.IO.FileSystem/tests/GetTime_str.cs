@@ -113,7 +113,7 @@ namespace System.IO.FileSystem.Tests
         }
 
         [Fact]
-        public void PositiveTests()
+        public virtual void PositiveTests()
         {
             // Create a new file / directory
             // Verify all of the file times are within CreateCheckGap of DateTime.Now

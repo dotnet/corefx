@@ -126,7 +126,7 @@ namespace System.IO.FileSystem.Tests
         }
 
         [Fact]
-        public void PositiveTests()
+        public virtual void PositiveTests()
         {
             // Positive tests ensure that the last write time we read is within Accuracy of the last write time we set
             Action<DateTime> test = (time) => TestOnValidFileAndDirectory((path) =>
@@ -143,7 +143,7 @@ namespace System.IO.FileSystem.Tests
         }
 
         [Fact]
-        public void RelativeTimePositiveTests()
+        public virtual void RelativeTimePositiveTests()
         {
             // Positive tests ensure that the last write time we read is within Accuracy of the last write time we set
             Action<DateTime> test = (time) => TestOnValidFileAndDirectory((path) =>
