@@ -10,282 +10,155 @@ using System.Threading;
 using System.Runtime.CompilerServices;
 using Xunit;
 
-public class Directory_SetLastWriteTime_str_dt
+namespace System.IO.FileSystem.Tests
 {
-    public static String s_strDtTmVer = "2001/02/12 17.04";
-    public static String s_strClassMethod = "Directory.SetLastWriteTime()";
-    public static String s_strTFName = "SetLastWriteTime_str_dt.cs";
-    public static String s_strTFPath = Directory.GetCurrentDirectory();
-
-    [Fact]
-    public static void runTest()
+    public class Directory_SetLastWriteTime_str_dt : FileSystemTest
     {
-        String strLoc = "Loc_0001";
-        String strValue = String.Empty;
-        int iCountErrors = 0;
-        int iCountTestcases = 0;
+        private readonly string NonExistantFileName = "nonexistant_file_name";
+        private readonly TimeSpan Accuracy = TimeSpan.FromSeconds(3);
 
-        try
+        private void CheckPathArgumentException<T>(string path) where T : Exception
         {
-            String fileName = "SetLastWriteTime_str_dt_test_TestDirectory";
-
-            // [] With null string
-            iCountTestcases++;
-            try
-            {
-                Directory.SetLastWriteTime(null, DateTime.Today);
-                iCountErrors++;
-                printerr("Error_0002! Expected exception not thrown");
-            }
-            catch (ArgumentNullException)
-            {
-            }
-            catch (Exception exc)
-            {
-                iCountErrors++;
-                printerr("Error_0003! Unexpected exceptiont thrown: " + exc.ToString());
-            }
-
-            // [] With an empty string.
-            iCountTestcases++;
-            try
-            {
-                Directory.SetLastWriteTime("", DateTime.Today);
-                iCountErrors++;
-                printerr("Error_0004! Expected exception not thrown");
-            }
-            catch (ArgumentException)
-            {
-            }
-            catch (Exception exc)
-            {
-                iCountErrors++;
-                printerr("Error_0005! Unexpected exceptiont thrown: " + exc.ToString());
-            }
-
-            // [] Valid file name and datetime(Today)
-            strLoc = "Loc_0006";
-            DirectoryInfo dir2 = new DirectoryInfo(fileName);
-            dir2.Create();
-            iCountTestcases++;
-            try
-            {
-                Directory.SetLastWriteTime(fileName, DateTime.Today);
-                if ((Directory.GetLastWriteTime(fileName) - DateTime.Now).Seconds > 0)
-                {
-                    iCountErrors++;
-                    printerr("Error_0007! Creation time cannot be correct");
-                }
-            }
-            catch (Exception exc)
-            {
-                iCountErrors++;
-                printerr("Error_0008! Unexpected exceptiont thrown: " + exc.ToString());
-            }
-            FailSafeDirectoryOperations.DeleteDirectoryInfo(dir2, false);
-
-            //Add one year from DateTime.today.
-            strLoc = "Loc_0009";
-
-            dir2 = new DirectoryInfo(fileName);
-            dir2.Create();
-            iCountTestcases++;
-            try
-            {
-                Directory.SetLastWriteTime(fileName, DateTime.Now.AddYears(1));
-                int iSeconds = (Directory.GetLastWriteTime(fileName) - DateTime.Now.AddYears(1)).Seconds;
-                if (iSeconds > 2)
-                {
-                    iCountErrors++;
-                    Console.WriteLine("Error_0010! Creation time cannot be correct, Expected....(<2), Actual....{0}", iSeconds);
-                }
-            }
-            catch (Exception exc)
-            {
-                iCountErrors++;
-                printerr("Error_0011! Unexpected exceptiont thrown: " + exc.ToString());
-            }
-            FailSafeDirectoryOperations.DeleteDirectoryInfo(dir2, false);
-
-            //Subtract one year from DateTime.today.
-            strLoc = "Loc_0012";
-
-            dir2 = new DirectoryInfo(fileName);
-            dir2.Create();
-            iCountTestcases++;
-            try
-            {
-                DateTime now = DateTime.Now;
-                now = new DateTime(now.Year, now.Month, now.Day, now.Hour, now.Minute, now.Second);
-                Directory.SetLastWriteTime(fileName, now.AddYears(-1));
-                if (Directory.GetLastWriteTime(fileName) != now.AddYears(-1))
-                {
-                    iCountErrors++;
-                    printerr("Error_0013! Creation time cannot be correct");
-                }
-            }
-            catch (Exception exc)
-            {
-                iCountErrors++;
-                printerr("Error_0014! Unexpected exceptiont thrown: " + exc.ToString());
-            }
-            FailSafeDirectoryOperations.DeleteDirectoryInfo(dir2, false);
-
-            //Add one month from DateTime.today.
-            strLoc = "Loc_0015";
-
-            dir2 = new DirectoryInfo(fileName);
-            dir2.Create();
-            iCountTestcases++;
-            try
-            {
-                Directory.SetLastWriteTime(fileName, DateTime.Now.AddMonths(1));
-                int iSeconds = (Directory.GetLastWriteTime(fileName) - DateTime.Now.AddMonths(1)).Seconds;
-                if (iSeconds > 2)
-                {
-                    iCountErrors++;
-                    Console.WriteLine("Error_0016! Creation time cannot be correct, Expected....(<2), Actual....{0}", iSeconds);
-                }
-            }
-            catch (Exception exc)
-            {
-                iCountErrors++;
-                printerr("Error_0017! Unexpected exceptiont thrown: " + exc.ToString());
-            }
-            FailSafeDirectoryOperations.DeleteDirectoryInfo(dir2, false);
-
-            //Subtract one month from DateTime.today.
-            strLoc = "Loc_0018";
-
-            dir2 = new DirectoryInfo(fileName);
-            dir2.Create();
-            iCountTestcases++;
-            try
-            {
-                Directory.SetLastWriteTime(fileName, DateTime.Now.AddMonths(-1));
-                int iSeconds = (Directory.GetLastAccessTime(fileName) - DateTime.Now.AddMonths(-1)).Seconds;
-                if (iSeconds > 60)
-                {
-                    iCountErrors++;
-                    printerr("Error_0019! Creation time cannot be correct" + iSeconds);
-                }
-            }
-            catch (Exception exc)
-            {
-                iCountErrors++;
-                printerr("Error_0020! Unexpected exceptiont thrown: " + exc.ToString());
-            }
-            FailSafeDirectoryOperations.DeleteDirectoryInfo(dir2, false);
-
-            //Add one day from DateTime.today.
-            strLoc = "Loc_0021";
-
-            dir2 = new DirectoryInfo(fileName);
-            dir2.Create();
-            iCountTestcases++;
-            try
-            {
-                Directory.SetLastWriteTime(fileName, DateTime.Now.AddDays(1));
-                int iSeconds = (Directory.GetLastWriteTime(fileName) - DateTime.Now.AddDays(1)).Seconds;
-                if (iSeconds > 2)
-                {
-                    iCountErrors++;
-                    Console.WriteLine("Error_0022! Creation time cannot be correct, Expected....(<2), Actual....{0}", iSeconds);
-                }
-            }
-            catch (Exception exc)
-            {
-                iCountErrors++;
-                printerr("Error_0023! Unexpected exceptiont thrown: " + exc.ToString());
-            }
-            FailSafeDirectoryOperations.DeleteDirectoryInfo(dir2, false);
-
-            //Subtract one day from DateTime.today.
-            strLoc = "Loc_0024";
-
-            dir2 = new DirectoryInfo(fileName);
-            dir2.Create();
-            iCountTestcases++;
-            try
-            {
-                Directory.SetLastWriteTime(fileName, DateTime.Now.AddDays(-1));
-                int iSeconds = (Directory.GetLastAccessTime(fileName) - DateTime.Now.AddMonths(-1)).Seconds;
-                if (iSeconds > 60)
-                {
-                    iCountErrors++;
-                    printerr("Error_0025! Creation time cannot be correct" + iSeconds);
-                }
-            }
-            catch (Exception exc)
-            {
-                iCountErrors++;
-                printerr("Error_0026! Unexpected exceptiont thrown: " + exc.ToString());
-            }
-            FailSafeDirectoryOperations.DeleteDirectoryInfo(dir2, false);
-
-            //With invalid datetime object.
-            strLoc = "Loc_0025";
-
-            dir2 = new DirectoryInfo(fileName);
-            dir2.Create();
-            iCountTestcases++;
-            try
-            {
-                Directory.SetLastWriteTime(fileName, new DateTime(2001, 332, 20, 50, 50, 50));
-                iCountErrors++;
-                printerr("Error_0026! Creation time cannot be correct");
-            }
-            catch (ArgumentOutOfRangeException)
-            {
-            }
-            catch (Exception exc)
-            {
-                iCountErrors++;
-                printerr("Error_0027! Unexpected exceptiont thrown: " + exc.ToString());
-            }
-            FailSafeDirectoryOperations.DeleteDirectoryInfo(dir2, false);
-
-            //With valid date and time. 
-            strLoc = "Loc_0028";
-
-            dir2 = new DirectoryInfo(fileName);
-            dir2.Create();
-            iCountTestcases++;
-            try
-            {
-                DateTime dt = new DateTime(2001, 2, 2, 20, 20, 20);
-                Directory.SetLastWriteTime(fileName, dt);
-                if ((Directory.GetLastWriteTime(fileName) - dt).Seconds > 60)
-                {
-                    iCountErrors++;
-                    printerr("Error_0029! Creation time cannot be correct");
-                }
-            }
-            catch (Exception exc)
-            {
-                iCountErrors++;
-                printerr("Error_0030! Unexpected exceptiont thrown: " + exc.ToString());
-            }
-            FailSafeDirectoryOperations.DeleteDirectoryInfo(dir2, false);
-        }
-        catch (Exception exc_general)
-        {
-            ++iCountErrors;
-            printerr("Error Err_0100!  strLoc==" + strLoc + ", exc_general==" + exc_general.ToString());
+            Assert.Throws<T>(() => Directory.SetLastWriteTime(path, default(DateTime)));
+            Assert.Throws<T>(() => Directory.SetLastWriteTime(path, new DateTime(2000, 1, 1, 1, 1, 1, 1, DateTimeKind.Utc)));
+            Assert.Throws<T>(() => Directory.SetLastWriteTime(path, new DateTime(1, 1, 1, 1, 1, 1, 1, DateTimeKind.Utc)));
         }
 
-        ////  Finish Diagnostics
-
-        if (iCountErrors != 0)
+        [Fact]
+        public void FileNotFound()
         {
-            Console.WriteLine("FAiL! " + s_strTFName + " ,iCountErrors==" + iCountErrors.ToString());
+            // Check FileNotFoundException is thrown for nonexistant path argument regardless of lastWriteTime argument
+            CheckPathArgumentException<FileNotFoundException>(NonExistantFileName);
         }
 
-        Assert.Equal(0, iCountErrors);
-    }
+        [Fact]
+        public void PathArgumentWhitespace()
+        {
+            // Check ArgumentException is thrown for only whitespace in path argument regardless of lastWriteTime argument
+            Action<string> test = (s) => CheckPathArgumentException<ArgumentException>(s);
 
-    public static void printerr(String err, [CallerMemberName] string memberName = "", [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0)
-    {
-        Console.WriteLine("ERROR: ({0}, {1}, {2}) {3}", memberName, filePath, lineNumber, err);
+            test("");
+            test("    ");
+            test("  \t\t  ");
+            test("  \t\t\n\n  ");
+            test("\t\t");
+            test("\n\n");
+            test("\x9");
+            test("\xA");
+            test("\xB");
+            test("\xC");
+            test("\xD");
+            test("\x20");
+            test("\x85");
+            test("\xA0");
+        }
+
+        [Fact]
+        public void PathInvalidCharacters()
+        {
+            // Check ArgumentException is thrown for invalid characters in path argument regardless of lastWriteTime argument
+            Action<string> test = (s) => CheckPathArgumentException<ArgumentException>(s);
+
+            foreach (char c in Path.GetInvalidPathChars())
+                test(c.ToString());
+            test("?");
+            test("*");
+        }
+
+        [Fact]
+        public void PathArgumentNull()
+        {
+            // Check ArgumentNullException is thrown for null path argument regardless of lastWriteTime argument
+            CheckPathArgumentException<ArgumentNullException>(null);
+        }
+
+        [Fact]
+        public void PathTooLong()
+        {
+            // Check PathTooLongException is thrown for too long a path regardless of lastWriteTime argument
+            StringBuilder sb = new StringBuilder(TestDirectory);
+            while (sb.Length < IOInputs.MaxPath + 1)
+            {
+                sb.Append("a");
+            }
+
+            CheckPathArgumentException<PathTooLongException>(sb.ToString());
+        }
+
+        [Fact]
+        public void DirectoryTooLong()
+        {
+            // Check PathTooLongException is thrown for too long a directory component of path regardless of lastWriteTime argument
+            StringBuilder sb = new StringBuilder();
+            while (sb.Length < IOInputs.MaxDirectory + 1)
+            {
+                sb.Append("a");
+            }
+
+            CheckPathArgumentException<PathTooLongException>(TestDirectory + Path.DirectorySeparatorChar + sb.ToString());
+        }
+
+        [Fact]
+        public void PathJustShortEnough()
+        {
+            // Check PathTooLongException is not thrown for a path that is just short enough
+            StringBuilder sb = new StringBuilder(TestDirectory + Path.DirectorySeparatorChar);
+            sb.Append(NonExistantFileName);
+            while (sb.Length < IOInputs.MaxPath)
+            {
+                sb.Append("a");
+            }
+
+            CheckPathArgumentException<FileNotFoundException>(sb.ToString());
+        }
+
+        [Fact]
+        public void DateTimeOutOfRange()
+        {
+            // Check ArgumentOutOfRangeException is thrown for a lastWriteTime argument out of range.
+            Action<DateTime> test = (time) => TestOnValidFileAndDirectory((path) => Assert.Throws<ArgumentOutOfRangeException>(() => Directory.SetLastWriteTime(path, time)));
+            
+            test(new DateTime(1, 1, 1, 1, 1, 1, 1, DateTimeKind.Utc));
+            test(new DateTime(1600, 1, 1, 1, 1, 1, 1, DateTimeKind.Utc));
+        }
+
+        [Fact]
+        public void PositiveTests()
+        {
+            // Positive tests ensure that the last write time we read is within Accuracy of the last write time we set
+            Action<DateTime> test = (time) => TestOnValidFileAndDirectory((path) =>
+            {
+                Directory.SetLastWriteTime(path, time);
+                Assert.True(Accuracy > Directory.GetLastWriteTimeUtc(path).Subtract(time).Duration());
+            });
+
+            test(new DateTime(1601, 1, 1, 1, 1, 1, 1, DateTimeKind.Utc));
+            test(new DateTime(2000, 1, 1, 1, 1, 1, 1, DateTimeKind.Utc));
+            test(new DateTime(2020, 10, 20, 20, 30, 30, 500, DateTimeKind.Utc));
+            test(new DateTime(2040, 12, 31, 23, 59, 59, 999, DateTimeKind.Utc));
+            test(new DateTime(9999, 1, 1, 1, 1, 1, 1, DateTimeKind.Utc));
+        }
+
+        [Fact]
+        public void RelativeTimePositiveTests()
+        {
+            // Positive tests ensure that the last write time we read is within Accuracy of the last write time we set
+            Action<DateTime> test = (time) => TestOnValidFileAndDirectory((path) =>
+            {
+                Directory.SetLastWriteTime(path, time);
+                Assert.True(Accuracy > Directory.GetLastWriteTime(path).Subtract(time).Duration());
+            });
+
+            test(DateTime.Today);
+            test(DateTime.Now);
+            test(DateTime.Now.AddDays(1));
+            test(DateTime.Now.AddMonths(1));
+            test(DateTime.Now.AddYears(1));
+            test(DateTime.Now.AddYears(10));
+            test(DateTime.Now.AddDays(-1));
+            test(DateTime.Now.AddMonths(-1));
+            test(DateTime.Now.AddYears(-1));
+            test(DateTime.Now.AddYears(-10));
+        }
     }
 }

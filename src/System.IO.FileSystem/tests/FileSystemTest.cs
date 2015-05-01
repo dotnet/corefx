@@ -11,7 +11,9 @@ namespace System.IO.FileSystem.Tests
     {
         public static readonly byte[] TestBuffer = { 0xBA, 0x5E, 0xBA, 0x11, 0xF0, 0x07, 0xBA, 0x11 };
 
-        public string TestDirectory { get; private set; }
+        private const bool CleanUp = true;
+
+        public readonly string TestDirectory;
 
         public FileSystemTest()
         {
@@ -30,10 +32,50 @@ namespace System.IO.FileSystem.Tests
         }
 
         // Generates a test file path to use that is unique name per test case / call
-        public string GetTestFilePath([CallerMemberName]string fileName = null, [CallerLineNumber] int lineNumber = 0)
+        public string GetTestFilePath([CallerMemberName]string fileName = null, [CallerLineNumber]int lineNumber = 0)
         {
             return Path.Combine(TestDirectory, String.Format("{0}_{1}", fileName ?? "testFile", lineNumber));
         }
+
+        // Perform a test action on a newly created directory
+        protected void TestOnValidDirectory(Action<string> testAction, [CallerMemberName]string fileName = null, [CallerLineNumber]int lineNumber = 0)
+        {
+            string testDirPath = GetTestFilePath(fileName, lineNumber);
+            Directory.CreateDirectory(testDirPath);
+            try
+            {
+                testAction(testDirPath);
+            }
+            finally
+            {
+                if (CleanUp)
+                    Directory.Delete(testDirPath);
+            }
+        }
+
+        // Perform a test action on a newly created file
+        protected void TestOnValidFile(Action<string> testAction, [CallerMemberName]string fileName = null, [CallerLineNumber]int lineNumber = 0)
+        {
+            string testFilePath = GetTestFilePath(fileName, lineNumber);
+            FileStream fs = File.Create(testFilePath);
+            fs.Dispose();
+            try
+            {
+                testAction(testFilePath);
+            }
+            finally
+            {
+                if (CleanUp)
+                    File.Delete(testFilePath);
+            }
+        }
+
+        protected void TestOnValidFileAndDirectory(Action<string> testAction, [CallerMemberName]string fileName = null, [CallerLineNumber]int lineNumber = 0)
+        {
+            TestOnValidFile(testAction, fileName + "_File", lineNumber);
+            TestOnValidDirectory(testAction, fileName + "_Directory", lineNumber);
+        }
+
 
         public void Dispose()
         {
@@ -48,7 +90,8 @@ namespace System.IO.FileSystem.Tests
             // clean up non-managed resources
             try
             {
-                Directory.Delete(TestDirectory, true);
+                if (CleanUp)
+                    Directory.Delete(TestDirectory, true);
             }
             catch
             {
