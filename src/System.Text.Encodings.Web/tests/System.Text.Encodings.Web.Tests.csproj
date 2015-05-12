@@ -27,19 +27,25 @@
     <Compile Include="AllowedCharsBitmapTests.cs" />
     <Compile Include="CodePointFilterTests.cs" />
     <Compile Include="CommonTestEncoder.cs" />
+    <Compile Include="EncoderCommon.cs" />
     <Compile Include="EncoderCommonTests.cs" />
     <Compile Include="EncoderExtensionsTests.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="HtmlEncoderTests.cs" />
+    <Compile Include="IHtmlEncoder.cs" />
+    <Compile Include="IJavaScriptStringEncoder.cs" />
+    <Compile Include="IUrlEncoder.cs" />
     <Compile Include="JavaScriptStringEncoderTests.cs" />
+    <Compile Include="PerformanceTests.cs" />
+    <Compile Include="TemporaryEncoderAdapters.cs" />
+    <Compile Include="TemporaryEncoderExtensions.cs" />
+    <Compile Include="TemporaryInternalTypes.cs" />
+    <Compile Include="UnicodeEncoderBase.cs" />
     <Compile Include="UnicodeEncoderBaseTests.cs" />
     <Compile Include="UnicodeHelpersTests.cs" />
     <Compile Include="UnicodeRangesTests.cs" />
     <Compile Include="UnicodeRangeTests.cs" />
     <Compile Include="UrlEncoderTests.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\src\System.Text.Encodings.Web.csproj">

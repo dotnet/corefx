@@ -25,9 +25,9 @@
     <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="$(CommonTestPath)\XunitTraitsDiscoverers\XunitTraitsDiscoverers.csproj">
-      <Project>{be8ed8c1-c314-4c4e-a929-64c9c8b3552a}</Project>
-      <Name>XunitTraitsDiscoverers</Name>
+    <ProjectReference Include="..\..\..\System.Text.Encoding.CodePages\src\System.Text.Encoding.CodePages.csproj">
+      <Project>{16ee6633-f557-5c9e-9ef3-b5334b044f47}</Project>
+      <Name>System.Text.Encoding.CodePages</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\src\System.Xml.ReaderWriter.csproj">
       <Project>{c559743a-762e-4d9d-b986-e77bdb97652e}</Project>
@@ -35,7 +35,6 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
     <None Include="project.json" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />

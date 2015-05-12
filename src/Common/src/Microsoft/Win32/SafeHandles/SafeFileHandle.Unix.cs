@@ -51,13 +51,13 @@ namespace Microsoft.Win32.SafeHandles
 
                 // Make sure it's not a directory; we do this after opening it once we have a file descriptor 
                 // to avoid race conditions.
-                Interop.libcoreclrpal.fileinfo buf;
-                if (Interop.libcoreclrpal.GetFileInformationFromFd(fd, out buf) != 0)
+                Interop.libcoreclr.fileinfo buf;
+                if (Interop.libcoreclr.GetFileInformationFromFd(fd, out buf) != 0)
                 {
                     handle.Dispose();
                     throw Interop.GetExceptionForIoErrno(Marshal.GetLastWin32Error(), path);
                 }
-                if ((buf.mode & Interop.libcoreclrpal.FileTypes.S_IFMT) == Interop.libcoreclrpal.FileTypes.S_IFDIR)
+                if ((buf.mode & Interop.libcoreclr.FileTypes.S_IFMT) == Interop.libcoreclr.FileTypes.S_IFDIR)
                 {
                     handle.Dispose();
                     throw Interop.GetExceptionForIoErrno(Interop.Errors.EACCES, path, isDirectory: true);
@@ -69,9 +69,9 @@ namespace Microsoft.Win32.SafeHandles
         [System.Security.SecurityCritical]
         protected override bool ReleaseHandle()
         {
-            // Close the handle. We do not want to throw here nor retry
-            // in the case of an EINTR error, so we simply check whether
-            // the call was successful or not.
+            // Close the handle. Although close is documented to potentially fail with EINTR, we never want
+            // to retry, as the descriptor could actually have been closed, been subsequently reassigned, and
+            // be in use elsewhere in the process.  Instead, we simply check whether the call was successful.
             int fd = (int)handle;
             Debug.Assert(fd >= 0);
             return Interop.libc.close(fd) == 0;

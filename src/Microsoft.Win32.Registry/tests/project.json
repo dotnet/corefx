@@ -2,6 +2,7 @@
   "dependencies": {
     "System.Collections": "4.0.10-beta-22809",
     "System.Console": "4.0.0-beta-22809",
+    "System.Linq": "4.0.0-beta-22809",
     "System.Reflection": "4.0.10-beta-22809",
     "System.Reflection.Primitives": "4.0.0-beta-22809",
     "System.Runtime": "4.0.20-beta-22809",
@@ -10,6 +11,13 @@
     "System.Runtime.InteropServices": "4.0.20-beta-22809",
     "System.Text.Encoding": "4.0.10-beta-22809",
     "System.Threading": "4.0.10-beta-22809",
-    "System.Threading.Tasks": "4.0.10-beta-22809"
+    "System.Threading.Tasks": "4.0.10-beta-22809",
+    "xunit": "2.0.0-beta5-build2785",
+    "xunit.abstractions.netcore": "1.0.0-prerelease",
+    "xunit.assert": "2.0.0-beta5-build2785",
+    "xunit.core.netcore": "1.0.1-prerelease"
+  },
+  "frameworks": {
+    "dnxcore50": {}
   }
 }

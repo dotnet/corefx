@@ -30,17 +30,12 @@
     <EmbeddedResource Include="IdnMapping\Data\Unicode_6_0\ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
     <None Include="project.json" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\src\System.Globalization.Extensions.csproj">
       <Project>{2b96aa10-84c0-4927-8611-8d2474b990e8}</Project>
       <Name>System.Globalization.Extensions</Name>
-    </ProjectReference>
-    <ProjectReference Include="$(CommonTestPath)\XunitTraitsDiscoverers\XunitTraitsDiscoverers.csproj">
-      <Project>{be8ed8c1-c314-4c4e-a929-64c9c8b3552a}</Project>
-      <Name>XunitTraitsDiscoverers</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />

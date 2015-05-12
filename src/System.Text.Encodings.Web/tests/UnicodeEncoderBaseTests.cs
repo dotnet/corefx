@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Text.Encodings.Web;
+using System.Text.Unicode;
 using Xunit;
 
 namespace Microsoft.Framework.WebEncoders
@@ -16,7 +17,7 @@ namespace Microsoft.Framework.WebEncoders
         public void Ctor_WithCustomFilters()
         {
             // Arrange
-            var filter = new CodePointFilter().AllowChars("ab").AllowChars('\0', '&', '\uFFFF', 'd');
+            var filter = new CodePointFilter().AllowCharacters("ab").AllowCharacters('\0', '&', '\uFFFF', 'd');
             UnicodeEncoderBase encoder = new CustomUnicodeEncoderBase(filter);
 
             // Act & assert

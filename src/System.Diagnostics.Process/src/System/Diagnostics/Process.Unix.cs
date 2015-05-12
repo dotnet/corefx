@@ -128,10 +128,10 @@ namespace System.Diagnostics
                 EnsureState(State.HaveId);
 
                 int pri = 0;
-                int result = Interop.libc.getpriority(Interop.libc.PriorityWhich.PRIO_PROCESS, _processId, out pri);
-                if (result == 0)
+                int errno = Interop.libc.getpriority(Interop.libc.PriorityWhich.PRIO_PROCESS, _processId, out pri);
+                if (errno != 0)
                 {
-                    throw new Win32Exception(); // match Windows exception
+                    throw new Win32Exception(errno); // match Windows exception
                 }
 
                 Debug.Assert(pri >= -20 && pri <= 20);
@@ -208,7 +208,7 @@ namespace System.Diagnostics
             // is used to fork/execve as executing managed code in a forked process is not safe (only
             // the calling thread will transfer, thread IDs aren't stable across the fork, etc.)
             int childPid, stdinFd, stdoutFd, stderrFd;
-            if (Interop.libcoreclrpal.ForkAndExecProcess(
+            if (Interop.libcoreclr.ForkAndExecProcess(
                 filename, argv, envp, cwd,
                 startInfo.RedirectStandardInput, startInfo.RedirectStandardOutput, startInfo.RedirectStandardError,
                 out childPid, 

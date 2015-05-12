@@ -89,6 +89,15 @@ namespace System.Reflection.Metadata {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Handle belongs to a future generation.
+        /// </summary>
+        internal static string HandleBelongsToFutureGeneration {
+            get {
+                return ResourceManager.GetString("HandleBelongsToFutureGeneration", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Illegal tables in compressed metadata stream..
         /// </summary>
         internal static string IllegalTablesInCompressedMetadataStream {
@@ -242,6 +251,15 @@ namespace System.Reflection.Metadata {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Invalid row count: {0}.
+        /// </summary>
+        internal static string InvalidRowCount {
+            get {
+                return ResourceManager.GetString("InvalidRowCount", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Invalid section name.
         /// </summary>
         internal static string InvalidSectionName {
@@ -283,6 +301,15 @@ namespace System.Reflection.Metadata {
         internal static string InvalidToken {
             get {
                 return ResourceManager.GetString("InvalidToken", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Invalid type size..
+        /// </summary>
+        internal static string InvalidTypeSize {
+            get {
+                return ResourceManager.GetString("InvalidTypeSize", resourceCulture);
             }
         }
         

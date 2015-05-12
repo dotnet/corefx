@@ -8,6 +8,7 @@
     <RootNamespace>System.IO.FileSystem.DriveInfo.Tests</RootNamespace>
     <AssemblyName>System.IO.FileSystem.DriveInfo.Tests</AssemblyName>
     <ProjectGuid>{7D9E5F2F-5677-40FC-AD04-FA7D603E4806}</ProjectGuid>
+    <UnsupportedPlatforms>OSX</UnsupportedPlatforms>
   </PropertyGroup>
   <!-- Default configurations to help VS understand the configurations -->
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -19,17 +20,12 @@
     <Compile Include="DriveInfo.Windows.Tests.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
     <None Include="project.json" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\src\System.IO.FileSystem.DriveInfo.csproj">
       <Project>{29c14ad7-dc03-45dc-897d-8dacc762707e}</Project>
       <Name>System.IO.FileSystem.DriveInfo</Name>
-    </ProjectReference>
-    <ProjectReference Include="$(CommonTestPath)\XunitTraitsDiscoverers\XunitTraitsDiscoverers.csproj">
-      <Project>{be8ed8c1-c314-4c4e-a929-64c9c8b3552a}</Project>
-      <Name>XunitTraitsDiscoverers</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
