@@ -35,6 +35,6 @@ namespace System.Reflection.Metadata
         public BlobHandle Alias { get { return _alias; } }
         public AssemblyReferenceHandle TargetAssembly { get { return _assembly; } }
         public BlobHandle TargetNamespace { get { return (BlobHandle)_typeOrNamespace; } }
-        public Handle TargetType { get { return _typeOrNamespace; } }
+        public EntityHandle TargetType { get { return (EntityHandle)_typeOrNamespace; } }
     }
 }

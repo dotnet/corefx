@@ -6,15 +6,15 @@ namespace System.Reflection.Metadata.Decoding
     internal enum TokenType
     {
         Literal = 0,
-        LeftBracket = (int)'[',
-        RightBracket = (int)']',
-        Comma = (int)',',
-        Plus = (int)'+',
-        Equals = (int)'=',
-        Ampersand = (int)'&',
-        Star = (int)'*',
-        WhiteSpace = (int)' ',
-        Quote = (int)'"',
-        EscapeSequence = (int)'\\',
+        LeftBracket = '[',
+        RightBracket = ']',
+        Comma = ',',
+        Plus = '+',
+        Equals = '=',
+        Ampersand = '&',
+        Star = '*',
+        WhiteSpace = ' ',
+        Quote = '"',
+        EscapeSequence = '\\',
     }
 }

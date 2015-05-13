@@ -380,37 +380,37 @@ namespace System.Reflection.Metadata.Ecma335
 
         public static DocumentHandle DocumentHandle(int rowNumber)
         {
-            return Metadata.DocumentHandle.FromRowId((uint)(rowNumber & TokenTypeIds.RIDMask));
+            return Metadata.DocumentHandle.FromRowId(ToRowId(rowNumber));
         }
 
         public static LocalScopeHandle LocalScopeHandle(int rowNumber)
         {
-            return Metadata.LocalScopeHandle.FromRowId((uint)(rowNumber & TokenTypeIds.RIDMask));
+            return Metadata.LocalScopeHandle.FromRowId(ToRowId(rowNumber));
         }
 
         public static LocalVariableHandle LocalVariableHandle(int rowNumber)
         {
-            return Metadata.LocalVariableHandle.FromRowId((uint)(rowNumber & TokenTypeIds.RIDMask));
+            return Metadata.LocalVariableHandle.FromRowId(ToRowId(rowNumber));
         }
 
         public static LocalConstantHandle LocalConstantHandle(int rowNumber)
         {
-            return Metadata.LocalConstantHandle.FromRowId((uint)(rowNumber & TokenTypeIds.RIDMask));
+            return Metadata.LocalConstantHandle.FromRowId(ToRowId(rowNumber));
         }
 
         public static ImportScopeHandle ImportScopeHandle(int rowNumber)
         {
-            return Metadata.ImportScopeHandle.FromRowId((uint)(rowNumber & TokenTypeIds.RIDMask));
+            return Metadata.ImportScopeHandle.FromRowId(ToRowId(rowNumber));
         }
 
         public static AsyncMethodHandle AsyncMethodHandle(int rowNumber)
         {
-            return Metadata.AsyncMethodHandle.FromRowId((uint)(rowNumber & TokenTypeIds.RIDMask));
+            return Metadata.AsyncMethodHandle.FromRowId(ToRowId(rowNumber));
         }
 
         public static CustomDebugInformationHandle CustomDebugInformationHandle(int rowNumber)
         {
-            return Metadata.CustomDebugInformationHandle.FromRowId((uint)(rowNumber & TokenTypeIds.RIDMask));
+            return Metadata.CustomDebugInformationHandle.FromRowId(ToRowId(rowNumber));
         }
 
         // heaps

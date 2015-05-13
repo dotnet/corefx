@@ -434,7 +434,7 @@ namespace System.Reflection.Metadata.Ecma335
 
             int offset, size;
             Block.PeekHeapValueOffsetAndSize(handle.GetHeapOffset(), out offset, out size);
-            return new BlobReader(this.Block.GetMemoryBlockAt(offset, size));
+            return this.Block.GetMemoryBlockAt(offset, size);
         }
 
         internal BlobHandle GetNextHandle(BlobHandle handle)

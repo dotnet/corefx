@@ -246,6 +246,16 @@ namespace System.Reflection.Metadata.Ecma335
         internal const uint MethodSpec = 0x2b;
         internal const uint GenericParamConstraint = 0x2c;
 
+        // debug tables:
+        internal const uint Document = 0x30;
+        internal const uint MethodBody = 0x31;
+        internal const uint LocalScope = 0x32;
+        internal const uint LocalVariable = 0x33;
+        internal const uint LocalConstant = 0x34;
+        internal const uint ImportScope = 0x35;
+        internal const uint AsyncMethod = 0x36;
+        internal const uint CustomDebugInformation = 0x37;
+
         internal const uint UserString = 0x70;     // #UserString heap
 
         // The following values never appear in a token stored in metadata, 
@@ -334,13 +344,13 @@ namespace System.Reflection.Metadata.Ecma335
 
         // debug tables:
         internal const uint Document = HandleType.Document << RowIdBitCount;
-        internal const uint MethodBody = (int)TableIndex.MethodBody << 24;
-        internal const uint LocalScope = (int)TableIndex.LocalScope << 24;
-        internal const uint LocalVariable = (int)TableIndex.LocalVariable << 24;
-        internal const uint LocalConstant = (int)TableIndex.LocalConstant << 24;
-        internal const uint ImportScope = (int)TableIndex.ImportScope << 24;
-        internal const uint AsyncMethod = (int)TableIndex.AsyncMethod << 24;
-        internal const uint CustomDebugInformation = (int)TableIndex.CustomDebugInformation << 24;
+        internal const uint MethodBody = HandleType.MethodBody << RowIdBitCount;
+        internal const uint LocalScope = HandleType.LocalScope << RowIdBitCount;
+        internal const uint LocalVariable = HandleType.LocalVariable << RowIdBitCount;
+        internal const uint LocalConstant = HandleType.LocalConstant << RowIdBitCount;
+        internal const uint ImportScope = HandleType.ImportScope << RowIdBitCount;
+        internal const uint AsyncMethod = HandleType.AsyncMethod << RowIdBitCount;
+        internal const uint CustomDebugInformation = HandleType.CustomDebugInformation << RowIdBitCount;
 
         internal const uint UserString = HandleType.UserString << RowIdBitCount;
 

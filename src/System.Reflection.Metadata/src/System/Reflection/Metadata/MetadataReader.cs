@@ -628,7 +628,7 @@ namespace System.Reflection.Metadata
             this.AssemblyOSTable = new AssemblyOSTableReader(rowCounts[(int)TableIndex.AssemblyOS], metadataTablesMemoryBlock, totalRequiredSize);
             totalRequiredSize += this.AssemblyOSTable.Block.Length;
 
-            this.AssemblyRefTable = new AssemblyRefTableReader((int)rowCounts[(int)TableIndex.AssemblyRef], stringHeapRefSize, blobHeapRefSize, metadataTablesMemoryBlock, totalRequiredSize, _metadataKind);
+            this.AssemblyRefTable = new AssemblyRefTableReader(rowCounts[(int)TableIndex.AssemblyRef], stringHeapRefSize, blobHeapRefSize, metadataTablesMemoryBlock, totalRequiredSize, _metadataKind);
             totalRequiredSize += this.AssemblyRefTable.Block.Length;
 
             this.AssemblyRefProcessorTable = new AssemblyRefProcessorTableReader(rowCounts[(int)TableIndex.AssemblyRefProcessor], referenceSizes[(int)TableIndex.AssemblyRef], metadataTablesMemoryBlock, totalRequiredSize);
@@ -804,11 +804,11 @@ namespace System.Reflection.Metadata
             firstEventRowId = this.EventMapTable.GetEventListStartFor(eventMapRowId);
             if (eventMapRowId == this.EventMapTable.NumberOfRows)
             {
-                lastEventRowId = (int)(this.UseEventPtrTable ? this.EventPtrTable.NumberOfRows : this.EventTable.NumberOfRows);
+                lastEventRowId = this.UseEventPtrTable ? this.EventPtrTable.NumberOfRows : this.EventTable.NumberOfRows;
             }
             else
             {
-                lastEventRowId = (int)this.EventMapTable.GetEventListStartFor(eventMapRowId + 1) - 1;
+                lastEventRowId = this.EventMapTable.GetEventListStartFor(eventMapRowId + 1) - 1;
             }
         }
 
@@ -855,9 +855,9 @@ namespace System.Reflection.Metadata
 
         internal void GetLocalVariableRange(LocalScopeHandle scope, out int firstVariableRowId, out int lastVariableRowId)
         {
-            int scopeRowId = (int)scope.RowId;
+            int scopeRowId = scope.RowId;
 
-            firstVariableRowId = (int)this.LocalScopeTable.GetVariableStart(scopeRowId);
+            firstVariableRowId = this.LocalScopeTable.GetVariableStart(scopeRowId);
             if (firstVariableRowId == 0)
             {
                 firstVariableRowId = 1;
@@ -865,19 +865,19 @@ namespace System.Reflection.Metadata
             }
             else if (scopeRowId == this.LocalScopeTable.NumberOfRows)
             {
-                lastVariableRowId = (int)this.LocalVariableTable.NumberOfRows;
+                lastVariableRowId = this.LocalVariableTable.NumberOfRows;
             }
             else
             {
-                lastVariableRowId = (int)this.LocalScopeTable.GetVariableStart(scopeRowId + 1) - 1;
+                lastVariableRowId = this.LocalScopeTable.GetVariableStart(scopeRowId + 1) - 1;
             }
         }
 
         internal void GetLocalConstantRange(LocalScopeHandle scope, out int firstConstantRowId, out int lastConstantRowId)
         {
-            int scopeRowId = (int)scope.RowId;
+            int scopeRowId = scope.RowId;
 
-            firstConstantRowId = (int)this.LocalScopeTable.GetConstantStart(scopeRowId);
+            firstConstantRowId = this.LocalScopeTable.GetConstantStart(scopeRowId);
             if (firstConstantRowId == 0)
             {
                 firstConstantRowId = 1;
@@ -885,11 +885,11 @@ namespace System.Reflection.Metadata
             }
             else if (scopeRowId == this.LocalScopeTable.NumberOfRows)
             {
-                lastConstantRowId = (int)this.LocalConstantTable.NumberOfRows;
+                lastConstantRowId = this.LocalConstantTable.NumberOfRows;
             }
             else
             {
-                lastConstantRowId = (int)this.LocalScopeTable.GetConstantStart(scopeRowId + 1) - 1;
+                lastConstantRowId = this.LocalScopeTable.GetConstantStart(scopeRowId + 1) - 1;
             }
         }
 
@@ -942,12 +942,12 @@ namespace System.Reflection.Metadata
 
         public TypeDefinitionHandleCollection TypeDefinitions
         {
-            get { return new TypeDefinitionHandleCollection((int)TypeDefTable.NumberOfRows); }
+            get { return new TypeDefinitionHandleCollection(TypeDefTable.NumberOfRows); }
         }
 
         public TypeReferenceHandleCollection TypeReferences
         {
-            get { return new TypeReferenceHandleCollection((int)TypeRefTable.NumberOfRows); }
+            get { return new TypeReferenceHandleCollection(TypeRefTable.NumberOfRows); }
         }
 
         public CustomAttributeHandleCollection CustomAttributes
@@ -962,22 +962,22 @@ namespace System.Reflection.Metadata
 
         public MemberReferenceHandleCollection MemberReferences
         {
-            get { return new MemberReferenceHandleCollection((int)MemberRefTable.NumberOfRows); }
+            get { return new MemberReferenceHandleCollection(MemberRefTable.NumberOfRows); }
         }
 
         public ManifestResourceHandleCollection ManifestResources
         {
-            get { return new ManifestResourceHandleCollection((int)ManifestResourceTable.NumberOfRows); }
+            get { return new ManifestResourceHandleCollection(ManifestResourceTable.NumberOfRows); }
         }
 
         public AssemblyFileHandleCollection AssemblyFiles
         {
-            get { return new AssemblyFileHandleCollection((int)FileTable.NumberOfRows); }
+            get { return new AssemblyFileHandleCollection(FileTable.NumberOfRows); }
         }
 
         public ExportedTypeHandleCollection ExportedTypes
         {
-            get { return new ExportedTypeHandleCollection((int)ExportedTypeTable.NumberOfRows); }
+            get { return new ExportedTypeHandleCollection(ExportedTypeTable.NumberOfRows); }
         }
 
         public MethodDefinitionHandleCollection MethodDefinitions
@@ -1363,7 +1363,7 @@ namespace System.Reflection.Metadata
                 }
 
                 // TODO: range checks
-                var partHandle = BlobHandle.FromIndex((uint)blobReader.ReadCompressedInteger());
+                var partHandle = BlobHandle.FromOffset(blobReader.ReadCompressedInteger());
                 var partBytes = GetBlobBytes(partHandle);
                 result.Append(Encoding.UTF8.GetString(partBytes, 0, partBytes.Length));
             }
@@ -1416,7 +1416,7 @@ namespace System.Reflection.Metadata
             return new CustomDebugInformation(this, handle);
         }
 
-        public CustomDebugInformationHandleCollection GetCustomDebugInformation(Handle handle)
+        public CustomDebugInformationHandleCollection GetCustomDebugInformation(EntityHandle handle)
         {
             Debug.Assert(!handle.IsNil);
             return new CustomDebugInformationHandleCollection(this, handle);

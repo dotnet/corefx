@@ -21,7 +21,7 @@ namespace System.Reflection.Metadata
             _reader = reader;
 
             _firstRowId = 1;
-            _lastRowId = (int)reader.DocumentTable.NumberOfRows;
+            _lastRowId = reader.DocumentTable.NumberOfRows;
         }
 
         public int Count
@@ -71,7 +71,7 @@ namespace System.Reflection.Metadata
                 get
                 {
                     // PERF: keep this code small to enable inlining.
-                    return DocumentHandle.FromRowId((uint)_currentRowId & TokenTypeIds.RIDMask);
+                    return DocumentHandle.FromRowId((int)(_currentRowId & TokenTypeIds.RIDMask));
                 }
             }
 
@@ -120,7 +120,7 @@ namespace System.Reflection.Metadata
             _reader = reader;
 
             _firstRowId = 1;
-            _lastRowId = (int)reader.MethodBodyTable.NumberOfRows;
+            _lastRowId = reader.MethodBodyTable.NumberOfRows;
         }
 
         public int Count
@@ -170,7 +170,7 @@ namespace System.Reflection.Metadata
                 get
                 {
                     // PERF: keep this code small to enable inlining.
-                    return MethodBodyHandle.FromRowId((uint)_currentRowId & TokenTypeIds.RIDMask);
+                    return MethodBodyHandle.FromRowId((int)(_currentRowId & TokenTypeIds.RIDMask));
                 }
             }
 
@@ -213,7 +213,7 @@ namespace System.Reflection.Metadata
         private readonly int _firstRowId;
         private readonly int _lastRowId;
 
-        internal LocalScopeHandleCollection(MetadataReader reader, uint methodDefinitionRowId)
+        internal LocalScopeHandleCollection(MetadataReader reader, int methodDefinitionRowId)
         {
             Debug.Assert(reader != null);
             _reader = reader;
@@ -221,7 +221,7 @@ namespace System.Reflection.Metadata
             if (methodDefinitionRowId == 0)
             {
                 _firstRowId = 1;
-                _lastRowId = (int)reader.LocalScopeTable.NumberOfRows;
+                _lastRowId = reader.LocalScopeTable.NumberOfRows;
             }
             else
             {
@@ -276,7 +276,7 @@ namespace System.Reflection.Metadata
                 get
                 {
                     // PERF: keep this code small to enable inlining.
-                    return LocalScopeHandle.FromRowId((uint)_currentRowId & TokenTypeIds.RIDMask);
+                    return LocalScopeHandle.FromRowId((int)(_currentRowId & TokenTypeIds.RIDMask));
                 }
             }
 
@@ -339,7 +339,7 @@ namespace System.Reflection.Metadata
                 get
                 {
                     // PERF: keep this code small to enable inlining.
-                    return LocalScopeHandle.FromRowId((uint)_currentRowId & TokenTypeIds.RIDMask);
+                    return LocalScopeHandle.FromRowId((int)(_currentRowId & TokenTypeIds.RIDMask));
                 }
             }
 
@@ -364,7 +364,7 @@ namespace System.Reflection.Metadata
                     nextRowId = currentRowId + 1;
                 }
 
-                int rowCount = (int)_reader.LocalScopeTable.NumberOfRows;
+                int rowCount = _reader.LocalScopeTable.NumberOfRows;
 
                 while (true)
                 {
@@ -429,7 +429,7 @@ namespace System.Reflection.Metadata
             if (scope.IsNil)
             {
                 _firstRowId = 1;
-                _lastRowId = (int)reader.LocalVariableTable.NumberOfRows;
+                _lastRowId = reader.LocalVariableTable.NumberOfRows;
             }
             else
             {
@@ -484,7 +484,7 @@ namespace System.Reflection.Metadata
                 get
                 {
                     // PERF: keep this code small to enable inlining.
-                    return LocalVariableHandle.FromRowId((uint)_currentRowId & TokenTypeIds.RIDMask);
+                    return LocalVariableHandle.FromRowId((int)(_currentRowId & TokenTypeIds.RIDMask));
                 }
             }
 
@@ -535,7 +535,7 @@ namespace System.Reflection.Metadata
             if (scope.IsNil)
             {
                 _firstRowId = 1;
-                _lastRowId = (int)reader.LocalConstantTable.NumberOfRows;
+                _lastRowId = reader.LocalConstantTable.NumberOfRows;
             }
             else
             {
@@ -590,7 +590,7 @@ namespace System.Reflection.Metadata
                 get
                 {
                     // PERF: keep this code small to enable inlining.
-                    return LocalConstantHandle.FromRowId((uint)_currentRowId & TokenTypeIds.RIDMask);
+                    return LocalConstantHandle.FromRowId((int)(_currentRowId & TokenTypeIds.RIDMask));
                 }
             }
 
@@ -639,7 +639,7 @@ namespace System.Reflection.Metadata
             _reader = reader;
 
             _firstRowId = 1;
-            _lastRowId = (int)reader.AsyncMethodTable.NumberOfRows;
+            _lastRowId = reader.AsyncMethodTable.NumberOfRows;
         }
 
         public int Count
@@ -689,7 +689,7 @@ namespace System.Reflection.Metadata
                 get
                 {
                     // PERF: keep this code small to enable inlining.
-                    return AsyncMethodHandle.FromRowId((uint)_currentRowId & TokenTypeIds.RIDMask);
+                    return AsyncMethodHandle.FromRowId((int)(_currentRowId & TokenTypeIds.RIDMask));
                 }
             }
 
@@ -738,7 +738,7 @@ namespace System.Reflection.Metadata
             _reader = reader;
 
             _firstRowId = 1;
-            _lastRowId = (int)reader.ImportScopeTable.NumberOfRows;
+            _lastRowId = reader.ImportScopeTable.NumberOfRows;
         }
 
         public int Count
@@ -788,7 +788,7 @@ namespace System.Reflection.Metadata
                 get
                 {
                     // PERF: keep this code small to enable inlining.
-                    return ImportScopeHandle.FromRowId((uint)_currentRowId & TokenTypeIds.RIDMask);
+                    return ImportScopeHandle.FromRowId((int)(_currentRowId & TokenTypeIds.RIDMask));
                 }
             }
 
@@ -837,10 +837,10 @@ namespace System.Reflection.Metadata
             _reader = reader;
 
             _firstRowId = 1;
-            _lastRowId = (int)reader.CustomDebugInformationTable.NumberOfRows;
+            _lastRowId = reader.CustomDebugInformationTable.NumberOfRows;
         }
 
-        internal CustomDebugInformationHandleCollection(MetadataReader reader, Handle handle)
+        internal CustomDebugInformationHandleCollection(MetadataReader reader, EntityHandle handle)
         {
             Debug.Assert(reader != null);
             Debug.Assert(!handle.IsNil);
@@ -896,7 +896,7 @@ namespace System.Reflection.Metadata
                 get
                 {
                     // PERF: keep this code small to enable inlining.
-                    return CustomDebugInformationHandle.FromRowId((uint)_currentRowId & TokenTypeIds.RIDMask);
+                    return CustomDebugInformationHandle.FromRowId((int)(_currentRowId & TokenTypeIds.RIDMask));
                 }
             }
 

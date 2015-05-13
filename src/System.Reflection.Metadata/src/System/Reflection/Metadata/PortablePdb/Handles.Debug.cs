@@ -9,27 +9,43 @@ namespace System.Reflection.Metadata
     public struct DocumentHandle : IEquatable<DocumentHandle>
     {
         private const uint tokenType = TokenTypeIds.Document;
-        private readonly uint _rowId;
+        private const byte tokenTypeSmall = (byte)HandleType.Document;
+        private readonly int _rowId;
 
-        private DocumentHandle(uint rowId)
+        private DocumentHandle(int rowId)
         {
             Debug.Assert(TokenTypeIds.IsValidRowId(rowId));
             _rowId = rowId;
         }
 
-        internal static DocumentHandle FromRowId(uint rowId)
+        internal static DocumentHandle FromRowId(int rowId)
         {
             return new DocumentHandle(rowId);
         }
 
         public static implicit operator Handle(DocumentHandle handle)
         {
-            return new Handle(handle._rowId | tokenType);
+            return new Handle(tokenTypeSmall, handle._rowId);
+        }
+
+        public static implicit operator EntityHandle(DocumentHandle handle)
+        {
+            return new EntityHandle((uint)(tokenType | handle._rowId));
         }
 
         public static explicit operator DocumentHandle(Handle handle)
         {
-            if (handle.TokenType != tokenType)
+            if (handle.VType != tokenTypeSmall)
+            {
+                Handle.ThrowInvalidCast();
+            }
+
+            return new DocumentHandle(handle.RowId);
+        }
+
+        public static explicit operator DocumentHandle(EntityHandle handle)
+        {
+            if (handle.VType != tokenType)
             {
                 Handle.ThrowInvalidCast();
             }
@@ -45,7 +61,7 @@ namespace System.Reflection.Metadata
             }
         }
 
-        internal uint RowId { get { return _rowId; } }
+        internal int RowId { get { return _rowId; } }
 
         public static bool operator ==(DocumentHandle left, DocumentHandle right)
         {
@@ -76,27 +92,43 @@ namespace System.Reflection.Metadata
     public struct MethodBodyHandle : IEquatable<MethodBodyHandle>
     {
         private const uint tokenType = TokenTypeIds.MethodBody;
-        private readonly uint _rowId;
+        private const byte tokenTypeSmall = (byte)HandleType.MethodBody;
+        private readonly int _rowId;
 
-        private MethodBodyHandle(uint rowId)
+        private MethodBodyHandle(int rowId)
         {
             Debug.Assert(TokenTypeIds.IsValidRowId(rowId));
             _rowId = rowId;
         }
 
-        internal static MethodBodyHandle FromRowId(uint rowId)
+        internal static MethodBodyHandle FromRowId(int rowId)
         {
             return new MethodBodyHandle(rowId);
         }
 
         public static implicit operator Handle(MethodBodyHandle handle)
         {
-            return new Handle(handle._rowId | tokenType);
+            return new Handle(tokenTypeSmall, handle._rowId);
+        }
+
+        public static implicit operator EntityHandle(MethodBodyHandle handle)
+        {
+            return new EntityHandle((uint)(tokenType | handle._rowId));
         }
 
         public static explicit operator MethodBodyHandle(Handle handle)
         {
-            if (handle.TokenType != tokenType)
+            if (handle.VType != tokenTypeSmall)
+            {
+                Handle.ThrowInvalidCast();
+            }
+
+            return new MethodBodyHandle(handle.RowId);
+        }
+
+        public static explicit operator MethodBodyHandle(EntityHandle handle)
+        {
+            if (handle.VType != tokenType)
             {
                 Handle.ThrowInvalidCast();
             }
@@ -112,7 +144,7 @@ namespace System.Reflection.Metadata
             }
         }
 
-        internal uint RowId { get { return _rowId; } }
+        internal int RowId { get { return _rowId; } }
 
         public static bool operator ==(MethodBodyHandle left, MethodBodyHandle right)
         {
@@ -143,27 +175,43 @@ namespace System.Reflection.Metadata
     public struct LocalScopeHandle : IEquatable<LocalScopeHandle>
     {
         private const uint tokenType = TokenTypeIds.LocalScope;
-        private readonly uint _rowId;
+        private const byte tokenTypeSmall = (byte)HandleType.LocalScope;
+        private readonly int _rowId;
 
-        private LocalScopeHandle(uint rowId)
+        private LocalScopeHandle(int rowId)
         {
             Debug.Assert(TokenTypeIds.IsValidRowId(rowId));
             _rowId = rowId;
         }
 
-        internal static LocalScopeHandle FromRowId(uint rowId)
+        internal static LocalScopeHandle FromRowId(int rowId)
         {
             return new LocalScopeHandle(rowId);
         }
 
         public static implicit operator Handle(LocalScopeHandle handle)
         {
-            return new Handle(handle._rowId | tokenType);
+            return new Handle(tokenTypeSmall, handle._rowId);
+        }
+
+        public static implicit operator EntityHandle(LocalScopeHandle handle)
+        {
+            return new EntityHandle((uint)(tokenType | handle._rowId));
         }
 
         public static explicit operator LocalScopeHandle(Handle handle)
         {
-            if (handle.TokenType != tokenType)
+            if (handle.VType != tokenTypeSmall)
+            {
+                Handle.ThrowInvalidCast();
+            }
+
+            return new LocalScopeHandle(handle.RowId);
+        }
+
+        public static explicit operator LocalScopeHandle(EntityHandle handle)
+        {
+            if (handle.VType != tokenType)
             {
                 Handle.ThrowInvalidCast();
             }
@@ -179,7 +227,7 @@ namespace System.Reflection.Metadata
             }
         }
 
-        internal uint RowId { get { return _rowId; } }
+        internal int RowId { get { return _rowId; } }
 
         public static bool operator ==(LocalScopeHandle left, LocalScopeHandle right)
         {
@@ -210,27 +258,43 @@ namespace System.Reflection.Metadata
     public struct LocalVariableHandle : IEquatable<LocalVariableHandle>
     {
         private const uint tokenType = TokenTypeIds.LocalVariable;
-        private readonly uint _rowId;
+        private const byte tokenTypeSmall = (byte)HandleType.LocalVariable;
+        private readonly int _rowId;
 
-        private LocalVariableHandle(uint rowId)
+        private LocalVariableHandle(int rowId)
         {
             Debug.Assert(TokenTypeIds.IsValidRowId(rowId));
             _rowId = rowId;
         }
 
-        internal static LocalVariableHandle FromRowId(uint rowId)
+        internal static LocalVariableHandle FromRowId(int rowId)
         {
             return new LocalVariableHandle(rowId);
         }
 
         public static implicit operator Handle(LocalVariableHandle handle)
         {
-            return new Handle(handle._rowId | tokenType);
+            return new Handle(tokenTypeSmall, handle._rowId);
+        }
+
+        public static implicit operator EntityHandle(LocalVariableHandle handle)
+        {
+            return new EntityHandle((uint)(tokenType | handle._rowId));
         }
 
         public static explicit operator LocalVariableHandle(Handle handle)
         {
-            if (handle.TokenType != tokenType)
+            if (handle.VType != tokenTypeSmall)
+            {
+                Handle.ThrowInvalidCast();
+            }
+
+            return new LocalVariableHandle(handle.RowId);
+        }
+
+        public static explicit operator LocalVariableHandle(EntityHandle handle)
+        {
+            if (handle.VType != tokenType)
             {
                 Handle.ThrowInvalidCast();
             }
@@ -246,7 +310,7 @@ namespace System.Reflection.Metadata
             }
         }
 
-        internal uint RowId { get { return _rowId; } }
+        internal int RowId { get { return _rowId; } }
 
         public static bool operator ==(LocalVariableHandle left, LocalVariableHandle right)
         {
@@ -277,27 +341,43 @@ namespace System.Reflection.Metadata
     public struct LocalConstantHandle : IEquatable<LocalConstantHandle>
     {
         private const uint tokenType = TokenTypeIds.LocalConstant;
-        private readonly uint _rowId;
+        private const byte tokenTypeSmall = (byte)HandleType.LocalConstant;
+        private readonly int _rowId;
 
-        private LocalConstantHandle(uint rowId)
+        private LocalConstantHandle(int rowId)
         {
             Debug.Assert(TokenTypeIds.IsValidRowId(rowId));
             _rowId = rowId;
         }
 
-        internal static LocalConstantHandle FromRowId(uint rowId)
+        internal static LocalConstantHandle FromRowId(int rowId)
         {
             return new LocalConstantHandle(rowId);
         }
 
         public static implicit operator Handle(LocalConstantHandle handle)
         {
-            return new Handle(handle._rowId | tokenType);
+            return new Handle(tokenTypeSmall, handle._rowId);
+        }
+
+        public static implicit operator EntityHandle(LocalConstantHandle handle)
+        {
+            return new EntityHandle((uint)(tokenType | handle._rowId));
         }
 
         public static explicit operator LocalConstantHandle(Handle handle)
         {
-            if (handle.TokenType != tokenType)
+            if (handle.VType != tokenTypeSmall)
+            {
+                Handle.ThrowInvalidCast();
+            }
+
+            return new LocalConstantHandle(handle.RowId);
+        }
+
+        public static explicit operator LocalConstantHandle(EntityHandle handle)
+        {
+            if (handle.VType != tokenType)
             {
                 Handle.ThrowInvalidCast();
             }
@@ -313,7 +393,7 @@ namespace System.Reflection.Metadata
             }
         }
 
-        internal uint RowId { get { return _rowId; } }
+        internal int RowId { get { return _rowId; } }
 
         public static bool operator ==(LocalConstantHandle left, LocalConstantHandle right)
         {
@@ -344,27 +424,43 @@ namespace System.Reflection.Metadata
     public struct ImportScopeHandle : IEquatable<ImportScopeHandle>
     {
         private const uint tokenType = TokenTypeIds.ImportScope;
-        private readonly uint _rowId;
+        private const byte tokenTypeSmall = (byte)HandleType.ImportScope;
+        private readonly int _rowId;
 
-        private ImportScopeHandle(uint rowId)
+        private ImportScopeHandle(int rowId)
         {
             Debug.Assert(TokenTypeIds.IsValidRowId(rowId));
             _rowId = rowId;
         }
 
-        internal static ImportScopeHandle FromRowId(uint rowId)
+        internal static ImportScopeHandle FromRowId(int rowId)
         {
             return new ImportScopeHandle(rowId);
         }
 
         public static implicit operator Handle(ImportScopeHandle handle)
         {
-            return new Handle(handle._rowId | tokenType);
+            return new Handle(tokenTypeSmall, handle._rowId);
+        }
+
+        public static implicit operator EntityHandle(ImportScopeHandle handle)
+        {
+            return new EntityHandle((uint)(tokenType | handle._rowId));
         }
 
         public static explicit operator ImportScopeHandle(Handle handle)
         {
-            if (handle.TokenType != tokenType)
+            if (handle.VType != tokenTypeSmall)
+            {
+                Handle.ThrowInvalidCast();
+            }
+
+            return new ImportScopeHandle(handle.RowId);
+        }
+
+        public static explicit operator ImportScopeHandle(EntityHandle handle)
+        {
+            if (handle.VType != tokenType)
             {
                 Handle.ThrowInvalidCast();
             }
@@ -380,7 +476,7 @@ namespace System.Reflection.Metadata
             }
         }
 
-        internal uint RowId { get { return _rowId; } }
+        internal int RowId { get { return _rowId; } }
 
         public static bool operator ==(ImportScopeHandle left, ImportScopeHandle right)
         {
@@ -411,27 +507,43 @@ namespace System.Reflection.Metadata
     public struct AsyncMethodHandle : IEquatable<AsyncMethodHandle>
     {
         private const uint tokenType = TokenTypeIds.AsyncMethod;
-        private readonly uint _rowId;
+        private const byte tokenTypeSmall = (byte)HandleType.AsyncMethod;
+        private readonly int _rowId;
 
-        private AsyncMethodHandle(uint rowId)
+        private AsyncMethodHandle(int rowId)
         {
             Debug.Assert(TokenTypeIds.IsValidRowId(rowId));
             _rowId = rowId;
         }
 
-        internal static AsyncMethodHandle FromRowId(uint rowId)
+        internal static AsyncMethodHandle FromRowId(int rowId)
         {
             return new AsyncMethodHandle(rowId);
         }
 
         public static implicit operator Handle(AsyncMethodHandle handle)
         {
-            return new Handle(handle._rowId | tokenType);
+            return new Handle(tokenTypeSmall, handle._rowId);
+        }
+
+        public static implicit operator EntityHandle(AsyncMethodHandle handle)
+        {
+            return new EntityHandle((uint)(tokenType | handle._rowId));
         }
 
         public static explicit operator AsyncMethodHandle(Handle handle)
         {
-            if (handle.TokenType != tokenType)
+            if (handle.VType != tokenTypeSmall)
+            {
+                Handle.ThrowInvalidCast();
+            }
+
+            return new AsyncMethodHandle(handle.RowId);
+        }
+
+        public static explicit operator AsyncMethodHandle(EntityHandle handle)
+        {
+            if (handle.VType != tokenType)
             {
                 Handle.ThrowInvalidCast();
             }
@@ -447,7 +559,7 @@ namespace System.Reflection.Metadata
             }
         }
 
-        internal uint RowId { get { return _rowId; } }
+        internal int RowId { get { return _rowId; } }
 
         public static bool operator ==(AsyncMethodHandle left, AsyncMethodHandle right)
         {
@@ -478,27 +590,43 @@ namespace System.Reflection.Metadata
     public struct CustomDebugInformationHandle : IEquatable<CustomDebugInformationHandle>
     {
         private const uint tokenType = TokenTypeIds.CustomDebugInformation;
-        private readonly uint _rowId;
+        private const byte tokenTypeSmall = (byte)HandleType.CustomDebugInformation;
+        private readonly int _rowId;
 
-        private CustomDebugInformationHandle(uint rowId)
+        private CustomDebugInformationHandle(int rowId)
         {
             Debug.Assert(TokenTypeIds.IsValidRowId(rowId));
             _rowId = rowId;
         }
 
-        internal static CustomDebugInformationHandle FromRowId(uint rowId)
+        internal static CustomDebugInformationHandle FromRowId(int rowId)
         {
             return new CustomDebugInformationHandle(rowId);
         }
 
         public static implicit operator Handle(CustomDebugInformationHandle handle)
         {
-            return new Handle(handle._rowId | tokenType);
+            return new Handle(tokenTypeSmall, handle._rowId);
+        }
+
+        public static implicit operator EntityHandle(CustomDebugInformationHandle handle)
+        {
+            return new EntityHandle((uint)(tokenType | handle._rowId));
         }
 
         public static explicit operator CustomDebugInformationHandle(Handle handle)
         {
-            if (handle.TokenType != tokenType)
+            if (handle.VType != tokenTypeSmall)
+            {
+                Handle.ThrowInvalidCast();
+            }
+
+            return new CustomDebugInformationHandle(handle.RowId);
+        }
+
+        public static explicit operator CustomDebugInformationHandle(EntityHandle handle)
+        {
+            if (handle.VType != tokenType)
             {
                 Handle.ThrowInvalidCast();
             }
@@ -514,7 +642,7 @@ namespace System.Reflection.Metadata
             }
         }
 
-        internal uint RowId { get { return _rowId; } }
+        internal int RowId { get { return _rowId; } }
 
         public static bool operator ==(CustomDebugInformationHandle left, CustomDebugInformationHandle right)
         {

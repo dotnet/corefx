@@ -10,7 +10,7 @@ namespace System.Reflection.Metadata
         private readonly MetadataReader _reader;
 
         // Workaround: JIT doesn't generate good code for nested structures, so use RowId.
-        private readonly uint _rowId;
+        private readonly int _rowId;
 
         internal CustomDebugInformation(MetadataReader reader, CustomDebugInformationHandle handle)
         {
@@ -26,7 +26,7 @@ namespace System.Reflection.Metadata
             get { return CustomDebugInformationHandle.FromRowId(_rowId); }
         }
 
-        public Handle Parent
+        public EntityHandle Parent
         {
             get
             {

@@ -202,10 +202,10 @@ namespace System.Reflection.Internal
             return BlobReader.InvalidCompressedInteger;
         }
 
-        internal UInt16 PeekUInt16(int offset)
+        internal ushort PeekUInt16(int offset)
         {
-            CheckBounds(offset, sizeof(UInt16));
-            return *(UInt16*)(Pointer + offset);
+            CheckBounds(offset, sizeof(ushort));
+            return *(ushort*)(Pointer + offset);
         }
 
         // When reference has tag bits.
@@ -485,7 +485,7 @@ namespace System.Reflection.Internal
 
             for (int i = 0; i < asciiPrefix.Length; i++)
             {
-                Debug.Assert((int)asciiPrefix[i] > 0 && (int)asciiPrefix[i] <= 0x7f);
+                Debug.Assert(asciiPrefix[i] > 0 && asciiPrefix[i] <= 0x7f);
 
                 if (asciiPrefix[i] != *p)
                 {
@@ -509,7 +509,7 @@ namespace System.Reflection.Internal
 
             for (int i = 0; i < asciiString.Length; i++)
             {
-                Debug.Assert((int)asciiString[i] > 0 && (int)asciiString[i] <= 0x7f);
+                Debug.Assert(asciiString[i] > 0 && asciiString[i] <= 0x7f);
 
                 if (i > limit)
                 {
@@ -609,8 +609,8 @@ namespace System.Reflection.Internal
         {
             int startRowNumber = 0;
             int endRowNumber = rowCount - 1;
-            uint startValue = PeekReferenceUnchecked(startRowNumber * rowSize + referenceOffset, isReferenceSmall);
-            uint endValue = PeekReferenceUnchecked(endRowNumber * rowSize + referenceOffset, isReferenceSmall);
+            uint startValue = PeekReferenceUnchecked(startRowNumber * rowSize + referenceListOffset, isReferenceSmall);
+            uint endValue = PeekReferenceUnchecked(endRowNumber * rowSize + referenceListOffset, isReferenceSmall);
             if (endRowNumber == 1)
             {
                 if (referenceValue >= endValue)
@@ -634,7 +634,7 @@ namespace System.Reflection.Internal
                 }
 
                 int midRowNumber = (startRowNumber + endRowNumber) / 2;
-                uint midReferenceValue = PeekReferenceUnchecked(midRowNumber * rowSize + referenceOffset, isReferenceSmall);
+                uint midReferenceValue = PeekReferenceUnchecked(midRowNumber * rowSize + referenceListOffset, isReferenceSmall);
                 if (referenceValue > midReferenceValue)
                 {
                     startRowNumber = midRowNumber;

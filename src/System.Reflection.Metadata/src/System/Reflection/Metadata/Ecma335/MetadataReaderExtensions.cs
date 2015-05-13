@@ -29,7 +29,7 @@ namespace System.Reflection.Metadata.Ecma335
                 throw new ArgumentOutOfRangeException("tableIndex");
             }
 
-            return (int)reader.TableRowCounts[(int)tableIndex];
+            return reader.TableRowCounts[(int)tableIndex];
         }
 
         /// <summary>
