@@ -5,6 +5,7 @@ using System;
 using System.Globalization;
 using System.IO;
 using System.Text.Encodings.Web;
+using System.Text.Unicode;
 using Xunit;
 
 namespace Microsoft.Framework.WebEncoders
@@ -15,7 +16,7 @@ namespace Microsoft.Framework.WebEncoders
         public void Ctor_WithCodePointFilter()
         {
             // Arrange
-            var filter = new CodePointFilter().AllowChars("ab").AllowChars('\0', '&', '\uFFFF', 'd');
+            var filter = new CodePointFilter().AllowCharacters("ab").AllowCharacters('\0', '&', '\uFFFF', 'd');
             JavaScriptStringEncoder encoder = new JavaScriptStringEncoder(filter);
 
             // Act & assert
@@ -68,17 +69,6 @@ namespace Microsoft.Framework.WebEncoders
                     Assert.Equal(controlEncoder.JavaScriptStringEncode(input), testEncoder.JavaScriptStringEncode(input));
                 }
             }
-        }
-
-        [Fact]
-        public void Default_ReturnsSingletonInstance()
-        {
-            // Act
-            JavaScriptStringEncoder encoder1 = JavaScriptStringEncoder.Default;
-            JavaScriptStringEncoder encoder2 = JavaScriptStringEncoder.Default;
-
-            // Assert
-            Assert.Same(encoder1, encoder2);
         }
 
         [Fact]
@@ -227,13 +217,12 @@ namespace Microsoft.Framework.WebEncoders
         }
 
         [Fact]
-        public void JavaScriptStringEncode_NullInput_ReturnsNull()
+        public void JavaScriptStringEncode_NullInput_Throws()
         {
             // Arrange
             JavaScriptStringEncoder encoder = new JavaScriptStringEncoder();
 
-            // Act & assert
-            Assert.Null(encoder.JavaScriptStringEncode(null));
+            Assert.Throws<ArgumentNullException>(() => { encoder.JavaScriptStringEncode(null); });
         }
 
         [Fact]

@@ -14,7 +14,7 @@ namespace System.Reflection.Metadata.Decoding
         public static CustomAttributeValue<TType> DecodeCustomAttribute<TType>(CustomAttributeHandle handle, ICustomAttributeTypeProvider<TType> provider)
         {
             CustomAttribute attribute = provider.Reader.GetCustomAttribute(handle);
-            Handle constructor = attribute.Constructor;
+            EntityHandle constructor = attribute.Constructor;
             BlobHandle signature;
 
             switch (constructor.Kind)
@@ -36,7 +36,7 @@ namespace System.Reflection.Metadata.Decoding
             BlobReader signatureReader = provider.Reader.GetBlobReader(signature);
             BlobReader valueReader = provider.Reader.GetBlobReader(attribute.Value);
 
-            UInt16 prolog = valueReader.ReadUInt16();
+            ushort prolog = valueReader.ReadUInt16();
             if (prolog != 1)
             {
                 throw new BadImageFormatException();
@@ -153,7 +153,7 @@ namespace System.Reflection.Metadata.Decoding
 
                 case SignatureTypeCode.TypeHandle:
                     // Parameter is type def or ref and is only allowed to be System.Type or Enum.
-                    Handle handle = signatureReader.ReadTypeHandle();
+                    EntityHandle handle = signatureReader.ReadTypeHandle();
                     info.Type = GetTypeFromReferenceOrDefinition(handle, provider);
                     info.TypeCode = provider.IsSystemType(info.Type) ? SerializationTypeCode.Type : (SerializationTypeCode)provider.GetUnderlyingEnumType(info.Type);
                     break;
@@ -350,7 +350,7 @@ namespace System.Reflection.Metadata.Decoding
             return ImmutableArray.Create(array);
         }
 
-        private static TType GetTypeFromReferenceOrDefinition<TType>(Handle typeRefOrDefHandle, ICustomAttributeTypeProvider<TType> provider)
+        private static TType GetTypeFromReferenceOrDefinition<TType>(EntityHandle typeRefOrDefHandle, ICustomAttributeTypeProvider<TType> provider)
         {
             switch (typeRefOrDefHandle.Kind)
             {

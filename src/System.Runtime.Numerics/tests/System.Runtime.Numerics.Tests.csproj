@@ -10,7 +10,6 @@
     <RootNamespace>System.Numerics.Tests</RootNamespace>
     <AssemblyName>System.Runtime.Numerics.Tests</AssemblyName>
     <ProjectGuid>{28AE24F8-BEF4-4358-B612-ADD9D587C8E1}</ProjectGuid>
-    <TestCategories>InnerLoop;OuterLoop</TestCategories>
   </PropertyGroup>
   <!-- Default configurations to help VS understand the configurations -->
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -19,10 +18,6 @@
   </PropertyGroup>
   <!-- References are resolved from packages.config -->
   <ItemGroup>
-    <ProjectReference Include="$(CommonTestPath)\XunitTraitsDiscoverers\XunitTraitsDiscoverers.csproj">
-      <Project>{be8ed8c1-c314-4c4e-a929-64c9c8b3552a}</Project>
-      <Name>XunitTraitsDiscoverers</Name>
-    </ProjectReference>
     <ProjectReference Include="..\src\System.Runtime.Numerics.csproj">
       <Project>{d2c99d27-0bef-4319-adb3-05cbeba8f69b}</Project>
       <Name>System.Runtime.Numerics</Name>
@@ -30,9 +25,6 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config">
-      <SubType>Designer</SubType>
-    </None>
     <None Include="project.json" />
   </ItemGroup>
   <ItemGroup>

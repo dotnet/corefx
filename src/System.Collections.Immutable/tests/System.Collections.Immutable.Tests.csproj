@@ -17,6 +17,10 @@
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
     <NuGetPackageImportStamp>7a9bfb7d</NuGetPackageImportStamp>
+    <!-- DNX fails to resolve assets from .NETPortable profiles if the PCL targeting pack is 
+         not installed on the machine, as is the case for our official build machines.
+         https://github.com/aspnet/dnx/issues/1814 -->
+    <NugetTargetFrameworkMoniker>DNXCore,Version=v5.0</NugetTargetFrameworkMoniker>
   </PropertyGroup>
   <!-- Default configurations to help VS understand the configurations -->
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -64,12 +68,13 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="ClassDiagram1.cd" />
-    <None Include="packages.config" />
+    <None Include="project.json" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\src\System.Collections.Immutable.csproj">
       <Project>{1dd0ff15-6234-4bd6-850a-317f05479554}</Project>
       <Name>System.Collections.Immutable</Name>
+      <Private>true</Private>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

@@ -300,4 +300,13 @@
   <data name="ValueTooLarge" xml:space="preserve">
     <value>Value is too large.</value>
   </data>
+  <data name="InvalidTypeSize" xml:space="preserve">
+    <value>Invalid type size.</value>
+  </data>
+  <data name="HandleBelongsToFutureGeneration" xml:space="preserve">
+    <value>Handle belongs to a future generation</value>
+  </data>
+  <data name="InvalidRowCount" xml:space="preserve">
+    <value>Invalid row count: {0}</value>
+  </data>
 </root>

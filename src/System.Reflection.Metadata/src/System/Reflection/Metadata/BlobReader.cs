@@ -455,6 +455,7 @@ namespace System.Reflection.Metadata
         /// <summary>
         /// Reads type code encoded in a serialized custom attribute value. 
         /// </summary>
+        /// <returns><see cref="SerializationTypeCode.Invalid"/> if the encoding is invalid.</returns>
         public SerializationTypeCode ReadSerializationTypeCode()
         {
             int value = ReadCompressedIntegerOrInvalid();
@@ -469,6 +470,7 @@ namespace System.Reflection.Metadata
         /// <summary>
         /// Reads type code encoded in a signature. 
         /// </summary>
+        /// <returns><see cref="SignatureTypeCode.Invalid"/> if the encoding is invalid.</returns>
         public SignatureTypeCode ReadSignatureTypeCode()
         {
             int value = ReadCompressedIntegerOrInvalid();
@@ -480,7 +482,7 @@ namespace System.Reflection.Metadata
                     return SignatureTypeCode.TypeHandle;
 
                 default:
-                    if (value > Byte.MaxValue)
+                    if (value > byte.MaxValue)
                     {
                         return SignatureTypeCode.Invalid;
                     }
@@ -495,6 +497,7 @@ namespace System.Reflection.Metadata
         /// </summary>
         /// <remarks>Defined as a 'SerString' in the Ecma CLI specification.</remarks>
         /// <returns>String value or null.</returns>
+        /// <exception cref="BadImageFormatException">If the encoding is invalid.</exception>
         public string ReadSerializedString()
         {
             int length;
@@ -514,20 +517,20 @@ namespace System.Reflection.Metadata
         }
 
         /// <summary>
-        /// Reads a type handle encoded in a signature as (CLASS | VALUETYPE) TypeDefOrRefOrSpecEncoded. 
+        /// Reads a type handle encoded in a signature as TypeDefOrRefOrSpecEncoded (see ECMA-335 II.23.2.8).
         /// </summary>
         /// <returns>The handle or nil if the encoding is invalid.</returns>
-        public Handle ReadTypeHandle()
+        public EntityHandle ReadTypeHandle()
         {
             uint value = (uint)ReadCompressedIntegerOrInvalid();
             uint tokenType = s_corEncodeTokenArray[value & 0x3];
 
             if (value == InvalidCompressedInteger || tokenType == 0)
             {
-                return default(Handle);
+                return default(EntityHandle);
             }
 
-            return new Handle(tokenType | (value >> 2));
+            return new EntityHandle(tokenType | (value >> 2));
         }
 
         private static readonly uint[] s_corEncodeTokenArray = new uint[] { TokenTypeIds.TypeDef, TokenTypeIds.TypeRef, TokenTypeIds.TypeSpec, 0 };

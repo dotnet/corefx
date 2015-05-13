@@ -287,7 +287,7 @@ namespace Microsoft.CSharp.RuntimeBinder
 #if UNSUPPORTEDAPI
             return (mi1.MetadataToken == mi2.MetadataToken) && (mi1.Module == mi2.Module));
 #else
-            if (mi1.Module != mi2.Module)
+            if (!mi1.Module.Equals(mi2.Module))
             {
                 return false;
             }
@@ -305,13 +305,22 @@ namespace Microsoft.CSharp.RuntimeBinder
                 else
                 {
                     var parameter = Expression.Parameter(memberInfo);
-                    s_GetMetadataToken = Expression.Lambda<Func<MemberInfo, int>>(Expression.Property(parameter, property), new[] { parameter }).Compile();
+                    try
+                    {
+                        s_GetMetadataToken = Expression.Lambda<Func<MemberInfo, int>>(Expression.Property(parameter, property), new[] { parameter }).Compile();
+                    }
+                    catch
+                    {
+                        // Platform might not allow access to the property
+                        s_GetMetadataToken = null;
+                    }
                 }
             }
 
-            if ((object)s_GetMetadataToken != null)
+            var getMetadataToken = s_GetMetadataToken;
+            if ((object)getMetadataToken != null)
             {
-                return s_GetMetadataToken(mi1) == s_GetMetadataToken(mi2);
+                return getMetadataToken(mi1) == getMetadataToken(mi2);
             }
 
             return mi1.IsEquivalentTo(mi2);

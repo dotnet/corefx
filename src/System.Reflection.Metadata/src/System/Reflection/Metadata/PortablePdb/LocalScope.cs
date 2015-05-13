@@ -10,7 +10,7 @@ namespace System.Reflection.Metadata
         private readonly MetadataReader _reader;
 
         // Workaround: JIT doesn't generate good code for nested structures, so use RowId.
-        private readonly uint _rowId;
+        private readonly int _rowId;
 
         internal LocalScope(MetadataReader reader, LocalScopeHandle handle)
         {
@@ -30,7 +30,7 @@ namespace System.Reflection.Metadata
         {
             get
             {
-                return _reader.LocalScopeTable.GetMethod((int)_rowId);
+                return _reader.LocalScopeTable.GetMethod(_rowId);
             }
         }
 
@@ -46,7 +46,7 @@ namespace System.Reflection.Metadata
         {
             get
             {
-                return _reader.LocalScopeTable.GetStartOffset((int)_rowId);
+                return _reader.LocalScopeTable.GetStartOffset(_rowId);
             }
         }
 
@@ -54,7 +54,7 @@ namespace System.Reflection.Metadata
         {
             get
             {
-                return _reader.LocalScopeTable.GetLength((int)_rowId);
+                return _reader.LocalScopeTable.GetLength(_rowId);
             }
         }
 
@@ -62,7 +62,7 @@ namespace System.Reflection.Metadata
         {
             get
             {
-                return _reader.LocalScopeTable.GetEndOffset((int)_rowId);
+                return _reader.LocalScopeTable.GetEndOffset(_rowId);
             }
         }
 
@@ -78,7 +78,7 @@ namespace System.Reflection.Metadata
 
         public LocalScopeHandleCollection.ChildrenEnumerator GetChildren()
         {
-            return new LocalScopeHandleCollection.ChildrenEnumerator(_reader, (int)_rowId);
+            return new LocalScopeHandleCollection.ChildrenEnumerator(_reader, _rowId);
         }
     }
 }

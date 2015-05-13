@@ -9,7 +9,6 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>System.Threading.Tasks.Parallel.Tests</RootNamespace>
     <AssemblyName>System.Threading.Tasks.Parallel.Tests</AssemblyName>
-    <TestCategories>InnerLoop;OuterLoop</TestCategories>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
   </PropertyGroup>
@@ -40,10 +39,6 @@
     <Compile Include="XunitAssemblyAttributes.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="$(CommonTestPath)\XunitTraitsDiscoverers\XunitTraitsDiscoverers.csproj">
-      <Project>{be8ed8c1-c314-4c4e-a929-64c9c8b3552a}</Project>
-      <Name>XunitTraitsDiscoverers</Name>
-    </ProjectReference>
     <ProjectReference Include="..\src\System.Threading.Tasks.Parallel.csproj">
       <Project>{A6BA5DF2-772E-4DA1-BC2D-89FF4A21EE4F}</Project>
       <Name>System.Threading.Tasks.Parallel</Name>
@@ -52,7 +47,6 @@
   </ItemGroup>
   <!-- References are resolved from packages.config -->
   <ItemGroup>
-    <None Include="packages.config" />
     <None Include="project.json" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />

@@ -22,9 +22,9 @@ namespace System.Reflection.Metadata
             _treatmentAndRowId = treatmentAndRowId;
         }
 
-        private uint RowId
+        private int RowId
         {
-            get { return _treatmentAndRowId & TokenTypeIds.RIDMask; }
+            get { return (int)(_treatmentAndRowId & TokenTypeIds.RIDMask); }
         }
 
         private FieldDefTreatment Treatment
@@ -88,7 +88,7 @@ namespace System.Reflection.Metadata
 
         public int GetRelativeVirtualAddress()
         {
-            uint fieldRvaRowId = _reader.FieldRvaTable.FindFieldRvaRowId(Handle.RowId);
+            int fieldRvaRowId = _reader.FieldRvaTable.FindFieldRvaRowId(Handle.RowId);
             if (fieldRvaRowId == 0)
             {
                 return 0;
@@ -102,7 +102,7 @@ namespace System.Reflection.Metadata
         /// </summary>
         public int GetOffset()
         {
-            uint layoutRowId = _reader.FieldLayoutTable.FindFieldLayoutRowId(Handle);
+            int layoutRowId = _reader.FieldLayoutTable.FindFieldLayoutRowId(Handle);
             if (layoutRowId == 0)
             {
                 return -1;
@@ -124,7 +124,7 @@ namespace System.Reflection.Metadata
 
         public BlobHandle GetMarshallingDescriptor()
         {
-            uint marshalRowId = _reader.FieldMarshalTable.FindFieldMarshalRowId(Handle);
+            int marshalRowId = _reader.FieldMarshalTable.FindFieldMarshalRowId(Handle);
             if (marshalRowId == 0)
             {
                 return default(BlobHandle);

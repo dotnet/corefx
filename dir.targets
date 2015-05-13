@@ -68,6 +68,8 @@
           Outputs="$(ToolsDir)Microsoft.DotNet.Build.Tasks.dll;$(NugetToolPath);$(DnuToolPath)">
     <Message Importance="High" Text="Restoring build tools..." />
 
+    <Copy Condition="Exists('$(NuGetCachedPath)')" SourceFiles="$(NuGetCachedPath)" DestinationFiles="$(NuGetToolPath)" SkipUnchangedFiles="true" />
+
     <!-- Download latest nuget.exe -->
     <DownloadFile FileName="$(NuGetToolPath)"
                   Address="https://www.nuget.org/nuget.exe"
@@ -79,6 +81,22 @@
 
     <!-- Restore build tools -->
     <Exec Command="$(_RestoreBuildToolsCommand)" StandardOutputImportance="Low" />
+
+    <!-- currently DNU doesn't support -ConfigFile: https://github.com/aspnet/dnx/issues/1693
+         Our DnuRestoreCommand doesn't force a config file  and we rely on the 
+         directory probing for it to find nuget.config.  This works for restore from source,
+         but not restore from PackagesDir as happens for test project restore since PackagesDir
+         will not be under src.  To workaround, copy our nuget.config to packages. -->
+    <Copy Condition="Exists('$(NuGetConfigFile)')" SourceFiles="$(NuGetConfigFile)" DestinationFolder="$(PackagesDir)" SkipUnchangedFiles="true" />
+    <Copy Condition="Exists('$(NuGetConfigFile)')" SourceFiles="$(NuGetConfigFile)" DestinationFolder="$(IntermediateOutputRootPath)" SkipUnchangedFiles="true" />
+
+    <!-- Add DNU and Roslyn tool execute rights -->
+    <Exec Condition="'$(OsEnvironment)'=='Unix'"
+          Command="chmod a+x &quot;$(DnxPackageDir)/bin/dnu&quot;" />
+    <Exec Condition="'$(OsEnvironment)'=='Unix'"
+          Command="chmod a+x &quot;$(DnxPackageDir)/bin/dnx&quot;" />
+    <Exec Condition="'$(OsEnvironment)'=='Unix'"
+          Command="find '$(RoslynPackageDir)tools' -name &quot;*.exe&quot; -exec chmod &quot;+x&quot; '{}' ';'" /> 
 
     <Error Condition="'$(ErrorIfBuildToolsRestoredFromIndividualProject)'=='true'"
            Text="The build tools package was just restored and so we cannot continue the build of an individual project because targets from the build tools package were not able to be imported. Please retry the build the individual project again." />
@@ -96,5 +114,4 @@
   <Target Name="BuildAndTest" DependsOnTargets="Build;Test" />
 
   <Target Name="Test" />
-
 </Project>

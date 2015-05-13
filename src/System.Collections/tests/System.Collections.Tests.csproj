@@ -15,6 +15,15 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
   </PropertyGroup>
   <ItemGroup>
+    <!-- Compile tests against the contract, but copy our local-built implementation for testing -->
+    <ProjectReference Include="..\src\System.Collections.csproj">
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <OutputItemType>Content</OutputItemType>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Targets>Build;DebugSymbolsProjectOutputGroup</Targets>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
     <Compile Include="BitArray\BitArray_CtorTests.cs" />
     <Compile Include="BitArray\BitArray_GetSetTests.cs" />
     <Compile Include="BitArray\BitArray_OperatorsTests.cs" />
@@ -115,17 +124,14 @@
     <Compile Include="Generic\SortedList\Values.cs" />
     <Compile Include="Generic\SortedSet\SortedSetSpecificTests.cs" />
     <Compile Include="Generic\SortedSet\SortedSetTest.cs" />
+    <Compile Include="Generic\Common\TestDebugger.cs" />
     <Compile Include="Generic\Stack\Stack_GetEnumerator.cs" />
+    <Compile Include="$(CommonTestPath)\System\Diagnostics\DebuggerAttributes.cs">
+      <Link>Common\System\Diagnostics\DebuggerAttributes.cs</Link>
+    </Compile>
   </ItemGroup>
   <!-- References are resolved from packages.config -->
   <ItemGroup>
-    <ProjectReference Include="$(CommonTestPath)\XunitTraitsDiscoverers\XunitTraitsDiscoverers.csproj">
-      <Project>{be8ed8c1-c314-4c4e-a929-64c9c8b3552a}</Project>
-      <Name>XunitTraitsDiscoverers</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="packages.config" />
     <None Include="project.json" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
