@@ -189,5 +189,67 @@ namespace System.IO.Tests
                 Assert.Throws<ObjectDisposedException>(() => stream.WriteAsync(buffer, 0, buffer.Length).GetAwaiter().GetResult());
             }
         }
+
+        [Fact]
+        public static void CopyToTest()
+        {
+            byte[] testData = Enumerable.Repeat((byte)0x20, 10).ToArray();
+
+            using (var manager = new UmsManager(FileAccess.Read, testData))
+            {
+                UnmanagedMemoryStream ums = manager.Stream;
+                UmsTests.ReadUmsInvariants(ums);
+
+                MemoryStream destination = new MemoryStream();
+                ums.CopyTo(destination);
+                Assert.Equal(testData, destination.ToArray());
+            }
+
+            // copy to disposed stream should throw
+            using (var manager = new UmsManager(FileAccess.Read, testData))
+            {
+                UnmanagedMemoryStream ums = manager.Stream;
+                UmsTests.ReadUmsInvariants(ums);
+
+                MemoryStream destination = new MemoryStream();
+                destination.Dispose();
+
+                Assert.Throws<ObjectDisposedException>(() => ums.CopyTo(destination));
+            }
+
+            // copy from disposed stream should throw
+            using (var manager = new UmsManager(FileAccess.Read, testData))
+            {
+                UnmanagedMemoryStream ums = manager.Stream;
+                UmsTests.ReadUmsInvariants(ums);
+                ums.Dispose();
+
+                MemoryStream destination = new MemoryStream();
+
+                Assert.Throws<ObjectDisposedException>(() => ums.CopyTo(destination));
+            }
+
+            // writing to non-writeable stream should throw
+            using (var manager = new UmsManager(FileAccess.Read, testData))
+            {
+                UnmanagedMemoryStream ums = manager.Stream;
+                UmsTests.ReadUmsInvariants(ums);
+
+                MemoryStream destination = new MemoryStream(new byte[0], false);
+
+                Assert.Throws<NotSupportedException>(() => ums.CopyTo(destination));
+            }
+
+            // copying from non-readable stream should throw
+            using (var manager = new UmsManager(FileAccess.Write, testData))
+            {
+                UnmanagedMemoryStream ums = manager.Stream;
+                UmsTests.WriteUmsInvariants(ums);
+
+                MemoryStream destination = new MemoryStream(new byte[0], false);
+
+                Assert.Throws<NotSupportedException>(() => ums.CopyTo(destination));
+            }
+        }
     }
 }
