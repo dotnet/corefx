@@ -216,45 +216,45 @@ namespace System.Reflection.Metadata.Ecma335
 
     internal static class HandleType
     {
-        internal const uint Module = 0x00;
-        internal const uint TypeRef = 0x01;
-        internal const uint TypeDef = 0x02;
-        internal const uint FieldDef = 0x04;
-        internal const uint MethodDef = 0x06;
-        internal const uint ParamDef = 0x08;
-        internal const uint InterfaceImpl = 0x09;
-        internal const uint MemberRef = 0x0a;
-        internal const uint Constant = 0x0b;
-        internal const uint CustomAttribute = 0x0c;
-        internal const uint DeclSecurity = 0x0e;
-        internal const uint Signature = 0x11;
-        internal const uint EventMap = 0x12;
-        internal const uint Event = 0x14;
-        internal const uint PropertyMap = 0x15;
-        internal const uint Property = 0x17;
-        internal const uint MethodSemantics = 0x18;
-        internal const uint MethodImpl = 0x19;
-        internal const uint ModuleRef = 0x1a;
-        internal const uint TypeSpec = 0x1b;
-        internal const uint Assembly = 0x20;
-        internal const uint AssemblyRef = 0x23;
-        internal const uint File = 0x26;
-        internal const uint ExportedType = 0x27;
-        internal const uint ManifestResource = 0x28;
-        internal const uint NestedClass = 0x29;
-        internal const uint GenericParam = 0x2a;
-        internal const uint MethodSpec = 0x2b;
-        internal const uint GenericParamConstraint = 0x2c;
+        internal const uint Module = (uint)TableIndex.Module;
+        internal const uint TypeRef = (uint)TableIndex.TypeRef;
+        internal const uint TypeDef = (uint)TableIndex.TypeDef;
+        internal const uint FieldDef = (uint)TableIndex.Field;
+        internal const uint MethodDef = (uint)TableIndex.MethodDef;
+        internal const uint ParamDef = (uint)TableIndex.Param;
+        internal const uint InterfaceImpl = (uint)TableIndex.InterfaceImpl;
+        internal const uint MemberRef = (uint)TableIndex.MemberRef;
+        internal const uint Constant = (uint)TableIndex.Constant;
+        internal const uint CustomAttribute = (uint)TableIndex.CustomAttribute;
+        internal const uint DeclSecurity = (uint)TableIndex.DeclSecurity;
+        internal const uint Signature = (uint)TableIndex.StandAloneSig;
+        internal const uint EventMap = (uint)TableIndex.EventMap;
+        internal const uint Event = (uint)TableIndex.Event;
+        internal const uint PropertyMap = (uint)TableIndex.PropertyMap;
+        internal const uint Property = (uint)TableIndex.Property;
+        internal const uint MethodSemantics = (uint)TableIndex.MethodSemantics;
+        internal const uint MethodImpl = (uint)TableIndex.MethodImpl;
+        internal const uint ModuleRef = (uint)TableIndex.ModuleRef;
+        internal const uint TypeSpec = (uint)TableIndex.TypeSpec;
+        internal const uint Assembly = (uint)TableIndex.Assembly;
+        internal const uint AssemblyRef = (uint)TableIndex.AssemblyRef;
+        internal const uint File = (uint)TableIndex.File;
+        internal const uint ExportedType = (uint)TableIndex.ExportedType;
+        internal const uint ManifestResource = (uint)TableIndex.ManifestResource;
+        internal const uint NestedClass = (uint)TableIndex.NestedClass;
+        internal const uint GenericParam = (uint)TableIndex.GenericParam;
+        internal const uint MethodSpec = (uint)TableIndex.MethodSpec;
+        internal const uint GenericParamConstraint = (uint)TableIndex.GenericParamConstraint;
 
         // debug tables:
-        internal const uint Document = 0x30;
-        internal const uint MethodBody = 0x31;
-        internal const uint LocalScope = 0x32;
-        internal const uint LocalVariable = 0x33;
-        internal const uint LocalConstant = 0x34;
-        internal const uint ImportScope = 0x35;
-        internal const uint AsyncMethod = 0x36;
-        internal const uint CustomDebugInformation = 0x37;
+        internal const uint Document = (uint)TableIndex.Document;
+        internal const uint MethodBody = (uint)TableIndex.MethodBody;
+        internal const uint LocalScope = (uint)TableIndex.LocalScope;
+        internal const uint LocalVariable = (uint)TableIndex.LocalVariable;
+        internal const uint LocalConstant = (uint)TableIndex.LocalConstant;
+        internal const uint ImportScope = (uint)TableIndex.ImportScope;
+        internal const uint AsyncMethod = (uint)TableIndex.AsyncMethod;
+        internal const uint CustomDebugInformation = (uint)TableIndex.CustomDebugInformation;
 
         internal const uint UserString = 0x70;     // #UserString heap
 
