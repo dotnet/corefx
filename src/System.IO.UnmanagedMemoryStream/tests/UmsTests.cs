@@ -3,6 +3,7 @@
 
 using Xunit;
 using System.Threading;
+using System.Threading.Tasks;
 
 // TODO: add WriteAsync, Timeout, Flush, CopyTo tests
 
@@ -193,7 +194,7 @@ namespace System.IO.Tests
         [Fact]
         public static void CopyToTest()
         {
-            byte[] testData = Enumerable.Repeat((byte)0x20, 10).ToArray();
+            byte[] testData = { 0x20, 0x21, 0x22, 0x23, 0x24 };
 
             using (var manager = new UmsManager(FileAccess.Read, testData))
             {
@@ -229,7 +230,7 @@ namespace System.IO.Tests
                 Assert.Throws<ObjectDisposedException>(() => ums.CopyTo(destination));
             }
 
-            // writing to non-writeable stream should throw
+            // copying to non-writeable stream should throw
             using (var manager = new UmsManager(FileAccess.Read, testData))
             {
                 UnmanagedMemoryStream ums = manager.Stream;
@@ -249,6 +250,70 @@ namespace System.IO.Tests
                 MemoryStream destination = new MemoryStream(new byte[0], false);
 
                 Assert.Throws<NotSupportedException>(() => ums.CopyTo(destination));
+            }
+        }
+
+        [Fact]
+        public static async Task CopyToAsyncTest()
+        {
+            byte[] testData = { 0x20, 0x21, 0x22, 0x23, 0x24 };
+
+            using (var manager = new UmsManager(FileAccess.Read, testData))
+            {
+                UnmanagedMemoryStream ums = manager.Stream;
+                UmsTests.ReadUmsInvariants(ums);
+
+                MemoryStream destination = new MemoryStream();
+                await ums.CopyToAsync(destination);
+                Assert.Equal(testData, destination.ToArray());
+            }
+
+            // copy to disposed stream should throw
+            using (var manager = new UmsManager(FileAccess.Read, testData))
+            {
+                UnmanagedMemoryStream ums = manager.Stream;
+                UmsTests.ReadUmsInvariants(ums);
+
+                MemoryStream destination = new MemoryStream();
+                destination.Dispose();
+
+                await Assert.ThrowsAsync<ObjectDisposedException>(async () => await ums.CopyToAsync(destination));
+
+                await Assert.ThrowsAsync<ObjectDisposedException>(async () => await ums.CopyToAsync(destination));
+            }
+
+            // copy from disposed stream should throw
+            using (var manager = new UmsManager(FileAccess.Read, testData))
+            {
+                UnmanagedMemoryStream ums = manager.Stream;
+                UmsTests.ReadUmsInvariants(ums);
+                ums.Dispose();
+
+                MemoryStream destination = new MemoryStream();
+
+                await Assert.ThrowsAsync<ObjectDisposedException>(async () => await ums.CopyToAsync(destination));
+            }
+
+            // cpoying to non-writeable stream should throw
+            using (var manager = new UmsManager(FileAccess.Read, testData))
+            {
+                UnmanagedMemoryStream ums = manager.Stream;
+                UmsTests.ReadUmsInvariants(ums);
+
+                MemoryStream destination = new MemoryStream(new byte[0], false);
+
+                await Assert.ThrowsAsync<NotSupportedException>(async () => await ums.CopyToAsync(destination));
+            }
+
+            // copying from non-readable stream should throw
+            using (var manager = new UmsManager(FileAccess.Write, testData))
+            {
+                UnmanagedMemoryStream ums = manager.Stream;
+                UmsTests.WriteUmsInvariants(ums);
+
+                MemoryStream destination = new MemoryStream(new byte[0], false);
+
+                await Assert.ThrowsAsync<NotSupportedException>(async () => await ums.CopyToAsync(destination));
             }
         }
     }
