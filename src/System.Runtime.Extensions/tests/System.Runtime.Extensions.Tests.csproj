@@ -48,20 +48,20 @@
     <Compile Include="System\Environment.GetEnvironmentVariable.cs" />
     <Compile Include="System\Environment.SetEnvironmentVariable.cs" />
     <Compile Include="System\Math.cs" />
+    <Compile Include="System\Progress.cs" />
     <Compile Include="System\Random.cs" />
     <Compile Include="System\StringComparer.cs" />
     <Compile Include="$(CommonPath)\Interop\Interop.PlatformDetection.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config">
-      <SubType>Designer</SubType>
-    </None>
     <None Include="project.json" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="$(CommonTestPath)\XunitTraitsDiscoverers\XunitTraitsDiscoverers.csproj">
-      <Project>{be8ed8c1-c314-4c4e-a929-64c9c8b3552a}</Project>
-      <Name>XunitTraitsDiscoverers</Name>
+    <ProjectReference Include="..\src\System.Runtime.Extensions.CoreCLR.csproj">
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <OutputItemType>Content</OutputItemType>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Targets>Build;DebugSymbolsProjectOutputGroup</Targets>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />

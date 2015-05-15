@@ -8,7 +8,7 @@
     <OutputType>Library</OutputType>
     <AssemblyName>System.Diagnostics.Debug.Tests</AssemblyName>
     <RootNamespace>System.Diagnostics.Tests</RootNamespace>
-    <NuGetTargetFrameworkMoniker>ASP.NetCore, version=v5.0</NuGetTargetFrameworkMoniker>
+    <NuGetTargetFrameworkMoniker>DNXCore,Version=v5.0</NuGetTargetFrameworkMoniker>
     <IgnoreArchitectureMismatches>true</IgnoreArchitectureMismatches>
     <PostFilterNugetReferences>true</PostFilterNugetReferences>
     <NoWarn>1685</NoWarn>
@@ -19,10 +19,6 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="$(CommonTestPath)\XunitTraitsDiscoverers\XunitTraitsDiscoverers.csproj">
-      <Project>{be8ed8c1-c314-4c4e-a929-64c9c8b3552a}</Project>
-      <Name>XunitTraitsDiscoverers</Name>
-    </ProjectReference>
     <ProjectReference Include="..\src\System.Diagnostics.Debug.csproj">
       <Project>{E7E8DE8A-9EC1-46A8-A6EE-727DB32DBEB8}</Project>
       <Name>System.Diagnostics.Debug</Name>
@@ -30,7 +26,6 @@
     <ProjectReference Include="..\..\System.Runtime\src\System.Runtime.CoreCLR.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
     <None Include="project.json" />
   </ItemGroup>
   <ItemGroup>

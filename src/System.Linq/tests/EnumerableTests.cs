@@ -1,10 +1,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using Xunit;
 
 namespace System.Linq.Tests
@@ -196,15 +193,6 @@ namespace System.Linq.Tests
             Assert.Equal(10, ten.Max());
             Assert.Equal(-10, minusTen.Max());
             Assert.Equal(1000, thousand.Max());
-        }
-
-        [Fact]
-        public void Range()
-        {
-            var array = Enumerable.Range(1, 100).ToArray();
-            Assert.Equal(array.Length, 100);
-            for (var i = 0; i < array.Length; i++)
-                Assert.Equal(array[i], i + 1);
         }
     }
 }

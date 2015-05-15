@@ -206,10 +206,6 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="$(CommonTestPath)\XunitTraitsDiscoverers\XunitTraitsDiscoverers.csproj">
-      <Project>{be8ed8c1-c314-4c4e-a929-64c9c8b3552a}</Project>
-      <Name>XunitTraitsDiscoverers</Name>
-    </ProjectReference>
     <ProjectReference Include="..\src\System.Xml.XPath.XmlDocument.csproj">
       <Project>{17cb2e3c-2904-4241-94db-3894d24f35da}</Project>
       <Name>System.Xml.XPath.XmlDocument</Name>
@@ -219,7 +215,6 @@
     <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
     <None Include="project.json" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />

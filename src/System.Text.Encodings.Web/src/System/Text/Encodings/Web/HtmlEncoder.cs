@@ -1,184 +1,142 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
 using System.Diagnostics;
-using System.IO;
 using System.Runtime.CompilerServices;
-using System.Threading;
+using System.Text.Internal;
+using System.Text.Unicode;
 
 namespace System.Text.Encodings.Web
 {
-    /// <summary>
-    /// A class which can perform HTML encoding given an allow list of characters which
-    /// can be represented unencoded.
-    /// </summary>
-    /// <remarks>
-    /// Instances of this type will always encode a certain set of characters (such as &lt;
-    /// and &gt;), even if the filter provided in the constructor allows such characters.
-    /// Once constructed, instances of this class are thread-safe for multiple callers.
-    /// </remarks>
-    public unsafe sealed class HtmlEncoder : IHtmlEncoder
+    public abstract class HtmlEncoder : TextEncoder
     {
-        // The default HtmlEncoder (Basic Latin), instantiated on demand
-        private static HtmlEncoder _defaultEncoder;
-
-        // The inner encoder, responsible for the actual encoding routines
-        private readonly HtmlUnicodeEncoder _innerUnicodeEncoder;
-
-        /// <summary>
-        /// Instantiates an encoder using <see cref="UnicodeRanges.BasicLatin"/> as its allow list.
-        /// Any character not in the <see cref="UnicodeRanges.BasicLatin"/> range will be escaped.
-        /// </summary>
-        public HtmlEncoder()
-            : this(HtmlUnicodeEncoder.BasicLatin)
-        {
-        }
-
-        /// <summary>
-        /// Instantiates an encoder specifying which Unicode character ranges are allowed to
-        /// pass through the encoder unescaped. Any character not in the set of ranges specified
-        /// by <paramref name="allowedRanges"/> will be escaped.
-        /// </summary>
-        public HtmlEncoder(params UnicodeRange[] allowedRanges)
-            : this(new HtmlUnicodeEncoder(new CodePointFilter(allowedRanges)))
-        {
-        }
-
-        /// <summary>
-        /// Instantiates an encoder using a custom code point filter. Any character not in the
-        /// set returned by <paramref name="filter"/>'s <see cref="ICodePointFilter.GetAllowedCodePoints"/>
-        /// method will be escaped.
-        /// </summary>
-        public HtmlEncoder(ICodePointFilter filter)
-            : this(new HtmlUnicodeEncoder(CodePointFilter.Wrap(filter)))
-        {
-        }
-
-        private HtmlEncoder(HtmlUnicodeEncoder innerEncoder)
-        {
-            Debug.Assert(innerEncoder != null);
-            _innerUnicodeEncoder = innerEncoder;
-        }
-
-        /// <summary>
-        /// A default instance of <see cref="HtmlEncoder"/>.
-        /// </summary>
-        /// <remarks>
-        /// This normally corresponds to <see cref="UnicodeRanges.BasicLatin"/>. However, this property is
-        /// settable so that a developer can change the default implementation application-wide.
-        /// </remarks>
         public static HtmlEncoder Default
         {
-            get
+            get { return DefaultHtmlEncoder.Singleton; }
+        }
+        public static HtmlEncoder Create(CodePointFilter filter)
+        {
+            return new DefaultHtmlEncoder(filter);
+        }
+        public static HtmlEncoder Create(params UnicodeRange[] allowedRanges)
+        {
+            return new DefaultHtmlEncoder(allowedRanges);
+        }
+    }
+
+    public sealed class DefaultHtmlEncoder : HtmlEncoder
+    {
+        private AllowedCharactersBitmap _allowedCharacters;
+        internal readonly static DefaultHtmlEncoder Singleton = new DefaultHtmlEncoder(new CodePointFilter(UnicodeRanges.BasicLatin));
+
+        public DefaultHtmlEncoder(CodePointFilter filter)
+        {
+            if (filter == null)
             {
-                return Volatile.Read(ref _defaultEncoder) ?? CreateDefaultEncoderSlow();
+                throw new ArgumentNullException("filter");
             }
-            set
-            {
-                if (value == null)
-                {
-                    throw new ArgumentNullException("value");
-                }
-                Volatile.Write(ref _defaultEncoder, value);
-            }
+
+            _allowedCharacters = filter.GetAllowedCharacters();
+
+            // Forbid codepoints which aren't mapped to characters or which are otherwise always disallowed
+            // (includes categories Cc, Cs, Co, Cn, Zs [except U+0020 SPACE], Zl, Zp)
+            _allowedCharacters.ForbidUndefinedCharacters();
+
+            ForbidHtmlCharacters(_allowedCharacters);
         }
 
-        [MethodImpl(MethodImplOptions.NoInlining)] // the JITter can attempt to inline the caller itself without worrying about us
-        private static HtmlEncoder CreateDefaultEncoderSlow()
+        internal static void ForbidHtmlCharacters(AllowedCharactersBitmap allowedCharacters)
         {
-            var onDemandEncoder = new HtmlEncoder();
-            return Interlocked.CompareExchange(ref _defaultEncoder, onDemandEncoder, null) ?? onDemandEncoder;
+            allowedCharacters.ForbidCharacter('<');
+            allowedCharacters.ForbidCharacter('>');
+            allowedCharacters.ForbidCharacter('&');
+            allowedCharacters.ForbidCharacter('\''); // can be used to escape attributes
+            allowedCharacters.ForbidCharacter('\"'); // can be used to escape attributes
+            allowedCharacters.ForbidCharacter('+'); // technically not HTML-specific, but can be used to perform UTF7-based attacks
         }
 
-        /// <summary>
-        /// Everybody's favorite HtmlEncode routine.
-        /// </summary>
-        public void HtmlEncode(char[] value, int startIndex, int charCount, TextWriter output)
+        public DefaultHtmlEncoder(params UnicodeRange[] allowedRanges) : this(new CodePointFilter(allowedRanges))
+        { }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public override bool Encodes(int unicodeScalar)
         {
-            _innerUnicodeEncoder.Encode(value, startIndex, charCount, output);
+            if (UnicodeHelpers.IsSupplementaryCodePoint(unicodeScalar)) return true;
+            return !_allowedCharacters.IsUnicodeScalarAllowed(unicodeScalar);
         }
 
-        /// <summary>
-        /// Everybody's favorite HtmlEncode routine.
-        /// </summary>
-        public string HtmlEncode(string value)
+        [CLSCompliant(false)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public unsafe override int FindFirstCharacterToEncode(char* text, int textLength)
         {
-            return _innerUnicodeEncoder.Encode(value);
+            return _allowedCharacters.FindFirstCharacterToEncode(text, textLength);
         }
 
-        /// <summary>
-        /// Everybody's favorite HtmlEncode routine.
-        /// </summary>
-        public void HtmlEncode(string value, int startIndex, int charCount, TextWriter output)
+        public override int MaxOutputCharactersPerInputCharacter
         {
-            _innerUnicodeEncoder.Encode(value, startIndex, charCount, output);
+            get { return 8; } // "&#xFFFF;" is the longest encoded form 
         }
 
-        private sealed class HtmlUnicodeEncoder : UnicodeEncoderBase
+        static readonly char[] quote = "&quot;".ToCharArray();
+        static readonly char[] ampersand = "&amp;".ToCharArray();
+        static readonly char[] lessthan = "&lt;".ToCharArray();
+        static readonly char[] greaterthan = "&gt;".ToCharArray();
+
+        [CLSCompliant(false)]
+        public unsafe override bool TryEncodeUnicodeScalar(int unicodeScalar, char* buffer, int bufferLength, out int numberOfCharactersWritten)
         {
-            // A singleton instance of the basic latin encoder.
-            private static HtmlUnicodeEncoder _basicLatinSingleton;
-
-            // The worst case encoding is 8 output chars per input char: [input] U+FFFF -> [output] "&#xFFFF;"
-            // We don't need to worry about astral code points since they consume *two* input chars to
-            // generate at most 10 output chars ("&#x10FFFF;"), which equates to 5 output chars per input char.
-            private const int MaxOutputCharsPerInputChar = 8;
-
-            internal HtmlUnicodeEncoder(CodePointFilter filter)
-                : base(filter, MaxOutputCharsPerInputChar)
+            if (buffer == null)
             {
+                throw new ArgumentNullException("buffer");
             }
 
-            internal static HtmlUnicodeEncoder BasicLatin
-            {
-                get
-                {
-                    HtmlUnicodeEncoder encoder = Volatile.Read(ref _basicLatinSingleton);
-                    if (encoder == null)
-                    {
-                        encoder = new HtmlUnicodeEncoder(new CodePointFilter(UnicodeRanges.BasicLatin));
-                        Volatile.Write(ref _basicLatinSingleton, encoder);
-                    }
-                    return encoder;
-                }
-            }
+            if (!Encodes(unicodeScalar)) { return unicodeScalar.TryWriteScalarAsChar(buffer, bufferLength, out numberOfCharactersWritten); }
+            else if (unicodeScalar == '\"') { return quote.TryCopyCharacters(buffer, bufferLength, out numberOfCharactersWritten); }
+            else if (unicodeScalar == '&') { return ampersand.TryCopyCharacters(buffer, bufferLength, out numberOfCharactersWritten); }
+            else if (unicodeScalar == '<') { return lessthan.TryCopyCharacters(buffer, bufferLength, out numberOfCharactersWritten); }
+            else if (unicodeScalar == '>') { return greaterthan.TryCopyCharacters(buffer, bufferLength, out numberOfCharactersWritten); }
+            else { return TryWriteEncodedScalarAsNumericEntity(unicodeScalar, buffer, bufferLength, out numberOfCharactersWritten); }
+        }
 
-            // Writes a scalar value as an HTML-encoded entity.
-            protected override void WriteEncodedScalar(ref Writer writer, uint value)
-            {
-                if (value == (uint)'\"') { writer.Write("&quot;"); }
-                else if (value == (uint)'&') { writer.Write("&amp;"); }
-                else if (value == (uint)'<') { writer.Write("&lt;"); }
-                else if (value == (uint)'>') { writer.Write("&gt;"); }
-                else { WriteEncodedScalarAsNumericEntity(ref writer, value); }
-            }
+        private unsafe static bool TryWriteEncodedScalarAsNumericEntity(int unicodeScalar, char* buffer, int bufferLength, out int numberOfCharactersWritten)
+        {
+            Debug.Assert(buffer != null && bufferLength >= 0);
 
-            // Writes a scalar value as an HTML-encoded numeric entity.
-            private static void WriteEncodedScalarAsNumericEntity(ref Writer writer, uint value)
+            // We're building the characters up in reverse
+            char* chars = stackalloc char[8 /* "FFFFFFFF" */];
+            int numberOfHexCharacters = 0;
+            do
             {
-                // We're building the characters up in reverse
-                char* chars = stackalloc char[8 /* "FFFFFFFF" */];
-                int numCharsWritten = 0;
-                do
-                {
-                    Debug.Assert(numCharsWritten < 8, "Couldn't have written 8 characters out by this point.");
-                    // Pop off the last nibble
-                    chars[numCharsWritten++] = HexUtil.IntToChar(value & 0xFU);
-                    value >>= 4;
-                } while (value != 0);
+                Debug.Assert(numberOfHexCharacters < 8, "Couldn't have written 8 characters out by this point.");
+                // Pop off the last nibble
+                chars[numberOfHexCharacters++] = HexUtil.Int32LsbToHexDigit(unicodeScalar & 0xF);
+                unicodeScalar >>= 4;
+            } while (unicodeScalar != 0);
 
-                // Finally, write out the HTML-encoded scalar value.
-                writer.Write('&');
-                writer.Write('#');
-                writer.Write('x');
-                Debug.Assert(numCharsWritten > 0, "At least one character should've been written.");
-                do
-                {
-                    writer.Write(chars[--numCharsWritten]);
-                } while (numCharsWritten != 0);
-                writer.Write(';');
+            numberOfCharactersWritten = numberOfHexCharacters + 4; // four chars are &, #, x, and ;
+            Debug.Assert(numberOfHexCharacters > 0, "At least one character should've been written.");
+
+            if (numberOfHexCharacters + 4 > bufferLength)
+            {
+                numberOfCharactersWritten = 0;
+                return false;
             }
+            // Finally, write out the HTML-encoded scalar value.
+            *buffer = '&';
+            buffer++;
+            *buffer = '#';
+            buffer++;
+            *buffer = 'x';
+            buffer++;
+            do
+            {
+                *buffer = chars[--numberOfHexCharacters];
+                buffer++;
+            }
+            while (numberOfHexCharacters != 0);
+
+            *buffer = ';';
+            return true;
         }
     }
 }
