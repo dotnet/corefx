@@ -27,6 +27,7 @@ namespace System.IO.Compression.Test
         }
 
         [Fact]
+        [ActiveIssue(1787)]
         public static void UpdateReadTwice()
         {
             using (ZipArchive archive = ZipFile.Open(zfile("small.zip"), ZipArchiveMode.Update))
@@ -46,6 +47,7 @@ namespace System.IO.Compression.Test
         }
 
         [Fact]
+        [ActiveIssue(1787)]
         public static async Task UpdateAddFile()
         {
             //add file

@@ -10,6 +10,7 @@ namespace System.IO.Compression.Test
     public partial class ZipTest
     {
         [Fact]
+        [ActiveIssue(1787)]
         public static async Task CreateFromDirectoryNormal()
         {
             await TestCreateDirectory(zfolder("normal"), true);
@@ -87,6 +88,7 @@ namespace System.IO.Compression.Test
         #region "Extension Methods"
 
         [Fact]
+        [ActiveIssue(1787)]
         public static async Task CreateEntryFromFileTest()
         {
             //add file
