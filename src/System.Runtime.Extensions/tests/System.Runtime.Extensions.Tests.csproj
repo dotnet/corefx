@@ -16,7 +16,6 @@
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
   </PropertyGroup>
-  <!-- References are resolved from packages.config -->
   <ItemGroup>
     <Compile Include="System\Diagnostics\Stopwatch.cs" />
     <Compile Include="System\Runtime\Versioning\FrameworkName.cs" />
@@ -48,6 +47,7 @@
     <Compile Include="System\Environment.GetEnvironmentVariable.cs" />
     <Compile Include="System\Environment.SetEnvironmentVariable.cs" />
     <Compile Include="System\Math.cs" />
+    <Compile Include="System\Progress.cs" />
     <Compile Include="System\Random.cs" />
     <Compile Include="System\StringComparer.cs" />
     <Compile Include="$(CommonPath)\Interop\Interop.PlatformDetection.cs" />

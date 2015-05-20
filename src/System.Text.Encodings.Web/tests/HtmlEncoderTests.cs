@@ -16,7 +16,7 @@ namespace Microsoft.Framework.WebEncoders
         public void Ctor_WithCodePointFilter()
         {
             // Arrange
-            var filter = new CodePointFilter().AllowChars("ab").AllowChars('\0', '&', '\uFFFF', 'd');
+            var filter = new CodePointFilter().AllowCharacters("ab").AllowCharacters('\0', '&', '\uFFFF', 'd');
             HtmlEncoder encoder = new HtmlEncoder(filter);
 
             // Act & assert
@@ -69,17 +69,6 @@ namespace Microsoft.Framework.WebEncoders
                     Assert.Equal(controlEncoder.HtmlEncode(input), testEncoder.HtmlEncode(input));
                 }
             }
-        }
-
-        [Fact]
-        public void Default_ReturnsSingletonInstance()
-        {
-            // Act
-            HtmlEncoder encoder1 = HtmlEncoder.Default;
-            HtmlEncoder encoder2 = HtmlEncoder.Default;
-
-            // Assert
-            Assert.Same(encoder1, encoder2);
         }
 
         [Theory]
@@ -202,13 +191,11 @@ namespace Microsoft.Framework.WebEncoders
         }
 
         [Fact]
-        public void HtmlEncode_NullInput_ReturnsNull()
+        public void HtmlEncode_NullInput_Throws()
         {
             // Arrange
             HtmlEncoder encoder = new HtmlEncoder();
-
-            // Act & assert
-            Assert.Null(encoder.HtmlEncode(null));
+            Assert.Throws<ArgumentNullException>(() => { encoder.HtmlEncode(null); });
         }
 
         [Fact]

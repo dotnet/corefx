@@ -20,7 +20,7 @@ namespace Microsoft.Framework.WebEncoders
         public void Ctor_WithCodePointFilter()
         {
             // Arrange
-            var filter = new CodePointFilter().AllowChars("ab").AllowChars('\0', '&', '\uFFFF', 'd');
+            var filter = new CodePointFilter().AllowCharacters("ab").AllowCharacters('\0', '&', '\uFFFF', 'd');
             UrlEncoder encoder = new UrlEncoder(filter);
 
             // Act & assert
@@ -73,17 +73,6 @@ namespace Microsoft.Framework.WebEncoders
                     Assert.Equal(controlEncoder.UrlEncode(input), testEncoder.UrlEncode(input));
                 }
             }
-        }
-
-        [Fact]
-        public void Default_ReturnsSingletonInstance()
-        {
-            // Act
-            UrlEncoder encoder1 = UrlEncoder.Default;
-            UrlEncoder encoder2 = UrlEncoder.Default;
-
-            // Assert
-            Assert.Same(encoder1, encoder2);
         }
 
         [Fact]
@@ -209,8 +198,7 @@ namespace Microsoft.Framework.WebEncoders
             // Arrange
             UrlEncoder encoder = new UrlEncoder();
 
-            // Act & assert
-            Assert.Null(encoder.UrlEncode(null));
+            Assert.Throws<ArgumentNullException>(() => { encoder.UrlEncode(null); });
         }
 
         [Fact]

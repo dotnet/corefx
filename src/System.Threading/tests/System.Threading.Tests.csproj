@@ -6,23 +6,34 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <OutputType>Library</OutputType>
     <AssemblyName>System.Threading.Tests</AssemblyName>
+    <ProjectGuid>{33F5A50E-B823-4FDD-8571-365C909ACEAE}</ProjectGuid>
   </PropertyGroup>
   <!-- Default configurations to help VS understand the configurations -->
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' " />
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' " />
   <ItemGroup>
     <Compile Include="AsyncLocalTests.cs" />
+    <Compile Include="AutoResetEventTests.cs" />
     <Compile Include="BarrierCancellationTests.cs" />
     <Compile Include="BarrierTests.cs" />
     <Compile Include="CountdownEventCancellationTests.cs" />
     <Compile Include="CountdownEventTests.cs" />
+    <Compile Include="EtwTests.cs" />
+    <Compile Include="EventWaitHandleTests.cs" />
+    <Compile Include="ManualResetEventTests.cs" />
     <Compile Include="ManualResetEventSlimCancellationTests.cs" />
     <Compile Include="ManualResetEventSlimTests.cs" />
+    <Compile Include="MutexTests.cs" />
     <Compile Include="SemaphoreSlimCancellationTests.cs" />
     <Compile Include="SemaphoreSlimTests.cs" />
+    <Compile Include="SemaphoreTests.cs" />
     <Compile Include="SpinLockTests.cs" />
+    <Compile Include="ReaderWriterLockSlimTests.cs" />
     <Compile Include="ThreadLocalTests.cs" />
     <Compile Include="XunitAssemblyAttributes.cs" />
+    <Compile Include="$(CommonTestPath)\System\Diagnostics\Tracing\TestEventListener.cs">
+      <Link>Common\System\Diagnostics\Tracing\TestEventListener.cs</Link>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <None Include="project.json" />
