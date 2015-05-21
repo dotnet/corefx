@@ -1,7 +1,13 @@
 #!/bin/bash
 
 __scriptpath=$(cd "$(dirname "$0")"; pwd -P)
-__msbuildpath=$__scriptpath/../msbuild/bin/Unix/Debug-MONO/MSBuild.exe
+__packageroot=$__scriptpath/packages
+__sourceroot=$__scriptpath/src
+__nugetpath=$__packageroot/NuGet.exe
+__nugetconfig=$__sourceroot/NuGet.Config
+__msbuildpackageid="Microsoft.Build.Mono.Debug"
+__msbuildpackageversion="14.1.0.0-prerelease"
+__msbuildpath=$__packageroot/$__msbuildpackageid.$__msbuildpackageversion/lib/MSBuild.exe
 __referenceassemblyroot=/usr/lib/mono/xbuild-frameworks
 __monoversion=$(mono --version | grep "version 4.[1-9]")
 
@@ -15,19 +21,48 @@ if [ ! -e "$__referenceassemblyroot/.NETPortable" ]; then
     exit 1
 fi
 
-if [ ! -e "$__msbuildpath" ]; then
-    echo "MSBuild.exe required at $__msbuildpath. Please see https://github.com/dotnet/corefx/wiki/Building-On-Unix for more details."
-    exit 1
+__buildproj=$__scriptpath/build.proj
+__buildlog=$__scriptpath/msbuild.log
+
+# Pull NuGet.exe down if we don't have it already
+if [ ! -e "$__nugetpath" ]; then
+    which curl wget > /dev/null 2> /dev/null
+    if [ $? -ne 0 -a $? -ne 1 ]; then
+        echo "cURL or wget is required to build corefx. Please see https://github.com/dotnet/corefx/wiki/Building-On-Unix for more details."
+        exit 1
+    fi
+    echo "Restoring NuGet.exe..."
+
+    which wget > /dev/null 2> /dev/null
+    if [ $? -ne 0 ]; then
+       curl -sSL --create-dirs -o $__nugetpath https://api.nuget.org/downloads/nuget.exe
+    else
+       mkdir -p $__packageroot
+       wget -q -O $__nugetpath https://api.nuget.org/downloads/nuget.exe
+    fi
+
+    if [ $? -ne 0 ]; then
+        echo "Failed to restore NuGet.exe."
+        exit 1
+    fi
 fi
+
+# Grab the MSBuild package if we don't have it already
+if [ ! -e "$__msbuildpath" ]; then
+    echo "Restoring MSBuild..."
+    mono "$__nugetpath" install $__msbuildpackageid -Version $__msbuildpackageversion -ConfigFile "$__nugetconfig" -OutputDirectory "$__packageroot"
+    if [ $? -ne 0 ]; then
+        echo "Failed to restore MSBuild."
+        exit 1
+    fi
+fi
+
 
 if [ $(uname) == "Linux" ]; then
     __osgroup=Linux
 else
     __osgroup=OSX
 fi
-
-__buildproj=$__scriptpath/build.proj
-__buildlog=$__scriptpath/msbuild.log
 
 MONO29679=1 ReferenceAssemblyRoot=$__referenceassemblyroot mono $__msbuildpath "$__buildproj" /nologo /verbosity:minimal "/fileloggerparameters:Verbosity=diag;LogFile=$__buildlog" /t:Build /p:OSGroup=$__osgroup /p:UseRoslynCompiler=true /p:COMPUTERNAME=$(hostname) /p:USERNAME=$(id -un) "$@"
 BUILDERRORLEVEL=$?
