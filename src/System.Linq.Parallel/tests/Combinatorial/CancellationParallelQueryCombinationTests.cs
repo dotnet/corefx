@@ -143,6 +143,17 @@ namespace System.Linq.Parallel.Tests
         [Theory]
         [MemberData(nameof(UnaryOperators))]
         [MemberData(nameof(BinaryOperators))]
+        public static void ForEach_OperationCanceledException_PreCanceled(LabeledOperation source, LabeledOperation operation)
+        {
+            CancellationTokenSource cs = new CancellationTokenSource();
+            cs.Cancel();
+
+            Functions.AssertIsCanceled(cs, () => { foreach (int i in operation.Item(DefaultStart, DefaultSize, source.Append(WithCancellation(cs.Token)).Item)) ; });
+        }
+
+        [Theory]
+        [MemberData(nameof(UnaryOperators))]
+        [MemberData(nameof(BinaryOperators))]
         public static void Last_OperationCanceledException_PreCanceled(LabeledOperation source, LabeledOperation operation)
         {
             CancellationTokenSource cs = new CancellationTokenSource();
