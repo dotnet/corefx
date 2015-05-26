@@ -146,14 +146,11 @@ namespace System.Linq.Parallel.Tests
         [MemberData(nameof(SequenceEqualUnequalData), new[] { 4 })]
         public static void SequenceEqual_OperationCanceledException_PreCanceled(Labeled<ParallelQuery<int>> left, Labeled<ParallelQuery<int>> right, int count, int item)
         {
-            CancellationTokenSource cs = new CancellationTokenSource();
-            cs.Cancel();
+            Functions.AssertAlreadyCanceled(token => left.Item.WithCancellation(token).SequenceEqual(right.Item));
+            Functions.AssertAlreadyCanceled(token => left.Item.WithCancellation(token).SequenceEqual(right.Item, new ModularCongruenceComparer(1)));
 
-            Functions.AssertIsCanceled(cs, () => left.Item.WithCancellation(cs.Token).SequenceEqual(right.Item));
-            Functions.AssertIsCanceled(cs, () => left.Item.WithCancellation(cs.Token).SequenceEqual(right.Item, new ModularCongruenceComparer(1)));
-
-            Functions.AssertIsCanceled(cs, () => left.Item.SequenceEqual(right.Item.WithCancellation(cs.Token)));
-            Functions.AssertIsCanceled(cs, () => left.Item.SequenceEqual(right.Item.WithCancellation(cs.Token), new ModularCongruenceComparer(1)));
+            Functions.AssertAlreadyCanceled(token => left.Item.SequenceEqual(right.Item.WithCancellation(token)));
+            Functions.AssertAlreadyCanceled(token => left.Item.SequenceEqual(right.Item.WithCancellation(token), new ModularCongruenceComparer(1)));
         }
 
         [Theory]

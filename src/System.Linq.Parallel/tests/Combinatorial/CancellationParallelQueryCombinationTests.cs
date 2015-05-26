@@ -14,14 +14,12 @@ namespace System.Linq.Parallel.Tests
         [MemberData(nameof(BinaryOperators))]
         public static void Aggregate_OperationCanceledException_PreCanceled(LabeledOperation source, LabeledOperation operation)
         {
-            CancellationTokenSource cs = new CancellationTokenSource();
-            cs.Cancel();
 
-            Functions.AssertIsCanceled(cs, () => operation.Item(DefaultStart, DefaultSize, source.Append(WithCancellation(cs.Token)).Item).Aggregate((x, y) => x));
-            Functions.AssertIsCanceled(cs, () => operation.Item(DefaultStart, DefaultSize, source.Append(WithCancellation(cs.Token)).Item).Aggregate(0, (x, y) => x + y));
-            Functions.AssertIsCanceled(cs, () => operation.Item(DefaultStart, DefaultSize, source.Append(WithCancellation(cs.Token)).Item).Aggregate(0, (x, y) => x + y, r => r));
-            Functions.AssertIsCanceled(cs, () => operation.Item(DefaultStart, DefaultSize, source.Append(WithCancellation(cs.Token)).Item).Aggregate(0, (a, x) => a + x, (l, r) => l + r, r => r));
-            Functions.AssertIsCanceled(cs, () => operation.Item(DefaultStart, DefaultSize, source.Append(WithCancellation(cs.Token)).Item).Aggregate(() => 0, (a, x) => a + x, (l, r) => l + r, r => r));
+            Functions.AssertAlreadyCanceled(token => operation.Item(DefaultStart, DefaultSize, source.Append(WithCancellation(token)).Item).Aggregate((x, y) => x));
+            Functions.AssertAlreadyCanceled(token => operation.Item(DefaultStart, DefaultSize, source.Append(WithCancellation(token)).Item).Aggregate(0, (x, y) => x + y));
+            Functions.AssertAlreadyCanceled(token => operation.Item(DefaultStart, DefaultSize, source.Append(WithCancellation(token)).Item).Aggregate(0, (x, y) => x + y, r => r));
+            Functions.AssertAlreadyCanceled(token => operation.Item(DefaultStart, DefaultSize, source.Append(WithCancellation(token)).Item).Aggregate(0, (a, x) => a + x, (l, r) => l + r, r => r));
+            Functions.AssertAlreadyCanceled(token => operation.Item(DefaultStart, DefaultSize, source.Append(WithCancellation(token)).Item).Aggregate(() => 0, (a, x) => a + x, (l, r) => l + r, r => r));
         }
 
         [Theory]
@@ -29,10 +27,7 @@ namespace System.Linq.Parallel.Tests
         [MemberData(nameof(BinaryOperators))]
         public static void All_OperationCanceledException_PreCanceled(LabeledOperation source, LabeledOperation operation)
         {
-            CancellationTokenSource cs = new CancellationTokenSource();
-            cs.Cancel();
-
-            Functions.AssertIsCanceled(cs, () => operation.Item(DefaultStart, DefaultSize, source.Append(WithCancellation(cs.Token)).Item).All(x => true));
+            Functions.AssertAlreadyCanceled(token => operation.Item(DefaultStart, DefaultSize, source.Append(WithCancellation(token)).Item).All(x => true));
         }
 
         [Theory]
@@ -40,11 +35,8 @@ namespace System.Linq.Parallel.Tests
         [MemberData(nameof(BinaryOperators))]
         public static void Any_OperationCanceledException_PreCanceled(LabeledOperation source, LabeledOperation operation)
         {
-            CancellationTokenSource cs = new CancellationTokenSource();
-            cs.Cancel();
-
-            Functions.AssertIsCanceled(cs, () => operation.Item(DefaultStart, DefaultSize, source.Append(WithCancellation(cs.Token)).Item).Any());
-            Functions.AssertIsCanceled(cs, () => operation.Item(DefaultStart, DefaultSize, source.Append(WithCancellation(cs.Token)).Item).Any(x => true));
+            Functions.AssertAlreadyCanceled(token => operation.Item(DefaultStart, DefaultSize, source.Append(WithCancellation(token)).Item).Any());
+            Functions.AssertAlreadyCanceled(token => operation.Item(DefaultStart, DefaultSize, source.Append(WithCancellation(token)).Item).Any(x => true));
         }
 
         [Theory]
@@ -52,10 +44,7 @@ namespace System.Linq.Parallel.Tests
         [MemberData(nameof(BinaryOperators))]
         public static void Average_OperationCanceledException_PreCanceled(LabeledOperation source, LabeledOperation operation)
         {
-            CancellationTokenSource cs = new CancellationTokenSource();
-            cs.Cancel();
-
-            Functions.AssertIsCanceled(cs, () => operation.Item(DefaultStart, DefaultSize, source.Append(WithCancellation(cs.Token)).Item).Average());
+            Functions.AssertAlreadyCanceled(token => operation.Item(DefaultStart, DefaultSize, source.Append(WithCancellation(token)).Item).Average());
         }
 
         [Theory]
@@ -63,10 +52,7 @@ namespace System.Linq.Parallel.Tests
         [MemberData(nameof(BinaryOperators))]
         public static void Contains_OperationCanceledException_PreCanceled(LabeledOperation source, LabeledOperation operation)
         {
-            CancellationTokenSource cs = new CancellationTokenSource();
-            cs.Cancel();
-
-            Functions.AssertIsCanceled(cs, () => operation.Item(DefaultStart, DefaultSize, source.Append(WithCancellation(cs.Token)).Item).Contains(DefaultStart));
+            Functions.AssertAlreadyCanceled(token => operation.Item(DefaultStart, DefaultSize, source.Append(WithCancellation(token)).Item).Contains(DefaultStart));
         }
 
         [Theory]
@@ -74,13 +60,10 @@ namespace System.Linq.Parallel.Tests
         [MemberData(nameof(BinaryOperators))]
         public static void Count_OperationCanceledException_PreCanceled(LabeledOperation source, LabeledOperation operation)
         {
-            CancellationTokenSource cs = new CancellationTokenSource();
-            cs.Cancel();
-
-            Functions.AssertIsCanceled(cs, () => operation.Item(DefaultStart, DefaultSize, source.Append(WithCancellation(cs.Token)).Item).Count());
-            Functions.AssertIsCanceled(cs, () => operation.Item(DefaultStart, DefaultSize, source.Append(WithCancellation(cs.Token)).Item).LongCount());
-            Functions.AssertIsCanceled(cs, () => operation.Item(DefaultStart, DefaultSize, source.Append(WithCancellation(cs.Token)).Item).Count(x => true));
-            Functions.AssertIsCanceled(cs, () => operation.Item(DefaultStart, DefaultSize, source.Append(WithCancellation(cs.Token)).Item).LongCount(x => true));
+            Functions.AssertAlreadyCanceled(token => operation.Item(DefaultStart, DefaultSize, source.Append(WithCancellation(token)).Item).Count());
+            Functions.AssertAlreadyCanceled(token => operation.Item(DefaultStart, DefaultSize, source.Append(WithCancellation(token)).Item).LongCount());
+            Functions.AssertAlreadyCanceled(token => operation.Item(DefaultStart, DefaultSize, source.Append(WithCancellation(token)).Item).Count(x => true));
+            Functions.AssertAlreadyCanceled(token => operation.Item(DefaultStart, DefaultSize, source.Append(WithCancellation(token)).Item).LongCount(x => true));
         }
 
         [Theory]
@@ -88,10 +71,7 @@ namespace System.Linq.Parallel.Tests
         [MemberData(nameof(BinaryOperators))]
         public static void ElementAt_OperationCanceledException_PreCanceled(LabeledOperation source, LabeledOperation operation)
         {
-            CancellationTokenSource cs = new CancellationTokenSource();
-            cs.Cancel();
-
-            Functions.AssertIsCanceled(cs, () => operation.Item(DefaultStart, DefaultSize, (start, count, ignore) => source.Item(start, count).WithCancellation(cs.Token)).ElementAt(0));
+            Functions.AssertAlreadyCanceled(token => operation.Item(DefaultStart, DefaultSize, (start, count, ignore) => source.Item(start, count).WithCancellation(token)).ElementAt(0));
         }
 
         [Theory]
@@ -99,11 +79,8 @@ namespace System.Linq.Parallel.Tests
         [MemberData(nameof(BinaryOperators))]
         public static void ElementAtOrDefault_OperationCanceledException_PreCanceled(LabeledOperation source, LabeledOperation operation)
         {
-            CancellationTokenSource cs = new CancellationTokenSource();
-            cs.Cancel();
-
-            Functions.AssertIsCanceled(cs, () => operation.Item(DefaultStart, DefaultSize, (start, count, ignore) => source.Item(start, count).WithCancellation(cs.Token)).ElementAtOrDefault(0));
-            Functions.AssertIsCanceled(cs, () => operation.Item(DefaultStart, DefaultSize, (start, count, ignore) => source.Item(start, count).WithCancellation(cs.Token)).ElementAtOrDefault(DefaultSize + 1));
+            Functions.AssertAlreadyCanceled(token => operation.Item(DefaultStart, DefaultSize, (start, count, ignore) => source.Item(start, count).WithCancellation(token)).ElementAtOrDefault(0));
+            Functions.AssertAlreadyCanceled(token => operation.Item(DefaultStart, DefaultSize, (start, count, ignore) => source.Item(start, count).WithCancellation(token)).ElementAtOrDefault(DefaultSize + 1));
         }
 
         [Theory]
@@ -111,11 +88,8 @@ namespace System.Linq.Parallel.Tests
         [MemberData(nameof(BinaryOperators))]
         public static void First_OperationCanceledException_PreCanceled(LabeledOperation source, LabeledOperation operation)
         {
-            CancellationTokenSource cs = new CancellationTokenSource();
-            cs.Cancel();
-
-            Functions.AssertIsCanceled(cs, () => operation.Item(DefaultStart, DefaultSize, source.Append(WithCancellation(cs.Token)).Item).First());
-            Functions.AssertIsCanceled(cs, () => operation.Item(DefaultStart, DefaultSize, source.Append(WithCancellation(cs.Token)).Item).First(x => false));
+            Functions.AssertAlreadyCanceled(token => operation.Item(DefaultStart, DefaultSize, source.Append(WithCancellation(token)).Item).First());
+            Functions.AssertAlreadyCanceled(token => operation.Item(DefaultStart, DefaultSize, source.Append(WithCancellation(token)).Item).First(x => false));
         }
 
         [Theory]
@@ -123,11 +97,8 @@ namespace System.Linq.Parallel.Tests
         [MemberData(nameof(BinaryOperators))]
         public static void FirstOrDefault_OperationCanceledException_PreCanceled(LabeledOperation source, LabeledOperation operation)
         {
-            CancellationTokenSource cs = new CancellationTokenSource();
-            cs.Cancel();
-
-            Functions.AssertIsCanceled(cs, () => operation.Item(DefaultStart, DefaultSize, source.Append(WithCancellation(cs.Token)).Item).FirstOrDefault());
-            Functions.AssertIsCanceled(cs, () => operation.Item(DefaultStart, DefaultSize, source.Append(WithCancellation(cs.Token)).Item).FirstOrDefault(x => false));
+            Functions.AssertAlreadyCanceled(token => operation.Item(DefaultStart, DefaultSize, source.Append(WithCancellation(token)).Item).FirstOrDefault());
+            Functions.AssertAlreadyCanceled(token => operation.Item(DefaultStart, DefaultSize, source.Append(WithCancellation(token)).Item).FirstOrDefault(x => false));
         }
 
         [Theory]
@@ -135,10 +106,7 @@ namespace System.Linq.Parallel.Tests
         [MemberData(nameof(BinaryOperators))]
         public static void ForAll_OperationCanceledException_PreCanceled(LabeledOperation source, LabeledOperation operation)
         {
-            CancellationTokenSource cs = new CancellationTokenSource();
-            cs.Cancel();
-
-            Functions.AssertIsCanceled(cs, () => operation.Item(DefaultStart, DefaultSize, source.Append(WithCancellation(cs.Token)).Item).ForAll(x => { }));
+            Functions.AssertAlreadyCanceled(token => operation.Item(DefaultStart, DefaultSize, source.Append(WithCancellation(token)).Item).ForAll(x => { }));
         }
 
         [Theory]
@@ -146,10 +114,7 @@ namespace System.Linq.Parallel.Tests
         [MemberData(nameof(BinaryOperators))]
         public static void ForEach_OperationCanceledException_PreCanceled(LabeledOperation source, LabeledOperation operation)
         {
-            CancellationTokenSource cs = new CancellationTokenSource();
-            cs.Cancel();
-
-            Functions.AssertIsCanceled(cs, () => { foreach (int i in operation.Item(DefaultStart, DefaultSize, source.Append(WithCancellation(cs.Token)).Item)) ; });
+            Functions.AssertAlreadyCanceled(token => { foreach (int i in operation.Item(DefaultStart, DefaultSize, source.Append(WithCancellation(token)).Item)) ; });
         }
 
         [Theory]
@@ -157,11 +122,8 @@ namespace System.Linq.Parallel.Tests
         [MemberData(nameof(BinaryOperators))]
         public static void Last_OperationCanceledException_PreCanceled(LabeledOperation source, LabeledOperation operation)
         {
-            CancellationTokenSource cs = new CancellationTokenSource();
-            cs.Cancel();
-
-            Functions.AssertIsCanceled(cs, () => operation.Item(DefaultStart, DefaultSize, source.Append(WithCancellation(cs.Token)).Item).Last());
-            Functions.AssertIsCanceled(cs, () => operation.Item(DefaultStart, DefaultSize, source.Append(WithCancellation(cs.Token)).Item).Last(x => true));
+            Functions.AssertAlreadyCanceled(token => operation.Item(DefaultStart, DefaultSize, source.Append(WithCancellation(token)).Item).Last());
+            Functions.AssertAlreadyCanceled(token => operation.Item(DefaultStart, DefaultSize, source.Append(WithCancellation(token)).Item).Last(x => true));
         }
 
         [Theory]
@@ -169,11 +131,8 @@ namespace System.Linq.Parallel.Tests
         [MemberData(nameof(BinaryOperators))]
         public static void LastOrDefault_OperationCanceledException_PreCanceled(LabeledOperation source, LabeledOperation operation)
         {
-            CancellationTokenSource cs = new CancellationTokenSource();
-            cs.Cancel();
-
-            Functions.AssertIsCanceled(cs, () => operation.Item(DefaultStart, DefaultSize, (start, count, ignore) => source.Item(start, count).WithCancellation(cs.Token)).LastOrDefault());
-            Functions.AssertIsCanceled(cs, () => operation.Item(DefaultStart, DefaultSize, source.Append(WithCancellation(cs.Token)).Item).LastOrDefault(x => true));
+            Functions.AssertAlreadyCanceled(token => operation.Item(DefaultStart, DefaultSize, (start, count, ignore) => source.Item(start, count).WithCancellation(token)).LastOrDefault());
+            Functions.AssertAlreadyCanceled(token => operation.Item(DefaultStart, DefaultSize, source.Append(WithCancellation(token)).Item).LastOrDefault(x => true));
         }
 
         [Theory]
@@ -181,10 +140,7 @@ namespace System.Linq.Parallel.Tests
         [MemberData(nameof(BinaryOperators))]
         public static void Max_OperationCanceledException_PreCanceled(LabeledOperation source, LabeledOperation operation)
         {
-            CancellationTokenSource cs = new CancellationTokenSource();
-            cs.Cancel();
-
-            Functions.AssertIsCanceled(cs, () => operation.Item(DefaultStart, DefaultSize, (start, count, ignore) => source.Item(start, count).WithCancellation(cs.Token)).Max());
+            Functions.AssertAlreadyCanceled(token => operation.Item(DefaultStart, DefaultSize, (start, count, ignore) => source.Item(start, count).WithCancellation(token)).Max());
         }
 
         [Theory]
@@ -192,10 +148,7 @@ namespace System.Linq.Parallel.Tests
         [MemberData(nameof(BinaryOperators))]
         public static void Min_OperationCanceledException_PreCanceled(LabeledOperation source, LabeledOperation operation)
         {
-            CancellationTokenSource cs = new CancellationTokenSource();
-            cs.Cancel();
-
-            Functions.AssertIsCanceled(cs, () => operation.Item(DefaultStart, DefaultSize, source.Append(WithCancellation(cs.Token)).Item).Min());
+            Functions.AssertAlreadyCanceled(token => operation.Item(DefaultStart, DefaultSize, source.Append(WithCancellation(token)).Item).Min());
         }
 
         [Theory]
@@ -203,11 +156,8 @@ namespace System.Linq.Parallel.Tests
         [MemberData(nameof(BinaryOperators))]
         public static void SequenceEqual_OperationCanceledException_PreCanceled(LabeledOperation source, LabeledOperation operation)
         {
-            CancellationTokenSource cs = new CancellationTokenSource();
-            cs.Cancel();
-
-            Functions.AssertIsCanceled(cs, () => operation.Item(DefaultStart, DefaultSize, source.Append(WithCancellation(cs.Token)).Item).SequenceEqual(ParallelEnumerable.Range(0, 2)));
-            Functions.AssertIsCanceled(cs, () => ParallelEnumerable.Range(0, 2).SequenceEqual(operation.Item(DefaultStart, DefaultSize, source.Append(WithCancellation(cs.Token)).Item)));
+            Functions.AssertAlreadyCanceled(token => operation.Item(DefaultStart, DefaultSize, source.Append(WithCancellation(token)).Item).SequenceEqual(ParallelEnumerable.Range(0, 2)));
+            Functions.AssertAlreadyCanceled(token => ParallelEnumerable.Range(0, 2).SequenceEqual(operation.Item(DefaultStart, DefaultSize, source.Append(WithCancellation(token)).Item)));
         }
 
         [Theory]
@@ -215,11 +165,8 @@ namespace System.Linq.Parallel.Tests
         [MemberData(nameof(BinaryOperators))]
         public static void Single_OperationCanceledException_PreCanceled(LabeledOperation source, LabeledOperation operation)
         {
-            CancellationTokenSource cs = new CancellationTokenSource();
-            cs.Cancel();
-
-            Functions.AssertIsCanceled(cs, () => operation.Item(DefaultStart, DefaultSize, source.Append(WithCancellation(cs.Token)).Item).Single());
-            Functions.AssertIsCanceled(cs, () => operation.Item(DefaultStart, DefaultSize, source.Append(WithCancellation(cs.Token)).Item).Single(x => false));
+            Functions.AssertAlreadyCanceled(token => operation.Item(DefaultStart, DefaultSize, source.Append(WithCancellation(token)).Item).Single());
+            Functions.AssertAlreadyCanceled(token => operation.Item(DefaultStart, DefaultSize, source.Append(WithCancellation(token)).Item).Single(x => false));
         }
 
         [Theory]
@@ -227,11 +174,8 @@ namespace System.Linq.Parallel.Tests
         [MemberData(nameof(BinaryOperators))]
         public static void SingleOrDefault_OperationCanceledException_PreCanceled(LabeledOperation source, LabeledOperation operation)
         {
-            CancellationTokenSource cs = new CancellationTokenSource();
-            cs.Cancel();
-
-            Functions.AssertIsCanceled(cs, () => operation.Item(DefaultStart, DefaultSize, source.Append(WithCancellation(cs.Token)).Item).SingleOrDefault());
-            Functions.AssertIsCanceled(cs, () => operation.Item(DefaultStart, DefaultSize, source.Append(WithCancellation(cs.Token)).Item).SingleOrDefault(x => false));
+            Functions.AssertAlreadyCanceled(token => operation.Item(DefaultStart, DefaultSize, source.Append(WithCancellation(token)).Item).SingleOrDefault());
+            Functions.AssertAlreadyCanceled(token => operation.Item(DefaultStart, DefaultSize, source.Append(WithCancellation(token)).Item).SingleOrDefault(x => false));
         }
 
         [Theory]
@@ -239,10 +183,7 @@ namespace System.Linq.Parallel.Tests
         [MemberData(nameof(BinaryOperators))]
         public static void Sum_OperationCanceledException_PreCanceled(LabeledOperation source, LabeledOperation operation)
         {
-            CancellationTokenSource cs = new CancellationTokenSource();
-            cs.Cancel();
-
-            Functions.AssertIsCanceled(cs, () => operation.Item(DefaultStart, DefaultSize, source.Append(WithCancellation(cs.Token)).Item).Sum());
+            Functions.AssertAlreadyCanceled(token => operation.Item(DefaultStart, DefaultSize, source.Append(WithCancellation(token)).Item).Sum());
         }
 
         [Theory]
@@ -250,10 +191,7 @@ namespace System.Linq.Parallel.Tests
         [MemberData(nameof(BinaryOperators))]
         public static void ToArray_OperationCanceledException_PreCanceled(LabeledOperation source, LabeledOperation operation)
         {
-            CancellationTokenSource cs = new CancellationTokenSource();
-            cs.Cancel();
-
-            Functions.AssertIsCanceled(cs, () => operation.Item(DefaultStart, DefaultSize, source.Append(WithCancellation(cs.Token)).Item).ToArray());
+            Functions.AssertAlreadyCanceled(token => operation.Item(DefaultStart, DefaultSize, source.Append(WithCancellation(token)).Item).ToArray());
         }
 
         [Theory]
@@ -261,11 +199,8 @@ namespace System.Linq.Parallel.Tests
         [MemberData(nameof(BinaryOperators))]
         public static void ToDictionary_OperationCanceledException_PreCanceled(LabeledOperation source, LabeledOperation operation)
         {
-            CancellationTokenSource cs = new CancellationTokenSource();
-            cs.Cancel();
-
-            Functions.AssertIsCanceled(cs, () => operation.Item(DefaultStart, DefaultSize, source.Append(WithCancellation(cs.Token)).Item).ToDictionary(x => x));
-            Functions.AssertIsCanceled(cs, () => operation.Item(DefaultStart, DefaultSize, source.Append(WithCancellation(cs.Token)).Item).ToDictionary(x => x, y => y));
+            Functions.AssertAlreadyCanceled(token => operation.Item(DefaultStart, DefaultSize, source.Append(WithCancellation(token)).Item).ToDictionary(x => x));
+            Functions.AssertAlreadyCanceled(token => operation.Item(DefaultStart, DefaultSize, source.Append(WithCancellation(token)).Item).ToDictionary(x => x, y => y));
         }
 
         [Theory]
@@ -273,10 +208,7 @@ namespace System.Linq.Parallel.Tests
         [MemberData(nameof(BinaryOperators))]
         public static void ToList_OperationCanceledException_PreCanceled(LabeledOperation source, LabeledOperation operation)
         {
-            CancellationTokenSource cs = new CancellationTokenSource();
-            cs.Cancel();
-
-            Functions.AssertIsCanceled(cs, () => operation.Item(DefaultStart, DefaultSize, source.Append(WithCancellation(cs.Token)).Item).ToList());
+            Functions.AssertAlreadyCanceled(token => operation.Item(DefaultStart, DefaultSize, source.Append(WithCancellation(token)).Item).ToList());
         }
 
         [Theory]
@@ -284,11 +216,8 @@ namespace System.Linq.Parallel.Tests
         [MemberData(nameof(BinaryOperators))]
         public static void ToLookup_OperationCanceledException_PreCanceled(LabeledOperation source, LabeledOperation operation)
         {
-            CancellationTokenSource cs = new CancellationTokenSource();
-            cs.Cancel();
-
-            Functions.AssertIsCanceled(cs, () => operation.Item(DefaultStart, DefaultSize, source.Append(WithCancellation(cs.Token)).Item).ToLookup(x => x));
-            Functions.AssertIsCanceled(cs, () => operation.Item(DefaultStart, DefaultSize, source.Append(WithCancellation(cs.Token)).Item).ToLookup(x => x, y => y));
+            Functions.AssertAlreadyCanceled(token => operation.Item(DefaultStart, DefaultSize, source.Append(WithCancellation(token)).Item).ToLookup(x => x));
+            Functions.AssertAlreadyCanceled(token => operation.Item(DefaultStart, DefaultSize, source.Append(WithCancellation(token)).Item).ToLookup(x => x, y => y));
         }
     }
 }

@@ -338,23 +338,20 @@ namespace System.Linq.Parallel.Tests
         [MemberData(nameof(UnorderedSources.Ranges), new[] { 2 }, MemberType = typeof(UnorderedSources))]
         public static void Sum_OperationCanceledException_PreCanceled(Labeled<ParallelQuery<int>> labeled, int count)
         {
-            CancellationTokenSource cs = new CancellationTokenSource();
-            cs.Cancel();
+            Functions.AssertAlreadyCanceled(token => labeled.Item.WithCancellation(token).Sum(x => x));
+            Functions.AssertAlreadyCanceled(token => labeled.Item.WithCancellation(token).Sum(x => (int?)x));
 
-            Functions.AssertIsCanceled(cs, () => labeled.Item.WithCancellation(cs.Token).Sum(x => x));
-            Functions.AssertIsCanceled(cs, () => labeled.Item.WithCancellation(cs.Token).Sum(x => (int?)x));
+            Functions.AssertAlreadyCanceled(token => labeled.Item.WithCancellation(token).Sum(x => (long)x));
+            Functions.AssertAlreadyCanceled(token => labeled.Item.WithCancellation(token).Sum(x => (long?)x));
 
-            Functions.AssertIsCanceled(cs, () => labeled.Item.WithCancellation(cs.Token).Sum(x => (long)x));
-            Functions.AssertIsCanceled(cs, () => labeled.Item.WithCancellation(cs.Token).Sum(x => (long?)x));
+            Functions.AssertAlreadyCanceled(token => labeled.Item.WithCancellation(token).Sum(x => (float)x));
+            Functions.AssertAlreadyCanceled(token => labeled.Item.WithCancellation(token).Sum(x => (float?)x));
 
-            Functions.AssertIsCanceled(cs, () => labeled.Item.WithCancellation(cs.Token).Sum(x => (float)x));
-            Functions.AssertIsCanceled(cs, () => labeled.Item.WithCancellation(cs.Token).Sum(x => (float?)x));
+            Functions.AssertAlreadyCanceled(token => labeled.Item.WithCancellation(token).Sum(x => (double)x));
+            Functions.AssertAlreadyCanceled(token => labeled.Item.WithCancellation(token).Sum(x => (double?)x));
 
-            Functions.AssertIsCanceled(cs, () => labeled.Item.WithCancellation(cs.Token).Sum(x => (double)x));
-            Functions.AssertIsCanceled(cs, () => labeled.Item.WithCancellation(cs.Token).Sum(x => (double?)x));
-
-            Functions.AssertIsCanceled(cs, () => labeled.Item.WithCancellation(cs.Token).Sum(x => (decimal)x));
-            Functions.AssertIsCanceled(cs, () => labeled.Item.WithCancellation(cs.Token).Sum(x => (decimal?)x));
+            Functions.AssertAlreadyCanceled(token => labeled.Item.WithCancellation(token).Sum(x => (decimal)x));
+            Functions.AssertAlreadyCanceled(token => labeled.Item.WithCancellation(token).Sum(x => (decimal?)x));
         }
 
         [Theory]

@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
-using System.Threading;
 using Xunit;
 
 namespace System.Linq.Parallel.Tests
@@ -317,25 +316,22 @@ namespace System.Linq.Parallel.Tests
         [MemberData(nameof(UnorderedSources.Ranges), new[] { 1 }, MemberType = typeof(UnorderedSources))]
         public static void Min_OperationCanceledException_PreCanceled(Labeled<ParallelQuery<int>> labeled, int count)
         {
-            CancellationTokenSource cs = new CancellationTokenSource();
-            cs.Cancel();
+            Functions.AssertAlreadyCanceled(token => labeled.Item.WithCancellation(token).Min(x => x));
+            Functions.AssertAlreadyCanceled(token => labeled.Item.WithCancellation(token).Min(x => (int?)x));
 
-            Functions.AssertIsCanceled(cs, () => labeled.Item.WithCancellation(cs.Token).Min(x => x));
-            Functions.AssertIsCanceled(cs, () => labeled.Item.WithCancellation(cs.Token).Min(x => (int?)x));
+            Functions.AssertAlreadyCanceled(token => labeled.Item.WithCancellation(token).Min(x => (long)x));
+            Functions.AssertAlreadyCanceled(token => labeled.Item.WithCancellation(token).Min(x => (long?)x));
 
-            Functions.AssertIsCanceled(cs, () => labeled.Item.WithCancellation(cs.Token).Min(x => (long)x));
-            Functions.AssertIsCanceled(cs, () => labeled.Item.WithCancellation(cs.Token).Min(x => (long?)x));
+            Functions.AssertAlreadyCanceled(token => labeled.Item.WithCancellation(token).Min(x => (float)x));
+            Functions.AssertAlreadyCanceled(token => labeled.Item.WithCancellation(token).Min(x => (float?)x));
 
-            Functions.AssertIsCanceled(cs, () => labeled.Item.WithCancellation(cs.Token).Min(x => (float)x));
-            Functions.AssertIsCanceled(cs, () => labeled.Item.WithCancellation(cs.Token).Min(x => (float?)x));
+            Functions.AssertAlreadyCanceled(token => labeled.Item.WithCancellation(token).Min(x => (double)x));
+            Functions.AssertAlreadyCanceled(token => labeled.Item.WithCancellation(token).Min(x => (double?)x));
 
-            Functions.AssertIsCanceled(cs, () => labeled.Item.WithCancellation(cs.Token).Min(x => (double)x));
-            Functions.AssertIsCanceled(cs, () => labeled.Item.WithCancellation(cs.Token).Min(x => (double?)x));
+            Functions.AssertAlreadyCanceled(token => labeled.Item.WithCancellation(token).Min(x => (decimal)x));
+            Functions.AssertAlreadyCanceled(token => labeled.Item.WithCancellation(token).Min(x => (decimal?)x));
 
-            Functions.AssertIsCanceled(cs, () => labeled.Item.WithCancellation(cs.Token).Min(x => (decimal)x));
-            Functions.AssertIsCanceled(cs, () => labeled.Item.WithCancellation(cs.Token).Min(x => (decimal?)x));
-
-            Functions.AssertIsCanceled(cs, () => labeled.Item.WithCancellation(cs.Token).Min(x => new NotComparable(x)));
+            Functions.AssertAlreadyCanceled(token => labeled.Item.WithCancellation(token).Min(x => new NotComparable(x)));
         }
 
         [Theory]

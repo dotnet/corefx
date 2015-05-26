@@ -246,23 +246,20 @@ namespace System.Linq.Parallel.Tests
         [MemberData(nameof(UnorderedSources.Ranges), new[] { 1 }, MemberType = typeof(UnorderedSources))]
         public static void Average_OperationCanceledException_PreCanceled(Labeled<ParallelQuery<int>> labeled, int count)
         {
-            CancellationTokenSource cs = new CancellationTokenSource();
-            cs.Cancel();
+            Functions.AssertAlreadyCanceled(token => labeled.Item.WithCancellation(token).Average(x => x));
+            Functions.AssertAlreadyCanceled(token => labeled.Item.WithCancellation(token).Average(x => (int?)x));
 
-            Functions.AssertIsCanceled(cs, () => labeled.Item.WithCancellation(cs.Token).Average(x => x));
-            Functions.AssertIsCanceled(cs, () => labeled.Item.WithCancellation(cs.Token).Average(x => (int?)x));
+            Functions.AssertAlreadyCanceled(token => labeled.Item.WithCancellation(token).Average(x => (long)x));
+            Functions.AssertAlreadyCanceled(token => labeled.Item.WithCancellation(token).Average(x => (long?)x));
 
-            Functions.AssertIsCanceled(cs, () => labeled.Item.WithCancellation(cs.Token).Average(x => (long)x));
-            Functions.AssertIsCanceled(cs, () => labeled.Item.WithCancellation(cs.Token).Average(x => (long?)x));
+            Functions.AssertAlreadyCanceled(token => labeled.Item.WithCancellation(token).Average(x => (float)x));
+            Functions.AssertAlreadyCanceled(token => labeled.Item.WithCancellation(token).Average(x => (float?)x));
 
-            Functions.AssertIsCanceled(cs, () => labeled.Item.WithCancellation(cs.Token).Average(x => (float)x));
-            Functions.AssertIsCanceled(cs, () => labeled.Item.WithCancellation(cs.Token).Average(x => (float?)x));
+            Functions.AssertAlreadyCanceled(token => labeled.Item.WithCancellation(token).Average(x => (double)x));
+            Functions.AssertAlreadyCanceled(token => labeled.Item.WithCancellation(token).Average(x => (double?)x));
 
-            Functions.AssertIsCanceled(cs, () => labeled.Item.WithCancellation(cs.Token).Average(x => (double)x));
-            Functions.AssertIsCanceled(cs, () => labeled.Item.WithCancellation(cs.Token).Average(x => (double?)x));
-
-            Functions.AssertIsCanceled(cs, () => labeled.Item.WithCancellation(cs.Token).Average(x => (decimal)x));
-            Functions.AssertIsCanceled(cs, () => labeled.Item.WithCancellation(cs.Token).Average(x => (decimal?)x));
+            Functions.AssertAlreadyCanceled(token => labeled.Item.WithCancellation(token).Average(x => (decimal)x));
+            Functions.AssertAlreadyCanceled(token => labeled.Item.WithCancellation(token).Average(x => (decimal?)x));
         }
 
         [Theory]

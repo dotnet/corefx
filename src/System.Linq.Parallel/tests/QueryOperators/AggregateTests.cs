@@ -297,13 +297,10 @@ namespace System.Linq.Parallel.Tests
         [MemberData(nameof(UnorderedSources.Ranges), new[] { 2 }, MemberType = typeof(UnorderedSources))]
         public static void Aggregate_OperationCanceledException_PreCanceled(Labeled<ParallelQuery<int>> labeled, int count)
         {
-            CancellationTokenSource cs = new CancellationTokenSource();
-            cs.Cancel();
-
-            Functions.AssertIsCanceled(cs, () => labeled.Item.WithCancellation(cs.Token).Aggregate((i, j) => i));
-            Functions.AssertIsCanceled(cs, () => labeled.Item.WithCancellation(cs.Token).Aggregate(0, (i, j) => i));
-            Functions.AssertIsCanceled(cs, () => labeled.Item.WithCancellation(cs.Token).Aggregate(0, (i, j) => i, i => i));
-            Functions.AssertIsCanceled(cs, () => labeled.Item.WithCancellation(cs.Token).Aggregate(0, (i, j) => i, (i, j) => i, i => i));
+            Functions.AssertAlreadyCanceled(token => labeled.Item.WithCancellation(token).Aggregate((i, j) => i));
+            Functions.AssertAlreadyCanceled(token => labeled.Item.WithCancellation(token).Aggregate(0, (i, j) => i));
+            Functions.AssertAlreadyCanceled(token => labeled.Item.WithCancellation(token).Aggregate(0, (i, j) => i, i => i));
+            Functions.AssertAlreadyCanceled(token => labeled.Item.WithCancellation(token).Aggregate(0, (i, j) => i, (i, j) => i, i => i));
         }
 
         [Theory]

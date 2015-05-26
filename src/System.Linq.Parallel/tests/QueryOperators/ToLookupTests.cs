@@ -215,14 +215,11 @@ namespace System.Linq.Parallel.Tests
         [MemberData(nameof(UnorderedSources.Ranges), new[] { 1 }, MemberType = typeof(UnorderedSources))]
         public static void ToLookup_OperationCanceledException_PreCanceled(Labeled<ParallelQuery<int>> labeled, int count)
         {
-            CancellationTokenSource cs = new CancellationTokenSource();
-            cs.Cancel();
+            Functions.AssertAlreadyCanceled(token => labeled.Item.WithCancellation(token).ToLookup(x => x));
+            Functions.AssertAlreadyCanceled(token => labeled.Item.WithCancellation(token).ToLookup(x => x, EqualityComparer<int>.Default));
 
-            Functions.AssertIsCanceled(cs, () => labeled.Item.WithCancellation(cs.Token).ToLookup(x => x));
-            Functions.AssertIsCanceled(cs, () => labeled.Item.WithCancellation(cs.Token).ToLookup(x => x, EqualityComparer<int>.Default));
-
-            Functions.AssertIsCanceled(cs, () => labeled.Item.WithCancellation(cs.Token).ToLookup(x => x, y => y));
-            Functions.AssertIsCanceled(cs, () => labeled.Item.WithCancellation(cs.Token).ToLookup(x => x, y => y, EqualityComparer<int>.Default));
+            Functions.AssertAlreadyCanceled(token => labeled.Item.WithCancellation(token).ToLookup(x => x, y => y));
+            Functions.AssertAlreadyCanceled(token => labeled.Item.WithCancellation(token).ToLookup(x => x, y => y, EqualityComparer<int>.Default));
         }
 
         [Theory]

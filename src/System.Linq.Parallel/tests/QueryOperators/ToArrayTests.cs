@@ -50,10 +50,7 @@ namespace System.Linq.Parallel.Tests
         [MemberData(nameof(UnorderedSources.ThrowOnFirstEnumeration), MemberType = typeof(UnorderedSources))]
         public static void ToArray_OperationCanceledException_PreCanceled(Labeled<ParallelQuery<int>> labeled, int count)
         {
-            CancellationTokenSource cs = new CancellationTokenSource();
-            cs.Cancel();
-
-            Functions.AssertIsCanceled(cs, () => labeled.Item.WithCancellation(cs.Token).ToArray());
+            Functions.AssertAlreadyCanceled(token => labeled.Item.WithCancellation(token).ToArray());
         }
 
         [Fact]

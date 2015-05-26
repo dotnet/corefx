@@ -49,10 +49,7 @@ namespace System.Linq.Parallel.Tests
         [MemberData(nameof(Sources.Ranges), new[] { 1 }, MemberType = typeof(Sources))]
         public static void ToList_OperationCanceledException_PreCanceled(Labeled<ParallelQuery<int>> labeled, int count)
         {
-            CancellationTokenSource cs = new CancellationTokenSource();
-            cs.Cancel();
-
-            Functions.AssertIsCanceled(cs, () => labeled.Item.WithCancellation(cs.Token).ToList());
+            Functions.AssertAlreadyCanceled(token => labeled.Item.WithCancellation(token).ToList());
         }
 
         [Fact]

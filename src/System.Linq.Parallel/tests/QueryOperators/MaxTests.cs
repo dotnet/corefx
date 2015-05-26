@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
-using System.Threading;
 using Xunit;
 
 namespace System.Linq.Parallel.Tests
@@ -284,25 +283,22 @@ namespace System.Linq.Parallel.Tests
         [MemberData(nameof(UnorderedSources.Ranges), new[] { 1 }, MemberType = typeof(UnorderedSources))]
         public static void Max_OperationCanceledException_PreCanceled(Labeled<ParallelQuery<int>> labeled, int count)
         {
-            CancellationTokenSource cs = new CancellationTokenSource();
-            cs.Cancel();
+            Functions.AssertAlreadyCanceled(token => labeled.Item.WithCancellation(token).Max(x => x));
+            Functions.AssertAlreadyCanceled(token => labeled.Item.WithCancellation(token).Max(x => (int?)x));
 
-            Functions.AssertIsCanceled(cs, () => labeled.Item.WithCancellation(cs.Token).Max(x => x));
-            Functions.AssertIsCanceled(cs, () => labeled.Item.WithCancellation(cs.Token).Max(x => (int?)x));
+            Functions.AssertAlreadyCanceled(token => labeled.Item.WithCancellation(token).Max(x => (long)x));
+            Functions.AssertAlreadyCanceled(token => labeled.Item.WithCancellation(token).Max(x => (long?)x));
 
-            Functions.AssertIsCanceled(cs, () => labeled.Item.WithCancellation(cs.Token).Max(x => (long)x));
-            Functions.AssertIsCanceled(cs, () => labeled.Item.WithCancellation(cs.Token).Max(x => (long?)x));
+            Functions.AssertAlreadyCanceled(token => labeled.Item.WithCancellation(token).Max(x => (float)x));
+            Functions.AssertAlreadyCanceled(token => labeled.Item.WithCancellation(token).Max(x => (float?)x));
 
-            Functions.AssertIsCanceled(cs, () => labeled.Item.WithCancellation(cs.Token).Max(x => (float)x));
-            Functions.AssertIsCanceled(cs, () => labeled.Item.WithCancellation(cs.Token).Max(x => (float?)x));
+            Functions.AssertAlreadyCanceled(token => labeled.Item.WithCancellation(token).Max(x => (double)x));
+            Functions.AssertAlreadyCanceled(token => labeled.Item.WithCancellation(token).Max(x => (double?)x));
 
-            Functions.AssertIsCanceled(cs, () => labeled.Item.WithCancellation(cs.Token).Max(x => (double)x));
-            Functions.AssertIsCanceled(cs, () => labeled.Item.WithCancellation(cs.Token).Max(x => (double?)x));
+            Functions.AssertAlreadyCanceled(token => labeled.Item.WithCancellation(token).Max(x => (decimal)x));
+            Functions.AssertAlreadyCanceled(token => labeled.Item.WithCancellation(token).Max(x => (decimal?)x));
 
-            Functions.AssertIsCanceled(cs, () => labeled.Item.WithCancellation(cs.Token).Max(x => (decimal)x));
-            Functions.AssertIsCanceled(cs, () => labeled.Item.WithCancellation(cs.Token).Max(x => (decimal?)x));
-
-            Functions.AssertIsCanceled(cs, () => labeled.Item.WithCancellation(cs.Token).Max(x => new NotComparable(x)));
+            Functions.AssertAlreadyCanceled(token => labeled.Item.WithCancellation(token).Max(x => new NotComparable(x)));
         }
 
         [Theory]

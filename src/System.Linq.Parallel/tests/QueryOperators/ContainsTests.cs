@@ -79,11 +79,8 @@ namespace System.Linq.Parallel.Tests
         [MemberData(nameof(UnorderedSources.Ranges), new[] { 1 }, MemberType = typeof(UnorderedSources))]
         public static void Contains_OperationCanceledException_PreCanceled(Labeled<ParallelQuery<int>> labeled, int count)
         {
-            CancellationTokenSource cs = new CancellationTokenSource();
-            cs.Cancel();
-
-            Functions.AssertIsCanceled(cs, () => labeled.Item.WithCancellation(cs.Token).Contains(0));
-            Functions.AssertIsCanceled(cs, () => labeled.Item.WithCancellation(cs.Token).Contains(0, EqualityComparer<int>.Default));
+            Functions.AssertAlreadyCanceled(token => labeled.Item.WithCancellation(token).Contains(0));
+            Functions.AssertAlreadyCanceled(token => labeled.Item.WithCancellation(token).Contains(0, EqualityComparer<int>.Default));
         }
 
         [Theory]

@@ -129,14 +129,11 @@ namespace System.Linq.Parallel.Tests
         [MemberData(nameof(UnorderedSources.Ranges), new[] { 1 }, MemberType = typeof(UnorderedSources))]
         public static void Last_OperationCanceledException_PreCanceled(Labeled<ParallelQuery<int>> labeled, int count)
         {
-            CancellationTokenSource cs = new CancellationTokenSource();
-            cs.Cancel();
+            Functions.AssertAlreadyCanceled(token => labeled.Item.WithCancellation(token).Last());
+            Functions.AssertAlreadyCanceled(token => labeled.Item.WithCancellation(token).Last(x => true));
 
-            Functions.AssertIsCanceled(cs, () => labeled.Item.WithCancellation(cs.Token).Last());
-            Functions.AssertIsCanceled(cs, () => labeled.Item.WithCancellation(cs.Token).Last(x => true));
-
-            Functions.AssertIsCanceled(cs, () => labeled.Item.WithCancellation(cs.Token).LastOrDefault());
-            Functions.AssertIsCanceled(cs, () => labeled.Item.WithCancellation(cs.Token).LastOrDefault(x => true));
+            Functions.AssertAlreadyCanceled(token => labeled.Item.WithCancellation(token).LastOrDefault());
+            Functions.AssertAlreadyCanceled(token => labeled.Item.WithCancellation(token).LastOrDefault(x => true));
         }
 
         [Theory]

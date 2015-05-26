@@ -37,10 +37,13 @@ namespace System.Linq.Parallel.Tests
             Assert.All(ae.InnerExceptions, e => Assert.IsType<T>(e));
         }
 
-        public static void AssertIsCanceled(CancellationTokenSource source, Action query)
+        public static void AssertAlreadyCanceled(Action<CancellationToken> query)
         {
-            OperationCanceledException oce = Assert.Throws<OperationCanceledException>(query);
-            Assert.Equal(source.Token, oce.CancellationToken);
+            CancellationTokenSource cs = new CancellationTokenSource();
+            cs.Cancel();
+
+            OperationCanceledException oce = Assert.Throws<OperationCanceledException>(() => query(cs.Token));
+            Assert.Equal(cs.Token, oce.CancellationToken);
         }
 
         public static void Enumerate<T>(this IEnumerable<T> e)
