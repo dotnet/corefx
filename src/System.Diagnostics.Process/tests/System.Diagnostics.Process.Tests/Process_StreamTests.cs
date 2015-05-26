@@ -113,7 +113,7 @@ namespace System.Diagnostics.ProcessTests
             Assert.True(p.WaitForExit(WaitInMS));
         }
 
-        [Fact]
+        [Fact, ActiveIssue(1841)]
         public void Process_AsyncHalfCharacterAtATime()
         {
             var receivedOutput = false;
