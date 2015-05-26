@@ -195,7 +195,7 @@ public class AnonymousPipesSimpleTest
         }
     }
 
-    [Fact]
+    [ActiveIssue(1840)]    
     public static void ClientPInvokeChecks()
     {
         using (AnonymousPipeServerStream server = new AnonymousPipeServerStream(PipeDirection.In))
