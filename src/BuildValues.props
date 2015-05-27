@@ -8,6 +8,6 @@
       prerelease version number and without the leading zeroes foo-20 is
       smaller than foo-4.
     -->
-    <RevisionNumber>00005</RevisionNumber>
+    <RevisionNumber>00006</RevisionNumber>
   </PropertyGroup>
 </Project>
