@@ -23,6 +23,11 @@ namespace System.ComponentModel
             _operationCompleted = new SendOrPostCallback(AsyncOperationCompleted);
             _progressReporter = new SendOrPostCallback(ProgressReporter);
         }
+        
+        ~BackgroundWorker()
+        {
+            Dispose(false);
+        }
 
         private void AsyncOperationCompleted(object arg)
         {
@@ -200,14 +205,7 @@ namespace System.ComponentModel
             RunWorkerCompletedEventArgs e =
                 new RunWorkerCompletedEventArgs(workerResult, error, cancelled);
 
-            if (_asyncOperation != null)
-            {
-                _asyncOperation.PostOperationCompleted(_operationCompleted, e);
-            }
-            else
-            {
-                _operationCompleted(e);
-            }
+            _asyncOperation.PostOperationCompleted(_operationCompleted, e);
         }
 
         public void Dispose()
