@@ -8,8 +8,8 @@
 // =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
 using System.Collections.Generic;
-using System.Threading;
 using System.Diagnostics;
+using System.Threading;
 
 namespace System.Linq.Parallel
 {
@@ -211,10 +211,9 @@ namespace System.Linq.Parallel
             private readonly CancellationToken _cancellationToken; // Token used to cancel this operator.
 
             private List<Pair> _buffer; // Our buffer.
-            private Shared<int> _bufferIndex; // Our current index within the buffer.  [allocate in moveNext to avoid false-sharing]
+            private int _bufferIndex = -1; // Our current index within the buffer.
             private int _updatesSeen; // How many updates has this enumerator observed? (Each other enumerator will contribute one update.)
             private TKey _currentLowKey; // The lowest key rejected by one of the other enumerators.
-
 
             //---------------------------------------------------------------------------------------
             // Instantiates a new select enumerator.
@@ -326,26 +325,25 @@ namespace System.Linq.Parallel
                     // Before exiting the search phase, we will synchronize with others. This is a barrier.
                     _sharedBarrier.Wait(_cancellationToken);
 
-                    // Publish the buffer and set the index to just before the 1st element.
+                    // Publish the buffer.
                     _buffer = buffer;
-                    _bufferIndex = new Shared<int>(-1);
                 }
 
                 // Now either enter (or continue) the yielding phase. As soon as we reach this, we know the
-                // current shared "low false" value is the absolute lowest with a false.                
+                // current shared "low false" value is the absolute lowest with a false.
                 if (_take)
                 {
                     // In the case of a take-while, we will yield each element from our buffer for which
                     // the element is lesser than the lowest false index found.
-                    if (_bufferIndex.Value >= _buffer.Count - 1)
+                    if (_bufferIndex >= _buffer.Count - 1)
                     {
                         return false;
                     }
 
                     // Increment the index, and remember the values.
-                    ++_bufferIndex.Value;
-                    currentElement = (TResult)_buffer[_bufferIndex.Value].First;
-                    currentKey = (TKey)_buffer[_bufferIndex.Value].Second;
+                    ++_bufferIndex;
+                    currentElement = (TResult)_buffer[_bufferIndex].First;
+                    currentKey = (TKey)_buffer[_bufferIndex].Second;
 
                     return _operatorState._updatesDone == 0 || _keyComparer.Compare(_operatorState._currentLowKey, currentKey) > 0;
                 }
@@ -360,16 +358,16 @@ namespace System.Linq.Parallel
                     // In the case of a skip-while, we must skip over elements whose index is lesser than the
                     // lowest index found. Once we've exhausted the buffer, we must go back and continue
                     // enumerating the data source until it is empty.
-                    if (_bufferIndex.Value < _buffer.Count - 1)
+                    if (_bufferIndex < _buffer.Count - 1)
                     {
-                        for (_bufferIndex.Value++; _bufferIndex.Value < _buffer.Count; _bufferIndex.Value++)
+                        for (_bufferIndex++; _bufferIndex < _buffer.Count; _bufferIndex++)
                         {
                             // If the current buffered element's index is greater than or equal to the smallest
                             // false index found, we will yield it as a result.
-                            if (_keyComparer.Compare((TKey)_buffer[_bufferIndex.Value].Second, _operatorState._currentLowKey) >= 0)
+                            if (_keyComparer.Compare((TKey)_buffer[_bufferIndex].Second, _operatorState._currentLowKey) >= 0)
                             {
-                                currentElement = (TResult)_buffer[_bufferIndex.Value].First;
-                                currentKey = (TKey)_buffer[_bufferIndex.Value].Second;
+                                currentElement = (TResult)_buffer[_bufferIndex].First;
+                                currentKey = (TKey)_buffer[_bufferIndex].Second;
                                 return true;
                             }
                         }

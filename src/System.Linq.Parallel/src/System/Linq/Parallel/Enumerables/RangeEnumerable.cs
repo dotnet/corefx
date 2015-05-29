@@ -76,7 +76,7 @@ namespace System.Linq.Parallel
             private readonly int _from; // The initial value.
             private readonly int _count; // How many values to yield.
             private readonly int _initialIndex; // The ordinal index of the first value in the range.
-            private Shared<int> _currentCount; // The 0-based index of the current value. [allocate in moveNext to avoid false-sharing]
+            private int _currentIndex = -1; // The 0-based index of the current value.
 
             //-----------------------------------------------------------------------------------
             // Creates a new enumerator.
@@ -96,16 +96,12 @@ namespace System.Linq.Parallel
 
             internal override bool MoveNext(ref int currentElement, ref int currentKey)
             {
-                if (_currentCount == null)
-                    _currentCount = new Shared<int>(-1);
-
                 // Calculate the next index and ensure it falls within our range.
-                int nextCount = _currentCount.Value + 1;
-                if (nextCount < _count)
+                if (_currentIndex + 1 < _count)
                 {
-                    _currentCount.Value = nextCount;
-                    currentElement = nextCount + _from;
-                    currentKey = nextCount + _initialIndex;
+                    _currentIndex++;
+                    currentElement = _currentIndex + _from;
+                    currentKey = _currentIndex + _initialIndex;
                     return true;
                 }
 
@@ -116,7 +112,7 @@ namespace System.Linq.Parallel
             {
                 // We set the current value such that the next addition of step
                 // results in the 1st real value in the range.
-                _currentCount = null;
+                _currentIndex = -1;
             }
         }
     }

@@ -81,7 +81,7 @@ namespace System.Linq.Parallel
             private readonly TResult _element; // The element to repeat.
             private readonly int _count; // The number of times to repeat it.
             private readonly int _indexOffset; // Our index offset.
-            private Shared<int> _currentIndex; // The number of times we have already repeated it. [allocate in moveNext to avoid false-sharing]
+            private int _currentCount = -1; // The number of times we have already repeated it.
 
             //-----------------------------------------------------------------------------------
             // Creates a new enumerator.
@@ -100,14 +100,11 @@ namespace System.Linq.Parallel
 
             internal override bool MoveNext(ref TResult currentElement, ref int currentKey)
             {
-                if (_currentIndex == null)
-                    _currentIndex = new Shared<int>(-1);
-
-                if (_currentIndex.Value < (_count - 1))
+                if (_currentCount + 1 < _count)
                 {
-                    ++_currentIndex.Value;
+                    ++_currentCount;
                     currentElement = _element;
-                    currentKey = _currentIndex.Value + _indexOffset;
+                    currentKey = _currentCount + _indexOffset;
                     return true;
                 }
 
@@ -116,7 +113,7 @@ namespace System.Linq.Parallel
 
             internal override void Reset()
             {
-                _currentIndex = null;
+                _currentCount = -1;
             }
         }
     }
