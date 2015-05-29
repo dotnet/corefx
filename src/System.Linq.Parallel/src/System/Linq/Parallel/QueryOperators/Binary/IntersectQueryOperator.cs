@@ -14,7 +14,7 @@ using System.Threading;
 namespace System.Linq.Parallel
 {
     /// <summary>
-    /// Operator that yields the intersection of two data sources. 
+    /// Operator that yields the intersection of two data sources.
     /// </summary>
     /// <typeparam name="TInputOutput"></typeparam>
     internal sealed class IntersectQueryOperator<TInputOutput> :
@@ -37,11 +37,10 @@ namespace System.Linq.Parallel
             SetOrdinalIndex(OrdinalIndexState.Shuffled);
         }
 
-
         internal override QueryResults<TInputOutput> Open(
             QuerySettings settings, bool preferStriping)
         {
-            // We just open our child operators, left and then right.  Do not propagate the preferStriping value, but 
+            // We just open our child operators, left and then right.  Do not propagate the preferStriping value, but
             // instead explicitly set it to false. Regardless of whether the parent prefers striping or range
             // partitioning, the output will be hash-partitioned.
             QueryResults<TInputOutput> leftChildResults = LeftChild.Open(settings, false);
@@ -129,7 +128,7 @@ namespace System.Linq.Parallel
             private IEqualityComparer<TInputOutput> _comparer; // Comparer to use for equality/hash-coding.
             private Set<TInputOutput> _hashLookup; // The hash lookup, used to produce the intersection.
             private CancellationToken _cancellationToken;
-            private Shared<int> _outputLoopCount;
+            private int _outputLoopCount = 0;
 
             //---------------------------------------------------------------------------------------
             // Instantiates a new intersection operator.
@@ -162,7 +161,6 @@ namespace System.Linq.Parallel
 
                 if (_hashLookup == null)
                 {
-                    _outputLoopCount = new Shared<int>(0);
                     _hashLookup = new Set<TInputOutput>(_comparer);
 
                     Pair rightElement = new Pair(default(TInputOutput), default(NoKeyMemoizationRequired));
@@ -184,7 +182,7 @@ namespace System.Linq.Parallel
 
                 while (_leftSource.MoveNext(ref leftElement, ref keyUnused))
                 {
-                    if ((_outputLoopCount.Value++ & CancellationState.POLL_INTERVAL) == 0)
+                    if ((_outputLoopCount++ & CancellationState.POLL_INTERVAL) == 0)
                         CancellationState.ThrowIfCanceled(_cancellationToken);
 
                     // If we found the element in our set, and if we haven't returned it yet,
@@ -222,7 +220,6 @@ namespace System.Linq.Parallel
             IEnumerable<TInputOutput> wrappedRightChild = CancellableEnumerable.Wrap(RightChild.AsSequentialQuery(token), token);
             return wrappedLeftChild.Intersect(wrappedRightChild, _comparer);
         }
-
 
         class OrderedIntersectQueryOperatorEnumerator<TLeftKey> : QueryOperatorEnumerator<TInputOutput, TLeftKey>
         {

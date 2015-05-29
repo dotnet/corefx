@@ -14,7 +14,7 @@ using System.Threading;
 namespace System.Linq.Parallel
 {
     /// <summary>
-    /// Operator that yields the union of two data sources. 
+    /// Operator that yields the union of two data sources.
     /// </summary>
     /// <typeparam name="TInputOutput"></typeparam>
     internal sealed class UnionQueryOperator<TInputOutput> :
@@ -43,7 +43,7 @@ namespace System.Linq.Parallel
         internal override QueryResults<TInputOutput> Open(
             QuerySettings settings, bool preferStriping)
         {
-            // We just open our child operators, left and then right.  Do not propagate the preferStriping value, but 
+            // We just open our child operators, left and then right.  Do not propagate the preferStriping value, but
             // instead explicitly set it to false. Regardless of whether the parent prefers striping or range
             // partitioning, the output will be hash-partitioned.
             QueryResults<TInputOutput> leftChildResults = LeftChild.Open(settings, false);
@@ -151,7 +151,6 @@ namespace System.Linq.Parallel
             }
         }
 
-
         //---------------------------------------------------------------------------------------
         // Returns an enumerable that represents the query executing sequentially.
         //
@@ -186,7 +185,7 @@ namespace System.Linq.Parallel
             private readonly int _partitionIndex; // The current partition.
             private Set<TInputOutput> _hashLookup; // The hash lookup, used to produce the union.
             private CancellationToken _cancellationToken;
-            private Shared<int> _outputLoopCount;
+            private int _outputLoopCount = 0;
             private readonly IEqualityComparer<TInputOutput> _comparer;
 
             //---------------------------------------------------------------------------------------
@@ -218,7 +217,6 @@ namespace System.Linq.Parallel
                 if (_hashLookup == null)
                 {
                     _hashLookup = new Set<TInputOutput>(_comparer);
-                    _outputLoopCount = new Shared<int>(0);
                 }
 
                 Debug.Assert(_hashLookup != null);
@@ -252,7 +250,6 @@ namespace System.Linq.Parallel
                     _leftSource = null;
                 }
 
-
                 if (_rightSource != null)
                 {
                     // Iterate over this set's elements until we find a unique element.
@@ -261,7 +258,7 @@ namespace System.Linq.Parallel
 
                     while (_rightSource.MoveNext(ref currentRightElement, ref keyUnused))
                     {
-                        if ((_outputLoopCount.Value++ & CancellationState.POLL_INTERVAL) == 0)
+                        if ((_outputLoopCount++ & CancellationState.POLL_INTERVAL) == 0)
                             CancellationState.ThrowIfCanceled(_cancellationToken);
 
                         // We ensure we never return duplicates by tracking them in our set.

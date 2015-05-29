@@ -16,7 +16,7 @@ namespace System.Linq.Parallel
     /// <summary>
     /// This operator yields all of the distinct elements in a single data set. It works quite
     /// like the above set operations, with the obvious difference being that it only accepts
-    /// a single data source as input. 
+    /// a single data source as input.
     /// </summary>
     /// <typeparam name="TInputOutput"></typeparam>
     internal sealed class DistinctQueryOperator<TInputOutput> : UnaryQueryOperator<TInputOutput, TInputOutput>
@@ -42,7 +42,7 @@ namespace System.Linq.Parallel
 
         internal override QueryResults<TInputOutput> Open(QuerySettings settings, bool preferStriping)
         {
-            // We just open our child operator.  Do not propagate the preferStriping value, but 
+            // We just open our child operator.  Do not propagate the preferStriping value, but
             // instead explicitly set it to false. Regardless of whether the parent prefers striping or range
             // partitioning, the output will be hash-partitioned.
             QueryResults<TInputOutput> childResults = Child.Open(settings, false);
@@ -120,7 +120,7 @@ namespace System.Linq.Parallel
             private QueryOperatorEnumerator<Pair, TKey> _source; // The data source.
             private Set<TInputOutput> _hashLookup; // The hash lookup, used to produce the distinct set.
             private CancellationToken _cancellationToken;
-            private Shared<int> _outputLoopCount; // Allocated in MoveNext to avoid false sharing.
+            private int _outputLoopCount = 0;
 
             //---------------------------------------------------------------------------------------
             // Instantiates a new distinction operator.
@@ -149,12 +149,9 @@ namespace System.Linq.Parallel
                 TKey keyUnused = default(TKey);
                 Pair current = new Pair(default(TInputOutput), default(NoKeyMemoizationRequired));
 
-                if (_outputLoopCount == null)
-                    _outputLoopCount = new Shared<int>(0);
-
                 while (_source.MoveNext(ref current, ref keyUnused))
                 {
-                    if ((_outputLoopCount.Value++ & CancellationState.POLL_INTERVAL) == 0)
+                    if ((_outputLoopCount++ & CancellationState.POLL_INTERVAL) == 0)
                         CancellationState.ThrowIfCanceled(_cancellationToken);
 
                     // We ensure we never return duplicates by tracking them in our set.

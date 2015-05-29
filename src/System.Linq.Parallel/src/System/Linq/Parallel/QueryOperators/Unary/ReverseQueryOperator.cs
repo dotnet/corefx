@@ -105,7 +105,7 @@ namespace System.Linq.Parallel
             private readonly QueryOperatorEnumerator<TSource, TKey> _source; // The data source to reverse.
             private readonly CancellationToken _cancellationToken;
             private List<Pair> _buffer; // Our buffer. [allocate in moveNext to avoid false-sharing]
-            private Shared<int> _bufferIndex; // Our current index within the buffer. [allocate in moveNext to avoid false-sharing]
+            private int _bufferIndex = 0; // Our current index within the buffer.
 
             //---------------------------------------------------------------------------------------
             // Instantiates a new select enumerator.
@@ -128,7 +128,6 @@ namespace System.Linq.Parallel
                 // If the buffer has not been created, we will generate it lazily on demand.
                 if (_buffer == null)
                 {
-                    _bufferIndex = new Shared<int>(0);
                     // Buffer all of our data.
                     _buffer = new List<Pair>();
                     TSource current = default(TSource);
@@ -140,15 +139,15 @@ namespace System.Linq.Parallel
                             CancellationState.ThrowIfCanceled(_cancellationToken);
 
                         _buffer.Add(new Pair(current, key));
-                        _bufferIndex.Value++;
+                        _bufferIndex++;
                     }
                 }
 
                 // Continue yielding elements from our buffer.
-                if (--_bufferIndex.Value >= 0)
+                if (--_bufferIndex >= 0)
                 {
-                    currentElement = (TSource)_buffer[_bufferIndex.Value].First;
-                    currentKey = (TKey)_buffer[_bufferIndex.Value].Second;
+                    currentElement = (TSource)_buffer[_bufferIndex].First;
+                    currentKey = (TKey)_buffer[_bufferIndex].Second;
                     return true;
                 }
 

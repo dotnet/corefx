@@ -66,7 +66,6 @@ namespace System.Linq.Parallel
             SetOrdinalIndexState(OrdinalIndexState.Increasing);
         }
 
-
         //---------------------------------------------------------------------------------------
         // Just opens the current operator, including opening the child and wrapping it with
         // partitions as needed.
@@ -109,7 +108,6 @@ namespace System.Linq.Parallel
             recipient.Receive(outputStream);
         }
 
-
         //---------------------------------------------------------------------------------------
         // Returns an enumerable that represents the query executing sequentially.
         //
@@ -119,7 +117,6 @@ namespace System.Linq.Parallel
             IEnumerable<TInputOutput> wrappedChild = CancellableEnumerable.Wrap(Child.AsSequentialQuery(token), token);
             return wrappedChild.Where(_predicate);
         }
-
 
         //---------------------------------------------------------------------------------------
         // Whether this operator performs a premature merge that would not be performed in
@@ -140,7 +137,7 @@ namespace System.Linq.Parallel
             private readonly QueryOperatorEnumerator<TInputOutput, int> _source; // The data source to enumerate.
             private readonly Func<TInputOutput, int, bool> _predicate; // The predicate used for filtering.
             private CancellationToken _cancellationToken;
-            private Shared<int> _outputLoopCount;
+            private int _outputLoopCount = 0;
             //-----------------------------------------------------------------------------------
             // Instantiates a new enumerator.
             //
@@ -166,12 +163,9 @@ namespace System.Linq.Parallel
                 // Iterate through the input until we reach the end of the sequence or find
                 // an element matching the predicate.
 
-                if (_outputLoopCount == null)
-                    _outputLoopCount = new Shared<int>(0);
-
                 while (_source.MoveNext(ref currentElement, ref currentKey))
                 {
-                    if ((_outputLoopCount.Value++ & CancellationState.POLL_INTERVAL) == 0)
+                    if ((_outputLoopCount++ & CancellationState.POLL_INTERVAL) == 0)
                         CancellationState.ThrowIfCanceled(_cancellationToken);
 
                     if (_predicate(currentElement, currentKey))
