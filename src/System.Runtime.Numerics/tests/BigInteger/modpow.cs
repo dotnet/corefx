@@ -217,6 +217,7 @@ namespace System.Numerics.Tests
         }
 
         [Fact]
+        [ActiveIssue(1873)]
         public static void ModPowAxiom()
         {
             byte[] tempByteArray1 = new byte[0];

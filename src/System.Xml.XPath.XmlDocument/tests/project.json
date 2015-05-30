@@ -11,12 +11,13 @@
     "System.Xml.ReaderWriter": "4.0.10-beta-*",
     "System.Xml.XmlDocument": "4.0.0-beta-*",
     "System.Xml.XPath": "4.0.0-beta-*",
-    "xunit": "2.0.0-beta5-build2785",
-    "xunit.abstractions.netcore": "1.0.0-prerelease",
-    "xunit.assert": "2.0.0-beta5-build2785",
-    "xunit.core.netcore": "1.0.1-prerelease",
-    "xunit.runner.visualstudio": "0.99.9-build1021",
-    "xunit.netcore.extensions": "1.0.0-prerelease-*"
+    "xunit": "2.1.0-beta2-build2981",
+    "xunit.core": "2.1.0-beta2-build2981",
+    "xunit.assert": "2.1.0-beta2-build2981",
+    "xunit.extensibility.core": "2.1.0-beta2-build2981",
+    "xunit.extensibility.execution": "2.1.0-beta2-build2981",
+    "xunit.abstractions": "2.0.0",
+    "xunit.netcore.extensions": "1.0.1-prerelease-00050"
   },
   "frameworks": {
     "dnxcore50": {}

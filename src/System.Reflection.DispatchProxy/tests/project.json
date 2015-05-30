@@ -12,10 +12,13 @@
     "System.Runtime": "4.0.20-beta-*",
     "System.Runtime.Extensions": "4.0.10-beta-*",
     "System.Threading": "4.0.10-beta-*",
-    "xunit": "2.0.0-beta5-build2785",
-    "xunit.abstractions.netcore": "1.0.0-prerelease",
-    "xunit.assert": "2.0.0-beta5-build2785",
-    "xunit.core.netcore": "1.0.1-prerelease"
+    "xunit": "2.1.0-beta2-build2981",
+    "xunit.core": "2.1.0-beta2-build2981",
+    "xunit.assert": "2.1.0-beta2-build2981",
+    "xunit.extensibility.core": "2.1.0-beta2-build2981",
+    "xunit.extensibility.execution": "2.1.0-beta2-build2981",
+    "xunit.abstractions": "2.0.0",
+    "xunit.netcore.extensions": "1.0.1-prerelease-00050"
   },
   "frameworks": {
     "dnxcore50": {}

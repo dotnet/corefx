@@ -70,6 +70,7 @@ public class EncodingTest
 
     [Fact]
     [ActiveIssue(846, PlatformID.AnyUnix)]
+    [ActiveIssue(1872)]
     public static void TestDefaultCodePage()
     {
 

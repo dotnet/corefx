@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
+using System.Runtime.CompilerServices;
 
 public static partial class StreamHelpers
 {
@@ -16,16 +17,16 @@ public static partial class StreamHelpers
 
     private const string dirPrefix = "ZipTests";
     private static int s_dirCount = 1;
-    public static String GetTmpPath(bool create = false)
+    public static String GetTmpPath(bool create = false, [CallerMemberName] string memberName = "")
     {
         var root = Path.GetTempPath();
-        string subDir = dirPrefix + s_dirCount.ToString();
+        string subDir = dirPrefix + "_" + memberName + s_dirCount.ToString();
         var tempPath = Path.Combine(root, subDir);
         s_dirCount++;
 
         while (Directory.Exists(tempPath))
         {
-            subDir = dirPrefix + s_dirCount.ToString();
+            subDir = dirPrefix + "_" + memberName + s_dirCount.ToString();
             tempPath = Path.Combine(root, subDir);
             s_dirCount++;
         }

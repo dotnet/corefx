@@ -13,41 +13,40 @@ namespace System.Reflection.Compatibility.UnitTests
     // System.Reflection.EventInfo.AddEventHandler
     public class EventInfoAddEventHandler
     {
-        // Positive Test 1: add Event handler to the not static event
         [Fact]
-        public void PosTest1()
+        public void PosTests()
         {
-            TestClass1 tc1 = new TestClass1();
-            Type tpA = tc1.GetType();
-            EventInfo eventinfo = tpA.GetEvent("Event1");
-            eventinfo.AddEventHandler(tc1, new TestForEvent1(tc1.method1));
-            tc1.method();
-            Assert.Equal(1, TestClass1.m_StaticVariable);
+            // Positive Test 1: add Event handler to the not static event
+            {
+                TestClass1 tc1 = new TestClass1();
+                Type tpA = tc1.GetType();
+                EventInfo eventinfo = tpA.GetEvent("Event1");
+                eventinfo.AddEventHandler(tc1, new TestForEvent1(tc1.method1));
+                tc1.method();
+                Assert.Equal(1, TestClass1.m_StaticVariable);
+            }
+
+            // Positive Test 2:add to Event handler to the static event and the target is null
+            {
+                TestClass1 tc1 = new TestClass1();
+                Type tpA = tc1.GetType();
+                EventInfo eventinfo = tpA.GetEvent("Event2");
+                eventinfo.AddEventHandler(null, new TestForEvent1(tc1.method2));
+                tc1.method();
+                Assert.Equal(0, TestClass1.m_StaticVariable);
+            }
+
+            // Positive Test 3:add to Event handler to the static event and the target is not null      
+            {
+                TestClass1 tc1 = new TestClass1();
+                Type tpA = tc1.GetType();
+                EventInfo eventinfo = tpA.GetEvent("Event2");
+                eventinfo.AddEventHandler(tc1, new TestForEvent1(tc1.method3));
+                tc1.method();
+                Assert.Equal(0, TestClass1.m_StaticVariable);
+            }      
         }
 
-        // Positive Test 2:add to Event handler to the static event and the target is null
-        [Fact]
-        public void PosTest2()
-        {
-            TestClass1 tc1 = new TestClass1();
-            Type tpA = tc1.GetType();
-            EventInfo eventinfo = tpA.GetEvent("Event2");
-            eventinfo.AddEventHandler(null, new TestForEvent1(tc1.method2));
-            tc1.method();
-            Assert.Equal(0, TestClass1.m_StaticVariable);
-        }
-
-        // Positive Test 3:add to Event handler to the static event and the target is not null
-        [Fact]
-        public void PosTest3()
-        {
-            TestClass1 tc1 = new TestClass1();
-            Type tpA = tc1.GetType();
-            EventInfo eventinfo = tpA.GetEvent("Event2");
-            eventinfo.AddEventHandler(tc1, new TestForEvent1(tc1.method3));
-            tc1.method();
-            Assert.Equal(0, TestClass1.m_StaticVariable);
-        }
 
         // Negative Test 1:add to Event handler to the not static event and the target is null
         [Fact]

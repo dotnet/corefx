@@ -114,6 +114,7 @@ namespace System.Diagnostics.ProcessTests
         }
 
         [Fact]
+        [ActiveIssue(1874)]
         public void Process_AsyncHalfCharacterAtATime()
         {
             var receivedOutput = false;
