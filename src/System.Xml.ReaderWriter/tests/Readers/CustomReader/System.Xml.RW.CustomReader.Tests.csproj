@@ -8,14 +8,12 @@
     <OutputType>Library</OutputType>
     <AssemblyName>System.Xml.RW.CustomReader.Tests</AssemblyName>
     <RootNamespace>XmlReaderTest.CustomReaderTest</RootNamespace>
-    <TestCategories>OuterLoop</TestCategories>
   </PropertyGroup>
   <!-- Default configurations to help VS understand the configurations -->
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
   </PropertyGroup>
-  <!-- References are resolved from packages.config -->
   <ItemGroup>
     <Compile Include="CReaderTestModule.cs" />
     <Compile Include="InheritedCases.cs" />
@@ -32,10 +30,6 @@
       <Project>{89701565-f68b-46d9-bd78-95b0f052c50b}</Project>
       <Name>XmlCoreTest</Name>
     </ProjectReference>
-    <ProjectReference Include="$(CommonTestPath)\XunitTraitsDiscoverers\XunitTraitsDiscoverers.csproj">
-      <Project>{be8ed8c1-c314-4c4e-a929-64c9c8b3552a}</Project>
-      <Name>XunitTraitsDiscoverers</Name>
-    </ProjectReference>
     <ProjectReference Include="..\..\..\src\System.Xml.ReaderWriter.csproj">
       <Project>{c559743a-762e-4d9d-b986-e77bdb97652e}</Project>
       <Name>System.Xml.ReaderWriter</Name>
@@ -44,6 +38,9 @@
       <Project>{6d9b0285-5e8a-4c20-9c53-9e2084ef64c4}</Project>
       <Name>System.Xml.RW.XmlReaderLib</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="project.json" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

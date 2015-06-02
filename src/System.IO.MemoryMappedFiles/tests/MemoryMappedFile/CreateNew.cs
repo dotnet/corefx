@@ -12,6 +12,27 @@ public class CreateNew : MMFTestBase
     private readonly static string s_uniquifier = Guid.NewGuid().ToString();
 
     [Fact]
+    public static void CreateNew_DelayAllocatePages_ReadWrite()
+    {
+        int capacity = 4096 * 10000;
+        using (MemoryMappedFile mmf = MemoryMappedFile.CreateNew(
+            null, capacity, MemoryMappedFileAccess.ReadWrite, MemoryMappedFileOptions.DelayAllocatePages, HandleInheritability.None))
+        {
+            foreach (int viewCapacity in new[] { 0, 1, 4096, capacity })
+            {
+                using (MemoryMappedViewAccessor accessor = mmf.CreateViewAccessor(0, viewCapacity, MemoryMappedFileAccess.ReadWrite))
+                {
+                    accessor.Write(0, (byte)42);
+                    Assert.Equal(42, accessor.ReadByte(0));
+
+                    accessor.Write(accessor.Capacity - 1, (byte)84);
+                    Assert.Equal(84, accessor.ReadByte(accessor.Capacity - 1));
+                }
+            }
+        }
+    }
+
+    [Fact]
     public static void CreateNewTestCases()
     {
         bool bResult = false;
@@ -53,7 +74,7 @@ public class CreateNew : MMFTestBase
             VerifyCreateNew("Loc114", "\t\t \n\u00A0", 4096);
 
             // MMF with this mapname already exists
-            if (Interop.PlatformDetection.OperatingSystem == Interop.OperatingSystem.Windows) // named maps not supported on Unix
+            if (Interop.IsWindows) // named maps not supported on Unix
             {
                 using (MemoryMappedFile mmf = MemoryMappedFile.CreateNew("map115" + s_uniquifier, 1000))
                 {
@@ -142,7 +163,7 @@ public class CreateNew : MMFTestBase
             VerifyCreateNew("Loc414", "\t\t \n\u00A0", 4096, MemoryMappedFileAccess.ReadWrite, MemoryMappedFileOptions.None, HandleInheritability.None);
 
             // MMF with this mapname already exists
-            if (Interop.PlatformDetection.OperatingSystem == Interop.OperatingSystem.Windows) // named maps not supported on Unix
+            if (Interop.IsWindows) // named maps not supported on Unix
             {
                 using (MemoryMappedFile mmf = MemoryMappedFile.CreateNew("map415" + s_uniquifier, 4096))
                 {

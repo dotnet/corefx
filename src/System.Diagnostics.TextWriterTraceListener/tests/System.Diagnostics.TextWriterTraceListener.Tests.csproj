@@ -15,8 +15,10 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="TestTraceFilter.cs" />
     <Compile Include="CommonUtilities.cs" />
     <Compile Include="CtorsDelimiterTests.cs" />
+    <Compile Include="TextWriterTraceListener_WriteTests.cs" />
     <Compile Include="CtorsStreamTests.cs" />
     <Compile Include="DelimiterWriteMethodTests.cs" />
   </ItemGroup>
@@ -27,8 +29,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
+    <None Include="project.json" />
   </ItemGroup>
-  <!-- References are resolved from packages.config -->
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

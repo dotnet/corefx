@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <PropertyGroup>
@@ -7,6 +7,8 @@
     <ProjectGuid>{57E8F8D4-0766-4CC7-B3F9-B243B81DB6A5}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AssemblyName>System.IO.FileSystem.Tests</AssemblyName>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <TestCategories>InnerLoop;OuterLoop</TestCategories>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
     <DebugSymbols>true</DebugSymbols>
@@ -16,16 +18,12 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
   </PropertyGroup>
   <ItemGroup>
-    <None Include="packages.config" />
+    <None Include="project.json" />
   </ItemGroup>
   <ItemGroup>
     <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="$(CommonTestPath)\XunitTraitsDiscoverers\XunitTraitsDiscoverers.csproj">
-      <Project>{be8ed8c1-c314-4c4e-a929-64c9c8b3552a}</Project>
-      <Name>XunitTraitsDiscoverers</Name>
-    </ProjectReference>
     <ProjectReference Include="..\src\System.IO.FileSystem.csproj">
       <Project>{879c23dc-d828-4dfb-8e92-abbc11b71035}</Project>
       <Name>System.IO.FileSystem</Name>
@@ -78,9 +76,7 @@
     <Compile Include="UnseekableFileStream.cs" />
     <Compile Include="FSAssert.cs" />
     <Compile Include="FileSystemTest.cs" />
-    
     <!-- Ported -->
-
     <Compile Include="PortedCommon\CommonUtilities.cs" />
     <Compile Include="PortedCommon\DllImports.cs" />
     <Compile Include="PortedCommon\EnumerableUtils.cs" />
@@ -207,7 +203,8 @@
     <Compile Include="FileInfo\AppendText.cs" />
     <Compile Include="FileInfo\CopyTo_str.cs" />
     <Compile Include="FileInfo\CopyTo_str_b.cs" />
-    
+    <!-- Helpers -->
+    <Compile Include="$(CommonPath)\Interop\Interop.PlatformDetection.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Directory\" />
@@ -216,4 +213,3 @@
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>
-

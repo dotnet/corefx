@@ -9,6 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>System.Numerics</RootNamespace>
     <AssemblyName>System.Numerics.Vectors</AssemblyName>
+    <AssemblyVersion>4.1.0.0</AssemblyVersion>
     <FileAlignment>512</FileAlignment>
     <DocumentationFile>$(OutputPath)System.Numerics.Vectors.xml</DocumentationFile>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -18,7 +19,6 @@
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
   </PropertyGroup>
-  <!-- References are resolved from packages.config -->
   <ItemGroup>
     <Compile Include="System\Numerics\ConstantHelper.cs">
       <AutoGen>True</AutoGen>
@@ -50,6 +50,7 @@
     <Compile Include="System\Numerics\Vector_Operations.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="project.json" />
     <None Include="System\Numerics\ConstantHelper.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>ConstantHelper.cs</LastGenOutput>
@@ -66,9 +67,6 @@
   </ItemGroup>
   <ItemGroup>
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

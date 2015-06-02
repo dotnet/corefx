@@ -18,7 +18,6 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'OSX_Release|AnyCPU' " />
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Windows_Debug|AnyCPU' " />
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Windows_Release|AnyCPU' " />
-  <!-- References are resolved from packages.config -->
   <ItemGroup>
     <Compile Include="System\Diagnostics\BooleanSwitch.cs" />
     <Compile Include="System\Diagnostics\DefaultTraceListener.cs" />
@@ -59,7 +58,7 @@
     <Compile Include="System\Diagnostics\TraceEventCache.Unix.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
+    <None Include="project.json" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

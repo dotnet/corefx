@@ -143,7 +143,7 @@ namespace System.Xml.Serialization
 
         internal static void CheckValidIdentifier(string ident)
         {
-            if (!CodeGenerator.IsValidLanguageIndependentIdentifier(ident))
+            if (!Globals.IsValidLanguageIndependentIdentifier(ident))
                 throw new ArgumentException(SR.Format(SR.XmlInvalidIdentifier, ident), "ident");
         }
 
@@ -208,7 +208,7 @@ namespace System.Xml.Serialization
                 }
             }
 
-            Type[] arguments = t.GetTypeInfo().IsGenericType || t.GetTypeInfo().ContainsGenericParameters ? t.GetGenericArguments() : new Type[0];
+            Type[] arguments = t.GetTypeInfo().IsGenericType || t.GetTypeInfo().ContainsGenericParameters ? t.GetGenericArguments() : Array.Empty<Type>();
             GetCSharpName(t, arguments, 0, sb);
             for (int i = 0; i < rank; i++)
             {

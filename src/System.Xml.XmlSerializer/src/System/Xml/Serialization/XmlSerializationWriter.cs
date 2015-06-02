@@ -38,10 +38,16 @@ namespace System.Xml.Serialization
         private bool _escapeName = true;
 
         // this method must be called before any generated serialization methods are called
-        internal void Init(XmlWriter w, XmlSerializerNamespaces namespaces, string encodingStyle, string idBase, TempAssembly tempAssembly)
+        internal void Init(XmlWriter w, XmlSerializerNamespaces namespaces, string encodingStyle, string idBase)
         {
             _w = w;
             _namespaces = namespaces;
+        }
+
+        // this method must be called before any generated serialization methods are called
+        internal void Init(XmlWriter w, XmlSerializerNamespaces namespaces, string encodingStyle, string idBase, TempAssembly tempAssembly)
+        {
+            Init(w, namespaces, encodingStyle, idBase);
             Init(tempAssembly);
         }
 
@@ -224,6 +230,10 @@ namespace System.Xml.Serialization
                         typeName = "guid";
                         typeNs = UrtTypes.Namespace;
                     }
+                    else if (type == typeof(XmlNode[]))
+                    {
+                        typeName = Soap.UrType;
+                    }
                     else
                         return null;
                     break;
@@ -331,6 +341,23 @@ namespace System.Xml.Serialization
                         value = XmlConvert.ToString((Guid)o);
                         type = "guid";
                         typeNs = UrtTypes.Namespace;
+                    }
+                    else if (typeof(XmlNode[]).IsAssignableFrom(t))
+                    {
+                        if (name == null)
+                            _w.WriteStartElement(Soap.UrType, XmlSchema.Namespace);
+                        else
+                            _w.WriteStartElement(name, ns);
+
+                        XmlNode[] xmlNodes = (XmlNode[])o;
+                        for (int i = 0; i < xmlNodes.Length; i++)
+                        {
+                            if (xmlNodes[i] == null)
+                                continue;
+                            xmlNodes[i].WriteTo(_w);
+                        }
+                        _w.WriteEndElement();
+                        return;
                     }
                     else
                         throw CreateUnknownTypeException(t);
@@ -720,7 +747,47 @@ namespace System.Xml.Serialization
                 WriteElementQualifiedName(name, ns, value, null);
         }
 
+        /// <include file='doc\XmlSerializationWriter.uex' path='docs/doc[@for="XmlSerializationWriter.WriteElementLiteral"]/*' />
+        protected void WriteElementLiteral(XmlNode node, string name, string ns, bool isNullable, bool any)
+        {
+            if (node == null)
+            {
+                if (isNullable) WriteNullTagLiteral(name, ns);
+                return;
+            }
+            WriteElement(node, name, ns, isNullable, any);
+        }
 
+        private void WriteElement(XmlNode node, string name, string ns, bool isNullable, bool any)
+        {
+            if (typeof(XmlAttribute).IsAssignableFrom(node.GetType()))
+                throw new InvalidOperationException(SR.XmlNoAttributeHere);
+            if (node is XmlDocument)
+            {
+                node = ((XmlDocument)node).DocumentElement;
+                if (node == null)
+                {
+                    if (isNullable) WriteNullTagEncoded(name, ns);
+                    return;
+                }
+            }
+            if (any)
+            {
+                if (node is XmlElement && name != null && name.Length > 0)
+                {
+                    // need to check against schema
+                    if (node.LocalName != name || node.NamespaceURI != ns)
+                        throw new InvalidOperationException(SR.Format(SR.XmlElementNameMismatch, node.LocalName, node.NamespaceURI, name, ns));
+                }
+            }
+            else
+                _w.WriteStartElement(name, ns);
+
+            node.WriteTo(_w);
+
+            if (!any)
+                _w.WriteEndElement();
+        }
 
         /// <include file='doc\XmlSerializationWriter.uex' path='docs/doc[@for="XmlSerializationWriter.CreateUnknownTypeException"]/*' />
         protected Exception CreateUnknownTypeException(object o)
@@ -781,12 +848,35 @@ namespace System.Xml.Serialization
             return new InvalidOperationException(SR.Format(SR.XmlIllegalAnyElement, type.FullName));
         }
 
+        /// <include file='doc\XmlSerializationWriter.uex' path='docs/doc[@for="XmlSerializationWriter.WriteXmlAttribute1"]/*' />
+        protected void WriteXmlAttribute(XmlNode node)
+        {
+            WriteXmlAttribute(node, null);
+        }
 
+        /// <include file='doc\XmlSerializationWriter.uex' path='docs/doc[@for="XmlSerializationWriter.WriteXmlAttribute2"]/*' />
+        protected void WriteXmlAttribute(XmlNode node, object container)
+        {
+            XmlAttribute attr = node as XmlAttribute;
+            if (attr == null) throw new InvalidOperationException(SR.XmlNeedAttributeHere);
+            if (attr.Value != null)
+            {
+                if (attr.NamespaceURI == Wsdl.Namespace && attr.LocalName == Wsdl.ArrayType)
+                {
+                    string dims;
+                    XmlQualifiedName qname = TypeScope.ParseWsdlArrayType(attr.Value, out dims, (container is XmlSchemaObject) ? (XmlSchemaObject)container : null);
 
+                    string value = FromXmlQualifiedName(qname, true) + dims;
 
-
-
-
+                    //<xsd:attribute xmlns:q3="s0" wsdl:arrayType="q3:FoosBase[]" xmlns:q4="http://schemas.xmlsoap.org/soap/encoding/" ref="q4:arrayType" />
+                    WriteAttribute(Wsdl.ArrayType, Wsdl.Namespace, value);
+                }
+                else
+                {
+                    WriteAttribute(attr.Name, attr.NamespaceURI, attr.Value);
+                }
+            }
+        }
 
         /// <include file='doc\XmlSerializationWriter.uex' path='docs/doc[@for="XmlSerializationWriter.WriteAttribute"]/*' />
         protected void WriteAttribute(string localName, string ns, string value)

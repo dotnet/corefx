@@ -100,10 +100,10 @@ namespace System.IO
             FileSystem.Current.SetCreationTime(fullPath, creationTime, asDirectory: true);
         }
 
-        public static void SetCreationTimeUtc(String path, DateTime creationTime)
+        public static void SetCreationTimeUtc(String path, DateTime creationTimeUtc)
         {
             String fullPath = PathHelpers.GetFullPathInternal(path);
-            FileSystem.Current.SetCreationTime(fullPath, File.GetUtcDateTimeOffset(creationTime), asDirectory: true);
+            FileSystem.Current.SetCreationTime(fullPath, File.GetUtcDateTimeOffset(creationTimeUtc), asDirectory: true);
         }
 
         public static DateTime GetCreationTime(String path)
@@ -122,10 +122,10 @@ namespace System.IO
             FileSystem.Current.SetLastWriteTime(fullPath, lastWriteTime, asDirectory: true);
         }
 
-        public static void SetLastWriteTimeUtc(String path, DateTime lastWriteTime)
+        public static void SetLastWriteTimeUtc(String path, DateTime lastWriteTimeUtc)
         {
             String fullPath = PathHelpers.GetFullPathInternal(path);
-            FileSystem.Current.SetLastWriteTime(fullPath, File.GetUtcDateTimeOffset(lastWriteTime), asDirectory: true);
+            FileSystem.Current.SetLastWriteTime(fullPath, File.GetUtcDateTimeOffset(lastWriteTimeUtc), asDirectory: true);
         }
 
         public static DateTime GetLastWriteTime(String path)
@@ -144,10 +144,10 @@ namespace System.IO
             FileSystem.Current.SetLastAccessTime(fullPath, lastAccessTime, asDirectory: true);
         }
 
-        public static void SetLastAccessTimeUtc(String path, DateTime lastAccessTime)
+        public static void SetLastAccessTimeUtc(String path, DateTime lastAccessTimeUtc)
         {
             String fullPath = PathHelpers.GetFullPathInternal(path);
-            FileSystem.Current.SetLastAccessTime(fullPath, File.GetUtcDateTimeOffset(lastAccessTime), asDirectory: true);
+            FileSystem.Current.SetLastAccessTime(fullPath, File.GetUtcDateTimeOffset(lastAccessTimeUtc), asDirectory: true);
         }
 
         public static DateTime GetLastAccessTime(String path)
@@ -576,12 +576,14 @@ namespace System.IO
             if (destPath.Length >= maxDirectoryPath)
                 throw new PathTooLongException(SR.IO_PathTooLong);
 
-            if (String.Compare(sourcePath, destPath, StringComparison.OrdinalIgnoreCase) == 0)
+            StringComparison pathComparison = PathInternal.GetComparison();
+
+            if (String.Compare(sourcePath, destPath, pathComparison) == 0)
                 throw new IOException(SR.IO_SourceDestMustBeDifferent);
 
             String sourceRoot = Path.GetPathRoot(sourcePath);
             String destinationRoot = Path.GetPathRoot(destPath);
-            if (String.Compare(sourceRoot, destinationRoot, StringComparison.OrdinalIgnoreCase) != 0)
+            if (String.Compare(sourceRoot, destinationRoot, pathComparison) != 0)
                 throw new IOException(SR.IO_SourceDestMustHaveSameRoot);
 
             FileSystem.Current.MoveDirectory(fullsourceDirName, fulldestDirName);

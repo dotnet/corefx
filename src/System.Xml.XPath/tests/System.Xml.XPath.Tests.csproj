@@ -8,8 +8,8 @@
     <ProjectGuid>{D0DF902A-2486-4A38-B7A7-232B9B6590E1}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AssemblyName>System.Xml.XPath.Tests</AssemblyName>
+    <DefineConstants>$(DefineConstants);FEATURE_XML_XPATH_ID</DefineConstants>
     <RootNamespace>System.Xml.XPath.Tests</RootNamespace>
-    <TestCategories>InnerLoop;OuterLoop</TestCategories>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
   </PropertyGroup>
@@ -18,7 +18,6 @@
   <PropertyGroup>
     <CommonPathXPath>$(CommonPath)\System.Xml.XPath</CommonPathXPath>
   </PropertyGroup>
-  <!-- References are resolved from packages.config -->
   <ItemGroup>
     <!-- XPath.XPathDocument navigator -->
     <Compile Include="XPathDocument\CreateNavigatorFromXmlReader.cs" />
@@ -206,10 +205,6 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="$(CommonTestPath)\XunitTraitsDiscoverers\XunitTraitsDiscoverers.csproj">
-      <Project>{be8ed8c1-c314-4c4e-a929-64c9c8b3552a}</Project>
-      <Name>XunitTraitsDiscoverers</Name>
-    </ProjectReference>
     <ProjectReference Include="..\src\System.Xml.XPath.csproj">
       <Project>{be28323e-327a-4e0f-b7f9-16ab7eab59dd}</Project>
       <Name>System.Xml.XPath</Name>
@@ -219,7 +214,7 @@
     <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
+    <None Include="project.json" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

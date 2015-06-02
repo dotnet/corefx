@@ -197,33 +197,36 @@ public class Directory_Move_str_str
             Directory.Delete(tempDirName);
 
 #if !TEST_WINRT
-            // [] Move to different drive will throw AccessException
-            //-----------------------------------------------------------------
-            strLoc = "Loc_00025";
-            string fullDirName = Path.GetFullPath(dirName);
-            Directory.CreateDirectory(dirName);
-            iCountTestcases++;
-            try
+            if (Interop.IsWindows) // moving between drive labels
             {
-                if (fullDirName.Substring(0, 3) == @"d:\" || fullDirName.Substring(0, 3) == @"D:\")
-                    Directory.Move(fullDirName, "C:\\TempDirectory");
-                else
-                    Directory.Move(fullDirName, "D:\\TempDirectory");
-                Console.WriteLine("Root directory..." + fullDirName.Substring(0, 3));
-                iCountErrors++;
-                printerr("Error_00026! Expected exception not thrown");
+                // [] Move to different drive will throw AccessException
+                //-----------------------------------------------------------------
+                strLoc = "Loc_00025";
+                string fullDirName = Path.GetFullPath(dirName);
+                Directory.CreateDirectory(dirName);
+                iCountTestcases++;
+                try
+                {
+                    if (fullDirName.Substring(0, 3) == @"d:\" || fullDirName.Substring(0, 3) == @"D:\")
+                        Directory.Move(fullDirName, "C:\\TempDirectory");
+                    else
+                        Directory.Move(fullDirName, "D:\\TempDirectory");
+                    Console.WriteLine("Root directory..." + fullDirName.Substring(0, 3));
+                    iCountErrors++;
+                    printerr("Error_00026! Expected exception not thrown");
+                }
+                catch (IOException)
+                {
+                }
+                catch (Exception exc)
+                {
+                    iCountErrors++;
+                    printerr("Error_00000! Incorrect exception thrown, exc==" + exc.ToString());
+                }
+                if (Directory.Exists(fullDirName))
+                    Directory.Delete(fullDirName, true);
+                //-----------------------------------------------------------------
             }
-            catch (IOException)
-            {
-            }
-            catch (Exception exc)
-            {
-                iCountErrors++;
-                printerr("Error_00000! Incorrect exception thrown, exc==" + exc.ToString());
-            }
-            if (Directory.Exists(fullDirName))
-                Directory.Delete(fullDirName, true);
-            //-----------------------------------------------------------------
 #endif
 
             // [] Moving Directory with subdirectories
@@ -257,45 +260,51 @@ public class Directory_Move_str_str
 
             //-----------------------------------------------------------------
 
-            // [] wildchars in src directory
-            //-----------------------------------------------------------------
-            strLoc = "Loc_00032";
+            if (Interop.IsWindows)
+            {
+                // [] wildchars in src directory
+                //-----------------------------------------------------------------
+                strLoc = "Loc_00032";
 
-            iCountTestcases++;
-            try
-            {
-                Directory.Move("*", tempDirName);
-                iCountErrors++;
-                printerr("Error_00033! Expected exception not thrown");
-            }
-            catch (ArgumentException)
-            {
-            }
-            catch (Exception exc)
-            {
-                iCountErrors++;
-                printerr("Error_00035! Incorrect exception thrown, exc==" + exc.ToString());
+                iCountTestcases++;
+                try
+                {
+                    Directory.Move("*", tempDirName);
+                    iCountErrors++;
+                    printerr("Error_00033! Expected exception not thrown");
+                }
+                catch (ArgumentException)
+                {
+                }
+                catch (Exception exc)
+                {
+                    iCountErrors++;
+                    printerr("Error_00035! Incorrect exception thrown, exc==" + exc.ToString());
+                }
             }
             //-----------------------------------------------------------------
 
-            // [] wildchars in dest directory
-            //-----------------------------------------------------------------
-            strLoc = "Loc_00036";
+            if (Interop.IsWindows)
+            {
+                // [] wildchars in dest directory
+                //-----------------------------------------------------------------
+                strLoc = "Loc_00036";
 
-            iCountTestcases++;
-            try
-            {
-                Directory.Move(TestInfo.CurrentDirectory, "Temp*");
-                iCountErrors++;
-                printerr("Error_00037! Expected exception not thrown");
-            }
-            catch (ArgumentException)
-            {
-            }
-            catch (Exception exc)
-            {
-                iCountErrors++;
-                printerr("Error_00039! Incorrect exception thrown, exc==" + exc.ToString());
+                iCountTestcases++;
+                try
+                {
+                    Directory.Move(TestInfo.CurrentDirectory, "Temp*");
+                    iCountErrors++;
+                    printerr("Error_00037! Expected exception not thrown");
+                }
+                catch (ArgumentException)
+                {
+                }
+                catch (Exception exc)
+                {
+                    iCountErrors++;
+                    printerr("Error_00039! Incorrect exception thrown, exc==" + exc.ToString());
+                }
             }
             //-----------------------------------------------------------------
 
@@ -306,7 +315,7 @@ public class Directory_Move_str_str
             iCountTestcases++;
             try
             {
-                Directory.Move(TestInfo.CurrentDirectory, "<MyDirectory>");
+                Directory.Move(TestInfo.CurrentDirectory, "<MyDirectory\0");
                 iCountErrors++;
                 printerr("Error_00041! Expected exception not thrown");
             }
@@ -324,9 +333,7 @@ public class Directory_Move_str_str
             //-----------------------------------------------------------------
             strLoc = "Loc_00044";
 
-            String str = "";
-            for (int i = 0; i < 250; i++)
-                str += "a";
+            String str = new string('a', IOInputs.MaxPath);
             iCountTestcases++;
             try
             {
@@ -349,23 +356,26 @@ public class Directory_Move_str_str
             //-----------------------------------------------------------------
             strLoc = "Loc_00048";
 
-            iCountTestcases++;
-            Directory.CreateDirectory(dirName);
-            try
+            if (Interop.IsWindows) // drive labels
             {
-                Directory.Move(dirName, "X:\\Temp");
-                iCountErrors++;
-                printerr("Error_00049! Expected exception not thrown");
+                iCountTestcases++;
+                Directory.CreateDirectory(dirName);
+                try
+                {
+                    Directory.Move(dirName, "X:\\Temp");
+                    iCountErrors++;
+                    printerr("Error_00049! Expected exception not thrown");
+                }
+                catch (IOException)
+                {
+                }
+                catch (Exception exc)
+                {
+                    iCountErrors++;
+                    printerr("Error_00051! Incorrect exception thrown, exc==" + exc.ToString());
+                }
+                Directory.Delete(dirName);
             }
-            catch (IOException)
-            {
-            }
-            catch (Exception exc)
-            {
-                iCountErrors++;
-                printerr("Error_00051! Incorrect exception thrown, exc==" + exc.ToString());
-            }
-            Directory.Delete(dirName);
             //-----------------------------------------------------------------
 
             // [] Use directory names with spaces
