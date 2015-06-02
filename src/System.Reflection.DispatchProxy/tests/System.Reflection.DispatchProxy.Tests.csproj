@@ -18,9 +18,8 @@
     <Compile Include="DispatchProxyTests.cs" />
     <Compile Include="TestTypes.cs" />
   </ItemGroup>
-  <!-- References are resolved from packages.config -->
   <ItemGroup>
-    <None Include="packages.config" />
+    <None Include="project.json" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\src\System.Reflection.DispatchProxy.csproj">

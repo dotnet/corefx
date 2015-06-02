@@ -12,7 +12,7 @@ using Microsoft.Win32.SafeHandles;
 namespace System.IO
 {
     /// <summary>Provides an implementation of a file stream for Unix files.</summary>
-    internal sealed class UnixFileStream : FileStreamBase
+    internal sealed partial class UnixFileStream : FileStreamBase
     {
         /// <summary>The file descriptor wrapped in a file handle.</summary>
         private readonly SafeFileHandle _fileHandle;
@@ -105,16 +105,8 @@ namespace System.IO
                 throw;
             }
 
-            // Support additional options after the file has been opened.
-            // These provide hints around how the file will be accessed.
-            Interop.libc.Advice fadv =
-                _options == FileOptions.RandomAccess ? Interop.libc.Advice.POSIX_FADV_RANDOM :
-                _options == FileOptions.SequentialScan ? Interop.libc.Advice.POSIX_FADV_SEQUENTIAL :
-                0;
-            if (fadv != 0)
-            {
-                SysCall<Interop.libc.Advice, int>((fd, advice, _) => Interop.libc.posix_fadvise(fd, 0, 0, advice), fadv);
-            }
+            // Perform additional configurations on the stream based on the provided FileOptions
+            PostOpenConfigureStreamFromOptions();
 
             // Jump to the end of the file if opened as Append.
             if (_mode == FileMode.Append)
@@ -122,6 +114,9 @@ namespace System.IO
                 _appendStart = SeekCore(0, SeekOrigin.End);
             }
         }
+
+        /// <summary>Performs additional configuration of the opened stream based on provided options.</summary>
+        partial void PostOpenConfigureStreamFromOptions();
 
         /// <summary>Initializes a stream from an already open file handle (file descriptor).</summary>
         /// <param name="handle">The handle to the file.</param>
@@ -134,6 +129,8 @@ namespace System.IO
             // Make sure the handle is open
             if (handle.IsInvalid)
                 throw new ArgumentException(SR.Arg_InvalidHandle, "handle");
+            if (handle.IsClosed)
+                throw new ObjectDisposedException(SR.ObjectDisposed_FileClosed);
             if (access < FileAccess.Read || access > FileAccess.ReadWrite)
                 throw new ArgumentOutOfRangeException("access", SR.ArgumentOutOfRange_Enum);
             if (bufferSize <= 0)
@@ -169,7 +166,7 @@ namespace System.IO
         private static Interop.libc.OpenFlags PreOpenConfigurationFromOptions(FileMode mode, FileAccess access, FileOptions options)
         {
             // Translate FileMode.  Most of the values map cleanly to one or more options for open.
-            Interop.libc.OpenFlags flags = Interop.libc.OpenFlags.O_LARGEFILE;
+            Interop.libc.OpenFlags flags = default(Interop.libc.OpenFlags);
             switch (mode)
             {
                 default:
@@ -216,8 +213,8 @@ namespace System.IO
                 case FileOptions.Asynchronous:    // Handled in ctor, setting _useAsync and SafeFileHandle.IsAsync to true
                 case FileOptions.DeleteOnClose:   // DeleteOnClose doesn't have a Unix equivalent, but we approximate it in Dispose
                 case FileOptions.Encrypted:       // Encrypted does not have an equivalent on Unix and is ignored.
-                case FileOptions.RandomAccess:    // Implemented after open via posix_fadvise
-                case FileOptions.SequentialScan:  // Implemented after open via posix_fadvise
+                case FileOptions.RandomAccess:    // Implemented after open if posix_fadvise is available
+                case FileOptions.SequentialScan:  // Implemented after open if posix_fadvise is available
                     break;
 
                 case FileOptions.WriteThrough:
@@ -581,7 +578,7 @@ namespace System.IO
                 SeekCore(value, SeekOrigin.Begin);
             }
 
-            SysCall<long, int>((fd, length, _) => Interop.libc.ftruncate64(fd, length), value);
+            SysCall<long, int>((fd, length, _) => Interop.libc.ftruncate(fd, length), value);
 
             // Return file pointer to where it was before setting length
             if (origPos != value)
@@ -948,11 +945,15 @@ namespace System.IO
             VerifyOSHandlePosition();
 
             // Flush our write/read buffer.  FlushWrite will output any write buffer we have and reset _bufferWritePos.
-            // We don't call FlushRead or FlushInternalBuffer, as that will do an unnecessary seek to rewind the read
-            // buffer, and since we're about to seek and update our position, we can simply dump the buffer and reset
-            // our read position. In the future, for some simple cases we could potentially add an optimization here to just 
-            // move data around in the buffer for short jumps, to avoid re-reading the data from disk.
+            // We don't call FlushRead, as that will do an unnecessary seek to rewind the read buffer, and since we're 
+            // about to seek and update our position, we can simply update the offset as necessary and reset our read 
+            // position and length to 0. (In the future, for some simple cases we could potentially add an optimization 
+            // here to just move data around in the buffer for short jumps, to avoid re-reading the data from disk.)
             FlushWriteBuffer();
+            if (origin == SeekOrigin.Current)
+            {
+                offset -= (_readLength - _readPos);
+            }
             _readPos = _readLength = 0;
 
             // Keep track of where we were, in case we're in append mode and need to verify
@@ -1015,14 +1016,19 @@ namespace System.IO
             TArg1 arg1 = default(TArg1), TArg2 arg2 = default(TArg2),
             bool throwOnError = true)
         {
+            SafeFileHandle handle = _fileHandle;
+
+            Debug.Assert(sysCall != null);
+            Debug.Assert(handle != null);
+
             bool gotRefOnHandle = false;
             try
             {
                 // Get the file descriptor from the handle.  We increment the ref count to help
                 // ensure it's not closed out from under us.
-                _fileHandle.DangerousAddRef(ref gotRefOnHandle);
+                handle.DangerousAddRef(ref gotRefOnHandle);
                 Debug.Assert(gotRefOnHandle);
-                int fd = (int)_fileHandle.DangerousGetHandle();
+                int fd = (int)handle.DangerousGetHandle();
                 Debug.Assert(fd >= 0);
 
                 // System calls may fail due to EINTR (signal interruption).  We need to retry in those cases.
@@ -1048,7 +1054,7 @@ namespace System.IO
             {
                 if (gotRefOnHandle)
                 {
-                    _fileHandle.DangerousRelease();
+                    handle.DangerousRelease();
                 }
                 else
                 {

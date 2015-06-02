@@ -7,12 +7,11 @@ using System.Runtime.InteropServices;
 using System.Threading;
 
 using CFStringRef = System.IntPtr;
-using CFArrayRef = System.IntPtr;
 using FSEventStreamRef = System.IntPtr;
 using size_t = System.IntPtr;
 using FSEventStreamEventId = System.UInt64;
-using CFTimeInterval = System.Double;
 using CFRunLoopRef = System.IntPtr;
+using Microsoft.Win32.SafeHandles;
 
 namespace System.IO
 {
@@ -100,11 +99,15 @@ namespace System.IO
         // and to only teardown and recreate streams when we need to.
         private string _lastWatchedDirectory = String.Empty;
 
+        // The user can input relative paths, which can muck with our path comparisons. Save off the 
+        // actual full path so we can use it for comparing
+        private string _fullDirectory = String.Empty;
+
         // The bitmask of events that we want to send to the user
         private Interop.EventStream.FSEventStreamEventFlags _filterFlags = 0;
 
         // The EventStream to listen for events on
-        private FSEventStreamRef _eventStream = IntPtr.Zero;
+        private SafeEventStreamHandle _eventStream = new SafeEventStreamHandle(IntPtr.Zero);
 
         // The background thread to use to monitor events
         private Thread _watcherThread = null;
@@ -125,25 +128,28 @@ namespace System.IO
 
         private void CreateStreamAndStartWatcher()
         {
-            Debug.Assert(_eventStream == IntPtr.Zero);
+            Debug.Assert(_eventStream.IsInvalid);
             Debug.Assert(_watcherRunLoop == IntPtr.Zero);
             Debug.Assert(_callback == null);
 
             // Make sure we only do this if there is a valid directory
             if (String.IsNullOrEmpty(_directory) == false)
             {
+                _fullDirectory = System.IO.Path.GetFullPath(_directory);
+
                 // Get the path to watch and verify we created the CFStringRef
-                CFStringRef path = Interop.CoreFoundation.CFStringCreateWithCString(_directory);
-                if (path == IntPtr.Zero)
+                SafeCreateHandle path = Interop.CoreFoundation.CFStringCreateWithCString(_fullDirectory);
+                if (path.IsInvalid)
                 {
-                    throw Interop.GetExceptionForIoErrno(Marshal.GetLastWin32Error(), _directory, true);
+                    throw Interop.GetExceptionForIoErrno(Marshal.GetLastWin32Error(), _fullDirectory, true);
                 }
 
                 // Take the CFStringRef and put it into an array to pass to the EventStream
-                CFArrayRef arrPaths = Interop.CoreFoundation.CFArrayCreate(new CFStringRef[1] { path }, 1);
-                if (arrPaths == IntPtr.Zero)
+                SafeCreateHandle arrPaths = Interop.CoreFoundation.CFArrayCreate(new CFStringRef[1] { path.DangerousGetHandle() }, 1);
+                if (arrPaths.IsInvalid)
                 {
-                    throw Interop.GetExceptionForIoErrno(Marshal.GetLastWin32Error(), _directory, true);
+                    path.Dispose();
+                    throw Interop.GetExceptionForIoErrno(Marshal.GetLastWin32Error(), _fullDirectory, true);
                 }
 
                 // Create the callback for the EventStream
@@ -156,14 +162,12 @@ namespace System.IO
                     Interop.EventStream.kFSEventStreamEventIdSinceNow,
                     0.2f,
                     EventStreamFlags);
-                if (_eventStream == IntPtr.Zero)
+                if (_eventStream.IsInvalid)
                 {
-                    throw Interop.GetExceptionForIoErrno(Marshal.GetLastWin32Error(), _directory, true);
+                    arrPaths.Dispose();
+                    path.Dispose();
+                    throw Interop.GetExceptionForIoErrno(Marshal.GetLastWin32Error(), _fullDirectory, true);
                 }
-
-                // The paths are copied inside FSEventStreamCreate so delete our references
-                Interop.CoreFoundation.CFRelease(path);
-                Interop.CoreFoundation.CFRelease(arrPaths);
 
                 // Create and start our watcher thread then wait for the thread to initialize and start 
                 // the RunLoop. We wait for that to prevent this function from returning before the RunLoop
@@ -177,6 +181,15 @@ namespace System.IO
 
         private void CleanupStreamAndWatcher()
         {
+            // If we're currently streaming, stop
+            StopStream();
+
+            // Clean up the EventStream, if it exists
+            if (!_eventStream.IsInvalid)
+            {
+                _eventStream = new SafeEventStreamHandle(IntPtr.Zero);
+            }
+
             // Make sure there's a loop to clear
             if (_watcherRunLoop != IntPtr.Zero)
             {
@@ -184,14 +197,7 @@ namespace System.IO
                 Interop.RunLoop.CFRunLoopStop(_watcherRunLoop);
                 _watcherThread.Join();
                 _watcherRunLoop = IntPtr.Zero;
-            }
-
-            // Clean up the EventStream, if it exists
-            if (_eventStream != IntPtr.Zero)
-            {
-                Interop.CoreFoundation.CFRelease(_eventStream);
-                _eventStream = IntPtr.Zero;
-            }
+            }          
 
             // Cleanup the callback
             if (_callback != null)
@@ -202,7 +208,7 @@ namespace System.IO
 
         private void RestartStream()
         {
-            Debug.Assert(_eventStream != IntPtr.Zero);
+            Debug.Assert(!_eventStream.IsInvalid);
 
             // We don't need to rebuild the stream since the path is the same so just restart the stream.
             if (Interop.EventStream.FSEventStreamStart(_eventStream) == false)
@@ -211,6 +217,7 @@ namespace System.IO
                 // cleanup and recreate our streams next time Start is called.
                 OnError(new ErrorEventArgs(new IOException("", Marshal.GetLastWin32Error())));
                 _lastWatchedDirectory = String.Empty;
+                _fullDirectory = String.Empty;
             }
         }
 
@@ -218,7 +225,7 @@ namespace System.IO
         {
             // Just stop the EventStream to be optimistic that we'll be restarted with the same path
             // and not have to teardown everything and rebuild.
-            if (_eventStream != IntPtr.Zero)
+            if (!_eventStream.IsInvalid)
             {
                 Interop.EventStream.FSEventStreamStop(_eventStream);
             }
@@ -288,7 +295,7 @@ namespace System.IO
                 else if ((DoesPathPassNameFilter(eventPaths[i])) && ((_filterFlags & eventFlags[i]) != 0))
                 {
                     // Remove the base directory prefix (including trailing / that OS X adds)
-                    string relativePath = eventPaths[i].Remove(0, _directory.Length + 1);
+                    string relativePath = eventPaths[i].Remove(0, _fullDirectory.Length + 1);
 
                     // Check if this is a rename
                     if ((eventFlags[i] & Interop.EventStream.FSEventStreamEventFlags.kFSEventStreamEventFlagItemRenamed) == Interop.EventStream.FSEventStreamEventFlags.kFSEventStreamEventFlagItemRenamed)
@@ -303,7 +310,7 @@ namespace System.IO
                         {
                             // Remove the base directory prefix (including trailing / that OS X adds) and 
                             // add the paired event to the list of events to skip and notify the user of the rename
-                            string newPathRelativeName = eventPaths[pairedId].Remove(0, _directory.Length + 1);
+                            string newPathRelativeName = eventPaths[pairedId].Remove(0, _fullDirectory.Length + 1);
                             NotifyRenameEventArgs(WatcherChangeTypes.Renamed, newPathRelativeName, relativePath);
 
                             // Create a new list, if necessary, and add the event
@@ -362,7 +369,7 @@ namespace System.IO
                 // Check if the parent is the root. If so, then we'll continue processing based on the name.
                 // If it isn't, then this will be set to false and we'll skip the name processing since it's irrelevant.
                 string parent = System.IO.Path.GetDirectoryName(eventPath);
-                doesPathPass = (parent.Equals(_directory, StringComparison.CurrentCultureIgnoreCase));
+                doesPathPass = (parent.Equals(_fullDirectory, StringComparison.CurrentCultureIgnoreCase));
             }
 
             if (doesPathPass)

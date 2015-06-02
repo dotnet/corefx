@@ -12,13 +12,15 @@
     <DefineConstants>$(DefineConstants);SILVERLIGHT</DefineConstants>
   </PropertyGroup>
   <!-- Default configurations to help VS understand the configurations -->
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' "></PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' "></PropertyGroup>
-  <!-- References are resolved from packages.config -->
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+  </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(CommonPath)\System\IO\StringBuilderCache.cs">
       <Link>System\StringBuilderCache.cs</Link>
     </Compile>
+    <Compile Include="Properties\InternalsVisibleTo.cs" />
     <Compile Include="System\Xml\Linq\BaseUriAnnotation.cs" />
     <Compile Include="System\Xml\Linq\Extensions.cs" />
     <Compile Include="System\Xml\Linq\LineInfoAnnotation.cs" />
@@ -50,7 +52,10 @@
     <Compile Include="System\Xml\Linq\XText.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
+    <EmbeddedResource Include="$(MsBuildThisFileDirectory)Resources\$(AssemblyName).rd.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="project.json" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

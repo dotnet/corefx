@@ -127,10 +127,11 @@ namespace System.Diagnostics
             {
                 EnsureState(State.HaveId);
 
-                int pri = Interop.libc.getpriority(Interop.libc.PriorityWhich.PRIO_PROCESS, _processId);
-                if (pri == -1 && Marshal.GetLastWin32Error() != 0)
+                int pri = 0;
+                int errno = Interop.libc.getpriority(Interop.libc.PriorityWhich.PRIO_PROCESS, _processId, out pri);
+                if (errno != 0)
                 {
-                    throw new Win32Exception(); // match Windows exception
+                    throw new Win32Exception(errno); // match Windows exception
                 }
 
                 Debug.Assert(pri >= -20 && pri <= 20);

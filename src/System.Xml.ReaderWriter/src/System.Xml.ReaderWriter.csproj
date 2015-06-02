@@ -16,10 +16,15 @@
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
   </PropertyGroup>
-  <!-- References are resolved from packages.config -->
   <ItemGroup>
     <Compile Include="$(CommonPath)\System\NotImplemented.cs">
       <Link>Common\System\NotImplemented.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\ValueTuple.cs">
+      <Link>Common\System\ValueTuple.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\Threading\Tasks\TaskValue.cs">
+      <Link>Common\System\Threading\Tasks\TaskValue.cs</Link>
     </Compile>
     <Compile Include="System\Xml\AsyncHelper.cs" />
     <Compile Include="System\Xml\Base64Decoder.cs" />
@@ -113,7 +118,10 @@
     <Compile Include="System\Xml\Serialization\XmlSchemaProviderAttribute.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
+    <EmbeddedResource Include="Resources\$(AssemblyName).rd.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="project.json" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

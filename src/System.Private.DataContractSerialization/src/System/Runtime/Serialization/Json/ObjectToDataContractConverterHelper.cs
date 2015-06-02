@@ -47,9 +47,10 @@ namespace System.Runtime.Serialization.Json
                 return dto.ToOffset(new TimeSpan(0, (int)deserialzedValue["OffsetMinutes"], 0));
             }
 
-            if (deserialzedValue.ContainsKey(JsonGlobals.ServerTypeString))
+            object serverTypeStringValue;
+            if (deserialzedValue.TryGetValue(JsonGlobals.ServerTypeString, out serverTypeStringValue))
             {
-                dataContract = ResolveDataContractFromTypeInformation(deserialzedValue[JsonGlobals.ServerTypeString].ToString(), dataContract, context);
+                dataContract = ResolveDataContractFromTypeInformation(serverTypeStringValue.ToString(), dataContract, context);
             }
 
             object o = CreateInstance(dataContract);
@@ -60,7 +61,7 @@ namespace System.Runtime.Serialization.Json
             DataContractJsonSerializer.InvokeOnDeserialized(o, dataContract, context);
             if (dataContract.IsKeyValuePairAdapter)
             {
-                return dataContract.GetKeyValuePairMethodInfo.Invoke(o, Globals.EmptyTypeArray);
+                return dataContract.GetKeyValuePairMethodInfo.Invoke(o, Array.Empty<Type>());
             }
             return o;
         }
@@ -75,7 +76,7 @@ namespace System.Runtime.Serialization.Json
             {
                 DataMember member = dataContract.Members[i];
                 object currentMemberValue;
-                if (deserialzedValue.TryGetValue(XmlConvert.DecodeName(dataContract.Members[i].Name), out currentMemberValue) || 
+                if (deserialzedValue.TryGetValue(XmlConvert.DecodeName(dataContract.Members[i].Name), out currentMemberValue) ||
                     dataContract.IsKeyValuePairAdapter && deserialzedValue.TryGetValue(XmlConvert.DecodeName(dataContract.Members[i].Name.ToLowerInvariant()), out currentMemberValue))
                 {
                     if (member.MemberType.GetTypeInfo().IsPrimitive || currentMemberValue == null)
@@ -176,7 +177,7 @@ namespace System.Runtime.Serialization.Json
                 return ConvertDictionary(serializer, contract, valueAsDictionary, context);
             }
 
-            object returnValue = (contract.Constructor != null) ? contract.Constructor.Invoke(Globals.EmptyTypeArray) : null;
+            object returnValue = (contract.Constructor != null) ? contract.Constructor.Invoke(Array.Empty<Type>()) : null;
 
             bool isCollectionDataContractDictionary = contract.IsDictionary;
             MethodInfo addMethod = contract.AddMethod;
@@ -270,10 +271,11 @@ namespace System.Runtime.Serialization.Json
         {
             System.Diagnostics.Debug.Assert(obj is IDictionary, "obj is IDictionary");
             Dictionary<string, object> dictOfStringObject = obj as Dictionary<string, object>;
-            if (dictOfStringObject.ContainsKey(JsonGlobals.ServerTypeString))
+            object serverTypeStringValue;
+            if (dictOfStringObject.TryGetValue(JsonGlobals.ServerTypeString, out serverTypeStringValue))
             {
                 return ConvertDictionaryToClassDataContract(serializer,
-                    ResolveDataContractFromTypeInformation(dictOfStringObject[JsonGlobals.ServerTypeString].ToString(), null, context),
+                    ResolveDataContractFromTypeInformation(serverTypeStringValue.ToString(), null, context),
                     dictOfStringObject, context);
             }
             else if (dictOfStringObject.ContainsKey("DateTime") && dictOfStringObject.ContainsKey("OffsetMinutes"))

@@ -14,8 +14,15 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="$(CommonTestPath)\Collections\IEnumerableTest.cs" />
+    <Compile Include="$(CommonTestPath)\Collections\ICollectionTest.cs" />
+    <Compile Include="$(CommonTestPath)\Collections\IListTest.cs" />
+    <Compile Include="$(CommonTestPath)\Collections\Utils.cs" />
     <Compile Include="ComponentModel\INotifyPropertyChangingTests.cs" />
     <Compile Include="ComponentModel\PropertyChangingEventArgsTests.cs" />
+    <Compile Include="KeyedCollection\TestMethods.cs" />
+    <Compile Include="KeyedCollection\ConcreteTestClasses.cs" />
+    <Compile Include="KeyedCollection\Utils.cs" />
     <Compile Include="ObservableCollection\ObservableCollection_ConstructorAndPropertyTests.cs" />
     <Compile Include="ObservableCollection\ObservableCollection_MethodsTest.cs" />
     <Compile Include="ReadOnlyDictionary\ReadOnlyDictionaryTests.cs" />
@@ -32,7 +39,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
+    <None Include="project.json" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

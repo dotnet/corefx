@@ -16,9 +16,6 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
   </PropertyGroup>
   <ItemGroup>
-    <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup>
     <Compile Include="$(CommonPath)\System\ArrayT.cs">
       <Link>Common\System\ArrayT.cs</Link>
     </Compile>
@@ -27,10 +24,12 @@
     </Compile>
     <Compile Include="System\Linq\Enumerable.cs" />
     <Compile Include="System\Linq\Errors.cs" />
-    <Compile Include="Var.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Resources\" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="project.json" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

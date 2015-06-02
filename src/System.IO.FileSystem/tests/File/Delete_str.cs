@@ -61,24 +61,27 @@ public class File_Delete_str
                 printerr("Error_19d4b! Incorrect exception thrown, exc==" + exc.ToString());
             }
 
-            // [] ArgumentException if argument is *.*
-            //-----------------------------------------------------------------
-            strLoc = "Loc_32453";
+            if (Interop.IsWindows)
+            {
+                // [] ArgumentException if argument is *.*
+                //-----------------------------------------------------------------
+                strLoc = "Loc_32453";
 
-            iCountTestcases++;
-            try
-            {
-                File.Delete("*.*");
-                iCountErrors++;
-                printerr("Error_4342! Expected exception not thrown");
-            }
-            catch (ArgumentException)
-            {
-            }
-            catch (Exception exc)
-            {
-                iCountErrors++;
-                printerr("Error_7777! Incorrect exception thrown, exc==" + exc.ToString());
+                iCountTestcases++;
+                try
+                {
+                    File.Delete("*.*");
+                    iCountErrors++;
+                    printerr("Error_4342! Expected exception not thrown");
+                }
+                catch (ArgumentException)
+                {
+                }
+                catch (Exception exc)
+                {
+                    iCountErrors++;
+                    printerr("Error_7777! Incorrect exception thrown, exc==" + exc.ToString());
+                }
             }
 
             // [] Exception for "."
@@ -179,34 +182,36 @@ public class File_Delete_str
 
             //-----------------------------------------------------------------
 
-
+            if (Interop.IsWindows) // readonly files can be deleted on Unix
+            {
 #if !TEST_WINRT  // TODO: Enable once we bring up file attributes
-            // [] Deleting a ReadOnly file should not work
-            //-----------------------------------------------------------------
-            strLoc = "Loc_298b7";
-            fil2 = new FileInfo(filName);
-            new FileStream(filName, FileMode.Create).Dispose();
-            fil2.Attributes = FileAttributes.ReadOnly;
-            iCountTestcases++;
-            try
-            {
-                File.Delete(filName);
-                iCountErrors++;
-                printerr("Error_487bg! Expected exception not thrown");
-            }
-            catch (UnauthorizedAccessException)
-            {
-            }
-            catch (Exception exc)
-            {
-                iCountErrors++;
-                printerr("Error_2467y! Incorrect exception thrown, exc==" + exc.ToString());
-            }
-            fil2.Attributes = new FileAttributes();
-            fil2.Delete();
+                // [] Deleting a ReadOnly file should not work
+                //-----------------------------------------------------------------
+                strLoc = "Loc_298b7";
+                fil2 = new FileInfo(filName);
+                new FileStream(filName, FileMode.Create).Dispose();
+                fil2.Attributes = FileAttributes.ReadOnly;
+                iCountTestcases++;
+                try
+                {
+                    File.Delete(filName);
+                    iCountErrors++;
+                    printerr("Error_487bg! Expected exception not thrown");
+                }
+                catch (UnauthorizedAccessException)
+                {
+                }
+                catch (Exception exc)
+                {
+                    iCountErrors++;
+                    printerr("Error_2467y! Incorrect exception thrown, exc==" + exc.ToString());
+                }
+                fil2.Attributes = new FileAttributes();
+                fil2.Delete();
 
-            //-----------------------------------------------------------------
+                //-----------------------------------------------------------------
 #endif
+            }
 
             // ][ Filename starting with wildcard
             // ][ Filename ending with wildcard

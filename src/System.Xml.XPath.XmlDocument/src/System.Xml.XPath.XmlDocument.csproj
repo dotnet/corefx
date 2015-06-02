@@ -11,9 +11,10 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <!-- Default configurations to help VS understand the configurations -->
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' "></PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' "></PropertyGroup>
-  <!-- References are resolved from packages.config -->
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+  </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(CommonPath)\System\Xml\Schema\XmlUntypedConverter.cs" />
     <Compile Include="$(CommonPath)\System\Xml\Schema\XsdDateTime.cs" />
@@ -49,7 +50,13 @@
     <Compile Include="$(CommonPath)\System\NotImplemented.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
+    <None Include="project.json" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\System.Xml.XPath\src\System.Xml.XPath.csproj">
+      <Project>{be28323e-327a-4e0f-b7f9-16ab7eab59dd}</Project>
+      <Name>System.Xml.XPath</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

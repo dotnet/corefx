@@ -77,13 +77,13 @@ namespace System.Diagnostics.ProcessTests
             Assert.Equal(priority, _process.BasePriority);
         }
 
-        [Fact]
+        [Fact, ActiveIssue(1538, PlatformID.OSX)]
         public void Process_BasePriority()
         {
             ProcessPriorityClass originalPriority = _process.PriorityClass;
             Assert.Equal(ProcessPriorityClass.Normal, originalPriority);
 
-            if (global::Interop.PlatformDetection.OperatingSystem == global::Interop.OperatingSystem.Windows)
+            if (global::Interop.IsWindows)
             {
                 try
                 {
@@ -117,7 +117,7 @@ namespace System.Diagnostics.ProcessTests
             Assert.True(p.WaitForExit(WaitInMS));
         }
 
-        [Fact]
+        [Fact, ActiveIssue(1538, PlatformID.OSX)]
         public void Process_EnableRaiseEvents()
         {
             {
@@ -154,7 +154,7 @@ namespace System.Diagnostics.ProcessTests
             }
         }
 
-        [Fact]
+        [Fact, ActiveIssue(1538, PlatformID.OSX)]
         public void Process_ExitCode()
         {
             {
@@ -227,7 +227,7 @@ namespace System.Diagnostics.ProcessTests
         {
             // Get MainModule property from a Process object
             ProcessModule mainModule = null;
-            if (global::Interop.PlatformDetection.OperatingSystem == global::Interop.OperatingSystem.Windows)
+            if (global::Interop.IsWindows)
             {
                 mainModule = _process.MainModule;
             }
@@ -258,7 +258,7 @@ namespace System.Diagnostics.ProcessTests
             }
         }
 
-        [Fact]
+        [Fact, ActiveIssue(1538, PlatformID.OSX)]
         public void Process_MaxWorkingSet()
         {
             IntPtr min, max;
@@ -267,7 +267,7 @@ namespace System.Diagnostics.ProcessTests
             long curValue = (long)_process.MaxWorkingSet;
             Assert.True(curValue >= 0);
 
-            if (global::Interop.PlatformDetection.OperatingSystem == global::Interop.OperatingSystem.Windows)
+            if (global::Interop.IsWindows)
             {
                 try
                 {
@@ -284,13 +284,13 @@ namespace System.Diagnostics.ProcessTests
             }
         }
 
-        [Fact]
+        [Fact, ActiveIssue(1538, PlatformID.OSX)]
         public void Process_MinWorkingSet()
         {
             long curValue = (long)_process.MinWorkingSet;
             Assert.True(curValue >= 0);
 
-            if (global::Interop.PlatformDetection.OperatingSystem == global::Interop.OperatingSystem.Windows)
+            if (global::Interop.IsWindows)
             {
                 try
                 {
@@ -338,49 +338,49 @@ namespace System.Diagnostics.ProcessTests
             }
         }
 
-        [Fact]
+        [Fact, ActiveIssue(1538, PlatformID.OSX)]
         public void Process_NonpagedSystemMemorySize64()
         {
             AssertNonZeroWindowsZeroUnix(_process.NonpagedSystemMemorySize64);
         }
 
-        [Fact]
+        [Fact, ActiveIssue(1538, PlatformID.OSX)]
         public void Process_PagedMemorySize64()
         {
             AssertNonZeroWindowsZeroUnix(_process.PagedMemorySize64);
         }
 
-        [Fact]
+        [Fact, ActiveIssue(1538, PlatformID.OSX)]
         public void Process_PagedSystemMemorySize64()
         {
             AssertNonZeroWindowsZeroUnix(_process.PagedSystemMemorySize64);
         }
 
-        [Fact]
+        [Fact, ActiveIssue(1538, PlatformID.OSX)]
         public void Process_PeakPagedMemorySize64()
         {
             AssertNonZeroWindowsZeroUnix(_process.PeakPagedMemorySize64);
         }
 
-        [Fact]
+        [Fact, ActiveIssue(1538, PlatformID.OSX)]
         public void Process_PeakVirtualMemorySize64()
         {
             AssertNonZeroWindowsZeroUnix(_process.PeakVirtualMemorySize64);
         }
 
-        [Fact]
+        [Fact, ActiveIssue(1538, PlatformID.OSX)]
         public void Process_PeakWorkingSet64()
         {
             AssertNonZeroWindowsZeroUnix(_process.PeakWorkingSet64);
         }
 
-        [Fact]
+        [Fact, ActiveIssue(1538, PlatformID.OSX)]
         public void Process_PrivateMemorySize64()
         {
             AssertNonZeroWindowsZeroUnix(_process.PrivateMemorySize64);
         }
 
-        [Fact]
+        [Fact, ActiveIssue(1538, PlatformID.OSX)]
         public void Process_PrivilegedProcessorTime()
         {
             Assert.True(_process.UserProcessorTime.TotalSeconds >= 0);
@@ -388,7 +388,7 @@ namespace System.Diagnostics.ProcessTests
             Assert.True(_process.TotalProcessorTime.TotalSeconds >= 0);
         }
 
-        [Fact]
+        [Fact, ActiveIssue(1538, PlatformID.OSX)]
         public void Process_ProcessorAffinity()
         {
             IntPtr curProcessorAffinity = _process.ProcessorAffinity;
@@ -446,7 +446,7 @@ namespace System.Diagnostics.ProcessTests
             Assert.Throws<ArgumentException>(() => { p.PriorityClass = ProcessPriorityClass.Normal | ProcessPriorityClass.Idle; });
         }
 
-        [Fact]
+        [Fact, ActiveIssue(1538, PlatformID.OSX)]
         public void ProcessProcessName()
         {
             Assert.Equal(_process.ProcessName, CoreRunName, StringComparer.OrdinalIgnoreCase);
@@ -459,13 +459,13 @@ namespace System.Diagnostics.ProcessTests
         [DllImport("libc")]
         internal static extern int getpid();
 
-        [Fact]
+        [Fact, ActiveIssue(1538, PlatformID.OSX)]
         public void Process_GetCurrentProcess()
         {
             Process current = Process.GetCurrentProcess();
             Assert.NotNull(current);
 
-            int currentProcessId = global::Interop.PlatformDetection.OperatingSystem == global::Interop.OperatingSystem.Windows ?
+            int currentProcessId = global::Interop.IsWindows ?
                 GetCurrentProcessId() :
                 getpid();
 
@@ -473,7 +473,7 @@ namespace System.Diagnostics.ProcessTests
             Assert.Equal(Process.GetProcessById(currentProcessId).ProcessName, Process.GetCurrentProcess().ProcessName);
         }
 
-        [Fact]
+        [Fact, ActiveIssue(1538, PlatformID.OSX)]
         public void Process_GetProcesses()
         {
             // Get all the processes running on the machine.
@@ -491,7 +491,7 @@ namespace System.Diagnostics.ProcessTests
             Assert.True(foundCurrentProcess, "Process_GetProcesses002 failed");
         }
 
-        [Fact]
+        [Fact, ActiveIssue(1538, PlatformID.OSX)]
         public void Process_GetProcessesByName()
         {
             // Get the current process using its name
@@ -535,7 +535,7 @@ namespace System.Diagnostics.ProcessTests
             Environment2.Add("NewKey", "NewValue");
             Environment2.Add("NewKey2", "NewValue2");
             Assert.True(Environment2.ContainsKey("NewKey"));
-            if (global::Interop.PlatformDetection.OperatingSystem == global::Interop.OperatingSystem.Windows)
+            if (global::Interop.IsWindows)
             {
                 Assert.True(Environment2.ContainsKey("newkey"));
             }
@@ -574,7 +574,7 @@ namespace System.Diagnostics.ProcessTests
 
             //Contains
             Assert.True(Environment2.Contains(new System.Collections.Generic.KeyValuePair<string, string>("NewKey", "NewValue")));
-            if (global::Interop.PlatformDetection.OperatingSystem == global::Interop.OperatingSystem.Windows)
+            if (global::Interop.IsWindows)
             {
                 Assert.True(Environment2.Contains(new System.Collections.Generic.KeyValuePair<string, string>("nEwKeY", "NewValue")));
             }
@@ -599,7 +599,7 @@ namespace System.Diagnostics.ProcessTests
             retval = Environment2.TryGetValue("NewKey", out stringout);
             Assert.True(retval);
             Assert.Equal("NewValue", stringout);
-            if (global::Interop.PlatformDetection.OperatingSystem == global::Interop.OperatingSystem.Windows)
+            if (global::Interop.IsWindows)
             {
                 retval = Environment2.TryGetValue("NeWkEy", out stringout);
                 Assert.True(retval);
@@ -645,7 +645,7 @@ namespace System.Diagnostics.ProcessTests
             Assert.Throws<System.Collections.Generic.KeyNotFoundException>(() => { string a1 = Environment2["1bB"]; });
 
             Assert.True(Environment2.Contains(new System.Collections.Generic.KeyValuePair<string, string>("NewKey2", "NewValue2")));
-            if (global::Interop.PlatformDetection.OperatingSystem == global::Interop.OperatingSystem.Windows)
+            if (global::Interop.IsWindows)
             {
                 Assert.True(Environment2.Contains(new System.Collections.Generic.KeyValuePair<string, string>("NEWKeY2", "NewValue2")));
             }
@@ -719,6 +719,11 @@ namespace System.Diagnostics.ProcessTests
                 Process process = new Process();
                 process.StartInfo = new ProcessStartInfo(TestExeName);
                 Assert.Equal(TestExeName, process.StartInfo.FileName);
+            }
+
+            {
+                Process process = new Process();
+                Assert.Throws<ArgumentNullException>(() => process.StartInfo = null);
             }
 
             {

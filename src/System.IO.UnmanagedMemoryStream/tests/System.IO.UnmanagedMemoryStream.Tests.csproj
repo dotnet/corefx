@@ -25,9 +25,11 @@
     <Compile Include="ArrayHelpers.cs" />
     <Compile Include="UmaTests.cs" />
     <Compile Include="UmsCtorTests.cs" />
+    <Compile Include="HGlobalSafeBuffer.cs" />
     <Compile Include="UmsRead.cs" />
     <Compile Include="UmsSafeBuffer.cs" />
     <Compile Include="UmaCtorTests.cs" />
+    <Compile Include="UmsFlush.cs" />
     <Compile Include="UmsWrite.cs" />
     <Compile Include="UmsReadWrite.cs" />
     <Compile Include="UmsTests.cs" />
@@ -35,7 +37,7 @@
     <Compile Include="UmsSecurityTest.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
+    <None Include="project.json" />
   </ItemGroup>
   <ItemGroup>
     <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />

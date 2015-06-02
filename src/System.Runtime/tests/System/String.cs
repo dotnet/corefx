@@ -266,7 +266,7 @@ public static unsafe class StringTests
     }
 
     [Fact]
-    [ActiveIssue(846, PlatformID.Linux | PlatformID.OSX)]
+    [ActiveIssue(846, PlatformID.AnyUnix)]
     public static void TestCompare()
     {
         String.Compare("A", "B");
@@ -1026,25 +1026,6 @@ public static unsafe class StringTests
         Assert.Equal(s1, "Heo");
 
         return;
-    }
-
-    [Fact]
-    public static void TestSplit()
-    {
-        String[] parts;
-
-        //@todo: Testing could be more thorough - this one's unchanged from desktop source, though.
-
-        parts = "Foo Bar Baz".Split(' ');
-        Assert.True(parts.Length == 3);
-        Assert.True(parts[0] == "Foo");
-        Assert.True(parts[1] == "Bar");
-        Assert.True(parts[2] == "Baz");
-
-        parts = "Foo Bar Baz".Split(new String[] { " " }, 2, StringSplitOptions.RemoveEmptyEntries);
-        Assert.True(parts.Length == 2);
-        Assert.True(parts[0] == "Foo");
-        Assert.True(parts[1] == "Bar Baz");
     }
 
     [Fact]

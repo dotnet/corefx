@@ -7,7 +7,6 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
-using System.Threading.Tasks;
 
 
 // Test types used to make proxies.
@@ -54,6 +53,18 @@ public interface TestType_IOneWay
 public interface TestType_IPropertyService
 {
     string ReadWrite { get; set; }
+}
+
+// Demonstrates proxies can be made for internal types
+internal interface TestType_InternalInterfaceService
+{
+    string Echo(string message);
+}
+
+// Demonstrates proxies can be made for public types implementing internal interfaces
+internal interface TestType_PublicInterfaceService_Implements_Internal : TestType_InternalInterfaceService
+{
+    string Echo2(string message);
 }
 
 // Negative -- demonstrates trying to use a class for the interface type for the proxy

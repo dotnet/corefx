@@ -486,7 +486,7 @@ namespace System.Xml.Serialization
             {
                 throw new ArgumentNullException("MethodName");
             }
-            if (!CodeGenerator.IsValidLanguageIndependentIdentifier(provider.MethodName))
+            if (!Globals.IsValidLanguageIndependentIdentifier(provider.MethodName))
                 throw new ArgumentException(SR.Format(SR.XmlGetSchemaMethodName, provider.MethodName), "MethodName");
 
             MethodInfo getMethod = getMethod = type.GetMethod(provider.MethodName, /* BindingFlags.DeclaredOnly | */ BindingFlags.Static | BindingFlags.Public, new Type[] { typeof(XmlSchemaSet) });
@@ -1601,7 +1601,7 @@ namespace System.Xml.Serialization
                     for (int i = 0; i < a.XmlAnyElements.Count; i++)
                     {
                         XmlAnyElementAttribute xmlAnyElement = a.XmlAnyElements[i];
-                        Type targetType = typeof(IXmlSerializable).IsAssignableFrom(arrayElementType) ? arrayElementType : typeof(object);
+                        Type targetType = typeof(IXmlSerializable).IsAssignableFrom(arrayElementType) ? arrayElementType : typeof(XmlNode).IsAssignableFrom(arrayElementType) ? arrayElementType : typeof(XmlElement);
                         if (!arrayElementType.IsAssignableFrom(targetType))
                             throw new InvalidOperationException(SR.Format(SR.XmlIllegalAnyElement, arrayElementType.FullName));
                         string anyName = xmlAnyElement.Name.Length == 0 ? xmlAnyElement.Name : XmlConvert.EncodeLocalName(xmlAnyElement.Name);
@@ -1842,7 +1842,7 @@ namespace System.Xml.Serialization
                     for (int i = 0; i < a.XmlAnyElements.Count; i++)
                     {
                         XmlAnyElementAttribute xmlAnyElement = a.XmlAnyElements[i];
-                        Type targetType = typeof(IXmlSerializable).IsAssignableFrom(accessorType) ? accessorType : typeof(object);
+                        Type targetType = typeof(IXmlSerializable).IsAssignableFrom(accessorType) ? accessorType : typeof(XmlNode).IsAssignableFrom(accessorType) ? accessorType : typeof(XmlElement);
                         if (!accessorType.IsAssignableFrom(targetType))
                             throw new InvalidOperationException(SR.Format(SR.XmlIllegalAnyElement, accessorType.FullName));
 
@@ -2011,6 +2011,11 @@ namespace System.Xml.Serialization
                         choiceTypes.Add(type, false);
                     }
                 }
+            }
+            if (choiceTypes.Contains(typeof(XmlElement)) && a.XmlAnyElements.Count > 0)
+            {
+                // You need to add {0} to the '{1}'.
+                throw new InvalidOperationException(SR.Format(SR.XmlChoiceIdentiferMissing, typeof(XmlChoiceIdentifierAttribute).Name, accessorName));
             }
 
             XmlArrayItemAttributes items = a.XmlArrayItems;

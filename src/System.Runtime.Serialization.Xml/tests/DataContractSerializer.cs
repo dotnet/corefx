@@ -941,7 +941,7 @@ public static class DataContractSerializerTests
     }
 
     [Fact]
-    [ActiveIssue(846, PlatformID.Linux | PlatformID.OSX)]
+    [ActiveIssue(846, PlatformID.AnyUnix)]
     public static void DCS_XElementAsRoot()
     {
         var original = new XElement("ElementName1");
@@ -953,7 +953,7 @@ public static class DataContractSerializerTests
     }
 
     [Fact]
-    [ActiveIssue(846, PlatformID.Linux | PlatformID.OSX)]
+    [ActiveIssue(846, PlatformID.AnyUnix)]
     public static void DCS_WithXElement()
     {
         var original = new WithXElement(true);
@@ -974,7 +974,7 @@ public static class DataContractSerializerTests
     }
 
     [Fact]
-    [ActiveIssue(846, PlatformID.Linux | PlatformID.OSX)]
+    [ActiveIssue(846, PlatformID.AnyUnix)]
     public static void DCS_WithXElementWithNestedXElement()
     {
         var original = new WithXElementWithNestedXElement(true);
@@ -985,7 +985,7 @@ public static class DataContractSerializerTests
     }
 
     [Fact]
-    [ActiveIssue(846, PlatformID.Linux | PlatformID.OSX)]
+    [ActiveIssue(846, PlatformID.AnyUnix)]
     public static void DCS_WithArrayOfXElement()
     {
         var original = new WithArrayOfXElement(true);
@@ -998,7 +998,7 @@ public static class DataContractSerializerTests
     }
 
     [Fact]
-    [ActiveIssue(846, PlatformID.Linux | PlatformID.OSX)]
+    [ActiveIssue(846, PlatformID.AnyUnix)]
     public static void DCS_WithListOfXElement()
     {
         var original = new WithListOfXElement(true);
@@ -1715,42 +1715,21 @@ public static class DataContractSerializerTests
             dcs = (settings != null) ? new DataContractSerializer(typeof(T), settings) : new DataContractSerializer(typeof(T));
         }
 
-        Console.WriteLine("Testing input value : {0}", value);
-
         using (MemoryStream ms = new MemoryStream())
         {
-            try
-            {
-                dcs.WriteObject(ms, value);
-                ms.Position = 0;
-            }
-            catch
-            {
-                Console.WriteLine("Error while serializing value");
-                throw;
-            }
+            dcs.WriteObject(ms, value);
+            ms.Position = 0;
 
             string actualOutput = new StreamReader(ms).ReadToEnd();
             Utils.CompareResult result = Utils.Compare(baseline, actualOutput);
 
-            if (!result.Equal)
-            {
-                Console.WriteLine(result.ErrorMessage);
-                throw new Exception(string.Format("Test failed for input : {0}", value));
-            }
+            Assert.True(result.Equal, string.Format("{1}{0}Test failed for input: {2}{0}Expected: {3}{0}Actual: {4}",
+                Environment.NewLine, result.ErrorMessage, value, baseline, actualOutput));
 
             ms.Position = 0;
             T deserialized;
 
-            try
-            {
-                deserialized = (T)dcs.ReadObject(ms);
-            }
-            catch
-            {
-                Console.WriteLine("Error deserializing value. the serialized string was:" + Environment.NewLine + actualOutput);
-                throw;
-            }
+            deserialized = (T)dcs.ReadObject(ms);
 
             return deserialized;
         }

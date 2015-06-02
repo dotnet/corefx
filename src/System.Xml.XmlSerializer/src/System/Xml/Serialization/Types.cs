@@ -525,6 +525,8 @@ namespace System.Xml.Serialization
                         return true;
                     else if (type == typeof(Guid))
                         return true;
+                    else if (type == typeof(XmlNode[]))
+                        return true;
                     break;
             }
             return false;
@@ -721,6 +723,24 @@ namespace System.Xml.Serialization
             }
             else if (type.GetTypeInfo().IsClass)
             {
+                if (type == typeof(XmlAttribute))
+                {
+                    kind = TypeKind.Attribute;
+                    flags |= TypeFlags.Special | TypeFlags.CanBeAttributeValue;
+                }
+                else if (typeof(XmlNode).IsAssignableFrom(type))
+                {
+                    kind = TypeKind.Node;
+                    baseType = type.GetTypeInfo().BaseType;
+                    flags |= TypeFlags.Special | TypeFlags.CanBeElementValue | TypeFlags.CanBeTextValue;
+                    if (typeof(XmlText).IsAssignableFrom(type))
+                        flags &= ~TypeFlags.CanBeElementValue;
+                    else if (typeof(XmlElement).IsAssignableFrom(type))
+                        flags &= ~TypeFlags.CanBeTextValue;
+                    else if (type.IsAssignableFrom(typeof(XmlAttribute)))
+                        flags |= TypeFlags.CanBeAttributeValue;
+                }
+                else
                 {
                     kind = TypeKind.Class;
                     baseType = type.GetTypeInfo().BaseType;
@@ -1040,7 +1060,7 @@ namespace System.Xml.Serialization
 
         private static TypeFlags GetConstructorFlags(Type type, ref Exception exception)
         {
-            ConstructorInfo ctor = type.GetConstructor(BindingFlags.Public | BindingFlags.Instance | BindingFlags.NonPublic, new Type[0]);
+            ConstructorInfo ctor = type.GetConstructor(BindingFlags.Public | BindingFlags.Instance | BindingFlags.NonPublic, Array.Empty<Type>());
             if (ctor != null)
             {
                 TypeFlags flags = TypeFlags.HasDefaultConstructor;
@@ -1067,7 +1087,7 @@ namespace System.Xml.Serialization
         {
             if (typeof(IEnumerable).IsAssignableFrom(type))
             {
-                MethodInfo enumerator = type.GetMethod("GetEnumerator", new Type[0]);
+                MethodInfo enumerator = type.GetMethod("GetEnumerator", Array.Empty<Type>());
 
                 if (enumerator == null || !typeof(IEnumerator).IsAssignableFrom(enumerator.ReturnType))
                 {
@@ -1091,7 +1111,7 @@ namespace System.Xml.Serialization
                     {
                         // and finally private interface implementation
                         flags |= TypeFlags.UsePrivateImplementation;
-                        enumerator = type.GetMethod("System.Collections.IEnumerable.GetEnumerator", BindingFlags.Public | BindingFlags.Instance | BindingFlags.NonPublic, new Type[0]);
+                        enumerator = type.GetMethod("System.Collections.IEnumerable.GetEnumerator", BindingFlags.Public | BindingFlags.Instance | BindingFlags.NonPublic, Array.Empty<Type>());
                     }
                 }
                 if (enumerator == null || !typeof(IEnumerator).IsAssignableFrom(enumerator.ReturnType))
@@ -1178,6 +1198,31 @@ namespace System.Xml.Serialization
             return GetDefaultIndexer(type, memberInfo).PropertyType;
         }
 
+        static internal XmlQualifiedName ParseWsdlArrayType(string type, out string dims, XmlSchemaObject parent)
+        {
+            string ns;
+            string name;
+
+            int nsLen = type.LastIndexOf(':');
+
+            if (nsLen <= 0)
+            {
+                ns = "";
+            }
+            else
+            {
+                ns = type.Substring(0, nsLen);
+            }
+            int nameLen = type.IndexOf('[', nsLen + 1);
+
+            if (nameLen <= nsLen)
+            {
+                throw new InvalidOperationException(SR.Format(SR.XmlInvalidArrayTypeSyntax, type));
+            }
+            name = type.Substring(nsLen + 1, nameLen - nsLen - 1);
+            dims = type.Substring(nameLen);
+            return new XmlQualifiedName(name, ns);
+        }
 
         internal ICollection Types
         {
