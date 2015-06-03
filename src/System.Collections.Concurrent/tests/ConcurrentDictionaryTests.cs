@@ -1,10 +1,8 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
-using System.Collections;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
@@ -114,7 +112,7 @@ namespace System.Collections.Concurrent.Tests
             for (int i = 0; i < expectKeys.Count; i++)
             {
                 Assert.True(expectKeys[i].Equals(gotKeys[i]),
-                    String.Format("The set of keys in the dictionary is are not the same as the expected\r\n" +
+                    String.Format("The set of keys in the dictionary is are not the same as the expected" + Environment.NewLine +
                             "TestAdd1(cLevel={0}, initSize={1}, threads={2}, addsPerThread={3})", cLevel, initSize, threads, addsPerThread)
                    );
             }
@@ -187,7 +185,7 @@ namespace System.Collections.Concurrent.Tests
             for (int i = 0; i < expectKeys.Count; i++)
             {
                 Assert.True(expectKeys[i].Equals(gotKeys[i]),
-                   String.Format("The set of keys in the dictionary is are not the same as the expected.\r\n" +
+                   String.Format("The set of keys in the dictionary is are not the same as the expected." + Environment.NewLine +
                            "TestUpdate1(cLevel={0}, threads={1}, updatesPerThread={2})", cLevel, threads, updatesPerThread)
                   );
             }
@@ -496,7 +494,8 @@ namespace System.Collections.Concurrent.Tests
             for (int i = 0; i < expectKeys.Count; i++)
             {
                 Assert.True(expectKeys[i].Equals(gotKeys[i]), 
-                    String.Format("* Test '{4}': Level={0}, initSize={1}, threads={2}, addsPerThread={3})\r\n > FAILED.  The set of keys in the dictionary is are not the same as the expected.", 
+                    String.Format("* Test '{4}': Level={0}, initSize={1}, threads={2}, addsPerThread={3})" + Environment.NewLine + 
+                    "> FAILED.  The set of keys in the dictionary is are not the same as the expected.", 
                     cLevel, initSize, threads, addsPerThread, isAdd ? "GetOrAdd" : "GetOrUpdate"));
             }
 
@@ -535,6 +534,13 @@ namespace System.Collections.Concurrent.Tests
             Assert.False(dictionary.IsEmpty);
             Assert.Equal(1, dictionary.Keys.Count);
             Assert.Equal(1, dictionary.Values.Count);
+        }
+
+        [Fact]
+        public static void TestDebuggerAttributes()
+        {
+            DebuggerAttributes.ValidateDebuggerDisplayReferences(new ConcurrentDictionary<string, int>());
+            DebuggerAttributes.ValidateDebuggerTypeProxyProperties(new ConcurrentDictionary<string, int>());
         }
 
         [Fact]
@@ -599,7 +605,7 @@ namespace System.Collections.Concurrent.Tests
             int item;
             Assert.Throws<ArgumentNullException>(
                () => dictionary.TryRemove(null, out item));
-            //  "TestExceptions:  FAILED.  TryRmove didn't throw ANE when null key is passed");
+            //  "TestExceptions:  FAILED.  TryRemove didn't throw ANE when null key is passed");
             Assert.Throws<ArgumentNullException>(
                () => dictionary.TryGetValue(null, out item));
             // "TestExceptions:  FAILED.  TryGetValue didn't throw ANE when null key is passed");
@@ -806,7 +812,7 @@ namespace System.Collections.Concurrent.Tests
             var dictionary = new ConcurrentDictionary<string, int>();
             Assert.Throws<ArgumentNullException>(
                () => dictionary.TryUpdate(null, 0, 0));
-            // "TestTryUpdate:  FAILED.  TryUpdte didn't throw ANE when null key is passed");
+            // "TestTryUpdate:  FAILED.  TryUpdate didn't throw ANE when null key is passed");
 
             for (int i = 0; i < 10; i++)
                 dictionary.TryAdd(i.ToString(), i);
@@ -878,7 +884,7 @@ namespace System.Collections.Concurrent.Tests
             //test TryUpdate with non atomic values (intPtr > 8)
             var dict = new ConcurrentDictionary<int, Struct16>();
             dict.TryAdd(1, new Struct16(1, -1));
-            Assert.True(dict.TryUpdate(1, new Struct16(2, -2), new Struct16(1, -1)), "TestTryUpdate:  FAILED.  TryUpdte failed for non atomic values ( > 8 bytes)");
+            Assert.True(dict.TryUpdate(1, new Struct16(2, -2), new Struct16(1, -1)), "TestTryUpdate:  FAILED.  TryUpdate failed for non atomic values ( > 8 bytes)");
         }
 
         #region Helper Classes and Methods

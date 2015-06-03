@@ -1,10 +1,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
-using System.Collections;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
@@ -227,7 +224,7 @@ namespace System.Collections.Concurrent.Tests
         }
 
         /// <summary>
-        /// Test parallel Add/Take, insert uniqe elements in the bag, and each element should be removed once
+        /// Test parallel Add/Take, insert unique elements in the bag, and each element should be removed once
         /// </summary>
         /// <param name="threadsCount"></param>
         /// <returns>True if succeeded, false otherwise</returns>
@@ -259,7 +256,7 @@ namespace System.Collections.Concurrent.Tests
 
             Task.WaitAll(threads);
 
-            int valu = -1;
+            int value = -1;
 
             //validation
             for (int i = 0; i < validation.Length; i++)
@@ -271,11 +268,11 @@ namespace System.Collections.Concurrent.Tests
                 }
                 else if (validation[i] == 0)
                 {
-                    Assert.True(bag.TryTake(out valu), String.Format("Add/Take failed, the list is not empty and TryTake returned false; thread count={0}", threadsCount));
+                    Assert.True(bag.TryTake(out value), String.Format("Add/Take failed, the list is not empty and TryTake returned false; thread count={0}", threadsCount));
                 }
             }
 
-            Assert.False(bag.Count > 0 || bag.TryTake(out valu), String.Format("Add/Take failed, this list is not empty after all remove operations; thread count={0}", threadsCount));
+            Assert.False(bag.Count > 0 || bag.TryTake(out value), String.Format("Add/Take failed, this list is not empty after all remove operations; thread count={0}", threadsCount));
         }
 
         [Fact]
@@ -410,6 +407,13 @@ namespace System.Collections.Concurrent.Tests
             Assert.True(0 == failCount, "RTest9_ToArray:  One or more thread failed to get the correct bag items from ToArray");
         }
 
+        [Fact]
+        public static void RTest10_DebuggerAttributes()
+        {
+            DebuggerAttributes.ValidateDebuggerDisplayReferences(new ConcurrentBag<int>());
+            DebuggerAttributes.ValidateDebuggerTypeProxyProperties(new ConcurrentBag<int>());
+        }
+
         #region Helper Methods / Classes
 
         private struct Interval
@@ -450,11 +454,11 @@ namespace System.Collections.Concurrent.Tests
         {
             for (int i = 0; i < count; i++)
             {
-                int valu = -1;
+                int value = -1;
 
-                if (bag.TryTake(out valu) && validation != null)
+                if (bag.TryTake(out value) && validation != null)
                 {
-                    Interlocked.Increment(ref validation[valu]);
+                    Interlocked.Increment(ref validation[value]);
                 }
             }
         }

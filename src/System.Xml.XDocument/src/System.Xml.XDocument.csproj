@@ -7,6 +7,7 @@
     <ProjectGuid>{442C5A88-29C2-4B00-B1DF-730D646D3861}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AssemblyName>System.Xml.XDocument</AssemblyName>
+    <AssemblyVersion>4.0.10.0</AssemblyVersion>
     <RootNamespace>System.Xml</RootNamespace>
     <DefineConstants>$(DefineConstants);SILVERLIGHT</DefineConstants>
   </PropertyGroup>
@@ -15,19 +16,11 @@
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
   </PropertyGroup>
-  <!-- References are resolved from packages.config -->
   <ItemGroup>
-    <Compile Include="$(CommonPath)\System\SR.cs">
-      <Link>Resources\SR.cs</Link>
-    </Compile>
     <Compile Include="$(CommonPath)\System\IO\StringBuilderCache.cs">
       <Link>System\StringBuilderCache.cs</Link>
     </Compile>
-    <Compile Include="Resources\Strings.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Strings.resx</DependentUpon>
-    </Compile>
+    <Compile Include="Properties\InternalsVisibleTo.cs" />
     <Compile Include="System\Xml\Linq\BaseUriAnnotation.cs" />
     <Compile Include="System\Xml\Linq\Extensions.cs" />
     <Compile Include="System\Xml\Linq\LineInfoAnnotation.cs" />
@@ -57,18 +50,12 @@
     <Compile Include="System\Xml\Linq\XProcessingInstruction.cs" />
     <Compile Include="System\Xml\Linq\XStreamingElement.cs" />
     <Compile Include="System\Xml\Linq\XText.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Resources\Strings.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Strings.Designer.cs</LastGenOutput>
-      <CustomToolNamespace>Resources</CustomToolNamespace>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
+    <EmbeddedResource Include="$(MsBuildThisFileDirectory)Resources\$(AssemblyName).rd.xml" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
+    <None Include="project.json" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

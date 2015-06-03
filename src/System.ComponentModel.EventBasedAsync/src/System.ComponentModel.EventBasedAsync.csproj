@@ -1,0 +1,31 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{551A6340-8EEF-445E-A2A2-639CC23DBD36}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>System.ComponentModel.EventBasedAsync</RootNamespace>
+    <AssemblyName>System.ComponentModel.EventBasedAsync</AssemblyName>
+    <AssemblyVersion>4.0.10.0</AssemblyVersion>
+  </PropertyGroup>
+  <!-- Default configurations to help VS understand the configurations -->
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="System\ComponentModel\AsyncCompletedEvent.cs" />
+    <Compile Include="System\ComponentModel\AsyncOperation.cs" />
+    <Compile Include="System\ComponentModel\AsyncOperationManager.cs" />
+    <Compile Include="System\ComponentModel\ProgressChangedEvent.cs" />
+    <Compile Include="System\ComponentModel\BackgroundWorker.cs" />
+    <Compile Include="System\ComponentModel\DoWorkEvent.cs" />
+    <Compile Include="System\ComponentModel\RunWorkerCompletedEvent.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="project.json" />
+  </ItemGroup>
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
+</Project>

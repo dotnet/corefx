@@ -3,18 +3,16 @@
 
 namespace Microsoft.Win32
 {
-    [System.Runtime.InteropServices.ComVisible(true)]
     public enum RegistryValueKind
     {
-        String = Interop.REG_SZ,
-        ExpandString = Interop.REG_EXPAND_SZ,
-        Binary = Interop.REG_BINARY,
-        DWord = Interop.REG_DWORD,
-        MultiString = Interop.REG_MULTI_SZ,
-        QWord = Interop.REG_QWORD,
+        String = Interop.mincore.RegistryValues.REG_SZ,
+        ExpandString = Interop.mincore.RegistryValues.REG_EXPAND_SZ,
+        Binary = Interop.mincore.RegistryValues.REG_BINARY,
+        DWord = Interop.mincore.RegistryValues.REG_DWORD,
+        MultiString = Interop.mincore.RegistryValues.REG_MULTI_SZ,
+        QWord = Interop.mincore.RegistryValues.REG_QWORD,
         Unknown = 0,                          // REG_NONE is defined as zero but BCL
-        [System.Runtime.InteropServices.ComVisible(false)]
-        None = unchecked((int)0xFFFFFFFF), //  mistakingly overrode this value.  
-    }   // Now instead of using Interop.REG_NONE we use "-1".
+        None = unchecked((int)0xFFFFFFFF), //  mistakenly overrode this value.  
+    }   // Now instead of using Interop.mincore.RegistryValues.REG_NONE we use "-1".
 }
 

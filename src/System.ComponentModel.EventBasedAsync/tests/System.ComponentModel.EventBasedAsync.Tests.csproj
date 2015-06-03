@@ -1,0 +1,37 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{59E9B218-81D0-4A80-A4B7-66C716136D82}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AssemblyName>System.ComponentModel.EventBasedAsync.Tests</AssemblyName>
+    <RootNamespace>System.ComponentModel.EventBasedAsync.Tests</RootNamespace>
+  </PropertyGroup>
+  <!-- Default configurations to help VS understand the configurations -->
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="AsyncOperationManagerTests.cs" />
+    <Compile Include="RunWorkerCompletedEventArgsTests.cs" />
+    <Compile Include="AsyncCompletedEventArgsTests.cs" />
+    <Compile Include="DoWorkEventArgsTests.cs" />
+    <Compile Include="ProgressChangedEventArgsTests.cs" />
+    <Compile Include="AsyncOperationTests.cs" />
+    <Compile Include="BackgroundWorkerTests.cs" />
+    <Compile Include="TestException.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\src\System.ComponentModel.EventBasedAsync.csproj">
+      <Project>{551A6340-8EEF-445E-A2A2-639CC23DBD36}</Project>
+      <Name>System.ComponentModel.EventBasedAsync</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="project.json" />
+  </ItemGroup>
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
+</Project>

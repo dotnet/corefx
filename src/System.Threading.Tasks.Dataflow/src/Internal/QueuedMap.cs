@@ -28,7 +28,7 @@ namespace System.Threading.Tasks.Dataflow.Internal
     /// <remarks>This type is not thread-safe.</remarks>
     [DebuggerDisplay("Count = {Count}")]
     [DebuggerTypeProxy(typeof(EnumerableDebugView<,>))]
-    internal sealed class QueuedMap<TKey, TValue> : IEnumerable<KeyValuePair<TKey, TValue>>
+    internal sealed class QueuedMap<TKey, TValue>
     {
         /// <summary>
         /// A queue structure that uses an array-based list to store its items
@@ -36,7 +36,7 @@ namespace System.Threading.Tasks.Dataflow.Internal
         /// </summary>
         /// <typeparam name="T">The type of the items storedin the queue</typeparam>
         /// <remarks>This type is not thread-safe.</remarks>
-        private sealed class ArrayBasedLinkedQueue<T> : IEnumerable<T>
+        private sealed class ArrayBasedLinkedQueue<T>
         {
             /// <summary>Terminator index.</summary>
             private const int TERMINATOR_INDEX = -1;
@@ -75,7 +75,7 @@ namespace System.Threading.Tasks.Dataflow.Internal
                 // If there is a free slot, reuse it
                 if (_freeIndex != TERMINATOR_INDEX)
                 {
-                    Contract.Assert(0 <= _freeIndex && _freeIndex < _storage.Count, "Index is out of range.");
+                    Debug.Assert(0 <= _freeIndex && _freeIndex < _storage.Count, "Index is out of range.");
                     newIndex = _freeIndex;
                     _freeIndex = _storage[_freeIndex].Key;
                     _storage[newIndex] = new KeyValuePair<int, T>(TERMINATOR_INDEX, item);
@@ -90,13 +90,13 @@ namespace System.Threading.Tasks.Dataflow.Internal
                 if (_headIndex == TERMINATOR_INDEX)
                 {
                     // Point _headIndex to newIndex if the queue was empty
-                    Contract.Assert(_tailIndex == TERMINATOR_INDEX, "If head indicates empty, so too should tail.");
+                    Debug.Assert(_tailIndex == TERMINATOR_INDEX, "If head indicates empty, so too should tail.");
                     _headIndex = newIndex;
                 }
                 else
                 {
                     // Point the tail slot to newIndex if the queue was not empty
-                    Contract.Assert(_tailIndex != TERMINATOR_INDEX, "If head does not indicate empty, neither should tail.");
+                    Debug.Assert(_tailIndex != TERMINATOR_INDEX, "If head does not indicate empty, neither should tail.");
                     _storage[_tailIndex] = new KeyValuePair<int, T>(newIndex, _storage[_tailIndex].Value);
                 }
 
@@ -113,13 +113,13 @@ namespace System.Threading.Tasks.Dataflow.Internal
                 // If the queue is empty, just initialize the output item and return false
                 if (_headIndex == TERMINATOR_INDEX)
                 {
-                    Contract.Assert(_tailIndex == TERMINATOR_INDEX, "If head indicates empty, so too should tail.");
+                    Debug.Assert(_tailIndex == TERMINATOR_INDEX, "If head indicates empty, so too should tail.");
                     item = default(T);
                     return false;
                 }
 
                 // If there are items in the queue, start with populating the output item
-                Contract.Assert(0 <= _headIndex && _headIndex < _storage.Count, "Head is out of range.");
+                Debug.Assert(0 <= _headIndex && _headIndex < _storage.Count, "Head is out of range.");
                 item = _storage[_headIndex].Value;
 
                 // Move the popped slot to the head of the free list
@@ -137,31 +137,16 @@ namespace System.Threading.Tasks.Dataflow.Internal
             /// <param name="item">The item to be places.</param>
             internal void Replace(int index, T item)
             {
-                Contract.Assert(0 <= index && index < _storage.Count, "Index is out of range.");
+                Debug.Assert(0 <= index && index < _storage.Count, "Index is out of range.");
 #if DEBUG
                 // Also assert that index does not belong to the list of free slots
                 for (int idx = _freeIndex; idx != TERMINATOR_INDEX; idx = _storage[idx].Key)
-                    Contract.Assert(idx != index, "Index should not belong to the list of free slots.");
+                    Debug.Assert(idx != index, "Index should not belong to the list of free slots.");
 #endif
                 _storage[index] = new KeyValuePair<int, T>(_storage[index].Key, item);
             }
 
-            internal void Clear()
-            {
-                _storage.Clear();
-                _headIndex = TERMINATOR_INDEX;
-                _tailIndex = TERMINATOR_INDEX;
-                _freeIndex = TERMINATOR_INDEX;
-            }
-
             internal bool IsEmpty { get { return _headIndex == TERMINATOR_INDEX; } }
-
-            public IEnumerator<T> GetEnumerator()
-            {
-                for (int index = _headIndex; index != TERMINATOR_INDEX; index = _storage[index].Key)
-                    yield return _storage[index].Value;
-            }
-            IEnumerator IEnumerable.GetEnumerator() { return GetEnumerator(); }
         }
 
         /// <summary>The queue of elements.</summary>
@@ -239,24 +224,7 @@ namespace System.Threading.Tasks.Dataflow.Internal
             return actualCount;
         }
 
-        /// <summary>Removes all elements from the data structure.</summary>
-        internal void Clear()
-        {
-            _queue.Clear();
-            _mapKeyToIndex.Clear();
-        }
-
         /// <summary>Gets the number of items in the data structure.</summary>
         internal int Count { get { return _mapKeyToIndex.Count; } }
-
-        /// <summary>Gets an enumerator for the contents of the queued map.</summary>
-        /// <returns>An enumerator for the contents of the queued map.</returns>
-        public IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator()
-        {
-            return _queue.GetEnumerator();
-        }
-        /// <summary>Gets an enumerator for the contents of the queued map.</summary>
-        /// <returns>An enumerator for the contents of the queued map.</returns>
-        IEnumerator IEnumerable.GetEnumerator() { return GetEnumerator(); }
     }
 }

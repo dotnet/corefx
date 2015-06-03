@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Microsoft.Win32.SafeHandles;
-using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Security;
 
@@ -99,6 +98,7 @@ namespace System.IO.Pipes
         public String GetClientHandleAsString()
         {
             _clientHandleExposed = true;
+            GC.SuppressFinalize(_clientHandle);
             return _clientHandle.DangerousGetHandle().ToString();
         }
 

@@ -9,6 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>System.Numerics</RootNamespace>
     <AssemblyName>System.Numerics.Vectors</AssemblyName>
+    <AssemblyVersion>4.1.0.0</AssemblyVersion>
     <FileAlignment>512</FileAlignment>
     <DocumentationFile>$(OutputPath)System.Numerics.Vectors.xml</DocumentationFile>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -18,17 +19,7 @@
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
   </PropertyGroup>
-  <!-- References are resolved from packages.config -->
   <ItemGroup>
-    <EmbeddedResource Include="Resources\Strings.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Strings.Designer.cs</LastGenOutput>
-      <CustomToolNamespace>System.Numerics</CustomToolNamespace>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="System\Numerics\ConstantHelper.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -45,11 +36,6 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Register.tt</DependentUpon>
     </Compile>
-    <Compile Include="Resources\Strings.Designer.cs">
-      <DependentUpon>Strings.resx</DependentUpon>
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-    </Compile>
     <Compile Include="System\Numerics\Vector.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -62,9 +48,9 @@
     <Compile Include="System\Numerics\Vector4.cs" />
     <Compile Include="System\Numerics\Vector4_Intrinsics.cs" />
     <Compile Include="System\Numerics\Vector_Operations.cs" />
-    <Compile Include="System\Numerics\SR.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="project.json" />
     <None Include="System\Numerics\ConstantHelper.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>ConstantHelper.cs</LastGenOutput>
@@ -81,9 +67,6 @@
   </ItemGroup>
   <ItemGroup>
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

@@ -2,34 +2,56 @@
 <Project ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <PropertyGroup>
-    <Configuration Condition="'$(Configuration)' == ''">Debug</Configuration>
+    <Configuration Condition="'$(Configuration)' == ''">Windows_Debug</Configuration>
     <Platform Condition="'$(Platform)' == ''">AnyCPU</Platform>
     <ProjectGuid>{00EDA5FD-E802-40D3-92D5-56C27612D36D}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AssemblyName>System.Diagnostics.FileVersionInfo</AssemblyName>
+    <AssemblyVersion>4.0.0.0</AssemblyVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
-  </PropertyGroup>
-  <!-- References are resolved from packages.config -->
-
+  <!-- Help VS understand available configurations -->
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Linux_Debug|AnyCPU' " />
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Linux_Release|AnyCPU' " />
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'OSX_Debug|AnyCPU' " />
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'OSX_Release|AnyCPU' " />
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Windows_Debug|AnyCPU' " />
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Windows_Release|AnyCPU' " />
   <ItemGroup>
     <Compile Include="System\Diagnostics\FileVersionInfo.cs" />
   </ItemGroup>
-
-  <ItemGroup Condition=" '$(OS)' == 'Windows_NT' ">
-    <Compile Include="Interop\Interop.Windows.cs" />
+  <ItemGroup Condition=" '$(TargetsWindows)' == 'true' ">
     <Compile Include="System\Diagnostics\FileVersionInfo.Windows.cs" />
+    <Compile Include="$(CommonPath)\Interop\Windows\Interop.Libraries.cs">
+      <Link>Common\Interop\Windows\Interop.Libraries.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.FileVersionInfo.cs">
+      <Link>Common\Interop\Windows\Interop.FileVersionInfo.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.FileVersionInfoType.cs">
+      <Link>Common\Interop\Windows\Interop.FileVersionInfoType.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.GetFileVersionInfoEx.cs">
+      <Link>Common\Interop\Windows\Interop.GetFileVersionInfoEx.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.GetFileVersionInfoSizeEx.cs">
+      <Link>Common\Interop\Windows\Interop.GetFileVersionInfoSizeEx.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.VerLanguageName.cs">
+      <Link>Common\Interop\Windows\Interop.VerLanguageName.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.VerQueryValue.cs">
+      <Link>Common\Interop\Windows\Interop.VerQueryValue.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.VSFixedFileInfo.cs">
+      <Link>Common\Interop\Windows\Interop.VSFixedFileInfo.cs</Link>
+    </Compile>
   </ItemGroup>
-
-  <ItemGroup Condition=" '$(OS)' == 'Unix' ">
+  <ItemGroup Condition=" '$(TargetsUnix)' == 'true' ">
     <Compile Include="System\Diagnostics\FileVersionInfo.Unix.cs" />
   </ItemGroup>
-
   <ItemGroup>
-    <None Include="packages.config" />
+    <None Include="project.json" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

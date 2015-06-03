@@ -34,6 +34,7 @@ namespace System.Globalization.Extensions.Tests
         /// Tests positive cases for GetAscii. 
         /// </summary>
         [Fact]
+        [ActiveIssue(810, PlatformID.AnyUnix)]
         public void TestAsciiPositive()
         {
             foreach (var entry in Factory.GetDataset())
@@ -55,6 +56,7 @@ namespace System.Globalization.Extensions.Tests
         /// There are some others that failed which have been commented out and marked in the dataset as "GETUNICODE DOES FAILS ON WINDOWS 8.1"
         /// </summary>
         [Fact]
+        [ActiveIssue(810, PlatformID.AnyUnix)]
         public void TestUnicodePositive()
         {
             foreach (var entry in Factory.GetDataset())
@@ -84,6 +86,7 @@ namespace System.Globalization.Extensions.Tests
         /// from the 6.0\IdnaTest.txt.  To find them, search for "GETASCII DOES NOT FAIL ON WINDOWS 8.1"
         /// </remarks>
         [Fact]
+        [ActiveIssue(810, PlatformID.AnyUnix)]
         public void TestAsciiNegative()
         {
             foreach (var entry in Factory.GetDataset())
@@ -104,6 +107,7 @@ namespace System.Globalization.Extensions.Tests
         /// from the 6.0\IdnaTest.txt.  To find them, search for "GETUNICODE DOES NOT FAIL ON WINDOWS 8.1"
         /// </remarks>
         [Fact]
+        [ActiveIssue(810, PlatformID.AnyUnix)]
         public void TestUnicodeNegative()
         {
             foreach (var entry in Factory.GetDataset())
@@ -114,6 +118,33 @@ namespace System.Globalization.Extensions.Tests
                     Assert.Throws<ArgumentException>(() => map.GetUnicode(entry.Source));
                 }
             }
+        }
+
+        [Theory]
+        [InlineData(false, false)]
+        [InlineData(false, true)]
+        [InlineData(true, false)]
+        [InlineData(true, true)]
+        public static void TestEquals(bool allowUnassigned, bool useStd3AsciiRules)
+        {
+            // first check for equals
+            IdnMapping original = new IdnMapping() { AllowUnassigned = allowUnassigned, UseStd3AsciiRules = useStd3AsciiRules };
+            IdnMapping identical = new IdnMapping() { AllowUnassigned = allowUnassigned, UseStd3AsciiRules = useStd3AsciiRules };
+            Assert.True(original.Equals(identical));
+            Assert.Equal(original.GetHashCode(), identical.GetHashCode());
+
+            //  now three sets of unequals
+            IdnMapping unequal1 = new IdnMapping() { AllowUnassigned = allowUnassigned, UseStd3AsciiRules = !useStd3AsciiRules };
+            Assert.False(original.Equals(unequal1));
+            Assert.NotEqual(original.GetHashCode(), unequal1.GetHashCode());
+
+            IdnMapping unequal2 = new IdnMapping() { AllowUnassigned = !allowUnassigned, UseStd3AsciiRules = useStd3AsciiRules };
+            Assert.False(original.Equals(unequal2));
+            Assert.NotEqual(original.GetHashCode(), unequal2.GetHashCode());
+
+            IdnMapping unequal3 = new IdnMapping() { AllowUnassigned = !allowUnassigned, UseStd3AsciiRules = useStd3AsciiRules };
+            Assert.False(original.Equals(unequal3));
+            Assert.NotEqual(original.GetHashCode(), unequal3.GetHashCode());
         }
     }
 }

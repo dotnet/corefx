@@ -7,7 +7,9 @@ using System.ComponentModel;
 using System.Globalization;
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Security;
 using System.Text;
+using System.Threading;
 
 namespace System.Diagnostics
 {
@@ -19,7 +21,7 @@ namespace System.Diagnostics
         /// </summary>
         public static void EnterDebugMode()
         {
-            SetPrivilege(Interop.SeDebugPrivilege, (int)Interop.SE_PRIVILEGE_ENABLED);
+            SetPrivilege(Interop.mincore.SeDebugPrivilege, (int)Interop.mincore.SEPrivileges.SE_PRIVILEGE_ENABLED);
         }
 
         /// <summary>
@@ -28,7 +30,7 @@ namespace System.Diagnostics
         /// </summary>
         public static void LeaveDebugMode()
         {
-            SetPrivilege(Interop.SeDebugPrivilege, 0);
+            SetPrivilege(Interop.mincore.SeDebugPrivilege, 0);
         }
 
         /// <summary>Stops the associated process immediately.</summary>
@@ -37,7 +39,7 @@ namespace System.Diagnostics
             SafeProcessHandle handle = null;
             try
             {
-                handle = GetProcessHandle(Interop.PROCESS_TERMINATE);
+                handle = GetProcessHandle(Interop.mincore.ProcessOptions.PROCESS_TERMINATE);
                 if (!Interop.mincore.TerminateProcess(handle, -1))
                     throw new Win32Exception();
             }
@@ -47,17 +49,29 @@ namespace System.Diagnostics
             }
         }
 
+        /// <summary>Discards any information about the associated process.</summary>
+        private void RefreshCore()
+        {
+            _signaled = false;
+        }
+
+        /// <summary>Additional logic invoked when the Process is closed.</summary>
+        private void CloseCore()
+        {
+            // Nop
+        }
+
         /// <summary>
         /// Instructs the Process component to wait the specified number of milliseconds for the associated process to exit.
         /// </summary>
-        public bool WaitForExit(int milliseconds)
+        private bool WaitForExitCore(int milliseconds)
         {
             SafeProcessHandle handle = null;
             bool exited;
             ProcessWaitHandle processWaitHandle = null;
             try
             {
-                handle = GetProcessHandle(Interop.SYNCHRONIZE, false);
+                handle = GetProcessHandle(Interop.mincore.ProcessOptions.SYNCHRONIZE, false);
                 if (handle.IsInvalid)
                 {
                     exited = true;
@@ -85,22 +99,17 @@ namespace System.Diagnostics
                 }
 
                 // If we have a hard timeout, we cannot wait for the streams
-                if (_output != null && milliseconds == -1)
+                if (_output != null && milliseconds == Timeout.Infinite)
                 {
                     _output.WaitUtilEOF();
                 }
 
-                if (_error != null && milliseconds == -1)
+                if (_error != null && milliseconds == Timeout.Infinite)
                 {
                     _error.WaitUtilEOF();
                 }
 
                 ReleaseProcessHandle(handle);
-            }
-
-            if (exited && _watchForExit)
-            {
-                RaiseOnExited();
             }
 
             return exited;
@@ -116,22 +125,20 @@ namespace System.Diagnostics
                 // On NT, the first module is the main module.
                 EnsureState(State.HaveId | State.IsLocal);
                 ModuleInfo module = NtProcessManager.GetFirstModuleInfo(_processId);
-                return new ProcessModule(module);
+                return (module != null ? new ProcessModule(module) : null);
             }
         }
 
-        /// <summary>Gets a value indicating whether the associated process has been terminated.</summary>
-        /// <param name="exitCode">The exit code, if it could be determined; otherwise, null.</param>
-        private bool GetHasExited(out int? exitCode)
+        /// <summary>Checks whether the process has exited and updates state accordingly.</summary>
+        private void UpdateHasExited()
         {
             SafeProcessHandle handle = null;
             try
             {
-                handle = GetProcessHandle(Interop.PROCESS_QUERY_INFORMATION | Interop.SYNCHRONIZE, false);
+                handle = GetProcessHandle(Interop.mincore.ProcessOptions.PROCESS_QUERY_LIMITED_INFORMATION | Interop.mincore.ProcessOptions.SYNCHRONIZE, false);
                 if (handle.IsInvalid)
                 {
-                    exitCode = null;
-                    return true;
+                    _exited = true;
                 }
                 else
                 {
@@ -144,10 +151,10 @@ namespace System.Diagnostics
                     // to allow 259 to function as a valid exit code and to break as few people as possible that
                     // took the ReadToEnd dependency, we check for an exit code before doing the more correct
                     // check to see if we have been signalled.
-                    if (Interop.mincore.GetExitCodeProcess(handle, out localExitCode) && localExitCode != Interop.STILL_ACTIVE)
+                    if (Interop.mincore.GetExitCodeProcess(handle, out localExitCode) && localExitCode != Interop.mincore.HandleOptions.STILL_ACTIVE)
                     {
-                        exitCode = localExitCode;
-                        return true;
+                        _exitCode = localExitCode;
+                        _exited = true;
                     }
                     else
                     {
@@ -167,14 +174,11 @@ namespace System.Diagnostics
                             if (!Interop.mincore.GetExitCodeProcess(handle, out localExitCode))
                                 throw new Win32Exception();
 
-                            exitCode = localExitCode;
-                            return true;
+                            _exitCode = localExitCode;
+                            _exited = true;
                         }
                     }
                 }
-
-                exitCode = null;
-                return false;
             }
             finally
             {
@@ -231,7 +235,7 @@ namespace System.Diagnostics
                 SafeProcessHandle handle = null;
                 try
                 {
-                    handle = GetProcessHandle(Interop.PROCESS_QUERY_INFORMATION);
+                    handle = GetProcessHandle(Interop.mincore.ProcessOptions.PROCESS_QUERY_INFORMATION);
                     bool disabled;
                     if (!Interop.mincore.GetProcessPriorityBoost(handle, out disabled))
                     {
@@ -249,7 +253,7 @@ namespace System.Diagnostics
                 SafeProcessHandle handle = null;
                 try
                 {
-                    handle = GetProcessHandle(Interop.PROCESS_SET_INFORMATION);
+                    handle = GetProcessHandle(Interop.mincore.ProcessOptions.PROCESS_SET_INFORMATION);
                     if (!Interop.mincore.SetProcessPriorityBoost(handle, !value))
                         throw new Win32Exception();
                 }
@@ -270,7 +274,7 @@ namespace System.Diagnostics
                 SafeProcessHandle handle = null;
                 try
                 {
-                    handle = GetProcessHandle(Interop.PROCESS_QUERY_INFORMATION);
+                    handle = GetProcessHandle(Interop.mincore.ProcessOptions.PROCESS_QUERY_INFORMATION);
                     int value = Interop.mincore.GetPriorityClass(handle);
                     if (value == 0)
                     {
@@ -288,7 +292,7 @@ namespace System.Diagnostics
                 SafeProcessHandle handle = null;
                 try
                 {
-                    handle = GetProcessHandle(Interop.PROCESS_SET_INFORMATION);
+                    handle = GetProcessHandle(Interop.mincore.ProcessOptions.PROCESS_SET_INFORMATION);
                     if (!Interop.mincore.SetPriorityClass(handle, (int)value))
                     {
                         throw new Win32Exception();
@@ -311,7 +315,7 @@ namespace System.Diagnostics
                 SafeProcessHandle handle = null;
                 try
                 {
-                    handle = GetProcessHandle(Interop.PROCESS_QUERY_INFORMATION);
+                    handle = GetProcessHandle(Interop.mincore.ProcessOptions.PROCESS_QUERY_INFORMATION);
                     IntPtr processAffinity, systemAffinity;
                     if (!Interop.mincore.GetProcessAffinityMask(handle, out processAffinity, out systemAffinity))
                         throw new Win32Exception();
@@ -327,7 +331,7 @@ namespace System.Diagnostics
                 SafeProcessHandle handle = null;
                 try
                 {
-                    handle = GetProcessHandle(Interop.PROCESS_SET_INFORMATION);
+                    handle = GetProcessHandle(Interop.mincore.ProcessOptions.PROCESS_SET_INFORMATION);
                     if (!Interop.mincore.SetProcessAffinityMask(handle, value))
                         throw new Win32Exception();
                 }
@@ -338,13 +342,28 @@ namespace System.Diagnostics
             }
         }
 
+        /// <summary>Gets the ID of the current process.</summary>
+        private static int GetCurrentProcessId()
+        {
+            return unchecked((int)Interop.mincore.GetCurrentProcessId());
+        }
+
+        /// <summary>
+        /// Gets a short-term handle to the process, with the given access.  If a handle exists,
+        /// then it is reused.  If the process has exited, it throws an exception.
+        /// </summary>
+        private SafeProcessHandle GetProcessHandle()
+        {
+            return GetProcessHandle(Interop.mincore.ProcessOptions.PROCESS_ALL_ACCESS);
+        }
+
         /// <summary>Get the minimum and maximum working set limits.</summary>
         private void GetWorkingSetLimits(out IntPtr minWorkingSet, out IntPtr maxWorkingSet)
         {
             SafeProcessHandle handle = null;
             try
             {
-                handle = GetProcessHandle(Interop.PROCESS_QUERY_INFORMATION);
+                handle = GetProcessHandle(Interop.mincore.ProcessOptions.PROCESS_QUERY_INFORMATION);
 
                 // GetProcessWorkingSetSize is not exposed in coresys.  We use 
                 // GetProcessWorkingSetSizeEx instead which also returns FLAGS which give some flexibility
@@ -361,21 +380,6 @@ namespace System.Diagnostics
             }
         }
 
-        /// <summary>Gets the ID of the current process.</summary>
-        private static int GetCurrentProcessId()
-        {
-            return unchecked((int)Interop.mincore.GetCurrentProcessId());
-        }
-
-        /// <summary>
-        /// Opens a long-term handle to the process, with all access.  If a handle exists,
-        /// then it is reused.  If the process has exited, it throws an exception.
-        /// </summary>
-        private SafeProcessHandle OpenProcessHandle()
-        {
-            return OpenProcessHandle(Interop.PROCESS_ALL_ACCESS);
-        }
-
         /// <summary>Sets one or both of the minimum and maximum working set limits.</summary>
         /// <param name="newMin">The new minimum working set limit, or null not to change it.</param>
         /// <param name="newMax">The new maximum working set limit, or null not to change it.</param>
@@ -386,7 +390,7 @@ namespace System.Diagnostics
             SafeProcessHandle handle = null;
             try
             {
-                handle = GetProcessHandle(Interop.PROCESS_QUERY_INFORMATION | Interop.PROCESS_SET_QUOTA);
+                handle = GetProcessHandle(Interop.mincore.ProcessOptions.PROCESS_QUERY_INFORMATION | Interop.mincore.ProcessOptions.PROCESS_SET_QUOTA);
                 IntPtr min, max;
                 int ignoredFlags;
                 if (!Interop.mincore.GetProcessWorkingSetSizeEx(handle, out min, out max, out ignoredFlags))
@@ -416,7 +420,7 @@ namespace System.Diagnostics
                 }
 
                 // We use SetProcessWorkingSetSizeEx which gives an option to follow
-                // the max and min value even in low-memory and abundant-memory situtions.
+                // the max and min value even in low-memory and abundant-memory situations.
                 // However, we do not use these flags to emulate the existing behavior
                 if (!Interop.mincore.SetProcessWorkingSetSizeEx(handle, min, max, 0))
                 {
@@ -438,37 +442,23 @@ namespace System.Diagnostics
             }
         }
 
+        private static readonly IntPtr INVALID_HANDLE_VALUE = new IntPtr(-1);
+
         /// <summary>Starts the process using the supplied start info.</summary>
         /// <param name="startInfo">The start info with which to start the process.</param>
         private bool StartCore(ProcessStartInfo startInfo)
         {
-            if (startInfo.StandardOutputEncoding != null && !startInfo.RedirectStandardOutput)
-            {
-                throw new InvalidOperationException(SR.StandardOutputEncodingNotAllowed);
-            }
-
-            if (startInfo.StandardErrorEncoding != null && !startInfo.RedirectStandardError)
-            {
-                throw new InvalidOperationException(SR.StandardErrorEncodingNotAllowed);
-            }
-
             // See knowledge base article Q190351 for an explanation of the following code.  Noteworthy tricky points:
             //    * The handles are duplicated as non-inheritable before they are passed to CreateProcess so
             //      that the child process can not close them
             //    * CreateProcess allows you to redirect all or none of the standard IO handles, so we use
             //      GetStdHandle for the handles that are not being redirected
 
-            //Cannot start a new process and store its handle if the object has been disposed, since finalization has been suppressed.            
-            if (_disposed)
-            {
-                throw new ObjectDisposedException(GetType().Name);
-            }
-
             StringBuilder commandLine = BuildCommandLine(startInfo.FileName, startInfo.Arguments);
 
-            Interop.STARTUPINFO startupInfo = new Interop.STARTUPINFO();
-            Interop.PROCESS_INFORMATION processInfo = new Interop.PROCESS_INFORMATION();
-            Interop.SECURITY_ATTRIBUTES unused_SecAttrs = new Interop.SECURITY_ATTRIBUTES();
+            Interop.mincore.STARTUPINFO startupInfo = new Interop.mincore.STARTUPINFO();
+            Interop.mincore.PROCESS_INFORMATION processInfo = new Interop.mincore.PROCESS_INFORMATION();
+            Interop.mincore.SECURITY_ATTRIBUTES unused_SecAttrs = new Interop.mincore.SECURITY_ATTRIBUTES();
             SafeProcessHandle procSH = new SafeProcessHandle();
             SafeThreadHandle threadSH = new SafeThreadHandle();
             bool retVal;
@@ -491,7 +481,7 @@ namespace System.Diagnostics
                         }
                         else
                         {
-                            startupInfo.hStdInput = new SafeFileHandle(Interop.mincore.GetStdHandle(Interop.STD_INPUT_HANDLE), false);
+                            startupInfo.hStdInput = new SafeFileHandle(Interop.mincore.GetStdHandle(Interop.mincore.HandleTypes.STD_INPUT_HANDLE), false);
                         }
 
                         if (startInfo.RedirectStandardOutput)
@@ -500,7 +490,7 @@ namespace System.Diagnostics
                         }
                         else
                         {
-                            startupInfo.hStdOutput = new SafeFileHandle(Interop.mincore.GetStdHandle(Interop.STD_OUTPUT_HANDLE), false);
+                            startupInfo.hStdOutput = new SafeFileHandle(Interop.mincore.GetStdHandle(Interop.mincore.HandleTypes.STD_OUTPUT_HANDLE), false);
                         }
 
                         if (startInfo.RedirectStandardError)
@@ -509,21 +499,21 @@ namespace System.Diagnostics
                         }
                         else
                         {
-                            startupInfo.hStdError = new SafeFileHandle(Interop.mincore.GetStdHandle(Interop.STD_ERROR_HANDLE), false);
+                            startupInfo.hStdError = new SafeFileHandle(Interop.mincore.GetStdHandle(Interop.mincore.HandleTypes.STD_ERROR_HANDLE), false);
                         }
 
-                        startupInfo.dwFlags = Interop.STARTF_USESTDHANDLES;
+                        startupInfo.dwFlags = Interop.mincore.StartupInfoOptions.STARTF_USESTDHANDLES;
                     }
 
                     // set up the creation flags paramater
                     int creationFlags = 0;
-                    if (startInfo.CreateNoWindow) creationFlags |= Interop.CREATE_NO_WINDOW;
+                    if (startInfo.CreateNoWindow) creationFlags |= Interop.mincore.StartupInfoOptions.CREATE_NO_WINDOW;
 
                     // set up the environment block parameter
                     IntPtr environmentPtr = (IntPtr)0;
                     if (startInfo._environmentVariables != null)
                     {
-                        creationFlags |= Interop.CREATE_UNICODE_ENVIRONMENT;
+                        creationFlags |= Interop.mincore.StartupInfoOptions.CREATE_UNICODE_ENVIRONMENT;
                         byte[] environmentBytes = EnvironmentVariablesToByteArray(startInfo._environmentVariables);
                         environmentHandle = GCHandle.Alloc(environmentBytes, GCHandleType.Pinned);
                         environmentPtr = environmentHandle.AddrOfPinnedObject();
@@ -532,35 +522,96 @@ namespace System.Diagnostics
                     if (workingDirectory == string.Empty)
                         workingDirectory = Directory.GetCurrentDirectory();
 
-                    try { }
-                    finally
+                    if (startInfo.UserName.Length != 0)
                     {
-                        retVal = Interop.mincore.CreateProcess(
-                                null,                // we don't need this since all the info is in commandLine
-                                commandLine,         // pointer to the command line string
-                                unused_SecAttrs, // address to process security attributes, we don't need to inheriat the handle
-                                unused_SecAttrs, // address to thread security attributes.
-                                true,                // handle inheritance flag
-                                creationFlags,       // creation flags
-                                environmentPtr,      // pointer to new environment block
-                                workingDirectory,    // pointer to current directory name
-                                startupInfo,         // pointer to STARTUPINFO
-                                processInfo      // pointer to PROCESS_INFORMATION
-                            );
-                        if (!retVal)
-                            errorCode = Marshal.GetLastWin32Error();
-                        if (processInfo.hProcess != (IntPtr)0 && processInfo.hProcess != (IntPtr)Interop.INVALID_HANDLE_VALUE)
-                            procSH.InitialSetHandle(processInfo.hProcess);
-                        if (processInfo.hThread != (IntPtr)0 && processInfo.hThread != (IntPtr)Interop.INVALID_HANDLE_VALUE)
-                            threadSH.InitialSetHandle(processInfo.hThread);
-                    }
-                    if (!retVal)
-                    {
-                        if (errorCode == Interop.ERROR_BAD_EXE_FORMAT || errorCode == Interop.ERROR_EXE_MACHINE_TYPE_MISMATCH)
+                        Interop.mincore.LogonFlags logonFlags = (Interop.mincore.LogonFlags)0;
+                        if (startInfo.LoadUserProfile)
                         {
-                            throw new Win32Exception(errorCode, SR.InvalidApplication);
+                            logonFlags = Interop.mincore.LogonFlags.LOGON_WITH_PROFILE;
                         }
-                        throw new Win32Exception(errorCode);
+
+                        IntPtr password = IntPtr.Zero;
+                        try
+                        {
+                            if (startInfo.Password == null)
+                            {
+                                password = Marshal.StringToCoTaskMemUni(String.Empty);
+                            }
+                            else
+                            {
+                                password = SecureStringMarshal.SecureStringToCoTaskMemUnicode(startInfo.Password);
+                            }
+
+                            try { }
+                            finally
+                            {
+                                retVal = Interop.mincore.CreateProcessWithLogonW(
+                                        startInfo.UserName,
+                                        startInfo.Domain,
+                                        password,
+                                        logonFlags,
+                                        null,            // we don't need this since all the info is in commandLine
+                                        commandLine,
+                                        creationFlags,
+                                        environmentPtr,
+                                        workingDirectory,
+                                        startupInfo,        // pointer to STARTUPINFO
+                                        processInfo         // pointer to PROCESS_INFORMATION
+                                    );
+                                if (!retVal)
+                                    errorCode = Marshal.GetLastWin32Error();
+                                if (processInfo.hProcess != IntPtr.Zero && processInfo.hProcess != (IntPtr)INVALID_HANDLE_VALUE)
+                                    procSH.InitialSetHandle(processInfo.hProcess);
+                                if (processInfo.hThread != IntPtr.Zero && processInfo.hThread != (IntPtr)INVALID_HANDLE_VALUE)
+                                    threadSH.InitialSetHandle(processInfo.hThread);
+                            }
+                            if (!retVal)
+                            {
+                                if (errorCode == Interop.mincore.Errors.ERROR_BAD_EXE_FORMAT || errorCode == Interop.mincore.Errors.ERROR_EXE_MACHINE_TYPE_MISMATCH)
+                                    throw new Win32Exception(errorCode, SR.InvalidApplication);
+
+                                throw new Win32Exception(errorCode);
+                            }
+                        }
+                        finally
+                        {
+                            if (password != IntPtr.Zero)
+                            {
+                                Marshal.ZeroFreeCoTaskMemUnicode(password);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        try { }
+                        finally
+                        {
+                            retVal = Interop.mincore.CreateProcess(
+                                    null,                // we don't need this since all the info is in commandLine
+                                    commandLine,         // pointer to the command line string
+                                    ref unused_SecAttrs, // address to process security attributes, we don't need to inheriat the handle
+                                    ref unused_SecAttrs, // address to thread security attributes.
+                                    true,                // handle inheritance flag
+                                    creationFlags,       // creation flags
+                                    environmentPtr,      // pointer to new environment block
+                                    workingDirectory,    // pointer to current directory name
+                                    startupInfo,         // pointer to STARTUPINFO
+                                    processInfo      // pointer to PROCESS_INFORMATION
+                                );
+                            if (!retVal)
+                                errorCode = Marshal.GetLastWin32Error();
+                            if (processInfo.hProcess != (IntPtr)0 && processInfo.hProcess != (IntPtr)INVALID_HANDLE_VALUE)
+                                procSH.InitialSetHandle(processInfo.hProcess);
+                            if (processInfo.hThread != (IntPtr)0 && processInfo.hThread != (IntPtr)INVALID_HANDLE_VALUE)
+                                threadSH.InitialSetHandle(processInfo.hThread);
+                        }
+                        if (!retVal)
+                        {
+                            if (errorCode == Interop.mincore.Errors.ERROR_BAD_EXE_FORMAT || errorCode == Interop.mincore.Errors.ERROR_EXE_MACHINE_TYPE_MISMATCH)
+                                throw new Win32Exception(errorCode, SR.InvalidApplication);
+
+                            throw new Win32Exception(errorCode);
+                        }
                     }
                 }
                 finally
@@ -583,12 +634,12 @@ namespace System.Diagnostics
             }
             if (startInfo.RedirectStandardOutput)
             {
-                Encoding enc = (startInfo.StandardOutputEncoding != null) ? startInfo.StandardOutputEncoding : GetEncoding((int)Interop.mincore.GetConsoleOutputCP());
+                Encoding enc = startInfo.StandardOutputEncoding ?? GetEncoding((int)Interop.mincore.GetConsoleOutputCP());
                 _standardOutput = new StreamReader(new FileStream(standardOutputReadPipeHandle, FileAccess.Read, 4096, false), enc, true, 4096);
             }
             if (startInfo.RedirectStandardError)
             {
-                Encoding enc = (startInfo.StandardErrorEncoding != null) ? startInfo.StandardErrorEncoding : GetEncoding((int)Interop.mincore.GetConsoleOutputCP());
+                Encoding enc = startInfo.StandardErrorEncoding ?? GetEncoding((int)Interop.mincore.GetConsoleOutputCP());
                 _standardError = new StreamReader(new FileStream(standardErrorReadPipeHandle, FileAccess.Read, 4096, false), enc, true, 4096);
             }
 
@@ -608,13 +659,46 @@ namespace System.Diagnostics
         // ---- PAL layer ends here ----
         // -----------------------------
 
+        private bool _signaled;
+
+        private static StringBuilder BuildCommandLine(string executableFileName, string arguments)
+        {
+            // Construct a StringBuilder with the appropriate command line
+            // to pass to CreateProcess.  If the filename isn't already 
+            // in quotes, we quote it here.  This prevents some security
+            // problems (it specifies exactly which part of the string
+            // is the file to execute).
+            StringBuilder commandLine = new StringBuilder();
+            string fileName = executableFileName.Trim();
+            bool fileNameIsQuoted = (fileName.StartsWith("\"", StringComparison.Ordinal) && fileName.EndsWith("\"", StringComparison.Ordinal));
+            if (!fileNameIsQuoted)
+            {
+                commandLine.Append("\"");
+            }
+
+            commandLine.Append(fileName);
+
+            if (!fileNameIsQuoted)
+            {
+                commandLine.Append("\"");
+            }
+
+            if (!String.IsNullOrEmpty(arguments))
+            {
+                commandLine.Append(" ");
+                commandLine.Append(arguments);
+            }
+
+            return commandLine;
+        }
+
         /// <summary>Gets timing information for the current process.</summary>
         private ProcessThreadTimes GetProcessTimes()
         {
             SafeProcessHandle handle = null;
             try
             {
-                handle = GetProcessHandle(Interop.PROCESS_QUERY_LIMITED_INFORMATION, false);
+                handle = GetProcessHandle(Interop.mincore.ProcessOptions.PROCESS_QUERY_LIMITED_INFORMATION, false);
                 if (handle.IsInvalid)
                 {
                     throw new InvalidOperationException(SR.Format(SR.ProcessHasExited, _processId.ToString(CultureInfo.CurrentCulture)));
@@ -638,14 +722,14 @@ namespace System.Diagnostics
         private static void SetPrivilege(string privilegeName, int attrib)
         {
             SafeTokenHandle hToken = null;
-            Interop.LUID debugValue = new Interop.LUID();
+            Interop.mincore.LUID debugValue = new Interop.mincore.LUID();
 
             // this is only a "pseudo handle" to the current process - no need to close it later
             SafeProcessHandle processHandle = Interop.mincore.GetCurrentProcess();
 
             // get the process token so we can adjust the privilege on it.  We DO need to
             // close the token when we're done with it.
-            if (!Interop.mincore.OpenProcessToken(processHandle, Interop.TOKEN_ADJUST_PRIVILEGES, out hToken))
+            if (!Interop.mincore.OpenProcessToken(processHandle, Interop.mincore.HandleOptions.TOKEN_ADJUST_PRIVILEGES, out hToken))
             {
                 throw new Win32Exception();
             }
@@ -657,7 +741,7 @@ namespace System.Diagnostics
                     throw new Win32Exception();
                 }
 
-                Interop.TokenPrivileges tkp = new Interop.TokenPrivileges();
+                Interop.mincore.TokenPrivileges tkp = new Interop.mincore.TokenPrivileges();
                 tkp.Luid = debugValue;
                 tkp.Attributes = attrib;
 
@@ -665,7 +749,7 @@ namespace System.Diagnostics
 
                 // AdjustTokenPrivileges can return true even if it failed to
                 // set the privilege, so we need to use GetLastError
-                if (Marshal.GetLastWin32Error() != Interop.ERROR_SUCCESS)
+                if (Marshal.GetLastWin32Error() != Interop.mincore.Errors.ERROR_SUCCESS)
                 {
                     throw new Win32Exception();
                 }
@@ -724,9 +808,9 @@ namespace System.Diagnostics
                 EnsureState(State.HaveId | State.IsLocal);
                 SafeProcessHandle handle = SafeProcessHandle.InvalidHandle;
                 handle = ProcessManager.OpenProcess(_processId, access, throwIfExited);
-                if (throwIfExited && (access & Interop.PROCESS_QUERY_INFORMATION) != 0)
+                if (throwIfExited && (access & Interop.mincore.ProcessOptions.PROCESS_QUERY_INFORMATION) != 0)
                 {
-                    if (Interop.mincore.GetExitCodeProcess(handle, out _exitCode) && _exitCode != Interop.STILL_ACTIVE)
+                    if (Interop.mincore.GetExitCodeProcess(handle, out _exitCode) && _exitCode != Interop.mincore.HandleOptions.STILL_ACTIVE)
                     {
                         throw new InvalidOperationException(SR.Format(SR.ProcessHasExited, _processId.ToString(CultureInfo.CurrentCulture)));
                     }
@@ -745,24 +829,9 @@ namespace System.Diagnostics
             return GetProcessHandle(access, true);
         }
 
-        private SafeProcessHandle OpenProcessHandle(Int32 access)
+        private static void CreatePipeWithSecurityAttributes(out SafeFileHandle hReadPipe, out SafeFileHandle hWritePipe, ref Interop.mincore.SECURITY_ATTRIBUTES lpPipeAttributes, int nSize)
         {
-            if (!_haveProcessHandle)
-            {
-                //Cannot open a new process handle if the object has been disposed, since finalization has been suppressed.            
-                if (_disposed)
-                {
-                    throw new ObjectDisposedException(GetType().Name);
-                }
-
-                SetProcessHandle(GetProcessHandle(access));
-            }
-            return _processHandle;
-        }
-
-        private static void CreatePipeWithSecurityAttributes(out SafeFileHandle hReadPipe, out SafeFileHandle hWritePipe, Interop.SECURITY_ATTRIBUTES lpPipeAttributes, int nSize)
-        {
-            bool ret = Interop.mincore.CreatePipe(out hReadPipe, out hWritePipe, lpPipeAttributes, nSize);
+            bool ret = Interop.mincore.CreatePipe(out hReadPipe, out hWritePipe, ref lpPipeAttributes, nSize);
             if (!ret || hReadPipe.IsInvalid || hWritePipe.IsInvalid)
             {
                 throw new Win32Exception();
@@ -775,10 +844,10 @@ namespace System.Diagnostics
         // Overlapped I/O for process input/output as it would break Console apps (managed Console class 
         // methods such as WriteLine as well as native CRT functions like printf) which are making an
         // assumption that the console standard handles (obtained via GetStdHandle()) are opened
-        // for synchronous I/O and hence they can work fine with ReadFile/WriteFile synchrnously!
+        // for synchronous I/O and hence they can work fine with ReadFile/WriteFile synchronously!
         private void CreatePipe(out SafeFileHandle parentHandle, out SafeFileHandle childHandle, bool parentInputs)
         {
-            Interop.SECURITY_ATTRIBUTES securityAttributesParent = new Interop.SECURITY_ATTRIBUTES();
+            Interop.mincore.SECURITY_ATTRIBUTES securityAttributesParent = new Interop.mincore.SECURITY_ATTRIBUTES();
             securityAttributesParent.bInheritHandle = true;
 
             SafeFileHandle hTmp = null;
@@ -786,13 +855,13 @@ namespace System.Diagnostics
             {
                 if (parentInputs)
                 {
-                    CreatePipeWithSecurityAttributes(out childHandle, out hTmp, securityAttributesParent, 0);
+                    CreatePipeWithSecurityAttributes(out childHandle, out hTmp, ref securityAttributesParent, 0);
                 }
                 else
                 {
                     CreatePipeWithSecurityAttributes(out hTmp,
                                                           out childHandle,
-                                                          securityAttributesParent,
+                                                          ref securityAttributesParent,
                                                           0);
                 }
                 // Duplicate the parent handle to be non-inheritable so that the child process 
@@ -807,7 +876,7 @@ namespace System.Diagnostics
                                                      out parentHandle,
                                                      0,
                                                      false,
-                                                     Interop.DUPLICATE_SAME_ACCESS))
+                                                     Interop.mincore.HandleOptions.DUPLICATE_SAME_ACCESS))
                 {
                     throw new Win32Exception();
                 }

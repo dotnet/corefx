@@ -1,0 +1,98 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build">
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
+  <PropertyGroup>
+    <AssemblyVersion>4.0.0.0</AssemblyVersion>
+    <Configuration Condition="'$(Configuration)' == ''">Windows_Debug</Configuration>
+    <Platform Condition="'$(Platform)' == ''">AnyCPU</Platform>
+    <OutputType>Library</OutputType>
+    <ProjectGuid>{77E702D9-C6D8-4CE4-9941-D3056C3CCBED}</ProjectGuid>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <!-- Help VS understand available configurations -->
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Windows_Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Windows_Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Linux_Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Linux_Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'OSX_Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'OSX_Release|AnyCPU'" />
+  <ItemGroup>
+    <Compile Include="$(CommonPath)\System\NotImplemented.cs">
+      <Link>Common\System\NotImplemented.cs</Link>
+    </Compile>
+    <Compile Include="System\HResults.cs" />
+    <Compile Include="System\IO\ErrorEventArgs.cs" />
+    <Compile Include="System\IO\ErrorEventHandler.cs" />
+    <Compile Include="System\IO\FileSystemEventArgs.cs" />
+    <Compile Include="System\IO\FileSystemEventHandler.cs" />
+    <Compile Include="System\IO\FileSystemWatcher.cs" />
+    <Compile Include="System\IO\InternalBufferOverflowException.cs" />
+    <Compile Include="System\IO\NotifyFilters.cs" />
+    <Compile Include="System\IO\PatternMatcher.cs" />
+    <Compile Include="System\IO\RenamedEventArgs.cs" />
+    <Compile Include="System\IO\RenamedEventHandler.cs" />
+    <Compile Include="System\IO\WatcherChangeTypes.cs" />
+  </ItemGroup>
+  <ItemGroup Condition=" '$(TargetsWindows)' == 'true' ">
+    <Compile Include="Microsoft\Win32\NativeMethods.cs" />
+    <Compile Include="Microsoft\Win32\UnsafeNativeMethods.cs" />
+    <Compile Include="System\IO\FileSystemWatcher.Win32.cs" />
+  </ItemGroup>
+  <ItemGroup Condition=" '$(TargetsUnix)' == 'true' ">
+    <Compile Include="$(CommonPath)\Interop\Unix\Interop.Libraries.cs">
+      <Link>Common\Interop\Unix\Interop.Libraries.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\libc\Interop.read.cs">
+      <Link>Common\Interop\Unix\libc\Interop.read.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\libc\Interop.strerror.cs">
+      <Link>Common\Interop\Unix\libc\Interop.strerror.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\Interop.Errors.cs">
+      <Link>Common\Interop\Unix\Interop.Errors.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\Interop.IOErrors.cs">
+      <Link>Common\Interop\Unix\Interop.IOErrors.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\libc\Interop.gnu_get_libc_version.cs">
+      <Link>Common\src\Interop\Unix\libc\Interop.gnu_get_libc_version.cs</Link>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup Condition=" '$(TargetsLinux)' == 'true'">
+    <Compile Include="System\IO\FileSystemWatcher.Linux.cs" />
+    <Compile Include="$(CommonPath)\Interop\Linux\libc\Interop.inotify.cs">
+      <Link>Common\Interop\Linux\Interop.inotify.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Linux\Interop.Errors.cs">
+      <Link>Common\Interop\Linux\Interop.Errors.cs</Link>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup Condition=" '$(TargetsOSX)' == 'true' ">
+    <Compile Include="System\IO\FileSystemWatcher.OSX.cs" />
+    <Compile Include="$(CommonPath)\Interop\OSX\Interop.EventStream.cs">
+      <Link>Common\Interop\OSX\Interop.EventStream.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\OSX\Interop.CoreFoundation.cs">
+      <Link>Common\Interop\OSX\Interop.CoreFoundation.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\OSX\Interop.Libraries.cs">
+      <Link>Common\Interop\OSX\Interop.Libraries.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\OSX\Interop.Errors.cs">
+      <Link>Common\Interop\OSX\Interop.Errors.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\OSX\Interop.RunLoop.cs">
+      <Link>Common\Interop\OSX\Interop.RunLoop.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Microsoft\Win32\SafeHandles\SafeCreateHandle.OSX.cs">
+      <Link>Common\Microsoft\Win32\SafeHandles\SafeCreateHandle.OSX.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Microsoft\Win32\SafeHandles\SafeEventStreamHandle.OSX.cs">
+      <Link>Common\Microsoft\Win32\SafeHandles\SafeEventStreamHandle.OSX.cs</Link>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="project.json" />
+  </ItemGroup>
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
+</Project>

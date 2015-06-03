@@ -152,13 +152,20 @@ namespace System.Reflection.Internal
         }
 
         // When reference has tag bits.
-        internal UInt32 PeekTaggedReference(int offset, bool smallRefSize)
+        internal uint PeekTaggedReference(int offset, bool smallRefSize)
+        {
+            return PeekReferenceUnchecked(offset, smallRefSize);
+        }
+
+        // Use when searching for a tagged or non-tagged reference.
+        // The result may be an invalid reference and shall only be used to compare with a valid reference.
+        internal uint PeekReferenceUnchecked(int offset, bool smallRefSize)
         {
             return smallRefSize ? PeekUInt16(offset) : PeekUInt32(offset);
         }
 
         // When reference has at most 24 bits.
-        internal UInt32 PeekReference(int offset, bool smallRefSize)
+        internal int PeekReference(int offset, bool smallRefSize)
         {
             if (smallRefSize)
             {
@@ -172,7 +179,25 @@ namespace System.Reflection.Internal
                 ThrowReferenceOverflow();
             }
 
-            return value;
+            return (int)value;
+        }
+
+        // #String, #Blob heaps
+        internal int PeekHeapReference(int offset, bool smallRefSize)
+        {
+            if (smallRefSize)
+            {
+                return PeekUInt16(offset);
+            }
+
+            uint value = PeekUInt32(offset);
+
+            if (!HeapHandleType.IsValidHeapOffset(value))
+            {
+                ThrowReferenceOverflow();
+            }
+
+            return (int)value;
         }
 
         internal Guid PeekGuid(int offset)
@@ -279,138 +304,111 @@ namespace System.Reflection.Internal
         }
 
         // comparison stops at null terminator, terminator parameter, or end-of-block -- whichever comes first.
-        internal bool Utf8NullTerminatedEquals(int offset, string text, char terminator = '\0')
+        internal bool Utf8NullTerminatedEquals(int offset, string text, MetadataStringDecoder utf8Decoder, char terminator = '\0')
         {
-            bool isPrefix;
-            return Utf8NullTerminatedEquals(offset, text, out isPrefix, terminator);
+            FastComparisonResult result = Utf8NullTerminatedFastCompare(offset, text, terminator);
+
+            switch (result)
+            {
+                case FastComparisonResult.Equal:
+                    return true;
+
+                case FastComparisonResult.IsPrefix:
+                case FastComparisonResult.Unequal:
+                    return false;
+
+                default:
+                    Debug.Assert(result == FastComparisonResult.Inconclusive);
+                    int bytesRead;
+                    string decoded = PeekUtf8NullTerminated(offset, null, utf8Decoder, out bytesRead, terminator);
+                    return decoded.Equals(text, StringComparison.Ordinal);
+            }
         }
 
         // comparison stops at null terminator, terminator parameter, or end-of-block -- whichever comes first.
-        private bool Utf8NullTerminatedEquals(int offset, string text, out bool isPrefix, char terminator = '\0')
+        internal bool Utf8NullTerminatedStartsWith(int offset, string text, MetadataStringDecoder utf8Decoder, char terminator = '\0')
+        {
+            FastComparisonResult result = Utf8NullTerminatedFastCompare(offset, text, terminator);
+
+            switch (result)
+            {
+                case FastComparisonResult.Equal:
+                case FastComparisonResult.IsPrefix:
+                    return true;
+
+                case FastComparisonResult.Unequal:
+                    return false;
+
+                default:
+                    Debug.Assert(result == FastComparisonResult.Inconclusive);
+                    int bytesRead;
+                    string decoded = PeekUtf8NullTerminated(offset, null, utf8Decoder, out bytesRead, terminator);
+                    return decoded.StartsWith(text, StringComparison.Ordinal);
+            }
+        }
+
+        internal enum FastComparisonResult
+        {
+            Equal,
+            IsPrefix,
+            Unequal,
+            Inconclusive
+        }
+
+        // comparison stops at null terminator, terminator parameter, or end-of-block -- whichever comes first.
+        private FastComparisonResult Utf8NullTerminatedFastCompare(int offset, string text, char terminator = '\0')
         {
             CheckBounds(offset, 0);
 
             Debug.Assert(terminator <= 0x7F);
 
-            isPrefix = false;
             byte* startPointer = Pointer + offset;
             byte* endPointer = Pointer + Length;
-            byte* iteratorPointer = startPointer;
+            byte* currentPointer = startPointer;
 
-            int cur = 0;
-
-            while (cur < text.Length)
+            int currentIndex = 0;
+            while (currentIndex < text.Length && currentPointer != endPointer)
             {
-                byte b;
-                if (iteratorPointer == endPointer || ((b = *iteratorPointer++) == 0) || b == terminator)
+                byte currentByte = *currentPointer++;
+                if (currentByte == 0 || currentByte == terminator)
                 {
                     break;
                 }
 
-                if ((b & 0x80) == 0)
+                char currentChar = text[currentIndex++];
+                if ((currentByte & 0x80) == 0)
                 {
-                    if (text[cur++] != b)
+                    // current byte is in ascii range.
+                    //  --> strings are unequal if current char and current byte are unequal
+                    if (currentChar != currentByte)
                     {
-                        return false;
+                        return FastComparisonResult.Unequal;
                     }
-                    continue;
                 }
-
-                char ch;
-                byte b1;
-                if (iteratorPointer == endPointer || ((b1 = *iteratorPointer++) == 0) || b1 == terminator)
+                else if (currentChar <= 0x7F)
                 {
-                    // Dangling lead byte, do not decompose
-                    if (text[cur++] != b)
-                    {
-                        return false;
-                    }
-                    break;
-                }
-
-                if ((b & 0x20) == 0)
-                {
-                    ch = (char)(((b & 0x1F) << 6) | (b1 & 0x3F));
+                    // current byte is not in ascii range, but current char is.
+                    // --> strings are unequal.
+                    return FastComparisonResult.Unequal;
                 }
                 else
                 {
-                    byte b2;
-                    if (iteratorPointer == endPointer || ((b2 = *iteratorPointer++) == 0) || b2 == terminator)
-                    {
-                        // Dangling lead bytes, do not decompose
-                        if (text[cur++] != (char)((b << 8) | b1))
-                        {
-                            return false;
-                        }
-                        break;
-                    }
-
-                    uint char32;
-                    if ((b & 0x10) == 0)
-                    {
-                        char32 = (uint)(((b & 0x0F) << 12) | ((b1 & 0x3F) << 6) | (b2 & 0x3F));
-                    }
-                    else
-                    {
-                        byte b3;
-                        if (iteratorPointer == endPointer || ((b3 = *iteratorPointer++) == 0) || b3 == terminator)
-                        {
-                            // Dangling lead bytes, do not decompose
-                            if (text[cur++] != (char)((b << 8) | b1))
-                            {
-                                return false;
-                            }
-                            if (cur == text.Length)
-                            {
-                                return false;
-                            }
-                            if (text[cur++] != b2)
-                            {
-                                return false;
-                            }
-                            break;
-                        }
-
-                        char32 = (uint)(((b & 0x07) << 18) | ((b1 & 0x3F) << 12) | ((b2 & 0x3F) << 6) | (b3 & 0x3F));
-                    }
-
-                    if ((char32 & 0xFFFF0000) == 0)
-                    {
-                        ch = (char)char32;
-                    }
-                    else
-                    {
-                        char32 -= 0x10000;
-
-                        // break up into UTF16 surrogate pair
-                        if (text[cur++] != (char)((char32 >> 10) | 0xD800))
-                        {
-                            return false;
-                        }
-                        ch = (char)((char32 & 0x3FF) | 0xDC00);
-                    }
-                }
-
-                if (cur == text.Length)
-                {
-                    return false;
-                }
-
-                if (text[cur++] != ch)
-                {
-                    return false;
+                    // uncommon non-ascii case --> fall back to slow allocating comparison.
+                    return FastComparisonResult.Inconclusive;
                 }
             }
 
-            return (isPrefix = cur == text.Length) && (iteratorPointer == endPointer || *iteratorPointer == 0 || *iteratorPointer == terminator);
-        }
+            if (currentIndex != text.Length)
+            {
+                return FastComparisonResult.Unequal;
+            }
 
-        // comparison stops at null terminator, terminator parameter, or end-of-block -- whichever comes first.
-        internal bool Utf8NullTerminatedStartsWith(int offset, string text, char terminator = '\0')
-        {
-            bool isPrefix;
-            Utf8NullTerminatedEquals(offset, text, out isPrefix, terminator);
-            return isPrefix;
+            if (currentPointer != endPointer && *currentPointer != 0 && *currentPointer != terminator)
+            {
+                return FastComparisonResult.IsPrefix;
+            }
+
+            return FastComparisonResult.Equal;
         }
 
         // comparison stops at null terminator, terminator parameter, or end-of-block -- whichever comes first.
@@ -542,16 +540,16 @@ namespace System.Reflection.Internal
 
         // Returns row number [0..RowCount) or -1 if not found.
         internal int BinarySearchForSlot(
-            uint rowCount,
+            int rowCount,
             int rowSize,
             int referenceOffset,
             uint referenceValue,
             bool isReferenceSmall)
         {
             int startRowNumber = 0;
-            int endRowNumber = (int)rowCount - 1;
-            uint startValue = PeekReference(startRowNumber * rowSize + referenceOffset, isReferenceSmall);
-            uint endValue = PeekReference(endRowNumber * rowSize + referenceOffset, isReferenceSmall);
+            int endRowNumber = rowCount - 1;
+            uint startValue = PeekReferenceUnchecked(startRowNumber * rowSize + referenceOffset, isReferenceSmall);
+            uint endValue = PeekReferenceUnchecked(endRowNumber * rowSize + referenceOffset, isReferenceSmall);
             if (endRowNumber == 1)
             {
                 if (referenceValue >= endValue)
@@ -568,13 +566,14 @@ namespace System.Reflection.Internal
                 {
                     return referenceValue == startValue ? startRowNumber : startRowNumber - 1;
                 }
-                else if (referenceValue >= endValue)
+
+                if (referenceValue >= endValue)
                 {
                     return referenceValue == endValue ? endRowNumber : endRowNumber + 1;
                 }
 
                 int midRowNumber = (startRowNumber + endRowNumber) / 2;
-                uint midReferenceValue = PeekReference(midRowNumber * rowSize + referenceOffset, isReferenceSmall);
+                uint midReferenceValue = PeekReferenceUnchecked(midRowNumber * rowSize + referenceOffset, isReferenceSmall);
                 if (referenceValue > midReferenceValue)
                 {
                     startRowNumber = midRowNumber;
@@ -596,18 +595,18 @@ namespace System.Reflection.Internal
 
         // Returns row number [0..RowCount) or -1 if not found.
         internal int BinarySearchReference(
-            uint rowCount,
+            int rowCount,
             int rowSize,
             int referenceOffset,
             uint referenceValue,
             bool isReferenceSmall)
         {
             int startRowNumber = 0;
-            int endRowNumber = (int)rowCount - 1;
+            int endRowNumber = rowCount - 1;
             while (startRowNumber <= endRowNumber)
             {
                 int midRowNumber = (startRowNumber + endRowNumber) / 2;
-                uint midReferenceValue = PeekReference(midRowNumber * rowSize + referenceOffset, isReferenceSmall);
+                uint midReferenceValue = PeekReferenceUnchecked(midRowNumber * rowSize + referenceOffset, isReferenceSmall);
                 if (referenceValue > midReferenceValue)
                 {
                     startRowNumber = midRowNumber + 1;
@@ -627,7 +626,7 @@ namespace System.Reflection.Internal
 
         // Row number [0, ptrTable.Length) or -1 if not found.
         internal int BinarySearchReference(
-            uint[] ptrTable,
+            int[] ptrTable,
             int rowSize,
             int referenceOffset,
             uint referenceValue,
@@ -638,7 +637,7 @@ namespace System.Reflection.Internal
             while (startRowNumber <= endRowNumber)
             {
                 int midRowNumber = (startRowNumber + endRowNumber) / 2;
-                uint midReferenceValue = PeekReference(((int)ptrTable[midRowNumber] - 1) * rowSize + referenceOffset, isReferenceSmall);
+                uint midReferenceValue = PeekReferenceUnchecked((ptrTable[midRowNumber] - 1) * rowSize + referenceOffset, isReferenceSmall);
                 if (referenceValue > midReferenceValue)
                 {
                     startRowNumber = midRowNumber + 1;
@@ -660,7 +659,7 @@ namespace System.Reflection.Internal
         /// Calculates a range of rows that have specified value in the specified column in a table that is sorted by that column.
         /// </summary>
         internal void BinarySearchReferenceRange(
-            uint rowCount,
+            int rowCount,
             int rowSize,
             int referenceOffset,
             uint referenceValue,
@@ -685,14 +684,14 @@ namespace System.Reflection.Internal
 
             startRowNumber = foundRowNumber;
             while (startRowNumber > 0 &&
-                   PeekReference((startRowNumber - 1) * rowSize + referenceOffset, isReferenceSmall) == referenceValue)
+                   PeekReferenceUnchecked((startRowNumber - 1) * rowSize + referenceOffset, isReferenceSmall) == referenceValue)
             {
                 startRowNumber--;
             }
 
             endRowNumber = foundRowNumber;
             while (endRowNumber + 1 < rowCount &&
-                   PeekReference((endRowNumber + 1) * rowSize + referenceOffset, isReferenceSmall) == referenceValue)
+                   PeekReferenceUnchecked((endRowNumber + 1) * rowSize + referenceOffset, isReferenceSmall) == referenceValue)
             {
                 endRowNumber++;
             }
@@ -702,7 +701,7 @@ namespace System.Reflection.Internal
         /// Calculates a range of rows that have specified value in the specified column in a table that is sorted by that column.
         /// </summary>
         internal void BinarySearchReferenceRange(
-            uint[] ptrTable,
+            int[] ptrTable,
             int rowSize,
             int referenceOffset,
             uint referenceValue,
@@ -727,14 +726,14 @@ namespace System.Reflection.Internal
 
             startRowNumber = foundRowNumber;
             while (startRowNumber > 0 &&
-                   PeekReference(((int)ptrTable[startRowNumber - 1] - 1) * rowSize + referenceOffset, isReferenceSmall) == referenceValue)
+                   PeekReferenceUnchecked((ptrTable[startRowNumber - 1] - 1) * rowSize + referenceOffset, isReferenceSmall) == referenceValue)
             {
                 startRowNumber--;
             }
 
             endRowNumber = foundRowNumber;
             while (endRowNumber + 1 < ptrTable.Length &&
-                   PeekReference(((int)ptrTable[endRowNumber + 1] - 1) * rowSize + referenceOffset, isReferenceSmall) == referenceValue)
+                   PeekReferenceUnchecked((ptrTable[endRowNumber + 1] - 1) * rowSize + referenceOffset, isReferenceSmall) == referenceValue)
             {
                 endRowNumber++;
             }
@@ -751,7 +750,7 @@ namespace System.Reflection.Internal
             int totalSize = this.Length;
             while (currOffset < totalSize)
             {
-                uint currReference = PeekReference(currOffset, isReferenceSmall);
+                uint currReference = PeekReferenceUnchecked(currOffset, isReferenceSmall);
                 if (currReference == referenceValue)
                 {
                     return currOffset / rowSize;
@@ -774,7 +773,7 @@ namespace System.Reflection.Internal
             uint previous = 0;
             while (offset < totalSize)
             {
-                uint current = PeekReference(offset, isReferenceSmall);
+                uint current = PeekReferenceUnchecked(offset, isReferenceSmall);
                 if (current < previous)
                 {
                     return false;
@@ -787,22 +786,22 @@ namespace System.Reflection.Internal
             return true;
         }
 
-        internal uint[] BuildPtrTable(
+        internal int[] BuildPtrTable(
             int numberOfRows,
             int rowSize,
             int referenceOffset,
             bool isReferenceSmall)
         {
-            uint[] ptrTable = new uint[numberOfRows];
+            int[] ptrTable = new int[numberOfRows];
             uint[] unsortedReferences = new uint[numberOfRows];
 
             for (int i = 0; i < ptrTable.Length; i++)
             {
-                ptrTable[i] = (uint)(i + 1);
+                ptrTable[i] = i + 1;
             }
 
             ReadColumn(unsortedReferences, rowSize, referenceOffset, isReferenceSmall);
-            Array.Sort(ptrTable, (uint a, uint b) => { return unsortedReferences[a - 1].CompareTo(unsortedReferences[b - 1]); });
+            Array.Sort(ptrTable, (int a, int b) => { return unsortedReferences[a - 1].CompareTo(unsortedReferences[b - 1]); });
             return ptrTable;
         }
 
@@ -818,7 +817,7 @@ namespace System.Reflection.Internal
             int i = 0;
             while (offset < totalSize)
             {
-                result[i] = PeekTaggedReference(offset, isReferenceSmall);
+                result[i] = PeekReferenceUnchecked(offset, isReferenceSmall);
                 offset += rowSize;
                 i++;
             }

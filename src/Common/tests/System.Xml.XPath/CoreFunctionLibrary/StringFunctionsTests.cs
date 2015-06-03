@@ -529,6 +529,49 @@ namespace XPathTests.FunctionalTests.CoreFunctionLibrary
 
         /// <summary>
         /// Verify result.
+        /// normalize-space("") = ""
+        /// </summary>
+        [Fact]
+        public static void StringFunctionsTest2473()
+        {
+            var xml = "dummy.xml";
+            var testExpression = @"normalize-space("""")";
+            var expected = @"";
+
+            Utils.XPathStringTest(xml, testExpression, expected);
+        }
+
+        /// <summary>
+        /// Verify result.
+        /// normalize-space(" \t\n\r") = ""
+        /// </summary>
+        [Fact]
+        public static void StringFunctionsTest2474()
+        {
+            var xml = "dummy.xml";
+            var testExpression = "normalize-space(\" \t\n\r\")";
+            var expected = @"";
+
+            Utils.XPathStringTest(xml, testExpression, expected);
+        }
+
+        /// <summary>
+        /// Verify result.
+        /// normalize-space(" Surrogate-Pair-String ") = ""
+        /// </summary>
+        [Fact]
+        public static void StringFunctionsTest2475()
+        {
+            var xml = "dummy.xml";
+            var fourCircles = char.ConvertFromUtf32(0x1F01C);
+            var testExpression = "normalize-space(\" " + fourCircles + " \")";
+            var expected = fourCircles;
+
+            Utils.XPathStringTest(xml, testExpression, expected);
+        }
+
+        /// <summary>
+        /// Verify result.
         /// normalize-space(" AB") = "AB"
         /// </summary>
         [Fact]
@@ -727,6 +770,64 @@ namespace XPathTests.FunctionalTests.CoreFunctionLibrary
 
         /// <summary>
         /// Verify result.
+        /// translate("", "abc", "ABC") = ""
+        /// </summary>
+        [Fact]
+        public static void StringFunctionsTest2472()
+        {
+            var xml = "dummy.xml";
+            var testExpression = @"translate("""", ""abc"", ""ABC"")";
+            var expected = @"";
+
+            Utils.XPathStringTest(xml, testExpression, expected);
+        }
+
+        /// <summary>
+        /// Verify result.
+        /// translate("unicode", "unicode", "uppercase-unicode") = "uppercase -unicode"
+        /// </summary>
+        [Fact]
+        public static void StringFunctionsTest2476()
+        {
+            var xml = "dummy.xml";
+            var testExpression = "translate(\"\0x03B1\0x03B2\0x03B3\", \"\0x03B1\0x03B2\0x03B3\", \"\0x0391\0x0392\0x0393\")";
+            var expected = "\0x0391\0x0392\0x0393";
+
+            Utils.XPathStringTest(xml, testExpression, expected);
+        }
+
+        /// <summary>
+        /// Verify result.
+        /// translate("surrogate-pairs", "ABC", "") = "surrogate-pairs"
+        /// </summary>
+        [Fact]
+        public static void StringFunctionsTest2477()
+        {
+            var xml = "dummy.xml";
+            var fourOClock = char.ConvertFromUtf32(0x1F553);
+            var fiveOClock = char.ConvertFromUtf32(0x1F554);
+            var testExpression = @"translate(""" + fourOClock + fiveOClock + @""", ""ABC"", """")";
+            var expected = fourOClock + fiveOClock;
+
+            Utils.XPathStringTest(xml, testExpression, expected);
+        }
+
+        /// <summary>
+        /// Verify result.
+        /// translate("abc", "abca", "ABCZ") = "ABC"
+        /// </summary>
+        [Fact]
+        public static void StringFunctionsTest2478()
+        {
+            var xml = "dummy.xml";
+            var testExpression = @"translate(""abc"", ""abca"", ""ABCZ"")";
+            var expected = "ABC";
+
+            Utils.XPathStringTest(xml, testExpression, expected);
+        }
+
+        /// <summary>
+        /// Verify result.
         /// translate("abc", "abc", "ABC") = "ABC"
         /// </summary>
         [Fact]
@@ -783,7 +884,7 @@ namespace XPathTests.FunctionalTests.CoreFunctionLibrary
         }
 
         /// <summary>
-        /// stirng(NaN)
+        /// string(NaN)
         /// </summary>
         [Fact]
         public static void StringFunctionsTest2455()
@@ -862,7 +963,7 @@ namespace XPathTests.FunctionalTests.CoreFunctionLibrary
         }
 
         /// <summary>
-        /// Code coverage: covers the substring() funtion with in a query
+        /// Code coverage: covers the substring() function with in a query
         /// child::*[substring(name(),0,1)="b"]
         /// </summary>
         [Fact]
@@ -877,7 +978,7 @@ namespace XPathTests.FunctionalTests.CoreFunctionLibrary
         }
 
         /// <summary>
-        /// Code coverage: covers the substring-after() funtion with in a query
+        /// Code coverage: covers the substring-after() function with in a query
         /// child::*[substring-after(name(),"b")="ook"]
         /// </summary>
         [Fact]
@@ -892,7 +993,7 @@ namespace XPathTests.FunctionalTests.CoreFunctionLibrary
         }
 
         /// <summary>
-        /// Code coverage: covers the normalize-space() funtion with in a query
+        /// Code coverage: covers the normalize-space() function with in a query
         /// child::*[normalize-space(" book")=name()]
         /// </summary>
         [Fact]
@@ -907,7 +1008,7 @@ namespace XPathTests.FunctionalTests.CoreFunctionLibrary
         }
 
         /// <summary>
-        /// Expected: namesapce uri
+        /// Expected: namespace uri
         /// string() (namespace node)
         /// </summary>
         [Fact]
@@ -926,8 +1027,8 @@ namespace XPathTests.FunctionalTests.CoreFunctionLibrary
         }
 
         /// <summary>
-        /// Expected: xml namesapce uri
-        /// stirng() (namespace node = xml)
+        /// Expected: xml namespace uri
+        /// string() (namespace node = xml)
         /// </summary>
         [Fact]
         public static void StringFunctionsTest2465()
@@ -945,7 +1046,7 @@ namespace XPathTests.FunctionalTests.CoreFunctionLibrary
         }
 
         /// <summary>
-        /// Expected: default namesapce uri
+        /// Expected: default namespace uri
         /// string() (namespace node = default ns)
         /// </summary>
         [Fact]

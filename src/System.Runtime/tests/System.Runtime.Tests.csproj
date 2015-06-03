@@ -17,7 +17,6 @@
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
   </PropertyGroup>
-  <!-- References are resolved from packages.config -->
   <ItemGroup>
     <Compile Include="System\Activator.cs" />
     <Compile Include="System\Array.cs" />
@@ -36,6 +35,8 @@
     <Compile Include="System\Collections\ObjectModel\Collection.cs" />
     <Compile Include="System\Collections\ObjectModel\CollectionTestBase.cs" />
     <Compile Include="System\Collections\ObjectModel\ReadOnlyCollection.cs" />
+    <Compile Include="System\ComponentModel\EditorBrowsableAttribute.cs" />
+    <Compile Include="System\ComponentModel\DefaultValueAttribute.cs" />
     <Compile Include="System\DateTime.cs" />
     <Compile Include="System\DateTimeOffset.cs" />
     <Compile Include="System\DateTimeOffset.UnixTimeConversions.cs" />
@@ -59,16 +60,19 @@
     <Compile Include="System\IO\PathTooLongException.cs" />
     <Compile Include="System\IO\PathTooLongException.Interop.cs" />
     <Compile Include="System\Lazy.cs" />
+    <Compile Include="System\LazyOfTMetadata.cs" />
     <Compile Include="System\MethodAccessException.cs" />
     <Compile Include="System\MissingFieldException.cs" />
     <Compile Include="System\MissingMethodException.cs" />
     <Compile Include="System\MulticastDelegate.cs" />
     <Compile Include="System\Nullable.cs" />
     <Compile Include="System\Object.cs" />
+    <Compile Include="System\Runtime\CompilerServices\StrongBox.cs" />
     <Compile Include="System\Runtime\CompilerServices\RuntimeHelpers.cs" />
     <Compile Include="System\SByte.cs" />
     <Compile Include="System\Single.cs" />
     <Compile Include="System\String.cs" />
+    <Compile Include="System\String.Split.cs" />
     <Compile Include="System\Text\StringBuilder.cs" />
     <Compile Include="System\Threading\WaitHandle.cs" />
     <Compile Include="System\TimeSpan.cs" />
@@ -84,9 +88,16 @@
     <Compile Include="System\WeakReference.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config">
-      <SubType>Designer</SubType>
-    </None>
+    <None Include="project.json" />
+  </ItemGroup>
+  <ItemGroup>
+    <!-- Compile tests against the System.Runtime contract, but copy our local-built implementation for testing -->
+    <ProjectReference Include="..\src\System.Runtime.CoreCLR.csproj">
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <OutputItemType>Content</OutputItemType>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Targets>Build;DebugSymbolsProjectOutputGroup</Targets>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

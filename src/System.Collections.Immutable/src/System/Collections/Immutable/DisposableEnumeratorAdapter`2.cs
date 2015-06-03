@@ -7,7 +7,7 @@ namespace System.Collections.Immutable
 {
     /// <summary>
     /// An adapter that allows a single foreach loop in C# to avoid
-    /// boxing an enumerator when possible, but fallback to boxing when necessary.
+    /// boxing an enumerator when possible, but fall back to boxing when necessary.
     /// </summary>
     /// <typeparam name="T">The type of value to be enumerated.</typeparam>
     /// <typeparam name="TEnumerator">The type of the enumerator struct.</typeparam>
@@ -29,7 +29,7 @@ namespace System.Collections.Immutable
         private TEnumerator _enumeratorStruct;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="EnumeratorAdapter{T, TEnumerator}"/> struct
+        /// Initializes a new instance of the <see cref="DisposableEnumeratorAdapter{T, TEnumerator}"/> struct
         /// for enumerating over a strongly typed struct enumerator.
         /// </summary>
         /// <param name="enumerator">The initialized enumerator struct.</param>
@@ -40,7 +40,7 @@ namespace System.Collections.Immutable
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="EnumeratorAdapter{T, TEnumerator}"/> struct
+        /// Initializes a new instance of the <see cref="DisposableEnumeratorAdapter{T, TEnumerator}"/> struct
         /// for enumerating over a (boxed) <see cref="IEnumerable{T}"/> enumerator.
         /// </summary>
         /// <param name="enumerator">The initialized enumerator object.</param>

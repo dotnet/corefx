@@ -1,11 +1,8 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
-using System.Collections;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Text;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
@@ -156,7 +153,7 @@ namespace System.Collections.Concurrent.Tests
         // a BCL stack on the side to validate contents are correctly maintained.
         private static void Test1_PushAndPop(int pushes, int pops)
         {
-            // It utilised a random generator to do x number of pushes and
+            // It utilized a random generator to do x number of pushes and
             // y number of pops where x = random, y = random.  Removed it
             // because it used System.Runtime.Extensions.
 
@@ -205,10 +202,10 @@ namespace System.Collections.Concurrent.Tests
         }
 
         // Pushes and pops a certain number of times, and validates the resulting count.
-        // These operations happen sconcurrently.
+        // These operations happen concurrently.
         private static void Test2_ConcPushAndPop(int threads, int pushes, int pops)
         {
-            // It utilised a random generator to do x number of pushes and
+            // It utilized a random generator to do x number of pushes and
             // y number of pops where x = random, y = random.  Removed it
             // because it used System.Runtime.Extensions.
 
@@ -372,7 +369,7 @@ namespace System.Collections.Concurrent.Tests
             }
         }
 
-        //Tests ConcurrentStack.PopRange by pushing consecutove numbers and run n threads each thread tries to pop m itmes
+        //Tests ConcurrentStack.PopRange by pushing consecutive numbers and run n threads each thread tries to pop m itmes
         // the popped m items should be consecutive
         private static void Test7_PopRange(int NumOfThreads, int elementsPerThread)
         {
@@ -474,6 +471,13 @@ namespace System.Collections.Concurrent.Tests
             Assert.Throws<NotSupportedException>(
                () => { object obj = collection.SyncRoot; });
                // "TestICollection:  ICollection.SyncRoot didn't throw NotSupportedException! for collection type: ConcurrentStack");
+        }
+
+        [Fact]
+        public static void Test10_DebuggerAttributes()
+        {
+            DebuggerAttributes.ValidateDebuggerDisplayReferences(new ConcurrentStack<int>());
+            DebuggerAttributes.ValidateDebuggerTypeProxyProperties(new ConcurrentStack<int>());
         }
 
         [Fact]

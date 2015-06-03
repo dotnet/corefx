@@ -1812,8 +1812,10 @@ namespace System.Text.RegularExpressions
                 _capnumlist = new Int32[_capcount];
                 int i = 0;
 
-                for (IDictionaryEnumerator de = _caps.GetEnumerator(); de.MoveNext();)
-                    _capnumlist[i++] = (int)de.Key;
+                foreach (KeyValuePair<int, int> kvp in _caps)
+                {
+                    _capnumlist[i++] = kvp.Key;
+                }
 
                 System.Array.Sort(_capnumlist, Comparer<Int32>.Default);
             }
@@ -1938,7 +1940,7 @@ namespace System.Text.RegularExpressions
         }
 
         internal const byte Q = 5;    // quantifier
-        internal const byte S = 4;    // ordinary stoppper
+        internal const byte S = 4;    // ordinary stopper
         internal const byte Z = 3;    // ScanBlank stopper
         internal const byte X = 2;    // whitespace
         internal const byte E = 1;    // should be escaped

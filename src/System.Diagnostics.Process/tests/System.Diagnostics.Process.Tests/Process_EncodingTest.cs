@@ -23,71 +23,59 @@ namespace System.Diagnostics.ProcessTests
 
         private const int s_ConsoleEncoding = 437;
 
-        [Fact]
-        [ActiveIssue(335)]
-        public static void Process_EncodingBeforeProvider()
+        [Fact, ActiveIssue(1538, PlatformID.OSX)]
+        public void Process_EncodingBeforeProvider()
         {
-            SetConsoleCP(s_ConsoleEncoding);
-            SetConsoleOutputCP(s_ConsoleEncoding);
+            Action<int> run = expectedCodePage =>
+            {
+                Process p = CreateProcessInfinite();
+                p.StartInfo.RedirectStandardInput = true;
+                p.StartInfo.RedirectStandardOutput = true;
+                p.StartInfo.RedirectStandardError = true;
+                p.Start();
+
+                Assert.Equal(p.StandardInput.Encoding.CodePage, expectedCodePage);
+                Assert.Equal(p.StandardOutput.CurrentEncoding.CodePage, expectedCodePage);
+                Assert.Equal(p.StandardError.CurrentEncoding.CodePage, expectedCodePage);
+
+                p.Kill();
+                Assert.True(p.WaitForExit(WaitInMS));
+            };
+
+            if (global::Interop.PlatformDetection.OperatingSystem != global::Interop.OperatingSystem.Windows)
+            {
+                run(Encoding.UTF8.CodePage);
+                return;
+            }
 
             int inputEncoding = GetConsoleCP();
             int outputEncoding = GetConsoleOutputCP();
 
             try
             {
-                Process p = CreateProcessInfinite();
-                p.StartInfo.RedirectStandardInput = true;
-                p.Start();
-                Assert.Equal(p.StandardInput.Encoding.CodePage, Encoding.UTF8.CodePage);
-                p.Kill();
-                p.WaitForExit();
+                {
+                    SetConsoleCP(s_ConsoleEncoding);
+                    SetConsoleOutputCP(s_ConsoleEncoding);
 
-                p = CreateProcessInfinite();
-                p.StartInfo.RedirectStandardOutput = true;
-                p.Start();
-                Assert.Equal(p.StandardOutput.CurrentEncoding.CodePage,  Encoding.UTF8.CodePage);
-                p.Kill();
-                p.WaitForExit();
+                    run(Encoding.UTF8.CodePage);
+                }
 
-                p = CreateProcessInfinite();
-                p.StartInfo.RedirectStandardError = true;
-                p.Start();
-                Assert.Equal(p.StandardError.CurrentEncoding.CodePage, Encoding.UTF8.CodePage);
-                p.Kill();
-                p.WaitForExit();
+                {
+                    SetConsoleCP(s_ConsoleEncoding);
+                    SetConsoleOutputCP(s_ConsoleEncoding);
 
+                    // Register the codeprovider which will ensure 437 is enabled.
+                    Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 
-                // Register the codeprovider which will ensure 437 is enabled.
-                Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
-                p = CreateProcessInfinite();
-                p.StartInfo.RedirectStandardInput = true;
-                p.Start();
-                Assert.Equal(p.StandardInput.Encoding.CodePage, inputEncoding);
-                p.Kill();
-                p.WaitForExit();
-
-                p = CreateProcessInfinite();
-                p.StartInfo.RedirectStandardOutput = true;
-                p.Start();
-                Assert.Equal(p.StandardOutput.CurrentEncoding.CodePage, outputEncoding);
-                p.Kill();
-                p.WaitForExit();
-
-                p = CreateProcessInfinite();
-                p.StartInfo.RedirectStandardError = true;
-                p.Start();
-                Assert.Equal(p.StandardError.CurrentEncoding.CodePage, outputEncoding);
-                p.Kill();
-                p.WaitForExit();
+                    run(s_ConsoleEncoding);
+                }
             }
             finally
             {
-                foreach (Process p in Process.GetProcessesByName(s_ProcessName))
-                {
-                    p.Kill();
-                    p.WaitForExit();
-                }
+                SetConsoleCP(inputEncoding);
+                SetConsoleOutputCP(outputEncoding);
             }
         }
+
     }
 }

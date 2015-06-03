@@ -132,7 +132,7 @@ namespace System.Threading.Tasks.Dataflow
             }
             else // async
             {
-                Contract.Assert(transformAsync != null, "Incorrect delegate type.");
+                Debug.Assert(transformAsync != null, "Incorrect delegate type.");
 
                 // If a task-based function was provided, we need to use asynchronous completion, meaning
                 // that the target won't consider a message completed until the task
@@ -161,7 +161,7 @@ namespace System.Threading.Tasks.Dataflow
             _source.Completion.ContinueWith((completed, state) =>
             {
                 var thisBlock = ((TransformManyBlock<TInput, TOutput>)state) as IDataflowBlock;
-                Contract.Assert(completed.IsFaulted, "The source must be faulted in order to trigger a target completion.");
+                Debug.Assert(completed.IsFaulted, "The source must be faulted in order to trigger a target completion.");
                 thisBlock.Fault(completed.Exception);
             }, this, CancellationToken.None, Common.GetContinuationOptions() | TaskContinuationOptions.OnlyOnFaulted, TaskScheduler.Default);
 
@@ -312,7 +312,7 @@ namespace System.Threading.Tasks.Dataflow
                     break;
 
                 default:
-                    Contract.Assert(false, "The task should have been in a final state.");
+                    Debug.Assert(false, "The task should have been in a final state.");
                     break;
             }
 
@@ -410,7 +410,7 @@ namespace System.Threading.Tasks.Dataflow
                 if (isNextItem)
                 {
                     StoreOutputItemsNonReorderedWithIteration(item);
-                    // here itemCopy remains null, so that base.AddItem will finish our iteractions with the reordering buffer
+                    // here itemCopy remains null, so that base.AddItem will finish our interactions with the reordering buffer
                 }
                 else if (itemAsTrustedList != null)
                 {
@@ -514,13 +514,13 @@ namespace System.Threading.Tasks.Dataflow
             Contract.Requires(_target.IsBounded, "Expected to be in bounding mode.");
             if (count > 1) _target.ChangeBoundingCount(count - 1);
             else if (count == 0) _target.ChangeBoundingCount(-1);
-            else Contract.Assert(count == 1, "Count shouldn't be negative.");
+            else Debug.Assert(count == 1, "Count shouldn't be negative.");
         }
 
-        /// <include file='XmlDocs\CommonXmlDocComments.xml' path='CommonXmlDocComments/Blocks/Member[@name="Complete"]/*' />
+        /// <include file='XmlDocs/CommonXmlDocComments.xml' path='CommonXmlDocComments/Blocks/Member[@name="Complete"]/*' />
         public void Complete() { _target.Complete(exception: null, dropPendingMessages: false); }
 
-        /// <include file='XmlDocs\CommonXmlDocComments.xml' path='CommonXmlDocComments/Blocks/Member[@name="Fault"]/*' />
+        /// <include file='XmlDocs/CommonXmlDocComments.xml' path='CommonXmlDocComments/Blocks/Member[@name="Fault"]/*' />
         void IDataflowBlock.Fault(Exception exception)
         {
             if (exception == null) throw new ArgumentNullException("exception");
@@ -529,43 +529,43 @@ namespace System.Threading.Tasks.Dataflow
             _target.Complete(exception, dropPendingMessages: true);
         }
 
-        /// <include file='XmlDocs\CommonXmlDocComments.xml' path='CommonXmlDocComments/Sources/Member[@name="LinkTo"]/*' />
+        /// <include file='XmlDocs/CommonXmlDocComments.xml' path='CommonXmlDocComments/Sources/Member[@name="LinkTo"]/*' />
         public IDisposable LinkTo(ITargetBlock<TOutput> target, DataflowLinkOptions linkOptions) { return _source.LinkTo(target, linkOptions); }
 
-        /// <include file='XmlDocs\CommonXmlDocComments.xml' path='CommonXmlDocComments/Sources/Member[@name="TryReceive"]/*' />
+        /// <include file='XmlDocs/CommonXmlDocComments.xml' path='CommonXmlDocComments/Sources/Member[@name="TryReceive"]/*' />
         public Boolean TryReceive(Predicate<TOutput> filter, out TOutput item) { return _source.TryReceive(filter, out item); }
 
-        /// <include file='XmlDocs\CommonXmlDocComments.xml' path='CommonXmlDocComments/Sources/Member[@name="TryReceiveAll"]/*' />
+        /// <include file='XmlDocs/CommonXmlDocComments.xml' path='CommonXmlDocComments/Sources/Member[@name="TryReceiveAll"]/*' />
         public bool TryReceiveAll(out IList<TOutput> items) { return _source.TryReceiveAll(out items); }
 
-        /// <include file='XmlDocs\CommonXmlDocComments.xml' path='CommonXmlDocComments/Blocks/Member[@name="Completion"]/*' />
+        /// <include file='XmlDocs/CommonXmlDocComments.xml' path='CommonXmlDocComments/Blocks/Member[@name="Completion"]/*' />
         public Task Completion { get { return _source.Completion; } }
 
-        /// <include file='XmlDocs\CommonXmlDocComments.xml' path='CommonXmlDocComments/Targets/Member[@name="InputCount"]/*' />
+        /// <include file='XmlDocs/CommonXmlDocComments.xml' path='CommonXmlDocComments/Targets/Member[@name="InputCount"]/*' />
         public int InputCount { get { return _target.InputCount; } }
 
-        /// <include file='XmlDocs\CommonXmlDocComments.xml' path='CommonXmlDocComments/Sources/Member[@name="OutputCount"]/*' />
+        /// <include file='XmlDocs/CommonXmlDocComments.xml' path='CommonXmlDocComments/Sources/Member[@name="OutputCount"]/*' />
         public int OutputCount { get { return _source.OutputCount; } }
 
-        /// <include file='XmlDocs\CommonXmlDocComments.xml' path='CommonXmlDocComments/Targets/Member[@name="OfferMessage"]/*' />
+        /// <include file='XmlDocs/CommonXmlDocComments.xml' path='CommonXmlDocComments/Targets/Member[@name="OfferMessage"]/*' />
         DataflowMessageStatus ITargetBlock<TInput>.OfferMessage(DataflowMessageHeader messageHeader, TInput messageValue, ISourceBlock<TInput> source, Boolean consumeToAccept)
         {
             return _target.OfferMessage(messageHeader, messageValue, source, consumeToAccept);
         }
 
-        /// <include file='XmlDocs\CommonXmlDocComments.xml' path='CommonXmlDocComments/Sources/Member[@name="ConsumeMessage"]/*' />
+        /// <include file='XmlDocs/CommonXmlDocComments.xml' path='CommonXmlDocComments/Sources/Member[@name="ConsumeMessage"]/*' />
         TOutput ISourceBlock<TOutput>.ConsumeMessage(DataflowMessageHeader messageHeader, ITargetBlock<TOutput> target, out Boolean messageConsumed)
         {
             return _source.ConsumeMessage(messageHeader, target, out messageConsumed);
         }
 
-        /// <include file='XmlDocs\CommonXmlDocComments.xml' path='CommonXmlDocComments/Sources/Member[@name="ReserveMessage"]/*' />
+        /// <include file='XmlDocs/CommonXmlDocComments.xml' path='CommonXmlDocComments/Sources/Member[@name="ReserveMessage"]/*' />
         bool ISourceBlock<TOutput>.ReserveMessage(DataflowMessageHeader messageHeader, ITargetBlock<TOutput> target)
         {
             return _source.ReserveMessage(messageHeader, target);
         }
 
-        /// <include file='XmlDocs\CommonXmlDocComments.xml' path='CommonXmlDocComments/Sources/Member[@name="ReleaseReservation"]/*' />
+        /// <include file='XmlDocs/CommonXmlDocComments.xml' path='CommonXmlDocComments/Sources/Member[@name="ReleaseReservation"]/*' />
         void ISourceBlock<TOutput>.ReleaseReservation(DataflowMessageHeader messageHeader, ITargetBlock<TOutput> target)
         {
             _source.ReleaseReservation(messageHeader, target);
@@ -576,7 +576,7 @@ namespace System.Threading.Tasks.Dataflow
         /// <summary>Gets the number of messages waiting to be processed.  This must only be used from the debugger as it avoids taking necessary locks.</summary>
         private int OutputCountForDebugger { get { return _source.GetDebuggingInformation().OutputCount; } }
 
-        /// <include file='XmlDocs\CommonXmlDocComments.xml' path='CommonXmlDocComments/Blocks/Member[@name="ToString"]/*' />
+        /// <include file='XmlDocs/CommonXmlDocComments.xml' path='CommonXmlDocComments/Blocks/Member[@name="ToString"]/*' />
         public override string ToString() { return Common.GetNameForDebugger(this, _source.DataflowBlockOptions); }
 
         /// <summary>The data to display in the debugger display attribute.</summary>

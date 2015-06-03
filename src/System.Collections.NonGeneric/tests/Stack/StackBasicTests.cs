@@ -3,15 +3,18 @@
 
 using System;
 using System.Collections;
+using System.Diagnostics;
 using Xunit;
 
+namespace System.Collections.StackTests
+{
 public class StackBasicTests
 {
     [Fact]
     public static void EmptyStackSizeIsZero()
     {
         Stack stack = new Stack();
-        Assert.Equal(stack.Count, 0);
+        Assert.Equal(0, stack.Count);
     }
 
     [Fact]
@@ -48,7 +51,7 @@ public class StackBasicTests
 
         stack.Clear();
 
-        Assert.Equal(stack.Count, 0);
+        Assert.Equal(0, stack.Count);
     }
 
     [Fact]
@@ -253,7 +256,7 @@ public class StackBasicTests
     public static void PassingValidCapacityCreatesZeroElementsStack()
     {
         Stack stack = new Stack(1);
-        Assert.Equal(stack.Count, 0);
+        Assert.Equal(0, stack.Count);
     }
 
     [Fact]
@@ -281,7 +284,7 @@ public class StackBasicTests
         Stack q2 = Stack.Synchronized(q1);
         Assert.Equal(q2.Count, q1.Count);
         q2.Clear();
-        Assert.Equal(q2.Count, 0);
+        Assert.Equal(0, q2.Count);
         for (int i = 0; i < 10; i++)
         {
             q2.Push("String_" + i);
@@ -293,7 +296,7 @@ public class StackBasicTests
             Assert.True(((String)q2.Pop()).Equals("String_" + j));
         }
 
-        Assert.Equal(q2.Count, 0);
+        Assert.Equal(0, q2.Count);
         Assert.True(q2.IsSynchronized);
 
         for (int i = 0; i < 10; i++)
@@ -356,4 +359,12 @@ public class StackBasicTests
     {
         Assert.Throws<ArgumentNullException>(() => { Stack stack = new Stack(null); });
     }
+        
+    [Fact]
+    public void DebuggerAttributeTests()
+    {
+        DebuggerAttributes.ValidateDebuggerDisplayReferences(new Stack());
+        DebuggerAttributes.ValidateDebuggerTypeProxyProperties(new Stack());
+    }
+}
 }

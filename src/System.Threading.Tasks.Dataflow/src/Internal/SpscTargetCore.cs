@@ -108,7 +108,7 @@ namespace System.Threading.Tasks.Dataflow.Internal
             return true;
         }
 
-        /// <include file='XmlDocs\CommonXmlDocComments.xml' path='CommonXmlDocComments/Targets/Member[@name="OfferMessage"]/*' />
+        /// <include file='XmlDocs/CommonXmlDocComments.xml' path='CommonXmlDocComments/Targets/Member[@name="OfferMessage"]/*' />
         internal DataflowMessageStatus OfferMessage(DataflowMessageHeader messageHeader, TInput messageValue, ISourceBlock<TInput> source, bool consumeToAccept)
         {
             // If we're not required to go back to the source to consume the offered message, try fast path.
@@ -134,13 +134,13 @@ namespace System.Threading.Tasks.Dataflow.Internal
             // If the message header is invalid, throw.
             if (!messageHeader.IsValid)
             {
-                throw new ArgumentException(Strings.Argument_InvalidMessageHeader, "messageHeader");
+                throw new ArgumentException(SR.Argument_InvalidMessageHeader, "messageHeader");
             }
 
             // If the caller has requested we consume the message using ConsumeMessage, do so.
             if (consumeToAccept)
             {
-                if (source == null) throw new ArgumentException(Strings.Argument_CantConsumeFromANullSource, "consumeToAccept");
+                if (source == null) throw new ArgumentException(SR.Argument_CantConsumeFromANullSource, "consumeToAccept");
                 bool consumed;
                 messageValue = source.ConsumeMessage(messageHeader, _owningTarget, out consumed);
                 if (!consumed) return DataflowMessageStatus.NotAvailable;
@@ -195,7 +195,7 @@ namespace System.Threading.Tasks.Dataflow.Internal
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
         private void ProcessMessagesLoopCore()
         {
-            Contract.Assert(
+            Debug.Assert(
                 _activeConsumer != null && _activeConsumer.Id == Task.CurrentId,
                 "This method should only be called when it's the active consumer.");
 
@@ -258,7 +258,7 @@ namespace System.Threading.Tasks.Dataflow.Internal
                         {
                             // Mark that we're exiting.
                             Task previousConsumer = Interlocked.Exchange(ref _activeConsumer, null);
-                            Contract.Assert(previousConsumer != null && previousConsumer.Id == Task.CurrentId,
+                            Debug.Assert(previousConsumer != null && previousConsumer.Id == Task.CurrentId,
                                 "The running task should have been denoted as the active task.");
 
                             // Now that we're no longer the active task, double
@@ -324,7 +324,7 @@ namespace System.Threading.Tasks.Dataflow.Internal
         /// </summary>
         private void CompleteBlockOncePossible()
         {
-            Contract.Assert(_completionReserved, "Should only invoke once completion has been reserved.");
+            Debug.Assert(_completionReserved, "Should only invoke once completion has been reserved.");
 
             // Dump any messages that might remain in the queue, which could happen if we completed due to exceptions.
             TInput dumpedMessage;
@@ -342,7 +342,7 @@ namespace System.Threading.Tasks.Dataflow.Internal
             {
                 result = CompletionSource.TrySetResult(default(VoidResult));
             }
-            Contract.Assert(result, "Expected completion task to not yet be completed");
+            Debug.Assert(result, "Expected completion task to not yet be completed");
             // We explicitly do not set the _activeTask to null here, as that would
             // allow for races where a producer calling OfferMessage could end up
             // seeing _activeTask as null and queueing a new consumer task even
@@ -357,7 +357,7 @@ namespace System.Threading.Tasks.Dataflow.Internal
 #endif
         }
 
-        /// <include file='XmlDocs\CommonXmlDocComments.xml' path='CommonXmlDocComments/Blocks/Member[@name="Completion"]/*' />
+        /// <include file='XmlDocs/CommonXmlDocComments.xml' path='CommonXmlDocComments/Blocks/Member[@name="Completion"]/*' />
         internal Task Completion { get { return CompletionSource.Task; } }
 
         /// <summary>Gets the lazily-initialized completion source.</summary>

@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -250,7 +251,8 @@ namespace System.Collections.Immutable.Test
             ImmutableArray<string> derivedImmutable = ImmutableArray.Create("a", "b", "c");
             ImmutableArray<object> baseImmutable = derivedImmutable.As<object>();
             Assert.False(baseImmutable.IsDefault);
-            Assert.Equal(derivedImmutable, baseImmutable);
+            // Must cast to object or the IEnumerable<object> overload of Equals would be used
+            Assert.Equal((object)derivedImmutable, baseImmutable, EqualityComparer<object>.Default);
 
             // Make sure we can reverse that, as a means to verify the underlying array is the same instance.
             ImmutableArray<string> derivedImmutable2 = baseImmutable.As<string>();
@@ -284,7 +286,8 @@ namespace System.Collections.Immutable.Test
         {
             ImmutableArray<string> derivedImmutable = ImmutableArray.Create("a", "b", "c");
             ImmutableArray<object> baseImmutable = ImmutableArray.CreateRange<object>(derivedImmutable);
-            Assert.Equal(derivedImmutable, baseImmutable);
+            // Must cast to object or the IEnumerable<object> overload of Equals would be used
+            Assert.Equal((object)derivedImmutable, baseImmutable, EqualityComparer<object>.Default);
 
             // Make sure we can reverse that, as a means to verify the underlying array is the same instance.
             ImmutableArray<string> derivedImmutable2 = baseImmutable.As<string>();
@@ -296,7 +299,8 @@ namespace System.Collections.Immutable.Test
         {
             ImmutableArray<string> derivedImmutable = ImmutableArray.Create("a", "b", "c");
             ImmutableArray<object> baseImmutable = ImmutableArray<object>.CastUp(derivedImmutable);
-            Assert.Equal(derivedImmutable, baseImmutable);
+            // Must cast to object or the IEnumerable<object> overload of Equals would be used
+            Assert.Equal((object)derivedImmutable, baseImmutable, EqualityComparer<object>.Default);
 
             // Make sure we can reverse that, as a means to verify the underlying array is the same instance.
             Assert.Equal(derivedImmutable, baseImmutable.As<string>());
@@ -1048,7 +1052,7 @@ namespace System.Collections.Immutable.Test
         {
             var array = ImmutableArray.Create(2, 4, 1, 3);
             Assert.Equal(new[] { 1, 2, 3, 4 }, array.Sort());
-            Assert.Equal(new[] { 2, 4, 1, 3 }, array); // original array uneffected.
+            Assert.Equal(new[] { 2, 4, 1, 3 }, array); // original array unaffected.
         }
 
         [Fact]
@@ -1056,7 +1060,7 @@ namespace System.Collections.Immutable.Test
         {
             var array = ImmutableArray.Create(2, 4, 1, 3);
             Assert.Equal(new[] { 1, 2, 3, 4 }, array.Sort(null));
-            Assert.Equal(new[] { 2, 4, 1, 3 }, array); // original array uneffected.
+            Assert.Equal(new[] { 2, 4, 1, 3 }, array); // original array unaffected.
         }
 
         [Fact]
@@ -1255,6 +1259,20 @@ namespace System.Collections.Immutable.Test
                 }
             };
             Task.WaitAll(Task.Run(mutator), Task.Run(mutator));
+        }
+
+        [Fact]
+        public void DebuggerAttributesValid()
+        {
+            DebuggerAttributes.ValidateDebuggerDisplayReferences(ImmutableArray.Create<string>()); // verify empty
+            DebuggerAttributes.ValidateDebuggerDisplayReferences(ImmutableArray.Create(1, 2, 3));  // verify non-empty
+        }
+
+        [Fact]
+        public void ICollectionSyncRoot_NotSupported()
+        {
+            ICollection c = ImmutableArray.Create(1, 2, 3);
+            Assert.Throws<NotSupportedException>(() => c.SyncRoot);
         }
 
         protected override IEnumerable<T> GetEnumerableOf<T>(params T[] contents)

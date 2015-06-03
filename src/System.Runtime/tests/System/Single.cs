@@ -176,10 +176,6 @@ public static class SingleTests
 
         Single i2 = -8249;
         Assert.Equal("-8249", i2.ToString());
-
-        Assert.Equal("NaN", Single.NaN.ToString());
-        Assert.Equal("Infinity", Single.PositiveInfinity.ToString());
-        Assert.Equal("-Infinity", Single.NegativeInfinity.ToString());
     }
 
     [Fact]
@@ -198,6 +194,10 @@ public static class SingleTests
         // Changing the negative pattern doesn't do anything without also passing in a format string
         numberFormat.NumberNegativePattern = 0;
         Assert.Equal("-2468", i3.ToString(numberFormat));
+
+        Assert.Equal("NaN", Single.NaN.ToString(NumberFormatInfo.InvariantInfo));
+        Assert.Equal("Infinity", Single.PositiveInfinity.ToString(NumberFormatInfo.InvariantInfo));
+        Assert.Equal("-Infinity", Single.NegativeInfinity.ToString(NumberFormatInfo.InvariantInfo));
     }
 
     [Fact]
@@ -210,7 +210,7 @@ public static class SingleTests
         Assert.Equal("-8249", i2.ToString("g"));
 
         Single i3 = -2468;
-        Assert.Equal("-2,468.00", i3.ToString("N"));
+        Assert.Equal(string.Format("{0:N}", -2468.00), i3.ToString("N"));
     }
 
     [Fact]
@@ -242,8 +242,8 @@ public static class SingleTests
     [Fact]
     public static void TestParseNumberStyle()
     {
-        Assert.Equal<Single>(123.1f, Single.Parse("123.1", NumberStyles.AllowDecimalPoint));
-        Assert.Equal(1000, Single.Parse("1,000", NumberStyles.AllowThousands));
+        Assert.Equal<Single>(123.1f, Single.Parse((123.1).ToString("F"), NumberStyles.AllowDecimalPoint));
+        Assert.Equal(1000, Single.Parse((1000).ToString("N0"), NumberStyles.AllowThousands));
         //TODO: Negative tests once we get better exceptions
     }
 
@@ -260,9 +260,11 @@ public static class SingleTests
     public static void TestParseNumberStyleFormatProvider()
     {
         var nfi = new NumberFormatInfo();
+        nfi.NumberDecimalSeparator = ".";
         Assert.Equal<Single>(123.123f, Single.Parse("123.123", NumberStyles.Float, nfi));
 
         nfi.CurrencySymbol = "$";
+        nfi.CurrencyGroupSeparator = ",";
         Assert.Equal(1000, Single.Parse("$1,000", NumberStyles.Currency, nfi));
         //TODO: Negative tests once we get better exception support
     }
@@ -282,25 +284,17 @@ public static class SingleTests
         Assert.True(Single.TryParse(" 678 ", out i));   // Leading/Trailing whitespace
         Assert.Equal(678, i);
 
-        Assert.True(Single.TryParse("678.90", out i)); // Decimal
+        Assert.True(Single.TryParse((678.90).ToString("F2"), out i)); // Decimal
         Assert.Equal((Single)678.90, i);
 
         Assert.True(Single.TryParse("1E23", out i));   // Exponent
         Assert.Equal((Single)1E23, i);
 
-        Assert.True(Single.TryParse("1,000", out i));  // Thousands
+        Assert.True(Single.TryParse((1000).ToString("N0"), out i));  // Thousands
         Assert.Equal(1000, i);
 
-        Assert.True(Single.TryParse("Infinity", out i));
-        Assert.True(Single.IsPositiveInfinity(i));
-
-        Assert.True(Single.TryParse("-Infinity", out i));
-        Assert.True(Single.IsNegativeInfinity(i));
-
-        Assert.True(Single.TryParse("NaN", out i));
-        Assert.True(Single.IsNaN(i));
-
-        Assert.False(Single.TryParse("$1000", out i));  // Currency
+        var nfi = new NumberFormatInfo() { CurrencyGroupSeparator = "" };
+        Assert.False(Single.TryParse((1000).ToString("C0", nfi), out i));  // Currency
         Assert.False(Single.TryParse("abc", out i));    // Hex digits
         Assert.False(Single.TryParse("(135)", out i));  // Parentheses
     }
@@ -310,6 +304,7 @@ public static class SingleTests
     {
         Single i;
         var nfi = new NumberFormatInfo();
+        nfi.NumberDecimalSeparator = ".";
         Assert.True(Single.TryParse("123.123", NumberStyles.Any, nfi, out i));   // Simple positive
         Assert.Equal(123.123f, i);
 
@@ -317,6 +312,7 @@ public static class SingleTests
         Assert.Equal(123, i);
 
         nfi.CurrencySymbol = "$";
+        nfi.CurrencyGroupSeparator = ",";
         Assert.True(Single.TryParse("$1,000", NumberStyles.Currency, nfi, out i)); // Currency/Thousands postive
         Assert.Equal(1000, i);
 
@@ -327,6 +323,15 @@ public static class SingleTests
 
         Assert.True(Single.TryParse("(135)", NumberStyles.AllowParentheses, nfi, out i)); // Parenthese postive
         Assert.Equal(-135, i);
+
+        Assert.True(Single.TryParse("Infinity", NumberStyles.Any, NumberFormatInfo.InvariantInfo, out i));
+        Assert.True(Single.IsPositiveInfinity(i));
+
+        Assert.True(Single.TryParse("-Infinity", NumberStyles.Any, NumberFormatInfo.InvariantInfo, out i));
+        Assert.True(Single.IsNegativeInfinity(i));
+
+        Assert.True(Single.TryParse("NaN", NumberStyles.Any, NumberFormatInfo.InvariantInfo, out i));
+        Assert.True(Single.IsNaN(i));
     }
 }
 

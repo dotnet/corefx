@@ -9,6 +9,7 @@ using Xunit;
 [Collection("Dispose")]
 public class MMF_Dispose
 {
+    private readonly static string s_uniquifier = Guid.NewGuid().ToString();
     private int _iCountErrors = 0;
     private int _iCountTestcases = 0;
 
@@ -39,7 +40,7 @@ public class MMF_Dispose
             // Dispose()
             ////////////////////////////////////////////////////////////////////////
 
-            MemoryMappedFile mmf = MemoryMappedFile.CreateNew("Dispose_mapname101", 100);
+            MemoryMappedFile mmf = MemoryMappedFile.CreateNew(null, 100);
             MemoryMappedViewStream viewStream = mmf.CreateViewStream();
             MemoryMappedViewAccessor viewAccessor = mmf.CreateViewAccessor();
             mmf.Dispose();
@@ -111,6 +112,9 @@ public class MMF_Dispose
                 _iCountErrors++;
                 Console.WriteLine("ERROR, Loc010c: Unexpected exception, {0}", ex);
             }
+
+            viewStream.Dispose();
+            viewAccessor.Dispose();
 
             /// END TEST CASES
 

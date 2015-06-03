@@ -51,24 +51,6 @@ public class GCTests
     }
 
     [Fact]
-    public static void TotalMemory()
-    {
-        GC.Collect();
-        GC.Collect();
-
-        int[] array1 = new int[20000];
-        int memOld = (int)GC.GetTotalMemory(false);
-
-        array1 = null;
-        GC.Collect();
-
-        int[] array2 = new int[40000];
-        int memNew = (int)GC.GetTotalMemory(false);
-
-        Assert.True(memNew >= memOld);
-    }
-
-    [Fact]
     public static void Finalizer()
     {
         FinalizerTest.Run();
@@ -109,19 +91,16 @@ public class GCTests
     {
         public static void Run()
         {
-            RunWorker();
-            Assert.False(KeepAliveObject.Finalized);
-            Assert.True(DoNotKeepAliveObject.Finalized);
-        }
-
-        private static void RunWorker()
-        {
             var keepAlive = new KeepAliveObject();
-            var doNotKeepAlive = new DoNotKeepAliveObject();
 
+            var doNotKeepAlive = new DoNotKeepAliveObject();
             doNotKeepAlive = null;
+
             GC.Collect();
             GC.WaitForPendingFinalizers();
+
+            Assert.True(DoNotKeepAliveObject.Finalized);
+            Assert.False(KeepAliveObject.Finalized);
 
             GC.KeepAlive(keepAlive);
         }
@@ -188,12 +167,8 @@ public class GCTests
     {
         public static void Run()
         {
-            var obj = new TestObject();
             int recursionCount = 0;
-
-            RunWorker(obj, ref recursionCount);
-
-            Assert.False(TestObject.Finalized);
+            RunWorker(new TestObject(), ref recursionCount);
         }
 
         private static void RunWorker(object obj, ref int recursionCount)
@@ -206,6 +181,7 @@ public class GCTests
 
             RunWorker(obj, ref recursionCount);
 
+            Assert.False(TestObject.Finalized);
             GC.KeepAlive(obj);
         }
 

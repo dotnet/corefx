@@ -3,20 +3,21 @@
 
 using System;
 using System.Runtime.InteropServices;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Diagnostics.Contracts;
+using System.Globalization;
+using System.Runtime.Versioning;
 using System.Security;
 using System.Text;
 using System.Threading;
+
 using Microsoft.Win32.SafeHandles;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Runtime.Versioning;
-using System.Diagnostics.Contracts;
 
 namespace System.IO
 {
     // Class for creating FileStream objects, and some basic file management
     // routines such as Delete, etc.
-    [ComVisible(true)]
     public static class File
     {
         public static StreamReader OpenText(String path)
@@ -193,7 +194,7 @@ namespace System.IO
                 // After normalizing, check whether path ends in directory separator.
                 // Otherwise, FillAttributeInfo removes it and we may return a false positive.
                 // GetFullPath should never return null
-                Contract.Assert(path != null, "File.Exists: GetFullPath returned null");
+                Debug.Assert(path != null, "File.Exists: GetFullPath returned null");
                 if (path.Length > 0 && PathHelpers.IsDirectorySeparator(path[path.Length - 1]))
                 {
                     return false;
@@ -243,10 +244,10 @@ namespace System.IO
             return dateTime.ToUniversalTime();
         }
 
-        public static void SetCreationTime(String path, DateTime creationTime)
+        public static void SetCreationTime(String path, DateTime creationTimeUtc)
         {
             String fullPath = PathHelpers.GetFullPathInternal(path);
-            FileSystem.Current.SetCreationTime(fullPath, creationTime, asDirectory: false);
+            FileSystem.Current.SetCreationTime(fullPath, creationTimeUtc, asDirectory: false);
         }
 
         public static void SetCreationTimeUtc(String path, DateTime creationTime)
@@ -275,10 +276,10 @@ namespace System.IO
             FileSystem.Current.SetLastAccessTime(fullPath, lastAccessTime, asDirectory: false);
         }
 
-        public static void SetLastAccessTimeUtc(String path, DateTime lastAccessTime)
+        public static void SetLastAccessTimeUtc(String path, DateTime lastAccessTimeUtc)
         {
             String fullPath = PathHelpers.GetFullPathInternal(path);
-            FileSystem.Current.SetLastAccessTime(fullPath, GetUtcDateTimeOffset(lastAccessTime), asDirectory: false);
+            FileSystem.Current.SetLastAccessTime(fullPath, GetUtcDateTimeOffset(lastAccessTimeUtc), asDirectory: false);
         }
 
         [System.Security.SecuritySafeCritical]
@@ -301,10 +302,10 @@ namespace System.IO
             FileSystem.Current.SetLastWriteTime(fullPath, lastWriteTime, asDirectory: false);
         }
 
-        public static void SetLastWriteTimeUtc(String path, DateTime lastWriteTime)
+        public static void SetLastWriteTimeUtc(String path, DateTime lastWriteTimeUtc)
         {
             String fullPath = PathHelpers.GetFullPathInternal(path);
-            FileSystem.Current.SetLastWriteTime(fullPath, GetUtcDateTimeOffset(lastWriteTime), asDirectory: false);
+            FileSystem.Current.SetLastWriteTime(fullPath, GetUtcDateTimeOffset(lastWriteTimeUtc), asDirectory: false);
         }
 
         [System.Security.SecuritySafeCritical]

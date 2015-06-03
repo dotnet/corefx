@@ -47,49 +47,49 @@ namespace System.IO
         {
             switch (errorCode)
             {
-                case Interop.ERROR_FILE_NOT_FOUND:
+                case Interop.mincore.Errors.ERROR_FILE_NOT_FOUND:
                     if (path.Length == 0)
                         return new FileNotFoundException(SR.IO_FileNotFound);
                     else
                         return new FileNotFoundException(SR.Format(SR.IO_FileNotFound_FileName, path), path);
 
-                case Interop.ERROR_PATH_NOT_FOUND:
+                case Interop.mincore.Errors.ERROR_PATH_NOT_FOUND:
                     if (path.Length == 0)
                         return new DirectoryNotFoundException(SR.IO_PathNotFound_NoPathName);
                     else
                         return new DirectoryNotFoundException(SR.Format(SR.IO_PathNotFound_Path, path));
 
-                case Interop.ERROR_ACCESS_DENIED:
+                case Interop.mincore.Errors.ERROR_ACCESS_DENIED:
                     if (path.Length == 0)
                         return new UnauthorizedAccessException(SR.UnauthorizedAccess_IODenied_NoPathName);
                     else
                         return new UnauthorizedAccessException(SR.Format(SR.UnauthorizedAccess_IODenied_Path, path));
 
-                case Interop.ERROR_ALREADY_EXISTS:
+                case Interop.mincore.Errors.ERROR_ALREADY_EXISTS:
                     if (path.Length == 0)
                         goto default;
 
                     return new IOException(SR.Format(SR.IO_AlreadyExists_Name, path), MakeHRFromErrorCode(errorCode));
 
-                case Interop.ERROR_FILENAME_EXCED_RANGE:
+                case Interop.mincore.Errors.ERROR_FILENAME_EXCED_RANGE:
                     return new PathTooLongException(SR.IO_PathTooLong);
 
-                case Interop.ERROR_INVALID_PARAMETER:
+                case Interop.mincore.Errors.ERROR_INVALID_PARAMETER:
                     return new IOException(GetMessage(errorCode), MakeHRFromErrorCode(errorCode));
 
-                case Interop.ERROR_SHARING_VIOLATION:
+                case Interop.mincore.Errors.ERROR_SHARING_VIOLATION:
                     if (path.Length == 0)
                         return new IOException(SR.IO_SharingViolation_NoFileName, MakeHRFromErrorCode(errorCode));
                     else
                         return new IOException(SR.Format(SR.IO_SharingViolation_File, path), MakeHRFromErrorCode(errorCode));
 
-                case Interop.ERROR_FILE_EXISTS:
+                case Interop.mincore.Errors.ERROR_FILE_EXISTS:
                     if (path.Length == 0)
                         goto default;
 
                     return new IOException(SR.Format(SR.IO_FileExists_Name, path), MakeHRFromErrorCode(errorCode));
 
-                case Interop.ERROR_OPERATION_ABORTED:
+                case Interop.mincore.Errors.ERROR_OPERATION_ABORTED:
                     return new OperationCanceledException();
 
                 default:
@@ -127,25 +127,7 @@ namespace System.IO
         /// </summary>
         internal static string GetMessage(int errorCode)
         {
-            const int FORMAT_MESSAGE_IGNORE_INSERTS = 0x00000200;
-            const int FORMAT_MESSAGE_FROM_SYSTEM = 0x00001000;
-            const int FORMAT_MESSAGE_ARGUMENT_ARRAY = 0x00002000;
-
-            char[] buffer = new char[512];
-            uint result = Interop.mincore.FormatMessage(FORMAT_MESSAGE_IGNORE_INSERTS |
-                FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_ARGUMENT_ARRAY,
-                IntPtr.Zero, (uint)errorCode, 0, buffer, (uint)buffer.Length, IntPtr.Zero);
-            if (result != 0)
-            {
-                // result is the # of characters copied to the StringBuilder on NT,
-                // but on Win9x, it appears to be the number of MBCS buffer.
-                // Just give up and return the String as-is...
-                return new string(buffer, 0, (int)result);
-            }
-            else
-            {
-                return SR.Format(SR.UnknownError_Num, errorCode);
-            }
+            return Interop.mincore.GetMessage(errorCode);
         }
     }
 }

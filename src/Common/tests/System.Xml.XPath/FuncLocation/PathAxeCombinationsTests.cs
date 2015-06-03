@@ -4185,7 +4185,6 @@ namespace XPathTests.FunctionalTests.Location.Paths
         /// child::node()/preceding::node()[preceding-sibling::book and following-sibling::magazine]
         /// </summary>
         [Fact]
-        [ActiveIssue(17)]
         public static void AxesCombinationsTest225()
         {
             var xml = "books.xml";
@@ -8471,7 +8470,6 @@ namespace XPathTests.FunctionalTests.Location.Paths
         /// book/descendant::award/preceding::text()
         /// </summary>
         [Fact]
-        [ActiveIssue(17)]
         public static void AxesCombinationsTest239()
         {
             var xml = "books.xml";
@@ -8802,7 +8800,7 @@ namespace XPathTests.FunctionalTests.Location.Paths
 
         /// <summary>
         /// Combines descendant axis with self axis
-        /// node()/descendant::node()/self::node [self::text() = false() and self::attribute=fasle()]
+        /// node()/descendant::node()/self::node [self::text() = false() and self::attribute=false()]
         /// </summary>
         [Fact]
         public static void AxesCombinationsTest242()
@@ -9902,7 +9900,7 @@ namespace XPathTests.FunctionalTests.Location.Paths
         }
 
         /// <summary>
-        /// I accidently put fasle() instead of false(), so I sould get an exception!
+        /// I accidentally put fasle() instead of false(), so I should get an exception!
         /// Copy of node()/descendant::node()/self::node [self::text() = false() and self::attribute=fasle()]
         /// </summary>
         [Fact]
@@ -16339,7 +16337,7 @@ namespace XPathTests.FunctionalTests.Location.Paths
 
         /// <summary>
         /// Combines descendant-or-self axis with descendant-or-self axis
-        /// descendant-or-self::node()[position()!=5]/descendant-or-self::node()[@atttribute::*]
+        /// descendant-or-self::node()[position()!=5]/descendant-or-self::node()[@attribute::*]
         /// </summary>
         [Fact]
         [OuterLoop]
@@ -17815,7 +17813,6 @@ namespace XPathTests.FunctionalTests.Location.Paths
         /// descendant-or-self::node()[position()>=3 and position()<=15]/preceding::node()
         /// </summary>
         [Fact]
-        [ActiveIssue(17)]
         public static void AxesCombinationsTest267()
         {
             var xml = "books.xml";
@@ -23032,7 +23029,6 @@ namespace XPathTests.FunctionalTests.Location.Paths
         /// preceding-sibling::*/preceding::node()
         /// </summary>
         [Fact]
-        [ActiveIssue(17)]
         public static void AxesCombinationsTest282()
         {
             var xml = "books.xml";
@@ -37817,7 +37813,7 @@ namespace XPathTests.FunctionalTests.Location.Paths
         }
 
         /// <summary>
-        /// descendant-or-self::*/descedant-or-self::text()
+        /// descendant-or-self::*/descendant-or-self::text()
         /// </summary>
         [Fact]
         public static void AxesCombinationsTest2118()
@@ -38313,7 +38309,7 @@ namespace XPathTests.FunctionalTests.Location.Paths
         }
 
         /// <summary>
-        /// descendant-or-self::*/descedant-or-self::*
+        /// descendant-or-self::*/descendant-or-self::*
         /// </summary>
         [Fact]
         public static void AxesCombinationsTest2125()
@@ -39424,7 +39420,7 @@ namespace XPathTests.FunctionalTests.Location.Paths
         }
 
         /// <summary>
-        /// descendant-or-self::node()/descedant-or-self::node()
+        /// descendant-or-self::node()/descendant-or-self::node()
         /// </summary>
         [Fact]
         public static void AxesCombinationsTest2126()
@@ -44939,7 +44935,6 @@ namespace XPathTests.FunctionalTests.Location.Paths
         /// NS59: //namespace::node()//@*
         /// </summary>
         [Fact]
-        [ActiveIssue(284)]
         public static void AxesCombinationsTest2142()
         {
             var xml = "ns_prefixes.xml";
@@ -44955,7 +44950,6 @@ namespace XPathTests.FunctionalTests.Location.Paths
         /// NS60: //namespace::node()//self::*
         /// </summary>
         [Fact]
-        [ActiveIssue(284)]
         public static void AxesCombinationsTest2143()
         {
             var xml = "ns_prefixes.xml";
@@ -44971,7 +44965,6 @@ namespace XPathTests.FunctionalTests.Location.Paths
         /// NS61: //namespace::node()//namespace::node()
         /// </summary>
         [Fact]
-        [ActiveIssue(284)]
         public static void AxesCombinationsTest2144()
         {
             var xml = "ns_prefixes.xml";
@@ -48209,7 +48202,6 @@ namespace XPathTests.FunctionalTests.Location.Paths
         /// (bookstore/book |/bookstore/magazine | bookstore | bookstore//*//title)/preceding::node()
         /// </summary>
         [Fact]
-        [ActiveIssue(17)]
         public static void AxesCombinationsTest2156()
         {
             var xml = "books.xml";
@@ -54033,7 +54025,6 @@ namespace XPathTests.FunctionalTests.Location.Paths
         /// NSXX: //namespace::*[local-name()=""]/preceding::*
         /// </summary>
         [Fact]
-        [ActiveIssue(17)]
         public static void AxesCombinationsTest2183()
         {
             var xml = "name2.xml";
@@ -55723,7 +55714,6 @@ namespace XPathTests.FunctionalTests.Location.Paths
         /// //@*/preceding::*
         /// </summary>
         [Fact]
-        [ActiveIssue(17)]
         public static void AxesCombinationsTest2189()
         {
             var xml = "books.xml";
@@ -57647,7 +57637,6 @@ namespace XPathTests.FunctionalTests.Location.Paths
         /// //comment()/preceding::node()
         /// </summary>
         [Fact]
-        [ActiveIssue(17)]
         public static void AxesCombinationsTest2199()
         {
             var xml = "test63682.xml";

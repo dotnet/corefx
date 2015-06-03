@@ -107,7 +107,7 @@ namespace System.Threading.Tasks.Dataflow
                 else // async
                 {
                     var asyncAction = action as Func<TInput, Task>;
-                    Contract.Assert(asyncAction != null, "action is of incorrect delegate type");
+                    Debug.Assert(asyncAction != null, "action is of incorrect delegate type");
                     _defaultTarget = new TargetCore<TInput>(this,
                         messageWithId => ProcessMessageWithTask(asyncAction, messageWithId),
                         null, dataflowBlockOptions, TargetCoreOptions.RepresentsBlockCompletion | TargetCoreOptions.UsesAsyncCompletion);
@@ -216,7 +216,7 @@ namespace System.Threading.Tasks.Dataflow
             _defaultTarget.SignalOneAsyncMessageCompleted(boundingCountChange: -1);
         }
 
-        /// <include file='XmlDocs\CommonXmlDocComments.xml' path='CommonXmlDocComments/Blocks/Member[@name="Complete"]/*' />
+        /// <include file='XmlDocs/CommonXmlDocComments.xml' path='CommonXmlDocComments/Blocks/Member[@name="Complete"]/*' />
         public void Complete()
         {
             if (_defaultTarget != null)
@@ -229,7 +229,7 @@ namespace System.Threading.Tasks.Dataflow
             }
         }
 
-        /// <include file='XmlDocs\CommonXmlDocComments.xml' path='CommonXmlDocComments/Blocks/Member[@name="Fault"]/*' />
+        /// <include file='XmlDocs/CommonXmlDocComments.xml' path='CommonXmlDocComments/Blocks/Member[@name="Fault"]/*' />
         void IDataflowBlock.Fault(Exception exception)
         {
             if (exception == null) throw new ArgumentNullException("exception");
@@ -245,7 +245,7 @@ namespace System.Threading.Tasks.Dataflow
             }
         }
 
-        /// <include file='XmlDocs\CommonXmlDocComments.xml' path='CommonXmlDocComments/Blocks/Member[@name="Completion"]/*' />
+        /// <include file='XmlDocs/CommonXmlDocComments.xml' path='CommonXmlDocComments/Blocks/Member[@name="Completion"]/*' />
         public Task Completion
         {
             get { return _defaultTarget != null ? _defaultTarget.Completion : _spscTarget.Completion; }
@@ -278,7 +278,7 @@ namespace System.Threading.Tasks.Dataflow
                 _spscTarget.Post(item);
         }
 
-        /// <include file='XmlDocs\CommonXmlDocComments.xml' path='CommonXmlDocComments/Targets/Member[@name="OfferMessage"]/*' />
+        /// <include file='XmlDocs/CommonXmlDocComments.xml' path='CommonXmlDocComments/Targets/Member[@name="OfferMessage"]/*' />
         DataflowMessageStatus ITargetBlock<TInput>.OfferMessage(DataflowMessageHeader messageHeader, TInput messageValue, ISourceBlock<TInput> source, Boolean consumeToAccept)
         {
             return _defaultTarget != null ?
@@ -286,7 +286,7 @@ namespace System.Threading.Tasks.Dataflow
                 _spscTarget.OfferMessage(messageHeader, messageValue, source, consumeToAccept);
         }
 
-        /// <include file='XmlDocs\CommonXmlDocComments.xml' path='CommonXmlDocComments/Targets/Member[@name="InputCount"]/*' />
+        /// <include file='XmlDocs/CommonXmlDocComments.xml' path='CommonXmlDocComments/Targets/Member[@name="InputCount"]/*' />
         public int InputCount
         {
             get { return _defaultTarget != null ? _defaultTarget.InputCount : _spscTarget.InputCount; }
@@ -298,7 +298,7 @@ namespace System.Threading.Tasks.Dataflow
             get { return _defaultTarget != null ? _defaultTarget.GetDebuggingInformation().InputCount : _spscTarget.InputCount; }
         }
 
-        /// <include file='XmlDocs\CommonXmlDocComments.xml' path='CommonXmlDocComments/Blocks/Member[@name="ToString"]/*' />
+        /// <include file='XmlDocs/CommonXmlDocComments.xml' path='CommonXmlDocComments/Blocks/Member[@name="ToString"]/*' />
         public override string ToString()
         {
             return Common.GetNameForDebugger(this, _defaultTarget != null ? _defaultTarget.DataflowBlockOptions : _spscTarget.DataflowBlockOptions);
@@ -355,7 +355,7 @@ namespace System.Threading.Tasks.Dataflow
                 get { return _defaultDebugInfo != null ? _defaultDebugInfo.PostponedMessages : null; }
             }
 
-            /// <summary>Gets the number of oustanding input operations.</summary>
+            /// <summary>Gets the number of outstanding input operations.</summary>
             public Int32 CurrentDegreeOfParallelism
             {
                 get { return _defaultDebugInfo != null ? _defaultDebugInfo.CurrentDegreeOfParallelism : _spscDebugInfo.CurrentDegreeOfParallelism; }

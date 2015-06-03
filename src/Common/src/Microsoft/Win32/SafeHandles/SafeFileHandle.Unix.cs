@@ -2,10 +2,8 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Diagnostics.Contracts;
-using System.Security;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
-using Microsoft.Win32;
 
 namespace Microsoft.Win32.SafeHandles
 {
@@ -18,7 +16,6 @@ namespace Microsoft.Win32.SafeHandles
         private SafeFileHandle(bool ownsHandle)
             : base(s_invalidHandle, ownsHandle)
         {
-            handle = s_invalidHandle; // TODO: remove this once base implementation correctly sets it
         }
 
         /// <summary>Opens the specified file with the requested flags and mode.</summary>
@@ -28,6 +25,8 @@ namespace Microsoft.Win32.SafeHandles
         /// <returns>A SafeFileHandle for the opened file.</returns>
         internal static SafeFileHandle Open(string path, Interop.libc.OpenFlags flags, int mode)
         {
+            Debug.Assert(path != null);
+
             // SafeFileHandle wraps a file descriptor rather than a pointer, and a file descriptor is always 4 bytes
             // rather than being pointer sized, which means we can't utilize the runtime's ability to marshal safe handles.
             // Ideally this would be a constrained execution region, but we don't have access to PrepareConstrainedRegions.
@@ -37,10 +36,32 @@ namespace Microsoft.Win32.SafeHandles
             SafeFileHandle handle = new SafeFileHandle(ownsHandle: true);
             try { } finally
             {
+                // If we fail to open the file due to a path not existing, we need to know whether to blame
+                // the file itself or its directory.  If we're creating the file, then we blame the directory,
+                // otherwise we blame the file.
+                bool enoentDueToDirectory = (flags & Interop.libc.OpenFlags.O_CREAT) != 0;
+
+                // Open the file.
                 int fd;
-                while (Interop.CheckIo(fd = Interop.libc.open64(path, flags, mode))) ;
-                Contract.Assert(fd >= 0);
+                while (Interop.CheckIo(fd = Interop.libc.open(path, flags, mode), path, isDirectory: enoentDueToDirectory,
+                    errorRewriter: errno => (errno == Interop.Errors.EISDIR) ? Interop.Errors.EACCES : errno)) ;
+                Debug.Assert(fd >= 0);
                 handle.SetHandle((IntPtr)fd);
+                Debug.Assert(!handle.IsInvalid);
+
+                // Make sure it's not a directory; we do this after opening it once we have a file descriptor 
+                // to avoid race conditions.
+                Interop.libcoreclr.fileinfo buf;
+                if (Interop.libcoreclr.GetFileInformationFromFd(fd, out buf) != 0)
+                {
+                    handle.Dispose();
+                    throw Interop.GetExceptionForIoErrno(Marshal.GetLastWin32Error(), path);
+                }
+                if ((buf.mode & Interop.libcoreclr.FileTypes.S_IFMT) == Interop.libcoreclr.FileTypes.S_IFDIR)
+                {
+                    handle.Dispose();
+                    throw Interop.GetExceptionForIoErrno(Interop.Errors.EACCES, path, isDirectory: true);
+                }
             }
             return handle;
         }
@@ -48,18 +69,22 @@ namespace Microsoft.Win32.SafeHandles
         [System.Security.SecurityCritical]
         protected override bool ReleaseHandle()
         {
-            // Close the handle. We do not want to throw here nor retry
-            // in the case of an EINTR error, so we simply check whether
-            // the call was successful or not.
+            // Close the handle. Although close is documented to potentially fail with EINTR, we never want
+            // to retry, as the descriptor could actually have been closed, been subsequently reassigned, and
+            // be in use elsewhere in the process.  Instead, we simply check whether the call was successful.
             int fd = (int)handle;
-            Contract.Assert(fd >= 0);
+            Debug.Assert(fd >= 0);
             return Interop.libc.close(fd) == 0;
         }
 
         public override bool IsInvalid
         {
             [System.Security.SecurityCritical]
-            get { return (int)handle < 0; }
+            get
+            {
+                long h = (long)handle;
+                return h < 0 || h > int.MaxValue;
+            }
         }
     }
 }

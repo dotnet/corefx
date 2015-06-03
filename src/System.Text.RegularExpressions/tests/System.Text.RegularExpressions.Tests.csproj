@@ -17,7 +17,6 @@
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
   </PropertyGroup>
-  <!-- References are resolved from packages.config -->
   <!-- Compiled Source Files -->
   <ItemGroup>
     <Compile Include="CaptureCollectionTests.cs" />
@@ -25,6 +24,7 @@
     <Compile Include="EscapeUnescapeTests.cs" />
     <Compile Include="GroupNamesAndNumbers.cs" />
     <Compile Include="IsMatchMatchSplitTests.cs" />
+    <Compile Include="MatchCollectionTests.cs" />
     <Compile Include="R2LGetGroupNamesMatchTests.cs" />
     <Compile Include="RegexComponentsSplitTests.cs" />
     <Compile Include="RegexConstructorTests.cs" />
@@ -54,10 +54,6 @@
     <Compile Include="Support.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Common\tests\XunitTraitsDiscoverers\XunitTraitsDiscoverers.csproj">
-      <Project>{be8ed8c1-c314-4c4e-a929-64c9c8b3552a}</Project>
-      <Name>XunitTraitsDiscoverers</Name>
-    </ProjectReference>
     <ProjectReference Include="..\src\System.Text.RegularExpressions.csproj">
       <Project>{be28323e-327a-4e0f-b7f9-16ab7eab59dd}</Project>
       <Name>System.Text.RegularExpressions</Name>
@@ -69,7 +65,7 @@
     <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
+    <None Include="project.json" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

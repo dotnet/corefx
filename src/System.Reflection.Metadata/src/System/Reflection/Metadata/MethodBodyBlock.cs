@@ -98,7 +98,7 @@ namespace System.Reflection.Metadata
             int startOffset = reader.Offset;
             int ilSize;
 
-            // Error need to check if the Memory Block is empty. This is calse for all the calls...
+            // Error need to check if the Memory Block is empty. This is false for all the calls...
             byte headByte = reader.ReadByte();
             if ((headByte & ILFormatMask) == ILTinyFormat)
             {
@@ -142,9 +142,9 @@ namespace System.Reflection.Metadata
             {
                 localSignatureHandle = default(StandaloneSignatureHandle);
             }
-            else if ((localSignatureToken & TokenTypeIds.TokenTypeMask) == TokenTypeIds.Signature)
+            else if ((localSignatureToken & TokenTypeIds.TypeMask) == TokenTypeIds.Signature)
             {
-                localSignatureHandle = StandaloneSignatureHandle.FromRowId((uint)localSignatureToken & TokenTypeIds.RIDMask);
+                localSignatureHandle = StandaloneSignatureHandle.FromRowId((int)((uint)localSignatureToken & TokenTypeIds.RIDMask));
             }
             else
             {

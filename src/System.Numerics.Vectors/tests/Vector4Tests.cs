@@ -21,8 +21,14 @@ namespace System.Numerics.Tests
         {
             Vector4 v1 = new Vector4(2.5f, 2.0f, 3.0f, 3.3f);
 
-            Single[] a = new Single[5];
-            Single[] b = new Single[4];
+            float[] a = new float[5];
+            float[] b = new float[4];
+
+            Assert.Throws<ArgumentNullException>(() => v1.CopyTo(null, 0));
+            Assert.Throws<ArgumentOutOfRangeException>(() => v1.CopyTo(a, -1));
+            Assert.Throws<ArgumentOutOfRangeException>(() => v1.CopyTo(a, a.Length));
+            Assert.Throws<ArgumentException>(() => v1.CopyTo(a, a.Length - 2));
+
             v1.CopyTo(a, 1);
             v1.CopyTo(b);
             Assert.Equal(0.0f, a[0]);
@@ -268,19 +274,19 @@ namespace System.Numerics.Tests
             Vector4 max = new Vector4(1.0f, 1.1f, 1.13f, 1.14f);
 
             // Normal case.
-            // Case N1: specfied value is in the range.
+            // Case N1: specified value is in the range.
             Vector4 expected = new Vector4(0.5f, 0.3f, 0.33f, 0.44f);
             Vector4 actual = Vector4.Clamp(a, min, max);
             Assert.True(MathHelper.Equal(expected, actual), "Vector4f.Clamp did not return the expected value.");
 
             // Normal case.
-            // Case N2: specfied value is bigger than max value.
+            // Case N2: specified value is bigger than max value.
             a = new Vector4(2.0f, 3.0f, 4.0f, 5.0f);
             expected = max;
             actual = Vector4.Clamp(a, min, max);
             Assert.True(MathHelper.Equal(expected, actual), "Vector4f.Clamp did not return the expected value.");
 
-            // Case N3: specfied value is smaller than max value.
+            // Case N3: specified value is smaller than max value.
             a = new Vector4(-2.0f, -3.0f, -4.0f, -5.0f);
             expected = min;
             actual = Vector4.Clamp(a, min, max);
@@ -292,24 +298,24 @@ namespace System.Numerics.Tests
             actual = Vector4.Clamp(a, min, max);
             Assert.True(MathHelper.Equal(expected, actual), "Vector4f.Clamp did not return the expected value.");
 
-            // User specfied min value is bigger than max value.
+            // User specified min value is bigger than max value.
             max = new Vector4(0.0f, 0.1f, 0.13f, 0.14f);
             min = new Vector4(1.0f, 1.1f, 1.13f, 1.14f);
 
-            // Case W1: specfied value is in the range.
+            // Case W1: specified value is in the range.
             a = new Vector4(0.5f, 0.3f, 0.33f, 0.44f);
             expected = min;
             actual = Vector4.Clamp(a, min, max);
             Assert.True(MathHelper.Equal(expected, actual), "Vector4f.Clamp did not return the expected value.");
 
             // Normal case.
-            // Case W2: specfied value is bigger than max and min value.
+            // Case W2: specified value is bigger than max and min value.
             a = new Vector4(2.0f, 3.0f, 4.0f, 5.0f);
             expected = min;
             actual = Vector4.Clamp(a, min, max);
             Assert.True(MathHelper.Equal(expected, actual), "Vector4f.Clamp did not return the expected value.");
 
-            // Case W3: specfied value is smaller than min and max value.
+            // Case W3: specified value is smaller than min and max value.
             a = new Vector4(-2.0f, -3.0f, -4.0f, -5.0f);
             expected = min;
             actual = Vector4.Clamp(a, min, max);
@@ -840,11 +846,11 @@ namespace System.Numerics.Tests
 
         // A test for operator * (Vector4f, float)
         [Fact]
-        public void Vector4MultiplyTest()
+        public void Vector4MultiplyOperatorTest()
         {
             Vector4 a = new Vector4(1.0f, 2.0f, 3.0f, 4.0f);
 
-            float factor = 2.0f;
+            const float factor = 2.0f;
 
             Vector4 expected = new Vector4(2.0f, 4.0f, 6.0f, 8.0f);
             Vector4 actual;
@@ -855,11 +861,11 @@ namespace System.Numerics.Tests
 
         // A test for operator * (float, Vector4f)
         [Fact]
-        public void Vector4MultiplyTest4()
+        public void Vector4MultiplyOperatorTest2()
         {
             Vector4 a = new Vector4(1.0f, 2.0f, 3.0f, 4.0f);
 
-            float factor = 2.0f;
+            const float factor = 2.0f;
             Vector4 expected = new Vector4(2.0f, 4.0f, 6.0f, 8.0f);
             Vector4 actual;
 
@@ -869,7 +875,7 @@ namespace System.Numerics.Tests
 
         // A test for operator * (Vector4f, Vector4f)
         [Fact]
-        public void Vector4MultiplyTest1()
+        public void Vector4MultiplyOperatorTest3()
         {
             Vector4 a = new Vector4(1.0f, 2.0f, 3.0f, 4.0f);
             Vector4 b = new Vector4(5.0f, 6.0f, 7.0f, 8.0f);
@@ -1121,12 +1127,23 @@ namespace System.Numerics.Tests
             Assert.Equal(expected, actual);
         }
 
+        // A test for Multiply (float, Vector4f)
+        [Fact]
+        public void Vector4MultiplyTest()
+        {
+            Vector4 a = new Vector4(1.0f, 2.0f, 3.0f, 4.0f);
+            const float factor = 2.0f;
+            Vector4 expected = new Vector4(2.0f, 4.0f, 6.0f, 8.0f);
+            Vector4 actual = Vector4.Multiply(factor, a);
+            Assert.Equal(expected, actual);
+        }
+
         // A test for Multiply (Vector4f, float)
         [Fact]
         public void Vector4MultiplyTest2()
         {
             Vector4 a = new Vector4(1.0f, 2.0f, 3.0f, 4.0f);
-            float factor = 2.0f;
+            const float factor = 2.0f;
             Vector4 expected = new Vector4(2.0f, 4.0f, 6.0f, 8.0f);
             Vector4 actual = Vector4.Multiply(a, factor);
             Assert.Equal(expected, actual);

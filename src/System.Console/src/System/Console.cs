@@ -1,9 +1,11 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.Diagnostics;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace System
 {
@@ -13,6 +15,9 @@ namespace System
         private static readonly object InternalSyncObject = new object(); // for synchronizing changing of Console's static fields
         private static TextReader _in;
         private static TextWriter _out, _error;
+
+        private static ConsoleCancelEventHandler _cancelCallbacks;
+        private static ConsolePal.ControlCHandlerRegistrar _registrar;
 
         private static T EnsureInitialized<T>(ref T field, Func<T> initializer) where T : class
         {
@@ -83,6 +88,48 @@ namespace System
         public static void ResetColor()
         {
             ConsolePal.ResetColor();
+        }
+
+        // This is the worker delegate that is called on the Threadpool thread to fire the actual events. It sets the DelegateStarted flag so
+        // the thread that queued the work to the threadpool knows it has started (since it does not want to block indefinitely on the task
+        // to start).
+        private static void ControlCDelegate(object data)
+        {
+            ControlCDelegateData controlCData = (ControlCDelegateData)data;
+            controlCData.DelegateStarted = true;
+            ConsoleCancelEventArgs args = new ConsoleCancelEventArgs(controlCData.ControlKey);
+            controlCData.CancelCallbacks(null, args);
+            controlCData.Cancel = args.Cancel;
+        }
+
+        public static event ConsoleCancelEventHandler CancelKeyPress
+        {
+            add
+            {
+                lock (InternalSyncObject)
+                {
+                    _cancelCallbacks += value;
+
+                    // If we haven't registered our control-C handler, do it.
+                    if (_registrar == null)
+                    {
+                        _registrar = new ConsolePal.ControlCHandlerRegistrar();
+                        _registrar.Register();
+                    }
+                }
+            }
+            remove
+            {
+                lock (InternalSyncObject)
+                {
+                    _cancelCallbacks -= value;
+                    if (_registrar != null && _cancelCallbacks == null)
+                    {
+                        _registrar.Unregister();
+                        _registrar = null;
+                    }
+                }
+            }
         }
 
         public static Stream OpenStandardInput()
@@ -364,6 +411,58 @@ namespace System
         public static void Write(String value)
         {
             Out.Write(value);
+        }
+
+        private sealed class ControlCDelegateData
+        {
+            internal readonly ConsoleSpecialKey ControlKey;
+            internal readonly ConsoleCancelEventHandler CancelCallbacks;
+
+            internal bool Cancel;
+            internal bool DelegateStarted;
+
+            internal ControlCDelegateData(ConsoleSpecialKey controlKey, ConsoleCancelEventHandler cancelCallbacks)
+            {
+                this.ControlKey = controlKey;
+                this.CancelCallbacks = cancelCallbacks;
+            }
+        }
+
+        internal static bool HandleBreakEvent(ConsoleSpecialKey controlKey)
+        {
+            // The thread that this gets called back on has a very small stack on some systems. There is
+            // not enough space to handle a managed exception being caught and thrown. So, run a task
+            // on the threadpool for the actual event callback.
+
+            // To avoid the race condition between remove handler and raising the event
+            ConsoleCancelEventHandler cancelCallbacks = Console._cancelCallbacks;
+            if (cancelCallbacks == null)
+            {
+                return false;
+            }
+
+            ControlCDelegateData delegateData = new ControlCDelegateData(controlKey, cancelCallbacks);
+
+            Task callBackTask = Task.Run(() =>
+            {
+                ControlCDelegate(delegateData);
+            });
+
+            // Block until the delegate is done. We need to be robust in the face of the task not executing
+            // but we also want to get control back immediately after it is done and we don't want to give the
+            // handler a fixed time limit in case it needs to display UI. Wait on the task twice, once with a
+            // timout and a second time without if we are sure that the handler actually started.
+            TimeSpan controlCWaitTime = new TimeSpan(0, 0, 30); // 30 seconds
+            callBackTask.Wait(controlCWaitTime);
+            
+            if (!delegateData.DelegateStarted)
+            {
+                Debug.Assert(false, "The task to execute the handler did not start within 30 seconds.");
+                return false;
+            }
+
+            callBackTask.Wait();
+            return delegateData.Cancel;
         }
     }
 }

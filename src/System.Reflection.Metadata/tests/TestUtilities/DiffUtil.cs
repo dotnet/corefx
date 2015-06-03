@@ -71,7 +71,7 @@ namespace TestUtilities
             }
         }
 
-        public static string DiffReport<T>(IEnumerable<T> expected, IEnumerable<T> actual, IEqualityComparer<T> comparer = null, Func<T, string> toString = null, string separator = ",\r\n")
+        public static string DiffReport<T>(IEnumerable<T> expected, IEnumerable<T> actual, IEqualityComparer<T> comparer, Func<T, string> toString, string separator)
         {
             var lcs = (comparer != null) ? new LCS<T>(comparer) : LCS<T>.Default;
             toString = toString ?? new Func<T, string>(obj => obj.ToString());
@@ -93,7 +93,7 @@ namespace TestUtilities
         {
             var exlines = Lines(expected);
             var aclines = Lines(actual);
-            return DiffReport(exlines, aclines, separator: "\r\n");
+            return DiffReport(exlines, aclines, null, null, Environment.NewLine);
         }
 
         /// <summary>
@@ -214,7 +214,7 @@ namespace TestUtilities
             }
 
             /// <summary>
-            /// Calculates costs of all paths in an edit graph starting from vertext (0,0) and ending in vertex (lengthA, lengthB). 
+            /// Calculates costs of all paths in an edit graph starting from vertex (0,0) and ending in vertex (lengthA, lengthB). 
             /// </summary>
             /// <remarks>
             /// The edit graph for A and B has a vertex at each point in the grid (i,j), i in [0, lengthA] and j in [0, lengthB].

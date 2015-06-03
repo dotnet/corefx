@@ -706,10 +706,6 @@ namespace System.Xml.XPath
 
                 if (parent1.IsSamePosition(parent2))
                 {
-                    if (n1.GetType().ToString() != "Microsoft.VisualStudio.Modeling.StoreNavigator")
-                    {
-                        Debug.Assert(CompareSiblings(n1.Clone(), n2.Clone()) != CompareSiblings(n2.Clone(), n1.Clone()), "IsSamePosition() on custom navigator returns inconsistent results");
-                    }
                     return CompareSiblings(n1, n2);
                 }
 
@@ -817,7 +813,7 @@ namespace System.Xml.XPath
 
             // We should clone query because some Query.MatchNode() alter expression state and this may brake
             // SelectionIterators that are running using this Query
-            // Example of MatchNode() that alret the state is FilterQuery.MatchNode()
+            // Example of MatchNode() that alert the state is FilterQuery.MatchNode()
             Query query = Query.Clone(cexpr.QueryTree);
 
             try

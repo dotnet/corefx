@@ -507,5 +507,69 @@ namespace System.Threading.Tasks.Dataflow.Tests
             });
         }
 
+        [Fact]
+        public async Task TestFaultySource()
+        {
+            var bb = new BufferBlock<int>(new DataflowBlockOptions { BoundedCapacity = 1 });
+            bb.Post(1);
+            var source = new DelegatePropagator<int, int> {
+                ConsumeMessageDelegate = delegate(DataflowMessageHeader messageHeader, ITargetBlock<int> target, out bool messageConsumed) {
+                    throw new FormatException();
+                }
+            };
+            Assert.Equal(
+                expected: DataflowMessageStatus.Postponed,
+                actual: ((ITargetBlock<int>)bb).OfferMessage(new DataflowMessageHeader(1), 2, source, true));
+            Assert.Equal(expected: 1, actual: bb.Receive());
+            await Assert.ThrowsAsync<FormatException>(() => bb.Completion);
+        }
+
+        [Fact]
+        public async Task TestMultiplePostponesFromSameSource()
+        {
+            var source = new BufferBlock<int>();
+
+            // Fill a target
+            var target1 = new BufferBlock<int>(new DataflowBlockOptions { BoundedCapacity = 1 });
+            target1.Post(1);
+
+            // Link to the target from a source; the message should get postponed
+            source.Post(2);
+            IDisposable unlink = source.LinkTo(target1);
+            Assert.Equal(expected: 1, actual: source.Count);
+
+            // Unlink, then relink; message should be offered again
+            unlink.Dispose();
+            source.LinkTo(target1);
+            Assert.Equal(expected: 1, actual: source.Count);
+
+            // Now receive to empty target1; it should then take the message from the source
+            Assert.Equal(expected: 1, actual: await target1.ReceiveAsync());
+            Assert.Equal(expected: 2, actual: await target1.ReceiveAsync());
+        }
+
+        [Fact]
+        public async Task TestReleasingFailsAtCompletion()
+        {
+            // Create a bounded block that's filled
+            var bb = new BufferBlock<int>(new DataflowBlockOptions { BoundedCapacity = 1 });
+            bb.Post(1);
+
+            // Create a source that will throw an exception when a message is released,
+            // which should happen when the buffer block drops any postponed messages
+            var source = new DelegatePropagator<int, int>
+            {
+                ReserveMessageDelegate = (header, target) => true,
+                ReleaseMessageDelegate = delegate { throw new FormatException(); }
+            };
+
+            // Offer a message from the source. It'll be postponed.
+            ((ITargetBlock<int>)bb).OfferMessage(new DataflowMessageHeader(1), 1, source, consumeToAccept: false);
+
+            // Mark the block as complete.  This should cause the block to reserve/release any postponed messages,
+            // which will cause the block to fault.
+            bb.Complete();
+            await Assert.ThrowsAsync<FormatException>(() => bb.Completion);
+        }
     }
 }

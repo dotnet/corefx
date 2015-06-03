@@ -1,9 +1,12 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using System.Text;
+using System.Threading;
 
 namespace System.IO
 {
@@ -17,31 +20,20 @@ namespace System.IO
 
         public override int MaxPath 
         {
-            get { return GetPathConfValue(ref _maxPath, Interop.libc.PathConfNames._PC_PATH_MAX, Interop.libc.DEFAULT_PC_PATH_MAX); } 
+            get
+            {
+                Interop.libc.GetPathConfValue(ref _maxPath, Interop.libc.PathConfNames._PC_PATH_MAX, Interop.libc.DEFAULT_PC_PATH_MAX);
+                return _maxPath;
+            } 
         }
 
         public override int MaxDirectoryPath 
         {
-            get { return GetPathConfValue(ref _maxName, Interop.libc.PathConfNames._PC_NAME_MAX, Interop.libc.DEFAULT_PC_NAME_MAX); } 
-        }
-
-        /// <summary>
-        /// Gets a pathconf value by name.  If the cached value is less than zero (meaning not yet initialized),
-        /// pathconf is used to retrieve the value, which is then stored into the field.
-        /// If the field is greater than or equal to zero, it's value is returned.
-        /// </summary>
-        /// <param name="cachedValue">The field used to cache the pathconf value.</param>
-        /// <param name="pathConfName">The name of the pathconf value.</param>
-        /// <param name="defaultValue">The default value to use in case pathconf fails.</param>
-        /// <returns>The pathconf value, or the default if pathconf failed to return a value.</returns>
-        private static int GetPathConfValue(ref int cachedValue, int pathConfName, int defaultValue)
-        {
-            if (cachedValue < 0) // benign race condition on cached value
+            get
             {
-                int result = Interop.libc.pathconf("/", pathConfName);
-                cachedValue = result >= 0 ? result : defaultValue;
-            }
-            return cachedValue;
+                Interop.libc.GetPathConfValue(ref _maxName, Interop.libc.PathConfNames._PC_NAME_MAX, Interop.libc.DEFAULT_PC_NAME_MAX);
+                return _maxName;
+            } 
         }
 
         public override FileStreamBase Open(string fullPath, FileMode mode, FileAccess access, FileShare share, int bufferSize, FileOptions options, FileStream parent)
@@ -54,6 +46,13 @@ namespace System.IO
             // Note: we could consider using sendfile here, but it isn't part of the POSIX spec, and
             // has varying degrees of support on different systems.
 
+            // The destination path may just be a directory into which the file should be copied.
+            // If it is, append the filename from the source onto the destination directory
+            if (DirectoryExists(destFullPath))
+            {
+                destFullPath = Path.Combine(destFullPath, Path.GetFileName(sourceFullPath));
+            }
+
             // Copy the contents of the file from the source to the destination, creating the destination in the process
             const int bufferSize = FileStream.DefaultBufferSize;
             const bool useAsync = false;
@@ -64,9 +63,9 @@ namespace System.IO
             }
 
             // Now copy over relevant read/write/execute permissions from the source to the destination
-            Interop.libc.structStat stat;
-            while (Interop.CheckIo(Interop.libc.stat(sourceFullPath, out stat), sourceFullPath)) ;
-            int newMode = stat.st_mode & (int)Interop.libc.Permissions.Mask;
+            Interop.libcoreclr.fileinfo fileinfo;
+            while (Interop.CheckIo(Interop.libcoreclr.GetFileInformationFromPath(sourceFullPath, out fileinfo), sourceFullPath)) ;
+            int newMode = fileinfo.mode & (int)Interop.libc.Permissions.Mask;
             while (Interop.CheckIo(Interop.libc.chmod(destFullPath, newMode), destFullPath)) ;
         }
 
@@ -94,7 +93,7 @@ namespace System.IO
 
         public override void DeleteFile(string fullPath)
         {
-            while (Interop.libc.remove(fullPath) < 0)
+            while (Interop.libc.unlink(fullPath) < 0)
             {
                 int errno = Marshal.GetLastWin32Error();
                 if (errno == Interop.Errors.EINTR) // interrupted; try again
@@ -107,22 +106,11 @@ namespace System.IO
                 }
                 else
                 {
+                    if (errno == Interop.Errors.EISDIR)
+                        errno = Interop.Errors.EACCES;
                     throw Interop.GetExceptionForIoErrno(errno, fullPath);
                 }
             }
-        }
-
-        public override bool FileExists(string fullPath)
-        {
-            while (Interop.libc.access(fullPath, Interop.libc.AccessModes.F_OK) < 0)
-            {
-                if (Marshal.GetLastWin32Error() == Interop.Errors.EINTR)
-                {
-                    continue;
-                }
-                return false;
-            }
-            return true;
         }
 
         public override void CreateDirectory(string fullPath)
@@ -300,7 +288,7 @@ namespace System.IO
                 }
             }
 
-            while (Interop.libc.remove(fullPath) < 0)
+            while (Interop.libc.rmdir(fullPath) < 0)
             {
                 int errno = Marshal.GetLastWin32Error();
                 switch (errno)
@@ -308,6 +296,9 @@ namespace System.IO
                     case Interop.Errors.EINTR: // interrupted; try again
                         continue;
                     case Interop.Errors.EACCES:
+                    case Interop.Errors.EPERM:
+                    case Interop.Errors.EROFS:
+                    case Interop.Errors.EISDIR:
                         throw new IOException(SR.Format(SR.UnauthorizedAccess_IODenied_Path, fullPath)); // match Win32 exception
                     case Interop.Errors.ENOENT:
                         if (!throwOnTopLevelDirectoryNotFound)
@@ -329,11 +320,22 @@ namespace System.IO
 
         private bool DirectoryExists(string fullPath, out int errno)
         {
-            Interop.libc.structStat stat;
+            return FileExists(fullPath, Interop.libcoreclr.FileTypes.S_IFDIR, out errno);
+        }
+
+        public override bool FileExists(string fullPath)
+        {
+            int errno;
+            return FileExists(fullPath, Interop.libcoreclr.FileTypes.S_IFREG, out errno);
+        }
+
+        private bool FileExists(string fullPath, int fileType, out int errno)
+        {
+            Interop.libcoreclr.fileinfo fileinfo;
             while (true)
             {
                 errno = 0;
-                int result = Interop.libc.stat(fullPath, out stat);
+                int result = Interop.libcoreclr.GetFileInformationFromPath(fullPath, out fileinfo);
                 if (result < 0)
                 {
                     errno = Marshal.GetLastWin32Error();
@@ -343,13 +345,13 @@ namespace System.IO
                     }
                     return false;
                 }
-                return (stat.st_mode & (int)Interop.libc.FileTypes.S_IFMT) == (int)Interop.libc.FileTypes.S_IFDIR;
+                return (fileinfo.mode & Interop.libcoreclr.FileTypes.S_IFMT) == fileType;
             }
         }
 
-        public override IEnumerable<string> EnumeratePaths(string fullPath, string searchPattern, SearchOption searchOption, SearchTarget searchTarget)
+        public override IEnumerable<string> EnumeratePaths(string path, string searchPattern, SearchOption searchOption, SearchTarget searchTarget)
         {
-            return EnumerateResults<string>(fullPath, searchPattern, searchOption, searchTarget, (path, _) => path);
+            return new FileSystemEnumerable<string>(path, searchPattern, searchOption, searchTarget, (p, _) => p);
         }
 
         public override IEnumerable<FileSystemInfo> EnumerateFileSystemInfos(string fullPath, string searchPattern, SearchOption searchOption, SearchTarget searchTarget)
@@ -357,104 +359,220 @@ namespace System.IO
             switch (searchTarget)
             {
                 case SearchTarget.Files:
-                    return EnumerateResults<FileInfo>(fullPath, searchPattern, searchOption, searchTarget, (path, isDir) =>
+                    return new FileSystemEnumerable<FileInfo>(fullPath, searchPattern, searchOption, searchTarget, (path, isDir) =>
                         new FileInfo(path, new UnixFileSystemObject(path, isDir)));
                 case SearchTarget.Directories:
-                    return EnumerateResults<DirectoryInfo>(fullPath, searchPattern, searchOption, searchTarget, (path, isDir) =>
+                    return new FileSystemEnumerable<DirectoryInfo>(fullPath, searchPattern, searchOption, searchTarget, (path, isDir) =>
                         new DirectoryInfo(path, new UnixFileSystemObject(path, isDir)));
                 default:
-                    return EnumerateResults<FileSystemInfo>(fullPath, searchPattern, searchOption, searchTarget, (path, isDir) => isDir ?
+                    return new FileSystemEnumerable<FileSystemInfo>(fullPath, searchPattern, searchOption, searchTarget, (path, isDir) => isDir ?
                         (FileSystemInfo)new DirectoryInfo(path, new UnixFileSystemObject(path, isDir)) :
                         (FileSystemInfo)new FileInfo(path, new UnixFileSystemObject(path, isDir)));
             }
         }
 
-        private static IEnumerable<T> EnumerateResults<T>(string fullPath, string searchPattern, SearchOption searchOption, SearchTarget searchTarget, Func<string, bool, T> translateResult)
+        private sealed class FileSystemEnumerable<T> : IEnumerable<T>
         {
-            // Maintain a stack of the directories to explore, in the case of SearchOption.AllDirectories
-            var toExplore = new Stack<string>();
-            toExplore.Push(fullPath);
+            private readonly PathPair _initialDirectory;
+            private readonly string _searchPattern;
+            private readonly SearchOption _searchOption;
+            private readonly bool _includeFiles;
+            private readonly bool _includeDirectories;
+            private readonly Func<string, bool, T> _translateResult;
+            private IEnumerator<T> _firstEnumerator;
 
-            // Check whether we care about files, directories, or both
-            bool includeFiles = (searchTarget & SearchTarget.Files) != 0;
-            bool includeDirectories = (searchTarget & SearchTarget.Directories) != 0;
-
-            // Process directories until we're out
-            while (toExplore.Count > 0)
+            internal FileSystemEnumerable(
+                string userPath, string searchPattern,
+                SearchOption searchOption, SearchTarget searchTarget,
+                Func<string, bool, T> translateResult)
             {
-                // Get the next directory to process
-                string dirPath = toExplore.Pop();
-
-                // Open an enumerator of its contents.
-                IntPtr pdir;
-                while (Interop.CheckIoPtr(pdir = Interop.libc.opendir(dirPath), dirPath, isDirectory: true)) ;
-                try
+                // Basic validation of the input path
+                if (userPath == null)
                 {
-                    // Read each entry from the enumerator
-                    IntPtr curEntry;
-                    while ((curEntry = Interop.libc.readdir(pdir)) != IntPtr.Zero) // no validation needed for readdir
+                    throw new ArgumentNullException("path");
+                }
+                if (string.IsNullOrWhiteSpace(userPath))
+                {
+                    throw new ArgumentException(SR.Argument_EmptyPath, "path");
+                }
+
+                // Validate and normalize the search pattern.  If after doing so it's empty,
+                // matching Win32 behavior we can skip all additional validation and effectively
+                // return an empty enumerable.
+                searchPattern = NormalizeSearchPattern(searchPattern);
+                if (searchPattern.Length > 0)
+                {
+                    PathHelpers.CheckSearchPattern(searchPattern);
+                    PathHelpers.ThrowIfEmptyOrRootedPath(searchPattern);
+
+                    // If the search pattern contains any paths, make sure we factor those into 
+                    // the user path, and then trim them off.
+                    int lastSlash = searchPattern.LastIndexOf(Path.DirectorySeparatorChar);
+                    if (lastSlash >= 0)
                     {
-                        // Get the name and full name of the entry
-                        string name = GetDirEntName(curEntry);
-                        string fullNewName = dirPath + "/" + name;
-
-                        // Determine whether the entry is a file or a directory and whether it matches the supplied pattern
-                        Interop.libc.structStat stat;
-                        while (Interop.CheckIo(Interop.libc.stat(fullNewName, out stat), fullNewName)) ;
-                        bool isDir = (stat.st_mode & (int)Interop.libc.FileTypes.S_IFMT) == (int)Interop.libc.FileTypes.S_IFDIR && !ShouldIgnoreDirectory(name);
-                        bool isFile = (stat.st_mode & (int)Interop.libc.FileTypes.S_IFMT) == (int)Interop.libc.FileTypes.S_IFREG;
-                        bool matchesSearchPattern = Interop.libc.fnmatch(searchPattern, name, Interop.libc.FnmatchFlags.None) == 0;
-
-                        // Yield the result if the user has asked for it.  In the case of directories,
-                        // always explore it by pushing it onto the stack, regardless of whether
-                        // we're returning directories.
-                        if (isDir)
+                        if (lastSlash >= 1)
                         {
-                            if (includeDirectories && matchesSearchPattern)
-                            {
-                                yield return translateResult(fullNewName, /*isDirectory*/true);
-                            }
-                            if (searchOption == SearchOption.AllDirectories)
-                            {
-                                toExplore.Push(fullNewName);
-                            }
+                            userPath = Path.Combine(userPath, searchPattern.Substring(0, lastSlash));
                         }
-                        else if (isFile && includeFiles && matchesSearchPattern)
+                        searchPattern = searchPattern.Substring(lastSlash + 1);
+                    }
+                    string fullPath = Path.GetFullPath(userPath);
+
+                    // Store everything for the enumerator
+                    _initialDirectory = new PathPair(userPath, fullPath);
+                    _searchPattern = searchPattern;
+                    _searchOption = searchOption;
+                    _includeFiles = (searchTarget & SearchTarget.Files) != 0;
+                    _includeDirectories = (searchTarget & SearchTarget.Directories) != 0;
+                    _translateResult = translateResult;
+                }
+
+                // Open the first enumerator so that any errors are propagated synchronously.
+                _firstEnumerator = Enumerate();
+            }
+
+            public IEnumerator<T> GetEnumerator()
+            {
+                return Interlocked.Exchange(ref _firstEnumerator, null) ?? Enumerate();
+            }
+
+            IEnumerator IEnumerable.GetEnumerator()
+            {
+                return GetEnumerator();
+            }
+
+            private IEnumerator<T> Enumerate()
+            {
+                return Enumerate(
+                    _initialDirectory.FullPath != null ? 
+                        OpenDirectory(_initialDirectory.FullPath) : 
+                        null);
+            }
+
+            private IEnumerator<T> Enumerate(Interop.libc.SafeDirHandle dirHandle)
+            {
+                if (dirHandle == null)
+                {
+                    // Empty search
+                    yield break;
+                }
+
+                Debug.Assert(!dirHandle.IsInvalid);
+                Debug.Assert(!dirHandle.IsClosed);
+
+                // Maintain a stack of the directories to explore, in the case of SearchOption.AllDirectories
+                // Lazily-initialized only if we find subdirectories that will be explored.
+                Stack<PathPair> toExplore = null;
+                PathPair dirPath = _initialDirectory;
+                while (dirHandle != null)
+                {
+                    try
+                    {
+                        // Read each entry from the enumerator
+                        IntPtr curEntry;
+                        while ((curEntry = Interop.libc.readdir(dirHandle)) != IntPtr.Zero) // no validation needed for readdir
                         {
-                            yield return translateResult(fullNewName, /*isDirectory*/false);
+                            string name = Interop.libc.GetDirEntName(curEntry);
+
+                            // Get from the dir entry whether the entry is a file or directory.
+                            // If we're not sure from the dir entry itself, stat to the entry.
+                            bool isDir = false, isFile = false;
+                            switch (Interop.libc.GetDirEntType(curEntry))
+                            {
+                                case Interop.libc.DType.DT_DIR:
+                                    isDir = true;
+                                    break;
+                                case Interop.libc.DType.DT_REG:
+                                    isFile = true;
+                                    break;
+                                case Interop.libc.DType.DT_LNK:
+                                case Interop.libc.DType.DT_UNKNOWN:
+                                    string fullPath = Path.Combine(dirPath.FullPath, name);
+                                    Interop.libcoreclr.fileinfo fileinfo;
+                                    while (Interop.CheckIo(Interop.libcoreclr.GetFileInformationFromPath(fullPath, out fileinfo), fullPath)) ;
+                                    isDir = (fileinfo.mode & Interop.libcoreclr.FileTypes.S_IFMT) == Interop.libcoreclr.FileTypes.S_IFDIR;
+                                    isFile = (fileinfo.mode & Interop.libcoreclr.FileTypes.S_IFMT) == Interop.libcoreclr.FileTypes.S_IFREG;
+                                    break;
+                            }
+                            bool matchesSearchPattern =
+                                (isFile || isDir) &&
+                                Interop.libc.fnmatch(_searchPattern, name, Interop.libc.FnmatchFlags.None) == 0;
+
+                            // Yield the result if the user has asked for it.  In the case of directories,
+                            // always explore it by pushing it onto the stack, regardless of whether
+                            // we're returning directories.
+                            if (isDir && !ShouldIgnoreDirectory(name))
+                            {
+                                if (_includeDirectories && matchesSearchPattern)
+                                {
+                                    yield return _translateResult(Path.Combine(dirPath.UserPath, name), /*isDirectory*/true);
+                                }
+                                if (_searchOption == SearchOption.AllDirectories)
+                                {
+                                    if (toExplore == null)
+                                    {
+                                        toExplore = new Stack<PathPair>();
+                                    }
+                                    toExplore.Push(new PathPair(Path.Combine(dirPath.UserPath, name), Path.Combine(dirPath.FullPath, name)));
+                                }
+                            }
+                            else if (isFile && _includeFiles && matchesSearchPattern)
+                            {
+                                yield return _translateResult(Path.Combine(dirPath.UserPath, name), /*isDirectory*/false);
+                            }
                         }
                     }
-                }
-                finally
-                {
-                    // Close the directory enumerator
-                    while (Interop.CheckIo(Interop.libc.closedir(pdir), dirPath)) ;
+                    finally
+                    {
+                        // Close the directory enumerator
+                        dirHandle.Dispose();
+                        dirHandle = null;
+                    }
+
+                    if (toExplore != null && toExplore.Count > 0)
+                    {
+                        // Open the next directory.
+                        dirPath = toExplore.Pop();
+                        dirHandle = OpenDirectory(dirPath.FullPath);
+                    }
                 }
             }
-        }
 
-        /// <summary>Gets the name of a directory from a dirent*.</summary>
-        /// <param name="dirEnt">
-        /// The pointer to the dirent.  It's represented as an IntPtr, as unsafe code
-        /// can't be used in iterators.
-        /// </param>
-        /// <returns>
-        /// The name extracted from the directory entry.
-        /// </returns>
-        private static unsafe string GetDirEntName(IntPtr dirEnt)
-        {
-            Interop.libc.dirent* curEntryPtr = (Interop.libc.dirent*)dirEnt;
-            return PtrToString(curEntryPtr->d_name);
-        }
+            private struct PathPair
+            {
+                internal readonly string UserPath;
+                internal readonly string FullPath;
 
-        /// <summary>Creates a string from a pointer to a sequence of null-terminated bytes.</summary>
-        /// <param name="buffer">A pointer to the first character in the string.  It must be null terminated.</param>
-        /// <returns>The string.</returns>
-        private static unsafe string PtrToString(byte* buffer)
-        {
-            int length = 0;
-            for (byte* ptr = buffer; *ptr != 0; ptr++, length++) ;
-            return Encoding.UTF8.GetString(buffer, length);
+                internal PathPair(string userPath, string fullPath)
+                {
+                    UserPath = userPath;
+                    FullPath = fullPath;
+                }
+            }
+
+            private static string NormalizeSearchPattern(string searchPattern)
+            {
+                searchPattern = searchPattern.TrimEnd(PathHelpers.TrimEndChars);
+                if (searchPattern.Equals(".") || searchPattern == "*.*")
+                {
+                    searchPattern = "*";
+                }
+                else if (PathHelpers.EndsInDirectorySeparator(searchPattern))
+                {
+                    searchPattern += "*";
+                }
+                return searchPattern;
+            }
+
+            private static Interop.libc.SafeDirHandle OpenDirectory(string fullPath)
+            {
+                Interop.libc.SafeDirHandle handle = Interop.libc.opendir(fullPath);
+                if (handle.IsInvalid)
+                {
+                    throw Interop.GetExceptionForIoErrno(Marshal.GetLastWin32Error(), fullPath, isDirectory: true);
+                }
+                return handle;
+            }
         }
 
         /// <summary>Determines whether the specified directory name should be ignored.</summary>
@@ -471,7 +589,7 @@ namespace System.IO
             fixed (byte* ptr = pathBuffer)
             {
                 while (Interop.CheckIoPtr((IntPtr)Interop.libc.getcwd(ptr, (IntPtr)pathBuffer.Length))) ;
-                return PtrToString(ptr);
+                return Marshal.PtrToStringAnsi((IntPtr)ptr);
             }
         }
 
@@ -512,7 +630,7 @@ namespace System.IO
 
         public override DateTimeOffset GetLastWriteTime(string fullPath)
         {
-            return new UnixFileSystemObject(fullPath, false).LastAccessTime;
+            return new UnixFileSystemObject(fullPath, false).LastWriteTime;
         }
 
         public override void SetLastWriteTime(string fullPath, DateTimeOffset time, bool asDirectory)

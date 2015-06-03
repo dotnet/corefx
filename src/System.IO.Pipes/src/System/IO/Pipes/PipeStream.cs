@@ -7,6 +7,8 @@ using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.Runtime.InteropServices;
 using System.Security;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace System.IO.Pipes
 {
@@ -64,7 +66,7 @@ namespace System.IO.Pipes
             Debug.Assert(transmissionMode >= PipeTransmissionMode.Byte && transmissionMode <= PipeTransmissionMode.Message, "transmissionMode is out of range");
             Debug.Assert(outBufferSize >= 0, "outBufferSize is negative");
 
-            // always defaults to this until overriden
+            // always defaults to this until overridden
             _readMode = transmissionMode;
             _transmissionMode = transmissionMode;
 
@@ -90,12 +92,11 @@ namespace System.IO.Pipes
 
         // Once a PipeStream has a handle ready, it should call this method to set up the PipeStream.  If
         // the pipe is in a connected state already, it should also set the IsConnected (protected) property.
+        // This method may also be called to uninitialize a handle, setting it to null.
         [SecuritySafeCritical]
         internal void InitializeHandle(SafePipeHandle handle, bool isExposed, bool isAsync)
         {
-            Debug.Assert(handle != null, "handle is null");
-
-            if (isAsync)
+            if (isAsync && handle != null)
             {
                 InitializeAsyncHandle(handle);
             }
@@ -137,6 +138,34 @@ namespace System.IO.Pipes
             return ReadCore(buffer, offset, count);
         }
 
+        [SecuritySafeCritical]
+        public override Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
+        {
+            if (buffer == null)
+                throw new ArgumentNullException("buffer");
+            if (offset < 0)
+                throw new ArgumentOutOfRangeException("offset", SR.ArgumentOutOfRange_NeedNonNegNum);
+            if (count < 0)
+                throw new ArgumentOutOfRangeException("count", SR.ArgumentOutOfRange_NeedNonNegNum);
+            if (buffer.Length - offset < count)
+                throw new ArgumentException(SR.Argument_InvalidOffLen);
+            Contract.EndContractBlock();
+
+            if (cancellationToken.IsCancellationRequested)
+            {
+                return Task.FromCanceled<int>(cancellationToken);
+            }
+
+            CheckReadOperations();
+
+            if (!_isAsync)
+            {
+                return base.ReadAsync(buffer, offset, count, cancellationToken);
+            }
+
+            return ReadAsyncCore(buffer, offset, count, cancellationToken);
+        }
+
         [SecurityCritical]
         public override void Write(byte[] buffer, int offset, int count)
         {
@@ -166,6 +195,35 @@ namespace System.IO.Pipes
 
             return;
         }
+
+        [SecuritySafeCritical]
+        public override Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
+        {
+            if (buffer == null)
+                throw new ArgumentNullException("buffer");
+            if (offset < 0)
+                throw new ArgumentOutOfRangeException("offset", SR.ArgumentOutOfRange_NeedNonNegNum);
+            if (count < 0)
+                throw new ArgumentOutOfRangeException("count", SR.ArgumentOutOfRange_NeedNonNegNum);
+            if (buffer.Length - offset < count)
+                throw new ArgumentException(SR.Argument_InvalidOffLen);
+            Contract.EndContractBlock();
+
+            if (cancellationToken.IsCancellationRequested)
+            {
+                return Task.FromCanceled<int>(cancellationToken);
+            }
+
+            CheckWriteOperations();
+
+            if (!_isAsync)
+            {
+                return base.WriteAsync(buffer, offset, count, cancellationToken);
+            }
+
+            return WriteAsyncCore(buffer, offset, count, cancellationToken);
+        }
+
 
         [ThreadStatic]
         private static byte[] t_singleByteArray;
@@ -230,6 +288,8 @@ namespace System.IO.Pipes
                 {
                     _handle.Dispose();
                 }
+
+                UninitializeAsyncHandle();
             }
             finally
             {
@@ -241,7 +301,7 @@ namespace System.IO.Pipes
 
         // ********************** Public Properties *********************** //
 
-        // Apis use coarser definition of connected, but these map to internal 
+        // APIs use coarser definition of connected, but these map to internal 
         // Connected/Disconnected states. Note that setter is protected; only
         // intended to be called by custom PipeStream concrete children
         public bool IsConnected
@@ -278,16 +338,12 @@ namespace System.IO.Pipes
                 {
                     throw new InvalidOperationException(SR.InvalidOperation_PipeDisconnected);
                 }
-                if (_handle == null)
+                if (CheckOperationsRequiresSetHandle && _handle == null)
                 {
                     throw new InvalidOperationException(SR.InvalidOperation_PipeHandleNotSet);
                 }
 
-                if (_state == PipeState.Closed)
-                {
-                    throw __Error.GetPipeNotOpen();
-                }
-                if (_handle.IsClosed)
+                if ((_state == PipeState.Closed) || (_handle != null && _handle.IsClosed))
                 {
                     throw __Error.GetPipeNotOpen();
                 }
@@ -401,17 +457,13 @@ namespace System.IO.Pipes
         [SecurityCritical]
         internal virtual void CheckPipePropertyOperations()
         {
-            if (_handle == null)
+            if (CheckOperationsRequiresSetHandle && _handle == null)
             {
                 throw new InvalidOperationException(SR.InvalidOperation_PipeHandleNotSet);
             }
 
             // these throw object disposed
-            if (_state == PipeState.Closed)
-            {
-                throw __Error.GetPipeNotOpen();
-            }
-            if (_handle.IsClosed)
+            if ((_state == PipeState.Closed) || (_handle != null && _handle.IsClosed))
             {
                 throw __Error.GetPipeNotOpen();
             }
@@ -432,17 +484,13 @@ namespace System.IO.Pipes
             {
                 throw new InvalidOperationException(SR.InvalidOperation_PipeDisconnected);
             }
-            if (_handle == null)
+            if (CheckOperationsRequiresSetHandle && _handle == null)
             {
                 throw new InvalidOperationException(SR.InvalidOperation_PipeHandleNotSet);
             }
 
             // these throw object disposed
-            if (_state == PipeState.Closed)
-            {
-                throw __Error.GetPipeNotOpen();
-            }
-            if (_handle.IsClosed)
+            if ((_state == PipeState.Closed) || (_handle != null && _handle.IsClosed))
             {
                 throw __Error.GetPipeNotOpen();
             }
@@ -462,7 +510,7 @@ namespace System.IO.Pipes
             {
                 throw new InvalidOperationException(SR.InvalidOperation_PipeDisconnected);
             }
-            if (_handle == null)
+            if (CheckOperationsRequiresSetHandle && _handle == null)
             {
                 throw new InvalidOperationException(SR.InvalidOperation_PipeHandleNotSet);
             }
@@ -474,11 +522,7 @@ namespace System.IO.Pipes
             }
 
             // these throw object disposed
-            if (_state == PipeState.Closed)
-            {
-                throw __Error.GetPipeNotOpen();
-            }
-            if (_handle.IsClosed)
+            if ((_state == PipeState.Closed) || (_handle != null && _handle.IsClosed))
             {
                 throw __Error.GetPipeNotOpen();
             }

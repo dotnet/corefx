@@ -1,0 +1,105 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Windows_Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{E7E8DE8A-9EC1-46A8-A6EE-727DB32DBEB8}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AssemblyName>System.Diagnostics.Debug</AssemblyName>
+    <AssemblyVersion>4.0.10.0</AssemblyVersion>
+    <DefineConstants>$(DefineConstants);PUBLIC_DEBUG</DefineConstants>
+    <IsPartialFacadeAssembly>true</IsPartialFacadeAssembly>
+    <NuGetTargetFrameworkMoniker>DNXCore,Version=v5.0</NuGetTargetFrameworkMoniker>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(TargetsUnix)' == 'true' ">
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <!-- Help VS understand available configurations -->
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Linux_Debug|AnyCPU' " />
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Linux_Release|AnyCPU' " />
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'OSX_Debug|AnyCPU' " />
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'OSX_Release|AnyCPU' " />
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Windows_Debug|AnyCPU' " />
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Windows_Release|AnyCPU' " />
+  <ItemGroup>
+    <Compile Include="Properties\InternalsVisibleTo.cs" />
+    <Compile Include="$(CommonPath)\System\Diagnostics\Debug.cs">
+      <Link>System\Diagnostics\Debug.cs</Link>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup Condition=" '$(TargetsWindows)' == 'true' ">
+    <Compile Include="$(CommonPath)\System\Diagnostics\Debug.Windows.cs">
+      <Link>System\Diagnostics\Debug.Windows.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\Interop.Libraries.cs">
+      <Link>Common\Interop\Windows\Interop.Libraries.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.OutputDebugString.cs">
+      <Link>Common\Interop\Windows\mincore\Interop.OutputDebugString.cs</Link>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup Condition=" '$(TargetsUnix)' == 'true' ">
+    <Compile Include="$(CommonPath)\System\Diagnostics\Debug.Unix.cs">
+      <Link>System\Diagnostics\Debug.Unix.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\Interop.Devices.cs">
+      <Link>Common\Interop\Unix\Interop.Devices.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\Interop.Libraries.cs">
+      <Link>Common\Interop\Unix\Interop.Libraries.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\Interop.Errors.cs">
+      <Link>Common\Interop\Unix\Interop.Errors.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\Interop.IOErrors.cs">
+      <Link>Common\Interop\Unix\Interop.IOErrors.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\libc\Interop.close.cs">
+      <Link>Common\Interop\Unix\libc\Interop.close.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\libc\Interop.gnu_get_libc_version.cs">
+      <Link>Common\Interop\Unix\Interop.gnu_get_libc_version.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\libc\Interop.open.cs">
+      <Link>Common\Interop\Unix\libc\Interop.open.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\libc\Interop.strerror.cs">
+      <Link>Common\Interop\Unix\libc\Interop.strerror.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\libc\Interop.syslog.cs">
+      <Link>Common\Interop\Unix\libc\Interop.syslog.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\libc\Interop.write.cs">
+      <Link>Common\Interop\Unix\libc\Interop.write.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\libcoreclr\Interop.GetFileInformation.cs">
+      <Link>Common\Interop\Unix\Interop.GetFileInformation.cs"</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Microsoft\Win32\SafeHandles\SafeFileHandle.Unix.cs">
+      <Link>Common\Microsoft\Win32\SafeHandles\SafeFileHandle.Unix.cs</Link>
+    </Compile>
+  </ItemGroup>
+  <!-- Linux -->
+  <ItemGroup Condition="'$(TargetsLinux)' == 'true'">
+    <Compile Include="$(CommonPath)\Interop\Linux\Interop.Errors.cs">
+      <Link>Common\Interop\Linux\Interop.Errors.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Linux\libc\Interop.OpenFlags.cs">
+      <Link>Common\Interop\Linux\Interop.OpenFlags.cs</Link>
+    </Compile>
+  </ItemGroup>
+  <!-- OSX -->
+  <ItemGroup Condition="'$(TargetsOSX)' == 'true'">
+    <Compile Include="$(CommonPath)\Interop\OSX\Interop.Errors.cs">
+      <Link>Common\Interop\OSX\Interop.Errors.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\OSX\libc\Interop.OpenFlags.cs">
+      <Link>Common\Interop\OSX\Interop.OpenFlags.cs</Link>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="project.json" />
+  </ItemGroup>
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
+</Project>

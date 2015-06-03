@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using Xunit;
 
@@ -104,14 +105,14 @@ namespace System.Collections.Immutable.Test
         [Fact]
         public void GetEnumeratorTest()
         {
-            var builder = ImmutableSortedSet.Create("a", "B").ToBuilder();
+            var builder = ImmutableSortedSet.Create("a", "B").WithComparer(StringComparer.Ordinal).ToBuilder();
             IEnumerable<string> enumerable = builder;
             using (var enumerator = enumerable.GetEnumerator())
             {
                 Assert.True(enumerator.MoveNext());
-                Assert.Equal("a", enumerator.Current);
-                Assert.True(enumerator.MoveNext());
                 Assert.Equal("B", enumerator.Current);
+                Assert.True(enumerator.MoveNext());
+                Assert.Equal("a", enumerator.Current);
                 Assert.False(enumerator.MoveNext());
             }
         }
@@ -325,6 +326,13 @@ namespace System.Collections.Immutable.Test
 
             Assert.Throws<ArgumentOutOfRangeException>(() => builder[-1]);
             Assert.Throws<ArgumentOutOfRangeException>(() => builder[3]);
+        }
+
+        [Fact]
+        public void DebuggerAttributesValid()
+        {
+            DebuggerAttributes.ValidateDebuggerDisplayReferences(ImmutableSortedSet.CreateBuilder<string>());
+            DebuggerAttributes.ValidateDebuggerTypeProxyProperties(ImmutableSortedSet.CreateBuilder<int>());
         }
     }
 }

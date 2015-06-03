@@ -10,7 +10,6 @@ namespace System.Collections.Immutable
     /// <summary>
     /// A simple view of the immutable collection that the debugger can show to the developer.
     /// </summary>
-    [ExcludeFromCodeCoverage]
     internal class ImmutableHashSetDebuggerProxy<T>
     {
         /// <summary>
@@ -24,7 +23,7 @@ namespace System.Collections.Immutable
         private T[] _contents;
 
         /// <summary>   
-        /// Initializes a new instance of the <see cref="ImmutableHashSetDebuggerProxy&lt;T&gt;"/> class.
+        /// Initializes a new instance of the <see cref="ImmutableHashSetDebuggerProxy{T}"/> class.
         /// </summary>
         /// <param name="set">The collection to display in the debugger</param>
         public ImmutableHashSetDebuggerProxy(ImmutableHashSet<T> set)

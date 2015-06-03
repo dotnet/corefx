@@ -2,25 +2,70 @@
 <Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Configuration Condition=" '$(Configuration)' == '' ">Windows_Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{D3F18ACC-D327-4ABB-BA6C-E9C34A041B2F}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>Microsoft.Win32.Registry</RootNamespace>
     <AssemblyName>Microsoft.Win32.Registry</AssemblyName>
+    <AssemblyVersion>4.0.0.0</AssemblyVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
-  <!-- Default configurations to help VS understand the configurations -->
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-  </PropertyGroup>
+  <!-- Help VS understand available configurations -->
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Windows_Debug|AnyCPU' " />
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Windows_Release|AnyCPU' " />
   <ItemGroup>
-    <Compile Include="$(CommonPath)\System\SR.cs" />
-  </ItemGroup>
-  <!-- References are resolved from packages.config -->
-  <ItemGroup>
-    <Compile Include="Interop\Interop.Manual.cs" />
+    <Compile Include="$(CommonPath)\Interop\Windows\Interop.Libraries.cs">
+      <Link>Common\Interop\Windows\Interop.Libraries.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.Errors.cs">
+      <Link>Common\Interop\Windows\Interop.Errors.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.FormatMessage.cs">
+      <Link>Common\Interop\Windows\Interop.FormatMessage.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.RegCloseKey.cs">
+      <Link>Common\Interop\Windows\Interop.RegCloseKey.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.RegConnectRegistry.cs">
+      <Link>Common\Interop\Windows\Interop.RegConnectRegistry.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.RegCreateKeyEx.cs">
+      <Link>Common\Interop\Windows\Interop.RegCreateKeyEx.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.RegDeleteKeyEx.cs">
+      <Link>Common\Interop\Windows\Interop.RegDeleteKeyEx.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.RegDeleteValue.cs">
+      <Link>Common\Interop\Windows\Interop.RegDeleteValue.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.RegEnumKeyEx.cs">
+      <Link>Common\Interop\Windows\Interop.RegEnumKeyEx.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.RegEnumValue.cs">
+      <Link>Common\Interop\Windows\Interop.RegEnumValue.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.RegFlushKey.cs">
+      <Link>Common\Interop\Windows\Interop.RegFlushKey.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.RegistryOptions.cs">
+      <Link>Common\Interop\Windows\Interop.RegistryOptions.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.RegOpenKeyEx.cs">
+      <Link>Common\Interop\Windows\Interop.RegOpenKeyEx.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.RegQueryInfoKey.cs">
+      <Link>Common\Interop\Windows\Interop.RegQueryInfoKey.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.RegQueryValueEx.cs">
+      <Link>Common\Interop\Windows\Interop.RegQueryValueEx.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.RegSetValueEx.cs">
+      <Link>Common\Interop\Windows\Interop.RegSetValueEx.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.SECURITY_ATTRIBUTES.cs">
+      <Link>Common\Interop\Windows\Interop.SECURITY_ATTRIBUTES.cs</Link>
+    </Compile>
     <Compile Include="Microsoft\Win32\Registry.cs" />
     <Compile Include="Microsoft\Win32\RegistryKey.cs" />
     <Compile Include="Microsoft\Win32\RegistryOptions.cs" />
@@ -28,23 +73,10 @@
     <Compile Include="Microsoft\Win32\RegistryView.cs" />
     <Compile Include="Microsoft\Win32\SafeHandles\SafeRegistryHandle.cs" />
     <Compile Include="Microsoft\Win32\ThrowHelper.cs" />
-    <Compile Include="Resources\Strings.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Strings.resx</DependentUpon>
-    </Compile>
     <Compile Include="System\Security\AccessControl\RegistryRights.cs" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Resources\Strings.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Strings.Designer.cs</LastGenOutput>
-      <CustomToolNamespace>Resources</CustomToolNamespace>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="packages.config" />
+    <None Include="project.json" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

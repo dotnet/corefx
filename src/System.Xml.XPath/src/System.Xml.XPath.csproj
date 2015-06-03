@@ -7,6 +7,7 @@
     <ProjectGuid>{BE28323E-327A-4E0F-B7F9-16AB7EAB59DD}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AssemblyName>System.Xml.XPath</AssemblyName>
+    <AssemblyVersion>4.0.0.0</AssemblyVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <!-- Default configurations to help VS understand the configurations -->
@@ -14,7 +15,6 @@
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
   </PropertyGroup>
-  <!-- References are resolved from packages.config -->
   <ItemGroup>
     <Compile Include="$(CommonPath)\System\Xml\Base64Decoder.cs" />
     <Compile Include="$(CommonPath)\System\Xml\Base64Encoder.cs" />
@@ -37,14 +37,6 @@
     <Compile Include="$(CommonPath)\System\Xml\XPathNavigatorEx.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="$(CommonPath)\System\SR.cs">
-      <Link>Resources\SR.cs</Link>
-    </Compile>
-    <Compile Include="Resources\Strings.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Strings.resx</DependentUpon>
-    </Compile>
     <Compile Include="System\Xml\Cache\XPathDocumentBuilder.cs" />
     <Compile Include="System\Xml\Cache\XPathDocumentNavigator.cs" />
     <Compile Include="System\Xml\Cache\XPathNode.cs" />
@@ -130,21 +122,12 @@
     <Compile Include="System\Xml\XPath\XPathNodeIterator.cs" />
     <Compile Include="System\Xml\XPath\XPathNodeType.cs" />
     <Compile Include="System\Xml\Xsl\XsltContext.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="$(CommonPath)\System\ArrayT.cs" />
     <Compile Include="$(CommonPath)\System\NotImplemented.cs" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Resources\Strings.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Strings.Designer.cs</LastGenOutput>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="packages.config" />
+    <None Include="project.json" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

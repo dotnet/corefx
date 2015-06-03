@@ -94,8 +94,8 @@ namespace System.Collections.Immutable
         /// <param name="count">The number of elements in the sequence.</param>
         /// <returns>The array.</returns>
         /// <remarks>
-        /// This is more efficient than the Enumerable.ToArray{T} extension method
-        /// because that only tries to cast the sequence to ICollection{T} to determine
+        /// This is more efficient than the <see cref="Enumerable.ToArray{TSource}"/> extension method
+        /// because that only tries to cast the sequence to <see cref="ICollection{T}"/> to determine
         /// the count before it falls back to reallocating arrays as it enumerates.
         /// </remarks>
         internal static T[] ToArray<T>(this IEnumerable<T> sequence, int count)
@@ -204,7 +204,7 @@ namespace System.Collections.Immutable
             }
             else
             {
-                // We have to fallback to doing it manually since the underlying collection
+                // We have to fall back to doing it manually since the underlying collection
                 // being compared isn't a (matching) generic type.
                 using (var enumerator = sequence1.GetEnumerator())
                 {
@@ -270,10 +270,10 @@ namespace System.Collections.Immutable
         }
 
         /// <summary>
-        /// Clears the specified stack.  For empty stacks, it avoids the call to Clear, which
-        /// avoids a call into the runtime's implementation of Array.Clear, helping performance,
-        /// in particular around inlining.  Stack.Count typically gets inlined by today's JIT, while
-        /// stack.Clear and Array.Clear typically don't.
+        /// Clears the specified stack.  For empty stacks, it avoids the call to <see cref="Stack{T}.Clear"/>, which
+        /// avoids a call into the runtime's implementation of <see cref="Array.Clear"/>, helping performance,
+        /// in particular around inlining.  <see cref="Stack{T}.Count"/> typically gets inlined by today's JIT, while
+        /// <see cref="Stack{T}.Clear"/> and <see cref="Array.Clear"/> typically don't.
         /// </summary>
         /// <typeparam name="T">Specifies the type of data in the stack to be cleared.</typeparam>
         /// <param name="stack">The stack to clear.</param>
@@ -282,38 +282,6 @@ namespace System.Collections.Immutable
             if (stack.Count > 0)
             {
                 stack.Clear();
-            }
-        }
-
-        /// <summary>
-        /// Gets a non-disposable enumerable that can be used as the source for a C# foreach loop
-        /// that will not box the enumerator if it is of a particular type.
-        /// </summary>
-        /// <typeparam name="T">The type of value to be enumerated.</typeparam>
-        /// <typeparam name="TEnumerator">
-        /// The type of the Enumerator struct. This must NOT implement <see cref="IDisposable"/> (or <see cref="IEnumerator{T}"/>).
-        /// If it does, call <see cref="GetEnumerableDisposable{T, TEnumerator}"/> instead.
-        /// </typeparam>
-        /// <param name="enumerable">The collection to be enumerated.</param>
-        /// <returns>A struct that enumerates the collection.</returns>
-        internal static EnumeratorAdapter<T, TEnumerator> GetEnumerable<T, TEnumerator>(this IEnumerable<T> enumerable)
-            where TEnumerator : struct, IStrongEnumerator<T>
-        {
-            Requires.NotNull(enumerable, "enumerable");
-
-            // This debug-only check is sufficient to cause test failures to flag errors so they never get checked in.
-            Debug.Assert(!typeof(IDisposable).GetTypeInfo().IsAssignableFrom(typeof(TEnumerator).GetTypeInfo()), "The enumerator struct implements IDisposable. Call GetEnumerableDisposable instead.");
-
-            var strongEnumerable = enumerable as IStrongEnumerable<T, TEnumerator>;
-            if (strongEnumerable != null)
-            {
-                return new EnumeratorAdapter<T, TEnumerator>(strongEnumerable.GetEnumerator());
-            }
-            else
-            {
-                // Consider for future: we could add more special cases for common
-                // mutable collection types like List<T>+Enumerator and such.
-                return new EnumeratorAdapter<T, TEnumerator>(enumerable.GetEnumerator());
             }
         }
 
@@ -344,7 +312,7 @@ namespace System.Collections.Immutable
         }
 
         /// <summary>
-        /// Wraps a List{T} as an ordered collection.
+        /// Wraps a <see cref="IList{T}"/> as an ordered collection.
         /// </summary>
         /// <typeparam name="T">The type of element in the collection.</typeparam>
         private class ListOfTWrapper<T> : IOrderedCollection<T>
@@ -355,7 +323,7 @@ namespace System.Collections.Immutable
             private readonly IList<T> _collection;
 
             /// <summary>
-            /// Initializes a new instance of the <see cref="ListOfTWrapper&lt;T&gt;"/> class.
+            /// Initializes a new instance of the <see cref="ListOfTWrapper{T}"/> class.
             /// </summary>
             /// <param name="collection">The collection.</param>
             internal ListOfTWrapper(IList<T> collection)
@@ -384,7 +352,7 @@ namespace System.Collections.Immutable
             /// Returns an enumerator that iterates through the collection.
             /// </summary>
             /// <returns>
-            /// A <see cref="T:System.Collections.Generic.IEnumerator`1"/> that can be used to iterate through the collection.
+            /// A <see cref="IEnumerator{T}"/> that can be used to iterate through the collection.
             /// </returns>
             public IEnumerator<T> GetEnumerator()
             {
@@ -395,7 +363,7 @@ namespace System.Collections.Immutable
             /// Returns an enumerator that iterates through a collection.
             /// </summary>
             /// <returns>
-            /// An <see cref="T:System.Collections.IEnumerator"/> object that can be used to iterate through the collection.
+            /// An <see cref="IEnumerator"/> object that can be used to iterate through the collection.
             /// </returns>
             IEnumerator IEnumerable.GetEnumerator()
             {
@@ -404,7 +372,7 @@ namespace System.Collections.Immutable
         }
 
         /// <summary>
-        /// Wraps any IEnumerable as an ordered, indexable list.
+        /// Wraps any <see cref="IEnumerable{T}"/> as an ordered, indexable list.
         /// </summary>
         /// <typeparam name="T">The type of element in the collection.</typeparam>
         private class FallbackWrapper<T> : IOrderedCollection<T>
@@ -420,7 +388,7 @@ namespace System.Collections.Immutable
             private IList<T> _collection;
 
             /// <summary>
-            /// Initializes a new instance of the <see cref="FallbackWrapper&lt;T&gt;"/> class.
+            /// Initializes a new instance of the <see cref="FallbackWrapper{T}"/> class.
             /// </summary>
             /// <param name="sequence">The sequence.</param>
             internal FallbackWrapper(IEnumerable<T> sequence)
@@ -471,7 +439,7 @@ namespace System.Collections.Immutable
             /// Returns an enumerator that iterates through the collection.
             /// </summary>
             /// <returns>
-            /// A <see cref="T:System.Collections.Generic.IEnumerator`1"/> that can be used to iterate through the collection.
+            /// A <see cref="IEnumerator{T}"/> that can be used to iterate through the collection.
             /// </returns>
             public IEnumerator<T> GetEnumerator()
             {
@@ -482,7 +450,7 @@ namespace System.Collections.Immutable
             /// Returns an enumerator that iterates through a collection.
             /// </summary>
             /// <returns>
-            /// An <see cref="T:System.Collections.IEnumerator"/> object that can be used to iterate through the collection.
+            /// An <see cref="IEnumerator"/> object that can be used to iterate through the collection.
             /// </returns>
             [ExcludeFromCodeCoverage]
             IEnumerator IEnumerable.GetEnumerator()

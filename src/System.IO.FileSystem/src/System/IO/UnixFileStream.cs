@@ -1,17 +1,18 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using Microsoft.Win32.SafeHandles;
 using System.Diagnostics;
 using System.Diagnostics.Contracts;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 
+using Microsoft.Win32.SafeHandles;
+
 namespace System.IO
 {
     /// <summary>Provides an implementation of a file stream for Unix files.</summary>
-    internal sealed class UnixFileStream : FileStreamBase
+    internal sealed partial class UnixFileStream : FileStreamBase
     {
         /// <summary>The file descriptor wrapped in a file handle.</summary>
         private readonly SafeFileHandle _fileHandle;
@@ -104,16 +105,8 @@ namespace System.IO
                 throw;
             }
 
-            // Support additional options after the file has been opened.
-            // These provide hints around how the file will be accessed.
-            Interop.libc.Advice fadv =
-                _options == FileOptions.RandomAccess ? Interop.libc.Advice.POSIX_FADV_RANDOM :
-                _options == FileOptions.SequentialScan ? Interop.libc.Advice.POSIX_FADV_SEQUENTIAL :
-                0;
-            if (fadv != 0)
-            {
-                SysCall<Interop.libc.Advice, int>((fd, advice, _) => Interop.libc.posix_fadvise(fd, IntPtr.Zero, IntPtr.Zero, advice), fadv);
-            }
+            // Perform additional configurations on the stream based on the provided FileOptions
+            PostOpenConfigureStreamFromOptions();
 
             // Jump to the end of the file if opened as Append.
             if (_mode == FileMode.Append)
@@ -121,6 +114,9 @@ namespace System.IO
                 _appendStart = SeekCore(0, SeekOrigin.End);
             }
         }
+
+        /// <summary>Performs additional configuration of the opened stream based on provided options.</summary>
+        partial void PostOpenConfigureStreamFromOptions();
 
         /// <summary>Initializes a stream from an already open file handle (file descriptor).</summary>
         /// <param name="handle">The handle to the file.</param>
@@ -133,10 +129,14 @@ namespace System.IO
             // Make sure the handle is open
             if (handle.IsInvalid)
                 throw new ArgumentException(SR.Arg_InvalidHandle, "handle");
+            if (handle.IsClosed)
+                throw new ObjectDisposedException(SR.ObjectDisposed_FileClosed);
             if (access < FileAccess.Read || access > FileAccess.ReadWrite)
                 throw new ArgumentOutOfRangeException("access", SR.ArgumentOutOfRange_Enum);
-            if (bufferSize < 0) // allow bufferSize == 0 for no buffering
+            if (bufferSize <= 0)
                 throw new ArgumentOutOfRangeException("bufferSize", SR.ArgumentOutOfRange_NeedNonNegNum);
+            if (handle.IsAsync.HasValue && useAsyncIO != handle.IsAsync.Value)
+                throw new ArgumentException(SR.Arg_HandleNotAsync);
 
             _fileHandle = handle;
             _access = access;
@@ -144,7 +144,7 @@ namespace System.IO
             _bufferLength = bufferSize;
             _useAsyncIO = useAsyncIO;
 
-            if (_parent.CanSeek)
+            if (CanSeek)
             {
                 SeekCore(0, SeekOrigin.Current);
             }
@@ -154,7 +154,7 @@ namespace System.IO
         /// <returns>The buffer.</returns>
         private byte[] GetBuffer()
         {
-            Contract.Assert(_buffer == null || _buffer.Length == _bufferLength);
+            Debug.Assert(_buffer == null || _buffer.Length == _bufferLength);
             return _buffer ?? (_buffer = new byte[_bufferLength]);
         }
 
@@ -165,8 +165,8 @@ namespace System.IO
         /// <returns>The flags value to be passed to the open system call.</returns>
         private static Interop.libc.OpenFlags PreOpenConfigurationFromOptions(FileMode mode, FileAccess access, FileOptions options)
         {
-            // Translate FileMode.  Most of the values map cleanly to one or more options for open/open64.
-            Interop.libc.OpenFlags flags = 0;
+            // Translate FileMode.  Most of the values map cleanly to one or more options for open.
+            Interop.libc.OpenFlags flags = default(Interop.libc.OpenFlags);
             switch (mode)
             {
                 default:
@@ -191,7 +191,7 @@ namespace System.IO
                     break;
             }
 
-            // Translate FileAccess.  All possible values map cleanly to corresponding values for open/open64.
+            // Translate FileAccess.  All possible values map cleanly to corresponding values for open.
             switch (access)
             {
                 case FileAccess.Read:
@@ -213,8 +213,8 @@ namespace System.IO
                 case FileOptions.Asynchronous:    // Handled in ctor, setting _useAsync and SafeFileHandle.IsAsync to true
                 case FileOptions.DeleteOnClose:   // DeleteOnClose doesn't have a Unix equivalent, but we approximate it in Dispose
                 case FileOptions.Encrypted:       // Encrypted does not have an equivalent on Unix and is ignored.
-                case FileOptions.RandomAccess:    // Implemented after open via posix_fadvise
-                case FileOptions.SequentialScan:  // Implemented after open via posix_fadvise
+                case FileOptions.RandomAccess:    // Implemented after open if posix_fadvise is available
+                case FileOptions.SequentialScan:  // Implemented after open if posix_fadvise is available
                     break;
 
                 case FileOptions.WriteThrough:
@@ -252,7 +252,7 @@ namespace System.IO
                 if (!_canSeek.HasValue)
                 {
                     // Lazily-initialize whether we're able to seek, tested by seeking to our current location.
-                    _canSeek = SysCall<int, int>((fd, _, __) => Interop.libc.lseek64(fd, 0, Interop.libc.SeekWhence.SEEK_CUR), throwOnError: false) >= 0;
+                    _canSeek = SysCall<int, int>((fd, _, __) => Interop.libc.lseek(fd, 0, Interop.libc.SeekWhence.SEEK_CUR), throwOnError: false) >= 0;
                 }
                 return _canSeek.Value;
             }
@@ -281,9 +281,9 @@ namespace System.IO
                 // Get the length of the file as reported by the OS
                 long length = SysCall<int, int>((fd, _, __) =>
                 {
-                    Interop.libc.structStat stat;
-                    int result = Interop.libc.fstat(fd, out stat);
-                    return result >= 0 ? stat.st_size : result;
+                    Interop.libcoreclr.fileinfo fileinfo;
+                    int result = Interop.libcoreclr.GetFileInformationFromFd(fd, out fileinfo);
+                    return result >= 0 ? fileinfo.size : result;
                 });
 
                 // But we may have buffered some data to be written that puts our length
@@ -298,7 +298,7 @@ namespace System.IO
         }
 
         /// <summary>Gets the path that was passed to the constructor.</summary>
-        public override String Name { get { return _path; } }
+        public override String Name { get { return _path ?? SR.IO_UnknownFileName; } }
 
         /// <summary>Gets the SafeFileHandle for the file descriptor encapsulated in this stream.</summary>
         public override SafeFileHandle SafeFileHandle
@@ -316,6 +316,15 @@ namespace System.IO
         {
             get
             {
+                if (_fileHandle.IsClosed)
+                {
+                    throw __Error.GetFileNotOpen();
+                }
+                if (!_parent.CanSeek)
+                {
+                    throw __Error.GetSeekNotSupported();
+                }
+
                 VerifyBufferInvariants();
                 VerifyOSHandlePosition();
 
@@ -343,13 +352,13 @@ namespace System.IO
         private void VerifyBufferInvariants()
         {
             // Read buffer values must be in range: 0 <= _bufferReadPos <= _bufferReadLength <= _bufferLength
-            Contract.Assert(0 <= _readPos && _readPos <= _readLength && _readLength <= _bufferLength);
+            Debug.Assert(0 <= _readPos && _readPos <= _readLength && _readLength <= _bufferLength);
 
             // Write buffer values must be in range: 0 <= _bufferWritePos <= _bufferLength
-            Contract.Assert(0 <= _writePos && _writePos <= _bufferLength);
+            Debug.Assert(0 <= _writePos && _writePos <= _bufferLength);
 
             // Read buffering and write buffering can't both be active
-            Contract.Assert((_readPos == 0 && _readLength == 0) || _writePos == 0);
+            Debug.Assert((_readPos == 0 && _readLength == 0) || _writePos == 0);
         }
 
         /// <summary>
@@ -569,7 +578,7 @@ namespace System.IO
                 SeekCore(value, SeekOrigin.Begin);
             }
 
-            SysCall<long, int>((fd, length, _) => Interop.libc.ftruncate64(fd, length), value);
+            SysCall<long, int>((fd, length, _) => Interop.libc.ftruncate(fd, length), value);
 
             // Return file pointer to where it was before setting length
             if (origPos != value)
@@ -613,7 +622,7 @@ namespace System.IO
             {
                 // If we're not able to seek, then we're not able to rewind the stream (i.e. flushing
                 // a read buffer), in which case we don't want to use a read buffer.  Similarly, if
-                // the user has ssked for more data than we can buffer, we also want to skip the buffer.
+                // the user has asked for more data than we can buffer, we also want to skip the buffer.
                 if (!_parent.CanSeek || (count >= _bufferLength))
                 {
                     // Read directly into the user's buffer
@@ -665,7 +674,7 @@ namespace System.IO
                 bytesRead = (int)SysCall((fd, ptr, len) =>
                 {
                     long result = (long)Interop.libc.read(fd, (byte*)ptr, (IntPtr)len);
-                    Contract.Assert(result <= len);
+                    Debug.Assert(result <= len);
                     return result;
                 }, (IntPtr)(bufPtr + offset), count);
             }
@@ -684,6 +693,12 @@ namespace System.IO
         /// <returns>A task that represents the asynchronous read operation.</returns>
         public override Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
         {
+            if (cancellationToken.IsCancellationRequested)
+                return Task.FromCanceled<int>(cancellationToken);
+
+            if (_fileHandle.IsClosed)
+                throw __Error.GetFileNotOpen();
+
             if (_useAsyncIO)
             {
                 // TODO: Use async I/O instead of sync I/O
@@ -775,7 +790,7 @@ namespace System.IO
             // Our buffer is now empty.  If using the buffer would slow things down (because
             // the user's looking to write more data than we can store in the buffer),
             // skip the buffer.  Otherwise, put the remaining data into the buffer.
-            Contract.Assert(_writePos == 0);
+            Debug.Assert(_writePos == 0);
             if (count >= _bufferLength)
             {
                 WriteCore(array, offset, count);
@@ -795,17 +810,21 @@ namespace System.IO
         {
             VerifyOSHandlePosition();
 
-            long bytesWritten;
             fixed (byte* bufPtr = array)
             {
-                bytesWritten = SysCall((fd, ptr, len) =>
+                while (count > 0)
                 {
-                    long result = (long)Interop.libc.write(fd, (byte*)ptr, (IntPtr)len);
-                    Contract.Assert(result <= len);
-                    return result;
-                }, (IntPtr)(bufPtr + offset), count);
+                    int bytesWritten = (int)SysCall((fd, ptr, len) =>
+                    {
+                        long result = (long)Interop.libc.write(fd, (byte*)ptr, (IntPtr)len);
+                        Debug.Assert(result <= len);
+                        return result;
+                    }, (IntPtr)(bufPtr + offset), count);
+                    _filePosition += bytesWritten;
+                    count -= bytesWritten;
+                    offset += bytesWritten;
+                }
             }
-            _filePosition += bytesWritten;
         }
 
         /// <summary>
@@ -820,6 +839,12 @@ namespace System.IO
         /// <returns>A task that represents the asynchronous write operation.</returns>
         public override Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
         {
+            if (cancellationToken.IsCancellationRequested)
+                return Task.FromCanceled(cancellationToken);
+
+            if (_fileHandle.IsClosed)
+                throw __Error.GetFileNotOpen();
+
             if (_useAsyncIO)
             {
                 // TODO: Use async I/O instead of sync I/O
@@ -906,7 +931,7 @@ namespace System.IO
         {
             if (origin < SeekOrigin.Begin || origin > SeekOrigin.End)
             {
-                throw new ArgumentException(SR.Argument_InvalidSeekOrigin);
+                throw new ArgumentException(SR.Argument_InvalidSeekOrigin, "origin");
             }
             if (_fileHandle.IsClosed)
             {
@@ -920,11 +945,15 @@ namespace System.IO
             VerifyOSHandlePosition();
 
             // Flush our write/read buffer.  FlushWrite will output any write buffer we have and reset _bufferWritePos.
-            // We don't call FlushRead or FlushInternalBuffer, as that will do an unnecessary seek to rewind the read
-            // buffer, and since we're about to seek and update our position, we can simply dump the buffer and reset
-            // our read position. In the future, for some simple cases we could potentially add an optimization here to just 
-            // move data around in the buffer for short jumps, to avoid re-reading the data from disk.
+            // We don't call FlushRead, as that will do an unnecessary seek to rewind the read buffer, and since we're 
+            // about to seek and update our position, we can simply update the offset as necessary and reset our read 
+            // position and length to 0. (In the future, for some simple cases we could potentially add an optimization 
+            // here to just move data around in the buffer for short jumps, to avoid re-reading the data from disk.)
             FlushWriteBuffer();
+            if (origin == SeekOrigin.Current)
+            {
+                offset -= (_readLength - _readPos);
+            }
             _readPos = _readLength = 0;
 
             // Keep track of where we were, in case we're in append mode and need to verify
@@ -957,10 +986,10 @@ namespace System.IO
         /// <returns>The new position in the stream.</returns>
         private long SeekCore(long offset, SeekOrigin origin)
         {
-            Contract.Assert(!_fileHandle.IsClosed && CanSeek);
-            Contract.Assert(origin >= SeekOrigin.Begin && origin <= SeekOrigin.End);
+            Debug.Assert(!_fileHandle.IsClosed && CanSeek);
+            Debug.Assert(origin >= SeekOrigin.Begin && origin <= SeekOrigin.End);
 
-            long pos = SysCall((fd, off, or) => Interop.libc.lseek64(fd, off, or), offset, (Interop.libc.SeekWhence)(int)origin); // SeekOrigin values are the same as Interop.libc.SeekWhence values
+            long pos = SysCall((fd, off, or) => Interop.libc.lseek(fd, off, or), offset, (Interop.libc.SeekWhence)(int)origin); // SeekOrigin values are the same as Interop.libc.SeekWhence values
             _filePosition = pos;
             return pos;
         }
@@ -987,15 +1016,20 @@ namespace System.IO
             TArg1 arg1 = default(TArg1), TArg2 arg2 = default(TArg2),
             bool throwOnError = true)
         {
+            SafeFileHandle handle = _fileHandle;
+
+            Debug.Assert(sysCall != null);
+            Debug.Assert(handle != null);
+
             bool gotRefOnHandle = false;
             try
             {
                 // Get the file descriptor from the handle.  We increment the ref count to help
                 // ensure it's not closed out from under us.
-                _fileHandle.DangerousAddRef(ref gotRefOnHandle);
-                Contract.Assert(gotRefOnHandle);
-                int fd = (int)_fileHandle.DangerousGetHandle();
-                Contract.Assert(fd >= 0);
+                handle.DangerousAddRef(ref gotRefOnHandle);
+                Debug.Assert(gotRefOnHandle);
+                int fd = (int)handle.DangerousGetHandle();
+                Debug.Assert(fd >= 0);
 
                 // System calls may fail due to EINTR (signal interruption).  We need to retry in those cases.
                 while (true)
@@ -1020,7 +1054,7 @@ namespace System.IO
             {
                 if (gotRefOnHandle)
                 {
-                    _fileHandle.DangerousRelease();
+                    handle.DangerousRelease();
                 }
                 else
                 {

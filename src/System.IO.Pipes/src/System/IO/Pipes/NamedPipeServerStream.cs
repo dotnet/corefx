@@ -159,15 +159,11 @@ namespace System.IO.Pipes
             // "pipe is being closed" if other side is closing (as does win32) or no-op if
             // already connected
 
-            if (InternalHandle == null)
-            {
-                throw new InvalidOperationException(SR.InvalidOperation_PipeHandleNotSet);
-            }
             if (State == PipeState.Closed)
             {
                 throw __Error.GetPipeNotOpen();
             }
-            if (InternalHandle.IsClosed)
+            if (InternalHandle != null && InternalHandle.IsClosed) // only check IsClosed if we have a handle
             {
                 throw __Error.GetPipeNotOpen();
             }
@@ -189,15 +185,11 @@ namespace System.IO.Pipes
             {
                 throw new InvalidOperationException(SR.InvalidOperation_PipeAlreadyDisconnected);
             }
-            if (InternalHandle == null)
+            if (CheckOperationsRequiresSetHandle && InternalHandle == null)
             {
                 throw new InvalidOperationException(SR.InvalidOperation_PipeHandleNotSet);
             }
-            if (State == PipeState.Closed)
-            {
-                throw __Error.GetPipeNotOpen();
-            }
-            if (InternalHandle.IsClosed)
+            if ((State == PipeState.Closed) || (InternalHandle != null && InternalHandle.IsClosed))
             {
                 throw __Error.GetPipeNotOpen();
             }

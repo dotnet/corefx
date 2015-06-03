@@ -17,7 +17,7 @@ namespace System.Reflection.PortableExecutable
         private readonly SectionCharacteristics _sectionCharacteristics;
 
         /// <summary>
-        /// An 8-byte, null-padded UTF-8 encoded string. If the string is exactly 8 characters long, there is no terminating null. 
+        /// The name of the section.
         /// </summary>
         public string Name { get { return _name; } }
 
@@ -85,7 +85,7 @@ namespace System.Reflection.PortableExecutable
 
         internal SectionHeader(ref PEBinaryReader reader)
         {
-            _name = reader.ReadUTF8(PEFileConstants.SizeofSectionName);
+            _name = reader.ReadNullPaddedUTF8(PEFileConstants.SizeofSectionName);
             _virtualSize = reader.ReadInt32();
             _virtualAddress = reader.ReadInt32();
             _sizeOfRawData = reader.ReadInt32();
