@@ -38,7 +38,7 @@ namespace System.IO
     public static class Path
     {
         // Platform specific directory separator character.  This is backslash
-        // ('\') on Windows, slash ('/') on Unix, and colon (':') on Mac.
+        // ('\') on Windows and slash ('/') on Unix.
         // 
 #if !PLATFORM_UNIX        
         public static readonly char DirectorySeparatorChar = '\\';
@@ -49,14 +49,10 @@ namespace System.IO
 #endif // !PLATFORM_UNIX
 
         // Platform specific alternate directory separator character.  
-        // This is backslash ('\') on Unix, and slash ('/') on Windows 
-        // and MacOS.
+        // This is slash ('/') on Windows
+        // There is no alternate separator on Unix, so the default separator is used.
         // 
-#if !PLATFORM_UNIX        
         public static readonly char AltDirectorySeparatorChar = '/';
-#else
-        public static readonly char AltDirectorySeparatorChar = '\\';
-#endif // !PLATFORM_UNIX
 
         // Platform specific volume separator character.  This is colon (':')
         // on Windows and MacOS, and slash ('/') on Unix.  This is mostly
