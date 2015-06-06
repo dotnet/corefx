@@ -14,7 +14,9 @@ namespace System.Text.RegularExpressions
     /// Represents a sequence of capture substrings. The object is used
     /// to return the set of captures done by a single capturing group.
     /// </summary>
-    public class GroupCollection : ICollection
+    [DebuggerDisplay("Count = {Count}")]
+    [DebuggerTypeProxy(typeof(RegexCollectionDebuggerProxy<Group>))]
+    public class GroupCollection : IList<Group>, IReadOnlyList<Group>, IList
     {
         private readonly Match _match;
         private readonly Dictionary<int, int> _captureMap;
@@ -53,9 +55,33 @@ namespace System.Text.RegularExpressions
         }
 
         /// <summary>
+        /// Copies all the elements of the collection to the given array
+        /// beginning at the given index.
+        /// </summary>
+        public void CopyTo(Group[] array, int arrayIndex)
+        {
+            if (array == null)
+                throw new ArgumentNullException("array");
+            if (arrayIndex < 0 || arrayIndex > array.Length)
+                throw new ArgumentOutOfRangeException("arrayIndex");
+            if (array.Length - arrayIndex < Count)
+                throw new ArgumentException(SR.Arg_ArrayPlusOffTooSmall);
+
+            for (int i = arrayIndex, j = 0; j < Count; i++, j++)
+            {
+                array[i] = this[j];
+            }
+        }
+
+        /// <summary>
         /// Provides an enumerator in the same order as Item[].
         /// </summary>
         public IEnumerator GetEnumerator()
+        {
+            return new Enumerator(this);
+        }
+
+        IEnumerator<Group> IEnumerable<Group>.GetEnumerator()
         {
             return new Enumerator(this);
         }
@@ -101,6 +127,109 @@ namespace System.Text.RegularExpressions
             return _groups[groupnum - 1];
         }
 
+        int IList<Group>.IndexOf(Group item)
+        {
+            var comparer = EqualityComparer<Group>.Default;
+            for (int i = 0; i < Count; i++)
+            {
+                if (comparer.Equals(this[i], item))
+                    return i;
+            }
+            return -1;
+        }
+
+        void IList<Group>.Insert(int index, Group item)
+        {
+            throw new NotSupportedException(SR.NotSupported_ReadOnlyCollection);
+        }
+
+        void IList<Group>.RemoveAt(int index)
+        {
+            throw new NotSupportedException(SR.NotSupported_ReadOnlyCollection);
+        }
+
+        Group IList<Group>.this[int index]
+        {
+            get { return this[index]; }
+            set { throw new NotSupportedException(SR.NotSupported_ReadOnlyCollection); }
+        }
+
+        void ICollection<Group>.Add(Group item)
+        {
+            throw new NotSupportedException(SR.NotSupported_ReadOnlyCollection);
+        }
+
+        void ICollection<Group>.Clear()
+        {
+            throw new NotSupportedException(SR.NotSupported_ReadOnlyCollection);
+        }
+
+        bool ICollection<Group>.Contains(Group item)
+        {
+            return ((IList<Group>)this).IndexOf(item) >= 0;
+        }
+
+        bool ICollection<Group>.IsReadOnly
+        {
+            get { return true; }
+        }
+
+        bool ICollection<Group>.Remove(Group item)
+        {
+            throw new NotSupportedException(SR.NotSupported_ReadOnlyCollection);
+        }
+
+        int IList.Add(object value)
+        {
+            throw new NotSupportedException(SR.NotSupported_ReadOnlyCollection);
+        }
+
+        void IList.Clear()
+        {
+            throw new NotSupportedException(SR.NotSupported_ReadOnlyCollection);
+        }
+
+        bool IList.Contains(object value)
+        {
+            return value is Group && ((ICollection<Group>)this).Contains((Group)value);
+        }
+
+        int IList.IndexOf(object value)
+        {
+            return value is Group ? ((IList<Group>)this).IndexOf((Group)value) : -1;
+        }
+
+        void IList.Insert(int index, object value)
+        {
+            throw new NotSupportedException(SR.NotSupported_ReadOnlyCollection);
+        }
+
+        bool IList.IsFixedSize
+        {
+            get { return true; }
+        }
+
+        bool IList.IsReadOnly
+        {
+            get { return true; }
+        }
+
+        void IList.Remove(object value)
+        {
+            throw new NotSupportedException(SR.NotSupported_ReadOnlyCollection);
+        }
+
+        void IList.RemoveAt(int index)
+        {
+            throw new NotSupportedException(SR.NotSupported_ReadOnlyCollection);
+        }
+
+        object IList.this[int index]
+        {
+            get { return this[index]; }
+            set { throw new NotSupportedException(SR.NotSupported_ReadOnlyCollection); }
+        }
+
         bool ICollection.IsSynchronized
         {
             get { return false; }
@@ -122,7 +251,7 @@ namespace System.Text.RegularExpressions
             }
         }
 
-        private class Enumerator : IEnumerator
+        private class Enumerator : IEnumerator<Group>
         {
             private readonly GroupCollection _collection;
             private int _index;
@@ -166,6 +295,10 @@ namespace System.Text.RegularExpressions
             void IEnumerator.Reset()
             {
                 _index = -1;
+            }
+
+            void IDisposable.Dispose()
+            {
             }
         }
     }

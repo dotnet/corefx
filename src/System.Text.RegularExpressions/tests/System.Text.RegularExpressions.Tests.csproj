@@ -22,6 +22,7 @@
     <Compile Include="CaptureCollectionTests.cs" />
     <Compile Include="CaptureTests.cs" />
     <Compile Include="EscapeUnescapeTests.cs" />
+    <Compile Include="GroupCollectionTests.cs" />
     <Compile Include="GroupNamesAndNumbers.cs" />
     <Compile Include="IsMatchMatchSplitTests.cs" />
     <Compile Include="MatchCollectionTests.cs" />
@@ -53,6 +54,9 @@
     <Compile Include="RegexLangElementsCoverageTests.cs" />
     <Compile Include="CharacterClassSubtractionSimple.cs" />
     <Compile Include="Support.cs" />
+    <Compile Include="$(CommonTestPath)\System\Diagnostics\DebuggerAttributes.cs">
+      <Link>Common\System\Diagnostics\DebuggerAttributes.cs</Link>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\src\System.Text.RegularExpressions.csproj">

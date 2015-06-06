@@ -11,37 +11,12 @@ using Xunit;
 
 namespace Test
 {
-    public class MatchCollectionTests
+    public class GroupCollectionTests
     {
         [Fact]
-        public static void EnumeratorTest1()
+        public static void EnumeratorTest()
         {
-            Regex regex = new Regex("e");
-            MatchCollection collection = regex.Matches("dotnet");
-            IEnumerator enumerator = collection.GetEnumerator();
-
-            Assert.Throws<InvalidOperationException>(() => enumerator.Current);
-            Assert.True(enumerator.MoveNext());
-            Assert.IsAssignableFrom<Match>(enumerator.Current);
-            Assert.Equal(4, ((Match)enumerator.Current).Index);
-            Assert.Equal("e", ((Match)enumerator.Current).Value);
-            Assert.False(enumerator.MoveNext());
-            Assert.Throws<InvalidOperationException>(() => enumerator.Current);
-
-            enumerator.Reset();
-            Assert.Throws<InvalidOperationException>(() => enumerator.Current);
-            Assert.True(enumerator.MoveNext());
-            Assert.IsAssignableFrom<Match>(enumerator.Current);
-            Assert.Equal(4, ((Match)enumerator.Current).Index);
-            Assert.Equal("e", ((Match)enumerator.Current).Value);
-            Assert.False(enumerator.MoveNext());
-            Assert.Throws<InvalidOperationException>(() => enumerator.Current);
-        }
-
-        [Fact]
-        public static void EnumeratorTest2()
-        {
-            MatchCollection collection = CreateCollection();
+            GroupCollection collection = CreateCollection();
             IEnumerator enumerator = collection.GetEnumerator();
 
             for (int i = 0; i < collection.Count; i++)
@@ -70,13 +45,13 @@ namespace Test
         [Fact]
         public static void Contains()
         {
-            ICollection<Match> collection = CreateCollection();
-            foreach (Match item in collection)
+            ICollection<Group> collection = CreateCollection();
+            foreach (Group item in collection)
             {
                 Assert.True(collection.Contains(item));
             }
 
-            foreach (Match item in CreateCollection())
+            foreach (Group item in CreateCollection())
             {
                 Assert.False(collection.Contains(item));
             }
@@ -102,16 +77,16 @@ namespace Test
         [Fact]
         public static void IndexOf()
         {
-            IList<Match> collection = CreateCollection();
+            IList<Group> collection = CreateCollection();
 
             int i = 0;
-            foreach (Match item in collection)
+            foreach (Group item in collection)
             {
                 Assert.Equal(i, collection.IndexOf(item));
                 i++;
             }
 
-            foreach (Match item in CreateCollection())
+            foreach (Group item in CreateCollection())
             {
                 Assert.Equal(-1, collection.IndexOf(item));
             }
@@ -140,36 +115,39 @@ namespace Test
         [Fact]
         public static void Indexer()
         {
-            MatchCollection collection = CreateCollection();
-            Assert.Equal("t", collection[0].ToString());
-            Assert.Equal("t", collection[1].ToString());
+            GroupCollection collection = CreateCollection();
+            Assert.Equal("212-555-6666", collection[0].ToString());
+            Assert.Equal("212", collection[1].ToString());
+            Assert.Equal("555-6666", collection[2].ToString());
         }
 
         [Fact]
         public static void IndexerIListOfT()
         {
-            IList<Match> collection = CreateCollection();
-            Assert.Equal("t", collection[0].ToString());
-            Assert.Equal("t", collection[1].ToString());
+            IList<Group> collection = CreateCollection();
+            Assert.Equal("212-555-6666", collection[0].ToString());
+            Assert.Equal("212", collection[1].ToString());
+            Assert.Equal("555-6666", collection[2].ToString());
         }
 
         [Fact]
         public static void IndexerIListNonGeneric()
         {
             IList collection = CreateCollection();
-            Assert.Equal("t", collection[0].ToString());
-            Assert.Equal("t", collection[1].ToString());
+            Assert.Equal("212-555-6666", collection[0].ToString());
+            Assert.Equal("212", collection[1].ToString());
+            Assert.Equal("555-6666", collection[2].ToString());
         }
 
         [Fact]
         public static void CopyToExceptions()
         {
-            MatchCollection collection = CreateCollection();
+            GroupCollection collection = CreateCollection();
             Assert.Throws<ArgumentNullException>(() => collection.CopyTo(null, 0));
-            Assert.Throws<ArgumentOutOfRangeException>(() => collection.CopyTo(new Match[1], -1));
-            Assert.Throws<ArgumentException>(() => collection.CopyTo(new Match[1], 0));
-            Assert.Throws<ArgumentException>(() => collection.CopyTo(new Match[1], 1));
-            Assert.Throws<ArgumentException>(() => collection.CopyTo(new Match[1], 2));
+            Assert.Throws<ArgumentOutOfRangeException>(() => collection.CopyTo(new Group[1], -1));
+            Assert.Throws<ArgumentException>(() => collection.CopyTo(new Group[1], 0));
+            Assert.Throws<ArgumentException>(() => collection.CopyTo(new Group[1], 1));
+            Assert.Throws<ArgumentOutOfRangeException>(() => collection.CopyTo(new Group[1], 2));
         }
 
         [Fact]
@@ -177,21 +155,21 @@ namespace Test
         {
             ICollection collection = CreateCollection();
             Assert.Throws<ArgumentNullException>(() => collection.CopyTo(null, 0));
-            Assert.Throws<ArgumentException>(() => collection.CopyTo(new Match[10, 10], 0));
-            Assert.Throws<ArgumentOutOfRangeException>(() => collection.CopyTo(new Match[1], -1));
-            Assert.Throws<ArgumentException>(() => collection.CopyTo(new Match[1], 0));
-            Assert.Throws<ArgumentException>(() => collection.CopyTo(new Match[1], 1));
-            Assert.Throws<ArgumentException>(() => collection.CopyTo(new Match[1], 2));
-            Assert.Throws<ArgumentException>(() => collection.CopyTo(new int[collection.Count], 0));
+            Assert.Throws<ArgumentException>(() => collection.CopyTo(new Group[10, 10], 0));
+            Assert.Throws<IndexOutOfRangeException>(() => collection.CopyTo(new Group[1], -1));
+            Assert.Throws<IndexOutOfRangeException>(() => collection.CopyTo(new Group[1], 0));
+            Assert.Throws<IndexOutOfRangeException>(() => collection.CopyTo(new Group[1], 1));
+            Assert.Throws<IndexOutOfRangeException>(() => collection.CopyTo(new Group[1], 2));
+            Assert.Throws<InvalidCastException>(() => collection.CopyTo(new int[collection.Count], 0));
         }
 
         [Fact]
         public static void CopyTo()
         {
-            string[] expected = new[] { "t", "t" };
-            MatchCollection collection = CreateCollection();
+            string[] expected = new[] { "212-555-6666", "212", "555-6666" };
+            GroupCollection collection = CreateCollection();
 
-            Match[] array = new Match[collection.Count];
+            Group[] array = new Group[collection.Count];
             collection.CopyTo(array, 0);
 
             Assert.Equal(expected, array.Select(c => c.ToString()));
@@ -200,10 +178,10 @@ namespace Test
         [Fact]
         public static void CopyToNonGeneric()
         {
-            string[] expected = new[] { "t", "t" };
+            string[] expected = new[] { "212-555-6666", "212", "555-6666" };
             ICollection collection = CreateCollection();
 
-            Capture[] array = new Capture[collection.Count];
+            Group[] array = new Group[collection.Count];
             collection.CopyTo(array, 0);
 
             Assert.Equal(expected, array.Select(c => c.ToString()));
@@ -227,14 +205,14 @@ namespace Test
         [Fact]
         public void IsReadOnly()
         {
-            IList<Match> list = CreateCollection();
+            IList<Group> list = CreateCollection();
             Assert.True(list.IsReadOnly);
-            Assert.Throws<NotSupportedException>(() => list.Add(default(Match)));
+            Assert.Throws<NotSupportedException>(() => list.Add(default(Group)));
             Assert.Throws<NotSupportedException>(() => list.Clear());
-            Assert.Throws<NotSupportedException>(() => list.Insert(0, default(Match)));
-            Assert.Throws<NotSupportedException>(() => list.Remove(default(Match)));
+            Assert.Throws<NotSupportedException>(() => list.Insert(0, default(Group)));
+            Assert.Throws<NotSupportedException>(() => list.Remove(default(Group)));
             Assert.Throws<NotSupportedException>(() => list.RemoveAt(0));
-            Assert.Throws<NotSupportedException>(() => list[0] = default(Match));
+            Assert.Throws<NotSupportedException>(() => list[0] = default(Group));
         }
 
         [Fact]
@@ -243,12 +221,12 @@ namespace Test
             IList list = CreateCollection();
             Assert.True(list.IsReadOnly);
             Assert.True(list.IsFixedSize);
-            Assert.Throws<NotSupportedException>(() => list.Add(default(Match)));
+            Assert.Throws<NotSupportedException>(() => list.Add(default(Group)));
             Assert.Throws<NotSupportedException>(() => list.Clear());
-            Assert.Throws<NotSupportedException>(() => list.Insert(0, default(Match)));
-            Assert.Throws<NotSupportedException>(() => list.Remove(default(Match)));
+            Assert.Throws<NotSupportedException>(() => list.Insert(0, default(Group)));
+            Assert.Throws<NotSupportedException>(() => list.Remove(default(Group)));
             Assert.Throws<NotSupportedException>(() => list.RemoveAt(0));
-            Assert.Throws<NotSupportedException>(() => list[0] = default(Match));
+            Assert.Throws<NotSupportedException>(() => list[0] = default(Group));
         }
 
         [Fact]
@@ -258,9 +236,11 @@ namespace Test
             DebuggerAttributes.ValidateDebuggerTypeProxyProperties(CreateCollection());
         }
 
-        private static MatchCollection CreateCollection()
+        private static GroupCollection CreateCollection()
         {
-            return new Regex("t").Matches("dotnet");
+            Regex regex = new Regex(@"(\d{3})-(\d{3}-\d{4})");
+            Match match = regex.Match("212-555-6666");
+            return match.Groups;
         }
     }
 }
