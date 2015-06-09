@@ -43,6 +43,7 @@ namespace System.Linq.Parallel.Tests
             CancellationTokenSource cs = new CancellationTokenSource();
             cs.Cancel();
 
+            Functions.AssertIsCanceled(cs, () => operation.Item(DefaultStart, DefaultSize, source.Append(WithCancellation(cs.Token)).Item).Any());
             Functions.AssertIsCanceled(cs, () => operation.Item(DefaultStart, DefaultSize, source.Append(WithCancellation(cs.Token)).Item).Any(x => true));
         }
 
