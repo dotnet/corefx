@@ -1286,6 +1286,13 @@ namespace System.Collections.Immutable
             return self.Replace(oldValue, newValue, equalityComparer);
         }
 
+        private static bool IsCompatibleObject(object value)
+        {
+            // Non-null values are fine.  Only accept nulls if T is a class or Nullable<U>.
+            // Note that default(T) is not equal to null for value types except when T is Nullable<U>. 
+            return ((value is T) || (value == null && default(T) == null));
+        }
+
         /// <summary>
         /// Adds an item to the <see cref="IList"/>.
         /// </summary>
@@ -1322,7 +1329,7 @@ namespace System.Collections.Immutable
         {
             var self = this;
             self.ThrowInvalidOperationIfNotInitialized();
-            return value is T && self.Contains((T)value);
+            return IsCompatibleObject(value) && self.Contains((T)value);
         }
 
         /// <summary>
@@ -1337,7 +1344,7 @@ namespace System.Collections.Immutable
         {
             var self = this;
             self.ThrowInvalidOperationIfNotInitialized();
-            return value is T ? self.IndexOf((T)value) : -1;
+            return IsCompatibleObject(value) ? self.IndexOf((T)value) : -1;
         }
 
         /// <summary>
