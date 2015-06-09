@@ -181,7 +181,7 @@ namespace System.Collections.Immutable
         }
 
         /// <summary>
-        /// Gets the number of array in the collection.
+        /// Gets the number of elements in the collection.
         /// </summary>
         /// <exception cref="InvalidOperationException">Thrown if the <see cref="IsDefault"/> property returns true.</exception>
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
@@ -196,7 +196,7 @@ namespace System.Collections.Immutable
         }
 
         /// <summary>
-        /// Gets the number of array in the collection.
+        /// Gets the number of elements in the collection.
         /// </summary>
         /// <exception cref="InvalidOperationException">Thrown if the <see cref="IsDefault"/> property returns true.</exception>
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
@@ -793,18 +793,24 @@ namespace System.Collections.Immutable
             Requires.NotNull(items, "items");
             Requires.NotNull(equalityComparer, "equalityComparer");
 
-            var indexesToRemove = new SortedSet<int>();
-            foreach (var item in items)
+            List<int> indexesToRemove = null;
+            for (int i = 0; i < self.Length; i++)
             {
-                int index = self.IndexOf(item, equalityComparer);
-                while (index >= 0 && !indexesToRemove.Add(index) && index + 1 < self.Length)
+                foreach (var item in items)
                 {
-                    // This is a duplicate of one we've found. Try hard to find another instance in the list to remove.
-                    index = self.IndexOf(item, index + 1, equalityComparer);
+                    T elem = self.array[i];
+                    if (equalityComparer.Equals(item, elem))
+                    {
+                        indexesToRemove = indexesToRemove ?? new List<int>();
+                        indexesToRemove.Add(i);
+                        break;
+                    }
                 }
             }
 
-            return self.RemoveAtRange(indexesToRemove);
+            return indexesToRemove != null ?
+                self.RemoveAtRange(indexesToRemove) :
+                self;
         }
 
         /// <summary>
@@ -1052,7 +1058,7 @@ namespace System.Collections.Immutable
         [Pure]
         public ImmutableArray<TOther> CastArray<TOther>() where TOther : class
         {
-            return new ImmutableArray<TOther>((TOther[])(object)array);
+            return new ImmutableArray<TOther>((TOther[])(object)this.array);
         }
 
         /// <summary>
@@ -1322,7 +1328,7 @@ namespace System.Collections.Immutable
         {
             var self = this;
             self.ThrowInvalidOperationIfNotInitialized();
-            return self.Contains((T)value);
+            return value is T && self.Contains((T)value);
         }
 
         /// <summary>
@@ -1337,7 +1343,7 @@ namespace System.Collections.Immutable
         {
             var self = this;
             self.ThrowInvalidOperationIfNotInitialized();
-            return self.IndexOf((T)value);
+            return value is T ? self.IndexOf((T)value) : -1;
         }
 
         /// <summary>
