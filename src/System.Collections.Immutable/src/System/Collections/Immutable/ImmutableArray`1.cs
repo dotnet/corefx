@@ -793,24 +793,18 @@ namespace System.Collections.Immutable
             Requires.NotNull(items, "items");
             Requires.NotNull(equalityComparer, "equalityComparer");
 
-            List<int> indexesToRemove = null;
-            for (int i = 0; i < self.Length; i++)
+            var indexesToRemove = new SortedSet<int>();
+            foreach (var item in items)
             {
-                foreach (var item in items)
+                int index = self.IndexOf(item, equalityComparer);
+                while (index >= 0 && !indexesToRemove.Add(index) && index + 1 < self.Length)
                 {
-                    T elem = self.array[i];
-                    if (equalityComparer.Equals(item, elem))
-                    {
-                        indexesToRemove = indexesToRemove ?? new List<int>();
-                        indexesToRemove.Add(i);
-                        break;
-                    }
+                    // This is a duplicate of one we've found. Try hard to find another instance in the list to remove.
+                    index = self.IndexOf(item, index + 1, equalityComparer);
                 }
             }
 
-            return indexesToRemove != null ?
-                self.RemoveAtRange(indexesToRemove) :
-                self;
+            return self.RemoveAtRange(indexesToRemove);
         }
 
         /// <summary>
