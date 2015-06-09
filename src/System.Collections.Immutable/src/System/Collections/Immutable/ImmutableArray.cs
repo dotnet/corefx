@@ -173,7 +173,7 @@ namespace System.Collections.Immutable
         public static ImmutableArray<T> Create<T>(T[] items, int start, int length)
         {
             Requires.NotNull(items, "items");
-            Requires.Range(start >= 0 && start < items.Length, "start");
+            Requires.Range(start >= 0 && start <= items.Length, "start");
             Requires.Range(length >= 0 && start + length <= items.Length, "length");
 
             if (length == 0)
@@ -205,7 +205,7 @@ namespace System.Collections.Immutable
         [Pure]
         public static ImmutableArray<T> Create<T>(ImmutableArray<T> items, int start, int length)
         {
-            Requires.Range(start >= 0 && start < items.Length, "start");
+            Requires.Range(start >= 0 && start <= items.Length, "start");
             Requires.Range(length >= 0 && start + length <= items.Length, "length");
 
             if (length == 0)
@@ -271,7 +271,7 @@ namespace System.Collections.Immutable
         {
             int itemsLength = items.Length;
 
-            Requires.Range(start >= 0 && start < itemsLength, "start");
+            Requires.Range(start >= 0 && start <= itemsLength, "start");
             Requires.Range(length >= 0 && start + length <= itemsLength, "length");
             Requires.NotNull(selector, "selector");
 
@@ -339,7 +339,7 @@ namespace System.Collections.Immutable
         {
             int itemsLength = items.Length;
 
-            Requires.Range(start >= 0 && start < itemsLength, "start");
+            Requires.Range(start >= 0 && start <= itemsLength, "start");
             Requires.Range(length >= 0 && start + length <= itemsLength, "length");
             Requires.NotNull(selector, "selector");
 
