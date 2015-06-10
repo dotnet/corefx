@@ -181,7 +181,7 @@ namespace System.Collections.Immutable
         }
 
         /// <summary>
-        /// Gets the number of array in the collection.
+        /// Gets the number of elements in the collection.
         /// </summary>
         /// <exception cref="InvalidOperationException">Thrown if the <see cref="IsDefault"/> property returns true.</exception>
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
@@ -196,7 +196,7 @@ namespace System.Collections.Immutable
         }
 
         /// <summary>
-        /// Gets the number of array in the collection.
+        /// Gets the number of elements in the collection.
         /// </summary>
         /// <exception cref="InvalidOperationException">Thrown if the <see cref="IsDefault"/> property returns true.</exception>
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
@@ -1052,7 +1052,7 @@ namespace System.Collections.Immutable
         [Pure]
         public ImmutableArray<TOther> CastArray<TOther>() where TOther : class
         {
-            return new ImmutableArray<TOther>((TOther[])(object)array);
+            return new ImmutableArray<TOther>((TOther[])(object)this.array);
         }
 
         /// <summary>
@@ -1286,6 +1286,13 @@ namespace System.Collections.Immutable
             return self.Replace(oldValue, newValue, equalityComparer);
         }
 
+        private static bool IsCompatibleObject(object value)
+        {
+            // Non-null values are fine.  Only accept nulls if T is a class or Nullable<U>.
+            // Note that default(T) is not equal to null for value types except when T is Nullable<U>. 
+            return ((value is T) || (value == null && default(T) == null));
+        }
+
         /// <summary>
         /// Adds an item to the <see cref="IList"/>.
         /// </summary>
@@ -1322,7 +1329,7 @@ namespace System.Collections.Immutable
         {
             var self = this;
             self.ThrowInvalidOperationIfNotInitialized();
-            return self.Contains((T)value);
+            return IsCompatibleObject(value) && self.Contains((T)value);
         }
 
         /// <summary>
@@ -1337,7 +1344,7 @@ namespace System.Collections.Immutable
         {
             var self = this;
             self.ThrowInvalidOperationIfNotInitialized();
-            return self.IndexOf((T)value);
+            return IsCompatibleObject(value) ? self.IndexOf((T)value) : -1;
         }
 
         /// <summary>
