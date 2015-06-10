@@ -69,6 +69,27 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
+        [MemberData(nameof(UnaryCancelingOperators))]
+        [MemberData(nameof(BinaryCancelingOperators))]
+        public static void Average_OperationCanceledException(Labeled<Func<CancellationToken, Operation>> source, Labeled<Func<Action, Operation>> operation)
+        {
+            Functions.AssertEventuallyCanceled((token, canceler) => Cancel(token, canceler, source, operation).Average());
+            Functions.AssertEventuallyCanceled((token, canceler) => Cancel(token, canceler, source, operation).Average(x => (int?)x));
+
+            Functions.AssertEventuallyCanceled((token, canceler) => Cancel(token, canceler, source, operation).Average(x => (long)x));
+            Functions.AssertEventuallyCanceled((token, canceler) => Cancel(token, canceler, source, operation).Average(x => (long?)x));
+
+            Functions.AssertEventuallyCanceled((token, canceler) => Cancel(token, canceler, source, operation).Average(x => (float)x));
+            Functions.AssertEventuallyCanceled((token, canceler) => Cancel(token, canceler, source, operation).Average(x => (float?)x));
+
+            Functions.AssertEventuallyCanceled((token, canceler) => Cancel(token, canceler, source, operation).Average(x => (double)x));
+            Functions.AssertEventuallyCanceled((token, canceler) => Cancel(token, canceler, source, operation).Average(x => (double?)x));
+
+            Functions.AssertEventuallyCanceled((token, canceler) => Cancel(token, canceler, source, operation).Average(x => (decimal)x));
+            Functions.AssertEventuallyCanceled((token, canceler) => Cancel(token, canceler, source, operation).Average(x => (decimal?)x));
+        }
+
+        [Theory]
         [MemberData(nameof(UnaryOperators))]
         [MemberData(nameof(BinaryOperators))]
         public static void Average_OperationCanceledException_PreCanceled(LabeledOperation source, LabeledOperation operation)

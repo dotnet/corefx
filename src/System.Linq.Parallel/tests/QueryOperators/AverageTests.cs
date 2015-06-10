@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
-using System.Threading;
 using Xunit;
 
 namespace System.Linq.Parallel.Tests
@@ -240,6 +239,26 @@ namespace System.Linq.Parallel.Tests
             Assert.Null(ParallelEnumerable.Empty<double?>().Average(x => x));
             Assert.Null(ParallelEnumerable.Empty<decimal?>().Average());
             Assert.Null(ParallelEnumerable.Empty<decimal?>().Average(x => x));
+        }
+
+        [Theory]
+        [MemberData(nameof(UnorderedSources.Ranges), new[] { 128 }, MemberType = typeof(UnorderedSources))]
+        public static void Average_OperationCanceledException(Labeled<ParallelQuery<int>> labeled, int count)
+        {
+            Functions.AssertEventuallyCanceled((token, canceler) => labeled.Item.WithCancellation(token).Average(x => { canceler(); return x; }));
+            Functions.AssertEventuallyCanceled((token, canceler) => labeled.Item.WithCancellation(token).Average(x => { canceler(); return (int?)x; }));
+
+            Functions.AssertEventuallyCanceled((token, canceler) => labeled.Item.WithCancellation(token).Average(x => { canceler(); return (long)x; }));
+            Functions.AssertEventuallyCanceled((token, canceler) => labeled.Item.WithCancellation(token).Average(x => { canceler(); return (long?)x; }));
+
+            Functions.AssertEventuallyCanceled((token, canceler) => labeled.Item.WithCancellation(token).Average(x => { canceler(); return (float)x; }));
+            Functions.AssertEventuallyCanceled((token, canceler) => labeled.Item.WithCancellation(token).Average(x => { canceler(); return (float?)x; }));
+
+            Functions.AssertEventuallyCanceled((token, canceler) => labeled.Item.WithCancellation(token).Average(x => { canceler(); return (double)x; }));
+            Functions.AssertEventuallyCanceled((token, canceler) => labeled.Item.WithCancellation(token).Average(x => { canceler(); return (double?)x; }));
+
+            Functions.AssertEventuallyCanceled((token, canceler) => labeled.Item.WithCancellation(token).Average(x => { canceler(); return (decimal)x; }));
+            Functions.AssertEventuallyCanceled((token, canceler) => labeled.Item.WithCancellation(token).Average(x => { canceler(); return (decimal?)x; }));
         }
 
         [Theory]
