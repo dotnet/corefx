@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
-using System.Threading;
 using Xunit;
 
 namespace System.Linq.Parallel.Tests
@@ -109,6 +108,13 @@ namespace System.Linq.Parallel.Tests
         {
             Assert.True(InfiniteEnumerable().AsParallel().Any());
             Assert.True(InfiniteEnumerable().AsParallel().Any(x => true));
+        }
+
+        [Theory]
+        [MemberData(nameof(UnorderedSources.Ranges), new[] { 128 }, MemberType = typeof(UnorderedSources))]
+        public static void Any_OperationCanceledException(Labeled<ParallelQuery<int>> labeled, int count)
+        {
+            Functions.AssertEventuallyCanceled((token, canceler) => labeled.Item.WithCancellation(token).Any(x => { canceler(); return false; }));
         }
 
         [Theory]
