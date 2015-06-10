@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
-using System.Threading;
 using Xunit;
 
 namespace System.Linq.Parallel.Tests
@@ -83,6 +82,13 @@ namespace System.Linq.Parallel.Tests
         public static void All_OneTrue_Longrunning(Labeled<ParallelQuery<int>> labeled, int count, int position)
         {
             All_OneTrue(labeled, count, position);
+        }
+
+        [Theory]
+        [MemberData(nameof(UnorderedSources.Ranges), new[] { 128 }, MemberType = typeof(UnorderedSources))]
+        public static void All_OperationCanceledException(Labeled<ParallelQuery<int>> labeled, int count)
+        {
+            Functions.AssertEventuallyCanceled((token, canceler) => labeled.Item.WithCancellation(token).All(x => { canceler(); return true; }));
         }
 
         [Theory]
