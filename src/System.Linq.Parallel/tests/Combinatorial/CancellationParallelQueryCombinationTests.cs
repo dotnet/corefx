@@ -136,11 +136,29 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
+        [MemberData(nameof(UnaryCancelingOperators))]
+        [MemberData(nameof(BinaryCancelingOperators))]
+        [MemberData(nameof(OrderCancelingOperators))]
+        public static void ElementAt_OperationCanceledException(Labeled<Func<CancellationToken, Operation>> source, Labeled<Func<Action, Operation>> operation)
+        {
+            Functions.AssertEventuallyCanceled((token, canceler) => Cancel(token, canceler, source, operation).ElementAt(int.MaxValue));
+        }
+
+        [Theory]
         [MemberData(nameof(UnaryOperators))]
         [MemberData(nameof(BinaryOperators))]
         public static void ElementAt_OperationCanceledException_PreCanceled(LabeledOperation source, LabeledOperation operation)
         {
             Functions.AssertAlreadyCanceled(token => Cancel(token, source, operation).ElementAt(0));
+        }
+
+        [Theory]
+        [MemberData(nameof(UnaryCancelingOperators))]
+        [MemberData(nameof(BinaryCancelingOperators))]
+        [MemberData(nameof(OrderCancelingOperators))]
+        public static void ElementAtOrDefault_OperationCanceledException(Labeled<Func<CancellationToken, Operation>> source, Labeled<Func<Action, Operation>> operation)
+        {
+            Functions.AssertEventuallyCanceled((token, canceler) => Cancel(token, canceler, source, operation).ElementAt(int.MaxValue));
         }
 
         [Theory]
