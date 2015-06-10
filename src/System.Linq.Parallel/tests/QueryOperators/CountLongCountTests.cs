@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
-using System.Threading;
 using Xunit;
 
 namespace System.Linq.Parallel.Tests
@@ -123,6 +122,14 @@ namespace System.Linq.Parallel.Tests
         public static void LongCount_One_Longrunning(Labeled<ParallelQuery<int>> labeled, int count, long position)
         {
             LongCount_One(labeled, count, position);
+        }
+
+        [Theory]
+        [MemberData(nameof(UnorderedSources.Ranges), new[] { 128 }, MemberType = typeof(UnorderedSources))]
+        public static void Count_OperationCanceledException(Labeled<ParallelQuery<int>> labeled, int count)
+        {
+            Functions.AssertEventuallyCanceled((token, canceler) => labeled.Item.WithCancellation(token).Count(x => { canceler(); return true; }));
+            Functions.AssertEventuallyCanceled((token, canceler) => labeled.Item.WithCancellation(token).LongCount(x => { canceler(); return true; }));
         }
 
         [Theory]

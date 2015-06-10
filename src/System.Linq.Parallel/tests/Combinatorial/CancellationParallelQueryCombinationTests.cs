@@ -114,6 +114,17 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
+        [MemberData(nameof(UnaryCancelingOperators))]
+        [MemberData(nameof(BinaryCancelingOperators))]
+        public static void Count_OperationCanceledException(Labeled<Func<CancellationToken, Operation>> source, Labeled<Func<Action, Operation>> operation)
+        {
+            Functions.AssertEventuallyCanceled((token, canceler) => Cancel(token, canceler, source, operation).Count());
+            Functions.AssertEventuallyCanceled((token, canceler) => Cancel(token, canceler, source, operation).LongCount());
+            Functions.AssertEventuallyCanceled((token, canceler) => Cancel(token, canceler, source, operation).Count(x => true));
+            Functions.AssertEventuallyCanceled((token, canceler) => Cancel(token, canceler, source, operation).LongCount(x => true));
+        }
+
+        [Theory]
         [MemberData(nameof(UnaryOperators))]
         [MemberData(nameof(BinaryOperators))]
         public static void Count_OperationCanceledException_PreCanceled(LabeledOperation source, LabeledOperation operation)
