@@ -4,7 +4,6 @@
 
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Threading;
 using Xunit;
 
 namespace System.Linq.Parallel.Tests
@@ -291,6 +290,17 @@ namespace System.Linq.Parallel.Tests
             Assert.Equal(-1, ParallelEnumerable.Empty<int>().Aggregate(-1, (i, j) => i + j, i => i));
             Assert.Equal(-1, ParallelEnumerable.Empty<int>().Aggregate(-1, (i, j) => i + j, (i, j) => i + j, i => i));
             Assert.Equal(-1, ParallelEnumerable.Empty<int>().Aggregate(() => -1, (i, j) => i + j, (i, j) => i + j, i => i));
+        }
+
+        [Theory]
+        [MemberData(nameof(UnorderedSources.Ranges), new[] { 128 }, MemberType = typeof(UnorderedSources))]
+        public static void Aggregate_OperationCanceledException(Labeled<ParallelQuery<int>> labeled, int count)
+        {
+            Functions.AssertEventuallyCanceled((token, canceler) => labeled.Item.WithCancellation(token).Aggregate((i, j) => { canceler(); return j; }));
+            Functions.AssertEventuallyCanceled((token, canceler) => labeled.Item.WithCancellation(token).Aggregate(0, (i, j) => { canceler(); return j; }));
+            Functions.AssertEventuallyCanceled((token, canceler) => labeled.Item.WithCancellation(token).Aggregate(0, (i, j) => { canceler(); return j; }, i => i));
+            Functions.AssertEventuallyCanceled((token, canceler) => labeled.Item.WithCancellation(token).Aggregate(0, (i, j) => { canceler(); return j; }, (i, j) => i, i => i));
+            Functions.AssertEventuallyCanceled((token, canceler) => labeled.Item.WithCancellation(token).Aggregate(() => 0, (i, j) => { canceler(); ; return j; }, (i, j) => i, i => i));
         }
 
         [Theory]

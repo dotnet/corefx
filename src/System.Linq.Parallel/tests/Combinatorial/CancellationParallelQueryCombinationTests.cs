@@ -9,6 +9,20 @@ namespace System.Linq.Parallel.Tests
 {
     public partial class ParallelQueryCombinationTests
     {
+        private const int EventualCancellationSize = 128;
+
+        [Theory]
+        [MemberData(nameof(UnaryCancelingOperators))]
+        [MemberData(nameof(BinaryCancelingOperators))]
+        public static void Aggregate_OperationCanceledException(Labeled<Func<CancellationToken, Operation>> source, Labeled<Func<Action, Operation>> operation)
+        {
+            Functions.AssertEventuallyCanceled((token, canceler) => Cancel(token, canceler, source, operation).Aggregate((i, j) => j));
+            Functions.AssertEventuallyCanceled((token, canceler) => Cancel(token, canceler, source, operation).Aggregate(0, (i, j) => j));
+            Functions.AssertEventuallyCanceled((token, canceler) => Cancel(token, canceler, source, operation).Aggregate(0, (i, j) => j, i => i));
+            Functions.AssertEventuallyCanceled((token, canceler) => Cancel(token, canceler, source, operation).Aggregate(0, (i, j) => j, (i, j) => i, i => i));
+            Functions.AssertEventuallyCanceled((token, canceler) => Cancel(token, canceler, source, operation).Aggregate(() => 0, (i, j) => j, (i, j) => i, i => i));
+        }
+
         [Theory]
         [MemberData(nameof(UnaryOperators))]
         [MemberData(nameof(BinaryOperators))]
