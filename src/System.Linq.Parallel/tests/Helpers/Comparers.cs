@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
+using System.Threading;
 
 namespace System.Linq.Parallel.Tests
 {
@@ -54,6 +55,28 @@ namespace System.Linq.Parallel.Tests
         }
     }
 
+    internal class CancelingEqualityComparer<T> : IEqualityComparer<T>
+    {
+        private Action _canceler;
+
+        public CancelingEqualityComparer(Action canceler)
+        {
+            _canceler = canceler;
+        }
+
+        public bool Equals(T x, T y)
+        {
+            _canceler();
+            return EqualityComparer<T>.Default.Equals(x, y);
+        }
+
+        public int GetHashCode(T obj)
+        {
+            _canceler();
+            return obj.GetHashCode();
+        }
+    }
+
     internal class ReverseComparer : IComparer<int>
     {
         public static readonly ReverseComparer Instance = new ReverseComparer();
@@ -87,6 +110,22 @@ namespace System.Linq.Parallel.Tests
             return direction == 0 ? 0 :
                 direction > 0 ? int.MaxValue :
                 int.MinValue;
+        }
+    }
+
+    internal class CancelingComparer : IComparer<int>
+    {
+        private Action _canceler;
+
+        public CancelingComparer(Action canceler)
+        {
+            _canceler = canceler;
+        }
+
+        public int Compare(int x, int y)
+        {
+            _canceler();
+            return Comparer<int>.Default.Compare(x, y);
         }
     }
 

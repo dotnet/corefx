@@ -46,6 +46,16 @@ namespace System.Linq.Parallel.Tests
             Assert.Equal(cs.Token, oce.CancellationToken);
         }
 
+        public static void AssertEventuallyCanceled(Action<CancellationToken, Action> query)
+        {
+            CancellationTokenSource cs = new CancellationTokenSource();
+            int countDown = 4;
+            Action canceler = () => { if (Interlocked.Decrement(ref countDown) == 0) cs.Cancel(); };
+
+            OperationCanceledException oce = Assert.Throws<OperationCanceledException>(() => query(cs.Token, canceler));
+            Assert.Equal(cs.Token, oce.CancellationToken);
+        }
+
         public static void Enumerate<T>(this IEnumerable<T> e)
         {
             foreach (var x in e) { }

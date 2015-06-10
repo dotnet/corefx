@@ -219,6 +219,11 @@ namespace System.Linq.Parallel.Tests
             Functions.AssertAlreadyCanceled(token => Cancel(token, source, operation).ToLookup(x => x, y => y));
         }
 
+        private static ParallelQuery<int> Cancel(CancellationToken token, Action canceler, Labeled<Func<CancellationToken, Operation>> source, Labeled<Func<Action, Operation>> operation)
+        {
+            return operation.Item(canceler)(DefaultStart, EventualCancellationSize, source.Item(token));
+        }
+
         private static ParallelQuery<int> Cancel(CancellationToken token, LabeledOperation source, LabeledOperation operation)
         {
             return operation.Item(DefaultStart, DefaultSize, source.Append(WithCancellation(token)).Item);

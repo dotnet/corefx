@@ -74,6 +74,24 @@ namespace System.Linq.Parallel.Tests
             }
         }
 
+        public static IEnumerable<object[]> OrderCancelingOperators()
+        {
+            // Token sources are supplied via delegate so they can be re-created as necessary.
+            // This means the funcs taking tokens and actions must be labeled.
+            LabeledOperation source = UnorderedRangeSources().First();
+            var src = Labeled.Label<Func<CancellationToken, Operation>>(source.ToString(), token => source.Append(WithCancellation(token)).Item);
+
+            foreach (var operation in new Labeled<Func<Action, Operation>>[] {
+                Labeled.Label<Func<Action, Operation>>("OrderBy-Comparer", cancel => (start, count, s) => s(start, count).OrderBy(x => x, new CancelingComparer(cancel))),
+                Labeled.Label<Func<Action, Operation>>("OrderByDescending-Comparer", cancel => (start, count, s) => s(start, count).OrderByDescending(x => x, new CancelingComparer(cancel))),
+                Labeled.Label<Func<Action, Operation>>("ThenBy-Comparer", cancel => (start, count, s) => s(start, count).OrderBy(x => 0).ThenBy(x => x, new CancelingComparer(cancel))),
+                Labeled.Label<Func<Action, Operation>>("ThenByDescending-Comparer", cancel => (start, count, s) => s(start, count).OrderBy(x => 0).ThenByDescending(x => x, new CancelingComparer(cancel))),
+                })
+            {
+                yield return new object[] { src, operation };
+            }
+        }
+
         private static IEnumerable<LabeledOperation> UnaryOperations()
         {
             yield return Label("Cast", (start, count, source) => source(start, count).Cast<int>());
@@ -196,6 +214,32 @@ namespace System.Linq.Parallel.Tests
             }
         }
 
+        public static IEnumerable<object[]> UnaryCancelingOperators()
+        {
+            // Token sources are supplied via delegate so they can be re-created as necessary.
+            // This means the funcs taking tokens and actions must be labeled.
+            LabeledOperation source = UnorderedRangeSources().First();
+            var src = Labeled.Label<Func<CancellationToken, Operation>>(source.ToString(), token => source.Append(WithCancellation(token)).Item);
+
+            foreach (var operation in new Labeled<Func<Action, Operation>>[] {
+                Labeled.Label<Func<Action, Operation>>("Distinct",cancel => (start, count, s) => s(start, count).Distinct(new CancelingEqualityComparer<int>(cancel))),
+                Labeled.Label<Func<Action, Operation>>("GroupBy-Comparer", cancel => (start, count, s) => s(start, count).GroupBy(x => x, new CancelingEqualityComparer<int>(cancel)).Select(g => g.Key)),
+                Labeled.Label<Func<Action, Operation>>("SelectMany", cancel => (start, count, s) => s(start, count).SelectMany(x => { cancel(); return new[] { x }; })),
+                Labeled.Label<Func<Action, Operation>>("SelectMany-Index", cancel => (start, count, s) => s(start, count).SelectMany((x, index) => { cancel(); return new[] { x }; })),
+                Labeled.Label<Func<Action, Operation>>("SelectMany-ResultSelector", cancel => (start, count, s) => s(start, count).SelectMany(x => new [] { x }, (group, elem) => { cancel(); return elem; })),
+                Labeled.Label<Func<Action, Operation>>("SelectMany-Index-ResultSelector", cancel => (start, count, s) => s(start, count).SelectMany((x, index) => new [] { x }, (group, elem) => { cancel(); return elem; })),
+                Labeled.Label<Func<Action, Operation>>("SkipWhile", cancel => (start, count, s) => s(start, count).SkipWhile(x => { cancel(); return true; })),
+                Labeled.Label<Func<Action, Operation>>("SkipWhile-Index", cancel => (start, count, s) => s(start, count).SkipWhile((x, index) => { cancel(); return true; })),
+                Labeled.Label<Func<Action, Operation>>("TakeWhile", cancel => (start, count, s) => s(start, count).TakeWhile(x => { cancel(); return true; })),
+                Labeled.Label<Func<Action, Operation>>("TakeWhile-Index", cancel => (start, count, s) => s(start, count).SkipWhile((x, index) => { cancel(); return true; })),
+                Labeled.Label<Func<Action, Operation>>("Where", cancel => (start, count, s) => s(start, count).Where(x => { cancel(); return true; })),
+                Labeled.Label<Func<Action, Operation>>("Where-Index", cancel => (start, count, s) => s(start, count).Where((x, index) => { cancel(); return true; })),
+                    })
+            {
+                yield return new object[] { src, operation };
+            }
+        }
+
         private static IEnumerable<LabeledOperation> BinaryOperations(LabeledOperation otherSource)
         {
             String label = otherSource.ToString();
@@ -307,6 +351,26 @@ namespace System.Linq.Parallel.Tests
                 })
             {
                 yield return new object[] { source, operation };
+            }
+        }
+
+        public static IEnumerable<object[]> BinaryCancelingOperators()
+        {
+            // Token sources are supplied via delegate so they can be re-created as necessary.
+            // This means the funcs taking tokens and actions must be labeled.
+            LabeledOperation source = UnorderedRangeSources().First();
+            var src = Labeled.Label<Func<CancellationToken, Operation>>(source.ToString(), token => source.Append(WithCancellation(token)).Item);
+            LabeledOperation otherSource = UnorderedRangeSources().First();
+
+            foreach (var operation in new Labeled<Func<Action, Operation>>[] {
+                Labeled.Label<Func<Action, Operation>>("Except", cancel => (start, count, s) => s(start, count).Except(otherSource.Item(start, count), new CancelingEqualityComparer<int>(cancel))),
+                Labeled.Label<Func<Action, Operation>>("GroupJoin", cancel => (start, count, s) => s(start, count).GroupJoin(otherSource.Item(start, count), x => x, y => y, (x, g) => x, new CancelingEqualityComparer<int>(cancel))),
+                Labeled.Label<Func<Action, Operation>>("Intersect", cancel => (start, count, s) => s(start, count).Intersect(otherSource.Item(start, count), new CancelingEqualityComparer<int>(cancel))),
+                Labeled.Label<Func<Action, Operation>>("Join", cancel => (start, count, s) => s(start, count).Join(otherSource.Item(start, count), x => x, y => y, (x, y) => x, new CancelingEqualityComparer<int>(cancel))),
+                Labeled.Label<Func<Action, Operation>>("Union", cancel => (start, count, s) => s(start, count).Union(otherSource.Item(start, count), new CancelingEqualityComparer<int>(cancel))),
+                    })
+            {
+                yield return new object[] { src, operation };
             }
         }
 
