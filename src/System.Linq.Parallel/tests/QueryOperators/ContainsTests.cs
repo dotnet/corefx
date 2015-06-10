@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
-using System.Threading;
 using Xunit;
 
 namespace System.Linq.Parallel.Tests
@@ -73,6 +72,13 @@ namespace System.Linq.Parallel.Tests
         public static void Contains_OneMatching_Longrunning(Labeled<ParallelQuery<int>> labeled, int count, int position)
         {
             Contains_OneMatching(labeled, count, position);
+        }
+
+        [Theory]
+        [MemberData(nameof(UnorderedSources.Ranges), new[] { 128 }, MemberType = typeof(UnorderedSources))]
+        public static void Contains_OperationCanceledException(Labeled<ParallelQuery<int>> labeled, int count)
+        {
+            Functions.AssertEventuallyCanceled((token, canceler) => labeled.Item.WithCancellation(token).Contains(-1, new CancelingEqualityComparer<int>(canceler)));
         }
 
         [Theory]
