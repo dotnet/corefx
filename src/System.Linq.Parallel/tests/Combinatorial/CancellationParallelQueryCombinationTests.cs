@@ -278,6 +278,27 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
+        [MemberData(nameof(UnaryCancelingOperators))]
+        [MemberData(nameof(BinaryCancelingOperators))]
+        public static void Max_OperationCanceledException(Labeled<Func<CancellationToken, Operation>> source, Labeled<Func<Action, Operation>> operation)
+        {
+            Functions.AssertEventuallyCanceled((token, canceler) => Cancel(token, canceler, source, operation).Max());
+            Functions.AssertEventuallyCanceled((token, canceler) => Cancel(token, canceler, source, operation).Max(x => (int?)x));
+
+            Functions.AssertEventuallyCanceled((token, canceler) => Cancel(token, canceler, source, operation).Max(x => (long)x));
+            Functions.AssertEventuallyCanceled((token, canceler) => Cancel(token, canceler, source, operation).Max(x => (long?)x));
+
+            Functions.AssertEventuallyCanceled((token, canceler) => Cancel(token, canceler, source, operation).Max(x => (float)x));
+            Functions.AssertEventuallyCanceled((token, canceler) => Cancel(token, canceler, source, operation).Max(x => (float?)x));
+
+            Functions.AssertEventuallyCanceled((token, canceler) => Cancel(token, canceler, source, operation).Max(x => (double)x));
+            Functions.AssertEventuallyCanceled((token, canceler) => Cancel(token, canceler, source, operation).Max(x => (double?)x));
+
+            Functions.AssertEventuallyCanceled((token, canceler) => Cancel(token, canceler, source, operation).Max(x => (decimal)x));
+            Functions.AssertEventuallyCanceled((token, canceler) => Cancel(token, canceler, source, operation).Max(x => (decimal?)x));
+        }
+
+        [Theory]
         [MemberData(nameof(UnaryOperators))]
         [MemberData(nameof(BinaryOperators))]
         public static void Max_OperationCanceledException_PreCanceled(LabeledOperation source, LabeledOperation operation)
