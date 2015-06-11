@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
-using System.Threading;
 using Xunit;
 
 namespace System.Linq.Parallel.Tests
@@ -164,6 +163,14 @@ namespace System.Linq.Parallel.Tests
         public static void SingleOrDefault_OneMatch_Longrunning(Labeled<ParallelQuery<int>> labeled, int count, int element)
         {
             SingleOrDefault_OneMatch(labeled, count, element);
+        }
+
+        [Theory]
+        [MemberData(nameof(UnorderedSources.Ranges), new[] { 128 }, MemberType = typeof(UnorderedSources))]
+        public static void Single_OperationCanceledException(Labeled<ParallelQuery<int>> labeled, int count)
+        {
+            Functions.AssertEventuallyCanceled((token, canceler) => labeled.Item.WithCancellation(token).Single(x => { canceler(); return false; }));
+            Functions.AssertEventuallyCanceled((token, canceler) => labeled.Item.WithCancellation(token).SingleOrDefault(x => { canceler(); return false; }));
         }
 
         [Theory]

@@ -355,12 +355,28 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
+        [MemberData(nameof(UnaryCancelingOperators))]
+        [MemberData(nameof(BinaryCancelingOperators))]
+        public static void Single_OperationCanceledException(Labeled<Func<CancellationToken, Operation>> source, Labeled<Func<Action, Operation>> operation)
+        {
+            Functions.AssertEventuallyCanceled((token, canceler) => Cancel(token, canceler, source, operation).Single(x => false));
+        }
+
+        [Theory]
         [MemberData(nameof(UnaryOperators))]
         [MemberData(nameof(BinaryOperators))]
         public static void Single_OperationCanceledException_PreCanceled(LabeledOperation source, LabeledOperation operation)
         {
             Functions.AssertAlreadyCanceled(token => Cancel(token, source, operation).Single());
             Functions.AssertAlreadyCanceled(token => Cancel(token, source, operation).Single(x => false));
+        }
+
+        [Theory]
+        [MemberData(nameof(UnaryCancelingOperators))]
+        [MemberData(nameof(BinaryCancelingOperators))]
+        public static void SingleOrDefault_OperationCanceledException(Labeled<Func<CancellationToken, Operation>> source, Labeled<Func<Action, Operation>> operation)
+        {
+            Functions.AssertEventuallyCanceled((token, canceler) => Cancel(token, canceler, source, operation).SingleOrDefault(x => false));
         }
 
         [Theory]
