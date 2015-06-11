@@ -14,6 +14,8 @@ namespace System.Reflection.Metadata
     {
         private BlobReader _reader;
         private SequencePoint _current;
+        private int _previousNonHiddenStartLine;
+        private ushort _previousNonHiddenStartColumn;
 
         public unsafe SequencePointBlobReader(byte* buffer, int length)
             : this(MemoryBlock.CreateChecked(buffer, length))
@@ -24,6 +26,8 @@ namespace System.Reflection.Metadata
         {
             _reader = new BlobReader(block);
             _current = default(SequencePoint);
+            _previousNonHiddenStartLine = -1;
+            _previousNonHiddenStartColumn = 0;
         }
 
         public bool MoveNext()
@@ -39,45 +43,52 @@ namespace System.Reflection.Metadata
 
             if (_current.Document.IsNil)
             {
-                // first record:
+                // header:
                 document = ReadDocumentHandle();
-                offset = _reader.ReadCompressedInteger();
-                ReadDeltaLinesAndColumns(out deltaLines, out deltaColumns);
-                startLine = _reader.ReadCompressedInteger();
-                startColumn = ReadColumn();
 
-                // hidden SP:
-                if (deltaLines == 0 && deltaColumns == 0)
-                {
-                    _current = new SequencePoint(document, offset);
-                    return true;
-                }
+                // IL offset:
+                offset = _reader.ReadCompressedInteger();
             }
             else
             {
-                int deltaOffset;
                 document = _current.Document;
 
+                // skip all document records and update the current document accordingly:
+                int deltaOffset;
                 while ((deltaOffset = _reader.ReadCompressedInteger()) == 0)
                 {
-                    // subsequent document record
                     document = ReadDocumentHandle();
                 }
 
-                // subsequent point record
+                // IL offset:
                 offset = AddOffsets(_current.Offset, deltaOffset);
-                ReadDeltaLinesAndColumns(out deltaLines, out deltaColumns);
-
-                if (deltaLines == 0 && deltaColumns == 0)
-                {
-                    // hidden
-                    _current = new SequencePoint(_current.Document, offset);
-                    return true;
-                }
-
-                startLine = AddLines(_current.StartLine, _reader.ReadCompressedSignedInteger());
-                startColumn = AddColumns(_current.StartColumn, _reader.ReadCompressedSignedInteger());
             }
+
+            ReadDeltaLinesAndColumns(out deltaLines, out deltaColumns);
+
+            // hidden
+            if (deltaLines == 0 && deltaColumns == 0)
+            {
+                _current = new SequencePoint(document, offset);
+                return true;
+            }
+
+            // delta Start Line & Column:
+            if (_previousNonHiddenStartLine < 0)
+            {
+                Debug.Assert(_previousNonHiddenStartColumn == 0);
+
+                startLine = ReadLine();
+                startColumn = ReadColumn();
+            }
+            else
+            {
+                startLine = AddLines(_previousNonHiddenStartLine, _reader.ReadCompressedSignedInteger());
+                startColumn = AddColumns(_previousNonHiddenStartColumn, _reader.ReadCompressedSignedInteger());
+            }
+
+            _previousNonHiddenStartLine = startLine;
+            _previousNonHiddenStartColumn = startColumn;
 
             _current = new SequencePoint(
                 document,
@@ -94,6 +105,11 @@ namespace System.Reflection.Metadata
         {
             deltaLines = _reader.ReadCompressedInteger();
             deltaColumns = (deltaLines == 0) ? _reader.ReadCompressedInteger() : _reader.ReadCompressedSignedInteger();
+        }
+
+        private int ReadLine()
+        {
+            return _reader.ReadCompressedInteger();
         }
 
         private ushort ReadColumn()
