@@ -143,6 +143,14 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
+        [MemberData(nameof(SequenceEqualUnequalData), new[] { 128 })]
+        public static void SequenceEqual_OperationCanceledException(Labeled<ParallelQuery<int>> left, Labeled<ParallelQuery<int>> right, int count)
+        {
+            Functions.AssertEventuallyCanceled((token, canceler) => left.Item.WithCancellation(token).SequenceEqual(right.Item, new CancelingEqualityComparer<int>(canceler)));
+            Functions.AssertEventuallyCanceled((token, canceler) => left.Item.SequenceEqual(right.Item.WithCancellation(token), new CancelingEqualityComparer<int>(canceler)));
+        }
+
+        [Theory]
         [MemberData(nameof(SequenceEqualUnequalData), new[] { 4 })]
         public static void SequenceEqual_OperationCanceledException_PreCanceled(Labeled<ParallelQuery<int>> left, Labeled<ParallelQuery<int>> right, int count, int item)
         {
