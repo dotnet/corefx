@@ -389,6 +389,27 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
+        [MemberData(nameof(UnaryCancelingOperators))]
+        [MemberData(nameof(BinaryCancelingOperators))]
+        public static void Sum_OperationCanceledException(Labeled<Func<CancellationToken, Operation>> source, Labeled<Func<Action, Operation>> operation)
+        {
+            Functions.AssertEventuallyCanceled((token, canceler) => Cancel(token, canceler, source, operation).Sum());
+            Functions.AssertEventuallyCanceled((token, canceler) => Cancel(token, canceler, source, operation).Sum(x => (int?)x));
+
+            Functions.AssertEventuallyCanceled((token, canceler) => Cancel(token, canceler, source, operation).Sum(x => (long)x));
+            Functions.AssertEventuallyCanceled((token, canceler) => Cancel(token, canceler, source, operation).Sum(x => (long?)x));
+
+            Functions.AssertEventuallyCanceled((token, canceler) => Cancel(token, canceler, source, operation).Sum(x => (float)x));
+            Functions.AssertEventuallyCanceled((token, canceler) => Cancel(token, canceler, source, operation).Sum(x => (float?)x));
+
+            Functions.AssertEventuallyCanceled((token, canceler) => Cancel(token, canceler, source, operation).Sum(x => (double)x));
+            Functions.AssertEventuallyCanceled((token, canceler) => Cancel(token, canceler, source, operation).Sum(x => (double?)x));
+
+            Functions.AssertEventuallyCanceled((token, canceler) => Cancel(token, canceler, source, operation).Sum(x => (decimal)x));
+            Functions.AssertEventuallyCanceled((token, canceler) => Cancel(token, canceler, source, operation).Sum(x => (decimal?)x));
+        }
+
+        [Theory]
         [MemberData(nameof(UnaryOperators))]
         [MemberData(nameof(BinaryOperators))]
         public static void Sum_OperationCanceledException_PreCanceled(LabeledOperation source, LabeledOperation operation)

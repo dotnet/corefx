@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
-using System.Threading;
 using Xunit;
 
 namespace System.Linq.Parallel.Tests
@@ -332,6 +331,26 @@ namespace System.Linq.Parallel.Tests
             ParallelQuery<int> query = labeled.Item;
             Assert.Equal(0, query.Select(x => (decimal?)null).Sum());
             Assert.Equal(0, query.Sum(x => (decimal?)null));
+        }
+
+        [Theory]
+        [MemberData(nameof(UnorderedSources.Ranges), new[] { 128 }, MemberType = typeof(UnorderedSources))]
+        public static void Sum_OperationCanceledException(Labeled<ParallelQuery<int>> labeled, int count)
+        {
+            Functions.AssertEventuallyCanceled((token, canceler) => labeled.Item.WithCancellation(token).Sum(x => { canceler(); return x; }));
+            Functions.AssertEventuallyCanceled((token, canceler) => labeled.Item.WithCancellation(token).Sum(x => { canceler(); return (int?)x; }));
+
+            Functions.AssertEventuallyCanceled((token, canceler) => labeled.Item.WithCancellation(token).Sum(x => { canceler(); return (long)x; }));
+            Functions.AssertEventuallyCanceled((token, canceler) => labeled.Item.WithCancellation(token).Sum(x => { canceler(); return (long?)x; }));
+
+            Functions.AssertEventuallyCanceled((token, canceler) => labeled.Item.WithCancellation(token).Sum(x => { canceler(); return (float)x; }));
+            Functions.AssertEventuallyCanceled((token, canceler) => labeled.Item.WithCancellation(token).Sum(x => { canceler(); return (float?)x; }));
+
+            Functions.AssertEventuallyCanceled((token, canceler) => labeled.Item.WithCancellation(token).Sum(x => { canceler(); return (double)x; }));
+            Functions.AssertEventuallyCanceled((token, canceler) => labeled.Item.WithCancellation(token).Sum(x => { canceler(); return (double?)x; }));
+
+            Functions.AssertEventuallyCanceled((token, canceler) => labeled.Item.WithCancellation(token).Sum(x => { canceler(); return (decimal)x; }));
+            Functions.AssertEventuallyCanceled((token, canceler) => labeled.Item.WithCancellation(token).Sum(x => { canceler(); return (decimal?)x; }));
         }
 
         [Theory]
