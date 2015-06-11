@@ -307,6 +307,27 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
+        [MemberData(nameof(UnaryCancelingOperators))]
+        [MemberData(nameof(BinaryCancelingOperators))]
+        public static void Min_OperationCanceledException(Labeled<Func<CancellationToken, Operation>> source, Labeled<Func<Action, Operation>> operation)
+        {
+            Functions.AssertEventuallyCanceled((token, canceler) => Cancel(token, canceler, source, operation).Min());
+            Functions.AssertEventuallyCanceled((token, canceler) => Cancel(token, canceler, source, operation).Min(x => (int?)x));
+
+            Functions.AssertEventuallyCanceled((token, canceler) => Cancel(token, canceler, source, operation).Min(x => (long)x));
+            Functions.AssertEventuallyCanceled((token, canceler) => Cancel(token, canceler, source, operation).Min(x => (long?)x));
+
+            Functions.AssertEventuallyCanceled((token, canceler) => Cancel(token, canceler, source, operation).Min(x => (float)x));
+            Functions.AssertEventuallyCanceled((token, canceler) => Cancel(token, canceler, source, operation).Min(x => (float?)x));
+
+            Functions.AssertEventuallyCanceled((token, canceler) => Cancel(token, canceler, source, operation).Min(x => (double)x));
+            Functions.AssertEventuallyCanceled((token, canceler) => Cancel(token, canceler, source, operation).Min(x => (double?)x));
+
+            Functions.AssertEventuallyCanceled((token, canceler) => Cancel(token, canceler, source, operation).Min(x => (decimal)x));
+            Functions.AssertEventuallyCanceled((token, canceler) => Cancel(token, canceler, source, operation).Min(x => (decimal?)x));
+        }
+
+        [Theory]
         [MemberData(nameof(UnaryOperators))]
         [MemberData(nameof(BinaryOperators))]
         public static void Min_OperationCanceledException_PreCanceled(LabeledOperation source, LabeledOperation operation)
