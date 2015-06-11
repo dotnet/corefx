@@ -240,12 +240,32 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
+        [MemberData(nameof(UnaryCancelingOperators))]
+        [MemberData(nameof(BinaryCancelingOperators))]
+        [MemberData(nameof(OrderCancelingOperators))]
+        public static void Last_OperationCanceledException(Labeled<Func<CancellationToken, Operation>> source, Labeled<Func<Action, Operation>> operation)
+        {
+            Functions.AssertEventuallyCanceled((token, canceler) => Cancel(token, canceler, source, operation).Last());
+            Functions.AssertEventuallyCanceled((token, canceler) => Cancel(token, canceler, source, operation).Last(x => true));
+        }
+
+        [Theory]
         [MemberData(nameof(UnaryOperators))]
         [MemberData(nameof(BinaryOperators))]
         public static void Last_OperationCanceledException_PreCanceled(LabeledOperation source, LabeledOperation operation)
         {
             Functions.AssertAlreadyCanceled(token => Cancel(token, source, operation).Last());
             Functions.AssertAlreadyCanceled(token => Cancel(token, source, operation).Last(x => true));
+        }
+
+        [Theory]
+        [MemberData(nameof(UnaryCancelingOperators))]
+        [MemberData(nameof(BinaryCancelingOperators))]
+        [MemberData(nameof(OrderCancelingOperators))]
+        public static void LastOrDefault_OperationCanceledException(Labeled<Func<CancellationToken, Operation>> source, Labeled<Func<Action, Operation>> operation)
+        {
+            Functions.AssertEventuallyCanceled((token, canceler) => Cancel(token, canceler, source, operation).LastOrDefault());
+            Functions.AssertEventuallyCanceled((token, canceler) => Cancel(token, canceler, source, operation).LastOrDefault(x => true));
         }
 
         [Theory]
