@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Threading;
 using Xunit;
 
 namespace System.Linq.Parallel.Tests
@@ -27,6 +26,13 @@ namespace System.Linq.Parallel.Tests
         public static void ForAll_Longrunning(Labeled<ParallelQuery<int>> labeled, int count)
         {
             ForAll(labeled, count);
+        }
+
+        [Theory]
+        [MemberData(nameof(UnorderedSources.Ranges), new[] { 128 }, MemberType = typeof(UnorderedSources))]
+        public static void ForAll_OperationCanceledException(Labeled<ParallelQuery<int>> labeled, int count)
+        {
+            Functions.AssertEventuallyCanceled((token, canceler) => labeled.Item.WithCancellation(token).ForAll(x => canceler()));
         }
 
         [Theory]
