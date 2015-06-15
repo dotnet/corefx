@@ -364,10 +364,15 @@ namespace System.Linq.Parallel.Tests
 
             foreach (var operation in new Labeled<Func<Action, Operation>>[] {
                 Labeled.Label<Func<Action, Operation>>("Except", cancel => (start, count, s) => s(start, count).Except(otherSource.Item(start, count), new CancelingEqualityComparer<int>(cancel))),
+                Labeled.Label<Func<Action, Operation>>("Except-Right", cancel => (start, count, s) => otherSource.Item(start, count).Except(s(start, count), new CancelingEqualityComparer<int>(cancel))),
                 Labeled.Label<Func<Action, Operation>>("GroupJoin", cancel => (start, count, s) => s(start, count).GroupJoin(otherSource.Item(start, count), x => x, y => y, (x, g) => x, new CancelingEqualityComparer<int>(cancel))),
+                Labeled.Label<Func<Action, Operation>>("GroupJoin-Right", cancel => (start, count, s) => otherSource.Item(start, count).GroupJoin(s(start, count), x => x, y => y, (x, g) => x, new CancelingEqualityComparer<int>(cancel))),
                 Labeled.Label<Func<Action, Operation>>("Intersect", cancel => (start, count, s) => s(start, count).Intersect(otherSource.Item(start, count), new CancelingEqualityComparer<int>(cancel))),
+                Labeled.Label<Func<Action, Operation>>("Intersect-Right", cancel => (start, count, s) => otherSource.Item(start, count).Intersect(s(start, count), new CancelingEqualityComparer<int>(cancel))),
                 Labeled.Label<Func<Action, Operation>>("Join", cancel => (start, count, s) => s(start, count).Join(otherSource.Item(start, count), x => x, y => y, (x, y) => x, new CancelingEqualityComparer<int>(cancel))),
+                Labeled.Label<Func<Action, Operation>>("Join-Right", cancel => (start, count, s) => otherSource.Item(start, count).Join(s(start, count), x => x, y => y, (x, y) => x, new CancelingEqualityComparer<int>(cancel))),
                 Labeled.Label<Func<Action, Operation>>("Union", cancel => (start, count, s) => s(start, count).Union(otherSource.Item(start, count), new CancelingEqualityComparer<int>(cancel))),
+                Labeled.Label<Func<Action, Operation>>("Union-Right", cancel => (start, count, s) => otherSource.Item(start, count).Union(s(start, count), new CancelingEqualityComparer<int>(cancel))),
                     })
             {
                 yield return new object[] { src, operation };
