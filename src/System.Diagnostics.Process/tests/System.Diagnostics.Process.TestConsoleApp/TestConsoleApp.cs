@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.IO.Pipes;
+using System.Threading.Tasks;
 
 namespace System.Diagnostics.ProcessTests
 {
@@ -18,7 +19,8 @@ namespace System.Diagnostics.ProcessTests
                 }
                 else if (args[0].Equals("error"))
                 {
-                    Console.Error.WriteLine(Name + " error stream");
+                    Console.Error.WriteLine(Name + " started error stream");
+                    Console.Error.WriteLine(Name + " closed error stream");
                     Sleep();
                 }
                 else if (args[0].Equals("input"))
@@ -41,6 +43,19 @@ namespace System.Diagnostics.ProcessTests
                         stdout.WriteByte(bytes[i]);
                         stdout.Flush();
                         Sleep(100);
+                    }
+                }
+                else if (args[0].Equals("ipc"))
+                {
+                    using (var inbound = new AnonymousPipeClientStream(PipeDirection.In, args[1]))
+                    using (var outbound = new AnonymousPipeClientStream(PipeDirection.Out, args[2]))
+                    {
+                        // Echo 10 bytes from inbound to outbound
+                        for (int i = 0; i < 10; i++)
+                        {
+                            int b = inbound.ReadByte();
+                            outbound.WriteByte((byte)b);
+                        }
                     }
                 }
                 else

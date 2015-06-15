@@ -21,20 +21,9 @@ namespace Microsoft.Framework.WebEncoders
         private static readonly UTF8Encoding _utf8EncodingThrowOnInvalidBytes = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false, throwOnInvalidBytes: true);
 
         [Fact]
-        public void GetDefinedCharacterBitmap_ReturnsSingletonInstance()
-        {
-            // Act
-            uint[] retVal1 = UnicodeHelpers.GetDefinedCharacterBitmap();
-            uint[] retVal2 = UnicodeHelpers.GetDefinedCharacterBitmap();
-
-            // Assert
-            Assert.Same(retVal1, retVal2);
-        }
-
-        [Fact]
         public void GetScalarValueFromUtf16()
         {
-            // TODO: [ActiveIssue(846, PlatformID.Linux | PlatformID.OSX)]
+            // TODO: [ActiveIssue(846, PlatformID.AnyUnix)]
             // This loop should instead be implemented as a [Theory] with multiple [InlineData]s.
             // However, until globalization support is implemented on Unix, this causes failures when
             // the xunit runner is configured with -xml to trace out results.  When it does so with 

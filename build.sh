@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 __scriptpath=$(cd "$(dirname "$0")"; pwd -P)
 __packageroot=$__scriptpath/packages
@@ -11,6 +11,8 @@ __msbuildpath=$__packageroot/$__msbuildpackageid.$__msbuildpackageversion/lib/MS
 
 if [ $(uname) == "Linux" ]; then
     __monoroot=/usr
+elif [ $(uname) == "FreeBSD" ]; then
+    __monoroot=/usr/local
 else
     __monoroot=/Library/Frameworks/Mono.framework/Versions/Current
 fi
@@ -21,12 +23,12 @@ __referenceassemblyroot=$__monoroot/lib/mono/xbuild-frameworks
 __monoversion=$(mono --version | grep "version 4.[1-9]")
 
 if [ $? -ne 0 ]; then
-    echo "Mono 4.1 or later is required to build corefx. Please see https://github.com/dotnet/corefx/wiki/Building-On-Unix for more details."
+    echo "Mono 4.1 or later is required to build corefx. Please see https://github.com/dotnet/corefx/blob/master/Documentation/linux-instructions.md for more details."
     exit 1
 fi
 
 if [ ! -e "$__referenceassemblyroot/.NETPortable" ]; then
-    echo "PCL reference assemblies not found. Please see https://github.com/dotnet/corefx/wiki/Building-On-Unix for more details."
+    echo "PCL reference assemblies not found. Please see https://github.com/dotnet/corefx/blob/master/Documentation/linux-instructions.md for more details."
     exit 1
 fi
 
@@ -37,7 +39,7 @@ __buildlog=$__scriptpath/msbuild.log
 if [ ! -e "$__nugetpath" ]; then
     which curl wget > /dev/null 2> /dev/null
     if [ $? -ne 0 -a $? -ne 1 ]; then
-        echo "cURL or wget is required to build corefx. Please see https://github.com/dotnet/corefx/wiki/Building-On-Unix for more details."
+        echo "cURL or wget is required to build corefx. Please see https://github.com/dotnet/corefx/blob/master/Documentation/linux-instructions.md for more details."
         exit 1
     fi
     echo "Restoring NuGet.exe..."
@@ -69,6 +71,8 @@ fi
 
 if [ $(uname) == "Linux" ]; then
     __osgroup=Linux
+elif [ $(uname) == "FreeBSD" ]; then
+    __osgroup=FreeBSD
 else
     __osgroup=OSX
 fi
