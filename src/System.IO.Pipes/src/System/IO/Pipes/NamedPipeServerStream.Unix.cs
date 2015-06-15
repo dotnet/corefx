@@ -86,6 +86,10 @@ namespace System.IO.Pipes
         public void WaitForConnection()
         {
             CheckConnectOperationsServer();
+            if (State == PipeState.Connected)
+            {
+                throw new InvalidOperationException(SR.InvalidOperation_PipeAlreadyConnected);
+            }
 
             // Open the file.  For In or Out, this will block until a client has connected.
             // Unfortunately for InOut it won't, which is different from the Windows behavior;
@@ -95,9 +99,7 @@ namespace System.IO.Pipes
                 TranslateFlags(_direction, _options, _inheritability), 
                 (int)Interop.libc.Permissions.S_IRWXU);
 
-            // Ignore _inBufferSize and _outBufferSize.  They're optional, and the fcntl F_SETPIPE_SZ for changing 
-            // a pipe's buffer size is Linux specific.
-
+            InitializeBufferSize(serverHandle, _outBufferSize); // there's only one capacity on Linux; just use the out buffer size
             InitializeHandle(serverHandle, isExposed: false, isAsync: (_options & PipeOptions.Asynchronous) != 0);
             State = PipeState.Connected;
         }

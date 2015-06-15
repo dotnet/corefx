@@ -3,6 +3,7 @@
 
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Pipes;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
@@ -15,6 +16,7 @@ namespace System.Diagnostics.ProcessTests
         private const int WaitInMS = 100 * 1000; 
         private const string CoreRunName = "corerun";
         private const string TestExeName = "System.Diagnostics.Process.TestConsoleApp.exe";
+        private const int SuccessExitCode = 100;
 
         private Process _process;
         private List<Process> _processes = new List<Process>();
@@ -161,7 +163,7 @@ namespace System.Diagnostics.ProcessTests
                 Process p = CreateProcess();
                 p.Start();
                 Assert.True(p.WaitForExit(WaitInMS));
-                Assert.Equal(p.ExitCode, 100);
+                Assert.Equal(SuccessExitCode, p.ExitCode);
             }
 
             {
@@ -223,6 +225,7 @@ namespace System.Diagnostics.ProcessTests
         }
 
         [Fact]
+        [ActiveIssue(1896, PlatformID.Windows)]
         public void Process_MainModule()
         {
             // Get MainModule property from a Process object
@@ -722,9 +725,40 @@ namespace System.Diagnostics.ProcessTests
             }
 
             {
+                Process process = new Process();
+                Assert.Throws<ArgumentNullException>(() => process.StartInfo = null);
+            }
+
+            {
                 Process process = Process.GetCurrentProcess();
                 Assert.Throws<System.InvalidOperationException>(() => process.StartInfo);
             }
         }
+
+        [Fact]
+        public void Process_IPC()
+        {
+            Process p = CreateProcess("ipc");
+
+            using (var outbound = new AnonymousPipeServerStream(PipeDirection.Out, HandleInheritability.Inheritable))
+            using (var inbound = new AnonymousPipeServerStream(PipeDirection.In, HandleInheritability.Inheritable))
+            {
+                p.StartInfo.Arguments += " " + outbound.GetClientHandleAsString() + " " + inbound.GetClientHandleAsString();
+                p.Start();
+                outbound.DisposeLocalCopyOfClientHandle();
+                inbound.DisposeLocalCopyOfClientHandle();
+                
+                for (byte i = 0; i < 10; i++)
+                {
+                    outbound.WriteByte(i);
+                    int received = inbound.ReadByte();
+                    Assert.Equal(i, received);
+                }
+
+                Assert.True(p.WaitForExit(WaitInMS));
+                Assert.Equal(SuccessExitCode, p.ExitCode);
+            }
+        }
+
     }
 }

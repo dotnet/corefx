@@ -50,6 +50,11 @@
           "lib/aspnetcore50/System.Linq.dll"
         ]
       },
+      "System.Private.Uri/4.0.0-beta-23008": {
+        "runtime": [
+          "lib/DNXCore50/System.Private.Uri.dll"
+        ]
+      },
       "System.Reflection/4.0.10-beta-22816": {
         "dependencies": {
           "System.IO": "4.0.10-beta-22816",
@@ -74,9 +79,11 @@
           "lib/aspnetcore50/System.Reflection.Primitives.dll"
         ]
       },
-      "System.Runtime/4.0.20-beta-22914": {
+      "System.Runtime/4.0.20-beta-23008": {
+        "dependencies": {
+          "System.Private.Uri": "4.0.0-beta-23008"
+        },
         "compile": [
-          "ref/any/mscorlib.dll",
           "ref/any/System.Runtime.dll"
         ],
         "runtime": [
@@ -205,7 +212,7 @@
           "lib/portable-net45+aspnetcore50+win+wpa81+wp80/xunit.core.dll"
         ]
       },
-      "xunit.netcore.extensions/1.0.0-prerelease-00041": {
+      "xunit.netcore.extensions/1.0.0-prerelease-00053": {
         "dependencies": {
           "System.Diagnostics.Debug": "4.0.10-beta-22703",
           "System.IO": "4.0.10-beta-22703",
@@ -284,6 +291,19 @@
         "lib/portable-wpa81+wp80+win80+net45+aspnetcore50/System.Linq.dll"
       ]
     },
+    "System.Private.Uri/4.0.0-beta-23008": {
+      "sha512": "q2VlKvy9ufHawdI5abrNKXvUIgFZYnBYMtPqK8gy1kEVhaQ1LWR7WLprwgI11mk7Ef18+P5mj08gCuXbl/rINw==",
+      "files": [
+        "System.Private.Uri.4.0.0-beta-23008.nupkg",
+        "System.Private.Uri.4.0.0-beta-23008.nupkg.sha512",
+        "System.Private.Uri.nuspec",
+        "lib/DNXCore50/System.Private.Uri.dll",
+        "lib/netcore50/System.Private.Uri.dll",
+        "ref/dnxcore50/_._",
+        "ref/netcore50/_._",
+        "runtimes/win8-aot/lib/netcore50/System.Private.Uri.dll"
+      ]
+    },
     "System.Reflection/4.0.10-beta-22816": {
       "sha512": "YzEbWoLTsPOUL4mPRbeRkhfJ12VgIJVy7fwoKnp0RgxXwuQQ2CPFt2E3qjl2TWzMpnhyRBtM2L/qkt4Dlg8Okw==",
       "files": [
@@ -310,18 +330,17 @@
         "lib/portable-wpa81+wp80+win80+net45+aspnetcore50/System.Reflection.Primitives.dll"
       ]
     },
-    "System.Runtime/4.0.20-beta-22914": {
-      "sha512": "zcC70jNo2flfsuUjDipvORyu+IRYZLgk+FhC4C6p9zjkzSPlGvln7vVHKrtSiq042YLmwIUH+jDtUenS8/TPoQ==",
+    "System.Runtime/4.0.20-beta-23008": {
+      "sha512": "YX9/7Q6EHadgTLjH4Sa5zKHGMTMrwiMynAlQxMSQLGYCyJX6Z4/hejrBR7cNxrRddXnzxs5OALdEZqdU80zwxw==",
       "files": [
-        "System.Runtime.4.0.20-beta-22914.nupkg",
-        "System.Runtime.4.0.20-beta-22914.nupkg.sha512",
+        "System.Runtime.4.0.20-beta-23008.nupkg",
+        "System.Runtime.4.0.20-beta-23008.nupkg.sha512",
         "System.Runtime.nuspec",
         "lib/DNXCore50/System.Runtime.dll",
-        "lib/net46/System.Runtime.dll",
+        "lib/net46/_._",
         "lib/netcore50/System.Runtime.dll",
-        "ref/any/mscorlib.dll",
         "ref/any/System.Runtime.dll",
-        "ref/net46/System.Runtime.dll",
+        "ref/net46/_._",
         "runtimes/win8-aot/lib/netcore50/System.Runtime.dll"
       ]
     },
@@ -493,11 +512,11 @@
         "lib/portable-net45+aspnetcore50+win+wpa81+wp80/xunit.runner.utility.xml"
       ]
     },
-    "xunit.netcore.extensions/1.0.0-prerelease-00041": {
-      "sha512": "5LbvNLWGILcHZ744JZQ586i8CqbWyde+XFY5m90VL55aQ7kCPdnGN6siRfYAUex09mFlU2VzKeXkl6GQQUgSGw==",
+    "xunit.netcore.extensions/1.0.0-prerelease-00053": {
+      "sha512": "Nr3usfWn6O4WWWJyIN9wgMENawbcGuZ0wjlVkBFxbC+O0KRc2K+F8sWNJ7mN6RN8wlczI3tizEcve83m/MvqtQ==",
       "files": [
-        "xunit.netcore.extensions.1.0.0-prerelease-00041.nupkg",
-        "xunit.netcore.extensions.1.0.0-prerelease-00041.nupkg.sha512",
+        "xunit.netcore.extensions.1.0.0-prerelease-00053.nupkg",
+        "xunit.netcore.extensions.1.0.0-prerelease-00053.nupkg.sha512",
         "xunit.netcore.extensions.nuspec",
         "lib/portable-wpa80+win80+net45+aspnetcore50/Xunit.NetCore.Extensions.dll"
       ]
@@ -510,7 +529,7 @@
       "xunit.abstractions.netcore >= 1.0.0-prerelease",
       "xunit.assert >= 2.0.0-beta5-build2785",
       "xunit.core.netcore >= 1.0.1-prerelease",
-      "xunit.netcore.extensions >= 1.0.0-prerelease"
+      "xunit.netcore.extensions >= 1.0.0-prerelease-*"
     ],
     "DNXCore,Version=v5.0": []
   }

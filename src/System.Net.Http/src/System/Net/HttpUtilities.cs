@@ -14,15 +14,20 @@ namespace System.Net.Http
 {
     internal static class HttpUtilities
     {
-        internal static readonly Version DefaultVersion = HttpVersion.Version11;
+#if NETNative
+        internal static readonly Version DefaultRequestVersion = HttpVersion.Version20;
+#else
+        internal static readonly Version DefaultRequestVersion = HttpVersion.Version11;
+#endif
+        internal static readonly Version DefaultResponseVersion = HttpVersion.Version11;
 
         internal static bool IsHttpUri(Uri uri)
         {
             Debug.Assert(uri != null);
 
             string scheme = uri.Scheme;
-            return ((string.Compare("http", scheme, StringComparison.OrdinalIgnoreCase) == 0) ||
-                (string.Compare("https", scheme, StringComparison.OrdinalIgnoreCase) == 0));
+            return string.Equals("http", scheme, StringComparison.OrdinalIgnoreCase) ||
+                string.Equals("https", scheme, StringComparison.OrdinalIgnoreCase);
         }
 
         // Returns true if the task was faulted or canceled and sets tcs accordingly.

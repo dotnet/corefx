@@ -10,7 +10,7 @@
 
   <!-- Build Tools Versions -->
   <PropertyGroup>
-    <BuildToolsVersion>1.0.25-prerelease-00050</BuildToolsVersion>
+    <BuildToolsVersion>1.0.25-prerelease-00053</BuildToolsVersion>
     <DnxVersion Condition="'$(OsEnvironment)'!='Unix'">1.0.0-beta5-11682</DnxVersion>
     <DnxVersion Condition="'$(OsEnvironment)'=='Unix'">1.0.0-beta5-11760</DnxVersion>
     <DnxPackageName Condition="'$(DnxPackageName)' == '' and '$(OsEnvironment)'!='Unix'">dnx-coreclr-win-x86.$(DnxVersion)</DnxPackageName>
@@ -137,6 +137,7 @@
     <OSGroup Condition="'$(OSGroup)'=='' and $(Configuration.StartsWith('Windows'))">Windows_NT</OSGroup>
     <OSGroup Condition="'$(OSGroup)'=='' and $(Configuration.StartsWith('Linux'))">Linux</OSGroup>
     <OSGroup Condition="'$(OSGroup)'=='' and $(Configuration.StartsWith('OSX'))">OSX</OSGroup>
+    <OSGroup Condition="'$(OSGroup)'=='' and $(Configuration.StartsWith('FreeBSD'))">FreeBSD</OSGroup>
     <OSGroup Condition="'$(OSGroup)'==''">Windows_NT</OSGroup>
   </PropertyGroup>
 
@@ -189,8 +190,9 @@
     <TargetsWindows Condition="'$(OSGroup)' == 'Windows_NT'">true</TargetsWindows>
     <TargetsLinux Condition="'$(OSGroup)' == 'Linux'">true</TargetsLinux>
     <TargetsOSX Condition="'$(OSGroup)' == 'OSX'">true</TargetsOSX>
+    <TargetsFreeBSD Condition="'$(OSGroup)' == 'FreeBSD'">true</TargetsFreeBSD>
 
-    <TargetsUnix Condition="'$(TargetsLinux)' == 'true' or '$(TargetsOSX)' == 'true'">true</TargetsUnix>
+    <TargetsUnix Condition="'$(TargetsLinux)' == 'true' or '$(TargetsOSX)' == 'true' or '$(TargetsFreeBSD)' == 'true'">true</TargetsUnix>
   </PropertyGroup>
 
   <PropertyGroup>
