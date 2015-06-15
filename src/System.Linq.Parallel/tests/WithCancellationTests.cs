@@ -15,59 +15,6 @@ namespace System.Linq.Parallel.Tests
     public static class WithCancellationTests
     {
         [Fact]
-        public static void PreCanceledToken_ForAll()
-        {
-            OperationCanceledException caughtException = null;
-            var cs = new CancellationTokenSource();
-            cs.Cancel();
-
-            IEnumerable<int> throwOnFirstEnumerable = Enumerables<int>.ThrowOnEnumeration();
-
-            try
-            {
-                throwOnFirstEnumerable
-                    .AsParallel()
-                    .WithCancellation(cs.Token)
-                    .ForAll((x) => { Debug.WriteLine(x.ToString()); });
-            }
-            catch (OperationCanceledException ex)
-            {
-                caughtException = ex;
-            }
-
-            Assert.NotNull(caughtException);
-            Assert.Equal(cs.Token, caughtException.CancellationToken);
-        }
-
-        [Fact]
-        public static void PreCanceledToken_SimpleEnumerator()
-        {
-            OperationCanceledException caughtException = null;
-            var cs = new CancellationTokenSource();
-            cs.Cancel();
-
-            IEnumerable<int> throwOnFirstEnumerable = Enumerables<int>.ThrowOnEnumeration();
-
-            try
-            {
-                var query = throwOnFirstEnumerable
-                    .AsParallel()
-                    .WithCancellation(cs.Token);
-
-                foreach (var item in query)
-                {
-                }
-            }
-            catch (OperationCanceledException ex)
-            {
-                caughtException = ex;
-            }
-
-            Assert.NotNull(caughtException);
-            Assert.Equal(cs.Token, caughtException.CancellationToken);
-        }
-
-        [Fact]
         public static void MultiplesWithCancellationIsIllegal()
         {
             InvalidOperationException caughtException = null;
@@ -176,34 +123,6 @@ namespace System.Linq.Parallel.Tests
             enumerator1.Dispose(); //can potentially hang
 
             Debug.WriteLine("        Done (success).");
-        }
-
-        /// <summary>
-        /// [Regression Test]
-        ///   This issue occurred because aggregations like Sum or Average would incorrectly
-        ///   wrap OperationCanceledException with AggregateException.
-        /// </summary>
-        [Fact]
-        public static void AggregatesShouldntWrapOCE()
-        {
-            var cs = new CancellationTokenSource();
-            cs.Cancel();
-
-            // Expect OperationCanceledException rather than AggregateException or something else
-            try
-            {
-                Enumerable.Range(0, 1000).AsParallel().WithCancellation(cs.Token).Sum(x => x);
-            }
-            catch (OperationCanceledException)
-            {
-                return;
-            }
-            catch (Exception e)
-            {
-                Assert.True(false, string.Format("PlinqCancellationTests.AggregatesShouldntWrapOCE:  > Failed: got {0}, expected OperationCanceledException", e.GetType().ToString()));
-            }
-
-            Assert.True(false, string.Format("PlinqCancellationTests.AggregatesShouldntWrapOCE:  > Failed: no exception occurred, expected OperationCanceledException"));
         }
 
         // Plinq suppresses OCE(externalCT) occurring in worker threads and then throws a single OCE(ct)
