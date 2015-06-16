@@ -6,19 +6,21 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <OutputType>Library</OutputType>
     <RootNamespace>System.Runtime.InteropServices</RootNamespace>
-    <AssemblyName>System.Runtime.Environment</AssemblyName>
+    <AssemblyName>System.Runtime.InteropServices.RuntimeInformation</AssemblyName>
     <AssemblyVersion>4.0.0.0</AssemblyVersion>
     <ProjectGuid>{F9DF2357-81B4-4317-908E-512DA9395583}</ProjectGuid>
   </PropertyGroup>
   <!-- Help VS understand available configurations -->
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'FreeBSD_Debug|AnyCPU' " />
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'FreeBSD_Release|AnyCPU' " />
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Linux_Debug|AnyCPU' " />
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Linux_Release|AnyCPU' " />
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'OSX_Debug|AnyCPU' " />
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'OSX_Release|AnyCPU' " />
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Windows_Debug|AnyCPU' " />
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Windows_Release|AnyCPU' " />
-  <ItemGroup Condition=" '$(TargetsWindows)' == 'true' ">
-    <Compile Include="RuntimeInformation.Windows.cs" />
+  <ItemGroup Condition=" '$(TargetsFreeBSD)' == 'true' ">
+    <Compile Include="RuntimeInformation.FreeBSD.cs" />
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetsLinux)' == 'true' ">
     <Compile Include="RuntimeInformation.Linux.cs" />
@@ -26,11 +28,14 @@
   <ItemGroup Condition=" '$(TargetsOSX)' == 'true' ">
     <Compile Include="RuntimeInformation.OSX.cs" />
   </ItemGroup>
+  <ItemGroup Condition=" '$(TargetsWindows)' == 'true' ">
+    <Compile Include="RuntimeInformation.Windows.cs" />
+  </ItemGroup>
   <ItemGroup>
     <None Include="project.json" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="OSName.cs" />
+    <Compile Include="OSPlatform.cs" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>
