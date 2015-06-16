@@ -130,5 +130,17 @@ namespace System.Linq.Parallel.Tests
             Assert.Equal(0, count);
             Assert.False(enumerator.MoveNext());
         }
+
+        [Theory]
+        [MemberData(nameof(Sources.Ranges), new[] { 0, 1, 2, 16 }, MemberType = typeof(Sources))]
+        [MemberData(nameof(UnorderedSources.Ranges), new[] { 0, 1, 2, 16 }, MemberType = typeof(UnorderedSources))]
+        public static void ImmediateDispose(Labeled<ParallelQuery<int>> labeled, int count)
+        {
+            // Regression test for an issue causing ODE if a queryEnumerator is disposed before moveNext is called.
+            ParallelQuery<int> query = labeled.Item;
+            IEnumerator<int> enumerator = query.GetEnumerator();
+            Assert.NotNull(enumerator);
+            enumerator.Dispose();
+        }
     }
 }

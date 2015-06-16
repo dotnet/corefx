@@ -155,14 +155,6 @@ namespace System.Linq.Parallel.Tests
                                               "Cancellation_ODEIssue:  We expect an aggregate exception with OCEs in it.");
         }
 
-        // Regression test for an issue causing ODE if a queryEnumerator is disposed before moveNext is called.
-        [Fact]
-        public static void ImmediateDispose()
-        {
-            var queryEnumerator = Enumerable.Range(1, 10).AsParallel().Select(x => x).GetEnumerator();
-            queryEnumerator.Dispose();
-        }
-
         // throwing a fake OCE(ct) when the ct isn't canceled should produce an AggregateException.
         [Fact]
         public static void SetOperationsThrowAggregateOnCancelOrDispose_2()
