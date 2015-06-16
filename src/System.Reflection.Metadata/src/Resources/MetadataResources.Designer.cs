@@ -161,6 +161,15 @@ namespace System.Reflection.Metadata {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Invalid entry point token: 0x{0:8X}.
+        /// </summary>
+        internal static string InvalidEntryPointToken {
+            get {
+                return ResourceManager.GetString("InvalidEntryPointToken", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Invalid handle..
         /// </summary>
         internal static string InvalidHandle {

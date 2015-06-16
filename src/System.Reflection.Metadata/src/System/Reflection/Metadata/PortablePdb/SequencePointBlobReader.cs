@@ -43,7 +43,8 @@ namespace System.Reflection.Metadata
 
             if (_current.Document.IsNil)
             {
-                // header:
+                // header (skip local signature rid):
+                _reader.ReadCompressedInteger();
                 document = ReadDocumentHandle();
 
                 // IL offset:

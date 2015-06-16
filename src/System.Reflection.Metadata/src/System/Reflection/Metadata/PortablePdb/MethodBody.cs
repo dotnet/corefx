@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Diagnostics;
-using System.Text;
 
 namespace System.Reflection.Metadata
 {
@@ -28,13 +27,24 @@ namespace System.Reflection.Metadata
         }
 
         /// <summary>
-        /// Returns Sequence Points Blob.
+        /// Returns a blob encoding sequence points.
         /// </summary>
         public BlobHandle SequencePoints
         {
             get
             {
                 return _reader.MethodBodyTable.GetSequencePoints(Handle);
+            }
+        }
+
+        /// <summary>
+        /// Returns local signature handle.
+        /// </summary>
+        public StandaloneSignatureHandle LocalSignature
+        {
+            get
+            {
+                return StandaloneSignatureHandle.FromRowId(_reader.GetBlobReader(SequencePoints).ReadCompressedInteger());
             }
         }
     }

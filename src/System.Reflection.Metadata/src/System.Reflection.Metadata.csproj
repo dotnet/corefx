@@ -146,9 +146,7 @@
     <Compile Include="System\Reflection\Metadata\Internal\MemberForwardedTag.cs" />
     <Compile Include="System\Reflection\Metadata\Internal\MemberRefParentTag.cs" />
     <Compile Include="System\Reflection\Metadata\Internal\MetadataFlags.cs" />
-    <Compile Include="System\Reflection\Metadata\Internal\MetadataHeader.cs" />
     <Compile Include="System\Reflection\Metadata\Internal\MetadataStreamConstants.cs" />
-    <Compile Include="System\Reflection\Metadata\Internal\MetadataTableHeader.cs" />
     <Compile Include="System\Reflection\Metadata\Internal\MethodDefOrRefTag.cs" />
     <Compile Include="System\Reflection\Metadata\Internal\NamespaceCache.cs" />
     <Compile Include="System\Reflection\Metadata\Internal\NamespaceData.cs" />
@@ -179,6 +177,7 @@
     <Compile Include="System\Reflection\Metadata\Parameter.cs" />
     <Compile Include="System\Reflection\Metadata\PortablePdb\AsyncMethod.cs" />
     <Compile Include="System\Reflection\Metadata\PortablePdb\CustomDebugInformation.cs" />
+    <Compile Include="System\Reflection\Metadata\PortablePdb\DebugMetadataHeader.cs" />
     <Compile Include="System\Reflection\Metadata\PortablePdb\Document.cs" />
     <Compile Include="System\Reflection\Metadata\PortablePdb\HandleCollections.Debug.cs" />
     <Compile Include="System\Reflection\Metadata\PortablePdb\Handles.Debug.cs" />

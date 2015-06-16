@@ -76,6 +76,7 @@ namespace System.Reflection.Metadata.Ecma335
           | ParamPtr
           | EventPtr
           | PropertyPtr,
+
         V2_0_TablesMask =
             Module
           | TypeRef
@@ -134,13 +135,11 @@ namespace System.Reflection.Metadata.Ecma335
           | PortablePdb_TablesMask,
     }
 
-    internal enum HeapSizeFlag : byte
+    internal enum HeapSizes : byte
     {
         StringHeapLarge = 0x01, // 4 byte uint indexes used for string heap offsets
         GuidHeapLarge = 0x02,   // 4 byte uint indexes used for GUID heap offsets
         BlobHeapLarge = 0x04,   // 4 byte uint indexes used for Blob heap offsets
-        EnCDeltas = 0x20,       // Indicates only EnC Deltas are present
-        DeletedMarks = 0x80,    // Indicates metadata might contain items marked deleted
     }
 
     internal enum StringKind : byte
