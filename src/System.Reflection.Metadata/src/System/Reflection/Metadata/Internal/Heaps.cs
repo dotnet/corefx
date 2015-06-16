@@ -407,7 +407,7 @@ namespace System.Reflection.Metadata.Ecma335
             return this.Block.PeekBytes(offset + bytesRead, numberOfBytes);
         }
 
-        internal BlobReader GetBlobReader(BlobHandle handle)
+        internal MemoryBlock GetMemoryBlock(BlobHandle handle)
         {
             if (handle.IsVirtual)
             {
@@ -429,12 +429,12 @@ namespace System.Reflection.Metadata.Ecma335
                     }
                 }
 
-                return new BlobReader(new MemoryBlock((byte*)virtualBlob.Pinned.AddrOfPinnedObject(), length));
+                return new MemoryBlock((byte*)virtualBlob.Pinned.AddrOfPinnedObject(), length);
             }
 
             int offset, size;
             Block.PeekHeapValueOffsetAndSize(handle.GetHeapOffset(), out offset, out size);
-            return new BlobReader(this.Block.GetMemoryBlockAt(offset, size));
+            return this.Block.GetMemoryBlockAt(offset, size);
         }
 
         internal BlobHandle GetNextHandle(BlobHandle handle)

@@ -143,6 +143,15 @@ namespace System.Reflection.Metadata {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Invalid constant value..
+        /// </summary>
+        internal static string InvalidConstantValue {
+            get {
+                return ResourceManager.GetString("InvalidConstantValue", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Invalid COR header size..
         /// </summary>
         internal static string InvalidCorHeaderSize {
@@ -152,11 +161,29 @@ namespace System.Reflection.Metadata {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Invalid entry point token: 0x{0:8X}.
+        /// </summary>
+        internal static string InvalidEntryPointToken {
+            get {
+                return ResourceManager.GetString("InvalidEntryPointToken", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Invalid handle..
         /// </summary>
         internal static string InvalidHandle {
             get {
                 return ResourceManager.GetString("InvalidHandle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Invalid import definition kind: {0}..
+        /// </summary>
+        internal static string InvalidImportDefinitionKind {
+            get {
+                return ResourceManager.GetString("InvalidImportDefinitionKind", resourceCulture);
             }
         }
         
@@ -598,6 +625,15 @@ namespace System.Reflection.Metadata {
         internal static string UnknownTables {
             get {
                 return ResourceManager.GetString("UnknownTables", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Value is too large..
+        /// </summary>
+        internal static string ValueTooLarge {
+            get {
+                return ResourceManager.GetString("ValueTooLarge", resourceCulture);
             }
         }
         

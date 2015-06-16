@@ -291,6 +291,15 @@
   <data name="MetadataStringDecoderEncodingMustBeUtf8" xml:space="preserve">
     <value>The MetadataStringDecoder instance used to instantiate the Metadata reader must have a UTF8 encoding.</value>
   </data>
+  <data name="InvalidConstantValue" xml:space="preserve">
+    <value>Invalid constant value.</value>
+  </data>
+  <data name="InvalidImportDefinitionKind" xml:space="preserve">
+    <value>Invalid import definition kind: {0}.</value>
+  </data>
+  <data name="ValueTooLarge" xml:space="preserve">
+    <value>Value is too large.</value>
+  </data>
   <data name="InvalidTypeSize" xml:space="preserve">
     <value>Invalid type size.</value>
   </data>
@@ -299,5 +308,8 @@
   </data>
   <data name="InvalidRowCount" xml:space="preserve">
     <value>Invalid row count: {0}</value>
+  </data>
+  <data name="InvalidEntryPointToken" xml:space="preserve">
+    <value>Invalid entry point token: 0x{0:8X}</value>
   </data>
 </root>

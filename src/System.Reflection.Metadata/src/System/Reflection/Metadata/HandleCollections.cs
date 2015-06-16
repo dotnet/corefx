@@ -249,7 +249,7 @@ namespace System.Reflection.Metadata
             Debug.Assert(reader != null);
             _reader = reader;
             _firstRowId = 1;
-            _lastRowId = (int)reader.CustomAttributeTable.NumberOfRows;
+            _lastRowId = reader.CustomAttributeTable.NumberOfRows;
         }
 
         internal CustomAttributeHandleCollection(MetadataReader reader, EntityHandle handle)
@@ -370,7 +370,7 @@ namespace System.Reflection.Metadata
             Debug.Assert(reader != null);
             _reader = reader;
             _firstRowId = 1;
-            _lastRowId = (int)reader.DeclSecurityTable.NumberOfRows;
+            _lastRowId = reader.DeclSecurityTable.NumberOfRows;
         }
 
         internal DeclarativeSecurityAttributeHandleCollection(MetadataReader reader, EntityHandle handle)
@@ -477,7 +477,7 @@ namespace System.Reflection.Metadata
             Debug.Assert(reader != null);
             _reader = reader;
             _firstRowId = 1;
-            _lastRowId = (int)reader.MethodDefTable.NumberOfRows;
+            _lastRowId = reader.MethodDefTable.NumberOfRows;
         }
 
         internal MethodDefinitionHandleCollection(MetadataReader reader, TypeDefinitionHandle containingType)
@@ -597,7 +597,7 @@ namespace System.Reflection.Metadata
             Debug.Assert(reader != null);
             _reader = reader;
             _firstRowId = 1;
-            _lastRowId = (int)reader.FieldTable.NumberOfRows;
+            _lastRowId = reader.FieldTable.NumberOfRows;
         }
 
         internal FieldDefinitionHandleCollection(MetadataReader reader, TypeDefinitionHandle containingType)
@@ -717,7 +717,7 @@ namespace System.Reflection.Metadata
             Debug.Assert(reader != null);
             _reader = reader;
             _firstRowId = 1;
-            _lastRowId = (int)reader.PropertyTable.NumberOfRows;
+            _lastRowId = reader.PropertyTable.NumberOfRows;
         }
 
         internal PropertyDefinitionHandleCollection(MetadataReader reader, TypeDefinitionHandle containingType)
@@ -837,7 +837,7 @@ namespace System.Reflection.Metadata
             Debug.Assert(reader != null);
             _reader = reader;
             _firstRowId = 1;
-            _lastRowId = (int)reader.EventTable.NumberOfRows;
+            _lastRowId = reader.EventTable.NumberOfRows;
         }
 
         internal EventDefinitionHandleCollection(MetadataReader reader, TypeDefinitionHandle containingType)
@@ -957,7 +957,7 @@ namespace System.Reflection.Metadata
             if (containingType.IsNil)
             {
                 _firstRowId = 1;
-                _lastRowId = (int)reader.MethodImplTable.NumberOfRows;
+                _lastRowId = reader.MethodImplTable.NumberOfRows;
             }
             else
             {

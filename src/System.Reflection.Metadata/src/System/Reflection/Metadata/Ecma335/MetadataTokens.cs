@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft. All rights reserved.
+﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Runtime.CompilerServices;
@@ -375,6 +375,45 @@ namespace System.Reflection.Metadata.Ecma335
         {
             return Metadata.AssemblyFileHandle.FromRowId(ToRowId(rowNumber));
         }
+
+        // debug
+
+        public static DocumentHandle DocumentHandle(int rowNumber)
+        {
+            return Metadata.DocumentHandle.FromRowId(ToRowId(rowNumber));
+        }
+
+        public static LocalScopeHandle LocalScopeHandle(int rowNumber)
+        {
+            return Metadata.LocalScopeHandle.FromRowId(ToRowId(rowNumber));
+        }
+
+        public static LocalVariableHandle LocalVariableHandle(int rowNumber)
+        {
+            return Metadata.LocalVariableHandle.FromRowId(ToRowId(rowNumber));
+        }
+
+        public static LocalConstantHandle LocalConstantHandle(int rowNumber)
+        {
+            return Metadata.LocalConstantHandle.FromRowId(ToRowId(rowNumber));
+        }
+
+        public static ImportScopeHandle ImportScopeHandle(int rowNumber)
+        {
+            return Metadata.ImportScopeHandle.FromRowId(ToRowId(rowNumber));
+        }
+
+        public static AsyncMethodHandle AsyncMethodHandle(int rowNumber)
+        {
+            return Metadata.AsyncMethodHandle.FromRowId(ToRowId(rowNumber));
+        }
+
+        public static CustomDebugInformationHandle CustomDebugInformationHandle(int rowNumber)
+        {
+            return Metadata.CustomDebugInformationHandle.FromRowId(ToRowId(rowNumber));
+        }
+
+        // heaps
 
         public static UserStringHandle UserStringHandle(int offset)
         {

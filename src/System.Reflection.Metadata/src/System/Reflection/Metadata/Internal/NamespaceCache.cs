@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft. All rights reserved.
+﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Collections.Generic;
@@ -58,7 +58,7 @@ namespace System.Reflection.Metadata.Ecma335
 
         // TODO: move throw helpers to common place. 
         [MethodImplAttribute(MethodImplOptions.NoInlining)]
-        private static void ThrowInvalidHandle()
+        internal static void ThrowInvalidHandle()
         {
             throw new BadImageFormatException(MetadataResources.InvalidHandle);
         }

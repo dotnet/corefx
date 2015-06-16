@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2013/01/nuspec.xsd">
   <metadata minClientVersion="2.8.1">
     <id>System.Reflection.Metadata</id>
-    <version>1.0.19-rc</version>
+    <version>1.1.0-alpha</version>
     <title>Microsoft ECMA-335 Metadata Reader</title>
     <authors>Microsoft</authors>
     <owners>Microsoft</owners>
