@@ -16,6 +16,7 @@ namespace System.IO.Compression.Test
         }
 
         [Fact]
+        [ActiveIssue(1787)]
         public void InvalidInstanceMethods()
         {
             string zipFileName = CreateTempCopyFile(zfile("normal.zip"));
@@ -35,6 +36,7 @@ namespace System.IO.Compression.Test
         }
 
         [Fact]
+        [ActiveIssue(1787)]
         public void InvalidConstructors()
         {
             //out of range enum values
@@ -43,6 +45,7 @@ namespace System.IO.Compression.Test
         }
 
         [Fact]
+        [ActiveIssue(1787)]
         public void InvalidFiles()
         {
             ConstructorThrows<InvalidDataException>(() => ZipFile.OpenRead(bad("EOCDmissing.zip")));
@@ -97,6 +100,7 @@ namespace System.IO.Compression.Test
         }
 
         [Fact]
+        [ActiveIssue(1787)]
         public void UnsupportedCompression()
         {
             //lzma compression method
@@ -150,6 +154,7 @@ namespace System.IO.Compression.Test
         }
 
         [Fact]
+        [ActiveIssue(1787)]
         public void InvalidDates()
         {
             using (ZipArchive archive = ZipFile.OpenRead(bad("invaliddate.zip")))
@@ -174,6 +179,7 @@ namespace System.IO.Compression.Test
         }
 
         [Fact]
+        [ActiveIssue(1787)]
         public void FilesOutsideDirectory()
         {
             string archivePath = GetTmpFilePath();
@@ -186,6 +192,7 @@ namespace System.IO.Compression.Test
         }
 
         [Fact]
+        [ActiveIssue(1787)]
         public void DirectoryEntryWithData()
         {
             string archivePath = GetTmpFilePath();
