@@ -9,6 +9,7 @@ namespace System.IO.Compression.Test
     public partial class ZipTest
     {
         [Fact]
+        [ActiveIssue(1787)]
         public void ReadStreamOps()
         {
             using (ZipArchive archive = ZipFile.OpenRead(zfile("normal.zip")))
@@ -27,6 +28,7 @@ namespace System.IO.Compression.Test
         }
 
         [Fact]
+        [ActiveIssue(1787)]
         public void UpdateReadTwice()
         {
             using (ZipArchive archive = ZipFile.Open(zfile("small.zip"), ZipArchiveMode.Update))
@@ -46,6 +48,7 @@ namespace System.IO.Compression.Test
         }
 
         [Fact]
+        [ActiveIssue(1787)]
         public async Task UpdateAddFile()
         {
             //add file
