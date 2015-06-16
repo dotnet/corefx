@@ -34,33 +34,6 @@ namespace System.Linq.Parallel.Tests
             Assert.NotNull(caughtException);
         }
 
-        [Fact]
-        public static void CTT_Sorting_ToArray()
-        {
-            int size = 10000;
-            CancellationTokenSource tokenSource = new CancellationTokenSource();
-
-            OperationCanceledException caughtException = null;
-            try
-            {
-                Enumerable.Range(1, size).AsParallel()
-                        .WithCancellation(tokenSource.Token)
-                        .Select(i =>
-                        {
-                            tokenSource.Cancel();
-                            return i;
-                        })
-                        .ToArray();
-            }
-            catch (OperationCanceledException ex)
-            {
-                caughtException = ex;
-            }
-
-            Assert.NotNull(caughtException);
-            Assert.Equal(tokenSource.Token, caughtException.CancellationToken);
-        }
-
         /// <summary>
         ///
         /// [Regression Test]
@@ -182,159 +155,12 @@ namespace System.Linq.Parallel.Tests
                                               "Cancellation_ODEIssue:  We expect an aggregate exception with OCEs in it.");
         }
 
-        [Fact]
-        [OuterLoop] // explicit timeouts / delays
-        public static void CancellationSequentialWhere()
-        {
-            IEnumerable<int> src = Enumerable.Repeat(0, int.MaxValue);
-            CancellationTokenSource tokenSrc = new CancellationTokenSource();
-
-            var q = src.AsParallel().WithCancellation(tokenSrc.Token).Where(x => false).TakeWhile(x => true);
-
-            Task task = Task.Run(
-                () =>
-                {
-                    try
-                    {
-                        foreach (var x in q) { }
-
-                        Assert.True(false, string.Format("PlinqCancellationTests.CancellationSequentialWhere:  > Failed: OperationCanceledException was not caught."));
-                    }
-                    catch (OperationCanceledException oce)
-                    {
-                        if (oce.CancellationToken != tokenSrc.Token)
-                        {
-                            Assert.True(false, string.Format("PlinqCancellationTests.CancellationSequentialWhere:  > Failed: Wrong cancellation token."));
-                        }
-                    }
-                }
-            );
-
-            // We wait for 100 ms. If we canceled the token source immediately, the cancellation
-            // would occur at the query opening time. The goal of this test is to test cancellation
-            // at query execution time.
-            Task.Delay(100).Wait();
-            //Thread.Sleep(100);
-
-            tokenSrc.Cancel();
-            task.Wait();
-        }
-
-        [Fact]
-        [OuterLoop] // explicit timeouts / delays
-        public static void CancellationSequentialElementAt()
-        {
-            IEnumerable<int> src = Enumerable.Repeat(0, int.MaxValue);
-            CancellationTokenSource tokenSrc = new CancellationTokenSource();
-
-            Task task = Task.Run(
-                () =>
-                {
-                    try
-                    {
-                        int res = src.AsParallel()
-                            .WithCancellation(tokenSrc.Token)
-                            .Where(x => true)
-                            .TakeWhile(x => true)
-                            .ElementAt(int.MaxValue - 1);
-
-                        Assert.True(false, string.Format("PlinqCancellationTests.CancellationSequentialElementAt:  > Failed: OperationCanceledException was not caught."));
-                    }
-                    catch (OperationCanceledException oce)
-                    {
-                        Assert.Equal(oce.CancellationToken, tokenSrc.Token);
-                    }
-                }
-            );
-
-            // We wait for 100 ms. If we canceled the token source immediately, the cancellation
-            // would occur at the query opening time. The goal of this test is to test cancellation
-            // at query execution time.
-            Task.Delay(100).Wait();
-
-            tokenSrc.Cancel();
-            task.Wait();
-        }
-
-        [Fact]
-        [OuterLoop]  // explicit timeouts / delays
-        public static void CancellationSequentialDistinct()
-        {
-            IEnumerable<int> src = Enumerable.Repeat(0, int.MaxValue);
-            CancellationTokenSource tokenSrc = new CancellationTokenSource();
-
-            Task task = Task.Run(
-                () =>
-                {
-                    try
-                    {
-                        var q = src.AsParallel()
-                            .WithCancellation(tokenSrc.Token)
-                            .Distinct()
-                            .TakeWhile(x => true);
-
-                        foreach (var x in q) { }
-
-                        Assert.True(false, string.Format("PlinqCancellationTests.CancellationSequentialDistinct:  > Failed: OperationCanceledException was not caught."));
-                    }
-                    catch (OperationCanceledException oce)
-                    {
-                        Assert.Equal(oce.CancellationToken, tokenSrc.Token);
-                    }
-                }
-            );
-
-            // We wait for 100 ms. If we canceled the token source immediately, the cancellation
-            // would occur at the query opening time. The goal of this test is to test cancellation
-            // at query execution time.
-            Task.Delay(100).Wait();
-
-            tokenSrc.Cancel();
-            task.Wait();
-        }
-
         // Regression test for an issue causing ODE if a queryEnumerator is disposed before moveNext is called.
         [Fact]
         public static void ImmediateDispose()
         {
             var queryEnumerator = Enumerable.Range(1, 10).AsParallel().Select(x => x).GetEnumerator();
             queryEnumerator.Dispose();
-        }
-
-        // REPRO 1 -- cancellation
-        [Fact]
-        public static void SetOperationsThrowAggregateOnCancelOrDispose_1()
-        {
-            CancellationTokenSource cs = new CancellationTokenSource();
-            var plinq_src =
-                Enumerable.Range(0, 5000000).Select(x =>
-                {
-                    cs.Cancel();
-                    return x;
-                });
-
-            try
-            {
-                var plinq = plinq_src
-                    .AsParallel().WithCancellation(cs.Token)
-                    .WithDegreeOfParallelism(1)
-                    .Union(Enumerable.Range(0, 10).AsParallel());
-
-                var walker = plinq.GetEnumerator();
-                while (walker.MoveNext())
-                {
-                    var item = walker.Current;
-                }
-                Assert.True(false, string.Format("PlinqCancellationTests.SetOperationsThrowAggregateOnCancelOrDispose_1:  OperationCanceledException was expected, but no exception occurred."));
-            }
-            catch (OperationCanceledException)
-            {
-                //This is expected.
-            }
-            catch (Exception e)
-            {
-                Assert.True(false, string.Format("PlinqCancellationTests.SetOperationsThrowAggregateOnCancelOrDispose_1:  OperationCanceledException was expected, but a different exception occurred.  " + e.ToString()));
-            }
         }
 
         // throwing a fake OCE(ct) when the ct isn't canceled should produce an AggregateException.
@@ -363,58 +189,6 @@ namespace System.Linq.Parallel.Tests
             {
                 Assert.True(false, string.Format("PlinqCancellationTests.SetOperationsThrowAggregateOnCancelOrDispose_2.  failed.  AggregateException was expected, but some other exception occurred." + e.ToString()));
             }
-        }
-
-        // Changes made to hash-partitioning (April'09) lost the cancellation checks during the
-        // main repartitioning loop (matrix building).
-        [Fact]
-        public static void HashPartitioningCancellation()
-        {
-            OperationCanceledException caughtException = null;
-
-            CancellationTokenSource cs = new CancellationTokenSource();
-
-            //Without ordering
-            var queryUnordered = Enumerable.Range(0, int.MaxValue)
-                .Select(x => { if (x == 0) cs.Cancel(); return x; })
-                .AsParallel()
-                .WithCancellation(cs.Token)
-                .Intersect(Enumerable.Range(0, 1000000).AsParallel());
-
-            try
-            {
-                foreach (var item in queryUnordered)
-                {
-                }
-            }
-            catch (OperationCanceledException oce)
-            {
-                caughtException = oce;
-            }
-
-            Assert.NotNull(caughtException);
-
-            caughtException = null;
-
-            //With ordering
-            var queryOrdered = Enumerable.Range(0, int.MaxValue)
-               .Select(x => { if (x == 0) cs.Cancel(); return x; })
-               .AsParallel().AsOrdered()
-               .WithCancellation(cs.Token)
-               .Intersect(Enumerable.Range(0, 1000000).AsParallel());
-
-            try
-            {
-                foreach (var item in queryOrdered)
-                {
-                }
-            }
-            catch (OperationCanceledException oce)
-            {
-                caughtException = oce;
-            }
-
-            Assert.NotNull(caughtException);
         }
 
         // If a query is cancelled and immediately disposed, the dispose should not throw an OCE.
