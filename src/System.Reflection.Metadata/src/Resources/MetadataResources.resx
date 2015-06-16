@@ -309,4 +309,7 @@
   <data name="InvalidRowCount" xml:space="preserve">
     <value>Invalid row count: {0}</value>
   </data>
+  <data name="InvalidEntryPointToken" xml:space="preserve">
+    <value>Invalid entry point token: 0x{0:8X}</value>
+  </data>
 </root>
