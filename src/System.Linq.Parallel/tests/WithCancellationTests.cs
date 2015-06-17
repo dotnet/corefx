@@ -33,6 +33,24 @@ namespace System.Linq.Parallel.Tests
             Assert.Throws<InvalidOperationException>(() => labeled.Item.WithCancellation(token).WithCancellation(new CancellationTokenSource().Token));
         }
 
+        [Theory]
+        [MemberData(nameof(Sources.Ranges), new[] { 16 }, MemberType = typeof(Sources))]
+        public static void WithCancellation_PreCanceled(Labeled<ParallelQuery<int>> labeled, int count)
+        {
+            // Anticipation is the query will cancel soon after starting.
+            CancellationTokenSource source = new CancellationTokenSource();
+            source.Cancel();
+            labeled.Item.WithCancellation(source.Token);
+        }
+
+        [Theory]
+        [MemberData(nameof(Sources.Ranges), new[] { 16 }, MemberType = typeof(Sources))]
+        public static void WithCancellation_NotCancelable(Labeled<ParallelQuery<int>> labeled, int count)
+        {
+            labeled.Item.WithCancellation(new CancellationToken(true));
+            labeled.Item.WithCancellation(new CancellationToken(false));
+        }
+
         /// <summary>
         ///
         /// [Regression Test]
