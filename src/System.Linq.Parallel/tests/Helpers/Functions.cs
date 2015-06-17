@@ -66,6 +66,15 @@ namespace System.Linq.Parallel.Tests
             Assert.All(ae.InnerExceptions, e => Assert.IsType<OperationCanceledException>(e));
         }
 
+        public static void AssertAggregateNotCanceled(Action<CancellationToken, Action> query)
+        {
+            CancellationToken token = new CancellationTokenSource().Token;
+            Action canceler = () => { throw new OperationCanceledException(token); };
+
+            AggregateException ae = Assert.Throws<AggregateException>(() => query(token, canceler));
+            Assert.All(ae.InnerExceptions, e => Assert.IsType<OperationCanceledException>(e));
+        }
+
         public static void Enumerate<T>(this IEnumerable<T> e)
         {
             foreach (var x in e) { }

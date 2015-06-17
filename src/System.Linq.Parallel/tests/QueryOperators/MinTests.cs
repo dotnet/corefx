@@ -350,6 +350,21 @@ namespace System.Linq.Parallel.Tests
 
             Functions.AssertAggregateAlternateCanceled((token, canceler) => labeled.Item.WithCancellation(token).Min(x => { canceler(); return (decimal)x; }));
             Functions.AssertAggregateAlternateCanceled((token, canceler) => labeled.Item.WithCancellation(token).Min(x => { canceler(); return (decimal?)x; }));
+
+            Functions.AssertAggregateNotCanceled((token, canceler) => labeled.Item.WithCancellation(token).Min(x => { canceler(); return x; }));
+            Functions.AssertAggregateNotCanceled((token, canceler) => labeled.Item.WithCancellation(token).Min(x => { canceler(); return (int?)x; }));
+
+            Functions.AssertAggregateNotCanceled((token, canceler) => labeled.Item.WithCancellation(token).Min(x => { canceler(); return (long)x; }));
+            Functions.AssertAggregateNotCanceled((token, canceler) => labeled.Item.WithCancellation(token).Min(x => { canceler(); return (long?)x; }));
+
+            Functions.AssertAggregateNotCanceled((token, canceler) => labeled.Item.WithCancellation(token).Min(x => { canceler(); return (float)x; }));
+            Functions.AssertAggregateNotCanceled((token, canceler) => labeled.Item.WithCancellation(token).Min(x => { canceler(); return (float?)x; }));
+
+            Functions.AssertAggregateNotCanceled((token, canceler) => labeled.Item.WithCancellation(token).Min(x => { canceler(); return (double)x; }));
+            Functions.AssertAggregateNotCanceled((token, canceler) => labeled.Item.WithCancellation(token).Min(x => { canceler(); return (double?)x; }));
+
+            Functions.AssertAggregateNotCanceled((token, canceler) => labeled.Item.WithCancellation(token).Min(x => { canceler(); return (decimal)x; }));
+            Functions.AssertAggregateNotCanceled((token, canceler) => labeled.Item.WithCancellation(token).Min(x => { canceler(); return (decimal?)x; }));
         }
 
         [Theory]

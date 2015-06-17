@@ -224,6 +224,8 @@ namespace System.Linq.Parallel.Tests
         {
             Functions.AssertAggregateAlternateCanceled((token, canceler) => labeled.Item.WithCancellation(token).ToLookup(x => x, new CancelingEqualityComparer<int>(canceler)));
             Functions.AssertAggregateAlternateCanceled((token, canceler) => labeled.Item.WithCancellation(token).ToLookup(x => x, y => y, new CancelingEqualityComparer<int>(canceler)));
+            Functions.AssertAggregateNotCanceled((token, canceler) => labeled.Item.WithCancellation(token).ToLookup(x => x, new CancelingEqualityComparer<int>(canceler)));
+            Functions.AssertAggregateNotCanceled((token, canceler) => labeled.Item.WithCancellation(token).ToLookup(x => x, y => y, new CancelingEqualityComparer<int>(canceler)));
         }
 
         [Theory]

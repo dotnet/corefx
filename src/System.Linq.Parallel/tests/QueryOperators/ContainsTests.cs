@@ -86,6 +86,7 @@ namespace System.Linq.Parallel.Tests
         public static void Contains_AggregateException_Wraps_OperationCanceledException(Labeled<ParallelQuery<int>> labeled, int count)
         {
             Functions.AssertAggregateAlternateCanceled((token, canceler) => labeled.Item.WithCancellation(token).Contains(-1, new CancelingEqualityComparer<int>(canceler)));
+            Functions.AssertAggregateNotCanceled((token, canceler) => labeled.Item.WithCancellation(token).Contains(-1, new CancelingEqualityComparer<int>(canceler)));
         }
 
         [Theory]

@@ -33,6 +33,11 @@ namespace System.Linq.Parallel.Tests
             Functions.AssertAggregateAlternateCanceled((token, canceler) => Cancel(token, canceler, source, operation).Aggregate(0, (i, j) => j, i => i));
             Functions.AssertAggregateAlternateCanceled((token, canceler) => Cancel(token, canceler, source, operation).Aggregate(0, (i, j) => j, (i, j) => i, i => i));
             Functions.AssertAggregateAlternateCanceled((token, canceler) => Cancel(token, canceler, source, operation).Aggregate(() => 0, (i, j) => j, (i, j) => i, i => i));
+            Functions.AssertAggregateNotCanceled((token, canceler) => Cancel(token, canceler, source, operation).Aggregate((i, j) => j));
+            Functions.AssertAggregateNotCanceled((token, canceler) => Cancel(token, canceler, source, operation).Aggregate(0, (i, j) => j));
+            Functions.AssertAggregateNotCanceled((token, canceler) => Cancel(token, canceler, source, operation).Aggregate(0, (i, j) => j, i => i));
+            Functions.AssertAggregateNotCanceled((token, canceler) => Cancel(token, canceler, source, operation).Aggregate(0, (i, j) => j, (i, j) => i, i => i));
+            Functions.AssertAggregateNotCanceled((token, canceler) => Cancel(token, canceler, source, operation).Aggregate(() => 0, (i, j) => j, (i, j) => i, i => i));
         }
 
         [Theory]
@@ -61,6 +66,7 @@ namespace System.Linq.Parallel.Tests
         public static void All_AggregateException_Wraps_OperationCanceledException(Labeled<Func<CancellationToken, Operation>> source, Labeled<Func<Action, Operation>> operation)
         {
             Functions.AssertAggregateAlternateCanceled((token, canceler) => Cancel(token, canceler, source, operation).All(x => true));
+            Functions.AssertAggregateNotCanceled((token, canceler) => Cancel(token, canceler, source, operation).All(x => true));
         }
 
         [Theory]
@@ -85,6 +91,7 @@ namespace System.Linq.Parallel.Tests
         public static void Any_AggregateException_Wraps_OperationCanceledException(Labeled<Func<CancellationToken, Operation>> source, Labeled<Func<Action, Operation>> operation)
         {
             Functions.AssertAggregateAlternateCanceled((token, canceler) => Cancel(token, canceler, source, operation).Any(x => false));
+            Functions.AssertAggregateNotCanceled((token, canceler) => Cancel(token, canceler, source, operation).Any(x => false));
         }
 
         [Theory]
@@ -136,6 +143,21 @@ namespace System.Linq.Parallel.Tests
 
             Functions.AssertAggregateAlternateCanceled((token, canceler) => Cancel(token, canceler, source, operation).Average(x => (decimal)x));
             Functions.AssertAggregateAlternateCanceled((token, canceler) => Cancel(token, canceler, source, operation).Average(x => (decimal?)x));
+
+            Functions.AssertAggregateNotCanceled((token, canceler) => Cancel(token, canceler, source, operation).Average());
+            Functions.AssertAggregateNotCanceled((token, canceler) => Cancel(token, canceler, source, operation).Average(x => (int?)x));
+
+            Functions.AssertAggregateNotCanceled((token, canceler) => Cancel(token, canceler, source, operation).Average(x => (long)x));
+            Functions.AssertAggregateNotCanceled((token, canceler) => Cancel(token, canceler, source, operation).Average(x => (long?)x));
+
+            Functions.AssertAggregateNotCanceled((token, canceler) => Cancel(token, canceler, source, operation).Average(x => (float)x));
+            Functions.AssertAggregateNotCanceled((token, canceler) => Cancel(token, canceler, source, operation).Average(x => (float?)x));
+
+            Functions.AssertAggregateNotCanceled((token, canceler) => Cancel(token, canceler, source, operation).Average(x => (double)x));
+            Functions.AssertAggregateNotCanceled((token, canceler) => Cancel(token, canceler, source, operation).Average(x => (double?)x));
+
+            Functions.AssertAggregateNotCanceled((token, canceler) => Cancel(token, canceler, source, operation).Average(x => (decimal)x));
+            Functions.AssertAggregateNotCanceled((token, canceler) => Cancel(token, canceler, source, operation).Average(x => (decimal?)x));
         }
 
         [Theory]
@@ -160,6 +182,7 @@ namespace System.Linq.Parallel.Tests
         public static void Contains_AggregateException_Wraps_OperationCanceledException(Labeled<Func<CancellationToken, Operation>> source, Labeled<Func<Action, Operation>> operation)
         {
             Functions.AssertAggregateAlternateCanceled((token, canceler) => Cancel(token, canceler, source, operation).Contains(-1));
+            Functions.AssertAggregateNotCanceled((token, canceler) => Cancel(token, canceler, source, operation).Contains(-1));
         }
 
         [Theory]
@@ -190,6 +213,10 @@ namespace System.Linq.Parallel.Tests
             Functions.AssertAggregateAlternateCanceled((token, canceler) => Cancel(token, canceler, source, operation).LongCount());
             Functions.AssertAggregateAlternateCanceled((token, canceler) => Cancel(token, canceler, source, operation).Count(x => true));
             Functions.AssertAggregateAlternateCanceled((token, canceler) => Cancel(token, canceler, source, operation).LongCount(x => true));
+            Functions.AssertAggregateNotCanceled((token, canceler) => Cancel(token, canceler, source, operation).Count());
+            Functions.AssertAggregateNotCanceled((token, canceler) => Cancel(token, canceler, source, operation).LongCount());
+            Functions.AssertAggregateNotCanceled((token, canceler) => Cancel(token, canceler, source, operation).Count(x => true));
+            Functions.AssertAggregateNotCanceled((token, canceler) => Cancel(token, canceler, source, operation).LongCount(x => true));
         }
 
         [Theory]
@@ -219,6 +246,7 @@ namespace System.Linq.Parallel.Tests
         public static void ElementAt_AggregateException_Wraps_OperationCanceledException(Labeled<Func<CancellationToken, Operation>> source, Labeled<Func<Action, Operation>> operation)
         {
             Functions.AssertAggregateAlternateCanceled((token, canceler) => Cancel(token, canceler, source, operation).ElementAt(int.MaxValue));
+            Functions.AssertAggregateNotCanceled((token, canceler) => Cancel(token, canceler, source, operation).ElementAt(int.MaxValue));
         }
 
         [Theory]
@@ -245,6 +273,7 @@ namespace System.Linq.Parallel.Tests
         public static void ElementAtOrDefault_AggregateException_Wraps_OperationCanceledException(Labeled<Func<CancellationToken, Operation>> source, Labeled<Func<Action, Operation>> operation)
         {
             Functions.AssertAggregateAlternateCanceled((token, canceler) => Cancel(token, canceler, source, operation).ElementAtOrDefault(int.MaxValue));
+            Functions.AssertAggregateNotCanceled((token, canceler) => Cancel(token, canceler, source, operation).ElementAtOrDefault(int.MaxValue));
         }
 
         [Theory]
@@ -272,6 +301,7 @@ namespace System.Linq.Parallel.Tests
         public static void First_AggregateException_Wraps_OperationCanceledException(Labeled<Func<CancellationToken, Operation>> source, Labeled<Func<Action, Operation>> operation)
         {
             Functions.AssertAggregateAlternateCanceled((token, canceler) => Cancel(token, canceler, source, operation).First(x => false));
+            Functions.AssertAggregateNotCanceled((token, canceler) => Cancel(token, canceler, source, operation).First(x => false));
         }
 
         [Theory]
@@ -299,6 +329,7 @@ namespace System.Linq.Parallel.Tests
         public static void FirstOrDefault_AggregateException_Wraps_OperationCanceledException(Labeled<Func<CancellationToken, Operation>> source, Labeled<Func<Action, Operation>> operation)
         {
             Functions.AssertAggregateAlternateCanceled((token, canceler) => Cancel(token, canceler, source, operation).FirstOrDefault(x => false));
+            Functions.AssertAggregateNotCanceled((token, canceler) => Cancel(token, canceler, source, operation).FirstOrDefault(x => false));
         }
 
         [Theory]
@@ -324,6 +355,7 @@ namespace System.Linq.Parallel.Tests
         public static void ForAll_AggregateException_Wraps_OperationCanceledException(Labeled<Func<CancellationToken, Operation>> source, Labeled<Func<Action, Operation>> operation)
         {
             Functions.AssertAggregateAlternateCanceled((token, canceler) => Cancel(token, canceler, source, operation).ForAll(x => { }));
+            Functions.AssertAggregateNotCanceled((token, canceler) => Cancel(token, canceler, source, operation).ForAll(x => { }));
         }
 
         [Theory]
@@ -350,6 +382,7 @@ namespace System.Linq.Parallel.Tests
         public static void ForEach_AggregateException_Wraps_OperationCanceledException(Labeled<Func<CancellationToken, Operation>> source, Labeled<Func<Action, Operation>> operation)
         {
             Functions.AssertAggregateAlternateCanceled((token, canceler) => { foreach (int i in Cancel(token, canceler, source, operation)) ; });
+            Functions.AssertAggregateNotCanceled((token, canceler) => { foreach (int i in Cancel(token, canceler, source, operation)) ; });
         }
 
         [Theory]
@@ -378,6 +411,8 @@ namespace System.Linq.Parallel.Tests
         {
             Functions.AssertAggregateAlternateCanceled((token, canceler) => Cancel(token, canceler, source, operation).Last());
             Functions.AssertAggregateAlternateCanceled((token, canceler) => Cancel(token, canceler, source, operation).Last(x => true));
+            Functions.AssertAggregateNotCanceled((token, canceler) => Cancel(token, canceler, source, operation).Last());
+            Functions.AssertAggregateNotCanceled((token, canceler) => Cancel(token, canceler, source, operation).Last(x => true));
         }
 
         [Theory]
@@ -407,6 +442,8 @@ namespace System.Linq.Parallel.Tests
         {
             Functions.AssertAggregateAlternateCanceled((token, canceler) => Cancel(token, canceler, source, operation).LastOrDefault());
             Functions.AssertAggregateAlternateCanceled((token, canceler) => Cancel(token, canceler, source, operation).LastOrDefault(x => true));
+            Functions.AssertAggregateNotCanceled((token, canceler) => Cancel(token, canceler, source, operation).LastOrDefault());
+            Functions.AssertAggregateNotCanceled((token, canceler) => Cancel(token, canceler, source, operation).LastOrDefault(x => true));
         }
 
         [Theory]
@@ -458,6 +495,21 @@ namespace System.Linq.Parallel.Tests
 
             Functions.AssertAggregateAlternateCanceled((token, canceler) => Cancel(token, canceler, source, operation).Max(x => (decimal)x));
             Functions.AssertAggregateAlternateCanceled((token, canceler) => Cancel(token, canceler, source, operation).Max(x => (decimal?)x));
+
+            Functions.AssertAggregateNotCanceled((token, canceler) => Cancel(token, canceler, source, operation).Max());
+            Functions.AssertAggregateNotCanceled((token, canceler) => Cancel(token, canceler, source, operation).Max(x => (int?)x));
+
+            Functions.AssertAggregateNotCanceled((token, canceler) => Cancel(token, canceler, source, operation).Max(x => (long)x));
+            Functions.AssertAggregateNotCanceled((token, canceler) => Cancel(token, canceler, source, operation).Max(x => (long?)x));
+
+            Functions.AssertAggregateNotCanceled((token, canceler) => Cancel(token, canceler, source, operation).Max(x => (float)x));
+            Functions.AssertAggregateNotCanceled((token, canceler) => Cancel(token, canceler, source, operation).Max(x => (float?)x));
+
+            Functions.AssertAggregateNotCanceled((token, canceler) => Cancel(token, canceler, source, operation).Max(x => (double)x));
+            Functions.AssertAggregateNotCanceled((token, canceler) => Cancel(token, canceler, source, operation).Max(x => (double?)x));
+
+            Functions.AssertAggregateNotCanceled((token, canceler) => Cancel(token, canceler, source, operation).Max(x => (decimal)x));
+            Functions.AssertAggregateNotCanceled((token, canceler) => Cancel(token, canceler, source, operation).Max(x => (decimal?)x));
         }
 
         [Theory]
@@ -508,6 +560,21 @@ namespace System.Linq.Parallel.Tests
 
             Functions.AssertAggregateAlternateCanceled((token, canceler) => Cancel(token, canceler, source, operation).Min(x => (decimal)x));
             Functions.AssertAggregateAlternateCanceled((token, canceler) => Cancel(token, canceler, source, operation).Min(x => (decimal?)x));
+
+            Functions.AssertAggregateNotCanceled((token, canceler) => Cancel(token, canceler, source, operation).Min());
+            Functions.AssertAggregateNotCanceled((token, canceler) => Cancel(token, canceler, source, operation).Min(x => (int?)x));
+
+            Functions.AssertAggregateNotCanceled((token, canceler) => Cancel(token, canceler, source, operation).Min(x => (long)x));
+            Functions.AssertAggregateNotCanceled((token, canceler) => Cancel(token, canceler, source, operation).Min(x => (long?)x));
+
+            Functions.AssertAggregateNotCanceled((token, canceler) => Cancel(token, canceler, source, operation).Min(x => (float)x));
+            Functions.AssertAggregateNotCanceled((token, canceler) => Cancel(token, canceler, source, operation).Min(x => (float?)x));
+
+            Functions.AssertAggregateNotCanceled((token, canceler) => Cancel(token, canceler, source, operation).Min(x => (double)x));
+            Functions.AssertAggregateNotCanceled((token, canceler) => Cancel(token, canceler, source, operation).Min(x => (double?)x));
+
+            Functions.AssertAggregateNotCanceled((token, canceler) => Cancel(token, canceler, source, operation).Min(x => (decimal)x));
+            Functions.AssertAggregateNotCanceled((token, canceler) => Cancel(token, canceler, source, operation).Min(x => (decimal?)x));
         }
 
         [Theory]
@@ -536,6 +603,8 @@ namespace System.Linq.Parallel.Tests
         {
             SequenceEqual_AssertAggregateAlternateCanceled((token, canceler) => Cancel(token, canceler, source, operation).SequenceEqual(ParallelEnumerable.Range(0, 128).AsOrdered()));
             SequenceEqual_AssertAggregateAlternateCanceled((token, canceler) => ParallelEnumerable.Range(0, 128).AsOrdered().SequenceEqual(Cancel(token, canceler, source, operation)));
+            SequenceEqual_AssertAggregateNotCanceled((token, canceler) => Cancel(token, canceler, source, operation).SequenceEqual(ParallelEnumerable.Range(0, 128).AsOrdered()));
+            SequenceEqual_AssertAggregateNotCanceled((token, canceler) => ParallelEnumerable.Range(0, 128).AsOrdered().SequenceEqual(Cancel(token, canceler, source, operation)));
         }
 
         [Theory]
@@ -561,6 +630,7 @@ namespace System.Linq.Parallel.Tests
         public static void Single_AggregateException_Wraps_OperationCanceledException(Labeled<Func<CancellationToken, Operation>> source, Labeled<Func<Action, Operation>> operation)
         {
             Functions.AssertAggregateAlternateCanceled((token, canceler) => Cancel(token, canceler, source, operation).Single(x => false));
+            Functions.AssertAggregateNotCanceled((token, canceler) => Cancel(token, canceler, source, operation).Single(x => false));
         }
 
         [Theory]
@@ -586,6 +656,7 @@ namespace System.Linq.Parallel.Tests
         public static void SingleOrDefault_AggregateException_Wraps_OperationCanceledException(Labeled<Func<CancellationToken, Operation>> source, Labeled<Func<Action, Operation>> operation)
         {
             Functions.AssertAggregateAlternateCanceled((token, canceler) => Cancel(token, canceler, source, operation).SingleOrDefault(x => false));
+            Functions.AssertAggregateNotCanceled((token, canceler) => Cancel(token, canceler, source, operation).SingleOrDefault(x => false));
         }
 
         [Theory]
@@ -637,6 +708,21 @@ namespace System.Linq.Parallel.Tests
 
             Functions.AssertAggregateAlternateCanceled((token, canceler) => Cancel(token, canceler, source, operation).Sum(x => (decimal)x));
             Functions.AssertAggregateAlternateCanceled((token, canceler) => Cancel(token, canceler, source, operation).Sum(x => (decimal?)x));
+
+            Functions.AssertAggregateNotCanceled((token, canceler) => Cancel(token, canceler, source, operation).Sum());
+            Functions.AssertAggregateNotCanceled((token, canceler) => Cancel(token, canceler, source, operation).Sum(x => (int?)x));
+
+            Functions.AssertAggregateNotCanceled((token, canceler) => Cancel(token, canceler, source, operation).Sum(x => (long)x));
+            Functions.AssertAggregateNotCanceled((token, canceler) => Cancel(token, canceler, source, operation).Sum(x => (long?)x));
+
+            Functions.AssertAggregateNotCanceled((token, canceler) => Cancel(token, canceler, source, operation).Sum(x => (float)x));
+            Functions.AssertAggregateNotCanceled((token, canceler) => Cancel(token, canceler, source, operation).Sum(x => (float?)x));
+
+            Functions.AssertAggregateNotCanceled((token, canceler) => Cancel(token, canceler, source, operation).Sum(x => (double)x));
+            Functions.AssertAggregateNotCanceled((token, canceler) => Cancel(token, canceler, source, operation).Sum(x => (double?)x));
+
+            Functions.AssertAggregateNotCanceled((token, canceler) => Cancel(token, canceler, source, operation).Sum(x => (decimal)x));
+            Functions.AssertAggregateNotCanceled((token, canceler) => Cancel(token, canceler, source, operation).Sum(x => (decimal?)x));
         }
 
         [Theory]
@@ -663,6 +749,7 @@ namespace System.Linq.Parallel.Tests
         public static void ToArray_AggregateException_Wraps_OperationCanceledException(Labeled<Func<CancellationToken, Operation>> source, Labeled<Func<Action, Operation>> operation)
         {
             Functions.AssertAggregateAlternateCanceled((token, canceler) => Cancel(token, canceler, source, operation).ToArray());
+            Functions.AssertAggregateNotCanceled((token, canceler) => Cancel(token, canceler, source, operation).ToArray());
         }
 
         [Theory]
@@ -689,6 +776,8 @@ namespace System.Linq.Parallel.Tests
         {
             Functions.AssertAggregateAlternateCanceled((token, canceler) => Cancel(token, canceler, source, operation).ToDictionary(x => x));
             Functions.AssertAggregateAlternateCanceled((token, canceler) => Cancel(token, canceler, source, operation).ToDictionary(x => x, y => y));
+            Functions.AssertAggregateNotCanceled((token, canceler) => Cancel(token, canceler, source, operation).ToDictionary(x => x));
+            Functions.AssertAggregateNotCanceled((token, canceler) => Cancel(token, canceler, source, operation).ToDictionary(x => x, y => y));
         }
 
         [Theory]
@@ -716,6 +805,7 @@ namespace System.Linq.Parallel.Tests
         public static void ToList_AggregateException_Wraps_OperationCanceledException(Labeled<Func<CancellationToken, Operation>> source, Labeled<Func<Action, Operation>> operation)
         {
             Functions.AssertAggregateAlternateCanceled((token, canceler) => Cancel(token, canceler, source, operation).ToList());
+            Functions.AssertAggregateNotCanceled((token, canceler) => Cancel(token, canceler, source, operation).ToList());
         }
 
         [Theory]
@@ -744,6 +834,8 @@ namespace System.Linq.Parallel.Tests
         {
             Functions.AssertAggregateAlternateCanceled((token, canceler) => Cancel(token, canceler, source, operation).ToLookup(x => x));
             Functions.AssertAggregateAlternateCanceled((token, canceler) => Cancel(token, canceler, source, operation).ToLookup(x => x, y => y));
+            Functions.AssertAggregateNotCanceled((token, canceler) => Cancel(token, canceler, source, operation).ToLookup(x => x));
+            Functions.AssertAggregateNotCanceled((token, canceler) => Cancel(token, canceler, source, operation).ToLookup(x => x, y => y));
         }
 
         [Theory]
@@ -772,6 +864,16 @@ namespace System.Linq.Parallel.Tests
             Action canceler = () => { throw new OperationCanceledException(cs.Token); };
 
             AggregateException outer = Assert.Throws<AggregateException>(() => query(new CancellationTokenSource().Token, canceler));
+            AggregateException ae = Assert.Single<AggregateException>(outer.InnerExceptions.Cast<AggregateException>());
+            Assert.All(ae.InnerExceptions, e => Assert.IsType<OperationCanceledException>(e));
+        }
+
+        private static void SequenceEqual_AssertAggregateNotCanceled(Action<CancellationToken, Action> query)
+        {
+            CancellationToken token = new CancellationTokenSource().Token;
+            Action canceler = () => { throw new OperationCanceledException(token); };
+
+            AggregateException outer = Assert.Throws<AggregateException>(() => query(token, canceler));
             AggregateException ae = Assert.Single<AggregateException>(outer.InnerExceptions.Cast<AggregateException>());
             Assert.All(ae.InnerExceptions, e => Assert.IsType<OperationCanceledException>(e));
         }

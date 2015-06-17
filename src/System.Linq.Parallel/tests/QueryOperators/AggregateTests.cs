@@ -312,6 +312,11 @@ namespace System.Linq.Parallel.Tests
             Functions.AssertAggregateAlternateCanceled((token, canceler) => labeled.Item.WithCancellation(token).Aggregate(0, (i, j) => { canceler(); return j; }, i => i));
             Functions.AssertAggregateAlternateCanceled((token, canceler) => labeled.Item.WithCancellation(token).Aggregate(0, (i, j) => { canceler(); return j; }, (i, j) => i, i => i));
             Functions.AssertAggregateAlternateCanceled((token, canceler) => labeled.Item.WithCancellation(token).Aggregate(() => 0, (i, j) => { canceler(); ; return j; }, (i, j) => i, i => i));
+            Functions.AssertAggregateNotCanceled((token, canceler) => labeled.Item.WithCancellation(token).Aggregate((i, j) => { canceler(); return j; }));
+            Functions.AssertAggregateNotCanceled((token, canceler) => labeled.Item.WithCancellation(token).Aggregate(0, (i, j) => { canceler(); return j; }));
+            Functions.AssertAggregateNotCanceled((token, canceler) => labeled.Item.WithCancellation(token).Aggregate(0, (i, j) => { canceler(); return j; }, i => i));
+            Functions.AssertAggregateNotCanceled((token, canceler) => labeled.Item.WithCancellation(token).Aggregate(0, (i, j) => { canceler(); return j; }, (i, j) => i, i => i));
+            Functions.AssertAggregateNotCanceled((token, canceler) => labeled.Item.WithCancellation(token).Aggregate(() => 0, (i, j) => { canceler(); ; return j; }, (i, j) => i, i => i));
         }
 
         [Theory]

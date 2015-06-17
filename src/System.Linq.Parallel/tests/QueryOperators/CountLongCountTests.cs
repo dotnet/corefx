@@ -138,6 +138,8 @@ namespace System.Linq.Parallel.Tests
         {
             Functions.AssertAggregateAlternateCanceled((token, canceler) => labeled.Item.WithCancellation(token).Count(x => { canceler(); return true; }));
             Functions.AssertAggregateAlternateCanceled((token, canceler) => labeled.Item.WithCancellation(token).LongCount(x => { canceler(); return true; }));
+            Functions.AssertAggregateNotCanceled((token, canceler) => labeled.Item.WithCancellation(token).Count(x => { canceler(); return true; }));
+            Functions.AssertAggregateNotCanceled((token, canceler) => labeled.Item.WithCancellation(token).LongCount(x => { canceler(); return true; }));
         }
 
         [Theory]

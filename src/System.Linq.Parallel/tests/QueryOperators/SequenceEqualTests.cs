@@ -156,6 +156,8 @@ namespace System.Linq.Parallel.Tests
         {
             AssertAggregateAlternateCanceled((token, canceler) => left.Item.WithCancellation(token).SequenceEqual(right.Item, new CancelingEqualityComparer<int>(canceler)));
             AssertAggregateAlternateCanceled((token, canceler) => left.Item.SequenceEqual(right.Item.WithCancellation(token), new CancelingEqualityComparer<int>(canceler)));
+            AssertAggregateNotCanceled((token, canceler) => left.Item.WithCancellation(token).SequenceEqual(right.Item, new CancelingEqualityComparer<int>(canceler)));
+            AssertAggregateNotCanceled((token, canceler) => left.Item.SequenceEqual(right.Item.WithCancellation(token), new CancelingEqualityComparer<int>(canceler)));
         }
 
         [Theory]
@@ -277,6 +279,15 @@ namespace System.Linq.Parallel.Tests
             Action canceler = () => { throw new OperationCanceledException(cs.Token); };
 
             AggregateException ae = Assert.Throws<AggregateException>(() => query(new CancellationTokenSource().Token, canceler));
+            Assert.All(ae.InnerExceptions, e => Assert.IsType<OperationCanceledException>(e));
+        }
+
+        private static void AssertAggregateNotCanceled(Action<CancellationToken, Action> query)
+        {
+            CancellationToken token = new CancellationTokenSource().Token;
+            Action canceler = () => { throw new OperationCanceledException(token); };
+
+            AggregateException ae = Assert.Throws<AggregateException>(() => query(token, canceler));
             Assert.All(ae.InnerExceptions, e => Assert.IsType<OperationCanceledException>(e));
         }
     }

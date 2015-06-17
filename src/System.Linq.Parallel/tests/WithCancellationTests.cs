@@ -79,37 +79,6 @@ namespace System.Linq.Parallel.Tests
             Debug.WriteLine("        Done (success).");
         }
 
-        // Plinq suppresses OCE(externalCT) occurring in worker threads and then throws a single OCE(ct)
-        // if a manual OCE(ct) is thrown but ct is not canceled, Plinq should not suppress it, else things
-        // get confusing...
-        // ONLY an OCE(ct) for ct.IsCancellationRequested=true is co-operative cancellation
-        [Fact]
-        public static void OnlySuppressOCEifCTCanceled()
-        {
-            AggregateException caughtException = null;
-            CancellationTokenSource cts = new CancellationTokenSource();
-            CancellationToken externalToken = cts.Token;
-            try
-            {
-                Enumerable.Range(1, 10).AsParallel()
-                    .WithCancellation(externalToken)
-                    .Select(
-                      x =>
-                      {
-                          if (x % 2 == 0) throw new OperationCanceledException(externalToken);
-                          return x;
-                      }
-                    )
-                 .ToArray();
-            }
-            catch (AggregateException ae)
-            {
-                caughtException = ae;
-            }
-
-            Assert.NotNull(caughtException);
-        }
-
         // a specific repro where inner queries would see an ODE on the merged cancellation token source
         // when the implementation involved disposing and recreating the token on each worker thread
         [Fact]
@@ -136,37 +105,10 @@ namespace System.Linq.Parallel.Tests
                                               "Cancellation_ODEIssue:  We expect an aggregate exception with OCEs in it.");
         }
 
-        // throwing a fake OCE(ct) when the ct isn't canceled should produce an AggregateException.
-        [Fact]
-        public static void SetOperationsThrowAggregateOnCancelOrDispose_2()
-        {
-            try
-            {
-                CancellationTokenSource cs = new CancellationTokenSource();
-                var plinq = Enumerable.Range(0, 50)
-                    .AsParallel().WithCancellation(cs.Token)
-                    .WithDegreeOfParallelism(1)
-                    .Union(Enumerable.Range(0, 10).AsParallel().Select<int, int>(x => { throw new OperationCanceledException(cs.Token); }));
-
-                var walker = plinq.GetEnumerator();
-                while (walker.MoveNext())
-                {
-                }
-                Assert.True(false, string.Format("PlinqCancellationTests.SetOperationsThrowAggregateOnCancelOrDispose_2:  failed.  AggregateException was expected, but no exception occurred."));
-            }
-            catch (AggregateException)
-            {
-                // expected
-            }
-            catch (Exception e)
-            {
-                Assert.True(false, string.Format("PlinqCancellationTests.SetOperationsThrowAggregateOnCancelOrDispose_2.  failed.  AggregateException was expected, but some other exception occurred." + e.ToString()));
-            }
-        }
-
-        // If a query is cancelled and immediately disposed, the dispose should not throw an OCE.
-        [Fact]
-        public static void CancelThenDispose()
+        // If a query is canceled and immediately disposed, the dispose should not throw an OCE.
+        [Theory]
+        [MemberData("Ranges", (object)(new int[] { 16 }), MemberType = typeof(Sources))]
+        public static void WithCancellation_CancelThenDispose(Labeled<ParallelQuery<int>> labeled, int count)
         {
             try
             {

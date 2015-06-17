@@ -122,6 +122,7 @@ namespace System.Linq.Parallel.Tests
         public static void Any_AggregateException_Wraps_OperationCanceledException(Labeled<ParallelQuery<int>> labeled, int count)
         {
             Functions.AssertAggregateAlternateCanceled((token, canceler) => labeled.Item.WithCancellation(token).Any(x => { canceler(); return false; }));
+            Functions.AssertAggregateNotCanceled((token, canceler) => labeled.Item.WithCancellation(token).Any(x => { canceler(); return false; }));
         }
 
         [Theory]

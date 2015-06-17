@@ -279,6 +279,21 @@ namespace System.Linq.Parallel.Tests
 
             Functions.AssertAggregateAlternateCanceled((token, canceler) => labeled.Item.WithCancellation(token).Average(x => { canceler(); return (decimal)x; }));
             Functions.AssertAggregateAlternateCanceled((token, canceler) => labeled.Item.WithCancellation(token).Average(x => { canceler(); return (decimal?)x; }));
+
+            Functions.AssertAggregateNotCanceled((token, canceler) => labeled.Item.WithCancellation(token).Average(x => { canceler(); return x; }));
+            Functions.AssertAggregateNotCanceled((token, canceler) => labeled.Item.WithCancellation(token).Average(x => { canceler(); return (int?)x; }));
+
+            Functions.AssertAggregateNotCanceled((token, canceler) => labeled.Item.WithCancellation(token).Average(x => { canceler(); return (long)x; }));
+            Functions.AssertAggregateNotCanceled((token, canceler) => labeled.Item.WithCancellation(token).Average(x => { canceler(); return (long?)x; }));
+
+            Functions.AssertAggregateNotCanceled((token, canceler) => labeled.Item.WithCancellation(token).Average(x => { canceler(); return (float)x; }));
+            Functions.AssertAggregateNotCanceled((token, canceler) => labeled.Item.WithCancellation(token).Average(x => { canceler(); return (float?)x; }));
+
+            Functions.AssertAggregateNotCanceled((token, canceler) => labeled.Item.WithCancellation(token).Average(x => { canceler(); return (double)x; }));
+            Functions.AssertAggregateNotCanceled((token, canceler) => labeled.Item.WithCancellation(token).Average(x => { canceler(); return (double?)x; }));
+
+            Functions.AssertAggregateNotCanceled((token, canceler) => labeled.Item.WithCancellation(token).Average(x => { canceler(); return (decimal)x; }));
+            Functions.AssertAggregateNotCanceled((token, canceler) => labeled.Item.WithCancellation(token).Average(x => { canceler(); return (decimal?)x; }));
         }
 
         [Theory]
