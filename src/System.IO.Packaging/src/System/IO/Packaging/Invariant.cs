@@ -209,7 +209,7 @@ namespace System.IO.Packaging
         {
             Debug.Assert(false, string.Format("Invariant failure: {0}\n{1}", message, detailMessage));
 
-            Environment.FailFast(SR.Get(SRID.InvariantFailure));
+            Environment.FailFast(SR.InvariantFailure);
         }
 
         #endregion Private Methods

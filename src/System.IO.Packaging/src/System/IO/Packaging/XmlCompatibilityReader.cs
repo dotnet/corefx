@@ -219,7 +219,7 @@ namespace System.IO.Packaging
                 HandleElementCallback elementCB;
                 if (!_elementHandler.TryGetValue(elementName, out elementCB))
                 {
-                    Error(SR.Get(SRID.XCRUnknownCompatElement), elementName);
+                    Error(SR.XCRUnknownCompatElement, elementName);
                 }
                 elementCB(elementDepth, ref more);
             }
@@ -257,7 +257,7 @@ namespace System.IO.Packaging
                     if (Scope.InAlternateContent)
                     {
                         // if this element is the child of an AlternateContent element, then throw an exception.
-                        Error(SR.Get(SRID.XCRInvalidACChild), Reader.Name);
+                        Error(SR.XCRInvalidACChild, Reader.Name);
                     }
 
                     result = true;
@@ -307,7 +307,7 @@ namespace System.IO.Packaging
                     {
                         // if the current element was a </mc:AlternateContent>, without any Choice
                         // element children, throw an exception
-                        Error(SR.Get(SRID.XCRChoiceNotFound));
+                        Error(SR.XCRChoiceNotFound);
                     }
                 }
                 _depthOffset--;
@@ -822,7 +822,7 @@ namespace System.IO.Packaging
                             // a cycle
                             if (IsNamespaceKnown(mappedNamespace))
                             {
-                                Error(SR.Get(SRID.XCRCompatCycle), mappedNamespace);
+                                Error(SR.XCRCompatCycle, mappedNamespace);
                             }
 
                             // mappedNamespace has not been mapped, so map it
@@ -951,7 +951,7 @@ namespace System.IO.Packaging
                     {
                         // if string does not have a ':', if the last character in the string is a ':'
                         // or if the string contains more than one ':', throw an exception
-                        Error(SR.Get(SRID.XCRInvalidFormat), callerContext);
+                        Error(SR.XCRInvalidFormat, callerContext);
                     }
 
                     string prefix = pair.Substring(0, colonIndex);
@@ -961,12 +961,12 @@ namespace System.IO.Packaging
                     if (namespaceName == null)
                     {
                         // if a prefix does not map to a namespace, throw an exception
-                        Error(SR.Get(SRID.XCRUndefinedPrefix), prefix);
+                        Error(SR.XCRUndefinedPrefix, prefix);
                     }
                     else if (elementName != "*" && !IsName(elementName))
                     {
                         // if the element's name is not valid XML, throw an exception
-                        Error(SR.Get(SRID.XCRInvalidXMLName), pair);
+                        Error(SR.XCRInvalidXMLName, pair);
                     }
                     else
                     {
@@ -997,7 +997,7 @@ namespace System.IO.Packaging
                     if (namespaceUri == null)
                     {
                         // if a prefix does not map to a namespace, throw an exception
-                        Error(SR.Get(SRID.XCRUndefinedPrefix), prefix);
+                        Error(SR.XCRUndefinedPrefix, prefix);
                     }
                     else
                     {
@@ -1066,7 +1066,7 @@ namespace System.IO.Packaging
                             HandleAttributeCallback attributeCB;
                             if (!_attributeHandler.TryGetValue(attributeName, out attributeCB))
                             {
-                                Error(SR.Get(SRID.XCRUnknownCompatAttrib), attributeName);
+                                Error(SR.XCRUnknownCompatAttrib, attributeName);
                             }
                             attributeCB(elementDepth);
                         }
@@ -1149,12 +1149,12 @@ namespace System.IO.Packaging
             {
                 // the only valid tags within <AlternateContent> ... </> are
                 // Choice and Fallback
-                Error(SR.Get(SRID.XCRInvalidACChild, Reader.Name));
+                Error(SR.Format(SR.XCRInvalidACChild, Reader.Name));
             }
             if (Reader.IsEmptyElement)
             {
                 // AlternateContent blocks must have a Choice, so they can't be empty
-                Error(SR.Get(SRID.XCRChoiceNotFound));
+                Error(SR.XCRChoiceNotFound);
             }
 
             // check for markup-compatibility attributes, then push an AlternateContent scope
@@ -1184,12 +1184,12 @@ namespace System.IO.Packaging
             if (!Scope.InAlternateContent)
             {
                 // Choice must be the child of AlternateContent
-                Error(SR.Get(SRID.XCRChoiceOnlyInAC));
+                Error(SR.XCRChoiceOnlyInAC);
             }
             if (Scope.FallbackSeen)
             {
                 // Choice cannot occur after Fallback
-                Error(SR.Get(SRID.XCRChoiceAfterFallback));
+                Error(SR.XCRChoiceAfterFallback);
             }
 
             string requiresValue = Reader.GetAttribute(Requires);
@@ -1197,12 +1197,12 @@ namespace System.IO.Packaging
             if (requiresValue == null)
             {
                 // Choice must have a requires attribute
-                Error(SR.Get(SRID.XCRRequiresAttribNotFound));
+                Error(SR.XCRRequiresAttribNotFound);
             }
             if (String.IsNullOrEmpty(requiresValue))
             {
                 // Requires attribute may not be empty
-                Error(SR.Get(SRID.XCRInvalidRequiresAttribute));
+                Error(SR.XCRInvalidRequiresAttribute);
             }
 
             CompatibilityScope scope = Scope;
@@ -1222,7 +1222,7 @@ namespace System.IO.Packaging
                 string attributeName = Reader.LocalName;
                 MoveToElement();
 
-                Error(SR.Get(SRID.XCRInvalidAttribInElement), attributeName, Choice);
+                Error(SR.XCRInvalidAttribInElement, attributeName, Choice);
             }
 
             if (scope.ChoiceTaken)
@@ -1254,7 +1254,7 @@ namespace System.IO.Packaging
                 if (!somethingSeen)
                 {
                     // if the Requires value does not contain a valid prefix/namespace, throw an exception
-                    Error(SR.Get(SRID.XCRInvalidRequiresAttribute));
+                    Error(SR.XCRInvalidRequiresAttribute);
                 }
 
                 if (allKnown)
@@ -1297,17 +1297,17 @@ namespace System.IO.Packaging
             if (!Scope.InAlternateContent)
             {
                 // Fallback must be the child of AlternateContent
-                Error(SR.Get(SRID.XCRFallbackOnlyInAC));
+                Error(SR.XCRFallbackOnlyInAC);
             }
             if (!Scope.ChoiceSeen)
             {
                 // AlternateContent block must contain a Choice element
-                Error(SR.Get(SRID.XCRChoiceNotFound));
+                Error(SR.XCRChoiceNotFound);
             }
             if (Scope.FallbackSeen)
             {
                 // AlternateContent block may only contain one Fallback child
-                Error(SR.Get(SRID.XCRMultipleFallbackFound));
+                Error(SR.XCRMultipleFallbackFound);
             }
 
             // mark scope as having a fallback
@@ -1325,7 +1325,7 @@ namespace System.IO.Packaging
                 string attributeName = Reader.LocalName;
                 MoveToElement();
 
-                Error(SR.Get(SRID.XCRInvalidAttribInElement), attributeName, Fallback);
+                Error(SR.XCRInvalidAttribInElement, attributeName, Fallback);
             }
 
             if (choiceTaken)
@@ -1396,7 +1396,7 @@ namespace System.IO.Packaging
             {
                 if (!IsNamespaceKnown(namespaceUri))
                 {
-                    Error(SR.Get(SRID.XCRMustUnderstandFailed), namespaceUri);
+                    Error(SR.XCRMustUnderstandFailed, namespaceUri);
                 }
             }
         }
@@ -1871,7 +1871,7 @@ namespace System.IO.Packaging
                     {
                         if (!IsIgnorableAtCurrentScope(key))
                         {
-                            _reader.Error(SR.Get(SRID.XCRNSProcessContentNotIgnorable), key);
+                            _reader.Error(SR.XCRNSProcessContentNotIgnorable, key);
                         }
                     }
                 }
@@ -1882,7 +1882,7 @@ namespace System.IO.Packaging
                     {
                         if (!IsIgnorableAtCurrentScope(key))
                         {
-                            _reader.Error(SR.Get(SRID.XCRNSPreserveNotIgnorable), key);
+                            _reader.Error(SR.XCRNSPreserveNotIgnorable, key);
                         }
                     }
                 }
@@ -1893,7 +1893,7 @@ namespace System.IO.Packaging
                     {
                         if (!IsIgnorableAtCurrentScope(key))
                         {
-                            _reader.Error(SR.Get(SRID.XCRNSPreserveNotIgnorable), key);
+                            _reader.Error(SR.XCRNSPreserveNotIgnorable, key);
                         }
                     }
                 }
@@ -1924,11 +1924,11 @@ namespace System.IO.Packaging
                 {
                     if (elementName == "*")
                     {
-                        _reader.Error(SR.Get(SRID.XCRDuplicateWildcardProcessContent), _namespaceName);
+                        _reader.Error(SR.XCRDuplicateWildcardProcessContent, _namespaceName);
                     }
                     else
                     {
-                        _reader.Error(SR.Get(SRID.XCRDuplicateProcessContent), _namespaceName, elementName);
+                        _reader.Error(SR.XCRDuplicateProcessContent, _namespaceName, elementName);
                     }
                 }
 
@@ -1936,7 +1936,7 @@ namespace System.IO.Packaging
                 {
                     if (_names != null)
                     {
-                        _reader.Error(SR.Get(SRID.XCRInvalidProcessContent), _namespaceName);
+                        _reader.Error(SR.XCRInvalidProcessContent, _namespaceName);
                     }
                     else
                     {
@@ -1979,11 +1979,11 @@ namespace System.IO.Packaging
                 {
                     if (itemName == "*")
                     {
-                        _reader.Error(SR.Get(SRID.XCRDuplicateWildcardPreserve), _namespaceName);
+                        _reader.Error(SR.XCRDuplicateWildcardPreserve, _namespaceName);
                     }
                     else
                     {
-                        _reader.Error(SR.Get(SRID.XCRDuplicatePreserve), itemName, _namespaceName);
+                        _reader.Error(SR.XCRDuplicatePreserve, itemName, _namespaceName);
                     }
                 }
 
@@ -1991,7 +1991,7 @@ namespace System.IO.Packaging
                 {
                     if (_names != null)
                     {
-                        _reader.Error(SR.Get(SRID.XCRInvalidPreserve), _namespaceName);
+                        _reader.Error(SR.XCRInvalidPreserve, _namespaceName);
                     }
                     else
                     {

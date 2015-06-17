@@ -210,7 +210,7 @@ namespace System.IO.Packaging
         private void ThrowIfStreamDisposed()
         {
             if (_disposed)
-                throw new ObjectDisposedException(null, SR.Get(SRID.StreamObjectDisposed));
+                throw new ObjectDisposedException(null, SR.StreamObjectDisposed);
         }
 
         #endregion Private Methods

@@ -252,7 +252,7 @@ namespace System.IO.Packaging
             PackUriHelper.ValidatedPartUri validatedPartUri = PackUriHelper.ValidatePartUri(partUri);
 
             if (_partList.ContainsKey(validatedPartUri))
-                throw new InvalidOperationException(SR.Get(SRID.PartAlreadyExists));
+                throw new InvalidOperationException(SR.PartAlreadyExists);
 
             // Add the part to the _partList if there is no prefix collision
             // Note: This is the only place where we pass a null to this method for the part and if the
@@ -287,7 +287,7 @@ namespace System.IO.Packaging
         {
             PackagePart returnedPart = GetPartHelper(partUri);
             if (returnedPart == null)
-                throw new InvalidOperationException(SR.Get(SRID.PartDoesNotExist));
+                throw new InvalidOperationException(SR.PartDoesNotExist);
             else
                 return returnedPart;
         }
@@ -434,7 +434,7 @@ namespace System.IO.Packaging
                     partUri = (PackUriHelper.ValidatedPartUri)parts[i].Uri;
 
                     if (seenPartUris.ContainsKey(partUri))
-                        throw new FileFormatException(SR.Get(SRID.BadPackageFormat));
+                        throw new FileFormatException(SR.BadPackageFormat);
                     else
                     {
                         // Add the part to the list of URIs that we have already seen
@@ -678,7 +678,7 @@ namespace System.IO.Packaging
 
             PackageRelationship returnedRelationship = GetRelationshipHelper(id);
             if (returnedRelationship == null)
-                throw new InvalidOperationException(SR.Get(SRID.PackageRelationshipDoesNotExist));
+                throw new InvalidOperationException(SR.PackageRelationshipDoesNotExist);
             else
                 return returnedRelationship;
         }
@@ -816,14 +816,14 @@ namespace System.IO.Packaging
         internal void ThrowIfReadOnly()
         {
             if (_openFileAccess == FileAccess.Read)
-                throw new IOException(SR.Get(SRID.CannotModifyReadOnlyContainer));
+                throw new IOException(SR.CannotModifyReadOnlyContainer);
         }
 
         // If the container is writeonly, parts cannot be retrieved from it
         internal void ThrowIfWriteOnly()
         {
             if (_openFileAccess == FileAccess.Write)
-                throw new IOException(SR.Get(SRID.CannotRetrievePartsOfWriteOnlyContainer));
+                throw new IOException(SR.CannotRetrievePartsOfWriteOnlyContainer);
         }
 
         // return true to continue
@@ -877,17 +877,17 @@ namespace System.IO.Packaging
 
                 // todo ew move into function
                 if (packageMode == FileMode.OpenOrCreate && packageAccess != FileAccess.ReadWrite)
-                    throw new ArgumentException(SR.Get(SRID.UnsupportedCombinationOfModeAccess));
+                    throw new ArgumentException(SR.UnsupportedCombinationOfModeAccess);
                 if (packageMode == FileMode.Create && packageAccess != FileAccess.ReadWrite)
-                    throw new ArgumentException(SR.Get(SRID.UnsupportedCombinationOfModeAccess));
+                    throw new ArgumentException(SR.UnsupportedCombinationOfModeAccess);
                 if (packageMode == FileMode.CreateNew && packageAccess != FileAccess.ReadWrite)
-                    throw new ArgumentException(SR.Get(SRID.UnsupportedCombinationOfModeAccess));
+                    throw new ArgumentException(SR.UnsupportedCombinationOfModeAccess);
                 if (packageMode == FileMode.Open && packageAccess == FileAccess.Write)
-                    throw new ArgumentException(SR.Get(SRID.UnsupportedCombinationOfModeAccess));
+                    throw new ArgumentException(SR.UnsupportedCombinationOfModeAccess);
                 if (packageMode == FileMode.Truncate && packageAccess == FileAccess.Read)
-                    throw new ArgumentException(SR.Get(SRID.UnsupportedCombinationOfModeAccess));
+                    throw new ArgumentException(SR.UnsupportedCombinationOfModeAccess);
                 if (packageMode == FileMode.Truncate)
-                    throw new NotSupportedException(SR.Get(SRID.UnsupportedCombinationOfModeAccess));
+                    throw new NotSupportedException(SR.UnsupportedCombinationOfModeAccess);
 
                 //Note: FileShare enum is not being verfied at this stage, as we do not interpret the flag in this
                 //code at all and just pass it on to the next layer, where the necessary validation can be
@@ -1053,7 +1053,7 @@ namespace System.IO.Packaging
                 //Removing the invalid entry from the _partList.
                 _partList.Remove(partUri);
 
-                throw new InvalidOperationException(SR.Get(SRID.PartNamePrefixExists));
+                throw new InvalidOperationException(SR.PartNamePrefixExists);
             }
         }
 
@@ -1066,12 +1066,12 @@ namespace System.IO.Packaging
             //asking for more permissions than the underlying stream.
             // Stream cannot write, but package to be created should have write access
             if (!s.CanWrite && (access == FileAccess.ReadWrite || access == FileAccess.Write))
-                throw new IOException(SR.Get(SRID.IncompatibleModeOrAccess));
+                throw new IOException(SR.IncompatibleModeOrAccess);
 
             //asking for more permissions than the underlying stream.
             // Stream cannot read, but the package to be created should have read access
             if (!s.CanRead && (access == FileAccess.ReadWrite || access == FileAccess.Read || access == (FileAccess.Read | FileAccess.Write)))
-                throw new IOException(SR.Get(SRID.IncompatibleModeOrAccess));
+                throw new IOException(SR.IncompatibleModeOrAccess);
 
             //asking for less restricted access to the underlying stream
             //stream is ReadWrite but the package is either readonly, or writeonly
@@ -1087,7 +1087,7 @@ namespace System.IO.Packaging
         private void ThrowIfObjectDisposed()
         {
             if (_disposed == true)
-                throw new ObjectDisposedException(null, SR.Get(SRID.ObjectDisposed));
+                throw new ObjectDisposedException(null, SR.ObjectDisposed);
         }
 
         private void EnsureRelationships()
@@ -1443,7 +1443,7 @@ namespace System.IO.Packaging
                 if (_canWrite)
                     _stream.SetLength(newLength);
                 else
-                    throw new NotSupportedException(SR.Get(SRID.ReadOnlyStream));
+                    throw new NotSupportedException(SR.ReadOnlyStream);
             }
 
             /// <summary>
@@ -1463,7 +1463,7 @@ namespace System.IO.Packaging
                 if (_canRead)
                     return _stream.Read(buffer, offset, count);
                 else
-                    throw new NotSupportedException(SR.Get(SRID.WriteOnlyStream));
+                    throw new NotSupportedException(SR.WriteOnlyStream);
             }
 
             /// <summary>
@@ -1478,7 +1478,7 @@ namespace System.IO.Packaging
                 if (_canWrite)
                     _stream.Write(buf, offset, count);
                 else
-                    throw new NotSupportedException(SR.Get(SRID.ReadOnlyStream));
+                    throw new NotSupportedException(SR.ReadOnlyStream);
             }
 
             /// <summary>
@@ -1526,7 +1526,7 @@ namespace System.IO.Packaging
             private void ThrowIfStreamDisposed()
             {
                 if (_disposed)
-                    throw new ObjectDisposedException(null, SR.Get(SRID.StreamObjectDisposed));
+                    throw new ObjectDisposedException(null, SR.StreamObjectDisposed);
             }
 
             #endregion Private Methods

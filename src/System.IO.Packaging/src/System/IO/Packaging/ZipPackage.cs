@@ -1063,7 +1063,7 @@ namespace System.IO.Packaging
                         //Also any other attribute on the <Types> tag is an error including xml: and xsi: attributes
                         if (PackagingUtilities.GetNonXmlnsAttributeCount(reader) > 0)
                         {
-                            throw new XmlException(SR.Get(SRID.TypesTagHasExtraAttributes), null, ((IXmlLineInfo)reader).LineNumber, ((IXmlLineInfo)reader).LinePosition);
+                            throw new XmlException(SR.TypesTagHasExtraAttributes, null, ((IXmlLineInfo)reader).LineNumber, ((IXmlLineInfo)reader).LinePosition);
                         }
 
                         // start tag encountered
@@ -1100,13 +1100,13 @@ namespace System.IO.Packaging
                                         continue;
                                     else
                                     {
-                                        throw new XmlException(SR.Get(SRID.TypesXmlDoesNotMatchSchema), null, ((IXmlLineInfo)reader).LineNumber, ((IXmlLineInfo)reader).LinePosition);
+                                        throw new XmlException(SR.TypesXmlDoesNotMatchSchema, null, ((IXmlLineInfo)reader).LineNumber, ((IXmlLineInfo)reader).LinePosition);
                                     }
                         }
                     }
                     else
                     {
-                        throw new XmlException(SR.Get(SRID.TypesElementExpected), null, ((IXmlLineInfo)reader).LineNumber, ((IXmlLineInfo)reader).LinePosition);
+                        throw new XmlException(SR.TypesElementExpected, null, ((IXmlLineInfo)reader).LineNumber, ((IXmlLineInfo)reader).LinePosition);
                     }
                 }
             }
@@ -1260,7 +1260,7 @@ namespace System.IO.Packaging
                 //There could be a namespace Attribute present at this level. 
                 //Also any other attribute on the <Default> tag is an error including xml: and xsi: attributes
                 if (PackagingUtilities.GetNonXmlnsAttributeCount(reader) != 2)
-                    throw new XmlException(SR.Get(SRID.DefaultTagDoesNotMatchSchema), null, ((IXmlLineInfo)reader).LineNumber, ((IXmlLineInfo)reader).LinePosition);
+                    throw new XmlException(SR.DefaultTagDoesNotMatchSchema, null, ((IXmlLineInfo)reader).LineNumber, ((IXmlLineInfo)reader).LinePosition);
 
                 // get the required Extension and ContentType attributes
 
@@ -1291,7 +1291,7 @@ namespace System.IO.Packaging
                 //There could be a namespace Attribute present at this level. 
                 //Also any other attribute on the <Override> tag is an error including xml: and xsi: attributes
                 if (PackagingUtilities.GetNonXmlnsAttributeCount(reader) != 2)
-                    throw new XmlException(SR.Get(SRID.OverrideTagDoesNotMatchSchema), null, ((IXmlLineInfo)reader).LineNumber, ((IXmlLineInfo)reader).LinePosition);
+                    throw new XmlException(SR.OverrideTagDoesNotMatchSchema, null, ((IXmlLineInfo)reader).LineNumber, ((IXmlLineInfo)reader).LinePosition);
 
                 // get the required Extension and ContentType attributes
 
@@ -1330,7 +1330,7 @@ namespace System.IO.Packaging
                 if (reader.NodeType == XmlNodeType.EndElement && String.CompareOrdinal(elementName, reader.LocalName) == 0)
                     return;
                 else
-                    throw new XmlException(SR.Get(SRID.ElementIsNotEmptyElement, elementName), null, ((IXmlLineInfo)reader).LineNumber, ((IXmlLineInfo)reader).LinePosition);
+                    throw new XmlException(SR.Format(SR.ElementIsNotEmptyElement, elementName), null, ((IXmlLineInfo)reader).LineNumber, ((IXmlLineInfo)reader).LinePosition);
             }
 
             private void AddOverrideElement(PackUriHelper.ValidatedPartUri partUri, ContentType contentType)
@@ -1382,7 +1382,7 @@ namespace System.IO.Packaging
 
                 //Checking for empty attribute
                 if (attributeValue == String.Empty)
-                    throw new XmlException(SR.Get(SRID.RequiredAttributeEmpty, tagName, attributeName), null, ((IXmlLineInfo)reader).LineNumber, ((IXmlLineInfo)reader).LinePosition);
+                    throw new XmlException(SR.Format(SR.RequiredAttributeEmpty, tagName, attributeName), null, ((IXmlLineInfo)reader).LineNumber, ((IXmlLineInfo)reader).LinePosition);
             }
 
 
@@ -1391,7 +1391,7 @@ namespace System.IO.Packaging
             private void ThrowIfXmlAttributeMissing(string attributeName, string attributeValue, string tagName, XmlReader reader)
             {
                 if (attributeValue == null)
-                    throw new XmlException(SR.Get(SRID.RequiredAttributeMissing, tagName, attributeName), null, ((IXmlLineInfo)reader).LineNumber, ((IXmlLineInfo)reader).LinePosition);
+                    throw new XmlException(SR.Format(SR.RequiredAttributeMissing, tagName, attributeName), null, ((IXmlLineInfo)reader).LineNumber, ((IXmlLineInfo)reader).LinePosition);
             }
 
             #endregion Private Methods

@@ -425,7 +425,7 @@ namespace System.IO.Packaging
                 // Parsing should detect redundant entries.
                 if (initializing)
                 {
-                    throw new XmlException(SR.Get(SRID.DuplicateCorePropertyName, reader.Name),
+                    throw new XmlException(SR.Format(SR.DuplicateCorePropertyName, reader.Name),
                         null, ((IXmlLineInfo)reader).LineNumber, ((IXmlLineInfo)reader).LinePosition);
                 }
 
@@ -477,7 +477,7 @@ namespace System.IO.Packaging
 
             // Retrieve the part referenced by its target URI.
             if (corePropertiesRelationship.TargetMode != TargetMode.Internal)
-                throw new FileFormatException(SR.Get(SRID.NoExternalTargetForMetadataRelationship));
+                throw new FileFormatException(SR.NoExternalTargetForMetadataRelationship);
 
             PackagePart propertiesPart = null;
             Uri propertiesPartUri = PackUriHelper.ResolvePartUri(
@@ -485,12 +485,12 @@ namespace System.IO.Packaging
                 corePropertiesRelationship.TargetUri);
 
             if (!_package.PartExists(propertiesPartUri))
-                throw new FileFormatException(SR.Get(SRID.DanglingMetadataRelationship));
+                throw new FileFormatException(SR.DanglingMetadataRelationship);
 
             propertiesPart = _package.GetPart(propertiesPartUri);
             if (!propertiesPart.ValidatedContentType.AreTypeAndSubTypeEqual(s_coreDocumentPropertiesContentType))
             {
-                throw new FileFormatException(SR.Get(SRID.WrongContentTypeForPropertyPart));
+                throw new FileFormatException(SR.WrongContentTypeForPropertyPart);
             }
 
             return propertiesPart;
@@ -505,7 +505,7 @@ namespace System.IO.Packaging
             {
                 if (propertiesPartRelationship != null)
                 {
-                    throw new FileFormatException(SR.Get(SRID.MoreThanOneMetadataRelationships));
+                    throw new FileFormatException(SR.MoreThanOneMetadataRelationships);
                 }
                 propertiesPartRelationship = rel;
             }
@@ -539,14 +539,14 @@ namespace System.IO.Packaging
                     || (object)reader.NamespaceURI != PackageXmlStringTable.GetXmlStringAsObject(PackageXmlEnum.PackageCorePropertiesNamespace)
                     || (object)reader.LocalName != PackageXmlStringTable.GetXmlStringAsObject(PackageXmlEnum.CoreProperties))
                 {
-                    throw new XmlException(SR.Get(SRID.CorePropertiesElementExpected),
+                    throw new XmlException(SR.CorePropertiesElementExpected,
                         null, ((IXmlLineInfo)reader).LineNumber, ((IXmlLineInfo)reader).LinePosition);
                 }
 
                 // The schema is closed and defines no attributes on the root element.
                 if (PackagingUtilities.GetNonXmlnsAttributeCount(reader) != 0)
                 {
-                    throw new XmlException(SR.Get(SRID.PropertyWrongNumbOfAttribsDefinedOn, reader.Name),
+                    throw new XmlException(SR.Format(SR.PropertyWrongNumbOfAttribsDefinedOn, reader.Name),
                         null, ((IXmlLineInfo)reader).LineNumber, ((IXmlLineInfo)reader).LinePosition);
                 }
 
@@ -565,14 +565,14 @@ namespace System.IO.Packaging
                     // Any content markup that is not an element here is unexpected.
                     if (reader.NodeType != XmlNodeType.Element)
                     {
-                        throw new XmlException(SR.Get(SRID.PropertyStartTagExpected),
+                        throw new XmlException(SR.PropertyStartTagExpected,
                             null, ((IXmlLineInfo)reader).LineNumber, ((IXmlLineInfo)reader).LinePosition);
                     }
 
                     // Any element below the root should open at level 1 exclusively.
                     if (reader.Depth != 1)
                     {
-                        throw new XmlException(SR.Get(SRID.NoStructuredContentInsideProperties),
+                        throw new XmlException(SR.NoStructuredContentInsideProperties,
                             null, ((IXmlLineInfo)reader).LineNumber, ((IXmlLineInfo)reader).LinePosition);
                     }
 
@@ -586,7 +586,7 @@ namespace System.IO.Packaging
                     if (Array.IndexOf(s_validProperties, xmlStringIndex) == -1)  // An unexpected element is an error.
                     {
                         throw new XmlException(
-                            SR.Get(SRID.InvalidPropertyNameInCorePropertiesPart, reader.LocalName),
+                            SR.Format(SR.InvalidPropertyNameInCorePropertiesPart, reader.LocalName),
                             null, ((IXmlLineInfo)reader).LineNumber, ((IXmlLineInfo)reader).LinePosition);
                     }
 
@@ -594,7 +594,7 @@ namespace System.IO.Packaging
                     // The following is an object comparison, not a string comparison.
                     if ((object)reader.NamespaceURI != PackageXmlStringTable.GetXmlStringAsObject(PackageXmlStringTable.GetXmlNamespace(xmlStringIndex)))
                     {
-                        throw new XmlException(SR.Get(SRID.UnknownNamespaceInCorePropertiesPart),
+                        throw new XmlException(SR.UnknownNamespaceInCorePropertiesPart,
                             null, ((IXmlLineInfo)reader).LineNumber, ((IXmlLineInfo)reader).LinePosition);
                     }
 
@@ -603,7 +603,7 @@ namespace System.IO.Packaging
                         // The schema is closed and defines no attributes on this type of element.
                         if (attributesCount != 0)
                         {
-                            throw new XmlException(SR.Get(SRID.PropertyWrongNumbOfAttribsDefinedOn, reader.Name),
+                            throw new XmlException(SR.Format(SR.PropertyWrongNumbOfAttribsDefinedOn, reader.Name),
                                 null, ((IXmlLineInfo)reader).LineNumber, ((IXmlLineInfo)reader).LinePosition);
                         }
 
@@ -618,7 +618,7 @@ namespace System.IO.Packaging
                         // The schema is closed and defines no attributes on this type of element.
                         if (attributesCount != allowedAttributeCount)
                         {
-                            throw new XmlException(SR.Get(SRID.PropertyWrongNumbOfAttribsDefinedOn, reader.Name),
+                            throw new XmlException(SR.Format(SR.PropertyWrongNumbOfAttribsDefinedOn, reader.Name),
                                 null, ((IXmlLineInfo)reader).LineNumber, ((IXmlLineInfo)reader).LinePosition);
                         }
 
@@ -652,7 +652,7 @@ namespace System.IO.Packaging
             // Missing xsi:type
             if (typeValue == null)
             {
-                throw new XmlException(SR.Get(SRID.UnknownDCDateTimeXsiType, reader.Name),
+                throw new XmlException(SR.Format(SR.UnknownDCDateTimeXsiType, reader.Name),
                     null, ((IXmlLineInfo)reader).LineNumber, ((IXmlLineInfo)reader).LinePosition);
             }
 
@@ -661,7 +661,7 @@ namespace System.IO.Packaging
             // The valude of xsi:type is not a qualified name
             if (index == -1)
             {
-                throw new XmlException(SR.Get(SRID.UnknownDCDateTimeXsiType, reader.Name),
+                throw new XmlException(SR.Format(SR.UnknownDCDateTimeXsiType, reader.Name),
                     null, ((IXmlLineInfo)reader).LineNumber, ((IXmlLineInfo)reader).LinePosition);
             }
 
@@ -671,7 +671,7 @@ namespace System.IO.Packaging
             if (!Object.ReferenceEquals(ns, reader.LookupNamespace(typeValue.Substring(0, index)))
                     || String.CompareOrdinal(name, typeValue.Substring(index + 1, typeValue.Length - index - 1)) != 0)
             {
-                throw new XmlException(SR.Get(SRID.UnknownDCDateTimeXsiType, reader.Name),
+                throw new XmlException(SR.Format(SR.UnknownDCDateTimeXsiType, reader.Name),
                     null, ((IXmlLineInfo)reader).LineNumber, ((IXmlLineInfo)reader).LinePosition);
             }
         }
@@ -689,7 +689,7 @@ namespace System.IO.Packaging
             // If there is any content in the element, it should be text content and nothing else.
             if (reader.NodeType != XmlNodeType.Text)
             {
-                throw new XmlException(SR.Get(SRID.NoStructuredContentInsideProperties),
+                throw new XmlException(SR.NoStructuredContentInsideProperties,
                     null, ((IXmlLineInfo)reader).LineNumber, ((IXmlLineInfo)reader).LinePosition);
             }
 
@@ -711,7 +711,7 @@ namespace System.IO.Packaging
             }
             catch (FormatException exc)
             {
-                throw new XmlException(SR.Get(SRID.XsdDateTimeExpected),
+                throw new XmlException(SR.XsdDateTimeExpected,
                     exc, ((IXmlLineInfo)reader).LineNumber, ((IXmlLineInfo)reader).LinePosition);
             }
             return dateTime;

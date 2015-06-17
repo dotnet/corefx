@@ -206,7 +206,7 @@ namespace System.IO.Packaging
                         //
                         // PackagePart is a public API.
 #pragma warning suppress 6503
-                        throw new InvalidOperationException(SR.Get(SRID.NullContentTypeProvided));
+                        throw new InvalidOperationException(SR.NullContentTypeProvided);
                     }
                     _contentType = new ContentType(contentType);
                 }
@@ -275,7 +275,7 @@ namespace System.IO.Packaging
         /// initialize the content type for a PackagePart in a lazy manner they must override this method.</exception>
         protected virtual string GetContentTypeCore()
         {
-            throw new NotSupportedException(SR.Get(SRID.GetContentTypeCoreNotImplemented));
+            throw new NotSupportedException(SR.GetContentTypeCoreNotImplemented);
         }
 
 
@@ -346,14 +346,14 @@ namespace System.IO.Packaging
             ThrowIfOpenAccessModesAreIncompatible(mode, access);
 
             if (mode == FileMode.CreateNew)
-                throw new ArgumentException(SR.Get(SRID.CreateNewNotSupported));
+                throw new ArgumentException(SR.CreateNewNotSupported);
             if (mode == FileMode.Truncate)
-                throw new ArgumentException(SR.Get(SRID.TruncateNotSupported));
+                throw new ArgumentException(SR.TruncateNotSupported);
 
             Stream s = GetStreamCore(mode, access);
 
             if (s == null)
-                throw new IOException(SR.Get(SRID.NullStreamReturned));
+                throw new IOException(SR.NullStreamReturned);
 
             //Detect if any stream implementations are returning all three
             //properties - CanSeek, CanWrite and CanRead as false. Such a 
@@ -527,7 +527,7 @@ namespace System.IO.Packaging
 
             PackageRelationship returnedRelationship = GetRelationshipHelper(id);
             if (returnedRelationship == null)
-                throw new InvalidOperationException(SR.Get(SRID.PackagePartRelationshipDoesNotExist));
+                throw new InvalidOperationException(SR.PackagePartRelationshipDoesNotExist);
             else
                 return returnedRelationship;
         }
@@ -761,12 +761,12 @@ namespace System.IO.Packaging
             //Creating a part using a readonly stream.
             if (access == FileAccess.Read &&
                 (mode == FileMode.Create || mode == FileMode.CreateNew || mode == FileMode.Truncate || mode == FileMode.Append))
-                throw new IOException(SR.Get(SRID.UnsupportedCombinationOfModeAccess));
+                throw new IOException(SR.UnsupportedCombinationOfModeAccess);
 
             //Incompatible access modes between container and part stream.
             if ((_container.FileOpenAccess == FileAccess.Read && access != FileAccess.Read) ||
                 (_container.FileOpenAccess == FileAccess.Write && access != FileAccess.Write))
-                throw new IOException(SR.Get(SRID.ContainerAndPartModeIncompatible));
+                throw new IOException(SR.ContainerAndPartModeIncompatible);
         }
 
         //Check if the part is in an invalid state
@@ -780,21 +780,21 @@ namespace System.IO.Packaging
         private void ThrowIfParentContainerClosed()
         {
             if (_container == null)
-                throw new InvalidOperationException(SR.Get(SRID.ParentContainerClosed));
+                throw new InvalidOperationException(SR.ParentContainerClosed);
         }
 
         //If the part has been deleted then we throw
         private void ThrowIfPackagePartDeleted()
         {
             if (_deleted == true)
-                throw new InvalidOperationException(SR.Get(SRID.PackagePartDeleted));
+                throw new InvalidOperationException(SR.PackagePartDeleted);
         }
 
         // some operations are invalid if we are a relationship part
         private void ThrowIfRelationship()
         {
             if (IsRelationshipPart)
-                throw new InvalidOperationException(SR.Get(SRID.RelationshipPartsCannotHaveRelationships));
+                throw new InvalidOperationException(SR.RelationshipPartsCannotHaveRelationships);
         }
 
         /// <summary>

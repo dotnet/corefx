@@ -1,0 +1,234 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+<data name="BadPackageFormat" xml:space="preserve"><value>BadPackageFormat</value></data>
+<data name="CannotModifyReadOnlyContainer" xml:space="preserve"><value>CannotModifyReadOnlyContainer</value></data>
+<data name="CannotRetrievePartsOfWriteOnlyContainer" xml:space="preserve"><value>CannotRetrievePartsOfWriteOnlyContainer</value></data>
+<data name="ContainerAndPartModeIncompatible" xml:space="preserve"><value>ContainerAndPartModeIncompatible</value></data>
+<data name="ContentTypeCannotHaveLeadingTrailingLWS" xml:space="preserve"><value>ContentTypeCannotHaveLeadingTrailingLWS</value></data>
+<data name="CorePropertiesElementExpected" xml:space="preserve"><value>CorePropertiesElementExpected</value></data>
+<data name="CreateNewNotSupported" xml:space="preserve"><value>CreateNewNotSupported</value></data>
+<data name="DanglingMetadataRelationship" xml:space="preserve"><value>DanglingMetadataRelationship</value></data>
+<data name="DefaultTagDoesNotMatchSchema" xml:space="preserve"><value>DefaultTagDoesNotMatchSchema</value></data>
+<data name="DuplicateCorePropertyName" xml:space="preserve"><value>DuplicateCorePropertyName</value></data>
+<data name="ElementIsNotEmptyElement" xml:space="preserve"><value>ElementIsNotEmptyElement</value></data>
+<data name="EncodingNotSupported" xml:space="preserve"><value>EncodingNotSupported</value></data>
+<data name="ExpectedRelationshipsElementTag" xml:space="preserve"><value>ExpectedRelationshipsElementTag</value></data>
+<data name="ExpectingParameterValuePairs" xml:space="preserve"><value>ExpectingParameterValuePairs</value></data>
+<data name="ExpectingSemicolon" xml:space="preserve"><value>ExpectingSemicolon</value></data>
+<data name="FileFormatException" xml:space="preserve"><value>FileFormatException</value></data>
+<data name="FileFormatExceptionWithFileName" xml:space="preserve"><value>FileFormatExceptionWithFileName</value></data>
+<data name="FragmentMustStartWithHash" xml:space="preserve"><value>FragmentMustStartWithHash</value></data>
+<data name="GetContentTypeCoreNotImplemented" xml:space="preserve"><value>GetContentTypeCoreNotImplemented</value></data>
+<data name="IncompatibleModeOrAccess" xml:space="preserve"><value>IncompatibleModeOrAccess</value></data>
+<data name="InnerPackageUriHasFragment" xml:space="preserve"><value>InnerPackageUriHasFragment</value></data>
+<data name="InvalidLinearWhiteSpaceCharacter" xml:space="preserve"><value>InvalidLinearWhiteSpaceCharacter</value></data>
+<data name="InvalidParameterValue" xml:space="preserve"><value>InvalidParameterValue</value></data>
+<data name="InvalidParameterValuePair" xml:space="preserve"><value>InvalidParameterValuePair</value></data>
+<data name="InvalidPartUri" xml:space="preserve"><value>InvalidPartUri</value></data>
+<data name="InvalidPropertyNameInCorePropertiesPart" xml:space="preserve"><value>InvalidPropertyNameInCorePropertiesPart</value></data>
+<data name="InvalidRelationshipType" xml:space="preserve"><value>InvalidRelationshipType</value></data>
+<data name="InvalidToken" xml:space="preserve"><value>InvalidToken</value></data>
+<data name="InvalidTypeSubType" xml:space="preserve"><value>InvalidTypeSubType</value></data>
+<data name="InvalidValueForTheAttribute" xml:space="preserve"><value>InvalidValueForTheAttribute</value></data>
+<data name="InvalidXmlBaseAttributePresent" xml:space="preserve"><value>InvalidXmlBaseAttributePresent</value></data>
+<data name="InvariantFailure" xml:space="preserve"><value>InvariantFailure</value></data>
+<data name="MoreThanOneMetadataRelationships" xml:space="preserve"><value>MoreThanOneMetadataRelationships</value></data>
+<data name="NoExternalTargetForMetadataRelationship" xml:space="preserve"><value>NoExternalTargetForMetadataRelationship</value></data>
+<data name="NoStructuredContentInsideProperties" xml:space="preserve"><value>NoStructuredContentInsideProperties</value></data>
+<data name="NotAUniqueRelationshipId" xml:space="preserve"><value>NotAUniqueRelationshipId</value></data>
+<data name="NotAValidRelationshipPartUri" xml:space="preserve"><value>NotAValidRelationshipPartUri</value></data>
+<data name="NotAValidXmlIdString" xml:space="preserve"><value>NotAValidXmlIdString</value></data>
+<data name="NullContentTypeProvided" xml:space="preserve"><value>NullContentTypeProvided</value></data>
+<data name="NullStreamReturned" xml:space="preserve"><value>NullStreamReturned</value></data>
+<data name="ObjectDisposed" xml:space="preserve"><value>ObjectDisposed</value></data>
+<data name="OffsetNegative" xml:space="preserve"><value>OffsetNegative</value></data>
+<data name="OverrideTagDoesNotMatchSchema" xml:space="preserve"><value>OverrideTagDoesNotMatchSchema</value></data>
+<data name="PackagePartDeleted" xml:space="preserve"><value>PackagePartDeleted</value></data>
+<data name="PackagePartRelationshipDoesNotExist" xml:space="preserve"><value>PackagePartRelationshipDoesNotExist</value></data>
+<data name="PackageRelationshipDoesNotExist" xml:space="preserve"><value>PackageRelationshipDoesNotExist</value></data>
+<data name="ParentContainerClosed" xml:space="preserve"><value>ParentContainerClosed</value></data>
+<data name="PartAlreadyExists" xml:space="preserve"><value>PartAlreadyExists</value></data>
+<data name="PartDoesNotExist" xml:space="preserve"><value>PartDoesNotExist</value></data>
+<data name="PartNamePrefixExists" xml:space="preserve"><value>PartNamePrefixExists</value></data>
+<data name="PartUriCannotHaveAFragment" xml:space="preserve"><value>PartUriCannotHaveAFragment</value></data>
+<data name="PartUriIsEmpty" xml:space="preserve"><value>PartUriIsEmpty</value></data>
+<data name="PartUriShouldNotEndWithForwardSlash" xml:space="preserve"><value>PartUriShouldNotEndWithForwardSlash</value></data>
+<data name="PartUriShouldNotStartWithTwoForwardSlashes" xml:space="preserve"><value>PartUriShouldNotStartWithTwoForwardSlashes</value></data>
+<data name="PartUriShouldStartWithForwardSlash" xml:space="preserve"><value>PartUriShouldStartWithForwardSlash</value></data>
+<data name="PropertyStartTagExpected" xml:space="preserve"><value>PropertyStartTagExpected</value></data>
+<data name="PropertyWrongNumbOfAttribsDefinedOn" xml:space="preserve"><value>PropertyWrongNumbOfAttribsDefinedOn</value></data>
+<data name="ReadBufferTooSmall" xml:space="preserve"><value>ReadBufferTooSmall</value></data>
+<data name="ReadCountNegative" xml:space="preserve"><value>ReadCountNegative</value></data>
+<data name="ReadNotSupported" xml:space="preserve"><value>ReadNotSupported</value></data>
+<data name="ReadOnlyStream" xml:space="preserve"><value>ReadOnlyStream</value></data>
+<data name="RelationshipPartIncorrectContentType" xml:space="preserve"><value>RelationshipPartIncorrectContentType</value></data>
+<data name="RelationshipPartsCannotHaveRelationships" xml:space="preserve"><value>RelationshipPartsCannotHaveRelationships</value></data>
+<data name="RelationshipPartUriExpected" xml:space="preserve"><value>RelationshipPartUriExpected</value></data>
+<data name="RelationshipPartUriNotExpected" xml:space="preserve"><value>RelationshipPartUriNotExpected</value></data>
+<data name="RelationshipsTagHasExtraAttributes" xml:space="preserve"><value>RelationshipsTagHasExtraAttributes</value></data>
+<data name="RelationshipTagDoesntMatchSchema" xml:space="preserve"><value>RelationshipTagDoesntMatchSchema</value></data>
+<data name="RelationshipTargetMustBeRelative" xml:space="preserve"><value>RelationshipTargetMustBeRelative</value></data>
+<data name="RelationshipToRelationshipIllegal" xml:space="preserve"><value>RelationshipToRelationshipIllegal</value></data>
+<data name="RequiredAttributeEmpty" xml:space="preserve"><value>RequiredAttributeEmpty</value></data>
+<data name="RequiredAttributeMissing" xml:space="preserve"><value>RequiredAttributeMissing</value></data>
+<data name="RequiredRelationshipAttributeMissing" xml:space="preserve"><value>RequiredRelationshipAttributeMissing</value></data>
+<data name="StreamObjectDisposed" xml:space="preserve"><value>StreamObjectDisposed</value></data>
+<data name="TruncateNotSupported" xml:space="preserve"><value>TruncateNotSupported</value></data>
+<data name="TypesElementExpected" xml:space="preserve"><value>TypesElementExpected</value></data>
+<data name="TypesTagHasExtraAttributes" xml:space="preserve"><value>TypesTagHasExtraAttributes</value></data>
+<data name="TypesXmlDoesNotMatchSchema" xml:space="preserve"><value>TypesXmlDoesNotMatchSchema</value></data>
+<data name="UnknownDCDateTimeXsiType" xml:space="preserve"><value>UnknownDCDateTimeXsiType</value></data>
+<data name="UnknownNamespaceInCorePropertiesPart" xml:space="preserve"><value>UnknownNamespaceInCorePropertiesPart</value></data>
+<data name="UnknownTagEncountered" xml:space="preserve"><value>UnknownTagEncountered</value></data>
+<data name="UnsupportedCombinationOfModeAccess" xml:space="preserve"><value>UnsupportedCombinationOfModeAccess</value></data>
+<data name="UriShouldBeAbsolute" xml:space="preserve"><value>UriShouldBeAbsolute</value></data>
+<data name="UriShouldBePackScheme" xml:space="preserve"><value>UriShouldBePackScheme</value></data>
+<data name="URIShouldNotBeAbsolute" xml:space="preserve"><value>URIShouldNotBeAbsolute</value></data>
+<data name="WriteBufferTooSmall" xml:space="preserve"><value>WriteBufferTooSmall</value></data>
+<data name="WriteCountNegative" xml:space="preserve"><value>WriteCountNegative</value></data>
+<data name="WriteNotSupported" xml:space="preserve"><value>WriteNotSupported</value></data>
+<data name="WriteOnlyStream" xml:space="preserve"><value>WriteOnlyStream</value></data>
+<data name="WrongContentTypeForPropertyPart" xml:space="preserve"><value>WrongContentTypeForPropertyPart</value></data>
+<data name="XCRChoiceAfterFallback" xml:space="preserve"><value>XCRChoiceAfterFallback</value></data>
+<data name="XCRChoiceNotFound" xml:space="preserve"><value>XCRChoiceNotFound</value></data>
+<data name="XCRChoiceOnlyInAC" xml:space="preserve"><value>XCRChoiceOnlyInAC</value></data>
+<data name="XCRCompatCycle" xml:space="preserve"><value>XCRCompatCycle</value></data>
+<data name="XCRDuplicatePreserve" xml:space="preserve"><value>XCRDuplicatePreserve</value></data>
+<data name="XCRDuplicateProcessContent" xml:space="preserve"><value>XCRDuplicateProcessContent</value></data>
+<data name="XCRDuplicateWildcardPreserve" xml:space="preserve"><value>XCRDuplicateWildcardPreserve</value></data>
+<data name="XCRDuplicateWildcardProcessContent" xml:space="preserve"><value>XCRDuplicateWildcardProcessContent</value></data>
+<data name="XCRFallbackOnlyInAC" xml:space="preserve"><value>XCRFallbackOnlyInAC</value></data>
+<data name="XCRInvalidACChild" xml:space="preserve"><value>XCRInvalidACChild</value></data>
+<data name="XCRInvalidAttribInElement" xml:space="preserve"><value>XCRInvalidAttribInElement</value></data>
+<data name="XCRInvalidFormat" xml:space="preserve"><value>XCRInvalidFormat</value></data>
+<data name="XCRInvalidPreserve" xml:space="preserve"><value>XCRInvalidPreserve</value></data>
+<data name="XCRInvalidProcessContent" xml:space="preserve"><value>XCRInvalidProcessContent</value></data>
+<data name="XCRInvalidRequiresAttribute" xml:space="preserve"><value>XCRInvalidRequiresAttribute</value></data>
+<data name="XCRInvalidXMLName" xml:space="preserve"><value>XCRInvalidXMLName</value></data>
+<data name="XCRMultipleFallbackFound" xml:space="preserve"><value>XCRMultipleFallbackFound</value></data>
+<data name="XCRMustUnderstandFailed" xml:space="preserve"><value>XCRMustUnderstandFailed</value></data>
+<data name="XCRNSPreserveNotIgnorable" xml:space="preserve"><value>XCRNSPreserveNotIgnorable</value></data>
+<data name="XCRNSProcessContentNotIgnorable" xml:space="preserve"><value>XCRNSProcessContentNotIgnorable</value></data>
+<data name="XCRRequiresAttribNotFound" xml:space="preserve"><value>XCRRequiresAttribNotFound</value></data>
+<data name="XCRUndefinedPrefix" xml:space="preserve"><value>XCRUndefinedPrefix</value></data>
+<data name="XCRUnknownCompatAttrib" xml:space="preserve"><value>XCRUnknownCompatAttrib</value></data>
+<data name="XCRUnknownCompatElement" xml:space="preserve"><value>XCRUnknownCompatElement</value></data>
+<data name="XsdDateTimeExpected" xml:space="preserve"><value>XsdDateTimeExpected</value></data>
+</root>
