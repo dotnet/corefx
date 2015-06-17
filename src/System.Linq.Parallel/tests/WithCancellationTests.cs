@@ -51,42 +51,6 @@ namespace System.Linq.Parallel.Tests
             labeled.Item.WithCancellation(new CancellationToken(false));
         }
 
-        /// <summary>
-        ///
-        /// [Regression Test]
-        ///   This issue occurred because the QuerySettings structure was not being deep-cloned during
-        ///   query-opening.  As a result, the concurrent inner-enumerators (for the RHS operators)
-        ///   that occur in SelectMany were sharing CancellationState that they should not have.
-        ///   The result was that enumerators could falsely believe they had been canceled when
-        ///   another inner-enumerator was disposed.
-        ///
-        ///   Note: the failure was intermittent.  this test would fail about 1 in 2 times on mikelid1 (4-core).
-        /// </summary>
-        /// <returns></returns>
-        [Fact]
-        public static void CloningQuerySettingsForSelectMany()
-        {
-            var plinq_src = ParallelEnumerable.Range(0, 1999).AsParallel();
-            Exception caughtException = null;
-
-            try
-            {
-                var inner = ParallelEnumerable.Range(0, 20).AsParallel().Select(_item => _item);
-                var output = plinq_src
-                    .SelectMany(
-                        _x => inner,
-                        (_x, _y) => _x
-                    )
-                    .ToArray();
-            }
-            catch (Exception ex)
-            {
-                caughtException = ex;
-            }
-
-            Assert.Null(caughtException);
-        }
-
         // [Regression Test]
         // Use of the async channel can block both the consumer and producer threads.. before the cancellation work
         // these had no means of being awoken.
