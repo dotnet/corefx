@@ -14,24 +14,23 @@ namespace System.Linq.Parallel.Tests
     // the tests here are only regarding basic API correctness and sanity checking.
     public static class WithCancellationTests
     {
-        [Fact]
-        public static void MultiplesWithCancellationIsIllegal()
+        [Theory]
+        [MemberData(nameof(Sources.Ranges), new[] { 16 }, MemberType = typeof(Sources))]
+        public static void WithCancellation_Multiple_NotCancelable(Labeled<ParallelQuery<int>> labeled, int count)
         {
-            InvalidOperationException caughtException = null;
-            try
-            {
-                CancellationTokenSource cs = new CancellationTokenSource();
-                CancellationToken ct = cs.Token;
-                var query = Enumerable.Range(1, 10).AsParallel().WithDegreeOfParallelism(2).WithDegreeOfParallelism(2);
-                query.ToArray();
-            }
-            catch (InvalidOperationException ex)
-            {
-                caughtException = ex;
-                //Program.TestHarness.Log("IOE caught. message = " + ex.Message);
-            }
+            // Multiple not-cancel-able tokens is not an error.
+            labeled.Item.WithCancellation(new CancellationToken()).WithCancellation(new CancellationToken());
+            CancellationToken token = new CancellationToken();
+            labeled.Item.WithCancellation(token).WithCancellation(token);
+        }
 
-            Assert.NotNull(caughtException);
+        [Theory]
+        [MemberData(nameof(Sources.Ranges), new[] { 16 }, MemberType = typeof(Sources))]
+        public static void WithCancellation_Multiple_CancelableToken(Labeled<ParallelQuery<int>> labeled, int count)
+        {
+            CancellationToken token = new CancellationTokenSource().Token;
+            Assert.Throws<InvalidOperationException>(() => labeled.Item.WithCancellation(token).WithCancellation(token));
+            Assert.Throws<InvalidOperationException>(() => labeled.Item.WithCancellation(token).WithCancellation(new CancellationTokenSource().Token));
         }
 
         /// <summary>
