@@ -262,6 +262,26 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
+        [MemberData(nameof(UnorderedSources.Ranges), new[] { 128 }, MemberType = typeof(UnorderedSources))]
+        public static void Average_AggregateException_Wraps_OperationCanceledException(Labeled<ParallelQuery<int>> labeled, int count)
+        {
+            Functions.AssertAggregateAlternateCanceled((token, canceler) => labeled.Item.WithCancellation(token).Average(x => { canceler(); return x; }));
+            Functions.AssertAggregateAlternateCanceled((token, canceler) => labeled.Item.WithCancellation(token).Average(x => { canceler(); return (int?)x; }));
+
+            Functions.AssertAggregateAlternateCanceled((token, canceler) => labeled.Item.WithCancellation(token).Average(x => { canceler(); return (long)x; }));
+            Functions.AssertAggregateAlternateCanceled((token, canceler) => labeled.Item.WithCancellation(token).Average(x => { canceler(); return (long?)x; }));
+
+            Functions.AssertAggregateAlternateCanceled((token, canceler) => labeled.Item.WithCancellation(token).Average(x => { canceler(); return (float)x; }));
+            Functions.AssertAggregateAlternateCanceled((token, canceler) => labeled.Item.WithCancellation(token).Average(x => { canceler(); return (float?)x; }));
+
+            Functions.AssertAggregateAlternateCanceled((token, canceler) => labeled.Item.WithCancellation(token).Average(x => { canceler(); return (double)x; }));
+            Functions.AssertAggregateAlternateCanceled((token, canceler) => labeled.Item.WithCancellation(token).Average(x => { canceler(); return (double?)x; }));
+
+            Functions.AssertAggregateAlternateCanceled((token, canceler) => labeled.Item.WithCancellation(token).Average(x => { canceler(); return (decimal)x; }));
+            Functions.AssertAggregateAlternateCanceled((token, canceler) => labeled.Item.WithCancellation(token).Average(x => { canceler(); return (decimal?)x; }));
+        }
+
+        [Theory]
         [MemberData(nameof(UnorderedSources.Ranges), new[] { 1 }, MemberType = typeof(UnorderedSources))]
         public static void Average_OperationCanceledException_PreCanceled(Labeled<ParallelQuery<int>> labeled, int count)
         {

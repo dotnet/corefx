@@ -36,6 +36,13 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
+        [MemberData(nameof(UnorderedSources.Ranges), new[] { 128 }, MemberType = typeof(UnorderedSources))]
+        public static void ForAll_AggregateException_Wraps_OperationCanceledException(Labeled<ParallelQuery<int>> labeled, int count)
+        {
+            Functions.AssertAggregateAlternateCanceled((token, canceler) => labeled.Item.WithCancellation(token).ForAll(x => canceler()));
+        }
+
+        [Theory]
         [MemberData(nameof(UnorderedSources.Ranges), new[] { 1 }, MemberType = typeof(UnorderedSources))]
         public static void ForAll_OperationCanceledException_PreCanceled(Labeled<ParallelQuery<int>> labeled, int count)
         {

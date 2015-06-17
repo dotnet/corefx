@@ -133,6 +133,14 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
+        [MemberData(nameof(UnorderedSources.Ranges), new[] { 128 }, MemberType = typeof(UnorderedSources))]
+        public static void First_AggregateException_Wraps_OperationCanceledException(Labeled<ParallelQuery<int>> labeled, int count)
+        {
+            Functions.AssertAggregateAlternateCanceled((token, canceler) => labeled.Item.WithCancellation(token).First(x => { canceler(); return false; }));
+            Functions.AssertAggregateAlternateCanceled((token, canceler) => labeled.Item.WithCancellation(token).FirstOrDefault(x => { canceler(); return false; }));
+        }
+
+        [Theory]
         [MemberData(nameof(UnorderedSources.Ranges), new[] { 1 }, MemberType = typeof(UnorderedSources))]
         public static void First_OperationCanceledException_PreCanceled(Labeled<ParallelQuery<int>> labeled, int count)
         {
