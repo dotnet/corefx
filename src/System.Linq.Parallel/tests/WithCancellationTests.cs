@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
@@ -51,6 +50,20 @@ namespace System.Linq.Parallel.Tests
             labeled.Item.WithCancellation(new CancellationToken(false));
         }
 
+        [Theory]
+        [MemberData(nameof(Sources.Ranges), new[] { 1024 * 16 }, MemberType = typeof(Sources))]
+        [MemberData(nameof(UnorderedSources.Ranges), new[] { 1024 * 16 }, MemberType = typeof(UnorderedSources))]
+        public static void WithCancellation_DisposedEnumerator(Labeled<ParallelQuery<int>> labeled, int count)
+        {
+            // Disposing an enumerator should throw ODE and not OCE.
+            ParallelQuery<int> query = labeled.Item;
+            DisposedEnumerator(query);
+            DisposedEnumerator(query.WithMergeOptions(ParallelMergeOptions.Default));
+            DisposedEnumerator(query.WithMergeOptions(ParallelMergeOptions.AutoBuffered));
+            DisposedEnumerator(query.WithMergeOptions(ParallelMergeOptions.FullyBuffered));
+            DisposedEnumerator(query.WithMergeOptions(ParallelMergeOptions.NotBuffered));
+        }
+
         // [Regression Test]
         // Use of the async channel can block both the consumer and producer threads.. before the cancellation work
         // these had no means of being awoken.
@@ -58,25 +71,22 @@ namespace System.Linq.Parallel.Tests
         // However, only the producers need to wake up on cancellation as the consumer
         // will wake up once all the producers have gone away (via AsynchronousOneToOneChannel.SetDone())
         //
-        // To specifically verify this test, we want to know that the Async channels were blocked in TryEnqueChunk before Dispose() is called
+        // To specifically verify this test, check that the Async channels were blocked in TryEnqueChunk before Dispose() is called
         //  -> this was verified manually, but is not simple to automate
-        [Fact]
-        [OuterLoop]  // explicit timeouts / delays
-        public static void ChannelCancellation_ProducerBlocked()
+        [Theory]
+        [OuterLoop] // explicit timeouts / delays
+        // Provide enough elements to ensure all the cores get >64K ints. Good up to 1000 cores
+        [MemberData(nameof(Sources.Ranges), new[] { 1024 * 16 }, MemberType = typeof(Sources))]
+        [MemberData(nameof(UnorderedSources.Ranges), new[] { 1024 * 16 }, MemberType = typeof(UnorderedSources))]
+        public static void WithCancellation_DisposedEnumerator_ChannelCancellation_ProducerBlocked(Labeled<ParallelQuery<int>> labeled, int count)
         {
-            Debug.WriteLine("PlinqCancellationTests.ChannelCancellation_ProducerBlocked()");
-
-            Debug.WriteLine("        Query running (should be few seconds max)..");
-            var query1 = Enumerable.Range(0, 100000000)  //provide 100million elements to ensure all the cores get >64K ints. Good up to 1600cores
-                .AsParallel()
-                .Select(x => x);
-            var enumerator1 = query1.GetEnumerator();
-            enumerator1.MoveNext();
-            Task.Delay(1000).Wait();
-            enumerator1.MoveNext();
-            enumerator1.Dispose(); //can potentially hang
-
-            Debug.WriteLine("        Done (success).");
+            ParallelQuery<int> query = labeled.Item;
+            // Larger size, delay may cause enumerator.Dispose() to hang
+            DisposedEnumerator(query, true);
+            DisposedEnumerator(query.WithMergeOptions(ParallelMergeOptions.Default), true);
+            DisposedEnumerator(query.WithMergeOptions(ParallelMergeOptions.AutoBuffered), true);
+            DisposedEnumerator(query.WithMergeOptions(ParallelMergeOptions.FullyBuffered), true);
+            DisposedEnumerator(query.WithMergeOptions(ParallelMergeOptions.NotBuffered), true);
         }
 
         // a specific repro where inner queries would see an ODE on the merged cancellation token source
@@ -156,6 +166,20 @@ namespace System.Linq.Parallel.Tests
             }
 
             Assert.NotNull(oce);
+        }
+
+        private static void DisposedEnumerator(ParallelQuery<int> query, bool delay = false)
+        {
+            query = query.WithCancellation(new CancellationTokenSource().Token).Select(x => x);
+
+            IEnumerator<int> enumerator = query.GetEnumerator();
+
+            enumerator.MoveNext();
+            if (delay) Task.Delay(1000).Wait();
+            enumerator.MoveNext();
+            enumerator.Dispose();
+
+            Assert.Throws<ObjectDisposedException>(() => enumerator.MoveNext());
         }
     }
 }
