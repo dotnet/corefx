@@ -258,16 +258,8 @@ namespace System.IO.Pipes
 
             // Create and store async stream class library specific data in the 
             // async result
-            PipeAsyncResult asyncResult = new PipeAsyncResult();
-            asyncResult._threadPoolBinding = _threadPoolBinding;
-            asyncResult._userCallback = callback;
-            asyncResult._userStateObject = state;
-
+            PipeAsyncResult asyncResult = new PipeAsyncResult(_threadPoolBinding, callback, state);
             IOCancellationHelper cancellationHelper = state as IOCancellationHelper;
-
-            // Create wait handle and store in async result
-            ManualResetEvent waitHandle = new ManualResetEvent(false);
-            asyncResult._waitHandle = waitHandle;
 
             NativeOverlapped* intOverlapped = _threadPoolBinding.AllocateNativeOverlapped((errorCode, numBytes, pOverlapped) =>
             {
@@ -355,20 +347,14 @@ namespace System.IO.Pipes
                 cancellationHelper.SetOperationCompleted();
             }
 
-            // Obtain the WaitHandle, but don't use public property in case we
-            // delay initialize the manual reset event in the future.
-            WaitHandle wh = afsar._waitHandle;
-            if (wh != null)
+            // We must block to ensure that ConnectionIOCallback has completed,
+            // and we should close the WaitHandle in here.  AsyncFSCallback
+            // and the hand-ported imitation version in COMThreadPool.cpp 
+            // are the only places that set this event.
+            using (ManualResetEventSlim wh = afsar.WaitHandle)
             {
-                // We must block to ensure that ConnectionIOCallback has completed,
-                // and we should close the WaitHandle in here.  AsyncFSCallback
-                // and the hand-ported imitation version in COMThreadPool.cpp 
-                // are the only places that set this event.
-                using (wh)
-                {
-                    wh.WaitOne();
-                    Debug.Assert(afsar._isComplete == true, "NamedPipeServerStream::EndWaitForConnection - AsyncFSCallback didn't set _isComplete to true!");
-                }
+                wh.Wait();
+                Debug.Assert(afsar._isComplete, "NamedPipeServerStream::EndWaitForConnection - AsyncFSCallback didn't set _isComplete to true!");
             }
 
             // We should have freed the overlapped and set it to null either in the Begin
@@ -414,16 +400,14 @@ namespace System.IO.Pipes
             asyncResult._isComplete = true;
 
             // The OS does not signal this event.  We must do it ourselves.
-            ManualResetEvent wh = asyncResult._waitHandle;
-            if (wh != null)
+            ManualResetEventSlim wh = asyncResult.WaitHandle;
+            Debug.Assert(!wh.IsSet, "ManualResetEventSlim already signaled!");
+            wh.Set();
+            bool isSet = wh.IsSet;
+            Debug.Assert(isSet, "ManualResetEventSlim::Set failed!");
+            if (!isSet)
             {
-                Debug.Assert(!wh.GetSafeWaitHandle().IsClosed, "ManualResetEvent already closed!");
-                bool r = wh.Set();
-                Debug.Assert(r, "ManualResetEvent::Set failed!");
-                if (!r)
-                {
-                    throw Win32Marshal.GetExceptionForLastWin32Error();
-                }
+                throw Win32Marshal.GetExceptionForLastWin32Error();
             }
 
             AsyncCallback userCallback = asyncResult._userCallback;
