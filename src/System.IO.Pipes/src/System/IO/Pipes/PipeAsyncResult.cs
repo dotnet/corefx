@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using Microsoft.Win32.SafeHandles;
 using System.Security;
 using System.Threading;
 
@@ -9,10 +8,10 @@ namespace System.IO.Pipes
 {
     internal unsafe sealed class PipeAsyncResult : IAsyncResult
     {
-        internal ThreadPoolBoundHandle _threadPoolBinding;
-        internal AsyncCallback _userCallback;   // User code callback
-        internal Object _userStateObject;
-        internal ManualResetEvent _waitHandle;
+        internal readonly ThreadPoolBoundHandle _threadPoolBinding;
+        internal readonly AsyncCallback _userCallback;   // User code callback
+        private readonly Object _userStateObject;
+        private readonly ManualResetEventSlim _waitHandle;
         [SecurityCritical]
         internal NativeOverlapped* _overlapped;
 
@@ -21,6 +20,14 @@ namespace System.IO.Pipes
 
         internal bool _isComplete;              // Value for IsCompleted property        
         internal bool _completedSynchronously;  // Which thread called callback
+
+        public PipeAsyncResult(ThreadPoolBoundHandle handle, AsyncCallback callback, Object state)
+        {
+            _threadPoolBinding = handle;
+            _userCallback = callback;
+            _userStateObject = state;
+            _waitHandle = new ManualResetEventSlim(false);
+        }
 
         public Object AsyncState
         {
@@ -37,26 +44,18 @@ namespace System.IO.Pipes
             [SecurityCritical]
             get
             {
-                if (_waitHandle == null)
-                {
-                    ManualResetEvent mre = new ManualResetEvent(false);
-                    if (_overlapped != null && _overlapped->EventHandle != IntPtr.Zero)
-                    {
-                        mre.SetSafeWaitHandle(new SafeWaitHandle(_overlapped->EventHandle, true));
-                    }
-                    if (_isComplete)
-                    {
-                        mre.Set();
-                    }
-                    _waitHandle = mre;
-                }
-                return _waitHandle;
+                return _waitHandle.WaitHandle;
             }
         }
 
         public bool CompletedSynchronously
         {
             get { return _completedSynchronously; }
+        }
+
+        internal ManualResetEventSlim WaitHandle
+        {
+            get { return _waitHandle; }
         }
 
         internal void CallUserCallback()
