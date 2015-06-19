@@ -188,8 +188,6 @@ namespace System.IO.Packaging
 
                     if (contentType == null)
                     {
-                        // From sarjanas:
-                        //
                         // We have seen this bug in the past and have said that this should be
                         // treated as exception. If we get a null content type, it’s an error.
                         // We want to throw this exception so that anyone sub-classing this class
@@ -199,7 +197,7 @@ namespace System.IO.Packaging
                         // in the constructor.
                         //
                         // We cannot get rid of this exception. At most, we can change it to
-                        // Invariant.Assert. But then client code will see an Assert if they make
+                        // Debug.Assert. But then client code will see an Assert if they make
                         // a mistake and that is also not desirable.
                         //
                         // PackagePart is a public API.

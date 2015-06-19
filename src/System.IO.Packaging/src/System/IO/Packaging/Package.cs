@@ -875,7 +875,6 @@ namespace System.IO.Packaging
                 ThrowIfFileModeInvalid(packageMode);
                 ThrowIfFileAccessInvalid(packageAccess);
 
-                // todo ew move into function
                 if (packageMode == FileMode.OpenOrCreate && packageAccess != FileAccess.ReadWrite)
                     throw new ArgumentException(SR.UnsupportedCombinationOfModeAccess);
                 if (packageMode == FileMode.Create && packageAccess != FileAccess.ReadWrite)
@@ -948,21 +947,11 @@ namespace System.IO.Packaging
                 if (stream == null)
                     throw new ArgumentNullException("stream");
 
-                //FileMode and FileAccess Enums are validated in the following call
-
-                // todo ew I think there may be a security issue if 
-                // don't have ensuredStream.
-
-                // Stream ensuredStream = ValidateModeAndAccess(stream, packageMode, packageAccess); todo
-
                 try
                 {
                     // Today the Open(Stream) method is purely used for streams of Zip file format as
                     // that is the default underlying file format mapper implemented.
 
-                    // todo ew what is the deal with ensuredStream?
-
-                    //package = new ZipPackage(ensuredStream, packageMode, packageAccess);
                     package = new ZipPackage(stream, packageMode, packageAccess);
 
                     //We need to get all the parts if any exists from the underlying file

@@ -688,28 +688,6 @@ namespace System.IO.Packaging
             }
         }
 
-#if !PBTCOMPILER
-        /// <summary>
-        /// Answer the encoding of the underlying xaml stream
-        /// </summary>
-        
-        // todo ew don't need this
-        //internal System.Text.Encoding Encoding
-        //{
-        //    get
-        //    {
-        //        XmlTextReader textReader = Reader as XmlTextReader;
-        //        if (textReader == null)
-        //        {
-        //            return new System.Text.UTF8Encoding(true, true);
-        //        }
-        //        else
-        //        {
-        //            return textReader.Encoding;
-        //        }
-        //    }
-        //}
-#endif
         #endregion Public Properties
 
         #region Private Methods
@@ -1827,22 +1805,6 @@ namespace System.IO.Packaging
                 }
                 preserveAttributeSet.Add(attributeName);
             }
-
-            /*public bool ShouldPreserveElement(string namespaceName, string elementName)
-            {
-                bool result = _preserveItems != null && _preserveItems.ShouldPreserveElement(namespaceName, elementName);
-                if (!result && _previous != null)
-                    result = _previous.ShouldPreserveElement(namespaceName, elementName);
-                return result;
-            }
-
-            public bool ShouldPreserveAttribute(string namespaceName, string attributeName)
-            {
-                bool result = _preserveItems != null && _preserveItems.ShouldPreserveAttribute(namespaceName, attributeName);
-                if (!result && _previous != null)
-                    result = _previous.ShouldPreserveAttribute(namespaceName, attributeName);
-                return result;
-            }*/
 
             public void Verify()
             {

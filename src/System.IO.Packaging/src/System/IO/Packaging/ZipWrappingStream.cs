@@ -103,7 +103,6 @@ namespace System.IO.Packaging
         // then can't get length from the stream.  Not supported.
         // The workaround - write the stream to a memory stream, then return the length of the
         // memory stream.
-        // todo ew this will cause inefficiencies in PowerTools - should fix PowerTools
         public override long Length
         {
             get {
