@@ -86,9 +86,10 @@ namespace System.IO.Packaging
             //Note: If not encoding attribute is present or no byte order marking is present the 
             //encoding default to UTF8
 
-            // todo ew
-            // if (!(reader.Encoding is UnicodeEncoding || reader.Encoding is UTF8Encoding))
-            //     throw new FileFormatException(SR.Get(SRID.EncodingNotSupported));
+            string encodingCheck;
+            encodingCheck = reader.GetAttribute(EncodingAttribute).ToLower();
+            if (!(encodingCheck == "utf-8" || encodingCheck == "utf-16"))
+                throw new FileFormatException(SR.EncodingNotSupported);
         }
 
         /// <summary>
