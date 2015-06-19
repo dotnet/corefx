@@ -52,13 +52,13 @@ namespace System.IO.Packaging
         /// <returns>throws an exception if the encoding is not UTF-8 or UTF-16</returns>
         internal static void PerformInitailReadAndVerifyEncoding(XmlReader reader)
         {
-            Invariant.Assert(reader != null && reader.ReadState == ReadState.Initial);
+            Debug.Assert(reader != null && reader.ReadState == ReadState.Initial);
 
             //If the first node is XmlDeclaration we check to see if the encoding attribute is present
             if (reader.Read() && reader.NodeType == XmlNodeType.XmlDeclaration && reader.Depth == 0)
             {
                 string encoding;
-                encoding = reader.GetAttribute(_encodingAttribute);
+                encoding = reader.GetAttribute(EncodingAttribute);
 
                 if (encoding != null && encoding.Length > 0)
                 {
@@ -193,14 +193,14 @@ namespace System.IO.Packaging
         /// return.  This one does.</remarks>
         internal static int ReliableRead(Stream stream, byte[] buffer, int offset, int requestedCount, int requiredCount)
         {
-            Invariant.Assert(stream != null);
-            Invariant.Assert(buffer != null);
-            Invariant.Assert(buffer.Length > 0);
-            Invariant.Assert(offset >= 0);
-            Invariant.Assert(requestedCount >= 0);
-            Invariant.Assert(requiredCount >= 0);
-            Invariant.Assert(checked(offset + requestedCount <= buffer.Length));
-            Invariant.Assert(requiredCount <= requestedCount);
+            Debug.Assert(stream != null);
+            Debug.Assert(buffer != null);
+            Debug.Assert(buffer.Length > 0);
+            Debug.Assert(offset >= 0);
+            Debug.Assert(requestedCount >= 0);
+            Debug.Assert(requiredCount >= 0);
+            Debug.Assert(checked(offset + requestedCount <= buffer.Length));
+            Debug.Assert(requiredCount <= requestedCount);
 
             // let's read the whole block into our buffer 
             int totalBytesRead = 0;
@@ -248,14 +248,14 @@ namespace System.IO.Packaging
         /// return.  This one does.</remarks>
         internal static int ReliableRead(BinaryReader reader, byte[] buffer, int offset, int requestedCount, int requiredCount)
         {
-            Invariant.Assert(reader != null);
-            Invariant.Assert(buffer != null);
-            Invariant.Assert(buffer.Length > 0);
-            Invariant.Assert(offset >= 0);
-            Invariant.Assert(requestedCount >= 0);
-            Invariant.Assert(requiredCount >= 0);
-            Invariant.Assert(checked(offset + requestedCount <= buffer.Length));
-            Invariant.Assert(requiredCount <= requestedCount);
+            Debug.Assert(reader != null);
+            Debug.Assert(buffer != null);
+            Debug.Assert(buffer.Length > 0);
+            Debug.Assert(offset >= 0);
+            Debug.Assert(requestedCount >= 0);
+            Debug.Assert(requiredCount >= 0);
+            Debug.Assert(checked(offset + requestedCount <= buffer.Length));
+            Debug.Assert(requiredCount <= requestedCount);
 
             // let's read the whole block into our buffer 
             int totalBytesRead = 0;
@@ -287,10 +287,10 @@ namespace System.IO.Packaging
         ///  Target stream isn't truncated even if it has more data past the area that was copied.</remarks> 
         internal static long CopyStream(Stream sourceStream, Stream targetStream, long bytesToCopy, int bufferSize)
         {
-            Invariant.Assert(sourceStream != null);
-            Invariant.Assert(targetStream != null);
-            Invariant.Assert(bytesToCopy >= 0);
-            Invariant.Assert(bufferSize > 0);
+            Debug.Assert(sourceStream != null);
+            Debug.Assert(targetStream != null);
+            Debug.Assert(bytesToCopy >= 0);
+            Debug.Assert(bufferSize > 0);
 
             byte[] buffer = new byte[bufferSize];
 
@@ -389,7 +389,7 @@ namespace System.IO.Packaging
         /// </summary>
         /// <remarks>See PS 1468964 for details.</remarks>
         private const string XmlNamespace = "xmlns";
-        private const string _encodingAttribute = "encoding";
+        private const string EncodingAttribute = "encoding";
         private static readonly string s_webNameUTF8 = Encoding.UTF8.WebName.ToUpperInvariant();
         private static readonly string s_webNameUnicode = Encoding.Unicode.WebName.ToUpperInvariant();
 

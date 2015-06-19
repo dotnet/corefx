@@ -243,4 +243,3 @@ namespace System.IO.Packaging
         #endregion Private Fields
     }
 }
-

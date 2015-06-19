@@ -15,8 +15,6 @@ using System.Collections;
 using System.Collections.Generic;   // For List <>
 using System.Diagnostics;           // For Debug.Assert
 
-#pragma warning disable 1634, 1691  // suppressing PreSharp warnings
-
 namespace System.IO.Packaging
 {
     /// <summary>
@@ -205,7 +203,6 @@ namespace System.IO.Packaging
                         // a mistake and that is also not desirable.
                         //
                         // PackagePart is a public API.
-#pragma warning suppress 6503
                         throw new InvalidOperationException(SR.NullContentTypeProvided);
                     }
                     _contentType = new ContentType(contentType);

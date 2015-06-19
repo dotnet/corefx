@@ -179,7 +179,7 @@ namespace System.IO.Packaging
         /// <returns>An array of ZipPackagePart.</returns>
         protected override PackagePart[] GetPartsCore()
         {
-            List<PackagePart> parts = new List<PackagePart>(_initialPartListSize);
+            List<PackagePart> parts = new List<PackagePart>(InitialPartListSize);
 
             // The list of files has to be searched linearly (1) to identify the content type
             // stream, and (2) to identify parts.
@@ -754,8 +754,8 @@ namespace System.IO.Packaging
 
         #region Private Members
 
-        private const int _initialPartListSize = 50;
-        private const int _initialPieceNameListSize = 50;
+        private const int InitialPartListSize = 50;
+        private const int InitialPieceNameListSize = 50;
 
         private ZipArchive _zipArchive;
         private Stream _containerStream;      // stream we are opened in if Open(Stream) was called
@@ -795,8 +795,8 @@ namespace System.IO.Packaging
         {
             bool IEqualityComparer<string>.Equals(string extensionA, string extensionB)
             {
-                Invariant.Assert(extensionA != null, "extenstion should not be null");
-                Invariant.Assert(extensionB != null, "extenstion should not be null");
+                Debug.Assert(extensionA != null, "extenstion should not be null");
+                Debug.Assert(extensionB != null, "extenstion should not be null");
 
                 //Important Note: any change to this should be made in accordance 
                 //with the rules for comparing/normalizing partnames. 
@@ -807,7 +807,7 @@ namespace System.IO.Packaging
 
             int IEqualityComparer<string>.GetHashCode(string extension)
             {
-                Invariant.Assert(extension != null, "extenstion should not be null");
+                Debug.Assert(extension != null, "extenstion should not be null");
 
                 //Important Note: any change to this should be made in accordance 
                 //with the rules for comparing/normalizing partnames.
@@ -1038,11 +1038,6 @@ namespace System.IO.Packaging
                 using (s)
                 using (XmlReader reader = XmlReader.Create(s, xrs))
                 {
-                    //Prohibit DTD from the markup as per the OPC spec
-#pragma warning disable 618
-                    // reader.ProhibitDtd = true; todo ew
-#pragma warning restore 618
-
                     //This method expects the reader to be in ReadState.Initial.
                     //It will make the first read call.
                     PackagingUtilities.PerformInitailReadAndVerifyEncoding(reader);
@@ -1468,8 +1463,8 @@ namespace System.IO.Packaging
             /// <param name="zipArchive"></param>
             internal IgnoredItemHelper(ZipArchive zipArchive)
             {
-                _extensionDictionary = new Dictionary<string, List<string>>(_dictionaryInitialSize, s_extensionEqualityComparer);
-                _ignoredItemDictionary = new Dictionary<string, List<string>>(_dictionaryInitialSize, StringComparer.Ordinal);
+                _extensionDictionary = new Dictionary<string, List<string>>(DictionaryInitialSize, s_extensionEqualityComparer);
+                _ignoredItemDictionary = new Dictionary<string, List<string>>(DictionaryInitialSize, StringComparer.Ordinal);
                 _zipArchive = zipArchive;
             }
 
@@ -1589,7 +1584,7 @@ namespace System.IO.Packaging
             private void AddItem(PackUriHelper.ValidatedPartUri partUri, string normalizedPrefixName, string zipFileName)
             {
                 if (!_ignoredItemDictionary.ContainsKey(normalizedPrefixName))
-                    _ignoredItemDictionary.Add(normalizedPrefixName, new List<string>(_listInitialSize));
+                    _ignoredItemDictionary.Add(normalizedPrefixName, new List<string>(ListInitialSize));
 
                 _ignoredItemDictionary[normalizedPrefixName].Add(zipFileName);
 
@@ -1604,7 +1599,7 @@ namespace System.IO.Packaging
                 string extension = partUri.PartUriExtension;
 
                 if (!_extensionDictionary.ContainsKey(extension))
-                    _extensionDictionary.Add(extension, new List<string>(_listInitialSize));
+                    _extensionDictionary.Add(extension, new List<string>(ListInitialSize));
 
                 _extensionDictionary[extension].Add(normalizedPrefixName);
             }
@@ -1613,8 +1608,8 @@ namespace System.IO.Packaging
 
             #region Private Member Variables
 
-            private const int _dictionaryInitialSize = 8;
-            private const int _listInitialSize = 1;
+            private const int DictionaryInitialSize = 8;
+            private const int ListInitialSize = 1;
 
             //dictionary mapping a normalized prefix name to different items
             //with the same prefix name.

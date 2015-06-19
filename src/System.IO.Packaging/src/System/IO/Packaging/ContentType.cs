@@ -94,7 +94,7 @@ namespace System.IO.Packaging
                 ValidateCarriageReturns(contentType);
 
                 //Begin Parsing                
-                int semiColonIndex = contentType.IndexOf(_semicolonSeparator);
+                int semiColonIndex = contentType.IndexOf(SemicolonSeparator);
 
                 if (semiColonIndex == -1)
                 {
@@ -284,10 +284,10 @@ namespace System.IO.Packaging
                     foreach (string paramterKey in _parameterDictionary.Keys)
                     {
                         stringBuilder.Append(s_linearWhiteSpaceChars[0]);
-                        stringBuilder.Append(_semicolonSeparator);
+                        stringBuilder.Append(SemicolonSeparator);
                         stringBuilder.Append(s_linearWhiteSpaceChars[0]);
                         stringBuilder.Append(paramterKey);
-                        stringBuilder.Append(_equalSeparator);
+                        stringBuilder.Append(EqualSeparator);
                         stringBuilder.Append(_parameterDictionary[paramterKey]);
                     }
                 }
@@ -440,7 +440,7 @@ namespace System.IO.Packaging
             {
                 //At this point the first character MUST be a semi-colon
                 //First time through this test is serving more as an assert.
-                if (parameterAndValue[0] != _semicolonSeparator)
+                if (parameterAndValue[0] != SemicolonSeparator)
                     throw new ArgumentException(SR.ExpectingSemicolon);
 
                 //At this point if we have just one semicolon, then its an error.
@@ -456,7 +456,7 @@ namespace System.IO.Packaging
                 //of the parameter name.
                 parameterAndValue = parameterAndValue.TrimStart(s_linearWhiteSpaceChars);
 
-                int equalSignIndex = parameterAndValue.IndexOf(_equalSeparator);
+                int equalSignIndex = parameterAndValue.IndexOf(EqualSeparator);
 
                 if (equalSignIndex <= 0 || equalSignIndex == (parameterAndValue.Length - 1))
                     throw new ArgumentException(SR.InvalidParameterValuePair);
@@ -493,7 +493,7 @@ namespace System.IO.Packaging
             //a ';' as the terminator for the token value.
             if (s[startIndex] != '"')
             {
-                int semicolonIndex = s.IndexOf(_semicolonSeparator, startIndex);
+                int semicolonIndex = s.IndexOf(SemicolonSeparator, startIndex);
 
                 if (semicolonIndex != -1)
                 {
@@ -552,12 +552,20 @@ namespace System.IO.Packaging
             for (int i = 0; i < token.Length; i++)
             {
                 if (IsAsciiLetterOrDigit(token[i]))
+                {
                     continue;
+                }
                 else
+                {
                     if (IsAllowedCharacter(token[i]))
-                    continue;
-                else
-                    throw new ArgumentException(SR.InvalidToken);
+                    {
+                        continue;
+                    }
+                    else
+                    {
+                        throw new ArgumentException(SR.InvalidToken);
+                    }
+                }
             }
 
             return token;
@@ -576,8 +584,8 @@ namespace System.IO.Packaging
                 throw new ArgumentException(SR.InvalidParameterValue);
 
             if (parameterValue.Length >= 2 &&
-                parameterValue.StartsWith(_quote, StringComparison.Ordinal) &&
-                parameterValue.EndsWith(_quote, StringComparison.Ordinal))
+                parameterValue.StartsWith(Quote, StringComparison.Ordinal) &&
+                parameterValue.EndsWith(Quote, StringComparison.Ordinal))
                 ValidateQuotedText(parameterValue.Substring(1, parameterValue.Length - 2));
             else
                 ValidateToken(parameterValue);
@@ -713,9 +721,9 @@ namespace System.IO.Packaging
         private Dictionary<string, string> _parameterDictionary = null;
         private bool _isInitialized = false;
 
-        private const string _quote = "\"";
-        private const char _semicolonSeparator = ';';
-        private const char _equalSeparator = '=';
+        private const string Quote = "\"";
+        private const char SemicolonSeparator = ';';
+        private const char EqualSeparator = '=';
 
         //This array is sorted by the ascii value of these characters.
         private static readonly char[] s_allowedCharacters =
@@ -741,4 +749,3 @@ namespace System.IO.Packaging
         #endregion Private Members
     }
 }
-

@@ -24,7 +24,6 @@
     <Compile Include="System\IO\Packaging\FileFormatException.cs" />
     <Compile Include="System\IO\Packaging\IgnoreFlushAndCloseStream.cs" />
     <Compile Include="System\IO\Packaging\InternalRelationshipCollection.cs" />
-    <Compile Include="System\IO\Packaging\Invariant.cs" />
     <Compile Include="System\IO\Packaging\Package.cs" />
     <Compile Include="System\IO\Packaging\PackagePart.cs" />
     <Compile Include="System\IO\Packaging\PackagePartCollection.cs" />

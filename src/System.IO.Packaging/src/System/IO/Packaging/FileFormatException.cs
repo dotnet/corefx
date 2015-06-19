@@ -139,4 +139,3 @@ namespace System.IO
         private Uri _sourceUri;
     }
 }
-

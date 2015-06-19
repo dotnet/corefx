@@ -454,7 +454,7 @@ namespace System.IO.Packaging
         // All values will remain null if the package is not enabled for reading.
         private void ReadPropertyValuesFromPackage()
         {
-            Invariant.Assert(_propertyPart == null); // This gets called exclusively from constructor.
+            Debug.Assert(_propertyPart == null); // This gets called exclusively from constructor.
 
             // Don't try to read properties from the package it does not have read access
             if (_package.FileOpenAccess == FileAccess.Write)
@@ -501,7 +501,7 @@ namespace System.IO.Packaging
         {
             PackageRelationship propertiesPartRelationship = null;
             foreach (PackageRelationship rel
-                in _package.GetRelationshipsByType(_coreDocumentPropertiesRelationshipType))
+                in _package.GetRelationshipsByType(CoreDocumentPropertiesRelationshipType))
             {
                 if (propertiesPartRelationship != null)
                 {
@@ -523,11 +523,6 @@ namespace System.IO.Packaging
             // in effect as a set of atomic identifiers.
             using (XmlReader reader = XmlReader.Create(stream, xrs))
             {
-                //Prohibit DTD from the markup as per the OPC spec
-#pragma warning disable 618
-                // reader.ProhibitDtd = true; todo ew
-#pragma warning restore 618
-
                 //This method expects the reader to be in ReadState.Initial.
                 //It will make the first read call.
                 PackagingUtilities.PerformInitailReadAndVerifyEncoding(reader);
@@ -626,14 +621,14 @@ namespace System.IO.Packaging
                         {
                             ValidateXsiType(reader,
                                 PackageXmlStringTable.GetXmlStringAsObject(PackageXmlEnum.DublinCoreTermsNamespace),
-                                _w3cdtf);
+                                W3cdtf);
                         }
 
                         RecordNewBinding(xmlStringIndex, GetDateData(reader), true /*initializing*/, reader);
                     }
                     else  // An unexpected element is an error.
                     {
-                        Invariant.Assert(false, "Unknown value type for properties");
+                        Debug.Assert(false, "Unknown value type for properties");
                     }
                 }
             }
@@ -763,14 +758,14 @@ namespace System.IO.Packaging
         {
             _propertyPart = _package.CreatePart(GeneratePropertyPartUri(), s_coreDocumentPropertiesContentType.ToString());
             _package.CreateRelationship(_propertyPart.Uri, TargetMode.Internal,
-                _coreDocumentPropertiesRelationshipType);
+                CoreDocumentPropertiesRelationshipType);
         }
 
         private Uri GeneratePropertyPartUri()
         {
-            string propertyPartName = _defaultPropertyPartNamePrefix
-                + Guid.NewGuid().ToString(_guidStorageFormatString)
-                + _defaultPropertyPartNameExtension;
+            string propertyPartName = DefaultPropertyPartNamePrefix
+                + Guid.NewGuid().ToString(GuidStorageFormatString)
+                + DefaultPropertyPartNameExtension;
 
             return PackUriHelper.CreatePartUri(new Uri(propertyPartName, UriKind.Relative));
         }
@@ -823,7 +818,7 @@ namespace System.IO.Packaging
                                                         PackageXmlStringTable.GetXmlString(PackageXmlEnum.XmlSchemaInstanceNamespace));
 
                         // "dcterms:W3CDTF"
-                        _xmlWriter.WriteQualifiedName(_w3cdtf,
+                        _xmlWriter.WriteQualifiedName(W3cdtf,
                                                         PackageXmlStringTable.GetXmlString(PackageXmlEnum.DublinCoreTermsNamespace));
 
                         _xmlWriter.WriteEndAttribute();
@@ -875,8 +870,8 @@ namespace System.IO.Packaging
 
         // Table of objects from the closed set of literals defined below.
         // (Uses object comparison rather than string comparison.)
-        private const int _numCoreProperties = 16;
-        private Dictionary<PackageXmlEnum, Object> _propertyDictionary = new Dictionary<PackageXmlEnum, Object>(_numCoreProperties);
+        private const int NumCoreProperties = 16;
+        private Dictionary<PackageXmlEnum, Object> _propertyDictionary = new Dictionary<PackageXmlEnum, Object>(NumCoreProperties);
         private bool _dirty = false;
 
         // This System.Xml.NameTable makes sure that we use the same references to strings
@@ -887,14 +882,14 @@ namespace System.IO.Packaging
         // Literals.
         private static readonly ContentType s_coreDocumentPropertiesContentType
             = new ContentType("application/vnd.openxmlformats-package.core-properties+xml");
-        private const string _coreDocumentPropertiesRelationshipType
+        private const string CoreDocumentPropertiesRelationshipType
             = "http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties";
 
-        private const string _defaultPropertyPartNamePrefix =
+        private const string DefaultPropertyPartNamePrefix =
             "/package/services/metadata/core-properties/";
-        private const string _w3cdtf = "W3CDTF";
-        private const string _defaultPropertyPartNameExtension = ".psmdcp";
-        private const string _guidStorageFormatString = @"N";     // N - simple format without adornments
+        private const string W3cdtf = "W3CDTF";
+        private const string DefaultPropertyPartNameExtension = ".psmdcp";
+        private const string GuidStorageFormatString = @"N";     // N - simple format without adornments
 
         private static PackageXmlEnum[] s_validProperties = new PackageXmlEnum[] {
                                                                                 PackageXmlEnum.Creator,
@@ -983,4 +978,3 @@ namespace System.IO.Packaging
         #endregion Private Fields
     }
 }
-

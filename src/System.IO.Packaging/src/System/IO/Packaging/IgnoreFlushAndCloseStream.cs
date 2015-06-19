@@ -223,4 +223,3 @@ namespace System.IO.Packaging
         #endregion Private Variables
     }
 }
-

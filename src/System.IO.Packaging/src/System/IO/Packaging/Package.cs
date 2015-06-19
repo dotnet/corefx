@@ -1025,7 +1025,7 @@ namespace System.IO.Packaging
             //Get the index of the entry at which this part was added
             int index = _partList.IndexOfKey(partUri);
 
-            Invariant.Assert(index >= 0, "Given uri must be present in the dictionary");
+            Debug.Assert(index >= 0, "Given uri must be present in the dictionary");
 
             string normalizedPartName = partUri.NormalizedPartUriString;
             string precedingPartName = null;

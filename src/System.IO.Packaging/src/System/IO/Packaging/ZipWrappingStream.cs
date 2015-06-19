@@ -123,10 +123,10 @@ namespace System.IO.Packaging
 
         private static void CopyStream(Stream source, Stream target)
         {
-            const int bufSize = 0x4096;
-            byte[] buf = new byte[bufSize];
+            const int BufSize = 0x4096;
+            byte[] buf = new byte[BufSize];
             int bytesRead = 0;
-            while ((bytesRead = source.Read(buf, 0, bufSize)) > 0)
+            while ((bytesRead = source.Read(buf, 0, BufSize)) > 0)
                 target.Write(buf, 0, bytesRead);
         }
 

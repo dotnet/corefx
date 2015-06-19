@@ -688,24 +688,6 @@ namespace System.IO.Packaging
             }
         }
 
-        /// <summary>
-        /// Sets a value indicating whether to normalize white space and attribute values.
-        /// </summary>
-        /// todo ew don't need this
-        //public bool Normalization
-        //{
-        //    set
-        //    {
-        //        XmlReader xmlTextReader = Reader as XmlReader;
-
-        //        // review, what if not the XmlReader.
-        //        if (null != xmlTextReader)
-        //        {
-        //            xmlTextReader.Normalization = value;
-        //        }
-        //    }
-        //}
-
 #if !PBTCOMPILER
         /// <summary>
         /// Answer the encoding of the underlying xaml stream

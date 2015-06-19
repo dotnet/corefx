@@ -175,7 +175,7 @@ namespace System.IO.Packaging
         // If 'id' is not of the xsd type ID, throw an exception.
         internal static void ThrowIfInvalidXsdId(string id)
         {
-            Invariant.Assert(id != null, "id should not be null");
+            Debug.Assert(id != null, "id should not be null");
 
             try
             {
@@ -260,13 +260,6 @@ namespace System.IO.Packaging
                 // load from the relationship part associated with the given part
                 using (XmlReader baseReader = XmlReader.Create(s))
                 {
-                    //baseReader.WhitespaceHandling = WhitespaceHandling.None; todo ew
-
-                    //Prohibit DTD from the markup as per the OPC spec
-#pragma warning disable 618
-                    // baseReader.ProhibitDtd = true; todo ew
-#pragma warning restore 618
-
                     using (XmlCompatibilityReader reader = new XmlCompatibilityReader(baseReader, s_relationshipKnownNamespaces))
                     {
                         //This method expects the reader to be in ReadState.Initial.
@@ -706,4 +699,3 @@ namespace System.IO.Packaging
         #endregion    
     }
 }
-

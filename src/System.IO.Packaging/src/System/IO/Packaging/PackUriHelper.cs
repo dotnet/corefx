@@ -9,9 +9,6 @@
 //
 //-----------------------------------------------------------------------------
 
-// Allow use of presharp warning numbers [6506] unknown to the compiler
-#pragma warning disable 1634, 1691
-
 using System;
 using System.IO;                        // for Path class
 using System.Diagnostics;
@@ -112,11 +109,8 @@ namespace System.IO.Packaging
             // Hence we can safely use IndexOf to find the begining of the fragment.
             string absolutePackageUri = packageUri.GetComponents(UriComponents.AbsoluteUri, UriFormat.UriEscaped);
 
-            //PRESHARP:Warning 6506 Parameter to this public method must be validated:  A null-dereference can occur here.
             //We know that the Fragment property will always be a string and never will return null, String.Empty if the fragment is empty.
-#pragma warning disable 6506
             if (packageUri.Fragment.Length != 0)
-#pragma warning restore 6506
             {
                 absolutePackageUri = absolutePackageUri.Substring(0, absolutePackageUri.IndexOf('#'));
             }
