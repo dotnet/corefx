@@ -91,28 +91,17 @@ namespace System.Linq.Parallel.Tests
 
         // a specific repro where inner queries would see an ODE on the merged cancellation token source
         // when the implementation involved disposing and recreating the token on each worker thread
-        [Fact]
-        public static void Cancellation_ODEIssue()
+        [Theory]
+        [MemberData(nameof(Sources.Ranges), new[] { 1024 * 4 }, MemberType = typeof(Sources))]
+        [MemberData(nameof(UnorderedSources.Ranges), new[] { 1024 * 4 }, MemberType = typeof(UnorderedSources))]
+        public static void WithCancellation_ODEIssue(Labeled<ParallelQuery<int>> labeled, int count)
         {
-            AggregateException caughtException = null;
-            try
-            {
-                Enumerable.Range(0, 1999).ToArray()
-                .AsParallel().AsUnordered()
-                .WithExecutionMode(ParallelExecutionMode.ForceParallelism)
-                .Zip<int, int, int>(
-                    Enumerable.Range(1000, 20).Select<int, int>(_item => (int)_item).AsParallel().AsUnordered(),
-                    (first, second) => { throw new OperationCanceledException(); })
-               .ForAll(x => { });
-            }
-            catch (AggregateException ae)
-            {
-                caughtException = ae;
-            }
-
             //the failure was an ODE coming out due to an ephemeral disposed merged cancellation token source.
-            Assert.True(caughtException != null,
-                                              "Cancellation_ODEIssue:  We expect an aggregate exception with OCEs in it.");
+            ParallelQuery<int> left = labeled.Item.AsUnordered().WithExecutionMode(ParallelExecutionMode.ForceParallelism);
+            ParallelQuery<int> right = Enumerable.Range(0, 1024).Select(x => x).AsParallel().AsUnordered();
+            Functions.AssertThrowsWrapped<OperationCanceledException>(() => left.GroupJoin(right, x => { throw new OperationCanceledException(); }, y => y, (x, e) => x).ForAll(x => { }));
+            Functions.AssertThrowsWrapped<OperationCanceledException>(() => left.Join(right, x => { throw new OperationCanceledException(); }, y => y, (x, e) => x).ForAll(x => { }));
+            Functions.AssertThrowsWrapped<OperationCanceledException>(() => left.Zip<int, int, int>(right, (x, y) => { throw new OperationCanceledException(); }).ForAll(x => { }));
         }
 
         // If a query is canceled and immediately disposed, the dispose should not throw an OCE.
