@@ -9,7 +9,7 @@ public class Program
         // Doc: https://msdn.microsoft.com/library/6sh2ey19.aspx
         
         // Create a list of parts.
-        List<Part> parts = new List<Part>();
+        var parts = new List<Part>();
 
         // Add a part to the list.
         var crank = new Part();
@@ -18,11 +18,11 @@ public class Program
         parts.Add(crank);
 
         // Add parts to the list with more compact syntax via object initializers.
-        parts.Add(new Part() {PartName = "chain ring", PartId = 1334 });
-        parts.Add(new Part() {PartName = "regular seat", PartId = 1434 });
-        parts.Add(new Part() {PartName = "banana seat", PartId = 1444 });
-        parts.Add(new Part() {PartName = "cassette", PartId = 1534 });
-        parts.Add(new Part() {PartName = "shift lever", PartId = 1634 }); ;
+        parts.Add(new Part() { PartName = "chain ring", PartId = 1334 });
+        parts.Add(new Part() { PartName = "regular seat", PartId = 1434 });
+        parts.Add(new Part() { PartName = "banana seat", PartId = 1444 });
+        parts.Add(new Part() { PartName = "cassette", PartId = 1534 });
+        parts.Add(new Part() { PartName = "shift lever", PartId = 1634 }); ;
  
         PrintParts(parts);
         

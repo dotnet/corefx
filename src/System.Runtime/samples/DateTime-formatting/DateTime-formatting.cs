@@ -15,16 +15,16 @@ public class Program
 		Console.WriteLine();
 		
 		// short / long formatting
-		Console.WriteLine("Print short date: {0}", date.ToString("d"));
-		Console.WriteLine("Print long date: {0}", date.ToString("D"));
-		Console.WriteLine("Print short time: {0}", date.ToString("t"));
-		Console.WriteLine("Print long time: {0}", date.ToString("T"));
+		Console.WriteLine("Print short date: {0:d}", date);
+		Console.WriteLine("Print long date: {0:D}", date);
+		Console.WriteLine("Print short time: {0:t}", date);
+		Console.WriteLine("Print long time: {0:T}", date);
 		Console.WriteLine();
 		
 		// custom formatting with templating
-		Console.WriteLine("Print date with month/year format: {0}", date.ToString("MM/yy"));
-		Console.WriteLine("Print date with month, year in verbose format: {0}", date.ToString("MMMM, yyyy"));
-		Console.WriteLine("Print time: {0}", date.ToString("hh:mm:ss"));
+		Console.WriteLine("Print date with month/year format: {0:MM/yy}", date);
+		Console.WriteLine("Print date with month, year in verbose format: {0:MMMM, yyyy}", date);
+		Console.WriteLine("Print time: {0:hh:mm:ss}", date);
 		Console.WriteLine();
 		
 		// print with locale-specific formatting

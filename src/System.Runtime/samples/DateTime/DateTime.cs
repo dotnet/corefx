@@ -8,25 +8,26 @@ public class Program
 		// Doc: https://msdn.microsoft.com/library/system.datetime.aspx
 		
 		// Get and manipulate time
-		Console.WriteLine("Print the DateTime now");
+		Console.WriteLine("Print local DateTime");
 		Console.WriteLine(DateTime.Now);
 		Console.WriteLine();
 		
-		Console.WriteLine("Print the UTC DateTime now");
+		Console.WriteLine("Print UTC DateTime");
 		Console.WriteLine(DateTime.UtcNow);
 		Console.WriteLine();
 		
-		Console.WriteLine("Print the DateTime in 10 mins");
+		Console.WriteLine("Print local DateTime + 10 mins");
 		Console.WriteLine(DateTime.Now.AddMinutes(10));
 		Console.WriteLine();
 		
-		Console.WriteLine("Print the DateTime 5 days and 4 hours ago");
+		Console.WriteLine("Print local DateTime - 5 days and 4 hours");
 		Console.WriteLine(DateTime.Now.AddDays(-5).AddHours(-4));
 		Console.WriteLine();
 		
 		// Create a DateTime for a specific date/time
 		// Uses Unix epoch as the example date - https://en.wikipedia.org/wiki/Unix_time
-		DateTime epoch = new DateTime(1970,1,1);
+		// Always specific DateTimeKind when creating a new DateTime
+		DateTime epoch = new DateTime(1970,1,1,0,0,0,DateTimeKind.Local);
 		Console.WriteLine("Create and print the DateTime for 1/1/1970 (unix epoch)");
 		Console.WriteLine(epoch);
 		Console.WriteLine();
@@ -38,10 +39,10 @@ public class Program
 		Console.WriteLine();
 
 		// Operate on parts of DateTime
-		Console.WriteLine("Print year: {0}",DateTime.Now.Year);
-		Console.WriteLine("Print day of month: {0}", DateTime.Now.Day);
-		Console.WriteLine("Print date without time: {0}", DateTime.Now.Date);
-		Console.WriteLine("Print time: {0}", DateTime.Now.TimeOfDay);
+		Console.WriteLine("Print local year: {0}",DateTime.Now.Year);
+		Console.WriteLine("Print local day of month: {0}", DateTime.Now.Day);
+		Console.WriteLine("Print local date without time: {0}", DateTime.Now.Date);
+		Console.WriteLine("Print local time: {0}", DateTime.Now.TimeOfDay);
 		Console.WriteLine();
 		
 		// Convenience formatting - not yet supported on .NET Core
