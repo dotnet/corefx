@@ -361,59 +361,56 @@ namespace System.Reflection.Internal
         }
 
         // comparison stops at null terminator, terminator parameter, or end-of-block -- whichever comes first.
-        internal bool Utf8NullTerminatedEquals(int offset, string text, MetadataStringDecoder utf8Decoder, char terminator = '\0')
+        internal bool Utf8NullTerminatedEquals(int offset, string text, MetadataStringDecoder utf8Decoder, char terminator, bool ignoreCase)
         {
-            FastComparisonResult result = Utf8NullTerminatedFastCompare(offset, text, terminator);
+            int firstDifference;
+            FastComparisonResult result = Utf8NullTerminatedFastCompare(offset, text, 0, out firstDifference, terminator, ignoreCase);
 
-            switch (result)
+            if (result == FastComparisonResult.Inconclusive)
             {
-                case FastComparisonResult.Equal:
-                    return true;
-
-                case FastComparisonResult.IsPrefix:
-                case FastComparisonResult.Unequal:
-                    return false;
-
-                default:
-                    Debug.Assert(result == FastComparisonResult.Inconclusive);
-                    int bytesRead;
-                    string decoded = PeekUtf8NullTerminated(offset, null, utf8Decoder, out bytesRead, terminator);
-                    return decoded.Equals(text, StringComparison.Ordinal);
+                int bytesRead;
+                string decoded = PeekUtf8NullTerminated(offset, null, utf8Decoder, out bytesRead, terminator);
+                return decoded.Equals(text, ignoreCase ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal);
             }
+
+            return result == FastComparisonResult.Equal;
         }
 
         // comparison stops at null terminator, terminator parameter, or end-of-block -- whichever comes first.
-        internal bool Utf8NullTerminatedStartsWith(int offset, string text, MetadataStringDecoder utf8Decoder, char terminator = '\0')
+        internal bool Utf8NullTerminatedStartsWith(int offset, string text, MetadataStringDecoder utf8Decoder, char terminator, bool ignoreCase)
         {
-            FastComparisonResult result = Utf8NullTerminatedFastCompare(offset, text, terminator);
+            int endIndex;
+            FastComparisonResult result = Utf8NullTerminatedFastCompare(offset, text, 0, out endIndex, terminator, ignoreCase);
 
             switch (result)
             {
                 case FastComparisonResult.Equal:
-                case FastComparisonResult.IsPrefix:
+                case FastComparisonResult.BytesStartWithText:
                     return true;
 
                 case FastComparisonResult.Unequal:
+                case FastComparisonResult.TextStartsWithBytes:
                     return false;
 
                 default:
                     Debug.Assert(result == FastComparisonResult.Inconclusive);
                     int bytesRead;
                     string decoded = PeekUtf8NullTerminated(offset, null, utf8Decoder, out bytesRead, terminator);
-                    return decoded.StartsWith(text, StringComparison.Ordinal);
+                    return decoded.StartsWith(text, ignoreCase ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal);
             }
         }
 
         internal enum FastComparisonResult
         {
             Equal,
-            IsPrefix,
+            BytesStartWithText,
+            TextStartsWithBytes,
             Unequal,
             Inconclusive
         }
 
         // comparison stops at null terminator, terminator parameter, or end-of-block -- whichever comes first.
-        private FastComparisonResult Utf8NullTerminatedFastCompare(int offset, string text, char terminator = '\0')
+        internal FastComparisonResult Utf8NullTerminatedFastCompare(int offset, string text, int textStart, out int firstDifferenceIndex, char terminator, bool ignoreCase)
         {
             CheckBounds(offset, 0);
 
@@ -423,49 +420,44 @@ namespace System.Reflection.Internal
             byte* endPointer = Pointer + Length;
             byte* currentPointer = startPointer;
 
-            int currentIndex = 0;
+            int ignoreCaseMask = StringUtils.IgnoreCaseMask(ignoreCase);
+            int currentIndex = textStart;
             while (currentIndex < text.Length && currentPointer != endPointer)
             {
-                byte currentByte = *currentPointer++;
+                byte currentByte = *currentPointer;
+
+                // note that terminator is not compared case-insensitively even if ignore case is true
                 if (currentByte == 0 || currentByte == terminator)
                 {
                     break;
                 }
 
-                char currentChar = text[currentIndex++];
-                if ((currentByte & 0x80) == 0)
+                char currentChar = text[currentIndex];
+                if ((currentByte & 0x80) == 0 && StringUtils.IsEqualAscii(currentChar, currentByte, ignoreCaseMask))
                 {
-                    // current byte is in ascii range.
-                    //  --> strings are unequal if current char and current byte are unequal
-                    if (currentChar != currentByte)
-                    {
-                        return FastComparisonResult.Unequal;
-                    }
-                }
-                else if (currentChar <= 0x7F)
-                {
-                    // current byte is not in ascii range, but current char is.
-                    // --> strings are unequal.
-                    return FastComparisonResult.Unequal;
+                    currentIndex++;
+                    currentPointer++;
                 }
                 else
                 {
+                    firstDifferenceIndex = currentIndex;
+
                     // uncommon non-ascii case --> fall back to slow allocating comparison.
-                    return FastComparisonResult.Inconclusive;
+                    return (currentChar > 0x7F) ? FastComparisonResult.Inconclusive : FastComparisonResult.Unequal;
                 }
             }
 
-            if (currentIndex != text.Length)
+            firstDifferenceIndex = currentIndex;
+
+            bool textTerminated = currentIndex == text.Length;
+            bool bytesTerminated = currentPointer == endPointer || *currentPointer == 0 || *currentPointer == terminator;
+
+            if (textTerminated && bytesTerminated)
             {
-                return FastComparisonResult.Unequal;
+                return FastComparisonResult.Equal;
             }
 
-            if (currentPointer != endPointer && *currentPointer != 0 && *currentPointer != terminator)
-            {
-                return FastComparisonResult.IsPrefix;
-            }
-
-            return FastComparisonResult.Equal;
+            return textTerminated ? FastComparisonResult.BytesStartWithText : FastComparisonResult.TextStartsWithBytes;
         }
 
         // comparison stops at null terminator, terminator parameter, or end-of-block -- whichever comes first.

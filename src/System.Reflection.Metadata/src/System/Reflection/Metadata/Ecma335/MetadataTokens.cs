@@ -435,6 +435,11 @@ namespace System.Reflection.Metadata.Ecma335
             return Metadata.GuidHandle.FromIndex(offset);
         }
 
+        public static DocumentNameBlobHandle DocumentNameBlobHandle(int offset)
+        {
+            return Metadata.DocumentNameBlobHandle.FromOffset(offset);
+        }
+
         #endregion
 
         [MethodImpl(MethodImplOptions.NoInlining)]

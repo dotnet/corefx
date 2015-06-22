@@ -267,6 +267,9 @@
   <data name="InvalidCompressedInteger" xml:space="preserve">
     <value>Invalid compressed integer.</value>
   </data>
+  <data name="InvalidDocumentName" xml:space="preserve">
+    <value>Invalid document name.</value>
+  </data>
   <data name="RowIdOrHeapOffsetTooLarge" xml:space="preserve">
     <value>Row ID or heap offset is too large.</value>
   </data>

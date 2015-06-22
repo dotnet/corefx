@@ -1179,7 +1179,7 @@ namespace System.Reflection.Metadata
 
         public BlobReader GetBlobReader(BlobHandle handle)
         {
-            return new BlobReader(BlobStream.GetMemoryBlock(handle));
+            return BlobStream.GetBlobReader(handle);
         }
 
         public string GetUserString(UserStringHandle handle)
@@ -1443,32 +1443,11 @@ namespace System.Reflection.Metadata
             return new ImportsBlobReader(BlobStream.GetMemoryBlock(handle));
         }
 
-        // TODO: DocumentNameBlobReader?
-        public string ReadDocumentName(BlobHandle handle)
+        private static readonly ObjectPool<StringBuilder> s_stringBuilderPool = new ObjectPool<StringBuilder>(() => new StringBuilder());
+
+        public string GetString(DocumentNameBlobHandle handle)
         {
-            // TODO: optimize
-
-            var blobReader = GetBlobReader(handle);
-
-            // TODO: should be UTF8
-            char separator = (char)blobReader.ReadByte();
-
-            // TODO: pool
-            var result = new StringBuilder();
-            while (blobReader.RemainingBytes > 0)
-            {
-                if (separator != 0 && result.Length > 0)
-                {
-                    result.Append(separator);
-                }
-
-                // TODO: range checks
-                var partHandle = BlobHandle.FromOffset(blobReader.ReadCompressedInteger());
-                var partBytes = GetBlobBytes(partHandle);
-                result.Append(Encoding.UTF8.GetString(partBytes, 0, partBytes.Length));
-            }
-
-            return result.ToString();
+            return BlobStream.GetDocumentName(handle);
         }
 
         public Document GetDocument(DocumentHandle handle)

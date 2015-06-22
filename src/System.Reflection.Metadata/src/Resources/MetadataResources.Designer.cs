@@ -161,6 +161,15 @@ namespace System.Reflection.Metadata {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Invalid document name..
+        /// </summary>
+        internal static string InvalidDocumentName {
+            get {
+                return ResourceManager.GetString("InvalidDocumentName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Invalid entry point token: 0x{0:8X}.
         /// </summary>
         internal static string InvalidEntryPointToken {

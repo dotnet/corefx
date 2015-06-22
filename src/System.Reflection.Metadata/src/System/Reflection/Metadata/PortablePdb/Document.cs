@@ -29,7 +29,7 @@ namespace System.Reflection.Metadata
         /// <summary>
         /// Returns Document Name Blob.
         /// </summary>
-        public BlobHandle Name
+        public DocumentNameBlobHandle Name
         {
             get
             {
@@ -59,11 +59,6 @@ namespace System.Reflection.Metadata
             {
                 return _reader.DocumentTable.GetHash(Handle);
             }
-        }
-
-        public string GetNameString()
-        {
-            return _reader.ReadDocumentName(Name);
         }
     }
 }
