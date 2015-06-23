@@ -15,8 +15,672 @@ namespace System.IO.Packaging.Tests
         private string Mime_MediaTypeNames_Text_Xml = "text/xml";
         private string Mime_MediaTypeNames_Image_Jpeg = "image/jpeg"; // System.Net.Mime.MediaTypeNames.Image.Jpeg
 
+        // 
+
         [Fact]
-        public void T201_Access_Length_Prop_of_Stream()
+        public void T172_EmptyRelationshipPart()
+        {
+            var docName = "EmptyRelationshipElement.docx";
+            var ba = TestFileLib.GetByteArray(docName);
+            const string DocumentRelationshipType = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument";
+            using (MemoryStream ms = new MemoryStream())
+            {
+                ms.Write(ba, 0, ba.Length);
+                Package package = Package.Open(ms, FileMode.Open);
+                PackageRelationship docPackageRelationship = package
+                    .GetRelationshipsByType(DocumentRelationshipType)
+                    .FirstOrDefault();
+                if (docPackageRelationship != null)
+                {
+                    Uri documentUri = PackUriHelper.ResolvePartUri(
+                            new Uri("/", UriKind.Relative), docPackageRelationship.TargetUri);
+                    var mdp = package.GetPart(documentUri);
+                    var relationships = mdp.GetRelationships().ToList();
+                    foreach (var r in relationships)
+                        mdp.DeleteRelationship(r.Id);
+                }
+                package.Close();
+            }
+        }
+
+        [Fact]
+        public void T171_IterateExternalRelationship()
+        {
+            var docName = "Hyperlink.docx";
+            var ba = TestFileLib.GetByteArray(docName);
+            const string DocumentRelationshipType = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument";
+            using (MemoryStream ms = new MemoryStream())
+            {
+                ms.Write(ba, 0, ba.Length);
+                Package package = Package.Open(ms, FileMode.Open);
+                PackageRelationship docPackageRelationship = package
+                    .GetRelationshipsByType(DocumentRelationshipType)
+                    .FirstOrDefault();
+                if (docPackageRelationship != null)
+                {
+                    Uri documentUri = PackUriHelper.ResolvePartUri(
+                            new Uri("/", UriKind.Relative), docPackageRelationship.TargetUri);
+                    var mdp = package.GetPart(documentUri);
+                    var relationships = mdp.GetRelationships().ToList();
+                    foreach (var r in relationships)
+                        mdp.DeleteRelationship(r.Id);
+                }
+                package.Close();
+            }
+        }
+
+        [Fact]
+        public void T170_InvalidRelationshipId()
+        {
+            var docName = "plain.docx";
+            var fiGuidName = TestFileLib.GetFileSavedWithGuidName(docName);
+            var documentPath = "document.xml";
+            var packagePath1 = TestFileLib.GetGuidNameForNewFile(".docx");
+            Uri partUriDocument = PackUriHelper.CreatePartUri(new Uri(documentPath, UriKind.Relative));
+            using (Package package = Package.Open(fiGuidName.FullName, FileMode.Create, FileAccess.ReadWrite))
+            {
+                Assert.Throws<XmlException>(() =>
+                {
+                    package.DeleteRelationship("ab:23");
+                });
+            }
+            fiGuidName.Delete();
+        }
+
+        [Fact]
+        public void T169_DeleteAllRelationshipOfMainDocPart()
+        {
+            var docName = "plain.docx";
+            var ba = TestFileLib.GetByteArray(docName);
+            const string DocumentRelationshipType = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument";
+            using (MemoryStream ms = new MemoryStream())
+            {
+                ms.Write(ba, 0, ba.Length);
+                Package package = Package.Open(ms, FileMode.Open);
+                PackageRelationship docPackageRelationship = package
+                    .GetRelationshipsByType(DocumentRelationshipType)
+                    .FirstOrDefault();
+                if (docPackageRelationship != null)
+                {
+                    Uri documentUri = PackUriHelper.ResolvePartUri(
+                            new Uri("/", UriKind.Relative), docPackageRelationship.TargetUri);
+                    var mdp = package.GetPart(documentUri);
+                    var relationships = mdp.GetRelationships().ToList();
+                    foreach (var r in relationships)
+                        mdp.DeleteRelationship(r.Id);
+                }
+                package.Close();
+            }
+        }
+
+        [Fact]
+        public void T168_InvalidRelationshipType()
+        {
+            var docName = "plain.docx";
+            var fiGuidName = TestFileLib.GetFileSavedWithGuidName(docName);
+            var documentPath = "document.xml";
+            var packagePath1 = TestFileLib.GetGuidNameForNewFile(".docx");
+            Uri partUriDocument = PackUriHelper.CreatePartUri(new Uri(documentPath, UriKind.Relative));
+            using (Package package = Package.Open(fiGuidName.FullName, FileMode.Create, FileAccess.ReadWrite))
+            {
+                PackagePart packagePartDocument = package.CreatePart(partUriDocument, Mime_MediaTypeNames_Text_Xml);
+                using (Stream partStream = packagePartDocument.GetStream())
+                using (StreamWriter sw = new StreamWriter(partStream))
+                {
+                    sw.Write(TestFileLib.s_DocumentXml);
+                }
+                Assert.Throws<ArgumentException>(() =>
+                    {
+                        package.CreateRelationship(packagePartDocument.Uri, TargetMode.Internal, "");
+                    });
+            }
+            fiGuidName.Delete();
+        }
+
+        [Fact]
+        public void T167_DeleteNonExistentRelationship()
+        {
+            var docName = "plain.docx";
+            var ba = TestFileLib.GetByteArray(docName);
+            const string DocumentRelationshipType = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument";
+            using (MemoryStream ms = new MemoryStream())
+            {
+                ms.Write(ba, 0, ba.Length);
+                using (Package package = Package.Open(ms, FileMode.Open))
+                {
+                    PackageRelationship docPackageRelationship = package
+                      .GetRelationshipsByType(DocumentRelationshipType)
+                      .FirstOrDefault();
+                    if (docPackageRelationship != null)
+                    {
+                        Uri documentUri = PackUriHelper.ResolvePartUri(
+                               new Uri("/", UriKind.Relative), docPackageRelationship.TargetUri);
+                        PackagePart documentPart = package.GetPart(documentUri);
+                        documentPart.DeleteRelationship("dummyId");
+                    }
+                }
+            }
+        }
+
+        [Fact]
+        public void T166_GetPartRelationshipById_InvalidId()
+        {
+            var docName = "plain.docx";
+            var ba = TestFileLib.GetByteArray(docName);
+            const string DocumentRelationshipType = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument";
+
+            using (MemoryStream ms = new MemoryStream())
+            {
+                ms.Write(ba, 0, ba.Length);
+                using (Package package = Package.Open(ms, FileMode.Open))
+                {
+                    PackageRelationship docPackageRelationship =
+                      package
+                      .GetRelationshipsByType(DocumentRelationshipType)
+                      .FirstOrDefault();
+
+                    if (docPackageRelationship != null)
+                    {
+                        Uri documentUri =
+                            PackUriHelper
+                            .ResolvePartUri(
+                               new Uri("/", UriKind.Relative),
+                                     docPackageRelationship.TargetUri);
+                        PackagePart documentPart =
+                            package.GetPart(documentUri);
+
+                        Assert.Throws<InvalidOperationException>(() =>
+                            {
+                                var styleRelation2 = documentPart.GetRelationship("dummyId");
+                            });
+                    }
+                }
+            }
+        }
+
+        [Fact]
+        public void T165_DeleteNonExistentPart()
+        {
+            var docName = "plain.docx";
+            var ba = TestFileLib.GetByteArray(docName);
+            using (MemoryStream ms = new MemoryStream())
+            {
+                ms.Write(ba, 0, ba.Length);
+                using (Package package = Package.Open(ms, FileMode.Open))
+                {
+                    var documentPath2 = "/abc.xaml";
+                    Uri partUriDocument2 = new Uri(documentPath2, UriKind.Relative);
+                    // following will not throw - just fails silently
+                    package.DeletePart(partUriDocument2);
+                }
+            }
+        }
+
+        [Fact]
+        public void T164_InvalidPartUri()
+        {
+            var docName = "plain.docx";
+            var ba = TestFileLib.GetByteArray(docName);
+
+            var documentPath2 = "/abc.xaml";
+            Uri partUriDocument2 = new Uri(documentPath2, UriKind.Relative);
+
+            var documentPath = "/abc.xaml/new.xaml";
+            Uri partUriDocument = new Uri(documentPath, UriKind.Relative);
+
+
+            using (MemoryStream ms = new MemoryStream())
+            {
+                ms.Write(ba, 0, ba.Length);
+                Package package = Package.Open(ms, FileMode.Create, FileAccess.ReadWrite);
+                PackagePart packagePartDocument = null;
+                Assert.Throws<InvalidOperationException>(() => {
+                    packagePartDocument = package.CreatePart(partUriDocument2, "image/jpeg");
+                    packagePartDocument = package.CreatePart(partUriDocument, "image/jpeg");
+                });
+            }
+        }
+
+        [Fact]
+        public void T163_FileFormatExceptionUriProperty()
+        {
+            var docName = "invaliddocpropsct.docx";
+            var ba = TestFileLib.GetByteArray(docName);
+            var documentPath = "document.xml";
+            Uri partUriDocument = PackUriHelper.CreatePartUri(new Uri(documentPath, UriKind.Relative));
+
+            using (MemoryStream ms = new MemoryStream())
+            {
+                ms.Write(ba, 0, ba.Length);
+                using (Package package = Package.Open(ms, FileMode.Create, FileAccess.ReadWrite))
+                {
+                    try
+                    {
+                        PackageProperties pp = package.PackageProperties;
+                    }
+                    catch (FileFormatException ffe)
+                    {
+                        var u = ffe.SourceUri;
+                    }
+                }
+            }
+        }
+
+        [Fact]
+        public void T162_ParameterWithUnquotedQuote()
+        {
+            var docName = "plain.docx";
+            var ba = TestFileLib.GetByteArray(docName);
+            var documentPath = "document.xml";
+            Uri partUriDocument = PackUriHelper.CreatePartUri(new Uri(documentPath, UriKind.Relative));
+
+            using (MemoryStream ms = new MemoryStream())
+            {
+                ms.Write(ba, 0, ba.Length);
+                Package package = Package.Open(ms, FileMode.Create, FileAccess.ReadWrite);
+                PackagePart packagePartDocument = null;
+                Assert.Throws<ArgumentException>(() => { packagePartDocument = package.CreatePart(partUriDocument, "image/jpeg; prop=\"\u0022\""); });
+            }
+        }
+
+        [Fact]
+        public void T161_ParameterWithInvalidChar()
+        {
+            var docName = "plain.docx";
+            var ba = TestFileLib.GetByteArray(docName);
+            var documentPath = "document.xml";
+            Uri partUriDocument = PackUriHelper.CreatePartUri(new Uri(documentPath, UriKind.Relative));
+
+            using (MemoryStream ms = new MemoryStream())
+            {
+                ms.Write(ba, 0, ba.Length);
+                Package package = Package.Open(ms, FileMode.Create, FileAccess.ReadWrite);
+                PackagePart packagePartDocument = null;
+                Assert.Throws<ArgumentException>(() => { packagePartDocument = package.CreatePart(partUriDocument, "image/jpeg; prop=\"\u0001value2\""); });
+            }
+        }
+
+        [Fact]
+        public void T160_InvalidContentType()
+        {
+            var docName = "plain.docx";
+            var ba = TestFileLib.GetByteArray(docName);
+            var documentPath = "document.xml";
+            Uri partUriDocument = PackUriHelper.CreatePartUri(new Uri(documentPath, UriKind.Relative));
+
+            using (MemoryStream ms = new MemoryStream())
+            {
+                ms.Write(ba, 0, ba.Length);
+                Package package = Package.Open(ms, FileMode.Create, FileAccess.ReadWrite);
+                PackagePart packagePartDocument = null;
+                Assert.Throws<ArgumentException>(() => { packagePartDocument = package.CreatePart(partUriDocument, "/"); });
+            }
+        }
+
+        [Fact]
+        public void T159_EmptyParameter()
+        {
+            var docName = "plain.docx";
+            var ba = TestFileLib.GetByteArray(docName);
+            var documentPath = "document.xml";
+            Uri partUriDocument = PackUriHelper.CreatePartUri(new Uri(documentPath, UriKind.Relative));
+
+            using (MemoryStream ms = new MemoryStream())
+            {
+                ms.Write(ba, 0, ba.Length);
+                Package package = Package.Open(ms, FileMode.Create, FileAccess.ReadWrite);
+                PackagePart packagePartDocument = null;
+                Assert.Throws<ArgumentException>(() => { packagePartDocument = package.CreatePart(partUriDocument, "image/jpeg; prop=;"); });
+            }
+        }
+
+        [Fact]
+        public void T158_ParameterWithInvalidChar()
+        {
+            var docName = "plain.docx";
+            var ba = TestFileLib.GetByteArray(docName);
+            var documentPath = "document.xml";
+            Uri partUriDocument = PackUriHelper.CreatePartUri(new Uri(documentPath, UriKind.Relative));
+
+            using (MemoryStream ms = new MemoryStream())
+            {
+                ms.Write(ba, 0, ba.Length);
+                Package package = Package.Open(ms, FileMode.Create, FileAccess.ReadWrite);
+                PackagePart packagePartDocument = null;
+                Assert.Throws<ArgumentException>(() => { packagePartDocument = package.CreatePart(partUriDocument, "image/jpeg; prop=\"   value   \"    ; prop2=\"\u0001value2"); });
+            }
+        }
+
+        [Fact]
+        public void T157_ParameterWithWhiteSpace()
+        {
+            var docName = "plain.docx";
+            var ba = TestFileLib.GetByteArray(docName);
+            var documentPath = "document.xml";
+            Uri partUriDocument = PackUriHelper.CreatePartUri(new Uri(documentPath, UriKind.Relative));
+
+            using (MemoryStream ms = new MemoryStream())
+            {
+                ms.Write(ba, 0, ba.Length);
+                Package package = Package.Open(ms, FileMode.Create, FileAccess.ReadWrite);
+                PackagePart packagePartDocument = null;
+                packagePartDocument = package.CreatePart(partUriDocument, "image/jpeg; prop=\"   value   \"    ; prop2=value2");
+            }
+        }
+
+        [Fact]
+        public void T156_CreatePart_ContentTypeWithInvalidSubtype()
+        {
+            var docName = "plain.docx";
+            var ba = TestFileLib.GetByteArray(docName);
+            var documentPath = "document.xml";
+            Uri partUriDocument = PackUriHelper.CreatePartUri(new Uri(documentPath, UriKind.Relative));
+
+            using (MemoryStream ms = new MemoryStream())
+            {
+                ms.Write(ba, 0, ba.Length);
+                Package package = Package.Open(ms, FileMode.Create, FileAccess.ReadWrite);
+                PackagePart packagePartDocument = null;
+                Assert.Throws<ArgumentException>(() => { packagePartDocument = package.CreatePart(partUriDocument, "image\r\njpeg"); });
+            }
+        }
+
+
+        [Fact]
+        public void T155_BadDateTimeDocProps()
+        {
+            var docName = "BadDocProps.docx";
+            var ba = TestFileLib.GetByteArray(docName);
+
+            using (MemoryStream ms = new MemoryStream())
+            {
+                ms.Write(ba, 0, ba.Length);
+                using (Package package = Package.Open(ms, FileMode.Create, FileAccess.ReadWrite))
+                {
+                    Assert.Throws<XmlException>(() =>
+                        {
+                            PackageProperties pp = package.PackageProperties;
+                            DateTime? c = pp.Created;
+                            DateTime? m = pp.Modified;
+                        });
+                }
+            }
+        }
+
+        [Fact]
+        public void T154_CreatedModifiedDocProps()
+        {
+            var docName = "MoreDocProps.docx";
+            var ba = TestFileLib.GetByteArray(docName);
+
+            using (MemoryStream ms = new MemoryStream())
+            {
+                ms.Write(ba, 0, ba.Length);
+                using (Package package = Package.Open(ms, FileMode.Create, FileAccess.ReadWrite))
+                {
+                    PackageProperties pp = package.PackageProperties;
+                    DateTime? c = pp.Created;
+                    DateTime? m = pp.Modified;
+                }
+            }
+        }
+
+        [Fact]
+        public void T153_NoDocProps()
+        {
+            var docName = "NoDocProps.docx";
+            var ba = TestFileLib.GetByteArray(docName);
+
+            using (MemoryStream ms = new MemoryStream())
+            {
+                ms.Write(ba, 0, ba.Length);
+                using (Package package = Package.Open(ms, FileMode.Create, FileAccess.ReadWrite))
+                {
+                    PackageProperties pp = package.PackageProperties;
+                    pp.Category = "foo";
+                }
+            }
+        }
+
+        [Fact]
+        public void T152_InvalidDocProps()
+        {
+            var docName = "invaliddocpropsct.docx";
+            var ba = TestFileLib.GetByteArray(docName);
+            var documentPath = "document.xml";
+            Uri partUriDocument = PackUriHelper.CreatePartUri(new Uri(documentPath, UriKind.Relative));
+
+            using (MemoryStream ms = new MemoryStream())
+            {
+                ms.Write(ba, 0, ba.Length);
+                using (Package package = Package.Open(ms, FileMode.Create, FileAccess.ReadWrite))
+                {
+                    Assert.Throws<FileFormatException>(() =>
+                    {
+                        PackageProperties pp = package.PackageProperties;
+                    });
+                }
+            }
+        }
+
+        [Fact]
+        public void T151_InvalidDocProps()
+        {
+            var docName = "invaliddocprops.docx";
+            var ba = TestFileLib.GetByteArray(docName);
+            var documentPath = "document.xml";
+            Uri partUriDocument = PackUriHelper.CreatePartUri(new Uri(documentPath, UriKind.Relative));
+
+            using (MemoryStream ms = new MemoryStream())
+            {
+                ms.Write(ba, 0, ba.Length);
+                using (Package package = Package.Open(ms, FileMode.Create, FileAccess.ReadWrite))
+                {
+                    Assert.Throws<FileFormatException>(() =>
+                    {
+                        PackageProperties pp = package.PackageProperties;
+                    });
+                }
+            }
+        }
+
+        [Fact]
+        public void T150_CreatePart_InvalidContentType()
+        {
+            var docName = "plain.docx";
+            var ba = TestFileLib.GetByteArray(docName);
+            var documentPath = "document.xml";
+            Uri partUriDocument = PackUriHelper.CreatePartUri(new Uri(documentPath, UriKind.Relative));
+
+            using (MemoryStream ms = new MemoryStream())
+            {
+                ms.Write(ba, 0, ba.Length);
+                Package package = Package.Open(ms, FileMode.Create, FileAccess.ReadWrite);
+                PackagePart packagePartDocument = null;
+                Assert.Throws<ArgumentException>(() =>
+                {
+                    packagePartDocument = package.CreatePart(partUriDocument, "text/text;foo=\"value\";");
+                });
+            }
+        }
+
+        [Fact]
+        public void T149_CreatePart_InvalidContentType()
+        {
+            var docName = "plain.docx";
+            var ba = TestFileLib.GetByteArray(docName);
+            var documentPath = "document.xml";
+            Uri partUriDocument = PackUriHelper.CreatePartUri(new Uri(documentPath, UriKind.Relative));
+
+            using (MemoryStream ms = new MemoryStream())
+            {
+                ms.Write(ba, 0, ba.Length);
+                Package package = Package.Open(ms, FileMode.Create, FileAccess.ReadWrite);
+                PackagePart packagePartDocument = null;
+                Assert.Throws<ArgumentException>(() =>
+                {
+                    packagePartDocument = package.CreatePart(partUriDocument, Mime_MediaTypeNames_Text_Xml + ";\"value\"");
+                });
+            }
+        }
+
+        [Fact]
+        public void T148_CreatePart_ContentTypeWithTwoSubtypes()
+        {
+            var docName = "plain.docx";
+            var ba = TestFileLib.GetByteArray(docName);
+            var documentPath = "document.xml";
+            Uri partUriDocument = PackUriHelper.CreatePartUri(new Uri(documentPath, UriKind.Relative));
+
+            using (MemoryStream ms = new MemoryStream())
+            {
+                ms.Write(ba, 0, ba.Length);
+                Package package = Package.Open(ms, FileMode.Create, FileAccess.ReadWrite);
+                PackagePart packagePartDocument = null;
+                packagePartDocument = package.CreatePart(partUriDocument, Mime_MediaTypeNames_Text_Xml + ";param1=value1;param2=\"value2\"");
+            }
+        }
+
+        [Fact]
+        public void T147_CreatePart_ContentTypeWithTwoSubtypes()
+        {
+            var docName = "plain.docx";
+            var ba = TestFileLib.GetByteArray(docName);
+            var documentPath = "document.xml";
+            Uri partUriDocument = PackUriHelper.CreatePartUri(new Uri(documentPath, UriKind.Relative));
+
+            using (MemoryStream ms = new MemoryStream())
+            {
+                ms.Write(ba, 0, ba.Length);
+                Package package = Package.Open(ms, FileMode.Create, FileAccess.ReadWrite);
+                PackagePart packagePartDocument = null;
+                packagePartDocument = package.CreatePart(partUriDocument, Mime_MediaTypeNames_Text_Xml + "; param1=value1; param2=value2");
+            }
+        }
+
+        [Fact]
+        public void T146_CreatePart_ContentTypeWithInvalidSubtype()
+        {
+            var docName = "plain.docx";
+            var ba = TestFileLib.GetByteArray(docName);
+            var documentPath = "document.xml";
+            Uri partUriDocument = PackUriHelper.CreatePartUri(new Uri(documentPath, UriKind.Relative));
+
+            using (MemoryStream ms = new MemoryStream())
+            {
+                ms.Write(ba, 0, ba.Length);
+                Package package = Package.Open(ms, FileMode.Create, FileAccess.ReadWrite);
+                PackagePart packagePartDocument = null;
+                Assert.Throws<ArgumentException>(() => { packagePartDocument = package.CreatePart(partUriDocument, "image\rjpeg"); });
+            }
+        }
+
+        [Fact]
+        public void T145_CreatePart_ContentTypeWithInvalidSubtype()
+        {
+            var docName = "plain.docx";
+            var ba = TestFileLib.GetByteArray(docName);
+            var documentPath = "document.xml";
+            Uri partUriDocument = PackUriHelper.CreatePartUri(new Uri(documentPath, UriKind.Relative));
+
+            using (MemoryStream ms = new MemoryStream())
+            {
+                ms.Write(ba, 0, ba.Length);
+                Package package = Package.Open(ms, FileMode.Create, FileAccess.ReadWrite);
+                PackagePart packagePartDocument = null;
+                Assert.Throws<ArgumentException>(() => { packagePartDocument = package.CreatePart(partUriDocument, "imagejpeg;property"); });
+            }
+        }
+
+        [Fact]
+        public void T144_CreatePart_ContentTypeWithInvalidSubtype()
+        {
+            var docName = "plain.docx";
+            var ba = TestFileLib.GetByteArray(docName);
+            var documentPath = "document.xml";
+            Uri partUriDocument = PackUriHelper.CreatePartUri(new Uri(documentPath, UriKind.Relative));
+
+            using (MemoryStream ms = new MemoryStream())
+            {
+                ms.Write(ba, 0, ba.Length);
+                Package package = Package.Open(ms, FileMode.Create, FileAccess.ReadWrite);
+                PackagePart packagePartDocument = null;
+                Assert.Throws<ArgumentException>(() => { packagePartDocument = package.CreatePart(partUriDocument, Mime_MediaTypeNames_Text_Xml + ";property"); });
+            }
+        }
+
+        [Fact]
+        public void T143_CreatePart_ContentTypeWithInvalidSubtype()
+        {
+            var docName = "plain.docx";
+            var ba = TestFileLib.GetByteArray(docName);
+            var documentPath = "document.xml";
+            Uri partUriDocument = PackUriHelper.CreatePartUri(new Uri(documentPath, UriKind.Relative));
+
+            using (MemoryStream ms = new MemoryStream())
+            {
+                ms.Write(ba, 0, ba.Length);
+                Package package = Package.Open(ms, FileMode.Create, FileAccess.ReadWrite);
+                PackagePart packagePartDocument = null;
+                Assert.Throws<ArgumentException>(() => { packagePartDocument = package.CreatePart(partUriDocument, Mime_MediaTypeNames_Text_Xml + ";"); });
+            }
+        }
+
+        [Fact]
+        public void T142_CreatePart_ContentTypeWithSubtypesDoubleSemicolon()
+        {
+            var docName = "plain.docx";
+            var ba = TestFileLib.GetByteArray(docName);
+            var documentPath = "document.xml";
+            Uri partUriDocument = PackUriHelper.CreatePartUri(new Uri(documentPath, UriKind.Relative));
+
+            using (MemoryStream ms = new MemoryStream())
+            {
+                ms.Write(ba, 0, ba.Length);
+                Package package = Package.Open(ms, FileMode.Create, FileAccess.ReadWrite);
+                PackagePart packagePartDocument = null;
+                Assert.Throws<ArgumentException>(() => { packagePartDocument = package.CreatePart(partUriDocument, Mime_MediaTypeNames_Text_Xml + ";; param1=value1"); });
+            }
+        }
+
+        [Fact]
+        public void T141_CreatePart_ContentTypeWithSubtypes()
+        {
+            var docName = "plain.docx";
+            var ba = TestFileLib.GetByteArray(docName);
+            var documentPath = "document.xml";
+            Uri partUriDocument = PackUriHelper.CreatePartUri(new Uri(documentPath, UriKind.Relative));
+
+            using (MemoryStream ms = new MemoryStream())
+            {
+                ms.Write(ba, 0, ba.Length);
+                using (Package package = Package.Open(ms, FileMode.Create, FileAccess.ReadWrite))
+                {
+                    PackagePart packagePartDocument = null;
+                    packagePartDocument = package.CreatePart(partUriDocument, Mime_MediaTypeNames_Text_Xml + "; param1=value1");
+                }
+            }
+        }
+
+        [Fact]
+        public void T140_CreatePart_SpaceAtBeginningOfContentType()
+        {
+            var docName = "plain.docx";
+            var ba = TestFileLib.GetByteArray(docName);
+            var documentPath = "document.xml";
+            Uri partUriDocument = PackUriHelper.CreatePartUri(new Uri(documentPath, UriKind.Relative));
+
+            using (MemoryStream ms = new MemoryStream())
+            {
+                ms.Write(ba, 0, ba.Length);
+                Package package = Package.Open(ms, FileMode.Create, FileAccess.ReadWrite);
+                PackagePart packagePartDocument = null;
+                Assert.Throws<ArgumentException>(() => packagePartDocument = package.CreatePart(partUriDocument, " " + Mime_MediaTypeNames_Text_Xml));
+            }
+        }
+
+        [Fact]
+        public void T139_Access_Length_Prop_of_Stream()
         {
             var ba = TestFileLib.GetByteArray("plain.docx");
             var tempGuidName = TestFileLib.GetGuidNameForNewFile(".docx");
@@ -805,87 +1469,15 @@ namespace System.IO.Packaging.Tests
                         sb.Append(String.Format("Uri: {0}" + NL, part.Uri));
                         sb.Append(String.Format("ContentType: {0}" + NL, part.ContentType));
                     }
-                    string s = sb.ToString();
-                    Assert.Equal(sb.ToString().Trim(), @"#0
-Uri: /docProps/app.xml
-ContentType: application/vnd.openxmlformats-officedocument.extended-properties+xml
-#1
-Uri: /docProps/core.xml
-ContentType: application/vnd.openxmlformats-package.core-properties+xml
-#2
-Uri: /word/document.xml
-ContentType: application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml
-#3
-Uri: /word/fontTable.xml
-ContentType: application/vnd.openxmlformats-officedocument.wordprocessingml.fontTable+xml
-#4
-Uri: /word/settings.xml
-ContentType: application/vnd.openxmlformats-officedocument.wordprocessingml.settings+xml
-#5
-Uri: /word/styles.xml
-ContentType: application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml
-#6
-Uri: /word/theme/theme1.xml
-ContentType: application/vnd.openxmlformats-officedocument.theme+xml
-#7
-Uri: /word/webSettings.xml
-ContentType: application/vnd.openxmlformats-officedocument.wordprocessingml.webSettings+xml
-#8
-Uri: /word/_rels/document.xml.rels
-ContentType: application/vnd.openxmlformats-package.relationships+xml
-#9
-Uri: /_rels/.rels
-ContentType: application/vnd.openxmlformats-package.relationships+xml
-".Trim());
+                    string s = sb.ToString().Replace(NL, "~");
+                    string other = @"#0~Uri: /docProps/app.xml~ContentType: application/vnd.openxmlformats-officedocument.extended-properties+xml~#1~Uri: /docProps/core.xml~ContentType: application/vnd.openxmlformats-package.core-properties+xml~#2~Uri: /word/document.xml~ContentType: application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml~#3~Uri: /word/fontTable.xml~ContentType: application/vnd.openxmlformats-officedocument.wordprocessingml.fontTable+xml~#4~Uri: /word/settings.xml~ContentType: application/vnd.openxmlformats-officedocument.wordprocessingml.settings+xml~#5~Uri: /word/styles.xml~ContentType: application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml~#6~Uri: /word/theme/theme1.xml~ContentType: application/vnd.openxmlformats-officedocument.theme+xml~#7~Uri: /word/webSettings.xml~ContentType: application/vnd.openxmlformats-officedocument.wordprocessingml.webSettings+xml~#8~Uri: /word/_rels/document.xml.rels~ContentType: application/vnd.openxmlformats-package.relationships+xml~#9~Uri: /_rels/.rels~ContentType: application/vnd.openxmlformats-package.relationships+xml~";
+                    Assert.Equal(s, other);
 
                     int relationshipsBefore = package.GetRelationships().Count();
                     package.DeleteRelationship(docPackageRelationship.Id);
                     int relationshipsAfter = package.GetRelationships().Count();
                     Assert.Equal(relationshipsBefore, relationshipsAfter + 1);
-
-                    //int partsBefore = package.GetParts().Count();
-                    //var nonRelationshipParts = package.GetParts().Cast<ZipPackagePart>().Where(p => p.ContentType != "application/vnd.openxmlformats-package.relationships+xml");
-                    //int relationshipsBefore = nonRelationshipParts.Select(p => p.GetRelationships().Count()).Sum();
-
-
-                    //int partsAfter = package.GetParts().Count();
-                    //int relationshipsAfter = nonRelationshipParts.Select(p => p.GetRelationships().Count()).Sum();
-
-                    //Assert.Equal(partsBefore, partsAfter);
-                    //Assert.Equal(relationshipsBefore, relationshipsAfter);
-
-                    //if (docPackageRelationship != null)
-                    //{
-                    //    Uri documentUri =
-                    //        PackUriHelper
-                    //        .ResolvePartUri(
-                    //           new Uri("/", UriKind.Relative),
-                    //                 docPackageRelationship.TargetUri);
-                    //    PackagePart documentPart =
-                    //        package.GetPart(documentUri);
-
-                    //    //  Load the document XML in the part into an XDocument instance.
-                    //    xDoc = XDocument.Load(XmlReader.Create(documentPart.GetStream()));
-
-                    //    //  Find the styles part. There will only be one.
-                    //    PackageRelationship styleRelation =
-                    //      documentPart.GetRelationshipsByType(stylesRelationshipType)
-                    //      .FirstOrDefault();
-
-                    //    if (styleRelation != null)
-                    //    {
-                    //        Uri styleUri = PackUriHelper.ResolvePartUri(documentUri, styleRelation.TargetUri);
-                    //        PackagePart stylePart = package.GetPart(styleUri);
-
-                    //        //  Load the style XML in the part into an XDocument instance.
-                    //        styleDoc = XDocument.Load(XmlReader.Create(stylePart.GetStream()));
-                    //    }
-                    //}
                 }
-
-                //var tempName = TestFileLib.GetGuidNameForNewFile(".docx");
-                //File.WriteAllBytes(tempName.FullName, ms.ToArray());
-                //tempName.Delete();
             }
         }
 
@@ -903,10 +1495,6 @@ ContentType: application/vnd.openxmlformats-package.relationships+xml
                 pp.Category = "TEST-CATEGORY";
                 package.Flush();
                 package.Close();
-
-                //var tempName = TestFileLib.GetGuidNameForNewFile(".docx");
-                //File.WriteAllBytes(tempName.FullName, ms.ToArray());
-                //tempName.Delete();
             }
         }
 
