@@ -168,31 +168,6 @@ namespace System.IO.Packaging
                 return _parameterDictionary.GetEnumerator();
             }
         }
-
-
-        /// <summary>
-        /// Static property that represents a content type that is empty ""
-        /// This is not a valid content type as per the grammar and should be used
-        /// in places where the content type is missing or not available. 
-        /// </summary>
-        internal static ContentType Empty
-        {
-            get
-            {
-                return s_emptyContentType;
-            }
-        }
-
-        /// <summary>
-        /// Original string provided to constructor
-        /// </summary>
-        internal string OriginalString
-        {
-            get
-            {
-                return _originalString;
-            }
-        }
         #endregion Internal Properties
 
         //------------------------------------------------------
@@ -238,8 +213,11 @@ namespace System.IO.Packaging
                 if (!allowParameterValuePairs)
                 {
                     //Return false if this content type object has parameters
-                    if (_parameterDictionary != null && _parameterDictionary.Count > 0)
-                        return false;
+                    if (_parameterDictionary != null)
+                    {
+                        if (_parameterDictionary.Count > 0)
+                            return false;
+                    }
 
                     //Return false if the content type object passed in has parameters
                     Dictionary<string, string>.Enumerator contentTypeEnumerator;
@@ -743,8 +721,6 @@ namespace System.IO.Packaging
            '\r', // carriage return - \x0D
            '\t'  // horizontal tab  - \x09
          };
-
-        private static readonly ContentType s_emptyContentType = new ContentType("");
 
         #endregion Private Members
     }
