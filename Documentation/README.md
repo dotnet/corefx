@@ -4,7 +4,7 @@ Documents Index
 Learn about .NET Core
 ====================
 
-- [Brief Intro to .NET Core](https://github.com/dotnet/coreclr/blob/master/Documentation/dotnetcore-intro.md)
+- [Brief Intro to .NET Core](https://github.com/dotnet/coreclr/blob/master/Documentation/README.md)
 - [[WIP] Official .NET Core Docs](http://dotnet.readthedocs.org)
 
 Get .NET Core
