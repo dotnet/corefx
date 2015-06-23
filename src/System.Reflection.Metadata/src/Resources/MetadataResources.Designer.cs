@@ -557,6 +557,15 @@ namespace System.Reflection.Metadata {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Standalone debug metadata image doesn&apos;t contain Module table..
+        /// </summary>
+        internal static string StandaloneDebugMetadataImageDoesNotContainModuleTable {
+            get {
+                return ResourceManager.GetString("StandaloneDebugMetadataImageDoesNotContainModuleTable", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Stream header too small..
         /// </summary>
         internal static string StreamHeaderTooSmall {

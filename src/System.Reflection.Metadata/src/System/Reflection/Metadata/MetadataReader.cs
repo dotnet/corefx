@@ -127,7 +127,7 @@ namespace System.Reflection.Metadata
             // Although the specification states that the module table will have exactly one row,
             // the native metadata reader would successfully read files containing more than one row.
             // Such files exist in the wild and may be produced by obfuscators.
-            if (this.ModuleTable.NumberOfRows < 1)
+            if (standalonePdbStream.Length == 0 && this.ModuleTable.NumberOfRows < 1)
             {
                 throw new BadImageFormatException(string.Format(MetadataResources.ModuleTableInvalidNumberOfRows, this.ModuleTable.NumberOfRows));
             }
@@ -1194,6 +1194,11 @@ namespace System.Reflection.Metadata
 
         public ModuleDefinition GetModuleDefinition()
         {
+            if (_debugMetadataHeader != null)
+            {
+                throw new InvalidOperationException(MetadataResources.StandaloneDebugMetadataImageDoesNotContainModuleTable);
+            }
+
             return new ModuleDefinition(this);
         }
 

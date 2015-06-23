@@ -150,6 +150,9 @@
   <data name="MetadataImageDoesNotRepresentAnAssembly" xml:space="preserve">
     <value>Metadata image doesn't represent an assembly.</value>
   </data>
+  <data name="StandaloneDebugMetadataImageDoesNotContainModuleTable" xml:space="preserve">
+    <value>Standalone debug metadata image doesn't contain Module table.</value>
+  </data>
   <data name="PEImageNotAvailable" xml:space="preserve">
     <value>PE image not available.</value>
   </data>
