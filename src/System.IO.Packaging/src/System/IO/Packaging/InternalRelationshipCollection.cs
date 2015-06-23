@@ -37,7 +37,7 @@ namespace System.IO.Packaging
         //------------------------------------------------------
         #region IEnumerable
         /// <summary>
-        /// Returns an enumertor over all the relationships for a Package or a PackagePart
+        /// Returns an enumerator over all the relationships for a Package or a PackagePart
         /// </summary>
         /// <returns></returns>
         IEnumerator IEnumerable.GetEnumerator()
@@ -184,7 +184,9 @@ namespace System.IO.Packaging
             }
             catch (XmlException exception)
             {
-                throw new XmlException(SR.Format(SR.NotAValidXmlIdString, id), exception);
+                var r = SR.NotAValidXmlIdString;
+                var s = SR.Format(r, id);
+                throw new XmlException(s, exception);
             }
         }
 
@@ -387,7 +389,7 @@ namespace System.IO.Packaging
         //If End element is present for Relationship then we process it
         private void ProcessEndElementForRelationshipTag(XmlCompatibilityReader reader)
         {
-            Debug.Assert(!reader.IsEmptyElement, "This method should only be called it the Relationship Element is not empty");
+            Debug.Assert(!reader.IsEmptyElement, "This method should only be called if the Relationship Element is not empty");
 
             reader.Read();
 
