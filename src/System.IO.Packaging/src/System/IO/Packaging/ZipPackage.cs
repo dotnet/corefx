@@ -185,7 +185,7 @@ namespace System.IO.Packaging
                 //Returns false if - 
                 // a. its a content type item
                 // b. items that have either a leading or trailing slash.
-                if (IsZipItemValidOpcPartOrPiece(zipArchiveEntry.Name))
+                if (IsZipItemValidOpcPartOrPiece(zipArchiveEntry.FullName))
                 {
                     Uri partUri = new Uri(GetOpcNameFromZipItemName(zipArchiveEntry.FullName), UriKind.Relative);
                     PackUriHelper.ValidatedPartUri validatedPartUri;
@@ -361,6 +361,10 @@ namespace System.IO.Packaging
                 _zipStreamManager = new ZipStreamManager(zipArchive, packageFileMode, packageFileAccess);
                 contentTypeHelper = new ContentTypeHelper(zipArchive, packageFileMode, packageFileAccess, _zipStreamManager);
             }
+            catch (InvalidDataException)
+            {
+                throw new FileFormatException("File contains corrupted data.");
+            }
             catch
             {
                 if (zipArchive != null)
@@ -410,23 +414,28 @@ namespace System.IO.Packaging
                 case CompressionOption.NotCompressed:
                     {
                         compressionLevel = CompressionLevel.NoCompression;
-                    } break;
+                    } 
+                    break;
                 case CompressionOption.Normal:
                     {
                         compressionLevel = CompressionLevel.Optimal;
-                    } break;
+                    } 
+                    break;
                 case CompressionOption.Maximum:
                     {
                         compressionLevel = CompressionLevel.Optimal;
-                    } break;
+                    } 
+                    break;
                 case CompressionOption.Fast:
                     {
                         compressionLevel = CompressionLevel.Fastest;
-                    } break;
+                    } 
+                    break;
                 case CompressionOption.SuperFast:
                     {
                         compressionLevel = CompressionLevel.Fastest;
-                    } break;
+                    } 
+                    break;
 
                 // fall-through is not allowed
                 default:
