@@ -78,18 +78,20 @@ namespace System.IO.Packaging
                 }
             }
 
-            //if the XmlDeclaration is not present, or encoding attribute is not present, we
-            //base our decision on byte order marking. reader.Encoding will take that into account
-            //and return the correct value. 
-            //Note: For Byte order markings that require additional information to be specified in
-            //the encoding attribute in XmlDeclaration have already been ruled out by the check above.
-            //Note: If not encoding attribute is present or no byte order marking is present the 
-            //encoding default to UTF8
+            //Previously, the logic in System.IO.Packaging was that if the XmlDeclaration is not present, or encoding attribute
+            //is not present, we base our decision on byte order marking. Previously, reader was an XmlTextReader, which would
+            //take that into account and return the correct value.
 
-            string encodingCheck;
-            encodingCheck = reader.GetAttribute(EncodingAttribute).ToLower();
-            if (!(encodingCheck == "utf-8" || encodingCheck == "utf-16"))
-                throw new FileFormatException(SR.EncodingNotSupported);
+            //However, we can't use XmlTextReader, as it is not in COREFX.  Therefore, if there is no XmlDeclaration, or the encoding
+            //attribute is not set, then we will throw now exception, and UTF-8 will be assumed.
+
+            //TODO: in the future, we can do the work to detect the BOM, and throw an exception if the file is in an invalid encoding.
+            // Eric White: IMO, this is not a serious problem.  Office will never write with the wrong encoding, nor will any of the
+            // other suites.  The Open XML SDK will always write with the correct encoding.
+
+            //The future logic would be:
+            //- determine the encoding from the BOM
+            //- if the encoding is not UTF-8 or UTF-16, then throw new FileFormatException(SR.EncodingNotSupported)
         }
 
         /// <summary>
