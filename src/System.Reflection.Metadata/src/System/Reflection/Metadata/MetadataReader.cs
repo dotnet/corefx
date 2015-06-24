@@ -423,7 +423,7 @@ namespace System.Reflection.Metadata
         internal LocalVariableTableReader LocalVariableTable;
         internal LocalConstantTableReader LocalConstantTable;
         internal ImportScopeTableReader ImportScopeTable;
-        internal AsyncMethodTableReader AsyncMethodTable;
+        internal StateMachineMethodTableReader StateMachineMethodTable;
         internal CustomDebugInformationTableReader CustomDebugInformationTable;
 
         private void ReadMetadataTableHeader(ref BlobReader reader, out HeapSizes heapSizes, out int[] metadataTableRowCounts, out TableMask sortedTables)
@@ -752,8 +752,8 @@ namespace System.Reflection.Metadata
             this.ImportScopeTable = new ImportScopeTableReader(rowCounts[(int)TableIndex.ImportScope], GetReferenceSize(rowCounts, TableIndex.ImportScope), blobHeapRefSize, metadataTablesMemoryBlock, totalRequiredSize);
             totalRequiredSize += this.ImportScopeTable.Block.Length;
 
-            this.AsyncMethodTable = new AsyncMethodTableReader(rowCounts[(int)TableIndex.AsyncMethod], methodRefSizeCombined, blobHeapRefSize, metadataTablesMemoryBlock, totalRequiredSize);
-            totalRequiredSize += this.AsyncMethodTable.Block.Length;
+            this.StateMachineMethodTable = new StateMachineMethodTableReader(rowCounts[(int)TableIndex.StateMachineMethod], methodRefSizeCombined, metadataTablesMemoryBlock, totalRequiredSize);
+            totalRequiredSize += this.StateMachineMethodTable.Block.Length;
 
             this.CustomDebugInformationTable = new CustomDebugInformationTableReader(rowCounts[(int)TableIndex.CustomDebugInformation], IsDeclaredSorted(TableMask.CustomDebugInformation), hasCustomDebugInformationRefSizeCombined, guidHeapRefSize, blobHeapRefSize, metadataTablesMemoryBlock, totalRequiredSize);
             totalRequiredSize += this.CustomDebugInformationTable.Block.Length;
@@ -1125,11 +1125,6 @@ namespace System.Reflection.Metadata
             get { return new LocalConstantHandleCollection(this, default(LocalScopeHandle)); }
         }
 
-        public AsyncMethodHandleCollection AsyncMethods
-        {
-            get { return new AsyncMethodHandleCollection(this); }
-        }
-
         public ImportScopeCollection ImportScopes
         {
             get { return new ImportScopeCollection(this); }
@@ -1483,11 +1478,6 @@ namespace System.Reflection.Metadata
         public LocalConstant GetLocalConstant(LocalConstantHandle handle)
         {
             return new LocalConstant(this, handle);
-        }
-
-        public AsyncMethod GetAsyncMethod(AsyncMethodHandle handle)
-        {
-            return new AsyncMethod(this, handle);
         }
 
         public ImportScope GetImportScope(ImportScopeHandle handle)

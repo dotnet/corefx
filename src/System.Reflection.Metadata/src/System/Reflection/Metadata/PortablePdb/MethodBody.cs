@@ -44,8 +44,21 @@ namespace System.Reflection.Metadata
         {
             get
             {
+                if (SequencePoints.IsNil)
+                {
+                    return default(StandaloneSignatureHandle);
+                }
+
                 return StandaloneSignatureHandle.FromRowId(_reader.GetBlobReader(SequencePoints).ReadCompressedInteger());
             }
+        }
+
+        /// <summary>
+        /// If the method is a MoveNext method of a state machine returns the kickoff method of the state machine, otherwise returns nil handle.
+        /// </summary>
+        public MethodDefinitionHandle GetStateMachineKickoffMethod()
+        {
+            return _reader.StateMachineMethodTable.FindKickoffMethod(_rowId);
         }
     }
 }

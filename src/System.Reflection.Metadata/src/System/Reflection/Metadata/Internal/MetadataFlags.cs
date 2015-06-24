@@ -67,7 +67,7 @@ namespace System.Reflection.Metadata.Ecma335
         LocalVariable = 1UL << TableIndex.LocalVariable,
         LocalConstant = 1UL << TableIndex.LocalConstant,
         ImportScope = 1UL << TableIndex.ImportScope,
-        AsyncMethod = 1UL << TableIndex.AsyncMethod,
+        AsyncMethod = 1UL << TableIndex.StateMachineMethod,
         CustomDebugInformation = 1UL << TableIndex.CustomDebugInformation,
 
         PtrTables =
@@ -252,7 +252,7 @@ namespace System.Reflection.Metadata.Ecma335
         internal const uint LocalVariable = (uint)TableIndex.LocalVariable;
         internal const uint LocalConstant = (uint)TableIndex.LocalConstant;
         internal const uint ImportScope = (uint)TableIndex.ImportScope;
-        internal const uint AsyncMethod = (uint)TableIndex.AsyncMethod;
+        internal const uint AsyncMethod = (uint)TableIndex.StateMachineMethod;
         internal const uint CustomDebugInformation = (uint)TableIndex.CustomDebugInformation;
 
         internal const uint UserString = 0x70;     // #UserString heap

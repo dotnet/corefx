@@ -307,57 +307,55 @@ namespace System.Reflection.Metadata.Ecma335
         }
     }
 
-    internal struct AsyncMethodTableReader
+    internal struct StateMachineMethodTableReader
     {
         internal readonly int NumberOfRows;
 
         private readonly bool _isMethodRefSizeSmall;
-        private readonly bool _isBlobHeapRefSizeSmall;
 
+        private const int MoveNextMethodOffset = 0;
         private readonly int _kickoffMethodOffset;
-        private readonly int _catchHandlerOffsetOffset;
-        private readonly int _awaitsOffset;
 
         internal readonly int RowSize;
         internal readonly MemoryBlock Block;
 
-        internal AsyncMethodTableReader(
+        internal StateMachineMethodTableReader(
             int numberOfRows,
             int methodRefSize,
-            int blobHeapRefSize,
             MemoryBlock containingBlock,
-            int containingBlockOffset
-        )
+            int containingBlockOffset)
         {
             NumberOfRows = numberOfRows;
             _isMethodRefSizeSmall = methodRefSize == 2;
-            _isBlobHeapRefSizeSmall = blobHeapRefSize == 2;
 
-            _kickoffMethodOffset = 0;
-            _catchHandlerOffsetOffset = _kickoffMethodOffset + methodRefSize;
-            _awaitsOffset = _catchHandlerOffsetOffset + sizeof(uint);
-            RowSize = _awaitsOffset + blobHeapRefSize;
+            _kickoffMethodOffset = methodRefSize;
+            RowSize = _kickoffMethodOffset + methodRefSize;
 
             Block = containingBlock.GetMemoryBlockAt(containingBlockOffset, RowSize * numberOfRows);
         }
 
-        internal MethodDefinitionHandle GetKickoffMethod(AsyncMethodHandle handle)
+        internal MethodDefinitionHandle FindKickoffMethod(int moveNextMethodRowId)
         {
-            int rowOffset = (handle.RowId - 1) * RowSize;
+            int foundRowNumber =
+              this.Block.BinarySearchReference(
+                this.NumberOfRows,
+                this.RowSize,
+                MoveNextMethodOffset,
+                (uint)moveNextMethodRowId,
+                _isMethodRefSizeSmall);
+
+            if (foundRowNumber < 0)
+            {
+                return default(MethodDefinitionHandle);
+            }
+
+            return GetKickoffMethod(foundRowNumber + 1);
+        }
+
+        private MethodDefinitionHandle GetKickoffMethod(int rowId)
+        {
+            int rowOffset = (rowId - 1) * RowSize;
             return MethodDefinitionHandle.FromRowId(Block.PeekReference(rowOffset + _kickoffMethodOffset, _isMethodRefSizeSmall));
-        }
-
-        internal int GetCatchHandlerOffset(AsyncMethodHandle handle)
-        {
-            int rowOffset = (handle.RowId - 1) * RowSize;
-            // TODO: overflow
-            return (int)Block.PeekUInt32(rowOffset + _catchHandlerOffsetOffset);
-        }
-
-        internal BlobHandle GetAwaits(AsyncMethodHandle handle)
-        {
-            int rowOffset = (handle.RowId - 1) * RowSize;
-            return BlobHandle.FromOffset(Block.PeekHeapReference(rowOffset + _awaitsOffset, _isBlobHeapRefSizeSmall));
         }
     }
 

@@ -177,7 +177,6 @@
     <Compile Include="System\Reflection\Metadata\ModuleReference.cs" />
     <Compile Include="System\Reflection\Metadata\NamespaceDefinition.cs" />
     <Compile Include="System\Reflection\Metadata\Parameter.cs" />
-    <Compile Include="System\Reflection\Metadata\PortablePdb\AsyncMethod.cs" />
     <Compile Include="System\Reflection\Metadata\PortablePdb\CustomDebugInformation.cs" />
     <Compile Include="System\Reflection\Metadata\PortablePdb\DebugMetadataHeader.cs" />
     <Compile Include="System\Reflection\Metadata\PortablePdb\Document.cs" />

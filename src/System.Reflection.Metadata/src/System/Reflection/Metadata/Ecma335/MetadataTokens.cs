@@ -403,11 +403,6 @@ namespace System.Reflection.Metadata.Ecma335
             return Metadata.ImportScopeHandle.FromRowId(ToRowId(rowNumber));
         }
 
-        public static AsyncMethodHandle AsyncMethodHandle(int rowNumber)
-        {
-            return Metadata.AsyncMethodHandle.FromRowId(ToRowId(rowNumber));
-        }
-
         public static CustomDebugInformationHandle CustomDebugInformationHandle(int rowNumber)
         {
             return Metadata.CustomDebugInformationHandle.FromRowId(ToRowId(rowNumber));
