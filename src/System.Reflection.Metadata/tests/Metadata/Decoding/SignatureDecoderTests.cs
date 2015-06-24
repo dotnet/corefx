@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Reflection.Metadata;
@@ -39,6 +40,39 @@ namespace System.Reflection.Metadata.Tests
                 }
                 // And that nothing is left over to decode
                 Assert.Throws<BadImageFormatException>(() => SignatureDecoder.DecodeType(ref signatureBlob, sigTypeProvider));
+            }
+        }
+
+        [Fact]
+        public unsafe void DecodeValidMethodSpecificationSignature()
+        {
+            // See Ecma 335 Section II.23.2.15 MethodSpec
+            var testSignature = new byte[] 
+            {
+                0x0A, // IMAGE_CEE_CS_CALLCONV_GENERICINST
+                2, // type parameter count
+                (byte)SignatureTypeCode.Int32,
+                (byte)SignatureTypeCode.String,
+            };
+
+            fixed (byte* testSignaturePtr = &testSignature[0])
+            {
+                var signatureBlob = new BlobReader(testSignaturePtr, testSignature.Length);
+                IEnumerable<string> expectedTypes = new[] { "Int32", "String" };
+                IEnumerable<string> actualTypes = SignatureDecoder.DecodeMethodSpecificationSignature(ref signatureBlob, new TestSignatureTypeProvider());
+                Assert.Equal(expectedTypes, actualTypes);
+            }
+        }
+
+        [Fact]
+        public unsafe void DecodeInvalidMethodSpecificationSignature()
+        {
+            var testSignature = new byte[] { 0x00 };
+
+            fixed (byte* testSignaturePtr = &testSignature[0])
+            {
+                var signatureBlob = new BlobReader(testSignaturePtr, testSignature.Length);
+                Assert.Throws<BadImageFormatException>(() => SignatureDecoder.DecodeMethodSpecificationSignature(ref signatureBlob, new TestSignatureTypeProvider()));
             }
         }
 

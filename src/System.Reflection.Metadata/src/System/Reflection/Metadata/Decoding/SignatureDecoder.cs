@@ -254,7 +254,7 @@ namespace System.Reflection.Metadata.Decoding
         public static ImmutableArray<TType> DecodeMethodSpecificationSignature<TType>(ref BlobReader blobReader, ISignatureTypeProvider<TType> provider)
         {
             SignatureHeader header = blobReader.ReadSignatureHeader();
-            if (header.RawValue != (byte)SignatureAttributes.Generic)
+            if (header.Kind != SignatureKind.MethodSpecification)
             {
                 throw new BadImageFormatException();
             }
