@@ -49,6 +49,14 @@ namespace System.Linq.Parallel.Tests
             yield return Label("ThenByDescending", (start, count, source) => source(start, count).OrderBy(x => 0).ThenByDescending(x => x, ReverseComparer.Instance));
         }
 
+        private static IEnumerable<LabeledOperation> ReverseOrderOperators()
+        {
+            yield return Label("OrderBy", (start, count, source) => source(start, count).OrderBy(x => x, ReverseComparer.Instance));
+            yield return Label("OrderByDescending", (start, count, source) => source(start, count).OrderByDescending(x => -x, ReverseComparer.Instance));
+            yield return Label("ThenBy", (start, count, source) => source(start, count).OrderBy(x => 0).ThenBy(x => x, ReverseComparer.Instance));
+            yield return Label("ThenByDescending", (start, count, source) => source(start, count).OrderBy(x => 0).ThenByDescending(x => -x, ReverseComparer.Instance));
+        }
+
         public static IEnumerable<object[]> OrderFailingOperators()
         {
             LabeledOperation source = UnorderedRangeSources().First();
@@ -134,6 +142,18 @@ namespace System.Linq.Parallel.Tests
             yield return Label("TakeWhile-Index", (start, count, source) => source(start, count * 2).TakeWhile((x, index) => x < start + count));
         }
 
+        private static IEnumerable<LabeledOperation> SkipTakeReverseOperations()
+        {
+            // Take/Skip-based operations require ordered input, or will disobey
+            // the [start, start + count) convention expected in tests.
+            yield return Label("Skip", (start, count, source) => source(start, count * 2).Skip(count));
+            yield return Label("SkipWhile", (start, count, source) => source(start, count * 2).SkipWhile(x => x >= start + count));
+            yield return Label("SkipWhile-Index", (start, count, source) => source(start, count * 2).SkipWhile((x, index) => index < count));
+            yield return Label("Take", (start, count, source) => source(start - count, count * 2).Take(count));
+            yield return Label("TakeWhile", (start, count, source) => source(start - count, count * 2).TakeWhile(x => x >= start));
+            yield return Label("TakeWhile-Index", (start, count, source) => source(start - count, count * 2).TakeWhile((x, index) => index < count));
+        }
+
         public static IEnumerable<object[]> SkipTakeOperators()
         {
             foreach (LabeledOperation source in RangeSources())
@@ -171,6 +191,21 @@ namespace System.Linq.Parallel.Tests
             foreach (object[] parms in SkipTakeOperators())
             {
                 yield return parms;
+            }
+        }
+
+        public static IEnumerable<object[]> UnaryReversedOperators()
+        {
+            // Apply reverse ordering to the input of each operation
+            foreach (LabeledOperation source in UnorderedRangeSources())
+            {
+                foreach (LabeledOperation operation in UnaryOperations().Where(x => !x.ToString().Contains("SelectMany")).Concat(SelectMany_Reversed_Operation).Concat(SkipTakeReverseOperations()))
+                {
+                    foreach (LabeledOperation ordering in ReverseOrderOperators())
+                    {
+                        yield return new object[] { source.Append(ordering), operation };
+                    }
+                }
             }
         }
 
@@ -315,6 +350,42 @@ namespace System.Linq.Parallel.Tests
             }
         }
 
+        public static IEnumerable<object[]> BinaryReversedOperators()
+        {
+            LabeledOperation unordered = UnorderedRangeSources().First();
+            foreach (LabeledOperation source in UnorderedRangeSources())
+            {
+                foreach (LabeledOperation ordering in ReverseOrderOperators())
+                {
+                    // Each binary can work differently, depending on which of the two source queries (or both) is ordered.
+
+                    // For most, only the ordering of the first query is important
+                    foreach (LabeledOperation operation in BinaryOperations(unordered).Where(op => !(op.ToString().StartsWith("Concat") || op.ToString().StartsWith("Union") || op.ToString().StartsWith("Zip")) && op.ToString().Contains("Right")))
+                    {
+                        yield return new object[] { source.Append(ordering), operation };
+                    }
+
+                    foreach (LabeledOperation operation in Concat_Reversed_Operation(unordered.Append(ordering)))
+                    {
+                        yield return new object[] { source.Append(ordering), operation };
+                    }
+
+                    // Zip is the same as Concat, but has a special check for matching indices (as compared to unordered)
+
+                    foreach (LabeledOperation operation in Zip_Ordered_Operation(unordered.Append(ordering)))
+                    {
+                        yield return new object[] { source.Append(ordering), operation };
+                    }
+
+                    // Union is an odd duck that (currently) orders only the portion that came from an ordered source.
+                    foreach (LabeledOperation operation in Union_Reversed_Operation(unordered.Append(ordering)))
+                    {
+                        yield return new object[] { source.Append(ordering), operation };
+                    }
+                }
+            }
+        }
+
         public static IEnumerable<object[]> BinaryFailingOperators()
         {
             LabeledOperation failing = Label("Failing", (start, count, s) => s(start, count).Select<int, int>(x => { throw new DeliberateTestException(); }));
@@ -372,6 +443,25 @@ namespace System.Linq.Parallel.Tests
         private static Func<LabeledOperation, IEnumerable<LabeledOperation>> Zip_Ordered_Operation = sOther => new[] {
             Label("Zip-Ordered-Right:" + sOther.ToString(), (start, count, source) => source(0, count).Zip(sOther.Item(start * 2, count), (x, y) => (x + y) / 2)),
             Label("Zip-Ordered-Left:" + sOther.ToString(), (start, count, source) => sOther.Item(start * 2, count).Zip(source(0, count), (x, y) => (x + y) / 2))
+        };
+
+        // Because of how SelectMany builds the results, reverse the inner enumerable.
+        private static IEnumerable<LabeledOperation> SelectMany_Reversed_Operation = new[] {
+            Label("SelectMany", (start, count, source) => source(0, (count - 1) / CountFactor + 1).SelectMany(x => Enumerable.Range(start + x * CountFactor, Math.Min(CountFactor, count - x * CountFactor)).Reverse())),
+            Label("SelectMany-Index", (start, count, source) => source(0, (count - 1) / CountFactor + 1).SelectMany((x, index) => Enumerable.Range(start + x * CountFactor, Math.Min(CountFactor, count - x * CountFactor)).Reverse())),
+            Label("SelectMany-ResultSelector", (start, count, source) => source(0, (count - 1) / CountFactor + 1).SelectMany(x => Enumerable.Range(0, Math.Min(CountFactor, count - x * CountFactor)).Reverse(), (group, element) => start + group * CountFactor + element)),
+            Label("SelectMany-Index-ResultSelector", (start, count, source) => source(0, (count - 1) / CountFactor + 1).SelectMany((x, index) => Enumerable.Range(0, Math.Min(CountFactor, count - x * CountFactor)).Reverse(), (group, element) => start + group * CountFactor + element))
+        };
+
+        // Union and Concat have to switch which side the 'greater' element is on.
+        private static Func<LabeledOperation, IEnumerable<LabeledOperation>> Union_Reversed_Operation = sOther => new[] {
+            Label("Union-Right:" + sOther.ToString(), (start, count, source) => source(start + count / 2, count / 2 + count % 2).Union(sOther.Item(start, count))),
+            Label("Union-Left:" + sOther.ToString(), (start, count, source) => sOther.Item(start + count / 2, count / 2 + count % 2).Union(source(start, count)))
+        };
+
+        private static Func<LabeledOperation, IEnumerable<LabeledOperation>> Concat_Reversed_Operation = sOther => new[] {
+            Label("Union-Right:" + sOther.ToString(), (start, count, source) => source(start + count / 2, count / 2 + count % 2).Concat(sOther.Item(start, count / 2 + count % 2))),
+            Label("Union-Left:" + sOther.ToString(), (start, count, source) => sOther.Item(start + count / 2, count / 2 + count % 2).Concat(source(start, count / 2 + count % 2)))
         };
 
         #endregion operators
