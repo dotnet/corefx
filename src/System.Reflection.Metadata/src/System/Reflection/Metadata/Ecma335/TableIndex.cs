@@ -58,7 +58,7 @@ namespace System.Reflection.Metadata.Ecma335
         LocalVariable = 0x33,
         LocalConstant = 0x34,
         ImportScope = 0x35,
-        AsyncMethod = 0x36,
+        StateMachineMethod = 0x36,
         CustomDebugInformation = 0x37,
     }
 

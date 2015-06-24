@@ -54,6 +54,7 @@
     <Compile Include="System\Reflection\Internal\MemoryBlocks\StreamConstraints.cs" />
     <Compile Include="System\Reflection\Internal\MemoryBlocks\StreamMemoryBlockProvider.cs" />
     <Compile Include="System\Reflection\Internal\Utilities\BitArithmetic.cs" />
+    <Compile Include="System\Reflection\Internal\Utilities\StringUtils.cs" />
     <Compile Include="System\Reflection\Internal\Utilities\EmptyArray.cs" />
     <Compile Include="System\Reflection\Internal\Utilities\EncodingHelper.cs" />
     <Compile Include="System\Reflection\Internal\Utilities\FileStreamReadLightUp.cs" />
@@ -63,6 +64,7 @@
     <Compile Include="System\Reflection\Internal\Utilities\LightUpHelper.cs" />
     <Compile Include="System\Reflection\Internal\Utilities\MemoryBlock.cs" />
     <Compile Include="System\Reflection\Internal\Utilities\MemoryMapLightUp.cs" />
+    <Compile Include="System\Reflection\Internal\Utilities\PooledStringBuilder.cs" />
     <Compile Include="System\Reflection\Internal\Utilities\ObjectPool`1.cs" />
     <Compile Include="System\Reflection\Internal\Utilities\ReadOnlyUnmanagedMemoryStream.cs" />
     <Compile Include="System\Reflection\Internal\Utilities\StreamExtensions.cs" />
@@ -175,10 +177,10 @@
     <Compile Include="System\Reflection\Metadata\ModuleReference.cs" />
     <Compile Include="System\Reflection\Metadata\NamespaceDefinition.cs" />
     <Compile Include="System\Reflection\Metadata\Parameter.cs" />
-    <Compile Include="System\Reflection\Metadata\PortablePdb\AsyncMethod.cs" />
     <Compile Include="System\Reflection\Metadata\PortablePdb\CustomDebugInformation.cs" />
     <Compile Include="System\Reflection\Metadata\PortablePdb\DebugMetadataHeader.cs" />
     <Compile Include="System\Reflection\Metadata\PortablePdb\Document.cs" />
+    <Compile Include="System\Reflection\Metadata\PortablePdb\DocumentNameHandle.cs" />
     <Compile Include="System\Reflection\Metadata\PortablePdb\HandleCollections.Debug.cs" />
     <Compile Include="System\Reflection\Metadata\PortablePdb\Handles.Debug.cs" />
     <Compile Include="System\Reflection\Metadata\PortablePdb\HasCustomDebugInformationTag.cs" />

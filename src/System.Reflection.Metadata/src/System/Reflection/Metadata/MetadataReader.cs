@@ -127,7 +127,7 @@ namespace System.Reflection.Metadata
             // Although the specification states that the module table will have exactly one row,
             // the native metadata reader would successfully read files containing more than one row.
             // Such files exist in the wild and may be produced by obfuscators.
-            if (this.ModuleTable.NumberOfRows < 1)
+            if (standalonePdbStream.Length == 0 && this.ModuleTable.NumberOfRows < 1)
             {
                 throw new BadImageFormatException(string.Format(MetadataResources.ModuleTableInvalidNumberOfRows, this.ModuleTable.NumberOfRows));
             }
@@ -423,7 +423,7 @@ namespace System.Reflection.Metadata
         internal LocalVariableTableReader LocalVariableTable;
         internal LocalConstantTableReader LocalConstantTable;
         internal ImportScopeTableReader ImportScopeTable;
-        internal AsyncMethodTableReader AsyncMethodTable;
+        internal StateMachineMethodTableReader StateMachineMethodTable;
         internal CustomDebugInformationTableReader CustomDebugInformationTable;
 
         private void ReadMetadataTableHeader(ref BlobReader reader, out HeapSizes heapSizes, out int[] metadataTableRowCounts, out TableMask sortedTables)
@@ -752,8 +752,8 @@ namespace System.Reflection.Metadata
             this.ImportScopeTable = new ImportScopeTableReader(rowCounts[(int)TableIndex.ImportScope], GetReferenceSize(rowCounts, TableIndex.ImportScope), blobHeapRefSize, metadataTablesMemoryBlock, totalRequiredSize);
             totalRequiredSize += this.ImportScopeTable.Block.Length;
 
-            this.AsyncMethodTable = new AsyncMethodTableReader(rowCounts[(int)TableIndex.AsyncMethod], methodRefSizeCombined, blobHeapRefSize, metadataTablesMemoryBlock, totalRequiredSize);
-            totalRequiredSize += this.AsyncMethodTable.Block.Length;
+            this.StateMachineMethodTable = new StateMachineMethodTableReader(rowCounts[(int)TableIndex.StateMachineMethod], methodRefSizeCombined, metadataTablesMemoryBlock, totalRequiredSize);
+            totalRequiredSize += this.StateMachineMethodTable.Block.Length;
 
             this.CustomDebugInformationTable = new CustomDebugInformationTableReader(rowCounts[(int)TableIndex.CustomDebugInformation], IsDeclaredSorted(TableMask.CustomDebugInformation), hasCustomDebugInformationRefSizeCombined, guidHeapRefSize, blobHeapRefSize, metadataTablesMemoryBlock, totalRequiredSize);
             totalRequiredSize += this.CustomDebugInformationTable.Block.Length;
@@ -1125,11 +1125,6 @@ namespace System.Reflection.Metadata
             get { return new LocalConstantHandleCollection(this, default(LocalScopeHandle)); }
         }
 
-        public AsyncMethodHandleCollection AsyncMethods
-        {
-            get { return new AsyncMethodHandleCollection(this); }
-        }
-
         public ImportScopeCollection ImportScopes
         {
             get { return new ImportScopeCollection(this); }
@@ -1179,7 +1174,7 @@ namespace System.Reflection.Metadata
 
         public BlobReader GetBlobReader(BlobHandle handle)
         {
-            return new BlobReader(BlobStream.GetMemoryBlock(handle));
+            return BlobStream.GetBlobReader(handle);
         }
 
         public string GetUserString(UserStringHandle handle)
@@ -1194,6 +1189,11 @@ namespace System.Reflection.Metadata
 
         public ModuleDefinition GetModuleDefinition()
         {
+            if (_debugMetadataHeader != null)
+            {
+                throw new InvalidOperationException(MetadataResources.StandaloneDebugMetadataImageDoesNotContainModuleTable);
+            }
+
             return new ModuleDefinition(this);
         }
 
@@ -1443,32 +1443,11 @@ namespace System.Reflection.Metadata
             return new ImportsBlobReader(BlobStream.GetMemoryBlock(handle));
         }
 
-        // TODO: DocumentNameBlobReader?
-        public string ReadDocumentName(BlobHandle handle)
+        private static readonly ObjectPool<StringBuilder> s_stringBuilderPool = new ObjectPool<StringBuilder>(() => new StringBuilder());
+
+        public string GetString(DocumentNameBlobHandle handle)
         {
-            // TODO: optimize
-
-            var blobReader = GetBlobReader(handle);
-
-            // TODO: should be UTF8
-            char separator = (char)blobReader.ReadByte();
-
-            // TODO: pool
-            var result = new StringBuilder();
-            while (blobReader.RemainingBytes > 0)
-            {
-                if (separator != 0 && result.Length > 0)
-                {
-                    result.Append(separator);
-                }
-
-                // TODO: range checks
-                var partHandle = BlobHandle.FromOffset(blobReader.ReadCompressedInteger());
-                var partBytes = GetBlobBytes(partHandle);
-                result.Append(Encoding.UTF8.GetString(partBytes, 0, partBytes.Length));
-            }
-
-            return result.ToString();
+            return BlobStream.GetDocumentName(handle);
         }
 
         public Document GetDocument(DocumentHandle handle)
@@ -1499,11 +1478,6 @@ namespace System.Reflection.Metadata
         public LocalConstant GetLocalConstant(LocalConstantHandle handle)
         {
             return new LocalConstant(this, handle);
-        }
-
-        public AsyncMethod GetAsyncMethod(AsyncMethodHandle handle)
-        {
-            return new AsyncMethod(this, handle);
         }
 
         public ImportScope GetImportScope(ImportScopeHandle handle)

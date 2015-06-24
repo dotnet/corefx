@@ -99,7 +99,7 @@ namespace System.Reflection.Metadata.Ecma335
                 case TableIndex.LocalVariable: return reader.LocalVariableTable.RowSize;
                 case TableIndex.LocalConstant: return reader.LocalConstantTable.RowSize;
                 case TableIndex.ImportScope: return reader.ImportScopeTable.RowSize;
-                case TableIndex.AsyncMethod: return reader.AsyncMethodTable.RowSize;
+                case TableIndex.StateMachineMethod: return reader.StateMachineMethodTable.RowSize;
                 case TableIndex.CustomDebugInformation: return reader.CustomDebugInformationTable.RowSize;
 
                 default:
@@ -181,7 +181,7 @@ namespace System.Reflection.Metadata.Ecma335
                 case TableIndex.LocalVariable: return reader.LocalVariableTable.Block;
                 case TableIndex.LocalConstant: return reader.LocalConstantTable.Block;
                 case TableIndex.ImportScope: return reader.ImportScopeTable.Block;
-                case TableIndex.AsyncMethod: return reader.AsyncMethodTable.Block;
+                case TableIndex.StateMachineMethod: return reader.StateMachineMethodTable.Block;
                 case TableIndex.CustomDebugInformation: return reader.CustomDebugInformationTable.Block;
 
                 default:

@@ -536,6 +536,17 @@ namespace System.Reflection.Metadata
         private static readonly uint[] s_corEncodeTokenArray = new uint[] { TokenTypeIds.TypeDef, TokenTypeIds.TypeRef, TokenTypeIds.TypeSpec, 0 };
 
         /// <summary>
+        /// Reads a #Blob heap handle encoded as a compressed integer.
+        /// </summary>
+        /// <remarks>
+        /// Blobs that contain references to other blobs are used in Portable PDB format, for example <see cref="Document.Name"/>.
+        /// </remarks>
+        public BlobHandle ReadBlobHandle()
+        {
+            return BlobHandle.FromOffset(ReadCompressedInteger());
+        }
+
+        /// <summary>
         /// Reads a constant value (see ECMA-335 Partition II section 22.9) from the current position.
         /// </summary>
         /// <exception cref="BadImageFormatException">Error while reading from the blob.</exception>
