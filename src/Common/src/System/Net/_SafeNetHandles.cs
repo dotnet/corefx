@@ -197,7 +197,6 @@ namespace System.Net {
             Trace();
         }
 
-        [SuppressMessage("Microsoft.Security","CA2106:SecureAsserts", Justification="DEBUG use only: Require access to Environment.StackTrace regardless of app permissions")]
         private void Trace() {
             m_Trace = "WARNING! GC-ed  >>" + this.GetType().FullName + "<< (should be excplicitly closed) \r\n";
             GlobalLog.Print("Creating SafeHandle, type = " + this.GetType().FullName);

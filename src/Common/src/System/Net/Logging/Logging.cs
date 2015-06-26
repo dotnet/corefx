@@ -190,7 +190,6 @@ namespace System.Net {
             }
         }
 
-        [SuppressMessage("Microsoft.Security","CA2122:DoNotIndirectlyExposeMethodsWithLinkDemands", Justification="Logging functions must work in partial trust mode")]
         private static void Close() {
             if (s_WebTraceSource != null) s_WebTraceSource.Close();
             if (s_HttpListenerTraceSource != null) s_HttpListenerTraceSource.Close();
