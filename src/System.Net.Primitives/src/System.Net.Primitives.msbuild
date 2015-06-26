@@ -1,0 +1,39 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build">
+  <ItemGroup>
+    <Reference Include="Microsoft.Win32.Primitives" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <CompileItem Include="..\System.Net.Common\Cookie\cookie.cs" />
+    <CompileItem Include="..\System.Net.Common\Cookie\cookieexception.cs" />
+    <CompileItem Include="System\Net\AuthenticationSchemes.cs" />
+    <CompileItem Include="System\Net\cookiecontainer.cs" />
+    <CompileItem Include="System\Net\cookiecollection.cs" />
+    <CompileItem Include="System\Net\CredentialCache.cs" />
+    <CompileItem Include="System\Net\DecompressionMethods.cs" />
+    <CompileItem Include="System\Net\DnsEndPoint.cs" />
+    <CompileItem Include="System\Net\EndPoint.cs" />
+    <CompileItem Include="System\Net\HttpStatusCode.cs" />
+    <CompileItem Include="System\Net\ICredentials.cs" />
+    <CompileItem Include="System\Net\ICredentialsByHost.cs" />
+    <CompileItem Include="System\Net\IPAddress.cs" />
+    <CompileItem Include="System\Net\IPEndPoint.cs" />
+    <CompileItem Include="System\Net\iwebproxy.cs" />
+    <CompileItem Include="System\Net\NetworkCredential.cs" />
+    <CompileItem Include="System\Net\Sockets\SocketAddress.cs" />
+    <CompileItem Include="System\Net\TransportContext.cs" />
+    <CompileItem Include="System\Net\NetworkInformation\IPAddressCollection.cs" />
+    <CompileItem Include="System\Net\SecureProtocols\NegotiateEnumTypes.cs" />
+    <CompileItem Include="System\Net\Security\SslPolicyErrors.cs" />
+    <CompileItem Include="System\Net\Sockets\AddressFamily.cs" />
+    <CompileItem Include="System\Net\Sockets\SocketError.cs" />
+    <CompileItem Include="System\Net\SocketException.cs" />
+    <CompileItem Include="System\Net\SecureProtocols\SslEnumTypes.cs" />
+    <CompileItem Include="System\Security\Authentication\ExtendedProtection\ChannelBinding.cs" />
+    <CompileItem Include="System\Security\Authentication\ExtendedProtection\ChannelBindingKind.cs" />
+
+    <CompileItem Include="System\Net\IPAddressParser.cs" />
+  </ItemGroup>
+</Project>
+
