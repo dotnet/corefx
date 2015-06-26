@@ -38,17 +38,10 @@ namespace System.Security.Authentication
     public enum ExchangeAlgorithmType
     {
         None = 0,
-
-        [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Rsa", Justification = "this would be a breaking change; has previously shipped")]
         RsaSign = (Interop.Alg.ClassSignture | Interop.Alg.TypeRSA | Interop.Alg.Any),
-
-        [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Rsa", Justification = "this would be a breaking change; has previously shipped")]
         RsaKeyX = (Interop.Alg.ClassKeyXch | Interop.Alg.TypeRSA | Interop.Alg.Any),
-
-        [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Diffie", Justification = "this would be a breaking change; has previously shipped")]
         DiffieHellman = (Interop.Alg.ClassKeyXch | Interop.Alg.TypeDH | Interop.Alg.NameDH_Ephem),
     }
-
 
     public enum CipherAlgorithmType
     {

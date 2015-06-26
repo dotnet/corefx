@@ -44,6 +44,13 @@
     <Compile Include="$(CommonPath)\System\Net\Cookie\cookie.cs" />
     <Compile Include="$(CommonPath)\System\Net\Cookie\cookieexception.cs" />
 
+    <!-- Logging -->
+    <Compile Include="$(CommonPath)\System\Net\Shims\TraceSource.cs" />
+    <Compile Include="$(CommonPath)\System\Net\Logging\Logging.cs" />
+    <Compile Include="$(CommonPath)\System\Net\Logging\GlobalLog.cs" />
+    <Compile Include="$(CommonPath)\System\Net\Logging\EventSourceLogging.cs" />
+    <Compile Include="$(CommonPath)\System\Net\InternalException.cs" />
+
     <!-- Primitives -->
     <Compile Include="System\Net\AuthenticationSchemes.cs" />
     <Compile Include="System\Net\cookiecontainer.cs" />
@@ -72,14 +79,12 @@
     <Compile Include="System\Net\Sockets\SocketError.cs" />
     <Compile Include="System\Security\Authentication\ExtendedProtection\ChannelBinding.cs" />
     <Compile Include="System\Security\Authentication\ExtendedProtection\ChannelBindingKind.cs" />
+
   </ItemGroup>
-  
-  <Import Project="$(CommonPath)\System\Net\Logging.msbuild" />
   
   <ItemGroup Condition=" '$(TargetsWindows)' == 'true' ">
     <!-- TODO -->
   </ItemGroup>
-  
   
   <ItemGroup>
     <None Include="project.json" />
