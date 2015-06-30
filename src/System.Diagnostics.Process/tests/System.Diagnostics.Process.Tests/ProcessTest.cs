@@ -79,7 +79,7 @@ namespace System.Diagnostics.ProcessTests
             Assert.Equal(priority, _process.BasePriority);
         }
 
-        [Fact, ActiveIssue(1538, PlatformID.OSX)]
+        [Fact]
         public void Process_BasePriority()
         {
             ProcessPriorityClass originalPriority = _process.PriorityClass;
@@ -119,7 +119,7 @@ namespace System.Diagnostics.ProcessTests
             Assert.True(p.WaitForExit(WaitInMS));
         }
 
-        [Fact, ActiveIssue(1538, PlatformID.OSX)]
+        [Fact]
         public void Process_EnableRaiseEvents()
         {
             {
@@ -156,7 +156,7 @@ namespace System.Diagnostics.ProcessTests
             }
         }
 
-        [Fact, ActiveIssue(1538, PlatformID.OSX)]
+        [Fact]
         public void Process_ExitCode()
         {
             {
@@ -229,14 +229,11 @@ namespace System.Diagnostics.ProcessTests
         public void Process_MainModule()
         {
             // Get MainModule property from a Process object
-            ProcessModule mainModule = null;
-            if (global::Interop.IsWindows)
+            ProcessModule mainModule = _process.MainModule;
+
+            if (!global::Interop.IsOSX) // OS X doesn't currently implement modules support
             {
-                mainModule = _process.MainModule;
-            }
-            else
-            {
-                Assert.Throws<PlatformNotSupportedException>(() => _process.MainModule);
+                Assert.NotNull(mainModule);
             }
 
             if (mainModule != null)
@@ -261,11 +258,17 @@ namespace System.Diagnostics.ProcessTests
             }
         }
 
-        [Fact, ActiveIssue(1538, PlatformID.OSX)]
+        [Fact]
         public void Process_MaxWorkingSet()
         {
-            IntPtr min, max;
-            uint flags;
+            using (Process p = Process.GetCurrentProcess())
+            {
+                Assert.True((long)p.MaxWorkingSet > 0);
+                Assert.True((long)p.MinWorkingSet >= 0);
+            }
+
+            if (global::Interop.IsOSX)
+                return; // doesn't support getting/setting working set for other processes
 
             long curValue = (long)_process.MaxWorkingSet;
             Assert.True(curValue >= 0);
@@ -275,6 +278,9 @@ namespace System.Diagnostics.ProcessTests
                 try
                 {
                     _process.MaxWorkingSet = (IntPtr)((int)curValue + 1024);
+
+                    IntPtr min, max;
+                    uint flags;
                     Interop.GetProcessWorkingSetSizeEx(_process.SafeHandle, out min, out max, out flags);
                     curValue = (int)max;
                     _process.Refresh();
@@ -287,9 +293,18 @@ namespace System.Diagnostics.ProcessTests
             }
         }
 
-        [Fact, ActiveIssue(1538, PlatformID.OSX)]
+        [Fact]
         public void Process_MinWorkingSet()
         {
+            using (Process p = Process.GetCurrentProcess())
+            {
+                Assert.True((long)p.MaxWorkingSet > 0);
+                Assert.True((long)p.MinWorkingSet >= 0);
+            }
+
+            if (global::Interop.IsOSX)
+                return; // doesn't support getting/setting working set for other processes
+
             long curValue = (long)_process.MinWorkingSet;
             Assert.True(curValue >= 0);
 
@@ -320,11 +335,13 @@ namespace System.Diagnostics.ProcessTests
             {
                 // Validated that we can get a value for each of the following.
                 Assert.NotNull(pModule);
-                Assert.NotNull(pModule.BaseAddress);
-                Assert.NotNull(pModule.EntryPointAddress);
+                Assert.NotEqual(IntPtr.Zero, pModule.BaseAddress);
                 Assert.NotNull(pModule.FileName);
-                int memSize = pModule.ModuleMemorySize;
                 Assert.NotNull(pModule.ModuleName);
+
+                // Just make sure these don't throw
+                IntPtr addr = pModule.EntryPointAddress;
+                int memSize = pModule.ModuleMemorySize;
             }
         }
 
@@ -341,57 +358,59 @@ namespace System.Diagnostics.ProcessTests
             }
         }
 
-        [Fact, ActiveIssue(1538, PlatformID.OSX)]
+        [Fact]
         public void Process_NonpagedSystemMemorySize64()
         {
             AssertNonZeroWindowsZeroUnix(_process.NonpagedSystemMemorySize64);
         }
 
-        [Fact, ActiveIssue(1538, PlatformID.OSX)]
+        [Fact]
         public void Process_PagedMemorySize64()
         {
             AssertNonZeroWindowsZeroUnix(_process.PagedMemorySize64);
         }
 
-        [Fact, ActiveIssue(1538, PlatformID.OSX)]
+        [Fact]
         public void Process_PagedSystemMemorySize64()
         {
             AssertNonZeroWindowsZeroUnix(_process.PagedSystemMemorySize64);
         }
 
-        [Fact, ActiveIssue(1538, PlatformID.OSX)]
+        [Fact]
         public void Process_PeakPagedMemorySize64()
         {
             AssertNonZeroWindowsZeroUnix(_process.PeakPagedMemorySize64);
         }
 
-        [Fact, ActiveIssue(1538, PlatformID.OSX)]
+        [Fact]
         public void Process_PeakVirtualMemorySize64()
         {
             AssertNonZeroWindowsZeroUnix(_process.PeakVirtualMemorySize64);
         }
 
-        [Fact, ActiveIssue(1538, PlatformID.OSX)]
+        [Fact]
         public void Process_PeakWorkingSet64()
         {
             AssertNonZeroWindowsZeroUnix(_process.PeakWorkingSet64);
         }
 
-        [Fact, ActiveIssue(1538, PlatformID.OSX)]
+        [Fact]
         public void Process_PrivateMemorySize64()
         {
             AssertNonZeroWindowsZeroUnix(_process.PrivateMemorySize64);
         }
 
-        [Fact, ActiveIssue(1538, PlatformID.OSX)]
-        public void Process_PrivilegedProcessorTime()
+        [Fact]
+        [ActiveIssue(2184, PlatformID.OSX)]
+        public void Process_ProcessorTime()
         {
             Assert.True(_process.UserProcessorTime.TotalSeconds >= 0);
             Assert.True(_process.PrivilegedProcessorTime.TotalSeconds >= 0);
             Assert.True(_process.TotalProcessorTime.TotalSeconds >= 0);
         }
 
-        [Fact, ActiveIssue(1538, PlatformID.OSX)]
+        [Fact]
+        [PlatformSpecific(~PlatformID.OSX)] // getting/setting affinity not supported on OSX
         public void Process_ProcessorAffinity()
         {
             IntPtr curProcessorAffinity = _process.ProcessorAffinity;
@@ -449,7 +468,7 @@ namespace System.Diagnostics.ProcessTests
             Assert.Throws<ArgumentException>(() => { p.PriorityClass = ProcessPriorityClass.Normal | ProcessPriorityClass.Idle; });
         }
 
-        [Fact, ActiveIssue(1538, PlatformID.OSX)]
+        [Fact]
         public void ProcessProcessName()
         {
             Assert.Equal(_process.ProcessName, CoreRunName, StringComparer.OrdinalIgnoreCase);
@@ -462,7 +481,7 @@ namespace System.Diagnostics.ProcessTests
         [DllImport("libc")]
         internal static extern int getpid();
 
-        [Fact, ActiveIssue(1538, PlatformID.OSX)]
+        [Fact]
         public void Process_GetCurrentProcess()
         {
             Process current = Process.GetCurrentProcess();
@@ -476,7 +495,7 @@ namespace System.Diagnostics.ProcessTests
             Assert.Equal(Process.GetProcessById(currentProcessId).ProcessName, Process.GetCurrentProcess().ProcessName);
         }
 
-        [Fact, ActiveIssue(1538, PlatformID.OSX)]
+        [Fact]
         public void Process_GetProcesses()
         {
             // Get all the processes running on the machine.
@@ -494,7 +513,7 @@ namespace System.Diagnostics.ProcessTests
             Assert.True(foundCurrentProcess, "Process_GetProcesses002 failed");
         }
 
-        [Fact, ActiveIssue(1538, PlatformID.OSX)]
+        [Fact]
         public void Process_GetProcessesByName()
         {
             // Get the current process using its name
@@ -757,6 +776,26 @@ namespace System.Diagnostics.ProcessTests
 
                 Assert.True(p.WaitForExit(WaitInMS));
                 Assert.Equal(SuccessExitCode, p.ExitCode);
+            }
+        }
+
+        [Fact]
+        public void ThreadCount()
+        {
+            Assert.True(_process.Threads.Count > 0);
+            using (Process p = Process.GetCurrentProcess())
+            {
+                Assert.True(p.Threads.Count > 0);
+            }
+        }
+
+        // [Fact] // uncomment for diagnostic purposes to list processes to console
+        public void ConsoleWriteLineProcesses()
+        {
+            foreach (var p in Process.GetProcesses().OrderBy(p => p.Id))
+            {
+                Console.WriteLine("{0} : \"{1}\" (Threads: {2})", p.Id, p.ProcessName, p.Threads.Count);
+                p.Dispose();
             }
         }
 
