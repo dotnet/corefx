@@ -1,0 +1,58 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build">
+  <ItemGroup>
+    <CompileItem Include="System\Net\NetworkInformation\DuplicateAddressDetectionState.cs" />
+    <CompileItem Include="System\Net\NetworkInformation\GatewayIPAddressInformation.cs" />
+    <CompileItem Include="System\Net\NetworkInformation\GatewayIPAddressInformationCollection.cs" />
+    <CompileItem Include="System\Net\NetworkInformation\IcmpV4Statistics.cs" />
+    <CompileItem Include="System\Net\NetworkInformation\IcmpV6Statistics.cs" />
+    <CompileItem Include="System\Net\NetworkInformation\interfacetype.cs" />
+    <CompileItem Include="System\Net\NetworkInformation\IPAddressInformation.cs" />
+    <CompileItem Include="System\Net\NetworkInformation\ipaddressinformationcollection.cs" />
+    <CompileItem Include="System\Net\NetworkInformation\IPGlobalProperties.cs" />
+    <CompileItem Include="System\Net\NetworkInformation\IPGlobalStatistics.cs" />
+    <CompileItem Include="System\Net\NetworkInformation\IPInterfaceProperties.cs" />
+    <CompileItem Include="System\Net\NetworkInformation\IPInterfaceStatistics.cs" />
+    <CompileItem Include="System\Net\NetworkInformation\IPv4InterfaceProperties.cs" />
+    <CompileItem Include="System\Net\NetworkInformation\IPv6InterfaceProperties.cs" />
+    <CompileItem Include="System\Net\NetworkInformation\MulticastIPAddressInformation.cs" />
+    <CompileItem Include="System\Net\NetworkInformation\MulticastIPAddressInformationCollection.cs" />
+    <CompileItem Include="System\Net\NetworkInformation\NetworkAddressChange.cs" />
+    <CompileItem Include="System\Net\NetworkInformation\NetworkInterface.cs" />
+    <CompileItem Include="System\Net\NetworkInformation\NetworkInterfaceComponent.cs" />
+    <CompileItem Include="System\Net\NetworkInformation\OperationalStatus.cs" />
+    <CompileItem Include="System\Net\NetworkInformation\PhysicalAddress.cs" />
+    <CompileItem Include="System\Net\NetworkInformation\PrefixOrigin.cs" />
+    <CompileItem Include="System\Net\NetworkInformation\SafeCancelMibChangeNotify.cs" />
+    <CompileItem Include="System\Net\NetworkInformation\SafeFreeMibTable.cs" />
+    <CompileItem Include="System\Net\NetworkInformation\ScopeLevel.cs" />
+    <CompileItem Include="System\Net\NetworkInformation\SuffixOrigin.cs" />
+    <CompileItem Include="System\Net\NetworkInformation\SystemGatewayIPAddressInformation.cs" />
+    <CompileItem Include="System\Net\NetworkInformation\SystemIcmpV4Statistics.cs" />
+    <CompileItem Include="System\Net\NetworkInformation\SystemIcmpV6Statistics.cs" />
+    <CompileItem Include="System\Net\NetworkInformation\SystemIPAddressInformation.cs" />
+    <CompileItem Include="System\Net\NetworkInformation\SystemIPGlobalProperties.cs" />
+    <CompileItem Include="System\Net\NetworkInformation\SystemIPGlobalStatistics.cs" />
+    <CompileItem Include="System\Net\NetworkInformation\SystemIPInterfaceProperties.cs" />
+    <CompileItem Include="System\Net\NetworkInformation\SystemIPInterfaceStatistics.cs" />
+    <CompileItem Include="System\Net\NetworkInformation\SystemIPv4InterfaceProperties.cs" />
+    <CompileItem Include="System\Net\NetworkInformation\SystemIPv6InterfaceProperties.cs" />
+    <CompileItem Include="System\Net\NetworkInformation\SystemMulticastIPAddressInformation.cs" />
+    <CompileItem Include="System\Net\NetworkInformation\SystemNetworkInterface.cs" />
+    <CompileItem Include="System\Net\NetworkInformation\SystemTcpConnection.cs" />
+    <CompileItem Include="System\Net\NetworkInformation\SystemTcpStatistics.cs" />
+    <CompileItem Include="System\Net\NetworkInformation\SystemUdpStatistics.cs" />
+    <CompileItem Include="System\Net\NetworkInformation\SystemUnicastIPAddressInformation.cs" />
+    <CompileItem Include="System\Net\NetworkInformation\TcpConnection.cs" />
+    <CompileItem Include="System\Net\NetworkInformation\TcpState.cs" />
+    <CompileItem Include="System\Net\NetworkInformation\TcpStatistics.cs" />
+    <CompileItem Include="System\Net\NetworkInformation\TeredoHelper.cs" />
+    <CompileItem Include="System\Net\NetworkInformation\UdpStatistics.cs" />
+    <CompileItem Include="System\Net\NetworkInformation\UnicastIPAddressInformation.cs" />
+    <CompileItem Include="System\Net\NetworkInformation\UnicastIPAddressInformationCollection.cs" />
+    <CompileItem Include="System\Net\NetworkInformation\UnsafeNetInfoNativeMethods.cs" />
+
+    <CompileItem Include="System\net\NetworkInformation\_SafeNetHandles.cs" />
+  </ItemGroup>
+</Project>
+
