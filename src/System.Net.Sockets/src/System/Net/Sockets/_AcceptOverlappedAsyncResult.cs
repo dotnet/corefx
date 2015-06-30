@@ -18,12 +18,12 @@ namespace System.Net.Sockets
         // internal class members
         //
 
-        private int m_LocalBytesTransferred;
-        private Socket m_ListenSocket;
-        private Socket m_AcceptSocket;
+        private int _localBytesTransferred;
+        private Socket _listenSocket;
+        private Socket _acceptSocket;
 
-        private int m_AddressBufferLength;
-        private byte[] m_Buffer;
+        private int _addressBufferLength;
+        private byte[] _buffer;
 
         // Constructor. We take in the socket that's creating us, the caller's
         // state object, and the buffer on which the I/O will be performed.
@@ -33,7 +33,7 @@ namespace System.Net.Sockets
         internal AcceptOverlappedAsyncResult(Socket listenSocket, Object asyncState, AsyncCallback asyncCallback) :
             base(listenSocket, asyncState, asyncCallback)
         {
-            m_ListenSocket = listenSocket;
+            _listenSocket = listenSocket;
         }
 
 #if !FEATURE_PAL
@@ -50,12 +50,12 @@ namespace System.Net.Sockets
             SocketAddress remoteSocketAddress = null;
             if (errorCode == SocketError.Success)
             {
-                m_LocalBytesTransferred = numBytes;
+                _localBytesTransferred = numBytes;
                 if (Logging.On) LogBuffer((long)numBytes);
 
                 //get the endpoint
 
-                remoteSocketAddress = m_ListenSocket.m_RightEndPoint.Serialize();
+                remoteSocketAddress = _listenSocket.m_RightEndPoint.Serialize();
 
                 IntPtr localAddr;
                 int localAddrLength;
@@ -64,11 +64,11 @@ namespace System.Net.Sockets
                 //set the socket context
                 try
                 {
-                    m_ListenSocket.GetAcceptExSockaddrs(
-                                    Marshal.UnsafeAddrOfPinnedArrayElement(m_Buffer, 0),
-                                    m_Buffer.Length - (m_AddressBufferLength * 2),
-                                    m_AddressBufferLength,
-                                    m_AddressBufferLength,
+                    _listenSocket.GetAcceptExSockaddrs(
+                                    Marshal.UnsafeAddrOfPinnedArrayElement(_buffer, 0),
+                                    _buffer.Length - (_addressBufferLength * 2),
+                                    _addressBufferLength,
+                                    _addressBufferLength,
                                     out localAddr,
                                     out localAddrLength,
                                     out remoteAddr,
@@ -76,17 +76,17 @@ namespace System.Net.Sockets
                                     );
                     Marshal.Copy(remoteAddr, remoteSocketAddress.m_Buffer, 0, remoteSocketAddress.m_Size);
 
-                    IntPtr handle = m_ListenSocket.SafeHandle.DangerousGetHandle();
+                    IntPtr handle = _listenSocket.SafeHandle.DangerousGetHandle();
 
                     errorCode = UnsafeSocketsNativeMethods.OSSOCK.setsockopt(
-                        m_AcceptSocket.SafeHandle,
+                        _acceptSocket.SafeHandle,
                         SocketOptionLevel.Socket,
                         SocketOptionName.UpdateAcceptContext,
                         ref handle,
                         Marshal.SizeOf(handle));
 
                     if (errorCode == SocketError.SocketError) errorCode = (SocketError)Marshal.GetLastWin32Error();
-                    GlobalLog.Print("AcceptOverlappedAsyncResult#" + Logging.HashString(this) + "::PostCallback() setsockopt handle:" + handle.ToString() + " AcceptSocket:" + Logging.HashString(m_AcceptSocket) + " itsHandle:" + m_AcceptSocket.SafeHandle.DangerousGetHandle().ToString() + " returns:" + errorCode.ToString());
+                    GlobalLog.Print("AcceptOverlappedAsyncResult#" + Logging.HashString(this) + "::PostCallback() setsockopt handle:" + handle.ToString() + " AcceptSocket:" + Logging.HashString(_acceptSocket) + " itsHandle:" + _acceptSocket.SafeHandle.DangerousGetHandle().ToString() + " returns:" + errorCode.ToString());
                 }
                 catch (ObjectDisposedException)
                 {
@@ -98,7 +98,7 @@ namespace System.Net.Sockets
 
             if (errorCode == SocketError.Success)
             {
-                return m_ListenSocket.UpdateAcceptSocket(m_AcceptSocket, m_ListenSocket.m_RightEndPoint.Create(remoteSocketAddress));
+                return _listenSocket.UpdateAcceptSocket(_acceptSocket, _listenSocket.m_RightEndPoint.Create(remoteSocketAddress));
             }
             else
                 return null;
@@ -122,8 +122,8 @@ namespace System.Net.Sockets
             //
             // Fill in Buffer Array structure that will be used for our send/recv Buffer
             //
-            m_AddressBufferLength = addressBufferLength;
-            m_Buffer = buffer;
+            _addressBufferLength = addressBufferLength;
+            _buffer = buffer;
         }
 
         /*
@@ -135,19 +135,19 @@ namespace System.Net.Sockets
         }
         */
 
-        void LogBuffer(long size)
+        private void LogBuffer(long size)
         {
             GlobalLog.Assert(Logging.On, "AcceptOverlappedAsyncResult#{0}::LogBuffer()|Logging is off!", Logging.HashString(this));
-            IntPtr pinnedBuffer = Marshal.UnsafeAddrOfPinnedArrayElement(m_Buffer, 0);
+            IntPtr pinnedBuffer = Marshal.UnsafeAddrOfPinnedArrayElement(_buffer, 0);
             if (pinnedBuffer != IntPtr.Zero)
             {
                 if (size > -1)
                 {
-                    Logging.Dump(Logging.Sockets, m_ListenSocket, "PostCompletion", pinnedBuffer, (int)Math.Min(size, (long)m_Buffer.Length));
+                    Logging.Dump(Logging.Sockets, _listenSocket, "PostCompletion", pinnedBuffer, (int)Math.Min(size, (long)_buffer.Length));
                 }
                 else
                 {
-                    Logging.Dump(Logging.Sockets, m_ListenSocket, "PostCompletion", pinnedBuffer, (int)m_Buffer.Length);
+                    Logging.Dump(Logging.Sockets, _listenSocket, "PostCompletion", pinnedBuffer, (int)_buffer.Length);
                 }
             }
         }
@@ -156,7 +156,7 @@ namespace System.Net.Sockets
         {
             get
             {
-                return m_Buffer;
+                return _buffer;
             }
         }
 
@@ -164,7 +164,7 @@ namespace System.Net.Sockets
         {
             get
             {
-                return m_LocalBytesTransferred;
+                return _localBytesTransferred;
             }
         }
 
@@ -172,7 +172,7 @@ namespace System.Net.Sockets
         {
             set
             {
-                m_AcceptSocket = value;
+                _acceptSocket = value;
             }
         }
     }

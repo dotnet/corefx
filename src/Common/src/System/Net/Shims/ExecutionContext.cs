@@ -5,7 +5,7 @@ namespace System.Threading
 {
     internal sealed partial class ExecutionContext : System.IDisposable
     {
-        static ThreadLocal<ExecutionContext> threadEc = new ThreadLocal<ExecutionContext>(() => new ExecutionContext());
+        private static ThreadLocal<ExecutionContext> s_threadEc = new ThreadLocal<ExecutionContext>(() => new ExecutionContext());
 
         internal ExecutionContext() { }
 
@@ -23,10 +23,10 @@ namespace System.Threading
 
         public void Dispose() { }
 
-        private bool isFlowSuppressed = false;
+        private bool _isFlowSuppressed = false;
         public static bool IsFlowSuppressed()
         {
-            return threadEc.Value.isFlowSuppressed;
+            return s_threadEc.Value.isFlowSuppressed;
         }
 
         [System.Security.SecuritySafeCriticalAttribute]
@@ -36,7 +36,7 @@ namespace System.Threading
             {
                 throw new InvalidOperationException();
             }
-            threadEc.Value.isFlowSuppressed = false;
+            s_threadEc.Value.isFlowSuppressed = false;
         }
 
         [System.Security.SecurityCriticalAttribute]
@@ -54,25 +54,25 @@ namespace System.Threading
                 throw new InvalidOperationException();
             }
 
-            threadEc.Value.isFlowSuppressed = true;
-            return new AsyncFlowControl(threadEc.Value);
+            s_threadEc.Value.isFlowSuppressed = true;
+            return new AsyncFlowControl(s_threadEc.Value);
         }
     }
 
     internal struct AsyncFlowControl : IDisposable
     {
-        private ExecutionContext ec;
+        private ExecutionContext _ec;
         public AsyncFlowControl(ExecutionContext ec)
         {
-            this.ec = ec;
+            _ec = ec;
         }
 
         public void Dispose()
         {
-            if (this.ec != null)
+            if (_ec != null)
             {
-                this.ec.Dispose();
-                this.ec = null;
+                _ec.Dispose();
+                _ec = null;
             }
         }
     }

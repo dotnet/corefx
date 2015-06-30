@@ -13,9 +13,9 @@ namespace System.Net.Sockets
     /// </devdoc>
     public class MulticastOption
     {
-        IPAddress group;
-        IPAddress localAddress;
-        int ifIndex;
+        private IPAddress _group;
+        private IPAddress _localAddress;
+        private int _ifIndex;
 
         /// <devdoc>
         ///    <para>
@@ -53,7 +53,7 @@ namespace System.Net.Sockets
             }
 
             Group = group;
-            ifIndex = interfaceIndex;
+            _ifIndex = interfaceIndex;
         }
 
 
@@ -84,11 +84,11 @@ namespace System.Net.Sockets
         {
             get
             {
-                return group;
+                return _group;
             }
             set
             {
-                group = value;
+                _group = value;
             }
         }
 
@@ -101,12 +101,12 @@ namespace System.Net.Sockets
         {
             get
             {
-                return localAddress;
+                return _localAddress;
             }
             set
             {
-                ifIndex = 0;
-                localAddress = value;
+                _ifIndex = 0;
+                _localAddress = value;
             }
         }
 
@@ -115,7 +115,7 @@ namespace System.Net.Sockets
         {
             get
             {
-                return ifIndex;
+                return _ifIndex;
             }
             set
             {
@@ -124,8 +124,8 @@ namespace System.Net.Sockets
                     throw new ArgumentOutOfRangeException("value");
                 }
 
-                localAddress = null;
-                ifIndex = value;
+                _localAddress = null;
+                _ifIndex = value;
             }
         }
     } // class MulticastOption
@@ -137,8 +137,8 @@ namespace System.Net.Sockets
     /// </devdoc>
     public class IPv6MulticastOption
     {
-        IPAddress m_Group;
-        long m_Interface;
+        private IPAddress _group;
+        private long _interface;
 
         /// <devdoc>
         /// <para>
@@ -188,7 +188,7 @@ namespace System.Net.Sockets
         {
             get
             {
-                return m_Group;
+                return _group;
             }
             set
             {
@@ -197,7 +197,7 @@ namespace System.Net.Sockets
                     throw new ArgumentNullException("value");
                 }
 
-                m_Group = value;
+                _group = value;
             }
         }
 
@@ -210,7 +210,7 @@ namespace System.Net.Sockets
         {
             get
             {
-                return m_Interface;
+                return _interface;
             }
             set
             {
@@ -219,7 +219,7 @@ namespace System.Net.Sockets
                     throw new ArgumentOutOfRangeException("value");
                 }
 
-                m_Interface = value;
+                _interface = value;
             }
         }
     } // class MulticastOptionIPv6

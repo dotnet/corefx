@@ -31,30 +31,30 @@ namespace System.Net.NetworkInformation
     {
         // Holds a list of all pending calls to NotifyStableUnicastIpAddressTable.  Also used as a lock to protect its
         // contents.
-        private static List<TeredoHelper> pendingNotifications;
+        private static List<TeredoHelper> s_pendingNotifications;
 
-        private readonly Action<object> callback;
-        private readonly object state;
+        private readonly Action<object> _callback;
+        private readonly object _state;
 
-        private bool runCallbackCalled;
+        private bool _runCallbackCalled;
 
         // We explicitly keep a copy of this to prevent it from getting GC'd.
-        private readonly StableUnicastIpAddressTableDelegate onStabilizedDelegate;
+        private readonly StableUnicastIpAddressTableDelegate _onStabilizedDelegate;
 
         // Used to cancel notification after receiving the first callback, or when the AppDomain is going down.
-        private SafeCancelMibChangeNotify cancelHandle;
+        private SafeCancelMibChangeNotify _cancelHandle;
 
         static TeredoHelper()
         {
-            pendingNotifications = new List<TeredoHelper>();
+            s_pendingNotifications = new List<TeredoHelper>();
         }
 
         private TeredoHelper(Action<object> callback, object state)
         {
-            this.callback = callback;
-            this.state = state;
-            this.onStabilizedDelegate = new StableUnicastIpAddressTableDelegate(OnStabilized);
-            this.runCallbackCalled = false;
+            _callback = callback;
+            _state = state;
+            _onStabilizedDelegate = new StableUnicastIpAddressTableDelegate(OnStabilized);
+            _runCallbackCalled = false;
         }
 
         // Returns true if the address table is already stable.  Otherwise, calls callback when it becomes stable.
@@ -69,7 +69,7 @@ namespace System.Net.NetworkInformation
             uint err = UnsafeCommonNativeMethods.ErrorCodes.ERROR_SUCCESS;
             SafeFreeMibTable table = null;
 
-            lock (pendingNotifications)
+            lock (s_pendingNotifications)
             {
                 // If OnAppDomainUnload gets the lock first, tell our caller that we'll finish async.  Their AppDomain 
                 // is about to go down anyways.  If we do, hold the lock until we've added helper to the 
@@ -80,7 +80,7 @@ namespace System.Net.NetworkInformation
                 }
 
                 err = UnsafeNetInfoNativeMethods.NotifyStableUnicastIpAddressTable(AddressFamily.Unspecified,
-                    out table, helper.onStabilizedDelegate, IntPtr.Zero, out helper.cancelHandle);
+                    out table, helper._onStabilizedDelegate, IntPtr.Zero, out helper._cancelHandle);
 
                 if (table != null)
                 {
@@ -89,12 +89,12 @@ namespace System.Net.NetworkInformation
 
                 if (err == UnsafeCommonNativeMethods.ErrorCodes.ERROR_IO_PENDING)
                 {
-                    GlobalLog.Assert(!helper.cancelHandle.IsInvalid,
+                    GlobalLog.Assert(!helper._cancelHandle.IsInvalid,
                         "CancelHandle invalid despite returning ERROR_IO_PENDING");
 
                     // Async completion: add us to the pendingNotifications list so we'll be canceled in the
                     // event of an AppDomain unload.
-                    pendingNotifications.Add(helper);
+                    s_pendingNotifications.Add(helper);
                     return false;
                 }
             }
@@ -109,11 +109,11 @@ namespace System.Net.NetworkInformation
 
         private void RunCallback(object o)
         {
-            GlobalLog.Assert(runCallbackCalled, "RunCallback called without setting runCallbackCalled!");
+            GlobalLog.Assert(_runCallbackCalled, "RunCallback called without setting runCallbackCalled!");
 
             // If OnAppDomainUnload beats us to the lock, do nothing: the AppDomain is going down soon anyways.
             // Otherwise, wait until the call to CancelMibChangeNotify2 is done before giving it up.
-            lock (pendingNotifications)
+            lock (s_pendingNotifications)
             {
                 if (Environment.HasShutdownStarted)
                 {
@@ -121,20 +121,20 @@ namespace System.Net.NetworkInformation
                 }
 
 #if DEBUG
-                bool successfullyRemoved = pendingNotifications.Remove(this);
+                bool successfullyRemoved = s_pendingNotifications.Remove(this);
                 GlobalLog.Assert(successfullyRemoved,
                     "RunCallback for a TeredoHelper which is not in pendingNotifications!");
 #else
                 pendingNotifications.Remove(this);
 #endif
 
-                GlobalLog.Assert(cancelHandle != null && !cancelHandle.IsInvalid,
+                GlobalLog.Assert(_cancelHandle != null && !_cancelHandle.IsInvalid,
                     "Invalid cancelHandle in RunCallback");
 
-                cancelHandle.Dispose();
+                _cancelHandle.Dispose();
             }
 
-            callback.Invoke(state);
+            _callback.Invoke(_state);
         }
 
         // This callback gets run on a native worker thread, which we don't want to allow arbitrary user code to
@@ -151,13 +151,13 @@ namespace System.Net.NetworkInformation
             // Lock the TeredoHelper instance to ensure that only the first call to OnStabilized will get to call 
             // RunCallback.  This is the only place that TeredoHelpers get locked, as individual instances are not
             // exposed to higher layers, so there's no chance for deadlock.
-            if (!runCallbackCalled)
+            if (!_runCallbackCalled)
             {
                 lock (this)
                 {
-                    if (!runCallbackCalled)
+                    if (!_runCallbackCalled)
                     {
-                        runCallbackCalled = true;
+                        _runCallbackCalled = true;
                         ThreadPool.QueueUserWorkItem(RunCallback, null);
                     }
                 }

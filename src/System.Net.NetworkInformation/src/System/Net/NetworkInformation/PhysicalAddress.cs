@@ -8,9 +8,9 @@ namespace System.Net.NetworkInformation
 {
     public class PhysicalAddress
     {
-        byte[] address = null;
-        bool changed = true;
-        int hash = 0;
+        private byte[] _address = null;
+        private bool _changed = true;
+        private int _hash = 0;
 
         // FxCop: if this class is ever made mutable (like, given any non-readonly fields),
         // the readonly should be removed from the None decoration.
@@ -19,40 +19,40 @@ namespace System.Net.NetworkInformation
         // constructors
         public PhysicalAddress(byte[] address)
         {
-            this.address = address;
+            _address = address;
         }
 
         public override int GetHashCode()
         {
-            if (changed)
+            if (_changed)
             {
-                changed = false;
-                hash = 0;
+                _changed = false;
+                _hash = 0;
 
                 int i;
-                int size = address.Length & ~3;
+                int size = _address.Length & ~3;
 
                 for (i = 0; i < size; i += 4)
                 {
-                    hash ^= (int)address[i]
-                            | ((int)address[i + 1] << 8)
-                            | ((int)address[i + 2] << 16)
-                            | ((int)address[i + 3] << 24);
+                    _hash ^= (int)_address[i]
+                            | ((int)_address[i + 1] << 8)
+                            | ((int)_address[i + 2] << 16)
+                            | ((int)_address[i + 3] << 24);
                 }
-                if ((address.Length & 3) != 0)
+                if ((_address.Length & 3) != 0)
                 {
                     int remnant = 0;
                     int shift = 0;
 
-                    for (; i < address.Length; ++i)
+                    for (; i < _address.Length; ++i)
                     {
-                        remnant |= ((int)address[i]) << shift;
+                        remnant |= ((int)_address[i]) << shift;
                         shift += 8;
                     }
-                    hash ^= remnant;
+                    _hash ^= remnant;
                 }
             }
-            return hash;
+            return _hash;
         }
 
         public override bool Equals(object comparand)
@@ -61,13 +61,13 @@ namespace System.Net.NetworkInformation
             if (address == null)
                 return false;
 
-            if (this.address.Length != address.address.Length)
+            if (_address.Length != address._address.Length)
             {
                 return false;
             }
-            for (int i = 0; i < address.address.Length; i++)
+            for (int i = 0; i < address._address.Length; i++)
             {
-                if (this.address[i] != address.address[i])
+                if (_address[i] != address._address[i])
                     return false;
             }
             return true;
@@ -78,7 +78,7 @@ namespace System.Net.NetworkInformation
         {
             StringBuilder addressString = new StringBuilder();
 
-            foreach (byte value in address)
+            foreach (byte value in _address)
             {
                 int tmp = (value >> 4) & 0x0F;
 
@@ -100,8 +100,8 @@ namespace System.Net.NetworkInformation
 
         public byte[] GetAddressBytes()
         {
-            byte[] tmp = new byte[address.Length];
-            Buffer.BlockCopy(address, 0, tmp, 0, address.Length);
+            byte[] tmp = new byte[_address.Length];
+            Buffer.BlockCopy(_address, 0, tmp, 0, _address.Length);
             return tmp;
         }
 

@@ -1,3 +1,15 @@
+
+
+using Microsoft.Win32.SafeHandles;
+using System.Diagnostics.CodeAnalysis;
+using System.Net.NetworkInformation;
+using System.Net.Sockets;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+using System.Threading;
+// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 /*++
 Copyright (c) Microsoft Corporation
 
@@ -94,15 +106,8 @@ Revision History:
 
 --*/
 
-namespace System.Net {
-    using Microsoft.Win32.SafeHandles;
-    using System.Diagnostics.CodeAnalysis;
-    using System.Net.NetworkInformation;
-    using System.Net.Sockets;
-    using System.Runtime.CompilerServices;
-    using System.Runtime.InteropServices;
-    using System.Threading;
-    
+namespace System.Net
+{
     //
     // SafeHandle to wrap handles created by IcmpCreateFile or Icmp6CreateFile
     // from either icmp.dll or iphlpapi.dll. These handles must be closed by
@@ -113,12 +118,14 @@ namespace System.Net {
     // which DLL being used but stashes the OS query results away at ctor
     // time so it is always available at critical finalizer time.
     //
-    internal sealed class SafeCloseIcmpHandle : SafeHandleZeroOrMinusOneIsInvalid {
-
-        private SafeCloseIcmpHandle() : base(true) {
+    internal sealed class SafeCloseIcmpHandle : SafeHandleZeroOrMinusOneIsInvalid
+    {
+        private SafeCloseIcmpHandle() : base(true)
+        {
         }
 
-        override protected bool ReleaseHandle() {
+        override protected bool ReleaseHandle()
+        {
             return UnsafeNetInfoNativeMethods.IcmpCloseHandle(handle);
         }
     }

@@ -273,7 +273,4 @@ namespace System.Net
           10.5.5   504 Gateway Timeout ......................................71
           10.5.6   505 HTTP Version Not Supported ...........................71
        */
-
-
-
 } // namespace System.Net

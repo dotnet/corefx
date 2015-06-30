@@ -8,11 +8,11 @@ namespace System.Net.NetworkInformation
     /// Provides information about a network interface address.
     internal class SystemGatewayIPAddressInformation : GatewayIPAddressInformation
     {
-        IPAddress address;
+        private IPAddress _address;
 
         private SystemGatewayIPAddressInformation(IPAddress address)
         {
-            this.address = address;
+            _address = address;
         }
 
         /// Gets the Internet Protocol (IP) address.
@@ -20,7 +20,7 @@ namespace System.Net.NetworkInformation
         {
             get
             {
-                return address;
+                return _address;
             }
         }
 

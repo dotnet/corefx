@@ -22,7 +22,7 @@ namespace System.Net.Sockets
                 for (int i = 0; i < s_MethodTable.Count; i++)
                 {
                     methods = s_MethodTable[i];
-                    if (methods.addressFamily == addressFamily && methods.socketType == socketType && methods.protocolType == protocolType)
+                    if (methods._addressFamily == addressFamily && methods._socketType == socketType && methods._protocolType == protocolType)
                     {
                         return methods;
                     }
@@ -34,27 +34,27 @@ namespace System.Net.Sockets
             }
         }
 
-        private AddressFamily addressFamily;
-        private SocketType socketType;
-        private ProtocolType protocolType;
-        private object lockObject;
+        private AddressFamily _addressFamily;
+        private SocketType _socketType;
+        private ProtocolType _protocolType;
+        private object _lockObject;
 
-        private AcceptExDelegate acceptEx;
-        private GetAcceptExSockaddrsDelegate getAcceptExSockaddrs;
-        private ConnectExDelegate connectEx;
-        private TransmitPacketsDelegate transmitPackets;
+        private AcceptExDelegate _acceptEx;
+        private GetAcceptExSockaddrsDelegate _getAcceptExSockaddrs;
+        private ConnectExDelegate _connectEx;
+        private TransmitPacketsDelegate _transmitPackets;
 
-        private DisconnectExDelegate disconnectEx;
-        private DisconnectExDelegate_Blocking disconnectEx_Blocking;
-        private WSARecvMsgDelegate recvMsg;
-        private WSARecvMsgDelegate_Blocking recvMsg_Blocking;
+        private DisconnectExDelegate _disconnectEx;
+        private DisconnectExDelegate_Blocking _disconnectEx_Blocking;
+        private WSARecvMsgDelegate _recvMsg;
+        private WSARecvMsgDelegate_Blocking _recvMsg_Blocking;
 
         private DynamicWinsockMethods(AddressFamily addressFamily, SocketType socketType, ProtocolType protocolType)
         {
-            this.addressFamily = addressFamily;
-            this.socketType = socketType;
-            this.protocolType = protocolType;
-            this.lockObject = new object();
+            _addressFamily = addressFamily;
+            _socketType = socketType;
+            _protocolType = protocolType;
+            _lockObject = new object();
         }
 
         public T GetDelegate<T>(SafeCloseSocket socketHandle) where T : class
@@ -62,42 +62,42 @@ namespace System.Net.Sockets
             if (typeof(T) == typeof(AcceptExDelegate))
             {
                 EnsureAcceptEx(socketHandle);
-                return (T)(object)acceptEx;
+                return (T)(object)_acceptEx;
             }
             else if (typeof(T) == typeof(GetAcceptExSockaddrsDelegate))
             {
                 EnsureGetAcceptExSockaddrs(socketHandle);
-                return (T)(object)getAcceptExSockaddrs;
+                return (T)(object)_getAcceptExSockaddrs;
             }
             else if (typeof(T) == typeof(ConnectExDelegate))
             {
                 EnsureConnectEx(socketHandle);
-                return (T)(object)connectEx;
+                return (T)(object)_connectEx;
             }
             else if (typeof(T) == typeof(DisconnectExDelegate))
             {
                 EnsureDisconnectEx(socketHandle);
-                return (T)(object)disconnectEx;
+                return (T)(object)_disconnectEx;
             }
             else if (typeof(T) == typeof(DisconnectExDelegate_Blocking))
             {
                 EnsureDisconnectEx(socketHandle);
-                return (T)(object)disconnectEx_Blocking;
+                return (T)(object)_disconnectEx_Blocking;
             }
             else if (typeof(T) == typeof(WSARecvMsgDelegate))
             {
                 EnsureWSARecvMsg(socketHandle);
-                return (T)(object)recvMsg;
+                return (T)(object)_recvMsg;
             }
             else if (typeof(T) == typeof(WSARecvMsgDelegate_Blocking))
             {
                 EnsureWSARecvMsg(socketHandle);
-                return (T)(object)recvMsg_Blocking;
+                return (T)(object)_recvMsg_Blocking;
             }
             else if (typeof(T) == typeof(TransmitPacketsDelegate))
             {
                 EnsureTransmitPackets(socketHandle);
-                return (T)(object)transmitPackets;
+                return (T)(object)_transmitPackets;
             }
 
             System.Diagnostics.Debug.Assert(false, "Invalid type passed to DynamicWinsockMethods.GetDelegate");
@@ -135,15 +135,15 @@ namespace System.Net.Sockets
 
         private void EnsureAcceptEx(SafeCloseSocket socketHandle)
         {
-            if (acceptEx == null)
+            if (_acceptEx == null)
             {
-                lock (lockObject)
+                lock (_lockObject)
                 {
-                    if (acceptEx == null)
+                    if (_acceptEx == null)
                     {
                         Guid guid = new Guid("{0xb5367df1,0xcbac,0x11cf,{0x95, 0xca, 0x00, 0x80, 0x5f, 0x48, 0xa1, 0x92}}");
                         IntPtr ptrAcceptEx = LoadDynamicFunctionPointer(socketHandle, ref guid);
-                        acceptEx = Marshal.GetDelegateForFunctionPointer<AcceptExDelegate>(ptrAcceptEx);
+                        _acceptEx = Marshal.GetDelegateForFunctionPointer<AcceptExDelegate>(ptrAcceptEx);
                     }
                 }
             }
@@ -151,15 +151,15 @@ namespace System.Net.Sockets
 
         private void EnsureGetAcceptExSockaddrs(SafeCloseSocket socketHandle)
         {
-            if (getAcceptExSockaddrs == null)
+            if (_getAcceptExSockaddrs == null)
             {
-                lock (lockObject)
+                lock (_lockObject)
                 {
-                    if (getAcceptExSockaddrs == null)
+                    if (_getAcceptExSockaddrs == null)
                     {
                         Guid guid = new Guid("{0xb5367df2,0xcbac,0x11cf,{0x95, 0xca, 0x00, 0x80, 0x5f, 0x48, 0xa1, 0x92}}");
                         IntPtr ptrGetAcceptExSockaddrs = LoadDynamicFunctionPointer(socketHandle, ref guid);
-                        getAcceptExSockaddrs = Marshal.GetDelegateForFunctionPointer<GetAcceptExSockaddrsDelegate>(ptrGetAcceptExSockaddrs);
+                        _getAcceptExSockaddrs = Marshal.GetDelegateForFunctionPointer<GetAcceptExSockaddrsDelegate>(ptrGetAcceptExSockaddrs);
                     }
                 }
             }
@@ -167,15 +167,15 @@ namespace System.Net.Sockets
 
         private void EnsureConnectEx(SafeCloseSocket socketHandle)
         {
-            if (connectEx == null)
+            if (_connectEx == null)
             {
-                lock (lockObject)
+                lock (_lockObject)
                 {
-                    if (connectEx == null)
+                    if (_connectEx == null)
                     {
                         Guid guid = new Guid("{0x25a207b9,0x0ddf3,0x4660,{0x8e,0xe9,0x76,0xe5,0x8c,0x74,0x06,0x3e}}");
                         IntPtr ptrConnectEx = LoadDynamicFunctionPointer(socketHandle, ref guid);
-                        connectEx = Marshal.GetDelegateForFunctionPointer<ConnectExDelegate>(ptrConnectEx);
+                        _connectEx = Marshal.GetDelegateForFunctionPointer<ConnectExDelegate>(ptrConnectEx);
                     }
                 }
             }
@@ -183,16 +183,16 @@ namespace System.Net.Sockets
 
         private void EnsureDisconnectEx(SafeCloseSocket socketHandle)
         {
-            if (disconnectEx == null)
+            if (_disconnectEx == null)
             {
-                lock (lockObject)
+                lock (_lockObject)
                 {
-                    if (disconnectEx == null)
+                    if (_disconnectEx == null)
                     {
                         Guid guid = new Guid("{0x7fda2e11,0x8630,0x436f,{0xa0, 0x31, 0xf5, 0x36, 0xa6, 0xee, 0xc1, 0x57}}");
                         IntPtr ptrDisconnectEx = LoadDynamicFunctionPointer(socketHandle, ref guid);
-                        disconnectEx = Marshal.GetDelegateForFunctionPointer<DisconnectExDelegate>(ptrDisconnectEx);
-                        disconnectEx_Blocking = Marshal.GetDelegateForFunctionPointer<DisconnectExDelegate_Blocking>(ptrDisconnectEx);
+                        _disconnectEx = Marshal.GetDelegateForFunctionPointer<DisconnectExDelegate>(ptrDisconnectEx);
+                        _disconnectEx_Blocking = Marshal.GetDelegateForFunctionPointer<DisconnectExDelegate_Blocking>(ptrDisconnectEx);
                     }
                 }
             }
@@ -200,16 +200,16 @@ namespace System.Net.Sockets
 
         private void EnsureWSARecvMsg(SafeCloseSocket socketHandle)
         {
-            if (recvMsg == null)
+            if (_recvMsg == null)
             {
-                lock (lockObject)
+                lock (_lockObject)
                 {
-                    if (recvMsg == null)
+                    if (_recvMsg == null)
                     {
                         Guid guid = new Guid("{0xf689d7c8,0x6f1f,0x436b,{0x8a,0x53,0xe5,0x4f,0xe3,0x51,0xc3,0x22}}");
                         IntPtr ptrWSARecvMsg = LoadDynamicFunctionPointer(socketHandle, ref guid);
-                        recvMsg = Marshal.GetDelegateForFunctionPointer<WSARecvMsgDelegate>(ptrWSARecvMsg);
-                        recvMsg_Blocking = Marshal.GetDelegateForFunctionPointer<WSARecvMsgDelegate_Blocking>(ptrWSARecvMsg);
+                        _recvMsg = Marshal.GetDelegateForFunctionPointer<WSARecvMsgDelegate>(ptrWSARecvMsg);
+                        _recvMsg_Blocking = Marshal.GetDelegateForFunctionPointer<WSARecvMsgDelegate_Blocking>(ptrWSARecvMsg);
                     }
                 }
             }
@@ -217,15 +217,15 @@ namespace System.Net.Sockets
 
         private void EnsureTransmitPackets(SafeCloseSocket socketHandle)
         {
-            if (transmitPackets == null)
+            if (_transmitPackets == null)
             {
-                lock (lockObject)
+                lock (_lockObject)
                 {
-                    if (transmitPackets == null)
+                    if (_transmitPackets == null)
                     {
                         Guid guid = new Guid("{0xd9689da0,0x1f90,0x11d3,{0x99,0x71,0x00,0xc0,0x4f,0x68,0xc8,0x76}}");
                         IntPtr ptrTransmitPackets = LoadDynamicFunctionPointer(socketHandle, ref guid);
-                        transmitPackets = Marshal.GetDelegateForFunctionPointer<TransmitPacketsDelegate>(ptrTransmitPackets);
+                        _transmitPackets = Marshal.GetDelegateForFunctionPointer<TransmitPacketsDelegate>(ptrTransmitPackets);
                     }
                 }
             }

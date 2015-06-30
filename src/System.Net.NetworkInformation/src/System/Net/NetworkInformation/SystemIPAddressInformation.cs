@@ -15,18 +15,18 @@ namespace System.Net.NetworkInformation
     //and other properties
     internal class SystemIPAddressInformation : IPAddressInformation
     {
-        IPAddress address;
+        private IPAddress _address;
         internal bool transient = false;
         internal bool dnsEligible = true;
 
         internal SystemIPAddressInformation(IPAddress address, AdapterAddressFlags flags)
         {
-            this.address = address;
+            _address = address;
             transient = (flags & AdapterAddressFlags.Transient) > 0;
             dnsEligible = (flags & AdapterAddressFlags.DnsEligible) > 0;
         }
 
-        public override IPAddress Address { get { return address; } }
+        public override IPAddress Address { get { return _address; } }
 
         /// <summary>The address is a cluster address and shouldn't be used by most applications.</summary>
         public override bool IsTransient

@@ -1,9 +1,11 @@
+// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 /*++
 Copyright (c) Microsoft Corporation
 
 Module Name:
 
-    _SafeNetHandles.cs
 
 Abstract:
         The file contains _all_ SafeHandles implementations for System.Net namespace.
@@ -94,7 +96,8 @@ Revision History:
 
 --*/
 
-namespace System.Net {
+namespace System.Net
+{
     using Microsoft.Win32.SafeHandles;
     using System.Diagnostics.CodeAnalysis;
     using System.Net.NetworkInformation;
@@ -102,35 +105,40 @@ namespace System.Net {
     using System.Runtime.CompilerServices;
     using System.Runtime.InteropServices;
     using System.Threading;
-    
+
 #if DEBUG
     //
     // This is a helper class for debugging GC-ed handles that we define.
     // As a general rule normal code path should always destroy handles explicitly
     //
-    internal abstract class DebugSafeHandle: SafeHandleZeroOrMinusOneIsInvalid {
-        string m_Trace;
+    internal abstract class DebugSafeHandle : SafeHandleZeroOrMinusOneIsInvalid
+    {
+        private string _trace;
 
-        protected DebugSafeHandle(bool ownsHandle): base(ownsHandle) {
+        protected DebugSafeHandle(bool ownsHandle) : base(ownsHandle)
+        {
             Trace();
         }
 
-        protected DebugSafeHandle(IntPtr invalidValue, bool ownsHandle): base(ownsHandle) {
+        protected DebugSafeHandle(IntPtr invalidValue, bool ownsHandle) : base(ownsHandle)
+        {
             SetHandle(invalidValue);
             Trace();
         }
 
-        private void Trace() {
-            m_Trace = "WARNING! GC-ed  >>" + this.GetType().FullName + "<< (should be excplicitly closed) \r\n";
+        private void Trace()
+        {
+            _trace = "WARNING! GC-ed  >>" + this.GetType().FullName + "<< (should be excplicitly closed) \r\n";
 #if TRAVE
             string stacktrace = Environment.StackTrace;
             m_Trace += stacktrace;
 #endif //TRAVE
         }
 
-        ~DebugSafeHandle() {
+        ~DebugSafeHandle()
+        {
             GlobalLog.SetThreadSource(ThreadKinds.Finalization);
-            GlobalLog.Print(m_Trace);
+            GlobalLog.Print(_trace);
         }
     }
 
@@ -138,15 +146,18 @@ namespace System.Net {
     // This is a helper class for debugging GC-ed handles that we define.
     // As a general rule normal code path should always destroy handles explicitly
     //
-    internal abstract class DebugCriticalHandleMinusOneIsInvalid : CriticalHandleMinusOneIsInvalid {
-        string m_Trace;
+    internal abstract class DebugCriticalHandleMinusOneIsInvalid : CriticalHandleMinusOneIsInvalid
+    {
+        private string _trace;
 
-        protected DebugCriticalHandleMinusOneIsInvalid(): base() {
+        protected DebugCriticalHandleMinusOneIsInvalid() : base()
+        {
             Trace();
         }
 
-        private void Trace() {
-            m_Trace = "WARNING! GC-ed  >>" + this.GetType().FullName + "<< (should be excplicitly closed) \r\n";
+        private void Trace()
+        {
+            _trace = "WARNING! GC-ed  >>" + this.GetType().FullName + "<< (should be excplicitly closed) \r\n";
             GlobalLog.Print("Creating SafeHandle, type = " + this.GetType().FullName);
 #if TRAVE
             string stacktrace = Environment.StackTrace;
@@ -154,9 +165,10 @@ namespace System.Net {
 #endif //TRAVE
         }
 
-        ~DebugCriticalHandleMinusOneIsInvalid() {
+        ~DebugCriticalHandleMinusOneIsInvalid()
+        {
             GlobalLog.SetThreadSource(ThreadKinds.Finalization);
-            GlobalLog.Print(m_Trace);
+            GlobalLog.Print(_trace);
         }
     }
 
@@ -164,15 +176,18 @@ namespace System.Net {
     // This is a helper class for debugging GC-ed handles that we define.
     // As a general rule normal code path should always destroy handles explicitly
     //
-    internal abstract class DebugSafeHandleMinusOneIsInvalid : SafeHandleMinusOneIsInvalid {
-        string m_Trace;
+    internal abstract class DebugSafeHandleMinusOneIsInvalid : SafeHandleMinusOneIsInvalid
+    {
+        private string _trace;
 
-        protected DebugSafeHandleMinusOneIsInvalid(bool ownsHandle): base(ownsHandle) {
+        protected DebugSafeHandleMinusOneIsInvalid(bool ownsHandle) : base(ownsHandle)
+        {
             Trace();
         }
 
-        private void Trace() {
-            m_Trace = "WARNING! GC-ed  >>" + this.GetType().FullName + "<< (should be excplicitly closed) \r\n";
+        private void Trace()
+        {
+            _trace = "WARNING! GC-ed  >>" + this.GetType().FullName + "<< (should be excplicitly closed) \r\n";
             GlobalLog.Print("Creating SafeHandle, type = " + this.GetType().FullName);
 #if TRAVE
             string stacktrace = Environment.StackTrace;
@@ -180,9 +195,10 @@ namespace System.Net {
 #endif //TRAVE
         }
 
-        ~DebugSafeHandleMinusOneIsInvalid() {
+        ~DebugSafeHandleMinusOneIsInvalid()
+        {
             GlobalLog.SetThreadSource(ThreadKinds.Finalization);
-            GlobalLog.Print(m_Trace);
+            GlobalLog.Print(_trace);
         }
     }
 
@@ -190,15 +206,18 @@ namespace System.Net {
     // This is a helper class for debugging GC-ed handles that we define.
     // As a general rule normal code path should always destroy handles explicitly
     //
-    internal abstract class DebugCriticalHandleZeroOrMinusOneIsInvalid : CriticalHandleZeroOrMinusOneIsInvalid {
-        string m_Trace;
+    internal abstract class DebugCriticalHandleZeroOrMinusOneIsInvalid : CriticalHandleZeroOrMinusOneIsInvalid
+    {
+        private string _trace;
 
-        protected DebugCriticalHandleZeroOrMinusOneIsInvalid(): base() {
+        protected DebugCriticalHandleZeroOrMinusOneIsInvalid() : base()
+        {
             Trace();
         }
 
-        private void Trace() {
-            m_Trace = "WARNING! GC-ed  >>" + this.GetType().FullName + "<< (should be excplicitly closed) \r\n";
+        private void Trace()
+        {
+            _trace = "WARNING! GC-ed  >>" + this.GetType().FullName + "<< (should be excplicitly closed) \r\n";
             GlobalLog.Print("Creating SafeHandle, type = " + this.GetType().FullName);
 #if TRAVE
             string stacktrace = Environment.StackTrace;
@@ -206,9 +225,10 @@ namespace System.Net {
 #endif //TRAVE
         }
 
-        ~DebugCriticalHandleZeroOrMinusOneIsInvalid() {
+        ~DebugCriticalHandleZeroOrMinusOneIsInvalid()
+        {
             GlobalLog.SetThreadSource(ThreadKinds.Finalization);
-            GlobalLog.Print(m_Trace);
+            GlobalLog.Print(_trace);
         }
     }
 #endif // DEBUG
@@ -223,7 +243,8 @@ namespace System.Net {
     //
     ///////////////////////////////////////////////////////////////
 #if DEBUG
-    internal sealed class SafeLocalFree : DebugSafeHandle {
+    internal sealed class SafeLocalFree : DebugSafeHandle
+    {
 #else
     internal sealed class SafeLocalFree : SafeHandleZeroOrMinusOneIsInvalid {
 #endif
@@ -233,13 +254,15 @@ namespace System.Net {
         // This returned handle cannot be modified by the application.
         public static SafeLocalFree Zero = new SafeLocalFree(false);
 
-        private SafeLocalFree() : base(true) {}
+        private SafeLocalFree() : base(true) { }
 
-        private SafeLocalFree(bool ownsHandle) : base(ownsHandle) {}
+        private SafeLocalFree(bool ownsHandle) : base(ownsHandle) { }
 
-        public static SafeLocalFree LocalAlloc(int cb) {
-            SafeLocalFree result = UnsafeCommonNativeMethods.LocalAlloc(LMEM_FIXED, (UIntPtr) cb);
-            if (result.IsInvalid) {
+        public static SafeLocalFree LocalAlloc(int cb)
+        {
+            SafeLocalFree result = UnsafeCommonNativeMethods.LocalAlloc(LMEM_FIXED, (UIntPtr)cb);
+            if (result.IsInvalid)
+            {
                 result.SetHandleAsInvalid();
                 throw new OutOfMemoryException();
             }

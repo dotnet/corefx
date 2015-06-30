@@ -8,7 +8,7 @@ namespace System.Net.NetworkInformation
 {
     public class UnicastIPAddressInformationCollection : ICollection<UnicastIPAddressInformation>
     {
-        Collection<UnicastIPAddressInformation> addresses = new Collection<UnicastIPAddressInformation>();
+        private Collection<UnicastIPAddressInformation> _addresses = new Collection<UnicastIPAddressInformation>();
 
 
         protected internal UnicastIPAddressInformationCollection()
@@ -19,7 +19,7 @@ namespace System.Net.NetworkInformation
         /// <include file='doc\HttpListenerPrefixCollection.uex' path='docs/doc[@for="HttpListenerPrefixCollection.CopyTo"]/*' />
         public virtual void CopyTo(UnicastIPAddressInformation[] array, int offset)
         {
-            addresses.CopyTo(array, offset);
+            _addresses.CopyTo(array, offset);
         }
 
 
@@ -28,7 +28,7 @@ namespace System.Net.NetworkInformation
         {
             get
             {
-                return addresses.Count;
+                return _addresses.Count;
             }
         }
 
@@ -49,14 +49,14 @@ namespace System.Net.NetworkInformation
 
         internal void InternalAdd(UnicastIPAddressInformation address)
         {
-            addresses.Add(address);
+            _addresses.Add(address);
         }
 
 
         /// <include file='doc\HttpListenerPrefixCollection.uex' path='docs/doc[@for="HttpListenerPrefixCollection.Contains"]/*' />
         public virtual bool Contains(UnicastIPAddressInformation address)
         {
-            return addresses.Contains(address);
+            return _addresses.Contains(address);
         }
 
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
@@ -67,7 +67,7 @@ namespace System.Net.NetworkInformation
 
         public virtual IEnumerator<UnicastIPAddressInformation> GetEnumerator()
         {
-            return (IEnumerator<UnicastIPAddressInformation>)addresses.GetEnumerator();
+            return (IEnumerator<UnicastIPAddressInformation>)_addresses.GetEnumerator();
         }
 
 
@@ -77,7 +77,7 @@ namespace System.Net.NetworkInformation
         {
             get
             {
-                return (UnicastIPAddressInformation)addresses[index];
+                return (UnicastIPAddressInformation)_addresses[index];
             }
         }
 

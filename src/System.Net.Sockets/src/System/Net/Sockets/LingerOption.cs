@@ -11,8 +11,8 @@ namespace System.Net.Sockets
     /// </devdoc>
     public class LingerOption
     {
-        bool enabled;
-        int lingerTime;
+        private bool _enabled;
+        private int _lingerTime;
 
         /// <devdoc>
         ///    <para>
@@ -35,11 +35,11 @@ namespace System.Net.Sockets
         {
             get
             {
-                return enabled;
+                return _enabled;
             }
             set
             {
-                enabled = value;
+                _enabled = value;
             }
         }
 
@@ -52,11 +52,11 @@ namespace System.Net.Sockets
         {
             get
             {
-                return lingerTime;
+                return _lingerTime;
             }
             set
             {
-                lingerTime = value;
+                _lingerTime = value;
             }
         }
     } // class LingerOption

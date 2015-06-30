@@ -27,15 +27,15 @@ namespace System.Net.Sockets
             Canceled,
         }
 
-        private State state;
+        private State _state;
 
-        private object lockObject = new object();
+        private object _lockObject = new object();
 
         // Called by Socket to kick off the ConnectAsync process.  We'll complete the user's SAEA
         // when it's done.  Returns true if the operation will be asynchronous, false if it has failed synchronously
         public bool StartConnectAsync(SocketAsyncEventArgs args, DnsEndPoint endPoint)
         {
-            lock (lockObject)
+            lock (_lockObject)
             {
                 GlobalLog.Assert(endPoint.AddressFamily == AddressFamily.Unspecified ||
                      endPoint.AddressFamily == AddressFamily.InterNetwork ||
@@ -47,15 +47,15 @@ namespace System.Net.Sockets
 
                 // If Cancel() was called before we got the lock, it only set the state to Canceled: we need to
                 // fail synchronously from here.  Once State.DnsQuery is set, the Cancel() call will handle calling AsyncFail.
-                if (state == State.Canceled)
+                if (_state == State.Canceled)
                 {
                     SyncFail(new SocketException(SocketError.OperationAborted));
                     return false;
                 }
 
-                GlobalLog.Assert(state == State.NotStarted, "MultipleConnectAsync.StartConnectAsync(): Unexpected object state");
+                GlobalLog.Assert(_state == State.NotStarted, "MultipleConnectAsync.StartConnectAsync(): Unexpected object state");
 
-                state = State.DnsQuery;
+                _state = State.DnsQuery;
 
                 IAsyncResult result = Dns.BeginGetHostAddresses(endPoint.Host, new AsyncCallback(DnsCallback), null);
                 if (result.CompletedSynchronously)
@@ -85,16 +85,16 @@ namespace System.Net.Sockets
         {
             Exception exception = null;
 
-            lock (lockObject)
+            lock (_lockObject)
             {
                 // If the connection attempt was canceled during the dns query, the user's callback has already been
                 // called asynchronously and we simply need to return.
-                if (state == State.Canceled)
+                if (_state == State.Canceled)
                 {
                     return true;
                 }
 
-                GlobalLog.Assert(state == State.DnsQuery, "MultipleConnectAsync.DoDnsCallback(): Unexpected object state");
+                GlobalLog.Assert(_state == State.DnsQuery, "MultipleConnectAsync.DoDnsCallback(): Unexpected object state");
 
                 try
                 {
@@ -103,14 +103,14 @@ namespace System.Net.Sockets
                 }
                 catch (Exception e)
                 {
-                    state = State.Completed;
+                    _state = State.Completed;
                     exception = e;
                 }
 
                 // If the dns query succeeded, try to connect to the first address
                 if (exception == null)
                 {
-                    state = State.ConnectAttempt;
+                    _state = State.ConnectAttempt;
 
                     internalArgs = new SocketAsyncEventArgs();
                     internalArgs.Completed += InternalConnectCallback;
@@ -121,7 +121,7 @@ namespace System.Net.Sockets
                     if (exception != null)
                     {
                         // There was a synchronous error while connecting
-                        state = State.Completed;
+                        _state = State.Completed;
                     }
                 }
             }
@@ -143,9 +143,9 @@ namespace System.Net.Sockets
         {
             Exception exception = null;
 
-            lock (lockObject)
+            lock (_lockObject)
             {
-                if (state == State.Canceled)
+                if (_state == State.Canceled)
                 {
                     // If Cancel was called before we got the lock, the Socket will be closed soon.  We need to report
                     // OperationAborted (even though the connection actually completed), or the user will try to use a 
@@ -154,20 +154,20 @@ namespace System.Net.Sockets
                 }
                 else
                 {
-                    GlobalLog.Assert(state == State.ConnectAttempt, "MultipleConnectAsync.InternalConnectCallback(): Unexpected object state");
+                    GlobalLog.Assert(_state == State.ConnectAttempt, "MultipleConnectAsync.InternalConnectCallback(): Unexpected object state");
 
                     if (args.SocketError == SocketError.Success)
                     {
                         // the connection attempt succeeded; go to the completed state.
                         // the callback will be called outside the lock
-                        state = State.Completed;
+                        _state = State.Completed;
                     }
                     else if (args.SocketError == SocketError.OperationAborted)
                     {
                         // The socket was closed while the connect was in progress.  This can happen if the user
                         // closes the socket, and is equivalent to a call to CancelConnectAsync
                         exception = new SocketException(SocketError.OperationAborted);
-                        state = State.Canceled;
+                        _state = State.Canceled;
                     }
                     else
                     {
@@ -196,7 +196,7 @@ namespace System.Net.Sockets
                                 exception = connectException;
                             }
 
-                            state = State.Completed;
+                            _state = State.Completed;
                         }
                     }
                 }
@@ -308,9 +308,9 @@ namespace System.Net.Sockets
         {
             bool callOnFail = false;
 
-            lock (lockObject)
+            lock (_lockObject)
             {
-                switch (state)
+                switch (_state)
                 {
                     case State.NotStarted:
                         // Cancel was called before the Dns query was started.  The dns query won't be started
@@ -346,7 +346,7 @@ namespace System.Net.Sockets
                         break;
                 }
 
-                state = State.Canceled;
+                _state = State.Canceled;
             }
 
             // Call this outside the lock because Socket.Close may block
@@ -370,18 +370,18 @@ namespace System.Net.Sockets
     // AddressFamily
     internal class SingleSocketMultipleConnectAsync : MultipleConnectAsync
     {
-        private Socket socket;
-        private bool userSocket;
+        private Socket _socket;
+        private bool _userSocket;
 
         public SingleSocketMultipleConnectAsync(Socket socket, bool userSocket)
         {
-            this.socket = socket;
-            this.userSocket = userSocket;
+            _socket = socket;
+            _userSocket = userSocket;
         }
 
         protected override IPAddress GetNextAddress(out Socket attemptSocket)
         {
-            attemptSocket = socket;
+            attemptSocket = _socket;
 
             IPAddress rval = null;
             do
@@ -394,7 +394,7 @@ namespace System.Net.Sockets
                 rval = addressList[nextAddress];
                 ++nextAddress;
             }
-            while (!socket.CanTryAddressFamily(rval.AddressFamily));
+            while (!_socket.CanTryAddressFamily(rval.AddressFamily));
 
             return rval;
         }
@@ -403,9 +403,9 @@ namespace System.Net.Sockets
         {
             // Close the socket if this is an abortive failure (CancelConnectAsync) 
             // or if we created it internally
-            if (abortive || !userSocket)
+            if (abortive || !_userSocket)
             {
-                socket.Dispose();
+                _socket.Dispose();
             }
         }
 
@@ -417,18 +417,18 @@ namespace System.Net.Sockets
     // ahead of time, so we create both IPv4 and IPv6 sockets.
     internal class MultipleSocketMultipleConnectAsync : MultipleConnectAsync
     {
-        private Socket socket4;
-        private Socket socket6;
+        private Socket _socket4;
+        private Socket _socket6;
 
         public MultipleSocketMultipleConnectAsync(SocketType socketType, ProtocolType protocolType)
         {
             if (Socket.OSSupportsIPv4)
             {
-                socket4 = new Socket(AddressFamily.InterNetwork, socketType, protocolType);
+                _socket4 = new Socket(AddressFamily.InterNetwork, socketType, protocolType);
             }
             if (Socket.OSSupportsIPv6)
             {
-                socket6 = new Socket(AddressFamily.InterNetworkV6, socketType, protocolType);
+                _socket6 = new Socket(AddressFamily.InterNetworkV6, socketType, protocolType);
             }
         }
 
@@ -449,11 +449,11 @@ namespace System.Net.Sockets
 
                 if (rval.AddressFamily == AddressFamily.InterNetworkV6)
                 {
-                    attemptSocket = socket6;
+                    attemptSocket = _socket6;
                 }
                 else if (rval.AddressFamily == AddressFamily.InterNetwork)
                 {
-                    attemptSocket = socket4;
+                    attemptSocket = _socket4;
                 }
             }
 
@@ -463,26 +463,26 @@ namespace System.Net.Sockets
         // on success, close the socket that wasn't used
         protected override void OnSucceed()
         {
-            if (socket4 != null && !socket4.Connected)
+            if (_socket4 != null && !_socket4.Connected)
             {
-                socket4.Dispose();
+                _socket4.Dispose();
             }
-            if (socket6 != null && !socket6.Connected)
+            if (_socket6 != null && !_socket6.Connected)
             {
-                socket6.Dispose();
+                _socket6.Dispose();
             }
         }
 
         // close both sockets whether its abortive or not - we always create them internally
         protected override void OnFail(bool abortive)
         {
-            if (socket4 != null)
+            if (_socket4 != null)
             {
-                socket4.Dispose();
+                _socket4.Dispose();
             }
-            if (socket6 != null)
+            if (_socket6 != null)
             {
-                socket6.Dispose();
+                _socket6.Dispose();
             }
         }
     }

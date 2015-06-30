@@ -27,24 +27,24 @@ namespace System.Net
 
     internal sealed class NetworkingPerfCounters
     {
-        private static NetworkingPerfCounters instance;
-        private static object lockObject = new object();
+        private static NetworkingPerfCounters s_instance;
+        private static object s_lockObject = new object();
 
         public static NetworkingPerfCounters Instance
         {
             get
             {
-                if (instance == null)
+                if (s_instance == null)
                 {
-                    lock (lockObject)
+                    lock (s_lockObject)
                     {
-                        if (instance == null)
+                        if (s_instance == null)
                         {
-                            instance = new NetworkingPerfCounters();
+                            s_instance = new NetworkingPerfCounters();
                         }
                     }
                 }
-                return instance;
+                return s_instance;
             }
         }
 

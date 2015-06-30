@@ -8,20 +8,20 @@ namespace System.Net
     [EventSource(Name = "Microsoft-System-Net-Debug")]
     internal class EventSourceLogging : EventSource
     {
-        static private EventSourceLogging _log = new EventSourceLogging();
-        private EventSourceLogging(){ }
-        
+        static private EventSourceLogging s_log = new EventSourceLogging();
+        private EventSourceLogging() { }
+
         static public EventSourceLogging Log
         {
             get
-            { 
-                return _log; 
+            {
+                return s_log;
             }
         }
 
         [Event(1, Keywords = Keywords.Default)]
         public void DebugMessage(string message)
-        { 
+        {
             WriteEvent(1, message);
         }
 

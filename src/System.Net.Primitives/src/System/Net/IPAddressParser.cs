@@ -1,3 +1,10 @@
+
+
+using System.Net.Sockets;
+using System.Text;
+// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 //------------------------------------------------------------------------------
 // <copyright file="IPAddressParser.cs" company="Microsoft">
 //     Copyright (c) Microsoft Corporation.  All rights reserved.
@@ -6,9 +13,6 @@
 
 namespace System.Net
 {
-    using System.Net.Sockets;
-    using System.Text;
-
     internal class IPAddressParser
     {
         internal const int IPv4AddressBytes = 4;
@@ -117,7 +121,7 @@ namespace System.Net
 
         internal static string IPv6AddressToString(byte[] numbers, UInt32 scopeId)
         {
-            UnsafeCommonNativeMethods.NtStatus  errorCode = 0;
+            UnsafeCommonNativeMethods.NtStatus errorCode = 0;
 
             StringBuilder sb = new StringBuilder(INET6_ADDRSTRLEN);
             uint length = (uint)sb.Capacity;

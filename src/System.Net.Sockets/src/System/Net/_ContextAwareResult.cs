@@ -23,26 +23,26 @@ namespace System.Net
     //
     internal class CallbackClosure
     {
-        private AsyncCallback savedCallback;
-        private ExecutionContext savedContext;
+        private AsyncCallback _savedCallback;
+        private ExecutionContext _savedContext;
 
         internal CallbackClosure(ExecutionContext context, AsyncCallback callback)
         {
             if (callback != null)
             {
-                savedCallback = callback;
-                savedContext = context;
+                _savedCallback = callback;
+                _savedContext = context;
             }
         }
 
         internal bool IsCompatible(AsyncCallback callback)
         {
-            if (callback == null || savedCallback == null)
+            if (callback == null || _savedCallback == null)
                 return false;
 
             // Delegates handle this ok.  AsyncCallback is sealed and immutable, so if this succeeds, we are safe to use
             // the passed-in instance.
-            if (!object.Equals(savedCallback, callback))
+            if (!object.Equals(_savedCallback, callback))
                 return false;
 
             return true;
@@ -52,7 +52,7 @@ namespace System.Net
         {
             get
             {
-                return savedCallback;
+                return _savedCallback;
             }
         }
 
@@ -60,7 +60,7 @@ namespace System.Net
         {
             get
             {
-                return savedContext;
+                return _savedContext;
             }
         }
     }

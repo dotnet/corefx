@@ -1,10 +1,12 @@
+// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 //------------------------------------------------------------------------------
-// <copyright file="IPAddress.cs" company="Microsoft">
-//     Copyright (c) Microsoft Corporation.  All rights reserved.
 // </copyright>
 //------------------------------------------------------------------------------
 
-namespace System.Net {
+namespace System.Net
+{
     using System.Net.Sockets;
     using System.Globalization;
     using System.Text;
@@ -12,12 +14,12 @@ namespace System.Net {
     /// <devdoc>
     ///    <para>Provides an internet protocol (IP) address.</para>
     /// </devdoc>
-    public class IPAddress {
-
+    public class IPAddress
+    {
         public static readonly IPAddress Any = new IPAddress(0x0000000000000000);
-        public static readonly  IPAddress Loopback = new IPAddress(0x000000000100007F);
-        public static readonly  IPAddress Broadcast = new IPAddress(0x00000000FFFFFFFF);
-        public static readonly  IPAddress None = Broadcast;
+        public static readonly IPAddress Loopback = new IPAddress(0x000000000100007F);
+        public static readonly IPAddress Broadcast = new IPAddress(0x00000000FFFFFFFF);
+        public static readonly IPAddress None = Broadcast;
 
         internal const long LoopbackMask = 0x00000000000000FF;
 
@@ -29,19 +31,19 @@ namespace System.Net {
 
         internal string m_ToString;
 
-        public static readonly IPAddress IPv6Any      = new IPAddress(new byte[]{ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 },0);
-        public static readonly IPAddress IPv6Loopback = new IPAddress(new byte[]{ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1 },0);
-        public static readonly IPAddress IPv6None     = new IPAddress(new byte[]{ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 },0);
+        public static readonly IPAddress IPv6Any = new IPAddress(new byte[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, 0);
+        public static readonly IPAddress IPv6Loopback = new IPAddress(new byte[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 }, 0);
+        public static readonly IPAddress IPv6None = new IPAddress(new byte[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, 0);
 
         /// <devdoc>
         ///   <para>
         ///     Default to IPv4 address
         ///   </para>
         /// </devdoc>
-        private AddressFamily m_Family       = AddressFamily.InterNetwork;
-        private ushort[]      m_Numbers      = new ushort[NumberOfLabels];
-        private long          m_ScopeId      = 0;                             // really uint !
-        private int           m_HashCode     = 0;
+        private AddressFamily _family = AddressFamily.InterNetwork;
+        private ushort[] _numbers = new ushort[NumberOfLabels];
+        private long _scopeId = 0;                             // really uint !
+        private int _hashCode = 0;
 
         //
         // Maximum length of address literals (potentially including a port number)
@@ -58,7 +60,7 @@ namespace System.Net {
         //   6: Port (including colon)
         //   1: Terminating null byte
 
-       
+
         internal const int NumberOfLabels = IPAddressParser.IPv6AddressBytes / 2;
 
 
@@ -69,8 +71,10 @@ namespace System.Net {
         ///       address.
         ///    </para>
         /// </devdoc>
-        public IPAddress(long newAddress) {
-            if (newAddress<0 || newAddress>0x00000000FFFFFFFF) {
+        public IPAddress(long newAddress)
+        {
+            if (newAddress < 0 || newAddress > 0x00000000FFFFFFFF)
+            {
                 throw new ArgumentOutOfRangeException("newAddress");
             }
             m_Address = newAddress;
@@ -82,38 +86,42 @@ namespace System.Net {
         ///       Constructor for an IPv6 Address with a specified Scope.
         ///    </para>
         /// </devdoc>
-        public IPAddress(byte[] address,long scopeid) {
-
-            if (address==null) {
+        public IPAddress(byte[] address, long scopeid)
+        {
+            if (address == null)
+            {
                 throw new ArgumentNullException("address");
             }
 
-            if(address.Length != IPAddressParser.IPv6AddressBytes){
+            if (address.Length != IPAddressParser.IPv6AddressBytes)
+            {
                 throw new ArgumentException(SR.dns_bad_ip_address, "address");
             }
 
-            m_Family = AddressFamily.InterNetworkV6;
+            _family = AddressFamily.InterNetworkV6;
 
-            for (int i = 0; i < NumberOfLabels; i++) {
-                m_Numbers[i] = (ushort)(address[i * 2] * 256 + address[i * 2 + 1]);
+            for (int i = 0; i < NumberOfLabels; i++)
+            {
+                _numbers[i] = (ushort)(address[i * 2] * 256 + address[i * 2 + 1]);
             }
 
             //
             // Consider: Since scope is only valid for link-local and site-local
             //           addresses we could implement some more robust checking here
             //
-            if ( scopeid < 0 || scopeid > 0x00000000FFFFFFFF ) {
+            if (scopeid < 0 || scopeid > 0x00000000FFFFFFFF)
+            {
                 throw new ArgumentOutOfRangeException("scopeid");
             }
 
-            m_ScopeId = scopeid;
+            _scopeId = scopeid;
         }
         //
         private IPAddress(ushort[] address, uint scopeid)
         {
-            m_Family = AddressFamily.InterNetworkV6;
-            m_Numbers = address;
-            m_ScopeId = scopeid;
+            _family = AddressFamily.InterNetworkV6;
+            _numbers = address;
+            _scopeId = scopeid;
         }
 
 
@@ -122,8 +130,10 @@ namespace System.Net {
         ///       Constructor for IPv4 and IPv6 Address.
         ///    </para>
         /// </devdoc>
-        public IPAddress(byte[] address){
-            if (address==null) {
+        public IPAddress(byte[] address)
+        {
+            if (address == null)
+            {
                 throw new ArgumentNullException("address");
             }
             if (address.Length != IPAddressParser.IPv4AddressBytes && address.Length != IPAddressParser.IPv6AddressBytes)
@@ -133,14 +143,16 @@ namespace System.Net {
 
             if (address.Length == IPAddressParser.IPv4AddressBytes)
             {
-                m_Family = AddressFamily.InterNetwork;
-                m_Address = ((address[3] << 24 | address[2] <<16 | address[1] << 8| address[0]) & 0x0FFFFFFFF);
+                _family = AddressFamily.InterNetwork;
+                m_Address = ((address[3] << 24 | address[2] << 16 | address[1] << 8 | address[0]) & 0x0FFFFFFFF);
             }
-            else {
-                m_Family = AddressFamily.InterNetworkV6;
+            else
+            {
+                _family = AddressFamily.InterNetworkV6;
 
-                for (int i = 0; i < NumberOfLabels; i++) {
-                    m_Numbers[i] = (ushort)(address[i * 2] * 256 + address[i * 2 + 1]);
+                for (int i = 0; i < NumberOfLabels; i++)
+                {
+                    _numbers[i] = (ushort)(address[i * 2] * 256 + address[i * 2 + 1]);
                 }
             }
         }
@@ -149,7 +161,8 @@ namespace System.Net {
         // we need this internally since we need to interface with winsock
         // and winsock only understands Int32
         //
-        internal IPAddress(int newAddress) {
+        internal IPAddress(int newAddress)
+        {
             m_Address = (long)newAddress & 0x00000000FFFFFFFF;
         }
 
@@ -159,32 +172,38 @@ namespace System.Net {
         /// <para>Converts an IP address string to an <see cref='System.Net.IPAddress'/>
         /// instance.</para>
         /// </devdoc>
-        public static bool TryParse(string ipString, out IPAddress address) {
+        public static bool TryParse(string ipString, out IPAddress address)
+        {
             address = IPAddressParser.Parse(ipString, true);
             return (address != null);
-        } 
-        
-        public static IPAddress Parse(string ipString) {
+        }
+
+        public static IPAddress Parse(string ipString)
+        {
             return IPAddressParser.Parse(ipString, false);
         }
-        
+
         /// <devdoc>
         /// <para>
         /// Provides a copy of the IPAddress internals as an array of bytes.
         /// </para>
         /// </devdoc>
-        public byte[] GetAddressBytes() {
+        public byte[] GetAddressBytes()
+        {
             byte[] bytes;
-            if (m_Family == AddressFamily.InterNetworkV6 ) {
+            if (_family == AddressFamily.InterNetworkV6)
+            {
                 bytes = new byte[NumberOfLabels * 2];
 
                 int j = 0;
-                for ( int i = 0; i < NumberOfLabels; i++) {
-                    bytes[j++] = (byte)((this.m_Numbers[i] >> 8) & 0xFF);
-                    bytes[j++] = (byte)((this.m_Numbers[i]     ) & 0xFF);
+                for (int i = 0; i < NumberOfLabels; i++)
+                {
+                    bytes[j++] = (byte)((_numbers[i] >> 8) & 0xFF);
+                    bytes[j++] = (byte)((_numbers[i]) & 0xFF);
                 }
             }
-            else {
+            else
+            {
                 bytes = new byte[IPAddressParser.IPv4AddressBytes];
                 bytes[0] = (byte)(m_Address);
                 bytes[1] = (byte)(m_Address >> 8);
@@ -194,9 +213,11 @@ namespace System.Net {
             return bytes;
         }
 
-        public AddressFamily AddressFamily {
-            get {
-                return m_Family;
+        public AddressFamily AddressFamily
+        {
+            get
+            {
+                return _family;
             }
         }
 
@@ -205,22 +226,27 @@ namespace System.Net {
         ///        IPv6 Scope identifier. This is really a uint32, but that isn't CLS compliant
         ///    </para>
         /// </devdoc>
-        public long ScopeId {
-            get {
+        public long ScopeId
+        {
+            get
+            {
                 //
                 // Not valid for IPv4 addresses
                 //
-                if ( m_Family == AddressFamily.InterNetwork ) {
+                if (_family == AddressFamily.InterNetwork)
+                {
                     throw new SocketException(SocketError.OperationNotSupported);
                 }
 
-                return m_ScopeId;
+                return _scopeId;
             }
-            set {
+            set
+            {
                 //
                 // Not valid for IPv4 addresses
                 //
-                if ( m_Family == AddressFamily.InterNetwork ) {
+                if (_family == AddressFamily.InterNetwork)
+                {
                     throw new SocketException(SocketError.OperationNotSupported);
                 }
 
@@ -228,12 +254,14 @@ namespace System.Net {
                 // Consider: Since scope is only valid for link-local and site-local
                 //           addresses we could implement some more robust checking here
                 //
-                if ( value < 0 || value > 0x00000000FFFFFFFF) {
+                if (value < 0 || value > 0x00000000FFFFFFFF)
+                {
                     throw new ArgumentOutOfRangeException("value");
                 }
-                if (m_ScopeId!=value) {
+                if (_scopeId != value)
+                {
                     m_Address = value;
-                    m_ScopeId = value;
+                    _scopeId = value;
                 }
             }
         }
@@ -244,16 +272,19 @@ namespace System.Net {
         ///       or standard IPv6 representation.
         ///    </para>
         /// </devdoc>
-        public override string ToString() {
-
-            if (m_ToString==null) {
+        public override string ToString()
+        {
+            if (m_ToString == null)
+            {
                 //
                 // IPv6 Changes: generate the IPV6 representation
                 //
-                if ( m_Family == AddressFamily.InterNetworkV6 ) {
-                    m_ToString = IPAddressParser.IPv6AddressToString(this.GetAddressBytes(), (UInt32)m_ScopeId);
+                if (_family == AddressFamily.InterNetworkV6)
+                {
+                    m_ToString = IPAddressParser.IPv6AddressToString(this.GetAddressBytes(), (UInt32)_scopeId);
                 }
-                else {
+                else
+                {
                     m_ToString = IPAddressParser.IPv4AddressToString(this.GetAddressBytes());
                 }
             }
@@ -261,7 +292,8 @@ namespace System.Net {
             return m_ToString;
         }
 
-        public static long HostToNetworkOrder(long host) {
+        public static long HostToNetworkOrder(long host)
+        {
 #if BIGENDIAN
             return host;
 #else
@@ -269,7 +301,8 @@ namespace System.Net {
                     | ((long)HostToNetworkOrder((int)(host >> 32)) & 0xFFFFFFFF);
 #endif
         }
-        public static int HostToNetworkOrder(int host) {
+        public static int HostToNetworkOrder(int host)
+        {
 #if BIGENDIAN
             return host;
 #else
@@ -277,48 +310,60 @@ namespace System.Net {
                     | ((int)HostToNetworkOrder((short)(host >> 16)) & 0xFFFF);
 #endif
         }
-        public static short HostToNetworkOrder(short host) {
+        public static short HostToNetworkOrder(short host)
+        {
 #if BIGENDIAN
             return host;
 #else
             return (short)((((int)host & 0xFF) << 8) | (int)((host >> 8) & 0xFF));
 #endif
         }
-        public static long NetworkToHostOrder(long network) {
+        public static long NetworkToHostOrder(long network)
+        {
             return HostToNetworkOrder(network);
         }
-        public static int NetworkToHostOrder(int network) {
+        public static int NetworkToHostOrder(int network)
+        {
             return HostToNetworkOrder(network);
         }
-        public static short NetworkToHostOrder(short network) {
+        public static short NetworkToHostOrder(short network)
+        {
             return HostToNetworkOrder(network);
         }
 
-        public static bool IsLoopback(IPAddress address) {
-            if (address == null) {
+        public static bool IsLoopback(IPAddress address)
+        {
+            if (address == null)
+            {
                 throw new ArgumentNullException("address");
             }
-            if ( address.m_Family == AddressFamily.InterNetworkV6 ) {
+            if (address._family == AddressFamily.InterNetworkV6)
+            {
                 //
                 // Do Equals test for IPv6 addresses
                 //
                 return address.Equals(IPv6Loopback);
             }
-            else {
+            else
+            {
                 return ((address.m_Address & IPAddress.LoopbackMask) == (IPAddress.Loopback.m_Address & IPAddress.LoopbackMask));
             }
         }
 
-        internal bool IsBroadcast {
-            get {
-                if ( m_Family == AddressFamily.InterNetworkV6 ) {
+        internal bool IsBroadcast
+        {
+            get
+            {
+                if (_family == AddressFamily.InterNetworkV6)
+                {
                     //
                     // No such thing as a broadcast address for IPv6
                     //
                     return false;
                 }
-                else {
-                    return m_Address==Broadcast.m_Address;
+                else
+                {
+                    return m_Address == Broadcast.m_Address;
                 }
             }
         }
@@ -328,12 +373,13 @@ namespace System.Net {
         ///       V.Next: Determines if an address is an IPv6 Multicast address
         ///    </para>
         /// </devdoc>
-        public bool IsIPv6Multicast{
-            get{
-                return ( m_Family == AddressFamily.InterNetworkV6 ) &&
-                    ( ( this.m_Numbers[0] & 0xFF00 ) == 0xFF00 );
+        public bool IsIPv6Multicast
+        {
+            get
+            {
+                return (_family == AddressFamily.InterNetworkV6) &&
+                    ((_numbers[0] & 0xFF00) == 0xFF00);
             }
-
         }
 
         /// <devdoc>
@@ -341,10 +387,12 @@ namespace System.Net {
         ///       V.Next: Determines if an address is an IPv6 Link Local address
         ///    </para>
         /// </devdoc>
-        public bool IsIPv6LinkLocal {
-            get{
-                return ( m_Family == AddressFamily.InterNetworkV6 ) &&
-                   ( ( this.m_Numbers[0] & 0xFFC0 ) == 0xFE80 );
+        public bool IsIPv6LinkLocal
+        {
+            get
+            {
+                return (_family == AddressFamily.InterNetworkV6) &&
+                   ((_numbers[0] & 0xFFC0) == 0xFE80);
             }
         }
 
@@ -353,66 +401,81 @@ namespace System.Net {
         ///       V.Next: Determines if an address is an IPv6 Site Local address
         ///    </para>
         /// </devdoc>
-        public bool IsIPv6SiteLocal {
-            get{
-                return ( m_Family == AddressFamily.InterNetworkV6 ) &&
-                   ( ( this.m_Numbers[0] & 0xFFC0 ) == 0xFEC0 );
+        public bool IsIPv6SiteLocal
+        {
+            get
+            {
+                return (_family == AddressFamily.InterNetworkV6) &&
+                   ((_numbers[0] & 0xFFC0) == 0xFEC0);
             }
         }
 
-        public bool IsIPv6Teredo {
-            get {
-                return ( m_Family == AddressFamily.InterNetworkV6 ) &&
-                       ( this.m_Numbers[0] == 0x2001 ) &&
-                       ( this.m_Numbers[1] == 0 );
+        public bool IsIPv6Teredo
+        {
+            get
+            {
+                return (_family == AddressFamily.InterNetworkV6) &&
+                       (_numbers[0] == 0x2001) &&
+                       (_numbers[1] == 0);
             }
         }
-        
+
         // 0:0:0:0:0:FFFF:x.x.x.x
-        public bool IsIPv4MappedToIPv6 {
-            get {
-                if (AddressFamily != AddressFamily.InterNetworkV6) {
+        public bool IsIPv4MappedToIPv6
+        {
+            get
+            {
+                if (AddressFamily != AddressFamily.InterNetworkV6)
+                {
                     return false;
                 }
-                for (int i = 0; i < 5; i++) {
-                    if (m_Numbers[i] != 0) {
+                for (int i = 0; i < 5; i++)
+                {
+                    if (_numbers[i] != 0)
+                    {
                         return false;
                     }
                 }
-                return (m_Numbers[5] == 0xFFFF);
+                return (_numbers[5] == 0xFFFF);
             }
         }
 
-        internal bool Equals(object comparandObj, bool compareScopeId) {
+        internal bool Equals(object comparandObj, bool compareScopeId)
+        {
             IPAddress comparand = comparandObj as IPAddress;
 
-            if (comparand == null) {
+            if (comparand == null)
+            {
                 return false;
             }
             //
             // Compare families before address representations
             //
-            if (m_Family != comparand.m_Family) {
+            if (_family != comparand._family)
+            {
                 return false;
             }
-            if ( m_Family == AddressFamily.InterNetworkV6 ) {
+            if (_family == AddressFamily.InterNetworkV6)
+            {
                 //
                 // For IPv6 addresses, we must compare the full 128bit
                 // representation.
                 //
-                for ( int i = 0; i < NumberOfLabels; i++) {
-                    if (comparand.m_Numbers[i] != this.m_Numbers[i])
+                for (int i = 0; i < NumberOfLabels; i++)
+                {
+                    if (comparand._numbers[i] != _numbers[i])
                         return false;
                 }
                 //
                 // In addition, the scope id's must match as well
                 //
-                if (comparand.m_ScopeId == this.m_ScopeId)
+                if (comparand._scopeId == _scopeId)
                     return true;
                 else
-                    return (compareScopeId? false : true);
+                    return (compareScopeId ? false : true);
             }
-            else {
+            else
+            {
                 //
                 // For IPv4 addresses, compare the integer representation.
                 //
@@ -425,23 +488,27 @@ namespace System.Net {
         ///       Compares two IP addresses.
         ///    </para>
         /// </devdoc>
-        public override bool Equals(object comparand) {
+        public override bool Equals(object comparand)
+        {
             return Equals(comparand, true);
         }
 
-        public override int GetHashCode() {
+        public override int GetHashCode()
+        {
             //
             // For IPv6 addresses, we cannot simply return the integer
             // representation as the hashcode. Instead, we calculate
             // the hashcode from the string representation of the address.
             //
-            if ( m_Family == AddressFamily.InterNetworkV6 ) {
-                if ( m_HashCode == 0 )
-                    m_HashCode = StringComparer.OrdinalIgnoreCase.GetHashCode(ToString());
+            if (_family == AddressFamily.InterNetworkV6)
+            {
+                if (_hashCode == 0)
+                    _hashCode = StringComparer.OrdinalIgnoreCase.GetHashCode(ToString());
 
-                return m_HashCode;
+                return _hashCode;
             }
-            else {
+            else
+            {
                 //
                 // For IPv4 addresses, we can simply use the integer
                 // representation.
@@ -453,13 +520,13 @@ namespace System.Net {
         // For security, we need to be able to take an IPAddress and make a copy that's immutable and not derived.
         internal IPAddress Snapshot()
         {
-            switch (m_Family)
+            switch (_family)
             {
                 case AddressFamily.InterNetwork:
                     return new IPAddress(m_Address);
 
                 case AddressFamily.InterNetworkV6:
-                    return new IPAddress(m_Numbers, (uint) m_ScopeId);
+                    return new IPAddress(_numbers, (uint)_scopeId);
             }
 
             throw new InternalException();
@@ -493,8 +560,8 @@ namespace System.Net {
             // Cast the ushort values to a uint and mask with unsigned literal before bit shifting.
             // Otherwise, we can end up getting a negative value for any IPv4 address that ends with
             // a byte higher than 127 due to sign extension of the most significant 1 bit.
-            long address = ((((uint)m_Numbers[6] & 0x0000FF00u) >> 8) | (((uint)m_Numbers[6] & 0x000000FFu) << 8)) |
-                    (((((uint)m_Numbers[7] & 0x0000FF00u) >> 8) | (((uint)m_Numbers[7] & 0x000000FFu) << 8)) << 16);
+            long address = ((((uint)_numbers[6] & 0x0000FF00u) >> 8) | (((uint)_numbers[6] & 0x000000FFu) << 8)) |
+                    (((((uint)_numbers[7] & 0x0000FF00u) >> 8) | (((uint)_numbers[7] & 0x000000FFu) << 8)) << 16);
 
             return new IPAddress(address);
         }

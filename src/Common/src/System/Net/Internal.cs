@@ -1,31 +1,40 @@
+// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using Microsoft.Win32;
+using System.Collections;
+using System.Globalization;
+using System.Net.NetworkInformation;
+using System.Runtime.InteropServices;
+using System.Security;
+using System.Threading;
+using System.Threading.Tasks;
+// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 //------------------------------------------------------------------------------
 // <copyright file="Internal.cs" company="Microsoft">
 //     Copyright (c) Microsoft Corporation.  All rights reserved.
 // </copyright>
 //------------------------------------------------------------------------------
 
-namespace System.Net {
-    using Microsoft.Win32;
-    using System.Collections;
-    using System.Globalization;
-    using System.Net.NetworkInformation;
-    using System.Runtime.InteropServices;
-    using System.Security;
-    using System.Threading;
-    using System.Threading.Tasks;
-
-    internal static class IntPtrHelper {
+namespace System.Net
+{
+    internal static class IntPtrHelper
+    {
         /*
         // Consider removing.
         internal static IntPtr Add(IntPtr a, IntPtr b) {
             return (IntPtr) ((long)a + (long)b);
         }
         */
-        internal static IntPtr Add(IntPtr a, int b) {
-            return (IntPtr) ((long)a + (long)b);
+        internal static IntPtr Add(IntPtr a, int b)
+        {
+            return (IntPtr)((long)a + (long)b);
         }
 
-        internal static long Subtract(IntPtr a, IntPtr b) {
+        internal static long Subtract(IntPtr a, IntPtr b)
+        {
             return ((long)a - (long)b);
         }
     }
@@ -70,29 +79,29 @@ namespace System.Net {
             return exception != null && (exception is OutOfMemoryException);
         }
 
-        #pragma warning disable 1998 // async method with no await
+#pragma warning disable 1998 // async method with no await
         internal static async Task MakeCompletedTask()
         {
             // do nothing.  We're taking advantage of the async infrastructure's optimizations, one of which is to
             // return a cached already-completed Task when possible.
         }
-        #pragma warning restore 1998
+#pragma warning restore 1998
     }
 
     internal static class NclConstants
     {
         internal static readonly object Sentinel = new object();
 
-        internal static readonly byte[] CRLF = new byte[] {(byte) '\r', (byte) '\n'};
-        internal static readonly byte[] ChunkTerminator = new byte[] {(byte) '0', (byte) '\r', (byte) '\n', (byte) '\r', (byte) '\n'};
+        internal static readonly byte[] CRLF = new byte[] { (byte)'\r', (byte)'\n' };
+        internal static readonly byte[] ChunkTerminator = new byte[] { (byte)'0', (byte)'\r', (byte)'\n', (byte)'\r', (byte)'\n' };
     }
-    
+
     //
     // support class for Validation related stuff.
     //
-    internal static class ValidationHelper {
-
-        internal static readonly char[]  InvalidMethodChars =
+    internal static class ValidationHelper
+    {
+        internal static readonly char[] InvalidMethodChars =
                 new char[]{
                 ' ',
                 '\r',
@@ -101,7 +110,7 @@ namespace System.Net {
                 };
 
         // invalid characters that cannot be found in a valid method-verb or http header
-        internal static readonly char[]  InvalidParamChars =
+        internal static readonly char[] InvalidParamChars =
                 new char[]{
                 '(',
                 ')',
@@ -126,18 +135,26 @@ namespace System.Net {
                 '\r',
                 '\n'};
 
-        public static string [] MakeEmptyArrayNull(string [] stringArray) {
-            if ( stringArray == null || stringArray.Length == 0 ) {
+        public static string[] MakeEmptyArrayNull(string[] stringArray)
+        {
+            if (stringArray == null || stringArray.Length == 0)
+            {
                 return null;
-            } else {
+            }
+            else
+            {
                 return stringArray;
             }
         }
 
-        public static string MakeStringNull(string stringValue) {
-            if ( stringValue == null || stringValue.Length == 0) {
+        public static string MakeStringNull(string stringValue)
+        {
+            if (stringValue == null || stringValue.Length == 0)
+            {
                 return null;
-            } else {
+            }
+            else
+            {
                 return stringValue;
             }
         }
@@ -166,14 +183,16 @@ namespace System.Net {
         }
         */
 
-        public static bool ValidateTcpPort(int port) {
+        public static bool ValidateTcpPort(int port)
+        {
             // on false, API should throw new ArgumentOutOfRangeException("port");
-            return port>=IPEndPoint.MinPort && port<=IPEndPoint.MaxPort;
+            return port >= IPEndPoint.MinPort && port <= IPEndPoint.MaxPort;
         }
 
-        public static bool ValidateRange(int actual, int fromAllowed, int toAllowed) {
+        public static bool ValidateRange(int actual, int fromAllowed, int toAllowed)
+        {
             // on false, API should throw new ArgumentOutOfRangeException("argument");
-            return actual>=fromAllowed && actual<=toAllowed;
+            return actual >= fromAllowed && actual <= toAllowed;
         }
 
         /*
@@ -186,14 +205,17 @@ namespace System.Net {
 
         // There are threading tricks a malicious app can use to create an ArraySegment with mismatched 
         // array/offset/count.  Copy locally and make sure they're valid before using them.
-        internal static void ValidateSegment(ArraySegment<byte> segment) {
+        internal static void ValidateSegment(ArraySegment<byte> segment)
+        {
             // ArraySegment<byte> is not nullable.
-            if (segment.Array == null) {
+            if (segment.Array == null)
+            {
                 throw new ArgumentNullException("segment");
             }
             // Length zero is explicitly allowed
-            if (segment.Offset < 0 || segment.Count < 0 
-                || segment.Count > (segment.Array.Length - segment.Offset)) {
+            if (segment.Offset < 0 || segment.Count < 0
+                || segment.Count > (segment.Array.Length - segment.Offset))
+            {
                 throw new ArgumentOutOfRangeException("segment");
             }
         }
@@ -201,28 +223,36 @@ namespace System.Net {
 
     internal static class ExceptionHelper
     {
-        internal static NotImplementedException MethodNotImplementedException {
-            get {
-                return  (NotImplementedException)NotImplemented.ByDesignWithMessage(
+        internal static NotImplementedException MethodNotImplementedException
+        {
+            get
+            {
+                return (NotImplementedException)NotImplemented.ByDesignWithMessage(
                     SR.net_MethodNotImplementedException);
             }
         }
 
-        internal static NotImplementedException PropertyNotImplementedException {
-            get {
+        internal static NotImplementedException PropertyNotImplementedException
+        {
+            get
+            {
                 return (NotImplementedException)NotImplemented.ByDesignWithMessage(
                     SR.net_PropertyNotImplementedException);
             }
         }
 
-        internal static NotSupportedException MethodNotSupportedException {
-            get {
+        internal static NotSupportedException MethodNotSupportedException
+        {
+            get
+            {
                 return new NotSupportedException(SR.net_MethodNotSupportedException);
             }
         }
 
-        internal static NotSupportedException PropertyNotSupportedException {
-            get {
+        internal static NotSupportedException PropertyNotSupportedException
+        {
+            get
+            {
                 return new NotSupportedException(SR.net_PropertyNotSupportedException);
             }
         }
@@ -288,7 +318,6 @@ namespace System.Net {
     //
     internal static class HttpKnownHeaderNames
     {
-
         public const string CacheControl = "Cache-Control";
         public const string Connection = "Connection";
         public const string Date = "Date";

@@ -37,11 +37,11 @@ namespace System.Net.NetworkInformation
     /// <summary>Icmp statistics for Ipv6.</summary>
     internal class SystemIcmpV6Statistics : IcmpV6Statistics
     {
-        MibIcmpInfoEx stats;
+        private MibIcmpInfoEx _stats;
 
         internal SystemIcmpV6Statistics()
         {
-            uint result = UnsafeNetInfoNativeMethods.GetIcmpStatisticsEx(out stats, AddressFamily.InterNetworkV6);
+            uint result = UnsafeNetInfoNativeMethods.GetIcmpStatisticsEx(out _stats, AddressFamily.InterNetworkV6);
 
             if (result != IpHelperErrors.Success)
             {
@@ -49,204 +49,204 @@ namespace System.Net.NetworkInformation
             }
         }
 
-        public override long MessagesSent { get { return (long)stats.outStats.dwMsgs; } }
-        public override long MessagesReceived { get { return (long)stats.inStats.dwMsgs; } }
-        public override long ErrorsSent { get { return (long)stats.outStats.dwErrors; } }
-        public override long ErrorsReceived { get { return (long)stats.inStats.dwErrors; } }
+        public override long MessagesSent { get { return (long)_stats.outStats.dwMsgs; } }
+        public override long MessagesReceived { get { return (long)_stats.inStats.dwMsgs; } }
+        public override long ErrorsSent { get { return (long)_stats.outStats.dwErrors; } }
+        public override long ErrorsReceived { get { return (long)_stats.inStats.dwErrors; } }
         public override long DestinationUnreachableMessagesSent
         {
             get
             {
-                return stats.outStats.rgdwTypeCount[(long)IcmpV6StatType.DestinationUnreachable];
+                return _stats.outStats.rgdwTypeCount[(long)IcmpV6StatType.DestinationUnreachable];
             }
         }
         public override long DestinationUnreachableMessagesReceived
         {
             get
             {
-                return stats.inStats.rgdwTypeCount[(long)IcmpV6StatType.DestinationUnreachable];
+                return _stats.inStats.rgdwTypeCount[(long)IcmpV6StatType.DestinationUnreachable];
             }
         }
         public override long PacketTooBigMessagesSent
         {
             get
             {
-                return stats.outStats.rgdwTypeCount[(long)IcmpV6StatType.PacketTooBig];
+                return _stats.outStats.rgdwTypeCount[(long)IcmpV6StatType.PacketTooBig];
             }
         }
         public override long PacketTooBigMessagesReceived
         {
             get
             {
-                return stats.inStats.rgdwTypeCount[(long)IcmpV6StatType.PacketTooBig];
+                return _stats.inStats.rgdwTypeCount[(long)IcmpV6StatType.PacketTooBig];
             }
         }
         public override long TimeExceededMessagesSent
         {
             get
             {
-                return stats.outStats.rgdwTypeCount[(long)IcmpV6StatType.TimeExceeded];
+                return _stats.outStats.rgdwTypeCount[(long)IcmpV6StatType.TimeExceeded];
             }
         }
         public override long TimeExceededMessagesReceived
         {
             get
             {
-                return stats.inStats.rgdwTypeCount[(long)IcmpV6StatType.TimeExceeded];
+                return _stats.inStats.rgdwTypeCount[(long)IcmpV6StatType.TimeExceeded];
             }
         }
         public override long ParameterProblemsSent
         {
             get
             {
-                return stats.outStats.rgdwTypeCount[(long)IcmpV6StatType.ParameterProblem];
+                return _stats.outStats.rgdwTypeCount[(long)IcmpV6StatType.ParameterProblem];
             }
         }
         public override long ParameterProblemsReceived
         {
             get
             {
-                return stats.inStats.rgdwTypeCount[(long)IcmpV6StatType.ParameterProblem];
+                return _stats.inStats.rgdwTypeCount[(long)IcmpV6StatType.ParameterProblem];
             }
         }
         public override long EchoRequestsSent
         {
             get
             {
-                return stats.outStats.rgdwTypeCount[(long)IcmpV6StatType.EchoRequest];
+                return _stats.outStats.rgdwTypeCount[(long)IcmpV6StatType.EchoRequest];
             }
         }
         public override long EchoRequestsReceived
         {
             get
             {
-                return stats.inStats.rgdwTypeCount[(long)IcmpV6StatType.EchoRequest];
+                return _stats.inStats.rgdwTypeCount[(long)IcmpV6StatType.EchoRequest];
             }
         }
         public override long EchoRepliesSent
         {
             get
             {
-                return stats.outStats.rgdwTypeCount[(long)IcmpV6StatType.EchoReply];
+                return _stats.outStats.rgdwTypeCount[(long)IcmpV6StatType.EchoReply];
             }
         }
         public override long EchoRepliesReceived
         {
             get
             {
-                return stats.inStats.rgdwTypeCount[(long)IcmpV6StatType.EchoReply];
+                return _stats.inStats.rgdwTypeCount[(long)IcmpV6StatType.EchoReply];
             }
         }
         public override long MembershipQueriesSent
         {
             get
             {
-                return stats.outStats.rgdwTypeCount[(long)IcmpV6StatType.MembershipQuery];
+                return _stats.outStats.rgdwTypeCount[(long)IcmpV6StatType.MembershipQuery];
             }
         }
         public override long MembershipQueriesReceived
         {
             get
             {
-                return stats.inStats.rgdwTypeCount[(long)IcmpV6StatType.MembershipQuery];
+                return _stats.inStats.rgdwTypeCount[(long)IcmpV6StatType.MembershipQuery];
             }
         }
         public override long MembershipReportsSent
         {
             get
             {
-                return stats.outStats.rgdwTypeCount[(long)IcmpV6StatType.MembershipReport];
+                return _stats.outStats.rgdwTypeCount[(long)IcmpV6StatType.MembershipReport];
             }
         }
         public override long MembershipReportsReceived
         {
             get
             {
-                return stats.inStats.rgdwTypeCount[(long)IcmpV6StatType.MembershipReport];
+                return _stats.inStats.rgdwTypeCount[(long)IcmpV6StatType.MembershipReport];
             }
         }
         public override long MembershipReductionsSent
         {
             get
             {
-                return stats.outStats.rgdwTypeCount[(long)IcmpV6StatType.MembershipReduction];
+                return _stats.outStats.rgdwTypeCount[(long)IcmpV6StatType.MembershipReduction];
             }
         }
         public override long MembershipReductionsReceived
         {
             get
             {
-                return stats.inStats.rgdwTypeCount[(long)IcmpV6StatType.MembershipReduction];
+                return _stats.inStats.rgdwTypeCount[(long)IcmpV6StatType.MembershipReduction];
             }
         }
         public override long RouterAdvertisementsSent
         {
             get
             {
-                return stats.outStats.rgdwTypeCount[(long)IcmpV6StatType.RouterAdvertisement];
+                return _stats.outStats.rgdwTypeCount[(long)IcmpV6StatType.RouterAdvertisement];
             }
         }
         public override long RouterAdvertisementsReceived
         {
             get
             {
-                return stats.inStats.rgdwTypeCount[(long)IcmpV6StatType.RouterAdvertisement];
+                return _stats.inStats.rgdwTypeCount[(long)IcmpV6StatType.RouterAdvertisement];
             }
         }
         public override long RouterSolicitsSent
         {
             get
             {
-                return stats.outStats.rgdwTypeCount[(long)IcmpV6StatType.RouterSolicit];
+                return _stats.outStats.rgdwTypeCount[(long)IcmpV6StatType.RouterSolicit];
             }
         }
         public override long RouterSolicitsReceived
         {
             get
             {
-                return stats.inStats.rgdwTypeCount[(long)IcmpV6StatType.RouterSolicit];
+                return _stats.inStats.rgdwTypeCount[(long)IcmpV6StatType.RouterSolicit];
             }
         }
         public override long NeighborAdvertisementsSent
         {
             get
             {
-                return stats.outStats.rgdwTypeCount[(long)IcmpV6StatType.NeighborAdvertisement];
+                return _stats.outStats.rgdwTypeCount[(long)IcmpV6StatType.NeighborAdvertisement];
             }
         }
         public override long NeighborAdvertisementsReceived
         {
             get
             {
-                return stats.inStats.rgdwTypeCount[(long)IcmpV6StatType.NeighborAdvertisement];
+                return _stats.inStats.rgdwTypeCount[(long)IcmpV6StatType.NeighborAdvertisement];
             }
         }
         public override long NeighborSolicitsSent
         {
             get
             {
-                return stats.outStats.rgdwTypeCount[(long)IcmpV6StatType.NeighborSolict];
+                return _stats.outStats.rgdwTypeCount[(long)IcmpV6StatType.NeighborSolict];
             }
         }
         public override long NeighborSolicitsReceived
         {
             get
             {
-                return stats.inStats.rgdwTypeCount[(long)IcmpV6StatType.NeighborSolict];
+                return _stats.inStats.rgdwTypeCount[(long)IcmpV6StatType.NeighborSolict];
             }
         }
         public override long RedirectsSent
         {
             get
             {
-                return stats.outStats.rgdwTypeCount[(long)IcmpV6StatType.Redirect];
+                return _stats.outStats.rgdwTypeCount[(long)IcmpV6StatType.Redirect];
             }
         }
         public override long RedirectsReceived
         {
             get
             {
-                return stats.inStats.rgdwTypeCount[(long)IcmpV6StatType.Redirect];
+                return _stats.inStats.rgdwTypeCount[(long)IcmpV6StatType.Redirect];
             }
         }
     }

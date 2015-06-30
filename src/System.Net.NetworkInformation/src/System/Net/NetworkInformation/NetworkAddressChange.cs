@@ -13,18 +13,18 @@ namespace System.Net.NetworkInformation
 {
     public class NetworkAvailabilityEventArgs : EventArgs
     {
-        bool isAvailable;
+        private bool _isAvailable;
 
         internal NetworkAvailabilityEventArgs(bool isAvailable)
         {
-            this.isAvailable = isAvailable;
+            _isAvailable = isAvailable;
         }
 
         public bool IsAvailable
         {
             get
             {
-                return isAvailable;
+                return _isAvailable;
             }
         }
     }
@@ -65,29 +65,29 @@ namespace System.Net.NetworkInformation
 
         internal static class AvailabilityChangeListener
         {
-            static object syncObject = new object();
+            private static object s_syncObject = new object();
             static private Dictionary<NetworkAvailabilityChangedEventHandler, ExecutionContext> s_availabilityCallerArray =
                 new Dictionary<NetworkAvailabilityChangedEventHandler, ExecutionContext>();
-            static NetworkAddressChangedEventHandler addressChange = ChangedAddress;
-            static volatile bool isAvailable = false;
+            private static NetworkAddressChangedEventHandler s_addressChange = ChangedAddress;
+            private static volatile bool s_isAvailable = false;
             private static ContextCallback s_RunHandlerCallback = new ContextCallback(RunHandlerCallback);
 
 
             private static void RunHandlerCallback(object state)
             {
-                ((NetworkAvailabilityChangedEventHandler)state)(null, new NetworkAvailabilityEventArgs(isAvailable));
+                ((NetworkAvailabilityChangedEventHandler)state)(null, new NetworkAvailabilityEventArgs(s_isAvailable));
             }
 
 
             private static void ChangedAddress(object sender, EventArgs eventArgs)
             {
-                lock (syncObject)
+                lock (s_syncObject)
                 {
                     bool isAvailableNow = SystemNetworkInterface.InternalGetIsNetworkAvailable();
 
-                    if (isAvailableNow != isAvailable)
+                    if (isAvailableNow != s_isAvailable)
                     {
-                        isAvailable = isAvailableNow;
+                        s_isAvailable = isAvailableNow;
 
                         var s_copy =
                             new Dictionary<NetworkAvailabilityChangedEventHandler, ExecutionContext>(s_availabilityCallerArray);
@@ -97,7 +97,7 @@ namespace System.Net.NetworkInformation
                             ExecutionContext context = s_copy[handler];
                             if (context == null)
                             {
-                                handler(null, new NetworkAvailabilityEventArgs(isAvailable));
+                                handler(null, new NetworkAvailabilityEventArgs(s_isAvailable));
                             }
                             else
                             {
@@ -112,12 +112,12 @@ namespace System.Net.NetworkInformation
 
             internal static void Start(NetworkAvailabilityChangedEventHandler caller)
             {
-                lock (syncObject)
+                lock (s_syncObject)
                 {
                     if (s_availabilityCallerArray.Count == 0)
                     {
-                        isAvailable = NetworkInterface.GetIsNetworkAvailable();
-                        AddressChangeListener.UnsafeStart(addressChange);
+                        s_isAvailable = NetworkInterface.GetIsNetworkAvailable();
+                        AddressChangeListener.UnsafeStart(s_addressChange);
                     }
 
                     if ((caller != null) && (!s_availabilityCallerArray.ContainsKey(caller)))
@@ -130,12 +130,12 @@ namespace System.Net.NetworkInformation
 
             internal static void Stop(NetworkAvailabilityChangedEventHandler caller)
             {
-                lock (syncObject)
+                lock (s_syncObject)
                 {
                     s_availabilityCallerArray.Remove(caller);
                     if (s_availabilityCallerArray.Count == 0)
                     {
-                        AddressChangeListener.Stop(addressChange);
+                        AddressChangeListener.Stop(s_addressChange);
                     }
                 }
             }

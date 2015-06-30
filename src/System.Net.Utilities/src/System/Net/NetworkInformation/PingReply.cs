@@ -8,11 +8,11 @@ namespace System.Net.NetworkInformation
 {
     public class PingReply
     {
-        IPAddress address;
-        PingOptions options;
-        IPStatus ipStatus;  // the status code returned by icmpsendecho, or the icmp status field on the raw socket
-        long rtt;  // the round trip time.
-        byte[] buffer; //buffer of the data
+        private IPAddress _address;
+        private PingOptions _options;
+        private IPStatus _ipStatus;  // the status code returned by icmpsendecho, or the icmp status field on the raw socket
+        private long _rtt;  // the round trip time.
+        private byte[] _buffer; //buffer of the data
 
 
         internal PingReply()
@@ -21,63 +21,63 @@ namespace System.Net.NetworkInformation
 
         internal PingReply(IPStatus ipStatus)
         {
-            this.ipStatus = ipStatus;
-            buffer = Array.Empty<byte>();
+            _ipStatus = ipStatus;
+            _buffer = Array.Empty<byte>();
         }
 
         // The downlevel constructor. 
         internal PingReply(byte[] data, int dataLength, IPAddress address, int time)
         {
-            this.address = address;
-            rtt = time;
+            _address = address;
+            _rtt = time;
 
 
-            ipStatus = GetIPStatus((IcmpV4Type)data[20], (IcmpV4Code)data[21]);
+            _ipStatus = GetIPStatus((IcmpV4Type)data[20], (IcmpV4Code)data[21]);
 
-            if (ipStatus == IPStatus.Success)
+            if (_ipStatus == IPStatus.Success)
             {
-                buffer = new byte[dataLength - 28];
-                Array.Copy(data, 28, buffer, 0, dataLength - 28);
+                _buffer = new byte[dataLength - 28];
+                Array.Copy(data, 28, _buffer, 0, dataLength - 28);
             }
             else
-                buffer = Array.Empty<byte>();
+                _buffer = Array.Empty<byte>();
         }
 
 
         // the main constructor for the icmpsendecho apis
         internal PingReply(IcmpEchoReply reply)
         {
-            address = new IPAddress(reply.address);
-            ipStatus = (IPStatus)reply.status; //the icmpsendecho ip status codes
+            _address = new IPAddress(reply.address);
+            _ipStatus = (IPStatus)reply.status; //the icmpsendecho ip status codes
 
             //only copy the data if we succeed w/ the ping operation
-            if (ipStatus == IPStatus.Success)
+            if (_ipStatus == IPStatus.Success)
             {
-                rtt = (long)reply.roundTripTime;
-                buffer = new byte[reply.dataSize];
-                Marshal.Copy(reply.data, buffer, 0, reply.dataSize);
-                options = new PingOptions(reply.options);
+                _rtt = (long)reply.roundTripTime;
+                _buffer = new byte[reply.dataSize];
+                Marshal.Copy(reply.data, _buffer, 0, reply.dataSize);
+                _options = new PingOptions(reply.options);
             }
             else
-                buffer = Array.Empty<byte>();
+                _buffer = Array.Empty<byte>();
         }
 
         // the main constructor for the icmpsendecho apis
         internal PingReply(Icmp6EchoReply reply, IntPtr dataPtr, int sendSize)
         {
-            address = new IPAddress(reply.Address.Address, reply.Address.ScopeID);
-            ipStatus = (IPStatus)reply.Status; //the icmpsendecho ip status codes
+            _address = new IPAddress(reply.Address.Address, reply.Address.ScopeID);
+            _ipStatus = (IPStatus)reply.Status; //the icmpsendecho ip status codes
 
             //only copy the data if we succeed w/ the ping operation
-            if (ipStatus == IPStatus.Success)
+            if (_ipStatus == IPStatus.Success)
             {
-                rtt = (long)reply.RoundTripTime;
-                buffer = new byte[sendSize];
-                Marshal.Copy(IntPtrHelper.Add(dataPtr, 36), buffer, 0, sendSize);
+                _rtt = (long)reply.RoundTripTime;
+                _buffer = new byte[sendSize];
+                Marshal.Copy(IntPtrHelper.Add(dataPtr, 36), _buffer, 0, sendSize);
                 //options = new PingOptions (reply.options);
             }
             else
-                buffer = Array.Empty<byte>();
+                _buffer = Array.Empty<byte>();
         }
 
 
@@ -119,16 +119,16 @@ namespace System.Net.NetworkInformation
         }
 
         //the basic properties
-        public IPStatus Status { get { return ipStatus; } }
-        public IPAddress Address { get { return address; } }
-        public long RoundtripTime { get { return rtt; } }
+        public IPStatus Status { get { return _ipStatus; } }
+        public IPAddress Address { get { return _address; } }
+        public long RoundtripTime { get { return _rtt; } }
         public PingOptions Options
         {
             get
             {
-                return options;
+                return _options;
             }
         }
-        public byte[] Buffer { get { return buffer; } }
+        public byte[] Buffer { get { return _buffer; } }
     }
 }

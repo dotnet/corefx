@@ -19,12 +19,12 @@ namespace System.Net.Sockets
         //
         // internal class members
         //
-        private UnsafeSocketsNativeMethods.OSSOCK.WSAMsg* m_Message;
+        private UnsafeSocketsNativeMethods.OSSOCK.WSAMsg* _message;
         internal SocketAddress SocketAddressOriginal;
         internal SocketAddress m_SocketAddress;
-        private WSABuffer* m_WSABuffer;
-        private byte[] m_WSABufferArray;
-        private byte[] m_ControlBuffer;
+        private WSABuffer* _WSABuffer;
+        private byte[] _WSABufferArray;
+        private byte[] _controlBuffer;
         internal byte[] m_MessageBuffer;
         internal SocketFlags m_flags;
 
@@ -73,7 +73,7 @@ namespace System.Net.Sockets
         internal void SetUnmanagedStructures(byte[] buffer, int offset, int size, SocketAddress socketAddress, SocketFlags socketFlags)
         {
             m_MessageBuffer = new byte[s_WSAMsgSize];
-            m_WSABufferArray = new byte[s_WSABufferSize];
+            _WSABufferArray = new byte[s_WSABufferSize];
 
             //ipv4 or ipv6?
             IPAddress ipAddress = (socketAddress.Family == AddressFamily.InterNetworkV6
@@ -85,61 +85,61 @@ namespace System.Net.Sockets
             //prepare control buffer
             if (ipv4)
             {
-                m_ControlBuffer = new byte[s_ControlDataSize];
+                _controlBuffer = new byte[s_ControlDataSize];
             }
             else if (ipv6)
             {
-                m_ControlBuffer = new byte[s_ControlDataIPv6Size];
+                _controlBuffer = new byte[s_ControlDataIPv6Size];
             }
 
             //pin buffers
-            object[] objectsToPin = new object[(m_ControlBuffer != null) ? 5 : 4];
+            object[] objectsToPin = new object[(_controlBuffer != null) ? 5 : 4];
             objectsToPin[0] = buffer;
             objectsToPin[1] = m_MessageBuffer;
-            objectsToPin[2] = m_WSABufferArray;
+            objectsToPin[2] = _WSABufferArray;
 
             //prepare socketaddress buffer
             m_SocketAddress = socketAddress;
             m_SocketAddress.CopyAddressSizeIntoBuffer();
             objectsToPin[3] = m_SocketAddress.m_Buffer;
 
-            if (m_ControlBuffer != null)
+            if (_controlBuffer != null)
             {
-                objectsToPin[4] = m_ControlBuffer;
+                objectsToPin[4] = _controlBuffer;
             }
 
             base.SetUnmanagedStructures(objectsToPin);
 
             //prepare data buffer
-            m_WSABuffer = (WSABuffer*)Marshal.UnsafeAddrOfPinnedArrayElement(m_WSABufferArray, 0);
-            m_WSABuffer->Length = size;
-            m_WSABuffer->Pointer = Marshal.UnsafeAddrOfPinnedArrayElement(buffer, offset);
+            _WSABuffer = (WSABuffer*)Marshal.UnsafeAddrOfPinnedArrayElement(_WSABufferArray, 0);
+            _WSABuffer->Length = size;
+            _WSABuffer->Pointer = Marshal.UnsafeAddrOfPinnedArrayElement(buffer, offset);
 
 
             //setup structure
-            m_Message = (UnsafeSocketsNativeMethods.OSSOCK.WSAMsg*)Marshal.UnsafeAddrOfPinnedArrayElement(m_MessageBuffer, 0);
-            m_Message->socketAddress = Marshal.UnsafeAddrOfPinnedArrayElement(m_SocketAddress.m_Buffer, 0);
-            m_Message->addressLength = (uint)m_SocketAddress.Size;
-            m_Message->buffers = Marshal.UnsafeAddrOfPinnedArrayElement(m_WSABufferArray, 0);
-            m_Message->count = 1;
+            _message = (UnsafeSocketsNativeMethods.OSSOCK.WSAMsg*)Marshal.UnsafeAddrOfPinnedArrayElement(m_MessageBuffer, 0);
+            _message->socketAddress = Marshal.UnsafeAddrOfPinnedArrayElement(m_SocketAddress.m_Buffer, 0);
+            _message->addressLength = (uint)m_SocketAddress.Size;
+            _message->buffers = Marshal.UnsafeAddrOfPinnedArrayElement(_WSABufferArray, 0);
+            _message->count = 1;
 
-            if (m_ControlBuffer != null)
+            if (_controlBuffer != null)
             {
-                m_Message->controlBuffer.Pointer = Marshal.UnsafeAddrOfPinnedArrayElement(m_ControlBuffer, 0);
-                m_Message->controlBuffer.Length = m_ControlBuffer.Length;
+                _message->controlBuffer.Pointer = Marshal.UnsafeAddrOfPinnedArrayElement(_controlBuffer, 0);
+                _message->controlBuffer.Length = _controlBuffer.Length;
             }
 
-            m_Message->flags = socketFlags;
+            _message->flags = socketFlags;
         }
-        
+
         unsafe private void InitIPPacketInformation()
         {
             IPAddress address = null;
 
             //ipv4
-            if (m_ControlBuffer.Length == s_ControlDataSize)
+            if (_controlBuffer.Length == s_ControlDataSize)
             {
-                UnsafeSocketsNativeMethods.OSSOCK.ControlData controlData = Marshal.PtrToStructure<UnsafeSocketsNativeMethods.OSSOCK.ControlData>(m_Message->controlBuffer.Pointer);
+                UnsafeSocketsNativeMethods.OSSOCK.ControlData controlData = Marshal.PtrToStructure<UnsafeSocketsNativeMethods.OSSOCK.ControlData>(_message->controlBuffer.Pointer);
                 if (controlData.length != UIntPtr.Zero)
                 {
                     address = new IPAddress((long)controlData.address);
@@ -147,9 +147,9 @@ namespace System.Net.Sockets
                 m_IPPacketInformation = new IPPacketInformation(((address != null) ? address : IPAddress.None), (int)controlData.index);
             }
             //ipv6
-            else if (m_ControlBuffer.Length == s_ControlDataIPv6Size)
+            else if (_controlBuffer.Length == s_ControlDataIPv6Size)
             {
-                UnsafeSocketsNativeMethods.OSSOCK.ControlDataIPv6 controlData = Marshal.PtrToStructure<UnsafeSocketsNativeMethods.OSSOCK.ControlDataIPv6>(m_Message->controlBuffer.Pointer);
+                UnsafeSocketsNativeMethods.OSSOCK.ControlDataIPv6 controlData = Marshal.PtrToStructure<UnsafeSocketsNativeMethods.OSSOCK.ControlDataIPv6>(_message->controlBuffer.Pointer);
                 if (controlData.length != UIntPtr.Zero)
                 {
                     address = new IPAddress(controlData.address);
@@ -181,7 +181,7 @@ namespace System.Net.Sockets
 
         protected override void ForceReleaseUnmanagedStructures()
         {
-            m_flags = m_Message->flags;
+            m_flags = _message->flags;
             base.ForceReleaseUnmanagedStructures();
         }
 
@@ -195,10 +195,10 @@ namespace System.Net.Sockets
             return (int)numBytes;
         }
 
-        void LogBuffer(int size)
+        private void LogBuffer(int size)
         {
             GlobalLog.Assert(Logging.On, "ReceiveMessageOverlappedAsyncResult#{0}::LogBuffer()|Logging is off!", Logging.HashString(this));
-            Logging.Dump(Logging.Sockets, AsyncObject, "PostCompletion", m_WSABuffer->Pointer, Math.Min(m_WSABuffer->Length, size));
+            Logging.Dump(Logging.Sockets, AsyncObject, "PostCompletion", _WSABuffer->Pointer, Math.Min(_WSABuffer->Length, size));
         }
     }; // class OverlappedAsyncResult
 } // namespace System.Net.Sockets

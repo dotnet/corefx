@@ -1,10 +1,12 @@
+// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 //------------------------------------------------------------------------------
-// <copyright file="UnsafeNativeMethods.cs" company="Microsoft">
-//     Copyright (c) Microsoft Corporation.  All rights reserved.
 // </copyright>
 //------------------------------------------------------------------------------
 
-namespace System.Net {
+namespace System.Net
+{
     using System.Runtime.InteropServices;
     using System.Threading;
     using System.Diagnostics.CodeAnalysis;
@@ -14,7 +16,6 @@ namespace System.Net {
 
     internal class IpHelperErrors
     {
-
         internal const uint Success = 0;
         internal const uint ErrorInvalidFunction = 1;
         internal const uint ErrorNoSuchDevice = 2;
@@ -27,25 +28,26 @@ namespace System.Net {
         internal const uint ErrorNotFound = 1168;
     }
 
-    internal static class UnsafeCommonNativeMethods {
+    internal static class UnsafeCommonNativeMethods
+    {
         internal static class ErrorCodes
         {
-            internal const uint ERROR_SUCCESS               = 0;
-            internal const uint ERROR_HANDLE_EOF            = 38;
-            internal const uint ERROR_NOT_SUPPORTED         = 50;
-            internal const uint ERROR_INVALID_PARAMETER     = 87;
-            internal const uint ERROR_ALREADY_EXISTS        = 183;
-            internal const uint ERROR_MORE_DATA             = 234;
-            internal const uint ERROR_OPERATION_ABORTED     = 995;
-            internal const uint ERROR_IO_PENDING            = 997;
-            internal const uint ERROR_NOT_FOUND             = 1168;
-            internal const uint ERROR_CONNECTION_INVALID    = 1229;
+            internal const uint ERROR_SUCCESS = 0;
+            internal const uint ERROR_HANDLE_EOF = 38;
+            internal const uint ERROR_NOT_SUPPORTED = 50;
+            internal const uint ERROR_INVALID_PARAMETER = 87;
+            internal const uint ERROR_ALREADY_EXISTS = 183;
+            internal const uint ERROR_MORE_DATA = 234;
+            internal const uint ERROR_OPERATION_ABORTED = 995;
+            internal const uint ERROR_IO_PENDING = 997;
+            internal const uint ERROR_NOT_FOUND = 1168;
+            internal const uint ERROR_CONNECTION_INVALID = 1229;
         }
 
         internal enum NtStatus : uint
         {
-            Success             = 0x00000000,
-            InvalidParameter    = 0xc000000d
+            Success = 0x00000000,
+            InvalidParameter = 0xc000000d
         }
 
 #if !PROJECTN
@@ -130,7 +132,7 @@ namespace System.Net {
 
                 var string1 = CreateString(secureString1);
                 var string2 = CreateString(secureString2);
-                
+
                 return (String.Compare(string1, string2, StringComparison.Ordinal) == 0);
             }
 #endif

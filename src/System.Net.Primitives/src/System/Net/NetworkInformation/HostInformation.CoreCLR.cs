@@ -1,21 +1,21 @@
 
+using System.Net;
+using System.Runtime.InteropServices;
+// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 namespace System.Net.NetworkInformation
 {
-
-    using System.Net;
-    using System.Runtime.InteropServices;
-
     internal class HostInformation
     {
-        private static FIXED_INFO fixedInfo;
-        private static bool fixedInfoInitialized = false;
+        private static FIXED_INFO s_fixedInfo;
+        private static bool s_fixedInfoInitialized = false;
 
         //changing these require a reboot, so we'll cache them instead.
-        private static volatile string hostName = null;
-        private static volatile string domainName = null;
+        private static volatile string s_hostName = null;
+        private static volatile string s_domainName = null;
 
-        private static object syncObject = new object();
+        private static object s_syncObject = new object();
 
         internal static FIXED_INFO GetFixedInfo()
         {
@@ -60,18 +60,18 @@ namespace System.Net.NetworkInformation
         {
             get
             {
-                if (!fixedInfoInitialized)
+                if (!s_fixedInfoInitialized)
                 {
-                    lock (syncObject)
+                    lock (s_syncObject)
                     {
-                        if (!fixedInfoInitialized)
+                        if (!s_fixedInfoInitialized)
                         {
-                            fixedInfo = GetFixedInfo();
-                            fixedInfoInitialized = true;
+                            s_fixedInfo = GetFixedInfo();
+                            s_fixedInfoInitialized = true;
                         }
                     }
                 }
-                return fixedInfo;
+                return s_fixedInfo;
             }
         }
 
@@ -80,18 +80,18 @@ namespace System.Net.NetworkInformation
         {
             get
             {
-                if (hostName == null)
+                if (s_hostName == null)
                 {
-                    lock (syncObject)
+                    lock (s_syncObject)
                     {
-                        if (hostName == null)
+                        if (s_hostName == null)
                         {
-                            hostName = FixedInfo.hostName;
-                            domainName = FixedInfo.domainName;
+                            s_hostName = FixedInfo.hostName;
+                            s_domainName = FixedInfo.domainName;
                         }
                     }
                 }
-                return hostName;
+                return s_hostName;
             }
         }
         /// <summary>Specifies the domain in which the local computer is registered.</summary>
@@ -99,18 +99,18 @@ namespace System.Net.NetworkInformation
         {
             get
             {
-                if (domainName == null)
+                if (s_domainName == null)
                 {
-                    lock (syncObject)
+                    lock (s_syncObject)
                     {
-                        if (domainName == null)
+                        if (s_domainName == null)
                         {
-                            hostName = FixedInfo.hostName;
-                            domainName = FixedInfo.domainName;
+                            s_hostName = FixedInfo.hostName;
+                            s_domainName = FixedInfo.domainName;
                         }
                     }
                 }
-                return domainName;
+                return s_domainName;
             }
         }
     }

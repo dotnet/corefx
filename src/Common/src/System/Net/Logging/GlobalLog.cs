@@ -80,11 +80,11 @@ namespace System.Net
 
         private class ThreadKindFrame : IDisposable
         {
-            private int m_FrameNumber;
+            private int _frameNumber;
 
             internal ThreadKindFrame()
             {
-                m_FrameNumber = ThreadKindStack.Count;
+                _frameNumber = ThreadKindStack.Count;
             }
 
             void IDisposable.Dispose()
@@ -95,7 +95,7 @@ namespace System.Net
                     return;
                 }
 
-                if (m_FrameNumber != ThreadKindStack.Count)
+                if (_frameNumber != ThreadKindStack.Count)
                 {
                     throw new InternalException();
                 }
