@@ -1248,6 +1248,9 @@ namespace System.Collections.Concurrent
                 result = tail._value;
             }
 
+            /// <summary>
+            /// Resets the local list
+            /// </summary>
             internal void Reset()
             {
                 _head = null;
