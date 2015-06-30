@@ -508,12 +508,6 @@ namespace System.Net {
             }
         }
 
-
-        /// <devdoc>
-        ///    <para>[To be supplied.]</para>
-        /// </devdoc>
-
-        // <CONSIDER>removing this method or adding Uri parameter to it</CONSIDER>
         public void Add(CookieCollection cookies) {
             if (cookies == null) {
                 throw new ArgumentNullException("cookies");
@@ -895,13 +889,6 @@ namespace System.Net {
             return cookieString;
         }
 
-        /// <devdoc>
-        ///    <para>[To be supplied.]</para>
-        /// </devdoc>
-
-        //<CONSIDER>
-        // Consider adding a parameter with Cookie Header Name value (like "Set-Cookie2")
-        // For now a Default value (see cookies.cs) will be used</CONSIDER>
         public void SetCookies(Uri uri, string cookieHeader) {
             if (uri == null) {
                 throw new ArgumentNullException("uri");

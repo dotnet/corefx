@@ -64,10 +64,6 @@
             Assert.AreEqual(IPAddress.Parse("10.57.74.64"), result2);
         }
 
-        // This following test cases are derived from a bug reported:
-        // http://stackoverflow.com/questions/23608829/why-does-ipaddress-maptoipv4-throw-argumentoutofrangeexception
-        // IPv4 addresses that end with a byte higher than 127 would cause an error when mapping back from IPv6.        
-   
         [TestMethod]
         public void IPAddressMapping_VerifyOriginalBugWhenLastByteofIPv4IsGreaterThan127_Success()
         {

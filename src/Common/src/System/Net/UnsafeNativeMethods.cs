@@ -28,7 +28,6 @@ namespace System.Net {
     }
 
     internal static class UnsafeCommonNativeMethods {
-        // CONSIDER: Make this an enum, requires changing a lot of types from uint to ErrorCodes.
         internal static class ErrorCodes
         {
             internal const uint ERROR_SUCCESS               = 0;

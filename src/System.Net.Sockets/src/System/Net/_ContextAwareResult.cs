@@ -446,9 +446,7 @@ namespace System.Net
 
             // If the context is being abandoned or wasn't captured (SuppressFlow, null AsyncCallback), just
             // complete regularly, as long as CaptureOrComplete() has finished.
-            // CONSIDER: DebugProtectState() is there to catch cases where we would mess up the internal state of LazyAsyncResult, which
-            // could cause us to call the callback on a new thread but without the captured context (through this codepath).  Should
-            // state-protection be enabled in retail?
+            // 
             if (userToken != IntPtr.Zero || context == null)
             {
                 base.Complete(userToken);
