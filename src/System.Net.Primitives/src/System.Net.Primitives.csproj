@@ -79,7 +79,6 @@
     <Compile Include="System\Net\Sockets\SocketError.cs" />
     <Compile Include="System\Security\Authentication\ExtendedProtection\ChannelBinding.cs" />
     <Compile Include="System\Security\Authentication\ExtendedProtection\ChannelBindingKind.cs" />
-
   </ItemGroup>
   
   <ItemGroup Condition=" '$(TargetsWindows)' == 'true' ">

@@ -1,46 +1,104 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build">
-  <ItemGroup>
-    <CompileItem Include="System\Net\Sockets\IOControlCode.cs" />
-    <CompileItem Include="System\Net\Sockets\IPPacketInformation.cs" />
-    <CompileItem Include="System\Net\Sockets\IPProtectionLevel.cs" />
-    <CompileItem Include="System\Net\Sockets\LingerOption.cs" />
-    <CompileItem Include="System\Net\Sockets\MulticastOption.cs" />
-    <CompileItem Include="System\Net\Sockets\NetworkStream.cs" />
-    <CompileItem Include="System\Net\Sockets\ProtocolFamily.cs" />
-    <CompileItem Include="System\Net\Sockets\ProtocolType.cs" />
-    <CompileItem Include="System\Net\Sockets\SelectMode.cs" />
-    <CompileItem Include="System\Net\Sockets\Socket.cs" />
-    <CompileItem Include="System\Net\Sockets\SocketFlags.cs" />
-    <CompileItem Include="System\Net\Sockets\SocketInformation.cs" />
-    <CompileItem Include="System\Net\Sockets\SocketInformationOptions.cs" />
-    <CompileItem Include="System\Net\Sockets\SocketOptionLevel.cs" />
-    <CompileItem Include="System\Net\Sockets\SocketOptionName.cs" />
-    <CompileItem Include="System\Net\Sockets\SocketShutdown.cs" />
-    <CompileItem Include="System\Net\Sockets\SocketType.cs" />
-    <CompileItem Include="System\Net\Sockets\TCPClient.cs" />
-    <CompileItem Include="System\Net\Sockets\TCPListener.cs" />
-    <CompileItem Include="System\Net\Sockets\TransmitFileFlags.cs" />
-    <CompileItem Include="System\Net\Sockets\UDPClient.cs" />
-    <CompileItem Include="System\Net\Sockets\UdpReceiveResult.cs" />
-    <CompileItem Include="System\Net\Sockets\_AcceptOverlappedAsyncResult.cs" />
-    <CompileItem Include="System\Net\Sockets\_BaseOverlappedAsyncResult.cs" />
-    <CompileItem Include="System\Net\Sockets\_ConnectOverlappedAsyncResult.cs" />
-    <CompileItem Include="System\Net\Sockets\_DisconnectOverlappedAsyncResult.cs" />
-    <CompileItem Include="System\Net\Sockets\_DynamicWinsockMethods.cs" />
-    <CompileItem Include="System\Net\Sockets\_MultipleConnectAsync.cs" />
-    <CompileItem Include="System\Net\Sockets\_OverlappedAsyncResult.cs" />
-    <CompileItem Include="System\Net\Sockets\_ReceiveMessageOverlappedAsyncResult.cs" />
-    <CompileItem Include="System\Net\Sockets\TransportType.cs" />
+﻿<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
+  <PropertyGroup>
+    <AssemblyName>System.Net.Sockets</AssemblyName>
+    <AssemblyVersion>4.0.10.0</AssemblyVersion>
+    <OutputType>Library</OutputType>
+    <ProjectGuid>{43311AFB-D7C4-4E5A-B1DE-855407F90D1B}</ProjectGuid>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <DefineConstants>$(DefineConstants);FEATURE_CORECLR</DefineConstants>
+  </PropertyGroup>
+  <!-- Help VS understand available configurations -->
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'FreeBSD_Debug|AnyCPU' " />
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'FreeBSD_Release|AnyCPU' " />
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Linux_Debug|AnyCPU' " />
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Linux_Release|AnyCPU' " />
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'OSX_Debug|AnyCPU' " />
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'OSX_Release|AnyCPU' " />
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Windows_Debug|AnyCPU' " />
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Windows_Release|AnyCPU' " />
 
-    <CompileItem Include="System\Net\_ContextAwareResult.cs" />   
-    <CompileItem Include="System\Net\Sockets\Internal.cs" />
-    <CompileItem Include="System\Net\Sockets\UnsafeNativeMethods.cs" />
-    <CompileItem Include="System\Net\Sockets\_SafeNetHandles.cs" />
-    <CompileItem Include="System\Net\Sockets\_OSSOCK.cs" />
-    <CompileItem Include="System\Net\_LazyAsyncResult.cs" />
-    <CompileItem Include="System\Net\StartIPOptions.cs" />
-   
+  <ItemGroup>
+    <Compile Include="$(CommonPath)\System\NotImplemented.cs"/>
+
+    <!--Shims for Primitives, Sockets and NetworkInformation-->
+    <Compile Include="$(CommonPath)\System\Net\Shims\ExecutionContext.cs" />
+    <Compile Include="$(CommonPath)\System\Net\Shims\DBNull.cs" />
+    <Compile Include="$(CommonPath)\System\Net\Shims\_NetworkingPerfCounters.cs" />
+    <Compile Include="$(CommonPath)\System\Net\Shims\Uri.cs" />
+    <Compile Include="$(CommonPath)\System\Net\Shims\Win32SafeHandles.cs" />
+
+    <!-- Interop for Primitives, Sockets and NetworkInformation -->
+    <Compile Include="$(CommonPath)\Interop\Windows\SystemNet\Interop.Primitives.Manual.cs" />
+    <Compile Include="$(CommonPath)\Interop\Windows\SystemNet\ExternDll.cs" />
+
+    <!-- Primitives, Sockets, NetworkInformation Common-->
+    <Compile Include="$(CommonPath)\System\Net\Internal.cs" />
+    <Compile Include="$(CommonPath)\System\Net\UnsafeNativeMethods.cs" />
+    <Compile Include="$(CommonPath)\System\Net\_BufferOffsetSize.cs" />
+    <Compile Include="$(CommonPath)\System\Net\_SafeNetHandles.cs" />
+    <Compile Include="$(CommonPath)\System\Net\_Win32.cs" />
+    <Compile Include="$(CommonPath)\System\Net\NetworkInformation\nodetype.cs" /> 
+    <Compile Include="$(CommonPath)\System\Net\NetworkInformation\NetworkInformationException.cs" />
+    <Compile Include="$(CommonPath)\System\Net\Cookie\cookie.cs" />
+    <Compile Include="$(CommonPath)\System\Net\Cookie\cookieexception.cs" />
+
+    <!-- Logging -->
+    <Compile Include="$(CommonPath)\System\Net\Shims\TraceSource.cs" />
+    <Compile Include="$(CommonPath)\System\Net\Logging\Logging.cs" />
+    <Compile Include="$(CommonPath)\System\Net\Logging\GlobalLog.cs" />
+    <Compile Include="$(CommonPath)\System\Net\Logging\EventSourceLogging.cs" />
+    <Compile Include="$(CommonPath)\System\Net\InternalException.cs" />
+
+    <!-- Sockets -->   
+    <Compile Include="System\Net\Sockets\IOControlCode.cs" />
+    <Compile Include="System\Net\Sockets\IPPacketInformation.cs" />
+    <Compile Include="System\Net\Sockets\IPProtectionLevel.cs" />
+    <Compile Include="System\Net\Sockets\LingerOption.cs" />
+    <Compile Include="System\Net\Sockets\MulticastOption.cs" />
+    <Compile Include="System\Net\Sockets\NetworkStream.cs" />
+    <Compile Include="System\Net\Sockets\ProtocolFamily.cs" />
+    <Compile Include="System\Net\Sockets\ProtocolType.cs" />
+    <Compile Include="System\Net\Sockets\SelectMode.cs" />
+    <Compile Include="System\Net\Sockets\Socket.cs" />
+    <Compile Include="System\Net\Sockets\SocketFlags.cs" />
+    <Compile Include="System\Net\Sockets\SocketInformation.cs" />
+    <Compile Include="System\Net\Sockets\SocketInformationOptions.cs" />
+    <Compile Include="System\Net\Sockets\SocketOptionLevel.cs" />
+    <Compile Include="System\Net\Sockets\SocketOptionName.cs" />
+    <Compile Include="System\Net\Sockets\SocketShutdown.cs" />
+    <Compile Include="System\Net\Sockets\SocketType.cs" />
+    <Compile Include="System\Net\Sockets\TCPClient.cs" />
+    <Compile Include="System\Net\Sockets\TCPListener.cs" />
+    <Compile Include="System\Net\Sockets\TransmitFileFlags.cs" />
+    <Compile Include="System\Net\Sockets\UDPClient.cs" />
+    <Compile Include="System\Net\Sockets\UdpReceiveResult.cs" />
+    <Compile Include="System\Net\Sockets\_AcceptOverlappedAsyncResult.cs" />
+    <Compile Include="System\Net\Sockets\_BaseOverlappedAsyncResult.cs" />
+    <Compile Include="System\Net\Sockets\_ConnectOverlappedAsyncResult.cs" />
+    <Compile Include="System\Net\Sockets\_DisconnectOverlappedAsyncResult.cs" />
+    <Compile Include="System\Net\Sockets\_DynamicWinsockMethods.cs" />
+    <Compile Include="System\Net\Sockets\_MultipleConnectAsync.cs" />
+    <Compile Include="System\Net\Sockets\_OverlappedAsyncResult.cs" />
+    <Compile Include="System\Net\Sockets\_ReceiveMessageOverlappedAsyncResult.cs" />
+    <Compile Include="System\Net\Sockets\TransportType.cs" />
+
+    <Compile Include="System\Net\_ContextAwareResult.cs" />   
+    <Compile Include="System\Net\_LazyAsyncResult.cs" />
+    <Compile Include="System\Net\StartIPOptions.cs" />
   </ItemGroup>
+
+  <ItemGroup Condition=" '$(TargetsWindows)' == 'true' ">
+    <!-- TODO -->
+    <Compile Include="System\Net\Sockets\Internal.cs" />
+    <Compile Include="System\Net\Sockets\UnsafeNativeMethods.cs" />
+    <Compile Include="System\Net\Sockets\_SafeNetHandles.cs" />
+    <Compile Include="System\Net\Sockets\_OSSOCK.cs" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <None Include="project.json" />
+  </ItemGroup>
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />  
 </Project>
 
