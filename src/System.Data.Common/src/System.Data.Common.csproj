@@ -7,7 +7,7 @@
     <ProjectGuid>{29ef8d53-8e84-4e49-b90f-5950a2fe7d54}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AssemblyName>System.Data.Common</AssemblyName>
-    <AssemblyVersion>4.0.10.0</AssemblyVersion>
+    <AssemblyVersion>4.0.0.0</AssemblyVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <PlatformTarget>AnyCPU</PlatformTarget>
   </PropertyGroup>
