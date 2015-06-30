@@ -13,14 +13,14 @@ namespace System.Net.Sockets
     /// </devdoc>
     public class TcpClient : IDisposable
     {
-        Socket m_ClientSocket;
-        bool m_Active;
-        NetworkStream m_DataStream;
+        private Socket _clientSocket;
+        private bool _active;
+        private NetworkStream _dataStream;
 
         //
         // IPv6: Maintain address family for the client
         //
-        AddressFamily m_Family = AddressFamily.InterNetwork;
+        private AddressFamily _family = AddressFamily.InterNetwork;
 
         // specify local IP and port
         /// <devdoc>
@@ -39,7 +39,7 @@ namespace System.Net.Sockets
             //
             // IPv6: Establish address family before creating a socket
             //
-            m_Family = localEP.AddressFamily;
+            _family = localEP.AddressFamily;
 
             initialize();
             Client.Bind(localEP);
@@ -82,7 +82,7 @@ namespace System.Net.Sockets
                 throw new ArgumentException(SR.Format(SR.net_protocol_invalid_family, "TCP"), "family");
             }
 
-            m_Family = family;
+            _family = family;
 
             initialize();
             if (Logging.On) Logging.Exit(Logging.Sockets, this, "TcpClient", null);
@@ -123,9 +123,9 @@ namespace System.Net.Sockets
                     throw;
                 }
 
-                if (m_ClientSocket != null)
+                if (_clientSocket != null)
                 {
-                    m_ClientSocket.Dispose();
+                    _clientSocket.Dispose();
                 }
                 throw e;
             }
@@ -140,7 +140,7 @@ namespace System.Net.Sockets
         {
             if (Logging.On) Logging.Enter(Logging.Sockets, this, "TcpClient", acceptedSocket);
             Client = acceptedSocket;
-            m_Active = true;
+            _active = true;
             if (Logging.On) Logging.Exit(Logging.Sockets, this, "TcpClient", null);
         }
 
@@ -154,11 +154,11 @@ namespace System.Net.Sockets
         {
             get
             {
-                return m_ClientSocket;
+                return _clientSocket;
             }
             set
             {
-                m_ClientSocket = value;
+                _clientSocket = value;
             }
         }
 
@@ -171,25 +171,25 @@ namespace System.Net.Sockets
         {
             get
             {
-                return m_Active;
+                return _active;
             }
             set
             {
-                m_Active = value;
+                _active = value;
             }
         }
 
-        public int Available { get { return m_ClientSocket.Available; } }
-        public bool Connected { get { return m_ClientSocket.Connected; } }
+        public int Available { get { return _clientSocket.Available; } }
+        public bool Connected { get { return _clientSocket.Connected; } }
         public bool ExclusiveAddressUse
         {
             get
             {
-                return m_ClientSocket.ExclusiveAddressUse;
+                return _clientSocket.ExclusiveAddressUse;
             }
             set
             {
-                m_ClientSocket.ExclusiveAddressUse = value;
+                _clientSocket.ExclusiveAddressUse = value;
             }
         }    //new
 
@@ -203,7 +203,7 @@ namespace System.Net.Sockets
         public void Connect(string hostname, int port)
         {
             if (Logging.On) Logging.Enter(Logging.Sockets, this, "Connect", hostname);
-            if (m_CleanedUp)
+            if (_cleanedUp)
             {
                 throw new ObjectDisposedException(this.GetType().FullName);
             }
@@ -222,7 +222,7 @@ namespace System.Net.Sockets
             // complex since we have to resolve a hostname so it's
             // easier to simply block the request up front.
             //
-            if (m_Active)
+            if (_active)
             {
                 throw new SocketException(SocketError.IsConnected);
             }
@@ -241,7 +241,7 @@ namespace System.Net.Sockets
 
             try
             {
-                if (m_ClientSocket == null)
+                if (_clientSocket == null)
                 {
                     if (Socket.OSSupportsIPv4)
                     {
@@ -257,7 +257,7 @@ namespace System.Net.Sockets
                 {
                     try
                     {
-                        if (m_ClientSocket == null)
+                        if (_clientSocket == null)
                         {
                             //
                             // We came via the <hostname,port> constructor. Set the
@@ -267,29 +267,29 @@ namespace System.Net.Sockets
                             if (address.AddressFamily == AddressFamily.InterNetwork && ipv4Socket != null)
                             {
                                 ipv4Socket.Connect(address, port);
-                                m_ClientSocket = ipv4Socket;
+                                _clientSocket = ipv4Socket;
                                 if (ipv6Socket != null)
                                     ipv6Socket.Dispose();
                             }
                             else if (ipv6Socket != null)
                             {
                                 ipv6Socket.Connect(address, port);
-                                m_ClientSocket = ipv6Socket;
+                                _clientSocket = ipv6Socket;
                                 if (ipv4Socket != null)
                                     ipv4Socket.Dispose();
                             }
 
-                            m_Family = address.AddressFamily;
-                            m_Active = true;
+                            _family = address.AddressFamily;
+                            _active = true;
                             break;
                         }
-                        else if (address.AddressFamily == m_Family)
+                        else if (address.AddressFamily == _family)
                         {
                             //
                             // Only use addresses with a matching family
                             //
                             Connect(new IPEndPoint(address, port));
-                            m_Active = true;
+                            _active = true;
                             break;
                         }
                     }
@@ -320,7 +320,7 @@ namespace System.Net.Sockets
                 //main socket gets closed when tcpclient gets closed
 
                 //did we connect?
-                if (!m_Active)
+                if (!_active)
                 {
                     if (ipv6Socket != null)
                     {
@@ -354,7 +354,7 @@ namespace System.Net.Sockets
         public void Connect(IPAddress address, int port)
         {
             if (Logging.On) Logging.Enter(Logging.Sockets, this, "Connect", address);
-            if (m_CleanedUp)
+            if (_cleanedUp)
             {
                 throw new ObjectDisposedException(this.GetType().FullName);
             }
@@ -379,7 +379,7 @@ namespace System.Net.Sockets
         public void Connect(IPEndPoint remoteEP)
         {
             if (Logging.On) Logging.Enter(Logging.Sockets, this, "Connect", remoteEP);
-            if (m_CleanedUp)
+            if (_cleanedUp)
             {
                 throw new ObjectDisposedException(this.GetType().FullName);
             }
@@ -388,7 +388,7 @@ namespace System.Net.Sockets
                 throw new ArgumentNullException("remoteEP");
             }
             Client.Connect(remoteEP);
-            m_Active = true;
+            _active = true;
             if (Logging.On) Logging.Exit(Logging.Sockets, this, "Connect", null);
         }
 
@@ -399,7 +399,7 @@ namespace System.Net.Sockets
         {
             if (Logging.On) Logging.Enter(Logging.Sockets, this, "Connect", ipAddresses);
             Client.Connect(ipAddresses, port);
-            m_Active = true;
+            _active = true;
             if (Logging.On) Logging.Exit(Logging.Sockets, this, "Connect", null);
         }
 
@@ -432,7 +432,7 @@ namespace System.Net.Sockets
         {
             if (Logging.On) Logging.Enter(Logging.Sockets, this, "EndConnect", asyncResult);
             Client.EndConnect(asyncResult);
-            m_Active = true;
+            _active = true;
             if (Logging.On) Logging.Exit(Logging.Sockets, this, "EndConnect", null);
         }
 
@@ -463,7 +463,7 @@ namespace System.Net.Sockets
         public NetworkStream GetStream()
         {
             if (Logging.On) Logging.Enter(Logging.Sockets, this, "GetStream", "");
-            if (m_CleanedUp)
+            if (_cleanedUp)
             {
                 throw new ObjectDisposedException(this.GetType().FullName);
             }
@@ -471,15 +471,15 @@ namespace System.Net.Sockets
             {
                 throw new InvalidOperationException(SR.net_notconnected);
             }
-            if (m_DataStream == null)
+            if (_dataStream == null)
             {
-                m_DataStream = new NetworkStream(Client, true);
+                _dataStream = new NetworkStream(Client, true);
             }
-            if (Logging.On) Logging.Exit(Logging.Sockets, this, "GetStream", m_DataStream);
-            return m_DataStream;
+            if (Logging.On) Logging.Exit(Logging.Sockets, this, "GetStream", _dataStream);
+            return _dataStream;
         }
 
-        private bool m_CleanedUp = false;
+        private bool _cleanedUp = false;
 
         /// <devdoc>
         ///    <para>
@@ -490,7 +490,7 @@ namespace System.Net.Sockets
         protected virtual void Dispose(bool disposing)
         {
             if (Logging.On) Logging.Enter(Logging.Sockets, this, "Dispose", "");
-            if (m_CleanedUp)
+            if (_cleanedUp)
             {
                 if (Logging.On) Logging.Exit(Logging.Sockets, this, "Dispose", "");
                 return;
@@ -498,7 +498,7 @@ namespace System.Net.Sockets
 
             if (disposing)
             {
-                IDisposable dataStream = m_DataStream;
+                IDisposable dataStream = _dataStream;
                 if (dataStream != null)
                 {
                     dataStream.Dispose();
@@ -529,7 +529,7 @@ namespace System.Net.Sockets
                 GC.SuppressFinalize(this);
             }
 
-            m_CleanedUp = true;
+            _cleanedUp = true;
             if (Logging.On) Logging.Exit(Logging.Sockets, this, "Dispose", "");
         }
 
@@ -545,7 +545,7 @@ namespace System.Net.Sockets
             using (GlobalLog.SetThreadKind(ThreadKinds.System | ThreadKinds.Async))
             {
 #endif
-            Dispose(false);
+                Dispose(false);
 #if DEBUG
             }
 #endif
@@ -668,8 +668,8 @@ namespace System.Net.Sockets
             //
             // IPv6: Use the address family from the constructor (or Connect method)
             //
-            Client = new Socket(m_Family, SocketType.Stream, ProtocolType.Tcp);
-            m_Active = false;
+            Client = new Socket(_family, SocketType.Stream, ProtocolType.Tcp);
+            _active = false;
         }
 
         private int numericOption(SocketOptionLevel optionLevel, SocketOptionName optionName)

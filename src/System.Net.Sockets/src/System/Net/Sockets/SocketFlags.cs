@@ -79,6 +79,4 @@ namespace System.Net.Sockets
        this is applicable only to Win16 environments and only for protocols that 
        have the XP1_INTERRUPT bit set in the PROTOCOL_INFO struct.
        */
-
-
 } // namespace System.Net.Sockets

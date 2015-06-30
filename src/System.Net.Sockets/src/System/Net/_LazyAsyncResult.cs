@@ -48,26 +48,26 @@ namespace System.Net
         //
         // class members
         //
-        private object m_AsyncObject;               // Caller's async object.
-        private object m_AsyncState;                // Caller's state object.
-        private AsyncCallback m_AsyncCallback;      // Caller's callback method.
-        private object m_Result;                    // Final IO result to be returned byt the End*() method.
-        private int m_ErrorCode;                    // Win32 error code for Win32 IO async calls (that want to throw).
-        private int m_IntCompleted;                 // Sign bit indicates synchronous completion if set.
+        private object _asyncObject;               // Caller's async object.
+        private object _asyncState;                // Caller's state object.
+        private AsyncCallback _asyncCallback;      // Caller's callback method.
+        private object _result;                    // Final IO result to be returned byt the End*() method.
+        private int _errorCode;                    // Win32 error code for Win32 IO async calls (that want to throw).
+        private int _intCompleted;                 // Sign bit indicates synchronous completion if set.
                                                     // Remaining bits count the number of InvokeCallbak() calls.
 
-        private bool m_EndCalled;                   // true if the user called the End*() method.
-        private bool m_UserEvent;                   // true if the event has been (or is about to be) handed to the user
+        private bool _endCalled;                   // true if the user called the End*() method.
+        private bool _userEvent;                   // true if the event has been (or is about to be) handed to the user
 
-        private object m_Event;                     // lazy allocated event to be returned in the IAsyncResult for the client to wait on
+        private object _event;                     // lazy allocated event to be returned in the IAsyncResult for the client to wait on
 
 
         internal LazyAsyncResult(object myObject, object myState, AsyncCallback myCallBack)
         {
-            m_AsyncObject = myObject;
-            m_AsyncState = myState;
-            m_AsyncCallback = myCallBack;
-            m_Result = DBNull.Value;
+            _asyncObject = myObject;
+            _asyncState = myState;
+            _asyncCallback = myCallBack;
+            _result = DBNull.Value;
             GlobalLog.Print("LazyAsyncResult#" + Logging.HashString(this) + "::.ctor()");
 #if TRACK_LAR
             _MyIndex = Interlocked.Increment(ref _PendingIndex);
@@ -80,13 +80,13 @@ namespace System.Net
         internal LazyAsyncResult(object myObject, object myState, AsyncCallback myCallBack, object result)
         {
             GlobalLog.Assert(result != DBNull.Value, "LazyAsyncResult#{0}::.ctor()|Result can't be set to DBNull - it's a special internal value.", Logging.HashString(this));
-            m_AsyncObject = myObject;
-            m_AsyncState = myState;
-            m_AsyncCallback = myCallBack;
-            m_Result = result;
-            m_IntCompleted = 1;
+            _asyncObject = myObject;
+            _asyncState = myState;
+            _asyncCallback = myCallBack;
+            _result = result;
+            _intCompleted = 1;
 
-            if (m_AsyncCallback != null)
+            if (_asyncCallback != null)
             {
                 GlobalLog.Print("LazyAsyncResult#" + Logging.HashString(this) + "::Complete() invoking callback");
                 m_AsyncCallback(this);
@@ -104,7 +104,7 @@ namespace System.Net
         {
             get
             {
-                return m_AsyncObject;
+                return _asyncObject;
             }
         }
 
@@ -113,7 +113,7 @@ namespace System.Net
         {
             get
             {
-                return m_AsyncState;
+                return _asyncState;
             }
         }
 
@@ -121,12 +121,12 @@ namespace System.Net
         {
             get
             {
-                return m_AsyncCallback;
+                return _asyncCallback;
             }
 
             set
             {
-                m_AsyncCallback = value;
+                _asyncCallback = value;
             }
         }
 
@@ -154,25 +154,25 @@ namespace System.Net
                 ManualResetEvent asyncEvent;
 
                 // Indicates that the user has seen the event; it can't be disposed.
-                m_UserEvent = true;
+                _userEvent = true;
 
                 // The user has access to this object.  Lock-in CompletedSynchronously.
-                if (m_IntCompleted == 0)
+                if (_intCompleted == 0)
                 {
-                    Interlocked.CompareExchange(ref m_IntCompleted, c_HighBit, 0);
+                    Interlocked.CompareExchange(ref _intCompleted, c_HighBit, 0);
                 }
 
                 // Because InternalWaitForCompletion() tries to dispose this event, it's
                 // possible for m_Event to become null immediately after being set, but only if
                 // IsCompleted has become true.  Therefore it's possible for this property
                 // to give different (set) events to different callers when IsCompleted is true.
-                asyncEvent = (ManualResetEvent)m_Event;
+                asyncEvent = (ManualResetEvent)_event;
                 while (asyncEvent == null)
                 {
                     LazilyCreateEvent(out asyncEvent);
                 }
 
-                GlobalLog.Print("LazyAsyncResult#" + Logging.HashString(this) + "::get_AsyncWaitHandle() m_Event:" + Logging.HashString(m_Event));
+                GlobalLog.Print("LazyAsyncResult#" + Logging.HashString(this) + "::get_AsyncWaitHandle() m_Event:" + Logging.HashString(_event));
                 return asyncEvent;
             }
         }
@@ -186,7 +186,7 @@ namespace System.Net
             waitHandle = new ManualResetEvent(false);
             try
             {
-                if (Interlocked.CompareExchange(ref m_Event, waitHandle, null) == null)
+                if (Interlocked.CompareExchange(ref _event, waitHandle, null) == null)
                 {
                     if (InternalPeekCompleted)
                     {
@@ -197,7 +197,7 @@ namespace System.Net
                 else
                 {
                     waitHandle.Dispose();
-                    waitHandle = (ManualResetEvent)m_Event;
+                    waitHandle = (ManualResetEvent)_event;
                     // There's a chance here that m_Event became null.  But the only way is if another thread completed
                     // in InternalWaitForCompletion and disposed it.  If we're in InternalWaitForCompletion, we now know
                     // IsCompleted is set, so we can avoid the wait when waitHandle comes back null.  AsyncWaitHandle
@@ -208,7 +208,7 @@ namespace System.Net
             catch
             {
                 // This should be very rare, but doing this will reduce the chance of deadlock.
-                m_Event = null;
+                _event = null;
                 if (waitHandle != null)
                     waitHandle.Dispose();
                 throw;
@@ -240,10 +240,10 @@ namespace System.Net
 #endif
 
                 // If this returns greater than zero, it means it was incremented by InvokeCallback before anyone ever saw it.
-                int result = m_IntCompleted;
+                int result = _intCompleted;
                 if (result == 0)
                 {
-                    result = Interlocked.CompareExchange(ref m_IntCompleted, c_HighBit, 0);
+                    result = Interlocked.CompareExchange(ref _intCompleted, c_HighBit, 0);
                 }
                 GlobalLog.Print("LazyAsyncResult#" + Logging.HashString(this) + "::get_CompletedSynchronously() returns: " + ((result > 0) ? "true" : "false"));
                 return result > 0;
@@ -267,10 +267,10 @@ namespace System.Net
 
                 // Look at just the low bits to see if it's been incremented.  If it hasn't, set the high bit
                 // to show that it's been looked at.
-                int result = m_IntCompleted;
+                int result = _intCompleted;
                 if (result == 0)
                 {
-                    result = Interlocked.CompareExchange(ref m_IntCompleted, c_HighBit, 0);
+                    result = Interlocked.CompareExchange(ref _intCompleted, c_HighBit, 0);
                 }
                 return (result & ~c_HighBit) != 0;
             }
@@ -281,7 +281,7 @@ namespace System.Net
         {
             get
             {
-                return (m_IntCompleted & ~c_HighBit) != 0;
+                return (_intCompleted & ~c_HighBit) != 0;
             }
         }
 
@@ -290,7 +290,7 @@ namespace System.Net
         {
             get
             {
-                return m_Result == DBNull.Value ? null : m_Result;
+                return _result == DBNull.Value ? null : _result;
             }
             set
             {
@@ -304,7 +304,7 @@ namespace System.Net
                 // It's an error to call after the result has been completed or with DBNull.
                 GlobalLog.Assert(value != DBNull.Value, "LazyAsyncResult#{0}::set_Result()|Result can't be set to DBNull - it's a special internal value.", Logging.HashString(this));
                 GlobalLog.Assert(!InternalPeekCompleted, "LazyAsyncResult#{0}::set_Result()|Called on completed result.", Logging.HashString(this));
-                m_Result = value;
+                _result = value;
             }
         }
 
@@ -312,11 +312,11 @@ namespace System.Net
         {
             get
             {
-                return m_EndCalled;
+                return _endCalled;
             }
             set
             {
-                m_EndCalled = value;
+                _endCalled = value;
             }
         }
 
@@ -325,11 +325,11 @@ namespace System.Net
         {
             get
             {
-                return m_ErrorCode;
+                return _errorCode;
             }
             set
             {
-                m_ErrorCode = value;
+                _errorCode = value;
             }
         }
 
@@ -355,16 +355,16 @@ namespace System.Net
             _ProtectState = false;
 #endif
 
-            if ((m_IntCompleted & ~c_HighBit) == 0 && (Interlocked.Increment(ref m_IntCompleted) & ~c_HighBit) == 1)
+            if ((_intCompleted & ~c_HighBit) == 0 && (Interlocked.Increment(ref _intCompleted) & ~c_HighBit) == 1)
             {
                 // DBNull.Value is used to guarantee that the first caller wins,
                 // even if the result was set to null.
-                if (m_Result == DBNull.Value)
-                    m_Result = result;
+                if (_result == DBNull.Value)
+                    _result = result;
 
                 // Does this need a memory barrier to be sure this thread gets the m_Event if it's set?  I don't think so
                 // because the Interlockeds on m_IntCompleted/m_Event should serve as the barrier.
-                ManualResetEvent asyncEvent = (ManualResetEvent)m_Event;
+                ManualResetEvent asyncEvent = (ManualResetEvent)_event;
                 if (asyncEvent != null)
                 {
                     try
@@ -413,7 +413,7 @@ namespace System.Net
             try
             {
 #endif
-                if (m_AsyncCallback != null)
+                if (_asyncCallback != null)
                 {
                     GlobalLog.Print("LazyAsyncResult#" + Logging.HashString(this) + "::Complete() invoking callback");
 
@@ -453,7 +453,7 @@ namespace System.Net
 
 #if !NET_PERF
         // Only called in the above method
-        void WorkerThreadComplete(object state)
+        private void WorkerThreadComplete(object state)
         {
             try
             {
@@ -496,7 +496,7 @@ namespace System.Net
             if (!complete)
             {
                 // Not done yet, so wait:
-                waitHandle = (ManualResetEvent)m_Event;
+                waitHandle = (ManualResetEvent)_event;
                 if (waitHandle == null)
                 {
                     createdByMe = LazilyCreateEvent(out waitHandle);
@@ -518,13 +518,13 @@ namespace System.Net
                 finally
                 {
                     // We also want to dispose the event although we can't unless we did wait on it here.
-                    if (createdByMe && !m_UserEvent)
+                    if (createdByMe && !_userEvent)
                     {
                         // Does m_UserEvent need to be volatile (or m_Event set via Interlocked) in order
                         // to avoid giving a user a disposed event?
-                        ManualResetEvent oldEvent = (ManualResetEvent)m_Event;
-                        m_Event = null;
-                        if (!m_UserEvent)
+                        ManualResetEvent oldEvent = (ManualResetEvent)_event;
+                        _event = null;
+                        if (!_userEvent)
                         {
                             oldEvent.Dispose();
                         }
@@ -537,25 +537,25 @@ namespace System.Net
             // set (although rarely - once every eight hours of stress).  Handle that case with a spin-lock.
 
             SpinWait sw = new SpinWait();
-            while (m_Result == DBNull.Value)
+            while (_result == DBNull.Value)
             {
                 sw.SpinOnce();
             }
 
             GlobalLog.Print("LazyAsyncResult#" + Logging.HashString(this) + "::InternalWaitForCompletion() done: " +
-                            (m_Result is Exception ? ((Exception)m_Result).Message : m_Result == null ? "<null>" : m_Result.ToString()));
+                            (_result is Exception ? ((Exception)_result).Message : _result == null ? "<null>" : _result.ToString()));
 
-            return m_Result;
+            return _result;
         }
 
         // A general interface that is called to release unmanaged resources associated with the class.
         // It completes the result but doesn't do any of the notifications.
         internal void InternalCleanup()
         {
-            if ((m_IntCompleted & ~c_HighBit) == 0 && (Interlocked.Increment(ref m_IntCompleted) & ~c_HighBit) == 1)
+            if ((_intCompleted & ~c_HighBit) == 0 && (Interlocked.Increment(ref _intCompleted) & ~c_HighBit) == 1)
             {
                 // Set no result so that just in case there are waiters, they don't hang in the spin lock.
-                m_Result = null;
+                _result = null;
                 Cleanup();
             }
         }

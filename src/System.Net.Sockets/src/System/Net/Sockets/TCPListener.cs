@@ -14,10 +14,10 @@ namespace System.Net.Sockets
     /// </devdoc>
     public class TcpListener
     {
-        IPEndPoint m_ServerSocketEP;
-        Socket m_ServerSocket;
-        bool m_Active;
-        bool m_ExclusiveAddressUse;
+        private IPEndPoint _serverSocketEP;
+        private Socket _serverSocket;
+        private bool _active;
+        private bool _exclusiveAddressUse;
 
 
 
@@ -34,8 +34,8 @@ namespace System.Net.Sockets
             {
                 throw new ArgumentNullException("localEP");
             }
-            m_ServerSocketEP = localEP;
-            m_ServerSocket = new Socket(m_ServerSocketEP.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+            _serverSocketEP = localEP;
+            _serverSocket = new Socket(_serverSocketEP.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
             if (Logging.On) Logging.Exit(Logging.Sockets, this, "TcpListener", null);
         }
 
@@ -56,8 +56,8 @@ namespace System.Net.Sockets
             {
                 throw new ArgumentOutOfRangeException("port");
             }
-            m_ServerSocketEP = new IPEndPoint(localaddr, port);
-            m_ServerSocket = new Socket(m_ServerSocketEP.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+            _serverSocketEP = new IPEndPoint(localaddr, port);
+            _serverSocket = new Socket(_serverSocketEP.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
             if (Logging.On) Logging.Exit(Logging.Sockets, this, "TcpListener", null);
         }
 
@@ -87,7 +87,7 @@ namespace System.Net.Sockets
         {
             get
             {
-                return m_ServerSocket;
+                return _serverSocket;
             }
         }
 
@@ -102,7 +102,7 @@ namespace System.Net.Sockets
         {
             get
             {
-                return m_Active;
+                return _active;
             }
         }
 
@@ -115,7 +115,7 @@ namespace System.Net.Sockets
         {
             get
             {
-                return m_Active ? m_ServerSocket.LocalEndPoint : m_ServerSocketEP;
+                return _active ? _serverSocket.LocalEndPoint : _serverSocketEP;
             }
         }
 
@@ -123,33 +123,33 @@ namespace System.Net.Sockets
         {
             get
             {
-                return m_ServerSocket.ExclusiveAddressUse;
+                return _serverSocket.ExclusiveAddressUse;
             }
             set
             {
-                if (m_Active)
+                if (_active)
                 {
                     throw new InvalidOperationException(SR.net_tcplistener_mustbestopped);
                 }
-                m_ServerSocket.ExclusiveAddressUse = value;
-                m_ExclusiveAddressUse = value;
+                _serverSocket.ExclusiveAddressUse = value;
+                _exclusiveAddressUse = value;
             }
         }
 
         public void AllowNatTraversal(bool allowed)
         {
-            if (m_Active)
+            if (_active)
             {
                 throw new InvalidOperationException(SR.net_tcplistener_mustbestopped);
             }
 
             if (allowed)
             {
-                m_ServerSocket.SetIPProtectionLevel(IPProtectionLevel.Unrestricted);
+                _serverSocket.SetIPProtectionLevel(IPProtectionLevel.Unrestricted);
             }
             else
             {
-                m_ServerSocket.SetIPProtectionLevel(IPProtectionLevel.EdgeRestricted);
+                _serverSocket.SetIPProtectionLevel(IPProtectionLevel.EdgeRestricted);
             }
         }
 
@@ -174,20 +174,20 @@ namespace System.Net.Sockets
             if (Logging.On) Logging.Enter(Logging.Sockets, this, "Start", null);
             GlobalLog.Print("TCPListener::Start()");
 
-            if (m_ServerSocket == null)
+            if (_serverSocket == null)
                 throw new InvalidOperationException(SR.net_InvalidSocketHandle);
 
             //already listening
-            if (m_Active)
+            if (_active)
             {
                 if (Logging.On) Logging.Exit(Logging.Sockets, this, "Start", null);
                 return;
             }
 
-            m_ServerSocket.Bind(m_ServerSocketEP);
+            _serverSocket.Bind(_serverSocketEP);
             try
             {
-                m_ServerSocket.Listen(backlog);
+                _serverSocket.Listen(backlog);
             }
             // When there is an exception unwind previous actions (bind etc) 
             catch (SocketException)
@@ -195,7 +195,7 @@ namespace System.Net.Sockets
                 Stop();
                 throw;
             }
-            m_Active = true;
+            _active = true;
             if (Logging.On) Logging.Exit(Logging.Sockets, this, "Start", null);
         }
 
@@ -210,17 +210,17 @@ namespace System.Net.Sockets
             if (Logging.On) Logging.Enter(Logging.Sockets, this, "Stop", null);
             GlobalLog.Print("TCPListener::Stop()");
 
-            if (m_ServerSocket != null)
+            if (_serverSocket != null)
             {
-                m_ServerSocket.Dispose();
-                m_ServerSocket = null;
+                _serverSocket.Dispose();
+                _serverSocket = null;
             }
-            m_Active = false;
-            m_ServerSocket = new Socket(m_ServerSocketEP.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+            _active = false;
+            _serverSocket = new Socket(_serverSocketEP.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
 
-            if (m_ExclusiveAddressUse)
+            if (_exclusiveAddressUse)
             {
-                m_ServerSocket.ExclusiveAddressUse = true;
+                _serverSocket.ExclusiveAddressUse = true;
             }
 
             if (Logging.On) Logging.Exit(Logging.Sockets, this, "Stop", null);
@@ -234,9 +234,9 @@ namespace System.Net.Sockets
         /// </devdoc>
         public bool Pending()
         {
-            if (!m_Active)
+            if (!_active)
                 throw new InvalidOperationException(SR.net_stopped);
-            return m_ServerSocket.Poll(0, SelectMode.SelectRead);
+            return _serverSocket.Poll(0, SelectMode.SelectRead);
         }
 
         // Accept the first pending connection
@@ -248,9 +248,9 @@ namespace System.Net.Sockets
         public Socket AcceptSocket()
         {
             if (Logging.On) Logging.Enter(Logging.Sockets, this, "AcceptSocket", null);
-            if (!m_Active)
+            if (!_active)
                 throw new InvalidOperationException(SR.net_stopped);
-            Socket socket = m_ServerSocket.Accept();
+            Socket socket = _serverSocket.Accept();
             if (Logging.On) Logging.Exit(Logging.Sockets, this, "AcceptSocket", socket);
             return socket;
         }
@@ -261,10 +261,10 @@ namespace System.Net.Sockets
         public TcpClient AcceptTcpClient()
         {
             if (Logging.On) Logging.Enter(Logging.Sockets, this, "AcceptTcpClient", null);
-            if (!m_Active)
+            if (!_active)
                 throw new InvalidOperationException(SR.net_stopped);
 
-            Socket acceptedSocket = m_ServerSocket.Accept();
+            Socket acceptedSocket = _serverSocket.Accept();
             TcpClient returnValue = new TcpClient(acceptedSocket);
             if (Logging.On) Logging.Exit(Logging.Sockets, this, "AcceptTcpClient", returnValue);
             return returnValue;
@@ -277,10 +277,10 @@ namespace System.Net.Sockets
         public IAsyncResult BeginAcceptSocket(AsyncCallback callback, object state)
         {
             if (Logging.On) Logging.Enter(Logging.Sockets, this, "BeginAcceptSocket", null);
-            if (!m_Active)
+            if (!_active)
                 throw new InvalidOperationException(SR.net_stopped);
 
-            IAsyncResult result = m_ServerSocket.BeginAccept(callback, state);
+            IAsyncResult result = _serverSocket.BeginAccept(callback, state);
             if (Logging.On) Logging.Exit(Logging.Sockets, this, "BeginAcceptSocket", null);
             return result;
         }
@@ -311,9 +311,9 @@ namespace System.Net.Sockets
         public IAsyncResult BeginAcceptTcpClient(AsyncCallback callback, object state)
         {
             if (Logging.On) Logging.Enter(Logging.Sockets, this, "BeginAcceptTcpClient", null);
-            if (!m_Active)
+            if (!_active)
                 throw new InvalidOperationException(SR.net_stopped);
-            IAsyncResult result = m_ServerSocket.BeginAccept(callback, state);
+            IAsyncResult result = _serverSocket.BeginAccept(callback, state);
             if (Logging.On) Logging.Exit(Logging.Sockets, this, "BeginAcceptTcpClient", null);
             return result;
         }

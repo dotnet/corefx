@@ -15,18 +15,18 @@ namespace System.Net
     {
         // fields
 
-        private Hashtable cache = new Hashtable();
-        private Hashtable cacheForHosts = new Hashtable();
+        private Hashtable _cache = new Hashtable();
+        private Hashtable _cacheForHosts = new Hashtable();
         internal int m_version;
 
-        private int m_NumbDefaultCredInCache = 0;
+        private int _numbDefaultCredInCache = 0;
 
         // [thread token optimization] The resulting counter of default credential resided in the cache.
         internal bool IsDefaultInCache
         {
             get
             {
-                return m_NumbDefaultCredInCache != 0;
+                return _numbDefaultCredInCache != 0;
             }
         }
 
@@ -69,10 +69,10 @@ namespace System.Net
 
             GlobalLog.Print("CredentialCache::Add() Adding key:[" + key.ToString() + "], cred:[" + cred.Domain + "],[" + cred.UserName + "]");
 
-            cache.Add(key, cred);
+            _cache.Add(key, cred);
             if (cred is SystemNetworkCredential)
             {
-                ++m_NumbDefaultCredInCache;
+                ++_numbDefaultCredInCache;
             }
         }
 
@@ -108,10 +108,10 @@ namespace System.Net
 
             GlobalLog.Print("CredentialCache::Add() Adding key:[" + key.ToString() + "], cred:[" + credential.Domain + "],[" + credential.UserName + "]");
 
-            cacheForHosts.Add(key, credential);
+            _cacheForHosts.Add(key, credential);
             if (credential is SystemNetworkCredential)
             {
-                ++m_NumbDefaultCredInCache;
+                ++_numbDefaultCredInCache;
             }
         }
 
@@ -135,11 +135,11 @@ namespace System.Net
 
             GlobalLog.Print("CredentialCache::Remove() Removing key:[" + key.ToString() + "]");
 
-            if (cache[key] is SystemNetworkCredential)
+            if (_cache[key] is SystemNetworkCredential)
             {
-                --m_NumbDefaultCredInCache;
+                --_numbDefaultCredInCache;
             }
-            cache.Remove(key);
+            _cache.Remove(key);
         }
 
 
@@ -164,11 +164,11 @@ namespace System.Net
 
             GlobalLog.Print("CredentialCache::Remove() Removing key:[" + key.ToString() + "]");
 
-            if (cacheForHosts[key] is SystemNetworkCredential)
+            if (_cacheForHosts[key] is SystemNetworkCredential)
             {
-                --m_NumbDefaultCredInCache;
+                --_numbDefaultCredInCache;
             }
-            cacheForHosts.Remove(key);
+            _cacheForHosts.Remove(key);
         }
 
         /// <devdoc>
@@ -189,7 +189,7 @@ namespace System.Net
 
             int longestMatchPrefix = -1;
             NetworkCredential mostSpecificMatch = null;
-            IDictionaryEnumerator credEnum = cache.GetEnumerator();
+            IDictionaryEnumerator credEnum = _cache.GetEnumerator();
 
             //
             // Enumerate through every credential in the cache
@@ -253,7 +253,7 @@ namespace System.Net
 
             NetworkCredential match = null;
 
-            IDictionaryEnumerator credEnum = cacheForHosts.GetEnumerator();
+            IDictionaryEnumerator credEnum = _cacheForHosts.GetEnumerator();
 
             //
             // Enumerate through every credential in the cache
@@ -289,7 +289,7 @@ namespace System.Net
 
         public IEnumerator GetEnumerator()
         {
-            return new CredentialEnumerator(this, cache, cacheForHosts, m_version);
+            return new CredentialEnumerator(this, _cache, _cacheForHosts, m_version);
         }
 
 
@@ -319,20 +319,20 @@ namespace System.Net
         {
             // fields
 
-            private CredentialCache m_cache;
-            private ICredentials[] m_array;
-            private int m_index = -1;
-            private int m_version;
+            private CredentialCache _cache;
+            private ICredentials[] _array;
+            private int _index = -1;
+            private int _version;
 
             // constructors
 
             internal CredentialEnumerator(CredentialCache cache, Hashtable table, Hashtable hostTable, int version)
             {
-                m_cache = cache;
-                m_array = new ICredentials[table.Count + hostTable.Count];
-                table.Values.CopyTo(m_array, 0);
-                hostTable.Values.CopyTo(m_array, table.Count);
-                m_version = version;
+                _cache = cache;
+                _array = new ICredentials[table.Count + hostTable.Count];
+                table.Values.CopyTo(_array, 0);
+                hostTable.Values.CopyTo(_array, table.Count);
+                _version = version;
             }
 
             // IEnumerator interface
@@ -343,15 +343,15 @@ namespace System.Net
             {
                 get
                 {
-                    if (m_index < 0 || m_index >= m_array.Length)
+                    if (_index < 0 || _index >= _array.Length)
                     {
                         throw new InvalidOperationException(SR.InvalidOperation_EnumOpCantHappen);
                     }
-                    if (m_version != m_cache.m_version)
+                    if (_version != _cache.m_version)
                     {
                         throw new InvalidOperationException(SR.InvalidOperation_EnumFailedVersion);
                     }
-                    return m_array[m_index];
+                    return _array[_index];
                 }
             }
 
@@ -359,21 +359,21 @@ namespace System.Net
 
             bool IEnumerator.MoveNext()
             {
-                if (m_version != m_cache.m_version)
+                if (_version != _cache.m_version)
                 {
                     throw new InvalidOperationException(SR.InvalidOperation_EnumFailedVersion);
                 }
-                if (++m_index < m_array.Length)
+                if (++_index < _array.Length)
                 {
                     return true;
                 }
-                m_index = m_array.Length;
+                _index = _array.Length;
                 return false;
             }
 
             void IEnumerator.Reset()
             {
-                m_index = -1;
+                _index = -1;
             }
         } // class CredentialEnumerator
     } // class CredentialCache
@@ -444,20 +444,20 @@ namespace System.Net
         }
 
 
-        private int m_HashCode = 0;
-        private bool m_ComputedHashCode = false;
+        private int _hashCode = 0;
+        private bool _computedHashCode = false;
         public override int GetHashCode()
         {
-            if (!m_ComputedHashCode)
+            if (!_computedHashCode)
             {
                 //
                 // compute HashCode on demand
                 //
 
-                m_HashCode = AuthenticationType.ToUpperInvariant().GetHashCode() + Host.ToUpperInvariant().GetHashCode() + Port.GetHashCode();
-                m_ComputedHashCode = true;
+                _hashCode = AuthenticationType.ToUpperInvariant().GetHashCode() + Host.ToUpperInvariant().GetHashCode() + Port.GetHashCode();
+                _computedHashCode = true;
             }
-            return m_HashCode;
+            return _hashCode;
         }
 
         public override bool Equals(object comparand)
@@ -547,20 +547,20 @@ namespace System.Net
             return String.Compare(uri.AbsolutePath, 0, prefixUri.AbsolutePath, 0, prefixLen, StringComparison.OrdinalIgnoreCase) == 0;
         }
 
-        private int m_HashCode = 0;
-        private bool m_ComputedHashCode = false;
+        private int _hashCode = 0;
+        private bool _computedHashCode = false;
         public override int GetHashCode()
         {
-            if (!m_ComputedHashCode)
+            if (!_computedHashCode)
             {
                 //
                 // compute HashCode on demand
                 //
 
-                m_HashCode = AuthenticationType.ToUpperInvariant().GetHashCode() + UriPrefixLength + UriPrefix.GetHashCode();
-                m_ComputedHashCode = true;
+                _hashCode = AuthenticationType.ToUpperInvariant().GetHashCode() + UriPrefixLength + UriPrefix.GetHashCode();
+                _computedHashCode = true;
             }
-            return m_HashCode;
+            return _hashCode;
         }
 
         public override bool Equals(object comparand)

@@ -8,7 +8,7 @@ namespace System.Net.NetworkInformation
 {
     public class IPAddressInformationCollection : ICollection<IPAddressInformation>
     {
-        Collection<IPAddressInformation> addresses = new Collection<IPAddressInformation>();
+        private Collection<IPAddressInformation> _addresses = new Collection<IPAddressInformation>();
 
         internal IPAddressInformationCollection()
         {
@@ -17,7 +17,7 @@ namespace System.Net.NetworkInformation
         /// <include file='doc\HttpListenerPrefixCollection.uex' path='docs/doc[@for="HttpListenerPrefixCollection.CopyTo"]/*' />
         public virtual void CopyTo(IPAddressInformation[] array, int offset)
         {
-            addresses.CopyTo(array, offset);
+            _addresses.CopyTo(array, offset);
         }
 
 
@@ -26,7 +26,7 @@ namespace System.Net.NetworkInformation
         {
             get
             {
-                return addresses.Count;
+                return _addresses.Count;
             }
         }
 
@@ -49,14 +49,14 @@ namespace System.Net.NetworkInformation
 
         internal void InternalAdd(IPAddressInformation address)
         {
-            addresses.Add(address);
+            _addresses.Add(address);
         }
 
 
         /// <include file='doc\HttpListenerPrefixCollection.uex' path='docs/doc[@for="HttpListenerPrefixCollection.Contains"]/*' />
         public virtual bool Contains(IPAddressInformation address)
         {
-            return addresses.Contains(address);
+            return _addresses.Contains(address);
         }
 
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
@@ -66,7 +66,7 @@ namespace System.Net.NetworkInformation
 
         public virtual IEnumerator<IPAddressInformation> GetEnumerator()
         {
-            return (IEnumerator<IPAddressInformation>)addresses.GetEnumerator();
+            return (IEnumerator<IPAddressInformation>)_addresses.GetEnumerator();
         }
 
 
@@ -74,7 +74,7 @@ namespace System.Net.NetworkInformation
         {
             get
             {
-                return (IPAddressInformation)addresses[index];
+                return (IPAddressInformation)_addresses[index];
             }
         }
 

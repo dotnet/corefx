@@ -17,12 +17,12 @@ namespace System.Net.NetworkInformation
     /// <summary>Udp statistics.</summary>
     internal class SystemUdpStatistics : UdpStatistics
     {
-        MibUdpStats stats;
+        private MibUdpStats _stats;
 
         private SystemUdpStatistics() { }
         internal SystemUdpStatistics(AddressFamily family)
         {
-            uint result = UnsafeNetInfoNativeMethods.GetUdpStatisticsEx(out stats, family);
+            uint result = UnsafeNetInfoNativeMethods.GetUdpStatisticsEx(out _stats, family);
 
             if (result != IpHelperErrors.Success)
             {
@@ -30,11 +30,11 @@ namespace System.Net.NetworkInformation
             }
         }
 
-        public override long DatagramsReceived { get { return stats.datagramsReceived; } }
-        public override long IncomingDatagramsDiscarded { get { return stats.incomingDatagramsDiscarded; } }
-        public override long IncomingDatagramsWithErrors { get { return stats.incomingDatagramsWithErrors; } }
-        public override long DatagramsSent { get { return stats.datagramsSent; } }
-        public override int UdpListeners { get { return (int)stats.udpListeners; } }
+        public override long DatagramsReceived { get { return _stats.datagramsReceived; } }
+        public override long IncomingDatagramsDiscarded { get { return _stats.incomingDatagramsDiscarded; } }
+        public override long IncomingDatagramsWithErrors { get { return _stats.incomingDatagramsWithErrors; } }
+        public override long DatagramsSent { get { return _stats.datagramsSent; } }
+        public override int UdpListeners { get { return (int)_stats.udpListeners; } }
     }
 }
 

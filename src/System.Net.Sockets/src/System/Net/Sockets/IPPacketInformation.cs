@@ -7,20 +7,20 @@ namespace System.Net.Sockets
 {
     public struct IPPacketInformation
     {
-        IPAddress address;
-        int networkInterface;
+        private IPAddress _address;
+        private int _networkInterface;
 
         internal IPPacketInformation(IPAddress address, int networkInterface)
         {
-            this.address = address;
-            this.networkInterface = networkInterface;
+            _address = address;
+            _networkInterface = networkInterface;
         }
 
         public IPAddress Address
         {
             get
             {
-                return address;
+                return _address;
             }
         }
 
@@ -28,7 +28,7 @@ namespace System.Net.Sockets
         {
             get
             {
-                return networkInterface;
+                return _networkInterface;
             }
         }
 
@@ -56,7 +56,7 @@ namespace System.Net.Sockets
 
             IPPacketInformation obj = (IPPacketInformation)comparand;
 
-            if (address.Equals(obj.address) && networkInterface == obj.networkInterface)
+            if (_address.Equals(obj._address) && _networkInterface == obj._networkInterface)
                 return (true);
 
             return false;
@@ -64,7 +64,7 @@ namespace System.Net.Sockets
 
         public override int GetHashCode()
         {
-            return address.GetHashCode() + networkInterface.GetHashCode();
+            return _address.GetHashCode() + _networkInterface.GetHashCode();
         }
     }; // enum SocketFlags
 }

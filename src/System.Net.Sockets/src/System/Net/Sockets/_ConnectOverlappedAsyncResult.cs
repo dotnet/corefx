@@ -14,12 +14,12 @@ namespace System.Net.Sockets
     //
     internal class ConnectOverlappedAsyncResult : BaseOverlappedAsyncResult
     {
-        private EndPoint m_EndPoint;
+        private EndPoint _endPoint;
 
         internal ConnectOverlappedAsyncResult(Socket socket, EndPoint endPoint, Object asyncState, AsyncCallback asyncCallback) :
             base(socket, asyncState, asyncCallback)
         {
-            m_EndPoint = endPoint;
+            _endPoint = endPoint;
         }
 
 
@@ -63,7 +63,7 @@ namespace System.Net.Sockets
 
         internal EndPoint RemoteEndPoint
         {
-            get { return m_EndPoint; }
+            get { return _endPoint; }
         }
     }
 }

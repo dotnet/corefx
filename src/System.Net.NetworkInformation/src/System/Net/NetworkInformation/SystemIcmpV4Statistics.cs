@@ -17,11 +17,11 @@ namespace System.Net.NetworkInformation
     /// <summary>Icmp statistics for IPv4.</summary>
     internal class SystemIcmpV4Statistics : IcmpV4Statistics
     {
-        MibIcmpInfo stats;
+        private MibIcmpInfo _stats;
 
         internal SystemIcmpV4Statistics()
         {
-            uint result = UnsafeNetInfoNativeMethods.GetIcmpStatistics(out stats);
+            uint result = UnsafeNetInfoNativeMethods.GetIcmpStatistics(out _stats);
 
             if (result != IpHelperErrors.Success)
             {
@@ -29,49 +29,49 @@ namespace System.Net.NetworkInformation
             }
         }
 
-        public override long MessagesSent { get { return stats.outStats.messages; } }
-        public override long MessagesReceived { get { return stats.inStats.messages; } }
+        public override long MessagesSent { get { return _stats.outStats.messages; } }
+        public override long MessagesReceived { get { return _stats.inStats.messages; } }
 
-        public override long ErrorsSent { get { return stats.outStats.errors; } }
-        public override long ErrorsReceived { get { return stats.inStats.errors; } }
-
-
-        public override long DestinationUnreachableMessagesSent { get { return stats.outStats.destinationUnreachables; } }
-        public override long DestinationUnreachableMessagesReceived { get { return stats.inStats.destinationUnreachables; } }
-
-        public override long TimeExceededMessagesSent { get { return stats.outStats.timeExceeds; } }
-        public override long TimeExceededMessagesReceived { get { return stats.inStats.timeExceeds; } }
-
-        public override long ParameterProblemsSent { get { return stats.outStats.parameterProblems; } }
-        public override long ParameterProblemsReceived { get { return stats.inStats.parameterProblems; } }
+        public override long ErrorsSent { get { return _stats.outStats.errors; } }
+        public override long ErrorsReceived { get { return _stats.inStats.errors; } }
 
 
-        public override long SourceQuenchesSent { get { return stats.outStats.sourceQuenches; } }
-        public override long SourceQuenchesReceived { get { return stats.inStats.sourceQuenches; } }
+        public override long DestinationUnreachableMessagesSent { get { return _stats.outStats.destinationUnreachables; } }
+        public override long DestinationUnreachableMessagesReceived { get { return _stats.inStats.destinationUnreachables; } }
+
+        public override long TimeExceededMessagesSent { get { return _stats.outStats.timeExceeds; } }
+        public override long TimeExceededMessagesReceived { get { return _stats.inStats.timeExceeds; } }
+
+        public override long ParameterProblemsSent { get { return _stats.outStats.parameterProblems; } }
+        public override long ParameterProblemsReceived { get { return _stats.inStats.parameterProblems; } }
 
 
-        public override long RedirectsSent { get { return stats.outStats.redirects; } }
-        public override long RedirectsReceived { get { return stats.inStats.redirects; } }
+        public override long SourceQuenchesSent { get { return _stats.outStats.sourceQuenches; } }
+        public override long SourceQuenchesReceived { get { return _stats.inStats.sourceQuenches; } }
 
 
-        public override long EchoRequestsSent { get { return stats.outStats.echoRequests; } }
-        public override long EchoRequestsReceived { get { return stats.inStats.echoRequests; } }
-
-        public override long EchoRepliesSent { get { return stats.outStats.echoReplies; } }
-        public override long EchoRepliesReceived { get { return stats.inStats.echoReplies; } }
+        public override long RedirectsSent { get { return _stats.outStats.redirects; } }
+        public override long RedirectsReceived { get { return _stats.inStats.redirects; } }
 
 
-        public override long TimestampRequestsSent { get { return stats.outStats.timestampRequests; } }
-        public override long TimestampRequestsReceived { get { return stats.inStats.timestampRequests; } }
+        public override long EchoRequestsSent { get { return _stats.outStats.echoRequests; } }
+        public override long EchoRequestsReceived { get { return _stats.inStats.echoRequests; } }
 
-        public override long TimestampRepliesSent { get { return stats.outStats.timestampReplies; } }
-        public override long TimestampRepliesReceived { get { return stats.inStats.timestampReplies; } }
+        public override long EchoRepliesSent { get { return _stats.outStats.echoReplies; } }
+        public override long EchoRepliesReceived { get { return _stats.inStats.echoReplies; } }
 
-        public override long AddressMaskRequestsSent { get { return stats.outStats.addressMaskRequests; } }
-        public override long AddressMaskRequestsReceived { get { return stats.inStats.addressMaskRequests; } }
 
-        public override long AddressMaskRepliesSent { get { return stats.outStats.addressMaskReplies; } }
-        public override long AddressMaskRepliesReceived { get { return stats.inStats.addressMaskReplies; } }
+        public override long TimestampRequestsSent { get { return _stats.outStats.timestampRequests; } }
+        public override long TimestampRequestsReceived { get { return _stats.inStats.timestampRequests; } }
+
+        public override long TimestampRepliesSent { get { return _stats.outStats.timestampReplies; } }
+        public override long TimestampRepliesReceived { get { return _stats.inStats.timestampReplies; } }
+
+        public override long AddressMaskRequestsSent { get { return _stats.outStats.addressMaskRequests; } }
+        public override long AddressMaskRequestsReceived { get { return _stats.inStats.addressMaskRequests; } }
+
+        public override long AddressMaskRepliesSent { get { return _stats.outStats.addressMaskReplies; } }
+        public override long AddressMaskRepliesReceived { get { return _stats.inStats.addressMaskReplies; } }
     }
 }
 

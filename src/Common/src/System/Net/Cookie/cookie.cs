@@ -65,30 +65,30 @@ namespace System.Net
         internal static readonly char[] PortSplitDelimiters = new char[] { ' ', ',', '\"' };
         internal static readonly char[] Reserved2Name = new char[] { ' ', '\t', '\r', '\n', '=', ';', ',' };
         internal static readonly char[] Reserved2Value = new char[] { ';', ',' };
-        private static Comparer staticComparer = new Comparer();
+        private static Comparer s_staticComparer = new Comparer();
 
         // fields
 
-        string m_comment = string.Empty;
-        Uri m_commentUri = null;
-        CookieVariant m_cookieVariant = CookieVariant.Plain;
-        bool m_discard = false;
-        string m_domain = string.Empty;
-        bool m_domain_implicit = true;
-        DateTime m_expires = DateTime.MinValue;
-        string m_name = string.Empty;
-        string m_path = string.Empty;
-        bool m_path_implicit = true;
-        string m_port = string.Empty;
-        bool m_port_implicit = true;
-        int[] m_port_list = null;
-        bool m_secure = false;
-        bool m_httpOnly = false;
-        DateTime m_timeStamp = DateTime.Now;
-        string m_value = string.Empty;
-        int m_version = 0;
+        private string _comment = string.Empty;
+        private Uri _commentUri = null;
+        private CookieVariant _cookieVariant = CookieVariant.Plain;
+        private bool _discard = false;
+        private string _domain = string.Empty;
+        private bool _domain_implicit = true;
+        private DateTime _expires = DateTime.MinValue;
+        private string _name = string.Empty;
+        private string _path = string.Empty;
+        private bool _path_implicit = true;
+        private string _port = string.Empty;
+        private bool _port_implicit = true;
+        private int[] _port_list = null;
+        private bool _secure = false;
+        private bool _httpOnly = false;
+        private DateTime _timeStamp = DateTime.Now;
+        private string _value = string.Empty;
+        private int _version = 0;
 
-        string m_domainKey = string.Empty;
+        private string _domainKey = string.Empty;
         internal bool IsQuotedVersion = false;
         internal bool IsQuotedDomain = false;
 
@@ -117,7 +117,7 @@ namespace System.Net
         public Cookie(string name, string value)
         {
             Name = name;
-            m_value = value;
+            _value = value;
         }
 
         /// <devdoc>
@@ -147,7 +147,7 @@ namespace System.Net
         {
             get
             {
-                return m_comment;
+                return _comment;
             }
             set
             {
@@ -155,7 +155,7 @@ namespace System.Net
                 {
                     value = string.Empty;
                 }
-                m_comment = value;
+                _comment = value;
             }
         }
 
@@ -166,11 +166,11 @@ namespace System.Net
         {
             get
             {
-                return m_commentUri;
+                return _commentUri;
             }
             set
             {
-                m_commentUri = value;
+                _commentUri = value;
             }
         }
 
@@ -179,11 +179,11 @@ namespace System.Net
         {
             get
             {
-                return m_httpOnly;
+                return _httpOnly;
             }
             set
             {
-                m_httpOnly = value;
+                _httpOnly = value;
             }
         }
 
@@ -195,11 +195,11 @@ namespace System.Net
         {
             get
             {
-                return m_discard;
+                return _discard;
             }
             set
             {
-                m_discard = value;
+                _discard = value;
             }
         }
 
@@ -210,13 +210,13 @@ namespace System.Net
         {
             get
             {
-                return m_domain;
+                return _domain;
             }
             set
             {
-                m_domain = (value == null ? String.Empty : value);
-                m_domain_implicit = false;
-                m_domainKey = string.Empty; //this will get it value when adding into the Container.
+                _domain = (value == null ? String.Empty : value);
+                _domain_implicit = false;
+                _domainKey = string.Empty; //this will get it value when adding into the Container.
             }
         }
 
@@ -224,12 +224,12 @@ namespace System.Net
         {
             get
             {
-                return (Plain || m_domain_implicit || (m_domain.Length == 0))
+                return (Plain || _domain_implicit || (_domain.Length == 0))
                     ? string.Empty
                     : (SpecialAttributeLiteral
                        + DomainAttributeName
                        + EqualsLiteral + (IsQuotedDomain ? "\"" : string.Empty)
-                       + m_domain + (IsQuotedDomain ? "\"" : string.Empty)
+                       + _domain + (IsQuotedDomain ? "\"" : string.Empty)
                        );
             }
         }
@@ -238,11 +238,11 @@ namespace System.Net
         {
             get
             {
-                return m_domain_implicit;
+                return _domain_implicit;
             }
             set
             {
-                m_domain_implicit = value;
+                _domain_implicit = value;
             }
         }
 
@@ -253,13 +253,13 @@ namespace System.Net
         {
             get
             {
-                return (m_expires != DateTime.MinValue) && (m_expires.ToLocalTime() <= DateTime.Now);
+                return (_expires != DateTime.MinValue) && (_expires.ToLocalTime() <= DateTime.Now);
             }
             set
             {
                 if (value == true)
                 {
-                    m_expires = DateTime.Now;
+                    _expires = DateTime.Now;
                 }
             }
         }
@@ -271,11 +271,11 @@ namespace System.Net
         {
             get
             {
-                return m_expires;
+                return _expires;
             }
             set
             {
-                m_expires = value;
+                _expires = value;
             }
         }
 
@@ -286,7 +286,7 @@ namespace System.Net
         {
             get
             {
-                return m_name;
+                return _name;
             }
             set
             {
@@ -301,10 +301,10 @@ namespace System.Net
         {
             if (String.IsNullOrEmpty(value) || value[0] == '$' || value.IndexOfAny(Reserved2Name) != -1)
             {
-                m_name = string.Empty;
+                _name = string.Empty;
                 return false;
             }
-            m_name = value;
+            _name = value;
             return true;
         }
 
@@ -315,12 +315,12 @@ namespace System.Net
         {
             get
             {
-                return m_path;
+                return _path;
             }
             set
             {
-                m_path = (value == null ? String.Empty : value);
-                m_path_implicit = false;
+                _path = (value == null ? String.Empty : value);
+                _path_implicit = false;
             }
         }
 
@@ -328,12 +328,12 @@ namespace System.Net
         {
             get
             {
-                return (Plain || m_path_implicit || (m_path.Length == 0))
+                return (Plain || _path_implicit || (_path.Length == 0))
                     ? string.Empty
                     : (SpecialAttributeLiteral
                        + PathAttributeName
                        + EqualsLiteral
-                       + m_path
+                       + _path
                        );
             }
         }
@@ -348,37 +348,37 @@ namespace System.Net
 
         internal Cookie Clone()
         {
-            Cookie clonedCookie = new Cookie(m_name, m_value);
+            Cookie clonedCookie = new Cookie(_name, _value);
 
             //
             // Copy over all the properties from the original cookie
             //
-            if (!m_port_implicit)
+            if (!_port_implicit)
             {
-                clonedCookie.Port = m_port;
+                clonedCookie.Port = _port;
             }
-            if (!m_path_implicit)
+            if (!_path_implicit)
             {
-                clonedCookie.Path = m_path;
+                clonedCookie.Path = _path;
             }
-            clonedCookie.Domain = m_domain;
+            clonedCookie.Domain = _domain;
             //
             // If the domain in the original cookie was implicit, we should preserve that property
-            clonedCookie.DomainImplicit = m_domain_implicit;
-            clonedCookie.m_timeStamp = m_timeStamp;
-            clonedCookie.Comment = m_comment;
-            clonedCookie.CommentUri = m_commentUri;
-            clonedCookie.HttpOnly = m_httpOnly;
-            clonedCookie.Discard = m_discard;
-            clonedCookie.Expires = m_expires;
-            clonedCookie.Version = m_version;
-            clonedCookie.Secure = m_secure;
+            clonedCookie.DomainImplicit = _domain_implicit;
+            clonedCookie._timeStamp = _timeStamp;
+            clonedCookie.Comment = _comment;
+            clonedCookie.CommentUri = _commentUri;
+            clonedCookie.HttpOnly = _httpOnly;
+            clonedCookie.Discard = _discard;
+            clonedCookie.Expires = _expires;
+            clonedCookie.Version = _version;
+            clonedCookie.Secure = _secure;
 
             //
             // The variant is set when we set properties like port/version. So, 
             // we should copy over the variant from the original cookie after 
             // we set all other properties
-            clonedCookie.m_cookieVariant = m_cookieVariant;
+            clonedCookie._cookieVariant = _cookieVariant;
 
             return clonedCookie;
         }
@@ -429,26 +429,26 @@ namespace System.Net
                     //since we don't expose Variant to an app, set it to Default
                     variant = CookieVariant.Default;
                 }
-                m_cookieVariant = variant;
+                _cookieVariant = variant;
             }
 
             //Check the name
-            if (m_name == null || m_name.Length == 0 || m_name[0] == '$' || m_name.IndexOfAny(Reserved2Name) != -1)
+            if (_name == null || _name.Length == 0 || _name[0] == '$' || _name.IndexOfAny(Reserved2Name) != -1)
             {
                 if (isThrow)
                 {
-                    throw new CookieException(SR.Format(SR.net_cookie_attribute, "Name", m_name == null ? "<null>" : m_name));
+                    throw new CookieException(SR.Format(SR.net_cookie_attribute, "Name", _name == null ? "<null>" : _name));
                 }
                 return false;
             }
 
             //Check the value
-            if (m_value == null ||
-                (!(m_value.Length > 2 && m_value[0] == '\"' && m_value[m_value.Length - 1] == '\"') && m_value.IndexOfAny(Reserved2Value) != -1))
+            if (_value == null ||
+                (!(_value.Length > 2 && _value[0] == '\"' && _value[_value.Length - 1] == '\"') && _value.IndexOfAny(Reserved2Value) != -1))
             {
                 if (isThrow)
                 {
-                    throw new CookieException(SR.Format(SR.net_cookie_attribute, "Value", m_value == null ? "<null>" : m_value));
+                    throw new CookieException(SR.Format(SR.net_cookie_attribute, "Value", _value == null ? "<null>" : _value));
                 }
                 return false;
             }
@@ -475,13 +475,13 @@ namespace System.Net
 
             //Check/set domain
             // if domain is implicit => assume a) uri is valid, b) just set domain to uri hostname
-            if (set_default && m_domain_implicit == true)
+            if (set_default && _domain_implicit == true)
             {
-                m_domain = host;
+                _domain = host;
             }
             else
             {
-                if (!m_domain_implicit)
+                if (!_domain_implicit)
                 {
                     // Forwarding note: If Uri.Host is of IP address form then the only supported case
                     // is for IMPLICIT domain property of a cookie.
@@ -489,7 +489,7 @@ namespace System.Net
                     // as a fqdn and reject the cookie
 
                     //aliasing since we might need the KeyValue (but not the original one)
-                    string domain = m_domain;
+                    string domain = _domain;
 
                     //Syntax check for Domain charset plus empty string
                     if (!DomainCharsTest(domain))
@@ -508,7 +508,7 @@ namespace System.Net
                         {
                             if (isThrow)
                             {
-                                throw new CookieException(SR.Format(SR.net_cookie_attribute, DomainAttributeName, m_domain));
+                                throw new CookieException(SR.Format(SR.net_cookie_attribute, DomainAttributeName, _domain));
                             }
                             return false;
                         }
@@ -559,14 +559,14 @@ namespace System.Net
 
                     if (valid)
                     {
-                        m_domainKey = domain.ToLowerInvariant();
+                        _domainKey = domain.ToLowerInvariant();
                     }
                 }
                 else
                 {
                     // for implicitly set domain AND at the set_default==false time
                     // we simply got to match uri.Host against m_domain
-                    if (string.Compare(host, m_domain, StringComparison.OrdinalIgnoreCase) != 0)
+                    if (string.Compare(host, _domain, StringComparison.OrdinalIgnoreCase) != 0)
                     {
                         valid = false;
                     }
@@ -575,7 +575,7 @@ namespace System.Net
                 {
                     if (isThrow)
                     {
-                        throw new CookieException(SR.Format(SR.net_cookie_attribute, DomainAttributeName, m_domain));
+                        throw new CookieException(SR.Format(SR.net_cookie_attribute, DomainAttributeName, _domain));
                     }
                     return false;
                 }
@@ -584,48 +584,48 @@ namespace System.Net
 
             //Check/Set Path
 
-            if (set_default && m_path_implicit == true)
+            if (set_default && _path_implicit == true)
             {
                 //assuming that uri path is always valid and contains at least one '/'
-                switch (m_cookieVariant)
+                switch (_cookieVariant)
                 {
                     case CookieVariant.Plain:
-                        m_path = path;
+                        _path = path;
                         break;
                     case CookieVariant.Rfc2109:
-                        m_path = path.Substring(0, path.LastIndexOf('/')); //may be empty
+                        _path = path.Substring(0, path.LastIndexOf('/')); //may be empty
                         break;
 
                     case CookieVariant.Rfc2965:
                     default:                //hope future versions will have same 'Path' semantic?
-                        m_path = path.Substring(0, path.LastIndexOf('/') + 1);
+                        _path = path.Substring(0, path.LastIndexOf('/') + 1);
                         break;
                 }
             }
             else
             {
                 //check current path (implicit/explicit) against given uri
-                if (!path.StartsWith(CookieParser.CheckQuoted(m_path)))
+                if (!path.StartsWith(CookieParser.CheckQuoted(_path)))
                 {
                     if (isThrow)
                     {
-                        throw new CookieException(SR.Format(SR.net_cookie_attribute, PathAttributeName, m_path));
+                        throw new CookieException(SR.Format(SR.net_cookie_attribute, PathAttributeName, _path));
                     }
                     return false;
                 }
             }
 
             // set the default port if Port attribute was present but had no value
-            if (set_default && (m_port_implicit == false && m_port.Length == 0))
+            if (set_default && (_port_implicit == false && _port.Length == 0))
             {
-                m_port_list = new int[1] { port };
+                _port_list = new int[1] { port };
             }
 
-            if (m_port_implicit == false)
+            if (_port_implicit == false)
             {
                 // Port must match agaist the one from the uri
                 valid = false;
-                foreach (int p in m_port_list)
+                foreach (int p in _port_list)
                 {
                     if (p == port)
                     {
@@ -637,7 +637,7 @@ namespace System.Net
                 {
                     if (isThrow)
                     {
-                        throw new CookieException(SR.Format(SR.net_cookie_attribute, PortAttributeName, m_port));
+                        throw new CookieException(SR.Format(SR.net_cookie_attribute, PortAttributeName, _port));
                     }
                     return false;
                 }
@@ -675,15 +675,15 @@ namespace System.Net
         {
             get
             {
-                return m_port;
+                return _port;
             }
             set
             {
-                m_port_implicit = false;
+                _port_implicit = false;
                 if ((value == null || value.Length == 0))
                 {
                     //"Port" is present but has no value.
-                    m_port = string.Empty;
+                    _port = string.Empty;
                 }
                 else
                 {
@@ -710,10 +710,10 @@ namespace System.Net
                             portList.Add(port);
                         }
                     }
-                    m_port_list = portList.ToArray();
-                    m_port = value;
-                    m_version = MaxSupportedVersion;
-                    m_cookieVariant = CookieVariant.Rfc2965;
+                    _port_list = portList.ToArray();
+                    _port = value;
+                    _version = MaxSupportedVersion;
+                    _cookieVariant = CookieVariant.Rfc2965;
                 }
             }
         }
@@ -724,7 +724,7 @@ namespace System.Net
             get
             {
                 //It must be null if Port Attribute was ommitted in the response
-                return m_port_list;
+                return _port_list;
             }
         }
 
@@ -732,10 +732,10 @@ namespace System.Net
         {
             get
             {
-                return m_port_implicit ? string.Empty :
+                return _port_implicit ? string.Empty :
                       (SpecialAttributeLiteral
                        + PortAttributeName
-                       + ((m_port.Length == 0) ? string.Empty : (EqualsLiteral + m_port))
+                       + ((_port.Length == 0) ? string.Empty : (EqualsLiteral + _port))
                        );
             }
         }
@@ -747,11 +747,11 @@ namespace System.Net
         {
             get
             {
-                return m_secure;
+                return _secure;
             }
             set
             {
-                m_secure = value;
+                _secure = value;
             }
         }
 
@@ -762,7 +762,7 @@ namespace System.Net
         {
             get
             {
-                return m_timeStamp;
+                return _timeStamp;
             }
         }
 
@@ -773,11 +773,11 @@ namespace System.Net
         {
             get
             {
-                return m_value;
+                return _value;
             }
             set
             {
-                m_value = (value == null ? String.Empty : value);
+                _value = (value == null ? String.Empty : value);
             }
         }
 
@@ -785,7 +785,7 @@ namespace System.Net
         {
             get
             {
-                return m_cookieVariant;
+                return _cookieVariant;
             }
             set
             {
@@ -793,7 +793,7 @@ namespace System.Net
 #if !NETNative_SystemNetHttp
                 GlobalLog.Assert(value == CookieVariant.Rfc2965, "Cookie#{0}::set_Variant()|value:{1}", Logging.HashString(this), value);
 #endif
-                m_cookieVariant = value;
+                _cookieVariant = value;
             }
         }
 
@@ -804,7 +804,7 @@ namespace System.Net
         {
             get
             {
-                return m_domain_implicit ? Domain : m_domainKey;
+                return _domain_implicit ? Domain : _domainKey;
             }
         }
 
@@ -817,7 +817,7 @@ namespace System.Net
         {
             get
             {
-                return m_version;
+                return _version;
             }
             set
             {
@@ -825,10 +825,10 @@ namespace System.Net
                 {
                     throw new ArgumentOutOfRangeException("value");
                 }
-                m_version = value;
-                if (value > 0 && m_cookieVariant < CookieVariant.Rfc2109)
+                _version = value;
+                if (value > 0 && _cookieVariant < CookieVariant.Rfc2109)
                 {
-                    m_cookieVariant = CookieVariant.Rfc2109;
+                    _cookieVariant = CookieVariant.Rfc2109;
                 }
             }
         }
@@ -841,7 +841,7 @@ namespace System.Net
                                        (SpecialAttributeLiteral
                                        + VersionAttributeName
                                        + EqualsLiteral + (IsQuotedVersion ? "\"" : string.Empty)
-                                       + m_version.ToString(NumberFormatInfo.InvariantInfo) + (IsQuotedVersion ? "\"" : string.Empty));
+                                       + _version.ToString(NumberFormatInfo.InvariantInfo) + (IsQuotedVersion ? "\"" : string.Empty));
             }
         }
 
@@ -851,7 +851,7 @@ namespace System.Net
         internal static IComparer GetComparer()
         {
             //the class don't have any members, it's safe reuse the instance
-            return staticComparer;
+            return s_staticComparer;
         }
 
 
@@ -918,21 +918,21 @@ namespace System.Net
         internal string ToServerString()
         {
             string result = Name + EqualsLiteral + Value;
-            if (m_comment != null && m_comment.Length > 0)
+            if (_comment != null && _comment.Length > 0)
             {
-                result += SeparatorLiteral + CommentAttributeName + EqualsLiteral + m_comment;
+                result += SeparatorLiteral + CommentAttributeName + EqualsLiteral + _comment;
             }
-            if (m_commentUri != null)
+            if (_commentUri != null)
             {
-                result += SeparatorLiteral + CommentUrlAttributeName + EqualsLiteral + QuotesLiteral + m_commentUri.ToString() + QuotesLiteral;
+                result += SeparatorLiteral + CommentUrlAttributeName + EqualsLiteral + QuotesLiteral + _commentUri.ToString() + QuotesLiteral;
             }
-            if (m_discard)
+            if (_discard)
             {
                 result += SeparatorLiteral + DiscardAttributeName;
             }
-            if (!m_domain_implicit && m_domain != null && m_domain.Length > 0)
+            if (!_domain_implicit && _domain != null && _domain.Length > 0)
             {
-                result += SeparatorLiteral + DomainAttributeName + EqualsLiteral + m_domain;
+                result += SeparatorLiteral + DomainAttributeName + EqualsLiteral + _domain;
             }
             if (Expires != DateTime.MinValue)
             {
@@ -945,18 +945,18 @@ namespace System.Net
                 }
                 result += SeparatorLiteral + MaxAgeAttributeName + EqualsLiteral + seconds.ToString(NumberFormatInfo.InvariantInfo);
             }
-            if (!m_path_implicit && m_path != null && m_path.Length > 0)
+            if (!_path_implicit && _path != null && _path.Length > 0)
             {
-                result += SeparatorLiteral + PathAttributeName + EqualsLiteral + m_path;
+                result += SeparatorLiteral + PathAttributeName + EqualsLiteral + _path;
             }
-            if (!Plain && !m_port_implicit && m_port != null && m_port.Length > 0)
+            if (!Plain && !_port_implicit && _port != null && _port.Length > 0)
             {
                 // QuotesLiteral are included in m_port
-                result += SeparatorLiteral + PortAttributeName + EqualsLiteral + m_port;
+                result += SeparatorLiteral + PortAttributeName + EqualsLiteral + _port;
             }
-            if (m_version > 0)
+            if (_version > 0)
             {
-                result += SeparatorLiteral + VersionAttributeName + EqualsLiteral + m_version.ToString(NumberFormatInfo.InvariantInfo);
+                result += SeparatorLiteral + VersionAttributeName + EqualsLiteral + _version.ToString(NumberFormatInfo.InvariantInfo);
             }
             return result == EqualsLiteral ? null : result;
         }
@@ -1039,25 +1039,25 @@ namespace System.Net
     {
         // fields
 
-        bool m_eofCookie;
-        int m_index;
-        int m_length;
-        string m_name;
-        bool m_quoted;
-        int m_start;
-        CookieToken m_token;
-        int m_tokenLength;
-        string m_tokenStream;
-        string m_value;
-        int m_cookieStartIndex;
-        int m_cookieLength;
+        private bool _eofCookie;
+        private int _index;
+        private int _length;
+        private string _name;
+        private bool _quoted;
+        private int _start;
+        private CookieToken _token;
+        private int _tokenLength;
+        private string _tokenStream;
+        private string _value;
+        private int _cookieStartIndex;
+        private int _cookieLength;
 
         // constructors
 
         internal CookieTokenizer(string tokenStream)
         {
-            m_length = tokenStream.Length;
-            m_tokenStream = tokenStream;
+            _length = tokenStream.Length;
+            _tokenStream = tokenStream;
         }
 
         // properties
@@ -1066,11 +1066,11 @@ namespace System.Net
         {
             get
             {
-                return m_eofCookie;
+                return _eofCookie;
             }
             set
             {
-                m_eofCookie = value;
+                _eofCookie = value;
             }
         }
 
@@ -1078,7 +1078,7 @@ namespace System.Net
         {
             get
             {
-                return m_index >= m_length;
+                return _index >= _length;
             }
         }
 
@@ -1086,11 +1086,11 @@ namespace System.Net
         {
             get
             {
-                return m_name;
+                return _name;
             }
             set
             {
-                m_name = value;
+                _name = value;
             }
         }
 
@@ -1098,11 +1098,11 @@ namespace System.Net
         {
             get
             {
-                return m_quoted;
+                return _quoted;
             }
             set
             {
-                m_quoted = value;
+                _quoted = value;
             }
         }
 
@@ -1110,11 +1110,11 @@ namespace System.Net
         {
             get
             {
-                return m_token;
+                return _token;
             }
             set
             {
-                m_token = value;
+                _token = value;
             }
         }
 
@@ -1122,11 +1122,11 @@ namespace System.Net
         {
             get
             {
-                return m_value;
+                return _value;
             }
             set
             {
-                m_value = value;
+                _value = value;
             }
         }
 
@@ -1137,10 +1137,10 @@ namespace System.Net
         //
         //  Gets the full string of the cookie
         //
-        
+
         internal string GetCookieString()
         {
-            return m_tokenStream.Substring(m_cookieStartIndex, m_cookieLength).Trim();
+            return _tokenStream.Substring(_cookieStartIndex, _cookieLength).Trim();
         }
 
         //
@@ -1153,9 +1153,9 @@ namespace System.Net
         {
             string tokenString = string.Empty;
 
-            if (m_tokenLength != 0)
+            if (_tokenLength != 0)
             {
-                tokenString = m_tokenStream.Substring(m_start, m_tokenLength);
+                tokenString = _tokenStream.Substring(_start, _tokenLength);
                 if (!Quoted)
                 {
                     tokenString = tokenString.Trim();
@@ -1219,12 +1219,12 @@ namespace System.Net
 
         internal CookieToken FindNext(bool ignoreComma, bool ignoreEquals)
         {
-            m_tokenLength = 0;
-            m_start = m_index;
-            while ((m_index < m_length) && Char.IsWhiteSpace(m_tokenStream[m_index]))
+            _tokenLength = 0;
+            _start = _index;
+            while ((_index < _length) && Char.IsWhiteSpace(_tokenStream[_index]))
             {
-                ++m_index;
-                ++m_start;
+                ++_index;
+                ++_start;
             }
 
             CookieToken token = CookieToken.End;
@@ -1232,52 +1232,52 @@ namespace System.Net
 
             if (!Eof)
             {
-                if (m_tokenStream[m_index] == '"')
+                if (_tokenStream[_index] == '"')
                 {
                     Quoted = true;
-                    ++m_index;
+                    ++_index;
                     bool quoteOn = false;
-                    while (m_index < m_length)
+                    while (_index < _length)
                     {
-                        char currChar = m_tokenStream[m_index];
+                        char currChar = _tokenStream[_index];
                         if (!quoteOn && currChar == '"')
                             break;
                         if (quoteOn)
                             quoteOn = false;
                         else if (currChar == '\\')
                             quoteOn = true;
-                        ++m_index;
+                        ++_index;
                     }
-                    if (m_index < m_length)
+                    if (_index < _length)
                     {
-                        ++m_index;
+                        ++_index;
                     }
-                    m_tokenLength = m_index - m_start;
+                    _tokenLength = _index - _start;
                     increment = 0;
                     // if we are here, reset ignoreComma
                     // In effect, we ignore everything after quoted string till next delimiter
                     ignoreComma = false;
                 }
-                while ((m_index < m_length)
-                       && (m_tokenStream[m_index] != ';')
-                       && (ignoreEquals || (m_tokenStream[m_index] != '='))
-                       && (ignoreComma || (m_tokenStream[m_index] != ',')))
+                while ((_index < _length)
+                       && (_tokenStream[_index] != ';')
+                       && (ignoreEquals || (_tokenStream[_index] != '='))
+                       && (ignoreComma || (_tokenStream[_index] != ',')))
                 {
                     // Fixing 2 things:
                     // 1) ignore day of week in cookie string
                     // 2) revert ignoreComma once meet it, so won't miss the next cookie)
-                    if (m_tokenStream[m_index] == ',')
+                    if (_tokenStream[_index] == ',')
                     {
-                        m_start = m_index + 1;
-                        m_tokenLength = -1;
+                        _start = _index + 1;
+                        _tokenLength = -1;
                         ignoreComma = false;
                     }
-                    ++m_index;
-                    m_tokenLength += increment;
+                    ++_index;
+                    _tokenLength += increment;
                 }
                 if (!Eof)
                 {
-                    switch (m_tokenStream[m_index])
+                    switch (_tokenStream[_index])
                     {
                         case ';':
                             token = CookieToken.EndToken;
@@ -1288,15 +1288,15 @@ namespace System.Net
                             break;
 
                         default:
-                            m_cookieLength = m_index - m_cookieStartIndex;
+                            _cookieLength = _index - _cookieStartIndex;
                             token = CookieToken.EndCookie;
                             break;
                     }
-                    ++m_index;
+                    ++_index;
                 }
                 else
                 {
-                    m_cookieLength = m_index - m_cookieStartIndex;
+                    _cookieLength = _index - _cookieStartIndex;
                 }
             }
             return token;
@@ -1392,8 +1392,8 @@ namespace System.Net
 
             if (first)
             {
-                m_cookieStartIndex = m_index;
-                m_cookieLength = 0;
+                _cookieStartIndex = _index;
+                _cookieLength = 0;
             }
 
             CookieToken terminator = FindNext(false, false);
@@ -1445,37 +1445,37 @@ namespace System.Net
 
         internal void Reset()
         {
-            m_eofCookie = false;
-            m_name = string.Empty;
-            m_quoted = false;
-            m_start = m_index;
-            m_token = CookieToken.Nothing;
-            m_tokenLength = 0;
-            m_value = string.Empty;
+            _eofCookie = false;
+            _name = string.Empty;
+            _quoted = false;
+            _start = _index;
+            _token = CookieToken.Nothing;
+            _tokenLength = 0;
+            _value = string.Empty;
         }
 
         private struct RecognizedAttribute
         {
-            string m_name;
-            CookieToken m_token;
+            private string _name;
+            private CookieToken _token;
 
             internal RecognizedAttribute(string name, CookieToken token)
             {
-                m_name = name;
-                m_token = token;
+                _name = name;
+                _token = token;
             }
 
             internal CookieToken Token
             {
                 get
                 {
-                    return m_token;
+                    return _token;
                 }
             }
 
             internal bool IsEqualTo(string value)
             {
-                return string.Compare(m_name, value, StringComparison.OrdinalIgnoreCase) == 0;
+                return string.Compare(_name, value, StringComparison.OrdinalIgnoreCase) == 0;
             }
         }
 
@@ -1483,7 +1483,7 @@ namespace System.Net
         // recognized attributes in order of expected commonality
         //
 
-        static RecognizedAttribute[] RecognizedAttributes = {
+        private static RecognizedAttribute[] s_recognizedAttributes = {
             new RecognizedAttribute(Cookie.PathAttributeName, CookieToken.Path),
             new RecognizedAttribute(Cookie.MaxAgeAttributeName, CookieToken.MaxAge),
             new RecognizedAttribute(Cookie.ExpiresAttributeName, CookieToken.Expires),
@@ -1497,7 +1497,7 @@ namespace System.Net
             new RecognizedAttribute(Cookie.HttpOnlyAttributeName, CookieToken.HttpOnly),
         };
 
-        static RecognizedAttribute[] RecognizedServerAttributes = {
+        private static RecognizedAttribute[] s_recognizedServerAttributes = {
             new RecognizedAttribute('$' + Cookie.PathAttributeName, CookieToken.Path),
             new RecognizedAttribute('$' + Cookie.VersionAttributeName, CookieToken.Version),
             new RecognizedAttribute('$' + Cookie.DomainAttributeName, CookieToken.Domain),
@@ -1509,21 +1509,21 @@ namespace System.Net
         {
             if (!parseResponseCookies)
             {
-                for (int i = 0; i < RecognizedServerAttributes.Length; ++i)
+                for (int i = 0; i < s_recognizedServerAttributes.Length; ++i)
                 {
-                    if (RecognizedServerAttributes[i].IsEqualTo(Name))
+                    if (s_recognizedServerAttributes[i].IsEqualTo(Name))
                     {
-                        return RecognizedServerAttributes[i].Token;
+                        return s_recognizedServerAttributes[i].Token;
                     }
                 }
             }
             else
             {
-                for (int i = 0; i < RecognizedAttributes.Length; ++i)
+                for (int i = 0; i < s_recognizedAttributes.Length; ++i)
                 {
-                    if (RecognizedAttributes[i].IsEqualTo(Name))
+                    if (s_recognizedAttributes[i].IsEqualTo(Name))
                     {
-                        return RecognizedAttributes[i].Token;
+                        return s_recognizedAttributes[i].Token;
                     }
                 }
             }
@@ -1541,14 +1541,14 @@ namespace System.Net
     {
         // fields
 
-        CookieTokenizer m_tokenizer;
-        Cookie m_savedCookie;
+        private CookieTokenizer _tokenizer;
+        private Cookie _savedCookie;
 
         // constructors
 
         internal CookieParser(string cookieString)
         {
-            m_tokenizer = new CookieTokenizer(cookieString);
+            _tokenizer = new CookieTokenizer(cookieString);
         }
 
         // properties
@@ -1573,20 +1573,22 @@ namespace System.Net
         //  Nothing
         //
 
-        internal string GetString() {
+        internal string GetString()
+        {
             bool first = true;
 
-            if (m_tokenizer.Eof)
+            if (_tokenizer.Eof)
             {
                 return null;
             }
 
-            do {
-                m_tokenizer.Next(first, true);
+            do
+            {
+                _tokenizer.Next(first, true);
                 first = false;
-            } while (!m_tokenizer.Eof && !m_tokenizer.EndOfCookie);
+            } while (!_tokenizer.Eof && !_tokenizer.EndOfCookie);
 
-            return m_tokenizer.GetCookieString();
+            return _tokenizer.GetCookieString();
         }
 
         //
@@ -1627,29 +1629,29 @@ namespace System.Net
 
             do
             {
-                CookieToken token = m_tokenizer.Next(cookie == null, true);
+                CookieToken token = _tokenizer.Next(cookie == null, true);
                 if (cookie == null && (token == CookieToken.NameValuePair || token == CookieToken.Attribute))
                 {
                     cookie = new Cookie();
-                    if (cookie.InternalSetName(m_tokenizer.Name) == false)
+                    if (cookie.InternalSetName(_tokenizer.Name) == false)
                     {
                         //will be rejected
                         cookie.InternalSetName(string.Empty);
                     }
-                    cookie.Value = m_tokenizer.Value;
+                    cookie.Value = _tokenizer.Value;
                 }
                 else
                 {
                     switch (token)
                     {
                         case CookieToken.NameValuePair:
-                            switch (m_tokenizer.Token)
+                            switch (_tokenizer.Token)
                             {
                                 case CookieToken.Comment:
                                     if (!commentSet)
                                     {
                                         commentSet = true;
-                                        cookie.Comment = m_tokenizer.Value;
+                                        cookie.Comment = _tokenizer.Value;
                                     }
                                     break;
 
@@ -1658,7 +1660,7 @@ namespace System.Net
                                     {
                                         commentUriSet = true;
                                         Uri parsed;
-                                        if (Uri.TryCreate(CheckQuoted(m_tokenizer.Value), UriKind.Absolute, out parsed))
+                                        if (Uri.TryCreate(CheckQuoted(_tokenizer.Value), UriKind.Absolute, out parsed))
                                         {
                                             cookie.CommentUri = parsed;
                                         }
@@ -1669,8 +1671,8 @@ namespace System.Net
                                     if (!domainSet)
                                     {
                                         domainSet = true;
-                                        cookie.Domain = CheckQuoted(m_tokenizer.Value);
-                                        cookie.IsQuotedDomain = m_tokenizer.Quoted;
+                                        cookie.Domain = CheckQuoted(_tokenizer.Value);
+                                        cookie.IsQuotedDomain = _tokenizer.Quoted;
                                     }
                                     break;
 
@@ -1680,7 +1682,7 @@ namespace System.Net
                                         expiresSet = true;
 
                                         DateTime expires;
-                                        if (DateTime.TryParse(CheckQuoted(m_tokenizer.Value),
+                                        if (DateTime.TryParse(CheckQuoted(_tokenizer.Value),
                                             CultureInfo.InvariantCulture, DateTimeStyles.AllowWhiteSpaces, out expires))
                                         {
                                             cookie.Expires = expires;
@@ -1698,7 +1700,7 @@ namespace System.Net
                                     {
                                         expiresSet = true;
                                         int parsed;
-                                        if (int.TryParse(CheckQuoted(m_tokenizer.Value), out parsed))
+                                        if (int.TryParse(CheckQuoted(_tokenizer.Value), out parsed))
                                         {
                                             cookie.Expires = DateTime.Now.AddSeconds((double)parsed);
                                         }
@@ -1714,7 +1716,7 @@ namespace System.Net
                                     if (!pathSet)
                                     {
                                         pathSet = true;
-                                        cookie.Path = m_tokenizer.Value;
+                                        cookie.Path = _tokenizer.Value;
                                     }
                                     break;
 
@@ -1724,7 +1726,7 @@ namespace System.Net
                                         portSet = true;
                                         try
                                         {
-                                            cookie.Port = m_tokenizer.Value;
+                                            cookie.Port = _tokenizer.Value;
                                         }
                                         catch
                                         {
@@ -1739,10 +1741,10 @@ namespace System.Net
                                     {
                                         versionSet = true;
                                         int parsed;
-                                        if (int.TryParse(CheckQuoted(m_tokenizer.Value), out parsed))
+                                        if (int.TryParse(CheckQuoted(_tokenizer.Value), out parsed))
                                         {
                                             cookie.Version = parsed;
-                                            cookie.IsQuotedVersion = m_tokenizer.Quoted;
+                                            cookie.IsQuotedVersion = _tokenizer.Quoted;
                                         }
                                         else
                                         {
@@ -1755,7 +1757,7 @@ namespace System.Net
                             break;
 
                         case CookieToken.Attribute:
-                            switch (m_tokenizer.Token)
+                            switch (_tokenizer.Token)
                             {
                                 case CookieToken.Discard:
                                     if (!discardSet)
@@ -1788,7 +1790,7 @@ namespace System.Net
                             break;
                     }
                 }
-            } while (!m_tokenizer.Eof && !m_tokenizer.EndOfCookie);
+            } while (!_tokenizer.Eof && !_tokenizer.EndOfCookie);
             return cookie;
         }
 
@@ -1796,8 +1798,8 @@ namespace System.Net
         // a different method
         internal Cookie GetServer()
         {
-            Cookie cookie = m_savedCookie;
-            m_savedCookie = null;
+            Cookie cookie = _savedCookie;
+            _savedCookie = null;
 
             // only first ocurence of an attribute value must be counted
             bool domainSet = false;
@@ -1807,7 +1809,7 @@ namespace System.Net
             do
             {
                 bool first = cookie == null || cookie.Name == null || cookie.Name.Length == 0;
-                CookieToken token = m_tokenizer.Next(first, false);
+                CookieToken token = _tokenizer.Next(first, false);
 
                 if (first && (token == CookieToken.NameValuePair || token == CookieToken.Attribute))
                 {
@@ -1815,26 +1817,26 @@ namespace System.Net
                     {
                         cookie = new Cookie();
                     }
-                    if (cookie.InternalSetName(m_tokenizer.Name) == false)
+                    if (cookie.InternalSetName(_tokenizer.Name) == false)
                     {
                         //will be rejected
                         cookie.InternalSetName(string.Empty);
                     }
-                    cookie.Value = m_tokenizer.Value;
+                    cookie.Value = _tokenizer.Value;
                 }
                 else
                 {
                     switch (token)
                     {
                         case CookieToken.NameValuePair:
-                            switch (m_tokenizer.Token)
+                            switch (_tokenizer.Token)
                             {
                                 case CookieToken.Domain:
                                     if (!domainSet)
                                     {
                                         domainSet = true;
-                                        cookie.Domain = CheckQuoted(m_tokenizer.Value);
-                                        cookie.IsQuotedDomain = m_tokenizer.Quoted;
+                                        cookie.Domain = CheckQuoted(_tokenizer.Value);
+                                        cookie.IsQuotedDomain = _tokenizer.Quoted;
                                     }
                                     break;
 
@@ -1842,7 +1844,7 @@ namespace System.Net
                                     if (!pathSet)
                                     {
                                         pathSet = true;
-                                        cookie.Path = m_tokenizer.Value;
+                                        cookie.Path = _tokenizer.Value;
                                     }
                                     break;
 
@@ -1852,7 +1854,7 @@ namespace System.Net
                                         portSet = true;
                                         try
                                         {
-                                            cookie.Port = m_tokenizer.Value;
+                                            cookie.Port = _tokenizer.Value;
                                         }
                                         catch (CookieException)
                                         {
@@ -1864,29 +1866,29 @@ namespace System.Net
 
                                 case CookieToken.Version:
                                     // this is a new cookie, this token is for the next cookie.
-                                    m_savedCookie = new Cookie();
+                                    _savedCookie = new Cookie();
                                     int parsed;
-                                    if (int.TryParse(m_tokenizer.Value, out parsed))
+                                    if (int.TryParse(_tokenizer.Value, out parsed))
                                     {
-                                        m_savedCookie.Version = parsed;
+                                        _savedCookie.Version = parsed;
                                     }
                                     return cookie;
 
                                 case CookieToken.Unknown:
                                     // this is a new cookie, the token is for the next cookie.
-                                    m_savedCookie = new Cookie();
-                                    if (m_savedCookie.InternalSetName(m_tokenizer.Name) == false)
+                                    _savedCookie = new Cookie();
+                                    if (_savedCookie.InternalSetName(_tokenizer.Name) == false)
                                     {
                                         //will be rejected
-                                        m_savedCookie.InternalSetName(string.Empty);
+                                        _savedCookie.InternalSetName(string.Empty);
                                     }
-                                    m_savedCookie.Value = m_tokenizer.Value;
+                                    _savedCookie.Value = _tokenizer.Value;
                                     return cookie;
                             }
                             break;
 
                         case CookieToken.Attribute:
-                            switch (m_tokenizer.Token)
+                            switch (_tokenizer.Token)
                             {
                                 case CookieToken.Port:
                                     if (!portSet)
@@ -1899,7 +1901,7 @@ namespace System.Net
                             break;
                     }
                 }
-            } while (!m_tokenizer.Eof && !m_tokenizer.EndOfCookie);
+            } while (!_tokenizer.Eof && !_tokenizer.EndOfCookie);
             return cookie;
         }
 

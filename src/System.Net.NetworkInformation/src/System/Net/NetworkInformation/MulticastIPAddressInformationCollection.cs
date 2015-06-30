@@ -8,7 +8,7 @@ namespace System.Net.NetworkInformation
 {
     public class MulticastIPAddressInformationCollection : ICollection<MulticastIPAddressInformation>
     {
-        Collection<MulticastIPAddressInformation> addresses = new Collection<MulticastIPAddressInformation>();
+        private Collection<MulticastIPAddressInformation> _addresses = new Collection<MulticastIPAddressInformation>();
 
         protected internal MulticastIPAddressInformationCollection()
         {
@@ -17,7 +17,7 @@ namespace System.Net.NetworkInformation
         /// <include file='doc\HttpListenerPrefixCollection.uex' path='docs/doc[@for="HttpListenerPrefixCollection.CopyTo"]/*' />
         public virtual void CopyTo(MulticastIPAddressInformation[] array, int offset)
         {
-            addresses.CopyTo(array, offset);
+            _addresses.CopyTo(array, offset);
         }
 
 
@@ -26,7 +26,7 @@ namespace System.Net.NetworkInformation
         {
             get
             {
-                return addresses.Count;
+                return _addresses.Count;
             }
         }
 
@@ -49,14 +49,14 @@ namespace System.Net.NetworkInformation
 
         internal void InternalAdd(MulticastIPAddressInformation address)
         {
-            addresses.Add(address);
+            _addresses.Add(address);
         }
 
 
         /// <include file='doc\HttpListenerPrefixCollection.uex' path='docs/doc[@for="HttpListenerPrefixCollection.Contains"]/*' />
         public virtual bool Contains(MulticastIPAddressInformation address)
         {
-            return addresses.Contains(address);
+            return _addresses.Contains(address);
         }
 
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
@@ -66,7 +66,7 @@ namespace System.Net.NetworkInformation
 
         public virtual IEnumerator<MulticastIPAddressInformation> GetEnumerator()
         {
-            return (IEnumerator<MulticastIPAddressInformation>)addresses.GetEnumerator();
+            return (IEnumerator<MulticastIPAddressInformation>)_addresses.GetEnumerator();
         }
 
 
@@ -74,7 +74,7 @@ namespace System.Net.NetworkInformation
         {
             get
             {
-                return (MulticastIPAddressInformation)addresses[index];
+                return (MulticastIPAddressInformation)_addresses[index];
             }
         }
 

@@ -1,13 +1,17 @@
 
-    /// <summary><para>
-    ///    Provides support for ip configuation information and statistics.
-    ///</para></summary>
-    ///
-namespace System.Net.NetworkInformation {
+using System.Net.Sockets;
+using System;
+// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-    using System.Net.Sockets;
-    using System;
+/// <summary><para>
+///    Provides support for ip configuation information and statistics.
+///</para></summary>
+///
 
+
+namespace System.Net.NetworkInformation
+{
     /// <summary>
     /// Provides information specific to a network
     /// interface.
@@ -17,125 +21,149 @@ namespace System.Net.NetworkInformation {
     /// than one IPAddress associated with it. We call the native GetAdaptersAddresses api to
     /// prepopulate all of the interface instances and most of their associated information.</para>
     /// </remarks>
-    internal class SystemIPInterfaceProperties:IPInterfaceProperties {
+    internal class SystemIPInterfaceProperties : IPInterfaceProperties
+    {
         //these are valid for all interfaces
-        private bool dnsEnabled = false;
-        private bool dynamicDnsEnabled = false;
-        private IPAddressCollection dnsAddresses = null;
-        private UnicastIPAddressInformationCollection unicastAddresses = null;
-        private MulticastIPAddressInformationCollection multicastAddresses = null;
-        private IPAddressInformationCollection anycastAddresses = null;
-        private AdapterFlags adapterFlags;
-        private string dnsSuffix;
-        private SystemIPv4InterfaceProperties ipv4Properties;
-        private SystemIPv6InterfaceProperties ipv6Properties;
-        private IPAddressCollection winsServersAddresses;
-        private GatewayIPAddressInformationCollection gatewayAddresses;
-        private IPAddressCollection dhcpServers;
+        private bool _dnsEnabled = false;
+        private bool _dynamicDnsEnabled = false;
+        private IPAddressCollection _dnsAddresses = null;
+        private UnicastIPAddressInformationCollection _unicastAddresses = null;
+        private MulticastIPAddressInformationCollection _multicastAddresses = null;
+        private IPAddressInformationCollection _anycastAddresses = null;
+        private AdapterFlags _adapterFlags;
+        private string _dnsSuffix;
+        private SystemIPv4InterfaceProperties _ipv4Properties;
+        private SystemIPv6InterfaceProperties _ipv6Properties;
+        private IPAddressCollection _winsServersAddresses;
+        private GatewayIPAddressInformationCollection _gatewayAddresses;
+        private IPAddressCollection _dhcpServers;
 
         // This constructor is for Vista and newer
-        internal SystemIPInterfaceProperties(FIXED_INFO fixedInfo, IpAdapterAddresses ipAdapterAddresses) {
-            adapterFlags = ipAdapterAddresses.flags;
-            dnsSuffix = ipAdapterAddresses.dnsSuffix;
-            dnsEnabled = fixedInfo.enableDns;
-            dynamicDnsEnabled = ((ipAdapterAddresses.flags & AdapterFlags.DnsEnabled) > 0);
+        internal SystemIPInterfaceProperties(FIXED_INFO fixedInfo, IpAdapterAddresses ipAdapterAddresses)
+        {
+            _adapterFlags = ipAdapterAddresses.flags;
+            _dnsSuffix = ipAdapterAddresses.dnsSuffix;
+            _dnsEnabled = fixedInfo.enableDns;
+            _dynamicDnsEnabled = ((ipAdapterAddresses.flags & AdapterFlags.DnsEnabled) > 0);
 
-            multicastAddresses = SystemMulticastIPAddressInformation.ToMulticastIpAddressInformationCollection(
+            _multicastAddresses = SystemMulticastIPAddressInformation.ToMulticastIpAddressInformationCollection(
                 IpAdapterAddress.MarshalIpAddressInformationCollection(ipAdapterAddresses.firstMulticastAddress));
-            dnsAddresses = IpAdapterAddress.MarshalIpAddressCollection(ipAdapterAddresses.firstDnsServerAddress);
-            anycastAddresses = IpAdapterAddress.MarshalIpAddressInformationCollection(
+            _dnsAddresses = IpAdapterAddress.MarshalIpAddressCollection(ipAdapterAddresses.firstDnsServerAddress);
+            _anycastAddresses = IpAdapterAddress.MarshalIpAddressInformationCollection(
                 ipAdapterAddresses.firstAnycastAddress);
-            unicastAddresses = SystemUnicastIPAddressInformation.MarshalUnicastIpAddressInformationCollection(
+            _unicastAddresses = SystemUnicastIPAddressInformation.MarshalUnicastIpAddressInformationCollection(
                 ipAdapterAddresses.firstUnicastAddress);
-            winsServersAddresses = IpAdapterAddress.MarshalIpAddressCollection(
+            _winsServersAddresses = IpAdapterAddress.MarshalIpAddressCollection(
                 ipAdapterAddresses.firstWinsServerAddress);
-            gatewayAddresses = SystemGatewayIPAddressInformation.ToGatewayIpAddressInformationCollection(
+            _gatewayAddresses = SystemGatewayIPAddressInformation.ToGatewayIpAddressInformationCollection(
                 IpAdapterAddress.MarshalIpAddressCollection(ipAdapterAddresses.firstGatewayAddress));
 
-            dhcpServers = new IPAddressCollection();
+            _dhcpServers = new IPAddressCollection();
             if (ipAdapterAddresses.dhcpv4Server.address != IntPtr.Zero)
-                dhcpServers.InternalAdd(ipAdapterAddresses.dhcpv4Server.MarshalIPAddress());
+                _dhcpServers.InternalAdd(ipAdapterAddresses.dhcpv4Server.MarshalIPAddress());
             if (ipAdapterAddresses.dhcpv6Server.address != IntPtr.Zero)
-                dhcpServers.InternalAdd(ipAdapterAddresses.dhcpv6Server.MarshalIPAddress());
+                _dhcpServers.InternalAdd(ipAdapterAddresses.dhcpv6Server.MarshalIPAddress());
 
-            if ((adapterFlags & AdapterFlags.IPv4Enabled) != 0) {
-                ipv4Properties = new SystemIPv4InterfaceProperties(fixedInfo, ipAdapterAddresses);
+            if ((_adapterFlags & AdapterFlags.IPv4Enabled) != 0)
+            {
+                _ipv4Properties = new SystemIPv4InterfaceProperties(fixedInfo, ipAdapterAddresses);
             }
 
-            if ((adapterFlags & AdapterFlags.IPv6Enabled) != 0) {
-                ipv6Properties = new SystemIPv6InterfaceProperties(ipAdapterAddresses.ipv6Index, 
+            if ((_adapterFlags & AdapterFlags.IPv6Enabled) != 0)
+            {
+                _ipv6Properties = new SystemIPv6InterfaceProperties(ipAdapterAddresses.ipv6Index,
                     ipAdapterAddresses.mtu, ipAdapterAddresses.zoneIndices);
             }
         }
 
-        public override bool IsDnsEnabled{get { return dnsEnabled;}}
+        public override bool IsDnsEnabled { get { return _dnsEnabled; } }
 
-        public override bool IsDynamicDnsEnabled{get {return dynamicDnsEnabled;}}
+        public override bool IsDynamicDnsEnabled { get { return _dynamicDnsEnabled; } }
 
-        public override IPv4InterfaceProperties GetIPv4Properties(){
-            if ((adapterFlags & AdapterFlags.IPv4Enabled) == 0) {
+        public override IPv4InterfaceProperties GetIPv4Properties()
+        {
+            if ((_adapterFlags & AdapterFlags.IPv4Enabled) == 0)
+            {
                 throw new NetworkInformationException(SocketError.ProtocolNotSupported);
             }
-            return ipv4Properties;
+            return _ipv4Properties;
         }
 
-        public override IPv6InterfaceProperties GetIPv6Properties(){
-            if ((adapterFlags & AdapterFlags.IPv6Enabled) == 0) {
+        public override IPv6InterfaceProperties GetIPv6Properties()
+        {
+            if ((_adapterFlags & AdapterFlags.IPv6Enabled) == 0)
+            {
                 throw new NetworkInformationException(SocketError.ProtocolNotSupported);
             }
-            return ipv6Properties;
+            return _ipv6Properties;
         }
 
-        public override string DnsSuffix {
-            get {
-                return dnsSuffix;
-            }
-        }
-        
-        //returns the addresses specified by the address type.
-        public override IPAddressInformationCollection AnycastAddresses{
-            get{
-                return anycastAddresses;
+        public override string DnsSuffix
+        {
+            get
+            {
+                return _dnsSuffix;
             }
         }
 
         //returns the addresses specified by the address type.
-        public override UnicastIPAddressInformationCollection UnicastAddresses{
-            get{
-                return unicastAddresses;
+        public override IPAddressInformationCollection AnycastAddresses
+        {
+            get
+            {
+                return _anycastAddresses;
             }
         }
 
         //returns the addresses specified by the address type.
-        public override MulticastIPAddressInformationCollection MulticastAddresses{
-            get{
-                return multicastAddresses;
+        public override UnicastIPAddressInformationCollection UnicastAddresses
+        {
+            get
+            {
+                return _unicastAddresses;
             }
         }
 
         //returns the addresses specified by the address type.
-        public override IPAddressCollection DnsAddresses{
-            get{
-                return dnsAddresses;
+        public override MulticastIPAddressInformationCollection MulticastAddresses
+        {
+            get
+            {
+                return _multicastAddresses;
+            }
+        }
+
+        //returns the addresses specified by the address type.
+        public override IPAddressCollection DnsAddresses
+        {
+            get
+            {
+                return _dnsAddresses;
             }
         }
 
         /// <summary>IP Address of the default gateway.</summary>
-        public override GatewayIPAddressInformationCollection GatewayAddresses{
-            get{
-                return gatewayAddresses;
-            }
-        }
-                        
-        public override IPAddressCollection DhcpServerAddresses{
-            get{
-                return dhcpServers;
+        public override GatewayIPAddressInformationCollection GatewayAddresses
+        {
+            get
+            {
+                return _gatewayAddresses;
             }
         }
 
-        public override IPAddressCollection WinsServersAddresses{
-            get{
-                return winsServersAddresses;
+        public override IPAddressCollection DhcpServerAddresses
+        {
+            get
+            {
+                return _dhcpServers;
+            }
+        }
+
+        public override IPAddressCollection WinsServersAddresses
+        {
+            get
+            {
+                return _winsServersAddresses;
             }
         }
     }

@@ -20,8 +20,8 @@ namespace System.Net.Sockets
         // internal class members
         //
 
-        private SocketAddress m_SocketAddress;
-        private SocketAddress m_SocketAddressOriginal; // needed for partial BeginReceiveFrom/EndReceiveFrom completion
+        private SocketAddress _socketAddress;
+        private SocketAddress _socketAddressOriginal; // needed for partial BeginReceiveFrom/EndReceiveFrom completion
 
         // These two are used only as alternatives
         internal WSABuffer m_SingleBuffer;
@@ -43,19 +43,19 @@ namespace System.Net.Sockets
         //
         internal IntPtr GetSocketAddressPtr()
         {
-            return Marshal.UnsafeAddrOfPinnedArrayElement(m_SocketAddress.m_Buffer, 0);
+            return Marshal.UnsafeAddrOfPinnedArrayElement(_socketAddress.m_Buffer, 0);
         }
         //
         internal IntPtr GetSocketAddressSizePtr()
         {
-            return Marshal.UnsafeAddrOfPinnedArrayElement(m_SocketAddress.m_Buffer, m_SocketAddress.GetAddressSizeOffset());
+            return Marshal.UnsafeAddrOfPinnedArrayElement(_socketAddress.m_Buffer, _socketAddress.GetAddressSizeOffset());
         }
         //
         internal SocketAddress SocketAddress
         {
             get
             {
-                return m_SocketAddress;
+                return _socketAddress;
             }
         }
         //
@@ -63,11 +63,11 @@ namespace System.Net.Sockets
         {
             get
             {
-                return m_SocketAddressOriginal;
+                return _socketAddressOriginal;
             }
             set
             {
-                m_SocketAddressOriginal = value;
+                _socketAddressOriginal = value;
             }
         }
 
@@ -84,15 +84,15 @@ namespace System.Net.Sockets
             //
             // Fill in Buffer Array structure that will be used for our send/recv Buffer
             //
-            m_SocketAddress = socketAddress;
-            if (pinSocketAddress && m_SocketAddress != null)
+            _socketAddress = socketAddress;
+            if (pinSocketAddress && _socketAddress != null)
             {
                 object[] objectsToPin = null;
                 objectsToPin = new object[2];
                 objectsToPin[0] = buffer;
 
-                m_SocketAddress.CopyAddressSizeIntoBuffer();
-                objectsToPin[1] = m_SocketAddress.m_Buffer;
+                _socketAddress.CopyAddressSizeIntoBuffer();
+                objectsToPin[1] = _socketAddress.m_Buffer;
 
                 base.SetUnmanagedStructures(objectsToPin);
             }
@@ -104,7 +104,7 @@ namespace System.Net.Sockets
             m_SingleBuffer.Length = size;
             m_SingleBuffer.Pointer = Marshal.UnsafeAddrOfPinnedArrayElement(buffer, offset);
         }
-        
+
         internal void SetUnmanagedStructures(BufferOffsetSize[] buffers)
         {
             //
@@ -173,7 +173,7 @@ namespace System.Net.Sockets
             return (int)numBytes;
         }
 
-        void LogBuffer(int size)
+        private void LogBuffer(int size)
         {
             GlobalLog.Assert(Logging.On, "OverlappedAsyncResult#{0}::LogBuffer()|Logging is off!", Logging.HashString(this));
             if (size > -1)

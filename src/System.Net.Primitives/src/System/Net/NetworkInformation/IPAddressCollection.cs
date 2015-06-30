@@ -8,7 +8,7 @@ namespace System.Net.NetworkInformation
 {
     public class IPAddressCollection : ICollection<IPAddress>
     {
-        Collection<IPAddress> addresses = new Collection<IPAddress>();
+        private Collection<IPAddress> _addresses = new Collection<IPAddress>();
 
         protected internal IPAddressCollection()
         {
@@ -17,7 +17,7 @@ namespace System.Net.NetworkInformation
         /// <include file='doc\HttpListenerPrefixCollection.uex' path='docs/doc[@for="HttpListenerPrefixCollection.CopyTo"]/*' />
         public virtual void CopyTo(IPAddress[] array, int offset)
         {
-            addresses.CopyTo(array, offset);
+            _addresses.CopyTo(array, offset);
         }
 
 
@@ -26,7 +26,7 @@ namespace System.Net.NetworkInformation
         {
             get
             {
-                return addresses.Count;
+                return _addresses.Count;
             }
         }
 
@@ -46,14 +46,14 @@ namespace System.Net.NetworkInformation
 
         internal void InternalAdd(IPAddress address)
         {
-            addresses.Add(address);
+            _addresses.Add(address);
         }
 
 
         /// <include file='doc\HttpListenerPrefixCollection.uex' path='docs/doc[@for="HttpListenerPrefixCollection.Contains"]/*' />
         public virtual bool Contains(IPAddress address)
         {
-            return addresses.Contains(address);
+            return _addresses.Contains(address);
         }
 
 
@@ -64,7 +64,7 @@ namespace System.Net.NetworkInformation
 
         public virtual IEnumerator<IPAddress> GetEnumerator()
         {
-            return (IEnumerator<IPAddress>)addresses.GetEnumerator();
+            return (IEnumerator<IPAddress>)_addresses.GetEnumerator();
         }
 
 
@@ -72,7 +72,7 @@ namespace System.Net.NetworkInformation
         {
             get
             {
-                return (IPAddress)addresses[index];
+                return (IPAddress)_addresses[index];
             }
         }
 

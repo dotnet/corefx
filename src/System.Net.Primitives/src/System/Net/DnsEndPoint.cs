@@ -7,9 +7,9 @@ namespace System.Net
 {
     public class DnsEndPoint : EndPoint
     {
-        private string m_Host;
-        private int m_Port;
-        private AddressFamily m_Family;
+        private string _host;
+        private int _port;
+        private AddressFamily _family;
 
         public DnsEndPoint(string host, int port) : this(host, port, AddressFamily.Unspecified) { }
 
@@ -37,9 +37,9 @@ namespace System.Net
                 throw new ArgumentException(SR.net_sockets_invalid_optionValue_all, "addressFamily");
             }
 
-            m_Host = host;
-            m_Port = port;
-            m_Family = addressFamily;
+            _host = host;
+            _port = port;
+            _family = addressFamily;
         }
 
         public override bool Equals(object comparand)
@@ -49,9 +49,9 @@ namespace System.Net
             if (dnsComparand == null)
                 return false;
 
-            return (m_Family == dnsComparand.m_Family &&
-                    m_Port == dnsComparand.m_Port &&
-                    m_Host == dnsComparand.m_Host);
+            return (_family == dnsComparand._family &&
+                    _port == dnsComparand._port &&
+                    _host == dnsComparand._host);
         }
 
         public override int GetHashCode()
@@ -61,14 +61,14 @@ namespace System.Net
 
         public override string ToString()
         {
-            return m_Family + "/" + m_Host + ":" + m_Port;
+            return _family + "/" + _host + ":" + _port;
         }
 
         public string Host
         {
             get
             {
-                return m_Host;
+                return _host;
             }
         }
 
@@ -76,7 +76,7 @@ namespace System.Net
         {
             get
             {
-                return m_Family;
+                return _family;
             }
         }
 
@@ -84,7 +84,7 @@ namespace System.Net
         {
             get
             {
-                return m_Port;
+                return _port;
             }
         }
     }

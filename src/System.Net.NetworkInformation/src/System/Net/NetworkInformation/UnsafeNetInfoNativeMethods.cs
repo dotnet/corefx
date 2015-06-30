@@ -1,68 +1,77 @@
 
-namespace System.Net.NetworkInformation {
-    using System;
-    using System.Net;
-    using System.Net.Sockets;
-    using System.Runtime.InteropServices;
-    using Microsoft.Win32.SafeHandles;
 
+using System;
+using System.Net;
+using System.Net.Sockets;
+using System.Runtime.InteropServices;
+using Microsoft.Win32.SafeHandles;
+// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+namespace System.Net.NetworkInformation
+{
     //
     // Per-adapter Flags
     //
 
     [Flags]
-    internal enum AdapterFlags {
-        DnsEnabled=               0x01,
-        RegisterAdapterSuffix=    0x02,
-        DhcpEnabled =                0x04,
-        ReceiveOnly =               0x08,
-        NoMulticast=               0x10,
-        Ipv6OtherStatefulConfig= 0x20,
+    internal enum AdapterFlags
+    {
+        DnsEnabled = 0x01,
+        RegisterAdapterSuffix = 0x02,
+        DhcpEnabled = 0x04,
+        ReceiveOnly = 0x08,
+        NoMulticast = 0x10,
+        Ipv6OtherStatefulConfig = 0x20,
         // Vista+
-        NetBiosOverTcp =        0x40,
-        IPv4Enabled =           0x80,
-        IPv6Enabled =           0x100,
+        NetBiosOverTcp = 0x40,
+        IPv4Enabled = 0x80,
+        IPv6Enabled = 0x100,
         IPv6ManagedAddressConfigurationSupported = 0x200,
     };
 
     [Flags]
-    internal enum AdapterAddressFlags{
+    internal enum AdapterAddressFlags
+    {
         DnsEligible = 0x1,
         Transient = 0x2
     }
-    internal enum OldOperationalStatus{
-        NonOperational      =0,
-        Unreachable          =1,
-        Disconnected         =2,
-        Connecting           =3,
-        Connected            =4,
-        Operational          =5
+    internal enum OldOperationalStatus
+    {
+        NonOperational = 0,
+        Unreachable = 1,
+        Disconnected = 2,
+        Connecting = 3,
+        Connected = 4,
+        Operational = 5
     }
 
     [Flags]
     internal enum GetAdaptersAddressesFlags
     {
-        SkipUnicast                 = 0x0001,
-        SkipAnycast                 = 0x0002,
-        SkipMulticast               = 0x0004,
-        SkipDnsServer               = 0x0008,
-        IncludePrefix               = 0x0010,
-        SkipFriendlyName            = 0x0020,
-        IncludeWins                 = 0x0040,
-        IncludeGateways             = 0x0080,
-        IncludeAllInterfaces        = 0x0100,
-        IncludeAllCompartments      = 0x0200,
-        IncludeTunnelBindingOrder   = 0x0400,
+        SkipUnicast = 0x0001,
+        SkipAnycast = 0x0002,
+        SkipMulticast = 0x0004,
+        SkipDnsServer = 0x0008,
+        IncludePrefix = 0x0010,
+        SkipFriendlyName = 0x0020,
+        IncludeWins = 0x0040,
+        IncludeGateways = 0x0080,
+        IncludeAllInterfaces = 0x0100,
+        IncludeAllCompartments = 0x0200,
+        IncludeTunnelBindingOrder = 0x0400,
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    internal struct IpSocketAddress {
+    internal struct IpSocketAddress
+    {
         internal IntPtr address;
         internal int addressLength;
 
-        internal IPAddress MarshalIPAddress() {
+        internal IPAddress MarshalIPAddress()
+        {
             // Determine the address family used to create the IPAddress
-            AddressFamily family = (addressLength > SocketAddress.IPv4AddressSize) 
+            AddressFamily family = (addressLength > SocketAddress.IPv4AddressSize)
                 ? AddressFamily.InterNetworkV6 : AddressFamily.InterNetwork;
             SocketAddress sockAddress = new SocketAddress(family, addressLength);
             Marshal.Copy(address, sockAddress.m_Buffer, 0, addressLength);
@@ -77,16 +86,19 @@ namespace System.Net.NetworkInformation {
     // IP_ADAPTER_WINS_SERVER_ADDRESS
     // IP_ADAPTER_GATEWAY_ADDRESS
     [StructLayout(LayoutKind.Sequential)]
-    internal struct IpAdapterAddress {
+    internal struct IpAdapterAddress
+    {
         internal uint length;
         internal AdapterAddressFlags flags;
         internal IntPtr next;
         internal IpSocketAddress address;
 
-        internal static IPAddressCollection MarshalIpAddressCollection(IntPtr ptr) {
+        internal static IPAddressCollection MarshalIpAddressCollection(IntPtr ptr)
+        {
             IPAddressCollection addressList = new IPAddressCollection();
 
-            while (ptr != IntPtr.Zero) {
+            while (ptr != IntPtr.Zero)
+            {
                 IpAdapterAddress addressStructure = Marshal.PtrToStructure<IpAdapterAddress>(ptr);
                 IPAddress address = addressStructure.address.MarshalIPAddress();
                 addressList.InternalAdd(address);
@@ -95,11 +107,13 @@ namespace System.Net.NetworkInformation {
 
             return addressList;
         }
-        
-        internal static IPAddressInformationCollection MarshalIpAddressInformationCollection(IntPtr ptr) {
+
+        internal static IPAddressInformationCollection MarshalIpAddressInformationCollection(IntPtr ptr)
+        {
             IPAddressInformationCollection addressList = new IPAddressInformationCollection();
 
-            while (ptr != IntPtr.Zero) {
+            while (ptr != IntPtr.Zero)
+            {
                 IpAdapterAddress addressStructure = Marshal.PtrToStructure<IpAdapterAddress>(ptr);
                 IPAddress address = addressStructure.address.MarshalIPAddress();
                 addressList.InternalAdd(new SystemIPAddressInformation(address, addressStructure.flags));
@@ -113,7 +127,8 @@ namespace System.Net.NetworkInformation {
 
     // Vista+
     [StructLayout(LayoutKind.Sequential)]
-    internal struct IpAdapterUnicastAddress {
+    internal struct IpAdapterUnicastAddress
+    {
         internal uint length;
         internal AdapterAddressFlags flags;
         internal IntPtr next;
@@ -128,7 +143,8 @@ namespace System.Net.NetworkInformation {
     }
 
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
-    internal struct IpAdapterAddresses {
+    internal struct IpAdapterAddresses
+    {
         internal const int MAX_ADAPTER_ADDRESS_LENGTH = 8;
 
         internal uint length;
@@ -184,14 +200,16 @@ namespace System.Net.NetworkInformation {
          * */
     }
 
-    internal enum InterfaceConnectionType : int {
+    internal enum InterfaceConnectionType : int
+    {
         Dedicated = 1,
         Passive = 2,
         Demand = 3,
         Maximum = 4,
     }
 
-    internal enum InterfaceTunnelType : int {
+    internal enum InterfaceTunnelType : int
+    {
         None = 0,
         Other = 1,
         Direct = 2,
@@ -204,15 +222,16 @@ namespace System.Net.NetworkInformation {
     /// <summary>
     ///   IP_PER_ADAPTER_INFO - per-adapter IP information such as DNS server list.
     /// </summary>
-    [StructLayout(LayoutKind.Sequential,CharSet=CharSet.Ansi)]
-    internal struct IpPerAdapterInfo {
-        internal bool           autoconfigEnabled;
-        internal bool           autoconfigActive;
-        internal IntPtr         currentDnsServer; /* IpAddressList* */
+    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi)]
+    internal struct IpPerAdapterInfo
+    {
+        internal bool autoconfigEnabled;
+        internal bool autoconfigActive;
+        internal IntPtr currentDnsServer; /* IpAddressList* */
         internal IpAddrString dnsServerList;
     };
 
-    [StructLayout(LayoutKind.Sequential,CharSet=CharSet.Unicode)]
+    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
     internal struct MibIfRow2 // MIB_IF_ROW2
     {
         private const int GuidLength = 16;
@@ -270,7 +289,8 @@ namespace System.Net.NetworkInformation {
 
 
     [StructLayout(LayoutKind.Sequential)]
-    internal struct MibUdpStats {
+    internal struct MibUdpStats
+    {
         internal uint datagramsReceived;
         internal uint incomingDatagramsDiscarded;
         internal uint incomingDatagramsWithErrors;
@@ -279,7 +299,8 @@ namespace System.Net.NetworkInformation {
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    internal struct MibTcpStats {
+    internal struct MibTcpStats
+    {
         internal uint reTransmissionAlgorithm;
         internal uint minimumRetransmissionTimeOut;
         internal uint maximumRetransmissionTimeOut;
@@ -299,7 +320,8 @@ namespace System.Net.NetworkInformation {
 
 
     [StructLayout(LayoutKind.Sequential)]
-    internal struct MibIpStats {
+    internal struct MibIpStats
+    {
         internal bool forwardingEnabled;
         internal uint defaultTtl;
         internal uint packetsReceived;
@@ -326,13 +348,15 @@ namespace System.Net.NetworkInformation {
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    internal struct MibIcmpInfo {
+    internal struct MibIcmpInfo
+    {
         internal MibIcmpStats inStats;
         internal MibIcmpStats outStats;
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    internal struct MibIcmpStats {
+    internal struct MibIcmpStats
+    {
         internal uint messages;
         internal uint errors;
         internal uint destinationUnreachables;
@@ -349,50 +373,56 @@ namespace System.Net.NetworkInformation {
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    internal struct MibIcmpInfoEx {
+    internal struct MibIcmpInfoEx
+    {
         internal MibIcmpStatsEx inStats;
         internal MibIcmpStatsEx outStats;
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    internal struct MibIcmpStatsEx {
-        internal uint       dwMsgs;
-        internal uint       dwErrors;
-        [MarshalAs(UnmanagedType.ByValArray,SizeConst=256)]
-        internal uint[]      rgdwTypeCount;
+    internal struct MibIcmpStatsEx
+    {
+        internal uint dwMsgs;
+        internal uint dwErrors;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 256)]
+        internal uint[] rgdwTypeCount;
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    internal struct MibTcpTable {
+    internal struct MibTcpTable
+    {
         internal uint numberOfEntries;
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    internal struct MibTcpRow {
-        internal TcpState  state;
-        internal uint  localAddr;
-        internal byte  localPort1;
-        internal byte  localPort2;
+    internal struct MibTcpRow
+    {
+        internal TcpState state;
+        internal uint localAddr;
+        internal byte localPort1;
+        internal byte localPort2;
         // Ports are only 16 bit values (in network WORD order, 3,4,1,2).
         // There are reports where the high order bytes have garbage in them.
-        internal byte  ignoreLocalPort3;
-        internal byte  ignoreLocalPort4;
-        internal uint  remoteAddr;
-        internal byte  remotePort1;
-        internal byte  remotePort2;
+        internal byte ignoreLocalPort3;
+        internal byte ignoreLocalPort4;
+        internal uint remoteAddr;
+        internal byte remotePort1;
+        internal byte remotePort2;
         // Ports are only 16 bit values (in network WORD order, 3,4,1,2).
         // There are reports where the high order bytes have garbage in them.
-        internal byte  ignoreRemotePort3;
-        internal byte  ignoreRemotePort4;
+        internal byte ignoreRemotePort3;
+        internal byte ignoreRemotePort4;
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    internal struct MibTcp6TableOwnerPid {
+    internal struct MibTcp6TableOwnerPid
+    {
         internal uint numberOfEntries;
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    internal struct MibTcp6RowOwnerPid {
+    internal struct MibTcp6RowOwnerPid
+    {
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 16)]
         internal byte[] localAddr;
         internal uint localScopeId;
@@ -415,7 +445,8 @@ namespace System.Net.NetworkInformation {
         internal uint owningPid;
     }
 
-    internal enum TcpTableClass {
+    internal enum TcpTableClass
+    {
         TcpTableBasicListener = 0,
         TcpTableBasicConnections = 1,
         TcpTableBasicAll = 2,
@@ -428,34 +459,39 @@ namespace System.Net.NetworkInformation {
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    internal struct MibUdpTable {
+    internal struct MibUdpTable
+    {
         internal uint numberOfEntries;
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    internal struct MibUdpRow {
-        internal uint  localAddr;
-        internal byte  localPort1;
-        internal byte  localPort2;
+    internal struct MibUdpRow
+    {
+        internal uint localAddr;
+        internal byte localPort1;
+        internal byte localPort2;
         // Ports are only 16 bit values (in network WORD order, 3,4,1,2).
         // There are reports where the high order bytes have garbage in them.
-        internal byte  ignoreLocalPort3;
-        internal byte  ignoreLocalPort4;
+        internal byte ignoreLocalPort3;
+        internal byte ignoreLocalPort4;
     }
 
-    internal enum UdpTableClass {
+    internal enum UdpTableClass
+    {
         UdpTableBasic = 0,
         UdpTableOwnerPid = 1,
         UdpTableOwnerModule = 2
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    internal struct MibUdp6TableOwnerPid {
+    internal struct MibUdp6TableOwnerPid
+    {
         internal uint numberOfEntries;
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    internal struct MibUdp6RowOwnerPid {
+    internal struct MibUdp6RowOwnerPid
+    {
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 16)]
         internal byte[] localAddr;
         internal uint localScopeId;
@@ -469,14 +505,15 @@ namespace System.Net.NetworkInformation {
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    internal struct IPOptions {
-        internal byte  ttl;
-        internal byte  tos;
-        internal byte  flags;
-        internal byte  optionsSize;
+    internal struct IPOptions
+    {
+        internal byte ttl;
+        internal byte tos;
+        internal byte flags;
+        internal byte optionsSize;
         internal IntPtr optionsData;
 
-        internal IPOptions (PingOptions options)
+        internal IPOptions(PingOptions options)
         {
             ttl = 128;
             tos = 0;
@@ -484,10 +521,12 @@ namespace System.Net.NetworkInformation {
             optionsSize = 0;
             optionsData = IntPtr.Zero;
 
-            if (options != null) {
+            if (options != null)
+            {
                 this.ttl = (byte)options.Ttl;
 
-                if (options.DontFragment){
+                if (options.DontFragment)
+                {
                     flags = 2;
                 }
             }
@@ -496,34 +535,37 @@ namespace System.Net.NetworkInformation {
 
 
     [StructLayout(LayoutKind.Sequential)]
-    internal struct IcmpEchoReply {
+    internal struct IcmpEchoReply
+    {
         internal uint address;
         internal uint status;
-        internal uint  roundTripTime;
+        internal uint roundTripTime;
         internal ushort dataSize;
         internal ushort reserved;
         internal IntPtr data;
         internal IPOptions options;
-        }
+    }
 
-    [StructLayout(LayoutKind.Sequential, Pack=1)]
-    internal struct Ipv6Address {
-        [MarshalAs(UnmanagedType.ByValArray,SizeConst=6)]
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    internal struct Ipv6Address
+    {
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 6)]
         internal byte[] Goo;
-        [MarshalAs(UnmanagedType.ByValArray,SizeConst=16)]
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 16)]
         internal byte[] Address;    // Replying address.
         internal uint ScopeID;
     }
-		
+
     [StructLayout(LayoutKind.Sequential)]
-     internal struct Icmp6EchoReply {
+    internal struct Icmp6EchoReply
+    {
         internal Ipv6Address Address;
         internal uint Status;               // Reply IP_STATUS.
         internal uint RoundTripTime; // RTT in milliseconds.
         internal IntPtr data;
         // internal IPOptions options;
         // internal IntPtr data; data os after tjos
-     }
+    }
 
     internal delegate void StableUnicastIpAddressTableDelegate(IntPtr context, IntPtr table);
 
@@ -531,8 +573,8 @@ namespace System.Net.NetworkInformation {
     ///   Wrapper for API's in iphlpapi.dll
     /// </summary>
 
-    internal static class UnsafeNetInfoNativeMethods {
-
+    internal static class UnsafeNetInfoNativeMethods
+    {
         [DllImport(ExternDll.IPHLPAPI)]
         internal extern static uint GetAdaptersAddresses(
             AddressFamily family,
@@ -540,9 +582,9 @@ namespace System.Net.NetworkInformation {
             IntPtr pReserved,
             SafeLocalFree adapterAddresses,
             ref uint outBufLen);
-        
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", 
-            "CA2118:ReviewSuppressUnmanagedCodeSecurityUsage", 
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security",
+            "CA2118:ReviewSuppressUnmanagedCodeSecurityUsage",
             Justification = "This operation is Read-Only and does not access restricted information")]
         [DllImport(ExternDll.IPHLPAPI)]
         internal extern static uint GetBestInterfaceEx(byte[] ipAddress, out int index);
@@ -563,7 +605,7 @@ namespace System.Net.NetworkInformation {
         internal extern static uint GetIcmpStatistics(out MibIcmpInfo statistics);
 
         [DllImport(ExternDll.IPHLPAPI)]
-        internal extern static uint GetIcmpStatisticsEx(out MibIcmpInfoEx statistics,AddressFamily family);
+        internal extern static uint GetIcmpStatisticsEx(out MibIcmpInfoEx statistics, AddressFamily family);
 
         [DllImport(ExternDll.IPHLPAPI)]
         internal extern static uint GetTcpTable(SafeLocalFree pTcpTable, ref uint dwOutBufLen, bool order);
@@ -580,33 +622,33 @@ namespace System.Net.NetworkInformation {
                                                         uint IPVersion, UdpTableClass tableClass, uint reserved);
 
         [DllImport(ExternDll.IPHLPAPI)]
-        internal extern static uint GetPerAdapterInfo(uint IfIndex,SafeLocalFree pPerAdapterInfo,ref uint pOutBufLen);
+        internal extern static uint GetPerAdapterInfo(uint IfIndex, SafeLocalFree pPerAdapterInfo, ref uint pOutBufLen);
 
-        [DllImport(ExternDll.IPHLPAPI, SetLastError=true)]
+        [DllImport(ExternDll.IPHLPAPI, SetLastError = true)]
         internal extern static SafeCloseIcmpHandle IcmpCreateFile();
 
-        [DllImport (ExternDll.IPHLPAPI, SetLastError=true)]
-        internal extern static SafeCloseIcmpHandle Icmp6CreateFile ();
+        [DllImport(ExternDll.IPHLPAPI, SetLastError = true)]
+        internal extern static SafeCloseIcmpHandle Icmp6CreateFile();
 
-        [DllImport (ExternDll.IPHLPAPI, SetLastError=true)]
+        [DllImport(ExternDll.IPHLPAPI, SetLastError = true)]
         internal extern static bool IcmpCloseHandle(IntPtr handle);
 
-        [DllImport (ExternDll.IPHLPAPI, SetLastError=true)]
-        internal extern static uint IcmpSendEcho2 (SafeCloseIcmpHandle icmpHandle, SafeWaitHandle Event, IntPtr apcRoutine, IntPtr apcContext,
+        [DllImport(ExternDll.IPHLPAPI, SetLastError = true)]
+        internal extern static uint IcmpSendEcho2(SafeCloseIcmpHandle icmpHandle, SafeWaitHandle Event, IntPtr apcRoutine, IntPtr apcContext,
             uint ipAddress, [In] SafeLocalFree data, ushort dataSize, ref IPOptions options, SafeLocalFree replyBuffer, uint replySize, uint timeout);
 
-        [DllImport (ExternDll.IPHLPAPI, SetLastError=true)]
-        internal extern static uint IcmpSendEcho2 (SafeCloseIcmpHandle icmpHandle, IntPtr Event, IntPtr apcRoutine, IntPtr apcContext,
+        [DllImport(ExternDll.IPHLPAPI, SetLastError = true)]
+        internal extern static uint IcmpSendEcho2(SafeCloseIcmpHandle icmpHandle, IntPtr Event, IntPtr apcRoutine, IntPtr apcContext,
             uint ipAddress, [In] SafeLocalFree data, ushort dataSize, ref IPOptions options, SafeLocalFree replyBuffer, uint replySize, uint timeout);
-        
-        [DllImport (ExternDll.IPHLPAPI, SetLastError=true)]
-        internal extern static uint Icmp6SendEcho2 (SafeCloseIcmpHandle icmpHandle, SafeWaitHandle Event, IntPtr apcRoutine, IntPtr apcContext,
+
+        [DllImport(ExternDll.IPHLPAPI, SetLastError = true)]
+        internal extern static uint Icmp6SendEcho2(SafeCloseIcmpHandle icmpHandle, SafeWaitHandle Event, IntPtr apcRoutine, IntPtr apcContext,
             byte[] sourceSocketAddress, byte[] destSocketAddress, [In] SafeLocalFree data, ushort dataSize, ref IPOptions options, SafeLocalFree replyBuffer, uint replySize, uint timeout);
 
-        [DllImport (ExternDll.IPHLPAPI, SetLastError=true)]
-        internal extern static uint Icmp6SendEcho2 (SafeCloseIcmpHandle icmpHandle, IntPtr Event, IntPtr apcRoutine, IntPtr apcContext,
+        [DllImport(ExternDll.IPHLPAPI, SetLastError = true)]
+        internal extern static uint Icmp6SendEcho2(SafeCloseIcmpHandle icmpHandle, IntPtr Event, IntPtr apcRoutine, IntPtr apcContext,
             byte[] sourceSocketAddress, byte[] destSocketAddress, [In] SafeLocalFree data, ushort dataSize, ref IPOptions options, SafeLocalFree replyBuffer, uint replySize, uint timeout);
-        
+
         [DllImport(ExternDll.IPHLPAPI)]
         internal static extern void FreeMibTable(IntPtr handle);
 

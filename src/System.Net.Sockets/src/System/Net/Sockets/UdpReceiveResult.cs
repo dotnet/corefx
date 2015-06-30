@@ -7,8 +7,8 @@ namespace System.Net.Sockets
 {
     public struct UdpReceiveResult : IEquatable<UdpReceiveResult>
     {
-        private byte[] m_buffer;
-        private IPEndPoint m_remoteEndPoint;
+        private byte[] _buffer;
+        private IPEndPoint _remoteEndPoint;
 
         public UdpReceiveResult(byte[] buffer, IPEndPoint remoteEndPoint)
         {
@@ -22,8 +22,8 @@ namespace System.Net.Sockets
                 throw new ArgumentNullException("remoteEndPoint");
             }
 
-            m_buffer = buffer;
-            m_remoteEndPoint = remoteEndPoint;
+            _buffer = buffer;
+            _remoteEndPoint = remoteEndPoint;
         }
 
         [SuppressMessage("Microsoft.Performance", "CA1819:PropertiesShouldNotReturnArrays",
@@ -32,7 +32,7 @@ namespace System.Net.Sockets
         {
             get
             {
-                return m_buffer;
+                return _buffer;
             }
         }
 
@@ -40,13 +40,13 @@ namespace System.Net.Sockets
         {
             get
             {
-                return m_remoteEndPoint;
+                return _remoteEndPoint;
             }
         }
 
         public override int GetHashCode()
         {
-            return (m_buffer != null) ? (m_buffer.GetHashCode() ^ m_remoteEndPoint.GetHashCode()) : 0;
+            return (_buffer != null) ? (_buffer.GetHashCode() ^ _remoteEndPoint.GetHashCode()) : 0;
         }
 
         public override bool Equals(object obj)
@@ -61,7 +61,7 @@ namespace System.Net.Sockets
 
         public bool Equals(UdpReceiveResult other)
         {
-            return object.Equals(this.m_buffer, other.m_buffer) && object.Equals(this.m_remoteEndPoint, other.m_remoteEndPoint);
+            return object.Equals(_buffer, other._buffer) && object.Equals(_remoteEndPoint, other._remoteEndPoint);
         }
 
         public static bool operator ==(UdpReceiveResult left, UdpReceiveResult right)

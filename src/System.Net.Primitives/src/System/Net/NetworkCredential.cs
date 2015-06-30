@@ -16,10 +16,10 @@ namespace System.Net
     /// </devdoc>
     public class NetworkCredential : ICredentials, ICredentialsByHost
     {
-        private static readonly object lockingObject = new object();
-        private string m_domain;
-        private string m_userName;
-        private SecureString m_password;
+        private static readonly object s_lockingObject = new object();
+        private string _domain;
+        private string _userName;
+        private SecureString _password;
 
         public NetworkCredential()
         : this(string.Empty, string.Empty, string.Empty)
@@ -88,9 +88,9 @@ namespace System.Net
             set
             {
                 if (value == null)
-                    m_userName = String.Empty;
+                    _userName = String.Empty;
                 else
-                    m_userName = value;
+                    _userName = value;
                 // GlobalLog.Print("NetworkCredential::set_UserName: m_userName: \"" + m_userName + "\"" );
             }
         }
@@ -108,7 +108,7 @@ namespace System.Net
             }
             set
             {
-                m_password = UnsafeCommonNativeMethods.SecureStringHelper.CreateSecureString(value);
+                _password = UnsafeCommonNativeMethods.SecureStringHelper.CreateSecureString(value);
                 //                GlobalLog.Print("NetworkCredential::set_Password: value = " + value);
                 //                GlobalLog.Print("NetworkCredential::set_Password: m_password:");
                 //                GlobalLog.Dump(m_password);
@@ -130,9 +130,9 @@ namespace System.Net
             set
             {
                 if (value == null)
-                    m_password = new SecureString(); // makes 0 length string
+                    _password = new SecureString(); // makes 0 length string
                 else
-                    m_password = value.Copy();
+                    _password = value.Copy();
             }
         }
 #endif //!FEATURE_PAL
@@ -152,9 +152,9 @@ namespace System.Net
             set
             {
                 if (value == null)
-                    m_domain = String.Empty;
+                    _domain = String.Empty;
                 else
-                    m_domain = value;
+                    _domain = value;
                 //                GlobalLog.Print("NetworkCredential::set_Domain: m_domain: \"" + m_domain + "\"" );
             }
         }
@@ -162,12 +162,12 @@ namespace System.Net
         internal string InternalGetUserName()
         {
             // GlobalLog.Print("NetworkCredential::get_UserName: returning \"" + m_userName + "\"");
-            return m_userName;
+            return _userName;
         }
 
         internal string InternalGetPassword()
         {
-            string decryptedString = UnsafeCommonNativeMethods.SecureStringHelper.CreateString(m_password);
+            string decryptedString = UnsafeCommonNativeMethods.SecureStringHelper.CreateString(_password);
 
             // GlobalLog.Print("NetworkCredential::get_Password: returning \"" + decryptedString + "\"");
             return decryptedString;
@@ -175,13 +175,13 @@ namespace System.Net
 
         internal SecureString InternalGetSecurePassword()
         {
-            return m_password;
+            return _password;
         }
 
         internal string InternalGetDomain()
         {
             // GlobalLog.Print("NetworkCredential::get_Domain: returning \"" + m_domain + "\"");
-            return m_domain;
+            return _domain;
         }
 
         internal string InternalGetDomainUserName()

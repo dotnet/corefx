@@ -17,62 +17,62 @@ namespace System.Net.NetworkInformation
 
     public class PingCompletedEventArgs : System.ComponentModel.AsyncCompletedEventArgs
     {
-        PingReply reply;
+        private PingReply _reply;
 
         internal PingCompletedEventArgs(PingReply reply, Exception error, bool cancelled, object userToken) : base(error, cancelled, userToken)
         {
-            this.reply = reply;
+            _reply = reply;
         }
-        public PingReply Reply { get { return reply; } }
+        public PingReply Reply { get { return _reply; } }
     }
 
     public class Ping : IDisposable
     {
-        const int MaxUdpPacket = 0xFFFF + 256; // Marshal.SizeOf(typeof(Icmp6EchoReply)) * 2 + ip header info;  
-        const int MaxBufferSize = 65500; //artificial constraint due to win32 api limitations.
-        const int DefaultTimeout = 5000; //5 seconds same as ping.exe
-        const int DefaultSendBufferSize = 32;  //same as ping.exe
+        private const int MaxUdpPacket = 0xFFFF + 256; // Marshal.SizeOf(typeof(Icmp6EchoReply)) * 2 + ip header info;  
+        private const int MaxBufferSize = 65500; //artificial constraint due to win32 api limitations.
+        private const int DefaultTimeout = 5000; //5 seconds same as ping.exe
+        private const int DefaultSendBufferSize = 32;  //same as ping.exe
 
-        byte[] defaultSendBuffer = null;
-        bool ipv6 = false;
-        bool cancelled = false;
-        bool disposeRequested = false;
-        object lockObject = new object();
+        private byte[] _defaultSendBuffer = null;
+        private bool _ipv6 = false;
+        private bool _cancelled = false;
+        private bool _disposeRequested = false;
+        private object _lockObject = new object();
 
         //used for icmpsendecho apis
         internal ManualResetEvent pingEvent = null;
-        private RegisteredWaitHandle registeredWait = null;
-        SafeLocalFree requestBuffer = null;
-        SafeLocalFree replyBuffer = null;
-        int sendSize = 0;  //needed to determine what reply size is for ipv6 in callback
+        private RegisteredWaitHandle _registeredWait = null;
+        private SafeLocalFree _requestBuffer = null;
+        private SafeLocalFree _replyBuffer = null;
+        private int _sendSize = 0;  //needed to determine what reply size is for ipv6 in callback
 
-        SafeCloseIcmpHandle handlePingV4 = null;
-        SafeCloseIcmpHandle handlePingV6 = null;
+        private SafeCloseIcmpHandle _handlePingV4 = null;
+        private SafeCloseIcmpHandle _handlePingV6 = null;
 
         //new async event support
-        AsyncOperation asyncOp = null;
-        SendOrPostCallback onPingCompletedDelegate;
+        private AsyncOperation _asyncOp = null;
+        private SendOrPostCallback _onPingCompletedDelegate;
         public event PingCompletedEventHandler PingCompleted;
 
         // For blocking in SendAsyncCancel()
-        ManualResetEvent asyncFinished = null;
-        bool InAsyncCall
+        private ManualResetEvent _asyncFinished = null;
+        private bool InAsyncCall
         {
             get
             {
-                if (asyncFinished == null)
+                if (_asyncFinished == null)
                     return false;
                 // Never blocks, just checks if a thread would block.
-                return !asyncFinished.WaitOne(0);
+                return !_asyncFinished.WaitOne(0);
             }
             set
             {
-                if (asyncFinished == null)
-                    asyncFinished = new ManualResetEvent(!value);
+                if (_asyncFinished == null)
+                    _asyncFinished = new ManualResetEvent(!value);
                 else if (value)
-                    asyncFinished.Reset(); // Block
+                    _asyncFinished.Reset(); // Block
                 else
-                    asyncFinished.Set(); // Clear
+                    _asyncFinished.Set(); // Clear
             }
         }
 
@@ -80,16 +80,16 @@ namespace System.Net.NetworkInformation
         private const int Free = 0;
         private const int InProgress = 1;
         private const int Disposed = 2;
-        private int status = Free;
+        private int _status = Free;
 
         private void CheckStart(bool async)
         {
-            if (disposeRequested)
+            if (_disposeRequested)
             {
                 throw new ObjectDisposedException(GetType().FullName);
             }
 
-            int currentStatus = Interlocked.CompareExchange(ref status, InProgress, Free);
+            int currentStatus = Interlocked.CompareExchange(ref _status, InProgress, Free);
             if (currentStatus == InProgress)
             {
                 throw new InvalidOperationException(SR.net_inasync);
@@ -107,13 +107,13 @@ namespace System.Net.NetworkInformation
 
         private void Finish(bool async)
         {
-            Debug.Assert(status == InProgress, "Invalid status: " + status);
-            status = Free;
+            Debug.Assert(_status == InProgress, "Invalid status: " + _status);
+            _status = Free;
             if (async)
             {
                 InAsyncCall = false;
             }
-            if (disposeRequested)
+            if (_disposeRequested)
             {
                 InternalDispose();
             }
@@ -127,37 +127,37 @@ namespace System.Net.NetworkInformation
             }
         }
 
-        void PingCompletedWaitCallback(object operationState)
+        private void PingCompletedWaitCallback(object operationState)
         {
             OnPingCompleted((PingCompletedEventArgs)operationState);
         }
 
         public Ping()
         {
-            onPingCompletedDelegate = new SendOrPostCallback(PingCompletedWaitCallback);
+            _onPingCompletedDelegate = new SendOrPostCallback(PingCompletedWaitCallback);
         }
 
         //cancel pending async requests, close the handles
         private void InternalDispose()
         {
-            disposeRequested = true;
+            _disposeRequested = true;
 
-            if (Interlocked.CompareExchange(ref status, Disposed, Free) != Free)
+            if (Interlocked.CompareExchange(ref _status, Disposed, Free) != Free)
             {
                 // Already disposed, or Finish will call Dispose again once Free
                 return;
             }
 
-            if (handlePingV4 != null)
+            if (_handlePingV4 != null)
             {
-                handlePingV4.Dispose();
-                handlePingV4 = null;
+                _handlePingV4.Dispose();
+                _handlePingV4 = null;
             }
 
-            if (handlePingV6 != null)
+            if (_handlePingV6 != null)
             {
-                handlePingV6.Dispose();
-                handlePingV6 = null;
+                _handlePingV6.Dispose();
+                _handlePingV6 = null;
             }
 
             UnregisterWaitHandle();
@@ -168,29 +168,29 @@ namespace System.Net.NetworkInformation
                 pingEvent = null;
             }
 
-            if (replyBuffer != null)
+            if (_replyBuffer != null)
             {
-                replyBuffer.Dispose();
-                replyBuffer = null;
+                _replyBuffer.Dispose();
+                _replyBuffer = null;
             }
 
-            if (asyncFinished != null)
+            if (_asyncFinished != null)
             {
-                asyncFinished.Dispose();
-                asyncFinished = null;
+                _asyncFinished.Dispose();
+                _asyncFinished = null;
             }
         }
 
         private void UnregisterWaitHandle()
         {
-            lock (lockObject)
+            lock (_lockObject)
             {
-                if (registeredWait != null)
+                if (_registeredWait != null)
                 {
-                    registeredWait.Unregister(null);
+                    _registeredWait.Unregister(null);
                     // If Unregister returns false, it is sufficient to nullify registeredWait
                     // and let its own finilizer clean up later.
-                    registeredWait = null;
+                    _registeredWait = null;
                 }
             }
         }
@@ -211,18 +211,18 @@ namespace System.Net.NetworkInformation
         //cancels pending async calls
         public void SendAsyncCancel()
         {
-            lock (lockObject)
+            lock (_lockObject)
             {
                 if (!InAsyncCall)
                 {
                     return;
                 }
 
-                cancelled = true;
+                _cancelled = true;
             }
             // Because there is no actual native cancel, 
             // we just have to block until the current operation is completed.
-            asyncFinished.WaitOne();
+            _asyncFinished.WaitOne();
         }
 
 
@@ -237,24 +237,24 @@ namespace System.Net.NetworkInformation
 
             try
             {
-                lock (ping.lockObject)
+                lock (ping._lockObject)
                 {
-                    cancelled = ping.cancelled;
-                    asyncOp = ping.asyncOp;
-                    onPingCompletedDelegate = ping.onPingCompletedDelegate;
+                    cancelled = ping._cancelled;
+                    asyncOp = ping._asyncOp;
+                    onPingCompletedDelegate = ping._onPingCompletedDelegate;
 
                     if (!cancelled)
                     {
                         //parse reply buffer
-                        SafeLocalFree buffer = ping.replyBuffer;
+                        SafeLocalFree buffer = ping._replyBuffer;
 
                         //marshals and constructs new reply
                         PingReply reply;
 
-                        if (ping.ipv6)
+                        if (ping._ipv6)
                         {
                             Icmp6EchoReply icmp6Reply = Marshal.PtrToStructure<Icmp6EchoReply>(buffer.DangerousGetHandle());
-                            reply = new PingReply(icmp6Reply, buffer.DangerousGetHandle(), ping.sendSize);
+                            reply = new PingReply(icmp6Reply, buffer.DangerousGetHandle(), ping._sendSize);
                         }
                         else
                         {
@@ -474,8 +474,8 @@ namespace System.Net.NetworkInformation
             CheckStart(true);
             try
             {
-                cancelled = false;
-                asyncOp = AsyncOperationManager.CreateOperation(userToken);
+                _cancelled = false;
+                _asyncOp = AsyncOperationManager.CreateOperation(userToken);
                 AsyncStateObject state = new AsyncStateObject(hostNameOrAddress, buffer, timeout, options, userToken);
                 ThreadPool.QueueUserWorkItem(new WaitCallback(ContinueAsyncSend), state);
             }
@@ -536,8 +536,8 @@ namespace System.Net.NetworkInformation
             CheckStart(true);
             try
             {
-                cancelled = false;
-                asyncOp = AsyncOperationManager.CreateOperation(userToken);
+                _cancelled = false;
+                _asyncOp = AsyncOperationManager.CreateOperation(userToken);
                 InternalSend(addressSnapshot, buffer, timeout, options, true);
             }
             catch (Exception e)
@@ -651,7 +651,7 @@ namespace System.Net.NetworkInformation
             // always returns "localhost" or something.
             //
 
-            Debug.Assert(asyncOp != null, "Null AsyncOp?");
+            Debug.Assert(_asyncOp != null, "Null AsyncOp?");
 
             AsyncStateObject stateObject = (AsyncStateObject)state;
 
@@ -664,34 +664,34 @@ namespace System.Net.NetworkInformation
             catch (Exception e)
             {
                 PingException pe = new PingException(SR.net_ping, e);
-                PingCompletedEventArgs eventArgs = new PingCompletedEventArgs(null, pe, false, asyncOp.UserSuppliedState);
+                PingCompletedEventArgs eventArgs = new PingCompletedEventArgs(null, pe, false, _asyncOp.UserSuppliedState);
                 Finish(true);
-                asyncOp.PostOperationCompleted(onPingCompletedDelegate, eventArgs);
+                _asyncOp.PostOperationCompleted(_onPingCompletedDelegate, eventArgs);
             }
         }
 
         // internal method responsible for sending echo request on win2k and higher
         private PingReply InternalSend(IPAddress address, byte[] buffer, int timeout, PingOptions options, bool async)
         {
-            ipv6 = (address.AddressFamily == AddressFamily.InterNetworkV6) ? true : false;
-            sendSize = buffer.Length;
+            _ipv6 = (address.AddressFamily == AddressFamily.InterNetworkV6) ? true : false;
+            _sendSize = buffer.Length;
 
             //get and cache correct handle
-            if (!ipv6 && handlePingV4 == null)
+            if (!_ipv6 && _handlePingV4 == null)
             {
-                handlePingV4 = UnsafeNetInfoNativeMethods.IcmpCreateFile();
-                if (handlePingV4.IsInvalid)
+                _handlePingV4 = UnsafeNetInfoNativeMethods.IcmpCreateFile();
+                if (_handlePingV4.IsInvalid)
                 {
-                    handlePingV4 = null;
+                    _handlePingV4 = null;
                     throw new Win32Exception(); // Gets last error
                 }
             }
-            else if (ipv6 && handlePingV6 == null)
+            else if (_ipv6 && _handlePingV6 == null)
             {
-                handlePingV6 = UnsafeNetInfoNativeMethods.Icmp6CreateFile();
-                if (handlePingV6.IsInvalid)
+                _handlePingV6 = UnsafeNetInfoNativeMethods.Icmp6CreateFile();
+                if (_handlePingV6.IsInvalid)
                 {
-                    handlePingV6 = null;
+                    _handlePingV6 = null;
                     throw new Win32Exception(); // Gets last error
                 }
             }
@@ -701,9 +701,9 @@ namespace System.Net.NetworkInformation
             IPOptions ipOptions = new IPOptions(options);
 
             //setup the reply buffer
-            if (replyBuffer == null)
+            if (_replyBuffer == null)
             {
-                replyBuffer = SafeLocalFree.LocalAlloc(MaxUdpPacket);
+                _replyBuffer = SafeLocalFree.LocalAlloc(MaxUdpPacket);
             }
 
             //queue the event
@@ -718,22 +718,22 @@ namespace System.Net.NetworkInformation
                     else
                         pingEvent.Reset();
 
-                    registeredWait = ThreadPool.RegisterWaitForSingleObject(pingEvent, new WaitOrTimerCallback(PingCallback), this, -1, true);
+                    _registeredWait = ThreadPool.RegisterWaitForSingleObject(pingEvent, new WaitOrTimerCallback(PingCallback), this, -1, true);
                 }
 
                 //Copy user dfata into the native world
                 SetUnmanagedStructures(buffer);
 
-                if (!ipv6)
+                if (!_ipv6)
                 {
                     if (async)
                     {
                         var pingEventSafeWaitHandle = pingEvent.GetSafeWaitHandle();
-                        error = (int)UnsafeNetInfoNativeMethods.IcmpSendEcho2(handlePingV4, pingEventSafeWaitHandle, IntPtr.Zero, IntPtr.Zero, (uint)address.m_Address, requestBuffer, (ushort)buffer.Length, ref ipOptions, replyBuffer, MaxUdpPacket, (uint)timeout);
+                        error = (int)UnsafeNetInfoNativeMethods.IcmpSendEcho2(_handlePingV4, pingEventSafeWaitHandle, IntPtr.Zero, IntPtr.Zero, (uint)address.m_Address, _requestBuffer, (ushort)buffer.Length, ref ipOptions, _replyBuffer, MaxUdpPacket, (uint)timeout);
                     }
                     else
                     {
-                        error = (int)UnsafeNetInfoNativeMethods.IcmpSendEcho2(handlePingV4, IntPtr.Zero, IntPtr.Zero, IntPtr.Zero, (uint)address.m_Address, requestBuffer, (ushort)buffer.Length, ref ipOptions, replyBuffer, MaxUdpPacket, (uint)timeout);
+                        error = (int)UnsafeNetInfoNativeMethods.IcmpSendEcho2(_handlePingV4, IntPtr.Zero, IntPtr.Zero, IntPtr.Zero, (uint)address.m_Address, _requestBuffer, (ushort)buffer.Length, ref ipOptions, _replyBuffer, MaxUdpPacket, (uint)timeout);
                     }
                 }
                 else
@@ -744,11 +744,11 @@ namespace System.Net.NetworkInformation
                     if (async)
                     {
                         var pingEventSafeWaitHandle = pingEvent.GetSafeWaitHandle();
-                        error = (int)UnsafeNetInfoNativeMethods.Icmp6SendEcho2(handlePingV6, pingEventSafeWaitHandle, IntPtr.Zero, IntPtr.Zero, sourceAddr, remoteAddr.m_Buffer, requestBuffer, (ushort)buffer.Length, ref ipOptions, replyBuffer, MaxUdpPacket, (uint)timeout);
+                        error = (int)UnsafeNetInfoNativeMethods.Icmp6SendEcho2(_handlePingV6, pingEventSafeWaitHandle, IntPtr.Zero, IntPtr.Zero, sourceAddr, remoteAddr.m_Buffer, _requestBuffer, (ushort)buffer.Length, ref ipOptions, _replyBuffer, MaxUdpPacket, (uint)timeout);
                     }
                     else
                     {
-                        error = (int)UnsafeNetInfoNativeMethods.Icmp6SendEcho2(handlePingV6, IntPtr.Zero, IntPtr.Zero, IntPtr.Zero, sourceAddr, remoteAddr.m_Buffer, requestBuffer, (ushort)buffer.Length, ref ipOptions, replyBuffer, MaxUdpPacket, (uint)timeout);
+                        error = (int)UnsafeNetInfoNativeMethods.Icmp6SendEcho2(_handlePingV6, IntPtr.Zero, IntPtr.Zero, IntPtr.Zero, sourceAddr, remoteAddr.m_Buffer, _requestBuffer, (ushort)buffer.Length, ref ipOptions, _replyBuffer, MaxUdpPacket, (uint)timeout);
                     }
                 }
             }
@@ -788,20 +788,20 @@ namespace System.Net.NetworkInformation
 
             //return the reply
             PingReply reply;
-            if (ipv6)
+            if (_ipv6)
             {
-                Icmp6EchoReply icmp6Reply = Marshal.PtrToStructure<Icmp6EchoReply>(replyBuffer.DangerousGetHandle());
-                reply = new PingReply(icmp6Reply, replyBuffer.DangerousGetHandle(), sendSize);
+                Icmp6EchoReply icmp6Reply = Marshal.PtrToStructure<Icmp6EchoReply>(_replyBuffer.DangerousGetHandle());
+                reply = new PingReply(icmp6Reply, _replyBuffer.DangerousGetHandle(), _sendSize);
             }
             else
             {
-                IcmpEchoReply icmpReply = Marshal.PtrToStructure<IcmpEchoReply>(replyBuffer.DangerousGetHandle());
+                IcmpEchoReply icmpReply = Marshal.PtrToStructure<IcmpEchoReply>(_replyBuffer.DangerousGetHandle());
                 reply = new PingReply(icmpReply);
             }
 
             // IcmpEchoReply still has an unsafe IntPtr reference into replybuffer
             // and replybuffer was being freed prematurely by the GC, causing AccessViolationExceptions.
-            GC.KeepAlive(replyBuffer);
+            GC.KeepAlive(_replyBuffer);
 
             return reply;
         }
@@ -820,8 +820,8 @@ namespace System.Net.NetworkInformation
         // copies sendbuffer into unmanaged memory for async icmpsendecho apis
         private unsafe void SetUnmanagedStructures(byte[] buffer)
         {
-            requestBuffer = SafeLocalFree.LocalAlloc(buffer.Length);
-            byte* dst = (byte*)requestBuffer.DangerousGetHandle();
+            _requestBuffer = SafeLocalFree.LocalAlloc(buffer.Length);
+            byte* dst = (byte*)_requestBuffer.DangerousGetHandle();
             for (int i = 0; i < buffer.Length; ++i)
             {
                 dst[i] = buffer[i];
@@ -829,12 +829,12 @@ namespace System.Net.NetworkInformation
         }
 
         // release the unmanaged memory after ping completion
-        void FreeUnmanagedStructures()
+        private void FreeUnmanagedStructures()
         {
-            if (requestBuffer != null)
+            if (_requestBuffer != null)
             {
-                requestBuffer.Dispose();
-                requestBuffer = null;
+                _requestBuffer.Dispose();
+                _requestBuffer = null;
             }
         }
 
@@ -844,13 +844,13 @@ namespace System.Net.NetworkInformation
         {
             get
             {
-                if (defaultSendBuffer == null)
+                if (_defaultSendBuffer == null)
                 {
-                    defaultSendBuffer = new byte[DefaultSendBufferSize];
+                    _defaultSendBuffer = new byte[DefaultSendBufferSize];
                     for (int i = 0; i < DefaultSendBufferSize; i++)
-                        defaultSendBuffer[i] = (byte)((int)'a' + i % 23);
+                        _defaultSendBuffer[i] = (byte)((int)'a' + i % 23);
                 }
-                return defaultSendBuffer;
+                return _defaultSendBuffer;
             }
         }
     }

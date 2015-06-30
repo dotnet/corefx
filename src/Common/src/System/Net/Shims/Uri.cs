@@ -56,6 +56,6 @@ namespace System
                     + 10);
             }
             throw new ArgumentException("digit");
-        }       
+        }
     }
 }

@@ -16,7 +16,7 @@ namespace System.Net.NetworkInformation
     /// </platnote>
     internal class SystemMulticastIPAddressInformation : MulticastIPAddressInformation
     {
-        private SystemIPAddressInformation innerInfo;
+        private SystemIPAddressInformation _innerInfo;
 
         private SystemMulticastIPAddressInformation()
         {
@@ -24,11 +24,11 @@ namespace System.Net.NetworkInformation
 
         public SystemMulticastIPAddressInformation(SystemIPAddressInformation addressInfo)
         {
-            innerInfo = addressInfo;
+            _innerInfo = addressInfo;
         }
 
         /// <include file='doc\NetworkInterface.uex' path='docs/doc[@for="IPAddressInformation.Address"]/*' />
-        public override IPAddress Address { get { return innerInfo.Address; } }
+        public override IPAddress Address { get { return _innerInfo.Address; } }
 
         /// <include file='doc\NetworkInterface.uex' path='docs/doc[@for="IPAddressInformation.Transient"]/*' />
         /// <summary>The address is a cluster address and shouldn't be used by most applications.</summary>
@@ -36,7 +36,7 @@ namespace System.Net.NetworkInformation
         {
             get
             {
-                return (innerInfo.IsTransient);
+                return (_innerInfo.IsTransient);
             }
         }
 
@@ -46,7 +46,7 @@ namespace System.Net.NetworkInformation
         {
             get
             {
-                return (innerInfo.IsDnsEligible);
+                return (_innerInfo.IsDnsEligible);
             }
         }
 

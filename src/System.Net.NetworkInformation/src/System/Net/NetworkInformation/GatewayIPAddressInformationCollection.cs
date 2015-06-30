@@ -8,7 +8,7 @@ namespace System.Net.NetworkInformation
 {
     public class GatewayIPAddressInformationCollection : ICollection<GatewayIPAddressInformation>
     {
-        Collection<GatewayIPAddressInformation> addresses = new Collection<GatewayIPAddressInformation>();
+        private Collection<GatewayIPAddressInformation> _addresses = new Collection<GatewayIPAddressInformation>();
 
         protected internal GatewayIPAddressInformationCollection()
         {
@@ -17,7 +17,7 @@ namespace System.Net.NetworkInformation
         /// <include file='doc\HttpListenerPrefixCollection.uex' path='docs/doc[@for="HttpListenerPrefixCollection.CopyTo"]/*' />
         public virtual void CopyTo(GatewayIPAddressInformation[] array, int offset)
         {
-            addresses.CopyTo(array, offset);
+            _addresses.CopyTo(array, offset);
         }
 
 
@@ -26,7 +26,7 @@ namespace System.Net.NetworkInformation
         {
             get
             {
-                return addresses.Count;
+                return _addresses.Count;
             }
         }
 
@@ -42,7 +42,7 @@ namespace System.Net.NetworkInformation
         {
             get
             {
-                return (GatewayIPAddressInformation)addresses[index];
+                return (GatewayIPAddressInformation)_addresses[index];
             }
         }
 
@@ -57,20 +57,20 @@ namespace System.Net.NetworkInformation
 
         internal void InternalAdd(GatewayIPAddressInformation address)
         {
-            addresses.Add(address);
+            _addresses.Add(address);
         }
 
 
         /// <include file='doc\HttpListenerPrefixCollection.uex' path='docs/doc[@for="HttpListenerPrefixCollection.Contains"]/*' />
         public virtual bool Contains(GatewayIPAddressInformation address)
         {
-            return addresses.Contains(address);
+            return _addresses.Contains(address);
         }
 
 
         public virtual IEnumerator<GatewayIPAddressInformation> GetEnumerator()
         {
-            return (IEnumerator<GatewayIPAddressInformation>)addresses.GetEnumerator();
+            return (IEnumerator<GatewayIPAddressInformation>)_addresses.GetEnumerator();
         }
 
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()

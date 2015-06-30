@@ -1,5 +1,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
 //determines which options will be used for sending icmp requests, as well as what options
 //were set in the returned icmp reply.
 
@@ -8,14 +10,14 @@ namespace System.Net.NetworkInformation
     // Represent the possible ip options used for the icmp packet
     public class PingOptions
     {
-        const int DontFragmentFlag = 2;
-        int ttl = 128;
-        bool dontFragment;
+        private const int DontFragmentFlag = 2;
+        private int _ttl = 128;
+        private bool _dontFragment;
 
         internal PingOptions(IPOptions options)
         {
-            this.ttl = options.ttl;
-            this.dontFragment = ((options.flags & DontFragmentFlag) > 0 ? true : false);
+            _ttl = options.ttl;
+            _dontFragment = ((options.flags & DontFragmentFlag) > 0 ? true : false);
         }
 
         public PingOptions(int ttl, bool dontFragment)
@@ -25,8 +27,8 @@ namespace System.Net.NetworkInformation
                 throw new ArgumentOutOfRangeException("ttl");
             }
 
-            this.ttl = ttl;
-            this.dontFragment = dontFragment;
+            _ttl = ttl;
+            _dontFragment = dontFragment;
         }
 
         public PingOptions()
@@ -37,7 +39,7 @@ namespace System.Net.NetworkInformation
         {
             get
             {
-                return ttl;
+                return _ttl;
             }
             set
             {
@@ -45,7 +47,7 @@ namespace System.Net.NetworkInformation
                 {
                     throw new ArgumentOutOfRangeException("value");
                 }
-                ttl = value; //useful to discover routes
+                _ttl = value; //useful to discover routes
             }
         }
 
@@ -53,11 +55,11 @@ namespace System.Net.NetworkInformation
         {
             get
             {
-                return dontFragment;
+                return _dontFragment;
             }
             set
             {
-                dontFragment = value;  //useful for discovering mtu
+                _dontFragment = value;  //useful for discovering mtu
             }
         }
     }

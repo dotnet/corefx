@@ -28,8 +28,8 @@ namespace System.Net
         /// </devdoc>
         public const int MaxPort = 0x0000FFFF;
 
-        private IPAddress m_Address;
-        private int m_Port;
+        private IPAddress _address;
+        private int _port;
 
         internal const int AnyPort = MinPort;
 
@@ -48,7 +48,7 @@ namespace System.Net
                 // IPv6 Changes: Always delegate this to the address we are
                 //               wrapping.
                 //
-                return m_Address.AddressFamily;
+                return _address.AddressFamily;
             }
         }
 
@@ -62,8 +62,8 @@ namespace System.Net
             {
                 throw new ArgumentOutOfRangeException("port");
             }
-            m_Port = port;
-            m_Address = new IPAddress(address);
+            _port = port;
+            _address = new IPAddress(address);
         }
 
         /// <devdoc>
@@ -79,8 +79,8 @@ namespace System.Net
             {
                 throw new ArgumentOutOfRangeException("port");
             }
-            m_Port = port;
-            m_Address = address;
+            _port = port;
+            _address = address;
         }
 
         /// <devdoc>
@@ -92,11 +92,11 @@ namespace System.Net
         {
             get
             {
-                return m_Address;
+                return _address;
             }
             set
             {
-                m_Address = value;
+                _address = value;
             }
         }
 
@@ -109,7 +109,7 @@ namespace System.Net
         {
             get
             {
-                return m_Port;
+                return _port;
             }
             set
             {
@@ -117,7 +117,7 @@ namespace System.Net
                 {
                     throw new ArgumentOutOfRangeException("value");
                 }
-                m_Port = value;
+                _port = value;
             }
         }
 
@@ -128,11 +128,11 @@ namespace System.Net
         public override string ToString()
         {
             string format;
-            if (m_Address.AddressFamily == AddressFamily.InterNetworkV6)
+            if (_address.AddressFamily == AddressFamily.InterNetworkV6)
                 format = "[{0}]:{1}";
             else
                 format = "{0}:{1}";
-            return String.Format(format, m_Address.ToString(), Port.ToString(NumberFormatInfo.InvariantInfo));
+            return String.Format(format, _address.ToString(), Port.ToString(NumberFormatInfo.InvariantInfo));
         }
 
         /// <devdoc>
@@ -172,13 +172,13 @@ namespace System.Net
             {
                 return false;
             }
-            return ((IPEndPoint)comparand).m_Address.Equals(m_Address) && ((IPEndPoint)comparand).m_Port == m_Port;
+            return ((IPEndPoint)comparand)._address.Equals(_address) && ((IPEndPoint)comparand)._port == _port;
         }
 
         //UEUE
         public override int GetHashCode()
         {
-            return m_Address.GetHashCode() ^ m_Port;
+            return _address.GetHashCode() ^ _port;
         }
 
         // For security, we need to be able to take an IPEndPoint and make a copy that's immutable and not derived.

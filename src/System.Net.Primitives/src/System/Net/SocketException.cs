@@ -14,7 +14,7 @@ namespace System.Net.Sockets
     /// </devdoc>
     public class SocketException : Win32Exception
     {
-        private EndPoint m_EndPoint;
+        private EndPoint _endPoint;
 
         /// <devdoc>
         ///    <para>
@@ -28,7 +28,7 @@ namespace System.Net.Sockets
 
         internal SocketException(EndPoint endPoint) : base(Marshal.GetLastWin32Error())
         {
-            m_EndPoint = endPoint;
+            _endPoint = endPoint;
         }
 
         /// <devdoc>
@@ -43,7 +43,7 @@ namespace System.Net.Sockets
 
         internal SocketException(int errorCode, EndPoint endPoint) : base(errorCode)
         {
-            m_EndPoint = endPoint;
+            _endPoint = endPoint;
         }
 
         /// <devdoc>
@@ -75,13 +75,13 @@ namespace System.Net.Sockets
             get
             {
                 // If not null add EndPoint.ToString() to end of base Message
-                if (m_EndPoint == null)
+                if (_endPoint == null)
                 {
                     return base.Message;
                 }
                 else
                 {
-                    return base.Message + " " + m_EndPoint.ToString();
+                    return base.Message + " " + _endPoint.ToString();
                 }
             }
         }

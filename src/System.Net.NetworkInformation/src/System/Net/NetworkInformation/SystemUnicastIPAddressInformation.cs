@@ -19,38 +19,38 @@ namespace System.Net.NetworkInformation
     /// <summary>Specifies the unicast addresses for an interface.</summary>
     internal class SystemUnicastIPAddressInformation : UnicastIPAddressInformation
     {
-        private long dhcpLeaseLifetime;
-        private SystemIPAddressInformation innerInfo;
-        private IPAddress ipv4Mask;
-        private PrefixOrigin prefixOrigin;
-        private SuffixOrigin suffixOrigin;
-        private DuplicateAddressDetectionState dadState;
-        private uint validLifetime;
-        private uint preferredLifetime;
-        private byte prefixLength;
+        private long _dhcpLeaseLifetime;
+        private SystemIPAddressInformation _innerInfo;
+        private IPAddress _ipv4Mask;
+        private PrefixOrigin _prefixOrigin;
+        private SuffixOrigin _suffixOrigin;
+        private DuplicateAddressDetectionState _dadState;
+        private uint _validLifetime;
+        private uint _preferredLifetime;
+        private byte _prefixLength;
 
         internal SystemUnicastIPAddressInformation(IpAdapterUnicastAddress adapterAddress)
         {
             IPAddress ipAddress = adapterAddress.address.MarshalIPAddress();
-            this.innerInfo = new SystemIPAddressInformation(ipAddress, adapterAddress.flags);
-            this.prefixOrigin = adapterAddress.prefixOrigin;
-            this.suffixOrigin = adapterAddress.suffixOrigin;
-            this.dadState = adapterAddress.dadState;
-            this.validLifetime = adapterAddress.validLifetime;
-            this.preferredLifetime = adapterAddress.preferredLifetime;
-            this.dhcpLeaseLifetime = adapterAddress.leaseLifetime;
+            _innerInfo = new SystemIPAddressInformation(ipAddress, adapterAddress.flags);
+            _prefixOrigin = adapterAddress.prefixOrigin;
+            _suffixOrigin = adapterAddress.suffixOrigin;
+            _dadState = adapterAddress.dadState;
+            _validLifetime = adapterAddress.validLifetime;
+            _preferredLifetime = adapterAddress.preferredLifetime;
+            _dhcpLeaseLifetime = adapterAddress.leaseLifetime;
 
-            this.prefixLength = adapterAddress.prefixLength;
+            _prefixLength = adapterAddress.prefixLength;
 
             // IPv6 returns 0.0.0.0 for consistancy with XP
             if (ipAddress.AddressFamily == AddressFamily.InterNetwork)
             {
-                ipv4Mask = PrefixLengthToSubnetMask(prefixLength, ipAddress.AddressFamily);
+                _ipv4Mask = PrefixLengthToSubnetMask(_prefixLength, ipAddress.AddressFamily);
             }
         }
 
         /// <include file='doc\NetworkInterface.uex' path='docs/doc[@for="IPAddressInformation.Address"]/*' />
-        public override IPAddress Address { get { return innerInfo.Address; } }
+        public override IPAddress Address { get { return _innerInfo.Address; } }
 
 
         public override IPAddress IPv4Mask
@@ -64,7 +64,7 @@ namespace System.Net.NetworkInformation
                     return IPAddress.Any;
                 }
 
-                return ipv4Mask;
+                return _ipv4Mask;
             }
         }
 
@@ -72,7 +72,7 @@ namespace System.Net.NetworkInformation
         {
             get
             {
-                return prefixLength;
+                return _prefixLength;
             }
         }
 
@@ -82,7 +82,7 @@ namespace System.Net.NetworkInformation
         {
             get
             {
-                return (innerInfo.IsTransient);
+                return (_innerInfo.IsTransient);
             }
         }
 
@@ -92,7 +92,7 @@ namespace System.Net.NetworkInformation
         {
             get
             {
-                return (innerInfo.IsDnsEligible);
+                return (_innerInfo.IsDnsEligible);
             }
         }
 
@@ -102,7 +102,7 @@ namespace System.Net.NetworkInformation
         {
             get
             {
-                return prefixOrigin;
+                return _prefixOrigin;
             }
         }
 
@@ -111,7 +111,7 @@ namespace System.Net.NetworkInformation
         {
             get
             {
-                return suffixOrigin;
+                return _suffixOrigin;
             }
         }
         /// <include file='doc\NetworkInterface.uex' path='docs/doc[@for="IPUnicastAddressInformation.DuplicateAddressDetectionState"]/*' />
@@ -121,7 +121,7 @@ namespace System.Net.NetworkInformation
         {
             get
             {
-                return dadState;
+                return _dadState;
             }
         }
 
@@ -132,7 +132,7 @@ namespace System.Net.NetworkInformation
         {
             get
             {
-                return validLifetime;
+                return _validLifetime;
             }
         }
         /// <include file='doc\NetworkInterface.uex' path='docs/doc[@for="IPUnicastAddressInformation.PreferredLifetime"]/*' />
@@ -142,7 +142,7 @@ namespace System.Net.NetworkInformation
         {
             get
             {
-                return preferredLifetime;
+                return _preferredLifetime;
             }
         }
         /// <include file='doc\NetworkInterface.uex' path='docs/doc[@for="IPUnicastAddressInformation.PreferredLifetime"]/*' />
@@ -153,7 +153,7 @@ namespace System.Net.NetworkInformation
         {
             get
             {
-                return dhcpLeaseLifetime;
+                return _dhcpLeaseLifetime;
             }
         }
 

@@ -12,25 +12,25 @@ namespace System.Net.NetworkInformation
 {
     internal class SystemIPInterfaceStatistics : IPInterfaceStatistics
     {
-        MibIfRow2 ifRow;
+        private MibIfRow2 _ifRow;
 
         internal SystemIPInterfaceStatistics(long index)
         {
-            ifRow = GetIfEntry2(index);
+            _ifRow = GetIfEntry2(index);
         }
 
-        public override long OutputQueueLength { get { return (long)ifRow.outQLen; } }
-        public override long BytesSent { get { return (long)ifRow.outOctets; } }
-        public override long BytesReceived { get { return (long)ifRow.inOctets; } }
-        public override long UnicastPacketsSent { get { return (long)ifRow.outUcastPkts; } }
-        public override long UnicastPacketsReceived { get { return (long)ifRow.inUcastPkts; } }
-        public override long NonUnicastPacketsSent { get { return (long)ifRow.outNUcastPkts; } }
-        public override long NonUnicastPacketsReceived { get { return (long)ifRow.inNUcastPkts; } }
-        public override long IncomingPacketsDiscarded { get { return (long)ifRow.inDiscards; } }
-        public override long OutgoingPacketsDiscarded { get { return (long)ifRow.outDiscards; } }
-        public override long IncomingPacketsWithErrors { get { return (long)ifRow.inErrors; } }
-        public override long OutgoingPacketsWithErrors { get { return (long)ifRow.outErrors; } }
-        public override long IncomingUnknownProtocolPackets { get { return (long)ifRow.inUnknownProtos; } }
+        public override long OutputQueueLength { get { return (long)_ifRow.outQLen; } }
+        public override long BytesSent { get { return (long)_ifRow.outOctets; } }
+        public override long BytesReceived { get { return (long)_ifRow.inOctets; } }
+        public override long UnicastPacketsSent { get { return (long)_ifRow.outUcastPkts; } }
+        public override long UnicastPacketsReceived { get { return (long)_ifRow.inUcastPkts; } }
+        public override long NonUnicastPacketsSent { get { return (long)_ifRow.outNUcastPkts; } }
+        public override long NonUnicastPacketsReceived { get { return (long)_ifRow.inNUcastPkts; } }
+        public override long IncomingPacketsDiscarded { get { return (long)_ifRow.inDiscards; } }
+        public override long OutgoingPacketsDiscarded { get { return (long)_ifRow.outDiscards; } }
+        public override long IncomingPacketsWithErrors { get { return (long)_ifRow.inErrors; } }
+        public override long OutgoingPacketsWithErrors { get { return (long)_ifRow.outErrors; } }
+        public override long IncomingUnknownProtocolPackets { get { return (long)_ifRow.inUnknownProtos; } }
 
         internal static MibIfRow2 GetIfEntry2(long index)
         {
@@ -54,25 +54,25 @@ namespace System.Net.NetworkInformation
     /// <summary>IP statistics</summary>
     internal class SystemIPv4InterfaceStatistics : IPv4InterfaceStatistics
     {
-        MibIfRow2 ifRow;
+        private MibIfRow2 _ifRow;
 
         internal SystemIPv4InterfaceStatistics(long index)
         {
-            ifRow = SystemIPInterfaceStatistics.GetIfEntry2(index);
+            _ifRow = SystemIPInterfaceStatistics.GetIfEntry2(index);
         }
 
-        public override long OutputQueueLength { get { return (long)ifRow.outQLen; } }
-        public override long BytesSent { get { return (long)ifRow.outOctets; } }
-        public override long BytesReceived { get { return (long)ifRow.inOctets; } }
-        public override long UnicastPacketsSent { get { return (long)ifRow.outUcastPkts; } }
-        public override long UnicastPacketsReceived { get { return (long)ifRow.inUcastPkts; } }
-        public override long NonUnicastPacketsSent { get { return (long)ifRow.outNUcastPkts; } }
-        public override long NonUnicastPacketsReceived { get { return (long)ifRow.inNUcastPkts; } }
-        public override long IncomingPacketsDiscarded { get { return (long)ifRow.inDiscards; } }
-        public override long OutgoingPacketsDiscarded { get { return (long)ifRow.outDiscards; } }
-        public override long IncomingPacketsWithErrors { get { return (long)ifRow.inErrors; } }
-        public override long OutgoingPacketsWithErrors { get { return (long)ifRow.outErrors; } }
-        public override long IncomingUnknownProtocolPackets { get { return (long)ifRow.inUnknownProtos; } }
+        public override long OutputQueueLength { get { return (long)_ifRow.outQLen; } }
+        public override long BytesSent { get { return (long)_ifRow.outOctets; } }
+        public override long BytesReceived { get { return (long)_ifRow.inOctets; } }
+        public override long UnicastPacketsSent { get { return (long)_ifRow.outUcastPkts; } }
+        public override long UnicastPacketsReceived { get { return (long)_ifRow.inUcastPkts; } }
+        public override long NonUnicastPacketsSent { get { return (long)_ifRow.outNUcastPkts; } }
+        public override long NonUnicastPacketsReceived { get { return (long)_ifRow.inNUcastPkts; } }
+        public override long IncomingPacketsDiscarded { get { return (long)_ifRow.inDiscards; } }
+        public override long OutgoingPacketsDiscarded { get { return (long)_ifRow.outDiscards; } }
+        public override long IncomingPacketsWithErrors { get { return (long)_ifRow.inErrors; } }
+        public override long OutgoingPacketsWithErrors { get { return (long)_ifRow.outErrors; } }
+        public override long IncomingUnknownProtocolPackets { get { return (long)_ifRow.inUnknownProtos; } }
     }
 }
 
