@@ -146,7 +146,7 @@
                     SslStream sslStream = null;
                     X509Certificate2 certificate;
 
-                    // TODO: Workaround for bug# 1068349 
+                    // TODO: Workaround for bug: "ProjectK X509Certificate2 doesn't load PFX files or binary buffers with or w/o a password"
                     // ProjectK X509Certificate2 doesn't load PFX files with or w/o a password
                     // The certificate MUST be installed in the CurrentUser\My store prior to running the test.
 
@@ -166,7 +166,7 @@
 
                         Logger.LogInformation("Server: attempting to open SslStream.");
 
-                        // TODO: Workaround for bug# 1068349 
+                        // TODO: Workaround for bug: "ProjectK X509Certificate2 doesn't load PFX files or binary buffers with or w/o a password"
                         //certificate = new X509Certificate2("DummyTcpServer.pfx");
 
                         sslStream.BeginAuthenticateAsServer(certificate, false, sslProtocols, false, OnAuthenticate, state);
