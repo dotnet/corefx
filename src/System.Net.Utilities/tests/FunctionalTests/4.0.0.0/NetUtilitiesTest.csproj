@@ -1,0 +1,25 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), CLRTest.Common.props))\CLRTest.Common.props" />
+  <PropertyGroup>
+    <CLRTestOwner>crispop</CLRTestOwner>
+    <CLRTestKind>BuildAndRun</CLRTestKind>
+    <CLRTestSuite>Weekly</CLRTestSuite>
+    <CLRTestGeneration>ByClass</CLRTestGeneration>
+  </PropertyGroup>
+  <ItemGroup>
+    <CLRTestContractReference Include="System.Net.Primitives" >
+      <Version>4.0.10.0</Version>
+    </CLRTestContractReference>
+    <CLRTestContractReference Include="System.Threading.Tasks"/>
+    <CLRTestContractReference Include="System.Net.NameResolution"/>
+    <CLRTestContractReference Include="System.Net.Utilities"/>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="PingTests.cs"  />
+    <Compile Include="TestSettings.cs"  />
+  </ItemGroup>
+  <Import Project="$(CLRTestRoot)\CLRTest.targets" />
+  <Import Project="$(CLRTestStoreRoot)\FX\Conformance\Common\CoreFXTestLib\CoreFXTestLib.cslib" />
+  <Import Project="$(CLRTestStoreRoot)\FX\Conformance\System.Net.Common\System.Net.Common.cslib" />
+</Project>
