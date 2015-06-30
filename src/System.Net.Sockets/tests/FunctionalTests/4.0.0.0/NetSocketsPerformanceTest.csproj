@@ -1,0 +1,52 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), CLRTest.Common.props))\CLRTest.Common.props" />
+  <PropertyGroup>
+    <CLRTestOwner>crispop</CLRTestOwner>
+    <CLRTestKind>BuildAndRun</CLRTestKind>
+    <CLRTestSuite>Weekly</CLRTestSuite>
+    <CLRTestGeneration>ByClass</CLRTestGeneration>
+    <CLRTestCategory>Stress;Performance</CLRTestCategory>
+    <ProjectGuid>{BB5C85AD-C51A-4903-80E9-6F6E1AC1AD34}</ProjectGuid>
+  </PropertyGroup>
+  <ItemGroup>
+    <CLRTestContractReference Include="System.Collections">
+      <Version>4.0.10.0</Version>
+    </CLRTestContractReference>
+    <CLRTestContractReference Include="System.Runtime">
+      <Version>4.0.20.0</Version>
+    </CLRTestContractReference>
+    <CLRTestContractReference Include="System.Runtime.Extensions" />
+    <CLRTestContractReference Include="System.Runtime.InteropServices" />
+    <CLRTestContractReference Include="System.Net.Primitives">
+      <Version>4.0.10.0</Version>
+    </CLRTestContractReference>
+    <CLRTestContractReference Include="System.Net.Sockets" >
+      <Version>4.0.0.0</Version>
+    </CLRTestContractReference>
+    <CLRTestContractReference Include="System.Threading" >
+      <Version>4.0.10.0</Version>
+    </CLRTestContractReference>
+    <CLRTestContractReference Include="System.Threading.Tasks.Parallel"/>
+  </ItemGroup>
+  <PropertyGroup>
+    <DefineConstants>$(DefineConstants);$(CLRTestTargetArch)</DefineConstants>          
+  </PropertyGroup>  
+  <!-- Uncomment the following to enable verbose, debugging logs
+  <PropertyGroup>
+    <DefineConstants>$(DefineConstants);TRAVE</DefineConstants>          
+  </PropertyGroup>  -->
+  <ItemGroup>
+    <Compile Include="..\Common\SocketTestServer.cs" />
+    <Compile Include="..\Common\SocketTestServerAsync.cs" />
+    <Compile Include="SocketTestServerAPMMock.cs" />    
+    <Compile Include="..\Common\SocketImplementationType.cs" />    
+
+    <Compile Include="..\Common\VerboseLog.cs" />
+    <Compile Include="..\Common\Performance\SocketPerformance.cs" />
+    <Compile Include="..\Common\Performance\SocketTestClient.cs" />
+    <Compile Include="..\Common\Performance\SocketTestClientAsync.cs" />
+  </ItemGroup>
+  <Import Project="$(CLRTestRoot)\CLRTest.targets" />
+  <Import Project="$(CLRTestStoreRoot)\FX\Conformance\Common\CoreFXTestLib\CoreFXTestLib.cslib" />
+</Project>

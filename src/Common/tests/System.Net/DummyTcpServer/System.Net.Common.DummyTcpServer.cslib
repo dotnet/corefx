@@ -1,0 +1,21 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CLRTestOtherProject Include="$(MSBuildThisFileFullPath)"/>
+    <CLRTestContractReference Include="System.Runtime"/>
+    <CLRTestContractReference Include="System.Threading.Tasks" />
+    <CLRTestContractReference Include="System.Diagnostics.Debug" />
+    <CLRTestContractReference Include="System.Collections" />
+    <CLRTestContractReference Include="System.Net.Sockets" />
+    <CLRTestContractReference Include="System.Net.Security" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)\DummyTcpServer.cs" />
+    <None Include="$(MSBuildThisFileDirectory)\DummyTcpServer.pfx">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <Compile Include="$(MSBuildThisFileDirectory)\StreamAPMExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)\SslStreamAPMExtensions.cs" />
+  </ItemGroup>
+</Project>
+
