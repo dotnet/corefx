@@ -20,6 +20,12 @@
     "System.Security.Claims": "4.0.0-beta-*",
     "System.Security.SecureString": "4.0.0-beta-*",
     "Microsoft.Win32.Primitives": "4.0.0-beta-*",
+
+    "System.Threading.ThreadPool": "4.0.10-beta-*",
+    "System.Threading.Overlapped": "4.0.0-beta-*",
+    "System.Security.Principal.Windows": "4.0.0-beta-*",
+
+    "System.Net.Primitives": "4.0.10-beta-*"
   },
   "frameworks": {
     "dnxcore50": {}
