@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -150,7 +151,7 @@ namespace System.IO
             return new FileStream(path, FileMode.Create, FileAccess.ReadWrite,
                                   FileShare.None, bufferSize, options);
         }
- 
+
         // Deletes a file. The file specified by the designated path is deleted.
         // If the file does not exist, Delete succeeds without throwing
         // an exception.
@@ -327,6 +328,46 @@ namespace System.IO
         {
             String fullPath = PathHelpers.GetFullPathInternal(path);
             return FileSystem.Current.GetAttributes(fullPath);
+        }
+
+        // Gets actual casing of path. The result is string with exact path
+        // as disk or network.
+        //
+        // Your application must have Read permission to the file.
+        //
+        public static string GetActualCasing(string path)
+        {
+            // TODO: Check permissions and throw SecurityException
+            //       once FIleIOPermissions is available on CoreFX.
+
+            StringBuilder builder = new StringBuilder(32767);
+
+            if (path.StartsWith(@"\\"))
+                path = @"\\?\UNC" + path.Substring(1);
+            else
+                path = @"\\?\" + path;
+
+            try
+            {
+                Interop.mincore.GetLongPathName(path, builder, builder.Capacity);
+
+                string returnedPathTrimmed = builder.Replace(@"\\?\UNC\", @"\\").Replace(@"\\?\", "").ToString();
+
+                if (Directory.Exists(returnedPathTrimmed))
+                    throw new Exception();
+
+                // unfortunately, the file part is not corrected by GetLongPathName
+                FileInfo fileInfo = new FileInfo(returnedPathTrimmed);
+
+                return fileInfo.Directory
+                      .GetFileSystemInfos()
+                      .FirstOrDefault(s => s.FullName.Equals(fileInfo.FullName, StringComparison.CurrentCultureIgnoreCase))
+                      .FullName;
+            }
+            catch (Exception)
+            {
+                throw new FileNotFoundException();
+            }
         }
 
         [System.Security.SecurityCritical]

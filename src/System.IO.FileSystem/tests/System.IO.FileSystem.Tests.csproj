@@ -37,6 +37,7 @@
     <Compile Include="DirectoryInfo\Delete.cs" />
     <Compile Include="DirectoryInfo\Delete_bool.cs" />
     <Compile Include="DirectoryInfo\Exists.cs" />
+    <Compile Include="Directory\GetActualCasing.cs" />
     <Compile Include="FileStream\Flush.Sharing.cs" />
     <Compile Include="FileStream\Flush_toDisk.cs" />
     <Compile Include="FileStream\SafeFileHandle.cs" />
@@ -72,6 +73,7 @@
     <Compile Include="FileStream\ctor_str_fm_fa_fs.cs" />
     <Compile Include="FileStream\ctor_str_fm_fa.cs" />
     <Compile Include="FileStream\ctor_str_fm.cs" />
+    <Compile Include="File\GetActualCasing.cs" />
     <Compile Include="UnseekableFileStream.cs" />
     <Compile Include="FSAssert.cs" />
     <Compile Include="FileSystemTest.cs" />

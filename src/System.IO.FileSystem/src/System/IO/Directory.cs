@@ -115,7 +115,41 @@ namespace System.IO
         {
             return File.GetCreationTimeUtc(path);
         }
- 
+
+        // Gets actual casing of path. The result is string with exact path
+        // as disk or network.
+        //
+        // Your application must have Read permissions to the directory.
+        //
+        public static string GetActualCasing(string path)
+        {
+            // TODO: Check permissions and throw SecurityException
+            //       once FIleIOPermissions is available on CoreFX.
+
+            StringBuilder builder = new StringBuilder(32767);
+
+            if (path.StartsWith(@"\\"))
+                path = @"\\?\UNC" + path.Substring(1);
+            else
+                path = @"\\?\" + path;
+
+            try
+            {
+                Interop.mincore.GetLongPathName(path, builder, builder.Capacity);
+
+                string returnedPathTrimmed = builder.Replace(@"\\?\UNC\", @"\\").Replace(@"\\?\", "").ToString();
+
+                if (Directory.Exists(returnedPathTrimmed))
+                    return returnedPathTrimmed;
+                else
+                    throw new Exception();
+            }
+            catch (Exception)
+            {
+                throw new DirectoryNotFoundException();
+            }
+        }
+
         public static void SetLastWriteTime(String path, DateTime lastWriteTime)
         {
             String fullPath = PathHelpers.GetFullPathInternal(path);
@@ -604,4 +638,3 @@ namespace System.IO
         }
     }
 }
-
