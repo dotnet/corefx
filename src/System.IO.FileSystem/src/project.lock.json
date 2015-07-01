@@ -82,6 +82,21 @@
           "lib/dotnet/System.IO.FileSystem.Primitives.dll": {}
         }
       },
+      "System.Linq/4.0.0-beta-23024": {
+        "dependencies": {
+          "System.Runtime": "4.0.20-beta-23024",
+          "System.Collections": "4.0.10-beta-23024",
+          "System.Resources.ResourceManager": "4.0.0-beta-23024",
+          "System.Diagnostics.Debug": "4.0.10-beta-23024",
+          "System.Runtime.Extensions": "4.0.10-beta-23024"
+        },
+        "compile": {
+          "ref/dotnet/System.Linq.dll": {}
+        },
+        "runtime": {
+          "lib/dotnet/System.Linq.dll": {}
+        }
+      },
       "System.Private.Uri/4.0.0-beta-23024": {
         "runtime": {
           "lib/DNXCore50/System.Private.Uri.dll": {}
