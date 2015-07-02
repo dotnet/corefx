@@ -24,6 +24,7 @@
     <Compile Include="Helpers\TestCollection.cs" />
     <Compile Include="Helpers\TestEnumerable.cs" />
     <Compile Include="Helpers\TestReadOnlyCollection.cs" />
+    <Compile Include="MinMaxTests.cs" />
     <Compile Include="Performance\CastPerf.cs" />
     <Compile Include="Performance\LinqPerformanceCore.cs" />
     <Compile Include="Performance\OrderByThenByPerf.cs" />
