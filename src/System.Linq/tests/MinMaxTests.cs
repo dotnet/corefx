@@ -254,5 +254,50 @@ namespace System.Linq.Tests
             Assert.Equal(null, Enumerable.Empty<decimal?>().Max());
             Assert.Equal(null, Enumerable.Repeat(default(decimal?), 100).Max());
         }
+
+        // Normally NaN < anything is false, as is anything < NaN
+        // However, this leads to some irksome outcomes in Min and Max.
+        // If we use those semantics then Min(NaN, 5.0) is NaN, but
+        // Min(5.0, NaN) is 5.0!  To fix this, we impose a total
+        // ordering where NaN is smaller than every value, including
+        // negative infinity.
+        // This behaviour must be confirmed as happening.
+        // Note that further to this, null is taken as not being in a sequence at all
+        // (Null will be returned if the only element in a sequence, but this will also
+        // happen with an empty sequence).
+
+        [Fact]
+        public void NaNFirstSingle()
+        {
+            var nanThenOne = Enumerable.Range(1, 10).Select(i => (float)i).Concat(Enumerable.Repeat(float.NaN, 1)).ToArray();
+            var nanThenMinusTen = new[] { -1F, -10, float.NaN, 10, 200, 1000 };
+            var nanThenMinValue = new[] { float.MinValue, 3000F, 100, 200, float.NaN, 1000 };
+            Assert.True(float.IsNaN(nanThenOne.Min()));
+            Assert.True(float.IsNaN(nanThenMinusTen.Min()));
+            Assert.True(float.IsNaN(nanThenMinValue.Min()));
+            Assert.False(float.IsNaN(nanThenOne.Max()));
+            Assert.False(float.IsNaN(nanThenMinusTen.Max()));
+            Assert.False(float.IsNaN(nanThenMinValue.Max()));
+            var nanWithNull = new[] { default(float?), float.NaN, default(float?) };
+            Assert.True(float.IsNaN(nanWithNull.Min().Value));
+            Assert.True(float.IsNaN(nanWithNull.Max().Value));
+        }
+
+        [Fact]
+        public void NaNFirstDouble()
+        {
+            var nanThenOne = Enumerable.Range(1, 10).Select(i => (double)i).Concat(Enumerable.Repeat(double.NaN, 1)).ToArray();
+            var nanThenMinusTen = new[] { -1F, -10, double.NaN, 10, 200, 1000 };
+            var nanThenMinValue = new[] { double.MinValue, 3000F, 100, 200, double.NaN, 1000 };
+            Assert.True(double.IsNaN(nanThenOne.Min()));
+            Assert.True(double.IsNaN(nanThenMinusTen.Min()));
+            Assert.True(double.IsNaN(nanThenMinValue.Min()));
+            Assert.False(double.IsNaN(nanThenOne.Max()));
+            Assert.False(double.IsNaN(nanThenMinusTen.Max()));
+            Assert.False(double.IsNaN(nanThenMinValue.Max()));
+            var nanWithNull = new[] { default(double?), double.NaN, default(double?) };
+            Assert.True(double.IsNaN(nanWithNull.Min().Value));
+            Assert.True(double.IsNaN(nanWithNull.Max().Value));
+        }
     }
 }
