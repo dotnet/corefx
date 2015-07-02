@@ -1320,22 +1320,22 @@ namespace System.Linq
         {
             if (source == null) throw Error.ArgumentNull("source");
             if (predicate == null) throw Error.ArgumentNull("predicate");
-            TSource result = default(TSource);
-            long count = 0;
-            foreach (TSource element in source)
+            using (IEnumerator<TSource> e = source.GetEnumerator())
             {
-                if (predicate(element))
+                while (e.MoveNext())
                 {
-                    result = element;
-                    checked { count++; }
+                    TSource result = e.Current;
+                    if (predicate(result))
+                    {
+                        while (e.MoveNext())
+                        {
+                            if (predicate(e.Current)) throw Error.MoreThanOneMatch();
+                        }
+                        return result;
+                    }
                 }
             }
-            switch (count)
-            {
-                case 0: throw Error.NoMatch();
-                case 1: return result;
-            }
-            throw Error.MoreThanOneMatch();
+            throw Error.NoMatch();
         }
 
         public static TSource SingleOrDefault<TSource>(this IEnumerable<TSource> source)
@@ -1366,22 +1366,22 @@ namespace System.Linq
         {
             if (source == null) throw Error.ArgumentNull("source");
             if (predicate == null) throw Error.ArgumentNull("predicate");
-            TSource result = default(TSource);
-            long count = 0;
-            foreach (TSource element in source)
+            using (IEnumerator<TSource> e = source.GetEnumerator())
             {
-                if (predicate(element))
+                while (e.MoveNext())
                 {
-                    result = element;
-                    checked { count++; }
+                    TSource result = e.Current;
+                    if (predicate(result))
+                    {
+                        while (e.MoveNext())
+                        {
+                            if (predicate(e.Current)) throw Error.MoreThanOneMatch();
+                        }
+                        return result;
+                    }
                 }
             }
-            switch (count)
-            {
-                case 0: return default(TSource);
-                case 1: return result;
-            }
-            throw Error.MoreThanOneMatch();
+            return default(TSource);
         }
 
         public static TSource ElementAt<TSource>(this IEnumerable<TSource> source, int index)
