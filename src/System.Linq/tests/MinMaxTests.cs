@@ -14,6 +14,7 @@ namespace System.Linq.Tests
             Assert.Equal(1, one.Min());
             Assert.Equal(-10, minusTen.Min());
             Assert.Equal(100, hundred.Min());
+            Assert.Throws<InvalidOperationException>(() => Enumerable.Empty<int>().Min());
         }
 
         [Fact]
@@ -25,6 +26,7 @@ namespace System.Linq.Tests
             Assert.Equal(10, ten.Max());
             Assert.Equal(-10, minusTen.Max());
             Assert.Equal(1000, thousand.Max());
+            Assert.Throws<InvalidOperationException>(() => Enumerable.Empty<int>().Max());
         }
 
         [Fact]
@@ -36,6 +38,7 @@ namespace System.Linq.Tests
             Assert.Equal(1, one.Min());
             Assert.Equal(-10, minusTen.Min());
             Assert.Equal(100, hundred.Min());
+            Assert.Throws<InvalidOperationException>(() => Enumerable.Empty<long>().Min());
         }
 
         [Fact]
@@ -47,6 +50,7 @@ namespace System.Linq.Tests
             Assert.Equal(10, ten.Max());
             Assert.Equal(-10, minusTen.Max());
             Assert.Equal(1000, thousand.Max());
+            Assert.Throws<InvalidOperationException>(() => Enumerable.Empty<long>().Max());
         }
 
         [Fact]
@@ -58,6 +62,7 @@ namespace System.Linq.Tests
             Assert.Equal(1L, one.Min());
             Assert.Equal(-10L, minusTen.Min());
             Assert.Equal(100L, hundred.Min());
+            Assert.Throws<InvalidOperationException>(() => Enumerable.Empty<float>().Min());
         }
 
         [Fact]
@@ -69,6 +74,7 @@ namespace System.Linq.Tests
             Assert.Equal(10F, ten.Max());
             Assert.Equal(-10F, minusTen.Max());
             Assert.Equal(1000F, thousand.Max());
+            Assert.Throws<InvalidOperationException>(() => Enumerable.Empty<float>().Max());
         }
 
         [Fact]
@@ -80,6 +86,7 @@ namespace System.Linq.Tests
             Assert.Equal(1D, one.Min());
             Assert.Equal(-10D, minusTen.Min());
             Assert.Equal(100D, hundred.Min());
+            Assert.Throws<InvalidOperationException>(() => Enumerable.Empty<double>().Min());
         }
 
         [Fact]
@@ -91,6 +98,7 @@ namespace System.Linq.Tests
             Assert.Equal(10D, ten.Max());
             Assert.Equal(-10D, minusTen.Max());
             Assert.Equal(1000D, thousand.Max());
+            Assert.Throws<InvalidOperationException>(() => Enumerable.Empty<double>().Max());
         }
 
         [Fact]
@@ -102,6 +110,7 @@ namespace System.Linq.Tests
             Assert.Equal(1M, one.Min());
             Assert.Equal(-10M, minusTen.Min());
             Assert.Equal(100M, hundred.Min());
+            Assert.Throws<InvalidOperationException>(() => Enumerable.Empty<decimal>().Min());
         }
 
         [Fact]
@@ -113,6 +122,7 @@ namespace System.Linq.Tests
             Assert.Equal(10M, ten.Max());
             Assert.Equal(-10M, minusTen.Max());
             Assert.Equal(1000M, thousand.Max());
+            Assert.Throws<InvalidOperationException>(() => Enumerable.Empty<decimal>().Max());
         }
 
         [Fact]
@@ -124,6 +134,8 @@ namespace System.Linq.Tests
             Assert.Equal(1, one.Min());
             Assert.Equal(-10, minusTen.Min());
             Assert.Equal(100, hundred.Min());
+            Assert.Equal(null, Enumerable.Empty<int?>().Min());
+            Assert.Equal(null, Enumerable.Repeat(default(int?), 100).Min());
         }
 
         [Fact]
@@ -135,6 +147,8 @@ namespace System.Linq.Tests
             Assert.Equal(10, ten.Max());
             Assert.Equal(-10, minusTen.Max());
             Assert.Equal(1000, thousand.Max());
+            Assert.Equal(null, Enumerable.Empty<int?>().Max());
+            Assert.Equal(null, Enumerable.Repeat(default(int?), 100).Max());
         }
 
         [Fact]
@@ -146,6 +160,8 @@ namespace System.Linq.Tests
             Assert.Equal(1, one.Min());
             Assert.Equal(-10, minusTen.Min());
             Assert.Equal(100, hundred.Min());
+            Assert.Equal(null, Enumerable.Empty<long?>().Min());
+            Assert.Equal(null, Enumerable.Repeat(default(long?), 100).Min());
         }
 
         [Fact]
@@ -157,6 +173,8 @@ namespace System.Linq.Tests
             Assert.Equal(10, ten.Max());
             Assert.Equal(-10, minusTen.Max());
             Assert.Equal(1000, thousand.Max());
+            Assert.Equal(null, Enumerable.Empty<long?>().Max());
+            Assert.Equal(null, Enumerable.Repeat(default(long?), 100).Max());
         }
 
         [Fact]
@@ -168,6 +186,8 @@ namespace System.Linq.Tests
             Assert.Equal(1L, one.Min());
             Assert.Equal(-10L, minusTen.Min());
             Assert.Equal(100L, hundred.Min());
+            Assert.Equal(null, Enumerable.Empty<float?>().Min());
+            Assert.Equal(null, Enumerable.Repeat(default(float?), 100).Min());
         }
 
         [Fact]
@@ -179,6 +199,8 @@ namespace System.Linq.Tests
             Assert.Equal(10F, ten.Max());
             Assert.Equal(-10F, minusTen.Max());
             Assert.Equal(1000F, thousand.Max());
+            Assert.Equal(null, Enumerable.Empty<float?>().Max());
+            Assert.Equal(null, Enumerable.Repeat(default(float?), 100).Max());
         }
 
         [Fact]
@@ -190,6 +212,8 @@ namespace System.Linq.Tests
             Assert.Equal(1D, one.Min());
             Assert.Equal(-10D, minusTen.Min());
             Assert.Equal(100D, hundred.Min());
+            Assert.Equal(null, Enumerable.Empty<double?>().Min());
+            Assert.Equal(null, Enumerable.Repeat(default(double?), 100).Min());
         }
 
         [Fact]
@@ -201,6 +225,8 @@ namespace System.Linq.Tests
             Assert.Equal(10D, ten.Max());
             Assert.Equal(-10D, minusTen.Max());
             Assert.Equal(1000D, thousand.Max());
+            Assert.Equal(null, Enumerable.Empty<double?>().Max());
+            Assert.Equal(null, Enumerable.Repeat(default(double?), 100).Max());
         }
 
         [Fact]
@@ -212,6 +238,8 @@ namespace System.Linq.Tests
             Assert.Equal(1M, one.Min());
             Assert.Equal(-10M, minusTen.Min());
             Assert.Equal(100M, hundred.Min());
+            Assert.Equal(null, Enumerable.Empty<decimal?>().Min());
+            Assert.Equal(null, Enumerable.Repeat(default(decimal?), 100).Min());
         }
 
         [Fact]
@@ -223,6 +251,8 @@ namespace System.Linq.Tests
             Assert.Equal(10M, ten.Max());
             Assert.Equal(-10M, minusTen.Max());
             Assert.Equal(1000M, thousand.Max());
+            Assert.Equal(null, Enumerable.Empty<decimal?>().Max());
+            Assert.Equal(null, Enumerable.Repeat(default(decimal?), 100).Max());
         }
     }
 }
