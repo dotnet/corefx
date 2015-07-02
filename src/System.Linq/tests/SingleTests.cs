@@ -19,7 +19,7 @@ namespace System.Linq.Tests
 
         // Warning: At time of writing these two tests, they will incorrectly run for about five millennia.
         // They'll then probably throw OverflowException rather than the correct InvalidOperationException,
-        // but I haven't had time to confirm.
+        // but I haven't had time to confirm. Recommend to skip if using without fix applied in commit 3f17916
 
         [Fact]
         public void FailOnManyMatches()
