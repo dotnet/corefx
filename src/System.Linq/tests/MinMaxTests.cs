@@ -299,5 +299,75 @@ namespace System.Linq.Tests
             Assert.True(double.IsNaN(nanWithNull.Min().Value));
             Assert.True(double.IsNaN(nanWithNull.Max().Value));
         }
+
+        [Fact]
+        public void MinDateTime()
+        {
+            var one = Enumerable.Range(1, 10).Select(i => new DateTime(2000, 1, i)).ToArray();
+            var newYears = new[]
+            {
+                new DateTime(2000, 12, 1),
+                new DateTime(2000, 1, 1),
+                new DateTime(2000, 1, 12)
+            };
+            var hundred = new[]
+            {
+                new DateTime(3000, 1, 1),
+                new DateTime(100, 1, 1),
+                new DateTime(200, 1, 1),
+                new DateTime(1000, 1, 1)
+            };
+            Assert.Equal(new DateTime(2000, 1, 1), one.Min());
+            Assert.Equal(new DateTime(2000, 1, 1), newYears.Min());
+            Assert.Equal(new DateTime(100, 1, 1), hundred.Min());
+            Assert.Throws<InvalidOperationException>(() => Enumerable.Empty<DateTime>().Min());
+        }
+
+        [Fact]
+        public void MaxDateTime()
+        {
+            var ten = Enumerable.Range(1, 10).Select(i => new DateTime(2000, 1, i)).ToArray();
+            var newYearsEve = new[]
+            {
+                new DateTime(2000, 12, 1),
+                new DateTime(2000, 12, 31),
+                new DateTime(2000, 1, 12)
+            };
+            var threeThousand = new[]
+            {
+                new DateTime(3000, 1, 1),
+                new DateTime(100, 1, 1),
+                new DateTime(200, 1, 1),
+                new DateTime(1000, 1, 1)
+            };
+            Assert.Equal(new DateTime(2000, 1, 10), ten.Max());
+            Assert.Equal(new DateTime(2000, 12, 31), newYearsEve.Max());
+            Assert.Equal(new DateTime(3000, 1, 1), threeThousand.Max());
+            Assert.Throws<InvalidOperationException>(() => Enumerable.Empty<DateTime>().Max());
+        }
+
+        [Fact]
+        public void MinString()
+        {
+            var one = Enumerable.Range(1, 10).Select(i => i.ToString()).ToArray();
+            var agents = new[] { "Alice", "Bob", "Charlie", "Eve", "Mallory", "Trent", "Victor"};
+            var confusedAgents = new[] { null, "Charlie", null, "Victor", "Trent", null, "Eve", "Alice", "Mallory", "Bob" };
+            Assert.Equal("1", one.Min());
+            Assert.Equal("Alice", agents.Min());
+            Assert.Equal("Alice", confusedAgents.Min());
+            Assert.Null(Enumerable.Empty<string>().Min());
+        }
+
+        [Fact]
+        public void MaxString()
+        {
+            var nine = Enumerable.Range(1, 10).Select(i => i.ToString()).ToArray();
+            var agents = new[] { "Alice", "Bob", "Charlie", "Eve", "Mallory", "Victor", "Trent" };
+            var confusedAgents = new[] { null, "Charlie", null, "Victor", "Trent", null, "Eve", "Alice", "Mallory", "Bob" };
+            Assert.Equal("9", nine.Max());
+            Assert.Equal("Victor", agents.Max());
+            Assert.Equal("Victor", confusedAgents.Max());
+            Assert.Null(Enumerable.Empty<string>().Max());
+        }
     }
 }
