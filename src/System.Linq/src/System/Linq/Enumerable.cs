@@ -679,18 +679,73 @@ namespace System.Linq
         public static IEnumerable<TSource> Skip<TSource>(this IEnumerable<TSource> source, int count)
         {
             if (source == null) throw Error.ArgumentNull("source");
-            return SkipIterator<TSource>(source, count);
+            return count <= 0 ? source : new SkipEnumerable<TSource>(source, count);
         }
 
-        private static IEnumerable<TSource> SkipIterator<TSource>(IEnumerable<TSource> source, int count)
+        private class SkipEnumerable<TSource> : IEnumerable<TSource>
         {
-            using (IEnumerator<TSource> e = source.GetEnumerator())
+            // Just in case somebody does something weird with the ordering of enumerator
+            // disposal, this wraps an enumerator that has been used, but not disposed,
+            // and disposes it when this is.
+            private class DeadEnumeratorWrapper : IEnumerator<TSource>
             {
-                while (count > 0 && e.MoveNext()) count--;
-                if (count <= 0)
+                private readonly IEnumerator<TSource> _corpse;
+                public DeadEnumeratorWrapper(IEnumerator<TSource> corpse)
                 {
-                    while (e.MoveNext()) yield return e.Current;
+                    _corpse = corpse;
                 }
+                public TSource Current
+                {
+                    get { return default(TSource); }
+                }
+                object IEnumerator.Current
+                {
+                    get { return default(TSource); }
+                }
+                public bool MoveNext()
+                {
+                    return false;
+                }
+                public void Dispose()
+                {
+                    _corpse.Dispose();
+                }
+                public void Reset()
+                {
+                    throw new NotSupportedException();
+                }
+            }
+            private readonly IEnumerable<TSource> _source;
+            private readonly int _count;
+            public SkipEnumerable(IEnumerable<TSource> source, int count)
+            {
+                _source = source;
+                _count = count;
+            }
+            public IEnumerator<TSource> GetEnumerator()
+            {
+                IEnumerator<TSource> sourceEnumerator = _source.GetEnumerator();
+                try
+                {
+                    int count = _count;
+                    while (count-- != 0)
+                    {
+                        if (!sourceEnumerator.MoveNext())
+                        {
+                            return new DeadEnumeratorWrapper(sourceEnumerator);
+                        }
+                    }
+                    return sourceEnumerator;
+                }
+                catch
+                {
+                    sourceEnumerator.Dispose();
+                    throw;
+                }
+            }
+            IEnumerator IEnumerable.GetEnumerator()
+            {
+                return GetEnumerator();
             }
         }
 
