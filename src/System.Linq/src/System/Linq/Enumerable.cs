@@ -3136,7 +3136,19 @@ namespace System.Linq
                         if (count > 0)
                         {
                             items = new TElement[count];
-                            collection.CopyTo(items, 0);
+                            try
+                            {
+                                collection.CopyTo(items, 0);
+                            }
+                            catch (ArrayTypeMismatchException)
+                            {
+                                // This is a relatively obscure edge-case, in which a sequence of one type is
+                                // being treated as a sequence of another type by Cast(), but the underlying
+                                // types don't work with array copy. Better and easier to catch the rare cases
+                                // than to detect them.
+                                // Eat the exception and try again below.
+                                items = null;
+                            }
                         }
                     }
                 }
@@ -3144,18 +3156,23 @@ namespace System.Linq
 
             if (items == null)
             {
-                foreach (TElement item in source)
+                using(IEnumerator<TElement> e = source.GetEnumerator())
                 {
-                    if (items == null)
+                    if (e.MoveNext())
                     {
-                        items = new TElement[4];
+                        if (count != 0)
+                        {
+                            items = new TElement[count];
+                            count = 0;
+                        }
+                        else items = new TElement[4];
+                        items[count++] = e.Current;
+                        while (e.MoveNext())
+                        {
+                            if (items.Length == count) Array.Resize(ref items, checked(count * 2));
+                            items[count++] = e.Current;
+                        }
                     }
-                    else if (items.Length == count)
-                    {
-                        Array.Resize(ref items, checked(count * 2));
-                    }
-                    items[count] = item;
-                    count++;
                 }
             }
 
