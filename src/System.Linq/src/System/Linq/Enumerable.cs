@@ -679,7 +679,7 @@ namespace System.Linq
         public static IEnumerable<TSource> Skip<TSource>(this IEnumerable<TSource> source, int count)
         {
             Error.CheckSourceNotNull(source);
-            return count <= 0 ? source : new SkipIterator<TSource>(source, count);
+            return new SkipIterator<TSource>(source, count);
         }
 
         private class SkipIterator<TSource> : IEnumerable<TSource>
@@ -720,20 +720,16 @@ namespace System.Linq
             public SkipIterator(IEnumerable<TSource> source, int count)
             {
                 _source = source;
-                _count = count;
+                _count = count > 0 ? count : 0;
             }
             public IEnumerator<TSource> GetEnumerator()
             {
                 IEnumerator<TSource> sourceEnumerator = _source.GetEnumerator();
                 try
                 {
-                    int count = _count;
-                    while (count-- != 0)
+                    for(int count = _count; count != 0; --count)
                     {
-                        if (!sourceEnumerator.MoveNext())
-                        {
-                            return new DeadEnumeratorWrapper(sourceEnumerator);
-                        }
+                        if (!sourceEnumerator.MoveNext()) return new DeadEnumeratorWrapper(sourceEnumerator);
                     }
                     return sourceEnumerator;
                 }
