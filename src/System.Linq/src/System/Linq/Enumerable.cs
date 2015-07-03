@@ -679,10 +679,10 @@ namespace System.Linq
         public static IEnumerable<TSource> Skip<TSource>(this IEnumerable<TSource> source, int count)
         {
             Error.CheckSourceNotNull(source);
-            return count <= 0 ? source : new SkipEnumerable<TSource>(source, count);
+            return count <= 0 ? source : new SkipIterator<TSource>(source, count);
         }
 
-        private class SkipEnumerable<TSource> : IEnumerable<TSource>
+        private class SkipIterator<TSource> : IEnumerable<TSource>
         {
             // Just in case somebody does something weird with the ordering of enumerator
             // disposal, this wraps an enumerator that has been used, but not disposed,
@@ -717,7 +717,7 @@ namespace System.Linq
             }
             private readonly IEnumerable<TSource> _source;
             private readonly int _count;
-            public SkipEnumerable(IEnumerable<TSource> source, int count)
+            public SkipIterator(IEnumerable<TSource> source, int count)
             {
                 _source = source;
                 _count = count;
