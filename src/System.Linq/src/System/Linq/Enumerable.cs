@@ -727,7 +727,7 @@ namespace System.Linq
                 IEnumerator<TSource> sourceEnumerator = _source.GetEnumerator();
                 try
                 {
-                    for(int count = _count; count != 0; --count)
+                    for (int count = _count; count != 0; --count)
                     {
                         if (!sourceEnumerator.MoveNext()) return new DeadEnumeratorWrapper(sourceEnumerator);
                     }
