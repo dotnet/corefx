@@ -9,6 +9,12 @@ namespace System.Linq
     {
         internal static Exception ArgumentNull(string s) { return new ArgumentNullException(s); }
 
+        internal static void CheckSourceNotNull<T>(T source) { if (source == null) throw ArgumentNull("source"); }
+
+        internal static void CheckPredicateNotNull<T>(Func<T, bool> predicate) { if (predicate == null) throw ArgumentNull("predicate"); }
+
+        internal static void CheckPredicateNotNull<T>(Func<T, int, bool> predicate) { if (predicate == null) throw ArgumentNull("predicate"); }
+
         internal static Exception ArgumentOutOfRange(string s) { return new ArgumentOutOfRangeException(s); }
 
         internal static Exception MoreThanOneElement() { return new InvalidOperationException(Strings.MoreThanOneElement); }
