@@ -753,23 +753,63 @@ namespace System.Linq
         {
             Error.CheckSourceNotNull(source);
             Error.CheckPredicateNotNull(predicate);
-            return SkipWhileIterator<TSource>(source, predicate);
+            return new SkipWhileIterator<TSource>(source, predicate);
         }
 
-        private static IEnumerable<TSource> SkipWhileIterator<TSource>(IEnumerable<TSource> source, Func<TSource, bool> predicate)
+        private class SkipWhileIterator<TSource> : IEnumerable<TSource>
         {
-            using (IEnumerator<TSource> e = source.GetEnumerator())
+            private class Enumerator : IEnumerator<TSource>
             {
-                while (e.MoveNext())
+                private readonly IEnumerator<TSource> _source;
+                private readonly Func<TSource, bool> _predicate;
+                private bool _started;
+                public Enumerator(IEnumerable<TSource> source, Func<TSource, bool> predicate)
                 {
-                    TSource element = e.Current;
-                    if (!predicate(element))
-                    {
-                        yield return element;
-                        while (e.MoveNext()) yield return e.Current;
-                        break;
-                    }
+                    _source = source.GetEnumerator();
+                    _predicate = predicate;
                 }
+                public TSource Current
+                {
+                    get { return _source.Current; }
+                }
+                object IEnumerator.Current
+                {
+                    get { return Current; }
+                }
+                public bool MoveNext()
+                {
+                    if (_started)
+                        return _source.MoveNext();
+                    _started = true;
+                    while (_source.MoveNext())
+                        if (!_predicate(_source.Current))
+                            return true;
+                    return false;
+                }
+                public void Reset()
+                {
+                    _source.Reset();
+                    _started = false;
+                }
+                public void Dispose()
+                {
+                    _source.Dispose();
+                }
+            }
+            private readonly IEnumerable<TSource> _source;
+            private readonly Func<TSource, bool> _predicate;
+            public SkipWhileIterator(IEnumerable<TSource> source, Func<TSource, bool> predicate)
+            {
+                _source = source;
+                _predicate = predicate;
+            }
+            public IEnumerator<TSource> GetEnumerator()
+            {
+                return new Enumerator(_source, _predicate);
+            }
+            IEnumerator IEnumerable.GetEnumerator()
+            {
+                return GetEnumerator();
             }
         }
 
@@ -777,25 +817,62 @@ namespace System.Linq
         {
             Error.CheckSourceNotNull(source);
             Error.CheckPredicateNotNull(predicate);
-            return SkipWhileIterator<TSource>(source, predicate);
+            return new SkipWhileWithIndexIterator<TSource>(source, predicate);
         }
 
-        private static IEnumerable<TSource> SkipWhileIterator<TSource>(IEnumerable<TSource> source, Func<TSource, int, bool> predicate)
+        private class SkipWhileWithIndexIterator<TSource> : IEnumerable<TSource>
         {
-            using (IEnumerator<TSource> e = source.GetEnumerator())
+            private class Enumerator : IEnumerator<TSource>
             {
-                int index = -1;
-                while (e.MoveNext())
+                private readonly IEnumerator<TSource> _source;
+                private readonly Func<TSource, int, bool> _predicate;
+                private int _index = 0;
+                public Enumerator(IEnumerable<TSource> source, Func<TSource, int, bool> predicate)
                 {
-                    TSource element = e.Current;
-                    checked { ++index; }
-                    if (!predicate(element, index))
-                    {
-                        yield return element;
-                        while (e.MoveNext()) yield return e.Current;
-                        break;
-                    }
+                    _source = source.GetEnumerator();
+                    _predicate = predicate;
                 }
+                public TSource Current
+                {
+                    get { return _source.Current; }
+                }
+                object IEnumerator.Current
+                {
+                    get { return Current; }
+                }
+                public bool MoveNext()
+                {
+                    if (_index != 0)
+                        return _source.MoveNext();
+                    while (_source.MoveNext())
+                        if (!_predicate(_source.Current, _index++))
+                            return true;
+                    return false;
+                }
+                public void Reset()
+                {
+                    _source.Reset();
+                    _index = 0;
+                }
+                public void Dispose()
+                {
+                    _source.Dispose();
+                }
+            }
+            private readonly IEnumerable<TSource> _source;
+            private readonly Func<TSource, int, bool> _predicate;
+            public SkipWhileWithIndexIterator(IEnumerable<TSource> source, Func<TSource, int, bool> predicate)
+            {
+                _source = source;
+                _predicate = predicate;
+            }
+            public IEnumerator<TSource> GetEnumerator()
+            {
+                return new Enumerator(_source, _predicate);
+            }
+            IEnumerator IEnumerable.GetEnumerator()
+            {
+                return GetEnumerator();
             }
         }
 
