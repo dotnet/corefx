@@ -729,6 +729,10 @@ namespace System.Linq
                 {
                     for (int count = _count; count != 0; --count)
                     {
+                        // It should be harmless to have the recipient call MoveNext again.
+                        // but we guard against strange behaviour from shortcuts in the enumerator
+                        // It should also be harmless to dispose the enumerator here if we've
+                        // exhausted it, but we guard against strange behaviour in the caller.
                         if (!sourceEnumerator.MoveNext()) return new DeadEnumeratorWrapper(sourceEnumerator);
                     }
                     return sourceEnumerator;
@@ -1378,17 +1382,22 @@ namespace System.Linq
         {
             Error.CheckSourceNotNull(source);
             Error.CheckPredicateNotNull(predicate);
-            TSource result = default(TSource);
-            bool found = false;
-            foreach (TSource element in source)
+            using (IEnumerator<TSource> e = source.GetEnumerator())
             {
-                if (predicate(element))
+                while (e.MoveNext())
                 {
-                    result = element;
-                    found = true;
+                    TSource result = e.Current;
+                    if (predicate(result))
+                    {
+                        while (e.MoveNext())
+                        {
+                            TSource element = e.Current;
+                            if (predicate(element)) result = element;
+                        }
+                        return result;
+                    }
                 }
             }
-            if (found) return result;
             throw Error.NoMatch();
         }
 
