@@ -229,7 +229,7 @@ namespace System.Net.Sockets
 
             // TODO: The MCG compiler or Test infrastructure is currently broken and cannot properly interpret CharSet.Unicode.
             //       The code has been changed from WSASocket to WSASocketW to avoid an EXE loader issue.
-            [DllImport(ExternDll.WS2_32, CharSet = CharSet.Unicode, SetLastError = true)]
+            [DllImport(Interop.Libraries.Ws2_32, CharSet = CharSet.Unicode, SetLastError = true)]
             internal static extern SafeCloseSocket.InnerSafeCloseSocket WSASocketW(
                                                     [In] AddressFamily addressFamily,
                                                     [In] SocketType socketType,
@@ -239,7 +239,7 @@ namespace System.Net.Sockets
                                                     [In] SocketConstructorFlags flags
                                                     );
 
-            [DllImport(ExternDll.WS2_32, CharSet = CharSet.Unicode, SetLastError = true)]
+            [DllImport(Interop.Libraries.Ws2_32, CharSet = CharSet.Unicode, SetLastError = true)]
             internal unsafe static extern SafeCloseSocket.InnerSafeCloseSocket WSASocketW(
                                         [In] AddressFamily addressFamily,
                                         [In] SocketType socketType,
@@ -250,45 +250,45 @@ namespace System.Net.Sockets
                                         );
 
 
-            [DllImport(ExternDll.WS2_32, CharSet = CharSet.Ansi, BestFitMapping = false, ThrowOnUnmappableChar = true, SetLastError = true)]
+            [DllImport(Interop.Libraries.Ws2_32, CharSet = CharSet.Ansi, BestFitMapping = false, ThrowOnUnmappableChar = true, SetLastError = true)]
             internal static extern SocketError WSAStartup(
                                                [In] short wVersionRequested,
                                                [Out] out WSAData lpWSAData
                                                );
 
-            [DllImport(ExternDll.WS2_32, SetLastError = true)]
+            [DllImport(Interop.Libraries.Ws2_32, SetLastError = true)]
             internal static extern SocketError ioctlsocket(
                                                 [In] SafeCloseSocket socketHandle,
                                                 [In] int cmd,
                                                 [In, Out] ref int argp
                                                 );
 
-            [DllImport(ExternDll.WS2_32, CharSet = CharSet.Ansi, BestFitMapping = false, ThrowOnUnmappableChar = true, SetLastError = true)]
+            [DllImport(Interop.Libraries.Ws2_32, CharSet = CharSet.Ansi, BestFitMapping = false, ThrowOnUnmappableChar = true, SetLastError = true)]
             internal static extern IntPtr gethostbyname(
                                                   [In] string host
                                                   );
 
-            [DllImport(ExternDll.WS2_32, SetLastError = true)]
+            [DllImport(Interop.Libraries.Ws2_32, SetLastError = true)]
             internal static extern IntPtr gethostbyaddr(
                                                   [In] ref int addr,
                                                   [In] int len,
                                                   [In] ProtocolFamily type
                                                   );
 
-            [DllImport(ExternDll.WS2_32, CharSet = CharSet.Ansi, BestFitMapping = false, ThrowOnUnmappableChar = true, SetLastError = true)]
+            [DllImport(Interop.Libraries.Ws2_32, CharSet = CharSet.Ansi, BestFitMapping = false, ThrowOnUnmappableChar = true, SetLastError = true)]
             internal static extern SocketError gethostname(
                                                 [Out] StringBuilder hostName,
                                                 [In] int bufferLength
                                                 );
 
-            [DllImport(ExternDll.WS2_32, SetLastError = true)]
+            [DllImport(Interop.Libraries.Ws2_32, SetLastError = true)]
             internal static extern SocketError getpeername(
                                                 [In] SafeCloseSocket socketHandle,
                                                 [Out] byte[] socketAddress,
                                                 [In, Out] ref int socketAddressSize
                                                 );
 
-            [DllImport(ExternDll.WS2_32, SetLastError = true)]
+            [DllImport(Interop.Libraries.Ws2_32, SetLastError = true)]
             internal static extern SocketError getsockopt(
                                                [In] SafeCloseSocket socketHandle,
                                                [In] SocketOptionLevel optionLevel,
@@ -297,7 +297,7 @@ namespace System.Net.Sockets
                                                [In, Out] ref int optionLength
                                                );
 
-            [DllImport(ExternDll.WS2_32, SetLastError = true)]
+            [DllImport(Interop.Libraries.Ws2_32, SetLastError = true)]
             internal static extern SocketError getsockopt(
                                                [In] SafeCloseSocket socketHandle,
                                                [In] SocketOptionLevel optionLevel,
@@ -306,7 +306,7 @@ namespace System.Net.Sockets
                                                [In, Out] ref int optionLength
                                                );
 
-            [DllImport(ExternDll.WS2_32, SetLastError = true)]
+            [DllImport(Interop.Libraries.Ws2_32, SetLastError = true)]
             internal static extern SocketError getsockopt(
                                                [In] SafeCloseSocket socketHandle,
                                                [In] SocketOptionLevel optionLevel,
@@ -315,7 +315,7 @@ namespace System.Net.Sockets
                                                [In, Out] ref int optionLength
                                                );
 
-            [DllImport(ExternDll.WS2_32, SetLastError = true)]
+            [DllImport(Interop.Libraries.Ws2_32, SetLastError = true)]
             internal static extern SocketError getsockopt(
                                                [In] SafeCloseSocket socketHandle,
                                                [In] SocketOptionLevel optionLevel,
@@ -327,7 +327,7 @@ namespace System.Net.Sockets
             //
             // IPv6 Changes: need to receive and IPv6MulticastRequest from getsockopt
             //
-            [DllImport(ExternDll.WS2_32, SetLastError = true)]
+            [DllImport(Interop.Libraries.Ws2_32, SetLastError = true)]
             internal static extern SocketError getsockopt(
                                                [In] SafeCloseSocket socketHandle,
                                                [In] SocketOptionLevel optionLevel,
@@ -336,7 +336,7 @@ namespace System.Net.Sockets
                                                [In, Out] ref int optionLength
                                                );
 
-            [DllImport(ExternDll.WS2_32, SetLastError = true)]
+            [DllImport(Interop.Libraries.Ws2_32, SetLastError = true)]
             internal static extern SocketError setsockopt(
                                                [In] SafeCloseSocket socketHandle,
                                                [In] SocketOptionLevel optionLevel,
@@ -345,7 +345,7 @@ namespace System.Net.Sockets
                                                [In] int optionLength
                                                );
 
-            [DllImport(ExternDll.WS2_32, SetLastError = true)]
+            [DllImport(Interop.Libraries.Ws2_32, SetLastError = true)]
             internal static extern SocketError setsockopt(
                                                [In] SafeCloseSocket socketHandle,
                                                [In] SocketOptionLevel optionLevel,
@@ -354,7 +354,7 @@ namespace System.Net.Sockets
                                                [In] int optionLength
                                                );
 
-            [DllImport(ExternDll.WS2_32, SetLastError = true)]
+            [DllImport(Interop.Libraries.Ws2_32, SetLastError = true)]
             internal static extern SocketError setsockopt(
                                                [In] SafeCloseSocket socketHandle,
                                                [In] SocketOptionLevel optionLevel,
@@ -363,7 +363,7 @@ namespace System.Net.Sockets
                                                [In] int optionLength
                                                );
 
-            [DllImport(ExternDll.WS2_32, SetLastError = true)]
+            [DllImport(Interop.Libraries.Ws2_32, SetLastError = true)]
             internal static extern SocketError setsockopt(
                                                [In] SafeCloseSocket socketHandle,
                                                [In] SocketOptionLevel optionLevel,
@@ -372,7 +372,7 @@ namespace System.Net.Sockets
                                                [In] int optionLength
                                                );
 
-            [DllImport(ExternDll.WS2_32, SetLastError = true)]
+            [DllImport(Interop.Libraries.Ws2_32, SetLastError = true)]
             internal static extern SocketError setsockopt(
                                                [In] SafeCloseSocket socketHandle,
                                                [In] SocketOptionLevel optionLevel,
@@ -384,7 +384,7 @@ namespace System.Net.Sockets
             //
             // IPv6 Changes: need to pass an IPv6MulticastRequest to setsockopt
             //
-            [DllImport(ExternDll.WS2_32, SetLastError = true)]
+            [DllImport(Interop.Libraries.Ws2_32, SetLastError = true)]
             internal static extern SocketError setsockopt(
                                                [In] SafeCloseSocket socketHandle,
                                                [In] SocketOptionLevel optionLevel,
@@ -393,57 +393,8 @@ namespace System.Net.Sockets
                                                [In] int optionLength
                                                );
 
-#if !FEATURE_PAL
-
-            [DllImport(ExternDll.MSWSOCK, SetLastError = true)]
-            internal static extern bool TransmitFile(
-                                      [In] SafeCloseSocket socket,
-                                      [In] SafeHandle fileHandle,
-                                      [In] int numberOfBytesToWrite,
-                                      [In] int numberOfBytesPerSend,
-                                      [In] SafeHandle overlapped,
-                                      [In] TransmitFileBuffers buffers,
-                                      [In] TransmitFileOptions flags
-                                      );
-
-            [DllImport(ExternDll.MSWSOCK, SetLastError = true, EntryPoint = "TransmitFile")]
-            internal static extern bool TransmitFile2(
-                                      [In] SafeCloseSocket socket,
-                                      [In] IntPtr fileHandle,
-                                      [In] int numberOfBytesToWrite,
-                                      [In] int numberOfBytesPerSend,
-                                      [In] SafeHandle overlapped,
-                                      [In] TransmitFileBuffers buffers,
-                                      [In] TransmitFileOptions flags
-                                      );
-
-
-            [DllImport(ExternDll.MSWSOCK, SetLastError = true, EntryPoint = "TransmitFile")]
-            internal static extern bool TransmitFile_Blocking(
-                                      [In] IntPtr socket,
-                                      [In] SafeHandle fileHandle,
-                                      [In] int numberOfBytesToWrite,
-                                      [In] int numberOfBytesPerSend,
-                                      [In] SafeHandle overlapped,
-                                      [In] TransmitFileBuffers buffers,
-                                      [In] TransmitFileOptions flags
-                                      );
-
-            [DllImport(ExternDll.MSWSOCK, SetLastError = true, EntryPoint = "TransmitFile")]
-            internal static extern bool TransmitFile_Blocking2(
-                                      [In] IntPtr socket,
-                                      [In] IntPtr fileHandle,
-                                      [In] int numberOfBytesToWrite,
-                                      [In] int numberOfBytesPerSend,
-                                      [In] SafeHandle overlapped,
-                                      [In] TransmitFileBuffers buffers,
-                                      [In] TransmitFileOptions flags
-                                      );
-
-#endif // !FEATURE_PAL
-
             // This method is always blocking, so it uses an IntPtr.
-            [DllImport(ExternDll.WS2_32, SetLastError = true)]
+            [DllImport(Interop.Libraries.Ws2_32, SetLastError = true)]
             internal unsafe static extern int send(
                                          [In] IntPtr socketHandle,
                                          [In] byte* pinnedBuffer,
@@ -452,7 +403,7 @@ namespace System.Net.Sockets
                                          );
 
             // This method is always blocking, so it uses an IntPtr.
-            [DllImport(ExternDll.WS2_32, SetLastError = true)]
+            [DllImport(Interop.Libraries.Ws2_32, SetLastError = true)]
             internal unsafe static extern int recv(
                                          [In] IntPtr socketHandle,
                                          [In] byte* pinnedBuffer,
@@ -460,27 +411,27 @@ namespace System.Net.Sockets
                                          [In] SocketFlags socketFlags
                                          );
 
-            [DllImport(ExternDll.WS2_32, SetLastError = true)]
+            [DllImport(Interop.Libraries.Ws2_32, SetLastError = true)]
             internal static extern SocketError listen(
                                            [In] SafeCloseSocket socketHandle,
                                            [In] int backlog
                                            );
 
-            [DllImport(ExternDll.WS2_32, SetLastError = true)]
+            [DllImport(Interop.Libraries.Ws2_32, SetLastError = true)]
             internal static extern SocketError bind(
                                          [In] SafeCloseSocket socketHandle,
                                          [In] byte[] socketAddress,
                                          [In] int socketAddressSize
                                          );
 
-            [DllImport(ExternDll.WS2_32, SetLastError = true)]
+            [DllImport(Interop.Libraries.Ws2_32, SetLastError = true)]
             internal static extern SocketError shutdown(
                                              [In] SafeCloseSocket socketHandle,
                                              [In] int how
                                              );
 
             // This method is always blocking, so it uses an IntPtr.
-            [DllImport(ExternDll.WS2_32, SetLastError = true)]
+            [DllImport(Interop.Libraries.Ws2_32, SetLastError = true)]
             internal unsafe static extern int sendto(
                                            [In] IntPtr socketHandle,
                                            [In] byte* pinnedBuffer,
@@ -491,7 +442,7 @@ namespace System.Net.Sockets
                                            );
 
             // This method is always blocking, so it uses an IntPtr.
-            [DllImport(ExternDll.WS2_32, SetLastError = true)]
+            [DllImport(Interop.Libraries.Ws2_32, SetLastError = true)]
             internal unsafe static extern int recvfrom(
                                              [In] IntPtr socketHandle,
                                              [In] byte* pinnedBuffer,
@@ -501,14 +452,14 @@ namespace System.Net.Sockets
                                              [In, Out] ref int socketAddressSize
                                              );
 
-            [DllImport(ExternDll.WS2_32, SetLastError = true)]
+            [DllImport(Interop.Libraries.Ws2_32, SetLastError = true)]
             internal static extern SocketError getsockname(
                                                 [In] SafeCloseSocket socketHandle,
                                                 [Out] byte[] socketAddress,
                                                 [In, Out] ref int socketAddressSize
                                                 );
 
-            [DllImport(ExternDll.WS2_32, SetLastError = true)]
+            [DllImport(Interop.Libraries.Ws2_32, SetLastError = true)]
             internal static extern int select(
                                            [In] int ignoredParameter,
                                            [In, Out] IntPtr[] readfds,
@@ -517,7 +468,7 @@ namespace System.Net.Sockets
                                            [In] ref TimeValue timeout
                                            );
 
-            [DllImport(ExternDll.WS2_32, SetLastError = true)]
+            [DllImport(Interop.Libraries.Ws2_32, SetLastError = true)]
             internal static extern int select(
                                            [In] int ignoredParameter,
                                            [In, Out] IntPtr[] readfds,
@@ -527,7 +478,7 @@ namespace System.Net.Sockets
                                            );
 
             // This function is always potentially blocking so it uses an IntPtr.
-            [DllImport(ExternDll.WS2_32, SetLastError = true)]
+            [DllImport(Interop.Libraries.Ws2_32, SetLastError = true)]
             internal static extern SocketError WSAConnect(
                                               [In] IntPtr socketHandle,
                                               [In] byte[] socketAddress,
@@ -539,7 +490,7 @@ namespace System.Net.Sockets
                                               );
 
 
-            [DllImport(ExternDll.WS2_32, SetLastError = true)]
+            [DllImport(Interop.Libraries.Ws2_32, SetLastError = true)]
             internal static extern SocketError WSASend(
                                               [In] SafeCloseSocket socketHandle,
                                               [In] ref WSABuffer buffer,
@@ -550,7 +501,7 @@ namespace System.Net.Sockets
                                               [In] IntPtr completionRoutine
                                               );
 
-            [DllImport(ExternDll.WS2_32, SetLastError = true)]
+            [DllImport(Interop.Libraries.Ws2_32, SetLastError = true)]
             internal static extern SocketError WSASend(
                                               [In] SafeCloseSocket socketHandle,
                                               [In] WSABuffer[] buffersArray,
@@ -561,7 +512,7 @@ namespace System.Net.Sockets
                                               [In] IntPtr completionRoutine
                                               );
 
-            [DllImport(ExternDll.WS2_32, SetLastError = true, EntryPoint = "WSASend")]
+            [DllImport(Interop.Libraries.Ws2_32, SetLastError = true, EntryPoint = "WSASend")]
             internal static extern SocketError WSASend_Blocking(
                                               [In] IntPtr socketHandle,
                                               [In] WSABuffer[] buffersArray,
@@ -572,7 +523,7 @@ namespace System.Net.Sockets
                                               [In] IntPtr completionRoutine
                                               );
 
-            [DllImport(ExternDll.WS2_32, SetLastError = true)]
+            [DllImport(Interop.Libraries.Ws2_32, SetLastError = true)]
             internal static extern SocketError WSASendTo(
                                                 [In] SafeCloseSocket socketHandle,
                                                 [In] ref WSABuffer buffer,
@@ -585,7 +536,7 @@ namespace System.Net.Sockets
                                                 [In] IntPtr completionRoutine
                                                 );
 
-            [DllImport(ExternDll.WS2_32, SetLastError = true)]
+            [DllImport(Interop.Libraries.Ws2_32, SetLastError = true)]
             internal static extern SocketError WSASendTo(
                                                 [In] SafeCloseSocket socketHandle,
                                                 [In] WSABuffer[] buffersArray,
@@ -598,7 +549,7 @@ namespace System.Net.Sockets
                                                 [In] IntPtr completionRoutine
                                                 );
 
-            [DllImport(ExternDll.WS2_32, SetLastError = true)]
+            [DllImport(Interop.Libraries.Ws2_32, SetLastError = true)]
             internal static extern SocketError WSARecv(
                                               [In] SafeCloseSocket socketHandle,
                                               [In] ref WSABuffer buffer,
@@ -609,7 +560,7 @@ namespace System.Net.Sockets
                                               [In] IntPtr completionRoutine
                                               );
 
-            [DllImport(ExternDll.WS2_32, SetLastError = true)]
+            [DllImport(Interop.Libraries.Ws2_32, SetLastError = true)]
             internal static extern SocketError WSARecv(
                                               [In] SafeCloseSocket socketHandle,
                                               [In, Out] WSABuffer[] buffers,
@@ -620,7 +571,7 @@ namespace System.Net.Sockets
                                               [In] IntPtr completionRoutine
                                               );
 
-            [DllImport(ExternDll.WS2_32, SetLastError = true, EntryPoint = "WSARecv")]
+            [DllImport(Interop.Libraries.Ws2_32, SetLastError = true, EntryPoint = "WSARecv")]
             internal static extern SocketError WSARecv_Blocking(
                                               [In] IntPtr socketHandle,
                                               [In, Out] WSABuffer[] buffers,
@@ -631,7 +582,7 @@ namespace System.Net.Sockets
                                               [In] IntPtr completionRoutine
                                               );
 
-            [DllImport(ExternDll.WS2_32, SetLastError = true)]
+            [DllImport(Interop.Libraries.Ws2_32, SetLastError = true)]
             internal static extern SocketError WSARecvFrom(
                                                   [In] SafeCloseSocket socketHandle,
                                                   [In] ref WSABuffer buffer,
@@ -644,7 +595,7 @@ namespace System.Net.Sockets
                                                   [In] IntPtr completionRoutine
                                                   );
 
-            [DllImport(ExternDll.WS2_32, SetLastError = true)]
+            [DllImport(Interop.Libraries.Ws2_32, SetLastError = true)]
             internal static extern SocketError WSARecvFrom(
                                                   [In] SafeCloseSocket socketHandle,
                                                   [In, Out] WSABuffer[] buffers,
@@ -657,14 +608,14 @@ namespace System.Net.Sockets
                                                   [In] IntPtr completionRoutine
                                                   );
 
-            [DllImport(ExternDll.WS2_32, SetLastError = true)]
+            [DllImport(Interop.Libraries.Ws2_32, SetLastError = true)]
             internal static extern SocketError WSAEventSelect(
                                                      [In] SafeCloseSocket socketHandle,
                                                      [In] SafeHandle Event,
                                                      [In] AsyncEventBits NetworkEvents
                                                      );
 
-            [DllImport(ExternDll.WS2_32, SetLastError = true)]
+            [DllImport(Interop.Libraries.Ws2_32, SetLastError = true)]
             internal static extern SocketError WSAEventSelect(
                                          [In] SafeCloseSocket socketHandle,
                                          [In] IntPtr Event,
@@ -673,7 +624,7 @@ namespace System.Net.Sockets
 
 
             // Used with SIOGETEXTENSIONFUNCTIONPOINTER - we're assuming that will never block.
-            [DllImport(ExternDll.WS2_32, SetLastError = true)]
+            [DllImport(Interop.Libraries.Ws2_32, SetLastError = true)]
             internal static extern SocketError WSAIoctl(
                                                 [In] SafeCloseSocket socketHandle,
                                                 [In] int ioControlCode,
@@ -686,7 +637,7 @@ namespace System.Net.Sockets
                                                 [In] IntPtr shouldBeNull2
                                                 );
 
-            [DllImport(ExternDll.WS2_32, SetLastError = true, EntryPoint = "WSAIoctl")]
+            [DllImport(Interop.Libraries.Ws2_32, SetLastError = true, EntryPoint = "WSAIoctl")]
             internal static extern SocketError WSAIoctl_Blocking(
                                                 [In] IntPtr socketHandle,
                                                 [In] int ioControlCode,
@@ -699,7 +650,7 @@ namespace System.Net.Sockets
                                                 [In] IntPtr completionRoutine
                                                 );
 
-            [DllImport(ExternDll.WS2_32, SetLastError = true, EntryPoint = "WSAIoctl")]
+            [DllImport(Interop.Libraries.Ws2_32, SetLastError = true, EntryPoint = "WSAIoctl")]
             internal static extern SocketError WSAIoctl_Blocking_Internal(
                                                 [In]  IntPtr socketHandle,
                                                 [In]  uint ioControlCode,
@@ -712,7 +663,7 @@ namespace System.Net.Sockets
                                                 [In]  IntPtr completionRoutine
                                                 );
 
-            [DllImport(ExternDll.WS2_32, SetLastError = true)]
+            [DllImport(Interop.Libraries.Ws2_32, SetLastError = true)]
             internal static extern SocketError WSAEnumNetworkEvents(
                                                      [In] SafeCloseSocket socketHandle,
                                                      [In] SafeWaitHandle Event,
@@ -720,7 +671,7 @@ namespace System.Net.Sockets
                                                      );
 
 #if !FEATURE_PAL
-            [DllImport(ExternDll.WS2_32, SetLastError = true)]
+            [DllImport(Interop.Libraries.Ws2_32, SetLastError = true)]
             internal unsafe static extern int WSADuplicateSocket(
                 [In] SafeCloseSocket socketHandle,
                 [In] uint targetProcessID,
@@ -728,7 +679,7 @@ namespace System.Net.Sockets
             );
 #endif // !FEATURE_PAL
 
-            [DllImport(ExternDll.WS2_32, SetLastError = true)]
+            [DllImport(Interop.Libraries.Ws2_32, SetLastError = true)]
             internal static extern bool WSAGetOverlappedResult(
                                                      [In] SafeCloseSocket socketHandle,
                                                      [In] SafeHandle overlapped,
@@ -736,7 +687,7 @@ namespace System.Net.Sockets
                                                      [In] bool wait,
                                                      [Out] out SocketFlags socketFlags
                                                      );
-            [DllImport(ExternDll.WS2_32, CharSet = CharSet.Unicode, BestFitMapping = false, ThrowOnUnmappableChar = true, SetLastError = true)]
+            [DllImport(Interop.Libraries.Ws2_32, CharSet = CharSet.Unicode, BestFitMapping = false, ThrowOnUnmappableChar = true, SetLastError = true)]
             internal static extern SocketError GetNameInfoW(
                 [In]         byte[] sa,
                 [In]         int salen,
@@ -751,7 +702,7 @@ namespace System.Net.Sockets
         // on legacy platforms.
         internal static class SafeNetHandlesXPOrLater
         {
-            [DllImport(ExternDll.WS2_32, ExactSpelling = true, CharSet = CharSet.Unicode, BestFitMapping = false, ThrowOnUnmappableChar = true, SetLastError = true)]
+            [DllImport(Interop.Libraries.Ws2_32, ExactSpelling = true, CharSet = CharSet.Unicode, BestFitMapping = false, ThrowOnUnmappableChar = true, SetLastError = true)]
             internal static extern int GetAddrInfoW(
                 [In] string nodename,
                 [In] string servicename,
@@ -759,40 +710,40 @@ namespace System.Net.Sockets
                 [Out] out SafeFreeAddrInfo handle
                 );
 
-            [DllImport(ExternDll.WS2_32, ExactSpelling = true, SetLastError = true)]
+            [DllImport(Interop.Libraries.Ws2_32, ExactSpelling = true, SetLastError = true)]
             internal static extern void freeaddrinfo([In] IntPtr info);
         }
 
         internal static class SafeNetHandles
         {
             // Blocking call - requires IntPtr instead of SafeCloseSocket.
-            [DllImport(ExternDll.WS2_32, ExactSpelling = true, SetLastError = true)]
+            [DllImport(Interop.Libraries.Ws2_32, ExactSpelling = true, SetLastError = true)]
             internal static extern SafeCloseSocket.InnerSafeCloseSocket accept(
                                                   [In] IntPtr socketHandle,
                                                   [Out] byte[] socketAddress,
                                                   [In, Out] ref int socketAddressSize
                                                   );
 
-            [DllImport(ExternDll.WS2_32, ExactSpelling = true, SetLastError = true)]
+            [DllImport(Interop.Libraries.Ws2_32, ExactSpelling = true, SetLastError = true)]
             internal static extern SocketError closesocket(
                                                   [In] IntPtr socketHandle
                                                   );
 
-            [DllImport(ExternDll.WS2_32, ExactSpelling = true, SetLastError = true)]
+            [DllImport(Interop.Libraries.Ws2_32, ExactSpelling = true, SetLastError = true)]
             internal static extern SocketError ioctlsocket(
                                                 [In] IntPtr handle,
                                                 [In] int cmd,
                                                 [In, Out] ref int argp
                                                 );
 
-            [DllImport(ExternDll.WS2_32, ExactSpelling = true, SetLastError = true)]
+            [DllImport(Interop.Libraries.Ws2_32, ExactSpelling = true, SetLastError = true)]
             internal static extern SocketError WSAEventSelect(
                                                      [In] IntPtr handle,
                                                      [In] IntPtr Event,
                                                      [In] AsyncEventBits NetworkEvents
                                                      );
 
-            [DllImport(ExternDll.WS2_32, ExactSpelling = true, SetLastError = true)]
+            [DllImport(Interop.Libraries.Ws2_32, ExactSpelling = true, SetLastError = true)]
             internal static extern SocketError setsockopt(
                                                [In] IntPtr handle,
                                                [In] SocketOptionLevel optionLevel,

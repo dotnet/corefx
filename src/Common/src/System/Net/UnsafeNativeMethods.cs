@@ -51,34 +51,34 @@ namespace System.Net
         }
 
 #if !PROJECTN
-        [DllImport(ExternDll.APIMSWINCOREHEAPOBSOLETEL1, ExactSpelling = true, SetLastError = true)]
+        [DllImport(Interop.Libraries.Heap, ExactSpelling = true, SetLastError = true)]
         internal static extern SafeLocalFree LocalAlloc(int uFlags, UIntPtr sizetdwBytes);
 
-        [DllImport(ExternDll.APIMSWINCOREHEAPOBSOLETEL1, ExactSpelling = true, SetLastError = true)]
+        [DllImport(Interop.Libraries.Heap, ExactSpelling = true, SetLastError = true)]
         internal static extern IntPtr LocalFree(IntPtr handle);
 
-        [DllImport(ExternDll.APIMSWINCOREHEAPOBSOLETEL1, ExactSpelling = true, SetLastError = true)]
+        [DllImport(Interop.Libraries.Heap, ExactSpelling = true, SetLastError = true)]
         internal static extern IntPtr GlobalFree(IntPtr handle);
 
-        [DllImport(ExternDll.IPHLPAPI, ExactSpelling = true)]
+        [DllImport(Interop.Libraries.IpHlpApi, ExactSpelling = true)]
         internal extern static uint GetNetworkParams(SafeLocalFree pFixedInfo, ref uint pOutBufLen);
 #endif //PROJECTN
 
-        [DllImport(ExternDll.NTDLL, ExactSpelling = true, CharSet = CharSet.Unicode)]
+        [DllImport(Interop.Libraries.NtDll, ExactSpelling = true, CharSet = CharSet.Unicode)]
         internal extern static NtStatus RtlIpv6StringToAddressExW(
             [In] string s,
             [Out] byte[] address,
             [Out] out UInt32 scopeId,
             [Out] out UInt16 port);
 
-        [DllImport(ExternDll.NTDLL, ExactSpelling = true, CharSet = CharSet.Unicode)]
+        [DllImport(Interop.Libraries.NtDll, ExactSpelling = true, CharSet = CharSet.Unicode)]
         internal extern static NtStatus RtlIpv4StringToAddressExW(
             [In] string s,
             [In] bool strict,
             [Out] byte[] address,
             [Out] out UInt16 port);
 
-        [DllImport(ExternDll.NTDLL, ExactSpelling = true, CharSet = CharSet.Unicode)]
+        [DllImport(Interop.Libraries.NtDll, ExactSpelling = true, CharSet = CharSet.Unicode)]
         internal extern static NtStatus RtlIpv6AddressToStringExW(
             [In] byte[] address,
             [In] UInt32 scopeId,
@@ -86,7 +86,7 @@ namespace System.Net
             [In, Out] StringBuilder addressString,
             [In, Out] ref UInt32 addressStringLength);
 
-        [DllImport(ExternDll.NTDLL, ExactSpelling = true, CharSet = CharSet.Unicode)]
+        [DllImport(Interop.Libraries.NtDll, ExactSpelling = true, CharSet = CharSet.Unicode)]
         internal extern static NtStatus RtlIpv4AddressToStringExW(
             [In] byte[] address,
             [In] UInt16 port,
@@ -96,7 +96,7 @@ namespace System.Net
 #if STRESS || !DEBUG
 
 #if !PROJECTN
-        [DllImport(ExternDll.APIMSWINCOREDEBUGL1, ExactSpelling = true)]
+        [DllImport(Interop.Libraries.Debug, ExactSpelling = true)]
         internal static extern void DebugBreak();
 #endif
 
