@@ -12,8 +12,8 @@ namespace System.Linq
     {
         public static IEnumerable<TSource> Where<TSource>(this IEnumerable<TSource> source, Func<TSource, bool> predicate)
         {
-            Error.CheckSourceNotNull(source);
-            Error.CheckPredicateNotNull(predicate);
+            if (source == null) throw Error.ArgumentNull("source");
+            if (predicate == null) throw Error.ArgumentNull("predicate");
             if (source is Iterator<TSource>) return ((Iterator<TSource>)source).Where(predicate);
             if (source is TSource[]) return new WhereArrayIterator<TSource>((TSource[])source, predicate);
             if (source is List<TSource>) return new WhereListIterator<TSource>((List<TSource>)source, predicate);
@@ -22,8 +22,8 @@ namespace System.Linq
 
         public static IEnumerable<TSource> Where<TSource>(this IEnumerable<TSource> source, Func<TSource, int, bool> predicate)
         {
-            Error.CheckSourceNotNull(source);
-            Error.CheckPredicateNotNull(predicate);
+            if (source == null) throw Error.ArgumentNull("source");
+            if (predicate == null) throw Error.ArgumentNull("predicate");
             return WhereIterator<TSource>(source, predicate);
         }
 
@@ -39,7 +39,7 @@ namespace System.Linq
 
         public static IEnumerable<TResult> Select<TSource, TResult>(this IEnumerable<TSource> source, Func<TSource, TResult> selector)
         {
-            Error.CheckSourceNotNull(source);
+            if (source == null) throw Error.ArgumentNull("source");
             if (selector == null) throw Error.ArgumentNull("selector");
             if (source is Iterator<TSource>) return ((Iterator<TSource>)source).Select(selector);
             if (source is TSource[]) return new WhereSelectArrayIterator<TSource, TResult>((TSource[])source, null, selector);
@@ -49,7 +49,7 @@ namespace System.Linq
 
         public static IEnumerable<TResult> Select<TSource, TResult>(this IEnumerable<TSource> source, Func<TSource, int, TResult> selector)
         {
-            Error.CheckSourceNotNull(source);
+            if (source == null) throw Error.ArgumentNull("source");
             if (selector == null) throw Error.ArgumentNull("selector");
             return SelectIterator<TSource, TResult>(source, selector);
         }
@@ -524,8 +524,8 @@ namespace System.Linq
         }
 
         //public static IEnumerable<TSource> Where<TSource>(this IEnumerable<TSource> source, Func<TSource, bool> predicate) {
-        //    Error.CheckSourceNotNull(source);
-        //    Error.CheckPredicateNotNull(predicate);
+        //    if (source == null) throw Error.ArgumentNull("source");
+        //    if (predicate == null) throw Error.ArgumentNull("predicate");
         //    return WhereIterator<TSource>(source, predicate);
         //}
 
@@ -536,7 +536,7 @@ namespace System.Linq
         //}
 
         //public static IEnumerable<TResult> Select<TSource, TResult>(this IEnumerable<TSource> source, Func<TSource, TResult> selector) {
-        //    Error.CheckSourceNotNull(source);
+        //    if (source == null) throw Error.ArgumentNull("source");
         //    if (selector == null) throw Error.ArgumentNull("selector");
         //    return SelectIterator<TSource, TResult>(source, selector);
         //}
@@ -549,7 +549,7 @@ namespace System.Linq
 
         public static IEnumerable<TResult> SelectMany<TSource, TResult>(this IEnumerable<TSource> source, Func<TSource, IEnumerable<TResult>> selector)
         {
-            Error.CheckSourceNotNull(source);
+            if (source == null) throw Error.ArgumentNull("source");
             if (selector == null) throw Error.ArgumentNull("selector");
             return SelectManyIterator<TSource, TResult>(source, selector);
         }
@@ -567,7 +567,7 @@ namespace System.Linq
 
         public static IEnumerable<TResult> SelectMany<TSource, TResult>(this IEnumerable<TSource> source, Func<TSource, int, IEnumerable<TResult>> selector)
         {
-            Error.CheckSourceNotNull(source);
+            if (source == null) throw Error.ArgumentNull("source");
             if (selector == null) throw Error.ArgumentNull("selector");
             return SelectManyIterator<TSource, TResult>(source, selector);
         }
@@ -586,7 +586,7 @@ namespace System.Linq
         }
         public static IEnumerable<TResult> SelectMany<TSource, TCollection, TResult>(this IEnumerable<TSource> source, Func<TSource, int, IEnumerable<TCollection>> collectionSelector, Func<TSource, TCollection, TResult> resultSelector)
         {
-            Error.CheckSourceNotNull(source);
+            if (source == null) throw Error.ArgumentNull("source");
             if (collectionSelector == null) throw Error.ArgumentNull("collectionSelector");
             if (resultSelector == null) throw Error.ArgumentNull("resultSelector");
             return SelectManyIterator<TSource, TCollection, TResult>(source, collectionSelector, resultSelector);
@@ -607,7 +607,7 @@ namespace System.Linq
 
         public static IEnumerable<TResult> SelectMany<TSource, TCollection, TResult>(this IEnumerable<TSource> source, Func<TSource, IEnumerable<TCollection>> collectionSelector, Func<TSource, TCollection, TResult> resultSelector)
         {
-            Error.CheckSourceNotNull(source);
+            if (source == null) throw Error.ArgumentNull("source");
             if (collectionSelector == null) throw Error.ArgumentNull("collectionSelector");
             if (resultSelector == null) throw Error.ArgumentNull("resultSelector");
             return SelectManyIterator<TSource, TCollection, TResult>(source, collectionSelector, resultSelector);
@@ -626,7 +626,7 @@ namespace System.Linq
 
         public static IEnumerable<TSource> Take<TSource>(this IEnumerable<TSource> source, int count)
         {
-            Error.CheckSourceNotNull(source);
+            if (source == null) throw Error.ArgumentNull("source");
             return TakeIterator<TSource>(source, count);
         }
 
@@ -644,8 +644,8 @@ namespace System.Linq
 
         public static IEnumerable<TSource> TakeWhile<TSource>(this IEnumerable<TSource> source, Func<TSource, bool> predicate)
         {
-            Error.CheckSourceNotNull(source);
-            Error.CheckPredicateNotNull(predicate);
+            if (source == null) throw Error.ArgumentNull("source");
+            if (predicate == null) throw Error.ArgumentNull("predicate");
             return TakeWhileIterator<TSource>(source, predicate);
         }
 
@@ -660,8 +660,8 @@ namespace System.Linq
 
         public static IEnumerable<TSource> TakeWhile<TSource>(this IEnumerable<TSource> source, Func<TSource, int, bool> predicate)
         {
-            Error.CheckSourceNotNull(source);
-            Error.CheckPredicateNotNull(predicate);
+            if (source == null) throw Error.ArgumentNull("source");
+            if (predicate == null) throw Error.ArgumentNull("predicate");
             return TakeWhileIterator<TSource>(source, predicate);
         }
 
@@ -678,7 +678,7 @@ namespace System.Linq
 
         public static IEnumerable<TSource> Skip<TSource>(this IEnumerable<TSource> source, int count)
         {
-            Error.CheckSourceNotNull(source);
+            if (source == null) throw Error.ArgumentNull("source");
             return new SkipIterator<TSource>(source, count);
         }
 
@@ -751,8 +751,8 @@ namespace System.Linq
 
         public static IEnumerable<TSource> SkipWhile<TSource>(this IEnumerable<TSource> source, Func<TSource, bool> predicate)
         {
-            Error.CheckSourceNotNull(source);
-            Error.CheckPredicateNotNull(predicate);
+            if (source == null) throw Error.ArgumentNull("source");
+            if (predicate == null) throw Error.ArgumentNull("predicate");
             return new SkipWhileIterator<TSource>(source, predicate);
         }
 
@@ -815,8 +815,8 @@ namespace System.Linq
 
         public static IEnumerable<TSource> SkipWhile<TSource>(this IEnumerable<TSource> source, Func<TSource, int, bool> predicate)
         {
-            Error.CheckSourceNotNull(source);
-            Error.CheckPredicateNotNull(predicate);
+            if (source == null) throw Error.ArgumentNull("source");
+            if (predicate == null) throw Error.ArgumentNull("predicate");
             return new SkipWhileWithIndexIterator<TSource>(source, predicate);
         }
 
@@ -963,25 +963,25 @@ namespace System.Linq
 
         public static IOrderedEnumerable<TSource> ThenBy<TSource, TKey>(this IOrderedEnumerable<TSource> source, Func<TSource, TKey> keySelector)
         {
-            Error.CheckSourceNotNull(source);
+            if (source == null) throw Error.ArgumentNull("source");
             return source.CreateOrderedEnumerable<TKey>(keySelector, null, false);
         }
 
         public static IOrderedEnumerable<TSource> ThenBy<TSource, TKey>(this IOrderedEnumerable<TSource> source, Func<TSource, TKey> keySelector, IComparer<TKey> comparer)
         {
-            Error.CheckSourceNotNull(source);
+            if (source == null) throw Error.ArgumentNull("source");
             return source.CreateOrderedEnumerable<TKey>(keySelector, comparer, false);
         }
 
         public static IOrderedEnumerable<TSource> ThenByDescending<TSource, TKey>(this IOrderedEnumerable<TSource> source, Func<TSource, TKey> keySelector)
         {
-            Error.CheckSourceNotNull(source);
+            if (source == null) throw Error.ArgumentNull("source");
             return source.CreateOrderedEnumerable<TKey>(keySelector, null, true);
         }
 
         public static IOrderedEnumerable<TSource> ThenByDescending<TSource, TKey>(this IOrderedEnumerable<TSource> source, Func<TSource, TKey> keySelector, IComparer<TKey> comparer)
         {
-            Error.CheckSourceNotNull(source);
+            if (source == null) throw Error.ArgumentNull("source");
             return source.CreateOrderedEnumerable<TKey>(keySelector, comparer, true);
         }
 
@@ -1057,13 +1057,13 @@ namespace System.Linq
 
         public static IEnumerable<TSource> Distinct<TSource>(this IEnumerable<TSource> source)
         {
-            Error.CheckSourceNotNull(source);
+            if (source == null) throw Error.ArgumentNull("source");
             return DistinctIterator<TSource>(source, null);
         }
 
         public static IEnumerable<TSource> Distinct<TSource>(this IEnumerable<TSource> source, IEqualityComparer<TSource> comparer)
         {
-            Error.CheckSourceNotNull(source);
+            if (source == null) throw Error.ArgumentNull("source");
             return DistinctIterator<TSource>(source, comparer);
         }
 
@@ -1143,7 +1143,7 @@ namespace System.Linq
 
         public static IEnumerable<TSource> Reverse<TSource>(this IEnumerable<TSource> source)
         {
-            Error.CheckSourceNotNull(source);
+            if (source == null) throw Error.ArgumentNull("source");
             return ReverseIterator<TSource>(source);
         }
 
@@ -1182,13 +1182,13 @@ namespace System.Linq
 
         public static TSource[] ToArray<TSource>(this IEnumerable<TSource> source)
         {
-            Error.CheckSourceNotNull(source);
+            if (source == null) throw Error.ArgumentNull("source");
             return new Buffer<TSource>(source).ToArray();
         }
 
         public static List<TSource> ToList<TSource>(this IEnumerable<TSource> source)
         {
-            Error.CheckSourceNotNull(source);
+            if (source == null) throw Error.ArgumentNull("source");
             return new List<TSource>(source);
         }
 
@@ -1209,7 +1209,7 @@ namespace System.Linq
 
         public static Dictionary<TKey, TElement> ToDictionary<TSource, TKey, TElement>(this IEnumerable<TSource> source, Func<TSource, TKey> keySelector, Func<TSource, TElement> elementSelector, IEqualityComparer<TKey> comparer)
         {
-            Error.CheckSourceNotNull(source);
+            if (source == null) throw Error.ArgumentNull("source");
             if (keySelector == null) throw Error.ArgumentNull("keySelector");
             if (elementSelector == null) throw Error.ArgumentNull("elementSelector");
             Dictionary<TKey, TElement> d = new Dictionary<TKey, TElement>(comparer);
@@ -1244,7 +1244,7 @@ namespace System.Linq
 
         public static IEnumerable<TSource> DefaultIfEmpty<TSource>(this IEnumerable<TSource> source, TSource defaultValue)
         {
-            Error.CheckSourceNotNull(source);
+            if (source == null) throw Error.ArgumentNull("source");
             return DefaultIfEmptyIterator<TSource>(source, defaultValue);
         }
 
@@ -1268,7 +1268,7 @@ namespace System.Linq
 
         public static IEnumerable<TResult> OfType<TResult>(this IEnumerable source)
         {
-            Error.CheckSourceNotNull(source);
+            if (source == null) throw Error.ArgumentNull("source");
             return OfTypeIterator<TResult>(source);
         }
 
@@ -1284,7 +1284,7 @@ namespace System.Linq
         {
             IEnumerable<TResult> typedSource = source as IEnumerable<TResult>;
             if (typedSource != null) return typedSource;
-            Error.CheckSourceNotNull(source);
+            if (source == null) throw Error.ArgumentNull("source");
             return CastIterator<TResult>(source);
         }
 
@@ -1295,7 +1295,7 @@ namespace System.Linq
 
         public static TSource First<TSource>(this IEnumerable<TSource> source)
         {
-            Error.CheckSourceNotNull(source);
+            if (source == null) throw Error.ArgumentNull("source");
             IList<TSource> list = source as IList<TSource>;
             if (list != null)
             {
@@ -1313,8 +1313,8 @@ namespace System.Linq
 
         public static TSource First<TSource>(this IEnumerable<TSource> source, Func<TSource, bool> predicate)
         {
-            Error.CheckSourceNotNull(source);
-            Error.CheckPredicateNotNull(predicate);
+            if (source == null) throw Error.ArgumentNull("source");
+            if (predicate == null) throw Error.ArgumentNull("predicate");
             foreach (TSource element in source)
             {
                 if (predicate(element)) return element;
@@ -1324,7 +1324,7 @@ namespace System.Linq
 
         public static TSource FirstOrDefault<TSource>(this IEnumerable<TSource> source)
         {
-            Error.CheckSourceNotNull(source);
+            if (source == null) throw Error.ArgumentNull("source");
             IList<TSource> list = source as IList<TSource>;
             if (list != null)
             {
@@ -1342,8 +1342,8 @@ namespace System.Linq
 
         public static TSource FirstOrDefault<TSource>(this IEnumerable<TSource> source, Func<TSource, bool> predicate)
         {
-            Error.CheckSourceNotNull(source);
-            Error.CheckPredicateNotNull(predicate);
+            if (source == null) throw Error.ArgumentNull("source");
+            if (predicate == null) throw Error.ArgumentNull("predicate");
             foreach (TSource element in source)
             {
                 if (predicate(element)) return element;
@@ -1353,7 +1353,7 @@ namespace System.Linq
 
         public static TSource Last<TSource>(this IEnumerable<TSource> source)
         {
-            Error.CheckSourceNotNull(source);
+            if (source == null) throw Error.ArgumentNull("source");
             IList<TSource> list = source as IList<TSource>;
             if (list != null)
             {
@@ -1380,8 +1380,8 @@ namespace System.Linq
 
         public static TSource Last<TSource>(this IEnumerable<TSource> source, Func<TSource, bool> predicate)
         {
-            Error.CheckSourceNotNull(source);
-            Error.CheckPredicateNotNull(predicate);
+            if (source == null) throw Error.ArgumentNull("source");
+            if (predicate == null) throw Error.ArgumentNull("predicate");
             using (IEnumerator<TSource> e = source.GetEnumerator())
             {
                 while (e.MoveNext())
@@ -1403,7 +1403,7 @@ namespace System.Linq
 
         public static TSource LastOrDefault<TSource>(this IEnumerable<TSource> source)
         {
-            Error.CheckSourceNotNull(source);
+            if (source == null) throw Error.ArgumentNull("source");
             IList<TSource> list = source as IList<TSource>;
             if (list != null)
             {
@@ -1430,8 +1430,8 @@ namespace System.Linq
 
         public static TSource LastOrDefault<TSource>(this IEnumerable<TSource> source, Func<TSource, bool> predicate)
         {
-            Error.CheckSourceNotNull(source);
-            Error.CheckPredicateNotNull(predicate);
+            if (source == null) throw Error.ArgumentNull("source");
+            if (predicate == null) throw Error.ArgumentNull("predicate");
             TSource result = default(TSource);
             foreach (TSource element in source)
             {
@@ -1445,7 +1445,7 @@ namespace System.Linq
 
         public static TSource Single<TSource>(this IEnumerable<TSource> source)
         {
-            Error.CheckSourceNotNull(source);
+            if (source == null) throw Error.ArgumentNull("source");
             IList<TSource> list = source as IList<TSource>;
             if (list != null)
             {
@@ -1469,8 +1469,8 @@ namespace System.Linq
 
         public static TSource Single<TSource>(this IEnumerable<TSource> source, Func<TSource, bool> predicate)
         {
-            Error.CheckSourceNotNull(source);
-            Error.CheckPredicateNotNull(predicate);
+            if (source == null) throw Error.ArgumentNull("source");
+            if (predicate == null) throw Error.ArgumentNull("predicate");
             using (IEnumerator<TSource> e = source.GetEnumerator())
             {
                 while (e.MoveNext())
@@ -1491,7 +1491,7 @@ namespace System.Linq
 
         public static TSource SingleOrDefault<TSource>(this IEnumerable<TSource> source)
         {
-            Error.CheckSourceNotNull(source);
+            if (source == null) throw Error.ArgumentNull("source");
             IList<TSource> list = source as IList<TSource>;
             if (list != null)
             {
@@ -1515,8 +1515,8 @@ namespace System.Linq
 
         public static TSource SingleOrDefault<TSource>(this IEnumerable<TSource> source, Func<TSource, bool> predicate)
         {
-            Error.CheckSourceNotNull(source);
-            Error.CheckPredicateNotNull(predicate);
+            if (source == null) throw Error.ArgumentNull("source");
+            if (predicate == null) throw Error.ArgumentNull("predicate");
             using (IEnumerator<TSource> e = source.GetEnumerator())
             {
                 while (e.MoveNext())
@@ -1537,7 +1537,7 @@ namespace System.Linq
 
         public static TSource ElementAt<TSource>(this IEnumerable<TSource> source, int index)
         {
-            Error.CheckSourceNotNull(source);
+            if (source == null) throw Error.ArgumentNull("source");
             IList<TSource> list = source as IList<TSource>;
             if (list != null) return list[index];
             if (index < 0) throw Error.ArgumentOutOfRange("index");
@@ -1554,7 +1554,7 @@ namespace System.Linq
 
         public static TSource ElementAtOrDefault<TSource>(this IEnumerable<TSource> source, int index)
         {
-            Error.CheckSourceNotNull(source);
+            if (source == null) throw Error.ArgumentNull("source");
             if (index >= 0)
             {
                 IList<TSource> list = source as IList<TSource>;
@@ -1608,7 +1608,7 @@ namespace System.Linq
 
         public static bool Any<TSource>(this IEnumerable<TSource> source)
         {
-            Error.CheckSourceNotNull(source);
+            if (source == null) throw Error.ArgumentNull("source");
             using (IEnumerator<TSource> e = source.GetEnumerator())
             {
                 return e.MoveNext();
@@ -1617,8 +1617,8 @@ namespace System.Linq
 
         public static bool Any<TSource>(this IEnumerable<TSource> source, Func<TSource, bool> predicate)
         {
-            Error.CheckSourceNotNull(source);
-            Error.CheckPredicateNotNull(predicate);
+            if (source == null) throw Error.ArgumentNull("source");
+            if (predicate == null) throw Error.ArgumentNull("predicate");
             foreach (TSource element in source)
             {
                 if (predicate(element)) return true;
@@ -1628,8 +1628,8 @@ namespace System.Linq
 
         public static bool All<TSource>(this IEnumerable<TSource> source, Func<TSource, bool> predicate)
         {
-            Error.CheckSourceNotNull(source);
-            Error.CheckPredicateNotNull(predicate);
+            if (source == null) throw Error.ArgumentNull("source");
+            if (predicate == null) throw Error.ArgumentNull("predicate");
             foreach (TSource element in source)
             {
                 if (!predicate(element)) return false;
@@ -1639,7 +1639,7 @@ namespace System.Linq
 
         public static int Count<TSource>(this IEnumerable<TSource> source)
         {
-            Error.CheckSourceNotNull(source);
+            if (source == null) throw Error.ArgumentNull("source");
             ICollection<TSource> collectionoft = source as ICollection<TSource>;
             if (collectionoft != null) return collectionoft.Count;
             ICollection collection = source as ICollection;
@@ -1657,8 +1657,8 @@ namespace System.Linq
 
         public static int Count<TSource>(this IEnumerable<TSource> source, Func<TSource, bool> predicate)
         {
-            Error.CheckSourceNotNull(source);
-            Error.CheckPredicateNotNull(predicate);
+            if (source == null) throw Error.ArgumentNull("source");
+            if (predicate == null) throw Error.ArgumentNull("predicate");
             int count = 0;
             foreach (TSource element in source)
             {
@@ -1672,7 +1672,7 @@ namespace System.Linq
 
         public static long LongCount<TSource>(this IEnumerable<TSource> source)
         {
-            Error.CheckSourceNotNull(source);
+            if (source == null) throw Error.ArgumentNull("source");
             long count = 0;
             using (IEnumerator<TSource> e = source.GetEnumerator())
             {
@@ -1686,8 +1686,8 @@ namespace System.Linq
 
         public static long LongCount<TSource>(this IEnumerable<TSource> source, Func<TSource, bool> predicate)
         {
-            Error.CheckSourceNotNull(source);
-            Error.CheckPredicateNotNull(predicate);
+            if (source == null) throw Error.ArgumentNull("source");
+            if (predicate == null) throw Error.ArgumentNull("predicate");
             long count = 0;
             foreach (TSource element in source)
             {
@@ -1709,7 +1709,7 @@ namespace System.Linq
         public static bool Contains<TSource>(this IEnumerable<TSource> source, TSource value, IEqualityComparer<TSource> comparer)
         {
             if (comparer == null) comparer = EqualityComparer<TSource>.Default;
-            Error.CheckSourceNotNull(source);
+            if (source == null) throw Error.ArgumentNull("source");
             foreach (TSource element in source)
                 if (comparer.Equals(element, value)) return true;
             return false;
@@ -1717,7 +1717,7 @@ namespace System.Linq
 
         public static TSource Aggregate<TSource>(this IEnumerable<TSource> source, Func<TSource, TSource, TSource> func)
         {
-            Error.CheckSourceNotNull(source);
+            if (source == null) throw Error.ArgumentNull("source");
             if (func == null) throw Error.ArgumentNull("func");
             using (IEnumerator<TSource> e = source.GetEnumerator())
             {
@@ -1730,7 +1730,7 @@ namespace System.Linq
 
         public static TAccumulate Aggregate<TSource, TAccumulate>(this IEnumerable<TSource> source, TAccumulate seed, Func<TAccumulate, TSource, TAccumulate> func)
         {
-            Error.CheckSourceNotNull(source);
+            if (source == null) throw Error.ArgumentNull("source");
             if (func == null) throw Error.ArgumentNull("func");
             TAccumulate result = seed;
             foreach (TSource element in source) result = func(result, element);
@@ -1739,7 +1739,7 @@ namespace System.Linq
 
         public static TResult Aggregate<TSource, TAccumulate, TResult>(this IEnumerable<TSource> source, TAccumulate seed, Func<TAccumulate, TSource, TAccumulate> func, Func<TAccumulate, TResult> resultSelector)
         {
-            Error.CheckSourceNotNull(source);
+            if (source == null) throw Error.ArgumentNull("source");
             if (func == null) throw Error.ArgumentNull("func");
             if (resultSelector == null) throw Error.ArgumentNull("resultSelector");
             TAccumulate result = seed;
@@ -1749,7 +1749,7 @@ namespace System.Linq
 
         public static int Sum(this IEnumerable<int> source)
         {
-            Error.CheckSourceNotNull(source);
+            if (source == null) throw Error.ArgumentNull("source");
             int sum = 0;
             checked
             {
@@ -1760,7 +1760,7 @@ namespace System.Linq
 
         public static int? Sum(this IEnumerable<int?> source)
         {
-            Error.CheckSourceNotNull(source);
+            if (source == null) throw Error.ArgumentNull("source");
             int sum = 0;
             checked
             {
@@ -1774,7 +1774,7 @@ namespace System.Linq
 
         public static long Sum(this IEnumerable<long> source)
         {
-            Error.CheckSourceNotNull(source);
+            if (source == null) throw Error.ArgumentNull("source");
             long sum = 0;
             checked
             {
@@ -1785,7 +1785,7 @@ namespace System.Linq
 
         public static long? Sum(this IEnumerable<long?> source)
         {
-            Error.CheckSourceNotNull(source);
+            if (source == null) throw Error.ArgumentNull("source");
             long sum = 0;
             checked
             {
@@ -1799,7 +1799,7 @@ namespace System.Linq
 
         public static float Sum(this IEnumerable<float> source)
         {
-            Error.CheckSourceNotNull(source);
+            if (source == null) throw Error.ArgumentNull("source");
             double sum = 0;
             foreach (float v in source) sum += v;
             return (float)sum;
@@ -1807,7 +1807,7 @@ namespace System.Linq
 
         public static float? Sum(this IEnumerable<float?> source)
         {
-            Error.CheckSourceNotNull(source);
+            if (source == null) throw Error.ArgumentNull("source");
             double sum = 0;
             foreach (float? v in source)
             {
@@ -1818,7 +1818,7 @@ namespace System.Linq
 
         public static double Sum(this IEnumerable<double> source)
         {
-            Error.CheckSourceNotNull(source);
+            if (source == null) throw Error.ArgumentNull("source");
             double sum = 0;
             foreach (double v in source) sum += v;
             return sum;
@@ -1826,7 +1826,7 @@ namespace System.Linq
 
         public static double? Sum(this IEnumerable<double?> source)
         {
-            Error.CheckSourceNotNull(source);
+            if (source == null) throw Error.ArgumentNull("source");
             double sum = 0;
             foreach (double? v in source)
             {
@@ -1837,7 +1837,7 @@ namespace System.Linq
 
         public static decimal Sum(this IEnumerable<decimal> source)
         {
-            Error.CheckSourceNotNull(source);
+            if (source == null) throw Error.ArgumentNull("source");
             decimal sum = 0;
             foreach (decimal v in source) sum += v;
             return sum;
@@ -1845,7 +1845,7 @@ namespace System.Linq
 
         public static decimal? Sum(this IEnumerable<decimal?> source)
         {
-            Error.CheckSourceNotNull(source);
+            if (source == null) throw Error.ArgumentNull("source");
             decimal sum = 0;
             foreach (decimal? v in source)
             {
@@ -1906,7 +1906,7 @@ namespace System.Linq
 
         public static int Min(this IEnumerable<int> source)
         {
-            Error.CheckSourceNotNull(source);
+            if (source == null) throw Error.ArgumentNull("source");
             int value;
             using (IEnumerator<int> e = source.GetEnumerator())
             {
@@ -1923,7 +1923,7 @@ namespace System.Linq
 
         public static int? Min(this IEnumerable<int?> source)
         {
-            Error.CheckSourceNotNull(source);
+            if (source == null) throw Error.ArgumentNull("source");
             int? value;
             using (IEnumerator<int?> e = source.GetEnumerator())
             {
@@ -1958,7 +1958,7 @@ namespace System.Linq
 
         public static long Min(this IEnumerable<long> source)
         {
-            Error.CheckSourceNotNull(source);
+            if (source == null) throw Error.ArgumentNull("source");
             long value;
             using (IEnumerator<long> e = source.GetEnumerator())
             {
@@ -1975,7 +1975,7 @@ namespace System.Linq
 
         public static long? Min(this IEnumerable<long?> source)
         {
-            Error.CheckSourceNotNull(source);
+            if (source == null) throw Error.ArgumentNull("source");
             long? value;
             using (IEnumerator<long?> e = source.GetEnumerator())
             {
@@ -2006,7 +2006,7 @@ namespace System.Linq
 
         public static float Min(this IEnumerable<float> source)
         {
-            Error.CheckSourceNotNull(source);
+            if (source == null) throw Error.ArgumentNull("source");
             float value;
             using (IEnumerator<float> e = source.GetEnumerator())
             {
@@ -2032,7 +2032,7 @@ namespace System.Linq
 
         public static float? Min(this IEnumerable<float?> source)
         {
-            Error.CheckSourceNotNull(source);
+            if (source == null) throw Error.ArgumentNull("source");
             float? value;
             using (IEnumerator<float?> e = source.GetEnumerator())
             {
@@ -2064,7 +2064,7 @@ namespace System.Linq
 
         public static double Min(this IEnumerable<double> source)
         {
-            Error.CheckSourceNotNull(source);
+            if (source == null) throw Error.ArgumentNull("source");
             double value;
             using (IEnumerator<double> e = source.GetEnumerator())
             {
@@ -2082,7 +2082,7 @@ namespace System.Linq
 
         public static double? Min(this IEnumerable<double?> source)
         {
-            Error.CheckSourceNotNull(source);
+            if (source == null) throw Error.ArgumentNull("source");
             double? value;
             using (IEnumerator<double?> e = source.GetEnumerator())
             {
@@ -2114,7 +2114,7 @@ namespace System.Linq
 
         public static decimal Min(this IEnumerable<decimal> source)
         {
-            Error.CheckSourceNotNull(source);
+            if (source == null) throw Error.ArgumentNull("source");
             decimal value;
             using (IEnumerator<decimal> e = source.GetEnumerator())
             {
@@ -2131,7 +2131,7 @@ namespace System.Linq
 
         public static decimal? Min(this IEnumerable<decimal?> source)
         {
-            Error.CheckSourceNotNull(source);
+            if (source == null) throw Error.ArgumentNull("source");
             decimal? value;
             using (IEnumerator<decimal?> e = source.GetEnumerator())
             {
@@ -2162,7 +2162,7 @@ namespace System.Linq
 
         public static TSource Min<TSource>(this IEnumerable<TSource> source)
         {
-            Error.CheckSourceNotNull(source);
+            if (source == null) throw Error.ArgumentNull("source");
             Comparer<TSource> comparer = Comparer<TSource>.Default;
             TSource value = default(TSource);
             // Note that the jitter generally does a nice job of removing
@@ -2258,7 +2258,7 @@ namespace System.Linq
 
         public static int Max(this IEnumerable<int> source)
         {
-            Error.CheckSourceNotNull(source);
+            if (source == null) throw Error.ArgumentNull("source");
             int value;
             using (IEnumerator<int> e = source.GetEnumerator())
             {
@@ -2275,7 +2275,7 @@ namespace System.Linq
 
         public static int? Max(this IEnumerable<int?> source)
         {
-            Error.CheckSourceNotNull(source);
+            if (source == null) throw Error.ArgumentNull("source");
             int? value;
             using (IEnumerator<int?> e = source.GetEnumerator())
             {
@@ -2306,7 +2306,7 @@ namespace System.Linq
 
         public static long Max(this IEnumerable<long> source)
         {
-            Error.CheckSourceNotNull(source);
+            if (source == null) throw Error.ArgumentNull("source");
             long value;
             using (IEnumerator<long> e = source.GetEnumerator())
             {
@@ -2323,7 +2323,7 @@ namespace System.Linq
 
         public static long? Max(this IEnumerable<long?> source)
         {
-            Error.CheckSourceNotNull(source);
+            if (source == null) throw Error.ArgumentNull("source");
             long? value;
             using (IEnumerator<long?> e = source.GetEnumerator())
             {
@@ -2354,7 +2354,7 @@ namespace System.Linq
 
         public static double Max(this IEnumerable<double> source)
         {
-            Error.CheckSourceNotNull(source);
+            if (source == null) throw Error.ArgumentNull("source");
             double value;
             using (IEnumerator<double> e = source.GetEnumerator())
             {
@@ -2380,7 +2380,7 @@ namespace System.Linq
 
         public static double? Max(this IEnumerable<double?> source)
         {
-            Error.CheckSourceNotNull(source);
+            if (source == null) throw Error.ArgumentNull("source");
             double? value;
             using (IEnumerator<double?> e = source.GetEnumerator())
             {
@@ -2417,7 +2417,7 @@ namespace System.Linq
 
         public static float Max(this IEnumerable<float> source)
         {
-            Error.CheckSourceNotNull(source);
+            if (source == null) throw Error.ArgumentNull("source");
             float value;
             using (IEnumerator<float> e = source.GetEnumerator())
             {
@@ -2439,7 +2439,7 @@ namespace System.Linq
 
         public static float? Max(this IEnumerable<float?> source)
         {
-            Error.CheckSourceNotNull(source);
+            if (source == null) throw Error.ArgumentNull("source");
             float? value;
             using (IEnumerator<float?> e = source.GetEnumerator())
             {
@@ -2476,7 +2476,7 @@ namespace System.Linq
 
         public static decimal Max(this IEnumerable<decimal> source)
         {
-            Error.CheckSourceNotNull(source);
+            if (source == null) throw Error.ArgumentNull("source");
             decimal value;
             using (IEnumerator<decimal> e = source.GetEnumerator())
             {
@@ -2493,7 +2493,7 @@ namespace System.Linq
 
         public static decimal? Max(this IEnumerable<decimal?> source)
         {
-            Error.CheckSourceNotNull(source);
+            if (source == null) throw Error.ArgumentNull("source");
             decimal? value;
             using (IEnumerator<decimal?> e = source.GetEnumerator())
             {
@@ -2524,7 +2524,7 @@ namespace System.Linq
 
         public static TSource Max<TSource>(this IEnumerable<TSource> source)
         {
-            Error.CheckSourceNotNull(source);
+            if (source == null) throw Error.ArgumentNull("source");
             Comparer<TSource> comparer = Comparer<TSource>.Default;
             TSource value = default(TSource);
             // Note that the jitter generally does a nice job of removing
@@ -2620,7 +2620,7 @@ namespace System.Linq
 
         public static double Average(this IEnumerable<int> source)
         {
-            Error.CheckSourceNotNull(source);
+            if (source == null) throw Error.ArgumentNull("source");
             using (IEnumerator<int> e = source.GetEnumerator())
             {
                 if (!e.MoveNext()) throw Error.NoElements();
@@ -2640,7 +2640,7 @@ namespace System.Linq
 
         public static double? Average(this IEnumerable<int?> source)
         {
-            Error.CheckSourceNotNull(source);
+            if (source == null) throw Error.ArgumentNull("source");
             using (IEnumerator<int?> e = source.GetEnumerator())
             {
                 while (e.MoveNext())
@@ -2671,7 +2671,7 @@ namespace System.Linq
 
         public static double Average(this IEnumerable<long> source)
         {
-            Error.CheckSourceNotNull(source);
+            if (source == null) throw Error.ArgumentNull("source");
             using (IEnumerator<long> e = source.GetEnumerator())
             {
                 if (!e.MoveNext()) throw Error.NoElements();
@@ -2691,7 +2691,7 @@ namespace System.Linq
 
         public static double? Average(this IEnumerable<long?> source)
         {
-            Error.CheckSourceNotNull(source);
+            if (source == null) throw Error.ArgumentNull("source");
             using (IEnumerator<long?> e = source.GetEnumerator())
             {
                 while (e.MoveNext())
@@ -2722,7 +2722,7 @@ namespace System.Linq
 
         public static float Average(this IEnumerable<float> source)
         {
-            Error.CheckSourceNotNull(source);
+            if (source == null) throw Error.ArgumentNull("source");
             using (IEnumerator<float> e = source.GetEnumerator())
             {
                 if (!e.MoveNext()) throw Error.NoElements();
@@ -2739,7 +2739,7 @@ namespace System.Linq
 
         public static float? Average(this IEnumerable<float?> source)
         {
-            Error.CheckSourceNotNull(source);
+            if (source == null) throw Error.ArgumentNull("source");
             using (IEnumerator<float?> e = source.GetEnumerator())
             {
                 while (e.MoveNext())
@@ -2770,7 +2770,7 @@ namespace System.Linq
 
         public static double Average(this IEnumerable<double> source)
         {
-            Error.CheckSourceNotNull(source);
+            if (source == null) throw Error.ArgumentNull("source");
             using (IEnumerator<double> e = source.GetEnumerator())
             {
                 if (!e.MoveNext()) throw Error.NoElements();
@@ -2790,7 +2790,7 @@ namespace System.Linq
 
         public static double? Average(this IEnumerable<double?> source)
         {
-            Error.CheckSourceNotNull(source);
+            if (source == null) throw Error.ArgumentNull("source");
             using (IEnumerator<double?> e = source.GetEnumerator())
             {
                 while (e.MoveNext())
@@ -2821,7 +2821,7 @@ namespace System.Linq
 
         public static decimal Average(this IEnumerable<decimal> source)
         {
-            Error.CheckSourceNotNull(source);
+            if (source == null) throw Error.ArgumentNull("source");
             using (IEnumerator<decimal> e = source.GetEnumerator())
             {
                 if (!e.MoveNext()) throw Error.NoElements();
@@ -2838,7 +2838,7 @@ namespace System.Linq
 
         public static decimal? Average(this IEnumerable<decimal?> source)
         {
-            Error.CheckSourceNotNull(source);
+            if (source == null) throw Error.ArgumentNull("source");
             using (IEnumerator<decimal?> e = source.GetEnumerator())
             {
                 while (e.MoveNext())
@@ -2958,7 +2958,7 @@ namespace System.Linq
 
         internal static Lookup<TKey, TElement> Create<TSource>(IEnumerable<TSource> source, Func<TSource, TKey> keySelector, Func<TSource, TElement> elementSelector, IEqualityComparer<TKey> comparer)
         {
-            Error.CheckSourceNotNull(source);
+            if (source == null) throw Error.ArgumentNull("source");
             if (keySelector == null) throw Error.ArgumentNull("keySelector");
             if (elementSelector == null) throw Error.ArgumentNull("elementSelector");
             Lookup<TKey, TElement> lookup = new Lookup<TKey, TElement>(comparer);
@@ -3330,7 +3330,7 @@ namespace System.Linq
 
         public GroupedEnumerable(IEnumerable<TSource> source, Func<TSource, TKey> keySelector, Func<TSource, TElement> elementSelector, Func<TKey, IEnumerable<TElement>, TResult> resultSelector, IEqualityComparer<TKey> comparer)
         {
-            Error.CheckSourceNotNull(source);
+            if (source == null) throw Error.ArgumentNull("source");
             if (keySelector == null) throw Error.ArgumentNull("keySelector");
             if (elementSelector == null) throw Error.ArgumentNull("elementSelector");
             if (resultSelector == null) throw Error.ArgumentNull("resultSelector");
@@ -3362,7 +3362,7 @@ namespace System.Linq
 
         public GroupedEnumerable(IEnumerable<TSource> source, Func<TSource, TKey> keySelector, Func<TSource, TElement> elementSelector, IEqualityComparer<TKey> comparer)
         {
-            Error.CheckSourceNotNull(source);
+            if (source == null) throw Error.ArgumentNull("source");
             if (keySelector == null) throw Error.ArgumentNull("keySelector");
             if (elementSelector == null) throw Error.ArgumentNull("elementSelector");
             _source = source;
@@ -3422,7 +3422,7 @@ namespace System.Linq
 
         internal OrderedEnumerable(IEnumerable<TElement> source, Func<TElement, TKey> keySelector, IComparer<TKey> comparer, bool descending)
         {
-            Error.CheckSourceNotNull(source);
+            if (source == null) throw Error.ArgumentNull("source");
             if (keySelector == null) throw Error.ArgumentNull("keySelector");
             this.source = source;
             this.parent = null;
