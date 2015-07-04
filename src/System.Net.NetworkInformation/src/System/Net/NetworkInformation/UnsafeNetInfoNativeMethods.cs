@@ -575,7 +575,7 @@ namespace System.Net.NetworkInformation
 
     internal static class UnsafeNetInfoNativeMethods
     {
-        [DllImport(ExternDll.IPHLPAPI)]
+        [DllImport(Interop.Libraries.IpHlpApi)]
         internal extern static uint GetAdaptersAddresses(
             AddressFamily family,
             uint flags,
@@ -586,76 +586,76 @@ namespace System.Net.NetworkInformation
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security",
             "CA2118:ReviewSuppressUnmanagedCodeSecurityUsage",
             Justification = "This operation is Read-Only and does not access restricted information")]
-        [DllImport(ExternDll.IPHLPAPI)]
+        [DllImport(Interop.Libraries.IpHlpApi)]
         internal extern static uint GetBestInterfaceEx(byte[] ipAddress, out int index);
 
-        [DllImport(ExternDll.IPHLPAPI)]
+        [DllImport(Interop.Libraries.IpHlpApi)]
         internal extern static uint GetIfEntry2(ref MibIfRow2 pIfRow);
 
-        [DllImport(ExternDll.IPHLPAPI)]
+        [DllImport(Interop.Libraries.IpHlpApi)]
         internal extern static uint GetIpStatisticsEx(out MibIpStats statistics, AddressFamily family);
 
-        [DllImport(ExternDll.IPHLPAPI)]
+        [DllImport(Interop.Libraries.IpHlpApi)]
         internal extern static uint GetTcpStatisticsEx(out MibTcpStats statistics, AddressFamily family);
 
-        [DllImport(ExternDll.IPHLPAPI)]
+        [DllImport(Interop.Libraries.IpHlpApi)]
         internal extern static uint GetUdpStatisticsEx(out MibUdpStats statistics, AddressFamily family);
 
-        [DllImport(ExternDll.IPHLPAPI)]
+        [DllImport(Interop.Libraries.IpHlpApi)]
         internal extern static uint GetIcmpStatistics(out MibIcmpInfo statistics);
 
-        [DllImport(ExternDll.IPHLPAPI)]
+        [DllImport(Interop.Libraries.IpHlpApi)]
         internal extern static uint GetIcmpStatisticsEx(out MibIcmpInfoEx statistics, AddressFamily family);
 
-        [DllImport(ExternDll.IPHLPAPI)]
+        [DllImport(Interop.Libraries.IpHlpApi)]
         internal extern static uint GetTcpTable(SafeLocalFree pTcpTable, ref uint dwOutBufLen, bool order);
 
-        [DllImport(ExternDll.IPHLPAPI)]
+        [DllImport(Interop.Libraries.IpHlpApi)]
         internal extern static uint GetExtendedTcpTable(SafeLocalFree pTcpTable, ref uint dwOutBufLen, bool order,
                                                         uint IPVersion, TcpTableClass tableClass, uint reserved);
 
-        [DllImport(ExternDll.IPHLPAPI)]
+        [DllImport(Interop.Libraries.IpHlpApi)]
         internal extern static uint GetUdpTable(SafeLocalFree pUdpTable, ref uint dwOutBufLen, bool order);
 
-        [DllImport(ExternDll.IPHLPAPI)]
+        [DllImport(Interop.Libraries.IpHlpApi)]
         internal extern static uint GetExtendedUdpTable(SafeLocalFree pUdpTable, ref uint dwOutBufLen, bool order,
                                                         uint IPVersion, UdpTableClass tableClass, uint reserved);
 
-        [DllImport(ExternDll.IPHLPAPI)]
+        [DllImport(Interop.Libraries.IpHlpApi)]
         internal extern static uint GetPerAdapterInfo(uint IfIndex, SafeLocalFree pPerAdapterInfo, ref uint pOutBufLen);
 
-        [DllImport(ExternDll.IPHLPAPI, SetLastError = true)]
+        [DllImport(Interop.Libraries.IpHlpApi, SetLastError = true)]
         internal extern static SafeCloseIcmpHandle IcmpCreateFile();
 
-        [DllImport(ExternDll.IPHLPAPI, SetLastError = true)]
+        [DllImport(Interop.Libraries.IpHlpApi, SetLastError = true)]
         internal extern static SafeCloseIcmpHandle Icmp6CreateFile();
 
-        [DllImport(ExternDll.IPHLPAPI, SetLastError = true)]
+        [DllImport(Interop.Libraries.IpHlpApi, SetLastError = true)]
         internal extern static bool IcmpCloseHandle(IntPtr handle);
 
-        [DllImport(ExternDll.IPHLPAPI, SetLastError = true)]
+        [DllImport(Interop.Libraries.IpHlpApi, SetLastError = true)]
         internal extern static uint IcmpSendEcho2(SafeCloseIcmpHandle icmpHandle, SafeWaitHandle Event, IntPtr apcRoutine, IntPtr apcContext,
             uint ipAddress, [In] SafeLocalFree data, ushort dataSize, ref IPOptions options, SafeLocalFree replyBuffer, uint replySize, uint timeout);
 
-        [DllImport(ExternDll.IPHLPAPI, SetLastError = true)]
+        [DllImport(Interop.Libraries.IpHlpApi, SetLastError = true)]
         internal extern static uint IcmpSendEcho2(SafeCloseIcmpHandle icmpHandle, IntPtr Event, IntPtr apcRoutine, IntPtr apcContext,
             uint ipAddress, [In] SafeLocalFree data, ushort dataSize, ref IPOptions options, SafeLocalFree replyBuffer, uint replySize, uint timeout);
 
-        [DllImport(ExternDll.IPHLPAPI, SetLastError = true)]
+        [DllImport(Interop.Libraries.IpHlpApi, SetLastError = true)]
         internal extern static uint Icmp6SendEcho2(SafeCloseIcmpHandle icmpHandle, SafeWaitHandle Event, IntPtr apcRoutine, IntPtr apcContext,
             byte[] sourceSocketAddress, byte[] destSocketAddress, [In] SafeLocalFree data, ushort dataSize, ref IPOptions options, SafeLocalFree replyBuffer, uint replySize, uint timeout);
 
-        [DllImport(ExternDll.IPHLPAPI, SetLastError = true)]
+        [DllImport(Interop.Libraries.IpHlpApi, SetLastError = true)]
         internal extern static uint Icmp6SendEcho2(SafeCloseIcmpHandle icmpHandle, IntPtr Event, IntPtr apcRoutine, IntPtr apcContext,
             byte[] sourceSocketAddress, byte[] destSocketAddress, [In] SafeLocalFree data, ushort dataSize, ref IPOptions options, SafeLocalFree replyBuffer, uint replySize, uint timeout);
 
-        [DllImport(ExternDll.IPHLPAPI)]
+        [DllImport(Interop.Libraries.IpHlpApi)]
         internal static extern void FreeMibTable(IntPtr handle);
 
-        [DllImport(ExternDll.IPHLPAPI)]
+        [DllImport(Interop.Libraries.IpHlpApi)]
         internal static extern uint CancelMibChangeNotify2(IntPtr notificationHandle);
 
-        [DllImport(ExternDll.IPHLPAPI)]
+        [DllImport(Interop.Libraries.IpHlpApi)]
         internal static extern uint NotifyStableUnicastIpAddressTable(
             [In] AddressFamily addressFamily,
             [Out] out SafeFreeMibTable table,

@@ -31,7 +31,7 @@
 
     <!-- Interop for Primitives, Sockets and NetworkInformation -->
     <Compile Include="$(CommonPath)\Interop\Windows\SystemNet\Interop.Primitives.Manual.cs" />
-    <Compile Include="$(CommonPath)\Interop\Windows\SystemNet\ExternDll.cs" />
+    <Compile Include="$(CommonPath)\Interop\Windows\Interop.Libraries.cs" />
 
     <!-- Primitives, Sockets, NetworkInformation Common-->
     <Compile Include="$(CommonPath)\System\Net\Internal.cs" />

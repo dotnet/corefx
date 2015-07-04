@@ -117,8 +117,6 @@ namespace System.Net.Sockets
 #else
     internal sealed class SafeFreeAddrInfo : SafeHandleZeroOrMinusOneIsInvalid {
 #endif
-        private const string WS2_32 = "ws2_32.dll";
-
         private SafeFreeAddrInfo() : base(true) { }
 
         internal static int GetAddrInfo(string nodename, string servicename, ref AddressInfo hints, out SafeFreeAddrInfo outAddrInfo)
@@ -710,7 +708,7 @@ namespace System.Net.Sockets
     // Because the regular SafeNetHandles has a LocalAlloc with a different return type.
     internal static class SafeNetHandlesSafeOverlappedFree
     {
-        [DllImport(ExternDll.APIMSWINCOREHEAPOBSOLETEL1, ExactSpelling = true, SetLastError = true)]
+        [DllImport(Interop.Libraries.Heap, ExactSpelling = true, SetLastError = true)]
         internal static extern SafeOverlappedFree LocalAlloc(int uFlags, UIntPtr sizetdwBytes);
     }
 
