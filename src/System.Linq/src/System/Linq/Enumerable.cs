@@ -5,6 +5,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
+using System.Runtime.ExceptionServices;
 
 namespace System.Linq
 {
@@ -682,7 +683,7 @@ namespace System.Linq
             return new SkipIterator<TSource>(source, count);
         }
 
-        private class SkipIterator<TSource> : IEnumerable<TSource>
+        private sealed class SkipIterator<TSource> : IEnumerable<TSource>
         {
             // Just in case somebody does something weird with the ordering of enumerator
             // disposal, this wraps an enumerator that has been used, but not disposed,
@@ -702,7 +703,7 @@ namespace System.Linq
                 {
                     get { return default(TSource); }
                 }
-                public bool MoveNext()
+                public virtual bool MoveNext()
                 {
                     return false;
                 }
@@ -713,6 +714,25 @@ namespace System.Linq
                 public void Reset()
                 {
                     throw new NotSupportedException();
+                }
+            }
+            private sealed class ErrorEnumeratorWrapper : DeadEnumeratorWrapper
+            {
+                private ExceptionDispatchInfo _exception;
+                public ErrorEnumeratorWrapper(IEnumerator<TSource> corpse, ExceptionDispatchInfo exception)
+                    : base (corpse)
+                {
+                    _exception = exception;
+                }
+                public override bool MoveNext()
+                {
+                    if(_exception != null)
+                    {
+                        ExceptionDispatchInfo ex = _exception;
+                        _exception = null;
+                        ex.Throw();
+                    }
+                    return false;
                 }
             }
             private readonly IEnumerable<TSource> _source;
@@ -737,10 +757,9 @@ namespace System.Linq
                     }
                     return sourceEnumerator;
                 }
-                catch
+                catch(Exception ex)
                 {
-                    sourceEnumerator.Dispose();
-                    throw;
+                    return new ErrorEnumeratorWrapper(sourceEnumerator, ExceptionDispatchInfo.Capture(ex));
                 }
             }
             IEnumerator IEnumerable.GetEnumerator()

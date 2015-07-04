@@ -1,10 +1,17 @@
 ﻿using System.Collections.Generic;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace System.Linq.Tests
 {
     public class SkipTests
     {
+        private readonly ITestOutputHelper _output;
+
+        public SkipTests(ITestOutputHelper output)
+        {
+            _output = output;
+        }
         [Fact]
         public void SkipSome()
         {
@@ -63,6 +70,21 @@ namespace System.Linq.Tests
         {
             Assert.Equal(Enumerable.Range(10, 10), Enumerable.Range(0, 20).SkipWhile(i => i < 10));
             Assert.Equal(Enumerable.Range(10, 10), Enumerable.Range(0, 20).SkipWhile((i, idx) => idx < 10));
+        }
+
+        [Fact]
+        public void SkipErrorWhenSourceErrors()
+        {
+            var source = Enumerable.Range(-2, 5).Select(i => (decimal)i).Select(m => 1 / m).Skip(4);
+            using(var en = source.GetEnumerator())
+            {
+                Assert.True(
+                    Assert.Throws<DivideByZeroException>(() => en.MoveNext())
+                    // Check stack-trace still references the WhereSelectEnumerableIterator`2.MoveNext() call
+                    // where it originated. Check will have to be changed if the details of `Select()`
+                    // implementation change accordingly.
+                    .StackTrace.Contains("at System.Linq.Enumerable.WhereSelectEnumerableIterator`2.MoveNext()"));
+            }
         }
     }
 }
