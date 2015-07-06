@@ -1136,8 +1136,17 @@ namespace System.Linq
 
         public static IEnumerable<TResult> Cast<TResult>(this IEnumerable source)
         {
-            IEnumerable<TResult> typedSource = source as IEnumerable<TResult>;
-            if (typedSource != null) return typedSource;
+            // The optimisation of casting source itself causes difficulties in
+            // some cases where TResult is a value type; specifically if it is an enum
+            // and the source is an array (or some other collections) of enum with the same
+            // underlying type, or if one of the types is itself an underlying type, 
+            // it will "mostly" work, for confusing values of "mostly".
+            // Have the jitter cut out this whole path for non-nullable TSource.
+            if (default(TResult) == null)
+            {
+                IEnumerable<TResult> typedSource = source as IEnumerable<TResult>;
+                if (typedSource != null) return typedSource;
+            }
             if (source == null) throw Error.ArgumentNull("source");
             return CastIterator<TResult>(source);
         }
@@ -3136,19 +3145,7 @@ namespace System.Linq
                         if (count > 0)
                         {
                             items = new TElement[count];
-                            try
-                            {
-                                collection.CopyTo(items, 0);
-                            }
-                            catch (ArrayTypeMismatchException)
-                            {
-                                // This is a relatively obscure edge-case, in which a sequence of one type is
-                                // being treated as a sequence of another type by Cast(), but the underlying
-                                // types don't work with array copy. Better and easier to catch the rare cases
-                                // than to detect them.
-                                // Eat the exception and try again below.
-                                items = null;
-                            }
+                            collection.CopyTo(items, 0);
                         }
                     }
                 }
@@ -3156,23 +3153,18 @@ namespace System.Linq
 
             if (items == null)
             {
-                using(IEnumerator<TElement> e = source.GetEnumerator())
+                foreach (TElement item in source)
                 {
-                    if (e.MoveNext())
+                    if (items == null)
                     {
-                        if (count != 0)
-                        {
-                            items = new TElement[count];
-                            count = 0;
-                        }
-                        else items = new TElement[4];
-                        items[count++] = e.Current;
-                        while (e.MoveNext())
-                        {
-                            if (items.Length == count) Array.Resize(ref items, checked(count * 2));
-                            items[count++] = e.Current;
-                        }
+                        items = new TElement[4];
                     }
+                    else if (items.Length == count)
+                    {
+                        Array.Resize(ref items, checked(count * 2));
+                    }
+                    items[count] = item;
+                    count++;
                 }
             }
 
