@@ -1,3 +1,4 @@
+[![Stories in Ready](https://badge.waffle.io/dotnet/corefx.png?label=ready&title=Ready)](https://waffle.io/dotnet/corefx)
 # .NET Core Libraries (CoreFX)
 
 |   |Linux|Windows|Mac OSX|
