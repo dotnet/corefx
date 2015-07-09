@@ -48,10 +48,6 @@ namespace System.Collections.Concurrent
         // GlobalListsLock lock
         private bool _needSync;
 
-        // Approximate item count inside the bag. This is used to determine initial capacity for list copying operations.
-        // Note that this might not represent totally correct item count inside the bag.
-        private volatile int _approxCount;
-
         // Count of the thread lists. This is used to determine initial capacity for the version lists
         private volatile int _threadListCount;
 
@@ -91,18 +87,14 @@ namespace System.Collections.Concurrent
             _locals = new ThreadLocal<ThreadLocalList>();
 
             // Copy the collection to the bag
-            int count = 0;
             if (collection != null)
             {
                 ThreadLocalList list = GetThreadList(true);
                 foreach (T item in collection)
                 {
                     list.Add(item, false);
-                    count++;
                 }
             }
-
-            _approxCount = count;
         }
 
         /// <summary>
@@ -141,9 +133,6 @@ namespace System.Collections.Concurrent
                     Monitor.Enter(list, ref lockTaken);
                 }
                 list.Add(item, lockTaken);
-#pragma warning disable 0420
-                Interlocked.Increment(ref _approxCount);
-#pragma warning restore 0420
             }
             finally
             {
@@ -244,10 +233,6 @@ namespace System.Collections.Concurrent
                         }
                     }
                     list.Remove(out result);
-#pragma warning disable 0420
-                    Interlocked.Decrement(ref _approxCount);
-#pragma warning restore 0420
-                    return true;
                 }
                 else
                 {
@@ -406,12 +391,6 @@ namespace System.Collections.Concurrent
                 if (CanSteal(list))
                 {
                     list.Steal(out result, take);
-                    if (take)
-                    {
-#pragma warning disable 0420
-                        Interlocked.Decrement(ref _approxCount);
-#pragma warning restore 0420
-                    }
                     return true;
                 }
                 result = default(T);
@@ -660,30 +639,15 @@ namespace System.Collections.Concurrent
         }
 
         /// <summary>
-        /// Searches for an element from <see cref="ConcurrentBag{T}"/> that matches the conditions defined by 
-        /// the specified predicate, and returns the first occurrence that matches the predicate.
+        /// Performs the specified action on each element of the <see cref="ConcurrentBag{T}"/>.
         /// </summary>
-        /// <param name="match">The <see cref="Predicate{T}"/> delegate that defines the conditions of the element to search for.</param>
-        /// <param name="item">When this method returns, <paramref name="item"/> contains the matched object from the
-        /// <see cref="ConcurrentBag{T}"/> or the default value of <typeparamref name="T"/> if there was no match.</param>
-        /// <returns>true if the <see cref="ConcurrentBag{T}"/> contains the matched item; 
-        /// otherwise, false.</returns>
-        /// <remarks>
-        /// The returned value represents a moment-in-time snapshot of the contents of the bag.
-        /// </remarks>
-        public bool Find(Predicate<T> match, out T item)
+        /// <param name="action">The delegate to perform on each element of the <see cref="ConcurrentBag{T}"/>.
+        /// Break the action by returning false from the specified delegate.</param>
+        public void ForEach(Func<T, bool> action)
         {
-            if (match == null)
-            {
-                throw new ArgumentNullException("match");
-            }
-
             // Short path if the bag is empty
             if (_headList == null)
-            {
-                item = default(T);
-                return false;
-            }
+                return;
 
             bool lockTaken = false;
             try
@@ -692,109 +656,9 @@ namespace System.Collections.Concurrent
 
                 foreach (T bagItem in GetEnumerableSlim())
                 {
-                    if (match(bagItem))
-                    {
-                        item = bagItem;
-                        return true; // Item found
-                    }
+                    if (!action(bagItem))
+                        return;
                 }
-                item = default(T);
-                return false;
-            }
-            finally
-            {
-                UnfreezeBag(lockTaken);
-            }
-        }
-
-        /// <summary>
-        /// Retrieves all the elements from <see cref="ConcurrentBag{T}"/> that match 
-        /// the conditions defined by the specified predicate.
-        /// </summary>
-        /// <param name="match">The <see cref="Predicate{T}"/> delegate that defines the conditions of the elements to search for.</param>
-        /// <returns>A <see cref="List{T}"/> containing all the elements that match the conditions defined by the specified predicate, 
-        /// if found; otherwise, an empty <see cref="List{T}"/>.</returns>
-        /// <remarks>
-        /// The returned value represents a moment-in-time snapshot of the contents of the bag.
-        /// </remarks>
-        public List<T> FindAll(Predicate<T> match)
-        {
-            if (match == null)
-            {
-                throw new ArgumentNullException("match");
-            }
-
-            // Short path if the bag is empty
-            if (_headList == null)
-                return new List<T>();
-
-            bool lockTaken = false;
-            try
-            {
-                FreezeBag(ref lockTaken);
-
-                List<T> matches = new List<T>();
-                foreach (T bagItem in GetEnumerableSlim())
-                {
-                    if (match(bagItem))
-                        matches.Add(bagItem);
-                }
-                return matches;
-            }
-            finally
-            {
-                UnfreezeBag(lockTaken);
-            }
-        }
-
-        /// <summary>
-        /// Searches for an element from <see cref="ConcurrentBag{T}"/> that matches the conditions defined by 
-        /// the specified predicate, and returns true if the match is found, otherwise false.
-        /// </summary>
-        /// <param name="match">The <see cref="Predicate{T}"/> delegate that defines the conditions of the element to search for.</param>
-        /// <returns>true if the <see cref="ConcurrentBag{T}"/> contains the matched item; 
-        /// otherwise, false.</returns>
-        /// <remarks>
-        /// The returned value represents a moment-in-time snapshot of the contents of the bag.
-        /// </remarks>
-        public bool Exists(Predicate<T> match)
-        {
-            T dummy = default(T);
-            return Find(match, out dummy);
-        }
-
-        /// <summary>
-        /// Determines whether every element in the <see cref="ConcurrentBag{T}"/> matches the 
-        /// conditions defined by the specified predicate.
-        /// </summary>
-        /// <param name="match">The <see cref="Predicate{T}"/> delegate that defines the conditions to check against the elements.</param>
-        /// <returns>true if every element in the <see cref="ConcurrentBag{T}"/> matches the conditions defined by the specified predicate; 
-        /// otherwise, false. If the list has no elements, the return value is true.</returns>
-        /// <remarks>
-        /// The returned value represents a moment-in-time snapshot of the contents of the bag.
-        /// </remarks>
-        public bool TrueForAll(Predicate<T> match)
-        {
-            if (match == null)
-            {
-                throw new ArgumentNullException("match");
-            }
-
-            // Short path if the bag is empty
-            if (_headList == null)
-                return true;
-
-            bool lockTaken = false;
-            try
-            {
-                FreezeBag(ref lockTaken);
-
-                foreach (T bagItem in GetEnumerableSlim())
-                {
-                    if (!match(bagItem))
-                        return false;
-                }
-                return true;
             }
             finally
             {
@@ -822,8 +686,6 @@ namespace System.Collections.Concurrent
                     currentList.Reset();
                     currentList = currentList._nextList;
                 }
-
-                _approxCount = 0;
             }
             finally
             {
@@ -1073,11 +935,7 @@ namespace System.Collections.Concurrent
         {
             Debug.Assert(Monitor.IsEntered(GlobalListsLock));
 
-            int capacity = _approxCount;
-            if (capacity < 0) // Ensure capacity
-                capacity = 0;
-
-            List<T> list = new List<T>(capacity);
+            List<T> list = new List<T>();
             ThreadLocalList currentList = _headList;
             while (currentList != null)
             {
