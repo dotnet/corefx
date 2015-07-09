@@ -5,6 +5,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
+using System.Runtime.ExceptionServices;
 
 namespace System.Linq
 {
@@ -679,18 +680,91 @@ namespace System.Linq
         public static IEnumerable<TSource> Skip<TSource>(this IEnumerable<TSource> source, int count)
         {
             if (source == null) throw Error.ArgumentNull("source");
-            return SkipIterator<TSource>(source, count);
+            return new SkipIterator<TSource>(source, count);
         }
 
-        private static IEnumerable<TSource> SkipIterator<TSource>(IEnumerable<TSource> source, int count)
+        private sealed class SkipIterator<TSource> : IEnumerable<TSource>
         {
-            using (IEnumerator<TSource> e = source.GetEnumerator())
+            // Just in case somebody does something weird with the ordering of enumerator
+            // disposal, this wraps an enumerator that has been used, but not disposed,
+            // and disposes it when this is.
+            private class DeadEnumeratorWrapper : IEnumerator<TSource>
             {
-                while (count > 0 && e.MoveNext()) count--;
-                if (count <= 0)
+                private readonly IEnumerator<TSource> _corpse;
+                public DeadEnumeratorWrapper(IEnumerator<TSource> corpse)
                 {
-                    while (e.MoveNext()) yield return e.Current;
+                    _corpse = corpse;
                 }
+                public TSource Current
+                {
+                    get { return default(TSource); }
+                }
+                object IEnumerator.Current
+                {
+                    get { return default(TSource); }
+                }
+                public virtual bool MoveNext()
+                {
+                    return false;
+                }
+                public void Dispose()
+                {
+                    _corpse.Dispose();
+                }
+                public void Reset()
+                {
+                    throw new NotSupportedException();
+                }
+            }
+            private sealed class ErrorEnumeratorWrapper : DeadEnumeratorWrapper
+            {
+                private ExceptionDispatchInfo _exception;
+                public ErrorEnumeratorWrapper(IEnumerator<TSource> corpse, ExceptionDispatchInfo exception)
+                    : base (corpse)
+                {
+                    _exception = exception;
+                }
+                public override bool MoveNext()
+                {
+                    if(_exception != null)
+                    {
+                        ExceptionDispatchInfo ex = _exception;
+                        _exception = null;
+                        ex.Throw();
+                    }
+                    return false;
+                }
+            }
+            private readonly IEnumerable<TSource> _source;
+            private readonly int _count;
+            public SkipIterator(IEnumerable<TSource> source, int count)
+            {
+                _source = source;
+                _count = count > 0 ? count : 0;
+            }
+            public IEnumerator<TSource> GetEnumerator()
+            {
+                IEnumerator<TSource> sourceEnumerator = _source.GetEnumerator();
+                try
+                {
+                    for (int count = _count; count != 0; --count)
+                    {
+                        // It should be harmless to have the recipient call MoveNext again.
+                        // but we guard against strange behaviour from shortcuts in the enumerator
+                        // It should also be harmless to dispose the enumerator here if we've
+                        // exhausted it, but we guard against strange behaviour in the caller.
+                        if (!sourceEnumerator.MoveNext()) return new DeadEnumeratorWrapper(sourceEnumerator);
+                    }
+                    return sourceEnumerator;
+                }
+                catch(Exception ex)
+                {
+                    return new ErrorEnumeratorWrapper(sourceEnumerator, ExceptionDispatchInfo.Capture(ex));
+                }
+            }
+            IEnumerator IEnumerable.GetEnumerator()
+            {
+                return GetEnumerator();
             }
         }
 
@@ -698,16 +772,63 @@ namespace System.Linq
         {
             if (source == null) throw Error.ArgumentNull("source");
             if (predicate == null) throw Error.ArgumentNull("predicate");
-            return SkipWhileIterator<TSource>(source, predicate);
+            return new SkipWhileIterator<TSource>(source, predicate);
         }
 
-        private static IEnumerable<TSource> SkipWhileIterator<TSource>(IEnumerable<TSource> source, Func<TSource, bool> predicate)
+        private class SkipWhileIterator<TSource> : IEnumerable<TSource>
         {
-            bool yielding = false;
-            foreach (TSource element in source)
+            private class Enumerator : IEnumerator<TSource>
             {
-                if (!yielding && !predicate(element)) yielding = true;
-                if (yielding) yield return element;
+                private readonly IEnumerator<TSource> _source;
+                private readonly Func<TSource, bool> _predicate;
+                private bool _started;
+                public Enumerator(IEnumerable<TSource> source, Func<TSource, bool> predicate)
+                {
+                    _source = source.GetEnumerator();
+                    _predicate = predicate;
+                }
+                public TSource Current
+                {
+                    get { return _source.Current; }
+                }
+                object IEnumerator.Current
+                {
+                    get { return Current; }
+                }
+                public bool MoveNext()
+                {
+                    if (_started)
+                        return _source.MoveNext();
+                    _started = true;
+                    while (_source.MoveNext())
+                        if (!_predicate(_source.Current))
+                            return true;
+                    return false;
+                }
+                public void Reset()
+                {
+                    _source.Reset();
+                    _started = false;
+                }
+                public void Dispose()
+                {
+                    _source.Dispose();
+                }
+            }
+            private readonly IEnumerable<TSource> _source;
+            private readonly Func<TSource, bool> _predicate;
+            public SkipWhileIterator(IEnumerable<TSource> source, Func<TSource, bool> predicate)
+            {
+                _source = source;
+                _predicate = predicate;
+            }
+            public IEnumerator<TSource> GetEnumerator()
+            {
+                return new Enumerator(_source, _predicate);
+            }
+            IEnumerator IEnumerable.GetEnumerator()
+            {
+                return GetEnumerator();
             }
         }
 
@@ -715,18 +836,62 @@ namespace System.Linq
         {
             if (source == null) throw Error.ArgumentNull("source");
             if (predicate == null) throw Error.ArgumentNull("predicate");
-            return SkipWhileIterator<TSource>(source, predicate);
+            return new SkipWhileWithIndexIterator<TSource>(source, predicate);
         }
 
-        private static IEnumerable<TSource> SkipWhileIterator<TSource>(IEnumerable<TSource> source, Func<TSource, int, bool> predicate)
+        private class SkipWhileWithIndexIterator<TSource> : IEnumerable<TSource>
         {
-            int index = -1;
-            bool yielding = false;
-            foreach (TSource element in source)
+            private class Enumerator : IEnumerator<TSource>
             {
-                checked { index++; }
-                if (!yielding && !predicate(element, index)) yielding = true;
-                if (yielding) yield return element;
+                private readonly IEnumerator<TSource> _source;
+                private readonly Func<TSource, int, bool> _predicate;
+                private int _index = 0;
+                public Enumerator(IEnumerable<TSource> source, Func<TSource, int, bool> predicate)
+                {
+                    _source = source.GetEnumerator();
+                    _predicate = predicate;
+                }
+                public TSource Current
+                {
+                    get { return _source.Current; }
+                }
+                object IEnumerator.Current
+                {
+                    get { return Current; }
+                }
+                public bool MoveNext()
+                {
+                    if (_index != 0)
+                        return _source.MoveNext();
+                    while (_source.MoveNext())
+                        if (!_predicate(_source.Current, _index++))
+                            return true;
+                    return false;
+                }
+                public void Reset()
+                {
+                    _source.Reset();
+                    _index = 0;
+                }
+                public void Dispose()
+                {
+                    _source.Dispose();
+                }
+            }
+            private readonly IEnumerable<TSource> _source;
+            private readonly Func<TSource, int, bool> _predicate;
+            public SkipWhileWithIndexIterator(IEnumerable<TSource> source, Func<TSource, int, bool> predicate)
+            {
+                _source = source;
+                _predicate = predicate;
+            }
+            public IEnumerator<TSource> GetEnumerator()
+            {
+                return new Enumerator(_source, _predicate);
+            }
+            IEnumerator IEnumerable.GetEnumerator()
+            {
+                return GetEnumerator();
             }
         }
 
@@ -1236,17 +1401,22 @@ namespace System.Linq
         {
             if (source == null) throw Error.ArgumentNull("source");
             if (predicate == null) throw Error.ArgumentNull("predicate");
-            TSource result = default(TSource);
-            bool found = false;
-            foreach (TSource element in source)
+            using (IEnumerator<TSource> e = source.GetEnumerator())
             {
-                if (predicate(element))
+                while (e.MoveNext())
                 {
-                    result = element;
-                    found = true;
+                    TSource result = e.Current;
+                    if (predicate(result))
+                    {
+                        while (e.MoveNext())
+                        {
+                            TSource element = e.Current;
+                            if (predicate(element)) result = element;
+                        }
+                        return result;
+                    }
                 }
             }
-            if (found) return result;
             throw Error.NoMatch();
         }
 
@@ -1320,22 +1490,22 @@ namespace System.Linq
         {
             if (source == null) throw Error.ArgumentNull("source");
             if (predicate == null) throw Error.ArgumentNull("predicate");
-            TSource result = default(TSource);
-            long count = 0;
-            foreach (TSource element in source)
+            using (IEnumerator<TSource> e = source.GetEnumerator())
             {
-                if (predicate(element))
+                while (e.MoveNext())
                 {
-                    result = element;
-                    checked { count++; }
+                    TSource result = e.Current;
+                    if (predicate(result))
+                    {
+                        while (e.MoveNext())
+                        {
+                            if (predicate(e.Current)) throw Error.MoreThanOneMatch();
+                        }
+                        return result;
+                    }
                 }
             }
-            switch (count)
-            {
-                case 0: throw Error.NoMatch();
-                case 1: return result;
-            }
-            throw Error.MoreThanOneMatch();
+            throw Error.NoMatch();
         }
 
         public static TSource SingleOrDefault<TSource>(this IEnumerable<TSource> source)
@@ -1366,22 +1536,22 @@ namespace System.Linq
         {
             if (source == null) throw Error.ArgumentNull("source");
             if (predicate == null) throw Error.ArgumentNull("predicate");
-            TSource result = default(TSource);
-            long count = 0;
-            foreach (TSource element in source)
+            using (IEnumerator<TSource> e = source.GetEnumerator())
             {
-                if (predicate(element))
+                while (e.MoveNext())
                 {
-                    result = element;
-                    checked { count++; }
+                    TSource result = e.Current;
+                    if (predicate(result))
+                    {
+                        while (e.MoveNext())
+                        {
+                            if (predicate(e.Current)) throw Error.MoreThanOneMatch();
+                        }
+                        return result;
+                    }
                 }
             }
-            switch (count)
-            {
-                case 0: return default(TSource);
-                case 1: return result;
-            }
-            throw Error.MoreThanOneMatch();
+            return default(TSource);
         }
 
         public static TSource ElementAt<TSource>(this IEnumerable<TSource> source, int index)
@@ -1756,32 +1926,51 @@ namespace System.Linq
         public static int Min(this IEnumerable<int> source)
         {
             if (source == null) throw Error.ArgumentNull("source");
-            int value = 0;
-            bool hasValue = false;
-            foreach (int x in source)
+            int value;
+            using (IEnumerator<int> e = source.GetEnumerator())
             {
-                if (hasValue)
+                if (!e.MoveNext()) throw Error.NoElements();
+                value = e.Current;
+                while (e.MoveNext())
                 {
+                    int x = e.Current;
                     if (x < value) value = x;
                 }
-                else
-                {
-                    value = x;
-                    hasValue = true;
-                }
             }
-            if (hasValue) return value;
-            throw Error.NoElements();
+            return value;
         }
 
         public static int? Min(this IEnumerable<int?> source)
         {
             if (source == null) throw Error.ArgumentNull("source");
-            int? value = null;
-            foreach (int? x in source)
+            int? value;
+            using (IEnumerator<int?> e = source.GetEnumerator())
             {
-                if (value == null || x < value)
-                    value = x;
+                if (!e.MoveNext()) return null;
+                int? cur = e.Current;
+                // Start off knowing that we've a non-null value (or exit here, knowing we don't)
+                // so we don't have to keep testing for nullity.
+                while (!cur.HasValue)
+                {
+                    if (!e.MoveNext()) return cur;
+                    cur = e.Current;
+                }
+                // Keep hold of the wrapped value, and do comparisons on that, rather than
+                // using the lifted operation each time.
+                int valueVal = (value = cur).Value;
+                while (e.MoveNext())
+                {
+                    cur = e.Current;
+                    if (cur.HasValue)
+                    {
+                        int x = cur.Value;
+                        if (x < valueVal)
+                        {
+                            valueVal = x;
+                            value = cur;
+                        }
+                    }
+                }
             }
             return value;
         }
@@ -1789,31 +1978,47 @@ namespace System.Linq
         public static long Min(this IEnumerable<long> source)
         {
             if (source == null) throw Error.ArgumentNull("source");
-            long value = 0;
-            bool hasValue = false;
-            foreach (long x in source)
+            long value;
+            using (IEnumerator<long> e = source.GetEnumerator())
             {
-                if (hasValue)
+                if (!e.MoveNext()) throw Error.NoElements();
+                value = e.Current;
+                while (e.MoveNext())
                 {
+                    long x = e.Current;
                     if (x < value) value = x;
                 }
-                else
-                {
-                    value = x;
-                    hasValue = true;
-                }
             }
-            if (hasValue) return value;
-            throw Error.NoElements();
+            return value;
         }
 
         public static long? Min(this IEnumerable<long?> source)
         {
             if (source == null) throw Error.ArgumentNull("source");
-            long? value = null;
-            foreach (long? x in source)
+            long? value;
+            using (IEnumerator<long?> e = source.GetEnumerator())
             {
-                if (value == null || x < value) value = x;
+                if (!e.MoveNext()) return null;
+                long? cur = e.Current;
+                while (!cur.HasValue)
+                {
+                    if (!e.MoveNext()) return cur;
+                    cur = e.Current;
+                }
+                long valueVal = (value = cur).Value;
+                while (e.MoveNext())
+                {
+                    cur = e.Current;
+                    if (cur.HasValue)
+                    {
+                        long x = cur.Value;
+                        if (x < valueVal)
+                        {
+                            valueVal = x;
+                            value = cur;
+                        }
+                    }
+                }
             }
             return value;
         }
@@ -1821,38 +2026,57 @@ namespace System.Linq
         public static float Min(this IEnumerable<float> source)
         {
             if (source == null) throw Error.ArgumentNull("source");
-            float value = 0;
-            bool hasValue = false;
-            foreach (float x in source)
+            float value;
+            using (IEnumerator<float> e = source.GetEnumerator())
             {
-                if (hasValue)
+                if (!e.MoveNext()) throw Error.NoElements();
+                value = e.Current;
+                while (e.MoveNext())
                 {
+                    float x = e.Current;
+                    if (x < value) value = x;
                     // Normally NaN < anything is false, as is anything < NaN
                     // However, this leads to some irksome outcomes in Min and Max.
                     // If we use those semantics then Min(NaN, 5.0) is NaN, but
                     // Min(5.0, NaN) is 5.0!  To fix this, we impose a total
                     // ordering where NaN is smaller than every value, including
                     // negative infinity.
-                    if (x < value || System.Single.IsNaN(x)) value = x;
-                }
-                else
-                {
-                    value = x;
-                    hasValue = true;
+                    // Not testing for NaN therefore isn't an option, but since we
+                    // can't find a smaller value, we can short-circuit.
+                    else if (float.IsNaN(x)) return x;
                 }
             }
-            if (hasValue) return value;
-            throw Error.NoElements();
+            return value;
         }
 
         public static float? Min(this IEnumerable<float?> source)
         {
             if (source == null) throw Error.ArgumentNull("source");
-            float? value = null;
-            foreach (float? x in source)
+            float? value;
+            using (IEnumerator<float?> e = source.GetEnumerator())
             {
-                if (x == null) continue;
-                if (value == null || x < value || System.Single.IsNaN((float)x)) value = x;
+                if (!e.MoveNext()) return null;
+                float? cur = e.Current;
+                while (cur == null)
+                {
+                    if (!e.MoveNext()) return cur;
+                    cur = e.Current;
+                }
+                float valueVal = (value = cur).Value;
+                while (e.MoveNext())
+                {
+                    cur = e.Current;
+                    if (cur.HasValue)
+                    {
+                        float x = cur.Value;
+                        if (x < valueVal)
+                        {
+                            valueVal = x;
+                            value = cur;
+                        }
+                        else if (float.IsNaN(x)) return cur;
+                    }
+                }
             }
             return value;
         }
@@ -1860,32 +2084,49 @@ namespace System.Linq
         public static double Min(this IEnumerable<double> source)
         {
             if (source == null) throw Error.ArgumentNull("source");
-            double value = 0;
-            bool hasValue = false;
-            foreach (double x in source)
+            double value;
+            using (IEnumerator<double> e = source.GetEnumerator())
             {
-                if (hasValue)
+                if (!e.MoveNext()) throw Error.NoElements();
+                value = e.Current;
+                while (e.MoveNext())
                 {
-                    if (x < value || System.Double.IsNaN(x)) value = x;
-                }
-                else
-                {
-                    value = x;
-                    hasValue = true;
+                    double x = e.Current;
+                    if (x < value) value = x;
+                    else if (double.IsNaN(x)) return x;
                 }
             }
-            if (hasValue) return value;
-            throw Error.NoElements();
+            return value;
         }
 
         public static double? Min(this IEnumerable<double?> source)
         {
             if (source == null) throw Error.ArgumentNull("source");
-            double? value = null;
-            foreach (double? x in source)
+            double? value;
+            using (IEnumerator<double?> e = source.GetEnumerator())
             {
-                if (x == null) continue;
-                if (value == null || x < value || System.Double.IsNaN((double)x)) value = x;
+                if (!e.MoveNext()) return null;
+                double? cur = e.Current;
+                while (cur == null)
+                {
+                    if (!e.MoveNext()) return cur;
+                    cur = e.Current;
+                }
+                double valueVal = (value = cur).Value;
+                while (e.MoveNext())
+                {
+                    cur = e.Current;
+                    if (cur.HasValue)
+                    {
+                        double x = cur.Value;
+                        if (x < valueVal)
+                        {
+                            valueVal = x;
+                            value = cur;
+                        }
+                        else if (double.IsNaN(x)) return cur;
+                    }
+                }
             }
             return value;
         }
@@ -1893,31 +2134,47 @@ namespace System.Linq
         public static decimal Min(this IEnumerable<decimal> source)
         {
             if (source == null) throw Error.ArgumentNull("source");
-            decimal value = 0;
-            bool hasValue = false;
-            foreach (decimal x in source)
+            decimal value;
+            using (IEnumerator<decimal> e = source.GetEnumerator())
             {
-                if (hasValue)
+                if (!e.MoveNext()) throw Error.NoElements();
+                value = e.Current;
+                while (e.MoveNext())
                 {
+                    decimal x = e.Current;
                     if (x < value) value = x;
                 }
-                else
-                {
-                    value = x;
-                    hasValue = true;
-                }
             }
-            if (hasValue) return value;
-            throw Error.NoElements();
+            return value;
         }
 
         public static decimal? Min(this IEnumerable<decimal?> source)
         {
             if (source == null) throw Error.ArgumentNull("source");
-            decimal? value = null;
-            foreach (decimal? x in source)
+            decimal? value;
+            using (IEnumerator<decimal?> e = source.GetEnumerator())
             {
-                if (value == null || x < value) value = x;
+                if (!e.MoveNext()) return null;
+                decimal? cur = e.Current;
+                while (!cur.HasValue)
+                {
+                    if (!e.MoveNext()) return cur;
+                    cur = e.Current;
+                }
+                decimal valueVal = (value = cur).Value;
+                while (e.MoveNext())
+                {
+                    cur = e.Current;
+                    if (cur.HasValue)
+                    {
+                        decimal x = cur.Value;
+                        if (x < valueVal)
+                        {
+                            valueVal = x;
+                            value = cur;
+                        }
+                    }
+                }
             }
             return value;
         }
@@ -1927,34 +2184,40 @@ namespace System.Linq
             if (source == null) throw Error.ArgumentNull("source");
             Comparer<TSource> comparer = Comparer<TSource>.Default;
             TSource value = default(TSource);
+            // Note that the jitter generally does a nice job of removing
+            // whichever of these two code-paths can't be hit.
             if (value == null)
             {
-                foreach (TSource x in source)
+                using (IEnumerator<TSource> e = source.GetEnumerator())
                 {
-                    if (x != null && (value == null || comparer.Compare(x, value) < 0))
-                        value = x;
+                    do
+                    {
+                        if (!e.MoveNext()) return value;
+                        value = e.Current;
+                        // Keep going until we've a non-null value (or return null)
+                        // rather than continually testing if value is null later.
+                    } while (value == null);
+                    while (e.MoveNext())
+                    {
+                        TSource x = e.Current;
+                        if (x != null && comparer.Compare(x, value) < 0) value = x;
+                    }
                 }
-                return value;
             }
             else
             {
-                bool hasValue = false;
-                foreach (TSource x in source)
+                using (IEnumerator<TSource> e = source.GetEnumerator())
                 {
-                    if (hasValue)
+                    if (!e.MoveNext()) throw Error.NoElements();
+                    value = e.Current;
+                    while (e.MoveNext())
                     {
-                        if (comparer.Compare(x, value) < 0)
-                            value = x;
-                    }
-                    else
-                    {
-                        value = x;
-                        hasValue = true;
+                        TSource x = e.Current;
+                        if (comparer.Compare(x, value) < 0) value = x;
                     }
                 }
-                if (hasValue) return value;
-                throw Error.NoElements();
             }
+            return value;
         }
 
         public static int Min<TSource>(this IEnumerable<TSource> source, Func<TSource, int> selector)
@@ -2015,31 +2278,47 @@ namespace System.Linq
         public static int Max(this IEnumerable<int> source)
         {
             if (source == null) throw Error.ArgumentNull("source");
-            int value = 0;
-            bool hasValue = false;
-            foreach (int x in source)
+            int value;
+            using (IEnumerator<int> e = source.GetEnumerator())
             {
-                if (hasValue)
+                if (!e.MoveNext()) throw Error.NoElements();
+                value = e.Current;
+                while (e.MoveNext())
                 {
+                    int x = e.Current;
                     if (x > value) value = x;
                 }
-                else
-                {
-                    value = x;
-                    hasValue = true;
-                }
             }
-            if (hasValue) return value;
-            throw Error.NoElements();
+            return value;
         }
 
         public static int? Max(this IEnumerable<int?> source)
         {
             if (source == null) throw Error.ArgumentNull("source");
-            int? value = null;
-            foreach (int? x in source)
+            int? value;
+            using (IEnumerator<int?> e = source.GetEnumerator())
             {
-                if (value == null || x > value) value = x;
+                if (!e.MoveNext()) return null;
+                int? cur = e.Current;
+                while (!cur.HasValue)
+                {
+                    if (!e.MoveNext()) return cur;
+                    cur = e.Current;
+                }
+                int valueVal = (value = cur).Value;
+                while (e.MoveNext())
+                {
+                    cur = e.Current;
+                    if (cur.HasValue)
+                    {
+                        int x = cur.Value;
+                        if (x > valueVal)
+                        {
+                            valueVal = x;
+                            value = cur;
+                        }
+                    }
+                }
             }
             return value;
         }
@@ -2047,31 +2326,47 @@ namespace System.Linq
         public static long Max(this IEnumerable<long> source)
         {
             if (source == null) throw Error.ArgumentNull("source");
-            long value = 0;
-            bool hasValue = false;
-            foreach (long x in source)
+            long value;
+            using (IEnumerator<long> e = source.GetEnumerator())
             {
-                if (hasValue)
+                if (!e.MoveNext()) throw Error.NoElements();
+                value = e.Current;
+                while (e.MoveNext())
                 {
+                    long x = e.Current;
                     if (x > value) value = x;
                 }
-                else
-                {
-                    value = x;
-                    hasValue = true;
-                }
             }
-            if (hasValue) return value;
-            throw Error.NoElements();
+            return value;
         }
 
         public static long? Max(this IEnumerable<long?> source)
         {
             if (source == null) throw Error.ArgumentNull("source");
-            long? value = null;
-            foreach (long? x in source)
+            long? value;
+            using (IEnumerator<long?> e = source.GetEnumerator())
             {
-                if (value == null || x > value) value = x;
+                if (!e.MoveNext()) return null;
+                long? cur = e.Current;
+                while (!cur.HasValue)
+                {
+                    if (!e.MoveNext()) return cur;
+                    cur = e.Current;
+                }
+                long valueVal = (value = cur).Value;
+                while (e.MoveNext())
+                {
+                    cur = e.Current;
+                    if (cur.HasValue)
+                    {
+                        long x = cur.Value;
+                        if (x > valueVal)
+                        {
+                            valueVal = x;
+                            value = cur;
+                        }
+                    }
+                }
             }
             return value;
         }
@@ -2079,32 +2374,62 @@ namespace System.Linq
         public static double Max(this IEnumerable<double> source)
         {
             if (source == null) throw Error.ArgumentNull("source");
-            double value = 0;
-            bool hasValue = false;
-            foreach (double x in source)
+            double value;
+            using (IEnumerator<double> e = source.GetEnumerator())
             {
-                if (hasValue)
+                if (!e.MoveNext()) throw Error.NoElements();
+                value = e.Current;
+                // As described in a comment on Min(this IEnumerable<double>) NaN is ordered
+                // less than all other values. We need to do explicit checks to ensure this, but
+                // once we've found a value that is not NaN we need no longer worry about it,
+                // so first loop until such a value is found (or not, as the case may be).
+                while (double.IsNaN(value))
                 {
-                    if (x > value || System.Double.IsNaN(value)) value = x;
+                    if (!e.MoveNext()) return value;
+                    value = e.Current;
                 }
-                else
+                while (e.MoveNext())
                 {
-                    value = x;
-                    hasValue = true;
+                    double x = e.Current;
+                    if (x > value) value = x;
                 }
             }
-            if (hasValue) return value;
-            throw Error.NoElements();
+            return value;
         }
 
         public static double? Max(this IEnumerable<double?> source)
         {
             if (source == null) throw Error.ArgumentNull("source");
-            double? value = null;
-            foreach (double? x in source)
+            double? value;
+            using (IEnumerator<double?> e = source.GetEnumerator())
             {
-                if (x == null) continue;
-                if (value == null || x > value || System.Double.IsNaN((double)value)) value = x;
+                if (!e.MoveNext()) return null;
+                double? cur = e.Current;
+                while (cur == null)
+                {
+                    if (!e.MoveNext()) return cur;
+                    cur = e.Current;
+                }
+                double valueVal = (value = cur).Value;
+                while (double.IsNaN(valueVal))
+                {
+                    if (!e.MoveNext()) return value;
+                    cur = e.Current;
+                    if (cur.HasValue) valueVal = (value = cur).Value;
+                }
+                while (e.MoveNext())
+                {
+                    cur = e.Current;
+                    if (cur.HasValue)
+                    {
+                        double x = cur.Value;
+                        if (x > valueVal)
+                        {
+                            valueVal = x;
+                            value = cur;
+                        }
+                    }
+                }
             }
             return value;
         }
@@ -2112,32 +2437,58 @@ namespace System.Linq
         public static float Max(this IEnumerable<float> source)
         {
             if (source == null) throw Error.ArgumentNull("source");
-            float value = 0;
-            bool hasValue = false;
-            foreach (float x in source)
+            float value;
+            using (IEnumerator<float> e = source.GetEnumerator())
             {
-                if (hasValue)
+                if (!e.MoveNext()) throw Error.NoElements();
+                value = e.Current;
+                while (float.IsNaN(value))
                 {
-                    if (x > value || System.Double.IsNaN(value)) value = x;
+                    if (!e.MoveNext()) return value;
+                    value = e.Current;
                 }
-                else
+                while (e.MoveNext())
                 {
-                    value = x;
-                    hasValue = true;
+                    float x = e.Current;
+                    if (x > value) value = x;
                 }
             }
-            if (hasValue) return value;
-            throw Error.NoElements();
+            return value;
         }
 
         public static float? Max(this IEnumerable<float?> source)
         {
             if (source == null) throw Error.ArgumentNull("source");
-            float? value = null;
-            foreach (float? x in source)
+            float? value;
+            using (IEnumerator<float?> e = source.GetEnumerator())
             {
-                if (x == null) continue;
-                if (value == null || x > value || System.Single.IsNaN((float)value)) value = x;
+                if (!e.MoveNext()) return null;
+                float? cur = e.Current;
+                while (cur == null)
+                {
+                    if (!e.MoveNext()) return cur;
+                    cur = e.Current;
+                }
+                float valueVal = (value = cur).Value;
+                while (float.IsNaN(valueVal))
+                {
+                    if (!e.MoveNext()) return value;
+                    cur = e.Current;
+                    if (cur.HasValue) valueVal = (value = cur).Value;
+                }
+                while (e.MoveNext())
+                {
+                    cur = e.Current;
+                    if (cur.HasValue)
+                    {
+                        float x = cur.Value;
+                        if (x > valueVal)
+                        {
+                            valueVal = x;
+                            value = cur;
+                        }
+                    }
+                }
             }
             return value;
         }
@@ -2145,31 +2496,47 @@ namespace System.Linq
         public static decimal Max(this IEnumerable<decimal> source)
         {
             if (source == null) throw Error.ArgumentNull("source");
-            decimal value = 0;
-            bool hasValue = false;
-            foreach (decimal x in source)
+            decimal value;
+            using (IEnumerator<decimal> e = source.GetEnumerator())
             {
-                if (hasValue)
+                if (!e.MoveNext()) throw Error.NoElements();
+                value = e.Current;
+                while (e.MoveNext())
                 {
+                    decimal x = e.Current;
                     if (x > value) value = x;
                 }
-                else
-                {
-                    value = x;
-                    hasValue = true;
-                }
             }
-            if (hasValue) return value;
-            throw Error.NoElements();
+            return value;
         }
 
         public static decimal? Max(this IEnumerable<decimal?> source)
         {
             if (source == null) throw Error.ArgumentNull("source");
-            decimal? value = null;
-            foreach (decimal? x in source)
+            decimal? value;
+            using (IEnumerator<decimal?> e = source.GetEnumerator())
             {
-                if (value == null || x > value) value = x;
+                if (!e.MoveNext()) return null;
+                decimal? cur = e.Current;
+                while (!cur.HasValue)
+                {
+                    if (!e.MoveNext()) return cur;
+                    cur = e.Current;
+                }
+                decimal valueVal = (value = cur).Value;
+                while (e.MoveNext())
+                {
+                    cur = e.Current;
+                    if (cur.HasValue)
+                    {
+                        decimal x = cur.Value;
+                        if (x > valueVal)
+                        {
+                            valueVal = x;
+                            value = cur;
+                        }
+                    }
+                }
             }
             return value;
         }
@@ -2179,34 +2546,40 @@ namespace System.Linq
             if (source == null) throw Error.ArgumentNull("source");
             Comparer<TSource> comparer = Comparer<TSource>.Default;
             TSource value = default(TSource);
+            // Note that the jitter generally does a nice job of removing
+            // whichever of these two code-paths can't be hit.
             if (value == null)
             {
-                foreach (TSource x in source)
+                using (IEnumerator<TSource> e = source.GetEnumerator())
                 {
-                    if (x != null && (value == null || comparer.Compare(x, value) > 0))
-                        value = x;
+                    do
+                    {
+                        if (!e.MoveNext()) return value;
+                        value = e.Current;
+                        // Keep going until we've a non-null value (or return null)
+                        // rather than continually testing if value is null later.
+                    } while (value == null);
+                    while (e.MoveNext())
+                    {
+                        TSource x = e.Current;
+                        if (x != null && comparer.Compare(x, value) > 0) value = x;
+                    }
                 }
-                return value;
             }
             else
             {
-                bool hasValue = false;
-                foreach (TSource x in source)
+                using (IEnumerator<TSource> e = source.GetEnumerator())
                 {
-                    if (hasValue)
+                    if (!e.MoveNext()) throw Error.NoElements();
+                    value = e.Current;
+                    while (e.MoveNext())
                     {
-                        if (comparer.Compare(x, value) > 0)
-                            value = x;
-                    }
-                    else
-                    {
-                        value = x;
-                        hasValue = true;
+                        TSource x = e.Current;
+                        if (comparer.Compare(x, value) > 0) value = x;
                     }
                 }
-                if (hasValue) return value;
-                throw Error.NoElements();
             }
+            return value;
         }
 
         public static int Max<TSource>(this IEnumerable<TSource> source, Func<TSource, int> selector)
@@ -2267,185 +2640,246 @@ namespace System.Linq
         public static double Average(this IEnumerable<int> source)
         {
             if (source == null) throw Error.ArgumentNull("source");
-            long sum = 0;
-            long count = 0;
-            checked
+            using (IEnumerator<int> e = source.GetEnumerator())
             {
-                foreach (int v in source)
+                if (!e.MoveNext()) throw Error.NoElements();
+                long sum = e.Current;
+                long count = 1;
+                checked
                 {
-                    sum += v;
-                    count++;
+                    while (e.MoveNext())
+                    {
+                        sum += e.Current;
+                        ++count;
+                    }
                 }
+                return (double)sum / count;
             }
-            if (count > 0) return (double)sum / count;
-            throw Error.NoElements();
         }
 
         public static double? Average(this IEnumerable<int?> source)
         {
             if (source == null) throw Error.ArgumentNull("source");
-            long sum = 0;
-            long count = 0;
-            checked
+            using (IEnumerator<int?> e = source.GetEnumerator())
             {
-                foreach (int? v in source)
+                while (e.MoveNext())
                 {
-                    if (v != null)
+                    int? v = e.Current;
+                    if (v.HasValue)
                     {
-                        sum += v.GetValueOrDefault();
-                        count++;
+                        long sum = v.Value;
+                        long count = 1;
+                        checked
+                        {
+                            while (e.MoveNext())
+                            {
+                                v = e.Current;
+                                if (v.HasValue)
+                                {
+                                    sum += v.Value;
+                                    ++count;
+                                }
+                            }
+                        }
+                        return (double)sum / count;
                     }
                 }
             }
-            if (count > 0) return (double)sum / count;
             return null;
         }
 
         public static double Average(this IEnumerable<long> source)
         {
             if (source == null) throw Error.ArgumentNull("source");
-            long sum = 0;
-            long count = 0;
-            checked
+            using (IEnumerator<long> e = source.GetEnumerator())
             {
-                foreach (long v in source)
+                if (!e.MoveNext()) throw Error.NoElements();
+                long sum = e.Current;
+                long count = 1;
+                checked
                 {
-                    sum += v;
-                    count++;
+                    while (e.MoveNext())
+                    {
+                        sum += e.Current;
+                        ++count;
+                    }
                 }
+                return (double)sum / count;
             }
-            if (count > 0) return (double)sum / count;
-            throw Error.NoElements();
         }
 
         public static double? Average(this IEnumerable<long?> source)
         {
             if (source == null) throw Error.ArgumentNull("source");
-            long sum = 0;
-            long count = 0;
-            checked
+            using (IEnumerator<long?> e = source.GetEnumerator())
             {
-                foreach (long? v in source)
+                while (e.MoveNext())
                 {
-                    if (v != null)
+                    long? v = e.Current;
+                    if (v.HasValue)
                     {
-                        sum += v.GetValueOrDefault();
-                        count++;
+                        long sum = v.Value;
+                        long count = 1;
+                        checked
+                        {
+                            while (e.MoveNext())
+                            {
+                                v = e.Current;
+                                if (v.HasValue)
+                                {
+                                    sum += v.Value;
+                                    ++count;
+                                }
+                            }
+                        }
+                        return (double)sum / count;
                     }
                 }
             }
-            if (count > 0) return (double)sum / count;
             return null;
         }
 
         public static float Average(this IEnumerable<float> source)
         {
             if (source == null) throw Error.ArgumentNull("source");
-            double sum = 0;
-            long count = 0;
-            checked
+            using (IEnumerator<float> e = source.GetEnumerator())
             {
-                foreach (float v in source)
+                if (!e.MoveNext()) throw Error.NoElements();
+                double sum = e.Current;
+                long count = 1;
+                while (e.MoveNext())
                 {
-                    sum += v;
-                    count++;
+                    sum += e.Current;
+                    ++count;
                 }
+                return (float)(sum / count);
             }
-            if (count > 0) return (float)(sum / count);
-            throw Error.NoElements();
         }
 
         public static float? Average(this IEnumerable<float?> source)
         {
             if (source == null) throw Error.ArgumentNull("source");
-            double sum = 0;
-            long count = 0;
-            checked
+            using (IEnumerator<float?> e = source.GetEnumerator())
             {
-                foreach (float? v in source)
+                while (e.MoveNext())
                 {
-                    if (v != null)
+                    float? v = e.Current;
+                    if (v.HasValue)
                     {
-                        sum += v.GetValueOrDefault();
-                        count++;
+                        double sum = v.Value;
+                        long count = 1;
+                        checked
+                        {
+                            while (e.MoveNext())
+                            {
+                                v = e.Current;
+                                if (v.HasValue)
+                                {
+                                    sum += v.Value;
+                                    ++count;
+                                }
+                            }
+                        }
+                        return (float)(sum / count);
                     }
                 }
             }
-            if (count > 0) return (float)(sum / count);
             return null;
         }
 
         public static double Average(this IEnumerable<double> source)
         {
             if (source == null) throw Error.ArgumentNull("source");
-            double sum = 0;
-            long count = 0;
-            checked
+            using (IEnumerator<double> e = source.GetEnumerator())
             {
-                foreach (double v in source)
+                if (!e.MoveNext()) throw Error.NoElements();
+                double sum = e.Current;
+                long count = 1;
+                while (e.MoveNext())
                 {
-                    sum += v;
-                    count++;
+                    // There is an opportunity to short-circuit here, in that if e.Current is
+                    // ever NaN then the result will always be NaN. Assuming that this case is
+                    // rare enough that not checking is the better approach generally.
+                    sum += e.Current;
+                    ++count;
                 }
+                return sum / count;
             }
-            if (count > 0) return sum / count;
-            throw Error.NoElements();
         }
 
         public static double? Average(this IEnumerable<double?> source)
         {
             if (source == null) throw Error.ArgumentNull("source");
-            double sum = 0;
-            long count = 0;
-            checked
+            using (IEnumerator<double?> e = source.GetEnumerator())
             {
-                foreach (double? v in source)
+                while (e.MoveNext())
                 {
-                    if (v != null)
+                    double? v = e.Current;
+                    if (v.HasValue)
                     {
-                        sum += v.GetValueOrDefault();
-                        count++;
+                        double sum = v.Value;
+                        long count = 1;
+                        checked
+                        {
+                            while (e.MoveNext())
+                            {
+                                v = e.Current;
+                                if (v.HasValue)
+                                {
+                                    sum += v.Value;
+                                    ++count;
+                                }
+                            }
+                        }
+                        return sum / count;
                     }
                 }
             }
-            if (count > 0) return sum / count;
             return null;
         }
 
         public static decimal Average(this IEnumerable<decimal> source)
         {
             if (source == null) throw Error.ArgumentNull("source");
-            decimal sum = 0;
-            long count = 0;
-            checked
+            using (IEnumerator<decimal> e = source.GetEnumerator())
             {
-                foreach (decimal v in source)
+                if (!e.MoveNext()) throw Error.NoElements();
+                decimal sum = e.Current;
+                long count = 1;
+                while (e.MoveNext())
                 {
-                    sum += v;
-                    count++;
+                    sum += e.Current;
+                    ++count;
                 }
+                return sum / count;
             }
-            if (count > 0) return sum / count;
-            throw Error.NoElements();
         }
 
         public static decimal? Average(this IEnumerable<decimal?> source)
         {
             if (source == null) throw Error.ArgumentNull("source");
-            decimal sum = 0;
-            long count = 0;
-            checked
+            using (IEnumerator<decimal?> e = source.GetEnumerator())
             {
-                foreach (decimal? v in source)
+                while (e.MoveNext())
                 {
-                    if (v != null)
+                    decimal? v = e.Current;
+                    if (v.HasValue)
                     {
-                        sum += v.GetValueOrDefault();
-                        count++;
+                        decimal sum = v.Value;
+                        long count = 1;
+                        while (e.MoveNext())
+                        {
+                            v = e.Current;
+                            if (v.HasValue)
+                            {
+                                sum += v.Value;
+                                ++count;
+                            }
+                        }
+                        return sum / count;
                     }
                 }
             }
-            if (count > 0) return sum / count;
             return null;
         }
 
