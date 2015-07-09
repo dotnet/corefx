@@ -966,7 +966,7 @@ namespace System.Collections.Concurrent
                 _value = value;
             }
             public readonly T _value;
-            public Node _next;
+            public volatile Node _next;
             public Node _prev;
         }
 
