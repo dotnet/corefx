@@ -75,22 +75,16 @@ namespace System.Collections.Generic
         #region Constructors
 
         public HashSet()
-            : this(EqualityComparer<T>.Default)
+            : this(0, EqualityComparer<T>.Default)
         { }
 
         public HashSet(IEqualityComparer<T> comparer)
-        {
-            if (comparer == null)
-            {
-                comparer = EqualityComparer<T>.Default;
-            }
+            : this(0, comparer)
+        { }
 
-            _comparer = comparer;
-            _lastIndex = 0;
-            _count = 0;
-            _freeList = -1;
-            _version = 0;
-        }
+        public HashSet(int capacity)
+            : this(capacity, EqualityComparer<T>.Default)
+        { }
 
         public HashSet(IEnumerable<T> collection)
             : this(collection, EqualityComparer<T>.Default)
@@ -128,6 +122,30 @@ namespace System.Collections.Generic
                 (_count > 0 && _slots.Length / _count > ShrinkThreshold))
             {
                 TrimExcess();
+            }
+        }
+
+        public HashSet(int capacity, IEqualityComparer<T> comparer)
+        {
+            if (capacity < 0)
+            {
+                throw new ArgumentOutOfRangeException("capacity");
+            }
+
+            if (comparer == null)
+            {
+                comparer = EqualityComparer<T>.Default;
+            }
+
+            _comparer = comparer;
+            _lastIndex = 0;
+            _count = 0;
+            _freeList = -1;
+            _version = 0;
+
+            if (capacity > 0)
+            {
+                Initialize(capacity);
             }
         }
 
