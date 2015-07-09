@@ -133,6 +133,7 @@ public class File_Create_str_i
                 printerr("Error_958bh! Incorrect file position==" + fs2.Position);
             }
             fs2.Dispose();
+            File.Delete(filName);
 
             // [] Create a file in root
             /* Test disabled because it modifies state outside the current working directory
@@ -187,38 +188,42 @@ public class File_Create_str_i
                 printerr("Error_t87gy! File not created, file==" + filName);
             }
             fs2.Dispose();
+            File.Delete(filName);
 
             strLoc = "loc_89tbh_1";
 
-            //see VSWhidbey bug 103341
-            filName = Path.Combine(TestInfo.CurrentDirectory, Path.GetRandomFileName());
-            if (File.Exists(filName))
-                File.Delete(filName);
-            fs2 = File.Create(String.Format(" {0}", filName), 100);
-            iCountTestcases++;
-            if (!File.Exists(filName))
+            if (Interop.IsWindows) // tests are expecting whitespace at beginning of filename will be trimmed off, which it doesn't on Unix
             {
-                iCountErrors++;
-                printerr("Error_t87gy_1! File not created, file==" + filName);
-            }
-            fs2.Dispose();
-
-            strLoc = "loc_89tbh_3";
-
-            //see VSWhidbey bug 103341
-            filName = Path.Combine(" " + TestInfo.CurrentDirectory, " " + Path.GetRandomFileName());
-            if (File.Exists(filName))
+                //see VSWhidbey bug 103341
+                filName = Path.Combine(TestInfo.CurrentDirectory, Path.GetRandomFileName());
+                if (File.Exists(filName))
+                    File.Delete(filName);
+                fs2 = File.Create(String.Format(" {0}", filName), 100);
+                iCountTestcases++;
+                if (!File.Exists(filName))
+                {
+                    iCountErrors++;
+                    printerr("Error_t87gy_1! File not created, file==" + filName);
+                }
+                fs2.Dispose();
                 File.Delete(filName);
-            fs2 = File.Create(filName, 100);
-            iCountTestcases++;
-            if (!File.Exists(filName))
-            {
-                iCountErrors++;
-                printerr("Error_t87gy_3! File not created, file==" + filName);
+
+                strLoc = "loc_89tbh_3";
+
+                //see VSWhidbey bug 103341
+                filName = Path.Combine(" " + TestInfo.CurrentDirectory, " " + Path.GetRandomFileName());
+                if (File.Exists(filName))
+                    File.Delete(filName);
+                fs2 = File.Create(filName, 100);
+                iCountTestcases++;
+                if (!File.Exists(filName))
+                {
+                    iCountErrors++;
+                    printerr("Error_t87gy_3! File not created, file==" + filName);
+                }
+                fs2.Dispose();
+                File.Delete(filName);
             }
-            fs2.Dispose();
-
-
 
             if (File.Exists(filName))
                 File.Delete(filName);

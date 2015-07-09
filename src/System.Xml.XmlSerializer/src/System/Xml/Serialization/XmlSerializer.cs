@@ -36,11 +36,11 @@ namespace System.Xml.Serialization
         /// <include file='doc\XmlSerializer.uex' path='docs/doc[@for="XmlSerializerImplementation.Writer"]/*' />
         public virtual XmlSerializationWriter Writer { get { throw new NotSupportedException(); } }
         /// <include file='doc\XmlSerializer.uex' path='docs/doc[@for="XmlSerializerImplementation.ReadMethods"]/*' />
-        public virtual Dictionary<string, string> ReadMethods { get { throw new NotSupportedException(); } }
+        public virtual IDictionary ReadMethods { get { throw new NotSupportedException(); } }
         /// <include file='doc\XmlSerializer.uex' path='docs/doc[@for="XmlSerializerImplementation.WriteMethods"]/*' />
-        public virtual Dictionary<string, string> WriteMethods { get { throw new NotSupportedException(); } }
+        public virtual IDictionary WriteMethods { get { throw new NotSupportedException(); } }
         /// <include file='doc\XmlSerializer.uex' path='docs/doc[@for="XmlSerializerImplementation.TypedSerializers"]/*' />
-        public virtual Dictionary<string, XmlSerializer> TypedSerializers { get { throw new NotSupportedException(); } }
+        public virtual IDictionary TypedSerializers { get { throw new NotSupportedException(); } }
         /// <include file='doc\XmlSerializer.uex' path='docs/doc[@for="XmlSerializerImplementation.CanSerialize"]/*' />
         public virtual bool CanSerialize(Type type) { throw new NotSupportedException(); }
         /// <include file='doc\XmlSerializer.uex' path='docs/doc[@for="XmlSerializerImplementation.GetSerializer"]/*' />
@@ -59,6 +59,7 @@ namespace System.Xml.Serialization
         private XmlMapping _mapping;
         private XmlDeserializationEvents _events = new XmlDeserializationEvents();
 #if NET_NATIVE
+        public string DefaultNamespace = null;
         private XmlSerializer innerSerializer;
         private readonly Type rootType;
 #endif
@@ -154,7 +155,9 @@ namespace System.Xml.Serialization
         {
             if (type == null)
                 throw new ArgumentNullException("type");
+
 #if NET_NATIVE
+            this.DefaultNamespace = defaultNamespace;
             rootType = type;
 #endif
             _mapping = GetKnownMapping(type, defaultNamespace);
@@ -202,6 +205,9 @@ namespace System.Xml.Serialization
         /// </devdoc>
         internal XmlSerializer(Type type, XmlAttributeOverrides overrides, Type[] extraTypes, XmlRootAttribute root, string defaultNamespace, object location, object evidence)
         {
+#if NET_NATIVE
+            throw new PlatformNotSupportedException();
+#else
             if (type == null)
                 throw new ArgumentNullException("type");
 
@@ -213,6 +219,7 @@ namespace System.Xml.Serialization
             }
             _mapping = importer.ImportTypeMapping(type, root, defaultNamespace);
             _tempAssembly = GenerateTempAssembly(_mapping, type, defaultNamespace);
+#endif
         }
 
 
@@ -332,6 +339,11 @@ namespace System.Xml.Serialization
                         throw new InvalidOperationException(SR.Format(SR.Xml_MissingSerializationCodeException, this.rootType, typeof(XmlSerializer).Name));
                     }
 
+                    if (!string.IsNullOrEmpty(this.DefaultNamespace))
+                    {
+                        this.innerSerializer.DefaultNamespace = this.DefaultNamespace; 
+                    }
+                    
                     XmlSerializationWriter writer = this.innerSerializer.CreateWriter();
                     writer.Init(xmlWriter, namespaces == null || namespaces.Count == 0 ? DefaultNamespaces : namespaces, encodingStyle, id);
                     try
@@ -445,6 +457,11 @@ namespace System.Xml.Serialization
                     if (this.innerSerializer == null)
                     {
                         throw new InvalidOperationException(SR.Format(SR.Xml_MissingSerializationCodeException, this.rootType, typeof(XmlSerializer).Name));
+                    }
+
+                    if (!string.IsNullOrEmpty(this.DefaultNamespace))
+                    {
+                        this.innerSerializer.DefaultNamespace = this.DefaultNamespace; 
                     }
 
                     XmlSerializationReader reader = this.innerSerializer.CreateReader();

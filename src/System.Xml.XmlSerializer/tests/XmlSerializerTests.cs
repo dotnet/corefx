@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Xml;
 using System.Xml.Serialization;
 using System.Xml.Linq;
@@ -120,7 +121,6 @@ public class XmlSerializerTests
     }
 
     [Fact]
-    [ActiveIssue(1768)]
     public static void Xml_ObjectAsRoot()
     {
         Assert.StrictEqual(SerializeAndDeserialize<object>(1, "<?xml version=\"1.0\"?>" + Environment.NewLine + "<anyType xmlns:q1=\"http://www.w3.org/2001/XMLSchema\" d1p1:type=\"q1:int\" xmlns:d1p1=\"http://www.w3.org/2001/XMLSchema-instance\">1</anyType>"), 1);
@@ -130,7 +130,6 @@ public class XmlSerializerTests
     }
 
     [Fact]
-    [ActiveIssue(1768)]
     public static void Xml_XmlQualifiedNameAsRoot()
     {
         Assert.StrictEqual(SerializeAndDeserialize<XmlQualifiedName>(new XmlQualifiedName("abc", "def"), "<?xml version=\"1.0\"?>" + Environment.NewLine + "<QName xmlns:q1=\"def\">q1:abc</QName>"), new XmlQualifiedName("abc", "def"));
@@ -194,7 +193,6 @@ public class XmlSerializerTests
     }
 
     [Fact]
-    [ActiveIssue(1768)]
     public static void Xml_ArrayAsRoot()
     {
         SimpleType[] x = new SimpleType[] { new SimpleType { P1 = "abc", P2 = 11 }, new SimpleType { P1 = "def", P2 = 12 } };
@@ -215,7 +213,6 @@ public class XmlSerializerTests
     }
 
     [Fact]
-    [ActiveIssue(1768)]
     public static void Xml_ArrayAsGetSet()
     {
         TypeWithGetSetArrayMembers x = new TypeWithGetSetArrayMembers
@@ -266,7 +263,6 @@ public class XmlSerializerTests
     }
 
     [Fact]
-    [ActiveIssue(1768)]
     public static void Xml_ArrayAsGetOnly()
     {
         TypeWithGetOnlyArrayProperties x = new TypeWithGetOnlyArrayProperties();
@@ -283,7 +279,6 @@ public class XmlSerializerTests
     }
 
     [Fact]
-    [ActiveIssue(1768)]
     public static void Xml_ListGenericRoot()
     {
         List<string> x = new List<string>();
@@ -304,7 +299,6 @@ public class XmlSerializerTests
     }
 
     [Fact]
-    [ActiveIssue(1768)]
     public static void Xml_CollectionGenericRoot()
     {
         MyCollection<string> x = new MyCollection<string>("a1", "a2");
@@ -324,7 +318,6 @@ public class XmlSerializerTests
     }
 
     [Fact]
-    [ActiveIssue(1768)]
     public static void Xml_ListRoot()
     {
         MyList x = new MyList("a1", "a2");
@@ -342,7 +335,6 @@ public class XmlSerializerTests
     }
 
     [Fact]
-    [ActiveIssue(1768)]
     public static void Xml_EnumerableGenericRoot()
     {
         MyEnumerable<string> x = new MyEnumerable<string>("a1", "a2");
@@ -361,7 +353,6 @@ public class XmlSerializerTests
     }
 
     [Fact]
-    [ActiveIssue(1768)]
     public static void Xml_CollectionRoot()
     {
         MyCollection x = new MyCollection('a', 45);
@@ -379,7 +370,6 @@ public class XmlSerializerTests
     }
 
     [Fact]
-    [ActiveIssue(1768)]
     public static void Xml_EnumerableRoot()
     {
         MyEnumerable x = new MyEnumerable("abc", 3);
@@ -397,7 +387,6 @@ public class XmlSerializerTests
     }
 
     [Fact]
-    [ActiveIssue(1768)]
     public static void Xml_EnumAsRoot()
     {
         Assert.StrictEqual(SerializeAndDeserialize<MyEnum>(MyEnum.Two, "<?xml version=\"1.0\"?>" + Environment.NewLine + "<MyEnum>Two</MyEnum>"), MyEnum.Two);
@@ -411,7 +400,6 @@ public class XmlSerializerTests
     }
 
     [Fact]
-    [ActiveIssue(1768)]
     public static void Xml_EnumAsMember()
     {
         TypeWithEnumMembers x = new TypeWithEnumMembers { F1 = MyEnum.Three, P1 = MyEnum.Two };
@@ -428,7 +416,6 @@ public class XmlSerializerTests
     }
 
     [Fact]
-    [ActiveIssue(1768)]
     public static void Xml_DCClassWithEnumAndStruct()
     {
         DCClassWithEnumAndStruct value = new DCClassWithEnumAndStruct(true);
@@ -446,7 +433,6 @@ public class XmlSerializerTests
     }
 
     [Fact]
-    [ActiveIssue(1768)]
     public static void Xml_BuiltInTypes()
     {
         BuiltInTypes x = new BuiltInTypes
@@ -464,7 +450,6 @@ public class XmlSerializerTests
     }
 
     [Fact]
-    [ActiveIssue(1768)]
     public static void Xml_GenericBase()
     {
         SerializeAndDeserialize<GenericBase2<SimpleBaseDerived, SimpleBaseDerived2>>(new GenericBase2<SimpleBaseDerived, SimpleBaseDerived2>(true),
@@ -482,7 +467,6 @@ public class XmlSerializerTests
     }
 
     [Fact]
-    [ActiveIssue(1768)]
     public static void Xml_TypesWithArrayOfOtherTypes()
     {
         SerializeAndDeserialize<TypeHasArrayOfASerializedAsB>(new TypeHasArrayOfASerializedAsB(true),
@@ -500,7 +484,6 @@ public class XmlSerializerTests
     }
 
     [Fact]
-    [ActiveIssue(1768)]
     [ActiveIssue(846, PlatformID.AnyUnix)]
     public static void Xml_WithXElement()
     {
@@ -528,7 +511,6 @@ public class XmlSerializerTests
     }
 
     [Fact]
-    [ActiveIssue(1768)]
     [ActiveIssue(846, PlatformID.AnyUnix)]
     public static void Xml_WithXElementWithNestedXElement()
     {
@@ -548,7 +530,6 @@ public class XmlSerializerTests
     }
 
     [Fact]
-    [ActiveIssue(1768)]
     [ActiveIssue(846, PlatformID.AnyUnix)]
     public static void Xml_WithArrayOfXElement()
     {
@@ -576,7 +557,6 @@ public class XmlSerializerTests
     }
 
     [Fact]
-    [ActiveIssue(1768)]
     [ActiveIssue(846, PlatformID.AnyUnix)]
     public static void Xml_WithListOfXElement()
     {
@@ -604,7 +584,6 @@ public class XmlSerializerTests
     }
 
     [Fact]
-    [ActiveIssue(1768)]
     public static void Xml_TypeNamesWithSpecialCharacters()
     {
         SerializeAndDeserialize<__TypeNameWithSpecialCharacters漢ñ>(new __TypeNameWithSpecialCharacters漢ñ() { PropertyNameWithSpecialCharacters漢ñ = "Test" },
@@ -615,7 +594,6 @@ public class XmlSerializerTests
     }
 
     [Fact]
-    [ActiveIssue(1768)]
     public static void Xml_JaggedArrayAsRoot()
     {
         int[][] jaggedIntegerArray = new int[][] { new int[] { 1, 3, 5, 7, 9 }, new int[] { 0, 2, 4, 6 }, new int[] { 11, 22 } };
@@ -721,7 +699,6 @@ public class XmlSerializerTests
     }
 
     [Fact]
-    [ActiveIssue(1768)]
     public static void Xml_DefaultNamespaceChangeTest()
     {
         Assert.StrictEqual(
@@ -731,7 +708,6 @@ public class XmlSerializerTests
     }
 
     [Fact]
-    [ActiveIssue(1768)]
     public static void Xml_KnownTypesThroughConstructor()
     {
         KnownTypesThroughConstructor value = new KnownTypesThroughConstructor() { EnumValue = MyEnum.One, SimpleTypeValue = new SimpleKnownTypeValue() { StrProperty = "PropertyValue" } };
@@ -750,7 +726,6 @@ public class XmlSerializerTests
     }
 
     [Fact]
-    [ActiveIssue(1768)]
     public static void Xml_BaseClassAndDerivedClassWithSameProperty()
     {
         DerivedClassWithSameProperty value = new DerivedClassWithSameProperty() { DateTimeProperty = new DateTime(100), IntProperty = 5, StringProperty = "TestString", ListProperty = new List<string>() };
@@ -776,7 +751,6 @@ public class XmlSerializerTests
     }
 
     [Fact]
-    [ActiveIssue(1768)]
     public static void XML_EnumerableCollection()
     {
         EnumerableCollection original = new EnumerableCollection();
@@ -789,7 +763,6 @@ public class XmlSerializerTests
     }
 
     [Fact]
-    [ActiveIssue(1768)]
     public static void Xml_SimpleCollectionDataContract()
     {
         var value = new SimpleCDC(true);
@@ -810,7 +783,6 @@ public class XmlSerializerTests
     }
 
     [Fact]
-    [ActiveIssue(1768)]
     public static void Xml_EnumFlags()
     {
         EnumFlags value1 = EnumFlags.One | EnumFlags.Four;
@@ -819,7 +791,6 @@ public class XmlSerializerTests
     }
 
     [Fact]
-    [ActiveIssue(1768)]
     public static void Xml_SerializeClassThatImplementsInteface()
     {
         ClassImplementsInterface value = new ClassImplementsInterface() { ClassID = "ClassID", DisplayName = "DisplayName", Id = "Id", IsLoaded = true };
@@ -840,7 +811,6 @@ public class XmlSerializerTests
 
 
     [Fact]
-    [ActiveIssue(1768)]
     public static void Xml_XmlAttributesTest()
     {
         var value = new XmlSerializerAttributes();
@@ -871,7 +841,6 @@ public class XmlSerializerTests
     }
 
     [Fact]
-    [ActiveIssue(1768)]
     public static void Xml_Struct()
     {
         var value = new WithStruct { Some = new SomeStruct { A = 1, B = 2 } };
@@ -890,7 +859,6 @@ public class XmlSerializerTests
     }
 
     [Fact]
-    [ActiveIssue(1768)]
     public static void Xml_Enums()
     {
         var item = new WithEnums() { Int = IntEnum.Option1, Short = ShortEnum.Option2 };
@@ -905,7 +873,6 @@ public class XmlSerializerTests
     }
 
     [Fact]
-    [ActiveIssue(1768)]
     public static void Xml_Nullables()
     {
         var item = new WithNullables() { Optional = IntEnum.Option1, OptionalInt = 42, Struct1 = new SomeStruct { A = 1, B = 2 } };
@@ -932,7 +899,6 @@ public class XmlSerializerTests
     }
 
     [Fact]
-    [ActiveIssue(1768)]
     public static void Xml_ClassImplementingIXmlSerialiable()
     {
         var value = new ClassImplementingIXmlSerialiable() { StringValue = "Hello world" };
@@ -944,7 +910,6 @@ public class XmlSerializerTests
     }
 
     [Fact]
-    [ActiveIssue(1768)]
     public static void Xml_TypeWithFieldNameEndBySpecified()
     {
         var value = new TypeWithPropertyNameSpecified() { MyField = "MyField", MyFieldIgnored = 99, MyFieldSpecified = true, MyFieldIgnoredSpecified = false };
@@ -954,7 +919,6 @@ public class XmlSerializerTests
     }
 
     [Fact]
-    [ActiveIssue(1768)]
     public static void XML_TypeWithXmlSchemaFormAttribute()
     {
         var value = new TypeWithXmlSchemaFormAttribute() { NoneSchemaFormListProperty = new List<string> { "abc" }, QualifiedSchemaFormListProperty = new List<bool> { true }, UnqualifiedSchemaFormListProperty = new List<int> { 1 } };
@@ -969,7 +933,6 @@ public class XmlSerializerTests
     }
 
     [Fact]
-    [ActiveIssue(1768)]
     public static void XML_TypeWithTypeNameInXmlTypeAttribute()
     {
         var value = new TypeWithTypeNameInXmlTypeAttribute();
@@ -978,7 +941,6 @@ public class XmlSerializerTests
     }
 
     [Fact]
-    [ActiveIssue(1768)]
     public static void XML_TypeWithMemberWithXmlNamespaceDeclarationsAttribute()
     {
         var original = new TypeWithMemberWithXmlNamespaceDeclarationsAttribute() { header = "foo", body = "bar" };
@@ -994,7 +956,6 @@ public class XmlSerializerTests
     }
 
     [Fact]
-    [ActiveIssue(1768)]
     public static void XML_TypeWithXmlTextAttributeOnArray()
     {
         var original = new TypeWithXmlTextAttributeOnArray() { Text = new string[] { "val1", "val2" } };
@@ -1006,7 +967,6 @@ public class XmlSerializerTests
     }
 
     [Fact]
-    [ActiveIssue(1768)]
     public static void Xml_TypeWithSchemaFormInXmlAttribute()
     {
         var value = new TypeWithSchemaFormInXmlAttribute() { TestProperty = "hello" };
@@ -1015,7 +975,6 @@ public class XmlSerializerTests
     }
 
     [Fact]
-    [ActiveIssue(1768)]
     public static void Xml_XmlElementAsRoot()
     {
         XmlDocument xDoc = new XmlDocument();
@@ -1028,7 +987,6 @@ public class XmlSerializerTests
     }
 
     [Fact]
-    [ActiveIssue(1768)]
     public static void Xml_TypeWithXmlElementProperty()
     {
         XmlDocument xDoc = new XmlDocument();
@@ -1047,7 +1005,6 @@ public class XmlSerializerTests
     }
 
     [Fact]
-    [ActiveIssue(1768)]
     public static void Xml_XmlDocumentAsRoot()
     {
         XmlDocument expected = new XmlDocument();
@@ -1058,7 +1015,6 @@ public class XmlSerializerTests
     }
 
     [Fact]
-    [ActiveIssue(1768)]
     public static void Xml_TypeWithXmlDocumentProperty()
     {
         XmlDocument xmlDoc = new XmlDocument();
@@ -1083,7 +1039,6 @@ public class XmlSerializerTests
     }
 
     [Fact]
-    [ActiveIssue(1768)]
     public static void TestIgnoreWhitespaceForDeserialization()
     {
         string xml = @"<?xml version=""1.0"" encoding=""utf-8""?>
@@ -1102,7 +1057,6 @@ public class XmlSerializerTests
     }
 
     [Fact]
-    [ActiveIssue(1768)]
     public static void TestTypeWithListPropertiesWithoutPublicSetters()
     {
         var value = new TypeWithListPropertiesWithoutPublicSetters();
@@ -1133,7 +1087,6 @@ public class XmlSerializerTests
     }
 
     [Fact]
-    [ActiveIssue(1768)]
     public static void Xml_HighScoreManager()
     {
         List<HighScores.BridgeGameHighScore> value = new List<HighScores.BridgeGameHighScore>();
@@ -1152,12 +1105,29 @@ public class XmlSerializerTests
     }
 
     [Fact]
-    [ActiveIssue(1768)]
     public static void Xml_TypeWithMismatchBetweenAttributeAndPropertyType()
     {
         var value = new TypeWithMismatchBetweenAttributeAndPropertyType();
         var actual = SerializeAndDeserialize(value, "<?xml version=\"1.0\"?><RootElement xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" IntValue=\"120\" />");
         Assert.StrictEqual(value.IntValue, actual.IntValue);
+    }
+
+    [Fact]
+    public static void Xml_TypeWithNonPublicDefaultConstructor()
+    {
+        TypeInfo ti = IntrospectionExtensions.GetTypeInfo(typeof(TypeWithNonPublicDefaultConstructor));
+        TypeWithNonPublicDefaultConstructor value = null;
+        value = (TypeWithNonPublicDefaultConstructor)FindDefaultConstructor(ti).Invoke(null);
+        Assert.StrictEqual("Mr. FooName", value.Name);
+        var actual = SerializeAndDeserialize(value, "<?xml version=\"1.0\"?>" + Environment.NewLine + "<TypeWithNonPublicDefaultConstructor xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\">" + Environment.NewLine + "  <Name>Mr. FooName</Name>" + Environment.NewLine + "</TypeWithNonPublicDefaultConstructor>");
+        Assert.StrictEqual(value.Name, actual.Name);
+    }
+
+    [Fact]
+    public static void Xml_TypeWithNonParameterlessConstructor()
+    {
+        var obj = new TypeWithNonParameterlessConstructor("string value");
+        Assert.Throws<InvalidOperationException>(() => { SerializeAndDeserialize(obj, string.Empty); });
     }
 
     private static T SerializeAndDeserialize<T>(T value, string baseline, Func<XmlSerializer> serializerFactory = null)

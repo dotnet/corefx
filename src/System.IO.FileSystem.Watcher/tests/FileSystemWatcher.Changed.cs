@@ -9,6 +9,7 @@ using Xunit;
 public partial class FileSystemWatcher_4000_Tests
 {
     [Fact]
+    [ActiveIssue(2011, PlatformID.OSX)]
     public static void FileSystemWatcher_Changed_LastWrite_File()
     {
         using (var file = Utility.CreateTestFile())
@@ -26,6 +27,7 @@ public partial class FileSystemWatcher_4000_Tests
     }
 
     [Fact]
+    [ActiveIssue(2011, PlatformID.OSX)]
     public static void FileSystemWatcher_Changed_LastWrite_Directory()
     {
         using (var dir = Utility.CreateTestDirectory())
@@ -71,6 +73,24 @@ public partial class FileSystemWatcher_4000_Tests
             }
 
             Utility.ExpectNoEvent(eventOccured, "changed");
+        }
+    }
+
+    [Fact, ActiveIssue(2279)]
+    public static void FileSystemWatcher_ChangeWatchedFolder()
+    {
+        using (var dir = Utility.CreateTestDirectory())
+        using (var watcher = new FileSystemWatcher())
+        {
+            watcher.Path = Path.GetFullPath(dir.Path);
+            watcher.Filter = "*";
+            AutoResetEvent eventOccured = Utility.WatchForEvents(watcher, WatcherChangeTypes.Changed);
+
+            watcher.EnableRaisingEvents = true;
+
+            Directory.SetLastAccessTime(watcher.Path, DateTime.Now);
+
+            Utility.ExpectEvent(eventOccured, "changed");
         }
     }
 }

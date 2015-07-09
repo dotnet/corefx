@@ -11,9 +11,12 @@
     <NugetTargetFrameworkMoniker>DNXCore,Version=v5.0</NugetTargetFrameworkMoniker>
     <IgnoreArchitectureMismatches>true</IgnoreArchitectureMismatches>
     <PostFilterNugetReferences>true</PostFilterNugetReferences>
+    <NoWarn>0436</NoWarn> <!-- Suppress warnings for type conflicts between SafeFileHandle in partial facade and mscorlib -->
   </PropertyGroup>
 
   <!-- Default configurations to help VS understand the configurations -->
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'FreeBSD_Debug|AnyCPU' " />
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'FreeBSD_Release|AnyCPU' " />
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Linux_Debug|AnyCPU' " />
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Linux_Release|AnyCPU' " />
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'OSX_Debug|AnyCPU' " />
@@ -24,9 +27,6 @@
   <ItemGroup>
     <Compile Include="$(CommonPath)\System\Diagnostics\Debug.cs">
       <Link>Common\System\Diagnostics\Debug.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\System\ArrayT.cs">
-      <Link>Common\System\ArrayT.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\System\Collections\Generic\LowLevelDictionary.cs">
       <Link>Common\System\Collections\Generic\LowLevelDictionary.cs</Link>
@@ -141,6 +141,15 @@
     </Compile>
   </ItemGroup>
 
+  <!-- FreeBSD -->
+  <ItemGroup Condition="'$(TargetsFreeBSD)' == 'true'">
+    <Compile Include="$(CommonPath)\Interop\FreeBSD\Interop.Errors.cs">
+      <Link>Common\Interop\FreeBSD\Interop.Errors.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\FreeBSD\libc\Interop.OpenFlags.cs">
+      <Link>Common\Interop\FreeBSD\Interop.OpenFlags.cs</Link>
+    </Compile>
+  </ItemGroup>
   <!-- Linux -->
   <ItemGroup Condition="'$(TargetsLinux)' == 'true'">
     <Compile Include="$(CommonPath)\Interop\Linux\Interop.Errors.cs">

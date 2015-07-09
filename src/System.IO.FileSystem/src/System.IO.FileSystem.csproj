@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <PropertyGroup>
@@ -13,11 +13,16 @@
   <PropertyGroup Condition="'$(TargetsUnix)' == 'true'">
     <NoWarn>$(NoWarn);414</NoWarn>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(TargetsWindows)' == 'true' AND '$(EnableWinRT)' != 'true'">
-    <!-- We don't yet have an Overlapped contract that works in UAP -->
+  <PropertyGroup Condition="'$(TargetsWindows)' == 'true'">
+    <!-- The System.Threading.Overlapped contract currently only works on Windows -->
     <DefineConstants>$(DefineConstants);USE_OVERLAPPED</DefineConstants>
   </PropertyGroup>
+  <PropertyGroup>
+    <TargetsBSD Condition="'$(TargetsOSX)' == 'true' or '$(TargetsFreeBSD)' == 'true'">true</TargetsBSD>
+  </PropertyGroup>
   <!-- Help VS understand available configurations -->
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'FreeBSD_Debug|AnyCPU' " />
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'FreeBSD_Release|AnyCPU' " />
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Linux_Debug|AnyCPU' " />
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Linux_Release|AnyCPU' " />
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'OSX_Debug|AnyCPU' " />
@@ -41,6 +46,9 @@
     <Compile Include="System\IO\ReadLinesIterator.cs" />
     <Compile Include="System\IO\SearchOption.cs" />
     <Compile Include="System\IO\SearchTarget.cs" />
+    <Compile Include="$(CommonPath)\System\Collections\Generic\EnumerableHelpers.cs">
+      <Link>Common\System\Collections\Generic\EnumerableHelpers.cs</Link>
+    </Compile>
     <Compile Include="$(CommonPath)\System\IO\StringBuilderCache.cs">
       <Link>Common\System\IO\StringBuilderCache.cs</Link>
     </Compile>
@@ -51,6 +59,7 @@
     <Compile Include="Microsoft\Win32\SafeHandles\SafeFileHandle.Windows.cs" />
     <Compile Include="Microsoft\Win32\SafeHandles\SafeFindHandle.Windows.cs" />
     <Compile Include="System\IO\FileStream.Win32.cs" />
+    <Compile Include="System\IO\PathHelpers.Windows.cs" />
     <Compile Include="System\IO\Win32FileStream.cs" />
     <Compile Include="System\IO\Win32FileStreamCompletionSource.cs" />
     <Compile Include="System\IO\Win32FileSystem.cs" />
@@ -73,6 +82,9 @@
     </Compile>
     <Compile Include="$(CommonPath)\System\IO\PathInternal.Windows.cs">
       <Link>Common\System\IO\PathInternal.Windows.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\IO\PathInternal.CaseInsensitive.cs">
+      <Link>Common\System\IO\PathInternal.CaseInsensitive.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\System\IO\Win32Marshal.cs">
       <Link>Common\System\IO\Win32Marshal.cs</Link>
@@ -100,6 +112,15 @@
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.SetFilePointerEx.cs">
       <Link>Common\Interop\Windows\Interop.SetFilePointerEx.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.CancelIoEx.cs">
+      <Link>Common\Interop\Windows\Interop.CancelIoEx.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.ReadFile_SafeHandle_NativeOverlapped.cs">
+      <Link>Common\Interop\Windows\Interop.ReadFile_NativeOverlapped.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.WriteFile_SafeHandle_NativeOverlapped.cs">
+      <Link>Common\Interop\Windows\Interop.WriteFile_NativeOverlapped.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.ReadFile_SafeHandle_IntPtr.cs">
       <Link>Common\Interop\Windows\Interop.ReadFile_IntPtr.cs</Link>
@@ -133,9 +154,6 @@
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.GetLongPathName.cs">
       <Link>Common\Interop\Windows\Interop.GetLongPathName.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.DeleteVolumeMountPoint.cs">
-      <Link>Common\Interop\Windows\Interop.DeleteVolumeMountPoint.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.RemoveDirectory.cs">
       <Link>Common\Interop\Windows\Interop.RemoveDirectory.cs</Link>
@@ -172,17 +190,11 @@
     <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.CopyFileEx.cs">
       <Link>Common\Interop\Windows\Interop.CopyFileEx.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.DeleteVolumeMountPoint.cs">
+      <Link>Common\Interop\Windows\Interop.DeleteVolumeMountPoint.cs</Link>
+    </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.SetErrorMode.cs">
       <Link>Common\Interop\Windows\Interop.SetErrorMode.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.CancelIoEx.cs">
-      <Link>Common\Interop\Windows\Interop.CancelIoEx.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.ReadFile_SafeHandle_NativeOverlapped.cs">
-      <Link>Common\Interop\Windows\Interop.ReadFile_NativeOverlapped.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.WriteFile_SafeHandle_NativeOverlapped.cs">
-      <Link>Common\Interop\Windows\Interop.WriteFile_NativeOverlapped.cs</Link>
     </Compile>
   </ItemGroup>
   <!-- Windows : Win32 + WinRT -->
@@ -206,6 +218,7 @@
     <Compile Include="Microsoft\Win32\SafeHandles\SafeFileHandle.Unix.cs" />
     <Compile Include="System\IO\FileStream.Unix.cs" />
     <Compile Include="System\IO\FileSystem.Current.Unix.cs" />
+    <Compile Include="System\IO\PathHelpers.Unix.cs" />
     <Compile Include="System\IO\UnixFileStream.cs" />
     <Compile Include="System\IO\UnixFileSystem.cs" />
     <Compile Include="System\IO\UnixFileSystemObject.cs" />
@@ -302,12 +315,40 @@
     <Compile Include="$(CommonPath)\Interop\Unix\libcoreclr\Interop.GetFileInformation.cs">
       <Link>Common\Interop\Unix\Interop.GetInformation.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\System\IO\PathInternal.Unix.cs">
+      <Link>Common\System\IO\PathInternal.Unix.cs</Link>
+    </Compile>
+  </ItemGroup>
+  <!-- FreeBSD -->
+  <ItemGroup Condition="'$(TargetsFreeBSD)' == 'true'">
+    <Compile Include="System\IO\UnixFileStream.posix_fadvise.cs" />
+    <Compile Include="$(CommonPath)\System\IO\PathInternal.CaseSensitive.cs">
+      <Link>Common\System\IO\PathInternal.CaseSensitive.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\FreeBSD\Interop.Errors.cs">
+      <Link>Common\Interop\FreeBSD\Interop.Errors.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\FreeBSD\libc\Interop.dirent.cs">
+      <Link>Common\Interop\FreeBSD\Interop.dirent.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\FreeBSD\libc\Interop.OpenFlags.cs">
+      <Link>Common\Interop\FreeBSD\Interop.OpenFlags.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\FreeBSD\libc\Interop.PathConfNames.cs">
+      <Link>Common\Interop\FreeBSD\Interop.PathConfNames.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\libc\Interop.posix_fadvise.cs">
+      <Link>Common\Interop\Unix\Interop.posix_fadvise.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\FreeBSD\Interop.Libraries.cs">
+      <Link>Common\Interop\FreeBSD\Interop.Libraries.cs</Link>
+    </Compile>
   </ItemGroup>
   <!-- Linux -->
   <ItemGroup Condition="'$(TargetsLinux)' == 'true'">
-    <Compile Include="System\IO\UnixFileStream.Linux.cs" />
-    <Compile Include="$(CommonPath)\System\IO\PathInternal.Linux.cs">
-      <Link>Common\System\IO\PathInternal.Linux.cs</Link>
+    <Compile Include="System\IO\UnixFileStream.posix_fadvise.cs" />
+    <Compile Include="$(CommonPath)\System\IO\PathInternal.CaseSensitive.cs">
+      <Link>Common\System\IO\PathInternal.CaseSensitive.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Linux\Interop.Errors.cs">
       <Link>Common\Interop\Linux\Interop.Errors.cs</Link>
@@ -321,17 +362,17 @@
     <Compile Include="$(CommonPath)\Interop\Linux\libc\Interop.PathConfNames.cs">
       <Link>Common\Interop\Linux\Interop.PathConfNames.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Linux\libc\Interop.posix_fadvise.cs">
-      <Link>Common\Interop\Linux\Interop.posix_fadvise.cs</Link>
+    <Compile Include="$(CommonPath)\Interop\Unix\libc\Interop.posix_fadvise.cs">
+      <Link>Common\Interop\Unix\Interop.posix_fadvise.cs</Link>
     </Compile>
   </ItemGroup>
   <!-- OSX -->
   <ItemGroup Condition="'$(TargetsOSX)' == 'true'">
-    <Compile Include="$(CommonPath)\System\IO\PathInternal.OSX.cs">
-      <Link>Common\System\IO\PathInternal.OSX.cs</Link>
+    <Compile Include="$(CommonPath)\System\IO\PathInternal.CaseInsensitive.cs">
+      <Link>Common\System\IO\PathInternal.CaseInsensitive.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\OSX\libc\Interop.readdir.cs">
-      <Link>Common\Interop\OSX\Interop.readdir.cs</Link>
+    <Compile Include="$(CommonPath)\Interop\OSX\libc\Interop.dirent.cs">
+      <Link>Common\Interop\OSX\Interop.dirent.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\OSX\libc\Interop.OpenFlags.cs">
       <Link>Common\Interop\OSX\Interop.OpenFlags.cs</Link>
@@ -341,6 +382,14 @@
     </Compile>
     <Compile Include="$(CommonPath)\Interop\OSX\Interop.Errors.cs">
       <Link>Common\Interop\OSX\Interop.Errors.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\OSX\Interop.Libraries.cs">
+      <Link>Common\Interop\OSX\Interop.Libraries.cs</Link>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetsBSD)' == 'true'">
+    <Compile Include="$(CommonPath)\Interop\BSD\libc\Interop.readdir.cs">
+      <Link>Common\Interop\BSD\Interop.readdir.cs</Link>
     </Compile>
   </ItemGroup>
   <ItemGroup>

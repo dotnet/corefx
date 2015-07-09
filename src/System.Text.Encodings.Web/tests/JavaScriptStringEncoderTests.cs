@@ -13,10 +13,13 @@ namespace Microsoft.Framework.WebEncoders
     public class JavaScriptStringEncoderTests
     {
         [Fact]
-        public void Ctor_WithCodePointFilter()
+        public void Ctor_WithTextEncoderSettings()
         {
             // Arrange
-            var filter = new CodePointFilter().AllowCharacters("ab").AllowCharacters('\0', '&', '\uFFFF', 'd');
+            var filter = new TextEncoderSettings();
+            filter.AllowCharacters('a', 'b');
+            filter.AllowCharacters('\0', '&', '\uFFFF', 'd');
+
             JavaScriptStringEncoder encoder = new JavaScriptStringEncoder(filter);
 
             // Act & assert

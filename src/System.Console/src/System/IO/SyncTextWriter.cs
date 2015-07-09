@@ -1,9 +1,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System.Diagnostics.CodeAnalysis;
-using System.Diagnostics.Contracts;
-using System.Runtime.InteropServices;
+using System.Diagnostics;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -12,17 +10,12 @@ namespace System.IO
     internal sealed class SyncTextWriter : TextWriter, IDisposable
     {
         private readonly object _methodLock = new object();
-        private TextWriter _out;
+        internal readonly TextWriter _out;
 
-        internal static TextWriter GetSynchronizedTextWriter(TextWriter writer)
+        internal static SyncTextWriter GetSynchronizedTextWriter(TextWriter writer)
         {
-            if (writer == null)
-                throw new ArgumentNullException("writer");
-            Contract.Ensures(Contract.Result<TextWriter>() != null);
-            Contract.EndContractBlock();
-
-            return writer is SyncTextWriter ?
-                writer :
+            Debug.Assert(writer != null);
+            return writer as SyncTextWriter ?? 
                 new SyncTextWriter(writer);
         }
 

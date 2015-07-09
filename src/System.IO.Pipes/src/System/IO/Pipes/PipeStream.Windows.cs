@@ -14,6 +14,9 @@ namespace System.IO.Pipes
 {
     public abstract partial class PipeStream : Stream
     {
+        internal const bool CheckOperationsRequiresSetHandle = true;
+        internal ThreadPoolBoundHandle _threadPoolBinding;
+
         internal static string GetPipePath(string serverName, string pipeName)
         {
             string normalizedPipePath = Path.GetFullPath(@"\\" + serverName + @"\pipe\" + pipeName);
@@ -26,7 +29,7 @@ namespace System.IO.Pipes
 
         /// <summary>Throws an exception if the supplied handle does not represent a valid pipe.</summary>
         /// <param name="safePipeHandle">The handle to validate.</param>
-        internal static void ValidateHandleIsPipe(SafePipeHandle safePipeHandle)
+        internal void ValidateHandleIsPipe(SafePipeHandle safePipeHandle)
         {
             // Check that this handle is infact a handle to a pipe.
             if (Interop.mincore.GetFileType(safePipeHandle) != Interop.mincore.FileTypes.FILE_TYPE_PIPE)
@@ -41,10 +44,13 @@ namespace System.IO.Pipes
         {
             // If the handle is of async type, bind the handle to the ThreadPool so that we can use 
             // the async operations (it's needed so that our native callbacks get called).
-            if (!ThreadPool.BindHandle(handle))
-            {
-                throw new IOException(SR.IO_BindHandleFailed);
-            }
+            _threadPoolBinding = ThreadPoolBoundHandle.BindHandle(handle);
+        }
+
+        private void UninitializeAsyncHandle()
+        {
+            if (_threadPoolBinding != null)
+                _threadPoolBinding.Dispose();
         }
 
         [SecurityCritical]
@@ -87,6 +93,13 @@ namespace System.IO.Pipes
             return r;
         }
 
+        [SecuritySafeCritical]
+        private Task<int> ReadAsyncCore(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
+        {
+            ReadWriteAsyncParams state = new ReadWriteAsyncParams(buffer, offset, count, cancellationToken);
+            return Task.Factory.FromAsync<int>(BeginRead, EndRead, state);
+        }
+
         [SecurityCritical]
         private unsafe void WriteCore(byte[] buffer, int offset, int count)
         {
@@ -113,6 +126,13 @@ namespace System.IO.Pipes
             }
             Debug.Assert(r >= 0, "PipeStream's WriteCore is likely broken.");
             return;
+        }
+
+        [SecuritySafeCritical]
+        private Task WriteAsyncCore(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
+        {
+            ReadWriteAsyncParams state = new ReadWriteAsyncParams(buffer, offset, count, cancellationToken);
+            return Task.Factory.FromAsync(BeginWrite, EndWrite, state);
         }
 
         // Blocks until the other end of the pipe has read in all written buffer.
@@ -272,14 +292,14 @@ namespace System.IO.Pipes
         private class ReadWriteAsyncParams
         {
             public ReadWriteAsyncParams() { }
-            public ReadWriteAsyncParams(Byte[] buffer, int offset, int count, CancellationToken cancellationToken)
+            public ReadWriteAsyncParams(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
             {
                 this.Buffer = buffer;
                 this.Offset = offset;
                 this.Count = count;
                 this.CancellationHelper = cancellationToken.CanBeCanceled ? new IOCancellationHelper(cancellationToken) : null;
             }
-            public Byte[] Buffer { get; set; }
+            public byte[] Buffer { get; set; }
             public int Offset { get; set; }
             public int Count { get; set; }
             public IOCancellationHelper CancellationHelper { get; private set; }
@@ -364,14 +384,7 @@ namespace System.IO.Pipes
                 ManualResetEvent waitHandle = new ManualResetEvent(false);
                 asyncResult._waitHandle = waitHandle;
 
-                // Create a managed overlapped class; set the file offsets later
-                Overlapped overlapped = new Overlapped();
-                overlapped.OffsetLow = 0;
-                overlapped.OffsetHigh = 0;
-                overlapped.AsyncResult = asyncResult;
-
-                // Pack the Overlapped class, and store it in the async result
-                NativeOverlapped* intOverlapped = overlapped.Pack(s_IOCallback, buffer);
+                NativeOverlapped* intOverlapped = _threadPoolBinding.AllocateNativeOverlapped(s_IOCallback, asyncResult, buffer);
                 asyncResult._overlapped = intOverlapped;
 
                 int errorCode = 0;
@@ -392,7 +405,7 @@ namespace System.IO.Pipes
                 if (r == -1 && errorCode != Interop.mincore.Errors.ERROR_IO_PENDING)
                 {
                     // Clean up
-                    if (intOverlapped != null) Overlapped.Free(intOverlapped);
+                    if (intOverlapped != null) _threadPoolBinding.FreeNativeOverlapped(intOverlapped);
                     WinIOError(errorCode);
                 }
 
@@ -468,7 +481,7 @@ namespace System.IO.Pipes
             NativeOverlapped* overlappedPtr = afsar._overlapped;
             if (overlappedPtr != null)
             {
-                Overlapped.Free(overlappedPtr);
+                _threadPoolBinding.FreeNativeOverlapped(overlappedPtr);
             }
 
             // Now check for any error during the write.
@@ -486,66 +499,6 @@ namespace System.IO.Pipes
 
             // Number of buffer written is afsar._numBytes.
             return;
-        }
-
-        [SecuritySafeCritical]
-        public override Task<int> ReadAsync(Byte[] buffer, int offset, int count, CancellationToken cancellationToken)
-        {
-            if (buffer == null)
-                throw new ArgumentNullException("buffer");
-            if (offset < 0)
-                throw new ArgumentOutOfRangeException("offset", SR.ArgumentOutOfRange_NeedNonNegNum);
-            if (count < 0)
-                throw new ArgumentOutOfRangeException("count", SR.ArgumentOutOfRange_NeedNonNegNum);
-            if (buffer.Length - offset < count)
-                throw new ArgumentException(SR.Argument_InvalidOffLen);
-            Contract.EndContractBlock();
-
-            if (cancellationToken.IsCancellationRequested)
-            {
-                return Task.FromCanceled<int>(cancellationToken);
-            }
-
-            CheckReadOperations();
-
-            if (!_isAsync)
-            {
-                return base.ReadAsync(buffer, offset, count, cancellationToken);
-            }
-
-            ReadWriteAsyncParams state = new ReadWriteAsyncParams(buffer, offset, count, cancellationToken);
-
-            return Task.Factory.FromAsync<int>(BeginRead, EndRead, state);
-        }
-
-        [SecuritySafeCritical]
-        public override Task WriteAsync(Byte[] buffer, int offset, int count, CancellationToken cancellationToken)
-        {
-            if (buffer == null)
-                throw new ArgumentNullException("buffer");
-            if (offset < 0)
-                throw new ArgumentOutOfRangeException("offset", SR.ArgumentOutOfRange_NeedNonNegNum);
-            if (count < 0)
-                throw new ArgumentOutOfRangeException("count", SR.ArgumentOutOfRange_NeedNonNegNum);
-            if (buffer.Length - offset < count)
-                throw new ArgumentException(SR.Argument_InvalidOffLen);
-            Contract.EndContractBlock();
-
-            if (cancellationToken.IsCancellationRequested)
-            {
-                return Task.FromCanceled<int>(cancellationToken);
-            }
-
-            CheckWriteOperations();
-
-            if (!_isAsync)
-            {
-                return base.WriteAsync(buffer, offset, count, cancellationToken);
-            }
-
-            ReadWriteAsyncParams state = new ReadWriteAsyncParams(buffer, offset, count, cancellationToken);
-
-            return Task.Factory.FromAsync(BeginWrite, EndWrite, state);
         }
 
         [SecurityCritical]
@@ -746,17 +699,7 @@ namespace System.IO.Pipes
                 ManualResetEvent waitHandle = new ManualResetEvent(false);
                 asyncResult._waitHandle = waitHandle;
 
-                // Create a managed overlapped class; set the file offsets later
-                Overlapped overlapped = new Overlapped();
-                overlapped.OffsetLow = 0;
-                overlapped.OffsetHigh = 0;
-                overlapped.AsyncResult = asyncResult;
-
-                // Pack the Overlapped class, and store it in the async result
-                NativeOverlapped* intOverlapped;
-                intOverlapped = overlapped.Pack(s_IOCallback, buffer);
-
-
+                NativeOverlapped* intOverlapped = _threadPoolBinding.AllocateNativeOverlapped(s_IOCallback, asyncResult, buffer);
                 asyncResult._overlapped = intOverlapped;
 
                 // Queue an async ReadFile operation and pass in a packed overlapped
@@ -867,7 +810,7 @@ namespace System.IO.Pipes
             NativeOverlapped* overlappedPtr = afsar._overlapped;
             if (overlappedPtr != null)
             {
-                Overlapped.Free(overlappedPtr);
+                _threadPoolBinding.FreeNativeOverlapped(overlappedPtr);
             }
 
             // Now check for any error during the read.
@@ -910,12 +853,8 @@ namespace System.IO.Pipes
         [SecurityCritical]
         unsafe private static void AsyncPSCallback(uint errorCode, uint numBytes, NativeOverlapped* pOverlapped)
         {
-            // Unpack overlapped
-            Overlapped overlapped = Overlapped.Unpack(pOverlapped);
-            // Free the overlapped struct in EndRead/EndWrite.
-
             // Extract async result from overlapped 
-            PipeStreamAsyncResult asyncResult = (PipeStreamAsyncResult)overlapped.AsyncResult;
+            PipeStreamAsyncResult asyncResult = (PipeStreamAsyncResult)ThreadPoolBoundHandle.GetNativeOverlappedState(pOverlapped);
             asyncResult._numBytes = (int)numBytes;
 
             // Allow async read to finish

@@ -6,12 +6,21 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
 using System.Security;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace System.IO.Pipes
 {
     public abstract partial class PipeStream : Stream
     {
-        private const string PipeDirectoryPath = "/tmp/corefxnamedpipes/";
+        // The Windows implementation of PipeStream sets the stream's handle during 
+        // creation, and as such should always have a handle, but the Unix implementation 
+        // sometimes sets the handle not during creation but later during connection.  
+        // As such, validation during member access needs to verify a valid handle on 
+        // Windows, but can't assume a valid handle on Unix.
+        internal const bool CheckOperationsRequiresSetHandle = false;
+
+        private static readonly string PipeDirectoryPath = Path.Combine(Path.GetTempPath(), "corefxnamedpipes");
 
         internal static string GetPipePath(string serverName, string pipeName)
         {
@@ -57,12 +66,12 @@ namespace System.IO.Pipes
             }
 
             // Return the pipe path
-            return PipeDirectoryPath + pipeName;
+            return Path.Combine(PipeDirectoryPath, pipeName);
         }
 
         /// <summary>Throws an exception if the supplied handle does not represent a valid pipe.</summary>
         /// <param name="safePipeHandle">The handle to validate.</param>
-        internal static void ValidateHandleIsPipe(SafePipeHandle safePipeHandle)
+        internal void ValidateHandleIsPipe(SafePipeHandle safePipeHandle)
         {
             SysCall(safePipeHandle, (fd, _, __) =>
             {
@@ -87,6 +96,11 @@ namespace System.IO.Pipes
             // nop
         }
 
+        private void UninitializeAsyncHandle()
+        {
+            // nop
+        }
+
         [SecurityCritical]
         private unsafe int ReadCore(byte[] buffer, int offset, int count)
         {
@@ -106,6 +120,19 @@ namespace System.IO.Pipes
                     return result;
                 }, (IntPtr)(bufPtr + offset), count);
             }
+        }
+
+        [SecuritySafeCritical]
+        private Task<int> ReadAsyncCore(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
+        {
+            Debug.Assert(_handle != null, "_handle is null");
+            Debug.Assert(!_handle.IsClosed, "_handle is closed");
+            Debug.Assert(CanRead, "can't read");
+            Debug.Assert(buffer != null, "buffer is null");
+            Debug.Assert(offset >= 0, "offset is negative");
+            Debug.Assert(count >= 0, "count is negative");
+
+            return base.ReadAsync(buffer, offset, count, cancellationToken);
         }
 
         [SecurityCritical]
@@ -132,6 +159,19 @@ namespace System.IO.Pipes
                     offset += bytesWritten;
                 }
             }
+        }
+
+        [SecuritySafeCritical]
+        private Task WriteAsyncCore(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
+        {
+            Debug.Assert(_handle != null, "_handle is null");
+            Debug.Assert(!_handle.IsClosed, "_handle is closed");
+            Debug.Assert(CanWrite, "can't write");
+            Debug.Assert(buffer != null, "buffer is null");
+            Debug.Assert(offset >= 0, "offset is negative");
+            Debug.Assert(count >= 0, "count is negative");
+
+            return base.WriteAsync(buffer, offset, count, cancellationToken);
         }
 
         // Blocks until the other end of the pipe has read in all written buffer.
@@ -173,10 +213,7 @@ namespace System.IO.Pipes
                 {
                     throw new NotSupportedException(SR.NotSupported_UnreadableStream);
                 }
-
-                // On Linux this could be retrieved using F_GETPIPE_SZ with fcntl, but that's non-conforming
-                // and works only on recent versions of Linux.  For now, we'll leave this as unsupported.
-                throw new PlatformNotSupportedException();
+                return InBufferSizeCore;
             }
         }
 
@@ -195,9 +232,7 @@ namespace System.IO.Pipes
                 {
                     throw new NotSupportedException(SR.NotSupported_UnwritableStream);
                 }
-
-                // See comments in inBufferSize
-                throw new PlatformNotSupportedException();
+                return OutBufferSizeCore;
             }
         }
 
@@ -272,7 +307,7 @@ namespace System.IO.Pipes
         /// Arguments are expected to be passed via <paramref name="arg1"/> and <paramref name="arg2"/>
         /// so as to avoid delegate and closure allocations at the call sites.
         /// </remarks>
-        private static long SysCall(
+        private long SysCall(
             SafePipeHandle handle,
             Func<int, IntPtr, int, long> sysCall,
             IntPtr arg1 = default(IntPtr), int arg2 = default(int))
@@ -287,9 +322,23 @@ namespace System.IO.Pipes
                 int fd = (int)handle.DangerousGetHandle();
                 Debug.Assert(fd >= 0);
 
-                long result;
-                while (Interop.CheckIo(result = sysCall(fd, arg1, arg2))) ;
-                return result;
+                while (true)
+                {
+                    long result = sysCall(fd, arg1, arg2);
+                    if (result < 0)
+                    {
+                        int errno = Marshal.GetLastWin32Error();
+
+                        if (errno == Interop.Errors.EINTR)
+                            continue;
+
+                        if (errno == Interop.Errors.EPIPE)
+                            State = PipeState.Broken;
+
+                        throw Interop.GetExceptionForIoErrno(errno);
+                    }
+                    return result;
+                }
             }
             finally
             {

@@ -1,12 +1,9 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System.Text;
-using System.Runtime.InteropServices;
-using System.Runtime.Versioning;
-using System.Runtime.CompilerServices;
-using Microsoft.Win32.SafeHandles;
+using System.Diagnostics;
 using System.Diagnostics.Contracts;
+using System.Runtime.InteropServices;
 using System.Security;
 
 namespace System.IO.Compression
@@ -17,7 +14,7 @@ namespace System.IO.Compression
     /// 
     /// See also: How to choose a compression level (in comments to <code>CompressionLevel</code>.
     /// </summary>
-    internal static class ZLibNative
+    internal static partial class ZLibNative
     {
         #region Constants defined in zlib.h
 
@@ -178,41 +175,6 @@ namespace System.IO.Compression
                                                           // More is faster and better compression with more memory usage.
         #endregion  // Defaults for ZLib parameters
 
-
-        #region ZLib stream descriptor data structure
-
-        /// <summary>
-        /// Do not construct instances of <code>ZStream</code> explicitly.
-        /// Always use <code>ZLibNative.DeflateInit2_</code> or <code>ZLibNative.InflateInit2_</code> instead.
-        /// Those methods will wrap this structure into a <code>SafeHandle</code> and thus make sure that it is always disposed correctly.
-        /// </summary>
-        [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi)]
-        internal struct ZStream
-        {
-            internal IntPtr nextIn;     //Bytef    *next_in;  /* next input byte */
-            internal UInt32 availIn;    //uInt     avail_in;  /* number of bytes available at next_in */
-            internal UInt32 totalIn;    //uLong    total_in;  /* total nb of input bytes read so far */
-
-            internal IntPtr nextOut;    //Bytef    *next_out; /* next output byte should be put there */
-            internal UInt32 availOut;   //uInt     avail_out; /* remaining free space at next_out */
-            internal UInt32 totalOut;   //uLong    total_out; /* total nb of bytes output so far */
-
-            internal IntPtr msg;        //char     *msg;      /* last error message, NULL if no error */
-
-            internal IntPtr state;      //struct internal_state FAR *state; /* not visible by applications */
-
-            internal IntPtr zalloc;     //alloc_func zalloc;  /* used to allocate the internal state */
-            internal IntPtr zfree;      //free_func  zfree;   /* used to free the internal state */
-            internal IntPtr opaque;     //voidpf   opaque;    /* private data object passed to zalloc and zfree */
-
-            internal Int32 dataType;    //int      data_type; /* best guess about the data type: binary or text */
-            internal UInt32 adler;      //uLong    adler;     /* adler32 value of the uncompressed data */
-            internal UInt32 reserved;   //uLong    reserved;  /* reserved for future use */
-        }
-
-        #endregion  // ZLib stream descriptor data structure
-
-
         /**
          * Do not remove the nested typing of types inside of <code>System.IO.Compression.ZLibNative</code>.
          * This was done on purpose to:
@@ -259,7 +221,6 @@ namespace System.IO.Compression
 
 
             public ZLibStreamHandle()
-
                 : base(new IntPtr(-1), true)
             {
                 _zStream = new ZStream();
@@ -274,7 +235,7 @@ namespace System.IO.Compression
             public override bool IsInvalid
             {
                 [SecurityCritical]
-                get { return DangerousGetHandle() == new IntPtr(-1); }
+                get { return handle == new IntPtr(-1); }
             }
 
             public State InitializationState
@@ -288,9 +249,6 @@ namespace System.IO.Compression
             [SecurityCritical]
             protected override bool ReleaseHandle()
             {
-                // We are in a finalizer thread at the end of the App and the finalization of the dynamically loaded ZLib happend
-                // to be scheduled first. In such case we have no hope of properly freeing zStream. If the process is dying - we
-                // do not care. In other cases somethign went badly wrong anyway:
                 switch (InitializationState)
                 {
                     case State.NotInitialized: return true;
@@ -314,11 +272,9 @@ namespace System.IO.Compression
 
             public UInt32 AvailIn
             {
-                [SecurityCritical] get { return _zStream.availIn; }
-                [SecurityCritical] set { _zStream.availIn = value; }
+                [SecurityCritical] get { return (uint)_zStream.availIn; }
+                [SecurityCritical] set { _zStream.availIn = CastUInt32ToNativeuLong(value); }
             }
-
-            public UInt32 TotalIn {[SecurityCritical] get { return _zStream.totalIn; } }
 
             public IntPtr NextOut
             {
@@ -328,15 +284,9 @@ namespace System.IO.Compression
 
             public UInt32 AvailOut
             {
-                [SecurityCritical] get { return _zStream.availOut; }
-                [SecurityCritical] set { _zStream.availOut = value; }
+                [SecurityCritical] get { return (uint)_zStream.availOut; }
+                [SecurityCritical] set { _zStream.availOut = CastUInt32ToNativeuLong(value); }
             }
-
-            public UInt32 TotalOut {[SecurityCritical] get { return _zStream.totalOut; } }
-
-            public Int32 DataType {[SecurityCritical] get { return _zStream.dataType; } }
-
-            public UInt32 Adler {[SecurityCritical] get { return _zStream.adler; } }
 
             #endregion  // Expose fields on ZStream for use by user / Fx code (add more as required)
 
@@ -458,48 +408,17 @@ namespace System.IO.Compression
             public string GetErrorMessage()
             {
                 // This can work even after XxflateEnd().
-
-                if (ZNullPtr.Equals(_zStream.msg))
-                    return String.Empty;
-
-                unsafe
-                {
-                    StringBuilder sb = new StringBuilder();
-                    SByte* pMessage = (SByte*)_zStream.msg;
-                    char c;
-                    do
-                    {
-                        c = (char)*pMessage;
-                        pMessage++;
-                        sb.Append(c);
-                    } while ((sbyte)c != 0);
-
-                    return sb.ToString();
-                }
+                return _zStream.msg != ZNullPtr ? Marshal.PtrToStringAnsi(_zStream.msg) : string.Empty;
             }
 
             #endregion  // Expose ZLib functions for use by user / Fx code (add more as required)
 
-            [SecurityCritical]
-            internal static Int32 ZLibCompileFlags()
-            {
-                return Interop.zlib.zlibCompileFlags();
-            }
         }  // class ZLibStreamHandle
 
         #endregion  // ZLib Stream Handle type
 
 
         #region public factory methods for ZLibStreamHandle
-
-
-        [SecurityCritical]
-        public static ErrorCode CreateZLibStreamForDeflate(out ZLibStreamHandle zLibStreamHandle)
-        {
-            return CreateZLibStreamForDeflate(out zLibStreamHandle,
-                                              CompressionLevel.DefaultCompression, Deflate_DefaultWindowBits,
-                                              Deflate_DefaultMemLevel, CompressionStrategy.DefaultStrategy);
-        }
 
 
         [SecurityCritical]
@@ -512,13 +431,6 @@ namespace System.IO.Compression
 
 
         [SecurityCritical]
-        public static ErrorCode CreateZLibStreamForInflate(out ZLibStreamHandle zLibStreamHandle)
-        {
-            return CreateZLibStreamForInflate(out zLibStreamHandle, Deflate_DefaultWindowBits);
-        }
-
-
-        [SecurityCritical]
         public static ErrorCode CreateZLibStreamForInflate(out ZLibStreamHandle zLibStreamHandle, int windowBits)
         {
             zLibStreamHandle = new ZLibStreamHandle();
@@ -526,16 +438,6 @@ namespace System.IO.Compression
         }
 
         #endregion  // public factory methods for ZLibStreamHandle
-
-
-        #region public utility APIs
-
-        [SecurityCritical]
-        public static Int32 ZLibCompileFlags()
-        {
-            return ZLibStreamHandle.ZLibCompileFlags();
-        }
-        #endregion  // public utility APIs
 
     }  // internal class ZLibNative
 }  // namespace System.IO.Compression

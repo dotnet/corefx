@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 __scriptpath=$(cd "$(dirname "$0")"; pwd -P)
 __packageroot=$__scriptpath/packages
@@ -8,16 +8,33 @@ __nugetconfig=$__sourceroot/NuGet.Config
 __msbuildpackageid="Microsoft.Build.Mono.Debug"
 __msbuildpackageversion="14.1.0.0-prerelease"
 __msbuildpath=$__packageroot/$__msbuildpackageid.$__msbuildpackageversion/lib/MSBuild.exe
-__referenceassemblyroot=/usr/lib/mono/xbuild-frameworks
+
+if [ $(uname) == "Linux" ]; then
+    __monoroot=/usr
+elif [ $(uname) == "FreeBSD" ]; then
+    __monoroot=/usr/local
+else
+    __monoroot=/Library/Frameworks/Mono.framework/Versions/Current
+fi
+
+__referenceassemblyroot=$__monoroot/lib/mono/xbuild-frameworks
+
+
 __monoversion=$(mono --version | grep "version 4.[1-9]")
 
 if [ $? -ne 0 ]; then
-    echo "Mono 4.1 or later is required to build corefx. Please see https://github.com/dotnet/corefx/wiki/Building-On-Unix for more details."
-    exit 1
+    # if built from tarball, mono only identifies itself as 4.0.1
+    __monoversion=$(mono --version | egrep "version 4.0.[1-9]+(.[0-9]+)?")
+    if [ $? -ne 0 ]; then
+        echo "Mono 4.0.1.44 or later is required to build corefx. Please see https://github.com/dotnet/corefx/blob/master/Documentation/building/unix-instructions.md for more details."
+        exit 1
+    else
+        echo "WARNING: Mono 4.0.1.44 or later is required to build corefx. Unable to asses if current version is supported."
+    fi
 fi
 
 if [ ! -e "$__referenceassemblyroot/.NETPortable" ]; then
-    echo "PCL reference assemblies not found. Please see https://github.com/dotnet/corefx/wiki/Building-On-Unix for more details."
+    echo "PCL reference assemblies not found. Please see https://github.com/dotnet/corefx/blob/master/Documentation/building/unix-instructions.md for more details."
     exit 1
 fi
 
@@ -28,17 +45,18 @@ __buildlog=$__scriptpath/msbuild.log
 if [ ! -e "$__nugetpath" ]; then
     which curl wget > /dev/null 2> /dev/null
     if [ $? -ne 0 -a $? -ne 1 ]; then
-        echo "cURL or wget is required to build corefx. Please see https://github.com/dotnet/corefx/wiki/Building-On-Unix for more details."
+        echo "cURL or wget is required to build corefx. Please see https://github.com/dotnet/corefx/blob/master/Documentation/building/unix-instructions.md for more details."
         exit 1
     fi
     echo "Restoring NuGet.exe..."
 
-    which wget > /dev/null 2> /dev/null
+    # curl has HTTPS CA trust-issues less often than wget, so lets try that first.
+    which curl > /dev/null 2> /dev/null
     if [ $? -ne 0 ]; then
-       curl -sSL --create-dirs -o $__nugetpath https://api.nuget.org/downloads/nuget.exe
-    else
        mkdir -p $__packageroot
        wget -q -O $__nugetpath https://api.nuget.org/downloads/nuget.exe
+    else
+       curl -sSL --create-dirs -o $__nugetpath https://api.nuget.org/downloads/nuget.exe
     fi
 
     if [ $? -ne 0 ]; then
@@ -60,11 +78,13 @@ fi
 
 if [ $(uname) == "Linux" ]; then
     __osgroup=Linux
+elif [ $(uname) == "FreeBSD" ]; then
+    __osgroup=FreeBSD
 else
     __osgroup=OSX
 fi
 
-MONO29679=1 ReferenceAssemblyRoot=$__referenceassemblyroot mono $__msbuildpath "$__buildproj" /nologo /verbosity:minimal "/fileloggerparameters:Verbosity=diag;LogFile=$__buildlog" /t:Build /p:OSGroup=$__osgroup /p:UseRoslynCompiler=true /p:COMPUTERNAME=$(hostname) /p:USERNAME=$(id -un) "$@"
+MONO29679=1 ReferenceAssemblyRoot=$__referenceassemblyroot mono $__msbuildpath "$__buildproj" /nologo /verbosity:minimal "/fileloggerparameters:Verbosity=normal;LogFile=$__buildlog" /t:Build /p:OSGroup=$__osgroup /p:UseRoslynCompiler=true /p:COMPUTERNAME=$(hostname) /p:USERNAME=$(id -un) "$@"
 BUILDERRORLEVEL=$?
 
 echo

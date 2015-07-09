@@ -48,13 +48,20 @@ namespace System.Numerics
         {
             if (_bits != null)
             {
-                Debug.Assert(_sign == 1 || _sign == -1 /*, "_sign must be +1 or -1 when _bits is non-null"*/);
-                Debug.Assert(Length(_bits) > 0 /*, "_bits must contain at least 1 element or be null"*/);
-                if (Length(_bits) == 1)
-                    Debug.Assert(_bits[0] >= kuMaskHighBit /*, "Wasted space _bits[0] could have been packed into _sign"*/);
+                // _sign must be +1 or -1 when _bits is non-null
+                Debug.Assert(_sign == 1 || _sign == -1);
+                // _bits must contain at least 1 element or be null
+                Debug.Assert(_bits.Length > 0);
+                // Wasted space: _bits[0] could have been packed into _sign
+                Debug.Assert(_bits.Length > 1 || _bits[0] >= kuMaskHighBit);
+                // Wasted space: leading zeros could have been truncated
+                Debug.Assert(_bits[_bits.Length - 1] != 0);
             }
             else
-                Debug.Assert(_sign > int.MinValue /*, "Int32.MinValue should not be stored in the _sign field"*/);
+            {
+                // Int32.MinValue should not be stored in the _sign field
+                Debug.Assert(_sign > int.MinValue);
+            }
         }
         #endregion members supporting exposed properties
 
@@ -420,47 +427,60 @@ namespace System.Numerics
             AssertValid();
         }
 
-        public BigInteger(Int64 value)
+        public BigInteger(long value)
         {
-            if (Int32.MinValue <= value && value <= Int32.MaxValue)
+            if (int.MinValue < value && value <= int.MaxValue)
             {
-                if (value == Int32.MinValue)
-                    this = s_bnMinInt;
-                else
-                {
-                    _sign = (int)value;
-                    _bits = null;
-                }
-                AssertValid();
-                return;
+                _sign = (int)value;
+                _bits = null;
             }
-
-            ulong x = 0;
-            if (value < 0)
+            else if (value == int.MinValue)
             {
-                x = (ulong)-value;
-                _sign = -1;
+                this = s_bnMinInt;
             }
             else
             {
-                Debug.Assert(value != 0);
-                x = (ulong)value;
-                _sign = +1;
+                ulong x = 0;
+                if (value < 0)
+                {
+                    x = (ulong)-value;
+                    _sign = -1;
+                }
+                else
+                {
+                    x = (ulong)value;
+                    _sign = +1;
+                }
+
+                if (x <= uint.MaxValue)
+                {
+                    _bits = new uint[1];
+                    _bits[0] = (uint)x;
+                }
+                else
+                {
+                    _bits = new uint[2];
+                    _bits[0] = (uint)x;
+                    _bits[1] = (uint)(x >> kcbitUint);
+                }
             }
 
-            _bits = new uint[2];
-            _bits[0] = (uint)x;
-            _bits[1] = (uint)(x >> kcbitUint);
             AssertValid();
         }
 
         [CLSCompliant(false)]
-        public BigInteger(UInt64 value)
+        public BigInteger(ulong value)
         {
-            if (value <= Int32.MaxValue)
+            if (value <= int.MaxValue)
             {
                 _sign = (int)value;
                 _bits = null;
+            }
+            else if (value <= uint.MaxValue)
+            {
+                _sign = +1;
+                _bits = new uint[1];
+                _bits[0] = (uint)value;
             }
             else
             {
@@ -469,6 +489,7 @@ namespace System.Numerics
                 _bits[0] = (uint)value;
                 _bits[1] = (uint)(value >> kcbitUint);
             }
+
             AssertValid();
         }
 
@@ -905,18 +926,46 @@ namespace System.Numerics
             dividend.AssertValid();
             divisor.AssertValid();
 
-            int signNum = +1;
-            int signDen = +1;
-            BigIntegerBuilder regNum = new BigIntegerBuilder(dividend, ref signNum);
-            BigIntegerBuilder regDen = new BigIntegerBuilder(divisor, ref signDen);
-            BigIntegerBuilder regQuo = new BigIntegerBuilder();
+            bool trivialDividend = dividend._bits == null;
+            bool trivialDivisor = divisor._bits == null;
 
-            // regNum and regQuo are overwritten with the remainder and quotient, respectively
-            regNum.ModDiv(ref regDen, ref regQuo);
-            remainder = regNum.GetInteger(signNum);
-            return regQuo.GetInteger(signNum * signDen);
+            if (trivialDividend && trivialDivisor)
+            {
+                remainder = dividend._sign % divisor._sign;
+                return dividend._sign / divisor._sign;
+            }
+
+            if (trivialDividend)
+            {
+                // the divisor is non-trivial
+                // and therefore the bigger one
+                remainder = dividend;
+                return s_bnZeroInt;
+            }
+
+            if (trivialDivisor)
+            {
+                uint[] rest;
+                uint[] bits = BigIntegerCalculator.Divide(dividend._bits, NumericsHelpers.Abs(divisor._sign), out rest);
+
+                remainder = new BigInteger(rest, dividend._sign < 0);
+                return new BigInteger(bits, (dividend._sign < 0) ^ (divisor._sign < 0));
+            }
+
+            if (dividend._bits.Length < divisor._bits.Length)
+            {
+                remainder = dividend;
+                return s_bnZeroInt;
+            }
+            else
+            {
+                uint[] rest;
+                uint[] bits = BigIntegerCalculator.Divide(dividend._bits, divisor._bits, out rest);
+
+                remainder = new BigInteger(rest, dividend._sign < 0);
+                return new BigInteger(bits, (dividend._sign < 0) ^ (divisor._sign < 0));
+            }
         }
-
 
         public static BigInteger Negate(BigInteger value)
         {
@@ -1000,45 +1049,6 @@ namespace System.Numerics
             return right;
         }
 
-
-        private static void ModPowUpdateResult(ref BigIntegerBuilder regRes, ref BigIntegerBuilder regVal, ref BigIntegerBuilder regMod, ref BigIntegerBuilder regTmp)
-        {
-            NumericsHelpers.Swap(ref regRes, ref regTmp);
-            regRes.Mul(ref regTmp, ref regVal);   // result = result * value;
-            regRes.Mod(ref regMod);               // result = result % modulus;                       
-        }
-
-        private static void ModPowSquareModValue(ref BigIntegerBuilder regVal, ref BigIntegerBuilder regMod, ref BigIntegerBuilder regTmp)
-        {
-            NumericsHelpers.Swap(ref regVal, ref regTmp);
-            regVal.Mul(ref regTmp, ref regTmp);   // value = value * value;
-            regVal.Mod(ref regMod);               // value = value % modulus;
-        }
-
-        private static void ModPowInner(uint exp, ref BigIntegerBuilder regRes, ref BigIntegerBuilder regVal, ref BigIntegerBuilder regMod, ref BigIntegerBuilder regTmp)
-        {
-            while (exp != 0)          // !(Exponent.IsZero)
-            {
-                if ((exp & 1) == 1)   // !(Exponent.IsEven)
-                    ModPowUpdateResult(ref regRes, ref regVal, ref regMod, ref regTmp);
-                if (exp == 1)         // Exponent.IsOne - we can exit early
-                    break;
-                ModPowSquareModValue(ref regVal, ref regMod, ref regTmp);
-                exp >>= 1;
-            }
-        }
-
-        private static void ModPowInner32(uint exp, ref BigIntegerBuilder regRes, ref BigIntegerBuilder regVal, ref BigIntegerBuilder regMod, ref BigIntegerBuilder regTmp)
-        {
-            for (int i = 0; i < 32; i++)
-            {
-                if ((exp & 1) == 1)   // !(Exponent.IsEven)
-                    ModPowUpdateResult(ref regRes, ref regVal, ref regMod, ref regTmp);
-                ModPowSquareModValue(ref regVal, ref regMod, ref regTmp);
-                exp >>= 1;
-            }
-        }
-
         public static BigInteger ModPow(BigInteger value, BigInteger exponent, BigInteger modulus)
         {
             if (exponent.Sign < 0)
@@ -1049,36 +1059,31 @@ namespace System.Numerics
             exponent.AssertValid();
             modulus.AssertValid();
 
-            int signRes = +1;
-            int signVal = +1;
-            int signMod = +1;
-            bool expIsEven = exponent.IsEven;
-            BigIntegerBuilder regRes = new BigIntegerBuilder(BigInteger.One, ref signRes);
-            BigIntegerBuilder regVal = new BigIntegerBuilder(value, ref signVal);
-            BigIntegerBuilder regMod = new BigIntegerBuilder(modulus, ref signMod);
-            BigIntegerBuilder regTmp = new BigIntegerBuilder(regVal.Size);
+            bool trivialValue = value._bits == null;
+            bool trivialExponent = exponent._bits == null;
+            bool trivialModulus = modulus._bits == null;
 
-            regRes.Mod(ref regMod);   // Handle special case of exponent=0, modulus=1
+            if (trivialModulus)
+            {
+                long bits = trivialValue && trivialExponent ? BigIntegerCalculator.Pow(NumericsHelpers.Abs(value._sign), NumericsHelpers.Abs(exponent._sign), NumericsHelpers.Abs(modulus._sign)) :
+                            trivialValue ? BigIntegerCalculator.Pow(NumericsHelpers.Abs(value._sign), exponent._bits, NumericsHelpers.Abs(modulus._sign)) :
+                            trivialExponent ? BigIntegerCalculator.Pow(value._bits, NumericsHelpers.Abs(exponent._sign), NumericsHelpers.Abs(modulus._sign)) :
+                            BigIntegerCalculator.Pow(value._bits, exponent._bits, NumericsHelpers.Abs(modulus._sign));
 
-            if (exponent._bits == null)
-            {   // exponent fits into an Int32
-                ModPowInner((uint)exponent._sign, ref regRes, ref regVal, ref regMod, ref regTmp);
+                return value._sign < 0 && !exponent.IsEven ? -1 * bits : bits;
             }
             else
-            {   // very large exponent
-                int len = Length(exponent._bits);
-                for (int i = 0; i < len - 1; i++)
-                {
-                    uint exp = exponent._bits[i];
-                    ModPowInner32(exp, ref regRes, ref regVal, ref regMod, ref regTmp);
-                }
-                ModPowInner(exponent._bits[len - 1], ref regRes, ref regVal, ref regMod, ref regTmp);
-            }
+            {
+                uint[] bits = trivialValue && trivialExponent ? BigIntegerCalculator.Pow(NumericsHelpers.Abs(value._sign), NumericsHelpers.Abs(exponent._sign), modulus._bits) :
+                              trivialValue ? BigIntegerCalculator.Pow(NumericsHelpers.Abs(value._sign), exponent._bits, modulus._bits) :
+                              trivialExponent ? BigIntegerCalculator.Pow(value._bits, NumericsHelpers.Abs(exponent._sign), modulus._bits) :
+                              BigIntegerCalculator.Pow(value._bits, exponent._bits, modulus._bits);
 
-            return regRes.GetInteger(value._sign > 0 ? +1 : expIsEven ? +1 : -1);
+                return new BigInteger(bits, value._sign < 0 && !exponent.IsEven);
+            }
         }
 
-        public static BigInteger Pow(BigInteger value, Int32 exponent)
+        public static BigInteger Pow(BigInteger value, int exponent)
         {
             if (exponent < 0)
                 throw new ArgumentOutOfRangeException("exponent", SR.ArgumentOutOfRange_MustBeNonNeg);
@@ -1087,75 +1092,27 @@ namespace System.Numerics
             value.AssertValid();
 
             if (exponent == 0)
-                return BigInteger.One;
+                return s_bnOneInt;
             if (exponent == 1)
                 return value;
-            if (value._bits == null)
+
+            bool trivialValue = value._bits == null;
+
+            if (trivialValue)
             {
                 if (value._sign == 1)
                     return value;
                 if (value._sign == -1)
-                    return (exponent & 1) != 0 ? value : 1;
+                    return (exponent & 1) != 0 ? value : s_bnOneInt;
                 if (value._sign == 0)
                     return value;
             }
 
-            int sign = +1;
-            BigIntegerBuilder regSquare = new BigIntegerBuilder(value, ref sign);
+            uint[] bits = trivialValue
+                        ? BigIntegerCalculator.Pow(NumericsHelpers.Abs(value._sign), NumericsHelpers.Abs(exponent))
+                        : BigIntegerCalculator.Pow(value._bits, NumericsHelpers.Abs(exponent));
 
-            // Get an estimate of the size needed for regSquare and regRes, so we can minimize allocations.
-            int cuSquareMin = regSquare.Size;
-            int cuSquareMax = cuSquareMin;
-            uint uSquareMin = regSquare.High;
-            uint uSquareMax = uSquareMin + 1;
-            if (uSquareMax == 0)
-            {
-                cuSquareMax++;
-                uSquareMax = 1;
-            }
-            int cuResMin = 1;
-            int cuResMax = 1;
-            uint uResMin = 1;
-            uint uResMax = 1;
-
-            for (int expTmp = exponent; ;)
-            {
-                if ((expTmp & 1) != 0)
-                {
-                    MulUpper(ref uResMax, ref cuResMax, uSquareMax, cuSquareMax);
-                    MulLower(ref uResMin, ref cuResMin, uSquareMin, cuSquareMin);
-                }
-
-                if ((expTmp >>= 1) == 0)
-                    break;
-
-                MulUpper(ref uSquareMax, ref cuSquareMax, uSquareMax, cuSquareMax);
-                MulLower(ref uSquareMin, ref cuSquareMin, uSquareMin, cuSquareMin);
-            }
-
-            if (cuResMax > 1)
-                regSquare.EnsureWritable(cuResMax, 0);
-            BigIntegerBuilder regTmp = new BigIntegerBuilder(cuResMax);
-            BigIntegerBuilder regRes = new BigIntegerBuilder(cuResMax);
-            regRes.Set(1);
-
-            if ((exponent & 1) == 0)
-                sign = +1;
-
-            for (int expTmp = exponent; ;)
-            {
-                if ((expTmp & 1) != 0)
-                {
-                    NumericsHelpers.Swap(ref regRes, ref regTmp);
-                    regRes.Mul(ref regSquare, ref regTmp);
-                }
-                if ((expTmp >>= 1) == 0)
-                    break;
-                NumericsHelpers.Swap(ref regSquare, ref regTmp);
-                regSquare.Mul(ref regTmp, ref regTmp);
-            }
-
-            return regRes.GetInteger(sign);
+            return new BigInteger(bits, value._sign < 0 && (exponent & 1) != 0);
         }
 
         #endregion public static methods
@@ -1576,20 +1533,43 @@ namespace System.Numerics
             left.AssertValid();
             right.AssertValid();
 
-            if (right.IsZero) return left;
-            if (left.IsZero) return right;
+            if (left._sign < 0 != right._sign < 0)
+                return Subtract(left._bits, left._sign, right._bits, -1 * right._sign);
+            return Add(left._bits, left._sign, right._bits, right._sign);
+        }
 
-            int sign1 = +1;
-            int sign2 = +1;
-            BigIntegerBuilder reg1 = new BigIntegerBuilder(left, ref sign1);
-            BigIntegerBuilder reg2 = new BigIntegerBuilder(right, ref sign2);
+        private static BigInteger Add(uint[] leftBits, int leftSign, uint[] rightBits, int rightSign)
+        {
+            bool trivialLeft = leftBits == null;
+            bool trivialRight = rightBits == null;
 
-            if (sign1 == sign2)
-                reg1.Add(ref reg2);
+            if (trivialLeft && trivialRight)
+            {
+                return (long)leftSign + rightSign;
+            }
+
+            if (trivialLeft)
+            {
+                uint[] bits = BigIntegerCalculator.Add(rightBits, NumericsHelpers.Abs(leftSign));
+                return new BigInteger(bits, leftSign < 0);
+            }
+
+            if (trivialRight)
+            {
+                uint[] bits = BigIntegerCalculator.Add(leftBits, NumericsHelpers.Abs(rightSign));
+                return new BigInteger(bits, leftSign < 0);
+            }
+
+            if (leftBits.Length < rightBits.Length)
+            {
+                uint[] bits = BigIntegerCalculator.Add(rightBits, leftBits);
+                return new BigInteger(bits, leftSign < 0);
+            }
             else
-                reg1.Sub(ref sign1, ref reg2);
-
-            return reg1.GetInteger(sign1);
+            {
+                uint[] bits = BigIntegerCalculator.Add(leftBits, rightBits);
+                return new BigInteger(bits, leftSign < 0);
+            }
         }
 
         public static BigInteger operator -(BigInteger left, BigInteger right)
@@ -1597,20 +1577,43 @@ namespace System.Numerics
             left.AssertValid();
             right.AssertValid();
 
-            if (right.IsZero) return left;
-            if (left.IsZero) return -right;
+            if (left._sign < 0 != right._sign < 0)
+                return Add(left._bits, left._sign, right._bits, -1 * right._sign);
+            return Subtract(left._bits, left._sign, right._bits, right._sign);
+        }
 
-            int sign1 = +1;
-            int sign2 = -1;
-            BigIntegerBuilder reg1 = new BigIntegerBuilder(left, ref sign1);
-            BigIntegerBuilder reg2 = new BigIntegerBuilder(right, ref sign2);
+        private static BigInteger Subtract(uint[] leftBits, int leftSign, uint[] rightBits, int rightSign)
+        {
+            bool trivialLeft = leftBits == null;
+            bool trivialRight = rightBits == null;
 
-            if (sign1 == sign2)
-                reg1.Add(ref reg2);
+            if (trivialLeft && trivialRight)
+            {
+                return (long)leftSign - rightSign;
+            }
+
+            if (trivialLeft)
+            {
+                uint[] bits = BigIntegerCalculator.Subtract(rightBits, NumericsHelpers.Abs(leftSign));
+                return new BigInteger(bits, leftSign >= 0);
+            }
+
+            if (trivialRight)
+            {
+                uint[] bits = BigIntegerCalculator.Subtract(leftBits, NumericsHelpers.Abs(rightSign));
+                return new BigInteger(bits, leftSign < 0);
+            }
+
+            if (BigIntegerCalculator.Compare(leftBits, rightBits) < 0)
+            {
+                uint[] bits = BigIntegerCalculator.Subtract(rightBits, leftBits);
+                return new BigInteger(bits, leftSign >= 0);
+            }
             else
-                reg1.Sub(ref sign1, ref reg2);
-
-            return reg1.GetInteger(sign1);
+            {
+                uint[] bits = BigIntegerCalculator.Subtract(leftBits, rightBits);
+                return new BigInteger(bits, leftSign < 0);
+            }
         }
 
         public static BigInteger operator *(BigInteger left, BigInteger right)
@@ -1618,46 +1621,42 @@ namespace System.Numerics
             left.AssertValid();
             right.AssertValid();
 
-            uint[] result;
+            bool trivialLeft = left._bits == null;
+            bool trivialRight = right._bits == null;
 
-            if (left._bits != null)
+            if (trivialLeft && trivialRight)
             {
-                if (right._bits != null)
-                {
-                    if (left._bits == right._bits)
-                    {
-                        result = BigIntegerCalculator.Square(left._bits);
-                    }
-                    else
-                    {
-                        if (left._bits.Length < right._bits.Length)
-                        {
-                            result = BigIntegerCalculator.Multiply(right._bits, left._bits);
-                        }
-                        else
-                        {
-                            result = BigIntegerCalculator.Multiply(left._bits, right._bits);
-                        }
-                    }
-                }
-                else
-                {
-                    result = BigIntegerCalculator.Multiply(left._bits, NumericsHelpers.Abs(right._sign));
-                }
+                return (long)left._sign * right._sign;
+            }
+
+            if (trivialLeft)
+            {
+                uint[] bits = BigIntegerCalculator.Multiply(right._bits, NumericsHelpers.Abs(left._sign));
+                return new BigInteger(bits, (left._sign < 0) ^ (right._sign < 0));
+            }
+
+            if (trivialRight)
+            {
+                uint[] bits = BigIntegerCalculator.Multiply(left._bits, NumericsHelpers.Abs(right._sign));
+                return new BigInteger(bits, (left._sign < 0) ^ (right._sign < 0));
+            }
+
+            if (left._bits == right._bits)
+            {
+                uint[] bits = BigIntegerCalculator.Square(left._bits);
+                return new BigInteger(bits, (left._sign < 0) ^ (right._sign < 0));
+            }
+
+            if (left._bits.Length < right._bits.Length)
+            {
+                uint[] bits = BigIntegerCalculator.Multiply(right._bits, left._bits);
+                return new BigInteger(bits, (left._sign < 0) ^ (right._sign < 0));
             }
             else
             {
-                if (right._bits != null)
-                {
-                    result = BigIntegerCalculator.Multiply(right._bits, NumericsHelpers.Abs(left._sign));
-                }
-                else
-                {
-                    result = BigIntegerCalculator.Multiply(NumericsHelpers.Abs(left._sign), NumericsHelpers.Abs(right._sign));
-                }
+                uint[] bits = BigIntegerCalculator.Multiply(left._bits, right._bits);
+                return new BigInteger(bits, (left._sign < 0) ^ (right._sign < 0));
             }
-
-            return new BigInteger(result, (left._sign < 0) ^ (right._sign < 0));
         }
 
         public static BigInteger operator /(BigInteger dividend, BigInteger divisor)
@@ -1665,12 +1664,36 @@ namespace System.Numerics
             dividend.AssertValid();
             divisor.AssertValid();
 
-            int sign = +1;
-            BigIntegerBuilder regNum = new BigIntegerBuilder(dividend, ref sign);
-            BigIntegerBuilder regDen = new BigIntegerBuilder(divisor, ref sign);
+            bool trivialDividend = dividend._bits == null;
+            bool trivialDivisor = divisor._bits == null;
 
-            regNum.Div(ref regDen);
-            return regNum.GetInteger(sign);
+            if (trivialDividend && trivialDivisor)
+            {
+                return dividend._sign / divisor._sign;
+            }
+
+            if (trivialDividend)
+            {
+                // the divisor is non-trivial
+                // and therefore the bigger one
+                return s_bnZeroInt;
+            }
+
+            if (trivialDivisor)
+            {
+                uint[] bits = BigIntegerCalculator.Divide(dividend._bits, NumericsHelpers.Abs(divisor._sign));
+                return new BigInteger(bits, (dividend._sign < 0) ^ (divisor._sign < 0));
+            }
+
+            if (dividend._bits.Length < divisor._bits.Length)
+            {
+                return s_bnZeroInt;
+            }
+            else
+            {
+                uint[] bits = BigIntegerCalculator.Divide(dividend._bits, divisor._bits);
+                return new BigInteger(bits, (dividend._sign < 0) ^ (divisor._sign < 0));
+            }
         }
 
         public static BigInteger operator %(BigInteger dividend, BigInteger divisor)
@@ -1678,13 +1701,36 @@ namespace System.Numerics
             dividend.AssertValid();
             divisor.AssertValid();
 
-            int signNum = +1;
-            int signDen = +1;
-            BigIntegerBuilder regNum = new BigIntegerBuilder(dividend, ref signNum);
-            BigIntegerBuilder regDen = new BigIntegerBuilder(divisor, ref signDen);
+            bool trivialDividend = dividend._bits == null;
+            bool trivialDivisor = divisor._bits == null;
 
-            regNum.Mod(ref regDen);
-            return regNum.GetInteger(signNum);
+            if (trivialDividend && trivialDivisor)
+            {
+                return dividend._sign % divisor._sign;
+            }
+
+            if (trivialDividend)
+            {
+                // the divisor is non-trivial
+                // and therefore the bigger one
+                return dividend;
+            }
+
+            if (trivialDivisor)
+            {
+                long bits = BigIntegerCalculator.Remainder(dividend._bits, NumericsHelpers.Abs(divisor._sign));
+                return dividend._sign < 0 ? -1 * bits : bits;
+            }
+
+            if (dividend._bits.Length < divisor._bits.Length)
+            {
+                return dividend;
+            }
+            else
+            {
+                uint[] bits = BigIntegerCalculator.Remainder(dividend._bits, divisor._bits);
+                return new BigInteger(bits, dividend._sign < 0);
+            }
         }
 
         public static bool operator <(BigInteger left, BigInteger right)
@@ -1894,11 +1940,10 @@ namespace System.Numerics
         [Pure]
         internal static int Length(uint[] rgu)
         {
-            int cu = rgu.Length;
-            if (rgu[cu - 1] != 0)
-                return cu;
-            Debug.Assert(cu >= 2 && rgu[cu - 2] != 0);
-            return cu - 1;
+            Debug.Assert(rgu[rgu.Length - 1] != 0);
+
+            // no leading zeros
+            return rgu.Length;
         }
 
         internal int _Sign { get { return _sign; } }
@@ -1948,47 +1993,6 @@ namespace System.Numerics
             }
             xl = (x._bits == null ? 1 : x._bits.Length);
             return x._sign < 0;
-        }
-
-        // Gets an upper bound on the product of uHiRes * (2^32)^(cuRes-1) and uHiMul * (2^32)^(cuMul-1).
-        // The result is put int uHiRes and cuRes.
-        private static void MulUpper(ref uint uHiRes, ref int cuRes, uint uHiMul, int cuMul)
-        {
-            ulong uu = (ulong)uHiRes * uHiMul;
-            uint uHi = NumericsHelpers.GetHi(uu);
-            if (uHi != 0)
-            {
-                if (NumericsHelpers.GetLo(uu) != 0 && ++uHi == 0)
-                {
-                    uHi = 1;
-                    cuRes++;
-                }
-                uHiRes = uHi;
-                cuRes += cuMul;
-            }
-            else
-            {
-                uHiRes = NumericsHelpers.GetLo(uu);
-                cuRes += cuMul - 1;
-            }
-        }
-
-        // Gets a lower bound on the product of uHiRes * (2^32)^(cuRes-1) and uHiMul * (2^32)^(cuMul-1).
-        // The result is put int uHiRes and cuRes.
-        private static void MulLower(ref uint uHiRes, ref int cuRes, uint uHiMul, int cuMul)
-        {
-            ulong uu = (ulong)uHiRes * uHiMul;
-            uint uHi = NumericsHelpers.GetHi(uu);
-            if (uHi != 0)
-            {
-                uHiRes = uHi;
-                cuRes += cuMul;
-            }
-            else
-            {
-                uHiRes = NumericsHelpers.GetLo(uu);
-                cuRes += cuMul - 1;
-            }
         }
 
         internal static int GetDiffLength(uint[] rgu1, uint[] rgu2, int cu)

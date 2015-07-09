@@ -816,6 +816,11 @@ namespace System.Linq.Expressions.Interpreter
             Emit(CastInstruction.Create(toType));
         }
 
+        public void EmitCastToEnum(Type toType)
+        {
+            Emit(new CastToEnumInstruction(toType));
+        }
+
         #endregion
 
         #region Boolean Operators
@@ -1125,10 +1130,16 @@ namespace System.Linq.Expressions.Interpreter
             Emit(LeaveExceptionHandlerInstruction.Create(EnsureLabelIndex(tryExpressionEndLabel), hasValue));
         }
 
-        public void EmitSwitch(Dictionary<int, int> cases)
+        public void EmitIntSwitch<T>(Dictionary<T, int> cases)
         {
-            Emit(new SwitchInstruction(cases));
+            Emit(new IntSwitchInstruction<T>(cases));
         }
+
+        public void EmitStringSwitch(Dictionary<string, int> cases, StrongBox<int> nullCase)
+        {
+            Emit(new StringSwitchInstruction(cases, nullCase));
+        }
+
         #endregion
     }
 }
