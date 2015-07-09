@@ -48,6 +48,9 @@ namespace System.Collections.Concurrent
         // GlobalListsLock lock
         private bool _needSync;
 
+        // Count of the thread lists. This is used to determine initial capacity for the version lists
+        private volatile int _threadListCount;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="ConcurrentBag{T}"/>
         /// class.
@@ -274,6 +277,7 @@ namespace System.Collections.Concurrent
                         list = new ThreadLocalList(Environment.CurrentManagedThreadId);
                         _headList = list;
                         _tailList = list;
+                        _threadListCount++;
                     }
                     else
                     {
@@ -283,6 +287,7 @@ namespace System.Collections.Concurrent
                             list = new ThreadLocalList(Environment.CurrentManagedThreadId);
                             _tailList._nextList = list;
                             _tailList = list;
+                            _threadListCount++;
                         }
                     }
                     _locals.Value = list;
@@ -339,7 +344,7 @@ namespace System.Collections.Concurrent
 #endif
 
             bool loop;
-            List<int> versionsList = new List<int>(); // save the lists version
+            List<int> versionsList = new List<int>(_threadListCount); // save the lists version
             do
             {
                 versionsList.Clear(); //clear the list from the previous iteration
@@ -574,13 +579,128 @@ namespace System.Collections.Concurrent
         }
 
         /// <summary>
+        /// Returns an enumerator that iterates through the <see cref="ConcurrentBag{T}"/>.
+        /// </summary>
+        /// <returns>An enumerator for the contents of the <see cref="ConcurrentBag{T}"/>.</returns>
+        /// <remarks>
+        /// The enumerator returned from the function is safe to use concurrently with
+        /// reads and writes to the bag, however it does not represent a moment-in-time snapshot
+        /// of the bag.  The contents exposed through the enumerator may contain modifications
+        /// made to the bag after <see cref="GetEnumerableSlim"/> was called. <see cref="GetEnumerableSlim"/>
+        /// does not copy the bag contents to a list as <see cref="GetEnumerator"/> does.
+        /// </remarks>
+        public IEnumerable<T> GetEnumerableSlim()
+        {
+            ThreadLocalList currentList = _headList;
+            while (currentList != null)
+            {
+                Node currentNode = currentList._head;
+                while (currentNode != null)
+                {
+                    yield return currentNode._value;
+                    currentNode = currentNode._next;
+                }
+                currentList = currentList._nextList;
+            }
+        }
+
+        /// <summary>
+        /// Determines whether the <see cref="ConcurrentBag{T}"/> contains the specified item.
+        /// </summary>
+        /// <param name="item">The item to locate in the <see cref="ConcurrentBag{T}"/>.</param>
+        /// <returns>true if the <see cref="ConcurrentBag{T}"/> contains the specified item; 
+        /// otherwise, false.</returns>
+        /// <remarks>
+        /// The returned value represents a moment-in-time snapshot of the contents of the bag.
+        /// </remarks>
+        public bool Contains(T item)
+        {
+            // Short path if the bag is empty
+            if (_headList == null)
+                return false;
+
+            bool lockTaken = false;
+            try
+            {
+                FreezeBag(ref lockTaken);
+
+                EqualityComparer<T> comparer = EqualityComparer<T>.Default;
+                foreach (T bagItem in GetEnumerableSlim())
+                {
+                    if (comparer.Equals(bagItem, item))
+                        return true; // Item found
+                }
+                return false;
+            }
+            finally
+            {
+                UnfreezeBag(lockTaken);
+            }
+        }
+
+        /// <summary>
+        /// Performs the specified action on each element of the <see cref="ConcurrentBag{T}"/>.
+        /// </summary>
+        /// <param name="action">The delegate to perform on each element of the <see cref="ConcurrentBag{T}"/>.
+        /// Break the action by returning false from the specified delegate.</param>
+        public void ForEach(Func<T, bool> action)
+        {
+            // Short path if the bag is empty
+            if (_headList == null)
+                return;
+
+            bool lockTaken = false;
+            try
+            {
+                FreezeBag(ref lockTaken);
+
+                foreach (T bagItem in GetEnumerableSlim())
+                {
+                    if (!action(bagItem))
+                        return;
+                }
+            }
+            finally
+            {
+                UnfreezeBag(lockTaken);
+            }
+        }
+
+        /// <summary>
+        /// Removes all items from the <see cref="ConcurrentBag{T}"/>.
+        /// </summary>
+        public void Clear()
+        {
+            // Short path if the bag is empty
+            if (_headList == null)
+                return;
+
+            bool lockTaken = false;
+            try
+            {
+                FreezeBag(ref lockTaken);
+
+                ThreadLocalList currentList = _headList;
+                while (currentList != null)
+                {
+                    currentList.Reset();
+                    currentList = currentList._nextList;
+                }
+            }
+            finally
+            {
+                UnfreezeBag(lockTaken);
+            }
+        }
+
+        /// <summary>
         /// Gets the number of elements contained in the <see cref="ConcurrentBag{T}"/>.
         /// </summary>
         /// <value>The number of elements contained in the <see cref="ConcurrentBag{T}"/>.</value>
         /// <remarks>
         /// The count returned represents a moment-in-time snapshot of the contents
         /// of the bag.  It does not reflect any updates to the collection after 
-        /// <see cref="GetEnumerator"/> was called.
+        /// <see cref="Count"/> was called.
         /// </remarks>
         public int Count
         {
@@ -666,7 +786,7 @@ namespace System.Collections.Concurrent
         /// <summary>
         ///  A global lock object, used in two cases:
         ///  1- To  maintain the _tailList pointer for each new list addition process ( first time a thread called Add )
-        ///  2- To freeze the bag in GetEnumerator, CopyTo, ToArray and Count members
+        ///  2- To freeze the bag in GetEnumerator, CopyTo, ToArray, Contains, Clear and Count members
         /// </summary>
         private object GlobalListsLock
         {
@@ -984,6 +1104,18 @@ namespace System.Collections.Concurrent
                     _stealCount++;
                 }
                 result = tail._value;
+            }
+
+            /// <summary>
+            /// Resets the local list
+            /// </summary>
+            internal void Reset()
+            {
+                _head = null;
+                _tail = null;
+                _count = 0;
+                _stealCount = 0;
+                _version = 0; // Reset version since the local list is empty again
             }
 
 
