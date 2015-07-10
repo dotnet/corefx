@@ -1599,15 +1599,10 @@ namespace System.Linq
         public static int Sum(this IEnumerable<int> source)
         {
             if (source == null) throw Error.ArgumentNull("source");
-            var array = source.ToArray();
-            var length = array.Length - 1;
             int sum = 0;
             checked
             {
-                for (var i = length; i >= 0; i--)
-                {
-                    sum += array[i];
-                }
+                foreach (int v in source) sum += v;
             }
             return sum;
         }
