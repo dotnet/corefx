@@ -135,8 +135,8 @@
     <Compile Include="$(CommonPath)\Interop\Unix\libc\Interop.strerror.cs">
       <Link>Common\Interop\Unix\Interop.strerror.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Unix\libcoreclr\Interop.GetFileInformation.cs">
-      <Link>Common\Interop\Unix\Interop.GetFileInformation.cs"</Link>
+    <Compile Include="$(CommonPath)\Interop\Unix\libcorefx_io\Interop.GetFileStats.cs">
+      <Link>Common\Interop\Unix\Interop.GetFileStats.cs"</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\libcoreclr\Interop.SetConsoleCtrlHandler.cs">
       <Link>Common\Interop\Unix\Interop.SetConsoleCtrlHandler.cs"</Link>
