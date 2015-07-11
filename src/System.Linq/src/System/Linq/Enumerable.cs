@@ -1863,7 +1863,7 @@ namespace System.Linq
             {
                 if (!e.MoveNext()) throw Error.NoElements();
                 float x = e.Current;
-                if (Single.IsNaN(x)) return Single.NaN;
+                if (float.IsNaN(x)) return float.NaN;
                 value = x;
                 
                 while (e.MoveNext())
@@ -1877,7 +1877,7 @@ namespace System.Linq
                     // ordering where NaN is smaller than every value, including
                     // negative infinity.
                     if (x < value) value = x;
-                    else if (Single.IsNaN(x)) return Single.NaN;
+                    else if (float.IsNaN(x)) return float.NaN;
                 }
             }
             return value;
@@ -1903,7 +1903,7 @@ namespace System.Linq
                 {
                     float? x = e.Current;
                     if (x < value) value = x;
-                    else if (Single.IsNaN(x.GetValueOrDefault())) return Single.NaN;
+                    else if (float.IsNaN(x.GetValueOrDefault())) return float.NaN;
                 }
             }
             return value;
@@ -1918,14 +1918,14 @@ namespace System.Linq
             {
                 if (!e.MoveNext()) throw Error.NoElements();
                 double x = e.Current;
-                if (Double.IsNaN(x)) return Double.NaN;
+                if (double.IsNaN(x)) return double.NaN;
                 value = x;
                 
                 while (e.MoveNext())
                 {
                     x = e.Current;
                     if (x < value) value = x;
-                    else if (Double.IsNaN(x)) return Double.NaN;
+                    else if (double.IsNaN(x)) return double.NaN;
                 }
             }
             return value;
@@ -1951,7 +1951,7 @@ namespace System.Linq
                 {
                     double? x = e.Current;
                     if (x < value) value = x;
-                    else if (Double.IsNaN(x.GetValueOrDefault())) return Double.NaN;
+                    else if (double.IsNaN(x.GetValueOrDefault())) return double.NaN;
                 }
             }
             return value;
@@ -2197,7 +2197,7 @@ namespace System.Linq
             {
                 if (!e.MoveNext()) throw Error.NoElements();
                 double x = e.Current;
-                if (Double.IsNaN(x)) return Double.NaN;
+                if (double.IsNaN(x)) return double.NaN;
                 value = x;
                 
                 while (e.MoveNext())
@@ -2230,7 +2230,7 @@ namespace System.Linq
                 {
                     double? x = e.Current;
                     if (x > value) value = x;
-                    else if (Double.IsNaN(x.GetValueOrDefault())) return Double.NaN;
+                    else if (double.IsNaN(x.GetValueOrDefault())) return double.NaN;
                 }
             }
             return value;
@@ -2245,14 +2245,14 @@ namespace System.Linq
             {
                 if (!e.MoveNext()) throw Error.NoElements();
                 float x = e.Current;
-                if (Single.IsNaN(x)) return Single.NaN;
+                if (float.IsNaN(x)) return float.NaN;
                 value = x;
                 
                 while (e.MoveNext())
                 {
                     x = e.Current;
                     if (x > value) value = x;
-                    else if (Single.IsNaN(x)) return Single.NaN;
+                    else if (float.IsNaN(x)) return float.NaN;
                 }
             }
             return value;
@@ -2278,7 +2278,7 @@ namespace System.Linq
                 {
                     float? x = e.Current;
                     if (x > value) value = x;
-                    else if (Single.IsNaN(x.GetValueOrDefault())) return Single.NaN;
+                    else if (float.IsNaN(x.GetValueOrDefault())) return float.NaN;
                 }
             }
             return value;
