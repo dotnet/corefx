@@ -184,9 +184,12 @@ namespace System.Linq
 
             public override void Dispose()
             {
-                ((IDisposable)_enumerator).Dispose();
-                _enumerator = null;
-                base.Dispose();
+                if (_enumerator != null)
+                {
+                    ((IDisposable)_enumerator).Dispose();
+                    _enumerator = null;
+                    base.Dispose();
+                }
             }
 
             public override bool MoveNext()
@@ -347,9 +350,12 @@ namespace System.Linq
 
             public override void Dispose()
             {
-                ((IDisposable)_enumerator).Dispose();
-                _enumerator = null;
-                base.Dispose();
+                if (_enumerator != null)
+                {
+                    ((IDisposable)_enumerator).Dispose();
+                    _enumerator = null;
+                    base.Dispose();
+                }
             }
 
             public override bool MoveNext()
@@ -703,11 +709,13 @@ namespace System.Linq
 
         private static IEnumerable<TSource> SkipWhileIterator<TSource>(IEnumerable<TSource> source, Func<TSource, bool> predicate)
         {
-            bool yielding = false;
-            foreach (TSource element in source)
+            using (IEnumerator<TSource> e = source.GetEnumerator())
             {
-                if (yielding) yield return element;
-                else if (!predicate(element)) yielding = true;
+                while (e.MonveNext())
+                    if (!predicate(element)) break;
+                do
+                    yield return element;
+                while (e.MoveNext());
             }
         }
 
@@ -721,12 +729,17 @@ namespace System.Linq
         private static IEnumerable<TSource> SkipWhileIterator<TSource>(IEnumerable<TSource> source, Func<TSource, int, bool> predicate)
         {
             int index = -1;
-            bool yielding = false;
-            foreach (TSource element in source)
+            using (IEnumerator<TSource> e = source.GetEnumerator())
             {
-                checked { index++; }
-                if (yielding) yield return element;
-                else if (!predicate(element, index)) yielding = true;
+                while (e.MoveNext())
+                {
+                    checked { index++; }
+                    if (!predicate(element, index)) break;
+                }
+                
+                do
+                    yield return element;
+                while (e.MoveNext());
             }
         }
 
@@ -1436,7 +1449,7 @@ namespace System.Linq
 
         private static IEnumerable<int> RangeIterator(int start, int count)
         {
-            for (int copy = start; start < copy + count; start++) yield return start;
+            for (int end = start + count; start < end; start++) yield return start;
         }
 
         public static IEnumerable<TResult> Repeat<TResult>(TResult element, int count)
