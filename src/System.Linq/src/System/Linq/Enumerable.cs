@@ -711,7 +711,7 @@ namespace System.Linq
         {
             using (IEnumerator<TSource> e = source.GetEnumerator())
             {
-                while (e.MonveNext())
+                while (e.MoveNext())
                     if (!predicate(element)) break;
                 do
                     yield return element;
