@@ -712,9 +712,9 @@ namespace System.Linq
             using (IEnumerator<TSource> e = source.GetEnumerator())
             {
                 while (e.MoveNext())
-                    if (!predicate(element)) break;
+                    if (!predicate(e.Current)) break;
                 do
-                    yield return element;
+                    yield return e.Current;
                 while (e.MoveNext());
             }
         }
@@ -734,11 +734,11 @@ namespace System.Linq
                 while (e.MoveNext())
                 {
                     checked { index++; }
-                    if (!predicate(element, index)) break;
+                    if (!predicate(e.Current, index)) break;
                 }
                 
                 do
-                    yield return element;
+                    yield return e.Current;
                 while (e.MoveNext());
             }
         }
@@ -2204,7 +2204,7 @@ namespace System.Linq
                 {
                     x = e.Current;
                     if (x > value) value = x;
-                    else if (Double.IsNaN(x)) return Double.NaN;
+                    else if (double.IsNaN(x)) return double.NaN;
                 }
             }
             return value;
