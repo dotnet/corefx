@@ -16,7 +16,7 @@ namespace System.Net.Http
         private HttpContentHeaders _headers;
         private MemoryStream _bufferedContent;
         private bool _disposed;
-        private Stream _contentReadStream;
+        internal Stream _contentReadStream;
         private bool _canCalculateLength;
 
         internal const long MaxBufferSize = Int32.MaxValue;
@@ -84,119 +84,91 @@ namespace System.Net.Http
         {
             CheckDisposed();
 
-            var tcs = new TaskCompletionSource<string>(this);
+            return LoadIntoBufferAndReadAsAsync(MaxBufferSize, content => content.GetStringFromBuffer());
+        }
 
-            LoadIntoBufferAsync().ContinueWithStandard(tcs, (task, state) =>
+        internal string GetStringFromBuffer()
+        {
+            if (_bufferedContent.Length == 0)
             {
-                var innerTcs = (TaskCompletionSource<string>)state;
-                var innerThis = (HttpContent)innerTcs.Task.AsyncState;
-                if (HttpUtilities.HandleFaultsAndCancelation(task, innerTcs))
-                {
-                    return;
-                }
+                return string.Empty;
+            }
 
-                if (innerThis._bufferedContent.Length == 0)
-                {
-                    innerTcs.TrySetResult(string.Empty);
-                    return;
-                }
 
-                // We don't validate the Content-Encoding header: If the content was encoded, it's the caller's 
-                // responsibility to make sure to only call ReadAsString() on already decoded content. E.g. if the 
-                // Content-Encoding is 'gzip' the user should set HttpClientHandler.AutomaticDecompression to get a 
-                // decoded response stream.
+            // We don't validate the Content-Encoding header: If the content was encoded, it's the caller's 
+            // responsibility to make sure to only call ReadAsString() on already decoded content. E.g. if the 
+            // Content-Encoding is 'gzip' the user should set HttpClientHandler.AutomaticDecompression to get a 
+            // decoded response stream.
 
-                Encoding encoding = null;
-                int bomLength = -1;
+            Encoding encoding = null;
+            int bomLength = -1;
 
-                byte[] data = innerThis.GetDataBuffer(innerThis._bufferedContent);
+            byte[] data = GetDataBuffer(_bufferedContent);
 
-                int dataLength = (int)innerThis._bufferedContent.Length; // Data is the raw buffer, it may not be full.
+            int dataLength = (int)_bufferedContent.Length; // Data is the raw buffer, it may not be full.
 
-                // If we do have encoding information in the 'Content-Type' header, use that information to convert
-                // the content to a string.
-                if ((innerThis.Headers.ContentType != null) && (innerThis.Headers.ContentType.CharSet != null))
-                {
-                    try
-                    {
-                        encoding = Encoding.GetEncoding(innerThis.Headers.ContentType.CharSet);
-                    }
-                    catch (ArgumentException e)
-                    {
-                        innerTcs.TrySetException(new InvalidOperationException(SR.net_http_content_invalid_charset, e));
-                        return;
-                    }
-                }
-
-                // If no content encoding is listed in the ContentType HTTP header, or no Content-Type header present, 
-                // then check for a byte-order-mark (BOM) in the data to figure out the encoding.
-                if (encoding == null)
-                {
-                    byte[] preamble;
-                    foreach (Encoding testEncoding in s_encodingsWithBom)
-                    {
-                        preamble = testEncoding.GetPreamble();
-                        if (ByteArrayHasPrefix(data, dataLength, preamble))
-                        {
-                            encoding = testEncoding;
-                            bomLength = preamble.Length;
-                            break;
-                        }
-                    }
-                }
-
-                // Use the default encoding if we couldn't detect one.
-                encoding = encoding ?? DefaultStringEncoding;
-
-                // BOM characters may be present even if a charset was specified.
-                if (bomLength == -1)
-                {
-                    byte[] preamble = encoding.GetPreamble();
-                    if (ByteArrayHasPrefix(data, dataLength, preamble))
-                        bomLength = preamble.Length;
-                    else
-                        bomLength = 0;
-                }
-
+            // If we do have encoding information in the 'Content-Type' header, use that information to convert
+            // the content to a string.
+            if ((Headers.ContentType != null) && (Headers.ContentType.CharSet != null))
+            {
                 try
                 {
-                    // Drop the BOM when decoding the data.
-                    string result = encoding.GetString(data, bomLength, dataLength - bomLength);
-                    innerTcs.TrySetResult(result);
+                    encoding = Encoding.GetEncoding(Headers.ContentType.CharSet);
                 }
-                catch (Exception ex)
+                catch (ArgumentException e)
                 {
-                    innerTcs.TrySetException(ex);
+                    throw new InvalidOperationException(SR.net_http_content_invalid_charset, e);
                 }
-            });
+            }
 
-            return tcs.Task;
+            // If no content encoding is listed in the ContentType HTTP header, or no Content-Type header present, 
+            // then check for a byte-order-mark (BOM) in the data to figure out the encoding.
+            if (encoding == null)
+            {
+                byte[] preamble;
+                foreach (Encoding testEncoding in s_encodingsWithBom)
+                {
+                    preamble = testEncoding.GetPreamble();
+                    if (ByteArrayHasPrefix(data, dataLength, preamble))
+                    {
+                        encoding = testEncoding;
+                        bomLength = preamble.Length;
+                        break;
+                    }
+                }
+            }
+
+            // Use the default encoding if we couldn't detect one.
+            encoding = encoding ?? DefaultStringEncoding;
+
+            // BOM characters may be present even if a charset was specified.
+            if (bomLength == -1)
+            {
+                byte[] preamble = encoding.GetPreamble();
+                if (ByteArrayHasPrefix(data, dataLength, preamble))
+                    bomLength = preamble.Length;
+                else
+                    bomLength = 0;
+            }
+
+            // Drop the BOM when decoding the data.
+            return encoding.GetString(data, bomLength, dataLength - bomLength);
         }
 
         public Task<byte[]> ReadAsByteArrayAsync()
         {
             CheckDisposed();
+            return LoadIntoBufferAndReadAsAsync(MaxBufferSize, content => content.GetByteArrayFromBuffer());
+        }
 
-            var tcs = new TaskCompletionSource<byte[]>(this);
-
-            LoadIntoBufferAsync().ContinueWithStandard(tcs, (task, state) =>
-            {
-                var innerTcs = (TaskCompletionSource<byte[]>)state;
-                var innerThis = (HttpContent)innerTcs.Task.AsyncState;
-                if (!HttpUtilities.HandleFaultsAndCancelation(task, innerTcs))
-                {
-                    innerTcs.TrySetResult(innerThis._bufferedContent.ToArray());
-                }
-            });
-
-            return tcs.Task;
+        internal byte[] GetByteArrayFromBuffer()
+        {
+            return _bufferedContent.ToArray();
         }
 
         public Task<Stream> ReadAsStreamAsync()
         {
             CheckDisposed();
-
-            TaskCompletionSource<Stream> tcs = new TaskCompletionSource<Stream>(this);
 
             if (_contentReadStream == null && IsBuffered)
             {
@@ -211,10 +183,10 @@ namespace System.Net.Http
 
             if (_contentReadStream != null)
             {
-                tcs.TrySetResult(_contentReadStream);
-                return tcs.Task;
+                return Task.FromResult<Stream>(_contentReadStream);
             }
 
+            var tcs = new TaskCompletionSource<Stream>(this);
             CreateContentReadStreamAsync().ContinueWithStandard(tcs, (task, state) =>
             {
                 var innerTcs = (TaskCompletionSource<Stream>)state;
@@ -299,6 +271,12 @@ namespace System.Net.Http
         // If buffering is used without a connection, it is supposed to be fast, thus no cancellation required.
         public Task LoadIntoBufferAsync(long maxBufferSize)
         {
+            // Since we need load content into buffer but not read it we passing delegate which returns null.
+            return LoadIntoBufferAndReadAsAsync<object>(maxBufferSize, content => null);
+        }
+
+        internal Task<T> LoadIntoBufferAndReadAsAsync<T>(long maxBufferSize, Func<HttpContent, T> readAs)
+        {
             CheckDisposed();
             if (maxBufferSize > HttpContent.MaxBufferSize)
             {
@@ -309,20 +287,27 @@ namespace System.Net.Http
                     SR.net_http_content_buffersize_limit, HttpContent.MaxBufferSize));
             }
 
+            var tcs = new TaskCompletionSource<T>();
             if (IsBuffered)
             {
-                // If we already buffered the content, just return a completed task.
-                return CreateCompletedTask();
+                // If we already buffered the content, just read it and return task with result.
+                try
+                {
+                    tcs.TrySetResult(readAs(this));
+                }
+                catch (Exception e)
+                {
+                    tcs.TrySetException(e);
+                }
+                return tcs.Task;
             }
-
-            TaskCompletionSource<object> tcs = new TaskCompletionSource<object>();
 
             Exception error = null;
             MemoryStream tempBuffer = CreateMemoryStream(maxBufferSize, out error);
 
             if (tempBuffer == null)
             {
-                // We don't throw in LoadIntoBufferAsync(): set the task as faulted and return the task.
+                // We don't throw in LoadIntoBufferAndReadAsAsync(): set the task as faulted and return the task.
                 Debug.Assert(error != null);
                 tcs.TrySetException(error);
             }
@@ -353,13 +338,13 @@ namespace System.Net.Http
 
                             tempBuffer.Seek(0, SeekOrigin.Begin); // Rewind after writing data.
                             _bufferedContent = tempBuffer;
-                            tcs.TrySetResult(null);
+                            tcs.TrySetResult(readAs(this));
                         }
                         catch (Exception e)
                         {
                             // Make sure we catch any exception, otherwise the task will catch it and throw in the finalizer.
                             tcs.TrySetException(e);
-                            if (Logging.On) Logging.Exception(Logging.Http, this, "LoadIntoBufferAsync", e);
+                            if (Logging.On) Logging.Exception(Logging.Http, this, "LoadIntoBufferAndReadAsAsync", e);
                         }
                     });
                 }
@@ -378,21 +363,15 @@ namespace System.Net.Http
 
         protected virtual Task<Stream> CreateContentReadStreamAsync()
         {
-            var tcs = new TaskCompletionSource<Stream>(this);
             // By default just buffer the content to a memory stream. Derived classes can override this behavior
             // if there is a better way to retrieve the content as stream (e.g. byte array/string use a more efficient
             // way, like wrapping a read-only MemoryStream around the bytes/string)
-            LoadIntoBufferAsync().ContinueWithStandard(tcs, (task, state) =>
-            {
-                var innerTcs = (TaskCompletionSource<Stream>)state;
-                var innerThis = (HttpContent)innerTcs.Task.AsyncState;
-                if (!HttpUtilities.HandleFaultsAndCancelation(task, innerTcs))
-                {
-                    innerTcs.TrySetResult(innerThis._bufferedContent);
-                }
-            });
+            return LoadIntoBufferAndReadAsAsync<Stream>(MaxBufferSize, content => content._bufferedContent);
+        }
 
-            return tcs.Task;
+        internal Task<Stream> CreateContentReadStreamInternalAsync()
+        {
+            return CreateContentReadStreamAsync();
         }
 
         // Derived types return true if they're able to compute the length. It's OK if derived types return false to
@@ -506,14 +485,6 @@ namespace System.Net.Http
                 if (Logging.On) Logging.PrintError(Logging.Http, string.Format(System.Globalization.CultureInfo.InvariantCulture, SR.net_http_log_content_no_task_returned_copytoasync, this.GetType().ToString()));
                 throw new InvalidOperationException(SR.net_http_content_no_task_returned);
             }
-        }
-
-        private static Task CreateCompletedTask()
-        {
-            TaskCompletionSource<object> completed = new TaskCompletionSource<object>();
-            bool resultSet = completed.TrySetResult(null);
-            Debug.Assert(resultSet, "Can't set Task as completed.");
-            return completed.Task;
         }
 
         private static Exception GetStreamCopyException(Exception originalException)
