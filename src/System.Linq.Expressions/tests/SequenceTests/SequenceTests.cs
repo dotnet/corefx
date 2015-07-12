@@ -1773,6 +1773,8 @@ namespace Tests
                 Console.WriteLine();
             }
 
+            Assert.Equal(Enumerable.Empty<string>(), list.Select(mi => mi.Name));
+
             List<MethodInfo> list2 = GetMissingExtensionMethods(
                 typeof(System.Linq.Queryable),
                 typeof(System.Linq.Enumerable),
@@ -1790,7 +1792,7 @@ namespace Tests
                 }
             }
 
-            Assert.True(list.Count == 0 && list2.Count == 0);
+            Assert.Equal(Enumerable.Empty<string>(), list2.Select(mi => mi.Name));
         }
 
         private static IEnumerable<MethodInfo> GetMissingExtensionMethods(Type a, Type b, string[] excludedMethods)
