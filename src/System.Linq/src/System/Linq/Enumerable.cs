@@ -711,8 +711,10 @@ namespace System.Linq
         {
             using (IEnumerator<TSource> e = source.GetEnumerator())
             {
-                while (e.MoveNext())
-                    if (!predicate(e.Current)) break;
+                do
+                    if (!e.MoveNext()) yield break;
+                while (predicate(e.Current));
+                
                 do
                     yield return e.Current;
                 while (e.MoveNext());
@@ -731,11 +733,11 @@ namespace System.Linq
             int index = -1;
             using (IEnumerator<TSource> e = source.GetEnumerator())
             {
-                while (e.MoveNext())
+                do
                 {
+                    if (!e.MoveNext()) yield break;
                     checked { index++; }
-                    if (!predicate(e.Current, index)) break;
-                }
+                } while (predicate(e.Current, index));
                 
                 do
                     yield return e.Current;
