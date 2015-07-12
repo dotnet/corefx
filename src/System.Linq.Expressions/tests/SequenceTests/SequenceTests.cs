@@ -1793,6 +1793,7 @@ namespace Tests
             }
 
             Assert.Equal(Enumerable.Empty<string>(), list2.Select(mi => mi.Name));
+            Assert.True(list.Count == 0 && list2.Count == 0);
         }
 
         private static IEnumerable<MethodInfo> GetMissingExtensionMethods(Type a, Type b, string[] excludedMethods)
