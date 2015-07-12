@@ -53,11 +53,13 @@ namespace Internal.Cryptography
 
         private sealed class EvpHashProvider : HashProvider
         {
+            private readonly IntPtr _algorithmEvp;
             private readonly int _hashSize;
             private readonly SafeEvpMdCtxHandle _ctx;
 
             public EvpHashProvider(IntPtr algorithmEvp)
             {
+                _algorithmEvp = algorithmEvp;
                 Debug.Assert(algorithmEvp != IntPtr.Zero);
 
                 _hashSize = Interop.libcrypto.EVP_MD_size(algorithmEvp);
@@ -67,10 +69,8 @@ namespace Internal.Cryptography
                 }
 
                 _ctx = Interop.libcrypto.EVP_MD_CTX_create();
-                if (_ctx.IsInvalid)
-                {
-                    throw new CryptographicException();
-                }
+
+                Interop.libcrypto.CheckValidOpenSslHandle(_ctx);
 
                 Check(Interop.libcrypto.EVP_DigestInit_ex(_ctx, algorithmEvp, IntPtr.Zero));
             }
@@ -89,6 +89,9 @@ namespace Internal.Cryptography
                 uint length = Interop.libcrypto.EVP_MAX_MD_SIZE;
                 Check(Interop.libcrypto.EVP_DigestFinal_ex(_ctx, md, ref length));
                 Debug.Assert(length == _hashSize);
+
+                // Reset the algorithm provider.
+                Check(Interop.libcrypto.EVP_DigestInit_ex(_ctx, _algorithmEvp, IntPtr.Zero));
 
                 byte[] result = new byte[(int)length];
                 Marshal.Copy((IntPtr)md, result, 0, (int)length);
@@ -146,6 +149,10 @@ namespace Internal.Cryptography
                 Check(Interop.libcrypto.HMAC_Final(ref _hmacCtx, md, ref length));
                 Debug.Assert(length == _hashSize);
 
+                // HMAC_Init_ex with all NULL values keeps the key and algorithm (and engine) intact,
+                // but resets the values for another computation.
+                Check(Interop.libcrypto.HMAC_Init_ex(ref _hmacCtx, null, 0, IntPtr.Zero, IntPtr.Zero));
+
                 byte[] result = new byte[(int)length];
                 Marshal.Copy((IntPtr)md, result, 0, (int)length);
                 return result;
@@ -168,7 +175,7 @@ namespace Internal.Cryptography
             if (result != Success)
             {
                 Debug.Assert(result == 0);
-                throw new CryptographicException(Interop.libcrypto.GetOpenSslErrorString());
+                throw Interop.libcrypto.CreateOpenSslCryptographicException();
             }
         }
     }

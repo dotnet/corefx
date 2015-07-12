@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Text.Internal;
@@ -14,9 +15,9 @@ namespace System.Text.Encodings.Web
         {
             get { return DefaultHtmlEncoder.Singleton; }
         }
-        public static HtmlEncoder Create(CodePointFilter filter)
+        public static HtmlEncoder Create(TextEncoderSettings settings)
         {
-            return new DefaultHtmlEncoder(filter);
+            return new DefaultHtmlEncoder(settings);
         }
         public static HtmlEncoder Create(params UnicodeRange[] allowedRanges)
         {
@@ -24,12 +25,12 @@ namespace System.Text.Encodings.Web
         }
     }
 
-    public sealed class DefaultHtmlEncoder : HtmlEncoder
+    internal sealed class DefaultHtmlEncoder : HtmlEncoder
     {
         private AllowedCharactersBitmap _allowedCharacters;
-        internal readonly static DefaultHtmlEncoder Singleton = new DefaultHtmlEncoder(new CodePointFilter(UnicodeRanges.BasicLatin));
+        internal readonly static DefaultHtmlEncoder Singleton = new DefaultHtmlEncoder(new TextEncoderSettings(UnicodeRanges.BasicLatin));
 
-        public DefaultHtmlEncoder(CodePointFilter filter)
+        public DefaultHtmlEncoder(TextEncoderSettings filter)
         {
             if (filter == null)
             {
@@ -55,17 +56,16 @@ namespace System.Text.Encodings.Web
             allowedCharacters.ForbidCharacter('+'); // technically not HTML-specific, but can be used to perform UTF7-based attacks
         }
 
-        public DefaultHtmlEncoder(params UnicodeRange[] allowedRanges) : this(new CodePointFilter(allowedRanges))
+        public DefaultHtmlEncoder(params UnicodeRange[] allowedRanges) : this(new TextEncoderSettings(allowedRanges))
         { }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public override bool Encodes(int unicodeScalar)
+        public override bool WillEncode(int unicodeScalar)
         {
             if (UnicodeHelpers.IsSupplementaryCodePoint(unicodeScalar)) return true;
             return !_allowedCharacters.IsUnicodeScalarAllowed(unicodeScalar);
         }
 
-        [CLSCompliant(false)]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public unsafe override int FindFirstCharacterToEncode(char* text, int textLength)
         {
@@ -77,12 +77,11 @@ namespace System.Text.Encodings.Web
             get { return 8; } // "&#xFFFF;" is the longest encoded form 
         }
 
-        static readonly char[] quote = "&quot;".ToCharArray();
-        static readonly char[] ampersand = "&amp;".ToCharArray();
-        static readonly char[] lessthan = "&lt;".ToCharArray();
-        static readonly char[] greaterthan = "&gt;".ToCharArray();
+        static readonly char[] s_quote = "&quot;".ToCharArray();
+        static readonly char[] s_ampersand = "&amp;".ToCharArray();
+        static readonly char[] s_lessthan = "&lt;".ToCharArray();
+        static readonly char[] s_greaterthan = "&gt;".ToCharArray();
 
-        [CLSCompliant(false)]
         public unsafe override bool TryEncodeUnicodeScalar(int unicodeScalar, char* buffer, int bufferLength, out int numberOfCharactersWritten)
         {
             if (buffer == null)
@@ -90,11 +89,11 @@ namespace System.Text.Encodings.Web
                 throw new ArgumentNullException("buffer");
             }
 
-            if (!Encodes(unicodeScalar)) { return unicodeScalar.TryWriteScalarAsChar(buffer, bufferLength, out numberOfCharactersWritten); }
-            else if (unicodeScalar == '\"') { return quote.TryCopyCharacters(buffer, bufferLength, out numberOfCharactersWritten); }
-            else if (unicodeScalar == '&') { return ampersand.TryCopyCharacters(buffer, bufferLength, out numberOfCharactersWritten); }
-            else if (unicodeScalar == '<') { return lessthan.TryCopyCharacters(buffer, bufferLength, out numberOfCharactersWritten); }
-            else if (unicodeScalar == '>') { return greaterthan.TryCopyCharacters(buffer, bufferLength, out numberOfCharactersWritten); }
+            if (!WillEncode(unicodeScalar)) { return TryWriteScalarAsChar(unicodeScalar, buffer, bufferLength, out numberOfCharactersWritten); }
+            else if (unicodeScalar == '\"') { return TryCopyCharacters(s_quote, buffer, bufferLength, out numberOfCharactersWritten); }
+            else if (unicodeScalar == '&') { return TryCopyCharacters(s_ampersand, buffer, bufferLength, out numberOfCharactersWritten); }
+            else if (unicodeScalar == '<') { return TryCopyCharacters(s_lessthan, buffer, bufferLength, out numberOfCharactersWritten); }
+            else if (unicodeScalar == '>') { return TryCopyCharacters(s_greaterthan, buffer, bufferLength, out numberOfCharactersWritten); }
             else { return TryWriteEncodedScalarAsNumericEntity(unicodeScalar, buffer, bufferLength, out numberOfCharactersWritten); }
         }
 
