@@ -249,7 +249,9 @@ namespace System.Linq.Tests
             var fifteenEitherWay = Enumerable.Range(-15, 31).ToArray();
             var minusTen = new[] { -1, -10, 10, 200, 1000 };
             var hundred = new[] { 3000, 100, 200, 1000 };
-            Assert.Equal(0, fifteenEitherWay.MinBy(i => i.ToString(), new StaticCultureComparer()));
+            var fifteenStrings = fifteenEitherWay.Select(i => i.ToString()).ToList();
+            fifteenStrings.Sort(new StaticCultureComparer());
+            Assert.Equal(int.Parse(fifteenStrings[0]), fifteenEitherWay.MinBy(i => i.ToString(), new StaticCultureComparer()));
             Assert.Equal(-1, fifteenEitherWay.MinBy(i => i.ToString(), StringComparer.Ordinal));
             Assert.Equal(-1, minusTen.MinBy(i => i.ToString(), new StaticCultureComparer()));
             Assert.Equal(100, hundred.MinBy(i => i.ToString(), new StaticCultureComparer()));
