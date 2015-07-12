@@ -2630,7 +2630,7 @@ namespace System.Linq
             return DistinctIterator<TSource, TKey>(source, keySelector, comparer);
         }
 
-        public static IEnumerable<TSource> DistinctIterator<TSource, TKey>(this IEnumerable<TSource> source, Func<TSource, TKey> keySelector, IEqualityComparer<TKey> comparer)
+        private static IEnumerable<TSource> DistinctIterator<TSource, TKey>(this IEnumerable<TSource> source, Func<TSource, TKey> keySelector, IEqualityComparer<TKey> comparer)
         {
             Set<TKey> set = new Set<TKey>(comparer);
             foreach (TSource element in source)
