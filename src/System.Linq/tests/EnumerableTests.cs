@@ -3,6 +3,7 @@
 
 using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
 using Xunit;
 
 namespace System.Linq.Tests
@@ -232,15 +233,26 @@ namespace System.Linq.Tests
             Assert.Throws<ArgumentNullException>(() => one.MinBy(default(Func<string, int>)));
             Assert.Throws<ArgumentNullException>(() => one.MinBy(default(Func<string, int>), null));
         }
+        private class StaticCultureComparer : IComparer<string>
+        {
+            // Compare in en-US no matter what culture the thread is running in.
+            // Closest thing to InvariantCulture without InvariantCulture
+            private static CompareInfo CmpInfo = new CultureInfo("en-US").CompareInfo;
+            public int Compare(string x, string y)
+            {
+ 	            return CmpInfo.Compare(x, y);
+            }
+        }
         [Fact]
         public void MinIntByString()
         {
             var fifteenEitherWay = Enumerable.Range(-15, 31).ToArray();
             var minusTen = new[] { -1, -10, 10, 200, 1000 };
             var hundred = new[] { 3000, 100, 200, 1000 };
-            Assert.Equal(0, fifteenEitherWay.MinBy(i => i.ToString()));
-            Assert.Equal(-1, minusTen.MinBy(i => i.ToString()));
-            Assert.Equal(100, hundred.MinBy(i => i.ToString()));
+            Assert.Equal(0, fifteenEitherWay.MinBy(i => i.ToString(), new StaticCultureComparer()));
+            Assert.Equal(-1, fifteenEitherWay.MinBy(i => i.ToString(), StringComparer.Ordinal));
+            Assert.Equal(-1, minusTen.MinBy(i => i.ToString(), new StaticCultureComparer()));
+            Assert.Equal(100, hundred.MinBy(i => i.ToString(), new StaticCultureComparer()));
         }
         [Fact]
         public void MaxStringByInt()
@@ -262,9 +274,9 @@ namespace System.Linq.Tests
             var ten = Enumerable.Range(3, 10);
             var minusTen = new[] { -100, -15, -50, -10 };
             var thousand = new[] { -16, 0, 50, 100, 1000 };
-            Assert.Equal(9, ten.MaxBy(i => i.ToString()));
-            Assert.Equal(-50, minusTen.MaxBy(i => i.ToString()));
-            Assert.Equal(50, thousand.MaxBy(i => i.ToString()));
+            Assert.Equal(9, ten.MaxBy(i => i.ToString(), new StaticCultureComparer()));
+            Assert.Equal(-50, minusTen.MaxBy(i => i.ToString(), new StaticCultureComparer()));
+            Assert.Equal(50, thousand.MaxBy(i => i.ToString(), new StaticCultureComparer()));
         }
         [Fact]
         public void KeyedNoElements()
