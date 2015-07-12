@@ -186,10 +186,10 @@ namespace System.Linq
             {
                 if (_enumerator != null)
                 {
-                    ((IDisposable)_enumerator).Dispose();
+                    _enumerator.Dispose();
                     _enumerator = null;
-                    base.Dispose();
                 }
+                base.Dispose();
             }
 
             public override bool MoveNext()
@@ -352,10 +352,10 @@ namespace System.Linq
             {
                 if (_enumerator != null)
                 {
-                    ((IDisposable)_enumerator).Dispose();
+                    _enumerator.Dispose();
                     _enumerator = null;
-                    base.Dispose();
                 }
+                base.Dispose();
             }
 
             public override bool MoveNext()
