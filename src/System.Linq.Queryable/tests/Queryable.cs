@@ -557,6 +557,22 @@ namespace System.Linq.Tests
         }
 
         [Fact]
+        public void MinWithComparer()
+        {
+            var val = (new int[] { 0, 2, 1 }).AsQueryable().Min(Comparer<int>.Default);
+            Assert.Equal(0, val);
+            val = (new int[] { 0, 2, 1 }).BlockOptimisations().Min(Comparer<int>.Default);
+            Assert.Equal(0, val);
+        }
+
+        [Fact]
+        public void Min2WithComparer()
+        {
+            var val = (new int[] { 0, 2, 1 }).AsQueryable().Min(n => n);
+            Assert.Equal(0, val);
+        }
+        
+        [Fact]
         public void Max1()
         {
             var val = (new int[] { 0, 2, 1 }).AsQueryable().Max();
@@ -570,6 +586,15 @@ namespace System.Linq.Tests
             Assert.Equal(2, val);
         }
 
+        [Fact]
+        public void MaxWithComparer()
+        {
+            var val = (new int[] { 0, 2, 1 }).AsQueryable().Max(Comparer<int>.Default);
+            Assert.Equal(2, val);
+            val = (new int[] { 0, 2, 1 }).BlockOptimisations().Max(Comparer<int>.Default);
+            Assert.Equal(2, val);
+        }
+        
         [Fact]
         public void Sum1()
         {

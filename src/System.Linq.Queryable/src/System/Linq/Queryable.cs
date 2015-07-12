@@ -10,6 +10,14 @@ namespace System.Linq
 {
     public static class Queryable
     {
+        internal class IdentityExpression<TElement>
+        {
+            public static Expression<Func<TElement, TElement>> Instance
+            {
+                get { return x => x; }
+            }
+        }
+        
         public static IQueryable<TElement> AsQueryable<TElement>(this IEnumerable<TElement> source)
         {
             if (source == null)
@@ -2008,6 +2016,15 @@ namespace System.Linq
             return default(TSource) == null ? ordered.FirstOrDefault() : ordered.First();
         }
 
+        public static TSource Max<TSource>(this IQueryable<TSource> source, IComparer<TSource> comparer)
+        {
+            IEnumerable<TSource> asEnum = AsEnumerableIfInternallyEnumerable(source);
+            if (asEnum != null) return asEnum.Max(comparer);
+            if (comparer == null) return source.Max();
+            IOrderedQueryable<TSource> ordered = source.OrderByDescending(IdentityExpression<TSource>.Instance, comparer);
+            return default(TSource) == null ? ordered.FirstOrDefault() : ordered.First();
+        }
+
         public static TSource MinBy<TSource, TKey>(this IQueryable<TSource> source, Expression<Func<TSource, TKey>> keySelector)
         {
             if (keySelector == null) throw Error.ArgumentNull("keySelector");
@@ -2028,6 +2045,15 @@ namespace System.Linq
             if (asEnum != null) return asEnum.MinBy(keySelector.Compile(), comparer);
 
             IOrderedQueryable<TSource> ordered = source.OrderBy(keySelector, comparer);
+            return default(TSource) == null ? ordered.FirstOrDefault() : ordered.First();
+        }
+
+        public static TSource Min<TSource>(this IQueryable<TSource> source, IComparer<TSource> comparer)
+        {
+            IEnumerable<TSource> asEnum = AsEnumerableIfInternallyEnumerable(source);
+            if (asEnum != null) return asEnum.Min(comparer);
+            if (comparer == null) return source.Min();
+            IOrderedQueryable<TSource> ordered = source.OrderBy(IdentityExpression<TSource>.Instance, comparer);
             return default(TSource) == null ? ordered.FirstOrDefault() : ordered.First();
         }
 

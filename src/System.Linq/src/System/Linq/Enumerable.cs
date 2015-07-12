@@ -1925,37 +1925,44 @@ namespace System.Linq
 
         public static TSource Min<TSource>(this IEnumerable<TSource> source)
         {
+            return source.Min(default(IComparer<TSource>));
+        }
+
+        public static TSource Min<TSource>(this IEnumerable<TSource> source, IComparer<TSource> comparer)
+        {
             if (source == null) throw Error.ArgumentNull("source");
-            Comparer<TSource> comparer = Comparer<TSource>.Default;
+            if (comparer == null) comparer = Comparer<TSource>.Default;
             TSource value = default(TSource);
             if (value == null)
             {
-                foreach (TSource x in source)
+                using (IEnumerator<TSource> e = source.GetEnumerator())
                 {
-                    if (x != null && (value == null || comparer.Compare(x, value) < 0))
-                        value = x;
+                    do
+                    {
+                        if (!e.MoveNext()) return value;
+                        value = e.Current;
+                    } while (value == null);
+                    while (e.MoveNext())
+                    {
+                        TSource x = e.Current;
+                        if (x != null && comparer.Compare(x, value) < 0) value = x;
+                    }
                 }
-                return value;
             }
             else
             {
-                bool hasValue = false;
-                foreach (TSource x in source)
+                using (IEnumerator<TSource> e = source.GetEnumerator())
                 {
-                    if (hasValue)
+                    if (!e.MoveNext()) throw Error.NoElements();
+                    value = e.Current;
+                    while (e.MoveNext())
                     {
-                        if (comparer.Compare(x, value) < 0)
-                            value = x;
-                    }
-                    else
-                    {
-                        value = x;
-                        hasValue = true;
+                        TSource x = e.Current;
+                        if (comparer.Compare(x, value) < 0) value = x;
                     }
                 }
-                if (hasValue) return value;
-                throw Error.NoElements();
             }
+            return value;
         }
 
         public static int Min<TSource>(this IEnumerable<TSource> source, Func<TSource, int> selector)
@@ -2177,37 +2184,44 @@ namespace System.Linq
 
         public static TSource Max<TSource>(this IEnumerable<TSource> source)
         {
+            return source.Max(default(IComparer<TSource>));
+        }
+
+        public static TSource Max<TSource>(this IEnumerable<TSource> source, IComparer<TSource> comparer)
+        {
             if (source == null) throw Error.ArgumentNull("source");
-            Comparer<TSource> comparer = Comparer<TSource>.Default;
+            if (comparer == null) comparer = Comparer<TSource>.Default;
             TSource value = default(TSource);
             if (value == null)
             {
-                foreach (TSource x in source)
+                using (IEnumerator<TSource> e = source.GetEnumerator())
                 {
-                    if (x != null && (value == null || comparer.Compare(x, value) > 0))
-                        value = x;
+                    do
+                    {
+                        if (!e.MoveNext()) return value;
+                        value = e.Current;
+                    } while (value == null);
+                    while (e.MoveNext())
+                    {
+                        TSource x = e.Current;
+                        if (x != null && comparer.Compare(x, value) > 0) value = x;
+                    }
                 }
-                return value;
             }
             else
             {
-                bool hasValue = false;
-                foreach (TSource x in source)
+                using (IEnumerator<TSource> e = source.GetEnumerator())
                 {
-                    if (hasValue)
+                    if (!e.MoveNext()) throw Error.NoElements();
+                    value = e.Current;
+                    while (e.MoveNext())
                     {
-                        if (comparer.Compare(x, value) > 0)
-                            value = x;
-                    }
-                    else
-                    {
-                        value = x;
-                        hasValue = true;
+                        TSource x = e.Current;
+                        if (comparer.Compare(x, value) > 0) value = x;
                     }
                 }
-                if (hasValue) return value;
-                throw Error.NoElements();
             }
+            return value;
         }
 
         public static int Max<TSource>(this IEnumerable<TSource> source, Func<TSource, int> selector)
