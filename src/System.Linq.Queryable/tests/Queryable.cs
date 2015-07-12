@@ -5,6 +5,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using Xunit;
 
 namespace System.Linq.Tests
@@ -869,7 +870,286 @@ namespace System.Linq.Tests
             var val = (new int[] { 0, 2, 1 }).AsQueryable().Aggregate(0L, (n1, n2) => n1 + n2, n => n.ToString());
             Assert.Equal("3", val);
         }
+#pragma warning disable 1720 // Triggered on purpose to test exception.
+        [Fact]
+        public void MinStringByInt()
+        {
+            var one = Enumerable.Range(1, 10).Select(i => "A" + i).ToArray().AsQueryable();
+            var minusTen = (new[] { "B-1", "B-10", "B10", "B200", "B1000" }).AsQueryable();
+            var hundred = (new[] { "C3000", "C100", "C200", "C1000" }).AsQueryable();
+            Assert.Equal("A1", one.MinBy(s => int.Parse(s.Substring(1))));
+            Assert.Equal("B-10", minusTen.MinBy(s => int.Parse(s.Substring(1))));
+            Assert.Equal("C100", hundred.MinBy(s => int.Parse(s.Substring(1))));
+            Assert.Equal(null, Enumerable.Empty<string>().AsQueryable().MinBy(s => int.Parse(s.Substring(1))));
+            Assert.Equal("A1", one.BlockOptimisations().MinBy(s => int.Parse(s.Substring(1))));
+            Assert.Equal("B-10", minusTen.BlockOptimisations().MinBy(s => int.Parse(s.Substring(1))));
+            Assert.Equal("C100", hundred.BlockOptimisations().MinBy(s => int.Parse(s.Substring(1))));
+            Assert.Equal(null, Enumerable.Empty<string>().BlockOptimisations().MinBy(s => int.Parse(s.Substring(1))));
+            Assert.Equal("A1", one.MinBy(s => int.Parse(s.Substring(1)), Comparer<int>.Default));
+            Assert.Equal("B-10", minusTen.MinBy(s => int.Parse(s.Substring(1)), Comparer<int>.Default));
+            Assert.Equal("C100", hundred.MinBy(s => int.Parse(s.Substring(1)), Comparer<int>.Default));
+            Assert.Equal(null, Enumerable.Empty<string>().AsQueryable().MinBy(s => int.Parse(s.Substring(1)), Comparer<int>.Default));
+            Assert.Equal("A1", one.BlockOptimisations().MinBy(s => int.Parse(s.Substring(1)), Comparer<int>.Default));
+            Assert.Equal("B-10", minusTen.BlockOptimisations().MinBy(s => int.Parse(s.Substring(1)), Comparer<int>.Default));
+            Assert.Equal("C100", hundred.BlockOptimisations().MinBy(s => int.Parse(s.Substring(1)), Comparer<int>.Default));
+            Assert.Equal(null, Enumerable.Empty<string>().BlockOptimisations().MinBy(s => int.Parse(s.Substring(1)), Comparer<int>.Default));
+            Assert.Throws<ArgumentNullException>(() => default(IQueryable<int>).MinBy(s => s));
+            Assert.Throws<ArgumentNullException>(() => one.AsQueryable().MinBy(default(Expression<Func<string, int>>)));
+            Assert.Throws<ArgumentNullException>(() => one.AsQueryable().MinBy(default(Expression<Func<string, int>>), null));
+        }
+        [Fact]
+        public void MaxStringByInt()
+        {
+            var ten = Enumerable.Range(1, 10).Select(i => "A" + i).ToArray().AsQueryable();
+            var minusTen = (new[] { "B-100", "B-15", "B-50", "B-10" }).AsQueryable();
+            var thousand = (new[] { "C-16", "C0", "C50", "C100", "C1000" }).AsQueryable();
+            Assert.Equal("A10", ten.MaxBy(s => int.Parse(s.Substring(1))));
+            Assert.Equal("B-10", minusTen.MaxBy(s => int.Parse(s.Substring(1))));
+            Assert.Equal("C1000", thousand.MaxBy(s => int.Parse(s.Substring(1))));
+            Assert.Equal(null, Enumerable.Empty<string>().AsQueryable().MaxBy(s => int.Parse(s.Substring(1))));
+            Assert.Equal("A10", ten.BlockOptimisations().MaxBy(s => int.Parse(s.Substring(1))));
+            Assert.Equal("B-10", minusTen.BlockOptimisations().MaxBy(s => int.Parse(s.Substring(1))));
+            Assert.Equal("C1000", thousand.BlockOptimisations().MaxBy(s => int.Parse(s.Substring(1))));
+            Assert.Equal(null, Enumerable.Empty<string>().BlockOptimisations().MaxBy(s => int.Parse(s.Substring(1))));
+            Assert.Equal("A10", ten.MaxBy(s => int.Parse(s.Substring(1)), Comparer<int>.Default));
+            Assert.Equal("B-10", minusTen.MaxBy(s => int.Parse(s.Substring(1)), Comparer<int>.Default));
+            Assert.Equal("C1000", thousand.MaxBy(s => int.Parse(s.Substring(1)), Comparer<int>.Default));
+            Assert.Equal(null, Enumerable.Empty<string>().AsQueryable().MaxBy(s => int.Parse(s.Substring(1)), Comparer<int>.Default));
+            Assert.Equal("A10", ten.BlockOptimisations().MaxBy(s => int.Parse(s.Substring(1)), Comparer<int>.Default));
+            Assert.Equal("B-10", minusTen.BlockOptimisations().MaxBy(s => int.Parse(s.Substring(1)), Comparer<int>.Default));
+            Assert.Equal("C1000", thousand.BlockOptimisations().MaxBy(s => int.Parse(s.Substring(1)), Comparer<int>.Default));
+            Assert.Equal(null, Enumerable.Empty<string>().BlockOptimisations().MaxBy(s => int.Parse(s.Substring(1)), Comparer<int>.Default));
+            Assert.Throws<ArgumentNullException>(() => default(IQueryable<int>).MaxBy(s => s));
+            Assert.Throws<ArgumentNullException>(() => ten.MaxBy(default(Expression<Func<string, int>>)));
+            Assert.Throws<ArgumentNullException>(() => ten.MaxBy(default(Expression<Func<string, int>>), null));
+        }
+        [Fact]
+        public void KeyedNoElements()
+        {
+            var empty = Enumerable.Empty<int>().BlockOptimisations();
+            Assert.Throws<InvalidOperationException>(() => empty.MaxBy(i => i));
+            Assert.Throws<InvalidOperationException>(() => empty.MinBy(i => i));
+        }
+        [Fact]
+        public void DistinctBy()
+        {
+            Assert.Equal(Enumerable.Range(0, 100).AsQueryable().DistinctBy(i => i / 10), Enumerable.Range(0, 10).Select(i => i * 10));
+            Assert.Equal(Enumerable.Range(0, 100).AsQueryable().DistinctBy(i => i / 10, EqualityComparer<int>.Default), Enumerable.Range(0, 10).Select(i => i * 10));
+            Assert.Throws<ArgumentNullException>(() => default(IQueryable<int>).DistinctBy(i => i));
+            Assert.Throws<ArgumentNullException>(() => Enumerable.Range(0, 1).AsQueryable().DistinctBy(default(Expression<Func<int, int>>)));
+            Assert.Equal(Enumerable.Range(0, 100).BlockOptimisations().DistinctBy(i => i / 10), Enumerable.Range(0, 10).Select(i => i * 10));
+            Assert.Equal(Enumerable.Range(0, 100).BlockOptimisations().DistinctBy(i => i / 10, EqualityComparer<int>.Default), Enumerable.Range(0, 10).Select(i => i * 10));
+            Assert.Throws<ArgumentNullException>(() => Enumerable.Range(0, 1).BlockOptimisations().DistinctBy(default(Expression<Func<int, int>>)));
+            Assert.Throws<ArgumentNullException>(() => Enumerable.Range(0, 1).BlockOptimisations().DistinctBy(default(Expression<Func<int, int>>), EqualityComparer<int>.Default));
+        }
+        [Fact]
+        public void Chunk()
+        {
+            Assert.Equal(3, Enumerable.Range(0, 12).AsQueryable().Chunk(5).Count());
+            Assert.Equal(3, Enumerable.Range(0, 15).AsQueryable().Chunk(5).Count());
+            Assert.Equal(4, Enumerable.Range(0, 16).AsQueryable().Chunk(5).Count());
+            Assert.Equal(new[] { 5, 5, 2 }, Enumerable.Range(0, 12).AsQueryable().Chunk(5).Select(c => c.Count()));
+            Assert.Equal(Enumerable.Range(0, 3), Enumerable.Range(0, 12).AsQueryable().Chunk(5).Select(g => g.Key));
+            Assert.Equal(Enumerable.Range(0, 12), Enumerable.Range(0, 12).AsQueryable().Chunk(7).SelectMany(g => g));
+            Assert.Throws<ArgumentOutOfRangeException>(() => Enumerable.Range(0, 3).AsQueryable().Chunk(0));
+            Assert.Throws<ArgumentNullException>(() => default(IQueryable<int>).Chunk(10));
+            Assert.Equal(3, Enumerable.Range(0, 12).BlockOptimisations().Chunk(5).Count());
+            Assert.Equal(3, Enumerable.Range(0, 15).BlockOptimisations().Chunk(5).Count());
+            Assert.Equal(4, Enumerable.Range(0, 16).BlockOptimisations().Chunk(5).Count());
+            Assert.Equal(new[] { 5, 5, 2 }, Enumerable.Range(0, 12).BlockOptimisations().Chunk(5).Select(c => c.Count()));
+            Assert.Equal(Enumerable.Range(0, 3), Enumerable.Range(0, 12).BlockOptimisations().Chunk(5).Select(g => g.Key));
+            Assert.Equal(Enumerable.Range(0, 12), Enumerable.Range(0, 12).BlockOptimisations().Chunk(7).SelectMany(g => g));
+            Assert.Throws<ArgumentOutOfRangeException>(() => Enumerable.Range(0, 3).BlockOptimisations().Chunk(0));
+        }
+        [Fact]
+        public void UnionBy()
+        {
+            Assert.Equal(
+                new[] { "a1", "c2", "d3", "g4", "h5", "i9", "m8" },
+                new[] { "a1", "b1", "c2", "d3", "e3", "f2", "g4", "h5", "i2", "j1" }.AsQueryable().UnionBy(
+                    new[] { "h2", "i9", "j2", "k2", "l3", "m8" }.AsQueryable(), s => s.Substring(1)
+                )
+            );
+            Assert.Equal(
+                new[] { "a1", "c2", "d3", "g4", "h5", "i9", "m8" },
+                new[] { "a1", "b1", "c2", "d3", "e3", "f2", "g4", "h5", "i2", "j1" }.BlockOptimisations().UnionBy(
+                    new[] { "h2", "i9", "j2", "k2", "l3", "m8" }.BlockOptimisations(), s => s.Substring(1)
+                )
+            );
+            Assert.Equal(
+                new[] { "a1", "c2", "d3", "g4", "h5", "i9", "m8" },
+                new[] { "a1", "b1", "c2", "d3", "e3", "f2", "g4", "h5", "i2", "j1" }.AsQueryable().UnionBy(
+                    new[] { "h2", "i9", "j2", "k2", "l3", "m8" }.AsQueryable(), s => s.Substring(1), EqualityComparer<string>.Default
+                )
+            );
+            Assert.Equal(
+                new[] { "a1", "c2", "d3", "g4", "h5", "i9", "m8" },
+                new[] { "a1", "b1", "c2", "d3", "e3", "f2", "g4", "h5", "i2", "j1" }.BlockOptimisations().UnionBy(
+                    new[] { "h2", "i9", "j2", "k2", "l3", "m8" }.BlockOptimisations(), s => s.Substring(1), EqualityComparer<string>.Default
+                )
+            );
+            Assert.Throws<ArgumentNullException>(() => default(IQueryable<int>).UnionBy(Enumerable.Range(0, 1).AsQueryable(), i => i));
+            Assert.Throws<ArgumentNullException>(() => Enumerable.Range(0, 1).BlockOptimisations().UnionBy(null, i => i));
+            Assert.Throws<ArgumentNullException>(() => Enumerable.Range(0, 1).BlockOptimisations().UnionBy(Enumerable.Range(0, 1).BlockOptimisations(), default(Expression<Func<int, int>>)));
+            Assert.Throws<ArgumentNullException>(() => Enumerable.Range(0, 1).BlockOptimisations().UnionBy(Enumerable.Range(0, 1).BlockOptimisations(), default(Expression<Func<int, int>>), EqualityComparer<int>.Default));
+        }
+        [Fact]
+        public void IntersectBy()
+        {
+            Assert.Equal(
+                new[] { "c2", "d3" },
+                new[] { "a1", "b1", "c2", "d3", "e3", "f2", "g4", "h5", "i2", "j1" }.AsQueryable().IntersectBy(
+                    new[] { "h2", "i9", "j2", "k2", "l3", "m8" }.AsQueryable(), s => s.Substring(1)
+                )
+            );
+            Assert.Equal(
+                new[] { "c2", "d3" },
+                new[] { "a1", "b1", "c2", "d3", "e3", "f2", "g4", "h5", "i2", "j1" }.AsQueryable().IntersectBy(
+                    new[] { "h2", "i9", "j2", "k2", "l3", "m8" }.AsQueryable(), s => s.Substring(1), EqualityComparer<string>.Default
+                )
+            );
+            Assert.Equal(
+                new[] { "c2", "d3" },
+                new[] { "a1", "b1", "c2", "d3", "e3", "f2", "g4", "h5", "i2", "j1" }.BlockOptimisations().IntersectBy(
+                    new[] { "h2", "i9", "j2", "k2", "l3", "m8" }.BlockOptimisations(), s => s.Substring(1)
+                )
+            );
+            Assert.Equal(
+                new[] { "c2", "d3" },
+                new[] { "a1", "b1", "c2", "d3", "e3", "f2", "g4", "h5", "i2", "j1" }.BlockOptimisations().IntersectBy(
+                    new[] { "h2", "i9", "j2", "k2", "l3", "m8" }.BlockOptimisations(), s => s.Substring(1), EqualityComparer<string>.Default
+                )
+            );
+            Assert.Throws<ArgumentNullException>(() => default(IQueryable<int>).IntersectBy(Enumerable.Range(0, 1).BlockOptimisations(), i => i));
+            Assert.Throws<ArgumentNullException>(() => Enumerable.Range(0, 1).BlockOptimisations().IntersectBy(null, i => i));
+            Assert.Throws<ArgumentNullException>(() => Enumerable.Range(0, 1).BlockOptimisations().IntersectBy(Enumerable.Range(0, 1).BlockOptimisations(), default(Expression<Func<int, int>>)));
+            Assert.Throws<ArgumentNullException>(() => default(IQueryable<int>).IntersectBy(Enumerable.Range(0, 1).BlockOptimisations(), i => i, EqualityComparer<int>.Default));
+            Assert.Throws<ArgumentNullException>(() => Enumerable.Range(0, 1).BlockOptimisations().IntersectBy(null, i => i, EqualityComparer<int>.Default));
+            Assert.Throws<ArgumentNullException>(() => Enumerable.Range(0, 1).BlockOptimisations().IntersectBy(Enumerable.Range(0, 1).BlockOptimisations(), default(Expression<Func<int, int>>), EqualityComparer<int>.Default));
+        }
+        [Fact]
+        public void ExceptBy()
+        {
+            Assert.Equal(
+                new[] { "a1", "g4", "h5" },
+                new[] { "a1", "b1", "c2", "d3", "e3", "f2", "g4", "h5", "i2", "j1" }.AsQueryable().ExceptBy(
+                    new[] { "h2", "i9", "j2", "k2", "l3", "m8" }.AsQueryable(), s => s.Substring(1)
+                )
+            );
+            Assert.Equal(
+                new[] { "a1", "g4", "h5" },
+                new[] { "a1", "b1", "c2", "d3", "e3", "f2", "g4", "h5", "i2", "j1" }.AsQueryable().ExceptBy(
+                    new[] { "h2", "i9", "j2", "k2", "l3", "m8" }.AsQueryable(), s => s.Substring(1), EqualityComparer<string>.Default
+                )
+            );
+            Assert.Equal(
+                new[] { "a1", "g4", "h5" },
+                new[] { "a1", "b1", "c2", "d3", "e3", "f2", "g4", "h5", "i2", "j1" }.BlockOptimisations().ExceptBy(
+                    new[] { "h2", "i9", "j2", "k2", "l3", "m8" }.BlockOptimisations(), s => s.Substring(1)
+                )
+            );
+            Assert.Equal(
+                new[] { "a1", "g4", "h5" },
+                new[] { "a1", "b1", "c2", "d3", "e3", "f2", "g4", "h5", "i2", "j1" }.BlockOptimisations().ExceptBy(
+                    new[] { "h2", "i9", "j2", "k2", "l3", "m8" }.BlockOptimisations(), s => s.Substring(1), EqualityComparer<string>.Default
+                )
+            );
+            Assert.Throws<ArgumentNullException>(() => default(IQueryable<int>).ExceptBy(Enumerable.Range(0, 1).BlockOptimisations(), i => i));
+            Assert.Throws<ArgumentNullException>(() => Enumerable.Range(0, 1).BlockOptimisations().ExceptBy(null, i => i));
+            Assert.Throws<ArgumentNullException>(() => Enumerable.Range(0, 1).BlockOptimisations().ExceptBy(Enumerable.Range(0, 1).BlockOptimisations(), default(Expression<Func<int, int>>)));
+            Assert.Throws<ArgumentNullException>(() => default(IQueryable<int>).ExceptBy(Enumerable.Range(0, 1).BlockOptimisations(), i => i, EqualityComparer<int>.Default));
+            Assert.Throws<ArgumentNullException>(() => Enumerable.Range(0, 1).BlockOptimisations().ExceptBy(null, i => i, EqualityComparer<int>.Default));
+            Assert.Throws<ArgumentNullException>(() => Enumerable.Range(0, 1).BlockOptimisations().ExceptBy(Enumerable.Range(0, 1).BlockOptimisations(), default(Expression<Func<int, int>>), EqualityComparer<int>.Default));
+        }
+ #pragma warning restore 1720 // Triggered on purpose to test exception.
+    }
+    // Wrap EnumerableQuery, so enumerables can be used to test non-optimised paths of queryable methods
+    // that have a path optimised for enumerables.
+    public static class EnumrableHider
+    {
+        public class DisguisedEnumerableQuery<T> : IOrderedQueryable<T>, IQueryable<T>, IOrderedQueryable, IQueryable, IQueryProvider, IEnumerable<T>, IEnumerable
+        {
+            private EnumerableQuery<T> _sourceProvider;
+            public DisguisedEnumerableQuery(EnumerableQuery<T> sourceProvider)
+            {
+                _sourceProvider = sourceProvider;
+            }
+            public DisguisedEnumerableQuery(IEnumerable<T> source)
+                : this(new EnumerableQuery<T>(source))
+            {
+            }
+            public IEnumerator<T> GetEnumerator()
+            {
+                return ((IEnumerable<T>)_sourceProvider).GetEnumerator();
+            }
+            IEnumerator IEnumerable.GetEnumerator()
+            {
+                return ((IEnumerable)_sourceProvider).GetEnumerator();
+            }
+            public Expression Expression
+            {
+                get { return ((IQueryable)_sourceProvider).Expression; }
+            }
+            public Type ElementType
+            {
+                get { return typeof(T); }
+            }
+            public IQueryProvider Provider
+            {
+                get { return this; }
+            }
+            public IQueryable CreateQuery(Expression expression)
+            {
+                return ((IQueryProvider)_sourceProvider).CreateQuery(expression);
+            }
+            public IQueryable<TElement> CreateQuery<TElement>(Expression expression)
+            {
+                return ((IQueryProvider)_sourceProvider).CreateQuery<TElement>(expression);
+            }
+            public object Execute(Expression expression)
+            {
+                return ((IQueryProvider)_sourceProvider).Execute(expression);
+            }
+            public TResult Execute<TResult>(Expression expression)
+            {
+                return ((IQueryProvider)_sourceProvider).Execute<TResult>(expression);
+            }
+        }
+        public class DisguisedEnumerable<T> : IQueryable<T>
+        {
+            private DisguisedEnumerableQuery<T> _sourceEnumerable;
+            public DisguisedEnumerable(IEnumerable<T> sourceEnumerable)
+            {
+                _sourceEnumerable = new DisguisedEnumerableQuery<T>(sourceEnumerable);
+            }
+            public IEnumerator<T> GetEnumerator()
+            {
+                return _sourceEnumerable.GetEnumerator();
+            }
+            IEnumerator IEnumerable.GetEnumerator()
+            {
+                return GetEnumerator();
+            }
+            public Expression Expression
+            {
+                get { return _sourceEnumerable.Expression; }
+            }
+            public Type ElementType
+            {
+                get { return typeof(T); }
+            }
+            public IQueryProvider Provider
+            {
+                get { return _sourceEnumerable; }
+            }
+        }
+        public static IQueryable<T> BlockOptimisations<T>(this IEnumerable<T> source)
+        {
+            return new DisguisedEnumerable<T>(source);
+        }
+        public static IQueryable<T> BlockOptimisations<T>(this IQueryable<T> source)
+        {
+            return source.Provider is EnumerableQuery<T> ? new DisguisedEnumerable<T>(source.AsEnumerable()) : source;
+        }
     }
 }
-
-

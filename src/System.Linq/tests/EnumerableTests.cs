@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.Collections;
 using System.Collections.Generic;
 using Xunit;
 
@@ -214,6 +215,171 @@ namespace System.Linq.Tests
             Assert.Equal(Enumerable.Range(0, 10), outOfOrder.OrderBy(i => i, new ExtremeComparer()));
             Assert.Equal(Enumerable.Range(0, 10).Reverse(), outOfOrder.OrderByDescending(i => i, new ExtremeComparer()));
         }
+
+#pragma warning disable 1720 // Triggered on purpose to test exception.
+
+        [Fact]
+        public void MinStringByInt()
+        {
+            var one = Enumerable.Range(1, 10).Select(i => "A" + i).ToArray();
+            var minusTen = new[] { "B-1", "B-10", "B10", "B200", "B1000" };
+            var hundred = new[] { "C3000", "C100", "C200", "C1000" };
+            Assert.Equal("A1", one.MinBy(s => int.Parse(s.Substring(1))));
+            Assert.Equal("B-10", minusTen.MinBy(s => int.Parse(s.Substring(1))));
+            Assert.Equal("C100", hundred.MinBy(s => int.Parse(s.Substring(1))));
+            Assert.Equal(null, Enumerable.Empty<string>().MinBy(s => int.Parse(s.Substring(1))));
+            Assert.Throws<ArgumentNullException>(() => default(IEnumerable<int>).MinBy(s => s));
+            Assert.Throws<ArgumentNullException>(() => one.MinBy(default(Func<string, int>)));
+            Assert.Throws<ArgumentNullException>(() => one.MinBy(default(Func<string, int>), null));
+        }
+        [Fact]
+        public void MinIntByString()
+        {
+            var fifteenEitherWay = Enumerable.Range(-15, 31).ToArray();
+            var minusTen = new[] { -1, -10, 10, 200, 1000 };
+            var hundred = new[] { 3000, 100, 200, 1000 };
+            Assert.Equal(0, fifteenEitherWay.MinBy(i => i.ToString()));
+            Assert.Equal(-1, minusTen.MinBy(i => i.ToString()));
+            Assert.Equal(100, hundred.MinBy(i => i.ToString()));
+        }
+        [Fact]
+        public void MaxStringByInt()
+        {
+            var ten = Enumerable.Range(1, 10).Select(i => "A" + i).ToArray();
+            var minusTen = new[] { "B-100", "B-15", "B-50", "B-10" };
+            var thousand = new[] { "C-16", "C0", "C50", "C100", "C1000" };
+            Assert.Equal("A10", ten.MaxBy(s => int.Parse(s.Substring(1))));
+            Assert.Equal("B-10", minusTen.MaxBy(s => int.Parse(s.Substring(1))));
+            Assert.Equal("C1000", thousand.MaxBy(s => int.Parse(s.Substring(1))));
+            Assert.Equal(null, Enumerable.Empty<string>().MaxBy(s => int.Parse(s.Substring(1))));
+            Assert.Throws<ArgumentNullException>(() => default(IEnumerable<int>).MaxBy(s => s));
+            Assert.Throws<ArgumentNullException>(() => ten.MaxBy(default(Func<string, int>)));
+            Assert.Throws<ArgumentNullException>(() => ten.MaxBy(default(Func<string, int>), null));
+        }
+        [Fact]
+        public void MaxIntByString()
+        {
+            var ten = Enumerable.Range(3, 10);
+            var minusTen = new[] { -100, -15, -50, -10 };
+            var thousand = new[] { -16, 0, 50, 100, 1000 };
+            Assert.Equal(9, ten.MaxBy(i => i.ToString()));
+            Assert.Equal(-50, minusTen.MaxBy(i => i.ToString()));
+            Assert.Equal(50, thousand.MaxBy(i => i.ToString()));
+        }
+        [Fact]
+        public void KeyedNoElements()
+        {
+            Assert.Throws<InvalidOperationException>(() => Enumerable.Empty<int>().MaxBy(i => i));
+            Assert.Throws<InvalidOperationException>(() => Enumerable.Empty<int>().MinBy(i => i));
+        }
+        [Fact]
+        public void DistinctBy()
+        {
+            Assert.Equal(Enumerable.Range(0, 100).DistinctBy(i => i / 10), Enumerable.Range(0, 10).Select(i => i * 10));
+            Assert.Equal(Enumerable.Range(0, 100).DistinctBy(i => i / 10, EqualityComparer<int>.Default), Enumerable.Range(0, 10).Select(i => i * 10));
+            Assert.Throws<ArgumentNullException>(() => default(IEnumerable<int>).DistinctBy(i => i));
+            Assert.Throws<ArgumentNullException>(() => Enumerable.Range(0, 1).DistinctBy(default(Func<int, int>)));
+        }
+        [Fact]
+        public void Chunk()
+        {
+            Assert.Equal(3, Enumerable.Range(0, 12).Chunk(5).Count());
+            Assert.Equal(3, Enumerable.Range(0, 15).Chunk(5).Count());
+            Assert.Equal(4, Enumerable.Range(0, 16).Chunk(5).Count());
+            Assert.Equal(new[] { 5, 5, 2 }, Enumerable.Range(0, 12).Chunk(5).Select(c => c.Count()));
+            Assert.Equal(Enumerable.Range(0, 3), Enumerable.Range(0, 12).Chunk(5).Select(g => g.Key));
+            Assert.Equal(Enumerable.Range(0, 12), Enumerable.Range(0, 12).Chunk(7).SelectMany(g => g));
+            Assert.Throws<ArgumentOutOfRangeException>(() => Enumerable.Range(0, 3).Chunk(0));
+            Assert.Throws<ArgumentNullException>(() => default(IEnumerable<int>).Chunk(10));
+            Assert.Equal(3, Enumerable.Range(0, 12).ToList().Chunk(5).Count());
+            Assert.Equal(3, Enumerable.Range(0, 15).ToList().Chunk(5).Count());
+            Assert.Equal(4, Enumerable.Range(0, 16).ToList().Chunk(5).Count());
+            Assert.Equal(new[] { 5, 5, 2 }, Enumerable.Range(0, 12).ToList().Chunk(5).Select(c => c.Count()));
+            Assert.Equal(Enumerable.Range(0, 3), Enumerable.Range(0, 12).ToList().Chunk(5).Select(g => g.Key));
+            Assert.Equal(Enumerable.Range(0, 12), Enumerable.Range(0, 12).ToList().Chunk(7).SelectMany(g => g));
+            Assert.Throws<ArgumentOutOfRangeException>(() => Enumerable.Range(0, 3).ToList().Chunk(0));
+        }
+        [Fact]
+        public void ChunkRacingEnumerators()
+        {
+            var chunks = Enumerable.Range(0, 13).Select(i => i % 5).Chunk(5)
+                .Concat(Enumerable.Range(0, 9).Select(i => i % 5).ToList().Chunk(5));
+            foreach (var chunk in chunks)
+            {
+                using (var en = (IEnumerator<int>)((IEnumerable)chunk).GetEnumerator())
+                {
+                    en.MoveNext();
+                    Assert.Equal(0, en.Current);
+                    en.MoveNext();
+                    Assert.Equal(1, en.Current);
+                    int count = 0;
+                    foreach (var item in chunk)
+                        Assert.Equal(count++, item);
+                    en.MoveNext();
+                    Assert.Equal(2, en.Current);
+                    if (en.MoveNext())
+                        Assert.Equal(3, en.Current);
+                }
+            }
+        }
+        [Fact]
+        public void UnionBy()
+        {
+            Assert.Equal(
+                new[] { "a1", "c2", "d3", "g4", "h5", "i9", "m8" },
+                new[] { "a1", "b1", "c2", "d3", "e3", "f2", "g4", "h5", "i2", "j1" }.UnionBy(
+                    new[] { "h2", "i9", "j2", "k2", "l3", "m8" }, s => s.Substring(1)
+                )
+            );
+            Assert.Equal(
+                new[] { "a1", "c2", "d3", "g4", "h5", "i9", "m8" },
+                new[] { "a1", "b1", "c2", "d3", "e3", "f2", "g4", "h5", "i2", "j1" }.UnionBy(
+                    new[] { "h2", "i9", "j2", "k2", "l3", "m8" }, s => s.Substring(1), EqualityComparer<string>.Default
+                )
+            );
+            Assert.Throws<ArgumentNullException>(() => default(IEnumerable<int>).UnionBy(Enumerable.Range(0, 1), i => i));
+            Assert.Throws<ArgumentNullException>(() => Enumerable.Range(0, 1).UnionBy(null, i => i));
+            Assert.Throws<ArgumentNullException>(() => Enumerable.Range(0, 1).UnionBy(Enumerable.Range(0, 1), default(Func<int, int>)));
+        }
+        [Fact]
+        public void IntersectBy()
+        {
+            Assert.Equal(
+                new[] { "c2", "d3" },
+                new[] { "a1", "b1", "c2", "d3", "e3", "f2", "g4", "h5", "i2", "j1" }.IntersectBy(
+                    new[] { "h2", "i9", "j2", "k2", "l3", "m8" }, s => s.Substring(1)
+                )
+            );
+            Assert.Equal(
+                new[] { "c2", "d3" },
+                new[] { "a1", "b1", "c2", "d3", "e3", "f2", "g4", "h5", "i2", "j1" }.IntersectBy(
+                    new[] { "h2", "i9", "j2", "k2", "l3", "m8" }, s => s.Substring(1), EqualityComparer<string>.Default
+                )
+            );
+            Assert.Throws<ArgumentNullException>(() => default(IEnumerable<int>).IntersectBy(Enumerable.Range(0, 1), i => i));
+            Assert.Throws<ArgumentNullException>(() => Enumerable.Range(0, 1).IntersectBy(null, i => i));
+            Assert.Throws<ArgumentNullException>(() => Enumerable.Range(0, 1).IntersectBy(Enumerable.Range(0, 1), default(Func<int, int>)));
+        }
+        [Fact]
+        public void ExceptBy()
+        {
+            Assert.Equal(
+                new[] { "a1", "g4", "h5" },
+                new[] { "a1", "b1", "c2", "d3", "e3", "f2", "g4", "h5", "i2", "j1" }.ExceptBy(
+                    new[] { "h2", "i9", "j2", "k2", "l3", "m8" }, s => s.Substring(1)
+                )
+            );
+            Assert.Equal(
+                new[] { "a1", "g4", "h5" },
+                new[] { "a1", "b1", "c2", "d3", "e3", "f2", "g4", "h5", "i2", "j1" }.ExceptBy(
+                    new[] { "h2", "i9", "j2", "k2", "l3", "m8" }, s => s.Substring(1), EqualityComparer<string>.Default
+                )
+            );
+            Assert.Throws<ArgumentNullException>(() => default(IEnumerable<int>).ExceptBy(Enumerable.Range(0, 1), i => i));
+            Assert.Throws<ArgumentNullException>(() => Enumerable.Range(0, 1).ExceptBy(null, i => i));
+            Assert.Throws<ArgumentNullException>(() => Enumerable.Range(0, 1).ExceptBy(Enumerable.Range(0, 1), default(Func<int, int>)));
+        }
+#pragma warning restore 1720 // Triggered on purpose to test exception.
     }
 }
 

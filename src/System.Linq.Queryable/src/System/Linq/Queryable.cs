@@ -1981,6 +1981,163 @@ namespace System.Linq
                     ));
         }
 
+        public static TSource MaxBy<TSource, TKey>(this IQueryable<TSource> source, Expression<Func<TSource, TKey>> keySelector)
+        {
+            if (keySelector == null) throw Error.ArgumentNull("keySelector");
+            // Note that we don't just pass to the form that takes an IEqualityComparer, because not all
+            // query providers can do something useful with Expression.Constant(comparer, typeof(IEqualityComparer<TKey>)).
+
+            // Enumerable has a more optimal approach. Use it if appropriate.
+            // FIXME: Does the benefit of this outweigh the cost of the check?
+            // FIXME: Nullity check comes from here. Will result in correct method,
+            // but the stack trace won't point straight to here.
+            IEnumerable<TSource> asEnum = AsEnumerableIfInternallyEnumerable(source);
+            if (asEnum != null) return asEnum.MaxBy(keySelector.Compile());
+
+            IOrderedQueryable<TSource> ordered = source.OrderByDescending(keySelector);
+            return default(TSource) == null ? ordered.FirstOrDefault() : ordered.First();
+        }
+
+        public static TSource MaxBy<TSource, TKey>(this IQueryable<TSource> source, Expression<Func<TSource, TKey>> keySelector, IComparer<TKey> comparer)
+        {
+            if (keySelector == null) throw Error.ArgumentNull("keySelector");
+            IEnumerable<TSource> asEnum = AsEnumerableIfInternallyEnumerable(source);
+            if (asEnum != null) return asEnum.MaxBy(keySelector.Compile(), comparer);
+
+            IOrderedQueryable<TSource> ordered = source.OrderByDescending(keySelector, comparer);
+            return default(TSource) == null ? ordered.FirstOrDefault() : ordered.First();
+        }
+
+        public static TSource MinBy<TSource, TKey>(this IQueryable<TSource> source, Expression<Func<TSource, TKey>> keySelector)
+        {
+            if (keySelector == null) throw Error.ArgumentNull("keySelector");
+            // Note that we don't just pass to the form that takes an IEqualityComparer, because not all
+            // query providers can do something useful with Expression.Constant(comparer, typeof(IEqualityComparer<TKey>)).
+
+            IEnumerable<TSource> asEnum = AsEnumerableIfInternallyEnumerable(source);
+            if (asEnum != null) return asEnum.MinBy(keySelector.Compile());
+
+            IOrderedQueryable<TSource> ordered = source.OrderBy(keySelector);
+            return default(TSource) == null ? ordered.FirstOrDefault() : ordered.First();
+        }
+
+        public static TSource MinBy<TSource, TKey>(this IQueryable<TSource> source, Expression<Func<TSource, TKey>> keySelector, IComparer<TKey> comparer)
+        {
+            if (keySelector == null) throw Error.ArgumentNull("keySelector");
+            IEnumerable<TSource> asEnum = AsEnumerableIfInternallyEnumerable(source);
+            if (asEnum != null) return asEnum.MinBy(keySelector.Compile(), comparer);
+
+            IOrderedQueryable<TSource> ordered = source.OrderBy(keySelector, comparer);
+            return default(TSource) == null ? ordered.FirstOrDefault() : ordered.First();
+        }
+
+        public static IQueryable<TSource> DistinctBy<TSource, TKey>(this IQueryable<TSource> source, Expression<Func<TSource, TKey>> keySelector)
+        {
+            // Note that we don't just pass to the form that takes an IEqualityComparer, because not all
+            // query providers can do something useful with Expression.Constant(comparer, typeof(IEqualityComparer<TKey>)).
+            if (keySelector == null) throw Error.ArgumentNull("keySelector");
+            IEnumerable<TSource> asEnum = AsEnumerableIfInternallyEnumerable(source);
+            return asEnum != null
+                ? new EnumerableQuery<TSource>(asEnum.DistinctBy(keySelector.Compile()))
+                : source.GroupBy(keySelector).Select(grp => grp.First());
+
+        }
+
+        public static IQueryable<TSource> DistinctBy<TSource, TKey>(this IQueryable<TSource> source, Expression<Func<TSource, TKey>> keySelector, IEqualityComparer<TKey> comparer)
+        {
+            if (keySelector == null) throw Error.ArgumentNull("keySelector");
+            IEnumerable<TSource> asEnum = AsEnumerableIfInternallyEnumerable(source);
+            return asEnum != null
+                ? new EnumerableQuery<TSource>(asEnum.DistinctBy(keySelector.Compile(), comparer))
+                : source.GroupBy(keySelector, comparer).Select(grp => grp.First());
+        }
+
+        public static IQueryable<IGrouping<int, TSource>> Chunk<TSource>(this IQueryable<TSource> source, int size)
+        {
+            IEnumerable<TSource> asEnum = AsEnumerableIfInternallyEnumerable(source);
+            if (size < 1) throw Error.ArgumentOutOfRange("size");
+            return asEnum != null
+                ? new EnumerableQuery<IGrouping<int, TSource>>(asEnum.Chunk(size))
+                : source
+                    .Select((el, idx) => new { el, idx })
+                    .GroupBy(indexed => indexed.idx / size, indexed => (TSource)indexed.el);
+        }
+
+        public static IQueryable<TSource> UnionBy<TSource, TKey>(this IQueryable<TSource> source1, IQueryable<TSource> source2, Expression<Func<TSource, TKey>> keySelector, IEqualityComparer<TKey> comparer)
+        {
+            // FIXME: Allowing nullity checks to pass to the next method. Will result
+            // in correct error-handling, but the stack trace would be affected if this was
+            // inlined, which we might hope it would be.
+            return source1.Concat(source2).DistinctBy(keySelector, comparer);
+        }
+
+        public static IQueryable<TSource> UnionBy<TSource, TKey>(this IQueryable<TSource> source1, IQueryable<TSource> source2, Expression<Func<TSource, TKey>> keySelector)
+        {
+            // Note that we don't just pass to the form that takes an IEqualityComparer, because not all
+            // query providers can do something useful with Expression.Constant(comparer, typeof(IEqualityComparer<TKey>)).
+            return source1.Concat(source2).DistinctBy(keySelector);
+        }
+
+        public static IQueryable<TSource> IntersectBy<TSource, TKey>(this IQueryable<TSource> source1, IQueryable<TSource> source2, Expression<Func<TSource, TKey>> keySelector, IEqualityComparer<TKey> comparer)
+        {
+            if (source1 == null) throw Error.ArgumentNull("source1");
+            if (source2 == null) throw Error.ArgumentNull("source2");
+            if (keySelector == null) throw Error.ArgumentNull("keySelector");
+            return source1.Provider is EnumerableQuery<TSource> || source2.Provider is EnumerableQuery<TSource>
+                ? new EnumerableQuery<TSource>(source1.IntersectBy(source2, keySelector.Compile(), comparer))
+                : source1
+                    .GroupBy(keySelector)
+                    .Where(grp => source2.Select(keySelector).Contains(grp.Key, comparer))
+                    .Select(grp => grp.First());
+        }
+
+        public static IQueryable<TSource> IntersectBy<TSource, TKey>(this IQueryable<TSource> source1, IQueryable<TSource> source2, Expression<Func<TSource, TKey>> keySelector)
+        {
+            // Note that we don't just pass to the form that takes an IEqualityComparer, because not all
+            // query providers can do something useful with Expression.Constant(comparer, typeof(IEqualityComparer<TKey>)).
+            if (source1 == null) throw Error.ArgumentNull("source1");
+            if (source2 == null) throw Error.ArgumentNull("source2");
+            if (keySelector == null) throw Error.ArgumentNull("keySelector");
+            return source1.Provider is EnumerableQuery<TSource> || source2.Provider is EnumerableQuery<TSource>
+                ? new EnumerableQuery<TSource>(source1.IntersectBy(source2, keySelector.Compile()))
+                : source1
+                    .GroupBy(keySelector)
+                    .Where(grp => source2.Select(keySelector).Contains(grp.Key))
+                    .Select(grp => grp.First());
+        }
+
+        public static IQueryable<TSource> ExceptBy<TSource, TKey>(this IQueryable<TSource> source1, IQueryable<TSource> source2, Expression<Func<TSource, TKey>> keySelector, IEqualityComparer<TKey> comparer)
+        {
+            if (source1 == null) throw Error.ArgumentNull("source1");
+            if (source2 == null) throw Error.ArgumentNull("source2");
+            if (keySelector == null) throw Error.ArgumentNull("keySelector");
+            return source1.Provider is EnumerableQuery<TSource> || source2.Provider is EnumerableQuery<TSource>
+                ? new EnumerableQuery<TSource>(source1.ExceptBy(source2, keySelector.Compile(), comparer))
+                : source1
+                    .GroupBy(keySelector)
+                    .Where(grp => !source2.Select(keySelector).Contains(grp.Key, comparer))
+                    .Select(grp => grp.First());
+        }
+
+        public static IQueryable<TSource> ExceptBy<TSource, TKey>(this IQueryable<TSource> source1, IQueryable<TSource> source2, Expression<Func<TSource, TKey>> keySelector)
+        {
+            if (source1 == null) throw Error.ArgumentNull("source1");
+            if (source2 == null) throw Error.ArgumentNull("source2");
+            if (keySelector == null) throw Error.ArgumentNull("keySelector");
+            return source1.Provider is EnumerableQuery<TSource> || source2.Provider is EnumerableQuery<TSource>
+                ? new EnumerableQuery<TSource>(source1.ExceptBy(source2, keySelector.Compile()))
+                : source1
+                    .GroupBy(keySelector)
+                    .Where(grp => !source2.Select(keySelector).Contains(grp.Key))
+                    .Select(grp => grp.First());
+        }
+
+        private static IEnumerable<TSource> AsEnumerableIfInternallyEnumerable<TSource>(IQueryable<TSource> source)
+        {
+            if (source == null) throw Error.ArgumentNull("source");
+            return source.Provider is EnumerableQuery<TSource> ? source.AsEnumerable() : null;
+        }
+
         private static MethodInfo GetMethodInfoOf<T>(Expression<Func<T>> expression)
         {
             var body = (MethodCallExpression)expression.Body;

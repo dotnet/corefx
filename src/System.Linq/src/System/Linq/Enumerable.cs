@@ -4,6 +4,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading;
 
 namespace System.Linq
@@ -2497,6 +2498,337 @@ namespace System.Linq
         public static decimal? Average<TSource>(this IEnumerable<TSource> source, Func<TSource, decimal?> selector)
         {
             return Enumerable.Average(Enumerable.Select(source, selector));
+        }
+
+        public static TSource MaxBy<TSource, TKey>(this IEnumerable<TSource> source, Func<TSource, TKey> keySelector)
+        {
+            return source.MaxBy(keySelector, null);
+        }
+
+        public static TSource MaxBy<TSource, TKey>(this IEnumerable<TSource> source, Func<TSource, TKey> keySelector, IComparer<TKey> comparer)
+        {
+            if (source == null) throw Error.ArgumentNull("source");
+            if (keySelector == null) throw Error.ArgumentNull("keySelector");
+            if (comparer == null) comparer = Comparer<TKey>.Default;
+            TSource value = default(TSource);
+            if (value == null)
+            {
+                using (IEnumerator<TSource> e = source.GetEnumerator())
+                {
+                    do
+                    {
+                        if (!e.MoveNext()) return value;
+                        value = e.Current;
+                    }
+                    while (value == null);
+                    TKey key = keySelector(value);
+                    while (e.MoveNext())
+                    {
+                        TSource x = e.Current;
+                        if (x != null)
+                        {
+                            TKey xKey = keySelector(x);
+                            if (comparer.Compare(xKey, key) > 0)
+                            {
+                                value = x;
+                                key = xKey;
+                            }
+                        }
+                    }
+                }
+            }
+            else
+            {
+                using(IEnumerator<TSource> e = source.GetEnumerator())
+                {
+                    if(!e.MoveNext())
+                        throw Error.NoElements();
+                    TKey key = keySelector(value = e.Current);
+                    while(e.MoveNext())
+                    {
+                        TSource x = e.Current;
+                        TKey xKey = keySelector(x);
+                        if(comparer.Compare(xKey, key) > 0)
+                        {
+                            value = x;
+                            key = xKey;
+                        }
+                    }
+                }
+            }
+            return value;
+        }
+
+        public static TSource MinBy<TSource, TKey>(this IEnumerable<TSource> source, Func<TSource, TKey> keySelector)
+        {
+            return source.MinBy(keySelector, null);
+        }
+
+        public static TSource MinBy<TSource, TKey>(this IEnumerable<TSource> source, Func<TSource, TKey> keySelector, IComparer<TKey> comparer)
+        {
+            if (source == null) throw Error.ArgumentNull("source");
+            if (keySelector == null) throw Error.ArgumentNull("keySelector");
+            if (comparer == null) comparer = Comparer<TKey>.Default;
+            TSource value = default(TSource);
+            if (value == null)
+            {
+                using (IEnumerator<TSource> e = source.GetEnumerator())
+                {
+                    do
+                    {
+                        if (!e.MoveNext()) return value;
+                        value = e.Current;
+                    }
+                    while (value == null);
+                    TKey key = keySelector(value);
+                    while (e.MoveNext())
+                    {
+                        TSource x = e.Current;
+                        if(x != null)
+                        {
+                            TKey xKey = keySelector(x);
+                            if (comparer.Compare(xKey, key) < 0)
+                            {
+                                value = x;
+                                key = xKey;
+                            }
+                        }
+                    }
+                }
+            }
+            else
+            {
+                using(IEnumerator<TSource> e = source.GetEnumerator())
+                {
+                    if (!e.MoveNext()) throw Error.NoElements();
+                    TKey key = keySelector(value = e.Current);
+                    while (e.MoveNext())
+                    {
+                        TSource x = e.Current;
+                        TKey xKey = keySelector(x);
+                        if (comparer.Compare(xKey, key) < 0)
+                        {
+                            value = x;
+                            key = xKey;
+                        }
+                    }
+                }
+            }
+
+            return value;
+        }
+
+        public static IEnumerable<TSource> DistinctBy<TSource, TKey>(this IEnumerable<TSource> source, Func<TSource, TKey> keySelector)
+        {
+            return source.DistinctBy(keySelector, null);
+        }
+
+        public static IEnumerable<TSource> DistinctBy<TSource, TKey>(this IEnumerable<TSource> source, Func<TSource, TKey> keySelector, IEqualityComparer<TKey> comparer)
+        {
+            if(source == null) throw Error.ArgumentNull("source");
+            if(keySelector == null) throw Error.ArgumentNull("keySelector");
+            return DistinctIterator<TSource, TKey>(source, keySelector, comparer);
+        }
+
+        public static IEnumerable<TSource> DistinctIterator<TSource, TKey>(this IEnumerable<TSource> source, Func<TSource, TKey> keySelector, IEqualityComparer<TKey> comparer)
+        {
+            Set<TKey> set = new Set<TKey>(comparer);
+            foreach (TSource element in source)
+            {
+                if (set.Add(keySelector(element))) yield return element;
+            }
+        }
+
+        public static IEnumerable<IGrouping<int, TSource>> Chunk<TSource>(this IEnumerable<TSource> source, int size)
+        {
+            if (source == null) throw Error.ArgumentNull("source");
+            if (size < 1) throw Error.ArgumentOutOfRange("size");
+            IList<TSource> asList = source as IList<TSource>;
+            return asList != null ? ChunkListIterator(asList, size) : ChunkIterator<TSource>(source, size);
+        }
+
+        private static IEnumerable<IGrouping<int, TSource>> ChunkIterator<TSource>(this IEnumerable<TSource> source, int size)
+        {
+            using(IEnumerator<TSource> e = source.GetEnumerator())
+            {
+                int index = -1;
+                while (e.MoveNext())
+                {
+                    EnumerableChunk<TSource> chunk = new EnumerableChunk<TSource>(++index, size, e);
+                    yield return chunk;
+                    chunk.FinishUp();
+                }
+            }
+        }
+
+        private static IEnumerable<IGrouping<int, TSource>> ChunkListIterator<TSource>(this IList<TSource> source, int size)
+        {
+            for(int i = 0; i * size < source.Count; ++i) yield return new ListChunk<TSource>(i, size, source);
+        }
+
+        private sealed class EnumerableChunk<TSource> : IGrouping<int, TSource>
+        {
+            private readonly int _index;
+            private readonly TSource[] _store;
+            private IEnumerator<TSource> _sourceEnumerator;
+            private int _current = 1;
+
+            public EnumerableChunk(int index, int chunkSize, IEnumerator<TSource> sourceEnumerator)
+            {
+                _index = index;
+                _store = new TSource[chunkSize];
+                // Setting the first element now makes the logic of having to call
+                // MoveNext prior to this constructor (to know if there is another chunk
+                // to come) simpler.
+                _store[0] = sourceEnumerator.Current;
+                _sourceEnumerator = sourceEnumerator;
+            }
+
+            public int Key
+            {
+                get { return _index; }
+            }
+
+            internal void FinishUp()
+            {
+                // If another chunk is sought while this one has not yet
+                // read all of its elements from the source, then
+                // we need to finish this one's reading first.
+                if (_sourceEnumerator != null)
+                {
+                    while (_current < _store.Length && _sourceEnumerator.MoveNext()) _store[_current++] = _sourceEnumerator.Current;
+                }
+                _sourceEnumerator = null;
+            }
+
+            public IEnumerator<TSource> GetEnumerator()
+            {
+                for(int i = 0; i != _store.Length; ++i)
+                {
+                    if (i < _current) yield return _store[i];
+                    else if (_sourceEnumerator != null && _sourceEnumerator.MoveNext())
+                    {
+                        Debug.Assert(i == _current);
+                        TSource currentEl = _sourceEnumerator.Current;
+                        _store[i] = currentEl;
+                        ++_current;
+                        yield return currentEl;                         
+                    }
+                    else
+                    {
+                        _sourceEnumerator = null;
+                        yield break;
+                    }
+                }
+            }
+
+            IEnumerator IEnumerable.GetEnumerator()
+            {
+                return GetEnumerator();
+            }
+        }
+
+        private sealed class ListChunk<TSource> : IGrouping<int, TSource>
+        {
+            private readonly int _index;
+            private readonly int _size;
+            private readonly IList<TSource> _list;
+
+            public ListChunk(int index, int size, IList<TSource> list)
+            {
+                _index = index;
+                _size = size;
+                _list = list;
+            }
+
+            public int Key
+            {
+                get { return _index; }
+            }
+
+            public IEnumerator<TSource> GetEnumerator()
+            {
+                int start = _index * _size;
+                int end = start + _size;
+                if(end > _list.Count) end = _list.Count;
+                for(int i = start; i != end; ++i) yield return _list[i];
+            }
+
+            IEnumerator IEnumerable.GetEnumerator()
+            {
+                return GetEnumerator();
+            }
+        }
+
+        public static IEnumerable<TSource> UnionBy<TSource, TKey>(this IEnumerable<TSource> source1, IEnumerable<TSource> source2, Func<TSource, TKey> keySelector, IEqualityComparer<TKey> comparer)
+        {
+            return source1.Concat(source2).DistinctBy(keySelector, comparer);
+        }
+
+        public static IEnumerable<TSource> UnionBy<TSource, TKey>(this IEnumerable<TSource> source1, IEnumerable<TSource> source2, Func<TSource, TKey> keySelector)
+        {
+            return source1.Concat(source2).DistinctBy(keySelector);
+        }
+
+        public static IEnumerable<TSource> IntersectBy<TSource, TKey>(this IEnumerable<TSource> source1, IEnumerable<TSource> source2, Func<TSource, TKey> keySelector, IEqualityComparer<TKey> comparer)
+        {
+            if (source1 == null) throw Error.ArgumentNull("source1");
+            if (source2 == null) throw Error.ArgumentNull("source2");
+            if (keySelector == null) throw Error.ArgumentNull("keySelector");
+            return IntersectByIterator(source1, source2, keySelector, null);
+        }
+
+        public static IEnumerable<TSource> IntersectBy<TSource, TKey>(this IEnumerable<TSource> source1, IEnumerable<TSource> source2, Func<TSource, TKey> keySelector)
+        {
+            return IntersectBy(source1, source2, keySelector, null);
+        }
+
+        private static IEnumerable<TSource> IntersectByIterator<TSource, TKey>(this IEnumerable<TSource> source1, IEnumerable<TSource> source2, Func<TSource, TKey> keySelector, IEqualityComparer<TKey> comparer)
+        {
+            Dictionary<TKey, TSource> fromFirst = new Dictionary<TKey, TSource>(comparer);
+            // We don't use ToDictionary() as that throws on repeated keys while we wish to discard on them.
+            foreach (TSource item in source1)
+            {
+                TKey key = keySelector(item);
+                if (!fromFirst.ContainsKey(key)) fromFirst.Add(key, item);
+            }
+            TSource match;
+            foreach (TSource item in source2)
+            {
+                TKey key = keySelector(item);
+                if (fromFirst.TryGetValue(key, out match))
+                {
+                    yield return match;
+                    fromFirst.Remove(key);
+                    // FIXME: Here if fromFirst.Count == 0 we can yield break. This short-circuits on
+                    // execution as a whole, but costs a test. The cost/benefit is therefore a matter of
+                    // how often the nett amount of work done is lower one way or the other, with real-world data.
+                    // Probably not, but worth considering.                    
+                }
+            }
+        }
+
+        public static IEnumerable<TSource> ExceptBy<TSource, TKey>(this IEnumerable<TSource> source1, IEnumerable<TSource> source2, Func<TSource, TKey> keySelector, IEqualityComparer<TKey> comparer)
+        {
+            if (source1 == null) throw Error.ArgumentNull("source1");
+            if (source2 == null) throw Error.ArgumentNull("source2");
+            if (keySelector == null) throw Error.ArgumentNull("keySelector");
+            return ExceptByIterator(source1, source2, keySelector, comparer);
+        }
+
+        public static IEnumerable<TSource> ExceptBy<TSource, TKey>(this IEnumerable<TSource> source1, IEnumerable<TSource> source2, Func<TSource, TKey> keySelector)
+        {
+            return source1.ExceptBy(source2, keySelector, null);
+        }
+
+        public static IEnumerable<TSource> ExceptByIterator<TSource, TKey>(IEnumerable<TSource> source1, IEnumerable<TSource> source2, Func<TSource, TKey> keySelector, IEqualityComparer<TKey> comparer)
+        {
+            Set<TKey> set = new Set<TKey>(comparer);
+            foreach (TSource item in source2) set.Add(keySelector(item));
+            foreach (TSource item in source1)
+            {
+                if (set.Add(keySelector(item))) yield return item;
+            }
         }
     }
 
