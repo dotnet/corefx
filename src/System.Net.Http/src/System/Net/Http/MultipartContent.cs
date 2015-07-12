@@ -21,13 +21,12 @@ namespace System.Net.Http
 
         private const string crlf = "\r\n";
 
-        private List<HttpContent> _nestedContent;
-        private string _boundary;
+        private readonly List<HttpContent> _nestedContent;
+        private readonly string _boundary;
 
         // Temp context for serialization.
         private int _nextContentIndex;
         private Stream _outputStream;
-        private TaskCompletionSource<Object> _tcs;
 
         #endregion Fields
 
@@ -175,112 +174,57 @@ namespace System.Net.Http
         {
             Debug.Assert(stream != null);
             Debug.Assert(_outputStream == null, "Opperation already in progress");
-            Debug.Assert(_tcs == null, "Opperation already in progress");
             Debug.Assert(_nextContentIndex == 0, "Opperation already in progress");
 
             // Keep a local copy in case the operation completes and cleans up synchronously.
-            TaskCompletionSource<Object> localTcs = new TaskCompletionSource<Object>();
-            _tcs = localTcs;
             _outputStream = stream;
             _nextContentIndex = 0;
 
-            // Start Boundary, chain everything else.
-            EncodeStringToStreamAsync(_outputStream, "--" + _boundary + crlf)
-                .ContinueWithStandard(WriteNextContentHeadersAsync);
-
-            return localTcs.Task;
+            return SerializeToStreamCoreAsync();
         }
 
-        private void WriteNextContentHeadersAsync(Task task)
+        private async Task SerializeToStreamCoreAsync()
         {
-            if (task.IsFaulted)
-            {
-                HandleAsyncException("WriteNextContentHeadersAsync", task.Exception.GetBaseException());
-                return;
-            }
-
             try
             {
-                // Base case, no more content, finish.
-                if (_nextContentIndex >= _nestedContent.Count)
-                {
-                    WriteTerminatingBoundaryAsync();
-                    return;
-                }
+                // Start Boundary, chain everything else.
+                string startBoundary = "--" + _boundary + crlf;
+                await EncodeStringToStreamAsync(_outputStream, startBoundary).ConfigureAwait(false);
 
-                string internalBoundary = crlf + "--" + _boundary + crlf;
+                string dividingBoundary = crlf + startBoundary;
                 StringBuilder output = new StringBuilder();
-                if (_nextContentIndex == 0)
+
+                while (_nextContentIndex < _nestedContent.Count)
                 {
-                    // First time, don't write dividing boundary.
-                }
-                else
-                {
-                    output.Append(internalBoundary);
-                }
-
-                HttpContent content = _nestedContent[_nextContentIndex];
-
-                // Headers
-                foreach (KeyValuePair<string, IEnumerable<string>> headerPair in content.Headers)
-                {
-                    output.Append(headerPair.Key + ": " + string.Join(", ", headerPair.Value) + crlf);
-                }
-
-                output.Append(crlf); // Extra CRLF to end headers (even if there are no headers).
-
-                EncodeStringToStreamAsync(_outputStream, output.ToString())
-                    .ContinueWithStandard(WriteNextContentAsync);
-            }
-            catch (Exception ex)
-            {
-                HandleAsyncException("WriteNextContentHeadersAsync", ex);
-            }
-        }
-
-        private void WriteNextContentAsync(Task task)
-        {
-            if (task.IsFaulted)
-            {
-                HandleAsyncException("WriteNextContentAsync", task.Exception.GetBaseException());
-                return;
-            }
-
-            try
-            {
-                HttpContent content = _nestedContent[_nextContentIndex];
-                _nextContentIndex++; // Next call will operate on the next content object.
-
-                content.CopyToAsync(_outputStream)
-                    .ContinueWithStandard(WriteNextContentHeadersAsync);
-            }
-            catch (Exception ex)
-            {
-                HandleAsyncException("WriteNextContentAsync", ex);
-            }
-        }
-
-        // Final step, write the footer boundary.
-        private void WriteTerminatingBoundaryAsync()
-        {
-            try
-            {
-                EncodeStringToStreamAsync(_outputStream, crlf + "--" + _boundary + "--" + crlf)
-                    .ContinueWithStandard(task =>
+                    if (_nextContentIndex != 0)
                     {
-                        if (task.IsFaulted)
-                        {
-                            HandleAsyncException("WriteTerminatingBoundaryAsync", task.Exception.GetBaseException());
-                            return;
-                        }
+                        // First time, don't write dividing boundary.
+                        output.Append(dividingBoundary);
+                    }
 
-                        TaskCompletionSource<object> lastTcs = CleanupAsync();
-                        lastTcs.TrySetResult(null); // This was the final opperation.
-                    });
+                    HttpContent content = _nestedContent[_nextContentIndex];
+
+                    // Headers
+                    foreach (KeyValuePair<string, IEnumerable<string>> headerPair in content.Headers)
+                    {
+                        output.Append(headerPair.Key + ": " + string.Join(", ", headerPair.Value) + crlf);
+                    }
+
+                    output.Append(crlf); // Extra CRLF to end headers (even if there are no headers).
+
+                    await EncodeStringToStreamAsync(_outputStream, output.ToString()).ConfigureAwait(false);
+                    _nextContentIndex++; // Next iteration will operate on the next content object.
+                    output.Clear();
+                    await content.CopyToAsync(_outputStream).ConfigureAwait(false);
+                }
+
+                // Write termination bounary
+                await EncodeStringToStreamAsync(_outputStream, crlf + "--" + _boundary + "--" + crlf).ConfigureAwait(false);
+                CleanupAsync();
             }
-            catch (Exception ex)
+            catch (Exception e)
             {
-                HandleAsyncException("WriteTerminatingBoundaryAsync", ex);
+                HandleAsyncException("SerializeToStreamCoreAsync", e);
             }
         }
 
@@ -290,21 +234,19 @@ namespace System.Net.Http
             return stream.WriteAsync(buffer, 0, buffer.Length);
         }
 
-        private TaskCompletionSource<object> CleanupAsync()
+        private void CleanupAsync()
         {
-            Contract.Requires(_tcs != null, "Operation already cleaned up");
-            TaskCompletionSource<object> toReturn = _tcs;
             _outputStream = null;
             _nextContentIndex = 0;
-            _tcs = null;
-            return toReturn;
         }
 
         private void HandleAsyncException(string method, Exception ex)
         {
-            if (Logging.On) Logging.Exception(Logging.Http, this, method, ex);
-            TaskCompletionSource<object> lastTcs = CleanupAsync();
-            lastTcs.TrySetException(ex);
+            if (Logging.On)
+            {
+                Logging.Exception(Logging.Http, this, method, ex);
+            }
+            CleanupAsync();
         }
 
         protected internal override bool TryComputeLength(out long length)
