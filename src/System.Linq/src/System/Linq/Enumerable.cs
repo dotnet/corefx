@@ -2630,7 +2630,7 @@ namespace System.Linq
             return DistinctIterator<TSource, TKey>(source, keySelector, comparer);
         }
 
-        private static IEnumerable<TSource> DistinctIterator<TSource, TKey>(this IEnumerable<TSource> source, Func<TSource, TKey> keySelector, IEqualityComparer<TKey> comparer)
+        private static IEnumerable<TSource> DistinctIterator<TSource, TKey>(IEnumerable<TSource> source, Func<TSource, TKey> keySelector, IEqualityComparer<TKey> comparer)
         {
             Set<TKey> set = new Set<TKey>(comparer);
             foreach (TSource element in source)
@@ -2647,7 +2647,7 @@ namespace System.Linq
             return asList != null ? ChunkListIterator(asList, size) : ChunkIterator<TSource>(source, size);
         }
 
-        private static IEnumerable<IGrouping<int, TSource>> ChunkIterator<TSource>(this IEnumerable<TSource> source, int size)
+        private static IEnumerable<IGrouping<int, TSource>> ChunkIterator<TSource>(IEnumerable<TSource> source, int size)
         {
             using(IEnumerator<TSource> e = source.GetEnumerator())
             {
@@ -2661,7 +2661,7 @@ namespace System.Linq
             }
         }
 
-        private static IEnumerable<IGrouping<int, TSource>> ChunkListIterator<TSource>(this IList<TSource> source, int size)
+        private static IEnumerable<IGrouping<int, TSource>> ChunkListIterator<TSource>(IList<TSource> source, int size)
         {
             for(int i = 0; i * size < source.Count; ++i) yield return new ListChunk<TSource>(i, size, source);
         }
@@ -2783,7 +2783,7 @@ namespace System.Linq
             return IntersectBy(source1, source2, keySelector, null);
         }
 
-        private static IEnumerable<TSource> IntersectByIterator<TSource, TKey>(this IEnumerable<TSource> source1, IEnumerable<TSource> source2, Func<TSource, TKey> keySelector, IEqualityComparer<TKey> comparer)
+        private static IEnumerable<TSource> IntersectByIterator<TSource, TKey>(IEnumerable<TSource> source1, IEnumerable<TSource> source2, Func<TSource, TKey> keySelector, IEqualityComparer<TKey> comparer)
         {
             Dictionary<TKey, TSource> fromFirst = new Dictionary<TKey, TSource>(comparer);
             // We don't use ToDictionary() as that throws on repeated keys while we wish to discard on them.
