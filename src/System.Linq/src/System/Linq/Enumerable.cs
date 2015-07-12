@@ -2020,6 +2020,11 @@ namespace System.Linq
             return Enumerable.Min(Enumerable.Select(source, selector));
         }
 
+        public static TResult Min<TSource, TResult>(this IEnumerable<TSource> source, Func<TSource, TResult> selector, IComparer<TResult> comparer)
+        {
+            return source.Select(selector).Min(comparer);
+        }
+
         public static int Max(this IEnumerable<int> source)
         {
             if (source == null) throw Error.ArgumentNull("source");
@@ -2277,6 +2282,11 @@ namespace System.Linq
         public static TResult Max<TSource, TResult>(this IEnumerable<TSource> source, Func<TSource, TResult> selector)
         {
             return Enumerable.Max(Enumerable.Select(source, selector));
+        }
+
+        public static TResult Max<TSource, TResult>(this IEnumerable<TSource> source, Func<TSource, TResult> selector, IComparer<TResult> comparer)
+        {
+            return source.Select(selector).Max(comparer);
         }
 
         public static double Average(this IEnumerable<int> source)

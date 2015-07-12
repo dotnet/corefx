@@ -2025,6 +2025,11 @@ namespace System.Linq
             return default(TSource) == null ? ordered.FirstOrDefault() : ordered.First();
         }
 
+        public static TResult Max<TSource, TResult>(this IQueryable<TSource> source, Expression<Func<TSource, TResult>> selector, IComparer<TResult> comparer)
+        {
+            return source.Select(selector).Max(comparer);
+        }
+
         public static TSource MinBy<TSource, TKey>(this IQueryable<TSource> source, Expression<Func<TSource, TKey>> keySelector)
         {
             if (keySelector == null) throw Error.ArgumentNull("keySelector");
@@ -2055,6 +2060,11 @@ namespace System.Linq
             if (comparer == null) return source.Min();
             IOrderedQueryable<TSource> ordered = source.OrderBy(IdentityExpression<TSource>.Instance, comparer);
             return default(TSource) == null ? ordered.FirstOrDefault() : ordered.First();
+        }
+
+        public static TResult Min<TSource, TResult>(this IQueryable<TSource> source, Expression<Func<TSource, TResult>> selector, IComparer<TResult> comparer)
+        {
+            return source.Select(selector).Min(comparer);
         }
 
         public static IQueryable<TSource> DistinctBy<TSource, TKey>(this IQueryable<TSource> source, Expression<Func<TSource, TKey>> keySelector)
