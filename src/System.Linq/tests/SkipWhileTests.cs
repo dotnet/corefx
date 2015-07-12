@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Linq;
 using Xunit;
 
 namespace System.Linq.Tests
@@ -56,7 +58,8 @@ namespace System.Linq.Tests
         {
             int[] array = { 1, 2, 3, 5, 8 };
             
-            IEnumerable<int> results = array.SkipWhile(element, index =>
+            IEnumerable<int> results = array.SkipWhile(
+                (element, index) =>
             {
                 Assert.Equal(element, array[index]);
                 return true;
