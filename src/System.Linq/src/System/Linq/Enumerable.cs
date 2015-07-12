@@ -2830,6 +2830,83 @@ namespace System.Linq
                 if (set.Add(keySelector(item))) yield return item;
             }
         }
+
+        public static IEnumerable<IEnumerable<TSource>> ToChunkedStream<TSource>(this IEnumerable<TSource> source, int size)
+        {
+            if (source == null) throw Error.ArgumentNull("source");
+            if (size < 1) throw Error.ArgumentOutOfRange("size");
+            return ChunkStreamIterator(source, size);
+        }
+
+        private static IEnumerable<IEnumerable<TSource>> ChunkStreamIterator<TSource>(IEnumerable<TSource> source, int size)
+        {
+            using (IEnumerator<TSource> e = source.GetEnumerator())
+            {
+                if (e.MoveNext())
+                {
+                    StreamedChunk<TSource> chunk;
+                    do
+                    {
+                        chunk = new StreamedChunk<TSource>(e, size);
+                        yield return chunk;
+                        chunk.Dispose();
+                    } while (!chunk.FinishedEnumerator);
+                }
+            }
+        }
+
+        private sealed class StreamedChunk<TSource> : IEnumerable<TSource>, IDisposable
+        {
+            private IEnumerator<TSource> _sourceEnumerator;
+            private readonly int _size;
+            private bool _enumerated;
+            private int _sent = 0;
+            public bool FinishedEnumerator;
+
+            public StreamedChunk(IEnumerator<TSource> sourceEnumerator, int size)
+            {
+                _sourceEnumerator = sourceEnumerator;
+                _size = size;
+            }
+
+            public IEnumerator<TSource> GetEnumerator()
+            {
+                // FIXME: Make localisable
+                if (_enumerated) throw new InvalidOperationException("Streamed chunks can only be enumerated once and only before the next is received.");
+                _enumerated = true;
+                while (_sent < _size)
+                {
+                    yield return _sourceEnumerator.Current;
+                    if (!_sourceEnumerator.MoveNext())
+                    {
+                        FinishedEnumerator = true;
+                        _sent = _size;
+                        yield break;
+                    }
+                    ++_sent;
+                }
+            }
+
+            public void Dispose()
+            {
+                _enumerated = true;
+                while (_sent < _size)
+                {
+                    if (_sourceEnumerator.MoveNext()) ++_sent;
+                    else
+                    {
+                        FinishedEnumerator = true;
+                        break;
+                    }
+                }
+                _sent = _size;
+            }
+
+            IEnumerator IEnumerable.GetEnumerator()
+            {
+                return GetEnumerator();
+            }
+        }
     }
 
     internal class IdentityFunction<TElement>

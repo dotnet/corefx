@@ -393,6 +393,24 @@ namespace System.Linq.Tests
             Assert.Throws<ArgumentNullException>(() => Enumerable.Range(0, 1).ExceptBy(null, i => i));
             Assert.Throws<ArgumentNullException>(() => Enumerable.Range(0, 1).ExceptBy(Enumerable.Range(0, 1), default(Func<int, int>)));
         }
+        [Fact]
+        public void ToChunkedStream()
+        {
+            Assert.Equal(3, Enumerable.Range(0, 12).ToChunkedStream(5).Count());
+            Assert.Equal(3, Enumerable.Range(0, 15).ToChunkedStream(5).Count());
+            Assert.Equal(4, Enumerable.Range(0, 16).ToChunkedStream(5).Count());
+            Assert.Equal(new[] { 5, 5, 2 }, Enumerable.Range(0, 12).ToChunkedStream(5).Select(c => c.Count()));
+            Assert.Equal(Enumerable.Range(0, 12), Enumerable.Range(0, 12).ToChunkedStream(7).SelectMany(g => g));
+            Assert.Throws<ArgumentOutOfRangeException>(() => Enumerable.Range(0, 3).ToChunkedStream(0));
+            Assert.Throws<ArgumentNullException>(() => default(IEnumerable<int>).ToChunkedStream(10));
+            Assert.Equal(3, Enumerable.Range(0, 12).ToList().ToChunkedStream(5).Count());
+            Assert.Equal(3, Enumerable.Range(0, 15).ToList().ToChunkedStream(5).Count());
+            Assert.Equal(4, Enumerable.Range(0, 16).ToList().ToChunkedStream(5).Count());
+            Assert.Equal(new[] { 5, 5, 2 }, Enumerable.Range(0, 12).ToList().ToChunkedStream(5).Select(c => c.Count()));
+            Assert.Equal(Enumerable.Range(0, 12), Enumerable.Range(0, 12).ToList().ToChunkedStream(7).SelectMany(g => g));
+            Assert.Throws<ArgumentOutOfRangeException>(() => Enumerable.Range(0, 3).ToList().ToChunkedStream(0));
+            Assert.Throws<InvalidOperationException>(() => Enumerable.Range(0, 10).ToChunkedStream(3).ToList()[0].First());
+        }
 #pragma warning restore 1720 // Triggered on purpose to test exception.
     }
 }
