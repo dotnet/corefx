@@ -2305,8 +2305,11 @@ namespace System.Linq
             {
                 foreach (int? v in source)
                 {
-                    sum += v.GetValueOrDefault();
-                    count++;
+                    if (v != null)
+                    {
+                        sum += v.GetValueOrDefault();
+                        count++;
+                    }
                 }
             }
             if (count > 0) return (double)sum / count;
@@ -2339,8 +2342,11 @@ namespace System.Linq
             {
                 foreach (long? v in source)
                 {
-                    sum += v.GetValueOrDefault();
-                    count++;
+                    if (v != null)
+                    {
+                        sum += v.GetValueOrDefault();
+                        count++;
+                    }
                 }
             }
             if (count > 0) return (double)sum / count;
@@ -2373,8 +2379,11 @@ namespace System.Linq
             {
                 foreach (float? v in source)
                 {
-                    sum += v.GetValueOrDefault();
-                    count++;
+                    if (v != null)
+                    {
+                        sum += v.GetValueOrDefault();
+                        count++;
+                    }
                 }
             }
             if (count > 0) return (float)(sum / count);
@@ -2407,8 +2416,11 @@ namespace System.Linq
             {
                 foreach (double? v in source)
                 {
-                    sum += v.GetValueOrDefault();
-                    count++;
+                    if (v != null)
+                    {
+                        sum += v.GetValueOrDefault();
+                        count++;
+                    }
                 }
             }
             if (count > 0) return sum / count;
@@ -2441,8 +2453,11 @@ namespace System.Linq
             {
                 foreach (decimal? v in source)
                 {
-                    sum += v.GetValueOrDefault();
-                    count++;
+                    if (v != null)
+                    {
+                        sum += v.GetValueOrDefault();
+                        count++;
+                    }
                 }
             }
             if (count > 0) return sum / count;
