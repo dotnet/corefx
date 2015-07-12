@@ -48,7 +48,7 @@ namespace System.Linq.Tests
         {
             string[] array = { "quick", "brown", "ghfox" };
             
-            IEnumerable<bool> results = array.SkipWhile(b => true);
+            IEnumerable<string> results = array.SkipWhile(b => true);
             
             Assert.Equal(results.Count(), 0);
         }
