@@ -106,23 +106,16 @@ namespace System.Linq.Parallel.Tests
 
         // If a query is canceled and immediately disposed, the dispose should not throw an OCE.
         [Theory]
-        [MemberData("Ranges", (object)(new int[] { 16 }), MemberType = typeof(Sources))]
+        [MemberData(nameof(Sources.Ranges), new[] { 16 }, MemberType = typeof(Sources))]
+        [MemberData(nameof(UnorderedSources.Ranges), new[] { 16 }, MemberType = typeof(UnorderedSources))]
         public static void WithCancellation_CancelThenDispose(Labeled<ParallelQuery<int>> labeled, int count)
         {
-            try
-            {
-                CancellationTokenSource cancel = new CancellationTokenSource();
-                var q = ParallelEnumerable.Range(0, 1000).WithCancellation(cancel.Token).Select(x => x);
-                IEnumerator<int> e = q.GetEnumerator();
-                e.MoveNext();
+            CancellationTokenSource cancel = new CancellationTokenSource();
+            IEnumerator<int> enumerator = labeled.Item.WithCancellation(cancel.Token).GetEnumerator();
+            enumerator.MoveNext();
 
-                cancel.Cancel();
-                e.Dispose();
-            }
-            catch (Exception e)
-            {
-                Assert.True(false, string.Format("PlinqCancellationTests.CancelThenDispose:  > Failed. Expected no exception, got " + e.GetType()));
-            }
+            cancel.Cancel();
+            enumerator.Dispose();
         }
 
         [Fact]
