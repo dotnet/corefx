@@ -8,7 +8,7 @@ using System.Globalization;
 using System.Runtime.CompilerServices;
 using Xunit;
 
-public class DirectoryInfo_Co5511get_FullName
+public class DirectoryInfo_get_FullName
 {
     public static String s_strActiveBugNums = "14866, 14849";
     public static String s_strClassMethod = "Directory.FullName";
@@ -112,21 +112,24 @@ public class DirectoryInfo_Co5511get_FullName
 
             strLoc = "Loc_298yb";
 
-            iCountTestcases++;
-            try
+            if (Interop.IsWindows) // whitespace-only directory name is valid on Unix
             {
-                dir = new DirectoryInfo("      ");
-                dir.Create();
-                iCountErrors++;
-                printerr("Error_0919x! Expected exception not thrown, dir==" + dir.FullName);
-            }
-            catch (ArgumentException)
-            {
-            }
-            catch (Exception exc)
-            {
-                iCountErrors++;
-                printerr("Error_4577c! Incorrect exception thrown, exc==" + exc.ToString());
+                iCountTestcases++;
+                try
+                {
+                    dir = new DirectoryInfo("      ");
+                    dir.Create();
+                    iCountErrors++;
+                    printerr("Error_0919x! Expected exception not thrown, dir==" + dir.FullName);
+                }
+                catch (ArgumentException)
+                {
+                }
+                catch (Exception exc)
+                {
+                    iCountErrors++;
+                    printerr("Error_4577c! Incorrect exception thrown, exc==" + exc.ToString());
+                }
             }
 
             // [] Go for current dir with "."

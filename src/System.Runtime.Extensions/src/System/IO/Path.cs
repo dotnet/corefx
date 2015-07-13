@@ -1,12 +1,11 @@
-using System;
-using System.Text;
+// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System.Diagnostics;
+using System.Diagnostics.Contracts;
 using System.Runtime.InteropServices;
 using System.Security;
-using System.Runtime.CompilerServices;
-using System.Globalization;
-using System.Runtime.Versioning;
-using System.Diagnostics.Contracts;
-using System.Diagnostics;
+using System.Text;
 
 namespace System.IO
 {
@@ -74,7 +73,7 @@ namespace System.IO
             {
                 CheckInvalidPathChars(path);
 
-                string normalizedPath = NormalizePath(path, false);
+                string normalizedPath = NormalizePath(path, fullCheck: false);
 
                 // If there are no permissions for PathDiscovery to this path, we should NOT expand the short paths
                 // as this would leak information about paths to which the user would not have access to.
@@ -104,7 +103,7 @@ namespace System.IO
                         // Only re-normalize if the original path had a ~ in it.
                         if (path.IndexOf("~", StringComparison.Ordinal) != -1)
                         {
-                            normalizedPath = NormalizePath(path, /*fullCheck*/ false, /*expandShortPaths*/ false);
+                            normalizedPath = NormalizePath(path, fullCheck: false, expandShortPaths: false);
                         }
                     }
                     catch (PathTooLongException) { }
@@ -130,7 +129,7 @@ namespace System.IO
 
         public static char[] GetInvalidPathChars()
         {
-            return (char[])RealInvalidPathChars.Clone();
+            return (char[])InvalidPathChars.Clone();
         }
 
         public static char[] GetInvalidFileNameChars()
@@ -166,32 +165,13 @@ namespace System.IO
             return string.Empty;
         }
 
-        // Expands the given path to a fully qualified path. 
-        [Pure]
-        [System.Security.SecuritySafeCritical]
-        public static string GetFullPath(string path)
-        {
-            string fullPath = GetFullPathInternal(path);
-
-            EmulateFileIOPermissionChecks(fullPath);
-
-            return fullPath;
-        }
-
-        // This method is package access to let us quickly get a string name
-        // while avoiding a security check.  This also serves a slightly
-        // different purpose - when we open a file, we need to resolve the
-        // path into a fully qualified, non-relative path name.  This
-        // method does that, finding the current drive &; directory.  But
-        // as long as we don't return this info to the user, we're good.  However,
-        // the public GetFullPath does need to do a security check.
         private static string GetFullPathInternal(string path)
         {
             if (path == null)
                 throw new ArgumentNullException("path");
             Contract.EndContractBlock();
 
-            return NormalizePath(path, true);
+            return NormalizePath(path, fullCheck: true);
         }
 
         [System.Security.SecuritySafeCritical]  // auto-generated
@@ -209,7 +189,7 @@ namespace System.IO
         [System.Security.SecuritySafeCritical]  // auto-generated
         private static string NormalizePath(string path, bool fullCheck, int maxPathLength)
         {
-            return NormalizePath(path, fullCheck, maxPathLength, true);
+            return NormalizePath(path, fullCheck, maxPathLength, expandShortPaths: true);
         }
 
         // Returns the name and extension parts of the given path. The resulting
@@ -258,7 +238,7 @@ namespace System.IO
         public static string GetPathRoot(string path)
         {
             if (path == null) return null;
-            path = NormalizePath(path, false);
+            path = NormalizePath(path, fullCheck: false);
             return path.Substring(0, GetRootLength(path));
         }
 
@@ -282,7 +262,7 @@ namespace System.IO
         [System.Security.SecuritySafeCritical]
         public static string GetTempFileName()
         {
-            return InternalGetTempFileName(true);
+            return InternalGetTempFileName(checkHost: true);
         }
 
         // Tests if a path includes a file extension. The result is
@@ -331,7 +311,7 @@ namespace System.IO
             CheckInvalidPathChars(path2);
             CheckInvalidPathChars(path3);
 
-            return CombineNoChecks(CombineNoChecks(path1, path2), path3);
+            return CombineNoChecks(path1, path2, path3);
         }
 
         public static string Combine(params string[] paths)
@@ -422,6 +402,49 @@ namespace System.IO
                 path1 + DirectorySeparatorCharAsString + path2;
         }
 
+        private static string CombineNoChecks(string path1, string path2, string path3)
+        {
+            if (path1.Length == 0)
+                return CombineNoChecks(path2, path3);
+            if (path2.Length == 0)
+                return CombineNoChecks(path1, path3);
+            if (path3.Length == 0)
+                return CombineNoChecks(path1, path2);
+
+            if (IsPathRooted(path3))
+                return path3;
+            if (IsPathRooted(path2))
+                return CombineNoChecks(path2, path3);
+
+            bool hasSep1 = IsDirectoryOrVolumeSeparator(path1[path1.Length - 1]);
+            bool hasSep2 = IsDirectoryOrVolumeSeparator(path2[path2.Length - 1]);
+
+            if (hasSep1 && hasSep2)
+            {
+                return path1 + path2 + path3;
+            }
+            else if (hasSep1)
+            {
+                return path1 + path2 + DirectorySeparatorCharAsString + path3;
+            }
+            else if (hasSep2)
+            {
+                return path1 + DirectorySeparatorCharAsString + path2 + path3;
+            }
+            else
+            {
+                // string.Concat only has string-based overloads up to four arguments; after that requires allocating
+                // a params string[].  Instead, try to use a cached StringBuilder.
+                StringBuilder sb = StringBuilderCache.Acquire(path1.Length + path2.Length + path3.Length + 2);
+                sb.Append(path1)
+                  .Append(DirectorySeparatorChar)
+                  .Append(path2)
+                  .Append(DirectorySeparatorChar)
+                  .Append(path3);
+                return StringBuilderCache.GetStringAndRelease(sb);
+            }
+        }
+
         private static readonly char[] s_Base32Char = {
                 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h',
                 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p',
@@ -485,7 +508,7 @@ namespace System.IO
         private static bool HasIllegalCharacters(string path, bool checkAdditional)
         {
             Contract.Requires(path != null);
-            return path.IndexOfAny(checkAdditional ? InvalidPathCharsWithAdditionalChecks : RealInvalidPathChars) >= 0;
+            return path.IndexOfAny(checkAdditional ? InvalidPathCharsWithAdditionalChecks : InvalidPathChars) >= 0;
         }
 
         private static void CheckInvalidPathChars(string path, bool checkAdditional = false)
@@ -495,6 +518,5 @@ namespace System.IO
             if (HasIllegalCharacters(path, checkAdditional))
                 throw new ArgumentException(SR.Argument_InvalidPathChars, "path");
         }
-
     }
 }

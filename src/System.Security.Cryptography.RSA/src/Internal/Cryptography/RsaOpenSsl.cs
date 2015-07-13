@@ -142,7 +142,15 @@ namespace Internal.Cryptography
 
             CheckInvalidKey(key);
 
-            return Interop.libcrypto.ExportRsaParameters(key, includePrivateParameters);
+            RSAParameters rsaParameters = Interop.libcrypto.ExportRsaParameters(key, includePrivateParameters);
+            bool hasPrivateKey = rsaParameters.D != null;
+
+            if (hasPrivateKey != includePrivateParameters || !HasConsistentPrivateKey(ref rsaParameters))
+            {
+                throw new CryptographicException(SR.Cryptography_CSP_NoPrivateKey);
+            }
+
+            return rsaParameters;
         }
         
         public override unsafe void ImportParameters(RSAParameters parameters)
@@ -152,7 +160,7 @@ namespace Internal.Cryptography
             SafeRsaHandle key = Interop.libcrypto.RSA_new();
             bool imported = false;
 
-            CheckInvalidNewKey(key);
+            Interop.libcrypto.CheckValidOpenSslHandle(key);
 
             try
             {
@@ -218,6 +226,12 @@ namespace Internal.Cryptography
             if (parameters.Modulus == null || parameters.Exponent == null)
                 throw new CryptographicException(SR.Argument_InvalidValue);
 
+            if (!HasConsistentPrivateKey(ref parameters))
+                throw new CryptographicException(SR.Argument_InvalidValue);
+        }
+
+        private static bool HasConsistentPrivateKey(ref RSAParameters parameters)
+        {
             if (parameters.D == null)
             {
                 if (parameters.P != null ||
@@ -226,7 +240,7 @@ namespace Internal.Cryptography
                     parameters.DQ != null ||
                     parameters.InverseQ != null)
                 {
-                    throw new CryptographicException(SR.Argument_InvalidValue);
+                    return false;
                 }
             }
             else
@@ -237,9 +251,11 @@ namespace Internal.Cryptography
                     parameters.DQ == null ||
                     parameters.InverseQ == null)
                 {
-                    throw new CryptographicException(SR.Argument_InvalidValue);
+                    return false;
                 }
             }
+
+            return true;
         }
 
         private static void CheckInvalidKey(SafeRsaHandle key)
@@ -250,19 +266,11 @@ namespace Internal.Cryptography
             }
         }
 
-        private static void CheckInvalidNewKey(SafeRsaHandle key)
-        {
-            if (key == null || key.IsInvalid)
-            {
-                throw CreateOpenSslException();
-            }
-        }
-
         private static void CheckReturn(int returnValue)
         {
             if (returnValue == -1)
             {
-                throw CreateOpenSslException();
+                throw Interop.libcrypto.CreateOpenSslCryptographicException();
             }
         }
 
@@ -273,7 +281,7 @@ namespace Internal.Cryptography
                 return;
             }
 
-            throw CreateOpenSslException();
+            throw Interop.libcrypto.CreateOpenSslCryptographicException();
         }
 
         private SafeRsaHandle GenerateKey()
@@ -281,7 +289,7 @@ namespace Internal.Cryptography
             SafeRsaHandle key = Interop.libcrypto.RSA_new();
             bool generated = false;
 
-            CheckInvalidNewKey(key);
+            Interop.libcrypto.CheckValidOpenSslHandle(key);
 
             try
             {
@@ -309,11 +317,6 @@ namespace Internal.Cryptography
             }
 
             return key;
-        }
-
-        private static Exception CreateOpenSslException()
-        {
-            return new CryptographicException(Interop.libcrypto.GetOpenSslErrorString());
         }
 
         internal byte[] HashData(byte[] buffer, int offset, int count, HashAlgorithmName hashAlgorithmName)
@@ -349,7 +352,7 @@ namespace Internal.Cryptography
 
             if (!success)
             {
-                throw CreateOpenSslException();
+                throw Interop.libcrypto.CreateOpenSslCryptographicException();
             }
 
             Debug.Assert(
