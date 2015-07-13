@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <PropertyGroup>
@@ -46,6 +46,9 @@
     <Compile Include="System\IO\ReadLinesIterator.cs" />
     <Compile Include="System\IO\SearchOption.cs" />
     <Compile Include="System\IO\SearchTarget.cs" />
+    <Compile Include="$(CommonPath)\System\Collections\Generic\EnumerableHelpers.cs">
+      <Link>Common\System\Collections\Generic\EnumerableHelpers.cs</Link>
+    </Compile>
     <Compile Include="$(CommonPath)\System\IO\StringBuilderCache.cs">
       <Link>Common\System\IO\StringBuilderCache.cs</Link>
     </Compile>
@@ -56,6 +59,7 @@
     <Compile Include="Microsoft\Win32\SafeHandles\SafeFileHandle.Windows.cs" />
     <Compile Include="Microsoft\Win32\SafeHandles\SafeFindHandle.Windows.cs" />
     <Compile Include="System\IO\FileStream.Win32.cs" />
+    <Compile Include="System\IO\PathHelpers.Windows.cs" />
     <Compile Include="System\IO\Win32FileStream.cs" />
     <Compile Include="System\IO\Win32FileStreamCompletionSource.cs" />
     <Compile Include="System\IO\Win32FileSystem.cs" />
@@ -214,6 +218,7 @@
     <Compile Include="Microsoft\Win32\SafeHandles\SafeFileHandle.Unix.cs" />
     <Compile Include="System\IO\FileStream.Unix.cs" />
     <Compile Include="System\IO\FileSystem.Current.Unix.cs" />
+    <Compile Include="System\IO\PathHelpers.Unix.cs" />
     <Compile Include="System\IO\UnixFileStream.cs" />
     <Compile Include="System\IO\UnixFileSystem.cs" />
     <Compile Include="System\IO\UnixFileSystemObject.cs" />

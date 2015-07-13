@@ -24,7 +24,7 @@ __monoversion=$(mono --version | grep "version 4.[1-9]")
 
 if [ $? -ne 0 ]; then
     # if built from tarball, mono only identifies itself as 4.0.1
-    __monoversion=$(mono --version | egrep "version 4.0.1(.[0-9]+)?")
+    __monoversion=$(mono --version | egrep "version 4.0.[1-9]+(.[0-9]+)?")
     if [ $? -ne 0 ]; then
         echo "Mono 4.0.1.44 or later is required to build corefx. Please see https://github.com/dotnet/corefx/blob/master/Documentation/building/unix-instructions.md for more details."
         exit 1
@@ -68,7 +68,7 @@ fi
 # Grab the MSBuild package if we don't have it already
 if [ ! -e "$__msbuildpath" ]; then
     echo "Restoring MSBuild..."
-    mono "$__nugetpath" install $__msbuildpackageid -Version $__msbuildpackageversion -ConfigFile "$__nugetconfig" -OutputDirectory "$__packageroot"
+    mono "$__nugetpath" install $__msbuildpackageid -Version $__msbuildpackageversion -source "https://www.myget.org/F/dotnet-buildtools/" -OutputDirectory "$__packageroot"
     if [ $? -ne 0 ]; then
         echo "Failed to restore MSBuild."
         exit 1
@@ -84,7 +84,7 @@ else
     __osgroup=OSX
 fi
 
-MONO29679=1 ReferenceAssemblyRoot=$__referenceassemblyroot mono $__msbuildpath "$__buildproj" /nologo /verbosity:minimal "/fileloggerparameters:Verbosity=diag;LogFile=$__buildlog" /t:Build /p:OSGroup=$__osgroup /p:UseRoslynCompiler=true /p:COMPUTERNAME=$(hostname) /p:USERNAME=$(id -un) "$@"
+MONO29679=1 ReferenceAssemblyRoot=$__referenceassemblyroot mono $__msbuildpath "$__buildproj" /nologo /verbosity:minimal "/fileloggerparameters:Verbosity=normal;LogFile=$__buildlog" /t:Build /p:OSGroup=$__osgroup /p:UseRoslynCompiler=true /p:COMPUTERNAME=$(hostname) /p:USERNAME=$(id -un) "$@"
 BUILDERRORLEVEL=$?
 
 echo

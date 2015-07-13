@@ -1452,7 +1452,7 @@ namespace System.Linq
 
         public static IEnumerable<TResult> Empty<TResult>()
         {
-            return EmptyEnumerable<TResult>.Instance;
+            return Array.Empty<TResult>();
         }
 
         public static bool Any<TSource>(this IEnumerable<TSource> source)
@@ -2500,15 +2500,6 @@ namespace System.Linq
         }
     }
 
-    //
-    // This is a more memory-intensive EmptyEnumerable<TElement> that allocates a new Enumerator each time. Unfortunately, we have to retain it
-    // for desktop platforms to avoid breaking scenarios that serialize an empty enumerable on 4.5 and deserialize it on 4.0.
-    // 
-    internal class EmptyEnumerable<TElement>
-    {
-        public static readonly TElement[] Instance = new TElement[0];
-    }
-
     internal class IdentityFunction<TElement>
     {
         public static Func<TElement, TElement> Instance
@@ -2583,7 +2574,7 @@ namespace System.Linq
             {
                 Grouping<TKey, TElement> grouping = GetGrouping(key, false);
                 if (grouping != null) return grouping;
-                return EmptyEnumerable<TElement>.Instance;
+                return Array.Empty<TElement>();
             }
         }
 
@@ -3105,7 +3096,10 @@ namespace System.Linq
                 if (next == null) return index1 - index2;
                 return next.CompareKeys(index1, index2);
             }
-            return descending ? -c : c;
+            // -c will result in a negative value for int.MinValue (-int.MinValue == int.MinValue).
+            // Flipping keys earlier is more likely to trigger something strange in a comparer,
+            // particularly as it comes to the sort being stable.
+            return (descending != (c > 0)) ? 1 : -1;
         }
     }
 
