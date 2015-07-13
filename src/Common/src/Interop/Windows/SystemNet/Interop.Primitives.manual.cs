@@ -9,7 +9,7 @@ internal static partial class Interop
     internal enum SchProtocols
     {
         Zero = 0,
-        PctClient = 0x00000002,
+        PctClient = 0x00000002,         // SP_PROT_PCT1_CLIENT
         PctServer = 0x00000001,
         Pct = (PctClient | PctServer),
         Ssl2Client = 0x00000008,
