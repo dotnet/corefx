@@ -1071,6 +1071,17 @@ namespace System.Linq
             return d;
         }
 
+        public static HashSet<TSource> ToHashSet<TSource>(this IEnumerable<TSource> source)
+        {
+            return ToHashSet<TSource>(source, null);
+        }
+
+        public static HashSet<TSource> ToHashSet<TSource>(this IEnumerable<TSource> source, IEqualityComparer<TSource> comparer)
+        {
+            if (source == null) throw Error.ArgumentNull("source");
+            return new HashSet<TSource>(source, comparer);
+        }
+
         public static ILookup<TKey, TSource> ToLookup<TSource, TKey>(this IEnumerable<TSource> source, Func<TSource, TKey> keySelector)
         {
             return Lookup<TKey, TSource>.Create(source, keySelector, IdentityFunction<TSource>.Instance, null);
