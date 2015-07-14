@@ -40,7 +40,9 @@ namespace System.Linq.Tests
         public void TolerateNullElements()
         {
             // Unlike the keys of a dictionary, HashSet tolerates null items.
-            new string[] { "abc", null, "def" }.ToHashSet();
+            Assert.False(new HashSet<string>().Contains(null));
+            var hs = new string[] { "abc", null, "def" }.ToHashSet();
+            Assert.True(hs.Contains(null));
         }
         [Fact]
         public void TolerateDuplicates()
