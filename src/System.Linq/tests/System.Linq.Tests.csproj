@@ -21,6 +21,7 @@
     <Compile Include="CachedEnumerator.cs" />
     <Compile Include="EnumerableTests.cs" />
     <Compile Include="EmptyEnumerable.cs" />
+    <Compile Include="ToHashSetTests.cs" />
     <Compile Include="Helpers\TestCollection.cs" />
     <Compile Include="Helpers\TestEnumerable.cs" />
     <Compile Include="Helpers\TestReadOnlyCollection.cs" />

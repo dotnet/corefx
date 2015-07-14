@@ -1759,7 +1759,8 @@ namespace Tests
                      "AsEnumerable",
                      "ToList",
                      "Fold",
-                     "LeftJoin"
+                     "LeftJoin",
+                     "ToHashSet"
                  }
                 ).ToList();
 
