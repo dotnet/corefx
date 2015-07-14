@@ -16,7 +16,7 @@ namespace System.Net.Http
         private HttpContentHeaders _headers;
         private MemoryStream _bufferedContent;
         private bool _disposed;
-        internal Stream _contentReadStream;
+        private Stream _contentReadStream;
         private bool _canCalculateLength;
 
         internal const long MaxBufferSize = Int32.MaxValue;
@@ -83,11 +83,15 @@ namespace System.Net.Http
         public Task<string> ReadAsStringAsync()
         {
             CheckDisposed();
-
-            return LoadIntoBufferAndReadAsAsync(MaxBufferSize, content => content.GetStringFromBuffer());
+            return ReadAsStringCoreAsync(MaxBufferSize);
         }
 
-        internal string GetStringFromBuffer()
+        internal Task<string> ReadAsStringCoreAsync(long maxBufferSize)
+        {
+            return LoadIntoBufferAndReadAsAsync(maxBufferSize, content => content.GetStringFromBuffer());
+        }
+
+        private string GetStringFromBuffer()
         {
             if (_bufferedContent.Length == 0)
             {
@@ -158,10 +162,15 @@ namespace System.Net.Http
         public Task<byte[]> ReadAsByteArrayAsync()
         {
             CheckDisposed();
-            return LoadIntoBufferAndReadAsAsync(MaxBufferSize, content => content.GetByteArrayFromBuffer());
+            return ReadAsByteArrayCoreAsync(MaxBufferSize);
         }
 
-        internal byte[] GetByteArrayFromBuffer()
+        internal Task<byte[]> ReadAsByteArrayCoreAsync(long maxBufferSize)
+        {
+            return LoadIntoBufferAndReadAsAsync(maxBufferSize, content => content.GetByteArrayFromBuffer());
+        }
+
+        private byte[] GetByteArrayFromBuffer()
         {
             return _bufferedContent.ToArray();
         }
@@ -186,6 +195,11 @@ namespace System.Net.Http
                 return Task.FromResult<Stream>(_contentReadStream);
             }
 
+            return ReadAsStreamCoreAsync();
+        }
+
+        internal Task<Stream> ReadAsStreamCoreAsync()
+        {
             var tcs = new TaskCompletionSource<Stream>(this);
             CreateContentReadStreamAsync().ContinueWithStandard(tcs, (task, state) =>
             {
@@ -275,7 +289,7 @@ namespace System.Net.Http
             return LoadIntoBufferAndReadAsAsync<object>(maxBufferSize, content => null);
         }
 
-        internal Task<T> LoadIntoBufferAndReadAsAsync<T>(long maxBufferSize, Func<HttpContent, T> readAs)
+        private Task<T> LoadIntoBufferAndReadAsAsync<T>(long maxBufferSize, Func<HttpContent, T> readAs)
         {
             CheckDisposed();
             if (maxBufferSize > HttpContent.MaxBufferSize)
@@ -367,11 +381,6 @@ namespace System.Net.Http
             // if there is a better way to retrieve the content as stream (e.g. byte array/string use a more efficient
             // way, like wrapping a read-only MemoryStream around the bytes/string)
             return LoadIntoBufferAndReadAsAsync<Stream>(MaxBufferSize, content => content._bufferedContent);
-        }
-
-        internal Task<Stream> CreateContentReadStreamInternalAsync()
-        {
-            return CreateContentReadStreamAsync();
         }
 
         // Derived types return true if they're able to compute the length. It's OK if derived types return false to

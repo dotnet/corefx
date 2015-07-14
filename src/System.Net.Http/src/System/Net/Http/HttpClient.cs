@@ -133,7 +133,7 @@ namespace System.Net.Http
         public Task<string> GetStringAsync(Uri requestUri)
         {
             return GetContentAsync(requestUri, HttpCompletionOption.ResponseContentRead, string.Empty,
-                content => content.GetStringFromBuffer());
+                (content, maxBufferSize) => content.ReadAsStringCoreAsync(maxBufferSize));
         }
 
         public Task<byte[]> GetByteArrayAsync(string requestUri)
@@ -144,7 +144,7 @@ namespace System.Net.Http
         public Task<byte[]> GetByteArrayAsync(Uri requestUri)
         {
             return GetContentAsync(requestUri, HttpCompletionOption.ResponseContentRead, Array.Empty<byte>(),
-                content => content.GetByteArrayFromBuffer());
+                (content, maxBufferSize) => content.ReadAsByteArrayCoreAsync(maxBufferSize));
         }
 
         // Unbuffered by default
@@ -157,15 +157,15 @@ namespace System.Net.Http
         public Task<Stream> GetStreamAsync(Uri requestUri)
         {
             return GetContentAsync(requestUri, HttpCompletionOption.ResponseHeadersRead, Stream.Null,
-                content => content._contentReadStream);
+                (content, _) => content.ReadAsStreamCoreAsync());
         }
 
-        private Task<T> GetContentAsync<T>(Uri requestUri, HttpCompletionOption option, T defaultValue, Func<HttpContent, T> readAs)
+        private Task<T> GetContentAsync<T>(Uri requestUri, HttpCompletionOption option, T defaultValue, Func<HttpContent, long, Task<T>> contentHandler)
         {
             bool readContent = option == HttpCompletionOption.ResponseContentRead;
             Debug.Assert(requestUri != null);
             Debug.Assert(readContent || option == HttpCompletionOption.ResponseHeadersRead, "Unknown option");
-            Debug.Assert(readAs != null);
+            Debug.Assert(contentHandler != null);
 
             CheckDisposed();
             var request = new HttpRequestMessage(HttpMethod.Get, requestUri);
@@ -178,7 +178,7 @@ namespace System.Net.Http
             SetTimeout(linkedCts);
 
             Task<HttpResponseMessage> sendTask = base.SendAsync(request, linkedCts.Token);
-            return GetContentCoreAsync(sendTask, request, option, defaultValue, linkedCts, readAs);
+            return GetContentCoreAsync(sendTask, request, option, defaultValue, linkedCts, contentHandler);
         }
 
         private async Task<T> GetContentCoreAsync<T>(
@@ -187,7 +187,7 @@ namespace System.Net.Http
             HttpCompletionOption option,
             T defaultValue,
             CancellationTokenSource cts,
-            Func<HttpContent, T> readAs)
+            Func<HttpContent, long, Task<T>> contentHandler)
         {
             HttpResponseMessage response;
 
@@ -227,28 +227,10 @@ namespace System.Net.Http
 
             try
             {
-                HttpContent content = response.Content;
-
-                if (option == HttpCompletionOption.ResponseContentRead)
-                {
-                    Task<T> task = content.LoadIntoBufferAndReadAsAsync(_maxResponseContentBufferSize, readAs);
-                    T result = await task.ConfigureAwait(false);
-                    HandleCompletion(request, cts, response);
-                    return result;
-                }
-                else
-                {
-                    // Otherwise option is HttpCompletionOption.ResponseHeadersRead.
-                    // This option used by GetStreamAsync so we expecting that generic argument is Stream.
-                    Debug.Assert(typeof(T) == typeof(Stream), "We expecting Stream as generic argument at this branch");
-
-                    // CreateContentReadStreamInternalAsync invokes CreateContentReadStreamAsync which is protected.
-                    // We need this call for preserving existing behaviour because it could be overriden.
-                    Stream result = await content.CreateContentReadStreamInternalAsync().ConfigureAwait(false);
-                    content._contentReadStream = result;
-                    HandleCompletion(request, cts, response);
-                    return readAs(content);
-                }
+                Task<T> task = contentHandler(response.Content, _maxResponseContentBufferSize);
+                T result = await task.ConfigureAwait(false);
+                HandleCompletion(request, cts, response);
+                return result;
             }
             catch (HttpRequestException e)
             {
