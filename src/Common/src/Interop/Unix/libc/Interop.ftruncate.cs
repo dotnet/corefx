@@ -10,7 +10,7 @@ internal static partial class Interop
 {
     internal static partial class libc
     {
-        [DllImport(Libraries.Libc, SetLastError = true)]
+        [DllImport(Libraries.Libc, SetLastError = true, EntryPoint = "ftruncate64")]
         internal static extern int ftruncate(int fd, off_t length);
     }
 }

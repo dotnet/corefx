@@ -11,7 +11,7 @@ internal static partial class Interop
 {
     internal static partial class libc
     {
-        [DllImport(Libraries.Libc, SetLastError = true)]
+        [DllImport(Libraries.Libc, SetLastError = true, EntryPoint = "mmap64")]
         internal static extern IntPtr mmap(
             IntPtr addr, size_t len, 
             MemoryMappedProtections prot, MemoryMappedFlags flags,
