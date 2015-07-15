@@ -10,7 +10,7 @@ internal static partial class Interop
 {
     internal static partial class libc
     {
-        [DllImport(Libraries.Libc, SetLastError = true)]
+        [DllImport(Libraries.Libc, SetLastError = true, EntryPoint = "open64")]
         internal static extern int open(string filename, OpenFlags flags, mode_t mode);
     }
 }

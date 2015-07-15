@@ -10,7 +10,7 @@ internal static partial class Interop
 {
     internal static partial class libc
     {
-        [DllImport(Libraries.Libc, SetLastError = true)]
+        [DllImport(Libraries.Libc, SetLastError = true, EntryPoint = "lseek64")]
         internal static extern off_t lseek(int fd, off_t offset, SeekWhence whence);
 
         internal enum SeekWhence

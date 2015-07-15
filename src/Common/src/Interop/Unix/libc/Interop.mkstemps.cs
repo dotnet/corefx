@@ -7,7 +7,7 @@ internal static partial class Interop
 {
     internal static partial class libc
     {
-        [DllImport(Libraries.Libc, SetLastError = true)]
+        [DllImport(Libraries.Libc, SetLastError = true, EntryPoint = "mkstemps64")]
         internal static extern int mkstemps(byte[] template, int suffixlen);
     }
 }
