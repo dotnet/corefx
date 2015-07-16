@@ -583,7 +583,7 @@ namespace System.Collections.Immutable
 
             if (self.IsEmpty)
             {
-                return new ImmutableArray<T>(items.array);
+                return items;
             }
             else if (items.IsEmpty)
             {
@@ -636,7 +636,7 @@ namespace System.Collections.Immutable
             if (self.IsEmpty)
             {
                 // Be sure what we return is marked as initialized.
-                return new ImmutableArray<T>(items.array);
+                return items;
             }
             else if (items.IsEmpty)
             {
