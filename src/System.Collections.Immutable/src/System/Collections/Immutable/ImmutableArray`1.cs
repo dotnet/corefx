@@ -587,7 +587,7 @@ namespace System.Collections.Immutable
             }
             else if (items.IsEmpty)
             {
-                return new ImmutableArray<T>(self.array);
+                return self;
             }
 
             return self.InsertRange(index, items.array);
@@ -728,7 +728,7 @@ namespace System.Collections.Immutable
             self.ThrowNullRefIfNotInitialized();
             int index = self.IndexOf(item, equalityComparer);
             return index < 0
-                ? new ImmutableArray<T>(self.array)
+                ? self
                 : self.RemoveAt(index);
         }
 
@@ -875,9 +875,7 @@ namespace System.Collections.Immutable
             Requires.NotNull(match, "match");
 
             if (self.IsEmpty)
-            {
-                return new ImmutableArray<T>(self.array);
-            }
+                return self;
 
             List<int> removeIndexes = null;
             for (int i = 0; i < self.array.Length; i++)
@@ -942,14 +940,14 @@ namespace System.Collections.Immutable
             Requires.Range(index >= 0, "index");
             Requires.Range(count >= 0 && index + count <= self.Length, "count");
 
-            if (comparer == null)
-            {
-                comparer = Comparer<T>.Default;
-            }
-
             // 0 and 1 element arrays don't need to be sorted.
             if (count > 1)
             {
+                if (comparer == null)
+                {
+                    comparer = Comparer<T>.Default;
+                }
+
                 // Avoid copying the entire array when the array is already sorted.
                 bool outOfOrder = false;
                 for (int i = index + 1; i < index + count; i++)
@@ -970,7 +968,7 @@ namespace System.Collections.Immutable
                 }
             }
 
-            return new ImmutableArray<T>(self.array);
+            return self;
         }
 
         /// <summary>
@@ -1642,7 +1640,7 @@ namespace System.Collections.Immutable
             if (indexesToRemove.Count == 0)
             {
                 // Be sure to return a !IsDefault instance.
-                return new ImmutableArray<T>(self.array);
+                return self;
             }
 
             var newArray = new T[self.Length - indexesToRemove.Count];
