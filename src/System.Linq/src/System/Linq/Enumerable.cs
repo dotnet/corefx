@@ -3150,16 +3150,12 @@ namespace System.Linq
                     }
                 }
             }
-
-            if (items == null)
+            else
             {
+                items = new TElement[4];
                 foreach (TElement item in source)
                 {
-                    if (items == null)
-                    {
-                        items = new TElement[4];
-                    }
-                    else if (items.Length == count)
+                    if (items.Length == count)
                     {
                         Array.Resize(ref items, checked(count * 2));
                     }
