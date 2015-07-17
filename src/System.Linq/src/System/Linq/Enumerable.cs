@@ -1136,8 +1136,17 @@ namespace System.Linq
 
         public static IEnumerable<TResult> Cast<TResult>(this IEnumerable source)
         {
-            IEnumerable<TResult> typedSource = source as IEnumerable<TResult>;
-            if (typedSource != null) return typedSource;
+            // The optimisation of casting source itself causes difficulties in
+            // some cases where TResult is a value type; specifically if it is an enum
+            // and the source is an array (or some other collections) of enum with the same
+            // underlying type, or if one of the types is itself an underlying type, 
+            // it will "mostly" work, for confusing values of "mostly".
+            // Have the jitter cut out this whole path for non-nullable TSource.
+            if (default(TResult) == null)
+            {
+                IEnumerable<TResult> typedSource = source as IEnumerable<TResult>;
+                if (typedSource != null) return typedSource;
+            }
             if (source == null) throw Error.ArgumentNull("source");
             return CastIterator<TResult>(source);
         }

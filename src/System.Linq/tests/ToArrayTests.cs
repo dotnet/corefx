@@ -196,5 +196,27 @@ namespace System.Linq.Tests
             Assert.Equal(Array.Empty<string>(), sourceList.Select(i => i.ToString()).Where(s => s == null).ToArray());
         }
 
+        // Consider that two very similar enums is not unheard of, if e.g. two assemblies map the
+        // same external source of numbers (codes, response codes, colour codes, etc.) to values.
+        private enum Enum0
+        {
+            First,
+            Second,
+            Third
+        }
+
+        private enum Enum1
+        {
+            First,
+            Second,
+            Third
+        }
+
+        [Fact]
+        public void ToArray_Cast()
+        {
+            var source = new[] { Enum0.First, Enum0.Second, Enum0.Third };
+            Assert.Equal(new[] { Enum1.First, Enum1.Second, Enum1.Third }, source.Cast<Enum1>().ToArray());
+        }
     }
 }
