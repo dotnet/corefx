@@ -597,11 +597,6 @@ namespace System.Collections.Immutable
         public ImmutableArray<T> Add(T item)
         {
             var self = this;
-            if (self.Length == 0)
-            {
-                return ImmutableArray.Create(item);
-            }
-
             return self.Insert(self.Length, item);
         }
 
@@ -686,6 +681,10 @@ namespace System.Collections.Immutable
         public ImmutableArray<T> Replace(T oldValue, T newValue, IEqualityComparer<T> equalityComparer)
         {
             var self = this;
+            
+            if (self.IsEmpty)
+                return self;
+            
             int index = self.IndexOf(oldValue, equalityComparer);
             if (index < 0)
             {
@@ -721,6 +720,10 @@ namespace System.Collections.Immutable
         {
             var self = this;
             self.ThrowNullRefIfNotInitialized();
+            
+            if (self.IsEmpty)
+                return self;
+            
             int index = self.IndexOf(item, equalityComparer);
             return index < 0
                 ? self
@@ -792,6 +795,9 @@ namespace System.Collections.Immutable
             self.ThrowNullRefIfNotInitialized();
             Requires.NotNull(items, "items");
             Requires.NotNull(equalityComparer, "equalityComparer");
+            
+            if (self.IsEmpty)
+                return self;
 
             var indexesToRemove = new SortedSet<int>();
             foreach (var item in items)
@@ -834,11 +840,11 @@ namespace System.Collections.Immutable
         public ImmutableArray<T> RemoveRange(ImmutableArray<T> items, IEqualityComparer<T> equalityComparer)
         {
             var self = this;
+            self.ThrowNullRefIfNotInitialized();
             Requires.NotNull(items.array, "items");
-
+            
             if (items.IsEmpty)
             {
-                self.ThrowNullRefIfNotInitialized();
                 return self;
             }
             else if (items.Length == 1)
@@ -1096,7 +1102,7 @@ namespace System.Collections.Immutable
         public IEnumerable<TResult> OfType<TResult>()
         {
             var self = this;
-            if (self.array == null || self.array.Length == 0)
+            if (self.IsDefaultOrEmpty)
             {
                 return Enumerable.Empty<TResult>();
             }
