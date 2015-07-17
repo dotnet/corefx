@@ -1,15 +1,14 @@
-using CoreFXTestLibrary;
+using Xunit;
 using System;
 using System.IO;
 using System.Text;
 
 namespace BinaryWriterTests
 {
-    [ContractsRequired("System.IO, System.Runtime, System.Text.Encoding, System.Threading.Tasks")]
     public class BinaryWriter_WriteTests
     {
 
-        [TestMethod]
+        [Fact]
         public static void BinaryWriter_WriteBoolTest()
         {
             // [] Write a series of booleans to a stream
@@ -61,7 +60,7 @@ namespace BinaryWriterTests
             mstr.Dispose();
         }
 
-        [TestMethod]
+        [Fact]
         public static void BinaryWriter_WriteSingleTest()
         {
             Single sgl2 = 0;
@@ -93,7 +92,7 @@ namespace BinaryWriterTests
             mstr.Dispose();
         }
 
-        [TestMethod]
+        [Fact]
         public static void BinaryWriter_WriteSingleTest_Negative()
         {
             Single sgl2 = 0;
@@ -130,7 +129,7 @@ namespace BinaryWriterTests
             }
         }
 
-        [TestMethod]
+        [Fact]
         public static void BinaryWriter_WriteDecimalTest()
         {
             Decimal dbl2 = 0;
@@ -163,7 +162,7 @@ namespace BinaryWriterTests
             mstr.Dispose();
         }
 
-        [TestMethod]
+        [Fact]
         public static void BinaryWriter_WriteDecimalTest_Negative()
         {
             Decimal dbl2 = 0;
@@ -205,7 +204,7 @@ namespace BinaryWriterTests
             mstr.Dispose();
         }
 
-        [TestMethod]
+        [Fact]
         public static void BinaryWriter_WriteDoubleTest()
         {
             MemoryStream mstr = new MemoryStream();
@@ -239,7 +238,7 @@ namespace BinaryWriterTests
             mstr.Dispose();
         }
 
-        [TestMethod]
+        [Fact]
         public static void BinaryWriter_WriteDoubleTest_Negative()
         {
             MemoryStream mstr = new MemoryStream();
@@ -280,7 +279,7 @@ namespace BinaryWriterTests
             mstr.Dispose();
         }
 
-        [TestMethod]
+        [Fact]
         public static void BinaryWriter_WriteInt16Test()
         {
             MemoryStream mstr = new MemoryStream();
@@ -310,7 +309,7 @@ namespace BinaryWriterTests
             mstr.Dispose();
         }
 
-        [TestMethod]
+        [Fact]
         public static void BinaryWriter_WriteInt16Test_Negative()
         {
             MemoryStream mstr = new MemoryStream();
@@ -348,7 +347,7 @@ namespace BinaryWriterTests
             mstr.Dispose();
         }
 
-        [TestMethod]
+        [Fact]
         public static void BinaryWriter_WriteInt32Test()
         {
             Int32 i32a = 0;
@@ -377,7 +376,7 @@ namespace BinaryWriterTests
             mstr.Dispose();
         }
 
-        [TestMethod]
+        [Fact]
         public static void BinaryWriter_WriteInt32Test_Negative()
         {
             Int32 i32a = 0;
@@ -415,7 +414,7 @@ namespace BinaryWriterTests
             mstr.Dispose();
         }
 
-        [TestMethod]
+        [Fact]
         public static void BinaryWriter_WriteInt64Test()
         {
             Int64 i64a = 0;
@@ -443,7 +442,7 @@ namespace BinaryWriterTests
             mstr.Dispose();
         }
 
-        [TestMethod]
+        [Fact]
         public static void BinaryWriter_WriteInt64Test_Negative()
         {
             Int64 i64a = 0;
@@ -480,7 +479,7 @@ namespace BinaryWriterTests
             mstr.Dispose();
         }
 
-        [TestMethod]
+        [Fact]
         public static void BinaryWriter_WriteUInt16Test()
         {
             UInt16 ui16a = 0;
@@ -510,7 +509,7 @@ namespace BinaryWriterTests
             mstr.Dispose();
         }
 
-        [TestMethod]
+        [Fact]
         public static void BinaryWriter_WriteUInt16Test_Negative()
         {
             UInt16 ui16a = 0;
@@ -548,7 +547,7 @@ namespace BinaryWriterTests
             mstr.Dispose();
         }
 
-        [TestMethod]
+        [Fact]
         public static void BinaryWriter_WriteUInt32Test()
         {
             UInt32 ui32a = 0;
@@ -578,7 +577,7 @@ namespace BinaryWriterTests
             mstr.Dispose();
         }
 
-        [TestMethod]
+        [Fact]
         public static void BinaryWriter_WriteUInt32Test_Negative()
         {
             UInt32 ui32a = 0;
@@ -618,7 +617,7 @@ namespace BinaryWriterTests
             mstr.Dispose();
         }
 
-        [TestMethod]
+        [Fact]
         public static void BinaryWriter_WriteUInt64Test()
         {
             UInt64 ui64a = 0;
@@ -648,7 +647,7 @@ namespace BinaryWriterTests
             mstr.Dispose();
         }
 
-        [TestMethod]
+        [Fact]
         public static void BinaryWriter_WriteUInt64Test_Negative()
         {
             UInt64 ui64a = 0;
@@ -689,7 +688,7 @@ namespace BinaryWriterTests
             mstr.Dispose();
         }
 
-        [TestMethod]
+        [Fact]
         public static void BinaryWriter_WriteStringTest()
         {
             String str2 = String.Empty;
@@ -730,7 +729,7 @@ namespace BinaryWriterTests
             dw2.Dispose();
             br.Dispose();
         }
-        [TestMethod]
+        [Fact]
         public static void BinaryWriter_WriteStringTest_Negative()
         {
             // [] ArgumentNullException for null argument

@@ -1,15 +1,14 @@
-using CoreFXTestLibrary;
+using Xunit;
 using System;
 using System.IO;
 using System.Text;
 
 namespace Tests
 {
-    [ContractsRequired("System.IO, System.Runtime, System.Text.Encoding, System.Threading.Tasks")]
     public class BinaryWriterTests
     {
 
-        [TestMethod]
+        [Fact]
         public static void BinaryWriter_CtorAndWriteTests1()
         {
             BinaryWriter dw2;
@@ -28,7 +27,7 @@ namespace Tests
             mstr.Dispose();
         }
 
-        [TestMethod]
+        [Fact]
         public static void BinaryWriter_CtorAndWriteTests1_Negative()
         {
             BinaryWriter dw2;
@@ -48,7 +47,7 @@ namespace Tests
             Assert.Throws<ArgumentException>(() => { dw2 = new BinaryWriter(mstr); }, "Error_98t4y! Expected exception not thrown");
         }
 
-        [TestMethod]
+        [Fact]
         public static void BinaryWriter_EncodingCtorAndWriteTests()
         {
             MemoryStream ms2;
@@ -98,7 +97,7 @@ namespace Tests
             ms2.Dispose();
         }
 
-        [TestMethod]
+        [Fact]
         public static void BinaryWriter_EncodingCtorAndWriteTests_Negative()
         {
             // [] Check for ArgumentNullException on null stream
@@ -112,7 +111,7 @@ namespace Tests
                "Error_209x7! Expected exception not thrown");
         }
 
-        [TestMethod]
+        [Fact]
         public static void BinaryWriter_SeekTests()
         {
             int[] iArrLargeValues = new Int32[] { 10000, 100000, Int32.MaxValue / 200, Int32.MaxValue / 1000, Int16.MaxValue, Int32.MaxValue, Int32.MaxValue - 1, Int32.MaxValue / 2, Int32.MaxValue / 10, Int32.MaxValue / 100 };
@@ -266,7 +265,7 @@ namespace Tests
             dw2.Dispose();
             mstr.Dispose();
         }
-        [TestMethod]
+        [Fact]
         public static void BinaryWriter_SeekTests_Negative()
         {
             int[] iArrInvalidValues = new Int32[] { -1, -2, -100, -1000, -10000, -100000, -1000000, -10000000, -100000000, -1000000000, Int32.MinValue, Int16.MinValue };
@@ -294,7 +293,7 @@ namespace Tests
             mstr.Dispose();
         }
 
-        [TestMethod]
+        [Fact]
         public static void BinaryWriter_BaseStreamTests()
         {
             // [] Get the base stream for MemoryStream
@@ -307,7 +306,7 @@ namespace Tests
             ms2.Dispose();
         }
 
-        [TestMethod]
+        [Fact]
         public static void BinaryWriter_FlushTests()
         {
             // [] Check that flush updates the underlying stream
@@ -334,7 +333,7 @@ namespace Tests
             }
         }
 
-        [TestMethod]
+        [Fact]
         public static void BinaryWriter_DisposeTests()
         {
             BinaryWriter binaryWriter;
@@ -356,7 +355,7 @@ namespace Tests
             memoryStream.Dispose();
         }
 
-        [TestMethod]
+        [Fact]
         public static void BinaryWriter_DisposeTests_Negative()
         {
             BinaryWriter binaryWriter;
