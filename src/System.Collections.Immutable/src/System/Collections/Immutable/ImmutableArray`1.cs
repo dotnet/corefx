@@ -890,7 +890,7 @@ namespace System.Collections.Immutable
 
             List<int> removeIndexes = null;
             
-            int i;
+            int i = 0;
             for (; i < self.array.Length; i++)
             {
                 if (match(self.array[i]))
