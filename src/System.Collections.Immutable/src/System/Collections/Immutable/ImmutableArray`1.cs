@@ -682,9 +682,6 @@ namespace System.Collections.Immutable
         {
             var self = this;
             
-            if (self.IsEmpty)
-                return self;
-            
             int index = self.IndexOf(oldValue, equalityComparer);
             if (index < 0)
             {
