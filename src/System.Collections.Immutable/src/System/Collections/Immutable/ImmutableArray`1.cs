@@ -545,21 +545,34 @@ namespace System.Collections.Immutable
             Requires.NotNull(items, "items");
 
             if (self.Length == 0)
-            {
                 return ImmutableArray.CreateRange(items);
-            }
             
-            T[] other = items.ToArray();
-            if (other.Length == 0)
+            if (items is ICollection<T>)
             {
-                return self;
+                ICollection<T> other = (ICollection<T>)items;
+                
+                if (other.Count == 0)
+                    return self;
+                
+                T[] dest = new T[self.Length + other.Count];
+                Array.Copy(self.array, 0, dest, 0, index);
+                other.CopyTo(dest, index);
+                Array.Copy(self.array, index, dest, index + other.Count, self.Length - index);
+                return new ImmutableArray<T>(dest);
             }
-
-            T[] tmp = new T[self.Length + other.Length];
-            Array.Copy(self.array, 0, tmp, 0, index);
-            Array.Copy(other, 0, tmp, index, other.Length);
-            Array.Copy(self.array, index, tmp, index + other.Length, self.Length - index);
-            return new ImmutableArray<T>(tmp);
+            else
+            {
+                T[] other = items.ToArray();
+                
+                if (other.Length == 0)
+                    return self;
+    
+                T[] tmp = new T[self.Length + other.Length];
+                Array.Copy(self.array, 0, tmp, 0, index);
+                Array.Copy(other, 0, tmp, index, other.Length);
+                Array.Copy(self.array, index, tmp, index + other.Length, self.Length - index);
+                return new ImmutableArray<T>(tmp);
+            }
         }
 
         /// <summary>
