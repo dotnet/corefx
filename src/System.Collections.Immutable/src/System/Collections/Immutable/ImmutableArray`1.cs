@@ -888,16 +888,25 @@ namespace System.Collections.Immutable
             if (self.IsEmpty)
                 return self;
 
-            List<int> removeIndexes = new List<int>();
-            for (int i = 0; i < self.array.Length; i++)
+            List<int> removeIndexes = null;
+            
+            int i;
+            for (; i < self.array.Length; i++)
             {
                 if (match(self.array[i]))
                 {
+                    removeIndexes = new List<int>();
                     removeIndexes.Add(i);
+                    break;
                 }
             }
+            for (; i < self.array.Length; i++)
+            {
+                if (match(self.array[i]))
+                    removeIndexes.Add(i);
+            }
 
-            return removeIndexes.Count != 0 ?
+            return removeIndexes != null ?
                 self.RemoveAtRange(removeIndexes) :
                 self;
         }
