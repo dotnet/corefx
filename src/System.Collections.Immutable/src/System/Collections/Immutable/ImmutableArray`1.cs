@@ -555,7 +555,7 @@ namespace System.Collections.Immutable
                     return self;
                 
                 T[] dest = new T[self.Length + other.Count];
-                other.CopyTo(dest, index);
+                other.CopyTo(dest, index); // keep this before so any changes it makes to unintended parts of the array are overwritten by Array.Copy
                 Array.Copy(self.array, 0, dest, 0, index);
                 Array.Copy(self.array, index, dest, index + other.Count, self.Length - index);
                 return new ImmutableArray<T>(dest);
