@@ -442,7 +442,7 @@ namespace System.Collections.Immutable
             }
             else
             {
-                for (int i = startIndex; i >= startIndex - count + 1; i--)
+                for (int i = startIndex; i > startIndex - count; i--)
                 {
                     if (equalityComparer.Equals(item, self.array[i]))
                     {
@@ -548,22 +548,17 @@ namespace System.Collections.Immutable
             {
                 return ImmutableArray.CreateRange(items);
             }
-
-            int count = ImmutableExtensions.GetCount(ref items);
-            if (count == 0)
+            
+            T[] other = items.ToArray();
+            if (other.Length == 0)
             {
                 return self;
             }
 
-            T[] tmp = new T[self.Length + count];
+            T[] tmp = new T[self.Length + other.Length];
             Array.Copy(self.array, 0, tmp, 0, index);
-            int sequenceIndex = index;
-            foreach (var item in items)
-            {
-                tmp[sequenceIndex++] = item;
-            }
-
-            Array.Copy(self.array, index, tmp, index + count, self.Length - index);
+            Array.Copy(other, 0, tmp, index, other.Length);
+            Array.Copy(self.array, index, tmp, index + other.Length, self.Length - index);
             return new ImmutableArray<T>(tmp);
         }
 
@@ -877,21 +872,16 @@ namespace System.Collections.Immutable
             if (self.IsEmpty)
                 return self;
 
-            List<int> removeIndexes = null;
+            List<int> removeIndexes = new List<int>();
             for (int i = 0; i < self.array.Length; i++)
             {
                 if (match(self.array[i]))
                 {
-                    if (removeIndexes == null)
-                    {
-                        removeIndexes = new List<int>();
-                    }
-
                     removeIndexes.Add(i);
                 }
             }
 
-            return removeIndexes != null ?
+            return removeIndexes.Count != 0 ?
                 self.RemoveAtRange(removeIndexes) :
                 self;
         }
