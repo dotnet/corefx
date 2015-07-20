@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.Threading;
+using System.Threading.Tasks;
 namespace System.Xml.Linq
 {
     /// <summary>
@@ -90,6 +92,21 @@ namespace System.Xml.Linq
         {
             if (writer == null) throw new ArgumentNullException("writer");
             writer.WriteComment(value);
+        }
+
+        /// <summary>
+        /// Write this <see cref="XComment"/> to the passed in <see cref="XmlWriter"/>.
+        /// </summary>
+        /// <param name="writer">
+        /// The <see cref="XmlWriter"/> to write this <see cref="XComment"/> to.
+        /// </param>
+        /// <param name="cancellationToken">A cancellation token.</param>
+        public override async Task WriteToAsync(XmlWriter writer, CancellationToken cancellationToken)
+        {
+            if (writer == null) throw new ArgumentNullException("writer");
+
+            cancellationToken.ThrowIfCancellationRequested();
+            await writer.WriteCommentAsync(value).ConfigureAwait(false);
         }
 
         internal override XNode CloneNode()

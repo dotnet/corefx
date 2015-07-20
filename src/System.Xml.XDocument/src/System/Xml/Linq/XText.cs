@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.Threading;
+using System.Threading.Tasks;
 using StringBuilder = System.Text.StringBuilder;
 
 namespace System.Xml.Linq
@@ -87,6 +89,33 @@ namespace System.Xml.Linq
             {
                 writer.WriteString(text);
             }
+        }
+
+        /// <summary>
+        /// Write this <see cref="XText"/> to the given <see cref="XmlWriter"/>.
+        /// </summary>
+        /// <param name="writer">
+        /// The <see cref="XmlWriter"/> to write this <see cref="XText"/> to.
+        /// </param>
+        /// <param name="cancellationToken">
+        /// A cancellation token.
+        /// </param>
+        public override async Task WriteToAsync(XmlWriter writer, CancellationToken cancellationToken)
+        {
+            if (writer == null) throw new ArgumentNullException("writer");
+
+            cancellationToken.ThrowIfCancellationRequested();
+
+            Task t;
+            if (parent is XDocument)
+            {
+                t = writer.WriteWhitespaceAsync(text);
+            }
+            else
+            {
+                t = writer.WriteStringAsync(text);
+            }
+            await t.ConfigureAwait(false);
         }
 
         internal override void AppendText(StringBuilder sb)
