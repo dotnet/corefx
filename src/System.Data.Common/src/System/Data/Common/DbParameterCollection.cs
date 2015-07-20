@@ -82,13 +82,21 @@ namespace System.Data.Common
 
         abstract public int Add(object value);
 
+        // 
+
         abstract public void AddRange(System.Array values);
+
+        // 
 
         abstract public bool Contains(object value);
 
         abstract public bool Contains(string value); // WebData 97349
 
+        // 
+
         abstract public void CopyTo(System.Array array, int index);
+
+        // 
 
         abstract public void Clear();
 
@@ -100,11 +108,17 @@ namespace System.Data.Common
 
         abstract public int IndexOf(object value);
 
+        // 
+
         abstract public int IndexOf(string parameterName);
 
         abstract public void Insert(int index, object value);
 
         abstract public void Remove(object value);
+
+        // 
+
+        // 
 
         abstract public void RemoveAt(int index);
 
