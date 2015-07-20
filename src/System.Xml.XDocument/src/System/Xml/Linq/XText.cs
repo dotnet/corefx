@@ -100,22 +100,16 @@ namespace System.Xml.Linq
         /// <param name="cancellationToken">
         /// A cancellation token.
         /// </param>
-        public override async Task WriteToAsync(XmlWriter writer, CancellationToken cancellationToken)
+        public override Task WriteToAsync(XmlWriter writer, CancellationToken cancellationToken)
         {
-            if (writer == null) throw new ArgumentNullException("writer");
+            if (writer == null)
+                throw new ArgumentNullException("writer");
+            if (cancellationToken.IsCancellationRequested)
+                return Task.FromCanceled(cancellationToken);
 
-            cancellationToken.ThrowIfCancellationRequested();
-
-            Task t;
-            if (parent is XDocument)
-            {
-                t = writer.WriteWhitespaceAsync(text);
-            }
-            else
-            {
-                t = writer.WriteStringAsync(text);
-            }
-            await t.ConfigureAwait(false);
+            return parent is XDocument ?
+                writer.WriteWhitespaceAsync(text) :
+                writer.WriteStringAsync(text);
         }
 
         internal override void AppendText(StringBuilder sb)

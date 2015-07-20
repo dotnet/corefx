@@ -9,7 +9,6 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using CultureInfo = System.Globalization.CultureInfo;
-using IEnumerable = System.Collections.IEnumerable;
 using SuppressMessageAttribute = System.Diagnostics.CodeAnalysis.SuppressMessageAttribute;
 using StringBuilder = System.Text.StringBuilder;
 
@@ -785,11 +784,17 @@ namespace System.Xml.Linq
         /// A new <see cref="XElement"/> containing the contents of the passed
         /// in <see cref="XmlReader"/>.
         /// </returns>
-        public static async Task<XElement> LoadAsync(XmlReader reader, LoadOptions options, CancellationToken cancellationToken)
+        public static Task<XElement> LoadAsync(XmlReader reader, LoadOptions options, CancellationToken cancellationToken)
         {
-            if (reader == null) throw new ArgumentNullException("reader");
+            if (reader == null)
+                throw new ArgumentNullException("reader");
+            if (cancellationToken.IsCancellationRequested)
+                return Task.FromCanceled<XElement>(cancellationToken);
+            return LoadAsyncInternal(reader, options, cancellationToken);
+        }
 
-            cancellationToken.ThrowIfCancellationRequested();
+        private static async Task<XElement> LoadAsyncInternal(XmlReader reader, LoadOptions options, CancellationToken cancellationToken)
+        {
             if (await reader.MoveToContentAsync().ConfigureAwait(false) != XmlNodeType.Element) throw new InvalidOperationException(SR.Format(SR.InvalidOperation_ExpectedNodeType, XmlNodeType.Element, reader.NodeType));
 
             XElement e = new XElement(new AsyncConstructionSentry());
@@ -1118,11 +1123,17 @@ namespace System.Xml.Linq
         /// The <see cref="XmlWriter"/> to output the XML to.
         /// </param>
         /// <param name="cancellationToken">A cancellation token.</param>
-        public async Task SaveAsync(XmlWriter writer, CancellationToken cancellationToken)
+        public Task SaveAsync(XmlWriter writer, CancellationToken cancellationToken)
         {
-            if (writer == null) throw new ArgumentNullException("writer");
+            if (writer == null)
+                throw new ArgumentNullException("writer");
+            if (cancellationToken.IsCancellationRequested)
+                return Task.FromCanceled(cancellationToken);
+            return SaveAsyncInternal(writer, cancellationToken);
+        }
 
-            cancellationToken.ThrowIfCancellationRequested();
+        private async Task SaveAsyncInternal(XmlWriter writer, CancellationToken cancellationToken)
+        {
             await writer.WriteStartDocumentAsync().ConfigureAwait(false);
 
             await WriteToAsync(writer, cancellationToken).ConfigureAwait(false);
@@ -1248,10 +1259,13 @@ namespace System.Xml.Linq
         /// The <see cref="XmlTextWriter"/> to write this <see cref="XElement"/> to.
         /// </param>
         /// <param name="cancellationToken">A cancellation token.</param>
-        public override async Task WriteToAsync(XmlWriter writer, CancellationToken cancellationToken)
+        public override Task WriteToAsync(XmlWriter writer, CancellationToken cancellationToken)
         {
-            if (writer == null) throw new ArgumentNullException("writer");
-            await new ElementWriter(writer).WriteElementAsync(this, cancellationToken).ConfigureAwait(false);
+            if (writer == null)
+                throw new ArgumentNullException("writer");
+            if (cancellationToken.IsCancellationRequested)
+                return Task.FromCanceled(cancellationToken);
+            return new ElementWriter(writer).WriteElementAsync(this, cancellationToken);
         }
 
         /// <summary>

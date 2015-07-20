@@ -451,12 +451,19 @@ namespace System.Xml.Linq
         /// A new <see cref="XDocument"/> containing the contents of the passed
         /// in <see cref="XmlReader"/>.
         /// </returns>
-        public static async Task<XDocument> LoadAsync(XmlReader reader, LoadOptions options, CancellationToken cancellationToken)
+        public static Task<XDocument> LoadAsync(XmlReader reader, LoadOptions options, CancellationToken cancellationToken)
         {
-            if (reader == null) throw new ArgumentNullException("reader");
+            if (reader == null)
+                throw new ArgumentNullException("reader");
+            if (cancellationToken.IsCancellationRequested)
+                return Task.FromCanceled<XDocument>(cancellationToken);
+            return LoadAsyncInternal(reader, options, cancellationToken);
+        }
+
+        private static async Task<XDocument> LoadAsyncInternal(XmlReader reader, LoadOptions options, CancellationToken cancellationToken)
+        {
             if (reader.ReadState == ReadState.Initial)
             {
-                cancellationToken.ThrowIfCancellationRequested();
                 await reader.ReadAsync().ConfigureAwait(false);
             }
 
@@ -714,9 +721,9 @@ namespace System.Xml.Linq
         /// <param name="cancellationToken">
         /// A cancellation token.
         /// </param>
-        public async Task SaveAsync(XmlWriter writer, CancellationToken cancellationToken)
+        public Task SaveAsync(XmlWriter writer, CancellationToken cancellationToken)
         {
-            await WriteToAsync(writer, cancellationToken).ConfigureAwait(false);
+            return WriteToAsync(writer, cancellationToken);
         }
 
         /// <summary>
@@ -757,12 +764,17 @@ namespace System.Xml.Linq
         /// <see cref="XDocument"/>.
         /// </param>
         /// <param name="cancellationToken">A cancellation token.</param>
-        public override async Task WriteToAsync(XmlWriter writer, CancellationToken cancellationToken)
+        public override Task WriteToAsync(XmlWriter writer, CancellationToken cancellationToken)
         {
-            if (writer == null) throw new ArgumentNullException("writer");
+            if (writer == null)
+                throw new ArgumentNullException("writer");
+            if (cancellationToken.IsCancellationRequested)
+                return Task.FromCanceled(cancellationToken);
+            return WriteToAsyncInternal(writer, cancellationToken);
+        }
 
-            cancellationToken.ThrowIfCancellationRequested();
-
+        private async Task WriteToAsyncInternal(XmlWriter writer, CancellationToken cancellationToken)
+        {
             Task tStart;
             if (_declaration != null && _declaration.Standalone == "yes")
             {

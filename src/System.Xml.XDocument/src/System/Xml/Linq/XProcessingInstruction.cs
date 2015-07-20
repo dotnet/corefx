@@ -127,12 +127,13 @@ namespace System.Xml.Linq
         /// The <see cref="XmlWriter"/> to write this <see cref="XProcessingInstruction"/> to.
         /// </param>
         /// <param name="cancellationToken">A cancellation token.</param>
-        public override async Task WriteToAsync(XmlWriter writer, CancellationToken cancellationToken)
+        public override Task WriteToAsync(XmlWriter writer, CancellationToken cancellationToken)
         {
-            if (writer == null) throw new ArgumentNullException("writer");
-
-            cancellationToken.ThrowIfCancellationRequested();
-            await writer.WriteProcessingInstructionAsync(target, data).ConfigureAwait(false);
+            if (writer == null)
+                throw new ArgumentNullException("writer");
+            if (cancellationToken.IsCancellationRequested)
+                return Task.FromCanceled(cancellationToken);
+            return writer.WriteProcessingInstructionAsync(target, data);
         }
 
         internal override XNode CloneNode()

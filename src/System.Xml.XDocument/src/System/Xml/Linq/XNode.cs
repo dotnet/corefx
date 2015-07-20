@@ -474,9 +474,17 @@ namespace System.Xml.Linq
         /// <exception cref="InvalidOperationException">
         /// Thrown if the <see cref="XmlReader"/> is not positioned on a recognized node type.
         /// </exception>
-        public static async Task<XNode> ReadFromAsync(XmlReader reader, CancellationToken cancellationToken)
+        public static Task<XNode> ReadFromAsync(XmlReader reader, CancellationToken cancellationToken)
         {
-            if (reader == null) throw new ArgumentNullException("reader");
+            if (reader == null)
+                throw new ArgumentNullException("reader");
+            if (cancellationToken.IsCancellationRequested)
+                return Task.FromCanceled<XNode>(cancellationToken);
+            return ReadFromAsyncInternal(reader, cancellationToken);
+        }
+
+        private static async Task<XNode> ReadFromAsyncInternal(XmlReader reader, CancellationToken cancellationToken)
+        {
             if (reader.ReadState != ReadState.Interactive) throw new InvalidOperationException(SR.InvalidOperation_ExpectedInteractive);
 
             XNode ret;
