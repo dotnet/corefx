@@ -9,7 +9,7 @@ using System.Net.Http.Headers;
 using System.Text;
 
 using Xunit;
-namespace System.Net.Http.Unit.Tests
+namespace System.Net.Http.Tests
 {
     public class Int64NumberHeaderParserTest
     {

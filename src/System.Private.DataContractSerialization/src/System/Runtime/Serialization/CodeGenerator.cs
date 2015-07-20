@@ -1,8 +1,5 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-// ***NOTE*** If this code is changed, make corresponding changes in System.ServiceModel.CodeGenerator also
 
 using System;
 using System.Collections;
@@ -15,7 +12,7 @@ using System.IO;
 using System.Security;
 using System.Diagnostics;
 
-
+#if !NET_NATIVE
 namespace System.Runtime.Serialization
 {
     internal class CodeGenerator
@@ -36,7 +33,10 @@ namespace System.Runtime.Serialization
             get
             {
                 if (s_getTypeFromHandle == null)
+                {
                     s_getTypeFromHandle = typeof(Type).GetMethod("GetTypeFromHandle");
+                    Debug.Assert(s_getTypeFromHandle != null);
+                }
                 return s_getTypeFromHandle;
             }
         }
@@ -57,7 +57,10 @@ namespace System.Runtime.Serialization
             get
             {
                 if (s_objectEquals == null)
+                {
                     s_objectEquals = Globals.TypeOfObject.GetMethod("Equals", BindingFlags.Public | BindingFlags.Static);
+                    Debug.Assert(s_objectEquals != null);
+                }
                 return s_objectEquals;
             }
         }
@@ -77,10 +80,46 @@ namespace System.Runtime.Serialization
             get
             {
                 if (s_arraySetValue == null)
+                {
                     s_arraySetValue = typeof(Array).GetMethod("SetValue", new Type[] { typeof(object), typeof(int) });
+                    Debug.Assert(s_arraySetValue != null);
+                }
                 return s_arraySetValue;
             }
         }
+
+#if !NET_NATIVE && MERGE_DCJS
+        [SecurityCritical]
+        private static MethodInfo s_objectToString;
+        private static MethodInfo ObjectToString
+        {
+            [SecuritySafeCritical]
+            get
+            {
+                if (s_objectToString == null)
+                {
+                    s_objectToString = typeof(object).GetMethod("ToString", Array.Empty<Type>());
+                    Debug.Assert(s_objectToString != null);
+                }
+                return s_objectToString;
+            }
+        }
+
+        private static MethodInfo s_stringFormat;
+        private static MethodInfo StringFormat
+        {
+            [SecuritySafeCritical]
+            get
+            {
+                if (s_stringFormat == null)
+                {
+                    s_stringFormat = typeof(string).GetMethod("Format", new Type[] { typeof(string), typeof(object[]) });
+                    Debug.Assert(s_stringFormat != null);
+                }
+                return s_stringFormat;
+            }
+        }
+#endif
 
         private Type _delegateType;
 
@@ -125,6 +164,10 @@ namespace System.Runtime.Serialization
 
         private enum CodeGenTrace { None, Save, Tron };
         private CodeGenTrace _codeGenTrace;
+
+#if !NET_NATIVE && MERGE_DCJS
+        private LocalBuilder _stringFormatArray;
+#endif
 
         internal CodeGenerator()
         {
@@ -977,7 +1020,6 @@ namespace System.Runtime.Serialization
                     case TypeCode.Decimal:
                     case TypeCode.DateTime:
                     case TypeCode.Empty:
-                    case TypeCode.DBNull:
                     default:
                         throw System.Runtime.Serialization.DiagnosticUtility.ExceptionUtility.ThrowHelperError(XmlObjectSerializer.CreateSerializationException(SR.Format(SR.UnknownConstantType, DataContract.GetClrTypeFullName(valueType))));
                 }
@@ -1188,7 +1230,6 @@ namespace System.Runtime.Serialization
             switch (typeCode)
             {
                 case TypeCode.Object:
-                case TypeCode.DBNull:
                     return OpCodes.Ldelem_Ref;// TypeCode.Object:
                 case TypeCode.Boolean:
                     return OpCodes.Ldelem_I1;// TypeCode.Boolean:
@@ -1253,7 +1294,6 @@ namespace System.Runtime.Serialization
             switch (typeCode)
             {
                 case TypeCode.Object:
-                case TypeCode.DBNull:
                     return OpCodes.Stelem_Ref;// TypeCode.Object:
                 case TypeCode.Boolean:
                     return OpCodes.Stelem_I1;// TypeCode.Boolean:
@@ -1498,7 +1538,6 @@ namespace System.Runtime.Serialization
             }
             else if (source.IsAssignableFrom(target))
             {
-                //assert(source.GetTypeInfo().IsValueType == false);
                 Castclass(target);
             }
             else if (target.GetTypeInfo().IsInterface || source.GetTypeInfo().IsInterface)
@@ -1623,6 +1662,55 @@ namespace System.Runtime.Serialization
             Load(0);
             If(Cmp.NotEqualTo);
         }
+
+#if !NET_NATIVE && MERGE_DCJS
+        internal void BeginWhileCondition()
+        {
+            Label startWhile = DefineLabel();
+            MarkLabel(startWhile);
+            _blockStack.Push(startWhile);
+        }
+
+        internal void BeginWhileBody(Cmp cmpOp)
+        {
+            Label startWhile = (Label)_blockStack.Pop();
+            If(cmpOp);
+            _blockStack.Push(startWhile);
+        }
+
+        internal void EndWhile()
+        {
+            Label startWhile = (Label)_blockStack.Pop();
+            Br(startWhile);
+            EndIf();
+        }
+
+        internal void CallStringFormat(string msg, params object[] values)
+        {
+            NewArray(typeof(object), values.Length);
+            if (_stringFormatArray == null)
+                _stringFormatArray = DeclareLocal(typeof(object[]), "stringFormatArray");
+            Stloc(_stringFormatArray);
+            for (int i = 0; i < values.Length; i++)
+                StoreArrayElement(_stringFormatArray, i, values[i]);
+
+            Load(msg);
+            Load(_stringFormatArray);
+            Call(StringFormat);
+        }
+
+        internal void ToString(Type type)
+        {
+            if (type != Globals.TypeOfString)
+            {
+                if (type.GetTypeInfo().IsValueType)
+                {
+                    Box(type);
+                }
+                Call(ObjectToString);
+            }
+        }
+#endif
     }
 
 
@@ -1791,3 +1879,4 @@ namespace System.Runtime.Serialization
         }
     }
 }
+#endif

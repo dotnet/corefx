@@ -16,7 +16,7 @@ namespace System.IO
         public override void CopyFile(string sourceFullPath, string destFullPath, bool overwrite)
         {
             Interop.mincore.SECURITY_ATTRIBUTES secAttrs = default(Interop.mincore.SECURITY_ATTRIBUTES);
-            int errorCode = Helpers.CopyFile(sourceFullPath, destFullPath, !overwrite);
+            int errorCode = Interop.mincore.CopyFile(sourceFullPath, destFullPath, !overwrite);
 
             if (errorCode != Interop.mincore.Errors.ERROR_SUCCESS)
             {
@@ -27,7 +27,7 @@ namespace System.IO
                     // For a number of error codes (sharing violation, path 
                     // not found, etc) we don't know if the problem was with
                     // the source or dest file.  Try reading the source file.
-                    using (SafeFileHandle handle = Helpers.UnsafeCreateFile(sourceFullPath, Win32FileStream.GENERIC_READ, FileShare.Read, ref secAttrs, FileMode.Open, 0, IntPtr.Zero))
+                    using (SafeFileHandle handle = Interop.mincore.UnsafeCreateFile(sourceFullPath, Win32FileStream.GENERIC_READ, FileShare.Read, ref secAttrs, FileMode.Open, 0, IntPtr.Zero))
                     {
                         if (handle.IsInvalid)
                             fileName = sourceFullPath;
@@ -200,7 +200,7 @@ namespace System.IO
                 case SearchTarget.Both:
                     return Win32FileSystemEnumerableFactory.CreateFileSystemInfoIterator(fullPath, fullPath, searchPattern, searchOption);
                 default:
-                    throw new ArgumentException("searchTarget", SR.ArgumentOutOfRange_Enum);
+                    throw new ArgumentException(SR.ArgumentOutOfRange_Enum, "searchTarget");
             }
         }
 
@@ -437,10 +437,13 @@ namespace System.IO
         {
             String root = fullPath.Substring(0, PathHelpers.GetRootLength(fullPath));
             if (root == fullPath && root[1] == Path.VolumeSeparatorChar)
-                throw new ArgumentException(SR.Arg_PathIsVolume);
+            {
+                // intentionally not fullpath, most upstack public APIs expose this as path.
+                throw new ArgumentException(SR.Arg_PathIsVolume, "path");
+            }
 
             Interop.mincore.SECURITY_ATTRIBUTES secAttrs = default(Interop.mincore.SECURITY_ATTRIBUTES);
-            SafeFileHandle handle = Helpers.SafeCreateFile(
+            SafeFileHandle handle = Interop.mincore.SafeCreateFile(
                 fullPath,
                 (int)Interop.mincore.GenericOperations.GENERIC_WRITE,
                 FileShare.ReadWrite | FileShare.Delete,
@@ -547,19 +550,22 @@ namespace System.IO
                                 {
                                     // Use full path plus a trailing '\'
                                     String mountPoint = Path.Combine(fullPath, data.cFileName + PathHelpers.DirectorySeparatorCharAsString);
-                                    errorCode = Helpers.DeleteVolumeMountPoint(mountPoint);
-                                    
-                                    if (errorCode != Interop.mincore.Errors.ERROR_SUCCESS && 
-                                        errorCode != Interop.mincore.Errors.ERROR_PATH_NOT_FOUND)
+                                    if (!Interop.mincore.DeleteVolumeMountPoint(mountPoint))
                                     {
-                                        try
+                                         errorCode = Marshal.GetLastWin32Error();
+                                    
+                                        if (errorCode != Interop.mincore.Errors.ERROR_SUCCESS && 
+                                            errorCode != Interop.mincore.Errors.ERROR_PATH_NOT_FOUND)
                                         {
-                                            throw Win32Marshal.GetExceptionForWin32Error(errorCode, data.cFileName);
-                                        }
-                                        catch (Exception e)
-                                        {
-                                            if (ex == null)
-                                                ex = e;
+                                            try
+                                            {
+                                                throw Win32Marshal.GetExceptionForWin32Error(errorCode, data.cFileName);
+                                            }
+                                            catch (Exception e)
+                                            {
+                                                if (ex == null)
+                                                    ex = e;
+                                            }
                                         }
                                     }
                                 }
@@ -650,7 +656,7 @@ namespace System.IO
             {
                 int errorCode = Marshal.GetLastWin32Error();
                 if (errorCode == Interop.mincore.Errors.ERROR_INVALID_PARAMETER)
-                    throw new ArgumentException(SR.Arg_InvalidFileAttrs);
+                    throw new ArgumentException(SR.Arg_InvalidFileAttrs, "attributes");
                 throw Win32Marshal.GetExceptionForWin32Error(errorCode, fullPath);
             }
         }

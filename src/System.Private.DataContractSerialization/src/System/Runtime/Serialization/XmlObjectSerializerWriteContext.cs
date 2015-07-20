@@ -1,7 +1,5 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//------------------------------------------------------------
-//------------------------------------------------------------
 
 using System;
 using System.Collections;
@@ -14,11 +12,13 @@ using System.Xml;
 using System.Collections.Generic;
 using System.Xml.Serialization;
 using System.Security;
-
+#if !NET_NATIVE
+using ExtensionDataObject = System.Object;
+#endif
 
 namespace System.Runtime.Serialization
 {
-#if USE_REFEMIT
+#if USE_REFEMIT || NET_NATIVE
     public class XmlObjectSerializerWriteContext : XmlObjectSerializerContext
 #else
     internal class XmlObjectSerializerWriteContext : XmlObjectSerializerContext
@@ -31,6 +31,7 @@ namespace System.Runtime.Serialization
         private bool _isGetOnlyCollection;
         private readonly bool _unsafeTypeForwardingEnabled;
         protected bool serializeReadOnlyTypes;
+        protected bool preserveObjectReferences;
 
         internal static XmlObjectSerializerWriteContext CreateContext(DataContractSerializer serializer, DataContract rootTypeDataContract, DataContractResolver dataContractResolver)
         {
@@ -56,7 +57,7 @@ namespace System.Runtime.Serialization
             _unsafeTypeForwardingEnabled = true;
         }
 
-#if USE_REFEMIT
+#if USE_REFEMIT || NET_NATIVE
         internal ObjectToIdCache SerializedObjects
 #else
         protected ObjectToIdCache SerializedObjects
@@ -176,14 +177,27 @@ namespace System.Runtime.Serialization
 
         protected virtual void SerializeWithXsiType(XmlWriterDelegator xmlWriter, object obj, RuntimeTypeHandle objectTypeHandle, Type objectType, int declaredTypeID, RuntimeTypeHandle declaredTypeHandle, Type declaredType)
         {
-            DataContract dataContract;
             bool verifyKnownType = false;
+#if !NET_NATIVE
+            DataContract dataContract;
             if (declaredType.GetTypeInfo().IsInterface && CollectionDataContract.IsCollectionInterface(declaredType))
             {
                 dataContract = GetDataContractSkipValidation(DataContract.GetId(objectTypeHandle), objectTypeHandle, objectType);
                 if (OnHandleIsReference(xmlWriter, dataContract, obj))
                     return;
                 dataContract = GetDataContract(declaredTypeHandle, declaredType);
+#else
+            DataContract dataContract = DataContract.GetDataContractFromGeneratedAssembly(declaredType);
+            if (dataContract.TypeIsInterface && dataContract.TypeIsCollectionInterface)
+            {
+                if (OnHandleIsReference(xmlWriter, dataContract, obj))
+                    return;
+                if (this.Mode == SerializationMode.SharedType && dataContract.IsValidContract(this.Mode))
+                    dataContract = dataContract.GetValidContract(this.Mode);
+                else
+                    dataContract = GetDataContract(declaredTypeHandle, declaredType);
+
+#endif
                 if (!WriteClrTypeInfo(xmlWriter, dataContract) && DataContractResolver != null)
                 {
                     if (objectType == null)
@@ -249,6 +263,7 @@ namespace System.Runtime.Serialization
                 knownTypesAddedInCurrentScope = true;
             }
 
+#if !NET_NATIVE
             if (verifyKnownType)
             {
                 if (!IsKnownType(dataContract, declaredType))
@@ -260,6 +275,7 @@ namespace System.Runtime.Serialization
                     }
                 }
             }
+#endif
             WriteDataContractValue(dataContract, xmlWriter, obj, declaredTypeHandle);
 
             if (knownTypesAddedInCurrentScope)
@@ -278,7 +294,12 @@ namespace System.Runtime.Serialization
             return false;
         }
 
-#if USE_REFEMIT
+        internal virtual bool WriteClrTypeInfo(XmlWriterDelegator xmlWriter, Type dataContractType, string clrTypeName, string clrAssemblyName)
+        {
+            return false;
+        }
+
+#if USE_REFEMIT || NET_NATIVE
         public virtual void WriteAnyType(XmlWriterDelegator xmlWriter, object value)
 #else
         internal virtual void WriteAnyType(XmlWriterDelegator xmlWriter, object value)
@@ -287,7 +308,7 @@ namespace System.Runtime.Serialization
             xmlWriter.WriteAnyType(value);
         }
 
-#if USE_REFEMIT
+#if USE_REFEMIT || NET_NATIVE
         public virtual void WriteString(XmlWriterDelegator xmlWriter, string value)
 #else
         internal virtual void WriteString(XmlWriterDelegator xmlWriter, string value)
@@ -295,7 +316,7 @@ namespace System.Runtime.Serialization
         {
             xmlWriter.WriteString(value);
         }
-#if USE_REFEMIT
+#if USE_REFEMIT || NET_NATIVE
         public virtual void WriteString(XmlWriterDelegator xmlWriter, string value, XmlDictionaryString name, XmlDictionaryString ns)
 #else
         internal virtual void WriteString(XmlWriterDelegator xmlWriter, string value, XmlDictionaryString name, XmlDictionaryString ns)
@@ -311,7 +332,7 @@ namespace System.Runtime.Serialization
             }
         }
 
-#if USE_REFEMIT
+#if USE_REFEMIT || NET_NATIVE
         public virtual void WriteBase64(XmlWriterDelegator xmlWriter, byte[] value)
 #else
         internal virtual void WriteBase64(XmlWriterDelegator xmlWriter, byte[] value)
@@ -319,7 +340,7 @@ namespace System.Runtime.Serialization
         {
             xmlWriter.WriteBase64(value);
         }
-#if USE_REFEMIT
+#if USE_REFEMIT || NET_NATIVE
         public virtual void WriteBase64(XmlWriterDelegator xmlWriter, byte[] value, XmlDictionaryString name, XmlDictionaryString ns)
 #else
         internal virtual void WriteBase64(XmlWriterDelegator xmlWriter, byte[] value, XmlDictionaryString name, XmlDictionaryString ns)
@@ -335,7 +356,7 @@ namespace System.Runtime.Serialization
             }
         }
 
-#if USE_REFEMIT
+#if USE_REFEMIT || NET_NATIVE
         public virtual void WriteUri(XmlWriterDelegator xmlWriter, Uri value)
 #else
         internal virtual void WriteUri(XmlWriterDelegator xmlWriter, Uri value)
@@ -343,7 +364,7 @@ namespace System.Runtime.Serialization
         {
             xmlWriter.WriteUri(value);
         }
-#if USE_REFEMIT
+#if USE_REFEMIT || NET_NATIVE
         public virtual void WriteUri(XmlWriterDelegator xmlWriter, Uri value, XmlDictionaryString name, XmlDictionaryString ns)
 #else
         internal virtual void WriteUri(XmlWriterDelegator xmlWriter, Uri value, XmlDictionaryString name, XmlDictionaryString ns)
@@ -359,7 +380,7 @@ namespace System.Runtime.Serialization
             }
         }
 
-#if USE_REFEMIT
+#if USE_REFEMIT || NET_NATIVE
         public virtual void WriteQName(XmlWriterDelegator xmlWriter, XmlQualifiedName value)
 #else
         internal virtual void WriteQName(XmlWriterDelegator xmlWriter, XmlQualifiedName value)
@@ -367,7 +388,7 @@ namespace System.Runtime.Serialization
         {
             xmlWriter.WriteQName(value);
         }
-#if USE_REFEMIT
+#if USE_REFEMIT || NET_NATIVE
         public virtual void WriteQName(XmlWriterDelegator xmlWriter, XmlQualifiedName value, XmlDictionaryString name, XmlDictionaryString ns)
 #else
         internal virtual void WriteQName(XmlWriterDelegator xmlWriter, XmlQualifiedName value, XmlDictionaryString name, XmlDictionaryString ns)
@@ -611,5 +632,12 @@ namespace System.Runtime.Serialization
         {
             writer.WriteAttributeQualifiedName(Globals.XsiPrefix, DictionaryGlobals.XsiTypeLocalName, DictionaryGlobals.SchemaInstanceNamespace, dataContractName, dataContractNamespace);
         }
+
+#if !NET_NATIVE && MERGE_DCJS
+        public void WriteExtensionData(XmlWriterDelegator xmlWriter, ExtensionDataObject extensionData, int memberIndex)
+        {
+            // Needed by the code generator, but not called. 
+        }
+#endif
     }
 }

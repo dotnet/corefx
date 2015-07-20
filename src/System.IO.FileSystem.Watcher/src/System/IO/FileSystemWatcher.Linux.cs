@@ -7,10 +7,12 @@ using System.Diagnostics;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Runtime.InteropServices;
 
 namespace System.IO
 {
+    // Note: This class has an OS Limitation where the inotify API can miss events if a directory is created and immediately has
+    //       changes underneath. This is due to the inotify* APIs not being recursive and needing to call inotify_add_watch on
+    //       each subdirectory, causing a race between adding the watch and file system events happening.
     public partial class FileSystemWatcher
     {
         /// <summary>Starts a new watch operation if one is not currently running.</summary>
@@ -167,7 +169,7 @@ namespace System.IO
         }
 
         /// <summary>
-        /// State and processing associatd with an active watch operation.  This state is kept separate from FileSystemWatcher to avoid 
+        /// State and processing associated with an active watch operation.  This state is kept separate from FileSystemWatcher to avoid 
         /// race conditions when a user starts/stops/starts/stops/etc. in quick succession, resulting in the potential for multiple 
         /// active operations. It also helps with avoiding rooted cycles and enabling proper finalization.
         /// </summary>
@@ -299,7 +301,10 @@ namespace System.IO
 
                 // Add a watch for the full path.  If the path is already being watched, this will return 
                 // the existing descriptor.  This works even in the case of a rename.
-                int wd = (int)SysCall(fd => Interop.libc.inotify_add_watch(fd, fullPath, (uint)_notifyFilters));
+                int wd = (int)SysCall(
+                    (fd, path, thisRef) => Interop.libc.inotify_add_watch(fd, path, (uint)thisRef._notifyFilters),
+                    fullPath,
+                    this);
 
                 // Then store the path information into our map.
                 WatchedDirectory directoryEntry;
@@ -401,15 +406,15 @@ namespace System.IO
                 // And if the caller has requested, remove the associated inotify watch.
                 if (removeInotify)
                 {
-                    SysCall(fd => 
+                    SysCall((fd, dirEntry, _) => 
                     {
                         // Remove the inotify watch.  This could fail if our state has become inconsistent
                         // with the state of the world (e.g. due to lost events).  So we don't want failures
                         // to throw exceptions, but we do assert to detect coding problems during debugging.
-                        long result = Interop.libc.inotify_rm_watch(fd, directoryEntry.WatchDescriptor);
+                        long result = Interop.libc.inotify_rm_watch(fd, dirEntry.WatchDescriptor);
                         Debug.Assert(result >= 0);
                         return 0;
-                    });
+                    }, directoryEntry, 0);
                 }
             }
 
@@ -423,14 +428,14 @@ namespace System.IO
                 {
                     // Remove all watches (inotiy_rm_watch) and clear out the map.
                     // No additional watches will be added after this point.
-                    SysCall(fd => {
-                        foreach (int wd in _wdToPathMap.Keys)
+                    SysCall((fd, thisRef, _) => {
+                        foreach (int wd in thisRef._wdToPathMap.Keys)
                         {
                             int result = Interop.libc.inotify_rm_watch(fd, wd);
                             Debug.Assert(result >= 0); // ignore errors; they're non-fatal, but they also shouldn't happen
                         }
                         return 0;
-                    });
+                    }, this, 0);
                     _wdToPathMap.Clear();
                 }
             }
@@ -468,7 +473,6 @@ namespace System.IO
                         }
 
                         uint mask = nextEvent.mask;
-                        bool addWatch = false;
                         string expandedName = null;
                         WatchedDirectory associatedDirectoryEntry = null;
 
@@ -529,6 +533,15 @@ namespace System.IO
                             previousEventCookie = 0;
                         }
 
+                        // If the event signaled that there's a new subdirectory and if we're monitoring subdirectories,
+                        // add a watch for it.
+                        const Interop.libc.NotifyEvents AddMaskFilters = Interop.libc.NotifyEvents.IN_CREATE | Interop.libc.NotifyEvents.IN_MOVED_TO;
+                        bool addWatch = ((mask & (uint)AddMaskFilters) != 0);
+                        if (addWatch && isDir && _includeSubdirectories)
+                        {
+                            AddDirectoryWatch(associatedDirectoryEntry, nextEvent.name);
+                        }
+
                         const Interop.libc.NotifyEvents switchMask =
                             Interop.libc.NotifyEvents.IN_Q_OVERFLOW | Interop.libc.NotifyEvents.IN_IGNORED |
                             Interop.libc.NotifyEvents.IN_CREATE | Interop.libc.NotifyEvents.IN_DELETE |
@@ -541,7 +554,6 @@ namespace System.IO
                                 break;
                             case Interop.libc.NotifyEvents.IN_CREATE:
                                 watcher.NotifyFileSystemEventArgs(WatcherChangeTypes.Created, expandedName);
-                                addWatch = true;
                                 break;
                             case Interop.libc.NotifyEvents.IN_IGNORED:
                                 // We're getting an IN_IGNORED because a directory watch was removed.
@@ -580,15 +592,7 @@ namespace System.IO
                                 previousEventName = null;
                                 previousEventParent = null;
                                 previousEventCookie = 0;
-                                addWatch = true; // for either rename or creation, we need to update our state
                                 break;
-                        }
-
-                        // If the event signaled that there's a new subdirectory and if we're monitoring subdirectories,
-                        // add a watch for it.
-                        if (addWatch && isDir && _includeSubdirectories)
-                        {
-                            AddDirectoryWatch(associatedDirectoryEntry, nextEvent.name);
                         }
 
                         // Drop our strong reference to the watcher now that we're potentially going to block again for another read
@@ -628,15 +632,15 @@ namespace System.IO
                     {
                         try
                         {
-                            _bufferAvailable = (int)SysCall(fd => {
+                            _bufferAvailable = (int)SysCall((fd, thisRef, _) => {
                                 long result;
-                                fixed (byte* buf = _buffer)
+                                fixed (byte* buf = thisRef._buffer)
                                 {
-                                    result = (long)Interop.libc.read(fd, buf, (IntPtr)_buffer.Length);
+                                    result = (long)Interop.libc.read(fd, buf, (IntPtr)thisRef._buffer.Length);
                                 }
-                                Debug.Assert(result <= _buffer.Length);
+                                Debug.Assert(result <= thisRef._buffer.Length);
                                 return result;
-                            });
+                            }, this, 0);
                         }
                         catch (ArgumentException)
                         {
@@ -710,10 +714,15 @@ namespace System.IO
             /// and less than zero on failure.  In the case of failure, errno is expected to
             /// be set to the relevant error code.
             /// </summary>
-            /// <param name="handle">The SafeFileHandle that wraps the file descriptor to use with the system call.</param>
             /// <param name="sysCall">A delegate that invokes the system call.  It's passed the associated file descriptor and should return the result.</param>
+            /// <param name="arg1">The first argument to be passed to the system call, after the file descriptor.</param>
+            /// <param name="arg2">The second argument to be passed to the system call.</param>
             /// <returns>The return value of the system call.</returns>
-            private long SysCall(Func<int, long> sysCall)
+            /// <remarks>
+            /// Arguments are expected to be passed via <paramref name="arg1"/> and <paramref name="arg2"/>
+            /// so as to avoid delegate and closure allocations at the call sites.
+            /// </remarks>
+            private long SysCall<TArg1, TArg2>(Func<int, TArg1, TArg2, long> sysCall, TArg1 arg1, TArg2 arg2)
             {
                 bool gotRefOnHandle = false;
                 try
@@ -726,7 +735,7 @@ namespace System.IO
                     Debug.Assert(fd >= 0);
 
                     long result;
-                    while (Interop.CheckIo(result = sysCall(fd), isDirectory: true)) ;
+                    while (Interop.CheckIo(result = sysCall(fd, arg1, arg2), isDirectory: true));
                     return result;
                 }
                 finally

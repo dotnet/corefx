@@ -9,7 +9,7 @@ using System.Text;
 
 using Xunit;
 
-namespace System.Net.Http.Unit.Tests
+namespace System.Net.Http.Tests
 {
     public class WarningParserTest
     {
@@ -25,6 +25,7 @@ namespace System.Net.Http.Unit.Tests
             Assert.Null(parser.Comparer);
         }
 
+        [ActiveIssue(846, PlatformID.AnyUnix)]
         [Fact]
         public void TryParse_SetOfValidValueStrings_ParsedCorrectly()
         {
@@ -46,6 +47,7 @@ namespace System.Net.Http.Unit.Tests
             CheckValidParsedValue("  ,,", 0, null, 4);
         }
 
+        [ActiveIssue(846, PlatformID.AnyUnix)]
         [Fact]
         public void TryParse_SetOfInvalidValueStrings_ReturnsFalse()
         {

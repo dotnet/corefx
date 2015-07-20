@@ -131,7 +131,7 @@ namespace System.Reflection.PortableExecutable
             {
                 if (maxSize > int.MaxValue)
                 {
-                    throw new ArgumentException(MetadataResources.StreamTooLarge, "peStream");
+                    throw new ArgumentException(SR.StreamTooLarge, "peStream");
                 }
 
                 return (int)maxSize;
@@ -146,7 +146,7 @@ namespace System.Reflection.PortableExecutable
             // Add cannot overflow because the worst case is (ulong)long.MaxValue + uint.MaxValue < ulong.MaxValue.
             if ((ulong)_reader.BaseStream.Position + count > (ulong)_maxOffset)
             {
-                ThrowImageTooSmall();
+                Throw.ImageTooSmall();
             }
         }
 
@@ -158,21 +158,8 @@ namespace System.Reflection.PortableExecutable
             // Negative count is handled by overflow to greater than maximum size = int.MaxValue.
             if ((ulong)startPosition + unchecked((uint)count) > (ulong)_maxOffset)
             {
-                ThrowImageTooSmallOrContainsInvalidOffsetOrCount();
+                Throw.ImageTooSmallOrContainsInvalidOffsetOrCount();
             }
-        }
-
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        private static void ThrowImageTooSmall()
-        {
-            throw new BadImageFormatException(MetadataResources.ImageTooSmall);
-        }
-
-        // TODO: move throw helpers together. 
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        internal static void ThrowImageTooSmallOrContainsInvalidOffsetOrCount()
-        {
-            throw new BadImageFormatException(MetadataResources.ImageTooSmallOrContainsInvalidOffsetOrCount);
         }
     }
 }

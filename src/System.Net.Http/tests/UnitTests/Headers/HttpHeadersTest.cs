@@ -10,7 +10,7 @@ using System.Text;
 
 using Xunit;
 
-namespace System.Net.Http.Unit.Tests
+namespace System.Net.Http.Tests
 {
     public class HttpHeadersTest
     {
@@ -2139,7 +2139,7 @@ namespace System.Net.Http.Unit.Tests
 
                 if ((xs != null) && (ys != null))
                 {
-                    return string.Compare(xs, ys, StringComparison.OrdinalIgnoreCase) == 0;
+                    return string.Equals(xs, ys, StringComparison.OrdinalIgnoreCase);
                 }
 
                 return x.Equals(y);

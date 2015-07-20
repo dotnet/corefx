@@ -9,7 +9,7 @@ using System.Text;
 
 using Xunit;
 
-namespace System.Net.Http.Unit.Tests
+namespace System.Net.Http.Tests
 {
     public class ContentDispositionHeaderValueTest
     {
@@ -203,6 +203,7 @@ namespace System.Net.Http.Unit.Tests
             Assert.Null(contentDisposition.FileNameStar);
         }
 
+        [ActiveIssue(846, PlatformID.AnyUnix)]
         [Fact]
         public void FileNameStar_UnknownOrBadEncoding_PropertyFails()
         {
@@ -1118,7 +1119,7 @@ namespace System.Net.Http.Unit.Tests
 
             foreach (var value in values)
             {
-                if (string.Compare(value.Name, name, StringComparison.OrdinalIgnoreCase) == 0)
+                if (string.Equals(value.Name, name, StringComparison.OrdinalIgnoreCase))
                 {
                     return value;
                 }

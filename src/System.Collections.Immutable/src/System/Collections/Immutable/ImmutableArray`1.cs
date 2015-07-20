@@ -659,7 +659,7 @@ namespace System.Collections.Immutable
             Requires.Range(index >= 0 && index < self.Length, "index");
 
             T[] tmp = new T[self.Length];
-            Array.Copy(self.array, tmp, self.Length);
+            Array.Copy(self.array, 0, tmp, 0, self.Length);
             tmp[index] = item;
             return new ImmutableArray<T>(tmp);
         }
@@ -756,6 +756,11 @@ namespace System.Collections.Immutable
             Requires.Range(index >= 0 && index < self.Length, "index");
             Requires.Range(length >= 0 && index + length <= self.Length, "length");
 
+            if (length == 0)
+            {
+                return self;
+            }
+
             T[] tmp = new T[self.Length - length];
             Array.Copy(self.array, 0, tmp, 0, index);
             Array.Copy(self.array, index + length, tmp, index, self.Length - index - length);
@@ -817,7 +822,7 @@ namespace System.Collections.Immutable
         [Pure]
         public ImmutableArray<T> RemoveRange(ImmutableArray<T> items)
         {
-            return this.RemoveRange(items.array);
+            return this.RemoveRange(items, EqualityComparer<T>.Default);
         }
 
         /// <summary>
@@ -833,7 +838,22 @@ namespace System.Collections.Immutable
         [Pure]
         public ImmutableArray<T> RemoveRange(ImmutableArray<T> items, IEqualityComparer<T> equalityComparer)
         {
-            return this.RemoveRange(items.array, equalityComparer);
+            var self = this;
+            Requires.NotNull(items.array, "items");
+
+            if (items.IsEmpty)
+            {
+                self.ThrowNullRefIfNotInitialized();
+                return self;
+            }
+            else if (items.Length == 1)
+            {
+                return self.Remove(items[0], equalityComparer);
+            }
+            else
+            {
+                return self.RemoveRange(items.array, equalityComparer);
+            }
         }
 
         /// <summary>
@@ -944,7 +964,7 @@ namespace System.Collections.Immutable
                 if (outOfOrder)
                 {
                     var tmp = new T[self.Length];
-                    Array.Copy(self.array, tmp, self.Length);
+                    Array.Copy(self.array, 0, tmp, 0, self.Length);
                     Array.Sort(tmp, index, count, comparer);
                     return new ImmutableArray<T>(tmp);
                 }
