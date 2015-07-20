@@ -17,6 +17,7 @@ namespace System.Reflection.Emit.Tests
         private const int MinStringLength = 8;
         private const int MaxStringLength = 256;
         private const int ReservedMaskFieldAttribute = 0x9500; // This constant maps to FieldAttributes.ReservedMask that is not available in the contract.
+        private readonly RandomDataGenerator _generator = new RandomDataGenerator();
 
         private ModuleBuilder GetModuleBuilder()
         {
@@ -26,11 +27,11 @@ namespace System.Reflection.Emit.Tests
         }
 
         [Fact]
-        public void PosTest1()
+        public void TestWithValidData()
         {
             ModuleBuilder builder = GetModuleBuilder();
             string fieldName = "PosTest1_";
-            int size = TestLibrary.Generator.GetByte();
+            int size = _generator.GetByte();
             if (size == 0)
                 size++;
 
@@ -66,7 +67,7 @@ namespace System.Reflection.Emit.Tests
         }
 
         [Fact]
-        public void PosTest2()
+        public void TestWithBoundaryData()
         {
             ModuleBuilder builder = GetModuleBuilder();
             string fieldName = "PosTest2_";
@@ -110,7 +111,7 @@ namespace System.Reflection.Emit.Tests
         }
 
         [Fact]
-        public void NegTest1()
+        public void TestThrowsExceptionWithZeroLengthName()
         {
             ModuleBuilder builder = GetModuleBuilder();
             FieldAttributes[] attributes = new FieldAttributes[] {
@@ -133,7 +134,7 @@ namespace System.Reflection.Emit.Tests
                 FieldAttributes.SpecialName,
                 FieldAttributes.Static
             };
-            int size = TestLibrary.Generator.GetByte();
+            int size = _generator.GetByte();
 
             for (int i = 0; i < attributes.Length; ++i)
             {
@@ -142,7 +143,7 @@ namespace System.Reflection.Emit.Tests
         }
 
         [Fact]
-        public void NegTest2()
+        public void TestThrowsExceptionWithInvalidSizeData()
         {
             int[] sizeValues = new int[] {
             0,
@@ -185,7 +186,7 @@ namespace System.Reflection.Emit.Tests
         }
 
         [Fact]
-        public void NegTest3()
+        public void TestThrowsExceptionWithNullName()
         {
             ModuleBuilder builder = GetModuleBuilder();
             FieldAttributes[] attributes = new FieldAttributes[] {
@@ -208,7 +209,7 @@ namespace System.Reflection.Emit.Tests
                 FieldAttributes.SpecialName,
                 FieldAttributes.Static
             };
-            int size = TestLibrary.Generator.GetByte();
+            int size = _generator.GetByte();
 
             for (int i = 0; i < attributes.Length; ++i)
             {
@@ -217,7 +218,7 @@ namespace System.Reflection.Emit.Tests
         }
 
         [Fact]
-        public void NegTest4()
+        public void TestThrowsExceptionOnCreateGlobalFunctionCalledPreviously()
         {
             FieldAttributes[] attributes = new FieldAttributes[] {
                 FieldAttributes.Assembly,
@@ -239,7 +240,7 @@ namespace System.Reflection.Emit.Tests
                 FieldAttributes.SpecialName,
                 FieldAttributes.Static
             };
-            int size = TestLibrary.Generator.GetByte();
+            int size = _generator.GetByte();
             ModuleBuilder testModuleBuilder = GetModuleBuilder();
 
             testModuleBuilder.CreateGlobalFunctions();

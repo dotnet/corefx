@@ -20,62 +20,55 @@ namespace System.Reflection.Emit.Tests
         private const AssemblyBuilderAccess TestAssemblyBuilderAccess = AssemblyBuilderAccess.Run;
         private const int MinStringLength = 1;
         private const int MaxStringLength = 128;
+        private readonly RandomDataGenerator _generator = new RandomDataGenerator();
 
-        private TypeBuilder TestTypeBuilder
+        private TypeBuilder GetTestTypeBuilder()
         {
-            get
-            {
-                if (null == _testTypeBuilder)
-                {
-                    AssemblyName assemblyName = new AssemblyName(TestDynamicAssemblyName);
-                    AssemblyBuilder assemblyBuilder = AssemblyBuilder.DefineDynamicAssembly(
-                        assemblyName, TestAssemblyBuilderAccess);
+            AssemblyName assemblyName = new AssemblyName(TestDynamicAssemblyName);
+            AssemblyBuilder assemblyBuilder = AssemblyBuilder.DefineDynamicAssembly(
+                assemblyName, TestAssemblyBuilderAccess);
 
-                    ModuleBuilder moduleBuilder = TestLibrary.Utilities.GetModuleBuilder(assemblyBuilder, TestDynamicModuleName);
-                    _testTypeBuilder = moduleBuilder.DefineType(TestDynamicTypeName);
-                }
-
-                return _testTypeBuilder;
-            }
+            ModuleBuilder moduleBuilder = TestLibrary.Utilities.GetModuleBuilder(assemblyBuilder, TestDynamicModuleName);
+            return moduleBuilder.DefineType(TestDynamicTypeName);
         }
 
-        private TypeBuilder _testTypeBuilder;
-
         [Fact]
-        public void PosTest1()
+        public void TestWithItself()
         {
-            MethodBuilder builder = TestTypeBuilder.DefineMethod(NegTestDynamicMethodName,
+            TypeBuilder typeBuilder = GetTestTypeBuilder();
+            MethodBuilder builder = typeBuilder.DefineMethod(NegTestDynamicMethodName,
                 MethodAttributes.Public);
 
             Assert.True(builder.Equals(builder));
         }
 
         [Fact]
-        public void PosTest2()
+        public void TestWithSameName()
         {
-            MethodBuilder builder1 = TestTypeBuilder.DefineMethod(NegTestDynamicMethodName,
+            TypeBuilder typeBuilder = GetTestTypeBuilder();
+            MethodBuilder builder1 = typeBuilder.DefineMethod(NegTestDynamicMethodName,
                 MethodAttributes.Public);
-            MethodBuilder builder2 = TestTypeBuilder.DefineMethod(NegTestDynamicMethodName,
+            MethodBuilder builder2 = typeBuilder.DefineMethod(NegTestDynamicMethodName,
                 MethodAttributes.Public);
 
             Assert.True(builder1.Equals(builder2));
         }
 
         [Fact]
-        public void PosTest3()
+        public void TestWithSameNameAndAttributes()
         {
             MethodAttributes attributes = MethodAttributes.Public | MethodAttributes.Virtual | MethodAttributes.NewSlot;
-
-            MethodBuilder builder1 = TestTypeBuilder.DefineMethod(NegTestDynamicMethodName,
+            TypeBuilder typeBuilder = GetTestTypeBuilder();
+            MethodBuilder builder1 = typeBuilder.DefineMethod(NegTestDynamicMethodName,
                 attributes);
-            MethodBuilder builder2 = TestTypeBuilder.DefineMethod(NegTestDynamicMethodName,
+            MethodBuilder builder2 = typeBuilder.DefineMethod(NegTestDynamicMethodName,
                 attributes);
 
             Assert.True(builder1.Equals(builder2));
         }
 
         [Fact]
-        public void PosTest4()
+        public void TestWithSameNameAttributeReturnTypeParameterType()
         {
             MethodAttributes attributes = MethodAttributes.Public;
             Type returnType = typeof(void);
@@ -84,11 +77,13 @@ namespace System.Reflection.Emit.Tests
                 typeof(string)
             };
 
-            MethodBuilder builder1 = TestTypeBuilder.DefineMethod(NegTestDynamicMethodName,
+            TypeBuilder typeBuilder = GetTestTypeBuilder();
+
+            MethodBuilder builder1 = typeBuilder.DefineMethod(NegTestDynamicMethodName,
                 attributes,
                 returnType,
                 paramTypes);
-            MethodBuilder builder2 = TestTypeBuilder.DefineMethod(NegTestDynamicMethodName,
+            MethodBuilder builder2 = typeBuilder.DefineMethod(NegTestDynamicMethodName,
                 attributes,
                 returnType,
                 paramTypes);
@@ -97,7 +92,7 @@ namespace System.Reflection.Emit.Tests
         }
 
         [Fact]
-        public void PosTest5()
+        public void TestWithDifferentReturnType()
         {
             MethodAttributes attributes = MethodAttributes.Public;
             Type returnType1 = typeof(void);
@@ -107,11 +102,13 @@ namespace System.Reflection.Emit.Tests
                 typeof(string)
             };
 
-            MethodBuilder builder1 = TestTypeBuilder.DefineMethod(NegTestDynamicMethodName,
+            TypeBuilder typeBuilder = GetTestTypeBuilder();
+
+            MethodBuilder builder1 = typeBuilder.DefineMethod(NegTestDynamicMethodName,
                 attributes,
                 returnType1,
                 paramTypes);
-            MethodBuilder builder2 = TestTypeBuilder.DefineMethod(NegTestDynamicMethodName,
+            MethodBuilder builder2 = typeBuilder.DefineMethod(NegTestDynamicMethodName,
                 attributes,
                 returnType2,
                 paramTypes);
@@ -120,46 +117,48 @@ namespace System.Reflection.Emit.Tests
         }
 
         [Fact]
-        public void PosTest6()
+        public void TestWithDifferentName()
         {
             string methodName1 = null;
             string methodName2 = null;
 
-            methodName1 = TestLibrary.Generator.GetString(false, MinStringLength, MaxStringLength);
-            methodName2 = TestLibrary.Generator.GetString(false, MinStringLength, MaxStringLength);
+            methodName1 = _generator.GetString(false, MinStringLength, MaxStringLength);
+            methodName2 = _generator.GetString(false, MinStringLength, MaxStringLength);
 
             // Avoid generate same method name
             if (methodName1.Length == methodName2.Length)
             {
-                methodName1 += TestLibrary.Generator.GetChar();
+                methodName1 += _generator.GetChar();
             }
 
             MethodAttributes attributes = MethodAttributes.Public;
 
-            MethodBuilder builder1 = TestTypeBuilder.DefineMethod(methodName1,
+            TypeBuilder typeBuilder = GetTestTypeBuilder();
+            MethodBuilder builder1 = typeBuilder.DefineMethod(methodName1,
                 attributes);
-            MethodBuilder builder2 = TestTypeBuilder.DefineMethod(methodName2,
+            MethodBuilder builder2 = typeBuilder.DefineMethod(methodName2,
                 attributes);
 
             Assert.False(builder1.Equals(builder2));
         }
 
         [Fact]
-        public void PosTest7()
+        public void TestWithDifferentAttributes()
         {
             MethodAttributes attributes1 = MethodAttributes.Public;
             MethodAttributes attributes2 = MethodAttributes.Private;
 
-            MethodBuilder builder1 = TestTypeBuilder.DefineMethod(NegTestDynamicMethodName,
+            TypeBuilder typeBuilder = GetTestTypeBuilder();
+            MethodBuilder builder1 = typeBuilder.DefineMethod(NegTestDynamicMethodName,
                 attributes1);
-            MethodBuilder builder2 = TestTypeBuilder.DefineMethod(NegTestDynamicMethodName,
+            MethodBuilder builder2 = typeBuilder.DefineMethod(NegTestDynamicMethodName,
                 attributes2);
 
             Assert.False(builder1.Equals(builder2));
         }
 
         [Fact]
-        public void PosTest8()
+        public void TestWithDifferentParameterList()
         {
             MethodAttributes attributes = MethodAttributes.Public;
             Type returnType = typeof(void);
@@ -172,11 +171,12 @@ namespace System.Reflection.Emit.Tests
                 typeof(float)
             };
 
-            MethodBuilder builder1 = TestTypeBuilder.DefineMethod(NegTestDynamicMethodName,
+            TypeBuilder typeBuilder = GetTestTypeBuilder();
+            MethodBuilder builder1 = typeBuilder.DefineMethod(NegTestDynamicMethodName,
                 attributes,
                 returnType,
                 paramTypes1);
-            MethodBuilder builder2 = TestTypeBuilder.DefineMethod(NegTestDynamicMethodName,
+            MethodBuilder builder2 = typeBuilder.DefineMethod(NegTestDynamicMethodName,
                 attributes,
                 returnType,
                 paramTypes2);
@@ -185,7 +185,7 @@ namespace System.Reflection.Emit.Tests
         }
 
         [Fact]
-        public void PosTest9()
+        public void TestWithDifferentParameterOrder()
         {
             MethodAttributes attributes = MethodAttributes.Public;
             Type returnType = typeof(void);
@@ -198,11 +198,12 @@ namespace System.Reflection.Emit.Tests
                 typeof(int)
             };
 
-            MethodBuilder builder1 = TestTypeBuilder.DefineMethod(NegTestDynamicMethodName,
+            TypeBuilder typeBuilder = GetTestTypeBuilder();
+            MethodBuilder builder1 = typeBuilder.DefineMethod(NegTestDynamicMethodName,
                 attributes,
                 returnType,
                 paramTypes1);
-            MethodBuilder builder2 = TestTypeBuilder.DefineMethod(NegTestDynamicMethodName,
+            MethodBuilder builder2 = typeBuilder.DefineMethod(NegTestDynamicMethodName,
                 attributes,
                 returnType,
                 paramTypes2);
@@ -211,9 +212,10 @@ namespace System.Reflection.Emit.Tests
         }
 
         [Fact]
-        public void NegTest1()
+        public void TestWithNull()
         {
-            MethodBuilder builder = TestTypeBuilder.DefineMethod(NegTestDynamicMethodName,
+            TypeBuilder typeBuilder = GetTestTypeBuilder();
+            MethodBuilder builder = typeBuilder.DefineMethod(NegTestDynamicMethodName,
                 MethodAttributes.Public);
 
             Assert.False(builder.Equals(null));

@@ -11,6 +11,7 @@ namespace System.Reflection.Emit.Tests
     public class EventBuilderSetRaiseMethod
     {
         public delegate void TestEventHandler(object sender, object arg);
+        private readonly RandomDataGenerator _generator = new RandomDataGenerator();
 
         private TypeBuilder TypeBuilder
         {
@@ -32,7 +33,7 @@ namespace System.Reflection.Emit.Tests
         private const int MethodBodyLength = 256;
 
         [Fact]
-        public void PosTest1()
+        public void TestOnAbstractMethod()
         {
             EventBuilder ev = TypeBuilder.DefineEvent("Event_PosTest1", EventAttributes.None, typeof(TestEventHandler));
             MethodBuilder method = TypeBuilder.DefineMethod("Method_PosTest1", MethodAttributes.Abstract | MethodAttributes.Virtual);
@@ -44,10 +45,10 @@ namespace System.Reflection.Emit.Tests
         }
 
         [Fact]
-        public void PosTest2()
+        public void TestOnInstanceMethod()
         {
             byte[] bytes = new byte[MethodBodyLength];
-            TestLibrary.Generator.GetBytes(bytes);
+            _generator.GetBytes(bytes);
             EventBuilder ev = TypeBuilder.DefineEvent("Event_PosTest2", EventAttributes.None, typeof(TestEventHandler));
             MethodBuilder method = TypeBuilder.DefineMethod("Method_PosTest2", MethodAttributes.Public);
             ILGenerator ilgen = method.GetILGenerator();
@@ -61,10 +62,10 @@ namespace System.Reflection.Emit.Tests
 
 
         [Fact]
-        public void PosTest3()
+        public void TestOnStaticMethod()
         {
             byte[] bytes = new byte[MethodBodyLength];
-            TestLibrary.Generator.GetBytes(bytes);
+            _generator.GetBytes(bytes);
             EventBuilder ev = TypeBuilder.DefineEvent("Event_PosTest3", EventAttributes.None, typeof(TestEventHandler));
             MethodBuilder method = TypeBuilder.DefineMethod("Method_PosTest3", MethodAttributes.Static);
             ILGenerator ilgen = method.GetILGenerator();
@@ -77,7 +78,7 @@ namespace System.Reflection.Emit.Tests
         }
 
         [Fact]
-        public void PosTest4()
+        public void TestOnPInvokeMethod()
         {
             EventBuilder ev = TypeBuilder.DefineEvent("Event_PosTest4", EventAttributes.None, typeof(TestEventHandler));
             MethodBuilder method = TypeBuilder.DefineMethod("Method_PosTest4", MethodAttributes.PinvokeImpl);
@@ -90,10 +91,10 @@ namespace System.Reflection.Emit.Tests
 
 
         [Fact]
-        public void PosTest5()
+        public void TestOnMultipleDifferentMethods()
         {
             byte[] bytes = new byte[MethodBodyLength];
-            TestLibrary.Generator.GetBytes(bytes);
+            _generator.GetBytes(bytes);
 
             EventBuilder ev = TypeBuilder.DefineEvent("Event_PosTest5", EventAttributes.None, typeof(TestEventHandler));
             MethodBuilder method1 = TypeBuilder.DefineMethod("PMethod_PosTest5", MethodAttributes.PinvokeImpl);
@@ -110,14 +111,14 @@ namespace System.Reflection.Emit.Tests
         }
 
         [Fact]
-        public void NegTest1()
+        public void TestThrowsExceptionOnNullBuilder()
         {
             EventBuilder ev = TypeBuilder.DefineEvent("Event_NegTest1", EventAttributes.None, typeof(TestEventHandler));
             Assert.Throws<ArgumentNullException>(() => { ev.SetRaiseMethod(null); });
         }
 
         [Fact]
-        public void NegTest2()
+        public void TestThrowsExceptionOnCreateTypeCalled()
         {
             try
             {

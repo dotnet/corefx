@@ -33,21 +33,22 @@ namespace System.Reflection.Emit.Tests
 
         private TypeBuilder _typeBuilder;
         private const int ArraySize = 256;
+        private readonly RandomDataGenerator _generator = new RandomDataGenerator();
 
         [Fact]
-        public void PosTest1()
+        public void TestSetCustomAttribute()
         {
             FieldBuilder field = TypeBuilder.DefineField("Field_PosTest1", typeof(object), FieldAttributes.Public);
             Type type = typeof(FBTestAttribute1);
             ConstructorInfo con = type.GetConstructor(new Type[] { });
             byte[] bytes = new byte[ArraySize];
-            TestLibrary.Generator.GetBytes(bytes);
+            _generator.GetBytes(bytes);
 
             field.SetCustomAttribute(con, bytes);
         }
 
         [Fact]
-        public void NegTest1()
+        public void TestThrowsExceptionForNullConstructorInfo()
         {
             FieldBuilder field = TypeBuilder.DefineField("Field_NegTest1", typeof(object), FieldAttributes.Public);
             byte[] bytes = new byte[ArraySize];
@@ -55,7 +56,7 @@ namespace System.Reflection.Emit.Tests
         }
 
         [Fact]
-        public void NegTest2()
+        public void TestThrowsExceptionForNullByteArray()
         {
             FieldBuilder field = TypeBuilder.DefineField("Field_NegTest2", typeof(object), FieldAttributes.Public);
             Type type = typeof(FBTestAttribute1);
@@ -64,13 +65,13 @@ namespace System.Reflection.Emit.Tests
         }
 
         [Fact]
-        public void NegTest3()
+        public void TestThrowsExceptionForCreateTypeCalled()
         {
             FieldBuilder field = TypeBuilder.DefineField("Field_NegTest3", typeof(object), FieldAttributes.Public);
             Type type = typeof(FBTestAttribute1);
             ConstructorInfo con = type.GetConstructor(new Type[] { });
             byte[] bytes = new byte[ArraySize];
-            TestLibrary.Generator.GetBytes(bytes);
+            _generator.GetBytes(bytes);
             TypeBuilder.CreateTypeInfo().AsType();
 
             Assert.Throws<InvalidOperationException>(() => { field.SetCustomAttribute(con, bytes); });

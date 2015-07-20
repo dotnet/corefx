@@ -18,6 +18,7 @@ namespace System.Reflection.Emit.Tests
         private const int MinTypName = 1;
         private const int MaxTypName = 1024;
         private const int NumLoops = 5;
+        private readonly RandomDataGenerator _generator = new RandomDataGenerator();
         private TypeAttributes[] _typesPos = new TypeAttributes[17] {
                                                        TypeAttributes.Abstract | TypeAttributes.NestedPublic,
                                                        TypeAttributes.AnsiClass | TypeAttributes.NestedPublic,
@@ -38,7 +39,7 @@ namespace System.Reflection.Emit.Tests
                                                        TypeAttributes.VisibilityMask,
                                                        };
         [Fact]
-        public void PosTest1()
+        public void TestDefineNestedType()
         {
             ModuleBuilder modBuilder;
             TypeBuilder typeBuilder;
@@ -48,19 +49,19 @@ namespace System.Reflection.Emit.Tests
             string nestedTypeName = "";
 
             modBuilder = CreateModule(
-                             TestLibrary.Generator.GetString(true, MinAsmName, MaxAsmName),
-                             TestLibrary.Generator.GetString(false, MinModName, MaxModName));
+                             _generator.GetString(true, MinAsmName, MaxAsmName),
+                             _generator.GetString(false, MinModName, MaxModName));
 
-            typeName = TestLibrary.Generator.GetString(true, MinTypName, MaxTypName);  // name can not contain embedded nulls
+            typeName = _generator.GetString(true, MinTypName, MaxTypName);  // name can not contain embedded nulls
 
             typeBuilder = modBuilder.DefineType(typeName);
 
             for (int i = 0; i < NumLoops; i++)
             {
-                nestedTypeName = TestLibrary.Generator.GetString(true, MinTypName, MaxTypName);  // name can not contain embedded nulls
+                nestedTypeName = _generator.GetString(true, MinTypName, MaxTypName);  // name can not contain embedded nulls
 
                 // create nested type
-                if (null != nestedType && 0 == (TestLibrary.Generator.GetInt32() % 2))
+                if (null != nestedType && 0 == (_generator.GetInt32() % 2))
                 {
                     nestedType.DefineNestedType(nestedTypeName, TypeAttributes.Abstract | TypeAttributes.NestedPublic, typeBuilder.GetType());
                 }
@@ -76,7 +77,7 @@ namespace System.Reflection.Emit.Tests
         }
 
         [Fact]
-        public void PosTest2()
+        public void TestWithEmbeddedNullsInName()
         {
             ModuleBuilder modBuilder;
             TypeBuilder typeBuilder;
@@ -87,15 +88,15 @@ namespace System.Reflection.Emit.Tests
             for (int i = 0; i < NumLoops; i++)
             {
                 modBuilder = CreateModule(
-                                 TestLibrary.Generator.GetString(true, MinAsmName, MaxAsmName),
-                                 TestLibrary.Generator.GetString(false, MinModName, MaxModName));
+                                 _generator.GetString(true, MinAsmName, MaxAsmName),
+                                 _generator.GetString(false, MinModName, MaxModName));
 
-                typeName = TestLibrary.Generator.GetString(true, MinTypName, MaxTypName);  // name can not contain embedded nulls
-                nestedTypeName = TestLibrary.Generator.GetString(true, MinTypName, MaxTypName / 4)
+                typeName = _generator.GetString(true, MinTypName, MaxTypName);  // name can not contain embedded nulls
+                nestedTypeName = _generator.GetString(true, MinTypName, MaxTypName / 4)
                                  + '\0'
-                                 + TestLibrary.Generator.GetString(true, MinTypName, MaxTypName / 4)
+                                 + _generator.GetString(true, MinTypName, MaxTypName / 4)
                                  + '\0'
-                                 + TestLibrary.Generator.GetString(true, MinTypName, MaxTypName / 4);
+                                 + _generator.GetString(true, MinTypName, MaxTypName / 4);
 
                 typeBuilder = modBuilder.DefineType(typeName);
 
@@ -109,7 +110,7 @@ namespace System.Reflection.Emit.Tests
         }
 
         [Fact]
-        public void PosTest3()
+        public void TestWithTypeAttributesSet()
         {
             ModuleBuilder modBuilder;
             TypeBuilder typeBuilder;
@@ -121,20 +122,20 @@ namespace System.Reflection.Emit.Tests
             int i = 0;
 
             modBuilder = CreateModule(
-                              TestLibrary.Generator.GetString(true, MinAsmName, MaxAsmName),
-                              TestLibrary.Generator.GetString(false, MinModName, MaxModName));
+                              _generator.GetString(true, MinAsmName, MaxAsmName),
+                              _generator.GetString(false, MinModName, MaxModName));
 
-            typeName = TestLibrary.Generator.GetString(true, MinTypName, MaxTypName);  // name can not contain embedded nulls
+            typeName = _generator.GetString(true, MinTypName, MaxTypName);  // name can not contain embedded nulls
 
             typeBuilder = modBuilder.DefineType(typeName, typeAttrib);
 
             for (i = 0; i < _typesPos.Length; i++)
             {
                 typeAttrib = _typesPos[i];
-                nestedTypeName = TestLibrary.Generator.GetString(true, MinTypName, MaxTypName);  // name can not contain embedded nulls
+                nestedTypeName = _generator.GetString(true, MinTypName, MaxTypName);  // name can not contain embedded nulls
 
                 // create nested type
-                if (null != nestedType && 0 == (TestLibrary.Generator.GetInt32() % 2))
+                if (null != nestedType && 0 == (_generator.GetInt32() % 2))
                 {
                     nestedType.DefineNestedType(nestedTypeName, _typesPos[i], typeBuilder.GetType());
                 }
@@ -150,7 +151,7 @@ namespace System.Reflection.Emit.Tests
         }
 
         [Fact]
-        public void PosTest4()
+        public void TestWithNullParentType()
         {
             ModuleBuilder modBuilder;
             TypeBuilder typeBuilder;
@@ -160,14 +161,14 @@ namespace System.Reflection.Emit.Tests
             string nestedTypeName = "";
 
             modBuilder = CreateModule(
-                             TestLibrary.Generator.GetString(true, MinAsmName, MaxAsmName),
-                             TestLibrary.Generator.GetString(false, MinModName, MaxModName));
+                             _generator.GetString(true, MinAsmName, MaxAsmName),
+                             _generator.GetString(false, MinModName, MaxModName));
 
-            typeName = TestLibrary.Generator.GetString(true, MinTypName, MaxTypName);  // name can not contain embedded nulls
+            typeName = _generator.GetString(true, MinTypName, MaxTypName);  // name can not contain embedded nulls
 
             typeBuilder = modBuilder.DefineType(typeName);
 
-            nestedTypeName = TestLibrary.Generator.GetString(true, MinTypName, MaxTypName);  // name can not contain embedded nulls
+            nestedTypeName = _generator.GetString(true, MinTypName, MaxTypName);  // name can not contain embedded nulls
 
             // create nested type
             nestedType = typeBuilder.DefineNestedType(nestedTypeName, TypeAttributes.Abstract | TypeAttributes.NestedPublic, null);
@@ -179,7 +180,7 @@ namespace System.Reflection.Emit.Tests
 
 
         [Fact]
-        public void NegTest1()
+        public void TestThrowsExceptionForNullname()
         {
             ModuleBuilder modBuilder;
             TypeBuilder typeBuilder;
@@ -188,10 +189,10 @@ namespace System.Reflection.Emit.Tests
             string nestedTypeName = "";
 
             modBuilder = CreateModule(
-                                 TestLibrary.Generator.GetString(true, MinAsmName, MaxAsmName),
-                                 TestLibrary.Generator.GetString(false, MinModName, MaxModName));
+                                 _generator.GetString(true, MinAsmName, MaxAsmName),
+                                 _generator.GetString(false, MinModName, MaxModName));
 
-            typeName = TestLibrary.Generator.GetString(true, MinTypName, MaxTypName);  // name can not contain embedded nulls
+            typeName = _generator.GetString(true, MinTypName, MaxTypName);  // name can not contain embedded nulls
             nestedTypeName = null;
 
             typeBuilder = modBuilder.DefineType(typeName);
@@ -205,7 +206,7 @@ namespace System.Reflection.Emit.Tests
         }
 
         [Fact]
-        public void NegTest2()
+        public void TestThrowsExcetpionForEmptyName()
         {
             ModuleBuilder modBuilder;
             TypeBuilder typeBuilder;
@@ -214,10 +215,10 @@ namespace System.Reflection.Emit.Tests
             string nestedTypeName = "";
 
             modBuilder = CreateModule(
-                                 TestLibrary.Generator.GetString(true, MinAsmName, MaxAsmName),
-                                 TestLibrary.Generator.GetString(false, MinModName, MaxModName));
+                                 _generator.GetString(true, MinAsmName, MaxAsmName),
+                                 _generator.GetString(false, MinModName, MaxModName));
 
-            typeName = TestLibrary.Generator.GetString(true, MinTypName, MaxTypName);  // name can not contain embedded nulls
+            typeName = _generator.GetString(true, MinTypName, MaxTypName);  // name can not contain embedded nulls
             nestedTypeName = string.Empty;
 
             typeBuilder = modBuilder.DefineType(typeName);

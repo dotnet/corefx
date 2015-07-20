@@ -20,36 +20,26 @@ namespace System.Reflection.Emit.Tests
         private const MethodAttributes TestMethodAttributes = MethodAttributes.Public | MethodAttributes.Abstract | MethodAttributes.Virtual;
         private const int MinStringLength = 1;
         private const int MaxStringLength = 128;
+        private readonly RandomDataGenerator _generator = new RandomDataGenerator();
 
-        private TypeBuilder TestTypeBuilder
+        private TypeBuilder GetTestTypeBuilder()
         {
-            get
-            {
-                if (null == _testTypeBuilder)
-                {
-                    AssemblyName assemblyName = new AssemblyName(TestDynamicAssemblyName);
-                    AssemblyBuilder assemblyBuilder = AssemblyBuilder.DefineDynamicAssembly(
-                        assemblyName, TestAssemblyBuilderAccess);
+            AssemblyName assemblyName = new AssemblyName(TestDynamicAssemblyName);
+            AssemblyBuilder assemblyBuilder = AssemblyBuilder.DefineDynamicAssembly(
+                assemblyName, TestAssemblyBuilderAccess);
 
-                    ModuleBuilder moduleBuilder = TestLibrary.Utilities.GetModuleBuilder(assemblyBuilder, TestDynamicModuleName);
-
-
-                    _testTypeBuilder = moduleBuilder.DefineType(TestDynamicTypeName, TestTypeAttributes);
-                }
-
-                return _testTypeBuilder;
-            }
+            ModuleBuilder moduleBuilder = TestLibrary.Utilities.GetModuleBuilder(assemblyBuilder, TestDynamicModuleName);
+            return moduleBuilder.DefineType(TestDynamicTypeName, TestTypeAttributes);
         }
 
-        private TypeBuilder _testTypeBuilder;
-
         [Fact]
-        public void PosTest1()
+        public void TestNameWithNoParameter()
         {
             string methodName = null;
 
-            methodName = TestLibrary.Generator.GetString(false, false, true, MinStringLength, MaxStringLength);
-            MethodBuilder builder = TestTypeBuilder.DefineMethod(methodName,
+            methodName = _generator.GetString(false, false, true, MinStringLength, MaxStringLength);
+            TypeBuilder typeBuilder = GetTestTypeBuilder();
+            MethodBuilder builder = typeBuilder.DefineMethod(methodName,
                 MethodAttributes.Public);
             string actualName = builder.Name;
 
@@ -57,16 +47,17 @@ namespace System.Reflection.Emit.Tests
         }
 
         [Fact]
-        public void PosTest2()
+        public void TestNameWithMultipleParameter()
         {
             string methodName = null;
             string strParamName = null;
 
-            methodName = TestLibrary.Generator.GetString(false, false, true, MinStringLength, MaxStringLength);
-            strParamName = TestLibrary.Generator.GetString(false, false, true, MinStringLength, MaxStringLength);
+            methodName = _generator.GetString(false, false, true, MinStringLength, MaxStringLength);
+            strParamName = _generator.GetString(false, false, true, MinStringLength, MaxStringLength);
 
             Type[] paramTypes = new Type[] { typeof(int) };
-            MethodBuilder builder = TestTypeBuilder.DefineMethod(
+            TypeBuilder typeBuilder = GetTestTypeBuilder();
+            MethodBuilder builder = typeBuilder.DefineMethod(
                 methodName,
                 TestMethodAttributes,
                 typeof(void),

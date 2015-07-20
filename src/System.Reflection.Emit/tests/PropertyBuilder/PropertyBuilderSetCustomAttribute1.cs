@@ -18,6 +18,7 @@ namespace System.Reflection.Emit.Tests
         private const string DynamicFieldName = "TestDynamicFieldA";
         private const string DynamicPropertyName = "TestDynamicProperty";
         private const string DynamicMethodName = "DynamicMethodA";
+        private readonly RandomDataGenerator _generator = new RandomDataGenerator();
 
         private TypeBuilder GetTypeBuilder(TypeAttributes typeAtt)
         {
@@ -33,14 +34,14 @@ namespace System.Reflection.Emit.Tests
         }
 
         [Fact]
-        public void PosTest1()
+        public void TestSetCustomAttribute()
         {
             MethodAttributes getMethodAttr = MethodAttributes.Public |
                                              MethodAttributes.SpecialName |
                                              MethodAttributes.HideBySig;
             Type returnType = typeof(int);
             Type[] ctorParamTypes = new Type[] { typeof(int) };
-            int expectedValue = TestLibrary.Generator.GetInt32();
+            int expectedValue = _generator.GetInt32();
             object[] ctorParamValues = new object[] { expectedValue };
             CustomAttributeBuilder customAttrBuilder = new CustomAttributeBuilder(
                                                             typeof(PBMyAttribute).GetConstructor(ctorParamTypes),
@@ -91,7 +92,7 @@ namespace System.Reflection.Emit.Tests
         }
 
         [Fact]
-        public void NegTest1()
+        public void TestThrowsExceptionOnNullBuilder()
         {
             MethodAttributes getMethodAttr = MethodAttributes.Public |
                                              MethodAttributes.SpecialName |
@@ -107,7 +108,7 @@ namespace System.Reflection.Emit.Tests
         }
 
         [Fact]
-        public void NegTest2()
+        public void TestThrowsExceptionForCreateTypeCalled()
         {
             MethodAttributes getMethodAttr = MethodAttributes.Public |
                                              MethodAttributes.SpecialName |
@@ -120,7 +121,7 @@ namespace System.Reflection.Emit.Tests
             Type[] paramTypes = new Type[0];
 
             Type[] ctorParamTypes = new Type[] { typeof(int) };
-            int expectedValue = TestLibrary.Generator.GetInt32();
+            int expectedValue = _generator.GetInt32();
             object[] ctorParamValues = new object[] { expectedValue };
             CustomAttributeBuilder customAttrBuilder = new CustomAttributeBuilder(
                                                             typeof(PBMyAttribute).GetConstructor(ctorParamTypes),

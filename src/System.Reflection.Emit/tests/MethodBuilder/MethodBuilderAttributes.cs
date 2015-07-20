@@ -19,29 +19,20 @@ namespace System.Reflection.Emit.Tests
         private const TypeAttributes TestTypeAttributes = TypeAttributes.Abstract;
         private const int MinStringLength = 1;
         private const int MaxStringLength = 128;
+        private readonly RandomDataGenerator _generator = new RandomDataGenerator();
 
-        private TypeBuilder TestTypeBuilder
+        private TypeBuilder GetTestTypeBuilder()
         {
-            get
-            {
-                if (null == _testTypeBuilder)
-                {
-                    AssemblyName assemblyName = new AssemblyName(TestDynamicAssemblyName);
-                    AssemblyBuilder assemblyBuilder = AssemblyBuilder.DefineDynamicAssembly(
-                        assemblyName, TestAssemblyBuilderAccess);
+            AssemblyName assemblyName = new AssemblyName(TestDynamicAssemblyName);
+            AssemblyBuilder assemblyBuilder = AssemblyBuilder.DefineDynamicAssembly(
+                assemblyName, TestAssemblyBuilderAccess);
 
-                    ModuleBuilder moduleBuilder = TestLibrary.Utilities.GetModuleBuilder(assemblyBuilder, TestDynamicModuleName);
-                    _testTypeBuilder = moduleBuilder.DefineType(TestDynamicTypeName, TestTypeAttributes);
-                }
-
-                return _testTypeBuilder;
-            }
+            ModuleBuilder moduleBuilder = TestLibrary.Utilities.GetModuleBuilder(assemblyBuilder, TestDynamicModuleName);
+            return moduleBuilder.DefineType(TestDynamicTypeName, TestTypeAttributes);
         }
 
-        private TypeBuilder _testTypeBuilder;
-
         [Fact]
-        public void PosTest1()
+        public void TestForMethodAttributes()
         {
             PosTestHelp(MethodAttributes.Abstract);
             PosTestHelp(MethodAttributes.Assembly);
@@ -69,7 +60,7 @@ namespace System.Reflection.Emit.Tests
         }
 
         [Fact]
-        public void PosTest2()
+        public void TestForCombinationOfMethodAttributes()
         {
             PosTestHelp(
                 MethodAttributes.Abstract |
@@ -87,9 +78,10 @@ namespace System.Reflection.Emit.Tests
         {
             string methodName = null;
             MethodAttributes actualAttribute = (MethodAttributes)(-1);
-            methodName = TestLibrary.Generator.GetString(false, MinStringLength, MaxStringLength);
+            methodName = _generator.GetString(false, MinStringLength, MaxStringLength);
 
-            MethodBuilder builder = TestTypeBuilder.DefineMethod(methodName,
+            TypeBuilder typeBuilder = GetTestTypeBuilder();
+            MethodBuilder builder = typeBuilder.DefineMethod(methodName,
                 desiredAttribute);
             actualAttribute = builder.Attributes;
 

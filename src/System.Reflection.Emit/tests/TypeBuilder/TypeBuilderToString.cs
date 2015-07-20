@@ -13,6 +13,7 @@ namespace System.Reflection.Emit.Tests
     {
         public const string ModuleName = "ModuleName";
         public const string TypeName = "TypeName";
+        private readonly RandomDataGenerator _generator = new RandomDataGenerator();
 
         private TypeBuilder GetTypeBuilder(string module_name, string type_name)
         {
@@ -24,9 +25,9 @@ namespace System.Reflection.Emit.Tests
         }
 
         [Fact]
-        public void PosTest1()
+        public void TestForRandomTypeName()
         {
-            string typename = TestLibrary.Generator.GetString(false, 8, 256);
+            string typename = _generator.GetString(false, 8, 256);
 
             // strip nulls and reserved characters out from the type-name
             // there is still a small chance that it might not be a valid identifier, but
@@ -46,18 +47,18 @@ namespace System.Reflection.Emit.Tests
         }
 
         [Fact]
-        public void PosTest2()
+        public void TestWithNumberStringName()
         {
-            string typename = TestLibrary.Generator.GetInt32().ToString();
+            string typename = _generator.GetInt32().ToString();
             TypeBuilder typebuilder = GetTypeBuilder(ModuleName, typename);
             string stringvalue = typebuilder.ToString();
             Assert.Equal(typename, stringvalue);
         }
 
         [Fact]
-        public void PosTest3()
+        public void TestWithWhitespaceInName()
         {
-            string typename = TestLibrary.Generator.GetString(false, 8, 256);
+            string typename = _generator.GetString(false, 8, 256);
             int len = typename.Length;
             int pos = GetInt32(0, len - 1);
             typename = typename.Replace(typename[pos], ' ');
@@ -67,7 +68,7 @@ namespace System.Reflection.Emit.Tests
         }
 
         [Fact]
-        public void PosTest4()
+        public void TestWithWhiteSpaceAsName()
         {
             string typename = "  ";
             TypeBuilder typebuilder = GetTypeBuilder(ModuleName, typename);
@@ -83,7 +84,7 @@ namespace System.Reflection.Emit.Tests
             }
             if (minValue < maxValue)
             {
-                return minValue + TestLibrary.Generator.GetInt32() % (maxValue - minValue);
+                return minValue + _generator.GetInt32() % (maxValue - minValue);
             }
 
             return minValue;

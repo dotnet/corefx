@@ -13,6 +13,7 @@ namespace System.Reflection.Emit.Tests
     public class EnumBuilderMakeArrayType2
     {
         private AssemblyBuilder _myAssemblyBuilder;
+        private readonly RandomDataGenerator _generator = new RandomDataGenerator();
 
         private ModuleBuilder CreateCallee()
         {
@@ -23,7 +24,7 @@ namespace System.Reflection.Emit.Tests
         }
 
         [Fact]
-        public void PosTest1()
+        public void TestMakeArrayTypeWithRank1()
         {
             var myModuleBuilder = CreateCallee();
             var myEnumBuilder = myModuleBuilder.DefineEnum("myEnum", TypeAttributes.Public, typeof(int));
@@ -34,7 +35,7 @@ namespace System.Reflection.Emit.Tests
         }
 
         [Fact]
-        public void PosTest2()
+        public void TestMakeArrayTypeWithRank2()
         {
             string szranks = null;
             var myModuleBuilder = CreateCallee();
@@ -49,7 +50,7 @@ namespace System.Reflection.Emit.Tests
         }
 
         [Fact]
-        public void NegTest1()
+        public void TestThrowsExceptionOnInvalidRank()
         {
             var myModuleBuilder = CreateCallee();
             var myEnumBuilder = myModuleBuilder.DefineEnum("myEnum", TypeAttributes.Public, typeof(int));
@@ -67,7 +68,7 @@ namespace System.Reflection.Emit.Tests
                 }
                 if (minValue < maxValue)
                 {
-                    return minValue + TestLibrary.Generator.GetInt32() % (maxValue - minValue);
+                    return minValue + _generator.GetInt32() % (maxValue - minValue);
                 }
             }
             catch

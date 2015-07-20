@@ -19,6 +19,7 @@ namespace System.Reflection.Emit.Tests
         private const TypeAttributes TestTypeAttributes = TypeAttributes.Abstract;
         private const int MinStringLength = 1;
         private const int MaxStringLength = 128;
+        private readonly RandomDataGenerator _generator = new RandomDataGenerator();
         private readonly byte[] _defaultILArray = new byte[]
         {
             0x00,
@@ -36,51 +37,43 @@ namespace System.Reflection.Emit.Tests
             0x2a
         };
 
-        private TypeBuilder TestTypeBuilder
+        private TypeBuilder GetTestTypeBuilder()
         {
-            get
-            {
-                if (null == _testTypeBuilder)
-                {
-                    AssemblyName assemblyName = new AssemblyName(TestDynamicAssemblyName);
-                    AssemblyBuilder assemblyBuilder = AssemblyBuilder.DefineDynamicAssembly(
-                        assemblyName, TestAssemblyBuilderAccess);
+            AssemblyName assemblyName = new AssemblyName(TestDynamicAssemblyName);
+            AssemblyBuilder assemblyBuilder = AssemblyBuilder.DefineDynamicAssembly(
+                assemblyName, TestAssemblyBuilderAccess);
 
-                    ModuleBuilder moduleBuilder = TestLibrary.Utilities.GetModuleBuilder(assemblyBuilder, TestDynamicModuleName);
-                    _testTypeBuilder = moduleBuilder.DefineType(TestDynamicTypeName, TestTypeAttributes);
-                }
-
-                return _testTypeBuilder;
-            }
+            ModuleBuilder moduleBuilder = TestLibrary.Utilities.GetModuleBuilder(assemblyBuilder, TestDynamicModuleName);
+            return moduleBuilder.DefineType(TestDynamicTypeName, TestTypeAttributes);
         }
 
-        private TypeBuilder _testTypeBuilder;
-
         [Fact]
-        public void PosTest1()
+        public void TestDeclaringTypeProperty()
         {
             string methodName = null;
 
-            methodName = TestLibrary.Generator.GetString(false, false, true, MinStringLength, MaxStringLength);
-            MethodBuilder builder = TestTypeBuilder.DefineMethod(methodName,
+            methodName = _generator.GetString(false, false, true, MinStringLength, MaxStringLength);
+            TypeBuilder typeBuilder = GetTestTypeBuilder();
+            MethodBuilder builder = typeBuilder.DefineMethod(methodName,
                 MethodAttributes.Public);
 
-            Assert.True(builder.DeclaringType.Equals(TestTypeBuilder));
+            Assert.True(builder.DeclaringType.Equals(typeBuilder));
         }
 
         [Fact]
-        public void PosTest2()
+        public void TestDeclaringTypePropertyAfterTypeCreated()
         {
             string methodName = null;
-            _testTypeBuilder = null;
-            methodName = TestLibrary.Generator.GetString(false, false, true, MinStringLength, MaxStringLength);
-            MethodBuilder builder = TestTypeBuilder.DefineMethod(methodName,
+            methodName = _generator.GetString(false, false, true, MinStringLength, MaxStringLength);
+
+            TypeBuilder typeBuilder = GetTestTypeBuilder();
+            MethodBuilder builder = typeBuilder.DefineMethod(methodName,
                 MethodAttributes.Public);
 
             ILGenerator ilgen = builder.GetILGenerator();
             ilgen.Emit(OpCodes.Ret);
 
-            Type type = TestTypeBuilder.CreateTypeInfo().AsType();
+            Type type = typeBuilder.CreateTypeInfo().AsType();
 
             Assert.True(builder.DeclaringType.Equals(type));
         }

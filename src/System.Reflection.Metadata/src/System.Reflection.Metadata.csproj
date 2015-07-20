@@ -23,7 +23,6 @@
     <Optimize>false</Optimize>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
     <CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
@@ -32,7 +31,6 @@
     <Optimize>true</Optimize>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Properties\InternalsVisibleTo.cs" />
@@ -157,6 +155,7 @@
     <Compile Include="System\Reflection\PortableExecutable\PEReader.cs" />
     <Compile Include="System\Reflection\PortableExecutable\PEStreamOptions.cs" />
     <Compile Include="System\Reflection\PortableExecutable\SectionHeader.cs" />
+    <Compile Include="System\Reflection\Throw.cs" />
     <Compile Include="System\Reflection\System.Reflection.cs" />
   </ItemGroup>
   <ItemGroup>

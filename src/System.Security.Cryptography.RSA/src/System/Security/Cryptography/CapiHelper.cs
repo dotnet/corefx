@@ -184,6 +184,15 @@ namespace Internal.NativeCrypto
             return ret;
         }
 
+
+        /// <summary>
+        /// Acquire a handle to a crypto service provider and optionally a key container
+        /// </summary>
+        public static bool CryptAcquireContext(out SafeProvHandle psafeProvHandle, string pszContainer, string pszProvider, int dwProvType, uint dwFlags)
+        {
+            return Interop.CryptAcquireContext(out psafeProvHandle, pszContainer, pszProvider, dwProvType, dwFlags);
+        }
+
         /// <summary>
         /// This method opens the CSP using CRYPT_VERIFYCONTEXT
         /// KeyContainer cannot be null for the flag CRYPT_VERIFYCONTEXT
@@ -1039,26 +1048,9 @@ namespace Internal.NativeCrypto
                 int halfModulusLength = (modulusLength + 1) / 2;
 
                 uint expAsDword = br.ReadUInt32();
-                byte[] exponent;
-                if (expAsDword == 0)
-                {
-                    exponent = new byte[] { 0 };
-                }
-                else
-                {
-                    LowLevelList<byte> exponentBytes = new LowLevelList<byte>();
-                    while (expAsDword != 0)
-                    {
-                        byte b = (byte)expAsDword;
-                        exponentBytes.Add(b);
-                        expAsDword >>= 8;
-                    }
-                    exponent = exponentBytes.ToArray();
-                    Array.Reverse(exponent);
-                }
 
                 RSAParameters rsaParameters = new RSAParameters();
-                rsaParameters.Exponent = exponent;
+                rsaParameters.Exponent = ExponentAsBytes(expAsDword);
                 rsaParameters.Modulus = br.ReadReversed(modulusLength);
                 if (includePrivateParameters)
                 {
@@ -1077,6 +1069,44 @@ namespace Internal.NativeCrypto
                 // For compat reasons, we throw an E_FAIL CrytoException if CAPI returns a smaller blob than expected.
                 // For compat reasons, we ignore the extra bits if the CAPI returns a larger blob than expected.
                 throw new CryptographicException(E_FAIL);
+            }
+        }
+
+        /// <summary>
+        /// Helper for converting a UInt32 exponent to bytes.
+        /// </summary>
+        private static byte[] ExponentAsBytes(uint exponent)
+        {
+            if (exponent <= 0xFF)
+            {
+                return new[] { (byte)exponent };
+            }
+            else if (exponent <= 0xFFFF)
+            {
+                return new[]
+                {
+                    (byte)(exponent >> 8),
+                    (byte)(exponent)
+                };
+            }
+            else if (exponent <= 0xFFFFFF)
+            {
+                return new[]
+                {
+                    (byte)(exponent >> 16),
+                    (byte)(exponent >> 8),
+                    (byte)(exponent)
+                };
+            }
+            else
+            {
+                return new[]
+                {
+                    (byte)(exponent >> 24),
+                    (byte)(exponent >> 16),
+                    (byte)(exponent >> 8),
+                    (byte)(exponent)
+                };
             }
         }
 
@@ -1323,6 +1353,30 @@ namespace Internal.NativeCrypto
                 }
             }
         }
+
+        /// <summary>
+        /// Destroy a crypto provider.
+        /// </summary>
+        public static bool CryptReleaseContext(IntPtr safeProvHandle, int dwFlags)
+        {
+            return Interop.CryptReleaseContext(safeProvHandle, dwFlags);
+        }
+
+        /// <summary>
+        /// Destroy a crypto key.
+        /// </summary>
+        public static bool CryptDestroyKey(IntPtr hKey)
+        {
+            return Interop.CryptDestroyKey(hKey);
+        }
+
+        /// <summary>
+        /// Destroy a crypto hash.
+        /// </summary>
+        public static bool CryptDestroyHash(IntPtr hHash)
+        {
+            return Interop.CryptDestroyHash(hHash);
+        }
     }//End of class CapiHelper : Wrappers
 
 
@@ -1367,7 +1421,7 @@ namespace Internal.NativeCrypto
             public static extern bool CryptGenKey(SafeProvHandle safeProvHandle, int Algid, int dwFlags, ref SafeKeyHandle safeKeyHandle);
 
             [DllImport(AdvapiDll, SetLastError = true)]
-            public static extern bool CryptReleaseContext(SafeProvHandle safeProvHandle, int dwFlags);
+            public static extern bool CryptReleaseContext(IntPtr safeProvHandle, int dwFlags);
 
             [DllImport(AdvapiDll, SetLastError = true)]
             public static extern bool CryptDecrypt(SafeKeyHandle safeKeyHandle, SafeHashHandle safeHashHandle, bool Final,
@@ -1407,6 +1461,14 @@ namespace Internal.NativeCrypto
             [DllImport(AdvapiDll, CharSet = CharSet.Unicode, SetLastError = true, EntryPoint = "CryptVerifySignatureW")]
             [return: MarshalAs(UnmanagedType.Bool)]
             public static extern bool CryptVerifySignature(SafeHashHandle hHash, byte[] pbSignature, int dwSigLen, SafeKeyHandle hPubKey, String sDescription, CryptSignAndVerifyHashFlags dwFlags);
+
+            [DllImport(AdvapiDll, CharSet = CharSet.Unicode, SetLastError = true)]
+            [return: MarshalAs(UnmanagedType.Bool)]
+            public static extern bool CryptDestroyKey(IntPtr hKey);
+
+            [DllImport(AdvapiDll, CharSet = CharSet.Unicode, SetLastError = true)]
+            [return: MarshalAs(UnmanagedType.Bool)]
+            public static extern bool CryptDestroyHash(IntPtr hHash);
         }
     } //End CapiHelper : Pinvokes
 

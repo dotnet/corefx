@@ -20,6 +20,7 @@ namespace System.Reflection.Emit.Tests
         private const MethodAttributes TestMethodAttributes = MethodAttributes.Public | MethodAttributes.Abstract | MethodAttributes.Virtual;
         private const int MinStringLength = 1;
         private const int MaxStringLength = 128;
+        private readonly RandomDataGenerator _generator = new RandomDataGenerator();
         private readonly byte[] _defaultILArray = new byte[]  {
             0x00,
             0x72,
@@ -36,33 +37,22 @@ namespace System.Reflection.Emit.Tests
             0x2a
         };
 
-        private TypeBuilder TestTypeBuilder
+        private TypeBuilder GetTestTypeBuilder()
         {
-            get
-            {
-                if (null == _testTypeBuilder)
-                {
-                    AssemblyName assemblyName = new AssemblyName(TestDynamicAssemblyName);
-                    AssemblyBuilder assemblyBuilder = AssemblyBuilder.DefineDynamicAssembly(
-                                    assemblyName, TestAssemblyBuilderAccess);
-                    ModuleBuilder moduleBuilder = TestLibrary.Utilities.GetModuleBuilder(assemblyBuilder, "Module1");
-
-
-                    _testTypeBuilder = moduleBuilder.DefineType(TestDynamicTypeName, TestTypeAttributes);
-                }
-
-                return _testTypeBuilder;
-            }
+            AssemblyName assemblyName = new AssemblyName(TestDynamicAssemblyName);
+            AssemblyBuilder assemblyBuilder = AssemblyBuilder.DefineDynamicAssembly(
+                            assemblyName, TestAssemblyBuilderAccess);
+            ModuleBuilder moduleBuilder = TestLibrary.Utilities.GetModuleBuilder(assemblyBuilder, "Module1");
+            return moduleBuilder.DefineType(TestDynamicTypeName, TestTypeAttributes);
         }
 
-        private TypeBuilder _testTypeBuilder;
-
         [Fact]
-        public void PosTest1()
+        public void TestWithAllFieldsSet()
         {
             string methodName = null;
-            methodName = TestLibrary.Generator.GetString(false, false, true, MinStringLength, MaxStringLength);
-            MethodBuilder builder = TestTypeBuilder.DefineMethod(methodName,
+            methodName = _generator.GetString(false, false, true, MinStringLength, MaxStringLength);
+            TypeBuilder typeBuilder = GetTestTypeBuilder();
+            MethodBuilder builder = typeBuilder.DefineMethod(methodName,
                 MethodAttributes.Public);
 
             ILGenerator ilgen = builder.GetILGenerator();
@@ -81,11 +71,12 @@ namespace System.Reflection.Emit.Tests
         }
 
         [Fact]
-        public void PosTest2()
+        public void TestWithNameAndAttributeSet()
         {
             string methodName = null;
-            methodName = TestLibrary.Generator.GetString(false, false, true, MinStringLength, MaxStringLength);
-            MethodBuilder builder = TestTypeBuilder.DefineMethod(methodName, MethodAttributes.Public);
+            methodName = _generator.GetString(false, false, true, MinStringLength, MaxStringLength);
+            TypeBuilder typeBuilder = GetTestTypeBuilder();
+            MethodBuilder builder = typeBuilder.DefineMethod(methodName, MethodAttributes.Public);
 
             string actualString = builder.ToString();
             string desiredString = GetDesiredMethodToString(builder);
@@ -95,11 +86,12 @@ namespace System.Reflection.Emit.Tests
         }
 
         [Fact]
-        public void PosTest3()
+        public void TestWithNameAttributeAndSignatureSet()
         {
             string methodName = null;
-            methodName = TestLibrary.Generator.GetString(false, false, true, MinStringLength, MaxStringLength);
-            MethodBuilder builder = TestTypeBuilder.DefineMethod(methodName,
+            methodName = _generator.GetString(false, false, true, MinStringLength, MaxStringLength);
+            TypeBuilder typeBuilder = GetTestTypeBuilder();
+            MethodBuilder builder = typeBuilder.DefineMethod(methodName,
                 MethodAttributes.Public);
 
             builder.SetSignature(typeof(void), null, null, null, null, null);
