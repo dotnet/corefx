@@ -10,7 +10,7 @@ using System.Dynamic.Utils;
 using System.Runtime.CompilerServices;
 using System.Reflection;
 
-#if FEATURE_REFEMIT
+#if !FEATURE_DYNAMIC_DELEGATE
 using System.Reflection.Emit;
 #endif
 
@@ -18,18 +18,9 @@ namespace System.Dynamic.Utils
 {
     internal static partial class DelegateHelpers
     {
-        public delegate object VBCallSiteDelegate0<T>(T callSite, object instance);
-        public delegate object VBCallSiteDelegate1<T>(T callSite, object instance, ref object arg1);
-        public delegate object VBCallSiteDelegate2<T>(T callSite, object instance, ref object arg1, ref object arg2);
-        public delegate object VBCallSiteDelegate3<T>(T callSite, object instance, ref object arg1, ref object arg2, ref object arg3);
-        public delegate object VBCallSiteDelegate4<T>(T callSite, object instance, ref object arg1, ref object arg2, ref object arg3, ref object arg4);
-        public delegate object VBCallSiteDelegate5<T>(T callSite, object instance, ref object arg1, ref object arg2, ref object arg3, ref object arg4, ref object arg5);
-        public delegate object VBCallSiteDelegate6<T>(T callSite, object instance, ref object arg1, ref object arg2, ref object arg3, ref object arg4, ref object arg5, ref object arg6);
-        public delegate object VBCallSiteDelegate7<T>(T callSite, object instance, ref object arg1, ref object arg2, ref object arg3, ref object arg4, ref object arg5, ref object arg6, ref object arg7);
-
         internal static Delegate CreateObjectArrayDelegate(Type delegateType, System.Func<object[], object> handler)
         {
-#if FEATURE_REFEMIT
+#if !FEATURE_DYNAMIC_DELEGATE
             return CreateObjectArrayDelegateRefEmit(delegateType, handler);
 #else
             return Internal.Runtime.Augments.DynamicDelegateAugments.CreateObjectArrayDelegate(delegateType, handler);
@@ -37,7 +28,7 @@ namespace System.Dynamic.Utils
         }
 
 
-#if FEATURE_REFEMIT
+#if !FEATURE_DYNAMIC_DELEGATE
 
         // We will generate the following code:
         //  
@@ -157,7 +148,7 @@ namespace System.Dynamic.Utils
             return (t.IsPointer) ? typeof(IntPtr) : t;
         }
 
-#endif // FEATURE_REFEMIT
+#endif
 
     }
 }

@@ -29,14 +29,11 @@ namespace System.Collections.Generic
         private Object _syncRoot;
 
         private const int DefaultCapacity = 4;
-        private static T[] s_emptyArray = Array.Empty<T>();
 
         /// <include file='doc\Stack.uex' path='docs/doc[@for="Stack.Stack"]/*' />
         public Stack()
         {
-            _array = s_emptyArray;
-            _size = 0;
-            _version = 0;
+            _array = Array.Empty<T>();
         }
 
         // Create a stack with a specific initial capacity.  The initial capacity
@@ -47,8 +44,6 @@ namespace System.Collections.Generic
             if (capacity < 0)
                 throw new ArgumentOutOfRangeException("capacity", SR.ArgumentOutOfRange_NeedNonNegNumRequired);
             _array = new T[capacity];
-            _size = 0;
-            _version = 0;
         }
 
         // Fills a Stack with the contents of a particular collection.  The items are
@@ -59,28 +54,7 @@ namespace System.Collections.Generic
         {
             if (collection == null)
                 throw new ArgumentNullException("collection");
-
-            ICollection<T> c = collection as ICollection<T>;
-            if (c != null)
-            {
-                int count = c.Count;
-                _array = new T[count];
-                c.CopyTo(_array, 0);
-                _size = count;
-            }
-            else
-            {
-                _size = 0;
-                _array = new T[DefaultCapacity];
-
-                using (IEnumerator<T> en = collection.GetEnumerator())
-                {
-                    while (en.MoveNext())
-                    {
-                        Push(en.Current);
-                    }
-                }
-            }
+            _array = EnumerableHelpers.ToArray(collection, out _size);
         }
 
         /// <include file='doc\Stack.uex' path='docs/doc[@for="Stack.Count"]/*' />
@@ -112,7 +86,7 @@ namespace System.Collections.Generic
         /// <include file='doc\Stack.uex' path='docs/doc[@for="Stack.Clear"]/*' />
         public void Clear()
         {
-            ArrayT<T>.Clear(_array, 0, _size); // Don't need to doc this but we clear the elements so that the gc can reclaim the references.
+            Array.Clear(_array, 0, _size); // Don't need to doc this but we clear the elements so that the gc can reclaim the references.
             _size = 0;
             _version++;
         }
@@ -167,7 +141,7 @@ namespace System.Collections.Generic
             else
             {
                 // Legacy fallback in case we ever end up copying within the same array.
-                ArrayT<T>.Copy(_array, 0, array, arrayIndex, _size);
+                Array.Copy(_array, 0, array, arrayIndex, _size);
                 Array.Reverse(array, arrayIndex, _size);
             }
         }
@@ -234,8 +208,7 @@ namespace System.Collections.Generic
             int threshold = (int)(((double)_array.Length) * 0.9);
             if (_size < threshold)
             {
-                T[] newarray = ArrayT<T>.Resize(_array, _size, _size);
-                _array = newarray;
+                Array.Resize(ref _array, _size);
                 _version++;
             }
         }
@@ -270,8 +243,7 @@ namespace System.Collections.Generic
         {
             if (_size == _array.Length)
             {
-                T[] newArray = ArrayT<T>.Resize(_array, (_array.Length == 0) ? DefaultCapacity : 2 * _array.Length, _size);
-                _array = newArray;
+                Array.Resize(ref _array, (_array.Length == 0) ? DefaultCapacity : 2 * _array.Length);
             }
             _array[_size++] = item;
             _version++;

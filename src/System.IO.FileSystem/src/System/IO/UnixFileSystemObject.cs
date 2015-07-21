@@ -76,7 +76,7 @@ namespace System.IO
                         FileAttributes.System | FileAttributes.Temporary;
                     if ((value & ~allValidFlags) != 0)
                     {
-                        throw new ArgumentException(SR.Arg_InvalidFileAttrs);
+                        throw new ArgumentException(SR.Arg_InvalidFileAttrs, "value");
                     }
 
                     // The only thing we can reasonably change is whether the file object is readonly,
@@ -178,7 +178,14 @@ namespace System.IO
                         DateTimeOffset.FromUnixTimeSeconds(_fileinfo.btime) :
                         default(DateTimeOffset);
                 }
-                set { } // Not supported
+                set 
+                {
+                    // The ctime in Unix can be interpreted differently by different formats so there isn't
+                    // a reliable way to set this; however, we can't just do nothing since the FileSystemWatcher
+                    // specifically looks for this call to make a Metatdata Change, so we should set the 
+                    // LastAccessTime of the file to cause the metadata change we need.
+                    LastAccessTime = LastAccessTime;
+                }
             }
 
             public DateTimeOffset LastAccessTime

@@ -13,28 +13,9 @@ namespace System.IO
     /// <summary>Provides an implementation of FileSystem for Unix systems.</summary>
     internal sealed partial class UnixFileSystem : FileSystem
     {
-        /// <summary>The maximum path length for the system.  -1 if it hasn't yet been initialized.</summary>
-        private static int _maxPath = -1;
-        /// <summary>The maximum name length for the system.  -1 if it hasn't yet been initialized.</summary>
-        private static int _maxName = -1;
+        public override int MaxPath { get { return Interop.libc.MaxPath; } }
 
-        public override int MaxPath 
-        {
-            get
-            {
-                Interop.libc.GetPathConfValue(ref _maxPath, Interop.libc.PathConfNames._PC_PATH_MAX, Interop.libc.DEFAULT_PC_PATH_MAX);
-                return _maxPath;
-            } 
-        }
-
-        public override int MaxDirectoryPath 
-        {
-            get
-            {
-                Interop.libc.GetPathConfValue(ref _maxName, Interop.libc.PathConfNames._PC_NAME_MAX, Interop.libc.DEFAULT_PC_NAME_MAX);
-                return _maxName;
-            } 
-        }
+        public override int MaxDirectoryPath { get { return Interop.libc.MaxName; } }
 
         public override FileStreamBase Open(string fullPath, FileMode mode, FileAccess access, FileShare share, int bufferSize, FileOptions options, FileStream parent)
         {
@@ -57,7 +38,7 @@ namespace System.IO
             const int bufferSize = FileStream.DefaultBufferSize;
             const bool useAsync = false;
             using (Stream src = new FileStream(sourceFullPath, FileMode.Open, FileAccess.Read, FileShare.Read, bufferSize, useAsync))
-            using (Stream dst = new FileStream(destFullPath, overwrite ? FileMode.CreateNew : FileMode.Create, FileAccess.ReadWrite, FileShare.None, bufferSize, useAsync))
+            using (Stream dst = new FileStream(destFullPath, overwrite ? FileMode.Create : FileMode.CreateNew, FileAccess.ReadWrite, FileShare.None, bufferSize, useAsync))
             {
                 src.CopyTo(dst);
             }
@@ -318,7 +299,7 @@ namespace System.IO
             return DirectoryExists(fullPath, out errno);
         }
 
-        private bool DirectoryExists(string fullPath, out int errno)
+        private static bool DirectoryExists(string fullPath, out int errno)
         {
             return FileExists(fullPath, Interop.libcoreclr.FileTypes.S_IFDIR, out errno);
         }
@@ -329,7 +310,7 @@ namespace System.IO
             return FileExists(fullPath, Interop.libcoreclr.FileTypes.S_IFREG, out errno);
         }
 
-        private bool FileExists(string fullPath, int fileType, out int errno)
+        private static bool FileExists(string fullPath, int fileType, out int errno)
         {
             Interop.libcoreclr.fileinfo fileinfo;
             while (true)
@@ -475,48 +456,53 @@ namespace System.IO
                             string name = Interop.libc.GetDirEntName(curEntry);
 
                             // Get from the dir entry whether the entry is a file or directory.
-                            // If we're not sure from the dir entry itself, stat to the entry.
-                            bool isDir = false, isFile = false;
+                            // We classify everything as a file unless we know it to be a directory,
+                            // e.g. a FIFO will be classified as a file.
+                            bool isDir;
                             switch (Interop.libc.GetDirEntType(curEntry))
                             {
                                 case Interop.libc.DType.DT_DIR:
+                                    // We know it's a directory.
                                     isDir = true;
-                                    break;
-                                case Interop.libc.DType.DT_REG:
-                                    isFile = true;
                                     break;
                                 case Interop.libc.DType.DT_LNK:
                                 case Interop.libc.DType.DT_UNKNOWN:
-                                    string fullPath = Path.Combine(dirPath.FullPath, name);
-                                    Interop.libcoreclr.fileinfo fileinfo;
-                                    while (Interop.CheckIo(Interop.libcoreclr.GetFileInformationFromPath(fullPath, out fileinfo), fullPath)) ;
-                                    isDir = (fileinfo.mode & Interop.libcoreclr.FileTypes.S_IFMT) == Interop.libcoreclr.FileTypes.S_IFDIR;
-                                    isFile = (fileinfo.mode & Interop.libcoreclr.FileTypes.S_IFMT) == Interop.libcoreclr.FileTypes.S_IFREG;
+                                    // It's a symlink or unknown: stat to it to see if we can resolve it to a directory.
+                                    // If we can't (e.g.symlink to a file, broken symlink, etc.), we'll just treat it as a file.
+                                    int errnoIgnored;
+                                    isDir = DirectoryExists(Path.Combine(dirPath.FullPath, name), out errnoIgnored);
+                                    break;
+                                default:
+                                    // Otherwise, treat it as a file.  This includes regular files,
+                                    // FIFOs, etc.
+                                    isDir = false;
                                     break;
                             }
-                            bool matchesSearchPattern =
-                                (isFile || isDir) &&
-                                Interop.libc.fnmatch(_searchPattern, name, Interop.libc.FnmatchFlags.None) == 0;
 
                             // Yield the result if the user has asked for it.  In the case of directories,
                             // always explore it by pushing it onto the stack, regardless of whether
                             // we're returning directories.
-                            if (isDir && !ShouldIgnoreDirectory(name))
+                            if (isDir)
                             {
-                                if (_includeDirectories && matchesSearchPattern)
+                                if (!ShouldIgnoreDirectory(name))
                                 {
-                                    yield return _translateResult(Path.Combine(dirPath.UserPath, name), /*isDirectory*/true);
-                                }
-                                if (_searchOption == SearchOption.AllDirectories)
-                                {
-                                    if (toExplore == null)
+                                    if (_includeDirectories &&
+                                        Interop.libc.fnmatch(_searchPattern, name, Interop.libc.FnmatchFlags.None) == 0)
                                     {
-                                        toExplore = new Stack<PathPair>();
+                                        yield return _translateResult(Path.Combine(dirPath.UserPath, name), /*isDirectory*/true);
                                     }
-                                    toExplore.Push(new PathPair(Path.Combine(dirPath.UserPath, name), Path.Combine(dirPath.FullPath, name)));
+                                    if (_searchOption == SearchOption.AllDirectories)
+                                    {
+                                        if (toExplore == null)
+                                        {
+                                            toExplore = new Stack<PathPair>();
+                                        }
+                                        toExplore.Push(new PathPair(Path.Combine(dirPath.UserPath, name), Path.Combine(dirPath.FullPath, name)));
+                                    }
                                 }
                             }
-                            else if (isFile && _includeFiles && matchesSearchPattern)
+                            else if (_includeFiles &&
+                                     Interop.libc.fnmatch(_searchPattern, name, Interop.libc.FnmatchFlags.None) == 0)
                             {
                                 yield return _translateResult(Path.Combine(dirPath.UserPath, name), /*isDirectory*/false);
                             }
@@ -552,8 +538,7 @@ namespace System.IO
 
             private static string NormalizeSearchPattern(string searchPattern)
             {
-                searchPattern = searchPattern.TrimEnd(PathHelpers.TrimEndChars);
-                if (searchPattern.Equals(".") || searchPattern == "*.*")
+                if (searchPattern == "." || searchPattern == "*.*")
                 {
                     searchPattern = "*";
                 }
@@ -583,14 +568,9 @@ namespace System.IO
             return name == "." || name == "..";
         }
 
-        public override unsafe string GetCurrentDirectory()
+        public override string GetCurrentDirectory()
         {
-            byte[] pathBuffer = new byte[MaxPath];
-            fixed (byte* ptr = pathBuffer)
-            {
-                while (Interop.CheckIoPtr((IntPtr)Interop.libc.getcwd(ptr, (IntPtr)pathBuffer.Length))) ;
-                return Marshal.PtrToStringAnsi((IntPtr)ptr);
-            }
+            return Interop.libc.getcwd();
         }
 
         public override void SetCurrentDirectory(string fullPath)

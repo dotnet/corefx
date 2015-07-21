@@ -45,6 +45,7 @@ public partial class FileSystemWatcher_4000_Tests
     }
 
     [Fact]
+    [ActiveIssue(2011, PlatformID.OSX)]
     public static void FileSystemWatcher_Created_MoveDirectory()
     {
         // create two test directories
@@ -109,5 +110,17 @@ public partial class FileSystemWatcher_4000_Tests
 
             Utility.ExpectNoEvent(eventOccured, "created");
         }
+    }
+
+    [Fact]
+    public static void FileSystemWatcher_Created_FileCreatedInNestedDirectory()
+    {
+        Utility.TestNestedDirectoriesHelper(WatcherChangeTypes.Created, (AutoResetEvent are, TemporaryTestDirectory ttd) =>
+        {
+            using (var nestedFile = new TemporaryTestFile(Path.Combine(ttd.Path, "nestedFile")))
+            {
+                Utility.ExpectEvent(are, "nested file created", 1000 * 30);
+            }
+        });
     }
 }

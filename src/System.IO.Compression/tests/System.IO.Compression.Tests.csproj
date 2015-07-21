@@ -7,7 +7,6 @@
     <ProjectGuid>{BC2E1649-291D-412E-9529-EDDA94FA7AD6}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AssemblyName>System.IO.Compression.Tests</AssemblyName>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'" />
@@ -22,8 +21,10 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Common.cs" />
     <Compile Include="DeflateStreamTests.cs" />
     <Compile Include="GZipStreamTests.cs" />
+    <Compile Include="XunitAssemblyAttributes.cs" />
     <Compile Include="ZipArchive\zip_CreateTests.cs" />
     <Compile Include="ZipArchive\zip_InvalidParametersAndStrangeFiles.cs" />
     <Compile Include="ZipArchive\zip_ManualAndCompatibilityTests.cs" />
@@ -31,15 +32,24 @@
     <Compile Include="ZipArchive\zip_UpdateTests.cs" />
     <Compile Include="Utilities\StripHeaderAndFooter.cs" />
     <Compile Include="Utilities\WrappedStream.cs" />
-    <Compile Include="$(CommonTestPath)\Compression\Utilities\CRC.cs" />
-    <Compile Include="$(CommonTestPath)\Compression\Utilities\FileData.cs" />
-    <Compile Include="$(CommonTestPath)\Compression\Utilities\LocalMemoryStream.cs" />
-    <Compile Include="$(CommonTestPath)\Compression\Utilities\StreamHelpers.cs" />
-    <Compile Include="$(CommonTestPath)\Compression\Utilities\ZipTestHelper.cs" />
-    <Compile Include="$(CommonPath)\Interop\Interop.PlatformDetection.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="DeflateStream\" />
+    <Compile Include="$(CommonTestPath)\Compression\Utilities\CRC.cs">
+      <Link>Common\Compression\Utilities\CRC.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonTestPath)\Compression\Utilities\FileData.cs">
+      <Link>Common\Compression\Utilities\FileData.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonTestPath)\Compression\Utilities\LocalMemoryStream.cs">
+      <Link>Common\Compression\Utilities\LocalMemoryStream.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonTestPath)\Compression\Utilities\StreamHelpers.cs">
+      <Link>Common\Compression\Utilities\StreamHelpers.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonTestPath)\Compression\Utilities\ZipTestHelper.cs">
+      <Link>Common\Compression\Utilities\ZipTestHelper.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Interop.PlatformDetection.cs">
+      <Link>Common\Interop\Interop.PlatformDetection.cs</Link>
+    </Compile>
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
   <!-- Temporary until we have new work in build tools to

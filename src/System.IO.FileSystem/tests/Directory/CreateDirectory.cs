@@ -31,6 +31,7 @@ public class Directory_CreateDirectory
     }
 
     [Fact]
+    [PlatformSpecific(PlatformID.Windows)] // whitespace-only names are valid on Unix
     public static void CreateDirectory_NonSignificantWhiteSpaceAsPath_ThrowsArgumentException()
     {
         var paths = IOInputs.GetNonSignificantTrailingWhiteSpace();
@@ -323,6 +324,7 @@ public class Directory_CreateDirectory
 #endif
 
     [Fact]
+    [PlatformSpecific(PlatformID.Windows)] // whitespace in names is significant on Unix
     public static void CreateDirectory_NonSignificantTrailingWhiteSpace_TreatsAsNonSignificant()
     {
         using (TemporaryDirectory directory = new TemporaryDirectory())

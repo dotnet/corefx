@@ -1271,6 +1271,44 @@ public static class DataContractJsonSerializerTests
         Assert.True(output.OnDeserializedMethodInvoked, "output.OnDeserializedMethodInvoked is false");
     }
 
+    [Fact]
+    public static void DCJS_DeserializeEmptyString()
+    {
+        var serializer = new DataContractJsonSerializer(typeof (object));
+        Assert.Throws<SerializationException>(() =>
+        {
+            serializer.ReadObject(new MemoryStream());
+        });
+    }
+
+    [Fact]
+    public static void DCJS_UseSimpleDictionaryFormat()
+    {
+        Dictionary<string, string> dict = new Dictionary<string, string>();
+        dict.Add("key1", "value1");
+        dict.Add("key2", "value2");
+        var deserialized = SerializeAndDeserialize(dict, @"{""key1"":""value1"",""key2"":""value2""}",
+            new DataContractJsonSerializerSettings { UseSimpleDictionaryFormat = true });
+        Assert.StrictEqual(2, deserialized.Count);
+        Assert.True(deserialized.ContainsKey("key1"));
+        Assert.True(deserialized.ContainsKey("key2"));
+        Assert.StrictEqual(dict["key1"], deserialized["key1"]);
+        Assert.StrictEqual(dict["key2"], deserialized["key2"]);
+    }
+
+    [Fact]
+    public static void DCJS_DataMemberNames()
+    {
+        var obj = new AppEnvironment()
+        {
+            ScreenDpi = 440,
+            ScreenOrientation = "horizontal"
+        };
+        var actual = SerializeAndDeserialize(obj, @"{""screen_dpi(x:y)"":440,""screen:orientation"":""horizontal""}");
+        Assert.StrictEqual(obj.ScreenDpi, actual.ScreenDpi);
+        Assert.StrictEqual(obj.ScreenOrientation, actual.ScreenOrientation);
+    }
+
     private static T SerializeAndDeserialize<T>(T value, string baseline, DataContractJsonSerializerSettings settings = null, Func<DataContractJsonSerializer> serializerFactory = null)
     {
         DataContractJsonSerializer dcjs;

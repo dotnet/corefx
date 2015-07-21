@@ -223,6 +223,10 @@ public class NamedPipesSimpleTest
             {
                 Assert.Equal(0, server.OutBufferSize);
             }
+            else if (Interop.IsLinux)
+            {
+                Assert.True(server.OutBufferSize > 0);
+            }
             else
             {
                 Assert.Throws<PlatformNotSupportedException>(() => server.OutBufferSize);
@@ -255,6 +259,10 @@ public class NamedPipesSimpleTest
             {
                 Assert.Equal(0, server.InBufferSize);
             }
+            else if (Interop.IsLinux)
+            {
+                Assert.True(server.InBufferSize > 0);
+            }
             else
             {
                 Assert.Throws<PlatformNotSupportedException>(() => server.InBufferSize);
@@ -270,7 +278,7 @@ public class NamedPipesSimpleTest
     [Fact]
     public static async Task ClientPInvokeChecks()
     {
-        using (NamedPipeServerStream server = new NamedPipeServerStream("foo", PipeDirection.In))
+        using (NamedPipeServerStream server = new NamedPipeServerStream("foo", PipeDirection.In, 1, PipeTransmissionMode.Byte, PipeOptions.None, 4096, 4096))
         {
             using (NamedPipeClientStream client = new NamedPipeClientStream(".", "foo", PipeDirection.Out))
             {
@@ -286,6 +294,10 @@ public class NamedPipesSimpleTest
                 if (Interop.IsWindows)
                 {
                     Assert.Equal(0, client.OutBufferSize);
+                }
+                else if (Interop.IsLinux)
+                {
+                    Assert.True(client.OutBufferSize > 0);
                 }
                 else
                 {
@@ -322,6 +334,10 @@ public class NamedPipesSimpleTest
                 {
                     Assert.Equal(0, client.InBufferSize);
                 }
+                else if (Interop.IsLinux)
+                {
+                    Assert.True(client.InBufferSize > 0);
+                }
                 else
                 {
                     Assert.Throws<PlatformNotSupportedException>(() => client.InBufferSize);
@@ -338,6 +354,7 @@ public class NamedPipesSimpleTest
     }
 
     [Fact]
+    [ActiveIssue(1840)]
     [PlatformSpecific(PlatformID.Windows)]
     public static void ClientServerMessages()
     {
@@ -389,6 +406,7 @@ public class NamedPipesSimpleTest
     }
 
     [Fact]
+    [ActiveIssue(1840, PlatformID.Windows)]
     public static async Task ServerCloneTests()
     {
         const string pipeName = "fooclone";
@@ -420,6 +438,7 @@ public class NamedPipesSimpleTest
     }
 
     [Fact]
+    [ActiveIssue(1840, PlatformID.Windows)]
     public static async Task ClientCloneTests()
     {
         const string pipeName = "fooClientclone";
