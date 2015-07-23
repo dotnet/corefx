@@ -1,4 +1,7 @@
-﻿using System.Diagnostics;
+﻿// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System.Diagnostics;
 using System.Security;
 
 namespace System.Numerics
@@ -6,7 +9,7 @@ namespace System.Numerics
     internal static partial class BigIntegerCalculator
     {
         public static uint[] Divide(uint[] left, uint right,
-                                    out uint[] remainder)
+                                    out uint remainder)
         {
             Debug.Assert(left != null);
             Debug.Assert(left.Length >= 1);
@@ -24,7 +27,7 @@ namespace System.Numerics
                 quotient[i] = (uint)(value / right);
                 carry = value % right;
             }
-            remainder = new uint[] { (uint)carry };
+            remainder = (uint)carry;
 
             return quotient;
         }

@@ -67,11 +67,6 @@ namespace System.Diagnostics
             }
 
             // Return the set of modules found
-            if (modules.Count == 0)
-            {
-                // Match Windows behavior when failing to enumerate modules
-                throw new Win32Exception(SR.EnumProcessModuleFailed);
-            }
             return modules.ToArray();
         }
 
@@ -94,7 +89,6 @@ namespace System.Diagnostics
                     VirtualBytes = (long)procFsStat.vsize,
                     WorkingSet = procFsStat.rss,
                     SessionId = procFsStat.session,
-                    HandleCount = 0, // not a Unix concept
 
                     // We don't currently fill in the other values.
                     // A few of these could probably be filled in from getrusage,

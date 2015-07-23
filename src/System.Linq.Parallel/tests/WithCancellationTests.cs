@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -22,8 +21,7 @@ namespace Test
             var cs = new CancellationTokenSource();
             cs.Cancel();
 
-            int[] srcEnumerable = Enumerable.Range(0, 1000).ToArray();
-            ThrowOnFirstEnumerable<int> throwOnFirstEnumerable = new ThrowOnFirstEnumerable<int>(srcEnumerable);
+            IEnumerable<int> throwOnFirstEnumerable = Enumerables<int>.ThrowOnEnumeration();
 
             try
             {
@@ -48,8 +46,7 @@ namespace Test
             var cs = new CancellationTokenSource();
             cs.Cancel();
 
-            int[] srcEnumerable = Enumerable.Range(0, 1000).ToArray();
-            ThrowOnFirstEnumerable<int> throwOnFirstEnumerable = new ThrowOnFirstEnumerable<int>(srcEnumerable);
+            IEnumerable<int> throwOnFirstEnumerable = Enumerables<int>.ThrowOnEnumeration();
 
             try
             {
@@ -619,131 +616,6 @@ namespace Test
             }
 
             Assert.NotNull(oce);
-        }
-
-        // To help the user, we will check if a cancellation token passed to WithCancellation() is
-        // not backed by a disposed CTS.  This will help them identify incorrect cts.Dispose calls, but
-        // doesn't solve all their problems if they don't manage CTS lifetime correctly.
-        // We test via a few random queries that have shown inconsistent behavior in the past.
-        [Fact]
-        public static void PreDisposedCTSPassedToPlinq()
-        {
-            ArgumentException ae1 = null;
-            ArgumentException ae2 = null;
-            ArgumentException ae3 = null;
-
-            CancellationTokenSource cts = new CancellationTokenSource();
-            CancellationToken ct = cts.Token;
-            cts.Dispose();  // Early dispose
-            try
-            {
-                Enumerable.Range(1, 10).AsParallel()
-                    .WithCancellation(ct)
-                    .OrderBy(x => x)
-                    .ToArray();
-            }
-            catch (Exception ex)
-            {
-                // This is not going to be the case since we changed the behavior of WithCancellation
-                // to not throw when called on disposed cancellationtokens.
-                ae1 = (ArgumentException)ex;
-            }
-
-            try
-            {
-                Enumerable.Range(1, 10).AsParallel()
-                    .WithCancellation(ct)
-                    .Last();
-            }
-            catch (Exception ex)
-            {
-                // This is not going to be the case since we changed the behavior of WithCancellation
-                // to not throw when called on disposed cancellationtokens.
-                ae2 = (ArgumentException)ex;
-            }
-
-            try
-            {
-                Enumerable.Range(1, 10).AsParallel()
-                    .WithCancellation(ct)
-                    .OrderBy(x => x)
-                    .Last();
-            }
-            catch (Exception ex)
-            {
-                // This is not going to be the case since we changed the behavior of WithCancellation
-                // to not throw when called on disposed cancellationtokens.
-                ae3 = (ArgumentException)ex;
-            }
-
-            Assert.Null(ae1);
-            Assert.Null(ae2);
-            Assert.Null(ae3);
-        }
-
-        public static void SimulateThreadSleep(int milliseconds)
-        {
-            ManualResetEvent mre = new ManualResetEvent(false);
-            mre.WaitOne(milliseconds);
-        }
-    }
-
-    // ---------------------------
-    // Helper classes
-    // ---------------------------
-
-    internal class ThrowOnFirstEnumerable<T> : IEnumerable<T>
-    {
-        private readonly IEnumerable<T> _innerEnumerable;
-
-        public ThrowOnFirstEnumerable(IEnumerable<T> innerEnumerable)
-        {
-            _innerEnumerable = innerEnumerable;
-        }
-
-        public IEnumerator<T> GetEnumerator()
-        {
-            return new ThrowOnFirstEnumerator<T>(_innerEnumerable.GetEnumerator());
-        }
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
-        }
-    }
-
-    internal class ThrowOnFirstEnumerator<T> : IEnumerator<T>
-    {
-        private IEnumerator<T> _innerEnumerator;
-
-        public ThrowOnFirstEnumerator(IEnumerator<T> sourceEnumerator)
-        {
-            _innerEnumerator = sourceEnumerator;
-        }
-
-        public void Dispose()
-        {
-            _innerEnumerator.Dispose();
-        }
-
-        public bool MoveNext()
-        {
-            throw new InvalidOperationException("ThrowOnFirstEnumerator throws on the first MoveNext");
-        }
-
-        public T Current
-        {
-            get { return _innerEnumerator.Current; }
-        }
-
-        object IEnumerator.Current
-        {
-            get { return Current; }
-        }
-
-        public void Reset()
-        {
-            _innerEnumerator.Reset();
         }
     }
 }

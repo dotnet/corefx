@@ -1,4 +1,7 @@
-﻿using System.IO.Pipes;
+﻿// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System.IO.Pipes;
 using System.Threading.Tasks;
 
 namespace System.Diagnostics.ProcessTests
@@ -45,18 +48,13 @@ namespace System.Diagnostics.ProcessTests
                         Sleep(100);
                     }
                 }
-                else if (args[0].Equals("ipc"))
+                else if (args[0].Equals("manyOutputLines"))
                 {
-                    using (var inbound = new AnonymousPipeClientStream(PipeDirection.In, args[1]))
-                    using (var outbound = new AnonymousPipeClientStream(PipeDirection.Out, args[2]))
+                    for (int i = 0; i < 144; i++)
                     {
-                        // Echo 10 bytes from inbound to outbound
-                        for (int i = 0; i < 10; i++)
-                        {
-                            int b = inbound.ReadByte();
-                            outbound.WriteByte((byte)b);
-                        }
+                        Console.WriteLine("This is line #" + i + ".");
                     }
+                    // no sleep here
                 }
                 else
                 {
