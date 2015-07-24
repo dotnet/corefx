@@ -194,6 +194,17 @@ namespace System.Linq.Tests
             Assert.Equal(-10, minusTen.Max());
             Assert.Equal(1000, thousand.Max());
         }
+
+        [Fact]
+        public void CovariantOrdered()
+        {
+            var ordered = Enumerable.Range(0, 100).Select(i => i.ToString()).OrderBy(i => i.Length);
+            IOrderedEnumerable<IComparable> o = ordered;
+            Assert.Equal(
+                Enumerable.Range(0, 100).Select(i => i.ToString()).OrderBy(i => i.Length).ThenBy(i => i).ToList(),
+                o.ThenBy(i => i).Cast<string>().ToList()
+                );
+        }
     }
 }
 
