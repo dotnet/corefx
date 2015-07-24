@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Text.Internal;
 using System.Text.Unicode;
@@ -13,9 +14,9 @@ namespace System.Text.Encodings.Web
         {
             get { return DefaultUrlEncoder.Singleton; }
         }
-        public static UrlEncoder Create(CodePointFilter filter)
+        public static UrlEncoder Create(TextEncoderSettings settings)
         {
-            return new DefaultUrlEncoder(filter);
+            return new DefaultUrlEncoder(settings);
         }
         public static UrlEncoder Create(params UnicodeRange[] allowedRanges)
         {
@@ -23,11 +24,11 @@ namespace System.Text.Encodings.Web
         }
     }
 
-    public sealed class DefaultUrlEncoder : UrlEncoder
+    internal sealed class DefaultUrlEncoder : UrlEncoder
     {
         private AllowedCharactersBitmap _allowedCharacters;
 
-        internal readonly static DefaultUrlEncoder Singleton = new DefaultUrlEncoder(new CodePointFilter(UnicodeRanges.BasicLatin));
+        internal readonly static DefaultUrlEncoder Singleton = new DefaultUrlEncoder(new TextEncoderSettings(UnicodeRanges.BasicLatin));
 
         // We perform UTF8 conversion of input, which means that the worst case is
         // 9 output chars per input char: [input] U+FFFF -> [output] "%XX%YY%ZZ".
@@ -38,7 +39,7 @@ namespace System.Text.Encodings.Web
             get { return 9; }
         }
 
-        public DefaultUrlEncoder(CodePointFilter filter)
+        public DefaultUrlEncoder(TextEncoderSettings filter)
         {
             if (filter == null)
             {
@@ -116,17 +117,16 @@ namespace System.Text.Encodings.Web
             }
         }
 
-        public DefaultUrlEncoder(params UnicodeRange[] allowedRanges) : this(new CodePointFilter(allowedRanges))
+        public DefaultUrlEncoder(params UnicodeRange[] allowedRanges) : this(new TextEncoderSettings(allowedRanges))
         { }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public override bool Encodes(int unicodeScalar)
+        public override bool WillEncode(int unicodeScalar)
         {
             if (UnicodeHelpers.IsSupplementaryCodePoint(unicodeScalar)) return true;
             return !_allowedCharacters.IsUnicodeScalarAllowed(unicodeScalar);
         }
 
-        [CLSCompliant(false)]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public unsafe override int FindFirstCharacterToEncode(char* text, int textLength)
         {
@@ -137,7 +137,6 @@ namespace System.Text.Encodings.Web
             return _allowedCharacters.FindFirstCharacterToEncode(text, textLength);
         }
 
-        [CLSCompliant(false)]
         public unsafe override bool TryEncodeUnicodeScalar(int unicodeScalar, char* buffer, int bufferLength, out int numberOfCharactersWritten)
         {
             if (buffer == null)
@@ -145,7 +144,7 @@ namespace System.Text.Encodings.Web
                 throw new ArgumentNullException("buffer");
             }
 
-            if (!Encodes(unicodeScalar)) { return unicodeScalar.TryWriteScalarAsChar(buffer, bufferLength, out numberOfCharactersWritten); }
+            if (!WillEncode(unicodeScalar)) { return TryWriteScalarAsChar(unicodeScalar, buffer, bufferLength, out numberOfCharactersWritten); }
 
             numberOfCharactersWritten = 0;
             uint asUtf8 = (uint)UnicodeHelpers.GetUtf8RepresentationForScalarValue((uint)unicodeScalar);

@@ -7,7 +7,7 @@ using System.Net.Http.Headers;
 
 using Xunit;
 
-namespace System.Net.Http.Unit.Tests
+namespace System.Net.Http.Tests
 {
     public class HttpResponseHeadersTest
     {
@@ -61,6 +61,7 @@ namespace System.Net.Http.Unit.Tests
             Assert.Equal(" http://example.com http://other", headers.GetValues("Location").First());
         }
 
+        [ActiveIssue(846, PlatformID.AnyUnix)]
         [Fact]
         public void Location_RequiresEncoding_Encoded()
         {

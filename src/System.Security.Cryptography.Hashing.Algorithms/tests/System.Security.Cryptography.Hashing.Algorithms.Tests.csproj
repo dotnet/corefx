@@ -22,12 +22,14 @@
   <ItemGroup>
     <Compile Include="ByteUtils.cs" />
     <Compile Include="HashAlgorithmTest.cs" />
+    <Compile Include="InvalidUsageTests.cs" />
     <Compile Include="HmacSha1Tests.cs" />
     <Compile Include="HmacSha256Tests.cs" />
     <Compile Include="HmacSha384Tests.cs" />
     <Compile Include="HmacSha512Tests.cs" />
     <Compile Include="HmacTests.cs" />
     <Compile Include="MD5Tests.cs" />
+    <Compile Include="ReusabilityTests.cs" />
     <Compile Include="Rfc2202HmacTests.cs" />
     <Compile Include="Rfc4231HmacTests.cs" />
     <Compile Include="Sha1Tests.cs" />

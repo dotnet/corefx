@@ -91,7 +91,7 @@ namespace System
                         UnixConsoleStream ucs = sw.BaseStream as UnixConsoleStream;
                         if (ucs != null)
                         {
-                            return ucs._handleType == Interop.libcoreclr.FileTypes.S_IFCHR;
+                            return ucs._handleType == Interop.NativeIO.FileTypes.S_IFCHR;
                         }
                     }
                 }
@@ -378,11 +378,11 @@ namespace System
                 try
                 {
                     _handle.DangerousAddRef(ref gotFd);
-                    Interop.libcoreclr.fileinfo buf;
+                    Interop.NativeIO.FileStats buf;
                     _handleType =
-                        Interop.libcoreclr.GetFileInformationFromFd((int)_handle.DangerousGetHandle(), out buf) == 0 ?
-                            (buf.mode & Interop.libcoreclr.FileTypes.S_IFMT) :
-                            Interop.libcoreclr.FileTypes.S_IFREG; // if something goes wrong, don't fail, just say it's a regular file
+                        Interop.NativeIO.FStat((int)_handle.DangerousGetHandle(), out buf) == 0 ?
+                            (buf.Mode & Interop.NativeIO.FileTypes.S_IFMT) :
+                            Interop.NativeIO.FileTypes.S_IFREG; // if something goes wrong, don't fail, just say it's a regular file
                 }
                 finally
                 {
@@ -1173,15 +1173,34 @@ namespace System
 
         internal sealed class ControlCHandlerRegistrar
         {
-            internal void Register()
+            private readonly Interop.libcoreclr.ConsoleCtrlHandlerRoutine _handler;
+            private bool _handlerRegistered;
+
+            internal ControlCHandlerRegistrar()
             {
-                // UNIXTODO: Install SIGINT signal handler.
+                _handler = new Interop.libcoreclr.ConsoleCtrlHandlerRoutine(c =>
+                    (c == Interop.libcoreclr.CTRL_C_EVENT || c == Interop.libcoreclr.CTRL_BREAK_EVENT) &&
+                    Console.HandleBreakEvent(c == Interop.libcoreclr.CTRL_C_EVENT ? ConsoleSpecialKey.ControlC : ConsoleSpecialKey.ControlBreak));
             }
 
-            internal void Unregister()
+            internal void Register() { RegisterOrUnregister(true); }
+
+            internal void Unregister() { RegisterOrUnregister(false); }
+
+            private void RegisterOrUnregister(bool register)
             {
-                // UNIXTODO: remove handler.
+                Debug.Assert(register == !_handlerRegistered);
+                if (!Interop.libcoreclr.SetConsoleCtrlHandler(_handler, register))
+                {
+                    int error = Marshal.GetLastWin32Error(); // Win32 error code from coreclr PAL, not a Unix errno value
+                    throw Interop.GetExceptionForIoErrno(
+                        error == Interop.libcoreclr.ERROR_INVALID_PARAMETER ? Interop.Errors.EINVAL :
+                        error == Interop.libcoreclr.ERROR_NOT_ENOUGH_MEMORY ? Interop.Errors.ENOMEM :
+                        Interop.Errors.EIO);
+                }
+                _handlerRegistered = register;
             }
         }
+
     }
 }

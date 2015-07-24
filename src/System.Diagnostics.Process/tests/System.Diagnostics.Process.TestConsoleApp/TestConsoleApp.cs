@@ -1,4 +1,8 @@
-﻿using System.Threading.Tasks;
+﻿// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System.IO.Pipes;
+using System.Threading.Tasks;
 
 namespace System.Diagnostics.ProcessTests
 {
@@ -43,6 +47,14 @@ namespace System.Diagnostics.ProcessTests
                         stdout.Flush();
                         Sleep(100);
                     }
+                }
+                else if (args[0].Equals("manyOutputLines"))
+                {
+                    for (int i = 0; i < 144; i++)
+                    {
+                        Console.WriteLine("This is line #" + i + ".");
+                    }
+                    // no sleep here
                 }
                 else
                 {

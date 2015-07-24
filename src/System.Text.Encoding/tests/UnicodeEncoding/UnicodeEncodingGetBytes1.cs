@@ -1,3 +1,6 @@
+﻿// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using System;
 using System.Text;
 using Xunit;
@@ -7,6 +10,8 @@ namespace System.Text.EncodingTests
     //System.Test.UnicodeEncoding.GetBytes(System.Char[],System.Int32,System.Int32,System.Byte[],System.Int32)
     public class UnicodeEncodingGetBytes1
     {
+        private readonly RandomDataGenerator _generator = new RandomDataGenerator();
+
         #region Positive Tests
         // PosTest1:Invoke the method
         [Fact]
@@ -202,7 +207,7 @@ namespace System.Text.EncodingTests
             int i = 0;
             while (i < length)
             {
-                Char temp = TestLibrary.Generator.GetChar(-55);
+                Char temp = _generator.GetChar(-55);
                 if (!Char.IsSurrogate(temp))
                 {
                     charArray[i] = temp;

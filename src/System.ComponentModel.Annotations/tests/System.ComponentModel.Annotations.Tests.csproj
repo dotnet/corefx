@@ -4,6 +4,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{6E48765E-D6AC-4A79-9C2E-B5EE67EEDECF}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>System.ComponentModel.Annotations.Tests</RootNamespace>
     <AssemblyName>System.ComponentModel.Annotations.Tests</AssemblyName>
@@ -20,6 +21,7 @@
     <Compile Include="CreditCardAttributeTests.cs" />
     <Compile Include="CustomValidationAttributeTests.cs" />
     <Compile Include="DataTypeAttributeTests.cs" />
+    <Compile Include="EditableAttributeTests.cs" />
     <Compile Include="EmailAddressAttributeTests.cs" />
     <Compile Include="EnumDataTypeAttributeTests.cs" />
     <Compile Include="FileExtensionsAttributeTests.cs" />
@@ -29,6 +31,7 @@
     <Compile Include="RangeAttributeTests.cs" />
     <Compile Include="RegularExpressionAttributeTests.cs" />
     <Compile Include="RequiredAttributeTests.cs" />
+    <Compile Include="ScaffoldColumnAttributeTests.cs" />
     <Compile Include="Schema\ColumnAttributeTests.cs" />
     <Compile Include="Schema\DatabaseGeneratedAttributeTests.cs" />
     <Compile Include="Schema\ForeignKeyAttributeTests.cs" />

@@ -32,14 +32,13 @@ namespace System.Collections.Generic
         private const int MinimumGrow = 4;
         private const int GrowFactor = 200;  // double each time
         private const int DefaultCapacity = 4;
-        private static T[] s_emptyArray = Array.Empty<T>();
 
         // Creates a queue with room for capacity objects. The default initial
         // capacity and grow factor are used.
         /// <include file='doc\Queue.uex' path='docs/doc[@for="Queue.Queue"]/*' />
         public Queue()
         {
-            _array = s_emptyArray;
+            _array = Array.Empty<T>();
         }
 
         // Creates a queue with room for capacity objects. The default grow factor
@@ -50,11 +49,7 @@ namespace System.Collections.Generic
         {
             if (capacity < 0)
                 throw new ArgumentOutOfRangeException("capacity", SR.ArgumentOutOfRange_NeedNonNegNumRequired);
-
             _array = new T[capacity];
-            _head = 0;
-            _tail = 0;
-            _size = 0;
         }
 
         // Fills a Queue with the elements of an ICollection.  Uses the enumerator
@@ -67,8 +62,6 @@ namespace System.Collections.Generic
                 throw new ArgumentNullException("collection");
 
             _array = new T[DefaultCapacity];
-            _size = 0;
-            _version = 0;
 
             using (IEnumerator<T> en = collection.GetEnumerator())
             {
@@ -109,11 +102,11 @@ namespace System.Collections.Generic
         public void Clear()
         {
             if (_head < _tail)
-                ArrayT<T>.Clear(_array, _head, _size);
+                Array.Clear(_array, _head, _size);
             else
             {
-                ArrayT<T>.Clear(_array, _head, _array.Length - _head);
-                ArrayT<T>.Clear(_array, 0, _tail);
+                Array.Clear(_array, _head, _array.Length - _head);
+                Array.Clear(_array, 0, _tail);
             }
 
             _head = 0;
@@ -148,11 +141,11 @@ namespace System.Collections.Generic
             if (numToCopy == 0) return;
 
             int firstPart = (_array.Length - _head < numToCopy) ? _array.Length - _head : numToCopy;
-            ArrayT<T>.Copy(_array, _head, array, arrayIndex, firstPart);
+            Array.Copy(_array, _head, array, arrayIndex, firstPart);
             numToCopy -= firstPart;
             if (numToCopy > 0)
             {
-                ArrayT<T>.Copy(_array, 0, array, arrayIndex + _array.Length - _head, numToCopy);
+                Array.Copy(_array, 0, array, arrayIndex + _array.Length - _head, numToCopy);
             }
         }
 
@@ -316,16 +309,16 @@ namespace System.Collections.Generic
         {
             T[] arr = new T[_size];
             if (_size == 0)
-                return arr;
-
+                return arr; // consider replacing with Array.Empty<T>() to be consistent with non-generic Queue
+            
             if (_head < _tail)
             {
-                ArrayT<T>.Copy(_array, _head, arr, 0, _size);
+                Array.Copy(_array, _head, arr, 0, _size);
             }
             else
             {
-                ArrayT<T>.Copy(_array, _head, arr, 0, _array.Length - _head);
-                ArrayT<T>.Copy(_array, 0, arr, _array.Length - _head, _tail);
+                Array.Copy(_array, _head, arr, 0, _array.Length - _head);
+                Array.Copy(_array, 0, arr, _array.Length - _head, _tail);
             }
 
             return arr;
@@ -341,12 +334,12 @@ namespace System.Collections.Generic
             {
                 if (_head < _tail)
                 {
-                    ArrayT<T>.Copy(_array, _head, newarray, 0, _size);
+                    Array.Copy(_array, _head, newarray, 0, _size);
                 }
                 else
                 {
-                    ArrayT<T>.Copy(_array, _head, newarray, 0, _array.Length - _head);
-                    ArrayT<T>.Copy(_array, 0, newarray, _array.Length - _head, _tail);
+                    Array.Copy(_array, _head, newarray, 0, _array.Length - _head);
+                    Array.Copy(_array, 0, newarray, _array.Length - _head, _tail);
                 }
             }
 

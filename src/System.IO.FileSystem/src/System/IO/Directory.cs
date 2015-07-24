@@ -41,7 +41,7 @@ namespace System.IO
             if (path == null)
                 throw new ArgumentNullException("path");
             if (path.Length == 0)
-                throw new ArgumentException(SR.Argument_PathEmpty);
+                throw new ArgumentException(SR.Argument_PathEmpty, "path");
             Contract.EndContractBlock();
 
             String fullPath = PathHelpers.GetFullPathInternal(path);
@@ -315,28 +315,6 @@ namespace System.IO
             return InternalGetFileDirectoryNames(path, path, searchPattern, true, true, searchOption);
         }
 
-
-        // Private class that holds search data that is passed around 
-        // in the heap based stack recursion
-        internal sealed class SearchData
-        {
-            public SearchData(String fullPath, String userPath, SearchOption searchOption)
-            {
-                Contract.Requires(fullPath != null && fullPath.Length > 0);
-                Contract.Requires(userPath != null && userPath.Length > 0);
-                Contract.Requires(searchOption == SearchOption.AllDirectories || searchOption == SearchOption.TopDirectoryOnly);
-
-                this.fullPath = fullPath;
-                this.userPath = userPath;
-                this.searchOption = searchOption;
-            }
-
-            public readonly string fullPath;     // Fully qualified search path excluding the search criteria in the end (ex, c:\temp\bar\foo)
-            public readonly string userPath;     // User specified path (ex, bar\foo)
-            public readonly SearchOption searchOption;
-        }
-
-
         // Returns fully qualified user path of dirs/files that matches the search parameters. 
         // For recursive search this method will search through all the sub dirs  and execute 
         // the given search criteria against every dir.
@@ -351,8 +329,7 @@ namespace System.IO
 
             IEnumerable<String> enumerable = FileSystem.Current.EnumeratePaths(path, searchPattern, searchOption,
                 (includeFiles ? SearchTarget.Files : 0) | (includeDirs ? SearchTarget.Directories : 0));
-            List<String> fileList = new List<String>(enumerable);
-            return fileList.ToArray();
+            return EnumerableHelpers.ToArray(enumerable);
         }
 
         public static IEnumerable<String> EnumerateDirectories(String path)
@@ -509,7 +486,7 @@ namespace System.IO
             Contract.EndContractBlock();
 
             String fullPath = PathHelpers.GetFullPathInternal(path);
-            String root = fullPath.Substring(0, PathHelpers.GetRootLength(fullPath));
+            String root = fullPath.Substring(0, PathInternal.GetRootLength(fullPath));
 
             return root;
         }
@@ -517,7 +494,7 @@ namespace System.IO
         internal static String InternalGetDirectoryRoot(String path)
         {
             if (path == null) return null;
-            return path.Substring(0, PathHelpers.GetRootLength(path));
+            return path.Substring(0, PathInternal.GetRootLength(path));
         }
 
         /*===============================CurrentDirectory===============================
@@ -540,7 +517,7 @@ namespace System.IO
             if (path == null)
                 throw new ArgumentNullException("value");
             if (path.Length == 0)
-                throw new ArgumentException(SR.Argument_PathEmpty);
+                throw new ArgumentException(SR.Argument_PathEmpty, "path");
             Contract.EndContractBlock();
             if (path.Length >= FileSystem.Current.MaxPath)
                 throw new PathTooLongException(SR.IO_PathTooLong);
@@ -578,12 +555,12 @@ namespace System.IO
 
             StringComparison pathComparison = PathInternal.GetComparison();
 
-            if (String.Compare(sourcePath, destPath, pathComparison) == 0)
+            if (String.Equals(sourcePath, destPath, pathComparison))
                 throw new IOException(SR.IO_SourceDestMustBeDifferent);
 
             String sourceRoot = Path.GetPathRoot(sourcePath);
             String destinationRoot = Path.GetPathRoot(destPath);
-            if (String.Compare(sourceRoot, destinationRoot, pathComparison) != 0)
+            if (!String.Equals(sourceRoot, destinationRoot, pathComparison))
                 throw new IOException(SR.IO_SourceDestMustHaveSameRoot);
 
             FileSystem.Current.MoveDirectory(fullsourceDirName, fulldestDirName);
