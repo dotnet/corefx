@@ -204,16 +204,14 @@ namespace System.Collections.Generic
         {
             if (_size == _array.Length)
             {
-                int newcapacity = (int)((long)_array.Length * (long)GrowFactor / 100);
-                if (newcapacity < _array.Length + MinimumGrow)
-                {
-                    newcapacity = _array.Length + MinimumGrow;
-                }
-                SetCapacity(newcapacity);
+                Grow();
             }
 
             _array[_tail] = item;
-            _tail = (_tail + 1) % _array.Length;
+            if (++_tail == _array.Length)
+            {
+                _tail = 0;
+            }
             _size++;
             _version++;
         }
@@ -249,7 +247,10 @@ namespace System.Collections.Generic
 
             T removed = _array[_head];
             _array[_head] = default(T);
-            _head = (_head + 1) % _array.Length;
+            if (++_head == _array.Length)
+            {
+                _head = 0;
+            }
             _size--;
             _version++;
             return removed;
@@ -289,13 +290,16 @@ namespace System.Collections.Generic
                 {
                     return true;
                 }
-                index = (index + 1) % _array.Length;
+                if (++index == _array.Length)
+                {
+                    index = 0;
+                }
             }
 
             return false;
         }
 
-        internal T GetElement(int i)
+        private T GetElement(int i)
         {
             return _array[(_head + i) % _array.Length];
         }
@@ -324,6 +328,15 @@ namespace System.Collections.Generic
             return arr;
         }
 
+        private void Grow()
+        {
+            int newcapacity = (int)((long)_array.Length * (long)GrowFactor / 100);
+            if (newcapacity < _array.Length + MinimumGrow)
+            {
+                newcapacity = _array.Length + MinimumGrow;
+            }
+            SetCapacity(newcapacity);
+        }
 
         // PRIVATE Grows or shrinks the buffer to hold capacity objects. Capacity
         // must be >= _size.
