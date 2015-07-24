@@ -124,7 +124,7 @@ namespace System.IO.FileSystem.Tests
         [ActiveIssue(2402)]
         public void WindowsWhiteSpaceAsPath_ThrowsArgumentException()
         {
-            var paths = IOInputs.GetNonSignificantTrailingWhiteSpace();
+            var paths = IOInputs.GetWhiteSpace();
             Assert.All(paths, (path) =>
             {
                 Assert.Throws<ArgumentException>(() => new DirectoryInfo(TestDirectory).CreateSubdirectory(path));
@@ -135,7 +135,7 @@ namespace System.IO.FileSystem.Tests
         [PlatformSpecific(PlatformID.AnyUnix)]
         public void UnixWhiteSpaceAsPath_Allowed()
         {
-            var paths = IOInputs.GetNonSignificantTrailingWhiteSpace();
+            var paths = IOInputs.GetWhiteSpace();
             Assert.All(paths, (path) =>
             {
                 new DirectoryInfo(TestDirectory).CreateSubdirectory(path);
@@ -149,7 +149,7 @@ namespace System.IO.FileSystem.Tests
         public void WindowsNonSignificantTrailingWhiteSpace()
         {
             // Windows will remove all nonsignificant whitespace in a path
-            var components = IOInputs.GetNonSignificantTrailingWhiteSpace();
+            var components = IOInputs.GetWhiteSpace();
 
             Assert.All(components, (component) =>
             {
@@ -178,7 +178,7 @@ namespace System.IO.FileSystem.Tests
         {
             // Unix treats trailing/prename whitespace as significant and a part of the name.
             DirectoryInfo testDir = Directory.CreateDirectory(GetTestFilePath());
-            var components = IOInputs.GetNonSignificantTrailingWhiteSpace();
+            var components = IOInputs.GetWhiteSpace();
 
             Assert.All(components, (component) =>
             {
@@ -190,6 +190,16 @@ namespace System.IO.FileSystem.Tests
             });
         }
 
+        [Fact]
+        [PlatformSpecific(PlatformID.Windows)]
+        public void ExtendedPathSubdirectory()
+        {
+            DirectoryInfo testDir = Directory.CreateDirectory(@"\\?\" + GetTestFilePath());
+            Assert.True(testDir.Exists);
+            DirectoryInfo subDir = testDir.CreateSubdirectory("Foo");
+            Assert.True(subDir.Exists);
+            Assert.StartsWith(@"\\?\", subDir.FullName);
+        }
         #endregion
     }
 }
