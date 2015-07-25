@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Diagnostics;
-using System.Diagnostics.Contracts;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -13,10 +12,10 @@ namespace System.Net.Http
     {
         private const int defaultBufferSize = 4096;
 
-        private Stream _content;
-        private int _bufferSize;
+        private readonly Stream _content;
+        private readonly int _bufferSize;
         private bool _contentConsumed;
-        private long _start;
+        private readonly long _start;
 
         public StreamContent(Stream content)
             : this(content, defaultBufferSize)
@@ -43,14 +42,27 @@ namespace System.Net.Http
             if (Logging.On) Logging.Associate(Logging.Http, this, content);
         }
 
-        protected override Task SerializeToStreamAsync(Stream stream, TransportContext context)
+        protected override async Task SerializeToStreamAsync(Stream stream, TransportContext context)
         {
             Debug.Assert(stream != null);
 
             PrepareContent();
-            // If the stream can't be re-read, make sure that it gets disposed once it is consumed.
-            StreamToStreamCopy sc = new StreamToStreamCopy(_content, stream, _bufferSize, !_content.CanSeek);
-            return sc.StartAsync();
+
+            await _content.CopyToAsync(stream, _bufferSize).ConfigureAwait(false);
+
+            try
+            {
+                // If the stream can't be re-read, make sure that it gets disposed once it is consumed.
+                if (!_content.CanSeek)
+                {
+                    _content.Dispose();
+                }
+            }
+            catch (Exception e)
+            {
+                // Dispose() should never throw, but since we're on an async codepath, make sure to catch the exception.
+                if (Logging.On) Logging.Exception(Logging.Http, this, "SerializeToStreamAsync", e);
+            }
         }
 
         protected internal override bool TryComputeLength(out long length)

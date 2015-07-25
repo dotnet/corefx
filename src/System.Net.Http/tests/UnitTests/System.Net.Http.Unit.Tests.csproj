@@ -250,9 +250,6 @@
     <Compile Include="..\..\src\System\Net\Http\StreamContent.cs">
       <Link>ProductionCode\System\Net\Http\StreamContent.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\System\Net\Http\StreamToStreamCopy.cs">
-      <Link>ProductionCode\System\Net\Http\StreamToStreamCopy.cs</Link>
-    </Compile>
     <Compile Include="..\..\src\System\Net\Http\StringContent.cs">
       <Link>ProductionCode\System\Net\Http\StringContent.cs</Link>
     </Compile>
