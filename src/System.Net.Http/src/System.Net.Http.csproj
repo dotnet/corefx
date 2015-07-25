@@ -46,7 +46,6 @@
     <Compile Include="System\Net\Http\MultipartContent.cs" />
     <Compile Include="System\Net\Http\MultipartFormDataContent.cs" />
     <Compile Include="System\Net\Http\StreamContent.cs" />
-    <Compile Include="System\Net\Http\StreamToStreamCopy.cs" />
     <Compile Include="System\Net\Http\StringContent.cs" />
     <Compile Include="System\Net\Http\Headers\AuthenticationHeaderValue.cs" />
     <Compile Include="System\Net\Http\Headers\BaseHeaderParser.cs" />
