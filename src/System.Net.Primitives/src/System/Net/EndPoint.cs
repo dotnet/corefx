@@ -7,8 +7,6 @@ using System.Net.Sockets;
 
 namespace System.Net
 {
-    // Generic abstraction to identify network addresses
-
     /// <devdoc>
     ///    <para>
     ///       Identifies a network address.
@@ -26,7 +24,7 @@ namespace System.Net
         {
             get
             {
-                throw ExceptionHelper.PropertyNotImplementedException;
+                throw NotImplemented.ByDesignWithMessage(SR.net_PropertyNotImplementedException);
             }
         }
 
@@ -37,7 +35,7 @@ namespace System.Net
         /// </devdoc>
         public virtual SocketAddress Serialize()
         {
-            throw ExceptionHelper.MethodNotImplementedException;
+            throw NotImplemented.ByDesignWithMessage(SR.net_MethodNotImplementedException);
         }
 
         /// <devdoc>
@@ -47,8 +45,7 @@ namespace System.Net
         /// </devdoc>
         public virtual EndPoint Create(SocketAddress socketAddress)
         {
-            throw ExceptionHelper.MethodNotImplementedException;
+            throw NotImplemented.ByDesignWithMessage(SR.net_MethodNotImplementedException);
         }
-    }; // abstract class EndPoint
-} // namespace System.Net
-
+    }
+}

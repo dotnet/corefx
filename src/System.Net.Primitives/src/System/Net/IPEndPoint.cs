@@ -58,7 +58,7 @@ namespace System.Net
         /// </devdoc>
         public IPEndPoint(long address, int port)
         {
-            if (!ValidationHelper.ValidateTcpPort(port))
+            if (!TcpValidationHelpers.ValidatePortNumber(port))
             {
                 throw new ArgumentOutOfRangeException("port");
             }
@@ -75,7 +75,7 @@ namespace System.Net
             {
                 throw new ArgumentNullException("address");
             }
-            if (!ValidationHelper.ValidateTcpPort(port))
+            if (!TcpValidationHelpers.ValidatePortNumber(port))
             {
                 throw new ArgumentOutOfRangeException("port");
             }
@@ -113,7 +113,7 @@ namespace System.Net
             }
             set
             {
-                if (!ValidationHelper.ValidateTcpPort(value))
+                if (!TcpValidationHelpers.ValidatePortNumber(value))
                 {
                     throw new ArgumentOutOfRangeException("value");
                 }

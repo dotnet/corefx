@@ -9,7 +9,7 @@ namespace System.Net.NetworkInformation
 {
     internal class HostInformation
     {
-        private static FIXED_INFO s_fixedInfo;
+        private static Interop.IpHlpApi.FIXED_INFO s_fixedInfo;
         private static bool s_fixedInfoInitialized = false;
 
         //changing these require a reboot, so we'll cache them instead.
@@ -18,11 +18,11 @@ namespace System.Net.NetworkInformation
 
         private static object s_syncObject = new object();
 
-        internal static FIXED_INFO GetFixedInfo()
+        internal static Interop.IpHlpApi.FIXED_INFO GetFixedInfo()
         {
             uint size = 0;
             SafeLocalAllocHandle buffer = null;
-            FIXED_INFO fixedInfo = new FIXED_INFO();
+            Interop.IpHlpApi.FIXED_INFO fixedInfo = new Interop.IpHlpApi.FIXED_INFO();
 
             //first we need to get the size of the buffer
             uint result = Interop.IpHlpApi.GetNetworkParams(SafeLocalAllocHandle.InvalidHandle, ref size);
@@ -41,7 +41,7 @@ namespace System.Net.NetworkInformation
                     result = Interop.IpHlpApi.GetNetworkParams(buffer, ref size);
                     if (result == Interop.IpHlpApi.ERROR_SUCCESS)
                     {
-                        fixedInfo = Marshal.PtrToStructure<FIXED_INFO>(buffer.DangerousGetHandle());
+                        fixedInfo = Marshal.PtrToStructure<Interop.IpHlpApi.FIXED_INFO>(buffer.DangerousGetHandle());
                     }
                 }
                 finally
@@ -62,7 +62,7 @@ namespace System.Net.NetworkInformation
         }
 
 
-        internal static FIXED_INFO FixedInfo
+        internal static Interop.IpHlpApi.FIXED_INFO FixedInfo
         {
             get
             {
