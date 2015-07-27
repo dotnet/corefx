@@ -108,7 +108,7 @@ namespace System.Net
             }
             set
             {
-                _password = UnsafeCommonNativeMethods.SecureStringHelper.CreateSecureString(value);
+                _password = SecureStringHelpers.CreateSecureString(value);
                 //                GlobalLog.Print("NetworkCredential::set_Password: value = " + value);
                 //                GlobalLog.Print("NetworkCredential::set_Password: m_password:");
                 //                GlobalLog.Dump(m_password);
@@ -167,7 +167,7 @@ namespace System.Net
 
         internal string InternalGetPassword()
         {
-            string decryptedString = UnsafeCommonNativeMethods.SecureStringHelper.CreateString(_password);
+            string decryptedString = SecureStringHelpers.GetPlaintext(_password);
 
             // GlobalLog.Print("NetworkCredential::get_Password: returning \"" + decryptedString + "\"");
             return decryptedString;
@@ -222,8 +222,8 @@ namespace System.Net
                 return false;
             return (InternalGetUserName() == compCred.InternalGetUserName() &&
                     InternalGetDomain() == compCred.InternalGetDomain() &&
-                    UnsafeCommonNativeMethods.SecureStringHelper.AreEqualValues(InternalGetSecurePassword(),
-                                                                             compCred.InternalGetSecurePassword()));
+                    SecureStringHelpers.AreEqualValues(InternalGetSecurePassword(),
+                                                       compCred.InternalGetSecurePassword()));
         }
 #endif //DEBUG
     } // class NetworkCredential

@@ -395,12 +395,12 @@ namespace System.Net.Sockets
         ///       Overlapped operations will complete later.
         ///    </para>
         /// </devdoc>
-        IOPending = (int)UnsafeCommonNativeMethods.ErrorCodes.ERROR_IO_PENDING,          // 997
+        IOPending = (int)Interop.Winsock.ERROR_IO_PENDING,          // 997
         /// <devdoc>
         ///    <para>
         ///       [To be supplied.]
         ///    </para>
         /// </devdoc>
-        OperationAborted = (int)UnsafeCommonNativeMethods.ErrorCodes.ERROR_OPERATION_ABORTED,   // 995, WSA_OPERATION_ABORTED
+        OperationAborted = (int)Interop.Winsock.ERROR_OPERATION_ABORTED,   // 995, WSA_OPERATION_ABORTED
     }
 }

@@ -267,7 +267,7 @@ namespace System.Net
 
             // We cannot add an invalid cookie into the container.
             // Trying to prepare Uri for the cookie verification
-            uriSb.Append(cookie.Secure ? UriShim.UriSchemeHttps : UriShim.UriSchemeHttp).Append(UriShim.SchemeDelimiter);
+            uriSb.Append(cookie.Secure ? UriScheme.Https : UriScheme.Http).Append(UriScheme.SchemeDelimiter);
 
             // If the original cookie has an explicitly set domain, copy it over
             // to the new cookie
@@ -793,7 +793,7 @@ namespace System.Net
 
         internal CookieCollection InternalGetCookies(Uri uri)
         {
-            bool isSecure = (uri.Scheme == UriShim.UriSchemeHttps);
+            bool isSecure = (uri.Scheme == UriScheme.Https);
             int port = uri.Port;
             CookieCollection cookies = new CookieCollection();
 

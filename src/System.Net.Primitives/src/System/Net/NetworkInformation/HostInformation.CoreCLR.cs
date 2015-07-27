@@ -1,8 +1,9 @@
-
-using System.Net;
-using System.Runtime.InteropServices;
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System.Runtime.InteropServices;
+
+using Microsoft.Win32.SafeHandles;
 
 namespace System.Net.NetworkInformation
 {
@@ -20,20 +21,25 @@ namespace System.Net.NetworkInformation
         internal static FIXED_INFO GetFixedInfo()
         {
             uint size = 0;
-            SafeLocalFree buffer = null;
+            SafeLocalAllocHandle buffer = null;
             FIXED_INFO fixedInfo = new FIXED_INFO();
 
             //first we need to get the size of the buffer
-            uint result = UnsafeCommonNativeMethods.GetNetworkParams(SafeLocalFree.Zero, ref size);
+            uint result = Interop.IpHlpApi.GetNetworkParams(SafeLocalAllocHandle.InvalidHandle, ref size);
 
-            while (result == IpHelperErrors.ErrorBufferOverflow)
+            while (result == Interop.IpHlpApi.ERROR_BUFFER_OVERFLOW)
             {
                 try
                 {
-                    //now we allocate the buffer and read the network parameters.
-                    buffer = SafeLocalFree.LocalAlloc((int)size);
-                    result = UnsafeCommonNativeMethods.GetNetworkParams(buffer, ref size);
-                    if (result == IpHelperErrors.Success)
+                    // Now we allocate the buffer and read the network parameters.
+                    buffer = Interop.mincore_obsolete.LocalAlloc(0, (UIntPtr)size);
+                    if (buffer.IsInvalid)
+                    {
+                        throw new OutOfMemoryException();
+                    }
+
+                    result = Interop.IpHlpApi.GetNetworkParams(buffer, ref size);
+                    if (result == Interop.IpHlpApi.ERROR_SUCCESS)
                     {
                         fixedInfo = Marshal.PtrToStructure<FIXED_INFO>(buffer.DangerousGetHandle());
                     }
@@ -48,7 +54,7 @@ namespace System.Net.NetworkInformation
             }
 
             //if the result include there being no information, we'll still throw
-            if (result != IpHelperErrors.Success)
+            if (result != Interop.IpHlpApi.ERROR_SUCCESS)
             {
                 throw new NetworkInformationException((int)result);
             }

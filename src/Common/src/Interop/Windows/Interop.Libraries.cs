@@ -54,6 +54,7 @@ internal static partial class Interop
         internal const string User32 = "user32.dll";
         internal const string Version = "api-ms-win-core-version-l1-1-0.dll";
         internal const string WinHttp = "winhttp.dll";
+        internal const string Winsock = "Ws2_32.dll";
         internal const string Wow64 = "api-ms-win-core-wow64-l1-1-0.dll";
         internal const string Zlib = "clrcompression.dll";
     }
