@@ -85,8 +85,8 @@ namespace System.Reflection.Metadata.Tests
             }
 
             public string GetPrimitiveType(PrimitiveTypeCode typeCode) { return typeCode.ToString(); }
-            public string GetTypeFromDefinition(TypeDefinitionHandle handle) { return handle.RowId.ToString("X"); }
-            public string GetTypeFromReference(TypeReferenceHandle handle) { return handle.RowId.ToString("X"); }
+            public string GetTypeFromDefinition(TypeDefinitionHandle handle, bool? isValueType) { return handle.RowId.ToString("X"); }
+            public string GetTypeFromReference(TypeReferenceHandle handle, bool? isValueType) { return handle.RowId.ToString("X"); }
             public string GetByReferenceType(string elemenstring) { return elemenstring + "&"; }
             public string GetSZArrayType(string elemenstring) { return elemenstring + "[]"; }
             public string GetPointerType(string elemenstring) { return elemenstring + "*"; }

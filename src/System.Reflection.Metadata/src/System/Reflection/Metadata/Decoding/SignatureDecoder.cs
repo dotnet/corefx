@@ -1,8 +1,8 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-
 using System.Collections.Immutable;
 using System.Diagnostics;
+using System.Reflection.Metadata.Ecma335;
 
 namespace System.Reflection.Metadata.Decoding
 {
@@ -16,16 +16,17 @@ namespace System.Reflection.Metadata.Decoding
         /// </summary>
         /// <param name="handle">A type definition, reference, or specification handle.</param>
         /// <param name="provider">The type provider.</param>
+        /// <param name="isValueType">Is the type a class or a value type. Null signifies that the current type signature does not have the prefix</param>
         /// <exception cref="System.BadImageFormatException">The handle does not represent a valid type reference, definition, or specification.</exception>
-        public static TType DecodeType<TType>(Handle handle, ISignatureTypeProvider<TType> provider)
+        public static TType DecodeType<TType>(Handle handle, ISignatureTypeProvider<TType> provider, bool? isValueType)
         {
             switch (handle.Kind)
             {
                 case HandleKind.TypeReference:
-                    return provider.GetTypeFromReference((TypeReferenceHandle)handle);
+                    return provider.GetTypeFromReference((TypeReferenceHandle)handle, isValueType);
 
                 case HandleKind.TypeDefinition:
-                    return provider.GetTypeFromDefinition((TypeDefinitionHandle)handle);
+                    return provider.GetTypeFromDefinition((TypeDefinitionHandle)handle, isValueType);
 
                 case HandleKind.TypeSpecification:
                     return DecodeTypeSpecification((TypeSpecificationHandle)handle, provider);
@@ -58,7 +59,7 @@ namespace System.Reflection.Metadata.Decoding
         /// <exception cref="System.BadImageFormatException">The reader was not positioned at a valid signature type.</exception>
         public static TType DecodeType<TType>(ref BlobReader blobReader, ISignatureTypeProvider<TType> provider)
         {
-            return DecodeType(ref blobReader, blobReader.ReadSignatureTypeCode(), provider);
+            return DecodeType(ref blobReader, blobReader.ReadCompressedInteger(), provider);
         }
 
         /// <summary>
@@ -69,75 +70,81 @@ namespace System.Reflection.Metadata.Decoding
         /// <param name="provider">The type provider.</param>
         /// <returns>The decoded type.</returns>
         /// <exception cref="System.BadImageFormatException">The reader was not positioned at a valud signature type.</exception>
-        private static TType DecodeType<TType>(ref BlobReader blobReader, SignatureTypeCode typeCode, ISignatureTypeProvider<TType> provider)
+        private static TType DecodeType<TType>(ref BlobReader blobReader, int typeCode, ISignatureTypeProvider<TType> provider)
         {
             TType elementType;
             int index;
-
+            if(typeCode > byte.MaxValue)
+            {
+                typeCode = (int)SignatureTypeCode.Invalid;
+            }
             switch (typeCode)
             {
-                case SignatureTypeCode.Boolean:
-                case SignatureTypeCode.Char:
-                case SignatureTypeCode.SByte:
-                case SignatureTypeCode.Byte:
-                case SignatureTypeCode.Int16:
-                case SignatureTypeCode.UInt16:
-                case SignatureTypeCode.Int32:
-                case SignatureTypeCode.UInt32:
-                case SignatureTypeCode.Int64:
-                case SignatureTypeCode.UInt64:
-                case SignatureTypeCode.Single:
-                case SignatureTypeCode.Double:
-                case SignatureTypeCode.IntPtr:
-                case SignatureTypeCode.UIntPtr:
-                case SignatureTypeCode.Object:
-                case SignatureTypeCode.String:
-                case SignatureTypeCode.Void:
-                case SignatureTypeCode.TypedReference:
+                case (int)SignatureTypeCode.Boolean:
+                case (int)SignatureTypeCode.Char:
+                case (int)SignatureTypeCode.SByte:
+                case (int)SignatureTypeCode.Byte:
+                case (int)SignatureTypeCode.Int16:
+                case (int)SignatureTypeCode.UInt16:
+                case (int)SignatureTypeCode.Int32:
+                case (int)SignatureTypeCode.UInt32:
+                case (int)SignatureTypeCode.Int64:
+                case (int)SignatureTypeCode.UInt64:
+                case (int)SignatureTypeCode.Single:
+                case (int)SignatureTypeCode.Double:
+                case (int)SignatureTypeCode.IntPtr:
+                case (int)SignatureTypeCode.UIntPtr:
+                case (int)SignatureTypeCode.Object:
+                case (int)SignatureTypeCode.String:
+                case (int)SignatureTypeCode.Void:
+                case (int)SignatureTypeCode.TypedReference:
                     return provider.GetPrimitiveType((PrimitiveTypeCode)typeCode);
 
-                case SignatureTypeCode.Pointer:
+                case (int)SignatureTypeCode.Pointer:
                     elementType = DecodeType(ref blobReader, provider);
                     return provider.GetPointerType(elementType);
 
-                case SignatureTypeCode.ByReference:
+                case (int)SignatureTypeCode.ByReference:
                     elementType = DecodeType(ref blobReader, provider);
                     return provider.GetByReferenceType(elementType);
 
-                case SignatureTypeCode.Pinned:
+                case (int)SignatureTypeCode.Pinned:
                     elementType = DecodeType(ref blobReader, provider);
                     return provider.GetPinnedType(elementType);
 
-                case SignatureTypeCode.SZArray:
+                case (int)SignatureTypeCode.SZArray:
                     elementType = DecodeType(ref blobReader, provider);
                     return provider.GetSZArrayType(elementType);
 
-                case SignatureTypeCode.FunctionPointer:
+                case (int)SignatureTypeCode.FunctionPointer:
                     MethodSignature<TType> methodSignature = DecodeMethodSignature(ref blobReader, provider);
                     return provider.GetFunctionPointerType(methodSignature);
 
-                case SignatureTypeCode.Array:
+                case (int)SignatureTypeCode.Array:
                     return DecodeArrayType(ref blobReader, provider);
 
-                case SignatureTypeCode.RequiredModifier:
+                case (int)SignatureTypeCode.RequiredModifier:
                     return DecodeModifiedType(ref blobReader, provider, isRequired: true);
 
-                case SignatureTypeCode.OptionalModifier:
+                case (int)SignatureTypeCode.OptionalModifier:
                     return DecodeModifiedType(ref blobReader, provider, isRequired: false);
 
-                case SignatureTypeCode.TypeHandle:
-                    return DecodeTypeHandle(ref blobReader, provider);
-
-                case SignatureTypeCode.GenericTypeInstance:
+                case (int)SignatureTypeCode.GenericTypeInstance:
                     return DecodeGenericTypeInstance(ref blobReader, provider);
 
-                case SignatureTypeCode.GenericTypeParameter:
+                case (int)SignatureTypeCode.GenericTypeParameter:
                     index = blobReader.ReadCompressedInteger();
                     return provider.GetGenericTypeParameter(index);
 
-                case SignatureTypeCode.GenericMethodParameter:
+                case (int)SignatureTypeCode.GenericMethodParameter:
                     index = blobReader.ReadCompressedInteger();
                     return provider.GetGenericMethodParameter(index);
+
+                case (int)CorElementType.ELEMENT_TYPE_CLASS:
+                    return DecodeTypeHandle(ref blobReader, provider, false);
+
+                case (int)CorElementType.ELEMENT_TYPE_VALUETYPE:
+                    return DecodeTypeHandle(ref blobReader, provider, true);
 
                 default:
                     throw new BadImageFormatException();
@@ -212,14 +219,14 @@ namespace System.Reflection.Metadata.Decoding
 
             for (parameterIndex = 0; parameterIndex < parameterCount; parameterIndex++)
             {
-                typeCode = blobReader.ReadSignatureTypeCode();
+                var reader = blobReader;
+                typeCode = reader.ReadSignatureTypeCode();
 
                 if (typeCode == SignatureTypeCode.Sentinel)
                 {
                     break;
                 }
-
-                parameterTypes[parameterIndex] = DecodeType(ref blobReader, typeCode, provider);
+                parameterTypes[parameterIndex] = DecodeType(ref blobReader, provider);
             }
 
             int requiredParameterCount = parameterIndex;
@@ -371,7 +378,7 @@ namespace System.Reflection.Metadata.Decoding
         // terminated by the unmodified type.
         private static TType DecodeModifiedType<TType>(ref BlobReader blobReader, ISignatureTypeProvider<TType> provider, bool isRequired)
         {
-            TType type = DecodeTypeHandle(ref blobReader, provider);
+            TType type = DecodeTypeHandle(ref blobReader, provider, null);
             var modifier = new CustomModifier<TType>(type, isRequired);
 
             ImmutableArray<CustomModifier<TType>> modifiers;
@@ -391,7 +398,7 @@ namespace System.Reflection.Metadata.Decoding
 
                 do
                 {
-                    type = DecodeTypeHandle(ref blobReader, provider);
+                    type = DecodeTypeHandle(ref blobReader, provider, null);
                     modifier = new CustomModifier<TType>(type, isRequired);
                     builder.Add(modifier);
                     typeCode = blobReader.ReadSignatureTypeCode();
@@ -400,16 +407,15 @@ namespace System.Reflection.Metadata.Decoding
 
                 modifiers = builder.ToImmutable();
             }
-
-            TType unmodifiedType = DecodeType(ref blobReader, typeCode, provider);
+            TType unmodifiedType = DecodeType(ref blobReader, (int)typeCode, provider);
             return provider.GetModifiedType(unmodifiedType, modifiers);
         }
 
         // Decodes a type definition, reference, or specification from the type handle at the given blob reader's current position.
-        private static TType DecodeTypeHandle<TType>(ref BlobReader blobReader, ISignatureTypeProvider<TType> provider)
+        private static TType DecodeTypeHandle<TType>(ref BlobReader blobReader, ISignatureTypeProvider<TType> provider, bool? isValueType)
         {
             Handle handle = blobReader.ReadTypeHandle();
-            return DecodeType(handle, provider);
+            return DecodeType(handle, provider, isValueType);
         }
     }
 }
