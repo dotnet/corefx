@@ -187,7 +187,7 @@ namespace System.Reflection.Metadata.Decoding
             if (_builder.IsSet(componentName))
             {
                 throw _tokenizer.FormatException(TypeNameFormatErrorId.DuplicateAssemblyComponent,
-                                                 Strings.TypeFormat_DuplicateAssemblyComponent,
+                                                 SR.TypeFormat_DuplicateAssemblyComponent,
                                                  componentName);
             }
         }

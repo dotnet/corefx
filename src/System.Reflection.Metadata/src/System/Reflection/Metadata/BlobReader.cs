@@ -274,7 +274,7 @@ namespace System.Reflection.Metadata
             byte scale = (byte)(*ptr & 0x7f);
             if (scale > 28)
             {
-                throw new BadImageFormatException(MetadataResources.ValueTooLarge);
+                throw new BadImageFormatException(SR.ValueTooLarge);
             }
 
             return new decimal(
@@ -594,7 +594,7 @@ namespace System.Reflection.Metadata
                     // Unlike uses of ELEMENT_TYPE_CLASS in signatures, this one is not followed by a type token.
                     if (ReadUInt32() != 0)
                     {
-                        throw new BadImageFormatException(MetadataResources.InvalidConstantValue);
+                        throw new BadImageFormatException(SR.InvalidConstantValue);
                     }
 
                     return null;

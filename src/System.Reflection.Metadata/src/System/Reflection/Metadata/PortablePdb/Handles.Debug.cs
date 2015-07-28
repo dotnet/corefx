@@ -37,7 +37,7 @@ namespace System.Reflection.Metadata
         {
             if (handle.VType != tokenTypeSmall)
             {
-                Handle.ThrowInvalidCast();
+                Throw.InvalidCast();
             }
 
             return new DocumentHandle(handle.RowId);
@@ -47,7 +47,7 @@ namespace System.Reflection.Metadata
         {
             if (handle.VType != tokenType)
             {
-                Handle.ThrowInvalidCast();
+                Throw.InvalidCast();
             }
 
             return new DocumentHandle(handle.RowId);
@@ -120,7 +120,7 @@ namespace System.Reflection.Metadata
         {
             if (handle.VType != tokenTypeSmall)
             {
-                Handle.ThrowInvalidCast();
+                Throw.InvalidCast();
             }
 
             return new MethodBodyHandle(handle.RowId);
@@ -130,7 +130,7 @@ namespace System.Reflection.Metadata
         {
             if (handle.VType != tokenType)
             {
-                Handle.ThrowInvalidCast();
+                Throw.InvalidCast();
             }
 
             return new MethodBodyHandle(handle.RowId);
@@ -203,7 +203,7 @@ namespace System.Reflection.Metadata
         {
             if (handle.VType != tokenTypeSmall)
             {
-                Handle.ThrowInvalidCast();
+                Throw.InvalidCast();
             }
 
             return new LocalScopeHandle(handle.RowId);
@@ -213,7 +213,7 @@ namespace System.Reflection.Metadata
         {
             if (handle.VType != tokenType)
             {
-                Handle.ThrowInvalidCast();
+                Throw.InvalidCast();
             }
 
             return new LocalScopeHandle(handle.RowId);
@@ -286,7 +286,7 @@ namespace System.Reflection.Metadata
         {
             if (handle.VType != tokenTypeSmall)
             {
-                Handle.ThrowInvalidCast();
+                Throw.InvalidCast();
             }
 
             return new LocalVariableHandle(handle.RowId);
@@ -296,7 +296,7 @@ namespace System.Reflection.Metadata
         {
             if (handle.VType != tokenType)
             {
-                Handle.ThrowInvalidCast();
+                Throw.InvalidCast();
             }
 
             return new LocalVariableHandle(handle.RowId);
@@ -369,7 +369,7 @@ namespace System.Reflection.Metadata
         {
             if (handle.VType != tokenTypeSmall)
             {
-                Handle.ThrowInvalidCast();
+                Throw.InvalidCast();
             }
 
             return new LocalConstantHandle(handle.RowId);
@@ -379,7 +379,7 @@ namespace System.Reflection.Metadata
         {
             if (handle.VType != tokenType)
             {
-                Handle.ThrowInvalidCast();
+                Throw.InvalidCast();
             }
 
             return new LocalConstantHandle(handle.RowId);
@@ -452,7 +452,7 @@ namespace System.Reflection.Metadata
         {
             if (handle.VType != tokenTypeSmall)
             {
-                Handle.ThrowInvalidCast();
+                Throw.InvalidCast();
             }
 
             return new ImportScopeHandle(handle.RowId);
@@ -462,7 +462,7 @@ namespace System.Reflection.Metadata
         {
             if (handle.VType != tokenType)
             {
-                Handle.ThrowInvalidCast();
+                Throw.InvalidCast();
             }
 
             return new ImportScopeHandle(handle.RowId);
@@ -535,7 +535,7 @@ namespace System.Reflection.Metadata
         {
             if (handle.VType != tokenTypeSmall)
             {
-                Handle.ThrowInvalidCast();
+                Throw.InvalidCast();
             }
 
             return new CustomDebugInformationHandle(handle.RowId);
@@ -545,7 +545,7 @@ namespace System.Reflection.Metadata
         {
             if (handle.VType != tokenType)
             {
-                Handle.ThrowInvalidCast();
+                Throw.InvalidCast();
             }
 
             return new CustomDebugInformationHandle(handle.RowId);

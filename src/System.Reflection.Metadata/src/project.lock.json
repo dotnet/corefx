@@ -91,7 +91,7 @@
           "lib/DNXCore50/System.Resources.ResourceManager.dll": {}
         }
       },
-      "System.Runtime/4.0.0-beta-23121": {
+      "System.Runtime/4.0.0-beta-23109": {
         "compile": {
           "ref/dotnet/System.Runtime.dll": {}
         }
@@ -497,21 +497,17 @@
         "runtimes/win8-aot/lib/netcore50/System.Resources.ResourceManager.dll"
       ]
     },
-    "System.Runtime/4.0.0-beta-23121": {
-      "sha512": "t1hTkWfQqjjCombetmFpgmQaJsMJqGk3e8Bf66Kmtc2fAPfGaTHIvXgpO7c6FltNA10Ri4MgNulAMnJ6XMk6Eg==",
+    "System.Runtime/4.0.0-beta-23109": {
+      "sha512": "n8DjssywHmehbn6YlOJZM9iutCja9i4Y0l6esJKBkzGHqfQ/w31FH4c21HwIGTsnYLLd8SxntAipo7rKGZswjQ==",
       "files": [
         "License.rtf",
-        "System.Runtime.4.0.0-beta-23121.nupkg",
-        "System.Runtime.4.0.0-beta-23121.nupkg.sha512",
+        "System.Runtime.4.0.0-beta-23109.nupkg",
+        "System.Runtime.4.0.0-beta-23109.nupkg.sha512",
         "System.Runtime.nuspec",
-        "lib/MonoAndroid10/_._",
-        "lib/MonoTouch10/_._",
         "lib/net45/_._",
         "lib/win8/_._",
         "lib/wp80/_._",
         "lib/wpa81/_._",
-        "lib/xamarinios10/_._",
-        "lib/xamarinmac20/_._",
         "ref/dotnet/System.Runtime.dll",
         "ref/dotnet/System.Runtime.xml",
         "ref/dotnet/de/System.Runtime.xml",
@@ -523,8 +519,6 @@
         "ref/dotnet/ru/System.Runtime.xml",
         "ref/dotnet/zh-hans/System.Runtime.xml",
         "ref/dotnet/zh-hant/System.Runtime.xml",
-        "ref/MonoAndroid10/_._",
-        "ref/MonoTouch10/_._",
         "ref/net45/_._",
         "ref/netcore50/System.Runtime.dll",
         "ref/netcore50/System.Runtime.xml",
@@ -539,9 +533,7 @@
         "ref/netcore50/zh-hant/System.Runtime.xml",
         "ref/win8/_._",
         "ref/wp80/_._",
-        "ref/wpa81/_._",
-        "ref/xamarinios10/_._",
-        "ref/xamarinmac20/_._"
+        "ref/wpa81/_._"
       ]
     },
     "System.Runtime.Extensions/4.0.0-beta-23127": {

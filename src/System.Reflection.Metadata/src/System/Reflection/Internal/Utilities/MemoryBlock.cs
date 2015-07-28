@@ -38,7 +38,7 @@ namespace System.Reflection.Internal
             // the reader performs little-endian specific operations
             if (!BitConverter.IsLittleEndian)
             {
-                throw new PlatformNotSupportedException(MetadataResources.LitteEndianArchitectureRequired);
+                throw new PlatformNotSupportedException(SR.LitteEndianArchitectureRequired);
             }
 
             return new MemoryBlock(buffer, length);
@@ -56,7 +56,7 @@ namespace System.Reflection.Internal
         [MethodImpl(MethodImplOptions.NoInlining)]
         internal static void ThrowValueOverflow()
         {
-            throw new BadImageFormatException(MetadataResources.ValueTooLarge);
+            throw new BadImageFormatException(SR.ValueTooLarge);
         }
 
         internal byte[] ToArray()

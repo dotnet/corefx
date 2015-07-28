@@ -99,7 +99,7 @@ namespace System.Reflection.Metadata
         {
             if (value == null)
             {
-                ThrowValueArgumentNull();
+                Throw.ValueArgumentNull();
             }
 
             return _reader.BlobStream.DocumentNameEquals(handle, value, ignoreCase);

@@ -341,7 +341,7 @@ namespace System.Reflection.Metadata
                     case COR20Constants.StandalonePdbStreamName:
                         if (metadataRoot.Length < streamHeader.Offset + streamHeader.Size)
                         {
-                            throw new BadImageFormatException(MetadataResources.NotEnoughSpaceForMetadataStream);
+                            throw new BadImageFormatException(SR.NotEnoughSpaceForMetadataStream);
                         }
 
                         standalonePdbStream = metadataRoot.GetMemoryBlockAt((int)streamHeader.Offset, streamHeader.Size);
@@ -490,13 +490,13 @@ namespace System.Reflection.Metadata
                 {
                     if (memReader.RemainingBytes < sizeof(uint))
                     {
-                        throw new BadImageFormatException(MetadataResources.TableRowCountSpaceTooSmall);
+                        throw new BadImageFormatException(SR.TableRowCountSpaceTooSmall);
                     }
 
                     uint rowCount = memReader.ReadUInt32();
                     if (rowCount > TokenTypeIds.RIDMask)
                     {
-                        throw new BadImageFormatException(string.Format(MetadataResources.InvalidRowCount, rowCount));
+                        throw new BadImageFormatException(string.Format(SR.InvalidRowCount, rowCount));
                     }
 
                     rowCounts[i] = (int)rowCount;
@@ -521,7 +521,7 @@ namespace System.Reflection.Metadata
             uint entryPointToken = reader.ReadUInt32();
             if (entryPointToken != 0 && (entryPointToken & TokenTypeIds.TypeMask) != TokenTypeIds.MethodDef)
             {
-                throw new BadImageFormatException(string.Format(MetadataResources.InvalidEntryPointToken, entryPointToken));
+                throw new BadImageFormatException(string.Format(SR.InvalidEntryPointToken, entryPointToken));
             }
 
             ulong externalTableMask = reader.ReadUInt64();
@@ -531,7 +531,7 @@ namespace System.Reflection.Metadata
 
             if ((externalTableMask & ~validTables) != 0)
             {
-                throw new BadImageFormatException(string.Format(MetadataResources.UnknownTables, (TableMask)externalTableMask));
+                throw new BadImageFormatException(string.Format(SR.UnknownTables, (TableMask)externalTableMask));
             }
 
             externalTableRowCounts = ReadMetadataTableRowCounts(ref reader, externalTableMask);
@@ -995,7 +995,7 @@ namespace System.Reflection.Metadata
         [MethodImpl(MethodImplOptions.NoInlining)]
         internal static void ThrowTableNotSorted(TableIndex tableIndex)
         {
-            throw new BadImageFormatException(string.Format(MetadataResources.MetadataTableNotSorted, (int)tableIndex));
+            throw new BadImageFormatException(string.Format(SR.MetadataTableNotSorted, (int)tableIndex));
         }
 
         #endregion
@@ -1191,7 +1191,7 @@ namespace System.Reflection.Metadata
         {
             if (_debugMetadataHeader != null)
             {
-                throw new InvalidOperationException(MetadataResources.StandaloneDebugMetadataImageDoesNotContainModuleTable);
+                throw new InvalidOperationException(SR.StandaloneDebugMetadataImageDoesNotContainModuleTable);
             }
 
             return new ModuleDefinition(this);

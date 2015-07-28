@@ -102,7 +102,7 @@ namespace System.Reflection.Metadata
                     break;
 
                 default:
-                    throw new BadImageFormatException(string.Format(MetadataResources.InvalidImportDefinitionKind, kind));
+                    throw new BadImageFormatException(string.Format(SR.InvalidImportDefinitionKind, kind));
             }
 
             return true;

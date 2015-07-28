@@ -321,4 +321,37 @@
   <data name="TooManySubnamespaces" xml:space="preserve">
     <value>There are too many subnamespaces.</value>
   </data>
+  <data name="TypeFormat_DelimiterExpected" xml:space="preserve">
+    <value>Expected '{0}', but found '{1}'.</value>
+  </data>
+  <data name="TypeFormat_DelimiterExpected_EncounteredEndOfString" xml:space="preserve">
+    <value>Expected '{0}'. but found end-of-string.</value>
+  </data>
+  <data name="TypeFormat_DuplicateAssemblyComponent" xml:space="preserve">
+    <value>Duplicate assembly name component '{0}' was found</value>
+  </data>
+  <data name="TypeFormat_EndOfStringExpected_EncounteredExtraCharacters" xml:space="preserve">
+    <value>Expected end-of-string, but found '{0}'.</value>
+  </data>
+  <data name="TypeFormat_EscapedDelimiterExpected" xml:space="preserve">
+    <value>Expected delimiter after escape character '\', but found '{0}'.</value>
+  </data>
+  <data name="TypeFormat_EscapedDelimiterExpected_EncounteredEndOfString" xml:space="preserve">
+    <value>Expected delimiter after escape character '\', but found end-of-string.</value>
+  </data>
+  <data name="TypeFormat_IdExpected_EncounteredDelimiter" xml:space="preserve">
+    <value>Expected identifier, but found '{0}'.</value>
+  </data>
+  <data name="TypeFormat_IdExpected_EncounteredEndOfString" xml:space="preserve">
+    <value>Expected identifier, but found end-of-string.</value>
+  </data>
+  <data name="TypeFormat_IdExpected_EncounteredWhiteSpace" xml:space="preserve">
+    <value>Expected identifier, but found only white-space.</value>
+  </data>
+  <data name="TypeFormat_Position" xml:space="preserve">
+    <value>Position {0}.</value>
+  </data>
+  <data name="TypeFormat_TypeNameInvalid" xml:space="preserve">
+    <value>The specified type name '{0}' is invalid.</value>
+  </data>
 </root>
