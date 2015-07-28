@@ -41,6 +41,14 @@ namespace System.Runtime.InteropServices
             }
         }
 
+        public static OSPlatform FreeBSD
+        {
+            get
+            {
+                return s_freebsd;
+            }
+        }
+
         private OSPlatform(string osPlatform)
         {
             if (osPlatform == null) throw new ArgumentNullException("osPlatform");

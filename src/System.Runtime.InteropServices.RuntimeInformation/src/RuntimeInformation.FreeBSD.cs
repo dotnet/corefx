@@ -5,11 +5,9 @@ namespace System.Runtime.InteropServices
 {
     public static class RuntimeInformation
     {
-        private static OSPlatform s_freeBSD = OSPlatform.Create("FREEBSD");
-
         public static bool IsOSPlatform(OSPlatform osPlatform)
         {
-            return s_freeBSD == osPlatform;
+            return OSPlatform.FreeBSD == osPlatform;
         }
     }
 }
