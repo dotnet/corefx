@@ -10,8 +10,6 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>System.Linq.Parallel.Tests</RootNamespace>
     <AssemblyName>System.Linq.Parallel.Tests</AssemblyName>
-    <SignAssembly>false</SignAssembly>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <NuGetPackageImportStamp>8be98411</NuGetPackageImportStamp>
   </PropertyGroup>
   <!-- Default configurations to help VS understand the configurations -->
@@ -31,6 +29,7 @@
     <Compile Include="Combinatorial\UnorderedParallelQueryCombinationTests.cs" />
     <Compile Include="Helpers\Comparers.cs" />
     <Compile Include="Helpers\DeliberateTestException.cs" />
+    <Compile Include="Helpers\Enumerables.cs" />
     <Compile Include="Helpers\Functions.cs" />
     <Compile Include="Helpers\IntegerRangeSet.cs" />
     <Compile Include="Helpers\Labeled.cs" />
@@ -80,17 +79,17 @@
     <Compile Include="QueryOperators\ZipTests.cs" />
     <Compile Include="DegreeOfParallelismTests.cs" />
     <Compile Include="EtwTests.cs" />
-    <Compile Include="ExceptionAndParallelEnumerableExceptionTests.cs" />
     <Compile Include="ExchangeTests.cs" />
     <Compile Include="ParallelEnumerableTests.cs" />
-    <Compile Include="PlinqDelegateExceptions.cs" />
     <Compile Include="PlinqModesTests.cs" />
     <Compile Include="WithCancellationTests.cs" />
     <Compile Include="XunitAssemblyAttributes.cs" />
   </ItemGroup>
   <!-- Common or Common-branched source files -->
   <ItemGroup>
-    <Compile Include="$(CommonTestPath)\System\Console.cs" />
+    <Compile Include="$(CommonTestPath)\System\Console.cs">
+      <Link>Common\System\Console.cs</Link>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\src\System.Linq.Parallel.csproj">

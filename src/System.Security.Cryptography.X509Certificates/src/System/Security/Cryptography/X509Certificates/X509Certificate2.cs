@@ -40,6 +40,11 @@ namespace System.Security.Cryptography.X509Certificates
         {
         }
 
+        internal X509Certificate2(ICertificatePal pal)
+            : base(pal)
+        {
+        }
+
         public X509Certificate2(String fileName)
             : base(fileName)
         {
@@ -150,32 +155,7 @@ namespace System.Security.Cryptography.X509Certificates
         {
             get { return GetNotBefore(); }
         }
-
-        public AsymmetricAlgorithm PrivateKey
-        {
-            get
-            {
-                ThrowIfInvalid();
-
-                if (!HasPrivateKey)
-                    return null;
-
-                AsymmetricAlgorithm privateKey = _lazyPrivateKey;
-                if (privateKey == null)
-                    privateKey = _lazyPrivateKey = Pal.PrivateKey;
-                return privateKey;
-            }
-
-            set
-            {
-                ThrowIfInvalid();
-
-                AsymmetricAlgorithm publicKey = PublicKey.Key;
-                Pal.SetPrivateKey(value, publicKey);
-                _lazyPrivateKey = value;
-            }
-        }
-
+        
         public PublicKey PublicKey
         {
             get
@@ -443,7 +423,14 @@ namespace System.Security.Cryptography.X509Certificates
                     sb.AppendLine();
                     sb.Append("  ");
                     sb.Append("Length: ");
-                    sb.Append(pubKey.Key.KeySize);
+
+                    using (RSA pubRsa = this.GetRSAPublicKey())
+                    {
+                        if (pubRsa != null)
+                        {
+                            sb.Append(pubRsa.KeySize);
+                        }
+                    }
                 }
                 catch (NotSupportedException)
                 {
@@ -526,7 +513,6 @@ namespace System.Security.Cryptography.X509Certificates
         private volatile X500DistinguishedName _lazySubjectName;
         private volatile X500DistinguishedName _lazyIssuer;
         private volatile PublicKey _lazyPublicKey;
-        private volatile AsymmetricAlgorithm _lazyPrivateKey;
         private volatile X509ExtensionCollection _lazyExtensions;
     }
 }

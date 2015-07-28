@@ -8,7 +8,6 @@ using System.Security;
 using System.Reflection;
 using System.Xml;
 
-#if NET_NATIVE
 namespace System.Runtime.Serialization.Json
 {
     internal class JsonDataContract
@@ -335,14 +334,44 @@ namespace System.Runtime.Serialization.Json
         }
     }
 
+#if NET_NATIVE
     public class JsonReadWriteDelegates
+#else
+    internal class JsonReadWriteDelegates
+#endif
     {
         // this is the global dictionary for JSON delegates introduced for multi-file
-        private static Dictionary<DataContract, JsonReadWriteDelegates> s_jsonDelegates = new Dictionary<DataContract, JsonReadWriteDelegates>();
+        private static Func<Dictionary<DataContract, JsonReadWriteDelegates>> s_jsonDelegatesInitializer;
+        private static Lazy<Dictionary<DataContract, JsonReadWriteDelegates>> s_jsonDelegates = new Lazy<Dictionary<DataContract, JsonReadWriteDelegates>>(InitJsonDelegates);
 
-        public static Dictionary<DataContract, JsonReadWriteDelegates> GetJsonDelegates()
+        public static Func<Dictionary<DataContract, JsonReadWriteDelegates>> JsonDelegatesInitializer
         {
-            return s_jsonDelegates;
+            get
+            {
+                return s_jsonDelegatesInitializer;
+            }
+            set
+            {
+                Fx.Assert(s_jsonDelegatesInitializer == null, "s_jsonDelegatesInitializer is already initialized.");
+                s_jsonDelegatesInitializer = value;
+            }
+        }
+
+        private static Dictionary<DataContract, JsonReadWriteDelegates> InitJsonDelegates()
+        {
+            if (JsonDelegatesInitializer != null)
+            {
+                return JsonDelegatesInitializer();
+            }
+            else
+            {
+                return new Dictionary<DataContract, JsonReadWriteDelegates>();
+            }
+        }
+
+        internal static Dictionary<DataContract, JsonReadWriteDelegates> GetJsonDelegates()
+        {
+            return s_jsonDelegates.Value;
         }
 
         public JsonFormatClassWriterDelegate ClassWriterDelegate { get; set; }
@@ -352,4 +381,3 @@ namespace System.Runtime.Serialization.Json
         public JsonFormatGetOnlyCollectionReaderDelegate GetOnlyCollectionReaderDelegate { get; set; }
     }
 }
-#endif

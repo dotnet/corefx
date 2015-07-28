@@ -8,8 +8,6 @@
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <AssemblyName>System.Diagnostics.FileVersionInfo.Tests</AssemblyName>
-    <SignAssembly>false</SignAssembly>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <ProjectGuid>{6DFDB760-CC88-48AE-BD81-C64844EA3CBC}</ProjectGuid>
     <NuGetPackageImportStamp>2fda0f27</NuGetPackageImportStamp>
   </PropertyGroup>
@@ -36,7 +34,9 @@
   <ItemGroup>
     <Compile Include="FileVersionInfoTest.cs" />
     <Compile Include="Interop\Interop.Windows.cs" />
-    <Compile Include="$(CommonPath)\Interop\Interop.PlatformDetection.cs" />
+    <Compile Include="$(CommonPath)\Interop\Interop.PlatformDetection.cs">
+      <Link>Common\Interop\Interop.PlatformDetection.cs</Link>
+    </Compile>
   </ItemGroup>
   <!-- References used -->
   <ItemGroup>

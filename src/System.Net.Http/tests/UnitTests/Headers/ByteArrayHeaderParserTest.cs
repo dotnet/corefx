@@ -8,7 +8,7 @@ using System.Text;
 
 using Xunit;
 
-namespace System.Net.Http.Unit.Tests
+namespace System.Net.Http.Tests
 {
     public class ByteArrayHeaderParserTest
     {

@@ -79,12 +79,12 @@ namespace System.Reflection.Metadata
 
             if (!(utf8Decoder.Encoding is UTF8Encoding))
             {
-                throw new ArgumentException(MetadataResources.MetadataStringDecoderEncodingMustBeUtf8, "utf8Decoder");
+                throw new ArgumentException(SR.MetadataStringDecoderEncodingMustBeUtf8, "utf8Decoder");
             }
 
             if (!BitConverter.IsLittleEndian)
             {
-                throw new PlatformNotSupportedException(MetadataResources.LitteEndianArchitectureRequired);
+                throw new PlatformNotSupportedException(SR.LitteEndianArchitectureRequired);
             }
 
             this.Block = new MemoryBlock(metadata, length);
@@ -129,7 +129,7 @@ namespace System.Reflection.Metadata
             // Such files exist in the wild and may be produced by obfuscators.
             if (standalonePdbStream.Length == 0 && this.ModuleTable.NumberOfRows < 1)
             {
-                throw new BadImageFormatException(string.Format(MetadataResources.ModuleTableInvalidNumberOfRows, this.ModuleTable.NumberOfRows));
+                throw new BadImageFormatException(string.Format(SR.ModuleTableInvalidNumberOfRows, this.ModuleTable.NumberOfRows));
             }
 
             //  read 
@@ -175,13 +175,13 @@ namespace System.Reflection.Metadata
         {
             if (memReader.RemainingBytes < COR20Constants.MinimumSizeofMetadataHeader)
             {
-                throw new BadImageFormatException(MetadataResources.MetadataHeaderTooSmall);
+                throw new BadImageFormatException(SR.MetadataHeaderTooSmall);
             }
 
             uint signature = memReader.ReadUInt32();
             if (signature != COR20Constants.COR20MetadataSignature)
             {
-                throw new BadImageFormatException(MetadataResources.MetadataSignature);
+                throw new BadImageFormatException(SR.MetadataSignature);
             }
 
             // major version
@@ -196,7 +196,7 @@ namespace System.Reflection.Metadata
             int versionStringSize = memReader.ReadInt32();
             if (memReader.RemainingBytes < versionStringSize)
             {
-                throw new BadImageFormatException(MetadataResources.NotEnoughSpaceForVersionString);
+                throw new BadImageFormatException(SR.NotEnoughSpaceForVersionString);
             }
 
             int numberOfBytesRead;
@@ -240,7 +240,7 @@ namespace System.Reflection.Metadata
             {
                 if (memReader.RemainingBytes < COR20Constants.MinimumSizeofStreamHeader)
                 {
-                    throw new BadImageFormatException(MetadataResources.StreamHeaderTooSmall);
+                    throw new BadImageFormatException(SR.StreamHeaderTooSmall);
                 }
 
                 streamHeaders[i].Offset = memReader.ReadUInt32();
@@ -250,7 +250,7 @@ namespace System.Reflection.Metadata
 
                 if (!aligned || memReader.RemainingBytes == 0)
                 {
-                    throw new BadImageFormatException(MetadataResources.NotEnoughSpaceForStreamHeaderName);
+                    throw new BadImageFormatException(SR.NotEnoughSpaceForStreamHeaderName);
                 }
             }
 
@@ -275,7 +275,7 @@ namespace System.Reflection.Metadata
                     case COR20Constants.StringStreamName:
                         if (metadataRoot.Length < streamHeader.Offset + streamHeader.Size)
                         {
-                            throw new BadImageFormatException(MetadataResources.NotEnoughSpaceForStringStream);
+                            throw new BadImageFormatException(SR.NotEnoughSpaceForStringStream);
                         }
 
                         this.StringStream = new StringStreamReader(metadataRoot.GetMemoryBlockAt((int)streamHeader.Offset, streamHeader.Size), _metadataKind);
@@ -284,7 +284,7 @@ namespace System.Reflection.Metadata
                     case COR20Constants.BlobStreamName:
                         if (metadataRoot.Length < streamHeader.Offset + streamHeader.Size)
                         {
-                            throw new BadImageFormatException(MetadataResources.NotEnoughSpaceForBlobStream);
+                            throw new BadImageFormatException(SR.NotEnoughSpaceForBlobStream);
                         }
 
                         this.BlobStream = new BlobStreamReader(metadataRoot.GetMemoryBlockAt((int)streamHeader.Offset, streamHeader.Size), _metadataKind);
@@ -293,7 +293,7 @@ namespace System.Reflection.Metadata
                     case COR20Constants.GUIDStreamName:
                         if (metadataRoot.Length < streamHeader.Offset + streamHeader.Size)
                         {
-                            throw new BadImageFormatException(MetadataResources.NotEnoughSpaceForGUIDStream);
+                            throw new BadImageFormatException(SR.NotEnoughSpaceForGUIDStream);
                         }
 
                         this.GuidStream = new GuidStreamReader(metadataRoot.GetMemoryBlockAt((int)streamHeader.Offset, streamHeader.Size));
@@ -302,7 +302,7 @@ namespace System.Reflection.Metadata
                     case COR20Constants.UserStringStreamName:
                         if (metadataRoot.Length < streamHeader.Offset + streamHeader.Size)
                         {
-                            throw new BadImageFormatException(MetadataResources.NotEnoughSpaceForBlobStream);
+                            throw new BadImageFormatException(SR.NotEnoughSpaceForBlobStream);
                         }
 
                         this.UserStringStream = new UserStringStreamReader(metadataRoot.GetMemoryBlockAt((int)streamHeader.Offset, streamHeader.Size));
@@ -311,7 +311,7 @@ namespace System.Reflection.Metadata
                     case COR20Constants.CompressedMetadataTableStreamName:
                         if (metadataRoot.Length < streamHeader.Offset + streamHeader.Size)
                         {
-                            throw new BadImageFormatException(MetadataResources.NotEnoughSpaceForMetadataStream);
+                            throw new BadImageFormatException(SR.NotEnoughSpaceForMetadataStream);
                         }
 
                         metadataStreamKind = MetadataStreamKind.Compressed;
@@ -321,7 +321,7 @@ namespace System.Reflection.Metadata
                     case COR20Constants.UncompressedMetadataTableStreamName:
                         if (metadataRoot.Length < streamHeader.Offset + streamHeader.Size)
                         {
-                            throw new BadImageFormatException(MetadataResources.NotEnoughSpaceForMetadataStream);
+                            throw new BadImageFormatException(SR.NotEnoughSpaceForMetadataStream);
                         }
 
                         metadataStreamKind = MetadataStreamKind.Uncompressed;
@@ -331,7 +331,7 @@ namespace System.Reflection.Metadata
                     case COR20Constants.MinimalDeltaMetadataTableStreamName:
                         if (metadataRoot.Length < streamHeader.Offset + streamHeader.Size)
                         {
-                            throw new BadImageFormatException(MetadataResources.NotEnoughSpaceForMetadataStream);
+                            throw new BadImageFormatException(SR.NotEnoughSpaceForMetadataStream);
                         }
 
                         // the content of the stream is ignored
@@ -355,7 +355,7 @@ namespace System.Reflection.Metadata
 
             if (IsMinimalDelta && metadataStreamKind != MetadataStreamKind.Uncompressed)
             {
-                throw new BadImageFormatException(MetadataResources.InvalidMetadataStreamFormat);
+                throw new BadImageFormatException(SR.InvalidMetadataStreamFormat);
             }
         }
 
@@ -430,7 +430,7 @@ namespace System.Reflection.Metadata
         {
             if (reader.RemainingBytes < MetadataStreamConstants.SizeOfMetadataTableHeader)
             {
-                throw new BadImageFormatException(MetadataResources.MetadataTableHeaderTooSmall);
+                throw new BadImageFormatException(SR.MetadataTableHeaderTooSmall);
             }
 
             // reserved (shall be ignored):
@@ -461,7 +461,7 @@ namespace System.Reflection.Metadata
 
             if ((presentTables & ~validTables) != 0)
             {
-                throw new BadImageFormatException(string.Format(MetadataResources.UnknownTables, presentTables));
+                throw new BadImageFormatException(string.Format(SR.UnknownTables, presentTables));
             }
 
             if (_metadataStreamKind == MetadataStreamKind.Compressed)
@@ -472,7 +472,7 @@ namespace System.Reflection.Metadata
                 // so we'll allow the table here but pretend it's empty later.
                 if ((presentTables & (ulong)(TableMask.PtrTables | TableMask.EnCMap)) != 0)
                 {
-                    throw new BadImageFormatException(MetadataResources.IllegalTablesInCompressedMetadataStream);
+                    throw new BadImageFormatException(SR.IllegalTablesInCompressedMetadataStream);
                 }
             }
 
@@ -760,7 +760,7 @@ namespace System.Reflection.Metadata
 
             if (totalRequiredSize > metadataTablesMemoryBlock.Length)
             {
-                throw new BadImageFormatException(MetadataResources.MetadataTablesTooSmall);
+                throw new BadImageFormatException(SR.MetadataTablesTooSmall);
             }
         }
 
@@ -1139,7 +1139,7 @@ namespace System.Reflection.Metadata
         {
             if (!IsAssembly)
             {
-                throw new InvalidOperationException(MetadataResources.MetadataImageDoesNotRepresentAnAssembly);
+                throw new InvalidOperationException(SR.MetadataImageDoesNotRepresentAnAssembly);
             }
 
             return new AssemblyDefinition(this);

@@ -437,6 +437,15 @@ namespace System.Runtime.Serialization
         }
 
         private static string[] s_knownSerializableTypeNames = new string[] {
+                "System.Collections.Queue",
+                "System.Collections.Stack",
+                "System.Globalization.CultureInfo",
+                "System.Version",
+                "System.Collections.Generic.KeyValuePair`2",
+                "System.Collections.Generic.Queue`1",
+                "System.Collections.Generic.Stack`1",
+                "System.Collections.ObjectModel.ReadOnlyCollection`1",
+                "System.Collections.ObjectModel.ReadOnlyDictionary`2",
                 "System.Tuple`1",
                 "System.Tuple`2",
                 "System.Tuple`3",
@@ -445,9 +454,6 @@ namespace System.Runtime.Serialization
                 "System.Tuple`6",
                 "System.Tuple`7",
                 "System.Tuple`8",
-                "System.Collections.Generic.Queue`1",
-                "System.Version",
-                "System.Collections.ObjectModel.ReadOnlyCollection`1"
         };
 
         internal static bool IsKnownSerializableType(Type type)
@@ -1064,8 +1070,7 @@ namespace System.Runtime.Serialization
 
             private static bool CanSerializeMember(FieldInfo field)
             {
-                return field != null &&
-                       field.FieldType != Globals.TypeOfObject; // Don't really know how to serialize plain System.Object instance
+                return field != null;
             }
 
             private bool SetIfGetOnlyCollection(DataMember memberContract)
@@ -1448,6 +1453,23 @@ namespace System.Runtime.Serialization
 
             internal static DataMemberComparer Singleton = new DataMemberComparer();
         }
+
+#if !NET_NATIVE && MERGE_DCJS
+        /// <summary>
+        ///  Get object type for Xml/JsonFormmatReaderGenerator
+        /// </summary>
+        internal Type ObjectType
+        {
+            get
+            {
+                Type type = UnderlyingType;
+                if (type.GetTypeInfo().IsValueType && !IsNonAttributedType)
+                {
+                    type = Globals.TypeOfValueType;
+                }
+                return type;
+            }
+        }
+#endif
     }
 }
-

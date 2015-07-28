@@ -44,7 +44,7 @@ namespace System.Reflection.Metadata.Ecma335
         {
             if (!handle.IsHeapHandle)
             {
-                ThrowHeapHandleRequired();
+                Throw.HeapHandleRequired();
             }
 
             if (handle.IsVirtual)
@@ -68,7 +68,7 @@ namespace System.Reflection.Metadata.Ecma335
         {
             if (!handle.IsEntityOrUserStringHandle)
             {
-                ThrowEntityOrUserStringHandleRequired();
+                Throw.EntityOrUserStringHandleRequired();
             }
 
             if (handle.IsVirtual)
@@ -91,10 +91,10 @@ namespace System.Reflection.Metadata.Ecma335
                 case HandleKind.Blob:
                     // We could precalculate offsets for virtual strings and blobs as we are creating them
                     // if we wanted to implement this.
-                    throw new NotSupportedException(MetadataResources.CantGetOffsetForVirtualHeapHandle);
+                    throw new NotSupportedException(SR.CantGetOffsetForVirtualHeapHandle);
 
                 default:
-                    throw new ArgumentException(MetadataResources.InvalidHandle, "handle");
+                    throw new ArgumentException(SR.InvalidHandle, "handle");
             }
         }
 
@@ -123,7 +123,7 @@ namespace System.Reflection.Metadata.Ecma335
         {
             if (!handle.IsHeapHandle)
             {
-                ThrowHeapHandleRequired();
+                Throw.HeapHandleRequired();
             }
 
             if (handle.IsVirtual)
@@ -149,7 +149,7 @@ namespace System.Reflection.Metadata.Ecma335
         {
             if (!handle.IsEntityOrUserStringHandle)
             {
-                ThrowEntityOrUserStringHandleRequired();
+                Throw.EntityOrUserStringHandleRequired();
             }
 
             if (handle.IsVirtual)
@@ -224,7 +224,7 @@ namespace System.Reflection.Metadata.Ecma335
         {
             if (!TokenTypeIds.IsEntityOrUserStringToken(unchecked((uint)token)))
             {
-                ThrowInvalidToken();
+                Throw.InvalidToken();
             }
 
             return Metadata.Handle.FromVToken((uint)token);
@@ -238,7 +238,7 @@ namespace System.Reflection.Metadata.Ecma335
         {
             if (!TokenTypeIds.IsEntityToken(unchecked((uint)token)))
             {
-                ThrowInvalidToken();
+                Throw.InvalidToken();
             }
 
             return new EntityHandle((uint)token);
@@ -255,7 +255,7 @@ namespace System.Reflection.Metadata.Ecma335
 
             if (!TokenTypeIds.IsEntityOrUserStringToken(unchecked((uint)token)))
             {
-                ThrowInvalidTableIndex();
+                Throw.TableIndexOutOfRange();
             }
 
             return new EntityHandle((uint)token);
@@ -436,35 +436,5 @@ namespace System.Reflection.Metadata.Ecma335
         }
 
         #endregion
-
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        private static void ThrowEntityHandleRequired()
-        {
-            throw new ArgumentException(MetadataResources.NotMetadataTableHandle, "handle");
-        }
-
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        private static void ThrowHeapHandleRequired()
-        {
-            throw new ArgumentException(MetadataResources.NotMetadataHeapHandle, "handle");
-        }
-
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        private static void ThrowEntityOrUserStringHandleRequired()
-        {
-            throw new ArgumentException(MetadataResources.NotMetadataTableOrUserStringHandle, "handle");
-        }
-
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        private static void ThrowInvalidToken()
-        {
-            throw new ArgumentException(MetadataResources.InvalidToken, "token");
-        }
-
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        private static void ThrowInvalidTableIndex()
-        {
-            throw new ArgumentOutOfRangeException("tableIndex");
-        }
     }
 }

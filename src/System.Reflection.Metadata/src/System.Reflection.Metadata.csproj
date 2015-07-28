@@ -9,8 +9,6 @@
     <AssemblyName>System.Reflection.Metadata</AssemblyName>
     <DocumentationFile>$(OutputPath)System.Reflection.Metadata.xml</DocumentationFile>
     <RootNamespace>System.Reflection.Metadata</RootNamespace>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
-    <TargetFrameworkProfile>Profile7</TargetFrameworkProfile>
     <FileAlignment>512</FileAlignment>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <DefaultLanguage>en-US</DefaultLanguage>
@@ -25,7 +23,6 @@
     <Optimize>false</Optimize>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
     <CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
@@ -34,15 +31,9 @@
     <Optimize>true</Optimize>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Properties\InternalsVisibleTo.cs" />
-    <Compile Include="Resources\MetadataResources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>MetadataResources.resx</DependentUpon>
-    </Compile>
     <Compile Include="System\Reflection\Internal\MemoryBlocks\AbstractMemoryBlock.cs" />
     <Compile Include="System\Reflection\Internal\MemoryBlocks\ByteArrayMemoryBlock.cs" />
     <Compile Include="System\Reflection\Internal\MemoryBlocks\ByteArrayMemoryProvider.cs" />
@@ -223,15 +214,10 @@
     <Compile Include="System\Reflection\PortableExecutable\PEReader.cs" />
     <Compile Include="System\Reflection\PortableExecutable\PEStreamOptions.cs" />
     <Compile Include="System\Reflection\PortableExecutable\SectionHeader.cs" />
+    <Compile Include="System\Reflection\Throw.cs" />
     <Compile Include="System\Reflection\System.Reflection.cs" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Resources\MetadataResources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <SubType>Designer</SubType>
-      <LastGenOutput>MetadataResources.Designer.cs</LastGenOutput>
-      <CustomToolNamespace>System.Reflection.Metadata</CustomToolNamespace>
-    </EmbeddedResource>
     <EmbeddedResource Include="System\Reflection\Metadata\Decoding\Strings.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Strings.Designer.cs</LastGenOutput>

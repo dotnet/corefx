@@ -5,7 +5,7 @@ using System.Net.Http.Headers;
 
 using Xunit;
 
-namespace System.Net.Http.Unit.Tests
+namespace System.Net.Http.Tests
 {
     public class ViaHeaderValueTest
     {

@@ -5,7 +5,7 @@ using System.Net.Http.Headers;
 
 using Xunit;
 
-namespace System.Net.Http.Unit.Tests
+namespace System.Net.Http.Tests
 {
     public class UriHeaderParserTest
     {
@@ -17,6 +17,7 @@ namespace System.Net.Http.Unit.Tests
             Assert.Null(parser.Comparer);
         }
 
+        [ActiveIssue(846, PlatformID.AnyUnix)]
         [Fact]
         public void TryParse_SetOfValidValueStrings_ParsedCorrectly()
         {

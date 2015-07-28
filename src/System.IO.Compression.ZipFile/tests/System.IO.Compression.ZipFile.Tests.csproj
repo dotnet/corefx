@@ -7,7 +7,6 @@
     <ProjectGuid>{ED453083-A80F-480C-AD25-5B8618E8A303}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AssemblyName>System.IO.Compression.ZipFile.Tests</AssemblyName>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'" />
@@ -23,12 +22,24 @@
     <Compile Include="ZipFileTests.cs" />
     <Compile Include="ZipFileInvalidFileTests.cs" />
     <Compile Include="ZipFileReadOpenUpdateTests.cs" />
-    <Compile Include="$(CommonTestPath)\Compression\Utilities\CRC.cs" />
-    <Compile Include="$(CommonTestPath)\Compression\Utilities\FileData.cs" />
-    <Compile Include="$(CommonTestPath)\Compression\Utilities\LocalMemoryStream.cs" />
-    <Compile Include="$(CommonTestPath)\Compression\Utilities\StreamHelpers.cs" />
-    <Compile Include="$(CommonTestPath)\Compression\Utilities\ZipTestHelper.cs" />
-    <Compile Include="$(CommonPath)\Interop\Interop.PlatformDetection.cs" />
+    <Compile Include="$(CommonTestPath)\Compression\Utilities\CRC.cs">
+      <Link>Common\Compression\Utilities\CRC.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonTestPath)\Compression\Utilities\FileData.cs">
+      <Link>Common\Compression\Utilities\FileData.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonTestPath)\Compression\Utilities\LocalMemoryStream.cs">
+      <Link>Common\Compression\Utilities\LocalMemoryStream.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonTestPath)\Compression\Utilities\StreamHelpers.cs">
+      <Link>Common\Compression\Utilities\StreamHelpers.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonTestPath)\Compression\Utilities\ZipTestHelper.cs">
+      <Link>Common\Compression\Utilities\ZipTestHelper.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Interop.PlatformDetection.cs">
+      <Link>Common\Interop\Interop.PlatformDetection.cs</Link>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <None Include="project.json" />

@@ -5,7 +5,7 @@ using System.Net.Http.Headers;
 
 using Xunit;
 
-namespace System.Net.Http.Unit.Tests
+namespace System.Net.Http.Tests
 {
     public class WarningHeaderValueTest
     {
@@ -198,6 +198,7 @@ namespace System.Net.Http.Unit.Tests
             CheckInvalidWarningViaLength("123 host \"t\" \"\"", 0);
         }
 
+        [ActiveIssue(846, PlatformID.AnyUnix)]
         [Fact]
         public void Parse_SetOfValidValueStrings_ParsedCorrectly()
         {
@@ -213,6 +214,7 @@ namespace System.Net.Http.Unit.Tests
             CheckValidParse("1 \u4F1A \"t\" ", new WarningHeaderValue(1, "\u4F1A", "\"t\""));
         }
 
+        [ActiveIssue(846, PlatformID.AnyUnix)]
         [Fact]
         public void Parse_SetOfInvalidValueStrings_Throws()
         {
@@ -236,6 +238,7 @@ namespace System.Net.Http.Unit.Tests
             CheckInvalidParse("  ,,");
         }
 
+        [ActiveIssue(846, PlatformID.AnyUnix)]
         [Fact]
         public void TryParse_SetOfValidValueStrings_ParsedCorrectly()
         {
@@ -251,6 +254,7 @@ namespace System.Net.Http.Unit.Tests
             CheckValidTryParse("1 \u4F1A \"t\" ", new WarningHeaderValue(1, "\u4F1A", "\"t\""));
         }
 
+        [ActiveIssue(846, PlatformID.AnyUnix)]
         [Fact]
         public void TryParse_SetOfInvalidValueStrings_ReturnsFalse()
         {
