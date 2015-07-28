@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System;
 using System.Net;
 
 using Xunit;
@@ -70,36 +73,36 @@ namespace System.Net.Primitives.Functional.Tests
             var initAddress = IPAddress.Parse(originalAddress);
             var ipv6Address = initAddress.MapToIPv6();
             Assert.True(ipv6Address.IsIPv4MappedToIPv6);
-            
+
             var ipv4Address = ipv6Address.MapToIPv4();
-            
+
             Assert.Equal(originalAddress, ipv4Address.ToString());
-        }        
+        }
 
         [Fact]
         public void IPAddressMapping_MapIPv4ToIPv6ToIPv4WhenFirstByteOfIPv4IsGreaterThan127_Success()
         {
             IPAddressMappingHighByteTestHelper("{0}.127.127.127");
-        }        
-        
+        }
+
         [Fact]
         public void IPAddressMapping_MapIPv4ToIPv6ToIPv4WhenSecondByteOfIPv4IsGreaterThan127_Success()
         {
             IPAddressMappingHighByteTestHelper("127.{0}.127.127");
-        }        
-        
+        }
+
         [Fact]
         public void IPAddressMapping_MapIPv4ToIPv6ToIPv4WhenThirdByteOfIPv4IsGreaterThan127_Success()
         {
             IPAddressMappingHighByteTestHelper("127.127.{0}.127");
-        }        
+        }
 
         [Fact]
         public void IPAddressMapping_MapIPv4ToIPv6ToIPv4WhenLastByteOfIPv4IsGreaterThan127_Success()
         {
             IPAddressMappingHighByteTestHelper("127.127.127.{0}");
         }
-        
+
         private void IPAddressMappingHighByteTestHelper(string ipv4AddressFormat)
         {
             string address;
@@ -110,11 +113,11 @@ namespace System.Net.Primitives.Functional.Tests
             for (var octet = 128; octet < 256; octet++)
             {
                 address = string.Format(ipv4AddressFormat, octet);
-                
+
                 initialIPv4Address = IPAddress.Parse(address);
-                ipv6Address = initialIPv4Address.MapToIPv6();         
+                ipv6Address = initialIPv4Address.MapToIPv6();
                 finalIPv4Address = ipv6Address.MapToIPv4();
-                
+
                 Assert.Equal(address, finalIPv4Address.ToString());
             }
         }

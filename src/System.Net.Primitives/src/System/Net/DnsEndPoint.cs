@@ -47,7 +47,9 @@ namespace System.Net
             DnsEndPoint dnsComparand = comparand as DnsEndPoint;
 
             if (dnsComparand == null)
+            {
                 return false;
+            }
 
             return (_family == dnsComparand._family &&
                     _port == dnsComparand._port &&

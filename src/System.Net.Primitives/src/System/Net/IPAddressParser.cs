@@ -1,15 +1,8 @@
-
-
-using System.Net.Sockets;
-using System.Text;
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-//------------------------------------------------------------------------------
-// <copyright file="IPAddressParser.cs" company="Microsoft">
-//     Copyright (c) Microsoft Corporation.  All rights reserved.
-// </copyright>
-//------------------------------------------------------------------------------
+using System.Net.Sockets;
+using System.Text;
 
 namespace System.Net
 {
@@ -34,34 +27,25 @@ namespace System.Net
 
             uint error = 0;
 
-            //
             // IPv6 Changes: Detect probable IPv6 addresses and use separate
             //               parse method.
-            //
             if (ipString.IndexOf(':') != -1)
             {
-                //
                 // If the address string contains the colon character
                 // then it can only be an IPv6 address. Use a separate
                 // parse method to unpick it all. Note: we don't support
                 // port specification at the end of address and so can
                 // make this decision.
-                //
                 uint scope = 0;
                 ushort port = 0;
                 byte[] bytes = new byte[IPv6AddressBytes];
 
-                error = Interop.NtDll.RtlIpv6StringToAddressExW(
-                    ipString,
-                    bytes,
-                    out scope,
-                    out port);
+                error = Interop.NtDll.RtlIpv6StringToAddressExW(ipString, bytes, out scope, out port);
 
                 if (error == Interop.StatusOptions.STATUS_SUCCESS)
                 {
                     // AppCompat: .Net 4.5 ignores a correct port if the address was specified in brackes.
                     // Will still throw for an incorrect port.
-
                     return new IPAddress(bytes, (long)scope);
                 }
             }
@@ -70,11 +54,7 @@ namespace System.Net
                 ushort port = 0;
                 byte[] bytes = new byte[IPv4AddressBytes];
 
-                error = Interop.NtDll.RtlIpv4StringToAddressExW(
-                    ipString,
-                    false,
-                    bytes,
-                    out port);
+                error = Interop.NtDll.RtlIpv4StringToAddressExW(ipString, false, bytes, out port);
 
                 if (error == 0)
                 {
@@ -103,11 +83,7 @@ namespace System.Net
             StringBuilder sb = new StringBuilder(INET_ADDRSTRLEN);
             uint length = (uint)sb.Capacity;
 
-            errorCode = Interop.NtDll.RtlIpv4AddressToStringExW(
-                numbers,
-                0,
-                sb,
-                ref length);
+            errorCode = Interop.NtDll.RtlIpv4AddressToStringExW(numbers, 0, sb, ref length);
 
             if (errorCode == Interop.StatusOptions.STATUS_SUCCESS)
             {
@@ -126,12 +102,7 @@ namespace System.Net
             StringBuilder sb = new StringBuilder(INET6_ADDRSTRLEN);
             uint length = (uint)sb.Capacity;
 
-            errorCode = Interop.NtDll.RtlIpv6AddressToStringExW(
-                numbers,
-                scopeId,
-                0,
-                sb,
-                ref length);
+            errorCode = Interop.NtDll.RtlIpv6AddressToStringExW(numbers, scopeId, 0, sb, ref length);
 
             if (errorCode == Interop.StatusOptions.STATUS_SUCCESS)
             {

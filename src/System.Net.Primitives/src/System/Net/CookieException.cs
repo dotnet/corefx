@@ -17,14 +17,8 @@ namespace System.Net.Internal
 namespace System.Net
 #endif
 {
-    /// <devdoc>
-    ///    <para>[To be supplied.]</para>
-    /// </devdoc>
     public class CookieException : FormatException
     {
-        /// <devdoc>
-        ///    <para>[To be supplied.]</para>
-        /// </devdoc>
         public CookieException() : base()
         {
         }

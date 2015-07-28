@@ -23,7 +23,7 @@
     <Compile Include="System\Net\AuthenticationSchemes.cs" />
     <Compile Include="System\Net\Cookie.cs" />
     <Compile Include="System\Net\CookieContainer.cs" />
-    <Compile Include="System\Net\cookiecollection.cs" />
+    <Compile Include="System\Net\CookieCollection.cs" />
     <Compile Include="System\Net\CookieException.cs" />
     <Compile Include="System\Net\CredentialCache.cs" />
     <Compile Include="System\Net\DecompressionMethods.cs" />
@@ -35,7 +35,7 @@
     <Compile Include="System\Net\IPAddress.cs" />
     <Compile Include="System\Net\IPAddressParser.cs" />
     <Compile Include="System\Net\IPEndPoint.cs" />
-    <Compile Include="System\Net\iwebproxy.cs" />
+    <Compile Include="System\Net\IWebProxy.cs" />
     <Compile Include="System\Net\NetworkCredential.cs" />
     <Compile Include="System\Net\Sockets\SocketAddress.cs" />
     <Compile Include="System\Net\TransportContext.cs" />

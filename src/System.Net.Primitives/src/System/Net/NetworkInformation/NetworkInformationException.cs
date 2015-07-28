@@ -33,7 +33,6 @@ namespace System.Net.NetworkInformation
         {
         }
 
-
         internal NetworkInformationException(SocketError socketError) : base((int)socketError)
         {
         }
@@ -43,14 +42,12 @@ namespace System.Net.NetworkInformation
         /// </devdoc>
         public int ErrorCode
         {
-            //
-            // the base class returns the HResult with this property
-            // we need the Win32 Error Code, hence the override.
-            //
+            // The base class returns the HResult with this property.
+            // We need the Win32 error code, hence the override.
             get
             {
                 return NativeErrorCode;
             }
         }
-    }; // class NetworkInformationException
-} // namespace System.Net.NetworkInformation
+    }
+}

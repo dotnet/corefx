@@ -11,8 +11,10 @@ using Microsoft.Win32;
 namespace System.Net
 {
     /// <devdoc>
-    ///    <para>Provides credentials for password-based
-    ///       authentication schemes such as basic, digest, NTLM and Kerberos.</para>
+    ///    <para>
+    ///       Provides credentials for password-based authentication schemes such as basic,
+    ///       digest, NTLM and Kerberos.
+    ///    </para>
     /// </devdoc>
     public class NetworkCredential : ICredentials, ICredentialsByHost
     {
@@ -22,7 +24,7 @@ namespace System.Net
         private SecureString _password;
 
         public NetworkCredential()
-        : this(string.Empty, string.Empty, string.Empty)
+            : this(string.Empty, string.Empty, string.Empty)
         {
         }
 
@@ -87,11 +89,7 @@ namespace System.Net
             }
             set
             {
-                if (value == null)
-                    _userName = String.Empty;
-                else
-                    _userName = value;
-                // GlobalLog.Print("NetworkCredential::set_UserName: m_userName: \"" + m_userName + "\"" );
+                _userName = value ?? string.Empty;
             }
         }
 
@@ -109,9 +107,6 @@ namespace System.Net
             set
             {
                 _password = SecureStringHelpers.CreateSecureString(value);
-                //                GlobalLog.Print("NetworkCredential::set_Password: value = " + value);
-                //                GlobalLog.Print("NetworkCredential::set_Password: m_password:");
-                //                GlobalLog.Dump(m_password);
             }
         }
 
@@ -129,13 +124,10 @@ namespace System.Net
             }
             set
             {
-                if (value == null)
-                    _password = new SecureString(); // makes 0 length string
-                else
-                    _password = value.Copy();
+                _password = value == null ? new SecureString() : value.Copy();
             }
         }
-#endif //!FEATURE_PAL
+#endif
 
         /// <devdoc>
         ///    <para>
@@ -151,26 +143,18 @@ namespace System.Net
             }
             set
             {
-                if (value == null)
-                    _domain = String.Empty;
-                else
-                    _domain = value;
-                //                GlobalLog.Print("NetworkCredential::set_Domain: m_domain: \"" + m_domain + "\"" );
+                _domain = value ?? string.Empty;
             }
         }
 
         internal string InternalGetUserName()
         {
-            // GlobalLog.Print("NetworkCredential::get_UserName: returning \"" + m_userName + "\"");
             return _userName;
         }
 
         internal string InternalGetPassword()
         {
-            string decryptedString = SecureStringHelpers.GetPlaintext(_password);
-
-            // GlobalLog.Print("NetworkCredential::get_Password: returning \"" + decryptedString + "\"");
-            return decryptedString;
+            return SecureStringHelpers.GetPlaintext(_password);
         }
 
         internal SecureString InternalGetSecurePassword()
@@ -180,7 +164,6 @@ namespace System.Net
 
         internal string InternalGetDomain()
         {
-            // GlobalLog.Print("NetworkCredential::get_Domain: returning \"" + m_domain + "\"");
             return _domain;
         }
 
@@ -210,21 +193,30 @@ namespace System.Net
         }
 
 #if DEBUG
-        // this method is only called as part of an assert
+        // This method is only called as part of an assert
         internal bool IsEqualTo(object compObject)
         {
             if ((object)compObject == null)
+            {
                 return false;
+            }
+
             if ((object)this == (object)compObject)
+            {
                 return true;
+            }
+
             NetworkCredential compCred = compObject as NetworkCredential;
             if ((object)compCred == null)
+            {
                 return false;
+            }
+
             return (InternalGetUserName() == compCred.InternalGetUserName() &&
                     InternalGetDomain() == compCred.InternalGetDomain() &&
                     SecureStringHelpers.AreEqualValues(InternalGetSecurePassword(),
                                                        compCred.InternalGetSecurePassword()));
         }
-#endif //DEBUG
-    } // class NetworkCredential
-} // namespace System.Net
+#endif
+    }
+}

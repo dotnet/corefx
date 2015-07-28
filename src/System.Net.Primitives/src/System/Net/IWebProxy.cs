@@ -11,18 +11,8 @@ namespace System.Net
     /// </devdoc>
     public interface IWebProxy
     {
-        /// <devdoc>
-        ///    <para>[To be supplied.]</para>
-        /// </devdoc>
-
         Uri GetProxy(Uri destination);
-        /// <devdoc>
-        ///    <para>[To be supplied.]</para>
-        /// </devdoc>
         bool IsBypassed(Uri host);
-        /// <devdoc>
-        ///    <para>[To be supplied.]</para>
-        /// </devdoc>
         ICredentials Credentials { get; set; }
     }
 }

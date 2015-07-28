@@ -29,32 +29,21 @@ namespace System.Security.Authentication
     public enum CipherAlgorithmType
     {
         None = 0,  // No encryption
-
         Rc2 = (Interop.Crypt32.Alg.ClassEncrypt | Interop.Crypt32.Alg.TypeBlock | Interop.Crypt32.Alg.NameRC2),
-
         Rc4 = (Interop.Crypt32.Alg.ClassEncrypt | Interop.Crypt32.Alg.TypeStream | Interop.Crypt32.Alg.NameRC4),
-
         Des = (Interop.Crypt32.Alg.ClassEncrypt | Interop.Crypt32.Alg.TypeBlock | Interop.Crypt32.Alg.NameDES),
-
         TripleDes = (Interop.Crypt32.Alg.ClassEncrypt | Interop.Crypt32.Alg.TypeBlock | Interop.Crypt32.Alg.Name3DES),
-
         Aes = (Interop.Crypt32.Alg.ClassEncrypt | Interop.Crypt32.Alg.TypeBlock | Interop.Crypt32.Alg.NameAES),
-
         Aes128 = (Interop.Crypt32.Alg.ClassEncrypt | Interop.Crypt32.Alg.TypeBlock | Interop.Crypt32.Alg.NameAES_128),
-
         Aes192 = (Interop.Crypt32.Alg.ClassEncrypt | Interop.Crypt32.Alg.TypeBlock | Interop.Crypt32.Alg.NameAES_192),
-
         Aes256 = (Interop.Crypt32.Alg.ClassEncrypt | Interop.Crypt32.Alg.TypeBlock | Interop.Crypt32.Alg.NameAES_256),
-
         Null = (Interop.Crypt32.Alg.ClassEncrypt)  // 0-bit NULL cipher algorithm
     }
 
     public enum HashAlgorithmType
     {
         None = 0,
-
         Md5 = (Interop.Crypt32.Alg.ClassHash | Interop.Crypt32.Alg.Any | Interop.Crypt32.Alg.NameMD5),
-
         Sha1 = (Interop.Crypt32.Alg.ClassHash | Interop.Crypt32.Alg.Any | Interop.Crypt32.Alg.NameSHA)
     }
 }

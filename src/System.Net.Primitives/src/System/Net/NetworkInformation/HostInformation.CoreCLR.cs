@@ -12,7 +12,7 @@ namespace System.Net.NetworkInformation
         private static Interop.IpHlpApi.FIXED_INFO s_fixedInfo;
         private static bool s_fixedInfoInitialized = false;
 
-        //changing these require a reboot, so we'll cache them instead.
+        // Changing these requires a reboot, so they're safe to cache.
         private static volatile string s_hostName = null;
         private static volatile string s_domainName = null;
 
@@ -24,7 +24,7 @@ namespace System.Net.NetworkInformation
             SafeLocalAllocHandle buffer = null;
             Interop.IpHlpApi.FIXED_INFO fixedInfo = new Interop.IpHlpApi.FIXED_INFO();
 
-            //first we need to get the size of the buffer
+            // First we need to get the size of the buffer
             uint result = Interop.IpHlpApi.GetNetworkParams(SafeLocalAllocHandle.InvalidHandle, ref size);
 
             while (result == Interop.IpHlpApi.ERROR_BUFFER_OVERFLOW)
@@ -53,7 +53,7 @@ namespace System.Net.NetworkInformation
                 }
             }
 
-            //if the result include there being no information, we'll still throw
+            // If the result include there being no information, we'll still throw
             if (result != Interop.IpHlpApi.ERROR_SUCCESS)
             {
                 throw new NetworkInformationException((int)result);
@@ -81,7 +81,7 @@ namespace System.Net.NetworkInformation
             }
         }
 
-        /// <summary>Specifies the host name for the local computer.</summary>
+        // Specifies the host name for the local computer.
         internal static string HostName
         {
             get
@@ -100,7 +100,8 @@ namespace System.Net.NetworkInformation
                 return s_hostName;
             }
         }
-        /// <summary>Specifies the domain in which the local computer is registered.</summary>
+
+        // Specifies the domain in which the local computer is registered.
         internal static string DomainName
         {
             get
@@ -121,4 +122,3 @@ namespace System.Net.NetworkInformation
         }
     }
 }
-
