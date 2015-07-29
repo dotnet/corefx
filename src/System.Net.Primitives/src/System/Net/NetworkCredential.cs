@@ -110,7 +110,6 @@ namespace System.Net
             }
         }
 
-#if !FEATURE_PAL
         /// <devdoc>
         ///    <para>
         ///       The password for the user name.
@@ -127,7 +126,6 @@ namespace System.Net
                 _password = value == null ? new SecureString() : value.Copy();
             }
         }
-#endif
 
         /// <devdoc>
         ///    <para>

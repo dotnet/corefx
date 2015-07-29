@@ -15,4 +15,3 @@ namespace System.Net.NetworkInformation
         Hybrid = 8
     }
 }
-

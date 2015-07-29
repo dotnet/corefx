@@ -67,7 +67,7 @@ namespace System.Net
             WriteEvent(8, message, detailMessage);
         }
 
-        public class Keywords
+        public static class Keywords
         {
             public const EventKeywords Default = (EventKeywords)0x0001;
             public const EventKeywords Debug = (EventKeywords)0x0002;

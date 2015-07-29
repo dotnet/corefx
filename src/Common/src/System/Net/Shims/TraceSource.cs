@@ -29,13 +29,6 @@ namespace System.Net
 
         public void TraceTransfer(int id, string message, Guid relatedActivityId) { }
 
-        // Removed all references to Attributes it uses Collections.Specialized
-        //public StringDictionary Attributes { get; }
-
-        //public string Name { get; }
-
-        //public TraceListenerCollection Listeners { get;  }
-
         public SourceSwitch Switch { get { return new SourceSwitch(); } }
     }
 

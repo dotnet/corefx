@@ -7,34 +7,40 @@ internal static partial class Interop
 {
     internal static partial class Crypt32
     {
-        //From WinCrypt.h
-        [Flags]
-        internal enum Alg
-        {
-            Any = 0,
-            ClassSignture = (1 << 13),
-            ClassEncrypt = (3 << 13),
-            ClassHash = (4 << 13),
-            ClassKeyXch = (5 << 13),
-            TypeRSA = (2 << 9),
-            TypeBlock = (3 << 9),
-            TypeStream = (4 << 9),
-            TypeDH = (5 << 9),
+        // All constants below are from wincrypt.h.
 
-            NameDES = 1,
-            NameRC2 = 2,
-            Name3DES = 3,
-            NameAES_128 = 14,
-            NameAES_192 = 15,
-            NameAES_256 = 16,
-            NameAES = 17,
+        // Algorithm classes
+        public const int ALG_CLASS_ANY = 0;
+        public const int ALG_CLASS_SIGNATURE = (1 << 13);
+        public const int ALG_CLASS_ENCRYPT = (3 << 13);
+        public const int ALG_CLASS_HASH = (4 << 13);
+        public const int ALG_CLASS_KEY_EXCHANGE = (5 << 13);
 
-            NameRC4 = 1,
+        // Algorithm types
+        public const int ALG_TYPE_RSA = (2 << 9);
+        public const int ALG_TYPE_BLOCK = (3 << 9);
+        public const int ALG_TYPE_STREAM = (4 << 9);
+        public const int ALG_TYPE_DH = (5 << 9);
 
-            NameMD5 = 3,
-            NameSHA = 4,
+        // Block ciipher sub-IDs
+        public const int ALG_SID_DES = 1;
+        public const int ALG_SID_3DES = 3;
+        public const int ALG_SID_AES_128 = 14;
+        public const int ALG_SID_AES_192 = 15;
+        public const int ALG_SID_AES_256 = 16;
+        public const int ALG_SID_AES = 17;
 
-            NameDH_Ephem = 2,
-        }
+        // RC2 sub-IDs
+        public const int ALG_SID_RC2 = 2;
+
+        // Stream cipher sub-IDs
+        public const int ALG_SID_RC4 = 1;
+
+        // Diffie-Hellman sub-IDs
+        public const int ALG_SID_DH_EPHEM = 2;
+
+        // Hash sub-IDs
+        public const int ALG_SID_MD5 = 3;
+        public const int ALG_SID_SHA = 4;
     }
 }

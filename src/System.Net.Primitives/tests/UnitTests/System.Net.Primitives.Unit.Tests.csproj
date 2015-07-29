@@ -8,7 +8,7 @@
     <ProjectGuid>{7860A11A-1841-4416-8A30-28EEEB42C6BB}</ProjectGuid>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <StringResourcesPath>..\..\src\Resources\Strings.resx</StringResourcesPath>
-    <UnsupportedPlatforms>Linux;OSX</UnsupportedPlatforms>
+    <UnsupportedPlatforms>Linux;OSX;FreeBSD</UnsupportedPlatforms>
   </PropertyGroup>
   
   <!-- Help VS understand available configurations -->
@@ -21,7 +21,6 @@
 
     <Compile Include="Fakes\GlobalLog.cs" />
     <Compile Include="Fakes\HostInformation.cs" />
-    <Compile Include="Fakes\Logger.cs" />
 
     <Compile Include="..\..\src\System\Net\Cookie.cs" >
       <Link>ProductionCode\System\Net\Cookie.cs</Link>

@@ -24,4 +24,3 @@ namespace System.Net.Security
         EncryptAndSign = 2
     }
 }
-
