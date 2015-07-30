@@ -400,7 +400,7 @@ namespace System.IO
 
         public override void MoveDirectory(string sourceFullPath, string destFullPath)
         {
-            if (!Interop.mincore.MoveFile(sourceFullPath, destFullPath))
+            if (!Interop.mincore.MoveFile(sourceFullPath, destFullPath, copyCrossVolume: false))
             {
                 int errorCode = Marshal.GetLastWin32Error();
 
