@@ -1,22 +1,5 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-/*++
-Copyright (c) 2003 Microsoft Corporation
-
-Module Name:
-
-    SslEnumProperties.cs
-
-Abstract:
-
-    Public enum types used in conjunction SslStream class
-
-Author:
-    Alexei Vopilov    Sept 28-2003
-
-Revision History:
-
---*/
 
 using System.Diagnostics.CodeAnalysis;
 using System.Net;
@@ -28,53 +11,39 @@ namespace System.Security.Authentication
     public enum SslProtocols
     {
         None = 0,
-        Ssl2 = Interop.SchProtocols.Ssl2,
-        Ssl3 = Interop.SchProtocols.Ssl3,
-        Tls = Interop.SchProtocols.Tls10,
-        Tls11 = Interop.SchProtocols.Tls11,
-        Tls12 = Interop.SchProtocols.Tls12,
+        Ssl2 = Interop.SChannel.SP_PROT_SSL2,
+        Ssl3 = Interop.SChannel.SP_PROT_SSL3,
+        Tls = Interop.SChannel.SP_PROT_TLS1_0,
+        Tls11 = Interop.SChannel.SP_PROT_TLS1_1,
+        Tls12 = Interop.SChannel.SP_PROT_TLS1_2,
     }
 
     public enum ExchangeAlgorithmType
     {
         None = 0,
-        RsaSign = (Interop.Alg.ClassSignture | Interop.Alg.TypeRSA | Interop.Alg.Any),
-        RsaKeyX = (Interop.Alg.ClassKeyXch | Interop.Alg.TypeRSA | Interop.Alg.Any),
-        DiffieHellman = (Interop.Alg.ClassKeyXch | Interop.Alg.TypeDH | Interop.Alg.NameDH_Ephem),
+        RsaSign = (Interop.Crypt32.ALG_CLASS_SIGNATURE | Interop.Crypt32.ALG_TYPE_RSA | Interop.Crypt32.ALG_CLASS_ANY),
+        RsaKeyX = (Interop.Crypt32.ALG_CLASS_KEY_EXCHANGE | Interop.Crypt32.ALG_TYPE_RSA | Interop.Crypt32.ALG_CLASS_ANY),
+        DiffieHellman = (Interop.Crypt32.ALG_CLASS_KEY_EXCHANGE | Interop.Crypt32.ALG_TYPE_DH | Interop.Crypt32.ALG_SID_DH_EPHEM),
     }
 
     public enum CipherAlgorithmType
     {
-        None = 0,   //No encrytpion
-
-        Rc2 = (Interop.Alg.ClassEncrypt | Interop.Alg.TypeBlock | Interop.Alg.NameRC2),
-
-        Rc4 = (Interop.Alg.ClassEncrypt | Interop.Alg.TypeStream | Interop.Alg.NameRC4),
-
-        Des = (Interop.Alg.ClassEncrypt | Interop.Alg.TypeBlock | Interop.Alg.NameDES),
-
-        TripleDes = (Interop.Alg.ClassEncrypt | Interop.Alg.TypeBlock | Interop.Alg.Name3DES),
-
-        Aes = (Interop.Alg.ClassEncrypt | Interop.Alg.TypeBlock | Interop.Alg.NameAES),
-
-        Aes128 = (Interop.Alg.ClassEncrypt | Interop.Alg.TypeBlock | Interop.Alg.NameAES_128),
-
-        Aes192 = (Interop.Alg.ClassEncrypt | Interop.Alg.TypeBlock | Interop.Alg.NameAES_192),
-
-        Aes256 = (Interop.Alg.ClassEncrypt | Interop.Alg.TypeBlock | Interop.Alg.NameAES_256),
-
-        Null = (Interop.Alg.ClassEncrypt)  // 0-bit NULL cipher algorithm
+        None = 0,  // No encryption
+        Rc2 = (Interop.Crypt32.ALG_CLASS_ENCRYPT | Interop.Crypt32.ALG_TYPE_BLOCK | Interop.Crypt32.ALG_SID_RC2),
+        Rc4 = (Interop.Crypt32.ALG_CLASS_ENCRYPT | Interop.Crypt32.ALG_TYPE_STREAM | Interop.Crypt32.ALG_SID_RC4),
+        Des = (Interop.Crypt32.ALG_CLASS_ENCRYPT | Interop.Crypt32.ALG_TYPE_BLOCK | Interop.Crypt32.ALG_SID_DES),
+        TripleDes = (Interop.Crypt32.ALG_CLASS_ENCRYPT | Interop.Crypt32.ALG_TYPE_BLOCK | Interop.Crypt32.ALG_SID_3DES),
+        Aes = (Interop.Crypt32.ALG_CLASS_ENCRYPT | Interop.Crypt32.ALG_TYPE_BLOCK | Interop.Crypt32.ALG_SID_AES),
+        Aes128 = (Interop.Crypt32.ALG_CLASS_ENCRYPT | Interop.Crypt32.ALG_TYPE_BLOCK | Interop.Crypt32.ALG_SID_AES_128),
+        Aes192 = (Interop.Crypt32.ALG_CLASS_ENCRYPT | Interop.Crypt32.ALG_TYPE_BLOCK | Interop.Crypt32.ALG_SID_AES_192),
+        Aes256 = (Interop.Crypt32.ALG_CLASS_ENCRYPT | Interop.Crypt32.ALG_TYPE_BLOCK | Interop.Crypt32.ALG_SID_AES_256),
+        Null = (Interop.Crypt32.ALG_CLASS_ENCRYPT)  // 0-bit NULL cipher algorithm
     }
 
     public enum HashAlgorithmType
     {
         None = 0,
-
-        Md5 = (Interop.Alg.ClassHash | Interop.Alg.Any | Interop.Alg.NameMD5),
-
-        Sha1 = (Interop.Alg.ClassHash | Interop.Alg.Any | Interop.Alg.NameSHA)
+        Md5 = (Interop.Crypt32.ALG_CLASS_HASH | Interop.Crypt32.ALG_CLASS_ANY | Interop.Crypt32.ALG_SID_MD5),
+        Sha1 = (Interop.Crypt32.ALG_CLASS_HASH | Interop.Crypt32.ALG_CLASS_ANY | Interop.Crypt32.ALG_SID_SHA)
     }
 }
-
-
-

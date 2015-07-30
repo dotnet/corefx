@@ -3,11 +3,11 @@
 
 using System;
 using System.Net;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+
+using Xunit;
 
 namespace NetPrimitivesUnitTests
 {
-    [TestClass]
     public class CookieInternalTest
     {
         private const string SchemePrefix = "http://";
@@ -15,8 +15,8 @@ namespace NetPrimitivesUnitTests
         private const string CookieName = "CookieName";
         private const string CookieValue = "CookieValue";
 
-        [TestMethod]
-        public void DomainImplicit_AddCookieWithImplicitDomain_DomainImplicitIsTrue()
+        [Fact]
+        public void DomainImplicit_AddCookieWithImplicitDomain_DomainImplicitTrue()
         {
             var container = new CookieContainer();
             var cookie = new Cookie(CookieName, CookieValue);
@@ -24,12 +24,12 @@ namespace NetPrimitivesUnitTests
             container.Add(uri, cookie);
 
             var cookies = container.GetCookies(uri);
-            Assert.AreEqual(1, cookies.Count);
-            Assert.IsTrue(cookies[CookieName].DomainImplicit);
+            Assert.Equal(1, cookies.Count);
+            Assert.True(cookies[CookieName].DomainImplicit);
         }
 
-        [TestMethod]
-        public void DomainImplicit_AddCookieWithExplicitDomain_DomainImplicitIsFalse()
+        [Fact]
+        public void DomainImplicit_AddCookieWithExplicitDomain_DomainImplicitFalse()
         {
             var container = new CookieContainer();
             var cookie1 = new Cookie(CookieName, CookieValue) { Domain = OriginalDomain };
@@ -37,8 +37,8 @@ namespace NetPrimitivesUnitTests
             container.Add(uri, cookie1);
 
             var cookies = container.GetCookies(uri);
-            Assert.AreEqual(1, cookies.Count);
-            Assert.IsFalse(cookies[CookieName].DomainImplicit);
+            Assert.Equal(1, cookies.Count);
+            Assert.False(cookies[CookieName].DomainImplicit);
         }
     }
 }

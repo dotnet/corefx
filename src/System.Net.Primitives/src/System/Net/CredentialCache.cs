@@ -7,17 +7,12 @@ using System.Globalization;
 namespace System.Net
 {
     // More sophisticated password cache that stores multiple
-    // name-password pairs and associates these with host/realm
-    /// <devdoc>
-    ///    <para>Provides storage for multiple credentials.</para>
-    /// </devdoc>
+    // name-password pairs and associates these with host/realm.
     public class CredentialCache : ICredentials, ICredentialsByHost, IEnumerable
     {
-        // fields
-
         private Hashtable _cache = new Hashtable();
         private Hashtable _cacheForHosts = new Hashtable();
-        internal int m_version;
+        internal int _version;
 
         private int _numbDefaultCredInCache = 0;
 
@@ -30,30 +25,23 @@ namespace System.Net
             }
         }
 
-        // constructors
-
         /// <devdoc>
-        ///    <para>
-        ///       Initializes a new instance of the <see cref='System.Net.CredentialCache'/> class.
-        ///    </para>
+        ///  <para>
+        ///    Initializes a new instance of the <see cref='System.Net.CredentialCache'/> class.
+        ///  </para>
         /// </devdoc>
         public CredentialCache()
         {
         }
 
-        // properties
-
-        // methods
-
         /// <devdoc>
-        /// <para>Adds a <see cref='System.Net.NetworkCredential'/>
-        /// instance to the credential cache.</para>
+        ///  <para>
+        ///    Adds a <see cref='System.Net.NetworkCredential'/> instance to the credential cache.
+        ///  </para>
         /// </devdoc>
         public void Add(Uri uriPrefix, string authType, NetworkCredential cred)
         {
-            //
-            // parameter validation
-            //
+            // Parameter validation
             if (uriPrefix == null)
             {
                 throw new ArgumentNullException("uriPrefix");
@@ -63,7 +51,7 @@ namespace System.Net
                 throw new ArgumentNullException("authType");
             }
 
-            ++m_version;
+            ++_version;
 
             CredentialKey key = new CredentialKey(uriPrefix, authType);
 
@@ -79,9 +67,7 @@ namespace System.Net
 
         public void Add(string host, int port, string authenticationType, NetworkCredential credential)
         {
-            //
-            // parameter validation
-            //
+            // Parameter validation
             if (host == null)
             {
                 throw new ArgumentNullException("host");
@@ -102,7 +88,7 @@ namespace System.Net
                 throw new ArgumentOutOfRangeException("port");
             }
 
-            ++m_version;
+            ++_version;
 
             CredentialHostKey key = new CredentialHostKey(host, port, authenticationType);
 
@@ -117,19 +103,20 @@ namespace System.Net
 
 
         /// <devdoc>
-        /// <para>Removes a <see cref='System.Net.NetworkCredential'/>
-        /// instance from the credential cache.</para>
+        ///  <para>
+        ///    Removes a <see cref='System.Net.NetworkCredential'/> instance from the credential cache.
+        ///  </para>
         /// </devdoc>
         public void Remove(Uri uriPrefix, string authType)
         {
             if (uriPrefix == null || authType == null)
             {
-                // these couldn't possibly have been inserted into
-                // the cache because of the test in Add()
+                // These couldn't possibly have been inserted into
+                // the cache because of the test in Add().
                 return;
             }
 
-            ++m_version;
+            ++_version;
 
             CredentialKey key = new CredentialKey(uriPrefix, authType);
 
@@ -147,8 +134,8 @@ namespace System.Net
         {
             if (host == null || authenticationType == null)
             {
-                // these couldn't possibly have been inserted into
-                // the cache because of the test in Add()
+                // These couldn't possibly have been inserted into
+                // the cache because of the test in Add().
                 return;
             }
 
@@ -157,8 +144,7 @@ namespace System.Net
                 return;
             }
 
-
-            ++m_version;
+            ++_version;
 
             CredentialHostKey key = new CredentialHostKey(host, port, authenticationType);
 
@@ -172,18 +158,22 @@ namespace System.Net
         }
 
         /// <devdoc>
-        ///    <para>
-        ///       Returns the <see cref='System.Net.NetworkCredential'/>
-        ///       instance associated with the supplied Uri and
-        ///       authentication type.
-        ///    </para>
+        ///  <para>
+        ///    Returns the <see cref='System.Net.NetworkCredential'/>
+        ///    instance associated with the supplied Uri and
+        ///    authentication type.
+        ///  </para>
         /// </devdoc>
         public NetworkCredential GetCredential(Uri uriPrefix, string authType)
         {
             if (uriPrefix == null)
+            {
                 throw new ArgumentNullException("uriPrefix");
+            }
             if (authType == null)
+            {
                 throw new ArgumentNullException("authType");
+            }
 
             GlobalLog.Print("CredentialCache::GetCredential(uriPrefix=\"" + uriPrefix + "\", authType=\"" + authType + "\")");
 
@@ -191,32 +181,20 @@ namespace System.Net
             NetworkCredential mostSpecificMatch = null;
             IDictionaryEnumerator credEnum = _cache.GetEnumerator();
 
-            //
             // Enumerate through every credential in the cache
-            //
-
             while (credEnum.MoveNext())
             {
                 CredentialKey key = (CredentialKey)credEnum.Key;
 
-                //
                 // Determine if this credential is applicable to the current Uri/AuthType
-                //
-
                 if (key.Match(uriPrefix, authType))
                 {
                     int prefixLen = key.UriPrefixLength;
 
-                    //
                     // Check if the match is better than the current-most-specific match
-                    //
-
                     if (prefixLen > longestMatchPrefix)
                     {
-                        //
-                        // Yes-- update the information about currently preferred match
-                        //
-
+                        // Yes: update the information about currently preferred match
                         longestMatchPrefix = prefixLen;
                         mostSpecificMatch = (NetworkCredential)credEnum.Value;
                     }
@@ -248,25 +226,18 @@ namespace System.Net
                 throw new ArgumentOutOfRangeException("port");
             }
 
-
             GlobalLog.Print("CredentialCache::GetCredential(host=\"" + host + ":" + port.ToString() + "\", authenticationType=\"" + authenticationType + "\")");
 
             NetworkCredential match = null;
 
             IDictionaryEnumerator credEnum = _cacheForHosts.GetEnumerator();
 
-            //
             // Enumerate through every credential in the cache
-            //
-
             while (credEnum.MoveNext())
             {
                 CredentialHostKey key = (CredentialHostKey)credEnum.Key;
 
-                //
                 // Determine if this credential is applicable to the current Uri/AuthType
-                //
-
                 if (key.Match(host, port, authenticationType))
                 {
                     match = (NetworkCredential)credEnum.Value;
@@ -277,33 +248,21 @@ namespace System.Net
             return match;
         }
 
-
-
-        /// <devdoc>
-        ///    [To be supplied]
-        /// </devdoc>
-
-        //
-        // IEnumerable interface
-        //
-
         public IEnumerator GetEnumerator()
         {
-            return new CredentialEnumerator(this, _cache, _cacheForHosts, m_version);
+            return new CredentialEnumerator(this, _cache, _cacheForHosts, _version);
         }
 
-
         /// <devdoc>
-        ///    <para>
-        ///       Gets
-        ///       the default system credentials from the <see cref='System.Net.CredentialCache'/>.
-        ///    </para>
+        ///  <para>
+        ///    Gets the default system credentials from the <see cref='System.Net.CredentialCache'/>.
+        ///  </para>
         /// </devdoc>
         public static ICredentials DefaultCredentials
         {
             get
             {
-                return SystemNetworkCredential.defaultCredential;
+                return SystemNetworkCredential.s_defaultCredential;
             }
         }
 
@@ -311,20 +270,16 @@ namespace System.Net
         {
             get
             {
-                return SystemNetworkCredential.defaultCredential;
+                return SystemNetworkCredential.s_defaultCredential;
             }
         }
 
         private class CredentialEnumerator : IEnumerator
         {
-            // fields
-
             private CredentialCache _cache;
             private ICredentials[] _array;
             private int _index = -1;
             private int _version;
-
-            // constructors
 
             internal CredentialEnumerator(CredentialCache cache, Hashtable table, Hashtable hostTable, int version)
             {
@@ -335,10 +290,6 @@ namespace System.Net
                 _version = version;
             }
 
-            // IEnumerator interface
-
-            // properties
-
             object IEnumerator.Current
             {
                 get
@@ -347,7 +298,7 @@ namespace System.Net
                     {
                         throw new InvalidOperationException(SR.InvalidOperation_EnumOpCantHappen);
                     }
-                    if (_version != _cache.m_version)
+                    if (_version != _cache._version)
                     {
                         throw new InvalidOperationException(SR.InvalidOperation_EnumFailedVersion);
                     }
@@ -355,11 +306,9 @@ namespace System.Net
                 }
             }
 
-            // methods
-
             bool IEnumerator.MoveNext()
             {
-                if (_version != _cache.m_version)
+                if (_version != _cache._version)
                 {
                     throw new InvalidOperationException(SR.InvalidOperation_EnumFailedVersion);
                 }
@@ -375,33 +324,28 @@ namespace System.Net
             {
                 _index = -1;
             }
-        } // class CredentialEnumerator
-    } // class CredentialCache
-
-
+        }
+    }
 
     // Abstraction for credentials in password-based
-    // authentication schemes (basic, digest, NTLM, Kerberos)
-    // Note this is not applicable to public-key based
-    // systems such as SSL client authentication
+    // authentication schemes (basic, digest, NTLM, Kerberos).
+    //
+    // Note that this is not applicable to public-key based
+    // systems such as SSL client authentication.
+    //
     // "Password" here may be the clear text password or it
     // could be a one-way hash that is sufficient to
     // authenticate, as in HTTP/1.1 digest.
-
-    //
-    // Object representing default credentials
-    //
     internal class SystemNetworkCredential : NetworkCredential
     {
-        internal static readonly SystemNetworkCredential defaultCredential = new SystemNetworkCredential();
+        internal static readonly SystemNetworkCredential s_defaultCredential = new SystemNetworkCredential();
 
-        // We want reference equality to work.  Making this private is a good way to guarantee that.
+        // We want reference equality to work. Making this private is a good way to guarantee that.
         private SystemNetworkCredential() :
             base(string.Empty, string.Empty, string.Empty)
         {
         }
     }
-
 
     internal class CredentialHostKey
     {
@@ -422,10 +366,8 @@ namespace System.Net
             {
                 return false;
             }
-            //
-            // If the protocols dont match this credential
-            // is not applicable for the given Uri
-            //
+
+            // If the protocols don't match, this credential is not applicable for the given Uri.
             if (string.Compare(authenticationType, AuthenticationType, StringComparison.OrdinalIgnoreCase) != 0)
             {
                 return false;
@@ -443,17 +385,13 @@ namespace System.Net
             return true;
         }
 
-
         private int _hashCode = 0;
         private bool _computedHashCode = false;
         public override int GetHashCode()
         {
             if (!_computedHashCode)
             {
-                //
-                // compute HashCode on demand
-                //
-
+                // Compute HashCode on demand
                 _hashCode = AuthenticationType.ToUpperInvariant().GetHashCode() + Host.ToUpperInvariant().GetHashCode() + Port.GetHashCode();
                 _computedHashCode = true;
             }
@@ -466,9 +404,7 @@ namespace System.Net
 
             if (comparand == null)
             {
-                //
-                // this covers also the compared==null case
-                //
+                // This covers also the compared == null case
                 return false;
             }
 
@@ -486,8 +422,7 @@ namespace System.Net
         {
             return "[" + Host.Length.ToString(NumberFormatInfo.InvariantInfo) + "]:" + Host + ":" + Port.ToString(NumberFormatInfo.InvariantInfo) + ":" + Logging.ObjectToString(AuthenticationType);
         }
-    } // class CredentialKey
-
+    }
 
     internal class CredentialKey
     {
@@ -508,10 +443,8 @@ namespace System.Net
             {
                 return false;
             }
-            //
-            // If the protocols dont match this credential
-            // is not applicable for the given Uri
-            //
+
+            // If the protocols don't match, this credential is not applicable for the given Uri.
             if (string.Compare(authenticationType, AuthenticationType, StringComparison.OrdinalIgnoreCase) != 0)
             {
                 return false;
@@ -521,28 +454,31 @@ namespace System.Net
 
             return IsPrefix(uri, UriPrefix);
         }
-        //
+
         // IsPrefix (Uri)
         //
-        //  Determines whether <prefixUri> is a prefix of this URI. A prefix
-        //  match is defined as:
+        // Determines whether <prefixUri> is a prefix of this URI. A prefix
+        // match is defined as:
         //
-        //      scheme match
-        //      + host match
-        //      + port match, if any
-        //      + <prefix> path is a prefix of <URI> path, if any
+        //     scheme match
+        //     + host match
+        //     + port match, if any
+        //     + <prefix> path is a prefix of <URI> path, if any
         //
         // Returns:
-        //  True if <prefixUri> is a prefix of this URI
-        //
+        // True if <prefixUri> is a prefix of this URI
         internal bool IsPrefix(Uri uri, Uri prefixUri)
         {
             if (prefixUri.Scheme != uri.Scheme || prefixUri.Host != uri.Host || prefixUri.Port != uri.Port)
+            {
                 return false;
+            }
 
             int prefixLen = prefixUri.AbsolutePath.LastIndexOf('/');
             if (prefixLen > uri.AbsolutePath.LastIndexOf('/'))
+            {
                 return false;
+            }
 
             return String.Compare(uri.AbsolutePath, 0, prefixUri.AbsolutePath, 0, prefixLen, StringComparison.OrdinalIgnoreCase) == 0;
         }
@@ -553,10 +489,7 @@ namespace System.Net
         {
             if (!_computedHashCode)
             {
-                //
-                // compute HashCode on demand
-                //
-
+                // Compute HashCode on demand
                 _hashCode = AuthenticationType.ToUpperInvariant().GetHashCode() + UriPrefixLength + UriPrefix.GetHashCode();
                 _computedHashCode = true;
             }
@@ -569,9 +502,7 @@ namespace System.Net
 
             if (comparand == null)
             {
-                //
-                // this covers also the compared==null case
-                //
+                // This covers also the compared==null case
                 return false;
             }
 
@@ -588,5 +519,5 @@ namespace System.Net
         {
             return "[" + UriPrefixLength.ToString(NumberFormatInfo.InvariantInfo) + "]:" + Logging.ObjectToString(UriPrefix) + ":" + Logging.ObjectToString(AuthenticationType);
         }
-    } // class CredentialKey
-} // namespace System.Net
+    }
+}

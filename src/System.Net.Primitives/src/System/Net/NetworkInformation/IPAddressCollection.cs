@@ -14,14 +14,12 @@ namespace System.Net.NetworkInformation
         {
         }
 
-        /// <include file='doc\HttpListenerPrefixCollection.uex' path='docs/doc[@for="HttpListenerPrefixCollection.CopyTo"]/*' />
         public virtual void CopyTo(IPAddress[] array, int offset)
         {
             _addresses.CopyTo(array, offset);
         }
 
 
-        /// <include file='doc\HttpListenerPrefixCollection.uex' path='docs/doc[@for="HttpListenerPrefixCollection.Count"]/*' />
         public virtual int Count
         {
             get
@@ -49,13 +47,10 @@ namespace System.Net.NetworkInformation
             _addresses.Add(address);
         }
 
-
-        /// <include file='doc\HttpListenerPrefixCollection.uex' path='docs/doc[@for="HttpListenerPrefixCollection.Contains"]/*' />
         public virtual bool Contains(IPAddress address)
         {
             return _addresses.Contains(address);
         }
-
 
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
         {
@@ -67,7 +62,6 @@ namespace System.Net.NetworkInformation
             return (IEnumerator<IPAddress>)_addresses.GetEnumerator();
         }
 
-
         public virtual IPAddress this[int index]
         {
             get
@@ -76,14 +70,11 @@ namespace System.Net.NetworkInformation
             }
         }
 
-
-        /// <include file='doc\HttpListenerPrefixCollection.uex' path='docs/doc[@for="HttpListenerPrefixCollection.Remove"]/*' />
         public virtual bool Remove(IPAddress address)
         {
             throw new NotSupportedException(SR.net_collection_readonly);
         }
 
-        /// <include file='doc\HttpListenerPrefixCollection.uex' path='docs/doc[@for="HttpListenerPrefixCollection.Clear"]/*' />
         public virtual void Clear()
         {
             throw new NotSupportedException(SR.net_collection_readonly);

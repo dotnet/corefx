@@ -55,15 +55,10 @@ namespace System.Net.Sockets
         {
         }
 
-        /// <devdoc>
-        ///    <para>[To be supplied.]</para>
-        /// </devdoc>
         public int ErrorCode
         {
-            //
-            // the base class returns the HResult with this property
-            // we need the Win32 Error Code, hence the override.
-            //
+            // The base class returns the HResult with this property.
+            // We need the Win32 error code, hence the override.
             get
             {
                 return NativeErrorCode;
@@ -74,29 +69,25 @@ namespace System.Net.Sockets
         {
             get
             {
-                // If not null add EndPoint.ToString() to end of base Message
+                // If not null, add EndPoint.ToString() to end of base Message
                 if (_endPoint == null)
                 {
                     return base.Message;
                 }
-                else
-                {
-                    return base.Message + " " + _endPoint.ToString();
-                }
+
+                return base.Message + " " + _endPoint.ToString();
             }
         }
 
 
         public SocketError SocketErrorCode
         {
-            //
-            // the base class returns the HResult with this property
-            // we need the Win32 Error Code, hence the override.
-            //
+            // The base class returns the HResult with this property.
+            // We need the Win32 error code, hence the override.
             get
             {
                 return (SocketError)NativeErrorCode;
             }
         }
-    }; // class SocketException
-} // namespace System.Net
+    }
+}

@@ -9,6 +9,10 @@ namespace System.Net
         {
         }
 
+        public static void Assert(string message)
+        {
+        }
+
         public static void Print(string message)
         {
         }

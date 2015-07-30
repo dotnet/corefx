@@ -6,15 +6,6 @@ using System.Globalization;
 using System.Runtime.InteropServices;
 using System.Security;
 using System.Threading;
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
-
-//------------------------------------------------------------------------------
-// <copyright file="Logging.cs" company="Microsoft">
-//     Copyright (c) Microsoft Corporation.  All rights reserved.
-// </copyright>
-//------------------------------------------------------------------------------
-
 
 namespace System.Net
 {
@@ -231,12 +222,30 @@ namespace System.Net
 
         private static void Close()
         {
-            if (s_WebTraceSource != null) s_WebTraceSource.Close();
-            if (s_HttpListenerTraceSource != null) s_HttpListenerTraceSource.Close();
-            if (s_SocketsTraceSource != null) s_SocketsTraceSource.Close();
-            if (s_WebSocketsTraceSource != null) s_WebSocketsTraceSource.Close();
-            if (s_CacheTraceSource != null) s_CacheTraceSource.Close();
-            if (s_TraceSourceHttpName != null) s_TraceSourceHttpName.Close();
+            if (s_WebTraceSource != null)
+            {
+                s_WebTraceSource.Close();
+            }
+            if (s_HttpListenerTraceSource != null)
+            {
+                s_HttpListenerTraceSource.Close();
+            }
+            if (s_SocketsTraceSource != null)
+            {
+                s_SocketsTraceSource.Close();
+            }
+            if (s_WebSocketsTraceSource != null)
+            {
+                s_WebSocketsTraceSource.Close();
+            }
+            if (s_CacheTraceSource != null)
+            {
+                s_CacheTraceSource.Close();
+            }
+            if (s_TraceSourceHttpName != null)
+            {
+                s_TraceSourceHttpName.Close();
+            }
         }
 
         /// <devdoc>
@@ -433,7 +442,7 @@ namespace System.Net
             {
                 return;
             }
-            if (!String.IsNullOrEmpty(retValue))
+            if (!string.IsNullOrEmpty(retValue))
             {
                 retValue = "\t-> " + retValue;
             }
@@ -476,7 +485,7 @@ namespace System.Net
             }
 
             string infoLine = SR.Format(SR.net_log_exception, GetObjectLogHash(obj), method, e.Message);
-            if (!String.IsNullOrEmpty(e.StackTrace))
+            if (!string.IsNullOrEmpty(e.StackTrace))
             {
                 infoLine += "\r\n" + e.StackTrace;
             }
@@ -581,7 +590,7 @@ namespace System.Net
         }
 
         /// <devdoc>
-        ///    <para>Marhsalls a buffer ptr to an array and then dumps the byte array to the log</para>
+        ///    <para>Marshals a buffer ptr to an array and then dumps the byte array to the log</para>
         /// </devdoc>
         internal static void Dump(TraceSource traceSource, object obj, string method, IntPtr bufferPtr, int length)
         {
@@ -628,10 +637,10 @@ namespace System.Net
             do
             {
                 int n = Math.Min(length, 16);
-                string disp = String.Format(CultureInfo.CurrentCulture, "{0:X8} : ", offset);
+                string disp = string.Format(CultureInfo.CurrentCulture, "{0:X8} : ", offset);
                 for (int i = 0; i < n; ++i)
                 {
-                    disp += String.Format(CultureInfo.CurrentCulture, "{0:X2}", buffer[offset + i]) + ((i == 7) ? '-' : ' ');
+                    disp += string.Format(CultureInfo.CurrentCulture, "{0:X2}", buffer[offset + i]) + ((i == 7) ? '-' : ' ');
                 }
                 for (int i = n; i < 16; ++i)
                 {
