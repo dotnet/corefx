@@ -43,6 +43,7 @@
     <Compile Include="System\IO\IFileSystemObject.cs" />
     <Compile Include="System\IO\Iterator.cs" />
     <Compile Include="System\IO\PathHelpers.cs" />
+    <Compile Include="System\IO\PathPair.cs" />
     <Compile Include="System\IO\ReadLinesIterator.cs" />
     <Compile Include="System\IO\SearchOption.cs" />
     <Compile Include="System\IO\SearchTarget.cs" />
@@ -329,6 +330,9 @@
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\libc\Interop.utime.cs">
       <Link>Common\Interop\Unix\Interop.utime.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\libc\Interop.link.cs">
+      <Link>Common\Interop\Unix\Interop.link.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\libc\Interop.unlink.cs">
       <Link>Common\Interop\Unix\Interop.unlink.cs</Link>

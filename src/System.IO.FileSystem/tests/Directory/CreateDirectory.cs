@@ -204,6 +204,10 @@ namespace System.IO.FileSystem.Tests
             });
         }
 
+        #endregion
+
+        #region PlatformSpecific
+
         [Fact]
         [PlatformSpecific(PlatformID.Windows)]
         public void DirectoryLongerThanMaxPathAsPath_ThrowsPathTooLongException()
@@ -215,10 +219,6 @@ namespace System.IO.FileSystem.Tests
             });
         }
 
-        #endregion
-
-        #region PlatformSpecific
-
         [Fact]
         [PlatformSpecific(PlatformID.Windows)]
         public void DirectoryLongerThanMaxDirectoryAsPath_ThrowsPathTooLongException()
@@ -227,6 +227,7 @@ namespace System.IO.FileSystem.Tests
             Assert.All(paths, (path) =>
             {
                 Assert.Throws<PathTooLongException>(() => Create(path));
+                Directory.Delete(Path.Combine(Path.GetPathRoot(Directory.GetCurrentDirectory()), path.Split(Path.DirectorySeparatorChar)[1]), true);
             });
         }
 
@@ -303,7 +304,7 @@ namespace System.IO.FileSystem.Tests
                 {
                     string extendedPath = Path.Combine(@"\\?\" + directory.Path, path);
                     Directory.CreateDirectory(extendedPath);
-                    Assert.True(Directory.Exists(extendedPath));
+                    Assert.True(Directory.Exists(extendedPath), extendedPath);
                 }
             }
         }
@@ -349,6 +350,20 @@ namespace System.IO.FileSystem.Tests
         }
 
         [Fact]
+        [PlatformSpecific(PlatformID.Windows)] // device name prefixes
+        public void PathWithReservedDeviceNameAsExtendedPath()
+        {
+            var paths = IOInputs.GetReservedDeviceNames();
+            using (TemporaryDirectory directory = new TemporaryDirectory())
+            {
+                Assert.All(paths, (path) =>
+                {
+                    Assert.True(Create(@"\\?\" + Path.Combine(directory.Path, path)).Exists, path);
+                });
+            }
+        }
+
+        [Fact]
         [PlatformSpecific(PlatformID.Windows)] // UNC shares
         public void UncPathWithoutShareNameAsPath_ThrowsArgumentException()
         {
@@ -357,6 +372,13 @@ namespace System.IO.FileSystem.Tests
             {
                 Assert.Throws<ArgumentException>(() => Create(path));
             }
+        }
+
+        [Fact]
+        [PlatformSpecific(PlatformID.Windows)] // UNC shares
+        public void UNCPathWithOnlySlashes()
+        {
+            Assert.Throws<ArgumentException>(() => Create("//"));
         }
 
         [Fact]
