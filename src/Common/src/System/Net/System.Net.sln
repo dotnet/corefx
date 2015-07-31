@@ -1,0 +1,112 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.23107.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.Primitives", "..\..\..\..\System.Net.Primitives\src\System.Net.Primitives.csproj", "{8772BC91-7B55-49B9-94FA-4B1BE5BEAB55}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.NetworkInformation", "..\..\..\..\System.Net.NetworkInformation\src\System.Net.NetworkInformation.csproj", "{3CA89D6C-F8D1-4813-9775-F8D249686E31}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.NameResolution", "..\..\..\..\System.Net.NameResolution\src\System.Net.NameResolution.csproj", "{1714448C-211E-48C1-8B7E-4EE667D336A1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.Sockets", "..\..\..\..\System.Net.Sockets\src\System.Net.Sockets.csproj", "{43311AFB-D7C4-4E5A-B1DE-855407F90D1B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.Utilities", "..\..\..\..\System.Net.Utilities\src\System.Net.Utilities.csproj", "{85FD05E8-A4B1-4B89-ABED-33AFD200CABD}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		FreeBSD_Debug|Any CPU = FreeBSD_Debug|Any CPU
+		FreeBSD_Release|Any CPU = FreeBSD_Release|Any CPU
+		Linux_Debug|Any CPU = Linux_Debug|Any CPU
+		Linux_Release|Any CPU = Linux_Release|Any CPU
+		OSX_Debug|Any CPU = OSX_Debug|Any CPU
+		OSX_Release|Any CPU = OSX_Release|Any CPU
+		Windows_Debug|Any CPU = Windows_Debug|Any CPU
+		Windows_Release|Any CPU = Windows_Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{8772BC91-7B55-49B9-94FA-4B1BE5BEAB55}.FreeBSD_Debug|Any CPU.ActiveCfg = FreeBSD_Debug|Any CPU
+		{8772BC91-7B55-49B9-94FA-4B1BE5BEAB55}.FreeBSD_Debug|Any CPU.Build.0 = FreeBSD_Debug|Any CPU
+		{8772BC91-7B55-49B9-94FA-4B1BE5BEAB55}.FreeBSD_Release|Any CPU.ActiveCfg = FreeBSD_Release|Any CPU
+		{8772BC91-7B55-49B9-94FA-4B1BE5BEAB55}.FreeBSD_Release|Any CPU.Build.0 = FreeBSD_Release|Any CPU
+		{8772BC91-7B55-49B9-94FA-4B1BE5BEAB55}.Linux_Debug|Any CPU.ActiveCfg = Linux_Debug|Any CPU
+		{8772BC91-7B55-49B9-94FA-4B1BE5BEAB55}.Linux_Debug|Any CPU.Build.0 = Linux_Debug|Any CPU
+		{8772BC91-7B55-49B9-94FA-4B1BE5BEAB55}.Linux_Release|Any CPU.ActiveCfg = Linux_Release|Any CPU
+		{8772BC91-7B55-49B9-94FA-4B1BE5BEAB55}.Linux_Release|Any CPU.Build.0 = Linux_Release|Any CPU
+		{8772BC91-7B55-49B9-94FA-4B1BE5BEAB55}.OSX_Debug|Any CPU.ActiveCfg = OSX_Debug|Any CPU
+		{8772BC91-7B55-49B9-94FA-4B1BE5BEAB55}.OSX_Debug|Any CPU.Build.0 = OSX_Debug|Any CPU
+		{8772BC91-7B55-49B9-94FA-4B1BE5BEAB55}.OSX_Release|Any CPU.ActiveCfg = OSX_Release|Any CPU
+		{8772BC91-7B55-49B9-94FA-4B1BE5BEAB55}.OSX_Release|Any CPU.Build.0 = OSX_Release|Any CPU
+		{8772BC91-7B55-49B9-94FA-4B1BE5BEAB55}.Windows_Debug|Any CPU.ActiveCfg = Windows_Debug|Any CPU
+		{8772BC91-7B55-49B9-94FA-4B1BE5BEAB55}.Windows_Debug|Any CPU.Build.0 = Windows_Debug|Any CPU
+		{8772BC91-7B55-49B9-94FA-4B1BE5BEAB55}.Windows_Release|Any CPU.ActiveCfg = Windows_Release|Any CPU
+		{8772BC91-7B55-49B9-94FA-4B1BE5BEAB55}.Windows_Release|Any CPU.Build.0 = Windows_Release|Any CPU
+		{3CA89D6C-F8D1-4813-9775-F8D249686E31}.FreeBSD_Debug|Any CPU.ActiveCfg = FreeBSD_Debug|Any CPU
+		{3CA89D6C-F8D1-4813-9775-F8D249686E31}.FreeBSD_Debug|Any CPU.Build.0 = FreeBSD_Debug|Any CPU
+		{3CA89D6C-F8D1-4813-9775-F8D249686E31}.FreeBSD_Release|Any CPU.ActiveCfg = FreeBSD_Release|Any CPU
+		{3CA89D6C-F8D1-4813-9775-F8D249686E31}.FreeBSD_Release|Any CPU.Build.0 = FreeBSD_Release|Any CPU
+		{3CA89D6C-F8D1-4813-9775-F8D249686E31}.Linux_Debug|Any CPU.ActiveCfg = Linux_Debug|Any CPU
+		{3CA89D6C-F8D1-4813-9775-F8D249686E31}.Linux_Debug|Any CPU.Build.0 = Linux_Debug|Any CPU
+		{3CA89D6C-F8D1-4813-9775-F8D249686E31}.Linux_Release|Any CPU.ActiveCfg = Linux_Release|Any CPU
+		{3CA89D6C-F8D1-4813-9775-F8D249686E31}.Linux_Release|Any CPU.Build.0 = Linux_Release|Any CPU
+		{3CA89D6C-F8D1-4813-9775-F8D249686E31}.OSX_Debug|Any CPU.ActiveCfg = OSX_Debug|Any CPU
+		{3CA89D6C-F8D1-4813-9775-F8D249686E31}.OSX_Debug|Any CPU.Build.0 = OSX_Debug|Any CPU
+		{3CA89D6C-F8D1-4813-9775-F8D249686E31}.OSX_Release|Any CPU.ActiveCfg = OSX_Release|Any CPU
+		{3CA89D6C-F8D1-4813-9775-F8D249686E31}.OSX_Release|Any CPU.Build.0 = OSX_Release|Any CPU
+		{3CA89D6C-F8D1-4813-9775-F8D249686E31}.Windows_Debug|Any CPU.ActiveCfg = Windows_Debug|Any CPU
+		{3CA89D6C-F8D1-4813-9775-F8D249686E31}.Windows_Debug|Any CPU.Build.0 = Windows_Debug|Any CPU
+		{3CA89D6C-F8D1-4813-9775-F8D249686E31}.Windows_Release|Any CPU.ActiveCfg = Windows_Release|Any CPU
+		{3CA89D6C-F8D1-4813-9775-F8D249686E31}.Windows_Release|Any CPU.Build.0 = Windows_Release|Any CPU
+		{1714448C-211E-48C1-8B7E-4EE667D336A1}.FreeBSD_Debug|Any CPU.ActiveCfg = FreeBSD_Debug|Any CPU
+		{1714448C-211E-48C1-8B7E-4EE667D336A1}.FreeBSD_Debug|Any CPU.Build.0 = FreeBSD_Debug|Any CPU
+		{1714448C-211E-48C1-8B7E-4EE667D336A1}.FreeBSD_Release|Any CPU.ActiveCfg = FreeBSD_Release|Any CPU
+		{1714448C-211E-48C1-8B7E-4EE667D336A1}.FreeBSD_Release|Any CPU.Build.0 = FreeBSD_Release|Any CPU
+		{1714448C-211E-48C1-8B7E-4EE667D336A1}.Linux_Debug|Any CPU.ActiveCfg = Linux_Debug|Any CPU
+		{1714448C-211E-48C1-8B7E-4EE667D336A1}.Linux_Debug|Any CPU.Build.0 = Linux_Debug|Any CPU
+		{1714448C-211E-48C1-8B7E-4EE667D336A1}.Linux_Release|Any CPU.ActiveCfg = Linux_Release|Any CPU
+		{1714448C-211E-48C1-8B7E-4EE667D336A1}.Linux_Release|Any CPU.Build.0 = Linux_Release|Any CPU
+		{1714448C-211E-48C1-8B7E-4EE667D336A1}.OSX_Debug|Any CPU.ActiveCfg = OSX_Debug|Any CPU
+		{1714448C-211E-48C1-8B7E-4EE667D336A1}.OSX_Debug|Any CPU.Build.0 = OSX_Debug|Any CPU
+		{1714448C-211E-48C1-8B7E-4EE667D336A1}.OSX_Release|Any CPU.ActiveCfg = OSX_Release|Any CPU
+		{1714448C-211E-48C1-8B7E-4EE667D336A1}.OSX_Release|Any CPU.Build.0 = OSX_Release|Any CPU
+		{1714448C-211E-48C1-8B7E-4EE667D336A1}.Windows_Debug|Any CPU.ActiveCfg = Windows_Debug|Any CPU
+		{1714448C-211E-48C1-8B7E-4EE667D336A1}.Windows_Debug|Any CPU.Build.0 = Windows_Debug|Any CPU
+		{1714448C-211E-48C1-8B7E-4EE667D336A1}.Windows_Release|Any CPU.ActiveCfg = Windows_Release|Any CPU
+		{1714448C-211E-48C1-8B7E-4EE667D336A1}.Windows_Release|Any CPU.Build.0 = Windows_Release|Any CPU
+		{43311AFB-D7C4-4E5A-B1DE-855407F90D1B}.FreeBSD_Debug|Any CPU.ActiveCfg = FreeBSD_Debug|Any CPU
+		{43311AFB-D7C4-4E5A-B1DE-855407F90D1B}.FreeBSD_Debug|Any CPU.Build.0 = FreeBSD_Debug|Any CPU
+		{43311AFB-D7C4-4E5A-B1DE-855407F90D1B}.FreeBSD_Release|Any CPU.ActiveCfg = FreeBSD_Release|Any CPU
+		{43311AFB-D7C4-4E5A-B1DE-855407F90D1B}.FreeBSD_Release|Any CPU.Build.0 = FreeBSD_Release|Any CPU
+		{43311AFB-D7C4-4E5A-B1DE-855407F90D1B}.Linux_Debug|Any CPU.ActiveCfg = Linux_Debug|Any CPU
+		{43311AFB-D7C4-4E5A-B1DE-855407F90D1B}.Linux_Debug|Any CPU.Build.0 = Linux_Debug|Any CPU
+		{43311AFB-D7C4-4E5A-B1DE-855407F90D1B}.Linux_Release|Any CPU.ActiveCfg = Linux_Release|Any CPU
+		{43311AFB-D7C4-4E5A-B1DE-855407F90D1B}.Linux_Release|Any CPU.Build.0 = Linux_Release|Any CPU
+		{43311AFB-D7C4-4E5A-B1DE-855407F90D1B}.OSX_Debug|Any CPU.ActiveCfg = OSX_Debug|Any CPU
+		{43311AFB-D7C4-4E5A-B1DE-855407F90D1B}.OSX_Debug|Any CPU.Build.0 = OSX_Debug|Any CPU
+		{43311AFB-D7C4-4E5A-B1DE-855407F90D1B}.OSX_Release|Any CPU.ActiveCfg = OSX_Release|Any CPU
+		{43311AFB-D7C4-4E5A-B1DE-855407F90D1B}.OSX_Release|Any CPU.Build.0 = OSX_Release|Any CPU
+		{43311AFB-D7C4-4E5A-B1DE-855407F90D1B}.Windows_Debug|Any CPU.ActiveCfg = Windows_Debug|Any CPU
+		{43311AFB-D7C4-4E5A-B1DE-855407F90D1B}.Windows_Debug|Any CPU.Build.0 = Windows_Debug|Any CPU
+		{43311AFB-D7C4-4E5A-B1DE-855407F90D1B}.Windows_Release|Any CPU.ActiveCfg = Windows_Release|Any CPU
+		{43311AFB-D7C4-4E5A-B1DE-855407F90D1B}.Windows_Release|Any CPU.Build.0 = Windows_Release|Any CPU
+		{85FD05E8-A4B1-4B89-ABED-33AFD200CABD}.FreeBSD_Debug|Any CPU.ActiveCfg = FreeBSD_Debug|Any CPU
+		{85FD05E8-A4B1-4B89-ABED-33AFD200CABD}.FreeBSD_Debug|Any CPU.Build.0 = FreeBSD_Debug|Any CPU
+		{85FD05E8-A4B1-4B89-ABED-33AFD200CABD}.FreeBSD_Release|Any CPU.ActiveCfg = FreeBSD_Release|Any CPU
+		{85FD05E8-A4B1-4B89-ABED-33AFD200CABD}.FreeBSD_Release|Any CPU.Build.0 = FreeBSD_Release|Any CPU
+		{85FD05E8-A4B1-4B89-ABED-33AFD200CABD}.Linux_Debug|Any CPU.ActiveCfg = Linux_Debug|Any CPU
+		{85FD05E8-A4B1-4B89-ABED-33AFD200CABD}.Linux_Debug|Any CPU.Build.0 = Linux_Debug|Any CPU
+		{85FD05E8-A4B1-4B89-ABED-33AFD200CABD}.Linux_Release|Any CPU.ActiveCfg = Linux_Release|Any CPU
+		{85FD05E8-A4B1-4B89-ABED-33AFD200CABD}.Linux_Release|Any CPU.Build.0 = Linux_Release|Any CPU
+		{85FD05E8-A4B1-4B89-ABED-33AFD200CABD}.OSX_Debug|Any CPU.ActiveCfg = OSX_Debug|Any CPU
+		{85FD05E8-A4B1-4B89-ABED-33AFD200CABD}.OSX_Debug|Any CPU.Build.0 = OSX_Debug|Any CPU
+		{85FD05E8-A4B1-4B89-ABED-33AFD200CABD}.OSX_Release|Any CPU.ActiveCfg = OSX_Release|Any CPU
+		{85FD05E8-A4B1-4B89-ABED-33AFD200CABD}.OSX_Release|Any CPU.Build.0 = OSX_Release|Any CPU
+		{85FD05E8-A4B1-4B89-ABED-33AFD200CABD}.Windows_Debug|Any CPU.ActiveCfg = Windows_Debug|Any CPU
+		{85FD05E8-A4B1-4B89-ABED-33AFD200CABD}.Windows_Debug|Any CPU.Build.0 = Windows_Debug|Any CPU
+		{85FD05E8-A4B1-4B89-ABED-33AFD200CABD}.Windows_Release|Any CPU.ActiveCfg = Windows_Release|Any CPU
+		{85FD05E8-A4B1-4B89-ABED-33AFD200CABD}.Windows_Release|Any CPU.Build.0 = Windows_Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
