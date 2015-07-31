@@ -40,8 +40,6 @@
     <Compile Include="$(CommonPath)\System\Net\_Win32.cs" />
     <Compile Include="$(CommonPath)\System\Net\NetworkInformation\nodetype.cs" /> 
     <Compile Include="$(CommonPath)\System\Net\NetworkInformation\NetworkInformationException.cs" />
-    <Compile Include="$(CommonPath)\System\Net\Cookie\cookie.cs" />
-    <Compile Include="$(CommonPath)\System\Net\Cookie\cookieexception.cs" />
 
     <!-- Logging -->
     <Compile Include="$(CommonPath)\System\Net\Shims\TraceSource.cs" />

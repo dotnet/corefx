@@ -27,7 +27,6 @@
     <Compile Include="$(CommonPath)\System\Net\Shims\DBNull.cs" />
     <Compile Include="$(CommonPath)\System\Net\Shims\_NetworkingPerfCounters.cs" />
     <Compile Include="$(CommonPath)\System\Net\Shims\Uri.cs" />
-    <Compile Include="$(CommonPath)\System\Net\Shims\Win32SafeHandles.cs" />
 
     <!-- Interop for Primitives, Sockets and NetworkInformation -->
     <Compile Include="$(CommonPath)\Interop\Windows\SystemNet\Interop.Primitives.Manual.cs" />
@@ -41,8 +40,6 @@
     <Compile Include="$(CommonPath)\System\Net\_Win32.cs" />
     <Compile Include="$(CommonPath)\System\Net\NetworkInformation\nodetype.cs" /> 
     <Compile Include="$(CommonPath)\System\Net\NetworkInformation\NetworkInformationException.cs" />
-    <Compile Include="$(CommonPath)\System\Net\Cookie\cookie.cs" />
-    <Compile Include="$(CommonPath)\System\Net\Cookie\cookieexception.cs" />
 
     <!-- Logging -->
     <Compile Include="$(CommonPath)\System\Net\Shims\TraceSource.cs" />
@@ -52,8 +49,8 @@
     <Compile Include="$(CommonPath)\System\Net\InternalException.cs" />
 
     <!-- NameResolution -->
-    <CompileItem Include="System\Net\DNS.cs" />
-    <CompileItem Include="System\Net\IPHostEntry.cs" />              
+    <Compile Include="System\Net\DNS.cs" />
+    <Compile Include="System\Net\IPHostEntry.cs" />              
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetsWindows)' == 'true' ">
