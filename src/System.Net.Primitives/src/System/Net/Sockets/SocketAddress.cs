@@ -1,15 +1,15 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.Diagnostics;
+using System.Globalization;
+using System.Net.Sockets;
+using System.Runtime.InteropServices;
+using System.Text;
+using System;
+
 namespace System.Net
 {
-    using System;
-    using System.Runtime.InteropServices;
-    using System.Net.Sockets;
-    using System.Text;
-    using System.Globalization;
-    using System.Diagnostics.Contracts;
-
     /// <devdoc>
     ///    <para>
     ///       This class is used when subclassing EndPoint, and provides indication
@@ -87,7 +87,7 @@ namespace System.Net
         {
             if (size < WriteableOffset)
             {
-                // It doesn't make sense to create a socket address with less tha
+                // It doesn't make sense to create a socket address with less than
                 // 2 bytes: that's where we store the address family.
                 throw new ArgumentOutOfRangeException("size");
             }
@@ -154,7 +154,7 @@ namespace System.Net
         {
             if (Family == AddressFamily.InterNetworkV6)
             {
-                Contract.Assert(Size >= IPv6AddressSize);
+                Debug.Assert(Size >= IPv6AddressSize);
 
                 byte[] address = new byte[IPAddressParser.IPv6AddressBytes];
                 for (int i = 0; i < address.Length; i++)
@@ -171,7 +171,7 @@ namespace System.Net
             }
             else if (Family == AddressFamily.InterNetwork)
             {
-                Contract.Assert(Size >= IPv4AddressSize);
+                Debug.Assert(Size >= IPv4AddressSize);
 
                 long address = (long)(
                         (Buffer[4] & 0x000000FF) |

@@ -3,6 +3,7 @@
 
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.Threading;
 
@@ -38,7 +39,10 @@ namespace System.Net
     // (e.g. "Cookie: $Version=1; name=value; $Path=/foo; $Secure")
     public sealed class Cookie
     {
+        // NOTE: these two constants must change together.
         internal const int MaxSupportedVersion = 1;
+        internal const string MaxSupportedVersionString = "1";
+
         internal const string CommentAttributeName = "Comment";
         internal const string CommentUrlAttributeName = "CommentURL";
         internal const string DiscardAttributeName = "Discard";
@@ -59,7 +63,6 @@ namespace System.Net
         internal static readonly char[] PortSplitDelimiters = new char[] { ' ', ',', '\"' };
         internal static readonly char[] ReservedToName = new char[] { ' ', '\t', '\r', '\n', '=', ';', ',' };
         internal static readonly char[] ReservedToValue = new char[] { ';', ',' };
-        private static Comparer s_staticComparer = new Comparer();
 
         private string _comment = string.Empty;
         private Uri _commentUri = null;
@@ -84,6 +87,12 @@ namespace System.Net
         internal bool IsQuotedVersion = false;
         internal bool IsQuotedDomain = false;
 
+#if DEBUG
+        static Cookie()
+        {
+            Debug.Assert(MaxSupportedVersion.ToString(NumberFormatInfo.InvariantInfo).Equals(MaxSupportedVersionString, StringComparison.Ordinal));
+        }
+#endif
 
         public Cookie()
         {
@@ -448,7 +457,7 @@ namespace System.Net
                     int host_dot = host.IndexOf('.');
 
                     // First quick check is for pushing a cookie into the local domain.
-                    if (isLocalDomain && (string.Compare(localDomain, domain, StringComparison.OrdinalIgnoreCase) == 0))
+                    if (isLocalDomain && string.Equals(localDomain, domain, StringComparison.OrdinalIgnoreCase))
                     {
                         valid = true;
                     }
@@ -468,7 +477,7 @@ namespace System.Net
                         if (!IsDomainEqualToHost(domain, host))
                         {
                             if (host.Length <= domain.Length ||
-                                string.Compare(host, host.Length - domain.Length, domain, 0, domain.Length, StringComparison.OrdinalIgnoreCase) != 0)
+                                (string.Compare(host, host.Length - domain.Length, domain, 0, domain.Length, StringComparison.OrdinalIgnoreCase) != 0))
                             {
                                 valid = false;
                             }
@@ -476,7 +485,7 @@ namespace System.Net
                     }
                     else if (host_dot == -1 ||
                              domain.Length != host.Length - host_dot ||
-                             string.Compare(host, host_dot, domain, 0, domain.Length, StringComparison.OrdinalIgnoreCase) != 0)
+                             (string.Compare(host, host_dot, domain, 0, domain.Length, StringComparison.OrdinalIgnoreCase) != 0))
                     {
                         // Starting from the first dot, the host must match the domain.
                         //
@@ -496,7 +505,7 @@ namespace System.Net
                 {
                     // For implicitly set domain AND at the set_default == false time
                     // we simply need to match uri.Host against m_domain.
-                    if (string.Compare(host, _domain, StringComparison.OrdinalIgnoreCase) != 0)
+                    if (!string.Equals(host, _domain, StringComparison.OrdinalIgnoreCase))
                     {
                         valid = false;
                     }
@@ -762,11 +771,6 @@ namespace System.Net
             }
         }
 
-        internal static IComparer GetComparer()
-        {
-            return s_staticComparer;
-        }
-
         public override bool Equals(object comparand)
         {
             if (!(comparand is Cookie))
@@ -776,10 +780,10 @@ namespace System.Net
 
             Cookie other = (Cookie)comparand;
 
-            return (string.Compare(Name, other.Name, StringComparison.OrdinalIgnoreCase) == 0)
-                    && (string.Compare(Value, other.Value, StringComparison.Ordinal) == 0)
-                    && (string.Compare(Path, other.Path, StringComparison.Ordinal) == 0)
-                    && (string.Compare(Domain, other.Domain, StringComparison.OrdinalIgnoreCase) == 0)
+            return string.Equals(Name, other.Name, StringComparison.OrdinalIgnoreCase)
+                    && string.Equals(Value, other.Value, StringComparison.Ordinal)
+                    && string.Equals(Path, other.Path, StringComparison.Ordinal)
+                    && string.Equals(Domain, other.Domain, StringComparison.OrdinalIgnoreCase)
                     && (Version == other.Version);
         }
 
@@ -1331,12 +1335,12 @@ namespace System.Net
 
             internal bool IsEqualTo(string value)
             {
-                return string.Compare(_name, value, StringComparison.OrdinalIgnoreCase) == 0;
+                return string.Equals(_name, value, StringComparison.OrdinalIgnoreCase);
             }
         }
 
         // Recognized attributes in order of expected frequency.
-        private static RecognizedAttribute[] s_recognizedAttributes = {
+        private readonly static RecognizedAttribute[] s_recognizedAttributes = {
             new RecognizedAttribute(Cookie.PathAttributeName, CookieToken.Path),
             new RecognizedAttribute(Cookie.MaxAgeAttributeName, CookieToken.MaxAge),
             new RecognizedAttribute(Cookie.ExpiresAttributeName, CookieToken.Expires),
@@ -1350,7 +1354,7 @@ namespace System.Net
             new RecognizedAttribute(Cookie.HttpOnlyAttributeName, CookieToken.HttpOnly),
         };
 
-        private static RecognizedAttribute[] s_recognizedServerAttributes = {
+        private readonly static RecognizedAttribute[] s_recognizedServerAttributes = {
             new RecognizedAttribute('$' + Cookie.PathAttributeName, CookieToken.Path),
             new RecognizedAttribute('$' + Cookie.VersionAttributeName, CookieToken.Version),
             new RecognizedAttribute('$' + Cookie.DomainAttributeName, CookieToken.Domain),
@@ -1722,13 +1726,26 @@ namespace System.Net
         }
     }
 
-    internal class Comparer : IComparer
+    internal sealed class CookieComparer : IComparer<Cookie>
     {
-        int IComparer.Compare(object ol, object or)
-        {
-            Cookie left = (Cookie)ol;
-            Cookie right = (Cookie)or;
+        private CookieComparer() {}
 
+        private static CookieComparer s_instance;
+
+        public static CookieComparer Instance
+        {
+            get
+            {
+                if (s_instance == null)
+                {
+                    Interlocked.CompareExchange(ref s_instance, new CookieComparer(), null);
+                }
+                return s_instance;
+            }
+        }
+
+        public int Compare(Cookie left, Cookie right)
+        {
             int result;
 
             if ((result = string.Compare(left.Name, right.Name, StringComparison.OrdinalIgnoreCase)) != 0)

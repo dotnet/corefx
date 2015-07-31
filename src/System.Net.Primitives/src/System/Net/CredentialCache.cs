@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Collections;
+using System.Collections.Generic;
 using System.Globalization;
 
 namespace System.Net
@@ -10,8 +11,8 @@ namespace System.Net
     // name-password pairs and associates these with host/realm.
     public class CredentialCache : ICredentials, ICredentialsByHost, IEnumerable
     {
-        private Hashtable _cache = new Hashtable();
-        private Hashtable _cacheForHosts = new Hashtable();
+        private readonly Dictionary<CredentialKey, NetworkCredential> _cache = new Dictionary<CredentialKey, NetworkCredential>();
+        private readonly Dictionary<CredentialHostKey, NetworkCredential> _cacheForHosts = new Dictionary<CredentialHostKey, NetworkCredential>();
         internal int _version;
 
         private int _numbDefaultCredInCache = 0;
@@ -281,12 +282,12 @@ namespace System.Net
             private int _index = -1;
             private int _version;
 
-            internal CredentialEnumerator(CredentialCache cache, Hashtable table, Hashtable hostTable, int version)
+            internal CredentialEnumerator(CredentialCache cache, Dictionary<CredentialKey, NetworkCredential> table, Dictionary<CredentialHostKey, NetworkCredential> hostTable, int version)
             {
                 _cache = cache;
                 _array = new ICredentials[table.Count + hostTable.Count];
-                table.Values.CopyTo(_array, 0);
-                hostTable.Values.CopyTo(_array, table.Count);
+                ((ICollection)table.Values).CopyTo(_array, 0);
+                ((ICollection)hostTable.Values).CopyTo(_array, table.Count);
                 _version = version;
             }
 
@@ -349,9 +350,9 @@ namespace System.Net
 
     internal class CredentialHostKey
     {
-        internal string Host;
-        internal string AuthenticationType;
-        internal int Port;
+        public readonly string Host;
+        public readonly string AuthenticationType;
+        public readonly int Port;
 
         internal CredentialHostKey(string host, int port, string authenticationType)
         {
@@ -368,15 +369,9 @@ namespace System.Net
             }
 
             // If the protocols don't match, this credential is not applicable for the given Uri.
-            if (string.Compare(authenticationType, AuthenticationType, StringComparison.OrdinalIgnoreCase) != 0)
-            {
-                return false;
-            }
-            if (string.Compare(Host, host, StringComparison.OrdinalIgnoreCase) != 0)
-            {
-                return false;
-            }
-            if (port != Port)
+            if (!string.Equals(authenticationType, AuthenticationType, StringComparison.OrdinalIgnoreCase) ||
+                !string.Equals(Host, host, StringComparison.OrdinalIgnoreCase) ||
+                port != Port)
             {
                 return false;
             }
@@ -409,12 +404,11 @@ namespace System.Net
             }
 
             bool equals =
-                (string.Compare(AuthenticationType, comparedCredentialKey.AuthenticationType, StringComparison.OrdinalIgnoreCase) == 0) &&
-                (string.Compare(Host, comparedCredentialKey.Host, StringComparison.OrdinalIgnoreCase) == 0) &&
+                string.Equals(AuthenticationType, comparedCredentialKey.AuthenticationType, StringComparison.OrdinalIgnoreCase) &&
+                string.Equals(Host, comparedCredentialKey.Host, StringComparison.OrdinalIgnoreCase) &&
                 Port == comparedCredentialKey.Port;
 
             GlobalLog.Print("CredentialKey::Equals(" + ToString() + ", " + comparedCredentialKey.ToString() + ") returns " + equals.ToString());
-
             return equals;
         }
 
@@ -426,9 +420,11 @@ namespace System.Net
 
     internal class CredentialKey
     {
-        internal Uri UriPrefix;
-        internal int UriPrefixLength = -1;
-        internal string AuthenticationType;
+        public readonly Uri UriPrefix;
+        public readonly int UriPrefixLength = -1;
+        public readonly string AuthenticationType;
+        private int _hashCode = 0;
+        private bool _computedHashCode = false;
 
         internal CredentialKey(Uri uriPrefix, string authenticationType)
         {
@@ -445,7 +441,7 @@ namespace System.Net
             }
 
             // If the protocols don't match, this credential is not applicable for the given Uri.
-            if (string.Compare(authenticationType, AuthenticationType, StringComparison.OrdinalIgnoreCase) != 0)
+            if (!string.Equals(authenticationType, AuthenticationType, StringComparison.OrdinalIgnoreCase))
             {
                 return false;
             }
@@ -483,8 +479,6 @@ namespace System.Net
             return String.Compare(uri.AbsolutePath, 0, prefixUri.AbsolutePath, 0, prefixLen, StringComparison.OrdinalIgnoreCase) == 0;
         }
 
-        private int _hashCode = 0;
-        private bool _computedHashCode = false;
         public override int GetHashCode()
         {
             if (!_computedHashCode)
@@ -507,7 +501,7 @@ namespace System.Net
             }
 
             bool equals =
-                (string.Compare(AuthenticationType, comparedCredentialKey.AuthenticationType, StringComparison.OrdinalIgnoreCase) == 0) &&
+                string.Equals(AuthenticationType, comparedCredentialKey.AuthenticationType, StringComparison.OrdinalIgnoreCase) &&
                 UriPrefix.Equals(comparedCredentialKey.UriPrefix);
 
             GlobalLog.Print("CredentialKey::Equals(" + ToString() + ", " + comparedCredentialKey.ToString() + ") returns " + equals.ToString());

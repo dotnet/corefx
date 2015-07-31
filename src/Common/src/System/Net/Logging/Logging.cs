@@ -487,7 +487,7 @@ namespace System.Net
             string infoLine = SR.Format(SR.net_log_exception, GetObjectLogHash(obj), method, e.Message);
             if (!string.IsNullOrEmpty(e.StackTrace))
             {
-                infoLine += "\r\n" + e.StackTrace;
+                infoLine += Environment.NewLine + e.StackTrace;
             }
             PrintLine(traceSource, TraceEventType.Error, 0, infoLine);
         }

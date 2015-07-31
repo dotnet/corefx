@@ -54,9 +54,6 @@
     <Compile Include="$(CommonPath)\Microsoft\Win32\SafeHandles\SafeLocalAllocHandle.cs" >
       <Link>Common\Microsoft\Win32\SafeHandles\SafeLocalAllocHandle.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\System\Net\SecureStringHelpers.cs" >
-      <Link>Common\System\Net\SecureStringHelpers.cs</Link>
-    </Compile>
     <Compile Include="$(CommonPath)\System\Net\HttpKnownHeaderNames.cs" >
       <Link>Common\System\Net\HttpKnownHeaderNames.cs</Link>
     </Compile>

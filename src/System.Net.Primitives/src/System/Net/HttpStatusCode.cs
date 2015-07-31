@@ -3,11 +3,7 @@
 
 namespace System.Net
 {
-    /// <devdoc>
-    ///   <para>
-    ///     Contains the values of status codes defined for the HTTP protocol.
-    ///   </para>
-    /// </devdoc>
+    // HTTP status codes as per RFC 2616.
     public enum HttpStatusCode
     {
         // Informational 1xx

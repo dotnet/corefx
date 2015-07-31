@@ -18,10 +18,9 @@ namespace System.Net
     /// </devdoc>
     public class NetworkCredential : ICredentials, ICredentialsByHost
     {
-        private static readonly object s_lockingObject = new object();
         private string _domain;
         private string _userName;
-        private SecureString _password;
+        private string _password;
 
         public NetworkCredential()
             : this(string.Empty, string.Empty, string.Empty)
@@ -45,34 +44,10 @@ namespace System.Net
         ///       class with name and password set as specified.
         ///    </para>
         /// </devdoc>
-        public NetworkCredential(string userName, SecureString password)
-        : this(userName, password, string.Empty)
-        {
-        }
-
-        /// <devdoc>
-        ///    <para>
-        ///       Initializes a new instance of the <see cref='System.Net.NetworkCredential'/>
-        ///       class with name and password set as specified.
-        ///    </para>
-        /// </devdoc>
         public NetworkCredential(string userName, string password, string domain)
         {
             UserName = userName;
             Password = password;
-            Domain = domain;
-        }
-
-        /// <devdoc>
-        ///    <para>
-        ///       Initializes a new instance of the <see cref='System.Net.NetworkCredential'/>
-        ///       class with name and password set as specified.
-        ///    </para>
-        /// </devdoc>
-        public NetworkCredential(string userName, SecureString password, string domain)
-        {
-            UserName = userName;
-            SecurePassword = password;
             Domain = domain;
         }
 
@@ -106,24 +81,7 @@ namespace System.Net
             }
             set
             {
-                _password = SecureStringHelpers.CreateSecureString(value);
-            }
-        }
-
-        /// <devdoc>
-        ///    <para>
-        ///       The password for the user name.
-        ///    </para>
-        /// </devdoc>
-        public SecureString SecurePassword
-        {
-            get
-            {
-                return InternalGetSecurePassword().Copy();
-            }
-            set
-            {
-                _password = value == null ? new SecureString() : value.Copy();
+                _password = value;
             }
         }
 
@@ -152,11 +110,6 @@ namespace System.Net
 
         internal string InternalGetPassword()
         {
-            return SecureStringHelpers.GetPlaintext(_password);
-        }
-
-        internal SecureString InternalGetSecurePassword()
-        {
             return _password;
         }
 
@@ -167,11 +120,9 @@ namespace System.Net
 
         internal string InternalGetDomainUserName()
         {
-            string domainUserName = InternalGetDomain();
-            if (domainUserName.Length != 0)
-                domainUserName += "\\";
-            domainUserName += InternalGetUserName();
-            return domainUserName;
+            string domain = InternalGetDomain();
+            string userName = InternalGetUserName();
+            return domain != "" ? domain + "\\" + userName : userName;
         }
 
         /// <devdoc>
@@ -212,8 +163,7 @@ namespace System.Net
 
             return (InternalGetUserName() == compCred.InternalGetUserName() &&
                     InternalGetDomain() == compCred.InternalGetDomain() &&
-                    SecureStringHelpers.AreEqualValues(InternalGetSecurePassword(),
-                                                       compCred.InternalGetSecurePassword()));
+                    string.Equals(_password, compCred._password, StringComparison.Ordinal));
         }
 #endif
     }

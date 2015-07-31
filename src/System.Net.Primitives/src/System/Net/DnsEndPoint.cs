@@ -7,9 +7,9 @@ namespace System.Net
 {
     public class DnsEndPoint : EndPoint
     {
-        private string _host;
-        private int _port;
-        private AddressFamily _family;
+        private readonly string _host;
+        private readonly int _port;
+        private readonly AddressFamily _family;
 
         public DnsEndPoint(string host, int port) : this(host, port, AddressFamily.Unspecified) { }
 

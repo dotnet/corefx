@@ -36,8 +36,8 @@ namespace System.Net
         ///     Default to IPv4 address
         ///   </para>
         /// </devdoc>
-        private AddressFamily _family = AddressFamily.InterNetwork;
-        private ushort[] _numbers = new ushort[NumberOfLabels];
+        private readonly AddressFamily _family = AddressFamily.InterNetwork;
+        private readonly ushort[] _numbers = new ushort[NumberOfLabels];
         private long _scopeId = 0;
         private int _hashCode = 0;
 
@@ -443,7 +443,7 @@ namespace System.Net
                 }
 
                 // The scope IDs must also match
-                return !compareScopeId || comparand._scopeId == _scopeId;
+                return comparand._scopeId == _scopeId || !compareScopeId;
             }
             else
             {

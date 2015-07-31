@@ -80,7 +80,7 @@ namespace System.Net
 
         private class ThreadKindFrame : IDisposable
         {
-            private int _frameNumber;
+            private readonly int _frameNumber;
 
             internal ThreadKindFrame()
             {
@@ -204,7 +204,7 @@ namespace System.Net
             }
             finally
             {
-                Debug.Assert(false, message, detailMessage);
+                Debug.Fail(message, detailMessage);
             }
         }
 
@@ -250,9 +250,12 @@ namespace System.Net
                 EventSourceLogging.Log.WarningDumpArray("length out of range");
                 return;
             }
-            ArraySegment<byte> bufferSegment = new ArraySegment<byte>(buffer, offset, length);
-            byte[] bufferSegmentArray = bufferSegment.Array;
-            EventSourceLogging.Log.DebugDumpArray(bufferSegmentArray);
+            var bufferSegment = new byte[length];
+            for (int i = 0; i < length; i++)
+            {
+                bufferSegment[i] = buffer[offset + i];
+            }
+            EventSourceLogging.Log.DebugDumpArray(bufferSegment);
         }
     }
 
