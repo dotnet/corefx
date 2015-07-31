@@ -89,7 +89,7 @@ namespace System.Net
             if (_asyncCallback != null)
             {
                 GlobalLog.Print("LazyAsyncResult#" + Logging.HashString(this) + "::Complete() invoking callback");
-                m_AsyncCallback(this);
+                _asyncCallback(this);
             }
             else
             {
@@ -427,7 +427,7 @@ namespace System.Net
                     else
 #endif
                     {
-                        m_AsyncCallback(this);
+                        _asyncCallback(this);
                     }
                 }
                 else
@@ -457,7 +457,7 @@ namespace System.Net
         {
             try
             {
-                m_AsyncCallback(this);
+                _asyncCallback(this);
             }
             finally
             {

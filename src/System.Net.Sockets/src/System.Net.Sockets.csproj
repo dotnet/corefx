@@ -91,7 +91,7 @@
     <Compile Include="System\Net\Sockets\Internal.cs" />
     <Compile Include="System\Net\Sockets\UnsafeNativeMethods.cs" />
     <Compile Include="System\Net\Sockets\_SafeNetHandles.cs" />
-    <Compile Include="System\Net\Sockets\_OSSOCK.cs" />
+    <Compile Include="($CommonPath)\Interop\Windows\Winsock\_OSSOCK.cs" />
   </ItemGroup>
   
   <ItemGroup>

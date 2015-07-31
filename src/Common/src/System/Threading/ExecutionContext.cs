@@ -26,7 +26,7 @@ namespace System.Threading
         private bool _isFlowSuppressed = false;
         public static bool IsFlowSuppressed()
         {
-            return s_threadEc.Value.isFlowSuppressed;
+            return s_threadEc.Value._isFlowSuppressed;
         }
 
         [System.Security.SecuritySafeCriticalAttribute]
@@ -36,7 +36,7 @@ namespace System.Threading
             {
                 throw new InvalidOperationException();
             }
-            s_threadEc.Value.isFlowSuppressed = false;
+            s_threadEc.Value._isFlowSuppressed = false;
         }
 
         [System.Security.SecurityCriticalAttribute]
@@ -54,7 +54,7 @@ namespace System.Threading
                 throw new InvalidOperationException();
             }
 
-            s_threadEc.Value.isFlowSuppressed = true;
+            s_threadEc.Value._isFlowSuppressed = true;
             return new AsyncFlowControl(s_threadEc.Value);
         }
     }

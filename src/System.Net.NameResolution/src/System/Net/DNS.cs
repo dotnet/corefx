@@ -527,7 +527,7 @@ namespace System.Net
         private static bool TryNormalizeHost(string host, out string result)
         {
             Uri uri;
-            if (Uri.TryCreate(UriShim.UriSchemeHttp + UriShim.SchemeDelimiter + host, UriKind.Absolute, out uri))
+            if (Uri.TryCreate(UriScheme.Http + UriScheme.SchemeDelimiter + host, UriKind.Absolute, out uri))
             {
                 result = uri.GetComponents(UriComponents.NormalizedHost, UriFormat.SafeUnescaped);
                 return true;

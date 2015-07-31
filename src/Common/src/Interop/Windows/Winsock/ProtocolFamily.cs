@@ -131,9 +131,5 @@ namespace System.Net.Sockets
         ///    <para>[To be supplied.]</para>
         /// </devdoc>
         NetworkDesigners = AddressFamily.NetworkDesigners,
-        /// <devdoc>
-        ///    <para>[To be supplied.]</para>
-        /// </devdoc>
-        Max = AddressFamily.Max,
     }; // enum ProtocolFamily
 } // namespace System.Net.Sockets
