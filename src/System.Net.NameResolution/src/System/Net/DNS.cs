@@ -217,7 +217,7 @@ namespace System.Net
                 // IPv6 disabled: use gethostbyname() to obtain DNS information.
                 //
                 IntPtr nativePointer =
-                    UnsafeSocketsNativeMethods.OSSOCK.gethostbyname(
+                    Interop.Winsock.gethostbyname(
                         hostName);
 
                 if (nativePointer == IntPtr.Zero)
@@ -279,7 +279,7 @@ namespace System.Net
                     // Log failure
                     if (Logging.On)
                         Logging.Exception(Logging.Sockets, "DNS",
-            "InternalGetHostByAddress", new SocketException(errorCode));
+            "InternalGetHostByAddress", new SocketException((int)errorCode));
 
                     // One of two things happened:
                     // 1. There was a ptr record in dns, but not a corollary A/AAA record.
@@ -290,7 +290,7 @@ namespace System.Net
                     // Just return the resolved host name and no IPs.
                     return hostEntry;
                 }
-                exception = new SocketException(errorCode);
+                exception = new SocketException((int)errorCode);
             }
 
             //
@@ -304,7 +304,7 @@ namespace System.Net
                     //
                     // Protocol not supported
                     //
-                    throw new SocketException(SocketError.ProtocolNotSupported);
+                    throw new SocketException((int)SocketError.ProtocolNotSupported);
                 }
                 //
                 // Use gethostbyaddr() to try to resolve the IP address
@@ -319,7 +319,7 @@ namespace System.Net
 #endif
 
                 IntPtr nativePointer =
-                    UnsafeSocketsNativeMethods.OSSOCK.gethostbyaddr(
+                    Interop.Winsock.gethostbyaddr(
                         ref addressAsInt,
                         Marshal.SizeOf<int>(),
                         ProtocolFamily.InterNetwork);
@@ -364,7 +364,7 @@ namespace System.Net
             Socket.InitializeSockets();
             StringBuilder sb = new StringBuilder(HostNameBufferLength);
             SocketError errorCode =
-                UnsafeSocketsNativeMethods.OSSOCK.gethostname(
+                Interop.Winsock.gethostname(
                     sb,
                     HostNameBufferLength);
 
@@ -878,7 +878,7 @@ namespace System.Net
             SocketError errorCode = TryGetAddrInfo(name, out hostEntry);
             if (errorCode != SocketError.Success)
             {
-                throw new SocketException(errorCode);
+                throw new SocketException((int)errorCode);
             }
             return hostEntry;
         }
@@ -899,9 +899,6 @@ namespace System.Net
             // if, by some nefarious means, this method is called on an
             // unsupported platform.
             //
-#if FEATURE_PAL
-            throw new SocketException(SocketError.OperationNotSupported);
-#else
             SafeFreeAddrInfo root = null;
             var addresses = new List<IPAddress>();
             string canonicalname = null;
@@ -963,11 +960,11 @@ namespace System.Net
                         //
                         if (pAddressInfo->ai_family == AddressFamily.InterNetwork)
                         {
-                            addresses.Add(((IPEndPoint)IPEndPoint.Any.Create(sockaddr)).Address);
+                            addresses.Add(((IPEndPoint)IPEndPointStatics.Any.Create(sockaddr)).Address);
                         }
                         else
                         {
-                            addresses.Add(((IPEndPoint)IPEndPoint.IPv6Any.Create(sockaddr)).Address);
+                            addresses.Add(((IPEndPoint)IPEndPointStatics.IPv6Any.Create(sockaddr)).Address);
                         }
                     }
                     //
@@ -995,7 +992,6 @@ namespace System.Net
             addresses.CopyTo(hostinfo.AddressList);
 
             return SocketError.Success;
-#endif // FEATURE_PAL
         }
 
         internal static string TryGetNameInfo(IPAddress addr, out SocketError errorCode)
@@ -1005,9 +1001,6 @@ namespace System.Net
             // if, by some nefarious means, this method is called on an
             // unsupported platform.
             //
-#if FEATURE_PAL
-            throw new SocketException(SocketError.OperationNotSupported);
-#else
             SocketAddress address = (new IPEndPoint(addr, 0)).Serialize();
             StringBuilder hostname = new StringBuilder(1025); // NI_MAXHOST
 
@@ -1015,7 +1008,7 @@ namespace System.Net
 
             Socket.InitializeSockets();
             errorCode =
-                UnsafeSocketsNativeMethods.OSSOCK.GetNameInfoW(
+                Interop.Winsock.GetNameInfoW(
                     address.m_Buffer,
                     address.m_Size,
                     hostname,
@@ -1030,7 +1023,6 @@ namespace System.Net
             }
 
             return hostname.ToString();
-#endif // FEATURE_PAL
         }
     }
 }

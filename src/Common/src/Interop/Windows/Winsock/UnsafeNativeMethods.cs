@@ -263,23 +263,6 @@ namespace System.Net.Sockets
                                                 [In, Out] ref int argp
                                                 );
 
-            [DllImport(Interop.Libraries.Ws2_32, CharSet = CharSet.Ansi, BestFitMapping = false, ThrowOnUnmappableChar = true, SetLastError = true)]
-            internal static extern IntPtr gethostbyname(
-                                                  [In] string host
-                                                  );
-
-            [DllImport(Interop.Libraries.Ws2_32, SetLastError = true)]
-            internal static extern IntPtr gethostbyaddr(
-                                                  [In] ref int addr,
-                                                  [In] int len,
-                                                  [In] ProtocolFamily type
-                                                  );
-
-            [DllImport(Interop.Libraries.Ws2_32, CharSet = CharSet.Ansi, BestFitMapping = false, ThrowOnUnmappableChar = true, SetLastError = true)]
-            internal static extern SocketError gethostname(
-                                                [Out] StringBuilder hostName,
-                                                [In] int bufferLength
-                                                );
 
             [DllImport(Interop.Libraries.Ws2_32, SetLastError = true)]
             internal static extern SocketError getpeername(
@@ -687,15 +670,6 @@ namespace System.Net.Sockets
                                                      [In] bool wait,
                                                      [Out] out SocketFlags socketFlags
                                                      );
-            [DllImport(Interop.Libraries.Ws2_32, CharSet = CharSet.Unicode, BestFitMapping = false, ThrowOnUnmappableChar = true, SetLastError = true)]
-            internal static extern SocketError GetNameInfoW(
-                [In]         byte[] sa,
-                [In]         int salen,
-                [In, Out]     StringBuilder host,
-                [In]         int hostlen,
-                [In, Out]     StringBuilder serv,
-                [In]         int servlen,
-                [In]         int flags);
         } // class UnsafeSocketsNativeMethods.OSSOCK
 
         // Because the regular SafeNetHandles tries to bind this MustRun method on type initialization, failing

@@ -86,10 +86,7 @@ namespace System.Net
         private volatile ExecutionContext _Context;
         private object _Lock;
         private StateFlags _Flags;
-
-#if !FEATURE_PAL
         private WindowsIdentity _Wi;
-#endif
 
         internal ContextAwareResult(object myObject, object myState, AsyncCallback myCallBack) :
             this(false, false, myObject, myState, myCallBack)
@@ -124,13 +121,11 @@ namespace System.Net
             }
         }
 
-#if !FEATURE_PAL
         // Security: We need an assert for a call into WindowsIdentity.GetCurrent
         private void SafeCaptureIdentity()
         {
             _Wi = WindowsIdentity.GetCurrent();
         }
-#endif
 
         //
         // This can be used to establish a context during an async op for something like calling a delegate or demanding a permission.
@@ -176,7 +171,6 @@ namespace System.Net
             }
         }
 
-#if !FEATURE_PAL
         //
         // Just like ContextCopy.
         //
@@ -215,7 +209,6 @@ namespace System.Net
                 return _Wi;
             }
         }
-#endif
 
 #if DEBUG
         // Want to be able to verify that the Identity was requested.  If it was requested but isn't available
@@ -341,13 +334,11 @@ namespace System.Net
             base.Cleanup();
 
             GlobalLog.Print("ContextAwareResult#" + Logging.HashString(this) + "::Cleanup()");
-#if !FEATURE_PAL
             if (_Wi != null)
             {
                 _Wi.Dispose();
                 _Wi = null;
             }
-#endif
         }
 
         //
@@ -364,7 +355,6 @@ namespace System.Net
             // See if we're going to need to capture the context.
             bool capturingContext = AsyncCallback != null || (_Flags & StateFlags.CaptureContext) != 0;
 
-#if !FEATURE_PAL
             // Peek if we've already completed, but don't fix CompletedSynchronously yet
             // Capture the identity if requested, unless we're going to capture the context anyway, unless
             // capturing the context won't be sufficient.
@@ -373,7 +363,6 @@ namespace System.Net
                 GlobalLog.Print("ContextAwareResult#" + Logging.HashString(this) + "::CaptureOrComplete() starting identity capture");
                 SafeCaptureIdentity();
             }
-#endif
 
             // No need to flow if there's no callback, unless it's been specifically requested.
             // Note that Capture() can return null, for example if SuppressFlow() is in effect.

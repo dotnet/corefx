@@ -59,31 +59,67 @@
     <Compile Include="$(CommonPath)\System\Net\IntPtrHelper.cs">
       <Link>Common\System\Net\IntPtrHelper.cs</Link>
     </Compile>
+
+    <Compile Include="$(CommonPath)\System\Net\IPEndPointStatics.cs">
+      <Link>Common\System\Net\IPEndPointStatics.cs</Link>
+    </Compile>
+
     <Compile Include="$(CommonPath)\System\Net\UriScheme.cs">
       <Link>Common\System\Net\UriScheme.cs</Link>
     </Compile>
 
     <!-- Shims -->
     <Compile Include="RefactoringShims\Socket.cs" />
+
+    <!-- Interop -->
+    <Compile Include="$(CommonPath)\Interop\Windows\Interop.Libraries.cs">
+      <Link>Interop\Windows\Interop.Libraries.cs</Link>
+    </Compile>
+
+    <Compile Include="$(CommonPath)\Interop\Windows\Winsock\AddressInfo.cs">
+      <Link>Interop\Windows\Winsock\AddressInfo.cs</Link>
+    </Compile>
+
+    <Compile Include="$(CommonPath)\Interop\Windows\Winsock\AddressInfoHints.cs">
+      <Link>Interop\Windows\Winsock\AddressInfoHints.cs</Link>
+    </Compile>
+
+    <Compile Include="$(CommonPath)\Interop\Windows\Winsock\hostent.cs">
+      <Link>Interop\Windows\Winsock\hostent.cs</Link>
+    </Compile>
+
+    <Compile Include="$(CommonPath)\Interop\Windows\Winsock\Interop.gethostbyaddr.cs">
+      <Link>Interop\Windows\Winsock\Interop.gethostbyaddr.cs</Link>
+    </Compile>
+
+    <Compile Include="$(CommonPath)\Interop\Windows\Winsock\Interop.gethostbyname.cs">
+      <Link>Interop\Windows\Winsock\Interop.gethostbyname.cs</Link>
+    </Compile>
+
+    <Compile Include="$(CommonPath)\Interop\Windows\Winsock\Interop.gethostname.cs">
+      <Link>Interop\Windows\Winsock\Interop.gethostname.cs</Link>
+    </Compile>
+
+    <Compile Include="$(CommonPath)\Interop\Windows\Winsock\Interop.GetNameInfoW.cs">
+      <Link>Interop\Windows\Winsock\Interop.GetNameInfoW.cs</Link>
+    </Compile>    
+
+    <Compile Include="$(CommonPath)\Interop\Windows\Winsock\NameInfoFlags.cs">
+      <Link>Interop\Windows\Winsock\NameInfoFlags.cs</Link>
+    </Compile>    
+
+    <Compile Include="$(CommonPath)\Interop\Windows\Winsock\ProtocolFamily.cs">
+      <Link>Interop\Windows\Winsock\ProtocolFamily.cs</Link>
+    </Compile>    
+
+    <Compile Include="$(CommonPath)\Interop\Windows\Winsock\SocketType.cs">
+      <Link>Interop\Windows\Winsock\SocketType.cs</Link>
+    </Compile>    
+
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetsWindows)' == 'true' ">
     <!-- TODO -->
-    <Compile Include="$(CommonPath)\Interop\Windows\Winsock\_OSSOCK.cs">
-      <Link>Interop\Windows\Winsock\_OSSOCK.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\Winsock\ProtocolFamily.cs">
-      <Link>Interop\Windows\Winsock\ProtocolFamily.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\Winsock\SocketType.cs">
-      <Link>Interop\Windows\Winsock\SocketType.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\Winsock\Internal.cs">
-      <Link>Interop\Windows\Winsock\Internal.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\Winsock\UnsafeNativeMethods.cs">
-      <Link>Interop\Windows\Winsock\UnsafeNativeMethods.cs</Link>
-    </Compile>
   </ItemGroup>
   <ItemGroup>
     <None Include="project.json" />
