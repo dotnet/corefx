@@ -1033,14 +1033,16 @@ public static class DataContractJsonSerializerTests
     [Fact]
     public static void DCJS_EnumerableCollection()
     {
-        var offsetMinutes = (int)TimeZoneInfo.Local.BaseUtcOffset.TotalMinutes;
-        var timeZoneString = string.Format("{0:+;-}{1}", offsetMinutes, new TimeSpan(0, offsetMinutes, 0).ToString(@"hhmm"));
+        var dates = new DateTime[] {new DateTime(2000, 1, 1), new DateTime(2000, 1, 2), new DateTime(2000, 1, 3)};
         var original = new EnumerableCollection();
-        original.Add(new DateTime(2000, 1, 1).AddMinutes(offsetMinutes));
-        original.Add(new DateTime(2000, 1, 2).AddMinutes(offsetMinutes));
-        original.Add(new DateTime(2000, 1, 3).AddMinutes(offsetMinutes));
-        var actual = SerializeAndDeserialize<EnumerableCollection>(original, string.Format("[\"\\/Date(946684800000{0})\\/\",\"\\/Date(946771200000{0})\\/\",\"\\/Date(946857600000{0})\\/\"]", timeZoneString));
-
+        var timeZoneStrings = new List<string>();
+        foreach (var date in dates)
+        {
+            var offsetMinutes = (int) TimeZoneInfo.Local.GetUtcOffset(date).TotalMinutes;
+            original.Add(date.AddMinutes(offsetMinutes));
+            timeZoneStrings.Add(string.Format("{0:+;-}{1}", offsetMinutes, new TimeSpan(0, offsetMinutes, 0).ToString(@"hhmm")));
+        }
+        var actual = SerializeAndDeserialize<EnumerableCollection>(original, string.Format("[\"\\/Date(946684800000{0})\\/\",\"\\/Date(946771200000{1})\\/\",\"\\/Date(946857600000{2})\\/\"]", timeZoneStrings.ToArray()));
         Assert.Equal((IEnumerable<DateTime>)actual, (IEnumerable<DateTime>)original);
     }
 
@@ -1269,6 +1271,44 @@ public static class DataContractJsonSerializerTests
         Assert.True(input.OnSerializedMethodInvoked, "input.OnSerializedMethodInvoked is false");
         Assert.True(output.OnDeserializingMethodInvoked, "output.OnDeserializingMethodInvoked is false");
         Assert.True(output.OnDeserializedMethodInvoked, "output.OnDeserializedMethodInvoked is false");
+    }
+
+    [Fact]
+    public static void DCJS_DeserializeEmptyString()
+    {
+        var serializer = new DataContractJsonSerializer(typeof (object));
+        Assert.Throws<SerializationException>(() =>
+        {
+            serializer.ReadObject(new MemoryStream());
+        });
+    }
+
+    [Fact]
+    public static void DCJS_UseSimpleDictionaryFormat()
+    {
+        Dictionary<string, string> dict = new Dictionary<string, string>();
+        dict.Add("key1", "value1");
+        dict.Add("key2", "value2");
+        var deserialized = SerializeAndDeserialize(dict, @"{""key1"":""value1"",""key2"":""value2""}",
+            new DataContractJsonSerializerSettings { UseSimpleDictionaryFormat = true });
+        Assert.StrictEqual(2, deserialized.Count);
+        Assert.True(deserialized.ContainsKey("key1"));
+        Assert.True(deserialized.ContainsKey("key2"));
+        Assert.StrictEqual(dict["key1"], deserialized["key1"]);
+        Assert.StrictEqual(dict["key2"], deserialized["key2"]);
+    }
+
+    [Fact]
+    public static void DCJS_DataMemberNames()
+    {
+        var obj = new AppEnvironment()
+        {
+            ScreenDpi = 440,
+            ScreenOrientation = "horizontal"
+        };
+        var actual = SerializeAndDeserialize(obj, @"{""screen_dpi(x:y)"":440,""screen:orientation"":""horizontal""}");
+        Assert.StrictEqual(obj.ScreenDpi, actual.ScreenDpi);
+        Assert.StrictEqual(obj.ScreenOrientation, actual.ScreenOrientation);
     }
 
     private static T SerializeAndDeserialize<T>(T value, string baseline, DataContractJsonSerializerSettings settings = null, Func<DataContractJsonSerializer> serializerFactory = null)

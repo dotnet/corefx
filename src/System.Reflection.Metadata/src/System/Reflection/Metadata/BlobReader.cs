@@ -26,6 +26,7 @@ namespace System.Reflection.Metadata
         public unsafe BlobReader(byte* buffer, int length)
             : this(MemoryBlock.CreateChecked(buffer, length))
         {
+
         }
 
         internal BlobReader(MemoryBlock block)
@@ -112,7 +113,7 @@ namespace System.Reflection.Metadata
         {
             if (!TryAlign(alignment))
             {
-                ThrowOutOfBounds();
+                Throw.OutOfBounds();
             }
         }
 
@@ -147,18 +148,12 @@ namespace System.Reflection.Metadata
 
         #region Bounds Checking
 
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        private static void ThrowOutOfBounds()
-        {
-            throw new BadImageFormatException(MetadataResources.OutOfBoundsRead);
-        }
-
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void CheckBounds(int offset, int byteCount)
         {
             if (unchecked((ulong)(uint)offset + (uint)byteCount) > (ulong)(_endPointer - _currentPointer))
             {
-                ThrowOutOfBounds();
+                Throw.OutOfBounds();
             }
         }
 
@@ -167,7 +162,7 @@ namespace System.Reflection.Metadata
         {
             if (unchecked((uint)byteCount) > (_endPointer - _currentPointer))
             {
-                ThrowOutOfBounds();
+                Throw.OutOfBounds();
             }
         }
 
@@ -178,7 +173,7 @@ namespace System.Reflection.Metadata
 
             if (unchecked((uint)length) > (uint)(_endPointer - p))
             {
-                ThrowOutOfBounds();
+                Throw.OutOfBounds();
             }
 
             _currentPointer = p + length;
@@ -192,7 +187,7 @@ namespace System.Reflection.Metadata
 
             if (p == _endPointer)
             {
-                ThrowOutOfBounds();
+                Throw.OutOfBounds();
             }
 
             _currentPointer = p + 1;
@@ -279,7 +274,7 @@ namespace System.Reflection.Metadata
             byte scale = (byte)(*ptr & 0x7f);
             if (scale > 28)
             {
-                throw new BadImageFormatException(MetadataResources.ValueTooLarge);
+                throw new BadImageFormatException(SR.ValueTooLarge);
             }
 
             return new decimal(
@@ -378,7 +373,7 @@ namespace System.Reflection.Metadata
             int value;
             if (!TryReadCompressedInteger(out value))
             {
-                ThrowInvalidCompressedInteger();
+                Throw.InvalidCompressedInteger();
             }
             return value;
         }
@@ -435,21 +430,9 @@ namespace System.Reflection.Metadata
             int value;
             if (!TryReadCompressedSignedInteger(out value))
             {
-                ThrowInvalidCompressedInteger();
+                Throw.InvalidCompressedInteger();
             }
             return value;
-        }
-
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        private static void ThrowInvalidCompressedInteger()
-        {
-            throw new BadImageFormatException(MetadataResources.InvalidCompressedInteger);
-        }
-
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        private static void ThrowInvalidSerializedString()
-        {
-            throw new BadImageFormatException(MetadataResources.InvalidSerializedString);
         }
 
         /// <summary>
@@ -510,7 +493,7 @@ namespace System.Reflection.Metadata
 
             if (ReadByte() != 0xFF)
             {
-                ThrowInvalidSerializedString();
+                Throw.InvalidSerializedString();
             }
 
             return null;
@@ -611,7 +594,7 @@ namespace System.Reflection.Metadata
                     // Unlike uses of ELEMENT_TYPE_CLASS in signatures, this one is not followed by a type token.
                     if (ReadUInt32() != 0)
                     {
-                        throw new BadImageFormatException(MetadataResources.InvalidConstantValue);
+                        throw new BadImageFormatException(SR.InvalidConstantValue);
                     }
 
                     return null;

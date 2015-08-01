@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <PropertyGroup>
@@ -16,6 +16,9 @@
   <PropertyGroup Condition="'$(TargetsWindows)' == 'true'">
     <!-- The System.Threading.Overlapped contract currently only works on Windows -->
     <DefineConstants>$(DefineConstants);USE_OVERLAPPED</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup>
+    <TargetsBSD Condition="'$(TargetsOSX)' == 'true' or '$(TargetsFreeBSD)' == 'true'">true</TargetsBSD>
   </PropertyGroup>
   <!-- Help VS understand available configurations -->
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'FreeBSD_Debug|AnyCPU' " />
@@ -43,16 +46,22 @@
     <Compile Include="System\IO\ReadLinesIterator.cs" />
     <Compile Include="System\IO\SearchOption.cs" />
     <Compile Include="System\IO\SearchTarget.cs" />
+    <Compile Include="$(CommonPath)\System\Collections\Generic\EnumerableHelpers.cs">
+      <Link>Common\System\Collections\Generic\EnumerableHelpers.cs</Link>
+    </Compile>
     <Compile Include="$(CommonPath)\System\IO\StringBuilderCache.cs">
       <Link>Common\System\IO\StringBuilderCache.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\IO\PathInternal.cs">
+      <Link>Common\System\IO\PathInternal.cs</Link>
     </Compile>
   </ItemGroup>
   <!-- Windows -->
   <ItemGroup Condition="'$(TargetsWindows)' == 'true'">
-    <Compile Include="Common\Helpers.cs" />
     <Compile Include="Microsoft\Win32\SafeHandles\SafeFileHandle.Windows.cs" />
     <Compile Include="Microsoft\Win32\SafeHandles\SafeFindHandle.Windows.cs" />
     <Compile Include="System\IO\FileStream.Win32.cs" />
+    <Compile Include="System\IO\PathHelpers.Windows.cs" />
     <Compile Include="System\IO\Win32FileStream.cs" />
     <Compile Include="System\IO\Win32FileStreamCompletionSource.cs" />
     <Compile Include="System\IO\Win32FileSystem.cs" />
@@ -172,10 +181,18 @@
     <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.MaxLengths.cs">
       <Link>Common\Interop\Windows\Interop.MaxLengths.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.SafeCreateFile.cs">
+      <Link>Common\Interop\Windows\Interop.SafeCreateFile.cs</Link>
+    </Compile>
   </ItemGroup>
   <!-- Windows : Win32 only -->
   <ItemGroup Condition="'$(TargetsWindows)' == 'true' AND '$(EnableWinRT)' != 'true'">
-    <Compile Include="Common\Helpers.Win7.cs" />
+    <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.UnsafeCreateFile.cs">
+      <Link>Common\Interop\Windows\Interop.UnsafeCreateFile.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.CopyFile.cs">
+      <Link>Common\Interop\Windows\Interop.CopyFile.cs</Link>
+    </Compile>
     <Compile Include="System\IO\FileSystem.Current.Win32.cs" />
     <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.CreateFile.cs">
       <Link>Common\Interop\Windows\Interop.CreateFile.cs</Link>
@@ -192,7 +209,18 @@
   </ItemGroup>
   <!-- Windows : Win32 + WinRT -->
   <ItemGroup Condition="'$(TargetsWindows)' == 'true' AND '$(EnableWinRT)' == 'true'">
-    <Compile Include="Common\Helpers.Win8.cs" />
+    <Compile Include="$(CommonPath)\Interop\Windows\mincore\WinRT\Interop.UnsafeCreateFile.cs">
+      <Link>Common\Interop\Windows\WinRT\Interop.UnsafeCreateFile.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\mincore\WinRT\Interop.CopyFile.cs">
+      <Link>Common\Interop\Windows\WinRT\Interop.CopyFile.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\mincore\WinRT\Interop.DeleteVolumeMountPoint.cs">
+      <Link>Common\Interop\Windows\WinRT\Interop.DeleteVolumeMountPoint.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\mincore\WinRT\Interop.SetErrorMode.cs">
+      <Link>Common\Interop\Windows\WinRT\Interop.SetErrorMode.cs</Link>
+    </Compile>
     <Compile Include="System\IO\FileSystem.Current.MuxWin32WinRT.cs" />
     <Compile Include="System\IO\MultiplexingWin32WinRTFileSystem.cs" />
     <Compile Include="System\IO\WinRTIOExtensions.cs" />
@@ -200,10 +228,10 @@
     <Compile Include="System\IO\WinRTFileSystem.cs" />
     <Compile Include="System\IO\WinRTFileSystemObject.cs" />
     <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.CopyFile2.cs">
-      <Link>Common\Interop\Windows\Interop.CopyFile2.cs</Link>
+      <Link>Common\Interop\Windows\WinRT\Interop.CopyFile2.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.CreateFile2.cs">
-      <Link>Common\Interop\Windows\Interop.CreateFile2.cs</Link>
+      <Link>Common\Interop\Windows\WinRT\Interop.CreateFile2.cs</Link>
     </Compile>
   </ItemGroup>
   <!-- Unix -->
@@ -211,6 +239,7 @@
     <Compile Include="Microsoft\Win32\SafeHandles\SafeFileHandle.Unix.cs" />
     <Compile Include="System\IO\FileStream.Unix.cs" />
     <Compile Include="System\IO\FileSystem.Current.Unix.cs" />
+    <Compile Include="System\IO\PathHelpers.Unix.cs" />
     <Compile Include="System\IO\UnixFileStream.cs" />
     <Compile Include="System\IO\UnixFileSystem.cs" />
     <Compile Include="System\IO\UnixFileSystemObject.cs" />
@@ -320,8 +349,8 @@
     <Compile Include="$(CommonPath)\Interop\FreeBSD\Interop.Errors.cs">
       <Link>Common\Interop\FreeBSD\Interop.Errors.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\FreeBSD\libc\Interop.readdir.cs">
-      <Link>Common\Interop\FreeBSD\Interop.readdir.cs</Link>
+    <Compile Include="$(CommonPath)\Interop\FreeBSD\libc\Interop.dirent.cs">
+      <Link>Common\Interop\FreeBSD\Interop.dirent.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\FreeBSD\libc\Interop.OpenFlags.cs">
       <Link>Common\Interop\FreeBSD\Interop.OpenFlags.cs</Link>
@@ -331,6 +360,9 @@
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\libc\Interop.posix_fadvise.cs">
       <Link>Common\Interop\Unix\Interop.posix_fadvise.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\FreeBSD\Interop.Libraries.cs">
+      <Link>Common\Interop\FreeBSD\Interop.Libraries.cs</Link>
     </Compile>
   </ItemGroup>
   <!-- Linux -->
@@ -360,8 +392,8 @@
     <Compile Include="$(CommonPath)\System\IO\PathInternal.CaseInsensitive.cs">
       <Link>Common\System\IO\PathInternal.CaseInsensitive.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\OSX\libc\Interop.readdir.cs">
-      <Link>Common\Interop\OSX\Interop.readdir.cs</Link>
+    <Compile Include="$(CommonPath)\Interop\OSX\libc\Interop.dirent.cs">
+      <Link>Common\Interop\OSX\Interop.dirent.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\OSX\libc\Interop.OpenFlags.cs">
       <Link>Common\Interop\OSX\Interop.OpenFlags.cs</Link>
@@ -371,6 +403,14 @@
     </Compile>
     <Compile Include="$(CommonPath)\Interop\OSX\Interop.Errors.cs">
       <Link>Common\Interop\OSX\Interop.Errors.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\OSX\Interop.Libraries.cs">
+      <Link>Common\Interop\OSX\Interop.Libraries.cs</Link>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetsBSD)' == 'true'">
+    <Compile Include="$(CommonPath)\Interop\BSD\libc\Interop.readdir.cs">
+      <Link>Common\Interop\BSD\Interop.readdir.cs</Link>
     </Compile>
   </ItemGroup>
   <ItemGroup>

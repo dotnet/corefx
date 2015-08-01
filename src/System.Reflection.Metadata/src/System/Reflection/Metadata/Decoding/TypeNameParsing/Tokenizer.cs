@@ -46,12 +46,12 @@ namespace System.Reflection.Metadata.Decoding
             Token token = ReadToken();
             if (token == null)
             {
-                throw FormatException(TypeNameFormatErrorId.DelimiterExpected_EncounteredEndOfString, Strings.TypeFormat_DelimiterExpected_EncounteredEndOfString, (char)expected);
+                throw FormatException(TypeNameFormatErrorId.DelimiterExpected_EncounteredEndOfString, SR.TypeFormat_DelimiterExpected_EncounteredEndOfString, (char)expected);
             }
 
             if (token.TokenType != expected)
             {
-                throw FormatException(TypeNameFormatErrorId.DelimiterExpected, Strings.TypeFormat_DelimiterExpected, (char)expected, token.Value);
+                throw FormatException(TypeNameFormatErrorId.DelimiterExpected, SR.TypeFormat_DelimiterExpected, (char)expected, token.Value);
             }
         }
 
@@ -68,7 +68,7 @@ namespace System.Reflection.Metadata.Decoding
         {
             Token token = ReadToken();
             if (token != null)
-                throw FormatException(TypeNameFormatErrorId.EndOfStringExpected_EncounteredExtraCharacters, Strings.TypeFormat_EndOfStringExpected_EncounteredExtraCharacters, token.Value);
+                throw FormatException(TypeNameFormatErrorId.EndOfStringExpected_EncounteredExtraCharacters, SR.TypeFormat_EndOfStringExpected_EncounteredExtraCharacters, token.Value);
         }
 
         public string ReadId(IdentifierOptions options)
@@ -118,17 +118,17 @@ namespace System.Reflection.Metadata.Decoding
             Token token = ReadToken(ParseOptions.IncludeWhiteSpace);    // Consume token, so "position" is correct
             if (token == null)
             {
-                throw FormatException(TypeNameFormatErrorId.IdExpected_EncounteredEndOfString, Strings.TypeFormat_IdExpected_EncounteredEndOfString);
+                throw FormatException(TypeNameFormatErrorId.IdExpected_EncounteredEndOfString, SR.TypeFormat_IdExpected_EncounteredEndOfString);
             }
 
             // Otherwise, we must have hit a delimiter as whitespace will have been consumed as part of the identifier
-            throw FormatException(TypeNameFormatErrorId.IdExpected_EncounteredDelimiter, Strings.TypeFormat_IdExpected_EncounteredDelimiter, token.Value);
+            throw FormatException(TypeNameFormatErrorId.IdExpected_EncounteredDelimiter, SR.TypeFormat_IdExpected_EncounteredDelimiter, token.Value);
         }
 
         private void CheckIdentifierAfterTrim(IdentifierOptions options, string identifier)
         {
             if (!IsValidIdentifier(options, identifier))
-                throw FormatException(TypeNameFormatErrorId.IdExpected_EncounteredOnlyWhiteSpace, Strings.TypeFormat_IdExpected_EncounteredWhiteSpace);
+                throw FormatException(TypeNameFormatErrorId.IdExpected_EncounteredOnlyWhiteSpace, SR.TypeFormat_IdExpected_EncounteredWhiteSpace);
         }
 
         private bool IsValidIdentifier(IdentifierOptions options, string identifier)
@@ -233,11 +233,11 @@ namespace System.Reflection.Metadata.Decoding
             // Escape sequence must be followed by a delimiter or escape sequence
             token = GetTokenFrom(reader);
             if (token == null)
-                throw FormatException(reader, TypeNameFormatErrorId.EscapedDelimiterExpected_EncounteredEndOfString, Strings.TypeFormat_EscapedDelimiterExpected_EncounteredEndOfString);
+                throw FormatException(reader, TypeNameFormatErrorId.EscapedDelimiterExpected_EncounteredEndOfString, SR.TypeFormat_EscapedDelimiterExpected_EncounteredEndOfString);
 
             // Next delimiter is always considered a literal
             if (!token.IsDelimiter && !token.IsEscapeSequence)
-                throw FormatException(reader, TypeNameFormatErrorId.EscapedDelimiterExpected, Strings.TypeFormat_EscapedDelimiterExpected, token.Value);
+                throw FormatException(reader, TypeNameFormatErrorId.EscapedDelimiterExpected, SR.TypeFormat_EscapedDelimiterExpected, token.Value);
 
             // Treat the next thing as literal
             return Token.Literal(token.Value);
@@ -261,7 +261,7 @@ namespace System.Reflection.Metadata.Decoding
         private static FormatException FormatException(StringReader reader, TypeNameFormatErrorId errorId, string format, params object[] arguments)
         {
             string message = String.Format(CultureInfo.CurrentCulture, format, arguments);
-            string positionMessage = String.Format(CultureInfo.CurrentCulture, Strings.TypeFormat_Position, reader.Position);
+            string positionMessage = String.Format(CultureInfo.CurrentCulture, SR.TypeFormat_Position, reader.Position);
 
             return new TypeNameFormatException(message + " " + positionMessage,
                                                errorId,

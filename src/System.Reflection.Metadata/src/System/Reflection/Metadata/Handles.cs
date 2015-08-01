@@ -182,18 +182,6 @@ namespace System.Reflection.Metadata
             return ((long)(uint)left._value | (long)left._vType << 32).CompareTo((long)(uint)right._value | (long)right._vType << 32);
         }
 
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        internal static void ThrowInvalidCast()
-        {
-            throw new InvalidCastException();
-        }
-
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        internal static void ThrowInvalidCodedIndex()
-        {
-            throw new BadImageFormatException(MetadataResources.InvalidCodedIndex);
-        }
-
         public static readonly ModuleDefinitionHandle ModuleDefinition = new ModuleDefinitionHandle(1);
         public static readonly AssemblyDefinitionHandle AssemblyDefinition = new AssemblyDefinitionHandle(1);
     }
@@ -227,7 +215,7 @@ namespace System.Reflection.Metadata
         {
             if (handle.IsHeapHandle)
             {
-                Handle.ThrowInvalidCast();
+                Throw.InvalidCast();
             }
 
             return new EntityHandle(handle.EntityHandleValue);
@@ -349,7 +337,7 @@ namespace System.Reflection.Metadata
         {
             if (handle.VType != tokenTypeSmall)
             {
-                Handle.ThrowInvalidCast();
+                Throw.InvalidCast();
             }
 
             return new ModuleDefinitionHandle(handle.RowId);
@@ -359,7 +347,7 @@ namespace System.Reflection.Metadata
         {
             if (handle.VType != tokenType)
             {
-                Handle.ThrowInvalidCast();
+                Throw.InvalidCast();
             }
 
             return new ModuleDefinitionHandle(handle.RowId);
@@ -432,7 +420,7 @@ namespace System.Reflection.Metadata
         {
             if (handle.VType != tokenTypeSmall)
             {
-                Handle.ThrowInvalidCast();
+                Throw.InvalidCast();
             }
 
             return new AssemblyDefinitionHandle(handle.RowId);
@@ -442,7 +430,7 @@ namespace System.Reflection.Metadata
         {
             if (handle.VType != tokenType)
             {
-                Handle.ThrowInvalidCast();
+                Throw.InvalidCast();
             }
 
             return new AssemblyDefinitionHandle(handle.RowId);
@@ -515,7 +503,7 @@ namespace System.Reflection.Metadata
         {
             if (handle.VType != tokenTypeSmall)
             {
-                Handle.ThrowInvalidCast();
+                Throw.InvalidCast();
             }
 
             return new InterfaceImplementationHandle(handle.RowId);
@@ -525,7 +513,7 @@ namespace System.Reflection.Metadata
         {
             if (handle.VType != tokenType)
             {
-                Handle.ThrowInvalidCast();
+                Throw.InvalidCast();
             }
 
             return new InterfaceImplementationHandle(handle.RowId);
@@ -598,7 +586,7 @@ namespace System.Reflection.Metadata
         {
             if (handle.VType != tokenTypeSmall)
             {
-                Handle.ThrowInvalidCast();
+                Throw.InvalidCast();
             }
 
             return new MethodDefinitionHandle(handle.RowId);
@@ -608,7 +596,7 @@ namespace System.Reflection.Metadata
         {
             if (handle.VType != tokenType)
             {
-                Handle.ThrowInvalidCast();
+                Throw.InvalidCast();
             }
 
             return new MethodDefinitionHandle(handle.RowId);
@@ -681,7 +669,7 @@ namespace System.Reflection.Metadata
         {
             if (handle.VType != tokenTypeSmall)
             {
-                Handle.ThrowInvalidCast();
+                Throw.InvalidCast();
             }
 
             return new MethodImplementationHandle(handle.RowId);
@@ -691,7 +679,7 @@ namespace System.Reflection.Metadata
         {
             if (handle.VType != tokenType)
             {
-                Handle.ThrowInvalidCast();
+                Throw.InvalidCast();
             }
 
             return new MethodImplementationHandle(handle.RowId);
@@ -764,7 +752,7 @@ namespace System.Reflection.Metadata
         {
             if (handle.VType != tokenTypeSmall)
             {
-                Handle.ThrowInvalidCast();
+                Throw.InvalidCast();
             }
 
             return new MethodSpecificationHandle(handle.RowId);
@@ -774,7 +762,7 @@ namespace System.Reflection.Metadata
         {
             if (handle.VType != tokenType)
             {
-                Handle.ThrowInvalidCast();
+                Throw.InvalidCast();
             }
 
             return new MethodSpecificationHandle(handle.RowId);
@@ -847,7 +835,7 @@ namespace System.Reflection.Metadata
         {
             if (handle.VType != tokenTypeSmall)
             {
-                Handle.ThrowInvalidCast();
+                Throw.InvalidCast();
             }
 
             return new TypeDefinitionHandle(handle.RowId);
@@ -857,7 +845,7 @@ namespace System.Reflection.Metadata
         {
             if (handle.VType != tokenType)
             {
-                Handle.ThrowInvalidCast();
+                Throw.InvalidCast();
             }
 
             return new TypeDefinitionHandle(handle.RowId);
@@ -930,7 +918,7 @@ namespace System.Reflection.Metadata
         {
             if (handle.VType != tokenTypeSmall)
             {
-                Handle.ThrowInvalidCast();
+                Throw.InvalidCast();
             }
 
             return new ExportedTypeHandle(handle.RowId);
@@ -940,7 +928,7 @@ namespace System.Reflection.Metadata
         {
             if (handle.VType != tokenType)
             {
-                Handle.ThrowInvalidCast();
+                Throw.InvalidCast();
             }
 
             return new ExportedTypeHandle(handle.RowId);
@@ -1013,7 +1001,7 @@ namespace System.Reflection.Metadata
         {
             if (handle.VType != tokenTypeSmall)
             {
-                Handle.ThrowInvalidCast();
+                Throw.InvalidCast();
             }
 
             return new TypeReferenceHandle(handle.RowId);
@@ -1023,7 +1011,7 @@ namespace System.Reflection.Metadata
         {
             if (handle.VType != tokenType)
             {
-                Handle.ThrowInvalidCast();
+                Throw.InvalidCast();
             }
 
             return new TypeReferenceHandle(handle.RowId);
@@ -1096,7 +1084,7 @@ namespace System.Reflection.Metadata
         {
             if (handle.VType != tokenTypeSmall)
             {
-                Handle.ThrowInvalidCast();
+                Throw.InvalidCast();
             }
 
             return new TypeSpecificationHandle(handle.RowId);
@@ -1106,7 +1094,7 @@ namespace System.Reflection.Metadata
         {
             if (handle.VType != tokenType)
             {
-                Handle.ThrowInvalidCast();
+                Throw.InvalidCast();
             }
 
             return new TypeSpecificationHandle(handle.RowId);
@@ -1179,7 +1167,7 @@ namespace System.Reflection.Metadata
         {
             if (handle.VType != tokenTypeSmall)
             {
-                Handle.ThrowInvalidCast();
+                Throw.InvalidCast();
             }
 
             return new MemberReferenceHandle(handle.RowId);
@@ -1189,7 +1177,7 @@ namespace System.Reflection.Metadata
         {
             if (handle.VType != tokenType)
             {
-                Handle.ThrowInvalidCast();
+                Throw.InvalidCast();
             }
 
             return new MemberReferenceHandle(handle.RowId);
@@ -1262,7 +1250,7 @@ namespace System.Reflection.Metadata
         {
             if (handle.VType != tokenTypeSmall)
             {
-                Handle.ThrowInvalidCast();
+                Throw.InvalidCast();
             }
 
             return new FieldDefinitionHandle(handle.RowId);
@@ -1272,7 +1260,7 @@ namespace System.Reflection.Metadata
         {
             if (handle.VType != tokenType)
             {
-                Handle.ThrowInvalidCast();
+                Throw.InvalidCast();
             }
 
             return new FieldDefinitionHandle(handle.RowId);
@@ -1345,7 +1333,7 @@ namespace System.Reflection.Metadata
         {
             if (handle.VType != tokenTypeSmall)
             {
-                Handle.ThrowInvalidCast();
+                Throw.InvalidCast();
             }
 
             return new EventDefinitionHandle(handle.RowId);
@@ -1355,7 +1343,7 @@ namespace System.Reflection.Metadata
         {
             if (handle.VType != tokenType)
             {
-                Handle.ThrowInvalidCast();
+                Throw.InvalidCast();
             }
 
             return new EventDefinitionHandle(handle.RowId);
@@ -1428,7 +1416,7 @@ namespace System.Reflection.Metadata
         {
             if (handle.VType != tokenTypeSmall)
             {
-                Handle.ThrowInvalidCast();
+                Throw.InvalidCast();
             }
 
             return new PropertyDefinitionHandle(handle.RowId);
@@ -1438,7 +1426,7 @@ namespace System.Reflection.Metadata
         {
             if (handle.VType != tokenType)
             {
-                Handle.ThrowInvalidCast();
+                Throw.InvalidCast();
             }
 
             return new PropertyDefinitionHandle(handle.RowId);
@@ -1511,7 +1499,7 @@ namespace System.Reflection.Metadata
         {
             if (handle.VType != tokenTypeSmall)
             {
-                Handle.ThrowInvalidCast();
+                Throw.InvalidCast();
             }
 
             return new StandaloneSignatureHandle(handle.RowId);
@@ -1521,7 +1509,7 @@ namespace System.Reflection.Metadata
         {
             if (handle.VType != tokenType)
             {
-                Handle.ThrowInvalidCast();
+                Throw.InvalidCast();
             }
 
             return new StandaloneSignatureHandle(handle.RowId);
@@ -1594,7 +1582,7 @@ namespace System.Reflection.Metadata
         {
             if (handle.VType != tokenTypeSmall)
             {
-                Handle.ThrowInvalidCast();
+                Throw.InvalidCast();
             }
 
             return new ParameterHandle(handle.RowId);
@@ -1604,7 +1592,7 @@ namespace System.Reflection.Metadata
         {
             if (handle.VType != tokenType)
             {
-                Handle.ThrowInvalidCast();
+                Throw.InvalidCast();
             }
 
             return new ParameterHandle(handle.RowId);
@@ -1677,7 +1665,7 @@ namespace System.Reflection.Metadata
         {
             if (handle.VType != tokenTypeSmall)
             {
-                Handle.ThrowInvalidCast();
+                Throw.InvalidCast();
             }
 
             return new GenericParameterHandle(handle.RowId);
@@ -1687,7 +1675,7 @@ namespace System.Reflection.Metadata
         {
             if (handle.VType != tokenType)
             {
-                Handle.ThrowInvalidCast();
+                Throw.InvalidCast();
             }
 
             return new GenericParameterHandle(handle.RowId);
@@ -1760,7 +1748,7 @@ namespace System.Reflection.Metadata
         {
             if (handle.VType != tokenTypeSmall)
             {
-                Handle.ThrowInvalidCast();
+                Throw.InvalidCast();
             }
 
             return new GenericParameterConstraintHandle(handle.RowId);
@@ -1770,7 +1758,7 @@ namespace System.Reflection.Metadata
         {
             if (handle.VType != tokenType)
             {
-                Handle.ThrowInvalidCast();
+                Throw.InvalidCast();
             }
 
             return new GenericParameterConstraintHandle(handle.RowId);
@@ -1843,7 +1831,7 @@ namespace System.Reflection.Metadata
         {
             if (handle.VType != tokenTypeSmall)
             {
-                Handle.ThrowInvalidCast();
+                Throw.InvalidCast();
             }
 
             return new ModuleReferenceHandle(handle.RowId);
@@ -1853,7 +1841,7 @@ namespace System.Reflection.Metadata
         {
             if (handle.VType != tokenType)
             {
-                Handle.ThrowInvalidCast();
+                Throw.InvalidCast();
             }
 
             return new ModuleReferenceHandle(handle.RowId);
@@ -1949,7 +1937,7 @@ namespace System.Reflection.Metadata
         {
             if (handle.Type != tokenTypeSmall)
             {
-                Handle.ThrowInvalidCast();
+                Throw.InvalidCast();
             }
 
             return new AssemblyReferenceHandle(handle.SpecificEntityHandleValue);
@@ -1959,7 +1947,7 @@ namespace System.Reflection.Metadata
         {
             if (handle.Type != tokenType)
             {
-                Handle.ThrowInvalidCast();
+                Throw.InvalidCast();
             }
 
             return new AssemblyReferenceHandle(handle.SpecificHandleValue);
@@ -2044,7 +2032,7 @@ namespace System.Reflection.Metadata
         {
             if (handle.VType != tokenTypeSmall)
             {
-                Handle.ThrowInvalidCast();
+                Throw.InvalidCast();
             }
 
             return new CustomAttributeHandle(handle.RowId);
@@ -2054,7 +2042,7 @@ namespace System.Reflection.Metadata
         {
             if (handle.VType != tokenType)
             {
-                Handle.ThrowInvalidCast();
+                Throw.InvalidCast();
             }
 
             return new CustomAttributeHandle(handle.RowId);
@@ -2127,7 +2115,7 @@ namespace System.Reflection.Metadata
         {
             if (handle.VType != tokenTypeSmall)
             {
-                Handle.ThrowInvalidCast();
+                Throw.InvalidCast();
             }
 
             return new DeclarativeSecurityAttributeHandle(handle.RowId);
@@ -2137,7 +2125,7 @@ namespace System.Reflection.Metadata
         {
             if (handle.VType != tokenType)
             {
-                Handle.ThrowInvalidCast();
+                Throw.InvalidCast();
             }
 
             return new DeclarativeSecurityAttributeHandle(handle.RowId);
@@ -2210,7 +2198,7 @@ namespace System.Reflection.Metadata
         {
             if (handle.VType != tokenTypeSmall)
             {
-                Handle.ThrowInvalidCast();
+                Throw.InvalidCast();
             }
 
             return new ConstantHandle(handle.RowId);
@@ -2220,7 +2208,7 @@ namespace System.Reflection.Metadata
         {
             if (handle.VType != tokenType)
             {
-                Handle.ThrowInvalidCast();
+                Throw.InvalidCast();
             }
 
             return new ConstantHandle(handle.RowId);
@@ -2293,7 +2281,7 @@ namespace System.Reflection.Metadata
         {
             if (handle.VType != tokenTypeSmall)
             {
-                Handle.ThrowInvalidCast();
+                Throw.InvalidCast();
             }
 
             return new ManifestResourceHandle(handle.RowId);
@@ -2303,7 +2291,7 @@ namespace System.Reflection.Metadata
         {
             if (handle.VType != tokenType)
             {
-                Handle.ThrowInvalidCast();
+                Throw.InvalidCast();
             }
 
             return new ManifestResourceHandle(handle.RowId);
@@ -2376,7 +2364,7 @@ namespace System.Reflection.Metadata
         {
             if (handle.VType != tokenTypeSmall)
             {
-                Handle.ThrowInvalidCast();
+                Throw.InvalidCast();
             }
 
             return new AssemblyFileHandle(handle.RowId);
@@ -2386,7 +2374,7 @@ namespace System.Reflection.Metadata
         {
             if (handle.VType != tokenType)
             {
-                Handle.ThrowInvalidCast();
+                Throw.InvalidCast();
             }
 
             return new AssemblyFileHandle(handle.RowId);
@@ -2458,7 +2446,7 @@ namespace System.Reflection.Metadata
         {
             if (handle.VType != HandleType.UserString)
             {
-                Handle.ThrowInvalidCast();
+                Throw.InvalidCast();
             }
 
             return new UserStringHandle(handle.Offset);
@@ -2640,7 +2628,7 @@ namespace System.Reflection.Metadata
         {
             if ((handle.VType & HandleType.StringOrNamespaceMask) != HandleType.String)
             {
-                Handle.ThrowInvalidCast();
+                Throw.InvalidCast();
             }
 
             // V111 10TT -> VTT...
@@ -2713,61 +2701,60 @@ namespace System.Reflection.Metadata
     /// </summary>
     public struct NamespaceDefinitionHandle : IEquatable<NamespaceDefinitionHandle>
     {
-        // At this time, IsVirtual is always false because namespace names come from type definitions 
-        // and type forwarders only, which never get their namespaces projected.
-        // 
-        // For Namespace, the offset is to the null-terminated full name of the 
-        // namespace in the #String heap.
+        // Non-virtual (namespace having at least one type or forwarder of its own) 
+        // heap offset is to the null-terminated full name of the namespace in the 
+        // #String heap.
         //
-        // For SyntheticNamespace, the offset points to the dot-terminated simple name of the namespace
-        // in the #String heap. This is used to represent namespaces that are parents of other namespaces
-        // but no type definitions or forwarders of their own.
+        // Virtual (namespace having child namespaces but no types of its own) 
+        // the virtual index is an auto-incremented value and serves solely to 
+        // create unique values for indexing into the NamespaceCache.
 
         // bits:
-        //     31: IsVirtual (0)
-        // 29..31: type (non-virtual: Namespace, SyntheticNamespace)
+        //     31: IsVirtual
+        // 29..31: 0
         //  0..28: Heap offset or Virtual index
         private readonly uint _value;
 
         private NamespaceDefinitionHandle(uint value)
         {
-            // note: no virtual namespaces allowed
-            Debug.Assert((value & HeapHandleType.TypeMask) == NamespaceHandleType.Namespace ||
-                         (value & HeapHandleType.TypeMask) == NamespaceHandleType.SyntheticNamespace);
-
             _value = value;
         }
 
         internal static NamespaceDefinitionHandle FromFullNameOffset(int stringHeapOffset)
         {
-            return new NamespaceDefinitionHandle(NamespaceHandleType.Namespace | (uint)stringHeapOffset);
+            return new NamespaceDefinitionHandle((uint)stringHeapOffset);
         }
 
-        internal static NamespaceDefinitionHandle FromSimpleNameOffset(int stringHeapOffset)
+        internal static NamespaceDefinitionHandle FromVirtualIndex(uint virtualIndex)
         {
-            return new NamespaceDefinitionHandle(NamespaceHandleType.SyntheticNamespace | (uint)stringHeapOffset);
+            // we arbitrarily disallow 0 virtual index to simplify nil check.
+            Debug.Assert(virtualIndex != 0); 
+
+            if (!HeapHandleType.IsValidHeapOffset(virtualIndex))
+            {
+                // only a pathological assembly would hit this, but it must fit in 29 bits.
+                Throw.TooManySubnamespaces();
+            }
+
+            return new NamespaceDefinitionHandle(TokenTypeIds.VirtualBit | virtualIndex);
         }
 
         public static implicit operator Handle(NamespaceDefinitionHandle handle)
         {
-            // VTT... -> V111 11TT
             return new Handle(
-                (byte)((handle._value & HeapHandleType.VirtualBit) >> 24 | HandleType.Namespace | (handle._value & HeapHandleType.NonVirtualTypeMask) >> 2),
+                (byte)((handle._value & HeapHandleType.VirtualBit) >> 24 | HandleType.Namespace),
                 (int)(handle._value & HeapHandleType.OffsetMask));
         }
 
         public static explicit operator NamespaceDefinitionHandle(Handle handle)
         {
-            // namespaces currently can't be virtual:
-            if ((handle.VType & (HandleType.VirtualBit | HandleType.StringOrNamespaceMask)) != HandleType.Namespace)
+            if ((handle.VType & HandleType.TypeMask) != HandleType.Namespace)
             {
-                Handle.ThrowInvalidCast();
+                Throw.InvalidCast();
             }
 
-            // V111 11TT -> VTT...
             return new NamespaceDefinitionHandle(
-                (handle.VType & HandleType.VirtualBit) << 24 |
-                (handle.VType & HandleType.StringHeapTypeMask) << HeapHandleType.OffsetBitCount |
+                (handle.VType & HandleType.VirtualBit) << TokenTypeIds.RowIdBitCount |
                 (uint)handle.Offset);
         }
 
@@ -2775,8 +2762,7 @@ namespace System.Reflection.Metadata
         {
             get
             {
-                // virtual strings are never nil, so include virtual bit
-                return (_value & (HeapHandleType.VirtualBit | HeapHandleType.OffsetMask)) == 0;
+                return _value == 0;
             }
         }
 
@@ -2791,19 +2777,13 @@ namespace System.Reflection.Metadata
             return (int)(_value & HeapHandleType.OffsetMask);
         }
 
-        internal NamespaceKind NamespaceKind
-        {
-            get { return (NamespaceKind)(_value >> HeapHandleType.OffsetBitCount); }
-        }
-
         internal bool HasFullName
         {
-            get { return NamespaceKind != NamespaceKind.Synthetic; }
+            get { return !IsVirtual; }
         }
 
         internal StringHandle GetFullName()
         {
-            Debug.Assert(!IsVirtual);
             Debug.Assert(HasFullName);
             return StringHandle.FromOffset(GetHeapOffset());
         }
@@ -2902,7 +2882,7 @@ namespace System.Reflection.Metadata
         {
             if ((handle.VType & HandleType.TypeMask) != HandleType.Blob)
             {
-                Handle.ThrowInvalidCast();
+                Throw.InvalidCast();
             }
 
             return new BlobHandle(
@@ -2989,7 +2969,7 @@ namespace System.Reflection.Metadata
         {
             if (handle.VType != HandleType.Guid)
             {
-                Handle.ThrowInvalidCast();
+                Throw.InvalidCast();
             }
 
             return new GuidHandle(handle.Offset);

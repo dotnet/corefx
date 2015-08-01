@@ -229,7 +229,6 @@ namespace System.Diagnostics
         static NtProcessManager()
         {
             s_valueIds = new Dictionary<String, ValueId>();
-            s_valueIds.Add("Handle Count", ValueId.HandleCount);
             s_valueIds.Add("Pool Paged Bytes", ValueId.PoolPagedBytes);
             s_valueIds.Add("Pool Nonpaged Bytes", ValueId.PoolNonpagedBytes);
             s_valueIds.Add("Elapsed Time", ValueId.ElapsedTime);
@@ -678,7 +677,7 @@ namespace System.Diagnostics
                         threadInfo._processId = (int)value;
                         break;
                     case ValueId.ThreadId:
-                        threadInfo._threadId = (int)value;
+                        threadInfo._threadId = (ulong)value;
                         break;
                     case ValueId.BasePriority:
                         threadInfo._basePriority = (int)value;
@@ -741,9 +740,6 @@ namespace System.Diagnostics
                     case ValueId.ProcessId:
                         processInfo.ProcessId = (int)value;
                         break;
-                    case ValueId.HandleCount:
-                        processInfo.HandleCount = (int)value;
-                        break;
                     case ValueId.PoolPagedBytes:
                         processInfo.PoolPagedBytes = value;
                         break;
@@ -802,7 +798,6 @@ namespace System.Diagnostics
         enum ValueId
         {
             Unknown = -1,
-            HandleCount,
             PoolPagedBytes,
             PoolNonpagedBytes,
             ElapsedTime,
@@ -950,7 +945,6 @@ namespace System.Diagnostics
                 ProcessInfo processInfo = new ProcessInfo();
                 // Process ID shouldn't overflow. OS API GetCurrentProcessID returns DWORD.
                 processInfo.ProcessId = pi.UniqueProcessId.ToInt32();
-                processInfo.HandleCount = (int)pi.HandleCount;
                 processInfo.SessionId = (int)pi.SessionId;
                 processInfo.PoolPagedBytes = (long)pi.QuotaPagedPoolUsage; ;
                 processInfo.PoolNonPagedBytes = (long)pi.QuotaNonPagedPoolUsage;
@@ -998,7 +992,7 @@ namespace System.Diagnostics
                     ThreadInfo threadInfo = new ThreadInfo();
 
                     threadInfo._processId = (int)ti.UniqueProcess;
-                    threadInfo._threadId = (int)ti.UniqueThread;
+                    threadInfo._threadId = (ulong)ti.UniqueThread;
                     threadInfo._basePriority = ti.BasePriority;
                     threadInfo._currentPriority = ti.Priority;
                     threadInfo._startAddress = ti.StartAddress;

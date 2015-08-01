@@ -42,7 +42,7 @@ namespace System.Reflection.Metadata
         {
             if (handle.IsVirtual)
             {
-                Handle.ThrowInvalidCast();
+                Throw.InvalidCast();
             }
 
             return FromOffset(handle.GetHeapOffset());

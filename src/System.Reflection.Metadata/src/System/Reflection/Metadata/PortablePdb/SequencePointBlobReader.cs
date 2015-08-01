@@ -166,7 +166,7 @@ namespace System.Reflection.Metadata
             int rowId = _reader.ReadCompressedInteger();
             if (rowId == 0 || !TokenTypeIds.IsValidRowId(rowId))
             {
-                NamespaceCache.ThrowInvalidHandle();
+                Throw.InvalidHandle();
             }
 
             return DocumentHandle.FromRowId(rowId);

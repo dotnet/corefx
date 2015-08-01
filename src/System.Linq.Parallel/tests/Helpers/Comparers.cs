@@ -19,7 +19,7 @@ namespace Test
         }
     }
 
-    internal class ModularCongruenceComparer : IEqualityComparer<int>
+    internal class ModularCongruenceComparer : IEqualityComparer<int>, IComparer<int>
     {
         private int _mod;
 
@@ -47,6 +47,11 @@ namespace Test
         {
             return GetHashCode((int)obj);
         }
+
+        public int Compare(int x, int y)
+        {
+            return leastPositiveResidue(x).CompareTo(leastPositiveResidue(y));
+        }
     }
 
     internal class ReverseComparer : IComparer<int>
@@ -64,6 +69,24 @@ namespace Test
         public int Compare(int x, int y)
         {
             throw new DeliberateTestException();
+        }
+    }
+
+    /// <summary>
+    /// Returns an extreme value from non-equal comparisons.
+    /// </summary>
+    /// <remarks>Helper for regression test against PLINQ's version of #2239 .</remarks>
+    /// <typeparam name="T">The type being compared.</typeparam>
+    internal class ExtremeComparer<T> : IComparer<T>
+    {
+        private IComparer<T> _def = Comparer<T>.Default;
+
+        public int Compare(T x, T y)
+        {
+            int direction = _def.Compare(x, y);
+            return direction == 0 ? 0 :
+                direction > 0 ? int.MaxValue :
+                int.MinValue;
         }
     }
 

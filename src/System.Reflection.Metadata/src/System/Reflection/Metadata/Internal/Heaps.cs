@@ -496,7 +496,7 @@ namespace System.Reflection.Metadata.Ecma335
             int separator = blobReader.ReadByte();
             if (separator > 0x7f)
             {
-                throw new BadImageFormatException(string.Format(MetadataResources.InvalidDocumentName, separator));
+                throw new BadImageFormatException(string.Format(SR.InvalidDocumentName, separator));
             }
 
             var pooledBuilder = PooledStringBuilder.GetInstance();
