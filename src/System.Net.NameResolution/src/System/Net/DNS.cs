@@ -48,7 +48,6 @@ namespace System.Net
             An IPHostEntry structure.
 
         --*/
-
         private static IPHostEntry NativeToHostEntry(IntPtr nativePointer)
         {
             //
@@ -151,28 +150,6 @@ namespace System.Net
 
             return HostEntry;
         } // NativeToHostEntry
-
-        /*****************************************************************************
-         Function :    gethostbyname
-
-         Abstract:     Queries DNS for hostname address
-
-         Input Parameters: str (String to query)
-
-         Returns: Void
-        ******************************************************************************/
-
-        /// <devdoc>
-        /// <para>Retrieves the <see cref='System.Net.IPHostEntry'/>
-        /// information
-        /// corresponding to the DNS name provided in the host
-        /// parameter.</para>
-        /// </devdoc>
-
-        internal static IPHostEntry InternalGetHostByName(string hostName)
-        {
-            return InternalGetHostByName(hostName, true);
-        }
 
         internal static IPHostEntry InternalGetHostByName(string hostName, bool includeIPv6)
         {
@@ -336,7 +313,6 @@ namespace System.Net
             throw exception;
         } // InternalGetHostByAddress
 
-
         /*****************************************************************************
          Function :    gethostname
 
@@ -378,63 +354,6 @@ namespace System.Net
             return sb.ToString();
         }
 
-
-        /*****************************************************************************
-         Function :    resolve
-
-         Abstract:     Converts IP/hostnames to IP numerical address using DNS
-                       Additional methods provided for convenience
-                       (These methods will resolve strings and hostnames. In case of
-                       multiple IP addresses, the address returned is chosen arbitrarily.)
-
-         Input Parameters: host/IP
-
-         Returns: IPAddress
-        ******************************************************************************/
-
-        /// <devdoc>
-        /// <para>Creates an <see cref='System.Net.IPAddress'/>
-        /// instance from a DNS hostname.</para>
-        /// </devdoc>
-        [Obsolete("Resolve is obsoleted for this type, please use GetHostEntry instead. http://go.microsoft.com/fwlink/?linkid=14202")]
-        public static IPHostEntry Resolve(string hostName)
-        {
-            if (Logging.On) Logging.Enter(Logging.Sockets, "DNS", "Resolve", hostName);
-
-            if (hostName == null)
-            {
-                throw new ArgumentNullException("hostName");
-            }
-
-            // See if it's an IP Address.
-            IPAddress address;
-            IPHostEntry ipHostEntry;
-
-            // Everett Compat (#497786).
-            // Everett.Resolve() returns the IPv6 address, even when IPv6 is off.  Everett.GetHostByAddress() throws.  So
-            // if IPv6 is off and they passed one in, call InternalGetHostByName which (also for compat) just returns it.
-            if (IPAddress.TryParse(hostName, out address) && (address.AddressFamily != AddressFamily.InterNetworkV6 || Socket.LegacySupportsIPv6))
-            {
-                try
-                {
-                    ipHostEntry = InternalGetHostByAddress(address, false);
-                }
-                catch (SocketException ex)
-                {
-                    if (Logging.On) Logging.PrintWarning(Logging.Sockets, "DNS", "DNS.Resolve", ex.Message);
-
-                    ipHostEntry = GetUnresolveAnswer(address);
-                }
-            }
-            else
-            {
-                ipHostEntry = InternalGetHostByName(hostName, false);
-            }
-
-            if (Logging.On) Logging.Exit(Logging.Sockets, "DNS", "Resolve", ipHostEntry);
-            return ipHostEntry;
-        }
-
         private static IPHostEntry GetUnresolveAnswer(IPAddress address)
         {
             IPHostEntry ipHostEntry = new IPHostEntry();
@@ -442,98 +361,6 @@ namespace System.Net
             ipHostEntry.Aliases = Array.Empty<string>();
             ipHostEntry.AddressList = new IPAddress[] { address };
             return ipHostEntry;
-        }
-
-        // Returns true if the resolution was successful. IPAddresses are not resolved, but return immediately.
-        // Resolving String.Empty is not supported for security reasons, this would return localhost IPs.
-        //
-        // Exceptions are not thrown for performance reasons.  The resulting message would never reach the user.
-        //
-        // On Win7 SP1+ this also attempts to determine if the host 
-        // name was changed by DNS and should not be trusted as an SPN.
-        internal static bool TryInternalResolve(string hostName, out IPHostEntry result)
-        {
-            if (Logging.On) Logging.Enter(Logging.Sockets, "DNS", "TryInternalResolve", hostName);
-
-            if (string.IsNullOrEmpty(hostName) || hostName.Length > MaxHostName)
-            {
-                result = null;
-                return false;
-            }
-
-            IPAddress address;
-            if (IPAddress.TryParse(hostName, out address))
-            {
-                GlobalLog.Print("Dns::InternalResolveFast() returned address:" + address.ToString());
-                result = GetUnresolveAnswer(address); // Do not do reverse lookups on IPAddresses.
-                return true;
-            }
-
-            IPHostEntry canonicalResult;
-            if (SocketError.Success != TryGetAddrInfo(hostName, AddressInfoHints.AI_CANONNAME, out canonicalResult))
-            {
-                result = null;
-                return false;
-            }
-
-            result = canonicalResult;
-
-            // CBT. If the SPN came from an untrusted source, we should tell the server by setting this flag
-            // SPNs are trusted if:
-            //  - They are manually configured by the user
-            //  - DNSSEC was used (but there is no way for us to find out about this)
-            //  - DNS didn't modify the host name (CNAMEs, Flat -> FQDNs, etc)
-
-            // Trusted if the resulting name the same as the input.
-            if (CompareHosts(hostName, canonicalResult.HostName))
-            {
-                return true; // Trusted
-            }
-
-            // AI_FQDN returns the FQDN that was used for resolution, rather than the name that the server returned.
-            // This helps us detect if CNAME aliases were traversed.
-            IPHostEntry fqdnResult;
-            if (SocketError.Success != TryGetAddrInfo(hostName, AddressInfoHints.AI_FQDN, out fqdnResult))
-            {
-                // This shouldn't have failed, the result should have been cached already.  Assume trusted.
-                return true;
-            }
-
-            // Trusted if the resulting FQDN matches the resulting CANONNAME.
-            if (CompareHosts(canonicalResult.HostName, fqdnResult.HostName))
-            {
-                return true; // Trusted
-            }
-
-            // Not trusted because the DNS result was different from the input.
-            canonicalResult.isTrustedHost = false;
-            return true;
-        }
-
-        private static bool CompareHosts(string host1, string host2)
-        {
-            // Normalize and compare
-            string normalizedHost1, normalizedHost2;
-            if (TryNormalizeHost(host1, out normalizedHost1))
-            {
-                if (TryNormalizeHost(host2, out normalizedHost2))
-                {
-                    return normalizedHost1.Equals(normalizedHost2, StringComparison.OrdinalIgnoreCase);
-                }
-            }
-            return host1.Equals(host2, StringComparison.OrdinalIgnoreCase);
-        }
-
-        private static bool TryNormalizeHost(string host, out string result)
-        {
-            Uri uri;
-            if (Uri.TryCreate(UriScheme.Http + UriScheme.SchemeDelimiter + host, UriKind.Absolute, out uri))
-            {
-                result = uri.GetComponents(UriComponents.NormalizedHost, UriFormat.SafeUnescaped);
-                return true;
-            }
-            result = null;
-            return false;
         }
 
         private class ResolveAsyncResult : ContextAwareResult
@@ -586,7 +413,6 @@ namespace System.Net
             result.InvokeCallback(hostEntry);
         }
 
-
         // Helpers for async GetHostByName, ResolveToAddresses, and Resolve - they're almost identical
         // If hostName is an IPString and justReturnParsedIP==true then no reverse lookup will be attempted, but the orriginal address is returned.
         private static IAsyncResult HostResolutionBeginHelper(string hostName, bool justReturnParsedIp, bool flowContext, bool includeIPv6, bool throwOnIPAny, AsyncCallback requestCallback, object state)
@@ -638,7 +464,6 @@ namespace System.Net
             return asyncResult;
         }
 
-
         private static IAsyncResult HostResolutionBeginHelper(IPAddress address, bool flowContext, bool includeIPv6, AsyncCallback requestCallback, object state)
         {
             if (address == null)
@@ -667,7 +492,6 @@ namespace System.Net
             asyncResult.FinishPostingAsyncOp();
             return asyncResult;
         }
-
 
         private static IPHostEntry HostResolutionEndHelper(IAsyncResult asyncResult)
         {
@@ -702,61 +526,7 @@ namespace System.Net
             return (IPHostEntry)castedResult.Result;
         }
 
-        //***********************************************************************
-        //*************   New Whidbey Apis  *************************************
-        //***********************************************************************
-        public static IPHostEntry GetHostEntry(string hostNameOrAddress)
-        {
-            if (Logging.On) Logging.Enter(Logging.Sockets, "DNS", "GetHostEntry", hostNameOrAddress);
-
-            if (hostNameOrAddress == null)
-            {
-                throw new ArgumentNullException("hostNameOrAddress");
-            }
-
-            // See if it's an IP Address.
-            IPAddress address;
-            IPHostEntry ipHostEntry;
-            if (IPAddress.TryParse(hostNameOrAddress, out address))
-            {
-                if (address.Equals(IPAddress.Any) || address.Equals(IPAddress.IPv6Any))
-                {
-                    throw new ArgumentException(SR.net_invalid_ip_addr, "hostNameOrAddress");
-                }
-
-                ipHostEntry = InternalGetHostByAddress(address, true);
-            }
-            else
-            {
-                ipHostEntry = InternalGetHostByName(hostNameOrAddress, true);
-            }
-
-            if (Logging.On) Logging.Exit(Logging.Sockets, "DNS", "GetHostEntry", ipHostEntry);
-            return ipHostEntry;
-        }
-
-
-        public static IPHostEntry GetHostEntry(IPAddress address)
-        {
-            if (Logging.On) Logging.Enter(Logging.Sockets, "DNS", "GetHostEntry", "");
-
-            if (address == null)
-            {
-                throw new ArgumentNullException("address");
-            }
-
-            if (address.Equals(IPAddress.Any) || address.Equals(IPAddress.IPv6Any))
-            {
-                throw new ArgumentException(SR.net_invalid_ip_addr, "address");
-            }
-
-            IPHostEntry ipHostEntry = InternalGetHostByAddress(address, true);
-            if (Logging.On) Logging.Exit(Logging.Sockets, "DNS", "GetHostEntry", ipHostEntry);
-            return ipHostEntry;
-        } // GetHostByAddress
-
-
-
+        // TODO: Used by Ping, Socket and TCPClient
         public static IPAddress[] GetHostAddresses(string hostNameOrAddress)
         {
             if (Logging.On) Logging.Enter(Logging.Sockets, "DNS", "GetHostAddresses", hostNameOrAddress);
@@ -788,7 +558,6 @@ namespace System.Net
             return addresses;
         }
 
-
         public static IAsyncResult BeginGetHostEntry(string hostNameOrAddress, AsyncCallback requestCallback, object stateObject)
         {
             if (Logging.On) Logging.Enter(Logging.Sockets, "DNS", "BeginGetHostEntry", hostNameOrAddress);
@@ -798,8 +567,6 @@ namespace System.Net
             if (Logging.On) Logging.Exit(Logging.Sockets, "DNS", "BeginGetHostEntry", asyncResult);
             return asyncResult;
         } // BeginResolve
-
-
 
         public static IAsyncResult BeginGetHostEntry(IPAddress address, AsyncCallback requestCallback, object stateObject)
         {
@@ -811,7 +578,6 @@ namespace System.Net
             return asyncResult;
         } // BeginResolve
 
-
         public static IPHostEntry EndGetHostEntry(IAsyncResult asyncResult)
         {
             if (Logging.On) Logging.Enter(Logging.Sockets, "DNS", "EndGetHostEntry", asyncResult);
@@ -821,7 +587,6 @@ namespace System.Net
             if (Logging.On) Logging.Exit(Logging.Sockets, "DNS", "EndGetHostEntry", ipHostEntry);
             return ipHostEntry;
         } // EndResolve()
-
 
         public static IAsyncResult BeginGetHostAddresses(string hostNameOrAddress, AsyncCallback requestCallback, object state)
         {
@@ -833,7 +598,6 @@ namespace System.Net
             return asyncResult;
         } // BeginResolve
 
-
         public static IPAddress[] EndGetHostAddresses(IAsyncResult asyncResult)
         {
             if (Logging.On) Logging.Enter(Logging.Sockets, "DNS", "EndGetHostAddresses", asyncResult);
@@ -844,7 +608,7 @@ namespace System.Net
             return ipHostEntry.AddressList;
         } // EndResolveToAddresses
 
-
+        // TODO: Used by Socket.BeginConnect
         internal static IAsyncResult UnsafeBeginGetHostAddresses(string hostName, AsyncCallback requestCallback, object state)
         {
             if (Logging.On) Logging.Enter(Logging.Sockets, "DNS", "UnsafeBeginGetHostAddresses", hostName);
@@ -870,7 +634,6 @@ namespace System.Net
         {
             return Task<IPHostEntry>.Factory.FromAsync(BeginGetHostEntry, EndGetHostEntry, hostNameOrAddress, null);
         }
-
 
         private unsafe static IPHostEntry GetAddrInfo(string name)
         {
