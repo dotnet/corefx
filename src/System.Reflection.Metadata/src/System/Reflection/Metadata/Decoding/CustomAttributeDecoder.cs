@@ -356,11 +356,11 @@ namespace System.Reflection.Metadata.Decoding
             {
                 case HandleKind.TypeDefinition:
                     TypeDefinitionHandle typeDefHandle = (TypeDefinitionHandle)typeRefOrDefHandle;
-                    return provider.GetTypeFromDefinition(typeDefHandle);
+                    return provider.GetTypeFromDefinition(typeDefHandle, null);
 
                 case HandleKind.TypeReference:
                     TypeReferenceHandle typeRefHandle = (TypeReferenceHandle)typeRefOrDefHandle;
-                    return provider.GetTypeFromReference(typeRefHandle);
+                    return provider.GetTypeFromReference(typeRefHandle, null);
 
                 default:
                     throw new BadImageFormatException();
