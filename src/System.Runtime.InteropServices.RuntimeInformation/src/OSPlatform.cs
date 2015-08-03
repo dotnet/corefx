@@ -17,6 +17,14 @@ namespace System.Runtime.InteropServices
         private static readonly OSPlatform s_osx = new OSPlatform(OSXName);
         private static readonly OSPlatform s_windows = new OSPlatform(WindowsName);
 
+        public static OSPlatform FreeBSD
+        {
+            get
+            {
+                return s_freebsd;
+            }
+        }
+
         public static OSPlatform Linux
         {
             get

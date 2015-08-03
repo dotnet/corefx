@@ -8,6 +8,21 @@ namespace System.Runtime.InteropServices.RuntimeInformationTests
 {
     public class CheckPlatformTests
     {
+        [Fact, PlatformSpecific(PlatformID.FreeBSD)]
+        public void CheckFreeBSD()
+        {
+            Assert.True(RuntimeInformation.IsOSPlatform(OSPlatform.FreeBSD));
+            Assert.True(RuntimeInformation.IsOSPlatform(OSPlatform.Create("FREEBSD")));
+
+            Assert.False(RuntimeInformation.IsOSPlatform(OSPlatform.Linux));
+            Assert.False(RuntimeInformation.IsOSPlatform(OSPlatform.Create("linux")));
+            Assert.False(RuntimeInformation.IsOSPlatform(OSPlatform.Create("UNIX")));
+            Assert.False(RuntimeInformation.IsOSPlatform(OSPlatform.Create("DARWIN")));
+            Assert.False(RuntimeInformation.IsOSPlatform(OSPlatform.Create("ubuntu")));
+            Assert.False(RuntimeInformation.IsOSPlatform(OSPlatform.Windows));
+            Assert.False(RuntimeInformation.IsOSPlatform(OSPlatform.OSX));
+        }
+
         [Fact, PlatformSpecific(PlatformID.Linux)]
         public void CheckLinux()
         {
