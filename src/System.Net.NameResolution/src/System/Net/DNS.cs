@@ -181,7 +181,7 @@ namespace System.Net
             //               decision). This is done to minimize the number of
             //               possible tests that are needed.
             //
-            if (Socket.LegacySupportsIPv6 || includeIPv6)
+            if (Socket.OSSupportsIPv6|| includeIPv6)
             {
                 //
                 // IPv6 enabled: use getaddrinfo() to obtain DNS information.
@@ -235,7 +235,7 @@ namespace System.Net
 
             SocketError errorCode = SocketError.Success;
             Exception exception = null;
-            if (Socket.LegacySupportsIPv6 || includeIPv6)
+            if (Socket.OSSupportsIPv6 || includeIPv6)
             {
                 //
                 // Try to get the data for the host from it's address
@@ -288,7 +288,10 @@ namespace System.Net
                 //
                 // End IPv6 Changes
                 //
-                int addressAsInt = unchecked((int)address.m_Address);
+
+                // TODO: Optimize this (or decide if this legacy code can be removed):
+                byte [] addressBytes = address.GetAddressBytes();
+                int addressAsInt = BitConverter.ToInt32(addressBytes, 0);
 
 #if BIGENDIAN
                 addressAsInt = (int)(((uint)addressAsInt << 24) | (((uint)addressAsInt & 0x0000FF00) << 8) |
@@ -715,7 +718,7 @@ namespace System.Net
                         //
                         for (int d = 0; d < pAddressInfo->ai_addrlen; d++)
                         {
-                            sockaddr.m_Buffer[d] = *(pAddressInfo->ai_addr + d);
+                            sockaddr[d] = *(pAddressInfo->ai_addr + d);
                         }
                         //
                         // NOTE: We need an IPAddress now, the only way to create it from a
@@ -770,10 +773,18 @@ namespace System.Net
             int flags = (int)NameInfoFlags.NI_NAMEREQD;
 
             Socket.InitializeSockets();
+
+            // TODO: Remove the copying step to improve performance. This requires a change in the contracts.
+            byte[] addressBuffer = new byte[address.Size];
+            for (int i = 0; i < address.Size; i++)
+            {
+                addressBuffer[i] = address[i];
+            }
+            
             errorCode =
                 Interop.Winsock.GetNameInfoW(
-                    address.m_Buffer,
-                    address.m_Size,
+                    addressBuffer,
+                    address.Size,
                     hostname,
                     hostname.Capacity,
                     null, // We don't want a service name
