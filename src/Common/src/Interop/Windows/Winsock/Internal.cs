@@ -103,16 +103,6 @@ namespace System.Net.Sockets
         public int[] ErrorCodes;
     }
 
-    //
-    // Structure used in select() call, taken from the BSD file sys/time.h.
-    //
-    [StructLayout(LayoutKind.Sequential)]
-    internal struct TimeValue
-    {
-        public int Seconds;  // seconds
-        public int Microseconds; // and microseconds
-    } // struct TimeValue
-
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
     internal struct hostent
     {

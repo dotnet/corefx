@@ -19,7 +19,7 @@ namespace System.Net.Sockets
         //
         // internal class members
         //
-        private UnsafeSocketsNativeMethods.OSSOCK.WSAMsg* _message;
+        private Interop.Winsock.WSAMsg* _message;
         internal SocketAddress SocketAddressOriginal;
         internal SocketAddress m_SocketAddress;
         private WSABuffer* _WSABuffer;
@@ -28,10 +28,10 @@ namespace System.Net.Sockets
         internal byte[] m_MessageBuffer;
         internal SocketFlags m_flags;
 
-        private static readonly int s_ControlDataSize = Marshal.SizeOf<UnsafeSocketsNativeMethods.OSSOCK.ControlData>();
-        private static readonly int s_ControlDataIPv6Size = Marshal.SizeOf<UnsafeSocketsNativeMethods.OSSOCK.ControlDataIPv6>();
+        private static readonly int s_ControlDataSize = Marshal.SizeOf<Interop.Winsock.ControlData>();
+        private static readonly int s_ControlDataIPv6Size = Marshal.SizeOf<Interop.Winsock.ControlDataIPv6>();
         private static readonly int s_WSABufferSize = Marshal.SizeOf<WSABuffer>();
-        private static readonly int s_WSAMsgSize = Marshal.SizeOf<UnsafeSocketsNativeMethods.OSSOCK.WSAMsg>();
+        private static readonly int s_WSAMsgSize = Marshal.SizeOf<Interop.Winsock.WSAMsg>();
 
         internal IPPacketInformation m_IPPacketInformation;
 
@@ -117,7 +117,7 @@ namespace System.Net.Sockets
 
 
             //setup structure
-            _message = (UnsafeSocketsNativeMethods.OSSOCK.WSAMsg*)Marshal.UnsafeAddrOfPinnedArrayElement(m_MessageBuffer, 0);
+            _message = (Interop.Winsock.WSAMsg*)Marshal.UnsafeAddrOfPinnedArrayElement(m_MessageBuffer, 0);
             _message->socketAddress = Marshal.UnsafeAddrOfPinnedArrayElement(m_SocketAddress.m_Buffer, 0);
             _message->addressLength = (uint)m_SocketAddress.Size;
             _message->buffers = Marshal.UnsafeAddrOfPinnedArrayElement(_WSABufferArray, 0);
@@ -139,7 +139,7 @@ namespace System.Net.Sockets
             //ipv4
             if (_controlBuffer.Length == s_ControlDataSize)
             {
-                UnsafeSocketsNativeMethods.OSSOCK.ControlData controlData = Marshal.PtrToStructure<UnsafeSocketsNativeMethods.OSSOCK.ControlData>(_message->controlBuffer.Pointer);
+                Interop.Winsock.ControlData controlData = Marshal.PtrToStructure<Interop.Winsock.ControlData>(_message->controlBuffer.Pointer);
                 if (controlData.length != UIntPtr.Zero)
                 {
                     address = new IPAddress((long)controlData.address);
@@ -149,7 +149,7 @@ namespace System.Net.Sockets
             //ipv6
             else if (_controlBuffer.Length == s_ControlDataIPv6Size)
             {
-                UnsafeSocketsNativeMethods.OSSOCK.ControlDataIPv6 controlData = Marshal.PtrToStructure<UnsafeSocketsNativeMethods.OSSOCK.ControlDataIPv6>(_message->controlBuffer.Pointer);
+                Interop.Winsock.ControlDataIPv6 controlData = Marshal.PtrToStructure<Interop.Winsock.ControlDataIPv6>(_message->controlBuffer.Pointer);
                 if (controlData.length != UIntPtr.Zero)
                 {
                     address = new IPAddress(controlData.address);

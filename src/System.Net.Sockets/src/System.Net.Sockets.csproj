@@ -71,6 +71,9 @@
     <Compile Include="$(CommonPath)\System\Net\DebugSafeHandle.cs">
       <Link>Common\System\Net\DebugSafeHandle.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\System\Net\DebugSafeHandleMinusOneIsInvalid.cs">
+      <Link>Common\System\Net\DebugSafeHandleMinusOneIsInvalid.cs</Link>
+    </Compile>
 
     <!-- System.Net common -->
     <Compile Include="$(CommonPath)\System\Net\_ContextAwareResult.cs">
@@ -85,9 +88,16 @@
     <Compile Include="$(CommonPath)\System\Net\Shims\DBNull.cs">
       <Link>Common\System\Net\Shims\DBNull.cs</Link>
     </Compile>
+    
+    <Compile Include="$(CommonPath)\System\Net\_BufferOffsetSize.cs">
+      <Link>Common\System\Net\_ContextAwareResult.cs</Link>
+    </Compile>
 
     <Compile Include="$(CommonPath)\Microsoft\Win32\SafeHandles\SafeHandleZeroOrMinusOneIsInvalid.cs">
       <Link>Common\Microsoft\Win32\SafeHandles\SafeHandleZeroOrMinusOneIsInvalid.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Microsoft\Win32\SafeHandles\SafeHandleMinusOneIsInvalid.cs">
+      <Link>Common\Microsoft\Win32\SafeHandles\SafeHandleMinusOneIsInvalid.cs</Link>
     </Compile>
 
     <!-- Interop -->
@@ -116,6 +126,14 @@
     </Compile>    
     <Compile Include="$(CommonPath)\Interop\Windows\mincore_obsolete\Interop.LocalAlloc.SafeOverlappedFree.cs">
       <Link>Interop\Windows\mincore_obsolete\Interop.LocalAlloc.SafeOverlappedFree.cs</Link>
+    </Compile>    
+
+    <Compile Include="$(CommonPath)\Interop\Windows\Winsock\TimeValue.cs">
+      <Link>Interop\Windows\Winsock\TimeValue.cs</Link>
+    </Compile>    
+
+    <Compile Include="$(CommonPath)\Interop\Windows\Winsock\WSABuffer.cs">
+      <Link>Interop\Windows\Winsock\WSABuffer.cs</Link>
     </Compile>    
 
   </ItemGroup>

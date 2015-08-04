@@ -25,13 +25,6 @@ namespace System.Net.Sockets
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    internal struct WSABuffer
-    {
-        internal int Length; // Length of Buffer
-        internal IntPtr Pointer;// Pointer to Buffer
-    }
-
-    [StructLayout(LayoutKind.Sequential)]
     internal class TransmitFileBuffers
     {
         internal IntPtr preBuffer;// Pointer to Buffer

@@ -85,7 +85,7 @@ namespace System.Net.Sockets
         private int _closeTimeout = Socket.DefaultCloseTimeout;
         private int _intCleanedUp;                 // 0 if not completed >0 otherwise.
         private const int microcnv = 1000000;
-        private readonly static int s_protocolInformationSize = Marshal.SizeOf<UnsafeSocketsNativeMethods.OSSOCK.WSAPROTOCOL_INFO>();
+        private readonly static int s_protocolInformationSize = Marshal.SizeOf<Interop.Winsock.WSAPROTOCOL_INFO>();
 
         internal static volatile bool s_SupportsIPv4;
         internal static volatile bool s_SupportsIPv6;
@@ -150,8 +150,8 @@ namespace System.Net.Sockets
                 {
                     _handle = SafeCloseSocket.CreateWSASocket(pinnedBuffer);
 
-                    UnsafeSocketsNativeMethods.OSSOCK.WSAPROTOCOL_INFO protocolInfo =
-                        (UnsafeSocketsNativeMethods.OSSOCK.WSAPROTOCOL_INFO)Marshal.PtrToStructure<UnsafeSocketsNativeMethods.OSSOCK.WSAPROTOCOL_INFO>((IntPtr)pinnedBuffer);
+                    Interop.Winsock.WSAPROTOCOL_INFO protocolInfo =
+                        (Interop.Winsock.WSAPROTOCOL_INFO)Marshal.PtrToStructure<Interop.Winsock.WSAPROTOCOL_INFO>((IntPtr)pinnedBuffer);
 
                     _addressFamily = protocolInfo.iAddressFamily;
                     _socketType = (SocketType)protocolInfo.iSocketType;
@@ -204,7 +204,7 @@ namespace System.Net.Sockets
                 SocketError errorCode;
                 try
                 {
-                    errorCode = UnsafeSocketsNativeMethods.OSSOCK.getsockname(
+                    errorCode = Interop.Winsock.getsockname(
                         _handle,
                         socketAddress.m_Buffer,
                         ref socketAddress.m_Size);
@@ -314,12 +314,12 @@ namespace System.Net.Sockets
                 int argp = 0;
 
                 // This may throw ObjectDisposedException.
-                SocketError errorCode = UnsafeSocketsNativeMethods.OSSOCK.ioctlsocket(
+                SocketError errorCode = Interop.Winsock.ioctlsocket(
                     _handle,
                     IoctlSocketConstants.FIONREAD,
                     ref argp);
 
-                GlobalLog.Print("Socket#" + Logging.HashString(this) + "::Available_get() UnsafeSocketsNativeMethods.OSSOCK.ioctlsocket returns errorCode:" + errorCode);
+                GlobalLog.Print("Socket#" + Logging.HashString(this) + "::Available_get() Interop.Winsock.ioctlsocket returns errorCode:" + errorCode);
 
                 //
                 // if the native call fails we'll throw a SocketException
@@ -369,7 +369,7 @@ namespace System.Net.Sockets
                 SocketAddress socketAddress = m_RightEndPoint.Serialize();
 
                 // This may throw ObjectDisposedException.
-                SocketError errorCode = UnsafeSocketsNativeMethods.OSSOCK.getsockname(
+                SocketError errorCode = Interop.Winsock.getsockname(
                     _handle,
                     socketAddress.m_Buffer,
                     ref socketAddress.m_Size);
@@ -421,7 +421,7 @@ namespace System.Net.Sockets
                     SocketAddress socketAddress = m_RightEndPoint.Serialize();
 
                     // This may throw ObjectDisposedException.
-                    SocketError errorCode = UnsafeSocketsNativeMethods.OSSOCK.getpeername(
+                    SocketError errorCode = Interop.Winsock.getpeername(
                         _handle,
                         socketAddress.m_Buffer,
                         ref socketAddress.m_Size);
@@ -937,7 +937,7 @@ namespace System.Net.Sockets
             }
 
             // This may throw ObjectDisposedException.
-            SocketError errorCode = UnsafeSocketsNativeMethods.OSSOCK.bind(
+            SocketError errorCode = Interop.Winsock.bind(
                 _handle,
                 socketAddress.m_Buffer,
                 socketAddress.m_Size);
@@ -945,7 +945,7 @@ namespace System.Net.Sockets
 #if TRAVE
             try
             {
-                GlobalLog.Print("Socket#" + Logging.HashString(this) + "::Bind() SRC:" + Logging.ObjectToString(LocalEndPoint) + " UnsafeSocketsNativeMethods.OSSOCK.bind returns errorCode:" + errorCode);
+                GlobalLog.Print("Socket#" + Logging.HashString(this) + "::Bind() SRC:" + Logging.ObjectToString(LocalEndPoint) + " Interop.Winsock.bind returns errorCode:" + errorCode);
             }
             catch (ObjectDisposedException) { }
 #endif
@@ -1168,14 +1168,14 @@ namespace System.Net.Sockets
             // the verification is done for Bind
 
             // This may throw ObjectDisposedException.
-            SocketError errorCode = UnsafeSocketsNativeMethods.OSSOCK.listen(
+            SocketError errorCode = Interop.Winsock.listen(
                 _handle,
                 backlog);
 
 #if TRAVE
             try
             {
-                GlobalLog.Print("Socket#" + Logging.HashString(this) + "::Listen() SRC:" + Logging.ObjectToString(LocalEndPoint) + " UnsafeSocketsNativeMethods.OSSOCK.listen returns errorCode:" + errorCode);
+                GlobalLog.Print("Socket#" + Logging.HashString(this) + "::Listen() SRC:" + Logging.ObjectToString(LocalEndPoint) + " Interop.Winsock.listen returns errorCode:" + errorCode);
             }
             catch (ObjectDisposedException) { }
 #endif
@@ -1353,7 +1353,7 @@ namespace System.Net.Sockets
                 }
 
                 // This may throw ObjectDisposedException.
-                errorCode = UnsafeSocketsNativeMethods.OSSOCK.WSASend_Blocking(
+                errorCode = Interop.Winsock.WSASend_Blocking(
                     _handle.DangerousGetHandle(),
                     WSABuffers,
                     count,
@@ -1370,7 +1370,7 @@ namespace System.Net.Sockets
 #if TRAVE
                 try
                 {
-                    GlobalLog.Print("Socket#" + Logging.HashString(this) + "::Send() SRC:" + Logging.ObjectToString(LocalEndPoint) + " DST:" + Logging.ObjectToString(RemoteEndPoint) + " UnsafeSocketsNativeMethods.OSSOCK.send returns errorCode:" + errorCode + " bytesTransferred:" + bytesTransferred);
+                    GlobalLog.Print("Socket#" + Logging.HashString(this) + "::Send() SRC:" + Logging.ObjectToString(LocalEndPoint) + " DST:" + Logging.ObjectToString(RemoteEndPoint) + " Interop.Winsock.send returns errorCode:" + errorCode + " bytesTransferred:" + bytesTransferred);
                 }
                 catch (ObjectDisposedException) { }
 #endif
@@ -1462,12 +1462,12 @@ namespace System.Net.Sockets
             unsafe
             {
                 if (buffer.Length == 0)
-                    bytesTransferred = UnsafeSocketsNativeMethods.OSSOCK.send(_handle.DangerousGetHandle(), null, 0, socketFlags);
+                    bytesTransferred = Interop.Winsock.send(_handle.DangerousGetHandle(), null, 0, socketFlags);
                 else
                 {
                     fixed (byte* pinnedBuffer = buffer)
                     {
-                        bytesTransferred = UnsafeSocketsNativeMethods.OSSOCK.send(
+                        bytesTransferred = Interop.Winsock.send(
                                         _handle.DangerousGetHandle(),
                                         pinnedBuffer + offset,
                                         size,
@@ -1508,7 +1508,7 @@ namespace System.Net.Sockets
             }
 #endif //!FEATURE_PAL
 
-            GlobalLog.Print("Socket#" + Logging.HashString(this) + "::Send() UnsafeSocketsNativeMethods.OSSOCK.send returns:" + bytesTransferred.ToString());
+            GlobalLog.Print("Socket#" + Logging.HashString(this) + "::Send() Interop.Winsock.send returns:" + bytesTransferred.ToString());
             GlobalLog.Dump(buffer, offset, bytesTransferred);
             if (s_LoggingEnabled) Logging.Dump(Logging.Sockets, this, "Send", buffer, offset, size);
             if (s_LoggingEnabled) Logging.Exit(Logging.Sockets, this, "Send", bytesTransferred);
@@ -1559,7 +1559,7 @@ namespace System.Net.Sockets
             {
                 if (buffer.Length == 0)
                 {
-                    bytesTransferred = UnsafeSocketsNativeMethods.OSSOCK.sendto(
+                    bytesTransferred = Interop.Winsock.sendto(
                         _handle.DangerousGetHandle(),
                         null,
                         0,
@@ -1571,7 +1571,7 @@ namespace System.Net.Sockets
                 {
                     fixed (byte* pinnedBuffer = buffer)
                     {
-                        bytesTransferred = UnsafeSocketsNativeMethods.OSSOCK.sendto(
+                        bytesTransferred = Interop.Winsock.sendto(
                             _handle.DangerousGetHandle(),
                             pinnedBuffer + offset,
                             size,
@@ -1723,12 +1723,12 @@ namespace System.Net.Sockets
             {
                 if (buffer.Length == 0)
                 {
-                    bytesTransferred = UnsafeSocketsNativeMethods.OSSOCK.recv(_handle.DangerousGetHandle(), null, 0, socketFlags);
+                    bytesTransferred = Interop.Winsock.recv(_handle.DangerousGetHandle(), null, 0, socketFlags);
                 }
                 else
                     fixed (byte* pinnedBuffer = buffer)
                     {
-                        bytesTransferred = UnsafeSocketsNativeMethods.OSSOCK.recv(_handle.DangerousGetHandle(), pinnedBuffer + offset, size, socketFlags);
+                        bytesTransferred = Interop.Winsock.recv(_handle.DangerousGetHandle(), pinnedBuffer + offset, size, socketFlags);
                     }
             }
 
@@ -1837,7 +1837,7 @@ namespace System.Net.Sockets
                 }
 
                 // This can throw ObjectDisposedException.
-                errorCode = UnsafeSocketsNativeMethods.OSSOCK.WSARecv_Blocking(
+                errorCode = Interop.Winsock.WSARecv_Blocking(
                     _handle.DangerousGetHandle(),
                     WSABuffers,
                     count,
@@ -1853,7 +1853,7 @@ namespace System.Net.Sockets
 #if TRAVE
                 try
                 {
-                    GlobalLog.Print("Socket#" + Logging.HashString(this) + "::Receive() SRC:" + Logging.ObjectToString(LocalEndPoint) + " DST:" + Logging.ObjectToString(RemoteEndPoint) + " UnsafeSocketsNativeMethods.OSSOCK.send returns errorCode:" + errorCode + " bytesTransferred:" + bytesTransferred);
+                    GlobalLog.Print("Socket#" + Logging.HashString(this) + "::Receive() SRC:" + Logging.ObjectToString(LocalEndPoint) + " DST:" + Logging.ObjectToString(RemoteEndPoint) + " Interop.Winsock.send returns errorCode:" + errorCode + " bytesTransferred:" + bytesTransferred);
                 }
                 catch (ObjectDisposedException) { }
 #endif
@@ -2085,11 +2085,11 @@ namespace System.Net.Sockets
             unsafe
             {
                 if (buffer.Length == 0)
-                    bytesTransferred = UnsafeSocketsNativeMethods.OSSOCK.recvfrom(_handle.DangerousGetHandle(), null, 0, socketFlags, socketAddress.m_Buffer, ref socketAddress.m_Size);
+                    bytesTransferred = Interop.Winsock.recvfrom(_handle.DangerousGetHandle(), null, 0, socketFlags, socketAddress.m_Buffer, ref socketAddress.m_Size);
                 else
                     fixed (byte* pinnedBuffer = buffer)
                     {
-                        bytesTransferred = UnsafeSocketsNativeMethods.OSSOCK.recvfrom(_handle.DangerousGetHandle(), pinnedBuffer + offset, size, socketFlags, socketAddress.m_Buffer, ref socketAddress.m_Size);
+                        bytesTransferred = Interop.Winsock.recvfrom(_handle.DangerousGetHandle(), pinnedBuffer + offset, size, socketFlags, socketAddress.m_Buffer, ref socketAddress.m_Size);
                     }
             }
 
@@ -2193,7 +2193,7 @@ namespace System.Net.Sockets
             int realOptionLength = 0;
 
             // This can throw ObjectDisposedException.
-            SocketError errorCode = UnsafeSocketsNativeMethods.OSSOCK.WSAIoctl_Blocking(
+            SocketError errorCode = Interop.Winsock.WSAIoctl_Blocking(
                 _handle.DangerousGetHandle(),
                 ioControlCode,
                 optionInValue,
@@ -2204,7 +2204,7 @@ namespace System.Net.Sockets
                 SafeNativeOverlapped.Zero,
                 IntPtr.Zero);
 
-            GlobalLog.Print("Socket#" + Logging.HashString(this) + "::IOControl() UnsafeSocketsNativeMethods.OSSOCK.WSAIoctl returns errorCode:" + errorCode);
+            GlobalLog.Print("Socket#" + Logging.HashString(this) + "::IOControl() Interop.Winsock.WSAIoctl returns errorCode:" + errorCode);
 
             //
             // if the native call fails we'll throw a SocketException
@@ -2249,7 +2249,7 @@ namespace System.Net.Sockets
             int realOptionLength = 0;
 
             // This can throw ObjectDisposedException.
-            SocketError errorCode = UnsafeSocketsNativeMethods.OSSOCK.WSAIoctl_Blocking_Internal(
+            SocketError errorCode = Interop.Winsock.WSAIoctl_Blocking_Internal(
                 _handle.DangerousGetHandle(),
                 (uint)ioControlCode,
                 optionInValue,
@@ -2260,7 +2260,7 @@ namespace System.Net.Sockets
                 SafeNativeOverlapped.Zero,
                 IntPtr.Zero);
 
-            GlobalLog.Print("Socket#" + Logging.HashString(this) + "::IOControl() UnsafeSocketsNativeMethods.OSSOCK.WSAIoctl returns errorCode:" + errorCode);
+            GlobalLog.Print("Socket#" + Logging.HashString(this) + "::IOControl() Interop.Winsock.WSAIoctl returns errorCode:" + errorCode);
 
             //
             // if the native call fails we'll throw a SocketException
@@ -2331,14 +2331,14 @@ namespace System.Net.Sockets
             GlobalLog.Print("Socket#" + Logging.HashString(this) + "::SetSocketOption(): optionLevel:" + optionLevel.ToString() + " optionName:" + optionName.ToString() + " optionValue:" + optionValue.ToString());
 
             // This can throw ObjectDisposedException.
-            SocketError errorCode = UnsafeSocketsNativeMethods.OSSOCK.setsockopt(
+            SocketError errorCode = Interop.Winsock.setsockopt(
                 _handle,
                 optionLevel,
                 optionName,
                 optionValue,
                 optionValue != null ? optionValue.Length : 0);
 
-            GlobalLog.Print("Socket#" + Logging.HashString(this) + "::SetSocketOption() UnsafeSocketsNativeMethods.OSSOCK.setsockopt returns errorCode:" + errorCode);
+            GlobalLog.Print("Socket#" + Logging.HashString(this) + "::SetSocketOption() Interop.Winsock.setsockopt returns errorCode:" + errorCode);
 
             //
             // if the native call fails we'll throw a SocketException
@@ -2457,14 +2457,14 @@ namespace System.Net.Sockets
                 int optionLength = 4;
 
                 // This can throw ObjectDisposedException.
-                SocketError errorCode = UnsafeSocketsNativeMethods.OSSOCK.getsockopt(
+                SocketError errorCode = Interop.Winsock.getsockopt(
                     _handle,
                     optionLevel,
                     optionName,
                     out optionValue,
                     ref optionLength);
 
-                GlobalLog.Print("Socket#" + Logging.HashString(this) + "::GetSocketOption() UnsafeSocketsNativeMethods.OSSOCK.getsockopt returns errorCode:" + errorCode);
+                GlobalLog.Print("Socket#" + Logging.HashString(this) + "::GetSocketOption() Interop.Winsock.getsockopt returns errorCode:" + errorCode);
 
                 //
                 // if the native call fails we'll throw a SocketException
@@ -2497,14 +2497,14 @@ namespace System.Net.Sockets
             int optionLength = optionValue != null ? optionValue.Length : 0;
 
             // This can throw ObjectDisposedException.
-            SocketError errorCode = UnsafeSocketsNativeMethods.OSSOCK.getsockopt(
+            SocketError errorCode = Interop.Winsock.getsockopt(
                 _handle,
                 optionLevel,
                 optionName,
                 optionValue,
                 ref optionLength);
 
-            GlobalLog.Print("Socket#" + Logging.HashString(this) + "::GetSocketOption() UnsafeSocketsNativeMethods.OSSOCK.getsockopt returns errorCode:" + errorCode);
+            GlobalLog.Print("Socket#" + Logging.HashString(this) + "::GetSocketOption() Interop.Winsock.getsockopt returns errorCode:" + errorCode);
 
             //
             // if the native call fails we'll throw a SocketException
@@ -2535,14 +2535,14 @@ namespace System.Net.Sockets
             int realOptionLength = optionLength;
 
             // This can throw ObjectDisposedException.
-            SocketError errorCode = UnsafeSocketsNativeMethods.OSSOCK.getsockopt(
+            SocketError errorCode = Interop.Winsock.getsockopt(
                 _handle,
                 optionLevel,
                 optionName,
                 optionValue,
                 ref realOptionLength);
 
-            GlobalLog.Print("Socket#" + Logging.HashString(this) + "::GetSocketOption() UnsafeSocketsNativeMethods.OSSOCK.getsockopt returns errorCode:" + errorCode);
+            GlobalLog.Print("Socket#" + Logging.HashString(this) + "::GetSocketOption() Interop.Winsock.getsockopt returns errorCode:" + errorCode);
 
             //
             // if the native call fails we'll throw a SocketException
@@ -2592,7 +2592,7 @@ namespace System.Net.Sockets
             {
                 MicrosecondsToTimeValue((long)(uint)microSeconds, ref IOwait);
                 socketCount =
-                    UnsafeSocketsNativeMethods.OSSOCK.select(
+                    Interop.Winsock.select(
                         0,
                         mode == SelectMode.SelectRead ? fileDescriptorSet : null,
                         mode == SelectMode.SelectWrite ? fileDescriptorSet : null,
@@ -2602,14 +2602,14 @@ namespace System.Net.Sockets
             else
             {
                 socketCount =
-                    UnsafeSocketsNativeMethods.OSSOCK.select(
+                    Interop.Winsock.select(
                         0,
                         mode == SelectMode.SelectRead ? fileDescriptorSet : null,
                         mode == SelectMode.SelectWrite ? fileDescriptorSet : null,
                         mode == SelectMode.SelectError ? fileDescriptorSet : null,
                         IntPtr.Zero);
             }
-            GlobalLog.Print("Socket#" + Logging.HashString(this) + "::Poll() UnsafeSocketsNativeMethods.OSSOCK.select returns socketCount:" + socketCount);
+            GlobalLog.Print("Socket#" + Logging.HashString(this) + "::Poll() Interop.Winsock.select returns socketCount:" + socketCount);
 
             //
             // if the native call fails we'll throw a SocketException
@@ -2678,7 +2678,7 @@ namespace System.Net.Sockets
                 MicrosecondsToTimeValue((long)(uint)microSeconds, ref IOwait);
 
                 socketCount =
-                    UnsafeSocketsNativeMethods.OSSOCK.select(
+                    Interop.Winsock.select(
                         0, // ignored value
                         readfileDescriptorSet,
                         writefileDescriptorSet,
@@ -2688,7 +2688,7 @@ namespace System.Net.Sockets
             else
             {
                 socketCount =
-                    UnsafeSocketsNativeMethods.OSSOCK.select(
+                    Interop.Winsock.select(
                         0, // ignored value
                         readfileDescriptorSet,
                         writefileDescriptorSet,
@@ -2696,7 +2696,7 @@ namespace System.Net.Sockets
                         IntPtr.Zero);
             }
 
-            GlobalLog.Print("Socket::Select() UnsafeSocketsNativeMethods.OSSOCK.select returns socketCount:" + socketCount);
+            GlobalLog.Print("Socket::Select() Interop.Winsock.select returns socketCount:" + socketCount);
 
             //
             // if the native call fails we'll throw a SocketException
@@ -2787,7 +2787,7 @@ namespace System.Net.Sockets
             {
                 fixed (byte* pinnedBuffer = info.ProtocolInformation)
                 {
-                    errorCode = (SocketError)UnsafeSocketsNativeMethods.OSSOCK.WSADuplicateSocket(_handle, (uint)targetProcessId, pinnedBuffer);
+                    errorCode = (SocketError)Interop.Winsock.WSADuplicateSocket(_handle, (uint)targetProcessId, pinnedBuffer);
                 }
             }
 #else
@@ -2987,7 +2987,7 @@ namespace System.Net.Sockets
                 m_RemoteEndPoint = null;
             }
 
-            GlobalLog.Print("Socket#" + Logging.HashString(this) + "::DoBeginDisconnect() UnsafeSocketsNativeMethods.OSSOCK.DisConnectEx returns:" + errorCode.ToString());
+            GlobalLog.Print("Socket#" + Logging.HashString(this) + "::DoBeginDisconnect() Interop.Winsock.DisConnectEx returns:" + errorCode.ToString());
 
             // if the asynchronous native call fails synchronously
             // we'll throw a SocketException
@@ -3033,7 +3033,7 @@ namespace System.Net.Sockets
                 errorCode = (SocketError)Marshal.GetLastWin32Error();
             }
 
-            GlobalLog.Print("Socket#" + Logging.HashString(this) + "::Disconnect() UnsafeSocketsNativeMethods.OSSOCK.DisConnectEx returns:" + errorCode.ToString());
+            GlobalLog.Print("Socket#" + Logging.HashString(this) + "::Disconnect() Interop.Winsock.DisConnectEx returns:" + errorCode.ToString());
 
 
             if (errorCode != SocketError.Success)
@@ -3327,7 +3327,7 @@ namespace System.Net.Sockets
                 int bytesTransferred;
 
                 // This can throw ObjectDisposedException.
-                errorCode = UnsafeSocketsNativeMethods.OSSOCK.WSASend(
+                errorCode = Interop.Winsock.WSASend(
                     _handle,
                     ref asyncResult.m_SingleBuffer,
                     1, // only ever 1 buffer being sent
@@ -3340,7 +3340,7 @@ namespace System.Net.Sockets
                 {
                     errorCode = (SocketError)Marshal.GetLastWin32Error();
                 }
-                GlobalLog.Print("Socket#" + Logging.HashString(this) + "::BeginSend() UnsafeSocketsNativeMethods.OSSOCK.WSASend returns:" + errorCode.ToString() + " size:" + size.ToString() + " returning AsyncResult:" + Logging.HashString(asyncResult));
+                GlobalLog.Print("Socket#" + Logging.HashString(this) + "::BeginSend() Interop.Winsock.WSASend returns:" + errorCode.ToString() + " size:" + size.ToString() + " returning AsyncResult:" + Logging.HashString(asyncResult));
             }
             finally
             {
@@ -3432,7 +3432,7 @@ namespace System.Net.Sockets
 
                 // This can throw ObjectDisposedException.
                 int bytesTransferred;
-                errorCode = UnsafeSocketsNativeMethods.OSSOCK.WSASend(
+                errorCode = Interop.Winsock.WSASend(
                     _handle,
                     asyncResult.m_WSABuffers,
                     asyncResult.m_WSABuffers.Length,
@@ -3445,7 +3445,7 @@ namespace System.Net.Sockets
                 {
                     errorCode = (SocketError)Marshal.GetLastWin32Error();
                 }
-                GlobalLog.Print("Socket#" + Logging.HashString(this) + "::BeginSend() UnsafeSocketsNativeMethods.OSSOCK.WSASend returns:" + errorCode.ToString() + " returning AsyncResult:" + Logging.HashString(asyncResult));
+                GlobalLog.Print("Socket#" + Logging.HashString(this) + "::BeginSend() Interop.Winsock.WSASend returns:" + errorCode.ToString() + " returning AsyncResult:" + Logging.HashString(asyncResult));
             }
             finally
             {
@@ -3646,7 +3646,7 @@ namespace System.Net.Sockets
                 }
 
                 int bytesTransferred;
-                errorCode = UnsafeSocketsNativeMethods.OSSOCK.WSASendTo(
+                errorCode = Interop.Winsock.WSASendTo(
                     _handle,
                     ref asyncResult.m_SingleBuffer,
                     1, // only ever 1 buffer being sent
@@ -3661,7 +3661,7 @@ namespace System.Net.Sockets
                 {
                     errorCode = (SocketError)Marshal.GetLastWin32Error();
                 }
-                GlobalLog.Print("Socket#" + Logging.HashString(this) + "::DoBeginSendTo() UnsafeSocketsNativeMethods.OSSOCK.WSASend returns:" + errorCode.ToString() + " size:" + size + " returning AsyncResult:" + Logging.HashString(asyncResult));
+                GlobalLog.Print("Socket#" + Logging.HashString(this) + "::DoBeginSendTo() Interop.Winsock.WSASend returns:" + errorCode.ToString() + " size:" + size + " returning AsyncResult:" + Logging.HashString(asyncResult));
             }
             catch (ObjectDisposedException)
             {
@@ -3888,7 +3888,7 @@ namespace System.Net.Sockets
 
                 // This can throw ObjectDisposedException.
                 int bytesTransferred;
-                errorCode = UnsafeSocketsNativeMethods.OSSOCK.WSARecv(
+                errorCode = Interop.Winsock.WSARecv(
                     _handle,
                     ref asyncResult.m_SingleBuffer,
                     1,
@@ -3902,7 +3902,7 @@ namespace System.Net.Sockets
                     errorCode = (SocketError)Marshal.GetLastWin32Error();
                     GlobalLog.Assert(errorCode != SocketError.Success, "Socket#{0}::DoBeginReceive()|GetLastWin32Error() returned zero.", Logging.HashString(this));
                 }
-                GlobalLog.Print("Socket#" + Logging.HashString(this) + "::BeginReceive() UnsafeSocketsNativeMethods.OSSOCK.WSARecv returns:" + errorCode.ToString() + " bytesTransferred:" + bytesTransferred.ToString() + " returning AsyncResult:" + Logging.HashString(asyncResult));
+                GlobalLog.Print("Socket#" + Logging.HashString(this) + "::BeginReceive() Interop.Winsock.WSARecv returns:" + errorCode.ToString() + " bytesTransferred:" + bytesTransferred.ToString() + " returning AsyncResult:" + Logging.HashString(asyncResult));
             }
             finally
             {
@@ -4004,7 +4004,7 @@ namespace System.Net.Sockets
 
                 // This can throw ObjectDisposedException.
                 int bytesTransferred;
-                errorCode = UnsafeSocketsNativeMethods.OSSOCK.WSARecv(
+                errorCode = Interop.Winsock.WSARecv(
                     _handle,
                     asyncResult.m_WSABuffers,
                     asyncResult.m_WSABuffers.Length,
@@ -4018,7 +4018,7 @@ namespace System.Net.Sockets
                     errorCode = (SocketError)Marshal.GetLastWin32Error();
                     GlobalLog.Assert(errorCode != SocketError.Success, "Socket#{0}::DoBeginReceive()|GetLastWin32Error() returned zero.", Logging.HashString(this));
                 }
-                GlobalLog.Print("Socket#" + Logging.HashString(this) + "::DoBeginReceive() UnsafeSocketsNativeMethods.OSSOCK.WSARecv returns:" + errorCode.ToString() + " returning AsyncResult:" + Logging.HashString(asyncResult));
+                GlobalLog.Print("Socket#" + Logging.HashString(this) + "::DoBeginReceive() Interop.Winsock.WSARecv returns:" + errorCode.ToString() + " returning AsyncResult:" + Logging.HashString(asyncResult));
             }
             finally
             {
@@ -4242,7 +4242,7 @@ namespace System.Net.Sockets
                     }
                 }
 
-                GlobalLog.Print("Socket#" + Logging.HashString(this) + "::BeginReceiveMessageFrom() UnsafeSocketsNativeMethods.OSSOCK.WSARecvMsg returns:" + errorCode.ToString() + " size:" + size.ToString() + " returning AsyncResult:" + Logging.HashString(asyncResult));
+                GlobalLog.Print("Socket#" + Logging.HashString(this) + "::BeginReceiveMessageFrom() Interop.Winsock.WSARecvMsg returns:" + errorCode.ToString() + " size:" + size.ToString() + " returning AsyncResult:" + Logging.HashString(asyncResult));
             }
             catch (ObjectDisposedException)
             {
@@ -4495,7 +4495,7 @@ namespace System.Net.Sockets
                 }
 
                 int bytesTransferred;
-                errorCode = UnsafeSocketsNativeMethods.OSSOCK.WSARecvFrom(
+                errorCode = Interop.Winsock.WSARecvFrom(
                     _handle,
                     ref asyncResult.m_SingleBuffer,
                     1,
@@ -4510,7 +4510,7 @@ namespace System.Net.Sockets
                 {
                     errorCode = (SocketError)Marshal.GetLastWin32Error();
                 }
-                GlobalLog.Print("Socket#" + Logging.HashString(this) + "::DoBeginReceiveFrom() UnsafeSocketsNativeMethods.OSSOCK.WSARecvFrom returns:" + errorCode.ToString() + " size:" + size.ToString() + " returning AsyncResult:" + Logging.HashString(asyncResult));
+                GlobalLog.Print("Socket#" + Logging.HashString(this) + "::DoBeginReceiveFrom() Interop.Winsock.WSARecvFrom returns:" + errorCode.ToString() + " size:" + size.ToString() + " returning AsyncResult:" + Logging.HashString(asyncResult));
             }
             catch (ObjectDisposedException)
             {
@@ -4821,7 +4821,7 @@ namespace System.Net.Sockets
             }
             errorCode = asyncResult.CheckAsyncCallOverlappedResult(errorCode);
 
-            GlobalLog.Print("Socket#" + Logging.HashString(this) + "::DoBeginAccept() UnsafeSocketsNativeMethods.OSSOCK.AcceptEx returns:" + errorCode.ToString() + Logging.HashString(asyncResult));
+            GlobalLog.Print("Socket#" + Logging.HashString(this) + "::DoBeginAccept() Interop.Winsock.AcceptEx returns:" + errorCode.ToString() + Logging.HashString(asyncResult));
 
             //
             // if the asynchronous native call fails synchronously
@@ -5032,14 +5032,14 @@ namespace System.Net.Sockets
             GlobalLog.Print("Socket#" + Logging.HashString(this) + "::Shutdown() how:" + how.ToString());
 
             // This can throw ObjectDisposedException.
-            SocketError errorCode = UnsafeSocketsNativeMethods.OSSOCK.shutdown(_handle, (int)how);
+            SocketError errorCode = Interop.Winsock.shutdown(_handle, (int)how);
 
             //
             // if the native call fails we'll throw a SocketException
             //
             errorCode = errorCode != SocketError.SocketError ? SocketError.Success : (SocketError)Marshal.GetLastWin32Error();
 
-            GlobalLog.Print("Socket#" + Logging.HashString(this) + "::Shutdown() UnsafeSocketsNativeMethods.OSSOCK.shutdown returns errorCode:" + errorCode);
+            GlobalLog.Print("Socket#" + Logging.HashString(this) + "::Shutdown() Interop.Winsock.shutdown returns errorCode:" + errorCode);
 
             //
             // skip good cases: success, socket already closed
@@ -5454,7 +5454,7 @@ namespace System.Net.Sockets
                 if (e.m_Buffer != null)
                 {
                     // Single buffer case
-                    socketError = UnsafeSocketsNativeMethods.OSSOCK.WSARecv(
+                    socketError = Interop.Winsock.WSARecv(
                         _handle,
                         ref e.m_WSABuffer,
                         1,
@@ -5466,7 +5466,7 @@ namespace System.Net.Sockets
                 else
                 {
                     // Multi buffer case
-                    socketError = UnsafeSocketsNativeMethods.OSSOCK.WSARecv(
+                    socketError = Interop.Winsock.WSARecv(
                         _handle,
                         e.m_WSABufferArray,
                         e.m_WSABufferArray.Length,
@@ -5560,7 +5560,7 @@ namespace System.Net.Sockets
             {
                 if (e.m_Buffer != null)
                 {
-                    socketError = UnsafeSocketsNativeMethods.OSSOCK.WSARecvFrom(
+                    socketError = Interop.Winsock.WSARecvFrom(
                                     _handle,
                                     ref e.m_WSABuffer,
                                     1,
@@ -5573,7 +5573,7 @@ namespace System.Net.Sockets
                 }
                 else
                 {
-                    socketError = UnsafeSocketsNativeMethods.OSSOCK.WSARecvFrom(
+                    socketError = Interop.Winsock.WSARecvFrom(
                                     _handle,
                                     e.m_WSABufferArray,
                                     e.m_WSABufferArray.Length,
@@ -5740,7 +5740,7 @@ namespace System.Net.Sockets
                 if (e.m_Buffer != null)
                 {
                     // Single buffer case
-                    socketError = UnsafeSocketsNativeMethods.OSSOCK.WSASend(
+                    socketError = Interop.Winsock.WSASend(
                         _handle,
                         ref e.m_WSABuffer,
                         1,
@@ -5752,7 +5752,7 @@ namespace System.Net.Sockets
                 else
                 {
                     // Multi buffer case
-                    socketError = UnsafeSocketsNativeMethods.OSSOCK.WSASend(
+                    socketError = Interop.Winsock.WSASend(
                         _handle,
                         e.m_WSABufferArray,
                         e.m_WSABufferArray.Length,
@@ -5931,7 +5931,7 @@ namespace System.Net.Sockets
                 if (e.m_Buffer != null)
                 {
                     // Single buffer case
-                    socketError = UnsafeSocketsNativeMethods.OSSOCK.WSASendTo(
+                    socketError = Interop.Winsock.WSASendTo(
                                     _handle,
                                     ref e.m_WSABuffer,
                                     1,
@@ -5944,7 +5944,7 @@ namespace System.Net.Sockets
                 }
                 else
                 {
-                    socketError = UnsafeSocketsNativeMethods.OSSOCK.WSASendTo(
+                    socketError = Interop.Winsock.WSASendTo(
                                     _handle,
                                     e.m_WSABufferArray,
                                     e.m_WSABufferArray.Length,
@@ -6263,7 +6263,7 @@ namespace System.Net.Sockets
                         WSAData wsaData = new WSAData();
 
                         SocketError errorCode =
-                            UnsafeSocketsNativeMethods.OSSOCK.WSAStartup(
+                            Interop.Winsock.WSAStartup(
                                 (short)0x0202, // we need 2.2
                                 out wsaData);
 
@@ -6294,7 +6294,7 @@ namespace System.Net.Sockets
                         bool ipv6 = true;
 
                         SafeCloseSocket.InnerSafeCloseSocket socketV4 =
-                                                             UnsafeSocketsNativeMethods.OSSOCK.WSASocketW(
+                                                             Interop.Winsock.WSASocketW(
                                                                     AddressFamily.InterNetwork,
                                                                     SocketType.Dgram,
                                                                     ProtocolType.IP,
@@ -6311,7 +6311,7 @@ namespace System.Net.Sockets
                         socketV4.Dispose();
 
                         SafeCloseSocket.InnerSafeCloseSocket socketV6 =
-                                                             UnsafeSocketsNativeMethods.OSSOCK.WSASocketW(
+                                                             Interop.Winsock.WSASocketW(
                                                                     AddressFamily.InterNetworkV6,
                                                                     SocketType.Dgram,
                                                                     ProtocolType.IP,
@@ -6383,7 +6383,7 @@ namespace System.Net.Sockets
             if (s_LoggingEnabled) Logging.Enter(Logging.Sockets, this, "Connect", endPointSnapshot);
 
             // This can throw ObjectDisposedException.
-            SocketError errorCode = UnsafeSocketsNativeMethods.OSSOCK.WSAConnect(
+            SocketError errorCode = Interop.Winsock.WSAConnect(
                 _handle.DangerousGetHandle(),
                 socketAddress.m_Buffer,
                 socketAddress.m_Size,
@@ -6395,7 +6395,7 @@ namespace System.Net.Sockets
 #if TRAVE
             try
             {
-                GlobalLog.Print("Socket#" + Logging.HashString(this) + "::InternalConnect() SRC:" + Logging.ObjectToString(LocalEndPoint) + " DST:" + Logging.ObjectToString(RemoteEndPoint) + " UnsafeSocketsNativeMethods.OSSOCK.WSAConnect returns errorCode:" + errorCode);
+                GlobalLog.Print("Socket#" + Logging.HashString(this) + "::InternalConnect() SRC:" + Logging.ObjectToString(LocalEndPoint) + " DST:" + Logging.ObjectToString(RemoteEndPoint) + " Interop.Winsock.WSAConnect returns errorCode:" + errorCode);
             }
             catch (ObjectDisposedException) { }
 #endif
@@ -6493,7 +6493,7 @@ namespace System.Net.Sockets
                     if (!_willBlock || !_willBlockInternal)
                     {
                         int nonBlockCmd = 0;
-                        errorCode = UnsafeSocketsNativeMethods.OSSOCK.ioctlsocket(
+                        errorCode = Interop.Winsock.ioctlsocket(
                             _handle,
                             IoctlSocketConstants.FIONBIO,
                             ref nonBlockCmd);
@@ -6509,11 +6509,11 @@ namespace System.Net.Sockets
                     else
                     {
                         // Since our timeout is in ms and linger is in seconds, implement our own sortof linger here.
-                        errorCode = UnsafeSocketsNativeMethods.OSSOCK.shutdown(_handle, (int)SocketShutdown.Send);
+                        errorCode = Interop.Winsock.shutdown(_handle, (int)SocketShutdown.Send);
                         GlobalLog.Print("SafeCloseSocket::Dispose(handle:" + _handle.DangerousGetHandle().ToString("x") + ") shutdown():" + (errorCode == SocketError.SocketError ? (SocketError)Marshal.GetLastWin32Error() : errorCode).ToString());
 
                         // This should give us a timeout in milliseconds.
-                        errorCode = UnsafeSocketsNativeMethods.OSSOCK.setsockopt(
+                        errorCode = Interop.Winsock.setsockopt(
                             _handle,
                             SocketOptionLevel.Socket,
                             SocketOptionName.ReceiveTimeout,
@@ -6529,7 +6529,7 @@ namespace System.Net.Sockets
                         {
                             unsafe
                             {
-                                errorCode = (SocketError)UnsafeSocketsNativeMethods.OSSOCK.recv(_handle.DangerousGetHandle(), null, 0, SocketFlags.None);
+                                errorCode = (SocketError)Interop.Winsock.recv(_handle.DangerousGetHandle(), null, 0, SocketFlags.None);
                             }
                             GlobalLog.Print("SafeCloseSocket::Dispose(handle:" + _handle.DangerousGetHandle().ToString("x") + ") recv():" + errorCode.ToString());
 
@@ -6542,7 +6542,7 @@ namespace System.Net.Sockets
                             {
                                 // We got a FIN or data.  Use ioctlsocket to find out which.
                                 int dataAvailable = 0;
-                                errorCode = UnsafeSocketsNativeMethods.OSSOCK.ioctlsocket(
+                                errorCode = Interop.Winsock.ioctlsocket(
                                     _handle,
                                     IoctlSocketConstants.FIONREAD,
                                     ref dataAvailable);
@@ -6597,7 +6597,7 @@ namespace System.Net.Sockets
 
             try
             {
-                UnsafeSocketsNativeMethods.OSSOCK.shutdown(_handle, (int)how);
+                Interop.Winsock.shutdown(_handle, (int)how);
             }
             catch (ObjectDisposedException) { }
         }
@@ -6642,14 +6642,14 @@ namespace System.Net.Sockets
             try
             {
                 // This can throw ObjectDisposedException.
-                errorCode = UnsafeSocketsNativeMethods.OSSOCK.setsockopt(
+                errorCode = Interop.Winsock.setsockopt(
                     _handle,
                     optionLevel,
                     optionName,
                     ref optionValue,
                     sizeof(int));
 
-                GlobalLog.Print("Socket#" + Logging.HashString(this) + "::SetSocketOption() UnsafeSocketsNativeMethods.OSSOCK.setsockopt returns errorCode:" + errorCode);
+                GlobalLog.Print("Socket#" + Logging.HashString(this) + "::SetSocketOption() Interop.Winsock.setsockopt returns errorCode:" + errorCode);
             }
             catch
             {
@@ -6721,14 +6721,14 @@ namespace System.Net.Sockets
             GlobalLog.Print("Socket#" + Logging.HashString(this) + "::setMulticastOption(): optionName:" + optionName.ToString() + " MR:" + MR.ToString() + " ipmr:" + ipmr.ToString() + " IPMulticastRequest.Size:" + IPMulticastRequest.Size.ToString());
 
             // This can throw ObjectDisposedException.
-            SocketError errorCode = UnsafeSocketsNativeMethods.OSSOCK.setsockopt(
+            SocketError errorCode = Interop.Winsock.setsockopt(
                 _handle,
                 SocketOptionLevel.IP,
                 optionName,
                 ref ipmr,
                 IPMulticastRequest.Size);
 
-            GlobalLog.Print("Socket#" + Logging.HashString(this) + "::setMulticastOption() UnsafeSocketsNativeMethods.OSSOCK.setsockopt returns errorCode:" + errorCode);
+            GlobalLog.Print("Socket#" + Logging.HashString(this) + "::setMulticastOption() Interop.Winsock.setsockopt returns errorCode:" + errorCode);
 
             //
             // if the native call fails we'll throw a SocketException
@@ -6760,14 +6760,14 @@ namespace System.Net.Sockets
             GlobalLog.Print("Socket#" + Logging.HashString(this) + "::setIPv6MulticastOption(): optionName:" + optionName.ToString() + " MR:" + MR.ToString() + " ipmr:" + ipmr.ToString() + " IPv6MulticastRequest.Size:" + IPv6MulticastRequest.Size.ToString());
 
             // This can throw ObjectDisposedException.
-            SocketError errorCode = UnsafeSocketsNativeMethods.OSSOCK.setsockopt(
+            SocketError errorCode = Interop.Winsock.setsockopt(
                 _handle,
                 SocketOptionLevel.IPv6,
                 optionName,
                 ref ipmr,
                 IPv6MulticastRequest.Size);
 
-            GlobalLog.Print("Socket#" + Logging.HashString(this) + "::setIPv6MulticastOption() UnsafeSocketsNativeMethods.OSSOCK.setsockopt returns errorCode:" + errorCode);
+            GlobalLog.Print("Socket#" + Logging.HashString(this) + "::setIPv6MulticastOption() Interop.Winsock.setsockopt returns errorCode:" + errorCode);
 
             //
             // if the native call fails we'll throw a SocketException
@@ -6793,14 +6793,14 @@ namespace System.Net.Sockets
             GlobalLog.Print("Socket#" + Logging.HashString(this) + "::setLingerOption(): lref:" + lref.ToString());
 
             // This can throw ObjectDisposedException.
-            SocketError errorCode = UnsafeSocketsNativeMethods.OSSOCK.setsockopt(
+            SocketError errorCode = Interop.Winsock.setsockopt(
                 _handle,
                 SocketOptionLevel.Socket,
                 SocketOptionName.Linger,
                 ref lngopt,
                 4);
 
-            GlobalLog.Print("Socket#" + Logging.HashString(this) + "::setLingerOption() UnsafeSocketsNativeMethods.OSSOCK.setsockopt returns errorCode:" + errorCode);
+            GlobalLog.Print("Socket#" + Logging.HashString(this) + "::setLingerOption() Interop.Winsock.setsockopt returns errorCode:" + errorCode);
 
             //
             // if the native call fails we'll throw a SocketException
@@ -6823,14 +6823,14 @@ namespace System.Net.Sockets
             int optlen = 4;
 
             // This can throw ObjectDisposedException.
-            SocketError errorCode = UnsafeSocketsNativeMethods.OSSOCK.getsockopt(
+            SocketError errorCode = Interop.Winsock.getsockopt(
                 _handle,
                 SocketOptionLevel.Socket,
                 SocketOptionName.Linger,
                 out lngopt,
                 ref optlen);
 
-            GlobalLog.Print("Socket#" + Logging.HashString(this) + "::getLingerOpt() UnsafeSocketsNativeMethods.OSSOCK.getsockopt returns errorCode:" + errorCode);
+            GlobalLog.Print("Socket#" + Logging.HashString(this) + "::getLingerOpt() Interop.Winsock.getsockopt returns errorCode:" + errorCode);
 
             //
             // if the native call fails we'll throw a SocketException
@@ -6856,14 +6856,14 @@ namespace System.Net.Sockets
             int optlen = IPMulticastRequest.Size;
 
             // This can throw ObjectDisposedException.
-            SocketError errorCode = UnsafeSocketsNativeMethods.OSSOCK.getsockopt(
+            SocketError errorCode = Interop.Winsock.getsockopt(
                 _handle,
                 SocketOptionLevel.IP,
                 optionName,
                 out ipmr,
                 ref optlen);
 
-            GlobalLog.Print("Socket#" + Logging.HashString(this) + "::getMulticastOpt() UnsafeSocketsNativeMethods.OSSOCK.getsockopt returns errorCode:" + errorCode);
+            GlobalLog.Print("Socket#" + Logging.HashString(this) + "::getMulticastOpt() Interop.Winsock.getsockopt returns errorCode:" + errorCode);
 
             //
             // if the native call fails we'll throw a SocketException
@@ -6910,14 +6910,14 @@ namespace System.Net.Sockets
             int optlen = IPv6MulticastRequest.Size;
 
             // This can throw ObjectDisposedException.
-            SocketError errorCode = UnsafeSocketsNativeMethods.OSSOCK.getsockopt(
+            SocketError errorCode = Interop.Winsock.getsockopt(
                 _handle,
                 SocketOptionLevel.IP,
                 optionName,
                 out ipmr,
                 ref optlen);
 
-            GlobalLog.Print("Socket#" + Logging.HashString(this) + "::getIPv6MulticastOpt() UnsafeSocketsNativeMethods.OSSOCK.getsockopt returns errorCode:" + errorCode);
+            GlobalLog.Print("Socket#" + Logging.HashString(this) + "::getIPv6MulticastOpt() Interop.Winsock.getsockopt returns errorCode:" + errorCode);
 
             //
             // if the native call fails we'll throw a SocketException
@@ -6959,7 +6959,7 @@ namespace System.Net.Sockets
             SocketError errorCode;
             try
             {
-                errorCode = UnsafeSocketsNativeMethods.OSSOCK.ioctlsocket(
+                errorCode = Interop.Winsock.ioctlsocket(
                     _handle,
                     IoctlSocketConstants.FIONBIO,
                     ref intBlocking);
@@ -6974,7 +6974,7 @@ namespace System.Net.Sockets
                 errorCode = SocketError.NotSocket;
             }
 
-            GlobalLog.Print("Socket#" + Logging.HashString(this) + "::InternalSetBlocking() UnsafeSocketsNativeMethods.OSSOCK.ioctlsocket returns errorCode:" + errorCode);
+            GlobalLog.Print("Socket#" + Logging.HashString(this) + "::InternalSetBlocking() Interop.Winsock.ioctlsocket returns errorCode:" + errorCode);
 
             //
             // we will update only internal state but only on successfull win32 call
@@ -7149,7 +7149,7 @@ namespace System.Net.Sockets
                 SetToConnected();
             }
 
-            GlobalLog.Print("Socket#" + Logging.HashString(this) + "::BeginConnectEx() UnsafeSocketsNativeMethods.OSSOCK.connect returns:" + errorCode.ToString());
+            GlobalLog.Print("Socket#" + Logging.HashString(this) + "::BeginConnectEx() Interop.Winsock.connect returns:" + errorCode.ToString());
 
             errorCode = asyncResult.CheckAsyncCallOverlappedResult(errorCode);
 
@@ -7207,7 +7207,7 @@ namespace System.Net.Sockets
                 }
 
                 // This can throw ObjectDisposedException.
-                errorCode = UnsafeSocketsNativeMethods.OSSOCK.WSASend_Blocking(
+                errorCode = Interop.Winsock.WSASend_Blocking(
                     _handle.DangerousGetHandle(),
                     WSABuffers,
                     WSABuffers.Length,
@@ -7216,7 +7216,7 @@ namespace System.Net.Sockets
                     SafeNativeOverlapped.Zero,
                     IntPtr.Zero);
 
-                GlobalLog.Print("Socket#" + Logging.HashString(this) + "::MultipleSend() UnsafeSocketsNativeMethods.OSSOCK.WSASend returns:" + errorCode.ToString() + " size:" + buffers.Length.ToString());
+                GlobalLog.Print("Socket#" + Logging.HashString(this) + "::MultipleSend() Interop.Winsock.WSASend returns:" + errorCode.ToString() + " size:" + buffers.Length.ToString());
             }
             finally
             {
@@ -7444,7 +7444,7 @@ namespace System.Net.Sockets
 
                 // This can throw ObjectDisposedException.
                 int bytesTransferred;
-                errorCode = UnsafeSocketsNativeMethods.OSSOCK.WSASend(
+                errorCode = Interop.Winsock.WSASend(
                     _handle,
                     asyncResult.m_WSABuffers,
                     asyncResult.m_WSABuffers.Length,
@@ -7457,7 +7457,7 @@ namespace System.Net.Sockets
                 {
                     errorCode = (SocketError)Marshal.GetLastWin32Error();
                 }
-                GlobalLog.Print("Socket#" + Logging.HashString(this) + "::BeginMultipleSend() UnsafeSocketsNativeMethods.OSSOCK.WSASend returns:" + errorCode.ToString() + " size:" + buffers.Length.ToString() + " returning AsyncResult:" + Logging.HashString(asyncResult));
+                GlobalLog.Print("Socket#" + Logging.HashString(this) + "::BeginMultipleSend() Interop.Winsock.WSASend returns:" + errorCode.ToString() + " size:" + buffers.Length.ToString() + " returning AsyncResult:" + Logging.HashString(asyncResult));
             }
             finally
             {
@@ -7728,7 +7728,7 @@ namespace System.Net.Sockets
         internal byte[] m_Buffer;
         internal int m_Offset;
         internal int m_Count;
-        internal UnsafeSocketsNativeMethods.OSSOCK.TransmitPacketsElementFlags m_Flags;
+        internal Interop.Winsock.TransmitPacketsElementFlags m_Flags;
 
         // hide default constructor
         private SendPacketsElement() { }
@@ -7760,7 +7760,7 @@ namespace System.Net.Sockets
             }
             Contract.EndContractBlock();
 
-            Initialize(filepath, null, offset, count, UnsafeSocketsNativeMethods.OSSOCK.TransmitPacketsElementFlags.File,
+            Initialize(filepath, null, offset, count, Interop.Winsock.TransmitPacketsElementFlags.File,
                 endOfPacket);
         }
 
@@ -7789,12 +7789,12 @@ namespace System.Net.Sockets
             }
             Contract.EndContractBlock();
 
-            Initialize(null, buffer, offset, count, UnsafeSocketsNativeMethods.OSSOCK.TransmitPacketsElementFlags.Memory,
+            Initialize(null, buffer, offset, count, Interop.Winsock.TransmitPacketsElementFlags.Memory,
                 endOfPacket);
         }
 
         private void Initialize(string filePath, byte[] buffer, int offset, int count,
-            UnsafeSocketsNativeMethods.OSSOCK.TransmitPacketsElementFlags flags, bool endOfPacket)
+            Interop.Winsock.TransmitPacketsElementFlags flags, bool endOfPacket)
         {
             m_FilePath = filePath;
             m_Buffer = buffer;
@@ -7803,7 +7803,7 @@ namespace System.Net.Sockets
             m_Flags = flags;
             if (endOfPacket)
             {
-                m_Flags |= UnsafeSocketsNativeMethods.OSSOCK.TransmitPacketsElementFlags.EndOfPacket;
+                m_Flags |= Interop.Winsock.TransmitPacketsElementFlags.EndOfPacket;
             }
         }
 
@@ -7834,16 +7834,16 @@ namespace System.Net.Sockets
         // EndOfPacket property
         public bool EndOfPacket
         {
-            get { return (m_Flags & UnsafeSocketsNativeMethods.OSSOCK.TransmitPacketsElementFlags.EndOfPacket) != 0; }
+            get { return (m_Flags & Interop.Winsock.TransmitPacketsElementFlags.EndOfPacket) != 0; }
         }
     }
 
     public class SocketAsyncEventArgs : EventArgs, IDisposable
     {
         // Struct sizes needed for some custom marshalling.
-        internal static readonly int s_ControlDataSize = Marshal.SizeOf<UnsafeSocketsNativeMethods.OSSOCK.ControlData>();
-        internal static readonly int s_ControlDataIPv6Size = Marshal.SizeOf<UnsafeSocketsNativeMethods.OSSOCK.ControlDataIPv6>();
-        internal static readonly int s_WSAMsgSize = Marshal.SizeOf<UnsafeSocketsNativeMethods.OSSOCK.WSAMsg>();
+        internal static readonly int s_ControlDataSize = Marshal.SizeOf<Interop.Winsock.ControlData>();
+        internal static readonly int s_ControlDataIPv6Size = Marshal.SizeOf<Interop.Winsock.ControlDataIPv6>();
+        internal static readonly int s_WSAMsgSize = Marshal.SizeOf<Interop.Winsock.WSAMsg>();
 
         // AcceptSocket property variables.
         internal Socket m_AcceptSocket;
@@ -7928,7 +7928,7 @@ namespace System.Net.Sockets
         // Internal variables for SendPackets
         internal FileStream[] m_SendPacketsFileStreams;
         internal SafeHandle[] m_SendPacketsFileHandles;
-        internal UnsafeSocketsNativeMethods.OSSOCK.TransmitPacketsElement[] m_SendPacketsDescriptor;
+        internal Interop.Winsock.TransmitPacketsElement[] m_SendPacketsDescriptor;
         internal IntPtr m_PtrSendPacketsDescriptor;
 
         // Misc state variables.
@@ -8611,7 +8611,7 @@ namespace System.Net.Sockets
             // Fill in WSAMessageBuffer
             unsafe
             {
-                UnsafeSocketsNativeMethods.OSSOCK.WSAMsg* pMessage = (UnsafeSocketsNativeMethods.OSSOCK.WSAMsg*)m_PtrWSAMessageBuffer; ;
+                Interop.Winsock.WSAMsg* pMessage = (Interop.Winsock.WSAMsg*)m_PtrWSAMessageBuffer; ;
                 pMessage->socketAddress = m_PtrSocketAddressBuffer;
                 pMessage->addressLength = (uint)m_SocketAddress.Size;
                 pMessage->buffers = _ptrWSARecvMsgWSABufferArray;
@@ -9034,7 +9034,7 @@ namespace System.Net.Sockets
 
             // Alloc native descriptor.
             m_SendPacketsDescriptor =
-                new UnsafeSocketsNativeMethods.OSSOCK.TransmitPacketsElement[m_SendPacketsElementsFileCount + m_SendPacketsElementsBufferCount];
+                new Interop.Winsock.TransmitPacketsElement[m_SendPacketsElementsFileCount + m_SendPacketsElementsBufferCount];
 
             // Number of things to pin is number of buffers + 1 (native descriptor).
             // Ensure we have properly sized object array.
@@ -9285,7 +9285,7 @@ namespace System.Net.Sockets
                         // Set the socket context.
                         IntPtr handle = _currentSocket.SafeHandle.DangerousGetHandle();
 
-                        socketError = UnsafeSocketsNativeMethods.OSSOCK.setsockopt(
+                        socketError = Interop.Winsock.setsockopt(
                             m_AcceptSocket.SafeHandle,
                             SocketOptionLevel.Socket,
                             SocketOptionName.UpdateAcceptContext,
@@ -9329,7 +9329,7 @@ namespace System.Net.Sockets
                     // Update the socket context.
                     try
                     {
-                        socketError = UnsafeSocketsNativeMethods.OSSOCK.setsockopt(
+                        socketError = Interop.Winsock.setsockopt(
                             _currentSocket.SafeHandle,
                             SocketOptionLevel.Socket,
                             SocketOptionName.UpdateConnectContext,
@@ -9425,12 +9425,12 @@ namespace System.Net.Sockets
                     unsafe
                     {
                         IPAddress address = null;
-                        UnsafeSocketsNativeMethods.OSSOCK.WSAMsg* PtrMessage = (UnsafeSocketsNativeMethods.OSSOCK.WSAMsg*)Marshal.UnsafeAddrOfPinnedArrayElement(_WSAMessageBuffer, 0);
+                        Interop.Winsock.WSAMsg* PtrMessage = (Interop.Winsock.WSAMsg*)Marshal.UnsafeAddrOfPinnedArrayElement(_WSAMessageBuffer, 0);
 
                         //ipv4
                         if (_controlBuffer.Length == s_ControlDataSize)
                         {
-                            UnsafeSocketsNativeMethods.OSSOCK.ControlData controlData = Marshal.PtrToStructure<UnsafeSocketsNativeMethods.OSSOCK.ControlData>(PtrMessage->controlBuffer.Pointer);
+                            Interop.Winsock.ControlData controlData = Marshal.PtrToStructure<Interop.Winsock.ControlData>(PtrMessage->controlBuffer.Pointer);
                             if (controlData.length != UIntPtr.Zero)
                             {
                                 address = new IPAddress((long)controlData.address);
@@ -9440,7 +9440,7 @@ namespace System.Net.Sockets
                         //ipv6
                         else if (_controlBuffer.Length == s_ControlDataIPv6Size)
                         {
-                            UnsafeSocketsNativeMethods.OSSOCK.ControlDataIPv6 controlData = Marshal.PtrToStructure<UnsafeSocketsNativeMethods.OSSOCK.ControlDataIPv6>(PtrMessage->controlBuffer.Pointer);
+                            Interop.Winsock.ControlDataIPv6 controlData = Marshal.PtrToStructure<Interop.Winsock.ControlDataIPv6>(PtrMessage->controlBuffer.Pointer);
                             if (controlData.length != UIntPtr.Zero)
                             {
                                 address = new IPAddress(controlData.address);
@@ -9559,7 +9559,7 @@ namespace System.Net.Sockets
                             {
                                 // The Async IO completed with a failure.
                                 // here we need to call WSAGetOverlappedResult() just so Marshal.GetLastWin32Error() will return the correct error.
-                                bool success = UnsafeSocketsNativeMethods.OSSOCK.WSAGetOverlappedResult(
+                                bool success = Interop.Winsock.WSAGetOverlappedResult(
                                     _currentSocket.SafeHandle,
                                     m_PtrNativeOverlapped,
                                     out numBytes,

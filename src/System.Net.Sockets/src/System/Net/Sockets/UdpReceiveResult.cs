@@ -26,8 +26,6 @@ namespace System.Net.Sockets
             _remoteEndPoint = remoteEndPoint;
         }
 
-        [SuppressMessage("Microsoft.Performance", "CA1819:PropertiesShouldNotReturnArrays",
-            Justification = "This is merely strongly type data aggregation")]
         public byte[] Buffer
         {
             get

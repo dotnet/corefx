@@ -19,4 +19,4 @@ namespace System.Net.Sockets
         internal byte* ai_addr;         // Ptr to the sockaddr structure
         internal AddressInfo* ai_next;  // Ptr to the next AddressInfo structure
     }
-} // namespace System.Net
+}

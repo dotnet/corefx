@@ -56,7 +56,7 @@ namespace System.Net.Sockets
 
             _family = family;
 
-            createClientSocket();
+            CreateClientSocket();
         }
 
         // bind specific port, arbitrary IP
@@ -108,7 +108,7 @@ namespace System.Net.Sockets
                 localEP = new IPEndPoint(IPAddress.IPv6Any, port);
             }
 
-            createClientSocket();
+            CreateClientSocket();
 
             Client.Bind(localEP);
         }
@@ -135,7 +135,7 @@ namespace System.Net.Sockets
             //
             _family = localEP.AddressFamily;
 
-            createClientSocket();
+            CreateClientSocket();
 
             Client.Bind(localEP);
         }
@@ -165,7 +165,7 @@ namespace System.Net.Sockets
             //       returned from DNS. As a result, we defer the creation of the 
             //       socket until the Connect method.
             //
-            //createClientSocket();
+            //CreateClientSocket();
             Connect(hostname, port);
         }
 
@@ -1141,8 +1141,6 @@ namespace System.Net.Sockets
             return Task<int>.Factory.FromAsync(BeginSend, EndSend, datagram, bytes, endPoint, null);
         }
 
-        [SuppressMessage("Microsoft.Naming", "CA1702:CompoundWordsShouldBeCasedCorrectly", MessageId = "hostname",
-            Justification = "Original parameter spelling is preserved for consistency")]
         public Task<int> SendAsync(byte[] datagram, int bytes, string hostname, int port)
         {
             return Task<int>.Factory.FromAsync((callback, state) => BeginSend(datagram, bytes, hostname, port, callback, state), EndSend, null);
@@ -1159,7 +1157,7 @@ namespace System.Net.Sockets
         }
 
 
-        private void createClientSocket()
+        private void CreateClientSocket()
         {
             //
             // common initialization code

@@ -16,4 +16,4 @@ namespace System.Net.Sockets
                                    * qualified domain name that the flat name resolved to. Only one of the AI_FQDN and 
                                    * AI_CANONNAME bits can be set.  Win7+ */
     }
-} // namespace System.Net
+}
