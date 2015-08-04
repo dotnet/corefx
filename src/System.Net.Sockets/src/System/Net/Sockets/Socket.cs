@@ -162,7 +162,7 @@ namespace System.Net.Sockets
             if (_handle.IsInvalid)
             {
                 SocketException e = new SocketException();
-                if (e.ErrorCode == (int)SocketError.InvalidArgument)
+                if (e.SocketErrorCode == SocketError.InvalidArgument)
                 {
                     throw new ArgumentException(SR.net_sockets_invalid_socketinformation, "socketInformation");
                 }
@@ -193,11 +193,11 @@ namespace System.Net.Sockets
                 EndPoint ep = null;
                 if (_addressFamily == AddressFamily.InterNetwork)
                 {
-                    ep = IPEndPoint.Any;
+                    ep = IPEndPointStatics.Any;
                 }
                 else if (_addressFamily == AddressFamily.InterNetworkV6)
                 {
-                    ep = IPEndPoint.IPv6Any;
+                    ep = IPEndPointStatics.IPv6Any;
                 }
 
                 SocketAddress socketAddress = ep.Serialize();
@@ -316,7 +316,7 @@ namespace System.Net.Sockets
                 // This may throw ObjectDisposedException.
                 SocketError errorCode = Interop.Winsock.ioctlsocket(
                     _handle,
-                    IoctlSocketConstants.FIONREAD,
+                    Interop.Winsock.IoctlSocketConstants.FIONREAD,
                     ref argp);
 
                 GlobalLog.Print("Socket#" + Logging.HashString(this) + "::Available_get() Interop.Winsock.ioctlsocket returns errorCode:" + errorCode);
@@ -1077,7 +1077,7 @@ namespace System.Net.Sockets
                 throw new NotSupportedException(SR.net_invalidversion);
             }
 
-            IPAddress[] addresses = Dns.GetHostAddresses(host);
+            IPAddress[] addresses = Dns.GetHostAddressesAsync(host).GetAwaiter().GetResult();
             Connect(addresses, port);
             if (s_LoggingEnabled) Logging.Exit(Logging.Sockets, this, "Connect", null);
         }
@@ -1346,7 +1346,7 @@ namespace System.Net.Sockets
                 for (int i = 0; i < count; ++i)
                 {
                     ArraySegment<byte> buffer = buffers[i];
-                    ValidationHelper.ValidateSegment(buffer);
+                    RangeValidationHelpers.ValidateSegment(buffer);
                     objectsToPin[i] = GCHandle.Alloc(buffer.Array, GCHandleType.Pinned);
                     WSABuffers[i].Length = buffer.Count;
                     WSABuffers[i].Pointer = Marshal.UnsafeAddrOfPinnedArrayElement(buffer.Array, buffer.Offset);
@@ -1830,7 +1830,7 @@ namespace System.Net.Sockets
                 for (int i = 0; i < count; ++i)
                 {
                     ArraySegment<byte> buffer = buffers[i];
-                    ValidationHelper.ValidateSegment(buffer);
+                    RangeValidationHelpers.ValidateSegment(buffer);
                     objectsToPin[i] = GCHandle.Alloc(buffer.Array, GCHandleType.Pinned);
                     WSABuffers[i].Length = buffer.Count;
                     WSABuffers[i].Pointer = Marshal.UnsafeAddrOfPinnedArrayElement(buffer.Array, buffer.Offset);
@@ -2102,7 +2102,7 @@ namespace System.Net.Sockets
                 UpdateStatusAfterSocketError(socketException);
                 if (s_LoggingEnabled) Logging.Exception(Logging.Sockets, this, "ReceiveFrom", socketException);
 
-                if (socketException.ErrorCode != (int)SocketError.MessageSize)
+                if (socketException.SocketErrorCode != SocketError.MessageSize)
                 {
                     throw socketException;
                 }
@@ -2185,7 +2185,7 @@ namespace System.Net.Sockets
             {
                 throw new ObjectDisposedException(this.GetType().FullName);
             }
-            if (ioControlCode == IoctlSocketConstants.FIONBIO)
+            if (ioControlCode == Interop.Winsock.IoctlSocketConstants.FIONBIO)
             {
                 throw new InvalidOperationException(SR.net_sockets_useblocking);
             }
@@ -2241,7 +2241,7 @@ namespace System.Net.Sockets
             {
                 throw new ObjectDisposedException(this.GetType().FullName);
             }
-            if ((unchecked((int)ioControlCode)) == IoctlSocketConstants.FIONBIO)
+            if ((unchecked((int)ioControlCode)) == Interop.Winsock.IoctlSocketConstants.FIONBIO)
             {
                 throw new InvalidOperationException(SR.net_sockets_useblocking);
             }
@@ -2768,52 +2768,6 @@ namespace System.Net.Sockets
             return BeginConnectEx(remoteEP, true, callback, state);
         }
 
-        public SocketInformation DuplicateAndClose(int targetProcessId)
-        {
-            if (s_LoggingEnabled) Logging.Enter(Logging.Sockets, this, "DuplicateAndClose", null);
-
-            if (CleanedUp)
-            {
-                throw new ObjectDisposedException(GetType().FullName);
-            }
-
-            SocketInformation info = new SocketInformation();
-            info.ProtocolInformation = new byte[s_protocolInformationSize];
-
-            // This can throw ObjectDisposedException.
-            SocketError errorCode;
-#if !FEATURE_PAL
-            unsafe
-            {
-                fixed (byte* pinnedBuffer = info.ProtocolInformation)
-                {
-                    errorCode = (SocketError)Interop.Winsock.WSADuplicateSocket(_handle, (uint)targetProcessId, pinnedBuffer);
-                }
-            }
-#else
-            errorCode = SocketError.SocketError;
-#endif // !FEATURE_PAL
-
-            if (errorCode != SocketError.Success)
-            {
-                SocketException socketException = new SocketException();
-                if (s_LoggingEnabled) Logging.Exception(Logging.Sockets, this, "DuplicateAndClose", socketException);
-                throw socketException;
-            }
-
-
-            info.IsConnected = Connected;
-            info.IsNonBlocking = !Blocking;
-            info.IsListening = _isListening;
-            info.RemoteEndPoint = m_RemoteEndPoint;
-
-            //make sure we don't shutdown, etc.
-            Close(-1);
-
-            if (s_LoggingEnabled) Logging.Exit(Logging.Sockets, this, "DuplicateAndClose", null);
-            return info;
-        }
-
         internal IAsyncResult UnsafeBeginConnect(EndPoint remoteEP, AsyncCallback callback, object state)
         {
             return BeginConnectEx(remoteEP, false, callback, state);
@@ -3140,7 +3094,7 @@ namespace System.Net.Sockets
                 //
                 // update our internal state after this socket error and throw
                 //
-                SocketException socketException = new SocketException(castedAsyncResult.ErrorCode, remoteEndPoint);
+                SocketException socketException = SocketExceptionShim.NewSocketException(castedAsyncResult.ErrorCode, remoteEndPoint);
                 UpdateStatusAfterSocketError(socketException);
                 if (s_LoggingEnabled) Logging.Exception(Logging.Sockets, this, "EndConnect", socketException);
                 throw socketException;
@@ -6260,7 +6214,7 @@ namespace System.Net.Sockets
                 {
                     if (!s_Initialized)
                     {
-                        WSAData wsaData = new WSAData();
+                        Interop.Winsock.WSAData wsaData = new Interop.Winsock.WSAData();
 
                         SocketError errorCode =
                             Interop.Winsock.WSAStartup(
@@ -6300,7 +6254,7 @@ namespace System.Net.Sockets
                                                                     ProtocolType.IP,
                                                                     IntPtr.Zero,
                                                                     0,
-                                                                    (SocketConstructorFlags)0);
+                                                                    (Interop.Winsock.SocketConstructorFlags)0);
                         if (socketV4.IsInvalid)
                         {
                             errorCode = (SocketError)Marshal.GetLastWin32Error();
@@ -6317,7 +6271,7 @@ namespace System.Net.Sockets
                                                                     ProtocolType.IP,
                                                                     IntPtr.Zero,
                                                                     0,
-                                                                    (SocketConstructorFlags)0);
+                                                                    (Interop.Winsock.SocketConstructorFlags)0);
                         if (socketV6.IsInvalid)
                         {
                             errorCode = (SocketError)Marshal.GetLastWin32Error();
@@ -6408,7 +6362,7 @@ namespace System.Net.Sockets
                 //
                 // update our internal state after this socket error and throw
                 //
-                SocketException socketException = new SocketException(endPointSnapshot);
+                SocketException socketException = SocketExceptionShim.NewSocketException(endPointSnapshot);
                 UpdateStatusAfterSocketError(socketException);
                 if (s_LoggingEnabled) Logging.Exception(Logging.Sockets, this, "Connect", socketException);
                 throw socketException;
@@ -6495,7 +6449,7 @@ namespace System.Net.Sockets
                         int nonBlockCmd = 0;
                         errorCode = Interop.Winsock.ioctlsocket(
                             _handle,
-                            IoctlSocketConstants.FIONBIO,
+                            Interop.Winsock.IoctlSocketConstants.FIONBIO,
                             ref nonBlockCmd);
                         GlobalLog.Print("SafeCloseSocket::Dispose(handle:" + _handle.DangerousGetHandle().ToString("x") + ") ioctlsocket(FIONBIO):" + (errorCode == SocketError.SocketError ? (SocketError)Marshal.GetLastWin32Error() : errorCode).ToString());
                     }
@@ -6544,7 +6498,7 @@ namespace System.Net.Sockets
                                 int dataAvailable = 0;
                                 errorCode = Interop.Winsock.ioctlsocket(
                                     _handle,
-                                    IoctlSocketConstants.FIONREAD,
+                                    Interop.Winsock.IoctlSocketConstants.FIONREAD,
                                     ref dataAvailable);
                                 GlobalLog.Print("SafeCloseSocket::Dispose(handle:" + _handle.DangerousGetHandle().ToString("x") + ") ioctlsocket(FIONREAD):" + (errorCode == SocketError.SocketError ? (SocketError)Marshal.GetLastWin32Error() : errorCode).ToString());
 
@@ -6689,7 +6643,7 @@ namespace System.Net.Sockets
 
         private void setMulticastOption(SocketOptionName optionName, MulticastOption MR)
         {
-            IPMulticastRequest ipmr = new IPMulticastRequest();
+            Interop.Winsock.IPMulticastRequest ipmr = new Interop.Winsock.IPMulticastRequest();
 
             ipmr.MulticastAddress = unchecked((int)MR.Group.m_Address);
 
@@ -6718,7 +6672,7 @@ namespace System.Net.Sockets
             }
 #endif  // BIGENDIAN
 
-            GlobalLog.Print("Socket#" + Logging.HashString(this) + "::setMulticastOption(): optionName:" + optionName.ToString() + " MR:" + MR.ToString() + " ipmr:" + ipmr.ToString() + " IPMulticastRequest.Size:" + IPMulticastRequest.Size.ToString());
+            GlobalLog.Print("Socket#" + Logging.HashString(this) + "::setMulticastOption(): optionName:" + optionName.ToString() + " MR:" + MR.ToString() + " ipmr:" + ipmr.ToString() + " Interop.Winsock.IPMulticastRequest.Size:" + Interop.Winsock.IPMulticastRequest.Size.ToString());
 
             // This can throw ObjectDisposedException.
             SocketError errorCode = Interop.Winsock.setsockopt(
@@ -6726,7 +6680,7 @@ namespace System.Net.Sockets
                 SocketOptionLevel.IP,
                 optionName,
                 ref ipmr,
-                IPMulticastRequest.Size);
+                Interop.Winsock.IPMulticastRequest.Size);
 
             GlobalLog.Print("Socket#" + Logging.HashString(this) + "::setMulticastOption() Interop.Winsock.setsockopt returns errorCode:" + errorCode);
 
@@ -6752,12 +6706,12 @@ namespace System.Net.Sockets
         /// </devdoc>
         private void setIPv6MulticastOption(SocketOptionName optionName, IPv6MulticastOption MR)
         {
-            IPv6MulticastRequest ipmr = new IPv6MulticastRequest();
+            Interop.Winsock.IPv6MulticastRequest ipmr = new Interop.Winsock.IPv6MulticastRequest();
 
             ipmr.MulticastAddress = MR.Group.GetAddressBytes();
             ipmr.InterfaceIndex = unchecked((int)MR.InterfaceIndex);
 
-            GlobalLog.Print("Socket#" + Logging.HashString(this) + "::setIPv6MulticastOption(): optionName:" + optionName.ToString() + " MR:" + MR.ToString() + " ipmr:" + ipmr.ToString() + " IPv6MulticastRequest.Size:" + IPv6MulticastRequest.Size.ToString());
+            GlobalLog.Print("Socket#" + Logging.HashString(this) + "::setIPv6MulticastOption(): optionName:" + optionName.ToString() + " MR:" + MR.ToString() + " ipmr:" + ipmr.ToString() + " Interop.Winsock.IPv6MulticastRequest.Size:" + Interop.Winsock.IPv6MulticastRequest.Size.ToString());
 
             // This can throw ObjectDisposedException.
             SocketError errorCode = Interop.Winsock.setsockopt(
@@ -6765,7 +6719,7 @@ namespace System.Net.Sockets
                 SocketOptionLevel.IPv6,
                 optionName,
                 ref ipmr,
-                IPv6MulticastRequest.Size);
+                Interop.Winsock.IPv6MulticastRequest.Size);
 
             GlobalLog.Print("Socket#" + Logging.HashString(this) + "::setIPv6MulticastOption() Interop.Winsock.setsockopt returns errorCode:" + errorCode);
 
@@ -6786,7 +6740,7 @@ namespace System.Net.Sockets
 
         private void setLingerOption(LingerOption lref)
         {
-            Linger lngopt = new Linger();
+            Interop.Winsock.Linger lngopt = new Interop.Winsock.Linger();
             lngopt.OnOff = lref.Enabled ? (ushort)1 : (ushort)0;
             lngopt.Time = (ushort)lref.LingerTime;
 
@@ -6819,7 +6773,7 @@ namespace System.Net.Sockets
 
         private LingerOption getLingerOpt()
         {
-            Linger lngopt = new Linger();
+            Interop.Winsock.Linger lngopt = new Interop.Winsock.Linger();
             int optlen = 4;
 
             // This can throw ObjectDisposedException.
@@ -6852,8 +6806,8 @@ namespace System.Net.Sockets
 
         private MulticastOption getMulticastOpt(SocketOptionName optionName)
         {
-            IPMulticastRequest ipmr = new IPMulticastRequest();
-            int optlen = IPMulticastRequest.Size;
+            Interop.Winsock.IPMulticastRequest ipmr = new Interop.Winsock.IPMulticastRequest();
+            int optlen = Interop.Winsock.IPMulticastRequest.Size;
 
             // This can throw ObjectDisposedException.
             SocketError errorCode = Interop.Winsock.getsockopt(
@@ -6905,9 +6859,9 @@ namespace System.Net.Sockets
         /// </devdoc>
         private IPv6MulticastOption getIPv6MulticastOpt(SocketOptionName optionName)
         {
-            IPv6MulticastRequest ipmr = new IPv6MulticastRequest();
+            Interop.Winsock.IPv6MulticastRequest ipmr = new Interop.Winsock.IPv6MulticastRequest();
 
-            int optlen = IPv6MulticastRequest.Size;
+            int optlen = Interop.Winsock.IPv6MulticastRequest.Size;
 
             // This can throw ObjectDisposedException.
             SocketError errorCode = Interop.Winsock.getsockopt(
@@ -6961,7 +6915,7 @@ namespace System.Net.Sockets
             {
                 errorCode = Interop.Winsock.ioctlsocket(
                     _handle,
-                    IoctlSocketConstants.FIONBIO,
+                    Interop.Winsock.IoctlSocketConstants.FIONBIO,
                     ref intBlocking);
 
                 if (errorCode == SocketError.SocketError)
@@ -7638,7 +7592,7 @@ namespace System.Net.Sockets
         //
         internal void UpdateStatusAfterSocketError(SocketException socketException)
         {
-            UpdateStatusAfterSocketError((SocketError)socketException.NativeErrorCode);
+            UpdateStatusAfterSocketError(socketException.SocketErrorCode);
         }
 
         internal void UpdateStatusAfterSocketError(SocketError errorCode)
@@ -9020,7 +8974,7 @@ namespace System.Net.Sockets
             for (int i = 0; i < tempList.Length; i++)
             {
                 ArraySegment<byte> localCopy = tempList[i];
-                ValidationHelper.ValidateSegment(localCopy);
+                RangeValidationHelpers.ValidateSegment(localCopy);
                 m_WSABufferArray[i].Pointer = Marshal.UnsafeAddrOfPinnedArrayElement(localCopy.Array, localCopy.Offset);
                 m_WSABufferArray[i].Length = localCopy.Count;
             }

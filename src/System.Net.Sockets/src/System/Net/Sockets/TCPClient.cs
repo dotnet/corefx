@@ -234,7 +234,7 @@ namespace System.Net.Sockets
             //
 
 
-            IPAddress[] addresses = Dns.GetHostAddresses(hostname);
+            IPAddress[] addresses = Dns.GetHostAddressesAsync(hostname).GetAwaiter().GetResult();
             Exception lastex = null;
             Socket ipv6Socket = null;
             Socket ipv4Socket = null;

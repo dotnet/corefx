@@ -64,7 +64,7 @@ namespace System.Net.Sockets
                 socketHandle.Dispose();
             }
             // Release the native overlapped structure
-            return UnsafeCommonNativeMethods.LocalFree(handle) == IntPtr.Zero;
+            return Interop.mincore_obsolete.LocalFree(handle) == IntPtr.Zero;
         }
     }
 #endif //PROJECTN

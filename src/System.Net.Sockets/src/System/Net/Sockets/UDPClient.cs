@@ -367,7 +367,7 @@ namespace System.Net.Sockets
             //               In addition, the redundant CheckForBroadcast call was
             //               removed here since it is called from Connect().
             //
-            IPAddress[] addresses = Dns.GetHostAddresses(hostname);
+            IPAddress[] addresses = Dns.GetHostAddressesAsync(hostname).GetAwaiter().GetResult();
 
             Exception lastex = null;
             Socket ipv6Socket = null;
@@ -631,7 +631,7 @@ namespace System.Net.Sockets
                 return Client.Send(dgram, 0, bytes, SocketFlags.None);
             }
 
-            IPAddress[] addresses = Dns.GetHostAddresses(hostname);
+            IPAddress[] addresses = Dns.GetHostAddressesAsync(hostname).GetAwaiter().GetResult();
 
             int i = 0;
             for (; i < addresses.Length && addresses[i].AddressFamily != _family; i++) ;
@@ -732,7 +732,7 @@ namespace System.Net.Sockets
 
             if (hostname != null && port != 0)
             {
-                IPAddress[] addresses = Dns.GetHostAddresses(hostname);
+                IPAddress[] addresses = Dns.GetHostAddressesAsync(hostname).GetAwaiter().GetResult();
 
                 int i = 0;
                 for (; i < addresses.Length && addresses[i].AddressFamily != _family; i++) ;
@@ -797,11 +797,11 @@ namespace System.Net.Sockets
 
             if (_family == AddressFamily.InterNetwork)
             {
-                tempRemoteEP = IPEndPoint.Any;
+                tempRemoteEP = IPEndPointStatics.Any;
             }
             else
             {
-                tempRemoteEP = IPEndPoint.IPv6Any;
+                tempRemoteEP = IPEndPointStatics.IPv6Any;
             }
 
             int received = Client.ReceiveFrom(_buffer, MaxUDPSize, 0, ref tempRemoteEP);
@@ -839,11 +839,11 @@ namespace System.Net.Sockets
 
             if (_family == AddressFamily.InterNetwork)
             {
-                tempRemoteEP = IPEndPoint.Any;
+                tempRemoteEP = IPEndPointStatics.Any;
             }
             else
             {
-                tempRemoteEP = IPEndPoint.IPv6Any;
+                tempRemoteEP = IPEndPointStatics.IPv6Any;
             }
 
             return Client.BeginReceiveFrom(_buffer, 0, MaxUDPSize, SocketFlags.None, ref tempRemoteEP, requestCallback, state);
@@ -861,11 +861,11 @@ namespace System.Net.Sockets
 
             if (_family == AddressFamily.InterNetwork)
             {
-                tempRemoteEP = IPEndPoint.Any;
+                tempRemoteEP = IPEndPointStatics.Any;
             }
             else
             {
-                tempRemoteEP = IPEndPoint.IPv6Any;
+                tempRemoteEP = IPEndPointStatics.IPv6Any;
             }
 
             int received = Client.EndReceiveFrom(asyncResult, ref tempRemoteEP);
@@ -1021,7 +1021,7 @@ namespace System.Net.Sockets
             {
                 throw new ArgumentNullException("multicastAddr");
             }
-            if (!ValidationHelper.ValidateRange(timeToLive, 0, 255))
+            if (!RangeValidationHelpers.ValidateRange(timeToLive, 0, 255))
             {
                 throw new ArgumentOutOfRangeException("timeToLive");
             }

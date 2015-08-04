@@ -475,7 +475,7 @@ namespace System.Net.Sockets
             internal unsafe static InnerSafeCloseSocket CreateWSASocket(byte* pinnedBuffer)
             {
                 //-1 is the value for FROM_PROTOCOL_INFO
-                InnerSafeCloseSocket result = Interop.Winsock.WSASocketW((AddressFamily)(-1), (SocketType)(-1), (ProtocolType)(-1), pinnedBuffer, 0, SocketConstructorFlags.WSA_FLAG_OVERLAPPED);
+                InnerSafeCloseSocket result = Interop.Winsock.WSASocketW((AddressFamily)(-1), (SocketType)(-1), (ProtocolType)(-1), pinnedBuffer, 0, Interop.Winsock.SocketConstructorFlags.WSA_FLAG_OVERLAPPED);
                 if (result.IsInvalid)
                 {
                     result.SetHandleAsInvalid();
@@ -485,7 +485,7 @@ namespace System.Net.Sockets
 
             internal static InnerSafeCloseSocket CreateWSASocket(AddressFamily addressFamily, SocketType socketType, ProtocolType protocolType)
             {
-                InnerSafeCloseSocket result = Interop.Winsock.WSASocketW(addressFamily, socketType, protocolType, IntPtr.Zero, 0, SocketConstructorFlags.WSA_FLAG_OVERLAPPED);
+                InnerSafeCloseSocket result = Interop.Winsock.WSASocketW(addressFamily, socketType, protocolType, IntPtr.Zero, 0, Interop.Winsock.SocketConstructorFlags.WSA_FLAG_OVERLAPPED);
                 if (result.IsInvalid)
                 {
                     result.SetHandleAsInvalid();

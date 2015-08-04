@@ -115,7 +115,7 @@ namespace System.Net.Sockets
             {
                 errorCode = Interop.Winsock.WSAIoctl(
                                socketHandle,
-                               IoctlSocketConstants.SIOGETEXTENSIONFUNCTIONPOINTER,
+                               Interop.Winsock.IoctlSocketConstants.SIOGETEXTENSIONFUNCTIONPOINTER,
                                ref guid,
                                sizeof(Guid),
                                out ptr,

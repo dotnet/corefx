@@ -139,7 +139,7 @@ namespace System.Net.Sockets
             for (int i = 0; i < count; i++)
             {
                 buffersCopy[i] = buffers[i];
-                ValidationHelper.ValidateSegment(buffersCopy[i]);
+                RangeValidationHelpers.ValidateSegment(buffersCopy[i]);
             }
 
             m_WSABuffers = new WSABuffer[count];

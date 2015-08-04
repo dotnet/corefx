@@ -52,6 +52,7 @@
     
     <!-- Shims -->
     <Compile Include="Shims\_NetworkingPerfCounters.cs"/>
+    <Compile Include="RefactoringShims\SocketExceptionShim.cs"/>
 
     <!-- Logging -->
     <Compile Include="$(CommonPath)\System\Net\Shims\TraceSource.cs">
@@ -96,8 +97,16 @@
       <Link>Common\System\Net\_BufferOffsetSize.cs</Link>
     </Compile>
 
+    <Compile Include="$(CommonPath)\System\Net\IPEndPointStatics.cs">
+      <Link>Common\System\Net\IPEndPointStatics.cs</Link>
+    </Compile>
+
     <Compile Include="$(CommonPath)\System\Net\ExceptionCheck.cs">
       <Link>Common\System\Net\ExceptionCheck.cs</Link>
+    </Compile>
+
+    <Compile Include="$(CommonPath)\System\Net\RangeValidationHelpers.cs">
+      <Link>Common\System\Net\RangeValidationHelpers.cs</Link>
     </Compile>
 
     <Compile Include="$(CommonPath)\System\Net\TcpValidationHelpers.cs">
@@ -141,7 +150,10 @@
     </Compile>    
     <Compile Include="$(CommonPath)\Interop\Windows\mincore_obsolete\Interop.LocalAlloc.SafeOverlappedFree.cs">
       <Link>Interop\Windows\mincore_obsolete\Interop.LocalAlloc.SafeOverlappedFree.cs</Link>
-    </Compile>    
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\mincore_obsolete\Interop.LocalFree.cs" >
+      <Link>Common\Interop\Windows\mincore_obsolete\Interop.LocalFree.cs</Link>
+    </Compile>
 
     <Compile Include="$(CommonPath)\Interop\Windows\Winsock\TimeValue.cs">
       <Link>Interop\Windows\Winsock\TimeValue.cs</Link>
@@ -153,6 +165,14 @@
 
     <Compile Include="$(CommonPath)\Interop\Windows\Winsock\Interop.ControlData.cs">
       <Link>Interop\Windows\Winsock\Interop.ControlData.cs</Link>
+    </Compile>
+
+    <Compile Include="$(CommonPath)\Interop\Windows\Winsock\Interop.getpeername.cs">
+      <Link>Interop\Windows\Winsock\Interop.getpeername.cs</Link>
+    </Compile>
+
+    <Compile Include="$(CommonPath)\Interop\Windows\Winsock\Interop.getsockopt.cs">
+      <Link>Interop\Windows\Winsock\Interop.getsockopt.cs</Link>
     </Compile>
 
     <Compile Include="$(CommonPath)\Interop\Windows\Winsock\Interop.WSAMsg.cs">
@@ -173,10 +193,6 @@
 
     <Compile Include="$(CommonPath)\Interop\Windows\Winsock\Interop.WinsockAsync.cs">
       <Link>Interop\Windows\Winsock\Interop.WinSockAsync.cs</Link>
-    </Compile>
-
-    <Compile Include="$(CommonPath)\Interop\Windows\Winsock\Interop.getsockopt.cs">
-      <Link>Interop\Windows\Winsock\Interop.getsockopt.cs</Link>
     </Compile>
 
     <Compile Include="$(CommonPath)\Interop\Windows\Winsock\Interop.setsockopt.cs">
