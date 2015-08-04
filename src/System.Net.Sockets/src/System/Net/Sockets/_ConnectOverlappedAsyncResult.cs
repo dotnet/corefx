@@ -37,7 +37,7 @@ namespace System.Net.Sockets
                 //set the socket context
                 try
                 {
-                    errorCode = UnsafeSocketsNativeMethods.OSSOCK.setsockopt(
+                    errorCode = Interop.Winsock.setsockopt(
                         socket.SafeHandle,
                         SocketOptionLevel.Socket,
                         SocketOptionName.UpdateConnectContext,

@@ -78,7 +78,7 @@ namespace System.Net.Sockets
 
                     IntPtr handle = _listenSocket.SafeHandle.DangerousGetHandle();
 
-                    errorCode = UnsafeSocketsNativeMethods.OSSOCK.setsockopt(
+                    errorCode = Interop.Winsock.setsockopt(
                         _acceptSocket.SafeHandle,
                         SocketOptionLevel.Socket,
                         SocketOptionName.UpdateAcceptContext,

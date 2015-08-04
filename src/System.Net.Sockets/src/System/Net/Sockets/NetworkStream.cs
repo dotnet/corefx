@@ -868,7 +868,7 @@ namespace System.Net.Sockets
             }
             catch (Exception exception)
             {
-                if (NclUtilities.IsFatal(exception)) throw;
+                if (ExceptionCheck.IsFatal(exception)) throw;
 
                 //
                 // some sort of error occured on the socket call,
@@ -1373,7 +1373,7 @@ namespace System.Net.Sockets
 
         public override Task FlushAsync(CancellationToken cancellationToken)
         {
-            return NclUtilities.MakeCompletedTask();
+            return Task.CompletedTask;
         }
 
         /// <devdoc>

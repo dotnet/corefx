@@ -100,7 +100,7 @@ namespace System.Net.Sockets
             {
                 throw new ArgumentNullException("hostname");
             }
-            if (!ValidationHelper.ValidateTcpPort(port))
+            if (!TcpValidationHelpers.ValidatePortNumber(port))
             {
                 throw new ArgumentOutOfRangeException("port");
             }
@@ -211,7 +211,7 @@ namespace System.Net.Sockets
             {
                 throw new ArgumentNullException("hostname");
             }
-            if (!ValidationHelper.ValidateTcpPort(port))
+            if (!TcpValidationHelpers.ValidatePortNumber(port))
             {
                 throw new ArgumentOutOfRangeException("port");
             }
@@ -224,7 +224,7 @@ namespace System.Net.Sockets
             //
             if (_active)
             {
-                throw new SocketException(SocketError.IsConnected);
+                throw new SocketException((int)SocketError.IsConnected);
             }
 
             //
@@ -339,7 +339,7 @@ namespace System.Net.Sockets
                     if (lastex != null)
                         throw lastex;
                     else
-                        throw new SocketException(SocketError.NotConnected);
+                        throw new SocketException((int)SocketError.NotConnected);
                 }
             }
 
@@ -362,7 +362,7 @@ namespace System.Net.Sockets
             {
                 throw new ArgumentNullException("address");
             }
-            if (!ValidationHelper.ValidateTcpPort(port))
+            if (!TcpValidationHelpers.ValidatePortNumber(port))
             {
                 throw new ArgumentOutOfRangeException("port");
             }

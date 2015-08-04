@@ -49,6 +49,9 @@
     <Compile Include="System\Net\Sockets\_ReceiveMessageOverlappedAsyncResult.cs" />
     <Compile Include="System\Net\Sockets\TransportType.cs" />
     <Compile Include="System\Net\StartIPOptions.cs"/>
+    
+    <!-- Shims -->
+    <Compile Include="Shims\_NetworkingPerfCounters.cs"/>
 
     <!-- Logging -->
     <Compile Include="$(CommonPath)\System\Net\Shims\TraceSource.cs">
@@ -90,7 +93,19 @@
     </Compile>
     
     <Compile Include="$(CommonPath)\System\Net\_BufferOffsetSize.cs">
-      <Link>Common\System\Net\_ContextAwareResult.cs</Link>
+      <Link>Common\System\Net\_BufferOffsetSize.cs</Link>
+    </Compile>
+
+    <Compile Include="$(CommonPath)\System\Net\ExceptionCheck.cs">
+      <Link>Common\System\Net\ExceptionCheck.cs</Link>
+    </Compile>
+
+    <Compile Include="$(CommonPath)\System\Net\TcpValidationHelpers.cs">
+      <Link>Common\System\Net\TcpValidationHelpers.cs</Link>
+    </Compile>
+
+    <Compile Include="$(CommonPath)\System\Net\_Win32.cs">
+      <Link>Common\System\Net\_Win32.cs</Link>
     </Compile>
 
     <Compile Include="$(CommonPath)\Microsoft\Win32\SafeHandles\SafeHandleZeroOrMinusOneIsInvalid.cs">
@@ -134,7 +149,39 @@
 
     <Compile Include="$(CommonPath)\Interop\Windows\Winsock\WSABuffer.cs">
       <Link>Interop\Windows\Winsock\WSABuffer.cs</Link>
-    </Compile>    
+    </Compile>
+
+    <Compile Include="$(CommonPath)\Interop\Windows\Winsock\Interop.ControlData.cs">
+      <Link>Interop\Windows\Winsock\Interop.ControlData.cs</Link>
+    </Compile>
+
+    <Compile Include="$(CommonPath)\Interop\Windows\Winsock\Interop.WSAMsg.cs">
+      <Link>Interop\Windows\Winsock\Interop.WSAMsg.cs</Link>
+    </Compile>
+
+    <Compile Include="$(CommonPath)\Interop\Windows\Winsock\Interop.WSASocketW.cs">
+      <Link>Interop\Windows\Winsock\Interop.WSASocketW.cs</Link>
+    </Compile>
+
+    <Compile Include="$(CommonPath)\Interop\Windows\Winsock\Interop.WSAStartup.cs">
+      <Link>Interop\Windows\Winsock\Interop.WSAStartup.cs</Link>
+    </Compile>
+
+    <Compile Include="$(CommonPath)\Interop\Windows\Winsock\Interop.WinsockBSD.cs">
+      <Link>Interop\Windows\Winsock\Interop.WinSockBSD.cs</Link>
+    </Compile>
+
+    <Compile Include="$(CommonPath)\Interop\Windows\Winsock\Interop.WinsockAsync.cs">
+      <Link>Interop\Windows\Winsock\Interop.WinSockAsync.cs</Link>
+    </Compile>
+
+    <Compile Include="$(CommonPath)\Interop\Windows\Winsock\Interop.getsockopt.cs">
+      <Link>Interop\Windows\Winsock\Interop.getsockopt.cs</Link>
+    </Compile>
+
+    <Compile Include="$(CommonPath)\Interop\Windows\Winsock\Interop.setsockopt.cs">
+      <Link>Interop\Windows\Winsock\Interop.setsockopt.cs</Link>
+    </Compile>
 
   </ItemGroup>
 

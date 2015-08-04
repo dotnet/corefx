@@ -52,7 +52,7 @@ namespace System.Net.Sockets
             {
                 throw new ArgumentNullException("localaddr");
             }
-            if (!ValidationHelper.ValidateTcpPort(port))
+            if (!TcpValidationHelpers.ValidatePortNumber(port))
             {
                 throw new ArgumentOutOfRangeException("port");
             }
@@ -66,7 +66,7 @@ namespace System.Net.Sockets
         {
             if (Logging.On) Logging.Enter(Logging.Sockets, "TcpListener.Create", "Port: " + port);
 
-            if (!ValidationHelper.ValidateTcpPort(port))
+            if (!TcpValidationHelpers.ValidatePortNumber(port))
             {
                 throw new ArgumentOutOfRangeException("port");
             }

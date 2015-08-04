@@ -113,7 +113,7 @@ namespace System.Net.Sockets
 
             unsafe
             {
-                errorCode = UnsafeSocketsNativeMethods.OSSOCK.WSAIoctl(
+                errorCode = Interop.Winsock.WSAIoctl(
                                socketHandle,
                                IoctlSocketConstants.SIOGETEXTENSIONFUNCTIONPOINTER,
                                ref guid,

@@ -490,7 +490,7 @@ namespace System.Net.Sockets
                 {
                     //
                     // update our internal state after this socket error and throw
-                    SocketException socketException = new SocketException(errorCode);
+                    SocketException socketException = new SocketException((int)errorCode);
                     UpdateStatusAfterSocketError(socketException);
                     if (s_LoggingEnabled) Logging.Exception(Logging.Sockets, this, "Blocking", socketException);
                     throw socketException;
@@ -930,7 +930,7 @@ namespace System.Net.Sockets
             IPEndPoint ipEndPoint = endPointSnapshot as IPEndPoint;
             if (!OSSupportsIPv4 && ipEndPoint != null && ipEndPoint.Address.IsIPv4MappedToIPv6)
             {
-                SocketException socketException = new SocketException(SocketError.InvalidArgument);
+                SocketException socketException = new SocketException((int)SocketError.InvalidArgument);
                 UpdateStatusAfterSocketError(socketException);
                 if (s_LoggingEnabled) Logging.Exception(Logging.Sockets, this, "DoBind", socketException);
                 throw socketException;
@@ -1042,7 +1042,7 @@ namespace System.Net.Sockets
                 throw new ArgumentNullException("address");
             }
 
-            if (!ValidationHelper.ValidateTcpPort(port))
+            if (!TcpValidationHelpers.ValidatePortNumber(port))
             {
                 throw new ArgumentOutOfRangeException("port");
             }
@@ -1068,7 +1068,7 @@ namespace System.Net.Sockets
             {
                 throw new ArgumentNullException("host");
             }
-            if (!ValidationHelper.ValidateTcpPort(port))
+            if (!TcpValidationHelpers.ValidatePortNumber(port))
             {
                 throw new ArgumentOutOfRangeException("port");
             }
@@ -1098,7 +1098,7 @@ namespace System.Net.Sockets
             {
                 throw new ArgumentException(SR.net_sockets_invalid_ipaddress_length, "addresses");
             }
-            if (!ValidationHelper.ValidateTcpPort(port))
+            if (!TcpValidationHelpers.ValidatePortNumber(port))
             {
                 throw new ArgumentOutOfRangeException("port");
             }
@@ -1120,7 +1120,7 @@ namespace System.Net.Sockets
                     }
                     catch (Exception ex)
                     {
-                        if (NclUtilities.IsFatal(ex)) throw;
+                        if (ExceptionCheck.IsFatal(ex)) throw;
                         lastex = ex;
                     }
                 }
@@ -1306,7 +1306,7 @@ namespace System.Net.Sockets
             int bytesTransferred = Send(buffers, socketFlags, out errorCode);
             if (errorCode != SocketError.Success)
             {
-                throw new SocketException(errorCode);
+                throw new SocketException((int)errorCode);
             }
             return bytesTransferred;
         }
@@ -1391,7 +1391,7 @@ namespace System.Net.Sockets
                 UpdateStatusAfterSocketError(errorCode);
                 if (s_LoggingEnabled)
                 {
-                    Logging.Exception(Logging.Sockets, this, "Send", new SocketException(errorCode));
+                    Logging.Exception(Logging.Sockets, this, "Send", new SocketException((int)errorCode));
                     Logging.Exit(Logging.Sockets, this, "Send", 0);
                 }
                 return 0;
@@ -1423,7 +1423,7 @@ namespace System.Net.Sockets
             int bytesTransferred = Send(buffer, offset, size, socketFlags, out errorCode);
             if (errorCode != SocketError.Success)
             {
-                throw new SocketException(errorCode);
+                throw new SocketException((int)errorCode);
             }
             return bytesTransferred;
         }
@@ -1488,7 +1488,7 @@ namespace System.Net.Sockets
                 UpdateStatusAfterSocketError(errorCode);
                 if (s_LoggingEnabled)
                 {
-                    Logging.Exception(Logging.Sockets, this, "Send", new SocketException(errorCode));
+                    Logging.Exception(Logging.Sockets, this, "Send", new SocketException((int)errorCode));
                     Logging.Exit(Logging.Sockets, this, "Send", 0);
                 }
                 return 0;
@@ -1683,7 +1683,7 @@ namespace System.Net.Sockets
             int bytesTransferred = Receive(buffer, offset, size, socketFlags, out errorCode);
             if (errorCode != SocketError.Success)
             {
-                throw new SocketException(errorCode);
+                throw new SocketException((int)errorCode);
             }
             return bytesTransferred;
         }
@@ -1741,7 +1741,7 @@ namespace System.Net.Sockets
                 UpdateStatusAfterSocketError(errorCode);
                 if (s_LoggingEnabled)
                 {
-                    Logging.Exception(Logging.Sockets, this, "Receive", new SocketException(errorCode));
+                    Logging.Exception(Logging.Sockets, this, "Receive", new SocketException((int)errorCode));
                     Logging.Exit(Logging.Sockets, this, "Receive", 0);
                 }
                 return 0;
@@ -1789,7 +1789,7 @@ namespace System.Net.Sockets
             int bytesTransferred = Receive(buffers, socketFlags, out errorCode);
             if (errorCode != SocketError.Success)
             {
-                throw new SocketException(errorCode);
+                throw new SocketException((int)errorCode);
             }
             return bytesTransferred;
         }
@@ -1874,7 +1874,7 @@ namespace System.Net.Sockets
                 UpdateStatusAfterSocketError(errorCode);
                 if (s_LoggingEnabled)
                 {
-                    Logging.Exception(Logging.Sockets, this, "Receive", new SocketException(errorCode));
+                    Logging.Exception(Logging.Sockets, this, "Receive", new SocketException((int)errorCode));
                     Logging.Exit(Logging.Sockets, this, "Receive", 0);
                 }
                 return 0;
@@ -1997,7 +1997,7 @@ namespace System.Net.Sockets
                 //
                 // update our internal state after this socket error and throw
                 //
-                SocketException socketException = new SocketException(errorCode);
+                SocketException socketException = new SocketException((int)errorCode);
                 UpdateStatusAfterSocketError(socketException);
                 if (s_LoggingEnabled) Logging.Exception(Logging.Sockets, this, "ReceiveMessageFrom", socketException);
                 throw socketException;
@@ -2832,7 +2832,7 @@ namespace System.Net.Sockets
             {
                 throw new ArgumentNullException("host");
             }
-            if (!ValidationHelper.ValidateTcpPort(port))
+            if (!TcpValidationHelpers.ValidatePortNumber(port))
             {
                 throw new ArgumentOutOfRangeException("port");
             }
@@ -2878,7 +2878,7 @@ namespace System.Net.Sockets
             {
                 throw new ArgumentNullException("address");
             }
-            if (!ValidationHelper.ValidateTcpPort(port))
+            if (!TcpValidationHelpers.ValidatePortNumber(port))
             {
                 throw new ArgumentOutOfRangeException("port");
             }
@@ -2909,7 +2909,7 @@ namespace System.Net.Sockets
             {
                 throw new ArgumentException(SR.net_invalidAddressList, "addresses");
             }
-            if (!ValidationHelper.ValidateTcpPort(port))
+            if (!TcpValidationHelpers.ValidatePortNumber(port))
             {
                 throw new ArgumentOutOfRangeException("port");
             }
@@ -2999,7 +2999,7 @@ namespace System.Net.Sockets
                 //
                 // update our internal state after this socket error and throw
                 //
-                SocketException socketException = new SocketException(errorCode);
+                SocketException socketException = new SocketException((int)errorCode);
                 UpdateStatusAfterSocketError(socketException);
                 if (s_LoggingEnabled) Logging.Exception(Logging.Sockets, this, "BeginDisconnect", socketException);
                 throw socketException;
@@ -3041,7 +3041,7 @@ namespace System.Net.Sockets
                 //
                 // update our internal state after this socket error and throw
                 //
-                SocketException socketException = new SocketException(errorCode);
+                SocketException socketException = new SocketException((int)errorCode);
                 UpdateStatusAfterSocketError(socketException);
                 if (s_LoggingEnabled) Logging.Exception(Logging.Sockets, this, "Disconnect", socketException);
                 throw socketException;
@@ -3234,7 +3234,7 @@ namespace System.Net.Sockets
             IAsyncResult result = BeginSend(buffer, offset, size, socketFlags, out errorCode, callback, state);
             if (errorCode != SocketError.Success && errorCode != SocketError.IOPending)
             {
-                throw new SocketException(errorCode);
+                throw new SocketException((int)errorCode);
             }
             return result;
         }
@@ -3300,7 +3300,7 @@ namespace System.Net.Sockets
             SocketError errorCode = DoBeginSend(buffer, offset, size, socketFlags, asyncResult);
             if (errorCode != SocketError.Success && errorCode != SocketError.IOPending)
             {
-                throw new SocketException(errorCode);
+                throw new SocketException((int)errorCode);
             }
 
             if (s_LoggingEnabled) Logging.Exit(Logging.Sockets, this, "UnsafeBeginSend", asyncResult);
@@ -3354,7 +3354,7 @@ namespace System.Net.Sockets
             if (errorCode != SocketError.Success)
             {
                 UpdateStatusAfterSocketError(errorCode);
-                if (s_LoggingEnabled) Logging.Exception(Logging.Sockets, this, "BeginSend", new SocketException(errorCode));
+                if (s_LoggingEnabled) Logging.Exception(Logging.Sockets, this, "BeginSend", new SocketException((int)errorCode));
             }
             return errorCode;
         }
@@ -3368,7 +3368,7 @@ namespace System.Net.Sockets
             IAsyncResult result = BeginSend(buffers, socketFlags, out errorCode, callback, state);
             if (errorCode != SocketError.Success && errorCode != SocketError.IOPending)
             {
-                throw new SocketException(errorCode);
+                throw new SocketException((int)errorCode);
             }
             return result;
         }
@@ -3459,7 +3459,7 @@ namespace System.Net.Sockets
             if (errorCode != SocketError.Success)
             {
                 UpdateStatusAfterSocketError(errorCode);
-                if (s_LoggingEnabled) Logging.Exception(Logging.Sockets, this, "BeginSend", new SocketException(errorCode));
+                if (s_LoggingEnabled) Logging.Exception(Logging.Sockets, this, "BeginSend", new SocketException((int)errorCode));
             }
             return errorCode;
         }
@@ -3486,7 +3486,7 @@ namespace System.Net.Sockets
             int bytesTransferred = EndSend(asyncResult, out errorCode);
             if (errorCode != SocketError.Success)
             {
-                throw new SocketException(errorCode);
+                throw new SocketException((int)errorCode);
             }
             return bytesTransferred;
         }
@@ -3546,7 +3546,7 @@ namespace System.Net.Sockets
                 UpdateStatusAfterSocketError(errorCode);
                 if (s_LoggingEnabled)
                 {
-                    Logging.Exception(Logging.Sockets, this, "EndSend", new SocketException(errorCode));
+                    Logging.Exception(Logging.Sockets, this, "EndSend", new SocketException((int)errorCode));
                     Logging.Exit(Logging.Sockets, this, "EndSend", 0);
                 }
                 return 0;
@@ -3683,7 +3683,7 @@ namespace System.Net.Sockets
                 // update our internal state after this socket error and throw
                 //
                 m_RightEndPoint = oldEndPoint;
-                SocketException socketException = new SocketException(errorCode);
+                SocketException socketException = new SocketException((int)errorCode);
                 UpdateStatusAfterSocketError(socketException);
                 if (s_LoggingEnabled) Logging.Exception(Logging.Sockets, this, "BeginSendTo", socketException);
                 throw socketException;
@@ -3801,7 +3801,7 @@ namespace System.Net.Sockets
             IAsyncResult result = BeginReceive(buffer, offset, size, socketFlags, out errorCode, callback, state);
             if (errorCode != SocketError.Success && errorCode != SocketError.IOPending)
             {
-                throw new SocketException(errorCode);
+                throw new SocketException((int)errorCode);
             }
             return result;
         }
@@ -3918,8 +3918,8 @@ namespace System.Net.Sockets
                 //
                 // update our internal state after this socket error and throw
                 UpdateStatusAfterSocketError(errorCode);
-                if (s_LoggingEnabled) Logging.Exception(Logging.Sockets, this, "BeginReceive", new SocketException(errorCode));
-                asyncResult.InvokeCallback(new SocketException(errorCode));
+                if (s_LoggingEnabled) Logging.Exception(Logging.Sockets, this, "BeginReceive", new SocketException((int)errorCode));
+                asyncResult.InvokeCallback(new SocketException((int)errorCode));
             }
 #if DEBUG
             else
@@ -3939,7 +3939,7 @@ namespace System.Net.Sockets
             IAsyncResult result = BeginReceive(buffers, socketFlags, out errorCode, callback, state);
             if (errorCode != SocketError.Success && errorCode != SocketError.IOPending)
             {
-                throw new SocketException(errorCode);
+                throw new SocketException((int)errorCode);
             }
             return result;
         }
@@ -4034,7 +4034,7 @@ namespace System.Net.Sockets
                 //
                 // update our internal state after this socket error and throw
                 UpdateStatusAfterSocketError(errorCode);
-                if (s_LoggingEnabled) Logging.Exception(Logging.Sockets, this, "BeginReceive", new SocketException(errorCode));
+                if (s_LoggingEnabled) Logging.Exception(Logging.Sockets, this, "BeginReceive", new SocketException((int)errorCode));
             }
 #if DEBUG
             else
@@ -4077,7 +4077,7 @@ namespace System.Net.Sockets
             int bytesTransferred = EndReceive(asyncResult, out errorCode);
             if (errorCode != SocketError.Success)
             {
-                throw new SocketException(errorCode);
+                throw new SocketException((int)errorCode);
             }
             return bytesTransferred;
         }
@@ -4144,7 +4144,7 @@ namespace System.Net.Sockets
                 UpdateStatusAfterSocketError(errorCode);
                 if (s_LoggingEnabled)
                 {
-                    Logging.Exception(Logging.Sockets, this, "EndReceive", new SocketException(errorCode));
+                    Logging.Exception(Logging.Sockets, this, "EndReceive", new SocketException((int)errorCode));
                     Logging.Exit(Logging.Sockets, this, "EndReceive", 0);
                 }
                 return 0;
@@ -4264,7 +4264,7 @@ namespace System.Net.Sockets
                 // update our internal state after this socket error and throw
                 //
                 m_RightEndPoint = oldEndPoint;
-                SocketException socketException = new SocketException(errorCode);
+                SocketException socketException = new SocketException((int)errorCode);
                 UpdateStatusAfterSocketError(socketException);
                 if (s_LoggingEnabled) Logging.Exception(Logging.Sockets, this, "BeginReceiveMessageFrom", socketException);
                 throw socketException;
@@ -4532,7 +4532,7 @@ namespace System.Net.Sockets
                 // update our internal state after this socket error and throw
                 //
                 m_RightEndPoint = oldEndPoint;
-                SocketException socketException = new SocketException(errorCode);
+                SocketException socketException = new SocketException((int)errorCode);
                 UpdateStatusAfterSocketError(socketException);
                 if (s_LoggingEnabled) Logging.Exception(Logging.Sockets, this, "BeginReceiveFrom", socketException);
                 throw socketException;
@@ -4707,7 +4707,7 @@ namespace System.Net.Sockets
                 // Notify about the completion outside the lock.
                 try
                 {
-                    asyncResult.InvokeCallback(new SocketException(SocketError.OperationAborted));
+                    asyncResult.InvokeCallback(new SocketException((int)SocketError.OperationAborted));
                 }
                 catch
                 {
@@ -4829,7 +4829,7 @@ namespace System.Net.Sockets
             //
             if (errorCode != SocketError.Success)
             {
-                SocketException socketException = new SocketException(errorCode);
+                SocketException socketException = new SocketException((int)errorCode);
                 UpdateStatusAfterSocketError(socketException);
                 if (s_LoggingEnabled) Logging.Exception(Logging.Sockets, this, "BeginAccept", socketException);
                 throw socketException;
@@ -5049,7 +5049,7 @@ namespace System.Net.Sockets
                 //
                 // update our internal state after this socket error and throw
                 //
-                SocketException socketException = new SocketException(errorCode);
+                SocketException socketException = new SocketException((int)errorCode);
                 UpdateStatusAfterSocketError(socketException);
                 if (s_LoggingEnabled) Logging.Exception(Logging.Sockets, this, "Shutdown", socketException);
                 throw socketException;
@@ -6273,7 +6273,7 @@ namespace System.Net.Sockets
                             // failed to initialize, throw
                             //
                             // WSAStartup does not set LastWin32Error
-                            throw new SocketException(errorCode);
+                            throw new SocketException((int)errorCode);
                         }
 
 #if !FEATURE_PAL
@@ -6449,7 +6449,7 @@ namespace System.Net.Sockets
             }
             catch (Exception exception)
             {
-                if (NclUtilities.IsFatal(exception)) throw;
+                if (ExceptionCheck.IsFatal(exception)) throw;
             }
 
             // make sure we're the first call to Dispose and no SetAsyncEventSelect is in progress
@@ -6467,7 +6467,7 @@ namespace System.Net.Sockets
                 }
                 catch (Exception exception)
                 {
-                    if (NclUtilities.IsFatal(exception)) throw;
+                    if (ExceptionCheck.IsFatal(exception)) throw;
                 }
                 return;
             }
@@ -7163,7 +7163,7 @@ namespace System.Net.Sockets
                 // update our internal state after this socket error and throw
                 //
                 m_RightEndPoint = oldEndPoint;
-                SocketException socketException = new SocketException(errorCode);
+                SocketException socketException = new SocketException((int)errorCode);
                 UpdateStatusAfterSocketError(socketException);
                 if (s_LoggingEnabled) Logging.Exception(Logging.Sockets, this, "BeginConnectEx", socketException);
                 throw socketException;
@@ -7473,7 +7473,7 @@ namespace System.Net.Sockets
                 //
                 // update our internal state after this socket error and throw
                 //
-                SocketException socketException = new SocketException(errorCode);
+                SocketException socketException = new SocketException((int)errorCode);
                 UpdateStatusAfterSocketError(socketException);
                 if (s_LoggingEnabled) Logging.Exception(Logging.Sockets, this, "BeginMultipleSend", socketException);
                 throw socketException;

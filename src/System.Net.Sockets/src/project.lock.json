@@ -159,6 +159,17 @@
           "lib/dotnet/System.IO.FileSystem.Primitives.dll": {}
         }
       },
+      "System.Net.NameResolution/4.0.0-beta-23127": {
+        "dependencies": {
+          "System.Private.Networking": "4.0.0-beta-23127"
+        },
+        "compile": {
+          "ref/dotnet/System.Net.NameResolution.dll": {}
+        },
+        "runtime": {
+          "lib/DNXCore50/System.Net.NameResolution.dll": {}
+        }
+      },
       "System.Net.Primitives/4.0.10-beta-23127": {
         "dependencies": {
           "System.Private.Networking": "4.0.0-beta-23127"
@@ -506,12 +517,15 @@
           "lib/DNXCore50/System.Threading.Overlapped.dll": {}
         }
       },
-      "System.Threading.Tasks/4.0.0-beta-23127": {
+      "System.Threading.Tasks/4.0.10-beta-23127": {
         "dependencies": {
           "System.Runtime": "4.0.0-beta-23127"
         },
         "compile": {
           "ref/dotnet/System.Threading.Tasks.dll": {}
+        },
+        "runtime": {
+          "lib/DNXCore50/System.Threading.Tasks.dll": {}
         }
       },
       "System.Threading.ThreadPool/4.0.10-beta-23127": {
@@ -987,6 +1001,36 @@
         "ref/MonoAndroid10/_._",
         "ref/MonoTouch10/_._",
         "ref/net46/System.IO.FileSystem.Primitives.dll",
+        "ref/xamarinios10/_._",
+        "ref/xamarinmac20/_._"
+      ]
+    },
+    "System.Net.NameResolution/4.0.0-beta-23127": {
+      "sha512": "pQHD00oGfbaeoHFgqtCtw9NJP5SRl5DaI2pEBWQME+iaDKU7HAmKnFC2w8KwS7KjDM/MT8nyONZqLGt+yOjXzw==",
+      "files": [
+        "System.Net.NameResolution.4.0.0-beta-23127.nupkg",
+        "System.Net.NameResolution.4.0.0-beta-23127.nupkg.sha512",
+        "System.Net.NameResolution.nuspec",
+        "lib/DNXCore50/System.Net.NameResolution.dll",
+        "lib/MonoAndroid10/_._",
+        "lib/MonoTouch10/_._",
+        "lib/net46/System.Net.NameResolution.dll",
+        "lib/xamarinios10/_._",
+        "lib/xamarinmac20/_._",
+        "ref/dotnet/System.Net.NameResolution.dll",
+        "ref/dotnet/System.Net.NameResolution.xml",
+        "ref/dotnet/de/System.Net.NameResolution.xml",
+        "ref/dotnet/es/System.Net.NameResolution.xml",
+        "ref/dotnet/fr/System.Net.NameResolution.xml",
+        "ref/dotnet/it/System.Net.NameResolution.xml",
+        "ref/dotnet/ja/System.Net.NameResolution.xml",
+        "ref/dotnet/ko/System.Net.NameResolution.xml",
+        "ref/dotnet/ru/System.Net.NameResolution.xml",
+        "ref/dotnet/zh-hans/System.Net.NameResolution.xml",
+        "ref/dotnet/zh-hant/System.Net.NameResolution.xml",
+        "ref/MonoAndroid10/_._",
+        "ref/MonoTouch10/_._",
+        "ref/net46/System.Net.NameResolution.dll",
         "ref/xamarinios10/_._",
         "ref/xamarinmac20/_._"
       ]
@@ -1702,19 +1746,18 @@
         "ref/net46/System.Threading.Overlapped.dll"
       ]
     },
-    "System.Threading.Tasks/4.0.0-beta-23127": {
-      "sha512": "IF6aSdAJwdUyofELbt4+F6EaB5PQEvnqEbahkDSBbjl/m/gkC+TuT7IhOI6SocsFrebiKcUOUk5x/BQMtq1wEg==",
+    "System.Threading.Tasks/4.0.10-beta-23127": {
+      "serviceable": true,
+      "sha512": "5K6t1u3aT7Yh8PbqmXyTnjDo4OJWDCCqHmAccauJ35hnXthzgSBiMvVr2wxtAl7A8eK/lVcSPKJIheJ6MZnLcg==",
       "files": [
-        "License.rtf",
-        "System.Threading.Tasks.4.0.0-beta-23127.nupkg",
-        "System.Threading.Tasks.4.0.0-beta-23127.nupkg.sha512",
+        "System.Threading.Tasks.4.0.10-beta-23127.nupkg",
+        "System.Threading.Tasks.4.0.10-beta-23127.nupkg.sha512",
         "System.Threading.Tasks.nuspec",
+        "lib/DNXCore50/System.Threading.Tasks.dll",
         "lib/MonoAndroid10/_._",
         "lib/MonoTouch10/_._",
-        "lib/net45/_._",
-        "lib/win8/_._",
-        "lib/wp80/_._",
-        "lib/wpa81/_._",
+        "lib/net46/_._",
+        "lib/netcore50/System.Threading.Tasks.dll",
         "lib/xamarinios10/_._",
         "lib/xamarinmac20/_._",
         "ref/dotnet/System.Threading.Tasks.dll",
@@ -1730,23 +1773,10 @@
         "ref/dotnet/zh-hant/System.Threading.Tasks.xml",
         "ref/MonoAndroid10/_._",
         "ref/MonoTouch10/_._",
-        "ref/net45/_._",
-        "ref/netcore50/System.Threading.Tasks.dll",
-        "ref/netcore50/System.Threading.Tasks.xml",
-        "ref/netcore50/de/System.Threading.Tasks.xml",
-        "ref/netcore50/es/System.Threading.Tasks.xml",
-        "ref/netcore50/fr/System.Threading.Tasks.xml",
-        "ref/netcore50/it/System.Threading.Tasks.xml",
-        "ref/netcore50/ja/System.Threading.Tasks.xml",
-        "ref/netcore50/ko/System.Threading.Tasks.xml",
-        "ref/netcore50/ru/System.Threading.Tasks.xml",
-        "ref/netcore50/zh-hans/System.Threading.Tasks.xml",
-        "ref/netcore50/zh-hant/System.Threading.Tasks.xml",
-        "ref/win8/_._",
-        "ref/wp80/_._",
-        "ref/wpa81/_._",
+        "ref/net46/_._",
         "ref/xamarinios10/_._",
-        "ref/xamarinmac20/_._"
+        "ref/xamarinmac20/_._",
+        "runtimes/win8-aot/lib/netcore50/System.Threading.Tasks.dll"
       ]
     },
     "System.Threading.ThreadPool/4.0.10-beta-23127": {
@@ -1789,7 +1819,7 @@
       "System.Runtime.Extensions >= 4.0.10-beta-*",
       "System.Resources.ResourceManager >= 4.0.0-beta-*",
       "System.Threading >= 4.0.0-beta-*",
-      "System.Threading.Tasks >= 4.0.0-beta-*",
+      "System.Threading.Tasks >= 4.0.10-beta-*",
       "System.Runtime.InteropServices >= 4.0.20-beta-*",
       "System.Runtime.Handles >= 4.0.0-beta-*",
       "System.IO >= 4.0.10-beta-*",
@@ -1805,7 +1835,8 @@
       "System.Threading.ThreadPool >= 4.0.10-beta-*",
       "System.Threading.Overlapped >= 4.0.0-beta-*",
       "System.Security.Principal.Windows >= 4.0.0-beta-*",
-      "System.Net.Primitives >= 4.0.10-beta-*"
+      "System.Net.Primitives >= 4.0.10-beta-*",
+      "System.Net.NameResolution >= 4.0.0-beta-*"
     ],
     "DNXCore,Version=v5.0": []
   }

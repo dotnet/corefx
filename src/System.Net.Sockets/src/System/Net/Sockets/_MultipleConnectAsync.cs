@@ -49,7 +49,7 @@ namespace System.Net.Sockets
                 // fail synchronously from here.  Once State.DnsQuery is set, the Cancel() call will handle calling AsyncFail.
                 if (_state == State.Canceled)
                 {
-                    SyncFail(new SocketException(SocketError.OperationAborted));
+                    SyncFail(new SocketException((int)SocketError.OperationAborted));
                     return false;
                 }
 
@@ -150,7 +150,7 @@ namespace System.Net.Sockets
                     // If Cancel was called before we got the lock, the Socket will be closed soon.  We need to report
                     // OperationAborted (even though the connection actually completed), or the user will try to use a 
                     // closed Socket.
-                    exception = new SocketException(SocketError.OperationAborted);
+                    exception = new SocketException((int)SocketError.OperationAborted);
                 }
                 else
                 {
@@ -166,7 +166,7 @@ namespace System.Net.Sockets
                     {
                         // The socket was closed while the connect was in progress.  This can happen if the user
                         // closes the socket, and is equivalent to a call to CancelConnectAsync
-                        exception = new SocketException(SocketError.OperationAborted);
+                        exception = new SocketException((int)SocketError.OperationAborted);
                         _state = State.Canceled;
                     }
                     else
@@ -189,7 +189,7 @@ namespace System.Net.Sockets
                             {
                                 // If the error is NoData, that means there are no more IPAddresses to attempt
                                 // a connection to.  Return the last error from an actual connection instead.
-                                exception = new SocketException(currentFailure);
+                                exception = new SocketException((int)currentFailure);
                             }
                             else
                             {
@@ -223,7 +223,7 @@ namespace System.Net.Sockets
 
                 if (attemptAddress == null)
                 {
-                    return new SocketException(SocketError.NoData);
+                    return new SocketException((int)SocketError.NoData);
                 }
 
                 GlobalLog.Assert(attemptSocket != null, "MultipleConnectAsync.AttemptConnection: attemptSocket is null!");
@@ -232,14 +232,14 @@ namespace System.Net.Sockets
 
                 if (!attemptSocket.ConnectAsync(internalArgs))
                 {
-                    return new SocketException(internalArgs.SocketError);
+                    return new SocketException((int)internalArgs.SocketError);
                 }
             }
             catch (ObjectDisposedException)
             {
                 // This can happen if the user closes the socket, and is equivalent to a call 
                 // to CancelConnectAsync
-                return new SocketException(SocketError.OperationAborted);
+                return new SocketException((int)SocketError.OperationAborted);
             }
             catch (Exception e)
             {
@@ -359,7 +359,7 @@ namespace System.Net.Sockets
         // Call AsyncFail on a threadpool thread so it's asynchronous with respect to Cancel().
         private void CallAsyncFail(object ignored)
         {
-            AsyncFail(new SocketException(SocketError.OperationAborted));
+            AsyncFail(new SocketException((int)SocketError.OperationAborted));
         }
 
         protected abstract IPAddress GetNextAddress(out Socket attemptSocket);

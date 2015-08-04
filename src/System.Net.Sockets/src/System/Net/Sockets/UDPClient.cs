@@ -84,7 +84,7 @@ namespace System.Net.Sockets
             //
             // parameter validation
             //
-            if (!ValidationHelper.ValidateTcpPort(port))
+            if (!TcpValidationHelpers.ValidatePortNumber(port))
             {
                 throw new ArgumentOutOfRangeException("port");
             }
@@ -156,7 +156,7 @@ namespace System.Net.Sockets
             {
                 throw new ArgumentNullException("hostname");
             }
-            if (!ValidationHelper.ValidateTcpPort(port))
+            if (!TcpValidationHelpers.ValidatePortNumber(port))
             {
                 throw new ArgumentOutOfRangeException("port");
             }
@@ -352,7 +352,7 @@ namespace System.Net.Sockets
             {
                 throw new ArgumentNullException("hostname");
             }
-            if (!ValidationHelper.ValidateTcpPort(port))
+            if (!TcpValidationHelpers.ValidatePortNumber(port))
             {
                 throw new ArgumentOutOfRangeException("port");
             }
@@ -431,7 +431,7 @@ namespace System.Net.Sockets
                     }
                     catch (Exception ex)
                     {
-                        if (NclUtilities.IsFatal(ex))
+                        if (ExceptionCheck.IsFatal(ex))
                         {
                             throw;
                         }
@@ -442,7 +442,7 @@ namespace System.Net.Sockets
 
             catch (Exception ex)
             {
-                if (NclUtilities.IsFatal(ex))
+                if (ExceptionCheck.IsFatal(ex))
                 {
                     throw;
                 }
@@ -473,7 +473,7 @@ namespace System.Net.Sockets
                     if (lastex != null)
                         throw lastex;
                     else
-                        throw new SocketException(SocketError.NotConnected);
+                        throw new SocketException((int)SocketError.NotConnected);
                 }
             }
         }
@@ -497,7 +497,7 @@ namespace System.Net.Sockets
             {
                 throw new ArgumentNullException("addr");
             }
-            if (!ValidationHelper.ValidateTcpPort(port))
+            if (!TcpValidationHelpers.ValidatePortNumber(port))
             {
                 throw new ArgumentOutOfRangeException("port");
             }
@@ -948,7 +948,7 @@ namespace System.Net.Sockets
 
             if (_family != AddressFamily.InterNetwork)
             {
-                throw new SocketException(SocketError.OperationNotSupported);
+                throw new SocketException((int)SocketError.OperationNotSupported);
             }
 
             MulticastOption mcOpt = new MulticastOption(multicastAddr, localAddress);
@@ -992,7 +992,7 @@ namespace System.Net.Sockets
             //
             if (_family != AddressFamily.InterNetworkV6)
             {
-                throw new SocketException(SocketError.OperationNotSupported);
+                throw new SocketException((int)SocketError.OperationNotSupported);
             }
 
             IPv6MulticastOption mcOpt = new IPv6MulticastOption(multicastAddr, ifindex);
@@ -1119,7 +1119,7 @@ namespace System.Net.Sockets
             //
             if (_family != AddressFamily.InterNetworkV6)
             {
-                throw new SocketException(SocketError.OperationNotSupported);
+                throw new SocketException((int)SocketError.OperationNotSupported);
             }
 
             IPv6MulticastOption mcOpt = new IPv6MulticastOption(multicastAddr, ifindex);

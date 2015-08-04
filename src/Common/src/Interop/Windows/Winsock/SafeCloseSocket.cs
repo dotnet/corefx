@@ -89,7 +89,7 @@ namespace System.Net.Sockets
                         }
                         catch (Exception exception)
                         {
-                            if (NclUtilities.IsFatal(exception)) throw;
+                            if (ExceptionCheck.IsFatal(exception)) throw;
                             CloseAsIs();
                             throw;
                         }
@@ -274,7 +274,7 @@ namespace System.Net.Sockets
             }
             catch (Exception exception)
             {
-                if (!NclUtilities.IsFatal(exception))
+                if (!ExceptionCheck.IsFatal(exception))
                 {
                     GlobalLog.Assert("SafeCloseSocket::CloseAsIs(handle:" + handle.ToString("x") + ")", exception.Message);
                 }
@@ -318,7 +318,7 @@ namespace System.Net.Sockets
                     {
                         GlobalLog.Print("SafeCloseSocket::ReleaseHandle(handle:" + handle.ToString("x") + ") Following 'blockable' branch.");
 
-                        errorCode = UnsafeSocketsNativeMethods.SafeNetHandles.closesocket(handle);
+                        errorCode = Interop.Winsock.closesocket(handle);
 #if DEBUG
                         _closeSocketHandle = handle;
                         _closeSocketResult = errorCode;
@@ -335,9 +335,9 @@ namespace System.Net.Sockets
                         // The socket must be non-blocking with a linger timeout set.
                         // We have to set the socket to blocking.
                         int nonBlockCmd = 0;
-                        errorCode = UnsafeSocketsNativeMethods.SafeNetHandles.ioctlsocket(
+                        errorCode = Interop.Winsock.ioctlsocket(
                             handle,
-                            IoctlSocketConstants.FIONBIO,
+                            Interop.Winsock.IoctlSocketConstants.FIONBIO,
                             ref nonBlockCmd);
                         if (errorCode == SocketError.SocketError) errorCode = (SocketError)Marshal.GetLastWin32Error();
                         GlobalLog.Print("SafeCloseSocket::ReleaseHandle(handle:" + handle.ToString("x") + ") ioctlsocket()#1:" + errorCode.ToString());
@@ -345,16 +345,16 @@ namespace System.Net.Sockets
                         // This can fail if there's a pending WSAEventSelect.  Try canceling it.
                         if (errorCode == SocketError.InvalidArgument)
                         {
-                            errorCode = UnsafeSocketsNativeMethods.SafeNetHandles.WSAEventSelect(
+                            errorCode = Interop.Winsock.WSAEventSelect(
                                 handle,
                                 IntPtr.Zero,
-                                AsyncEventBits.FdNone);
+                                Interop.Winsock.AsyncEventBits.FdNone);
                             GlobalLog.Print("SafeCloseSocket::ReleaseHandle(handle:" + handle.ToString("x") + ") WSAEventSelect():" + (errorCode == SocketError.SocketError ? (SocketError)Marshal.GetLastWin32Error() : errorCode).ToString());
 
                             // Now retry the ioctl.
-                            errorCode = UnsafeSocketsNativeMethods.SafeNetHandles.ioctlsocket(
+                            errorCode = Interop.Winsock.ioctlsocket(
                                 handle,
-                                IoctlSocketConstants.FIONBIO,
+                                Interop.Winsock.IoctlSocketConstants.FIONBIO,
                                 ref nonBlockCmd);
                             GlobalLog.Print("SafeCloseSocket::ReleaseHandle(handle:" + handle.ToString("x") + ") ioctlsocket#2():" + (errorCode == SocketError.SocketError ? (SocketError)Marshal.GetLastWin32Error() : errorCode).ToString());
                         }
@@ -362,7 +362,7 @@ namespace System.Net.Sockets
                         // If that succeeded, try again.
                         if (errorCode == SocketError.Success)
                         {
-                            errorCode = UnsafeSocketsNativeMethods.SafeNetHandles.closesocket(handle);
+                            errorCode = Interop.Winsock.closesocket(handle);
 #if DEBUG
                             _closeSocketHandle = handle;
                             _closeSocketResult = errorCode;
@@ -381,11 +381,11 @@ namespace System.Net.Sockets
                     }
 
                     // By default or if CloseAsIs() path failed, set linger timeout to zero to get an abortive close (RST).
-                    Linger lingerStruct;
+                    Interop.Winsock.Linger lingerStruct;
                     lingerStruct.OnOff = 1;
                     lingerStruct.Time = 0;
 
-                    errorCode = UnsafeSocketsNativeMethods.SafeNetHandles.setsockopt(
+                    errorCode = Interop.Winsock.setsockopt(
                         handle,
                         SocketOptionLevel.Socket,
                         SocketOptionName.Linger,
@@ -403,7 +403,7 @@ namespace System.Net.Sockets
                         return ret = false;
                     }
 
-                    errorCode = UnsafeSocketsNativeMethods.SafeNetHandles.closesocket(handle);
+                    errorCode = Interop.Winsock.closesocket(handle);
 #if DEBUG
                     _closeSocketHandle = handle;
                     _closeSocketResult = errorCode;
@@ -415,7 +415,7 @@ namespace System.Net.Sockets
                 }
                 catch (Exception exception)
                 {
-                    if (!NclUtilities.IsFatal(exception))
+                    if (!ExceptionCheck.IsFatal(exception))
                     {
                         GlobalLog.Assert("SafeCloseSocket::ReleaseHandle(handle:" + handle.ToString("x") + ")", exception.Message);
                     }
@@ -475,7 +475,7 @@ namespace System.Net.Sockets
             internal unsafe static InnerSafeCloseSocket CreateWSASocket(byte* pinnedBuffer)
             {
                 //-1 is the value for FROM_PROTOCOL_INFO
-                InnerSafeCloseSocket result = UnsafeSocketsNativeMethods.OSSOCK.WSASocketW((AddressFamily)(-1), (SocketType)(-1), (ProtocolType)(-1), pinnedBuffer, 0, SocketConstructorFlags.WSA_FLAG_OVERLAPPED);
+                InnerSafeCloseSocket result = Interop.Winsock.WSASocketW((AddressFamily)(-1), (SocketType)(-1), (ProtocolType)(-1), pinnedBuffer, 0, SocketConstructorFlags.WSA_FLAG_OVERLAPPED);
                 if (result.IsInvalid)
                 {
                     result.SetHandleAsInvalid();
@@ -485,7 +485,7 @@ namespace System.Net.Sockets
 
             internal static InnerSafeCloseSocket CreateWSASocket(AddressFamily addressFamily, SocketType socketType, ProtocolType protocolType)
             {
-                InnerSafeCloseSocket result = UnsafeSocketsNativeMethods.OSSOCK.WSASocketW(addressFamily, socketType, protocolType, IntPtr.Zero, 0, SocketConstructorFlags.WSA_FLAG_OVERLAPPED);
+                InnerSafeCloseSocket result = Interop.Winsock.WSASocketW(addressFamily, socketType, protocolType, IntPtr.Zero, 0, SocketConstructorFlags.WSA_FLAG_OVERLAPPED);
                 if (result.IsInvalid)
                 {
                     result.SetHandleAsInvalid();
@@ -495,7 +495,7 @@ namespace System.Net.Sockets
 
             internal static InnerSafeCloseSocket Accept(SafeCloseSocket socketHandle, byte[] socketAddress, ref int socketAddressSize)
             {
-                InnerSafeCloseSocket result = UnsafeSocketsNativeMethods.SafeNetHandles.accept(socketHandle.DangerousGetHandle(), socketAddress, ref socketAddressSize);
+                InnerSafeCloseSocket result = Interop.Winsock.accept(socketHandle.DangerousGetHandle(), socketAddress, ref socketAddressSize);
                 if (result.IsInvalid)
                 {
                     result.SetHandleAsInvalid();

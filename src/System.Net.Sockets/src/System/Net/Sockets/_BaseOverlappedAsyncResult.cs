@@ -146,7 +146,7 @@ namespace System.Net.Sockets
                             // here we need to call WSAGetOverlappedResult() just so Marshal.GetLastWin32Error() will return the correct error.
                             //
                             SocketFlags ignore;
-                            bool success = UnsafeSocketsNativeMethods.OSSOCK.WSAGetOverlappedResult(
+                            bool success = Interop.Winsock.WSAGetOverlappedResult(
                                     socket.SafeHandle,
                                     asyncResult.NativeOverlapped,
                                     out numBytes,

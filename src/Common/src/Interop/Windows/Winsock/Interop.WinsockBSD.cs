@@ -9,6 +9,49 @@ internal static partial class Interop
 {
     internal static partial class Winsock
     {
+        //
+        // IO-Control operations are not directly exposed.
+        // blocking is controlled by "Blocking" property on socket (FIONBIO)
+        // amount of data available is queried by "Available" property (FIONREAD)
+        // The other flags are not exposed currently
+        //
+        internal static class IoctlSocketConstants
+        {
+            public const int FIONREAD = 0x4004667F;
+            public const int FIONBIO = unchecked((int)0x8004667E);
+            public const int FIOASYNC = unchecked((int)0x8004667D);
+            public const int SIOGETEXTENSIONFUNCTIONPOINTER = unchecked((int)0xC8000006);
+            //
+            // not likely to block (sync IO ok)
+            //
+            // FIONBIO
+            // FIONREAD
+            // SIOCATMARK
+            // SIO_RCVALL
+            // SIO_RCVALL_MCAST
+            // SIO_RCVALL_IGMPMCAST
+            // SIO_KEEPALIVE_VALS
+            // SIO_ASSOCIATE_HANDLE (opcode setting: I, T==1)
+            // SIO_ENABLE_CIRCULAR_QUEUEING (opcode setting: V, T==1)
+            // SIO_GET_BROADCAST_ADDRESS (opcode setting: O, T==1)
+            // SIO_GET_EXTENSION_FUNCTION_POINTER (opcode setting: O, I, T==1)
+            // SIO_MULTIPOINT_LOOPBACK (opcode setting: I, T==1)
+            // SIO_MULTICAST_SCOPE (opcode setting: I, T==1)
+            // SIO_TRANSLATE_HANDLE (opcode setting: I, O, T==1)
+            // SIO_ROUTING_INTERFACE_QUERY (opcode setting: I, O, T==1)
+            //
+            // likely to block (reccommended for async IO)
+            //
+            // SIO_FIND_ROUTE (opcode setting: O, T==1)
+            // SIO_FLUSH (opcode setting: V, T==1)
+            // SIO_GET_QOS (opcode setting: O, T==1)
+            // SIO_GET_GROUP_QOS (opcode setting: O, I, T==1)
+            // SIO_SET_QOS (opcode setting: I, T==1)
+            // SIO_SET_GROUP_QOS (opcode setting: I, T==1)
+            // SIO_ROUTING_INTERFACE_CHANGE (opcode setting: I, T==1)
+            // SIO_ADDRESS_LIST_CHANGE (opcode setting: T==1)
+        }
+        
         // This method is always blocking, so it uses an IntPtr.
         [DllImport(Interop.Libraries.Ws2_32, SetLastError = true)]
         internal unsafe static extern int send(
@@ -112,33 +155,5 @@ internal static partial class Interop
                                             [In] int cmd,
                                             [In, Out] ref int argp
                                             );
-
-        //
-        // Argument structure for IP_ADD_MEMBERSHIP and IP_DROP_MEMBERSHIP.
-        //
-        [StructLayout(LayoutKind.Sequential)]
-        internal struct IPMulticastRequest
-        {
-            internal int MulticastAddress; // IP multicast address of group
-            internal int InterfaceAddress; // local IP address of interface
-    
-            internal static readonly int Size = Marshal.SizeOf<IPMulticastRequest>();
-        }
-    
-        [StructLayout(LayoutKind.Sequential)]
-        internal struct Linger
-        {
-            internal ushort OnOff; // option on/off
-            internal ushort Time; // linger time
-        }
-
-        [DllImport(Interop.Libraries.Ws2_32, ExactSpelling = true, SetLastError = true)]
-        internal static extern SocketError setsockopt(
-                                           [In] IntPtr handle,
-                                           [In] SocketOptionLevel optionLevel,
-                                           [In] SocketOptionName optionName,
-                                           [In] ref Linger linger,
-                                           [In] int optionLength
-                                           );
     }
 }
