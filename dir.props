@@ -235,6 +235,20 @@
     <TargetsUnix Condition="'$(TargetsLinux)' == 'true' or '$(TargetsOSX)' == 'true' or '$(TargetsFreeBSD)' == 'true'">true</TargetsUnix>
   </PropertyGroup>
 
+  <ItemGroup Condition="'$(TargetsUnix)'=='true'">
+    <!-- Skip building Windows specific projects when building Unix binaries -->
+    <ExcludeProjects Include="Microsoft.Win32.Primitives\src\Microsoft.Win32.Primitives.csproj" />
+    <ExcludeProjects Include="Microsoft.Win32.Primitives\tests\Microsoft.Win32.Primitives.Tests.csproj" />
+    <ExcludeProjects Include="Microsoft.Win32.Registry\src\Microsoft.Win32.Registry.csproj" />
+    <ExcludeProjects Include="Microsoft.Win32.Registry\tests\Microsoft.Win32.Registry.Tests.csproj" />
+    <ExcludeProjects Include="System.Net.Http.WinHttpHandler\src\System.Net.Http.WinHttpHandler.csproj" />
+    <ExcludeProjects Include="System.Net.Http.WinHttpHandler\tests\FunctionalTests\System.Net.Http.WinHttpHandler.Tests.csproj" />
+    <ExcludeProjects Include="System.Net.Http.WinHttpHandler\tests\UnitTests\System.Net.Http.WinHttpHandler.Unit.Tests.csproj" />
+    <ExcludeProjects Include="System.Security.Principal.Windows\src\System.Security.Principal.Windows.csproj" />
+    <ExcludeProjects Include="System.Security.Principal.Windows\tests\System.Security.Principal.Windows.Tests.csproj" />
+    <ExcludeProjects Include="System.Threading.Tasks.Dataflow\src\System.Threading.Tasks.Dataflow.WP8.csproj" />
+  </ItemGroup>
+
   <PropertyGroup>
     <!-- Work around known Dev14 bug - see
          https://connect.microsoft.com/VisualStudio/feedback/details/1000796/connect-file-uap-props-not-found-cant-build-a-portable-lib-on-vs14
