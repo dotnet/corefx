@@ -25,7 +25,6 @@
     <Compile Include="System\Net\Sockets\LingerOption.cs" />
     <Compile Include="System\Net\Sockets\MulticastOption.cs" />
     <Compile Include="System\Net\Sockets\NetworkStream.cs" />
-    <Compile Include="System\Net\Sockets\ProtocolFamily.cs" />
     <Compile Include="System\Net\Sockets\ProtocolType.cs" />
     <Compile Include="System\Net\Sockets\SelectMode.cs" />
     <Compile Include="System\Net\Sockets\Socket.cs" />
@@ -35,7 +34,6 @@
     <Compile Include="System\Net\Sockets\SocketOptionLevel.cs" />
     <Compile Include="System\Net\Sockets\SocketOptionName.cs" />
     <Compile Include="System\Net\Sockets\SocketShutdown.cs" />
-    <Compile Include="System\Net\Sockets\SocketType.cs" />
     <Compile Include="System\Net\Sockets\TCPClient.cs" />
     <Compile Include="System\Net\Sockets\TCPListener.cs" />
     <Compile Include="System\Net\Sockets\TransmitFileFlags.cs" />
@@ -51,93 +49,75 @@
     <Compile Include="System\Net\Sockets\_ReceiveMessageOverlappedAsyncResult.cs" />
     <Compile Include="System\Net\Sockets\TransportType.cs" />
     <Compile Include="System\Net\StartIPOptions.cs"/>
-    <Compile Include="System\Net\Sockets\Internal.cs"/>
-    <Compile Include="System\Net\Sockets\UnsafeNativeMethods.cs"/>
-    <Compile Include="System\Net\Sockets\_SafeNetHandles.cs"/>
 
-
-      <!-- Logging -->
+    <!-- Logging -->
     <Compile Include="$(CommonPath)\System\Net\Shims\TraceSource.cs">
-        <Link>Common\System\Net\Shims\TraceSource.cs</Link>
+      <Link>Common\System\Net\Shims\TraceSource.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\System\Net\Logging\Logging.cs">
-        <Link>Common\System\Net\Logging\Logging.cs</Link>
+      <Link>Common\System\Net\Logging\Logging.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\System\Net\Logging\GlobalLog.cs">
-        <Link>Common\System\Net\Logging\GlobalLog.cs</Link>
+      <Link>Common\System\Net\Logging\GlobalLog.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\System\Net\Logging\EventSourceLogging.cs">
-        <Link>Common\System\Net\Logging\EventSourceLogging.cs</Link>
+      <Link>Common\System\Net\Logging\EventSourceLogging.cs</Link>
     </Compile>
-
     <Compile Include="$(CommonPath)\System\Net\InternalException.cs">
-        <Link>Common\System\Net\InternalException.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\System\NotImplemented.cs">
-        <Link>Common\System\NotImplemented.cs</Link>
+      <Link>Common\System\Net\InternalException.cs</Link>
     </Compile>
 
+    <!-- Debug only --> 
+    <Compile Include="$(CommonPath)\System\Net\DebugSafeHandle.cs">
+      <Link>Common\System\Net\DebugSafeHandle.cs</Link>
+    </Compile>
+
+    <!-- System.Net common -->
     <Compile Include="$(CommonPath)\System\Net\_ContextAwareResult.cs">
-        <Link>Common\System\Net\_ContextAwareResult.cs</Link>
+      <Link>Common\System\Net\_ContextAwareResult.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\System\Net\_LazyAsyncResult.cs">
-        <Link>Common\System\Net\_LazyAsyncResult.cs</Link>
+      <Link>Common\System\Net\_LazyAsyncResult.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\System\Threading\ExecutionContext.cs">
-        <Link>Common\System\Threading\ExecutionContext.cs</Link>
+      <Link>Common\System\Threading\ExecutionContext.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\System\Net\Shims\DBNull.cs">
-        <Link>Common\System\Net\Shims\DBNull.cs</Link>
+      <Link>Common\System\Net\Shims\DBNull.cs</Link>
     </Compile>
 
-    <Compile Include="$(CommonPath)\System\Net\IntPtrHelper.cs">
-        <Link>Common\System\Net\IntPtrHelper.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\System\Net\UriScheme.cs">
-        <Link>Common\System\Net\UriScheme.cs</Link>
+    <Compile Include="$(CommonPath)\Microsoft\Win32\SafeHandles\SafeHandleZeroOrMinusOneIsInvalid.cs">
+      <Link>Common\Microsoft\Win32\SafeHandles\SafeHandleZeroOrMinusOneIsInvalid.cs</Link>
     </Compile>
 
-    <Compile Include="$(CommonPath)\System\Net\Shims\_NetworkingPerfCounters.cs" >
-        <Link>Common\System\Net\_NetworkingPerfCounters.cs</Link>
-    </Compile>
-      
-    <!-- Interop for Primitives, Sockets and NetworkInformation -->
-    <Compile Include="$(CommonPath)\Interop\Windows\SystemNet\Interop.Primitives.Manual.cs" >
-        <Link>Interop\Windows\SystemNet\Interop.Primitives.Manual.cs</Link>
-    </Compile>
-      
-    <Compile Include="$(CommonPath)\Interop\Windows\Interop.Libraries.cs" >
-        <Link>Interop\Windows\Interop.Libraries.cs</Link>
-    </Compile>
-      
-    <!-- Primitives, Sockets, NetworkInformation Common-->
-    <Compile Include="$(CommonPath)\System\Net\Internal.cs">
-        <Link>Common\System\Net\Internal.cs</Link>
-    </Compile>
-      
-    <Compile Include="$(CommonPath)\System\Net\UnsafeNativeMethods.cs">
-        <Link>Common\System\Net\UnsafeNativeMethods.cs</Link>
+    <!-- Interop -->
+    <Compile Include="$(CommonPath)\Interop\Windows\Interop.Libraries.cs">
+      <Link>Interop\Windows\Interop.Libraries.cs</Link>
     </Compile>
 
-    <Compile Include="$(CommonPath)\System\Net\_BufferOffsetSize.cs">
-        <Link>Common\System\Net\_BufferOffsetSize.cs</Link>
-    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\Winsock\ProtocolFamily.cs">
+      <Link>Interop\Windows\Winsock\ProtocolFamily.cs</Link>
+    </Compile>    
 
-    <Compile Include="$(CommonPath)\System\Net\_SafeNetHandles.cs">
-        <Link>Common\System\Net\_SafeNetHandles.cs</Link>
-    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\Winsock\SocketType.cs">
+      <Link>Interop\Windows\Winsock\SocketType.cs</Link>
+    </Compile>    
 
-    <Compile Include="$(CommonPath)\System\Net\_Win32.cs">
-        <Link>Common\System\Net\_Win32.cs</Link>
-    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\Winsock\SafeCloseSocket.cs">
+      <Link>Interop\Windows\Winsock\SafeCloseSocket.cs</Link>
+    </Compile>    
 
-    <Compile Include="$(CommonPath)\System\Net\NetworkInformation\nodetype.cs">
-        <Link>Common\System\Net\nodetype.cs</Link>
-    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\Winsock\SafeNativeOverlapped.cs">
+      <Link>Interop\Windows\Winsock\SafeNativeOverlapped.cs</Link>
+    </Compile>    
 
-    <Compile Include="$(CommonPath)\Interop\Windows\Winsock\_OSSOCK.cs">
-        <Link>Interop\Windows\Winsock\_OSSOCK.cs</Link>
-    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\Winsock\SafeOverlappedFree.cs">
+      <Link>Interop\Windows\Winsock\SafeOverlappedFree.cs</Link>
+    </Compile>    
+    <Compile Include="$(CommonPath)\Interop\Windows\mincore_obsolete\Interop.LocalAlloc.SafeOverlappedFree.cs">
+      <Link>Interop\Windows\mincore_obsolete\Interop.LocalAlloc.SafeOverlappedFree.cs</Link>
+    </Compile>    
+
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetsWindows)' == 'true' ">

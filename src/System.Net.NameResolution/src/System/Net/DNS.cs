@@ -294,6 +294,8 @@ namespace System.Net
                 int addressAsInt = BitConverter.ToInt32(addressBytes, 0);
 
 #if BIGENDIAN
+                // TODO: above code needs testing for BIGENDIAN.
+
                 addressAsInt = (int)(((uint)addressAsInt << 24) | (((uint)addressAsInt & 0x0000FF00) << 8) |
                     (((uint)addressAsInt >> 8) & 0x0000FF00) | ((uint)addressAsInt >> 24));
 #endif

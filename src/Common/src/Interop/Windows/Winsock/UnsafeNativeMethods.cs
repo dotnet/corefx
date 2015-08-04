@@ -672,22 +672,6 @@ namespace System.Net.Sockets
                                                      );
         } // class UnsafeSocketsNativeMethods.OSSOCK
 
-        // Because the regular SafeNetHandles tries to bind this MustRun method on type initialization, failing
-        // on legacy platforms.
-        internal static class SafeNetHandlesXPOrLater
-        {
-            [DllImport(Interop.Libraries.Ws2_32, ExactSpelling = true, CharSet = CharSet.Unicode, BestFitMapping = false, ThrowOnUnmappableChar = true, SetLastError = true)]
-            internal static extern int GetAddrInfoW(
-                [In] string nodename,
-                [In] string servicename,
-                [In] ref AddressInfo hints,
-                [Out] out SafeFreeAddrInfo handle
-                );
-
-            [DllImport(Interop.Libraries.Ws2_32, ExactSpelling = true, SetLastError = true)]
-            internal static extern void freeaddrinfo([In] IntPtr info);
-        }
-
         internal static class SafeNetHandles
         {
             // Blocking call - requires IntPtr instead of SafeCloseSocket.
