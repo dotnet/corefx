@@ -550,7 +550,7 @@ namespace System.Net.Sockets
             // if the user really wants complete control over Broadcast addresses he needs to
             // inherit from UdpClient and gain control over the Socket and do whatever is appropriate.
             //
-            if (Client != null && !_isBroadcast && ipAddress.IsBroadcast)
+            if (Client != null && !_isBroadcast && IsBroadcast(ipAddress))
             {
                 //
                 // we need to set the Broadcast socket option.
@@ -561,7 +561,18 @@ namespace System.Net.Sockets
             }
         }
 
-
+        private bool IsBroadcast(IPAddress address)
+        {
+            if (address.AddressFamily == AddressFamily.InterNetworkV6)
+            {
+                // No such thing as a broadcast address for IPv6
+                return false;
+            }
+            else
+            {
+                return address.Equals(IPAddress.Broadcast);
+            }
+        }
 
         /// <devdoc>
         ///    <para>

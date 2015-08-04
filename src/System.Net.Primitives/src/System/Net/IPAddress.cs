@@ -329,22 +329,6 @@ namespace System.Net
             }
         }
 
-        internal bool IsBroadcast
-        {
-            get
-            {
-                if (_family == AddressFamily.InterNetworkV6)
-                {
-                    // No such thing as a broadcast address for IPv6
-                    return false;
-                }
-                else
-                {
-                    return Address == Broadcast.Address;
-                }
-            }
-        }
-
         /// <devdoc>
         ///   <para>
         ///     Determines if an address is an IPv6 Multicast address
