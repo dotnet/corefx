@@ -6,7 +6,7 @@ using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace System.Net.Http.Unit.Tests
+namespace System.Net.Http.Tests
 {
     [Flags]
     public enum MockOptions

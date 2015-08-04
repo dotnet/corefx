@@ -18,47 +18,103 @@ namespace Internal.Cryptography.Pal
         private static DateTimeFormatInfo s_validityDateTimeFormatInfo;
 
         private SafeX509Handle _cert;
+        private SafeEvpPkeyHandle _privateKey;
         private X500DistinguishedName _subjectName;
         private X500DistinguishedName _issuerName;
 
-        internal unsafe OpenSslX509CertificateReader(byte[] data)
+        internal OpenSslX509CertificateReader(SafeX509Handle handle)
         {
-            fixed (byte* pDataFixed = data)
+            // X509_check_purpose has the effect of populating the sha1_hash value,
+            // and other "initialize" type things.
+            bool init = Interop.libcrypto.X509_check_purpose(handle, -1, 0);
+
+            if (!init)
             {
-                byte* pData = pDataFixed;
-                byte** ppData = &pData;
+                throw Interop.libcrypto.CreateOpenSslCryptographicException();
+            }
 
-                _cert = Interop.libcrypto.d2i_X509(IntPtr.Zero, ppData, data.Length);
+            _cert = handle;
+        }
+      
+        internal static ICertificatePal FromBio(SafeBioHandle bio, string password)
+        {
+            // Try reading the value as: PEM-X509, DER-X509, DER-PKCS12.
+            int bioPosition = Interop.NativeCrypto.BioTell(bio);
 
-                if (_cert.IsInvalid)
+            Debug.Assert(bioPosition >= 0);
+
+            SafeX509Handle cert = Interop.libcrypto.PEM_read_bio_X509_AUX(bio, IntPtr.Zero, IntPtr.Zero, IntPtr.Zero);
+
+            if (cert != null && !cert.IsInvalid)
+            {
+                return new OpenSslX509CertificateReader(cert);
+            }
+
+            // Rewind, try again.
+            Interop.NativeCrypto.BioSeek(bio, bioPosition);
+            cert = Interop.NativeCrypto.ReadX509AsDerFromBio(bio);
+
+            if (cert != null && !cert.IsInvalid)
+            {
+                return new OpenSslX509CertificateReader(cert);
+            }
+
+            // Rewind, try again.
+            Interop.NativeCrypto.BioSeek(bio, bioPosition);
+
+            OpenSslPkcs12Reader pfx;
+
+            if (OpenSslPkcs12Reader.TryRead(bio, out pfx))
+            {
+                using (pfx)
                 {
-                    throw new CryptographicException();
-                }
+                    pfx.Decrypt(password);
 
-                // X509_check_purpose has the effect of populating the sha1_hash value,
-                // and other "initialize" type things.
-                bool init = Interop.libcrypto.X509_check_purpose(_cert, -1, 0);
+                    ICertificatePal first = null;
 
-                if (!init)
-                {
-                    throw new CryptographicException(Interop.libcrypto.GetOpenSslErrorString());
+                    foreach (OpenSslX509CertificateReader certPal in pfx.ReadCertificates())
+                    {
+                        // When requesting an X509Certificate2 from a PFX only the first entry is
+                        // returned.  Other entries should be disposed.
+                        if (first == null)
+                        {
+                            first = certPal;
+                        }
+                        else
+                        {
+                            certPal.Dispose();
+                        }
+                    }
+
+                    return first;
                 }
             }
+
+            // Since we aren't going to finish reading, leaving the buffer where it was when we got
+            // it seems better than leaving it in some arbitrary other position.
+            // 
+            // But, before seeking back to start, save the Exception representing the last reported
+            // OpenSSL error in case the last BioSeek would change it.
+            Exception openSslException = Interop.libcrypto.CreateOpenSslCryptographicException();
+
+            Interop.NativeCrypto.BioSeek(bio, bioPosition);
+
+            throw openSslException;
         }
 
         public bool HasPrivateKey
         {
-            get { return false; }
-        }
-
-        public AsymmetricAlgorithm PrivateKey
-        {
-            get { return null; }
+            get { return _privateKey != null; }
         }
 
         public IntPtr Handle
         {
             get { return _cert == null ? IntPtr.Zero : _cert.DangerousGetHandle(); }
+        }
+
+        internal SafeX509Handle SafeHandle
+        {
+            get { return _cert; }
         }
 
         public string Issuer
@@ -75,22 +131,7 @@ namespace Internal.Cryptography.Pal
         {
             get
             {
-                int negativeSize = Interop.NativeCrypto.GetX509Thumbprint(_cert, null, 0);
-
-                if (negativeSize >= 0)
-                {
-                    throw new CryptographicException();
-                }
-
-                byte[] buf = new byte[-negativeSize];
-                int ret = Interop.NativeCrypto.GetX509Thumbprint(_cert, buf, buf.Length);
-
-                if (ret != 1)
-                {
-                    throw new CryptographicException();
-                }
-
-                return buf;
+                return Interop.NativeCrypto.GetX509Thumbprint(_cert);
             }
         }
 
@@ -107,22 +148,7 @@ namespace Internal.Cryptography.Pal
         {
             get
             {
-                int negativeLen = Interop.NativeCrypto.GetX509PublicKeyParameterBytes(_cert, null, 0);
-
-                if (negativeLen >= 0)
-                {
-                    throw new CryptographicException();
-                }
-
-                byte[] buf = new byte[-negativeLen];
-                int ret = Interop.NativeCrypto.GetX509PublicKeyParameterBytes(_cert, buf, buf.Length);
-
-                if (ret != 1)
-                {
-                    throw new CryptographicException();
-                }
-
-                return buf;
+                return Interop.NativeCrypto.GetX509PublicKeyParameterBytes(_cert);
             }
         }
 
@@ -245,28 +271,18 @@ namespace Internal.Cryptography.Pal
                 {
                     IntPtr ext = Interop.libcrypto.X509_get_ext(_cert, i);
 
-                    if (ext == IntPtr.Zero)
-                    {
-                        // This would happen on a bounds violation, but no error code is set.
-                        throw new CryptographicException();
-                    }
+                    Interop.libcrypto.CheckValidOpenSslHandle(ext);
 
                     IntPtr oidPtr = Interop.libcrypto.X509_EXTENSION_get_object(ext);
 
-                    if (oidPtr == IntPtr.Zero)
-                    {
-                        throw new CryptographicException();
-                    }
+                    Interop.libcrypto.CheckValidOpenSslHandle(oidPtr);
 
                     string oidValue = Interop.libcrypto.OBJ_obj2txt_helper(oidPtr);
                     Oid oid = new Oid(oidValue);
 
                     IntPtr dataPtr = Interop.libcrypto.X509_EXTENSION_get_data(ext);
 
-                    if (dataPtr == IntPtr.Zero)
-                    {
-                        throw new CryptographicException();
-                    }
+                    Interop.libcrypto.CheckValidOpenSslHandle(dataPtr);
 
                     byte[] extData = Interop.NativeCrypto.GetAsn1StringBytes(dataPtr);
                     bool critical = Interop.libcrypto.X509_EXTENSION_get_critical(ext);
@@ -279,9 +295,22 @@ namespace Internal.Cryptography.Pal
             }
         }
 
-        public void SetPrivateKey(AsymmetricAlgorithm privateKey, AsymmetricAlgorithm publicKey)
+        internal void SetPrivateKey(SafeEvpPkeyHandle privateKey)
         {
-            throw new NotImplementedException();
+            _privateKey = privateKey;
+        }
+
+        public RSA GetRSAPrivateKey()
+        {
+            if (_privateKey == null || _privateKey.IsInvalid)
+            {
+                return null;
+            }
+
+            using (SafeRsaHandle rsaHandle = Interop.libcrypto.EVP_PKEY_get1_RSA(_privateKey))
+            {
+                return new RSAOpenSsl(rsaHandle.DangerousGetHandle());
+            }
         }
 
         public string GetNameInfo(X509NameType nameType, bool forIssuer)
@@ -300,7 +329,7 @@ namespace Internal.Cryptography.Pal
 
                 if (read < 0)
                 {
-                    throw new CryptographicException(Interop.libcrypto.GetOpenSslErrorString());
+                    throw Interop.libcrypto.CreateOpenSslCryptographicException();
                 }
 
                 return builder.ToString();
@@ -309,10 +338,25 @@ namespace Internal.Cryptography.Pal
 
         public void AppendPrivateKeyInfo(StringBuilder sb)
         {
+            if (!HasPrivateKey)
+            {
+                return;
+            }
+
+            // There's nothing really to say about the key, just acknowledge there is one.
+            sb.AppendLine();
+            sb.AppendLine();
+            sb.AppendLine("[Private Key]");
         }
 
         public void Dispose()
         {
+            if (_privateKey != null)
+            {
+                _privateKey.Dispose();
+                _privateKey = null;
+            }
+
             if (_cert != null)
             {
                 _cert.Dispose();
@@ -322,26 +366,9 @@ namespace Internal.Cryptography.Pal
 
         private static X500DistinguishedName LoadX500Name(IntPtr namePtr)
         {
-            if (namePtr == IntPtr.Zero)
-            {
-                throw new CryptographicException();
-            }
+            Interop.libcrypto.CheckValidOpenSslHandle(namePtr);
 
-            int negativeSize = Interop.NativeCrypto.GetX509NameRawBytes(namePtr, null, 0);
-
-            if (negativeSize > 0)
-            {
-                throw new CryptographicException();
-            }
-
-            byte[] buf = new byte[-negativeSize];
-            int ret = Interop.NativeCrypto.GetX509NameRawBytes(namePtr, buf, buf.Length);
-
-            if (ret != 1)
-            {
-                throw new CryptographicException();
-            }
-
+            byte[] buf = Interop.NativeCrypto.GetX509NameRawBytes(namePtr);
             return new X500DistinguishedName(buf);
         }
 

@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using Test.Cryptography;
 using Xunit;
 
 namespace System.Security.Cryptography.X509Certificates.Tests
@@ -100,6 +101,8 @@ namespace System.Security.Cryptography.X509Certificates.Tests
             Assert.Equal(expectedParameters, pk.EncodedParameters.RawData);
         }
 
+        /*
+         * TODO: Move the spirit of this method to a GetRSAPublicKey test
         [Fact]
         public static void TestKey_RSA()
         {
@@ -122,5 +125,6 @@ namespace System.Security.Cryptography.X509Certificates.Tests
             Assert.Equal(expectedModulus, rsaParameters.Modulus);
             Assert.Equal(expectedExponent, rsaParameters.Exponent);
         }
+        */
     }
 }

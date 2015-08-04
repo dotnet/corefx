@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+# Enable globstar for the purposes of directory evaluation
+shopt -s globstar
+
 wait_on_pids()
 {
   # Wait on the last processes
@@ -128,6 +131,12 @@ create_test_overlay()
 	exit 1
   fi
   find $CoreFxBins -name '*.dll' -exec cp '{}' "$OverlayDir" ";"
+
+  # Then the native CoreFX binaries
+  #
+  # TODO: Currently, CI does not build the native CoreFX components so build them here
+  #       in the test phase for now.
+  ( $ProjectRoot/src/Native/build.sh && cp $ProjectRoot/bin/$OS.x64.$Configuration/Native/* $OverlayDir ) || exit 1
 }
 
 copy_test_overlay()
@@ -269,7 +278,7 @@ create_test_overlay
 TestsFailed=0
 numberOfProcesses=0
 maxProcesses=$(($(getconf _NPROCESSORS_ONLN)+1))
-for file in src/**/tests/*.Tests.csproj
+for file in src/**/tests/**/*.Tests.csproj
 do
   runtest $file &
   pids="$pids $!"

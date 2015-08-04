@@ -76,7 +76,7 @@ namespace System.IO
                         FileAttributes.System | FileAttributes.Temporary;
                     if ((value & ~allValidFlags) != 0)
                     {
-                        throw new ArgumentException(SR.Arg_InvalidFileAttrs);
+                        throw new ArgumentException(SR.Arg_InvalidFileAttrs, "value");
                     }
 
                     // The only thing we can reasonably change is whether the file object is readonly,
@@ -178,7 +178,14 @@ namespace System.IO
                         DateTimeOffset.FromUnixTimeSeconds(_fileinfo.btime) :
                         default(DateTimeOffset);
                 }
-                set { } // Not supported
+                set 
+                {
+                    // The ctime in Unix can be interpreted differently by different formats so there isn't
+                    // a reliable way to set this; however, we can't just do nothing since the FileSystemWatcher
+                    // specifically looks for this call to make a Metatdata Change, so we should set the 
+                    // LastAccessTime of the file to cause the metadata change we need.
+                    LastAccessTime = LastAccessTime;
+                }
             }
 
             public DateTimeOffset LastAccessTime
@@ -258,20 +265,18 @@ namespace System.IO
                     int errno = _fileinfoInitialized;
                     _fileinfoInitialized = -1;
 
-                    bool failedBecauseOfDirectory = _isDirectory;
-                    if (!failedBecauseOfDirectory && errno == Interop.Errors.ENOENT)
-                    {
-                        // Windows distinguishes between whether the directory or the file isn't found,
-                        // and throws a different exception in these cases.  We attempt to approximate that
-                        // here; there is a race condition here, where something could change between
-                        // when the error occurs and our checks, but it's the best we can do, and the
-                        // worst case in such a race condition (which could occur if the file system is
-                        // being manipulated concurrently with these checks) is that we throw a
-                        // FileNotFoundException instead of DirectoryNotFoundexception.
-                        failedBecauseOfDirectory = !Directory.Exists(Path.GetDirectoryName(_fullPath));
-                    }
+                    // Windows distinguishes between whether the directory or the file isn't found,
+                    // and throws a different exception in these cases.  We attempt to approximate that
+                    // here; there is a race condition here, where something could change between
+                    // when the error occurs and our checks, but it's the best we can do, and the
+                    // worst case in such a race condition (which could occur if the file system is
+                    // being manipulated concurrently with these checks) is that we throw a
+                    // FileNotFoundException instead of DirectoryNotFoundexception.
 
-                    throw Interop.GetExceptionForIoErrno(errno, _fullPath, failedBecauseOfDirectory);
+                    // directoryError is true only if a FileNotExists error was provided and the parent 
+                    // directory of the file represented by _fullPath is nonexistent
+                    bool directoryError = (errno == Interop.Errors.ENOENT && !Directory.Exists(Path.GetDirectoryName(PathHelpers.TrimEndingDirectorySeparator(_fullPath)))); // The destFile's path is invalid
+                    throw Interop.GetExceptionForIoErrno(errno, _fullPath, directoryError);
                 }
             }
         }

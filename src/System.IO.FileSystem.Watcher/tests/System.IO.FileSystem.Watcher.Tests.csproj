@@ -5,7 +5,6 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{20411A66-C7A4-4941-8FA2-66308365FD22}</ProjectGuid>
-    <ProjectTypeGuids>{786C830F-07A1-408B-BD7F-6EE04809D6DB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <OutputType>Library</OutputType>
     <AssemblyName>System.IO.FileSystem.Watcher.Tests</AssemblyName>
   </PropertyGroup>
@@ -33,7 +32,9 @@
     <Compile Include="FileSystemEventArgs.unit.cs" />
     <Compile Include="FileSystemWatcher.unit.cs" />
     <Compile Include="RenamedEventArgs.unit.cs" />
-    <Compile Include="$(CommonPath)\Interop\Interop.PlatformDetection.cs" />
+    <Compile Include="$(CommonPath)\Interop\Interop.PlatformDetection.cs">
+      <Link>Common\Interop\Interop.PlatformDetection.cs</Link>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <None Include="project.json" />

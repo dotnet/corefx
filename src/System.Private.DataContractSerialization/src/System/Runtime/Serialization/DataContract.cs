@@ -41,9 +41,35 @@ namespace System.Runtime.Serialization
 
 #if NET_NATIVE
         // this the global dictionary for data contracts introduced for multi-file.
-        private static Dictionary<Type, DataContract> s_dataContracts = new Dictionary<Type, DataContract>();
+        private static Func<Dictionary<Type, DataContract>> s_dataContractsInitializer;
+        private static Lazy<Dictionary<Type, DataContract>> s_dataContracts = new Lazy<Dictionary<Type, DataContract>>(InitDataContracts);
 
-        public static Dictionary<Type, DataContract> GetDataContracts()
+        public static Func<Dictionary<Type, DataContract>> DataContractsInitializer
+        {
+            get
+            {
+                return s_dataContractsInitializer;
+            }
+            set
+            {
+                Fx.Assert(s_dataContractsInitializer == null, "s_dataContractsInitializer is already initialized.");
+                s_dataContractsInitializer = value;
+            }
+        }
+
+        private static Dictionary<Type, DataContract> InitDataContracts()
+        {
+            if (DataContractsInitializer != null)
+            {
+                return DataContractsInitializer();
+            }
+            else
+            {
+                return new Dictionary<Type, DataContract>();
+            }
+        }
+
+        public static Lazy<Dictionary<Type, DataContract>> GetDataContracts()
         {
             return s_dataContracts;
         }
@@ -75,7 +101,7 @@ namespace System.Runtime.Serialization
             // this method used to be rewritten by an IL transfrom
             // with the restructuring for multi-file, it has become a regular method
             DataContract result;
-            return s_dataContracts.TryGetValue(type, out result) ? result : null;
+            return s_dataContracts.Value.TryGetValue(type, out result) ? result : null;
         }
 
         internal static bool TryGetDataContractFromGeneratedAssembly(Type type, out DataContract dataContract)
@@ -103,6 +129,12 @@ namespace System.Runtime.Serialization
         }
 #endif
 
+#if !NET_NATIVE && MERGE_DCJS
+        internal MethodInfo ParseMethod
+        {
+            get { return _helper.ParseMethod; }
+        }
+#endif
         internal static DataContract GetDataContract(Type type)
         {
             return GetDataContract(type.TypeHandle, type);
@@ -522,6 +554,11 @@ namespace System.Runtime.Serialization
             private XmlQualifiedName _stableName;
             private XmlDictionaryString _name;
             private XmlDictionaryString _ns;
+
+#if !NET_NATIVE && MERGE_DCJS
+            private MethodInfo _parseMethod;
+            private bool _parseMethodSet;
+#endif
 
             /// <SecurityNote>
             /// Critical - in deserialization, we initialize an object instance passing this Type to GetUninitializedObject method
@@ -1150,6 +1187,27 @@ namespace System.Runtime.Serialization
             {
                 get { return false; }
             }
+
+#if !NET_NATIVE && MERGE_DCJS
+            internal MethodInfo ParseMethod
+            {
+                get
+                {
+                    if (!_parseMethodSet)
+                    {
+                        MethodInfo method = UnderlyingType.GetMethod(Globals.ParseMethodName, BindingFlags.Public | BindingFlags.Static, new Type[] { typeof(string) });
+
+                        if (method != null && method.ReturnType == UnderlyingType)
+                        {
+                            _parseMethod = method;
+                        }
+
+                        _parseMethodSet = true;
+                    }
+                    return _parseMethod;
+                }
+            }
+#endif
 
             internal virtual void WriteRootElement(XmlWriterDelegator writer, XmlDictionaryString name, XmlDictionaryString ns)
             {
@@ -2173,6 +2231,13 @@ namespace System.Runtime.Serialization
             }
             return false;
         }
+
+#if !NET_NATIVE && MERGE_DCJS
+        internal static string SanitizeTypeName(string typeName)
+        {
+            return typeName.Replace('.', '_');
+        }
+#endif
     }
 
     internal interface IGenericNameProvider

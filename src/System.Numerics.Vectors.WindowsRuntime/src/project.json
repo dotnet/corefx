@@ -1,0 +1,9 @@
+{
+  "dependencies": {
+    "System.Numerics.Vectors": "4.1.0",
+    "System.Runtime.WindowsRuntime": "4.0.0"
+  },
+  "frameworks": {
+    "dnxcore50": {}
+  }
+}

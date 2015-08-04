@@ -15,6 +15,7 @@ namespace Test
         private const int KeyFactor = 4;
         private const int GroupFactor = 8;
 
+        // Get ranges from 0 to each count.  The data is random, seeded from the size of the range.
         public static IEnumerable<object[]> OrderByRandomData(object[] counts)
         {
             foreach (int count in counts.Cast<int>())
@@ -35,6 +36,27 @@ namespace Test
                 data[i] = source.Next(count);
             }
             return data;
+        }
+
+        // Get a set of ranges, from 0 to each count, and an additional parameter denoting degree of parallelism.
+        public static IEnumerable<object[]> OrderByThreadedData(object[] counts, object[] degrees)
+        {
+            foreach (object[] results in UnorderedSources.Ranges(counts.Cast<int>(), x => degrees.Cast<int>()))
+            {
+                yield return results;
+            }
+            foreach (object[] results in Sources.Ranges(counts.Cast<int>(), x => degrees.Cast<int>()))
+            {
+                yield return results;
+            }
+
+            foreach (object[] results in OrderByRandomData(counts))
+            {
+                foreach (int degree in degrees)
+                {
+                    yield return new object[] { results[0], results[1], degree };
+                }
+            }
         }
 
         //
@@ -304,6 +326,55 @@ namespace Test
             OrderByDescending_NotPipelined_CustomComparer(labeled, count);
         }
 
+        [Theory]
+        [MemberData("Ranges", (object)(new int[] { 0, 1, 2, 16 }), MemberType = typeof(Sources))]
+        [MemberData("OrderByRandomData", (object)(new[] { 0, 1, 2, 16 }))]
+        [MemberData("Ranges", (object)(new int[] { 0, 1, 2, 16 }), MemberType = typeof(UnorderedSources))]
+        // Regression test for the PLINQ version of #2239 - comparer returning max/min value.
+        public static void OrderBy_ExtremeComparer(Labeled<ParallelQuery<int>> labeled, int count)
+        {
+            int prev = int.MinValue;
+            foreach (int i in labeled.Item.OrderBy(x => x, new ExtremeComparer<int>()))
+            {
+                Assert.InRange(i, prev, int.MaxValue);
+                prev = i;
+            }
+        }
+
+        [Theory]
+        [MemberData("Ranges", (object)(new int[] { 0, 1, 2, 16 }), MemberType = typeof(Sources))]
+        [MemberData("OrderByRandomData", (object)(new[] { 0, 1, 2, 16 }))]
+        [MemberData("Ranges", (object)(new int[] { 0, 1, 2, 16 }), MemberType = typeof(UnorderedSources))]
+        // Regression test for the PLINQ version of #2239 - comparer returning max/min value.
+        public static void OrderByDescending_ExtremeComparer(Labeled<ParallelQuery<int>> labeled, int count)
+        {
+            int prev = int.MaxValue;
+            foreach (int i in labeled.Item.OrderByDescending(x => x, new ExtremeComparer<int>()))
+            {
+                Assert.InRange(i, int.MinValue, prev);
+                prev = i;
+            }
+        }
+
+        [Theory]
+        [MemberData("Ranges", (object)(new int[] { 0, 1, 2, 16 }), MemberType = typeof(Sources))]
+        [MemberData("Ranges", (object)(new int[] { 0, 1, 2, 16 }), MemberType = typeof(UnorderedSources))]
+        public static void OrderBy_NotPipelined_ExtremeComparer(Labeled<ParallelQuery<int>> labeled, int count)
+        {
+            int prev = int.MinValue;
+            Assert.All(labeled.Item.OrderBy(x => x, new ExtremeComparer<int>()).ToList(), x => { Assert.InRange(x, prev, int.MaxValue); prev = x; });
+        }
+
+        [Theory]
+        [MemberData("Ranges", (object)(new int[] { 0, 1, 2, 16 }), MemberType = typeof(Sources))]
+        [MemberData("OrderByRandomData", (object)(new[] { 0, 1, 2, 16 }))]
+        [MemberData("Ranges", (object)(new int[] { 0, 1, 2, 16 }), MemberType = typeof(UnorderedSources))]
+        public static void OrderByDescending_NotPipelined_ExtremeComparer(Labeled<ParallelQuery<int>> labeled, int count)
+        {
+            int prev = int.MaxValue;
+            Assert.All(labeled.Item.OrderByDescending(x => x, new ExtremeComparer<int>()).ToList(), x => { Assert.InRange(x, int.MinValue, prev); prev = x; });
+        }
+
         [Fact]
         public static void OrderBy_ArgumentNullException()
         {
@@ -320,6 +391,34 @@ namespace Test
             Assert.Throws<ArgumentNullException>(() => ParallelEnumerable.Range(0, 1).OrderByDescending((Func<int, int>)null));
             Assert.Throws<ArgumentNullException>(() => ((ParallelQuery<int>)null).OrderByDescending(x => x, Comparer<int>.Default));
             Assert.Throws<ArgumentNullException>(() => ParallelEnumerable.Range(0, 1).OrderByDescending((Func<int, int>)null, Comparer<int>.Default));
+        }
+
+        // Heavily exercises OrderBy in the face of user-delegate exceptions.
+        // On CTP-M1, this would deadlock for DOP=7,9,11,... on 4-core, but works for DOP=1..6 and 8,10,12, ...
+        //
+        // In this test, every call to the key-selector delegate throws.
+        [Theory]
+        [MemberData("OrderByThreadedData", new[] { 1, 2, 16, 128, 1024 }, new[] { 1, 2, 4, 7, 8, 31, 32 })]
+        public static void OrderBy_ThreadedDeadlock(Labeled<ParallelQuery<int>> labeled, int count, int degree)
+        {
+            ParallelQuery<int> query = labeled.Item.WithDegreeOfParallelism(degree).OrderBy<int, int>(x => { throw new DeliberateTestException(); });
+
+            AggregateException ae = Assert.Throws<AggregateException>(() => { foreach (int i in query) { } });
+            Assert.All(ae.InnerExceptions, e => Assert.IsType<DeliberateTestException>(e));
+        }
+
+        // Heavily exercises OrderBy, but only throws one user delegate exception to simulate an occasional failure.
+        [Theory]
+        [MemberData("OrderByThreadedData", new[] { 1, 2, 16, 128, 1024 }, new[] { 1, 2, 4, 7, 8, 31, 32 })]
+        public static void OrderBy_ThreadedDeadlock_SingleException(Labeled<ParallelQuery<int>> labeled, int count, int degree)
+        {
+            int countdown = Math.Min(count / 2, degree) + 1;
+
+            ParallelQuery<int> query = labeled.Item.WithDegreeOfParallelism(degree).OrderBy(x => { if (Interlocked.Decrement(ref countdown) == 0) throw new DeliberateTestException(); return x; });
+
+            AggregateException ae = Assert.Throws<AggregateException>(() => { foreach (int i in query) { } });
+            Assert.Single(ae.InnerExceptions);
+            Assert.All(ae.InnerExceptions, e => Assert.IsType<DeliberateTestException>(e));
         }
 
         //
@@ -701,6 +800,55 @@ namespace Test
         public static void ThenByDescending_NotPipelined_CustomComparator_Longrunning(Labeled<ParallelQuery<int>> labeled, int count)
         {
             ThenByDescending_NotPipelined_CustomComparer(labeled, count);
+        }
+
+        [Theory]
+        [MemberData("Ranges", (object)(new int[] { 0, 1, 2, 16 }), MemberType = typeof(Sources))]
+        [MemberData("OrderByRandomData", (object)(new[] { 0, 1, 2, 16 }))]
+        [MemberData("Ranges", (object)(new int[] { 0, 1, 2, 16 }), MemberType = typeof(UnorderedSources))]
+        // Regression test for the PLINQ version of #2239 - comparer returning max/min value.
+        public static void ThenBy_ExtremeComparer(Labeled<ParallelQuery<int>> labeled, int count)
+        {
+            int prev = int.MinValue;
+            foreach (int i in labeled.Item.OrderBy(x => 0).ThenBy(x => x, new ExtremeComparer<int>()))
+            {
+                Assert.InRange(i, prev, int.MaxValue);
+                prev = i;
+            }
+        }
+
+        [Theory]
+        [MemberData("Ranges", (object)(new int[] { 0, 1, 2, 16 }), MemberType = typeof(Sources))]
+        [MemberData("OrderByRandomData", (object)(new[] { 0, 1, 2, 16 }))]
+        [MemberData("Ranges", (object)(new int[] { 0, 1, 2, 16 }), MemberType = typeof(UnorderedSources))]
+        // Regression test for the PLINQ version of #2239 - comparer returning max/min value.
+        public static void ThenByDescending_ExtremeComparer(Labeled<ParallelQuery<int>> labeled, int count)
+        {
+            int prev = int.MaxValue;
+            foreach (int i in labeled.Item.OrderBy(x => 0).ThenByDescending(x => x, new ExtremeComparer<int>()))
+            {
+                Assert.InRange(i, int.MinValue, prev);
+                prev = i;
+            }
+        }
+
+        [Theory]
+        [MemberData("Ranges", (object)(new int[] { 0, 1, 2, 16 }), MemberType = typeof(Sources))]
+        [MemberData("Ranges", (object)(new int[] { 0, 1, 2, 16 }), MemberType = typeof(UnorderedSources))]
+        public static void ThenBy_NotPipelined_ExtremeComparer(Labeled<ParallelQuery<int>> labeled, int count)
+        {
+            int prev = int.MinValue;
+            Assert.All(labeled.Item.OrderBy(x => 0).ThenBy(x => x, new ExtremeComparer<int>()).ToList(), x => { Assert.InRange(x, prev, int.MaxValue); prev = x; });
+        }
+
+        [Theory]
+        [MemberData("Ranges", (object)(new int[] { 0, 1, 2, 16 }), MemberType = typeof(Sources))]
+        [MemberData("OrderByRandomData", (object)(new[] { 0, 1, 2, 16 }))]
+        [MemberData("Ranges", (object)(new int[] { 0, 1, 2, 16 }), MemberType = typeof(UnorderedSources))]
+        public static void ThenByDescending_NotPipelined_ExtremeComparer(Labeled<ParallelQuery<int>> labeled, int count)
+        {
+            int prev = int.MaxValue;
+            Assert.All(labeled.Item.OrderBy(x => 0).ThenByDescending(x => x, new ExtremeComparer<int>()).ToList(), x => { Assert.InRange(x, int.MinValue, prev); prev = x; });
         }
 
         // Recursive sort with nested ThenBy...s
