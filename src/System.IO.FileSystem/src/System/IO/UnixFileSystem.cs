@@ -4,7 +4,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading;
 
@@ -15,7 +14,7 @@ namespace System.IO
     {
         public override int MaxPath { get { return Interop.libc.MaxPath; } }
 
-        public override int MaxDirectoryPath { get { return Interop.libc.MaxName; } }
+        public override int MaxDirectoryPath { get { return Interop.libc.MaxPath; } }
 
         public override FileStreamBase Open(string fullPath, FileMode mode, FileAccess access, FileShare share, int bufferSize, FileOptions options, FileStream parent)
         {
@@ -52,24 +51,39 @@ namespace System.IO
 
         public override void MoveFile(string sourceFullPath, string destFullPath)
         {
-            while (Interop.libc.rename(sourceFullPath, destFullPath) < 0)
+            // The desired behavior for Move(source, dest) is to not overwrite the destination file
+            // if it exists. Since rename(source, dest) will replace the file at 'dest' if it exists,
+            // link/unlink are used instead. Note that the Unix FileSystemWatcher will treat a Move 
+            // as a Creation and Deletion instead of a Rename and thus differ from Windows.
+            while (Interop.libc.link(sourceFullPath, destFullPath) < 0)
             {
                 int errno = Marshal.GetLastWin32Error();
                 if (errno == Interop.Errors.EINTR) // interrupted; try again
                 {
                     continue;
                 }
-                else if (errno == Interop.Errors.EXDEV) // rename fails across devices / mount points
+                else if (errno == Interop.Errors.EXDEV) // link fails across devices / mount points
                 {
                     CopyFile(sourceFullPath, destFullPath, overwrite: false);
-                    DeleteFile(sourceFullPath);
                     break;
+                }
+                else if (errno == Interop.Errors.ENOENT && !Directory.Exists(Path.GetDirectoryName(destFullPath))) // The parent directory of destFile can't be found
+                {
+                    // Windows distinguishes between whether the directory or the file isn't found,
+                    // and throws a different exception in these cases.  We attempt to approximate that
+                    // here; there is a race condition here, where something could change between
+                    // when the error occurs and our checks, but it's the best we can do, and the
+                    // worst case in such a race condition (which could occur if the file system is
+                    // being manipulated concurrently with these checks) is that we throw a
+                    // FileNotFoundException instead of DirectoryNotFoundexception.
+                    throw Interop.GetExceptionForIoErrno(errno, destFullPath, isDirectory: true);
                 }
                 else
                 {
                     throw Interop.GetExceptionForIoErrno(errno);
                 }
             }
+            DeleteFile(sourceFullPath);
         }
 
         public override void DeleteFile(string fullPath)
@@ -521,18 +535,6 @@ namespace System.IO
                         dirPath = toExplore.Pop();
                         dirHandle = OpenDirectory(dirPath.FullPath);
                     }
-                }
-            }
-
-            private struct PathPair
-            {
-                internal readonly string UserPath;
-                internal readonly string FullPath;
-
-                internal PathPair(string userPath, string fullPath)
-                {
-                    UserPath = userPath;
-                    FullPath = fullPath;
                 }
             }
 
