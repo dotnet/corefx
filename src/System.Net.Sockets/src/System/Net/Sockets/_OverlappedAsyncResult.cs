@@ -20,8 +20,8 @@ namespace System.Net.Sockets
         // internal class members
         //
 
-        private SocketAddress _socketAddress;
-        private SocketAddress _socketAddressOriginal; // needed for partial BeginReceiveFrom/EndReceiveFrom completion
+        private Internals.SocketAddress _socketAddress;
+        private Internals.SocketAddress _socketAddressOriginal; // needed for partial BeginReceiveFrom/EndReceiveFrom completion
 
         // These two are used only as alternatives
         internal WSABuffer m_SingleBuffer;
@@ -43,15 +43,15 @@ namespace System.Net.Sockets
         //
         internal IntPtr GetSocketAddressPtr()
         {
-            return Marshal.UnsafeAddrOfPinnedArrayElement(_socketAddress.m_Buffer, 0);
+            return Marshal.UnsafeAddrOfPinnedArrayElement(_socketAddress.Buffer, 0);
         }
         //
         internal IntPtr GetSocketAddressSizePtr()
         {
-            return Marshal.UnsafeAddrOfPinnedArrayElement(_socketAddress.m_Buffer, _socketAddress.GetAddressSizeOffset());
+            return Marshal.UnsafeAddrOfPinnedArrayElement(_socketAddress.Buffer, _socketAddress.GetAddressSizeOffset());
         }
         //
-        internal SocketAddress SocketAddress
+        internal Internals.SocketAddress SocketAddress
         {
             get
             {
@@ -59,7 +59,7 @@ namespace System.Net.Sockets
             }
         }
         //
-        internal SocketAddress SocketAddressOriginal
+        internal Internals.SocketAddress SocketAddressOriginal
         {
             get
             {
@@ -79,7 +79,7 @@ namespace System.Net.Sockets
         //   since the Overlapped calls can be Async
         //
 
-        internal void SetUnmanagedStructures(byte[] buffer, int offset, int size, SocketAddress socketAddress, bool pinSocketAddress)
+        internal void SetUnmanagedStructures(byte[] buffer, int offset, int size, Internals.SocketAddress socketAddress, bool pinSocketAddress)
         {
             //
             // Fill in Buffer Array structure that will be used for our send/recv Buffer
@@ -92,7 +92,7 @@ namespace System.Net.Sockets
                 objectsToPin[0] = buffer;
 
                 _socketAddress.CopyAddressSizeIntoBuffer();
-                objectsToPin[1] = _socketAddress.m_Buffer;
+                objectsToPin[1] = _socketAddress.Buffer;
 
                 base.SetUnmanagedStructures(objectsToPin);
             }

@@ -57,7 +57,7 @@ namespace System.Net.Sockets
 
                 _state = State.DnsQuery;
 
-                IAsyncResult result = Dns.BeginGetHostAddresses(endPoint.Host, new AsyncCallback(DnsCallback), null);
+                IAsyncResult result = DnsAPMExtensions.BeginGetHostAddresses(endPoint.Host, new AsyncCallback(DnsCallback), null);
                 if (result.CompletedSynchronously)
                 {
                     return DoDnsCallback(result, true);
@@ -98,7 +98,7 @@ namespace System.Net.Sockets
 
                 try
                 {
-                    addressList = Dns.EndGetHostAddresses(result);
+                    addressList = DnsAPMExtensions.EndGetHostAddresses(result);
                     GlobalLog.Assert(addressList != null, "MultipleConnectAsync.DoDnsCallback(): EndGetHostAddresses returned null!");
                 }
                 catch (Exception e)

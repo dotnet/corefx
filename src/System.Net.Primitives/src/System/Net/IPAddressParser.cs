@@ -8,9 +8,6 @@ namespace System.Net
 {
     internal class IPAddressParser
     {
-        internal const int IPv4AddressBytes = 4;
-        internal const int IPv6AddressBytes = 16;
-
         internal const int INET_ADDRSTRLEN = 22;
         internal const int INET6_ADDRSTRLEN = 65;
 
@@ -38,7 +35,7 @@ namespace System.Net
                 // make this decision.
                 uint scope = 0;
                 ushort port = 0;
-                byte[] bytes = new byte[IPv6AddressBytes];
+                byte[] bytes = new byte[IPAddressParserStatics.IPv6AddressBytes];
 
                 error = Interop.NtDll.RtlIpv6StringToAddressExW(ipString, bytes, out scope, out port);
 
@@ -52,7 +49,7 @@ namespace System.Net
             else
             {
                 ushort port = 0;
-                byte[] bytes = new byte[IPv4AddressBytes];
+                byte[] bytes = new byte[IPAddressParserStatics.IPv4AddressBytes];
 
                 error = Interop.NtDll.RtlIpv4StringToAddressExW(ipString, false, bytes, out port);
 

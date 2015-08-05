@@ -19,7 +19,11 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Windows_Release|AnyCPU' " />
 
   <ItemGroup>
+    <Compile Include="System\Net\StartIPOptions.cs"/>
+    <Compile Include="System\Net\DnsAPMExtensions.cs"/>
+
     <Compile Include="System\Net\Sockets\IOControlCode.cs" />
+    <Compile Include="System\Net\Sockets\IPEndPointExtensions.cs"/>
     <Compile Include="System\Net\Sockets\IPPacketInformation.cs" />
     <Compile Include="System\Net\Sockets\IPProtectionLevel.cs" />
     <Compile Include="System\Net\Sockets\LingerOption.cs" />
@@ -48,7 +52,6 @@
     <Compile Include="System\Net\Sockets\_OverlappedAsyncResult.cs" />
     <Compile Include="System\Net\Sockets\_ReceiveMessageOverlappedAsyncResult.cs" />
     <Compile Include="System\Net\Sockets\TransportType.cs" />
-    <Compile Include="System\Net\StartIPOptions.cs"/>
     
     <!-- Shims -->
     <Compile Include="Shims\_NetworkingPerfCounters.cs"/>
@@ -101,12 +104,20 @@
       <Link>Common\System\Net\IPEndPointStatics.cs</Link>
     </Compile>
 
+    <Compile Include="$(CommonPath)\System\Net\IPAddressParserStatics.cs" >
+      <Link>Common\System\Net\IPAddressParserStatics.cs</Link>
+    </Compile>
+
     <Compile Include="$(CommonPath)\System\Net\ExceptionCheck.cs">
       <Link>Common\System\Net\ExceptionCheck.cs</Link>
     </Compile>
 
     <Compile Include="$(CommonPath)\System\Net\RangeValidationHelpers.cs">
       <Link>Common\System\Net\RangeValidationHelpers.cs</Link>
+    </Compile>
+
+    <Compile Include="$(CommonPath)\System\Net\SocketAddress.cs">
+      <Link>Common\System\Net\SocketAddress.cs</Link>
     </Compile>
 
     <Compile Include="$(CommonPath)\System\Net\TcpValidationHelpers.cs">

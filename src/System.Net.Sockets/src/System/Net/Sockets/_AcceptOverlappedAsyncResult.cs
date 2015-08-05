@@ -47,7 +47,7 @@ namespace System.Net.Sockets
         {
             SocketError errorCode = (SocketError)ErrorCode;
 
-            SocketAddress remoteSocketAddress = null;
+            Internals.SocketAddress remoteSocketAddress = null;
             if (errorCode == SocketError.Success)
             {
                 _localBytesTransferred = numBytes;
@@ -55,7 +55,7 @@ namespace System.Net.Sockets
 
                 //get the endpoint
 
-                remoteSocketAddress = _listenSocket.m_RightEndPoint.Serialize();
+                remoteSocketAddress = IPEndPointExtensions.Serialize(_listenSocket.m_RightEndPoint);
 
                 IntPtr localAddr;
                 int localAddrLength;
@@ -72,9 +72,9 @@ namespace System.Net.Sockets
                                     out localAddr,
                                     out localAddrLength,
                                     out remoteAddr,
-                                    out remoteSocketAddress.m_Size
+                                    out remoteSocketAddress.InternalSize
                                     );
-                    Marshal.Copy(remoteAddr, remoteSocketAddress.m_Buffer, 0, remoteSocketAddress.m_Size);
+                    Marshal.Copy(remoteAddr, remoteSocketAddress.Buffer, 0, remoteSocketAddress.Size);
 
                     IntPtr handle = _listenSocket.SafeHandle.DangerousGetHandle();
 

@@ -8,7 +8,11 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System;
 
+#if SYSTEM_NET_PRIMITIVES_DLL
 namespace System.Net
+#else
+namespace System.Net.Sockets.Internals
+#endif
 {
     /// <devdoc>
     ///    <para>
@@ -156,7 +160,7 @@ namespace System.Net
             {
                 Debug.Assert(Size >= IPv6AddressSize);
 
-                byte[] address = new byte[IPAddressParser.IPv6AddressBytes];
+                byte[] address = new byte[IPAddressParserStatics.IPv6AddressBytes];
                 for (int i = 0; i < address.Length; i++)
                 {
                     address[i] = Buffer[i + 8];
@@ -184,7 +188,11 @@ namespace System.Net
             }
             else
             {
+#if SYSTEM_NET_PRIMITIVES_DLL
                 throw new SocketException(SocketError.AddressFamilyNotSupported);
+#else
+                throw new SocketException((int)SocketError.AddressFamilyNotSupported);
+#endif
             }
         }
 

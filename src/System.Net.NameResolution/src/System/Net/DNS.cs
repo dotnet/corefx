@@ -420,7 +420,7 @@ namespace System.Net
 
         // Helpers for async GetHostByName, ResolveToAddresses, and Resolve - they're almost identical
         // If hostName is an IPString and justReturnParsedIP==true then no reverse lookup will be attempted, but the orriginal address is returned.
-        private static IAsyncResult HostResolutionBeginHelper(string hostName, bool justReturnParsedIp, bool flowContext, bool includeIPv6, bool throwOnIPAny, AsyncCallback requestCallback, object state)
+        private static IAsyncResult HostResolutionBeginHelper(string hostName, bool justReturnParsedIp, AsyncCallback requestCallback, object state)
         {
             if (hostName == null)
             {
@@ -434,12 +434,12 @@ namespace System.Net
             ResolveAsyncResult asyncResult;
             if (IPAddress.TryParse(hostName, out address))
             {
-                if (throwOnIPAny && (address.Equals(IPAddress.Any) || address.Equals(IPAddress.IPv6Any)))
+                if ((address.Equals(IPAddress.Any) || address.Equals(IPAddress.IPv6Any)))
                 {
                     throw new ArgumentException(SR.net_invalid_ip_addr, "hostNameOrAddress");
                 }
 
-                asyncResult = new ResolveAsyncResult(address, null, includeIPv6, state, requestCallback);
+                asyncResult = new ResolveAsyncResult(address, null, true, state, requestCallback);
 
                 if (justReturnParsedIp)
                 {
@@ -452,14 +452,11 @@ namespace System.Net
             }
             else
             {
-                asyncResult = new ResolveAsyncResult(hostName, null, includeIPv6, state, requestCallback);
+                asyncResult = new ResolveAsyncResult(hostName, null, true, state, requestCallback);
             }
 
             // Set up the context, possibly flow.
-            if (flowContext)
-            {
-                asyncResult.StartPostingAsyncOp(false);
-            }
+            asyncResult.StartPostingAsyncOp(false);
 
             // Start the resolve.
             Task.Factory.StartNew(ResolveCallback, asyncResult);
@@ -567,7 +564,7 @@ namespace System.Net
         {
             if (Logging.On) Logging.Enter(Logging.Sockets, "DNS", "BeginGetHostEntry", hostNameOrAddress);
 
-            IAsyncResult asyncResult = HostResolutionBeginHelper(hostNameOrAddress, false, true, true, true, requestCallback, stateObject);
+            IAsyncResult asyncResult = HostResolutionBeginHelper(hostNameOrAddress, false, requestCallback, stateObject);
 
             if (Logging.On) Logging.Exit(Logging.Sockets, "DNS", "BeginGetHostEntry", asyncResult);
             return asyncResult;
@@ -597,7 +594,7 @@ namespace System.Net
         {
             if (Logging.On) Logging.Enter(Logging.Sockets, "DNS", "BeginGetHostAddresses", hostNameOrAddress);
 
-            IAsyncResult asyncResult = HostResolutionBeginHelper(hostNameOrAddress, true, true, true, true, requestCallback, state);
+            IAsyncResult asyncResult = HostResolutionBeginHelper(hostNameOrAddress, true, requestCallback, state);
 
             if (Logging.On) Logging.Exit(Logging.Sockets, "DNS", "BeginGetHostAddresses", asyncResult);
             return asyncResult;
@@ -612,17 +609,6 @@ namespace System.Net
             if (Logging.On) Logging.Exit(Logging.Sockets, "DNS", "EndGetHostAddresses", ipHostEntry);
             return ipHostEntry.AddressList;
         } // EndResolveToAddresses
-
-        // TODO: Used by Socket.BeginConnect
-        internal static IAsyncResult UnsafeBeginGetHostAddresses(string hostName, AsyncCallback requestCallback, object state)
-        {
-            if (Logging.On) Logging.Enter(Logging.Sockets, "DNS", "UnsafeBeginGetHostAddresses", hostName);
-
-            IAsyncResult asyncResult = HostResolutionBeginHelper(hostName, true, false, true, true, requestCallback, state);
-
-            if (Logging.On) Logging.Exit(Logging.Sockets, "DNS", "UnsafeBeginGetHostAddresses", asyncResult);
-            return asyncResult;
-        } // UnsafeBeginResolveToAddresses
 
         //************* Task-based async public methods *************************
         public static Task<IPAddress[]> GetHostAddressesAsync(string hostNameOrAddress)

@@ -20,8 +20,8 @@ namespace System.Net.Sockets
         // internal class members
         //
         private Interop.Winsock.WSAMsg* _message;
-        internal SocketAddress SocketAddressOriginal;
-        internal SocketAddress m_SocketAddress;
+        internal Internals.SocketAddress SocketAddressOriginal;
+        internal Internals.SocketAddress m_SocketAddress;
         private WSABuffer* _WSABuffer;
         private byte[] _WSABufferArray;
         private byte[] _controlBuffer;
@@ -50,10 +50,10 @@ namespace System.Net.Sockets
 
         internal IntPtr GetSocketAddressSizePtr()
         {
-            return Marshal.UnsafeAddrOfPinnedArrayElement(m_SocketAddress.m_Buffer, m_SocketAddress.GetAddressSizeOffset());
+            return Marshal.UnsafeAddrOfPinnedArrayElement(m_SocketAddress.Buffer, m_SocketAddress.GetAddressSizeOffset());
         }
 
-        internal SocketAddress SocketAddress
+        internal Internals.SocketAddress SocketAddress
         {
             get
             {
@@ -70,7 +70,7 @@ namespace System.Net.Sockets
         //   since the Overlapped calls can be Async
         //
 
-        internal void SetUnmanagedStructures(byte[] buffer, int offset, int size, SocketAddress socketAddress, SocketFlags socketFlags)
+        internal void SetUnmanagedStructures(byte[] buffer, int offset, int size, Internals.SocketAddress socketAddress, SocketFlags socketFlags)
         {
             m_MessageBuffer = new byte[s_WSAMsgSize];
             _WSABufferArray = new byte[s_WSABufferSize];
@@ -101,7 +101,7 @@ namespace System.Net.Sockets
             //prepare socketaddress buffer
             m_SocketAddress = socketAddress;
             m_SocketAddress.CopyAddressSizeIntoBuffer();
-            objectsToPin[3] = m_SocketAddress.m_Buffer;
+            objectsToPin[3] = m_SocketAddress.Buffer;
 
             if (_controlBuffer != null)
             {
@@ -118,7 +118,7 @@ namespace System.Net.Sockets
 
             //setup structure
             _message = (Interop.Winsock.WSAMsg*)Marshal.UnsafeAddrOfPinnedArrayElement(m_MessageBuffer, 0);
-            _message->socketAddress = Marshal.UnsafeAddrOfPinnedArrayElement(m_SocketAddress.m_Buffer, 0);
+            _message->socketAddress = Marshal.UnsafeAddrOfPinnedArrayElement(m_SocketAddress.Buffer, 0);
             _message->addressLength = (uint)m_SocketAddress.Size;
             _message->buffers = Marshal.UnsafeAddrOfPinnedArrayElement(_WSABufferArray, 0);
             _message->count = 1;

@@ -77,7 +77,7 @@ namespace System.Net.Sockets
         private bool _receivingPacketInformation;
 
         //These members are to cache permission checks
-        private SocketAddress _permittedRemoteAddress;
+        private Internals.SocketAddress _permittedRemoteAddress;
 
         private DynamicWinsockMethods _dynamicWinsockMethods;
 
@@ -200,14 +200,14 @@ namespace System.Net.Sockets
                     ep = IPEndPointStatics.IPv6Any;
                 }
 
-                SocketAddress socketAddress = ep.Serialize();
+                Internals.SocketAddress socketAddress = IPEndPointExtensions.Serialize(ep);
                 SocketError errorCode;
                 try
                 {
                     errorCode = Interop.Winsock.getsockname(
                         _handle,
-                        socketAddress.m_Buffer,
-                        ref socketAddress.m_Size);
+                        socketAddress.Buffer,
+                        ref socketAddress.InternalSize);
                 }
                 catch (ObjectDisposedException)
                 {
@@ -366,13 +366,13 @@ namespace System.Net.Sockets
                     return null;
                 }
 
-                SocketAddress socketAddress = m_RightEndPoint.Serialize();
+                Internals.SocketAddress socketAddress = IPEndPointExtensions.Serialize(m_RightEndPoint);
 
                 // This may throw ObjectDisposedException.
                 SocketError errorCode = Interop.Winsock.getsockname(
                     _handle,
-                    socketAddress.m_Buffer,
-                    ref socketAddress.m_Size);
+                    socketAddress.Buffer,
+                    ref socketAddress.InternalSize);
 
                 if (errorCode != SocketError.Success)
                 {
@@ -418,13 +418,13 @@ namespace System.Net.Sockets
                         return null;
                     }
 
-                    SocketAddress socketAddress = m_RightEndPoint.Serialize();
+                    Internals.SocketAddress socketAddress = IPEndPointExtensions.Serialize(m_RightEndPoint);
 
                     // This may throw ObjectDisposedException.
                     SocketError errorCode = Interop.Winsock.getpeername(
                         _handle,
-                        socketAddress.m_Buffer,
-                        ref socketAddress.m_Size);
+                        socketAddress.Buffer,
+                        ref socketAddress.InternalSize);
 
                     if (errorCode != SocketError.Success)
                     {
@@ -896,7 +896,7 @@ namespace System.Net.Sockets
             // ask the EndPoint to generate a SocketAddress that we
             // can pass down to winsock
             //
-            SocketAddress socketAddress = CallSerializeCheckDnsEndPoint(endPointSnapshot);
+            Internals.SocketAddress socketAddress = CallSerializeCheckDnsEndPoint(endPointSnapshot);
             DoBind(endPointSnapshot, socketAddress);
             if (s_LoggingEnabled) Logging.Exit(Logging.Sockets, this, "Bind", "");
         }
@@ -918,13 +918,13 @@ namespace System.Net.Sockets
             // can pass down to winsock
             //
             EndPoint endPointSnapshot = localEP;
-            SocketAddress socketAddress = SnapshotAndSerialize(ref endPointSnapshot);
+            Internals.SocketAddress socketAddress = SnapshotAndSerialize(ref endPointSnapshot);
             DoBind(endPointSnapshot, socketAddress);
 
             if (s_LoggingEnabled) Logging.Exit(Logging.Sockets, this, "InternalBind", "");
         }
 
-        private void DoBind(EndPoint endPointSnapshot, SocketAddress socketAddress)
+        private void DoBind(EndPoint endPointSnapshot, Internals.SocketAddress socketAddress)
         {
             // Mitigation for Blue Screen of Death (Win7, maybe others)
             IPEndPoint ipEndPoint = endPointSnapshot as IPEndPoint;
@@ -939,8 +939,8 @@ namespace System.Net.Sockets
             // This may throw ObjectDisposedException.
             SocketError errorCode = Interop.Winsock.bind(
                 _handle,
-                socketAddress.m_Buffer,
-                socketAddress.m_Size);
+                socketAddress.Buffer,
+                socketAddress.Size);
 
 #if TRAVE
             try
@@ -1017,7 +1017,7 @@ namespace System.Net.Sockets
 
             //This will check the permissions for connect
             EndPoint endPointSnapshot = remoteEP;
-            SocketAddress socketAddress = CheckCacheRemote(ref endPointSnapshot, true);
+            Internals.SocketAddress socketAddress = CheckCacheRemote(ref endPointSnapshot, true);
 
             if (!Blocking)
             {
@@ -1234,13 +1234,13 @@ namespace System.Net.Sockets
             ValidateBlockingMode();
             GlobalLog.Print("Socket#" + Logging.HashString(this) + "::Accept() SRC:" + Logging.ObjectToString(LocalEndPoint));
 
-            SocketAddress socketAddress = m_RightEndPoint.Serialize();
+            Internals.SocketAddress socketAddress = IPEndPointExtensions.Serialize(m_RightEndPoint);
 
             // This may throw ObjectDisposedException.
             SafeCloseSocket acceptedSocketHandle = SafeCloseSocket.Accept(
                 _handle,
-                socketAddress.m_Buffer,
-                ref socketAddress.m_Size);
+                socketAddress.Buffer,
+                ref socketAddress.InternalSize);
 
             //
             // if the native call fails we'll throw a SocketException
@@ -1551,7 +1551,7 @@ namespace System.Net.Sockets
 
             //That will check ConnectPermission for remoteEP
             EndPoint endPointSnapshot = remoteEP;
-            SocketAddress socketAddress = CheckCacheRemote(ref endPointSnapshot, false);
+            Internals.SocketAddress socketAddress = CheckCacheRemote(ref endPointSnapshot, false);
 
             // This can throw ObjectDisposedException.
             int bytesTransferred;
@@ -1564,8 +1564,8 @@ namespace System.Net.Sockets
                         null,
                         0,
                         socketFlags,
-                        socketAddress.m_Buffer,
-                        socketAddress.m_Size);
+                        socketAddress.Buffer,
+                        socketAddress.Size);
                 }
                 else
                 {
@@ -1576,8 +1576,8 @@ namespace System.Net.Sockets
                             pinnedBuffer + offset,
                             size,
                             socketFlags,
-                            socketAddress.m_Buffer,
-                            socketAddress.m_Size);
+                            socketAddress.Buffer,
+                            socketAddress.Size);
                     }
                 }
             }
@@ -1956,13 +1956,13 @@ namespace System.Net.Sockets
             // WSARecvMsg; all that matters is that we generate a unique-to-this-call SocketAddress
             // with the right address family
             EndPoint endPointSnapshot = remoteEP;
-            SocketAddress socketAddress = SnapshotAndSerialize(ref endPointSnapshot);
+            Internals.SocketAddress socketAddress = SnapshotAndSerialize(ref endPointSnapshot);
 
             ReceiveMessageOverlappedAsyncResult asyncResult = new ReceiveMessageOverlappedAsyncResult(this, null, null);
             asyncResult.SetUnmanagedStructures(buffer, offset, size, socketAddress, socketFlags);
 
             // save a copy of the original EndPoint
-            SocketAddress socketAddressOriginal = endPointSnapshot.Serialize();
+            Internals.SocketAddress socketAddressOriginal = IPEndPointExtensions.Serialize(endPointSnapshot);
 
             //setup structure
             int bytesTransfered = 0;
@@ -2077,19 +2077,19 @@ namespace System.Net.Sockets
             // WSARecvFrom; all that matters is that we generate a unique-to-this-call SocketAddress
             // with the right address family
             EndPoint endPointSnapshot = remoteEP;
-            SocketAddress socketAddress = SnapshotAndSerialize(ref endPointSnapshot);
-            SocketAddress socketAddressOriginal = endPointSnapshot.Serialize();
+            Internals.SocketAddress socketAddress = SnapshotAndSerialize(ref endPointSnapshot);
+            Internals.SocketAddress socketAddressOriginal = IPEndPointExtensions.Serialize(endPointSnapshot);
 
             // This can throw ObjectDisposedException.
             int bytesTransferred;
             unsafe
             {
                 if (buffer.Length == 0)
-                    bytesTransferred = Interop.Winsock.recvfrom(_handle.DangerousGetHandle(), null, 0, socketFlags, socketAddress.m_Buffer, ref socketAddress.m_Size);
+                    bytesTransferred = Interop.Winsock.recvfrom(_handle.DangerousGetHandle(), null, 0, socketFlags, socketAddress.Buffer, ref socketAddress.InternalSize);
                 else
                     fixed (byte* pinnedBuffer = buffer)
                     {
-                        bytesTransferred = Interop.Winsock.recvfrom(_handle.DangerousGetHandle(), pinnedBuffer + offset, size, socketFlags, socketAddress.m_Buffer, ref socketAddress.m_Size);
+                        bytesTransferred = Interop.Winsock.recvfrom(_handle.DangerousGetHandle(), pinnedBuffer + offset, size, socketFlags, socketAddress.Buffer, ref socketAddress.InternalSize);
                     }
             }
 
@@ -2804,7 +2804,7 @@ namespace System.Net.Sockets
             MultipleAddressConnectAsyncResult result = new MultipleAddressConnectAsyncResult(null, port, this, state, requestCallback);
             result.StartPostingAsyncOp(false);
 
-            IAsyncResult dnsResult = Dns.UnsafeBeginGetHostAddresses(host, new AsyncCallback(DnsCallback), result);
+            IAsyncResult dnsResult = DnsAPMExtensions.BeginGetHostAddresses(host, new AsyncCallback(DnsCallback), result);
             if (dnsResult.CompletedSynchronously)
             {
                 if (DoDnsCallback(dnsResult, result))
@@ -3564,7 +3564,7 @@ namespace System.Net.Sockets
 
             // This will check the permissions for connect.
             EndPoint endPointSnapshot = remoteEP;
-            SocketAddress socketAddress = CheckCacheRemote(ref endPointSnapshot, false);
+            Internals.SocketAddress socketAddress = CheckCacheRemote(ref endPointSnapshot, false);
 
             // Set up the async result and indicate to flow the context.
             OverlappedAsyncResult asyncResult = new OverlappedAsyncResult(this, state, callback);
@@ -3580,7 +3580,7 @@ namespace System.Net.Sockets
             return asyncResult;
         }
 
-        private void DoBeginSendTo(byte[] buffer, int offset, int size, SocketFlags socketFlags, EndPoint endPointSnapshot, SocketAddress socketAddress, OverlappedAsyncResult asyncResult)
+        private void DoBeginSendTo(byte[] buffer, int offset, int size, SocketFlags socketFlags, EndPoint endPointSnapshot, Internals.SocketAddress socketAddress, OverlappedAsyncResult asyncResult)
         {
             GlobalLog.Print("Socket#" + Logging.HashString(this) + "::DoBeginSendTo() size:" + size.ToString());
             EndPoint oldEndPoint = m_RightEndPoint;
@@ -4153,7 +4153,7 @@ namespace System.Net.Sockets
             // We don't do a CAS demand here because the contents of remoteEP aren't used by
             // WSARecvMsg; all that matters is that we generate a unique-to-this-call SocketAddress
             // with the right address family
-            SocketAddress socketAddress = SnapshotAndSerialize(ref remoteEP);
+            Internals.SocketAddress socketAddress = SnapshotAndSerialize(ref remoteEP);
 
             // Guarantee to call CheckAsyncCallOverlappedResult if we call SetUnamangedStructures with a cache in order to
             // avoid a Socket leak in case of error.
@@ -4163,7 +4163,7 @@ namespace System.Net.Sockets
                 asyncResult.SetUnmanagedStructures(buffer, offset, size, socketAddress, socketFlags);
 
                 // save a copy of the original EndPoint in the asyncResult
-                asyncResult.SocketAddressOriginal = remoteEP.Serialize();
+                asyncResult.SocketAddressOriginal = IPEndPointExtensions.Serialize(remoteEP);
 
                 int bytesTransfered;
 
@@ -4273,7 +4273,7 @@ namespace System.Net.Sockets
                 throw new InvalidOperationException(SR.Format(SR.net_io_invalidendcall, "EndReceiveMessageFrom"));
             }
 
-            SocketAddress socketAddressOriginal = SnapshotAndSerialize(ref endPoint);
+            Internals.SocketAddress socketAddressOriginal = SnapshotAndSerialize(ref endPoint);
 
             int bytesTransferred = (int)castedAsyncResult.InternalWaitForCompletion();
             castedAsyncResult.EndCalled = true;
@@ -4398,7 +4398,7 @@ namespace System.Net.Sockets
             // We don't do a CAS demand here because the contents of remoteEP aren't used by
             // WSARecvFrom; all that matters is that we generate a unique-to-this-call SocketAddress
             // with the right address family
-            SocketAddress socketAddress = SnapshotAndSerialize(ref remoteEP);
+            Internals.SocketAddress socketAddress = SnapshotAndSerialize(ref remoteEP);
 
             // Set up the result and set it to collect the context.
             OverlappedAsyncResult asyncResult = new OverlappedAsyncResult(this, state, callback);
@@ -4426,7 +4426,7 @@ namespace System.Net.Sockets
             return asyncResult;
         }
 
-        private void DoBeginReceiveFrom(byte[] buffer, int offset, int size, SocketFlags socketFlags, EndPoint endPointSnapshot, SocketAddress socketAddress, OverlappedAsyncResult asyncResult)
+        private void DoBeginReceiveFrom(byte[] buffer, int offset, int size, SocketFlags socketFlags, EndPoint endPointSnapshot, Internals.SocketAddress socketAddress, OverlappedAsyncResult asyncResult)
         {
             EndPoint oldEndPoint = m_RightEndPoint;
             GlobalLog.Print("Socket#" + Logging.HashString(this) + "::DoBeginReceiveFrom() size:" + size.ToString());
@@ -4441,7 +4441,7 @@ namespace System.Net.Sockets
                 asyncResult.SetUnmanagedStructures(buffer, offset, size, socketAddress, true /* pin remoteEP*/);
 
                 // save a copy of the original EndPoint in the asyncResult
-                asyncResult.SocketAddressOriginal = endPointSnapshot.Serialize();
+                asyncResult.SocketAddressOriginal = IPEndPointExtensions.Serialize(endPointSnapshot);
 
                 if (m_RightEndPoint == null)
                 {
@@ -4545,7 +4545,7 @@ namespace System.Net.Sockets
                 throw new InvalidOperationException(SR.Format(SR.net_io_invalidendcall, "EndReceiveFrom"));
             }
 
-            SocketAddress socketAddressOriginal = SnapshotAndSerialize(ref endPoint);
+            Internals.SocketAddress socketAddressOriginal = SnapshotAndSerialize(ref endPoint);
 
             int bytesTransferred = (int)castedAsyncResult.InternalWaitForCompletion();
             castedAsyncResult.EndCalled = true;
@@ -5214,7 +5214,7 @@ namespace System.Net.Sockets
                     if (!ConnectEx(
                             _handle,
                             e.m_PtrSocketAddressBuffer,
-                            e.m_SocketAddress.m_Size,
+                            e.m_SocketAddress.Size,
                             e.m_PtrSingleBuffer,
                             e.Count,
                             out bytesTransferred,
@@ -5892,7 +5892,7 @@ namespace System.Net.Sockets
                                     out bytesTransferred,
                                     e.m_SocketFlags,
                                     e.m_PtrSocketAddressBuffer,
-                                    e.m_SocketAddress.m_Size,
+                                    e.m_SocketAddress.Size,
                                     e.m_PtrNativeOverlapped,
                                     IntPtr.Zero);
                 }
@@ -5905,7 +5905,7 @@ namespace System.Net.Sockets
                                     out bytesTransferred,
                                     e.m_SocketFlags,
                                     e.m_PtrSocketAddressBuffer,
-                                    e.m_SocketAddress.m_Size,
+                                    e.m_SocketAddress.Size,
                                     e.m_PtrNativeOverlapped,
                                     IntPtr.Zero);
                 }
@@ -6137,7 +6137,7 @@ namespace System.Net.Sockets
             }
         }
 
-        private SocketAddress SnapshotAndSerialize(ref EndPoint remoteEP)
+        private Internals.SocketAddress SnapshotAndSerialize(ref EndPoint remoteEP)
         {
             IPEndPoint ipSnapshot = remoteEP as IPEndPoint;
 
@@ -6151,14 +6151,14 @@ namespace System.Net.Sockets
         }
 
         // Give a nicer exception for DnsEndPoint in cases where it is not supported
-        private SocketAddress CallSerializeCheckDnsEndPoint(EndPoint remoteEP)
+        private Internals.SocketAddress CallSerializeCheckDnsEndPoint(EndPoint remoteEP)
         {
             if (remoteEP is DnsEndPoint)
             {
                 throw new ArgumentException(SR.Format(SR.net_sockets_invalid_dnsendpoint, "remoteEP"), "remoteEP");
             }
 
-            return remoteEP.Serialize();
+            return IPEndPointExtensions.Serialize(remoteEP);
         }
 
         // DualMode: Automatically re-map IPv4 addresses to IPv6 addresses
@@ -6174,7 +6174,7 @@ namespace System.Net.Sockets
         //
         // socketAddress must always be the result of remoteEP.Serialize()
         //
-        private SocketAddress CheckCacheRemote(ref EndPoint remoteEP, bool isOverwrite)
+        private Internals.SocketAddress CheckCacheRemote(ref EndPoint remoteEP, bool isOverwrite)
         {
             IPEndPoint ipSnapshot = remoteEP as IPEndPoint;
 
@@ -6188,10 +6188,10 @@ namespace System.Net.Sockets
             }
 
             // This doesn't use SnapshotAndSerialize() because we need the ipSnapshot later.
-            SocketAddress socketAddress = CallSerializeCheckDnsEndPoint(remoteEP);
+            Internals.SocketAddress socketAddress = CallSerializeCheckDnsEndPoint(remoteEP);
 
             // We remember the first peer we have communicated with
-            SocketAddress permittedRemoteAddress = _permittedRemoteAddress;
+            Internals.SocketAddress permittedRemoteAddress = _permittedRemoteAddress;
             if (permittedRemoteAddress != null && permittedRemoteAddress.Equals(socketAddress))
             {
                 return permittedRemoteAddress;
@@ -6328,19 +6328,19 @@ namespace System.Net.Sockets
         internal void InternalConnect(EndPoint remoteEP)
         {
             EndPoint endPointSnapshot = remoteEP;
-            SocketAddress socketAddress = SnapshotAndSerialize(ref endPointSnapshot);
+            Internals.SocketAddress socketAddress = SnapshotAndSerialize(ref endPointSnapshot);
             DoConnect(endPointSnapshot, socketAddress);
         }
 
-        private void DoConnect(EndPoint endPointSnapshot, SocketAddress socketAddress)
+        private void DoConnect(EndPoint endPointSnapshot, Internals.SocketAddress socketAddress)
         {
             if (s_LoggingEnabled) Logging.Enter(Logging.Sockets, this, "Connect", endPointSnapshot);
 
             // This can throw ObjectDisposedException.
             SocketError errorCode = Interop.Winsock.WSAConnect(
                 _handle.DangerousGetHandle(),
-                socketAddress.m_Buffer,
-                socketAddress.m_Size,
+                socketAddress.Buffer,
+                socketAddress.Size,
                 IntPtr.Zero,
                 IntPtr.Zero,
                 IntPtr.Zero,
@@ -7032,7 +7032,7 @@ namespace System.Net.Sockets
 
             // This will check the permissions for connect.
             EndPoint endPointSnapshot = remoteEP;
-            SocketAddress socketAddress = flowContext ? CheckCacheRemote(ref endPointSnapshot, true) : SnapshotAndSerialize(ref endPointSnapshot);
+            Internals.SocketAddress socketAddress = flowContext ? CheckCacheRemote(ref endPointSnapshot, true) : SnapshotAndSerialize(ref endPointSnapshot);
 
             //socket must be bound first
             //the calling method BeginConnect will ensure that this method is only
@@ -7059,7 +7059,7 @@ namespace System.Net.Sockets
             }
 
             // This will pin socketAddress buffer
-            asyncResult.SetUnmanagedStructures(socketAddress.m_Buffer);
+            asyncResult.SetUnmanagedStructures(socketAddress.Buffer);
 
             //we should fix this in Whidbey.
             EndPoint oldEndPoint = m_RightEndPoint;
@@ -7076,8 +7076,8 @@ namespace System.Net.Sockets
             {
                 if (!ConnectEx(
                     _handle,
-                    Marshal.UnsafeAddrOfPinnedArrayElement(socketAddress.m_Buffer, 0),
-                    socketAddress.m_Size,
+                    Marshal.UnsafeAddrOfPinnedArrayElement(socketAddress.Buffer, 0),
+                    socketAddress.Size,
                     IntPtr.Zero,
                     0,
                     out ignoreBytesSent,
@@ -7217,7 +7217,7 @@ namespace System.Net.Sockets
 
         private static bool DoDnsCallback(IAsyncResult result, MultipleAddressConnectAsyncResult context)
         {
-            IPAddress[] addresses = Dns.EndGetHostAddresses(result);
+            IPAddress[] addresses = DnsAPMExtensions.EndGetHostAddresses(result);
             context.addresses = addresses;
             return DoMultipleAddressConnectCallback(PostOneBeginConnect(context), context);
         }
@@ -7862,9 +7862,9 @@ namespace System.Net.Sockets
         internal IntPtr m_PtrAcceptBuffer;
 
         // Internal SocketAddress buffer
-        internal SocketAddress m_SocketAddress;
+        internal Internals.SocketAddress m_SocketAddress;
         private GCHandle _socketAddressGCHandle;
-        private SocketAddress _pinnedSocketAddress;
+        private Internals.SocketAddress _pinnedSocketAddress;
         internal IntPtr m_PtrSocketAddressBuffer;
         internal IntPtr m_PtrSocketAddressBufferSize;
 
@@ -8834,10 +8834,10 @@ namespace System.Net.Sockets
             }
 
             // Pin down the new one.
-            _socketAddressGCHandle = GCHandle.Alloc(m_SocketAddress.m_Buffer, GCHandleType.Pinned);
+            _socketAddressGCHandle = GCHandle.Alloc(m_SocketAddress.Buffer, GCHandleType.Pinned);
             m_SocketAddress.CopyAddressSizeIntoBuffer();
-            m_PtrSocketAddressBuffer = Marshal.UnsafeAddrOfPinnedArrayElement(m_SocketAddress.m_Buffer, 0);
-            m_PtrSocketAddressBufferSize = Marshal.UnsafeAddrOfPinnedArrayElement(m_SocketAddress.m_Buffer, m_SocketAddress.GetAddressSizeOffset());
+            m_PtrSocketAddressBuffer = Marshal.UnsafeAddrOfPinnedArrayElement(m_SocketAddress.Buffer, 0);
+            m_PtrSocketAddressBufferSize = Marshal.UnsafeAddrOfPinnedArrayElement(m_SocketAddress.Buffer, m_SocketAddress.GetAddressSizeOffset());
             _pinnedSocketAddress = m_SocketAddress;
         }
 
@@ -9216,7 +9216,7 @@ namespace System.Net.Sockets
                     }
 
                     // Get the endpoint.
-                    SocketAddress remoteSocketAddress = _currentSocket.m_RightEndPoint.Serialize();
+                    Internals.SocketAddress remoteSocketAddress = IPEndPointExtensions.Serialize(_currentSocket.m_RightEndPoint);
 
                     IntPtr localAddr;
                     int localAddrLength;
@@ -9232,9 +9232,9 @@ namespace System.Net.Sockets
                             out localAddr,
                             out localAddrLength,
                             out remoteAddr,
-                            out remoteSocketAddress.m_Size
+                            out remoteSocketAddress.InternalSize
                             );
-                        Marshal.Copy(remoteAddr, remoteSocketAddress.m_Buffer, 0, remoteSocketAddress.m_Size);
+                        Marshal.Copy(remoteAddr, remoteSocketAddress.Buffer, 0, remoteSocketAddress.Size);
 
                         // Set the socket context.
                         IntPtr handle = _currentSocket.SafeHandle.DangerousGetHandle();
@@ -9339,7 +9339,7 @@ namespace System.Net.Sockets
 
                     // Deal with incoming address.
                     m_SocketAddress.SetSize(m_PtrSocketAddressBufferSize);
-                    SocketAddress socketAddressOriginal = _remoteEndPoint.Serialize();
+                    Internals.SocketAddress socketAddressOriginal = IPEndPointExtensions.Serialize(_remoteEndPoint);
                     if (!socketAddressOriginal.Equals(m_SocketAddress))
                     {
                         try
@@ -9363,7 +9363,7 @@ namespace System.Net.Sockets
 
                     // Deal with incoming address.
                     m_SocketAddress.SetSize(m_PtrSocketAddressBufferSize);
-                    socketAddressOriginal = _remoteEndPoint.Serialize();
+                    socketAddressOriginal = IPEndPointExtensions.Serialize(_remoteEndPoint);
                     if (!socketAddressOriginal.Equals(m_SocketAddress))
                     {
                         try

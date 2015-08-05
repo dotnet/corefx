@@ -19,6 +19,10 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Windows_Debug|AnyCPU' " />
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Windows_Release|AnyCPU' " />
 
+  <PropertyGroup>
+    <DefineConstants>$(DefineConstants);SYSTEM_NET_PRIMITIVES_DLL</DefineConstants>
+  </PropertyGroup>
+
   <ItemGroup>
     <Compile Include="System\Net\AuthenticationSchemes.cs" />
     <Compile Include="System\Net\Cookie.cs" />
@@ -37,7 +41,6 @@
     <Compile Include="System\Net\IPEndPoint.cs" />
     <Compile Include="System\Net\IWebProxy.cs" />
     <Compile Include="System\Net\NetworkCredential.cs" />
-    <Compile Include="System\Net\Sockets\SocketAddress.cs" />
     <Compile Include="System\Net\TransportContext.cs" />
     <Compile Include="System\Net\SocketException.cs" />
     <Compile Include="System\Net\NetworkInformation\IPAddressCollection.cs" />
@@ -54,6 +57,9 @@
     <Compile Include="$(CommonPath)\Microsoft\Win32\SafeHandles\SafeLocalAllocHandle.cs" >
       <Link>Common\Microsoft\Win32\SafeHandles\SafeLocalAllocHandle.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\System\Net\IPAddressParserStatics.cs" >
+      <Link>Common\System\Net\IPAddressParserStatics.cs</Link>
+    </Compile>
     <Compile Include="$(CommonPath)\System\Net\HttpKnownHeaderNames.cs" >
       <Link>Common\System\Net\HttpKnownHeaderNames.cs</Link>
     </Compile>
@@ -62,6 +68,9 @@
     </Compile>
     <Compile Include="$(CommonPath)\System\Net\UriScheme.cs" >
       <Link>Common\System\Net\UriScheme.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\Net\SocketAddress.cs">
+      <Link>Common\System\Net\SocketAddress.cs</Link>
     </Compile>
 
     <!-- Logging -->

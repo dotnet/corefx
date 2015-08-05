@@ -20,37 +20,6 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Windows_Release|AnyCPU' " />
 
   <ItemGroup>
-    <Compile Include="$(CommonPath)\System\NotImplemented.cs"/>
-
-    <!--Shims for Primitives, Sockets and NetworkInformation-->
-    <Compile Include="$(CommonPath)\System\Net\Shims\ExecutionContext.cs" />
-    <Compile Include="$(CommonPath)\System\Net\Shims\DBNull.cs" />
-    <Compile Include="$(CommonPath)\System\Net\Shims\_NetworkingPerfCounters.cs" />
-    <Compile Include="$(CommonPath)\System\Net\Shims\Uri.cs" />
-    <Compile Include="$(CommonPath)\System\Net\Shims\Win32SafeHandles.cs" />
-
-    <!-- Interop for Primitives, Sockets and NetworkInformation -->
-    <Compile Include="$(CommonPath)\Interop\Windows\SystemNet\Interop.Primitives.Manual.cs" />
-    <Compile Include="$(CommonPath)\Interop\Windows\Interop.Libraries.cs" />
-
-    <!-- Primitives, Sockets, NetworkInformation Common-->
-    <Compile Include="$(CommonPath)\System\Net\Internal.cs" />
-    <Compile Include="$(CommonPath)\System\Net\UnsafeNativeMethods.cs" />
-    <Compile Include="$(CommonPath)\System\Net\_BufferOffsetSize.cs" />
-    <Compile Include="$(CommonPath)\System\Net\_SafeNetHandles.cs" />
-    <Compile Include="$(CommonPath)\System\Net\_Win32.cs" />
-    <Compile Include="$(CommonPath)\System\Net\NetworkInformation\nodetype.cs" /> 
-    <Compile Include="$(CommonPath)\System\Net\NetworkInformation\NetworkInformationException.cs" />
-    <Compile Include="$(CommonPath)\System\Net\Cookie\cookie.cs" />
-    <Compile Include="$(CommonPath)\System\Net\Cookie\cookieexception.cs" />
-
-    <!-- Logging -->
-    <Compile Include="$(CommonPath)\System\Net\Shims\TraceSource.cs" />
-    <Compile Include="$(CommonPath)\System\Net\Logging\Logging.cs" />
-    <Compile Include="$(CommonPath)\System\Net\Logging\GlobalLog.cs" />
-    <Compile Include="$(CommonPath)\System\Net\Logging\EventSourceLogging.cs" />
-    <Compile Include="$(CommonPath)\System\Net\InternalException.cs" />
-          
     <Compile Include="System\Net\NetworkInformation\IPStatus.cs" />
     <Compile Include="System\Net\NetworkInformation\ping.cs" />
     <Compile Include="System\Net\NetworkInformation\pingexception.cs" />
