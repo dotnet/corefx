@@ -16,14 +16,18 @@ namespace System.Reflection.Metadata.Tests.PortableExecutable
 {
     public class SectionHeaderTests
     {
-        [Theory]
-        [InlineData(".debug", 0, 0, 0x5C, 0x152, 0, 0, 0, 0, SectionCharacteristics.LinkerInfo)]
-        [InlineData(".drectve", 0, 0, 26, 0x12C, 0, 0, 0, 0, SectionCharacteristics.Align1Bytes)]
-        [InlineData("", 1, 1, 2, 3, 5, 8, 13, 21, SectionCharacteristics.Align16Bytes)]
-        [InlineData("x", 1, 1, 2, 3, 5, 8, 13, 21, SectionCharacteristics.MemSysheap)]
-        [InlineData(".\u092c\u0917", int.MaxValue, int.MinValue, int.MaxValue, int.MinValue, int.MaxValue, int.MaxValue, ushort.MaxValue, ushort.MaxValue, SectionCharacteristics.GPRel)]
-        [InlineData("nul\u0000nul", 1, 1, 1, 1, 1, 1, 1, 1, SectionCharacteristics.ContainsInitializedData)]
-        public void Ctor(
+        [Fact]
+        public void Ctor()
+        {
+            TestCtor(".debug", 0, 0, 0x5C, 0x152, 0, 0, 0, 0, SectionCharacteristics.LinkerInfo);
+            TestCtor(".drectve", 0, 0, 26, 0x12C, 0, 0, 0, 0, SectionCharacteristics.Align1Bytes);
+            TestCtor("", 1, 1, 2, 3, 5, 8, 13, 21, SectionCharacteristics.Align16Bytes);
+            TestCtor("x", 1, 1, 2, 3, 5, 8, 13, 21, SectionCharacteristics.MemSysheap);
+            TestCtor(".\u092c\u0917", int.MaxValue, int.MinValue, int.MaxValue, int.MinValue, int.MaxValue, int.MaxValue, ushort.MaxValue, ushort.MaxValue, SectionCharacteristics.GPRel);
+            TestCtor("nul\u0000nul", 1, 1, 1, 1, 1, 1, 1, 1, SectionCharacteristics.ContainsInitializedData);
+        }
+
+        private void TestCtor(
             string name,
             int virtualSize,
             int virtualAddress,

@@ -1,0 +1,118 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition="'$(Configuration)' == ''">Debug</Configuration>
+    <Platform Condition="'$(Platform)' == ''">AnyCPU</Platform>
+    <ProjectGuid>{22BD405A-907D-4907-BC1C-BD9A0ED974D1}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AssemblyName>System.Reflection.Metadata.Tests.Desktop</AssemblyName>
+    <RootNamespace>System.Reflection.Metadata.Tests</RootNamespace>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <FileAlignment>512</FileAlignment>
+    <ExternallyShipping>false</ExternallyShipping>
+    <NuGetPackageImportStamp>83230753</NuGetPackageImportStamp>
+    <CLSCompliant>false</CLSCompliant>
+    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
+    <TargetFrameworkProfile />
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>..\..\..\packages\Microsoft.DotNet.BuildTools.1.0.25-prerelease-00053\lib\MSFT.snk</AssemblyOriginatorKeyFile>
+    <DelaySign>true</DelaySign>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <OutputPath>..\..\..\bin\tests\Debug</OutputPath>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <OutputPath>..\..\..\bin\tests\Release</OutputPath>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\src\System.Reflection.Metadata.csproj">
+      <Project>{f3e433c8-352f-4944-bf7f-765ce435370d}</Project>
+      <Name>System.Reflection.Metadata</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="XunitStubs.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="xunit">
+      <HintPath>..\..\..\packages\xunit.1.9.2\lib\net20\xunit.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Collections.Immutable">
+      <HintPath>..\..\..\packages\System.Collections.Immutable\1.1.36\lib\portable-net45+win8+wp8+wpa81\System.Collections.Immutable.dll</HintPath>
+    </Reference>
+  </ItemGroup>  
+  <ItemGroup>
+    <Compile Include="Metadata\ClassLayoutRow.cs" />
+    <Compile Include="Metadata\Decoding\MethodSignatureTests.cs" />
+    <Compile Include="Metadata\Decoding\SignatureDecoderTests.cs" />
+    <Compile Include="Metadata\Ecma335\MetadataAggregatorTests.cs" />
+    <Compile Include="Metadata\Ecma335\MetadataTokensTests.cs" />
+    <Compile Include="Metadata\HandleComparerTests.cs" />
+    <Compile Include="Metadata\HandleTests.cs" />
+    <Compile Include="Metadata\MetadataReaderTestHelpers.cs" />
+    <Compile Include="Metadata\MetadataReaderTests.cs" />
+    <Compile Include="Metadata\MethodImportRow.cs" />
+    <Compile Include="Metadata\TagToTokenTests.cs" />
+    <Compile Include="Metadata\PortablePdb\DocumentNameTests.cs" />
+    <Compile Include="PortableExecutable\AbstractMemoryBlockTests.cs" />
+    <Compile Include="PortableExecutable\BadImageFormat.cs" />
+    <Compile Include="PortableExecutable\PEBinaryReaderTests.cs" />
+    <Compile Include="PortableExecutable\PEReaderTests.cs" />
+    <Compile Include="PortableExecutable\SectionHeaderTests.cs" />
+    <Compile Include="PortableExecutable\StreamExtensionsTests.cs" />
+    <Compile Include="TestUtilities\AssertEx.cs" />
+    <Compile Include="TestUtilities\DiffUtil.cs" />
+    <Compile Include="Utilities\StringUtilsTests.cs" />
+    <Compile Include="Utilities\BlobReaderTests.cs" />
+    <Compile Include="Utilities\CompressedIntegerTests.cs" />
+    <Compile Include="Utilities\ImmutableByteArrayInteropTest.cs" />
+    <Compile Include="Utilities\MemoryBlockTests.cs" />
+    <Compile Include="Resources\TestResources.cs" />
+    <None Include="Resources\Namespace\NamespaceForwardedCS.cs" />
+    <None Include="Resources\Namespace\NamespaceTests.cs" />
+    <None Include="Resources\Interop\Interop.Mock01.cs" />
+    <None Include="Resources\Interop\Interop.Mock01.Impl.cs" />
+    <None Include="Resources\Interop\IndexerWithByRefParam.il" />
+    <EmbeddedResource Include="Resources\Interop\IndexerWithByRefParam.dll" />
+    <EmbeddedResource Include="Resources\Interop\Interop.Mock01.dll" />
+    <EmbeddedResource Include="Resources\Interop\Interop.Mock01.Impl.dll" />
+    <None Include="Resources\Misc\CPPClassLibrary2.h" />
+    <EmbeddedResource Include="Resources\Misc\CPPClassLibrary2.obj" />
+    <None Include="Resources\Misc\EmptyType.il" />
+    <EmbeddedResource Include="Resources\Misc\EmptyType.dll" />
+    <None Include="Resources\Misc\Members.cs" />
+    <EmbeddedResource Include="Resources\Misc\Members.dll" />
+    <EmbeddedResource Include="Resources\Namespace\NamespaceForwardedCS.dll" />
+    <EmbeddedResource Include="Resources\Namespace\NamespaceTests.dll" />
+    <None Include="Resources\NetModule\AppCS.cs" />
+    <EmbeddedResource Include="Resources\NetModule\AppCS.exe" />
+    <None Include="Resources\NetModule\ModuleCS00.cs" />
+    <EmbeddedResource Include="Resources\NetModule\ModuleCS00.mod" />
+    <None Include="Resources\NetModule\ModuleCS01.cs" />
+    <EmbeddedResource Include="Resources\NetModule\ModuleCS01.mod" />
+    <EmbeddedResource Include="Resources\NetModule\ModuleVB01.mod" />
+    <None Include="Resources\NetModule\ModuleVB01.vb" />
+  </ItemGroup>
+  <Target Name="BuildAndTest" />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>

@@ -2,11 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2013/01/nuspec.xsd">
   <metadata minClientVersion="2.8.1">
     <id>System.Reflection.Metadata</id>
-    <!-- NOTE: We only currently use packages built from this nuspec out of the dev/metadata/branch, 
-               where the 1.1.x version should be retained upon merge conflict. Using a version in
-               main that matches the assembly version built there, but is visibly not something
-               we'd ever ship. -->
-    <version>1.0.37-unofficial</version> 
+    <version>1.1.0-alpha</version>
     <title>Microsoft ECMA-335 Metadata Reader</title>
     <authors>Microsoft</authors>
     <owners>Microsoft</owners>

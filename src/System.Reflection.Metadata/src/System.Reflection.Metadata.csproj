@@ -14,7 +14,8 @@
     <DefaultLanguage>en-US</DefaultLanguage>
     <NoWarn>1591</NoWarn>
     <CLSCompliant>false</CLSCompliant>
-    <AssemblyVersion>1.0.22.0</AssemblyVersion>
+    <AssemblyVersion>1.1.0.0</AssemblyVersion>
+    <AssemblyFileVersion>1.1.0.0</AssemblyFileVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -45,14 +46,17 @@
     <Compile Include="System\Reflection\Internal\MemoryBlocks\StreamConstraints.cs" />
     <Compile Include="System\Reflection\Internal\MemoryBlocks\StreamMemoryBlockProvider.cs" />
     <Compile Include="System\Reflection\Internal\Utilities\BitArithmetic.cs" />
+    <Compile Include="System\Reflection\Internal\Utilities\StringUtils.cs" />
     <Compile Include="System\Reflection\Internal\Utilities\EmptyArray.cs" />
     <Compile Include="System\Reflection\Internal\Utilities\EncodingHelper.cs" />
     <Compile Include="System\Reflection\Internal\Utilities\FileStreamReadLightUp.cs" />
+    <Compile Include="System\Reflection\Internal\Utilities\Hash.cs" />
     <Compile Include="System\Reflection\Internal\Utilities\ImmutableByteArrayInterop.cs" />
     <Compile Include="System\Reflection\Internal\Utilities\ImmutableMemoryStream.cs" />
     <Compile Include="System\Reflection\Internal\Utilities\LightUpHelper.cs" />
     <Compile Include="System\Reflection\Internal\Utilities\MemoryBlock.cs" />
     <Compile Include="System\Reflection\Internal\Utilities\MemoryMapLightUp.cs" />
+    <Compile Include="System\Reflection\Internal\Utilities\PooledStringBuilder.cs" />
     <Compile Include="System\Reflection\Internal\Utilities\ObjectPool`1.cs" />
     <Compile Include="System\Reflection\Internal\Utilities\ReadOnlyUnmanagedMemoryStream.cs" />
     <Compile Include="System\Reflection\Internal\Utilities\StreamExtensions.cs" />
@@ -65,6 +69,40 @@
     <Compile Include="System\Reflection\Metadata\CustomAttribute.cs" />
     <Compile Include="System\Reflection\Metadata\CustomAttributeNamedArgumentKind.cs" />
     <Compile Include="System\Reflection\Metadata\DeclarativeSecurityAttribute.cs" />
+    <Compile Include="System\Reflection\Metadata\Decoding\ArrayShape.cs" />
+    <Compile Include="System\Reflection\Metadata\Decoding\AssemblyNameParsing\AssemblyNameComponents.cs" />
+    <Compile Include="System\Reflection\Metadata\Decoding\AssemblyNameParsing\AssemblyNameParser.AssemblyNameBuilder.cs" />
+    <Compile Include="System\Reflection\Metadata\Decoding\AssemblyNameParsing\AssemblyNameParser.cs" />
+    <Compile Include="System\Reflection\Metadata\Decoding\AssemblyNameParsing\AssemblyNameParser.ParseMode.cs" />
+    <Compile Include="System\Reflection\Metadata\Decoding\CustomAttributeDecoder.cs" />
+    <Compile Include="System\Reflection\Metadata\Decoding\ICustomAttributeTypeProvider.cs" />
+    <Compile Include="System\Reflection\Metadata\Decoding\ISignatureTypeProvider.cs" />
+    <Compile Include="System\Reflection\Metadata\Decoding\ITypeProvider.cs" />
+    <Compile Include="System\Reflection\Metadata\Decoding\SignatureDecoder.cs" />
+    <Compile Include="System\Reflection\Metadata\Decoding\StringComparers.cs" />
+    <Compile Include="System\Reflection\Metadata\Decoding\CustomAttributeNamedArgument.cs" />
+    <Compile Include="System\Reflection\Metadata\Decoding\CustomAttributeTypedArgument.cs" />
+    <Compile Include="System\Reflection\Metadata\Decoding\CustomAttributeValue.cs" />
+    <Compile Include="System\Reflection\Metadata\Decoding\CustomModifier.cs" />
+    <Compile Include="System\Reflection\Metadata\Decoding\MethodSignature.cs" />
+    <Compile Include="System\Reflection\Metadata\Decoding\PrimitiveTypeCode.cs" />
+    <Compile Include="System\Reflection\Metadata\Decoding\TypeNameParsing\Delimiters.cs" />
+    <Compile Include="System\Reflection\Metadata\Decoding\TypeNameParsing\IdentifierOptions.cs" />
+    <Compile Include="System\Reflection\Metadata\Decoding\TypeNameParsing\ITypeNameParserTypeProvider.cs" />
+    <Compile Include="System\Reflection\Metadata\Decoding\TypeNameParsing\QuotedIdentifierParser.cs" />
+    <Compile Include="System\Reflection\Metadata\Decoding\TypeNameParsing\StringReader.cs" />
+    <Compile Include="System\Reflection\Metadata\Decoding\TypeNameParsing\Tokenizer.cs" />
+    <Compile Include="System\Reflection\Metadata\Decoding\TypeNameParsing\Tokenizer.ParseOptions.cs" />
+    <Compile Include="System\Reflection\Metadata\Decoding\TypeNameParsing\Tokenizer.Token.cs" />
+    <Compile Include="System\Reflection\Metadata\Decoding\TypeNameParsing\TokenType.cs" />
+    <Compile Include="System\Reflection\Metadata\Decoding\TypeNameParsing\TypeModifier.cs" />
+    <Compile Include="System\Reflection\Metadata\Decoding\TypeNameParsing\TypeModifierType.cs" />
+    <Compile Include="System\Reflection\Metadata\Decoding\TypeNameParsing\TypeNameFormatErrorId.cs" />
+    <Compile Include="System\Reflection\Metadata\Decoding\TypeNameParsing\TypeNameFormatException.cs" />
+    <Compile Include="System\Reflection\Metadata\Decoding\TypeNameParsing\TypeNameParser.cs" />
+    <Compile Include="System\Reflection\Metadata\Decoding\TypeNameParsing\TypeNameParserOfT.cs" />
+    <Compile Include="System\Reflection\Metadata\Decoding\TypeNameParsing\TypeNameParserOfT.ParseMode.cs" />
+    <Compile Include="System\Reflection\Metadata\Decoding\TypeNameParsing\TypeNameParserOfT.TypeBuilder.cs" />
     <Compile Include="System\Reflection\Metadata\Ecma335\EditAndContinueLogEntry.cs" />
     <Compile Include="System\Reflection\Metadata\Ecma335\EditAndContinueOperation.cs" />
     <Compile Include="System\Reflection\Metadata\Ecma335\ExportedTypeExtensions.cs" />
@@ -97,9 +135,7 @@
     <Compile Include="System\Reflection\Metadata\Internal\MemberForwardedTag.cs" />
     <Compile Include="System\Reflection\Metadata\Internal\MemberRefParentTag.cs" />
     <Compile Include="System\Reflection\Metadata\Internal\MetadataFlags.cs" />
-    <Compile Include="System\Reflection\Metadata\Internal\MetadataHeader.cs" />
     <Compile Include="System\Reflection\Metadata\Internal\MetadataStreamConstants.cs" />
-    <Compile Include="System\Reflection\Metadata\Internal\MetadataTableHeader.cs" />
     <Compile Include="System\Reflection\Metadata\Internal\MethodDefOrRefTag.cs" />
     <Compile Include="System\Reflection\Metadata\Internal\NamespaceCache.cs" />
     <Compile Include="System\Reflection\Metadata\Internal\NamespaceData.cs" />
@@ -128,6 +164,25 @@
     <Compile Include="System\Reflection\Metadata\ModuleReference.cs" />
     <Compile Include="System\Reflection\Metadata\NamespaceDefinition.cs" />
     <Compile Include="System\Reflection\Metadata\Parameter.cs" />
+    <Compile Include="System\Reflection\Metadata\PortablePdb\CustomDebugInformation.cs" />
+    <Compile Include="System\Reflection\Metadata\PortablePdb\DebugMetadataHeader.cs" />
+    <Compile Include="System\Reflection\Metadata\PortablePdb\Document.cs" />
+    <Compile Include="System\Reflection\Metadata\PortablePdb\DocumentNameHandle.cs" />
+    <Compile Include="System\Reflection\Metadata\PortablePdb\HandleCollections.Debug.cs" />
+    <Compile Include="System\Reflection\Metadata\PortablePdb\Handles.Debug.cs" />
+    <Compile Include="System\Reflection\Metadata\PortablePdb\HasCustomDebugInformationTag.cs" />
+    <Compile Include="System\Reflection\Metadata\PortablePdb\ImportDefinition.cs" />
+    <Compile Include="System\Reflection\Metadata\PortablePdb\ImportDefinitionKind.cs" />
+    <Compile Include="System\Reflection\Metadata\PortablePdb\ImportsBlobReader.cs" />
+    <Compile Include="System\Reflection\Metadata\PortablePdb\LocalConstant.cs" />
+    <Compile Include="System\Reflection\Metadata\PortablePdb\ImportScope.cs" />
+    <Compile Include="System\Reflection\Metadata\PortablePdb\LocalScope.cs" />
+    <Compile Include="System\Reflection\Metadata\PortablePdb\LocalVariable.cs" />
+    <Compile Include="System\Reflection\Metadata\PortablePdb\LocalVariableAttributes.cs" />
+    <Compile Include="System\Reflection\Metadata\PortablePdb\MethodBody.cs" />
+    <Compile Include="System\Reflection\Metadata\PortablePdb\SequencePoint.cs" />
+    <Compile Include="System\Reflection\Metadata\PortablePdb\SequencePointBlobReader.cs" />
+    <Compile Include="System\Reflection\Metadata\PortablePdb\Tables.Debug.cs" />
     <Compile Include="System\Reflection\Metadata\PEReaderExtensions.cs" />
     <Compile Include="System\Reflection\Metadata\PropertyDefinition.cs" />
     <Compile Include="System\Reflection\Metadata\SerializationTypeCode.cs" />
@@ -157,6 +212,11 @@
     <Compile Include="System\Reflection\PortableExecutable\SectionHeader.cs" />
     <Compile Include="System\Reflection\Throw.cs" />
     <Compile Include="System\Reflection\System.Reflection.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="System.Collections.Immutable, Version=1.1.36.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+      <HintPath>$(PackagesDir)\System.Collections.Immutable.1.1.36\lib\portable-net45+win8+wp8+wpa81\System.Collections.Immutable.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <None Include="project.json" />

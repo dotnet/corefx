@@ -10,6 +10,7 @@ namespace System.IO.Compression.Test
     public partial class ZipTest
     {
         [Fact]
+        [ActiveIssue(1787)]
         public async Task CreateFromDirectoryNormal()
         {
             await TestCreateDirectory(zfolder("normal"), true);
@@ -62,6 +63,7 @@ namespace System.IO.Compression.Test
         }
 
         [Fact]
+        [ActiveIssue(1787)]
         public void ExtractToDirectoryNormal()
         {
             TestExtract(zfile("normal.zip"), zfolder("normal"));
@@ -91,6 +93,7 @@ namespace System.IO.Compression.Test
         [Theory]
         [InlineData(true)]
         [InlineData(false)]
+        [ActiveIssue(1787)]
         public async Task CreateEntryFromFileTest(bool withCompressionLevel)
         {
             //add file
@@ -115,6 +118,7 @@ namespace System.IO.Compression.Test
         }
 
         [Fact]
+        [ActiveIssue(1787)]
         public void ExtractToFileTest()
         {
             using (ZipArchive archive = ZipFile.Open(zfile("normal.zip"), ZipArchiveMode.Read))
@@ -149,6 +153,7 @@ namespace System.IO.Compression.Test
         }
 
         [Fact]
+        [ActiveIssue(1787)]
         public void ExtractToDirectoryTest()
         {
             using (ZipArchive archive = ZipFile.Open(zfile("normal.zip"), ZipArchiveMode.Read))
@@ -174,6 +179,7 @@ namespace System.IO.Compression.Test
         }
 
         [Fact]
+        [ActiveIssue(1787)]
         public void CreatedEmptyDirectoriesRoundtrip()
         {
             DirectoryInfo rootDir = new DirectoryInfo(GetTmpDirPath(create: true));
@@ -192,6 +198,7 @@ namespace System.IO.Compression.Test
         }
 
         [Fact]
+        [ActiveIssue(1787)]
         public void CreatedEmptyRootDirectoryRoundtrips()
         {
             DirectoryInfo emptyRoot = new DirectoryInfo(GetTmpDirPath(create: true));
