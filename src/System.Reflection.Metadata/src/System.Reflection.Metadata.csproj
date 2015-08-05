@@ -15,6 +15,7 @@
     <NoWarn>1591</NoWarn>
     <CLSCompliant>false</CLSCompliant>
     <AssemblyVersion>1.1.0.0</AssemblyVersion>
+    <AssemblyFileVersion>1.1.0.0</AssemblyFileVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
     <PlatformTarget>AnyCPU</PlatformTarget>
