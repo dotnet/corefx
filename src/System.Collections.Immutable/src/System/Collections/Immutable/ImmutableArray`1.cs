@@ -442,7 +442,7 @@ namespace System.Collections.Immutable
             }
             else
             {
-                for (int i = startIndex; i >= startIndex - count + 1; i--)
+                for (int i = startIndex; i > startIndex - count; i--)
                 {
                     if (equalityComparer.Equals(item, self.array[i]))
                     {
@@ -545,26 +545,34 @@ namespace System.Collections.Immutable
             Requires.NotNull(items, "items");
 
             if (self.Length == 0)
-            {
                 return ImmutableArray.CreateRange(items);
-            }
-
-            int count = ImmutableExtensions.GetCount(ref items);
-            if (count == 0)
+            
+            if (items is ICollection<T>)
             {
-                return self;
+                ICollection<T> other = (ICollection<T>)items;
+                
+                if (other.Count == 0)
+                    return self;
+                
+                T[] dest = new T[self.Length + other.Count];
+                other.CopyTo(dest, index); // keep this before so any changes it makes to unintended parts of the array are overwritten by Array.Copy
+                Array.Copy(self.array, 0, dest, 0, index);
+                Array.Copy(self.array, index, dest, index + other.Count, self.Length - index);
+                return new ImmutableArray<T>(dest);
             }
-
-            T[] tmp = new T[self.Length + count];
-            Array.Copy(self.array, 0, tmp, 0, index);
-            int sequenceIndex = index;
-            foreach (var item in items)
+            else
             {
-                tmp[sequenceIndex++] = item;
+                T[] other = items.ToArray();
+                
+                if (other.Length == 0)
+                    return self;
+    
+                T[] tmp = new T[self.Length + other.Length];
+                Array.Copy(self.array, 0, tmp, 0, index);
+                Array.Copy(other, 0, tmp, index, other.Length);
+                Array.Copy(self.array, index, tmp, index + other.Length, self.Length - index);
+                return new ImmutableArray<T>(tmp);
             }
-
-            Array.Copy(self.array, index, tmp, index + count, self.Length - index);
-            return new ImmutableArray<T>(tmp);
         }
 
         /// <summary>
@@ -583,11 +591,11 @@ namespace System.Collections.Immutable
 
             if (self.IsEmpty)
             {
-                return new ImmutableArray<T>(items.array);
+                return items;
             }
             else if (items.IsEmpty)
             {
-                return new ImmutableArray<T>(self.array);
+                return self;
             }
 
             return self.InsertRange(index, items.array);
@@ -602,11 +610,6 @@ namespace System.Collections.Immutable
         public ImmutableArray<T> Add(T item)
         {
             var self = this;
-            if (self.Length == 0)
-            {
-                return ImmutableArray.Create(item);
-            }
-
             return self.Insert(self.Length, item);
         }
 
@@ -636,7 +639,7 @@ namespace System.Collections.Immutable
             if (self.IsEmpty)
             {
                 // Be sure what we return is marked as initialized.
-                return new ImmutableArray<T>(items.array);
+                return items;
             }
             else if (items.IsEmpty)
             {
@@ -691,6 +694,7 @@ namespace System.Collections.Immutable
         public ImmutableArray<T> Replace(T oldValue, T newValue, IEqualityComparer<T> equalityComparer)
         {
             var self = this;
+            
             int index = self.IndexOf(oldValue, equalityComparer);
             if (index < 0)
             {
@@ -726,9 +730,13 @@ namespace System.Collections.Immutable
         {
             var self = this;
             self.ThrowNullRefIfNotInitialized();
+            
+            if (self.IsEmpty)
+                return self;
+            
             int index = self.IndexOf(item, equalityComparer);
             return index < 0
-                ? new ImmutableArray<T>(self.array)
+                ? self
                 : self.RemoveAt(index);
         }
 
@@ -797,6 +805,9 @@ namespace System.Collections.Immutable
             self.ThrowNullRefIfNotInitialized();
             Requires.NotNull(items, "items");
             Requires.NotNull(equalityComparer, "equalityComparer");
+            
+            if (self.IsEmpty)
+                return self;
 
             var indexesToRemove = new SortedSet<int>();
             foreach (var item in items)
@@ -839,11 +850,11 @@ namespace System.Collections.Immutable
         public ImmutableArray<T> RemoveRange(ImmutableArray<T> items, IEqualityComparer<T> equalityComparer)
         {
             var self = this;
+            self.ThrowNullRefIfNotInitialized();
             Requires.NotNull(items.array, "items");
-
+            
             if (items.IsEmpty)
             {
-                self.ThrowNullRefIfNotInitialized();
                 return self;
             }
             else if (items.Length == 1)
@@ -875,22 +886,24 @@ namespace System.Collections.Immutable
             Requires.NotNull(match, "match");
 
             if (self.IsEmpty)
-            {
-                return new ImmutableArray<T>(self.array);
-            }
+                return self;
 
             List<int> removeIndexes = null;
-            for (int i = 0; i < self.array.Length; i++)
+            
+            int i = 0;
+            for (; i < self.array.Length; i++)
             {
                 if (match(self.array[i]))
                 {
-                    if (removeIndexes == null)
-                    {
-                        removeIndexes = new List<int>();
-                    }
-
+                    removeIndexes = new List<int>();
                     removeIndexes.Add(i);
+                    break;
                 }
+            }
+            for (; i < self.array.Length; i++)
+            {
+                if (match(self.array[i]))
+                    removeIndexes.Add(i);
             }
 
             return removeIndexes != null ?
@@ -942,14 +955,14 @@ namespace System.Collections.Immutable
             Requires.Range(index >= 0, "index");
             Requires.Range(count >= 0 && index + count <= self.Length, "count");
 
-            if (comparer == null)
-            {
-                comparer = Comparer<T>.Default;
-            }
-
             // 0 and 1 element arrays don't need to be sorted.
             if (count > 1)
             {
+                if (comparer == null)
+                {
+                    comparer = Comparer<T>.Default;
+                }
+
                 // Avoid copying the entire array when the array is already sorted.
                 bool outOfOrder = false;
                 for (int i = index + 1; i < index + count; i++)
@@ -970,7 +983,7 @@ namespace System.Collections.Immutable
                 }
             }
 
-            return new ImmutableArray<T>(self.array);
+            return self;
         }
 
         /// <summary>
@@ -1108,7 +1121,7 @@ namespace System.Collections.Immutable
         public IEnumerable<TResult> OfType<TResult>()
         {
             var self = this;
-            if (self.array == null || self.array.Length == 0)
+            if (self.IsDefaultOrEmpty)
             {
                 return Enumerable.Empty<TResult>();
             }
@@ -1642,7 +1655,7 @@ namespace System.Collections.Immutable
             if (indexesToRemove.Count == 0)
             {
                 // Be sure to return a !IsDefault instance.
-                return new ImmutableArray<T>(self.array);
+                return self;
             }
 
             var newArray = new T[self.Length - indexesToRemove.Count];
