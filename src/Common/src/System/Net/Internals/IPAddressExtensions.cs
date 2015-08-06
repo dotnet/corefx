@@ -5,7 +5,6 @@ namespace System.Net.Sockets
 {
     public static class IPAddressExtensions
     {
-        // TODO: Extract the following into IPAddressExtensions and reconcile with IPAddress.cs in Primitives:
         public static IPAddress Snapshot(this IPAddress original)
         {
             switch (original.AddressFamily)
@@ -20,7 +19,6 @@ namespace System.Net.Sockets
             throw new InternalException();
         }
 
-        // TODO: Reuse in DNS.cs:239.
         public static long GetAddress(this IPAddress thisObj)
         {
             byte[] addressBytes = thisObj.GetAddressBytes();

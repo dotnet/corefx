@@ -16,7 +16,6 @@ namespace System.Net.Sockets
 
         public static EndPoint Create(this EndPoint thisObj, Internals.SocketAddress socketAddress)
         {
-            // Validate SocketAddress
             if (socketAddress.Family != thisObj.AddressFamily)
             {
                 throw new ArgumentException(SR.Format(SR.net_InvalidAddressFamily, socketAddress.Family.ToString(), thisObj.GetType().FullName, thisObj.AddressFamily.ToString()), "socketAddress");
