@@ -14,14 +14,33 @@ namespace System.IO.Packaging.Tests
     {
         private string Mime_MediaTypeNames_Text_Xml = "text/xml";
         private string Mime_MediaTypeNames_Image_Jpeg = "image/jpeg"; // System.Net.Mime.MediaTypeNames.Image.Jpeg
+        private static string s_DocumentXml = @"<Hello>Test</Hello>";
+        private static string s_ResourceXml = @"<Resource>Test</Resource>";
 
-        // 
+        private static FileInfo GetFileSavedWithGuidName(string test, string name)
+        {
+            var fiDoc = new FileInfo(name);
+            var ba = File.ReadAllBytes(fiDoc.FullName);
+            var fiGuidName = new FileInfo("Temp-" + Guid.NewGuid().ToString().Replace("-", "") + fiDoc.Extension);
+            File.WriteAllBytes(fiGuidName.FullName, ba);
+			// If a test leaves a Test-* file in existence, then uncomment following line to determine which test it was.
+			// Console.WriteLine("{0}:{1}", test, fiGuidName.Name);
+            return fiGuidName;
+        }
+
+        public static FileInfo GetGuidNameForNewFile(string test, string extension)
+        {
+            var fiDoc = new FileInfo("Temp-" + Guid.NewGuid().ToString().Replace("-", "") + extension);
+			// If a test leaves a Test-* file in existence, then uncomment following line to determine which test it was.
+			// Console.WriteLine("{0}:{1}", test, fiDoc.Name);
+			return fiDoc;
+        }
 
         [Fact]
         public void T172_EmptyRelationshipPart()
         {
             var docName = "EmptyRelationshipElement.docx";
-            var ba = TestFileLib.GetByteArray(docName);
+            var ba = File.ReadAllBytes(docName);
             const string DocumentRelationshipType = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument";
             using (MemoryStream ms = new MemoryStream())
             {
@@ -47,7 +66,7 @@ namespace System.IO.Packaging.Tests
         public void T171_IterateExternalRelationship()
         {
             var docName = "Hyperlink.docx";
-            var ba = TestFileLib.GetByteArray(docName);
+            var ba = File.ReadAllBytes(docName);
             const string DocumentRelationshipType = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument";
             using (MemoryStream ms = new MemoryStream())
             {
@@ -73,9 +92,8 @@ namespace System.IO.Packaging.Tests
         public void T170_InvalidRelationshipId()
         {
             var docName = "plain.docx";
-            var fiGuidName = TestFileLib.GetFileSavedWithGuidName(docName);
+            var fiGuidName = GetFileSavedWithGuidName("T170_InvalidRelationshipId", docName);
             var documentPath = "document.xml";
-            var packagePath1 = TestFileLib.GetGuidNameForNewFile(".docx");
             Uri partUriDocument = PackUriHelper.CreatePartUri(new Uri(documentPath, UriKind.Relative));
             using (Package package = Package.Open(fiGuidName.FullName, FileMode.Create, FileAccess.ReadWrite))
             {
@@ -91,7 +109,7 @@ namespace System.IO.Packaging.Tests
         public void T169_DeleteAllRelationshipOfMainDocPart()
         {
             var docName = "plain.docx";
-            var ba = TestFileLib.GetByteArray(docName);
+            var ba = File.ReadAllBytes(docName);
             const string DocumentRelationshipType = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument";
             using (MemoryStream ms = new MemoryStream())
             {
@@ -114,12 +132,11 @@ namespace System.IO.Packaging.Tests
         }
 
         [Fact]
-        public void T168_InvalidRelationshipType()
+        public void T168_InvalidRelationshipId()
         {
             var docName = "plain.docx";
-            var fiGuidName = TestFileLib.GetFileSavedWithGuidName(docName);
+            var fiGuidName = GetFileSavedWithGuidName("T168_InvalidRelationshipId", docName);
             var documentPath = "document.xml";
-            var packagePath1 = TestFileLib.GetGuidNameForNewFile(".docx");
             Uri partUriDocument = PackUriHelper.CreatePartUri(new Uri(documentPath, UriKind.Relative));
             using (Package package = Package.Open(fiGuidName.FullName, FileMode.Create, FileAccess.ReadWrite))
             {
@@ -127,7 +144,7 @@ namespace System.IO.Packaging.Tests
                 using (Stream partStream = packagePartDocument.GetStream())
                 using (StreamWriter sw = new StreamWriter(partStream))
                 {
-                    sw.Write(TestFileLib.s_DocumentXml);
+                    sw.Write(s_DocumentXml);
                 }
                 Assert.Throws<ArgumentException>(() =>
                     {
@@ -141,7 +158,7 @@ namespace System.IO.Packaging.Tests
         public void T167_DeleteNonExistentRelationship()
         {
             var docName = "plain.docx";
-            var ba = TestFileLib.GetByteArray(docName);
+            var ba = File.ReadAllBytes(docName);
             const string DocumentRelationshipType = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument";
             using (MemoryStream ms = new MemoryStream())
             {
@@ -166,7 +183,7 @@ namespace System.IO.Packaging.Tests
         public void T166_GetPartRelationshipById_InvalidId()
         {
             var docName = "plain.docx";
-            var ba = TestFileLib.GetByteArray(docName);
+            var ba = File.ReadAllBytes(docName);
             const string DocumentRelationshipType = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument";
 
             using (MemoryStream ms = new MemoryStream())
@@ -202,7 +219,7 @@ namespace System.IO.Packaging.Tests
         public void T165_DeleteNonExistentPart()
         {
             var docName = "plain.docx";
-            var ba = TestFileLib.GetByteArray(docName);
+            var ba = File.ReadAllBytes(docName);
             using (MemoryStream ms = new MemoryStream())
             {
                 ms.Write(ba, 0, ba.Length);
@@ -220,7 +237,7 @@ namespace System.IO.Packaging.Tests
         public void T164_InvalidPartUri()
         {
             var docName = "plain.docx";
-            var ba = TestFileLib.GetByteArray(docName);
+            var ba = File.ReadAllBytes(docName);
 
             var documentPath2 = "/abc.xaml";
             Uri partUriDocument2 = new Uri(documentPath2, UriKind.Relative);
@@ -245,7 +262,7 @@ namespace System.IO.Packaging.Tests
         public void T163_FileFormatExceptionUriProperty()
         {
             var docName = "invaliddocpropsct.docx";
-            var ba = TestFileLib.GetByteArray(docName);
+            var ba = File.ReadAllBytes(docName);
             var documentPath = "document.xml";
             Uri partUriDocument = PackUriHelper.CreatePartUri(new Uri(documentPath, UriKind.Relative));
 
@@ -270,7 +287,7 @@ namespace System.IO.Packaging.Tests
         public void T162_ParameterWithUnquotedQuote()
         {
             var docName = "plain.docx";
-            var ba = TestFileLib.GetByteArray(docName);
+            var ba = File.ReadAllBytes(docName);
             var documentPath = "document.xml";
             Uri partUriDocument = PackUriHelper.CreatePartUri(new Uri(documentPath, UriKind.Relative));
 
@@ -287,7 +304,7 @@ namespace System.IO.Packaging.Tests
         public void T161_ParameterWithInvalidChar()
         {
             var docName = "plain.docx";
-            var ba = TestFileLib.GetByteArray(docName);
+            var ba = File.ReadAllBytes(docName);
             var documentPath = "document.xml";
             Uri partUriDocument = PackUriHelper.CreatePartUri(new Uri(documentPath, UriKind.Relative));
 
@@ -304,7 +321,7 @@ namespace System.IO.Packaging.Tests
         public void T160_InvalidContentType()
         {
             var docName = "plain.docx";
-            var ba = TestFileLib.GetByteArray(docName);
+            var ba = File.ReadAllBytes(docName);
             var documentPath = "document.xml";
             Uri partUriDocument = PackUriHelper.CreatePartUri(new Uri(documentPath, UriKind.Relative));
 
@@ -321,7 +338,7 @@ namespace System.IO.Packaging.Tests
         public void T159_EmptyParameter()
         {
             var docName = "plain.docx";
-            var ba = TestFileLib.GetByteArray(docName);
+            var ba = File.ReadAllBytes(docName);
             var documentPath = "document.xml";
             Uri partUriDocument = PackUriHelper.CreatePartUri(new Uri(documentPath, UriKind.Relative));
 
@@ -338,7 +355,7 @@ namespace System.IO.Packaging.Tests
         public void T158_ParameterWithInvalidChar()
         {
             var docName = "plain.docx";
-            var ba = TestFileLib.GetByteArray(docName);
+            var ba = File.ReadAllBytes(docName);
             var documentPath = "document.xml";
             Uri partUriDocument = PackUriHelper.CreatePartUri(new Uri(documentPath, UriKind.Relative));
 
@@ -355,7 +372,7 @@ namespace System.IO.Packaging.Tests
         public void T157_ParameterWithWhiteSpace()
         {
             var docName = "plain.docx";
-            var ba = TestFileLib.GetByteArray(docName);
+            var ba = File.ReadAllBytes(docName);
             var documentPath = "document.xml";
             Uri partUriDocument = PackUriHelper.CreatePartUri(new Uri(documentPath, UriKind.Relative));
 
@@ -372,7 +389,7 @@ namespace System.IO.Packaging.Tests
         public void T156_CreatePart_ContentTypeWithInvalidSubtype()
         {
             var docName = "plain.docx";
-            var ba = TestFileLib.GetByteArray(docName);
+            var ba = File.ReadAllBytes(docName);
             var documentPath = "document.xml";
             Uri partUriDocument = PackUriHelper.CreatePartUri(new Uri(documentPath, UriKind.Relative));
 
@@ -390,7 +407,7 @@ namespace System.IO.Packaging.Tests
         public void T155_BadDateTimeDocProps()
         {
             var docName = "BadDocProps.docx";
-            var ba = TestFileLib.GetByteArray(docName);
+            var ba = File.ReadAllBytes(docName);
 
             using (MemoryStream ms = new MemoryStream())
             {
@@ -411,7 +428,7 @@ namespace System.IO.Packaging.Tests
         public void T154_CreatedModifiedDocProps()
         {
             var docName = "MoreDocProps.docx";
-            var ba = TestFileLib.GetByteArray(docName);
+            var ba = File.ReadAllBytes(docName);
 
             using (MemoryStream ms = new MemoryStream())
             {
@@ -429,7 +446,7 @@ namespace System.IO.Packaging.Tests
         public void T153_NoDocProps()
         {
             var docName = "NoDocProps.docx";
-            var ba = TestFileLib.GetByteArray(docName);
+            var ba = File.ReadAllBytes(docName);
 
             using (MemoryStream ms = new MemoryStream())
             {
@@ -446,7 +463,7 @@ namespace System.IO.Packaging.Tests
         public void T152_InvalidDocProps()
         {
             var docName = "invaliddocpropsct.docx";
-            var ba = TestFileLib.GetByteArray(docName);
+            var ba = File.ReadAllBytes(docName);
             var documentPath = "document.xml";
             Uri partUriDocument = PackUriHelper.CreatePartUri(new Uri(documentPath, UriKind.Relative));
 
@@ -467,7 +484,7 @@ namespace System.IO.Packaging.Tests
         public void T151_InvalidDocProps()
         {
             var docName = "invaliddocprops.docx";
-            var ba = TestFileLib.GetByteArray(docName);
+            var ba = File.ReadAllBytes(docName);
             var documentPath = "document.xml";
             Uri partUriDocument = PackUriHelper.CreatePartUri(new Uri(documentPath, UriKind.Relative));
 
@@ -488,7 +505,7 @@ namespace System.IO.Packaging.Tests
         public void T150_CreatePart_InvalidContentType()
         {
             var docName = "plain.docx";
-            var ba = TestFileLib.GetByteArray(docName);
+            var ba = File.ReadAllBytes(docName);
             var documentPath = "document.xml";
             Uri partUriDocument = PackUriHelper.CreatePartUri(new Uri(documentPath, UriKind.Relative));
 
@@ -508,7 +525,7 @@ namespace System.IO.Packaging.Tests
         public void T149_CreatePart_InvalidContentType()
         {
             var docName = "plain.docx";
-            var ba = TestFileLib.GetByteArray(docName);
+            var ba = File.ReadAllBytes(docName);
             var documentPath = "document.xml";
             Uri partUriDocument = PackUriHelper.CreatePartUri(new Uri(documentPath, UriKind.Relative));
 
@@ -528,7 +545,7 @@ namespace System.IO.Packaging.Tests
         public void T148_CreatePart_ContentTypeWithTwoSubtypes()
         {
             var docName = "plain.docx";
-            var ba = TestFileLib.GetByteArray(docName);
+            var ba = File.ReadAllBytes(docName);
             var documentPath = "document.xml";
             Uri partUriDocument = PackUriHelper.CreatePartUri(new Uri(documentPath, UriKind.Relative));
 
@@ -545,7 +562,7 @@ namespace System.IO.Packaging.Tests
         public void T147_CreatePart_ContentTypeWithTwoSubtypes()
         {
             var docName = "plain.docx";
-            var ba = TestFileLib.GetByteArray(docName);
+            var ba = File.ReadAllBytes(docName);
             var documentPath = "document.xml";
             Uri partUriDocument = PackUriHelper.CreatePartUri(new Uri(documentPath, UriKind.Relative));
 
@@ -562,7 +579,7 @@ namespace System.IO.Packaging.Tests
         public void T146_CreatePart_ContentTypeWithInvalidSubtype()
         {
             var docName = "plain.docx";
-            var ba = TestFileLib.GetByteArray(docName);
+            var ba = File.ReadAllBytes(docName);
             var documentPath = "document.xml";
             Uri partUriDocument = PackUriHelper.CreatePartUri(new Uri(documentPath, UriKind.Relative));
 
@@ -579,7 +596,7 @@ namespace System.IO.Packaging.Tests
         public void T145_CreatePart_ContentTypeWithInvalidSubtype()
         {
             var docName = "plain.docx";
-            var ba = TestFileLib.GetByteArray(docName);
+            var ba = File.ReadAllBytes(docName);
             var documentPath = "document.xml";
             Uri partUriDocument = PackUriHelper.CreatePartUri(new Uri(documentPath, UriKind.Relative));
 
@@ -596,7 +613,7 @@ namespace System.IO.Packaging.Tests
         public void T144_CreatePart_ContentTypeWithInvalidSubtype()
         {
             var docName = "plain.docx";
-            var ba = TestFileLib.GetByteArray(docName);
+            var ba = File.ReadAllBytes(docName);
             var documentPath = "document.xml";
             Uri partUriDocument = PackUriHelper.CreatePartUri(new Uri(documentPath, UriKind.Relative));
 
@@ -613,7 +630,7 @@ namespace System.IO.Packaging.Tests
         public void T143_CreatePart_ContentTypeWithInvalidSubtype()
         {
             var docName = "plain.docx";
-            var ba = TestFileLib.GetByteArray(docName);
+            var ba = File.ReadAllBytes(docName);
             var documentPath = "document.xml";
             Uri partUriDocument = PackUriHelper.CreatePartUri(new Uri(documentPath, UriKind.Relative));
 
@@ -630,7 +647,7 @@ namespace System.IO.Packaging.Tests
         public void T142_CreatePart_ContentTypeWithSubtypesDoubleSemicolon()
         {
             var docName = "plain.docx";
-            var ba = TestFileLib.GetByteArray(docName);
+            var ba = File.ReadAllBytes(docName);
             var documentPath = "document.xml";
             Uri partUriDocument = PackUriHelper.CreatePartUri(new Uri(documentPath, UriKind.Relative));
 
@@ -647,7 +664,7 @@ namespace System.IO.Packaging.Tests
         public void T141_CreatePart_ContentTypeWithSubtypes()
         {
             var docName = "plain.docx";
-            var ba = TestFileLib.GetByteArray(docName);
+            var ba = File.ReadAllBytes(docName);
             var documentPath = "document.xml";
             Uri partUriDocument = PackUriHelper.CreatePartUri(new Uri(documentPath, UriKind.Relative));
 
@@ -666,7 +683,7 @@ namespace System.IO.Packaging.Tests
         public void T140_CreatePart_SpaceAtBeginningOfContentType()
         {
             var docName = "plain.docx";
-            var ba = TestFileLib.GetByteArray(docName);
+            var ba = File.ReadAllBytes(docName);
             var documentPath = "document.xml";
             Uri partUriDocument = PackUriHelper.CreatePartUri(new Uri(documentPath, UriKind.Relative));
 
@@ -682,8 +699,8 @@ namespace System.IO.Packaging.Tests
         [Fact]
         public void T139_Access_Length_Prop_of_Stream()
         {
-            var ba = TestFileLib.GetByteArray("plain.docx");
-            var tempGuidName = TestFileLib.GetGuidNameForNewFile(".docx");
+            var ba = File.ReadAllBytes("plain.docx");
+            var tempGuidName = GetGuidNameForNewFile("T139_Access_Length_Prop_of_Stream", ".docx");
             File.WriteAllBytes(tempGuidName.FullName, ba);
 
             using (Package package = Package.Open(tempGuidName.FullName, FileMode.Open, FileAccess.Read))
@@ -710,13 +727,14 @@ namespace System.IO.Packaging.Tests
                     }
                 }
             }
+			tempGuidName.Delete();
         }
 
         [Fact]
         public void T049_PackUriHelper_GetRelationshipPartUri()
         {
             var docName = "plain.docx";
-            var ba = TestFileLib.GetByteArray(docName);
+            var ba = File.ReadAllBytes(docName);
             const string DocumentRelationshipType = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument";
 
             using (MemoryStream ms = new MemoryStream())
@@ -752,7 +770,7 @@ namespace System.IO.Packaging.Tests
         public void T048_PackUriHelper_GetRelativeUri()
         {
             var docName = "plain.docx";
-            var ba = TestFileLib.GetByteArray(docName);
+            var ba = File.ReadAllBytes(docName);
             const string DocumentRelationshipType = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument";
 
             using (MemoryStream ms = new MemoryStream())
@@ -788,7 +806,7 @@ namespace System.IO.Packaging.Tests
         public void T047_PackUriHelper_IsRelationshipPartUri()
         {
             var docName = "plain.docx";
-            var ba = TestFileLib.GetByteArray(docName);
+            var ba = File.ReadAllBytes(docName);
 
             using (MemoryStream ms = new MemoryStream())
             {
@@ -820,7 +838,7 @@ namespace System.IO.Packaging.Tests
         public void T046_PackageRelationshipSelectorFromPartUsingId()
         {
             var docName = "plain.docx";
-            var ba = TestFileLib.GetByteArray(docName);
+            var ba = File.ReadAllBytes(docName);
             const string DocumentRelationshipType = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument";
 
             using (MemoryStream ms = new MemoryStream())
@@ -854,7 +872,7 @@ namespace System.IO.Packaging.Tests
         public void T045_PackageRelationshipSelectorFromPackageUsingId()
         {
             var docName = "plain.docx";
-            var ba = TestFileLib.GetByteArray(docName);
+            var ba = File.ReadAllBytes(docName);
 
             using (MemoryStream ms = new MemoryStream())
             {
@@ -873,7 +891,7 @@ namespace System.IO.Packaging.Tests
         public void T044_PackageRelationshipSelectorFromPackage()
         {
             var docName = "plain.docx";
-            var ba = TestFileLib.GetByteArray(docName);
+            var ba = File.ReadAllBytes(docName);
             const string DocumentRelationshipType = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument";
 
             using (MemoryStream ms = new MemoryStream())
@@ -893,7 +911,7 @@ namespace System.IO.Packaging.Tests
         public void T043_PackageRelationshipSelector()
         {
             var docName = "plain.docx";
-            var ba = TestFileLib.GetByteArray(docName);
+            var ba = File.ReadAllBytes(docName);
             const string StylesRelationshipType = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles";
 
             using (MemoryStream ms = new MemoryStream())
@@ -913,7 +931,7 @@ namespace System.IO.Packaging.Tests
         public void T042_DeletePartRelationship()
         {
             var docName = "plain.docx";
-            var ba = TestFileLib.GetByteArray(docName);
+            var ba = File.ReadAllBytes(docName);
             const string DocumentRelationshipType = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument";
 
             using (MemoryStream ms = new MemoryStream())
@@ -946,10 +964,6 @@ namespace System.IO.Packaging.Tests
                         Assert.Equal(documentPart.Uri.ToString(), "/word/document.xml");
                     }
                 }
-
-                //var tempName = TestFileLib.GetGuidNameForNewFile(".docx");
-                //File.WriteAllBytes(tempName.FullName, ms.ToArray());
-                //tempName.Delete();
             }
         }
 
@@ -957,7 +971,7 @@ namespace System.IO.Packaging.Tests
         public void T041_PartExists()
         {
             var docName = "plain.docx";
-            var ba = TestFileLib.GetByteArray(docName);
+            var ba = File.ReadAllBytes(docName);
 
             using (MemoryStream ms = new MemoryStream())
             {
@@ -994,10 +1008,10 @@ namespace System.IO.Packaging.Tests
         }
 
         [Fact]
-        public void T040_OpenFileFourArgs()
+        public void T040_InvalidRelationshipId()
         {
             var docName = "plain.docx";
-            var fiGuidName = TestFileLib.GetFileSavedWithGuidName(docName);
+            var fiGuidName = GetFileSavedWithGuidName("T040_InvalidRelationshipId", docName);
 
             XNamespace W = "http://schemas.openxmlformats.org/wordprocessingml/2006/main";
             using (Package package = Package.Open(fiGuidName.FullName, FileMode.Open, FileAccess.ReadWrite, FileShare.None))
@@ -1021,7 +1035,7 @@ namespace System.IO.Packaging.Tests
         public void T039_OpenStreamThreeArgs()
         {
             var docName = "plain.docx";
-            var ba = TestFileLib.GetByteArray(docName);
+            var ba = File.ReadAllBytes(docName);
             const string DocumentRelationshipType = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument";
 
             using (MemoryStream ms = new MemoryStream())
@@ -1046,7 +1060,7 @@ namespace System.IO.Packaging.Tests
         public void T038_DisposePackage()
         {
             var docName = "plain.docx";
-            var ba = TestFileLib.GetByteArray(docName);
+            var ba = File.ReadAllBytes(docName);
 
             using (MemoryStream ms = new MemoryStream())
             {
@@ -1056,10 +1070,6 @@ namespace System.IO.Packaging.Tests
                 pp.Category = "TEST-CATEGORY";
                 package.Flush();
                 ((IDisposable)package).Dispose();
-
-                //var tempName = TestFileLib.GetGuidNameForNewFile(".docx");
-                //File.WriteAllBytes(tempName.FullName, ms.ToArray());
-                //tempName.Delete();
             }
         }
 
@@ -1067,7 +1077,7 @@ namespace System.IO.Packaging.Tests
         public void T037_DeleteRootRelationship()
         {
             var docName = "plain.docx";
-            var ba = TestFileLib.GetByteArray(docName);
+            var ba = File.ReadAllBytes(docName);
             const string DocumentRelationshipType = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument";
 
             using (MemoryStream ms = new MemoryStream())
@@ -1097,7 +1107,7 @@ namespace System.IO.Packaging.Tests
             var packageRelationshipType = "http://packageRelType";
             var ResourceRelationshipType = "http://resourceRelType";
 
-            var packagePath1 = TestFileLib.GetGuidNameForNewFile(".docx");
+            var packagePath1 = GetGuidNameForNewFile("T036_CreateRelationshipWithId", ".docx");
             Uri partUriDocument = PackUriHelper.CreatePartUri(
                                       new Uri(documentPath, UriKind.Relative));
             Uri partUriResource = PackUriHelper.CreatePartUri(
@@ -1121,7 +1131,7 @@ namespace System.IO.Packaging.Tests
                 using (Stream partStream = packagePartDocument.GetStream())
                 using (StreamWriter sw = new StreamWriter(partStream))
                 {
-                    sw.Write(TestFileLib.s_DocumentXml);
+                    sw.Write(s_DocumentXml);
                 }
 
                 // Add a Package Relationship to the Document Part
@@ -1140,7 +1150,7 @@ namespace System.IO.Packaging.Tests
                 using (Stream partStream = packagePartResource.GetStream())
                 using (StreamWriter sw = new StreamWriter(partStream))
                 {
-                    sw.Write(TestFileLib.s_ResourceXml);
+                    sw.Write(s_ResourceXml);
                 }
 
                 // Add Relationship from the Document part to the Resource part
@@ -1159,7 +1169,7 @@ namespace System.IO.Packaging.Tests
         public void T035_ModifyAllPackageProperties()
         {
             var docName = "plain.docx";
-            var ba = TestFileLib.GetByteArray(docName);
+            var ba = File.ReadAllBytes(docName);
 
             using (MemoryStream ms = new MemoryStream())
             {
@@ -1225,10 +1235,6 @@ namespace System.IO.Packaging.Tests
                     Assert.Equal(sb.ToString().Trim(), @"pp.Category: >Category<, pp.ContentStatus: >ContentStatus<, pp.ContentType: >ContentType<, pp.Creator: >Creator<, pp.Description: >Description<, pp.Identifier: >Identifier<, pp.Keywords: >Keywords<, pp.Language: >Language<, pp.LastModifiedBy: >LastModifiedBy<, pp.Revision: >Revision<, pp.Subject: >Subject<, pp.Title: >Title<, pp.Version: >Version<,");
 
                 }
-
-                //var tempName = TestFileLib.GetGuidNameForNewFile(".docx");
-                //File.WriteAllBytes(tempName.FullName, ms.ToArray());
-                //tempName.Delete();
             }
         }
 
@@ -1236,7 +1242,7 @@ namespace System.IO.Packaging.Tests
         public void T034_GetPartRelationshipById()
         {
             var docName = "plain.docx";
-            var ba = TestFileLib.GetByteArray(docName);
+            var ba = File.ReadAllBytes(docName);
             const string DocumentRelationshipType = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument";
             const string StylesRelationshipType = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles";
 
@@ -1278,7 +1284,7 @@ namespace System.IO.Packaging.Tests
         public void T033_GetStreamOverload()
         {
             var docName = "plain.docx";
-            var ba = TestFileLib.GetByteArray(docName);
+            var ba = File.ReadAllBytes(docName);
 
             XNamespace W = "http://schemas.openxmlformats.org/wordprocessingml/2006/main";
             using (MemoryStream ms = new MemoryStream())
@@ -1324,7 +1330,7 @@ namespace System.IO.Packaging.Tests
         public void T032_DeletePartRelationship()
         {
             var docName = "plain.docx";
-            var ba = TestFileLib.GetByteArray(docName);
+            var ba = File.ReadAllBytes(docName);
             const string DocumentRelationshipType = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument";
             const string StylesRelationshipType = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles";
 
@@ -1368,10 +1374,6 @@ namespace System.IO.Packaging.Tests
                         Assert.Equal(relationshipsBefore, relationshipsAfter + 1);
                     }
                 }
-
-                //var tempName = TestFileLib.GetGuidNameForNewFile(".docx");
-                //File.WriteAllBytes(tempName.FullName, ms.ToArray());
-                //tempName.Delete();
             }
         }
 
@@ -1379,7 +1381,7 @@ namespace System.IO.Packaging.Tests
         public void T031_DeleteMainDocumentPart()
         {
             var docName = "plain.docx";
-            var ba = TestFileLib.GetByteArray(docName);
+            var ba = File.ReadAllBytes(docName);
             const string DocumentRelationshipType = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument";
 
             using (MemoryStream ms = new MemoryStream())
@@ -1412,10 +1414,6 @@ namespace System.IO.Packaging.Tests
                         Assert.Equal(relationshipsBefore, relationshipsAfter);
                     }
                 }
-
-                //var tempName = TestFileLib.GetGuidNameForNewFile(".docx");
-                //File.WriteAllBytes(tempName.FullName, ms.ToArray());
-                //tempName.Delete();
             }
         }
 
@@ -1423,7 +1421,7 @@ namespace System.IO.Packaging.Tests
         public void T030_GetRootRelationshipById()
         {
             var docName = "plain.docx";
-            var ba = TestFileLib.GetByteArray(docName);
+            var ba = File.ReadAllBytes(docName);
             const string DocumentRelationshipType = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument";
 
             using (MemoryStream ms = new MemoryStream())
@@ -1448,7 +1446,7 @@ namespace System.IO.Packaging.Tests
         public void T029_DeletePackageRelationship()
         {
             var docName = "plain.docx";
-            var ba = TestFileLib.GetByteArray(docName);
+            var ba = File.ReadAllBytes(docName);
             const string DocumentRelationshipType = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument";
 
             using (MemoryStream ms = new MemoryStream())
@@ -1485,7 +1483,7 @@ namespace System.IO.Packaging.Tests
         public void T028_ModifyPackagePropertiesAndFlush()
         {
             var docName = "plain.docx";
-            var ba = TestFileLib.GetByteArray(docName);
+            var ba = File.ReadAllBytes(docName);
 
             using (MemoryStream ms = new MemoryStream())
             {
@@ -1502,7 +1500,7 @@ namespace System.IO.Packaging.Tests
         public void T027_ModifyPackageProperties()
         {
             var docName = "plain.docx";
-            var ba = TestFileLib.GetByteArray(docName);
+            var ba = File.ReadAllBytes(docName);
 
             using (MemoryStream ms = new MemoryStream())
             {
@@ -1519,7 +1517,7 @@ namespace System.IO.Packaging.Tests
         public void T026_PackageFlush()
         {
             var docName = "plain.docx";
-            var ba = TestFileLib.GetByteArray(docName);
+            var ba = File.ReadAllBytes(docName);
 
             using (MemoryStream ms = new MemoryStream())
             {
@@ -1537,7 +1535,7 @@ namespace System.IO.Packaging.Tests
         public void T025_PackageClose()
         {
             var docName = "plain.docx";
-            var ba = TestFileLib.GetByteArray(docName);
+            var ba = File.ReadAllBytes(docName);
 
             using (MemoryStream ms = new MemoryStream())
             {
@@ -1553,7 +1551,7 @@ namespace System.IO.Packaging.Tests
         public void T024_DeleteRootRelsPart()
         {
             var docName = "plain.docx";
-            var ba = TestFileLib.GetByteArray(docName);
+            var ba = File.ReadAllBytes(docName);
 
             using (MemoryStream ms = new MemoryStream())
             {
@@ -1570,7 +1568,7 @@ namespace System.IO.Packaging.Tests
         public void T023_DeleteRelsPart()
         {
             var docName = "plain.docx";
-            var ba = TestFileLib.GetByteArray(docName);
+            var ba = File.ReadAllBytes(docName);
 
             using (MemoryStream ms = new MemoryStream())
             {
@@ -1587,7 +1585,7 @@ namespace System.IO.Packaging.Tests
         public void T022_DeletePartInvalidArgument()
         {
             var docName = "plain.docx";
-            var ba = TestFileLib.GetByteArray(docName);
+            var ba = File.ReadAllBytes(docName);
 
             using (MemoryStream ms = new MemoryStream())
             {
@@ -1605,7 +1603,7 @@ namespace System.IO.Packaging.Tests
         public void T021_DeletePartThatContainsRelationships()
         {
             var docName = "plain.docx";
-            var ba = TestFileLib.GetByteArray(docName);
+            var ba = File.ReadAllBytes(docName);
 
             using (MemoryStream ms = new MemoryStream())
             {
@@ -1615,9 +1613,6 @@ namespace System.IO.Packaging.Tests
                     Uri documentUri = new Uri("/word/document.xml", UriKind.Relative);
                     package.DeletePart(documentUri);
                 }
-                //var tempName = TestFileLib.GetGuidNameForNewFile(".docx");
-                //File.WriteAllBytes(tempName.FullName, ms.ToArray());
-                //tempName.Delete();
             }
         }
 
@@ -1625,7 +1620,7 @@ namespace System.IO.Packaging.Tests
         public void T020_GetNonExistentPart()
         {
             var docName = "plain.docx";
-            var ba = TestFileLib.GetByteArray(docName);
+            var ba = File.ReadAllBytes(docName);
             const string DocumentRelationshipType = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument";
 
             using (MemoryStream ms = new MemoryStream())
@@ -1664,7 +1659,7 @@ namespace System.IO.Packaging.Tests
         public void T019_GetPartFromRelativeUri()
         {
             var docName = "plain.docx";
-            var ba = TestFileLib.GetByteArray(docName);
+            var ba = File.ReadAllBytes(docName);
             const string DocumentRelationshipType = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument";
 
             using (MemoryStream ms = new MemoryStream())
@@ -1703,7 +1698,7 @@ namespace System.IO.Packaging.Tests
         public void T018_GetMainDocPartAndStyleDefPart()
         {
             var docName = "plain.docx";
-            var ba = TestFileLib.GetByteArray(docName);
+            var ba = File.ReadAllBytes(docName);
             const string DocumentRelationshipType = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument";
             const string StylesRelationshipType = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles";
 
@@ -1760,7 +1755,7 @@ namespace System.IO.Packaging.Tests
         public void T017_CreatePartTwice()
         {
             var docName = "plain.docx";
-            var ba = TestFileLib.GetByteArray(docName);
+            var ba = File.ReadAllBytes(docName);
             var documentPath = "document.xml";
             Uri partUriDocument = PackUriHelper.CreatePartUri(new Uri(documentPath, UriKind.Relative));
             var packageRelationshipType = "http://packageRelType";
@@ -1776,7 +1771,7 @@ namespace System.IO.Packaging.Tests
                     using (Stream partStream = packagePartDocument.GetStream())
                     using (StreamWriter sw = new StreamWriter(partStream))
                     {
-                        sw.Write(TestFileLib.s_DocumentXml);
+                        sw.Write(s_DocumentXml);
                     }
 
                     // Add a Package Relationship to the Document Part
@@ -1793,7 +1788,7 @@ namespace System.IO.Packaging.Tests
                         using (Stream partStream = packagePartDocument.GetStream())
                         using (StreamWriter sw = new StreamWriter(partStream))
                         {
-                            sw.Write(TestFileLib.s_DocumentXml);
+                            sw.Write(s_DocumentXml);
                         }
 
                         // Add a Package Relationship to the Document Part
@@ -1816,7 +1811,7 @@ namespace System.IO.Packaging.Tests
         public void T016_CreatePartInvalidArg()
         {
             var docName = "plain.docx";
-            var ba = TestFileLib.GetByteArray(docName);
+            var ba = File.ReadAllBytes(docName);
             var documentPath = "document.xml";
             Uri partUriDocument = PackUriHelper.CreatePartUri(new Uri(documentPath, UriKind.Relative));
 
@@ -1836,11 +1831,10 @@ namespace System.IO.Packaging.Tests
         public void T015_CreatePart()
         {
             var docName = "plain.docx";
-            var fiGuidName = TestFileLib.GetFileSavedWithGuidName(docName);
+            var fiGuidName = GetFileSavedWithGuidName("T015_CreatePart", docName);
             var documentPath = "document.xml";
             var packageRelationshipType = "http://packageRelType";
 
-            var packagePath1 = TestFileLib.GetGuidNameForNewFile(".docx");
             Uri partUriDocument = PackUriHelper.CreatePartUri(
                                       new Uri(documentPath, UriKind.Relative));
 
@@ -1854,7 +1848,7 @@ namespace System.IO.Packaging.Tests
                 using (Stream partStream = packagePartDocument.GetStream())
                 using (StreamWriter sw = new StreamWriter(partStream))
                 {
-                    sw.Write(TestFileLib.s_DocumentXml);
+                    sw.Write(s_DocumentXml);
                 }
 
                 // Add a Package Relationship to the Document Part
@@ -1869,7 +1863,7 @@ namespace System.IO.Packaging.Tests
         public void T014_PackageOpenStream()
         {
             var docName = "plain.docx";
-            var ba = TestFileLib.GetByteArray(docName);
+            var ba = File.ReadAllBytes(docName);
 
             try
             {
@@ -1896,7 +1890,7 @@ namespace System.IO.Packaging.Tests
         public void T013_PackageOpenStream()
         {
             var docName = "plain.docx";
-            var ba = TestFileLib.GetByteArray(docName);
+            var ba = File.ReadAllBytes(docName);
 
             using (MemoryStream ms = new MemoryStream())
             {
@@ -1913,7 +1907,7 @@ namespace System.IO.Packaging.Tests
         public void T012_PackageOpenStream()
         {
             var docName = "plain.docx";
-            var ba = TestFileLib.GetByteArray(docName);
+            var ba = File.ReadAllBytes(docName);
 
             using (MemoryStream ms = new MemoryStream())
             {
@@ -1930,11 +1924,10 @@ namespace System.IO.Packaging.Tests
         public void T011_PackageOpen()
         {
             var docName = "plain.docx";
-            var fiGuidName = TestFileLib.GetFileSavedWithGuidName(docName);
+            var fiGuidName = GetFileSavedWithGuidName("T011_PackageOpen", docName);
             var documentPath = "document.xml";
             var packageRelationshipType = "http://packageRelType";
 
-            var packagePath1 = TestFileLib.GetGuidNameForNewFile(".docx");
             Uri partUriDocument = PackUriHelper.CreatePartUri(
                                       new Uri(documentPath, UriKind.Relative));
 
@@ -1951,7 +1944,7 @@ namespace System.IO.Packaging.Tests
                     using (Stream partStream = packagePartDocument.GetStream())
                     using (StreamWriter sw = new StreamWriter(partStream))
                     {
-                        sw.Write(TestFileLib.s_DocumentXml);
+                        sw.Write(s_DocumentXml);
                     }
 
                     // Add a Package Relationship to the Document Part
@@ -1974,7 +1967,7 @@ namespace System.IO.Packaging.Tests
         public void T010_PackageOpen()
         {
             var docName = "plain.docx";
-            var fiGuidName = TestFileLib.GetFileSavedWithGuidName(docName);
+            var fiGuidName = GetFileSavedWithGuidName("T010_PackageOpen", docName);
 
             using (Package package = Package.Open(fiGuidName.FullName, FileMode.Open, FileAccess.Read))
             {
@@ -1988,7 +1981,7 @@ namespace System.IO.Packaging.Tests
         public void T009_PackageOpen()
         {
             var docName = "plain.docx";
-            var fiGuidName = TestFileLib.GetFileSavedWithGuidName(docName);
+            var fiGuidName = GetFileSavedWithGuidName("T009_PackageOpen", docName);
 
             using (Package package = Package.Open(fiGuidName.FullName))
             {
@@ -2002,7 +1995,7 @@ namespace System.IO.Packaging.Tests
         public void T008_PackageProperties()
         {
             var docName = "docprops.docx";
-            var fiGuidName = TestFileLib.GetFileSavedWithGuidName(docName);
+            var fiGuidName = GetFileSavedWithGuidName("T008_PackageProperties", docName);
 
             XNamespace W = "http://schemas.openxmlformats.org/wordprocessingml/2006/main";
             using (Package package = Package.Open(fiGuidName.FullName, FileMode.Open))
@@ -2026,7 +2019,7 @@ namespace System.IO.Packaging.Tests
         public void T007_PackageProperties()
         {
             var docName = "plain.docx";
-            var fiGuidName = TestFileLib.GetFileSavedWithGuidName(docName);
+            var fiGuidName = GetFileSavedWithGuidName("T007_PackageProperties", docName);
 
             XNamespace W = "http://schemas.openxmlformats.org/wordprocessingml/2006/main";
             using (Package package = Package.Open(fiGuidName.FullName, FileMode.Open))
@@ -2057,44 +2050,51 @@ namespace System.IO.Packaging.Tests
                 var packageRelationshipType = "http://packageRelType";
                 var ResourceRelationshipType = "http://resourceRelType";
 
-                var packagePath2 = TestFileLib.GetGuidNameForNewFile(".docx");
-                Uri partUriDocument2 = PackUriHelper.CreatePartUri(
-                                          new Uri(documentPath, UriKind.Relative));
-                Uri partUriResource2 = PackUriHelper.CreatePartUri(
-                          new Uri(resourcePath, UriKind.Relative));
+				FileInfo packagePath2 = null;
+				try
+				{
+					packagePath2 = GetGuidNameForNewFile("T006_CreateExternalRelationshipInvalidUri", ".docx");
+					Uri partUriDocument2 = PackUriHelper.CreatePartUri(
+											  new Uri(documentPath, UriKind.Relative));
+					Uri partUriResource2 = PackUriHelper.CreatePartUri(
+							  new Uri(resourcePath, UriKind.Relative));
 
-                using (Package package = Package.Open(packagePath2.FullName, FileMode.Create))
-                {
-                    // Add the Document part to the Package
-                    PackagePart packagePartDocument =
-                        package.CreatePart(partUriDocument2,
-                                       Mime_MediaTypeNames_Text_Xml,
-                                       CompressionOption.Normal);
+					using (Package package = Package.Open(packagePath2.FullName, FileMode.Create))
+					{
+						// Add the Document part to the Package
+						PackagePart packagePartDocument =
+							package.CreatePart(partUriDocument2,
+										   Mime_MediaTypeNames_Text_Xml,
+										   CompressionOption.Normal);
 
-                    // Copy the data to the Document Part
-                    var fiDocumentPath = TestFileLib.GetGuidNameForNewFile(".xml");
-                    File.WriteAllText(fiDocumentPath.FullName, TestFileLib.s_DocumentXml);
-                    using (FileStream fileStream = new FileStream(fiDocumentPath.FullName, FileMode.Open, FileAccess.Read))
-                    using (Stream partStream = packagePartDocument.GetStream())
-                    {
-                        CopyStream(fileStream, partStream);
-                    }
-                    fiDocumentPath.Delete();
+						// Copy the data to the Document Part
+						var fiDocumentPath = GetGuidNameForNewFile("T006_CreateExternalRelationshipInvalidUri", ".xml");
+						File.WriteAllText(fiDocumentPath.FullName, s_DocumentXml);
+						using (FileStream fileStream = new FileStream(fiDocumentPath.FullName, FileMode.Open, FileAccess.Read))
+						using (Stream partStream = packagePartDocument.GetStream())
+						{
+							CopyStream(fileStream, partStream);
+						}
+						fiDocumentPath.Delete();
 
-                    // Add a Package Relationship to the Document Part
-                    package.CreateRelationship(packagePartDocument.Uri,
-                                               TargetMode.Internal,
-                                               packageRelationshipType);
+						// Add a Package Relationship to the Document Part
+						package.CreateRelationship(packagePartDocument.Uri,
+												   TargetMode.Internal,
+												   packageRelationshipType);
 
-                    Uri uri = new Uri("a b c d e", UriKind.Absolute);
+						Uri uri = new Uri("a b c d e", UriKind.Absolute);
 
-                    // Add external relationship
-                    packagePartDocument.CreateRelationship(uri,
-                                                           TargetMode.External,
-                                                           ResourceRelationshipType);
-                }
-
-                packagePath2.Delete();
+						// Add external relationship
+						packagePartDocument.CreateRelationship(uri,
+															   TargetMode.External,
+															   ResourceRelationshipType);
+					}
+				}
+				finally
+				{
+					if (packagePath2 != null && packagePath2.Exists)
+						packagePath2.Delete();
+				}
             }
             catch (UriFormatException)
             {
@@ -2113,7 +2113,7 @@ namespace System.IO.Packaging.Tests
             var packageRelationshipType = "http://packageRelType";
             var ResourceRelationshipType = "http://resourceRelType";
 
-            var packagePath1 = TestFileLib.GetGuidNameForNewFile(".docx");
+            var packagePath1 = GetGuidNameForNewFile("T005_CreateInternalRelationship", ".docx");
             Uri partUriDocument = PackUriHelper.CreatePartUri(
                                       new Uri(documentPath, UriKind.Relative));
             Uri partUriResource = PackUriHelper.CreatePartUri(
@@ -2131,7 +2131,7 @@ namespace System.IO.Packaging.Tests
                 using (Stream partStream = packagePartDocument.GetStream())
                 using (StreamWriter sw = new StreamWriter(partStream))
                 {
-                    sw.Write(TestFileLib.s_DocumentXml);
+                    sw.Write(s_DocumentXml);
                 }
 
                 // Add a Package Relationship to the Document Part
@@ -2149,7 +2149,7 @@ namespace System.IO.Packaging.Tests
                 using (Stream partStream = packagePartResource.GetStream())
                 using (StreamWriter sw = new StreamWriter(partStream))
                 {
-                    sw.Write(TestFileLib.s_ResourceXml);
+                    sw.Write(s_ResourceXml);
                 }
 
                 // Add Relationship from the Document part to the Resource part
@@ -2170,7 +2170,7 @@ namespace System.IO.Packaging.Tests
             var packageRelationshipType = "http://packageRelType";
             var ResourceRelationshipType = "http://resourceRelType";
 
-            var packagePath1 = TestFileLib.GetGuidNameForNewFile(".docx");
+            var packagePath1 = GetGuidNameForNewFile("T004_CreateInternalRelationship", ".docx");
             Uri partUriDocument = PackUriHelper.CreatePartUri(
                                       new Uri(documentPath, UriKind.Relative));
             Uri partUriResource = PackUriHelper.CreatePartUri(
@@ -2185,8 +2185,8 @@ namespace System.IO.Packaging.Tests
                                    CompressionOption.Normal);
 
                 // Copy the data to the Document Part
-                var fiDocumentPath = TestFileLib.GetGuidNameForNewFile(".xml");
-                File.WriteAllText(fiDocumentPath.FullName, TestFileLib.s_DocumentXml);
+                var fiDocumentPath = GetGuidNameForNewFile("T004_CreateInternalRelationship", ".xml");
+                File.WriteAllText(fiDocumentPath.FullName, s_DocumentXml);
                 using (FileStream fileStream = new FileStream(fiDocumentPath.FullName, FileMode.Open, FileAccess.Read))
                 using (Stream partStream = packagePartDocument.GetStream())
                 {
@@ -2206,8 +2206,8 @@ namespace System.IO.Packaging.Tests
                                    CompressionOption.Normal);
 
                 // Copy the data to the Resource Part 
-                fiDocumentPath = TestFileLib.GetGuidNameForNewFile(".xml");
-                File.WriteAllText(fiDocumentPath.FullName, TestFileLib.s_DocumentXml);
+                fiDocumentPath = GetGuidNameForNewFile("T004_CreateInternalRelationship", ".xml");
+                File.WriteAllText(fiDocumentPath.FullName, s_DocumentXml);
                 using (FileStream fileStream = new FileStream(fiDocumentPath.FullName, FileMode.Open, FileAccess.Read))
                 using (Stream partStream = packagePartResource.GetStream())
                 {
@@ -2234,7 +2234,7 @@ namespace System.IO.Packaging.Tests
             var packageRelationshipType = "http://packageRelType";
             var ResourceRelationshipType = "http://resourceRelType";
 
-            var packagePath2 = TestFileLib.GetGuidNameForNewFile(".docx");
+            var packagePath2 = GetGuidNameForNewFile("T003_CreateExternalRelationship", ".docx");
             Uri partUriDocument2 = PackUriHelper.CreatePartUri(new Uri(documentPath, UriKind.Relative));
             Uri partUriResource2 = PackUriHelper.CreatePartUri(new Uri(resourcePath, UriKind.Relative));
 
@@ -2247,8 +2247,8 @@ namespace System.IO.Packaging.Tests
                                    CompressionOption.Normal);
 
                 // Copy the data to the Document Part
-                var fiDocumentPath = TestFileLib.GetGuidNameForNewFile(".xml");
-                File.WriteAllText(fiDocumentPath.FullName, TestFileLib.s_DocumentXml);
+                var fiDocumentPath = GetGuidNameForNewFile("T003_CreateExternalRelationship", ".xml");
+                File.WriteAllText(fiDocumentPath.FullName, s_DocumentXml);
                 using (FileStream fileStream = new FileStream(fiDocumentPath.FullName, FileMode.Open, FileAccess.Read))
                 using (Stream partStream = packagePartDocument.GetStream())
                 {
@@ -2286,7 +2286,7 @@ namespace System.IO.Packaging.Tests
         public void T001_AddParagraphToDocument()
         {
             var docName = "plain.docx";
-            var fiGuidName = TestFileLib.GetFileSavedWithGuidName(docName);
+            var fiGuidName = GetFileSavedWithGuidName("T001_AddParagraphToDocument", docName);
 
             XNamespace W = "http://schemas.openxmlformats.org/wordprocessingml/2006/main";
             using (Package package = Package.Open(fiGuidName.FullName, FileMode.Open))
@@ -2329,7 +2329,7 @@ namespace System.IO.Packaging.Tests
         public void T002_IterateParts()
         {
             var docName = "plain.docx";
-            var fiGuidName = TestFileLib.GetFileSavedWithGuidName(docName);
+            var fiGuidName = GetFileSavedWithGuidName("T002_IterateParts", docName);
 
             using (Package package = Package.Open(fiGuidName.FullName, FileMode.Open))
             {
@@ -2348,55 +2348,16 @@ namespace System.IO.Packaging.Tests
                 }
                 Assert.Equal(sumLen, 44768);
             }
+			fiGuidName.Delete();
         }
-
-#if false
-        [Fact]
-        public void Z_PassingTest()
-        {
-            int i = 2;
-            int j = 2;
-            int z = i + j;
-            Assert.Equal(4, z);
-        }
-
-        [Fact]
-        public void Z_FailingTest()
-        {
-            Assert.Equal(4, Add(2, 2));
-        }
-
-        int Add(int x, int y)
-        {
-            return x + y;
-        }
-
-        // what we can do with theories - I can build up a library of documents that are stored in this C# file.
-        // I could have a method that simply tries to iterate through all parts, for instance.
-        // The InlineData will contain names of documents.
-        // It could also contain a reference to an array of names, if I want to add another layer of indirection.
-
-        [Theory]
-        [InlineData(3)]
-        [InlineData(5)]
-        public void Z_MyFirstTheory(int value)
-        {
-            Assert.True(IsOdd(value));
-        }
-
-        bool IsOdd(int value)
-        {
-            return value % 2 == 1;
-        }
-#endif
 
         private string NL = Environment.NewLine;
 
         [Fact]
         public void T138_String_Truncate_ReadWrite_OpenOrCreate_Read_Write()
         {
-            var ba = TestFileLib.GetByteArray("plain.docx");
-            var tempGuidName = TestFileLib.GetGuidNameForNewFile(".docx");
+            var ba = File.ReadAllBytes("plain.docx");
+            var tempGuidName = GetGuidNameForNewFile("T138_String_Truncate_ReadWrite_OpenOrCreate_Read_Write", ".docx");
             File.WriteAllBytes(tempGuidName.FullName, ba);
 
             // Truncate is invalid
@@ -2404,13 +2365,14 @@ namespace System.IO.Packaging.Tests
             {
                 Package package = Package.Open(tempGuidName.FullName, FileMode.Truncate, FileAccess.ReadWrite);
             });
+			tempGuidName.Delete();
         }
 
         [Fact]
         public void T137_String_Truncate_Write_Star()
         {
-            var ba = TestFileLib.GetByteArray("plain.docx");
-            var tempGuidName = TestFileLib.GetGuidNameForNewFile(".docx");
+            var ba = File.ReadAllBytes("plain.docx");
+            var tempGuidName = GetGuidNameForNewFile("T137_String_Truncate_Write_Star", ".docx");
             File.WriteAllBytes(tempGuidName.FullName, ba);
 
             // Truncate is invalid
@@ -2418,13 +2380,14 @@ namespace System.IO.Packaging.Tests
             {
                 Package package = Package.Open(tempGuidName.FullName, FileMode.Truncate, FileAccess.Write);
             });
+			tempGuidName.Delete();
         }
 
         [Fact]
         public void T136_String_Truncate_Read_Star()
         {
-            var ba = TestFileLib.GetByteArray("plain.docx");
-            var tempGuidName = TestFileLib.GetGuidNameForNewFile(".docx");
+            var ba = File.ReadAllBytes("plain.docx");
+            var tempGuidName = GetGuidNameForNewFile("T136_String_Truncate_Read_Star", ".docx");
             File.WriteAllBytes(tempGuidName.FullName, ba);
 
             // Truncate is invalid
@@ -2432,13 +2395,14 @@ namespace System.IO.Packaging.Tests
             {
                 Package package = Package.Open(tempGuidName.FullName, FileMode.Truncate, FileAccess.Read);
             });
+			tempGuidName.Delete();
         }
 
         [Fact]
         public void T135_String_OpenOrCreate_ReadWrite_OpenOrCreate_Read_Write()
         {
-            var ba = TestFileLib.GetByteArray("plain.docx");
-            var tempGuidName = TestFileLib.GetGuidNameForNewFile(".docx");
+            var ba = File.ReadAllBytes("plain.docx");
+            var tempGuidName = GetGuidNameForNewFile("T135_String_OpenOrCreate_ReadWrite_OpenOrCreate_Read_Write", ".docx");
             File.WriteAllBytes(tempGuidName.FullName, ba);
 
             using (Package package = Package.Open(tempGuidName.FullName, FileMode.OpenOrCreate, FileAccess.ReadWrite))
@@ -2480,17 +2444,18 @@ namespace System.IO.Packaging.Tests
                     using (Stream partStream = mainPart.GetStream(FileMode.Create, FileAccess.ReadWrite))
                     using (StreamWriter sw = new StreamWriter(partStream))
                     {
-                        sw.Write(TestFileLib.s_DocumentXml);
+                        sw.Write(s_DocumentXml);
                     }
                 }
             }
+			tempGuidName.Delete();
         }
 
         [Fact]
         public void T134_String_OpenOrCreate_ReadWrite_OpenOrCreate_Read_Write()
         {
-            var ba = TestFileLib.GetByteArray("plain.docx");
-            var tempGuidName = TestFileLib.GetGuidNameForNewFile(".docx");
+            var ba = File.ReadAllBytes("plain.docx");
+            var tempGuidName = GetGuidNameForNewFile("T134_String_OpenOrCreate_ReadWrite_OpenOrCreate_Read_Write", ".docx");
             File.WriteAllBytes(tempGuidName.FullName, ba);
 
             using (Package package = Package.Open(tempGuidName.FullName, FileMode.OpenOrCreate, FileAccess.ReadWrite))
@@ -2519,17 +2484,18 @@ namespace System.IO.Packaging.Tests
                     using (Stream partStream = mainPart.GetStream(FileMode.OpenOrCreate, FileAccess.Write))
                     using (StreamWriter sw = new StreamWriter(partStream))
                     {
-                        sw.Write(TestFileLib.s_DocumentXml);
+                        sw.Write(s_DocumentXml);
                     }
                 }
             }
+			tempGuidName.Delete();
         }
 
         [Fact]
         public void T133_String_OpenOrCreate_ReadWrite_Star()
         {
-            var ba = TestFileLib.GetByteArray("plain.docx");
-            var tempGuidName = TestFileLib.GetGuidNameForNewFile(".docx");
+            var ba = File.ReadAllBytes("plain.docx");
+            var tempGuidName = GetGuidNameForNewFile("T133_String_OpenOrCreate_ReadWrite_Star", ".docx");
             File.WriteAllBytes(tempGuidName.FullName, ba);
 
             using (Package package = Package.Open(tempGuidName.FullName, FileMode.OpenOrCreate, FileAccess.ReadWrite))
@@ -2559,17 +2525,18 @@ namespace System.IO.Packaging.Tests
                     using (Stream partStream = mainPart.GetStream(FileMode.Create, FileAccess.ReadWrite))
                     using (StreamWriter sw = new StreamWriter(partStream))
                     {
-                        sw.Write(TestFileLib.s_DocumentXml);
+                        sw.Write(s_DocumentXml);
                     }
                 }
             }
+			tempGuidName.Delete();
         }
 
         [Fact]
         public void T132_String_OpenOrCreate_ReadWrite_Star()
         {
-            var ba = TestFileLib.GetByteArray("plain.docx");
-            var tempGuidName = TestFileLib.GetGuidNameForNewFile(".docx");
+            var ba = File.ReadAllBytes("plain.docx");
+            var tempGuidName = GetGuidNameForNewFile("T132_String_OpenOrCreate_ReadWrite_Star", ".docx");
             File.WriteAllBytes(tempGuidName.FullName, ba);
 
             using (Package package = Package.Open(tempGuidName.FullName, FileMode.OpenOrCreate, FileAccess.ReadWrite))
@@ -2599,17 +2566,18 @@ namespace System.IO.Packaging.Tests
                     using (Stream partStream = mainPart.GetStream(FileMode.Open, FileAccess.ReadWrite))
                     using (StreamWriter sw = new StreamWriter(partStream))
                     {
-                        sw.Write(TestFileLib.s_DocumentXml);
+                        sw.Write(s_DocumentXml);
                     }
                 }
             }
+			tempGuidName.Delete();
         }
 
         [Fact]
         public void T131_String_OpenOrCreate_ReadWrite_Star()
         {
-            var ba = TestFileLib.GetByteArray("plain.docx");
-            var tempGuidName = TestFileLib.GetGuidNameForNewFile(".docx");
+            var ba = File.ReadAllBytes("plain.docx");
+            var tempGuidName = GetGuidNameForNewFile("T131_String_OpenOrCreate_ReadWrite_Star", ".docx");
             File.WriteAllBytes(tempGuidName.FullName, ba);
 
             using (Package package = Package.Open(tempGuidName.FullName, FileMode.OpenOrCreate, FileAccess.ReadWrite))
@@ -2639,43 +2607,46 @@ namespace System.IO.Packaging.Tests
                     using (Stream partStream = mainPart.GetStream(FileMode.Open, FileAccess.Write))
                     using (StreamWriter sw = new StreamWriter(partStream))
                     {
-                        sw.Write(TestFileLib.s_DocumentXml);
+                        sw.Write(s_DocumentXml);
                     }
                 }
             }
+			tempGuidName.Delete();
         }
 
         [Fact]
         public void T130_String_OpenOrCreate_Write_Star()
         {
-            var ba = TestFileLib.GetByteArray("plain.docx");
-            var tempGuidName = TestFileLib.GetGuidNameForNewFile(".docx");
+            var ba = File.ReadAllBytes("plain.docx");
+            var tempGuidName = GetGuidNameForNewFile("T130_String_OpenOrCreate_Write_Star", ".docx");
             File.WriteAllBytes(tempGuidName.FullName, ba);
 
             Assert.Throws<ArgumentException>(() =>
             {
                 Package package = Package.Open(tempGuidName.FullName, FileMode.OpenOrCreate, FileAccess.Write);
             });
+			tempGuidName.Delete();
         }
 
         [Fact]
         public void T129_String_OpenOrCreate_Read_Star()
         {
-            var ba = TestFileLib.GetByteArray("plain.docx");
-            var tempGuidName = TestFileLib.GetGuidNameForNewFile(".docx");
+            var ba = File.ReadAllBytes("plain.docx");
+            var tempGuidName = GetGuidNameForNewFile("T129_String_OpenOrCreate_Read_Star", ".docx");
             File.WriteAllBytes(tempGuidName.FullName, ba);
 
             Assert.Throws<ArgumentException>(() =>
             {
                 Package package = Package.Open(tempGuidName.FullName, FileMode.OpenOrCreate, FileAccess.Read);
             });
+			tempGuidName.Delete();
         }
 
         [Fact]
         public void T128_String_Open_ReadWrite_OpenOrCreate_Read_Write_ReadWrite()
         {
-            var ba = TestFileLib.GetByteArray("plain.docx");
-            var tempGuidName = TestFileLib.GetGuidNameForNewFile(".docx");
+            var ba = File.ReadAllBytes("plain.docx");
+            var tempGuidName = GetGuidNameForNewFile("T128_String_Open_ReadWrite_OpenOrCreate_Read_Write_ReadWrite", ".docx");
             File.WriteAllBytes(tempGuidName.FullName, ba);
 
             using (Package package = Package.Open(tempGuidName.FullName, FileMode.Open, FileAccess.ReadWrite))
@@ -2705,7 +2676,7 @@ namespace System.IO.Packaging.Tests
                     using (Stream partStream = mainPart.GetStream(FileMode.OpenOrCreate, FileAccess.Write))
                     using (StreamWriter sw = new StreamWriter(partStream))
                     {
-                        sw.Write(TestFileLib.s_DocumentXml);
+                        sw.Write(s_DocumentXml);
                     }
 
                     Assert.Throws<XmlException>(() =>
@@ -2718,13 +2689,14 @@ namespace System.IO.Packaging.Tests
                     });
                 }
             }
+			tempGuidName.Delete();
         }
 
         [Fact]
         public void T127_String_Open_ReadWrite_Open_Read_Write_ReadWrite()
         {
-            var ba = TestFileLib.GetByteArray("plain.docx");
-            var tempGuidName = TestFileLib.GetGuidNameForNewFile(".docx");
+            var ba = File.ReadAllBytes("plain.docx");
+            var tempGuidName = GetGuidNameForNewFile("T127_String_Open_ReadWrite_Open_Read_Write_ReadWrite", ".docx");
             File.WriteAllBytes(tempGuidName.FullName, ba);
 
             using (Package package = Package.Open(tempGuidName.FullName, FileMode.Open, FileAccess.ReadWrite))
@@ -2754,7 +2726,7 @@ namespace System.IO.Packaging.Tests
                     using (Stream partStream = mainPart.GetStream(FileMode.Create, FileAccess.Write))
                     using (StreamWriter sw = new StreamWriter(partStream))
                     {
-                        sw.Write(TestFileLib.s_DocumentXml);
+                        sw.Write(s_DocumentXml);
                     }
 
                     using (Stream partStream = mainPart.GetStream(FileMode.Open, FileAccess.ReadWrite))
@@ -2764,26 +2736,28 @@ namespace System.IO.Packaging.Tests
                     }
                 }
             }
+			tempGuidName.Delete();
         }
 
         [Fact]
         public void T126_String_Open_Write_Star()
         {
-            var ba = TestFileLib.GetByteArray("plain.docx");
-            var tempGuidName = TestFileLib.GetGuidNameForNewFile(".docx");
+            var ba = File.ReadAllBytes("plain.docx");
+            var tempGuidName = GetGuidNameForNewFile("T126_String_Open_Write_Star", ".docx");
             File.WriteAllBytes(tempGuidName.FullName, ba);
 
             Assert.Throws<ArgumentException>(() =>
             {
                 Package package = Package.Open(tempGuidName.FullName, FileMode.Open, FileAccess.Write);
             });
+			tempGuidName.Delete();
         }
 
         [Fact]
         public void T125_String_Open_Read_OpenOrCreate()
         {
-            var ba = TestFileLib.GetByteArray("plain.docx");
-            var tempGuidName = TestFileLib.GetGuidNameForNewFile(".docx");
+            var ba = File.ReadAllBytes("plain.docx");
+            var tempGuidName = GetGuidNameForNewFile("T125_String_Open_Read_OpenOrCreate", ".docx");
             File.WriteAllBytes(tempGuidName.FullName, ba);
 
             using (Package package = Package.Open(tempGuidName.FullName, FileMode.Open, FileAccess.Read))
@@ -2813,7 +2787,7 @@ namespace System.IO.Packaging.Tests
                         using (Stream partStream = mainPart.GetStream(FileMode.OpenOrCreate, FileAccess.Write))
                         using (StreamWriter sw = new StreamWriter(partStream))
                         {
-                            sw.Write(TestFileLib.s_DocumentXml);
+                            sw.Write(s_DocumentXml);
                         }
                     });
                     Assert.Throws<IOException>(() =>
@@ -2821,18 +2795,19 @@ namespace System.IO.Packaging.Tests
                         using (Stream partStream = mainPart.GetStream(FileMode.OpenOrCreate, FileAccess.ReadWrite))
                         using (StreamWriter sw = new StreamWriter(partStream))
                         {
-                            sw.Write(TestFileLib.s_DocumentXml);
+                            sw.Write(s_DocumentXml);
                         }
                     });
                 }
             }
+			tempGuidName.Delete();
         }
 
         [Fact]
         public void T124_String_Open_Read_Create_Write()
         {
-            var ba = TestFileLib.GetByteArray("plain.docx");
-            var tempGuidName = TestFileLib.GetGuidNameForNewFile(".docx");
+            var ba = File.ReadAllBytes("plain.docx");
+            var tempGuidName = GetGuidNameForNewFile("T124_String_Open_Read_Create_Write", ".docx");
             File.WriteAllBytes(tempGuidName.FullName, ba);
 
             using (Package package = Package.Open(tempGuidName.FullName, FileMode.Open, FileAccess.Read))
@@ -2857,7 +2832,7 @@ namespace System.IO.Packaging.Tests
                         using (Stream partStream = mainPart.GetStream(FileMode.Create, FileAccess.Write))
                         using (StreamWriter sw = new StreamWriter(partStream))
                         {
-                            sw.Write(TestFileLib.s_DocumentXml);
+                            sw.Write(s_DocumentXml);
                         }
                     });
                     Assert.Throws<IOException>(() =>
@@ -2865,18 +2840,19 @@ namespace System.IO.Packaging.Tests
                         using (Stream partStream = mainPart.GetStream(FileMode.Create, FileAccess.ReadWrite))
                         using (StreamWriter sw = new StreamWriter(partStream))
                         {
-                            sw.Write(TestFileLib.s_DocumentXml);
+                            sw.Write(s_DocumentXml);
                         }
                     });
                 }
             }
+			tempGuidName.Delete();
         }
 
         [Fact]
         public void T123_String_Open_Read_Create_Star()
         {
-            var ba = TestFileLib.GetByteArray("plain.docx");
-            var tempGuidName = TestFileLib.GetGuidNameForNewFile(".docx");
+            var ba = File.ReadAllBytes("plain.docx");
+            var tempGuidName = GetGuidNameForNewFile("T123_String_Open_Read_Create_Star", ".docx");
             File.WriteAllBytes(tempGuidName.FullName, ba);
 
             using (Package package = Package.Open(tempGuidName.FullName, FileMode.Open, FileAccess.Read))
@@ -2901,18 +2877,19 @@ namespace System.IO.Packaging.Tests
                         using (Stream partStream = mainPart.GetStream(FileMode.Create, FileAccess.Read))
                         using (StreamWriter sw = new StreamWriter(partStream))
                         {
-                            sw.Write(TestFileLib.s_DocumentXml);
+                            sw.Write(s_DocumentXml);
                         }
                     });
                 }
             }
+			tempGuidName.Delete();
         }
 
         [Fact]
         public void T122_String_Open_Read_Open_ReadWrite()
         {
-            var ba = TestFileLib.GetByteArray("plain.docx");
-            var tempGuidName = TestFileLib.GetGuidNameForNewFile(".docx");
+            var ba = File.ReadAllBytes("plain.docx");
+            var tempGuidName = GetGuidNameForNewFile("T122_String_Open_Read_Open_ReadWrite", ".docx");
             File.WriteAllBytes(tempGuidName.FullName, ba);
 
             using (Package package = Package.Open(tempGuidName.FullName, FileMode.Open, FileAccess.Read))
@@ -2938,18 +2915,19 @@ namespace System.IO.Packaging.Tests
                         using (Stream partStream = mainPart.GetStream(FileMode.Open, FileAccess.ReadWrite))
                         using (StreamWriter sw = new StreamWriter(partStream))
                         {
-                            sw.Write(TestFileLib.s_DocumentXml);
+                            sw.Write(s_DocumentXml);
                         }
                     });
                 }
             }
+			tempGuidName.Delete();
         }
 
         [Fact]
         public void T121_String_Open_Read_Open_Write()
         {
-            var ba = TestFileLib.GetByteArray("plain.docx");
-            var tempGuidName = TestFileLib.GetGuidNameForNewFile(".docx");
+            var ba = File.ReadAllBytes("plain.docx");
+            var tempGuidName = GetGuidNameForNewFile("T121_String_Open_Read_Open_Write", ".docx");
             File.WriteAllBytes(tempGuidName.FullName, ba);
 
             using (Package package = Package.Open(tempGuidName.FullName, FileMode.Open, FileAccess.Read))
@@ -2974,18 +2952,19 @@ namespace System.IO.Packaging.Tests
                         using (Stream partStream = mainPart.GetStream(FileMode.Open, FileAccess.Write))
                         using (StreamWriter sw = new StreamWriter(partStream))
                         {
-                            sw.Write(TestFileLib.s_DocumentXml);
+                            sw.Write(s_DocumentXml);
                         }
                     });
                 }
             }
+			tempGuidName.Delete();
         }
 
         [Fact]
         public void T120_String_Open_Read_Open_Read()
         {
-            var ba = TestFileLib.GetByteArray("plain.docx");
-            var tempGuidName = TestFileLib.GetGuidNameForNewFile(".docx");
+            var ba = File.ReadAllBytes("plain.docx");
+            var tempGuidName = GetGuidNameForNewFile("T120_String_Open_Read_Open_Read", ".docx");
             File.WriteAllBytes(tempGuidName.FullName, ba);
 
             using (Package package = Package.Open(tempGuidName.FullName, FileMode.Open, FileAccess.Read))
@@ -3012,12 +2991,13 @@ namespace System.IO.Packaging.Tests
                     }
                 }
             }
+			tempGuidName.Delete();
         }
 
         [Fact]
         public void T119_String_CreateNew_ReadWrite_OpenOrCreate_ReadWrite()
         {
-            var tempGuidName = TestFileLib.GetGuidNameForNewFile(".docx");
+            var tempGuidName = GetGuidNameForNewFile("T119_String_CreateNew_ReadWrite_OpenOrCreate_ReadWrite", ".docx");
             using (Package package = Package.Open(tempGuidName.FullName, FileMode.CreateNew, FileAccess.ReadWrite))
             {
                 Uri uri = PackUriHelper.CreatePartUri(new Uri("dummy.xml", UriKind.Relative));
@@ -3031,7 +3011,7 @@ namespace System.IO.Packaging.Tests
                 using (Stream partStream = packagePartDocument.GetStream(FileMode.OpenOrCreate, FileAccess.ReadWrite))
                 using (StreamWriter sw = new StreamWriter(partStream))
                 {
-                    sw.Write(TestFileLib.s_DocumentXml);
+                    sw.Write(s_DocumentXml);
                 }
 
                 using (Stream partStream = packagePartDocument.GetStream(FileMode.OpenOrCreate, FileAccess.ReadWrite))
@@ -3040,12 +3020,13 @@ namespace System.IO.Packaging.Tests
                     Assert.True(xd.DescendantNodes().Count() != 0);
                 }
             }
+			tempGuidName.Delete();
         }
 
         [Fact]
         public void T118_String_CreateNew_ReadWrite_Truncate_ReadWrite()
         {
-            var tempGuidName = TestFileLib.GetGuidNameForNewFile(".docx");
+            var tempGuidName = GetGuidNameForNewFile("T118_String_CreateNew_ReadWrite_Truncate_ReadWrite", ".docx");
             using (Package package = Package.Open(tempGuidName.FullName, FileMode.CreateNew, FileAccess.ReadWrite))
             {
                 Uri uri = PackUriHelper.CreatePartUri(new Uri("dummy.xml", UriKind.Relative));
@@ -3062,16 +3043,17 @@ namespace System.IO.Packaging.Tests
                     using (Stream partStream = packagePartDocument.GetStream(FileMode.Truncate, FileAccess.ReadWrite))
                     using (StreamWriter sw = new StreamWriter(partStream))
                     {
-                        sw.Write(TestFileLib.s_DocumentXml);
+                        sw.Write(s_DocumentXml);
                     }
                 });
             }
+			tempGuidName.Delete();
         }
 
         [Fact]
         public void T117_String_CreateNew_ReadWrite_CreateNew_Star()
         {
-            var tempGuidName = TestFileLib.GetGuidNameForNewFile(".docx");
+            var tempGuidName = GetGuidNameForNewFile("T117_String_CreateNew_ReadWrite_CreateNew_Star", ".docx");
             using (Package package = Package.Open(tempGuidName.FullName, FileMode.CreateNew, FileAccess.ReadWrite))
             {
                 Uri uri = PackUriHelper.CreatePartUri(new Uri("dummy.xml", UriKind.Relative));
@@ -3087,16 +3069,17 @@ namespace System.IO.Packaging.Tests
                     using (Stream partStream = packagePartDocument.GetStream(FileMode.CreateNew, FileAccess.ReadWrite))
                     using (StreamWriter sw = new StreamWriter(partStream))
                     {
-                        sw.Write(TestFileLib.s_DocumentXml);
+                        sw.Write(s_DocumentXml);
                     }
                 });
             }
+			tempGuidName.Delete();
         }
 
         [Fact]
         public void T116_String_CreateNew_ReadWrite_Open_ReadAndWrite()
         {
-            var tempGuidName = TestFileLib.GetGuidNameForNewFile(".docx");
+            var tempGuidName = GetGuidNameForNewFile("T116_String_CreateNew_ReadWrite_Open_ReadAndWrite", ".docx");
             using (Package package = Package.Open(tempGuidName.FullName, FileMode.CreateNew, FileAccess.ReadWrite))
             {
                 Uri uri = PackUriHelper.CreatePartUri(new Uri("dummy.xml", UriKind.Relative));
@@ -3110,7 +3093,7 @@ namespace System.IO.Packaging.Tests
                 using (Stream partStream = packagePartDocument.GetStream(FileMode.Create, FileAccess.ReadWrite))
                 using (StreamWriter sw = new StreamWriter(partStream))
                 {
-                    sw.Write(TestFileLib.s_DocumentXml);
+                    sw.Write(s_DocumentXml);
                 }
 
                 using (Stream partStream = packagePartDocument.GetStream(FileMode.Open, FileAccess.ReadWrite))
@@ -3119,12 +3102,13 @@ namespace System.IO.Packaging.Tests
                     Assert.True(xd.DescendantNodes().Count() != 0);
                 }
             }
+			tempGuidName.Delete();
         }
 
         [Fact]
         public void T115_String_CreateNew_ReadWrite_Open_ReadAndWrite()
         {
-            var tempGuidName = TestFileLib.GetGuidNameForNewFile(".docx");
+            var tempGuidName = GetGuidNameForNewFile("T115_String_CreateNew_ReadWrite_Open_ReadAndWrite", ".docx");
             using (Package package = Package.Open(tempGuidName.FullName, FileMode.CreateNew, FileAccess.ReadWrite))
             {
                 Uri uri = PackUriHelper.CreatePartUri(new Uri("dummy.xml", UriKind.Relative));
@@ -3138,7 +3122,7 @@ namespace System.IO.Packaging.Tests
                 using (Stream partStream = packagePartDocument.GetStream(FileMode.Create, FileAccess.Write))
                 using (StreamWriter sw = new StreamWriter(partStream))
                 {
-                    sw.Write(TestFileLib.s_DocumentXml);
+                    sw.Write(s_DocumentXml);
                 }
 
                 Assert.Throws<IOException>(() =>
@@ -3150,12 +3134,13 @@ namespace System.IO.Packaging.Tests
                     }
                 });
             }
+			tempGuidName.Delete();
         }
 
         [Fact]
         public void T114_String_CreateNew_ReadWrite_Open_ReadAndWrite()
         {
-            var tempGuidName = TestFileLib.GetGuidNameForNewFile(".docx");
+            var tempGuidName = GetGuidNameForNewFile("T114_String_CreateNew_ReadWrite_Open_ReadAndWrite", ".docx");
             using (Package package = Package.Open(tempGuidName.FullName, FileMode.CreateNew, FileAccess.ReadWrite))
             {
                 Uri uri = PackUriHelper.CreatePartUri(new Uri("dummy.xml", UriKind.Relative));
@@ -3169,7 +3154,7 @@ namespace System.IO.Packaging.Tests
                 using (Stream partStream = packagePartDocument.GetStream(FileMode.Open, FileAccess.ReadWrite))
                 using (StreamWriter sw = new StreamWriter(partStream))
                 {
-                    sw.Write(TestFileLib.s_DocumentXml);
+                    sw.Write(s_DocumentXml);
                 }
 
                 using (Stream partStream = packagePartDocument.GetStream(FileMode.Open, FileAccess.ReadWrite))
@@ -3178,40 +3163,44 @@ namespace System.IO.Packaging.Tests
                     Assert.True(xd.DescendantNodes().Count() != 0);
                 }
             }
+			tempGuidName.Delete();
         }
 
         [Fact]
         public void T113_String_CreateNew_Write_Open_Read()
         {
-            var tempGuidName = TestFileLib.GetGuidNameForNewFile(".docx");
+            var tempGuidName = GetGuidNameForNewFile("T113_String_CreateNew_Write_Open_Read", ".docx");
             Assert.Throws<ArgumentException>(() =>
             {
                 Package package = Package.Open(tempGuidName.FullName, FileMode.CreateNew, FileAccess.Write);
             });
+			tempGuidName.Delete();
         }
 
         [Fact]
         public void T112_String_CreateNew_Read_Create_Read()
         {
-            var tempGuidName = TestFileLib.GetGuidNameForNewFile(".docx");
+            var tempGuidName = GetGuidNameForNewFile("T112_String_CreateNew_Read_Create_Read", ".docx");
             Assert.Throws<ArgumentException>(() =>
             {
                 Package package = Package.Open(tempGuidName.FullName, FileMode.CreateNew, FileAccess.Read);
             });
+			tempGuidName.Delete();
         }
 
         [Fact]
         public void T111_String_Create_Write_Star()
         {
-            var tempGuidName = TestFileLib.GetGuidNameForNewFile(".docx");
+            var tempGuidName = GetGuidNameForNewFile("T111_String_Create_Write_Star", ".docx");
             // opening the package attempts to read the package, and no permissions.
             Assert.Throws<ArgumentException>(() => Package.Open(tempGuidName.FullName, FileMode.Create, FileAccess.Write));
+			tempGuidName.Delete();
         }
 
         [Fact]
         public void T110_String_Create_ReadWrite_OpenOrCreate_ReadWrite()
         {
-            var tempGuidName = TestFileLib.GetGuidNameForNewFile(".docx");
+            var tempGuidName = GetGuidNameForNewFile("T110_String_Create_ReadWrite_OpenOrCreate_ReadWrite", ".docx");
             using (Package package = Package.Open(tempGuidName.FullName, FileMode.Create, FileAccess.ReadWrite))
             {
                 Uri uri = PackUriHelper.CreatePartUri(new Uri("dummy.xml", UriKind.Relative));
@@ -3225,7 +3214,7 @@ namespace System.IO.Packaging.Tests
                 using (Stream partStream = packagePartDocument.GetStream(FileMode.OpenOrCreate, FileAccess.Read | FileAccess.Write))
                 using (StreamWriter sw = new StreamWriter(partStream))
                 {
-                    sw.Write(TestFileLib.s_DocumentXml);
+                    sw.Write(s_DocumentXml);
                 }
 
                 using (Stream partStream = packagePartDocument.GetStream(FileMode.OpenOrCreate, FileAccess.Read | FileAccess.Write))
@@ -3234,12 +3223,13 @@ namespace System.IO.Packaging.Tests
                     Assert.True(xd.DescendantNodes().Count() != 0);
                 }
             }
+			tempGuidName.Delete();
         }
 
         [Fact]
         public void T109_String_Create_ReadWrite_OpenOrCreate_ReadWrite()
         {
-            var tempGuidName = TestFileLib.GetGuidNameForNewFile(".docx");
+            var tempGuidName = GetGuidNameForNewFile("T109_String_Create_ReadWrite_OpenOrCreate_ReadWrite", ".docx");
             using (Package package = Package.Open(tempGuidName.FullName, FileMode.Create, FileAccess.ReadWrite))
             {
                 Uri uri = PackUriHelper.CreatePartUri(new Uri("dummy.xml", UriKind.Relative));
@@ -3253,7 +3243,7 @@ namespace System.IO.Packaging.Tests
                 using (Stream partStream = packagePartDocument.GetStream(FileMode.OpenOrCreate, FileAccess.ReadWrite))
                 using (StreamWriter sw = new StreamWriter(partStream))
                 {
-                    sw.Write(TestFileLib.s_DocumentXml);
+                    sw.Write(s_DocumentXml);
                 }
 
                 using (Stream partStream = packagePartDocument.GetStream(FileMode.OpenOrCreate, FileAccess.ReadWrite))
@@ -3262,12 +3252,13 @@ namespace System.IO.Packaging.Tests
                     Assert.True(xd.DescendantNodes().Count() != 0);
                 }
             }
+			tempGuidName.Delete();
         }
 
         [Fact]
         public void T108_String_Create_ReadWrite_OpenOrCreate_Read()
         {
-            var tempGuidName = TestFileLib.GetGuidNameForNewFile(".docx");
+            var tempGuidName = GetGuidNameForNewFile("T108_String_Create_ReadWrite_OpenOrCreate_Read", ".docx");
             using (Package package = Package.Open(tempGuidName.FullName, FileMode.Create, FileAccess.ReadWrite))
             {
                 Uri uri = PackUriHelper.CreatePartUri(new Uri("dummy.xml", UriKind.Relative));
@@ -3281,7 +3272,7 @@ namespace System.IO.Packaging.Tests
                 using (Stream partStream = packagePartDocument.GetStream(FileMode.OpenOrCreate, FileAccess.Write))
                 using (StreamWriter sw = new StreamWriter(partStream))
                 {
-                    sw.Write(TestFileLib.s_DocumentXml);
+                    sw.Write(s_DocumentXml);
                 }
 
                 using (Stream partStream = packagePartDocument.GetStream(FileMode.OpenOrCreate, FileAccess.Read))
@@ -3290,12 +3281,13 @@ namespace System.IO.Packaging.Tests
                     Assert.True(xd.DescendantNodes().Count() != 0);
                 }
             }
+			tempGuidName.Delete();
         }
 
         [Fact]
         public void T107_String_Create_ReadWrite_Open_ReadWrite()
         {
-            var tempGuidName = TestFileLib.GetGuidNameForNewFile(".docx");
+            var tempGuidName = GetGuidNameForNewFile("T107_String_Create_ReadWrite_Open_ReadWrite", ".docx");
             using (Package package = Package.Open(tempGuidName.FullName, FileMode.Create, FileAccess.ReadWrite))
             {
                 Uri uri = PackUriHelper.CreatePartUri(new Uri("dummy.xml", UriKind.Relative));
@@ -3309,7 +3301,7 @@ namespace System.IO.Packaging.Tests
                 using (Stream partStream = packagePartDocument.GetStream(FileMode.Open, FileAccess.Read | FileAccess.Write))
                 using (StreamWriter sw = new StreamWriter(partStream))
                 {
-                    sw.Write(TestFileLib.s_DocumentXml);
+                    sw.Write(s_DocumentXml);
                 }
 
                 using (Stream partStream = packagePartDocument.GetStream(FileMode.Open, FileAccess.Read | FileAccess.Write))
@@ -3318,12 +3310,13 @@ namespace System.IO.Packaging.Tests
                     Assert.True(xd.DescendantNodes().Count() != 0);
                 }
             }
+			tempGuidName.Delete();
         }
 
         [Fact]
         public void T106_String_Create_ReadWrite_Open_ReadWrite()
         {
-            var tempGuidName = TestFileLib.GetGuidNameForNewFile(".docx");
+            var tempGuidName = GetGuidNameForNewFile("T106_String_Create_ReadWrite_Open_ReadWrite", ".docx");
             using (Package package = Package.Open(tempGuidName.FullName, FileMode.Create, FileAccess.ReadWrite))
             {
                 Uri uri = PackUriHelper.CreatePartUri(new Uri("dummy.xml", UriKind.Relative));
@@ -3337,7 +3330,7 @@ namespace System.IO.Packaging.Tests
                 using (Stream partStream = packagePartDocument.GetStream(FileMode.Open, FileAccess.ReadWrite))
                 using (StreamWriter sw = new StreamWriter(partStream))
                 {
-                    sw.Write(TestFileLib.s_DocumentXml);
+                    sw.Write(s_DocumentXml);
                 }
 
                 using (Stream partStream = packagePartDocument.GetStream(FileMode.Open, FileAccess.ReadWrite))
@@ -3346,12 +3339,13 @@ namespace System.IO.Packaging.Tests
                     Assert.True(xd.DescendantNodes().Count() != 0);
                 }
             }
+			tempGuidName.Delete();
         }
 
         [Fact]
         public void T105_String_Create_ReadWrite_Open_Write()
         {
-            var tempGuidName = TestFileLib.GetGuidNameForNewFile(".docx");
+            var tempGuidName = GetGuidNameForNewFile("T105_String_Create_ReadWrite_Open_Write", ".docx");
             using (Package package = Package.Open(tempGuidName.FullName, FileMode.Create, FileAccess.ReadWrite))
             {
                 Uri uri = PackUriHelper.CreatePartUri(new Uri("dummy.xml", UriKind.Relative));
@@ -3373,12 +3367,13 @@ namespace System.IO.Packaging.Tests
                     });
                 }
             }
+			tempGuidName.Delete();
         }
 
         [Fact]
         public void T104_String_Create_ReadWrite_Open_Write()
         {
-            var tempGuidName = TestFileLib.GetGuidNameForNewFile(".docx");
+            var tempGuidName = GetGuidNameForNewFile("T104_String_Create_ReadWrite_Open_Write", ".docx");
             using (Package package = Package.Open(tempGuidName.FullName, FileMode.Create, FileAccess.ReadWrite))
             {
                 Uri uri = PackUriHelper.CreatePartUri(new Uri("dummy.xml", UriKind.Relative));
@@ -3392,15 +3387,16 @@ namespace System.IO.Packaging.Tests
                 using (Stream partStream = packagePartDocument.GetStream(FileMode.Open, FileAccess.Write))
                 using (StreamWriter sw = new StreamWriter(partStream))
                 {
-                    sw.Write(TestFileLib.s_DocumentXml);
+                    sw.Write(s_DocumentXml);
                 }
             }
+			tempGuidName.Delete();
         }
 
         [Fact]
         public void T103_String_Create_ReadWrite_Open_Read()
         {
-            var tempGuidName = TestFileLib.GetGuidNameForNewFile(".docx");
+            var tempGuidName = GetGuidNameForNewFile("T103_String_Create_ReadWrite_Open_Read", ".docx");
             using (Package package = Package.Open(tempGuidName.FullName, FileMode.Create, FileAccess.ReadWrite))
             {
                 Uri uri = PackUriHelper.CreatePartUri(new Uri("dummy.xml", UriKind.Relative));
@@ -3418,12 +3414,13 @@ namespace System.IO.Packaging.Tests
                     Assert.True(partStream.Length == 0);
                 }
             }
+			tempGuidName.Delete();
         }
 
         [Fact]
         public void T102_String_Create_ReadWrite_Open_Read()
         {
-            var tempGuidName = TestFileLib.GetGuidNameForNewFile(".docx");
+            var tempGuidName = GetGuidNameForNewFile("T102_String_Create_ReadWrite_Open_Read", ".docx");
             using (Package package = Package.Open(tempGuidName.FullName, FileMode.Create, FileAccess.ReadWrite))
             {
                 Uri uri = PackUriHelper.CreatePartUri(new Uri("dummy.xml", UriKind.Relative));
@@ -3439,16 +3436,17 @@ namespace System.IO.Packaging.Tests
                     using (Stream partStream = packagePartDocument.GetStream(FileMode.Open, FileAccess.Read))
                     using (StreamWriter sw = new StreamWriter(partStream))
                     {
-                        sw.Write(TestFileLib.s_DocumentXml);
+                        sw.Write(s_DocumentXml);
                     }
                 });
             }
+			tempGuidName.Delete();
         }
 
         [Fact]
         public void T101_String_Create_ReadWrite_Create_Read()
         {
-            var tempGuidName = TestFileLib.GetGuidNameForNewFile(".docx");
+            var tempGuidName = GetGuidNameForNewFile("T101_String_Create_ReadWrite_Create_Read", ".docx");
             using (Package package = Package.Open(tempGuidName.FullName, FileMode.Create, FileAccess.ReadWrite))
             {
                 Uri uri = PackUriHelper.CreatePartUri(new Uri("dummy.xml", UriKind.Relative));
@@ -3481,15 +3479,16 @@ namespace System.IO.Packaging.Tests
                 //using (Stream partStream = packagePartDocument.GetStream(FileMode.Create, FileAccess.Read))
                 //using (StreamWriter sw = new StreamWriter(partStream))
                 //{
-                //    sw.Write(TestFileLib.s_DocumentXml);
+                //    sw.Write(s_DocumentXml);
                 //}
             }
+			tempGuidName.Delete();
         }
 
         [Fact]
         public void T100_String_Create_Read_Star()
         {
-            var tempGuidName = TestFileLib.GetGuidNameForNewFile(".docx");
+            var tempGuidName = GetGuidNameForNewFile("T100_String_Create_Read_Star", ".docx");
             Assert.Throws<ArgumentException>(() =>
             {
                 Package package = Package.Open(tempGuidName.FullName, FileMode.Create, FileAccess.Read);
@@ -3508,9 +3507,10 @@ namespace System.IO.Packaging.Tests
             //    using (Stream partStream = packagePartDocument.GetStream(FileMode.Create, FileAccess.Read))
             //    using (StreamWriter sw = new StreamWriter(partStream))
             //    {
-            //        sw.Write(TestFileLib.s_DocumentXml);
+            //        sw.Write(s_DocumentXml);
             //    }
             //}
+			tempGuidName.Delete();
         }
 
         const string DocumentRelationshipType = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument";
