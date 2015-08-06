@@ -224,7 +224,6 @@ namespace System.Net
         } // GetHostByName
 
         // Does internal IPAddress reverse and then forward lookups (for Legacy and current public methods).
-        // Legacy methods do not include IPv6, unless configed to by Socket.LegacySupportsIPv6 and Socket.OSSupportsIPv6.
         internal static IPHostEntry InternalGetHostByAddress(IPAddress address, bool includeIPv6)
         {
             GlobalLog.Print("Dns.InternalGetHostByAddress: " + address.ToString());
@@ -253,10 +252,11 @@ namespace System.Net
                     if (errorCode == SocketError.Success)
                         return hostEntry;
 
-                    // Log failure
                     if (Logging.On)
+                    {
                         Logging.Exception(Logging.Sockets, "DNS",
-            "InternalGetHostByAddress", new SocketException((int)errorCode));
+                        "InternalGetHostByAddress", new SocketException((int)errorCode));
+                    }
 
                     // One of two things happened:
                     // 1. There was a ptr record in dns, but not a corollary A/AAA record.
@@ -290,8 +290,7 @@ namespace System.Net
                 //
 
                 // TODO: Optimize this (or decide if this legacy code can be removed):
-                byte [] addressBytes = address.GetAddressBytes();
-                int addressAsInt = BitConverter.ToInt32(addressBytes, 0);
+                int addressAsInt = unchecked((int)address.GetAddress());
 
 #if BIGENDIAN
                 // TODO: above code needs testing for BIGENDIAN.

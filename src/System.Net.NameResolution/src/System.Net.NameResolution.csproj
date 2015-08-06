@@ -62,23 +62,11 @@
       <Link>Common\System\Net\IntPtrHelper.cs</Link>
     </Compile>
 
-    <Compile Include="$(CommonPath)\System\Net\IPAddressParserStatics.cs" >
-      <Link>Common\System\Net\IPAddressParserStatics.cs</Link>
-    </Compile>
-
     <Compile Include="$(CommonPath)\System\Net\IPEndPointStatics.cs">
       <Link>Common\System\Net\IPEndPointStatics.cs</Link>
     </Compile>
 
-    <Compile Include="$(CommonPath)\System\Net\SocketAddress.cs">
-      <Link>Common\System\Net\SocketAddress.cs</Link>
-    </Compile>
-
     <!-- System.Net.Internals -->
-    <Compile Include="$(CommonPath)\System\Net\Internals\IPEndPointExtensions.cs">
-      <Link>Common\System\Net\Internals\IPEndPointExtensions.cs</Link>
-    </Compile>
-    
     <Compile Include="$(CommonPath)\System\Net\Internals\IPAddressExtensions.cs">
       <Link>Common\System\Net\Internals\IPAddressExtensions.cs</Link>
     </Compile>

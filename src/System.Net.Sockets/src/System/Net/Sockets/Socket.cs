@@ -278,15 +278,6 @@ namespace System.Net.Sockets
             }
         }
 
-        internal static bool LegacySupportsIPv6
-        {
-            get
-            {
-                InitializeSockets();
-                return s_SupportsIPv6;
-            }
-        }
-
         public static bool OSSupportsIPv6
         {
             get
