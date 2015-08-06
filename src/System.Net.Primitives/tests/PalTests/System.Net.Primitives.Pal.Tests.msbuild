@@ -76,15 +76,15 @@
     <CompileItem Include="..\..\src\System\Net\HostInformationPal.Windows.cs" >
       <Link>ProductionCode\System\Net\HostInformationPal.Windows.cs</Link>
     </CompileItem>
-    <CompileItem Include="..\..\src\System\Net\SocketAddressPal.Windows.cs" >
-      <Link>ProductionCode\System\Net\SocketAddressPal.Windows.cs</Link>
-    </CompileItem>
     <CompileItem Include="..\..\src\System\Net\SocketException.Windows.cs" >
       <Link>ProductionCode\System\Net\SocketException.Windows.cs</Link>
     </CompileItem>
 
     <CompileItem Include="$(CommonPath)\Microsoft\Win32\SafeHandles\SafeLocalAllocHandle.cs" >
       <Link>Common\Microsoft\Win32\SafeHandles\SafeLocalAllocHandle.cs</Link>
+    </CompileItem>
+    <CompileItem Include="$(CommonPath)\System\Net\SocketAddressPal.Windows.cs" >
+      <Link>Common\System\Net\SocketAddressPal.Windows.cs</Link>
     </CompileItem>
 
     <CompileItem Include="$(CommonPath)\Interop\Windows\IpHlpApi\Interop.ErrorCodes.cs" >
@@ -132,11 +132,12 @@
     <CompileItem Include="..\..\src\System\Net\HostInformationPal.Unix.cs" >
       <Link>ProductionCode\System\Net\HostInformationPal.Unix.cs</Link>
     </CompileItem>
-    <CompileItem Include="..\..\src\System\Net\SocketAddressPal.Unix.cs" >
-      <Link>ProductionCode\System\Net\SocketAddressPal.Unix.cs</Link>
-    </CompileItem>
     <CompileItem Include="..\..\src\System\Net\SocketException.Unix.cs" >
       <Link>ProductionCode\System\Net\SocketException.Unix.cs</Link>
+    </CompileItem>
+
+    <CompileItem Include="$(CommonPath)\System\Net\SocketAddressPal.Unix.cs" >
+      <Link>Common\System\Net\SocketAddressPal.Unix.cs</Link>
     </CompileItem>
 
     <CompileItem Include="$(CommonPath)\Interop\Interop.CheckedAccess.cs" >
