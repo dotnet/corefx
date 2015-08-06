@@ -11,7 +11,7 @@ using System;
 #if SYSTEM_NET_PRIMITIVES_DLL
 namespace System.Net
 #else
-namespace System.Net.Sockets.Internals
+namespace System.Net.Internals
 #endif
 {
     /// <devdoc>
