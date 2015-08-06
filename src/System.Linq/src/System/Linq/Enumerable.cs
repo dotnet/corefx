@@ -136,7 +136,7 @@ namespace System.Linq
                 //
                 // Normally, this happens when you chain two consecutive Select<,>. There may be
                 // some clever way to handle that second generic parameter within the limitations of the
-                // static type system but it's a lot simpler just to break the chain by inserting 
+                // static type system but it's a lot simpler just to break the chain by inserting
                 // a dummy Where(x => y) in the middle.
                 //
                 return new WhereEnumerableIterator<TSource>(this, x => true).SelectImpl<TResult>(selector);
@@ -1615,7 +1615,7 @@ namespace System.Linq
             {
                 foreach (int? v in source)
                 {
-                    if (v != null) sum += v.GetValueOrDefault();
+                    sum += v.GetValueOrDefault();
                 }
             }
             return sum;
@@ -1640,7 +1640,7 @@ namespace System.Linq
             {
                 foreach (long? v in source)
                 {
-                    if (v != null) sum += v.GetValueOrDefault();
+                    sum += v.GetValueOrDefault();
                 }
             }
             return sum;
@@ -1660,7 +1660,7 @@ namespace System.Linq
             double sum = 0;
             foreach (float? v in source)
             {
-                if (v != null) sum += v.GetValueOrDefault();
+                sum += v.GetValueOrDefault();
             }
             return (float)sum;
         }
@@ -1679,7 +1679,7 @@ namespace System.Linq
             double sum = 0;
             foreach (double? v in source)
             {
-                if (v != null) sum += v.GetValueOrDefault();
+                sum += v.GetValueOrDefault();
             }
             return sum;
         }
@@ -1698,7 +1698,7 @@ namespace System.Linq
             decimal sum = 0;
             foreach (decimal? v in source)
             {
-                if (v != null) sum += v.GetValueOrDefault();
+                sum += v.GetValueOrDefault();
             }
             return sum;
         }
