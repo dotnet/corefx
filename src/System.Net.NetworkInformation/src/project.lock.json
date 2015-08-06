@@ -84,9 +84,9 @@
           "lib/DNXCore50/System.Diagnostics.Debug.dll": {}
         }
       },
-      "System.Diagnostics.Tracing/4.0.0-beta-23109": {
+      "System.Diagnostics.Tracing/4.0.0-beta-23127": {
         "dependencies": {
-          "System.Runtime": "4.0.0-beta-23109"
+          "System.Runtime": "4.0.0-beta-23127"
         },
         "compile": {
           "ref/dotnet/System.Diagnostics.Tracing.dll": {}
@@ -779,16 +779,20 @@
         "runtimes/win8-aot/lib/netcore50/System.Diagnostics.Debug.dll"
       ]
     },
-    "System.Diagnostics.Tracing/4.0.0-beta-23109": {
-      "sha512": "+90WBy3WP9cbv3GW89Yq0AhMTYb27hdAKxiJlK1wTE5zmhIYAvi/7LNMh4RQd3mfToVyLTvMUqGCvlaAwIRc+A==",
+    "System.Diagnostics.Tracing/4.0.0-beta-23127": {
+      "sha512": "aT+BaMposJ66/wYQVuCdcEBF+WoY+BSf435aUbRa2U/WTvqVgDfmEvs7vlJOrjlW3pqylBAC1U8mv4cdEucPYQ==",
       "files": [
         "License.rtf",
-        "System.Diagnostics.Tracing.4.0.0-beta-23109.nupkg",
-        "System.Diagnostics.Tracing.4.0.0-beta-23109.nupkg.sha512",
+        "System.Diagnostics.Tracing.4.0.0-beta-23127.nupkg",
+        "System.Diagnostics.Tracing.4.0.0-beta-23127.nupkg.sha512",
         "System.Diagnostics.Tracing.nuspec",
+        "lib/MonoAndroid10/_._",
+        "lib/MonoTouch10/_._",
         "lib/net45/_._",
         "lib/win8/_._",
         "lib/wpa81/_._",
+        "lib/xamarinios10/_._",
+        "lib/xamarinmac20/_._",
         "ref/dotnet/System.Diagnostics.Tracing.dll",
         "ref/dotnet/System.Diagnostics.Tracing.xml",
         "ref/dotnet/de/System.Diagnostics.Tracing.xml",
@@ -800,6 +804,8 @@
         "ref/dotnet/ru/System.Diagnostics.Tracing.xml",
         "ref/dotnet/zh-hans/System.Diagnostics.Tracing.xml",
         "ref/dotnet/zh-hant/System.Diagnostics.Tracing.xml",
+        "ref/MonoAndroid10/_._",
+        "ref/MonoTouch10/_._",
         "ref/net45/_._",
         "ref/netcore50/System.Diagnostics.Tracing.dll",
         "ref/netcore50/System.Diagnostics.Tracing.xml",
@@ -813,7 +819,9 @@
         "ref/netcore50/zh-hans/System.Diagnostics.Tracing.xml",
         "ref/netcore50/zh-hant/System.Diagnostics.Tracing.xml",
         "ref/win8/_._",
-        "ref/wpa81/_._"
+        "ref/wpa81/_._",
+        "ref/xamarinios10/_._",
+        "ref/xamarinmac20/_._"
       ]
     },
     "System.Globalization/4.0.0-beta-23127": {
