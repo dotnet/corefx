@@ -136,7 +136,7 @@ namespace System.Linq
                 //
                 // Normally, this happens when you chain two consecutive Select<,>. There may be
                 // some clever way to handle that second generic parameter within the limitations of the
-                // static type system but it's a lot simpler just to break the chain by inserting 
+                // static type system but it's a lot simpler just to break the chain by inserting
                 // a dummy Where(x => y) in the middle.
                 //
                 return new WhereEnumerableIterator<TSource>(this, x => true).SelectImpl<TResult>(selector);
@@ -184,8 +184,11 @@ namespace System.Linq
 
             public override void Dispose()
             {
-                if (_enumerator is IDisposable) ((IDisposable)_enumerator).Dispose();
-                _enumerator = null;
+                if (_enumerator != null)
+                {
+                    _enumerator.Dispose();
+                    _enumerator = null;
+                }
                 base.Dispose();
             }
 
@@ -347,8 +350,11 @@ namespace System.Linq
 
             public override void Dispose()
             {
-                if (_enumerator is IDisposable) ((IDisposable)_enumerator).Dispose();
-                _enumerator = null;
+                if (_enumerator != null)
+                {
+                    _enumerator.Dispose();
+                    _enumerator = null;
+                }
                 base.Dispose();
             }
 
@@ -703,11 +709,15 @@ namespace System.Linq
 
         private static IEnumerable<TSource> SkipWhileIterator<TSource>(IEnumerable<TSource> source, Func<TSource, bool> predicate)
         {
-            bool yielding = false;
-            foreach (TSource element in source)
+            using (IEnumerator<TSource> e = source.GetEnumerator())
             {
-                if (!yielding && !predicate(element)) yielding = true;
-                if (yielding) yield return element;
+                do
+                    if (!e.MoveNext()) yield break;
+                while (predicate(e.Current));
+                
+                do
+                    yield return e.Current;
+                while (e.MoveNext());
             }
         }
 
@@ -721,12 +731,17 @@ namespace System.Linq
         private static IEnumerable<TSource> SkipWhileIterator<TSource>(IEnumerable<TSource> source, Func<TSource, int, bool> predicate)
         {
             int index = -1;
-            bool yielding = false;
-            foreach (TSource element in source)
+            using (IEnumerator<TSource> e = source.GetEnumerator())
             {
-                checked { index++; }
-                if (!yielding && !predicate(element, index)) yielding = true;
-                if (yielding) yield return element;
+                do
+                {
+                    if (!e.MoveNext()) yield break;
+                    checked { index++; }
+                } while (predicate(e.Current, index));
+                
+                do
+                    yield return e.Current;
+                while (e.MoveNext());
             }
         }
 
@@ -1436,7 +1451,7 @@ namespace System.Linq
 
         private static IEnumerable<int> RangeIterator(int start, int count)
         {
-            for (int i = 0; i < count; i++) yield return start + i;
+            for (int end = start + count; start < end; start++) yield return start;
         }
 
         public static IEnumerable<TResult> Repeat<TResult>(TResult element, int count)
@@ -1557,8 +1572,8 @@ namespace System.Linq
 
         public static bool Contains<TSource>(this IEnumerable<TSource> source, TSource value, IEqualityComparer<TSource> comparer)
         {
-            if (comparer == null) comparer = EqualityComparer<TSource>.Default;
             if (source == null) throw Error.ArgumentNull("source");
+            if (comparer == null) comparer = EqualityComparer<TSource>.Default;
             foreach (TSource element in source)
                 if (comparer.Equals(element, value)) return true;
             return false;
@@ -1615,7 +1630,7 @@ namespace System.Linq
             {
                 foreach (int? v in source)
                 {
-                    if (v != null) sum += v.GetValueOrDefault();
+                    sum += v.GetValueOrDefault();
                 }
             }
             return sum;
@@ -1640,7 +1655,7 @@ namespace System.Linq
             {
                 foreach (long? v in source)
                 {
-                    if (v != null) sum += v.GetValueOrDefault();
+                    sum += v.GetValueOrDefault();
                 }
             }
             return sum;
@@ -1660,7 +1675,7 @@ namespace System.Linq
             double sum = 0;
             foreach (float? v in source)
             {
-                if (v != null) sum += v.GetValueOrDefault();
+                sum += v.GetValueOrDefault();
             }
             return (float)sum;
         }
@@ -1679,7 +1694,7 @@ namespace System.Linq
             double sum = 0;
             foreach (double? v in source)
             {
-                if (v != null) sum += v.GetValueOrDefault();
+                sum += v.GetValueOrDefault();
             }
             return sum;
         }
@@ -1698,7 +1713,7 @@ namespace System.Linq
             decimal sum = 0;
             foreach (decimal? v in source)
             {
-                if (v != null) sum += v.GetValueOrDefault();
+                sum += v.GetValueOrDefault();
             }
             return sum;
         }
@@ -3414,16 +3429,12 @@ namespace System.Linq
                     }
                 }
             }
-
-            if (items == null)
+            else
             {
+                items = new TElement[4];
                 foreach (TElement item in source)
                 {
-                    if (items == null)
-                    {
-                        items = new TElement[4];
-                    }
-                    else if (items.Length == count)
+                    if (items.Length == count)
                     {
                         Array.Resize(ref items, checked(count * 2));
                     }
