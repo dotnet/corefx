@@ -40,7 +40,7 @@ namespace System.Collections.Immutable
         public static readonly ImmutableArray<T> Empty = new ImmutableArray<T>(new T[0]);
 
         /// <summary>
-        /// The backing field for this instance. References to this value should never be shared with outside code. 
+        /// The backing field for this instance. References to this value should never be shared with outside code.
         /// </summary>
         /// <remarks>
         /// This would be private, but we make it internal so that our own extension methods can access it.
@@ -879,21 +879,16 @@ namespace System.Collections.Immutable
                 return new ImmutableArray<T>(self.array);
             }
 
-            List<int> removeIndexes = null;
+            var removeIndexes = new List<int>();
             for (int i = 0; i < self.array.Length; i++)
             {
                 if (match(self.array[i]))
                 {
-                    if (removeIndexes == null)
-                    {
-                        removeIndexes = new List<int>();
-                    }
-
                     removeIndexes.Add(i);
                 }
             }
 
-            return removeIndexes != null ?
+            return removeIndexes.Count != 0 ?
                 self.RemoveAtRange(removeIndexes) :
                 self;
         }
@@ -1007,7 +1002,7 @@ namespace System.Collections.Immutable
         /// Returns a hash code for this instance.
         /// </summary>
         /// <returns>
-        /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table. 
+        /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table.
         /// </returns>
         [Pure]
         public override int GetHashCode()
@@ -1592,16 +1587,16 @@ namespace System.Collections.Immutable
         {
             // Force NullReferenceException if array is null by touching its Length.
             // This way of checking has a nice property of requiring very little code
-            // and not having any conditions/branches. 
+            // and not having any conditions/branches.
             // In a faulting scenario we are relying on hardware to generate the fault.
-            // And in the non-faulting scenario (most common) the check is virtually free since 
+            // And in the non-faulting scenario (most common) the check is virtually free since
             // if we are going to do anything with the array, we will need Length anyways
-            // so touching it, and potentially causing a cache miss, is not going to be an 
+            // so touching it, and potentially causing a cache miss, is not going to be an
             // extra expense.
             var unused = this.array.Length;
 
             // This line is a workaround for a bug in C# compiler
-            // The code in this line will not be emitted, but it will prevent incorrect 
+            // The code in this line will not be emitted, but it will prevent incorrect
             // optimizing away of "Length" call above in Release builds.
             // TODO: remove the workaround when building with Roslyn which does not have this bug.
             var unused2 = unused;
@@ -1612,7 +1607,7 @@ namespace System.Collections.Immutable
         /// <see cref="IsDefault"/> property returns true.  The
         /// <see cref="InvalidOperationException"/> message specifies that the operation cannot be performed
         /// on a default instance of <see cref="ImmutableArray{T}"/>.
-        /// 
+        ///
         /// This is intended for explicitly implemented interface method and property implementations.
         /// </summary>
         private void ThrowInvalidOperationIfNotInitialized()
