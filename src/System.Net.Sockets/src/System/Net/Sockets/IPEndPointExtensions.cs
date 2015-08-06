@@ -28,5 +28,32 @@ namespace System.Net.Sockets
 
             return socketAddress.GetIPEndPoint();
         }
+
+        internal static IPEndPoint Snapshot(this IPEndPoint thisObj)
+        {
+            return new IPEndPoint(IPAddressSnapshot(thisObj.Address), thisObj.Port);
+        }
+
+        // TODO: Extract the following into IPAddressExtensions and reconcile with IPAddress.cs in Primitives:
+        private static IPAddress IPAddressSnapshot(IPAddress original)
+        {
+            switch (original.AddressFamily)
+            {
+                case AddressFamily.InterNetwork:
+                return new IPAddress(original.GetAddressBytes());
+
+                case AddressFamily.InterNetworkV6:
+                return new IPAddress(original.GetAddressBytes(), (uint)original.ScopeId);
+            }
+
+            throw new InternalException();
+        }
+
+        // TODO: Reuse in DNS.cs:239.
+        public static long GetAddress(this IPAddress thisObj)
+        {
+            byte[] addressBytes = thisObj.GetAddressBytes();
+            return BitConverter.ToInt64(addressBytes, 0);
+        }
     }
 }

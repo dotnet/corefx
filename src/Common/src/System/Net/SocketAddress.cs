@@ -139,11 +139,17 @@ namespace System.Net.Sockets.Internals
             }
             else
             {
+#if SYSTEM_NET_PRIMITIVES_DLL
                 // IPv4 Address serialization
                 Buffer[4] = unchecked((byte)(ipAddress.Address));
                 Buffer[5] = unchecked((byte)(ipAddress.Address >> 8));
                 Buffer[6] = unchecked((byte)(ipAddress.Address >> 16));
                 Buffer[7] = unchecked((byte)(ipAddress.Address >> 24));
+#else
+                byte[] ipAddressBytes = ipAddress.GetAddressBytes();
+                Debug.Assert(ipAddressBytes.Length == 4);
+                ipAddressBytes.CopyTo(Buffer, 4);
+#endif
             }
         }
 

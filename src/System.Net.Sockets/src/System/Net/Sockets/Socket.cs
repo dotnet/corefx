@@ -6645,12 +6645,12 @@ namespace System.Net.Sockets
         {
             Interop.Winsock.IPMulticastRequest ipmr = new Interop.Winsock.IPMulticastRequest();
 
-            ipmr.MulticastAddress = unchecked((int)MR.Group.m_Address);
+            ipmr.MulticastAddress = unchecked((int)MR.Group.GetAddress());
 
 
             if (MR.LocalAddress != null)
             {
-                ipmr.InterfaceAddress = unchecked((int)MR.LocalAddress.m_Address);
+                ipmr.InterfaceAddress = unchecked((int)MR.LocalAddress.GetAddress());
             }
             else
             {  //this structure works w/ interfaces as well
