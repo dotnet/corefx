@@ -1,15 +1,14 @@
-namespace NCLTest.NameResolution
-{
-    using CoreFXTestLibrary;
-    using System;
-    using System.Net;
-    using System.Net.Sockets;
-    using System.Text;
-    using System.Threading.Tasks;
+using System;
+using System.Net;
+using System.Net.Sockets;
+using System.Text;
+using System.Threading.Tasks;
 
+namespace System.Net.NameResolution.Tests
+{
     internal static class TestSettings
     {
-        public static readonly string LocalHost = "localhost";
+        public const string LocalHost = "localhost";
 
         public static Task<IPAddress> GetLocalIPAddress()
         {
@@ -32,7 +31,6 @@ namespace NCLTest.NameResolution
             {
                 if (address.AddressFamily == family)
                 {
-                    Logger.LogInformation("ResolveHost: {0} translated to {1}", host, address);
                     return address;
                 }
             }

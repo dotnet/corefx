@@ -21,6 +21,8 @@
   <ItemGroup>
     <Compile Include="System\Net\DNS.cs" />
     <Compile Include="System\Net\IPHostEntry.cs" />
+    <Compile Include="System\Net\NameResolutionPal.Windows.cs" />
+    <Compile Include="System\Net\NameResolutionUtilities.cs" />
 
     <!-- Logging -->
     <Compile Include="$(CommonPath)\System\Net\Shims\TraceSource.cs">
