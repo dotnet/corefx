@@ -382,10 +382,10 @@ namespace System.Reflection.Metadata.Decoding
             var modifier = new CustomModifier<TType>(type, isRequired);
 
             ImmutableArray<CustomModifier<TType>> modifiers;
-            SignatureTypeCode typeCode = blobReader.ReadSignatureTypeCode();
+            int typeCode = blobReader.ReadCompressedInteger();
 
-            isRequired = typeCode == SignatureTypeCode.RequiredModifier;
-            if (!isRequired && typeCode != SignatureTypeCode.OptionalModifier)
+            isRequired = typeCode == (int)SignatureTypeCode.RequiredModifier;
+            if (!isRequired && typeCode != (int)SignatureTypeCode.OptionalModifier)
             {
                 // common case: 1 modifier.
                 modifiers = ImmutableArray.Create(modifier);
@@ -401,13 +401,13 @@ namespace System.Reflection.Metadata.Decoding
                     type = DecodeTypeHandle(ref blobReader, provider, null);
                     modifier = new CustomModifier<TType>(type, isRequired);
                     builder.Add(modifier);
-                    typeCode = blobReader.ReadSignatureTypeCode();
-                    isRequired = typeCode == SignatureTypeCode.RequiredModifier;
-                } while (isRequired || typeCode == SignatureTypeCode.OptionalModifier);
+                    typeCode = blobReader.ReadCompressedInteger();
+                    isRequired = typeCode == (int)SignatureTypeCode.RequiredModifier;
+                } while (isRequired || typeCode == (int)SignatureTypeCode.OptionalModifier);
 
                 modifiers = builder.ToImmutable();
             }
-            TType unmodifiedType = DecodeType(ref blobReader, (int)typeCode, provider);
+            TType unmodifiedType = DecodeType(ref blobReader, typeCode, provider);
             return provider.GetModifiedType(unmodifiedType, modifiers);
         }
 
