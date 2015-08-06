@@ -16,6 +16,12 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'OSX_Release|AnyCPU' " />
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Windows_Debug|AnyCPU' " />
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Windows_Release|AnyCPU' " />
+
+  <PropertyGroup>
+    <!-- SYSTEM_NET_PRIMITIVES_DLL is required to allow source-level code sharing for types defined within the 
+         System.Net.Internals namespace. -->
+    <DefineConstants>$(DefineConstants);SYSTEM_NET_PRIMITIVES_DLL</DefineConstants>
+  </PropertyGroup>
   
   <ItemGroup>
     <CompileItem Include="IPAddressPalTest.cs" />
@@ -39,9 +45,6 @@
     <CompileItem Include="..\..\src\System\Net\NetworkInformation\NetworkInformationException.cs" >
       <Link>ProductionCode\System\Net\NetworkInformation\NetworkInformationException.cs</Link>
     </CompileItem>
-    <CompileItem Include="..\..\src\System\Net\Sockets\SocketAddress.cs" >
-      <Link>ProductionCode\System\Net\Sockets\SocketAddress.cs</Link>
-    </CompileItem>
     <CompileItem Include="..\..\src\System\Net\SocketException.cs" >
       <Link>ProductionCode\System\Net\SocketException.cs</Link>
     </CompileItem>
@@ -56,6 +59,12 @@
     </CompileItem>
     <CompileItem Include="$(CommonPath)\System\Net\InternalException.cs" >
       <Link>ProductionCode\Common\System\Net\InternalException.cs</Link>
+    </CompileItem>
+    <CompileItem Include="$(CommonPath)\System\Net\IPAddressParserStatics.cs" >
+      <Link>ProductionCode\Common\System\Net\IPAddressParserStatics.cs</Link>
+    </CompileItem>
+    <CompileItem Include="$(CommonPath)\System\Net\SocketAddress.cs" >
+      <Link>Common\System\Net\SocketAddress.cs</Link>
     </CompileItem>
     <CompileItem Include="$(CommonPath)\System\Net\TcpValidationHelpers.cs" >
       <Link>ProductionCode\Common\System\Net\TcpValidationHelpers.cs</Link>

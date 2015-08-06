@@ -32,6 +32,7 @@ namespace System.Net
                 // parse method to unpick it all. Note: we don't support
                 // port specification at the end of address and so can
                 // make this decision.
+                uint scope;
                 byte[] bytes = new byte[IPAddressParserStatics.IPv6AddressBytes];
                 error = IPAddressPal.Ipv6StringToAddress(ipString, bytes, out scope);
 

@@ -112,7 +112,7 @@ namespace System.Net.Internals
 #else
                 byte[] ipAddressBytes = ipAddress.GetAddressBytes();
                 Debug.Assert(ipAddressBytes.Length == 4);
-                uint address = ipAddressBytes.NetworkBytesToNetworkUInt32();
+                uint address = ipAddressBytes.NetworkBytesToNetworkUInt32(0);
 #endif
 
                 Debug.Assert(ipAddress.AddressFamily == AddressFamily.InterNetwork);
