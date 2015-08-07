@@ -14,6 +14,8 @@ namespace System.Net
         // used by GetHostName() to preallocate a buffer for the call to gethostname.
         //
         private const int HostNameBufferLength = 256;
+        private static volatile bool s_Initialized;
+        private static object s_InitializedLock = new object();
 
         /*++
 
@@ -140,8 +142,6 @@ namespace System.Net
 
         public static IPHostEntry GetHostByName(string hostName)
         {
-            Socket.InitializeSockets();
-
             //
             // IPv6 disabled: use gethostbyname() to obtain DNS information.
             //
@@ -183,8 +183,6 @@ namespace System.Net
                 (((uint)addressAsInt >> 8) & 0x0000FF00) | ((uint)addressAsInt >> 24));
 #endif
 
-            Socket.InitializeSockets();
-
             IntPtr nativePointer =
                 Interop.Winsock.gethostbyaddr(
                     ref addressAsInt,
@@ -214,8 +212,6 @@ namespace System.Net
             AddressInfo hints = new AddressInfo();
             hints.ai_flags = AddressInfoHints.AI_CANONNAME;
             hints.ai_family = AddressFamily.Unspecified;   // gets all address families
-
-            Socket.InitializeSockets();
 
             //
             // Use try / finally so we always get a shot at freeaddrinfo
@@ -251,8 +247,7 @@ namespace System.Net
                     // platform / machine.
                     //
                     if ((pAddressInfo->ai_family == AddressFamily.InterNetwork) || // Never filter v4
-                        (pAddressInfo->ai_family == AddressFamily.InterNetworkV6 && Socket.OSSupportsIPv6))
-
+                        (pAddressInfo->ai_family == AddressFamily.InterNetworkV6 && SocketProtocolSupportPal.OSSupportsIPv6))
                     {
                         sockaddr = new SocketAddress(pAddressInfo->ai_family, pAddressInfo->ai_addrlen);
                         //
@@ -314,8 +309,6 @@ namespace System.Net
 
             int flags = (int)NameInfoFlags.NI_NAMEREQD;
 
-            Socket.InitializeSockets();
-
             // TODO: Remove the copying step to improve performance. This requires a change in the contracts.
             byte[] addressBuffer = new byte[address.Size];
             for (int i = 0; i < address.Size; i++)
@@ -349,8 +342,8 @@ namespace System.Net
             // execution, but this might still happen and we would want to
             // react to that change.
             //
+            NameResolutionPal.EnsureSocketsAreInitialized();
 
-            Socket.InitializeSockets();
             StringBuilder sb = new StringBuilder(HostNameBufferLength);
             SocketError errorCode =
                 Interop.Winsock.gethostname(
@@ -366,5 +359,36 @@ namespace System.Net
             }
             return sb.ToString();
         }
+
+        public static void EnsureSocketsAreInitialized()
+        {
+            if (!s_Initialized)
+            {
+                lock (s_InitializedLock)
+                {
+                    if (!s_Initialized)
+                    {
+                        Interop.Winsock.WSAData wsaData = new Interop.Winsock.WSAData();
+
+                        SocketError errorCode =
+                            Interop.Winsock.WSAStartup(
+                                (short)0x0202, // we need 2.2
+                                out wsaData);
+
+                        if (errorCode != SocketError.Success)
+                        {
+                            //
+                            // failed to initialize, throw
+                            //
+                            // WSAStartup does not set LastWin32Error
+                            throw new SocketException((int)errorCode);
+                        }
+
+                        s_Initialized = true;
+                    }
+                }
+            }
+        }
+
     }
 }

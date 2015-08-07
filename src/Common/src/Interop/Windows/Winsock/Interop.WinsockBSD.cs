@@ -145,11 +145,6 @@ internal static partial class Interop
                                               );
 
         [DllImport(Interop.Libraries.Ws2_32, ExactSpelling = true, SetLastError = true)]
-        internal static extern SocketError closesocket(
-                                              [In] IntPtr socketHandle
-                                              );
-
-        [DllImport(Interop.Libraries.Ws2_32, ExactSpelling = true, SetLastError = true)]
         internal static extern SocketError ioctlsocket(
                                             [In] IntPtr handle,
                                             [In] int cmd,

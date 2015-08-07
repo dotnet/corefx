@@ -87,9 +87,6 @@ namespace System.Net.Sockets
         private const int microcnv = 1000000;
         private readonly static int s_protocolInformationSize = Marshal.SizeOf<Interop.Winsock.WSAPROTOCOL_INFO>();
 
-        internal static volatile bool s_SupportsIPv4;
-        internal static volatile bool s_SupportsIPv6;
-        internal static volatile bool s_OSSupportsIPv6;
         internal static volatile bool s_Initialized;
         private static volatile bool s_LoggingEnabled;
 #if !FEATURE_PAL // perfcounter
@@ -274,7 +271,7 @@ namespace System.Net.Sockets
             get
             {
                 InitializeSockets();
-                return s_SupportsIPv4;
+                return SocketProtocolSupportPal.OSSupportsIPv4;
             }
         }
 
@@ -283,7 +280,7 @@ namespace System.Net.Sockets
             get
             {
                 InitializeSockets();
-                return s_OSSupportsIPv6;
+                return SocketProtocolSupportPal.OSSupportsIPv6;
             }
         }
 
@@ -6205,111 +6202,14 @@ namespace System.Net.Sockets
                 {
                     if (!s_Initialized)
                     {
-                        Interop.Winsock.WSAData wsaData = new Interop.Winsock.WSAData();
+                        // TODO: Note for PAL implementation: this call is not required for *NIX and should be avoided during PAL design.
 
-                        SocketError errorCode =
-                            Interop.Winsock.WSAStartup(
-                                (short)0x0202, // we need 2.2
-                                out wsaData);
-
-                        if (errorCode != SocketError.Success)
-                        {
-                            //
-                            // failed to initialize, throw
-                            //
-                            // WSAStartup does not set LastWin32Error
-                            throw new SocketException((int)errorCode);
-                        }
-
-#if !FEATURE_PAL
-                        //
-                        // we're on WinNT4 or greater, we could use CompletionPort if we
-                        // wanted. check if the user has disabled this functionality in
-                        // the registry, otherwise use CompletionPort.
-                        //
-
-#if DEBUG
-                        //
-                        // Uncomment out to disable Overlapped IO in debug builds only.
-                        //
-                        // UseOverlappedIO = true;
-#endif
-
-                        bool ipv4 = true;
-                        bool ipv6 = true;
-
-                        SafeCloseSocket.InnerSafeCloseSocket socketV4 =
-                                                             Interop.Winsock.WSASocketW(
-                                                                    AddressFamily.InterNetwork,
-                                                                    SocketType.Dgram,
-                                                                    ProtocolType.IP,
-                                                                    IntPtr.Zero,
-                                                                    0,
-                                                                    (Interop.Winsock.SocketConstructorFlags)0);
-                        if (socketV4.IsInvalid)
-                        {
-                            errorCode = (SocketError)Marshal.GetLastWin32Error();
-                            if (errorCode == SocketError.AddressFamilyNotSupported)
-                                ipv4 = false;
-                        }
-
-                        socketV4.Dispose();
-
-                        SafeCloseSocket.InnerSafeCloseSocket socketV6 =
-                                                             Interop.Winsock.WSASocketW(
-                                                                    AddressFamily.InterNetworkV6,
-                                                                    SocketType.Dgram,
-                                                                    ProtocolType.IP,
-                                                                    IntPtr.Zero,
-                                                                    0,
-                                                                    (Interop.Winsock.SocketConstructorFlags)0);
-                        if (socketV6.IsInvalid)
-                        {
-                            errorCode = (SocketError)Marshal.GetLastWin32Error();
-                            if (errorCode == SocketError.AddressFamilyNotSupported)
-                                ipv6 = false;
-                        }
-
-                        socketV6.Dispose();
-
-                        // <CONSIDER>
-                        // Checking that the platforms supports at least one of IPv4 or IPv6.
-                        // </CONSIDER>
-
-#if COMNET_DISABLEIPV6
-                        //
-                        // Turn off IPv6 support
-                        //
-                        ipv6 = false;
-#else
-                        //
-                        // Now read the switch as the final check: by checking the current value for IPv6
-                        // support we may be able to avoid a painful configuration file read.
-                        //
-                        if (ipv6)
-                        {
-                            s_OSSupportsIPv6 = true;
-                        }
-#endif
-
-                        //
-                        // Update final state
-                        //
-                        s_SupportsIPv4 = ipv4;
-                        s_SupportsIPv6 = ipv6;
-
-#else //!FEATURE_PAL
-
-                        s_SupportsIPv4 = true;
-                        s_SupportsIPv6 = false;
-
-#endif //!FEATURE_PAL
+                        // Ensure that WSAStartup has been called once per process.  
+                        // The System.Net.NameResolution contract is responsible with the initialization.
+                        Dns.GetHostName();
 
                         // Cache some settings locally.
-
-#if !FEATURE_PAL // perfcounter
                         s_PerfCountersEnabled = NetworkingPerfCounters.Instance.Enabled;
-#endif
                         s_Initialized = true;
                     }
                 }

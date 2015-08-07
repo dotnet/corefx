@@ -27,8 +27,9 @@ namespace System.Net
         {
             if (Logging.On) Logging.Enter(Logging.Sockets, "DNS", "GetHostByName", hostName);
             IPHostEntry ipHostEntry = null;
-
+            
             GlobalLog.Print("Dns.GetHostByName: " + hostName);
+            NameResolutionPal.EnsureSocketsAreInitialized();
 
             if (hostName.Length > MaxHostName // If 255 chars, the last one must be a dot.
                 || hostName.Length == MaxHostName && hostName[MaxHostName - 1] != '.')
@@ -53,7 +54,7 @@ namespace System.Net
             //               decision). This is done to minimize the number of
             //               possible tests that are needed.
             //
-            if (Socket.OSSupportsIPv6|| includeIPv6)
+            if (SocketProtocolSupportPal.OSSupportsIPv6|| includeIPv6)
             {
                 //
                 // IPv6 enabled: use getaddrinfo() to obtain DNS information.
@@ -82,8 +83,10 @@ namespace System.Net
             //               for resolution of IPv6 addresses.
             //
 
+            NameResolutionPal.EnsureSocketsAreInitialized();
+
             SocketError errorCode = SocketError.Success;
-            if (Socket.OSSupportsIPv6 || includeIPv6)
+            if (SocketProtocolSupportPal.OSSupportsIPv6 || includeIPv6)
             {
                 //
                 // Try to get the data for the host from it's address
@@ -320,42 +323,9 @@ namespace System.Net
             return (IPHostEntry)castedResult.Result;
         }
 
-        // TODO: Used by Ping, Socket and TCPClient
-        public static IPAddress[] GetHostAddresses(string hostNameOrAddress)
-        {
-            if (Logging.On) Logging.Enter(Logging.Sockets, "DNS", "GetHostAddresses", hostNameOrAddress);
-
-            if (hostNameOrAddress == null)
-            {
-                throw new ArgumentNullException("hostNameOrAddress");
-            }
-
-            // See if it's an IP Address.
-            IPAddress address;
-            IPAddress[] addresses;
-            if (IPAddress.TryParse(hostNameOrAddress, out address))
-            {
-                if (address.Equals(IPAddress.Any) || address.Equals(IPAddress.IPv6Any))
-                {
-                    throw new ArgumentException(SR.net_invalid_ip_addr, "hostNameOrAddress");
-                }
-                addresses = new IPAddress[] { address };
-            }
-            else
-            {
-                // InternalGetHostByName works with IP addresses (and avoids a reverse-lookup), but we need
-                // explicit handling in order to do the ArgumentException and guarantee the behavior.
-                addresses = InternalGetHostByName(hostNameOrAddress, true).AddressList;
-            }
-
-            if (Logging.On) Logging.Exit(Logging.Sockets, "DNS", "GetHostAddresses", addresses);
-            return addresses;
-        }
-
         public static IAsyncResult BeginGetHostEntry(string hostNameOrAddress, AsyncCallback requestCallback, object stateObject)
         {
             if (Logging.On) Logging.Enter(Logging.Sockets, "DNS", "BeginGetHostEntry", hostNameOrAddress);
-
             IAsyncResult asyncResult = HostResolutionBeginHelper(hostNameOrAddress, false, requestCallback, stateObject);
 
             if (Logging.On) Logging.Exit(Logging.Sockets, "DNS", "BeginGetHostEntry", asyncResult);
@@ -365,7 +335,6 @@ namespace System.Net
         public static IAsyncResult BeginGetHostEntry(IPAddress address, AsyncCallback requestCallback, object stateObject)
         {
             if (Logging.On) Logging.Enter(Logging.Sockets, "DNS", "BeginGetHostEntry", address);
-
             IAsyncResult asyncResult = HostResolutionBeginHelper(address, true, true, requestCallback, stateObject);
 
             if (Logging.On) Logging.Exit(Logging.Sockets, "DNS", "BeginGetHostEntry", asyncResult);
@@ -375,7 +344,6 @@ namespace System.Net
         public static IPHostEntry EndGetHostEntry(IAsyncResult asyncResult)
         {
             if (Logging.On) Logging.Enter(Logging.Sockets, "DNS", "EndGetHostEntry", asyncResult);
-
             IPHostEntry ipHostEntry = HostResolutionEndHelper(asyncResult);
 
             if (Logging.On) Logging.Exit(Logging.Sockets, "DNS", "EndGetHostEntry", ipHostEntry);
@@ -385,7 +353,6 @@ namespace System.Net
         public static IAsyncResult BeginGetHostAddresses(string hostNameOrAddress, AsyncCallback requestCallback, object state)
         {
             if (Logging.On) Logging.Enter(Logging.Sockets, "DNS", "BeginGetHostAddresses", hostNameOrAddress);
-
             IAsyncResult asyncResult = HostResolutionBeginHelper(hostNameOrAddress, true, requestCallback, state);
 
             if (Logging.On) Logging.Exit(Logging.Sockets, "DNS", "BeginGetHostAddresses", asyncResult);
@@ -395,7 +362,6 @@ namespace System.Net
         public static IPAddress[] EndGetHostAddresses(IAsyncResult asyncResult)
         {
             if (Logging.On) Logging.Enter(Logging.Sockets, "DNS", "EndGetHostAddresses", asyncResult);
-
             IPHostEntry ipHostEntry = HostResolutionEndHelper(asyncResult);
 
             if (Logging.On) Logging.Exit(Logging.Sockets, "DNS", "EndGetHostAddresses", ipHostEntry);

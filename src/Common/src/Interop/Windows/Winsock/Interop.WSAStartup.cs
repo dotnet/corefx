@@ -22,7 +22,9 @@ internal static partial class Interop
             internal short iMaxUdpDg;
             internal IntPtr lpVendorInfo;
         }
-        
+
+        // Important: this API is called once by the System.Net.NameResolution contract implementation.
+        // WSACleanup is not called and will be automatically performed at process shutdown.
         [DllImport(Interop.Libraries.Ws2_32, CharSet = CharSet.Ansi, BestFitMapping = false, ThrowOnUnmappableChar = true, SetLastError = true)]
         internal static extern SocketError WSAStartup(
                                            [In] short wVersionRequested,
