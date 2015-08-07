@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Threading;
 using Xunit;
 
@@ -21,14 +22,13 @@ namespace System.Diagnostics.ProcessTests
 
         private void AssertNonZeroWindowsZeroUnix(long value)
         {
-            switch (global::Interop.PlatformDetection.OperatingSystem)
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                case global::Interop.OperatingSystem.Windows:
-                    Assert.NotEqual(0, value);
-                    break;
-                default:
-                    Assert.Equal(0, value);
-                    break;
+                Assert.NotEqual(0, value);
+            }
+            else
+            {
+                Assert.Equal(0, value);
             }
         }
 
@@ -133,15 +133,17 @@ namespace System.Diagnostics.ProcessTests
         {
             DateTime timeBeforeProcessStart = DateTime.UtcNow;
             Process p = CreateProcessInfinite();
-            StartAndKillProcessWithDelay(p);
+            p.Start();
+            Assert.Throws<InvalidOperationException>(() => p.ExitTime);
+            p.Kill();
+            Assert.True(p.WaitForExit(WaitInMS));
             Assert.True(p.ExitTime.ToUniversalTime() > timeBeforeProcessStart, "TestExitTime is incorrect.");
         }
-
 
         [Fact]
         public void TestId()
         {
-            if (global::Interop.IsWindows)
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 Assert.Equal(_process.Id, Interop.GetProcessId(_process.SafeHandle));
             }
@@ -190,7 +192,7 @@ namespace System.Diagnostics.ProcessTests
         public void TestMainModuleOnNonOSX()
         {
             string fileName = "corerun";
-            if (global::Interop.IsWindows)
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 fileName = "CoreRun.exe";
 
             Process p = Process.GetCurrentProcess();
@@ -209,13 +211,13 @@ namespace System.Diagnostics.ProcessTests
                 Assert.True((long)p.MinWorkingSet >= 0);
             }
 
-            if (global::Interop.IsOSX)
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
                 return; // doesn't support getting/setting working set for other processes
 
             long curValue = (long)_process.MaxWorkingSet;
             Assert.True(curValue >= 0);
 
-            if (global::Interop.IsWindows)
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 try
                 {
@@ -244,13 +246,13 @@ namespace System.Diagnostics.ProcessTests
                 Assert.True((long)p.MinWorkingSet >= 0);
             }
 
-            if (global::Interop.IsOSX)
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
                 return; // doesn't support getting/setting working set for other processes
 
             long curValue = (long)_process.MinWorkingSet;
             Assert.True(curValue >= 0);
 
-            if (global::Interop.IsWindows)
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 try
                 {
@@ -366,6 +368,8 @@ namespace System.Diagnostics.ProcessTests
         {
             DateTime timeBeforeCreatingProcess = DateTime.UtcNow;
             Process p = CreateProcessInfinite();
+
+            Assert.Throws<InvalidOperationException>(() => p.StartTime);
             try
             {
                 p.Start();
@@ -376,8 +380,19 @@ namespace System.Diagnostics.ProcessTests
                 // Allowing for error in 10 ms.
                 long tenMSTicks = new TimeSpan(0, 0, 0, 0, 10).Ticks;
                 long beforeTicks = timeBeforeCreatingProcess.Ticks - tenMSTicks;
-                long afterTicks = DateTime.UtcNow.Ticks + tenMSTicks;
-                Assert.InRange(p.StartTime.ToUniversalTime().Ticks, beforeTicks, afterTicks);
+
+                try
+                {
+                    // Ensure the process has started, p.id throws InvalidOperationException, if the process has not yet started.
+                    Assert.Equal(p.Id, Process.GetProcessById(p.Id).Id);
+
+                    long afterTicks = DateTime.UtcNow.Ticks + tenMSTicks;
+                    Assert.InRange(p.StartTime.ToUniversalTime().Ticks, beforeTicks, afterTicks);
+                }
+                catch (InvalidOperationException)
+                {
+                    Assert.True(p.StartTime.ToUniversalTime().Ticks > beforeTicks);
+                }
             }
             finally
             {
@@ -482,7 +497,7 @@ namespace System.Diagnostics.ProcessTests
         public void TestSessionId()
         {
             uint sessionId;
-            if (global::Interop.IsWindows)
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 Interop.ProcessIdToSessionId((uint)_process.Id, out sessionId);
             }
@@ -500,7 +515,7 @@ namespace System.Diagnostics.ProcessTests
             Process current = Process.GetCurrentProcess();
             Assert.NotNull(current);
 
-            int currentProcessId = global::Interop.IsWindows ?
+            int currentProcessId = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ?
                 Interop.GetCurrentProcessId() :
                 Interop.getpid();
 
@@ -542,6 +557,34 @@ namespace System.Diagnostics.ProcessTests
 
             Assert.True(Process.GetProcessesByName(currentProcess.ProcessName).Count() > 0, "TestGetProcessesByName001 failed");
             Assert.True(Process.GetProcessesByName(currentProcess.ProcessName, currentProcess.MachineName).Count() > 0, "TestGetProcessesByName001 failed");
+        }
+
+        public static IEnumerable<object[]> GetTestProcess()
+        {
+            Process currentProcess = Process.GetCurrentProcess();
+            yield return new object[] { currentProcess, Process.GetProcessById(currentProcess.Id, "127.0.0.1") };
+            yield return new object[] { currentProcess, Process.GetProcessesByName(currentProcess.ProcessName, "127.0.0.1").Where(p => p.Id == currentProcess.Id).Single() };
+        }
+
+        [Theory, PlatformSpecific(PlatformID.Windows)]
+        [MemberData("GetTestProcess")]
+        public void TestProcessOnRemoteMachineWindows(Process currentProcess, Process remoteProcess)
+        {
+            Assert.Equal(currentProcess.Id, remoteProcess.Id);
+            Assert.Equal(currentProcess.BasePriority, remoteProcess.BasePriority);
+            Assert.Equal(currentProcess.EnableRaisingEvents, remoteProcess.EnableRaisingEvents);
+            Assert.Equal("127.0.0.1", remoteProcess.MachineName);
+            // This property throws exception only on remote processes.
+            Assert.Throws<NotSupportedException>(() => remoteProcess.MainModule);
+        }
+
+        [Fact, PlatformSpecific(PlatformID.AnyUnix)]
+        public void TestProcessOnRemoteMachineUnix()
+        {
+            Process currentProcess = Process.GetCurrentProcess();
+
+            Assert.Throws<PlatformNotSupportedException>(() => Process.GetProcessesByName(currentProcess.ProcessName, "127.0.0.1"));
+            Assert.Throws<PlatformNotSupportedException>(() => Process.GetProcessById(currentProcess.Id, "127.0.0.1"));
         }
 
         [Fact]

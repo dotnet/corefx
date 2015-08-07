@@ -9,6 +9,7 @@ using System.IO;
 using Xunit;
 using Microsoft.Win32.SafeHandles;
 using System.Linq;
+using System.Runtime.InteropServices;
 
 namespace System.Diagnostics.ProcessTests
 {
@@ -49,7 +50,7 @@ namespace System.Diagnostics.ProcessTests
             environment.Add("NewKey2", "NewValue2");
             Assert.True(environment.ContainsKey("NewKey"));
 
-            Assert.Equal(global::Interop.IsWindows, environment.ContainsKey("newkey"));
+            Assert.Equal(RuntimeInformation.IsOSPlatform(OSPlatform.Windows), environment.ContainsKey("newkey"));
             Assert.False(environment.ContainsKey("NewKey99"));
 
             //Iterating
@@ -85,7 +86,7 @@ namespace System.Diagnostics.ProcessTests
 
             //Contains
             Assert.True(environment.Contains(new KeyValuePair<string, string>("NewKey", "NewValue")));
-            Assert.Equal(global::Interop.IsWindows, environment.Contains(new KeyValuePair<string, string>("nEwKeY", "NewValue")));
+            Assert.Equal(RuntimeInformation.IsOSPlatform(OSPlatform.Windows), environment.Contains(new KeyValuePair<string, string>("nEwKeY", "NewValue")));
             Assert.False(environment.Contains(new KeyValuePair<string, string>("NewKey99", "NewValue99")));
 
             //Exception not thrown with invalid key
@@ -102,7 +103,7 @@ namespace System.Diagnostics.ProcessTests
             Assert.True(environment.TryGetValue("NewKey", out stringout));
             Assert.Equal("NewValue", stringout);
 
-            if (global::Interop.IsWindows)
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 Assert.True(environment.TryGetValue("NeWkEy", out stringout));
                 Assert.Equal("NewValue", stringout);
@@ -136,7 +137,7 @@ namespace System.Diagnostics.ProcessTests
             Assert.Throws<KeyNotFoundException>(() => environment["1bB"]);
 
             Assert.True(environment.Contains(new KeyValuePair<string, string>("NewKey2", "NewValue2")));
-            Assert.Equal(global::Interop.IsWindows, environment.Contains(new KeyValuePair<string, string>("NEWKeY2", "NewValue2")));
+            Assert.Equal(RuntimeInformation.IsOSPlatform(OSPlatform.Windows), environment.Contains(new KeyValuePair<string, string>("NEWKeY2", "NewValue2")));
 
             Assert.False(environment.Contains(new KeyValuePair<string, string>("NewKey2", "newvalue2")));
             Assert.False(environment.Contains(new KeyValuePair<string, string>("newkey2", "newvalue2")));
@@ -230,47 +231,53 @@ namespace System.Diagnostics.ProcessTests
         public void TestUserCredentialsPropertiesOnWindows()
         {
             string username = "test", password = "PassWord123!!";
-            
-            if (Interop.NetUserAdd(username, password))
+            try
             {
-                Process p = CreateProcessInfinite();
+                Interop.NetUserAdd(username, password);
+            }
+            catch (Exception exc)
+            {
+                Console.Error.WriteLine("TestUserCredentialsPropertiesOnWindows: NetUserAdd failed: {0}", exc.Message);
+                return; // test is irrelevant if we can't add a user
+            }
 
-                p.StartInfo.LoadUserProfile = true;
-                p.StartInfo.UserName = username;
-                p.StartInfo.Password = GetSecureString(password);
+            Process p = CreateProcessInfinite();
 
-                SafeProcessHandle handle = null;
-                try
+            p.StartInfo.LoadUserProfile = true;
+            p.StartInfo.UserName = username;
+            p.StartInfo.Password = GetSecureString(password);
+
+            SafeProcessHandle handle = null;
+            try
+            {
+                p.Start();
+                if (Interop.OpenProcessToken(p.SafeHandle, 0x8u, out handle))
                 {
-                    p.Start();
-                    if (Interop.OpenProcessToken(p.SafeHandle, 0x8u, out handle))
+                    SecurityIdentifier sid;
+                    if (Interop.ProcessTokenToSid(handle, out sid))
                     {
-                        SecurityIdentifier sid;
-                        if (Interop.ProcessTokenToSid(handle, out sid))
-                        {
-                            string actualUserName = sid.Translate(typeof(NTAccount)).ToString();
-                            int indexOfDomain = actualUserName.IndexOf('\\');
-                            if (indexOfDomain != -1)
-                                actualUserName = actualUserName.Substring(indexOfDomain + 1);
+                        string actualUserName = sid.Translate(typeof(NTAccount)).ToString();
+                        int indexOfDomain = actualUserName.IndexOf('\\');
+                        if (indexOfDomain != -1)
+                            actualUserName = actualUserName.Substring(indexOfDomain + 1);
 
-                            bool isProfileLoaded = GetNamesOfUserProfiles().Any(profile => profile.Equals(username));
+                        bool isProfileLoaded = GetNamesOfUserProfiles().Any(profile => profile.Equals(username));
 
-                            Assert.Equal(username, actualUserName);
-                            Assert.True(isProfileLoaded);
-                        }
+                        Assert.Equal(username, actualUserName);
+                        Assert.True(isProfileLoaded);
                     }
                 }
-                finally
-                {
-                    if (handle != null)
-                        handle.Dispose();
+            }
+            finally
+            {
+                if (handle != null)
+                    handle.Dispose();
 
-                    if (!p.HasExited)
-                        p.Kill();
+                if (!p.HasExited)
+                    p.Kill();
 
-                    Interop.NetUserDel(null, username);
-                    Assert.True(p.WaitForExit(WaitInMS));
-                }
+                Interop.NetUserDel(null, username);
+                Assert.True(p.WaitForExit(WaitInMS));
             }
         }
 
