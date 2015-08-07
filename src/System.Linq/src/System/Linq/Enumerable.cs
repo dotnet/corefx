@@ -3437,18 +3437,20 @@ namespace System.Linq
 
             if (items == null)
             {
-                foreach (TElement item in source)
+                using (IEnumerator<TElement> e = source.GetEnumerator())
                 {
-                    if (items == null)
+                    if (!e.MoveNext()) return;
+                    
+                    items = new TElement[4];
+                    do
                     {
-                        items = new TElement[4];
-                    }
-                    else if (items.Length == count)
-                    {
-                        Array.Resize(ref items, checked(count * 2));
-                    }
-                    items[count] = item;
-                    count++;
+                        if (items.Length == count)
+                        {
+                            Array.Resize(ref items, checked(count * 2));
+                        }
+                        items[count] = e.Current;
+                        count++;
+                    } while (e.MoveNext());
                 }
             }
 
