@@ -709,11 +709,14 @@ namespace System.Linq
 
         private static IEnumerable<TSource> SkipWhileIterator<TSource>(IEnumerable<TSource> source, Func<TSource, bool> predicate)
         {
-            bool yielding = false;
-            foreach (TSource element in source)
+            using (IEnumerator<TSource> e = source.GetEnumerator())
             {
-                if (!yielding && !predicate(element)) yielding = true;
-                if (yielding) yield return element;
+                do
+                    if (!e.MoveNext()) yield break;
+                while (predicate(e.Current));
+                do
+                    yield return e.Current;
+                while (e.MoveNext());
             }
         }
 
@@ -727,12 +730,16 @@ namespace System.Linq
         private static IEnumerable<TSource> SkipWhileIterator<TSource>(IEnumerable<TSource> source, Func<TSource, int, bool> predicate)
         {
             int index = -1;
-            bool yielding = false;
-            foreach (TSource element in source)
+            using (IEnumerator<TSource> e = source.GetEnumerator())
             {
-                checked { index++; }
-                if (!yielding && !predicate(element, index)) yielding = true;
-                if (yielding) yield return element;
+                do
+                {
+                    if (!e.MoveNext()) yield break;
+                    checked { index++; }
+                } while (predicate(e.Current, index));
+                do
+                    yield return e.Current;
+                while (e.MoveNext());
             }
         }
 
