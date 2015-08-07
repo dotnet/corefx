@@ -39,6 +39,7 @@
     <Compile Include="SingleTests.cs" />
     <Compile Include="SkipTests.cs" />
     <Compile Include="SumTests.cs" />
+    <Compile Include="SkipWhileTests.cs" />
     <Compile Include="ReverseTests.cs" />
     <Compile Include="WhereTests.cs" />
     <Compile Include="ToArrayTests.cs" />
