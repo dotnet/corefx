@@ -27,8 +27,9 @@ namespace System.Net
         {
             if (Logging.On) Logging.Enter(Logging.Sockets, "DNS", "GetHostByName", hostName);
             IPHostEntry ipHostEntry = null;
-
+            
             GlobalLog.Print("Dns.GetHostByName: " + hostName);
+            NameResolutionPal.EnsureSocketsAreInitialized();
 
             if (hostName.Length > MaxHostName // If 255 chars, the last one must be a dot.
                 || hostName.Length == MaxHostName && hostName[MaxHostName - 1] != '.')
@@ -81,6 +82,8 @@ namespace System.Net
             // IPv6 Changes: We need to use the new getnameinfo / getaddrinfo functions
             //               for resolution of IPv6 addresses.
             //
+
+            NameResolutionPal.EnsureSocketsAreInitialized();
 
             SocketError errorCode = SocketError.Success;
             if (SocketProtocolSupportPal.OSSupportsIPv6 || includeIPv6)
@@ -157,7 +160,6 @@ namespace System.Net
         public static string GetHostName()
         {
             GlobalLog.Print("Dns.GetHostName");
-            NameResolutionPal.EnsureSocketsAreInitialized();
             return NameResolutionPal.GetHostName();
         }
 
@@ -273,8 +275,6 @@ namespace System.Net
 
             GlobalLog.Print("Dns.HostResolutionBeginHelper: " + address);
 
-            NameResolutionPal.EnsureSocketsAreInitialized();
-
             // Set up the context, possibly flow.
             ResolveAsyncResult asyncResult = new ResolveAsyncResult(address, null, includeIPv6, state, requestCallback);
             if (flowContext)
@@ -326,8 +326,6 @@ namespace System.Net
         public static IAsyncResult BeginGetHostEntry(string hostNameOrAddress, AsyncCallback requestCallback, object stateObject)
         {
             if (Logging.On) Logging.Enter(Logging.Sockets, "DNS", "BeginGetHostEntry", hostNameOrAddress);
-
-            NameResolutionPal.EnsureSocketsAreInitialized();
             IAsyncResult asyncResult = HostResolutionBeginHelper(hostNameOrAddress, false, requestCallback, stateObject);
 
             if (Logging.On) Logging.Exit(Logging.Sockets, "DNS", "BeginGetHostEntry", asyncResult);
@@ -337,8 +335,6 @@ namespace System.Net
         public static IAsyncResult BeginGetHostEntry(IPAddress address, AsyncCallback requestCallback, object stateObject)
         {
             if (Logging.On) Logging.Enter(Logging.Sockets, "DNS", "BeginGetHostEntry", address);
-
-            NameResolutionPal.EnsureSocketsAreInitialized();
             IAsyncResult asyncResult = HostResolutionBeginHelper(address, true, true, requestCallback, stateObject);
 
             if (Logging.On) Logging.Exit(Logging.Sockets, "DNS", "BeginGetHostEntry", asyncResult);
@@ -348,7 +344,6 @@ namespace System.Net
         public static IPHostEntry EndGetHostEntry(IAsyncResult asyncResult)
         {
             if (Logging.On) Logging.Enter(Logging.Sockets, "DNS", "EndGetHostEntry", asyncResult);
-
             IPHostEntry ipHostEntry = HostResolutionEndHelper(asyncResult);
 
             if (Logging.On) Logging.Exit(Logging.Sockets, "DNS", "EndGetHostEntry", ipHostEntry);
@@ -358,8 +353,6 @@ namespace System.Net
         public static IAsyncResult BeginGetHostAddresses(string hostNameOrAddress, AsyncCallback requestCallback, object state)
         {
             if (Logging.On) Logging.Enter(Logging.Sockets, "DNS", "BeginGetHostAddresses", hostNameOrAddress);
-
-            NameResolutionPal.EnsureSocketsAreInitialized();
             IAsyncResult asyncResult = HostResolutionBeginHelper(hostNameOrAddress, true, requestCallback, state);
 
             if (Logging.On) Logging.Exit(Logging.Sockets, "DNS", "BeginGetHostAddresses", asyncResult);
@@ -369,7 +362,6 @@ namespace System.Net
         public static IPAddress[] EndGetHostAddresses(IAsyncResult asyncResult)
         {
             if (Logging.On) Logging.Enter(Logging.Sockets, "DNS", "EndGetHostAddresses", asyncResult);
-
             IPHostEntry ipHostEntry = HostResolutionEndHelper(asyncResult);
 
             if (Logging.On) Logging.Exit(Logging.Sockets, "DNS", "EndGetHostAddresses", ipHostEntry);

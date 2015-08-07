@@ -342,6 +342,7 @@ namespace System.Net
             // execution, but this might still happen and we would want to
             // react to that change.
             //
+            NameResolutionPal.EnsureSocketsAreInitialized();
 
             StringBuilder sb = new StringBuilder(HostNameBufferLength);
             SocketError errorCode =
