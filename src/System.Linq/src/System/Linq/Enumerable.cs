@@ -1616,7 +1616,7 @@ namespace System.Linq
             {
                 foreach (int? v in source)
                 {
-                    if (v != null) sum += v.GetValueOrDefault();
+                    sum += v.GetValueOrDefault();
                 }
             }
             return sum;
@@ -1641,7 +1641,7 @@ namespace System.Linq
             {
                 foreach (long? v in source)
                 {
-                    if (v != null) sum += v.GetValueOrDefault();
+                    sum += v.GetValueOrDefault();
                 }
             }
             return sum;
@@ -1661,7 +1661,7 @@ namespace System.Linq
             double sum = 0;
             foreach (float? v in source)
             {
-                if (v != null) sum += v.GetValueOrDefault();
+                sum += v.GetValueOrDefault();
             }
             return (float)sum;
         }
@@ -1680,7 +1680,7 @@ namespace System.Linq
             double sum = 0;
             foreach (double? v in source)
             {
-                if (v != null) sum += v.GetValueOrDefault();
+                sum += v.GetValueOrDefault();
             }
             return sum;
         }
@@ -1699,7 +1699,7 @@ namespace System.Linq
             decimal sum = 0;
             foreach (decimal? v in source)
             {
-                if (v != null) sum += v.GetValueOrDefault();
+                sum += v.GetValueOrDefault();
             }
             return sum;
         }
