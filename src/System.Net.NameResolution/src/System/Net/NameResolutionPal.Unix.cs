@@ -221,5 +221,10 @@ namespace System.Net
         {
             return Interop.libc.gethostname();
         }
+        
+        public static void InitializeSockets()
+        {
+            // No-op for Unix.
+        }
     }
 }

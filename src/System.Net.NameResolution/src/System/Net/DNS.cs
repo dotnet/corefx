@@ -53,7 +53,7 @@ namespace System.Net
             //               decision). This is done to minimize the number of
             //               possible tests that are needed.
             //
-            if (Socket.OSSupportsIPv6|| includeIPv6)
+            if (SocketProtocolSupportPal.OSSupportsIPv6|| includeIPv6)
             {
                 //
                 // IPv6 enabled: use getaddrinfo() to obtain DNS information.
@@ -83,7 +83,7 @@ namespace System.Net
             //
 
             SocketError errorCode = SocketError.Success;
-            if (Socket.OSSupportsIPv6 || includeIPv6)
+            if (SocketProtocolSupportPal.OSSupportsIPv6 || includeIPv6)
             {
                 //
                 // Try to get the data for the host from it's address
@@ -157,6 +157,7 @@ namespace System.Net
         public static string GetHostName()
         {
             GlobalLog.Print("Dns.GetHostName");
+            NameResolutionPal.EnsureSocketsAreInitialized();
             return NameResolutionPal.GetHostName();
         }
 
@@ -272,6 +273,8 @@ namespace System.Net
 
             GlobalLog.Print("Dns.HostResolutionBeginHelper: " + address);
 
+            NameResolutionPal.EnsureSocketsAreInitialized();
+
             // Set up the context, possibly flow.
             ResolveAsyncResult asyncResult = new ResolveAsyncResult(address, null, includeIPv6, state, requestCallback);
             if (flowContext)
@@ -320,42 +323,11 @@ namespace System.Net
             return (IPHostEntry)castedResult.Result;
         }
 
-        // TODO: Used by Ping, Socket and TCPClient
-        public static IPAddress[] GetHostAddresses(string hostNameOrAddress)
-        {
-            if (Logging.On) Logging.Enter(Logging.Sockets, "DNS", "GetHostAddresses", hostNameOrAddress);
-
-            if (hostNameOrAddress == null)
-            {
-                throw new ArgumentNullException("hostNameOrAddress");
-            }
-
-            // See if it's an IP Address.
-            IPAddress address;
-            IPAddress[] addresses;
-            if (IPAddress.TryParse(hostNameOrAddress, out address))
-            {
-                if (address.Equals(IPAddress.Any) || address.Equals(IPAddress.IPv6Any))
-                {
-                    throw new ArgumentException(SR.net_invalid_ip_addr, "hostNameOrAddress");
-                }
-                addresses = new IPAddress[] { address };
-            }
-            else
-            {
-                // InternalGetHostByName works with IP addresses (and avoids a reverse-lookup), but we need
-                // explicit handling in order to do the ArgumentException and guarantee the behavior.
-                addresses = InternalGetHostByName(hostNameOrAddress, true).AddressList;
-            }
-
-            if (Logging.On) Logging.Exit(Logging.Sockets, "DNS", "GetHostAddresses", addresses);
-            return addresses;
-        }
-
         public static IAsyncResult BeginGetHostEntry(string hostNameOrAddress, AsyncCallback requestCallback, object stateObject)
         {
             if (Logging.On) Logging.Enter(Logging.Sockets, "DNS", "BeginGetHostEntry", hostNameOrAddress);
 
+            NameResolutionPal.EnsureSocketsAreInitialized();
             IAsyncResult asyncResult = HostResolutionBeginHelper(hostNameOrAddress, false, requestCallback, stateObject);
 
             if (Logging.On) Logging.Exit(Logging.Sockets, "DNS", "BeginGetHostEntry", asyncResult);
@@ -366,6 +338,7 @@ namespace System.Net
         {
             if (Logging.On) Logging.Enter(Logging.Sockets, "DNS", "BeginGetHostEntry", address);
 
+            NameResolutionPal.EnsureSocketsAreInitialized();
             IAsyncResult asyncResult = HostResolutionBeginHelper(address, true, true, requestCallback, stateObject);
 
             if (Logging.On) Logging.Exit(Logging.Sockets, "DNS", "BeginGetHostEntry", asyncResult);
@@ -386,6 +359,7 @@ namespace System.Net
         {
             if (Logging.On) Logging.Enter(Logging.Sockets, "DNS", "BeginGetHostAddresses", hostNameOrAddress);
 
+            NameResolutionPal.EnsureSocketsAreInitialized();
             IAsyncResult asyncResult = HostResolutionBeginHelper(hostNameOrAddress, true, requestCallback, state);
 
             if (Logging.On) Logging.Exit(Logging.Sockets, "DNS", "BeginGetHostAddresses", asyncResult);

@@ -18,9 +18,12 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'OSX_Release|AnyCPU' " />
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Windows_Debug|AnyCPU' " />
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Windows_Release|AnyCPU' " />
+  
   <ItemGroup>
     <Compile Include="System\Net\DNS.cs" />
     <Compile Include="System\Net\IPHostEntry.cs" />
+    
+    <!-- TODO: Move to the Windows ItemGroup -->
     <Compile Include="System\Net\NameResolutionPal.Windows.cs" />
     <Compile Include="System\Net\NameResolutionUtilities.cs" />
 
@@ -95,6 +98,10 @@
       <Link>Interop\Windows\Winsock\hostent.cs</Link>
     </Compile>
 
+    <Compile Include="$(CommonPath)\Interop\Windows\Winsock\Interop.closesocket.cs">
+      <Link>Interop\Windows\Winsock\Interop.closesocket.cs</Link>
+    </Compile>
+
     <Compile Include="$(CommonPath)\Interop\Windows\Winsock\Interop.gethostbyaddr.cs">
       <Link>Interop\Windows\Winsock\Interop.gethostbyaddr.cs</Link>
     </Compile>
@@ -119,6 +126,14 @@
       <Link>Interop\Windows\Winsock\Interop.freeaddinfo.cs</Link>
     </Compile>    
 
+    <Compile Include="$(CommonPath)\Interop\Windows\Winsock\Interop.WSAStartup.cs">
+      <Link>Interop\Windows\Winsock\Interop.WSAStartup.cs</Link>
+    </Compile>
+    
+    <Compile Include="$(CommonPath)\Interop\Windows\Winsock\Interop.WSASocketW.cs">
+      <Link>Interop\Windows\Winsock\Interop.WSASocketW.cs</Link>
+    </Compile>
+
     <Compile Include="$(CommonPath)\Interop\Windows\Winsock\NameInfoFlags.cs">
       <Link>Interop\Windows\Winsock\NameInfoFlags.cs</Link>
     </Compile>    
@@ -134,10 +149,11 @@
     <Compile Include="$(CommonPath)\Interop\Windows\Winsock\SafeFreeAddrInfo.cs">
       <Link>Interop\Windows\Winsock\SafeFreeAddrInfo.cs</Link>
     </Compile>
-
-    <!-- Shims -->
-    <Compile Include="RefactoringShims\Socket.cs" />
-
+    
+    <!-- TODO: Move to the Windows ItemGroup -->
+    <Compile Include="$(CommonPath)\Interop\Windows\Winsock\SocketProtocolSupportPal.Windows.cs">
+      <Link>Interop\Windows\Winsock\SocketProtocolSupportPal.Windows</Link>
+    </Compile>
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetsWindows)' == 'true' ">
