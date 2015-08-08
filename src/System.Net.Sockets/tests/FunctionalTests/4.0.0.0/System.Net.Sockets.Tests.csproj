@@ -1,0 +1,44 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build">
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{8CBA022C-635F-4C8D-9D29-CD8AAC68C8E6}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <UnsupportedPlatforms>Linux;OSX;FreeBSD</UnsupportedPlatforms>
+  </PropertyGroup>
+
+  <!-- Help VS understand available configurations -->
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' " />
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' " />
+    
+  <ItemGroup>
+    <!--<Compile Include="..\Common\SocketTestServer.cs" />
+    <Compile Include="..\Common\SocketTestServerAsync.cs" />
+    <Compile Include="..\Common\SocketImplementationType.cs" />
+    <Compile Include="..\Common\VerboseLog.cs" />-->
+
+    <Compile Include="AcceptAsync.cs" />
+    
+    <!--<Compile Include="ConnectAsync.cs" />
+    <Compile Include="ConnectExTest.cs" />
+    <Compile Include="DnsEndPointTest.cs" />
+    <Compile Include="DualModeSocketTest.cs" />
+    <Compile Include="SocketTestServerAPMMock.cs" />-->
+  </ItemGroup>
+
+  <!--TODO: Reference NameResolution-->
+  
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\src\System.Net.Sockets.csproj">
+      <Project>{43311AFB-D7C4-4E5A-B1DE-855407F90D1B}</Project>
+      <Name>System.Net.Sockets</Name>
+    </ProjectReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="project.json" />
+  </ItemGroup>
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
+</Project>
