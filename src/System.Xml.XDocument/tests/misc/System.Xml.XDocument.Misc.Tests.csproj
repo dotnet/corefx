@@ -17,6 +17,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Annotation.cs" />
+    <Compile Include="LoadSaveAsyncTests.cs" />
     <Compile Include="FunctionalTests.cs" />
     <Compile Include="PrefixNamespaceFixes.cs" />
     <Compile Include="RegressionTests.cs" />
