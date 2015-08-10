@@ -1,6 +1,6 @@
-﻿using CoreFXTestLibrary;
+﻿using Xunit.Abstractions;
 
-namespace NCLTest.Sockets
+namespace System.Net.Sockets.Tests
 {
     public static class VerboseLog
     {

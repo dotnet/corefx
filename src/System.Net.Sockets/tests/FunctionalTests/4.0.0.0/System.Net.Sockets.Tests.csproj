@@ -14,21 +14,25 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' " />
     
   <ItemGroup>
-    <!--<Compile Include="..\Common\SocketTestServer.cs" />
+    <Compile Include="..\Common\SocketTestServer.cs" />
     <Compile Include="..\Common\SocketTestServerAsync.cs" />
     <Compile Include="..\Common\SocketImplementationType.cs" />
-    <Compile Include="..\Common\VerboseLog.cs" />-->
+    <Compile Include="..\Common\VerboseLog.cs" />
 
     <Compile Include="AcceptAsync.cs" />
-    
-    <!--<Compile Include="ConnectAsync.cs" />
+    <Compile Include="ConnectAsync.cs" />
     <Compile Include="ConnectExTest.cs" />
     <Compile Include="DnsEndPointTest.cs" />
     <Compile Include="DualModeSocketTest.cs" />
-    <Compile Include="SocketTestServerAPMMock.cs" />-->
+    <Compile Include="SocketTestServerAPMMock.cs" />
   </ItemGroup>
 
-  <!--TODO: Reference NameResolution-->
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\..\..\System.Net.NameResolution\System.Net.NameResolution.csproj">
+      <Project>{1714448C-211E-48C1-8B7E-4EE667D336A1}</Project>
+      <Name>System.Net.NameResolution</Name>
+    </ProjectReference>
+  </ItemGroup>
   
   <ItemGroup>
     <ProjectReference Include="..\..\..\src\System.Net.Sockets.csproj">

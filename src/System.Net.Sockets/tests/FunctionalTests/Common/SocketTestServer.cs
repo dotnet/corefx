@@ -1,9 +1,5 @@
-﻿using System;
-using System.Net;
-
-using Xunit;
-
-namespace NCLTest.Sockets
+﻿
+namespace System.Net.Sockets.Tests
 {
     public abstract class SocketTestServer : IDisposable
     {
