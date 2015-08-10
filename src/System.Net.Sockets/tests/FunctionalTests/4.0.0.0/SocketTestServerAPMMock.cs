@@ -1,8 +1,8 @@
-﻿namespace NCLTest.Sockets
-{
-    using System;
-    using System.Net;
+﻿using System;
+using System.Net;
 
+namespace System.Net.Sockets.Tests
+{
     public class SocketTestServerAPM : SocketTestServer
     {
         public SocketTestServerAPM(int numConnections, int receiveBufferSize, EndPoint localEndPoint) 

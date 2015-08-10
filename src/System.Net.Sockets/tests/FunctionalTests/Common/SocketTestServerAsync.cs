@@ -1,11 +1,10 @@
-﻿namespace NCLTest.Sockets
+﻿using System.Collections.Generic;
+using System.Threading;
+
+using Xunit;
+
+namespace System.Net.Sockets.Tests
 {   // Code taken from https://msdn.microsoft.com/en-us/library/system.net.sockets.socketasynceventargs.aspx
-    using CoreFXTestLibrary;
-    using System;
-    using System.Collections.Generic;
-    using System.Net;
-    using System.Net.Sockets;
-    using System.Threading;
 
     // Implements the connection logic for the socket server.   
     // After accepting a connection, all data read from the client  

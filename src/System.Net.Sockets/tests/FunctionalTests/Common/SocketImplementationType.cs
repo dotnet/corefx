@@ -1,4 +1,4 @@
-﻿namespace NCLTest.Sockets
+﻿namespace System.Net.Sockets.Tests
 {
     public enum SocketImplementationType
     {
