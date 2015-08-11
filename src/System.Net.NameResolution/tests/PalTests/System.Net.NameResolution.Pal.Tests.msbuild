@@ -1,15 +1,14 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build">
   <PropertyGroup>
-    <AssemblyName>System.Net.NameResolution</AssemblyName>
-    <AssemblyVersion>4.0.0.0</AssemblyVersion>
+    <Configuration Condition=" '$(Configuration)' == '' ">Windows_Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <OutputType>Library</OutputType>
-    <ProjectGuid>{1714448C-211E-48C1-8B7E-4EE667D336A1}</ProjectGuid>
+    <ProjectGuid>{F6D1C093-081D-46DE-B5A8-516533375FDD}</ProjectGuid>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <DefineConstants>$(DefineConstants);FEATURE_CORECLR</DefineConstants>
+    <StringResourcesPath>..\..\src\Resources\Strings.resx</StringResourcesPath>
   </PropertyGroup>
-
+  
   <!-- Help VS understand available configurations -->
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Linux_Debug|AnyCPU' " />
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Linux_Release|AnyCPU' " />
@@ -17,41 +16,17 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'OSX_Release|AnyCPU' " />
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Windows_Debug|AnyCPU' " />
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Windows_Release|AnyCPU' " />
-
+  
   <ItemGroup>
-    <Compile Include="System\Net\DNS.cs" />
-    <Compile Include="System\Net\IPHostEntry.cs" />
-    <Compile Include="System\Net\NameResolutionUtilities.cs" />
+    <CompileItem Include="NameResolutionPalTests.cs" />
+    <CompileItem Include="Fakes\GlobalLog.cs" />
+    <CompileItem Include="Fakes\Logging.cs" />
 
-    <!-- Logging -->
-    <Compile Include="$(CommonPath)\System\Net\Shims\TraceSource.cs">
-      <Link>Common\System\Net\Shims\TraceSource.cs</Link>
+    <Compile Include="..\..\src\System\Net\IPHostEntry.cs" >
+      <Link>ProductionCode\System\Net\IPHostEntry.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\System\Net\Logging\Logging.cs">
-      <Link>Common\System\Net\Logging\Logging.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\System\Net\Logging\GlobalLog.cs">
-      <Link>Common\System\Net\Logging\GlobalLog.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\System\Net\Logging\EventSourceLogging.cs">
-      <Link>Common\System\Net\Logging\EventSourceLogging.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\System\Net\InternalException.cs">
-      <Link>Common\System\Net\InternalException.cs</Link>
-    </Compile>
-    
-    <!-- System.Net common -->
-    <Compile Include="$(CommonPath)\System\Net\_ContextAwareResult.cs">
-      <Link>Common\System\Net\_ContextAwareResult.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\System\Net\_LazyAsyncResult.cs">
-      <Link>Common\System\Net\_LazyAsyncResult.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\System\Threading\ExecutionContext.cs">
-      <Link>Common\System\Threading\ExecutionContext.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\System\Net\Shims\DBNull.cs">
-      <Link>Common\System\Net\Shims\DBNull.cs</Link>
+    <Compile Include="..\..\src\System\Net\NameResolutionUtilities.cs" >
+      <Link>ProductionCode\System\Net\NameResolutionUtilities.cs</Link>
     </Compile>
 
     <Compile Include="$(CommonPath)\System\Net\IPEndPointStatics.cs">
@@ -60,11 +35,18 @@
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetsWindows)' == 'true' ">
-    <Compile Include="RefactoringShims\SocketException.Windows.cs" />
-    <Compile Include="System\Net\NameResolutionPal.Windows.cs" />
+    <Compile Include="..\..\src\System\Net\NameResolutionPal.Windows.cs">
+      <Link>ProductionCode\System\Net\NameResolutionPal.Windows.cs</Link>
+    </Compile>
 
+    <Compile Include="$(CommonPath)\System\Net\InternalException.cs">
+      <Link>Common\System\Net\InternalException.cs</Link>
+    </Compile>
     <Compile Include="$(CommonPath)\System\Net\IntPtrHelper.cs">
       <Link>Common\System\Net\IntPtrHelper.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\Net\SocketProtocolSupportPal.Windows.cs">
+      <Link>System\Net\SocketProtocolSupportPal.Windows</Link>
     </Compile>
 
     <!-- Debug only --> 
@@ -80,10 +62,6 @@
     <!-- System.Net.Internals -->
     <Compile Include="$(CommonPath)\System\Net\Internals\IPAddressExtensions.cs">
       <Link>Common\System\Net\Internals\IPAddressExtensions.cs</Link>
-    </Compile>
-
-    <Compile Include="$(CommonPath)\System\Net\SocketProtocolSupportPal.Windows.cs">
-      <Link>System\Net\SocketProtocolSupportPal.Windows</Link>
     </Compile>
 
     <!-- Interop -->
@@ -137,15 +115,19 @@
     </Compile>    
     <Compile Include="$(CommonPath)\Interop\Windows\Winsock\SafeFreeAddrInfo.cs">
       <Link>Interop\Windows\Winsock\SafeFreeAddrInfo.cs</Link>
-    </Compile>  
+    </Compile>
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetsUnix)' == 'true' ">
-    <Compile Include="RefactoringShims\SocketException.Unix.cs" />
-    <Compile Include="System\Net\NameResolutionPal.Unix.cs" />
+    <Compile Include="..\..\src\RefactoringShims\SocketException.Unix.cs">
+      <Link>ProductionCode\RefactoringShims\SocketException.Unix.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\System\Net\NameResolutionPal.Unix.cs">
+      <Link>ProductionCode\System\Net\NameResolutionPal.Unix.cs</Link>
+    </Compile>
 
     <Compile Include="$(CommonPath)\System\Net\SocketProtocolSupportPal.Unix.cs">
-      <Link>System\Net\SocketProtocolSupportPal.Unix</Link>
+      <Link>System\Net\SocketProtocolSupportPal.Unix.cs</Link>
     </Compile>
 
     <Compile Include="$(CommonPath)\Interop\Unix\Interop.Errors.cs">
@@ -178,7 +160,9 @@
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetsLinux)' == 'true' ">
-    <Compile Include="System\Net\NameResolutionPal.Linux.cs" />
+    <Compile Include="..\..\src\System\Net\NameResolutionPal.Linux.cs">
+      <Link>ProductionCode\System\Net\NameResolutionPal.Linux.cs</Link>
+    </Compile>
 
     <Compile Include="$(CommonPath)\Interop\Linux\Interop.Errors.cs">
       <Link>Interop\Linux\Interop.Errors.cs</Link>
@@ -198,7 +182,9 @@
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetsOSX)' == 'true' ">
-    <Compile Include="System\Net\NameResolutionPal.OSX.cs" />
+    <Compile Include="..\..\src\System\Net\NameResolutionPal.OSX.cs">
+      <Link>ProductionCode\System\Net\NameResolutionPal.OSX.cs</Link>
+    </Compile>
 
     <Compile Include="$(CommonPath)\Interop\OSX\Interop.Errors.cs">
       <Link>Interop\OSX\Interop.Errors.cs</Link>
@@ -220,6 +206,4 @@
   <ItemGroup>
     <None Include="project.json" />
   </ItemGroup>
-
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

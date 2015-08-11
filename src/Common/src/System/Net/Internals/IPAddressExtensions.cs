@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.Diagnostics;
+
 namespace System.Net.Sockets
 {
     public static class IPAddressExtensions
@@ -22,7 +24,8 @@ namespace System.Net.Sockets
         public static long GetAddress(this IPAddress thisObj)
         {
             byte[] addressBytes = thisObj.GetAddressBytes();
-            return BitConverter.ToInt64(addressBytes, 0);
+            Debug.Assert(addressBytes.Length == 4);
+            return (long)BitConverter.ToInt32(addressBytes, 0);
         }
     }
 }

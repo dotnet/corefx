@@ -1,18 +1,63 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.Diagnostics;
 using System.Net.Sockets;
+using System.Runtime.InteropServices;
+using System.Text;
 
 namespace System.Net
 {
-    internal static class NameResolutionPal
+    internal static partial class NameResolutionPal
     {
+        private static SocketError GetSocketErrorForErrno(int errno)
+        {
+            switch (errno)
+            {
+                case 0:
+                    return SocketError.Success;
+                case Interop.libc.HOST_NOT_FOUND:
+                    return SocketError.HostNotFound;
+                case Interop.libc.NO_DATA:
+                    return SocketError.NoData;
+                case Interop.libc.NO_RECOVERY:
+                    return SocketError.NoRecovery;
+                case Interop.libc.TRY_AGAIN:
+                    return SocketError.TryAgain;
+                default:
+                    Debug.Fail("Unexpected errno: " + errno.ToString());
+                    return SocketError.SocketError;
+            }
+        }
+
+        private static SocketError GetSocketErrorForNativeError(int error)
+        {
+            switch (error)
+            {
+                case 0:
+                    return SocketError.Success;
+                case Interop.libc.EAI_AGAIN:
+                    return SocketError.TryAgain;
+                case Interop.libc.EAI_BADFLAGS:
+                    return SocketError.InvalidArgument;
+                case Interop.libc.EAI_FAIL:
+                    return SocketError.NoRecovery;
+                case Interop.libc.EAI_FAMILY:
+                    return SocketError.AddressFamilyNotSupported;
+                case Interop.libc.EAI_NONAME:
+                    return SocketError.HostNotFound;
+                default:
+                    Debug.Fail("Unexpected error: " + error.ToString());
+                    return SocketError.SocketError;
+            }
+        }
+
         private static unsafe IPHostEntry CreateHostEntry(Interop.libc.hostent* hostent)
         {
-            var hostEntry = new IPHostEntry();
+            string hostName = null;
             if (hostent->h_name != null)
             {
-                hostEntry.HostName = Marshal.PtrToStringAnsi((IntPtr)hostent->h_name);
+                hostName= Marshal.PtrToStringAnsi((IntPtr)hostent->h_name);
             }
 
             int numAddresses;
@@ -31,10 +76,9 @@ namespace System.Net
                 for (int i = 0; i < numAddresses; i++)
                 {
                     Debug.Assert(hostent->h_addr_list[i] != null);
-                    ipAddresses[i] = *(int*)hostent->h_addr_list[i];
+                    ipAddresses[i] = new IPAddress(*(int*)hostent->h_addr_list[i]);
                 }
             }
-            hostEntry.AddressList = ipAddresses;
 
             int numAliases;
             for (numAliases = 0; hostent->h_aliases[numAliases] != null; numAliases++)
@@ -55,81 +99,36 @@ namespace System.Net
                     aliases[i] = Marshal.PtrToStringAnsi((IntPtr)hostent->h_addr_list[i]);
                 }
             }
+
+            return new IPHostEntry {
+                HostName = hostName,
+                AddressList = ipAddresses,
+                Aliases = aliases
+            };
         }
 
-        private static SocketError GetSocketErrorForNativeError(uint error)
-        {
-            switch (error)
-            {
-                case 0:
-                    return SocketError.Success;
-                case Interop.libc.EAI_AGAIN:
-                    return SocketError.TryAgain;
-                case Interop.libc.EAI_BADFLAGS:
-                    return SocketError.InvalidArgument;
-                case Interop.libc.EAI_FAIL:
-                    return SocketError.NoRecovery;
-                case Interop.libc.EAI_FAMILY:
-                    return SocketError.AddressFamilyNotSupported;
-                case Interop.libc.EAI_NONAME:
-                    return SocketError.HostNotFound;
-            }
-        }
-
-        public static IPHostEntry GetHostByName(string hostName)
-        {
-            Interop.libc.hostent* hostent = Interop.NativeNameResolution.GetHostByName(hostName);
-            if (hostent == null)
-            {
-                throw new SocketException();
-            }
-
-            IPHostEntry hostEntry = CreateHostEntry(hostent);
-            Interop.NativeNameResolution.FreeHostEntry(hostent);
-            return hostEntry;
-        }
-
-
-        public static IPHostEntry GetHostByAddr(IPAddress address)
-        {
-            // TODO: Optimize this (or decide if this legacy code can be removed):
-            byte [] addressBytes = address.GetAddressBytes();
-            int address = BitConverter.ToInt32(addressBytes, 0);
-
-            Interop.libc.hostent* hostent = Interop.NativeNameResolution.GetHostByAddr(address);
-            if (hostent == null)
-            {
-                throw new SocketException();
-            }
-
-            IPHostEntry hostEntry = CreateHostEntry(hostent);
-            Interop.NativeNameResolution.FreeHostEntry(hostent);
-            return hostEntry;
-        }
-
-        public static unsafe SocketError TryGetAddrInfo(string name, out IPHostEntry hostinfo)
+        public static unsafe SocketError TryGetAddrInfo(string name, out IPHostEntry hostinfo, out int nativeErrorCode)
         {
             var hints = new Interop.libc.addrinfo {
                 ai_family = Interop.libc.AF_UNSPEC, // Get all address families
                 ai_flags = Interop.libc.AI_CANONNAME
             };
 
-            AddrInfoHandle root;
-            uint errorCode = Interop.libc.getaddrinfo(name, null, &hints, out root);
-            if (errorCode != 0)
-            {
-                Debug.Assert(root == null);
-                return NameResolutionUtilities.GetUnresolvedAnswer(name);
-            }
-
+            Interop.libc.addrinfo* addrinfo = null;
             string canonicalName = null;
             IPAddress[] ipAddresses;
-            using (root)
+            try
             {
-                var addrinfo = (Interop.libc.addrinfo*)root.DangerousGetHandle();
+                int errorCode = Interop.libc.getaddrinfo(name, null, &hints, &addrinfo);
+                if (errorCode != 0)
+                {
+                    hostinfo = NameResolutionUtilities.GetUnresolvedAnswer(name);
+                    nativeErrorCode = errorCode;
+                    return GetSocketErrorForNativeError(errorCode);
+                }
 
                 int numAddresses = 0;
-                for (Interop.libc.addrinfo* ai = addrinfo; ai != null; ai = ai.ai_next)
+                for (Interop.libc.addrinfo* ai = addrinfo; ai != null; ai = ai->ai_next)
                 {
                     if (canonicalName == null && ai->ai_canonname != null)
                     {
@@ -137,7 +136,7 @@ namespace System.Net
                     }
 
                     if ((ai->ai_family != Interop.libc.AF_INET) &&
-                        (ai->ai_family != Interop.libc.AF_INET6 || !Socket.OSSupportsIPv6))
+                        (ai->ai_family != Interop.libc.AF_INET6 || !SocketProtocolSupportPal.OSSupportsIPv6))
                     {
                         continue;
                     }
@@ -152,33 +151,43 @@ namespace System.Net
                 else
                 {
                     ipAddresses = new IPAddress[numAddresses];
-                    for (int i = 0; i < numAddresses; addrinfo = addrinfo.ai_next)
+                    Interop.libc.addrinfo* ai = addrinfo;
+                    for (int i = 0; i < numAddresses; ai = ai->ai_next)
                     {
-                        Debug.Assert(addrinfo != null);
+                        Debug.Assert(ai != null);
 
-                        if ((addrinfo->ai_family != Interop.libc.AF_INET) &&
-                            (addrinfo->ai_family != Interop.libc.AF_INET6 || Socket.OSSupportsIPv6))
+                        if ((ai->ai_family != Interop.libc.AF_INET) &&
+                            (ai->ai_family != Interop.libc.AF_INET6 || !SocketProtocolSupportPal.OSSupportsIPv6))
                         {
                             continue;
                         }
 
-                        var sockaddr = new SocketAddress(addrinfo->ai_family, addrinfo->ai_addrlen);
-                        for (int d = 0; d < addrinfo->ai_addrlen; d++)
+                        var sockaddr = new SocketAddress(
+                            ai->ai_family == Interop.libc.AF_INET ? AddressFamily.InterNetwork : AddressFamily.InterNetworkV6,
+                            checked((int)ai->ai_addrlen));
+                        for (int d = 0; d < ai->ai_addrlen; d++)
                         {
-                            sockaddr[d] = ((byte*)addrinfo->ai_addr)[d];
+                            sockaddr[d] = ((byte*)ai->ai_addr)[d];
                         }
 
-                        if (addrinfo->ai_family == Interop.libc.AF_INET)
+                        if (ai->ai_family == Interop.libc.AF_INET)
                         {
-                            ipAddresses[i] = (IPEndPoint)IPEndPointStatics.Any.Create(sockaddr).Address;
+                            ipAddresses[i] = ((IPEndPoint)IPEndPointStatics.Any.Create(sockaddr)).Address;
                         }
                         else
                         {
-                            ipAddresses[i] = (IPEndPoint)IPEndPointStatics.IPv6Any.Create(sockaddr).Address;
+                            ipAddresses[i] = ((IPEndPoint)IPEndPointStatics.IPv6Any.Create(sockaddr)).Address;
                         }
 
                         i++;
                     }
+                }
+            }
+            finally
+            {
+                if (addrinfo != null)
+                {
+                    Interop.libc.freeaddrinfo(addrinfo);
                 }
             }
 
@@ -187,10 +196,11 @@ namespace System.Net
                 Aliases = Array.Empty<string>(),
                 AddressList = ipAddresses
             };
+            nativeErrorCode = 0;
             return SocketError.Success;
         }
 
-        public static string TryGetNameInfo(IPAddress address, out SocketError socketError, out int nativeError)
+        public static unsafe string TryGetNameInfo(IPAddress addr, out SocketError socketError, out int nativeErrorCode)
         {
             SocketAddress address = (new IPEndPoint(addr, 0)).Serialize();
             StringBuilder hostname = new StringBuilder(Interop.libc.NI_MAXHOST);
@@ -202,18 +212,21 @@ namespace System.Net
                 addressBuffer[i] = address[i];
             }
 
-            uint error = Interop.libc.getnameinfo(
-                addressBuffer,
-                addressBuffer.Length,
-                hostname,
-                hostname.Capacity,
-                null,
-                0,
-                Interop.libc.NI_NAMEREQD);
+            int error;
+            fixed (byte* rawAddress = addressBuffer)
+            {
+                error = Interop.libc.getnameinfo(
+                    (Interop.libc.sockaddr*)rawAddress,
+                    unchecked((uint)addressBuffer.Length),
+                    hostname,
+                    unchecked((uint)hostname.Capacity),
+                    null,
+                    0,
+                    Interop.libc.NI_NAMEREQD);
+            }
 
             socketError = GetSocketErrorForNativeError(error);
-            nativeError = (int)error;
-
+            nativeErrorCode = error;
             return socketError != SocketError.Success ? null : hostname.ToString();
         }
 
@@ -222,7 +235,7 @@ namespace System.Net
             return Interop.libc.gethostname();
         }
         
-        public static void InitializeSockets()
+        public static void EnsureSocketsAreInitialized()
         {
             // No-op for Unix.
         }

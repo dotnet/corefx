@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
 
 namespace System.Net
 {
@@ -14,8 +15,8 @@ namespace System.Net
         // used by GetHostName() to preallocate a buffer for the call to gethostname.
         //
         private const int HostNameBufferLength = 256;
-        private static volatile bool s_Initialized;
-        private static object s_InitializedLock = new object();
+        private static bool s_initialized;
+        private static object s_initializedLock = new object();
 
         /*++
 
@@ -91,7 +92,7 @@ namespace System.Net
                 //
                 // ...and add it to the list
                 //
-                TempIPAddressList.Add(new IPAddress(IPAddressToAdd));
+                TempIPAddressList.Add(new IPAddress((long)IPAddressToAdd & 0x0FFFFFFFF));
 
                 //
                 // now get the next pointer in the array and start over
@@ -198,7 +199,7 @@ namespace System.Net
             throw new SocketException();
         }
 
-        public static unsafe SocketError TryGetAddrInfo(string name, out IPHostEntry hostinfo)
+        public static unsafe SocketError TryGetAddrInfo(string name, out IPHostEntry hostinfo, out int nativeErrorCode)
         {
             //
             // Use SocketException here to show operation not supported
@@ -212,6 +213,8 @@ namespace System.Net
             AddressInfo hints = new AddressInfo();
             hints.ai_flags = AddressInfoHints.AI_CANONNAME;
             hints.ai_family = AddressFamily.Unspecified;   // gets all address families
+
+            nativeErrorCode = 0;
 
             //
             // Use try / finally so we always get a shot at freeaddrinfo
@@ -297,7 +300,7 @@ namespace System.Net
             return SocketError.Success;
         }
 
-        public static string TryGetNameInfo(IPAddress addr, out SocketError errorCode)
+        public static string TryGetNameInfo(IPAddress addr, out SocketError errorCode, out int nativeErrorCode)
         {
             //
             // Use SocketException here to show operation not supported
@@ -308,6 +311,8 @@ namespace System.Net
             StringBuilder hostname = new StringBuilder(1025); // NI_MAXHOST
 
             int flags = (int)NameInfoFlags.NI_NAMEREQD;
+
+            nativeErrorCode = 0;
 
             // TODO: Remove the copying step to improve performance. This requires a change in the contracts.
             byte[] addressBuffer = new byte[address.Size];
@@ -342,7 +347,7 @@ namespace System.Net
             // execution, but this might still happen and we would want to
             // react to that change.
             //
-            NameResolutionPal.EnsureSocketsAreInitialized();
+            EnsureSocketsAreInitialized();
 
             StringBuilder sb = new StringBuilder(HostNameBufferLength);
             SocketError errorCode =
@@ -362,11 +367,11 @@ namespace System.Net
 
         public static void EnsureSocketsAreInitialized()
         {
-            if (!s_Initialized)
+            if (!Volatile.Read(ref s_initialized))
             {
-                lock (s_InitializedLock)
+                lock (s_initializedLock)
                 {
-                    if (!s_Initialized)
+                    if (!s_initialized)
                     {
                         Interop.Winsock.WSAData wsaData = new Interop.Winsock.WSAData();
 
@@ -384,7 +389,7 @@ namespace System.Net
                             throw new SocketException((int)errorCode);
                         }
 
-                        s_Initialized = true;
+                        Volatile.Write(ref s_initialized, true);
                     }
                 }
             }
