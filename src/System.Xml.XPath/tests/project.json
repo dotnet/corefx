@@ -5,6 +5,7 @@
     "System.IO": "4.0.10",
     "System.Runtime.Extensions": "4.0.10",
     "System.Reflection": "4.0.10",
+    "System.Runtime.InteropServices.RuntimeInformation": "4.0.0-beta-*",
     "System.Globalization": "4.0.10",
     "System.Threading.Tasks": "4.0.10",
     "System.Text.Encoding": "4.0.10",
