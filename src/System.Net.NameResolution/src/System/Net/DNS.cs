@@ -59,10 +59,11 @@ namespace System.Net
                 //
                 // IPv6 enabled: use getaddrinfo() to obtain DNS information.
                 //
-                SocketError errorCode = NameResolutionPal.TryGetAddrInfo(hostName, out ipHostEntry);
+                int nativeErrorCode;
+                SocketError errorCode = NameResolutionPal.TryGetAddrInfo(hostName, out ipHostEntry, out nativeErrorCode);
                 if (errorCode != SocketError.Success)
                 {
-                    throw new SocketException((int)errorCode);
+                    throw new InternalSocketException(errorCode, nativeErrorCode);
                 }
             }
             else
@@ -83,9 +84,6 @@ namespace System.Net
             //               for resolution of IPv6 addresses.
             //
 
-            NameResolutionPal.EnsureSocketsAreInitialized();
-
-            SocketError errorCode = SocketError.Success;
             if (SocketProtocolSupportPal.OSSupportsIPv6 || includeIPv6)
             {
                 //
@@ -95,19 +93,21 @@ namespace System.Net
                 // will only return that address and not the full list.
 
                 // Do a reverse lookup to get the host name.
-                string name = NameResolutionPal.TryGetNameInfo(address, out errorCode);
+                SocketError errorCode;
+                int nativeErrorCode;
+                string name = NameResolutionPal.TryGetNameInfo(address, out errorCode, out nativeErrorCode);
                 if (errorCode == SocketError.Success)
                 {
                     // Do the forward lookup to get the IPs for that host name
                     IPHostEntry hostEntry;
-                    errorCode = NameResolutionPal.TryGetAddrInfo(name, out hostEntry);
+                    errorCode = NameResolutionPal.TryGetAddrInfo(name, out hostEntry, out nativeErrorCode);
                     if (errorCode == SocketError.Success)
                         return hostEntry;
 
                     if (Logging.On)
                     {
                         Logging.Exception(Logging.Sockets, "DNS",
-                        "InternalGetHostByAddress", new SocketException((int)errorCode));
+                        "InternalGetHostByAddress", new InternalSocketException(errorCode, nativeErrorCode));
                     }
 
                     // One of two things happened:
@@ -119,7 +119,7 @@ namespace System.Net
                     // Just return the resolved host name and no IPs.
                     return hostEntry;
                 }
-                throw new SocketException((int)errorCode);
+                throw new InternalSocketException(errorCode, nativeErrorCode);
             }
 
             //

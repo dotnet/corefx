@@ -1,6 +1,10 @@
-﻿using System.Diagnostics;
+﻿// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System.Diagnostics;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
+using System.Threading;
 
 namespace System.Net
 {
@@ -9,7 +13,7 @@ namespace System.Net
         private static bool s_IpV4 = true;
         private static bool s_IpV6 = true;
 
-        private static volatile bool s_Initialized;
+        private static bool s_Initialized;
         private static object s_InitializedLock = new object();
 
         public static bool OSSupportsIPv6
@@ -32,7 +36,7 @@ namespace System.Net
 
         private static void EnsureInitialized()
         {
-            if (!s_Initialized)
+            if (!Volatile.Read(ref s_Initialized))
             {
                 lock (s_InitializedLock)
                 {
@@ -41,7 +45,7 @@ namespace System.Net
                         s_IpV4 = IsProtocolSupported(AddressFamily.InterNetwork);
                         s_IpV6 = IsProtocolSupported(AddressFamily.InterNetworkV6);
 
-                        s_Initialized = true;
+                        Volatile.Write(ref s_Initialized, true);
                     }
                 }
             }

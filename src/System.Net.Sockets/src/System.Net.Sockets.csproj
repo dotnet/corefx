@@ -144,6 +144,11 @@
       <Link>Common\System\Net\Internals\IPAddressExtensions.cs</Link>
     </Compile>
 
+    <!-- TODO: Move to the Windows ItemGroup -->
+    <Compile Include="$(CommonPath)\System\Net\SocketProtocolSupportPal.Windows.cs">
+      <Link>System\Net\SocketProtocolSupportPal.Windows</Link>
+    </Compile>
+
     <!-- Common -->
     <Compile Include="$(CommonPath)\Microsoft\Win32\SafeHandles\SafeHandleZeroOrMinusOneIsInvalid.cs">
       <Link>Common\Microsoft\Win32\SafeHandles\SafeHandleZeroOrMinusOneIsInvalid.cs</Link>
@@ -233,11 +238,6 @@
 
     <Compile Include="$(CommonPath)\Interop\Windows\Winsock\Interop.setsockopt.cs">
       <Link>Interop\Windows\Winsock\Interop.setsockopt.cs</Link>
-    </Compile>
-
-    <!-- TODO: Move to the Windows ItemGroup -->
-    <Compile Include="$(CommonPath)\Interop\Windows\Winsock\SocketProtocolSupportPal.Windows.cs">
-      <Link>Interop\Windows\Winsock\SocketProtocolSupportPal.Windows</Link>
     </Compile>
   </ItemGroup>
 
