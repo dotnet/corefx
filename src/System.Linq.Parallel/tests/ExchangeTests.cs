@@ -5,6 +5,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using Xunit;
 
 namespace Test
@@ -25,7 +26,7 @@ namespace Test
         /// <returns>Entries for test data.
         /// The first element is the Labeled{ParallelQuery{int}} range,
         /// the second element is the count, and the third is the number of partitions or degrees of parallelism to use.</returns>
-        public static IEnumerable<object[]> PartitioningData(object[] counts)
+        public static IEnumerable<object[]> PartitioningData(int[] counts)
         {
             foreach (object[] results in Sources.Ranges(counts.Cast<int>(), x => new[] { 1, 2, 4 }))
             {
@@ -41,7 +42,7 @@ namespace Test
         /// <returns>Entries for test data.
         /// The first element is the Labeled{ParallelQuery{int}} range,
         /// the second element is the count, and the third is the ParallelMergeOption to use.</returns>
-        public static IEnumerable<object[]> MergeData(object[] counts)
+        public static IEnumerable<object[]> MergeData(int[] counts)
         {
             foreach (object[] results in Sources.Ranges(counts.Cast<int>(), x => Options))
             {
@@ -56,7 +57,7 @@ namespace Test
         /// <returns>Entries for test data.
         /// The first element is the Labeled{ParallelQuery{int}} range,
         /// the second element is the count, and the third is the ParallelMergeOption to use.</returns>
-        public static IEnumerable<object[]> ThrowOnCount_AllMergeOptions_MemberData(object[] counts)
+        public static IEnumerable<object[]> ThrowOnCount_AllMergeOptions_MemberData(int[] counts)
         {
             foreach (int count in counts.Cast<int>())
             {
@@ -131,22 +132,26 @@ namespace Test
         }
 
         [Theory]
-        [MemberData("MergeData", (object)(new int[] { 16, 1024 }))]
-        [MemberData("ThrowOnCount_AllMergeOptions_MemberData", (object)(new int[] { 16, 1024 }))]
+        [MemberData("ThrowOnCount_AllMergeOptions_MemberData", (object)(new int[] { 4, 8 }))]
         // FailingMergeData has enumerables that throw errors when attempting to perform the nth enumeration.
         // This test checks whether the query runs in a pipelined or buffered fashion.
         public static void Merge_Ordered_Pipelining(Labeled<ParallelQuery<int>> labeled, int count, ParallelMergeOptions options)
         {
-            Assert.Equal(0, labeled.Item.WithMergeOptions(options).Select(x => x).First());
+            Assert.Equal(0, labeled.Item.WithDegreeOfParallelism(count - 1).WithMergeOptions(options).First());
         }
 
         [Theory]
-        [OuterLoop]
-        [MemberData("MergeData", (object)(new int[] { 1024 * 4, 1024 * 1024 }))]
-        [MemberData("ThrowOnCount_AllMergeOptions_MemberData", (object)(new int[] { 1024 * 4, 1024 * 1024 }))]
-        public static void Merge_Ordered_Pipelining_Longrunning(Labeled<ParallelQuery<int>> labeled, int count, ParallelMergeOptions options)
+        [MemberData("MergeData", (object)(new int[] { 4, 8 }))]
+        // This test checks whether the query runs in a pipelined or buffered fashion.
+        public static void Merge_Ordered_Pipelining_Select(Labeled<ParallelQuery<int>> labeled, int count, ParallelMergeOptions options)
         {
-            Merge_Ordered_Pipelining(labeled, count, options);
+            int countdown = count;
+            Func<int, int> down = i =>
+            {
+                if (Interlocked.Decrement(ref countdown) == 0) throw new DeliberateTestException();
+                return i;
+            };
+            Assert.Equal(0, labeled.Item.WithDegreeOfParallelism(count - 1).WithMergeOptions(options).Select(down).First());
         }
 
         [Theory]

@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -45,7 +48,7 @@ namespace Test
         /// <returns>Entries for test data.
         /// The first element is the Labeled{ParallelQuery{int}} range,
         /// and the second element is the count</returns>
-        public static IEnumerable<object[]> Ranges(object[] counts)
+        public static IEnumerable<object[]> Ranges(int[] counts)
         {
             foreach (object[] parms in Ranges(counts.Cast<int>())) yield return parms;
         }
@@ -59,7 +62,7 @@ namespace Test
         /// <returns>Entries for test data.
         /// The first element is the Labeled{ParallelQuery{int}} range,
         /// the second element is the count, and the third is the start.</returns>
-        public static IEnumerable<object[]> Ranges(int start, object[] counts)
+        public static IEnumerable<object[]> Ranges(int start, int[] counts)
         {
             foreach (object[] parms in Ranges(start, counts.Cast<int>())) yield return parms;
         }
@@ -73,7 +76,7 @@ namespace Test
         /// <returns>Entries for test data.
         /// The first element is the left Labeled{ParallelQuery{int}} range, the second element is the left count,
         /// the third element is the right Labeled{ParallelQuery{int}} range, and the fourth element is the right count, .</returns>
-        public static IEnumerable<object[]> BinaryRanges(object[] leftCounts, object[] rightCounts)
+        public static IEnumerable<object[]> BinaryRanges(int[] leftCounts, int[] rightCounts)
         {
             foreach (object[] parms in BinaryRanges(leftCounts.Cast<int>(), rightCounts.Cast<int>())) yield return parms;
         }

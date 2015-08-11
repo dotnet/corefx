@@ -7,7 +7,7 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using Xunit;
 
-public partial class FileSystemWatcher_4000_Tests
+public partial class NotifyFilterTests
 {
     [Fact]
     [ActiveIssue(2011, PlatformID.OSX)]
@@ -72,26 +72,6 @@ public partial class FileSystemWatcher_4000_Tests
         }
     }
 
-    [Fact]
-    public static void FileSystemWatcher_NotifyFilter_FileName()
-    {
-        using (var file = Utility.CreateTestFile())
-        using (var watcher = new FileSystemWatcher("."))
-        {
-            watcher.NotifyFilter = NotifyFilters.FileName;
-            watcher.Filter = Path.GetFileName(file.Path);
-            AutoResetEvent eventOccured = Utility.WatchForEvents(watcher, WatcherChangeTypes.Renamed);
-
-            string newName = file.Path + "_rename";
-            Utility.EnsureDelete(newName);
-
-            watcher.EnableRaisingEvents = true;
-
-            file.Move(newName);
-
-            Utility.ExpectEvent(eventOccured, "changed");
-        }
-    }
 
     [Fact]
     [ActiveIssue(2011, PlatformID.OSX)]
@@ -238,7 +218,7 @@ public partial class FileSystemWatcher_4000_Tests
             file.Write(buffer, 0, buffer.Length);
             file.Flush(flushToDisk: true);
 
-            if (Interop.IsWindows)
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 // Change security
                 uint result = SetSecurityInfoByHandle(file.Path,
@@ -253,13 +233,6 @@ public partial class FileSystemWatcher_4000_Tests
 
             // None of these should trigger any events
             Utility.ExpectNoEvent(eventOccured, "any");
-
-            // finally, change name and expect a name change
-            eventOccured = Utility.WatchForEvents(watcher, WatcherChangeTypes.Renamed);
-
-            file.Move(newName);
-
-            Utility.ExpectEvent(eventOccured, "changed");
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.Runtime.InteropServices;
 using Xunit;
 
 namespace System.IO.FileSystem.Tests
@@ -41,6 +42,29 @@ namespace System.IO.FileSystem.Tests
         public void SearchPatternValid()
         {
             Assert.Empty(GetEntries(TestDirectory, "a..b abc..d")); //Should not throw
+        }
+
+        [Fact]
+        public void SearchPatternDotIsStar()
+        {
+            DirectoryInfo testDir = Directory.CreateDirectory(GetTestFilePath());
+            testDir.CreateSubdirectory("TestDir1");
+            testDir.CreateSubdirectory("TestDir2");
+            using (File.Create(Path.Combine(testDir.FullName, "TestFile1")))
+            using (File.Create(Path.Combine(testDir.FullName, "TestFile2")))
+            {
+                string[] strArr = GetEntries(testDir.FullName, ".");
+                if (TestFiles)
+                {
+                    Assert.Contains(Path.Combine(testDir.FullName, "TestFile1"), strArr);
+                    Assert.Contains(Path.Combine(testDir.FullName, "TestFile2"), strArr);
+                }
+                if (TestDirectories)
+                {
+                    Assert.Contains(Path.Combine(testDir.FullName, "TestDir1"), strArr);
+                    Assert.Contains(Path.Combine(testDir.FullName, "TestDir2"), strArr);
+                }
+            }
         }
 
         [Fact]
@@ -229,11 +253,15 @@ namespace System.IO.FileSystem.Tests
                         // 1) we assumed that this will work in all non-9x machine
                         // 2) Then only in XP
                         // 3) NTFS?
-                        if (Interop.IsWindows && FileSystemDebugInfo.IsCurrentDriveNTFS()) // testing NTFS
+                        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) &&
+                            FileSystemDebugInfo.IsCurrentDriveNTFS()) // testing NTFS
+                        {
                             Assert.Throws<IOException>(() => GetEntries(Directory.GetCurrentDirectory(), string.Format("te{0}st", invalidFileNames[i].ToString())));
+                        }
                         else
+                        {
                             GetEntries(Directory.GetCurrentDirectory(), string.Format("te{0}st", invalidFileNames[i].ToString()));
-
+                        }
                         break;
                     case '*':
                     case '?':
