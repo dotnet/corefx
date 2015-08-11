@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.Linq;
 using Xunit;
 
 namespace System.IO.FileSystem.Tests
@@ -54,9 +55,12 @@ namespace System.IO.FileSystem.Tests
         public void PathWithInvalidCharactersAsPath_ReturnsFalse()
         {
             // Checks that errors aren't thrown when calling Exists() on paths with impossible to create characters
+            char[] trimmed = { (char)0x9, (char)0xA, (char)0xB, (char)0xC, (char)0xD, (char)0x20, (char)0x85, (char)0xA0 };
             Assert.All((IOInputs.GetPathsWithInvalidCharacters()), (component) =>
             {
                 Assert.False(Exists(component));
+                if (!trimmed.Contains(component.ToCharArray()[0]))
+                    Assert.False(Exists(TestDirectory + Path.DirectorySeparatorChar + component));
             });
         }
 
@@ -119,7 +123,7 @@ namespace System.IO.FileSystem.Tests
         {
             Assert.All((IOInputs.GetValidPathComponentNames()), (component) =>
             {
-                string path = @"\\?\" + Path.Combine(TestDirectory, "extended", component);
+                string path = IOInputs.ExtendedPrefix + Path.Combine(TestDirectory, "extended", component);
                 DirectoryInfo testDir = Directory.CreateDirectory(path);
                 Assert.True(Exists(path));
             });
@@ -129,7 +133,7 @@ namespace System.IO.FileSystem.Tests
         [PlatformSpecific(PlatformID.Windows)]
         public void ExtendedPathAlreadyExistsAsFile()
         {
-            string path = @"\\?\" + GetTestFilePath();
+            string path = IOInputs.ExtendedPrefix + GetTestFilePath();
             File.Create(path).Dispose();
 
             Assert.False(Exists(IOServices.RemoveTrailingSlash(path)));
@@ -141,7 +145,7 @@ namespace System.IO.FileSystem.Tests
         [PlatformSpecific(PlatformID.Windows)]
         public void ExtendedPathAlreadyExistsAsDirectory()
         {
-            string path = @"\\?\" + GetTestFilePath();
+            string path = IOInputs.ExtendedPrefix + GetTestFilePath();
             DirectoryInfo testDir = Directory.CreateDirectory(path);
 
             Assert.True(Exists(IOServices.RemoveTrailingSlash(path)));
@@ -199,13 +203,13 @@ namespace System.IO.FileSystem.Tests
             {
                 string path = testDir.FullName + component;
                 Assert.True(Exists(path), path); // string concat in case Path.Combine() trims whitespace before Exists gets to it
-                Assert.False(Exists(@"\\?\" + path), path);
+                Assert.False(Exists(IOInputs.ExtendedPrefix + path), path);
             });
 
             Assert.All(IOInputs.GetSimpleWhiteSpace(), (component) =>
             {
-                string path = GetTestFilePath("Extended") + component;
-                testDir = Directory.CreateDirectory(@"\\?\" + path);
+                string path = GetTestFilePath(memberName: "Extended") + component;
+                testDir = Directory.CreateDirectory(IOInputs.ExtendedPrefix + path);
                 Assert.False(Exists(path), path);
                 Assert.True(Exists(testDir.FullName));
             });

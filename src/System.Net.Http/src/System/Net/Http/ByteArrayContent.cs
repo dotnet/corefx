@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Diagnostics;
-using System.Diagnostics.Contracts;
 using System.IO;
 using System.Threading.Tasks;
 
@@ -10,9 +9,9 @@ namespace System.Net.Http
 {
     public class ByteArrayContent : HttpContent
     {
-        private byte[] _content;
-        private int _offset;
-        private int _count;
+        private readonly byte[] _content;
+        private readonly int _offset;
+        private readonly int _count;
 
         public ByteArrayContent(byte[] content)
         {
@@ -24,6 +23,10 @@ namespace System.Net.Http
             _content = content;
             _offset = 0;
             _count = content.Length;
+            
+#if NETNative
+            SetBuffer(_content, _offset, _count);
+#endif
         }
 
         public ByteArrayContent(byte[] content, int offset, int count)
@@ -44,6 +47,10 @@ namespace System.Net.Http
             _content = content;
             _offset = offset;
             _count = count;
+            
+#if NETNative
+            SetBuffer(_content, _offset, _count);
+#endif
         }
 
         protected override Task SerializeToStreamAsync(Stream stream, TransportContext context)
@@ -60,9 +67,7 @@ namespace System.Net.Http
 
         protected override Task<Stream> CreateContentReadStreamAsync()
         {
-            TaskCompletionSource<Stream> tcs = new TaskCompletionSource<Stream>();
-            tcs.TrySetResult(new MemoryStream(_content, _offset, _count, false));
-            return tcs.Task;
+            return Task.FromResult<Stream>(new MemoryStream(_content, _offset, _count, writable: false));
         }
     }
 }

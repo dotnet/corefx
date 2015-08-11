@@ -6,7 +6,7 @@ using System.IO;
 using System.Threading;
 using Xunit;
 
-public partial class FileSystemWatcher_4000_Tests
+public class ChangedTests
 {
     [Fact]
     [ActiveIssue(2011, PlatformID.OSX)]
@@ -117,5 +117,136 @@ public partial class FileSystemWatcher_4000_Tests
             }
         },
         NotifyFilters.DirectoryName | NotifyFilters.LastAccess | NotifyFilters.FileName);
+    }
+
+    [Fact]
+    public static void FileSystemWatcher_Changed_FileDataChange()
+    {
+        using (var dir = Utility.CreateTestDirectory())
+        using (var watcher = new FileSystemWatcher())
+        {
+            AutoResetEvent eventOccured = Utility.WatchForEvents(watcher, WatcherChangeTypes.Changed);
+
+            // Attach the FSW to the existing structure
+            watcher.Path = Path.GetFullPath(dir.Path);
+            watcher.Filter = "*";
+            watcher.NotifyFilter = NotifyFilters.FileName | NotifyFilters.Size;
+
+            using (var file = File.Create(Path.Combine(dir.Path, "testfile.txt")))
+            {
+                watcher.EnableRaisingEvents = true;
+
+                // Change the nested file and verify we get the changed event
+                byte[] bt = new byte[4096];
+                file.Write(bt, 0, bt.Length);
+                file.Flush();
+            }
+
+            Utility.ExpectEvent(eventOccured, "file changed");
+        }
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public static void FileSystemWatcher_Changed_PreSeededNestedStructure(bool includeSubdirectories)
+    {
+        // Make a nested structure before the FSW is setup
+        using (var dir = Utility.CreateTestDirectory())
+        using (var watcher = new FileSystemWatcher())
+        using (var dir1 = Utility.CreateTestDirectory(Path.Combine(dir.Path, "dir1")))
+        using (var dir2 = Utility.CreateTestDirectory(Path.Combine(dir1.Path, "dir2")))
+        using (var dir3 = Utility.CreateTestDirectory(Path.Combine(dir2.Path, "dir3")))
+        {
+            string filePath = Path.Combine(dir3.Path, "testfile.txt");
+            File.WriteAllBytes(filePath, new byte[4096]);
+
+            // Attach the FSW to the existing structure
+            AutoResetEvent eventOccured = Utility.WatchForEvents(watcher, WatcherChangeTypes.Changed);
+            watcher.Path = Path.GetFullPath(dir.Path);
+            watcher.Filter = "*";
+            watcher.NotifyFilter = NotifyFilters.Attributes;
+            watcher.IncludeSubdirectories = includeSubdirectories;
+            watcher.EnableRaisingEvents = true;
+
+            File.SetAttributes(filePath, FileAttributes.ReadOnly);
+            File.SetAttributes(filePath, FileAttributes.Normal);
+
+            if (includeSubdirectories)
+                Utility.ExpectEvent(eventOccured, "file changed");
+            else
+                Utility.ExpectNoEvent(eventOccured, "file changed");
+
+            // Restart the FSW
+            watcher.EnableRaisingEvents = false;
+            watcher.EnableRaisingEvents = true;
+
+            File.SetAttributes(filePath, FileAttributes.ReadOnly);
+            File.SetAttributes(filePath, FileAttributes.Normal);
+
+            if (includeSubdirectories)
+                Utility.ExpectEvent(eventOccured, "second file change");
+            else
+                Utility.ExpectNoEvent(eventOccured, "second file change");
+        }
+    }
+
+    [Fact, ActiveIssue(1477, PlatformID.Windows)]
+    public static void FileSystemWatcher_Changed_SymLinkFileDoesntFireEvent()
+    {
+        using (var dir = Utility.CreateTestDirectory())
+        using (var watcher = new FileSystemWatcher())
+        {
+            AutoResetEvent are = Utility.WatchForEvents(watcher, WatcherChangeTypes.Changed);
+
+            // Setup the watcher
+            watcher.Path = Path.GetFullPath(dir.Path);
+            watcher.Filter = "*";
+            watcher.NotifyFilter = NotifyFilters.FileName | NotifyFilters.Size;
+
+            using (var file = Utility.CreateTestFile(Path.GetTempFileName()))
+            {
+                Utility.CreateSymLink(file.Path, Path.Combine(dir.Path, "link"), false);
+                watcher.EnableRaisingEvents = true;
+
+                // Changing the temp file should not fire an event through the symlink
+                byte[] bt = new byte[4096];
+                file.Write(bt, 0, bt.Length);
+                file.Flush();
+            }
+
+            Utility.ExpectNoEvent(are, "symlink'd file change");
+        }
+    }
+
+    [Fact, ActiveIssue(1477, PlatformID.Windows)]
+    public static void FileSystemWatcher_Changed_SymLinkFolderDoesntFireEvent()
+    {
+        using (var dir = Utility.CreateTestDirectory())
+        using (var tempDir = Utility.CreateTestDirectory(Path.Combine(Path.GetTempPath(), "FooBar")))
+        using (var watcher = new FileSystemWatcher())
+        {
+            AutoResetEvent are = Utility.WatchForEvents(watcher, WatcherChangeTypes.Changed);
+
+            // Setup the watcher
+            watcher.Path = Path.GetFullPath(dir.Path);
+            watcher.Filter = "*";
+            watcher.NotifyFilter = NotifyFilters.FileName | NotifyFilters.Size;
+            watcher.IncludeSubdirectories = true;
+
+            using (var file = Utility.CreateTestFile(Path.Combine(tempDir.Path, "test")))
+            {
+                // Create the symlink first
+                Utility.CreateSymLink(tempDir.Path, Path.Combine(dir.Path, "link"), true);
+                watcher.EnableRaisingEvents = true;
+
+                // Changing the temp file should not fire an event through the symlink
+                byte[] bt = new byte[4096];
+                file.Write(bt, 0, bt.Length);
+                file.Flush();
+            }
+
+            Utility.ExpectNoEvent(are, "symlink'd file change");
+        }
     }
 }

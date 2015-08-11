@@ -6,13 +6,21 @@ using System.IO;
 using System.Threading;
 using System.Runtime.CompilerServices;
 using Xunit;
+using System.Runtime.InteropServices;
 
 public static class Utility
 {
+    // These pinvokes are used only for tests and not by the src
+    [DllImport("Kernel32.dll", EntryPoint = "CreateSymbolicLinkW", SetLastError = true)]
+    private static extern byte CreateSymbolicLink(string linkName, string targetFileName, int flags);
+    [DllImport("libc", SetLastError = true)]
+    private static extern int symlink(string oldPath, string newPath);
+
     // events are reported asynchronously by the OS, so allow an amount of time for
     // them to arrive before testing an assertion.
     public const int Timeout = 500;
     public const int WaitForCreationTimeoutInMs = 1000 * 30;
+    private const int SYMBOLIC_LINK_FLAG_DIRECTORY = 0x1;
 
     public static TemporaryTestFile CreateTestFile([CallerMemberName] string path = null)
     {
@@ -106,7 +114,7 @@ public static class Utility
         Action<AutoResetEvent, TemporaryTestDirectory> action,
         NotifyFilters changeFilers = NotifyFilters.LastWrite | NotifyFilters.FileName | NotifyFilters.DirectoryName)
     {
-        using (var dir = Utility.CreateTestDirectory())
+        using (var dir = Utility.CreateTestDirectory(Guid.NewGuid().ToString()))
         using (var watcher = new FileSystemWatcher())
         {
             AutoResetEvent createdOccured = Utility.WatchForEvents(watcher, WatcherChangeTypes.Created); // not "using" to avoid race conditions with FSW callbacks
@@ -129,6 +137,20 @@ public static class Utility
                     action(eventOccured, nestedDir);
                 }
             }
+        }
+    }
+
+    public static void CreateSymLink(String sourceItem, String symlinkPath, bool isDirectory)
+    {
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            Assert.True(CreateSymbolicLink(sourceItem, symlinkPath, (isDirectory ? SYMBOLIC_LINK_FLAG_DIRECTORY : 0)) > 0,
+                        String.Format("Failed to create symlink with {0}", Marshal.GetLastWin32Error()));
+        }
+        else
+        {
+            Assert.True(symlink(sourceItem, symlinkPath) == 0,
+                        String.Format("Failed to create symlink with {0}", Marshal.GetLastWin32Error()));
         }
     }
 }

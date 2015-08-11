@@ -72,7 +72,10 @@ namespace System.IO.FileSystem.Tests
             {
                 DateTime dt = new DateTime(2014, 12, 1, 12, 0, 0, tuple.Item3);
                 tuple.Item1(testDir.FullName, dt);
-                Assert.Equal(dt, tuple.Item2(testDir.FullName));
+                var result = tuple.Item2(testDir.FullName);
+                Assert.Equal(dt, result);
+                Assert.Equal(dt.ToLocalTime(), result.ToLocalTime());
+                Assert.Equal(dt.ToUniversalTime(), result.ToUniversalTime());
             });
         }
 
@@ -132,24 +135,24 @@ namespace System.IO.FileSystem.Tests
 
             //non-utc
             Assert.Throws<FileNotFoundException>(() => Directory.GetLastAccessTime(path));
-            Assert.Throws<DirectoryNotFoundException>(() => new DirectoryInfo(path).LastAccessTime);
+            Assert.Throws<FileNotFoundException>(() => new DirectoryInfo(path).LastAccessTime);
             Assert.Throws<FileNotFoundException>(() => Directory.GetLastWriteTime(path));
-            Assert.Throws<DirectoryNotFoundException>(() => new DirectoryInfo(path).LastWriteTime);
+            Assert.Throws<FileNotFoundException>(() => new DirectoryInfo(path).LastWriteTime);
             if (IOInputs.SupportsCreationTime)
             {
                 Assert.Throws<FileNotFoundException>(() => Directory.GetCreationTime(path));
-                Assert.Throws<DirectoryNotFoundException>(() => new DirectoryInfo(path).CreationTime);
+                Assert.Throws<FileNotFoundException>(() => new DirectoryInfo(path).CreationTime);
             }
 
             //utc
             Assert.Throws<FileNotFoundException>(() => Directory.GetLastAccessTimeUtc(path));
-            Assert.Throws<DirectoryNotFoundException>(() => new DirectoryInfo(path).LastAccessTimeUtc);
+            Assert.Throws<FileNotFoundException>(() => new DirectoryInfo(path).LastAccessTimeUtc);
             Assert.Throws<FileNotFoundException>(() => Directory.GetLastWriteTimeUtc(path));
-            Assert.Throws<DirectoryNotFoundException>(() => new DirectoryInfo(path).LastWriteTimeUtc);
+            Assert.Throws<FileNotFoundException>(() => new DirectoryInfo(path).LastWriteTimeUtc);
             if (IOInputs.SupportsCreationTime)
             {
                 Assert.Throws<FileNotFoundException>(() => Directory.GetCreationTimeUtc(path));
-                Assert.Throws<DirectoryNotFoundException>(() => new DirectoryInfo(path).CreationTimeUtc);
+                Assert.Throws<FileNotFoundException>(() => new DirectoryInfo(path).CreationTimeUtc);
             }
         }
     }

@@ -124,7 +124,7 @@ namespace System.IO.FileSystem.Tests
             var components = IOInputs.GetValidPathComponentNames();
             Assert.All(components, (component) =>
             {
-                string path = @"\\?\" + IOServices.AddTrailingSlashIfNeeded(Path.Combine(testDir.FullName, component));
+                string path = IOInputs.ExtendedPrefix + IOServices.AddTrailingSlashIfNeeded(Path.Combine(testDir.FullName, component));
                 DirectoryInfo result = Create(path);
 
                 Assert.Equal(path, result.FullName);
@@ -204,6 +204,10 @@ namespace System.IO.FileSystem.Tests
             });
         }
 
+        #endregion
+
+        #region PlatformSpecific
+
         [Fact]
         [PlatformSpecific(PlatformID.Windows)]
         public void DirectoryLongerThanMaxPathAsPath_ThrowsPathTooLongException()
@@ -215,9 +219,16 @@ namespace System.IO.FileSystem.Tests
             });
         }
 
-        #endregion
-
-        #region PlatformSpecific
+        [Fact]
+        [PlatformSpecific(PlatformID.Windows)]
+        public void ExtendedDirectoryLongerThanLegacyMaxPathSucceeds()
+        {
+            var paths = IOInputs.GetPathsLongerThanMaxPath(useExtendedSyntax: true, includeExtendedMaxPath: false);
+            Assert.All(paths, (path) =>
+            {
+                Assert.True(Create(path).Exists);
+            });
+        }
 
         [Fact]
         [PlatformSpecific(PlatformID.Windows)]
@@ -227,12 +238,12 @@ namespace System.IO.FileSystem.Tests
             Assert.All(paths, (path) =>
             {
                 Assert.Throws<PathTooLongException>(() => Create(path));
+                Directory.Delete(Path.Combine(Path.GetPathRoot(Directory.GetCurrentDirectory()), path.Split(Path.DirectorySeparatorChar)[1]), true);
             });
         }
 
         [Fact]
         [PlatformSpecific(PlatformID.AnyUnix)]
-        [ActiveIssue(645)]
         public void UnixPathLongerThan256_Allowed()
         {
             DirectoryInfo testDir = Create(GetTestFilePath());
@@ -244,11 +255,14 @@ namespace System.IO.FileSystem.Tests
 
         [Fact]
         [PlatformSpecific(PlatformID.AnyUnix)]
-        public void UnixPathLongerThan256_Throws()
+        public void UnixPathWithDeeplyNestedDirectories()
         {
-            DirectoryInfo testDir = Create(GetTestFilePath());
-            PathInfo path = IOServices.GetPath(testDir.FullName, 257, IOInputs.MaxComponent);
-            Assert.Throws<PathTooLongException>(() => Create(path.FullPath));
+            DirectoryInfo parent = Create(GetTestFilePath());
+            for (int i = 1; i <= 100; i++) // 100 == arbitrarily large number of directories
+            {
+                parent = Create(Path.Combine(parent.FullName, "dir" + i));
+                Assert.True(Directory.Exists(parent.FullName));
+            }
         }
 
         [Fact]
@@ -301,7 +315,7 @@ namespace System.IO.FileSystem.Tests
             {
                 foreach (var path in paths)
                 {
-                    string extendedPath = Path.Combine(@"\\?\" + directory.Path, path);
+                    string extendedPath = Path.Combine(IOInputs.ExtendedPrefix + directory.Path, path);
                     Directory.CreateDirectory(extendedPath);
                     Assert.True(Directory.Exists(extendedPath), extendedPath);
                 }
@@ -357,7 +371,7 @@ namespace System.IO.FileSystem.Tests
             {
                 Assert.All(paths, (path) =>
                 {
-                    Assert.True(Create(@"\\?\" + Path.Combine(directory.Path, path)).Exists, path);
+                    Assert.True(Create(IOInputs.ExtendedPrefix + Path.Combine(directory.Path, path)).Exists, path);
                 });
             }
         }
@@ -371,6 +385,13 @@ namespace System.IO.FileSystem.Tests
             {
                 Assert.Throws<ArgumentException>(() => Create(path));
             }
+        }
+
+        [Fact]
+        [PlatformSpecific(PlatformID.Windows)] // UNC shares
+        public void UNCPathWithOnlySlashes()
+        {
+            Assert.Throws<ArgumentException>(() => Create("//"));
         }
 
         [Fact]
