@@ -92,7 +92,7 @@ namespace System.Net
                 //
                 // ...and add it to the list
                 //
-                TempIPAddressList.Add(new IPAddress(IPAddressToAdd));
+                TempIPAddressList.Add(new IPAddress((long)IPAddressToAdd & 0x0FFFFFFFF));
 
                 //
                 // now get the next pointer in the array and start over
