@@ -200,7 +200,17 @@ namespace System.Reflection.Metadata
 
         public bool ReadBoolean()
         {
-            return ReadByte() == 1;
+            // It's not clear from the ECMA spec what exactly is the encoding of Boolean. 
+            // Some metadata writers encode "true" as 0xff, others as 1. So we treat all non-zero values as "true".
+            //
+            // We propose to clarify and relax the current wording in the spec as follows:
+            //
+            // Chapter II.16.2 "Field init metadata"
+            //   ... bool '(' true | false ')' Boolean value stored in a single byte, 0 represents false, any non-zero value represents true ...
+            // 
+            // Chapter 23.3 "Custom attributes"
+            //   ... A bool is a single byte with value 0 reprseenting false and any non-zero value representing true ...
+            return ReadByte() != 0;
         }
 
         public sbyte ReadSByte()
