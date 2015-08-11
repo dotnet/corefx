@@ -201,17 +201,20 @@ internal static class Assert
         catch (Exception e) { throw WrapException(e, path, line); }
     }
 
-    public static void False(bool condition,
+    public static void False(bool condition, string userMessage = null,
         [CallerFilePath] string path = null, [CallerLineNumber] int line = 0)
     {
-        try { Xunit.Assert.False(condition); }
-        catch (Exception e) { throw WrapException(e, path, line); }
-    }
-
-    public static void False(bool condition, string userMessage,
-        [CallerFilePath] string path = null, [CallerLineNumber] int line = 0)
-    {
-        try { Xunit.Assert.False(condition, userMessage); }
+        try
+        {
+            if (userMessage == null)
+            {
+                Xunit.Assert.False(condition);
+            }
+            else
+            {
+                Xunit.Assert.False(condition, userMessage);
+            }
+        }
         catch (Exception e) { throw WrapException(e, path, line); }
     }
 
@@ -268,27 +271,6 @@ internal static class Assert
         [CallerFilePath] string path = null, [CallerLineNumber] int line = 0)
     {
         try { return Xunit.Assert.IsType<T>(@object); }
-        catch (Exception e) { throw WrapException(e, path, line); }
-    }
-
-    public static void None(IEnumerable collection, object expected,
-        [CallerFilePath] string path = null, [CallerLineNumber] int line = 0)
-    {
-        try { Xunit.Assert.None(collection, expected); }
-        catch (Exception e) { throw WrapException(e, path, line); }
-    }
-
-    public static void None<T>(IEnumerable<T> collection, Func<T, bool> predicate,
-        [CallerFilePath] string path = null, [CallerLineNumber] int line = 0)
-    {
-        try { Xunit.Assert.None(collection, predicate); }
-        catch (Exception e) { throw WrapException(e, path, line); }
-    }
-
-    public static void None<T>(IEnumerable<T> collection, T expected,
-        [CallerFilePath] string path = null, [CallerLineNumber] int line = 0)
-    {
-        try { Xunit.Assert.None(collection, expected); }
         catch (Exception e) { throw WrapException(e, path, line); }
     }
 
@@ -604,7 +586,7 @@ internal static class Assert
     // so to use it we derive a custom exception type
     internal sealed class WrapperXunitException : XunitException
     {
-        internal WrapperXunitException(string message, Exception innerException) : 
+        internal WrapperXunitException(string message, Exception innerException) :
             base(message, innerException)
         {
         }

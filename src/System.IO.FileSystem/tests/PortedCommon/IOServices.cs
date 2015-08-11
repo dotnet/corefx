@@ -93,13 +93,20 @@ internal class IOServices
         return null;
     }
 
-
-    public static PathInfo GetPath(int characterCount)
+    public static PathInfo GetPath(int characterCount, bool extended = false)
     {
-        return GetPath("C:", characterCount, IOInputs.MaxComponent);
+        string root = Path.GetPathRoot(Directory.GetCurrentDirectory());
+        if (extended)
+            root = IOInputs.ExtendedPrefix + root;
+        return GetPath(root, characterCount);
     }
 
-    public static PathInfo GetPath(string rootPath, int characterCount, int maxComponent)
+    public static PathInfo GetExtendedPath(int characterCount)
+    {
+        return GetPath(characterCount, extended: true);
+    }
+
+    public static PathInfo GetPath(string rootPath, int characterCount, int maxComponent = IOInputs.MaxComponent)
     {
         List<string> paths = new List<string>();
         rootPath = rootPath.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
@@ -113,11 +120,11 @@ internal class IOServices
             if (path.Length == characterCount)
                 break;
 
-            // Components need to be in 255 character increments
-            path.Append(new string('A', Math.Min(maxComponent, characterCount - path.Length)));
+            // Continue adding guids until the character count is hit
+            string guid = Guid.NewGuid().ToString();
+            path.Append(guid.Substring(0, Math.Min(characterCount - path.Length, guid.Length)));
             paths.Add(path.ToString());
         }
-
         Assert.Equal(path.Length, characterCount);
 
         return new PathInfo(paths.ToArray());

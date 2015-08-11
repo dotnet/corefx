@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
 
@@ -499,6 +500,12 @@ namespace System.IO.Compression
                 if (includeBaseDirectory && di.Parent != null)
                     basePath = di.Parent.FullName;
 
+                // Windows' MaxPath (260) is used as an arbitrary default capacity, as it is likely
+                // to be greater than the length of typical entry names from the file system, even
+                // on non-Windows platforms. The capacity will be increased, if needed.
+                const int DefaultCapacity = 260;
+                char[] entryNameBuffer = new char[DefaultCapacity];
+
                 foreach (FileSystemInfo file in di.EnumerateFileSystemInfos("*", SearchOption.AllDirectories))
                 {
                     directoryIsEmpty = false;
@@ -506,11 +513,10 @@ namespace System.IO.Compression
                     Int32 entryNameLength = file.FullName.Length - basePath.Length;
                     Debug.Assert(entryNameLength > 0);
 
-                    String entryName = EntryFromPath(file.FullName, basePath.Length, entryNameLength);
-
                     if (file is FileInfo)
                     {
                         // Create entry for file:
+                        String entryName = EntryFromPath(file.FullName, basePath.Length, entryNameLength, ref entryNameBuffer);
                         ZipFileExtensions.DoCreateEntryFromFile(archive, file.FullName, entryName, compressionLevel);
                     }
                     else
@@ -521,21 +527,23 @@ namespace System.IO.Compression
                         {
                             // FullName never returns a directory separator character on the end,
                             // but Zip archives require it to specify an explicit directory:
-                            archive.CreateEntry(entryName + PathSeparator);
+                            String entryName = EntryFromPath(file.FullName, basePath.Length, entryNameLength, ref entryNameBuffer, appendPathSeparator: true);
+                            archive.CreateEntry(entryName);
                         }
                     }
                 }  // foreach
 
                 // If no entries create an empty root directory entry:
                 if (includeBaseDirectory && directoryIsEmpty)
-                    archive.CreateEntry(EntryFromPath(di.Name, 0, di.Name.Length) + PathSeparator);
+                    archive.CreateEntry(EntryFromPath(di.Name, 0, di.Name.Length, ref entryNameBuffer, appendPathSeparator: true));
 
             } // using
         }  // DoCreateFromDirectory
 
-        private static string EntryFromPath(string entry, int offset, int length)
+        private static string EntryFromPath(string entry, int offset, int length, ref char[] buffer, bool appendPathSeparator = false)
         {
             Debug.Assert(length <= entry.Length - offset);
+            Debug.Assert(buffer != null);
 
             // Remove any leading slashes from the entry name:
             while (length > 0)
@@ -549,30 +557,45 @@ namespace System.IO.Compression
             }
 
             if (length == 0)
-                return String.Empty;
+                return appendPathSeparator ? PathSeparator.ToString() : String.Empty;
 
-            // create a mutable copy
-            char[] chars = entry.ToCharArray(offset, length);
+            int resultLength = appendPathSeparator ? length + 1 : length;
+            EnsureCapacity(ref buffer, resultLength);
+            entry.CopyTo(offset, buffer, 0, length);
 
             // '/' is a more broadly recognized directory separator on all platforms (eg: mac, linux)
             // We don't use Path.DirectorySeparatorChar or AltDirectorySeparatorChar because this is
             // explicitly trying to standardize to '/'
-            for(int i = 0; i < chars.Length; i++)
+            for (int i = 0; i < length; i++)
             {
-                if (chars[i] == Path.DirectorySeparatorChar || chars[i] == Path.AltDirectorySeparatorChar)
-                    chars[i] = PathSeparator;
+                char ch = buffer[i];
+                if (ch == Path.DirectorySeparatorChar || ch == Path.AltDirectorySeparatorChar)
+                    buffer[i] = PathSeparator;
             }
 
-            return new string(chars);
+            if (appendPathSeparator)
+                buffer[length] = PathSeparator;
+
+            return new string(buffer, 0, resultLength);
         }
 
+        private static void EnsureCapacity(ref char[] buffer, int min)
+        {
+            Debug.Assert(buffer != null);
+            Debug.Assert(min > 0);
+
+            if (buffer.Length < min)
+            {
+                int newCapacity = buffer.Length * 2;
+                if (newCapacity < min) newCapacity = min;
+                buffer = new char[newCapacity];
+            }
+        }
 
         private static Boolean IsDirEmpty(DirectoryInfo possiblyEmptyDir)
         {
-            foreach (FileSystemInfo fi in possiblyEmptyDir.EnumerateFileSystemInfos("*", SearchOption.AllDirectories))
-                return false;
-
-            return true;
+            using (IEnumerator<String> enumerator = Directory.EnumerateFileSystemEntries(possiblyEmptyDir.FullName).GetEnumerator())
+                return !enumerator.MoveNext();
         }
     }  // class ZipFile
 }  // namespace

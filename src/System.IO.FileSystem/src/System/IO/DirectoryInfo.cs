@@ -25,7 +25,7 @@ namespace System.IO
         [System.Security.SecuritySafeCritical]
         internal DirectoryInfo(String fullPath, IFileSystemObject fileSystemObject) : base(fileSystemObject)
         {
-            Debug.Assert(PathHelpers.GetRootLength(fullPath) > 0, "fullPath must be fully qualified!");
+            Debug.Assert(PathInternal.GetRootLength(fullPath) > 0, "fullPath must be fully qualified!");
             
             // Fast path when we know a DirectoryInfo exists.
             OriginalPath = Path.GetFileName(fullPath);
@@ -391,6 +391,12 @@ namespace System.IO
                 fullSourcePath = FullPath;
             else
                 fullSourcePath = FullPath + PathHelpers.DirectorySeparatorCharAsString;
+
+            if (PathInternal.IsDirectoryTooLong(fullSourcePath))
+                throw new PathTooLongException(SR.IO_PathTooLong);
+
+            if (PathInternal.IsDirectoryTooLong(fullDestDirName))
+                throw new PathTooLongException(SR.IO_PathTooLong);
 
             StringComparison pathComparison = PathInternal.GetComparison();
             if (String.Equals(fullSourcePath, fullDestDirName, pathComparison))

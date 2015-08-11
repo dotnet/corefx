@@ -32,6 +32,9 @@
     <Compile Include="$(CommonPath)\System\__HResults.cs">
       <Link>Common\System\__HResults.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\System\IO\PathInternal.cs">
+      <Link>Common\System\IO\PathInternal.cs</Link>
+    </Compile>
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetsWindows)' == 'true' ">
     <Compile Include="System\IO\__Error.cs" />
@@ -93,11 +96,11 @@
     <Compile Include="$(CommonPath)\Interop\Unix\libc\Interop.gnu_get_libc_version.cs">
       <Link>Common\Interop\Unix\Interop.gnu_get_libc_version.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Unix\libc\Interop.strerror.cs">
-      <Link>Common\Interop\Unix\Interop.strerror.cs</Link>
-    </Compile>
     <Compile Include="$(CommonPath)\System\IO\PathInternal.Unix.cs">
       <Link>Common\System\IO\PathInternal.Unix.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\libc\Interop.pathconf.cs">
+      <Link>Common\Interop\Unix\Interop.pathconf.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\libc\Interop.mountpoints.cs">
       <Link>Common\Interop\Unix\Interop.mountpoints.cs</Link>
@@ -114,9 +117,6 @@
     <Compile Include="$(CommonPath)\Interop\Linux\libc\Interop.setmntent.cs">
       <Link>Common\Interop\Unix\Interop.setmntent.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Linux\Interop.Errors.cs">
-      <Link>Common\Interop\Linux\Interop.Errors.cs</Link>
-    </Compile>
     <Compile Include="$(CommonPath)\System\IO\PathInternal.CaseSensitive.cs">
       <Link>Common\System\IO\PathInternal.CaseSensitive.cs</Link>
     </Compile>
@@ -126,14 +126,14 @@
     <Compile Include="$(CommonPath)\Interop\Linux\Interop.Libraries.cs">
       <Link>Common\Interop\Linux\Interop.Libraries.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\Interop\Linux\libc\Interop.PathConfNames.cs">
+      <Link>Common\Interop\Linux\Interop.PathConfNames.cs</Link>
+    </Compile>
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetsBSD)' == 'true' ">
     <Compile Include="System\IO\DriveInfo.BSD.cs" />
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetsOSX)' == 'true' ">
-    <Compile Include="$(CommonPath)\Interop\OSX\Interop.Errors.cs">
-      <Link>Common\Interop\OSX\Interop.Errors.cs</Link>
-    </Compile>
     <Compile Include="$(CommonPath)\System\IO\PathInternal.CaseInsensitive.cs">
       <Link>Common\System\IO\PathInternal.CaseInsensitive.cs</Link>
     </Compile>
@@ -143,6 +143,9 @@
     <Compile Include="$(CommonPath)\Interop\OSX\libc\Interop.statfs.cs">
       <Link>Common\Interop\OSX\Interop.statfs.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\Interop\OSX\libc\Interop.PathConfNames.cs">
+      <Link>Common\Interop\OSX\Interop.PathConfNames.cs</Link>
+    </Compile>
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetsFreeBSD)' == 'true'">
     <Compile Include="$(CommonPath)\Interop\FreeBSD\libc\Interop.statfs.cs">
@@ -151,8 +154,8 @@
     <Compile Include="$(CommonPath)\Interop\FreeBSD\Interop.Libraries.cs">
       <Link>Common\Interop\FreeBSD\Interop.Libraries.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\FreeBSD\Interop.Errors.cs">
-      <Link>Common\Interop\OSX\Interop.Errors.cs</Link>
+    <Compile Include="$(CommonPath)\Interop\FreeBSD\libc\Interop.PathConfNames.cs">
+      <Link>Common\Interop\FreeBSD\Interop.PathConfNames.cs</Link>
     </Compile>
   </ItemGroup>
   <ItemGroup>

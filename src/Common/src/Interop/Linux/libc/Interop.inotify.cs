@@ -22,8 +22,8 @@ internal static partial class Interop
             int result = Interop.libc.inotify_rm_watch_extern(fd, wd);
             if (result < 0)
             {
-                int hr = System.Runtime.InteropServices.Marshal.GetLastWin32Error();
-                if (hr == Interop.Errors.EINVAL)
+                Error hr = Interop.Sys.GetLastError();
+                if (hr == Interop.Error.EINVAL)
                 {
                     // This specific case means that there was a deleted event in the queue that was not processed
                     // so this call is expected to fail since the WatchDescriptor is no longer valid and was cleaned
@@ -53,6 +53,7 @@ internal static partial class Interop
             IN_Q_OVERFLOW  = 0x00004000,
             IN_IGNORED     = 0x00008000,
             IN_ONLYDIR     = 0x01000000,
+            IN_DONT_FOLLOW = 0x02000000,
             IN_EXCL_UNLINK = 0x04000000,
             IN_ISDIR       = 0x40000000,
         }

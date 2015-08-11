@@ -9,16 +9,16 @@ namespace System.Security.Cryptography.X509Certificates.Tests
     public static class CertTests
     {
         [Fact]
-        [ActiveIssue(1993, PlatformID.AnyUnix)]
+        [ActiveIssue(1985, PlatformID.AnyUnix)]
         public static void X509CertTest()
         {
-            const string CertSubject =
-                @"CN=Microsoft Corporate Root Authority, OU=ITG, O=Microsoft, L=Redmond, S=WA, C=US, E=pkit@microsoft.com";
+            string certSubject = TestData.NormalizeX500String(
+                @"CN=Microsoft Corporate Root Authority, OU=ITG, O=Microsoft, L=Redmond, S=WA, C=US, E=pkit@microsoft.com");
 
             using (X509Certificate cert = new X509Certificate(Path.Combine("TestData", "microsoft.cer")))
             {
-                Assert.Equal(CertSubject, cert.Subject);
-                Assert.Equal(CertSubject, cert.Issuer);
+                Assert.Equal(certSubject, cert.Subject);
+                Assert.Equal(certSubject, cert.Issuer);
 
                 int snlen = cert.GetSerialNumber().Length;
                 Assert.Equal(16, snlen);
@@ -49,24 +49,23 @@ namespace System.Security.Cryptography.X509Certificates.Tests
         }
 
         [Fact]
-        [ActiveIssue(1993, PlatformID.AnyUnix)]
+        [ActiveIssue(1985, PlatformID.AnyUnix)]
         public static void X509Cert2Test()
         {
-            const string CertName =
-                @"E=admin@digsigtrust.com, CN=ABA.ECOM Root CA, O=""ABA.ECOM, INC."", L=Washington, S=DC, C=US";
+            string certName = TestData.NormalizeX500String(
+                @"E=admin@digsigtrust.com, CN=ABA.ECOM Root CA, O=""ABA.ECOM, INC."", L=Washington, S=DC, C=US");
 
             DateTime notBefore = new DateTime(1999, 7, 12, 17, 33, 53, DateTimeKind.Utc).ToLocalTime();
             DateTime notAfter = new DateTime(2009, 7, 9, 17, 33, 53, DateTimeKind.Utc).ToLocalTime();
 
             using (X509Certificate2 cert2 = new X509Certificate2(Path.Combine("TestData", "test.cer")))
             {
-                Assert.Equal(CertName, cert2.IssuerName.Name);
-                Assert.Equal(CertName, cert2.SubjectName.Name);
+                Assert.Equal(certName, cert2.IssuerName.Name);
+                Assert.Equal(certName, cert2.SubjectName.Name);
 
                 Assert.Equal("ABA.ECOM Root CA", cert2.GetNameInfo(X509NameType.DnsName, true));
 
                 PublicKey pubKey = cert2.PublicKey;
-                Assert.True(pubKey.Key is RSACryptoServiceProvider);
                 Assert.Equal("RSA", pubKey.Oid.FriendlyName);
 
                 Assert.Equal(notAfter, cert2.NotAfter);
@@ -148,7 +147,6 @@ namespace System.Security.Cryptography.X509Certificates.Tests
         }
 
         [Fact]
-        [ActiveIssue(1993, PlatformID.AnyUnix)]
         public static void X509Cert2CreateFromPfxFile()
         {
             using (X509Certificate2 cert2 = new X509Certificate2(Path.Combine("TestData", "DummyTcpServer.pfx")))
@@ -159,13 +157,40 @@ namespace System.Security.Cryptography.X509Certificates.Tests
         }
 
         [Fact]
-        [ActiveIssue(1993, PlatformID.AnyUnix)]
         public static void X509Cert2CreateFromPfxWithPassword()
         {
             using (X509Certificate2 cert2 = new X509Certificate2(Path.Combine("TestData", "test.pfx"), "test"))
             {
                 // OID=RSA Encryption
                 Assert.Equal("1.2.840.113549.1.1.1", cert2.GetKeyAlgorithm());
+            }
+        }
+
+        [Fact]
+        public static void UseAfterDispose()
+        {
+            using (X509Certificate2 c = new X509Certificate2(TestData.MsCertificate))
+            {
+                IntPtr h = c.Handle;
+
+                // Do a couple of things that would only be true on a valid certificate, as a precondition.
+                Assert.NotEqual(IntPtr.Zero, h);
+                byte[] actualThumbprint = c.GetCertHash();
+
+                c.Dispose();
+
+                // For compat reasons, Dispose() acts like the now-defunct Reset() method rather than
+                // causing ObjectDisposedExceptions.
+                h = c.Handle;
+                Assert.Equal(IntPtr.Zero, h);
+                Assert.Throws<CryptographicException>(() => c.GetCertHash());
+                Assert.Throws<CryptographicException>(() => c.GetKeyAlgorithm());
+                Assert.Throws<CryptographicException>(() => c.GetKeyAlgorithmParameters());
+                Assert.Throws<CryptographicException>(() => c.GetKeyAlgorithmParametersString());
+                Assert.Throws<CryptographicException>(() => c.GetPublicKey());
+                Assert.Throws<CryptographicException>(() => c.GetSerialNumber());
+                Assert.Throws<CryptographicException>(() => c.Issuer);
+                Assert.Throws<CryptographicException>(() => c.Subject);
             }
         }
     }

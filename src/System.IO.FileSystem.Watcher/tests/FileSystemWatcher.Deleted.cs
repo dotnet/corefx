@@ -3,10 +3,11 @@
 
 using System;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Threading;
 using Xunit;
 
-public partial class FileSystemWatcher_4000_Tests
+public class DeletedTests
 {
     [Fact]
     public static void FileSystemWatcher_Deleted_File()
@@ -45,7 +46,6 @@ public partial class FileSystemWatcher_4000_Tests
         }
     }
 
-
     [Fact]
     public static void FileSystemWatcher_Deleted_Negative()
     {
@@ -70,13 +70,17 @@ public partial class FileSystemWatcher_4000_Tests
                 testFile.WriteByte(0xFF);
                 testFile.Flush();
 
-                // rename a file in the same directory
-                testFile.Move(testFile.Path + "_rename");
-
                 // renaming a directory
-                testDir.Move(testDir.Path + "_rename");
+                //
+                // We don't do this on Linux because depending on the timing of MOVED_FROM and MOVED_TO events,
+                // a rename can trigger delete + create as a deliberate handling of an edge case, and this
+                // test is checking that no delete events are raised.
+                if (!RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                {
+                    testDir.Move(testDir.Path + "_rename");
+                }
 
-                Utility.ExpectNoEvent(eventOccured, "changed");
+                Utility.ExpectNoEvent(eventOccured, "deleted");
             }
         }
     }
@@ -86,9 +90,10 @@ public partial class FileSystemWatcher_4000_Tests
     {
         using (var dir = Utility.CreateTestDirectory())
         using (var watcher = new FileSystemWatcher())
-        using (AutoResetEvent createOccured = Utility.WatchForEvents(watcher, WatcherChangeTypes.Created))
-        using (AutoResetEvent eventOccured = Utility.WatchForEvents(watcher, WatcherChangeTypes.Deleted))
         {
+            AutoResetEvent createOccured = Utility.WatchForEvents(watcher, WatcherChangeTypes.Created); // not "using" to avoid race conditions with FSW callbacks
+            AutoResetEvent eventOccured = Utility.WatchForEvents(watcher, WatcherChangeTypes.Deleted);
+
             watcher.Path = Path.GetFullPath(dir.Path);
             watcher.Filter = "*";
             watcher.IncludeSubdirectories = true;
@@ -125,9 +130,10 @@ public partial class FileSystemWatcher_4000_Tests
     {
         using (var dir = Utility.CreateTestDirectory())
         using (var watcher = new FileSystemWatcher())
-        using (AutoResetEvent createOccured = Utility.WatchForEvents(watcher, WatcherChangeTypes.Created))
-        using (AutoResetEvent eventOccured = Utility.WatchForEvents(watcher, WatcherChangeTypes.Deleted))
         {
+            AutoResetEvent createOccured = Utility.WatchForEvents(watcher, WatcherChangeTypes.Created); // not "using" to avoid race conditions with FSW callbacks
+            AutoResetEvent eventOccured = Utility.WatchForEvents(watcher, WatcherChangeTypes.Deleted);
+
             watcher.Path = Path.GetFullPath(dir.Path);
             watcher.Filter = "*";
             watcher.IncludeSubdirectories = true;

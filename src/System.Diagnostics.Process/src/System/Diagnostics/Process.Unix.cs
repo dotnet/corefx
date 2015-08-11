@@ -62,7 +62,7 @@ namespace System.Diagnostics
         /// <summary>
         /// Instructs the Process component to wait the specified number of milliseconds for the associated process to exit.
         /// </summary>
-        public bool WaitForExitCore(int milliseconds)
+        private bool WaitForExitCore(int milliseconds)
         {
             bool exited = GetWaitState().WaitForExit(milliseconds);
             Debug.Assert(exited || milliseconds != Timeout.Infinite);
@@ -352,7 +352,7 @@ namespace System.Diagnostics
             }
 
             // Could not find the file
-            throw new Win32Exception(Interop.Errors.ENOENT);
+            throw new Win32Exception(Interop.Error.ENOENT.Info().RawErrno);
         }
 
         /// <summary>Convert a number of "jiffies", or ticks, to a TimeSpan.</summary>
