@@ -3,7 +3,6 @@
 
 using System.Diagnostics;
 using System.Diagnostics.Contracts;
-using System.Security;
 using System.Text;
 
 namespace System.IO
@@ -33,7 +32,7 @@ namespace System.IO
         {
             if (path != null)
             {
-                CheckInvalidPathChars(path);
+                PathInternal.CheckInvalidPathChars(path);
 
                 string s = path;
                 for (int i = path.Length - 1; i >= 0; i--)
@@ -69,56 +68,16 @@ namespace System.IO
         {
             if (path != null)
             {
-                CheckInvalidPathChars(path);
+                PathInternal.CheckInvalidPathChars(path);
+                path = NormalizePath(path, fullCheck: false);
 
-                string normalizedPath = NormalizePath(path, fullCheck: false);
-
-                // If there are no permissions for PathDiscovery to this path, we should NOT expand the short paths
-                // as this would leak information about paths to which the user would not have access to.
-                if (path.Length > 0)
-                {
-                    try
-                    {
-                        // If we were passed in a path with \\?\ we need to remove it as FileIOPermission does not like it.
-                        string tempPath = RemoveLongPathPrefix(path);
-
-                        // FileIOPermission cannot handle paths that contain ? or *
-                        // So we only pass to FileIOPermission the text up to them.
-                        int pos = 0;
-                        while (pos < tempPath.Length && (tempPath[pos] != '?' && tempPath[pos] != '*'))
-                            pos++;
-
-                        // GetFullPath will Demand that we have the PathDiscovery FileIOPermission and thus throw 
-                        // SecurityException if we don't. 
-                        // While we don't use the result of this call we are using it as a consistent way of 
-                        // doing the security checks. 
-                        if (pos > 0)
-                            GetFullPath(tempPath.Substring(0, pos));
-                    }
-                    catch (SecurityException)
-                    {
-                        // If the user did not have permissions to the path, make sure that we don't leak expanded short paths
-                        // Only re-normalize if the original path had a ~ in it.
-                        if (path.IndexOf("~", StringComparison.Ordinal) != -1)
-                        {
-                            normalizedPath = NormalizePath(path, fullCheck: false, expandShortPaths: false);
-                        }
-                    }
-                    catch (PathTooLongException) { }
-                    catch (NotSupportedException) { }  // Security can throw this on "c:\foo:"
-                    catch (IOException) { }
-                    catch (ArgumentException) { } // The normalizePath with fullCheck will throw this for file: and http:
-                }
-
-                path = normalizedPath;
-
-                int root = GetRootLength(path);
+                int root = PathInternal.GetRootLength(path);
                 int i = path.Length;
                 if (i > root)
                 {
                     i = path.Length;
                     if (i == root) return null;
-                    while (i > root && !IsDirectorySeparator(path[--i])) ;
+                    while (i > root && !PathInternal.IsDirectorySeparator(path[--i])) ;
                     return path.Substring(0, i);
                 }
             }
@@ -127,7 +86,7 @@ namespace System.IO
 
         public static char[] GetInvalidPathChars()
         {
-            return (char[])InvalidPathChars.Clone();
+            return (char[])PathInternal.InvalidPathChars.Clone();
         }
 
         public static char[] GetInvalidFileNameChars()
@@ -145,7 +104,7 @@ namespace System.IO
             if (path == null)
                 return null;
 
-            CheckInvalidPathChars(path);
+            PathInternal.CheckInvalidPathChars(path);
             int length = path.Length;
             for (int i = length - 1; i >= 0; i--)
             {
@@ -198,7 +157,7 @@ namespace System.IO
         {
             if (path != null)
             {
-                CheckInvalidPathChars(path);
+                PathInternal.CheckInvalidPathChars(path);
 
                 int length = path.Length;
                 for (int i = length - 1; i >= 0; i--)
@@ -237,7 +196,7 @@ namespace System.IO
         {
             if (path == null) return null;
             path = NormalizePath(path, fullCheck: false);
-            return path.Substring(0, GetRootLength(path));
+            return path.Substring(0, PathInternal.GetRootLength(path));
         }
 
         // Returns a cryptographically strong random 8.3 string that can be 
@@ -272,7 +231,7 @@ namespace System.IO
         {
             if (path != null)
             {
-                CheckInvalidPathChars(path);
+                PathInternal.CheckInvalidPathChars(path);
 
                 for (int i = path.Length - 1; i >= 0; i--)
                 {
@@ -293,8 +252,8 @@ namespace System.IO
                 throw new ArgumentNullException((path1 == null) ? "path1" : "path2");
             Contract.EndContractBlock();
 
-            CheckInvalidPathChars(path1);
-            CheckInvalidPathChars(path2);
+            PathInternal.CheckInvalidPathChars(path1);
+            PathInternal.CheckInvalidPathChars(path2);
 
             return CombineNoChecks(path1, path2);
         }
@@ -305,9 +264,9 @@ namespace System.IO
                 throw new ArgumentNullException((path1 == null) ? "path1" : (path2 == null) ? "path2" : "path3");
             Contract.EndContractBlock();
 
-            CheckInvalidPathChars(path1);
-            CheckInvalidPathChars(path2);
-            CheckInvalidPathChars(path3);
+            PathInternal.CheckInvalidPathChars(path1);
+            PathInternal.CheckInvalidPathChars(path2);
+            PathInternal.CheckInvalidPathChars(path3);
 
             return CombineNoChecks(path1, path2, path3);
         }
@@ -338,7 +297,7 @@ namespace System.IO
                     continue;
                 }
 
-                CheckInvalidPathChars(paths[i]);
+                PathInternal.CheckInvalidPathChars(paths[i]);
 
                 if (IsPathRooted(paths[i]))
                 {
@@ -501,20 +460,6 @@ namespace System.IO
             } while (i < len);
 
             return StringBuilderCache.GetStringAndRelease(sb);
-        }
-
-        private static bool HasIllegalCharacters(string path, bool checkAdditional)
-        {
-            Contract.Requires(path != null);
-            return path.IndexOfAny(checkAdditional ? InvalidPathCharsWithAdditionalChecks : InvalidPathChars) >= 0;
-        }
-
-        private static void CheckInvalidPathChars(string path, bool checkAdditional = false)
-        {
-            Debug.Assert(path != null);
-
-            if (HasIllegalCharacters(path, checkAdditional))
-                throw new ArgumentException(SR.Argument_InvalidPathChars, "path");
         }
     }
 }

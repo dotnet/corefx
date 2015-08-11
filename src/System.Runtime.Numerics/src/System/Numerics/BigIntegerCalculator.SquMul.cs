@@ -1,4 +1,7 @@
-﻿using System.Diagnostics;
+﻿// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System.Diagnostics;
 using System.Security;
 
 namespace System.Numerics
@@ -26,7 +29,7 @@ namespace System.Numerics
 
         // Mutable for unit testing...
         private static int SquareThreshold = 32;
-        private static int AllocationThreshold = 4096;
+        private static int AllocationThreshold = 256;
 
         [SecuritySafeCritical]
         private unsafe static void Square(uint* value, int valueLength,
