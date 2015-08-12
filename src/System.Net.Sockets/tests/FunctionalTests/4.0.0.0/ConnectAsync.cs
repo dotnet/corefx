@@ -1,11 +1,21 @@
 ﻿using System.Threading;
 
 using Xunit;
+using Xunit.Abstractions;
 
 namespace System.Net.Sockets.Tests
 {
     public class ConnectAsync
     {
+        private readonly ITestOutputHelper _output;
+        private readonly VerboseLog _verboseLog;
+
+        public ConnectAsync(ITestOutputHelper output)
+        {
+            _output = output;
+            _verboseLog = new VerboseLog(_output);
+        }
+
         private const int TestPortBase = 8020;
         public void OnConnectCompleted(object sender, SocketAsyncEventArgs args)
         {
@@ -20,7 +30,9 @@ namespace System.Net.Sockets.Tests
 
             if (Socket.OSSupportsIPv4)
             {
-                using (SocketTestServer.SocketTestServerFactory(new IPEndPoint(IPAddress.Loopback, TestPortBase)))
+                using (SocketTestServer.SocketTestServerFactory(
+                                            _verboseLog, 
+                                            new IPEndPoint(IPAddress.Loopback, TestPortBase)))
                 {
 
                     SocketAsyncEventArgs args = new SocketAsyncEventArgs();
@@ -42,7 +54,9 @@ namespace System.Net.Sockets.Tests
 
             if (Socket.OSSupportsIPv6)
             {
-                using (SocketTestServer.SocketTestServerFactory(new IPEndPoint(IPAddress.IPv6Loopback, TestPortBase)))
+                using (SocketTestServer.SocketTestServerFactory(
+                                            _verboseLog,
+                                            new IPEndPoint(IPAddress.IPv6Loopback, TestPortBase)))
                 {
                     SocketAsyncEventArgs args = new SocketAsyncEventArgs();
                     args.RemoteEndPoint = new IPEndPoint(IPAddress.IPv6Loopback, TestPortBase);

@@ -169,17 +169,6 @@
           "lib/dotnet/System.Linq.dll": {}
         }
       },
-      "System.Net.NameResolution/4.0.0-beta-23127": {
-        "dependencies": {
-          "System.Private.Networking": "4.0.0-beta-23127"
-        },
-        "compile": {
-          "ref/dotnet/System.Net.NameResolution.dll": {}
-        },
-        "runtime": {
-          "lib/DNXCore50/System.Net.NameResolution.dll": {}
-        }
-      },
       "System.Net.Primitives/4.0.10-beta-23127": {
         "dependencies": {
           "System.Private.Networking": "4.0.0-beta-23127"
@@ -1071,36 +1060,6 @@
         "ref/wpa81/_._"
       ]
     },
-    "System.Net.NameResolution/4.0.0-beta-23127": {
-      "sha512": "pQHD00oGfbaeoHFgqtCtw9NJP5SRl5DaI2pEBWQME+iaDKU7HAmKnFC2w8KwS7KjDM/MT8nyONZqLGt+yOjXzw==",
-      "files": [
-        "System.Net.NameResolution.4.0.0-beta-23127.nupkg",
-        "System.Net.NameResolution.4.0.0-beta-23127.nupkg.sha512",
-        "System.Net.NameResolution.nuspec",
-        "lib/DNXCore50/System.Net.NameResolution.dll",
-        "lib/MonoAndroid10/_._",
-        "lib/MonoTouch10/_._",
-        "lib/net46/System.Net.NameResolution.dll",
-        "lib/xamarinios10/_._",
-        "lib/xamarinmac20/_._",
-        "ref/dotnet/System.Net.NameResolution.dll",
-        "ref/dotnet/System.Net.NameResolution.xml",
-        "ref/dotnet/de/System.Net.NameResolution.xml",
-        "ref/dotnet/es/System.Net.NameResolution.xml",
-        "ref/dotnet/fr/System.Net.NameResolution.xml",
-        "ref/dotnet/it/System.Net.NameResolution.xml",
-        "ref/dotnet/ja/System.Net.NameResolution.xml",
-        "ref/dotnet/ko/System.Net.NameResolution.xml",
-        "ref/dotnet/ru/System.Net.NameResolution.xml",
-        "ref/dotnet/zh-hans/System.Net.NameResolution.xml",
-        "ref/dotnet/zh-hant/System.Net.NameResolution.xml",
-        "ref/MonoAndroid10/_._",
-        "ref/MonoTouch10/_._",
-        "ref/net46/System.Net.NameResolution.dll",
-        "ref/xamarinios10/_._",
-        "ref/xamarinmac20/_._"
-      ]
-    },
     "System.Net.Primitives/4.0.10-beta-23127": {
       "serviceable": true,
       "sha512": "iMopReygV88cUUXWeem9y9vrb1Sn8gOXXaRClKWW1KrRozBklOh6Og+b/gpsVQJpz2ztZLJI3k96ttoie2M2QA==",
@@ -1984,7 +1943,6 @@
       "System.Threading.Tasks >= 4.0.0-beta-*",
       "System.IO >= 4.0.10-beta-*",
       "System.Net.Primitives >= 4.0.10-beta-*",
-      "System.Net.NameResolution >= 4.0.0-beta-*",
       "xunit >= 2.0.0-beta5-build2785",
       "xunit.abstractions.netcore >= 1.0.0-prerelease",
       "xunit.assert >= 2.0.0-beta5-build2785",

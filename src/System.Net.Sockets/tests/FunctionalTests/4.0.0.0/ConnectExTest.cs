@@ -1,12 +1,21 @@
 ﻿using System.Threading;
 
 using Xunit;
+using Xunit.Abstractions;
 
 namespace System.Net.Sockets.Tests
 {
     public class ConnectExTest
     {
         private const int TestPortBase = 8030;
+        private readonly ITestOutputHelper _output;
+        private readonly VerboseLog _verboseLog;
+
+        public ConnectExTest(ITestOutputHelper output)
+        {
+            _output = output;
+            _verboseLog = new VerboseLog(_output);
+        }
 
         private static void OnConnectAsyncCompleted(object sender, SocketAsyncEventArgs args)
         {
@@ -17,8 +26,13 @@ namespace System.Net.Sockets.Tests
         [Fact]
         public void Success()
         {
-            SocketTestServer server = SocketTestServer.SocketTestServerFactory(new IPEndPoint(IPAddress.Loopback, TestPortBase));
-            SocketTestServer server6 = SocketTestServer.SocketTestServerFactory(new IPEndPoint(IPAddress.IPv6Loopback, TestPortBase));
+            SocketTestServer server = SocketTestServer.SocketTestServerFactory(
+                        _verboseLog,
+                        new IPEndPoint(IPAddress.Loopback, TestPortBase));
+
+            SocketTestServer server6 = SocketTestServer.SocketTestServerFactory(
+                        _verboseLog,
+                        new IPEndPoint(IPAddress.IPv6Loopback, TestPortBase));
 
             Socket sock = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 
