@@ -2,17 +2,24 @@
 
 namespace System.Net.Sockets.Tests
 {
-    public static class VerboseLog
+    public class VerboseLog
     {
-        public static void Log(string str)
+        private readonly ITestOutputHelper _output;
+
+        public VerboseLog(ITestOutputHelper output)
+        {
+            _output = output;
+        }
+
+        public void Log(string str)
         {
             Log("{0}", str);
         }
 
-        public static void Log(string format, params object[] arg)
+        public void Log(string format, params object[] arg)
         {
 #if TRAVE
-            Logger.LogInformation(format, arg);
+            _output.WriteLine(format, arg);
 #endif
         }
     }

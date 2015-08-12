@@ -1,11 +1,22 @@
-﻿using System.Threading;
+﻿using System.Net.Common;
+using System.Threading;
 
 using Xunit;
+using Xunit.Abstractions;
 
 namespace System.Net.Sockets.Tests
 {
     public class DnsEndPointTest
     {
+        private readonly ITestOutputHelper _output;
+        private readonly VerboseLog _verboseLog;
+
+        public DnsEndPointTest(ITestOutputHelper output)
+        {
+            _output = output;
+            _verboseLog = new VerboseLog(_output);
+        }
+
         private void OnConnectAsyncCompleted(object sender, SocketAsyncEventArgs args)
         {
             ManualResetEvent complete = (ManualResetEvent)args.UserToken;
@@ -15,7 +26,9 @@ namespace System.Net.Sockets.Tests
         [Fact]
         public void Socket_ConnectAsyncDnsEndPoint_Success()
         {
-            SocketTestServer server = SocketTestServer.SocketTestServerFactory(new IPEndPoint(IPAddress.Loopback, 8080));
+            SocketTestServer server = SocketTestServer.SocketTestServerFactory(
+                _verboseLog,
+                new IPEndPoint(IPAddress.Loopback, 8080));
 
             SocketAsyncEventArgs args = new SocketAsyncEventArgs();
             args.RemoteEndPoint = new DnsEndPoint("localhost", 8080);
@@ -87,8 +100,13 @@ namespace System.Net.Sockets.Tests
             TestRequirements.CheckIPv6Support();
             TestRequirements.CheckIPv4Support();
 
-            SocketTestServer server4 = SocketTestServer.SocketTestServerFactory(new IPEndPoint(IPAddress.Loopback, 8080));
-            SocketTestServer server6 = SocketTestServer.SocketTestServerFactory(new IPEndPoint(IPAddress.IPv6Loopback, 8081));
+            SocketTestServer server4 = SocketTestServer.SocketTestServerFactory(
+                _verboseLog,
+                new IPEndPoint(IPAddress.Loopback, 8080));
+
+            SocketTestServer server6 = SocketTestServer.SocketTestServerFactory(
+                _verboseLog,
+                new IPEndPoint(IPAddress.IPv6Loopback, 8081));
 
             SocketAsyncEventArgs args = new SocketAsyncEventArgs();
             args.RemoteEndPoint = new DnsEndPoint("localhost", 8080);
