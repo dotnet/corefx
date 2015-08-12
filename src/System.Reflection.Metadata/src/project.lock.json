@@ -11,22 +11,12 @@
           "ref/dotnet/System.Collections.dll": {}
         }
       },
-      "System.Collections.Immutable/1.1.37": {
-        "dependencies": {
-          "System.Runtime": "4.0.0",
-          "System.Resources.ResourceManager": "4.0.0",
-          "System.Diagnostics.Debug": "4.0.0",
-          "System.Collections": "4.0.0",
-          "System.Linq": "4.0.0",
-          "System.Runtime.Extensions": "4.0.0",
-          "System.Globalization": "4.0.0",
-          "System.Threading": "4.0.0"
-        },
+      "System.Collections.Immutable/1.1.36": {
         "compile": {
-          "lib/dotnet/System.Collections.Immutable.dll": {}
+          "lib/portable-net45+win8+wp8+wpa81/System.Collections.Immutable.dll": {}
         },
         "runtime": {
-          "lib/dotnet/System.Collections.Immutable.dll": {}
+          "lib/portable-net45+win8+wp8+wpa81/System.Collections.Immutable.dll": {}
         }
       },
       "System.Diagnostics.Debug/4.0.0": {
@@ -53,21 +43,6 @@
         },
         "compile": {
           "ref/dotnet/System.IO.dll": {}
-        }
-      },
-      "System.Linq/4.0.0": {
-        "dependencies": {
-          "System.Runtime": "4.0.20",
-          "System.Collections": "4.0.10",
-          "System.Resources.ResourceManager": "4.0.0",
-          "System.Diagnostics.Debug": "4.0.10",
-          "System.Runtime.Extensions": "4.0.10"
-        },
-        "compile": {
-          "ref/dotnet/System.Linq.dll": {}
-        },
-        "runtime": {
-          "lib/dotnet/System.Linq.dll": {}
         }
       },
       "System.Reflection/4.0.0": {
@@ -223,15 +198,14 @@
         "ref/xamarinmac20/_._"
       ]
     },
-    "System.Collections.Immutable/1.1.37": {
+    "System.Collections.Immutable/1.1.36": {
       "serviceable": true,
-      "sha512": "fTpqwZYBzoklTT+XjTRK8KxvmrGkYHzBiylCcKyQcxiOM8k+QvhNBxRvFHDWzy4OEP5f8/9n+xQ9mEgEXY+muA==",
+      "sha512": "MOlivTIeAIQPPMUPWIIoMCvZczjFRLYUWSYwqi1szu8QPyeIbsaPeI+hpXe1DzTxNwnRnmfYaoToi6kXIfSPNg==",
       "files": [
-        "System.Collections.Immutable.1.1.37.nupkg",
-        "System.Collections.Immutable.1.1.37.nupkg.sha512",
+        "License-Stable.rtf",
+        "System.Collections.Immutable.1.1.36.nupkg",
+        "System.Collections.Immutable.1.1.36.nupkg.sha512",
         "System.Collections.Immutable.nuspec",
-        "lib/dotnet/System.Collections.Immutable.dll",
-        "lib/dotnet/System.Collections.Immutable.xml",
         "lib/portable-net45+win8+wp8+wpa81/System.Collections.Immutable.dll",
         "lib/portable-net45+win8+wp8+wpa81/System.Collections.Immutable.xml"
       ]
@@ -375,38 +349,6 @@
         "ref/wpa81/_._",
         "ref/xamarinios10/_._",
         "ref/xamarinmac20/_._"
-      ]
-    },
-    "System.Linq/4.0.0": {
-      "serviceable": true,
-      "sha512": "r6Hlc+ytE6m/9UBr+nNRRdoJEWjoeQiT3L3lXYFDHoXk3VYsRBCDNXrawcexw7KPLaH0zamQLiAb6avhZ50cGg==",
-      "files": [
-        "System.Linq.4.0.0.nupkg",
-        "System.Linq.4.0.0.nupkg.sha512",
-        "System.Linq.nuspec",
-        "lib/dotnet/System.Linq.dll",
-        "lib/net45/_._",
-        "lib/netcore50/System.Linq.dll",
-        "lib/win8/_._",
-        "lib/wp80/_._",
-        "lib/wpa81/_._",
-        "ref/dotnet/System.Linq.dll",
-        "ref/dotnet/System.Linq.xml",
-        "ref/dotnet/de/System.Linq.xml",
-        "ref/dotnet/es/System.Linq.xml",
-        "ref/dotnet/fr/System.Linq.xml",
-        "ref/dotnet/it/System.Linq.xml",
-        "ref/dotnet/ja/System.Linq.xml",
-        "ref/dotnet/ko/System.Linq.xml",
-        "ref/dotnet/ru/System.Linq.xml",
-        "ref/dotnet/zh-hans/System.Linq.xml",
-        "ref/dotnet/zh-hant/System.Linq.xml",
-        "ref/net45/_._",
-        "ref/netcore50/System.Linq.dll",
-        "ref/netcore50/System.Linq.xml",
-        "ref/win8/_._",
-        "ref/wp80/_._",
-        "ref/wpa81/_._"
       ]
     },
     "System.Reflection/4.0.0": {
@@ -890,7 +832,7 @@
       "System.Reflection.Primitives >= 4.0.0",
       "System.Diagnostics.Debug >= 4.0.0",
       "System.IO >= 4.0.0",
-      "System.Collections.Immutable >= 1.1.37",
+      "System.Collections.Immutable >= 1.1.36",
       "System.Collections >= 4.0.0",
       "System.Text.Encoding >= 4.0.0",
       "System.Runtime.InteropServices >= 4.0.0",
