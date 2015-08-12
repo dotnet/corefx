@@ -193,7 +193,7 @@ namespace System.IO
                 get
                 {
                     EnsureStatInitialized();
-                    return DateTimeOffset.FromUnixTimeSeconds(_fileinfo.atime);
+                    return DateTimeOffset.FromUnixTimeSeconds(_fileinfo.atime).ToLocalTime();
                 }
                 set { SetAccessWriteTimes((IntPtr)value.ToUnixTimeSeconds(), null); }
             }
@@ -203,7 +203,7 @@ namespace System.IO
                 get
                 {
                     EnsureStatInitialized();
-                    return DateTimeOffset.FromUnixTimeSeconds(_fileinfo.mtime);
+                    return DateTimeOffset.FromUnixTimeSeconds(_fileinfo.mtime).ToLocalTime();
                 }
                 set { SetAccessWriteTimes(null, (IntPtr)value.ToUnixTimeSeconds()); }
             }
@@ -242,12 +242,12 @@ namespace System.IO
                     }
                     else
                     {
-                        int errno = Marshal.GetLastWin32Error();
-                        if (errno == Interop.Errors.EINTR)
+                        var errorInfo = Interop.Sys.GetLastErrorInfo();
+                        if (errorInfo.Error == Interop.Error.EINTR)
                         {
                             continue;
                         }
-                        _fileinfoInitialized = errno;
+                        _fileinfoInitialized = errorInfo.RawErrno;
                     }
                     break;
                 }
@@ -264,21 +264,20 @@ namespace System.IO
                 {
                     int errno = _fileinfoInitialized;
                     _fileinfoInitialized = -1;
+                    var errorInfo =  new Interop.ErrorInfo(errno);
 
-                    bool failedBecauseOfDirectory = _isDirectory;
-                    if (!failedBecauseOfDirectory && errno == Interop.Errors.ENOENT)
-                    {
-                        // Windows distinguishes between whether the directory or the file isn't found,
-                        // and throws a different exception in these cases.  We attempt to approximate that
-                        // here; there is a race condition here, where something could change between
-                        // when the error occurs and our checks, but it's the best we can do, and the
-                        // worst case in such a race condition (which could occur if the file system is
-                        // being manipulated concurrently with these checks) is that we throw a
-                        // FileNotFoundException instead of DirectoryNotFoundexception.
-                        failedBecauseOfDirectory = !Directory.Exists(Path.GetDirectoryName(_fullPath));
-                    }
+                    // Windows distinguishes between whether the directory or the file isn't found,
+                    // and throws a different exception in these cases.  We attempt to approximate that
+                    // here; there is a race condition here, where something could change between
+                    // when the error occurs and our checks, but it's the best we can do, and the
+                    // worst case in such a race condition (which could occur if the file system is
+                    // being manipulated concurrently with these checks) is that we throw a
+                    // FileNotFoundException instead of DirectoryNotFoundexception.
 
-                    throw Interop.GetExceptionForIoErrno(errno, _fullPath, failedBecauseOfDirectory);
+                    // directoryError is true only if a FileNotExists error was provided and the parent 
+                    // directory of the file represented by _fullPath is nonexistent
+                    bool directoryError = (errorInfo.Error == Interop.Error.ENOENT && !Directory.Exists(Path.GetDirectoryName(PathHelpers.TrimEndingDirectorySeparator(_fullPath)))); // The destFile's path is invalid
+                    throw Interop.GetExceptionForIoErrno(errorInfo, _fullPath, directoryError);
                 }
             }
         }

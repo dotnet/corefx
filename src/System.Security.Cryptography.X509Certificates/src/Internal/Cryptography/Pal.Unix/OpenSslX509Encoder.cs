@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using System;
 using System.Diagnostics;
 using System.Security.Cryptography;
@@ -281,7 +284,7 @@ namespace Internal.Cryptography.Pal
                 Interop.libcrypto.CheckValidOpenSslHandle(rsaHandle);
 
                 RSAParameters rsaParameters = Interop.libcrypto.ExportRsaParameters(rsaHandle, false);
-                RSA rsa = new RSACryptoServiceProvider();
+                RSA rsa = new RSAOpenSsl();
                 rsa.ImportParameters(rsaParameters);
                 return rsa;
             }

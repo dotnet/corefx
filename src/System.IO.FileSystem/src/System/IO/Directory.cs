@@ -486,7 +486,7 @@ namespace System.IO
             Contract.EndContractBlock();
 
             String fullPath = PathHelpers.GetFullPathInternal(path);
-            String root = fullPath.Substring(0, PathHelpers.GetRootLength(fullPath));
+            String root = fullPath.Substring(0, PathInternal.GetRootLength(fullPath));
 
             return root;
         }
@@ -494,7 +494,7 @@ namespace System.IO
         internal static String InternalGetDirectoryRoot(String path)
         {
             if (path == null) return null;
-            return path.Substring(0, PathHelpers.GetRootLength(path));
+            return path.Substring(0, PathInternal.GetRootLength(path));
         }
 
         /*===============================CurrentDirectory===============================
@@ -519,7 +519,7 @@ namespace System.IO
             if (path.Length == 0)
                 throw new ArgumentException(SR.Argument_PathEmpty, "path");
             Contract.EndContractBlock();
-            if (path.Length >= FileSystem.Current.MaxPath)
+            if (PathInternal.IsPathTooLong(path))
                 throw new PathTooLongException(SR.IO_PathTooLong);
 
             String fulldestDirName = PathHelpers.GetFullPathInternal(path);
@@ -544,13 +544,12 @@ namespace System.IO
             String fullsourceDirName = PathHelpers.GetFullPathInternal(sourceDirName);
             String sourcePath = EnsureTrailingDirectorySeparator(fullsourceDirName);
 
-            int maxDirectoryPath = FileSystem.Current.MaxDirectoryPath;
-            if (sourcePath.Length >= maxDirectoryPath)
+            if (PathInternal.IsDirectoryTooLong(sourcePath))
                 throw new PathTooLongException(SR.IO_PathTooLong);
 
             String fulldestDirName = PathHelpers.GetFullPathInternal(destDirName);
             String destPath = EnsureTrailingDirectorySeparator(fulldestDirName);
-            if (destPath.Length >= maxDirectoryPath)
+            if (PathInternal.IsDirectoryTooLong(destPath))
                 throw new PathTooLongException(SR.IO_PathTooLong);
 
             StringComparison pathComparison = PathInternal.GetComparison();

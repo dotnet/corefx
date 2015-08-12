@@ -24,6 +24,12 @@
     <Compile Include="System\Security\SecureString.cs" />
     <Compile Include="System\Security\SecureStringMarshal.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\System.Security.Cryptography.Primitives\src\System.Security.Cryptography.Primitives.csproj">
+      <Project>{D04A73AE-E418-4ACD-A132-7688435BE8B5}</Project>
+      <Name>System.Security.Cryptography.Primitives</Name>
+    </ProjectReference>
+  </ItemGroup>      
   <ItemGroup Condition=" '$(TargetsWindows)' == 'true' ">
     <Compile Include="System\Security\SecureString.Windows.cs" />
     <Compile Include="System\Security\SafeBSTRHandle.cs" />
@@ -74,9 +80,6 @@
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\libc\Interop.munmap.cs">
       <Link>Common\Interop\Unix\Interop.munmap.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\Interop\Unix\libc\Interop.strerror.cs">
-      <Link>Common\Interop\Unix\Interop.strerror.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\libc\Interop.sysconf.cs">
       <Link>Common\Interop\Unix\Interop.sysconf.cs</Link>

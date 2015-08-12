@@ -1,3 +1,6 @@
+﻿// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using System.Runtime.InteropServices;
 using Xunit;
 
@@ -68,9 +71,11 @@ namespace System.Runtime.InteropServices.RuntimeInformationTests
             Assert.False(winObj != winProp);
 
             Assert.True(winObj.Equals(winProp));
+            Assert.True(winObj.Equals((object)winProp));
             Assert.True(conObj.Equals(defaultObj));
 
             Assert.False(defaultObj.Equals(winProp));
+            Assert.False(defaultObj.Equals((object)winProp));
             Assert.False(winObj.Equals(null));
             Assert.False(winObj.Equals("something"));
 
