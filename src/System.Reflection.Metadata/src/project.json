@@ -5,7 +5,7 @@
     "System.Reflection.Primitives": "4.0.0",
     "System.Diagnostics.Debug": "4.0.0",
     "System.IO": "4.0.0",
-    "System.Collections.Immutable": "1.1.37",
+    "System.Collections.Immutable": "1.1.36",
     "System.Collections": "4.0.0",
     "System.Text.Encoding": "4.0.0",
     "System.Runtime.InteropServices": "4.0.0",
