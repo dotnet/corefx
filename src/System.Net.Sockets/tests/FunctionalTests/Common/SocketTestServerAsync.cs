@@ -1,7 +1,8 @@
 ﻿using System.Collections.Generic;
+using System.Net.Test.Common;
 using System.Threading;
 
-using Xunit;
+using Xunit.Abstractions;
 
 namespace System.Net.Sockets.Tests
 {   // Code taken from https://msdn.microsoft.com/en-us/library/system.net.sockets.socketasynceventargs.aspx
@@ -12,7 +13,7 @@ namespace System.Net.Sockets.Tests
     // is continued until the client disconnects. 
     public class SocketTestServerAsync : SocketTestServer
     {
-        private VerboseLog _verboseLog;
+        private ITestOutputHelper _log;
 
         private int m_maxNumConnections;   // the maximum number of connections the sample is designed to handle simultaneously  
         private int m_receiveBufferSize;// buffer size to use for each socket I/O operation 
@@ -27,9 +28,9 @@ namespace System.Net.Sockets.Tests
 
         private object listenSocketLock = new object();
 
-        public SocketTestServerAsync(VerboseLog log, int numConnections, int receiveBufferSize, EndPoint localEndPoint)
+        public SocketTestServerAsync(int numConnections, int receiveBufferSize, EndPoint localEndPoint)
         {
-            _verboseLog = log;
+            _log = VerboseTestLogging.GetInstance();
             m_totalBytesRead = 0;
             m_numConnectedSockets = 0;
             m_maxNumConnections = numConnections;
@@ -47,7 +48,7 @@ namespace System.Net.Sockets.Tests
 
         protected override void Dispose(bool disposing)
         {
-            _verboseLog.Log(this.GetHashCode() + " Dispose (m_numConnectedSockets={0})", m_numConnectedSockets);
+            _log.WriteLine(this.GetHashCode() + " Dispose (m_numConnectedSockets={0})", m_numConnectedSockets);
             if (disposing && (listenSocket != null))
             {
                 lock (listenSocketLock)
@@ -125,7 +126,7 @@ namespace System.Net.Sockets.Tests
                 acceptEventArg.AcceptSocket = null;
             }
 
-            _verboseLog.Log(this.GetHashCode() + " StartAccept(m_numConnectedSockets={0})", m_numConnectedSockets);
+            _log.WriteLine(this.GetHashCode() + " StartAccept(m_numConnectedSockets={0})", m_numConnectedSockets);
             m_maxNumberAcceptedClientsSemaphore.WaitOne();
 
             if (listenSocket == null)
@@ -169,7 +170,7 @@ namespace System.Net.Sockets.Tests
             }
 
             Interlocked.Increment(ref m_numConnectedSockets);
-            _verboseLog.Log(this.GetHashCode() + " ProcessAccept(m_numConnectedSockets={0})", m_numConnectedSockets);
+            _log.WriteLine(this.GetHashCode() + " ProcessAccept(m_numConnectedSockets={0})", m_numConnectedSockets);
 
             // Get the socket for the accepted client connection and put it into the ReadEventArg object user token.
             SocketAsyncEventArgs readEventArgs = m_readWritePool.Pop();
@@ -180,7 +181,7 @@ namespace System.Net.Sockets.Tests
             bool willRaiseEvent = e.AcceptSocket.ReceiveAsync(readEventArgs);
             if (!willRaiseEvent)
             {
-                _verboseLog.Log(this.GetHashCode() + " ProcessAccept -> ProcessReceive");
+                _log.WriteLine(this.GetHashCode() + " ProcessAccept -> ProcessReceive");
                 ProcessReceive(readEventArgs);
             }
 
@@ -214,7 +215,7 @@ namespace System.Net.Sockets.Tests
         // 
         private void ProcessReceive(SocketAsyncEventArgs e)
         {
-            _verboseLog.Log(
+            _log.WriteLine(
                 this.GetHashCode() + " ProcessReceive(bytesTransferred={0}, SocketError={1}, m_numConnectedSockets={2})", 
                 e.BytesTransferred,
                 e.SocketError,
@@ -226,7 +227,7 @@ namespace System.Net.Sockets.Tests
             {
                 //increment the count of the total bytes receive by the server
                 Interlocked.Add(ref m_totalBytesRead, e.BytesTransferred);
-                _verboseLog.Log(this.GetHashCode() + " The server has read a total of {0} bytes", m_totalBytesRead);
+                _log.WriteLine(this.GetHashCode() + " The server has read a total of {0} bytes", m_totalBytesRead);
 
                 //echo the data received back to the client
                 e.SetBuffer(e.Offset, e.BytesTransferred);
@@ -250,7 +251,7 @@ namespace System.Net.Sockets.Tests
         // <param name="e"></param>
         private void ProcessSend(SocketAsyncEventArgs e)
         {
-            _verboseLog.Log(
+            _log.WriteLine(
                 this.GetHashCode() + " ProcessSend(SocketError={0}, m_numConnectedSockets={1})",
                 e.SocketError,
                 m_numConnectedSockets);
@@ -263,13 +264,13 @@ namespace System.Net.Sockets.Tests
                 bool willRaiseEvent = token.Socket.ReceiveAsync(e);
                 if (!willRaiseEvent)
                 {
-                    _verboseLog.Log(this.GetHashCode() + " ProcessSend -> ProcessReceive");
+                    _log.WriteLine(this.GetHashCode() + " ProcessSend -> ProcessReceive");
                     ProcessReceive(e);
                 }
             }
             else
             {
-                _verboseLog.Log(this.GetHashCode() + " ProcessSend -> CloseClientSocket");
+                _log.WriteLine(this.GetHashCode() + " ProcessSend -> CloseClientSocket");
                 CloseClientSocket(e);
             }
         }
@@ -278,7 +279,7 @@ namespace System.Net.Sockets.Tests
         {
             AsyncUserToken token = e.UserToken as AsyncUserToken;
 
-            _verboseLog.Log(
+            _log.WriteLine(
                 this.GetHashCode() + " CloseClientSocket(m_numConnectedSockets={0}, SocketError={1})",
                 m_numConnectedSockets,
                 e.SocketError);
@@ -291,7 +292,7 @@ namespace System.Net.Sockets.Tests
             // throws if client process has already closed 
             catch (Exception ex)
             {
-                _verboseLog.Log(
+                _log.WriteLine(
                     this.GetHashCode() + " CloseClientSocket Exception:{0}",
                     ex);
             }
@@ -300,7 +301,7 @@ namespace System.Net.Sockets.Tests
             // decrement the counter keeping track of the total number of clients connected to the server
             Interlocked.Decrement(ref m_numConnectedSockets);
             m_maxNumberAcceptedClientsSemaphore.Release();
-            _verboseLog.Log(
+            _log.WriteLine(
                 this.GetHashCode() + " CloseClientSocket(m_numConnectedSockets={0})", 
                 m_numConnectedSockets);
 

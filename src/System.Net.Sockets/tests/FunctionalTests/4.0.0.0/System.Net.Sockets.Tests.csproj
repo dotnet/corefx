@@ -8,52 +8,51 @@
     <OutputType>Library</OutputType>
     <UnsupportedPlatforms>Linux;OSX;FreeBSD</UnsupportedPlatforms>
   </PropertyGroup>
-
   <!-- Help VS understand available configurations -->
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' " />
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' " />
-    
   <ItemGroup>
     <Compile Include="..\Common\SocketTestServer.cs">
       <Link>SocketCommon\SocketTestServer.cs</Link>
     </Compile>
-    <Compile Include="..\Common\SocketTestServerAsync.cs" >
+    <Compile Include="..\Common\SocketTestServerAsync.cs">
       <Link>SocketCommon\SocketTestServerAsync.cs</Link>
     </Compile>
     <Compile Include="..\Common\SocketImplementationType.cs">
       <Link>SocketCommon\SocketImplementationType.cs</Link>
     </Compile>
-    <Compile Include="..\Common\VerboseLog.cs">
-      <Link>SocketCommon\VerboseLog.cs</Link>
-    </Compile>
-
     <Compile Include="AcceptAsync.cs" />
     <Compile Include="ConnectAsync.cs" />
     <Compile Include="ConnectExTest.cs" />
     <Compile Include="DnsEndPointTest.cs" />
     <Compile Include="DualModeSocketTest.cs" />
     <Compile Include="SocketTestServerAPMMock.cs" />
-    
     <!-- Common test files -->
-    <Compile Include="$(CommonTestPath)\System.Net\TestRequirements.Sockets.cs">
-      <Link>Common\System.Net\TestRequirements.Sockets.cs</Link>
+    <Compile Include="$(CommonTestPath)\System.Net\TestLogging.cs">
+      <Link>Common\System.Net\TestLogging.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonTestPath)\System.Net\VerboseTestLogging.cs">
+      <Link>Common\System.Net\VerboseTestLogging.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonTestPath)\System.Net\EventSourceTestLogging.cs">
+      <Link>Common\System.Net\EventSourceTestLogging.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonTestPath)\System.Net\Capability.Sockets.cs">
+      <Link>Common\System.Net\Capability.Sockets.cs</Link>
     </Compile>
   </ItemGroup>
-
   <ItemGroup>
     <ProjectReference Include="..\..\..\..\System.Net.NameResolution\src\System.Net.NameResolution.csproj">
       <Project>{1714448C-211E-48C1-8B7E-4EE667D336A1}</Project>
       <Name>System.Net.NameResolution</Name>
     </ProjectReference>
   </ItemGroup>
-  
   <ItemGroup>
     <ProjectReference Include="..\..\..\src\System.Net.Sockets.csproj">
       <Project>{43311AFB-D7C4-4E5A-B1DE-855407F90D1B}</Project>
       <Name>System.Net.Sockets</Name>
     </ProjectReference>
   </ItemGroup>
-
   <ItemGroup>
     <None Include="project.json" />
   </ItemGroup>

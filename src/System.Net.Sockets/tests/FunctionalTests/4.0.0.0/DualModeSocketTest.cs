@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System.Net.Test.Common;
+using System.Threading;
 using System.Threading.Tasks;
 
 using Xunit;
@@ -6,14 +7,17 @@ using Xunit.Abstractions;
 
 namespace System.Net.Sockets.Tests
 {
+    [Trait("IPv4", "true")]
+    [Trait("IPv6", "true")]
     public class DualMode
     {
         private const int TestPortBase = 8200;  // to 8300
-        private readonly ITestOutputHelper _output;
+        private readonly ITestOutputHelper _log;
 
         public DualMode(ITestOutputHelper output)
         {
-            _output = output;
+            _log = TestLogging.GetInstance();
+            Assert.True(Capability.IPv4Support() && Capability.IPv6Support());
         }
 
         #region Constructor and Property
@@ -92,7 +96,7 @@ namespace System.Net.Sockets.Tests
         private void DualModeConnectAsync_IPEndPointToHost_Helper(IPAddress connectTo, IPAddress listenOn, bool dualModeServer)
         {
             Socket socket = new Socket(SocketType.Stream, ProtocolType.Tcp);
-            using (SocketServer server = new SocketServer(_output, listenOn, dualModeServer, TestPortBase + 13))
+            using (SocketServer server = new SocketServer(_log, listenOn, dualModeServer, TestPortBase + 13))
             {
                 ManualResetEvent waitHandle = new ManualResetEvent(false);
                 SocketAsyncEventArgs args = new SocketAsyncEventArgs();
@@ -136,7 +140,7 @@ namespace System.Net.Sockets.Tests
         private void DualModeConnectAsync_DnsEndPointToHost_Helper(IPAddress listenOn, bool dualModeServer)
         {
             Socket socket = new Socket(SocketType.Stream, ProtocolType.Tcp);
-            using (SocketServer server = new SocketServer(_output, listenOn, dualModeServer, TestPortBase + 51))
+            using (SocketServer server = new SocketServer(_log, listenOn, dualModeServer, TestPortBase + 51))
             {
                 ManualResetEvent waitHandle = new ManualResetEvent(false);
                 SocketAsyncEventArgs args = new SocketAsyncEventArgs();
@@ -284,13 +288,13 @@ namespace System.Net.Sockets.Tests
                 args.UserToken = waitHandle;
                 args.SocketError = SocketError.SocketError;
 
-                _output.WriteLine(args.GetHashCode() + " SocketAsyncEventArgs with manual event " + waitHandle.GetHashCode());
+                _log.WriteLine(args.GetHashCode() + " SocketAsyncEventArgs with manual event " + waitHandle.GetHashCode());
                 if (!serverSocket.AcceptAsync(args))
                 {
                     throw new SocketException((int)args.SocketError);
                 }
 
-                SocketClient client = new SocketClient(_output, serverSocket, connectTo, port);
+                SocketClient client = new SocketClient(_log, serverSocket, connectTo, port);
                 
                 var waitHandles = new WaitHandle[2];
                 waitHandles[0] = waitHandle;
@@ -317,7 +321,7 @@ namespace System.Net.Sockets.Tests
                     }
                 }
 
-                _output.WriteLine(args.SocketError.ToString());
+                _log.WriteLine(args.SocketError.ToString());
                 
 
                 if (args.SocketError != SocketError.Success)
@@ -410,7 +414,7 @@ namespace System.Net.Sockets.Tests
         {
             ManualResetEvent waitHandle = new ManualResetEvent(false);
             Socket client = new Socket(SocketType.Dgram, ProtocolType.Udp);
-            using (SocketUdpServer server = new SocketUdpServer(_output, listenOn, dualModeServer, TestPortBase + 26))
+            using (SocketUdpServer server = new SocketUdpServer(_log, listenOn, dualModeServer, TestPortBase + 26))
             {
                 SocketAsyncEventArgs args = new SocketAsyncEventArgs();
                 args.RemoteEndPoint = new IPEndPoint(connectTo, TestPortBase + 26);
@@ -540,7 +544,7 @@ namespace System.Net.Sockets.Tests
                 args.Completed += AsyncCompleted;
 
                 bool async = serverSocket.ReceiveFromAsync(args);
-                SocketUdpClient client = new SocketUdpClient(_output, serverSocket, connectTo, TestPortBase + 32);
+                SocketUdpClient client = new SocketUdpClient(_log, serverSocket, connectTo, TestPortBase + 32);
                 if (async && !waitHandle.WaitOne(200))
                 {
                     throw new TimeoutException();
@@ -785,7 +789,7 @@ namespace System.Net.Sockets.Tests
         {
             EventWaitHandle handle = (EventWaitHandle)e.UserToken;
 
-            _output.WriteLine(
+            _log.WriteLine(
                 "AsyncCompleted: " + e.GetHashCode() + " SocketAsyncEventArgs with manual event " +
                 handle.GetHashCode() + " error: " + e.SocketError);
 

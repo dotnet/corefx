@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System.Net.Test.Common;
+using System.Threading;
 
 using Xunit;
 using Xunit.Abstractions;
@@ -8,13 +9,11 @@ namespace System.Net.Sockets.Tests
     public class ConnectExTest
     {
         private const int TestPortBase = 8030;
-        private readonly ITestOutputHelper _output;
-        private readonly VerboseLog _verboseLog;
+        private readonly ITestOutputHelper _log;
 
         public ConnectExTest(ITestOutputHelper output)
         {
-            _output = output;
-            _verboseLog = new VerboseLog(_output);
+            _log = TestLogging.GetInstance();
         }
 
         private static void OnConnectAsyncCompleted(object sender, SocketAsyncEventArgs args)
@@ -24,14 +23,16 @@ namespace System.Net.Sockets.Tests
         }
 
         [Fact]
-        public void Success()
+        [Trait("IPv4", "true")]
+        [Trait("IPv6", "true")]
+        public void ConnectEx_Success()
         {
+            Assert.True(Capability.IPv4Support() && Capability.IPv6Support());
+
             SocketTestServer server = SocketTestServer.SocketTestServerFactory(
-                        _verboseLog,
                         new IPEndPoint(IPAddress.Loopback, TestPortBase));
 
             SocketTestServer server6 = SocketTestServer.SocketTestServerFactory(
-                        _verboseLog,
                         new IPEndPoint(IPAddress.IPv6Loopback, TestPortBase));
 
             Socket sock = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);

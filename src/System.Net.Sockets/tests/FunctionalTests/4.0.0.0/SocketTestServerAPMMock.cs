@@ -5,7 +5,7 @@ namespace System.Net.Sockets.Tests
 {
     public class SocketTestServerAPM : SocketTestServer
     {
-        public SocketTestServerAPM(VerboseLog log, int numConnections, int receiveBufferSize, EndPoint localEndPoint) 
+        public SocketTestServerAPM(int numConnections, int receiveBufferSize, EndPoint localEndPoint) 
         {
             throw new NotSupportedException();
         }
