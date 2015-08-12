@@ -3,26 +3,24 @@ namespace System.Net.Sockets.Tests
 {
     public abstract class SocketTestServer : IDisposable
     {
-        public static SocketTestServer SocketTestServerFactory(VerboseLog log, EndPoint endpoint)
+        public static SocketTestServer SocketTestServerFactory(EndPoint endpoint)
         {
-            return SocketTestServerFactory(log, 5, 1024, endpoint);
+            return SocketTestServerFactory(5, 1024, endpoint);
         }
 
         public static SocketTestServer SocketTestServerFactory(
-            VerboseLog log,
             int numConnections, 
             int receiveBufferSize, 
             EndPoint localEndPoint)
         {
 #if !SOCKETTESTSERVERAPM
-            return new SocketTestServerAsync(log, numConnections, receiveBufferSize, localEndPoint);
+            return new SocketTestServerAsync(numConnections, receiveBufferSize, localEndPoint);
 #else
-            return new SocketTestServerAPM(log, numConnections, receiveBufferSize, localEndPoint);
+            return new SocketTestServerAPM(numConnections, receiveBufferSize, localEndPoint);
 #endif
         }
 
         public static SocketTestServer SocketTestServerFactory(
-            VerboseLog log,
             SocketImplementationType type, 
             int numConnections, 
             int receiveBufferSize, 
@@ -31,9 +29,9 @@ namespace System.Net.Sockets.Tests
             switch (type)
             {
                 case SocketImplementationType.APM:
-                    return new SocketTestServerAPM(log, numConnections, receiveBufferSize, localEndPoint);
+                    return new SocketTestServerAPM(numConnections, receiveBufferSize, localEndPoint);
                 case SocketImplementationType.Async:
-                    return new SocketTestServerAsync(log, numConnections, receiveBufferSize, localEndPoint);
+                    return new SocketTestServerAsync(numConnections, receiveBufferSize, localEndPoint);
                 default:
                     throw new ArgumentOutOfRangeException("type");
             }

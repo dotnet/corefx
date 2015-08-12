@@ -1,4 +1,4 @@
-﻿using System.Net.Common;
+﻿using System.Net.Test.Common;
 using System.Threading;
 
 using Xunit;
@@ -8,13 +8,11 @@ namespace System.Net.Sockets.Tests
 {
     public class DnsEndPointTest
     {
-        private readonly ITestOutputHelper _output;
-        private readonly VerboseLog _verboseLog;
+        private readonly ITestOutputHelper _log;
 
         public DnsEndPointTest(ITestOutputHelper output)
         {
-            _output = output;
-            _verboseLog = new VerboseLog(_output);
+            _log = TestLogging.GetInstance();
         }
 
         private void OnConnectAsyncCompleted(object sender, SocketAsyncEventArgs args)
@@ -24,10 +22,12 @@ namespace System.Net.Sockets.Tests
         }
 
         [Fact]
+        [Trait("IPv4", "true")]
         public void Socket_ConnectAsyncDnsEndPoint_Success()
         {
+            Assert.True(Capability.IPv4Support());
+
             SocketTestServer server = SocketTestServer.SocketTestServerFactory(
-                _verboseLog,
                 new IPEndPoint(IPAddress.Loopback, 8080));
 
             SocketAsyncEventArgs args = new SocketAsyncEventArgs();
@@ -51,8 +51,11 @@ namespace System.Net.Sockets.Tests
         }
 
         [Fact]
+        [Trait("IPv4", "true")]
         public void Socket_ConnectAsyncDnsEndPoint_HostNotFound()
         {
+            Assert.True(Capability.IPv4Support());
+
             SocketAsyncEventArgs args = new SocketAsyncEventArgs();
             args.RemoteEndPoint = new DnsEndPoint("notahostname.invalid.corp.microsoft.com", 8080);
             args.Completed += OnConnectAsyncCompleted;
@@ -72,8 +75,11 @@ namespace System.Net.Sockets.Tests
         }
 
         [Fact]
+        [Trait("IPv4", "true")]
         public void Socket_ConnectAsyncDnsEndPoint_ConnectionRefused()
         {
+            Assert.True(Capability.IPv4Support());
+
             SocketAsyncEventArgs args = new SocketAsyncEventArgs();
             args.RemoteEndPoint = new DnsEndPoint("localhost", 8080);
             args.Completed += OnConnectAsyncCompleted;
@@ -95,17 +101,16 @@ namespace System.Net.Sockets.Tests
         }
 
         [Fact]
+        [Trait("IPv4", "true")]
+        [Trait("IPv6", "true")]
         public void Socket_StaticConnectAsync_Success()
         {
-            TestRequirements.CheckIPv6Support();
-            TestRequirements.CheckIPv4Support();
+            Assert.True(Capability.IPv4Support() && Capability.IPv6Support());
 
             SocketTestServer server4 = SocketTestServer.SocketTestServerFactory(
-                _verboseLog,
                 new IPEndPoint(IPAddress.Loopback, 8080));
 
             SocketTestServer server6 = SocketTestServer.SocketTestServerFactory(
-                _verboseLog,
                 new IPEndPoint(IPAddress.IPv6Loopback, 8081));
 
             SocketAsyncEventArgs args = new SocketAsyncEventArgs();
@@ -195,9 +200,10 @@ namespace System.Net.Sockets.Tests
         }
 
         [Fact]
+        [Trait("IPv6", "true")]
         public void Socket_StaticConnectAsync_SyncFailure()
         {
-            TestRequirements.CheckIPv6Support(); // IPv6 required because we use AF.InterNetworkV6
+            Assert.True(Capability.IPv6Support());
 
             SocketAsyncEventArgs args = new SocketAsyncEventArgs();
             args.RemoteEndPoint = new DnsEndPoint("127.0.0.1", 8080, AddressFamily.InterNetworkV6);
