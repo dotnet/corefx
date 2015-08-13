@@ -14,11 +14,6 @@ namespace System.Net.Sockets.Tests
         {
             throw new NotSupportedException();
         }
-
-        protected override bool IsSupported()
-        {
-            return false;
-        }
     }
 }
 

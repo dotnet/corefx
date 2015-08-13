@@ -43,8 +43,6 @@ namespace System.Net.Sockets.Tests
             GC.SuppressFinalize(this);
         }
 
-        protected abstract bool IsSupported();
-
         protected abstract void Dispose(bool disposing);
     }
 }

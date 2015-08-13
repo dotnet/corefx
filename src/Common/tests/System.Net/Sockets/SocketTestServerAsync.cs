@@ -2,8 +2,6 @@
 using System.Net.Test.Common;
 using System.Threading;
 
-using Xunit.Abstractions;
-
 namespace System.Net.Sockets.Tests
 {   // Code taken from https://msdn.microsoft.com/en-us/library/system.net.sockets.socketasynceventargs.aspx
 
@@ -13,7 +11,7 @@ namespace System.Net.Sockets.Tests
     // is continued until the client disconnects. 
     public class SocketTestServerAsync : SocketTestServer
     {
-        private ITestOutputHelper _log;
+        private VerboseTestLogging _log;
 
         private int m_maxNumConnections;   // the maximum number of connections the sample is designed to handle simultaneously  
         private int m_receiveBufferSize;// buffer size to use for each socket I/O operation 
@@ -46,11 +44,6 @@ namespace System.Net.Sockets.Tests
             Start(localEndPoint);
         }
 
-        protected override bool IsSupported()
-        {
-            return true;
-        }
-        
         protected override void Dispose(bool disposing)
         {
             _log.WriteLine(this.GetHashCode() + " Dispose (m_numConnectedSockets={0})", m_numConnectedSockets);

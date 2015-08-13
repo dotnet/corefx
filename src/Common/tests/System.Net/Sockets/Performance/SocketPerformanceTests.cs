@@ -1,17 +1,23 @@
 ﻿using System.Diagnostics;
-using System.Net;
 using System.Threading.Tasks;
 using System.Net.Sockets.Tests;
 
 using Xunit;
+using Xunit.Abstractions;
 
 namespace System.Net.Sockets.Performance.Tests
 {
-    public class SocketPerformanceFactories
+    public class SocketPerformanceTests
     {
         private const string _format = "{0, -20}, {1, -25}, {2, 15}, {3, 15}, {4, 15}, {5, 15}, {6, 15}, {7, 15}, {8, 15}";
+        private readonly ITestOutputHelper _log;
 
-        public static void ClientServerTest(
+        public SocketPerformanceTests(ITestOutputHelper log)
+        {
+            _log = log;
+        }
+
+        public void ClientServerTest(
             int port, 
             SocketImplementationType serverType, 
             SocketImplementationType clientType, 
@@ -22,8 +28,8 @@ namespace System.Net.Sockets.Performance.Tests
         {
             long milliseconds;
 
-#if DEBUG || arm
-            iterations /= 100;
+#if arm
+        iterations /= 100;
 #endif
 
             using (SocketTestServer.SocketTestServerFactory(
@@ -46,7 +52,7 @@ namespace System.Net.Sockets.Performance.Tests
                 "Test execution is expected to be shorter than " + expectedMilliseconds + " but was " + milliseconds);
         }
 
-        public static long RunClient(
+        public long RunClient(
             SocketImplementationType testType, 
             string server, 
             int port,
@@ -54,7 +60,7 @@ namespace System.Net.Sockets.Performance.Tests
             int bufferSize,
             int socket_instances)
         {
-            TestLogger.GetInstance().WriteLine(
+            _log.WriteLine(
                 _format,
                 "Implementation",
                 "Type",
@@ -89,6 +95,7 @@ namespace System.Net.Sockets.Performance.Tests
                 (i) =>
                 {
                     var test = SocketTestClient.SocketTestClientFactory(
+                        _log,
                         testType, 
                         server,
                         port, 

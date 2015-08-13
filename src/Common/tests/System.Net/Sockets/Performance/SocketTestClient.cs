@@ -7,10 +7,14 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace NCLTest.Sockets
+using Xunit.Abstractions;
+
+namespace System.Net.Sockets.Performance.Tests
 {
     public abstract class SocketTestClient
     {
+        protected readonly ITestOutputHelper _log;
+
         protected string _server;
         protected int _port;
         protected EndPoint _endpoint;
@@ -40,8 +44,16 @@ namespace NCLTest.Sockets
 
         TaskCompletionSource<long> tcs = new TaskCompletionSource<long>();
 
-        public SocketTestClient(string server, int port, int iterations, string message, Stopwatch timeProgramStart)
+        public SocketTestClient(
+            ITestOutputHelper log,
+            string server, 
+            int port, 
+            int iterations, 
+            string message, 
+            Stopwatch timeProgramStart)
         {
+            _log = log;
+
             _server = server;
             _port = port;
             _endpoint = new DnsEndPoint(server, _port);
@@ -62,6 +74,7 @@ namespace NCLTest.Sockets
         }
 
         public static SocketTestClient SocketTestClientFactory(
+            ITestOutputHelper log,
             SocketImplementationType type,
             string server,
             int port, 
@@ -74,14 +87,14 @@ namespace NCLTest.Sockets
                 case SocketImplementationType.APM:
 #if SOCKETTESTSERVERAPM
                     var socketAPM = new SocketTestClientAPM(server, port, iterations, message, timeProgramStart);
-                    VerboseLog.Log(socketAPM.GetHashCode() + " SocketTestClientAPM(..)");
+                    _log.WriteLine(socketAPM.GetHashCode() + " SocketTestClientAPM(..)");
                     return socketAPM;
 #else
                     throw new PlatformNotSupportedException();
 #endif
                 case SocketImplementationType.Async:
-                    var socketAsync = new SocketTestClientAsync(server, port, iterations, message, timeProgramStart);
-                    VerboseLog.Log(socketAsync.GetHashCode() + " SocketTestClientAsync(..)");
+                    var socketAsync = new SocketTestClientAsync(log, server, port, iterations, message, timeProgramStart);
+                    log.WriteLine(socketAsync.GetHashCode() + " SocketTestClientAsync(..)");
                     return socketAsync;
 
                 default:
@@ -94,7 +107,7 @@ namespace NCLTest.Sockets
         private void OnConnect()
         {
             _timeConnect.Stop();
-            VerboseLog.Log(this.GetHashCode() + " OnConnect() _timeConnect={0}", _timeConnect.ElapsedMilliseconds);
+            _log.WriteLine(this.GetHashCode() + " OnConnect() _timeConnect={0}", _timeConnect.ElapsedMilliseconds);
 
             _timeSendRecv.Start();
 
@@ -111,7 +124,7 @@ namespace NCLTest.Sockets
         // Called when the entire _sendBuffer has been sent.
         private void OnSend(int bytesSent)
         {
-            VerboseLog.Log(this.GetHashCode() + " OnSend({0})", bytesSent);
+            _log.WriteLine(this.GetHashCode() + " OnSend({0})", bytesSent);
 
             if (bytesSent == _sendBuffer.Length)
             {
@@ -119,7 +132,7 @@ namespace NCLTest.Sockets
             }
             else
             {
-                Logger.LogInformation(
+                _log.WriteLine(
                     "OnSend: Unexpected bytesSent={0}, expected {1}",
                     bytesSent,
                     _sendBuffer.Length);
@@ -129,7 +142,7 @@ namespace NCLTest.Sockets
         private void OnSendMessage()
         {
             _send_iterations++;
-            VerboseLog.Log(this.GetHashCode() + " OnSendMessage() _send_iterations={0}", _send_iterations);
+            _log.WriteLine(this.GetHashCode() + " OnSendMessage() _send_iterations={0}", _send_iterations);
 
             if (_send_iterations < _iterations)
             {
@@ -144,7 +157,7 @@ namespace NCLTest.Sockets
         // Called when the entire _recvBuffer has been received.
         private void OnReceive(int receivedBytes)
         {
-            VerboseLog.Log(this.GetHashCode() + " OnSend({0})", receivedBytes);
+            _log.WriteLine(this.GetHashCode() + " OnSend({0})", receivedBytes);
             _recvBufferIndex += receivedBytes;
 
             if (_recvBufferIndex == _recvBuffer.Length)
@@ -153,7 +166,7 @@ namespace NCLTest.Sockets
             }
             else if (receivedBytes == 0)
             {
-                Logger.LogInformation("Socket unexpectedly closed.");
+                _log.WriteLine("Socket unexpectedly closed.");
             }
             else
             {
@@ -164,14 +177,14 @@ namespace NCLTest.Sockets
         private void OnReceiveMessage()
         {
             _receive_iterations++;
-            VerboseLog.Log(this.GetHashCode() + " OnReceiveMessage() _receive_iterations={0}", _receive_iterations);
+            _log.WriteLine(this.GetHashCode() + " OnReceiveMessage() _receive_iterations={0}", _receive_iterations);
 
             _recvBufferIndex = 0;
 
             // Expect echo server.
             if (memcmp(_sendBuffer, _recvBuffer, _sendBuffer.Length) != 0)
             {
-                Logger.LogInformation("Received different data from echo server");
+                _log.WriteLine("Received different data from echo server");
             }
 
             if (_receive_iterations >= _iterations)
@@ -192,11 +205,11 @@ namespace NCLTest.Sockets
         private void OnClose()
         {
             _timeClose.Stop();
-            VerboseLog.Log(this.GetHashCode() + " OnClose() _timeClose={0}", _timeClose.ElapsedMilliseconds);
+            _log.WriteLine(this.GetHashCode() + " OnClose() _timeClose={0}", _timeClose.ElapsedMilliseconds);
 
             try
             {
-                Logger.LogInformation(
+                _log.WriteLine(
                     _format,
                     "Socket",
                     ImplementationName(),
@@ -210,10 +223,10 @@ namespace NCLTest.Sockets
             }
             catch (Exception ex)
             {
-                Logger.LogInformation("Exception while writing the report: {0}", ex);
+                _log.WriteLine("Exception while writing the report: {0}", ex);
             }
 
-            VerboseLog.Log(
+            _log.WriteLine(
                 this.GetHashCode() + " OnClose() setting tcs result : {0}", 
                 _timeSendRecv.ElapsedMilliseconds);
 
@@ -229,7 +242,8 @@ namespace NCLTest.Sockets
         }
 
         protected abstract string ImplementationName();
-
+        
+        //TODO: Either find a different fast way to compare or extract this in Interop.
         [DllImport("msvcrt.dll", CallingConvention = CallingConvention.Cdecl)]
         private static extern int memcmp(byte[] b1, byte[] b2, long count);
     }
