@@ -43,13 +43,14 @@ namespace System.Net.Http
 
         private volatile bool _anyOperationStarted;
         private volatile bool _disposed;
-        private bool _automaticRedirection = true;
         private IWebProxy _proxy = null;
         private ICredentials _serverCredentials = null;
         private ProxyUsePolicy _proxyPolicy = ProxyUsePolicy.UseDefaultProxy;
         private DecompressionMethods _automaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
         private SafeCurlMultiHandle _multiHandle;
         private GCHandle _multiHandlePtr = new GCHandle();
+        private bool _automaticRedirection = true;
+        private int _maxAutomaticRedirections = 50;
 
         #endregion
 
@@ -175,6 +176,28 @@ namespace System.Net.Http
             {
                 CheckDisposedOrStarted();
                 _automaticDecompression = value;
+            }
+        }
+
+        internal int MaxAutomaticRedirections
+        {
+            get
+            {
+                return _maxAutomaticRedirections;
+            }
+
+            set
+            {
+                if (value <= 0)
+                {
+                    throw new ArgumentOutOfRangeException(
+                        "value",
+                        value,
+                        string.Format(SR.net_http_value_must_be_greater_than, 0));
+                }
+
+                CheckDisposedOrStarted();
+                _maxAutomaticRedirections = value;
             }
         }
 
@@ -351,6 +374,9 @@ namespace System.Net.Http
             if (_automaticRedirection)
             {
                 SetCurlOption(requestHandle, CURLoption.CURLOPT_FOLLOWLOCATION, 1L);
+                
+                // Set maximum automatic redirection option
+                SetCurlOption(requestHandle, CURLoption.CURLOPT_MAXREDIRS, _maxAutomaticRedirections);
             }
             if (state.RequestMessage.Content != null)
             {
