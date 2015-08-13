@@ -12,7 +12,7 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' " />
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' " />
   <ItemGroup>
-    <Compile Include="SocketPerformance.cs" />    
+    <Compile Include="SocketPerformanceAsyncTests.cs" />    
     <Compile Include="SocketTestServerAPMMock.cs" />    
 
     <!-- Common Sockets files -->
@@ -25,7 +25,7 @@
     <Compile Include="$(CommonTestPath)\System.Net\Sockets\SocketImplementationType.cs">
       <Link>SocketCommon\SocketImplementationType.cs</Link>
     </Compile>
-    <Compile Include="$(CommonTestPath)\System.Net\Sockets\Performance\SocketPerformanceFactories.cs">
+    <Compile Include="$(CommonTestPath)\System.Net\Sockets\Performance\SocketPerformanceTests.cs">
       <Link>SocketCommon\SocketPerformanceFactories.cs</Link>
     </Compile>
     <Compile Include="$(CommonTestPath)\System.Net\Sockets\Performance\SocketTestClient.cs">

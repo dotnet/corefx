@@ -1,16 +1,21 @@
-﻿using System;
-using System.Diagnostics;
-using System.Net.Sockets;
+﻿using System.Diagnostics;
 
-namespace NCLTest.Sockets
+using Xunit.Abstractions;
+
+namespace System.Net.Sockets.Performance.Tests
 {
     public class SocketTestClientAsync : SocketTestClient
     {
         SocketAsyncEventArgs sendEventArgs = new SocketAsyncEventArgs();
         SocketAsyncEventArgs recvEventArgs = new SocketAsyncEventArgs();
 
-        public SocketTestClientAsync(string server, int port, int iterations, string message, Stopwatch timeProgramStart) :
-            base(server, port, iterations, message, timeProgramStart)
+        public SocketTestClientAsync(
+            ITestOutputHelper log,
+            string server, 
+            int port, 
+            int iterations, 
+            string message, 
+            Stopwatch timeProgramStart) : base(log, server, port, iterations, message, timeProgramStart)
         {
             sendEventArgs.Completed += IO_Complete;
             recvEventArgs.Completed += IO_Complete;

@@ -23,13 +23,23 @@
           "ref/dotnet/System.Collections.dll": {}
         }
       },
-      "System.Collections.Concurrent/4.0.0-beta-23127": {
+      "System.Collections.Concurrent/4.0.10-beta-23127": {
         "dependencies": {
-          "System.Runtime": "4.0.0-beta-23127",
-          "System.Threading.Tasks": "4.0.0-beta-23127"
+          "System.Runtime": "4.0.20-beta-23127",
+          "System.Threading.Tasks": "4.0.10-beta-23127",
+          "System.Diagnostics.Tracing": "4.0.20-beta-23127",
+          "System.Resources.ResourceManager": "4.0.0-beta-23127",
+          "System.Diagnostics.Debug": "4.0.10-beta-23127",
+          "System.Threading": "4.0.10-beta-23127",
+          "System.Collections": "4.0.10-beta-23127",
+          "System.Runtime.Extensions": "4.0.10-beta-23127",
+          "System.Globalization": "4.0.10-beta-23127"
         },
         "compile": {
           "ref/dotnet/System.Collections.Concurrent.dll": {}
+        },
+        "runtime": {
+          "lib/dotnet/System.Collections.Concurrent.dll": {}
         }
       },
       "System.Collections.NonGeneric/4.0.0-beta-23127": {
@@ -527,6 +537,24 @@
           "ref/dotnet/System.Threading.Tasks.dll": {}
         }
       },
+      "System.Threading.Tasks.Parallel/4.0.0-beta-23127": {
+        "dependencies": {
+          "System.Runtime": "4.0.20-beta-23127",
+          "System.Collections.Concurrent": "4.0.10-beta-23127",
+          "System.Threading.Tasks": "4.0.10-beta-23127",
+          "System.Diagnostics.Tracing": "4.0.20-beta-23127",
+          "System.Resources.ResourceManager": "4.0.0-beta-23127",
+          "System.Diagnostics.Debug": "4.0.10-beta-23127",
+          "System.Threading": "4.0.10-beta-23127",
+          "System.Runtime.Extensions": "4.0.10-beta-23127"
+        },
+        "compile": {
+          "ref/dotnet/System.Threading.Tasks.Parallel.dll": {}
+        },
+        "runtime": {
+          "lib/dotnet/System.Threading.Tasks.Parallel.dll": {}
+        }
+      },
       "System.Threading.ThreadPool/4.0.10-beta-23127": {
         "dependencies": {
           "System.Runtime": "4.0.0-beta-23127",
@@ -591,7 +619,7 @@
           "lib/portable-net45+aspnetcore50+win+wpa81+wp80/xunit.core.dll": {}
         }
       },
-      "xunit.netcore.extensions/1.0.0-prerelease-00073": {
+      "xunit.netcore.extensions/1.0.0-prerelease-00075": {
         "dependencies": {
           "System.Diagnostics.Debug": "4.0.10-beta-23127",
           "System.IO": "4.0.10-beta-23127",
@@ -695,18 +723,17 @@
         "ref/xamarinmac20/_._"
       ]
     },
-    "System.Collections.Concurrent/4.0.0-beta-23127": {
-      "sha512": "j8ufZHr70QG/Huw22TNMa2PNbTl81zdTdaYyruFbdHCuAjnzuIaumzspDpSGy6jmm8XMecbF6FjCpuqQ4T26cQ==",
+    "System.Collections.Concurrent/4.0.10-beta-23127": {
+      "serviceable": true,
+      "sha512": "6ztGCgMpxYIVbHC0KYDDR2UdwzVXT7QB827EkPHntcRJKmcyEYbH3ZS3uWXOoLG8PBTSoJfVP/k2Wpf0CwcKvA==",
       "files": [
-        "License.rtf",
-        "System.Collections.Concurrent.4.0.0-beta-23127.nupkg",
-        "System.Collections.Concurrent.4.0.0-beta-23127.nupkg.sha512",
+        "System.Collections.Concurrent.4.0.10-beta-23127.nupkg",
+        "System.Collections.Concurrent.4.0.10-beta-23127.nupkg.sha512",
         "System.Collections.Concurrent.nuspec",
+        "lib/dotnet/System.Collections.Concurrent.dll",
         "lib/MonoAndroid10/_._",
         "lib/MonoTouch10/_._",
-        "lib/net45/_._",
-        "lib/win8/_._",
-        "lib/wpa81/_._",
+        "lib/net46/_._",
         "lib/xamarinios10/_._",
         "lib/xamarinmac20/_._",
         "ref/dotnet/System.Collections.Concurrent.dll",
@@ -722,20 +749,7 @@
         "ref/dotnet/zh-hant/System.Collections.Concurrent.xml",
         "ref/MonoAndroid10/_._",
         "ref/MonoTouch10/_._",
-        "ref/net45/_._",
-        "ref/netcore50/System.Collections.Concurrent.dll",
-        "ref/netcore50/System.Collections.Concurrent.xml",
-        "ref/netcore50/de/System.Collections.Concurrent.xml",
-        "ref/netcore50/es/System.Collections.Concurrent.xml",
-        "ref/netcore50/fr/System.Collections.Concurrent.xml",
-        "ref/netcore50/it/System.Collections.Concurrent.xml",
-        "ref/netcore50/ja/System.Collections.Concurrent.xml",
-        "ref/netcore50/ko/System.Collections.Concurrent.xml",
-        "ref/netcore50/ru/System.Collections.Concurrent.xml",
-        "ref/netcore50/zh-hans/System.Collections.Concurrent.xml",
-        "ref/netcore50/zh-hant/System.Collections.Concurrent.xml",
-        "ref/win8/_._",
-        "ref/wpa81/_._",
+        "ref/net46/_._",
         "ref/xamarinios10/_._",
         "ref/xamarinmac20/_._"
       ]
@@ -1803,6 +1817,36 @@
         "ref/xamarinmac20/_._"
       ]
     },
+    "System.Threading.Tasks.Parallel/4.0.0-beta-23127": {
+      "serviceable": true,
+      "sha512": "5g9d4gt4QnsE56fPfwROlfv3X6tQ1mmv0gQY5KWQIpGe2EWlaL/zt9QzOqmPnny+isEXs5EzVGuemTs3cwgnUA==",
+      "files": [
+        "System.Threading.Tasks.Parallel.4.0.0-beta-23127.nupkg",
+        "System.Threading.Tasks.Parallel.4.0.0-beta-23127.nupkg.sha512",
+        "System.Threading.Tasks.Parallel.nuspec",
+        "lib/dotnet/System.Threading.Tasks.Parallel.dll",
+        "lib/net45/_._",
+        "lib/netcore50/System.Threading.Tasks.Parallel.dll",
+        "lib/win8/_._",
+        "lib/wpa81/_._",
+        "ref/dotnet/System.Threading.Tasks.Parallel.dll",
+        "ref/dotnet/System.Threading.Tasks.Parallel.xml",
+        "ref/dotnet/de/System.Threading.Tasks.Parallel.xml",
+        "ref/dotnet/es/System.Threading.Tasks.Parallel.xml",
+        "ref/dotnet/fr/System.Threading.Tasks.Parallel.xml",
+        "ref/dotnet/it/System.Threading.Tasks.Parallel.xml",
+        "ref/dotnet/ja/System.Threading.Tasks.Parallel.xml",
+        "ref/dotnet/ko/System.Threading.Tasks.Parallel.xml",
+        "ref/dotnet/ru/System.Threading.Tasks.Parallel.xml",
+        "ref/dotnet/zh-hans/System.Threading.Tasks.Parallel.xml",
+        "ref/dotnet/zh-hant/System.Threading.Tasks.Parallel.xml",
+        "ref/net45/_._",
+        "ref/netcore50/System.Threading.Tasks.Parallel.dll",
+        "ref/netcore50/System.Threading.Tasks.Parallel.xml",
+        "ref/win8/_._",
+        "ref/wpa81/_._"
+      ]
+    },
     "System.Threading.ThreadPool/4.0.10-beta-23127": {
       "sha512": "Z99U+/mlNrB1+1XL7NkwoqEnUJvDZISG9InPJFmnrNKIHX1TywFK5F8/O+B5QJXB18XCvEMpXbOk0BQ241iYoQ==",
       "files": [
@@ -1923,12 +1967,12 @@
         "lib/portable-net45+aspnetcore50+win+wpa81+wp80/xunit.runner.utility.xml"
       ]
     },
-    "xunit.netcore.extensions/1.0.0-prerelease-00073": {
+    "xunit.netcore.extensions/1.0.0-prerelease-00075": {
       "serviceable": true,
-      "sha512": "lP/AU18553jqq4HzwmO9J3iJeqkc7D3T/V32iG6jbhcwkVZV40dCuGw5TdbrO2w4GX/60EG2unOWvsWH2cKGcg==",
+      "sha512": "crNU2PbilYFmbAwmiIYSGVSTRrY4Su+h4qmkeotRe41jxyJnzcfZwtY2/xFK9RiXFYjiTJrF/pRc589eNFljsw==",
       "files": [
-        "xunit.netcore.extensions.1.0.0-prerelease-00073.nupkg",
-        "xunit.netcore.extensions.1.0.0-prerelease-00073.nupkg.sha512",
+        "xunit.netcore.extensions.1.0.0-prerelease-00075.nupkg",
+        "xunit.netcore.extensions.1.0.0-prerelease-00075.nupkg.sha512",
         "xunit.netcore.extensions.nuspec",
         "lib/dotnet/Xunit.NetCore.Extensions.dll"
       ]
@@ -1941,6 +1985,7 @@
       "System.Runtime >= 4.0.20-beta-*",
       "System.Threading >= 4.0.0-beta-*",
       "System.Threading.Tasks >= 4.0.0-beta-*",
+      "System.Threading.Tasks.Parallel >= 4.0.0-beta-*",
       "System.IO >= 4.0.10-beta-*",
       "System.Net.Primitives >= 4.0.10-beta-*",
       "xunit >= 2.0.0-beta5-build2785",

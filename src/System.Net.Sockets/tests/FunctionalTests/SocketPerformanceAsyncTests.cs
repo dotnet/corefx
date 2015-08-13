@@ -18,7 +18,7 @@ using Xunit.Abstractions;
 namespace System.Net.Sockets.Performance.Tests
 {
     [Trait("Perf", "true")]
-    public class SocketPerformanceAsyncTests 
+    public class SocketPerformanceAsyncTests
     {
         public const int TestPortBase = 8300;
         private readonly ITestOutputHelper _log;
@@ -39,13 +39,15 @@ namespace System.Net.Sockets.Performance.Tests
             int socket_instances = 1;
             long expectedMilliseconds = 5000;
 
-            SocketPerformanceAsyncTests.ClientServerTest(
-                port, 
-                serverType, 
-                clientType, 
-                iterations, 
-                bufferSize, 
-                socket_instances, 
+            var test = new SocketPerformanceTests(_log);
+
+            test.ClientServerTest(
+                port,
+                serverType,
+                clientType,
+                iterations,
+                bufferSize,
+                socket_instances,
                 expectedMilliseconds);
         }
 
@@ -60,7 +62,16 @@ namespace System.Net.Sockets.Performance.Tests
             int socket_instances = 100;
             long expectedMilliseconds = 10000;
 
-            SocketPerformanceAsyncTests.ClientServerTest(port, serverType, clientType, iterations, bufferSize, socket_instances, expectedMilliseconds);
+            var test = new SocketPerformanceTests(_log);
+
+            test.ClientServerTest(
+                port, 
+                serverType, 
+                clientType, 
+                iterations, 
+                bufferSize, 
+                socket_instances, 
+                expectedMilliseconds);
         }
     }
 }
