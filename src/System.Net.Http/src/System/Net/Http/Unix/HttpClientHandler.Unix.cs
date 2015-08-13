@@ -99,8 +99,14 @@ namespace System.Net.Http
 
         public int MaxAutomaticRedirections
         {
-            get { throw NotImplemented.ByDesignWithMessage("HTTP stack not implemented"); }
-            set { throw NotImplemented.ByDesignWithMessage("HTTP stack not implemented"); }
+            get
+            {
+                return _curlHandler.MaxAutomaticRedirections;
+            }
+            set
+            {
+                _curlHandler.MaxAutomaticRedirections = value;
+            }
         }
 
         public long MaxRequestContentBufferSize
