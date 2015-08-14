@@ -11,11 +11,9 @@ namespace System.Net.Sockets.Tests
     public class AgnosticListenerTest
     {
         private static int TestPortBase = 8010;
-        private readonly ITestOutputHelper _log;
 
         public AgnosticListenerTest(ITestOutputHelper _log)
         {
-            _log = TestLogging.GetInstance();
             Assert.True(Capability.IPv4Support() && Capability.IPv6Support());
         }
 
