@@ -43,9 +43,11 @@ namespace System.Net.Sockets.Tests
         public void IPv4Constructor_DualModeThrows()
         {
             Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-            Assert.False(socket.DualMode);
+            Assert.Throws<NotSupportedException>( () => {
+                Assert.False(socket.DualMode);
+            });
 
-            Assert.Throws<NotSupportedException>(() => {
+            Assert.Throws<NotSupportedException>( () => {
                 socket.DualMode = true;
             });
         }

@@ -4,36 +4,22 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{DA4FB750-6D71-495F-B6B9-3029E58F3AC3}</ProjectGuid>
+    <ProjectGuid>{7340F160-F482-468D-AA09-2B6882BCDAD9}</ProjectGuid>
     <OutputType>Library</OutputType>
     <UnsupportedPlatforms>Linux;OSX;FreeBSD</UnsupportedPlatforms>
   </PropertyGroup>
   <!-- Help VS understand available configurations -->
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' " />
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' " />
-
   <ItemGroup>
-    <Compile Include="AcceptAsync.cs" />
-    <Compile Include="AgnosticListenerTest.cs" />
-    <Compile Include="ConnectAsync.cs" />
-    <Compile Include="ConnectExTest.cs" />
-    <Compile Include="Disconnect.cs" />
-    <Compile Include="DisconnectAsync.cs" />
-    <Compile Include="DnsEndPointTest.cs" />
-    <Compile Include="DualModeSocketTest.cs" />
-    <Compile Include="LingerStateTest.cs" />
-    <Compile Include="ReceiveMessageFrom.cs" />
-    <Compile Include="ReceiveMessageFromAsync.cs" />
-    <Compile Include="SendPacketsAsync.cs" />
-    <Compile Include="SendPacketsElementTest.cs" />
-    <Compile Include="TimeoutTest.cs" />
-    
+    <Compile Include="SocketPerformanceAPMTests.cs" />
+
     <!-- Common Sockets files -->
-    <Compile Include="$(CommonTestPath)\System.Net\Sockets\SocketTestServer.DefaultAPMFactoryConfiguration.cs">
-      <Link>SocketCommon\SocketTestServer.DefaultAsyncFactoryConfiguration.cs</Link>
-    </Compile>
     <Compile Include="$(CommonTestPath)\System.Net\Sockets\SocketTestServer.cs">
       <Link>SocketCommon\SocketTestServer.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonTestPath)\System.Net\Sockets\SocketTestServer.DefaultAsyncFactoryConfiguration.cs">
+      <Link>SocketCommon\SocketTestServer.DefaultAPMFactoryConfiguration.cs</Link>
     </Compile>
     <Compile Include="$(CommonTestPath)\System.Net\Sockets\SocketTestServerAsync.cs">
       <Link>SocketCommon\SocketTestServerAsync.cs</Link>
@@ -43,6 +29,15 @@
     </Compile>
     <Compile Include="$(CommonTestPath)\System.Net\Sockets\SocketImplementationType.cs">
       <Link>SocketCommon\SocketImplementationType.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonTestPath)\System.Net\Sockets\Performance\SocketPerformanceTests.cs">
+      <Link>SocketCommon\SocketPerformanceFactories.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonTestPath)\System.Net\Sockets\Performance\SocketTestClient.cs">
+      <Link>SocketCommon\SocketTestClient.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonTestPath)\System.Net\Sockets\Performance\SocketTestClientAsync.cs">
+      <Link>SocketCommon\SocketTestClientAsync.cs</Link>
     </Compile>
 
     <!-- Common test files -->
@@ -59,7 +54,7 @@
       <Link>Common\System.Net\Capability.Sockets.cs</Link>
     </Compile>
   </ItemGroup>
-
+  
   <ItemGroup>
     <ProjectReference Include="..\..\..\System.Net.NameResolution\src\System.Net.NameResolution.csproj">
       <Project>{1714448C-211E-48C1-8B7E-4EE667D336A1}</Project>
