@@ -54,7 +54,7 @@ namespace System.Net.Http
         private SafeCurlMultiHandle _multiHandle;
         private GCHandle _multiHandlePtr = new GCHandle();
         private bool _preAuthenticate = false;
-        private CredentialCache _credentialCache = new CredentialCache();
+        private readonly CredentialCache _credentialCache = new CredentialCache();
 
         #endregion
 
@@ -142,7 +142,6 @@ namespace System.Net.Http
             }
             set
             {
-                CheckDisposedOrStarted();
                 _serverCredentials = value;
             }
         }
@@ -244,7 +243,7 @@ namespace System.Net.Http
             }
 
             // Create RequestCompletionSource object and save current values of handler settings.
-            RequestCompletionSource state = new RequestCompletionSource
+            RequestCompletionSource state = new RequestCompletionSource(this)
             {
                 CancellationToken = cancellationToken,
                 RequestMessage = request,
@@ -267,7 +266,6 @@ namespace System.Net.Http
                 // Prepare context objects
                 state.ResponseMessage = new CurlResponseMessage(state.RequestMessage);
                 stateHandle = GCHandle.Alloc(state);
-                state.Handler = this;
                 requestHandle = CreateRequestHandle(state, stateHandle);
                 state.RequestHandle = requestHandle;
                 needCleanup = true;
@@ -398,7 +396,7 @@ namespace System.Net.Http
 
             SetProxyOptions(requestHandle, state.RequestMessage.RequestUri);
 
-            SetRequestHandleCredentialsOptions(requestHandle,state);
+            SetRequestHandleCredentialsOptions(requestHandle, state);
             state.RequestHeaderHandle = SetRequestHeaders(requestHandle, state.RequestMessage);
 
             // TODO: Handle other options
@@ -855,6 +853,13 @@ namespace System.Net.Http
 
         private sealed class RequestCompletionSource : TaskCompletionSource<HttpResponseMessage>
         {
+            private readonly CurlHandler _handler;
+
+            public RequestCompletionSource(CurlHandler handler)
+            {
+                this._handler = handler;
+            }
+
             public CancellationToken CancellationToken { get; set; }
 
             public HttpRequestMessage RequestMessage { get; set; }
@@ -873,7 +878,13 @@ namespace System.Net.Http
 
             public NetworkCredential NetworkCredential {get; set;}
 
-            public CurlHandler Handler { get; set;}
+            public CurlHandler Handler
+            {
+                get
+                {
+                    return _handler;
+                }
+            }
         }
 
         private enum ProxyUsePolicy
