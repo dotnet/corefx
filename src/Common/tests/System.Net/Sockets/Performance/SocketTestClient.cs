@@ -85,13 +85,9 @@ namespace System.Net.Sockets.Performance.Tests
             switch (type)
             {
                 case SocketImplementationType.APM:
-#if SOCKETTESTSERVERAPM
-                    var socketAPM = new SocketTestClientAPM(server, port, iterations, message, timeProgramStart);
-                    _log.WriteLine(socketAPM.GetHashCode() + " SocketTestClientAPM(..)");
+                    var socketAPM = new SocketTestClientAPM(log, server, port, iterations, message, timeProgramStart);
+                    log.WriteLine(socketAPM.GetHashCode() + " SocketTestClientAPM(..)");
                     return socketAPM;
-#else
-                    throw new PlatformNotSupportedException();
-#endif
                 case SocketImplementationType.Async:
                     var socketAsync = new SocketTestClientAsync(log, server, port, iterations, message, timeProgramStart);
                     log.WriteLine(socketAsync.GetHashCode() + " SocketTestClientAsync(..)");

@@ -1,13 +1,18 @@
-﻿using System;
-using System.Diagnostics;
-using System.Net.Sockets;
+﻿using System.Diagnostics;
 
-namespace NCLTest.Sockets
+using Xunit.Abstractions;
+
+namespace System.Net.Sockets.Performance.Tests
 {
     public class SocketTestClientAPM : SocketTestClient
     {
-        public SocketTestClientAPM(string server, int port, int iterations, string message, Stopwatch timeProgramStart) :
-            base(server, port, iterations, message, timeProgramStart)
+        public SocketTestClientAPM(
+            ITestOutputHelper log, 
+            string server, 
+            int port, 
+            int iterations, 
+            string message, 
+            Stopwatch timeProgramStart) : base(log, server, port, iterations, message, timeProgramStart)
         {
         }
 
