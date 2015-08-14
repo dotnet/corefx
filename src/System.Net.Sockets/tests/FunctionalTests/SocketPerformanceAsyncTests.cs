@@ -1,8 +1,5 @@
-﻿using System.Diagnostics;
-using System.Net;
-using System.Net.Sockets.Tests;
+﻿using System.Net.Sockets.Tests;
 using System.Net.Test.Common;
-using System.Threading.Tasks;
 
 using Xunit;
 using Xunit.Abstractions;

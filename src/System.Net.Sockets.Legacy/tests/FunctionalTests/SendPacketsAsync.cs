@@ -228,17 +228,11 @@ namespace System.Net.Sockets.Tests
         [Fact]
         public void SendPacketsElement_BlankFileName_Throws()
         {
-            try
+            Assert.Throws<ArgumentException>(() =>
             {
                 // Existence is validated on send
                 SendPackets(new SendPacketsElement(" \t  "), 0);
-                Assert.Fail("Expected ArgumentException");
-            }
-            catch (ArgumentException)
-            {
-                // expected
-                return;
-            }
+            });
         }
         
         [Fact]
