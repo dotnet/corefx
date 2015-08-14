@@ -526,7 +526,7 @@ namespace System.IO
             Debug.Assert(_isAsync);
             Debug.Assert(_readPos == 0 && _readLen == 0, "FileStream: Read buffer must be empty in FlushWriteAsync!");
 
-            Task flushTask = WriteInternalCoreAsync(_buffer, 0, _writePos, CancellationToken.None);
+            Task flushTask = WriteInternalCoreAsync(_buffer, 0, _writePos, cancellationToken);
 
             _writePos = 0;
 
