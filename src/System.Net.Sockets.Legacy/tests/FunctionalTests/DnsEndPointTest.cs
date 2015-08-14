@@ -22,67 +22,48 @@ namespace System.Net.Sockets.Tests
         [Fact]
         public void Socket_ConnectDnsEndPoint_Failure()
         {
-            Socket sock = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            using (Socket sock = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
+            {
 
-            try
-            {
-                sock.Connect(new DnsEndPoint("notahostname.invalid.corp.microsoft.com", 8080));
-                Assert.Fail("Connecting to invalid dns name did not fail");
-            }
-            catch (SocketException ex)
-            {
+                SocketException ex = Assert.Throws<SocketException>(() => {
+                    sock.Connect(new DnsEndPoint("notahostname.invalid.corp.microsoft.com", 8080));
+                });
+
                 SocketError errorCode = ex.SocketErrorCode;
                 Assert.True((errorCode == SocketError.HostNotFound) || (errorCode == SocketError.NoData),
-                    "SocketErrorCode: {0}", errorCode);
-            }
+                    "SocketErrorCode: {0}" + errorCode);
 
-            try
-            {
-                sock.Connect(new DnsEndPoint("localhost", 8081));
-                Assert.Fail("Connecting to an invalid port did not fail");
-            }
-            catch (SocketException ex)
-            {
+                ex = Assert.Throws<SocketException>(() => {
+                    sock.Connect(new DnsEndPoint("localhost", 8081));
+                });
+
                 Assert.Equal(SocketError.ConnectionRefused, ex.SocketErrorCode);
             }
-
-            sock.Dispose();
         }
 
         [Fact]
         public void Socket_SendToDnsEndPoint_ArgumentException()
         {
-            Socket sock = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-
-            try
+            using (Socket sock = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp))
             {
-                sock.SendTo(new byte[10], new DnsEndPoint("localhost", 8080));
-                Assert.Fail("SendTo a DnsEndPoint did not fail");
+                Assert.Throws<ArgumentException>(() => {
+                    sock.SendTo(new byte[10], new DnsEndPoint("localhost", 8080));
+                });
             }
-            catch (ArgumentException)
-            {
-            }
-
-            sock.Dispose();
         }
 
         [Fact]
         public void Socket_ReceiveFromDnsEndPoint_ArgumentException()
         {
-            Socket sock = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-            sock.Bind(new IPEndPoint(IPAddress.Loopback, 8080));
-
-            try
+            using (Socket sock = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp))
             {
+                sock.Bind(new IPEndPoint(IPAddress.Loopback, 8080));
                 EndPoint endpoint = new DnsEndPoint("localhost", 8080);
-                sock.ReceiveFrom(new byte[10], ref endpoint);
-                Assert.Fail("ReceiveFrom a DnsEndPoint did not fail");
-            }
-            catch (ArgumentException)
-            {
-            }
 
-            sock.Dispose();
+                Assert.Throws<ArgumentException>(() => {
+                    sock.ReceiveFrom(new byte[10], ref endpoint);
+                });
+            }
         }
 
         [Fact]
@@ -101,50 +82,36 @@ namespace System.Net.Sockets.Tests
         [Fact]
         public void Socket_BeginConnectDnsEndPoint_Failure()
         {
-            Socket sock = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            using (Socket sock = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
+            {
 
-            try
-            {
-                IAsyncResult result = sock.BeginConnect(new DnsEndPoint("notahostname.invalid.corp.microsoft.com", 8080), null, null);
-                sock.EndConnect(result);
-                Assert.Fail("BeginConnect to an invalid hostname did not fail");
-            }
-            catch (SocketException ex)
-            {
+                SocketException ex = Assert.Throws<SocketException>(() => {
+                    IAsyncResult result = sock.BeginConnect(new DnsEndPoint("notahostname.invalid.corp.microsoft.com", 8080), null, null);
+                    sock.EndConnect(result);
+                });
+
                 SocketError errorCode = ex.SocketErrorCode;
                 Assert.True((errorCode == SocketError.HostNotFound) || (errorCode == SocketError.NoData),
-                    "SocketErrorCode: {0}", errorCode);
-            }
+                    "SocketErrorCode: {0}" + errorCode);
 
-            try
-            {
-                IAsyncResult result = sock.BeginConnect(new DnsEndPoint("localhost", 8080), null, null);
-                sock.EndConnect(result);
-                Assert.Fail("BeginConnect to an invalid port did not fail");
-            }
-            catch (SocketException ex)
-            {
+                ex = Assert.Throws<SocketException>(() => {
+                    IAsyncResult result = sock.BeginConnect(new DnsEndPoint("localhost", 8080), null, null);
+                    sock.EndConnect(result);
+                });
+
                 Assert.Equal(SocketError.ConnectionRefused, ex.SocketErrorCode);
             }
-
-            sock.Dispose();
         }
 
         [Fact]
         public void Socket_BeginSendToDnsEndPoint_ArgumentException()
         {
-            Socket sock = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-
-            try
+            using (Socket sock = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp))
             {
-                sock.BeginSendTo(new byte[10], 0, 0, SocketFlags.None, new DnsEndPoint("localhost", 8080), null, null);
-                Assert.Fail("SendTo a DnsEndPoint did not fail");
+                Assert.Throws<ArgumentException>(() => {
+                    sock.BeginSendTo(new byte[10], 0, 0, SocketFlags.None, new DnsEndPoint("localhost", 8080), null, null);
+                });
             }
-            catch (ArgumentException)
-            {
-            }
-
-            sock.Dispose();
         }
 
         private void OnConnectAsyncCompleted(object sender, SocketAsyncEventArgs args)
@@ -314,7 +281,7 @@ namespace System.Net.Sockets.Tests
 
         public void CallbackThatShouldNotBeCalled(object sender, SocketAsyncEventArgs args)
         {
-            Assert.Fail("This Callback should not be called");
+            Assert.True(false, "This Callback should not be called");
         }
 
         [Fact]

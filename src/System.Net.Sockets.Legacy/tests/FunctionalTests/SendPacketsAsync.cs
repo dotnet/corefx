@@ -53,83 +53,57 @@ namespace System.Net.Sockets.Tests
         [Fact]
         public void Disposed_Throw()
         {
-            try
+            using (SocketTestServer.SocketTestServerFactory(Server))
             {
-                using (SocketTestServer.SocketTestServerFactory(Server))
+                using (Socket sock = new Socket(AddressFamily.InterNetworkV6, SocketType.Stream, ProtocolType.Tcp))
                 {
-                    using (Socket sock = new Socket(AddressFamily.InterNetworkV6, SocketType.Stream, ProtocolType.Tcp))
-                    {
-                        sock.Connect(Server);
-                        sock.Dispose();
+                    sock.Connect(Server);
+                    sock.Dispose();
 
+                    Assert.Throws<ObjectDisposedException>(() => {
                         sock.SendPacketsAsync(new SocketAsyncEventArgs());
-                    }
+                    });
                 }
-                Assert.Fail("Expected ObjectDisposedException");
-            }
-            catch (ObjectDisposedException)
-            {
-                // expected
-                return;
             }
         }
 
         [Fact]
         public void NullArgs_Throw()
         {
-            try
+            using (SocketTestServer.SocketTestServerFactory(Server))
             {
-                using (SocketTestServer.SocketTestServerFactory(Server))
+                using (Socket sock = new Socket(AddressFamily.InterNetworkV6, SocketType.Stream, ProtocolType.Tcp))
                 {
-                    using (Socket sock = new Socket(AddressFamily.InterNetworkV6, SocketType.Stream, ProtocolType.Tcp))
-                    {
-                        sock.Connect(Server);
+                    sock.Connect(Server);
 
+                    ArgumentNullException ex = Assert.Throws<ArgumentNullException>(() => {
                         sock.SendPacketsAsync(null);
-                    }
+                    });
+                    Assert.Equal("e", ex.ParamName);
                 }
-                Assert.Fail("Expected NullReferenceException");
-            }
-            catch (ArgumentNullException ex)
-            {
-                // expected
-                Assert.Equal("e", ex.ParamName);
-                return;
             }
         }
 
         [Fact]
         public void NotConnected_Throw()
         {
-            try
-            {
-                Socket socket = new Socket(AddressFamily.InterNetworkV6, SocketType.Stream, ProtocolType.Tcp);
-                // Needs to be connected before send
+            Socket socket = new Socket(AddressFamily.InterNetworkV6, SocketType.Stream, ProtocolType.Tcp);
+            // Needs to be connected before send
+
+            ArgumentNullException ex = Assert.Throws<ArgumentNullException>(() => {
                 socket.SendPacketsAsync(new SocketAsyncEventArgs());
-                Assert.Fail("Expected NotSupportedException");
-            }
-            catch (ArgumentNullException ex)
-            {
-                // expected
-                Assert.Equal("e.SendPacketsElements", ex.ParamName);
-                return;
-            }
+            });
+            Assert.Equal("e.SendPacketsElements", ex.ParamName);
         }
 
         [Fact]
         public void NullList_Throws()
         {
-            try
-            {
+            ArgumentNullException ex = Assert.Throws<ArgumentNullException>(() => {
                 SendPackets((SendPacketsElement[])null, SocketError.Success, 0);
-                Assert.Fail("Expected NullReferenceException");
-            }
-            catch (ArgumentNullException ex)
-            {
-                // expected
-                Assert.Equal("e.SendPacketsElements", ex.ParamName);
-                return;
-            }
+            });
+
+            Assert.Equal("e.SendPacketsElements", ex.ParamName);
         }
 
         [Fact]
@@ -246,17 +220,9 @@ namespace System.Net.Sockets.Tests
         [Fact]
         public void SendPacketsElement_EmptyFileName_Throws()
         {
-            try
-            {
-                // Existence is validated on send
+            Assert.Throws<ArgumentException>(() => {
                 SendPackets(new SendPacketsElement(String.Empty), 0);
-                Assert.Fail("Expected ArgumentException");
-            }
-            catch (ArgumentException)
-            {
-                // expected
-                return;
-            }
+            });
         }
 
         [Fact]
@@ -278,49 +244,28 @@ namespace System.Net.Sockets.Tests
         [Fact]
         public void SendPacketsElement_BadCharactersFileName_Throws()
         {
-            try
-            {
+            Assert.Throws<ArgumentException>(() => {
                 // Existence is validated on send
                 SendPackets(new SendPacketsElement("blarkd@dfa?/sqersf"), 0);
-                Assert.Fail("Expected ArgumentException");
-            }
-            catch (ArgumentException)
-            {
-                // expected
-                return;
-            }
+            });
         }
 
         [Fact]
         public void SendPacketsElement_MissingDirectoryName_Throws()
         {
-            try
-            {
+            Assert.Throws<DirectoryNotFoundException>(() => {
                 // Existence is validated on send
                 SendPackets(new SendPacketsElement(@"nodir\nofile"), 0);
-                Assert.Fail("Expected DirectoryNotFoundException");
-            }
-            catch (DirectoryNotFoundException)
-            {
-                // expected
-                return;
-            }
+            });
         }
 
         [Fact]
         public void SendPacketsElement_MissingFile_Throws()
         {
-            try
-            {
+            Assert.Throws<FileNotFoundException>(() => {
                 // Existence is validated on send
                 SendPackets(new SendPacketsElement("DoesntExit"), 0);
-                Assert.Fail("Expected FileNotFoundException");
-            }
-            catch (FileNotFoundException)
-            {
-                // expected
-                return;
-            }
+            });
         }
 
         [Fact]
