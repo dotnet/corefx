@@ -41,18 +41,12 @@ namespace System.IO
     internal sealed partial class Win32FileStream : FileStreamBase
     {
         internal const int DefaultBufferSize = 4096;
-#if USE_OVERLAPPED
         internal const bool DefaultUseAsync = true;
-#else
-        internal const bool DefaultUseAsync = false;
-#endif
         internal const bool DefaultIsAsync = false;
 
         private byte[] _buffer;   // Shared read/write buffer.  Alloc on first use.
         private String _fileName; // Fully qualified file name.
-#if USE_OVERLAPPED
         private bool _isAsync;    // Whether we opened the handle for overlapped IO
-#endif
         private bool _canRead;
         private bool _canWrite;
         private bool _canSeek;
@@ -95,13 +89,8 @@ namespace System.IO
             if (mode == FileMode.Append)
                 mode = FileMode.OpenOrCreate;
 
-#if USE_OVERLAPPED
             if ((options & FileOptions.Asynchronous) != 0)
                 _isAsync = true;
-#else
-            // Disallow overlapped IO.
-            options &= ~FileOptions.Asynchronous;
-#endif
 
             int flagsAndAttributes = (int)options;
 
@@ -115,9 +104,7 @@ namespace System.IO
             try
             {
                 _handle = Interop.mincore.SafeCreateFile(path, fAccess, share, ref secAttrs, mode, flagsAndAttributes, IntPtr.Zero);
-#if USE_OVERLAPPED
                 _handle.IsAsync = _isAsync;
-#endif
 
                 if (_handle.IsInvalid)
                 {
@@ -150,7 +137,6 @@ namespace System.IO
                 throw new NotSupportedException(SR.NotSupported_FileStreamOnNonFiles);
             }
 
-#if USE_OVERLAPPED
             // This is necessary for async IO using IO Completion ports via our 
             // managed Threadpool API's.  This (theoretically) calls the OS's 
             // BindIoCompletionCallback method, and passes in a stub for the 
@@ -179,7 +165,6 @@ namespace System.IO
                     }
                 }
             }
-#endif
 
             _canRead = (access & FileAccess.Read) != 0;
             _canWrite = (access & FileAccess.Write) != 0;
@@ -240,9 +225,7 @@ namespace System.IO
             int handleType = Interop.mincore.GetFileType(_handle);
             Debug.Assert(handleType == Interop.mincore.FileTypes.FILE_TYPE_DISK || handleType == Interop.mincore.FileTypes.FILE_TYPE_PIPE || handleType == Interop.mincore.FileTypes.FILE_TYPE_CHAR, "FileStream was passed an unknown file type!");
 
-#if USE_OVERLAPPED
             _isAsync = isAsync;
-#endif
             _canRead = 0 != (access & FileAccess.Read);
             _canWrite = 0 != (access & FileAccess.Write);
             _canSeek = handleType == Interop.mincore.FileTypes.FILE_TYPE_DISK;
@@ -253,7 +236,6 @@ namespace System.IO
             _fileName = null;
             _isPipe = handleType == Interop.mincore.FileTypes.FILE_TYPE_PIPE;
 
-#if USE_OVERLAPPED
             // This is necessary for async IO using IO Completion ports via our 
             // managed Threadpool API's.  This calls the OS's 
             // BindIoCompletionCallback method, and passes in a stub for the 
@@ -280,22 +262,10 @@ namespace System.IO
                 }
             }
             else if (!_isAsync)
-#endif
             {
                 if (handleType != Interop.mincore.FileTypes.FILE_TYPE_PIPE)
                     VerifyHandleIsSync();
             }
-
-#if !USE_OVERLAPPED
-            // When USE_OVERLAPPED is not supported we ignore the isAsync property and always call
-            // VerifyHandleIsSync above.  We'll then throw here if we were told it was Async.
-
-            if (isAsync)
-            {
-                // Passed in a synchronous handle and told us isAsync
-                throw new ArgumentException(SR.Arg_HandleNotAsync, "handle");
-            }
-#endif
 
             if (_canSeek)
                 SeekCore(0, SeekOrigin.Current);
@@ -332,44 +302,33 @@ namespace System.IO
         [System.Security.SecuritySafeCritical]  // auto-generated
         private unsafe void VerifyHandleIsSync()
         {
+            Debug.Assert(!_isAsync);
+
             // Do NOT use this method on pipes.  Reading or writing to a pipe may
             // cause an app to block incorrectly, introducing a deadlock (depending
             // on whether a write will wake up an already-blocked thread or this
             // Win32FileStream's thread).
+            Debug.Assert(Interop.mincore.GetFileType(_handle) != Interop.mincore.FileTypes.FILE_TYPE_PIPE);
 
-            // Do NOT change this to use a byte[] of length 0, or test test won't
-            // work.  Our ReadFile & WriteFile methods are special cased to return
-            // for arrays of length 0, since we'd get an IndexOutOfRangeException 
-            // while using C#'s fixed syntax.
-            byte[] bytes = new byte[1];
-            int errorCode = 0;
-            int r = 0;
+            byte* bytes = stackalloc byte[1];
+            int numBytesReadWritten;
+            int r = -1;
 
             // If the handle is a pipe, ReadFile will block until there
             // has been a write on the other end.  We'll just have to deal with it,
             // For the read end of a pipe, you can mess up and 
             // accidentally read synchronously from an async pipe.
             if (_canRead)
-            {
-#if USE_OVERLAPPED
-                r = ReadFileNative(_handle, bytes, 0, 0, null, out errorCode);
-#else
-                r = ReadFileNative(_handle, bytes, 0, 0, out errorCode);
-#endif
-            }
+                r = Interop.mincore.ReadFile(_handle, bytes, 0, out numBytesReadWritten, IntPtr.Zero);
             else if (_canWrite)
-            {
-#if USE_OVERLAPPED
-                r = WriteFileNative(_handle, bytes, 0, 0, null, out errorCode);
-#else
-                r = WriteFileNative(_handle, bytes, 0, 0, out errorCode);
-#endif
-            }
+                r = Interop.mincore.WriteFile(_handle, bytes, 0, out numBytesReadWritten, IntPtr.Zero);
 
-            if (errorCode == ERROR_INVALID_PARAMETER)
-                throw new ArgumentException(SR.Arg_HandleNotSync, "handle");
-            if (errorCode == Interop.mincore.Errors.ERROR_INVALID_HANDLE)
-                throw Win32Marshal.GetExceptionForWin32Error(errorCode, "<OS handle>");
+            if (r == 0)
+            {
+                int errorCode = GetLastWin32ErrorAndDisposeHandleIfInvalid(throwIfInvalidHandle: true);
+                if (errorCode == ERROR_INVALID_PARAMETER)
+                    throw new ArgumentException(SR.Arg_HandleNotSync, "handle");
+            }
         }
 
 
@@ -396,11 +355,7 @@ namespace System.IO
 
         public override bool IsAsync
         {
-#if USE_OVERLAPPED
             get { return _isAsync; }
-#else
-            get { return false; }
-#endif
         }
 
         public override long Length
@@ -494,10 +449,8 @@ namespace System.IO
                 if (_handle != null && !_handle.IsClosed)
                     _handle.Dispose();
 
-#if USE_OVERLAPPED
                 if (_handle.ThreadPoolBinding != null)
                     _handle.ThreadPoolBinding.Dispose();
-#endif
 
                 _canRead = false;
                 _canWrite = false;
@@ -574,10 +527,9 @@ namespace System.IO
         {
             Debug.Assert(_readPos == 0 && _readLen == 0, "FileStream: Read buffer must be empty in FlushWrite!");
 
-#if USE_OVERLAPPED
             if (_isAsync)
             {
-                Task<int> writeTask = WriteInternalCoreAsync(_buffer, 0, _writePos, CancellationToken.None);
+                Task writeTask = WriteInternalCoreAsync(_buffer, 0, _writePos, CancellationToken.None);
                 // With our Whidbey async IO & overlapped support for AD unloads,
                 // we don't strictly need to block here to release resources
                 // since that support takes care of the pinning & freeing the 
@@ -597,7 +549,6 @@ namespace System.IO
                 }
             }
             else
-#endif
             {
                 WriteCore(_buffer, 0, _writePos);
             }
@@ -766,23 +717,18 @@ namespace System.IO
             Debug.Assert(_writePos == 0, "_writePos == 0");
             Debug.Assert(offset >= 0, "offset is negative");
             Debug.Assert(count >= 0, "count is negative");
-#if USE_OVERLAPPED
             if (_isAsync)
             {
                 return ReadInternalCoreAsync(buffer, offset, count, 0, CancellationToken.None).GetAwaiter().GetResult();
             }
-#endif
 
             // Make sure we are reading from the right spot
             if (_exposedHandle)
                 VerifyOSHandlePosition();
 
             int errorCode = 0;
-#if USE_OVERLAPPED
             int r = ReadFileNative(_handle, buffer, offset, count, null, out errorCode);
-#else       
-            int r = ReadFileNative(_handle, buffer, offset, count, out errorCode);
-#endif
+
             if (r == -1)
             {
                 // For pipes, ERROR_BROKEN_PIPE is the normal end of the pipe.
@@ -901,32 +847,11 @@ namespace System.IO
         {
             Debug.Assert(!_handle.IsClosed && _canSeek, "!_handle.IsClosed && _parent.CanSeek");
             Debug.Assert(origin >= SeekOrigin.Begin && origin <= SeekOrigin.End, "origin>=SeekOrigin.Begin && origin<=SeekOrigin.End");
-            int errorCode = 0;
             long ret = 0;
 
             if (!Interop.mincore.SetFilePointerEx(_handle, offset, out ret, (uint)origin))
             {
-                errorCode = Marshal.GetLastWin32Error();
-                // #errorInvalidHandle
-                // If ERROR_INVALID_HANDLE is returned, it doesn't suffice to set 
-                // the handle as invalid; the handle must also be closed.
-                // 
-                // Marking the handle as invalid but not closing the handle
-                // resulted in exceptions during finalization and locked column 
-                // values (due to invalid but unclosed handle) in SQL Win32FileStream 
-                // scenarios.
-                // 
-                // A more mainstream scenario involves accessing a file on a 
-                // network share. ERROR_INVALID_HANDLE may occur because the network 
-                // connection was dropped and the server closed the handle. However, 
-                // the client side handle is still open and even valid for certain 
-                // operations.
-                //
-                // Note that _parent.Dispose doesn't throw so we don't need to special case. 
-                // SetHandleAsInvalid only sets _closed field to true (without 
-                // actually closing handle) so we don't need to call that as well.
-                if (errorCode == Interop.mincore.Errors.ERROR_INVALID_HANDLE)
-                    _handle.Dispose();
+                int errorCode = GetLastWin32ErrorAndDisposeHandleIfInvalid();
                 throw Win32Marshal.GetExceptionForWin32Error(errorCode);
             }
 
@@ -1009,13 +934,11 @@ namespace System.IO
                 // Reset our buffer.  We essentially want to call FlushWrite
                 // without calling Flush on the underlying Stream.
 
-#if USE_OVERLAPPED
                 if (_isAsync)
                 {
                     WriteInternalCoreAsync(_buffer, 0, _writePos, CancellationToken.None).GetAwaiter().GetResult();
                 }
                 else
-#endif
                 {
                     WriteCore(_buffer, 0, _writePos);
                 }
@@ -1047,24 +970,18 @@ namespace System.IO
             Debug.Assert(_readPos == _readLen, "_readPos == _readLen");
             Debug.Assert(offset >= 0, "offset is negative");
             Debug.Assert(count >= 0, "count is negative");
-#if USE_OVERLAPPED
             if (_isAsync)
             {
                 WriteInternalCoreAsync(buffer, offset, count, CancellationToken.None).GetAwaiter().GetResult();
                 return;
             }
-#endif
 
             // Make sure we are writing to the position that we think we are
             if (_exposedHandle)
                 VerifyOSHandlePosition();
 
             int errorCode = 0;
-#if USE_OVERLAPPED
             int r = WriteFileNative(_handle, buffer, offset, count, null, out errorCode);
-#else
-            int r = WriteFileNative(_handle, buffer, offset, count, out errorCode);
-#endif
 
             if (r == -1)
             {
@@ -1089,7 +1006,6 @@ namespace System.IO
             return;
         }
 
-#if USE_OVERLAPPED
         [System.Security.SecuritySafeCritical]  // auto-generated
         private Task<int> ReadInternalAsync(byte[] array, int offset, int numBytes, CancellationToken cancellationToken)
         {
@@ -1310,7 +1226,6 @@ namespace System.IO
 
             return completionSource.Task;
         }       
-#endif
 
         // Reads a byte from the file stream.  Returns the byte cast to an int
         // or -1 if reading from the end of the stream.
@@ -1336,7 +1251,6 @@ namespace System.IO
             return result;
         }
 
-#if USE_OVERLAPPED
         [System.Security.SecuritySafeCritical]  // auto-generated
         private Task WriteInternalAsync(byte[] array, int offset, int numBytes, CancellationToken cancellationToken)
         {
@@ -1394,7 +1308,7 @@ namespace System.IO
         }
 
         [System.Security.SecuritySafeCritical]  // auto-generated
-        unsafe private Task<int> WriteInternalCoreAsync(byte[] bytes, int offset, int numBytes, CancellationToken cancellationToken)
+        private unsafe Task WriteInternalCoreAsync(byte[] bytes, int offset, int numBytes, CancellationToken cancellationToken)
         {
             Debug.Assert(!_handle.IsClosed, "!_handle.IsClosed");
             Debug.Assert(_parent.CanWrite, "_parent.CanWrite");
@@ -1458,9 +1372,10 @@ namespace System.IO
                 // For pipes, when they are closed on the other side, they will come here.
                 if (errorCode == ERROR_NO_DATA)
                 {
-                    // Not an error, but EOF.  AsyncFSCallback will NOT be 
-                    // called.  Call the user callback here.
+                    // Not an error, but EOF. AsyncFSCallback will NOT be called.
+                    // Completing TCS and return cached task allowing the GC to collect TCS.
                     completionSource.SetCompletedSynchronously(0);
+                    return Task.CompletedTask;
                 }
                 else if (errorCode != ERROR_IO_PENDING)
                 {
@@ -1500,7 +1415,6 @@ namespace System.IO
 
             return completionSource.Task;
         }
-#endif
 
         [System.Security.SecuritySafeCritical]  // auto-generated
         public override void WriteByte(byte value)
@@ -1544,11 +1458,7 @@ namespace System.IO
 
         // __ConsoleStream also uses this code. 
         [System.Security.SecurityCritical]  // auto-generated
-#if USE_OVERLAPPED
         private unsafe int ReadFileNative(SafeFileHandle handle, byte[] bytes, int offset, int count, NativeOverlapped* overlapped, out int errorCode)
-#else
-        private unsafe int ReadFileNative(SafeFileHandle handle, byte[] bytes, int offset, int count, out int errorCode)
-#endif
         {
             Contract.Requires(handle != null, "handle != null");
             Contract.Requires(offset >= 0, "offset >= 0");
@@ -1560,9 +1470,7 @@ namespace System.IO
                 throw new IndexOutOfRangeException(SR.IndexOutOfRange_IORaceCondition);
             Contract.EndContractBlock();
 
-#if USE_OVERLAPPED
             Debug.Assert((_isAsync && overlapped != null) || (!_isAsync && overlapped == null), "Async IO and overlapped parameters inconsistent in call to ReadFileNative.");
-#endif
 
             // You can't use the fixed statement on an array of length 0.
             if (bytes.Length == 0)
@@ -1576,46 +1484,27 @@ namespace System.IO
 
             fixed (byte* p = bytes)
             {
-#if USE_OVERLAPPED
                 if (_isAsync)
                     r = Interop.mincore.ReadFile(handle, p + offset, count, IntPtr.Zero, overlapped);
                 else
-#endif
-                r = Interop.mincore.ReadFile(handle, p + offset, count, out numBytesRead, IntPtr.Zero);
+                    r = Interop.mincore.ReadFile(handle, p + offset, count, out numBytesRead, IntPtr.Zero);
             }
 
             if (r == 0)
             {
-                errorCode = Marshal.GetLastWin32Error();
-
-                if (errorCode == ERROR_BROKEN_PIPE || errorCode == Interop.mincore.Errors.ERROR_PIPE_NOT_CONNECTED)
-                {
-                    // This handle was a pipe, and it's done. Not an error, but EOF.
-                    // However, the OS will not call AsyncFSCallback!
-                    // Let the caller handle this, since ReadInternalCoreAsync & ReadCore 
-                    // need to do different things.
-                    return -1;
-                }
-
-                // See code:#errorInvalidHandle in "private long SeekCore(long offset, SeekOrigin origin)".
-                if (errorCode == Interop.mincore.Errors.ERROR_INVALID_HANDLE)
-                    _handle.Dispose();
-
+                errorCode = GetLastWin32ErrorAndDisposeHandleIfInvalid();
                 return -1;
             }
             else
+            {
                 errorCode = 0;
-            return numBytesRead;
+                return numBytesRead;
+            }
         }
 
         [System.Security.SecurityCritical]  // auto-generated
-#if USE_OVERLAPPED
         private unsafe int WriteFileNative(SafeFileHandle handle, byte[] bytes, int offset, int count, NativeOverlapped* overlapped, out int errorCode)
         {
-#else
-        private unsafe int WriteFileNative(SafeFileHandle handle, byte[] bytes, int offset, int count, out int errorCode)
-        {
-#endif
             Contract.Requires(handle != null, "handle != null");
             Contract.Requires(offset >= 0, "offset >= 0");
             Contract.Requires(count >= 0, "count >= 0");
@@ -1628,9 +1517,7 @@ namespace System.IO
                 throw new IndexOutOfRangeException(SR.IndexOutOfRange_IORaceCondition);
             Contract.EndContractBlock();
 
-#if USE_OVERLAPPED
             Debug.Assert((_isAsync && overlapped != null) || (!_isAsync && overlapped == null), "Async IO and overlapped parameters inconsistent in call to WriteFileNative.");
-#endif
 
             // You can't use the fixed statement on an array of length 0.
             if (bytes.Length == 0)
@@ -1644,35 +1531,55 @@ namespace System.IO
 
             fixed (byte* p = bytes)
             {
-#if USE_OVERLAPPED
                 if (_isAsync)
                     r = Interop.mincore.WriteFile(handle, p + offset, count, IntPtr.Zero, overlapped);
                 else
-#endif
-                r = Interop.mincore.WriteFile(handle, p + offset, count, out numBytesWritten, IntPtr.Zero);
+                    r = Interop.mincore.WriteFile(handle, p + offset, count, out numBytesWritten, IntPtr.Zero);
             }
 
             if (r == 0)
             {
-                errorCode = Marshal.GetLastWin32Error();
-
-                if (errorCode == ERROR_NO_DATA)
-                {
-                    // This handle was a pipe, and the pipe is being closed on the 
-                    // other side.  Let the caller handle this, since Write
-                    // and WriteAsync need to do different things.
-                    return -1;
-                }
-
-                // See code:#errorInvalidHandle in "private long SeekCore(long offset, SeekOrigin origin)".
-                if (errorCode == Interop.mincore.Errors.ERROR_INVALID_HANDLE)
-                    _handle.Dispose();
-
+                errorCode = GetLastWin32ErrorAndDisposeHandleIfInvalid();
                 return -1;
             }
             else
+            {
                 errorCode = 0;
-            return numBytesWritten;
+                return numBytesWritten;
+            }
+        }
+
+        [System.Security.SecurityCritical]
+        private int GetLastWin32ErrorAndDisposeHandleIfInvalid(bool throwIfInvalidHandle = false)
+        {
+            int errorCode = Marshal.GetLastWin32Error();
+
+            // If ERROR_INVALID_HANDLE is returned, it doesn't suffice to set
+            // the handle as invalid; the handle must also be closed.
+            //
+            // Marking the handle as invalid but not closing the handle
+            // resulted in exceptions during finalization and locked column
+            // values (due to invalid but unclosed handle) in SQL Win32FileStream
+            // scenarios.
+            //
+            // A more mainstream scenario involves accessing a file on a
+            // network share. ERROR_INVALID_HANDLE may occur because the network
+            // connection was dropped and the server closed the handle. However,
+            // the client side handle is still open and even valid for certain
+            // operations.
+            //
+            // Note that _parent.Dispose doesn't throw so we don't need to special case.
+            // SetHandleAsInvalid only sets _closed field to true (without
+            // actually closing handle) so we don't need to call that as well.
+            if (errorCode == Interop.mincore.Errors.ERROR_INVALID_HANDLE)
+            {
+                _handle.Dispose();
+
+                if (throwIfInvalidHandle)
+                    throw Win32Marshal.GetExceptionForWin32Error(errorCode);
+            }
+
+            return errorCode;
         }
 
         [System.Security.SecuritySafeCritical]
@@ -1684,20 +1591,16 @@ namespace System.IO
             if (_handle.IsClosed)
                 throw __Error.GetFileNotOpen();
 
-#if USE_OVERLAPPED
             // If async IO is not supported on this platform or 
             // if this Win32FileStream was not opened with FileOptions.Asynchronous.
             if (!_isAsync)
-#endif
             {
                 return base.ReadAsync(buffer, offset, count, cancellationToken);
             }
-#if USE_OVERLAPPED
             else
             {
                 return ReadInternalAsync(buffer, offset, count, cancellationToken);
             }
-#endif
         }
 
         [System.Security.SecuritySafeCritical]
@@ -1709,20 +1612,16 @@ namespace System.IO
             if (_handle.IsClosed)
                 throw __Error.GetFileNotOpen();
 
-#if USE_OVERLAPPED
             // If async IO is not supported on this platform or 
             // if this Win32FileStream was not opened with FileOptions.Asynchronous.
             if (!_isAsync)
-#endif
             {
                 return base.WriteAsync(buffer, offset, count, cancellationToken);
             }
-#if USE_OVERLAPPED
             else
             {
                 return WriteInternalAsync(buffer, offset, count, cancellationToken);
             } 
-#endif
         }
         
         // Unlike Flush(), FlushAsync() always flushes to disk. This is intentional.

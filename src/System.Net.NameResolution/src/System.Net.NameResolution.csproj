@@ -180,9 +180,6 @@
   <ItemGroup Condition=" '$(TargetsLinux)' == 'true' ">
     <Compile Include="System\Net\NameResolutionPal.Linux.cs" />
 
-    <Compile Include="$(CommonPath)\Interop\Linux\Interop.Errors.cs">
-      <Link>Interop\Linux\Interop.Errors.cs</Link>
-    </Compile>
     <Compile Include="$(CommonPath)\Interop\Linux\libc\Interop.gethostbyaddr_r.cs">
       <Link>Interop\Linux\libc\Interop.gethostbyaddr_r.cs</Link>
     </Compile>

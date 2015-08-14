@@ -73,7 +73,10 @@ namespace System.IO.FileSystem.Tests
             {
                 DateTime dt = new DateTime(2014, 12, 1, 12, 0, 0, tuple.Item3);
                 tuple.Item1(testFile.FullName, dt);
-                Assert.Equal(dt, tuple.Item2(testFile.FullName));
+                var result = tuple.Item2(testFile.FullName);
+                Assert.Equal(dt, result);
+                Assert.Equal(dt.ToLocalTime(), result.ToLocalTime());
+                Assert.Equal(dt.ToUniversalTime(), result.ToUniversalTime());
             });
         }
 
@@ -94,10 +97,9 @@ namespace System.IO.FileSystem.Tests
             });
         }
 
-        [OuterLoop]
         [Fact]
-        [ActiveIssue(1728, PlatformID.AnyUnix)]
-        public void FileDoesntExist_ReturnDefaultValues()
+        [PlatformSpecific(PlatformID.Windows)]
+        public void Windows_FileDoesntExist_ReturnDefaultValues()
         {
             string path = GetTestFilePath();
 
@@ -124,10 +126,9 @@ namespace System.IO.FileSystem.Tests
             }
         }
 
-        [OuterLoop]
         [Fact]
         [PlatformSpecific(PlatformID.AnyUnix)]
-        public void UnixFileDoesntExist_Throws()
+        public void Unix_FileDoesntExist_Throws_FileNotFoundException()
         {
             string path = GetTestFilePath();
 
