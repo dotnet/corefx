@@ -526,10 +526,11 @@ namespace System.IO
             Debug.Assert(_isAsync);
             Debug.Assert(_readPos == 0 && _readLen == 0, "FileStream: Read buffer must be empty in FlushWriteAsync!");
 
+            // If the buffer is already flushed, don't spin up the OS write
+            if (_writePos == 0) return Task.CompletedTask;
+
             Task flushTask = WriteInternalCoreAsync(_buffer, 0, _writePos, cancellationToken);
-
             _writePos = 0;
-
             return flushTask;
         }
 
@@ -1264,6 +1265,14 @@ namespace System.IO
             return result;
         }
 
+        private async Task FlushAndWriteAsync(byte[] array, int offset, int numBytes, CancellationToken cancellationToken)
+        {
+            Debug.Assert(_isAsync);
+
+            await FlushWriteAsync(cancellationToken);
+            await WriteInternalCoreAsync(array, offset, numBytes, cancellationToken);
+        }
+
         [System.Security.SecuritySafeCritical]  // auto-generated
         private Task WriteInternalAsync(byte[] array, int offset, int numBytes, CancellationToken cancellationToken)
         {
@@ -1290,9 +1299,8 @@ namespace System.IO
                 // pipes.   
                 Debug.Assert(_readPos == 0 && _readLen == 0, "Win32FileStream must not have buffered data here!  Pipes should be unidirectional.");
 
-                if(_writePos > 0)
-                    return FlushWriteAsync(cancellationToken)
-                        .ContinueWith((_) => WriteInternalCoreAsync(array, offset, numBytes, cancellationToken));
+                if (_writePos > 0)
+                    return FlushAndWriteAsync(array, offset, numBytes, cancellationToken);
 
                 return WriteInternalCoreAsync(array, offset, numBytes, cancellationToken);
             }
@@ -1338,9 +1346,8 @@ namespace System.IO
 
             // If there's data in the existing buffer, and the incoming write would overflow it and
             // the subsequent buffer, chain the flush operation with the subsequent write
-            else if(_writePos > 0)
-                return FlushWriteAsync(cancellationToken)
-                    .ContinueWith((_) => WriteInternalCoreAsync(array, offset, numBytes, cancellationToken));
+            else if (_writePos > 0)
+                return FlushAndWriteAsync(array, offset, numBytes, cancellationToken);
 
             // Otherwise, there's no buffered data, and the incoming write is too big to fit
             // in the buffer, so write it directly to disk
