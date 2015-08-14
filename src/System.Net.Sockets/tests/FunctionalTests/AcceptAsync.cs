@@ -8,14 +8,13 @@ namespace System.Net.Sockets.Tests
 {
     public class AcceptAsync
     {
+        private const int TestPortBase = 8000;
         private readonly ITestOutputHelper _log;
 
         public AcceptAsync(ITestOutputHelper output)
         {
             _log = TestLogging.GetInstance();
         }
-
-        private const int TestPortBase = 8000;
 
         public void OnAcceptCompleted(object sender, SocketAsyncEventArgs args)
         {

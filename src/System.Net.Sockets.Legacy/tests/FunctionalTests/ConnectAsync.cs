@@ -1,12 +1,9 @@
-﻿namespace NCLTest.Sockets
+﻿using System.Threading;
+
+using Xunit;
+
+namespace System.Net.Sockets.Tests
 {
-    using CoreFXTestLibrary;
-    using System;
-    using System.Net;
-    using System.Net.Sockets;
-    using System.Threading;
-    
-    [TestClass]
     public class ConnectAsync
     {
         private const int TestPortBase = 8020;
@@ -17,7 +14,7 @@
             handle.Set();            
         }
 
-        [TestMethod]
+        [Fact]
         public void Success()
         {
             AutoResetEvent completed = new AutoResetEvent(false);
@@ -32,11 +29,11 @@
                     args.UserToken = completed;
 
                     Socket client = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-                    Assert.IsTrue(client.ConnectAsync(args));
+                    Assert.True(client.ConnectAsync(args));
 
-                    Assert.IsTrue(completed.WaitOne(5000), "IPv4: Timed out while waiting for connection");
+                    Assert.True(completed.WaitOne(5000), "IPv4: Timed out while waiting for connection");
 
-                    Assert.AreEqual<SocketError>(SocketError.Success, args.SocketError, "Failed to Connect");
+                    Assert.Equal<SocketError>(SocketError.Success, args.SocketError);
 
                     client.Dispose();
                 }
@@ -52,11 +49,11 @@
                     args.UserToken = completed;
 
                     Socket client = new Socket(AddressFamily.InterNetworkV6, SocketType.Stream, ProtocolType.Tcp);
-                    Assert.IsTrue(client.ConnectAsync(args));
+                    Assert.True(client.ConnectAsync(args));
 
-                    Assert.IsTrue(completed.WaitOne(5000), "IPv6: Timed out while waiting for connection");
+                    Assert.True(completed.WaitOne(5000), "IPv6: Timed out while waiting for connection");
 
-                    Assert.AreEqual<SocketError>(SocketError.Success, args.SocketError, "Failed to Connect");
+                    Assert.Equal<SocketError>(SocketError.Success, args.SocketError);
 
                     client.Dispose();
                 }

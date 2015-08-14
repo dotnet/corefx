@@ -1,12 +1,9 @@
-﻿namespace NCLTest.Sockets
-{
-    using CoreFXTestLibrary;
-    using System;
-    using System.Net;
-    using System.Net.Sockets;
-    using System.Threading;
+﻿using System.Threading;
 
-    [TestClass]
+using Xunit;
+
+namespace System.Net.Sockets.Tests
+{
     public class ConnectExTest
     {
         private const int TestPortBase = 8030;
@@ -17,7 +14,7 @@
             complete.Set();
         }
 
-        [TestMethod]
+        [Fact]
         public void Success()
         {
             SocketTestServer server = SocketTestServer.SocketTestServerFactory(new IPEndPoint(IPAddress.Loopback, TestPortBase));
@@ -32,11 +29,11 @@
             ManualResetEvent complete = new ManualResetEvent(false);
             args.UserToken = complete;
 
-            Assert.IsTrue(sock.ConnectAsync(args));
+            Assert.True(sock.ConnectAsync(args));
 
-            Assert.IsTrue(complete.WaitOne(5000), "IPv4: Timed out while waiting for connection");
+            Assert.True(complete.WaitOne(5000), "IPv4: Timed out while waiting for connection");
 
-            Assert.IsTrue(args.SocketError == SocketError.Success);
+            Assert.True(args.SocketError == SocketError.Success);
 
             sock.Dispose();
 
@@ -44,11 +41,11 @@
             args.RemoteEndPoint = new IPEndPoint(IPAddress.IPv6Loopback, TestPortBase);
             complete.Reset();
 
-            Assert.IsTrue(sock.ConnectAsync(args));
+            Assert.True(sock.ConnectAsync(args));
 
-            Assert.IsTrue(complete.WaitOne(5000), "IPv6: Timed out while waiting for connection");
+            Assert.True(complete.WaitOne(5000), "IPv6: Timed out while waiting for connection");
 
-            Assert.IsTrue(args.SocketError == SocketError.Success);
+            Assert.True(args.SocketError == SocketError.Success);
 
             sock.Dispose();
 
@@ -59,7 +56,7 @@
         #region GC Finalizer test
         // This test assumes sequential execution of tests and that it is going to be executed after other tests
         // that used Sockets. 
-        [TestMethod]
+        [Fact]
         public void TestFinalizers()
         {
             // Making several passes through the FReachable list.

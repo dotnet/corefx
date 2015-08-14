@@ -1,23 +1,19 @@
-﻿namespace NCLTest.Sockets
-{
-    using CoreFXTestLibrary;
-    using System;
-    using System.Diagnostics;
-    using System.Net;
-    using System.Net.Sockets;
+﻿using System.Net.Test.Common;
 
+namespace System.Net.Sockets.Tests
+{
     // Provides a dummy socket server that accepts connections and echoes data sent
     public class SocketTestServerAPM : SocketTestServer
     {
-        private VerboseLog _verboseLog;
+        private VerboseTestLogging _log;
 
         private Socket socket;
         private int _receiveBufferSize;
         private volatile bool disposed = false;
 
-        public SocketTestServerAPM(VerboseLog log, int numConnections, int receiveBufferSize, EndPoint localEndPoint) 
+        public SocketTestServerAPM(int numConnections, int receiveBufferSize, EndPoint localEndPoint) 
         {
-            _verboseLog = log;
+            _log = VerboseTestLogging.GetInstance();
             _receiveBufferSize = receiveBufferSize;
 
             socket = new Socket(localEndPoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
@@ -138,7 +134,7 @@
                 int bytesSent = sendState.Socket.EndSend(result);
                 if (bytesSent != sendState.TransferBuffer.Length)
                 {
-                    _verboseLog.Log("{2} APM: OnSend {0}bytes - expecting {1}bytes.", bytesSent, sendState.TransferBuffer.Length, sendState.Socket.GetHashCode());
+                    _log.WriteLine("{2} APM: OnSend {0}bytes - expecting {1}bytes.", bytesSent, sendState.TransferBuffer.Length, sendState.Socket.GetHashCode());
                 }
             }
             catch (SocketException)

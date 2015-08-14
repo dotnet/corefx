@@ -1,38 +1,31 @@
-﻿namespace NCLTest.Sockets
-{
-    using CoreFXTestLibrary;
-    using System;
-    using System.Net;
-    using System.Net.Sockets;
+﻿using Xunit;
 
-    [TestClass]
+namespace System.Net.Sockets.Tests
+{
     public class LingerStateTest
     {
         private void TestLingerState_Success(Socket sock, bool enabled, int lingerTime)
         {
             sock.LingerState = new LingerOption(enabled, lingerTime);
 
-            Assert.AreEqual<bool>(enabled, sock.LingerState.Enabled, "LingerState.Enabled not propogated correctly!");
-            Assert.AreEqual<int>(lingerTime, sock.LingerState.LingerTime, "LingerState.LingerTime not propogated correctly!");
+            Assert.Equal<bool>(enabled, sock.LingerState.Enabled);
+            Assert.Equal<int>(lingerTime, sock.LingerState.LingerTime);
         }
 
         private void TestLingerState_ArgumentException(Socket sock, bool enabled, int lingerTime)
         {
-            try
-            {
+            Assert.Throws<ArgumentException>( () => {
                 sock.LingerState = new LingerOption(enabled, lingerTime);
-                Assert.Fail("Expected ArgumentException not thrown from set_LingerState!");
-            }
-            catch (ArgumentException) { }
+            });
         }
 
-        [TestMethod]
+        [Fact]
         public void Socket_LingerState_Boundaries_CorrectBehavior()
         {
             Socket sock = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 
-            Assert.IsFalse(sock.LingerState.Enabled, "Linger was turned on by default!");
-            Assert.AreEqual<int>(sock.LingerState.LingerTime, 0, "Default Linger Time not Zero!");
+            Assert.False(sock.LingerState.Enabled, "Linger was turned on by default!");
+            Assert.Equal<int>(sock.LingerState.LingerTime, 0);
 
             TestLingerState_ArgumentException(sock, true, -1);
 

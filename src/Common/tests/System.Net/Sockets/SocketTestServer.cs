@@ -1,7 +1,9 @@
 ﻿
 namespace System.Net.Sockets.Tests
 {
-    public abstract class SocketTestServer : IDisposable
+    // Each individual test must configure this class by defining s_implementationType within 
+    // SocketTestServer.DefaultFactoryConfiguration.cs
+    public abstract partial class SocketTestServer : IDisposable
     {
         public static SocketTestServer SocketTestServerFactory(EndPoint endpoint)
         {
@@ -13,11 +15,11 @@ namespace System.Net.Sockets.Tests
             int receiveBufferSize, 
             EndPoint localEndPoint)
         {
-#if !SOCKETTESTSERVERAPM
-            return new SocketTestServerAsync(numConnections, receiveBufferSize, localEndPoint);
-#else
-            return new SocketTestServerAPM(numConnections, receiveBufferSize, localEndPoint);
-#endif
+            return SocketTestServerFactory(
+                s_implementationType,
+                numConnections,
+                receiveBufferSize,
+                localEndPoint);
         }
 
         public static SocketTestServer SocketTestServerFactory(

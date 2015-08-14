@@ -1,12 +1,9 @@
-﻿namespace NCLTest.Sockets
-{
-    using CoreFXTestLibrary;
-    using System;
-    using System.Net;
-    using System.Net.Sockets;
-    using System.Threading;
+﻿using System.Threading;
 
-    [TestClass]
+using Xunit;
+
+namespace System.Net.Sockets.Tests
+{
     public class Disconnect
     {
         private const int TestPortBase = 8040;
@@ -17,7 +14,7 @@
             handle.Set();
         }
 
-        [TestMethod]
+        [Fact]
         public void Success()
         {
             AutoResetEvent completed = new AutoResetEvent(false);
@@ -35,17 +32,17 @@
 
                     Socket client = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 
-                    Assert.IsTrue(client.ConnectAsync(args));
-                    Assert.IsTrue(completed.WaitOne(5000), "Timed out while waiting for connection");
-                    Assert.AreEqual<SocketError>(SocketError.Success, args.SocketError, "Initial Connect attempt fails with " + args.SocketError);
+                    Assert.True(client.ConnectAsync(args));
+                    Assert.True(completed.WaitOne(5000), "Timed out while waiting for connection");
+                    Assert.Equal<SocketError>(SocketError.Success, args.SocketError);
 
                     client.Disconnect(true);
 
                     args.RemoteEndPoint = new IPEndPoint(IPAddress.Loopback, TestPortBase + 1);
 
-                    Assert.IsTrue(client.ConnectAsync(args));
-                    Assert.IsTrue(completed.WaitOne(5000), "Timed out while waiting for connection");
-                    Assert.AreEqual<SocketError>(SocketError.Success, args.SocketError, "reconnect failed with " + args.SocketError);
+                    Assert.True(client.ConnectAsync(args));
+                    Assert.True(completed.WaitOne(5000), "Timed out while waiting for connection");
+                    Assert.Equal<SocketError>(SocketError.Success, args.SocketError);
 
                     client.Dispose();
                 }

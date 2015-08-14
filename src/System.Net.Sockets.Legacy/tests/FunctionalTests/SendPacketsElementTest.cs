@@ -1,16 +1,12 @@
-﻿namespace NCLTest.Sockets
-{
-    using CoreFXTestLibrary;
-    using System;
-    using System.Net;
-    using System.Net.Sockets;
+﻿using Xunit;
 
-    [TestClass]
+namespace System.Net.Sockets.Tests
+{
     public class SendPacketsElementTest
     {
         #region Buffer
 
-        [TestMethod]
+        [Fact]
         public void NullBufferCtor_Throws()
         {
             try
@@ -25,7 +21,7 @@
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void NullBufferCtorWithOffset_Throws()
         {
             try
@@ -40,7 +36,7 @@
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void NullBufferCtorWithEndOfPacket_Throws()
         {
             try
@@ -56,32 +52,32 @@
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void EmptyBufferCtor_Success()
         {
             // Elements with empty Buffers are ignored on Send
             SendPacketsElement element = new SendPacketsElement(new byte[0]);
-            Assert.IsNotNull(element.Buffer);
-            Assert.AreEqual(0, element.Buffer.Length);
-            Assert.AreEqual(0, element.Offset);
-            Assert.AreEqual(0, element.Count);
-            Assert.IsFalse(element.EndOfPacket);
-            Assert.IsNull(element.FilePath);
+            Assert.NotNull(element.Buffer);
+            Assert.Equal(0, element.Buffer.Length);
+            Assert.Equal(0, element.Offset);
+            Assert.Equal(0, element.Count);
+            Assert.False(element.EndOfPacket);
+            Assert.Null(element.FilePath);
         }
 
-        [TestMethod]
+        [Fact]
         public void BufferCtorNormal_Success()
         {
             SendPacketsElement element = new SendPacketsElement(new byte[10]);
-            Assert.IsNotNull(element.Buffer);
-            Assert.AreEqual(10, element.Buffer.Length);
-            Assert.AreEqual(0, element.Offset);
-            Assert.AreEqual(10, element.Count);
-            Assert.IsFalse(element.EndOfPacket);
-            Assert.IsNull(element.FilePath);
+            Assert.NotNull(element.Buffer);
+            Assert.Equal(10, element.Buffer.Length);
+            Assert.Equal(0, element.Offset);
+            Assert.Equal(10, element.Count);
+            Assert.False(element.EndOfPacket);
+            Assert.Null(element.FilePath);
         }
 
-        [TestMethod]
+        [Fact]
         public void BufferCtorNegOffset_ArgumentOutOfRangeException()
         {
             try
@@ -96,7 +92,7 @@
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void BufferCtorNegCount_ArgumentOutOfRangeException()
         {
             try
@@ -111,7 +107,7 @@
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void BufferCtorLargeOffset_ArgumentOutOfRangeException()
         {
             try
@@ -126,7 +122,7 @@
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void BufferCtorLargeCount_ArgumentOutOfRangeException()
         {
             try
@@ -141,48 +137,48 @@
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void BufferCtorEndOfBufferTrue_Success()
         {
             SendPacketsElement element = new SendPacketsElement(new byte[10], 2, 8, true);
-            Assert.IsNotNull(element.Buffer);
-            Assert.AreEqual(10, element.Buffer.Length);
-            Assert.AreEqual(2, element.Offset);
-            Assert.AreEqual(8, element.Count);
-            Assert.IsTrue(element.EndOfPacket);
-            Assert.IsNull(element.FilePath);
+            Assert.NotNull(element.Buffer);
+            Assert.Equal(10, element.Buffer.Length);
+            Assert.Equal(2, element.Offset);
+            Assert.Equal(8, element.Count);
+            Assert.True(element.EndOfPacket);
+            Assert.Null(element.FilePath);
         }
 
-        [TestMethod]
+        [Fact]
         public void BufferCtorEndOfBufferFalse_Success()
         {
             SendPacketsElement element = new SendPacketsElement(new byte[10], 6, 4, false);
-            Assert.IsNotNull(element.Buffer);
-            Assert.AreEqual(10, element.Buffer.Length);
-            Assert.AreEqual(6, element.Offset);
-            Assert.AreEqual(4, element.Count);
-            Assert.IsFalse(element.EndOfPacket);
-            Assert.IsNull(element.FilePath);
+            Assert.NotNull(element.Buffer);
+            Assert.Equal(10, element.Buffer.Length);
+            Assert.Equal(6, element.Offset);
+            Assert.Equal(4, element.Count);
+            Assert.False(element.EndOfPacket);
+            Assert.Null(element.FilePath);
         }
 
-        [TestMethod]
+        [Fact]
         public void BufferCtorZeroCount_Success()
         {
             // Elements with empty Buffers are ignored on Send
             SendPacketsElement element = new SendPacketsElement(new byte[0], 0, 0);
-            Assert.IsNotNull(element.Buffer);
-            Assert.AreEqual(0, element.Buffer.Length);
-            Assert.AreEqual(0, element.Offset);
-            Assert.AreEqual(0, element.Count);
-            Assert.IsFalse(element.EndOfPacket);
-            Assert.IsNull(element.FilePath);
+            Assert.NotNull(element.Buffer);
+            Assert.Equal(0, element.Buffer.Length);
+            Assert.Equal(0, element.Offset);
+            Assert.Equal(0, element.Count);
+            Assert.False(element.EndOfPacket);
+            Assert.Null(element.FilePath);
         }
 
         #endregion Buffer
 
         #region File
 
-        [TestMethod]
+        [Fact]
         public void FileCtorNull_Throws()
         {
             try
@@ -197,55 +193,55 @@
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void FileCtorEmpty_Success()
         {
             // An exception will happen on send if this file doesn't exist
             SendPacketsElement element = new SendPacketsElement(String.Empty);
-            Assert.IsNull(element.Buffer);
-            Assert.AreEqual(0, element.Offset);
-            Assert.AreEqual(0, element.Count);
-            Assert.IsFalse(element.EndOfPacket);
-            Assert.AreEqual(String.Empty, element.FilePath);
+            Assert.Null(element.Buffer);
+            Assert.Equal(0, element.Offset);
+            Assert.Equal(0, element.Count);
+            Assert.False(element.EndOfPacket);
+            Assert.Equal(String.Empty, element.FilePath);
         }
 
-        [TestMethod]
+        [Fact]
         public void FileCtorWhiteSpace_Success()
         {
             // An exception will happen on send if this file doesn't exist
             SendPacketsElement element = new SendPacketsElement("   \t ");
-            Assert.IsNull(element.Buffer);
-            Assert.AreEqual(0, element.Offset);
-            Assert.AreEqual(0, element.Count);
-            Assert.IsFalse(element.EndOfPacket);
-            Assert.AreEqual("   \t ", element.FilePath);
+            Assert.Null(element.Buffer);
+            Assert.Equal(0, element.Offset);
+            Assert.Equal(0, element.Count);
+            Assert.False(element.EndOfPacket);
+            Assert.Equal("   \t ", element.FilePath);
         }
 
-        [TestMethod]
+        [Fact]
         public void FileCtorNormal_Success()
         {
             // An exception will happen on send if this file doesn't exist
             SendPacketsElement element = new SendPacketsElement("SomeFileName"); // Send whole file
-            Assert.IsNull(element.Buffer);
-            Assert.AreEqual(0, element.Offset);
-            Assert.AreEqual(0, element.Count);
-            Assert.IsFalse(element.EndOfPacket);
-            Assert.AreEqual("SomeFileName", element.FilePath);
+            Assert.Null(element.Buffer);
+            Assert.Equal(0, element.Offset);
+            Assert.Equal(0, element.Count);
+            Assert.False(element.EndOfPacket);
+            Assert.Equal("SomeFileName", element.FilePath);
         }
 
-        [TestMethod]
+        [Fact]
         public void FileCtorZeroCountLength_Success()
         {
             // An exception will happen on send if this file doesn't exist
             SendPacketsElement element = new SendPacketsElement("SomeFileName", 0, 0); // Send whole file
-            Assert.IsNull(element.Buffer);
-            Assert.AreEqual(0, element.Offset);
-            Assert.AreEqual(0, element.Count);
-            Assert.IsFalse(element.EndOfPacket);
-            Assert.AreEqual("SomeFileName", element.FilePath);
+            Assert.Null(element.Buffer);
+            Assert.Equal(0, element.Offset);
+            Assert.Equal(0, element.Count);
+            Assert.False(element.EndOfPacket);
+            Assert.Equal("SomeFileName", element.FilePath);
         }
 
-        [TestMethod]
+        [Fact]
         public void FileCtorNegOffset_ArgumentOutOfRangeException()
         {
             try
@@ -260,7 +256,7 @@
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void FileCtorNegCount_ArgumentOutOfRangeException()
         {
             try
@@ -277,26 +273,26 @@
 
         // File lengths are validated on send
 
-        [TestMethod]
+        [Fact]
         public void FileCtorEndOfBufferTrue_Success()
         {
             SendPacketsElement element = new SendPacketsElement("SomeFileName", 2, 8, true);
-            Assert.IsNull(element.Buffer);
-            Assert.AreEqual(2, element.Offset);
-            Assert.AreEqual(8, element.Count);
-            Assert.IsTrue(element.EndOfPacket);
-            Assert.AreEqual("SomeFileName", element.FilePath);
+            Assert.Null(element.Buffer);
+            Assert.Equal(2, element.Offset);
+            Assert.Equal(8, element.Count);
+            Assert.True(element.EndOfPacket);
+            Assert.Equal("SomeFileName", element.FilePath);
         }
 
-        [TestMethod]
+        [Fact]
         public void FileCtorEndOfBufferFalse_Success()
         {
             SendPacketsElement element = new SendPacketsElement("SomeFileName", 6, 4, false);
-            Assert.IsNull(element.Buffer);
-            Assert.AreEqual(6, element.Offset);
-            Assert.AreEqual(4, element.Count);
-            Assert.IsFalse(element.EndOfPacket);
-            Assert.AreEqual("SomeFileName", element.FilePath);
+            Assert.Null(element.Buffer);
+            Assert.Equal(6, element.Offset);
+            Assert.Equal(4, element.Count);
+            Assert.False(element.EndOfPacket);
+            Assert.Equal("SomeFileName", element.FilePath);
         }
 
         #endregion File
