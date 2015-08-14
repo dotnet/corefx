@@ -520,6 +520,19 @@ namespace System.IO
             _readLen = 0;
         }
 
+        // Returns a task that flushes the internal write buffer
+        private Task FlushWriteAsync(CancellationToken cancellationToken)
+        {
+            Debug.Assert(_isAsync);
+            Debug.Assert(_readPos == 0 && _readLen == 0, "FileStream: Read buffer must be empty in FlushWriteAsync!");
+
+            Task flushTask = WriteInternalCoreAsync(_buffer, 0, _writePos, CancellationToken.None);
+
+            _writePos = 0;
+
+            return flushTask;
+        }
+
         // Writes are buffered.  Anytime the buffer fills up 
         // (_writePos + delta > _bufferSize) or the buffer switches to reading
         // and there is left over data (_writePos > 0), this function must be called.
@@ -529,7 +542,7 @@ namespace System.IO
 
             if (_isAsync)
             {
-                Task writeTask = WriteInternalCoreAsync(_buffer, 0, _writePos, CancellationToken.None);
+                Task writeTask = FlushWriteAsync(CancellationToken.None);
                 // With our Whidbey async IO & overlapped support for AD unloads,
                 // we don't strictly need to block here to release resources
                 // since that support takes care of the pinning & freeing the 
@@ -1277,8 +1290,9 @@ namespace System.IO
                 // pipes.   
                 Debug.Assert(_readPos == 0 && _readLen == 0, "Win32FileStream must not have buffered data here!  Pipes should be unidirectional.");
 
-                if (_writePos > 0)
-                    FlushWrite(false);
+                if(_writePos > 0)
+                    return FlushWriteAsync(cancellationToken)
+                        .ContinueWith((_) => WriteInternalCoreAsync(array, offset, numBytes, cancellationToken));
 
                 return WriteInternalCoreAsync(array, offset, numBytes, cancellationToken);
             }
@@ -1291,19 +1305,45 @@ namespace System.IO
                 _readLen = 0;
             }
 
-            int n = _bufferSize - _writePos;
-            if (numBytes <= n)
+            int remainingBuffer = _bufferSize - _writePos;
+
+            // if the incoming write fits in the remaining buffer, treat
+            // as synchronous since memcopy is so fast
+            if (numBytes <= remainingBuffer)
             {
                 if (_writePos == 0) _buffer = new byte[_bufferSize];
                 Buffer.BlockCopy(array, offset, _buffer, _writePos, numBytes);
                 _writePos += numBytes;
-                
+
                 return Task.CompletedTask;
             }
 
-            if (_writePos > 0)
-                FlushWrite(false);
+            // if the incoming write fits in the current buffer + next buffer,
+            // only perform a single write to flush the existing buffer and fill
+            // the next buffer with the remainder
+            if (numBytes <= (_bufferSize + remainingBuffer))
+            {
+                if (_writePos == 0) _buffer = new byte[_bufferSize];
 
+                Buffer.BlockCopy(array, offset, _buffer, _writePos, remainingBuffer);
+
+                byte[] oldBuffer = _buffer;
+                _buffer = new byte[_bufferSize];
+
+                _writePos = (numBytes - remainingBuffer);
+                Buffer.BlockCopy(array, offset + remainingBuffer, _buffer, 0, _writePos);
+
+                return WriteInternalCoreAsync(oldBuffer, 0, _bufferSize, cancellationToken);
+            }
+
+            // If there's data in the existing buffer, and the incoming write would overflow it and
+            // the subsequent buffer, chain the flush operation with the subsequent write
+            else if(_writePos > 0)
+                return FlushWriteAsync(cancellationToken)
+                    .ContinueWith((_) => WriteInternalCoreAsync(array, offset, numBytes, cancellationToken));
+
+            // Otherwise, there's no buffered data, and the incoming write is too big to fit
+            // in the buffer, so write it directly to disk
             return WriteInternalCoreAsync(array, offset, numBytes, cancellationToken);
         }
 
