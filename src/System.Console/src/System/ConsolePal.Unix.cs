@@ -18,6 +18,10 @@ namespace System
     // e.g. for reading/writing /dev/stdin, /dev/stdout, and /dev/stderr,
     // for getting environment variables for accessing charset information for encodings, 
     // and terminfo databases / strings for manipulating the terminal.
+    // NOTE: The test class reflects over this class to run the tests due to limitations in
+    //       the test infrastructure that prevent OS-specific builds of test binaries. If you
+    //       change any of the class / struct / function names, parameters, etc then you need
+    //       to also change the test class.
     internal static class ConsolePal
     {
         public static Stream OpenStandardInput()
@@ -91,7 +95,7 @@ namespace System
                         UnixConsoleStream ucs = sw.BaseStream as UnixConsoleStream;
                         if (ucs != null)
                         {
-                            return ucs._handleType == Interop.NativeIO.FileTypes.S_IFCHR;
+                            return ucs._handleType == Interop.Sys.FileTypes.S_IFCHR;
                         }
                     }
                 }
@@ -181,7 +185,7 @@ namespace System
             // See if we've already cached a format string for this foreground/background
             // and specific color choice.  If we have, just output that format string again.
             int fgbgIndex = foreground ? 0 : 1;
-            string evaluatedString = s_fgbgAndColorStrings[fgbgIndex][ccValue]; // benign race
+            string evaluatedString = s_fgbgAndColorStrings[fgbgIndex, ccValue]; // benign race
             if (evaluatedString != null)
             {
                 Console.Write(evaluatedString);
@@ -200,7 +204,7 @@ namespace System
 
                     Console.Write(evaluatedString);
 
-                    s_fgbgAndColorStrings[fgbgIndex][ccValue] = evaluatedString; // benign race
+                    s_fgbgAndColorStrings[fgbgIndex, ccValue] = evaluatedString; // benign race
                 }
             }
         }
@@ -234,18 +238,7 @@ namespace System
         };
 
         /// <summary>Cache of the format strings for foreground/background and ConsoleColor.</summary>
-        private static readonly string[][] s_fgbgAndColorStrings = CreateTwoDimArray(2, 16); // 2 == fg vs bg, 16 == ConsoleColor values
-
-        /// <summary>Constructs a two-dimensional jagged array.</summary>
-        private static string[][] CreateTwoDimArray(int dim1, int dim2)
-        {
-            string[][] arr = new string[dim1][];
-            for (int i = 0; i < dim1; i++)
-            {
-                arr[i] = new string[dim2];
-            }
-            return arr;
-        }
+        private static readonly string[,] s_fgbgAndColorStrings = new string[2, 16]; // 2 == fg vs bg, 16 == ConsoleColor values
 
         /// <summary>Provides a cache of color information sourced from terminfo.</summary>
         private struct TerminalColorInfo
@@ -262,26 +255,27 @@ namespace System
             /// <summary>The cached instance.</summary>
             public static TerminalColorInfo Instance { get { return _instance.Value; } }
 
+            private TerminalColorInfo(TermInfo.Database db)
+            {
+                ForegroundFormat = db != null ? db.GetString(TermInfo.Database.SetAnsiForegroundIndex) : string.Empty;
+                BackgroundFormat = db != null ? db.GetString(TermInfo.Database.SetAnsiBackgroundIndex) : string.Empty;
+                ResetFormat = db != null ?
+                    db.GetString(TermInfo.Database.OrigPairsIndex) ??
+                    db.GetString(TermInfo.Database.OrigColorsIndex)
+                    : string.Empty;
+
+                int maxColors = db != null ? db.GetNumber(TermInfo.Database.MaxColorsIndex) : 0;
+                MaxColors = // normalize to either the full range of all ANSI colors, just the dark ones, or none
+                    maxColors >= 16 ? 16 :
+                    maxColors >= 8 ? 8 :
+                    0;
+            }
+
             /// <summary>Lazy initialization of the terminal color information.</summary>
             private static Lazy<TerminalColorInfo> _instance = new Lazy<TerminalColorInfo>(() =>
             {
-                TermInfo.Database db = TermInfo.Database.Instance;
-                TerminalColorInfo tci = new TerminalColorInfo();
-                if (db != null)
-                {
-                    tci.ForegroundFormat = db.GetString(TermInfo.Database.SetAnsiForegroundIndex);
-                    tci.BackgroundFormat = db.GetString(TermInfo.Database.SetAnsiBackgroundIndex);
-                    tci.ResetFormat =
-                        db.GetString(TermInfo.Database.OrigPairsIndex) ??
-                        db.GetString(TermInfo.Database.OrigColorsIndex);
-
-                    int maxColors = db.GetNumber(TermInfo.Database.MaxColorsIndex);
-                    tci.MaxColors = // normalize to either the full range of all ANSI colors, just the dark ones, or none
-                        maxColors >= 16 ? 16 :
-                        maxColors >= 8 ? 8 :
-                        0;
-                }
-                return tci;
+                TermInfo.Database db = TermInfo.Database.Instance; // Could be null if TERM is set to a file that doesn't exist
+                return new TerminalColorInfo(db);
             }, isThreadSafe: true);
         }
 
@@ -321,32 +315,6 @@ namespace System
             }
         }
 
-        /// <summary>Creates a string from an array of ASCII bytes.</summary>
-        /// <param name="buffer">The byte buffer.</param>
-        /// <param name="offset">The starting location in the buffer from which to begin the string.</param>
-        /// <param name="length">The length of the resulting string.</param>
-        /// <returns>
-        /// A string containing characters copied from the buffer, one character per byte starting
-        /// from <paramref name="offset"/> and going for <paramref name="length"/> bytes.
-        /// </returns>
-        private static string StringFromAsciiBytes(byte[] buffer, int offset, int length)
-        {
-            // Special-case for empty strings
-            if (length == 0)
-            {
-                return string.Empty;
-            }
-
-            // new string(sbyte*, ...) doesn't exist in the targeted reference assembly,
-            // so we first copy to an array of chars, and then create a string from that.
-            char[] chars = new char[length];
-            for (int i = 0, j = offset; i < length; i++, j++)
-            {
-                chars[i] = (char)buffer[j];
-            }
-            return new string(chars);
-        }
-
         /// <summary>Provides a stream to use for Unix console input or output.</summary>
         private sealed class UnixConsoleStream : ConsoleStream
         {
@@ -378,11 +346,11 @@ namespace System
                 try
                 {
                     _handle.DangerousAddRef(ref gotFd);
-                    Interop.NativeIO.FileStats buf;
+                    Interop.Sys.FileStatus buf;
                     _handleType =
-                        Interop.NativeIO.FStat((int)_handle.DangerousGetHandle(), out buf) == 0 ?
-                            (buf.Mode & Interop.NativeIO.FileTypes.S_IFMT) :
-                            Interop.NativeIO.FileTypes.S_IFREG; // if something goes wrong, don't fail, just say it's a regular file
+                        Interop.Sys.FStat((int)_handle.DangerousGetHandle(), out buf) == 0 ?
+                            (buf.Mode & Interop.Sys.FileTypes.S_IFMT) :
+                            Interop.Sys.FileTypes.S_IFREG; // if something goes wrong, don't fail, just say it's a regular file
                 }
                 finally
                 {
@@ -552,7 +520,7 @@ namespace System
                     {
                         // Don't throw in this case, as we'll be polling multiple locations looking for the file.
                         // But we still want to retry if the open is interrupted by a signal.
-                        if (Marshal.GetLastWin32Error() != Interop.Errors.EINTR)
+                        if (Interop.Sys.GetLastError() != Interop.Error.EINTR)
                         {
                             fd = -1;
                             return false;
@@ -710,7 +678,7 @@ namespace System
                     {
                         findNullEnding++;
                     }
-                    return StringFromAsciiBytes(buffer, pos, findNullEnding - pos);
+                    return Encoding.ASCII.GetString(buffer, pos, findNullEnding - pos);
                 }
             }
 
@@ -939,10 +907,16 @@ namespace System
                                     ~value);
                                 break;
 
-                            // Augment first two parameters by 1
+                                // Some terminfo files appear to have a fairly liberal interpretation of %i. The spec states that %i increments the first two arguments, 
+                                // but some uses occur when there's only a single argument. To make sure we accomodate these files, we increment the values 
+                                // of up to (but not requiring) two arguments.
                             case 'i':
-                                args[0] = 1 + args[0].Int32;
-                                args[1] = 1 + args[1].Int32;
+                                if (args.Length > 0)
+                                {
+                                    args[0] = 1 + args[0].Int32;
+                                    if (args.Length > 1)
+                                        args[1] = 1 + args[1].Int32;
+                                }
                                 break;
 
                             // Conditional of the form %? if-part %t then-part %e else-part %;
@@ -1054,7 +1028,7 @@ namespace System
                             throw new InvalidOperationException(SR.InvalidOperation_PrintF);
                         }
                     }
-                    return StringFromAsciiBytes(bytes, 0, neededLength);
+                    return Encoding.ASCII.GetString(bytes, 0, neededLength);
                 }
 
                 /// <summary>Gets the lazily-initialized dynamic or static variables collection, based on the supplied variable name.</summary>
@@ -1194,9 +1168,9 @@ namespace System
                 {
                     int error = Marshal.GetLastWin32Error(); // Win32 error code from coreclr PAL, not a Unix errno value
                     throw Interop.GetExceptionForIoErrno(
-                        error == Interop.libcoreclr.ERROR_INVALID_PARAMETER ? Interop.Errors.EINVAL :
-                        error == Interop.libcoreclr.ERROR_NOT_ENOUGH_MEMORY ? Interop.Errors.ENOMEM :
-                        Interop.Errors.EIO);
+                        error == Interop.libcoreclr.ERROR_INVALID_PARAMETER ? Interop.Error.EINVAL.Info() :
+                        error == Interop.libcoreclr.ERROR_NOT_ENOUGH_MEMORY ? Interop.Error.ENOMEM.Info() :
+                        Interop.Error.EIO.Info());
                 }
                 _handlerRegistered = register;
             }

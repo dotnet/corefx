@@ -72,7 +72,10 @@ namespace System.IO.FileSystem.Tests
             {
                 DateTime dt = new DateTime(2014, 12, 1, 12, 0, 0, tuple.Item3);
                 tuple.Item1(testDir.FullName, dt);
-                Assert.Equal(dt, tuple.Item2(testDir.FullName));
+                var result = tuple.Item2(testDir.FullName);
+                Assert.Equal(dt, result);
+                Assert.Equal(dt.ToLocalTime(), result.ToLocalTime());
+                Assert.Equal(dt.ToUniversalTime(), result.ToUniversalTime());
             });
         }
 
@@ -93,10 +96,9 @@ namespace System.IO.FileSystem.Tests
             });
         }
 
-        [OuterLoop]
         [Fact]
-        [ActiveIssue(2369, PlatformID.AnyUnix)]
-        public void DirectoryDoesntExist_ReturnDefaultValues()
+        [PlatformSpecific(PlatformID.Windows)]
+        public void Windows_DirectoryDoesntExist_ReturnDefaultValues()
         {
             string path = GetTestFilePath();
 
@@ -123,10 +125,9 @@ namespace System.IO.FileSystem.Tests
             }
         }
 
-        [OuterLoop]
         [Fact]
         [PlatformSpecific(PlatformID.AnyUnix)]
-        public void UnixDirectoryDoesntExist_Throws()
+        public void Unix_DirectoryDoesntExist_Throws()
         {
             string path = GetTestFilePath();
 
