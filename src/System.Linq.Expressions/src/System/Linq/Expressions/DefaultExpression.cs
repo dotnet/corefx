@@ -49,6 +49,8 @@ namespace System.Linq.Expressions
 
     public partial class Expression
     {
+        private static readonly DefaultExpression s_empty = new DefaultExpression(typeof(void));
+
         /// <summary>
         /// Creates an empty expression that has <see cref="System.Void"/> type.
         /// </summary>
@@ -58,7 +60,7 @@ namespace System.Linq.Expressions
         /// </returns>
         public static DefaultExpression Empty()
         {
-            return new DefaultExpression(typeof(void));
+            return s_empty;
         }
 
         /// <summary>
