@@ -3871,6 +3871,57 @@ namespace Tests
             Assert.Equal("default", f("HI"));
             Assert.Equal("null", f(null));
         }
+        
+        [Fact]
+        public static void DefaultOnlySwitch()
+        {
+            var p = Expression.Parameter(typeof(int));
+            var s = Expression.Switch(p, Expression.Constant(42));
+            
+            var fInt32Int32 = Expression.Lambda<Func<int, int>>(s, p).Compile();
+            
+            Assert.Equal(42, fInt32Int32(0));
+            Assert.Equal(42, fInt32Int32(1));
+            Assert.Equal(42, fInt32Int32(-1));
+            
+            s = Expression.Switch(typeof(object), p, Expression.Constant("A test string"), null);
+            
+            var fInt32Object = Expression.Lambda<Func<int, object>>(s, p).Compile();
+
+            Assert.Equal("A test string", fInt32Object(0));
+            Assert.Equal("A test string", fInt32Object(1));
+            Assert.Equal("A test string", fInt32Object(-1));
+            
+            p = Expression.Parameter(typeof(string));
+            s = Expression.Switch(p, Expression.Constant("foo"));
+            
+            var fStringString = Expression.Lambda<Func<string, string>>(s, p).Compile();
+            
+            Assert.Equal("foo", fStringString("bar"));
+            Assert.Equal("foo", fStringString(null));
+            Assert.Equal("foo", fStringString("foo"));
+        }
+        
+        [Fact]
+        public static void NoDefaultOrCasesSwitch()
+        {
+            var p = Expression.Parameter(typeof(int));
+            var s = Expression.Switch(p, (Expression)null);
+            
+            var f = Expression.Lambda<Action<int>>(s, p).Compile();
+            
+            f(0);
+            
+            Assert.Equal(s.Type, typeof(void));
+        }
+
+        [Fact]
+        public static void TypedNoDefaultOrCasesSwitch()
+        {
+            var p = Expression.Parameter(typeof(int));
+            // A SwitchExpression with neither a defaultBody nor any cases can not be any type except void.
+            Assert.Throws<ArgumentException>(() => Expression.Switch(typeof(int), p, (Expression)null, null));
+        }
 
         static class System_Linq_Expressions_Expression_TDelegate__1
         {

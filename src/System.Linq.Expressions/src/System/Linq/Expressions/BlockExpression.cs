@@ -781,12 +781,14 @@ namespace System.Linq.Expressions
 
             switch (expressions.Length)
             {
+                case 0:
+                    expressions = new []{ Empty() };
+                    goto default;
                 case 2: return Block(expressions[0], expressions[1]);
                 case 3: return Block(expressions[0], expressions[1], expressions[2]);
                 case 4: return Block(expressions[0], expressions[1], expressions[2], expressions[3]);
                 case 5: return Block(expressions[0], expressions[1], expressions[2], expressions[3], expressions[4]);
                 default:
-                    ContractUtils.RequiresNotEmpty(expressions, "expressions");
                     RequiresCanRead(expressions, "expressions");
                     return new BlockN(expressions.Copy());
             }
@@ -857,8 +859,12 @@ namespace System.Linq.Expressions
         public static BlockExpression Block(IEnumerable<ParameterExpression> variables, IEnumerable<Expression> expressions)
         {
             ContractUtils.RequiresNotNull(expressions, "expressions");
+            var variableList = variables.ToReadOnly();
             var expressionList = expressions.ToReadOnly();
-            ContractUtils.RequiresNotEmpty(expressionList, "expressions");
+            if (variableList.Count != 0)
+                ContractUtils.RequiresNotEmpty(expressionList, "expressions");
+            else if (expressionList.Count == 0)
+                expressionList = new ReadOnlyCollection<Expression>(new []{ Empty() });
             RequiresCanRead(expressionList, "expressions");
 
             return Block(expressionList.Last().Type, variables, expressionList);
@@ -879,7 +885,10 @@ namespace System.Linq.Expressions
             var expressionList = expressions.ToReadOnly();
             var variableList = variables.ToReadOnly();
 
-            ContractUtils.RequiresNotEmpty(expressionList, "expressions");
+            if (variableList.Count != 0)
+                ContractUtils.RequiresNotEmpty(expressionList, "expressions");
+            else if (expressionList.Count == 0)
+                expressionList = new ReadOnlyCollection<Expression>(new []{ Empty() });
             RequiresCanRead(expressionList, "expressions");
             ValidateVariables(variableList, "variables");
 

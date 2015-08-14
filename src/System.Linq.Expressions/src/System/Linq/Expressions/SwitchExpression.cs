@@ -202,8 +202,44 @@ namespace System.Linq.Expressions
             if (switchValue.Type == typeof(void)) throw Error.ArgumentCannotBeOfTypeVoid();
 
             var caseList = cases.ToReadOnly();
-            ContractUtils.RequiresNotEmpty(caseList, "cases");
-            ContractUtils.RequiresNotNullItems(caseList, "cases");
+            if (caseList.Count == 0)
+            {
+                // Previous versions did not allow for a switch expression with no SwitchCases. This though can be useful if
+                // the SwitchCases are determined dynamically, in not having to special-case the case where there are zero
+                // such SwitchCases.
+                // However, merely changing this method to allow the zero-cases condition may have compatibility issues with
+                // code acting on the expression tree assuming that this condition cannot occur. Therefore we produce a
+                // switch with a case for the default value of the expression matching that of the the default case.
+                // By analogy to C#, we turn the equivalent to the (valid) C#:
+                //
+                // switch(expr)
+                // {
+                //     default:
+                //         doSomething();
+                //         break;
+                // }
+                //
+                // into:
+                //
+                // switch(expr)
+                // {
+                //     case 0:
+                //         doSomething();
+                //         break;
+                //     default:
+                //         doSomething();
+                //         break;
+                // }
+                //
+                // but where the 0 is typed according to the type of expr
+                //               
+                // If there is no defaultBody either we create a noop body. This will mean the type of the expression is void
+                // If there is no defaultBody and the type is explicitly set to something other than void, an ArgumentException
+                // is thrown.
+                caseList = new ReadOnlyCollection<SwitchCase>(new [] { SwitchCase(defaultBody ?? Empty(), Default(switchValue.Type)) });
+            }
+            else
+                ContractUtils.RequiresNotNullItems(caseList, "cases");
 
             // Type of the result. Either provided, or it is type of the branches.
             Type resultType = type ?? caseList[0].Body.Type;
