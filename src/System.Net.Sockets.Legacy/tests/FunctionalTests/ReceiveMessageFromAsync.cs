@@ -1,13 +1,10 @@
-﻿namespace NCLTest.Sockets
-{
-    using CoreFXTestLibrary;
-    using System;
-    using System.IO;
-    using System.Net;
-    using System.Net.Sockets;
-    using System.Threading;
+﻿using System.Net.Test.Common;
+using System.Threading;
 
-    [TestClass]
+using Xunit;
+
+namespace System.Net.Sockets.Tests
+{
     public class ReceiveMessageFromAsync
     {
         private const int TestPortBase = 8090;
@@ -18,7 +15,7 @@
             handle.Set();
         }
 
-        [TestMethod]
+        [Fact]
         public void Success()
         {
             ManualResetEvent completed = new ManualResetEvent(false);
@@ -40,13 +37,13 @@
                     args.Completed += OnCompleted;
                     args.UserToken = completed;
 
-                    Assert.IsTrue(receiver.ReceiveMessageFromAsync(args));
+                    Assert.True(receiver.ReceiveMessageFromAsync(args));
 
-                    Assert.IsTrue(completed.WaitOne(5000), "Timeout while waiting for connection");
+                    Assert.True(completed.WaitOne(5000), "Timeout while waiting for connection");
 
-                    Assert.AreEqual(1024, args.BytesTransferred, "Unexpected packet size");
-                    Assert.AreEqual(sender.LocalEndPoint, args.RemoteEndPoint, "Unexpected sender");
-                    Assert.AreEqual(((IPEndPoint)sender.LocalEndPoint).Address, args.ReceiveMessageFromPacketInfo.Address, "Unexpected address in packetinfo");
+                    Assert.Equal(1024, args.BytesTransferred);
+                    Assert.Equal(sender.LocalEndPoint, args.RemoteEndPoint);
+                    Assert.Equal(((IPEndPoint)sender.LocalEndPoint).Address, args.ReceiveMessageFromPacketInfo.Address);
 
                     sender.Dispose();
                 }

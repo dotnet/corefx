@@ -1,36 +1,32 @@
-﻿namespace NCLTest.Sockets
+﻿using Xunit;
+
+namespace System.Net.Sockets.Tests
 {
-    using CoreFXTestLibrary;
-    using System;
-    using System.Net;
-    using System.Net.Sockets;
-    
-    [TestClass]
     public class TimeoutTest
     {
         private const int TestPortBase = 8110;
 
         private const int ServerPort = TestPortBase;
 
-        [TestMethod]
+        [Fact]
         public void GetAndSet_Success()
         {
             Socket socket = new Socket(AddressFamily.InterNetworkV6, SocketType.Stream, ProtocolType.Tcp);
-            Assert.AreEqual(0, socket.ReceiveTimeout);
+            Assert.Equal(0, socket.ReceiveTimeout);
             socket.ReceiveTimeout = 100;
-            Assert.AreEqual(100, socket.ReceiveTimeout);
+            Assert.Equal(100, socket.ReceiveTimeout);
         }
 
-        [TestMethod]
+        [Fact]
         public void SocketSendTimeout_GetAndSet_Success()
         {
             Socket socket = new Socket(AddressFamily.InterNetworkV6, SocketType.Stream, ProtocolType.Tcp);
-            Assert.AreEqual(0, socket.SendTimeout);
+            Assert.Equal(0, socket.SendTimeout);
             socket.SendTimeout = 100;
-            Assert.AreEqual(100, socket.SendTimeout);
+            Assert.Equal(100, socket.SendTimeout);
         }
 
-        [TestMethod]
+        [Fact]
         public void ReceiveTimesOut_Throws()
         {
             using (Socket localSocket = new Socket(AddressFamily.InterNetworkV6, SocketType.Stream, ProtocolType.Tcp))
@@ -46,21 +42,17 @@
                     Socket acceptedSocket = localSocket.EndAccept(localAsync);
                     acceptedSocket.ReceiveTimeout = 100;
 
-                    try
-                    {
-                        int bytes = acceptedSocket.Receive(new byte[1]);
-                        Assert.Fail("Timeout Expected");
-                    }
-                    catch (SocketException sockEx)
-                    {
-                        Assert.AreEqual(SocketError.TimedOut, sockEx.SocketErrorCode);
-                        Assert.IsTrue(acceptedSocket.Connected);
-                    }
-                }                
+                    SocketException sockEx = Assert.Throws<SocketException>( () => {
+                        acceptedSocket.Receive(new byte[1]);
+                    });
+                    
+                    Assert.Equal(SocketError.TimedOut, sockEx.SocketErrorCode);
+                    Assert.True(acceptedSocket.Connected);
+                }
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void SocketSendTimeout_Send_Success()
         {
             using (Socket localSocket = new Socket(AddressFamily.InterNetworkV6, SocketType.Stream, ProtocolType.Tcp))
@@ -78,8 +70,8 @@
 
                     // Note that Send almost never times out because it only has to copy the data to the native buffer.
                     int bytes = acceptedSocket.Send(new byte[100]);
-                    Assert.AreEqual(100, bytes);
-                    Assert.IsTrue(acceptedSocket.Connected);
+                    Assert.Equal(100, bytes);
+                    Assert.True(acceptedSocket.Connected);
                 }
             }
         }

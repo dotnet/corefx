@@ -1,16 +1,13 @@
-﻿namespace NCLTest.Sockets
+﻿using System.Net.Test.Common;
+using System.Threading;
+
+using Xunit;
+
+namespace System.Net.Sockets.Tests
 {
-    using CoreFXTestLibrary;
-    using System;
-    using System.Net;
-    using System.Net.Sockets;
-    using System.Threading;
-    using NCLTest.Common;
-    
-    [TestClass]
     public class DnsEndPointTest
     {
-        [TestMethod]
+        [Fact]
         public void Socket_ConnectDnsEndPoint_Success()
         {
             SocketTestServer server = SocketTestServer.SocketTestServerFactory(new IPEndPoint(IPAddress.Loopback, 8080));
@@ -22,7 +19,7 @@
             server.Dispose();
         }
 
-        [TestMethod]
+        [Fact]
         public void Socket_ConnectDnsEndPoint_Failure()
         {
             Socket sock = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
@@ -35,7 +32,7 @@
             catch (SocketException ex)
             {
                 SocketError errorCode = ex.SocketErrorCode;
-                Assert.IsTrue((errorCode == SocketError.HostNotFound) || (errorCode == SocketError.NoData),
+                Assert.True((errorCode == SocketError.HostNotFound) || (errorCode == SocketError.NoData),
                     "SocketErrorCode: {0}", errorCode);
             }
 
@@ -46,13 +43,13 @@
             }
             catch (SocketException ex)
             {
-                Assert.AreEqual(SocketError.ConnectionRefused, ex.SocketErrorCode);
+                Assert.Equal(SocketError.ConnectionRefused, ex.SocketErrorCode);
             }
 
             sock.Dispose();
         }
 
-        [TestMethod]
+        [Fact]
         public void Socket_SendToDnsEndPoint_ArgumentException()
         {
             Socket sock = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
@@ -69,7 +66,7 @@
             sock.Dispose();
         }
 
-        [TestMethod]
+        [Fact]
         public void Socket_ReceiveFromDnsEndPoint_ArgumentException()
         {
             Socket sock = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
@@ -88,7 +85,7 @@
             sock.Dispose();
         }
 
-        [TestMethod]
+        [Fact]
         public void Socket_BeginConnectDnsEndPoint_Success()
         {
             SocketTestServer server = SocketTestServer.SocketTestServerFactory(new IPEndPoint(IPAddress.Loopback, 8080));
@@ -101,7 +98,7 @@
             server.Dispose();
         }
 
-        [TestMethod]
+        [Fact]
         public void Socket_BeginConnectDnsEndPoint_Failure()
         {
             Socket sock = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
@@ -115,7 +112,7 @@
             catch (SocketException ex)
             {
                 SocketError errorCode = ex.SocketErrorCode;
-                Assert.IsTrue((errorCode == SocketError.HostNotFound) || (errorCode == SocketError.NoData),
+                Assert.True((errorCode == SocketError.HostNotFound) || (errorCode == SocketError.NoData),
                     "SocketErrorCode: {0}", errorCode);
             }
 
@@ -127,13 +124,13 @@
             }
             catch (SocketException ex)
             {
-                Assert.AreEqual(SocketError.ConnectionRefused, ex.SocketErrorCode);
+                Assert.Equal(SocketError.ConnectionRefused, ex.SocketErrorCode);
             }
 
             sock.Dispose();
         }
 
-        [TestMethod]
+        [Fact]
         public void Socket_BeginSendToDnsEndPoint_ArgumentException()
         {
             Socket sock = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
@@ -156,7 +153,7 @@
             complete.Set();
         }
 
-        [TestMethod]
+        [Fact]
         public void Socket_ConnectAsyncDnsEndPoint_Success()
         {
             SocketTestServer server = SocketTestServer.SocketTestServerFactory(new IPEndPoint(IPAddress.Loopback, 8080));
@@ -169,19 +166,19 @@
             args.UserToken = complete;
 
             Socket sock = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-            Assert.IsTrue(sock.ConnectAsync(args));
+            Assert.True(sock.ConnectAsync(args));
 
             complete.WaitOne();
 
-            Assert.AreEqual(SocketError.Success, args.SocketError);
-            Assert.IsNull(args.ConnectByNameError, "ConnectByNameError");
+            Assert.Equal(SocketError.Success, args.SocketError);
+            Assert.Null(args.ConnectByNameError);
 
             complete.Dispose();
             sock.Dispose();
             server.Dispose();
         }
 
-        [TestMethod]
+        [Fact]
         public void Socket_ConnectAsyncDnsEndPoint_HostNotFound()
         {
             SocketAsyncEventArgs args = new SocketAsyncEventArgs();
@@ -192,7 +189,7 @@
             args.UserToken = complete;
 
             Socket sock = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-            Assert.IsTrue(sock.ConnectAsync(args));
+            Assert.True(sock.ConnectAsync(args));
 
             complete.WaitOne();
 
@@ -202,7 +199,7 @@
             sock.Dispose();
         }
 
-        [TestMethod]
+        [Fact]
         public void Socket_ConnectAsyncDnsEndPoint_ConnectionRefused()
         {
             SocketAsyncEventArgs args = new SocketAsyncEventArgs();
@@ -213,23 +210,23 @@
             args.UserToken = complete;
 
             Socket sock = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-            Assert.IsTrue(sock.ConnectAsync(args));
+            Assert.True(sock.ConnectAsync(args));
 
             complete.WaitOne();
 
-            Assert.AreEqual(SocketError.ConnectionRefused, args.SocketError);
-            Assert.IsTrue(args.ConnectByNameError is SocketException);
-            Assert.AreEqual(SocketError.ConnectionRefused, ((SocketException)args.ConnectByNameError).SocketErrorCode);
+            Assert.Equal(SocketError.ConnectionRefused, args.SocketError);
+            Assert.True(args.ConnectByNameError is SocketException);
+            Assert.Equal(SocketError.ConnectionRefused, ((SocketException)args.ConnectByNameError).SocketErrorCode);
 
             complete.Dispose();
             sock.Dispose();
         }
 
-        [TestMethod]
+        [Fact]
         public void Socket_StaticConnectAsync_Success()
         {
-            TestRequirements.CheckIPv6Support();
-            TestRequirements.CheckIPv4Support();
+
+            Assert.True(Capability.IPv6Support() && Capability.IPv4Support());
 
             SocketTestServer server4 = SocketTestServer.SocketTestServerFactory(new IPEndPoint(IPAddress.Loopback, 8080));
             SocketTestServer server6 = SocketTestServer.SocketTestServerFactory(new IPEndPoint(IPAddress.IPv6Loopback, 8081));
@@ -241,30 +238,30 @@
             ManualResetEvent complete = new ManualResetEvent(false);
             args.UserToken = complete;
 
-            Assert.IsTrue(Socket.ConnectAsync(SocketType.Stream, ProtocolType.Tcp, args));
+            Assert.True(Socket.ConnectAsync(SocketType.Stream, ProtocolType.Tcp, args));
 
             complete.WaitOne();
 
-            Assert.AreEqual(SocketError.Success, args.SocketError);
-            Assert.IsNull(args.ConnectByNameError);
-            Assert.IsNotNull(args.ConnectSocket);
-            Assert.IsTrue(args.ConnectSocket.AddressFamily == AddressFamily.InterNetwork);
-            Assert.IsTrue(args.ConnectSocket.Connected);
+            Assert.Equal(SocketError.Success, args.SocketError);
+            Assert.Null(args.ConnectByNameError);
+            Assert.NotNull(args.ConnectSocket);
+            Assert.True(args.ConnectSocket.AddressFamily == AddressFamily.InterNetwork);
+            Assert.True(args.ConnectSocket.Connected);
 
             args.ConnectSocket.Dispose();
 
             args.RemoteEndPoint = new DnsEndPoint("localhost", 8081);
             complete.Reset();
 
-            Assert.IsTrue(Socket.ConnectAsync(SocketType.Stream, ProtocolType.Tcp, args));
+            Assert.True(Socket.ConnectAsync(SocketType.Stream, ProtocolType.Tcp, args));
 
             complete.WaitOne();
 
-            Assert.AreEqual(SocketError.Success, args.SocketError);
-            Assert.IsNull(args.ConnectByNameError);
-            Assert.IsNotNull(args.ConnectSocket);
-            Assert.IsTrue(args.ConnectSocket.AddressFamily == AddressFamily.InterNetworkV6);
-            Assert.IsTrue(args.ConnectSocket.Connected);
+            Assert.Equal(SocketError.Success, args.SocketError);
+            Assert.Null(args.ConnectByNameError);
+            Assert.NotNull(args.ConnectSocket);
+            Assert.True(args.ConnectSocket.AddressFamily == AddressFamily.InterNetworkV6);
+            Assert.True(args.ConnectSocket.Connected);
 
             args.ConnectSocket.Dispose();
 
@@ -272,7 +269,7 @@
             server6.Dispose();
         }
 
-        [TestMethod]
+        [Fact]
         public void Socket_StaticConnectAsync_HostNotFound()
         {
             SocketAsyncEventArgs args = new SocketAsyncEventArgs();
@@ -282,18 +279,18 @@
             ManualResetEvent complete = new ManualResetEvent(false);
             args.UserToken = complete;
 
-            Assert.IsTrue(Socket.ConnectAsync(SocketType.Stream, ProtocolType.Tcp, args));
+            Assert.True(Socket.ConnectAsync(SocketType.Stream, ProtocolType.Tcp, args));
 
             complete.WaitOne();
 
             AssertHostNotFoundOrNoData(args);
 
-            Assert.IsNull(args.ConnectSocket);
+            Assert.Null(args.ConnectSocket);
 
             complete.Dispose();
         }
 
-        [TestMethod]
+        [Fact]
         public void Socket_StaticConnectAsync_ConnectionRefused()
         {
             SocketAsyncEventArgs args = new SocketAsyncEventArgs();
@@ -303,14 +300,14 @@
             ManualResetEvent complete = new ManualResetEvent(false);
             args.UserToken = complete;
 
-            Assert.IsTrue(Socket.ConnectAsync(SocketType.Stream, ProtocolType.Tcp, args));
+            Assert.True(Socket.ConnectAsync(SocketType.Stream, ProtocolType.Tcp, args));
 
             complete.WaitOne();
 
-            Assert.AreEqual(SocketError.ConnectionRefused, args.SocketError);
-            Assert.IsTrue(args.ConnectByNameError is SocketException);
-            Assert.AreEqual(SocketError.ConnectionRefused, ((SocketException)args.ConnectByNameError).SocketErrorCode);
-            Assert.IsNull(args.ConnectSocket);
+            Assert.Equal(SocketError.ConnectionRefused, args.SocketError);
+            Assert.True(args.ConnectByNameError is SocketException);
+            Assert.Equal(SocketError.ConnectionRefused, ((SocketException)args.ConnectByNameError).SocketErrorCode);
+            Assert.Null(args.ConnectSocket);
 
             complete.Dispose();
         }
@@ -320,37 +317,37 @@
             Assert.Fail("This Callback should not be called");
         }
 
-        [TestMethod]
+        [Fact]
         public void Socket_StaticConnectAsync_SyncFailure()
         {
-            TestRequirements.CheckIPv6Support(); // IPv6 required because we use AF.InterNetworkV6
+            Assert.True(Capability.IPv6Support()); // IPv6 required because we use AF.InterNetworkV6
 
             SocketAsyncEventArgs args = new SocketAsyncEventArgs();
             args.RemoteEndPoint = new DnsEndPoint("127.0.0.1", 8080, AddressFamily.InterNetworkV6);
             args.Completed += CallbackThatShouldNotBeCalled;
 
-            Assert.IsFalse(Socket.ConnectAsync(SocketType.Stream, ProtocolType.Tcp, args));
+            Assert.False(Socket.ConnectAsync(SocketType.Stream, ProtocolType.Tcp, args));
 
-            Assert.AreEqual(SocketError.NoData, args.SocketError);
-            Assert.IsNull(args.ConnectSocket);
+            Assert.Equal(SocketError.NoData, args.SocketError);
+            Assert.Null(args.ConnectSocket);
         }
 
         private static void AssertHostNotFoundOrNoData(SocketAsyncEventArgs args)
         {
             SocketError errorCode = args.SocketError;
-            Assert.IsTrue((errorCode == SocketError.HostNotFound) || (errorCode == SocketError.NoData),
-                "SocketError: {0}", errorCode);
+            Assert.True((errorCode == SocketError.HostNotFound) || (errorCode == SocketError.NoData),
+                "SocketError: " + errorCode);
 
-            Assert.IsTrue(args.ConnectByNameError is SocketException);
+            Assert.True(args.ConnectByNameError is SocketException);
             errorCode = ((SocketException)args.ConnectByNameError).SocketErrorCode;
-            Assert.IsTrue((errorCode == SocketError.HostNotFound) || (errorCode == SocketError.NoData),
-                "SocketError: {0}", errorCode);
+            Assert.True((errorCode == SocketError.HostNotFound) || (errorCode == SocketError.NoData),
+                "SocketError: " + errorCode);
         }
 
         #region GC Finalizer test
         // This test assumes sequential execution of tests and that it is going to be executed after other tests
         // that used Sockets. 
-        [TestMethod]
+        [Fact]
         public void TestFinalizers()
         {
             // Making several passes through the FReachable list.

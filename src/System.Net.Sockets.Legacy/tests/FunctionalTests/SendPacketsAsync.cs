@@ -1,17 +1,16 @@
-﻿namespace NCLTest.Sockets
-{
-    using CoreFXTestLibrary;
-    using System;
-    using System.IO;
-    using System.Net;
-    using System.Net.Sockets;
-    using System.Threading;
-    using NCLTest.Common;
+﻿using System.IO;
+using System.Net.Test.Common;
+using System.Threading;
 
-    [TestClass]
+using Xunit;
+using Xunit.Abstractions;
+
+namespace System.Net.Sockets.Tests
+{
     public class SendPacketsAsync
     {
         private const int TestPortBase = 8100;
+        private readonly ITestOutputHelper _log;
 
         private IPEndPoint Server = new IPEndPoint(IPAddress.IPv6Loopback, 8080); 
         // In the current directory
@@ -20,15 +19,10 @@
         
         #region Additional test attributes
 
-        public SendPacketsAsync()
+        public SendPacketsAsync(ITestOutputHelper output)
         {
-            // Workaround for 916993
-            ClassInitialize();
-        }
-
-        [TestInitialize]
-        public void ClassInitialize()
-        {
+            _log = TestLogging.GetInstance();
+            
             byte[] buffer = new byte[TestFileSize];
 
             for (int i = 0; i < TestFileSize; i++)
@@ -38,7 +32,7 @@
 
             try
             {
-                Console.WriteLine("Creating file {0} with size: {1}", TestFileName, TestFileSize);
+                _log.WriteLine("Creating file {0} with size: {1}", TestFileName, TestFileSize);
                 using (FileStream fs = new FileStream(TestFileName, FileMode.CreateNew))
                 {
                     fs.Write(buffer, 0, buffer.Length);
@@ -47,7 +41,7 @@
             catch (IOException)
             {
                 // Test payload file already exists.
-                Console.WriteLine("Payload file exists: {0}", TestFileName);
+                _log.WriteLine("Payload file exists: {0}", TestFileName);
             }
         }
 
@@ -56,7 +50,7 @@
 
         #region Basic Arguments
 
-        [TestMethod]
+        [Fact]
         public void Disposed_Throw()
         {
             try
@@ -80,7 +74,7 @@
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void NullArgs_Throw()
         {
             try
@@ -99,12 +93,12 @@
             catch (ArgumentNullException ex)
             {
                 // expected
-                Assert.AreEqual("e", ex.ParamName);
+                Assert.Equal("e", ex.ParamName);
                 return;
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void NotConnected_Throw()
         {
             try
@@ -117,12 +111,12 @@
             catch (ArgumentNullException ex)
             {
                 // expected
-                Assert.AreEqual("e.SendPacketsElements", ex.ParamName);
+                Assert.Equal("e.SendPacketsElements", ex.ParamName);
                 return;
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void NullList_Throws()
         {
             try
@@ -133,59 +127,59 @@
             catch (ArgumentNullException ex)
             {
                 // expected
-                Assert.AreEqual("e.SendPacketsElements", ex.ParamName);
+                Assert.Equal("e.SendPacketsElements", ex.ParamName);
                 return;
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void NullElement_Ignored()
         {
             SendPackets((SendPacketsElement)null, 0);
         }
 
-        [TestMethod]
+        [Fact]
         public void EmptyList_Ignored()
         {
             SendPackets(new SendPacketsElement[0], SocketError.Success, 0);
         }
 
-        [TestMethod]
+        [Fact]
         public void SocketAsyncEventArgs_DefaultSendSize_0()
         {
             SocketAsyncEventArgs args = new SocketAsyncEventArgs();
-            Assert.AreEqual(0, args.SendPacketsSendSize);
+            Assert.Equal(0, args.SendPacketsSendSize);
         }
 
         #endregion Basic Arguments
 
         #region Buffers
 
-        [TestMethod]
+        [Fact]
         public void NormalBuffer_Success()
         {
             SendPackets(new SendPacketsElement(new byte[10]), 10);
         }
 
-        [TestMethod]
+        [Fact]
         public void NormalBufferRange_Success()
         {
             SendPackets(new SendPacketsElement(new byte[10], 5, 5), 5);
         }
 
-        [TestMethod]
+        [Fact]
         public void EmptyBuffer_Ignored()
         {
             SendPackets(new SendPacketsElement(new byte[0]), 0);
         }
 
-        [TestMethod]
+        [Fact]
         public void BufferZeroCount_Ignored()
         {
             SendPackets(new SendPacketsElement(new byte[10], 4, 0), 0);
         }
 
-        [TestMethod]
+        [Fact]
         public void BufferMixedBuffers_ZeroCountBufferIgnored()
         {
             SendPacketsElement[] elements = new SendPacketsElement[] 
@@ -197,11 +191,11 @@
             SendPackets(elements, SocketError.Success, 8);
         }
 
-        [TestMethod]
+        [Fact]
         public void BufferZeroCountThenNormal_ZeroCountIgnored()
         {
-            TestRequirements.CheckIPv6Support();
-
+            Assert.True(Capability.IPv6Support());
+            
             EventWaitHandle completed = new ManualResetEvent(false);
 
             using (SocketTestServer.SocketTestServerFactory(Server))
@@ -222,10 +216,10 @@
 
                         if (sock.SendPacketsAsync(args))
                         {
-                            Assert.IsTrue(completed.WaitOne(500), "Timed out");
+                            Assert.True(completed.WaitOne(500), "Timed out");
                         }
-                        Assert.AreEqual(SocketError.Success, args.SocketError);
-                        Assert.AreEqual(0, args.BytesTransferred);
+                        Assert.Equal(SocketError.Success, args.SocketError);
+                        Assert.Equal(0, args.BytesTransferred);
 
                         completed.Reset();
                         // Now do a real send
@@ -236,10 +230,10 @@
 
                         if (sock.SendPacketsAsync(args))
                         {
-                            Assert.IsTrue(completed.WaitOne(500), "Timed out");
+                            Assert.True(completed.WaitOne(500), "Timed out");
                         }
-                        Assert.AreEqual(SocketError.Success, args.SocketError);
-                        Assert.AreEqual(4, args.BytesTransferred);
+                        Assert.Equal(SocketError.Success, args.SocketError);
+                        Assert.Equal(4, args.BytesTransferred);
                     }
                 }
             }
@@ -249,7 +243,7 @@
 
         #region Files
 
-        [TestMethod]
+        [Fact]
         public void SendPacketsElement_EmptyFileName_Throws()
         {
             try
@@ -265,7 +259,7 @@
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void SendPacketsElement_BlankFileName_Throws()
         {
             try
@@ -281,7 +275,7 @@
             }
         }
         
-        [TestMethod]
+        [Fact]
         public void SendPacketsElement_BadCharactersFileName_Throws()
         {
             try
@@ -297,7 +291,7 @@
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void SendPacketsElement_MissingDirectoryName_Throws()
         {
             try
@@ -313,7 +307,7 @@
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void SendPacketsElement_MissingFile_Throws()
         {
             try
@@ -329,25 +323,25 @@
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void SendPacketsElement_File_Success()
         {
             SendPackets(new SendPacketsElement(TestFileName), TestFileSize); // Whole File
         }
 
-        [TestMethod]
+        [Fact]
         public void SendPacketsElement_FileZeroCount_Success()
         {
             SendPackets(new SendPacketsElement(TestFileName, 0, 0), TestFileSize);  // Whole File
         }
 
-        [TestMethod]
+        [Fact]
         public void SendPacketsElement_FilePart_Success()
         {
             SendPackets(new SendPacketsElement(TestFileName, 10, 20), 20);
         }
 
-        [TestMethod]
+        [Fact]
         public void SendPacketsElement_FileMultiPart_Success()
         {
             SendPacketsElement[] elements = new SendPacketsElement[] 
@@ -359,14 +353,14 @@
             SendPackets(elements, SocketError.Success, 40);
         }
 
-        [TestMethod]
+        [Fact]
         public void SendPacketsElement_FileLargeOffset_Throws()
         {
             // Length is validated on Send
             SendPackets(new SendPacketsElement(TestFileName, 11000, 1), SocketError.InvalidArgument, 0);
         }
 
-        [TestMethod]
+        [Fact]
         public void SendPacketsElement_FileLargeCount_Throws()
         {
             // Length is validated on Send
@@ -378,7 +372,7 @@
         #region GC Finalizer test
         // This test assumes sequential execution of tests and that it is going to be executed after other tests
         // that used Sockets. 
-        [TestMethod]
+        [Fact]
         public void TestFinalizers()
         {
             // Making several passes through the FReachable list.
@@ -404,7 +398,7 @@
 
         private void SendPackets(SendPacketsElement[] elements, SocketError expectedResut, int bytesExpected)
         {
-            TestRequirements.CheckIPv6Support();
+            Assert.True(Capability.IPv6Support());
 
             EventWaitHandle completed = new ManualResetEvent(false);
 
@@ -421,10 +415,10 @@
 
                         if (sock.SendPacketsAsync(args))
                         {
-                            Assert.IsTrue(completed.WaitOne(500), "Timed out");
+                            Assert.True(completed.WaitOne(500), "Timed out");
                         }
-                        Assert.AreEqual(expectedResut, args.SocketError);
-                        Assert.AreEqual(bytesExpected, args.BytesTransferred);
+                        Assert.Equal(expectedResut, args.SocketError);
+                        Assert.Equal(bytesExpected, args.BytesTransferred);
                     }
                 }
             }

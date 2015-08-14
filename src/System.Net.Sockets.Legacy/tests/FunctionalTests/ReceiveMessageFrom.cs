@@ -1,16 +1,12 @@
-﻿namespace NCLTest.Sockets
-{
-    using CoreFXTestLibrary;
-    using System;
-    using System.Net;
-    using System.Net.Sockets;
+﻿using Xunit;
 
-    [TestClass]
+namespace System.Net.Sockets.Tests
+{
     public class ReceiveMessageFrom
     {
         private const int TestPortBase = 8060;
 
-        [TestMethod]
+        [Fact]
         public void Success()
         {
             if (Socket.OSSupportsIPv4)
@@ -30,9 +26,9 @@
 
                     int len = receiver.ReceiveMessageFrom(new byte[1024], 0, 1024, ref flags, ref remoteEP, out packetInformation);
 
-                    Assert.AreEqual(1024, len, "Unexpected packet size");
-                    Assert.AreEqual(sender.LocalEndPoint, remoteEP, "Unexpected sender");
-                    Assert.AreEqual(((IPEndPoint)sender.LocalEndPoint).Address, packetInformation.Address, "Unexpected address in packetinfo");
+                    Assert.Equal(1024, len);
+                    Assert.Equal(sender.LocalEndPoint, remoteEP);
+                    Assert.Equal(((IPEndPoint)sender.LocalEndPoint).Address, packetInformation.Address);
 
                     sender.Dispose();
                 }
