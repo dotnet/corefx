@@ -73,7 +73,7 @@ namespace System.Net
                 socket = Interop.libc.socket(family, Interop.libc.SOCK_DGRAM, 0);
                 if (socket == -1)
                 {
-                    return Marshal.GetLastWin32Error() != Interop.Errors.EAFNOSUPPORT;
+                    return Interop.Sys.GetLastError() != Interop.Error.EAFNOSUPPORT;
                 }
                 return true;
             }

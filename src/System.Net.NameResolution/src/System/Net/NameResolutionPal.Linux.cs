@@ -13,11 +13,11 @@ namespace System.Net
         {
             int errno;
             int err = Interop.libc.gethostbyname_r(hostName, hostent, buffer, (IntPtr)bufferSize, result, &errno);
-            switch (err)
+            switch (Interop.Sys.ConvertErrorPlatformToPal(err))
             {
                 case 0:
                     return true;
-                case Interop.Errors.ERANGE:
+                case Interop.Error.ERANGE:
                     return false;
                 default:
                     throw new InternalSocketException(GetSocketErrorForErrno(errno), errno);
@@ -28,11 +28,11 @@ namespace System.Net
         {
             int errno;
             int err = Interop.libc.gethostbyaddr_r(&address, (uint)sizeof(Interop.libc.in_addr), Interop.libc.AF_INET, hostent, buffer, (IntPtr)bufferSize, result, &errno);
-            switch (err)
+            switch (Interop.Sys.ConvertErrorPlatformToPal(err))
             {
                 case 0:
                     return true;
-                case Interop.Errors.ERANGE:
+                case Interop.Error.ERANGE:
                     return false;
                 default:
                     throw new InternalSocketException(GetSocketErrorForErrno(errno), errno);
