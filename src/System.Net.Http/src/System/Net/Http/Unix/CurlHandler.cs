@@ -21,11 +21,14 @@ using CURLcode = Interop.libcurl.CURLcode;
 using CURLMcode = Interop.libcurl.CURLMcode;
 using CURLINFO = Interop.libcurl.CURLINFO;
 using CURLAUTH = Interop.libcurl.CURLAUTH;
+using CurlVersionInfoData = Interop.libcurl.curl_version_info_data;
+using CurlFeatures = Interop.libcurl.CURL_VERSION_Features;
 using CURLProxyType = Interop.libcurl.curl_proxytype;
 using size_t = System.IntPtr;
 
+
 namespace System.Net.Http
-{
+{  
     internal partial class CurlHandler : HttpMessageHandler
     {
         #region Constants
@@ -37,16 +40,21 @@ namespace System.Net.Http
         private readonly static string[] AuthenticationSchemes = { "Negotiate", "Digest","NTLM", "Basic" }; // the order in which libcurl goes over authentication schemes
         private readonly static ulong[]  AuthSchemePriorityOrder = { CURLAUTH.Negotiate, CURLAUTH.Digest, CURLAUTH.Ntlm, CURLAUTH.Basic };
         private static readonly string[] s_headerDelimiters = new string[] { "\r\n" };
+
         private const int s_requestBufferSize = 16384; // Default used by libcurl
         private const string NoTransferEncoding = HttpKnownHeaderNames.TransferEncoding + ":";
+        private readonly static CurlVersionInfoData curlVersionInfoData;
+        private const int CurlAge = 5;
+        private const int MinCurlAge = 3;
 
         #endregion
 
         #region Fields
 
+        private static readonly bool _supportsAutomaticDecompression;
+        private static readonly bool _supportsSSL;
         private volatile bool _anyOperationStarted;
         private volatile bool _disposed;
-        private bool _automaticRedirection = true;
         private IWebProxy _proxy = null;
         private ICredentials _serverCredentials = null;
         private ProxyUsePolicy _proxyPolicy = ProxyUsePolicy.UseDefaultProxy;
@@ -55,8 +63,12 @@ namespace System.Net.Http
         private GCHandle _multiHandlePtr = new GCHandle();
         private bool _preAuthenticate = false;
         private readonly CredentialCache _credentialCache = new CredentialCache();
+        private CookieContainer _cookieContainer = null;
+        private bool _useCookie = false;
+        private bool _automaticRedirection = true;
+        private int _maxAutomaticRedirections = 50;
 
-        #endregion
+        #endregion        
 
         static CurlHandler()
         {
@@ -65,6 +77,13 @@ namespace System.Net.Http
             {
                 throw new InvalidOperationException("Cannot use libcurl in this process");
             }
+            curlVersionInfoData = Marshal.PtrToStructure<CurlVersionInfoData>(Interop.libcurl.curl_version_info(CurlAge));
+            if (curlVersionInfoData.age < MinCurlAge)
+            {
+                throw new InvalidOperationException(SR.net_http_unix_https_libcurl_too_old);
+            }
+            _supportsSSL = (CurlFeatures.CURL_VERSION_SSL & curlVersionInfoData.features) != 0;
+            _supportsAutomaticDecompression = (CurlFeatures.CURL_VERSION_LIBZ & curlVersionInfoData.features) != 0;
         }
 
         internal CurlHandler()
@@ -107,6 +126,7 @@ namespace System.Net.Http
             {
                 return _proxyPolicy != ProxyUsePolicy.DoNotUseProxy;
             }
+
             set
             {
                 CheckDisposedOrStarted();
@@ -127,6 +147,7 @@ namespace System.Net.Http
             {
                 return _proxy;
             }
+
             set
             {
                 CheckDisposedOrStarted();
@@ -140,6 +161,7 @@ namespace System.Net.Http
             {
                 return _serverCredentials;
             }
+
             set
             {
                 _serverCredentials = value;
@@ -152,6 +174,7 @@ namespace System.Net.Http
             {
                 return ClientCertificateOption.Manual;
             }
+
             set
             {
                 if (ClientCertificateOption.Manual != value)
@@ -165,7 +188,7 @@ namespace System.Net.Http
         {
             get
             {
-                return true;
+                return _supportsAutomaticDecompression;
             }
         }
 
@@ -175,6 +198,7 @@ namespace System.Net.Http
             {
                 return _automaticDecompression;
             }
+
             set
             {
                 CheckDisposedOrStarted();
@@ -194,6 +218,57 @@ namespace System.Net.Http
                 _preAuthenticate = value;
             }
         }
+
+        internal bool UseCookie
+        {
+            get
+            {
+                return _useCookie;
+            }
+
+            set
+            {               
+                CheckDisposedOrStarted();
+                _useCookie = value;
+            }
+        }
+
+        internal CookieContainer CookieContainer
+        {
+            get
+            {
+                return _cookieContainer;
+            }
+
+            set
+            {
+                CheckDisposedOrStarted();
+                _cookieContainer = value;
+            }
+        }
+
+        internal int MaxAutomaticRedirections
+        {
+            get
+            {
+                return _maxAutomaticRedirections;
+            }
+
+            set
+            {
+                if (value <= 0)
+                {
+                    throw new ArgumentOutOfRangeException(
+                        "value",
+                        value,
+                        string.Format(SR.net_http_value_must_be_greater_than, 0));
+                }
+
+                CheckDisposedOrStarted();
+                _maxAutomaticRedirections = value;
+            }
+        }
+
         #endregion
 
         protected override void Dispose(bool disposing)
@@ -223,6 +298,11 @@ namespace System.Net.Http
             if ((request.RequestUri.Scheme != UriSchemeHttp) && (request.RequestUri.Scheme != UriSchemeHttps))
             {
                 throw NotImplemented.ByDesignWithMessage(SR.net_http_client_http_baseaddress_required);
+            }
+
+            if (request.RequestUri.Scheme == UriSchemeHttps && !_supportsSSL)
+            {
+                throw new PlatformNotSupportedException(SR.net_http_unix_https_support_unavailable_libcurl);
             }
 
             if (request.Headers.TransferEncodingChunked.GetValueOrDefault() && (request.Content == null))
@@ -377,6 +457,9 @@ namespace System.Net.Http
             if (_automaticRedirection)
             {
                 SetCurlOption(requestHandle, CURLoption.CURLOPT_FOLLOWLOCATION, 1L);
+                
+                // Set maximum automatic redirection option
+                SetCurlOption(requestHandle, CURLoption.CURLOPT_MAXREDIRS, _maxAutomaticRedirections);
             }
             if (state.RequestMessage.Content != null)
             {
@@ -392,11 +475,17 @@ namespace System.Net.Http
 
             SetCurlCallbacks(requestHandle, state.RequestMessage, statePtr);
 
-            SetRequestHandleDecompressionOptions(requestHandle);
+            if (_supportsAutomaticDecompression)
+            {
+                SetRequestHandleDecompressionOptions(requestHandle);
+            }
 
             SetProxyOptions(requestHandle, state.RequestMessage.RequestUri);
 
             SetRequestHandleCredentialsOptions(requestHandle, state);
+
+            SetCookieOption(requestHandle, state.RequestMessage.RequestUri);
+
             state.RequestHeaderHandle = SetRequestHeaders(requestHandle, state.RequestMessage);
 
             // TODO: Handle other options
@@ -508,6 +597,25 @@ namespace System.Net.Http
             }
 
             return GetCredentials(credentials, requestUri);
+        }
+
+        private void SetCookieOption(SafeCurlHandle requestHandle, Uri requestUri)
+        {
+            if (!_useCookie)
+            {
+                return;
+            }
+            else if (_cookieContainer == null)
+            {
+                throw new InvalidOperationException(SR.net_http_invalid_cookiecontainer);
+            }
+
+            string cookieValues = _cookieContainer.GetCookieHeader(requestUri);                    
+
+            if (cookieValues != null)
+            {
+                SetCurlOption(requestHandle, CURLoption.CURLOPT_COOKIE, cookieValues);
+            }           
         }
 
         private void AddCredentialToCache(Uri serverUri, ulong authAvail, NetworkCredential nc)
