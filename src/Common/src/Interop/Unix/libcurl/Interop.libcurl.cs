@@ -102,6 +102,12 @@ internal static partial class Interop
         public static extern int curl_easy_setopt(
             SafeCurlHandle curl,
             int option,
+            ulong value);
+
+        [DllImport(Interop.Libraries.LibCurl)]
+        public static extern int curl_easy_setopt(
+            SafeCurlHandle curl,
+            int option,
             IntPtr value);
 
         [DllImport(Interop.Libraries.LibCurl)]
@@ -132,6 +138,12 @@ internal static partial class Interop
             int info,
             out IntPtr value);
 
+        [DllImport(Interop.Libraries.LibCurl)]
+        public static extern int curl_easy_getinfo(
+            SafeCurlHandle handle,
+            int info,
+            out ulong value);
+
         [DllImport(Interop.Libraries.LibCurl, CharSet = CharSet.Ansi)]
         public static extern IntPtr curl_slist_append(
             IntPtr curl_slist,
@@ -140,5 +152,8 @@ internal static partial class Interop
         [DllImport(Interop.Libraries.LibCurl)]
         public static extern void curl_slist_free_all(
             IntPtr curl_slist);
+
+        [DllImport(Interop.Libraries.LibCurl)]
+        public static extern IntPtr curl_version_info(int curlVersionStamp);
     }
 }
