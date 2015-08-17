@@ -352,13 +352,23 @@ namespace System.Net.Http
             {
                 SetCurlOption(requestHandle, CURLoption.CURLOPT_FOLLOWLOCATION, 1L);
             }
-            if (state.RequestMessage.Content != null)
+
+            if (state.RequestMessage.Method == HttpMethod.Put)
             {
                 SetCurlOption(requestHandle, CURLoption.CURLOPT_UPLOAD, 1L);
             }
-            if (state.RequestMessage.Method == HttpMethod.Head)
+            else if (state.RequestMessage.Method == HttpMethod.Head)
             {
                 SetCurlOption(requestHandle, CURLoption.CURLOPT_NOBODY, 1L);
+            }
+            else if (state.RequestMessage.Method == HttpMethod.Post)
+            {
+                SetCurlOption(requestHandle, CURLoption.CURLOPT_POST, 1L);
+                if (state.RequestMessage.Content == null)
+                {
+                    SetCurlOption(requestHandle, CURLoption.CURLOPT_POSTFIELDSIZE, 0L);
+                    SetCurlOption(requestHandle, CURLoption.CURLOPT_POSTFIELDS, "");
+                }
             }
 
             IntPtr statePtr = GCHandle.ToIntPtr(stateHandle);
