@@ -24,8 +24,7 @@ namespace System.Net.Sockets.Tests
         {
             using (Socket sock = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
             {
-
-                SocketException ex = Assert.Throws<SocketException>(() => {
+                SocketException ex = Assert.ThrowsAny<SocketException>(() => {
                     sock.Connect(new DnsEndPoint("notahostname.invalid.corp.microsoft.com", 8080));
                 });
 
@@ -33,7 +32,7 @@ namespace System.Net.Sockets.Tests
                 Assert.True((errorCode == SocketError.HostNotFound) || (errorCode == SocketError.NoData),
                     "SocketErrorCode: {0}" + errorCode);
 
-                ex = Assert.Throws<SocketException>(() => {
+                ex = Assert.ThrowsAny<SocketException>(() => {
                     sock.Connect(new DnsEndPoint("localhost", 8081));
                 });
 
@@ -85,7 +84,7 @@ namespace System.Net.Sockets.Tests
             using (Socket sock = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
             {
 
-                SocketException ex = Assert.Throws<SocketException>(() => {
+                SocketException ex = Assert.ThrowsAny<SocketException>(() => {
                     IAsyncResult result = sock.BeginConnect(new DnsEndPoint("notahostname.invalid.corp.microsoft.com", 8080), null, null);
                     sock.EndConnect(result);
                 });
@@ -94,7 +93,7 @@ namespace System.Net.Sockets.Tests
                 Assert.True((errorCode == SocketError.HostNotFound) || (errorCode == SocketError.NoData),
                     "SocketErrorCode: {0}" + errorCode);
 
-                ex = Assert.Throws<SocketException>(() => {
+                ex = Assert.ThrowsAny<SocketException>(() => {
                     IAsyncResult result = sock.BeginConnect(new DnsEndPoint("localhost", 8080), null, null);
                     sock.EndConnect(result);
                 });
