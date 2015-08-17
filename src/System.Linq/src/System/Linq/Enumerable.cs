@@ -4,7 +4,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Threading;
 
 namespace System.Linq
 {
@@ -633,18 +632,69 @@ namespace System.Linq
         public static IEnumerable<TSource> Take<TSource>(this IEnumerable<TSource> source, int count)
         {
             if (source == null) throw Error.ArgumentNull("source");
-            return TakeIterator<TSource>(source, count);
+            SkipIterator<TSource> skip = source as SkipIterator<TSource>;
+            if (skip != null) return skip.Take(count);
+            return new TakeIterator<TSource>(source, count);
         }
 
-        private static IEnumerable<TSource> TakeIterator<TSource>(IEnumerable<TSource> source, int count)
+        private sealed class TakeIterator<TSource> : IEnumerable<TSource>, IEnumerator<TSource>
         {
-            if (count > 0)
+            private readonly IEnumerable<TSource> _source;
+            private readonly int _count;
+            private readonly int _threadId = Environment.CurrentManagedThreadId;
+            private IEnumerator<TSource> _enumerator;
+            private int _toTake;
+            private int _state;
+
+            public TakeIterator(IEnumerable<TSource> source, int count)
             {
-                foreach (TSource element in source)
+                _source = source;
+                _toTake = _count = count > 0 ? count : 0;
+            }
+            
+            public IEnumerator<TSource> GetEnumerator()
+            {
+                TakeIterator<TSource> ret = _state == 0 && _threadId == Environment.CurrentManagedThreadId
+                    ? this : new TakeIterator<TSource>(_source, _count);
+                ret._state = 1;
+                ret._enumerator = _source.GetEnumerator();
+                return ret;
+            }
+            
+            IEnumerator IEnumerable.GetEnumerator()
+            {
+                return GetEnumerator();
+            }
+            
+            public TSource Current
+            {
+                get { return _enumerator.Current; }
+            }
+            
+            object IEnumerator.Current
+            {
+                get { return Current; }
+            }
+            
+            public bool MoveNext()
+            {
+                if (_state == 1 && _enumerator.MoveNext())
                 {
-                    yield return element;
-                    if (--count == 0) break;
+                    if (--_toTake == 0) _state = -1;
+                    return true;
                 }
+                return false;
+            }
+            public void Dispose()
+            {
+                if (_enumerator != null & _state != -2)
+                    _enumerator.Dispose();
+                _state = -2;
+            }
+            
+            void IEnumerator.Reset()
+            {
+                throw Error.NotSupported();
             }
         }
 
@@ -652,15 +702,72 @@ namespace System.Linq
         {
             if (source == null) throw Error.ArgumentNull("source");
             if (predicate == null) throw Error.ArgumentNull("predicate");
-            return TakeWhileIterator<TSource>(source, predicate);
+            return new TakeWhileIterator<TSource>(source, predicate);
         }
 
-        private static IEnumerable<TSource> TakeWhileIterator<TSource>(IEnumerable<TSource> source, Func<TSource, bool> predicate)
+        private sealed class TakeWhileIterator<TSource> : IEnumerable<TSource>, IEnumerator<TSource>
         {
-            foreach (TSource element in source)
+            private readonly IEnumerable<TSource> _source;
+            private readonly Func<TSource, bool> _predicate;
+            private readonly int _threadId = Environment.CurrentManagedThreadId;
+            private IEnumerator<TSource> _enumerator;
+            private TSource _current;
+            private int _state;
+
+            public TakeWhileIterator(IEnumerable<TSource> source, Func<TSource, bool> predicate)
             {
-                if (!predicate(element)) break;
-                yield return element;
+                _source = source;
+                _predicate = predicate;
+            }
+            
+            public IEnumerator<TSource> GetEnumerator()
+            {
+                var ret = _state == 0 && _threadId == Environment.CurrentManagedThreadId
+                    ? this : new TakeWhileIterator<TSource>(_source, _predicate);
+                ret._state = 1;
+                ret._enumerator = _source.GetEnumerator();
+                return ret;
+            }
+            
+            IEnumerator IEnumerable.GetEnumerator()
+            {
+                return GetEnumerator();
+            }
+            
+            public TSource Current
+            {
+                get { return _current; }
+            }
+            
+            object IEnumerator.Current
+            {
+                get { return Current; }
+            }
+            
+            public bool MoveNext()
+            {
+                if (_state == 1 && _enumerator.MoveNext())
+                {
+                    TSource current = _enumerator.Current;
+                    if (!_predicate(current)) _state = -1;
+                    else
+                    {
+                        _current = current;
+                        return true;
+                    }
+                }
+                return false;
+            }
+            public void Dispose()
+            {
+                if (_enumerator != null & _state != -2)
+                    _enumerator.Dispose();
+                _state = -2;
+            }
+            
+            void IEnumerator.Reset()
+            {
+                throw Error.NotSupported();
             }
         }
 
@@ -668,35 +775,209 @@ namespace System.Linq
         {
             if (source == null) throw Error.ArgumentNull("source");
             if (predicate == null) throw Error.ArgumentNull("predicate");
-            return TakeWhileIterator<TSource>(source, predicate);
+            return new TakeWhileIndexIterator<TSource>(source, predicate);
         }
 
-        private static IEnumerable<TSource> TakeWhileIterator<TSource>(IEnumerable<TSource> source, Func<TSource, int, bool> predicate)
+        private sealed class TakeWhileIndexIterator<TSource> : IEnumerable<TSource>, IEnumerator<TSource>
         {
-            int index = -1;
-            foreach (TSource element in source)
+            private readonly IEnumerable<TSource> _source;
+            private readonly Func<TSource, int, bool> _predicate;
+            private readonly int _threadId = Environment.CurrentManagedThreadId;
+            private IEnumerator<TSource> _enumerator;
+            private TSource _current;
+            private int _index;
+            private int _state;
+
+            public TakeWhileIndexIterator(IEnumerable<TSource> source, Func<TSource, int,  bool> predicate)
             {
-                checked { index++; }
-                if (!predicate(element, index)) break;
-                yield return element;
+                _source = source;
+                _predicate = predicate;
+            }
+            
+            public IEnumerator<TSource> GetEnumerator()
+            {
+                var ret = _state == 0 && _threadId == Environment.CurrentManagedThreadId
+                    ? this : new TakeWhileIndexIterator<TSource>(_source, _predicate);
+                ret._state = 1;
+                ret._enumerator = _source.GetEnumerator();
+                return ret;
+            }
+            
+            IEnumerator IEnumerable.GetEnumerator()
+            {
+                return GetEnumerator();
+            }
+            
+            public TSource Current
+            {
+                get { return _current; }
+            }
+            
+            object IEnumerator.Current
+            {
+                get { return Current; }
+            }
+            
+            public bool MoveNext()
+            {
+                if (_state == 1 && _enumerator.MoveNext())
+                {
+                    TSource current = _enumerator.Current;
+                    if (!_predicate(current, _index)) _state = -1;
+                    else
+                    {
+                        ++_index;
+                        _current = current;
+                        return true;
+                    }
+                }
+                return false;
+            }
+            public void Dispose()
+            {
+                if (_enumerator != null & _state != -2)
+                    _enumerator.Dispose();
+                _state = -2;
+            }
+            
+            void IEnumerator.Reset()
+            {
+                throw Error.NotSupported();
             }
         }
 
         public static IEnumerable<TSource> Skip<TSource>(this IEnumerable<TSource> source, int count)
         {
             if (source == null) throw Error.ArgumentNull("source");
-            return SkipIterator<TSource>(source, count);
+            return new SkipIterator<TSource>(source, count);
         }
 
-        private static IEnumerable<TSource> SkipIterator<TSource>(IEnumerable<TSource> source, int count)
+        private class SkipIterator<TSource> : IEnumerable<TSource>, IEnumerator<TSource>
         {
-            using (IEnumerator<TSource> e = source.GetEnumerator())
+            protected readonly IEnumerable<TSource> _source;
+            protected readonly int _toSkip;
+            private readonly int _threadId = Environment.CurrentManagedThreadId;
+            protected IEnumerator<TSource> _enumerator;
+            protected int _state;
+
+            public SkipIterator(IEnumerable<TSource> source, int count)
             {
-                while (count > 0 && e.MoveNext()) count--;
-                if (count <= 0)
+                _source = source;
+                _toSkip = count > 0 ? count : 0;
+            }
+
+            public IEnumerator<TSource> GetEnumerator()
+            {
+                var ret = _state == 0 && _threadId == Environment.CurrentManagedThreadId ? this : Clone();
+                ret._state = _toSkip == 0 ? 2 : 1;
+                ret._enumerator = _source.GetEnumerator();
+                return ret;
+            }
+
+            // Optimise .Skip().Take() combinations. We could optimise further .Skip() operations with comparable
+            // ease, but the combination .Skip().Take() is a common paging idiom, and so benefits from optimisation more.
+            public virtual SkipTakeIterator<TSource> Take(int count)
+            {
+                return new SkipTakeIterator<TSource>(_source, _toSkip, count);
+            }
+
+            protected virtual SkipIterator<TSource> Clone()
+            {
+                return new SkipIterator<TSource>(_source, _toSkip);
+            }
+
+            IEnumerator IEnumerable.GetEnumerator()
+            {
+                return GetEnumerator();
+            }
+            
+            public TSource Current
+            {
+                get
                 {
-                    while (e.MoveNext()) yield return e.Current;
+                    return _enumerator.Current;
                 }
+            }
+            
+            object IEnumerator.Current
+            {
+                get { return Current; }
+            }
+            
+            public virtual bool MoveNext()
+            {
+                switch (_state)
+                {
+                    case 1:
+                        _state = 2;
+                        int count = _toSkip;
+                        while (_enumerator.MoveNext())
+                        {
+                            if (--count == 0) goto case 2;
+                        }
+                        break;
+                    case 2:
+                        if (_enumerator.MoveNext()) return true;
+                        break;
+                }
+                _state = -1;
+                return false;
+            }
+
+            public void Dispose()
+            {
+                if (_enumerator != null && _state != -2) _enumerator.Dispose();
+                _state = -2;
+            }
+
+            void IEnumerator.Reset()
+            {
+                throw Error.NotSupported();
+            }
+        }
+
+        private sealed class SkipTakeIterator<TSource> : SkipIterator<TSource>
+        {
+            private readonly int _toTake;
+            private int _leftToTake;
+            public SkipTakeIterator(IEnumerable<TSource> source, int toSkip, int toTake)
+                : base(source, toSkip)
+            {
+                _leftToTake = _toTake = toTake > 0 ? toTake : 0;
+            }
+            
+            protected override SkipIterator<TSource> Clone()
+            {
+                return new SkipTakeIterator<TSource>(_source, _toSkip, _toTake);
+            }
+            
+            public override SkipTakeIterator<TSource> Take(int count)
+            {
+                return count >= _toTake ? this : new SkipTakeIterator<TSource>(_source, _toSkip, count);
+            }
+            
+            public override bool MoveNext()
+            {
+                switch (_state)
+                {
+                    case 1:
+                        _state = 2;
+                        int count = _toSkip;
+                        while (_enumerator.MoveNext())
+                        {
+                            if (--count == 0) goto case 2;
+                        }
+                        break;
+                    case 2:
+                        if (_enumerator.MoveNext())
+                        {
+                            if (--_leftToTake == 0) _state = -1;
+                            return true;
+                        }
+                        break;
+                }
+                _state = -1;
+                return false;
             }
         }
 
@@ -704,16 +985,85 @@ namespace System.Linq
         {
             if (source == null) throw Error.ArgumentNull("source");
             if (predicate == null) throw Error.ArgumentNull("predicate");
-            return SkipWhileIterator<TSource>(source, predicate);
+            return new SkipWhileIterator<TSource>(source, predicate);
         }
 
-        private static IEnumerable<TSource> SkipWhileIterator<TSource>(IEnumerable<TSource> source, Func<TSource, bool> predicate)
+        private sealed class SkipWhileIterator<TSource> : IEnumerable<TSource>, IEnumerator<TSource>
         {
-            bool yielding = false;
-            foreach (TSource element in source)
+            private readonly IEnumerable<TSource> _source;
+            private readonly Func<TSource, bool> _predicate;
+            private readonly int _threadId = Environment.CurrentManagedThreadId;
+            private IEnumerator<TSource> _enumerator;
+            private int _state;
+            private TSource _current;
+
+            internal SkipWhileIterator(IEnumerable<TSource> source, Func<TSource, bool> predicate)
             {
-                if (!yielding && !predicate(element)) yielding = true;
-                if (yielding) yield return element;
+                _source = source;
+                _predicate = predicate;
+            }
+
+            public IEnumerator<TSource> GetEnumerator()
+            {
+                var ret = _state == 0 && _threadId == Environment.CurrentManagedThreadId
+                    ? this : new SkipWhileIterator<TSource>(_source, _predicate);
+                ret._state = 1;
+                return ret;
+            }
+
+            IEnumerator IEnumerable.GetEnumerator()
+            {
+                return GetEnumerator();
+            }
+
+            public TSource Current
+            {
+                get { return _current; }
+            }
+
+            object IEnumerator.Current
+            {
+                get { return _current; }
+            }
+
+            public bool MoveNext()
+            {
+                switch (_state)
+                {
+                    case 1:
+                        _enumerator = _source.GetEnumerator();
+                        while (_enumerator.MoveNext())
+                        {
+                            TSource item = _enumerator.Current;
+                            if (!_predicate(item))
+                            {
+                                _current = item;
+                                _state = 2;
+                                return true;
+                            }
+                        }
+                        break;
+                    case 2:
+                        if (_enumerator.MoveNext())
+                        {
+                            _current = _enumerator.Current;
+                            return true;
+                        }
+                        break;
+                }
+                _state = -1;
+                return false;
+            }
+
+            public void Dispose()
+            {
+                if (_enumerator != null) _enumerator.Dispose();
+                _enumerator = null;
+            }
+
+            void IEnumerator.Reset()
+            {
+                throw Error.NotSupported();
             }
         }
 
@@ -721,18 +1071,86 @@ namespace System.Linq
         {
             if (source == null) throw Error.ArgumentNull("source");
             if (predicate == null) throw Error.ArgumentNull("predicate");
-            return SkipWhileIterator<TSource>(source, predicate);
+            return new SkipWhileWithIndexIterator<TSource>(source, predicate);
         }
 
-        private static IEnumerable<TSource> SkipWhileIterator<TSource>(IEnumerable<TSource> source, Func<TSource, int, bool> predicate)
+        private sealed class SkipWhileWithIndexIterator<TSource> : IEnumerable<TSource>, IEnumerator<TSource>
         {
-            int index = -1;
-            bool yielding = false;
-            foreach (TSource element in source)
+            private readonly IEnumerable<TSource> _source;
+            private readonly Func<TSource, int, bool> _predicate;
+            private readonly int _threadId = Environment.CurrentManagedThreadId;
+            private IEnumerator<TSource> _enumerator;
+            private int _state;
+            private TSource _current;
+
+            public SkipWhileWithIndexIterator(IEnumerable<TSource> source, Func<TSource, int, bool> predicate)
             {
-                checked { index++; }
-                if (!yielding && !predicate(element, index)) yielding = true;
-                if (yielding) yield return element;
+                _source = source;
+                _predicate = predicate;
+            }
+
+            public IEnumerator<TSource> GetEnumerator()
+            {
+                var ret = _state == 0 && _threadId == Environment.CurrentManagedThreadId
+                    ? this : new SkipWhileWithIndexIterator<TSource>(_source, _predicate);
+                ret._state = 1;
+                return ret;
+            }
+
+            IEnumerator IEnumerable.GetEnumerator()
+            {
+                return GetEnumerator();
+            }
+
+            public TSource Current
+            {
+                get { return _current; }
+            }
+
+            object IEnumerator.Current
+            {
+                get { return _current; }
+            }
+
+            public bool MoveNext()
+            {
+                switch (_state)
+                {
+                    case 1:
+                        _enumerator = _source.GetEnumerator();
+                        int index = -1;
+                        while (_enumerator.MoveNext())
+                        {
+                            TSource item = _enumerator.Current;
+                            if (!_predicate(item, checked(++index)))
+                            {
+                                _current = item;
+                                _state = 2;
+                                return true;
+                            }
+                        }
+                        break;
+                    case 2:
+                        if (_enumerator.MoveNext())
+                        {
+                            _current = _enumerator.Current;
+                            return true;
+                        }
+                        break;
+                }
+                _state = -1;
+                return false;
+            }
+
+            public void Dispose()
+            {
+                if (_enumerator != null) _enumerator.Dispose();
+                _enumerator = null;
+            }
+
+            void IEnumerator.Reset()
+            {
+                throw Error.NotSupported();
             }
         }
 
