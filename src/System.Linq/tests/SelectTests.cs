@@ -813,53 +813,5 @@ namespace System.Linq.Tests
 
             Assert.Throws<NotImplementedException>(() => enumerator.Reset());
         }
-        
-        public static IEnumerable<object[]> SelectedLists
-        {
-            get
-            {
-                var arr = new [] { 1, 2 };
-                yield return new [] { arr.Select(i => i * 2) } ;
-                yield return new [] { arr.Select((x, i) => i + 1 + x) } ;
-                yield return new [] { arr.ToList().Select(i => i * 2) } ;
-                yield return new [] { arr.ToList().Select((x, i) => i + 1 + x) } ;
-                yield return new [] { new ListWrapping<int>(arr).Select(i => i * 2) } ;
-            }
-        }
-
-        [Theory]
-        [MemberData("SelectedLists")]
-        public void Select_ResultsReadonly(IList<int> list)
-        {
-            Assert.True(list.IsReadOnly);
-            Assert.Throws<NotSupportedException>(() => list.Add(0));
-            Assert.Throws<NotSupportedException>(() => list[0] = 0);
-            Assert.Throws<NotSupportedException>(() => list.Remove(0));
-            Assert.Throws<NotSupportedException>(() => list.Remove(0));
-            Assert.Throws<NotSupportedException>(() => list.Clear());
-            Assert.Throws<NotSupportedException>(() => list.RemoveAt(0));
-            Assert.Throws<NotSupportedException>(() => list.Insert(0, 0));
-        }
-        
-        [Theory]
-        [MemberData("SelectedLists")]
-        private static void TestIList(IList<int> list)
-        {
-            Assert.Equal(2, list.Count);
-            Assert.Equal(2, list[0]);
-            Assert.Equal(4, list[1]);
-            Assert.Throws<ArgumentOutOfRangeException>(() => list[-1].ToString());
-            Assert.Throws<ArgumentOutOfRangeException>(() => list[2].ToString());
-            var targetArray = new int[4];
-            list.CopyTo(targetArray, 1);
-            Assert.Equal(new int[]{ 0, 2, 4, 0 }, targetArray);
-            Assert.Throws<ArgumentNullException>(() => list.CopyTo(null, 0));
-            Assert.Throws<ArgumentOutOfRangeException>(() => list.CopyTo(targetArray, -1));
-            Assert.Throws<ArgumentException>(() => list.CopyTo(targetArray, 3));
-            Assert.Equal(-1, list.IndexOf(3));
-            Assert.Equal(1, list.IndexOf(4));
-            Assert.False(list.Contains(3));
-            Assert.True(list.Contains(4));
-        }
     }
 }
