@@ -706,7 +706,7 @@ namespace System.Net.Sockets
                 throw new ArgumentNullException("datagram");
             }
 
-            if (bytes > datagram.Length)
+            if (bytes > datagram.Length || bytes < 0)
             {
                 throw new ArgumentOutOfRangeException("bytes");
             }

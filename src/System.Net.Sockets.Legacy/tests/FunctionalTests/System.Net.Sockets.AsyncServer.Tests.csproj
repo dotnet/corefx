@@ -27,6 +27,7 @@
     <Compile Include="SendPacketsAsync.cs" />
     <Compile Include="SendPacketsElementTest.cs" />
     <Compile Include="TimeoutTest.cs" />
+    <Compile Include="UdpClientTest.cs" />
     
     <!-- Common Sockets files -->
     <Compile Include="$(CommonTestPath)\System.Net\Sockets\SocketTestServer.DefaultAsyncFactoryConfiguration.cs">

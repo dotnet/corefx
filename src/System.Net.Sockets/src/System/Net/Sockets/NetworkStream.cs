@@ -400,31 +400,8 @@ namespace System.Net.Sockets
             throw new NotSupportedException(SR.net_noseek);
         }
 
-
-        /*++
-
-            InitNetworkStream - initialize a network stream.
-
-            This is the common NetworkStream constructor, called whenever a
-            network stream is created. We validate the socket, set a few
-            options, and call our parent's initializer.
-
-            Input:
-
-                S           - Socket to be used.
-                Access      - Access type desired.
-
-
-            Returns:
-
-                Nothing, but may throw an exception.
-        --*/
-
         internal void InitNetworkStream(Socket socket)
         {
-            //
-            // parameter validation
-            //
             if (!socket.Blocking)
             {
                 throw new IOException(SR.net_sockets_blocking);
