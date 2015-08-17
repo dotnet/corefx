@@ -443,7 +443,7 @@ namespace System.IO.Packaging
                 // if the current element should not ignored any attributes, call Reader method
                 Reader.MoveToAttribute(i);
             }
-            else if (i < 0 || i >= AttributeCount)
+            else if ((uint)i >= (uint)AttributeCount)
             {
                 throw new ArgumentOutOfRangeException("i");
             }

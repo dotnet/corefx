@@ -447,7 +447,7 @@ namespace System.IO.Compression
                             }
                             else
                             {
-                                if (symbol < 0 || symbol >= s_extraLengthBits.Length)
+                                if ((uint)symbol >= (uint)s_extraLengthBits.Length)
                                 {
                                     throw new InvalidDataException(SR.GenericInvalidData);
                                 }
@@ -469,7 +469,7 @@ namespace System.IO.Compression
                                 return false;
                             }
 
-                            if (_length < 0 || _length >= s_lengthBase.Length)
+                            if ((uint)_length >= (uint)s_lengthBase.Length)
                             {
                                 throw new InvalidDataException(SR.GenericInvalidData);
                             }

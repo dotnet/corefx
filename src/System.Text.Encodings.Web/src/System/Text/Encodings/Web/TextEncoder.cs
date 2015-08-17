@@ -350,7 +350,7 @@ namespace System.Text.Encodings.Web
 
         private static void ValidateRanges(int startIndex, int characterCount, int actualInputLength)
         {
-            if (startIndex < 0 || startIndex > actualInputLength)
+            if ((uint)startIndex > (uint)actualInputLength)
             {
                 throw new ArgumentOutOfRangeException("startIndex");
             }

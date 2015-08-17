@@ -175,7 +175,7 @@ namespace System.Xml
             Debug.Assert(offset != -1); // the if statement above guarantees that the ref node is in the collection
 
             int dupoff = RemoveDuplicateAttribute(newNode);
-            if (dupoff >= 0 && dupoff < offset)
+            if ((uint)dupoff < (uint)offset)
                 offset--;
             InsertNodeAt(offset, newNode);
 
@@ -204,7 +204,7 @@ namespace System.Xml
             Debug.Assert(offset != -1); // the if statement above guarantees that the ref node is in the collection
 
             int dupoff = RemoveDuplicateAttribute(newNode);
-            if (dupoff >= 0 && dupoff < offset)
+            if ((uint)dupoff < (uint)offset)
                 offset--;
             InsertNodeAt(offset + 1, newNode);
 
@@ -229,7 +229,7 @@ namespace System.Xml
         // Removes the attribute node with the specified index from the map.
         public XmlAttribute RemoveAt(int i)
         {
-            if (i < 0 || i >= Count)
+            if ((uint)i >= (uint)Count)
                 return null;
 
             return (XmlAttribute)RemoveNodeAt(i);

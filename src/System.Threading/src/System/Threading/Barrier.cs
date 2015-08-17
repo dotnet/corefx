@@ -203,7 +203,7 @@ namespace System.Threading
         public Barrier(int participantCount, Action<Barrier> postPhaseAction)
         {
             // the count must be non negative value
-            if (participantCount < 0 || participantCount > MAX_PARTICIPANTS)
+            if ((uint)participantCount > (uint)MAX_PARTICIPANTS)
             {
                 throw new ArgumentOutOfRangeException("participantCount", participantCount, SR.Barrier_ctor_ArgumentOutOfRange);
             }

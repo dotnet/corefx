@@ -54,7 +54,7 @@ namespace System.Security.Cryptography
         {
             if (data == null)
                 throw new ArgumentNullException("data");
-            if (offset < 0 || offset > data.Length)
+            if ((uint)offset > (uint)data.Length)
                 throw new ArgumentOutOfRangeException("offset");
             if (count < 0 || count > data.Length - offset)
                 throw new ArgumentOutOfRangeException("count");
@@ -98,7 +98,7 @@ namespace System.Security.Cryptography
         {
             if (data == null)
                 throw new ArgumentNullException("data");
-            if (offset < 0 || offset > data.Length)
+            if ((uint)offset > (uint)data.Length)
                 throw new ArgumentOutOfRangeException("offset");
             if (count < 0 || count > data.Length - offset)
                 throw new ArgumentOutOfRangeException("count");

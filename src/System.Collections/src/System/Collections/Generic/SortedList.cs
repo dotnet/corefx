@@ -450,7 +450,7 @@ namespace System.Collections.Generic
                 throw new ArgumentNullException("array");
             }
 
-            if (arrayIndex < 0 || arrayIndex > array.Length)
+            if ((uint)arrayIndex > (uint)array.Length)
             {
                 throw new ArgumentOutOfRangeException("arrayIndex", SR.ArgumentOutOfRange_NeedNonNegNum);
             }
@@ -484,7 +484,7 @@ namespace System.Collections.Generic
                 throw new ArgumentException(SR.Arg_NonZeroLowerBound);
             }
 
-            if (arrayIndex < 0 || arrayIndex > array.Length)
+            if ((uint)arrayIndex > (uint)array.Length)
             {
                 throw new ArgumentOutOfRangeException("arrayIndex", SR.ArgumentOutOfRange_NeedNonNegNum);
             }
@@ -544,8 +544,7 @@ namespace System.Collections.Generic
         // 
         private TValue GetByIndex(int index)
         {
-            if (index < 0 || index >= _size)
-                throw new ArgumentOutOfRangeException("index", SR.ArgumentOutOfRange_Index);
+            if ((uint)index >= (uint)_size) throw new ArgumentOutOfRangeException("index", SR.ArgumentOutOfRange_Index);
             return _values[index];
         }
 
@@ -575,7 +574,7 @@ namespace System.Collections.Generic
         // 
         private TKey GetKey(int index)
         {
-            if (index < 0 || index >= _size) throw new ArgumentOutOfRangeException("index", SR.ArgumentOutOfRange_Index);
+            if ((uint)index >= (uint)_size) throw new ArgumentOutOfRangeException("index", SR.ArgumentOutOfRange_Index);
             return _keys[index];
         }
 
@@ -711,7 +710,7 @@ namespace System.Collections.Generic
         // 
         public void RemoveAt(int index)
         {
-            if (index < 0 || index >= _size) throw new ArgumentOutOfRangeException("index", SR.ArgumentOutOfRange_Index);
+            if ((uint)index >= (uint)_size) throw new ArgumentOutOfRangeException("index", SR.ArgumentOutOfRange_Index);
             _size--;
             if (index < _size)
             {

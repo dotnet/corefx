@@ -52,7 +52,7 @@ namespace System.Xml.Schema
             if (hours < 0) throw new ArgumentOutOfRangeException("hours");
             if (minutes < 0) throw new ArgumentOutOfRangeException("minutes");
             if (seconds < 0) throw new ArgumentOutOfRangeException("seconds");
-            if (nanoseconds < 0 || nanoseconds > 999999999) throw new ArgumentOutOfRangeException("nanoseconds");
+            if ((uint)nanoseconds > 999999999U) throw new ArgumentOutOfRangeException("nanoseconds");
 
             _years = years;
             _months = months;

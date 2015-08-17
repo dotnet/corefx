@@ -83,7 +83,7 @@ namespace Microsoft.Win32.SafeHandles
             get
             {
                 long h = (long)handle;
-                return h < 0 || h > int.MaxValue;
+                return (ulong)h > (ulong)int.MaxValue;
             }
         }
     }

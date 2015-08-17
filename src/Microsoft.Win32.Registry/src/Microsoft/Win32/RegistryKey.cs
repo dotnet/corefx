@@ -592,7 +592,7 @@ namespace Microsoft.Win32
             if (machineName == null)
                 throw new ArgumentNullException("machineName");
             int index = (int)hKey & 0x0FFFFFFF;
-            if (index < 0 || index >= hkeyNames.Length || ((int)hKey & 0xFFFFFFF0) != 0x80000000)
+            if ((uint)index >= (uint)hkeyNames.Length || ((int)hKey & 0xFFFFFFF0) != 0x80000000)
             {
                 throw new ArgumentException(SR.Arg_RegKeyOutOfRange);
             }

@@ -102,7 +102,7 @@ namespace System.Security
         {
             lock (_methodLock)
             {
-                if (index < 0 || index > _decryptedLength)
+                if ((uint)index > (uint)_decryptedLength)
                 {
                     throw new ArgumentOutOfRangeException("index", SR.ArgumentOutOfRange_IndexString);
                 }
@@ -142,7 +142,7 @@ namespace System.Security
                 EnsureNotDisposed();
                 EnsureNotReadOnly();
 
-                if (index < 0 || index >= _decryptedLength)
+                if ((uint)index >= (uint)_decryptedLength)
                 {
                     throw new ArgumentOutOfRangeException("index", SR.ArgumentOutOfRange_IndexString);
                 }
@@ -156,7 +156,7 @@ namespace System.Security
         {
             lock (_methodLock)
             {
-                if (index < 0 || index >= _decryptedLength)
+                if ((uint)index >= (uint)_decryptedLength)
                 {
                     throw new ArgumentOutOfRangeException("index", SR.ArgumentOutOfRange_IndexString);
                 }

@@ -506,7 +506,7 @@ namespace System.Collections.Specialized
             {
                 get
                 {
-                    if (_pos >= 0 && _pos < _coll.Count)
+                    if ((uint)_pos < (uint)_coll.Count)
                     {
                         return _coll.BaseGetKey(_pos);
                     }

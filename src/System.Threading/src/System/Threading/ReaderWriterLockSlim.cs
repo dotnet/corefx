@@ -247,7 +247,7 @@ namespace System.Threading
 
                     int elapsed = Environment.TickCount - _start;
                     // elapsed may be negative if TickCount has overflowed by 2^31 milliseconds.
-                    if (elapsed < 0 || elapsed >= _total)
+                    if ((uint)elapsed >= (uint)_total)
                         return 0;
 
                     return _total - elapsed;

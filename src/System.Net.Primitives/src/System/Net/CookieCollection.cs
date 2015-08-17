@@ -50,7 +50,7 @@ namespace System.Net
         {
             get
             {
-                if (index < 0 || index >= _list.Count)
+                if ((uint)index >= (uint)_list.Count)
                 {
                     throw new ArgumentOutOfRangeException("index");
                 }
@@ -265,7 +265,7 @@ namespace System.Net
             {
                 get
                 {
-                    if (_index < 0 || _index >= _count)
+                    if ((uint)_index >= (uint)_count)
                     {
                         throw new InvalidOperationException(SR.InvalidOperation_EnumOpCantHappen);
                     }

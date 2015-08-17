@@ -22,7 +22,7 @@ namespace System.Text
 
         public override Encoding GetEncoding(int codepage)
         {
-            if (codepage < 0 || codepage > 65535)
+            if ((uint)codepage > 65535U)
                 return null;
 
             if (codepage == 0)

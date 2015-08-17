@@ -3066,7 +3066,7 @@ namespace System.Linq
         {
             get
             {
-                if (index < 0 || index >= count) throw Error.ArgumentOutOfRange("index");
+                if ((uint)index >= (uint)count) throw Error.ArgumentOutOfRange("index");
                 return elements[index];
             }
             set

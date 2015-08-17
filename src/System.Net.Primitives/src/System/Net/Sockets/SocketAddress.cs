@@ -53,7 +53,7 @@ namespace System.Net
         {
             get
             {
-                if (offset < 0 || offset >= Size)
+                if ((uint)offset >= (uint)Size)
                 {
                     throw new IndexOutOfRangeException();
                 }
@@ -61,7 +61,7 @@ namespace System.Net
             }
             set
             {
-                if (offset < 0 || offset >= Size)
+                if ((uint)offset >= (uint)Size)
                 {
                     throw new IndexOutOfRangeException();
                 }

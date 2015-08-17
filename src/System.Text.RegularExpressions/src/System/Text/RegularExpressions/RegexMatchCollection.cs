@@ -32,7 +32,7 @@ namespace System.Text.RegularExpressions
 
         internal MatchCollection(Regex regex, string input, int beginning, int length, int startat)
         {
-            if (startat < 0 || startat > input.Length)
+            if ((uint)startat > (uint)input.Length)
                 throw new ArgumentOutOfRangeException("startat", SR.BeginIndexNotNegative);
 
             _regex = regex;

@@ -293,7 +293,7 @@ namespace System.Xml.Linq
                 // Although this means that the first entry will never be used, it avoids the need to initialize all
                 // starting buckets to the EndOfList value.
                 newEntry = Interlocked.Increment(ref _numEntries);
-                if (newEntry < 0 || newEntry >= _buckets.Length)
+                if ((uint)newEntry >= (uint)_buckets.Length)
                     return false;
 
                 _entries[newEntry].Value = value;

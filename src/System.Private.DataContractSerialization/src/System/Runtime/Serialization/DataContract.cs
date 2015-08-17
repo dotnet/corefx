@@ -1886,7 +1886,7 @@ namespace System.Runtime.Serialization
                     else
                     {
                         int paramIndex;
-                        if (!Int32.TryParse(format.Substring(start, i - start), out paramIndex) || paramIndex < 0 || paramIndex >= genericNameProvider.GetParameterCount())
+                        if (!Int32.TryParse(format.Substring(start, i - start), out paramIndex) || (uint)paramIndex >= (uint)genericNameProvider.GetParameterCount())
                             throw DiagnosticUtility.ExceptionUtility.ThrowHelperError(new InvalidDataContractException(SR.Format(SR.GenericParameterNotValid, format.Substring(start, i - start), genericNameProvider.GetGenericTypeName(), genericNameProvider.GetParameterCount() - 1)));
                         typeName.Append(genericNameProvider.GetParameterName(paramIndex));
                     }

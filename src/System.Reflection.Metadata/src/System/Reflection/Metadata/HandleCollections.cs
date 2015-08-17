@@ -34,7 +34,7 @@ namespace System.Reflection.Metadata
         {
             get
             {
-                if (index < 0 || index >= _count)
+                if ((uint)index >= (uint)_count)
                 {
                     Throw.IndexOutOfRange();
                 }
@@ -142,7 +142,7 @@ namespace System.Reflection.Metadata
         {
             get
             {
-                if (index < 0 || index >= _count)
+                if ((uint)index >= (uint)_count)
                 {
                     Throw.IndexOutOfRange();
                 }

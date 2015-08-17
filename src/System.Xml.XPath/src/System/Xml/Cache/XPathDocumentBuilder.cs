@@ -212,7 +212,7 @@ namespace MS.Internal.Xml.Cache
 
                             // If position is not within 256 of parent, don't collapse text
                             int posDiff = _textBldr.LinePosition - _pageParent[_idxParent].LinePosition;
-                            if (posDiff < 0 || posDiff > XPathNode.MaxCollapsedPositionOffset)
+                            if ((uint)posDiff > (uint)XPathNode.MaxCollapsedPositionOffset)
                                 goto case TextBlockType.Whitespace;
 
                             // Set collapsed node line position offset
@@ -651,14 +651,14 @@ namespace MS.Internal.Xml.Cache
             }
 
             lineNumOffset = lineNum - _lineNumBase;
-            if (lineNumOffset < 0 || lineNumOffset > XPathNode.MaxLineNumberOffset)
+            if (lineNumOffset > (uint)XPathNode.MaxLineNumberOffset)
             {
                 _lineNumBase = lineNum;
                 lineNumOffset = 0;
             }
 
             linePosOffset = linePos - _linePosBase;
-            if (linePosOffset < 0 || linePosOffset > XPathNode.MaxLinePositionOffset)
+            if ((uint)linePosOffset > (uint)XPathNode.MaxLinePositionOffset)
             {
                 _linePosBase = linePos;
                 linePosOffset = 0;

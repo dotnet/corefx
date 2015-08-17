@@ -77,7 +77,7 @@ namespace System.Xml
 
         public virtual bool TryLookup(int key, out XmlDictionaryString result)
         {
-            if (key < 0 || key >= _nextId)
+            if ((uint)key >= (uint)_nextId)
             {
                 result = null;
                 return false;

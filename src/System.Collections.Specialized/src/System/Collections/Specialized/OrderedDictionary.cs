@@ -167,7 +167,7 @@ namespace System.Collections.Specialized
                 {
                     throw new NotSupportedException(SR.OrderedDictionary_ReadOnly);
                 }
-                if (index < 0 || index >= objectsArray.Count)
+                if ((uint)index >= (uint)objectsArray.Count)
                 {
                     throw new ArgumentOutOfRangeException("index");
                 }

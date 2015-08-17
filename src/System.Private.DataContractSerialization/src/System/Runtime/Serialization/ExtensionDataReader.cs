@@ -162,7 +162,7 @@ namespace System.Runtime.Serialization
                 _xmlNodeReader.MoveToAttribute(index);
             else
             {
-                if (index < 0 || index >= _attributeCount)
+                if ((uint)index >= (uint)_attributeCount)
                     throw new XmlException(SR.InvalidXmlDeserializingExtensionData);
 
                 _nodeType = XmlNodeType.Attribute;

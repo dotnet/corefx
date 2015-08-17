@@ -75,7 +75,7 @@ namespace System.Collections
 
         public void RemoveAt(int index)
         {
-            if (index < 0 || index >= Count)
+            if ((uint)index >= (uint)Count)
                 throw new ArgumentOutOfRangeException("index", SR.ArgumentOutOfRange_Index);
             Contract.EndContractBlock();
             Object temp = InnerList[index];
@@ -122,14 +122,14 @@ namespace System.Collections
         {
             get
             {
-                if (index < 0 || index >= Count)
+                if ((uint)index >= (uint)Count)
                     throw new ArgumentOutOfRangeException("index", SR.ArgumentOutOfRange_Index);
                 Contract.EndContractBlock();
                 return InnerList[index];
             }
             set
             {
-                if (index < 0 || index >= Count)
+                if ((uint)index >= (uint)Count)
                     throw new ArgumentOutOfRangeException("index", SR.ArgumentOutOfRange_Index);
                 Contract.EndContractBlock();
                 OnValidate(value);
@@ -196,7 +196,7 @@ namespace System.Collections
 
         void IList.Insert(int index, Object value)
         {
-            if (index < 0 || index > Count)
+            if ((uint)index > (uint)Count)
                 throw new ArgumentOutOfRangeException("index", SR.ArgumentOutOfRange_Index);
             Contract.EndContractBlock();
             OnValidate(value);

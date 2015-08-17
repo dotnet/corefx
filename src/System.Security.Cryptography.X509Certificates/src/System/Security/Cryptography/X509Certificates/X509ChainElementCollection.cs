@@ -61,7 +61,7 @@ namespace System.Security.Cryptography.X509Certificates
                 throw new ArgumentNullException("array");
             if (array.Rank != 1)
                 throw new ArgumentException(SR.Arg_RankMultiDimNotSupported);
-            if (index < 0 || index >= array.Length)
+            if ((uint)index >= (uint)array.Length)
                 throw new ArgumentOutOfRangeException("index", SR.ArgumentOutOfRange_Index);
             if (index + Count > array.Length)
                 throw new ArgumentException(SR.Argument_InvalidOffLen);

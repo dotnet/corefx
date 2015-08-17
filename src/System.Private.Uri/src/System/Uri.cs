@@ -2502,7 +2502,7 @@ namespace System
                 for (int idx = 0; idx < portStr.Length; ++idx)
                 {
                     int val = portStr[idx] - '0';
-                    if (val < 0 || val > 9 || (port = (port * 10 + val)) > 0xFFFF)
+                    if ((uint)val > 9U || (port = (port * 10 + val)) > 0xFFFF)
                         throw new UriFormatException(SR.Format(SR.net_uri_PortOutOfRange, _syntax.GetType().ToString(), portStr));
                 }
                 if (port != _info.Offset.PortValue)
