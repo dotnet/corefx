@@ -19,6 +19,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CachedEnumerator.cs" />
+    <Compile Include="DefaultIfEmptyTests.cs" />
     <Compile Include="EnumerableTests.cs" />
     <Compile Include="EmptyEnumerable.cs" />
     <Compile Include="Helpers\TestCollection.cs" />
@@ -45,6 +46,7 @@
     <Compile Include="ToDictionaryTests.cs" />
     <Compile Include="ToListTests.cs" />
     <Compile Include="SelectTests.cs" />
+    <Compile Include="ZipTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\src\System.Linq.csproj">

@@ -4,7 +4,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Threading;
+using System.Diagnostics.Contracts;
 
 namespace System.Linq
 {
@@ -42,8 +42,15 @@ namespace System.Linq
             if (source == null) throw Error.ArgumentNull("source");
             if (selector == null) throw Error.ArgumentNull("selector");
             if (source is Iterator<TSource>) return ((Iterator<TSource>)source).Select(selector);
-            if (source is TSource[]) return new WhereSelectArrayIterator<TSource, TResult>((TSource[])source, null, selector);
-            if (source is List<TSource>) return new WhereSelectListIterator<TSource, TResult>((List<TSource>)source, null, selector);
+            IList<TSource> ilist = source as IList<TSource>;
+            if (ilist != null)
+            {
+                TSource[] array = source as TSource[];
+                if (array != null) return new SelectArrayIterator<TSource, TResult>(array, selector);
+                List<TSource> list = ilist as List<TSource>;
+                if (list != null) return new SelectListIterator<TSource, TResult>(list, selector);
+                return new SelectIListIterator<TSource, TResult>(ilist, selector);
+            }
             return new WhereSelectEnumerableIterator<TSource, TResult>(source, null, selector);
         }
 
@@ -51,6 +58,13 @@ namespace System.Linq
         {
             if (source == null) throw Error.ArgumentNull("source");
             if (selector == null) throw Error.ArgumentNull("selector");
+            IList<TSource> list = source as IList<TSource>;
+            if (list != null)
+            {
+                TSource[] array = source as TSource[];
+                if (array != null) return new SelectIndexArrayIterator<TSource, TResult>(array, selector);
+                return new SelectIndexListIterator<TSource, TResult>(list, selector);
+            }
             return SelectIterator<TSource, TResult>(source, selector);
         }
 
@@ -72,6 +86,11 @@ namespace System.Linq
         private static Func<TSource, TResult> CombineSelectors<TSource, TMiddle, TResult>(Func<TSource, TMiddle> selector1, Func<TMiddle, TResult> selector2)
         {
             return x => selector2(selector1(x));
+        }
+
+        private static Func<TSource, int, TResult> CombineSelectors<TSource, TMiddle, TResult>(Func<TSource, int, TMiddle> selector1, Func<TMiddle, TResult> selector2)
+        {
+            return (item, index) => selector2(selector1(item, index));
         }
 
         internal abstract class Iterator<TSource> : IEnumerable<TSource>, IEnumerator<TSource>
@@ -228,14 +247,16 @@ namespace System.Linq
             }
         }
 
-        internal class WhereArrayIterator<TSource> : Iterator<TSource>
+        internal sealed class WhereArrayIterator<TSource> : Iterator<TSource>
         {
-            private TSource[] _source;
-            private Func<TSource, bool> _predicate;
+            private readonly TSource[] _source;
+            private readonly Func<TSource, bool> _predicate;
             private int _index;
 
             public WhereArrayIterator(TSource[] source, Func<TSource, bool> predicate)
             {
+                Contract.Assert(source != null);
+                Contract.Assert(predicate != null);
                 _source = source;
                 _predicate = predicate;
             }
@@ -276,14 +297,16 @@ namespace System.Linq
             }
         }
 
-        internal class WhereListIterator<TSource> : Iterator<TSource>
+        internal sealed class WhereListIterator<TSource> : Iterator<TSource>
         {
-            private List<TSource> _source;
-            private Func<TSource, bool> _predicate;
+            private readonly List<TSource> _source;
+            private readonly Func<TSource, bool> _predicate;
             private List<TSource>.Enumerator _enumerator;
 
             public WhereListIterator(List<TSource> source, Func<TSource, bool> predicate)
             {
+                Contract.Assert(source != null);
+                Contract.Assert(predicate != null);
                 _source = source;
                 _predicate = predicate;
             }
@@ -329,15 +352,17 @@ namespace System.Linq
             }
         }
 
-        internal class WhereSelectEnumerableIterator<TSource, TResult> : Iterator<TResult>
+        internal sealed class WhereSelectEnumerableIterator<TSource, TResult> : Iterator<TResult>
         {
-            private IEnumerable<TSource> _source;
-            private Func<TSource, bool> _predicate;
-            private Func<TSource, TResult> _selector;
+            private readonly IEnumerable<TSource> _source;
+            private readonly Func<TSource, bool> _predicate;
+            private readonly Func<TSource, TResult> _selector;
             private IEnumerator<TSource> _enumerator;
 
             public WhereSelectEnumerableIterator(IEnumerable<TSource> source, Func<TSource, bool> predicate, Func<TSource, TResult> selector)
             {
+                Contract.Assert(source != null);
+                Contract.Assert(selector != null);
                 _source = source;
                 _predicate = predicate;
                 _selector = selector;
@@ -364,13 +389,26 @@ namespace System.Linq
                 {
                     case 1:
                         _enumerator = _source.GetEnumerator();
-                        state = 2;
-                        goto case 2;
+                        if (_predicate == null)
+                        {
+                            state = 2;
+                            goto case 2;
+                        }
+                        state = 3;
+                        goto case 3;
                     case 2:
+                        if (_enumerator.MoveNext())
+                        {
+                            current = _selector(_enumerator.Current);
+                            return true;
+                        }
+                        Dispose();
+                        break;
+                    case 3:
                         while (_enumerator.MoveNext())
                         {
                             TSource item = _enumerator.Current;
-                            if (_predicate == null || _predicate(item))
+                            if (_predicate(item))
                             {
                                 current = _selector(item);
                                 return true;
@@ -394,15 +432,18 @@ namespace System.Linq
             }
         }
 
-        internal class WhereSelectArrayIterator<TSource, TResult> : Iterator<TResult>
+        internal sealed class WhereSelectArrayIterator<TSource, TResult> : Iterator<TResult>
         {
-            private TSource[] _source;
-            private Func<TSource, bool> _predicate;
-            private Func<TSource, TResult> _selector;
+            private readonly TSource[] _source;
+            private readonly Func<TSource, bool> _predicate;
+            private readonly Func<TSource, TResult> _selector;
             private int _index;
 
             public WhereSelectArrayIterator(TSource[] source, Func<TSource, bool> predicate, Func<TSource, TResult> selector)
             {
+                Contract.Assert(source != null);
+                Contract.Assert(predicate != null);
+                Contract.Assert(selector != null);
                 _source = source;
                 _predicate = predicate;
                 _selector = selector;
@@ -459,15 +500,18 @@ namespace System.Linq
             }
         }
 
-        internal class WhereSelectListIterator<TSource, TResult> : Iterator<TResult>
+        internal sealed class WhereSelectListIterator<TSource, TResult> : Iterator<TResult>
         {
-            private List<TSource> _source;
-            private Func<TSource, bool> _predicate;
-            private Func<TSource, TResult> _selector;
+            private readonly List<TSource> _source;
+            private readonly Func<TSource, bool> _predicate;
+            private readonly Func<TSource, TResult> _selector;
             private List<TSource>.Enumerator _enumerator;
 
             public WhereSelectListIterator(List<TSource> source, Func<TSource, bool> predicate, Func<TSource, TResult> selector)
             {
+                Contract.Assert(source != null);
+                Contract.Assert(predicate != null);
+                Contract.Assert(selector != null);
                 _source = source;
                 _predicate = predicate;
                 _selector = selector;
@@ -526,6 +570,668 @@ namespace System.Linq
                     results[i] = _selector(_source[i]);
                 }
                 return results;
+            }
+        }
+        
+        private static void ValidateCopyTo<T>(T[] array, int arrayIndex, int count)
+        {
+            if (array == null) throw Error.ArgumentNull("array");
+            if (arrayIndex < 0) throw Error.ArgumentOutOfRange("arrayIndex");
+            if (arrayIndex + count > array.Length) throw new ArgumentException();
+        }
+
+        internal sealed class SelectArrayIterator<TSource, TResult> : Iterator<TResult>, IList<TResult>
+        {
+            private readonly TSource[] _source;
+            private readonly Func<TSource, TResult> _selector;
+            private int _index;
+
+            public SelectArrayIterator(TSource[] source, Func<TSource, TResult> selector)
+            {
+                Contract.Assert(source != null);
+                Contract.Assert(selector != null);
+                _source = source;
+                _selector = selector;
+            }
+
+            public override Iterator<TResult> Clone()
+            {
+                return new SelectArrayIterator<TSource, TResult>(_source, _selector);
+            }
+
+            public override bool MoveNext()
+            {
+                if (state == 1 & _index < _source.Length)
+                {
+                    current = _selector(_source[_index++]);
+                    return true;
+                }
+                Dispose();
+                return false;
+            }
+
+            // Once we have generic virtual support back, rename this back to Select and turn it into an override of the parent's abstract Select() method.
+            public IEnumerable<TResult2> SelectImpl<TResult2>(Func<TResult, TResult2> selector)
+            {
+                return new SelectArrayIterator<TSource, TResult2>(_source, CombineSelectors(_selector, selector));
+            }
+
+            public override IEnumerable<TResult> Where(Func<TResult, bool> predicate)
+            {
+                return new WhereEnumerableIterator<TResult>(this, predicate);
+            }
+
+            public override TResult[] ToArray()
+            {
+                var results = new TResult[_source.Length];
+                for (int i = 0; i < results.Length; i++)
+                {
+                    results[i] = _selector(_source[i]);
+                }
+                return results;
+            }
+
+            public int IndexOf(TResult item)
+            {
+                EqualityComparer<TResult> cmp = EqualityComparer<TResult>.Default;
+                for (int index = 0; index != _source.Length; ++index)
+                {
+                    if (cmp.Equals(item, _selector(_source[index]))) return index;
+                }
+                return -1;
+            }
+            
+            public bool Contains(TResult item)
+            {
+                EqualityComparer<TResult> cmp = EqualityComparer<TResult>.Default;
+                for (int index = 0; index != _source.Length; ++index)
+                {
+                    if (cmp.Equals(item, _selector(_source[index]))) return true;
+                }
+                return false;
+            }
+            
+            public TResult this[int index]
+            {
+                get
+                {
+                    if ((uint)index >= (uint)_source.Length) throw Error.ArgumentOutOfRange("index");
+                    return _selector(_source[index]);
+                }
+                set { throw Error.NotSupported(); }
+            }
+            
+            public void CopyTo(TResult[] array, int arrayIndex)
+            {
+                ValidateCopyTo(array, arrayIndex, Count);
+                foreach (TSource item in _source) array[arrayIndex++] = _selector(item);
+            }
+            
+            public int Count
+            {
+                get { return _source.Length; }
+            }
+
+            public void Insert(int index, TResult item)
+            {
+                throw Error.NotSupported();
+            }
+    
+            public void RemoveAt(int index)
+            {
+                throw Error.NotSupported();
+            }
+    
+            public void Add(TResult item)
+            {
+                throw Error.NotSupported();
+            }
+    
+            public void Clear()
+            {
+                throw Error.NotSupported();
+            }
+    
+            public bool Remove(TResult item)
+            {
+                throw Error.NotSupported();
+            }
+    
+            public bool IsReadOnly
+            {
+                get { return true; }
+            }
+        }
+
+        internal sealed class SelectIndexArrayIterator<TSource, TResult> : Iterator<TResult>, IList<TResult>
+        {
+            private readonly TSource[] _source;
+            private readonly Func<TSource, int, TResult> _selector;
+            private int _index;
+
+            public SelectIndexArrayIterator(TSource[] source, Func<TSource, int, TResult> selector)
+            {
+                Contract.Assert(source != null);
+                Contract.Assert(selector != null);
+                _source = source;
+                _selector = selector;
+            }
+
+            public override Iterator<TResult> Clone()
+            {
+                return new SelectIndexArrayIterator<TSource, TResult>(_source, _selector);
+            }
+
+            public override bool MoveNext()
+            {
+                if (state == 1 & _index < _source.Length)
+                {
+                    current = _selector(_source[_index], _index);
+                    ++_index;
+                    return true;
+                }
+                Dispose();
+                return false;
+            }
+
+            // Once we have generic virtual support back, rename this back to Select and turn it into an override of the parent's abstract Select() method.
+            public IEnumerable<TResult2> SelectImpl<TResult2>(Func<TResult, TResult2> selector)
+            {
+                return new SelectIndexArrayIterator<TSource, TResult2>(_source, CombineSelectors(_selector, selector));
+            }
+
+            public override IEnumerable<TResult> Where(Func<TResult, bool> predicate)
+            {
+                return new WhereEnumerableIterator<TResult>(this, predicate);
+            }
+
+            public override TResult[] ToArray()
+            {
+                var results = new TResult[_source.Length];
+                for (int i = 0; i < results.Length; i++)
+                {
+                    results[i] = _selector(_source[i], i);
+                }
+                return results;
+            }
+
+            public int IndexOf(TResult item)
+            {
+                EqualityComparer<TResult> cmp = EqualityComparer<TResult>.Default;
+                for (int index = 0; index != _source.Length; ++index)
+                {
+                    if (cmp.Equals(item, _selector(_source[index], index))) return index;
+                }
+                return -1;
+            }
+            
+            public bool Contains(TResult item)
+            {
+                EqualityComparer<TResult> cmp = EqualityComparer<TResult>.Default;
+                for (int index = 0; index != _source.Length; ++index)
+                {
+                    if (cmp.Equals(item, _selector(_source[index], index))) return true;
+                }
+                return false;
+            }
+            
+            public TResult this[int index]
+            {
+                get
+                {
+                    if ((uint)index >= (uint)_source.Length) throw Error.ArgumentOutOfRange("index");
+                    return _selector(_source[index], index);
+                }
+                set { throw Error.NotSupported(); }
+            }
+            
+            public void CopyTo(TResult[] array, int arrayIndex)
+            {
+                ValidateCopyTo(array, arrayIndex, Count);
+                for (int i = 0; i != _source.Length; ++i) array[arrayIndex++] = _selector(_source[i], i);
+            }
+            
+            public int Count
+            {
+                get { return _source.Length; }
+            }
+
+            public void Insert(int index, TResult item)
+            {
+                throw Error.NotSupported();
+            }
+    
+            public void RemoveAt(int index)
+            {
+                throw Error.NotSupported();
+            }
+    
+            public void Add(TResult item)
+            {
+                throw Error.NotSupported();
+            }
+    
+            public void Clear()
+            {
+                throw Error.NotSupported();
+            }
+    
+            public bool Remove(TResult item)
+            {
+                throw Error.NotSupported();
+            }
+    
+            public bool IsReadOnly
+            {
+                get { return true; }
+            }
+        }
+
+        internal sealed class SelectIListIterator<TSource, TResult> : Iterator<TResult>, IList<TResult>
+        {
+            private readonly IList<TSource> _source;
+            private readonly Func<TSource, TResult> _selector;
+            private IEnumerator<TSource> _enumerator;
+
+            public SelectIListIterator(IList<TSource> source, Func<TSource, TResult> selector)
+            {
+                Contract.Assert(source != null);
+                Contract.Assert(selector != null);
+                _source = source;
+                _selector = selector;
+            }
+
+            public override Iterator<TResult> Clone()
+            {
+                return new SelectIListIterator<TSource, TResult>(_source, _selector);
+            }
+
+            public override bool MoveNext()
+            {
+                switch (state)
+                {
+                    case 1:
+                        _enumerator = _source.GetEnumerator();
+                        state = 2;
+                        goto case 2;
+                    case 2:
+                        if (_enumerator.MoveNext())
+                        {
+                            current = _selector(_enumerator.Current);
+                            return true;
+                        }
+                        Dispose();
+                        break;
+                }
+                return false;
+            }
+            
+            public override void Dispose()
+            {
+                base.Dispose();
+                if (_enumerator != null) _enumerator.Dispose();
+                _enumerator = null;
+            }
+
+            // Once we have generic virtual support back, rename this back to Select and turn it into an override of the parent's abstract Select() method.
+            public IEnumerable<TResult2> SelectImpl<TResult2>(Func<TResult, TResult2> selector)
+            {
+                return new SelectIListIterator<TSource, TResult2>(_source, CombineSelectors(_selector, selector));
+            }
+
+            public override IEnumerable<TResult> Where(Func<TResult, bool> predicate)
+            {
+                return new WhereEnumerableIterator<TResult>(this, predicate);
+            }
+
+            public override TResult[] ToArray()
+            {
+                var results = new TResult[_source.Count];
+                for (int i = 0; i < results.Length; i++)
+                {
+                    results[i] = _selector(_source[i]);
+                }
+                return results;
+            }
+            
+            public int IndexOf(TResult item)
+            {
+                int index = 0;
+                EqualityComparer<TResult> cmp = EqualityComparer<TResult>.Default;
+                foreach (TSource sourceItem in _source)
+                {
+                    if (cmp.Equals(item, _selector(sourceItem))) return index;
+                    ++index;
+                }
+                return -1;
+            }
+            
+            public bool Contains(TResult item)
+            {
+                EqualityComparer<TResult> cmp = EqualityComparer<TResult>.Default;
+                foreach (TSource sourceItem in _source)
+                {
+                    if (cmp.Equals(item, _selector(sourceItem))) return true;
+                }
+                return false;
+            }
+            
+            public TResult this[int index]
+            {
+                get { return _selector(_source[index]); }
+                set { throw Error.NotSupported(); }
+            }
+            
+            public void CopyTo(TResult[] array, int arrayIndex)
+            {
+                ValidateCopyTo(array, arrayIndex, Count);
+                foreach (TSource item in _source) array[arrayIndex++] = _selector(item);
+            }
+            
+            public int Count
+            {
+                get { return _source.Count; }
+            }
+
+            public void Insert(int index, TResult item)
+            {
+                throw Error.NotSupported();
+            }
+    
+            public void RemoveAt(int index)
+            {
+                throw Error.NotSupported();
+            }
+    
+            public void Add(TResult item)
+            {
+                throw Error.NotSupported();
+            }
+    
+            public void Clear()
+            {
+                throw Error.NotSupported();
+            }
+    
+            public bool Remove(TResult item)
+            {
+                throw Error.NotSupported();
+            }
+    
+            public bool IsReadOnly
+            {
+                get { return true; }
+            }
+        }
+
+        internal sealed class SelectIndexListIterator<TSource, TResult> : Iterator<TResult>, IList<TResult>
+        {
+            private readonly IList<TSource> _source;
+            private readonly Func<TSource, int, TResult> _selector;
+            private IEnumerator<TSource> _enumerator;
+            private int _index;
+
+            public SelectIndexListIterator(IList<TSource> source, Func<TSource, int, TResult> selector)
+            {
+                Contract.Assert(source != null);
+                Contract.Assert(selector != null);
+                _source = source;
+                _selector = selector;
+            }
+
+            public override Iterator<TResult> Clone()
+            {
+                return new SelectIndexListIterator<TSource, TResult>(_source, _selector);
+            }
+
+            public override bool MoveNext()
+            {
+                switch (state)
+                {
+                    case 1:
+                        _enumerator = _source.GetEnumerator();
+                        state = 2;
+                        goto case 2;
+                    case 2:
+                        if (_enumerator.MoveNext())
+                        {
+                            current = _selector(_enumerator.Current, _index++);
+                            return true;
+                        }
+                        Dispose();
+                        break;
+                }
+                return false;
+            }
+
+            public override void Dispose()
+            {
+                base.Dispose();
+                if (_enumerator != null) _enumerator.Dispose();
+                _enumerator = null;
+            }
+
+            // Once we have generic virtual support back, rename this back to Select and turn it into an override of the parent's abstract Select() method.
+            public IEnumerable<TResult2> SelectImpl<TResult2>(Func<TResult, TResult2> selector)
+            {
+                return new SelectIndexListIterator<TSource, TResult2>(_source, CombineSelectors(_selector, selector));
+            }
+
+            public override IEnumerable<TResult> Where(Func<TResult, bool> predicate)
+            {
+                return new WhereEnumerableIterator<TResult>(this, predicate);
+            }
+
+            public override TResult[] ToArray()
+            {
+                var results = new TResult[_source.Count];
+                for (int i = 0; i < results.Length; i++)
+                {
+                    results[i] = _selector(_source[i], i);
+                }
+                return results;
+            }
+            
+            public int IndexOf(TResult item)
+            {
+                int index = 0;
+                EqualityComparer<TResult> cmp = EqualityComparer<TResult>.Default;
+                foreach (TSource sourceItem in _source)
+                {
+                    if (cmp.Equals(item, _selector(sourceItem, index))) return index;
+                    ++index;
+                }
+                return -1;
+            }
+            
+            public bool Contains(TResult item)
+            {
+                EqualityComparer<TResult> cmp = EqualityComparer<TResult>.Default;
+                int index = 0;
+                foreach (TSource sourceItem in _source)
+                {
+                    if (cmp.Equals(item, _selector(sourceItem, index))) return true;
+                    ++index;
+                }
+                return false;
+            }
+            
+            public TResult this[int index]
+            {
+                get { return _selector(_source[index], index); }
+                set { throw Error.NotSupported(); }
+            }
+            
+            public void CopyTo(TResult[] array, int arrayIndex)
+            {
+                ValidateCopyTo(array, arrayIndex, Count);
+                int index = 0;
+                foreach (TSource item in _source) array[arrayIndex++] = _selector(item, index++);
+            }
+            
+            public int Count
+            {
+                get { return _source.Count; }
+            }
+
+            public void Insert(int index, TResult item)
+            {
+                throw Error.NotSupported();
+            }
+    
+            public void RemoveAt(int index)
+            {
+                throw Error.NotSupported();
+            }
+    
+            public void Add(TResult item)
+            {
+                throw Error.NotSupported();
+            }
+    
+            public void Clear()
+            {
+                throw Error.NotSupported();
+            }
+    
+            public bool Remove(TResult item)
+            {
+                throw Error.NotSupported();
+            }
+    
+            public bool IsReadOnly
+            {
+                get { return true; }
+            }
+        }
+
+        internal sealed class SelectListIterator<TSource, TResult> : Iterator<TResult>, IList<TResult>
+        {
+            private readonly List<TSource> _source;
+            private readonly Func<TSource, TResult> _selector;
+            private List<TSource>.Enumerator _enumerator;
+
+            public SelectListIterator(List<TSource> source, Func<TSource, TResult> selector)
+            {
+                Contract.Assert(source != null);
+                Contract.Assert(selector != null);
+                _source = source;
+                _selector = selector;
+            }
+
+            public override Iterator<TResult> Clone()
+            {
+                return new SelectListIterator<TSource, TResult>(_source, _selector);
+            }
+
+            public override bool MoveNext()
+            {
+                switch (state)
+                {
+                    case 1:
+                        _enumerator = _source.GetEnumerator();
+                        state = 2;
+                        goto case 2;
+                    case 2:
+                        if (_enumerator.MoveNext())
+                        {
+                            current = _selector(_enumerator.Current);
+                            return true;
+                        }
+                        Dispose();
+                        break;
+                }
+                return false;
+            }
+
+            // Once we have generic virtual support back, rename this back to Select and turn it into an override of the parent's abstract Select() method.
+            public IEnumerable<TResult2> SelectImpl<TResult2>(Func<TResult, TResult2> selector)
+            {
+                return new SelectIListIterator<TSource, TResult2>(_source, CombineSelectors(_selector, selector));
+            }
+
+            public override IEnumerable<TResult> Where(Func<TResult, bool> predicate)
+            {
+                return new WhereEnumerableIterator<TResult>(this, predicate);
+            }
+
+            public override TResult[] ToArray()
+            {
+                var results = new TResult[_source.Count];
+                for (int i = 0; i < results.Length; i++)
+                {
+                    results[i] = _selector(_source[i]);
+                }
+                return results;
+            }
+            
+            public int IndexOf(TResult item)
+            {
+                int index = 0;
+                EqualityComparer<TResult> cmp = EqualityComparer<TResult>.Default;
+                foreach (TSource sourceItem in _source)
+                {
+                    if (cmp.Equals(item, _selector(sourceItem))) return index;
+                    ++index;
+                }
+                return -1;
+            }
+            
+            public bool Contains(TResult item)
+            {
+                EqualityComparer<TResult> cmp = EqualityComparer<TResult>.Default;
+                foreach (TSource sourceItem in _source)
+                {
+                    if (cmp.Equals(item, _selector(sourceItem))) return true;
+                }
+                return false;
+            }
+            
+            public TResult this[int index]
+            {
+                get { return _selector(_source[index]); }
+                set { throw Error.NotSupported(); }
+            }
+            
+            public void CopyTo(TResult[] array, int arrayIndex)
+            {
+                ValidateCopyTo(array, arrayIndex, Count);
+                foreach (TSource item in _source) array[arrayIndex++] = _selector(item);
+            }
+            
+            public int Count
+            {
+                get { return _source.Count; }
+            }
+
+            public void Insert(int index, TResult item)
+            {
+                throw Error.NotSupported();
+            }
+    
+            public void RemoveAt(int index)
+            {
+                throw Error.NotSupported();
+            }
+    
+            public void Add(TResult item)
+            {
+                throw Error.NotSupported();
+            }
+    
+            public void Clear()
+            {
+                throw Error.NotSupported();
+            }
+    
+            public bool Remove(TResult item)
+            {
+                throw Error.NotSupported();
+            }
+    
+            public bool IsReadOnly
+            {
+                get { return true; }
             }
         }
 
@@ -889,6 +1595,13 @@ namespace System.Linq
         {
             if (first == null) throw Error.ArgumentNull("first");
             if (second == null) throw Error.ArgumentNull("second");
+            IList<TSource> firstList = first as IList<TSource>;
+            if (firstList != null)
+            {
+                IList<TSource> secondList = second as IList<TSource>;
+                if (secondList != null)
+                    return new ListConcat<TSource>(firstList, secondList);
+            }
             return ConcatIterator<TSource>(first, second);
         }
 
@@ -897,12 +1610,115 @@ namespace System.Linq
             foreach (TSource element in first) yield return element;
             foreach (TSource element in second) yield return element;
         }
+        
+        private class ListConcat<TSource> : ReadOnlyList<TSource>, IListIterator<TSource>
+        {
+            private readonly IList<TSource> _first;
+            private readonly IList<TSource> _second;
+            private IEnumerator<TSource> _enumerator;
+            
+            public ListConcat(IList<TSource> first, IList<TSource> second)
+            {
+                _first = first;
+                _second = second;
+            }
+            
+            public IEnumerator<TSource> GetEnumerator()
+            {
+                ListConcat<TSource> ret = Fresh ? this : new ListConcat<TSource>(_first, _second);
+                ret.state = 1;
+                ret._enumerator = _first.GetEnumerator();
+                return ret;
+            }
+            
+            IEnumerator IEnumerable.GetEnumerator()
+            {
+                return GetEnumerator();
+            }
+            
+            public TSource Current
+            {
+                get { return _enumerator.Current; }
+            }
+            
+            object IEnumerator.Current
+            {
+                get { return Current; }
+            }
+            
+            public bool MoveNext()
+            {
+                switch(state)
+                {
+                    case 1:
+                        if (_enumerator.MoveNext()) return true;
+                        _enumerator.Dispose();
+                        _enumerator = _second.GetEnumerator();
+                        state = 2;
+                        goto case 2;
+                    case 2:
+                        if (_enumerator.MoveNext()) return true;
+                        state = -1;
+                        break;
+                }
+                return false;
+            }
+            
+            public void Dispose()
+            {
+                if (_enumerator != null) _enumerator.Dispose();
+                _enumerator = null;
+            }
+            
+            public int IndexOf(TSource item)
+            {
+                int index = _first.IndexOf(item);
+                if (index != -1) return index;
+                index = _second.IndexOf(item);
+                return index == -1 ? -1 : index + _first.Count;
+            }
+            
+            public TSource this[int index]
+            {
+                get
+                {
+                    if ((uint)index > (uint)Count) throw Error.ArgumentOutOfRange("index");
+                    int firstCount = _first.Count;
+                    return index < firstCount ? _first[index] : _second[index - firstCount];
+                }
+                set { throw Error.NotSupported(); }
+            }
+            
+            public bool Contains(TSource item)
+            {
+                return _first.Contains(item) || _second.Contains(item);
+            }
+            
+            public void CopyTo(TSource[] array, int arrayIndex)
+            {
+                int firstCount = _first.Count;
+                ValidateCopyTo(array, arrayIndex, firstCount + _second.Count);
+                _first.CopyTo(array, arrayIndex);
+                _second.CopyTo(array, arrayIndex + firstCount);
+            }
+            
+            public int Count
+            {
+                get { return _first.Count + _second.Count; }
+            }
+        }
 
         public static IEnumerable<TResult> Zip<TFirst, TSecond, TResult>(this IEnumerable<TFirst> first, IEnumerable<TSecond> second, Func<TFirst, TSecond, TResult> resultSelector)
         {
             if (first == null) throw Error.ArgumentNull("first");
             if (second == null) throw Error.ArgumentNull("second");
             if (resultSelector == null) throw Error.ArgumentNull("resultSelector");
+            IList<TFirst> firstList = first as IList<TFirst>;
+            if (firstList != null)
+            {
+                IList<TSecond> secondList = second as IList<TSecond>;
+                if (secondList != null) return new ZipListIterator<TFirst, TSecond, TResult>(firstList, secondList, resultSelector);
+            }
             return ZipIterator(first, second, resultSelector);
         }
 
@@ -914,6 +1730,120 @@ namespace System.Linq
                     yield return resultSelector(e1.Current, e2.Current);
         }
 
+        private sealed class ZipListIterator<TFirst, TSecond, TResult> : ReadOnlyList<TResult>, IListIterator<TResult>
+        {
+            private readonly IList<TFirst> _first;
+            private readonly IList<TSecond> _second;
+            private readonly Func<TFirst, TSecond, TResult> _selector;
+            private IEnumerator<TFirst> _firstEn;
+            private IEnumerator<TSecond> _secondEn;
+            
+            public ZipListIterator(IList<TFirst> first, IList<TSecond> second, Func<TFirst, TSecond, TResult> selector)
+            {
+                Contract.Assert(first != null);
+                Contract.Assert(second != null);
+                Contract.Assert(selector != null);
+                _first = first;
+                _second = second;
+                _selector = selector;                
+            }
+            
+            public IEnumerator<TResult> GetEnumerator()
+            {
+                ZipListIterator<TFirst, TSecond, TResult> ret = Fresh ? this : new ZipListIterator<TFirst, TSecond, TResult>(_first, _second, _selector);
+                ret.state = 1;
+                return ret;
+            }
+            
+            IEnumerator IEnumerable.GetEnumerator()
+            {
+                return GetEnumerator();
+            }
+            
+            public bool MoveNext()
+            {
+                switch (state)
+                {
+                    case 1:
+                        _firstEn = _first.GetEnumerator();
+                        _secondEn = _second.GetEnumerator();
+                        state = 2;
+                        goto case 2;
+                    case 2:
+                        if (_firstEn.MoveNext() && _secondEn.MoveNext()) return true;
+                        break;                        
+                }
+                state = -1;
+                return false;
+            }
+            
+            public void Dispose()
+            {
+                if (_firstEn != null) _firstEn.Dispose();
+                if (_secondEn != null) _secondEn.Dispose();
+                _firstEn = null;
+                _secondEn = null;
+            }
+            
+            public TResult Current
+            {
+                get { return _selector(_firstEn.Current, _secondEn.Current); }
+            }
+            
+            object IEnumerator.Current
+            {
+                get { return Current; }
+            }
+            
+            public TResult this[int index]
+            {
+                get { return _selector(_first[index], _second[index]); }
+                set { throw Error.NotSupported(); }
+            }
+            
+            public bool Contains(TResult item)
+            {
+                EqualityComparer<TResult> cmp = EqualityComparer<TResult>.Default;
+                using (IEnumerator<TFirst> firstEn = _first.GetEnumerator())
+                using (IEnumerator<TSecond> secondEn = _second.GetEnumerator())
+                    while (firstEn.MoveNext() && secondEn.MoveNext())
+                        if (cmp.Equals(item, _selector(firstEn.Current, secondEn.Current))) return true;
+                return false;
+            }
+            
+            public int IndexOf(TResult item)
+            {
+                EqualityComparer<TResult> cmp = EqualityComparer<TResult>.Default;
+                int index = 0;
+                using (IEnumerator<TFirst> firstEn = _first.GetEnumerator())
+                using (IEnumerator<TSecond> secondEn = _second.GetEnumerator())
+                    while (firstEn.MoveNext() && secondEn.MoveNext())
+                    {
+                        if (cmp.Equals(item, _selector(firstEn.Current, secondEn.Current))) return index;
+                        ++index;
+                    }
+                return -1;
+            }
+            
+            public int Count
+            {
+                get
+                {
+                    int count0 = _first.Count;
+                    int count1 = _second.Count;
+                    return count0 < count1 ? count0 : count1;
+                }
+            }
+            
+            public void CopyTo(TResult[] array, int arrayIndex)
+            {
+                ValidateCopyTo(array, arrayIndex, Count);
+                using (IEnumerator<TFirst> firstEn = _first.GetEnumerator())
+                using (IEnumerator<TSecond> secondEn = _second.GetEnumerator())
+                    while (firstEn.MoveNext() && secondEn.MoveNext())
+                        array[arrayIndex++] = _selector(firstEn.Current, secondEn.Current);
+            }
+        }
 
         public static IEnumerable<TSource> Distinct<TSource>(this IEnumerable<TSource> source)
         {
@@ -1012,6 +1942,105 @@ namespace System.Linq
             Buffer<TSource> buffer = new Buffer<TSource>(source);
             for (int i = buffer.count - 1; i >= 0; i--) yield return buffer.items[i];
         }
+        
+        private class ReverseList<TSource> : ReadOnlyList<TSource>, IListIterator<TSource>
+        {
+            private readonly IList<TSource> _list;
+            private int _index;
+            private TSource _current;
+            
+            public ReverseList(IList<TSource> list)
+            {
+                _list = list;
+            }
+            
+            public IEnumerator<TSource> GetEnumerator()
+            {
+                ReverseList<TSource> ret = Fresh ? this : new ReverseList<TSource>(_list);
+                ret.state = 1;
+                return ret;
+            }
+            
+            IEnumerator IEnumerable.GetEnumerator()
+            {
+                return GetEnumerator();
+            }
+            
+            public void Dispose()
+            {
+            }
+
+            public TSource Current
+            {
+                get { return _current; }
+            }
+            
+            object IEnumerator.Current
+            {
+                get { return _current; }
+            }
+            
+            public bool MoveNext()
+            {
+                switch(state)
+                {
+                    case 1:
+                        int count = _list.Count;
+                        if (count != 0)
+                        {
+                            _current = _list[_index = count - 1];
+                            state = 2;
+                            return true;
+                        }
+                        break;
+                    case 2:
+                        if (--_index != -1)
+                        {
+                            count = _list.Count; // in case of change in meantime
+                            if (_index >= count)
+                                _index = count - 1;
+                            _current = _list[_index];
+                            return true;
+                        }
+                        break;
+                }
+                state = -1;
+                return false;
+            }
+            
+            public int IndexOf(TSource item)
+            {
+                int index = 0;
+                EqualityComparer<TSource> cmp = EqualityComparer<TSource>.Default;
+                for (int i = Count - 1; i != -1; --i)
+                    if (cmp.Equals(item, _list[i])) return index;
+                    else ++index;
+                return -1;
+            }
+            
+            public bool Contains(TSource item)
+            {
+                return _list.Contains(item);
+            }
+            
+            public TSource this[int index]
+            {
+                get { return _list[Count - 1 - index]; }
+                set { throw Error.NotSupported(); }
+            }
+            
+            public void CopyTo(TSource[] array, int arrayIndex)
+            {
+                ValidateCopyTo(array, arrayIndex, Count);
+                for (int i = Count - 1; i != -1; --i)
+                    array[arrayIndex++] = array[i];
+            }
+            
+            public int Count
+            {
+                get { return _list.Count; }
+            }
+        }
 
         public static bool SequenceEqual<TSource>(this IEnumerable<TSource> first, IEnumerable<TSource> second)
         {
@@ -1105,6 +2134,11 @@ namespace System.Linq
         public static IEnumerable<TSource> DefaultIfEmpty<TSource>(this IEnumerable<TSource> source, TSource defaultValue)
         {
             if (source == null) throw Error.ArgumentNull("source");
+            ICollection<TSource> col = source as ICollection<TSource>;
+            if (col != null)
+            {
+                return col.Count != 0 ?  source : Repeat(defaultValue, 1);
+            }
             return DefaultIfEmptyIterator<TSource>(source, defaultValue);
         }
 
@@ -1465,26 +2499,173 @@ namespace System.Linq
 
         public static IEnumerable<int> Range(int start, int count)
         {
-            long max = ((long)start) + count - 1;
-            if (count < 0 || max > Int32.MaxValue) throw Error.ArgumentOutOfRange("count");
-            return RangeIterator(start, count);
+            return new RangeIterator(start, count);
         }
 
-        private static IEnumerable<int> RangeIterator(int start, int count)
+        private sealed class RangeIterator : ReadOnlyList<int>, IListIterator<int>
         {
-            for (int end = start + count; start < end; start++)
-                yield return start;
+            private readonly int _start;
+            private readonly int _count;
+            private readonly int _end;
+            private int _current;
+
+            public RangeIterator(int start, int count)
+            {
+                _end = (_start = start) + (_count = count);
+                if (count < 0 | _end < start) throw Error.ArgumentOutOfRange("count");
+                _current = _start - 1;
+            }
+
+            public IEnumerator<int> GetEnumerator()
+            {
+                RangeIterator ret = Fresh ? this : new RangeIterator(_start, _count);
+                ret.state = _count == 0 ? -1 : 1;
+                return ret;
+            }
+
+            IEnumerator IEnumerable.GetEnumerator()
+            {
+                return GetEnumerator();
+            }
+            
+            public void Dispose()
+            {
+            }
+
+            public bool Contains(int item)
+            {
+                return item >= _start && item < _start + _count;
+            }
+            public int IndexOf(int item)
+            {
+                return Contains(item) ? item - _start : -1;
+            }
+
+            public int Count
+            {
+                get { return _count; }
+            }
+
+            public int Current
+            {
+                get { return _current; }
+            }
+
+            object IEnumerator.Current
+            {
+                get { return _current; }
+            }
+
+            public bool MoveNext()
+            {
+                if (state == 1 && ++_current != _end) return true;
+                state = -1;
+                return false;
+            }
+
+            public void CopyTo(int[] array, int arrayIndex)
+            {
+                ValidateCopyTo(array, arrayIndex, _count);
+                for(int i = _start; i != _end; ++i)
+                    array[arrayIndex++] = i;
+            }
+
+            public int this[int index]
+            {
+                get
+                {
+                    if ((uint)index >= (uint)_count) throw Error.ArgumentOutOfRange("index");
+                    return _start + index;
+                }
+                set { throw Error.NotSupported(); }
+            }
         }
 
         public static IEnumerable<TResult> Repeat<TResult>(TResult element, int count)
         {
             if (count < 0) throw Error.ArgumentOutOfRange("count");
-            return RepeatIterator<TResult>(element, count);
+            return count == 0 ? Empty<TResult>() : new RepeatIterator<TResult>(element, count);
         }
 
-        private static IEnumerable<TResult> RepeatIterator<TResult>(TResult element, int count)
+        private sealed class RepeatIterator<TResult> : ReadOnlyList<TResult>, IListIterator<TResult>
         {
-            for (int i = 0; i < count; i++) yield return element;
+            private readonly TResult _element;
+            private readonly int _count;
+            private int _sent;
+            
+            public RepeatIterator(TResult element, int count)
+            {
+                _element = element;
+                _count = count;
+            }
+            
+            public IEnumerator<TResult> GetEnumerator()
+            {
+                RepeatIterator<TResult> ret = Fresh ? this : new RepeatIterator<TResult>(_element, _count);
+                ret.state = 1;
+                return ret;
+            }
+            
+            IEnumerator IEnumerable.GetEnumerator()
+            {
+                return GetEnumerator();
+            }
+            
+            public bool MoveNext()
+            {
+                if (state == 1)
+                {
+                    if (++_sent == _count) state = -1;
+                    return true;
+                }
+                return false;
+            }
+
+            public TResult Current
+            {
+                get { return _element; }
+            }
+
+            object IEnumerator.Current
+            {
+                get { return _element; }
+            }
+
+            public void Dispose()
+            {
+            }
+
+            public TResult this[int index]
+            {
+                get
+                {
+                    if ((uint)index >= (uint)_count) throw Error.ArgumentOutOfRange("index");
+                    return _element;
+                }
+                set { throw Error.NotSupported(); }
+            }
+
+            public int Count
+            {
+                get { return _count; }
+            }
+
+            public bool Contains(TResult item)
+            {
+                return EqualityComparer<TResult>.Default.Equals(item, _element);
+            }
+
+            public int IndexOf(TResult item)
+            {
+                return Contains(item) ? 0 : -1;
+            }
+
+            public void CopyTo(TResult[] array, int arrayIndex)
+            {
+                ValidateCopyTo(array, arrayIndex, _count);
+                for(int i = _count; i != 0; --i)
+                    array[arrayIndex++] = _element;
+            }
         }
 
         public static IEnumerable<TResult> Empty<TResult>()
@@ -3576,5 +4757,55 @@ namespace System.Linq
 
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         private int _count;
+    }
+    
+    internal interface IListIterator<T> : IList<T>, IEnumerator<T>
+    {
+    }
+    
+    internal abstract class ReadOnlyList<T>
+    {
+        private readonly int _threadId = Environment.CurrentManagedThreadId;
+        protected int state;
+        
+        protected bool Fresh
+        {
+            get { return state == 0 && _threadId == Environment.CurrentManagedThreadId; }
+        }
+        
+        public void Reset()
+        {
+            throw Error.NotSupported();
+        }
+
+        public void Insert(int index, T item)
+        {
+            throw Error.NotSupported();
+        }
+
+        public void RemoveAt(int index)
+        {
+            throw Error.NotSupported();
+        }
+
+        public void Add(T item)
+        {
+            throw Error.NotSupported();
+        }
+
+        public void Clear()
+        {
+            throw Error.NotSupported();
+        }
+
+        public bool Remove(T item)
+        {
+            throw Error.NotSupported();
+        }
+
+        public bool IsReadOnly
+        {
+            get { return true; }
+        }
     }
 }
