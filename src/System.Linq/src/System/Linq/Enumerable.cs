@@ -3414,9 +3414,9 @@ namespace System.Linq
 
         internal Buffer(IEnumerable<TElement> source, bool queryInterfaces = true)
         {
-            TElement[] items = null;
-            int count = 0;
-
+            items = null;
+            count = 0;
+            
             if (queryInterfaces)
             {
                 Enumerable.Iterator<TElement> iterator = source as Enumerable.Iterator<TElement>;
@@ -3424,6 +3424,7 @@ namespace System.Linq
                 {
                     items = iterator.ToArray();
                     count = items.Length;
+                    return;
                 }
                 else
                 {
@@ -3436,29 +3437,26 @@ namespace System.Linq
                             items = new TElement[count];
                             collection.CopyTo(items, 0);
                         }
+                        return;
                     }
                 }
             }
 
-            if (items == null)
+            using (IEnumerator<TElement> e = source.GetEnumerator())
             {
-                foreach (TElement item in source)
+                if (!e.MoveNext()) return;
+                
+                items = new TElement[4];
+                do
                 {
-                    if (items == null)
-                    {
-                        items = new TElement[4];
-                    }
-                    else if (items.Length == count)
+                    if (items.Length == count)
                     {
                         Array.Resize(ref items, checked(count * 2));
                     }
-                    items[count] = item;
+                    items[count] = e.Current;
                     count++;
-                }
+                } while (e.MoveNext());
             }
-
-            this.items = items;
-            this.count = count;
         }
 
         internal TElement[] ToArray()
