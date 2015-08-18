@@ -103,42 +103,5 @@ namespace System.Linq.Tests
             for (int i = 15; i != 20; ++i)
                 Assert.False(rangeEnumerable.Contains(i));
         }
-        
-        [Fact]
-        public void Range_IndexOf()
-        {
-            var rangeEnumerable = (IList<int>)Enumerable.Range(5, 10);
-            for (int i = 0; i != 5; ++i)
-                Assert.Equal(-1, rangeEnumerable.IndexOf(i));
-            for (int i = 0; i != 10; ++i)
-                Assert.Equal(i, rangeEnumerable.IndexOf(i + 5));
-            for (int i = 15; i != 20; ++i)
-                Assert.Equal(-1, rangeEnumerable.IndexOf(i));
-        }
-        
-        [Fact]
-        public void Range_Index()
-        {
-            var rangeEnumerable = (IList<int>)Enumerable.Range(5, 10);
-            for(int i = 0; i != 10; ++i)
-                Assert.Equal(i + 5, rangeEnumerable[i]);
-            int dummy;
-            Assert.Throws<ArgumentOutOfRangeException>(() => dummy = rangeEnumerable[-1]);
-            Assert.Throws<ArgumentOutOfRangeException>(() => dummy = rangeEnumerable[10]);
-        }
-        
-        [Fact]
-        public void Range_IsReadOnly()
-        {
-            var rangeEnumerable = (IList<int>)Enumerable.Range(5, 10);
-            Assert.True(rangeEnumerable.IsReadOnly);
-            Assert.Throws<NotSupportedException>(() => rangeEnumerable.Add(3));
-            Assert.Throws<NotSupportedException>(() => rangeEnumerable[0] = 2);
-            Assert.Throws<NotSupportedException>(() => rangeEnumerable.Remove(3));
-            Assert.Throws<NotSupportedException>(() => rangeEnumerable.Remove(13));
-            Assert.Throws<NotSupportedException>(() => rangeEnumerable.Clear());
-            Assert.Throws<NotSupportedException>(() => rangeEnumerable.RemoveAt(0));
-            Assert.Throws<NotSupportedException>(() => rangeEnumerable.Insert(0, 0));
-        }
     }
 }

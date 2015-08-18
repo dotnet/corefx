@@ -111,40 +111,5 @@ namespace System.Linq.Tests
             Assert.False(repeatEnumerable.Contains(null));
             Assert.False(repeatEnumerable.Contains(""));
         }
-        
-        [Fact]
-        public void Repeat_IndexOf()
-        {
-            var repeatEnumerable = (IList<string>)Enumerable.Repeat("test", 10);
-            Assert.Equal(-1, repeatEnumerable.IndexOf("not test"));
-            Assert.Equal(0, repeatEnumerable.IndexOf("test"));
-            Assert.Equal(-1, repeatEnumerable.IndexOf(null));
-            Assert.Equal(-1, repeatEnumerable.IndexOf(""));
-        }
-        
-        [Fact]
-        public void Repeat_Index()
-        {
-            var repeatEnumerable = (IList<string>)Enumerable.Repeat("test", 10);
-            for(int i = 0; i != 10; ++i)
-                Assert.Same("test", repeatEnumerable[i]);
-            string dummy;
-            Assert.Throws<ArgumentOutOfRangeException>(() => dummy = repeatEnumerable[-1]);
-            Assert.Throws<ArgumentOutOfRangeException>(() => dummy = repeatEnumerable[10]);
-        }
-        
-        [Fact]
-        public void Repeat_IsReadOnly()
-        {
-            var repeatEnumerable = (IList<string>)Enumerable.Repeat("test", 10);
-            Assert.True(repeatEnumerable.IsReadOnly);
-            Assert.Throws<NotSupportedException>(() => repeatEnumerable.Add(""));
-            Assert.Throws<NotSupportedException>(() => repeatEnumerable[0] = "");
-            Assert.Throws<NotSupportedException>(() => repeatEnumerable.Remove(""));
-            Assert.Throws<NotSupportedException>(() => repeatEnumerable.Remove(""));
-            Assert.Throws<NotSupportedException>(() => repeatEnumerable.Clear());
-            Assert.Throws<NotSupportedException>(() => repeatEnumerable.RemoveAt(0));
-            Assert.Throws<NotSupportedException>(() => repeatEnumerable.Insert(0, ""));
-        }
     }
 }
