@@ -456,7 +456,7 @@ namespace System.IO.Pipes.Tests
                     var ctx1 = new CancellationTokenSource();
                     Task serverReadToken = server.ReadAsync(buffer, 0, buffer.Length, ctx1.Token);
                     ctx1.Cancel();
-                    await Assert.ThrowsAsync<OperationCanceledException>(() => serverReadToken);
+                    await Assert.ThrowsAnyAsync<OperationCanceledException>(() => serverReadToken);
                     Assert.True(server.ReadAsync(buffer, 0, buffer.Length, ctx1.Token).IsCanceled);
                 }
                 if (server.CanWrite)
@@ -464,7 +464,7 @@ namespace System.IO.Pipes.Tests
                     var ctx1 = new CancellationTokenSource();
                     Task serverWriteToken = server.WriteAsync(buffer, 0, buffer.Length, ctx1.Token);
                     ctx1.Cancel();
-                    await Assert.ThrowsAsync<OperationCanceledException>(() => serverWriteToken);
+                    await Assert.ThrowsAnyAsync<OperationCanceledException>(() => serverWriteToken);
                     Assert.True(server.WriteAsync(buffer, 0, buffer.Length, ctx1.Token).IsCanceled);
                 }
             }
@@ -485,7 +485,7 @@ namespace System.IO.Pipes.Tests
                     var ctx1 = new CancellationTokenSource();
                     Task serverReadToken = client.ReadAsync(buffer, 0, buffer.Length, ctx1.Token);
                     ctx1.Cancel();
-                    await Assert.ThrowsAsync<OperationCanceledException>(() => serverReadToken);
+                    await Assert.ThrowsAnyAsync<OperationCanceledException>(() => serverReadToken);
                     Assert.True(client.ReadAsync(buffer, 0, buffer.Length, ctx1.Token).IsCanceled);
                 }
                 if (client.CanWrite)
@@ -493,7 +493,7 @@ namespace System.IO.Pipes.Tests
                     var ctx1 = new CancellationTokenSource();
                     Task serverWriteToken = client.WriteAsync(buffer, 0, buffer.Length, ctx1.Token);
                     ctx1.Cancel();
-                    await Assert.ThrowsAsync<OperationCanceledException>(() => serverWriteToken);
+                    await Assert.ThrowsAnyAsync<OperationCanceledException>(() => serverWriteToken);
                     Assert.True(client.WriteAsync(buffer, 0, buffer.Length, ctx1.Token).IsCanceled);
                 }
             }
