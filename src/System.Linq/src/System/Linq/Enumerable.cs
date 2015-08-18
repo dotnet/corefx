@@ -588,7 +588,7 @@ namespace System.Linq
         {
             if (array == null) throw Error.ArgumentNull("array");
             if (arrayIndex < 0) throw Error.ArgumentOutOfRange("arrayIndex");
-            if (arrayIndex + count > array.Length) throw new ArgumentException();
+            if (arrayIndex + count > array.Length) throw Error.ArrayPlusOffTooSmall();
         }
 
         internal sealed class SelectArrayIterator<TSource, TResult> : Iterator<TResult>, IListWrapper<TResult>, IEnumerator<TResult>

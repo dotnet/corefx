@@ -135,4 +135,7 @@
   <data name="NoMatch" xml:space="preserve">
     <value>Sequence contains no matching element</value>
   </data>
+  <data name="ArrayPlusOffTooSmall" xml:space="preserve">
+    <value>Destination array is not long enough to copy all the items in the collection. Check array index and length.</value>
+  </data>
 </root>
