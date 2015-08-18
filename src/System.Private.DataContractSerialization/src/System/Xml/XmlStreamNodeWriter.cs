@@ -76,16 +76,17 @@ namespace System.Xml
             }
         }
 
-        private int GetByteCount(char[] chars)
+        private Encoding EncodingOrDefault
         {
-            if (_encoding == null)
+            get
             {
-                return s_UTF8Encoding.GetByteCount(chars);
+                return _encoding ?? s_UTF8Encoding;
             }
-            else
-            {
-                return _encoding.GetByteCount(chars);
-            }
+        }
+
+        private unsafe int GetByteCount(char* pChar, int length)
+        {
+            return EncodingOrDefault.GetByteCount(pChar, length);
         }
 
         protected byte[] GetBuffer(int count, out int offset)
@@ -348,12 +349,8 @@ namespace System.Xml
             if (chars == charsMax)
                 return charCount;
 
-            char[] chArray = new char[charsMax - chars];
-            for (int i = 0; i < chArray.Length; i++)
-            {
-                chArray[i] = chars[i];
-            }
-            return (int)(chars - (charsMax - charCount)) + GetByteCount(chArray);
+            int charLength = (int)(charsMax - chars);
+            return charCount - charLength + GetByteCount(chars, charLength);
         }
 
         /// <SecurityNote>
@@ -365,11 +362,12 @@ namespace System.Xml
         {
             if (charCount > 0)
             {
-                fixed (byte* _bytes = &buffer[offset])
+                fixed (byte* pBuffer = buffer)
                 {
+                    byte* _bytes = pBuffer + offset;
                     byte* bytes = _bytes;
-                    byte* bytesMax = &bytes[buffer.Length - offset];
-                    char* charsMax = &chars[charCount];
+                    byte* bytesMax = pBuffer + buffer.Length;
+                    char* charsMax = chars + charCount;
 
                     while (true)
                     {
@@ -393,12 +391,27 @@ namespace System.Xml
                             chars++;
                         }
 
-                        string tmp = new string(charsStart, 0, (int)(chars - charsStart));
-                        byte[] newBytes = _encoding != null ? _encoding.GetBytes(tmp) : s_UTF8Encoding.GetBytes(tmp);
-                        int toCopy = Math.Min(newBytes.Length, (int)(bytesMax - bytes));
-                        Array.Copy(newBytes, 0, buffer, (int)(bytes - _bytes) + offset, toCopy);
+                        int skippedLength = (int)(chars - charsStart);
+                        int bytesLeft = (int)(bytesMax - bytes);
+                        int bytesTraversed = (int)(bytes - _bytes);
 
-                        bytes += toCopy;
+                        int byteCount = EncodingOrDefault.GetByteCount(charsStart, skippedLength);
+
+                        if (byteCount <= bytesLeft)
+                        {
+                            EncodingOrDefault.GetBytes(charsStart, skippedLength, bytes, byteCount);
+                            bytes += byteCount;
+                        }
+                        else
+                        {
+                            byte[] newBytes = new byte[byteCount];
+
+                            fixed (byte* pNewBytes = newBytes)
+                                EncodingOrDefault.GetBytes(charsStart, skippedLength, pNewBytes, byteCount);
+
+                            Array.Copy(newBytes, 0, buffer, bytesTraversed + offset, bytesLeft);
+                            bytes += bytesLeft;
+                        }
 
                         if (chars >= charsMax)
                             break;
