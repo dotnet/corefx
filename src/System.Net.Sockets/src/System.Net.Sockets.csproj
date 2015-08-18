@@ -91,9 +91,8 @@
     <Compile Include="$(CommonPath)\System\Net\_LazyAsyncResult.cs">
       <Link>Common\System\Net\_LazyAsyncResult.cs</Link>
     </Compile>
-    <!-- TODO: refactor ExecutionContext to use System.Threading 4.0.10.0 -->
-    <Compile Include="$(CommonPath)\System\Threading\ExecutionContext.cs">
-      <Link>Common\System\Threading\ExecutionContext.cs</Link>
+    <Compile Include="$(CommonPath)\System\Net\Shims\ExecutionContext.cs">
+      <Link>Common\System\Net\Shims\ExecutionContext.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\System\Net\Shims\DBNull.cs">
       <Link>Common\System\Net\Shims\DBNull.cs</Link>
