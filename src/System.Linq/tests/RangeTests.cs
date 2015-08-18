@@ -92,6 +92,7 @@ namespace System.Linq.Tests
                 Assert.NotSame(enum1, enum2);
             }
         }
+
         [Fact]
         public void Range_Contains()
         {
@@ -102,6 +103,19 @@ namespace System.Linq.Tests
                 Assert.True(rangeEnumerable.Contains(i));
             for (int i = 15; i != 20; ++i)
                 Assert.False(rangeEnumerable.Contains(i));
+        }
+
+        [Fact]
+        public void Range_ToInt32MaxValue()
+        {
+            int from = Int32.MaxValue - 3;
+            int count = 4;
+            var rangeEnumerable = Enumerable.Range(from, count);
+
+            Assert.Equal(count, rangeEnumerable.Count());
+
+            int[] expected = { Int32.MaxValue - 3, Int32.MaxValue - 2, Int32.MaxValue - 1, Int32.MaxValue };
+            Assert.Equal(expected, rangeEnumerable);
         }
     }
 }
