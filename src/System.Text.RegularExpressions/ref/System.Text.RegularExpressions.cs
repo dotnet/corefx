@@ -15,15 +15,36 @@ namespace System.Text.RegularExpressions
         public string Value { get { return default(string); } }
         public override string ToString() { return default(string); }
     }
-    public partial class CaptureCollection : System.Collections.ICollection, System.Collections.IEnumerable
+    public partial class CaptureCollection : System.Collections.Generic.ICollection<System.Text.RegularExpressions.Capture>, System.Collections.Generic.IEnumerable<System.Text.RegularExpressions.Capture>, System.Collections.Generic.IList<System.Text.RegularExpressions.Capture>, System.Collections.Generic.IReadOnlyCollection<System.Text.RegularExpressions.Capture>, System.Collections.Generic.IReadOnlyList<System.Text.RegularExpressions.Capture>, System.Collections.ICollection, System.Collections.IEnumerable, System.Collections.IList
     {
         internal CaptureCollection() { }
         public int Count { get { return default(int); } }
         public System.Text.RegularExpressions.Capture this[int i] { get { return default(System.Text.RegularExpressions.Capture); } }
+        bool System.Collections.Generic.ICollection<System.Text.RegularExpressions.Capture>.IsReadOnly { get { return default(bool); } }
+        System.Text.RegularExpressions.Capture System.Collections.Generic.IList<System.Text.RegularExpressions.Capture>.this[int index] { get { return default(System.Text.RegularExpressions.Capture); } set { } }
         bool System.Collections.ICollection.IsSynchronized { get { return default(bool); } }
         object System.Collections.ICollection.SyncRoot { get { return default(object); } }
+        bool System.Collections.IList.IsFixedSize { get { return default(bool); } }
+        bool System.Collections.IList.IsReadOnly { get { return default(bool); } }
+        object System.Collections.IList.this[int index] { get { return default(object); } set { } }
+        public void CopyTo(System.Text.RegularExpressions.Capture[] array, int arrayIndex) { }
         public System.Collections.IEnumerator GetEnumerator() { return default(System.Collections.IEnumerator); }
+        void System.Collections.Generic.ICollection<System.Text.RegularExpressions.Capture>.Add(System.Text.RegularExpressions.Capture item) { }
+        void System.Collections.Generic.ICollection<System.Text.RegularExpressions.Capture>.Clear() { }
+        bool System.Collections.Generic.ICollection<System.Text.RegularExpressions.Capture>.Contains(System.Text.RegularExpressions.Capture item) { return default(bool); }
+        bool System.Collections.Generic.ICollection<System.Text.RegularExpressions.Capture>.Remove(System.Text.RegularExpressions.Capture item) { return default(bool); }
+        System.Collections.Generic.IEnumerator<System.Text.RegularExpressions.Capture> System.Collections.Generic.IEnumerable<System.Text.RegularExpressions.Capture>.GetEnumerator() { return default(System.Collections.Generic.IEnumerator<System.Text.RegularExpressions.Capture>); }
+        int System.Collections.Generic.IList<System.Text.RegularExpressions.Capture>.IndexOf(System.Text.RegularExpressions.Capture item) { return default(int); }
+        void System.Collections.Generic.IList<System.Text.RegularExpressions.Capture>.Insert(int index, System.Text.RegularExpressions.Capture item) { }
+        void System.Collections.Generic.IList<System.Text.RegularExpressions.Capture>.RemoveAt(int index) { }
         void System.Collections.ICollection.CopyTo(System.Array array, int arrayIndex) { }
+        int System.Collections.IList.Add(object value) { return default(int); }
+        void System.Collections.IList.Clear() { }
+        bool System.Collections.IList.Contains(object value) { return default(bool); }
+        int System.Collections.IList.IndexOf(object value) { return default(int); }
+        void System.Collections.IList.Insert(int index, object value) { }
+        void System.Collections.IList.Remove(object value) { }
+        void System.Collections.IList.RemoveAt(int index) { }
     }
     public partial class Group : System.Text.RegularExpressions.Capture
     {
@@ -32,16 +53,37 @@ namespace System.Text.RegularExpressions
         public string Name { get { return default(string); } }
         public bool Success { get { return default(bool); } }
     }
-    public partial class GroupCollection : System.Collections.ICollection, System.Collections.IEnumerable
+    public partial class GroupCollection : System.Collections.Generic.ICollection<System.Text.RegularExpressions.Group>, System.Collections.Generic.IEnumerable<System.Text.RegularExpressions.Group>, System.Collections.Generic.IList<System.Text.RegularExpressions.Group>, System.Collections.Generic.IReadOnlyCollection<System.Text.RegularExpressions.Group>, System.Collections.Generic.IReadOnlyList<System.Text.RegularExpressions.Group>, System.Collections.ICollection, System.Collections.IEnumerable, System.Collections.IList
     {
         internal GroupCollection() { }
         public int Count { get { return default(int); } }
         public System.Text.RegularExpressions.Group this[int groupnum] { get { return default(System.Text.RegularExpressions.Group); } }
         public System.Text.RegularExpressions.Group this[string groupname] { get { return default(System.Text.RegularExpressions.Group); } }
+        bool System.Collections.Generic.ICollection<System.Text.RegularExpressions.Group>.IsReadOnly { get { return default(bool); } }
+        System.Text.RegularExpressions.Group System.Collections.Generic.IList<System.Text.RegularExpressions.Group>.this[int index] { get { return default(System.Text.RegularExpressions.Group); } set { } }
         bool System.Collections.ICollection.IsSynchronized { get { return default(bool); } }
         object System.Collections.ICollection.SyncRoot { get { return default(object); } }
+        bool System.Collections.IList.IsFixedSize { get { return default(bool); } }
+        bool System.Collections.IList.IsReadOnly { get { return default(bool); } }
+        object System.Collections.IList.this[int index] { get { return default(object); } set { } }
+        public void CopyTo(System.Text.RegularExpressions.Group[] array, int arrayIndex) { }
         public System.Collections.IEnumerator GetEnumerator() { return default(System.Collections.IEnumerator); }
+        void System.Collections.Generic.ICollection<System.Text.RegularExpressions.Group>.Add(System.Text.RegularExpressions.Group item) { }
+        void System.Collections.Generic.ICollection<System.Text.RegularExpressions.Group>.Clear() { }
+        bool System.Collections.Generic.ICollection<System.Text.RegularExpressions.Group>.Contains(System.Text.RegularExpressions.Group item) { return default(bool); }
+        bool System.Collections.Generic.ICollection<System.Text.RegularExpressions.Group>.Remove(System.Text.RegularExpressions.Group item) { return default(bool); }
+        System.Collections.Generic.IEnumerator<System.Text.RegularExpressions.Group> System.Collections.Generic.IEnumerable<System.Text.RegularExpressions.Group>.GetEnumerator() { return default(System.Collections.Generic.IEnumerator<System.Text.RegularExpressions.Group>); }
+        int System.Collections.Generic.IList<System.Text.RegularExpressions.Group>.IndexOf(System.Text.RegularExpressions.Group item) { return default(int); }
+        void System.Collections.Generic.IList<System.Text.RegularExpressions.Group>.Insert(int index, System.Text.RegularExpressions.Group item) { }
+        void System.Collections.Generic.IList<System.Text.RegularExpressions.Group>.RemoveAt(int index) { }
         void System.Collections.ICollection.CopyTo(System.Array array, int arrayIndex) { }
+        int System.Collections.IList.Add(object value) { return default(int); }
+        void System.Collections.IList.Clear() { }
+        bool System.Collections.IList.Contains(object value) { return default(bool); }
+        int System.Collections.IList.IndexOf(object value) { return default(int); }
+        void System.Collections.IList.Insert(int index, object value) { }
+        void System.Collections.IList.Remove(object value) { }
+        void System.Collections.IList.RemoveAt(int index) { }
     }
     public partial class Match : System.Text.RegularExpressions.Group
     {
@@ -51,15 +93,36 @@ namespace System.Text.RegularExpressions
         public System.Text.RegularExpressions.Match NextMatch() { return default(System.Text.RegularExpressions.Match); }
         public virtual string Result(string replacement) { return default(string); }
     }
-    public partial class MatchCollection : System.Collections.ICollection, System.Collections.IEnumerable
+    public partial class MatchCollection : System.Collections.Generic.ICollection<System.Text.RegularExpressions.Match>, System.Collections.Generic.IEnumerable<System.Text.RegularExpressions.Match>, System.Collections.Generic.IList<System.Text.RegularExpressions.Match>, System.Collections.Generic.IReadOnlyCollection<System.Text.RegularExpressions.Match>, System.Collections.Generic.IReadOnlyList<System.Text.RegularExpressions.Match>, System.Collections.ICollection, System.Collections.IEnumerable, System.Collections.IList
     {
         internal MatchCollection() { }
         public int Count { get { return default(int); } }
         public virtual System.Text.RegularExpressions.Match this[int i] { get { return default(System.Text.RegularExpressions.Match); } }
+        bool System.Collections.Generic.ICollection<System.Text.RegularExpressions.Match>.IsReadOnly { get { return default(bool); } }
+        System.Text.RegularExpressions.Match System.Collections.Generic.IList<System.Text.RegularExpressions.Match>.this[int index] { get { return default(System.Text.RegularExpressions.Match); } set { } }
         bool System.Collections.ICollection.IsSynchronized { get { return default(bool); } }
         object System.Collections.ICollection.SyncRoot { get { return default(object); } }
+        bool System.Collections.IList.IsFixedSize { get { return default(bool); } }
+        bool System.Collections.IList.IsReadOnly { get { return default(bool); } }
+        object System.Collections.IList.this[int index] { get { return default(object); } set { } }
+        public void CopyTo(System.Text.RegularExpressions.Match[] array, int arrayIndex) { }
         public System.Collections.IEnumerator GetEnumerator() { return default(System.Collections.IEnumerator); }
+        void System.Collections.Generic.ICollection<System.Text.RegularExpressions.Match>.Add(System.Text.RegularExpressions.Match item) { }
+        void System.Collections.Generic.ICollection<System.Text.RegularExpressions.Match>.Clear() { }
+        bool System.Collections.Generic.ICollection<System.Text.RegularExpressions.Match>.Contains(System.Text.RegularExpressions.Match item) { return default(bool); }
+        bool System.Collections.Generic.ICollection<System.Text.RegularExpressions.Match>.Remove(System.Text.RegularExpressions.Match item) { return default(bool); }
+        System.Collections.Generic.IEnumerator<System.Text.RegularExpressions.Match> System.Collections.Generic.IEnumerable<System.Text.RegularExpressions.Match>.GetEnumerator() { return default(System.Collections.Generic.IEnumerator<System.Text.RegularExpressions.Match>); }
+        int System.Collections.Generic.IList<System.Text.RegularExpressions.Match>.IndexOf(System.Text.RegularExpressions.Match item) { return default(int); }
+        void System.Collections.Generic.IList<System.Text.RegularExpressions.Match>.Insert(int index, System.Text.RegularExpressions.Match item) { }
+        void System.Collections.Generic.IList<System.Text.RegularExpressions.Match>.RemoveAt(int index) { }
         void System.Collections.ICollection.CopyTo(System.Array array, int arrayIndex) { }
+        int System.Collections.IList.Add(object value) { return default(int); }
+        void System.Collections.IList.Clear() { }
+        bool System.Collections.IList.Contains(object value) { return default(bool); }
+        int System.Collections.IList.IndexOf(object value) { return default(int); }
+        void System.Collections.IList.Insert(int index, object value) { }
+        void System.Collections.IList.Remove(object value) { }
+        void System.Collections.IList.RemoveAt(int index) { }
     }
     public delegate string MatchEvaluator(System.Text.RegularExpressions.Match match);
     public partial class Regex
