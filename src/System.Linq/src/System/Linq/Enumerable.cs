@@ -2140,7 +2140,7 @@ namespace System.Linq
                 public void CopyTo(TSource[] array, int arrayIndex)
                 {
                     ValidateCopyTo(array, arrayIndex, Count);
-                    for (int i = Count - 1; i != -1; --i) array[arrayIndex++] = array[i];
+                    for (int i = Count - 1; i != -1; --i) array[arrayIndex++] = _list[i];
                 }
 
                 public int Count
@@ -2209,7 +2209,8 @@ namespace System.Linq
             if (source == null) throw Error.ArgumentNull("source");
             if (keySelector == null) throw Error.ArgumentNull("keySelector");
             if (elementSelector == null) throw Error.ArgumentNull("elementSelector");
-            Dictionary<TKey, TElement> d = new Dictionary<TKey, TElement>(comparer);
+            IList<TSource> list = AsIList(source);
+            Dictionary<TKey, TElement> d = list == null ? new Dictionary<TKey, TElement>(comparer) : new Dictionary<TKey, TElement>(list.Count, comparer); 
             foreach (TSource element in source) d.Add(keySelector(element), elementSelector(element));
             return d;
         }
@@ -2727,8 +2728,11 @@ namespace System.Linq
 
             public RangeIterator(int start, int count)
             {
-                _end = (_start = start) + (_count = count);
-                if (count < 0 | _end < start) throw Error.ArgumentOutOfRange("count");
+                _start = start;
+                _count = count;
+                long max = (long)start + count;
+                if (count < 0 | max > 1L + int.MaxValue) throw Error.ArgumentOutOfRange("count");
+                _end = (int)max;
                 _current = _start - 1;
             }
 
@@ -2797,7 +2801,7 @@ namespace System.Linq
 
                 public bool Contains(int item)
                 {
-                    return item >= _start && item < _start + _count;
+                    return item >= _start && item - _count < _start;
                 }
                 public int IndexOf(int item)
                 {

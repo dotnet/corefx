@@ -37,6 +37,15 @@ namespace System.Linq.Tests
             Assert.Equal(expectedResults.Select(i => i * 2), input.Select(i => i * 2).Reverse());
             Assert.Equal(expectedResults.Where(i => true).Select(i => i * 2), input.Where(i => true).Select(i => i * 2).Reverse());
             Assert.Equal(expectedResults.Where(i => false).Select(i => i * 2), input.Where(i => false).Select(i => i * 2).Reverse());
+
+            Assert.Equal(expectedResults, input.Reverse().ToArray());
+            Assert.Equal(expectedResults, new TestCollection<int>(input).Reverse().ToList());
+            Assert.Equal(expectedResults, new TestEnumerable<int>(input).Reverse().ToArray());
+            Assert.Equal(expectedResults, new TestReadOnlyCollection<int>(input).Reverse().ToList());
+
+            Assert.Equal(expectedResults.Select(i => i * 2), input.Select(i => i * 2).Reverse().ToArray());
+            Assert.Equal(expectedResults.Where(i => true).Select(i => i * 2), input.Where(i => true).Select(i => i * 2).Reverse().ToArray());
+            Assert.Equal(expectedResults.Where(i => false).Select(i => i * 2), input.Where(i => false).Select(i => i * 2).Reverse().ToList());
         }
     }
 }
