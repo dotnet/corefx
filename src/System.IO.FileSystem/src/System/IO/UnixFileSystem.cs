@@ -43,9 +43,9 @@ namespace System.IO
             }
 
             // Now copy over relevant read/write/execute permissions from the source to the destination
-            Interop.libcoreclr.fileinfo fileinfo;
-            while (Interop.CheckIo(Interop.libcoreclr.GetFileInformationFromPath(sourceFullPath, out fileinfo), sourceFullPath)) ;
-            int newMode = fileinfo.mode & (int)Interop.libc.Permissions.Mask;
+            Interop.Sys.FileStatus status;
+            while (Interop.CheckIo(Interop.Sys.Stat(sourceFullPath, out status), sourceFullPath)) ;
+            int newMode = status.Mode & (int)Interop.libc.Permissions.Mask;
             while (Interop.CheckIo(Interop.libc.chmod(destFullPath, newMode), destFullPath)) ;
         }
 
@@ -315,22 +315,22 @@ namespace System.IO
 
         private static bool DirectoryExists(string fullPath, out Interop.ErrorInfo errorInfo)
         {
-            return FileExists(fullPath, Interop.libcoreclr.FileTypes.S_IFDIR, out errorInfo);
+            return FileExists(fullPath, Interop.Sys.FileTypes.S_IFDIR, out errorInfo);
         }
 
         public override bool FileExists(string fullPath)
         {
             Interop.ErrorInfo ignored;
-            return FileExists(fullPath, Interop.libcoreclr.FileTypes.S_IFREG, out ignored);
+            return FileExists(fullPath, Interop.Sys.FileTypes.S_IFREG, out ignored);
         }
 
         private static bool FileExists(string fullPath, int fileType, out Interop.ErrorInfo errorInfo)
         {
-            Interop.libcoreclr.fileinfo fileinfo;
+            Interop.Sys.FileStatus fileinfo;
             while (true)
             {
                 errorInfo = default(Interop.ErrorInfo);
-                int result = Interop.libcoreclr.GetFileInformationFromPath(fullPath, out fileinfo);
+                int result = Interop.Sys.Stat(fullPath, out fileinfo);
                 if (result < 0)
                 {
                     errorInfo = Interop.Sys.GetLastErrorInfo();
@@ -340,7 +340,7 @@ namespace System.IO
                     }
                     return false;
                 }
-                return (fileinfo.mode & Interop.libcoreclr.FileTypes.S_IFMT) == fileType;
+                return (fileinfo.Mode & Interop.Sys.FileTypes.S_IFMT) == fileType;
             }
         }
 
@@ -355,14 +355,14 @@ namespace System.IO
             {
                 case SearchTarget.Files:
                     return new FileSystemEnumerable<FileInfo>(fullPath, searchPattern, searchOption, searchTarget, (path, isDir) =>
-                        new FileInfo(path, new UnixFileSystemObject(path, isDir)));
+                        new FileInfo(path, null));
                 case SearchTarget.Directories:
                     return new FileSystemEnumerable<DirectoryInfo>(fullPath, searchPattern, searchOption, searchTarget, (path, isDir) =>
-                        new DirectoryInfo(path, new UnixFileSystemObject(path, isDir)));
+                        new DirectoryInfo(path, null));
                 default:
                     return new FileSystemEnumerable<FileSystemInfo>(fullPath, searchPattern, searchOption, searchTarget, (path, isDir) => isDir ?
-                        (FileSystemInfo)new DirectoryInfo(path, new UnixFileSystemObject(path, isDir)) :
-                        (FileSystemInfo)new FileInfo(path, new UnixFileSystemObject(path, isDir)));
+                        (FileSystemInfo)new DirectoryInfo(path, null) :
+                        (FileSystemInfo)new FileInfo(path, null));
             }
         }
 
@@ -582,47 +582,61 @@ namespace System.IO
 
         public override FileAttributes GetAttributes(string fullPath)
         {
-            return new UnixFileSystemObject(fullPath, false).Attributes;
+            return new FileInfo(fullPath, null).Attributes;
         }
 
         public override void SetAttributes(string fullPath, FileAttributes attributes)
         {
-            new UnixFileSystemObject(fullPath, false).Attributes = attributes;
+            new FileInfo(fullPath, null).Attributes = attributes;
         }
 
         public override DateTimeOffset GetCreationTime(string fullPath)
         {
-            return new UnixFileSystemObject(fullPath, false).CreationTime;
+            return new FileInfo(fullPath, null).CreationTime;
         }
 
         public override void SetCreationTime(string fullPath, DateTimeOffset time, bool asDirectory)
         {
-            new UnixFileSystemObject(fullPath, asDirectory).CreationTime = time;
+            IFileSystemObject info = asDirectory ?
+                (IFileSystemObject)new DirectoryInfo(fullPath, null) :
+                (IFileSystemObject)new FileInfo(fullPath, null);
+
+            info.CreationTime = time;
         }
 
         public override DateTimeOffset GetLastAccessTime(string fullPath)
         {
-            return new UnixFileSystemObject(fullPath, false).LastAccessTime;
+            return new FileInfo(fullPath, null).LastAccessTime;
         }
 
         public override void SetLastAccessTime(string fullPath, DateTimeOffset time, bool asDirectory)
         {
-            new UnixFileSystemObject(fullPath, asDirectory).LastAccessTime = time;
+            IFileSystemObject info = asDirectory ?
+                (IFileSystemObject)new DirectoryInfo(fullPath, null) :
+                (IFileSystemObject)new FileInfo(fullPath, null);
+
+            info.LastAccessTime = time;
         }
 
         public override DateTimeOffset GetLastWriteTime(string fullPath)
         {
-            return new UnixFileSystemObject(fullPath, false).LastWriteTime;
+            return new FileInfo(fullPath, null).LastWriteTime;
         }
 
         public override void SetLastWriteTime(string fullPath, DateTimeOffset time, bool asDirectory)
         {
-            new UnixFileSystemObject(fullPath, asDirectory).LastWriteTime = time;
+            IFileSystemObject info = asDirectory ?
+                (IFileSystemObject)new DirectoryInfo(fullPath, null) :
+                (IFileSystemObject)new FileInfo(fullPath, null);
+
+            info.LastWriteTime = time;
         }
 
         public override IFileSystemObject GetFileSystemInfo(string fullPath, bool asDirectory)
         {
-            return new UnixFileSystemObject(fullPath, asDirectory);
+            return asDirectory ?
+                (IFileSystemObject)new DirectoryInfo(fullPath, null) :
+                (IFileSystemObject)new FileInfo(fullPath, null);
         }
     }
 }

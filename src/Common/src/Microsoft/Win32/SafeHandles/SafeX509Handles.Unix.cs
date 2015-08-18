@@ -10,6 +10,8 @@ namespace Microsoft.Win32.SafeHandles
     [SecurityCritical]
     internal sealed class SafeX509Handle : SafeHandle
     {
+        internal static readonly SafeX509Handle InvalidHandle = new SafeX509Handle();
+
         private SafeX509Handle() : 
             base(IntPtr.Zero, ownsHandle: true)
         {
@@ -80,7 +82,7 @@ namespace Microsoft.Win32.SafeHandles
 
         protected override bool ReleaseHandle()
         {
-            Interop.NativeCrypto.RecursiveFreeX509Stack(handle);
+            Interop.Crypto.RecursiveFreeX509Stack(handle);
             SetHandle(IntPtr.Zero);
             return true;
         }
