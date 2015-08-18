@@ -2728,11 +2728,11 @@ namespace System.Linq
 
             public RangeIterator(int start, int count)
             {
+                int end = start + count;
+                if (count < 0 || (end < start && end != int.MinValue)) throw Error.ArgumentOutOfRange("count");
                 _start = start;
                 _count = count;
-                long max = (long)start + count;
-                if (count < 0 | max > 1L + int.MaxValue) throw Error.ArgumentOutOfRange("count");
-                _end = (int)max;
+                _end = end;
                 _current = _start - 1;
             }
 
