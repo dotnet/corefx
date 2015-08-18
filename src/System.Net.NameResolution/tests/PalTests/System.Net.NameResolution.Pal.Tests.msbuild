@@ -104,9 +104,6 @@
     <Compile Include="$(CommonPath)\Interop\Windows\Winsock\Interop.WSASocketW.cs">
       <Link>Interop\Windows\Winsock\Interop.WSASocketW.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\Winsock\NameInfoFlags.cs">
-      <Link>Interop\Windows\Winsock\NameInfoFlags.cs</Link>
-    </Compile>    
     <Compile Include="$(CommonPath)\Interop\Windows\Winsock\ProtocolFamily.cs">
       <Link>Interop\Windows\Winsock\ProtocolFamily.cs</Link>
     </Compile>    

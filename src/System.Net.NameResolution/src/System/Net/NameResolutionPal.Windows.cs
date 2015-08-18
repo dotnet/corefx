@@ -310,7 +310,7 @@ namespace System.Net
             SocketAddress address = (new IPEndPoint(addr, 0)).Serialize();
             StringBuilder hostname = new StringBuilder(1025); // NI_MAXHOST
 
-            int flags = (int)NameInfoFlags.NI_NAMEREQD;
+            int flags = (int)Interop.Winsock.NameInfoFlags.NI_NAMEREQD;
 
             nativeErrorCode = 0;
 

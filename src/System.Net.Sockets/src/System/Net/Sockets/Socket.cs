@@ -2570,7 +2570,7 @@ namespace System.Net.Sockets
 
             IntPtr handle = _handle.DangerousGetHandle();
             IntPtr[] fileDescriptorSet = new IntPtr[2] { (IntPtr)1, handle };
-            TimeValue IOwait = new TimeValue();
+            var IOwait = new Interop.Winsock.TimeValue();
 
             //
             // negative timeout value implies indefinite wait
@@ -2662,7 +2662,7 @@ namespace System.Net.Sockets
 
             if (microSeconds != -1)
             {
-                TimeValue IOwait = new TimeValue();
+                var IOwait = new Interop.Winsock.TimeValue();
                 MicrosecondsToTimeValue((long)(uint)microSeconds, ref IOwait);
 
                 socketCount =
@@ -6908,7 +6908,7 @@ namespace System.Net.Sockets
             }
         }
 
-        private static void MicrosecondsToTimeValue(long microSeconds, ref TimeValue socketTime)
+        private static void MicrosecondsToTimeValue(long microSeconds, ref Interop.Winsock.TimeValue socketTime)
         {
             socketTime.Seconds = (int)(microSeconds / microcnv);
             socketTime.Microseconds = (int)(microSeconds % microcnv);

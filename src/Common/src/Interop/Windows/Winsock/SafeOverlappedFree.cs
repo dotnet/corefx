@@ -9,7 +9,6 @@ using System.Diagnostics;
 
 namespace System.Net.Sockets
 {
-#if !PROJECTN
 #if DEBUG
     internal sealed class SafeOverlappedFree : DebugSafeHandle
     {
@@ -67,6 +66,5 @@ namespace System.Net.Sockets
             return Interop.mincore_obsolete.LocalFree(handle) == IntPtr.Zero;
         }
     }
-#endif //PROJECTN
 }
 

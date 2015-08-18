@@ -198,32 +198,12 @@
       <Link>Common\Interop\Windows\mincore_obsolete\Interop.LocalFree.cs</Link>
     </Compile>
 
-    <Compile Include="$(CommonPath)\Interop\Windows\Winsock\TimeValue.cs">
-      <Link>Interop\Windows\Winsock\TimeValue.cs</Link>
-    </Compile>    
-
     <Compile Include="$(CommonPath)\Interop\Windows\Winsock\WSABuffer.cs">
       <Link>Interop\Windows\Winsock\WSABuffer.cs</Link>
     </Compile>
 
-    <Compile Include="$(CommonPath)\Interop\Windows\Winsock\Interop.ControlData.cs">
-      <Link>Interop\Windows\Winsock\Interop.ControlData.cs</Link>
-    </Compile>
-
     <Compile Include="$(CommonPath)\Interop\Windows\Winsock\Interop.closesocket.cs">
       <Link>Interop\Windows\Winsock\Interop.closesocket.cs</Link>
-    </Compile>
-
-    <Compile Include="$(CommonPath)\Interop\Windows\Winsock\Interop.getpeername.cs">
-      <Link>Interop\Windows\Winsock\Interop.getpeername.cs</Link>
-    </Compile>
-
-    <Compile Include="$(CommonPath)\Interop\Windows\Winsock\Interop.getsockopt.cs">
-      <Link>Interop\Windows\Winsock\Interop.getsockopt.cs</Link>
-    </Compile>
-
-    <Compile Include="$(CommonPath)\Interop\Windows\Winsock\Interop.WSAMsg.cs">
-      <Link>Interop\Windows\Winsock\Interop.WSAMsg.cs</Link>
     </Compile>
 
     <Compile Include="$(CommonPath)\Interop\Windows\Winsock\Interop.WSASocketW.cs">
@@ -240,10 +220,6 @@
 
     <Compile Include="$(CommonPath)\Interop\Windows\Winsock\Interop.WinsockAsync.cs">
       <Link>Interop\Windows\Winsock\Interop.WinSockAsync.cs</Link>
-    </Compile>
-
-    <Compile Include="$(CommonPath)\Interop\Windows\Winsock\Interop.setsockopt.cs">
-      <Link>Interop\Windows\Winsock\Interop.setsockopt.cs</Link>
     </Compile>
   </ItemGroup>
 

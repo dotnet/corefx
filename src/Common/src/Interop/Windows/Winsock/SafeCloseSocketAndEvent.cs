@@ -9,7 +9,6 @@ using System.Diagnostics;
 
 namespace System.Net.Sockets
 {
-#if !PROJECTN
     internal sealed class SafeCloseSocketAndEvent : SafeCloseSocket
     {
         internal SafeCloseSocketAndEvent() : base() { }
@@ -147,6 +146,5 @@ namespace System.Net.Sockets
             return UnsafeCommonNativeMethods.LocalFree(handle) == IntPtr.Zero;
         }
     }
-#endif //PROJECTN
 }
 
