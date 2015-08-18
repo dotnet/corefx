@@ -20,6 +20,8 @@ namespace System.Linq
         internal static Exception NoMatch() { return new InvalidOperationException(Strings.NoMatch); }
 
         internal static Exception NotSupported() { return new NotSupportedException(); }
+        
+        internal static Exception ArrayPlusOffTooSmall() { return new ArgumentException(Strings.ArrayPlusOffTooSmall); }
     }
 
     internal static class Strings
@@ -29,5 +31,6 @@ namespace System.Linq
         internal static String MoreThanOneMatch { get { return SR.MoreThanOneMatch; } }
         internal static String NoElements { get { return SR.NoElements; } }
         internal static String NoMatch { get { return SR.NoMatch; } }
+        internal static string ArrayPlusOffTooSmall { get { return SR.ArrayPlusOffTooSmall; } }
     }
 }

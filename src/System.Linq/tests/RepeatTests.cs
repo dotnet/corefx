@@ -101,5 +101,15 @@ namespace System.Linq.Tests
                 Assert.NotSame(enum1, enum2);
             }
         }
+
+        [Fact]
+        public void Repeat_Contains()
+        {
+            var repeatEnumerable = Enumerable.Repeat("test", 10);
+            Assert.False(repeatEnumerable.Contains("not test"));
+            Assert.True(repeatEnumerable.Contains("test"));
+            Assert.False(repeatEnumerable.Contains(null));
+            Assert.False(repeatEnumerable.Contains(""));
+        }
     }
 }

@@ -5,11 +5,76 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using Xunit;
+using Xunit.Extensions;
 
 namespace System.Linq.Tests
 {
     public class SelectTests
     {
+        private class ListWrapping<T> : IList<T>
+        {
+            private readonly List<T> _source;
+            
+            public ListWrapping(IEnumerable<T> source)
+            {
+                _source = new List<T>(source);
+            }
+            
+            public int IndexOf(T item)
+            {
+                return _source.IndexOf(item);
+            }
+            public void Insert(int index, T item)
+            {
+                _source.Insert(index, item);
+            }
+            public void RemoveAt(int index)
+            {
+                _source.RemoveAt(index);
+            }
+            public T this[int index]
+            {
+                get { return _source[index]; }
+                set { _source[index] = value; }
+            }
+            public void Add(T item)
+            {
+                _source.Add(item);
+            }
+            public void Clear()
+            {
+                _source.Clear();
+            }
+            public bool Contains(T item)
+            {
+                return _source.Contains(item);
+            }
+            public void CopyTo(T[] array, int arrayIndex)
+            {
+                _source.CopyTo(array, arrayIndex);
+            }
+            public bool Remove(T item)
+            {
+                return _source.Remove(item);
+            }
+            public int Count
+            {
+                get { return _source.Count; }
+            }
+            public bool IsReadOnly
+            {
+                get { return false; }
+            }
+            public IEnumerator<T> GetEnumerator()
+            {
+                return _source.GetEnumerator();
+            }
+            IEnumerator IEnumerable.GetEnumerator()
+            {
+                return GetEnumerator();
+            }
+        }
+
         #region Null arguments
 
         [Fact]
@@ -19,6 +84,7 @@ namespace System.Linq.Tests
             Func<int, int> selector = i => i + 1;
 
             Assert.Throws<ArgumentNullException>(() => source.Select(selector));
+            Assert.Throws<ArgumentNullException>(() => source.Select((x, i) => x + i));
         }
 
         [Fact]
@@ -26,8 +92,10 @@ namespace System.Linq.Tests
         {
             IEnumerable<int> source = Enumerable.Range(1, 10);
             Func<int, int> selector = null;
+            Func<int, int, int> indexSelector = null;
 
             Assert.Throws<ArgumentNullException>(() => source.Select(selector));
+            Assert.Throws<ArgumentNullException>(() => source.Select(indexSelector));
         }
 
         #endregion
@@ -143,6 +211,7 @@ namespace System.Linq.Tests
         {
             int[] source = new[] { 1, 2, 3, 4, 5 };
             Func<int, int> selector = i => i + 1;
+            Func<int, int, int> indexSelector = (x, i) => x + i;
 
             IEnumerable<int> query = source.Select(selector);
 
@@ -155,6 +224,26 @@ namespace System.Linq.Tests
             }
 
             Assert.Equal(source.Length, index);
+
+            query = source.Select(indexSelector);
+
+            index = 0;
+            foreach (var item in query)
+            {
+                var expected = indexSelector(source[index], index);
+                Assert.Equal(expected, item);
+                index++;
+            }
+
+            Assert.Equal(source.Length, index);
+            
+            index = 0;
+            foreach (var item in query.ToArray())
+            {
+                var expected = indexSelector(source[index], index);
+                Assert.Equal(expected, item);
+                index++;
+            }
         }
 
         [Fact]
@@ -162,6 +251,7 @@ namespace System.Linq.Tests
         {
             List<int> source = new List<int> { 1, 2, 3, 4, 5 };
             Func<int, int> selector = i => i + 1;
+            Func<int, int, int> indexSelector = (x, i) => x + i;
 
             IEnumerable<int> query = source.Select(selector);
 
@@ -174,6 +264,34 @@ namespace System.Linq.Tests
             }
 
             Assert.Equal(source.Count, index);
+            
+            index = 0;
+            foreach (var item in query.ToArray())
+            {
+                index++;
+                var expected = selector(index);
+                Assert.Equal(expected, item);
+            }
+
+            query = source.Select(indexSelector);
+
+            index = 0;
+            foreach (var item in query)
+            {
+                var expected = indexSelector(source[index], index);
+                Assert.Equal(expected, item);
+                index++;
+            }
+
+            Assert.Equal(source.Count, index);
+            
+            index = 0;
+            foreach (var item in query.ToArray())
+            {
+                var expected = indexSelector(source[index], index);
+                Assert.Equal(expected, item);
+                index++;
+            }
         }
 
         [Fact]
@@ -193,6 +311,14 @@ namespace System.Linq.Tests
             }
 
             Assert.Equal(source.Count, index);
+            
+            index = 0;
+            foreach (var item in query.ToArray())
+            {
+                index++;
+                var expected = selector(index);
+                Assert.Equal(expected, item);
+            }
         }
 
         [Fact]
@@ -212,6 +338,14 @@ namespace System.Linq.Tests
             }
 
             Assert.Equal(source.Count, index);
+            
+            index = 0;
+            foreach (var item in query.ToArray())
+            {
+                index++;
+                var expected = selector(index);
+                Assert.Equal(expected, item);
+            }
         }
 
         [Fact]
@@ -380,12 +514,19 @@ namespace System.Linq.Tests
             Assert.Equal(source.Count, index);
         }
 
+        private static IEnumerable<int> OneToFive()
+        {
+            for(int i = 1; i != 6; ++i)
+                yield return i;
+        }
+
         [Fact]
         public void SelectSelect_SourceIsIEnumerable_ReturnsExpectedValues()
         {
             int nbOfItems = 5;
-            IEnumerable<int> source = Enumerable.Range(1, 5);
+            IEnumerable<int> source = OneToFive();
             Func<int, int> selector = i => i + 1;
+            Func<int, int, int> indexSelector = (x, i) => x + i;
 
             IEnumerable<int> query = source.Select(selector).Select(selector);
 
@@ -395,6 +536,18 @@ namespace System.Linq.Tests
                 index++;
                 var expected = selector(selector(index));
                 Assert.Equal(expected, item);
+            }
+
+            Assert.Equal(nbOfItems, index);
+            
+            query = source.Select(selector).Select(indexSelector);
+
+            index = 0;
+            foreach (var item in query)
+            {
+                var expected = indexSelector(selector(index + 1), index);
+                Assert.Equal(expected, item);
+                index++;
             }
 
             Assert.Equal(nbOfItems, index);

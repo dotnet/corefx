@@ -94,6 +94,18 @@ namespace System.Linq.Tests
         }
 
         [Fact]
+        public void Range_Contains()
+        {
+            var rangeEnumerable = Enumerable.Range(5, 10);
+            for (int i = 0; i != 5; ++i)
+                Assert.False(rangeEnumerable.Contains(i));
+            for (int i = 5; i != 15; ++i)
+                Assert.True(rangeEnumerable.Contains(i));
+            for (int i = 15; i != 20; ++i)
+                Assert.False(rangeEnumerable.Contains(i));
+        }
+
+        [Fact]
         public void Range_ToInt32MaxValue()
         {
             int from = Int32.MaxValue - 3;
