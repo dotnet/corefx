@@ -3,15 +3,15 @@
 
 using System;
 using System.ComponentModel;
+using System.Net.Sockets;
 
-namespace System.Net.Sockets
+namespace System.Net.Internals
 {
-    public class InternalSocketException : SocketException
+    internal class InternalSocketException : SocketException
     {
-        internal InternalSocketException(SocketError errorCode, int platformError)
+        public InternalSocketException(SocketError errorCode, int platformError)
             : base((int)errorCode)
         {
-            HResult = platformError;
         }
     }
 }

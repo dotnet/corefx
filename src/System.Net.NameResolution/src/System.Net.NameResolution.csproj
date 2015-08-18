@@ -60,11 +60,13 @@
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetsWindows)' == 'true' ">
-    <Compile Include="RefactoringShims\SocketException.Windows.cs" />
     <Compile Include="System\Net\NameResolutionPal.Windows.cs" />
 
     <Compile Include="$(CommonPath)\System\Net\IntPtrHelper.cs">
       <Link>Common\System\Net\IntPtrHelper.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\Net\Internals\SocketException.Windows.cs">
+      <Link>Common\System\Net\Internals\SocketException.Windows.cs</Link>
     </Compile>
 
     <!-- Debug only --> 
@@ -83,7 +85,7 @@
     </Compile>
 
     <Compile Include="$(CommonPath)\System\Net\SocketProtocolSupportPal.Windows.cs">
-      <Link>System\Net\SocketProtocolSupportPal.Windows</Link>
+      <Link>Common\System\Net\SocketProtocolSupportPal.Windows</Link>
     </Compile>
 
     <!-- Interop -->
@@ -138,11 +140,13 @@
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetsUnix)' == 'true' ">
-    <Compile Include="RefactoringShims\SocketException.Unix.cs" />
     <Compile Include="System\Net\NameResolutionPal.Unix.cs" />
 
+    <Compile Include="$(CommonPath)\System\Net\Internals\SocketException.Unix.cs">
+      <Link>Common\System\Net\Internals\SocketException.Unix.cs</Link>
+    </Compile>
     <Compile Include="$(CommonPath)\System\Net\SocketProtocolSupportPal.Unix.cs">
-      <Link>System\Net\SocketProtocolSupportPal.Unix</Link>
+      <Link>Common\System\Net\SocketProtocolSupportPal.Unix</Link>
     </Compile>
 
     <Compile Include="$(CommonPath)\Interop\Unix\Interop.Errors.cs">

@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Diagnostics;
+using System.Net.Internals;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
 

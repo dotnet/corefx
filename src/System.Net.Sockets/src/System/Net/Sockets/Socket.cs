@@ -18,6 +18,7 @@ namespace System.Net.Sockets
     using System.Diagnostics;
     using System.Diagnostics.Contracts;
     using System.Threading.Tasks;
+    using Internals;
 
     /// <devdoc>
     /// <para>The <see cref='Sockets.Socket'/> class implements the Berkeley sockets
@@ -1389,10 +1390,10 @@ namespace System.Net.Sockets
             {
                 if (bytesTransferred > 0)
                 {
-                    NetworkingPerfCounters.Instance.Increment(NetworkingPerfCounterName.SocketBytesSent, bytesTransferred);
+                    SocketPerfCounter.Instance.Increment(SocketPerfCounterName.SocketBytesSent, bytesTransferred);
                     if (Transport == TransportType.Udp)
                     {
-                        NetworkingPerfCounters.Instance.Increment(NetworkingPerfCounterName.SocketDatagramsSent);
+                        SocketPerfCounter.Instance.Increment(SocketPerfCounterName.SocketDatagramsSent);
                     }
                 }
             }
@@ -1487,10 +1488,10 @@ namespace System.Net.Sockets
             {
                 if (bytesTransferred > 0)
                 {
-                    NetworkingPerfCounters.Instance.Increment(NetworkingPerfCounterName.SocketBytesSent, bytesTransferred);
+                    SocketPerfCounter.Instance.Increment(SocketPerfCounterName.SocketBytesSent, bytesTransferred);
                     if (Transport == TransportType.Udp)
                     {
-                        NetworkingPerfCounters.Instance.Increment(NetworkingPerfCounterName.SocketDatagramsSent);
+                        SocketPerfCounter.Instance.Increment(SocketPerfCounterName.SocketDatagramsSent);
                     }
                 }
             }
@@ -1597,10 +1598,10 @@ namespace System.Net.Sockets
             {
                 if (bytesTransferred > 0)
                 {
-                    NetworkingPerfCounters.Instance.Increment(NetworkingPerfCounterName.SocketBytesSent, bytesTransferred);
+                    SocketPerfCounter.Instance.Increment(SocketPerfCounterName.SocketBytesSent, bytesTransferred);
                     if (Transport == TransportType.Udp)
                     {
-                        NetworkingPerfCounters.Instance.Increment(NetworkingPerfCounterName.SocketDatagramsSent);
+                        SocketPerfCounter.Instance.Increment(SocketPerfCounterName.SocketDatagramsSent);
                     }
                 }
             }
@@ -1742,10 +1743,10 @@ namespace System.Net.Sockets
 
                 if (bytesTransferred > 0 && !peek)
                 {
-                    NetworkingPerfCounters.Instance.Increment(NetworkingPerfCounterName.SocketBytesReceived, bytesTransferred);
+                    SocketPerfCounter.Instance.Increment(SocketPerfCounterName.SocketBytesReceived, bytesTransferred);
                     if (Transport == TransportType.Udp)
                     {
-                        NetworkingPerfCounters.Instance.Increment(NetworkingPerfCounterName.SocketDatagramsReceived);
+                        SocketPerfCounter.Instance.Increment(SocketPerfCounterName.SocketDatagramsReceived);
                     }
                 }
             }
@@ -1877,10 +1878,10 @@ namespace System.Net.Sockets
 
                 if (bytesTransferred > 0 && !peek)
                 {
-                    NetworkingPerfCounters.Instance.Increment(NetworkingPerfCounterName.SocketBytesReceived, bytesTransferred);
+                    SocketPerfCounter.Instance.Increment(SocketPerfCounterName.SocketBytesReceived, bytesTransferred);
                     if (Transport == TransportType.Udp)
                     {
-                        NetworkingPerfCounters.Instance.Increment(NetworkingPerfCounterName.SocketDatagramsReceived);
+                        SocketPerfCounter.Instance.Increment(SocketPerfCounterName.SocketDatagramsReceived);
                     }
                 }
             }
@@ -2125,10 +2126,10 @@ namespace System.Net.Sockets
             {
                 if (bytesTransferred > 0)
                 {
-                    NetworkingPerfCounters.Instance.Increment(NetworkingPerfCounterName.SocketBytesReceived, bytesTransferred);
+                    SocketPerfCounter.Instance.Increment(SocketPerfCounterName.SocketBytesReceived, bytesTransferred);
                     if (Transport == TransportType.Udp)
                     {
-                        NetworkingPerfCounters.Instance.Increment(NetworkingPerfCounterName.SocketDatagramsReceived);
+                        SocketPerfCounter.Instance.Increment(SocketPerfCounterName.SocketDatagramsReceived);
                     }
                 }
             }
@@ -3082,7 +3083,7 @@ namespace System.Net.Sockets
                 //
                 // update our internal state after this socket error and throw
                 //
-                SocketException socketException = SocketExceptionShim.NewSocketException(castedAsyncResult.ErrorCode, remoteEndPoint);
+                SocketException socketException = SocketExceptionFactory.CreateSocketException(castedAsyncResult.ErrorCode, remoteEndPoint);
                 UpdateStatusAfterSocketError(socketException);
                 if (s_LoggingEnabled) Logging.Exception(Logging.Sockets, this, "EndConnect", socketException);
                 throw socketException;
@@ -3465,10 +3466,10 @@ namespace System.Net.Sockets
             {
                 if (bytesTransferred > 0)
                 {
-                    NetworkingPerfCounters.Instance.Increment(NetworkingPerfCounterName.SocketBytesSent, bytesTransferred);
+                    SocketPerfCounter.Instance.Increment(SocketPerfCounterName.SocketBytesSent, bytesTransferred);
                     if (Transport == TransportType.Udp)
                     {
-                        NetworkingPerfCounters.Instance.Increment(NetworkingPerfCounterName.SocketDatagramsSent);
+                        SocketPerfCounter.Instance.Increment(SocketPerfCounterName.SocketDatagramsSent);
                     }
                 }
             }
@@ -3682,10 +3683,10 @@ namespace System.Net.Sockets
             {
                 if (bytesTransferred > 0)
                 {
-                    NetworkingPerfCounters.Instance.Increment(NetworkingPerfCounterName.SocketBytesSent, bytesTransferred);
+                    SocketPerfCounter.Instance.Increment(SocketPerfCounterName.SocketBytesSent, bytesTransferred);
                     if (Transport == TransportType.Udp)
                     {
-                        NetworkingPerfCounters.Instance.Increment(NetworkingPerfCounterName.SocketDatagramsSent);
+                        SocketPerfCounter.Instance.Increment(SocketPerfCounterName.SocketDatagramsSent);
                     }
                 }
             }
@@ -4056,10 +4057,10 @@ namespace System.Net.Sockets
             {
                 if (bytesTransferred > 0)
                 {
-                    NetworkingPerfCounters.Instance.Increment(NetworkingPerfCounterName.SocketBytesReceived, bytesTransferred);
+                    SocketPerfCounter.Instance.Increment(SocketPerfCounterName.SocketBytesReceived, bytesTransferred);
                     if (Transport == TransportType.Udp)
                     {
-                        NetworkingPerfCounters.Instance.Increment(NetworkingPerfCounterName.SocketDatagramsReceived);
+                        SocketPerfCounter.Instance.Increment(SocketPerfCounterName.SocketDatagramsReceived);
                     }
                 }
             }
@@ -4285,10 +4286,10 @@ namespace System.Net.Sockets
             {
                 if (bytesTransferred > 0)
                 {
-                    NetworkingPerfCounters.Instance.Increment(NetworkingPerfCounterName.SocketBytesReceived, bytesTransferred);
+                    SocketPerfCounter.Instance.Increment(SocketPerfCounterName.SocketBytesReceived, bytesTransferred);
                     if (Transport == TransportType.Udp)
                     {
-                        NetworkingPerfCounters.Instance.Increment(NetworkingPerfCounterName.SocketDatagramsReceived);
+                        SocketPerfCounter.Instance.Increment(SocketPerfCounterName.SocketDatagramsReceived);
                     }
                 }
             }
@@ -4557,10 +4558,10 @@ namespace System.Net.Sockets
             {
                 if (bytesTransferred > 0)
                 {
-                    NetworkingPerfCounters.Instance.Increment(NetworkingPerfCounterName.SocketBytesReceived, bytesTransferred);
+                    SocketPerfCounter.Instance.Increment(SocketPerfCounterName.SocketBytesReceived, bytesTransferred);
                     if (Transport == TransportType.Udp)
                     {
-                        NetworkingPerfCounters.Instance.Increment(NetworkingPerfCounterName.SocketDatagramsReceived);
+                        SocketPerfCounter.Instance.Increment(SocketPerfCounterName.SocketDatagramsReceived);
                     }
                 }
             }
@@ -4922,7 +4923,7 @@ namespace System.Net.Sockets
             {
                 if (bytesTransferred > 0)
                 {
-                    NetworkingPerfCounters.Instance.Increment(NetworkingPerfCounterName.SocketBytesReceived, bytesTransferred);
+                    SocketPerfCounter.Instance.Increment(SocketPerfCounterName.SocketBytesReceived, bytesTransferred);
                 }
             }
 #endif
@@ -6209,7 +6210,7 @@ namespace System.Net.Sockets
                         Dns.GetHostName();
 
                         // Cache some settings locally.
-                        s_PerfCountersEnabled = NetworkingPerfCounters.Instance.Enabled;
+                        s_PerfCountersEnabled = SocketPerfCounter.Instance.Enabled;
                         s_Initialized = true;
                     }
                 }
@@ -6253,7 +6254,7 @@ namespace System.Net.Sockets
                 //
                 // update our internal state after this socket error and throw
                 //
-                SocketException socketException = SocketExceptionShim.NewSocketException(endPointSnapshot);
+                SocketException socketException = SocketExceptionFactory.CreateSocketException(endPointSnapshot);
                 UpdateStatusAfterSocketError(socketException);
                 if (s_LoggingEnabled) Logging.Exception(Logging.Sockets, this, "Connect", socketException);
                 throw socketException;
@@ -7348,10 +7349,10 @@ namespace System.Net.Sockets
             {
                 if (bytesTransferred > 0)
                 {
-                    NetworkingPerfCounters.Instance.Increment(NetworkingPerfCounterName.SocketBytesSent, bytesTransferred);
+                    SocketPerfCounter.Instance.Increment(SocketPerfCounterName.SocketBytesSent, bytesTransferred);
                     if (Transport == TransportType.Udp)
                     {
-                        NetworkingPerfCounters.Instance.Increment(NetworkingPerfCounterName.SocketDatagramsSent);
+                        SocketPerfCounter.Instance.Increment(SocketPerfCounterName.SocketDatagramsSent);
                     }
                 }
             }
@@ -7442,7 +7443,7 @@ namespace System.Net.Sockets
 #if !FEATURE_PAL // perfcounter
             if (s_PerfCountersEnabled)
             {
-                NetworkingPerfCounters.Instance.Increment(NetworkingPerfCounterName.SocketConnectionsEstablished);
+                SocketPerfCounter.Instance.Increment(SocketPerfCounterName.SocketConnectionsEstablished);
             }
 #endif //!FEATURE_PAL
         }
@@ -8988,18 +8989,18 @@ namespace System.Net.Sockets
 #if !FEATURE_PAL // perfcounter
             if (sendOp)
             {
-                NetworkingPerfCounters.Instance.Increment(NetworkingPerfCounterName.SocketBytesSent, size);
+                SocketPerfCounter.Instance.Increment(SocketPerfCounterName.SocketBytesSent, size);
                 if (_currentSocket.Transport == TransportType.Udp)
                 {
-                    NetworkingPerfCounters.Instance.Increment(NetworkingPerfCounterName.SocketDatagramsSent);
+                    SocketPerfCounter.Instance.Increment(SocketPerfCounterName.SocketDatagramsSent);
                 }
             }
             else
             {
-                NetworkingPerfCounters.Instance.Increment(NetworkingPerfCounterName.SocketBytesReceived, size);
+                SocketPerfCounter.Instance.Increment(SocketPerfCounterName.SocketBytesReceived, size);
                 if (_currentSocket.Transport == TransportType.Udp)
                 {
-                    NetworkingPerfCounters.Instance.Increment(NetworkingPerfCounterName.SocketDatagramsReceived);
+                    SocketPerfCounter.Instance.Increment(SocketPerfCounterName.SocketDatagramsReceived);
                 }
             }
 #endif

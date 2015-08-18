@@ -116,8 +116,8 @@
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetsUnix)' == 'true' ">
-    <Compile Include="..\..\src\RefactoringShims\SocketException.Unix.cs">
-      <Link>ProductionCode\RefactoringShims\SocketException.Unix.cs</Link>
+    <Compile Include="$(CommonPath)\System\Net\Internals\SocketException.Unix.cs">
+      <Link>ProductionCode\Common\System\Net\Internals\SocketException.Unix.cs</Link>
     </Compile>
     <Compile Include="..\..\src\System\Net\NameResolutionPal.Unix.cs">
       <Link>ProductionCode\System\Net\NameResolutionPal.Unix.cs</Link>

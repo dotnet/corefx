@@ -39,7 +39,7 @@ namespace NCLTest.Sockets
         }
 
         [Fact]
-        public void BeginSend_Success()
+        public void BeginSend_AsyncOperationCompletes_Success()
         {
             UdpClient udpClient = new UdpClient();
             byte[] sendBytes = new byte[1];
