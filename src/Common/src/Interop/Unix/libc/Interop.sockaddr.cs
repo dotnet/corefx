@@ -41,7 +41,7 @@ internal static partial class Interop
             public sa_family_t sin_family; // Address family: AF_INET
             public in_port_t sin_port;     // Port in network byte order
             public in_addr sin_addr;       // Internet address
-            private ulong padding;         // 8 bytes of padding
+            private ulong _padding;         // 8 bytes of padding
         }
 
         public unsafe struct in6_addr

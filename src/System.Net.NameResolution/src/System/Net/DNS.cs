@@ -23,7 +23,7 @@ namespace System.Net
         {
             if (Logging.On) Logging.Enter(Logging.Sockets, "DNS", "GetHostByName", hostName);
             IPHostEntry ipHostEntry = null;
-            
+
             GlobalLog.Print("Dns.GetHostByName: " + hostName);
             NameResolutionPal.EnsureSocketsAreInitialized();
 
@@ -50,7 +50,7 @@ namespace System.Net
             //               decision). This is done to minimize the number of
             //               possible tests that are needed.
             //
-            if (SocketProtocolSupportPal.OSSupportsIPv6|| includeIPv6)
+            if (SocketProtocolSupportPal.OSSupportsIPv6 || includeIPv6)
             {
                 //
                 // IPv6 enabled: use getaddrinfo() to obtain DNS information.

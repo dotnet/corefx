@@ -52,7 +52,7 @@ namespace System.Net
                 return CreateHostEntry(&hostent);
             }
 
-            for (;;)
+            for (; ;)
             {
                 bufferSize *= 2;
                 fixed (byte* heapBuffer = new byte[bufferSize])
@@ -81,7 +81,7 @@ namespace System.Net
                 return CreateHostEntry(&hostent);
             }
 
-            for (;;)
+            for (; ;)
             {
                 bufferSize *= 2;
                 fixed (byte* heapBuffer = new byte[bufferSize])
