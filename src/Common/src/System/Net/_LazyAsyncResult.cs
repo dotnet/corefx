@@ -421,7 +421,12 @@ namespace System.Net
                     if (threadContext.m_NestedIOCount >= c_ForceAsyncCount)
                     {
                         GlobalLog.Print("LazyAsyncResult::Complete *** OFFLOADED the user callback ***");
-                        Task.Factory.StartNew(WorkerThreadComplete, null);
+                        Task.Factory.StartNew(
+                            s => WorkerThreadComplete(s),
+                            null, 
+                            CancellationToken.None,
+                            TaskCreationOptions.DenyChildAttach,
+                            TaskScheduler.Default);
                         offloaded = true;
                     }
                     else

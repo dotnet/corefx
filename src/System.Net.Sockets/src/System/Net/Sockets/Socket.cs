@@ -4658,7 +4658,7 @@ namespace System.Net.Sockets
                     // If we need to loop, offload to a different thread and re-throw for debugging
                     if (acceptNeeded)
                     {
-                        Task.Factory.StartNew(CompleteAcceptResults);
+                        Task.Factory.StartNew(() => CompleteAcceptResults());
                     }
 
                     throw;
