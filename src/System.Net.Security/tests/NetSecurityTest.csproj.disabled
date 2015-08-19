@@ -1,0 +1,38 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), CLRTest.Common.props))\CLRTest.Common.props" />
+  <PropertyGroup>
+    <CLRTestOwner>crispop</CLRTestOwner>
+    <CLRTestKind>BuildAndRun</CLRTestKind>
+    <CLRTestSuite>Weekly</CLRTestSuite>
+    <CLRTestGeneration>ByClass</CLRTestGeneration>
+    <ProjectGuid>{A55A2B9A-830F-4330-A0E7-02A9FB30ABD2}</ProjectGuid>
+    <CLRTestRequires>NCLClientCertificateCapability</CLRTestRequires>
+  </PropertyGroup>
+  <ItemGroup>
+    <CLRTestContractReference Include="System.Net.Primitives">
+      <Version>4.0.10.0</Version>
+    </CLRTestContractReference>
+    <CLRTestContractReference Include="System.Net.Security" />
+    <CLRTestContractReference Include="System.Net.Sockets">
+      <Version>4.0.10.0</Version>
+    </CLRTestContractReference>
+    <CLRTestContractReference Include="System.Security.Cryptography.X509Certificates" />
+    <CLRTestContractReference Include="System.Runtime.InteropServices" />
+    <CLRTestContractReference Include="Microsoft.Win32.Primitives" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="TestConfiguration.cs" />
+    <Compile Include="ClientAsyncAuthenticateTest.cs" />
+    <Compile Include="ClientDefaultEncryptionTest.cs" />
+    <Compile Include="ParameterValidationTest.cs" />
+    <Compile Include="ServerAllowNoEncryptionTest.cs" />
+    <Compile Include="ServerNoEncryptionTest.cs" />
+    <Compile Include="ServerRequireEncryptionTest.cs" />
+    <Compile Include="TransportContextTest.cs" />
+  </ItemGroup>
+  <Import Project="$(CLRTestRoot)\CLRTest.targets" />
+  <Import Project="$(CLRTestStoreRoot)\FX\Conformance\Common\CoreFXTestLib\CoreFXTestLib.cslib" />
+  <Import Project="$(CLRTestStoreRoot)\FX\Conformance\System.Net.Common\System.Net.Common.cslib" />
+  <Import Project="$(CLRTestStoreRoot)\FX\Conformance\System.Net.Common\DummyTcpServer\System.Net.Common.DummyTcpServer.cslib" />
+</Project>
