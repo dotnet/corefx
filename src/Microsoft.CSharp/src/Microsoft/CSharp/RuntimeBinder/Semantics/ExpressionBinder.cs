@@ -2452,15 +2452,15 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     case FUNDTYPE.FT_I8:
                         return true;
                     case FUNDTYPE.FT_U1:
-                        if (value >= 0 && value <= 0xff)
+                        if ((ulong)value <= (ulong)0xff)
                             return true;
                         break;
                     case FUNDTYPE.FT_U2:
-                        if (value >= 0 && value <= 0xffff)
+                        if ((ulong)value <= (ulong)0xffff)
                             return true;
                         break;
                     case FUNDTYPE.FT_U4:
-                        if (value >= 0 && value <= I64(0xffffffff))
+                        if ((ulong)value <= (ulong)I64(0xffffffff))
                             return true;
                         break;
                     case FUNDTYPE.FT_U8:

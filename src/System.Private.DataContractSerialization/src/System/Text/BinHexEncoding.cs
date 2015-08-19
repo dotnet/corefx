@@ -106,7 +106,7 @@ namespace System.Text
 #endif
         public override int GetMaxCharCount(int byteCount)
         {
-            if (byteCount < 0 || byteCount > int.MaxValue / 2)
+            if ((uint)byteCount > (uint)(int.MaxValue / 2))
                 throw new ArgumentOutOfRangeException("byteCount", SR.Format(SR.ValueMustBeInRange, 0, int.MaxValue / 2));
             return byteCount * 2;
         }

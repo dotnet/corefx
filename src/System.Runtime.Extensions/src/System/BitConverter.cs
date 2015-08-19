@@ -344,7 +344,7 @@ namespace System
         {
             if (value == null)
                 ThrowValueArgumentNull();
-            if (startIndex < 0 || startIndex >= value.Length && startIndex > 0)
+            if ((uint)startIndex >= (uint)value.Length && startIndex != 0)
                 ThrowStartIndexArgumentOutOfRange();
             if (length < 0)
                 throw new ArgumentOutOfRangeException("length", SR.ArgumentOutOfRange_GenericPositive);

@@ -22,7 +22,7 @@ namespace System.Text.Unicode
         {
             // Parameter checking: the first code point and last code point must
             // lie within the BMP. See http://unicode.org/faq/blocks_ranges.html for more info.
-            if (firstCodePoint < 0 || firstCodePoint > 0xFFFF)
+            if ((firstCodePoint & ~0xFFFF) != 0)
             {
                 throw new ArgumentOutOfRangeException("firstCodePoint");
             }

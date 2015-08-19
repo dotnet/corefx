@@ -64,7 +64,7 @@ namespace System.Net
         /// </devdoc>
         public IPAddress(long newAddress)
         {
-            if (newAddress < 0 || newAddress > 0x00000000FFFFFFFF)
+            if ((newAddress & unchecked((long)0xFFFFFFFF00000000)) != 0)
             {
                 throw new ArgumentOutOfRangeException("newAddress");
             }
@@ -97,7 +97,7 @@ namespace System.Net
 
             // Consider: Since scope is only valid for link-local and site-local
             //           addresses we could implement some more robust checking here
-            if (scopeid < 0 || scopeid > 0x00000000FFFFFFFF)
+            if ((scopeid & unchecked((long)0xFFFFFFFF00000000)) != 0)
             {
                 throw new ArgumentOutOfRangeException("scopeid");
             }
@@ -232,7 +232,7 @@ namespace System.Net
 
                 // Consider: Since scope is only valid for link-local and site-local
                 //           addresses we could implement some more robust checking here
-                if (value < 0 || value > 0x00000000FFFFFFFF)
+                if ((value & unchecked((long)0xFFFFFFFF00000000)) != 0)
                 {
                     throw new ArgumentOutOfRangeException("value");
                 }

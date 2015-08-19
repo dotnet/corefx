@@ -32,7 +32,7 @@ namespace System.Linq.Expressions.Interpreter
             _offset = offset;
 
             var cache = Cache;
-            if (cache != null && offset >= 0 && offset < cache.Length)
+            if (cache != null && (uint)offset < (uint)cache.Length)
             {
                 return cache[offset] ?? (cache[offset] = this);
             }

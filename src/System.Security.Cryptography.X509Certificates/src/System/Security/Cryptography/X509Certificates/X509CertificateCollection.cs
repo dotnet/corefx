@@ -72,14 +72,14 @@ namespace System.Security.Cryptography.X509Certificates
         {
             get
             {
-                if (index < 0 || index >= Count)
+                if ((uint)index >= (uint)Count)
                     throw new ArgumentOutOfRangeException("index", SR.ArgumentOutOfRange_Index);
 
                 return _list[index];
             }
             set
             {
-                if (index < 0 || index >= Count)
+                if ((uint)index >= (uint)Count)
                     throw new ArgumentOutOfRangeException("index", SR.ArgumentOutOfRange_Index);
                 if (value == null)
                     throw new ArgumentNullException("value");
@@ -188,7 +188,7 @@ namespace System.Security.Cryptography.X509Certificates
 
         public void RemoveAt(int index)
         {
-            if (index < 0 || index >= Count)
+            if ((uint)index >= (uint)Count)
                 throw new ArgumentOutOfRangeException("index", SR.ArgumentOutOfRange_Index);
             _list.RemoveAt(index);
         }

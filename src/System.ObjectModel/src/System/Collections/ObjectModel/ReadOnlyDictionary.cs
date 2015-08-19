@@ -276,7 +276,7 @@ namespace System.Collections.ObjectModel
                 throw new ArgumentException(SR.Arg_NonZeroLowerBound);
             }
 
-            if (index < 0 || index > array.Length)
+            if ((uint)index > (uint)array.Length)
             {
                 throw new ArgumentOutOfRangeException("index", SR.ArgumentOutOfRange_NeedNonNegNum);
             }

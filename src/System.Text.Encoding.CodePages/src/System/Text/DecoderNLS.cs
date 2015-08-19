@@ -147,7 +147,7 @@ namespace System.Text
             if (bytes.Length - byteIndex < byteCount)
                 throw new ArgumentOutOfRangeException("bytes", SR.ArgumentOutOfRange_IndexCountBuffer);
 
-            if (charIndex < 0 || charIndex > chars.Length)
+            if ((uint)charIndex > (uint)chars.Length)
                 throw new ArgumentOutOfRangeException("charIndex", SR.ArgumentOutOfRange_Index);
 
             Contract.EndContractBlock();

@@ -188,7 +188,7 @@ namespace System.Text.RegularExpressions
         {
             if (count < -1)
                 throw new ArgumentOutOfRangeException("count", SR.CountTooSmall);
-            if (startat < 0 || startat > input.Length)
+            if ((uint)startat > (uint)input.Length)
                 throw new ArgumentOutOfRangeException("startat", SR.BeginIndexNotNegative);
 
             if (count == 0)
@@ -270,7 +270,7 @@ namespace System.Text.RegularExpressions
                 throw new ArgumentNullException("evaluator");
             if (count < -1)
                 throw new ArgumentOutOfRangeException("count", SR.CountTooSmall);
-            if (startat < 0 || startat > input.Length)
+            if ((uint)startat > (uint)input.Length)
                 throw new ArgumentOutOfRangeException("startat", SR.BeginIndexNotNegative);
 
             if (count == 0)
@@ -349,7 +349,7 @@ namespace System.Text.RegularExpressions
         {
             if (count < 0)
                 throw new ArgumentOutOfRangeException("count", SR.CountTooSmall);
-            if (startat < 0 || startat > input.Length)
+            if ((uint)startat > (uint)input.Length)
                 throw new ArgumentOutOfRangeException("startat", SR.BeginIndexNotNegative);
 
             String[] result;

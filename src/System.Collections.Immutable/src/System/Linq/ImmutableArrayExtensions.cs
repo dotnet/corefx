@@ -336,7 +336,7 @@ namespace System.Linq
         [Pure]
         public static T ElementAtOrDefault<T>(this ImmutableArray<T> immutableArray, int index)
         {
-            if (index < 0 || index >= immutableArray.Length)
+            if ((uint)index >= (uint)immutableArray.Length)
             {
                 return default(T);
             }

@@ -117,7 +117,7 @@ namespace System.Text
             if (s.Length - charIndex < charCount)
                 throw new ArgumentOutOfRangeException("s", SR.ArgumentOutOfRange_IndexCount);
 
-            if (byteIndex < 0 || byteIndex > bytes.Length)
+            if ((uint)byteIndex > (uint)bytes.Length)
                 throw new ArgumentOutOfRangeException("byteIndex", SR.ArgumentOutOfRange_Index);
             Contract.EndContractBlock();
 
@@ -159,7 +159,7 @@ namespace System.Text
             if (chars.Length - charIndex < charCount)
                 throw new ArgumentOutOfRangeException("chars", SR.ArgumentOutOfRange_IndexCountBuffer);
 
-            if (byteIndex < 0 || byteIndex > bytes.Length)
+            if ((uint)byteIndex > (uint)bytes.Length)
                 throw new ArgumentOutOfRangeException("byteIndex", SR.ArgumentOutOfRange_Index);
             Contract.EndContractBlock();
 
@@ -259,7 +259,7 @@ namespace System.Text
             if (bytes.Length - byteIndex < byteCount)
                 throw new ArgumentOutOfRangeException("bytes", SR.ArgumentOutOfRange_IndexCountBuffer);
 
-            if (charIndex < 0 || charIndex > chars.Length)
+            if ((uint)charIndex > (uint)chars.Length)
                 throw new ArgumentOutOfRangeException("charIndex", SR.ArgumentOutOfRange_Index);
             Contract.EndContractBlock();
 

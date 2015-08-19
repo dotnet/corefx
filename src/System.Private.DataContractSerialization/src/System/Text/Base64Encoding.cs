@@ -282,7 +282,7 @@ namespace System.Text
         }
         public override int GetMaxCharCount(int byteCount)
         {
-            if (byteCount < 0 || byteCount > int.MaxValue / 4 * 3 - 2)
+            if ((uint)byteCount > (uint)(int.MaxValue / 4 * 3 - 2))
                 throw System.Runtime.Serialization.DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentOutOfRangeException("byteCount", SR.Format(SR.ValueMustBeInRange, 0, int.MaxValue / 4 * 3 - 2)));
             return ((byteCount + 2) / 3) * 4;
         }

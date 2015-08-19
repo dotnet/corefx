@@ -405,7 +405,7 @@ namespace System.Collections
         // 
         public virtual Object GetByIndex(int index)
         {
-            if (index < 0 || index >= Count)
+            if ((uint)index >= (uint)Count)
                 throw new ArgumentOutOfRangeException("index", SR.ArgumentOutOfRange_Index);
             Contract.EndContractBlock();
             return _values[index];
@@ -435,7 +435,7 @@ namespace System.Collections
         // 
         public virtual Object GetKey(int index)
         {
-            if (index < 0 || index >= Count) throw new ArgumentOutOfRangeException("index", SR.ArgumentOutOfRange_Index);
+            if ((uint)index >= (uint)Count) throw new ArgumentOutOfRangeException("index", SR.ArgumentOutOfRange_Index);
             Contract.EndContractBlock();
             return _keys[index];
         }
@@ -548,7 +548,7 @@ namespace System.Collections
         // 
         public virtual void RemoveAt(int index)
         {
-            if (index < 0 || index >= Count) throw new ArgumentOutOfRangeException("index", SR.ArgumentOutOfRange_Index);
+            if ((uint)index >= (uint)Count) throw new ArgumentOutOfRangeException("index", SR.ArgumentOutOfRange_Index);
             Contract.EndContractBlock();
             _size--;
             if (index < _size)
@@ -577,7 +577,7 @@ namespace System.Collections
         // 
         public virtual void SetByIndex(int index, Object value)
         {
-            if (index < 0 || index >= Count) throw new ArgumentOutOfRangeException("index", SR.ArgumentOutOfRange_Index);
+            if ((uint)index >= (uint)Count) throw new ArgumentOutOfRangeException("index", SR.ArgumentOutOfRange_Index);
             Contract.EndContractBlock();
             _values[index] = value;
             _version++;

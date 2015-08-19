@@ -776,7 +776,7 @@ namespace System.Numerics
                 // Match the JIT's exception type here. For perf, a NullReference is thrown instead of an ArgumentNull.
                 throw new NullReferenceException(SR.Arg_NullArgumentNullRef);
             }
-            if (startIndex < 0 || startIndex >= destination.Length)
+            if ((uint)startIndex >= (uint)destination.Length)
             {
                 throw new ArgumentOutOfRangeException(SR.Format(SR.Arg_ArgumentOutOfRangeException, startIndex));
             }

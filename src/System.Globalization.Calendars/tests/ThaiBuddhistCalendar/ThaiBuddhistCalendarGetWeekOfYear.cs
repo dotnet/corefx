@@ -241,7 +241,7 @@ namespace System.Globalization.CalendarsTests
         // integer between 1 and 53.
         private int getWeekOfYear(DateTime time, CalendarWeekRule rule, DayOfWeek firstDayOfWeek)
         {
-            if ((int)firstDayOfWeek < 0 || (int)firstDayOfWeek > 6)
+            if ((uint)firstDayOfWeek > 6U)
             {
                 throw new ArgumentOutOfRangeException();
             }

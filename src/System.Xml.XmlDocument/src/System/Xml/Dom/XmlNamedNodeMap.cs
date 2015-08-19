@@ -66,7 +66,7 @@ namespace System.Xml
         // Retrieves the node at the specified index in this XmlNamedNodeMap.
         public virtual XmlNode Item(int index)
         {
-            if (index < 0 || index >= nodes.Count)
+            if ((uint)index >= (uint)nodes.Count)
                 return null;
             try
             {

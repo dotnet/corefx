@@ -635,7 +635,7 @@ namespace System.Net
             {
                 throw new ArgumentNullException("bytes");
             }
-            if (offset < 0 || offset > bytes.Length)
+            if ((uint)offset > (uint)bytes.Length)
             {
                 throw new ArgumentOutOfRangeException("offset");
             }

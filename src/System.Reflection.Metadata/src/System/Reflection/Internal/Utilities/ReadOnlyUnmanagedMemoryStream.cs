@@ -113,7 +113,7 @@ namespace System.Reflection.Internal
                 throw new ArgumentOutOfRangeException("offset");
             }
 
-            if (target < 0 || target >= _length)
+            if ((uint)target >= (uint)_length)
             {
                 throw new ArgumentOutOfRangeException("offset");
             }

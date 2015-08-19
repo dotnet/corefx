@@ -129,7 +129,7 @@ namespace System.Resources
                     count -= n;
                 }
                 dataOffset = _store.ReadInt32();
-                if (dataOffset < 0 || dataOffset >= _store.BaseStream.Length - _dataSectionOffset)
+                if ((uint)dataOffset >= (uint)(_store.BaseStream.Length - _dataSectionOffset))
                 {
                     throw new FormatException(SR.BadImageFormat_ResourcesDataInvalidOffset + " offset :" + dataOffset);
                 }
@@ -147,7 +147,7 @@ namespace System.Resources
                 SkipString();
 
                 int dataPos = _store.ReadInt32();
-                if (dataPos < 0 || dataPos >= _store.BaseStream.Length - _dataSectionOffset)
+                if ((uint)dataPos >= (uint)(_store.BaseStream.Length - _dataSectionOffset))
                 {
                     throw new FormatException(SR.BadImageFormat_ResourcesDataInvalidOffset + dataPos);
                 }
@@ -344,7 +344,7 @@ namespace System.Resources
        
         private Type FindType(int typeIndex)
         {
-            if (typeIndex < 0 || typeIndex >= _typeTable.Length)
+            if ((uint)typeIndex >= (uint)_typeTable.Length)
             {
                 throw new BadImageFormatException(SR.BadImageFormat_InvalidType);
             }

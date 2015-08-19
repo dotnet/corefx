@@ -353,7 +353,7 @@ namespace System.Text.RegularExpressions
         {
             if (_capslist == null)
             {
-                if (i >= 0 && i < _capsize)
+                if ((uint)i < (uint)_capsize)
                     return i.ToString(CultureInfo.InvariantCulture);
 
                 return String.Empty;
@@ -366,7 +366,7 @@ namespace System.Text.RegularExpressions
                         return String.Empty;
                 }
 
-                if (i >= 0 && i < _capslist.Length)
+                if ((uint)i < (uint)_capslist.Length)
                     return _capslist[i];
 
                 return String.Empty;
@@ -413,7 +413,7 @@ namespace System.Text.RegularExpressions
             }
 
             // return int if it's in range
-            if (result >= 0 && result < _capsize)
+            if ((uint)result < (uint)_capsize)
                 return result;
 
             return -1;
@@ -825,10 +825,10 @@ namespace System.Text.RegularExpressions
             Match match;
             RegexRunner runner = null;
 
-            if (startat < 0 || startat > input.Length)
+            if ((uint)startat > (uint)input.Length)
                 throw new ArgumentOutOfRangeException("start", SR.BeginIndexNotNegative);
 
-            if (length < 0 || length > input.Length)
+            if ((uint)length > (uint)input.Length)
                 throw new ArgumentOutOfRangeException("length", SR.LengthNotNegative);
 
             // There may be a cached runner; grab ownership of it if we can.

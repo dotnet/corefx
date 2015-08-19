@@ -118,7 +118,7 @@ namespace System.Xml
                 }
 #endif
 
-                if (value < 0 || value > _length)
+                if ((uint)value > (uint)_length)
                 {
                     throw new ArgumentOutOfRangeException("value");
                 }

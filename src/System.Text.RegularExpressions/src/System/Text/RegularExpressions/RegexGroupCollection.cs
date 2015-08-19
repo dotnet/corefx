@@ -150,7 +150,7 @@ namespace System.Text.RegularExpressions
             {
                 get
                 {
-                    if (_index < 0 || _index >= _collection.Count)
+                    if ((uint)_index >= (uint)_collection.Count)
                         throw new InvalidOperationException(SR.EnumNotStarted);
 
                     return _collection[_index];

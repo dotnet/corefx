@@ -38,7 +38,7 @@ namespace System.Security.Cryptography
                 throw new ArgumentNullException("buffer");
             if (offset < 0)
                 throw new ArgumentOutOfRangeException("offset", SR.ArgumentOutOfRange_NeedNonNegNum);
-            if (count < 0 || (count > buffer.Length))
+            if ((uint)count > (uint)buffer.Length)
                 throw new ArgumentException(SR.Argument_InvalidValue);
             if ((buffer.Length - count) < offset)
                 throw new ArgumentException(SR.Argument_InvalidOffLen);

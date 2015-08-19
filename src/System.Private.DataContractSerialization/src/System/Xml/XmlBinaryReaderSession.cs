@@ -58,7 +58,7 @@ namespace System.Xml
 
         public bool TryLookup(int key, out XmlDictionaryString result)
         {
-            if (_strings != null && key >= 0 && key < _strings.Length)
+            if (_strings != null && (uint)key < (uint)_strings.Length)
             {
                 result = _strings[key];
                 return result != null;

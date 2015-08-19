@@ -186,7 +186,7 @@ namespace System.Collections.Generic
                 throw new ArgumentNullException("array");
             }
 
-            if (index < 0 || index > array.Length)
+            if ((uint)index > (uint)array.Length)
             {
                 throw new ArgumentOutOfRangeException("index", SR.Format(SR.IndexOutOfRange, index));
             }

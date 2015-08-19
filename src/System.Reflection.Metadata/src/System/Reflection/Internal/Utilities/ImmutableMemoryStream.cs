@@ -51,7 +51,7 @@ namespace System.Reflection.Internal
             }
             set
             {
-                if (value < 0 || value >= _array.Length)
+                if ((uint)value >= (uint)_array.Length)
                 {
                     throw new ArgumentOutOfRangeException("value");
                 }
@@ -100,7 +100,7 @@ namespace System.Reflection.Internal
                 throw new ArgumentOutOfRangeException("offset");
             }
 
-            if (target < 0 || target >= _array.Length)
+            if ((uint)target >= (uint)_array.Length)
             {
                 throw new ArgumentOutOfRangeException("offset");
             }

@@ -126,7 +126,7 @@ namespace System.Collections.Generic
                 throw new ArgumentNullException("array");
             }
 
-            if (arrayIndex < 0 || arrayIndex > array.Length)
+            if ((uint)arrayIndex > (uint)array.Length)
             {
                 throw new ArgumentOutOfRangeException("arrayIndex", SR.ArgumentOutOfRange_Index);
             }
@@ -167,7 +167,7 @@ namespace System.Collections.Generic
             }
 
             int arrayLen = array.Length;
-            if (index < 0 || index > arrayLen)
+            if ((uint)index > (uint)arrayLen)
             {
                 throw new ArgumentOutOfRangeException("index", SR.ArgumentOutOfRange_Index);
             }

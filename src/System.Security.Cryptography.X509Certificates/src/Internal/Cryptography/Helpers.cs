@@ -79,7 +79,7 @@ namespace Internal.Cryptography
         private static char NibbleToHex(byte b)
         {
             Debug.Assert(b >= 0 && b <= 15);
-            return (char)(b >= 0 && b <= 9 ? 
+            return (char)(b <= 9 ? 
                 '0' + b : 
                 'A' + (b - 10));
         }

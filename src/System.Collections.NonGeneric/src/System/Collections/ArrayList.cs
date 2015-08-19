@@ -185,13 +185,13 @@ namespace System.Collections
         {
             get
             {
-                if (index < 0 || index >= _size) throw new ArgumentOutOfRangeException("index", SR.ArgumentOutOfRange_Index);
+                if ((uint)index >= (uint)_size) throw new ArgumentOutOfRangeException("index", SR.ArgumentOutOfRange_Index);
                 Contract.EndContractBlock();
                 return _items[index];
             }
             set
             {
-                if (index < 0 || index >= _size) throw new ArgumentOutOfRangeException("index", SR.ArgumentOutOfRange_Index);
+                if ((uint)index >= (uint)_size) throw new ArgumentOutOfRangeException("index", SR.ArgumentOutOfRange_Index);
                 Contract.EndContractBlock();
                 _items[index] = value;
                 _version++;
@@ -496,7 +496,7 @@ namespace System.Collections
         public virtual void Insert(int index, Object value)
         {
             // Note that insertions at the end are legal.
-            if (index < 0 || index > _size) throw new ArgumentOutOfRangeException("index", SR.ArgumentOutOfRange_ArrayListInsert);
+            if ((uint)index > (uint)_size) throw new ArgumentOutOfRangeException("index", SR.ArgumentOutOfRange_ArrayListInsert);
             //Contract.Ensures(Count == Contract.OldValue(Count) + 1);
             Contract.EndContractBlock();
 
@@ -519,7 +519,7 @@ namespace System.Collections
         {
             if (c == null)
                 throw new ArgumentNullException("c", SR.ArgumentNull_Collection);
-            if (index < 0 || index > _size) throw new ArgumentOutOfRangeException("index", SR.ArgumentOutOfRange_Index);
+            if ((uint)index > (uint)_size) throw new ArgumentOutOfRangeException("index", SR.ArgumentOutOfRange_Index);
             //Contract.Ensures(Count == Contract.OldValue(Count) + c.Count);
             Contract.EndContractBlock();
 
@@ -641,7 +641,7 @@ namespace System.Collections
         // 
         public virtual void RemoveAt(int index)
         {
-            if (index < 0 || index >= _size) throw new ArgumentOutOfRangeException("index", SR.ArgumentOutOfRange_Index);
+            if ((uint)index >= (uint)_size) throw new ArgumentOutOfRangeException("index", SR.ArgumentOutOfRange_Index);
             Contract.Ensures(Count >= 0);
             //Contract.Ensures(Count == Contract.OldValue(Count) - 1);
             Contract.EndContractBlock();
@@ -1039,7 +1039,7 @@ namespace System.Collections
 
             public override int IndexOf(Object value, int startIndex, int count)
             {
-                if (startIndex < 0 || startIndex > Count) throw new ArgumentOutOfRangeException("startIndex", SR.ArgumentOutOfRange_Index);
+                if ((uint)startIndex > (uint)Count) throw new ArgumentOutOfRangeException("startIndex", SR.ArgumentOutOfRange_Index);
                 if (count < 0 || startIndex > Count - count) throw new ArgumentOutOfRangeException("count", SR.ArgumentOutOfRange_Count);
                 Contract.EndContractBlock();
 
@@ -1070,7 +1070,7 @@ namespace System.Collections
             {
                 if (c == null)
                     throw new ArgumentNullException("c", SR.ArgumentNull_Collection);
-                if (index < 0 || index > Count) throw new ArgumentOutOfRangeException("index", SR.ArgumentOutOfRange_Index);
+                if ((uint)index > (uint)Count) throw new ArgumentOutOfRangeException("index", SR.ArgumentOutOfRange_Index);
                 Contract.EndContractBlock();
 
                 if (c.Count > 0)
@@ -1112,8 +1112,8 @@ namespace System.Collections
                 if (_list.Count == 0)
                     return -1;
 
-                if (startIndex < 0 || startIndex >= _list.Count) throw new ArgumentOutOfRangeException("startIndex", SR.ArgumentOutOfRange_Index);
-                if (count < 0 || count > startIndex + 1) throw new ArgumentOutOfRangeException("count", SR.ArgumentOutOfRange_Count);
+                if ((uint)startIndex >= (uint)_list.Count) throw new ArgumentOutOfRangeException("startIndex", SR.ArgumentOutOfRange_Index);
+                if ((uint)count > (uint)(startIndex + 1)) throw new ArgumentOutOfRangeException("count", SR.ArgumentOutOfRange_Count);
 
                 int endIndex = startIndex - count + 1;
                 if (value == null)
@@ -2732,7 +2732,7 @@ namespace System.Collections
 
             public override int IndexOf(Object value, int startIndex, int count)
             {
-                if (startIndex < 0 || startIndex > _baseSize)
+                if ((uint)startIndex > (uint)_baseSize)
                     throw new ArgumentOutOfRangeException("startIndex", SR.ArgumentOutOfRange_Index);
 
                 if (count < 0 || (startIndex > _baseSize - count))
@@ -2747,7 +2747,7 @@ namespace System.Collections
 
             public override void Insert(int index, Object value)
             {
-                if (index < 0 || index > _baseSize) throw new ArgumentOutOfRangeException("index", SR.ArgumentOutOfRange_Index);
+                if ((uint)index > (uint)_baseSize) throw new ArgumentOutOfRangeException("index", SR.ArgumentOutOfRange_Index);
                 Contract.EndContractBlock();
 
                 InternalUpdateRange();
@@ -2758,7 +2758,7 @@ namespace System.Collections
 
             public override void InsertRange(int index, ICollection c)
             {
-                if (index < 0 || index > _baseSize) throw new ArgumentOutOfRangeException("index", SR.ArgumentOutOfRange_Index);
+                if ((uint)index > (uint)_baseSize) throw new ArgumentOutOfRangeException("index", SR.ArgumentOutOfRange_Index);
                 if (c == null)
                 {
                     throw new ArgumentNullException("c");
@@ -2810,7 +2810,7 @@ namespace System.Collections
 
             public override void RemoveAt(int index)
             {
-                if (index < 0 || index >= _baseSize) throw new ArgumentOutOfRangeException("index", SR.ArgumentOutOfRange_Index);
+                if ((uint)index >= (uint)_baseSize) throw new ArgumentOutOfRangeException("index", SR.ArgumentOutOfRange_Index);
                 Contract.EndContractBlock();
 
                 InternalUpdateRange();
@@ -2855,7 +2855,7 @@ namespace System.Collections
             public override void SetRange(int index, ICollection c)
             {
                 InternalUpdateRange();
-                if (index < 0 || index >= _baseSize) throw new ArgumentOutOfRangeException("index", SR.ArgumentOutOfRange_Index);
+                if ((uint)index >= (uint)_baseSize) throw new ArgumentOutOfRangeException("index", SR.ArgumentOutOfRange_Index);
                 _baseList.SetRange(_baseIndex + index, c);
                 if (c.Count > 0)
                 {
@@ -2881,13 +2881,13 @@ namespace System.Collections
                 get
                 {
                     InternalUpdateRange();
-                    if (index < 0 || index >= _baseSize) throw new ArgumentOutOfRangeException("index", SR.ArgumentOutOfRange_Index);
+                    if ((uint)index >= (uint)_baseSize) throw new ArgumentOutOfRangeException("index", SR.ArgumentOutOfRange_Index);
                     return _baseList[_baseIndex + index];
                 }
                 set
                 {
                     InternalUpdateRange();
-                    if (index < 0 || index >= _baseSize) throw new ArgumentOutOfRangeException("index", SR.ArgumentOutOfRange_Index);
+                    if ((uint)index >= (uint)_baseSize) throw new ArgumentOutOfRangeException("index", SR.ArgumentOutOfRange_Index);
                     _baseList[_baseIndex + index] = value;
                     InternalUpdateVersion();
                 }

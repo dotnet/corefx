@@ -798,7 +798,7 @@ namespace System.Xml
         // Returns value of an attribute at the specified index (position)
         public override string GetAttribute(int i)
         {
-            if (i < 0 || i >= _attrCount)
+            if ((uint)i >= (uint)_attrCount)
             {
                 throw new ArgumentOutOfRangeException("i");
             }
@@ -860,7 +860,7 @@ namespace System.Xml
         // Moves to an attribute at the specified index (position)
         public override void MoveToAttribute(int i)
         {
-            if (i < 0 || i >= _attrCount)
+            if ((uint)i >= (uint)_attrCount)
             {
                 throw new ArgumentOutOfRangeException("i");
             }

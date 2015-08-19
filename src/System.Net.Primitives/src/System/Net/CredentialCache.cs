@@ -295,7 +295,7 @@ namespace System.Net
             {
                 get
                 {
-                    if (_index < 0 || _index >= _array.Length)
+                    if ((uint)_index >= (uint)_array.Length)
                     {
                         throw new InvalidOperationException(SR.InvalidOperation_EnumOpCantHappen);
                     }

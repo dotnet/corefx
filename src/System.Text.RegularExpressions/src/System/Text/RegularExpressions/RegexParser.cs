@@ -1877,7 +1877,7 @@ namespace System.Text.RegularExpressions
             if (_caps != null)
                 return _caps.ContainsKey(i);
 
-            return (i >= 0 && i < _capsize);
+            return ((uint)i < (uint)_capsize);
         }
 
         /*
