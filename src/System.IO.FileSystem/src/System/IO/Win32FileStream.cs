@@ -562,6 +562,16 @@ namespace System.IO
                 {
                     writeTask.GetAwaiter().GetResult();
                 }
+
+                // If not completing synchronously, ensure the async flush operation
+                // is tracked in case of incoming WriteAsync calls.
+                else
+                {
+                    if (ActiveBufferOperation())
+                        _activeBufferOperation = Task.WhenAll(_activeBufferOperation, writeTask);
+                    else
+                        _activeBufferOperation = writeTask;
+                }
             }
             else
             {
