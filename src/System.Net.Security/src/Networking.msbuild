@@ -1,0 +1,309 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build">
+  <Import Project="..\dir.settings.targets" />
+  <PropertyGroup>
+    <AssemblyName>System.Private.Networking</AssemblyName>
+    <AssemblyVersion>4.0.1.0</AssemblyVersion>
+    <OutputType>Library</OutputType>
+    <ProjectGuid>{6D9AC7B6-4EA5-4D54-A050-A85083880465}</ProjectGuid>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <!-- Default configurations to help VS understand the options -->
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|amd64' ">
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|amd64' ">
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- Primitives, Sockets, NetworkInformation -->
+    <Reference Include="System.Collections">
+      <Version>4.0.10.0</Version>
+    </Reference>
+    <Reference Include="System.Runtime">
+      <Version>4.0.20.0</Version>
+    </Reference>
+    <Reference Include="System.Runtime.Extensions">
+      <Version>4.0.10.0</Version>
+    </Reference>
+    <Reference Include="System.Resources.ResourceManager" />
+    <Reference Include="System.Threading">
+      <Version>4.0.10.0</Version>
+    </Reference>
+    <Reference Include="System.Threading.Tasks">
+      <Version>4.0.10.0</Version>
+    </Reference>
+    <Reference Include="System.Runtime.InteropServices">
+      <Version>4.0.20.0</Version>
+    </Reference>
+    <Reference Include="System.Runtime.Handles" />
+    <Reference Include="System.IO">
+      <Version>4.0.10.0</Version>
+    </Reference>
+    <Reference Include="System.IO.FileSystem" />
+    <Reference Include="System.IO.FileSystem.Primitives" />
+    <!--Missing: Reference Include="System.Diagnostics.PerformanceCounter" / -->
+    <Reference Include="System.ComponentModel.EventBasedAsync">
+      <Version>4.0.10.0</Version>
+    </Reference>
+    <Reference Include="System.Globalization">
+      <Version>4.0.10.0</Version>
+    </Reference>
+    <Reference Include="System.Diagnostics.Debug">
+      <Version>4.0.10.0</Version>
+    </Reference>
+    <Reference Include="System.Collections.NonGeneric" />
+  </ItemGroup>
+  <ItemGroup>
+    <CompileItem Include="..\Common\System\NotImplemented.cs">
+      <Link>NotImplemented.cs</Link>
+    </CompileItem>
+  </ItemGroup>
+  <ItemGroup>
+    <!--Shims for Primitives, Sockets and NetworkInformation-->
+    <CompileItem Include="Shims\ExecutionContext.cs" />
+    <CompileItem Include="Shims\DBNull.cs" />
+    <CompileItem Include="Shims\_NetworkingPerfCounters.cs" />
+    <CompileItem Include="Shims\Uri.cs" />
+    <CompileItem Include="..\System.Net.Common\Shims\Uri.cs" />
+    <CompileItem Include="Shims\Win32SafeHandles.cs" />
+
+    <!-- Primitives, Sockets, NetworkInformation Common-->
+    <CompileItem Include="Interop\Interop.Primitives.Manual.cs" />
+    <CompileItem Include="System\Net\Internal.cs" />
+    <CompileItem Include="System\Net\UnsafeNativeMethods.cs" />
+    <CompileItem Include="System\Net\_BufferOffsetSize.cs" />
+    <CompileItem Include="System\Net\_SafeNetHandles.cs" />
+    <CompileItem Include="System\Net\_Win32.cs" />
+    <CompileItem Include="System\ExternDll.cs" />
+    <CompileItem Include="System\Net\NetworkInformation\nodetype.cs" /> 
+    <CompileItem Include="System\Net\NetworkInformation\NetworkInformationException.cs" />
+    
+  </ItemGroup>
+
+  <Import Project="..\System.Net.Common\Logging.msbuild" />
+
+
+  <!-- Commented out to ensure all items are clear within VS
+
+
+  <ItemGroup Condition="'$(TestMode)' == 'all'">
+    <CompileItem Include="System\Security\Authentication\ExtendedProtection\ExtendedProtectionPolicyTypeConverter.cs" />
+    <CompileItem Include="System\Net\SecureProtocols\NegotiateStream.cs" />
+    <CompileItem Include="System\Net\SecureProtocols\_NegoStream.cs" />
+    <CompileItem Include="System\Net\SecureProtocols\_NegoState.cs" />
+    <CompileItem Include="System\Net\_NTAuthentication.cs" />
+    <CompileItem Include="System\Net\_NetworkingPerfCounters.cs" />
+    <CompileItem Include="System\Net\AuthenticationManager.cs" />
+    <CompileItem Include="System\Net\AuthenticationSchemeSelector.cs" />
+    <CompileItem Include="System\Net\Authorization.cs" />
+    <CompileItem Include="System\Net\BaseWebProxyFinder.cs" />
+    <CompileItem Include="System\Net\ConnectionModes.cs" />
+    <CompileItem Include="System\Net\connectionpool.cs" />
+    <CompileItem Include="System\Net\ConnectionPoolManager.cs" />
+    <CompileItem Include="System\Net\EntitySendFormat.cs" />
+    <CompileItem Include="System\Net\filewebrequest.cs" />
+    <CompileItem Include="System\Net\filewebresponse.cs" />
+    <CompileItem Include="System\Net\FtpStatusCode.cs" />
+    <CompileItem Include="System\Net\FtpWebRequest.cs" />
+    <CompileItem Include="System\Net\FtpWebResponse.cs" />
+    <CompileItem Include="System\Net\GlobalProxySelection.cs" />
+    <CompileItem Include="System\Net\HttpExtension.cs" />
+    <CompileItem Include="System\Net\HttpListener.cs" />
+    <CompileItem Include="System\Net\HttpListenerContext.cs" />
+    <CompileItem Include="System\Net\HttpListenerException.cs" />
+    <CompileItem Include="System\Net\HttpListenerPrefixCollection.cs" />
+    <CompileItem Include="System\Net\HttpListenerRequest.cs" />
+    <CompileItem Include="System\Net\HttpListenerRequestUriBuilder.cs" />
+    <CompileItem Include="System\Net\HttpListenerResponse.cs" />
+    <CompileItem Include="System\Net\HttpListenerTimeoutManager.cs" />
+    <CompileItem Include="System\Net\HttpRequestHeader.cs" />
+    <CompileItem Include="System\Net\HttpResponseHeader.cs" />
+    <CompileItem Include="System\Net\HttpStatusDescription.cs" />
+    <CompileItem Include="System\Net\HttpSysSettings.cs" />
+    <CompileItem Include="System\Net\HttpVersion.cs" />
+    <CompileItem Include="System\Net\HttpWebRequest.cs" />
+    <CompileItem Include="System\Net\HttpWebResponse.cs" />
+    <CompileItem Include="System\Net\HybridWebProxyFinder.cs" />
+    <CompileItem Include="System\Net\IAuthenticationModule.cs" />
+    <CompileItem Include="System\Net\ICertificatePolicy.cs" />
+    <CompileItem Include="System\Net\IntranetCredentialPolicy.cs" />
+    <CompileItem Include="System\Net\IWebProxyFinder.cs" />
+    <CompileItem Include="System\Net\IWebRequestCreate.cs" />
+    <CompileItem Include="System\Net\NativeMethods.cs" />
+    <CompileItem Include="System\Net\NetWebProxyFinder.cs" />
+    <CompileItem Include="System\Net\NetworkAccess.cs" />
+    <CompileItem Include="System\Net\ProtocolViolationException.cs" />
+    <CompileItem Include="System\Net\SafeNativeMethods.cs" />
+    <CompileItem Include="System\Net\ServicePoint.cs" />
+    <CompileItem Include="System\Net\ServicePointManager.cs" />
+    <CompileItem Include="System\Net\UnicodeDecodingConformance.cs" />
+    <CompileItem Include="System\Net\UnicodeEncodingConformance.cs" />
+    <CompileItem Include="System\Net\webclient.cs" />
+    <CompileItem Include="System\Net\WebException.cs" />
+    <CompileItem Include="System\Net\WebExceptionStatus.cs" />
+    <CompileItem Include="System\Net\WebHeaderCollection.cs" />
+    <CompileItem Include="System\Net\WebPermission.cs" />
+    <CompileItem Include="System\Net\webproxy.cs" />
+    <CompileItem Include="System\Net\WebRequest.cs" />
+    <CompileItem Include="System\Net\WebRequestMethods.cs" />
+    <CompileItem Include="System\Net\WebResponse.cs" />
+    <CompileItem Include="System\Net\WebUtility.cs" />
+    <CompileItem Include="System\Net\WinHttpWebProxyFinder.cs" />
+    <CompileItem Include="System\Net\WriteStreamClosedEventArgs.cs" />
+    <CompileItem Include="System\Net\X509CertificateCollection.cs" />
+    <CompileItem Include="System\Net\_AuthenticationState.cs" />
+    <CompileItem Include="System\Net\_AutoWebProxyScriptEngine.cs" />
+    <CompileItem Include="System\Net\_AutoWebProxyScriptHelper.cs" />
+    <CompileItem Include="System\Net\_AutoWebProxyScriptWrapper.cs" />
+    <CompileItem Include="System\Net\_BasicClient.cs" />
+    <CompileItem Include="System\Net\_ChunkParser.cs" />
+    <CompileItem Include="System\Net\_ComImports.cs" />
+    <CompileItem Include="System\Net\_CommandStream.cs" />
+    <CompileItem Include="System\Net\_Connection.cs" />
+    <CompileItem Include="System\Net\_ConnectionGroup.cs" />
+    <CompileItem Include="System\Net\_ConnectStream.cs" />
+    <CompileItem Include="System\Net\_CookieModule.cs" />
+    <CompileItem Include="System\Net\_DigestClient.cs" />
+    <CompileItem Include="System\Net\_emptywebproxy.cs" />
+    <CompileItem Include="System\Net\_FtpControlStream.cs" />
+    <CompileItem Include="System\Net\_FtpDataStream.cs" />
+    <CompileItem Include="System\Net\_HeaderInfo.cs" />
+    <CompileItem Include="System\Net\_HeaderInfoTable.cs" />
+    <CompileItem Include="System\Net\_HTTPDateParse.cs" />
+    <CompileItem Include="System\Net\_IRequestLifetimeTracker.cs" />
+    <CompileItem Include="System\Net\_ISessionAuthenticationModule.cs" />
+    <CompileItem Include="System\Net\_IStreams.cs" />
+    <CompileItem Include="System\Net\_KerberosClient.cs" />
+    <CompileItem Include="System\Net\_ListenerAsyncResult.cs" />
+    <CompileItem Include="System\Net\_ListenerRequestStream.cs" />
+    <CompileItem Include="System\Net\_ListenerResponseStream.cs" />
+    <CompileItem Include="System\Net\_NegotiateClient.cs" />
+    <CompileItem Include="System\Net\_NestedMultipleAsyncResult.cs" />
+    <CompileItem Include="System\Net\_NestedSingleAsyncResult.cs" />
+    <CompileItem Include="System\Net\_NetRes.cs" />
+    <CompileItem Include="System\Net\_NtlmClient.cs" />
+    <CompileItem Include="System\Net\_PooledStream.cs" />
+    <CompileItem Include="System\Net\_ProxyChain.cs" />
+    <CompileItem Include="System\Net\_RegBlobWebProxyDataBuilder.cs" />
+    <CompileItem Include="System\Net\_RequestLifetimeSetter.cs" />
+    <CompileItem Include="System\Net\_ScatterGatherBuffers.cs" />
+    <CompileItem Include="System\Net\_Semaphore.cs" />
+    <CompileItem Include="System\Net\_ServiceNameStore.cs" />
+    <CompileItem Include="System\Net\_ShellExpression.cs" />
+    <CompileItem Include="System\Net\_SpnDictionary.cs" />
+    <CompileItem Include="System\Net\_SSPISessionCache.cs" />
+    <CompileItem Include="System\Net\_TimerThread.cs" />
+    <CompileItem Include="System\Net\_TLSstream.cs" />
+    <CompileItem Include="System\Net\_WebProxyDataBuilder.cs" />
+    <CompileItem Include="System\Net\_WinHttpWebProxyDataBuilder.cs" />
+    <CompileItem Include="System\Net\Cache\FtpRequestCacheValidator.cs" />
+    <CompileItem Include="System\Net\Cache\HttpRequestCacheValidator.cs" />
+    <CompileItem Include="System\Net\Cache\IERequestCache.cs" />
+    <CompileItem Include="System\Net\Cache\RequestCache.cs" />
+    <CompileItem Include="System\Net\Cache\RequestCacheEntry.cs" />
+    <CompileItem Include="System\Net\Cache\RequestCacheManager.cs" />
+    <CompileItem Include="System\Net\Cache\RequestCachePolicy.cs" />
+    <CompileItem Include="System\Net\Cache\RequestCacheValidator.cs" />
+    <CompileItem Include="System\Net\Cache\WinInetCache.cs" />
+    <CompileItem Include="System\Net\Cache\_CacheStreams.cs" />
+    <CompileItem Include="System\Net\Cache\_RequestCacheProtocol.cs" />
+    <CompileItem Include="System\Net\Cache\_Rfc2616CacheValidators.cs" />
+    <CompileItem Include="System\Net\Cache\_SingleItemRequestCache.cs" />
+    <CompileItem Include="System\Net\Mail\AlternateView.cs" />
+    <CompileItem Include="System\Net\Mail\AlternateViewCollection.cs" />
+    <CompileItem Include="System\Net\Mail\Attachment.cs" />
+    <CompileItem Include="System\Net\Mail\AttachmentCollection.cs" />
+    <CompileItem Include="System\Net\Mail\Base64Stream.cs" />
+    <CompileItem Include="System\Net\Mail\Base64WriteStateInfo.cs" />
+    <CompileItem Include="System\Net\Mail\BaseWriter.cs" />
+    <CompileItem Include="System\Net\Mail\BufferBuilder.cs" />
+    <CompileItem Include="System\Net\Mail\BufferedReadStream.cs" />
+    <CompileItem Include="System\Net\Mail\ClosableStream.cs" />
+    <CompileItem Include="System\Net\Mail\ContentDisposition.cs" />
+    <CompileItem Include="System\Net\Mail\ContentTransferEncoding.cs" />
+    <CompileItem Include="System\Net\Mail\ContentType.cs" />
+    <CompileItem Include="System\Net\Mail\DelegatedStream.cs" />
+    <CompileItem Include="System\Net\Mail\DispositionTypeNames.cs" />
+    <CompileItem Include="System\Net\Mail\DomainLiteralReader.cs" />
+    <CompileItem Include="System\Net\Mail\DotAtomReader.cs" />
+    <CompileItem Include="System\Net\Mail\EightBitStream.cs" />
+    <CompileItem Include="System\Net\Mail\EncodedStreamFactory.cs" />
+    <CompileItem Include="System\Net\Mail\HeaderCollection.cs" />
+    <CompileItem Include="System\Net\Mail\IEncodableStream.cs" />
+    <CompileItem Include="System\Net\Mail\iisPickupDirectory.cs" />
+    <CompileItem Include="System\Net\Mail\ISmtpAuthenticationModule.cs" />
+    <CompileItem Include="System\Net\Mail\LinkedResource.cs" />
+    <CompileItem Include="System\Net\Mail\LinkedResourceCollection.cs" />
+    <CompileItem Include="System\Net\Mail\MailAddress.cs" />
+    <CompileItem Include="System\Net\Mail\MailAddressCollection.cs" />
+    <CompileItem Include="System\Net\Mail\MailAddressParser.cs" />
+    <CompileItem Include="System\Net\Mail\MailBnfHelper.cs" />
+    <CompileItem Include="System\Net\Mail\MailHeaderInfo.cs" />
+    <CompileItem Include="System\Net\Mail\MailMessage.cs" />
+    <CompileItem Include="System\Net\Mail\MailWriter.cs" />
+    <CompileItem Include="System\Net\Mail\mediatypenames.cs" />
+    <CompileItem Include="System\Net\Mail\Message.cs" />
+    <CompileItem Include="System\Net\Mail\MimeBasePart.cs" />
+    <CompileItem Include="System\Net\Mail\MimeEmbeddedMessagePart.cs" />
+    <CompileItem Include="System\Net\Mail\MimeMultiPart.cs" />
+    <CompileItem Include="System\Net\Mail\MimeMultiPartType.cs" />
+    <CompileItem Include="System\Net\Mail\MimePart.cs" />
+    <CompileItem Include="System\Net\Mail\MimeWriter.cs" />
+    <CompileItem Include="System\Net\Mail\MultiAsyncResult.cs" />
+    <CompileItem Include="System\Net\Mail\QEncodedStream.cs" />
+    <CompileItem Include="System\Net\Mail\QuotedPairReader.cs" />
+    <CompileItem Include="System\Net\Mail\QuotedPrintableStream.cs" />
+    <CompileItem Include="System\Net\Mail\QuotedStringFormatReader.cs" />
+    <CompileItem Include="System\Net\Mail\RecipientLocation.cs" />
+    <CompileItem Include="System\Net\Mail\RecipientLocationType.cs" />
+    <CompileItem Include="System\Net\Mail\SmtpAuthenticationManager.cs" />
+    <CompileItem Include="System\Net\Mail\SmtpClient.cs" />
+    <CompileItem Include="System\Net\Mail\SmtpCommands.cs" />
+    <CompileItem Include="System\Net\Mail\smtpconnection.cs" />
+    <CompileItem Include="System\Net\Mail\SmtpDateTime.cs" />
+    <CompileItem Include="System\Net\Mail\SmtpDigestAuthenticationModule.cs" />
+    <CompileItem Include="System\Net\Mail\SmtpException.cs" />
+    <CompileItem Include="System\Net\Mail\SmtpFailedRecipientException.cs" />
+    <CompileItem Include="System\Net\Mail\SmtpFailedRecipientsException.cs" />
+    <CompileItem Include="System\Net\Mail\SmtpLoginAuthenticationModule.cs" />
+    <CompileItem Include="System\Net\Mail\SmtpNegotiateAuthenticationModule.cs" />
+    <CompileItem Include="System\Net\Mail\SmtpNtlmAuthenticationModule.cs" />
+    <CompileItem Include="System\Net\Mail\smtppermission.cs" />
+    <CompileItem Include="System\Net\Mail\SmtpReplyReader.cs" />
+    <CompileItem Include="System\Net\Mail\SmtpReplyReaderFactory.cs" />
+    <CompileItem Include="System\Net\Mail\SmtpStatusCode.cs" />
+    <CompileItem Include="System\Net\Mail\SmtpTransport.cs" />
+    <CompileItem Include="System\Net\Mail\TrackingStringDictionary.cs" />
+    <CompileItem Include="System\Net\Mail\TrackingValidationObjectDictionary.cs" />
+    <CompileItem Include="System\Net\Mail\TransferEncoding.cs" />
+    <CompileItem Include="System\Net\Mail\WhitespaceReader.cs" />
+    <CompileItem Include="System\Net\Mail\WriteStateInfoBase.cs" />
+    <CompileItem Include="System\Net\WebSockets\ClientWebSocket.cs" />
+    <CompileItem Include="System\Net\WebSockets\HttpListenerWebSocketContext.cs" />
+    <CompileItem Include="System\Net\WebSockets\InternalClientWebSocket.cs" />
+    <CompileItem Include="System\Net\WebSockets\ServerWebSocket.cs" />
+    <CompileItem Include="System\Net\WebSockets\WebSocket.cs" />
+    <CompileItem Include="System\Net\WebSockets\WebSocketBase.cs" />
+    <CompileItem Include="System\Net\WebSockets\WebSocketBuffer.cs" />
+    <CompileItem Include="System\Net\WebSockets\WebSocketCloseStatus.cs" />
+    <CompileItem Include="System\Net\WebSockets\WebSocketConnectionStream.cs" />
+    <CompileItem Include="System\Net\WebSockets\WebSocketContext.cs" />
+    <CompileItem Include="System\Net\WebSockets\WebSocketError.cs" />
+    <CompileItem Include="System\Net\WebSockets\WebSocketException.cs" />
+    <CompileItem Include="System\Net\WebSockets\WebSocketHelpers.cs" />
+    <CompileItem Include="System\Net\WebSockets\WebSocketHttpListenerDuplexStream.cs" />
+    <CompileItem Include="System\Net\WebSockets\WebSocketMessageType.cs" />
+    <CompileItem Include="System\Net\WebSockets\WebSocketProtocolComponent.cs" />
+    <CompileItem Include="System\Net\WebSockets\WebSocketReceiveResult.cs" />
+    <CompileItem Include="System\Net\WebSockets\WebSocketState.cs" />
+  </ItemGroup>
+
+
+
+-->
+  <Import Project="..\dir.targets" />
+</Project>
+
