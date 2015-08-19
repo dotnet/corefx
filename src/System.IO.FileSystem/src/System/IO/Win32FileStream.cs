@@ -61,6 +61,7 @@ namespace System.IO
         private long _appendStart;// When appending, prevent overwriting file.
         
         private Task<int> _lastSynchronouslyCompletedTask = null;
+        private Task _activeBufferOperation = null;
 
         [System.Security.SecuritySafeCritical]
         public Win32FileStream(String path, FileMode mode, FileAccess access, FileShare share, int bufferSize, FileOptions options, FileStream parent) : base(parent)
@@ -1265,12 +1266,9 @@ namespace System.IO
             return result;
         }
 
-        private async Task FlushAndWriteAsync(byte[] array, int offset, int numBytes, CancellationToken cancellationToken)
+        private bool ActiveBufferOperation()
         {
-            Debug.Assert(_isAsync);
-
-            await FlushWriteAsync(cancellationToken);
-            await WriteInternalCoreAsync(array, offset, numBytes, cancellationToken);
+            return _activeBufferOperation != null && !_activeBufferOperation.IsCompleted;
         }
 
         [System.Security.SecuritySafeCritical]  // auto-generated
@@ -1299,13 +1297,20 @@ namespace System.IO
                 // pipes.   
                 Debug.Assert(_readPos == 0 && _readLen == 0, "Win32FileStream must not have buffered data here!  Pipes should be unidirectional.");
 
+                // If there's data in the write buffer, flush it before starting a new write
                 if (_writePos > 0)
-                    return FlushAndWriteAsync(array, offset, numBytes, cancellationToken);
+                {
+                    Task flushTask = FlushWriteAsync(cancellationToken);
+                    if (ActiveBufferOperation())
+                        _activeBufferOperation = Task.WhenAll(_activeBufferOperation, flushTask);
+                    else
+                        _activeBufferOperation = flushTask;
+                }
 
                 return WriteInternalCoreAsync(array, offset, numBytes, cancellationToken);
             }
 
-            // Handle buffering.
+            // Ensure the buffer is clear for writing
             if (_writePos == 0)
             {
                 if (_readPos < _readLen) FlushRead();
@@ -1313,44 +1318,64 @@ namespace System.IO
                 _readLen = 0;
             }
 
-            int remainingBuffer = _bufferSize - _writePos;
+            // There are a few different cases to handle when performing the write operation
+            // surrounding the internal buffer. Buffer flush operations can be issued asynchronously
+            // so the state of any async operation that touches the internal buffer must be tracked
+            // to ensure there are no data races at play.
+            //
+            //   1. No active async buffer op and numBytes fits in existing buffer:
+            //       Simply perform a memory copy operation and return synchronously.
+            //
+            //   2. Active async buffer op and numBytes <= _bufferSize
+            //       Since there's an active buffer operation, a new buffer needs to be allocated
+            //       to write to in order to ensure the existing buffer isn't modified mid-write.
+            //       The incoming write can then be copied into the new buffer.
+            //
+            //   3. No active async buffer and numBytes too large for buffer
+            //       If there's buffered data, issue a flush operation and then directly issue the
+            //       incoming write since it can't be buffered.
+            //
+            //   4. Active async buffer op and numBytes too large for buffer
+            //       If there's buffered data, attach it to the existing async operation using Task.WhenAll
+            //       and then directly issue the incoming write.
+            //
+            //       Note: since _writePos is reset synchronously when calling FlushWriteAsync, it can be
+            //       assumed that if _writePos > 0 and there's an active async flush operation, the buffer
+            //       was reallocated since that operation was initiated.
 
-            // if the incoming write fits in the remaining buffer, treat
-            // as synchronous since memcopy is so fast
-            if (numBytes <= remainingBuffer)
+            // Case 1 - no active buffer op & fits in remaining size
+            int remainingBuffer = _bufferSize - _writePos;
+            if(!ActiveBufferOperation() && numBytes <= remainingBuffer)
             {
-                if (_writePos == 0) _buffer = new byte[_bufferSize];
+                if (_buffer == null) _buffer = new byte[_bufferSize];
+
                 Buffer.BlockCopy(array, offset, _buffer, _writePos, numBytes);
                 _writePos += numBytes;
-
                 return Task.CompletedTask;
             }
 
-            // if the incoming write fits in the current buffer + next buffer,
-            // only perform a single write to flush the existing buffer and fill
-            // the next buffer with the remainder
-            if (numBytes <= (_bufferSize + remainingBuffer))
+            // Case 2 - active buffer op & fits in new buffer
+            else if (ActiveBufferOperation() && numBytes <= _bufferSize)
             {
-                if (_writePos == 0) _buffer = new byte[_bufferSize];
-
-                Buffer.BlockCopy(array, offset, _buffer, _writePos, remainingBuffer);
-
-                byte[] oldBuffer = _buffer;
                 _buffer = new byte[_bufferSize];
 
-                _writePos = (numBytes - remainingBuffer);
-                Buffer.BlockCopy(array, offset + remainingBuffer, _buffer, 0, _writePos);
-
-                return WriteInternalCoreAsync(oldBuffer, 0, _bufferSize, cancellationToken);
+                Buffer.BlockCopy(array, offset, _buffer, 0, numBytes);
+                _writePos = numBytes;
+                return Task.CompletedTask;
             }
 
-            // If there's data in the existing buffer, and the incoming write would overflow it and
-            // the subsequent buffer, chain the flush operation with the subsequent write
-            else if (_writePos > 0)
-                return FlushAndWriteAsync(array, offset, numBytes, cancellationToken);
+            // Case 3 & 4 - The incoming write can't be handled with a synchronous
+            // memcpy, so issue a write to disk, flushing if necessary
 
-            // Otherwise, there's no buffered data, and the incoming write is too big to fit
-            // in the buffer, so write it directly to disk
+            if (_writePos > 0)
+            {
+                Task flushTask = FlushWriteAsync(cancellationToken);
+                if (ActiveBufferOperation())
+                    _activeBufferOperation = Task.WhenAll(_activeBufferOperation, flushTask);
+                else
+                    _activeBufferOperation = flushTask;
+            }
+
             return WriteInternalCoreAsync(array, offset, numBytes, cancellationToken);
         }
 
