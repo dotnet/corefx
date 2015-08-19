@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System;
 using System.Net;
 using System.Threading.Tasks;
 
@@ -23,7 +26,7 @@ namespace System.Net.NameResolution.Tests
             Assert.NotNull(list2);
 
             Assert.Equal(list1.Length, list2.Length);
-            for(int i = 0; i < list1.Length; i++)
+            for (int i = 0; i < list1.Length; i++)
             {
                 Assert.Equal(list1[i], list2[i]);
             }

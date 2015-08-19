@@ -323,9 +323,14 @@ namespace System.Net.Sockets
                         // Cancel was called after the Dns query was started, but before it finished.  We can't
                         // actually cancel the Dns query, but we'll fake it by failing the connect attempt asynchronously
                         // from here, and silently dropping the connection attempt when the Dns query finishes.
-                        Task.Factory.StartNew(CallAsyncFail, null);
+                        Task.Factory.StartNew(
+                            s => CallAsyncFail(s), 
+                            null,
+                            CancellationToken.None,
+                            TaskCreationOptions.DenyChildAttach,
+                            TaskScheduler.Default);
 
-                        callOnFail = true;
+                    callOnFail = true;
                         break;
 
                     case State.ConnectAttempt:

@@ -9,7 +9,7 @@ namespace System.Net.Sockets
     ///       class can use.
     ///    </para>
     /// </devdoc>
-    public enum ProtocolFamily
+    internal enum ProtocolFamily
     {
         /// <devdoc>
         ///    <para>[To be supplied.]</para>

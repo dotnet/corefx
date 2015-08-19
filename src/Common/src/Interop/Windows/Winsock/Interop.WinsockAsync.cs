@@ -10,6 +10,27 @@ internal static partial class Interop
 {
     internal static partial class Winsock
     {
+        [StructLayout(LayoutKind.Sequential)]
+        internal struct ControlData
+        {
+            internal UIntPtr length;
+            internal uint level;
+            internal uint type;
+            internal uint address;
+            internal uint index;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        internal struct ControlDataIPv6
+        {
+            internal UIntPtr length;
+            internal uint level;
+            internal uint type;
+            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 16)]
+            internal byte[] address;
+            internal uint index;
+        }
+        
         [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
         internal struct WSAPROTOCOLCHAIN
         {
@@ -151,6 +172,17 @@ internal static partial class Interop
             //
             [MarshalAs(UnmanagedType.ByValArray, SizeConst = (int)AsyncEventBitsPos.FdMaxEvents)]
             public int[] ErrorCodes;
+        }
+        
+        [StructLayout(LayoutKind.Sequential)]
+        internal struct WSAMsg
+        {
+            internal IntPtr socketAddress;
+            internal uint addressLength;
+            internal IntPtr buffers;
+            internal uint count;
+            internal WSABuffer controlBuffer;
+            internal SocketFlags flags;
         }
         
         // This function is always potentially blocking so it uses an IntPtr.

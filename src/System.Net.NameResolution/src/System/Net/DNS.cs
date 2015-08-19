@@ -1,14 +1,11 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System.Text;
-using System.Collections;
+using System.Globalization;
+using System.Net.Internals;
 using System.Net.Sockets;
-using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Globalization;
-using System.Collections.Generic;
 
 namespace System.Net
 {
@@ -27,7 +24,7 @@ namespace System.Net
         {
             if (Logging.On) Logging.Enter(Logging.Sockets, "DNS", "GetHostByName", hostName);
             IPHostEntry ipHostEntry = null;
-            
+
             GlobalLog.Print("Dns.GetHostByName: " + hostName);
             NameResolutionPal.EnsureSocketsAreInitialized();
 
@@ -54,7 +51,7 @@ namespace System.Net
             //               decision). This is done to minimize the number of
             //               possible tests that are needed.
             //
-            if (SocketProtocolSupportPal.OSSupportsIPv6|| includeIPv6)
+            if (SocketProtocolSupportPal.OSSupportsIPv6 || includeIPv6)
             {
                 //
                 // IPv6 enabled: use getaddrinfo() to obtain DNS information.
@@ -254,7 +251,12 @@ namespace System.Net
             asyncResult.StartPostingAsyncOp(false);
 
             // Start the resolve.
-            Task.Factory.StartNew(ResolveCallback, asyncResult);
+            Task.Factory.StartNew(
+                s => ResolveCallback(s), 
+                asyncResult,
+                CancellationToken.None,
+                TaskCreationOptions.DenyChildAttach,
+                TaskScheduler.Default);
 
             // Finish the flowing, maybe it completed?  This does nothing if we didn't initiate the flowing above.
             asyncResult.FinishPostingAsyncOp();
@@ -283,7 +285,12 @@ namespace System.Net
             }
 
             // Start the resolve.
-            Task.Factory.StartNew(ResolveCallback, asyncResult);
+            Task.Factory.StartNew(
+                s => ResolveCallback(s), 
+                asyncResult,
+                CancellationToken.None,
+                TaskCreationOptions.DenyChildAttach,
+                TaskScheduler.Default);
 
             // Finish the flowing, maybe it completed?  This does nothing if we didn't initiate the flowing above.
             asyncResult.FinishPostingAsyncOp();

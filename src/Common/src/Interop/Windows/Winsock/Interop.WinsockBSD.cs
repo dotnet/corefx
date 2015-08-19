@@ -118,6 +118,13 @@ internal static partial class Interop
                                             [In, Out] ref int socketAddressSize
                                             );
 
+        [StructLayout(LayoutKind.Sequential)]
+        internal struct TimeValue
+        {
+            public int Seconds;
+            public int Microseconds;
+        }
+
         [DllImport(Interop.Libraries.Ws2_32, SetLastError = true)]
         internal static extern int select(
                                        [In] int ignoredParameter,
@@ -157,5 +164,152 @@ internal static partial class Interop
                                             [In] int cmd,
                                             [In, Out] ref int argp
                                             );
+
+        [DllImport(Interop.Libraries.Ws2_32, SetLastError = true)]
+        internal static extern SocketError getpeername(
+                                            [In] SafeCloseSocket socketHandle,
+                                            [Out] byte[] socketAddress,
+                                            [In, Out] ref int socketAddressSize
+                                            );
+
+        [DllImport(Interop.Libraries.Ws2_32, SetLastError = true)]
+        internal static extern SocketError getsockopt(
+                                           [In] SafeCloseSocket socketHandle,
+                                           [In] SocketOptionLevel optionLevel,
+                                           [In] SocketOptionName optionName,
+                                           [Out] out int optionValue,
+                                           [In, Out] ref int optionLength
+                                           );
+
+        [DllImport(Interop.Libraries.Ws2_32, SetLastError = true)]
+        internal static extern SocketError getsockopt(
+                                           [In] SafeCloseSocket socketHandle,
+                                           [In] SocketOptionLevel optionLevel,
+                                           [In] SocketOptionName optionName,
+                                           [Out] byte[] optionValue,
+                                           [In, Out] ref int optionLength
+                                           );
+
+        [DllImport(Interop.Libraries.Ws2_32, SetLastError = true)]
+        internal static extern SocketError getsockopt(
+                                           [In] SafeCloseSocket socketHandle,
+                                           [In] SocketOptionLevel optionLevel,
+                                           [In] SocketOptionName optionName,
+                                           [Out] out Linger optionValue,
+                                           [In, Out] ref int optionLength
+                                           );
+
+        [DllImport(Interop.Libraries.Ws2_32, SetLastError = true)]
+        internal static extern SocketError getsockopt(
+                                           [In] SafeCloseSocket socketHandle,
+                                           [In] SocketOptionLevel optionLevel,
+                                           [In] SocketOptionName optionName,
+                                           [Out] out IPMulticastRequest optionValue,
+                                           [In, Out] ref int optionLength
+                                           );
+
+        [DllImport(Interop.Libraries.Ws2_32, SetLastError = true)]
+        internal static extern SocketError getsockopt(
+                                           [In] SafeCloseSocket socketHandle,
+                                           [In] SocketOptionLevel optionLevel,
+                                           [In] SocketOptionName optionName,
+                                           [Out] out IPv6MulticastRequest optionValue,
+                                           [In, Out] ref int optionLength
+                                           );
+
+        //
+        // Argument structure for IP_ADD_MEMBERSHIP and IP_DROP_MEMBERSHIP.
+        //
+        [StructLayout(LayoutKind.Sequential)]
+        internal struct IPMulticastRequest
+        {
+            internal int MulticastAddress; // IP multicast address of group
+            internal int InterfaceAddress; // local IP address of interface
+    
+            internal static readonly int Size = Marshal.SizeOf<IPMulticastRequest>();
+        }
+
+        // Argument structure for IPV6_ADD_MEMBERSHIP and IPV6_DROP_MEMBERSHIP.
+        [StructLayout(LayoutKind.Sequential)]
+        internal struct IPv6MulticastRequest
+        {
+            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 16)]
+            internal byte[] MulticastAddress; // IP address of group
+            internal int InterfaceIndex;   // local interface index
+    
+            internal static readonly int Size = Marshal.SizeOf<IPv6MulticastRequest>();
+        }
+    
+        [StructLayout(LayoutKind.Sequential)]
+        internal struct Linger
+        {
+            internal ushort OnOff; // option on/off
+            internal ushort Time; // linger time
+        }
+
+        [DllImport(Interop.Libraries.Ws2_32, ExactSpelling = true, SetLastError = true)]
+        internal static extern SocketError setsockopt(
+                                           [In] IntPtr handle,
+                                           [In] SocketOptionLevel optionLevel,
+                                           [In] SocketOptionName optionName,
+                                           [In] ref Linger linger,
+                                           [In] int optionLength
+                                           );
+        
+        [DllImport(Interop.Libraries.Ws2_32, SetLastError = true)]
+        internal static extern SocketError setsockopt(
+                                           [In] SafeCloseSocket socketHandle,
+                                           [In] SocketOptionLevel optionLevel,
+                                           [In] SocketOptionName optionName,
+                                           [In] ref int optionValue,
+                                           [In] int optionLength
+                                           );
+
+        [DllImport(Interop.Libraries.Ws2_32, SetLastError = true)]
+        internal static extern SocketError setsockopt(
+                                           [In] SafeCloseSocket socketHandle,
+                                           [In] SocketOptionLevel optionLevel,
+                                           [In] SocketOptionName optionName,
+                                           [In] byte[] optionValue,
+                                           [In] int optionLength
+                                           );
+
+        [DllImport(Interop.Libraries.Ws2_32, SetLastError = true)]
+        internal static extern SocketError setsockopt(
+                                           [In] SafeCloseSocket socketHandle,
+                                           [In] SocketOptionLevel optionLevel,
+                                           [In] SocketOptionName optionName,
+                                           [In] ref IntPtr pointer,
+                                           [In] int optionLength
+                                           );
+
+        [DllImport(Interop.Libraries.Ws2_32, SetLastError = true)]
+        internal static extern SocketError setsockopt(
+                                           [In] SafeCloseSocket socketHandle,
+                                           [In] SocketOptionLevel optionLevel,
+                                           [In] SocketOptionName optionName,
+                                           [In] ref Linger linger,
+                                           [In] int optionLength
+                                           );
+
+        [DllImport(Interop.Libraries.Ws2_32, SetLastError = true)]
+        internal static extern SocketError setsockopt(
+                                           [In] SafeCloseSocket socketHandle,
+                                           [In] SocketOptionLevel optionLevel,
+                                           [In] SocketOptionName optionName,
+                                           [In] ref IPMulticastRequest mreq,
+                                           [In] int optionLength
+                                           );
+
+        [DllImport(Interop.Libraries.Ws2_32, SetLastError = true)]
+        internal static extern SocketError setsockopt(
+                                           [In] SafeCloseSocket socketHandle,
+                                           [In] SocketOptionLevel optionLevel,
+                                           [In] SocketOptionName optionName,
+                                           [In] ref IPv6MulticastRequest mreq,
+                                           [In] int optionLength
+                                           );
+                                           
+
     }
 }

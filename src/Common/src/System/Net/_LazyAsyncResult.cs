@@ -54,7 +54,7 @@ namespace System.Net
         private object _result;                    // Final IO result to be returned byt the End*() method.
         private int _errorCode;                    // Win32 error code for Win32 IO async calls (that want to throw).
         private int _intCompleted;                 // Sign bit indicates synchronous completion if set.
-                                                    // Remaining bits count the number of InvokeCallbak() calls.
+                                                   // Remaining bits count the number of InvokeCallbak() calls.
 
         private bool _endCalled;                   // true if the user called the End*() method.
         private bool _userEvent;                   // true if the event has been (or is about to be) handed to the user
@@ -421,7 +421,12 @@ namespace System.Net
                     if (threadContext.m_NestedIOCount >= c_ForceAsyncCount)
                     {
                         GlobalLog.Print("LazyAsyncResult::Complete *** OFFLOADED the user callback ***");
-                        Task.Factory.StartNew(WorkerThreadComplete, null);
+                        Task.Factory.StartNew(
+                            s => WorkerThreadComplete(s),
+                            null, 
+                            CancellationToken.None,
+                            TaskCreationOptions.DenyChildAttach,
+                            TaskScheduler.Default);
                         offloaded = true;
                     }
                     else

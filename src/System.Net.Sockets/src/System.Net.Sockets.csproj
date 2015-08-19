@@ -25,8 +25,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="System\Net\StartIPOptions.cs"/>
     <Compile Include="System\Net\DnsAPMExtensions.cs"/>
+    <Compile Include="System\Net\StartIPOptions.cs"/>
+    <Compile Include="System\Net\SocketPerfCounters.cs"/>
 
     <Compile Include="System\Net\Sockets\IOControlCode.cs" />
     <Compile Include="System\Net\Sockets\IPPacketInformation.cs" />
@@ -58,10 +59,6 @@
     <Compile Include="System\Net\Sockets\_ReceiveMessageOverlappedAsyncResult.cs" />
     <Compile Include="System\Net\Sockets\TransportType.cs" />
     
-    <!-- Shims -->
-    <Compile Include="Shims\_NetworkingPerfCounters.cs"/>
-    <Compile Include="RefactoringShims\SocketExceptionShim.cs"/>
-
     <!-- Logging -->
     <Compile Include="$(CommonPath)\System\Net\Shims\TraceSource.cs">
       <Link>Common\System\Net\Shims\TraceSource.cs</Link>
@@ -94,8 +91,8 @@
     <Compile Include="$(CommonPath)\System\Net\_LazyAsyncResult.cs">
       <Link>Common\System\Net\_LazyAsyncResult.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\System\Threading\ExecutionContext.cs">
-      <Link>Common\System\Threading\ExecutionContext.cs</Link>
+    <Compile Include="$(CommonPath)\System\Net\Shims\ExecutionContext.cs">
+      <Link>Common\System\Net\Shims\ExecutionContext.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\System\Net\Shims\DBNull.cs">
       <Link>Common\System\Net\Shims\DBNull.cs</Link>
@@ -140,16 +137,18 @@
     <Compile Include="$(CommonPath)\System\Net\_Win32.cs">
       <Link>Common\System\Net\_Win32.cs</Link>
     </Compile>
-
+    
     <!-- System.Net.Internals -->
     <Compile Include="$(CommonPath)\System\Net\Internals\IPEndPointExtensions.cs">
       <Link>Common\System\Net\Internals\IPEndPointExtensions.cs</Link>
     </Compile>
-    
     <Compile Include="$(CommonPath)\System\Net\Internals\IPAddressExtensions.cs">
       <Link>Common\System\Net\Internals\IPAddressExtensions.cs</Link>
     </Compile>
-
+    <Compile Include="$(CommonPath)\System\Net\Internals\SocketExceptionFactory.cs">
+      <Link>Common\System\Net\Internals\SocketExceptionFactory.cs</Link>
+    </Compile>
+    
     <!-- TODO: Move to the Windows ItemGroup -->
     <Compile Include="$(CommonPath)\System\Net\SocketProtocolSupportPal.Windows.cs">
       <Link>System\Net\SocketProtocolSupportPal.Windows</Link>
@@ -198,32 +197,12 @@
       <Link>Common\Interop\Windows\mincore_obsolete\Interop.LocalFree.cs</Link>
     </Compile>
 
-    <Compile Include="$(CommonPath)\Interop\Windows\Winsock\TimeValue.cs">
-      <Link>Interop\Windows\Winsock\TimeValue.cs</Link>
-    </Compile>    
-
     <Compile Include="$(CommonPath)\Interop\Windows\Winsock\WSABuffer.cs">
       <Link>Interop\Windows\Winsock\WSABuffer.cs</Link>
     </Compile>
 
-    <Compile Include="$(CommonPath)\Interop\Windows\Winsock\Interop.ControlData.cs">
-      <Link>Interop\Windows\Winsock\Interop.ControlData.cs</Link>
-    </Compile>
-
     <Compile Include="$(CommonPath)\Interop\Windows\Winsock\Interop.closesocket.cs">
       <Link>Interop\Windows\Winsock\Interop.closesocket.cs</Link>
-    </Compile>
-
-    <Compile Include="$(CommonPath)\Interop\Windows\Winsock\Interop.getpeername.cs">
-      <Link>Interop\Windows\Winsock\Interop.getpeername.cs</Link>
-    </Compile>
-
-    <Compile Include="$(CommonPath)\Interop\Windows\Winsock\Interop.getsockopt.cs">
-      <Link>Interop\Windows\Winsock\Interop.getsockopt.cs</Link>
-    </Compile>
-
-    <Compile Include="$(CommonPath)\Interop\Windows\Winsock\Interop.WSAMsg.cs">
-      <Link>Interop\Windows\Winsock\Interop.WSAMsg.cs</Link>
     </Compile>
 
     <Compile Include="$(CommonPath)\Interop\Windows\Winsock\Interop.WSASocketW.cs">
@@ -240,10 +219,6 @@
 
     <Compile Include="$(CommonPath)\Interop\Windows\Winsock\Interop.WinsockAsync.cs">
       <Link>Interop\Windows\Winsock\Interop.WinSockAsync.cs</Link>
-    </Compile>
-
-    <Compile Include="$(CommonPath)\Interop\Windows\Winsock\Interop.setsockopt.cs">
-      <Link>Interop\Windows\Winsock\Interop.setsockopt.cs</Link>
     </Compile>
   </ItemGroup>
 

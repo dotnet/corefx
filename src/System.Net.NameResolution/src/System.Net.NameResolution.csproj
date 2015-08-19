@@ -47,8 +47,8 @@
     <Compile Include="$(CommonPath)\System\Net\_LazyAsyncResult.cs">
       <Link>Common\System\Net\_LazyAsyncResult.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\System\Threading\ExecutionContext.cs">
-      <Link>Common\System\Threading\ExecutionContext.cs</Link>
+    <Compile Include="$(CommonPath)\System\Net\Shims\ExecutionContext.cs">
+      <Link>Common\System\Net\Shims\ExecutionContext.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\System\Net\Shims\DBNull.cs">
       <Link>Common\System\Net\Shims\DBNull.cs</Link>
@@ -60,7 +60,6 @@
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetsWindows)' == 'true' ">
-    <Compile Include="RefactoringShims\SocketException.Windows.cs" />
     <Compile Include="System\Net\NameResolutionPal.Windows.cs" />
 
     <Compile Include="$(CommonPath)\System\Net\IntPtrHelper.cs">
@@ -81,9 +80,12 @@
     <Compile Include="$(CommonPath)\System\Net\Internals\IPAddressExtensions.cs">
       <Link>Common\System\Net\Internals\IPAddressExtensions.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\System\Net\Internals\SocketException.Windows.cs">
+      <Link>Common\System\Net\Internals\SocketException.Windows.cs</Link>
+    </Compile>
 
     <Compile Include="$(CommonPath)\System\Net\SocketProtocolSupportPal.Windows.cs">
-      <Link>System\Net\SocketProtocolSupportPal.Windows</Link>
+      <Link>Common\System\Net\SocketProtocolSupportPal.Windows</Link>
     </Compile>
 
     <!-- Interop -->
@@ -126,9 +128,6 @@
     <Compile Include="$(CommonPath)\Interop\Windows\Winsock\Interop.WSASocketW.cs">
       <Link>Interop\Windows\Winsock\Interop.WSASocketW.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\Winsock\NameInfoFlags.cs">
-      <Link>Interop\Windows\Winsock\NameInfoFlags.cs</Link>
-    </Compile>    
     <Compile Include="$(CommonPath)\Interop\Windows\Winsock\ProtocolFamily.cs">
       <Link>Interop\Windows\Winsock\ProtocolFamily.cs</Link>
     </Compile>    
@@ -141,11 +140,13 @@
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetsUnix)' == 'true' ">
-    <Compile Include="RefactoringShims\SocketException.Unix.cs" />
     <Compile Include="System\Net\NameResolutionPal.Unix.cs" />
 
+    <Compile Include="$(CommonPath)\System\Net\Internals\SocketException.Unix.cs">
+      <Link>Common\System\Net\Internals\SocketException.Unix.cs</Link>
+    </Compile>
     <Compile Include="$(CommonPath)\System\Net\SocketProtocolSupportPal.Unix.cs">
-      <Link>System\Net\SocketProtocolSupportPal.Unix</Link>
+      <Link>Common\System\Net\SocketProtocolSupportPal.Unix</Link>
     </Compile>
 
     <Compile Include="$(CommonPath)\Interop\Unix\Interop.Errors.cs">
