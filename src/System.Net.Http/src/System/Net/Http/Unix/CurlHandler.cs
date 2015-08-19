@@ -39,7 +39,6 @@ namespace System.Net.Http
         private const string EncodingNameDeflate = "deflate";
         private readonly static string[] AuthenticationSchemes = { "Negotiate", "Digest", "Basic" }; // the order in which libcurl goes over authentication schemes
         private readonly static ulong[]  AuthSchemePriorityOrder = { CURLAUTH.Negotiate, CURLAUTH.Digest, CURLAUTH.Basic };
-        private static readonly string[] s_headerDelimiters = new string[] { "\r\n" };
 
         private const int s_requestBufferSize = 16384; // Default used by libcurl
         private const string NoTransferEncoding = HttpKnownHeaderNames.TransferEncoding + ":";
@@ -827,20 +826,16 @@ namespace System.Net.Http
                 contentHeaders = request.Content.Headers;
             }
 
-            string[] allHeaders = HeaderUtilities.DumpHeaders(request.Headers, contentHeaders)
-                .Split(s_headerDelimiters, StringSplitOptions.RemoveEmptyEntries);
+            // Prepare request headers
+            List<string> allHeaders = PrepareRequestHeaders(request.Headers, contentHeaders);
             bool gotReference = false;
             try
             {
                 retVal.DangerousAddRef(ref gotReference);
                 IntPtr rawHandle = IntPtr.Zero;
-                for (int i = 0; i < allHeaders.Length; i++)
+
+                foreach (var header in allHeaders)
                 {
-                    string header = allHeaders[i].Trim();
-                    if (header.Equals("{") || header.Equals("}"))
-                    {
-                        continue;
-                    }
                     rawHandle = Interop.libcurl.curl_slist_append(rawHandle, header);
                     retVal.SetHandle(rawHandle);
                 }
@@ -867,6 +862,36 @@ namespace System.Net.Http
             }
 
             return retVal;
+        }
+
+        /// <summary>
+        /// Prepare headers in a format that can be fed to curl API
+        /// </summary>
+        /// <param name="headers"></param>
+        /// <returns>List of headers</returns>
+        private static List<string> PrepareRequestHeaders(params HttpHeaders[] headers)
+        {
+            List<string> allHeaders = new List<string>(headers.Length);
+
+            foreach (var multiHeaders in headers)
+            {
+                if (multiHeaders != null)
+                {
+                    foreach (var header in multiHeaders)
+                    {
+                        string headerStr = header.Key + ":";
+
+                        foreach (var headerValue in header.Value)
+                        {
+                            headerStr += " " + headerValue;
+                        }
+
+                        allHeaders.Add(headerStr);
+                    }
+                }
+            }
+
+            return allHeaders;
         }
 
         private static void SetChunkedModeForSend(HttpRequestMessage request)
