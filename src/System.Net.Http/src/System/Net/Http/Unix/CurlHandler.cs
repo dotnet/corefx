@@ -849,6 +849,12 @@ namespace System.Net.Http
                 if (request.Headers.TransferEncodingChunked.HasValue && !request.Headers.TransferEncodingChunked.Value)
                 {
                     rawHandle = Interop.libcurl.curl_slist_append(rawHandle, NoTransferEncoding);
+                    
+                    if (rawHandle == null)
+                    {
+                        throw new HttpRequestException(SR.net_http_client_execution_error);
+                    }
+
                     retVal.SetHandle(rawHandle);
                 }
 
@@ -877,9 +883,15 @@ namespace System.Net.Http
         private static void AddRequestHeaders(HttpHeaders headers, SafeCurlSlistHandle handle, ref IntPtr rawHandle)     
         {          
             foreach (KeyValuePair<string, IEnumerable<string>> header in headers)
-            {              
-                string headerStr = header.Key + ": " +  headers.GetHeaderString(header.Key);                       
+            {
+                string headerStr = header.Key + ": " + headers.GetHeaderString(header.Key);
                 rawHandle = Interop.libcurl.curl_slist_append(rawHandle, headerStr);
+
+                if (rawHandle == null)
+                {
+                    throw new HttpRequestException(SR.net_http_client_execution_error);
+                }
+
                 handle.SetHandle(rawHandle);
             }
         }
