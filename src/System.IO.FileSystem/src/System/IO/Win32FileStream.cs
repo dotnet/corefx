@@ -332,6 +332,10 @@ namespace System.IO
             }
         }
 
+        private bool HasActiveBufferOperation
+        {
+            get { return _activeBufferOperation != null && !_activeBufferOperation.IsCompleted; }
+        }
 
         public override bool CanRead
         {
@@ -532,6 +536,12 @@ namespace System.IO
 
             Task flushTask = WriteInternalCoreAsync(_buffer, 0, _writePos, cancellationToken);
             _writePos = 0;
+
+            // Update the active buffer operation
+            _activeBufferOperation = HasActiveBufferOperation ? 
+                Task.WhenAll(_activeBufferOperation, flushTask) : 
+                flushTask;
+
             return flushTask;
         }
 
@@ -561,16 +571,6 @@ namespace System.IO
                 if (!calledFromFinalizer)
                 {
                     writeTask.GetAwaiter().GetResult();
-                }
-
-                // If not completing synchronously, ensure the async flush operation
-                // is tracked in case of incoming WriteAsync calls.
-                else
-                {
-                    if (ActiveBufferOperation())
-                        _activeBufferOperation = Task.WhenAll(_activeBufferOperation, writeTask);
-                    else
-                        _activeBufferOperation = writeTask;
                 }
             }
             else
@@ -1276,11 +1276,6 @@ namespace System.IO
             return result;
         }
 
-        private bool ActiveBufferOperation()
-        {
-            return _activeBufferOperation != null && !_activeBufferOperation.IsCompleted;
-        }
-
         [System.Security.SecuritySafeCritical]  // auto-generated
         private Task WriteInternalAsync(byte[] array, int offset, int numBytes, CancellationToken cancellationToken)
         {
@@ -1309,13 +1304,7 @@ namespace System.IO
 
                 // If there's data in the write buffer, flush it before starting a new write
                 if (_writePos > 0)
-                {
-                    Task flushTask = FlushWriteAsync(cancellationToken);
-                    if (ActiveBufferOperation())
-                        _activeBufferOperation = Task.WhenAll(_activeBufferOperation, flushTask);
-                    else
-                        _activeBufferOperation = flushTask;
-                }
+                    FlushWriteAsync(cancellationToken);
 
                 return WriteInternalCoreAsync(array, offset, numBytes, cancellationToken);
             }
@@ -1342,7 +1331,7 @@ namespace System.IO
             //       The incoming write can then be copied into the new buffer.
             //
             //   3. No active async buffer and numBytes too large for buffer
-            //       If there's buffered data, issue a flush operation and then directly issue the
+            //       If there's buffered data, issue a flush operation. Then, regardless, issue the
             //       incoming write since it can't be buffered.
             //
             //   4. Active async buffer op and numBytes too large for buffer
@@ -1355,7 +1344,7 @@ namespace System.IO
 
             // Case 1 - no active buffer op & fits in remaining size
             int remainingBuffer = _bufferSize - _writePos;
-            if(!ActiveBufferOperation() && numBytes <= remainingBuffer)
+            if (!ActiveBufferOperation() && numBytes <= remainingBuffer)
             {
                 if (_buffer == null) _buffer = new byte[_bufferSize];
 
@@ -1365,7 +1354,7 @@ namespace System.IO
             }
 
             // Case 2 - active buffer op & fits in new buffer
-            else if (ActiveBufferOperation() && numBytes <= _bufferSize)
+            if (ActiveBufferOperation() && numBytes <= _bufferSize)
             {
                 _buffer = new byte[_bufferSize];
 
@@ -1374,18 +1363,22 @@ namespace System.IO
                 return Task.CompletedTask;
             }
 
-            // Case 3 & 4 - The incoming write can't be handled with a synchronous
-            // memcpy, so issue a write to disk, flushing if necessary
-
+            // Case 3 - Incoming write can't be buffered and there's existing data in the buffer
             if (_writePos > 0)
             {
                 Task flushTask = FlushWriteAsync(cancellationToken);
-                if (ActiveBufferOperation())
-                    _activeBufferOperation = Task.WhenAll(_activeBufferOperation, flushTask);
-                else
-                    _activeBufferOperation = flushTask;
-            }
 
+                // If the task has already completed and was unsuccessful, avoid issuing the write.
+                if (flushTask.IsCanceled || flushTask.IsFaulted) return flushTask;
+
+                // Return both the flush and write operations. It's not necessary that they complete in a
+                // specific order since the internal position is updated synchronously when crafting the
+                // tasks, but consumers will want to know if either fails so the health of the stream is known.
+                return Task.WhenAll(flushTask, WriteInternalCoreAsync(array, offset, numBytes, cancellationToken));
+            }
+                
+            // Case 4 - Incoming write can't be buffered and there's no existing buffered data, so just
+            // issue the OS write directly.
             return WriteInternalCoreAsync(array, offset, numBytes, cancellationToken);
         }
 
