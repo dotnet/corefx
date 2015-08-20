@@ -826,20 +826,24 @@ namespace System.Net.Http
                 contentHeaders = request.Content.Headers;
             }
 
-            // Prepare request headers
-            List<string> allHeaders = PrepareRequestHeaders(request.Headers, contentHeaders);
             bool gotReference = false;
             try
             {
                 retVal.DangerousAddRef(ref gotReference);
                 IntPtr rawHandle = IntPtr.Zero;
 
-                foreach (var header in allHeaders)
+                if (request.Headers != null)
                 {
-                    rawHandle = Interop.libcurl.curl_slist_append(rawHandle, header);
-                    retVal.SetHandle(rawHandle);
+                    // Add request headers
+                    AddRequestHeaders(request.Headers, retVal, ref rawHandle);
                 }
-
+                
+                if (contentHeaders != null)
+                {
+                    // Add content request headers
+                    AddRequestHeaders(contentHeaders, retVal, ref rawHandle);
+                }
+                             
                 // Since libcurl always adds a Transfer-Encoding header, we need to explicitly block
                 // it if caller specifically does not want to set the header
                 if (request.Headers.TransferEncodingChunked.HasValue && !request.Headers.TransferEncodingChunked.Value)
@@ -865,33 +869,19 @@ namespace System.Net.Http
         }
 
         /// <summary>
-        /// Prepare headers in a format that can be fed to curl API
+        /// Add request headers to curl API
         /// </summary>
         /// <param name="headers"></param>
-        /// <returns>List of headers</returns>
-        private static List<string> PrepareRequestHeaders(params HttpHeaders[] headers)
-        {
-            List<string> allHeaders = new List<string>(headers.Length);
-
-            foreach (var multiHeaders in headers)
-            {
-                if (multiHeaders != null)
-                {
-                    foreach (var header in multiHeaders)
-                    {
-                        string headerStr = header.Key + ":";
-
-                        foreach (var headerValue in header.Value)
-                        {
-                            headerStr += " " + headerValue;
-                        }
-
-                        allHeaders.Add(headerStr);
-                    }
-                }
+        /// <param name="handle"></param>
+        /// <param name="rawHandle"></param>
+        private static void AddRequestHeaders(HttpHeaders headers, SafeCurlSlistHandle handle, ref IntPtr rawHandle)     
+        {          
+            foreach (KeyValuePair<string, IEnumerable<string>> header in headers)
+            {              
+                string headerStr = header.Key + ": " +  headers.GetHeaderString(header.Key);                       
+                rawHandle = Interop.libcurl.curl_slist_append(rawHandle, headerStr);
+                handle.SetHandle(rawHandle);
             }
-
-            return allHeaders;
         }
 
         private static void SetChunkedModeForSend(HttpRequestMessage request)
