@@ -1344,7 +1344,7 @@ namespace System.IO
 
             // Case 1 - no active buffer op & fits in remaining size
             int remainingBuffer = _bufferSize - _writePos;
-            if (!ActiveBufferOperation() && numBytes <= remainingBuffer)
+            if (!HasActiveBufferOperation && numBytes < remainingBuffer)
             {
                 if (_buffer == null) _buffer = new byte[_bufferSize];
 
@@ -1354,7 +1354,7 @@ namespace System.IO
             }
 
             // Case 2 - active buffer op & fits in new buffer
-            if (ActiveBufferOperation() && numBytes <= _bufferSize)
+            if (HasActiveBufferOperation && numBytes < _bufferSize)
             {
                 _buffer = new byte[_bufferSize];
 
