@@ -1043,6 +1043,7 @@ namespace System.Linq
         public static TSource[] ToArray<TSource>(this IEnumerable<TSource> source, int? capacity = null)
         {
             if (source == null) throw Error.ArgumentNull("source");
+            if (capacity < 1) throw Error.ArgumentOutOfRange("capacity");
             return new Buffer<TSource>(source, capacity: capacity).ToArray();
         }
 
