@@ -1040,10 +1040,11 @@ namespace System.Linq
             return source;
         }
 
-        public static TSource[] ToArray<TSource>(this IEnumerable<TSource> source)
+        public static TSource[] ToArray<TSource>(this IEnumerable<TSource> source, int? capacity = null)
         {
             if (source == null) throw Error.ArgumentNull("source");
-            return new Buffer<TSource>(source).ToArray();
+            if (capacity < 1) throw Error.ArgumentOutOfRange("capacity");
+            return new Buffer<TSource>(source, capacity: capacity).ToArray();
         }
 
         public static List<TSource> ToList<TSource>(this IEnumerable<TSource> source)
@@ -1882,7 +1883,7 @@ namespace System.Linq
             }
             return value;
         }
-        
+
         public static float Min(this IEnumerable<float> source)
         {
             if (source == null) throw Error.ArgumentNull("source");
@@ -1891,7 +1892,7 @@ namespace System.Linq
             {
                 if (!e.MoveNext()) throw Error.NoElements();
                 value = e.Current;
-                while(e.MoveNext())
+                while (e.MoveNext())
                 {
                     float x = e.Current;
                     if (x < value) value = x;
@@ -1947,7 +1948,7 @@ namespace System.Linq
             {
                 if (!e.MoveNext()) throw Error.NoElements();
                 value = e.Current;
-                while(e.MoveNext())
+                while (e.MoveNext())
                 {
                     double x = e.Current;
                     if (x < value) value = x;
@@ -3406,7 +3407,7 @@ namespace System.Linq
         internal TElement[] items;
         internal int count;
 
-        internal Buffer(IEnumerable<TElement> source, bool queryInterfaces = true)
+        internal Buffer(IEnumerable<TElement> source, bool queryInterfaces = true, int? capacity = null)
         {
             TElement[] items = null;
             int count = 0;
@@ -3440,7 +3441,7 @@ namespace System.Linq
                 {
                     if (items == null)
                     {
-                        items = new TElement[4];
+                        items = new TElement[capacity ?? 4];
                     }
                     else if (items.Length == count)
                     {
