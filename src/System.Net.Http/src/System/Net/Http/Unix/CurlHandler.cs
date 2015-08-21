@@ -63,7 +63,7 @@ namespace System.Net.Http
         private bool _preAuthenticate = false;
         private CredentialCache _credentialCache = null;
         private CookieContainer _cookieContainer = null;
-        private bool _useCookie = false;
+        private bool _useCookie = true;
         private bool _automaticRedirection = HttpHandlerDefaults.DefaultAutomaticRedirection;
         private int _maxAutomaticRedirections = HttpHandlerDefaults.DefaultMaxAutomaticRedirections;
 
