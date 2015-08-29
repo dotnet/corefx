@@ -163,6 +163,7 @@ namespace System.Net.Http.Tests
             }
         }
 
+        /* Commenting out below test till the https://github.com/dotnet/corefx/issues/3015 is fixed.
         [Theory]
         [InlineData(6)]
         public async void GetAsync_MaxAutomaticRedirectionsNServerHopsNPlus1_Throw(int hops)
@@ -174,6 +175,7 @@ namespace System.Net.Http.Tests
                 await Assert.ThrowsAsync<HttpRequestException>(() => client.GetAsync(HttpTestServers.RedirectUriHops(hops + 1)));
             }
         }
+        */
 
         [Fact]
         public async void GetAsync_CredentialIsNetworkCredentialUriRedirect_StatusCodeUnauthorized()
