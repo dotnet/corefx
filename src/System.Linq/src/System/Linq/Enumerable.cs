@@ -4,12 +4,16 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Numerics;
 using System.Threading;
 
 namespace System.Linq
 {
     public static class Enumerable
     {
+
+        private static readonly int SIMD_THRESHOLD = 64;
+
         public static IEnumerable<TSource> Where<TSource>(this IEnumerable<TSource> source, Func<TSource, bool> predicate)
         {
             if (source == null) throw Error.ArgumentNull("source");
@@ -1610,10 +1614,61 @@ namespace System.Linq
             int sum = 0;
             checked
             {
-                foreach (int v in source) sum += v;
+                if (Vector.IsHardwareAccelerated && source.Count() >= SIMD_THRESHOLD)
+                    sum = VectorSum(source);
+                else
+                    foreach (int v in source) sum += v;
             }
             return sum;
         }
+
+        private static int VectorSum(IEnumerable<int> source) 
+        {
+            int sum = 0;
+
+            int[] sourceArray = source.ToArray();
+            int vectorLength = Vector<int>.Count;
+  
+            // Normalize the arrays to be the same divisor as of the SIMD Length
+            // Example: if the "Vector<int>.Count" is 4, then the array size need to be a multiple of 4
+            // Add zeros to the end of the array if necessary.
+            int correctionSize = (sourceArray.Length % vectorLength);
+            int midpoint = (sourceArray.Length / 2);
+            int correctedMidpoint = midpoint + correctionSize;
+
+            // create two arrays with a multiple of the vector length
+            int[] arrayA = new int[correctedMidpoint];
+            int[] arrayB = new int[correctedMidpoint];
+
+            // Copy over the source data from the original IEnumerable source.
+            Array.Copy(sourceArray, 0, arrayA, 0, midpoint);
+            Array.Copy(sourceArray, midpoint, arrayB, 0, midpoint);
+
+            // if it's not even, then go ahead and "add" the final number to the sum variable
+            // because we're only going to vectorize the "even" part of the arrays.
+
+            if (sourceArray.Length % 2 != 0)
+                sum = sourceArray[sourceArray.Length - 1];
+
+            Vector<int> vectorA;
+            Vector<int> vectorB;
+
+            for (int i = 0; i < midpoint; i += vectorLength)
+            {
+
+                vectorA = new Vector<int>(arrayA, i);
+                vectorB = new Vector<int>(arrayB, i);
+
+                vectorA = Vector.Add(vectorA, vectorB);
+
+                // you can't easily do this with generics without hacks because Operator+ isn't supported
+                for (int j = 0; j < vectorLength; j++) sum += vectorA[j];
+                
+            }
+
+            return sum;
+        }
+        
 
         public static int? Sum(this IEnumerable<int?> source)
         {
