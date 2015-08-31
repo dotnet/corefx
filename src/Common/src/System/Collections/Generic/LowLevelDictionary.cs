@@ -28,12 +28,12 @@ namespace System.Collections.Generic
         private const int DefaultSize = 17;
 
         public LowLevelDictionary()
-            : this(DefaultSize, new DefaultComparer<TKey>())
+            : this(DefaultSize, DefaultComparer)
         {
         }
 
         public LowLevelDictionary(int capacity)
-            : this(capacity, new DefaultComparer<TKey>())
+            : this(capacity, DefaultComparer)
         {
         }
 
@@ -72,7 +72,9 @@ namespace System.Collections.Generic
                 if (key == null)
                     throw new ArgumentNullException("key");
 
+#if DEBUG
                 _version++;
+#endif
                 Entry entry = Find(key);
                 if (entry != null)
                     entry.m_value = value;
@@ -102,13 +104,17 @@ namespace System.Collections.Generic
             Entry entry = Find(key);
             if (entry != null)
                 throw new ArgumentException(SR.Argument_AddingDuplicate);
+#if DEBUG
             _version++;
+#endif
             UncheckedAdd(key, value);
         }
 
         public void Clear(int capacity = DefaultSize)
         {
+#if DEBUG
             _version++;
+#endif
             _buckets = new Entry[capacity];
             _numEntries = 0;
         }
@@ -132,7 +138,9 @@ namespace System.Collections.Generic
                     {
                         prev.m_next = entry.m_next;
                     }
+#if DEBUG
                     _version++;
+#endif
                     _numEntries--;
                     return true;
                 }
@@ -231,30 +239,48 @@ namespace System.Collections.Generic
 
         private Entry[] _buckets;
         private int _numEntries;
+#if DEBUG
         private int _version;
+#endif
         private IEqualityComparer<TKey> _comparer;
 
-        // This comparator is used if no comparator is supplied. It emulates the behavior of EqualityComparer<T>.Default.
+        // This comparator is used if no comparator is supplied. It emulates the behavior of EqualityComparer<T>.Default
+        // when T implements IEquatable<T>.
 #if TYPE_LOADER_IMPLEMENTATION
         [System.Runtime.CompilerServices.ForceDictionaryLookups]
 #endif
-        private sealed class DefaultComparer<T> : IEqualityComparer<T>
+        private sealed class DefaultComparerForIEquatable : IEqualityComparer<TKey>
         {
-            public bool Equals(T x, T y)
+            public bool Equals(TKey x, TKey y)
             {
-                if (x == null)
-                    return y == null;
-                IEquatable<T> iequatable = x as IEquatable<T>;
-                if (iequatable != null)
-                    return iequatable.Equals(y);
-                return ((object)x).Equals(y);
+                return x == null ? y == null : ((IEquatable<TKey>)x).Equals(y);
             }
 
-            public int GetHashCode(T obj)
+            public int GetHashCode(TKey obj)
             {
-                return ((object)obj).GetHashCode();
+                return obj.GetHashCode();
             }
         }
+        // This comparator is used if no comparator is supplied. It emulates the behavior of EqualityComparer<T>.Default
+        // when T does not implement IEquatable<T>.
+#if TYPE_LOADER_IMPLEMENTATION
+        [System.Runtime.CompilerServices.ForceDictionaryLookups]
+#endif
+        private sealed class DefaultComparerForNotIEquatable : IEqualityComparer<TKey>
+        {
+            public bool Equals(TKey x, TKey y)
+            {
+                return x == null ? y == null : x.Equals(y);
+            }
+
+            public int GetHashCode(TKey obj)
+            {
+                return obj.GetHashCode();
+            }
+        }
+        
+        private static readonly IEqualityComparer<TKey> DefaultComparer = typeof(IEquatable<TKey>).IsAssignableFrom(typeof(TKey)) ? (IEqualityComparer<TKey>)new DefaultComparerForIEquatable() : new DefaultComparerForNotIEquatable();
+        
 
 #if TYPE_LOADER_IMPLEMENTATION
         [System.Runtime.CompilerServices.ForceDictionaryLookups]
@@ -263,13 +289,15 @@ namespace System.Collections.Generic
         {
             public LowLevelDictEnumerator(LowLevelDictionary<TKey, TValue> dict)
             {
+#if DEBUG
                 _dict = dict;
                 _version = _dict._version;
-                Entry[] entries = new Entry[_dict._numEntries];
+#endif
+                Entry[] entries = new Entry[dict._numEntries];
                 int dst = 0;
-                for (int bucket = 0; bucket < _dict._buckets.Length; bucket++)
+                for (int bucket = 0; bucket < dict._buckets.Length; bucket++)
                 {
-                    Entry entry = _dict._buckets[bucket];
+                    Entry entry = dict._buckets[bucket];
                     while (entry != null)
                     {
                         entries[dst++] = entry;
@@ -284,8 +312,10 @@ namespace System.Collections.Generic
             {
                 get
                 {
+#if DEBUG
                     if (_version != _dict._version)
                         throw new InvalidOperationException("InvalidOperation_EnumFailedVersion");
+#endif
                     if (_curPosition == -1 || _curPosition == _entries.Length)
                         throw new InvalidOperationException("InvalidOperation_EnumOpCantHappen");
                     Entry entry = _entries[_curPosition];
@@ -299,34 +329,35 @@ namespace System.Collections.Generic
 
             public bool MoveNext()
             {
+#if DEBUG
                 if (_version != _dict._version)
                     throw new InvalidOperationException("InvalidOperation_EnumFailedVersion");
+#endif
                 if (_curPosition != _entries.Length)
                     _curPosition++;
-                bool anyMore = (_curPosition != _entries.Length);
-                return anyMore;
+                return _curPosition != _entries.Length;
             }
 
             object IEnumerator.Current
             {
-                get
-                {
-                    KeyValuePair<TKey, TValue> kv = Current;
-                    return kv;
-                }
+                get { return Current; }
             }
 
             public void Reset()
             {
+#if DEBUG
                 if (_version != _dict._version)
                     throw new InvalidOperationException("InvalidOperation_EnumFailedVersion");
+#endif
                 _curPosition = -1;
             }
 
-            private LowLevelDictionary<TKey, TValue> _dict;
             private Entry[] _entries;
             private int _curPosition;
+#if DEBUG
+            private LowLevelDictionary<TKey, TValue> _dict;
             private int _version;
+#endif
         }
     }
 
@@ -342,8 +373,7 @@ namespace System.Collections.Generic
 
         IEnumerator IEnumerable.GetEnumerator()
         {
-            IEnumerator<KeyValuePair<TKey, TValue>> ie = GetEnumerator();
-            return ie;
+            return GetEnumerator();
         }
     }
 }
