@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Collections.Generic;
+using System.Diagnostics;
 using Xunit;
 
 namespace System.Linq.Tests
@@ -171,6 +172,57 @@ namespace System.Linq.Tests
                 "namespace",
                 "namespace",
             });
+        }
+
+        [Fact]
+        public void VectorAddition()
+        {
+            int ARRAY_SIZE = 10000;
+            int[] array = RandomizeArray(ARRAY_SIZE);
+
+            int sum = 0;
+            int simdSum = 0;
+            // Sum those numbers using the tradition LINQ
+            Stopwatch sw = Stopwatch.StartNew();
+
+            for (int i = 0; i < 1000; i++)
+            {
+                // hard-coding in the "traditional" addition method from IEnumerable<int>.Sum()
+                foreach (int num in array)
+                    sum += num;
+            }
+
+            sw.Stop();
+            
+            double linqMS = sw.Elapsed.TotalMilliseconds;
+            Debug.WriteLine("LINQ Method: " + sw.Elapsed.TotalMilliseconds.ToString() + "ms");
+
+            // Sum those numbers using SIMD (must have x64-release mode turned on for RyuJIT)
+            sw = Stopwatch.StartNew();
+            for (int j = 0; j < 1000; j++)
+                simdSum = array.Sum();
+            sw.Stop();
+
+            // Verify that the numbers are the same using the traditional way and the SIMD way
+            Assert.Equal(simdSum, sum);
+
+            double simdMS = sw.Elapsed.TotalMilliseconds;
+            Debug.WriteLine("SIMD Method: " + sw.Elapsed.TotalMilliseconds.ToString() + "ms");
+            
+        }
+
+        private int[] RandomizeArray(int arraySize)
+        {
+            Random random = new Random();
+            // Generate random array
+            int[] array = new int[arraySize];
+
+            for (int i = 0; i < arraySize; i++)
+            {
+                array[i] = random.Next(arraySize * -1, arraySize * 10);
+            }
+
+            return array;
         }
     }
 }
