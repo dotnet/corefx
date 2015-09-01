@@ -202,11 +202,19 @@ namespace System.Linq.Expressions
             if (switchValue.Type == typeof(void)) throw Error.ArgumentCannotBeOfTypeVoid();
 
             var caseList = cases.ToReadOnly();
-            ContractUtils.RequiresNotEmpty(caseList, "cases");
             ContractUtils.RequiresNotNullItems(caseList, "cases");
 
             // Type of the result. Either provided, or it is type of the branches.
-            Type resultType = type ?? caseList[0].Body.Type;
+            Type resultType;
+            if (type != null)
+                resultType = type;
+            else if (caseList.Count != 0)
+                resultType = caseList[0].Body.Type;
+            else if (defaultBody != null)
+                resultType = defaultBody.Type;
+            else
+                resultType = typeof(void);
+
             bool customType = type != null;
 
             if (comparison != null)
@@ -253,6 +261,11 @@ namespace System.Linq.Expressions
                         }
                     }
                 }
+            }
+            else if(caseList.Count == 0)
+            {
+                // Set a sensible default equality based on the switchValue type.
+                comparison = Equal(switchValue, switchValue).Method;
             }
             else
             {
