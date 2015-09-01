@@ -265,6 +265,7 @@ namespace System.Linq.Expressions.Compiler
                     case ExpressionType.Block:
                         // Look in the last significant expression of a block
                         var body = (BlockExpression)expression;
+                        if (body.ExpressionCount == 0) return; // No labels.
                         // omit empty and debuginfo at the end of the block since they
                         // are not going to emit any IL
                         for (int i = body.ExpressionCount - 1; i >= 0; i--)
