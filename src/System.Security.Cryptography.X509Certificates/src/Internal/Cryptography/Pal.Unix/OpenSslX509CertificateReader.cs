@@ -35,72 +35,6 @@ namespace Internal.Cryptography.Pal
 
             _cert = handle;
         }
-      
-        internal static ICertificatePal FromBio(SafeBioHandle bio, string password)
-        {
-            // Try reading the value as: PEM-X509, DER-X509, DER-PKCS12.
-            int bioPosition = Interop.NativeCrypto.BioTell(bio);
-
-            Debug.Assert(bioPosition >= 0);
-
-            SafeX509Handle cert = Interop.libcrypto.PEM_read_bio_X509_AUX(bio, IntPtr.Zero, IntPtr.Zero, IntPtr.Zero);
-
-            if (cert != null && !cert.IsInvalid)
-            {
-                return new OpenSslX509CertificateReader(cert);
-            }
-
-            // Rewind, try again.
-            Interop.NativeCrypto.BioSeek(bio, bioPosition);
-            cert = Interop.NativeCrypto.ReadX509AsDerFromBio(bio);
-
-            if (cert != null && !cert.IsInvalid)
-            {
-                return new OpenSslX509CertificateReader(cert);
-            }
-
-            // Rewind, try again.
-            Interop.NativeCrypto.BioSeek(bio, bioPosition);
-
-            OpenSslPkcs12Reader pfx;
-
-            if (OpenSslPkcs12Reader.TryRead(bio, out pfx))
-            {
-                using (pfx)
-                {
-                    pfx.Decrypt(password);
-
-                    ICertificatePal first = null;
-
-                    foreach (OpenSslX509CertificateReader certPal in pfx.ReadCertificates())
-                    {
-                        // When requesting an X509Certificate2 from a PFX only the first entry is
-                        // returned.  Other entries should be disposed.
-                        if (first == null)
-                        {
-                            first = certPal;
-                        }
-                        else
-                        {
-                            certPal.Dispose();
-                        }
-                    }
-
-                    return first;
-                }
-            }
-
-            // Since we aren't going to finish reading, leaving the buffer where it was when we got
-            // it seems better than leaving it in some arbitrary other position.
-            // 
-            // But, before seeking back to start, save the Exception representing the last reported
-            // OpenSSL error in case the last BioSeek would change it.
-            Exception openSslException = Interop.libcrypto.CreateOpenSslCryptographicException();
-
-            Interop.NativeCrypto.BioSeek(bio, bioPosition);
-
-            throw openSslException;
-        }
 
         public bool HasPrivateKey
         {
@@ -131,7 +65,7 @@ namespace Internal.Cryptography.Pal
         {
             get
             {
-                return Interop.NativeCrypto.GetX509Thumbprint(_cert);
+                return Interop.Crypto.GetX509Thumbprint(_cert);
             }
         }
 
@@ -139,7 +73,7 @@ namespace Internal.Cryptography.Pal
         {
             get
             {
-                IntPtr oidPtr = Interop.NativeCrypto.GetX509PublicKeyAlgorithm(_cert);
+                IntPtr oidPtr = Interop.Crypto.GetX509PublicKeyAlgorithm(_cert);
                 return Interop.libcrypto.OBJ_obj2txt_helper(oidPtr);
             }
         }
@@ -148,7 +82,7 @@ namespace Internal.Cryptography.Pal
         {
             get
             {
-                return Interop.NativeCrypto.GetX509PublicKeyParameterBytes(_cert);
+                return Interop.Crypto.GetX509PublicKeyParameterBytes(_cert);
             }
         }
 
@@ -156,8 +90,8 @@ namespace Internal.Cryptography.Pal
         {
             get
             {
-                IntPtr keyBytesPtr = Interop.NativeCrypto.GetX509PublicKeyBytes(_cert);
-                return Interop.NativeCrypto.GetAsn1StringBytes(keyBytesPtr);
+                IntPtr keyBytesPtr = Interop.Crypto.GetX509PublicKeyBytes(_cert);
+                return Interop.Crypto.GetAsn1StringBytes(keyBytesPtr);
             }
         }
 
@@ -166,7 +100,7 @@ namespace Internal.Cryptography.Pal
             get
             {
                 IntPtr serialNumberPtr = Interop.libcrypto.X509_get_serialNumber(_cert);
-                byte[] serial = Interop.NativeCrypto.GetAsn1StringBytes(serialNumberPtr);
+                byte[] serial = Interop.Crypto.GetAsn1StringBytes(serialNumberPtr);
 
                 // Windows returns this in BigInteger Little-Endian,
                 // OpenSSL returns this in BigInteger Big-Endian.
@@ -179,7 +113,7 @@ namespace Internal.Cryptography.Pal
         {
             get
             {
-                IntPtr oidPtr = Interop.NativeCrypto.GetX509SignatureAlgorithm(_cert);
+                IntPtr oidPtr = Interop.Crypto.GetX509SignatureAlgorithm(_cert);
                 return Interop.libcrypto.OBJ_obj2txt_helper(oidPtr);
             }
         }
@@ -188,7 +122,7 @@ namespace Internal.Cryptography.Pal
         {
             get
             {
-                return ExtractValidityDateTime(Interop.NativeCrypto.GetX509NotAfter(_cert));
+                return ExtractValidityDateTime(Interop.Crypto.GetX509NotAfter(_cert));
             }
         }
 
@@ -196,7 +130,7 @@ namespace Internal.Cryptography.Pal
         {
             get
             {
-                return ExtractValidityDateTime(Interop.NativeCrypto.GetX509NotBefore(_cert));
+                return ExtractValidityDateTime(Interop.Crypto.GetX509NotBefore(_cert));
             }
         }
 
@@ -209,7 +143,7 @@ namespace Internal.Cryptography.Pal
         {
             get
             {
-                int version = Interop.NativeCrypto.GetX509Version(_cert);
+                int version = Interop.Crypto.GetX509Version(_cert);
 
                 if (version < 0)
                 {
@@ -265,7 +199,7 @@ namespace Internal.Cryptography.Pal
             get
             {
                 int extensionCount = Interop.libcrypto.X509_get_ext_count(_cert);
-                LowLevelListWithIList<X509Extension> extensions = new LowLevelListWithIList<X509Extension>(extensionCount);
+                X509Extension[] extensions = new X509Extension[extensionCount];
 
                 for (int i = 0; i < extensionCount; i++)
                 {
@@ -284,11 +218,10 @@ namespace Internal.Cryptography.Pal
 
                     Interop.libcrypto.CheckValidOpenSslHandle(dataPtr);
 
-                    byte[] extData = Interop.NativeCrypto.GetAsn1StringBytes(dataPtr);
+                    byte[] extData = Interop.Crypto.GetAsn1StringBytes(dataPtr);
                     bool critical = Interop.libcrypto.X509_EXTENSION_get_critical(ext);
-                    X509Extension extension = new X509Extension(oid, extData, critical);
 
-                    extensions.Add(extension);
+                    extensions[i] = new X509Extension(oid, extData, critical);
                 }
 
                 return extensions;
@@ -298,6 +231,11 @@ namespace Internal.Cryptography.Pal
         internal void SetPrivateKey(SafeEvpPkeyHandle privateKey)
         {
             _privateKey = privateKey;
+        }
+
+        internal SafeEvpPkeyHandle PrivateKeyHandle
+        {
+            get { return _privateKey; }
         }
 
         public RSA GetRSAPrivateKey()
@@ -315,7 +253,7 @@ namespace Internal.Cryptography.Pal
 
         public string GetNameInfo(X509NameType nameType, bool forIssuer)
         {
-            using (SafeBioHandle bioHandle = Interop.NativeCrypto.GetX509NameInfo(_cert, (int)nameType, forIssuer))
+            using (SafeBioHandle bioHandle = Interop.Crypto.GetX509NameInfo(_cert, (int)nameType, forIssuer))
             {
                 if (bioHandle.IsInvalid)
                 {
@@ -364,17 +302,31 @@ namespace Internal.Cryptography.Pal
             }
         }
 
+        internal OpenSslX509CertificateReader DuplicateHandles()
+        {
+            SafeX509Handle certHandle = Interop.libcrypto.X509_dup(_cert);
+            OpenSslX509CertificateReader duplicate = new OpenSslX509CertificateReader(certHandle);
+
+            if (_privateKey != null)
+            {
+                SafeEvpPkeyHandle keyHandle = SafeEvpPkeyHandle.DuplicateHandle(_privateKey);
+                duplicate.SetPrivateKey(keyHandle);
+            }
+
+            return duplicate;
+        }
+
         private static X500DistinguishedName LoadX500Name(IntPtr namePtr)
         {
             Interop.libcrypto.CheckValidOpenSslHandle(namePtr);
 
-            byte[] buf = Interop.NativeCrypto.GetX509NameRawBytes(namePtr);
+            byte[] buf = Interop.Crypto.GetX509NameRawBytes(namePtr);
             return new X500DistinguishedName(buf);
         }
 
         private static DateTime ExtractValidityDateTime(IntPtr validityDatePtr)
         {
-            byte[] bytes = Interop.NativeCrypto.GetAsn1StringBytes(validityDatePtr);
+            byte[] bytes = Interop.Crypto.GetAsn1StringBytes(validityDatePtr);
 
             // RFC 5280 (X509v3 - https://tools.ietf.org/html/rfc5280)
             // states that the validity times are either UTCTime:YYMMDDHHMMSSZ (13 bytes)

@@ -196,6 +196,14 @@ namespace System.Net.Http.WinHttpHandlerUnitTests
         }
 
         [Fact]
+        public void Write_OffsetPlusCountMaxValueExceedsBufferLength_ThrowsArgumentException()
+        {
+            Stream stream = MakeRequestStream();
+
+            Assert.Throws<ArgumentException>(() => { stream.Write(new byte[1], int.MaxValue, int.MaxValue); });
+        }
+
+        [Fact]
         public void Write_WhenDisposed_ThrowsObjectDisposedException()
         {
             Stream stream = MakeRequestStream();
@@ -209,7 +217,7 @@ namespace System.Net.Http.WinHttpHandlerUnitTests
         {
             Stream stream = MakeRequestStream();
 
-            TestControl.WinHttpAPIFail = true;
+            TestControl.Fail.WinHttpWriteData = true;
             
             Assert.Throws<IOException>(() => { stream.Write(new byte[1], 0, 1); });
         }

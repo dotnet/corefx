@@ -8,7 +8,7 @@ using System.Security;
 
 namespace System.IO
 {
-    public sealed class DirectoryInfo : FileSystemInfo
+    public sealed partial class DirectoryInfo : FileSystemInfo
     {
         [System.Security.SecuritySafeCritical]
         public DirectoryInfo(String path)
@@ -23,12 +23,12 @@ namespace System.IO
         }
 
         [System.Security.SecuritySafeCritical]
-        internal DirectoryInfo(String fullPath, IFileSystemObject fileSystemObject) : base(fileSystemObject)
+        internal DirectoryInfo(String fullPath, String originalPath)
         {
-            Debug.Assert(PathInternal.GetRootLength(fullPath) > 0, "fullPath must be fully qualified!");
-            
+            Debug.Assert(Path.IsPathRooted(fullPath), "fullPath must be fully qualified!");
+
             // Fast path when we know a DirectoryInfo exists.
-            OriginalPath = Path.GetFileName(fullPath);
+            OriginalPath = originalPath ?? Path.GetFileName(fullPath);
             FullPath = fullPath;
             DisplayPath = GetDisplayName(OriginalPath, FullPath);
         }
@@ -392,11 +392,10 @@ namespace System.IO
             else
                 fullSourcePath = FullPath + PathHelpers.DirectorySeparatorCharAsString;
 
-            int maxDirectoryPath = FileSystem.Current.MaxDirectoryPath;
-            if (fullSourcePath.Length >= maxDirectoryPath)
+            if (PathInternal.IsDirectoryTooLong(fullSourcePath))
                 throw new PathTooLongException(SR.IO_PathTooLong);
 
-            if (fullDestDirName.Length >= maxDirectoryPath)
+            if (PathInternal.IsDirectoryTooLong(fullDestDirName))
                 throw new PathTooLongException(SR.IO_PathTooLong);
 
             StringComparison pathComparison = PathInternal.GetComparison();

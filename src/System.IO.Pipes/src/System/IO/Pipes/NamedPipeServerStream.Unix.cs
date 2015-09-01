@@ -15,7 +15,6 @@ namespace System.IO.Pipes
     /// </summary>
     public sealed partial class NamedPipeServerStream : PipeStream
     {
-        private bool _createdFifo;
         private string _path;
         private PipeDirection _direction;
         private PipeOptions _options;
@@ -32,7 +31,7 @@ namespace System.IO.Pipes
             Debug.Assert(direction >= PipeDirection.In && direction <= PipeDirection.InOut, "invalid pipe direction");
             Debug.Assert(inBufferSize >= 0, "inBufferSize is negative");
             Debug.Assert(outBufferSize >= 0, "outBufferSize is negative");
-            Debug.Assert((maxNumberOfServerInstances >= 1 && maxNumberOfServerInstances <= 254) || (maxNumberOfServerInstances == MaxAllowedServerInstances), "maxNumberOfServerInstances is invalid");
+            Debug.Assert((maxNumberOfServerInstances >= 1) || (maxNumberOfServerInstances == MaxAllowedServerInstances), "maxNumberOfServerInstances is invalid");
             Debug.Assert(transmissionMode >= PipeTransmissionMode.Byte && transmissionMode <= PipeTransmissionMode.Message, "transmissionMode is out of range");
 
             if (transmissionMode == PipeTransmissionMode.Message)
@@ -47,20 +46,22 @@ namespace System.IO.Pipes
             _path = GetPipePath(".", pipeName);
             while (true)
             {
-                int result = Interop.libc.mkfifo(_path, (int)Interop.libc.Permissions.S_IRWXU);
+                int result = Interop.Sys.MkFifo(_path, (int)Interop.Sys.Permissions.S_IRWXU);
                 if (result == 0)
                 {
-                    _createdFifo = true;
+                    // The FIFO was successfully created - note that although we create the FIFO here, we don't
+                    // ever delete it. If we remove the FIFO we could invalidate other servers that also use it. 
+                    // See #2764 for further discussion.
                     break;
                 }
 
-                int errno = Marshal.GetLastWin32Error();
-                if (errno == Interop.Errors.EINTR)
+                Interop.ErrorInfo errorInfo = Interop.Sys.GetLastErrorInfo();
+                if (errorInfo.Error == Interop.Error.EINTR)
                 {
                     // interrupted; try again
                     continue;
                 }
-                else if (errno == Interop.Errors.EEXIST)
+                else if (errorInfo.Error == Interop.Error.EEXIST)
                 {
                     // FIFO already exists; nothing more to do
                     break;
@@ -68,7 +69,7 @@ namespace System.IO.Pipes
                 else
                 {
                     // something else; fail
-                    throw Interop.GetExceptionForIoErrno(errno, _path);
+                    throw Interop.GetExceptionForIoErrno(errorInfo, _path);
                 }
             }
 
@@ -97,7 +98,7 @@ namespace System.IO.Pipes
             var serverHandle = Microsoft.Win32.SafeHandles.SafePipeHandle.Open(
                 _path, 
                 TranslateFlags(_direction, _options, _inheritability), 
-                (int)Interop.libc.Permissions.S_IRWXU);
+                (int)Interop.Sys.Permissions.S_IRWXU);
 
             InitializeBufferSize(serverHandle, _outBufferSize); // there's only one capacity on Linux; just use the out buffer size
             InitializeHandle(serverHandle, isExposed: false, isAsync: (_options & PipeOptions.Asynchronous) != 0);
@@ -121,17 +122,6 @@ namespace System.IO.Pipes
             InitializeHandle(null, false, false);
         }
 
-        protected override void Dispose(bool disposing)
-        {
-            // If we created the FIFO object, be a good citizen and clean it up.
-            // If this doesn't happen, worst case is we leave a temp file around.
-            if (_createdFifo && _path != null)
-            {
-                Interop.libc.unlink(_path); // ignore any errors
-            }
-            base.Dispose(disposing);
-        }
-
         // Gets the username of the connected client.  Not that we will not have access to the client's 
         // username until it has written at least once to the pipe (and has set its impersonationLevel 
         // argument appropriately). 
@@ -140,6 +130,16 @@ namespace System.IO.Pipes
         {
             CheckWriteOperations();
             throw new PlatformNotSupportedException();
+        }
+
+        private void ValidateMaxNumberOfServerInstances(int maxNumberOfServerInstances)
+        {
+            // Since Unix has no notion of Max allowed Server Instances per named pipe, we don't enforce an
+            // upper bound on maxNumberOfServerInstances.
+            if ((maxNumberOfServerInstances < 1) && (maxNumberOfServerInstances != MaxAllowedServerInstances))
+            {
+                throw new ArgumentOutOfRangeException("maxNumberOfServerInstances", SR.ArgumentOutOfRange_MaxNumServerInstances);
+            }
         }
 
         // -----------------------------

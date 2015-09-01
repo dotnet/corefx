@@ -7,6 +7,7 @@
     <ProjectGuid>{1D422B1D-D7C4-41B9-862D-EB3D98DF37DE}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AssemblyName>System.Net.Http</AssemblyName>
+    <AssemblyVersion>4.0.1.0</AssemblyVersion>
   </PropertyGroup>
   
   <!-- Help VS understand available configurations -->
@@ -132,14 +133,55 @@
     <Compile Include="@(CompileItem)" />
   </ItemGroup>
   
+  <PropertyGroup Condition=" '$(TargetsUnix)' == 'true' ">
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
   <ItemGroup Condition=" '$(TargetsUnix)' == 'true' ">
+    <Compile Include="System\Net\Http\Unix\CurlCallbacks.cs" />
     <Compile Include="System\Net\Http\Unix\CurlHandler.cs" />
+    <Compile Include="System\Net\Http\Unix\CurlResponseMessage.cs" />
     <Compile Include="System\Net\Http\Unix\HttpClientHandler.Unix.cs" />
+    <Compile Include="$(CommonPath)\Interop\Unix\Interop.Errors.cs">
+      <Link>Common\Interop\Unix\Interop.Errors.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\Interop.IOErrors.cs">
+      <Link>Common\Interop\Unix\Interop.IOErrors.cs</Link>
+    </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\Interop.Libraries.cs">
       <Link>Common\Interop\Unix\Interop.Libraries.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.Close.cs">
+      <Link>Common\Interop\Unix\System.Native\Interop.Close.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.Open.cs">
+      <Link>Common\Interop\Unix\System.Native\Interop.Open.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.OpenFlags.cs">
+      <Link>Common\Interop\Unix\System.Native\Interop.OpenFlags.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.Pipe.cs">
+      <Link>Common\Interop\Unix\System.Native\Interop.Pipe.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\libc\Interop.poll.cs">
+      <Link>Common\Interop\Unix\libc\Interop.poll.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\libc\Interop.read.cs">
+      <Link>Common\Interop\Unix\libc\Interop.read.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\libc\Interop.write.cs">
+      <Link>Common\Interop\Unix\libc\Interop.write.cs</Link>
+    </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\libcurl\Interop.libcurl.cs">
       <Link>Common\Interop\Unix\libcurl\Interop.libcurl.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\libcurl\Interop.libcurl_easy.cs">
+      <Link>Common\Interop\Unix\libcurl\Interop.libcurl_easy.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\libcurl\Interop.libcurl_multi.cs">
+      <Link>Common\Interop\Unix\libcurl\Interop.libcurl_multi.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\libcurl\Interop.libcurl_slist.cs">
+      <Link>Common\Interop\Unix\libcurl\Interop.libcurl_slist.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\libcurl\Interop.libcurl_types.cs">
       <Link>Common\Interop\Unix\libcurl\Interop.libcurl_types.cs</Link>
@@ -147,11 +189,25 @@
     <Compile Include="$(CommonPath)\Interop\Unix\libcurl\Interop.SafeCurlHandle.cs">
       <Link>Common\Interop\Unix\libcurl\Interop.SafeCurlHandle.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\libcurl\Interop.SafeCurlMultiHandle.cs">
+      <Link>Common\Interop\Unix\libcurl\Interop.SafeCurlMultiHandle.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\libcurl\Interop.SafeCurlSlistHandle.cs">
+      <Link>Common\Interop\Unix\libcurl\Interop.SafeCurlSlistHandle.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Net.Http.Native\Interop.Initialization.cs">
+      <Link>Common\Interop\Unix\System.Net.Http.Native\Interop.Initialization.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Security.Cryptography.Native\Interop.Initialization.cs">
+      <Link>Common\Interop\Unix\System.Security.Cryptography.Native\Interop.Initialization.cs</Link>
+    </Compile>
     <Compile Include="$(CommonPath)\System\NotImplemented.cs">
       <Link>Common\System\NotImplemented.cs</Link>
-    </Compile>    
+    </Compile>
+    <Compile Include="$(CommonPath)\System\Net\Http\HttpHandlerDefaults.cs">
+      <Link>Common\System\Net\Http\HttpHandlerDefaults.cs</Link>
+    </Compile>
   </ItemGroup>
-  
   <ItemGroup>
     <None Include="project.json" />
   </ItemGroup>

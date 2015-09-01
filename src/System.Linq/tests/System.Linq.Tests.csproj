@@ -18,12 +18,21 @@
     <None Include="project.json" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AllTests.cs" />
+    <Compile Include="AnyTests.cs" />
     <Compile Include="CachedEnumerator.cs" />
+    <Compile Include="ConcatTests.cs" />
     <Compile Include="EnumerableTests.cs" />
     <Compile Include="EmptyEnumerable.cs" />
+    <Compile Include="ExceptTests.cs" />
+    <Compile Include="FirstOrDefaultTests.cs" />
+    <Compile Include="FirstTests.cs" />
     <Compile Include="Helpers\TestCollection.cs" />
     <Compile Include="Helpers\TestEnumerable.cs" />
     <Compile Include="Helpers\TestReadOnlyCollection.cs" />
+    <Compile Include="IntersectTests.cs" />
+    <Compile Include="LastOrDefaultTests.cs" />
+    <Compile Include="LastTests.cs" />
     <Compile Include="MinMaxTests.cs" />
     <Compile Include="Performance\CastPerf.cs" />
     <Compile Include="Performance\LinqPerformanceCore.cs" />
@@ -38,6 +47,7 @@
     <Compile Include="ShortCircuitingTests.cs" />
     <Compile Include="SingleTests.cs" />
     <Compile Include="SkipTests.cs" />
+    <Compile Include="SkipWhileTests.cs" />
     <Compile Include="SumTests.cs" />
     <Compile Include="ReverseTests.cs" />
     <Compile Include="WhereTests.cs" />
@@ -45,6 +55,39 @@
     <Compile Include="ToDictionaryTests.cs" />
     <Compile Include="ToListTests.cs" />
     <Compile Include="SelectTests.cs" />
+    <Compile Include="UnionTests.cs" />
+    <Compile Include="AggregateTests.cs" />
+    <Compile Include="AverageTests.cs" />
+    <Compile Include="CastTests.cs" />
+    <Compile Include="ContainsTests.cs" />
+    <Compile Include="CountTests.cs" />
+    <Compile Include="DefaultIfEmptyTests.cs" />
+    <Compile Include="DistinctTests.cs" />
+    <Compile Include="ElementAtOrDefaultTests.cs" />
+    <Compile Include="ElementAtTests.cs" />
+    <Compile Include="SequenceEqualTests.cs" />
+    <Compile Include="LegacyTests\GroupByTests.cs" />
+    <Compile Include="LegacyTests\GroupJoinTests.cs" />
+    <Compile Include="LegacyTests\Helper.cs" />
+    <Compile Include="LegacyTests\JoinTests.cs" />
+    <Compile Include="LongCountTests.cs" />
+    <Compile Include="LegacyTests\MaxTests.cs" />
+    <Compile Include="LegacyTests\MinTests.cs" />
+    <Compile Include="OfTypeTests.cs" />
+    <Compile Include="OrderByDescendingTests.cs" />
+    <Compile Include="OrderByTests.cs" />
+    <Compile Include="LegacyTests\SelectManyTests.cs" />
+    <Compile Include="LegacyTests\SelectTests.cs" />
+    <Compile Include="SingleOrDefaultTests.cs" />
+    <Compile Include="LegacyTests\SumTests.cs" />
+    <Compile Include="TakeTests.cs" />
+    <Compile Include="TakeWhileTests.cs" />
+    <Compile Include="ThenByDescendingTests.cs" />
+    <Compile Include="ThenByTests.cs" />
+    <Compile Include="ToLookupTests.cs" />
+    <Compile Include="AsEnumerableTests.cs" />
+    <Compile Include="LegacyTests\WhereTests.cs" />
+    <Compile Include="ZipTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\src\System.Linq.csproj">

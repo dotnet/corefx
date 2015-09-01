@@ -147,6 +147,12 @@ namespace System.Security.Cryptography.X509Certificates.Tests
         }
 
         [Fact]
+        public static void X509Cert2CreateFromEmptyPfx()
+        {
+            Assert.Throws<CryptographicException>(() => new X509Certificate2(TestData.EmptyPfx));
+        }
+
+        [Fact]
         public static void X509Cert2CreateFromPfxFile()
         {
             using (X509Certificate2 cert2 = new X509Certificate2(Path.Combine("TestData", "DummyTcpServer.pfx")))
@@ -163,6 +169,81 @@ namespace System.Security.Cryptography.X509Certificates.Tests
             {
                 // OID=RSA Encryption
                 Assert.Equal("1.2.840.113549.1.1.1", cert2.GetKeyAlgorithm());
+            }
+        }
+
+        [Fact]
+        [ActiveIssue(2635)]
+        public static void X509Certificate2FromPkcs7DerFile()
+        {
+            Assert.Throws<CryptographicException>(() => new X509Certificate2(Path.Combine("TestData", "singlecert.p7b")));
+        }
+
+        [Fact]
+        [ActiveIssue(2635)]
+        public static void X509Certificate2FromPkcs7PemFile()
+        {
+            Assert.Throws<CryptographicException>(() => new X509Certificate2(Path.Combine("TestData", "singlecert.p7c")));
+        }
+
+        [Fact]
+        public static void X509Certificate2FromPkcs7DerBlob()
+        {
+            Assert.Throws<CryptographicException>(() => new X509Certificate2(TestData.Pkcs7SingleDerBytes));
+        }
+
+        [Fact]
+        public static void X509Certificate2FromPkcs7PemBlob()
+        {
+            Assert.Throws<CryptographicException>(() => new X509Certificate2(TestData.Pkcs7SinglePemBytes));
+        }
+
+        [Fact]
+        public static void UseAfterDispose()
+        {
+            using (X509Certificate2 c = new X509Certificate2(TestData.MsCertificate))
+            {
+                IntPtr h = c.Handle;
+
+                // Do a couple of things that would only be true on a valid certificate, as a precondition.
+                Assert.NotEqual(IntPtr.Zero, h);
+                byte[] actualThumbprint = c.GetCertHash();
+
+                c.Dispose();
+
+                // For compat reasons, Dispose() acts like the now-defunct Reset() method rather than
+                // causing ObjectDisposedExceptions.
+                h = c.Handle;
+                Assert.Equal(IntPtr.Zero, h);
+                Assert.Throws<CryptographicException>(() => c.GetCertHash());
+                Assert.Throws<CryptographicException>(() => c.GetKeyAlgorithm());
+                Assert.Throws<CryptographicException>(() => c.GetKeyAlgorithmParameters());
+                Assert.Throws<CryptographicException>(() => c.GetKeyAlgorithmParametersString());
+                Assert.Throws<CryptographicException>(() => c.GetPublicKey());
+                Assert.Throws<CryptographicException>(() => c.GetSerialNumber());
+                Assert.Throws<CryptographicException>(() => c.Issuer);
+                Assert.Throws<CryptographicException>(() => c.Subject);
+            }
+        }
+
+        [Fact]
+        public static void ExportPublicKeyAsPkcs12()
+        {
+            using (X509Certificate2 publicOnly = new X509Certificate2(TestData.MsCertificate))
+            {
+                // Pre-condition: There's no private key
+                Assert.False(publicOnly.HasPrivateKey);
+
+                // This won't throw.
+                byte[] pkcs12Bytes = publicOnly.Export(X509ContentType.Pkcs12);
+
+                // Read it back as a collection, there should be only one cert, and it should
+                // be equal to the one we started with.
+                X509Certificate2Collection fromPfx = new X509Certificate2Collection();
+                fromPfx.Import(pkcs12Bytes);
+
+                Assert.Equal(1, fromPfx.Count);
+                Assert.Equal(publicOnly, fromPfx[0]);
             }
         }
     }
