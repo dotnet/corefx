@@ -120,6 +120,19 @@ namespace System.Linq.Expressions
             }
             return Expression.Switch(Type, switchValue, defaultBody, Comparison, cases);
         }
+        
+        /// <inheritdoc/>
+        public override bool CanReduce
+        {
+            get { return _cases.Count == 0; }
+        }
+        
+        /// <inheritdoc/>
+        public override Expression Reduce()
+        {
+            if (_cases.Count != 0) return this;
+            return _defaultBody ?? Expression.Empty();
+        }
     }
 
     public partial class Expression

@@ -3904,6 +3904,46 @@ namespace Tests
         }
         
         [Fact]
+        public static void DefaultOnlySwitchReducable()
+        {
+            var p = Expression.Parameter(typeof(int));
+            var s = Expression.Switch(p, Expression.Constant(42));
+            
+            Assert.True(s.CanReduce);
+            
+            var r = s.ReduceAndCheck();
+            
+            var fInt32Int32 = Expression.Lambda<Func<int, int>>(r, p).Compile();
+            
+            Assert.Equal(42, fInt32Int32(0));
+            Assert.Equal(42, fInt32Int32(1));
+            Assert.Equal(42, fInt32Int32(-1));
+            
+            s = Expression.Switch(typeof(object), p, Expression.Constant("A test string"), null);
+            
+            Assert.True(s.CanReduce);
+            
+            r = s.ReduceAndCheck();
+
+            var fInt32Object = Expression.Lambda<Func<int, object>>(r, p).Compile();
+
+            Assert.Equal("A test string", fInt32Object(0));
+            Assert.Equal("A test string", fInt32Object(1));
+            Assert.Equal("A test string", fInt32Object(-1));
+            
+            p = Expression.Parameter(typeof(string));
+            s = Expression.Switch(p, Expression.Constant("foo"));
+            
+            r = s.ReduceAndCheck();
+            
+            var fStringString = Expression.Lambda<Func<string, string>>(r, p).Compile();
+            
+            Assert.Equal("foo", fStringString("bar"));
+            Assert.Equal("foo", fStringString(null));
+            Assert.Equal("foo", fStringString("foo"));
+        }
+
+        [Fact]
         public static void NoDefaultOrCasesSwitch()
         {
             var p = Expression.Parameter(typeof(int));
@@ -3914,6 +3954,21 @@ namespace Tests
             f(0);
             
             Assert.Equal(s.Type, typeof(void));
+        }
+
+        [Fact]
+        public static void NoDefaultOrCasesSwitchReducable()
+        {
+            var p = Expression.Parameter(typeof(int));
+            var s = Expression.Switch(p, (Expression)null);
+            
+            var r = s.ReduceAndCheck();
+            
+            var f = Expression.Lambda<Action<int>>(r, p).Compile();
+            
+            f(0);
+            
+            Assert.Equal(r.Type, typeof(void));
         }
 
         [Fact]
