@@ -598,6 +598,35 @@ namespace System.Linq.Expressions
 
             return new ScopeWithType(ReuseOrValidateVariables(variables), args, _type);
         }
+        
+        public override bool CanReduce
+        {
+            get
+            {
+                switch(ExpressionCount)
+                {
+                    case 0:
+                        return true;
+                    case 1:
+                        return VariableCount == 0;
+                    default:
+                        return false;
+                }
+            }
+        }
+        
+        public override Expression Reduce()
+        {
+            switch(ExpressionCount)
+            {
+                case 0:
+                    return Expression.Empty();
+                case 1:
+                    return VariableCount == 0 ? Expressions[0] : this;
+                default:
+                    return this;
+            }
+        }
     }
 
     #endregion
