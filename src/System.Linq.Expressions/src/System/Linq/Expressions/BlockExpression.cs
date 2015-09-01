@@ -778,8 +778,12 @@ namespace System.Linq.Expressions
         public static BlockExpression Block(params Expression[] expressions)
         {
             ContractUtils.RequiresNotNull(expressions, "expressions");
-
-            switch (expressions.Length)
+            return Block((IList<Expression>)expressions);
+        }
+        
+        private static BlockExpression Block(IList<Expression> expressions)
+        {
+            switch (expressions.Count)
             {
                 case 2: return Block(expressions[0], expressions[1]);
                 case 3: return Block(expressions[0], expressions[1], expressions[2]);
@@ -788,7 +792,7 @@ namespace System.Linq.Expressions
                 default:
                     ContractUtils.RequiresNotEmpty(expressions, "expressions");
                     RequiresCanRead(expressions, "expressions");
-                    return new BlockN(expressions.Copy());
+                    return new BlockN(expressions.ToReadOnly());
             }
         }
 
@@ -799,7 +803,8 @@ namespace System.Linq.Expressions
         /// <returns>The created <see cref="BlockExpression"/>.</returns>
         public static BlockExpression Block(IEnumerable<Expression> expressions)
         {
-            return Block(EmptyReadOnlyCollection<ParameterExpression>.Instance, expressions);
+            ContractUtils.RequiresNotNull(expressions, "expressions");
+            return Block(expressions as IList<Expression> ?? expressions.ToReadOnly());
         }
 
         /// <summary>
@@ -896,16 +901,17 @@ namespace System.Linq.Expressions
             {
                 return new ScopeWithType(variableList, expressionList, type);
             }
+            else if (variableList.Count == 0)
+            {
+                return Block(expressionList);
+            }
+            else if (expressionList.Count == 1)
+            {
+                return new Scope1(variableList, expressionList[0]);
+            }
             else
             {
-                if (expressionList.Count == 1)
-                {
-                    return new Scope1(variableList, expressionList[0]);
-                }
-                else
-                {
-                    return new ScopeN(variableList, expressionList);
-                }
+                return new ScopeN(variableList, expressionList);
             }
         }
 
