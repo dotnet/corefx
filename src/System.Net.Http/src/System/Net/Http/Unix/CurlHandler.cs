@@ -63,7 +63,7 @@ namespace System.Net.Http
         private bool _preAuthenticate = false;
         private CredentialCache _credentialCache = null;
         private CookieContainer _cookieContainer = null;
-        private bool _useCookie = false;
+        private bool _useCookie = true;
         private bool _automaticRedirection = HttpHandlerDefaults.DefaultAutomaticRedirection;
         private int _maxAutomaticRedirections = HttpHandlerDefaults.DefaultMaxAutomaticRedirections;
 
@@ -71,11 +71,6 @@ namespace System.Net.Http
 
         static CurlHandler()
         {
-            int result = Interop.libcurl.curl_global_init(Interop.libcurl.CurlGlobalFlags.CURL_GLOBAL_ALL);
-            if (result != CURLcode.CURLE_OK)
-            {
-                throw new InvalidOperationException("Cannot use libcurl in this process");
-            }
             curlVersionInfoData = Marshal.PtrToStructure<CurlVersionInfoData>(Interop.libcurl.curl_version_info(CurlAge));
             if (curlVersionInfoData.age < MinCurlAge)
             {
@@ -581,13 +576,9 @@ namespace System.Net.Http
 
         private void SetCookieOption(SafeCurlHandle requestHandle, Uri requestUri)
         {
-            if (!_useCookie)
+            if (!_useCookie || _cookieContainer == null)
             {
                 return;
-            }
-            else if (_cookieContainer == null)
-            {
-                throw new InvalidOperationException(SR.net_http_invalid_cookiecontainer);
             }
 
             string cookieValues = _cookieContainer.GetCookieHeader(requestUri);                    
