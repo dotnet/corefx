@@ -75,6 +75,7 @@
     <Compile Include="FakeMarshal.cs" />
     <Compile Include="FakeRegistry.cs" />
     <Compile Include="FakeSafeWinHttpHandle.cs" />
+    <Compile Include="SafeWinHttpHandleTest.cs" />
     <Compile Include="TestServer.cs" />
     <Compile Include="TestControl.cs" />
     <Compile Include="WinHttpHandlerTest.cs" />

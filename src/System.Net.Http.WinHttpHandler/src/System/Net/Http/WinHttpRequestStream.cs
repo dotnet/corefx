@@ -27,6 +27,11 @@ namespace System.Net.Http
             _chunkedMode = chunkedMode;
         }
 
+        ~WinHttpRequestStream()
+        {
+            Dispose(false);
+        }
+        
         public override bool CanRead
         {
             get
@@ -134,13 +139,12 @@ namespace System.Net.Http
         
         protected override void Dispose(bool disposing)
         {
-            if (disposing && !_disposed)
+            if (!_disposed)
             {
                 _disposed = true;
 
                 _requestHandle.DangerousRelease();
-
-                SafeWinHttpHandle.DisposeAndClearHandle(ref _requestHandle);
+                _requestHandle = null;
             }
 
             base.Dispose(disposing);

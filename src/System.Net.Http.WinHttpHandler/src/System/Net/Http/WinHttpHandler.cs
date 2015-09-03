@@ -150,6 +150,11 @@ namespace System.Net.Http
         {
         }
 
+        ~WinHttpHandler()
+        {
+            Dispose(false);
+        }
+
         #region Properties
         public bool AutomaticRedirection
         {
@@ -546,14 +551,14 @@ namespace System.Net.Http
 
         protected override void Dispose(bool disposing)
         {
-            if (disposing && !_disposed)
+            if (!_disposed)
             {
                 _disposed = true;
 
                 if (_sessionHandle != null)
                 {
                     _sessionHandle.DangerousRelease();
-                    SafeWinHttpHandle.DisposeAndClearHandle(ref _sessionHandle);
+                    _sessionHandle = null;
                 }
             }
 
@@ -933,8 +938,6 @@ namespace System.Net.Http
 
         private void EnsureSessionHandleExists(RequestState state)
         {
-            bool ignore = false;
-
             if (_sessionHandle == null)
             {
                 lock (_lockObject)
@@ -989,8 +992,6 @@ namespace System.Net.Http
                             0);
                         if (!_sessionHandle.IsInvalid)
                         {
-                            _sessionHandle.DangerousAddRef(ref ignore);
-
                             return;
                         }
 
@@ -1018,8 +1019,6 @@ namespace System.Net.Http
                                 SR.net_http_client_execution_error,
                                 WinHttpException.CreateExceptionUsingLastError());
                         }
-
-                        _sessionHandle.DangerousAddRef(ref ignore);
                     }
                 }
             }
@@ -1083,7 +1082,6 @@ namespace System.Net.Http
             Exception savedException = null;
             SafeWinHttpHandle connectHandle = null;
             SafeWinHttpHandle requestHandle = null;
-            WinHttpRequestStream requestStream = null;
             GCHandle requestStateHandle = new GCHandle();
 
             if (state.CancellationToken.IsCancellationRequested)
@@ -1186,11 +1184,13 @@ namespace System.Net.Http
                     // Send request body if present.
                     if (state.RequestMessage.Content != null)
                     {
-                        requestStream = new WinHttpRequestStream(requestHandle, chunkedModeForSend);
-                        await state.RequestMessage.Content.CopyToAsync(
-                            requestStream,
-                            state.TransportContext).ConfigureAwait(false);
-                        requestStream.EndUpload();
+                        using (var requestStream = new WinHttpRequestStream(requestHandle, chunkedModeForSend))
+                        {
+                            await state.RequestMessage.Content.CopyToAsync(
+                                requestStream,
+                                state.TransportContext).ConfigureAwait(false);
+                            requestStream.EndUpload();
+                        }
                     }
 
                     state.CancellationToken.ThrowIfCancellationRequested();
@@ -1264,11 +1264,6 @@ namespace System.Net.Http
             if (requestStateHandle.IsAllocated)
             {
                 requestStateHandle.Free();
-            }
-
-            if (requestStream != null)
-            {
-                requestStream.Dispose();
             }
 
             SafeWinHttpHandle.DisposeAndClearHandle(ref requestHandle);

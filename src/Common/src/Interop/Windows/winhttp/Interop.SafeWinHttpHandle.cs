@@ -30,6 +30,31 @@ internal partial class Interop
                 }
             }
 
+            // The SafeHandle base class is inconsistent w.r.t. how Dispose() and DangerousRelease()
+            // are implemented. Both methods can cause the ref count on the SafeHandle to be decremented.
+            // And when the ref count reaches zero, ReleaseHandle() is called and the handle is marked
+            // as 'closed'. However, there is a separate internal state bit to track Dispose() calls.
+            // Calling Dispose() more than once is a no-op.  However, calling DangerousRelease() and then
+            // Dispose() will cause ObjectDisposedException to be thrown if the previous DangerousRelease()
+            // caused the handle to be closed. This seems inconsistent especially since both methods can
+            // decrement the ref count and cause ReleaseHandle() to be called.
+            //
+            // The SafeWinHttpHandle class requires special lifetime management. Multiple classes such as
+            // WinHttpHandler, WinHttpRequestStream, and WinHttpResponseStream interact together with the
+            // same WinHttp handles for a single request/response operation. In addition, there is a parent-child
+            // hierarchy among the handles which causes additional ref counts to be added to keep the handles
+            // valid. Due to these requirements, the use pattern of SafeWinHttpHandle typically uses DangerousAddRef()
+            // and DangerousRelease() to help manage ref counts. Thus, to work around the limitations of the
+            // current SafeHandle implementation, it is important that Dispose() be a no-op if the handle has
+            // already been closed due to final release caused by DangerousRelease().
+            protected override void Dispose(bool disposing)
+            {
+                if (!IsClosed)
+                {
+                    base.Dispose(disposing);
+                }
+            }
+        
             // Important: WinHttp API calls should not happen while another WinHttp call for the same handle did not 
             // return. During finalization that was not initiated by the Dispose pattern we don't expect any other WinHttp
             // calls in progress.

@@ -32,6 +32,11 @@ namespace System.Net.Http
             _requestHandle = requestHandle;
         }
 
+        ~WinHttpResponseStream()
+        {
+            Dispose(false);
+        }
+        
         public override bool CanRead
         {
             get
@@ -145,17 +150,16 @@ namespace System.Net.Http
 
         protected override void Dispose(bool disposing)
         {
-            if (disposing && !_disposed)
+            if (!_disposed)
             {
                 _disposed = true;
 
                 _requestHandle.DangerousRelease();
+                _requestHandle = null;
                 _connectHandle.DangerousRelease();
+                _connectHandle = null;
                 _sessionHandle.DangerousRelease();
-
-                SafeWinHttpHandle.DisposeAndClearHandle(ref _requestHandle);
-                SafeWinHttpHandle.DisposeAndClearHandle(ref _connectHandle);
-                SafeWinHttpHandle.DisposeAndClearHandle(ref _sessionHandle);
+                _sessionHandle = null;
             }
 
             base.Dispose(disposing);

@@ -10,9 +10,9 @@ using Xunit;
 
 namespace System.Net.Http.WinHttpHandlerUnitTests
 {
-    public class WinHttpResponseStreamTests
+    public class WinHttpResponseStreamTest
     {
-        public WinHttpResponseStreamTests()
+        public WinHttpResponseStreamTest()
         {
             TestControl.ResetAll();
         }
