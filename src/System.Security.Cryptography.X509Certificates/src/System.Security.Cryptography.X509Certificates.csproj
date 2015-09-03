@@ -131,6 +131,7 @@
     <Compile Include="Internal\Cryptography\Pal.Unix\CertificatePolicy.cs" />
     <Compile Include="Internal\Cryptography\Pal.Unix\ChainPal.cs" />
     <Compile Include="Internal\Cryptography\Pal.Unix\CollectionBackedStoreProvider.cs" />
+    <Compile Include="Internal\Cryptography\Pal.Unix\CrlCache.cs" />
     <Compile Include="Internal\Cryptography\Pal.Unix\DerSequenceReader.cs" />
     <Compile Include="Internal\Cryptography\Pal.Unix\DirectoryBasedStoreProvider.cs" />
     <Compile Include="Internal\Cryptography\Pal.Unix\OpenSslPkcs12Reader.cs" />
@@ -141,6 +142,7 @@
     <Compile Include="Internal\Cryptography\Pal.Unix\PkcsFormatReader.cs" />
     <Compile Include="Internal\Cryptography\Pal.Unix\StorePal.cs" />
     <Compile Include="Internal\Cryptography\Pal.Unix\X509Pal.cs" />
+    <Compile Include="Internal\Cryptography\Pal.Unix\X509Persistence.cs" />
     <Compile Include="$(CommonPath)\Interop\Unix\Interop.Libraries.cs">
       <Link>Common\Interop\Unix\Interop.Libraries.cs</Link>
     </Compile>
@@ -254,6 +256,21 @@
     </Compile>
     <Compile Include="$(CommonPath)\System\IO\PersistedFiles.Names.Unix.cs">
       <Link>Common\System\IO\PersistedFiles.Names.Unix.cs</Link>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetsFreeBSD)' == 'true'">
+    <Compile Include="$(CommonPath)\Interop\FreeBSD\Interop.Libraries.cs">
+      <Link>Common\Interop\FreeBSD\Interop.Libraries.cs</Link>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetsOSX)' == 'true'">
+    <Compile Include="$(CommonPath)\Interop\OSX\Interop.Libraries.cs">
+      <Link>Common\Interop\OSX\Interop.Libraries.cs</Link>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetsLinux)' == 'true'">
+    <Compile Include="$(CommonPath)\Interop\Linux\Interop.Libraries.cs">
+      <Link>Common\Interop\Linux\Interop.Libraries.cs</Link>
     </Compile>
   </ItemGroup>
   <ItemGroup>

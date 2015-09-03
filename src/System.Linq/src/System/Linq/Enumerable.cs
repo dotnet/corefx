@@ -106,14 +106,9 @@ namespace System.Linq
 
             public IEnumerator<TSource> GetEnumerator()
             {
-                if (state == 0 && _threadId == Environment.CurrentManagedThreadId)
-                {
-                    state = 1;
-                    return this;
-                }
-                Iterator<TSource> duplicate = Clone();
-                duplicate.state = 1;
-                return duplicate;
+                Iterator<TSource> enumerator = state == 0 && _threadId == Environment.CurrentManagedThreadId ? this : Clone();
+                enumerator.state = 1;
+                return enumerator;
             }
 
             public abstract bool MoveNext();
@@ -121,11 +116,6 @@ namespace System.Linq
             public abstract IEnumerable<TResult> Select<TResult>(Func<TSource, TResult> selector);
 
             public abstract IEnumerable<TSource> Where(Func<TSource, bool> predicate);
-
-            public virtual TSource[] ToArray()
-            {
-                return new Buffer<TSource>(this, queryInterfaces: false).ToArray();
-            }
 
             object IEnumerator.Current
             {
@@ -368,7 +358,7 @@ namespace System.Linq
             }
         }
 
-        internal class WhereSelectArrayIterator<TSource, TResult> : Iterator<TResult>
+        internal class WhereSelectArrayIterator<TSource, TResult> : Iterator<TResult>, IArrayProvider<TResult>
         {
             private TSource[] _source;
             private Func<TSource, bool> _predicate;
@@ -416,12 +406,9 @@ namespace System.Linq
                 return new WhereEnumerableIterator<TResult>(this, predicate);
             }
 
-            public override TResult[] ToArray()
+            public TResult[] ToArray()
             {
-                if (_predicate != null)
-                {
-                    return base.ToArray();
-                }
+                if (_predicate != null && _source.Length != 0) return null;
 
                 var results = new TResult[_source.Length];
                 for (int i = 0; i < results.Length; i++)
@@ -432,7 +419,7 @@ namespace System.Linq
             }
         }
 
-        internal class WhereSelectListIterator<TSource, TResult> : Iterator<TResult>
+        internal class WhereSelectListIterator<TSource, TResult> : Iterator<TResult>, IArrayProvider<TResult>
         {
             private List<TSource> _source;
             private Func<TSource, bool> _predicate;
@@ -485,12 +472,9 @@ namespace System.Linq
                 return new WhereEnumerableIterator<TResult>(this, predicate);
             }
 
-            public override TResult[] ToArray()
+            public TResult[] ToArray()
             {
-                if (_predicate != null)
-                {
-                    return base.ToArray();
-                }
+                if (_predicate != null && _source.Count != 0) return null;
 
                 var results = new TResult[_source.Count];
                 for (int i = 0; i < results.Length; i++)
@@ -1015,6 +999,12 @@ namespace System.Linq
         public static TSource[] ToArray<TSource>(this IEnumerable<TSource> source)
         {
             if (source == null) throw Error.ArgumentNull("source");
+            IArrayProvider<TSource> arrayProvider = source as IArrayProvider<TSource>;
+            if (arrayProvider != null)
+            {
+                TSource[] array = arrayProvider.ToArray();
+                if (array != null) return array;
+            }
             return new Buffer<TSource>(source).ToArray();
         }
 
@@ -1439,23 +1429,130 @@ namespace System.Linq
         {
             long max = ((long)start) + count - 1;
             if (count < 0 || max > Int32.MaxValue) throw Error.ArgumentOutOfRange("count");
-            return RangeIterator(start, count);
+            return new RangeIterator(start, count);
         }
 
-        private static IEnumerable<int> RangeIterator(int start, int count)
+        private sealed class RangeIterator : Iterator<int>, IArrayProvider<int>
         {
-            for (int end = start + count; start != end; start++) yield return start;
+            private readonly int _start;
+            private readonly int _end;
+
+            public RangeIterator(int start, int count)
+            {
+                _start = start;
+                _end = start + count;
+            }
+
+            public override Iterator<int> Clone()
+            {
+                return new RangeIterator(_start, _end - _start);
+            }
+
+            public override bool MoveNext()
+            {
+                switch(state)
+                {
+                    case 1:
+                        if (_start == _end) break;
+                        current = _start;
+                        state = 2;
+                        return true;
+                    case 2:
+                        if (++current == _end) break;
+                        return true;
+                }
+                state = -1;
+                return false;
+            }
+
+            public override void Dispose()
+            {
+                state = -1; // Don't reset current
+            }
+
+            public override IEnumerable<TResult> Select<TResult>(Func<int, TResult> selector)
+            {
+                return new WhereSelectEnumerableIterator<int, TResult>(this, null, selector);
+            }
+
+            public override IEnumerable<int> Where(Func<int, bool> predicate)
+            {
+                return new WhereEnumerableIterator<int>(this, predicate);
+            }
+
+            public int[] ToArray()
+            {
+                int[] array = new int[_end - _start];
+                int cur = _start;
+                for (int i = 0; i != array.Length; ++i)
+                {
+                    array[i] = cur;
+                    ++cur;
+                }
+
+                return array;
+            }
         }
 
         public static IEnumerable<TResult> Repeat<TResult>(TResult element, int count)
         {
             if (count < 0) throw Error.ArgumentOutOfRange("count");
-            return RepeatIterator<TResult>(element, count);
+            return new RepeatIterator<TResult>(element, count);
         }
 
-        private static IEnumerable<TResult> RepeatIterator<TResult>(TResult element, int count)
+        private sealed class RepeatIterator<TResult> : Iterator<TResult>, IArrayProvider<TResult>
         {
-            for (int i = 0; i < count; i++) yield return element;
+            private readonly int _count;
+            private int _sent;
+
+            public RepeatIterator(TResult element, int count)
+            {
+                current = element;
+                _count = count;
+            }
+
+            public override Iterator<TResult> Clone()
+            {
+                return new RepeatIterator<TResult>(current, _count);
+            }
+
+            public override void Dispose()
+            {
+                // Don't let base Dispose wipe current.
+                state = -1;
+            }
+
+            public override bool MoveNext()
+            {
+                if (state == 1 & _sent != _count)
+                {
+                    ++_sent;
+                    return true;
+                }
+                state = -1;
+                return false;
+            }
+
+            public override IEnumerable<TSelected> Select<TSelected>(Func<TResult, TSelected> selector)
+            {
+                return new WhereSelectEnumerableIterator<TResult, TSelected>(this, null, selector);
+            }
+
+            public override IEnumerable<TResult> Where(Func<TResult, bool> predicate)
+            {
+                return new WhereEnumerableIterator<TResult>(this, predicate);
+            }
+
+            public TResult[] ToArray()
+            {
+                TResult[] array = new TResult[_count];
+                if (current != null)
+                {
+                    for (int i = 0; i != array.Length; ++i) array[i] = current;
+                }
+
+                return array;
+            }
         }
 
         public static IEnumerable<TResult> Empty<TResult>()
@@ -1799,7 +1896,7 @@ namespace System.Linq
                     int? cur = e.Current;
                     int x = cur.GetValueOrDefault();
                     // Do not replace & with &&. The branch prediction cost outweighs the extra operation
-                    // unless nulls either never happen or always happen. 
+                    // unless nulls either never happen or always happen.
                     if (cur.HasValue & x < valueVal)
                     {
                         valueVal = x;
@@ -1844,7 +1941,7 @@ namespace System.Linq
                     long? cur = e.Current;
                     long x = cur.GetValueOrDefault();
                     // Do not replace & with &&. The branch prediction cost outweighs the extra operation
-                    // unless nulls either never happen or always happen. 
+                    // unless nulls either never happen or always happen.
                     if (cur.HasValue & x < valueVal)
                     {
                         valueVal = x;
@@ -1854,7 +1951,7 @@ namespace System.Linq
             }
             return value;
         }
-        
+
         public static float Min(this IEnumerable<float> source)
         {
             if (source == null) throw Error.ArgumentNull("source");
@@ -2149,7 +2246,7 @@ namespace System.Linq
                         int? cur = e.Current;
                         int x = cur.GetValueOrDefault();
                         // Do not replace & with &&. The branch prediction cost outweighs the extra operation
-                        // unless nulls either never happen or always happen. 
+                        // unless nulls either never happen or always happen.
                         if (cur.HasValue & x > valueVal)
                         {
                             valueVal = x;
@@ -2210,7 +2307,7 @@ namespace System.Linq
                         long? cur = e.Current;
                         long x = cur.GetValueOrDefault();
                         // Do not replace & with &&. The branch prediction cost outweighs the extra operation
-                        // unless nulls either never happen or always happen. 
+                        // unless nulls either never happen or always happen.
                         if (cur.HasValue & x > valueVal)
                         {
                             valueVal = x;
@@ -2271,7 +2368,7 @@ namespace System.Linq
                     double? cur = e.Current;
                     double x = cur.GetValueOrDefault();
                     // Do not replace & with &&. The branch prediction cost outweighs the extra operation
-                    // unless nulls either never happen or always happen. 
+                    // unless nulls either never happen or always happen.
                     if (cur.HasValue & x > valueVal)
                     {
                         valueVal = x;
@@ -2327,7 +2424,7 @@ namespace System.Linq
                     float? cur = e.Current;
                     float x = cur.GetValueOrDefault();
                     // Do not replace & with &&. The branch prediction cost outweighs the extra operation
-                    // unless nulls either never happen or always happen. 
+                    // unless nulls either never happen or always happen.
                     if (cur.HasValue & x > valueVal)
                     {
                         valueVal = x;
@@ -2770,6 +2867,18 @@ namespace System.Linq
         }
     }
 
+    /// <summary>
+    /// An iterator that can (or sometimes can) produce an array through an optimized path.
+    /// </summary>
+    internal interface IArrayProvider<TElement>
+    {
+        /// <summary>
+        /// Produce an array of the sequence through an optimized path, if possible.
+        /// </summary>
+        /// <returns>The array, or null if an optimized path isn't possible, and default behavior should be used.</returns>
+        TElement[] ToArray();
+    }
+
     internal class IdentityFunction<TElement>
     {
         public static Func<TElement, TElement> Instance
@@ -2795,7 +2904,7 @@ namespace System.Linq
         bool Contains(TKey key);
     }
 
-    public class Lookup<TKey, TElement> : IEnumerable<IGrouping<TKey, TElement>>, ILookup<TKey, TElement>
+    public class Lookup<TKey, TElement> : IEnumerable<IGrouping<TKey, TElement>>, ILookup<TKey, TElement>, IArrayProvider<IGrouping<TKey, TElement>>
     {
         private IEqualityComparer<TKey> _comparer;
         private Grouping<TKey, TElement>[] _groupings;
@@ -2864,6 +2973,23 @@ namespace System.Linq
                     yield return g;
                 } while (g != _lastGrouping);
             }
+        }
+
+        IGrouping<TKey, TElement>[] IArrayProvider<IGrouping<TKey, TElement>>.ToArray()
+        {
+            IGrouping<TKey, TElement>[] array = new IGrouping<TKey, TElement>[_count];
+            int index = 0;
+            Grouping<TKey, TElement> g = _lastGrouping;
+            if (g != null)
+            {
+                do
+                {
+                    g = g.next;
+                    array[index] = g;
+                    ++index;
+                } while (g != _lastGrouping);
+            }
+            return array;
         }
 
         public IEnumerable<TResult> ApplyResultSelector<TResult>(Func<TKey, IEnumerable<TElement>, TResult> resultSelector)
@@ -3199,7 +3325,7 @@ namespace System.Linq
         }
     }
 
-    internal class GroupedEnumerable<TSource, TKey, TElement> : IEnumerable<IGrouping<TKey, TElement>>
+    internal class GroupedEnumerable<TSource, TKey, TElement> : IEnumerable<IGrouping<TKey, TElement>>, IArrayProvider<IGrouping<TKey, TElement>>
     {
         private IEnumerable<TSource> _source;
         private Func<TSource, TKey> _keySelector;
@@ -3226,22 +3352,45 @@ namespace System.Linq
         {
             return GetEnumerator();
         }
+
+        public IGrouping<TKey, TElement>[] ToArray()
+        {
+            IArrayProvider<IGrouping<TKey, TElement>> lookup = Lookup<TKey, TElement>.Create<TSource>(_source, _keySelector, _elementSelector, _comparer);
+            return lookup.ToArray();
+        }
     }
 
-    internal abstract class OrderedEnumerable<TElement> : IOrderedEnumerable<TElement>
+    internal abstract class OrderedEnumerable<TElement> : IOrderedEnumerable<TElement>, IArrayProvider<TElement>
     {
         internal IEnumerable<TElement> source;
+
+        private int[] SortedMap(Buffer<TElement> buffer)
+        {
+            return GetEnumerableSorter(null).Sort(buffer.items, buffer.count);
+        }
 
         public IEnumerator<TElement> GetEnumerator()
         {
             Buffer<TElement> buffer = new Buffer<TElement>(source);
             if (buffer.count > 0)
             {
-                EnumerableSorter<TElement> sorter = GetEnumerableSorter(null);
-                int[] map = sorter.Sort(buffer.items, buffer.count);
-                sorter = null;
+                int[] map = SortedMap(buffer);
                 for (int i = 0; i < buffer.count; i++) yield return buffer.items[map[i]];
             }
+        }
+
+        public TElement[] ToArray()
+        {
+            Buffer<TElement> buffer = new Buffer<TElement>(source);
+            int count = buffer.count;
+            TElement[] array = new TElement[count];
+            if (count > 0)
+            {
+                int[] map = SortedMap(buffer);
+                for (int i = 0; i != array.Length; i++) array[i] = buffer.items[map[i]];
+            }
+
+            return array;
         }
 
         internal abstract EnumerableSorter<TElement> GetEnumerableSorter(EnumerableSorter<TElement> next);
@@ -3378,56 +3527,21 @@ namespace System.Linq
         internal TElement[] items;
         internal int count;
 
-        internal Buffer(IEnumerable<TElement> source, bool queryInterfaces = true)
+        internal Buffer(IEnumerable<TElement> source)
         {
-            TElement[] items = null;
-            int count = 0;
-
-            if (queryInterfaces)
+            IArrayProvider<TElement> iterator = source as IArrayProvider<TElement>;
+            if (iterator != null)
             {
-                Enumerable.Iterator<TElement> iterator = source as Enumerable.Iterator<TElement>;
-                if (iterator != null)
+                TElement[] array = iterator.ToArray();
+                if (array != null)
                 {
-                    items = iterator.ToArray();
-                    count = items.Length;
-                }
-                else
-                {
-                    ICollection<TElement> collection = source as ICollection<TElement>;
-                    if (collection != null)
-                    {
-                        count = collection.Count;
-                        if (count > 0)
-                        {
-                            items = new TElement[count];
-                            collection.CopyTo(items, 0);
-                        }
-                    }
+                    items = array;
+                    count = array.Length;
+                    return;
                 }
             }
 
-            if (items == null)
-            {
-                using (IEnumerator<TElement> e = source.GetEnumerator())
-                {
-                    if (e.MoveNext())
-                    {
-                        items = new TElement[4];
-                        items[0] = e.Current;
-                        count = 1;
-                        
-                        while (e.MoveNext())
-                        {
-                            if (items.Length == count) Array.Resize(ref items, checked(count * 2));
-                            items[count] = e.Current;
-                            ++count;
-                        }
-                    }
-                }
-            }
-
-            this.items = items;
-            this.count = count;
+            items = EnumerableHelpers.ToArray(source, out count);
         }
 
         internal TElement[] ToArray()

@@ -4,11 +4,13 @@
 using System;
 using System.Runtime.InteropServices;
 
-internal static partial class Interop
+internal partial class Interop
 {
-    internal static partial class libc
+    internal partial class SspiCli
     {
-        [DllImport(Libraries.Libc, SetLastError = true)]
-        internal static extern int chdir(string path);
+        internal enum SECURITY_LOGON_TYPE : int
+        {
+            Network = 3,
+        }
     }
 }

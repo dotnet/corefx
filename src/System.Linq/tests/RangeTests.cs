@@ -106,14 +106,14 @@ namespace System.Linq.Tests
             int[] expected = { Int32.MaxValue - 3, Int32.MaxValue - 2, Int32.MaxValue - 1, Int32.MaxValue };
             Assert.Equal(expected, rangeEnumerable);
         }
-        
+
         [Fact]
         public void RepeatedCallsSameResults()
         {
             Assert.Equal(Enumerable.Range(-1, 2), Enumerable.Range(-1, 2));
             Assert.Equal(Enumerable.Range(0, 0), Enumerable.Range(0, 0));
         }
-        
+
         [Fact]
         public void NegativeStart()
         {
