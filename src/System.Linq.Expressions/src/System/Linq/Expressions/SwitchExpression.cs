@@ -131,7 +131,8 @@ namespace System.Linq.Expressions
         public override Expression Reduce()
         {
             if (_cases.Count != 0) return this;
-            return _defaultBody ?? Expression.Empty();
+            if (_defaultBody != null && _defaultBody.Type != Type) return Expression.Block(Type, _switchValue, _defaultBody);
+            return Expression.Block(_switchValue, _defaultBody ?? Expression.Empty());
         }
     }
 

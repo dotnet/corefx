@@ -155,7 +155,12 @@ namespace System.Linq.Expressions.Compiler
             
             if (node.Cases.Count == 0)
             {
-                // A switch with just a default can be replaced with that default.
+                // Emit the switch value in case it has side-effects, but as void
+                // since the result is ignored. (EmitExpressionAsVoid also handles
+                // skipping some values that can't have side-effects).
+                EmitExpressionAsVoid(node.SwitchValue);
+                
+                // Now if there is a default body, it happens unconditionally.
                 if (node.DefaultBody != null)
                 {
                     EmitExpressionAsType(node.DefaultBody, node.Type, flags);
