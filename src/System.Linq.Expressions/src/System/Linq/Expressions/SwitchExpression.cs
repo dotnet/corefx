@@ -120,6 +120,20 @@ namespace System.Linq.Expressions
             }
             return Expression.Switch(Type, switchValue, defaultBody, Comparison, cases);
         }
+        
+        /// <inheritdoc/>
+        public override bool CanReduce
+        {
+            get { return _cases.Count == 0; }
+        }
+        
+        /// <inheritdoc/>
+        public override Expression Reduce()
+        {
+            if (_cases.Count != 0) return this;
+            if (_defaultBody != null && _defaultBody.Type != Type) return Expression.Block(Type, _switchValue, _defaultBody);
+            return Expression.Block(_switchValue, _defaultBody ?? Expression.Empty());
+        }
     }
 
     public partial class Expression
@@ -202,11 +216,19 @@ namespace System.Linq.Expressions
             if (switchValue.Type == typeof(void)) throw Error.ArgumentCannotBeOfTypeVoid();
 
             var caseList = cases.ToReadOnly();
-            ContractUtils.RequiresNotEmpty(caseList, "cases");
             ContractUtils.RequiresNotNullItems(caseList, "cases");
 
             // Type of the result. Either provided, or it is type of the branches.
-            Type resultType = type ?? caseList[0].Body.Type;
+            Type resultType;
+            if (type != null)
+                resultType = type;
+            else if (caseList.Count != 0)
+                resultType = caseList[0].Body.Type;
+            else if (defaultBody != null)
+                resultType = defaultBody.Type;
+            else
+                resultType = typeof(void);
+
             bool customType = type != null;
 
             if (comparison != null)
@@ -253,6 +275,11 @@ namespace System.Linq.Expressions
                         }
                     }
                 }
+            }
+            else if(caseList.Count == 0)
+            {
+                // Set a sensible default equality based on the switchValue type.
+                comparison = Equal(switchValue, switchValue).Method;
             }
             else
             {

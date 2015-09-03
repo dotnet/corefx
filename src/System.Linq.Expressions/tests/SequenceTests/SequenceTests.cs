@@ -3872,6 +3872,195 @@ namespace Tests
             Assert.Equal("null", f(null));
         }
 
+        
+        [Fact]
+        public static void DefaultOnlySwitch()
+        {
+            var p = Expression.Parameter(typeof(int));
+            var s = Expression.Switch(p, Expression.Constant(42));
+            
+            var fInt32Int32 = Expression.Lambda<Func<int, int>>(s, p).Compile();
+            
+            Assert.Equal(42, fInt32Int32(0));
+            Assert.Equal(42, fInt32Int32(1));
+            Assert.Equal(42, fInt32Int32(-1));
+            
+            s = Expression.Switch(typeof(object), p, Expression.Constant("A test string"), null);
+            
+            var fInt32Object = Expression.Lambda<Func<int, object>>(s, p).Compile();
+
+            Assert.Equal("A test string", fInt32Object(0));
+            Assert.Equal("A test string", fInt32Object(1));
+            Assert.Equal("A test string", fInt32Object(-1));
+            
+            p = Expression.Parameter(typeof(string));
+            s = Expression.Switch(p, Expression.Constant("foo"));
+            
+            var fStringString = Expression.Lambda<Func<string, string>>(s, p).Compile();
+            
+            Assert.Equal("foo", fStringString("bar"));
+            Assert.Equal("foo", fStringString(null));
+            Assert.Equal("foo", fStringString("foo"));
+        }
+        
+        [Fact]
+        public static void DefaultOnlySwitchReducible()
+        {
+            var p = Expression.Parameter(typeof(int));
+            var s = Expression.Switch(p, Expression.Constant(42));
+            
+            Assert.True(s.CanReduce);
+            
+            var r = s.ReduceAndCheck();
+            
+            var fInt32Int32 = Expression.Lambda<Func<int, int>>(r, p).Compile();
+            
+            Assert.Equal(42, fInt32Int32(0));
+            Assert.Equal(42, fInt32Int32(1));
+            Assert.Equal(42, fInt32Int32(-1));
+            
+            s = Expression.Switch(typeof(object), p, Expression.Constant("A test string"), null);
+            
+            Assert.True(s.CanReduce);
+            
+            r = s.ReduceAndCheck();
+
+            var fInt32Object = Expression.Lambda<Func<int, object>>(r, p).Compile();
+
+            Assert.Equal("A test string", fInt32Object(0));
+            Assert.Equal("A test string", fInt32Object(1));
+            Assert.Equal("A test string", fInt32Object(-1));
+            
+            p = Expression.Parameter(typeof(string));
+            s = Expression.Switch(p, Expression.Constant("foo"));
+            
+            r = s.ReduceAndCheck();
+            
+            var fStringString = Expression.Lambda<Func<string, string>>(r, p).Compile();
+            
+            Assert.Equal("foo", fStringString("bar"));
+            Assert.Equal("foo", fStringString(null));
+            Assert.Equal("foo", fStringString("foo"));
+        }
+
+        [Fact]
+        public static void NoDefaultOrCasesSwitch()
+        {
+            var p = Expression.Parameter(typeof(int));
+            var s = Expression.Switch(p, (Expression)null);
+            
+            var f = Expression.Lambda<Action<int>>(s, p).Compile();
+            
+            f(0);
+            
+            Assert.Equal(s.Type, typeof(void));
+        }
+
+        [Fact]
+        public static void NoDefaultOrCasesSwitchReducible()
+        {
+            var p = Expression.Parameter(typeof(int));
+            var s = Expression.Switch(p, (Expression)null);
+            
+            var r = s.ReduceAndCheck();
+            
+            var f = Expression.Lambda<Action<int>>(r, p).Compile();
+            
+            f(0);
+            
+            Assert.Equal(r.Type, typeof(void));
+        }
+
+        [Fact]
+        public static void TypedNoDefaultOrCasesSwitch()
+        {
+            var p = Expression.Parameter(typeof(int));
+            // A SwitchExpression with neither a defaultBody nor any cases can not be any type except void.
+            Assert.Throws<ArgumentException>(() => Expression.Switch(typeof(int), p, (Expression)null, null));
+        }
+        
+        private delegate int RefSettingDelegate(ref bool changed);
+        
+        private delegate void JustRefSettingDelegate(ref bool changed);
+        
+        public static int QuestionMeaning(ref bool changed)
+        {
+            changed = true;
+            return 42;
+        }
+
+        [Fact]
+        public static void DefaultOnlySwitchWithSideEffect()
+        {
+            bool changed = false;
+            var pOut = Expression.Parameter(typeof(bool).MakeByRefType(), "changed");
+            var switchValue = Expression.Call(typeof(Compiler_Tests).GetMethod("QuestionMeaning"), pOut);
+            var s = Expression.Switch(switchValue, Expression.Constant(42));
+            
+            var fInt32Int32 = Expression.Lambda<RefSettingDelegate>(s, pOut).Compile();
+            
+            Assert.False(changed);
+            Assert.Equal(42, fInt32Int32(ref changed));
+            Assert.True(changed);
+            changed = false;
+            Assert.Equal(42, fInt32Int32(ref changed));
+            Assert.True(changed);
+        }
+
+        [Fact]
+        public static void DefaultOnlySwitchWithSideEffectReducible()
+        {
+            bool changed = false;
+            var pOut = Expression.Parameter(typeof(bool).MakeByRefType(), "changed");
+            var switchValue = Expression.Call(typeof(Compiler_Tests).GetMethod("QuestionMeaning"), pOut);
+            var s = Expression.Switch(switchValue, Expression.Constant(42));
+            
+            Assert.True(s.CanReduce);
+            
+            var r = s.ReduceAndCheck();
+
+            var fInt32Int32 = Expression.Lambda<RefSettingDelegate>(r, pOut).Compile();
+            
+            Assert.False(changed);
+            Assert.Equal(42, fInt32Int32(ref changed));
+            Assert.True(changed);
+            changed = false;
+            Assert.Equal(42, fInt32Int32(ref changed));
+            Assert.True(changed);
+        }
+
+        [Fact]
+        public static void NoDefaultOrCasesSwitchWithSideEffect()
+        {
+            bool changed = false;
+            var pOut = Expression.Parameter(typeof(bool).MakeByRefType(), "changed");
+            var switchValue = Expression.Call(typeof(Compiler_Tests).GetMethod("QuestionMeaning"), pOut);
+            var s = Expression.Switch(switchValue, (Expression)null);
+            
+            var f = Expression.Lambda<JustRefSettingDelegate>(s, pOut).Compile();
+            
+            Assert.False(changed);
+            f(ref changed);
+            Assert.True(changed);
+        }
+
+        [Fact]
+        public static void NoDefaultOrCasesSwitchWithSideEffectReducible()
+        {
+            bool changed = false;
+            var pOut = Expression.Parameter(typeof(bool).MakeByRefType(), "changed");
+            var switchValue = Expression.Call(typeof(Compiler_Tests).GetMethod("QuestionMeaning"), pOut);
+            var s = Expression.Switch(switchValue, (Expression)null);
+
+            var r = s.ReduceAndCheck();
+            
+            var f = Expression.Lambda<JustRefSettingDelegate>(r, pOut).Compile();
+            
+            Assert.False(changed);
+            f(ref changed);
+            Assert.True(changed);
+        }
+
         static class System_Linq_Expressions_Expression_TDelegate__1
         {
             public static T Default<T>() { return default(T); }

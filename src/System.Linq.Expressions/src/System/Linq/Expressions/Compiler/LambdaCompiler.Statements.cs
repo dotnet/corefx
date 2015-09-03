@@ -152,6 +152,28 @@ namespace System.Linq.Expressions.Compiler
         private void EmitSwitchExpression(Expression expr, CompilationFlags flags)
         {
             SwitchExpression node = (SwitchExpression)expr;
+            
+            if (node.Cases.Count == 0)
+            {
+                // Emit the switch value in case it has side-effects, but as void
+                // since the result is ignored. (EmitExpressionAsVoid also handles
+                // skipping some values that can't have side-effects).
+                EmitExpressionAsVoid(node.SwitchValue);
+                
+                // Now if there is a default body, it happens unconditionally.
+                if (node.DefaultBody != null)
+                {
+                    EmitExpressionAsType(node.DefaultBody, node.Type, flags);
+                }
+                else
+                {
+                    // A switch with neither case nor default must be of type void,
+                    // and can be simply omitted. Verify that earlier validation
+                    // caught any other type.
+                    Debug.Assert(node.Type == typeof(void));
+                }
+                return;
+            }
 
             // Try to emit it as an IL switch. Works for integer types.
             if (TryEmitSwitchInstruction(node, flags))
@@ -212,6 +234,7 @@ namespace System.Linq.Expressions.Compiler
             {
                 // If we have no comparison, all right side types must be the
                 // same.
+                if (node.Cases.Count == 0) return node.SwitchValue.Type;
                 return node.Cases[0].TestValues[0].Type;
             }
 
