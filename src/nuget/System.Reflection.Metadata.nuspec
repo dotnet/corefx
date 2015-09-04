@@ -21,7 +21,7 @@ Supported Platforms:
     <tags>BCL Microsoft System ECMA ECMA335 Metadata Reflection</tags>
     <dependencies>
       <group>
-        <dependency id="System.Collections.Immutable" version="1.1.37-beta-23024" />
+        <dependency id="System.Collections.Immutable" version="1.1.36" />
       </group>
     </dependencies>
   </metadata>
