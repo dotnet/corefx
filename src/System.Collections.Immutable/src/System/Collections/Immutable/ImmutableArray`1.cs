@@ -549,6 +549,9 @@ namespace System.Collections.Immutable
                 return ImmutableArray.CreateRange(items);
             }
 
+            // If items is not any of the interfaces below, it will
+            // be 'captured' in a List<T> here and travel
+            // down the ICollection<T> path.
             int count = ImmutableExtensions.GetCount(ref items);
             if (count == 0)
             {
@@ -556,13 +559,11 @@ namespace System.Collections.Immutable
             }
 
             T[] tmp = new T[self.Length + count];
-            Array.Copy(self.array, 0, tmp, 0, index);
-            int sequenceIndex = index;
-            foreach (var item in items)
-            {
-                tmp[sequenceIndex++] = item;
-            }
 
+            // CopyTo first in case bad interface impl
+            // tries to modify other parts of tmp
+            items.CopyTo(tmp, index);
+            Array.Copy(self.array, 0, tmp, 0, index);
             Array.Copy(self.array, index, tmp, index + count, self.Length - index);
             return new ImmutableArray<T>(tmp);
         }

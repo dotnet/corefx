@@ -1375,9 +1375,46 @@ namespace System.Collections.Immutable.Test
             Assert.Throws<NotSupportedException>(() => c.SyncRoot);
         }
 
+        ////[Fact] // Perf test
+        public void InsertRange_Perf_Arrays()
+        {
+            TestInsertRangePerfWith(Enumerable.Range(1, 10000).ToArray());
+        }
+        
+        ////[Fact] // Perf test
+        public void InsertRange_Perf_ListOfT()
+        {
+            TestInsertRangePerfWith(Enumerable.Range(1, 10000).ToList());
+        }
+        
+        ////[Fact] // Perf test
+        public void InsertRange_Perf_NonCollectionEnumerable()
+        {
+            // IEnumerable being tested here must not inherit from
+            // ICollection<T>, ICollection, or IReadOnlyCollection<T>.
+            
+            TestInsertRangePerfWith(Enumerable.Range(1, 10000));
+        }
+
         protected override IEnumerable<T> GetEnumerableOf<T>(params T[] contents)
         {
             return ImmutableArray.Create(contents);
+        }
+
+        private static void TestInsertRangePerfWith<T>(IEnumerable<T> toInsert)
+        {
+            var iarray = ImmutableArray<T>.Empty;
+            
+            var watch = new Stopwatch();
+            
+            for (int i = 0; i < 3; i++)
+            {
+                watch.Start();
+                iarray = iarray.InsertRange(0, toInsert);
+                watch.Stop();
+                Debug.WriteLine(watch.Elapsed);
+                watch.Reset();
+            }
         }
 
         /// <summary>
