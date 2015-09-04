@@ -7,15 +7,19 @@ using System.Threading.Tasks;
 
 namespace System.IO
 {
+    /* SyncTextWriter intentionally locks on itself rather than a private lock object.
+     * This is done to synchronize different console writers.
+     * For example - colored console writers can be synchronized with non-colored
+     * writers by locking on Console.On (Issue#2855).
+     */
     internal sealed class SyncTextWriter : TextWriter, IDisposable
     {
-        private readonly object _methodLock = new object();
         internal readonly TextWriter _out;
 
         internal static SyncTextWriter GetSynchronizedTextWriter(TextWriter writer)
         {
             Debug.Assert(writer != null);
-            return writer as SyncTextWriter ?? 
+            return writer as SyncTextWriter ??
                 new SyncTextWriter(writer);
         }
 
@@ -37,25 +41,24 @@ namespace System.IO
 
         public override String NewLine
         {
-            get { lock (_methodLock) { return _out.NewLine; } }
-            set { lock (_methodLock) { _out.NewLine = value; } }
+            get { lock (this) { return _out.NewLine; } }
+            set { lock (this) { _out.NewLine = value; } }
         }
 
         protected override void Dispose(bool disposing)
         {
             if (disposing)
             {
-                lock (_methodLock)
+                lock (this)
                 {
-                    // Explicitly pick up a potentially methodimpl'ed Dispose
-                    ((IDisposable)_out).Dispose();
+                    _out.Dispose();
                 }
             }
         }
 
         public override void Flush()
         {
-            lock (_methodLock)
+            lock (this)
             {
                 _out.Flush();
             }
@@ -63,7 +66,7 @@ namespace System.IO
 
         public override void Write(char value)
         {
-            lock (_methodLock)
+            lock (this)
             {
                 _out.Write(value);
             }
@@ -71,7 +74,7 @@ namespace System.IO
 
         public override void Write(char[] buffer)
         {
-            lock (_methodLock)
+            lock (this)
             {
                 _out.Write(buffer);
             }
@@ -79,7 +82,7 @@ namespace System.IO
 
         public override void Write(char[] buffer, int index, int count)
         {
-            lock (_methodLock)
+            lock (this)
             {
                 _out.Write(buffer, index, count);
             }
@@ -87,7 +90,7 @@ namespace System.IO
 
         public override void Write(bool value)
         {
-            lock (_methodLock)
+            lock (this)
             {
                 _out.Write(value);
             }
@@ -95,7 +98,7 @@ namespace System.IO
 
         public override void Write(int value)
         {
-            lock (_methodLock)
+            lock (this)
             {
                 _out.Write(value);
             }
@@ -103,7 +106,7 @@ namespace System.IO
 
         public override void Write(uint value)
         {
-            lock (_methodLock)
+            lock (this)
             {
                 _out.Write(value);
             }
@@ -111,7 +114,7 @@ namespace System.IO
 
         public override void Write(long value)
         {
-            lock (_methodLock)
+            lock (this)
             {
                 _out.Write(value);
             }
@@ -119,7 +122,7 @@ namespace System.IO
 
         public override void Write(ulong value)
         {
-            lock (_methodLock)
+            lock (this)
             {
                 _out.Write(value);
             }
@@ -127,7 +130,7 @@ namespace System.IO
 
         public override void Write(float value)
         {
-            lock (_methodLock)
+            lock (this)
             {
                 _out.Write(value);
             }
@@ -135,7 +138,7 @@ namespace System.IO
 
         public override void Write(double value)
         {
-            lock (_methodLock)
+            lock (this)
             {
                 _out.Write(value);
             }
@@ -143,7 +146,7 @@ namespace System.IO
 
         public override void Write(Decimal value)
         {
-            lock (_methodLock)
+            lock (this)
             {
                 _out.Write(value);
             }
@@ -151,7 +154,7 @@ namespace System.IO
 
         public override void Write(String value)
         {
-            lock (_methodLock)
+            lock (this)
             {
                 _out.Write(value);
             }
@@ -159,7 +162,7 @@ namespace System.IO
 
         public override void Write(Object value)
         {
-            lock (_methodLock)
+            lock (this)
             {
                 _out.Write(value);
             }
@@ -167,7 +170,7 @@ namespace System.IO
 
         public override void Write(String format, Object[] arg)
         {
-            lock (_methodLock)
+            lock (this)
             {
                 _out.Write(format, arg);
             }
@@ -175,7 +178,7 @@ namespace System.IO
 
         public override void WriteLine()
         {
-            lock (_methodLock)
+            lock (this)
             {
                 _out.WriteLine();
             }
@@ -183,7 +186,7 @@ namespace System.IO
 
         public override void WriteLine(char value)
         {
-            lock (_methodLock)
+            lock (this)
             {
                 _out.WriteLine(value);
             }
@@ -191,7 +194,7 @@ namespace System.IO
 
         public override void WriteLine(decimal value)
         {
-            lock (_methodLock)
+            lock (this)
             {
                 _out.WriteLine(value);
             }
@@ -199,7 +202,7 @@ namespace System.IO
 
         public override void WriteLine(char[] buffer)
         {
-            lock (_methodLock)
+            lock (this)
             {
                 _out.WriteLine(buffer);
             }
@@ -207,7 +210,7 @@ namespace System.IO
 
         public override void WriteLine(char[] buffer, int index, int count)
         {
-            lock (_methodLock)
+            lock (this)
             {
                 _out.WriteLine(buffer, index, count);
             }
@@ -215,7 +218,7 @@ namespace System.IO
 
         public override void WriteLine(bool value)
         {
-            lock (_methodLock)
+            lock (this)
             {
                 _out.WriteLine(value);
             }
@@ -223,7 +226,7 @@ namespace System.IO
 
         public override void WriteLine(int value)
         {
-            lock (_methodLock)
+            lock (this)
             {
                 _out.WriteLine(value);
             }
@@ -231,7 +234,7 @@ namespace System.IO
 
         public override void WriteLine(uint value)
         {
-            lock (_methodLock)
+            lock (this)
             {
                 _out.WriteLine(value);
             }
@@ -239,7 +242,7 @@ namespace System.IO
 
         public override void WriteLine(long value)
         {
-            lock (_methodLock)
+            lock (this)
             {
                 _out.WriteLine(value);
             }
@@ -247,7 +250,7 @@ namespace System.IO
 
         public override void WriteLine(ulong value)
         {
-            lock (_methodLock)
+            lock (this)
             {
                 _out.WriteLine(value);
             }
@@ -255,7 +258,7 @@ namespace System.IO
 
         public override void WriteLine(float value)
         {
-            lock (_methodLock)
+            lock (this)
             {
                 _out.WriteLine(value);
             }
@@ -263,7 +266,7 @@ namespace System.IO
 
         public override void WriteLine(double value)
         {
-            lock (_methodLock)
+            lock (this)
             {
                 _out.WriteLine(value);
             }
@@ -271,7 +274,7 @@ namespace System.IO
 
         public override void WriteLine(String value)
         {
-            lock (_methodLock)
+            lock (this)
             {
                 _out.WriteLine(value);
             }
@@ -279,7 +282,7 @@ namespace System.IO
 
         public override void WriteLine(Object value)
         {
-            lock (_methodLock)
+            lock (this)
             {
                 _out.WriteLine(value);
             }
@@ -287,7 +290,7 @@ namespace System.IO
 
         public override void WriteLine(String format, Object[] arg)
         {
-            lock (_methodLock)
+            lock (this)
             {
                 _out.WriteLine(format, arg);
             }

@@ -2980,7 +2980,7 @@ namespace Tests
         }
 
         [Fact]
-        public static void InvokeLambda()      
+        public static void InvokeLambda()
         {
             Expression<Func<int, int>> f = x => x + 1;
             InvocationExpression ie = Expression.Invoke(f, Expression.Constant(5));
@@ -3002,7 +3002,7 @@ namespace Tests
         [Fact]
         public static void CallCompiledLambdaWithTypeMissing()
         {
-            Expression<Func<object, bool>> f = x => x == Type.Missing;  
+            Expression<Func<object, bool>> f = x => x == Type.Missing;
             var compiled = f.Compile();
             Expression<Func<object, bool>> lambda = x => compiled(x);
             Func<object, bool> d = lambda.Compile();
@@ -3427,7 +3427,8 @@ namespace Tests
 
 
         [Fact]
-        public void NewStructWithMemberListIntializer() {
+        public void NewStructWithMemberListIntializer()
+        {
             Expression<Func<int, StructX>> f =
                 v => new StructX { A = v, B = v + 1, Ys = { new ClassY { B = v + 2 } } };
             var d = f.Compile();
@@ -3439,7 +3440,8 @@ namespace Tests
         }
 
         [Fact]
-        public void NewStructWithStructMemberMemberIntializer() {
+        public void NewStructWithStructMemberMemberIntializer()
+        {
             Expression<Func<int, StructX>> f =
                 v => new StructX { A = v, B = v + 1, SY = new StructY { B = v + 2 } };
             var d = f.Compile();
@@ -3847,7 +3849,7 @@ namespace Tests
             Assert.Equal("default", f(null));
         }
 
-        [Fact]  
+        [Fact]
         public static void ObjectSwitch1()
         {
             var p = Expression.Parameter(typeof(object));
@@ -3868,6 +3870,27 @@ namespace Tests
             Assert.Equal("default", f("hi2"));
             Assert.Equal("default", f("HI"));
             Assert.Equal("null", f(null));
+        }
+
+        static class System_Linq_Expressions_Expression_TDelegate__1
+        {
+            public static T Default<T>() { return default(T); }
+            public static void UseSystem_Linq_Expressions_Expression_TDelegate__1(bool call) // call this passing false
+            {
+                if (call)
+                {
+                    Default<System.Linq.Expressions.Expression<System.Object>>().Compile();
+                    Default<System.Linq.Expressions.Expression<System.Object>>().Update(
+                Default<System.Linq.Expressions.Expression>(),
+                Default<System.Collections.Generic.IEnumerable<System.Linq.Expressions.ParameterExpression>>());
+                }
+            }
+        }
+
+        [Fact]
+        public static void ExprT_Update()
+        {
+            System_Linq_Expressions_Expression_TDelegate__1.UseSystem_Linq_Expressions_Expression_TDelegate__1(false);
         }
 
         public class TestComparers
@@ -4243,6 +4266,31 @@ namespace Tests
             Assert.Equal(f.Body.NodeType, ExpressionType.Convert);
             Func<int, int?> d = f.Compile();
             Assert.Equal(2, d(2));
+        }
+
+        [Fact]
+        public static void TestNullableMethods()
+        {
+            TestNullableCall(new ArraySegment<int>(), (v) => v.HasValue, (v) => v.HasValue);
+            TestNullableCall(5.1, (v) => v.GetHashCode(), (v) => v.GetHashCode());
+            TestNullableCall(5L, (v) => v.ToString(), (v) => v.ToString());
+            TestNullableCall(5, (v) => v.GetValueOrDefault(7), (v) => v.GetValueOrDefault(7));
+            TestNullableCall(42, (v) => v.Equals(42), (v) => v.Equals(42));
+            TestNullableCall(42, (v) => v.Equals(0), (v) => v.Equals(0));
+            TestNullableCall(5, (v) => v.GetValueOrDefault(), (v) => v.GetValueOrDefault());
+
+            Expression<Func<int?, int>> f = x => x.Value;
+            Func<int?, int> d = f.Compile();
+            Assert.Equal(2, d(2));
+            Assert.Throws<InvalidOperationException>(() => d(null));
+        }
+
+        private static void TestNullableCall<T, U>(T arg, Func<T?, U> f, Expression<Func<T?, U>> e)
+            where T : struct
+        {
+            Func<T?, U> d = e.Compile();
+            Assert.Equal(f(arg), d(arg));
+            Assert.Equal(f(null), d(null));
         }
 
         public static int BadJuju(int v)

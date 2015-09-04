@@ -30,7 +30,7 @@ internal static partial class Interop
 
             protected override bool ReleaseHandle()
             {
-                Interop.libcurl.curl_easy_cleanup(this.handle);
+                libcurl.curl_easy_cleanup(this.handle);
                 return true;
             }
         }

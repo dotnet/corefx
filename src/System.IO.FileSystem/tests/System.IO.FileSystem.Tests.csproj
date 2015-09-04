@@ -31,10 +31,18 @@
 
     <!-- 
       Until an updated packages is published, temporarily copy the locally built System.Runtime.Extensions library
-      but still reference the contract from the package for compiling. 
+      but still reference the contract from the package for compiling.  
       Issue https://github.com/dotnet/corefx/issues/2519 is tracking the removal of this ProjectReference
+      We also must reference System.Diagnostics.Debug due to this project reference and issue
+      https://github.com/dotnet/corefx/issues/2817.
     -->
     <ProjectReference Include="..\..\System.Runtime.Extensions\src\System.Runtime.Extensions.CoreCLR.csproj">
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <OutputItemType>Content</OutputItemType>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Targets>Build;DebugSymbolsProjectOutputGroup</Targets>
+    </ProjectReference>
+    <ProjectReference Include="..\..\System.Diagnostics.Debug\src\System.Diagnostics.Debug.csproj">
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
       <OutputItemType>Content</OutputItemType>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -55,8 +63,8 @@
     <Compile Include="FileInfo\GetSetAttributes.cs" />
     <Compile Include="FileInfo\Length.cs" />
     <Compile Include="FileInfo\Open.cs" />
-    <Compile Include="FileStream\Flush.Sharing.cs" />
-    <Compile Include="FileStream\Flush_toDisk.cs" />
+    <Compile Include="FileStream\FlushAsync.cs" />
+    <Compile Include="FileStream\Pipes.cs" />
     <Compile Include="FileStream\SafeFileHandle.cs" />
     <Compile Include="FileStream\IsAsync.cs" />
     <Compile Include="FileStream\CanTimeout.cs" />
@@ -154,8 +162,8 @@
     <Compile Include="FileInfo\AppendText.cs" />
     <Compile Include="FileInfo\CopyTo.cs" />
     <!-- Helpers -->
-    <Compile Include="$(CommonPath)\Interop\Interop.PlatformDetection.cs">
-      <Link>Common\Interop\Interop.PlatformDetection.cs</Link>
+    <Compile Include="$(CommonTestPath)\System\IO\FileCleanupTestBase.cs">
+      <Link>Common\System\IO\FileCleanupTestBase.cs</Link>
     </Compile>
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />

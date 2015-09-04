@@ -25,6 +25,7 @@ internal static partial class Interop
         internal const string Localization = "api-ms-win-core-localization-l1-2-0.dll";
         internal const string Memory_L1_0 = "api-ms-win-core-memory-l1-1-0.dll";
         internal const string Memory_L1_1 = "api-ms-win-core-memory-l1-1-1.dll";
+        internal const string NCrypt = "ncrypt.dll";
         internal const string NtDll = "ntdll.dll";
         internal const string OleAut32 = "oleaut32.dll";
         internal const string Pipe = "api-ms-win-core-namedpipe-l1-1-0.dll";
@@ -56,6 +57,7 @@ internal static partial class Interop
         internal const string WinHttp = "winhttp.dll";
         internal const string Winsock = "Ws2_32.dll";
         internal const string Wow64 = "api-ms-win-core-wow64-l1-1-0.dll";
+        internal const string Ws2_32 = "ws2_32.dll";
         internal const string Zlib = "clrcompression.dll";
     }
 }

@@ -12,7 +12,7 @@ namespace System.Net.Http
 
         public virtual bool SupportsAutomaticDecompression
         {
-            get { throw NotImplemented.ByDesignWithMessage("HTTP stack not implemented"); }
+            get { return _curlHandler.SupportsAutomaticDecompression; }
         }
 
         public virtual bool SupportsProxy
@@ -27,26 +27,47 @@ namespace System.Net.Http
 
         public bool UseCookies
         {
-            get { throw NotImplemented.ByDesignWithMessage("HTTP stack not implemented"); }
-            set { throw NotImplemented.ByDesignWithMessage("HTTP stack not implemented"); }
+            get
+            {
+                return _curlHandler.UseCookie;
+            }
+
+            set
+            {
+                _curlHandler.UseCookie = value;
+            }          
         }
 
         public CookieContainer CookieContainer
         {
-            get { throw NotImplemented.ByDesignWithMessage("HTTP stack not implemented"); }
-            set { throw NotImplemented.ByDesignWithMessage("HTTP stack not implemented"); }
+            get
+            {
+                return _curlHandler.CookieContainer;
+            }
+
+            set
+            {
+                _curlHandler.CookieContainer = value;
+            }
         }
 
         public ClientCertificateOption ClientCertificateOptions
         {
-            get { throw NotImplemented.ByDesignWithMessage("HTTP stack not implemented"); }
-            set { throw NotImplemented.ByDesignWithMessage("HTTP stack not implemented"); }
+            get
+            {
+                return _curlHandler.ClientCertificateOptions;
+            }
+
+            set
+            {
+                _curlHandler.ClientCertificateOptions = value;
+            }
         }
 
         public DecompressionMethods AutomaticDecompression
         {
-            get { throw NotImplemented.ByDesignWithMessage("HTTP stack not implemented"); }
-            set { throw NotImplemented.ByDesignWithMessage("HTTP stack not implemented"); }
+            get { return _curlHandler.AutomaticDecompression; }
+            set { _curlHandler.AutomaticDecompression = value; }
         }
 
         public bool UseProxy
@@ -63,8 +84,8 @@ namespace System.Net.Http
 
         public bool PreAuthenticate
         {
-            get { throw NotImplemented.ByDesignWithMessage("HTTP stack not implemented"); }
-            set { throw NotImplemented.ByDesignWithMessage("HTTP stack not implemented"); }
+            get { return _curlHandler.PreAuthenticate; }
+            set { _curlHandler.PreAuthenticate = value;} 
         }
 
         public bool UseDefaultCredentials
@@ -85,6 +106,7 @@ namespace System.Net.Http
             {
                 return _curlHandler.AutomaticRedirection;
             }
+
             set
             {
                 _curlHandler.AutomaticRedirection = value;
@@ -93,8 +115,15 @@ namespace System.Net.Http
 
         public int MaxAutomaticRedirections
         {
-            get { throw NotImplemented.ByDesignWithMessage("HTTP stack not implemented"); }
-            set { throw NotImplemented.ByDesignWithMessage("HTTP stack not implemented"); }
+            get
+            {
+                return _curlHandler.MaxAutomaticRedirections;
+            }
+
+            set
+            {
+                _curlHandler.MaxAutomaticRedirections = value;
+            }
         }
 
         public long MaxRequestContentBufferSize

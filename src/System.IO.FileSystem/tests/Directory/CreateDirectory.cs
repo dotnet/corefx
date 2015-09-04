@@ -124,7 +124,7 @@ namespace System.IO.FileSystem.Tests
             var components = IOInputs.GetValidPathComponentNames();
             Assert.All(components, (component) =>
             {
-                string path = @"\\?\" + IOServices.AddTrailingSlashIfNeeded(Path.Combine(testDir.FullName, component));
+                string path = IOInputs.ExtendedPrefix + IOServices.AddTrailingSlashIfNeeded(Path.Combine(testDir.FullName, component));
                 DirectoryInfo result = Create(path);
 
                 Assert.Equal(path, result.FullName);
@@ -210,9 +210,21 @@ namespace System.IO.FileSystem.Tests
 
         [Fact]
         [PlatformSpecific(PlatformID.Windows)]
-        public void DirectoryLongerThanMaxPathAsPath_ThrowsPathTooLongException()
+        public void DirectoryLongerThanMaxPath_Succeeds()
         {
             var paths = IOInputs.GetPathsLongerThanMaxPath();
+            Assert.All(paths, (path) =>
+            {
+                DirectoryInfo result = Create(path);
+                Assert.True(Directory.Exists(result.FullName));
+            });
+        }
+
+        [Fact]
+        [PlatformSpecific(PlatformID.Windows)]
+        public void DirectoryLongerThanMaxLongPath_ThrowsPathTooLongException()
+        {
+            var paths = IOInputs.GetPathsLongerThanMaxLongPath();
             Assert.All(paths, (path) =>
             {
                 Assert.Throws<PathTooLongException>(() => Create(path));
@@ -221,19 +233,41 @@ namespace System.IO.FileSystem.Tests
 
         [Fact]
         [PlatformSpecific(PlatformID.Windows)]
-        public void DirectoryLongerThanMaxDirectoryAsPath_ThrowsPathTooLongException()
+        public void DirectoryLongerThanMaxLongPathWithExtendedSyntax_ThrowsPathTooLongException()
+        {
+            var paths = IOInputs.GetPathsLongerThanMaxLongPath(useExtendedSyntax: true);
+            Assert.All(paths, (path) =>
+            {
+                Assert.Throws<PathTooLongException>(() => Create(path));
+            });
+        }
+
+
+        [Fact]
+        [PlatformSpecific(PlatformID.Windows)]
+        public void ExtendedDirectoryLongerThanLegacyMaxPath_Succeeds()
+        {
+            var paths = IOInputs.GetPathsLongerThanMaxPath(useExtendedSyntax: true);
+            Assert.All(paths, (path) =>
+            {
+                Assert.True(Create(path).Exists);
+            });
+        }
+
+        [Fact]
+        [PlatformSpecific(PlatformID.Windows)]
+        public void DirectoryLongerThanMaxDirectoryAsPath_Succeeds()
         {
             var paths = IOInputs.GetPathsLongerThanMaxDirectory();
             Assert.All(paths, (path) =>
             {
-                Assert.Throws<PathTooLongException>(() => Create(path));
-                Directory.Delete(Path.Combine(Path.GetPathRoot(Directory.GetCurrentDirectory()), path.Split(Path.DirectorySeparatorChar)[1]), true);
+                var result = Create(path);
+                Assert.True(Directory.Exists(result.FullName));
             });
         }
 
         [Fact]
         [PlatformSpecific(PlatformID.AnyUnix)]
-        [ActiveIssue(645)]
         public void UnixPathLongerThan256_Allowed()
         {
             DirectoryInfo testDir = Create(GetTestFilePath());
@@ -245,11 +279,14 @@ namespace System.IO.FileSystem.Tests
 
         [Fact]
         [PlatformSpecific(PlatformID.AnyUnix)]
-        public void UnixPathLongerThan256_Throws()
+        public void UnixPathWithDeeplyNestedDirectories()
         {
-            DirectoryInfo testDir = Create(GetTestFilePath());
-            PathInfo path = IOServices.GetPath(testDir.FullName, 257, IOInputs.MaxComponent);
-            Assert.Throws<PathTooLongException>(() => Create(path.FullPath));
+            DirectoryInfo parent = Create(GetTestFilePath());
+            for (int i = 1; i <= 100; i++) // 100 == arbitrarily large number of directories
+            {
+                parent = Create(Path.Combine(parent.FullName, "dir" + i));
+                Assert.True(Directory.Exists(parent.FullName));
+            }
         }
 
         [Fact]
@@ -302,7 +339,7 @@ namespace System.IO.FileSystem.Tests
             {
                 foreach (var path in paths)
                 {
-                    string extendedPath = Path.Combine(@"\\?\" + directory.Path, path);
+                    string extendedPath = Path.Combine(IOInputs.ExtendedPrefix + directory.Path, path);
                     Directory.CreateDirectory(extendedPath);
                     Assert.True(Directory.Exists(extendedPath), extendedPath);
                 }
@@ -358,7 +395,7 @@ namespace System.IO.FileSystem.Tests
             {
                 Assert.All(paths, (path) =>
                 {
-                    Assert.True(Create(@"\\?\" + Path.Combine(directory.Path, path)).Exists, path);
+                    Assert.True(Create(IOInputs.ExtendedPrefix + Path.Combine(directory.Path, path)).Exists, path);
                 });
             }
         }

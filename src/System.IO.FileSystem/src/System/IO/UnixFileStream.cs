@@ -84,8 +84,8 @@ namespace System.IO
             _useAsyncIO = (options & FileOptions.Asynchronous) != 0;
 
             // Translate the arguments into arguments for an open call
-            Interop.libc.OpenFlags openFlags = PreOpenConfigurationFromOptions(mode, access, options); // FileShare currently ignored
-            Interop.libc.Permissions openPermissions = Interop.libc.Permissions.S_IRWXU; // creator has read/write/execute permissions; no permissions for anyone else
+            Interop.Sys.OpenFlags openFlags = PreOpenConfigurationFromOptions(mode, access, options); // FileShare currently ignored
+            Interop.Sys.Permissions openPermissions = Interop.Sys.Permissions.S_IRWXU; // creator has read/write/execute permissions; no permissions for anyone else
 
             // Open the file and store the safe handle. Subsequent code in this method expects the safe handle to be initialized.
             _fileHandle = SafeFileHandle.Open(path, openFlags, (int)openPermissions);
@@ -163,10 +163,10 @@ namespace System.IO
         /// <param name="access">The FileAccess provided to the stream's constructor</param>
         /// <param name="options">The FileOptions provided to the stream's constructor</param>
         /// <returns>The flags value to be passed to the open system call.</returns>
-        private static Interop.libc.OpenFlags PreOpenConfigurationFromOptions(FileMode mode, FileAccess access, FileOptions options)
+        private static Interop.Sys.OpenFlags PreOpenConfigurationFromOptions(FileMode mode, FileAccess access, FileOptions options)
         {
             // Translate FileMode.  Most of the values map cleanly to one or more options for open.
-            Interop.libc.OpenFlags flags = default(Interop.libc.OpenFlags);
+            Interop.Sys.OpenFlags flags = default(Interop.Sys.OpenFlags);
             switch (mode)
             {
                 default:
@@ -175,19 +175,19 @@ namespace System.IO
 
                 case FileMode.Append: // Append is the same as OpenOrCreate, except that we'll also separately jump to the end later
                 case FileMode.OpenOrCreate:
-                    flags |= Interop.libc.OpenFlags.O_CREAT;
+                    flags |= Interop.Sys.OpenFlags.O_CREAT;
                     break;
 
                 case FileMode.Create:
-                    flags |= (Interop.libc.OpenFlags.O_CREAT | Interop.libc.OpenFlags.O_TRUNC);
+                    flags |= (Interop.Sys.OpenFlags.O_CREAT | Interop.Sys.OpenFlags.O_TRUNC);
                     break;
 
                 case FileMode.CreateNew:
-                    flags |= (Interop.libc.OpenFlags.O_CREAT | Interop.libc.OpenFlags.O_EXCL);
+                    flags |= (Interop.Sys.OpenFlags.O_CREAT | Interop.Sys.OpenFlags.O_EXCL);
                     break;
 
                 case FileMode.Truncate:
-                    flags |= Interop.libc.OpenFlags.O_TRUNC;
+                    flags |= Interop.Sys.OpenFlags.O_TRUNC;
                     break;
             }
 
@@ -195,15 +195,15 @@ namespace System.IO
             switch (access)
             {
                 case FileAccess.Read:
-                    flags |= Interop.libc.OpenFlags.O_RDONLY;
+                    flags |= Interop.Sys.OpenFlags.O_RDONLY;
                     break;
 
                 case FileAccess.ReadWrite:
-                    flags |= Interop.libc.OpenFlags.O_RDWR;
+                    flags |= Interop.Sys.OpenFlags.O_RDWR;
                     break;
 
                 case FileAccess.Write:
-                    flags |= Interop.libc.OpenFlags.O_WRONLY;
+                    flags |= Interop.Sys.OpenFlags.O_WRONLY;
                     break;
             }
 
@@ -218,7 +218,7 @@ namespace System.IO
                     break;
 
                 case FileOptions.WriteThrough:
-                    flags |= Interop.libc.OpenFlags.O_SYNC;
+                    flags |= Interop.Sys.OpenFlags.O_SYNC;
                     break;
             }
 
@@ -281,9 +281,9 @@ namespace System.IO
                 // Get the length of the file as reported by the OS
                 long length = SysCall<int, int>((fd, _, __) =>
                 {
-                    Interop.libcoreclr.fileinfo fileinfo;
-                    int result = Interop.libcoreclr.GetFileInformationFromFd(fd, out fileinfo);
-                    return result >= 0 ? fileinfo.size : result;
+                    Interop.Sys.FileStatus status;
+                    int result = Interop.Sys.FStat(fd, out status);
+                    return result >= 0 ? status.Size : result;
                 });
 
                 // But we may have buffered some data to be written that puts our length
@@ -407,7 +407,7 @@ namespace System.IO
                     {
                         // Since we still have the file open, this will end up deleting
                         // it (assuming we're the only link to it) once it's closed.
-                        Interop.libc.unlink(_path); // ignore any error
+                        Interop.Sys.Unlink(_path); // ignore any error
                     }
                 }
             }
@@ -1037,14 +1037,14 @@ namespace System.IO
                     long result = sysCall(fd, arg1, arg2);
                     if (result < 0)
                     {
-                        int errno = Marshal.GetLastWin32Error();
-                        if (errno == Interop.Errors.EINTR)
+                        Interop.ErrorInfo errorInfo = Interop.Sys.GetLastErrorInfo();
+                        if (errorInfo.Error == Interop.Error.EINTR)
                         {
                             continue;
                         }
                         else if (throwOnError)
                         {
-                            throw Interop.GetExceptionForIoErrno(errno, _path, isDirectory: false);
+                            throw Interop.GetExceptionForIoErrno(errorInfo, _path, isDirectory: false);
                         }
                     }
                     return result;

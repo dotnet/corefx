@@ -3,10 +3,11 @@
 
 using System;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Threading;
 using Xunit;
 
-public partial class FileSystemWatcher_4000_Tests
+public class DeletedTests
 {
     [Fact]
     public static void FileSystemWatcher_Deleted_File()
@@ -45,7 +46,6 @@ public partial class FileSystemWatcher_4000_Tests
         }
     }
 
-
     [Fact]
     public static void FileSystemWatcher_Deleted_Negative()
     {
@@ -70,13 +70,17 @@ public partial class FileSystemWatcher_4000_Tests
                 testFile.WriteByte(0xFF);
                 testFile.Flush();
 
-                // rename a file in the same directory
-                testFile.Move(testFile.Path + "_rename");
-
                 // renaming a directory
-                testDir.Move(testDir.Path + "_rename");
+                //
+                // We don't do this on Linux because depending on the timing of MOVED_FROM and MOVED_TO events,
+                // a rename can trigger delete + create as a deliberate handling of an edge case, and this
+                // test is checking that no delete events are raised.
+                if (!RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                {
+                    testDir.Move(testDir.Path + "_rename");
+                }
 
-                Utility.ExpectNoEvent(eventOccured, "changed");
+                Utility.ExpectNoEvent(eventOccured, "deleted");
             }
         }
     }
@@ -98,17 +102,17 @@ public partial class FileSystemWatcher_4000_Tests
             using (var firstDir = new TemporaryTestDirectory(Path.Combine(dir.Path, "dir1")))
             {
                 // Wait for the created event
-                Utility.ExpectEvent(createOccured, "create", 1000 * 30);
+                Utility.ExpectEvent(createOccured, "create");
 
                 using (var secondDir = new TemporaryTestDirectory(Path.Combine(firstDir.Path, "dir2")))
                 {
                     // Wait for the created event
-                    Utility.ExpectEvent(createOccured, "create", 1000 * 30);
+                    Utility.ExpectEvent(createOccured, "create");
 
                     using (var nestedDir = new TemporaryTestDirectory(Path.Combine(secondDir.Path, "nested")))
                     {
                         // Wait for the created event
-                        Utility.ExpectEvent(createOccured, "create", 1000 * 30);
+                        Utility.ExpectEvent(createOccured, "create");
                     }
 
                     Utility.ExpectEvent(eventOccured, "deleted");
@@ -138,12 +142,12 @@ public partial class FileSystemWatcher_4000_Tests
             using (var firstDir = new TemporaryTestDirectory(Path.Combine(dir.Path, "dir1")))
             {
                 // Wait for the created event
-                Utility.ExpectEvent(createOccured, "create", 1000 * 30);
+                Utility.ExpectEvent(createOccured, "create");
 
                 using (var secondDir = new TemporaryTestDirectory(Path.Combine(dir.Path, "dir2")))
                 {
                     // Wait for the created event
-                    Utility.ExpectEvent(createOccured, "create", 1000 * 30);
+                    Utility.ExpectEvent(createOccured, "create");
 
                     using (var nestedDir = new TemporaryTestFile(Path.Combine(secondDir.Path, "nestedFile"))) { }
 

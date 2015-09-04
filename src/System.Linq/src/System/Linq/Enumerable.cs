@@ -14,9 +14,12 @@ namespace System.Linq
         {
             if (source == null) throw Error.ArgumentNull("source");
             if (predicate == null) throw Error.ArgumentNull("predicate");
-            if (source is Iterator<TSource>) return ((Iterator<TSource>)source).Where(predicate);
-            if (source is TSource[]) return new WhereArrayIterator<TSource>((TSource[])source, predicate);
-            if (source is List<TSource>) return new WhereListIterator<TSource>((List<TSource>)source, predicate);
+            Iterator<TSource> iterator = source as Iterator<TSource>;
+            if (iterator != null) return iterator.Where(predicate);
+            TSource[] array = source as TSource[];
+            if (array != null) return new WhereArrayIterator<TSource>(array, predicate);
+            List<TSource> list = source as List<TSource>;
+            if (list != null) return new WhereListIterator<TSource>(list, predicate);
             return new WhereEnumerableIterator<TSource>(source, predicate);
         }
 
@@ -41,9 +44,12 @@ namespace System.Linq
         {
             if (source == null) throw Error.ArgumentNull("source");
             if (selector == null) throw Error.ArgumentNull("selector");
-            if (source is Iterator<TSource>) return ((Iterator<TSource>)source).Select(selector);
-            if (source is TSource[]) return new WhereSelectArrayIterator<TSource, TResult>((TSource[])source, null, selector);
-            if (source is List<TSource>) return new WhereSelectListIterator<TSource, TResult>((List<TSource>)source, null, selector);
+            Iterator<TSource> iterator = source as Iterator<TSource>;
+            if (iterator != null) return iterator.Select(selector);
+            TSource[] array = source as TSource[];
+            if (array != null) return new WhereSelectArrayIterator<TSource, TResult>(array, null, selector);
+            List<TSource> list = source as List<TSource>;
+            if (list != null) return new WhereSelectListIterator<TSource, TResult>(list, null, selector);
             return new WhereSelectEnumerableIterator<TSource, TResult>(source, null, selector);
         }
 
@@ -112,35 +118,7 @@ namespace System.Linq
 
             public abstract bool MoveNext();
 
-            public IEnumerable<TResult> Select<TResult>(Func<TSource, TResult> selector)
-            {
-                // This method is a generic virtual (actually abstract) in the original desktop source.
-                // Once we have generic virtual's supported in the toolset, we can make this back into an abstract.
-                //
-                // This is a workaround implementation that does the "virtual dispatch" manually.
-
-                if (this is WhereEnumerableIterator<TSource>)
-                    return ((WhereEnumerableIterator<TSource>)this).SelectImpl<TResult>(selector);
-
-                if (this is WhereArrayIterator<TSource>)
-                    return ((WhereArrayIterator<TSource>)this).SelectImpl<TResult>(selector);
-
-                if (this is WhereListIterator<TSource>)
-                    return ((WhereListIterator<TSource>)this).SelectImpl<TResult>(selector);
-
-                // If we got here, then "this" is one of these types:
-                //
-                //    WhereSelectEnumerableIterator<TSource, some completely random type>
-                //    WhereSelectArrayIterator<TSource, some completely random type>
-                //    WhereSelectListIterator<TSource, some completely random type>
-                //
-                // Normally, this happens when you chain two consecutive Select<,>. There may be
-                // some clever way to handle that second generic parameter within the limitations of the
-                // static type system but it's a lot simpler just to break the chain by inserting 
-                // a dummy Where(x => y) in the middle.
-                //
-                return new WhereEnumerableIterator<TSource>(this, x => true).SelectImpl<TResult>(selector);
-            }
+            public abstract IEnumerable<TResult> Select<TResult>(Func<TSource, TResult> selector);
 
             public abstract IEnumerable<TSource> Where(Func<TSource, bool> predicate);
 
@@ -161,7 +139,7 @@ namespace System.Linq
 
             void IEnumerator.Reset()
             {
-                throw NotImplemented.ByDesign;
+                throw Error.NotSupported();
             }
         }
 
@@ -184,8 +162,11 @@ namespace System.Linq
 
             public override void Dispose()
             {
-                if (_enumerator is IDisposable) ((IDisposable)_enumerator).Dispose();
-                _enumerator = null;
+                if (_enumerator != null)
+                {
+                    _enumerator.Dispose();
+                    _enumerator = null;
+                }
                 base.Dispose();
             }
 
@@ -213,8 +194,7 @@ namespace System.Linq
                 return false;
             }
 
-            // Once we have generic virtual support back, rename this back to Select and turn it into an override of the parent's abstract Select() method.
-            public IEnumerable<TResult> SelectImpl<TResult>(Func<TSource, TResult> selector)
+            public override IEnumerable<TResult> Select<TResult>(Func<TSource, TResult> selector)
             {
                 return new WhereSelectEnumerableIterator<TSource, TResult>(_source, _predicate, selector);
             }
@@ -261,8 +241,7 @@ namespace System.Linq
                 return false;
             }
 
-            // Once we have generic virtual support back, rename this back to Select and turn it into an override of the parent's abstract Select() method.
-            public IEnumerable<TResult> SelectImpl<TResult>(Func<TSource, TResult> selector)
+            public override IEnumerable<TResult> Select<TResult>(Func<TSource, TResult> selector)
             {
                 return new WhereSelectArrayIterator<TSource, TResult>(_source, _predicate, selector);
             }
@@ -314,8 +293,7 @@ namespace System.Linq
                 return false;
             }
 
-            // Once we have generic virtual support back, rename this back to Select and turn it into an override of the parent's abstract Select() method.
-            public IEnumerable<TResult> SelectImpl<TResult>(Func<TSource, TResult> selector)
+            public override IEnumerable<TResult> Select<TResult>(Func<TSource, TResult> selector)
             {
                 return new WhereSelectListIterator<TSource, TResult>(_source, _predicate, selector);
             }
@@ -347,8 +325,11 @@ namespace System.Linq
 
             public override void Dispose()
             {
-                if (_enumerator is IDisposable) ((IDisposable)_enumerator).Dispose();
-                _enumerator = null;
+                if (_enumerator != null)
+                {
+                    _enumerator.Dispose();
+                    _enumerator = null;
+                }
                 base.Dispose();
             }
 
@@ -376,8 +357,7 @@ namespace System.Linq
                 return false;
             }
 
-            // Once we have generic virtual support back, rename this back to Select and turn it into an override of the parent's abstract Select() method.
-            public IEnumerable<TResult2> SelectImpl<TResult2>(Func<TResult, TResult2> selector)
+            public override IEnumerable<TResult2> Select<TResult2>(Func<TResult, TResult2> selector)
             {
                 return new WhereSelectEnumerableIterator<TSource, TResult2>(_source, _predicate, CombineSelectors(_selector, selector));
             }
@@ -426,8 +406,7 @@ namespace System.Linq
                 return false;
             }
 
-            // Once we have generic virtual support back, rename this back to Select and turn it into an override of the parent's abstract Select() method.
-            public IEnumerable<TResult2> SelectImpl<TResult2>(Func<TResult, TResult2> selector)
+            public override IEnumerable<TResult2> Select<TResult2>(Func<TResult, TResult2> selector)
             {
                 return new WhereSelectArrayIterator<TSource, TResult2>(_source, _predicate, CombineSelectors(_selector, selector));
             }
@@ -496,8 +475,7 @@ namespace System.Linq
                 return false;
             }
 
-            // Once we have generic virtual support back, rename this back to Select and turn it into an override of the parent's abstract Select() method.
-            public IEnumerable<TResult2> SelectImpl<TResult2>(Func<TResult, TResult2> selector)
+            public override IEnumerable<TResult2> Select<TResult2>(Func<TResult, TResult2> selector)
             {
                 return new WhereSelectListIterator<TSource, TResult2>(_source, _predicate, CombineSelectors(_selector, selector));
             }
@@ -1236,17 +1214,34 @@ namespace System.Linq
         {
             if (source == null) throw Error.ArgumentNull("source");
             if (predicate == null) throw Error.ArgumentNull("predicate");
-            TSource result = default(TSource);
-            bool found = false;
-            foreach (TSource element in source)
+            IList<TSource> list = source as IList<TSource>;
+            if (list != null)
             {
-                if (predicate(element))
+                for (int i = list.Count - 1; i >= 0; --i)
                 {
-                    result = element;
-                    found = true;
+                    TSource result = list[i];
+                    if (predicate(result)) return result;
                 }
             }
-            if (found) return result;
+            else
+            {
+                using (IEnumerator<TSource> e = source.GetEnumerator())
+                {
+                    while (e.MoveNext())
+                    {
+                        TSource result = e.Current;
+                        if (predicate(result))
+                        {
+                            while (e.MoveNext())
+                            {
+                                TSource element = e.Current;
+                                if (predicate(element)) result = element;
+                            }
+                            return result;
+                        }
+                    }
+                }
+            }
             throw Error.NoMatch();
         }
 
@@ -1281,15 +1276,28 @@ namespace System.Linq
         {
             if (source == null) throw Error.ArgumentNull("source");
             if (predicate == null) throw Error.ArgumentNull("predicate");
-            TSource result = default(TSource);
-            foreach (TSource element in source)
+            IList<TSource> list = source as IList<TSource>;
+            if (list != null)
             {
-                if (predicate(element))
+                for (int i = list.Count - 1; i >= 0; --i)
                 {
-                    result = element;
+                    TSource element = list[i];
+                    if (predicate(element)) return element;
                 }
+                return default(TSource);
             }
-            return result;
+            else
+            {
+                TSource result = default(TSource);
+                foreach (TSource element in source)
+                {
+                    if (predicate(element))
+                    {
+                        result = element;
+                    }
+                }
+                return result;
+            }
         }
 
         public static TSource Single<TSource>(this IEnumerable<TSource> source)
@@ -1320,22 +1328,22 @@ namespace System.Linq
         {
             if (source == null) throw Error.ArgumentNull("source");
             if (predicate == null) throw Error.ArgumentNull("predicate");
-            TSource result = default(TSource);
-            long count = 0;
-            foreach (TSource element in source)
+            using (IEnumerator<TSource> e = source.GetEnumerator())
             {
-                if (predicate(element))
+                while (e.MoveNext())
                 {
-                    result = element;
-                    checked { count++; }
+                    TSource result = e.Current;
+                    if (predicate(result))
+                    {
+                        while (e.MoveNext())
+                        {
+                            if (predicate(e.Current)) throw Error.MoreThanOneMatch();
+                        }
+                        return result;
+                    }
                 }
             }
-            switch (count)
-            {
-                case 0: throw Error.NoMatch();
-                case 1: return result;
-            }
-            throw Error.MoreThanOneMatch();
+            throw Error.NoMatch();
         }
 
         public static TSource SingleOrDefault<TSource>(this IEnumerable<TSource> source)
@@ -1366,22 +1374,22 @@ namespace System.Linq
         {
             if (source == null) throw Error.ArgumentNull("source");
             if (predicate == null) throw Error.ArgumentNull("predicate");
-            TSource result = default(TSource);
-            long count = 0;
-            foreach (TSource element in source)
+            using (IEnumerator<TSource> e = source.GetEnumerator())
             {
-                if (predicate(element))
+                while (e.MoveNext())
                 {
-                    result = element;
-                    checked { count++; }
+                    TSource result = e.Current;
+                    if (predicate(result))
+                    {
+                        while (e.MoveNext())
+                        {
+                            if (predicate(e.Current)) throw Error.MoreThanOneMatch();
+                        }
+                        return result;
+                    }
                 }
             }
-            switch (count)
-            {
-                case 0: return default(TSource);
-                case 1: return result;
-            }
-            throw Error.MoreThanOneMatch();
+            return default(TSource);
         }
 
         public static TSource ElementAt<TSource>(this IEnumerable<TSource> source, int index)
@@ -1436,7 +1444,7 @@ namespace System.Linq
 
         private static IEnumerable<int> RangeIterator(int start, int count)
         {
-            for (int i = 0; i < count; i++) yield return start + i;
+            for (int end = start + count; start != end; start++) yield return start;
         }
 
         public static IEnumerable<TResult> Repeat<TResult>(TResult element, int count)
@@ -1866,13 +1874,8 @@ namespace System.Linq
                     // ordering where NaN is smaller than every value, including
                     // negative infinity.
                     // Not testing for NaN therefore isn't an option, but since we
-                    // can't find a smaller value, we can short-circuit. But we consume
-                    // the rest for backwards-compatibility reasons.
-                    else if (float.IsNaN(x))
-                    {
-                        while (e.MoveNext()) {}
-                        return x;
-                    }
+                    // can't find a smaller value, we can short-circuit.
+                    else if (float.IsNaN(x)) return x;
                 }
             }
             return value;
@@ -1901,11 +1904,7 @@ namespace System.Linq
                             valueVal = x;
                             value = cur;
                         }
-                        else if (float.IsNaN(x))
-                        {
-                            while (e.MoveNext()) { }
-                            return cur;
-                        }
+                        else if (float.IsNaN(x)) return cur;
                     }
                 }
             }
@@ -1924,11 +1923,7 @@ namespace System.Linq
                 {
                     double x = e.Current;
                     if (x < value) value = x;
-                    else if (double.IsNaN(x))
-                    {
-                        while (e.MoveNext()) {}
-                        return x;
-                    }
+                    else if (double.IsNaN(x)) return x;
                 }
             }
             return value;
@@ -1957,11 +1952,7 @@ namespace System.Linq
                             valueVal = x;
                             value = cur;
                         }
-                        else if (double.IsNaN(x))
-                        {
-                            while (e.MoveNext()) {}
-                            return cur;
-                        }
+                        else if (double.IsNaN(x)) return cur;
                     }
                 }
             }
@@ -3389,9 +3380,6 @@ namespace System.Linq
 
         internal Buffer(IEnumerable<TElement> source, bool queryInterfaces = true)
         {
-            TElement[] items = null;
-            int count = 0;
-
             if (queryInterfaces)
             {
                 Enumerable.Iterator<TElement> iterator = source as Enumerable.Iterator<TElement>;
@@ -3399,41 +3387,11 @@ namespace System.Linq
                 {
                     items = iterator.ToArray();
                     count = items.Length;
-                }
-                else
-                {
-                    ICollection<TElement> collection = source as ICollection<TElement>;
-                    if (collection != null)
-                    {
-                        count = collection.Count;
-                        if (count > 0)
-                        {
-                            items = new TElement[count];
-                            collection.CopyTo(items, 0);
-                        }
-                    }
+                    return;
                 }
             }
-
-            if (items == null)
-            {
-                foreach (TElement item in source)
-                {
-                    if (items == null)
-                    {
-                        items = new TElement[4];
-                    }
-                    else if (items.Length == count)
-                    {
-                        Array.Resize(ref items, checked(count * 2));
-                    }
-                    items[count] = item;
-                    count++;
-                }
-            }
-
-            this.items = items;
-            this.count = count;
+            
+            items = EnumerableHelpers.ToArray(source, out count);
         }
 
         internal TElement[] ToArray()
@@ -3482,8 +3440,8 @@ namespace System.Linq
                 {
                     throw new SystemCore_EnumerableDebugViewEmptyException();
                 }
-                _cachedCollection = new T[_count];
-                tempList.CopyTo(_cachedCollection, 0);
+
+                _cachedCollection = tempList.ToArray();
                 return _cachedCollection;
             }
         }

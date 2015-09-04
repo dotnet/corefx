@@ -5,22 +5,38 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 
 internal static class IOInputs
 {
     // see: http://msdn.microsoft.com/en-us/library/aa365247.aspx
-    private static readonly char[] s_invalidFileNameChars = Interop.IsWindows ?
+    private static readonly char[] s_invalidFileNameChars = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ?
         new char[] { '\"', '<', '>', '|', '\0', (Char)1, (Char)2, (Char)3, (Char)4, (Char)5, (Char)6, (Char)7, (Char)8, (Char)9, (Char)10, (Char)11, (Char)12, (Char)13, (Char)14, (Char)15, (Char)16, (Char)17, (Char)18, (Char)19, (Char)20, (Char)21, (Char)22, (Char)23, (Char)24, (Char)25, (Char)26, (Char)27, (Char)28, (Char)29, (Char)30, (Char)31, ':', '*', '?' } :
         new char[] { '\0' };
 
-    public static bool SupportsCreationTime { get { return Interop.IsWindows | Interop.IsOSX; } }
-    public static bool CaseSensitive { get { return Interop.IsWindows | Interop.IsOSX; } }
-    public static bool CaseInsensitive { get { return Interop.IsWindows | Interop.IsOSX; } }
+    public static bool SupportsCreationTime { get { return RuntimeInformation.IsOSPlatform(OSPlatform.Windows) | RuntimeInformation.IsOSPlatform(OSPlatform.OSX); } }
+    public static bool CaseSensitive { get { return RuntimeInformation.IsOSPlatform(OSPlatform.Windows) | RuntimeInformation.IsOSPlatform(OSPlatform.OSX); } }
+    public static bool CaseInsensitive { get { return RuntimeInformation.IsOSPlatform(OSPlatform.Windows) | RuntimeInformation.IsOSPlatform(OSPlatform.OSX); } }
 
-    // Unix values vary system to system; just using really long values here likely to be more than on the average system
-    public static readonly int MaxDirectory = 247; // Does not include trailing \0. This the maximum length that can be passed to APIs taking directory names, such as Directory.CreateDirectory, Directory.Move
-    public static readonly int MaxPath = Interop.IsWindows ? 259 : 10000;      // Does not include trailing \0.
-    public static readonly int MaxComponent = 255;
+    // Max path length (minus trailing \0). Unix values vary system to system; just using really long values here likely to be more than on the average system.
+    public static readonly int MaxPath = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? 259 : 10000;
+
+    // Same as MaxPath on Unix
+    public static readonly int MaxLongPath = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? MaxExtendedPath : MaxPath;
+
+    // Windows specific, this is the maximum length that can be passed to APIs taking directory names, such as Directory.CreateDirectory & Directory.Move.
+    // Does not include the trailing \0.
+    // We now do the appropriate wrapping to allow creating longer directories. Like MaxPath, this is a legacy restriction.
+    public static readonly int MaxDirectory = 247;
+
+    // Windows specific, this is the maximum length that can be passed using extended syntax. Does not include the trailing \0.
+    public static readonly int MaxExtendedPath = short.MaxValue - 1;
+
+
+    public const int MaxComponent = 255;
+
+    public const string ExtendedPrefix = @"\\?\";
+    public const string ExtendedUncPrefix = @"\\?\UNC\";
 
     public static IEnumerable<string> GetValidPathComponentNames()
     {
@@ -132,7 +148,7 @@ internal static class IOInputs
         // NOTE: That I/O treats "file"/http" specially and throws ArgumentException.
         // Otherwise, it treats all other urls as alternative data streams
 
-        if (Interop.IsWindows) // alternate data streams, drive labels, etc.
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) // alternate data streams, drive labels, etc.
         {
             yield return "\0";
             yield return "middle\0path";
@@ -207,18 +223,22 @@ internal static class IOInputs
         yield return GetLongPath(MaxDirectory + 3);
     }
 
-    public static IEnumerable<string> GetPathsLongerThanMaxPath()
+    public static IEnumerable<string> GetPathsLongerThanMaxPath(bool useExtendedSyntax = false)
     {
-        yield return GetLongPath(MaxPath + 1);
-        yield return GetLongPath(MaxPath + 2);
-        yield return GetLongPath(MaxPath + 3);
-        yield return GetLongPath(Int16.MaxValue);
-        yield return GetLongPath(Int16.MaxValue + 1);
+        yield return GetLongPath(MaxPath + 1, useExtendedSyntax);
+        yield return GetLongPath(MaxPath + 2, useExtendedSyntax);
+        yield return GetLongPath(MaxPath + 3, useExtendedSyntax);
     }
 
-    private static string GetLongPath(int characterCount)
+    public static IEnumerable<string> GetPathsLongerThanMaxLongPath(bool useExtendedSyntax = false)
     {
-        return IOServices.GetPath(characterCount).FullPath;
+        yield return GetLongPath(MaxExtendedPath + 1 - (useExtendedSyntax ? 0 : ExtendedPrefix.Length), useExtendedSyntax);
+        yield return GetLongPath(MaxExtendedPath + 2 - (useExtendedSyntax ? 0 : ExtendedPrefix.Length), useExtendedSyntax);
+    }
+
+    private static string GetLongPath(int characterCount, bool extended = false)
+    {
+        return IOServices.GetPath(characterCount, extended).FullPath;
     }
 
     public static IEnumerable<string> GetReservedDeviceNames()
