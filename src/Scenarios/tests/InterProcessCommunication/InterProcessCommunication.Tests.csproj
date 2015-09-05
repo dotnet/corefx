@@ -15,9 +15,10 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' " />
   <ItemGroup>
     <Compile Include="AnonymousPipesTests.cs" />
+    <Compile Include="EnvironmentOfChildProcess.cs" />
+    <Compile Include="EventWaitHandleTests.cs" />
     <Compile Include="MemoryMappedFilesTests.cs" />
     <Compile Include="NamedPipesTests.cs" />
-    <Compile Include="EventWaitHandleTests.cs" />
     <Compile Include="SemaphoreTests.cs" />
     <Compile Include="$(CommonTestPath)\System\IO\TempFile.cs">
       <Link>Common\System\IO\TempFile.cs</Link>

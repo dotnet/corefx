@@ -182,66 +182,6 @@ namespace System.Diagnostics.ProcessTests
         }
 
         [Fact]
-        public void TestEnvironmentOfChildProcess()
-        {
-            var expectedEnv = new HashSet<string>();
-            var actualEnv = new HashSet<string>();
-            Process p = CreateProcess(() =>
-            {
-                foreach (DictionaryEntry envVar in Environment.GetEnvironmentVariables())
-                {
-                    Console.WriteLine(envVar.Key + "=" + envVar.Value);
-                }
-
-                return SuccessExitCode;
-            });
-
-            p.StartInfo.RedirectStandardOutput = true;
-            p.OutputDataReceived += (s, e) =>
-            {
-                if (e.Data != null)
-                {
-                    expectedEnv.Add(e.Data);
-                }
-            };
-
-            p.Start();
-            p.BeginOutputReadLine();
-
-            foreach (KeyValuePair<string, string> envVar in p.StartInfo.Environment)
-            {
-                actualEnv.Add(envVar.Key + "=" + envVar.Value);
-            }
-
-            Assert.True(p.WaitForExit(WaitInMS));
-            p.WaitForExit(); // This ensures async event handlers are finished processing.
-
-            // Validate against StartInfo.Environment
-            if (!expectedEnv.SetEquals(actualEnv))
-            {
-                var expected = string.Join(", ", expectedEnv.Except(actualEnv));
-                var actual = string.Join(", ", actualEnv.Except(expectedEnv));
-
-                Assert.True(false, string.Format("Expected: {0}{1}Actual: {2}", expected, Environment.NewLine, actual));
-            }
-
-            // Validate against current process
-            var currentProcEnv = new HashSet<string>();
-            foreach (DictionaryEntry envVar in Environment.GetEnvironmentVariables())
-            {
-                currentProcEnv.Add(envVar.Key + "=" + envVar.Value);
-            }
-
-            // Profilers / code coverage tools can add own environment variables but we start
-            // child process without them. Thus the set of variables from child process will
-            // compose subset of variables from current process.
-            // But in case if tests running directly through the Xunit runner, sets will be equal
-            // and Assert.ProperSubset will throw. We add null to avoid this.
-            currentProcEnv.Add(null);
-            Assert.ProperSubset(currentProcEnv, actualEnv);
-        }
-
-        [Fact]
         public void TestUseShellExecuteProperty()
         {
             ProcessStartInfo psi = new ProcessStartInfo();
