@@ -3779,6 +3779,101 @@ namespace Tests
             Assert.Equal("hello", f("HI"));
             Assert.Equal("null", f(null));
         }
+        
+        [Fact]
+        public void EmptyBlock()
+        {
+            var block = Expression.Block();
+            Assert.Equal(typeof(void), block.Type);
+            Action nop = Expression.Lambda<Action>(block).Compile();
+            nop();
+        }
+        
+        [Fact]
+        public void EmptyBlockReducible()
+        {
+            var block = Expression.Block();
+            Assert.True(block.CanReduce);
+            var reduced = block.ReduceAndCheck();
+            Assert.Equal(typeof(void), reduced.Type);
+            Action nop = Expression.Lambda<Action>(reduced).Compile();
+            nop();
+        }
+
+        [Fact]
+        public void EmptyBlockExplicitType()
+        {
+            var block = Expression.Block(typeof(void));
+            Assert.Equal(typeof(void), block.Type);
+            Action nop = Expression.Lambda<Action>(block).Compile();
+            nop();
+        }
+        
+        [Fact]
+        public void EmptyBlockExplicitTypeReducible()
+        {
+            var block = Expression.Block(typeof(void));
+            Assert.True(block.CanReduce);
+            var reduced = block.ReduceAndCheck();
+            Assert.Equal(typeof(void), reduced.Type);
+            Action nop = Expression.Lambda<Action>(reduced).Compile();
+            nop();
+        }
+
+        [Fact]
+        public void EmptyBlockWrongExplicitType()
+        {
+            Assert.Throws<ArgumentException>(() => Expression.Block(typeof(int)));
+        }
+        
+        [Fact]
+        public void EmptyScope()
+        {
+            var scope = Expression.Block(new []{ Expression.Parameter(typeof(int), "x") }, new Expression[0]);
+            Assert.Equal(typeof(void), scope.Type);
+            Action nop = Expression.Lambda<Action>(scope).Compile();
+            nop();
+        }
+
+        [Fact]
+        public void EmptyScopeReducible()
+        {
+            var scope = Expression.Block(new []{ Expression.Parameter(typeof(int), "x") }, new Expression[0]);
+            Assert.True(scope.CanReduce);
+            var reduced = scope.ReduceAndCheck();
+            Assert.Equal(typeof(void), reduced.Type);
+            Action nop = Expression.Lambda<Action>(reduced).Compile();
+            nop();
+        }
+
+        [Fact]
+        public void EmptyScopeExplicitType()
+        {
+            var scope = Expression.Block(typeof(void), new []{ Expression.Parameter(typeof(int), "x") }, new Expression[0]);
+            Assert.Equal(typeof(void), scope.Type);
+            Action nop = Expression.Lambda<Action>(scope).Compile();
+            nop();
+        }
+
+        [Fact]
+        public void EmptyScopeExplicitTypeReducible()
+        {
+            var scope = Expression.Block(typeof(void), new []{ Expression.Parameter(typeof(int), "x") }, new Expression[0]);
+            Assert.True(scope.CanReduce);
+            var reduced = scope.ReduceAndCheck();
+            Assert.Equal(typeof(void), reduced.Type);
+            Action nop = Expression.Lambda<Action>(reduced).Compile();
+            nop();
+        }
+
+        [Fact]
+        public void EmptyScopeExplicitWrongType()
+        {
+            Assert.Throws<ArgumentException>(() => Expression.Block(
+                typeof(int),
+                new []{ Expression.Parameter(typeof(int), "x") },
+                new Expression[0]));
+        }
 
         [Fact]
         public static void BinaryOperators()

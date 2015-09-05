@@ -179,6 +179,50 @@ namespace System.Linq.Expressions
     }
 
     #region Specialized Subclasses
+    
+    internal sealed class Block0 : BlockExpression
+    {
+        internal Block0()
+        {
+        }
+        
+        internal override Expression GetExpression(int index)
+        {
+            throw new InvalidOperationException();
+        }
+        
+        internal override int ExpressionCount
+        {
+            get { return 0; }
+        }
+        
+        public override Type Type
+        {
+            get { return typeof(void); }
+        }
+        
+        public override Expression Reduce()
+        {
+            return Expression.Empty();
+        }
+        
+        public override bool CanReduce
+        {
+            get { return true; }
+        }
+        
+        internal override ReadOnlyCollection<Expression> GetOrMakeExpressions()
+        {
+            return EmptyReadOnlyCollection<Expression>.Instance;
+        }
+        
+        internal override BlockExpression Rewrite(ReadOnlyCollection<ParameterExpression> variables, Expression[] args)
+        {
+            Debug.Assert(args.Length == 0);
+            Debug.Assert(variables == null || variables.Count == 0);
+            return new Block0();
+        }
+    }
 
     internal sealed class Block2 : BlockExpression
     {
@@ -554,6 +598,35 @@ namespace System.Linq.Expressions
 
             return new ScopeWithType(ReuseOrValidateVariables(variables), args, _type);
         }
+        
+        public override bool CanReduce
+        {
+            get
+            {
+                switch(ExpressionCount)
+                {
+                    case 0:
+                        return true;
+                    case 1:
+                        return VariableCount == 0;
+                    default:
+                        return false;
+                }
+            }
+        }
+        
+        public override Expression Reduce()
+        {
+            switch(ExpressionCount)
+            {
+                case 0:
+                    return Expression.Empty();
+                case 1:
+                    return VariableCount == 0 ? Expressions[0] : this;
+                default:
+                    return this;
+            }
+        }
     }
 
     #endregion
@@ -781,12 +854,12 @@ namespace System.Linq.Expressions
 
             switch (expressions.Length)
             {
+                case 0: return new Block0();
                 case 2: return Block(expressions[0], expressions[1]);
                 case 3: return Block(expressions[0], expressions[1], expressions[2]);
                 case 4: return Block(expressions[0], expressions[1], expressions[2], expressions[3]);
                 case 5: return Block(expressions[0], expressions[1], expressions[2], expressions[3], expressions[4]);
                 default:
-                    ContractUtils.RequiresNotEmpty(expressions, "expressions");
                     RequiresCanRead(expressions, "expressions");
                     return new BlockN(expressions.Copy());
             }
@@ -858,10 +931,9 @@ namespace System.Linq.Expressions
         {
             ContractUtils.RequiresNotNull(expressions, "expressions");
             var expressionList = expressions.ToReadOnly();
-            ContractUtils.RequiresNotEmpty(expressionList, "expressions");
             RequiresCanRead(expressionList, "expressions");
 
-            return Block(expressionList.Last().Type, variables, expressionList);
+            return Block(expressionList.Count == 0 ? typeof(void) : expressionList.Last().Type, variables, expressionList);
         }
 
         /// <summary>
@@ -879,20 +951,21 @@ namespace System.Linq.Expressions
             var expressionList = expressions.ToReadOnly();
             var variableList = variables.ToReadOnly();
 
-            ContractUtils.RequiresNotEmpty(expressionList, "expressions");
+            if (type != typeof(void))
+                ContractUtils.RequiresNotEmpty(expressionList, "expressions");
             RequiresCanRead(expressionList, "expressions");
             ValidateVariables(variableList, "variables");
-
-            Expression last = expressionList.Last();
+            
+            Type lastType = expressionList.Count == 0 ? typeof(void) : expressionList.Last().Type;
             if (type != typeof(void))
             {
-                if (!TypeUtils.AreReferenceAssignable(type, last.Type))
+                if (!TypeUtils.AreReferenceAssignable(type, lastType))
                 {
                     throw Error.ArgumentTypesMustMatch();
                 }
             }
 
-            if (!TypeUtils.AreEquivalent(type, last.Type))
+            if (expressionList.Count == 0 || !TypeUtils.AreEquivalent(type, lastType))
             {
                 return new ScopeWithType(variableList, expressionList, type);
             }
