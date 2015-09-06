@@ -87,6 +87,41 @@ namespace System.Collections.Immutable
         }
 
         /// <summary>
+        /// Copies part of an <see cref="IEnumerable{T}"/> to an array, starting at the specified index.
+        /// </summary>
+        /// <typeparam name="T">The type of element.</typeparam>
+        /// <param name="sequence">The sequence of elements you want to copy.</param>
+        /// <param name="dest">The destination array.</param>
+        /// <param name="index">The index in the array to start copying to.</param>
+        internal static void CopyTo<T>(this IEnumerable<T> sequence, T[] dest, int index)
+        {
+            Requires.NotNull(sequence, "sequence");
+            Requires.NotNull(dest, "dest");
+            Requires.Range(index >= 0 && index < dest.Length, "index");
+            
+            var collectionOfT = sequence as ICollection<T>;
+            if (collectionOfT != null)
+            {
+                collectionOfT.CopyTo(dest, index);
+                return;
+            }
+            
+            var collection = sequence as ICollection;
+            if (collection != null)
+            {
+                collection.CopyTo(dest, index);
+                return;
+            }
+            
+            // Fallback to manual iteration over dest and sequence
+            int sequenceIndex = index;
+            foreach (var item in sequence)
+            {
+                dest[sequenceIndex++] = item;
+            }
+        }
+
+        /// <summary>
         /// Gets a copy of a sequence as an array.
         /// </summary>
         /// <typeparam name="T">The type of element.</typeparam>
