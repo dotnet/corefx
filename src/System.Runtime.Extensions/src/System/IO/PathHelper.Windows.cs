@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.Diagnostics;
 using System.Diagnostics.Contracts;
 using System.Runtime.InteropServices;
 using System.Security;
@@ -55,7 +56,10 @@ namespace System.IO
         // Whether to skip calls to Win32Native.GetLongPathName becasue we tried before and failed:
         private bool doNotTryExpandShortFileName;
 
-        // Instantiates a PathHelper with a stack alloc'd array of chars
+        /// <summary>
+        /// Instantiates a PathHelper with a stack alloc'd array of chars.
+        /// NOTE: This cannot grow past the initial length and will always fail if over MAX_PATH.
+        /// </summary>
         [System.Security.SecurityCritical]
         internal PathHelper(char* charArrayPtr, int length)
         {
@@ -166,7 +170,7 @@ namespace System.IO
             if (useStackAlloc)
             {
                 char* finalBuffer = stackalloc char[Path.MaxPath + 1];
-                int result = Interop.mincore.GetFullPathNameW(m_arrayPtr, Path.MaxPath + 1, finalBuffer, IntPtr.Zero);
+                int result = Interop.mincore.GetFullPathNameUnsafe(m_arrayPtr, Path.MaxPath + 1, finalBuffer, IntPtr.Zero);
 
                 // If success, the return buffer length does not account for the terminating null character.
                 // If in-sufficient buffer, the return buffer length does account for the path + the terminating null character.
@@ -175,14 +179,14 @@ namespace System.IO
                 {
                     char* tempBuffer = stackalloc char[result];
                     finalBuffer = tempBuffer;
-                    result = Interop.mincore.GetFullPathNameW(m_arrayPtr, result, finalBuffer, IntPtr.Zero);
+                    result = Interop.mincore.GetFullPathNameUnsafe(m_arrayPtr, result, finalBuffer, IntPtr.Zero);
                 }
 
                 // Full path is genuinely long
                 if (result >= Path.MaxPath)
                     throw new PathTooLongException(SR.IO_PathTooLong);
 
-                Contract.Assert(result < Path.MaxPath, "did we accidently remove a PathTooLongException check?");
+                Debug.Assert(result < Path.MaxPath, "did we accidently remove a PathTooLongException check?");
                 if (result == 0 && m_arrayPtr[0] != '\0')
                 {
                     throw Win32Marshal.GetExceptionForLastWin32Error();
@@ -208,7 +212,7 @@ namespace System.IO
             else
             {
                 StringBuilder finalBuffer = new StringBuilder(m_capacity + 1);
-                int result = Interop.mincore.GetFullPathNameW(m_sb.ToString(), m_capacity + 1, finalBuffer, IntPtr.Zero);
+                int result = Interop.mincore.GetFullPathName(m_sb.ToString(), m_capacity + 1, finalBuffer, IntPtr.Zero);
 
                 // If success, the return buffer length does not account for the terminating null character.
                 // If in-sufficient buffer, the return buffer length does account for the path + the terminating null character.
@@ -216,14 +220,14 @@ namespace System.IO
                 if (result > m_maxPath)
                 {
                     finalBuffer.Length = result;
-                    result = Interop.mincore.GetFullPathNameW(m_sb.ToString(), result, finalBuffer, IntPtr.Zero);
+                    result = Interop.mincore.GetFullPathName(m_sb.ToString(), result, finalBuffer, IntPtr.Zero);
                 }
 
                 // Fullpath is genuinely long
                 if (result >= m_maxPath)
                     throw new PathTooLongException(SR.IO_PathTooLong);
 
-                Contract.Assert(result < m_maxPath, "did we accidentally remove a PathTooLongException check?");
+                Debug.Assert(result < m_maxPath, "did we accidentally remove a PathTooLongException check?");
                 if (result == 0 && m_sb[0] != '\0')
                 {
                     if (Length >= m_maxPath)
@@ -254,7 +258,7 @@ namespace System.IO
                 char* buffer = UnsafeGetArrayPtr();
                 char* shortFileNameBuffer = stackalloc char[Path.MaxPath + 1];
 
-                int r = Interop.mincore.GetLongPathNameW(buffer, shortFileNameBuffer, Path.MaxPath);
+                int r = Interop.mincore.GetLongPathNameUnsafe(buffer, shortFileNameBuffer, Path.MaxPath);
 
                 // If success, the return buffer length does not account for the terminating null character.
                 // If in-sufficient buffer, the return buffer length does account for the path + the terminating null character.
@@ -297,12 +301,12 @@ namespace System.IO
                 bool addedPrefix = false;
                 if (tempName.Length > Path.MaxPath)
                 {
-                    tempName = PathInternal.AddExtendedPathPrefix(tempName);
+                    tempName = PathInternal.EnsureExtendedPrefix(tempName);
                     addedPrefix = true;
                 }
                 sb.Capacity = m_capacity;
                 sb.Length = 0;
-                int r = Interop.mincore.GetLongPathNameW(tempName, sb, m_capacity);
+                int r = Interop.mincore.GetLongPathName(tempName, sb, m_capacity);
 
                 if (r == 0)
                 {
@@ -324,7 +328,10 @@ namespace System.IO
                 }
 
                 if (addedPrefix)
+                {
                     r -= 4;
+                    sb = PathInternal.RemoveExtendedPrefix(sb);
+                }
 
                 // If success, the return buffer length does not account for the terminating null character.
                 // If in-sufficient buffer, the return buffer length does account for the path + the terminating null character.
@@ -332,7 +339,6 @@ namespace System.IO
                 if (r >= m_maxPath)
                     throw new PathTooLongException(SR.IO_PathTooLong);
 
-                sb = PathInternal.RemoveExtendedPathPrefix(sb);
                 Length = sb.Length;
                 return true;
             }

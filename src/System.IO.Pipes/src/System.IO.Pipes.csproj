@@ -20,9 +20,6 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Windows_Release|AnyCPU' " />
   <!-- Compiled Source Files -->
   <ItemGroup>
-    <Compile Include="$(CommonPath)\System\IO\StreamAsyncHelper.cs">
-      <Link>Common\System\IO\StreamAsyncHelper.cs</Link>
-    </Compile>
     <Compile Include="Microsoft\Win32\SafeHandles\SafePipeHandle.cs" />
     <Compile Include="System\IO\__Error.cs" />
     <Compile Include="System\IO\Pipes\AnonymousPipeClientStream.cs" />
@@ -132,17 +129,13 @@
     <Compile Include="Microsoft\Win32\SafeHandles\SafePipeHandle.Windows.cs" />
     <Compile Include="System\IO\Pipes\AnonymousPipeServerStream.Windows.cs" />
     <Compile Include="System\IO\Pipes\ConnectionCompletionSource.cs" />
-    <Compile Include="System\IO\Pipes\IOCancellationHelper.Windows.cs" />
     <Compile Include="System\IO\Pipes\NamedPipeClientStream.Windows.cs" />
     <Compile Include="System\IO\Pipes\NamedPipeServerStream.Windows.cs" />
+    <Compile Include="System\IO\Pipes\PipeCompletionSource.cs" />
     <Compile Include="System\IO\Pipes\PipeStream.Windows.cs" />
-    <Compile Include="System\IO\Pipes\PipeStreamAsyncResult.cs" />
+    <Compile Include="System\IO\Pipes\ReadWriteCompletionSource.cs" />
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetsUnix)' == 'true' ">
-    <Compile Include="$(CommonPath)\System\NotImplemented.cs">
-      <!-- TODO: Remove once implemented -->
-      <Link>Common\System\NotImplemented.cs</Link>
-    </Compile>
     <Compile Include="Microsoft\Win32\SafeHandles\SafePipeHandle.Unix.cs" />
     <Compile Include="System\IO\Pipes\AnonymousPipeServerStream.Unix.cs" />
     <Compile Include="System\IO\Pipes\NamedPipeClientStream.Unix.cs" />
@@ -160,66 +153,53 @@
     <Compile Include="$(CommonPath)\Interop\Unix\Interop.IOErrors.cs">
       <Link>Common\Interop\Unix\Interop.IOErrors.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Linux\libc\Interop.pipe2.cs">
-      <Link>Common\Interop\Unix\Interop.pipe2.cs</Link>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.Close.cs">
+      <Link>Common\Interop\Unix\Interop.Close.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Unix\libc\Interop.close.cs">
-      <Link>Common\Interop\Unix\Interop.close.cs</Link>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.Fcntl.cs">
+      <Link>Common\Interop\Unix\Interop.Fcntl.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\libc\Interop.gethostname.cs">
       <Link>Common\Interop\Unix\Interop.gethostname.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Unix\libc\Interop.gnu_get_libc_version.cs">
-      <Link>Common\Interop\Unix\Interop.gnu_get_libc_version.cs</Link>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.MkDir.cs">
+      <Link>Common\Interop\Unix\Interop.MkDir.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Unix\libc\Interop.mkdir.cs">
-      <Link>Common\Interop\Unix\Interop.mkdir.cs</Link>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.MkFifo.cs">
+      <Link>Common\Interop\Unix\Interop.MkFifo.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Unix\libc\Interop.mkfifo.cs">
-      <Link>Common\Interop\Unix\Interop.mkfifo.cs</Link>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.Open.cs">
+      <Link>Common\Interop\Unix\Interop.Open.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Unix\libc\Interop.open.cs">
-      <Link>Common\Interop\Unix\Interop.open.cs</Link>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.OpenFlags.cs">
+      <Link>Common\Interop\Unix\Interop.OpenFlags.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Unix\libc\Interop.Permissions.cs">
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.Permissions.cs">
       <Link>Common\Interop\Unix\Interop.Permissions.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Unix\libc\Interop.pipe.cs">
-      <Link>Common\Interop\Unix\Interop.pipe.cs</Link>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.Pipe.cs">
+      <Link>Common\Interop\Unix\Interop.Pipe.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\libc\Interop.poll.cs">
+      <Link>Common\Interop\Unix\Interop.poll.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\libc\Interop.read.cs">
       <Link>Common\Interop\Unix\Interop.read.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Unix\libc\Interop.unlink.cs">
-      <Link>Common\Interop\Unix\Interop.unlink.cs</Link>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.Unlink.cs">
+      <Link>Common\Interop\Unix\Interop.Unlink.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\libc\Interop.write.cs">
       <Link>Common\Interop\Unix\Interop.write.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Unix\libcoreclr\Interop.GetFileInformation.cs">
-      <Link>Common\Interop\Unix\Interop.GetInformation.cs</Link>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.Stat.cs">
+      <Link>Common\Interop\Unix\Interop.Stat.cs</Link>
     </Compile>
-  </ItemGroup>
-  <!-- Linux -->
-  <ItemGroup Condition="'$(TargetsLinux)' == 'true'">
-    <Compile Include="System\IO\Pipes\AnonymousPipeServerStream.Linux.cs" />
-    <Compile Include="System\IO\Pipes\PipeStream.Linux.cs" />
-    <Compile Include="$(CommonPath)\Interop\Unix\libc\Interop.fcntl.cs">
-      <Link>Common\Interop\Unix\Interop.fcntl.cs</Link>
+    <Compile Include="$(CommonPath)\System\IO\PersistedFiles.Names.Unix.cs">
+      <Link>Common\System\IO\PersistedFiles.Names.Unix.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Linux\libc\Interop.FcntlCommands.cs">
-      <Link>Common\Interop\Linux\Interop.FcntlCommands.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\Interop\Linux\libc\Interop.OpenFlags.cs">
-      <Link>Common\Interop\Linux\Interop.OpenFlags.cs</Link>
-    </Compile>
-  </ItemGroup>
-  <!-- OSX -->
-  <ItemGroup Condition="'$(TargetsOSX)' == 'true'">
-    <Compile Include="System\IO\Pipes\AnonymousPipeServerStream.OSX.cs" />
-    <Compile Include="System\IO\Pipes\PipeStream.OSX.cs" />
-    <Compile Include="$(CommonPath)\Interop\OSX\libc\Interop.OpenFlags.cs">
-      <Link>Common\Interop\OSX\Interop.OpenFlags.cs</Link>
+    <Compile Include="$(CommonPath)\System\Threading\Tasks\ForceAsyncAwaiter.cs">
+      <Link>Common\System\Threading\Tasks\ForceAsyncAwaiter.cs</Link>
     </Compile>
   </ItemGroup>
   <!-- Resource files -->

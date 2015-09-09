@@ -333,11 +333,11 @@ namespace System
                 Debug.Assert(access == FileAccess.Read || access == FileAccess.Write);
                 
                 // Open the file descriptor for this stream
-                Interop.libc.OpenFlags flags = 0;
+                Interop.Sys.OpenFlags flags = 0;
                 switch (access)
                 {
-                    case FileAccess.Read: flags = Interop.libc.OpenFlags.O_RDONLY; break;
-                    case FileAccess.Write: flags = Interop.libc.OpenFlags.O_WRONLY; break;
+                    case FileAccess.Read: flags = Interop.Sys.OpenFlags.O_RDONLY; break;
+                    case FileAccess.Write: flags = Interop.Sys.OpenFlags.O_WRONLY; break;
                 }
                 _handle = SafeFileHandle.Open(devPath, flags, 0);
 
@@ -490,7 +490,7 @@ namespace System
                     }
 
                     // Then try in the user's home directory.
-                    string home = Environment.GetEnvironmentVariable("HOME");
+                    string home = PersistedFiles.GetHomeDirectory();
                     if (!string.IsNullOrWhiteSpace(home) && (db = ReadDatabase(term, home + "/.terminfo")) != null)
                     {
                         return db;
@@ -516,7 +516,7 @@ namespace System
                 private static bool TryOpen(string filePath, out int fd)
                 {
                     int tmpFd;
-                    while ((tmpFd = Interop.libc.open(filePath, Interop.libc.OpenFlags.O_RDONLY, 0)) < 0)
+                    while ((tmpFd = Interop.Sys.Open(filePath, Interop.Sys.OpenFlags.O_RDONLY, 0)) < 0)
                     {
                         // Don't throw in this case, as we'll be polling multiple locations looking for the file.
                         // But we still want to retry if the open is interrupted by a signal.
@@ -552,8 +552,8 @@ namespace System
                     {
                         // Read in all of the terminfo data
                         long termInfoLength;
-                        while (Interop.CheckIo(termInfoLength = Interop.libc.lseek(fd, 0, Interop.libc.SeekWhence.SEEK_END))) ; // jump to the end to get the file length
-                        while (Interop.CheckIo(Interop.libc.lseek(fd, 0, Interop.libc.SeekWhence.SEEK_SET))) ; // reset back to beginning
+                        while (Interop.CheckIo(termInfoLength = Interop.Sys.LSeek(fd, 0, Interop.Sys.SeekWhence.SEEK_END))) ; // jump to the end to get the file length
+                        while (Interop.CheckIo(Interop.Sys.LSeek(fd, 0, Interop.Sys.SeekWhence.SEEK_SET))) ; // reset back to beginning
                         const int MaxTermInfoLength = 4096; // according to the term and tic man pages, 4096 is the terminfo file size max
                         const int HeaderLength = 12;
                         if (termInfoLength <= HeaderLength || termInfoLength > MaxTermInfoLength)
@@ -573,7 +573,7 @@ namespace System
                     }
                     finally
                     {
-                        Interop.CheckIo(Interop.libc.close(fd)); // Avoid retrying close on EINTR, e.g. https://lkml.org/lkml/2005/9/11/49
+                        Interop.CheckIo(Interop.Sys.Close(fd)); // Avoid retrying close on EINTR, e.g. https://lkml.org/lkml/2005/9/11/49
                     }
                 }
 

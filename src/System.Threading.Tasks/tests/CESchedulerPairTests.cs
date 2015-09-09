@@ -101,7 +101,7 @@ namespace System.Threading.Tasks.Tests
             ConcurrentExclusiveSchedulerPair schedPair = null;
             //Need to define the default values since these values are passed to the verification methods
             TaskScheduler scheduler = TaskScheduler.Default;
-            int maxConcurrentLevel = 4;
+            int maxConcurrentLevel = Environment.ProcessorCount;
 
             //Based on input args, use one of the ctor overloads
             switch (ctorType.ToLower())
@@ -283,7 +283,7 @@ namespace System.Threading.Tasks.Tests
             blockMainThreadEvent.WaitOne(); // wait for the blockedTask to start execution
 
             //Now add more reader tasks
-            int maxConcurrentTasks = 8;
+            int maxConcurrentTasks = Environment.ProcessorCount;
             List<Task> taskList = new List<Task>();
             for (int i = 0; i < maxConcurrentTasks; i++)
                 taskList.Add(readers.StartNew(() => { })); //schedule some dummy reader tasks
@@ -339,7 +339,7 @@ namespace System.Threading.Tasks.Tests
         public static void TestIntegration(String apiType, bool useReader)
         {
             Debug.WriteLine(string.Format(" Running apiType:{0} useReader:{1}", apiType, useReader));
-            int taskCount = 8; //To get varying number of tasks as a function of cores
+            int taskCount = Environment.ProcessorCount; //To get varying number of tasks as a function of cores
             ConcurrentExclusiveSchedulerPair schedPair = new ConcurrentExclusiveSchedulerPair();
             CountdownEvent cde = new CountdownEvent(taskCount); //Used to track how many tasks were executed
             Action work = () => { cde.Signal(); }; //Work done by all APIs
@@ -396,7 +396,7 @@ namespace System.Threading.Tasks.Tests
 
             // Can create a bunch of schedulers, do work on them all, complete them all, and they all complete
             {
-                var cesps = new ConcurrentExclusiveSchedulerPair[1000];
+                var cesps = new ConcurrentExclusiveSchedulerPair[100];
                 for (int i = 0; i < cesps.Length; i++)
                 {
                     cesps[i] = new ConcurrentExclusiveSchedulerPair();
@@ -420,12 +420,8 @@ namespace System.Threading.Tasks.Tests
 
         /// <summary>
         /// Ensure that CESPs can be layered on other CESPs.
-        /// There is and assert in src\Threading\System\Threading\Tasks\ConcurrentExclusiveSchedulerPair.cs
-        /// line 355 - the scheduler enters in exclusive processing mode when  should not
-        /// it needs more investigations
         /// </summary
         [Fact]
-        [ActiveIssue(2797)]
         public static void TestSchedulerNesting()
         {
             // Create a hierarchical set of scheduler pairs
@@ -490,30 +486,13 @@ namespace System.Threading.Tasks.Tests
                 }
             }
 
-            // Once all tasks have completed, complete the schedulers
-            Task.Factory.StartNew(() =>
+            // Wait for all tasks to complete, then complete the schedulers
+            Task.WaitAll(tasks.ToArray());
+            foreach (var cesp in cesps)
             {
-                Debug.WriteLine(string.Format("Waiting for all tasks", tasks.Count));
-                Task.WaitAll(tasks.ToArray());
-                foreach (var cesp in cesps) cesp.Complete();
-            }, CancellationToken.None, TaskCreationOptions.None, TaskScheduler.Default);
-
-            // In the meantime, wait for all schedulers to complete
-            Debug.WriteLine("Waiting for all csps");
-            foreach (var cesp in cesps) cesp.Completion.Wait();
-
-            Debug.WriteLine("Done waiting");
-            // All tasks should now be done for the schedulers to have completed
-            foreach (var task in tasks)
-            {
-                if (task.Status != TaskStatus.RanToCompletion)
-                {
-                    Debug.WriteLine("Task didn't run to completion");
-                }
+                cesp.Complete();
+                cesp.Completion.Wait();
             }
-
-            // All tasks should now be done for the schedulers to have completed
-            foreach (var task in tasks) Assert.True(task.Status == TaskStatus.RanToCompletion, "All tasks should now be complete");
         }
 
         /// <summary>
@@ -525,7 +504,7 @@ namespace System.Threading.Tasks.Tests
         [InlineData(false)]
         public static void TestConcurrentExclusiveChain(bool syncContinuations)
         {
-            var scheduler = new TrackingTaskScheduler(8);
+            var scheduler = new TrackingTaskScheduler(Environment.ProcessorCount);
             var cesp = new ConcurrentExclusiveSchedulerPair(scheduler);
 
             // continuations

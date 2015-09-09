@@ -1,15 +1,15 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using Xunit;
-using System;
-using System.Threading;
 using System.Threading.Tasks;
+using Xunit;
 
-namespace Test
+namespace System.Threading.Tests
 {
     public class SemaphoreTests
     {
+        private const int FailedWaitTimeout = 30000;
+
         [Theory]
         [InlineData(0, 1)]
         [InlineData(1, 1)]
@@ -154,7 +154,7 @@ namespace Test
                     Task.Factory.StartNew(() =>
                     {
                         for (int i = 0; i < NumItems; i++)
-                            s.WaitOne();
+                            Assert.True(s.WaitOne(FailedWaitTimeout));
                         Assert.False(s.WaitOne(0));
                     }, CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default),
                     Task.Factory.StartNew(() =>
@@ -169,22 +169,25 @@ namespace Test
         [Fact]
         public void NamedProducerConsumer()
         {
-            const string Name = "NamedProducerConsumerSemaphoreTest";
+            string name = Guid.NewGuid().ToString("N");
             const int NumItems = 5;
+            var b = new Barrier(2);
             Task.WaitAll(
                 Task.Factory.StartNew(() =>
                 {
-                    using (Semaphore s = new Semaphore(0, Int32.MaxValue, Name))
+                    using (var s = new Semaphore(0, int.MaxValue, name))
                     {
+                        Assert.True(b.SignalAndWait(FailedWaitTimeout));
                         for (int i = 0; i < NumItems; i++)
-                            s.WaitOne();
+                            Assert.True(s.WaitOne(FailedWaitTimeout));
                         Assert.False(s.WaitOne(0));
                     }
                 }, CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default),
                 Task.Factory.StartNew(() =>
                 {
-                    using (Semaphore s = new Semaphore(0, Int32.MaxValue, Name))
+                    using (var s = new Semaphore(0, int.MaxValue, name))
                     {
+                        Assert.True(b.SignalAndWait(FailedWaitTimeout));
                         for (int i = 0; i < NumItems; i++)
                             s.Release();
                     }

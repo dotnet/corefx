@@ -294,7 +294,8 @@ namespace System.Threading.Tasks.Tests.WaitAllAny
                 if (taskInfo.Task.Status == TaskStatus.Running)
                 {
                     taskInfo.CancellationTokenSource.Cancel();
-                    taskInfo.Task.Wait();
+                    try { taskInfo.Task.GetAwaiter().GetResult(); }
+                    catch (OperationCanceledException) { }
                 }
             }
         }
@@ -809,6 +810,7 @@ namespace System.Threading.Tasks.Tests.WaitAllAny
         }
 
         [Fact]
+        [OuterLoop]
         public static void TaskWaitAllAny31()
         {
             TaskInfo node1 = new TaskInfo(WorkloadType.Medium);
@@ -904,6 +906,7 @@ namespace System.Threading.Tasks.Tests.WaitAllAny
         }
 
         [Fact]
+        [OuterLoop]
         public static void TaskWaitAllAny34()
         {
             TaskInfo node1 = new TaskInfo(WorkloadType.Medium);
@@ -940,6 +943,7 @@ namespace System.Threading.Tasks.Tests.WaitAllAny
         }
 
         [Fact]
+        [OuterLoop]
         public static void TaskWaitAllAny37()
         {
             TaskInfo node1 = new TaskInfo(WorkloadType.VeryHeavy);
@@ -1027,6 +1031,7 @@ namespace System.Threading.Tasks.Tests.WaitAllAny
         }
 
         [Fact]
+        [OuterLoop]
         public static void TaskWaitAllAny45()
         {
             TaskInfo node1 = new TaskInfo(WorkloadType.Medium);

@@ -8,6 +8,12 @@ internal static partial class Interop
 {
     internal static partial class Sys
     {
+        // Even though csc will by default use a sequential layout, a CS0649 warning as error
+        // is produced for un-assigned fields when no StructLayout is specified.
+        //
+        // Explicitly saying Sequential disables that warning/error for consumers which only
+        // use Stat in debug builds.
+        [StructLayout(LayoutKind.Sequential)]
         internal struct FileStatus
         {
             internal FileStatusFlags Flags;
@@ -35,11 +41,11 @@ internal static partial class Interop
         internal enum FileStatusFlags
         {
             None = 0,
-            HasCreationTime = 1,
+            HasBirthTime = 1,
         }
 
         [DllImport(Libraries.SystemNative, SetLastError = true)]
-        internal static extern int FStat(int fileDescriptor, out FileStatus output);
+        internal static extern int FStat(int fd, out FileStatus output);
 
         [DllImport(Libraries.SystemNative, SetLastError = true)]
         internal static extern int Stat(string path, out FileStatus output);

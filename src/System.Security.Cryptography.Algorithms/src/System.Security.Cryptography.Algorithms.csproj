@@ -28,6 +28,7 @@
   <ItemGroup>
     <Compile Include="System\Security\Cryptography\Aes.cs" />
     <Compile Include="System\Security\Cryptography\DeriveBytes.cs" />
+    <Compile Include="System\Security\Cryptography\ECDsa.cs" />
     <Compile Include="System\Security\Cryptography\MD5.cs" />
     <Compile Include="System\Security\Cryptography\SHA1.cs" />
     <Compile Include="System\Security\Cryptography\SHA256.cs" />
@@ -125,9 +126,6 @@
     <Compile Include="$(CommonPath)\Interop\Unix\Interop.Libraries.cs">
       <Link>Common\Interop\Unix\Interop.Libraries.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Unix\libcoreclr\Interop.EnsureOpenSslInitialized.cs">
-      <Link>Common\Interop\Unix\libcoreclr\Interop.EnsureOpenSslInitialized.cs</Link>
-    </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\libcrypto\Interop.ERR.cs">
       <Link>Common\Interop\Unix\libcrypto\Interop.ERR.cs</Link>
     </Compile>
@@ -137,8 +135,8 @@
     <Compile Include="$(CommonPath)\Interop\Unix\libcrypto\Interop.EVP.Cipher.cs">
       <Link>Common\Interop\Unix\libcrypto\Interop.EVP.Cipher.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Unix\libcrypto\Interop.Initialization.cs">
-      <Link>Common\Interop\Unix\libcrypto\Interop.Initialization.cs</Link>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Security.Cryptography.Native\Interop.Initialization.cs">
+      <Link>Common\Interop\Unix\System.Security.Cryptography.Native\Interop.Initialization.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\libcrypto\Interop.RAND.cs">
       <Link>Common\Interop\Unix\libcrypto\Interop.RAND.cs</Link>

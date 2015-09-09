@@ -1,15 +1,16 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.Collections;
 using System.Collections.Generic;
-using System.Security;
-using System.Security.Principal;
-using Microsoft.Win32;
 using System.IO;
-using Xunit;
-using Microsoft.Win32.SafeHandles;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Security.Principal;
+using Microsoft.Win32;
+using Microsoft.Win32.SafeHandles;
+using Xunit;
+using System.Text;
 
 namespace System.Diagnostics.ProcessTests
 {
@@ -182,6 +183,76 @@ namespace System.Diagnostics.ProcessTests
         }
 
         [Fact]
+        public void TestEnvironmentOfChildProcess()
+        {
+            const string UnicodeEnvVar = "TestEnvironmentOfChildProcess";
+            Environment.SetEnvironmentVariable(UnicodeEnvVar, "\x1234\x5678"); // ensure some Unicode characters are in the output
+            try
+            {
+                var expectedEnv = new HashSet<string>();
+                var actualEnv = new HashSet<string>();
+                Process p = CreateProcess(() =>
+                {
+                    foreach (DictionaryEntry envVar in Environment.GetEnvironmentVariables())
+                    {
+                        Console.WriteLine(envVar.Key + "=" + envVar.Value);
+                    }
+
+                    return SuccessExitCode;
+                });
+                p.StartInfo.StandardOutputEncoding = Encoding.UTF8;
+
+                p.StartInfo.RedirectStandardOutput = true;
+                p.OutputDataReceived += (s, e) =>
+                {
+                    if (e.Data != null)
+                    {
+                        expectedEnv.Add(e.Data);
+                    }
+                };
+
+                p.Start();
+                p.BeginOutputReadLine();
+
+                foreach (KeyValuePair<string, string> envVar in p.StartInfo.Environment)
+                {
+                    actualEnv.Add(envVar.Key + "=" + envVar.Value);
+                }
+
+                Assert.True(p.WaitForExit(WaitInMS));
+                p.WaitForExit(); // This ensures async event handlers are finished processing.
+
+                // Validate against StartInfo.Environment
+                if (!expectedEnv.SetEquals(actualEnv))
+                {
+                    var expected = string.Join(", ", expectedEnv.Except(actualEnv));
+                    var actual = string.Join(", ", actualEnv.Except(expectedEnv));
+
+                    Assert.True(false, string.Format("Expected: {0}{1}Actual: {2}", expected, Environment.NewLine, actual));
+                }
+
+                // Validate against current process
+                var currentProcEnv = new HashSet<string>();
+                foreach (DictionaryEntry envVar in Environment.GetEnvironmentVariables())
+                {
+                    currentProcEnv.Add(envVar.Key + "=" + envVar.Value);
+                }
+
+                // Profilers / code coverage tools can add own environment variables but we start
+                // child process without them. Thus the set of variables from child process will
+                // compose subset of variables from current process.
+                // But in case if tests running directly through the Xunit runner, sets will be equal
+                // and Assert.ProperSubset will throw. We add null to avoid this.
+                currentProcEnv.Add(null);
+                Assert.ProperSubset(currentProcEnv, actualEnv);
+            }
+            finally
+            {
+                Environment.SetEnvironmentVariable(UnicodeEnvVar, null);
+            }
+        }
+
+        [Fact]
         public void TestUseShellExecuteProperty()
         {
             ProcessStartInfo psi = new ProcessStartInfo();
@@ -245,7 +316,7 @@ namespace System.Diagnostics.ProcessTests
 
             p.StartInfo.LoadUserProfile = true;
             p.StartInfo.UserName = username;
-            p.StartInfo.Password = GetSecureString(password);
+            p.StartInfo.PasswordInClearText = password;
 
             SafeProcessHandle handle = null;
             try
@@ -286,7 +357,7 @@ namespace System.Diagnostics.ProcessTests
         {
             Assert.Throws<PlatformNotSupportedException>(() => _process.StartInfo.Domain);
             Assert.Throws<PlatformNotSupportedException>(() => _process.StartInfo.UserName);
-            Assert.Throws<PlatformNotSupportedException>(() => _process.StartInfo.Password);
+            Assert.Throws<PlatformNotSupportedException>(() => _process.StartInfo.PasswordInClearText);
             Assert.Throws<PlatformNotSupportedException>(() => _process.StartInfo.LoadUserProfile);
         }
 
@@ -311,12 +382,6 @@ namespace System.Diagnostics.ProcessTests
 
                 Assert.True(p.WaitForExit(WaitInMS));
             }
-        }
-
-        private unsafe SecureString GetSecureString(string password)
-        {
-            fixed (char* p = password)
-                return new SecureString(p, password.Length);
         }
 
         private static List<string> GetNamesOfUserProfiles()
