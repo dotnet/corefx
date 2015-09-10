@@ -7,6 +7,8 @@
     <ProjectGuid>{BC2E1649-291D-412E-9529-EDDA94FA7AD6}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AssemblyName>System.IO.Compression.Tests</AssemblyName>
+    <TargetFrameworkVersion>v5.0</TargetFrameworkVersion>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'" />
@@ -24,6 +26,7 @@
     <Compile Include="Common.cs" />
     <Compile Include="DeflateStreamTests.cs" />
     <Compile Include="GZipStreamTests.cs" />
+    <Compile Include="Performance\Perf.DeflateStream.cs" />
     <Compile Include="XunitAssemblyAttributes.cs" />
     <Compile Include="ZipArchive\zip_CreateTests.cs" />
     <Compile Include="ZipArchive\zip_InvalidParametersAndStrangeFiles.cs" />
@@ -46,6 +49,9 @@
     </Compile>
     <Compile Include="$(CommonTestPath)\Compression\Utilities\ZipTestHelper.cs">
       <Link>Common\Compression\Utilities\ZipTestHelper.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonTestPath)\Performance\PerfTestBase.cs">
+      <Link>Common\Performance\PerfTestBase.cs</Link>
     </Compile>
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />

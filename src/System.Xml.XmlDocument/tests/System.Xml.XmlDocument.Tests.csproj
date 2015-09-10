@@ -9,6 +9,8 @@
     <OutputType>Library</OutputType>
     <AssemblyName>System.Xml.XmlDocument.Tests</AssemblyName>
     <RootNamespace>System.Xml.XmlDocument.UnitTests</RootNamespace>
+	<TargetFrameworkVersion>v5.0</TargetFrameworkVersion>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <!-- Default configurations to help VS understand the configurations -->
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -99,6 +101,9 @@
     <Compile Include="XmlProcessingInstructionTests\DataTests.cs" />
     <Compile Include="XmlProcessingInstructionTests\TargetTests.cs" />
     <Compile Include="XmlTextTests\SplitTextTests.cs" />
+    <Compile Include="Performance\Perf.XmlDocument.cs" />
+    <Compile Include="Performance\Perf.XmlNode.cs" />
+    <Compile Include="Performance\Perf.XmlNodeList.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\src\System.Xml.XmlDocument.csproj">

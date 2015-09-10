@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "Microsoft.DotNet.xunit.performance": "1.0.0-*",
     "System.AppContext": "4.0.0",
     "System.Console": "4.0.0-beta-*",
     "System.Globalization": "4.0.10",
@@ -14,6 +15,8 @@
     "xunit.netcore.extensions": "1.0.0-prerelease-*"
   },
   "frameworks": {
-    "dnxcore50": {}
+    "dnxcore50": {
+      "imports": "portable-net45+win"
+    }
   }
 }

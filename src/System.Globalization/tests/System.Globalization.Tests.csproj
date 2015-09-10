@@ -9,6 +9,8 @@
     <RootNamespace>System.Globalization.Tests</RootNamespace>
     <AssemblyName>System.Globalization.Tests</AssemblyName>
     <RestorePackages>true</RestorePackages>
+	<TargetFrameworkVersion>v5.0</TargetFrameworkVersion>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <!-- Default configurations to help VS understand the configurations -->
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -159,6 +161,7 @@
     <Compile Include="TextInfo\TextInfoToUpper1.cs" />
     <Compile Include="TextInfo\TextInfoToUpper2.cs" />
     <Compile Include="UnicodeCategory\UnicodeCategoryTests.cs" />
+    <Compile Include="Performance\Perf.CultureInfo.cs" />
     <Compile Include="$(CommonTestPath)\System\RandomDataGenerator.cs" />
   </ItemGroup>
   <ItemGroup>

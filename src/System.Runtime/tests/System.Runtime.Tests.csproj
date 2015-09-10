@@ -11,6 +11,8 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <RestorePackages>true</RestorePackages>
     <NoWarn>1718</NoWarn>
+    <TargetFrameworkVersion>v5.0</TargetFrameworkVersion>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <!-- Default configurations to help VS understand the configurations -->
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -18,6 +20,15 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Performance\Perf.Boolean.cs" />
+    <Compile Include="Performance\Perf.Enum.cs" />
+    <Compile Include="Performance\Perf.GC.cs" />
+    <Compile Include="Performance\Perf.Guid.cs" />
+    <Compile Include="Performance\Perf.Object.cs" />
+    <Compile Include="Performance\Perf.String.cs" />
+    <Compile Include="Performance\Perf.TimeSpan.cs" />
+    <Compile Include="Performance\Perf.Type.cs" />
+    <Compile Include="Performance\Perf.UInt32.cs" />
     <Compile Include="System\Activator.cs" />
     <Compile Include="System\Array.cs" />
     <Compile Include="System\Array.CustomClassStructTests.cs" />
@@ -88,6 +99,14 @@
     <Compile Include="System\ValueType.cs" />
     <Compile Include="System\Version.cs" />
     <Compile Include="System\WeakReference.cs" />
+    <Compile Include="Performance\Perf.DateTime.cs" />
+    <Compile Include="Performance\Perf.Int32.cs" />
+    <Compile Include="Performance\Perf.IntPtr.cs" />
+    <Compile Include="Performance\Perf.StringBuilder.cs" />
+    <!-- Helpers -->
+    <Compile Include="$(CommonTestPath)\Performance\PerfTestBase.cs">
+      <Link>Common\Performance\PerfTestBase.cs</Link>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <None Include="project.json" />

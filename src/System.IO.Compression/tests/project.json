@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "Microsoft.DotNet.xunit.performance": "1.0.0-*",
     "System.Collections": "4.0.10",
     "System.Console": "4.0.0-beta-*",
     "System.Diagnostics.Debug": "4.0.10",
@@ -22,7 +23,9 @@
     "xunit.netcore.extensions": "1.0.0-prerelease-*"
   },
   "frameworks": {
-    "dnxcore50": {}
+    "dnxcore50": {
+      "imports": "portable-net45+win"
+    }
   },
   "runtimes": {
     "win7-x86": {},

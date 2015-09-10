@@ -8,8 +8,10 @@
     <OutputType>Library</OutputType>
     <AssemblyName>System.Text.Encoding.Tests</AssemblyName>
     <RootNamespace>System.Text.Encoding.Tests</RootNamespace>
+    <TargetFrameworkVersion>v5.0</TargetFrameworkVersion>
+    <TargetFrameworkProfile />
   </PropertyGroup>
-   <!-- Default configurations to help VS understand the configurations -->
+  <!-- Default configurations to help VS understand the configurations -->
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
@@ -68,6 +70,7 @@
     <Compile Include="Encoding\EncodingUnicode.cs" />
     <Compile Include="Encoding\EncodingUTF8.cs" />
     <Compile Include="Encoding\EncodingWebName.cs" />
+    <Compile Include="Performance\Perf.Encoding.cs" />
     <Compile Include="UnicodeEncoding\UnicodeEncodingCtor1.cs" />
     <Compile Include="UnicodeEncoding\UnicodeEncodingEquals.cs" />
     <Compile Include="UnicodeEncoding\UnicodeEncodingGetByteCount1.cs" />
@@ -116,6 +119,9 @@
     <Compile Include="UTF8Encoding\UTF8EncodingGetPreamble.cs" />
     <Compile Include="UTF8Encoding\UTF8EncodingGetString.cs" />
     <Compile Include="$(CommonTestPath)\System\RandomDataGenerator.cs" />
+    <Compile Include="$(CommonTestPath)\Performance\PerfTestBase.cs">
+      <Link>Common\Performance\PerfTestBase.cs</Link>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <None Include="project.json" />
