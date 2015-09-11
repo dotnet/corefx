@@ -16,14 +16,14 @@ using Xunit;
 
 namespace System.Net.Http.WinHttpHandlerUnitTests
 {
-    public class WinHttpHandlerTests : IDisposable
+    public class WinHttpHandlerTest : IDisposable
     {
         private const string ExpectedResponseBody = "This is the response body.";
         private const string FakeServerEndpoint = "http://www.contoso.com/";
         private const string FakeSecureServerEndpoint = "https://www.contoso.com/";
         private const string FakeProxy = "http://proxy.contoso.com";
 
-        public WinHttpHandlerTests()
+        public WinHttpHandlerTest()
         {
             TestControl.ResetAll();
         }
@@ -31,6 +31,9 @@ namespace System.Net.Http.WinHttpHandlerUnitTests
         public void Dispose()
         {
             TestControl.ResponseDelayCompletedEvent.WaitOne();
+            
+            FakeSafeWinHttpHandle.ForceGarbageCollection();
+            Assert.Equal(0, FakeSafeWinHttpHandle.HandlesOpen);
         }
 
         [Fact]
@@ -151,8 +154,7 @@ namespace System.Net.Http.WinHttpHandlerUnitTests
 
             var request = new HttpRequestMessage(HttpMethod.Post, FakeServerEndpoint);
 
-            await Assert.ThrowsAsync<InvalidOperationException>(
-                async () => { HttpResponseMessage response = await client.SendAsync(request); });
+            await Assert.ThrowsAsync<InvalidOperationException>(() => client.SendAsync(request));
         }
 
         [Fact]
@@ -287,8 +289,7 @@ namespace System.Net.Http.WinHttpHandlerUnitTests
 
             var request = new HttpRequestMessage(HttpMethod.Post, FakeServerEndpoint);
 
-            await Assert.ThrowsAsync<InvalidOperationException>(
-                async () => { HttpResponseMessage response = await client.SendAsync(request); });
+            await Assert.ThrowsAsync<InvalidOperationException>(() => client.SendAsync(request));
         }
 
 
@@ -304,8 +305,7 @@ namespace System.Net.Http.WinHttpHandlerUnitTests
 
             var request = new HttpRequestMessage(HttpMethod.Post, FakeServerEndpoint);
 
-            await Assert.ThrowsAsync<InvalidOperationException>(
-                async () => { HttpResponseMessage response = await client.SendAsync(request); });
+            await Assert.ThrowsAsync<InvalidOperationException>(() => client.SendAsync(request));
         }
 
         [Fact]
@@ -519,8 +519,7 @@ namespace System.Net.Http.WinHttpHandlerUnitTests
 
             var request = new HttpRequestMessage(HttpMethod.Post, FakeServerEndpoint);
 
-            await Assert.ThrowsAsync<InvalidOperationException>(
-                async () => { HttpResponseMessage response = await client.SendAsync(request); });
+            await Assert.ThrowsAsync<InvalidOperationException>(() => client.SendAsync(request));
         }
 
         // TODO: Need to skip this test due to missing native dependency clrcompression.dll.
@@ -816,8 +815,8 @@ namespace System.Net.Http.WinHttpHandlerUnitTests
             var content = new StringContent(new String('a', 1000));
             request.Content = content;
             
-            await Assert.ThrowsAsync<TaskCanceledException>(
-                async () => { await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cts.Token); });
+            await Assert.ThrowsAsync<TaskCanceledException>(() =>
+                client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cts.Token));
         }
 
         [Fact]
@@ -829,8 +828,8 @@ namespace System.Net.Http.WinHttpHandlerUnitTests
             var client = new HttpClient(handler);
             var request = new HttpRequestMessage(HttpMethod.Get, FakeServerEndpoint);
             
-            await Assert.ThrowsAsync<TaskCanceledException>(
-                async () => { await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cts.Token); });
+            await Assert.ThrowsAsync<TaskCanceledException>(() =>
+                client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cts.Token));
         }
 
         [Fact]
@@ -842,10 +841,59 @@ namespace System.Net.Http.WinHttpHandlerUnitTests
             var client = new HttpClient(handler);
             var request = new HttpRequestMessage(HttpMethod.Get, FakeServerEndpoint);
             
-            await Assert.ThrowsAsync<TaskCanceledException>(
-                async () => { await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cts.Token); });
+            await Assert.ThrowsAsync<TaskCanceledException>(() =>
+                client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cts.Token));
         }
 
+        [Fact]
+        public async Task SendAsync_WinHttpOpenReturnsError_ExpectHttpRequestException()
+        {
+            var handler = new WinHttpHandler();
+            var client = new HttpClient(handler);
+            var request = new HttpRequestMessage(HttpMethod.Get, FakeServerEndpoint);
+
+            TestControl.Fail.WinHttpOpen = true;
+
+            Exception ex = await Assert.ThrowsAsync<HttpRequestException>(() => client.SendAsync(request));
+            Assert.Equal(typeof(WinHttpException), ex.InnerException.GetType());
+        }
+        
+        [Fact]
+        public void SendAsync_MultipleCallsWithDispose_NoHandleLeaks()
+        {
+            WinHttpHandler handler;
+            HttpResponseMessage response;
+            for (int i = 0; i < 50; i++)
+            {
+                handler = new WinHttpHandler();
+                response = SendRequestHelper(handler, () => { });
+                response.Dispose();
+                handler.Dispose();
+            }
+            
+            FakeSafeWinHttpHandle.ForceGarbageCollection();
+            
+            Assert.Equal(0, FakeSafeWinHttpHandle.HandlesOpen);
+        }
+        
+        [Fact]
+        public void SendAsync_MultipleCallsWithoutDispose_NoHandleLeaks()
+        {
+            WinHttpHandler handler;
+            HttpResponseMessage response;
+            for (int i = 0; i < 50; i++)
+            {
+                handler = new WinHttpHandler();
+                response = SendRequestHelper(handler, () => { });
+            }
+
+            handler = null;
+            response = null;
+            FakeSafeWinHttpHandle.ForceGarbageCollection();
+            
+            Assert.Equal(0, FakeSafeWinHttpHandle.HandlesOpen);
+        }
+        
         private HttpResponseMessage SendRequestHelper(WinHttpHandler handler, Action setup)
         {
             return SendRequestHelper(handler, setup, FakeServerEndpoint);
@@ -857,13 +905,12 @@ namespace System.Net.Http.WinHttpHandlerUnitTests
 
             setup();
 
-            var client = new HttpClient(handler);
+            var invoker = new HttpMessageInvoker(handler, false);
             var request = new HttpRequestMessage(HttpMethod.Get, fakeServerEndpoint);
-            Task<HttpResponseMessage> task = client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
+            Task<HttpResponseMessage> task = invoker.SendAsync(request, CancellationToken.None);
             
             return task.GetAwaiter().GetResult();
         }
-
         
         public class CustomProxy : IWebProxy
         {

@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <PropertyGroup>
@@ -25,6 +25,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="EcDsaOpenSslTests.cs" />
     <Compile Include="RSAOpenSslProvider.cs" />
     <Compile Include="$(CommonTestPath)\Cryptography\ByteUtils.cs">
       <Link>CommonTest\Cryptography\ByteUtils.cs</Link>
@@ -34,9 +35,6 @@
     </Compile>
     <Compile Include="$(CommonTestPath)\Cryptography\AlgorithmImplementations\RSA\ImportExport.cs">
       <Link>CommonTest\Cryptography\AlgorithmImplementations\RSA\ImportExport.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonTestPath)\Cryptography\AlgorithmImplementations\RSA\ImportExportUnusual.cs">
-      <Link>CommonTest\Cryptography\AlgorithmImplementations\RSA\ImportExportUnusual.cs</Link>
     </Compile>
     <Compile Include="$(CommonTestPath)\Cryptography\AlgorithmImplementations\RSA\KeyGeneration.cs">
       <Link>CommonTest\Cryptography\AlgorithmImplementations\RSA\KeyGeneration.cs</Link>
@@ -53,6 +51,18 @@
     <Compile Include="$(CommonTestPath)\Streams\PositionValueStream.cs">
       <Link>CommonTest\Streams\PositionValueStream.cs</Link>
     </Compile>
+
+    <Compile Include="EcDsaOpenSslProvider.cs" />
+    <Compile Include="$(CommonTestPath)\Cryptography\AlgorithmImplementations\ECDsa\ECDsaFactory.cs">
+      <Link>CommonTest\Cryptography\AlgorithmImplementations\ECDsa\ECDsaFactory.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonTestPath)\Cryptography\AlgorithmImplementations\ECDsa\ECDsaTests.cs">
+      <Link>CommonTest\Cryptography\AlgorithmImplementations\ECDsa\ECDsaTests.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonTestPath)\Cryptography\AlgorithmImplementations\ECDsa\ECDsaStub.cs">
+      <Link>CommonTest\Cryptography\AlgorithmImplementations\ECDsa\ECDsaStub.cs</Link>
+    </Compile>
+
   </ItemGroup>
   <ItemGroup>
     <None Include="project.json" />

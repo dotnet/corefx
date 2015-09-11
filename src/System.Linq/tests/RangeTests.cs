@@ -59,6 +59,7 @@ namespace System.Linq.Tests
         {
             Assert.Throws<ArgumentOutOfRangeException>(() => Enumerable.Range(1000, int.MaxValue));
             Assert.Throws<ArgumentOutOfRangeException>(() => Enumerable.Range(int.MaxValue, 1000));
+            Assert.Throws<ArgumentOutOfRangeException>(() => Enumerable.Range(Int32.MaxValue - 10, 20));
         }
 
         [Fact]
@@ -75,22 +76,62 @@ namespace System.Linq.Tests
         [Fact]
         public void Range_EnumerableAndEnumeratorAreSame()
         {
-            var rangeEnumberable = Enumerable.Range(1, 1);
-            using (var rangeEnumberator = rangeEnumberable.GetEnumerator())
+            var rangeEnumerable = Enumerable.Range(1, 1);
+            using (var rangeEnumerator = rangeEnumerable.GetEnumerator())
             {
-                Assert.Same(rangeEnumberable, rangeEnumberator);
+                Assert.Same(rangeEnumerable, rangeEnumerator);
             }
         }
 
         [Fact]
         public void Range_GetEnumeratorReturnUniqueInstances()
         {
-            var rangeEnumberable = Enumerable.Range(1, 1);
-            using (var enum1 = rangeEnumberable.GetEnumerator())
-            using (var enum2 = rangeEnumberable.GetEnumerator())
+            var rangeEnumerable = Enumerable.Range(1, 1);
+            using (var enum1 = rangeEnumerable.GetEnumerator())
+            using (var enum2 = rangeEnumerable.GetEnumerator())
             {
                 Assert.NotSame(enum1, enum2);
             }
+        }
+
+        [Fact]
+        public void Range_ToInt32MaxValue()
+        {
+            int from = Int32.MaxValue - 3;
+            int count = 4;
+            var rangeEnumerable = Enumerable.Range(from, count);
+
+            Assert.Equal(count, rangeEnumerable.Count());
+
+            int[] expected = { Int32.MaxValue - 3, Int32.MaxValue - 2, Int32.MaxValue - 1, Int32.MaxValue };
+            Assert.Equal(expected, rangeEnumerable);
+        }
+
+        [Fact]
+        public void RepeatedCallsSameResults()
+        {
+            Assert.Equal(Enumerable.Range(-1, 2), Enumerable.Range(-1, 2));
+            Assert.Equal(Enumerable.Range(0, 0), Enumerable.Range(0, 0));
+        }
+
+        [Fact]
+        public void NegativeStart()
+        {
+            int start = -5;
+            int count = 1;
+            int[] expected = { -5 };
+
+            Assert.Equal(expected, Enumerable.Range(start, count));
+        }
+
+        [Fact]
+        public void ArbitraryStart()
+        {
+            int start = 12;
+            int count = 6;
+            int[] expected = { 12, 13, 14, 15, 16, 17 };
+
+            Assert.Equal(expected, Enumerable.Range(start, count));
         }
     }
 }

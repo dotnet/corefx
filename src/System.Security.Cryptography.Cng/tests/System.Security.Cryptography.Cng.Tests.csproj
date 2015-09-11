@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <PropertyGroup>
@@ -30,7 +30,8 @@
     <Compile Include="OpenTests.cs" />
     <Compile Include="ImportExportTests.cs" />
     <Compile Include="PropertyTests.cs" />
-    <Compile Include="RSACngTests.cs" />
+    <Compile Include="RsaCngTests.cs" />
+    <Compile Include="ECDsaCngTests.cs" />
     <Compile Include="TestData.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -58,6 +59,17 @@
     </Compile>
     <Compile Include="$(CommonTestPath)\Streams\PositionValueStream.cs">
       <Link>CommonTest\Streams\PositionValueStream.cs</Link>
+    </Compile>
+
+    <Compile Include="ECDsaCngProvider.cs" />
+    <Compile Include="$(CommonTestPath)\Cryptography\AlgorithmImplementations\ECDsa\ECDsaFactory.cs">
+      <Link>CommonTest\Cryptography\AlgorithmImplementations\ECDsa\ECDsaFactory.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonTestPath)\Cryptography\AlgorithmImplementations\ECDsa\ECDsaTests.cs">
+      <Link>CommonTest\Cryptography\AlgorithmImplementations\ECDsa\ECDsaTests.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonTestPath)\Cryptography\AlgorithmImplementations\ECDsa\ECDsaStub.cs">
+      <Link>CommonTest\Cryptography\AlgorithmImplementations\ECDsa\ECDsaStub.cs</Link>
     </Compile>
   </ItemGroup>
 

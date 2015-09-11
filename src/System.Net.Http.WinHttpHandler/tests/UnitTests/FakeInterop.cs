@@ -58,6 +58,12 @@ internal static partial class Interop
             string proxyBypass,
             uint flags)
         {
+            if (TestControl.Fail.WinHttpOpen)
+            {
+                TestControl.LastWin32Error = (int)Interop.WinHttp.ERROR_INVALID_HANDLE;
+                return new FakeSafeWinHttpHandle(false);
+            }
+            
             if (accessType == Interop.WinHttp.WINHTTP_ACCESS_TYPE_AUTOMATIC_PROXY && 
                 !TestControl.WinHttpAutomaticProxySupport)
             {
@@ -76,6 +82,8 @@ internal static partial class Interop
 
         public static bool WinHttpCloseHandle(IntPtr sessionHandle)
         {
+            Marshal.FreeHGlobal(sessionHandle);
+
             return true;
         }
 
@@ -156,7 +164,7 @@ internal static partial class Interop
         {
             bytesRead = 0;
 
-            if (TestControl.WinHttpAPIFail)
+            if (TestControl.Fail.WinHttpReadData)
             {
                 return false;
             }
@@ -314,7 +322,7 @@ internal static partial class Interop
             uint bufferSize,
             out uint bytesWritten)
         {
-            if (TestControl.WinHttpAPIFail)
+            if (TestControl.Fail.WinHttpWriteData)
             {
                 bytesWritten = 0;
                 return false;
@@ -501,6 +509,11 @@ internal static partial class Interop
             uint notificationFlags,
             IntPtr reserved)
         {
+            if (handle == null)
+            {
+                throw new ArgumentNullException("handle");
+            }
+            
             return IntPtr.Zero;
         }
     }

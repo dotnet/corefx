@@ -57,6 +57,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
         }
 
         [Fact]
+        [ActiveIssue(2583, PlatformID.Windows)]
         public static void TestPrivateKey()
         {
             using (var c = new X509Certificate2(TestData.PfxData, TestData.PfxDataPassword))
@@ -69,6 +70,24 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                     byte[] hash = new byte[20];
                     byte[] sig = rsa.SignHash(hash, HashAlgorithmName.SHA1, RSASignaturePadding.Pkcs1);
                     Assert.Equal(s_expectedSig, sig);
+                }
+            }
+        }
+
+        [Fact]
+        [ActiveIssue(2885, PlatformID.Windows)]
+        public static void ExportWithPrivateKey()
+        {
+            using (var cert = new X509Certificate2(TestData.PfxData, TestData.PfxDataPassword, X509KeyStorageFlags.Exportable))
+            {
+                const string password = "NotVerySecret";
+
+                byte[] pkcs12 = cert.Export(X509ContentType.Pkcs12, password);
+
+                using (var certFromPfx = new X509Certificate2(pkcs12, password))
+                {
+                    Assert.True(certFromPfx.HasPrivateKey);
+                    Assert.Equal(cert, certFromPfx);
                 }
             }
         }

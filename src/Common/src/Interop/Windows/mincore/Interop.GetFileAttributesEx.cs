@@ -3,14 +3,24 @@
 
 using Microsoft.Win32.SafeHandles;
 using System;
+using System.IO;
 using System.Runtime.InteropServices;
 
 internal partial class Interop
 {
     internal partial class mincore
     {
+        /// <summary>
+        /// WARNING: This method does not implicitly handle long paths. Use GetFileAttributesEx.
+        /// </summary>
         [DllImport(Libraries.CoreFile_L1, EntryPoint = "GetFileAttributesExW", SetLastError = true, CharSet = CharSet.Unicode, BestFitMapping = false)]
-        internal static extern bool GetFileAttributesEx(string name, GET_FILEEX_INFO_LEVELS fileInfoLevel, ref WIN32_FILE_ATTRIBUTE_DATA lpFileInformation);
+        private static extern bool GetFileAttributesExPrivate(string name, GET_FILEEX_INFO_LEVELS fileInfoLevel, ref WIN32_FILE_ATTRIBUTE_DATA lpFileInformation);
+
+        internal static bool GetFileAttributesEx(string name, GET_FILEEX_INFO_LEVELS fileInfoLevel, ref WIN32_FILE_ATTRIBUTE_DATA lpFileInformation)
+        {
+            name = PathInternal.EnsureExtendedPrefixOverMaxPath(name);
+            return GetFileAttributesExPrivate(name, fileInfoLevel, ref lpFileInformation);
+        }
 
         internal enum GET_FILEEX_INFO_LEVELS : uint
         {
@@ -30,7 +40,7 @@ internal partial class Interop
             internal uint fileSizeHigh;
             internal uint fileSizeLow;
 
-            internal void PopulateFrom(WIN32_FIND_DATA findData)
+            internal void PopulateFrom(ref WIN32_FIND_DATA findData)
             {
                 // Copy the information to data
                 fileAttributes = (int)findData.dwFileAttributes;

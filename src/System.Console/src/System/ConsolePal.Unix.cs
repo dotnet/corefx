@@ -18,6 +18,10 @@ namespace System
     // e.g. for reading/writing /dev/stdin, /dev/stdout, and /dev/stderr,
     // for getting environment variables for accessing charset information for encodings, 
     // and terminfo databases / strings for manipulating the terminal.
+    // NOTE: The test class reflects over this class to run the tests due to limitations in
+    //       the test infrastructure that prevent OS-specific builds of test binaries. If you
+    //       change any of the class / struct / function names, parameters, etc then you need
+    //       to also change the test class.
     internal static class ConsolePal
     {
         public static Stream OpenStandardInput()
@@ -251,26 +255,27 @@ namespace System
             /// <summary>The cached instance.</summary>
             public static TerminalColorInfo Instance { get { return _instance.Value; } }
 
+            private TerminalColorInfo(TermInfo.Database db)
+            {
+                ForegroundFormat = db != null ? db.GetString(TermInfo.Database.SetAnsiForegroundIndex) : string.Empty;
+                BackgroundFormat = db != null ? db.GetString(TermInfo.Database.SetAnsiBackgroundIndex) : string.Empty;
+                ResetFormat = db != null ?
+                    db.GetString(TermInfo.Database.OrigPairsIndex) ??
+                    db.GetString(TermInfo.Database.OrigColorsIndex)
+                    : string.Empty;
+
+                int maxColors = db != null ? db.GetNumber(TermInfo.Database.MaxColorsIndex) : 0;
+                MaxColors = // normalize to either the full range of all ANSI colors, just the dark ones, or none
+                    maxColors >= 16 ? 16 :
+                    maxColors >= 8 ? 8 :
+                    0;
+            }
+
             /// <summary>Lazy initialization of the terminal color information.</summary>
             private static Lazy<TerminalColorInfo> _instance = new Lazy<TerminalColorInfo>(() =>
             {
-                TermInfo.Database db = TermInfo.Database.Instance;
-                TerminalColorInfo tci = new TerminalColorInfo();
-                if (db != null)
-                {
-                    tci.ForegroundFormat = db.GetString(TermInfo.Database.SetAnsiForegroundIndex);
-                    tci.BackgroundFormat = db.GetString(TermInfo.Database.SetAnsiBackgroundIndex);
-                    tci.ResetFormat =
-                        db.GetString(TermInfo.Database.OrigPairsIndex) ??
-                        db.GetString(TermInfo.Database.OrigColorsIndex);
-
-                    int maxColors = db.GetNumber(TermInfo.Database.MaxColorsIndex);
-                    tci.MaxColors = // normalize to either the full range of all ANSI colors, just the dark ones, or none
-                        maxColors >= 16 ? 16 :
-                        maxColors >= 8 ? 8 :
-                        0;
-                }
-                return tci;
+                TermInfo.Database db = TermInfo.Database.Instance; // Could be null if TERM is set to a file that doesn't exist
+                return new TerminalColorInfo(db);
             }, isThreadSafe: true);
         }
 
@@ -328,11 +333,11 @@ namespace System
                 Debug.Assert(access == FileAccess.Read || access == FileAccess.Write);
                 
                 // Open the file descriptor for this stream
-                Interop.libc.OpenFlags flags = 0;
+                Interop.Sys.OpenFlags flags = 0;
                 switch (access)
                 {
-                    case FileAccess.Read: flags = Interop.libc.OpenFlags.O_RDONLY; break;
-                    case FileAccess.Write: flags = Interop.libc.OpenFlags.O_WRONLY; break;
+                    case FileAccess.Read: flags = Interop.Sys.OpenFlags.O_RDONLY; break;
+                    case FileAccess.Write: flags = Interop.Sys.OpenFlags.O_WRONLY; break;
                 }
                 _handle = SafeFileHandle.Open(devPath, flags, 0);
 
@@ -485,7 +490,7 @@ namespace System
                     }
 
                     // Then try in the user's home directory.
-                    string home = Environment.GetEnvironmentVariable("HOME");
+                    string home = PersistedFiles.GetHomeDirectory();
                     if (!string.IsNullOrWhiteSpace(home) && (db = ReadDatabase(term, home + "/.terminfo")) != null)
                     {
                         return db;
@@ -511,7 +516,7 @@ namespace System
                 private static bool TryOpen(string filePath, out int fd)
                 {
                     int tmpFd;
-                    while ((tmpFd = Interop.libc.open(filePath, Interop.libc.OpenFlags.O_RDONLY, 0)) < 0)
+                    while ((tmpFd = Interop.Sys.Open(filePath, Interop.Sys.OpenFlags.O_RDONLY, 0)) < 0)
                     {
                         // Don't throw in this case, as we'll be polling multiple locations looking for the file.
                         // But we still want to retry if the open is interrupted by a signal.
@@ -547,8 +552,8 @@ namespace System
                     {
                         // Read in all of the terminfo data
                         long termInfoLength;
-                        while (Interop.CheckIo(termInfoLength = Interop.libc.lseek(fd, 0, Interop.libc.SeekWhence.SEEK_END))) ; // jump to the end to get the file length
-                        while (Interop.CheckIo(Interop.libc.lseek(fd, 0, Interop.libc.SeekWhence.SEEK_SET))) ; // reset back to beginning
+                        while (Interop.CheckIo(termInfoLength = Interop.Sys.LSeek(fd, 0, Interop.Sys.SeekWhence.SEEK_END))) ; // jump to the end to get the file length
+                        while (Interop.CheckIo(Interop.Sys.LSeek(fd, 0, Interop.Sys.SeekWhence.SEEK_SET))) ; // reset back to beginning
                         const int MaxTermInfoLength = 4096; // according to the term and tic man pages, 4096 is the terminfo file size max
                         const int HeaderLength = 12;
                         if (termInfoLength <= HeaderLength || termInfoLength > MaxTermInfoLength)
@@ -568,7 +573,7 @@ namespace System
                     }
                     finally
                     {
-                        Interop.CheckIo(Interop.libc.close(fd)); // Avoid retrying close on EINTR, e.g. https://lkml.org/lkml/2005/9/11/49
+                        Interop.CheckIo(Interop.Sys.Close(fd)); // Avoid retrying close on EINTR, e.g. https://lkml.org/lkml/2005/9/11/49
                     }
                 }
 
@@ -902,10 +907,16 @@ namespace System
                                     ~value);
                                 break;
 
-                            // Augment first two parameters by 1
+                                // Some terminfo files appear to have a fairly liberal interpretation of %i. The spec states that %i increments the first two arguments, 
+                                // but some uses occur when there's only a single argument. To make sure we accomodate these files, we increment the values 
+                                // of up to (but not requiring) two arguments.
                             case 'i':
-                                args[0] = 1 + args[0].Int32;
-                                args[1] = 1 + args[1].Int32;
+                                if (args.Length > 0)
+                                {
+                                    args[0] = 1 + args[0].Int32;
+                                    if (args.Length > 1)
+                                        args[1] = 1 + args[1].Int32;
+                                }
                                 break;
 
                             // Conditional of the form %? if-part %t then-part %e else-part %;

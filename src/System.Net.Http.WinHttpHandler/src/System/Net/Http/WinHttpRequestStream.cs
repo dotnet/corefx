@@ -21,8 +21,6 @@ namespace System.Net.Http
 
         internal WinHttpRequestStream(SafeWinHttpHandle requestHandle, bool chunkedMode)
         {
-            bool ignore = false;
-            requestHandle.DangerousAddRef(ref ignore);
             _requestHandle = requestHandle;
             _chunkedMode = chunkedMode;
         }
@@ -77,10 +75,6 @@ namespace System.Net.Http
 
         public override void Flush()
         {
-            if (_chunkedMode)
-            {
-                WriteData(s_endChunk, 0, s_endChunk.Length);
-            }
         }
 
         public override void Write(byte[] buffer, int offset, int count)
@@ -100,7 +94,7 @@ namespace System.Net.Http
                 throw new ArgumentOutOfRangeException("count");
             }
 
-            if (offset + count > buffer.Length)
+            if (count > buffer.Length - offset)
             {
                 throw new ArgumentException("buffer");
             }
@@ -128,15 +122,19 @@ namespace System.Net.Http
             throw new NotSupportedException();
         }
 
+        internal void EndUpload()
+        {
+            if (_chunkedMode)
+            {
+                WriteData(s_endChunk, 0, s_endChunk.Length);
+            }
+        }
+        
         protected override void Dispose(bool disposing)
         {
-            if (disposing && !_disposed)
+            if (!_disposed)
             {
                 _disposed = true;
-
-                _requestHandle.DangerousRelease();
-
-                SafeWinHttpHandle.DisposeAndClearHandle(ref _requestHandle);
             }
 
             base.Dispose(disposing);

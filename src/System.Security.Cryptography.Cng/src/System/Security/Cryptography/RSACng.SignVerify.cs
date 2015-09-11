@@ -31,16 +31,8 @@ namespace System.Security.Cryptography
                 SignOrVerify(padding, hashAlgorithm, hash,
                     delegate (AsymmetricPaddingMode paddingMode, void* pPaddingInfo)
                     {
-                        SafeNCryptKeyHandle keyHandle = Key.Handle;
-                        int numBytesNeeded;
-                        ErrorCode errorCode = Interop.NCrypt.NCryptSignHash(keyHandle, pPaddingInfo, hash, hash.Length, null, 0, out numBytesNeeded, paddingMode);
-                        if (errorCode != ErrorCode.ERROR_SUCCESS)
-                            throw errorCode.ToCryptographicException();
-
-                        signature = new byte[numBytesNeeded];
-                        errorCode = Interop.NCrypt.NCryptSignHash(keyHandle, pPaddingInfo, hash, hash.Length, signature, signature.Length, out numBytesNeeded, paddingMode);
-                        if (errorCode != ErrorCode.ERROR_SUCCESS)
-                            throw errorCode.ToCryptographicException();
+                        int estimatedSize = KeySize / 8;
+                        signature = CngAsymmetricAlgorithmCore.SignHash(Key, hash, paddingMode, pPaddingInfo, estimatedSize);
                     }
                 );
                 return signature;
@@ -63,9 +55,7 @@ namespace System.Security.Cryptography
                 SignOrVerify(padding, hashAlgorithm, hash,
                     delegate (AsymmetricPaddingMode paddingMode, void* pPaddingInfo)
                     {
-                        SafeNCryptKeyHandle keyHandle = Key.Handle;
-                        ErrorCode errorCode = Interop.NCrypt.NCryptVerifySignature(keyHandle, pPaddingInfo, hash, hash.Length, signature, signature.Length, paddingMode);
-                        verified = (errorCode == ErrorCode.ERROR_SUCCESS);  // For consistency with other RSA classes, return "false" for any error code rather than making the caller catch an exception.
+                        verified = CngAsymmetricAlgorithmCore.VerifyHash(Key, hash, signature, paddingMode, pPaddingInfo);
                     }
                 );
                 return verified;

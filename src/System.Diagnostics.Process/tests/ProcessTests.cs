@@ -74,40 +74,35 @@ namespace System.Diagnostics.ProcessTests
             }
         }
 
-        [Fact]
-        public void TestEnableRaiseEvents()
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        [InlineData(null)]
+        public void TestEnableRaiseEvents(bool? enable)
         {
-            {
-                bool isExitedInvoked = false;
+            bool exitedInvoked = false;
 
-                // Test behavior when EnableRaisingEvent = true;
-                // Ensure event is called.
-                Process p = CreateProcessInfinite();
-                p.EnableRaisingEvents = true;
-                p.Exited += delegate { isExitedInvoked = true; };
-                StartSleepKillWait(p);
-                Assert.True(isExitedInvoked, String.Format("TestCanRaiseEvents0001: {0}", "isExited Event not called when EnableRaisingEvent is set to true."));
+            Process p = CreateProcessInfinite();
+            if (enable.HasValue)
+            {
+                p.EnableRaisingEvents = enable.Value;
             }
+            p.Exited += delegate { exitedInvoked = true; };
+            StartSleepKillWait(p);
 
+            if (enable.GetValueOrDefault())
             {
-                bool isExitedInvoked = false;
-
-                // Check with the default settings (false, events will not be raised)
-                Process p = CreateProcessInfinite();
-                p.Exited += delegate { isExitedInvoked = true; };
-                StartSleepKillWait(p);
-                Assert.False(isExitedInvoked, String.Format("TestCanRaiseEvents0002: {0}", "isExited Event called with the default settings for EnableRaiseEvents"));
+                // There's no guarantee that the Exited callback will be invoked by
+                // the time Process.WaitForExit completes, though it's extremely likely.
+                // There could be a race condition where WaitForExit is returning from
+                // its wait and sees that the callback is already running asynchronously,
+                // at which point it returns to the caller even if the callback hasn't
+                // entirely completed. As such, we spin until the value is set.
+                Assert.True(SpinWait.SpinUntil(() => exitedInvoked, WaitInMS));
             }
-
+            else
             {
-                bool isExitedInvoked = false;
-
-                // Same test, this time explicitly set the property to false
-                Process p = CreateProcessInfinite();
-                p.EnableRaisingEvents = false;
-                p.Exited += delegate { isExitedInvoked = true; }; ;
-                StartSleepKillWait(p);
-                Assert.False(isExitedInvoked, String.Format("TestCanRaiseEvents0003: {0}", "isExited Event called with the EnableRaiseEvents = false"));
+                Assert.False(exitedInvoked);
             }
         }
 
@@ -275,7 +270,8 @@ namespace System.Diagnostics.ProcessTests
         [Fact]
         public void TestModules()
         {
-            foreach (ProcessModule pModule in _process.Modules)
+            ProcessModuleCollection moduleCollection = Process.GetCurrentProcess().Modules;
+            foreach (ProcessModule pModule in moduleCollection)
             {
                 // Validated that we can get a value for each of the following.
                 Assert.NotNull(pModule);
@@ -363,7 +359,7 @@ namespace System.Diagnostics.ProcessTests
             Assert.InRange(processorTimeAtHalfSpin, processorTimeBeforeSpin, Process.GetCurrentProcess().TotalProcessorTime.TotalSeconds);
         }
 
-        [Fact, ActiveIssue("https://github.com/dotnet/corefx/issues/2613", PlatformID.Linux)]
+        [Fact, ActiveIssue(3037)]
         public void TestProcessStartTime()
         {
             DateTime timeBeforeCreatingProcess = DateTime.UtcNow;
@@ -377,18 +373,19 @@ namespace System.Diagnostics.ProcessTests
                 // Time in unix, is measured in jiffies, which is incremented by one for every timer interrupt since the boot time.
                 // Thus, because there are HZ timer interrupts in a second, there are HZ jiffies in a second. Hence 1\HZ, will
                 // be the resolution of system timer. The lowest value of HZ on unix is 100, hence the timer resolution is 10 ms.
-                // Allowing for error in 10 ms.
-                long tenMSTicks = new TimeSpan(0, 0, 0, 0, 10).Ticks;
-                long beforeTicks = timeBeforeCreatingProcess.Ticks - tenMSTicks;
+                // On Windows, timer resolution is 15 ms from MSDN DateTime.Now. Hence, allowing error in 15ms [max(10,15)].
+
+                long intervalTicks = new TimeSpan(0, 0, 0, 0, 15).Ticks;
+                long beforeTicks = timeBeforeCreatingProcess.Ticks - intervalTicks;
 
                 try
                 {
                     // Ensure the process has started, p.id throws InvalidOperationException, if the process has not yet started.
                     Assert.Equal(p.Id, Process.GetProcessById(p.Id).Id);
-
-                long afterTicks = DateTime.UtcNow.Ticks + tenMSTicks;
-                Assert.InRange(p.StartTime.ToUniversalTime().Ticks, beforeTicks, afterTicks);
-            }
+                    long startTicks = p.StartTime.ToUniversalTime().Ticks;
+                    long afterTicks = DateTime.UtcNow.Ticks + intervalTicks;
+                    Assert.InRange(startTicks, beforeTicks, afterTicks);
+                }
                 catch (InvalidOperationException)
                 {
                     Assert.True(p.StartTime.ToUniversalTime().Ticks > beforeTicks);
