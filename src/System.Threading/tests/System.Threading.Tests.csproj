@@ -7,6 +7,8 @@
     <OutputType>Library</OutputType>
     <AssemblyName>System.Threading.Tests</AssemblyName>
     <ProjectGuid>{33F5A50E-B823-4FDD-8571-365C909ACEAE}</ProjectGuid>
+    <TargetFrameworkVersion>v5.0</TargetFrameworkVersion>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <!-- Default configurations to help VS understand the configurations -->
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' " />
@@ -24,6 +26,7 @@
     <Compile Include="ManualResetEventSlimCancellationTests.cs" />
     <Compile Include="ManualResetEventSlimTests.cs" />
     <Compile Include="MutexTests.cs" />
+    <Compile Include="Performance\Perf.EventWaitHandle.cs" />
     <Compile Include="SemaphoreSlimCancellationTests.cs" />
     <Compile Include="SemaphoreSlimTests.cs" />
     <Compile Include="SemaphoreTests.cs" />

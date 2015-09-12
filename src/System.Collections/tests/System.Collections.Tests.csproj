@@ -8,6 +8,8 @@
     <OutputType>Library</OutputType>
     <AssemblyName>System.Collections.Tests</AssemblyName>
     <RootNamespace>System.Collections.Tests</RootNamespace>
+	<TargetFrameworkVersion>v5.0</TargetFrameworkVersion>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <!-- Default configurations to help VS understand the configurations -->
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -139,8 +141,13 @@
     <Compile Include="Generic\SortedSet\SortedSetTest.cs" />
     <Compile Include="Generic\Common\TestDebugger.cs" />
     <Compile Include="Generic\Stack\Stack_GetEnumerator.cs" />
+    <Compile Include="Performance\Perf.Dictionary.cs" />
+    <Compile Include="Performance\Perf.List.cs" />
     <Compile Include="$(CommonTestPath)\System\Diagnostics\DebuggerAttributes.cs">
       <Link>Common\System\Diagnostics\DebuggerAttributes.cs</Link>
+    </Compile>
+	<Compile Include="$(CommonTestPath)\Performance\PerfTestBase.cs">
+      <Link>Common\Performance\PerfTestBase.cs</Link>
     </Compile>
   </ItemGroup>
   <ItemGroup>

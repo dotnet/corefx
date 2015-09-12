@@ -8,6 +8,8 @@
     <RootNamespace>System.Collections.NonGeneric.Tests</RootNamespace>
     <AssemblyName>System.Collections.NonGeneric.Tests</AssemblyName>
     <ProjectGuid>{EE95AE39-845A-42D3-86D0-8065DBE56612}</ProjectGuid>
+    <TargetFrameworkVersion>v5.0</TargetFrameworkVersion>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <!-- Default configurations to help VS understand the configurations -->
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -89,6 +91,7 @@
     <Compile Include="Hashtable\PropertyValuesTests.cs" />
     <Compile Include="Hashtable\RemoveTests.cs" />
     <Compile Include="Hashtable\SynchronizedTests.cs" />
+    <Compile Include="Performance\Perf.HashTable.cs" />
     <Compile Include="Queue\Queue_Clone.cs" />
     <Compile Include="Queue\Queue_Contains.cs" />
     <Compile Include="Queue\Queue_ctor.cs" />
@@ -144,6 +147,9 @@
     <Compile Include="XunitAssemblyAttributes.cs" />
     <Compile Include="$(CommonTestPath)\System\Diagnostics\DebuggerAttributes.cs">
       <Link>Common\System\Diagnostics\DebuggerAttributes.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonTestPath)\Performance\PerfTestBase.cs">
+      <Link>Common\Performance\PerfTestBase.cs</Link>
     </Compile>
   </ItemGroup>
   <ItemGroup>

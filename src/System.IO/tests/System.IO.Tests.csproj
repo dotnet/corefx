@@ -9,6 +9,8 @@
     <AssemblyName>System.IO.Tests</AssemblyName>
     <RestorePackages>true</RestorePackages>
     <ProjectGuid>{492EC54D-D2C4-4B3F-AC1F-646B3F7EBB02}</ProjectGuid>
+    <TargetFrameworkVersion>v5.0</TargetFrameworkVersion>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <!-- Default configurations to help VS understand the configurations -->
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' " />
@@ -19,6 +21,8 @@
     <Compile Include="BinaryWriter\BinaryWriterTests.cs" />
     <Compile Include="InvalidDataException\InvalidDataExceptionTests.cs" />
     <Compile Include="MemoryStream\MemoryStream_TryGetBufferTests.cs" />
+    <Compile Include="Performance\Perf.StreamReader.cs" />
+    <Compile Include="Performance\Perf.StreamWriter.cs" />
     <Compile Include="StreamReader\StreamReaderCtorTests.cs" />
     <Compile Include="StreamReader\StreamReaderTests.cs" />
     <Compile Include="StreamWriter\BaseStream.cs" />
@@ -33,6 +37,9 @@
     <Compile Include="Stream\TimeoutTests.cs" />
     <Compile Include="StringReader\StringReaderCtorTests.cs" />
     <Compile Include="StringWriter\StringWriterTests.cs" />
+    <Compile Include="$(CommonTestPath)\Performance\PerfTestBase.cs">
+      <Link>Common\Performance\PerfTestBase.cs</Link>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <!-- Compile tests against the contract, but copy our local-built implementation for testing -->

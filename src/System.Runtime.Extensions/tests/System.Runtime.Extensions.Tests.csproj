@@ -10,6 +10,8 @@
     <AssemblyName>System.Runtime.Extensions.Tests</AssemblyName>
     <RestorePackages>true</RestorePackages>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <TargetFrameworkVersion>v5.0</TargetFrameworkVersion>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <!-- Default configurations to help VS understand the configurations -->
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -17,6 +19,9 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Performance\Perf.Environment.cs" />
+    <Compile Include="Performance\Perf.Path.cs" />
+    <Compile Include="Performance\Perf.Random.cs" />
     <Compile Include="System\Diagnostics\Stopwatch.cs" />
     <Compile Include="System\Runtime\Versioning\FrameworkName.cs" />
     <Compile Include="System\IO\PathTests.cs" />
@@ -54,6 +59,10 @@
     <Compile Include="System\Progress.cs" />
     <Compile Include="System\Random.cs" />
     <Compile Include="System\StringComparer.cs" />
+    <!-- Helpers -->
+    <Compile Include="$(CommonTestPath)\Performance\PerfTestBase.cs">
+      <Link>Common\Performance\PerfTestBase.cs</Link>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <None Include="project.json" />
