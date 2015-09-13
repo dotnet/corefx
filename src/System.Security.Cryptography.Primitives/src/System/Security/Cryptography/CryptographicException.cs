@@ -5,7 +5,7 @@ using System.Globalization;
 
 namespace System.Security.Cryptography
 {
-    public class CryptographicException : Exception
+    public partial class CryptographicException : Exception
     {
         public CryptographicException()
             : base(SR.Arg_CryptographyException)
@@ -13,7 +13,7 @@ namespace System.Security.Cryptography
         }
 
         public CryptographicException(int hr)
-            : base(SR.Arg_CryptographyException)
+            : base(GetMessage(hr))
         {
             HResult = hr;
         }
