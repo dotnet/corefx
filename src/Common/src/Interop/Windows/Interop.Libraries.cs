@@ -3,7 +3,7 @@
 
 internal static partial class Interop
 {
-    internal static class Libraries
+    internal static partial class Libraries
     {
         internal const string BCrypt = "BCrypt.dll";
         internal const string Console_L1 = "api-ms-win-core-console-l1-1-0.dll";

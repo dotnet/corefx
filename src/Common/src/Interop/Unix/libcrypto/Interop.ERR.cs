@@ -14,9 +14,9 @@ internal static partial class Interop
         private static extern uint ERR_get_error();
 
         [DllImport(Libraries.LibCrypto, CharSet = CharSet.Ansi)]
-        private static extern void ERR_error_string_n(uint e, StringBuilder buf, int len);
+        private static extern void ERR_error_string_n(int e, StringBuilder buf, int len);
 
-        private static string ERR_error_string_n(uint error)
+        internal static string ERR_error_string_n(int error)
         {
             StringBuilder buf = new StringBuilder(1024);
 
@@ -70,8 +70,8 @@ internal static partial class Interop
             }
 
             // If there was an error code, and it wasn't something handled specially,
-            // use the OpenSSL error string as the message to a CryptographicException.
-            return new CryptographicException(ERR_error_string_n(error));
+            // use the OpenSSL error code as a CryptographicException.
+            return new CryptographicException(unchecked((int)error));
         }
 
         internal static void CheckValidOpenSslHandle(SafeHandle handle)
