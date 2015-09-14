@@ -185,8 +185,14 @@ namespace System.Diagnostics.ProcessTests
         [Fact]
         public void TestEnvironmentOfChildProcess()
         {
+            string toReplace = Environment.NewLine;
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            {
+                toReplace = ", " + toReplace;
+            }
+
             const string UnicodeEnvVar = "TestEnvironmentOfChildProcess";
-            Environment.SetEnvironmentVariable(UnicodeEnvVar, "\x1234\x5678"); // ensure some Unicode characters are in the output
+            Environment.SetEnvironmentVariable(UnicodeEnvVar, "\x1234\x5678" + Environment.NewLine + "some text"); // ensure some Unicode characters are in the output
             try
             {
                 var expectedEnv = new HashSet<string>();
@@ -195,7 +201,7 @@ namespace System.Diagnostics.ProcessTests
                 {
                     foreach (DictionaryEntry envVar in Environment.GetEnvironmentVariables())
                     {
-                        Console.WriteLine(envVar.Key + "=" + envVar.Value);
+                        Console.WriteLine(envVar.Key + "=" + envVar.Value.ToString().Replace(toReplace, "*"));
                     }
 
                     return SuccessExitCode;
@@ -216,7 +222,7 @@ namespace System.Diagnostics.ProcessTests
 
                 foreach (KeyValuePair<string, string> envVar in p.StartInfo.Environment)
                 {
-                    actualEnv.Add(envVar.Key + "=" + envVar.Value);
+                    actualEnv.Add(envVar.Key + "=" + envVar.Value.Replace(toReplace, "*"));
                 }
 
                 Assert.True(p.WaitForExit(WaitInMS));
@@ -235,7 +241,7 @@ namespace System.Diagnostics.ProcessTests
                 var currentProcEnv = new HashSet<string>();
                 foreach (DictionaryEntry envVar in Environment.GetEnvironmentVariables())
                 {
-                    currentProcEnv.Add(envVar.Key + "=" + envVar.Value);
+                    currentProcEnv.Add(envVar.Key + "=" + envVar.Value.ToString().Replace(toReplace, "*"));
                 }
 
                 // Profilers / code coverage tools can add own environment variables but we start
