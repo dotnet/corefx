@@ -1119,7 +1119,16 @@ namespace System.Linq
 
         private static IEnumerable<TResult> CastIterator<TResult>(IEnumerable source)
         {
-            foreach (object obj in source) yield return (TResult)obj;
+            if (default(TResult) == null)
+                foreach (object obj in source) yield return (TResult)obj;
+            else
+            {
+                foreach (object obj in source)
+                {
+                    if (obj == null) throw new InvalidCastException();
+                    yield return (TResult)obj;
+                }
+            }
         }
 
         public static TSource First<TSource>(this IEnumerable<TSource> source)
