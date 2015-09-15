@@ -1501,6 +1501,11 @@ namespace System.Linq
             }
         }
 
+        public static IEnumerable<TResult> Singleton<TResult>(TResult element)
+        {
+            return Repeat(element, 1);
+        }
+
         public static IEnumerable<TResult> Repeat<TResult>(TResult element, int count)
         {
             if (count < 0) throw Error.ArgumentOutOfRange("count");

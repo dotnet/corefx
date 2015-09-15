@@ -48,6 +48,7 @@
     <Compile Include="RepeatTests.cs" />
     <Compile Include="ShortCircuitingTests.cs" />
     <Compile Include="SingleTests.cs" />
+    <Compile Include="SingletonTests.cs" />
     <Compile Include="SkipTests.cs" />
     <Compile Include="SkipWhileTests.cs" />
     <Compile Include="SumTests.cs" />
