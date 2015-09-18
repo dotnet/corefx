@@ -138,21 +138,18 @@ namespace System.Numerics
             else
             {
                 //??? this is weird
-                d = resize(d, d.Length + 1);
+                d = Resize(d, d.Length + 1);
                 d[d.Length - 1] = 1;
             }
             return d;
         }
 
-        public static uint[] resize(uint[] v, int len)
+        public static uint[] Resize(uint[] v, int len)
         {
             if (v.Length == len) return v;
             uint[] ret = new uint[len];
-            int n = System.Math.Min(v.Length, len);
-            for (int i = 0; i < n; i++)
-            {
-                ret[i] = v[i];
-            }
+            int n = Math.Min(v.Length, len);
+            Array.Copy(v, 0, ret, 0, n);
             return ret;
         }
 
