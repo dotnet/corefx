@@ -39,6 +39,7 @@
     <Compile Include="System\Security\Cryptography\HMACSHA256.cs" />
     <Compile Include="System\Security\Cryptography\HMACSHA384.cs" />
     <Compile Include="System\Security\Cryptography\HMACSHA512.cs" />
+    <Compile Include="System\Security\Cryptography\IncrementalHash.cs" />
     <Compile Include="System\Security\Cryptography\RandomNumberGenerator.cs" />
     <Compile Include="System\Security\Cryptography\Rfc2898DeriveBytes.cs" />
     <Compile Include="System\Security\Cryptography\RSA.cs" />
@@ -116,6 +117,12 @@
     </Compile>
     <Compile Include="$(CommonPath)\Internal\Cryptography\HashProviderCng.cs">
       <Link>Internal\Cryptography\HashProviderCng.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Internal\Cryptography\Windows\CryptoThrowHelper.cs">
+      <Link>Internal\Cryptography\Windows\CryptoThrowHelper.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.FormatMessage.cs">
+      <Link>Internal\Windows\mincore\Interop.FormatMessage.cs</Link>
     </Compile>
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetsUnix)' == 'true' ">

@@ -2,11 +2,12 @@ project(System.Native)
 
 set(NATIVE_SOURCES
     pal_errno.cpp
-    pal_exec.cpp
     pal_io.cpp
-    pal_uid.cpp
     pal_mount.cpp
-    pal_utilities.cpp
+    pal_process.cpp
+    pal_string.cpp
+    pal_time.cpp
+    pal_uid.cpp
 )
 
 add_library(System.Native

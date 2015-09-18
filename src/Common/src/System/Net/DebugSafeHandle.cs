@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Microsoft.Win32.SafeHandles;
+
 using System.Diagnostics.CodeAnalysis;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
@@ -34,7 +35,7 @@ namespace System.Net
         private void Trace()
         {
             _trace = "WARNING! GC-ed  >>" + this.GetType().FullName + "<< (should be excplicitly closed) \r\n";
-#if TRAVE
+#if TRACE_VERBOSE
             string stacktrace = Environment.StackTrace;
             _trace += stacktrace;
 #endif

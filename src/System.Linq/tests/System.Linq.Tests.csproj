@@ -22,11 +22,13 @@
     <Compile Include="AnyTests.cs" />
     <Compile Include="CachedEnumerator.cs" />
     <Compile Include="ConcatTests.cs" />
+    <Compile Include="EnumerableDebugViewTests.cs" />
     <Compile Include="EnumerableTests.cs" />
     <Compile Include="EmptyEnumerable.cs" />
     <Compile Include="ExceptTests.cs" />
     <Compile Include="FirstOrDefaultTests.cs" />
     <Compile Include="FirstTests.cs" />
+    <Compile Include="GroupByTests.cs" />
     <Compile Include="Helpers\TestCollection.cs" />
     <Compile Include="Helpers\TestEnumerable.cs" />
     <Compile Include="Helpers\TestReadOnlyCollection.cs" />
@@ -67,9 +69,9 @@
     <Compile Include="ElementAtTests.cs" />
     <Compile Include="SequenceEqualTests.cs" />
     <Compile Include="LegacyTests\GroupByTests.cs" />
-    <Compile Include="LegacyTests\GroupJoinTests.cs" />
+    <Compile Include="GroupJoinTests.cs" />
     <Compile Include="LegacyTests\Helper.cs" />
-    <Compile Include="LegacyTests\JoinTests.cs" />
+    <Compile Include="JoinTests.cs" />
     <Compile Include="LongCountTests.cs" />
     <Compile Include="LegacyTests\MaxTests.cs" />
     <Compile Include="LegacyTests\MinTests.cs" />

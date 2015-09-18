@@ -277,6 +277,7 @@ public static class PathTests
     [InlineData("./tmp/", "./tmp")]
     [InlineData("/home/someuser/sometempdir/", "/home/someuser/sometempdir/")]
     [InlineData("/home/someuser/some tempdir/", "/home/someuser/some tempdir/")]
+    [InlineData("/tmp/", null)]
     public static void GetTempPath_SetEnvVar_Unix(string expected, string newTempPath)
     {
         GetTempPath_SetEnvVar("TMPDIR", expected, newTempPath);
@@ -295,7 +296,7 @@ public static class PathTests
         }
         finally
         {
-            Environment.SetEnvironmentVariable(envVar, null);
+            Environment.SetEnvironmentVariable(envVar, original);
             Assert.Equal(original, Path.GetTempPath());
         }
     }
@@ -468,6 +469,19 @@ public static class PathTests
     public static void GetFullPath_Windows_PathTooLong()
     {
         Assert.Throws<PathTooLongException>(() => Path.GetFullPath(@"C:\" + new string('a', short.MaxValue) + @"\"));
+    }
+
+    [PlatformSpecific(PlatformID.Windows)]
+    [Theory]
+    [InlineData(@"C:\", @"C:\")]
+    [InlineData(@"C:\.", @"C:\")]
+    [InlineData(@"C:\..", @"C:\")]
+    [InlineData(@"C:\..\..", @"C:\")]
+    [InlineData(@"C:\A\..", @"C:\")]
+    [InlineData(@"C:\..\..\A\..", @"C:\")]
+    public static void GetFullPath_Windows_RelativeRoot(string path, string expected)
+    {
+        Assert.Equal(Path.GetFullPath(path), expected);
     }
 
     [PlatformSpecific(PlatformID.Windows)]

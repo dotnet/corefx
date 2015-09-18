@@ -182,17 +182,8 @@ namespace Tests
         [Fact]
         public static void Contains_SourceNull()
         {
-            try
-            {
-                IEnumerable<string> source = null;
-                string value = null;
-
-                source.Contains(value);
-                Assert.False(true);
-            }
-            catch (ArgumentNullException)
-            {
-            }
+            IEnumerable<string> source = null;
+            Assert.Throws<ArgumentNullException>("source", () => source.Contains(null));
         }
 
         public static IEnumerable<string> Contains_Source1()
@@ -458,66 +449,31 @@ namespace Tests
         [Fact]
         public static void RangeNegativeCount()
         {
-            try
-            {
-                Enumerable.Range(0, -1).ToList();
-                Assert.False(true);
-            }
-            catch (ArgumentOutOfRangeException)
-            {
-            }
+            Assert.Throws<ArgumentOutOfRangeException>("count", () => Enumerable.Range(0, -1));
         }
 
         [Fact]
         public static void MaxEmpty()
         {
-            try
-            {
-                Enumerable.Empty<int>().Max();
-                Assert.False(true);
-            }
-            catch (InvalidOperationException)
-            {
-            }
+            Assert.Throws<InvalidOperationException>(() => Enumerable.Empty<int>().Max());
         }
 
         [Fact]
         public static void MinEmpty()
         {
-            try
-            {
-                Enumerable.Empty<int>().Min();
-                Assert.False(true);
-            }
-            catch (InvalidOperationException)
-            {
-            }
+            Assert.Throws<InvalidOperationException>(() => Enumerable.Empty<int>().Min());
         }
 
         [Fact]
         public static void MaxNullSource()
         {
-            try
-            {
-                Enumerable.Max((IEnumerable<int>)null);
-                Assert.False(true);
-            }
-            catch (ArgumentNullException)
-            {
-            }
+            Assert.Throws<ArgumentNullException>("source", () => ((IEnumerable<int>)null).Max());
         }
 
         [Fact]
         public static void MinNullSource()
         {
-            try
-            {
-                Enumerable.Min((IEnumerable<int>)null);
-                Assert.False(true);
-            }
-            catch (ArgumentNullException)
-            {
-            }
+            Assert.Throws<ArgumentNullException>("source", () => ((IEnumerable<int>)null).Min());
         }
 
         [Fact]
@@ -702,23 +658,10 @@ namespace Tests
             ConstantExpression init1 = Expression.Constant(4, typeof(int));
             Expression[] inits = new Expression[] { null, init1 };
 
-            try
-            {
-                ListInitExpression result = Expression.ListInit(newExpr, inits);
-            }
-            catch (ArgumentNullException ane)
-            {
-                Assert.Equal("argument", ane.ParamName);
-            }
+            Assert.Throws<ArgumentNullException>("argument", () => Expression.ListInit(newExpr, inits));
 
             ElementInit[] einits = new ElementInit[] { };
-            try
-            {
-                ListInitExpression result1 = Expression.ListInit(newExpr, einits);
-            }
-            catch (ArgumentException)
-            {
-            }
+            Assert.Throws<ArgumentException>(() => Expression.ListInit(newExpr, einits));
         }
 
         public void Add(ref int i)
@@ -731,13 +674,7 @@ namespace Tests
             MethodInfo mi1 = typeof(Expression_Tests).GetMethod("Add");
             ConstantExpression ce1 = Expression.Constant(4, typeof(int));
 
-            try
-            {
-                ElementInit ei1 = Expression.ElementInit(mi1, new Expression[] { ce1 });
-            }
-            catch (ArgumentException)
-            {
-            }
+            Assert.Throws<ArgumentException>(() => Expression.ElementInit(mi1, new Expression[] { ce1 }));
         }
 
         public class Atom
@@ -764,14 +701,9 @@ namespace Tests
         [Fact]
         public static void EqualityBetweenStructAndIterfaceFails()
         {
-            try
-            {
-                Expression.Equal(Expression.Constant(5), Expression.Constant(null, typeof(IComparable)));
-                Assert.False(true);
-            }
-            catch (InvalidOperationException)
-            {
-            }
+            Expression expStruct = Expression.Constant(5);
+            Expression expIface = Expression.Constant(null, typeof(IComparable));
+            Assert.Throws<InvalidOperationException>(() => Expression.Equal(expStruct, expIface));
         }
 
         [Fact]
@@ -889,14 +821,7 @@ namespace Tests
         [Fact]
         public static void ConstantNullWithValueTypeIsInvalid()
         {
-            try
-            {
-                Expression.Constant(null, typeof(int));
-                Assert.False(true);
-            }
-            catch (ArgumentException)
-            {
-            }
+            Assert.Throws<ArgumentException>(() => Expression.Constant(null, typeof(int)));
         }
 
         [Fact]
@@ -1176,27 +1101,13 @@ namespace Tests
         [Fact]
         public static void TestGetFuncTypeWithNullFails()
         {
-            try
-            {
-                Expression.GetFuncType(null);
-                Assert.False(true);
-            }
-            catch (ArgumentNullException)
-            {
-            }
+            Assert.Throws<ArgumentNullException>("typeArgs", () => Expression.GetFuncType(null));
         }
 
         [Fact]
         public static void TestGetFuncTypeWithTooManyArgsFails()
         {
-            try
-            {
-                Expression.GetFuncType(new Type[] { typeof(int), typeof(int), typeof(int), typeof(int), typeof(int), typeof(int), typeof(int), typeof(int), typeof(int), typeof(int), typeof(int), typeof(int), typeof(int), typeof(int), typeof(int), typeof(int), typeof(int), typeof(int) });
-                Assert.False(true);
-            }
-            catch (ArgumentException)
-            {
-            }
+            Assert.Throws<ArgumentException>(() => Expression.GetFuncType(new Type[] { typeof(int), typeof(int), typeof(int), typeof(int), typeof(int), typeof(int), typeof(int), typeof(int), typeof(int), typeof(int), typeof(int), typeof(int), typeof(int), typeof(int), typeof(int), typeof(int), typeof(int), typeof(int) }));
         }
 
         [Fact]
@@ -1996,13 +1907,7 @@ namespace Tests
             Assert.Equal(f2().Value.Name, "lhs");
 
             var constant = Expression.Constant(1.0, typeof(double));
-            try
-            {
-                Expression<Func<double?>> e = Expression.Lambda<Func<double?>>(constant, null);
-            }
-            catch (ArgumentException)
-            {
-            }
+            Assert.Throws<ArgumentException>(() => Expression.Lambda<Func<double?>>(constant, null));
         }
 
         public static int GetBound()
@@ -3067,15 +2972,8 @@ namespace Tests
         [Fact]
         public static void InvokeNonTypedLambdaFails()
         {
-            try
-            {
-                Expression call = Expression.Call(null, typeof(Compiler_Tests).GetMethod("ComputeDynamicLambda", BindingFlags.Static | BindingFlags.Public), new Expression[] { });
-                InvocationExpression ie = Expression.Invoke(call, null);
-                Assert.False(true);
-            }
-            catch (ArgumentException)
-            {
-            }
+            Expression call = Expression.Call(null, typeof(Compiler_Tests).GetMethod("ComputeDynamicLambda", BindingFlags.Static | BindingFlags.Public), new Expression[] { });
+            Assert.Throws<ArgumentException>(() => Expression.Invoke(call, null));
         }
 
         public static LambdaExpression ComputeDynamicLambda()
@@ -3086,15 +2984,8 @@ namespace Tests
         [Fact]
         public static void InvokeNonTypedDelegateFails()
         {
-            try
-            {
-                Expression call = Expression.Call(null, typeof(Compiler_Tests).GetMethod("ComputeDynamicDelegate", BindingFlags.Static | BindingFlags.Public), new Expression[] { });
-                InvocationExpression ie = Expression.Invoke(call, null);
-                Assert.False(true);
-            }
-            catch (ArgumentException)
-            {
-            }
+            Expression call = Expression.Call(null, typeof(Compiler_Tests).GetMethod("ComputeDynamicDelegate", BindingFlags.Static | BindingFlags.Public), new Expression[] { });
+            Assert.Throws<ArgumentException>(() => Expression.Invoke(call, null));
         }
 
         public static Delegate ComputeDynamicDelegate()
@@ -3454,37 +3345,15 @@ namespace Tests
         [Fact]
         public static void StructStructMemberInitializationThroughPropertyThrowsException()
         {
-            try
-            {
-                Expression<Func<int, StructX>> f = GetExpressionTreeForMemberInitializationThroughProperty<StructX>();
-                var d = f.Compile();
-                StructX x = d(5);
-                Assert.Equal(5, x.A);
-                Assert.Equal(6, x.B);
-                Assert.Equal(7, x.SY.B);
-                Assert.False(true);
-            }
-            catch (InvalidOperationException)
-            {
-            }
+            Expression<Func<int, StructX>> f = GetExpressionTreeForMemberInitializationThroughProperty<StructX>();
+            Assert.Throws<InvalidOperationException>(() => f.Compile());
         }
 
         [Fact]
         public static void ClassStructMemberInitializationThroughPropertyThrowsException()
         {
-            try
-            {
-                Expression<Func<int, ClassX>> f = GetExpressionTreeForMemberInitializationThroughProperty<ClassX>();
-                var d = f.Compile();
-                ClassX x = d(5);
-                Assert.Equal(5, x.A);
-                Assert.Equal(6, x.B);
-                Assert.Equal(7, x.SY.B);
-                Assert.False(true);
-            }
-            catch (InvalidOperationException)
-            {
-            }
+            Expression<Func<int, ClassX>> f = GetExpressionTreeForMemberInitializationThroughProperty<ClassX>();
+            Assert.Throws<InvalidOperationException>(() => f.Compile());
         }
 
 
@@ -3654,36 +3523,22 @@ namespace Tests
         [Fact]
         public static void ConvertUnsignedToSigned()
         {
-            Func<sbyte> f2 = Expression.Lambda<Func<sbyte>>(Expression.Convert(Expression.Constant(UInt64.MaxValue), typeof(sbyte))).Compile();
-            Assert.Equal((sbyte)-1, f2());
+            Func<sbyte> f = Expression.Lambda<Func<sbyte>>(Expression.Convert(Expression.Constant(UInt64.MaxValue), typeof(sbyte))).Compile();
+            Assert.Equal((sbyte)-1, f());
         }
 
         [Fact]
         public static void ConvertCheckedSignedToUnsigned()
         {
-            try
-            {
-                Func<ulong> f = Expression.Lambda<Func<ulong>>(Expression.ConvertChecked(Expression.Constant((sbyte)-1), typeof(ulong))).Compile();
-                ulong result = f();
-                Assert.False(true);
-            }
-            catch (OverflowException)
-            {
-            }
+            Func<ulong> f = Expression.Lambda<Func<ulong>>(Expression.ConvertChecked(Expression.Constant((sbyte)-1), typeof(ulong))).Compile();
+            Assert.Throws<OverflowException>(() => f());
         }
 
         [Fact]
         public static void ConvertCheckedUnsignedToSigned()
         {
-            try
-            {
-                Func<sbyte> f2 = Expression.Lambda<Func<sbyte>>(Expression.ConvertChecked(Expression.Constant(UInt64.MaxValue), typeof(sbyte))).Compile();
-                sbyte result = f2();
-                Assert.False(true);
-            }
-            catch (OverflowException)
-            {
-            }
+            Func<sbyte> f = Expression.Lambda<Func<sbyte>>(Expression.ConvertChecked(Expression.Constant(UInt64.MaxValue), typeof(sbyte))).Compile();
+            Assert.Throws<OverflowException>(() => f());
         }
 
         [Fact]
@@ -3923,6 +3778,51 @@ namespace Tests
             Assert.Equal("default", f("hi2"));
             Assert.Equal("hello", f("HI"));
             Assert.Equal("null", f(null));
+        }
+
+        public enum MyEnum
+        {
+            Value
+        }
+
+        public class EnumOutLambdaClass
+        {
+            public static void Bar(out MyEnum o)
+            {
+                o = MyEnum.Value;
+            }
+
+            public static void BarRef(ref MyEnum o)
+            {
+                o = MyEnum.Value;
+            }
+        }
+
+        [Fact]
+        public static void UninitializedEnumOut()
+        {
+            var x = Expression.Variable(typeof(MyEnum), "x");
+
+            var expression = Expression.Lambda<Action>(
+                            Expression.Block(
+                            new[] { x },
+                            Expression.Call(null, typeof(EnumOutLambdaClass).GetMethod("Bar"), x)));
+
+            expression.Compile()();
+        }
+
+        [Fact]
+        public static void DefaultEnumRef()
+        {
+            var x = Expression.Variable(typeof(MyEnum), "x");
+
+            var expression = Expression.Lambda<Action>(
+                            Expression.Block(
+                            new[] { x },
+                            Expression.Assign(x, Expression.Default(typeof(MyEnum))),
+                            Expression.Call(null, typeof(EnumOutLambdaClass).GetMethod("BarRef"), x)));
+
+            expression.Compile()();
         }
 
         [Fact]
@@ -4545,14 +4445,6 @@ namespace Tests
     // Extensions on System.Type and friends
     internal static class TypeExtensions
     {
-        /// <summary>
-        /// Creates a closed delegate for the given (dynamic)method.
-        /// </summary>
-        internal static Delegate CreateDelegate(this MethodInfo methodInfo, Type delegateType, object target)
-        {
-            return methodInfo.CreateDelegate(delegateType, target);
-        }
-
         internal static Type GetReturnType(this MethodBase mi)
         {
             return (mi.IsConstructor) ? mi.DeclaringType : ((MethodInfo)mi).ReturnType;
@@ -4633,91 +4525,6 @@ namespace Tests
             return false;
         }
 
-
-        internal static TypeCode GetTypeCode(this Type type)
-        {
-            if (type == typeof(object))
-                return TypeCode.Object;
-            else if (type == typeof(bool))
-                return TypeCode.Boolean;
-            else if (type == typeof(char))
-                return TypeCode.Char;
-            else if (type == typeof(sbyte))
-                return TypeCode.SByte;
-            else if (type == typeof(byte))
-                return TypeCode.Byte;
-            else if (type == typeof(short))
-                return TypeCode.Int16;
-            else if (type == typeof(ushort))
-                return TypeCode.UInt16;
-            else if (type == typeof(int))
-                return TypeCode.Int32;
-            else if (type == typeof(uint))
-                return TypeCode.UInt32;
-            else if (type == typeof(long))
-                return TypeCode.Int64;
-            else if (type == typeof(ulong))
-                return TypeCode.UInt64;
-            else if (type == typeof(float))
-                return TypeCode.Single;
-            else if (type == typeof(double))
-                return TypeCode.Double;
-            else if (type == typeof(decimal))
-                return TypeCode.Decimal;
-            else if (type == typeof(System.DateTime))
-                return TypeCode.DateTime;
-            else if (type == typeof(string))
-                return TypeCode.String;
-            else
-                return TypeCode.Empty;
-        }
-
-        internal static bool IsAssignableFrom(this Type source, Type destination)
-        {
-            return source.GetTypeInfo().IsAssignableFrom(destination.GetTypeInfo());
-        }
-
-        internal static bool IsSubclassOf(this Type source, Type other)
-        {
-            return source.GetTypeInfo().IsSubclassOf(other);
-        }
-
-        internal static Type[] GetGenericArguments(this Type type)
-        {
-            return type.GetTypeInfo().GenericTypeArguments;
-        }
-
-
-        internal static FieldInfo GetField(this Type type, string fieldName)
-        {
-            foreach (var field in type.GetTypeInfo().DeclaredFields)
-            {
-                if (field.Name == fieldName)
-                {
-                    return field;
-                }
-            }
-            return null;
-        }
-
-        internal static MethodInfo GetMethod(this Type type, string methodName)
-        {
-            return type.GetTypeInfo().GetDeclaredMethod(methodName);
-        }
-
-        internal static MethodInfo[] GetStaticMethods(this Type type)
-        {
-            var list = new List<MethodInfo>();
-            foreach (var method in type.GetTypeInfo().DeclaredMethods)
-            {
-                if (method.IsStatic)
-                {
-                    list.Add(method);
-                }
-            }
-            return list.ToArray();
-        }
-
         internal static MethodInfo GetAnyStaticMethod(this Type type, string name)
         {
             foreach (var method in type.GetTypeInfo().DeclaredMethods)
@@ -4729,218 +4536,6 @@ namespace Tests
             }
             return null;
         }
-
-        internal static MethodInfo[] GetMethodsIgnoreCase(this Type type, BindingFlags flags, string name)
-        {
-            var list = new List<MethodInfo>();
-            foreach (var method in type.GetTypeInfo().DeclaredMethods)
-            {
-                if (method.Name.Equals(name, StringComparison.CurrentCultureIgnoreCase))
-                {
-                    list.Add(method);
-                }
-            }
-            return list.ToArray();
-        }
-
-        internal static MethodInfo GetGetMethod(this PropertyInfo pi, bool nonPublic = false)
-        {
-            return pi.GetMethod;
-        }
-
-        internal static MethodInfo GetSetMethod(this PropertyInfo pi, bool nonPublic = false)
-        {
-            return pi.SetMethod;
-        }
-
-        internal static IEnumerable<PropertyInfo> GetProperties(this Type type, BindingFlags flags)
-        {
-            return type.GetTypeInfo().DeclaredProperties;
-        }
-
-        internal static ConstructorInfo GetConstructor(this Type type, Type[] argTypes)
-        {
-            return GetConstructor(type, BindingFlags.Static | BindingFlags.Public, null, argTypes, null);
-        }
-
-        internal static TypeInfo GetNestedType(this Type type, string name)
-        {
-            foreach (var nested in type.GetTypeInfo().DeclaredNestedTypes)
-            {
-                if (nested.Name == name)
-                {
-                    return nested;
-                }
-            }
-            return null;
-        }
-
-        internal static ConstructorInfo GetConstructor(this Type type, BindingFlags flags, object binder, Type[] argTypes, object[] modifier)
-        {
-            foreach (var ctor in type.GetTypeInfo().DeclaredConstructors)
-            {
-                var parameters = ctor.GetParameters();
-                if (parameters.Length == argTypes.Length)
-                {
-                    bool mismatch = false;
-                    for (int i = 0; i < parameters.Length; i++)
-                    {
-                        if (parameters[i].ParameterType != argTypes[i])
-                        {
-                            mismatch = true;
-                        }
-                    }
-                    if (!mismatch)
-                    {
-                        return ctor;
-                    }
-                }
-            }
-            return null;
-        }
-
-        internal static IEnumerable<MemberInfo> GetMember(this Type type, string name, MemberTypes memberType, BindingFlags flags)
-        {
-            switch (memberType)
-            {
-                case MemberTypes.Method:
-                    foreach (var method in type.GetTypeInfo().DeclaredMethods)
-                    {
-                        if (method.Name == name)
-                        {
-                            yield return method;
-                        }
-                    }
-                    break;
-                default:
-                    throw new InvalidOperationException("type.GetMember for " + memberType);
-            }
-        }
-
-        internal static IEnumerable<MethodInfo> GetMethods(this Type type, BindingFlags flags)
-        {
-            foreach (var method in type.GetTypeInfo().DeclaredMethods)
-            {
-                yield return method;
-            }
-        }
-
-        internal static MethodInfo GetMethod(this Type type, string name, Type[] argTypes)
-        {
-            return GetMethod(type, name, BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static, null, argTypes, null);
-        }
-
-        internal static MethodInfo GetMethod(this Type type, string name, BindingFlags flags, object binder, Type[] argTypes, object[] modifier)
-        {
-            foreach (var method in type.GetTypeInfo().DeclaredMethods)
-            {
-                if (method.Name != name)
-                {
-                    continue;
-                }
-
-                var parameters = method.GetParameters();
-                if (parameters.Length == argTypes.Length)
-                {
-                    bool mismatch = false;
-                    for (int i = 0; i < parameters.Length; i++)
-                    {
-                        if (parameters[i].ParameterType != argTypes[i])
-                        {
-                            mismatch = true;
-                        }
-                    }
-                    if (!mismatch)
-                    {
-                        return method;
-                    }
-                }
-            }
-            return null;
-        }
-
-        internal static FieldInfo GetField(this Type type, string name, BindingFlags flags)
-        {
-            return type.GetTypeInfo().GetDeclaredField(name);
-        }
-
-        internal static PropertyInfo GetProperty(this Type type, string name, BindingFlags flags)
-        {
-            return type.GetTypeInfo().GetDeclaredProperty(name);
-        }
-
-        internal static PropertyInfo GetProperty(this Type type, string name)
-        {
-            return GetProperty(type, name, BindingFlags.Public | BindingFlags.Instance);
-        }
-
-        internal static MethodInfo GetMethod(this Type type, string name, BindingFlags flags)
-        {
-            return type.GetTypeInfo().GetDeclaredMethod(name);
-        }
-    }
-
-    [Flags]
-    internal enum BindingFlags
-    {
-        Default = 0,
-        IgnoreCase = 1,
-        DeclaredOnly = 2,
-        Instance = 4,
-        Static = 8,
-        Public = 16,
-        NonPublic = 32,
-        AnyStatic = Static | Public | NonPublic,
-        FlattenHierarchy = 64,
-        InvokeMethod = 256,
-        CreateInstance = 512,
-        GetField = 1024,
-        SetField = 2048,
-        GetProperty = 4096,
-        SetProperty = 8192,
-        PutDispProperty = 16384,
-        PutRefDispProperty = 32768,
-        ExactBinding = 65536,
-        SuppressChangeType = 131072,
-        OptionalParamBinding = 262144,
-        IgnoreReturn = 16777216,
-    }
-
-    [Flags]
-    public enum MemberTypes
-    {
-        // The following are the known classes which extend MemberInfo
-        Constructor = 0x01,
-        Event = 0x02,
-        Field = 0x04,
-        Method = 0x08,
-        Property = 0x10,
-        TypeInfo = 0x20,
-        Custom = 0x40,
-        NestedType = 0x80,
-        All = Constructor | Event | Field | Method | Property | TypeInfo | NestedType,
-    }
-
-    public enum TypeCode
-    {
-        Empty = 0,
-        Object = 1,
-        DBNull = 2,
-        Boolean = 3,
-        Char = 4,
-        SByte = 5,
-        Byte = 6,
-        Int16 = 7,
-        UInt16 = 8,
-        Int32 = 9,
-        UInt32 = 10,
-        Int64 = 11,
-        UInt64 = 12,
-        Single = 13,
-        Double = 14,
-        Decimal = 15,
-        DateTime = 16,
-        String = 18,
     }
 
     public struct U

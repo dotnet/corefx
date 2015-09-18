@@ -14,7 +14,8 @@ internal static class IOInputs
         new char[] { '\"', '<', '>', '|', '\0', (Char)1, (Char)2, (Char)3, (Char)4, (Char)5, (Char)6, (Char)7, (Char)8, (Char)9, (Char)10, (Char)11, (Char)12, (Char)13, (Char)14, (Char)15, (Char)16, (Char)17, (Char)18, (Char)19, (Char)20, (Char)21, (Char)22, (Char)23, (Char)24, (Char)25, (Char)26, (Char)27, (Char)28, (Char)29, (Char)30, (Char)31, ':', '*', '?' } :
         new char[] { '\0' };
 
-    public static bool SupportsCreationTime { get { return RuntimeInformation.IsOSPlatform(OSPlatform.Windows) | RuntimeInformation.IsOSPlatform(OSPlatform.OSX); } }
+    public static bool SupportsSettingCreationTime { get { return RuntimeInformation.IsOSPlatform(OSPlatform.Windows); } }
+    public static bool SupportsGettingCreationTime { get { return RuntimeInformation.IsOSPlatform(OSPlatform.Windows) | RuntimeInformation.IsOSPlatform(OSPlatform.OSX); } }
     public static bool CaseSensitive { get { return RuntimeInformation.IsOSPlatform(OSPlatform.Windows) | RuntimeInformation.IsOSPlatform(OSPlatform.OSX); } }
     public static bool CaseInsensitive { get { return RuntimeInformation.IsOSPlatform(OSPlatform.Windows) | RuntimeInformation.IsOSPlatform(OSPlatform.OSX); } }
 
@@ -216,29 +217,29 @@ internal static class IOInputs
         yield return String.Format(@"\\Server\Share\{0}", component);
     }
 
-    public static IEnumerable<string> GetPathsLongerThanMaxDirectory()
+    public static IEnumerable<string> GetPathsLongerThanMaxDirectory(string rootPath)
     {
-        yield return GetLongPath(MaxDirectory + 1);
-        yield return GetLongPath(MaxDirectory + 2);
-        yield return GetLongPath(MaxDirectory + 3);
+        yield return GetLongPath(rootPath, MaxDirectory + 1);
+        yield return GetLongPath(rootPath, MaxDirectory + 2);
+        yield return GetLongPath(rootPath, MaxDirectory + 3);
     }
 
-    public static IEnumerable<string> GetPathsLongerThanMaxPath(bool useExtendedSyntax = false)
+    public static IEnumerable<string> GetPathsLongerThanMaxPath(string rootPath, bool useExtendedSyntax = false)
     {
-        yield return GetLongPath(MaxPath + 1, useExtendedSyntax);
-        yield return GetLongPath(MaxPath + 2, useExtendedSyntax);
-        yield return GetLongPath(MaxPath + 3, useExtendedSyntax);
+        yield return GetLongPath(rootPath, MaxPath + 1, useExtendedSyntax);
+        yield return GetLongPath(rootPath, MaxPath + 2, useExtendedSyntax);
+        yield return GetLongPath(rootPath, MaxPath + 3, useExtendedSyntax);
     }
 
-    public static IEnumerable<string> GetPathsLongerThanMaxLongPath(bool useExtendedSyntax = false)
+    public static IEnumerable<string> GetPathsLongerThanMaxLongPath(string rootPath, bool useExtendedSyntax = false)
     {
-        yield return GetLongPath(MaxExtendedPath + 1 - (useExtendedSyntax ? 0 : ExtendedPrefix.Length), useExtendedSyntax);
-        yield return GetLongPath(MaxExtendedPath + 2 - (useExtendedSyntax ? 0 : ExtendedPrefix.Length), useExtendedSyntax);
+        yield return GetLongPath(rootPath, MaxExtendedPath + 1 - (useExtendedSyntax ? 0 : ExtendedPrefix.Length), useExtendedSyntax);
+        yield return GetLongPath(rootPath, MaxExtendedPath + 2 - (useExtendedSyntax ? 0 : ExtendedPrefix.Length), useExtendedSyntax);
     }
 
-    private static string GetLongPath(int characterCount, bool extended = false)
+    private static string GetLongPath(string rootPath, int characterCount, bool extended = false)
     {
-        return IOServices.GetPath(characterCount, extended).FullPath;
+        return IOServices.GetPath(rootPath, characterCount, extended).FullPath;
     }
 
     public static IEnumerable<string> GetReservedDeviceNames()

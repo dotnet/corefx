@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-#include "../config.h"
+#include "pal_config.h"
 #include "pal_mount.h"
 #include "pal_utilities.h"
 #include <assert.h>
@@ -17,10 +17,9 @@
 #define STRING_BUFFER_SIZE 8192
 #endif
 
-#if HAVE_MNTINFO
-
-int GetMountInfo(MountPointFound onFound)
+static int32_t GetMountInfo(MountPointFound onFound)
 {
+#if HAVE_MNTINFO
     // getmntinfo returns pointers to OS-internal structs, so we don't need to worry about free'ing the object
     struct statfs* mounts = nullptr;
     int count = getmntinfo(&mounts, 0);
@@ -34,15 +33,13 @@ int GetMountInfo(MountPointFound onFound)
 
 #else
 
-int GetMountInfo(MountPointFound onFound)
-{
     int result = -1;
     FILE* fp = setmntent("/proc/mounts", MNTOPT_RO);
     if (fp != nullptr)
     {
         // The _r version of getmntent needs all buffers to be passed in; however, we don't know how big of a string
         // buffer we will need, so pick something that seems like it will be big enough.
-        char buffer[STRING_BUFFER_SIZE] = { };
+        char buffer[STRING_BUFFER_SIZE] = {};
         mntent entry;
         while (getmntent_r(fp, &entry, buffer, STRING_BUFFER_SIZE) != nullptr)
         {
@@ -51,7 +48,8 @@ int GetMountInfo(MountPointFound onFound)
 
         result = endmntent(fp);
         assert(result == 1); // documented to always return 1
-        result = 0; // We need to standardize a success return code between our implementations, so settle on 0 for success
+        result =
+            0; // We need to standardize a success return code between our implementations, so settle on 0 for success
     }
 
     return result;
@@ -59,42 +57,42 @@ int GetMountInfo(MountPointFound onFound)
 
 #endif
 
-extern "C"
-int GetAllMountPoints(MountPointFound onFound)
+extern "C" int32_t GetAllMountPoints(MountPointFound onFound)
 {
     return GetMountInfo(onFound);
 }
 
-extern "C"
-int GetSpaceInfoForMountPoint(
-    const char*             name,
-    MountPointInformation*  mpi)
+extern "C" int32_t GetSpaceInfoForMountPoint(const char* name, MountPointInformation* mpi)
 {
     assert(name != nullptr);
     assert(mpi != nullptr);
 
-    struct statfs stats = { };
+    struct statfs stats = {};
     int result = statfs(name, &stats);
     if (result == 0)
     {
-        mpi->AvailableFreeSpace = stats.f_bsize * stats.f_bavail;
-        mpi->TotalFreeSpace = stats.f_bsize * stats.f_bfree;
-        mpi->TotalSize = stats.f_bsize * stats.f_blocks;
+        // Note that these have signed integer types on some platforms but musn't be negative.
+        // Also, upcast here (some platforms have smaller types) to 64-bit before multiplying to
+        // avoid overflow.
+        uint64_t bsize = UnsignedCast(stats.f_bsize);
+        uint64_t bavail = UnsignedCast(stats.f_bavail);
+        uint64_t bfree = UnsignedCast(stats.f_bfree);
+        uint64_t blocks = UnsignedCast(stats.f_blocks);
+
+        mpi->AvailableFreeSpace = bsize * bavail;
+        mpi->TotalFreeSpace = bsize * bfree;
+        mpi->TotalSize = bsize * blocks;
     }
     else
     {
-        *mpi = { };
+        *mpi = {};
     }
 
     return result;
 }
 
-extern "C"
-int GetFormatInfoForMountPoint(
-    const char* name, 
-    char*       formatNameBuffer, 
-    int32_t     bufferLength, 
-    int64_t*    formatType)
+extern "C" int32_t
+GetFormatInfoForMountPoint(const char* name, char* formatNameBuffer, int32_t bufferLength, int64_t* formatType)
 {
     assert((formatNameBuffer != nullptr) && (formatType != nullptr));
     assert(bufferLength > 0);
@@ -118,9 +116,8 @@ int GetFormatInfoForMountPoint(
 #else
         assert(formatType != nullptr);
         *formatType = stats.f_type;
-        *formatNameBuffer = '\0';
+        SafeStringCopy(formatNameBuffer, bufferLength, "");
 #endif
-
     }
     else
     {
