@@ -82,14 +82,8 @@ namespace System.Linq
 
         internal abstract class Iterator<TSource> : IEnumerable<TSource>, IEnumerator<TSource>
         {
-            private int _threadId;
             internal int state;
             internal TSource current;
-
-            public Iterator()
-            {
-                _threadId = Environment.CurrentManagedThreadId;
-            }
 
             public TSource Current
             {
@@ -106,7 +100,8 @@ namespace System.Linq
 
             public IEnumerator<TSource> GetEnumerator()
             {
-                Iterator<TSource> enumerator = state == 0 && _threadId == Environment.CurrentManagedThreadId ? this : Clone();
+                if (Interlocked.CompareExchange(ref state, 1, 0) == 0) return this;
+                Iterator<TSource> enumerator = Clone();
                 enumerator.state = 1;
                 return enumerator;
             }
