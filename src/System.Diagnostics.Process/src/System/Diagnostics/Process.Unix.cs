@@ -36,7 +36,7 @@ namespace System.Diagnostics
         public void Kill()
         {
             EnsureState(State.HaveId);
-            int errno = Interop.libc.kill(_processId, Interop.libc.Signals.SIGKILL);
+            int errno = Interop.Sys.Kill(_processId, Interop.Sys.Signals.SIGKILL);
             if (errno != 0)
             {
                 throw new Win32Exception(errno); // same exception as on Windows
@@ -132,7 +132,7 @@ namespace System.Diagnostics
                 EnsureState(State.HaveId);
 
                 int pri = 0;
-                int errno = Interop.libc.getpriority(Interop.libc.PriorityWhich.PRIO_PROCESS, _processId, out pri);
+                int errno = Interop.Sys.GetPriority(Interop.Sys.PriorityWhich.PRIO_PROCESS, _processId, out pri);
                 if (errno != 0)
                 {
                     throw new Win32Exception(errno); // match Windows exception
@@ -161,7 +161,7 @@ namespace System.Diagnostics
                     default: throw new Win32Exception(); // match Windows exception
                 }
 
-                int result = Interop.libc.setpriority(Interop.libc.PriorityWhich.PRIO_PROCESS, _processId, pri);
+                int result = Interop.Sys.SetPriority(Interop.Sys.PriorityWhich.PRIO_PROCESS, _processId, pri);
                 if (result == -1)
                 {
                     throw new Win32Exception(); // match Windows exception
@@ -172,7 +172,7 @@ namespace System.Diagnostics
         /// <summary>Gets the ID of the current process.</summary>
         private static int GetCurrentProcessId()
         {
-            return Interop.libc.getpid();
+            return Interop.Sys.GetPid();
         }
 
         /// <summary>
@@ -362,7 +362,7 @@ namespace System.Diagnostics
         {
             // Look up the number of ticks per second in the system's configuration,
             // then use that to convert to a TimeSpan
-            int ticksPerSecond = Interop.libc.sysconf(Interop.libc.SysConfNames._SC_CLK_TCK);
+            long ticksPerSecond = Interop.Sys.SysConf(Interop.Sys.SysConfName._SC_CLK_TCK);
             if (ticksPerSecond <= 0)
             {
                 throw new Win32Exception();

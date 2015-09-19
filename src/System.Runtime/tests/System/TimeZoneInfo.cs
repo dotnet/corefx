@@ -105,7 +105,6 @@ public static class TimeZoneInfoTests
     }
 
     [Fact]
-    [ActiveIssue(2821)]
     public static void ValidateRussiaTimeZoneTest()
     {
         TimeZoneInfo tz = TimeZoneInfo.FindSystemTimeZoneById(s_strRussian);
@@ -147,8 +146,8 @@ public static class TimeZoneInfoTests
         VerifyConvertException<Exception>(time1, new String('a', 256)); // long string
     }
 
+    [ActiveIssue(3211, PlatformID.OSX)]
     [Fact]
-    [ActiveIssue(2821)]
     public static void NearMinMaxDateTimeOffsetConvertTest()
     {
         VerifyConvert(DateTimeOffset.MaxValue, TimeZoneInfo.Utc.Id, DateTimeOffset.MaxValue);
@@ -331,8 +330,8 @@ public static class TimeZoneInfoTests
         VerifyConvert(time1, TimeZoneInfo.Utc.Id, time1.ToUniversalTime());
     }
 
+    [ActiveIssue(3211, PlatformID.OSX)]
     [Fact]
-    [ActiveIssue(2821)]
     public static void NearMinMaxDateTimeConvertTest()
     {
         DateTime time1 = new DateTime(2006, 5, 12);
@@ -422,7 +421,6 @@ public static class TimeZoneInfoTests
     }
 
     [Fact]
-    [ActiveIssue(2821)]
     public static void PerthRulesTest()
     {
         var time1utc = new DateTime(2005, 12, 31, 15, 59, 59, DateTimeKind.Utc);
@@ -1787,6 +1785,20 @@ public static class TimeZoneInfoTests
                         previous.DisplayName, current.DisplayName));
             }
         }
+    }
+
+    [Fact]
+    public static void TestDaylightTransitionsExactTime()
+    {
+        TimeZoneInfo zone = TimeZoneInfo.FindSystemTimeZoneById(s_strPacific);
+
+        DateTime after = new DateTime(2011, 11, 6, 9, 0, 0, 0, DateTimeKind.Utc);
+        DateTime mid = after.AddTicks(-1);
+        DateTime before = after.AddTicks(-2);
+
+        Assert.Equal(TimeSpan.FromHours(-7), zone.GetUtcOffset(before));
+        Assert.Equal(TimeSpan.FromHours(-7), zone.GetUtcOffset(mid));
+        Assert.Equal(TimeSpan.FromHours(-8), zone.GetUtcOffset(after));
     }
 
     //

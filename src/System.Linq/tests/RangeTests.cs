@@ -76,19 +76,19 @@ namespace System.Linq.Tests
         [Fact]
         public void Range_EnumerableAndEnumeratorAreSame()
         {
-            var rangeEnumberable = Enumerable.Range(1, 1);
-            using (var rangeEnumberator = rangeEnumberable.GetEnumerator())
+            var rangeEnumerable = Enumerable.Range(1, 1);
+            using (var rangeEnumerator = rangeEnumerable.GetEnumerator())
             {
-                Assert.Same(rangeEnumberable, rangeEnumberator);
+                Assert.Same(rangeEnumerable, rangeEnumerator);
             }
         }
 
         [Fact]
         public void Range_GetEnumeratorReturnUniqueInstances()
         {
-            var rangeEnumberable = Enumerable.Range(1, 1);
-            using (var enum1 = rangeEnumberable.GetEnumerator())
-            using (var enum2 = rangeEnumberable.GetEnumerator())
+            var rangeEnumerable = Enumerable.Range(1, 1);
+            using (var enum1 = rangeEnumerable.GetEnumerator())
+            using (var enum2 = rangeEnumerable.GetEnumerator())
             {
                 Assert.NotSame(enum1, enum2);
             }
@@ -106,14 +106,14 @@ namespace System.Linq.Tests
             int[] expected = { Int32.MaxValue - 3, Int32.MaxValue - 2, Int32.MaxValue - 1, Int32.MaxValue };
             Assert.Equal(expected, rangeEnumerable);
         }
-        
+
         [Fact]
         public void RepeatedCallsSameResults()
         {
             Assert.Equal(Enumerable.Range(-1, 2), Enumerable.Range(-1, 2));
             Assert.Equal(Enumerable.Range(0, 0), Enumerable.Range(0, 0));
         }
-        
+
         [Fact]
         public void NegativeStart()
         {

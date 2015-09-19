@@ -146,14 +146,14 @@ namespace System.Diagnostics
         private static string GetExePath()
         {
             // Determine the maximum size of a path
-            int maxPath = Interop.libc.MaxPath;
+            int maxPath = Interop.Sys.MaxPath;
 
             // Start small with a buffer allocation, and grow only up to the max path
             for (int pathLen = 256; pathLen < maxPath; pathLen *= 2)
             {
                 // Read from procfs the symbolic link to this process' executable
                 byte[] buffer = new byte[pathLen + 1]; // +1 for null termination
-                int resultLength = (int)Interop.libc.readlink(Interop.procfs.SelfExeFilePath, buffer, (IntPtr)pathLen);
+                int resultLength = Interop.Sys.ReadLink(Interop.procfs.SelfExeFilePath, buffer, pathLen);
 
                 // If we got one, null terminate it (readlink doesn't do this) and return the string
                 if (resultLength > 0)

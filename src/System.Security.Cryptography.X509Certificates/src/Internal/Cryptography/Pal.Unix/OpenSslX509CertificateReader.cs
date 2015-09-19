@@ -251,6 +251,16 @@ namespace Internal.Cryptography.Pal
             }
         }
 
+        public ECDsa GetECDsaPrivateKey()
+        {
+            if (_privateKey == null || _privateKey.IsInvalid)
+            {
+                return null;
+            }
+
+            throw new NotImplementedException();
+        }
+
         public string GetNameInfo(X509NameType nameType, bool forIssuer)
         {
             using (SafeBioHandle bioHandle = Interop.Crypto.GetX509NameInfo(_cert, (int)nameType, forIssuer))
@@ -324,7 +334,7 @@ namespace Internal.Cryptography.Pal
             return new X500DistinguishedName(buf);
         }
 
-        private static DateTime ExtractValidityDateTime(IntPtr validityDatePtr)
+        internal static DateTime ExtractValidityDateTime(IntPtr validityDatePtr)
         {
             byte[] bytes = Interop.Crypto.GetAsn1StringBytes(validityDatePtr);
 

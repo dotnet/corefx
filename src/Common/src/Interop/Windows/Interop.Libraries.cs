@@ -5,6 +5,7 @@ internal static partial class Interop
 {
     internal static class Libraries
     {
+        internal const string Advapi32 = "advapi32.dll";
         internal const string BCrypt = "BCrypt.dll";
         internal const string Console_L1 = "api-ms-win-core-console-l1-1-0.dll";
         internal const string Console_L2 = "api-ms-win-core-console-l2-1-0.dll";
@@ -40,6 +41,7 @@ internal static partial class Interop
         internal const string Psapi_Obsolete = "api-ms-win-core-psapi-obsolete-l1-1-0.dll";
         internal const string Registry_L1 = "api-ms-win-core-registry-l1-1-0.dll";
         internal const string Registry_L2 = "api-ms-win-core-registry-l2-1-0.dll";
+        internal const string Secur32 = "Secur32.dll";
         internal const string SecurityBase = "api-ms-win-security-base-l1-1-0.dll";
         internal const string SecurityCpwl = "api-ms-win-security-cpwl-l1-1-0.dll";
         internal const string SecurityLsa = "api-ms-win-security-lsalookup-l2-1-0.dll";

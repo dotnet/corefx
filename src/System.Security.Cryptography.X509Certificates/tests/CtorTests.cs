@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.Runtime.InteropServices;
 using Xunit;
 
 namespace System.Security.Cryptography.X509Certificates.Tests
@@ -15,24 +16,24 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 IntPtr h = c.Handle;
                 object ignored;
                 Assert.Equal(IntPtr.Zero, h);
-                Assert.Throws<CryptographicException>(() => c.GetCertHash());
-                Assert.Throws<CryptographicException>(() => c.GetKeyAlgorithm());
-                Assert.Throws<CryptographicException>(() => c.GetKeyAlgorithmParameters());
-                Assert.Throws<CryptographicException>(() => c.GetKeyAlgorithmParametersString());
-                Assert.Throws<CryptographicException>(() => c.GetPublicKey());
-                Assert.Throws<CryptographicException>(() => c.GetSerialNumber());
-                Assert.Throws<CryptographicException>(() => ignored = c.Issuer);
-                Assert.Throws<CryptographicException>(() => ignored = c.Subject);
-                Assert.Throws<CryptographicException>(() => ignored = c.RawData);
-                Assert.Throws<CryptographicException>(() => ignored = c.Thumbprint);
-                Assert.Throws<CryptographicException>(() => ignored = c.SignatureAlgorithm);
-                Assert.Throws<CryptographicException>(() => ignored = c.HasPrivateKey);
-                Assert.Throws<CryptographicException>(() => ignored = c.Version);
-                Assert.Throws<CryptographicException>(() => ignored = c.Archived);
-                Assert.Throws<CryptographicException>(() => c.Archived = false);
-                Assert.Throws<CryptographicException>(() => c.FriendlyName = "Hi");
-                Assert.Throws<CryptographicException>(() => ignored = c.SubjectName);
-                Assert.Throws<CryptographicException>(() => ignored = c.IssuerName);
+                Assert.ThrowsAny<CryptographicException>(() => c.GetCertHash());
+                Assert.ThrowsAny<CryptographicException>(() => c.GetKeyAlgorithm());
+                Assert.ThrowsAny<CryptographicException>(() => c.GetKeyAlgorithmParameters());
+                Assert.ThrowsAny<CryptographicException>(() => c.GetKeyAlgorithmParametersString());
+                Assert.ThrowsAny<CryptographicException>(() => c.GetPublicKey());
+                Assert.ThrowsAny<CryptographicException>(() => c.GetSerialNumber());
+                Assert.ThrowsAny<CryptographicException>(() => ignored = c.Issuer);
+                Assert.ThrowsAny<CryptographicException>(() => ignored = c.Subject);
+                Assert.ThrowsAny<CryptographicException>(() => ignored = c.RawData);
+                Assert.ThrowsAny<CryptographicException>(() => ignored = c.Thumbprint);
+                Assert.ThrowsAny<CryptographicException>(() => ignored = c.SignatureAlgorithm);
+                Assert.ThrowsAny<CryptographicException>(() => ignored = c.HasPrivateKey);
+                Assert.ThrowsAny<CryptographicException>(() => ignored = c.Version);
+                Assert.ThrowsAny<CryptographicException>(() => ignored = c.Archived);
+                Assert.ThrowsAny<CryptographicException>(() => c.Archived = false);
+                Assert.ThrowsAny<CryptographicException>(() => c.FriendlyName = "Hi");
+                Assert.ThrowsAny<CryptographicException>(() => ignored = c.SubjectName);
+                Assert.ThrowsAny<CryptographicException>(() => ignored = c.IssuerName);
             }
         }
 
@@ -89,7 +90,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 {
                     IntPtr h = c.Handle;
                     Assert.Equal(IntPtr.Zero, h);
-                    Assert.Throws<CryptographicException>(() => c.GetCertHash());
+                    Assert.ThrowsAny<CryptographicException>(() => c.GetCertHash());
                 }
             }
 
@@ -98,7 +99,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 {
                     IntPtr h = c.Handle;
                     Assert.Equal(IntPtr.Zero, h);
-                    Assert.Throws<CryptographicException>(() => c.GetCertHash());
+                    Assert.ThrowsAny<CryptographicException>(() => c.GetCertHash());
                 }
             }
         }
@@ -106,7 +107,20 @@ namespace System.Security.Cryptography.X509Certificates.Tests
         [Fact]
         public static void InvalidCertificateBlob()
         {
-            Assert.Throws<CryptographicException>(() => new X509Certificate2(new byte[] { 0x01, 0x02, 0x03 }));
+            CryptographicException ex = Assert.ThrowsAny<CryptographicException>(
+                () => new X509Certificate2(new byte[] { 0x01, 0x02, 0x03 }));
+
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                Assert.Equal(unchecked((int)0x80092009), ex.HResult);
+                // TODO (3233): Test that Message is also set correctly
+                //Assert.Equal("Cannot find the requested object.", ex.Message);
+            }
+            else // Any Unix
+            {
+                Assert.Equal(0x0D07803A, ex.HResult);
+                Assert.Equal("error:0D07803A:asn1 encoding routines:ASN1_ITEM_EX_D2I:nested asn1 error", ex.Message);
+            }
         }
     }
 }

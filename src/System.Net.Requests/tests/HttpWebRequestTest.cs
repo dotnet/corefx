@@ -387,8 +387,8 @@ namespace System.Net.Requests.Test
             WebResponse response = request.GetResponseAsync().Result;
         }
 
-        [Theory, MemberData("GetServers")]
-        public void GetResponseAsync_ServerNameNotInDns_ThrowsWebException(Uri remoteServer)
+        [Fact]
+        public void GetResponseAsync_ServerNameNotInDns_ThrowsWebException()
         {
             string serverUrl = string.Format("http://www.{0}.com/", Guid.NewGuid().ToString());
             HttpWebRequest request = WebRequest.CreateHttp(serverUrl);

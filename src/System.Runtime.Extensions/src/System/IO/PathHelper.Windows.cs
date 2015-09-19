@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.Diagnostics;
 using System.Diagnostics.Contracts;
 using System.Runtime.InteropServices;
 using System.Security;
@@ -185,7 +186,7 @@ namespace System.IO
                 if (result >= Path.MaxPath)
                     throw new PathTooLongException(SR.IO_PathTooLong);
 
-                Contract.Assert(result < Path.MaxPath, "did we accidently remove a PathTooLongException check?");
+                Debug.Assert(result < Path.MaxPath, "did we accidently remove a PathTooLongException check?");
                 if (result == 0 && m_arrayPtr[0] != '\0')
                 {
                     throw Win32Marshal.GetExceptionForLastWin32Error();
@@ -211,7 +212,7 @@ namespace System.IO
             else
             {
                 StringBuilder finalBuffer = new StringBuilder(m_capacity + 1);
-                int result = Interop.mincore.GetFullPathName(m_sb.ToString(), m_capacity + 1, finalBuffer, IntPtr.Zero);
+                int result = Interop.mincore.GetFullPathName(m_sb.ToString(), m_capacity + 1, finalBuffer);
 
                 // If success, the return buffer length does not account for the terminating null character.
                 // If in-sufficient buffer, the return buffer length does account for the path + the terminating null character.
@@ -219,14 +220,14 @@ namespace System.IO
                 if (result > m_maxPath)
                 {
                     finalBuffer.Length = result;
-                    result = Interop.mincore.GetFullPathName(m_sb.ToString(), result, finalBuffer, IntPtr.Zero);
+                    result = Interop.mincore.GetFullPathName(m_sb.ToString(), result, finalBuffer);
                 }
 
                 // Fullpath is genuinely long
                 if (result >= m_maxPath)
                     throw new PathTooLongException(SR.IO_PathTooLong);
 
-                Contract.Assert(result < m_maxPath, "did we accidentally remove a PathTooLongException check?");
+                Debug.Assert(result < m_maxPath, "did we accidentally remove a PathTooLongException check?");
                 if (result == 0 && m_sb[0] != '\0')
                 {
                     if (Length >= m_maxPath)

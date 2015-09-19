@@ -61,8 +61,8 @@
     <Compile Include="$(CommonPath)\Interop\Unix\Interop.Libraries.cs">
       <Link>Common\Interop\Unix\Interop.Libraries.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Unix\libc\Interop.read.cs">
-      <Link>Common\Interop\Unix\libc\Interop.read.cs</Link>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.Read.cs">
+      <Link>Common\Interop\Unix\libc\Interop.Read.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\Interop.Errors.cs">
       <Link>Common\Interop\Unix\Interop.Errors.cs</Link>
@@ -73,14 +73,8 @@
     <Compile Include="$(CommonPath)\System\IO\PathInternal.Unix.cs">
       <Link>Common\System\IO\PathInternal.Unix.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Unix\libc\Interop.pathconf.cs">
-      <Link>Common\Interop\Unix\Interop.pathconf.cs</Link>
-    </Compile>
-  </ItemGroup>
-  <!-- FreeBSD -->
-  <ItemGroup Condition="'$(TargetsFreeBSD)' == 'true'">
-    <Compile Include="$(CommonPath)\Interop\FreeBSD\libc\Interop.PathConfNames.cs">
-      <Link>Common\Interop\FreeBSD\Interop.PathConfNames.cs</Link>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.PathConf.cs">
+      <Link>Common\Interop\Unix\Interop.PathConf.cs</Link>
     </Compile>
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetsLinux)' == 'true'">
@@ -88,14 +82,11 @@
     <Compile Include="$(CommonPath)\Interop\Linux\libc\Interop.inotify.cs">
       <Link>Common\Interop\Linux\Interop.inotify.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Unix\libc\Interop.poll.cs">
-      <Link>Common\Interop\Unix\Interop.poll.cs</Link>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.Poll.cs">
+      <Link>Common\Interop\Unix\Interop.Poll.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.Stat.cs">
       <Link>Common\Interop\Unix\Interop.Stat.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\Interop\Linux\libc\Interop.PathConfNames.cs">
-      <Link>Common\Interop\Linux\Interop.PathConfNames.cs</Link>
     </Compile>
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetsOSX)' == 'true' ">
@@ -112,17 +103,14 @@
     <Compile Include="$(CommonPath)\Interop\OSX\Interop.RunLoop.cs">
       <Link>Common\Interop\OSX\Interop.RunLoop.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Unix\libc\Interop.sync.cs">
-      <Link>Common\Interop\Unix\Interop.sync.cs</Link>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.Sync.cs">
+      <Link>Common\Interop\Unix\Interop.Sync.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Microsoft\Win32\SafeHandles\SafeCreateHandle.OSX.cs">
       <Link>Common\Microsoft\Win32\SafeHandles\SafeCreateHandle.OSX.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Microsoft\Win32\SafeHandles\SafeEventStreamHandle.OSX.cs">
       <Link>Common\Microsoft\Win32\SafeHandles\SafeEventStreamHandle.OSX.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\Interop\OSX\libc\Interop.PathConfNames.cs">
-      <Link>Common\Interop\OSX\Interop.PathConfNames.cs</Link>
     </Compile>
   </ItemGroup>
   <ItemGroup>

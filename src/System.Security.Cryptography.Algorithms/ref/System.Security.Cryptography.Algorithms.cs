@@ -20,6 +20,20 @@ namespace System.Security.Cryptography
         public abstract byte[] GetBytes(int cb);
         public abstract void Reset();
     }
+    public abstract partial class ECDsa : System.Security.Cryptography.AsymmetricAlgorithm
+    {
+        protected ECDsa() {}
+        protected abstract byte[] HashData(byte[] data, int offset, int count, System.Security.Cryptography.HashAlgorithmName hashAlgorithm);
+        protected abstract byte[] HashData(System.IO.Stream data, System.Security.Cryptography.HashAlgorithmName hashAlgorithm);
+        public virtual byte[] SignData(byte[] data, int offset, int count, System.Security.Cryptography.HashAlgorithmName hashAlgorithm) { return default(byte[]); }
+        public virtual byte[] SignData(byte[] data, System.Security.Cryptography.HashAlgorithmName hashAlgorithm) { return default(byte[]); }
+        public virtual byte[] SignData(System.IO.Stream data, System.Security.Cryptography.HashAlgorithmName hashAlgorithm) { return default(byte[]); }
+        public abstract byte[] SignHash(byte[] hash);
+        public bool VerifyData(byte[] data, byte[] signature, System.Security.Cryptography.HashAlgorithmName hashAlgorithm) { return default(bool); }
+        public virtual bool VerifyData(byte[] data, int offset, int count, byte[] signature, System.Security.Cryptography.HashAlgorithmName hashAlgorithm) { return default(bool); }
+        public bool VerifyData(System.IO.Stream data, byte[] signature, System.Security.Cryptography.HashAlgorithmName hashAlgorithm) { return default(bool); }
+        public abstract bool VerifyHash(byte[] hash, byte[] signature);
+    }
     public partial class HMACSHA1 : System.Security.Cryptography.HMAC
     {
         public HMACSHA1() { }
@@ -39,6 +53,17 @@ namespace System.Security.Cryptography
     {
         public HMACSHA512() { }
         public HMACSHA512(byte[] key) { }
+    }
+    public sealed partial class IncrementalHash : IDisposable
+    {
+        private IncrementalHash() { }
+        public HashAlgorithmName AlgorithmName { get { return default(HashAlgorithmName); } }
+        public void AppendData(byte[] data) { }
+        public void AppendData(byte[] data, int offset, int count) { }
+        public byte[] GetHashAndReset() { return default(byte[]); }
+        public void Dispose() { }
+        public static IncrementalHash CreateHash(HashAlgorithmName hashAlgorithm) { return default(IncrementalHash); }
+        public static IncrementalHash CreateHMAC(HashAlgorithmName hashAlgorithm, byte[] key) { return default(IncrementalHash); }
     }
     public abstract partial class MD5 : System.Security.Cryptography.HashAlgorithm
     {

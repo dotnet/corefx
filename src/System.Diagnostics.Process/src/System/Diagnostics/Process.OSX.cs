@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.ComponentModel;
+
 namespace System.Diagnostics
 {
     public partial class Process
@@ -83,15 +85,25 @@ namespace System.Diagnostics
         private void GetWorkingSetLimits(out IntPtr minWorkingSet, out IntPtr maxWorkingSet)
         {
             // We can only do this for the current process on OS X
-            if (_processId != Interop.libc.getpid())
+            if (_processId != Interop.Sys.GetPid())
                 throw new PlatformNotSupportedException(SR.OsxExternalProcessWorkingSetNotSupported);
 
             // Minimum working set (or resident set, as it is called on *nix) doesn't exist so set to 0
             minWorkingSet = IntPtr.Zero;
 
             // Get the max working set size
-            Interop.libc.rlimit info = Interop.libc.getrlimit(Interop.libc.RLIMIT_Resources.RLIMIT_RSS);
-            maxWorkingSet = new IntPtr(Convert.ToInt64(info.rlim_cur));
+            Interop.Sys.RLimit limit;
+            if (Interop.Sys.GetRLimit(Interop.Sys.RlimitResources.RLIMIT_RSS, out limit) == 0)
+            {
+                maxWorkingSet = limit.CurrentLimit == Interop.Sys.RLIM_INFINITY ?
+                    new IntPtr(Int64.MaxValue) :
+                    new IntPtr(Convert.ToInt64(limit.CurrentLimit));
+            }
+            else
+            {
+                // The contract specifies that this throws Win32Exception when it failes to retrieve the info
+                throw new Win32Exception();
+            }
         }
 
         /// <summary>Sets one or both of the minimum and maximum working set limits.</summary>
@@ -102,7 +114,7 @@ namespace System.Diagnostics
         private void SetWorkingSetLimitsCore(IntPtr? newMin, IntPtr? newMax, out IntPtr resultingMin, out IntPtr resultingMax)
         {
             // We can only do this for the current process on OS X
-            if (_processId != Interop.libc.getpid())
+            if (_processId != Interop.Sys.GetPid())
                 throw new PlatformNotSupportedException(SR.OsxExternalProcessWorkingSetNotSupported);
 
             // There isn't a way to set the minimum working set, so throw an exception here
@@ -119,16 +131,16 @@ namespace System.Diagnostics
             // if you aren't root and move the upper limit down, you need root to move it back up
             if (newMax.HasValue)
             {
-                Interop.libc.rlimit limits = new Interop.libc.rlimit() { rlim_cur = (ulong)newMax.Value.ToInt64() };
-                int result = Interop.libc.setrlimit(Interop.libc.RLIMIT_Resources.RLIMIT_RSS, ref limits);
-                if (result < 0)
+                Interop.Sys.RLimit limits = new Interop.Sys.RLimit() { CurrentLimit = (ulong)newMax.Value.ToInt64() };
+                int result = Interop.Sys.SetRLimit(Interop.Sys.RlimitResources.RLIMIT_RSS, ref limits);
+                if (result != 0)
                 {
                     throw new System.ComponentModel.Win32Exception(SR.RUsageFailure);
                 }
 
-                // Grab the actual value, in case the OS decides to fudge the numbers
-                limits = Interop.libc.getrlimit(Interop.libc.RLIMIT_Resources.RLIMIT_RSS);
-                resultingMax = new IntPtr((long)limits.rlim_cur);
+                // Try to grab the actual value, in case the OS decides to fudge the numbers
+                result = Interop.Sys.GetRLimit(Interop.Sys.RlimitResources.RLIMIT_RSS, out limits);
+                if (result == 0) resultingMax = new IntPtr((long)limits.CurrentLimit);
             }
         }
 
@@ -139,7 +151,7 @@ namespace System.Diagnostics
         /// <summary>Gets the path to the current executable, or null if it could not be retrieved.</summary>
         private static string GetExePath()
         {
-            return Interop.libproc.proc_pidpath(Interop.libc.getpid());
+            return Interop.libproc.proc_pidpath(Interop.Sys.GetPid());
         }
 
         // ----------------------------------
@@ -148,7 +160,7 @@ namespace System.Diagnostics
 
         private Interop.libproc.rusage_info_v3 GetCurrentProcessRUsage()
         {
-            return Interop.libproc.proc_pid_rusage(Interop.libc.getpid());
+            return Interop.libproc.proc_pid_rusage(Interop.Sys.GetPid());
         }
 
     }

@@ -11,7 +11,7 @@ internal static partial class Interop
     {
         private static readonly int s_direntSize = GetDirentSize();
 
-        internal enum NodeType : short
+        internal enum NodeType : int
         {
             DT_UNKNOWN  =  0,
             DT_FIFO     =  1,
@@ -27,9 +27,9 @@ internal static partial class Interop
         [StructLayout(LayoutKind.Sequential)]
         private unsafe struct InternalDirectoryEntry
         {
-            internal NodeType   InodeType;
             internal IntPtr     Name;
             internal int        NameLength;
+            internal NodeType   InodeType;
         }
 
         internal struct DirectoryEntry
@@ -44,7 +44,7 @@ internal static partial class Interop
         [DllImport(Libraries.SystemNative, SetLastError = false)]
         internal static extern int GetDirentSize();
 
-        [DllImport(Libraries.SystemNative, SetLastError = true)]
+        [DllImport(Libraries.SystemNative, SetLastError = false)]
         private static unsafe extern int ReadDirR(SafeDirectoryHandle dir, byte* buffer, int bufferSize, out InternalDirectoryEntry outputEntry);
 
         [DllImport(Libraries.SystemNative, SetLastError = true)]
