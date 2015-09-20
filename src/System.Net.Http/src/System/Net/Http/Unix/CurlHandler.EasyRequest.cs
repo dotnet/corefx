@@ -81,6 +81,7 @@ namespace System.Net.Http
                 SetCredentialsOptions(_handler.GetNetworkCredentials(_handler._serverCredentials,_requestMessage.RequestUri));
                 SetCookieOption(_requestMessage.RequestUri);
                 SetRequestHeaders();
+                SetClientCertificateOptions(_requestMessage.RequestUri);
             }
 
             public void EnsureResponseMessagePublished()
@@ -319,6 +320,24 @@ namespace System.Net.Http
                     SetCurlOption(CURLoption.CURLOPT_COOKIE, cookieValues);
                     VerboseTrace("Set cookies");
                 }
+            }
+
+            private void SetClientCertificateOptions(Uri requestUri)
+            {
+                IDisposable clientCertProvider = ClientCertProvider.Create(_handler.ClientCertificateOptions, requestUri.Scheme, this);
+                if (clientCertProvider == null)
+                {
+                    return;
+                }
+
+                // dispose Provider when done
+                this.Task.ContinueWith((_, state) => ((IDisposable)state).Dispose(),
+                                       clientCertProvider,
+                                       CancellationToken.None,
+                                       TaskContinuationOptions.ExecuteSynchronously,
+                                       TaskScheduler.Default);
+
+                VerboseTrace("Set clientCert");
             }
 
             private void SetRequestHeaders()

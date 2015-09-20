@@ -3,7 +3,8 @@
 
 using System;
 using System.Runtime.InteropServices;
-
+using Microsoft.Win32.SafeHandles;
+using System.Security.Cryptography;
 using size_t = System.UInt64;
 using curl_socket_t = System.Int32;
 using curl_off_t = System.Int64;
@@ -28,6 +29,7 @@ internal static partial class Interop
             internal const int CURLOPT_FOLLOWLOCATION = CurlOptionLongBase + 52;
             internal const int CURLOPT_PROXYPORT = CurlOptionLongBase + 59;
             internal const int CURLOPT_POSTFIELDSIZE = CurlOptionLongBase + 60;
+            internal const int CURLOPT_VERIFYPEER = CurlOptionLongBase + 64;
             internal const int CURLOPT_MAXREDIRS = CurlOptionLongBase + 68;
             internal const int CURLOPT_NOSIGNAL = CurlOptionLongBase + 99;
             internal const int CURLOPT_PROXYTYPE = CurlOptionLongBase + 101;
@@ -42,9 +44,13 @@ internal static partial class Interop
             internal const int CURLOPT_READDATA = CurlOptionObjectPointBase + 9;
             internal const int CURLOPT_COOKIE = CurlOptionObjectPointBase + 22;
             internal const int CURLOPT_HTTPHEADER = CurlOptionObjectPointBase + 23;
+            internal const int CURLOPT_SSLCERT = CurlOptionObjectPointBase + 25;
+            internal const int CURLOPT_KEYPASSWD = CurlOptionObjectPointBase + 26;
             internal const int CURLOPT_HEADERDATA = CurlOptionObjectPointBase + 29;
+            internal const int CURLOPT_SSLCERTTYPE = CurlOptionObjectPointBase + 86;
             internal const int CURLOPT_ACCEPTENCODING = CurlOptionObjectPointBase + 102;
             internal const int CURLOPT_PRIVATE = CurlOptionObjectPointBase + 103;
+            internal const int CURLOPT_SSL_CTX_DATA = CurlOptionObjectPointBase + 109;
             internal const int CURLOPT_COPYPOSTFIELDS = CurlOptionObjectPointBase + 165;
             internal const int CURLOPT_SEEKDATA = CurlOptionObjectPointBase + 168;
             internal const int CURLOPT_USERNAME = CurlOptionObjectPointBase + 173;
@@ -53,6 +59,7 @@ internal static partial class Interop
             internal const int CURLOPT_WRITEFUNCTION = CurlOptionFunctionPointBase + 11;
             internal const int CURLOPT_READFUNCTION = CurlOptionFunctionPointBase + 12;
             internal const int CURLOPT_HEADERFUNCTION = CurlOptionFunctionPointBase + 79;
+            internal const int CURLOPT_SSL_CTX_FUNCTION = CurlOptionFunctionPointBase + 108;
             internal const int CURLOPT_SEEKFUNCTION = CurlOptionFunctionPointBase + 167;
         }
 
@@ -62,9 +69,11 @@ internal static partial class Interop
             // Curl info are of the format <type base> + <n>
             private const int CurlInfoStringBase = 0x100000;
             private const int CurlInfoLongBase = 0x200000;
+            private const int CurlInfoSListBase = 0x40000;
 
             internal const int CURLINFO_PRIVATE = CurlInfoStringBase + 21;
             internal const int CURLINFO_HTTPAUTH_AVAIL = CurlInfoLongBase + 23;
+            internal const int CURLINFO_TLS_SESSION = CurlInfoSListBase + 45;
         }
 
         // Class for constants defined for the enum curl_proxytype in curl.h
@@ -166,7 +175,16 @@ internal static partial class Interop
             private int versionNum;
             private unsafe char *host;
             internal int features;
+            internal IntPtr ssl_version;
         }
+
+        [StructLayout(LayoutKind.Sequential)]
+        internal struct curl_tlssessioninfo
+        {
+            internal int backend;
+            internal IntPtr internals;
+        };
+
 
         // Poll values used with curl_multi_wait and curl_waitfd.events/revents
         internal const int CURL_WAIT_POLLIN = 0x0001;
@@ -192,6 +210,11 @@ internal static partial class Interop
             IntPtr userp, 
             curl_off_t offset, 
             int origin);
+
+        public delegate int ssl_ctx_callback(
+            IntPtr easyHandle,
+            IntPtr ssl_ctx,
+            IntPtr userp);
 
         public const int CURL_READFUNC_ABORT = 0x10000000;
         public const int CURL_READFUNC_PAUSE = 0x10000001;
