@@ -264,6 +264,19 @@ namespace System.Net.Http
             }
         }
 
+        /// <summary>
+        ///   <b> UseDefaultCredentials is a no op on Unix </b>
+        /// </summary>
+        internal bool UseDefaultCredentials
+        {
+            get
+            {
+                return false;
+            }
+            set
+            {
+            }
+        }
         #endregion
 
         protected override void Dispose(bool disposing)
