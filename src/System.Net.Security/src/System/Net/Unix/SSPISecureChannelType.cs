@@ -16,8 +16,8 @@ namespace System.Net
     {
         public Exception GetException(SecurityStatus status)
         {
-            // TODO: To be implemented
-            throw new Exception("status = " + status);
+            // TODO (Issue #3362) To be implemented
+            return new Exception("status = " + status);
         }
 
         public void VerifyPackageInfo()
@@ -27,7 +27,15 @@ namespace System.Net
         public SafeFreeCredentials AcquireCredentialsHandle(X509Certificate certificate,
             SslProtocols protocols, EncryptionPolicy policy, bool isServer)
         {
-            return new SafeFreeCredentials(certificate, protocols, policy);
+            SafeFreeCredentials retVal = new SafeFreeCredentials(certificate, protocols, policy);
+            if ((null != retVal) && !retVal.IsInvalid)
+            {
+                // Caller does a ref count decrement
+                bool ignore = false;
+                retVal.DangerousAddRef(ref ignore);
+                // TODO (Issue #3362) retVal is not getting released now, need to be fixed.
+            }
+            return retVal;
         }
 
         public SecurityStatus AcceptSecurityContext(ref SafeFreeCredentials credential, ref SafeDeleteContext context,
@@ -52,8 +60,12 @@ namespace System.Net
         public SecurityStatus EncryptMessage(SafeDeleteContext securityContext, byte[] buffer, int size, int headerSize, int trailerSize, out int resultSize)
         {
             // Unencrypted data starts at an offset of headerSize
+<<<<<<< HEAD
             return EncryptDecryptHelper(securityContext, buffer, headerSize, size, headerSize, trailerSize, true,
                 out resultSize);
+=======
+            return EncryptDecryptHelper(securityContext, buffer, headerSize, size, headerSize, trailerSize, true, out resultSize);
+>>>>>>> Incorporated some comments.
         }
 
         public SecurityStatus DecryptMessage(SafeDeleteContext securityContext, byte[] buffer, ref int offset, ref int count)
@@ -219,18 +231,24 @@ namespace System.Net
                 {
                     outputBuffer.token = new byte[outputBuffer.size];
                     Marshal.Copy(outputPtr, outputBuffer.token, 0, outputBuffer.size);
-                    Marshal.FreeHGlobal(outputPtr);
                 }
                 else
                 {
                     outputBuffer.token = null;
-                }      
+                }
+
+                if (outputPtr != IntPtr.Zero)
+                {
+                     Marshal.FreeHGlobal(outputPtr);
+                     outputPtr = IntPtr.Zero;
+                }
 
                 return done ? SecurityStatus.OK : SecurityStatus.ContinueNeeded;
             }
-            catch
+            catch(Exception Ex)
             {
-                return SecurityStatus.InternalError;
+                Debug.Fail("Exception Caught. StackTrace - " +Ex.StackTrace);
+                return SecurityStatus.InternalError;             
             }
             finally
             {
@@ -270,8 +288,9 @@ namespace System.Net
                 }
                 return ((size == 0) || (resultSize > 0)) ? SecurityStatus.OK : SecurityStatus.ContextExpired;
             }
-            catch
+            catch(Exception Ex)
             {
+                Debug.Fail("Exception Caught. StackTrace - " + Ex.StackTrace);
                 return SecurityStatus.InternalError;
             }
             finally

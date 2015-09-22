@@ -9,10 +9,7 @@ using Microsoft.Win32.SafeHandles;
 internal static partial class Interop
 {
     internal static partial class libssl
-    {
-
-        [DllImport(Interop.Libraries.LibSsl, EntryPoint = "ERR_load_BIO_strings")]
-        internal static extern void ERR_load_BIO_strings();
+    {    
 
         [DllImport(Interop.Libraries.LibSsl, EntryPoint = "SSLv3_server_method")]
         internal static extern IntPtr SSLv3_server_method();
@@ -25,12 +22,6 @@ internal static partial class Interop
 
         [DllImport(Interop.Libraries.LibSsl, EntryPoint = "SSLv23_client_method")]
         internal static extern IntPtr SSLv23_client_method();
-
-        [DllImport(Interop.Libraries.LibSsl, EntryPoint = "TLS_server_method")]
-        internal static extern IntPtr TLS_server_method();
-
-        [DllImport(Interop.Libraries.LibSsl, EntryPoint = "TLS_client_method")]
-        internal static extern IntPtr TLS_client_method();
 
         [DllImport(Interop.Libraries.LibSsl, EntryPoint = "TLSv1_server_method")]
         internal static extern IntPtr TLSv1_server_method();
@@ -112,15 +103,6 @@ internal static partial class Interop
 
         [DllImport(Interop.Libraries.LibSsl, EntryPoint = "SSL_get_current_cipher")]
         internal static extern IntPtr SSL_get_current_cipher(IntPtr ssl);
-
-        [DllImport(Interop.Libraries.LibSsl, EntryPoint = "X509_free")]
-        internal static extern void X509_free(IntPtr certPtr);
-
-        [DllImport(Interop.Libraries.LibSsl, EntryPoint = "i2d_X509")]
-        internal static extern unsafe int i2d_X509(IntPtr certPtr, ref byte* bufPtr);
-
-        [DllImport(Interop.Libraries.LibSsl, EntryPoint = "d2i_X509")]
-        internal static extern unsafe IntPtr d2i_X509(IntPtr certPtr, ref byte* bufPtr, int len);
 
         [DllImport(Interop.Libraries.LibSsl, EntryPoint = "SSL_CTX_use_certificate")]
         internal static extern int SSL_CTX_use_certificate(IntPtr ssl, SafeX509Handle certPtr);
