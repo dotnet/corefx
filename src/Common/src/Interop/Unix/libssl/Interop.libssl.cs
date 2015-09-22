@@ -123,8 +123,8 @@ internal static partial class Interop
         [DllImport(Interop.Libraries.LibSsl, EntryPoint = "SSL_CTX_use_certificate")]
         internal static extern int SSL_CTX_use_certificate(IntPtr ssl, IntPtr certPtr);
 
-        [DllImport(Interop.Libraries.LibSsl, EntryPoint = "SSL_CTX_use_PrivateKey")]
-        internal static extern int SSL_CTX_use_PrivateKey(IntPtr ssl, IntPtr certPtr);
+        [DllImport(Interop.Libraries.LibSsl, EntryPoint = "SSL_CTX_use_PrivateKey_file", CharSet=CharSet.Ansi)]
+        internal static extern int SSL_CTX_use_PrivateKey_file(IntPtr ssl, string file, int type);
 
         [DllImport(Interop.Libraries.LibSsl, EntryPoint = "SSL_CTX_check_private_key")]
         internal static extern int SSL_CTX_check_private_key(IntPtr ssl);

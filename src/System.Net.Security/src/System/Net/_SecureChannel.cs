@@ -246,7 +246,8 @@ namespace System.Net.Security
 
                 if (certEx != null)
                 {
-                    if (certEx.HasPrivateKey)
+                    // TODO: Fix after HasPrivateKey is fixed
+                    if (!String.IsNullOrEmpty(certEx.Subject)) //certEx.HasPrivateKey)
                     {
                         if (Logging.On)
                         {

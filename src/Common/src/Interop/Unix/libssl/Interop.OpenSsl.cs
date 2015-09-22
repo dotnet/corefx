@@ -5,6 +5,7 @@ using System;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using Microsoft.Win32.SafeHandles;
+using System.Security.Cryptography.X509Certificates;
 
 internal static partial class Interop
 {
@@ -48,6 +49,11 @@ internal static partial class Interop
                 }
 
                 libssl.SSL_CTX_ctrl(contextPtr, libssl.SSL_CTRL_OPTIONS, options, IntPtr.Zero);
+
+                if ((null != certHandle) && !certHandle.IsInvalid)
+                {
+                    SetSslCertificate(contextPtr, certHandle);
+                }
 
                 sslContext.sslPtr = libssl.SSL_new(contextPtr);
 
@@ -361,26 +367,30 @@ internal static partial class Interop
             return retVal;
         }
 
-        private static void SetSslCertificate(IntPtr contextPtr, IntPtr certPtr, IntPtr keyPtr)
+        private static void SetSslCertificate(IntPtr contextPtr, SafeX509Handle certHandle)
         {
+            IntPtr certPtr = certHandle.DangerousGetHandle();
             int retVal = libssl.SSL_CTX_use_certificate(contextPtr, certPtr);
             if (1 != retVal)
             {
                 throw CreateSslException("Failed to use SSL certificate");
             }
 
-            retVal = libssl.SSL_CTX_use_PrivateKey(contextPtr, keyPtr);
+            // TODO: Fix this implementation
+            retVal = libssl.SSL_CTX_use_PrivateKey_file(contextPtr, "DummyTcpServer.pfx", 1);
             if (1 != retVal)
             {
                 throw CreateSslException("Failed to use SSL certificate private key");
             }
+
+#if DEBUG
             //check private key
             retVal = libssl.SSL_CTX_check_private_key(contextPtr);
             if (1 != retVal)
             {
                 throw CreateSslException("Certificate pivate key check failed");
             }
-
+#endif
         }
 
         private static SslException CreateSslException(string message)
