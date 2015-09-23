@@ -19,6 +19,9 @@ Runtime-specific library code - namely [mscorlib][mscorlib] - lives in the CoreC
 
 ## How to Engage, Contribute and Provide Feedback
 
+[![Pull Request Stats](http://issuestats.com/github/dotnet/corefx/badge/pr?style=flat)](http://issuestats.com/github/dotnet/corefx)
+[![Issue Stats](http://issuestats.com/github/dotnet/corefx/badge/issue?style=flat)](http://issuestats.com/github/dotnet/corefx)
+
 Some of the best ways to contribute are to try things out, file bugs, and join in design conversations.
 
 Want to get more familiar with what's going on in the code?
