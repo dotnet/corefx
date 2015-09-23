@@ -60,12 +60,7 @@ namespace System.Net
         public SecurityStatus EncryptMessage(SafeDeleteContext securityContext, byte[] buffer, int size, int headerSize, int trailerSize, out int resultSize)
         {
             // Unencrypted data starts at an offset of headerSize
-<<<<<<< HEAD
-            return EncryptDecryptHelper(securityContext, buffer, headerSize, size, headerSize, trailerSize, true,
-                out resultSize);
-=======
             return EncryptDecryptHelper(securityContext, buffer, headerSize, size, headerSize, trailerSize, true, out resultSize);
->>>>>>> Incorporated some comments.
         }
 
         public SecurityStatus DecryptMessage(SafeDeleteContext securityContext, byte[] buffer, ref int offset, ref int count)
@@ -82,6 +77,7 @@ namespace System.Net
         public int QueryContextChannelBinding(SafeDeleteContext phContext, ChannelBindingKind attribute,
             out SafeFreeContextBufferChannelBinding refHandle)
         {
+            // TODO (Issue #3362) To be implemented
             throw NotImplemented.ByDesignWithMessage(SR.net_MethodNotImplementedException);
         }
 
@@ -149,6 +145,7 @@ namespace System.Net
 
         public int QueryContextIssuerList(SafeDeleteContext securityContext, out Object issuerList)
         {
+            // TODO (Issue #3362) To be implemented
             throw NotImplemented.ByDesignWithMessage(SR.net_MethodNotImplementedException);
         }
 
@@ -188,7 +185,6 @@ namespace System.Net
             Debug.Assert(!credential.IsInvalid);
             bool gotCredReference = false;
             bool gotContextReference = false;
-            GCHandle inputHandle = new GCHandle();
 
             try
             {
@@ -220,10 +216,15 @@ namespace System.Net
                 }
                 else
                 {
-                    inputHandle = GCHandle.Alloc(inputBuffer.token, GCHandleType.Pinned);
-                    inputPtr = Marshal.UnsafeAddrOfPinnedArrayElement(inputBuffer.token, inputBuffer.offset);
-                    done = Interop.OpenSsl.DoSslHandshake(context.DangerousGetHandle(), inputPtr, inputBuffer.size, out outputPtr, out outputSize);
-                }           
+                    unsafe
+                    {
+                        fixed (byte* tokenPtr = inputBuffer.token)
+                        {
+                            inputPtr = new IntPtr(tokenPtr + inputBuffer.offset);
+                            done = Interop.OpenSsl.DoSslHandshake(context.DangerousGetHandle(), inputPtr, inputBuffer.size, out outputPtr, out outputSize);
+                        }
+                    }
+                }
 
                 outputBuffer.size = outputSize;
                 outputBuffer.offset = 0;
@@ -252,10 +253,6 @@ namespace System.Net
             }
             finally
             {
-                if (inputHandle.IsAllocated)
-                {
-                    inputHandle.Free();
-                }
                 if (gotContextReference)
                 {
                     context.DangerousRelease();
@@ -271,21 +268,28 @@ namespace System.Net
         private SecurityStatus EncryptDecryptHelper(SafeDeleteContext securityContext, byte[] buffer, int offset, int size, int headerSize, int trailerSize, bool encrypt, out int resultSize)
         {
             bool gotReference = false;
-            GCHandle inputHandle = new GCHandle();
             resultSize = 0;
             try
             {
                 securityContext.DangerousAddRef(ref gotReference);
-                inputHandle = GCHandle.Alloc(buffer, GCHandleType.Pinned);
-                IntPtr inputPtr = Marshal.UnsafeAddrOfPinnedArrayElement(buffer, 0);
-                if (encrypt)
+
+                unsafe
                 {
-                    resultSize = Interop.OpenSsl.Encrypt(securityContext.DangerousGetHandle(), inputPtr, offset, size, buffer.Length);
+                    fixed (byte* bufferPtr = buffer)
+                    {
+                        IntPtr inputPtr = new IntPtr(bufferPtr);
+
+                        if (encrypt)
+                        {
+                            resultSize = Interop.OpenSsl.Encrypt(securityContext.DangerousGetHandle(), inputPtr, offset, size, buffer.Length);
+                        }
+                        else
+                        {
+                            resultSize = Interop.OpenSsl.Decrypt(securityContext.DangerousGetHandle(), inputPtr, size);
+                        }
+                    }
                 }
-                else
-                {
-                    resultSize = Interop.OpenSsl.Decrypt(securityContext.DangerousGetHandle(), inputPtr, size);
-                }
+
                 return ((size == 0) || (resultSize > 0)) ? SecurityStatus.OK : SecurityStatus.ContextExpired;
             }
             catch(Exception Ex)
@@ -295,10 +299,6 @@ namespace System.Net
             }
             finally
             {
-                if (inputHandle.IsAllocated)
-                {
-                    inputHandle.Free();
-                }
                 if (gotReference)
                 {
                     securityContext.DangerousRelease();
