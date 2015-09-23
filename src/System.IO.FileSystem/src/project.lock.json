@@ -252,7 +252,7 @@
           "lib/DNXCore50/System.Threading.Tasks.dll": {}
         }
       },
-      "System.Threading.ThreadPool/4.0.10-beta-23311": {
+      "System.Threading.ThreadPool/4.0.10-beta-23321": {
         "type": "package",
         "dependencies": {
           "System.Runtime": "4.0.0",
@@ -528,7 +528,7 @@
           "lib/netcore50/System.Threading.Tasks.dll": {}
         }
       },
-      "System.Threading.ThreadPool/4.0.10-beta-23311": {
+      "System.Threading.ThreadPool/4.0.10-beta-23321": {
         "type": "package",
         "dependencies": {
           "System.Runtime": "4.0.0",
@@ -1186,10 +1186,10 @@
         "System.Threading.Tasks.nuspec"
       ]
     },
-    "System.Threading.ThreadPool/4.0.10-beta-23311": {
+    "System.Threading.ThreadPool/4.0.10-beta-23321": {
       "type": "package",
       "serviceable": true,
-      "sha512": "KF1vm7tZIPslDE262oI6FXlKlXOoz5K4HMR1V6DlZIstkL6CyLISv8c6vhdj3R0k2vmmVKcp2GyF4sOWbD0Y2A==",
+      "sha512": "C9n2qyHG1ywYg1YGZLfeF4Xn6p0eqjDchxvZNF4Ac3nH4GKmLizFTRLdQ5NbNrPJ0Ry1JDg2LEhcVEaztWk61Q==",
       "files": [
         "lib/DNXCore50/System.Threading.ThreadPool.dll",
         "lib/MonoAndroid10/_._",
@@ -1203,8 +1203,8 @@
         "ref/net46/System.Threading.ThreadPool.dll",
         "ref/xamarinios10/_._",
         "ref/xamarinmac20/_._",
-        "System.Threading.ThreadPool.4.0.10-beta-23311.nupkg",
-        "System.Threading.ThreadPool.4.0.10-beta-23311.nupkg.sha512",
+        "System.Threading.ThreadPool.4.0.10-beta-23321.nupkg",
+        "System.Threading.ThreadPool.4.0.10-beta-23321.nupkg.sha512",
         "System.Threading.ThreadPool.nuspec"
       ]
     }
