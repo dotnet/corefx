@@ -292,9 +292,9 @@ namespace System.Net
 
                 return ((size == 0) || (resultSize > 0)) ? SecurityStatus.OK : SecurityStatus.ContextExpired;
             }
-            catch(Exception Ex)
+            catch(Exception ex)
             {
-                Debug.Fail("Exception Caught. StackTrace - " + Ex.StackTrace);
+                Debug.Fail("Exception Caught. - " + ex);
                 return SecurityStatus.InternalError;
             }
             finally
