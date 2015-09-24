@@ -7,10 +7,7 @@ using System.Security.Cryptography;
 using System.Net.Security;
 using System.Security.Principal;
 using System.Runtime.InteropServices;
-using System.Security;
-using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
-using System.Security.Principal;
 
 namespace System.Net
 {   
@@ -191,10 +188,7 @@ namespace System.Net
         internal override X509Store EnsureStoreOpened(bool isMachineStore)
         {
             X509Store store = isMachineStore ? s_myMachineCertStoreEx : s_myCertStoreEx;
-<<<<<<< HEAD
-=======
 
->>>>>>> Incorporated some comments.
             if (store == null)
             {
                 lock (s_syncObject)
