@@ -1074,7 +1074,9 @@ Return values:
 non-zero on failure
 */
 int
-EnsureOpenSslInitialized()
+EnsureOpenSslInitialized(
+    const char* randomSeed,
+    int randomSeedLength)
 {
     int ret = 0;
     int numLocks = 0;
@@ -1129,6 +1131,8 @@ EnsureOpenSslInitialized()
         ret = 4;
         goto done;
     }
+
+    RAND_add(randomSeed, randomSeedLength, 0);
 
 done:
     if (ret != 0)
