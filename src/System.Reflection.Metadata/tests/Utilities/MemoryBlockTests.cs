@@ -4,7 +4,6 @@
 using System.Linq;
 using System.Reflection.Internal;
 using System.Text;
-using TestUtilities;
 using Xunit;
 
 namespace System.Reflection.Metadata.Tests
@@ -376,7 +375,7 @@ namespace System.Reflection.Metadata.Tests
 
                 var actual = block.BuildPtrTable(rowCount, rowSize, secondColumnOffset, isReferenceSmall: true);
                 var expected = new int[] { 4, 2, 1, 5, 3 };
-                AssertEx.Equal(expected, actual);
+                Assert.Equal(expected, actual);
             }
         }
 
@@ -405,7 +404,7 @@ namespace System.Reflection.Metadata.Tests
 
                 var actual = block.BuildPtrTable(rowCount, rowSize, secondColumnOffset, isReferenceSmall: false);
                 var expected = new int[] { 4, 2, 1, 5, 3 };
-                AssertEx.Equal(expected, actual);
+                Assert.Equal(expected, actual);
             }
         }
 

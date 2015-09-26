@@ -2,10 +2,8 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Xunit;
-using System;
-using System.Collections.Generic;
 
-namespace System.Globalization.Extensions.Tests
+namespace System.Globalization.Tests
 {
     /// <summary>
     /// This suite of tests enumerate a set of input and outputs provided by the Unicode consortium.
@@ -15,23 +13,7 @@ namespace System.Globalization.Extensions.Tests
     public class IdnaConformanceTests
     {
         /// <summary>
-        /// Tests whether the expected object is equal to the actual object as determined by
-        /// the supplied comparer and throws an exception if it is not.
-        /// </summary>
-        /// <param name="expected">Expected object.</param>
-        /// <param name="actual">Actual object.</param>
-        /// <param name="comparer">Comparer to be used to determine equality of objects.</param>
-        /// <param name="message">Message to display upon failure.</param>
-        public static void CompareResult<T>(T expected, T actual, IComparer<T> comparer, string message)
-        {
-            if (comparer.Compare(expected, actual) != 0)
-            {
-                Assert.False(true, string.Format(@"Expected: <{1}>. Actual:<{2}>. {0}", message, expected, actual));
-            }
-        }
-
-        /// <summary>
-        /// Tests positive cases for GetAscii. 
+        /// Tests positive cases for GetAscii.
         /// </summary>
         [Fact]
         public void TestAsciiPositive()
@@ -42,8 +24,7 @@ namespace System.Globalization.Extensions.Tests
                 {
                     var map = new System.Globalization.IdnMapping();
                     var asciiResult = map.GetAscii(entry.Source);
-
-                    CompareResult(entry.GetASCIIResult.Value, asciiResult, StringComparer.OrdinalIgnoreCase, "Error on line number " + entry.LineNumber);
+                    Assert.Equal(entry.GetASCIIResult.Value, asciiResult, StringComparer.OrdinalIgnoreCase);
                 }
             }
         }
@@ -67,11 +48,11 @@ namespace System.Globalization.Extensions.Tests
                         var map = new System.Globalization.IdnMapping { UseStd3AsciiRules = true, AllowUnassigned = true };
                         var unicodeResult = map.GetUnicode(entry.Source);
 
-                        CompareResult(entry.GetUnicodeResult.Value, unicodeResult, StringComparer.OrdinalIgnoreCase, "Error on line number " + entry.LineNumber);
+                        Assert.Equal(entry.GetUnicodeResult.Value, unicodeResult, StringComparer.OrdinalIgnoreCase);
                     }
                     catch (ArgumentException)
                     {
-                        CompareResult(entry.GetUnicodeResult.Value, entry.Source, StringComparer.OrdinalIgnoreCase, "Error on line number " + entry.LineNumber);
+                        Assert.Equal(entry.GetUnicodeResult.Value, entry.Source, StringComparer.OrdinalIgnoreCase);
                     }
                 }
             }
