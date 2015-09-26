@@ -1084,188 +1084,191 @@ namespace System.Net.Http
                 return;
             }
 
-            try
+            using(state.CancellationToken.Register(() => state.Tcs.TrySetCanceled()))
             {
-                // Prepare context object.
-                requestStateHandle = GCHandle.Alloc(state);
-
-                EnsureSessionHandleExists(state);
-
-                SetSessionHandleOptions();
-
-                // Specify an HTTP server.
-                connectHandle = Interop.WinHttp.WinHttpConnect(
-                    _sessionHandle,
-                    state.RequestMessage.RequestUri.Host,
-                    (ushort)state.RequestMessage.RequestUri.Port,
-                    0);
-                if (connectHandle.IsInvalid)
+                try
                 {
-                    throw new HttpRequestException(
-                        SR.net_http_client_execution_error,
-                        WinHttpException.CreateExceptionUsingLastError());
-                }
-                connectHandle.SetParentHandle(_sessionHandle);
+                    // Prepare context object.
+                    requestStateHandle = GCHandle.Alloc(state);
 
-                if (state.RequestMessage.RequestUri.Scheme == UriSchemeHttps)
-                {
-                    secureConnection = true;
-                }
-                else
-                {
-                    secureConnection = false;
-                }
+                    EnsureSessionHandleExists(state);
 
-                // Create an HTTP request handle.
-                requestHandle = Interop.WinHttp.WinHttpOpenRequest(
-                    connectHandle,
-                    state.RequestMessage.Method.Method,
-                    state.RequestMessage.RequestUri.PathAndQuery,
-                    null,
-                    Interop.WinHttp.WINHTTP_NO_REFERER,
-                    Interop.WinHttp.WINHTTP_DEFAULT_ACCEPT_TYPES,
-                    secureConnection ? Interop.WinHttp.WINHTTP_FLAG_SECURE : 0);
-                if (requestHandle.IsInvalid)
-                {
-                    throw new HttpRequestException(
-                        SR.net_http_client_execution_error,
-                        WinHttpException.CreateExceptionUsingLastError());
-                }
-                requestHandle.SetParentHandle(connectHandle);
-                
-                state.RequestHandle = requestHandle;
+                    SetSessionHandleOptions();
 
-                // Set callback function.
-                SetStatusCallback(requestHandle, s_staticCallback);
-
-                // Set needed options on the request handle.
-                SetRequestHandleOptions(state);
-
-                bool chunkedModeForSend = IsChunkedModeForSend(state.RequestMessage);
-
-                AddRequestHeaders(
-                    requestHandle,
-                    state.RequestMessage,
-                    _cookieUsePolicy == CookieUsePolicy.UseSpecifiedCookieContainer ? _cookieContainer : null);
-
-                uint proxyAuthScheme = 0;
-                uint serverAuthScheme = 0;
-                bool retryRequest = false;
-
-                do
-                {
-                    state.CancellationToken.ThrowIfCancellationRequested();
-
-                    PreAuthenticateRequest(state, requestHandle, proxyAuthScheme);
-
-                    // Send a request.
-                    if (!Interop.WinHttp.WinHttpSendRequest(
-                        requestHandle,
-                        null,
-                        0,
-                        IntPtr.Zero,
-                        0,
-                        0,
-                        GCHandle.ToIntPtr(requestStateHandle)))
+                    // Specify an HTTP server.
+                    connectHandle = Interop.WinHttp.WinHttpConnect(
+                        _sessionHandle,
+                        state.RequestMessage.RequestUri.Host,
+                        (ushort)state.RequestMessage.RequestUri.Port,
+                        0);
+                    if (connectHandle.IsInvalid)
                     {
-                        WinHttpException.ThrowExceptionUsingLastError();
+                        throw new HttpRequestException(
+                            SR.net_http_client_execution_error,
+                            WinHttpException.CreateExceptionUsingLastError());
                     }
+                    connectHandle.SetParentHandle(_sessionHandle);
 
-                    // Send request body if present.
-                    if (state.RequestMessage.Content != null)
+                    if (state.RequestMessage.RequestUri.Scheme == UriSchemeHttps)
                     {
-                        using (var requestStream = new WinHttpRequestStream(requestHandle, chunkedModeForSend))
-                        {
-                            await state.RequestMessage.Content.CopyToAsync(
-                                requestStream,
-                                state.TransportContext).ConfigureAwait(false);
-                            requestStream.EndUpload();
-                        }
-                    }
-
-                    state.CancellationToken.ThrowIfCancellationRequested();
-
-                    // End the request and wait for the response.
-                    if (!Interop.WinHttp.WinHttpReceiveResponse(requestHandle, IntPtr.Zero))
-                    {
-                        int lastError = Marshal.GetLastWin32Error();
-                        if (lastError == (int)Interop.WinHttp.ERROR_WINHTTP_RESEND_REQUEST)
-                        {
-                            retryRequest = true;
-                        }
-                        else if (lastError == (int)Interop.WinHttp.ERROR_WINHTTP_CLIENT_AUTH_CERT_NEEDED)
-                        {
-                            // WinHttp will automatically drop any client SSL certificates that we
-                            // have pre-set into the request handle.  For security reasons, we don't
-                            // allow the certificate to be re-applied. But we need to tell WinHttp
-                            // that we don't have any certificate.
-                            SetNoClientCertificate(requestHandle);
-                            retryRequest = true;
-                        }
-
-                        else
-                        {
-                            throw WinHttpException.CreateExceptionUsingError(lastError);
-                        }
+                        secureConnection = true;
                     }
                     else
                     {
-                        ProcessResponse(
-                            state,
-                            requestHandle,
-                            ref proxyAuthScheme,
-                            ref serverAuthScheme,
-                            out retryRequest);
+                        secureConnection = false;
                     }
-                } while (retryRequest);
 
-                // Clear callback function in WinHTTP once we have a final response
-                // and are ready to create the response message.
-                SetStatusCallback(requestHandle, null);
+                    // Create an HTTP request handle.
+                    requestHandle = Interop.WinHttp.WinHttpOpenRequest(
+                        connectHandle,
+                        state.RequestMessage.Method.Method,
+                        state.RequestMessage.RequestUri.PathAndQuery,
+                        null,
+                        Interop.WinHttp.WINHTTP_NO_REFERER,
+                        Interop.WinHttp.WINHTTP_DEFAULT_ACCEPT_TYPES,
+                        secureConnection ? Interop.WinHttp.WINHTTP_FLAG_SECURE : 0);
+                    if (requestHandle.IsInvalid)
+                    {
+                        throw new HttpRequestException(
+                            SR.net_http_client_execution_error,
+                            WinHttpException.CreateExceptionUsingLastError());
+                    }
+                    requestHandle.SetParentHandle(connectHandle);
+                    
+                    state.RequestHandle = requestHandle;
 
-                state.CancellationToken.ThrowIfCancellationRequested();
+                    // Set callback function.
+                    SetStatusCallback(requestHandle, s_staticCallback);
 
-                // Create HttpResponseMessage object.
-                responseMessage = CreateResponseMessage(requestHandle, state.RequestMessage);
-            }
-            catch (Exception ex)
-            {
-                if (ex is OperationCanceledException)
-                {
-                    savedException = ex;
+                    // Set needed options on the request handle.
+                    SetRequestHandleOptions(state);
+
+                    bool chunkedModeForSend = IsChunkedModeForSend(state.RequestMessage);
+
+                    AddRequestHeaders(
+                        requestHandle,
+                        state.RequestMessage,
+                        _cookieUsePolicy == CookieUsePolicy.UseSpecifiedCookieContainer ? _cookieContainer : null);
+
+                    uint proxyAuthScheme = 0;
+                    uint serverAuthScheme = 0;
+                    bool retryRequest = false;
+
+                    do
+                    {
+                        state.CancellationToken.ThrowIfCancellationRequested();
+
+                        PreAuthenticateRequest(state, requestHandle, proxyAuthScheme);
+
+                        // Send a request.
+                        if (!Interop.WinHttp.WinHttpSendRequest(
+                            requestHandle,
+                            null,
+                            0,
+                            IntPtr.Zero,
+                            0,
+                            0,
+                            GCHandle.ToIntPtr(requestStateHandle)))
+                        {
+                            WinHttpException.ThrowExceptionUsingLastError();
+                        }
+
+                        // Send request body if present.
+                        if (state.RequestMessage.Content != null)
+                        {
+                            using (var requestStream = new WinHttpRequestStream(requestHandle, chunkedModeForSend))
+                            {
+                                await state.RequestMessage.Content.CopyToAsync(
+                                    requestStream,
+                                    state.TransportContext).ConfigureAwait(false);
+                                requestStream.EndUpload();
+                            }
+                        }
+
+                        state.CancellationToken.ThrowIfCancellationRequested();
+
+                        // End the request and wait for the response.
+                        if (!Interop.WinHttp.WinHttpReceiveResponse(requestHandle, IntPtr.Zero))
+                        {
+                            int lastError = Marshal.GetLastWin32Error();
+                            if (lastError == (int)Interop.WinHttp.ERROR_WINHTTP_RESEND_REQUEST)
+                            {
+                                retryRequest = true;
+                            }
+                            else if (lastError == (int)Interop.WinHttp.ERROR_WINHTTP_CLIENT_AUTH_CERT_NEEDED)
+                            {
+                                // WinHttp will automatically drop any client SSL certificates that we
+                                // have pre-set into the request handle.  For security reasons, we don't
+                                // allow the certificate to be re-applied. But we need to tell WinHttp
+                                // that we don't have any certificate.
+                                SetNoClientCertificate(requestHandle);
+                                retryRequest = true;
+                            }
+
+                            else
+                            {
+                                throw WinHttpException.CreateExceptionUsingError(lastError);
+                            }
+                        }
+                        else
+                        {
+                            ProcessResponse(
+                                state,
+                                requestHandle,
+                                ref proxyAuthScheme,
+                                ref serverAuthScheme,
+                                out retryRequest);
+                        }
+                    } while (retryRequest);
+
+                    // Clear callback function in WinHTTP once we have a final response
+                    // and are ready to create the response message.
+                    SetStatusCallback(requestHandle, null);
+
+                    state.CancellationToken.ThrowIfCancellationRequested();
+
+                    // Create HttpResponseMessage object.
+                    responseMessage = CreateResponseMessage(requestHandle, state.RequestMessage);
                 }
-                else if (state.SavedException != null)
+                catch (Exception ex)
                 {
-                    savedException = state.SavedException;
+                    if (ex is OperationCanceledException)
+                    {
+                        savedException = ex;
+                    }
+                    else if (state.SavedException != null)
+                    {
+                        savedException = state.SavedException;
+                    }
+                    else
+                    {
+                        savedException = ex;
+                    }
+
+                    // Clear callback function in WinHTTP to prevent
+                    // further native callbacks as we clean up the objects.
+                    if (requestHandle != null)
+                    {
+                        SetStatusCallback(requestHandle, null);
+                    }
+                }
+
+                if (requestStateHandle.IsAllocated)
+                {
+                    requestStateHandle.Free();
+                }
+
+                SafeWinHttpHandle.DisposeAndClearHandle(ref connectHandle);
+
+                // Move the task to a terminal state.
+                if (responseMessage != null)
+                {
+                    state.Tcs.TrySetResult(responseMessage);
                 }
                 else
                 {
-                    savedException = ex;
+                    HandleAsyncException(state, savedException);
                 }
-
-                // Clear callback function in WinHTTP to prevent
-                // further native callbacks as we clean up the objects.
-                if (requestHandle != null)
-                {
-                    SetStatusCallback(requestHandle, null);
-                }
-            }
-
-            if (requestStateHandle.IsAllocated)
-            {
-                requestStateHandle.Free();
-            }
-
-            SafeWinHttpHandle.DisposeAndClearHandle(ref connectHandle);
-
-            // Move the task to a terminal state.
-            if (responseMessage != null)
-            {
-                state.Tcs.TrySetResult(responseMessage);
-            }
-            else
-            {
-                HandleAsyncException(state, savedException);
             }
         }
 
