@@ -2,35 +2,31 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.IO;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
 namespace System.Reflection.Metadata.Decoding
 {
-    [TestClass]
     public class TypeNameParserTests
     {
-        [TestMethod]
-        [ExpectedException(typeof(ArgumentNullException))]
+        [Fact]
         public void Parse_NullAsTypeName_ThrowsArgumentNull()
         {
-            TypeNameParser.Parse((string)null, new StringBasedTypeNameParserTypeProvider());
+            Assert.Throws<ArgumentNullException>(() => TypeNameParser.Parse((string)null, new StringBasedTypeNameParserTypeProvider()));
         }
 
-        [TestMethod]
-        [ExpectedException(typeof(ArgumentException))]
+        [Fact]
         public void Parse_EmptyAsTypeName_ThrowsArgument()
         {
-            TypeNameParser.Parse("", new StringBasedTypeNameParserTypeProvider());
+            Assert.Throws<ArgumentException>(() => TypeNameParser.Parse("", new StringBasedTypeNameParserTypeProvider()));
         }
 
-        [TestMethod]
-        [ExpectedException(typeof(ArgumentNullException))]
+        [Fact]
         public void Parse_NullAsTypeProvider_ThrowsArgumentNull()
         {
-            TypeNameParser.Parse("T", (ITypeNameParserTypeProvider<string>)null);
+            Assert.Throws<ArgumentNullException>(() => TypeNameParser.Parse("T", (ITypeNameParserTypeProvider<string>)null));
         }
 
-        [TestMethod]
+        [Fact]
         public void IdExpected_EncountedOnlyWhiteSpace()
         {
             ParseInvalidType(" ",                                                                                                    1, TypeNameFormatErrorId.IdExpected_EncounteredOnlyWhiteSpace);
@@ -94,7 +90,7 @@ namespace System.Reflection.Metadata.Decoding
             ParseInvalidType("T[[A[[B, mscorlib, Version=1.0.0.0, Culture=neutral], [  ",                                            57, TypeNameFormatErrorId.IdExpected_EncounteredOnlyWhiteSpace);
         }
 
-        [TestMethod]
+        [Fact]
         public void IdExpected_EncountedEndOfString()
         {
             ParseInvalidType("T,",                                                                                                  2, TypeNameFormatErrorId.IdExpected_EncounteredEndOfString);
@@ -129,7 +125,7 @@ namespace System.Reflection.Metadata.Decoding
             ParseInvalidType("T[[A[[B, mscorlib, Version=1.0.0.0, Culture=neutral], [",                                             55, TypeNameFormatErrorId.IdExpected_EncounteredEndOfString);
         }
 
-        [TestMethod]
+        [Fact]
         public void IdExpected_EncounteredDelimiter()
         {
             ParseInvalidType("+",                                                                                                    1, TypeNameFormatErrorId.IdExpected_EncounteredDelimiter);
@@ -253,7 +249,7 @@ namespace System.Reflection.Metadata.Decoding
             ParseInvalidType("T[[A[[B, mscorlib, Version=1.0.0.0, Culture=neutral],[]",                                              55, TypeNameFormatErrorId.IdExpected_EncounteredDelimiter);
         }
 
-        [TestMethod]
+        [Fact]
         public void EscapedDelimiterExpected()
         {
             ParseInvalidType(@"\A",                                                                                                  2, TypeNameFormatErrorId.EscapedDelimiterExpected, reflectionBug:true);                        // BUG: Reflection treats this as an empty type
@@ -274,7 +270,7 @@ namespace System.Reflection.Metadata.Decoding
             ParseInvalidType(@"T[[A, mscorlib\[]]",                                                                                  16, TypeNameFormatErrorId.EscapedDelimiterExpected);
         }
 
-        [TestMethod]
+        [Fact]
         public void EscapedLiteralExpected_EncounteredEndOfString()
         {
             ParseInvalidType(@"\",                                                                                                   1, TypeNameFormatErrorId.EscapedDelimiterExpected_EncounteredEndOfString, reflectionBug:true);  // BUG: Reflection treats this as an empty type
@@ -289,7 +285,7 @@ namespace System.Reflection.Metadata.Decoding
             ParseInvalidType(@"T[[A, mscorlib\",                                                                                     15, TypeNameFormatErrorId.EscapedDelimiterExpected_EncounteredEndOfString);
         }
 
-         [TestMethod]
+         [Fact]
         public void EndOfStringExpected_EncounteredExtraCharacters()
         {
             ParseInvalidType("T&A",                                                                                                 3, TypeNameFormatErrorId.EndOfStringExpected_EncounteredExtraCharacters);
@@ -307,7 +303,7 @@ namespace System.Reflection.Metadata.Decoding
             ParseInvalidType(@"T\, mscorlib, Culture=",                                                                             22, TypeNameFormatErrorId.EndOfStringExpected_EncounteredExtraCharacters);
         }
 
-         [TestMethod]
+         [Fact]
         public void DelimiterExpected_EncounteredEndOfString()
         {
             ParseInvalidType("T, \"mscorlib",                                                                                       12, TypeNameFormatErrorId.DelimiterExpected_EncounteredEndOfString, reflectionBug:true);    // BUG: Reflection ignores the missing quote
@@ -336,7 +332,7 @@ namespace System.Reflection.Metadata.Decoding
             ParseInvalidType("T[[A[[B, mscorlib, Version=1.0.0.0, Culture=neutral], [A",                                            56, TypeNameFormatErrorId.DelimiterExpected_EncounteredEndOfString);
         }
 
-        [TestMethod]
+        [Fact]
         public void DelimiterExpected()
         {
             ParseInvalidType("T, mscorlib, Version,",                                                                               21, TypeNameFormatErrorId.DelimiterExpected, reflectionBug:true);   // BUG: Reflection ignores the trailing Version + ,
@@ -348,7 +344,7 @@ namespace System.Reflection.Metadata.Decoding
             ParseInvalidType("T[,][[A, mscorlib]]",                                                                                 6, TypeNameFormatErrorId.DelimiterExpected);
         }
 
-        [TestMethod]
+        [Fact]
         public void DuplicateAssemblyComponent()
         {
             ParseInvalidType("T, mscorlib, version=1.0.0.0, version=1.0.0.0",                                                       45, TypeNameFormatErrorId.DuplicateAssemblyComponent, reflectionBug:true);  // BUG: Reflection ignores the duplicate version
@@ -360,7 +356,7 @@ namespace System.Reflection.Metadata.Decoding
             ParseInvalidType("T, mscorlib, Culture=\"\", culture=en-US",                                                            38, TypeNameFormatErrorId.DuplicateAssemblyComponent, reflectionBug:true);  // BUG: Reflection ignores the duplicate culture
         }
 
-        [TestMethod]
+        [Fact]
         public void AssemblyNames()
         {
             ParseType("T, mscorlib",                                                                                                "|mscorlib(name)|T(simple)");
@@ -381,7 +377,7 @@ namespace System.Reflection.Metadata.Decoding
             ParseType("T, mscorlib, Version=1.0.0.0, PublicKeyToken=b03f5f7f11d50a3a, Culture=en-US, Retargetable=Yes",             "|mscorlib(name)Version(componentName)1.0.0.0(componentValue)PublicKeyToken(componentName)b03f5f7f11d50a3a(componentValue)Culture(componentName)en-US(componentValue)Retargetable(componentName)Yes(componentValue)|T(simple)");
         }
 
-        [TestMethod]
+        [Fact]
         public void EscapeSequence()
         {
             ParseType(@"\\",                                                                                                        @"\(simple)");
@@ -410,7 +406,7 @@ namespace System.Reflection.Metadata.Decoding
             ParseType(@"T[[A, mscor\,lib]]",                                                                                        "T(simple)<|mscor,lib(name)|A(simple)>");
         }
 
-        [TestMethod]
+        [Fact]
         public void SignificantWhiteSpace()
         {   
             ParseType("T ",                                                                                                         "T (simple)");
@@ -442,7 +438,7 @@ namespace System.Reflection.Metadata.Decoding
             ParseType("T[[A, mscorlib, Custom=en -US]]",                                                                            "T(simple)<|mscorlib(name)Custom(componentName)en -US(componentValue)|A(simple)>",         "T(simple)<|mscorlib(name)|A(simple)>");                                                     // Reflection throws away unrecognized elements
         }
 
-        [TestMethod]
+        [Fact]
         public void InsignificantWhiteSpace()
         {
             ParseType(" T",                                                                                                         "T(simple)");
@@ -478,7 +474,7 @@ namespace System.Reflection.Metadata.Decoding
             ParseType("T, mscorlib, Version=1.0.0.0 ",                                                                              "|mscorlib(name)Version(componentName)1.0.0.0(componentValue)|T(simple)");
         }
 
-        [TestMethod]
+        [Fact]
         public void SimpleTypeName()
         {
             ParseType("T",                                                                                                          "T(simple)");
@@ -494,7 +490,7 @@ namespace System.Reflection.Metadata.Decoding
             ParseType("System.Collections.List`1",                                                                                  "System.Collections.List`1(simple)");
         }
 
-        [TestMethod]
+        [Fact]
         public void NestedTypeName()
         {
             ParseType("A+B",                                                                                                        "A(simple)-B");
@@ -507,7 +503,7 @@ namespace System.Reflection.Metadata.Decoding
             ParseType("System.Collections.List+Enumerator`1+Nested",                                                                "System.Collections.List(simple)-Enumerator`1-Nested");
         }
 
-        [TestMethod]
+        [Fact]
         public void GenericTypeArgumentFullName()
         {
             ParseType("T[T1]",                                                                                                      "T(simple)<T1(simple)>");
@@ -527,14 +523,14 @@ namespace System.Reflection.Metadata.Decoding
             ParseType("Type[T[T[T+N],T,T]]",                                                                                        "Type(simple)<T(simple)<T(simple)<T(simple)-N>,T(simple),T(simple)>>");
         }
 
-        [TestMethod]
+        [Fact]
         public void ByReference()
         {
             ParseType("T&",                                                                                                         "T(simple)(reference)");
             ParseType("T+N&",                                                                                                       "T(simple)-N(reference)");
         }
 
-        [TestMethod]
+        [Fact]
         public void Pointer()
         {
             ParseType("T*",                                                                                                         "T(simple)(pointer)");
@@ -542,7 +538,7 @@ namespace System.Reflection.Metadata.Decoding
             ParseType("T+N**",                                                                                                      "T(simple)-N(pointer)(pointer)");
         }
 
-        [TestMethod]
+        [Fact]
         public void Arrays()
         {
             ParseType("T[]",                                                                                                        "T(simple){}");
@@ -564,12 +560,14 @@ namespace System.Reflection.Metadata.Decoding
         {
             string actual = TypeNameParser.Parse<string>(typeName, new StringBasedTypeNameParserTypeProvider());
 
-            Assert.AreEqual(expected, actual);
+            Assert.Equal(expected, actual);
 
             // Now check Reflection
             string reflectionActual = StringBasedReflectionTypeProvider.ParseTypeName(typeName);
-            
-            Assert.AreEqual(reflectionExpected ?? actual, reflectionActual, "Reflection parsed the name differently. TypeName: '{0}' | TypeNameParser: '{1}' | Reflection: '{2}'", typeName, actual, reflectionActual);
+
+            Assert.True(
+                (reflectionExpected ?? actual) == reflectionActual, 
+                String.Format("Reflection parsed the name differently. TypeName: '{0}' | TypeNameParser: '{1}' | Reflection: '{2}'", typeName, actual, reflectionActual));
         }
 
         private void ParseInvalidType(string typeName, int position, TypeNameFormatErrorId errorId, bool reflectionBug = false)
@@ -578,13 +576,13 @@ namespace System.Reflection.Metadata.Decoding
             {
                 string actual = TypeNameParser.Parse<string>(typeName, new StringBasedTypeNameParserTypeProvider());
 
-                Assert.Fail("Type name '{0}' was expected to be invalid, but was successfully parsed as '{1}'.", typeName, actual);
+                Assert.False(true, String.Format("Type name '{0}' was expected to be invalid, but was successfully parsed as '{1}'.", typeName, actual));
 
             }
             catch (TypeNameFormatException ex)
             {
-                Assert.AreEqual(position, ex.Position, "Expected type name '{0}' to be invalid at position {1}, but was actually {2}.", typeName, position, ex.Position);
-                Assert.AreEqual(errorId, ex.ErrorId, "Expected type name '{0}' to be invalid due to {1}, but was actually {2}.", typeName, errorId, ex.ErrorId);
+                Assert.True(position == ex.Position, String.Format("Expected type name '{0}' to be invalid at position {1}, but was actually {2}.", typeName, position, ex.Position));
+                Assert.True(errorId == ex.ErrorId, String.Format("Expected type name '{0}' to be invalid due to {1}, but was actually {2}.", typeName, errorId, ex.ErrorId));
             }
 
 
@@ -595,7 +593,7 @@ namespace System.Reflection.Metadata.Decoding
             {
                 string actual = StringBasedReflectionTypeProvider.ParseTypeName(typeName);
 
-                Assert.Fail("Type name '{0}' was expected to be invalid, but was successfully parsed as '{1}' by Reflection.", typeName, actual);
+                Assert.False(true, String.Format("Type name '{0}' was expected to be invalid, but was successfully parsed as '{1}' by Reflection.", typeName, actual));
             }
             catch (ArgumentException)
             {
