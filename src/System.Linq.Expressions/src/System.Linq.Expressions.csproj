@@ -62,6 +62,9 @@
     <Compile Include="$(CommonPath)\System\NotImplemented.cs">
       <Link>Common\System\NotImplemented.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\System\Diagnostics\CodeAnalysis\ExcludeFromCodeCoverageAttribute.cs">
+      <Link>Common\System\Diagnostics\CodeAnalysis\ExcludeFromCodeCoverageAttribute.cs</Link>
+    </Compile>
     <Compile Include="$(CommonPath)\System\Runtime\CompilerServices\ReadOnlyCollectionBuilder.cs">
       <Link>Common\System\Runtime\CompilerServices\ReadOnlyCollectionBuilder.cs</Link>
     </Compile>

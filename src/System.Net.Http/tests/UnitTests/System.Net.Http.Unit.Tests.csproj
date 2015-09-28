@@ -25,6 +25,9 @@
     <Compile Include="$(CommonPath)\System\NotImplemented.cs">
       <Link>ProductionCode\Common\System\NotImplemented.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\System\Diagnostics\CodeAnalysis\ExcludeFromCodeCoverageAttribute.cs">
+      <Link>ProductionCode\Common\System\Diagnostics\CodeAnalysis\ExcludeFromCodeCoverageAttribute.cs</Link>
+    </Compile>
     <Compile Include="..\..\src\Internal\HttpStatusDescription.cs">
       <Link>ProductionCode\Internal\HttpStatusDescription.cs</Link>
     </Compile>

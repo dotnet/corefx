@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.Diagnostics.CodeAnalysis;
+
 namespace System
 {
     //
@@ -14,6 +16,7 @@ namespace System
     //
     // This makes it distinguishable both from human eyes and CCI from NYI's that truly represent undone work.
     //
+    [ExcludeFromCodeCoverage]
     internal static class NotImplemented
     {
         internal static Exception ByDesign
