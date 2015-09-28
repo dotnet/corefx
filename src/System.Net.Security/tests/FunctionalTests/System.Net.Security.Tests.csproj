@@ -6,12 +6,12 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{A55A2B9A-830F-4330-A0E7-02A9FB30ABD2}</ProjectGuid>
     <OutputType>Library</OutputType>
-    <UnsupportedPlatforms>Linux;OSX;FreeBSD</UnsupportedPlatforms>
+    <UnsupportedPlatforms>OSX;FreeBSD</UnsupportedPlatforms>
   </PropertyGroup>
   <!-- Help VS understand available configurations -->
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' " />
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' " />
-  <ItemGroup>
+  <ItemGroup Condition=" '$(TargetsWindows)' == 'true' ">
     <Compile Include="ClientAsyncAuthenticateTest.cs" />
     <Compile Include="ClientDefaultEncryptionTest.cs" />
     <Compile Include="DummyTcpServer.cs" />
@@ -24,7 +24,7 @@
     <Compile Include="SslStreamAPMExtensions.cs" />
     <Compile Include="TestConfiguration.cs" />
     <Compile Include="TransportContextTest.cs" />
-    
+
     <!-- Common test files -->
     <Compile Include="$(CommonTestPath)\System.Net\TestLogging.cs">
       <Link>Common\System.Net\TestLogging.cs</Link>
@@ -39,6 +39,12 @@
       <Link>Common\System.Net\TaskAPMExtensions.cs</Link>
     </Compile>
 
+  </ItemGroup>
+  <ItemGroup Condition=" '$(TargetsUnix)' == 'true' "> 
+ 
+    <Compile Include="SslStreamStreamToStreamTest.cs" />   
+    <Compile Include="TestConfiguration.cs" />    
+       
   </ItemGroup>
 
   <!-- TODO: Remove after the packages are not using System.Private.Networking. -->

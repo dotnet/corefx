@@ -145,7 +145,7 @@ internal static partial class Interop
                     throw CreateSslException("SSL Handshake failed", error);                   
                 }
             }
-        
+
             return ((libssl.SSL_state(context.sslPtr) == libssl.SslState.SSL_ST_OK)) ? true : false;
 
         }

@@ -207,9 +207,6 @@
     <Compile Include="$(CommonPath)\Interop\Unix\libcrypto\Interop.EvpPkey.EcKey.cs">
       <Link>Common\Interop\Unix\libcrypto\Interop.EvpPkey.EcKey.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Unix\libcrypto\Interop.EvpPkey.Rsa.cs">
-      <Link>Common\Interop\Unix\libcrypto\Interop.EvpPkey.Rsa.cs</Link>
-    </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\System.Net.Http.Native\Interop.Initialization.cs">
       <Link>Common\Interop\Unix\System.Net.Http.Native\Interop.Initialization.cs</Link>
     </Compile>
