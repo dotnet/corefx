@@ -6,18 +6,18 @@ using Xunit;
 
 namespace System.Reflection.Metadata.Decoding
 {
-    public class TypeNameParserTests
+    public partial class TypeNameParserTests
     {
         [Fact]
         public void Parse_NullAsTypeName_ThrowsArgumentNull()
         {
-            Assert.Throws<ArgumentNullException>(() => TypeNameParser.Parse((string)null, new StringBasedTypeNameParserTypeProvider()));
+            Assert.Throws<ArgumentNullException>(() => TypeNameParser.Parse((string)null, new StringBasedTypeProvider()));
         }
 
         [Fact]
         public void Parse_EmptyAsTypeName_ThrowsArgument()
         {
-            Assert.Throws<ArgumentException>(() => TypeNameParser.Parse("", new StringBasedTypeNameParserTypeProvider()));
+            Assert.Throws<ArgumentException>(() => TypeNameParser.Parse("", new StringBasedTypeProvider()));
         }
 
         [Fact]
@@ -558,52 +558,26 @@ namespace System.Reflection.Metadata.Decoding
 
         private void ParseType(string typeName, string expected, string reflectionExpected = null)
         {
-            string actual = TypeNameParser.Parse<string>(typeName, new StringBasedTypeNameParserTypeProvider());
+            string actual = TypeNameParser.Parse<string>(typeName, new StringBasedTypeProvider());
 
             Assert.Equal(expected, actual);
 
-            // Now check Reflection
-            string reflectionActual = StringBasedReflectionTypeProvider.ParseTypeName(typeName);
-
-            Assert.True(
-                (reflectionExpected ?? actual) == reflectionActual, 
-                String.Format("Reflection parsed the name differently. TypeName: '{0}' | TypeNameParser: '{1}' | Reflection: '{2}'", typeName, actual, reflectionActual));
+            ParseTypeWithDesktopReflection(typeName, reflectionExpected ?? expected);
         }
 
         private void ParseInvalidType(string typeName, int position, TypeNameFormatErrorId errorId, bool reflectionBug = false)
         {
-            try
-            {
-                string actual = TypeNameParser.Parse<string>(typeName, new StringBasedTypeNameParserTypeProvider());
+            var ex = Assert.Throws<TypeNameFormatException>(() => TypeNameParser.Parse(typeName, new StringBasedTypeProvider()));
+            Assert.Equal(position, ex.Position);
+            Assert.Equal(errorId, ex.ErrorId);
 
-                Assert.False(true, String.Format("Type name '{0}' was expected to be invalid, but was successfully parsed as '{1}'.", typeName, actual));
-
-            }
-            catch (TypeNameFormatException ex)
+            if (!reflectionBug)
             {
-                Assert.True(position == ex.Position, String.Format("Expected type name '{0}' to be invalid at position {1}, but was actually {2}.", typeName, position, ex.Position));
-                Assert.True(errorId == ex.ErrorId, String.Format("Expected type name '{0}' to be invalid due to {1}, but was actually {2}.", typeName, errorId, ex.ErrorId));
-            }
-
-
-            if (reflectionBug)
-                return;
-
-            try
-            {
-                string actual = StringBasedReflectionTypeProvider.ParseTypeName(typeName);
-
-                Assert.False(true, String.Format("Type name '{0}' was expected to be invalid, but was successfully parsed as '{1}' by Reflection.", typeName, actual));
-            }
-            catch (ArgumentException)
-            {
-            }
-            catch (TypeLoadException)
-            {
-            }
-            catch (FileLoadException)
-            {
+                ParseInvalidTypeWithDesktopReflection(typeName);
             }
         }
+
+        partial void ParseTypeWithDesktopReflection(string typeName, string expected);
+        partial void ParseInvalidTypeWithDesktopReflection(string typeName);
     }
 }

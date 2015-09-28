@@ -5,9 +5,9 @@ using System.Collections.Immutable;
 
 namespace System.Reflection.Metadata.Decoding
 {
-    internal class StringBasedTypeNameParserTypeProvider : ITypeNameParserTypeProvider<string>
+    internal class StringBasedTypeProvider : ITypeNameParserTypeProvider<string>
     {
-        public StringBasedTypeNameParserTypeProvider()
+        public StringBasedTypeProvider()
         {
         }
 

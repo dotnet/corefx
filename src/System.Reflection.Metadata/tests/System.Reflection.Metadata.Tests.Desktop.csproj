@@ -47,9 +47,10 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Metadata\Decoding\StringBasedReflectionTypeProvider.cs" />
-    <Compile Include="Metadata\Decoding\StringBasedTypeNameParserTypeProvider.cs" />
+    <Compile Include="Metadata\Decoding\StringBasedType.Desktop.cs" />
+    <Compile Include="Metadata\Decoding\StringBasedTypeProvider.cs" />
     <Compile Include="Metadata\Decoding\TypeNameParserTests.cs" />
+    <Compile Include="Metadata\Decoding\TypeNameParserTests.Desktop.cs" />
     <Compile Include="XunitStubs.cs" />
   </ItemGroup>
   <ItemGroup>

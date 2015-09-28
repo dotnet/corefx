@@ -52,14 +52,14 @@ namespace System.Reflection.Metadata.Decoding
         }
     }
 
-    public class StringBasedReflectionTypeProvider : Type
+    public class StringBasedType : Type
     {
         private readonly string _typeName;
         private readonly Assembly _assembly;
 
         public static string ParseTypeName(string typeName)
         {
-            StringBasedReflectionTypeProvider type =  (StringBasedReflectionTypeProvider)Type.GetType(typeName, (name) => new StringBasedAssembly(name), (assembly, t, throwOnError) => new StringBasedReflectionTypeProvider(assembly, Unescape(t) + "(simple)"), true);
+            StringBasedType type =  (StringBasedType)Type.GetType(typeName, (name) => new StringBasedAssembly(name), (assembly, t, throwOnError) => new StringBasedType(assembly, Unescape(t) + "(simple)"), true);
 
             return type.AssemblyQualifiedName;
         }
@@ -85,7 +85,7 @@ namespace System.Reflection.Metadata.Decoding
             return builder.ToString();
         }
 
-        public StringBasedReflectionTypeProvider(Assembly assembly, string typeName)
+        public StringBasedType(Assembly assembly, string typeName)
         {
             _assembly = assembly;
             _typeName = typeName;
@@ -103,34 +103,34 @@ namespace System.Reflection.Metadata.Decoding
 
         public override Type MakeArrayType()
         {
-            return new StringBasedReflectionTypeProvider(_assembly, _typeName + "{}");
+            return new StringBasedType(_assembly, _typeName + "{}");
         }
 
         public override Type MakeArrayType(int rank)
         {
-            return new StringBasedReflectionTypeProvider(_assembly, _typeName + "{" + rank + "}");
+            return new StringBasedType(_assembly, _typeName + "{" + rank + "}");
         }
 
         public override Type MakeByRefType()
         {
-            return new StringBasedReflectionTypeProvider(_assembly, _typeName + "(reference)");
+            return new StringBasedType(_assembly, _typeName + "(reference)");
         }
 
         public override Type MakePointerType()
         {
-            return new StringBasedReflectionTypeProvider(_assembly, _typeName + "(pointer)");
+            return new StringBasedType(_assembly, _typeName + "(pointer)");
         }
 
         public override Type MakeGenericType(params Type[] typeArguments)
         {
             IEnumerable<string> names = typeArguments.Select(t => t.AssemblyQualifiedName);
 
-            return new StringBasedReflectionTypeProvider(_assembly, _typeName + "<" + String.Join(",", names) + ">");
+            return new StringBasedType(_assembly, _typeName + "<" + String.Join(",", names) + ">");
         }
 
         public override Type GetNestedType(string name, System.Reflection.BindingFlags bindingAttr)
         {
-            return new StringBasedReflectionTypeProvider(_assembly, _typeName + "-" + name);
+            return new StringBasedType(_assembly, _typeName + "-" + name);
         }
 
         public override Assembly Assembly
