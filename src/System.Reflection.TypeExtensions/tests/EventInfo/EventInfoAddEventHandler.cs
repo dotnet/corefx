@@ -1,12 +1,9 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
-using System.Collections.Generic;
-using System.Reflection;
 using Xunit;
 
-namespace System.Reflection.Compatibility.UnitTests
+namespace System.Reflection.Tests
 {
     public delegate void TestForEvent1();
 
@@ -53,43 +50,24 @@ namespace System.Reflection.Compatibility.UnitTests
         [Fact]
         public void NegTest1()
         {
-            try
-            {
-                TestClass1 tc1 = new TestClass1();
-                Type tpA = tc1.GetType();
-                EventInfo eventinfo = tpA.GetEvent("Event1");
-                eventinfo.AddEventHandler(null, new TestForEvent1(tc1.method2));
-                Assert.True(false);
-            }
-            catch (Exception e)
-            {
-                if (e.GetType().ToString() != "System.Reflection.TargetException")
-                {
-                    Assert.True(false);
-                }
-            }
+            TestClass1 tc1 = new TestClass1();
+            Type tpA = tc1.GetType();
+            EventInfo eventinfo = tpA.GetEvent("Event1");
+            // System.Reflection.TargetException not visible at the moment.
+            Exception e = Assert.ThrowsAny<Exception>(() => eventinfo.AddEventHandler(null, new TestForEvent1(tc1.method2)));
+            Assert.Equal("System.Reflection.TargetException", e.GetType().FullName);
         }
 
         // Negative Test 2:The EventInfo is not declared on the target
         [Fact]
         public void NegTest2()
         {
-            try
-            {
-                TestClass1 tc1 = new TestClass1();
-                Type tpA = tc1.GetType();
-                EventInfo eventinfo = tpA.GetEvent("Event1");
-                TestClass2 tc2 = new TestClass2();
-                eventinfo.AddEventHandler(tc2, new TestForEvent1(tc1.method2));
-                Assert.True(false);
-            }
-            catch (Exception e)
-            {
-                if (!e.GetType().FullName.Equals("System.Reflection.TargetException"))
-                {
-                    Assert.True(false);
-                }
-            }
+            TestClass1 tc1 = new TestClass1();
+            Type tpA = tc1.GetType();
+            EventInfo eventinfo = tpA.GetEvent("Event1");
+            TestClass2 tc2 = new TestClass2();
+            Exception e = Assert.ThrowsAny<Exception>(() => eventinfo.AddEventHandler(tc2, new TestForEvent1(tc1.method2)));
+            Assert.Equal("System.Reflection.TargetException", e.GetType().FullName);
         }
 
         // Negative Test 3:The event does not have a public add accessor
