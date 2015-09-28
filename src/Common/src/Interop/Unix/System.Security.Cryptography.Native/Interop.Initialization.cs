@@ -31,7 +31,15 @@ internal static partial class Interop
     {
         static CryptoInitializer()
         {
-            if (EnsureOpenSslInitialized() != 0)
+            byte[] randomSeed = new byte[32];
+            if (!Random(true, randomSeed, randomSeed.Length))
+            {
+                // unable to get a reliable random seed, so we cannot
+                // safely assume crypto is going to work securely.
+                throw new InvalidOperationException();
+            }
+
+            if (EnsureOpenSslInitialized(randomSeed, randomSeed.Length) != 0)
             {
                 // Ideally this would be a CryptographicException, but we use
                 // OpenSSL in libraries lower than System.Security.Cryptography.
@@ -56,7 +64,13 @@ internal static partial class Interop
         }
 
         [DllImport(Libraries.CryptoNative)]
-        private static extern int EnsureOpenSslInitialized();
+        private static extern int EnsureOpenSslInitialized(byte[] randomSeed, int randomSeedLength);
+
+        [DllImport(Libraries.LibCoreClr, EntryPoint = "PAL_Random")]
+        private extern static bool Random(
+            bool bStrong,
+            [Out, MarshalAs(UnmanagedType.LPArray)] byte[] buffer, 
+            int length);
 
         [DllImport(Libraries.LibCrypto)]
         private static extern void ERR_load_crypto_strings();
