@@ -14,7 +14,7 @@ using Xunit;
 //   members from base classes.)
 //
 
-namespace System.Reflection.Extensions.Tests
+namespace System.Reflection.Tests
 {
     public class RuntimeReflectionExtensionsTestsWithQuirks
     {
@@ -39,18 +39,8 @@ namespace System.Reflection.Extensions.Tests
                 properties.AddRange((IEnumerable<String>)type.GetDeclaredField("DeclaredPropertyNames").GetValue(null));
                 properties.AddRange((IEnumerable<String>)type.GetDeclaredField("InheritedPropertyNames").GetValue(null));
 
-                foreach (PropertyInfo pi in type.AsType().GetRuntimeProperties())
-                {
-                    if (properties.Remove(pi.Name))
-                        continue;
-
-                    Assert.False(true, String.Format("Type: {0}, Property: {1} is not expected", type, pi));
-                }
-
-                foreach (String propertyName in properties)
-                {
-                    Assert.False(true, String.Format("Property: {0} cannot be found in {1}", propertyName, type));
-                }
+                Assert.All(type.AsType().GetRuntimeProperties(), p => Assert.True(properties.Remove(p.Name)));
+                Assert.Empty(properties);
             }
         }
 
@@ -78,24 +68,14 @@ namespace System.Reflection.Extensions.Tests
                 events.AddRange((IEnumerable<String>)type.GetDeclaredField("DeclaredEvents").GetValue(null));
                 events.AddRange((IEnumerable<String>)type.GetDeclaredField("InheritedEvents").GetValue(null));
 
-                foreach (EventInfo ei in type.AsType().GetRuntimeEvents())
-                {
-                    if (events.Remove(ei.Name))
-                        continue;
-
-                    Assert.False(true, String.Format("Type: {0}, Event: {1} is not expected", type, ei));
-                }
-
-                foreach (String eventName in events)
-                {
-                    Assert.False(true, String.Format("Event: {0} cannot be found", eventName));
-                }
+                Assert.All(type.AsType().GetRuntimeEvents(), e => Assert.True(events.Remove(e.Name)));
+                Assert.Empty(events);
             }
         }
 
         private static TypeInfo[] GetTypes()
         {
-            Assembly asm = typeof(PropertyDefinitions.BaseClass).GetTypeInfo().Assembly;
+            Assembly asm = typeof(PropertyTestBaseClass).GetTypeInfo().Assembly;
             var list = new List<TypeInfo>();
             foreach (var t in asm.DefinedTypes)
             {

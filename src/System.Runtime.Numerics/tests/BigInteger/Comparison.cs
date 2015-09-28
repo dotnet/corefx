@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using Tools;
 using Xunit;
 
 namespace System.Numerics.Tests
@@ -617,17 +616,11 @@ namespace System.Numerics.Tests
             }
             else if (0 > expected)
             {
-                if (0 <= actual)
-                {
-                    Assert.True(false, string.Format(message + " expected result less than zero actual: {0}", actual));
-                }
+                Assert.InRange(actual, int.MinValue, -1);
             }
             else if (0 < expected)
             {
-                if (0 >= actual)
-                {
-                    Assert.True(false, string.Format(message + " expected result greater than zero actual: {0}", actual));
-                }
+                Assert.InRange(actual, 1, int.MaxValue);
             }
         }
 

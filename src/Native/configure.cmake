@@ -2,10 +2,11 @@ include(CheckFunctionExists)
 include(CheckStructHasMember)
 include(CheckCXXSourceCompiles)
 include(CheckCXXSourceRuns)
+include(CheckPrototypeDefinition)
 
 #CMake does not include /usr/local/include into the include search path
 #thus add it manually. This is required on FreeBSD.
-include_directories(/usr/local/include)
+include_directories(SYSTEM /usr/local/include)
 
 check_function_exists(
     stat64
@@ -85,6 +86,13 @@ check_cxx_source_runs(
     }
     "
     HAVE_SHM_OPEN_THAT_WORKS_WELL_ENOUGH_WITH_MMAP)
+
+check_prototype_definition(
+    getpriority
+    "int getpriority(int which, int who)"
+    "0"
+    "sys/resource.h"
+    PRIORITY_REQUIRES_INT_WHO)
 
 set (CMAKE_REQUIRED_LIBRARIES)
 

@@ -6,12 +6,11 @@ using System;
 using System.Text;
 using System.Globalization;
 
-namespace System.Globalization.Extensions.Tests
+namespace System.Globalization.Tests
 {
     public class NormalizationAll
     {
         [Fact]
-        [ActiveIssue(810, PlatformID.AnyUnix)]
         public void NormalizeTest()
         {
             bool failed = false;

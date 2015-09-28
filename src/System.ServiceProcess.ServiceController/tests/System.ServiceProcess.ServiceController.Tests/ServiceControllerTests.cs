@@ -1,15 +1,11 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
-using System.Diagnostics;
-using System.IO;
-using System.ServiceProcess;
-using System.Threading;
-using Xunit;
 using Microsoft.Win32;
+using System.Diagnostics;
+using Xunit;
 
-namespace System.ServiceProcessServiceController.Tests
+namespace System.ServiceProcess.Tests
 {
     internal sealed class ServiceProvider
     {
@@ -211,13 +207,7 @@ namespace System.ServiceProcessServiceController.Tests
                 ServiceType.KernelDriver |
                 ServiceType.RecognizerDriver;
 
-            foreach (var device in devices)
-            {
-                if ((int)(device.ServiceType & SERVICE_TYPE_DRIVER) == 0)
-                {
-                    Assert.True(false, string.Format("Service '{0}' is of type '{1}' and is not a device driver.", device.ServiceName, device.ServiceType));
-                }
-            }
+            Assert.All(devices, device => Assert.NotEqual(0, (int)(device.ServiceType & SERVICE_TYPE_DRIVER)));
         }
 
         [Fact]
@@ -275,10 +265,7 @@ namespace System.ServiceProcessServiceController.Tests
         private static ServiceController AssertHasDependent(ServiceController controller, string serviceName, string displayName)
         {
             var dependent = FindService(controller.DependentServices, serviceName, displayName);
-            if (dependent == null)
-            {
-                Assert.True(false, string.Format("Expected service {0} to have dependent service {1}", controller.ServiceName, serviceName));
-            }
+            Assert.NotNull(dependent);
 
             return dependent;
         }
@@ -286,10 +273,7 @@ namespace System.ServiceProcessServiceController.Tests
         private static ServiceController AssertDependsOn(ServiceController controller, string serviceName, string displayName)
         {
             var dependency = FindService(controller.ServicesDependedOn, serviceName, displayName);
-            if (dependency == null)
-            {
-                Assert.True(false, string.Format("Expected service {0} to depend on service {1}", controller.ServiceName, serviceName));
-            }
+            Assert.NotNull(dependency);
 
             return dependency;
         }
