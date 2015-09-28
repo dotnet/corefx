@@ -16,7 +16,7 @@
     <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
     <TargetFrameworkProfile />
     <SignAssembly>true</SignAssembly>
-    <AssemblyOriginatorKeyFile>..\..\..\packages\Microsoft.DotNet.BuildTools.1.0.25-prerelease-00053\lib\MSFT.snk</AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyFile>..\..\..\packages\Microsoft.DotNet.BuildTools.1.0.25-prerelease-00095\lib\MSFT.snk</AssemblyOriginatorKeyFile>
     <DelaySign>true</DelaySign>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
