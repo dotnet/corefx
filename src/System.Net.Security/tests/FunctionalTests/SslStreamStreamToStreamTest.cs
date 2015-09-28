@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -28,9 +29,16 @@ namespace System.Net.Security.Tests
                 Task[] auth = new Task[2];
                 auth[0] = client.AuthenticateAsClientAsync(certificate.Subject);
                 auth[1] = server.AuthenticateAsServerAsync(certificate);
-
+                
                 bool finished = Task.WaitAll(auth, TimeSpan.FromSeconds(3));
                 Assert.True(finished, "Handshake completed in the allotted time");
+
+                string testData = "Hello SSL";
+                byte[] sendBuf = Encoding.UTF8.GetBytes(testData);
+                client.Write(sendBuf);
+                byte[] recvBuf = new byte[sendBuf.Length];
+                server.Read(recvBuf, 0, recvBuf.Length);
+                Assert.Equal(testData, Encoding.UTF8.GetString(recvBuf));
             }
         }
 
@@ -48,6 +56,7 @@ namespace System.Net.Security.Tests
             return false;
         }
 
+        [ActiveIssue(3362, PlatformID.AnyUnix)]
         [Fact]
         public void SslStream_StreamToStream_Authentication_IncorrectServerName_Fail()
         {
