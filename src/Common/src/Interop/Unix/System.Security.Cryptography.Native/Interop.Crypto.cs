@@ -4,7 +4,7 @@
 using System;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
-
+using System.Security.Cryptography;
 using Microsoft.Win32.SafeHandles;
 
 internal static partial class Interop
@@ -98,9 +98,6 @@ internal static partial class Interop
         internal static extern string GetX509RootStorePath();
 
         [DllImport(Libraries.CryptoNative)]
-        internal static extern int UpRefEvpPkey(SafeEvpPkeyHandle handle);
-
-        [DllImport(Libraries.CryptoNative)]
         private static extern int GetPkcs7Certificates(SafePkcs7Handle p7, out SafeSharedX509StackHandle certs);
 
         [DllImport(Libraries.CryptoNative)]
@@ -113,6 +110,9 @@ internal static partial class Interop
             int minute,
             int second,
             [MarshalAs(UnmanagedType.Bool)] bool isDst);
+
+        [DllImport(Libraries.CryptoNative)]
+        internal static extern int CheckX509Hostname(SafeX509Handle x509, string hostname, int cchHostname);
 
         internal static byte[] GetAsn1StringBytes(IntPtr asn1)
         {
