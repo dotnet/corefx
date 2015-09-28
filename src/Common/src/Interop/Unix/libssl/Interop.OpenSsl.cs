@@ -313,8 +313,6 @@ internal static partial class Interop
             return method;
         }
 
-        // TODO Issue #3362 - TODO See if SSL_CTX_set_quiet_shutdown can be used
-
         private static void Disconnect(IntPtr sslPtr)
         {
             if (IntPtr.Zero != sslPtr)
@@ -384,19 +382,20 @@ internal static partial class Interop
             {
                 throw CreateSslException("Certificate pivate key check failed");
             }
-
         }
 
         private static SslException CreateSslException(string message)
         {
-            return new SslException(message);
+            ulong errorVal = libssl.ERR_get_error();
+            string msg = message + ": " + Marshal.PtrToStringAnsi(libssl.ERR_reason_error_string(errorVal));
+            return new SslException(msg, (int)errorVal);
         }
 
         private static SslException CreateSslException(string message, int error)
         {
             if (error == libssl.SslErrorCode.SSL_ERROR_SYSCALL)
             {
-                return new SslException(message);
+                return new SslException(message, error);
             }
             else if (error == libssl.SslErrorCode.SSL_ERROR_SSL)
             {
@@ -404,7 +403,7 @@ internal static partial class Interop
             }
             else
             {
-                return new SslException(message, error);
+                return new SslException(msg, message + ": " + error);
             }
         }
 
@@ -415,22 +414,9 @@ internal static partial class Interop
 
         private sealed class SslException : Exception
         {
-            private string message;
-            public override string Message { get { return message; } }
-            
-            public SslException(string inputMessage)
-                : base()
+            public SslException(string inputMessage, int error): base(inputMessage)
             {
-                ulong errorVal = libssl.ERR_get_error();
-                HResult = (int)errorVal;
-                this.message = inputMessage + ": " + Marshal.PtrToStringAnsi(libssl.ERR_reason_error_string(errorVal));
-            }
-
-            public SslException(string inputMessage, int error)
-                : base()
-            {
-                HResult = error;
-                this.message = inputMessage + ": " + error;
+                HResult = error;               
             }
         }
         #endregion
