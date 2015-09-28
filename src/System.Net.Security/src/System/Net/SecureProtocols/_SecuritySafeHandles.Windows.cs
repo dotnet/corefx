@@ -218,117 +218,6 @@ namespace System.Net.Security
             throw NotImplemented.ByDesign;
         }
 #endif
-
-        #if false //TODO if not used in Nego Stream as well, please remove it.
-        public unsafe static int AcquireCredentialsHandle(
-            string package,
-            Interop.Secur32.CredentialUse intent,
-            ref Interop.Secur32.AuthIdentity authdata,
-            out SafeFreeCredentials outCredential)
-        {
-            GlobalLog.Print("SafeFreeCredentials::AcquireCredentialsHandle#1("
-                            + package + ", "
-                            + intent + ", "
-                            + authdata + ")");
-
-            int errorCode = -1;
-            long timeStamp;
-
-            outCredential = new SafeFreeCredential_SECURITY();
-
-            errorCode = Interop.Secur32.AcquireCredentialsHandleW(
-                            null,
-                            package,
-                            (int)intent,
-                            null,
-                            ref authdata,
-                            null,
-                            null,
-                            ref outCredential._handle,
-                            out timeStamp);
-#if TRACE_VERBOSE
-            GlobalLog.Print("Unmanaged::AcquireCredentialsHandle() returns 0x"
-                            + String.Format("{0:x}", errorCode)
-                            + ", handle = " + outCredential.ToString());
-#endif
-
-            if (errorCode != 0)
-            {
-                outCredential.SetHandleAsInvalid();
-            }
-
-            return errorCode;
-        }
-
-        public unsafe static int AcquireDefaultCredential(
-            string package,
-            Interop.Secur32.CredentialUse intent,
-            out SafeFreeCredentials outCredential)
-        {
-            GlobalLog.Print("SafeFreeCredentials::AcquireDefaultCredential("
-                            + package + ", "
-                            + intent + ")");
-
-            int errorCode = -1;
-            long timeStamp;
-
-            outCredential = new SafeFreeCredential_SECURITY();
-
-            errorCode = Interop.Secur32.AcquireCredentialsHandleW(
-                            null,
-                            package,
-                            (int)intent,
-                            null,
-                            IntPtr.Zero,
-                            null,
-                            null,
-                            ref outCredential._handle,
-                            out timeStamp);
-
-#if TRACE_VERBOSE
-            GlobalLog.Print("Unmanaged::AcquireCredentialsHandle() returns 0x"
-                            + errorCode.ToString("x")
-                            + ", handle = " + outCredential.ToString());
-#endif
-
-            if (errorCode != 0)
-            {
-                outCredential.SetHandleAsInvalid();
-            }
-
-            return errorCode;
-        }
-
-        public unsafe static int AcquireCredentialsHandle(
-            string package,
-            Interop.Secur32.CredentialUse intent,
-            ref SafeSspiAuthDataHandle authdata,
-            out SafeFreeCredentials outCredential)
-        {
-            int errorCode = -1;
-            long timeStamp;
-
-            outCredential = new SafeFreeCredential_SECURITY();
-            errorCode = Interop.Secur32.AcquireCredentialsHandleW(
-                            null,
-                            package,
-                            (int)intent,
-                            null,
-                            authdata,
-                            null,
-                            null,
-                            ref outCredential._handle,
-                            out timeStamp);
-
-            if (errorCode != 0)
-            {
-                outCredential.SetHandleAsInvalid();
-            }
-
-            return errorCode;
-        }
-        #endif
-
         public unsafe static int AcquireCredentialsHandle(
             string package,
             Interop.Secur32.CredentialUse intent,
@@ -402,7 +291,7 @@ namespace System.Net.Security
         //
         // Static cache will return the target handle if found the reference in the table.
         //
-        internal SafeFreeCredentials _Target;
+        internal SafeFreeCredentials _target;
 
         internal static SafeCredentialReference CreateReference(SafeFreeCredentials target)
         {
@@ -420,19 +309,19 @@ namespace System.Net.Security
             // its dispose should be postponed
             bool ignore = false;
             target.DangerousAddRef(ref ignore);
-            _Target = target;
+            _target = target;
             SetHandle(new IntPtr(0));   // make this handle valid
         }
 
         protected override bool ReleaseHandle()
         {
-            SafeFreeCredentials target = _Target;
+            SafeFreeCredentials target = _target;
             if (target != null)
             {
                 target.DangerousRelease();
             }
 
-            _Target = null;
+            _target = null;
             return true;
         }
     }
