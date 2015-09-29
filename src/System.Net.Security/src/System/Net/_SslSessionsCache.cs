@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Collections;
+using System.Security.Authentication;
 
 namespace System.Net.Security
 {
@@ -18,6 +19,7 @@ namespace System.Net.Security
         {
             private byte[] _CertThumbPrint;
             private int _AllowedProtocols;
+            private bool isServerMode;
             private EncryptionPolicy _EncryptionPolicy;
             private readonly int _HashCode;
 
@@ -26,7 +28,7 @@ namespace System.Net.Security
             //           the caller of this ctor has to ensure that a user cert object was inspected and
             //           optionally cloned.
             //
-            internal SslCredKey(byte[] thumbPrint, int allowedProtocols, EncryptionPolicy encryptionPolicy)
+            internal SslCredKey(byte[] thumbPrint, int allowedProtocols, bool serverMode, EncryptionPolicy encryptionPolicy)
             {
                 _CertThumbPrint = thumbPrint == null ? Array.Empty<byte>() : thumbPrint;
                 _HashCode = 0;
@@ -51,8 +53,10 @@ namespace System.Net.Security
 
                 _HashCode ^= allowedProtocols;
                 _HashCode ^= (int)encryptionPolicy;
-                _AllowedProtocols = allowedProtocols;
+                _HashCode ^= serverMode ? 5 : 7; //TODO (Issue #3362) used a prime number here as it's a XOR. Figure out appropriate value.
+                _AllowedProtocols = allowedProtocols;               
                 _EncryptionPolicy = encryptionPolicy;
+                isServerMode = serverMode;
             }
 
             public override int GetHashCode()
@@ -96,6 +100,11 @@ namespace System.Net.Security
                     return false;
                 }
 
+                if (isServerMode != other.isServerMode)
+                {
+                    return false;
+                }
+
                 for (int i = 0; i < _CertThumbPrint.Length; ++i)
                 {
                     if (_CertThumbPrint[i] != other._CertThumbPrint[i])
@@ -114,7 +123,7 @@ namespace System.Net.Security
         // ATTN: The returned handle can be invalid, the callers of InitializeSecurityContext and AcceptSecurityContext
         // must be prepared to execute a back-out code if the call fails.
         //
-        internal static SafeFreeCredentials TryCachedCredential(byte[] thumbPrint, int allowedProtocols, EncryptionPolicy encryptionPolicy)
+        internal static SafeFreeCredentials TryCachedCredential(byte[] thumbPrint, SslProtocols sslProtocols, bool isServer, EncryptionPolicy encryptionPolicy)
         {
             if (s_CachedCreds.Count == 0)
             {
@@ -122,19 +131,19 @@ namespace System.Net.Security
                 return null;
             }
 
-            object key = new SslCredKey(thumbPrint, allowedProtocols, encryptionPolicy);
+            object key = new SslCredKey(thumbPrint, (int)sslProtocols, isServer, encryptionPolicy);
 
             SafeCredentialReference cached = s_CachedCreds[key] as SafeCredentialReference;
 
-            if (cached == null || cached.IsClosed || cached._Target.IsInvalid)
+            if (cached == null || cached.IsClosed || cached.Target.IsInvalid)
             {
                 GlobalLog.Print("TryCachedCredential() Not found or invalid, Current Cache Count = " + s_CachedCreds.Count);
                 return null;
             }
 
-            GlobalLog.Print("TryCachedCredential() Found a cached Handle = " + cached._Target.ToString());
+            GlobalLog.Print("TryCachedCredential() Found a cached Handle = " + cached.Target.ToString());
 
-            return cached._Target;
+            return cached.Target;
         }
 
         //
@@ -142,7 +151,7 @@ namespace System.Net.Security
         //
         // ATTN: The thumbPrint must be from inspected and possibly cloned user Cert object or we get a security hole in SslCredKey ctor.
         //
-        internal static void CacheCredential(SafeFreeCredentials creds, byte[] thumbPrint, int allowedProtocols, EncryptionPolicy encryptionPolicy)
+        internal static void CacheCredential(SafeFreeCredentials creds, byte[] thumbPrint, SslProtocols sslProtocols, bool isServer, EncryptionPolicy encryptionPolicy)
         {
             GlobalLog.Assert(creds != null, "CacheCredential|creds == null");
             if (creds.IsInvalid)
@@ -151,11 +160,11 @@ namespace System.Net.Security
                 return;
             }
 
-            object key = new SslCredKey(thumbPrint, allowedProtocols, encryptionPolicy);
+            object key = new SslCredKey(thumbPrint, (int)sslProtocols, isServer, encryptionPolicy);
 
             SafeCredentialReference cached = s_CachedCreds[key] as SafeCredentialReference;
 
-            if (cached == null || cached.IsClosed || cached._Target.IsInvalid)
+            if (cached == null || cached.IsClosed || cached.Target.IsInvalid)
             {
                 lock (s_CachedCreds)
                 {
@@ -195,7 +204,7 @@ namespace System.Net.Security
 
                                 if (cached != null)
                                 {
-                                    creds = cached._Target;
+                                    creds = cached.Target;
                                     cached.Dispose();
 
                                     if (!creds.IsClosed && !creds.IsInvalid && (cached = SafeCredentialReference.CreateReference(creds)) != null)
@@ -213,13 +222,13 @@ namespace System.Net.Security
                     }
                     else
                     {
-                        GlobalLog.Print("CacheCredential() (locked retry) Found already cached Handle = " + cached._Target.ToString());
+                        GlobalLog.Print("CacheCredential() (locked retry) Found already cached Handle = " + cached.Target.ToString());
                     }
                 }
             }
             else
             {
-                GlobalLog.Print("CacheCredential() Ignoring incoming handle = " + creds.ToString() + " since found already cached Handle = " + cached._Target.ToString());
+                GlobalLog.Print("CacheCredential() Ignoring incoming handle = " + creds.ToString() + " since found already cached Handle = " + cached.Target.ToString());
             }
         }
     }

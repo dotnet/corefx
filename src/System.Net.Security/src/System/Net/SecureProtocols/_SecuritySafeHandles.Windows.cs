@@ -219,6 +219,7 @@ namespace System.Net.Security
         }
 #endif
 
+#if false //TODO if not used in Nego Stream as well, please remove it.
         public unsafe static int AcquireCredentialsHandle(
             string package,
             Interop.Secur32.CredentialUse intent,
@@ -326,6 +327,7 @@ namespace System.Net.Security
 
             return errorCode;
         }
+#endif
 
         public unsafe static int AcquireCredentialsHandle(
             string package,
@@ -400,7 +402,7 @@ namespace System.Net.Security
         //
         // Static cache will return the target handle if found the reference in the table.
         //
-        internal SafeFreeCredentials _Target;
+        internal SafeFreeCredentials Target;
 
         internal static SafeCredentialReference CreateReference(SafeFreeCredentials target)
         {
@@ -418,19 +420,19 @@ namespace System.Net.Security
             // its dispose should be postponed
             bool ignore = false;
             target.DangerousAddRef(ref ignore);
-            _Target = target;
+            Target = target;
             SetHandle(new IntPtr(0));   // make this handle valid
         }
 
         protected override bool ReleaseHandle()
         {
-            SafeFreeCredentials target = _Target;
+            SafeFreeCredentials target = Target;
             if (target != null)
             {
                 target.DangerousRelease();
             }
 
-            _Target = null;
+            Target = null;
             return true;
         }
     }
