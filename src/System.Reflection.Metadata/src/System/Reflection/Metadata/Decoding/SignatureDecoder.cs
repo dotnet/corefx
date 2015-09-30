@@ -176,14 +176,14 @@ namespace System.Reflection.Metadata.Decoding
                 return ImmutableArray<TType>.Empty;
             }
 
-            var types = new TType[count];
+            var types = ImmutableArray.CreateBuilder<TType>(count);
 
             for (int i = 0; i < count; i++)
             {
-                types[i] = DecodeType(metadataReader, ref blobReader);
+                types.Add(DecodeType(metadataReader, ref blobReader));
             }
 
-            return ImmutableArray.Create(types);
+            return types.MoveToImmutable();
         }
 
         /// <summary>
@@ -229,7 +229,7 @@ namespace System.Reflection.Metadata.Decoding
                 return new MethodSignature<TType>(header, returnType, 0, genericParameterCount, ImmutableArray<TType>.Empty);
             }
 
-            var parameterTypes = new TType[parameterCount];
+            var parameterTypes = ImmutableArray.CreateBuilder<TType>(parameterCount);
             SignatureTypeCode typeCode;
             int parameterIndex;
 
@@ -242,17 +242,17 @@ namespace System.Reflection.Metadata.Decoding
                 {
                     break;
                 }
-                parameterTypes[parameterIndex] = DecodeType(metadataReader, ref blobReader);
+                parameterTypes.Add(DecodeType(metadataReader, ref blobReader));
             }
 
             int requiredParameterCount = parameterIndex;
 
             for (; parameterIndex < parameterCount; parameterIndex++)
             {
-                parameterTypes[parameterIndex] = DecodeType(metadataReader, ref blobReader);
+                parameterTypes.Add(DecodeType(metadataReader, ref blobReader));
             }
 
-            return new MethodSignature<TType>(header, returnType, requiredParameterCount, genericParameterCount, ImmutableArray.Create(parameterTypes));
+            return new MethodSignature<TType>(header, returnType, requiredParameterCount, genericParameterCount, parameterTypes.MoveToImmutable());
         }
 
         /// <summary>
@@ -360,23 +360,23 @@ namespace System.Reflection.Metadata.Decoding
             int sizesCount = blobReader.ReadCompressedInteger();
             if (sizesCount > 0)
             {
-                var array = new int[sizesCount];
+                var builder = ImmutableArray.CreateBuilder<int>(sizesCount);
                 for (int i = 0; i < sizesCount; i++)
                 {
-                    array[i] = blobReader.ReadCompressedInteger();
+                    builder.Add(blobReader.ReadCompressedInteger());
                 }
-                sizes = ImmutableArray.Create(array);
+                sizes = builder.MoveToImmutable();
             }
 
             int lowerBoundsCount = blobReader.ReadCompressedInteger();
             if (lowerBoundsCount > 0)
             {
-                var array = new int[lowerBoundsCount];
+                var builder = ImmutableArray.CreateBuilder<int>(lowerBoundsCount);
                 for (int i = 0; i < lowerBoundsCount; i++)
                 {
-                    array[i] = blobReader.ReadCompressedSignedInteger();
+                    builder.Add(blobReader.ReadCompressedSignedInteger());
                 }
-                lowerBounds = ImmutableArray.Create(array);
+                lowerBounds = builder.MoveToImmutable();
             }
 
             var arrayShape = new ArrayShape(rank, sizes, lowerBounds);
