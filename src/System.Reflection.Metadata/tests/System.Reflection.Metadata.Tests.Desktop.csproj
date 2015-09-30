@@ -16,7 +16,7 @@
     <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
     <TargetFrameworkProfile />
     <SignAssembly>true</SignAssembly>
-    <AssemblyOriginatorKeyFile>..\..\..\packages\Microsoft.DotNet.BuildTools.1.0.25-prerelease-00053\lib\MSFT.snk</AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyFile>..\..\..\packages\Microsoft.DotNet.BuildTools.1.0.25-prerelease-00095\lib\MSFT.snk</AssemblyOriginatorKeyFile>
     <DelaySign>true</DelaySign>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -47,6 +47,10 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Metadata\Decoding\StringBasedType.Desktop.cs" />
+    <Compile Include="Metadata\Decoding\StringBasedTypeProvider.cs" />
+    <Compile Include="Metadata\Decoding\TypeNameParserTests.cs" />
+    <Compile Include="Metadata\Decoding\TypeNameParserTests.Desktop.cs" />
     <Compile Include="XunitStubs.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -60,7 +64,7 @@
     <Reference Include="System.Collections.Immutable">
       <HintPath>..\..\..\packages\System.Collections.Immutable\1.1.36\lib\portable-net45+win8+wp8+wpa81\System.Collections.Immutable.dll</HintPath>
     </Reference>
-  </ItemGroup>  
+  </ItemGroup>
   <ItemGroup>
     <Compile Include="Metadata\ClassLayoutRow.cs" />
     <Compile Include="Metadata\Decoding\MethodSignatureTests.cs" />
@@ -112,6 +116,9 @@
     <EmbeddedResource Include="Resources\NetModule\ModuleCS01.mod" />
     <EmbeddedResource Include="Resources\NetModule\ModuleVB01.mod" />
     <None Include="Resources\NetModule\ModuleVB01.vb" />
+  </ItemGroup>
+  <ItemGroup>
+    <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
   </ItemGroup>
   <Target Name="BuildAndTest" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
