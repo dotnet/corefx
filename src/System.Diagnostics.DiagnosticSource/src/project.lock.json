@@ -1,5 +1,5 @@
 {
-  "locked": false,
+  "locked": true,
   "version": 1,
   "targets": {
     "DNXCore,Version=v5.0": {
@@ -92,6 +92,8 @@
       "type": "package",
       "sha512": "Uq9epame8hEqJlj4KaWb67dDJvj4IM37jRFGVeFbugRdPz48bR0voyBhrbf3iSa2tAmlkg4lsa6BUOL9iwlMew==",
       "files": [
+        "[Content_Types].xml",
+        "_rels/.rels",
         "lib/MonoAndroid10/_._",
         "lib/MonoTouch10/_._",
         "lib/net45/_._",
@@ -101,6 +103,7 @@
         "lib/xamarinios10/_._",
         "lib/xamarinmac20/_._",
         "License.rtf",
+        "package/services/metadata/core-properties/c5db97a122ad42aeb8e429022c1d1ab8.psmdcp",
         "ref/dotnet/de/System.Runtime.xml",
         "ref/dotnet/es/System.Runtime.xml",
         "ref/dotnet/fr/System.Runtime.xml",
@@ -131,8 +134,6 @@
         "ref/wpa81/_._",
         "ref/xamarinios10/_._",
         "ref/xamarinmac20/_._",
-        "System.Runtime.4.0.0.nupkg",
-        "System.Runtime.4.0.0.nupkg.sha512",
         "System.Runtime.nuspec"
       ]
     },
@@ -140,6 +141,8 @@
       "type": "package",
       "sha512": "H6O/9gUrjPDNYanh/7OFGAZHjVXvEuITD0RcnjfvIV04HOGrOPqUBU0kmz9RIX/7YGgCQn1o1S2DX6Cuv8kVGQ==",
       "files": [
+        "[Content_Types].xml",
+        "_rels/.rels",
         "lib/MonoAndroid10/_._",
         "lib/MonoTouch10/_._",
         "lib/net45/_._",
@@ -149,6 +152,7 @@
         "lib/xamarinios10/_._",
         "lib/xamarinmac20/_._",
         "License.rtf",
+        "package/services/metadata/core-properties/bec033e95dbf4d6ba6595d2be7bb7e25.psmdcp",
         "ref/dotnet/de/System.Threading.xml",
         "ref/dotnet/es/System.Threading.xml",
         "ref/dotnet/fr/System.Threading.xml",
@@ -179,8 +183,6 @@
         "ref/wpa81/_._",
         "ref/xamarinios10/_._",
         "ref/xamarinmac20/_._",
-        "System.Threading.4.0.0.nupkg",
-        "System.Threading.4.0.0.nupkg.sha512",
         "System.Threading.nuspec"
       ]
     },
@@ -188,6 +190,8 @@
       "type": "package",
       "sha512": "dA3y1B6Pc8mNt9obhEWWGGpvEakS51+nafXpmM/Z8IF847GErLXGTjdfA+AYEKszfFbH7SVLWUklXhYeeSQ1lw==",
       "files": [
+        "[Content_Types].xml",
+        "_rels/.rels",
         "lib/MonoAndroid10/_._",
         "lib/MonoTouch10/_._",
         "lib/net45/_._",
@@ -197,6 +201,7 @@
         "lib/xamarinios10/_._",
         "lib/xamarinmac20/_._",
         "License.rtf",
+        "package/services/metadata/core-properties/e45094f04ec149d1ba36afbb03ce2e9e.psmdcp",
         "ref/dotnet/de/System.Threading.Tasks.xml",
         "ref/dotnet/es/System.Threading.Tasks.xml",
         "ref/dotnet/fr/System.Threading.Tasks.xml",
@@ -227,17 +232,15 @@
         "ref/wpa81/_._",
         "ref/xamarinios10/_._",
         "ref/xamarinmac20/_._",
-        "System.Threading.Tasks.4.0.0.nupkg",
-        "System.Threading.Tasks.4.0.0.nupkg.sha512",
         "System.Threading.Tasks.nuspec"
       ]
     }
   },
   "projectFileDependencyGroups": {
     "": [
-      "System.Diagnostics.Debug >= 4.0.0",
       "System.Runtime >= 4.0.0",
-      "System.Threading >= 4.0.0"
+      "System.Threading >= 4.0.0",
+      "System.Diagnostics.Debug >= 4.0.0"
     ],
     "DNXCore,Version=v5.0": []
   }
