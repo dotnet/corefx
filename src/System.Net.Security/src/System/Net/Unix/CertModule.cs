@@ -48,7 +48,6 @@ namespace System.Net
                     }
                 }
             }
-
             return sslPolicyErrors;
         }
 
@@ -58,6 +57,7 @@ namespace System.Net
         internal override X509Certificate2 GetRemoteCertificate(SafeDeleteContext securityContext, out X509Certificate2Collection remoteCertificateStore)
         {
             remoteCertificateStore = null;
+            bool gotReference = false;
 
             if (securityContext == null)
             {
@@ -70,15 +70,51 @@ namespace System.Net
             try
             {
                 int errorCode = SSPIWrapper.QueryContextRemoteCertificate(GlobalSSPI.SSPISecureChannel, securityContext, out remoteContext);
+
                 if (remoteContext != null && !remoteContext.IsInvalid)
                 {
+                    remoteContext.DangerousAddRef(ref gotReference);
                     result = new X509Certificate2(remoteContext.DangerousGetHandle());
+                }
+
+                remoteCertificateStore = new X509Certificate2Collection();
+
+                SafeSharedX509StackHandle chainStack =
+                    Interop.OpenSsl.GetPeerCertificateChain(securityContext.DangerousGetHandle());
+
+                GC.KeepAlive(securityContext);
+
+                using (chainStack)
+                {
+                    if (!chainStack.IsInvalid)
+                    {
+                        int count = Interop.Crypto.GetX509StackFieldCount(chainStack);
+
+                        for (int i = 0; i < count; i++)
+                        {
+                            IntPtr certPtr = Interop.Crypto.GetX509StackField(chainStack, i);
+
+                            if (certPtr != IntPtr.Zero)
+                            {
+                                // X509Certificate2(IntPtr) calls X509_dup, so the reference is appropriately tracked.
+                                X509Certificate2 chainCert = new X509Certificate2(certPtr);
+                                remoteCertificateStore.Add(chainCert);
+                            }
+                        }
+                    }
                 }
             }
             finally
             {
-				//TODO: Fetch remoteCertificateStore, if applicable for unix
-				remoteCertificateStore = new X509Certificate2Collection();
+                if (gotReference)
+                {
+                    remoteContext.DangerousRelease();
+                }
+
+                if (remoteContext != null)
+                {
+                    remoteContext.Dispose();
+                }
             }
 
             if (Logging.On)
@@ -96,7 +132,7 @@ namespace System.Net
         //
         internal override string[] GetRequestCertificateAuthorities(SafeDeleteContext securityContext)
         {
-			//TODO populate issuers
+            // TODO (Issue #3362) populate issuers
             string[] issuers = Array.Empty<string>();          
 
             return issuers;
@@ -104,7 +140,7 @@ namespace System.Net
 
         internal override X509Store EnsureStoreOpened(bool isMachineStore)
         {
-            // TODO: fix implementation
+            // TODO (Issue #3362) do the implementation
             return null;
         }
 
