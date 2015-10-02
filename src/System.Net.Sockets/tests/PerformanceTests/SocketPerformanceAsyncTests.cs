@@ -14,7 +14,6 @@ namespace System.Net.Sockets.Performance.Tests
     {
         private const int DummyOSXPerfIssue = 123456;
 
-        public const int TestPortBase = 9310;
         private readonly ITestOutputHelper _log;
 
         public SocketPerformanceAsyncTests(ITestOutputHelper output)
@@ -23,9 +22,9 @@ namespace System.Net.Sockets.Performance.Tests
         }
 
         [Fact]
+        [OuterLoop]
         public void SocketPerformance_SingleSocketClientAsync_LocalHostServerAsync()
         {
-            int port = TestPortBase + 6;
             SocketImplementationType serverType = SocketImplementationType.Async;
             SocketImplementationType clientType = SocketImplementationType.Async;
             int iterations = 5000;
@@ -36,7 +35,6 @@ namespace System.Net.Sockets.Performance.Tests
             var test = new SocketPerformanceTests(_log);
 
             test.ClientServerTest(
-                port,
                 serverType,
                 clientType,
                 iterations,
@@ -46,10 +44,10 @@ namespace System.Net.Sockets.Performance.Tests
         }
 
         [Fact]
+        [OuterLoop]
         [ActiveIssue(DummyOSXPerfIssue, PlatformID.OSX)]
         public void SocketPerformance_MultipleSocketClientAsync_LocalHostServerAsync()
         {
-            int port = TestPortBase + 7;
             SocketImplementationType serverType = SocketImplementationType.Async;
             SocketImplementationType clientType = SocketImplementationType.Async;
             int iterations = 1000;
@@ -60,7 +58,6 @@ namespace System.Net.Sockets.Performance.Tests
             var test = new SocketPerformanceTests(_log);
 
             test.ClientServerTest(
-                port, 
                 serverType, 
                 clientType, 
                 iterations, 
