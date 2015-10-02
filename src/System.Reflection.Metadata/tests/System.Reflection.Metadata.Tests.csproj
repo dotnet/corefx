@@ -96,4 +96,7 @@
     <None Include="Resources\NetModule\ModuleVB01.vb" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
+  <PropertyGroup>
+     <ProjectPackagesConfigFile /> <!-- buildtools get tripped up by packages.config for desktop project -->
+  </PropertyGroup>
 </Project>
