@@ -79,6 +79,7 @@
     <Compile Include="System\Reflection\Metadata\Decoding\ISignatureTypeProvider.cs" />
     <Compile Include="System\Reflection\Metadata\Decoding\ITypeProvider.cs" />
     <Compile Include="System\Reflection\Metadata\Decoding\SignatureDecoder.cs" />
+    <Compile Include="System\Reflection\Metadata\Decoding\SignatureDecoderOptions.cs" />
     <Compile Include="System\Reflection\Metadata\Decoding\StringComparers.cs" />
     <Compile Include="System\Reflection\Metadata\Decoding\CustomAttributeNamedArgument.cs" />
     <Compile Include="System\Reflection\Metadata\Decoding\CustomAttributeTypedArgument.cs" />
