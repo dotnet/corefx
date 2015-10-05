@@ -276,7 +276,7 @@ namespace System
                 }
                 if (value.Length > 0)
                 {
-                    value = '?' + value;
+                    value = value.StartsWith("?") ? value : '?' + value;
                 }
                 _query = value;
                 _changed = true;
