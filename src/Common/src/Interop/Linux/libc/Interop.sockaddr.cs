@@ -16,6 +16,7 @@ internal static partial class Interop
         public const sa_family_t AF_UNIX = 1;   // Local to host.
         public const sa_family_t AF_INET = 2;   // IP protocol family.
         public const sa_family_t AF_INET6 = 10; // IP version 6.
+        public const sa_family_t AF_PACKET = 17; // Packet family
 
         // Disable CS0169 (The field 'Interop.libc.sockaddr_in.padding' is never used) and CS0649
         // (Field 'Interop.libc.sockaddr.sa_family' is never assigned to, and will always have its
@@ -59,6 +60,45 @@ internal static partial class Interop
             public in6_addr sin6_addr;      // IPv6 address
             public uint sin6_scope_id;      // Scope ID
         }
+
+        public unsafe struct sockaddr_ll // "Link-level" address
+        {
+            public ushort sll_family; // Always AF_PACKET
+            public ushort sll_protocol; // Physical layer protocol
+            public int sll_ifindex; // Interface number
+            public ushort sll_hatype; // Hardware type (?), perhaps "Header" type, see constants below
+            public byte sll_pkttyle; // Packet type
+            public byte sll_halen; // Length of address
+            public fixed byte sll_addr[8]; // Physical layer address
+        }
+
+        // From /usr/include/linux/if_arp.h
+        // These should be the valid values of sll_hatype
+        // denoting the type of hardware link.
+
+        /* ARP protocol HARDWARE identifiers. */
+        public const ushort ARPHRD_ETHER = 1;                   /* Ethernet 10Mbps              */
+        public const ushort ARPHRD_EETHER = 2;                  /* Experimental Ethernet        */
+        public const ushort ARPHRD_PRONET = 4;                  /* PROnet token ring            */
+        public const ushort ARPHRD_ATM = 19;                    /* ATM                          */
+
+        public const ushort ARPHRD_SLIP = 256;
+        public const ushort ARPHRD_CSLIP = 257;
+        public const ushort ARPHRD_SLIP6 = 258;
+        public const ushort ARPHRD_CSLIP6 = 259;
+
+        public const ushort ARPHRD_PPP = 512;
+
+        public const ushort ARPHRD_TUNNEL = 768;                /* IPIP tunnel                  */
+        public const ushort ARPHRD_TUNNEL6 = 769;               /* IP6IP6 tunnel                */
+
+        public const ushort ARPHRD_LOOPBACK = 772;              /* Loopback device              */
+
+        public const ushort ARPHRD_FDDI = 774;                  /* Fiber Distributed Data Interface */
+
+        public const ushort ARPHRD_IEEE80211 = 801;             /* IEEE 802.11                  */
+        public const ushort ARPHRD_IEEE80211_PRISM = 802;       /* IEEE 802.11 + Prism2 header  */
+        public const ushort ARPHRD_IEEE80211_RADIOTAP = 803;    /* IEEE 802.11 + radiotap header    */
 
 #pragma warning restore 169, 649
     }
