@@ -460,6 +460,7 @@ namespace System.Threading.Tasks.Dataflow.Tests
             }
         }
 
+        [ActiveIssue(3658)]
         [Fact]
         public async Task TestExceptionDataStorage()
         {
