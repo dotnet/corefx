@@ -213,7 +213,6 @@ namespace System.Net.Sockets
         public bool DisconnectAsync(System.Net.Sockets.SocketAsyncEventArgs e) { return default(bool); }
         public void Dispose() { }
         protected virtual void Dispose(bool disposing) { }
-        public System.Net.Sockets.SocketInformation DuplicateAndClose(int targetProcessId) { return default(System.Net.Sockets.SocketInformation); }
         ~Socket() { }
         public object GetSocketOption(System.Net.Sockets.SocketOptionLevel optionLevel, System.Net.Sockets.SocketOptionName optionName) { return default(object); }
         public void GetSocketOption(System.Net.Sockets.SocketOptionLevel optionLevel, System.Net.Sockets.SocketOptionName optionName, byte[] optionValue) { }
@@ -254,7 +253,6 @@ namespace System.Net.Sockets
         public int SendTo(byte[] buffer, System.Net.EndPoint remoteEP) { return default(int); }
         public int SendTo(byte[] buffer, System.Net.Sockets.SocketFlags socketFlags, System.Net.EndPoint remoteEP) { return default(int); }
         public bool SendToAsync(System.Net.Sockets.SocketAsyncEventArgs e) { return default(bool); }
-        public void SetIPProtectionLevel(System.Net.Sockets.IPProtectionLevel level) { }
         public void SetSocketOption(System.Net.Sockets.SocketOptionLevel optionLevel, System.Net.Sockets.SocketOptionName optionName, bool optionValue) { }
         public void SetSocketOption(System.Net.Sockets.SocketOptionLevel optionLevel, System.Net.Sockets.SocketOptionName optionName, byte[] optionValue) { }
         public void SetSocketOption(System.Net.Sockets.SocketOptionLevel optionLevel, System.Net.Sockets.SocketOptionName optionName, int optionValue) { }
@@ -416,10 +414,6 @@ namespace System.Net.Sockets
         public int ReceiveTimeout { get { return default(int); } set { } }
         public int SendBufferSize { get { return default(int); } set { } }
         public int SendTimeout { get { return default(int); } set { } }
-        public void Connect(System.Net.IPAddress address, int port) { }
-        public void Connect(System.Net.IPAddress[] ipAddresses, int port) { }
-        public void Connect(System.Net.IPEndPoint remoteEP) { }
-        public void Connect(string hostname, int port) { }
         public System.Threading.Tasks.Task ConnectAsync(System.Net.IPAddress address, int port) { return default(System.Threading.Tasks.Task); }
         public System.Threading.Tasks.Task ConnectAsync(System.Net.IPAddress[] addresses, int port) { return default(System.Threading.Tasks.Task); }
         public System.Threading.Tasks.Task ConnectAsync(string host, int port) { return default(System.Threading.Tasks.Task); }
@@ -436,12 +430,8 @@ namespace System.Net.Sockets
         public bool ExclusiveAddressUse { get { return default(bool); } set { } }
         public System.Net.EndPoint LocalEndpoint { get { return default(System.Net.EndPoint); } }
         public System.Net.Sockets.Socket Server { get { return default(System.Net.Sockets.Socket); } }
-        public System.Net.Sockets.Socket AcceptSocket() { return default(System.Net.Sockets.Socket); }
         public System.Threading.Tasks.Task<System.Net.Sockets.Socket> AcceptSocketAsync() { return default(System.Threading.Tasks.Task<System.Net.Sockets.Socket>); }
-        public System.Net.Sockets.TcpClient AcceptTcpClient() { return default(System.Net.Sockets.TcpClient); }
         public System.Threading.Tasks.Task<System.Net.Sockets.TcpClient> AcceptTcpClientAsync() { return default(System.Threading.Tasks.Task<System.Net.Sockets.TcpClient>); }
-        public void AllowNatTraversal(bool allowed) { }
-        public static System.Net.Sockets.TcpListener Create(int port) { return default(System.Net.Sockets.TcpListener); }
         public bool Pending() { return default(bool); }
         public void Start() { }
         public void Start(int backlog) { }
@@ -469,10 +459,6 @@ namespace System.Net.Sockets
         public bool ExclusiveAddressUse { get { return default(bool); } set { } }
         public bool MulticastLoopback { get { return default(bool); } set { } }
         public short Ttl { get { return default(short); } set { } }
-        public void AllowNatTraversal(bool allowed) { }
-        public void Connect(System.Net.IPAddress addr, int port) { }
-        public void Connect(System.Net.IPEndPoint endPoint) { }
-        public void Connect(string hostname, int port) { }
         public void Dispose() { }
         protected virtual void Dispose(bool disposing) { }
         public void DropMulticastGroup(System.Net.IPAddress multicastAddr) { }
@@ -481,11 +467,7 @@ namespace System.Net.Sockets
         public void JoinMulticastGroup(System.Net.IPAddress multicastAddr) { }
         public void JoinMulticastGroup(System.Net.IPAddress multicastAddr, int timeToLive) { }
         public void JoinMulticastGroup(System.Net.IPAddress multicastAddr, System.Net.IPAddress localAddress) { }
-        public byte[] Receive(ref System.Net.IPEndPoint remoteEP) { return default(byte[]); }
         public System.Threading.Tasks.Task<System.Net.Sockets.UdpReceiveResult> ReceiveAsync() { return default(System.Threading.Tasks.Task<System.Net.Sockets.UdpReceiveResult>); }
-        public int Send(byte[] dgram, int bytes) { return default(int); }
-        public int Send(byte[] dgram, int bytes, System.Net.IPEndPoint endPoint) { return default(int); }
-        public int Send(byte[] dgram, int bytes, string hostname, int port) { return default(int); }
         public System.Threading.Tasks.Task<int> SendAsync(byte[] datagram, int bytes) { return default(System.Threading.Tasks.Task<int>); }
         public System.Threading.Tasks.Task<int> SendAsync(byte[] datagram, int bytes, System.Net.IPEndPoint endPoint) { return default(System.Threading.Tasks.Task<int>); }
         public System.Threading.Tasks.Task<int> SendAsync(byte[] datagram, int bytes, string hostname, int port) { return default(System.Threading.Tasks.Task<int>); }
