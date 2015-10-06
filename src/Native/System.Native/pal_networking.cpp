@@ -13,6 +13,7 @@
 #include <sys/socket.h>
 #include <unistd.h>
 #include <vector>
+#include <ifaddrs.h>
 
 const int NUM_BYTES_IN_IPV4_ADDRESS = 4;
 const int NUM_BYTES_IN_IPV6_ADDRESS = 16;
@@ -391,4 +392,34 @@ extern "C" int32_t GetHostName(uint8_t* name, int32_t nameLength)
 
     size_t unsignedSize = UnsignedCast(nameLength);
     return gethostname(reinterpret_cast<char*>(name), unsignedSize);
+}
+
+extern "C" void EnumerateInterfaceAddresses(const std::function<void(char* ifaceName)>& ipv4Callback,
+                                            const std::function<void(char* ifaceName)>& ipv6Callback,
+                                            const std::function<void(char* ifaceName)>& linkLayerCallback)
+{
+    ifaddrs *headAddr, *current;
+    if (getifaddrs(&headAddr) == -1)
+    {
+        assert(false && "getifaddrs failed.");
+    }
+
+    for (current = headAddr; current != nullptr; current = current->ifa_next)
+    {
+        printf("NAME: %s", current->ifa_name);
+        int family = current->ifa_addr->sa_family;
+        printf("Address family: %d", family);
+        if (family == AF_INET)
+        {
+            ipv4Callback(current->ifa_name);
+        }
+        else if (family == AF_INET6)
+        {
+            ipv6Callback(current->ifa_name);
+        }
+        else if (family == AF_PACKET)
+        {
+            linkLayerCallback(current->ifa_name);
+        }
+    }
 }
