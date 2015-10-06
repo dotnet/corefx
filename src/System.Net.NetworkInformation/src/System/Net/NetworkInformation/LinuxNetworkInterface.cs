@@ -100,7 +100,7 @@ namespace System.Net.NetworkInformation
             lni._ipv6ScopeId = scopeId;
         }
 
-        private static unsafe void ProcessLinkLevelAddress(LinuxNetworkInterface lni, Interop.Sys.LinkLayerAddress* llAddr)
+        private static unsafe void ProcessLinkLevelAddress(LinuxNetworkInterface lni, Interop.Sys.LinkLayerAddressInfo* llAddr)
         {
             byte[] macAddress = new byte[llAddr->NumAddressBytes];
             fixed (byte* macAddressPtr = macAddress)

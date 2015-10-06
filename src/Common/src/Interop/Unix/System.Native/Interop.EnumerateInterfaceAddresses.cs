@@ -8,7 +8,7 @@ internal static partial class Interop
     internal static partial class Sys
     {
         [StructLayout(LayoutKind.Sequential)]
-        public unsafe struct LinkLayerAddress
+        public unsafe struct LinkLayerAddressInfo
         {
             public int InterfaceIndex;
             public fixed byte AddressBytes[8];
@@ -28,7 +28,7 @@ internal static partial class Interop
 
         public unsafe delegate void IPv4AddressDiscoveredCallback(string ifaceName, IpAddressInfo* ipAddressInfo, IpAddressInfo* netMaskInfo);
         public unsafe delegate void IPv6AddressDiscoveredCallback(string ifaceName, IpAddressInfo* ipAddressInfo, uint* scopeId);
-        public unsafe delegate void LinkLayerAddressDiscoveredCallback(string ifaceName, LinkLayerAddress* llAddress);
+        public unsafe delegate void LinkLayerAddressDiscoveredCallback(string ifaceName, LinkLayerAddressInfo* llAddress);
 
         [DllImport("System.Native")]
         public static extern void EnumerateInterfaceAddresses(  IPv4AddressDiscoveredCallback ipv4Found,
