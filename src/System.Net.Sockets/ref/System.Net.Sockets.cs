@@ -189,7 +189,6 @@ namespace System.Net.Sockets
         public System.Threading.Tasks.Task ConnectAsync(System.Net.IPAddress address, int port) { return default(System.Threading.Tasks.Task); }
         public System.Threading.Tasks.Task ConnectAsync(System.Net.IPAddress[] addresses, int port) { return default(System.Threading.Tasks.Task); }
         public System.Threading.Tasks.Task ConnectAsync(string host, int port) { return default(System.Threading.Tasks.Task); }
-        public System.Threading.Tasks.Task DisconnectAsync(bool reuseSocket) { return default(System.Threading.Tasks.Task); }
         public System.Threading.Tasks.Task<int> ReceiveAsync(byte[] buffer, int offset, int size, System.Net.Sockets.SocketFlags socketFlags) { return default(System.Threading.Tasks.Task<int>); }
         public System.Threading.Tasks.Task<int> ReceiveAsync(byte[] buffer, int offset, int size, System.Net.Sockets.SocketFlags socketFlags, out System.Net.Sockets.SocketError errorCode) { errorCode = default(System.Net.Sockets.SocketError); return default(System.Threading.Tasks.Task<int>); }
         public System.Threading.Tasks.Task<int> ReceiveAsync(System.Collections.Generic.IList<System.ArraySegment<byte>> buffers, System.Net.Sockets.SocketFlags socketFlags) { return default(System.Threading.Tasks.Task<int>); }
@@ -209,8 +208,6 @@ namespace System.Net.Sockets
         public void Connect(string host, int port) { }
         public bool ConnectAsync(System.Net.Sockets.SocketAsyncEventArgs e) { return default(bool); }
         public static bool ConnectAsync(System.Net.Sockets.SocketType socketType, System.Net.Sockets.ProtocolType protocolType, System.Net.Sockets.SocketAsyncEventArgs e) { return default(bool); }
-        public void Disconnect(bool reuseSocket) { }
-        public bool DisconnectAsync(System.Net.Sockets.SocketAsyncEventArgs e) { return default(bool); }
         public void Dispose() { }
         protected virtual void Dispose(bool disposing) { }
         ~Socket() { }
@@ -306,7 +303,6 @@ namespace System.Net.Sockets
         Broadcast = 1024,
         ControlDataTruncated = 512,
         DontRoute = 4,
-        MaxIOVectorLength = 16,
         Multicast = 2048,
         None = 0,
         OutOfBand = 1,
