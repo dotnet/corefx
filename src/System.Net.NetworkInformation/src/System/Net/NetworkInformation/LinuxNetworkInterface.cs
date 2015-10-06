@@ -41,8 +41,28 @@ namespace System.Net.NetworkInformation
         {
             Console.WriteLine("Calling EnumerateInterfaceAddresses");
             EnumerateInterfaceAddresses(
-                (name) => Console.WriteLine("IPv4: " + name),
-                (name) => Console.WriteLine("IPv6: " + name),
+                (name, ipAddr) =>
+                {
+                    Console.WriteLine("IPv4: " + name);
+                    byte[] ipBytes = new byte[ipAddr->NumAddressBytes];
+                    fixed (byte* ipArrayPtr = ipBytes)
+                    {
+                        Buffer.MemoryCopy(ipAddr->AddressBytes, ipArrayPtr, ipBytes.Length, ipBytes.Length);
+                    }
+                    IPAddress address = new IPAddress(ipBytes);
+                    Console.WriteLine("Got an IPv4 Address for iface" + ipAddr->InterfaceIndex + ": " + address);
+                },
+                (name, ipAddr) =>
+                {
+                    Console.WriteLine("IPv6: " + name);
+                    byte[] ipBytes = new byte[ipAddr->NumAddressBytes];
+                    fixed (byte* ipArrayPtr = ipBytes)
+                    {
+                        Buffer.MemoryCopy(ipAddr->AddressBytes, ipArrayPtr, ipBytes.Length, ipBytes.Length);
+                    }
+                    IPAddress address = new IPAddress(ipBytes);
+                    Console.WriteLine("Got an IPv6 Address for iface" + ipAddr->InterfaceIndex + ": " + address);
+                },
                 (name, llAddr) => 
                 {
                     Console.WriteLine("LinkLayer: " + name);
@@ -366,8 +386,17 @@ namespace System.Net.NetworkInformation
             private fixed byte __padding[3];
         }
 
-        public delegate void IPv4AddressDiscoveredCallback(string ifaceName);
-        public delegate void IPv6AddressDiscoveredCallback(string ifaceName);
+        [StructLayout(LayoutKind.Sequential)]
+        public unsafe struct IpAddressInfo
+        {
+            public int InterfaceIndex;
+            public fixed byte AddressBytes[16];
+            public byte NumAddressBytes;
+            private fixed byte __padding[3];
+        }
+
+        public unsafe delegate void IPv4AddressDiscoveredCallback(string ifaceName, IpAddressInfo* ipAddressInfo);
+        public unsafe delegate void IPv6AddressDiscoveredCallback(string ifaceName, IpAddressInfo* ipAddressInfo);
         public unsafe delegate void LinkLayerAddressDiscoveredCallback(string ifaceName, LinkLayerAddress* llAddress);
 
         [DllImport("System.Native")]

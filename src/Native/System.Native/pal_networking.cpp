@@ -416,13 +416,24 @@ extern "C" void EnumerateInterfaceAddresses(IPv4AddressFound onIpv4Found,
         printf("Address family: %d\n", family);
         if (family == AF_INET)
         {
-            onIpv4Found(current->ifa_name);
+            IpAddressInfo iai;
+            memset(&iai, 0, sizeof(iai));
+            iai.InterfaceIndex = interfaceIndex;
+            sockaddr_in* sain = reinterpret_cast<sockaddr_in*>(current->ifa_addr);
+            memcpy(iai.AddressBytes, &sain->sin_addr.s_addr, sizeof(sain->sin_addr.s_addr));
+            iai.NumAddressBytes = NUM_BYTES_IN_IPV4_ADDRESS;
+            onIpv4Found(current->ifa_name, &iai);
         }
         else if (family == AF_INET6)
         {
-            onIpv6Found(current->ifa_name);
+            IpAddressInfo iai;
+            memset(&iai, 0, sizeof(iai));
+            iai.InterfaceIndex = interfaceIndex;
+            sockaddr_in6* sain6 = reinterpret_cast<sockaddr_in6*>(current->ifa_addr);
+            memcpy(iai.AddressBytes, sain6->sin6_addr.s6_addr, sizeof(sain6->sin6_addr.s6_addr));
+            iai.NumAddressBytes = NUM_BYTES_IN_IPV6_ADDRESS;
+            onIpv6Found(current->ifa_name, &iai);
         }
-
         // LINUX : AF_PACKET = 17
         // OSX/BSD : AF_LINK = 18
 #if HAVE_AF_PACKET
