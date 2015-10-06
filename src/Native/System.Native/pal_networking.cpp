@@ -397,6 +397,8 @@ extern "C" int32_t GetHostName(uint8_t* name, int32_t nameLength)
 }
 
 #define HAVE_AF_PACKET 1
+#define HAVE_AF_LINK 0
+static_assert(HAVE_AF_PACKET || HAVE_AF_LINK, "System must have AF_PACKET or AF_LINK.");
 
 extern "C" void EnumerateInterfaceAddresses(IPv4AddressFound onIpv4Found,
                                             IPv6AddressFound onIpv6Found,
@@ -411,9 +413,7 @@ extern "C" void EnumerateInterfaceAddresses(IPv4AddressFound onIpv4Found,
     for (current = headAddr; current != nullptr; current = current->ifa_next)
     {
         uint32_t interfaceIndex = if_nametoindex(current->ifa_name);
-        printf("NAME: %s Index:%u\n", current->ifa_name, interfaceIndex);
         int family = current->ifa_addr->sa_family;
-        printf("Address family: %d\n", family);
         if (family == AF_INET)
         {
             // IP Address
@@ -445,8 +445,8 @@ extern "C" void EnumerateInterfaceAddresses(IPv4AddressFound onIpv4Found,
             uint32_t scopeId = sain6->sin6_scope_id;
             onIpv6Found(current->ifa_name, &iai, &scopeId);
         }
-        // LINUX : AF_PACKET = 17
-        // OSX/BSD : AF_LINK = 18
+
+        // LINUX : AF_PACKET = 17        
 #if HAVE_AF_PACKET
         else if (family == AF_PACKET)
         {
@@ -454,14 +454,14 @@ extern "C" void EnumerateInterfaceAddresses(IPv4AddressFound onIpv4Found,
             memset(&lla, 0, sizeof(lla));
             lla.InterfaceIndex = interfaceIndex;
             sockaddr_ll* sall = reinterpret_cast<sockaddr_ll*>(current->ifa_addr);
-            printf("sall->sll_halen = %u\n", sall->sll_halen);
             memcpy(&lla.AddressBytes, &sall->sll_addr, sall->sll_halen);
-            printf("Copied %hhu bytes into LinkLayerAddressInfo\n", sall->sll_halen);
             lla.NumAddressBytes = sall->sll_halen;
             lla.HardwareType = sall->sll_hatype;
             onLinkLayerFound(current->ifa_name, &lla);
         }
+
 #elif HAVE_AF_LINK
+        // OSX/BSD : AF_LINK = 18
         else if (family == AF_LINK)
         {
             LinkLayerAddressInfo lla;

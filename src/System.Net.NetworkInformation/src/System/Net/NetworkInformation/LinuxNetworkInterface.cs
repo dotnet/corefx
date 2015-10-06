@@ -39,10 +39,8 @@ namespace System.Net.NetworkInformation
 
         public unsafe static NetworkInterface[] GetLinuxNetworkInterfaces()
         {
-            Console.WriteLine("Calling EnumerateInterfaceAddresses");
-
             Dictionary<string, LinuxNetworkInterface> interfacesByName = new Dictionary<string, LinuxNetworkInterface>();
-                        EnumerateInterfaceAddresses(
+            EnumerateInterfaceAddresses(
                 (name, ipAddr, maskAddr) =>
                 {
                     LinuxNetworkInterface lni = GetOrCreate(interfacesByName, name);
@@ -84,14 +82,15 @@ namespace System.Net.NetworkInformation
 
         private static unsafe void ProcessIpv6Address(LinuxNetworkInterface lni, IpAddressInfo* addressInfo, uint scopeId)
         {
-            lni._ipv6ScopeId = scopeId;
             byte[] ipBytes = new byte[addressInfo->NumAddressBytes];
             fixed (byte* ipArrayPtr = ipBytes)
             {
                 Buffer.MemoryCopy(addressInfo->AddressBytes, ipArrayPtr, ipBytes.Length, ipBytes.Length);
             }
             IPAddress address = new IPAddress(ipBytes);
+
             lni.AddAddress(address);
+            lni._ipv6ScopeId = scopeId;
         }
 
         private static unsafe void ProcessLinkLevelAddress(LinuxNetworkInterface lni, LinkLayerAddress* llAddr)
@@ -105,7 +104,6 @@ namespace System.Net.NetworkInformation
 
             lni._index = llAddr->InterfaceIndex;
             lni._physicalAddress = physicalAddress;
-            Console.WriteLine("Got hardware type of " + llAddr->HardwareType);
             lni._networkInterfaceType = MapArpHardwareType(llAddr->HardwareType);
         }
 
