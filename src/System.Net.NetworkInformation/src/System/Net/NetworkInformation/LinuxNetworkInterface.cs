@@ -1,4 +1,7 @@
-﻿using System.Collections.Generic;
+﻿// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
@@ -40,7 +43,7 @@ namespace System.Net.NetworkInformation
         public unsafe static NetworkInterface[] GetLinuxNetworkInterfaces()
         {
             Dictionary<string, LinuxNetworkInterface> interfacesByName = new Dictionary<string, LinuxNetworkInterface>();
-            EnumerateInterfaceAddresses(
+            Interop.Sys.EnumerateInterfaceAddresses(
                 (name, ipAddr, maskAddr) =>
                 {
                     LinuxNetworkInterface lni = GetOrCreate(interfacesByName, name);
@@ -60,7 +63,9 @@ namespace System.Net.NetworkInformation
             return interfacesByName.Values.ToArray();
         }
 
-        private static unsafe void ProcessIpv4Address(LinuxNetworkInterface lni, IpAddressInfo* addressInfo, IpAddressInfo* netMask)
+        private static unsafe void ProcessIpv4Address(LinuxNetworkInterface lni,
+                                                        Interop.Sys.IpAddressInfo* addressInfo,
+                                                        Interop.Sys.IpAddressInfo* netMask)
         {
             byte[] ipBytes = new byte[addressInfo->NumAddressBytes];
             fixed (byte* ipArrayPtr = ipBytes)
@@ -80,7 +85,9 @@ namespace System.Net.NetworkInformation
             lni._netMasks[ipAddress] = netMaskAddress;
         }
 
-        private static unsafe void ProcessIpv6Address(LinuxNetworkInterface lni, IpAddressInfo* addressInfo, uint scopeId)
+        private static unsafe void ProcessIpv6Address(LinuxNetworkInterface lni, 
+                                                        Interop.Sys.IpAddressInfo* addressInfo,
+                                                        uint scopeId)
         {
             byte[] ipBytes = new byte[addressInfo->NumAddressBytes];
             fixed (byte* ipArrayPtr = ipBytes)
@@ -93,7 +100,7 @@ namespace System.Net.NetworkInformation
             lni._ipv6ScopeId = scopeId;
         }
 
-        private static unsafe void ProcessLinkLevelAddress(LinuxNetworkInterface lni, LinkLayerAddress* llAddr)
+        private static unsafe void ProcessLinkLevelAddress(LinuxNetworkInterface lni, Interop.Sys.LinkLayerAddress* llAddr)
         {
             byte[] macAddress = new byte[llAddr->NumAddressBytes];
             fixed (byte* macAddressPtr = macAddress)
@@ -284,33 +291,5 @@ namespace System.Net.NetworkInformation
             Debug.Assert(address.AddressFamily == Sockets.AddressFamily.InterNetwork);
             return _netMasks[address];
         }
-
-        [StructLayout(LayoutKind.Sequential)]
-        public unsafe struct LinkLayerAddress
-        {
-            public int InterfaceIndex;
-            public fixed byte AddressBytes[8];
-            public byte NumAddressBytes;
-            private byte __pading;
-            public ushort HardwareType;
-        }
-
-        [StructLayout(LayoutKind.Sequential)]
-        public unsafe struct IpAddressInfo
-        {
-            public int InterfaceIndex;
-            public fixed byte AddressBytes[16];
-            public byte NumAddressBytes;
-            private fixed byte __padding[3];
-        }
-
-        public unsafe delegate void IPv4AddressDiscoveredCallback(string ifaceName, IpAddressInfo* ipAddressInfo, IpAddressInfo* netMaskInfo);
-        public unsafe delegate void IPv6AddressDiscoveredCallback(string ifaceName, IpAddressInfo* ipAddressInfo, uint* scopeId);
-        public unsafe delegate void LinkLayerAddressDiscoveredCallback(string ifaceName, LinkLayerAddress* llAddress);
-
-        [DllImport("System.Native")]
-        public static extern void EnumerateInterfaceAddresses(  IPv4AddressDiscoveredCallback ipv4Found,
-                                                                IPv6AddressDiscoveredCallback ipv6Found,
-                                                                LinkLayerAddressDiscoveredCallback linkLayerFound);
     }
 }

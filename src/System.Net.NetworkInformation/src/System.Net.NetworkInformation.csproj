@@ -239,12 +239,15 @@
     <Compile Include="System\Net\NetworkInformation\LinuxNetworkInterface.cs" />
     <Compile Include="System\Net\NetworkInformation\LinuxIPv4InterfaceProperties.cs" />
     <Compile Include="System\Net\NetworkInformation\LinuxIPv6InterfaceProperties.cs" />
-    <Compile Include="System\Net\NetworkInformation\Linux.NetDeviceFlags.cs" />
+    <Compile Include="System\Net\NetworkInformation\LinuxNetDeviceFlags.cs" />
     <Compile Include="System\Net\NetworkInformation\LinuxUnicastIPAddressInformation.cs" />
     <Compile Include="System\Net\NetworkInformation\IPAddressCollectionImpl.cs" />
     <!-- Linux Common -->
     <Compile Include="$(CommonPath)\Interop\Unix\Interop.Libraries.cs">
       <Link>Common\Interop\Unix\Interop.Libraries.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.EnumerateInterfaceAddresses.cs">
+      <Link>Common\Interop\Unix\System.Native\Interop.EnumerateInterfaceAddresses.cs" </Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\libc\Interop.getfreeifaddrs.cs">
       <Link>Common\Interop\Unix\libc\Interop.getfreeifaddrs.cs</Link>

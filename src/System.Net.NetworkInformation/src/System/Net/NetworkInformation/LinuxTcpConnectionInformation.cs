@@ -1,4 +1,7 @@
-﻿namespace System.Net.NetworkInformation
+﻿// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+namespace System.Net.NetworkInformation
 {
     // This class is not Linux-specific. It is just a data container.
     // TODO: Combine this with SystemTcpConnection. Make Windows construct that object differently.
