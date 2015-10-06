@@ -90,7 +90,8 @@ struct LinkLayerAddressInfo
     uint32_t InterfaceIndex; // The index of the interface to which this address belongs.
     uint8_t AddressBytes[8]; // A pointer to the bytes containing the address.
     uint8_t NumAddressBytes; // The number of bytes actually stored in the address.
-    uint8_t __padding[3];
+    uint8_t __padding;
+    uint16_t HardwareType; // Abstract this type?
 };
 
 struct IpAddressInfo
@@ -101,6 +102,6 @@ struct IpAddressInfo
     uint8_t __padding[3];
 };
 
-typedef void (*IPv4AddressFound)(const char* interfaceName, IpAddressInfo* info);
-typedef void (*IPv6AddressFound)(const char* interfaceName, IpAddressInfo* info);
+typedef void (*IPv4AddressFound)(const char* interfaceName, IpAddressInfo* addressInfo, IpAddressInfo* netMaskInfo);
+typedef void (*IPv6AddressFound)(const char* interfaceName, IpAddressInfo* info, uint32_t* scopeId);
 typedef void (*LinkLayerAddressFound)(const char* interfaceName, LinkLayerAddressInfo* llAddress);

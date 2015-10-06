@@ -40,163 +40,73 @@ namespace System.Net.NetworkInformation
         public unsafe static NetworkInterface[] GetLinuxNetworkInterfaces()
         {
             Console.WriteLine("Calling EnumerateInterfaceAddresses");
-            EnumerateInterfaceAddresses(
-                (name, ipAddr) =>
+
+            Dictionary<string, LinuxNetworkInterface> interfacesByName = new Dictionary<string, LinuxNetworkInterface>();
+                        EnumerateInterfaceAddresses(
+                (name, ipAddr, maskAddr) =>
                 {
-                    Console.WriteLine("IPv4: " + name);
-                    byte[] ipBytes = new byte[ipAddr->NumAddressBytes];
-                    fixed (byte* ipArrayPtr = ipBytes)
-                    {
-                        Buffer.MemoryCopy(ipAddr->AddressBytes, ipArrayPtr, ipBytes.Length, ipBytes.Length);
-                    }
-                    IPAddress address = new IPAddress(ipBytes);
-                    Console.WriteLine("Got an IPv4 Address for iface" + ipAddr->InterfaceIndex + ": " + address);
+                    LinuxNetworkInterface lni = GetOrCreate(interfacesByName, name);
+                    ProcessIpv4Address(lni, ipAddr, maskAddr);
                 },
-                (name, ipAddr) =>
+                (name, ipAddr, scopeId) =>
                 {
-                    Console.WriteLine("IPv6: " + name);
-                    byte[] ipBytes = new byte[ipAddr->NumAddressBytes];
-                    fixed (byte* ipArrayPtr = ipBytes)
-                    {
-                        Buffer.MemoryCopy(ipAddr->AddressBytes, ipArrayPtr, ipBytes.Length, ipBytes.Length);
-                    }
-                    IPAddress address = new IPAddress(ipBytes);
-                    Console.WriteLine("Got an IPv6 Address for iface" + ipAddr->InterfaceIndex + ": " + address);
+                    LinuxNetworkInterface lni = GetOrCreate(interfacesByName, name);
+                    ProcessIpv6Address(lni, ipAddr, *scopeId);
                 },
                 (name, llAddr) => 
                 {
-                    Console.WriteLine("LinkLayer: " + name);
-                    byte[] macAddress = new byte[llAddr->NumAddressBytes];
-                    fixed (byte* macAddressPtr = macAddress)
-                    {
-                        Buffer.MemoryCopy(llAddr->AddressBytes, macAddressPtr, llAddr->NumAddressBytes, llAddr->NumAddressBytes);
-                    }
-                    PhysicalAddress physicalAddress = new PhysicalAddress(macAddress);
-                    Console.WriteLine("Parsed the address! : " + physicalAddress);  
+                    LinuxNetworkInterface lni = GetOrCreate(interfacesByName, name);
+                    ProcessLinkLevelAddress(lni, llAddr);
                 });
-
-            IntPtr headPtr = IntPtr.Zero;
-            if (Interop.libc.getifaddrs(out headPtr) == 0)
-            {
-                try
-                {
-                    return GetInterfacesFromLinkedList(headPtr);
-                }
-                finally
-                {
-                    Interop.libc.freeifaddrs(headPtr);
-                }
-            }
-            else
-            {
-                throw new NetworkInformationException(Marshal.GetLastWin32Error());
-            }
-        }
-
-        private static unsafe NetworkInterface[] GetInterfacesFromLinkedList(IntPtr headPtr)
-        {
-            /*  
-                TODO: Reimplement this logic using a shim on top of free/getifaddrs. The majority of this logic
-                should be applicable on all platforms that impelement the getifaddrs function. This logic
-                should also be lifted into a common base class ("UnixNetworkInterface"), or exposed generically
-                so that the constructors of derived interfaces ("LinuxNetworkInterface", "MacNetworkInterface"
-                can use the data retrieved to construct themselves.
-            */
-            if (headPtr == IntPtr.Zero)
-            {
-                // TODO: Is this legitimate? getifaddrs behaviour is unclear if there are no network interfaces.
-                return Array.Empty<NetworkInterface>();
-            }
-
-            // The linked list structure will contain multiple nodes per device interface, one for each
-            // address address associated with a device. We need to enumerate all of these addresses and store them in the correct interface.
-            Dictionary<string, LinuxNetworkInterface> interfacesByName = new Dictionary<string, LinuxNetworkInterface>();
-
-            while (headPtr != IntPtr.Zero)
-            {
-                Interop.libc.ifaddrs headInterface = Marshal.PtrToStructure<Interop.libc.ifaddrs>(headPtr);
-                LinuxNetworkInterface lni = GetOrCreate(interfacesByName, headInterface.ifa_name);
-
-                // Process address by family (ipv4, ipv6, link-level)
-                switch (headInterface.ifa_addr->sa_family)
-                {
-                    // IPv4 Address
-                    case Interop.libc.AF_INET:
-                        {
-                            ProcessIpv4Address(headInterface, lni);
-                            break;
-                        }
-
-                    // IPv6 Address
-                    case Interop.libc.AF_INET6:
-                        {
-                            ProcessIpv6Address(headInterface, lni);
-                            break;
-                        }
-
-                    // Link-Layer Address (MAC)
-                    case Interop.libc.AF_PACKET:
-                        {
-                            ProcessLinkLevelAddress(headInterface, lni);
-                            break;
-                        }
-
-                    // TODO: Determine if we should throw an exception here or if there are other valid address types.
-                    default:
-                        Debug.WriteLine("Unrecognized sa_family: " + headInterface.ifa_addr->sa_family);
-                        break;
-                }
-
-                headPtr = headInterface.ifa_next;
-            }
 
             return interfacesByName.Values.ToArray();
         }
 
-        private static void ProcessIpv4Address(Interop.libc.ifaddrs headInterface, LinuxNetworkInterface lni)
+        private static unsafe void ProcessIpv4Address(LinuxNetworkInterface lni, IpAddressInfo* addressInfo, IpAddressInfo* netMask)
         {
-            Interop.libc.sockaddr_in ipv4Address = headInterface.GetIPv4Address();
-            IPAddress addr = new IPAddress(ipv4Address.sin_addr.s_addr);
-            lni.AddAddress(addr);
-            Debug.WriteLine("Interface " + headInterface.ifa_name + " has an IPv4 address: " + new IPAddress(ipv4Address.sin_addr.s_addr));
+            byte[] ipBytes = new byte[addressInfo->NumAddressBytes];
+            fixed (byte* ipArrayPtr = ipBytes)
+            {
+                Buffer.MemoryCopy(addressInfo->AddressBytes, ipArrayPtr, ipBytes.Length, ipBytes.Length);
+            }
+            IPAddress ipAddress = new IPAddress(ipBytes);
 
-            IPAddress netMask = new IPAddress(headInterface.GetNetMask().sin_addr.s_addr);
-            Debug.Assert(!lni._netMasks.ContainsKey(addr), "NetworkInterface already contains a net mask for address " + addr);
-            lni._netMasks.Add(addr, netMask); // This will throw if there is somehow a duplicate address.
+            byte[] ipBytes2 = new byte[netMask->NumAddressBytes];
+            fixed (byte* ipArrayPtr = ipBytes2)
+            {
+                Buffer.MemoryCopy(netMask->AddressBytes, ipArrayPtr, ipBytes2.Length, ipBytes2.Length);
+            }
+            IPAddress netMaskAddress = new IPAddress(ipBytes2);
+
+            lni.AddAddress(ipAddress);
+            lni._netMasks[ipAddress] = netMaskAddress;
         }
 
-        private static unsafe void ProcessIpv6Address(Interop.libc.ifaddrs headInterface, LinuxNetworkInterface lni)
+        private static unsafe void ProcessIpv6Address(LinuxNetworkInterface lni, IpAddressInfo* addressInfo, uint scopeId)
         {
-            Interop.libc.sockaddr_in6 ipv6Address = headInterface.GetIPv6Address();
-            lni._ipv6ScopeId = ipv6Address.sin6_scope_id;
-            byte[] addressBytes = new byte[16];
-            fixed (byte* ipv6BytesPtr = addressBytes)
+            lni._ipv6ScopeId = scopeId;
+            byte[] ipBytes = new byte[addressInfo->NumAddressBytes];
+            fixed (byte* ipArrayPtr = ipBytes)
             {
-                Buffer.MemoryCopy(ipv6Address.sin6_addr.s6_addr, ipv6BytesPtr, 16, 16);
+                Buffer.MemoryCopy(addressInfo->AddressBytes, ipArrayPtr, ipBytes.Length, ipBytes.Length);
             }
-            lni.AddAddress(new IPAddress(addressBytes));
-            Debug.WriteLine("Interface " + headInterface.ifa_name + " has an IPv6 address: " + new IPAddress(addressBytes));
+            IPAddress address = new IPAddress(ipBytes);
+            lni.AddAddress(address);
         }
 
-        private static unsafe void ProcessLinkLevelAddress(Interop.libc.ifaddrs headInterface, LinuxNetworkInterface lni)
+        private static unsafe void ProcessLinkLevelAddress(LinuxNetworkInterface lni, LinkLayerAddress* llAddr)
         {
-            Interop.libc.sockaddr_ll linkLevelAddress = headInterface.GetLinkLevelAddress();
-            lni._index = linkLevelAddress.sll_ifindex;
-            Console.WriteLine("SLL_HALEN FOR INDEX " + lni._index + " = " + linkLevelAddress.sll_halen);
-            Debug.WriteLine("Interface  " + headInterface.ifa_name + " has index " + lni._index);
-            if (linkLevelAddress.sll_halen > 0)
+            byte[] macAddress = new byte[llAddr->NumAddressBytes];
+            fixed (byte* macAddressPtr = macAddress)
             {
-                byte[] macAddress = new byte[linkLevelAddress.sll_halen];
-                fixed (byte* macAddressPtr = macAddress)
-                {
-                    Buffer.MemoryCopy(linkLevelAddress.sll_addr, macAddressPtr, macAddress.Length, macAddress.Length);
-                }
-                lni._physicalAddress = new PhysicalAddress(macAddress);
-
-                Debug.WriteLine(headInterface.ifa_name + " MAC Address: " + lni._physicalAddress);
+                Buffer.MemoryCopy(llAddr->AddressBytes, macAddressPtr, llAddr->NumAddressBytes, llAddr->NumAddressBytes);
             }
+            PhysicalAddress physicalAddress = new PhysicalAddress(macAddress);
 
-            lni._networkInterfaceType = MapArpHardwareType(linkLevelAddress.sll_hatype);
+            lni._index = llAddr->InterfaceIndex;
+            lni._physicalAddress = physicalAddress;
+            Console.WriteLine("Got hardware type of " + llAddr->HardwareType);
+            lni._networkInterfaceType = MapArpHardwareType(llAddr->HardwareType);
         }
 
         // Maps ARPHRD_* values to analogous NetworkInterfaceType values, as closely as possible.
@@ -383,7 +293,8 @@ namespace System.Net.NetworkInformation
             public int InterfaceIndex;
             public fixed byte AddressBytes[8];
             public byte NumAddressBytes;
-            private fixed byte __padding[3];
+            private byte __pading;
+            public ushort HardwareType;
         }
 
         [StructLayout(LayoutKind.Sequential)]
@@ -395,8 +306,8 @@ namespace System.Net.NetworkInformation
             private fixed byte __padding[3];
         }
 
-        public unsafe delegate void IPv4AddressDiscoveredCallback(string ifaceName, IpAddressInfo* ipAddressInfo);
-        public unsafe delegate void IPv6AddressDiscoveredCallback(string ifaceName, IpAddressInfo* ipAddressInfo);
+        public unsafe delegate void IPv4AddressDiscoveredCallback(string ifaceName, IpAddressInfo* ipAddressInfo, IpAddressInfo* netMaskInfo);
+        public unsafe delegate void IPv6AddressDiscoveredCallback(string ifaceName, IpAddressInfo* ipAddressInfo, uint* scopeId);
         public unsafe delegate void LinkLayerAddressDiscoveredCallback(string ifaceName, LinkLayerAddress* llAddress);
 
         [DllImport("System.Native")]

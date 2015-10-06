@@ -416,13 +416,23 @@ extern "C" void EnumerateInterfaceAddresses(IPv4AddressFound onIpv4Found,
         printf("Address family: %d\n", family);
         if (family == AF_INET)
         {
+            // IP Address
             IpAddressInfo iai;
             memset(&iai, 0, sizeof(iai));
             iai.InterfaceIndex = interfaceIndex;
             sockaddr_in* sain = reinterpret_cast<sockaddr_in*>(current->ifa_addr);
             memcpy(iai.AddressBytes, &sain->sin_addr.s_addr, sizeof(sain->sin_addr.s_addr));
             iai.NumAddressBytes = NUM_BYTES_IN_IPV4_ADDRESS;
-            onIpv4Found(current->ifa_name, &iai);
+
+            // Net Mask
+            IpAddressInfo maskInfo;
+            memset(&maskInfo, 0, sizeof(maskInfo));
+            maskInfo.InterfaceIndex = interfaceIndex;
+            sockaddr_in* mask_sain = reinterpret_cast<sockaddr_in*>(current->ifa_netmask);
+            memcpy(maskInfo.AddressBytes, &mask_sain->sin_addr.s_addr, sizeof(mask_sain->sin_addr.s_addr));
+            maskInfo.NumAddressBytes = NUM_BYTES_IN_IPV4_ADDRESS;
+
+            onIpv4Found(current->ifa_name, &iai, &maskInfo);
         }
         else if (family == AF_INET6)
         {
@@ -432,7 +442,8 @@ extern "C" void EnumerateInterfaceAddresses(IPv4AddressFound onIpv4Found,
             sockaddr_in6* sain6 = reinterpret_cast<sockaddr_in6*>(current->ifa_addr);
             memcpy(iai.AddressBytes, sain6->sin6_addr.s6_addr, sizeof(sain6->sin6_addr.s6_addr));
             iai.NumAddressBytes = NUM_BYTES_IN_IPV6_ADDRESS;
-            onIpv6Found(current->ifa_name, &iai);
+            uint32_t scopeId = sain6->sin6_scope_id;
+            onIpv6Found(current->ifa_name, &iai, &scopeId);
         }
         // LINUX : AF_PACKET = 17
         // OSX/BSD : AF_LINK = 18
@@ -447,6 +458,7 @@ extern "C" void EnumerateInterfaceAddresses(IPv4AddressFound onIpv4Found,
             memcpy(&lla.AddressBytes, &sall->sll_addr, sall->sll_halen);
             printf("Copied %hhu bytes into LinkLayerAddressInfo\n", sall->sll_halen);
             lla.NumAddressBytes = sall->sll_halen;
+            lla.HardwareType = sall->sll_hatype;
             onLinkLayerFound(current->ifa_name, &lla);
         }
 #elif HAVE_AF_LINK
