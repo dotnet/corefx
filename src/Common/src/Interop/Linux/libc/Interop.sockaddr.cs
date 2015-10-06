@@ -71,35 +71,6 @@ internal static partial class Interop
             public byte sll_halen; // Length of address
             public fixed byte sll_addr[8]; // Physical layer address
         }
-
-        // From /usr/include/linux/if_arp.h
-        // These should be the valid values of sll_hatype
-        // denoting the type of hardware link.
-
-        /* ARP protocol HARDWARE identifiers. */
-        public const ushort ARPHRD_ETHER = 1;                   /* Ethernet 10Mbps              */
-        public const ushort ARPHRD_EETHER = 2;                  /* Experimental Ethernet        */
-        public const ushort ARPHRD_PRONET = 4;                  /* PROnet token ring            */
-        public const ushort ARPHRD_ATM = 19;                    /* ATM                          */
-
-        public const ushort ARPHRD_SLIP = 256;
-        public const ushort ARPHRD_CSLIP = 257;
-        public const ushort ARPHRD_SLIP6 = 258;
-        public const ushort ARPHRD_CSLIP6 = 259;
-
-        public const ushort ARPHRD_PPP = 512;
-
-        public const ushort ARPHRD_TUNNEL = 768;                /* IPIP tunnel                  */
-        public const ushort ARPHRD_TUNNEL6 = 769;               /* IP6IP6 tunnel                */
-
-        public const ushort ARPHRD_LOOPBACK = 772;              /* Loopback device              */
-
-        public const ushort ARPHRD_FDDI = 774;                  /* Fiber Distributed Data Interface */
-
-        public const ushort ARPHRD_IEEE80211 = 801;             /* IEEE 802.11                  */
-        public const ushort ARPHRD_IEEE80211_PRISM = 802;       /* IEEE 802.11 + Prism2 header  */
-        public const ushort ARPHRD_IEEE80211_RADIOTAP = 803;    /* IEEE 802.11 + radiotap header    */
-
 #pragma warning restore 169, 649
     }
 }

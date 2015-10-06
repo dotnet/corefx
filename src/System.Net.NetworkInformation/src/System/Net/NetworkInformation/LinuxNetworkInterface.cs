@@ -31,70 +31,13 @@ namespace System.Net.NetworkInformation
                     LinuxNetworkInterface lni = GetOrCreate(interfacesByName, name);
                     ProcessIpv6Address(lni, ipAddr, *scopeId);
                 },
-                (name, llAddr) => 
+                (name, llAddr) =>
                 {
                     LinuxNetworkInterface lni = GetOrCreate(interfacesByName, name);
                     ProcessLinkLevelAddress(lni, llAddr);
                 });
 
             return interfacesByName.Values.ToArray();
-        }
-
-        private static unsafe void ProcessIpv4Address(LinuxNetworkInterface lni,
-                                                        Interop.Sys.IpAddressInfo* addressInfo,
-                                                        Interop.Sys.IpAddressInfo* netMask)
-        {
-            byte[] ipBytes = new byte[addressInfo->NumAddressBytes];
-            fixed (byte* ipArrayPtr = ipBytes)
-            {
-                Buffer.MemoryCopy(addressInfo->AddressBytes, ipArrayPtr, ipBytes.Length, ipBytes.Length);
-            }
-            IPAddress ipAddress = new IPAddress(ipBytes);
-
-            byte[] ipBytes2 = new byte[netMask->NumAddressBytes];
-            fixed (byte* ipArrayPtr = ipBytes2)
-            {
-                Buffer.MemoryCopy(netMask->AddressBytes, ipArrayPtr, ipBytes2.Length, ipBytes2.Length);
-            }
-            IPAddress netMaskAddress = new IPAddress(ipBytes2);
-
-            lni.AddAddress(ipAddress);
-            lni._netMasks[ipAddress] = netMaskAddress;
-        }
-
-        private static unsafe void ProcessIpv6Address(LinuxNetworkInterface lni, 
-                                                        Interop.Sys.IpAddressInfo* addressInfo,
-                                                        uint scopeId)
-        {
-            byte[] ipBytes = new byte[addressInfo->NumAddressBytes];
-            fixed (byte* ipArrayPtr = ipBytes)
-            {
-                Buffer.MemoryCopy(addressInfo->AddressBytes, ipArrayPtr, ipBytes.Length, ipBytes.Length);
-            }
-            IPAddress address = new IPAddress(ipBytes);
-
-            lni.AddAddress(address);
-            lni._ipv6ScopeId = scopeId;
-        }
-
-        private static unsafe void ProcessLinkLevelAddress(LinuxNetworkInterface lni, Interop.Sys.LinkLayerAddressInfo* llAddr)
-        {
-            byte[] macAddress = new byte[llAddr->NumAddressBytes];
-            fixed (byte* macAddressPtr = macAddress)
-            {
-                Buffer.MemoryCopy(llAddr->AddressBytes, macAddressPtr, llAddr->NumAddressBytes, llAddr->NumAddressBytes);
-            }
-            PhysicalAddress physicalAddress = new PhysicalAddress(macAddress);
-
-            lni._index = llAddr->InterfaceIndex;
-            lni._physicalAddress = physicalAddress;
-            lni._networkInterfaceType = MapArpHardwareType(llAddr->HardwareType);
-        }
-
-        // Adds any IPAddress to this interface's List of addresses.
-        private void AddAddress(IPAddress ipAddress)
-        {
-            _addresses.Add(ipAddress);
         }
 
         /// <summary>
@@ -115,10 +58,6 @@ namespace System.Net.NetworkInformation
 
             return lni;
         }
-
-        public override string Name { get { return _name; } }
-
-        public override NetworkInterfaceType NetworkInterfaceType { get { return _networkInterfaceType; } }
 
         public override bool SupportsMulticast { get { return GetSupportsMulticast(); } }
 
@@ -143,12 +82,6 @@ namespace System.Net.NetworkInformation
         public override IPv4InterfaceStatistics GetIPv4Statistics()
         {
             return new LinuxIpv4InterfaceStatisticsWrapper(_name);
-        }
-
-        public override PhysicalAddress GetPhysicalAddress()
-        {
-            Debug.Assert(_physicalAddress != null, "_physicalAddress was never initialized. This means no address with type AF_PACKET was discovered.");
-            return _physicalAddress;
         }
 
         public override OperationalStatus OperationalStatus
@@ -217,11 +150,5 @@ namespace System.Net.NetworkInformation
         }
 
         public override bool IsReceiveOnly { get { throw new PlatformNotSupportedException(); } }
-
-        public IPAddress GetNetMaskForIPv4Address(IPAddress address)
-        {
-            Debug.Assert(address.AddressFamily == Sockets.AddressFamily.InterNetwork);
-            return _netMasks[address];
-        }
     }
 }
