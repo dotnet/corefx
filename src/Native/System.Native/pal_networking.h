@@ -84,3 +84,7 @@ extern "C" int32_t GetNameInfo(const uint8_t* address,
                                int32_t flags);
 
 extern "C" int32_t GetHostName(uint8_t* name, int32_t nameLength);
+
+typedef void (*IPv4AddressFound)(const char* interfaceName);
+typedef void (*IPv6AddressFound)(const char* interfaceName);
+typedef void (*LinkLayerAddressFound)(const char* interfaceName);

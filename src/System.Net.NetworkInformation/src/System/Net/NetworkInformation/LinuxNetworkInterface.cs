@@ -39,6 +39,12 @@ namespace System.Net.NetworkInformation
 
         public static NetworkInterface[] GetLinuxNetworkInterfaces()
         {
+            Console.WriteLine("Calling EnumerateInterfaceAddresses");
+            EnumerateInterfaceAddresses(
+                (name) => Console.WriteLine("IPv4: " + name),
+                (name) => Console.WriteLine("IPv6: " + name),
+                (name) => Console.WriteLine("LinkLayer: " + name));
+
             IntPtr headPtr = IntPtr.Zero;
             if (Interop.libc.getifaddrs(out headPtr) == 0)
             {
@@ -339,5 +345,14 @@ namespace System.Net.NetworkInformation
             Debug.Assert(address.AddressFamily == Sockets.AddressFamily.InterNetwork);
             return _netMasks[address];
         }
+
+        public delegate void IPv4AddressDiscoveredCallback(string ifaceName);
+        public delegate void IPv6AddressDiscoveredCallback(string ifaceName);
+        public delegate void LinkLayerAddressDiscoveredCallback(string ifaceName);
+
+        [DllImport("System.Native")]
+        public static extern void EnumerateInterfaceAddresses(  IPv4AddressDiscoveredCallback ipv4Found,
+                                                                IPv6AddressDiscoveredCallback ipv6Found,
+                                                                LinkLayerAddressDiscoveredCallback linkLayerFound);
     }
 }

@@ -394,9 +394,9 @@ extern "C" int32_t GetHostName(uint8_t* name, int32_t nameLength)
     return gethostname(reinterpret_cast<char*>(name), unsignedSize);
 }
 
-extern "C" void EnumerateInterfaceAddresses(const std::function<void(char* ifaceName)>& ipv4Callback,
-                                            const std::function<void(char* ifaceName)>& ipv6Callback,
-                                            const std::function<void(char* ifaceName)>& linkLayerCallback)
+extern "C" void EnumerateInterfaceAddresses(IPv4AddressFound onIpv4Found,
+                                            IPv6AddressFound onIpv6Found,
+                                            LinkLayerAddressFound onLinkLayerFound)
 {
     ifaddrs *headAddr, *current;
     if (getifaddrs(&headAddr) == -1)
@@ -406,20 +406,22 @@ extern "C" void EnumerateInterfaceAddresses(const std::function<void(char* iface
 
     for (current = headAddr; current != nullptr; current = current->ifa_next)
     {
-        printf("NAME: %s", current->ifa_name);
+        printf("NAME: %s\n", current->ifa_name);
         int family = current->ifa_addr->sa_family;
-        printf("Address family: %d", family);
+        printf("Address family: %d\n", family);
         if (family == AF_INET)
         {
-            ipv4Callback(current->ifa_name);
+            onIpv4Found(current->ifa_name);
         }
         else if (family == AF_INET6)
         {
-            ipv6Callback(current->ifa_name);
+            onIpv6Found(current->ifa_name);
         }
         else if (family == AF_PACKET)
         {
-            linkLayerCallback(current->ifa_name);
+            onLinkLayerFound(current->ifa_name);
         }
     }
+
+    freeifaddrs(headAddr);
 }
