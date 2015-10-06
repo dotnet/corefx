@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
+
   <PropertyGroup>
     <AssemblyName>System.Net.NetworkInformation</AssemblyName>
     <AssemblyVersion>4.0.10.0</AssemblyVersion>
@@ -9,15 +10,15 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <DefineConstants>$(DefineConstants);FEATURE_CORECLR</DefineConstants>
   </PropertyGroup>
+
   <!-- Help VS understand available configurations -->
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'FreeBSD_Debug|AnyCPU' " />
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'FreeBSD_Release|AnyCPU' " />
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Linux_Debug|AnyCPU' " />
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Linux_Release|AnyCPU' " />
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'OSX_Debug|AnyCPU' " />
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'OSX_Release|AnyCPU' " />
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Windows_Debug|AnyCPU' " />
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Windows_Release|AnyCPU' " />
+
   <ItemGroup>
     <Compile Include="System\Net\NetworkInformation\NetworkAvailabilityEventArgs.cs" />
     <Compile Include="System\Net\StartIPOptions.cs" />
@@ -102,6 +103,7 @@
     </Compile>
     <!--/TODO-->
   </ItemGroup>
+
   <ItemGroup Condition=" '$(TargetsWindows)' == 'true' ">
     <Compile Include="System\Net\NetworkInformation\IPGlobalPropertiesPal.Windows.cs" />
     <Compile Include="System\Net\NetworkInformation\NetworkChange.Windows.cs" />
@@ -217,6 +219,23 @@
       <Link>Interop\Windows\Winsock\Interop.WinSockAsync.cs</Link>
     </Compile>
   </ItemGroup>
+
+  <!-- Unix Common -->
+  <ItemGroup Condition=" '$(TargetsUnix)' == 'true' ">
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.EnumerateInterfaceAddresses.cs">
+      <Link>Common\Interop\Unix\System.Native\Interop.EnumerateInterfaceAddresses.cs" </Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\libc\Interop.gethostname.cs">
+      <Link>Common\Interop\Unix\libc\Interop.gethostname.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\libc\Interop.getdomainname.cs">
+      <Link>Common\Interop\Unix\libc\Interop.getdomainname.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.GetHostName.cs">
+      <Link>Interop\Unix\System.Native\Interop.GetHostName.cs</Link>
+    </Compile>
+  </ItemGroup>
+
   <ItemGroup Condition=" '$(TargetsLinux)' == 'true' ">
     <Compile Include="System\Net\NetworkInformation\LinuxGatewayIPAddressInformation.cs" />
     <Compile Include="System\Net\NetworkInformation\LinuxIcmpV4Statistics.cs" />
@@ -246,33 +265,20 @@
     <Compile Include="$(CommonPath)\Interop\Unix\Interop.Libraries.cs">
       <Link>Common\Interop\Unix\Interop.Libraries.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.EnumerateInterfaceAddresses.cs">
-      <Link>Common\Interop\Unix\System.Native\Interop.EnumerateInterfaceAddresses.cs" </Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\Interop\Unix\libc\Interop.getfreeifaddrs.cs">
-      <Link>Common\Interop\Unix\libc\Interop.getfreeifaddrs.cs</Link>
-    </Compile>
     <Compile Include="$(CommonPath)\Interop\Linux\libc\Interop.sockaddr.cs">
       <Link>Common\Interop\Linux\libc\Interop.sockaddr.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\System\Net\NetworkInformation\HostInformationPal.Unix.cs">
       <Link>Common\System\Net\NetworkInformation\HostInformationPal.Unix.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Unix\libc\Interop.gethostname.cs">
-      <Link>Common\Interop\Unix\libc\Interop.gethostname.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\Interop\Unix\libc\Interop.getdomainname.cs">
-      <Link>Common\Interop\Unix\libc\Interop.getdomainname.cs</Link>
-    </Compile>
     <Compile Include="$(CommonPath)\System\IO\StringParser.cs">
       <Link>System\IO\StringParser.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.GetHostName.cs">
-      <Link>Interop\Unix\System.Native\Interop.GetHostName.cs</Link>
-    </Compile>
   </ItemGroup>
+
   <ItemGroup>
     <None Include="project.json" />
   </ItemGroup>
+
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>
