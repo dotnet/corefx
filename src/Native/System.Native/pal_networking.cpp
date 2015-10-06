@@ -14,6 +14,8 @@
 #include <unistd.h>
 #include <vector>
 #include <ifaddrs.h>
+#include <linux/if_packet.h>
+#include <net/if.h>
 
 const int NUM_BYTES_IN_IPV4_ADDRESS = 4;
 const int NUM_BYTES_IN_IPV6_ADDRESS = 16;
@@ -394,6 +396,8 @@ extern "C" int32_t GetHostName(uint8_t* name, int32_t nameLength)
     return gethostname(reinterpret_cast<char*>(name), unsignedSize);
 }
 
+#define HAVE_AF_PACKET 1
+
 extern "C" void EnumerateInterfaceAddresses(IPv4AddressFound onIpv4Found,
                                             IPv6AddressFound onIpv6Found,
                                             LinkLayerAddressFound onLinkLayerFound)
@@ -406,7 +410,8 @@ extern "C" void EnumerateInterfaceAddresses(IPv4AddressFound onIpv4Found,
 
     for (current = headAddr; current != nullptr; current = current->ifa_next)
     {
-        printf("NAME: %s\n", current->ifa_name);
+        uint32_t interfaceIndex = if_nametoindex(current->ifa_name);
+        printf("NAME: %s Index:%u\n", current->ifa_name, interfaceIndex);
         int family = current->ifa_addr->sa_family;
         printf("Address family: %d\n", family);
         if (family == AF_INET)
@@ -417,10 +422,31 @@ extern "C" void EnumerateInterfaceAddresses(IPv4AddressFound onIpv4Found,
         {
             onIpv6Found(current->ifa_name);
         }
+
+        // LINUX : AF_PACKET = 17
+        // OSX/BSD : AF_LINK = 18
+#if HAVE_AF_PACKET
         else if (family == AF_PACKET)
         {
-            onLinkLayerFound(current->ifa_name);
+            LinkLayerAddressInfo lla;
+            memset(&lla, 0, sizeof(lla));
+            lla.InterfaceIndex = interfaceIndex;
+            sockaddr_ll* sall = reinterpret_cast<sockaddr_ll*>(current->ifa_addr);
+            printf("sall->sll_halen = %u\n", sall->sll_halen);
+            memcpy(&lla.AddressBytes, &sall->sll_addr, sall->sll_halen);
+            printf("Copied %hhu bytes into LinkLayerAddressInfo\n", sall->sll_halen);
+            lla.NumAddressBytes = sall->sll_halen;
+            onLinkLayerFound(current->ifa_name, &lla);
         }
+#elif HAVE_AF_LINK
+        else if (family == AF_LINK)
+        {
+            LinkLayerAddressInfo lla;
+            memset(&lla, 0, sizeof(lla));
+            lla.InterfaceIndex = interfaceIndex;
+            // Do stuff for OSX
+        }
+#endif
     }
 
     freeifaddrs(headAddr);

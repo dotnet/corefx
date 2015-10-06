@@ -85,6 +85,14 @@ extern "C" int32_t GetNameInfo(const uint8_t* address,
 
 extern "C" int32_t GetHostName(uint8_t* name, int32_t nameLength);
 
+struct LinkLayerAddressInfo
+{
+  uint32_t InterfaceIndex; // The index of the interface to which this address belongs.
+  uint8_t AddressBytes[8]; // A pointer to the bytes containing the address.
+  uint8_t NumAddressBytes; // The number of bytes actually stored in the address.
+  uint8_t __padding[3];
+};
+
 typedef void (*IPv4AddressFound)(const char* interfaceName);
 typedef void (*IPv6AddressFound)(const char* interfaceName);
-typedef void (*LinkLayerAddressFound)(const char* interfaceName);
+typedef void (*LinkLayerAddressFound)(const char* interfaceName, LinkLayerAddressInfo* llAddress);

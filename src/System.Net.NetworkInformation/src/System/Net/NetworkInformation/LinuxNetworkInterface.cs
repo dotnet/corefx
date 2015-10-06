@@ -37,13 +37,23 @@ namespace System.Net.NetworkInformation
             _name = name;
         }
 
-        public static NetworkInterface[] GetLinuxNetworkInterfaces()
+        public unsafe static NetworkInterface[] GetLinuxNetworkInterfaces()
         {
             Console.WriteLine("Calling EnumerateInterfaceAddresses");
             EnumerateInterfaceAddresses(
                 (name) => Console.WriteLine("IPv4: " + name),
                 (name) => Console.WriteLine("IPv6: " + name),
-                (name) => Console.WriteLine("LinkLayer: " + name));
+                (name, llAddr) => 
+                {
+                    Console.WriteLine("LinkLayer: " + name);
+                    byte[] macAddress = new byte[llAddr->NumAddressBytes];
+                    fixed (byte* macAddressPtr = macAddress)
+                    {
+                        Buffer.MemoryCopy(llAddr->AddressBytes, macAddressPtr, llAddr->NumAddressBytes, llAddr->NumAddressBytes);
+                    }
+                    PhysicalAddress physicalAddress = new PhysicalAddress(macAddress);
+                    Console.WriteLine("Parsed the address! : " + physicalAddress);  
+                });
 
             IntPtr headPtr = IntPtr.Zero;
             if (Interop.libc.getifaddrs(out headPtr) == 0)
@@ -152,6 +162,7 @@ namespace System.Net.NetworkInformation
         {
             Interop.libc.sockaddr_ll linkLevelAddress = headInterface.GetLinkLevelAddress();
             lni._index = linkLevelAddress.sll_ifindex;
+            Console.WriteLine("SLL_HALEN FOR INDEX " + lni._index + " = " + linkLevelAddress.sll_halen);
             Debug.WriteLine("Interface  " + headInterface.ifa_name + " has index " + lni._index);
             if (linkLevelAddress.sll_halen > 0)
             {
@@ -346,9 +357,18 @@ namespace System.Net.NetworkInformation
             return _netMasks[address];
         }
 
+        [StructLayout(LayoutKind.Sequential)]
+        public unsafe struct LinkLayerAddress
+        {
+            public int InterfaceIndex;
+            public fixed byte AddressBytes[8];
+            public byte NumAddressBytes;
+            private fixed byte __padding[3];
+        }
+
         public delegate void IPv4AddressDiscoveredCallback(string ifaceName);
         public delegate void IPv6AddressDiscoveredCallback(string ifaceName);
-        public delegate void LinkLayerAddressDiscoveredCallback(string ifaceName);
+        public unsafe delegate void LinkLayerAddressDiscoveredCallback(string ifaceName, LinkLayerAddress* llAddress);
 
         [DllImport("System.Native")]
         public static extern void EnumerateInterfaceAddresses(  IPv4AddressDiscoveredCallback ipv4Found,
