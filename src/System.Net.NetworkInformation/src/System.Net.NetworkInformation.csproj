@@ -222,6 +222,7 @@
 
   <!-- Unix Common -->
   <ItemGroup Condition=" '$(TargetsUnix)' == 'true' ">
+    <Compile Include="System\Net\NetworkInformation\UnixNetworkInterface.cs" />
     <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.EnumerateInterfaceAddresses.cs">
       <Link>Common\Interop\Unix\System.Native\Interop.EnumerateInterfaceAddresses.cs" </Link>
     </Compile>

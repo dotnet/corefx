@@ -13,32 +13,9 @@ namespace System.Net.NetworkInformation
     /// <summary>
     /// Implements a NetworkInterface on Linux.
     /// </summary>
-    internal class LinuxNetworkInterface : NetworkInterface
+    internal class LinuxNetworkInterface : UnixNetworkInterface
     {
-        private string _name;
-        private int _index;
-        private NetworkInterfaceType _networkInterfaceType = NetworkInterfaceType.Unknown;
-        private PhysicalAddress _physicalAddress;
-        private List<IPAddress> _addresses = new List<IPAddress>();
-        private Dictionary<IPAddress, IPAddress> _netMasks = new Dictionary<IPAddress, IPAddress>();
-
-        // If this is an ipv6 device, contains the Scope ID.
-        private uint? _ipv6ScopeId = null;
-
-        /// <summary>
-        /// The system's index for this network device.
-        /// </summary>
-        public int Index { get { return _index; } }
-
-        /// <summary>
-        /// Returns a list of all of the interface's IP Addresses.
-        /// </summary>
-        public List<IPAddress> Addresses { get { return _addresses; } }
-
-        private LinuxNetworkInterface(string name)
-        {
-            _name = name;
-        }
+        internal LinuxNetworkInterface(string name) : base(name) { }
 
         public unsafe static NetworkInterface[] GetLinuxNetworkInterfaces()
         {
@@ -112,51 +89,6 @@ namespace System.Net.NetworkInformation
             lni._index = llAddr->InterfaceIndex;
             lni._physicalAddress = physicalAddress;
             lni._networkInterfaceType = MapArpHardwareType(llAddr->HardwareType);
-        }
-
-        // Maps ARPHRD_* values to analogous NetworkInterfaceType values, as closely as possible.
-        private static NetworkInterfaceType MapArpHardwareType(ushort arpHardwareType)
-        {
-            switch (arpHardwareType)
-            {
-                case Interop.libc.ARPHRD_ETHER:
-                case Interop.libc.ARPHRD_EETHER:
-                    return NetworkInterfaceType.Ethernet;
-
-                case Interop.libc.ARPHRD_PRONET:
-                    return NetworkInterfaceType.TokenRing;
-
-                case Interop.libc.ARPHRD_ATM:
-                    return NetworkInterfaceType.Atm;
-
-                case Interop.libc.ARPHRD_SLIP:
-                case Interop.libc.ARPHRD_CSLIP:
-                case Interop.libc.ARPHRD_SLIP6:
-                case Interop.libc.ARPHRD_CSLIP6:
-                    return NetworkInterfaceType.Slip;
-
-                case Interop.libc.ARPHRD_PPP:
-                    return NetworkInterfaceType.Ppp;
-
-                case Interop.libc.ARPHRD_TUNNEL:
-                case Interop.libc.ARPHRD_TUNNEL6:
-                    return NetworkInterfaceType.Tunnel;
-
-                case Interop.libc.ARPHRD_LOOPBACK:
-                    return NetworkInterfaceType.Loopback;
-
-                case Interop.libc.ARPHRD_FDDI:
-                    return NetworkInterfaceType.Fddi;
-
-                case Interop.libc.ARPHRD_IEEE80211:
-                case Interop.libc.ARPHRD_IEEE80211_PRISM:
-                case Interop.libc.ARPHRD_IEEE80211_RADIOTAP:
-                    return NetworkInterfaceType.Wireless80211;
-
-                default:
-                    Debug.WriteLine("Unmapped ARP Hardware type: " + arpHardwareType);
-                    return NetworkInterfaceType.Unknown;
-            }
         }
 
         // Adds any IPAddress to this interface's List of addresses.
