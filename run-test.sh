@@ -214,6 +214,8 @@ runtest()
   then
     rm mscorlib.ni.dll
   fi
+
+  chmod +x ./corerun
   
   # Invoke xunit
 
