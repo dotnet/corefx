@@ -14,6 +14,7 @@ namespace System.IO.Compression
     /// </summary>
     internal class InflaterZlib : IInflater
     {
+        private int _windowBits;
         private bool _finished;                             // Whether the end of the stream has been reached
         private bool _isDisposed;                           // Prevents multiple disposals
         private ZLibNative.ZLibStreamHandle _zlibStream;    // The handle to the primary underlying zlib stream
@@ -27,9 +28,20 @@ namespace System.IO.Compression
         /// </summary>
         internal InflaterZlib(int windowBits)
         {
+            _windowBits = windowBits;
             _finished = false;
             _isDisposed = false;
-            InflateInit(windowBits);
+
+            InflateInit(_windowBits);
+        }
+
+
+        public void Reset()
+        {
+            _finished = false;
+            _zlibStream.Dispose();
+
+            InflateInit(_windowBits);
         }
 
         public int AvailableOutput

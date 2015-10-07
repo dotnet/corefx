@@ -57,6 +57,12 @@ namespace System.IO.Compression
             }
         }
 
+        public void Reset()
+        {
+            _crc32 = 0;
+            _inputStreamSizeModulo = 0;
+        }
+
         public byte[] GetHeader()
         {
             return _headerBytes;

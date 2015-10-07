@@ -95,6 +95,7 @@ namespace System.IO.Compression
 
             _codeList = new byte[HuffmanTree.MaxLiteralTreeElements + HuffmanTree.MaxDistTreeElements];
             _codeLengthTreeCodeLength = new byte[HuffmanTree.NumberOfCodeLengthTreeElements];
+
             Reset();
         }
 
@@ -105,11 +106,13 @@ namespace System.IO.Compression
 
             _codeList = new byte[HuffmanTree.MaxLiteralTreeElements + HuffmanTree.MaxDistTreeElements];
             _codeLengthTreeCodeLength = new byte[HuffmanTree.NumberOfCodeLengthTreeElements];
+
             if (reader != null)
             {
                 _formatReader = reader;
                 _hasFormatReader = true;
             }
+
             Reset();
         }
 
@@ -117,14 +120,16 @@ namespace System.IO.Compression
         {
             _formatReader = reader;
             _hasFormatReader = true;
+
             Reset();
         }
 
-        private void Reset()
+        public void Reset()
         {
             if (_hasFormatReader)
             {
                 _state = InflaterState.ReadingHeader;     // start by reading Header info
+                _formatReader.Reset();
             }
             else
             {
@@ -744,6 +749,7 @@ namespace System.IO.Compression
         }
 
         public void Dispose() { }
+
     }
 }
 

@@ -60,6 +60,18 @@ namespace System.IO.Compression
             _processingState = DeflaterState.NotStarted;
         }
 
+        public void Reset()
+        {
+            _processingState = DeflaterState.NotStarted;
+
+            _deflateEncoder.Reset();
+            _copyEncoder = new CopyEncoder();
+
+            _input = new DeflateInput();
+            _inputFromHistory = new DeflateInput();
+            _output = new OutputBuffer();
+        }
+
         private bool NeedsInput()
         {
             // Convenience method to call NeedsInput privately without a cast.

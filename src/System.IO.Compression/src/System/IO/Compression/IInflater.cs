@@ -12,6 +12,11 @@ namespace System.IO.Compression
         int AvailableOutput { get;}
 
         /// <summary>
+        /// Ensures the infrater internal state is reset and be ready to start again.
+        /// </summary>
+        void Reset();
+
+        /// <summary>
         /// Performs the actual inflation of data currently in the input buffer of the Inflater
         /// and stores it into the given array with the given information
         /// </summary>
