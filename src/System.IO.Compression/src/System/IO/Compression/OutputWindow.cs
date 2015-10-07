@@ -4,6 +4,7 @@
 using System;
 using System.Diagnostics;
 using System.Globalization;
+using System.IO.Compression.Internal;
 
 namespace System.IO.Compression
 {
@@ -13,14 +14,21 @@ namespace System.IO.Compression
     // we need to look back in the output window and copy bytes from there.
     // We use a byte array of WindowSize circularly.
     //
-    internal class OutputWindow
+    internal class OutputWindow : IDisposable
     {
+        private static readonly ObjectPool<byte[]> s_byteBufferPool = new ObjectPool<byte[]>(() => new byte[WindowSize], 16);
+
         private const int WindowSize = 32768;
         private const int WindowMask = 32767;
 
-        private byte[] _window = new byte[WindowSize]; //The window is 2^15 bytes
+        private readonly byte[] _window; //The window is 2^15 bytes
         private int _end;       // this is the position to where we should write next byte 
         private int _bytesUsed; // The number of bytes in the output window which is not consumed.
+
+        public OutputWindow()
+        {
+            _window = s_byteBufferPool.Allocate();
+        }
 
         // Add a byte to output window
         public void Write(byte b)
@@ -150,5 +158,31 @@ namespace System.IO.Compression
             Debug.Assert(_bytesUsed >= 0, "check this function and find why we copied more bytes than we have");
             return copied;
         }
+
+        #region IDisposable Support
+
+        private bool disposedValue = false; // To detect redundant calls
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    s_byteBufferPool.Free(_window);
+                }
+
+                disposedValue = true;
+            }
+        }
+
+        // This code added to correctly implement the disposable pattern.
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+            Dispose(true);
+        }
+
+        #endregion
     }
 }

@@ -743,7 +743,10 @@ namespace System.IO.Compression
             return true;
         }
 
-        public void Dispose() { }
+        public void Dispose()
+        {
+            _output.Dispose();
+        }
     }
 }
 
