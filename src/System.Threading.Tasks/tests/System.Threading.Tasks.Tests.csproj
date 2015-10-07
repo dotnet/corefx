@@ -33,7 +33,7 @@
     <Compile Include="Task\TaskRunSyncTests.cs" />
     <Compile Include="Task\TaskStatusTest.cs" />
     <Compile Include="Task\TaskPropertiesTests.cs" />
-    <Compile Include="Task\TaskCreateTest.cs" />
+    <Compile Include="Task\TaskCreateTests.cs" />
     <Compile Include="Task\TaskWaitAllAnyTest.cs" />
     <Compile Include="Task\TaskContinueWithTests.cs" />
     <Compile Include="Task\TaskContinueWithAllAnyTests.cs" />
