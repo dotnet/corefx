@@ -228,7 +228,7 @@ namespace System.Net.Sockets
 
         // Set/Get WriteTimeout, note of a strange behavior, 0 timeout == infinite for sockets,
         // so we map this to -1, and if you set 0, we cannot support it
-	    public override int WriteTimeout
+        public override int WriteTimeout
         {
             get
             {
@@ -436,7 +436,7 @@ namespace System.Net.Sockets
                         throw;
                     }
 
-                    // Some sort of error occured on the socket call,
+                    // Some sort of error occurred on the socket call,
                     // set the SocketException as InnerException and throw.
                     throw new IOException(SR.Format(SR.net_io_readfailure, exception.Message), exception);
                 }
@@ -510,7 +510,7 @@ namespace System.Net.Sockets
                         throw;
                     }
 
-                    // Some sort of error occured on the socket call,
+                    // Some sort of error occurred on the socket call,
                     // set the SocketException as InnerException and throw.
                     throw new IOException(SR.Format(SR.net_io_writefailure, exception.Message), exception);
                 }
@@ -674,7 +674,7 @@ namespace System.Net.Sockets
                         throw;
                     }
 
-                    // Some sort of error occured on the socket call,
+                    // Some sort of error occurred on the socket call,
                     // set the SocketException as InnerException and throw.
                     throw new IOException(SR.Format(SR.net_io_readfailure, exception.Message), exception);
                 }
@@ -717,7 +717,7 @@ namespace System.Net.Sockets
             {
                 if (ExceptionCheck.IsFatal(exception)) throw;
 
-                // Some sort of error occured on the socket call,
+                // Some sort of error occurred on the socket call,
                 // set the SocketException as InnerException and throw.
                 throw new IOException(SR.Format(SR.net_io_readfailure, exception.Message), exception);
             }
@@ -766,7 +766,7 @@ namespace System.Net.Sockets
                         throw;
                     }
 
-                    // Some sort of error occured on the socket call,
+                    // Some sort of error occurred on the socket call,
                     // set the SocketException as InnerException and throw.
                     throw new IOException(SR.Format(SR.net_io_readfailure, exception.Message), exception);
                 }
@@ -846,7 +846,7 @@ namespace System.Net.Sockets
                         throw;
                     }
 
-                    // Some sort of error occured on the socket call,
+                    // Some sort of error occurred on the socket call,
                     // set the SocketException as InnerException and throw.
                     throw new IOException(SR.Format(SR.net_io_writefailure, exception.Message), exception);
                 }
@@ -899,7 +899,7 @@ namespace System.Net.Sockets
                         throw;
                     }
 
-                    // Some sort of error occured on the socket call,
+                    // Some sort of error occurred on the socket call,
                     // set the SocketException as InnerException and throw.
                     throw new IOException(SR.Format(SR.net_io_writefailure, exception.Message), exception);
                 }
@@ -946,183 +946,13 @@ namespace System.Net.Sockets
                         throw;
                     }
 
-                    // Some sort of error occured on the socket call,
+                    // Some sort of error occurred on the socket call,
                     // set the SocketException as InnerException and throw.
                     throw new IOException(SR.Format(SR.net_io_writefailure, exception.Message), exception);
                 }
 #if DEBUG
             }
 #endif
-        }
-
-        // Performs a sync Write of an array of buffers.
-        internal virtual void MultipleWrite(BufferOffsetSize[] buffers)
-        {
-            GlobalLog.ThreadContract(ThreadKinds.Sync, "NetworkStream#" + Logging.HashString(this) + "::MultipleWrite");
-
-            // Validate input parameters.
-            if (buffers == null)
-            {
-                throw new ArgumentNullException("buffers");
-            }
-
-            Socket chkStreamSocket = _streamSocket;
-            if (chkStreamSocket == null)
-            {
-                throw new IOException(SR.Format(SR.net_io_writefailure, SR.net_io_connectionclosed));
-            }
-
-            try
-            {
-                chkStreamSocket.MultipleSend(
-                    buffers,
-                    SocketFlags.None);
-            }
-            catch (Exception exception)
-            {
-                if (exception is OutOfMemoryException)
-                {
-                    throw;
-                }
-
-                // Some sort of error occured on the socket call,
-                // set the SocketException as InnerException and throw.
-                throw new IOException(SR.Format(SR.net_io_writefailure, exception.Message), exception);
-            }
-        }
-
-        // Starts off an async Write of an array of buffers.
-        internal virtual IAsyncResult BeginMultipleWrite(
-            BufferOffsetSize[] buffers,
-            AsyncCallback callback,
-            Object state)
-        {
-#if DEBUG
-            GlobalLog.ThreadContract(ThreadKinds.Unknown, "NetworkStream#" + Logging.HashString(this) + "::BeginMultipleWrite");
-            using (GlobalLog.SetThreadKind(ThreadKinds.Async))
-            {
-#endif
-                // Validate input parameters.
-                if (buffers == null)
-                {
-                    throw new ArgumentNullException("buffers");
-                }
-
-                Socket chkStreamSocket = _streamSocket;
-                if (chkStreamSocket == null)
-                {
-                    throw new IOException(SR.Format(SR.net_io_writefailure, SR.net_io_connectionclosed));
-                }
-
-                try
-                {
-                    // Call BeginMultipleSend on the Socket.
-                    IAsyncResult asyncResult =
-                        chkStreamSocket.BeginMultipleSend(
-                            buffers,
-                            SocketFlags.None,
-                            callback,
-                            state);
-
-                    return asyncResult;
-                }
-                catch (Exception exception)
-                {
-                    if (exception is OutOfMemoryException)
-                    {
-                        throw;
-                    }
-
-                    // Some sort of error occured on the socket call,
-                    // set the SocketException as InnerException and throw.
-                    throw new IOException(SR.Format(SR.net_io_writefailure, exception.Message), exception);
-                }
-#if DEBUG
-            }
-#endif
-        }
-
-        internal virtual IAsyncResult UnsafeBeginMultipleWrite(
-            BufferOffsetSize[] buffers,
-            AsyncCallback callback,
-            Object state)
-        {
-#if DEBUG
-            GlobalLog.ThreadContract(ThreadKinds.Unknown, "NetworkStream#" + Logging.HashString(this) + "::BeginMultipleWrite");
-            using (GlobalLog.SetThreadKind(ThreadKinds.Async))
-            {
-#endif
-                // Validate input parameters.
-                if (buffers == null)
-                {
-                    throw new ArgumentNullException("buffers");
-                }
-
-                Socket chkStreamSocket = _streamSocket;
-                if (chkStreamSocket == null)
-                {
-                    throw new IOException(SR.Format(SR.net_io_writefailure, SR.net_io_connectionclosed));
-                }
-
-                try
-                {
-                    // Call BeginMultipleSend on the Socket.
-                    IAsyncResult asyncResult =
-                        chkStreamSocket.UnsafeBeginMultipleSend(
-                            buffers,
-                            SocketFlags.None,
-                            callback,
-                            state);
-
-                    return asyncResult;
-                }
-                catch (Exception exception)
-                {
-                    if (exception is OutOfMemoryException)
-                    {
-                        throw;
-                    }
-
-                    // Some sort of error occured on the socket call,
-                    // set the SocketException as InnerException and throw.
-                    throw new IOException(SR.Format(SR.net_io_writefailure, exception.Message), exception);
-                }
-#if DEBUG
-            }
-#endif
-        }
-
-        internal virtual void EndMultipleWrite(IAsyncResult asyncResult)
-        {
-            GlobalLog.ThreadContract(ThreadKinds.Unknown, "NetworkStream#" + Logging.HashString(this) + "::EndMultipleWrite");
-
-            // Validate input parameters.
-            if (asyncResult == null)
-            {
-                throw new ArgumentNullException("asyncResult");
-            }
-
-            Socket chkStreamSocket = _streamSocket;
-            if (chkStreamSocket == null)
-            {
-                throw new IOException(SR.Format(SR.net_io_writefailure, SR.net_io_connectionclosed));
-            }
-
-            try
-            {
-                chkStreamSocket.EndMultipleSend(asyncResult);
-            }
-            catch (Exception exception)
-            {
-                if (exception is OutOfMemoryException)
-                {
-                    throw;
-                }
-
-                // Some sort of error occured on the socket call,
-                // set the SocketException as InnerException and throw.
-                throw new IOException(SR.Format(SR.net_io_writefailure, exception.Message), exception);
-            }
         }
 
         // Flushes data from the stream.  This is meaningless for us, so it does nothing.

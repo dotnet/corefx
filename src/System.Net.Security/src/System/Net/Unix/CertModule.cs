@@ -4,13 +4,17 @@
 using System.Diagnostics;
 using Microsoft.Win32.SafeHandles;
 using System.Net.Security;
-using System.Runtime.InteropServices;
+using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
+using System.Threading;
 
 namespace System.Net
 {   
     internal partial class CertModule : CertInterface
     {
+        private static readonly object s_lockObject = new object();
+        private static X509Store s_userCertStore;
+
         #region internal Methods
         internal override SslPolicyErrors VerifyCertificateProperties(
             X509Chain chain,
@@ -79,12 +83,8 @@ namespace System.Net
 
                 remoteCertificateStore = new X509Certificate2Collection();
 
-                SafeSharedX509StackHandle chainStack =
-                    Interop.OpenSsl.GetPeerCertificateChain(securityContext.DangerousGetHandle());
-
-                GC.KeepAlive(securityContext);
-
-                using (chainStack)
+                using (SafeSharedX509StackHandle chainStack =
+                    Interop.OpenSsl.GetPeerCertificateChain(securityContext.SslContext))
                 {
                     if (!chainStack.IsInvalid)
                     {
@@ -140,8 +140,54 @@ namespace System.Net
 
         internal override X509Store EnsureStoreOpened(bool isMachineStore)
         {
-            // TODO (Issue #3362) do the implementation
-            return null;
+            if (isMachineStore)
+            {
+                // There's not currently a LocalMachine\My store on Unix, so don't bother trying
+                // and having to deal with the exception.
+                //
+                // https://github.com/dotnet/corefx/issues/3690 tracks the lack of this store.
+                return null;
+            }
+
+            return EnsureStoreOpened(ref s_userCertStore, StoreLocation.CurrentUser);
+        }
+
+        private static X509Store EnsureStoreOpened(ref X509Store storeField, StoreLocation storeLocation)
+        {
+            X509Store store = Volatile.Read(ref storeField);
+
+            if (store == null)
+            {
+                lock (s_lockObject)
+                {
+                    store = Volatile.Read(ref storeField);
+
+                    if (store == null)
+                    {
+                        try
+                        {
+                            store = new X509Store(StoreName.My, storeLocation);
+                            store.Open(OpenFlags.ReadOnly);
+
+                            Volatile.Write(ref storeField, store);
+
+                            GlobalLog.Print(
+                                "CertModule::EnsureStoreOpened() storeLocation:" + storeLocation +
+                                    " returned store:" + store.GetHashCode().ToString("x"));
+                        }
+                        catch (CryptographicException e)
+                        {
+                            GlobalLog.Assert(
+                                "CertModule::EnsureStoreOpened()",
+                                "Failed to open cert store, location:" + storeLocation + " exception:" + e);
+
+                            throw;
+                        }
+                    }
+                }
+            }
+
+            return store;
         }
 
         #endregion

@@ -29,6 +29,9 @@
     <Compile Include="$(CommonTestPath)\Cryptography\AlgorithmImplementations\AES\AesContractTests.cs">
       <Link>CommonTest\AlgorithmImplementations\AES\AesContractTests.cs</Link>
     </Compile>
+    <Compile Include="$(CommonTestPath)\Cryptography\AlgorithmImplementations\AES\AesCornerTests.cs">
+      <Link>CommonTest\AlgorithmImplementations\AES\AesCornerTests.cs</Link>
+    </Compile>
     <Compile Include="$(CommonTestPath)\Cryptography\AlgorithmImplementations\AES\AesModeTests.cs">
       <Link>CommonTest\AlgorithmImplementations\AES\AesModeTests.cs</Link>
     </Compile>
@@ -39,7 +42,6 @@
       <Link>CommonTest\AlgorithmImplementations\AES\AesFactory.cs</Link>
     </Compile>
     <Compile Include="AesProvider.cs" />
-    <Compile Include="DesTests.cs" />
     <Compile Include="HashAlgorithmTest.cs" />
     <Compile Include="InvalidUsageTests.cs" />
     <Compile Include="HmacMD5Tests.cs" />
@@ -51,7 +53,6 @@
     <Compile Include="IncrementalHashTests.cs" />
     <Compile Include="MD5Tests.cs" />
     <Compile Include="RandomNumberGeneratorTests.cs" />
-    <Compile Include="RC2Tests.cs" />
     <Compile Include="ReusabilityTests.cs" />
     <Compile Include="Rfc2202HmacTests.cs" />
     <Compile Include="Rfc2898Tests.cs" />
@@ -63,6 +64,9 @@
     <Compile Include="TripleDesTests.cs" />
     <Compile Include="$(CommonTestPath)\Cryptography\ByteUtils.cs">
       <Link>CommonTest\Cryptography\ByteUtils.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonTestPath)\Cryptography\CryptoUtils.cs">
+      <Link>CommonTest\Cryptography\CryptoUtils.cs</Link>
     </Compile>
   </ItemGroup>
   <ItemGroup>
