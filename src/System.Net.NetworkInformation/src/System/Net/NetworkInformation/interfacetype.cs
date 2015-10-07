@@ -30,7 +30,7 @@ namespace System.Net.NetworkInformation
         GigabitEthernet = 117,
         Tunnel = 131,
         MultiRateSymmetricDsl = 143, // Multi-rate Symmetric DSL
-        HighPerformanceSerialBus = 144, // ieee1394
+        HighPerformanceSerialBus = 144, // IEEE1394
         Wman = 237, // IF_TYPE_IEEE80216_WMAN WIMAX
         Wwanpp = 243, // IF_TYPE_WWANPP Mobile Broadband devices based on GSM technology
         Wwanpp2 = 244, // IF_TYPE_WWANPP2 Mobile Broadband devices based on CDMA technology

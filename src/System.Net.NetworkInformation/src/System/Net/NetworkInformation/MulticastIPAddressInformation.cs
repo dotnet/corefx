@@ -1,17 +1,15 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
-
 namespace System.Net.NetworkInformation
 {
-    /// Provides information about a network interface's unicast address
+    /// Provides information about a network interface's unicast address.
     public abstract class MulticastIPAddressInformation : IPAddressInformation
     {
-        /// [To be supplied.]
+        /// Gets the number of seconds remaining during which this address is the preferred address.
         public abstract long AddressPreferredLifetime { get; }
 
-        /// [To be supplied.]
+        /// Gets the number of seconds remaining during which this address is valid.
         public abstract long AddressValidLifetime { get; }
 
         /// Specifies the amount of time remaining on the Dynamic Host Configuration Protocol (DHCP) lease for this IP address.
@@ -27,4 +25,3 @@ namespace System.Net.NetworkInformation
         public abstract SuffixOrigin SuffixOrigin { get; }
     }
 }
-

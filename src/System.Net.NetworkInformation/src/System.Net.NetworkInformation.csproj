@@ -10,15 +10,16 @@
     <DefineConstants>$(DefineConstants);FEATURE_CORECLR</DefineConstants>
   </PropertyGroup>
   <!-- Help VS understand available configurations -->
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'FreeBSD_Debug|AnyCPU' " />
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'FreeBSD_Release|AnyCPU' " />
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Linux_Debug|AnyCPU' " />
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Linux_Release|AnyCPU' " />
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'OSX_Debug|AnyCPU' " />
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'OSX_Release|AnyCPU' " />
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Windows_Debug|AnyCPU' " />
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Windows_Release|AnyCPU' " />
+  
   <ItemGroup>
-    <Compile Include="System\Net\NetworkInformation\NetworkAvailabilityEventArgs.cs" />
-    <Compile Include="System\Net\StartIPOptions.cs" />
     <Compile Include="System\Net\NetworkInformation\DuplicateAddressDetectionState.cs" />
     <Compile Include="System\Net\NetworkInformation\GatewayIPAddressInformation.cs" />
     <Compile Include="System\Net\NetworkInformation\GatewayIPAddressInformationCollection.cs" />
@@ -42,70 +43,10 @@
     <Compile Include="System\Net\NetworkInformation\OperationalStatus.cs" />
     <Compile Include="System\Net\NetworkInformation\PhysicalAddress.cs" />
     <Compile Include="System\Net\NetworkInformation\PrefixOrigin.cs" />
-    <Compile Include="System\Net\NetworkInformation\ScopeLevel.cs" />
-    <Compile Include="System\Net\NetworkInformation\SuffixOrigin.cs" />
-    <Compile Include="System\Net\NetworkInformation\TcpConnection.cs" />
-    <Compile Include="System\Net\NetworkInformation\TcpState.cs" />
-    <Compile Include="System\Net\NetworkInformation\TcpStatistics.cs" />
-    <Compile Include="System\Net\NetworkInformation\UdpStatistics.cs" />
-    <Compile Include="System\Net\NetworkInformation\UnicastIPAddressInformation.cs" />
-    <Compile Include="System\Net\NetworkInformation\UnicastIPAddressInformationCollection.cs" />
-    <Compile Include="System\Net\NetworkInformation\InternalIPAddressCollection.cs" />
-    <!-- System.Net common -->
-    <Compile Include="$(CommonPath)\System\Net\_ContextAwareResult.cs">
-      <Link>Common\System\Net\_ContextAwareResult.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\System\Net\_LazyAsyncResult.cs">
-      <Link>Common\System\Net\_LazyAsyncResult.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\System\Net\Shims\ExecutionContext.cs">
-      <Link>Common\System\Net\Shims\ExecutionContext.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\System\Net\Shims\DBNull.cs">
-      <Link>Common\System\Net\Shims\DBNull.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\System\Net\ExceptionCheck.cs">
-      <Link>Common\System\Net\ExceptionCheck.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\System\NotImplemented.cs">
-      <Link>Common\System\NotImplemented.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\System\Net\ByteOrder.cs">
-      <Link>Common\System\Net\ByteOrder.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\System\Net\IPAddressParserStatics.cs">
-      <Link>Common\System\Net\IPAddressParserStatics.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\System\Net\NetworkInformation\HostInformation.CoreCLR.cs">
-      <Link>Common\System\Net\NetworkInformation\HostInformation.CoreCLR.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\System\Net\NetworkInformation\NetworkInformationException.cs">
-      <Link>Common\System\Net\NetworkInformation\NetworkInformationException.cs</Link>
-    </Compile>
-    <!-- Logging -->
-    <Compile Include="$(CommonPath)\System\Net\Shims\TraceSource.cs">
-      <Link>Common\System\Net\Shims\TraceSource.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\System\Net\Logging\Logging.cs">
-      <Link>Common\System\Net\Logging\Logging.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\System\Net\Logging\GlobalLog.cs">
-      <Link>Common\System\Net\Logging\GlobalLog.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\System\Net\Logging\EventSourceLogging.cs">
-      <Link>Common\System\Net\Logging\EventSourceLogging.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\System\Net\InternalException.cs">
-      <Link>Common\System\Net\InternalException.cs</Link>
-    </Compile>
-    <!--/TODO-->
-  </ItemGroup>
-  <ItemGroup Condition=" '$(TargetsWindows)' == 'true' ">
-    <Compile Include="System\Net\NetworkInformation\IPGlobalPropertiesPal.Windows.cs" />
-    <Compile Include="System\Net\NetworkInformation\NetworkChange.Windows.cs" />
-    <Compile Include="System\Net\NetworkInformation\NetworkInterfacePal.Windows.cs" />
     <Compile Include="System\Net\NetworkInformation\SafeCancelMibChangeNotify.cs" />
     <Compile Include="System\Net\NetworkInformation\SafeFreeMibTable.cs" />
+    <Compile Include="System\Net\NetworkInformation\ScopeLevel.cs" />
+    <Compile Include="System\Net\NetworkInformation\SuffixOrigin.cs" />
     <Compile Include="System\Net\NetworkInformation\SystemGatewayIPAddressInformation.cs" />
     <Compile Include="System\Net\NetworkInformation\SystemIcmpV4Statistics.cs" />
     <Compile Include="System\Net\NetworkInformation\SystemIcmpV6Statistics.cs" />
@@ -122,54 +63,126 @@
     <Compile Include="System\Net\NetworkInformation\SystemTcpStatistics.cs" />
     <Compile Include="System\Net\NetworkInformation\SystemUdpStatistics.cs" />
     <Compile Include="System\Net\NetworkInformation\SystemUnicastIPAddressInformation.cs" />
+    <Compile Include="System\Net\NetworkInformation\TcpConnection.cs" />
+    <Compile Include="System\Net\NetworkInformation\TcpState.cs" />
+    <Compile Include="System\Net\NetworkInformation\TcpStatistics.cs" />
     <Compile Include="System\Net\NetworkInformation\TeredoHelper.cs" />
-    <!-- Common -->
-    <Compile Include="$(CommonPath)\System\Net\SafeCloseSocket.cs">
-      <Link>Common\System\Net\SafeCloseSocket.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\System\Net\SafeCloseSocketAndEvent.cs">
-      <Link>Common\System\Net\SafeCloseSocketAndEvent.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\System\Net\SocketAddress.cs">
-      <Link>Common\System\Net\SocketAddress.cs</Link>
-    </Compile>
-    <!-- Debug only -->
+    <Compile Include="System\Net\NetworkInformation\UdpStatistics.cs" />
+    <Compile Include="System\Net\NetworkInformation\UnicastIPAddressInformation.cs" />
+    <Compile Include="System\Net\NetworkInformation\UnicastIPAddressInformationCollection.cs" />
+    <Compile Include="System\Net\NetworkInformation\InternalIPAddressCollection.cs" />
+
+    <!-- Debug only --> 
     <Compile Include="$(CommonPath)\System\Net\DebugSafeHandle.cs">
       <Link>Common\System\Net\DebugSafeHandle.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\System\Net\DebugSafeHandleMinusOneIsInvalid.cs">
       <Link>Common\System\Net\DebugSafeHandleMinusOneIsInvalid.cs</Link>
     </Compile>
+
+    <!-- System.Net.Internals common -->    
+    <Compile Include="$(CommonPath)\System\Net\Sockets\SocketType.cs">
+      <Link>Common\System\Net\Sockets\SocketType.cs</Link>
+    </Compile>
+
+    <!-- System.Net common -->
+    <Compile Include="$(CommonPath)\System\Net\_ContextAwareResult.cs">
+      <Link>Common\System\Net\_ContextAwareResult.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\Net\_LazyAsyncResult.cs">
+      <Link>Common\System\Net\_LazyAsyncResult.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\Net\Shims\ExecutionContext.cs">
+      <Link>Common\System\Net\Shims\ExecutionContext.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\Net\Shims\DBNull.cs">
+      <Link>Common\System\Net\Shims\DBNull.cs</Link>
+    </Compile>
+
+    <Compile Include="$(CommonPath)\System\Net\ByteOrder.cs">
+      <Link>Common\System\Net\ByteOrder.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\Net\ExceptionCheck.cs">
+      <Link>Common\System\Net\ExceptionCheck.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\Net\IPAddressParserStatics.cs" >
+      <Link>Common\System\Net\IPAddressParserStatics.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\Net\SafeCloseSocket.cs">
+      <Link>Common\System\Net\SafeCloseSocket.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\Net\SafeCloseSocket.Windows.cs">
+      <Link>Common\System\Net\SafeCloseSocket.Windows.cs</Link>
+    </Compile>    
+    <Compile Include="$(CommonPath)\System\Net\SafeCloseSocketAndEvent.cs">
+      <Link>Common\System\Net\SafeCloseSocketAndEvent.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\Net\SocketAddress.cs">
+      <Link>Common\System\Net\SocketAddress.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\Net\SocketAddressPal.Windows.cs">
+      <Link>Common\System\Net\SocketAddressPal.Windows.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\Net\NetworkInformation\HostInformation.CoreCLR.cs" >
+      <Link>Common\System\Net\NetworkInformation\HostInformation.CoreCLR.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\Net\NetworkInformation\NetworkInformationException.cs" >
+      <Link>Common\System\Net\NetworkInformation\NetworkInformationException.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\Net\NetworkInformation\StartIPOptions.cs" >
+      <Link>Common\System\Net\NetworkInformation\StartIPOptions.cs</Link>
+    </Compile>
+
+    <Compile Include="$(CommonPath)\System\Net\NetworkInformation\HostInformationPal.Windows.cs" >
+      <Link>Common\System\Net\NetworkInformation\HostInformationPal.Windows.cs</Link>
+    </Compile>
+    
+    <!-- Logging -->
+    <Compile Include="$(CommonPath)\System\Net\Shims\TraceSource.cs">
+      <Link>Common\System\Net\Shims\TraceSource.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\Net\Logging\Logging.cs">
+      <Link>Common\System\Net\Logging\Logging.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\Net\Logging\GlobalLog.cs">
+      <Link>Common\System\Net\Logging\GlobalLog.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\Net\Logging\EventSourceLogging.cs">
+      <Link>Common\System\Net\Logging\EventSourceLogging.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\Net\InternalException.cs">
+      <Link>Common\System\Net\InternalException.cs</Link>
+    </Compile>
+
+    <!-- Common -->
     <Compile Include="$(CommonPath)\Microsoft\Win32\SafeHandles\SafeHandleZeroOrMinusOneIsInvalid.cs">
       <Link>Common\Microsoft\Win32\SafeHandles\SafeHandleZeroOrMinusOneIsInvalid.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Microsoft\Win32\SafeHandles\SafeHandleMinusOneIsInvalid.cs">
       <Link>Common\Microsoft\Win32\SafeHandles\SafeHandleMinusOneIsInvalid.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\Interop.Libraries.cs">
-      <Link>Interop\Windows\Interop.Libraries.cs</Link>
-    </Compile>
     <Compile Include="$(CommonPath)\Microsoft\Win32\SafeHandles\SafeLocalAllocHandle.cs">
       <Link>Common\Microsoft\Win32\SafeHandles\SafeLocalAllocHandle.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\System\Net\SafeCloseSocket.Windows.cs">
-      <Link>Common\System\Net\SafeCloseSocket.Windows.cs</Link>
+    <Compile Include="$(CommonPath)\System\NotImplemented.cs">
+      <Link>Common\System\NotImplemented.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\System\Net\SocketAddressPal.Windows.cs">
-      <Link>Common\System\Net\SocketAddressPal.Windows.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\System\Net\NetworkInformation\HostInformationPal.Windows.cs">
-      <Link>Common\System\Net\NetworkInformation\HostInformationPal.Windows.cs</Link>
-    </Compile>
+    
     <!-- Interop -->
+    <Compile Include="$(CommonPath)\Interop\Windows\Interop.Libraries.cs">
+      <Link>Interop\Windows\Interop.Libraries.cs</Link>
+    </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\IpHlpApi\Interop.ErrorCodes.cs">
-      <Link>Common\Interop\Windows\IpHlpApi\Interop.ErrorCodes.cs</Link>
+      <Link>Interop\Windows\IpHlpApi\Interop.ErrorCodes.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\IpHlpApi\Interop.FIXED_INFO.cs">
-      <Link>Common\Interop\Windows\IpHlpApi\Interop.FIXED_INFO.cs</Link>
+      <Link>Interop\Windows\IpHlpApi\Interop.FIXED_INFO.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\IpHlpApi\Interop.IP_ADDR_STRING.cs">
-      <Link>Common\Interop\Windows\IpHlpApi\Interop.IP_ADDR_STRING.cs</Link>
+      <Link>Interop\Windows\IpHlpApi\Interop.IP_ADDR_STRING.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\IpHlpApi\Interop.NetworkInformation.cs">
+      <Link>Interop\Windows\IpHlpApi\Interop.NetworkInformation.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\mincore_obsolete\Interop.LocalAlloc.cs">
       <Link>Interop\Windows\mincore_obsolete\Interop.LocalAlloc.cs</Link>
@@ -178,19 +191,34 @@
       <Link>Interop\Windows\mincore_obsolete\Interop.LocalAlloc_SafeOverlappedFree.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\mincore_obsolete\Interop.LocalAlloc.Constants.cs">
-      <Link>Common\Interop\Windows\mincore_obsolete\Interop.LocalAlloc.Constants.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\Winsock\SafeOverlappedFree.cs">
-      <Link>Interop\Windows\Winsock\SafeOverlappedFree.cs</Link>
-    </Compile>
+      <Link>Interop\Windows\mincore_obsolete\Interop.LocalAlloc.Constants.cs</Link>
+    </Compile>  
     <Compile Include="$(CommonPath)\Interop\Windows\mincore_obsolete\Interop.LocalFree.cs">
-      <Link>Common\Interop\Windows\mincore_obsolete\Interop.LocalFree.cs</Link>
+      <Link>Interop\Windows\mincore_obsolete\Interop.LocalFree.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\IpHlpApi\Interop.NetworkInformation.cs">
-      <Link>Common\Interop\Windows\IpHlpApi\Interop.NetworkInformation.cs</Link>
+    <Compile Include="$(CommonPath)\Interop\Windows\Winsock\Interop.accept.cs">
+      <Link>Interop\Windows\Winsock\Interop.accept.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\Winsock\Interop.closesocket.cs">
       <Link>Interop\Windows\Winsock\Interop.closesocket.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\Winsock\Interop.ioctlsocket.cs">
+      <Link>Interop\Windows\Winsock\Interop.ioctlsocket.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\Winsock\Interop.setsockopt.cs">
+      <Link>Interop\Windows\Winsock\Interop.setsockopt.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\Winsock\Interop.WinsockBSD.cs">
+      <Link>Interop\Windows\Winsock\Interop.WinsockBSD.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\Winsock\Interop.WinsockAsync.cs">
+      <Link>Interop\Windows\Winsock\Interop.WinsockAsync.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\Winsock\Interop.WSAEventSelect.cs">
+      <Link>Interop\Windows\Winsock\Interop.WSAEventSelect.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\Winsock\Interop.WSAIoctl.cs">
+      <Link>Interop\Windows\Winsock\Interop.WSAIoctl.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\Winsock\Interop.WSASocketW.cs">
       <Link>Interop\Windows\Winsock\Interop.WSASocketW.cs</Link>
@@ -198,83 +226,21 @@
     <Compile Include="$(CommonPath)\Interop\Windows\Winsock\Interop.WSASocketW.SafeCloseSocket.cs">
       <Link>Interop\Windows\Winsock\Interop.WSASocketW.SafeCloseSocket.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\Winsock\SocketType.cs">
-      <Link>Interop\Windows\Winsock\SocketType.cs</Link>
-    </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\Winsock\SafeNativeOverlapped.cs">
       <Link>Interop\Windows\Winsock\SafeNativeOverlapped.cs</Link>
-    </Compile>
+    </Compile>    
+    <Compile Include="$(CommonPath)\Interop\Windows\Winsock\SafeOverlappedFree.cs">
+      <Link>Interop\Windows\Winsock\SafeOverlappedFree.cs</Link>
+    </Compile>    
     <Compile Include="$(CommonPath)\Interop\Windows\Winsock\WSABuffer.cs">
       <Link>Interop\Windows\Winsock\WSABuffer.cs</Link>
     </Compile>
-    <!--TODO: Should this be more granular?-->
-    <Compile Include="$(CommonPath)\Interop\Windows\Winsock\Interop.WinsockBSD.cs">
-      <Link>Interop\Windows\Winsock\Interop.WinSockBSD.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\Winsock\Interop.WinsockAsync.cs">
-      <Link>Interop\Windows\Winsock\Interop.WinSockAsync.cs</Link>
-    </Compile>
   </ItemGroup>
-  <!-- Unix Common -->
-  <ItemGroup Condition=" '$(TargetsUnix)' == 'true' ">
-    <Compile Include="System\Net\NetworkInformation\UnixNetworkInterface.cs" />
-    <Compile Include="$(CommonPath)\Interop\Unix\Interop.Libraries.cs">
-      <Link>Common\Interop\Unix\Interop.Libraries.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.EnumerateInterfaceAddresses.cs">
-      <Link>Common\Interop\Unix\System.Native\Interop.EnumerateInterfaceAddresses.cs" </Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\System\Net\NetworkInformation\HostInformationPal.Unix.cs">
-      <Link>Common\System\Net\NetworkInformation\HostInformationPal.Unix.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\Interop\Unix\libc\Interop.gethostname.cs">
-      <Link>Common\Interop\Unix\libc\Interop.gethostname.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\Interop\Unix\libc\Interop.getdomainname.cs">
-      <Link>Common\Interop\Unix\libc\Interop.getdomainname.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.GetHostName.cs">
-      <Link>Interop\Unix\System.Native\Interop.GetHostName.cs</Link>
-    </Compile>
+
+  <ItemGroup Condition=" '$(TargetsWindows)' == 'true' ">
+    <!-- TODO -->
   </ItemGroup>
-  <ItemGroup Condition=" '$(TargetsLinux)' == 'true' ">
-    <Compile Include="System\Net\NetworkInformation\LinuxGatewayIPAddressInformation.cs" />
-    <Compile Include="System\Net\NetworkInformation\LinuxIcmpV4Statistics.cs" />
-    <Compile Include="System\Net\NetworkInformation\LinuxIcmpV6Statistics.cs" />
-    <Compile Include="System\Net\NetworkInformation\LinuxTcpConnectionInformation.cs" />
-    <Compile Include="System\Net\NetworkInformation\LinuxTcpState.cs" />
-    <Compile Include="System\Net\NetworkInformation\LinuxTcpStatistics.cs" />
-    <Compile Include="System\Net\NetworkInformation\LinuxUdpStatistics.cs" />
-    <Compile Include="System\Net\NetworkInformation\NetworkChange.Linux.cs" />
-    <Compile Include="System\Net\NetworkInformation\RowConfigReader.cs" />
-    <Compile Include="System\Net\NetworkInformation\IPGlobalPropertiesPal.Linux.cs" />
-    <Compile Include="System\Net\NetworkInformation\LinuxIPAddressInformation.cs" />
-    <Compile Include="System\Net\NetworkInformation\LinuxMulticastIPAddressInformation.cs" />
-    <Compile Include="System\Net\NetworkInformation\LinuxIPGlobalProperties.cs" />
-    <Compile Include="System\Net\NetworkInformation\LinuxIPGlobalStatistics.cs" />
-    <Compile Include="System\Net\NetworkInformation\LinuxIPInterfaceProperties.cs" />
-    <Compile Include="System\Net\NetworkInformation\LinuxIPInterfaceStatistics.cs" />
-    <Compile Include="System\Net\NetworkInformation\LinuxNetworkFiles.cs" />
-    <Compile Include="System\Net\NetworkInformation\NetworkInterfacePal.Linux.cs" />
-    <Compile Include="System\Net\NetworkInformation\LinuxNetworkInterface.cs" />
-    <Compile Include="System\Net\NetworkInformation\LinuxIPv4InterfaceProperties.cs" />
-    <Compile Include="System\Net\NetworkInformation\LinuxIPv6InterfaceProperties.cs" />
-    <Compile Include="System\Net\NetworkInformation\LinuxNetDeviceFlags.cs" />
-    <Compile Include="System\Net\NetworkInformation\LinuxUnicastIPAddressInformation.cs" />
-    <Compile Include="System\Net\NetworkInformation\IPAddressCollectionImpl.cs" />
-    <!-- Linux Common -->
-    <Compile Include="$(CommonPath)\Interop\Linux\libc\Interop.sockaddr.cs">
-      <Link>Common\Interop\Linux\libc\Interop.sockaddr.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\System\IO\StringParser.cs">
-      <Link>System\IO\StringParser.cs</Link>
-    </Compile>
-  </ItemGroup>
-  <ItemGroup Condition=" '$(TargetsOsx)' == 'true'">
-    <Compile Include="System\Net\NetworkInformation\IPGlobalPropertiesPal.Osx.cs" />
-    <Compile Include="System\Net\NetworkInformation\NetworkInterfacePal.Osx.cs" />
-    <Compile Include="System\Net\NetworkInformation\OsxNetworkInterface.cs" />
-  </ItemGroup>
+  
   <ItemGroup>
     <None Include="project.json" />
   </ItemGroup>

@@ -1,15 +1,13 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 
 namespace System.Net.NetworkInformation
 {
-    public class InternalIPAddressCollection : IPAddressCollection
+    internal class InternalIPAddressCollection : IPAddressCollection
     {
-
-        private Collection<IPAddress> _addresses = new Collection<IPAddress>();
+        private readonly Collection<IPAddress> _addresses = new Collection<IPAddress>();
 
         protected internal InternalIPAddressCollection()
         {
@@ -19,7 +17,6 @@ namespace System.Net.NetworkInformation
         {
             _addresses.CopyTo(array, offset);
         }
-
 
         public override int Count
         {
@@ -42,7 +39,6 @@ namespace System.Net.NetworkInformation
             throw new NotSupportedException(SR.net_collection_readonly);
         }
 
-
         internal void InternalAdd(IPAddress address)
         {
             _addresses.Add(address);
@@ -57,7 +53,7 @@ namespace System.Net.NetworkInformation
         {
             get
             {
-                return (IPAddress)_addresses[index];
+                return _addresses[index];
             }
         }
     }

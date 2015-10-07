@@ -1,16 +1,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-
-/// <summary><para>
-///    Provides support for ip configuation information and statistics.
-///</para></summary>     
-///
-
-
 using System.Net.Sockets;
-using System;
-using System.ComponentModel;
 
 namespace System.Net.NetworkInformation
 {
@@ -30,14 +21,12 @@ namespace System.Net.NetworkInformation
         NeighborSolict = 135,
         NeighborAdvertisement = 136,
         Redirect = 137,
-    };
+    }
 
-
-
-    /// <summary>Icmp statistics for Ipv6.</summary>
+    // ICMP statistics for Ipv6.
     internal class SystemIcmpV6Statistics : IcmpV6Statistics
     {
-        private Interop.IpHlpApi.MibIcmpInfoEx _stats;
+        private readonly Interop.IpHlpApi.MibIcmpInfoEx _stats;
 
         internal SystemIcmpV6Statistics()
         {
@@ -50,9 +39,13 @@ namespace System.Net.NetworkInformation
         }
 
         public override long MessagesSent { get { return (long)_stats.outStats.dwMsgs; } }
+
         public override long MessagesReceived { get { return (long)_stats.inStats.dwMsgs; } }
+
         public override long ErrorsSent { get { return (long)_stats.outStats.dwErrors; } }
+
         public override long ErrorsReceived { get { return (long)_stats.inStats.dwErrors; } }
+
         public override long DestinationUnreachableMessagesSent
         {
             get
@@ -60,6 +53,7 @@ namespace System.Net.NetworkInformation
                 return _stats.outStats.rgdwTypeCount[(long)IcmpV6StatType.DestinationUnreachable];
             }
         }
+
         public override long DestinationUnreachableMessagesReceived
         {
             get
@@ -67,6 +61,7 @@ namespace System.Net.NetworkInformation
                 return _stats.inStats.rgdwTypeCount[(long)IcmpV6StatType.DestinationUnreachable];
             }
         }
+
         public override long PacketTooBigMessagesSent
         {
             get
@@ -74,6 +69,7 @@ namespace System.Net.NetworkInformation
                 return _stats.outStats.rgdwTypeCount[(long)IcmpV6StatType.PacketTooBig];
             }
         }
+
         public override long PacketTooBigMessagesReceived
         {
             get
@@ -81,6 +77,7 @@ namespace System.Net.NetworkInformation
                 return _stats.inStats.rgdwTypeCount[(long)IcmpV6StatType.PacketTooBig];
             }
         }
+
         public override long TimeExceededMessagesSent
         {
             get
@@ -88,6 +85,7 @@ namespace System.Net.NetworkInformation
                 return _stats.outStats.rgdwTypeCount[(long)IcmpV6StatType.TimeExceeded];
             }
         }
+
         public override long TimeExceededMessagesReceived
         {
             get
@@ -95,6 +93,7 @@ namespace System.Net.NetworkInformation
                 return _stats.inStats.rgdwTypeCount[(long)IcmpV6StatType.TimeExceeded];
             }
         }
+
         public override long ParameterProblemsSent
         {
             get
@@ -102,6 +101,7 @@ namespace System.Net.NetworkInformation
                 return _stats.outStats.rgdwTypeCount[(long)IcmpV6StatType.ParameterProblem];
             }
         }
+
         public override long ParameterProblemsReceived
         {
             get
@@ -109,6 +109,7 @@ namespace System.Net.NetworkInformation
                 return _stats.inStats.rgdwTypeCount[(long)IcmpV6StatType.ParameterProblem];
             }
         }
+
         public override long EchoRequestsSent
         {
             get
@@ -116,6 +117,7 @@ namespace System.Net.NetworkInformation
                 return _stats.outStats.rgdwTypeCount[(long)IcmpV6StatType.EchoRequest];
             }
         }
+
         public override long EchoRequestsReceived
         {
             get
@@ -123,6 +125,7 @@ namespace System.Net.NetworkInformation
                 return _stats.inStats.rgdwTypeCount[(long)IcmpV6StatType.EchoRequest];
             }
         }
+
         public override long EchoRepliesSent
         {
             get
@@ -130,6 +133,7 @@ namespace System.Net.NetworkInformation
                 return _stats.outStats.rgdwTypeCount[(long)IcmpV6StatType.EchoReply];
             }
         }
+
         public override long EchoRepliesReceived
         {
             get
@@ -137,6 +141,7 @@ namespace System.Net.NetworkInformation
                 return _stats.inStats.rgdwTypeCount[(long)IcmpV6StatType.EchoReply];
             }
         }
+
         public override long MembershipQueriesSent
         {
             get
@@ -144,6 +149,7 @@ namespace System.Net.NetworkInformation
                 return _stats.outStats.rgdwTypeCount[(long)IcmpV6StatType.MembershipQuery];
             }
         }
+
         public override long MembershipQueriesReceived
         {
             get
@@ -151,6 +157,7 @@ namespace System.Net.NetworkInformation
                 return _stats.inStats.rgdwTypeCount[(long)IcmpV6StatType.MembershipQuery];
             }
         }
+
         public override long MembershipReportsSent
         {
             get
@@ -158,6 +165,7 @@ namespace System.Net.NetworkInformation
                 return _stats.outStats.rgdwTypeCount[(long)IcmpV6StatType.MembershipReport];
             }
         }
+
         public override long MembershipReportsReceived
         {
             get
@@ -165,6 +173,7 @@ namespace System.Net.NetworkInformation
                 return _stats.inStats.rgdwTypeCount[(long)IcmpV6StatType.MembershipReport];
             }
         }
+
         public override long MembershipReductionsSent
         {
             get
@@ -172,6 +181,7 @@ namespace System.Net.NetworkInformation
                 return _stats.outStats.rgdwTypeCount[(long)IcmpV6StatType.MembershipReduction];
             }
         }
+
         public override long MembershipReductionsReceived
         {
             get
@@ -179,6 +189,7 @@ namespace System.Net.NetworkInformation
                 return _stats.inStats.rgdwTypeCount[(long)IcmpV6StatType.MembershipReduction];
             }
         }
+
         public override long RouterAdvertisementsSent
         {
             get
@@ -186,6 +197,7 @@ namespace System.Net.NetworkInformation
                 return _stats.outStats.rgdwTypeCount[(long)IcmpV6StatType.RouterAdvertisement];
             }
         }
+
         public override long RouterAdvertisementsReceived
         {
             get
@@ -193,6 +205,7 @@ namespace System.Net.NetworkInformation
                 return _stats.inStats.rgdwTypeCount[(long)IcmpV6StatType.RouterAdvertisement];
             }
         }
+
         public override long RouterSolicitsSent
         {
             get
@@ -200,6 +213,7 @@ namespace System.Net.NetworkInformation
                 return _stats.outStats.rgdwTypeCount[(long)IcmpV6StatType.RouterSolicit];
             }
         }
+
         public override long RouterSolicitsReceived
         {
             get
@@ -207,6 +221,7 @@ namespace System.Net.NetworkInformation
                 return _stats.inStats.rgdwTypeCount[(long)IcmpV6StatType.RouterSolicit];
             }
         }
+
         public override long NeighborAdvertisementsSent
         {
             get
@@ -214,6 +229,7 @@ namespace System.Net.NetworkInformation
                 return _stats.outStats.rgdwTypeCount[(long)IcmpV6StatType.NeighborAdvertisement];
             }
         }
+
         public override long NeighborAdvertisementsReceived
         {
             get
@@ -221,6 +237,7 @@ namespace System.Net.NetworkInformation
                 return _stats.inStats.rgdwTypeCount[(long)IcmpV6StatType.NeighborAdvertisement];
             }
         }
+
         public override long NeighborSolicitsSent
         {
             get
@@ -228,6 +245,7 @@ namespace System.Net.NetworkInformation
                 return _stats.outStats.rgdwTypeCount[(long)IcmpV6StatType.NeighborSolict];
             }
         }
+
         public override long NeighborSolicitsReceived
         {
             get
@@ -235,6 +253,7 @@ namespace System.Net.NetworkInformation
                 return _stats.inStats.rgdwTypeCount[(long)IcmpV6StatType.NeighborSolict];
             }
         }
+
         public override long RedirectsSent
         {
             get
@@ -242,6 +261,7 @@ namespace System.Net.NetworkInformation
                 return _stats.outStats.rgdwTypeCount[(long)IcmpV6StatType.Redirect];
             }
         }
+
         public override long RedirectsReceived
         {
             get
@@ -251,5 +271,3 @@ namespace System.Net.NetworkInformation
         }
     }
 }
-
-

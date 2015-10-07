@@ -1,8 +1,6 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
-
 namespace System.Net.NetworkInformation
 {
     public abstract class IPInterfaceProperties
@@ -36,8 +34,6 @@ namespace System.Net.NetworkInformation
 
         /// Gets the list of Wins Servers registered with this interface
         public abstract IPAddressCollection WinsServersAddresses { get; }
-
-
 
         /// Gets the IP version 4.0 specific properties for this network interface.
         public abstract IPv4InterfaceProperties GetIPv4Properties();

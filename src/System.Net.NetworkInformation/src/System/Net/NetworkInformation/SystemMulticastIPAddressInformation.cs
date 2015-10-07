@@ -1,37 +1,21 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-/// <summary><para>
-///    Provides support for ip configuation information and statistics.
-///</para></summary>
-///
-
-
-using System.Net;
-
 namespace System.Net.NetworkInformation
 {
-    /// <include file='doc\NetworkInterface.uex' path='docs/doc[@for="IPMulticastAddressInformation"]/*' />
-    /// <summary>Specifies the Multicast addresses for an interface.</summary>
-    /// </platnote>
+    // Specifies the Multicast addresses for an interface.
     internal class SystemMulticastIPAddressInformation : MulticastIPAddressInformation
     {
-        private SystemIPAddressInformation _innerInfo;
-
-        private SystemMulticastIPAddressInformation()
-        {
-        }
-
+        private readonly SystemIPAddressInformation _innerInfo;
+        
         public SystemMulticastIPAddressInformation(SystemIPAddressInformation addressInfo)
         {
             _innerInfo = addressInfo;
         }
 
-        /// <include file='doc\NetworkInterface.uex' path='docs/doc[@for="IPAddressInformation.Address"]/*' />
         public override IPAddress Address { get { return _innerInfo.Address; } }
 
-        /// <include file='doc\NetworkInterface.uex' path='docs/doc[@for="IPAddressInformation.Transient"]/*' />
-        /// <summary>The address is a cluster address and shouldn't be used by most applications.</summary>
+        // The address is a cluster address and shouldn't be used by most applications.
         public override bool IsTransient
         {
             get
@@ -40,8 +24,7 @@ namespace System.Net.NetworkInformation
             }
         }
 
-        /// <include file='doc\NetworkInterface.uex' path='docs/doc[@for="IPAddressInformation.DnsEligible"]/*' />
-        /// <summary>This address can be used for DNS.</summary>
+        // This address can be used for DNS.
         public override bool IsDnsEligible
         {
             get
@@ -50,8 +33,6 @@ namespace System.Net.NetworkInformation
             }
         }
 
-
-        /// <include file='doc\NetworkInterface.uex' path='docs/doc[@for="IPMulticastAddressInformation.PrefixOrigin"]/*' />
         public override PrefixOrigin PrefixOrigin
         {
             get
@@ -60,7 +41,6 @@ namespace System.Net.NetworkInformation
             }
         }
 
-        /// <include file='doc\NetworkInterface.uex' path='docs/doc[@for="IPMulticastAddressInformation.SuffixOrigin"]/*' />
         public override SuffixOrigin SuffixOrigin
         {
             get
@@ -68,9 +48,7 @@ namespace System.Net.NetworkInformation
                 return SuffixOrigin.Other;
             }
         }
-        /// <include file='doc\NetworkInterface.uex' path='docs/doc[@for="IPMulticastAddressInformation.DuplicateAddressDetectionState"]/*' />
-        /// <summary>IPv6 only.  Specifies the duplicate address detection state. Only supported
-        /// for IPv6. If called on an IPv4 address, will throw a "not supported" exception.</summary>
+
         public override DuplicateAddressDetectionState DuplicateAddressDetectionState
         {
             get
@@ -79,9 +57,7 @@ namespace System.Net.NetworkInformation
             }
         }
 
-
-        /// <include file='doc\NetworkInterface.uex' path='docs/doc[@for="IPMulticastAddressInformation.ValidLifetime"]/*' />
-        /// <summary>Specifies the valid lifetime of the address in seconds.</summary>
+        // Specifies the valid lifetime of the address in seconds.
         public override long AddressValidLifetime
         {
             get
@@ -89,9 +65,8 @@ namespace System.Net.NetworkInformation
                 return 0;
             }
         }
-        /// <include file='doc\NetworkInterface.uex' path='docs/doc[@for="IPMulticastAddressInformation.PreferredLifetime"]/*' />
-        /// <summary>Specifies the prefered lifetime of the address in seconds.</summary>
 
+        // Specifies the preferred lifetime of the address in seconds.
         public override long AddressPreferredLifetime
         {
             get
@@ -99,10 +74,8 @@ namespace System.Net.NetworkInformation
                 return 0;
             }
         }
-        /// <include file='doc\NetworkInterface.uex' path='docs/doc[@for="IPMulticastAddressInformation.PreferredLifetime"]/*' />
 
-        /// <include file='doc\NetworkInterface.uex' path='docs/doc[@for="IPMulticastAddressInformation.DhcpLeaseLifetime"]/*' />
-        /// <summary>Specifies the prefered lifetime of the address in seconds.</summary>
+        // Specifies the preferred lifetime of the address in seconds.
         public override long DhcpLeaseLifetime
         {
             get
@@ -110,7 +83,6 @@ namespace System.Net.NetworkInformation
                 return 0;
             }
         }
-
 
         internal static MulticastIPAddressInformationCollection ToMulticastIpAddressInformationCollection(IPAddressInformationCollection addresses)
         {
@@ -123,4 +95,3 @@ namespace System.Net.NetworkInformation
         }
     }
 }
-

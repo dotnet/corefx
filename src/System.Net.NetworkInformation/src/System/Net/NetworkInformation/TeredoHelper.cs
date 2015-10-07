@@ -4,9 +4,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Net.Sockets;
-using System.Runtime.InteropServices;
 using System.Threading;
-using System.Net;
 
 namespace System.Net.NetworkInformation
 {
@@ -31,8 +29,7 @@ namespace System.Net.NetworkInformation
     {
         // Holds a list of all pending calls to NotifyStableUnicastIpAddressTable.  Also used as a lock to protect its
         // contents.
-        private static List<TeredoHelper> s_pendingNotifications;
-
+        private readonly static List<TeredoHelper> s_pendingNotifications = new List<TeredoHelper>();
         private readonly Action<object> _callback;
         private readonly object _state;
 
@@ -43,11 +40,6 @@ namespace System.Net.NetworkInformation
 
         // Used to cancel notification after receiving the first callback, or when the AppDomain is going down.
         private SafeCancelMibChangeNotify _cancelHandle;
-
-        static TeredoHelper()
-        {
-            s_pendingNotifications = new List<TeredoHelper>();
-        }
 
         private TeredoHelper(Action<object> callback, object state)
         {
@@ -73,7 +65,7 @@ namespace System.Net.NetworkInformation
             {
                 // If OnAppDomainUnload gets the lock first, tell our caller that we'll finish async.  Their AppDomain 
                 // is about to go down anyways.  If we do, hold the lock until we've added helper to the 
-                // pendingNotifications list (if we're going to complete asynchronously).
+                // s_pendingNotifications list (if we're going to complete asynchronously).
                 if (Environment.HasShutdownStarted)
                 {
                     return false;
@@ -92,7 +84,7 @@ namespace System.Net.NetworkInformation
                     GlobalLog.Assert(!helper._cancelHandle.IsInvalid,
                         "CancelHandle invalid despite returning ERROR_IO_PENDING");
 
-                    // Async completion: add us to the pendingNotifications list so we'll be canceled in the
+                    // Async completion: add us to the s_pendingNotifications list so we'll be canceled in the
                     // event of an AppDomain unload.
                     s_pendingNotifications.Add(helper);
                     return false;
@@ -123,9 +115,9 @@ namespace System.Net.NetworkInformation
 #if DEBUG
                 bool successfullyRemoved = s_pendingNotifications.Remove(this);
                 GlobalLog.Assert(successfullyRemoved,
-                    "RunCallback for a TeredoHelper which is not in pendingNotifications!");
+                    "RunCallback for a TeredoHelper which is not in s_pendingNotifications!");
 #else
-                pendingNotifications.Remove(this);
+                s_pendingNotifications.Remove(this);
 #endif
 
                 GlobalLog.Assert(_cancelHandle != null && !_cancelHandle.IsInvalid,

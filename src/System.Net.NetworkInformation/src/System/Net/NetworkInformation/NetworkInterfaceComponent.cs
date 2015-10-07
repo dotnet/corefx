@@ -1,8 +1,6 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
-
 namespace System.Net.NetworkInformation
 {
     /// Specified the list of Networking components that are supported on a Network Interface
@@ -15,4 +13,3 @@ namespace System.Net.NetworkInformation
         IPv6
     }
 }
-

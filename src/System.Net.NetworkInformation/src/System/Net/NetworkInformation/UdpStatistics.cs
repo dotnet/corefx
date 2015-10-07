@@ -1,8 +1,6 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
-
 namespace System.Net.NetworkInformation
 {
     /// Provides User Datagram Protocol (UDP) statistical data.
@@ -24,4 +22,3 @@ namespace System.Net.NetworkInformation
         public abstract int UdpListeners { get; }
     }
 }
-

@@ -2,13 +2,10 @@
   "dependencies": {
     "System.Diagnostics.Contracts": "4.0.0-*",
     "System.Threading": "4.0.0-*",
-    "System.Net.Primitives": "4.0.10-beta-*",
-    "System.Net.Sockets": "4.0.10-beta-*",
-    "System.Net.Utilities": "4.0.0-beta-*",
-    "System.Linq": "4.0.0",
-    "System.Console": "4.0.0-beta-23019"
+    "System.Net.Primitives": "4.0.10-*",
+    "System.Net.Sockets": "4.0.10-*"
   },
   "frameworks": {
-    "dnxcore50": { }
+    "dnxcore50": {}
   }
 }

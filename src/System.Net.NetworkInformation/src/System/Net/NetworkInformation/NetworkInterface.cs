@@ -1,11 +1,9 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
-
 namespace System.Net.NetworkInformation
 {
-    public abstract partial class NetworkInterface
+    public abstract class NetworkInterface
     {
         /// Returns objects that describe the network interfaces on the local computer.
         public static NetworkInterface[] GetAllNetworkInterfaces()
@@ -48,14 +46,6 @@ namespace System.Net.NetworkInformation
             throw NotImplemented.ByDesignWithMessage(SR.net_MethodNotImplementedException);
         }
 
-        /// Provides Internet Protocol (IP) statistical data for thisnetwork interface.
-        /// Despite the naming, the results are not IPv4 specific.
-        /// Do not use this method, use GetIPStatistics instead.
-        public virtual IPv4InterfaceStatistics GetIPv4Statistics()
-        {
-            throw NotImplemented.ByDesignWithMessage(SR.net_MethodNotImplementedException);
-        }
-
         /// Provides Internet Protocol (IP) statistical data for this network interface.
         public virtual IPInterfaceStatistics GetIPStatistics()
         {
@@ -75,7 +65,6 @@ namespace System.Net.NetworkInformation
         public virtual bool SupportsMulticast { get { throw NotImplemented.ByDesignWithMessage(SR.net_PropertyNotImplementedException); } }
 
         /// Gets the physical address of this network interface
-        /// <b>deonb. This is okay if you don't support this in Whidbey. This actually belongs in the NetworkAdapter derived class</b>
         public virtual PhysicalAddress GetPhysicalAddress()
         {
             throw NotImplemented.ByDesignWithMessage(SR.net_MethodNotImplementedException);

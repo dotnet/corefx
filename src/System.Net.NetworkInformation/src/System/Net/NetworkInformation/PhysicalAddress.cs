@@ -1,22 +1,18 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
 using System.Text;
 
 namespace System.Net.NetworkInformation
 {
     public class PhysicalAddress
     {
-        private byte[] _address = null;
-        private bool _changed = true;
+        private readonly byte[] _address = null;
+        private bool _hashNotComputed = true;
         private int _hash = 0;
 
-        // FxCop: if this class is ever made mutable (like, given any non-readonly fields),
-        // the readonly should be removed from the None decoration.
         public static readonly PhysicalAddress None = new PhysicalAddress(Array.Empty<byte>());
 
-        // constructors
         public PhysicalAddress(byte[] address)
         {
             _address = address;
@@ -24,9 +20,9 @@ namespace System.Net.NetworkInformation
 
         public override int GetHashCode()
         {
-            if (_changed)
+            if (_hashNotComputed)
             {
-                _changed = false;
+                _hashNotComputed = false;
                 _hash = 0;
 
                 int i;
@@ -39,6 +35,7 @@ namespace System.Net.NetworkInformation
                             | ((int)_address[i + 2] << 16)
                             | ((int)_address[i + 3] << 24);
                 }
+
                 if ((_address.Length & 3) != 0)
                 {
                     int remnant = 0;
@@ -49,9 +46,11 @@ namespace System.Net.NetworkInformation
                         remnant |= ((int)_address[i]) << shift;
                         shift += 8;
                     }
+
                     _hash ^= remnant;
                 }
             }
+
             return _hash;
         }
 
@@ -59,20 +58,30 @@ namespace System.Net.NetworkInformation
         {
             PhysicalAddress address = comparand as PhysicalAddress;
             if (address == null)
+            {
                 return false;
+            }
 
             if (_address.Length != address._address.Length)
             {
                 return false;
             }
+
+            if (_address.GetHashCode() != address._address.GetHashCode())
+            {
+                return false;
+            }
+
             for (int i = 0; i < address._address.Length; i++)
             {
                 if (_address[i] != address._address[i])
+                {
                     return false;
+                }
             }
+
             return true;
         }
-
 
         public override string ToString()
         {
@@ -92,20 +101,18 @@ namespace System.Net.NetworkInformation
                     {
                         addressString.Append((char)(tmp + 0x37));
                     }
+
                     tmp = ((int)value & 0x0F);
                 }
             }
+
             return addressString.ToString();
         }
 
         public byte[] GetAddressBytes()
         {
-            byte[] tmp = new byte[_address.Length];
-            Buffer.BlockCopy(_address, 0, tmp, 0, _address.Length);
-            return tmp;
+            return (byte[])_address.Clone();
         }
-
-
 
         public static PhysicalAddress Parse(string address)
         {
@@ -118,7 +125,7 @@ namespace System.Net.NetworkInformation
                 return PhysicalAddress.None;
             }
 
-            //has dashes?
+            // Has dashes?
             if (address.IndexOf('-') >= 0)
             {
                 hasDashes = true;
@@ -127,7 +134,7 @@ namespace System.Net.NetworkInformation
             else
             {
                 if (address.Length % 2 > 0)
-                {  //should be even
+                {
                     throw new FormatException(SR.net_bad_mac_address);
                 }
 
@@ -192,4 +199,3 @@ namespace System.Net.NetworkInformation
         }
     }
 }
-

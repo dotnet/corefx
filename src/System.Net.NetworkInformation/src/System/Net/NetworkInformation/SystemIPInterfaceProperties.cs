@@ -1,42 +1,30 @@
-
-using System.Net.Sockets;
-using System;
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-/// <summary><para>
-///    Provides support for ip configuation information and statistics.
-///</para></summary>
-///
-
+using System.Net.Sockets;
 
 namespace System.Net.NetworkInformation
 {
-    /// <summary>
-    /// Provides information specific to a network
-    /// interface.
-    /// </summary>
-    /// <remarks>
-    /// <para>Provides information specific to a network interface. A network interface can have more 
-    /// than one IPAddress associated with it. We call the native GetAdaptersAddresses api to
-    /// prepopulate all of the interface instances and most of their associated information.</para>
-    /// </remarks>
+    // Provides information specific to a network interface.
+    // Note: Provides information specific to a network interface. A network interface can have more 
+    // than one IPAddress associated with it. We call the native GetAdaptersAddresses API to
+    // pre-populate all of the interface instances and most of their associated information.
     internal class SystemIPInterfaceProperties : IPInterfaceProperties
     {
-        //these are valid for all interfaces
-        private bool _dnsEnabled = false;
-        private bool _dynamicDnsEnabled = false;
-        private InternalIPAddressCollection _dnsAddresses = null;
-        private UnicastIPAddressInformationCollection _unicastAddresses = null;
-        private MulticastIPAddressInformationCollection _multicastAddresses = null;
-        private IPAddressInformationCollection _anycastAddresses = null;
-        private Interop.IpHlpApi.AdapterFlags _adapterFlags;
-        private string _dnsSuffix;
-        private SystemIPv4InterfaceProperties _ipv4Properties;
-        private SystemIPv6InterfaceProperties _ipv6Properties;
-        private InternalIPAddressCollection _winsServersAddresses;
-        private GatewayIPAddressInformationCollection _gatewayAddresses;
-        private InternalIPAddressCollection _dhcpServers;
+        // These are valid for all interfaces.
+        private readonly bool _dnsEnabled = false;
+        private readonly bool _dynamicDnsEnabled = false;
+        private readonly InternalIPAddressCollection _dnsAddresses = null;
+        private readonly UnicastIPAddressInformationCollection _unicastAddresses = null;
+        private readonly MulticastIPAddressInformationCollection _multicastAddresses = null;
+        private readonly IPAddressInformationCollection _anycastAddresses = null;
+        private readonly Interop.IpHlpApi.AdapterFlags _adapterFlags;
+        private readonly string _dnsSuffix;
+        private readonly SystemIPv4InterfaceProperties _ipv4Properties;
+        private readonly SystemIPv6InterfaceProperties _ipv6Properties;
+        private readonly InternalIPAddressCollection _winsServersAddresses;
+        private readonly GatewayIPAddressInformationCollection _gatewayAddresses;
+        private readonly InternalIPAddressCollection _dhcpServers;
 
         internal SystemIPInterfaceProperties(Interop.IpHlpApi.FIXED_INFO fixedInfo, Interop.IpHlpApi.IpAdapterAddresses ipAdapterAddresses)
         {
@@ -59,9 +47,14 @@ namespace System.Net.NetworkInformation
 
             _dhcpServers = new InternalIPAddressCollection();
             if (ipAdapterAddresses.dhcpv4Server.address != IntPtr.Zero)
+            {
                 _dhcpServers.InternalAdd(ipAdapterAddresses.dhcpv4Server.MarshalIPAddress());
+            }
+
             if (ipAdapterAddresses.dhcpv6Server.address != IntPtr.Zero)
+            {
                 _dhcpServers.InternalAdd(ipAdapterAddresses.dhcpv6Server.MarshalIPAddress());
+            }
 
             if ((_adapterFlags & Interop.IpHlpApi.AdapterFlags.IPv4Enabled) != 0)
             {
@@ -85,6 +78,7 @@ namespace System.Net.NetworkInformation
             {
                 throw new NetworkInformationException(SocketError.ProtocolNotSupported);
             }
+
             return _ipv4Properties;
         }
 
@@ -94,6 +88,7 @@ namespace System.Net.NetworkInformation
             {
                 throw new NetworkInformationException(SocketError.ProtocolNotSupported);
             }
+
             return _ipv6Properties;
         }
 
@@ -105,7 +100,7 @@ namespace System.Net.NetworkInformation
             }
         }
 
-        //returns the addresses specified by the address type.
+        // Returns the addresses specified by the address type.
         public override IPAddressInformationCollection AnycastAddresses
         {
             get
@@ -114,7 +109,7 @@ namespace System.Net.NetworkInformation
             }
         }
 
-        //returns the addresses specified by the address type.
+        // Returns the addresses specified by the address type.
         public override UnicastIPAddressInformationCollection UnicastAddresses
         {
             get
@@ -123,7 +118,7 @@ namespace System.Net.NetworkInformation
             }
         }
 
-        //returns the addresses specified by the address type.
+        // Returns the addresses specified by the address type.
         public override MulticastIPAddressInformationCollection MulticastAddresses
         {
             get
@@ -132,7 +127,7 @@ namespace System.Net.NetworkInformation
             }
         }
 
-        //returns the addresses specified by the address type.
+        // Returns the addresses specified by the address type.
         public override IPAddressCollection DnsAddresses
         {
             get
@@ -141,7 +136,7 @@ namespace System.Net.NetworkInformation
             }
         }
 
-        /// <summary>IP Address of the default gateway.</summary>
+        /// IP Address of the default gateway.
         public override GatewayIPAddressInformationCollection GatewayAddresses
         {
             get

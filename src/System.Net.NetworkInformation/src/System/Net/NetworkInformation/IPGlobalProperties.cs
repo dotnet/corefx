@@ -1,28 +1,25 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
-using System.Net.Sockets;
-using System.Net;
 using System.Threading.Tasks;
 using System.Diagnostics.CodeAnalysis;
 
 namespace System.Net.NetworkInformation
 {
-    public abstract partial class IPGlobalProperties
+    public abstract class IPGlobalProperties
     {
         public static IPGlobalProperties GetIPGlobalProperties()
         {
             return IPGlobalPropertiesPal.GetIPGlobalProperties();
         }
 
-        /// Gets the Active Udp Listeners on this machine
+        /// Gets the Active Udp Listeners on this machine.
         public abstract IPEndPoint[] GetActiveUdpListeners();
 
-        /// Gets the Active Tcp Listeners on this machine
+        /// Gets the Active Tcp Listeners on this machine.
         public abstract IPEndPoint[] GetActiveTcpListeners();
 
-        /// Gets the Active Udp Listeners on this machine
+        /// Gets the Active Udp Listeners on this machine.
         public abstract TcpConnectionInformation[] GetActiveTcpConnections();
 
         /// Gets the Dynamic Host Configuration Protocol (DHCP) scope name.
@@ -47,14 +44,12 @@ namespace System.Net.NetworkInformation
 
         public abstract TcpStatistics GetTcpIPv6Statistics();
 
-        /// Provides Internet Control Message Protocol (ICMP) version 4 statistical data for the local computer.
         /// Provides User Datagram Protocol (UDP) statistical data for the local computer.
-
         public abstract UdpStatistics GetUdpIPv4Statistics();
+
         public abstract UdpStatistics GetUdpIPv6Statistics();
 
         /// Provides Internet Control Message Protocol (ICMP) version 4 statistical data for the local computer.
-
         public abstract IcmpV4Statistics GetIcmpV4Statistics();
 
         /// Provides Internet Control Message Protocol (ICMP) version 6 statistical data for the local computer.
@@ -63,9 +58,9 @@ namespace System.Net.NetworkInformation
 
         /// Provides Internet Protocol (IP) statistical data for the local computer.
         public abstract IPGlobalStatistics GetIPv4GlobalStatistics();
+
         public abstract IPGlobalStatistics GetIPv6GlobalStatistics();
 
-        /// Returns a list of all unicast IP addresses after ensuring they are all stable
         public virtual UnicastIPAddressInformationCollection GetUnicastAddresses()
         {
             throw NotImplemented.ByDesignWithMessage(SR.net_MethodNotImplementedException);
@@ -81,7 +76,6 @@ namespace System.Net.NetworkInformation
             throw NotImplemented.ByDesignWithMessage(SR.net_MethodNotImplementedException);
         }
 
-        //************* Task-based async public methods *************************
         public virtual Task<UnicastIPAddressInformationCollection> GetUnicastAddressesAsync()
         {
             return Task<UnicastIPAddressInformationCollection>.Factory.FromAsync(BeginGetUnicastAddresses, EndGetUnicastAddresses, null);

@@ -1,32 +1,23 @@
-
-using System.Net;
-using System;
-using System.Runtime.InteropServices;
-using Microsoft.Win32.SafeHandles;
-
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-/// <summary><para>
-///    Provides support for ip configuation information and statistics.
-///</para></summary>
-///
+using Microsoft.Win32.SafeHandles;
 
+using System.Runtime.InteropServices;
 
 namespace System.Net.NetworkInformation
 {
     internal class SystemIPv4InterfaceProperties : IPv4InterfaceProperties
     {
-        //these are only valid for ipv4 interfaces
-        private bool _haveWins = false;
-        private bool _dhcpEnabled = false;
-        private bool _routingEnabled = false;
+        // These are only valid for ipv4 interfaces.
+        private readonly bool _haveWins;
+        private readonly bool _dhcpEnabled;
+        private readonly bool _routingEnabled;
+        private readonly uint _index = 0;
+        private readonly uint _mtu = 0;
         private bool _autoConfigEnabled = false;
         private bool _autoConfigActive = false;
-        private uint _index = 0;
-        private uint _mtu = 0;
 
-        // Vista+
         internal SystemIPv4InterfaceProperties(Interop.IpHlpApi.FIXED_INFO fixedInfo, Interop.IpHlpApi.IpAdapterAddresses ipAdapterAddresses)
         {
             _index = ipAdapterAddresses.index;
@@ -39,29 +30,24 @@ namespace System.Net.NetworkInformation
             GetPerAdapterInfo(ipAdapterAddresses.index);
         }
 
-        /// <summary>Only valid for Ipv4 Uses WINS for name resolution.</summary>
+        /// Only valid for Ipv4 Uses WINS for name resolution.
         public override bool UsesWins { get { return _haveWins; } }
-
 
         public override bool IsDhcpEnabled
         {
             get { return _dhcpEnabled; }
         }
 
-        public override bool IsForwardingEnabled { get { return _routingEnabled; } }      //proto
+        public override bool IsForwardingEnabled { get { return _routingEnabled; } }
 
-
-
-        /// <summary>Auto configuration of an ipv4 address for a client
-        /// on a network where a DHCP server
-        /// isn't available.</summary>
+        /// Auto configuration of an ipv4 address for a client on a network where a DHCP server isn't available.
         public override bool IsAutomaticPrivateAddressingEnabled
         {
             get
             {
                 return _autoConfigEnabled;
             }
-        } // proto
+        }
 
         public override bool IsAutomaticPrivateAddressingActive
         {
@@ -71,9 +57,8 @@ namespace System.Net.NetworkInformation
             }
         }
 
-
-        /// <summary>Specifies the Maximum transmission unit in bytes. Uses GetIFEntry.</summary>
-        //We cache this to be consistent across all platforms
+        // Specifies the Maximum transmission unit in bytes. Uses GetIFEntry.
+        // We cache this to be consistent across all platforms.
         public override int Mtu
         {
             get
@@ -100,23 +85,18 @@ namespace System.Net.NetworkInformation
                 uint result = Interop.IpHlpApi.GetPerAdapterInfo(index, SafeLocalAllocHandle.Zero, ref size);
                 while (result == Interop.IpHlpApi.ERROR_BUFFER_OVERFLOW)
                 {
-                    try
+                    // Now we allocate the buffer and read the network parameters.
+                    using (buffer = SafeLocalAllocHandle.LocalAlloc((int)size))
                     {
-                        //now we allocate the buffer and read the network parameters.
-                        buffer = SafeLocalAllocHandle.LocalAlloc((int)size);
                         result = Interop.IpHlpApi.GetPerAdapterInfo(index, buffer, ref size);
                         if (result == Interop.IpHlpApi.ERROR_SUCCESS)
                         {
-                            Interop.IpHlpApi.IpPerAdapterInfo ipPerAdapterInfo = Marshal.PtrToStructure<Interop.IpHlpApi.IpPerAdapterInfo>(buffer.DangerousGetHandle());
+                            Interop.IpHlpApi.IpPerAdapterInfo ipPerAdapterInfo =
+                                Marshal.PtrToStructure<Interop.IpHlpApi.IpPerAdapterInfo>(buffer.DangerousGetHandle());
 
                             _autoConfigEnabled = ipPerAdapterInfo.autoconfigEnabled;
                             _autoConfigActive = ipPerAdapterInfo.autoconfigActive;
                         }
-                    }
-                    finally
-                    {
-                        if (buffer != null)
-                            buffer.Dispose();
                     }
                 }
 

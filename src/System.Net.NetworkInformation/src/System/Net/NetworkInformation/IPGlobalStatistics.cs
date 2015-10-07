@@ -1,8 +1,6 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
-
 namespace System.Net.NetworkInformation
 {
     /// Provides Internet Protocol (IP) statistical data for the local machine.
@@ -17,7 +15,7 @@ namespace System.Net.NetworkInformation
         /// Gets the number of network interfaces.
         public abstract int NumberOfInterfaces { get; }
 
-        /// <b>deonb: Don't have a description for this. Ask dthaler</b>
+        /// Gets the number of Internet Protocol (IP) addresses assigned to the local computer.
         public abstract int NumberOfIPAddresses { get; }
 
         /// Gets the number of outbound Internet Protocol (IP) packets.
@@ -53,7 +51,7 @@ namespace System.Net.NetworkInformation
         /// Gets the number of Internet Protocol (IP) packets received.
         public abstract long ReceivedPackets { get; }
 
-        /// <b>deonb: Don't have a description for this. Ask dthaler</b>
+        // Gets the number of Internet Protocol(IP) packets received and delivered.
         public abstract long ReceivedPacketsDelivered { get; }
 
         /// Gets the number of Internet Protocol (IP) packets that have been received and discarded.
