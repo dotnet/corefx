@@ -1,10 +1,6 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-#define HAVE_AF_LINK 1
-#define HAVE_AF_PACKET 0
-static_assert(HAVE_AF_PACKET || HAVE_AF_LINK, "System must have AF_PACKET or AF_LINK.");
-
 #include "pal_config.h"
 #include "pal_networking.h"
 #include "pal_utilities.h"
@@ -36,6 +32,7 @@ static_assert(PAL_NO_RECOVERY == NO_RECOVERY, "");
 static_assert(PAL_NO_DATA == NO_DATA, "");
 static_assert(PAL_NO_ADDRESS == NO_ADDRESS, "");
 static_assert(sizeof(uint8_t) == sizeof(char), ""); // We make casts from uint8_t to char for OS functions, make sure it's legal
+static_assert(HAVE_AF_PACKET || HAVE_AF_LINK, "System must have AF_PACKET or AF_LINK.");
 
 static void IpStringToAddressHelper(const uint8_t* address,
                                     const uint8_t* port,
@@ -417,7 +414,6 @@ extern "C" void EnumerateInterfaceAddresses(IPv4AddressFound onIpv4Found,
 
     for (current = headAddr; current != nullptr; current = current->ifa_next)
     {
-        printf("** PROCESSING %s **\n", current->ifa_name);
         uint32_t interfaceIndex = if_nametoindex(current->ifa_name);
         int family = current->ifa_addr->sa_family;
         if (family == AF_INET)
@@ -477,7 +473,6 @@ extern "C" void EnumerateInterfaceAddresses(IPv4AddressFound onIpv4Found,
             memcpy(&lla.AddressBytes, reinterpret_cast<uint8_t*>(LLADDR(sadl)), sadl->sdl_alen);
             lla.NumAddressBytes = sadl->sdl_alen;
             lla.HardwareType = sadl->sdl_type;
-            printf("Got hardware type %hhu\n", sadl->sdl_type);
             onLinkLayerFound(current->ifa_name, &lla);
 
             // Do stuff for OSX

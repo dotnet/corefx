@@ -3,6 +3,7 @@ include(CheckStructHasMember)
 include(CheckCXXSourceCompiles)
 include(CheckCXXSourceRuns)
 include(CheckPrototypeDefinition)
+include(CheckIncludeFiles)
 
 #CMake does not include /usr/local/include into the include search path
 #thus add it manually. This is required on FreeBSD.
@@ -99,6 +100,14 @@ check_prototype_definition(
     "0"
     "sys/resource.h"
     PRIORITY_REQUIRES_INT_WHO)
+
+check_include_files(
+    linux/if_packet.h
+    HAVE_AF_PACKET)
+
+check_include_files(
+    net/if_dl.dh
+    HAVE_AF_LINK)
 
 set (CMAKE_REQUIRED_LIBRARIES)
 
