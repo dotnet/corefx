@@ -16,6 +16,7 @@
 #include <ifaddrs.h>
 #include <net/if.h>
 
+static_assert(HAVE_AF_PACKET || HAVE_AF_LINK, "System must have AF_PACKET or AF_LINK.");
 #if HAVE_AF_PACKET
 #include <linux/if_packet.h>
 #elif HAVE_AF_LINK
@@ -32,7 +33,6 @@ static_assert(PAL_NO_RECOVERY == NO_RECOVERY, "");
 static_assert(PAL_NO_DATA == NO_DATA, "");
 static_assert(PAL_NO_ADDRESS == NO_ADDRESS, "");
 static_assert(sizeof(uint8_t) == sizeof(char), ""); // We make casts from uint8_t to char for OS functions, make sure it's legal
-static_assert(HAVE_AF_PACKET || HAVE_AF_LINK, "System must have AF_PACKET or AF_LINK.");
 
 static void IpStringToAddressHelper(const uint8_t* address,
                                     const uint8_t* port,

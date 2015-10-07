@@ -8,6 +8,7 @@ include(CheckIncludeFiles)
 #CMake does not include /usr/local/include into the include search path
 #thus add it manually. This is required on FreeBSD.
 include_directories(SYSTEM /usr/local/include)
+include_directories(SYSTEM /usr/include)
 
 check_function_exists(
     stat64
@@ -101,13 +102,21 @@ check_prototype_definition(
     "sys/resource.h"
     PRIORITY_REQUIRES_INT_WHO)
 
+check_cxx_source_compiles(
+    "
+    #include <netdb.h>
+    #include <net/if_dl.h>
+    int main() { return 0; }
+    "
+    HAVE_AF_LINK)
+
+check_include_files(
+    net/if_dl.h
+    HAVE_AF_LINK)
+
 check_include_files(
     linux/if_packet.h
     HAVE_AF_PACKET)
-
-check_include_files(
-    net/if_dl.dh
-    HAVE_AF_LINK)
 
 set (CMAKE_REQUIRED_LIBRARIES)
 
