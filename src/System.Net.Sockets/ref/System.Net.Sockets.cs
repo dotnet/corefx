@@ -266,13 +266,11 @@ namespace System.Net.Sockets
         public System.Exception ConnectByNameError { get { return default(System.Exception); } }
         public System.Net.Sockets.Socket ConnectSocket { get { return default(System.Net.Sockets.Socket); } }
         public int Count { get { return default(int); } }
-        public bool DisconnectReuseSocket { get { return default(bool); } set { } }
         public System.Net.Sockets.SocketAsyncOperation LastOperation { get { return default(System.Net.Sockets.SocketAsyncOperation); } }
         public int Offset { get { return default(int); } }
         public System.Net.Sockets.IPPacketInformation ReceiveMessageFromPacketInfo { get { return default(System.Net.Sockets.IPPacketInformation); } }
         public System.Net.EndPoint RemoteEndPoint { get { return default(System.Net.EndPoint); } set { } }
         public System.Net.Sockets.SendPacketsElement[] SendPacketsElements { get { return default(System.Net.Sockets.SendPacketsElement[]); } set { } }
-        public System.Net.Sockets.TransmitFileOptions SendPacketsFlags { get { return default(System.Net.Sockets.TransmitFileOptions); } set { } }
         public int SendPacketsSendSize { get { return default(int); } set { } }
         public System.Net.Sockets.SocketError SocketError { get { return default(System.Net.Sockets.SocketError); } set { } }
         public System.Net.Sockets.SocketFlags SocketFlags { get { return default(System.Net.Sockets.SocketFlags); } set { } }
@@ -322,7 +320,6 @@ namespace System.Net.Sockets
         Connected = 2,
         Listening = 4,
         NonBlocking = 1,
-        UseOnlyOverlappedIO = 8,
     }
     public enum SocketOptionLevel
     {
@@ -433,19 +430,11 @@ namespace System.Net.Sockets
         public void Start(int backlog) { }
         public void Stop() { }
     }
-    [System.FlagsAttribute]
-    public enum TransmitFileOptions
-    {
-        Disconnect = 1,
-        ReuseSocket = 2,
-        UseDefaultWorkerThread = 0,
-        UseKernelApc = 32,
-        UseSystemThread = 16,
-        WriteBehind = 4,
-    }
     public partial class UdpClient : System.IDisposable
     {
         public UdpClient() { }
+        public UdpClient(int port) { }
+        public UdpClient(int port, System.Net.Sockets.AddressFamily family) { }
         public UdpClient(System.Net.Sockets.AddressFamily family) { }
         protected bool Active { get { return default(bool); } set { } }
         public int Available { get { return default(int); } }
