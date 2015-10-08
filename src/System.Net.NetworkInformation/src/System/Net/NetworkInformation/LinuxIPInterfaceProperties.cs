@@ -154,7 +154,7 @@ namespace System.Net.NetworkInformation
             // These are the DNS servers the machine is configured to use.
             string data = File.ReadAllText(LinuxNetworkFiles.EtcResolvConfFile);
             RowConfigReader rcr = new RowConfigReader(data);
-            List<IPAddress> addresses = new List<IPAddress>();
+            InternalIPAddressCollection addresses = new InternalIPAddressCollection();
 
             string addressString = null;
             while (rcr.TryGetNextValue("nameserver", out addressString))
@@ -162,11 +162,11 @@ namespace System.Net.NetworkInformation
                 IPAddress parsedAddress;
                 if (IPAddress.TryParse(addressString, out parsedAddress))
                 {
-                    addresses.Add(parsedAddress);
+                    addresses.InternalAdd(parsedAddress);
                 }
             }
 
-            return new IPAddressCollectionImpl(addresses);
+            return addresses;
         }
 
         // /proc/net/route contains some information about gateway addresses,

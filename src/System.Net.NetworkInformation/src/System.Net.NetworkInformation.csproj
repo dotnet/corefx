@@ -274,7 +274,6 @@
     <Compile Include="System\Net\NetworkInformation\LinuxIPv6InterfaceProperties.cs" />
     <Compile Include="System\Net\NetworkInformation\LinuxNetDeviceFlags.cs" />
     <Compile Include="System\Net\NetworkInformation\LinuxUnicastIPAddressInformation.cs" />
-    <Compile Include="System\Net\NetworkInformation\IPAddressCollectionImpl.cs" />
     <!-- Linux Common -->
     <Compile Include="$(CommonPath)\Interop\Linux\libc\Interop.sockaddr.cs">
       <Link>Common\Interop\Linux\libc\Interop.sockaddr.cs</Link>
