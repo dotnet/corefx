@@ -394,12 +394,13 @@ namespace System.Xml
                         int skippedLength = (int)(chars - charsStart);
                         int bytesLeft = (int)(bytesMax - bytes);
                         int bytesTraversed = (int)(bytes - _bytes);
+                        Encoding encoding = EncodingOrDefault;
 
-                        int byteCount = EncodingOrDefault.GetByteCount(charsStart, skippedLength);
+                        int byteCount = encoding.GetByteCount(charsStart, skippedLength);
 
                         if (byteCount <= bytesLeft)
                         {
-                            EncodingOrDefault.GetBytes(charsStart, skippedLength, bytes, byteCount);
+                            encoding.GetBytes(charsStart, skippedLength, bytes, byteCount);
                             bytes += byteCount;
                         }
                         else
@@ -407,7 +408,7 @@ namespace System.Xml
                             byte[] newBytes = new byte[byteCount];
 
                             fixed (byte* pNewBytes = newBytes)
-                                EncodingOrDefault.GetBytes(charsStart, skippedLength, pNewBytes, byteCount);
+                                encoding.GetBytes(charsStart, skippedLength, pNewBytes, byteCount);
 
                             Array.Copy(newBytes, 0, buffer, bytesTraversed + offset, bytesLeft);
                             bytes += bytesLeft;
