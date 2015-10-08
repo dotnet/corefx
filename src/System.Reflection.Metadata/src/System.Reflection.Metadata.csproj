@@ -14,7 +14,7 @@
     <DefaultLanguage>en-US</DefaultLanguage>
     <NoWarn>1591</NoWarn>
     <CLSCompliant>false</CLSCompliant>
-    <AssemblyFileVersion>1.1.0.0</AssemblyFileVersion>
+    <AssemblyFileVersion>1.1.1.0</AssemblyFileVersion>
     <AssemblyVersion>1.1.0.0</AssemblyVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">

@@ -1,36 +1,47 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0"?>
 <package xmlns="http://schemas.microsoft.com/packaging/2013/01/nuspec.xsd">
-  <metadata minClientVersion="2.8.1">
+  <metadata minClientVersion="2.8.6">
     <id>System.Reflection.Metadata</id>
     <version>1.1.0-alpha</version>
-    <title>Microsoft ECMA-335 Metadata Reader</title>
+    <title>System.Reflection.Metadata</title>
     <authors>Microsoft</authors>
-    <owners>Microsoft</owners>
+    <owners>microsoft,dotnetframework</owners>
     <licenseUrl>http://go.microsoft.com/fwlink/?LinkId=329770</licenseUrl>
-    <projectUrl>http://go.microsoft.com/fwlink/?LinkID=392305</projectUrl>
     <iconUrl>http://go.microsoft.com/fwlink/?LinkID=288859</iconUrl>
     <requireLicenseAcceptance>true</requireLicenseAcceptance>
     <description>This packages provides a low-level .NET (ECMA-335) metadata reader. It's geared for performance and is the ideal choice for building higher-level libraries that intend to provide their own object model, such as compilers.
 
-Supported Platforms:
-- .NET Framework 4.5
-- Windows 8
-- Portable Class Libraries</description>
-    <summary>Provides a low-level .NET metadata reader.</summary>
-    <copyright>Copyright © Microsoft Corporation</copyright>
-    <tags>BCL Microsoft System ECMA ECMA335 Metadata Reflection</tags>
+Commonly Used Types:
+System.Reflection.Metadata.MetadataReader
+System.Reflection.PortableExecutable.PEReader
+</description>
+    <copyright>© Microsoft Corporation.  All rights reserved.</copyright>
     <dependencies>
-      <group>
-        <dependency id="System.Collections.Immutable" version="1.1.36" />
+      <group targetFramework="dotnet">
+        <dependency id="System.Runtime" version="4.0.0" />
+        <dependency id="System.Resources.ResourceManager" version="4.0.0" />
+        <dependency id="System.Reflection.Primitives" version="4.0.0" />
+        <dependency id="System.IO" version="4.0.0" />
+        <dependency id="System.Diagnostics.Debug" version="4.0.0" />
+        <dependency id="System.Collections" version="4.0.0" />
+        <dependency id="System.Text.Encoding" version="4.0.0" />
+        <dependency id="System.Runtime.InteropServices" version="4.0.0" />
+        <dependency id="System.Reflection" version="4.0.0" />
+        <dependency id="System.Runtime.Extensions" version="4.0.0" />
+        <dependency id="System.Threading" version="4.0.0" />
+        <dependency id="System.Text.Encoding.Extensions" version="4.0.0" />
+        <dependency id="System.Reflection.Extensions" version="4.0.0" />
+        <dependency id="System.Collections.Immutable" version="1.1.37" />
+      </group>
+      <group targetFramework="portable-net45+win80">
+        <dependency id="System.Collections.Immutable" version="1.1.37" />
       </group>
     </dependencies>
   </metadata>
   <files>
-
-    <!-- Portable Class Library -->
     <file src="System.Reflection.Metadata\System.Reflection.Metadata.dll" target="lib\portable-net45+win8" />
-    <file src="System.Reflection.Metadata\System.Reflection.Metadata.pdb" target="lib\portable-net45+win8" />
     <file src="System.Reflection.Metadata\System.Reflection.Metadata.xml" target="lib\portable-net45+win8" />
-
+    <file src="System.Reflection.Metadata\System.Reflection.Metadata.dll" target="lib\dotnet" />
+    <file src="System.Reflection.Metadata\System.Reflection.Metadata.xml" target="lib\dotnet" />
   </files>
 </package>
