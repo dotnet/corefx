@@ -9,6 +9,7 @@
     <AssemblyName>System.Linq.Expressions.Tests</AssemblyName>
     <RootNamespace>System.Linq.Expressions.Tests</RootNamespace>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <UnsupportedPlatforms>OSX</UnsupportedPlatforms> <!-- [ActiveIssue(3712)] -->
   </PropertyGroup>
   <!-- Default configurations to help VS understand the configurations -->
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -32,6 +33,7 @@
     <Compile Include="Array\NullableNewArrayListTests.cs" />
     <Compile Include="Array\ObjectArrayBoundsTests.cs" />
     <Compile Include="Array\ObjectNullableArrayBoundsTests.cs" />
+    <Compile Include="BinaryOperators\Arithmetic\BinaryShiftTests.cs" />
     <Compile Include="BinaryOperators\Arithmetic\BinaryAddTests.cs" />
     <Compile Include="BinaryOperators\Arithmetic\BinaryDivideTests.cs" />
     <Compile Include="BinaryOperators\Arithmetic\BinaryModuloTests.cs" />
@@ -65,6 +67,7 @@
     <Compile Include="BinaryOperators\Comparison\BinaryNullableNotEqualTests.cs" />
     <Compile Include="BinaryOperators\Logical\BinaryLogicalTests.cs" />
     <Compile Include="BinaryOperators\Logical\BinaryNullableLogicalTests.cs" />
+    <Compile Include="Block\BlockFactoryTests.cs" />
     <Compile Include="Call\CallFactoryTests.cs" />
     <Compile Include="Cast\AsNullable.cs" />
     <Compile Include="Cast\AsTests.cs" />
