@@ -2,11 +2,8 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
 
 namespace System.Net.NetworkInformation
 {
@@ -63,10 +60,10 @@ namespace System.Net.NetworkInformation
 
         private bool GetSupportsMulticast()
         {
-            string path = Path.Combine(LinuxNetworkFiles.SysClassNetFolder, _name, "flags");
+            string path = Path.Combine(LinuxNetworkFiles.SysClassNetFolder, _name, LinuxNetworkFiles.FlagsFileName);
             string fileContents = File.ReadAllText(path).Trim();
-            LinuxNetDeviceFlags flags = (LinuxNetDeviceFlags)Convert.ToInt32(fileContents, 16);
-            return (flags & LinuxNetDeviceFlags.IFF_MULTICAST) == LinuxNetDeviceFlags.IFF_MULTICAST;
+            Interop.LinuxNetDeviceFlags flags = (Interop.LinuxNetDeviceFlags)Convert.ToInt32(fileContents, 16);
+            return (flags & Interop.LinuxNetDeviceFlags.IFF_MULTICAST) == Interop.LinuxNetDeviceFlags.IFF_MULTICAST;
         }
 
         public override IPInterfaceProperties GetIPProperties()
@@ -84,7 +81,7 @@ namespace System.Net.NetworkInformation
             get
             {
                 // /sys/class/net/<name>/operstate
-                string path = Path.Combine(LinuxNetworkFiles.SysClassNetFolder, _name, "operstate");
+                string path = Path.Combine(LinuxNetworkFiles.SysClassNetFolder, _name, LinuxNetworkFiles.OperstateFileName);
                 string state = File.ReadAllText(path).Trim();
                 return MapState(state);
             }
@@ -125,7 +122,7 @@ namespace System.Net.NetworkInformation
             {
                 try
                 {
-                    string path = Path.Combine(LinuxNetworkFiles.SysClassNetFolder, _name, "speed");
+                    string path = Path.Combine(LinuxNetworkFiles.SysClassNetFolder, _name, LinuxNetworkFiles.SpeedFileName);
                     string contents = File.ReadAllText(path);
                     long val;
                     if (long.TryParse(contents, out val))

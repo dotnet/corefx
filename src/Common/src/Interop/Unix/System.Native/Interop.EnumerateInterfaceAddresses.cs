@@ -30,7 +30,7 @@ internal static partial class Interop
         public unsafe delegate void IPv6AddressDiscoveredCallback(string ifaceName, IpAddressInfo* ipAddressInfo, uint* scopeId);
         public unsafe delegate void LinkLayerAddressDiscoveredCallback(string ifaceName, LinkLayerAddressInfo* llAddress);
 
-        [DllImport("System.Native")]
+        [DllImport(Libraries.SystemNative)]
         public static extern void EnumerateInterfaceAddresses(IPv4AddressDiscoveredCallback ipv4Found,
                                                                 IPv6AddressDiscoveredCallback ipv6Found,
                                                                 LinkLayerAddressDiscoveredCallback linkLayerFound);

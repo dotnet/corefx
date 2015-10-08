@@ -18,7 +18,6 @@ namespace System.Net.NetworkInformation
         {
             get
             {
-                // We could call if_nametoindex(name), if we wanted.
                 return _linuxNetworkInterface.Index;
             }
         }
@@ -28,7 +27,7 @@ namespace System.Net.NetworkInformation
             get
             {
                 // /proc/sys/net/ipv6/conf/<name>/mtu
-                string path = Path.Combine(LinuxNetworkFiles.ProcSysNetFolder, "ipv6", "conf", _linuxNetworkInterface.Name, "mtu");
+                string path = Path.Combine(LinuxNetworkFiles.Ipv6ConfigFolder, _linuxNetworkInterface.Name, LinuxNetworkFiles.MtuFileName);
                 return int.Parse(File.ReadAllText(path));
             }
         }

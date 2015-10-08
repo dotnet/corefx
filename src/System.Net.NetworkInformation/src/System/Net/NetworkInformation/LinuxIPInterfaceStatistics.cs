@@ -38,7 +38,7 @@ namespace System.Net.NetworkInformation
         public LinuxIPInterfaceStatistics(string name)
         {
             ParseTable(name);
-            string transmitQueueLengthFilePath = Path.Combine(LinuxNetworkFiles.SysClassNetFolder, name, "tx_queue_len");
+            string transmitQueueLengthFilePath = Path.Combine(LinuxNetworkFiles.SysClassNetFolder, name, LinuxNetworkFiles.TransmitQueueLengthFileName);
             _transmitQueueLength = int.Parse(File.ReadAllText(transmitQueueLengthFilePath));
         }
 
@@ -52,7 +52,7 @@ namespace System.Net.NetworkInformation
                    There does not appear to be any additional information exposed there that is not exposed in /proc/net/dev
             */
 
-            using (var sr = File.OpenText(LinuxNetworkFiles.InterfaceListingFile))
+            using (StreamReader sr = File.OpenText(LinuxNetworkFiles.InterfaceListingFile))
             {
                 sr.ReadLine();
                 sr.ReadLine();
@@ -68,7 +68,7 @@ namespace System.Net.NetworkInformation
                     index += 1;
                 }
 
-                throw new InvalidOperationException("Reached the end of the file. Interface name " + name + " was invalid.");
+                throw new NetworkInformationException("Reached the end of the file. Interface name " + name + " was invalid.");
             }
         }
 

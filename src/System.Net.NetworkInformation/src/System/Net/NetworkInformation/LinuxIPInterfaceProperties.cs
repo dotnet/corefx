@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Sockets;
@@ -36,7 +35,7 @@ namespace System.Net.NetworkInformation
             get
             {
                 // /etc/nsswitchc.conf may be of use here.
-                // the absence of "dns" in that file could indicate that DNS is not enabled.
+                // The absence of "dns" in that file could indicate that DNS is not enabled.
                 return DnsAddresses.Count > 0;
             }
         }

@@ -2,7 +2,7 @@
 {
     public class NetworkAvailabilityEventArgs : EventArgs
     {
-        private bool _isAvailable;
+        private readonly bool _isAvailable;
 
         internal NetworkAvailabilityEventArgs(bool isAvailable)
         {
