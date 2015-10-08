@@ -6,13 +6,14 @@ namespace System.Reflection.Metadata.Decoding
 {
     public interface ISignatureTypeProvider<TType> : ITypeProvider<TType>
     {
+        MetadataReader Reader { get; }
         TType GetFunctionPointerType(MethodSignature<TType> signature);
         TType GetGenericMethodParameter(int index);
         TType GetGenericTypeParameter(int index);
         TType GetModifiedType(TType unmodifiedType, ImmutableArray<CustomModifier<TType>> customModifiers);
         TType GetPinnedType(TType elementType);
         TType GetPrimitiveType(PrimitiveTypeCode typeCode);
-        TType GetTypeFromDefinition(MetadataReader reader, TypeDefinitionHandle handle, bool? isValueType);
-        TType GetTypeFromReference(MetadataReader reader, TypeReferenceHandle handle, bool? isValueType);
+        TType GetTypeFromDefinition(TypeDefinitionHandle handle, bool? isValueType);
+        TType GetTypeFromReference(TypeReferenceHandle handle, bool? isValueType);
     }
 }

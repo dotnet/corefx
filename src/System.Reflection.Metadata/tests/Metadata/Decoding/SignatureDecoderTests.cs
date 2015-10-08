@@ -32,15 +32,14 @@ namespace System.Reflection.Metadata.Tests
             {
                 var signatureBlob = new BlobReader(testSignaturePtr, testSignature.Length);
                 var sigTypeProvider = new TestSignatureTypeProvider();
-                var decoder = new SignatureDecoder<TestSignatureTypeProvider, string>(sigTypeProvider);
 
                 foreach (string typeString in types)
                 {
                     // Verify that each type is decoded as expected
-                    Assert.Equal(typeString, decoder.DecodeType(null, ref signatureBlob));
+                    Assert.Equal(typeString, SignatureDecoder.DecodeType(ref signatureBlob, sigTypeProvider));
                 }
                 // And that nothing is left over to decode
-                Assert.Throws<BadImageFormatException>(() => decoder.DecodeType(null, ref signatureBlob));
+                Assert.Throws<BadImageFormatException>(() => SignatureDecoder.DecodeType(ref signatureBlob, sigTypeProvider));
             }
         }
 
@@ -59,10 +58,8 @@ namespace System.Reflection.Metadata.Tests
             fixed (byte* testSignaturePtr = &testSignature[0])
             {
                 var signatureBlob = new BlobReader(testSignaturePtr, testSignature.Length);
-                var decoder = new SignatureDecoder<TestSignatureTypeProvider, string>(new TestSignatureTypeProvider());
-
                 IEnumerable<string> expectedTypes = new[] { "Int32", "String" };
-                IEnumerable<string> actualTypes = decoder.DecodeMethodSpecificationSignature(null, ref signatureBlob);
+                IEnumerable<string> actualTypes = SignatureDecoder.DecodeMethodSpecificationSignature(ref signatureBlob, new TestSignatureTypeProvider());
                 Assert.Equal(expectedTypes, actualTypes);
             }
         }
@@ -75,8 +72,7 @@ namespace System.Reflection.Metadata.Tests
             fixed (byte* testSignaturePtr = &testSignature[0])
             {
                 var signatureBlob = new BlobReader(testSignaturePtr, testSignature.Length);
-                var decoder = new SignatureDecoder<TestSignatureTypeProvider, string>(new TestSignatureTypeProvider());
-                Assert.Throws<BadImageFormatException>(() => decoder.DecodeMethodSpecificationSignature(null, ref signatureBlob));
+                Assert.Throws<BadImageFormatException>(() => SignatureDecoder.DecodeMethodSpecificationSignature(ref signatureBlob, new TestSignatureTypeProvider()));
             }
         }
 
@@ -89,12 +85,13 @@ namespace System.Reflection.Metadata.Tests
             }
 
             public string GetPrimitiveType(PrimitiveTypeCode typeCode) { return typeCode.ToString(); }
-            public string GetTypeFromDefinition(MetadataReader reader, TypeDefinitionHandle handle, bool? isValueType) { return handle.RowId.ToString("X"); }
-            public string GetTypeFromReference(MetadataReader reader, TypeReferenceHandle handle, bool? isValueType) { return handle.RowId.ToString("X"); }
+            public string GetTypeFromDefinition(TypeDefinitionHandle handle, bool? isValueType) { return handle.RowId.ToString("X"); }
+            public string GetTypeFromReference(TypeReferenceHandle handle, bool? isValueType) { return handle.RowId.ToString("X"); }
             public string GetByReferenceType(string elemenstring) { return elemenstring + "&"; }
             public string GetSZArrayType(string elemenstring) { return elemenstring + "[]"; }
             public string GetPointerType(string elemenstring) { return elemenstring + "*"; }
 
+            public MetadataReader Reader { get { return null; } } // Not needed, currently
             public string GetFunctionPointerType(MethodSignature<string> signature) { return null; } // Not needed, currently
             public string GetGenericMethodParameter(int index) { return null; } // Not needed, currently
             public string GetGenericTypeParameter(int index) { return null; } // Not needed, currently
