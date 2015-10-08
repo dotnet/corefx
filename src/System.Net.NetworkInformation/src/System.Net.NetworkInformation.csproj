@@ -287,6 +287,8 @@
     <Compile Include="System\Net\NetworkInformation\IPGlobalPropertiesPal.Osx.cs" />
     <Compile Include="System\Net\NetworkInformation\NetworkChange.OSX.cs" />
     <Compile Include="System\Net\NetworkInformation\NetworkInterfacePal.Osx.cs" />
+    <Compile Include="System\Net\NetworkInformation\OsxIpInterfaceStatistics.cs" />
+    <Compile Include="System\Net\NetworkInformation\OsxIpInterfaceProperties.cs" />
     <Compile Include="System\Net\NetworkInformation\OsxNetworkInterface.cs" />
   </ItemGroup>
   <ItemGroup>

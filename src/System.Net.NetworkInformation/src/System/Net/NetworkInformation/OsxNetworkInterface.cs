@@ -51,5 +51,15 @@ namespace System.Net.NetworkInformation
 
             return oni;
         }
+
+        public override IPInterfaceProperties GetIPProperties()
+        {
+            return new OsxIpInterfaceProperties(_name);
+        }
+
+        public override IPInterfaceStatistics GetIPStatistics()
+        {
+            return new OsxIpInterfaceStatistics(_name);
+        }
     }
 }
