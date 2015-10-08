@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.Diagnostics;
 using System.IO;
 
 namespace System.Net.NetworkInformation
@@ -92,11 +93,12 @@ namespace System.Net.NetworkInformation
             var files = new DirectoryInfo(LinuxNetworkFiles.Ipv4ConfigFolder).GetFiles();
             foreach (var file in files)
             {
-                if (file.Name != "all" && file.Name != "default")
+                if (file.Name != LinuxNetworkFiles.AllNetworkInterfaceFileName && file.Name != LinuxNetworkFiles.DefaultNetworkInterfaceFileName)
                 {
                     interfacesCount++;
                 }
             }
+
             stats._numInterfaces = interfacesCount;
 
             return stats;
@@ -232,6 +234,7 @@ namespace System.Net.NetworkInformation
 
         private static int CountOccurences(string value, string candidate)
         {
+            Debug.Assert(candidate != null, "CountOcurrences: Candidate string was null.");
             int index = 0;
             int occurrences = 0;
             while (index != -1)

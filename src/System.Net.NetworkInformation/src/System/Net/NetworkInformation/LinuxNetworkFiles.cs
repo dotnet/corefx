@@ -5,6 +5,7 @@ namespace System.Net.NetworkInformation
 {
     internal static class LinuxNetworkFiles
     {
+        // Paths to specific directories and files
         public const string InterfaceListingFile = "/proc/net/dev";
         public const string SnmpV4StatsFile = "/proc/net/snmp";
         public const string SnmpV6StatsFile = "/proc/net/snmp6";
@@ -15,11 +16,20 @@ namespace System.Net.NetworkInformation
         public const string SockstatFile = "/proc/net/sockstat";
         public const string Sockstat6File = "/proc/net/sockstat6";
         public const string SysClassNetFolder = "/sys/class/net";
-        public const string ProcSysNetFolder = "/proc/sys/net";
         public const string EtcResolvConfFile = "/etc/resolv.conf";
         public const string Tcp4ConnectionsFile = "/proc/net/tcp";
         public const string Tcp6ConnectionsFile = "/proc/net/tcp6";
         public const string Udp4ConnectionsFile = "/proc/net/udp";
         public const string Udp6ConnectionsFile = "/proc/net/udp6";
+
+        // Individual file names
+        public const string AllNetworkInterfaceFileName = "all";
+        public const string DefaultNetworkInterfaceFileName = "default";
+        public const string FlagsFileName = "flags";
+        public const string ForwardingFileName = "forwarding";
+        public const string MtuFileName = "mtu";
+        public const string OperstateFileName = "operstate";
+        public const string SpeedFileName = "speed";
+        public const string TransmitQueueLengthFileName = "tx_queue_len";
     }
 }

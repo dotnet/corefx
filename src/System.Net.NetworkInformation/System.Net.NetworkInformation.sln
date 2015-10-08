@@ -20,8 +20,6 @@ EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
-		FreeBSD_Debug|Any CPU = FreeBSD_Debug|Any CPU
-		FreeBSD_Release|Any CPU = FreeBSD_Release|Any CPU
 		Linux_Debug|Any CPU = Linux_Debug|Any CPU
 		Linux_Release|Any CPU = Linux_Release|Any CPU
 		OSX_Debug|Any CPU = OSX_Debug|Any CPU

@@ -1,8 +1,6 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
-
 namespace System.Net.NetworkInformation
 {
     /// Provides information about a network interface address.
@@ -25,4 +23,3 @@ namespace System.Net.NetworkInformation
         }
     }
 }
-

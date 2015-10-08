@@ -8,7 +8,7 @@ namespace System.Net.NetworkInformation
 {
     internal class LinuxIPGlobalProperties : IPGlobalProperties
     {
-        private static readonly string[] newLineSeparator = new string[] { Environment.NewLine }; // Used for string splitting
+        private static readonly string[] s_newLineSeparator = new string[] { Environment.NewLine }; // Used for string splitting
 
         public override string DhcpScopeName
         {
@@ -54,10 +54,10 @@ namespace System.Net.NetworkInformation
         public override TcpConnectionInformation[] GetActiveTcpConnections()
         {
             string tcp4FileContents = File.ReadAllText(LinuxNetworkFiles.Tcp4ConnectionsFile);
-            string[] v4connections = tcp4FileContents.Split(newLineSeparator, StringSplitOptions.RemoveEmptyEntries);
+            string[] v4connections = tcp4FileContents.Split(s_newLineSeparator, StringSplitOptions.RemoveEmptyEntries);
 
             string tcp6FileContents = File.ReadAllText(LinuxNetworkFiles.Tcp6ConnectionsFile);
-            string[] v6connections = tcp6FileContents.Split(newLineSeparator, StringSplitOptions.RemoveEmptyEntries);
+            string[] v6connections = tcp6FileContents.Split(s_newLineSeparator, StringSplitOptions.RemoveEmptyEntries);
 
             TcpConnectionInformation[] connections = new TcpConnectionInformation[v4connections.Length + v6connections.Length - 2]; // First line is header in each file
             int index = 0;
@@ -86,10 +86,10 @@ namespace System.Net.NetworkInformation
         public override IPEndPoint[] GetActiveTcpListeners()
         {
             string tcp4FileContents = File.ReadAllText(LinuxNetworkFiles.Tcp4ConnectionsFile);
-            string[] v4connections = tcp4FileContents.Split(newLineSeparator, StringSplitOptions.RemoveEmptyEntries);
+            string[] v4connections = tcp4FileContents.Split(s_newLineSeparator, StringSplitOptions.RemoveEmptyEntries);
 
             string tcp6FileContents = File.ReadAllText(LinuxNetworkFiles.Tcp6ConnectionsFile);
-            string[] v6connections = tcp6FileContents.Split(newLineSeparator, StringSplitOptions.RemoveEmptyEntries);
+            string[] v6connections = tcp6FileContents.Split(s_newLineSeparator, StringSplitOptions.RemoveEmptyEntries);
 
             IPEndPoint[] endPoints = new IPEndPoint[v4connections.Length + v6connections.Length - 2]; // First line is header in each file
             int index = 0;
@@ -122,10 +122,10 @@ namespace System.Net.NetworkInformation
         public override IPEndPoint[] GetActiveUdpListeners()
         {
             string udp4FileContents = File.ReadAllText(LinuxNetworkFiles.Udp4ConnectionsFile);
-            string[] v4connections = udp4FileContents.Split(newLineSeparator, StringSplitOptions.RemoveEmptyEntries);
+            string[] v4connections = udp4FileContents.Split(s_newLineSeparator, StringSplitOptions.RemoveEmptyEntries);
 
             string udp6FileContents = File.ReadAllText(LinuxNetworkFiles.Udp6ConnectionsFile);
-            string[] v6connections = udp6FileContents.Split(newLineSeparator, StringSplitOptions.RemoveEmptyEntries);
+            string[] v6connections = udp6FileContents.Split(s_newLineSeparator, StringSplitOptions.RemoveEmptyEntries);
 
             IPEndPoint[] endPoints = new IPEndPoint[v4connections.Length + v6connections.Length - 2]; // First line is header in each file
             int index = 0;
@@ -217,7 +217,7 @@ namespace System.Net.NetworkInformation
             {
                 throw new InvalidOperationException("Invalid state value: " + socketStateHex);
             }
-            TcpState tcpState = MapTcpState((LinuxTcpState)state);
+            TcpState tcpState = MapTcpState((Interop.LinuxTcpState)state);
 
             IPEndPoint localEndPoint = new IPEndPoint(localAddress, localPort);
             IPEndPoint remoteEndPoint = new IPEndPoint(remoteAddress, remotePort);
@@ -226,35 +226,35 @@ namespace System.Net.NetworkInformation
         }
 
         // Maps from Linux TCP states (include/net/tcp_states.h) to .NET TcpStates
-        private static TcpState MapTcpState(LinuxTcpState state)
+        private static TcpState MapTcpState(Interop.LinuxTcpState state)
         {
             switch (state)
             {
-                case LinuxTcpState.TCP_ESTABLISHED:
+                case Interop.LinuxTcpState.TCP_ESTABLISHED:
                     return TcpState.Established;
-                case LinuxTcpState.TCP_SYN_SENT:
+                case Interop.LinuxTcpState.TCP_SYN_SENT:
                     return TcpState.SynSent;
-                case LinuxTcpState.TCP_SYN_RECV:
+                case Interop.LinuxTcpState.TCP_SYN_RECV:
                     return TcpState.SynReceived;
-                case LinuxTcpState.TCP_FIN_WAIT1:
+                case Interop.LinuxTcpState.TCP_FIN_WAIT1:
                     return TcpState.FinWait1;
-                case LinuxTcpState.TCP_FIN_WAIT2:
+                case Interop.LinuxTcpState.TCP_FIN_WAIT2:
                     return TcpState.FinWait2;
-                case LinuxTcpState.TCP_TIME_WAIT:
+                case Interop.LinuxTcpState.TCP_TIME_WAIT:
                     return TcpState.TimeWait;
-                case LinuxTcpState.TCP_CLOSE:
+                case Interop.LinuxTcpState.TCP_CLOSE:
                     return TcpState.Closing;
-                case LinuxTcpState.TCP_CLOSE_WAIT:
+                case Interop.LinuxTcpState.TCP_CLOSE_WAIT:
                     return TcpState.CloseWait;
-                case LinuxTcpState.TCP_LAST_ACK:
+                case Interop.LinuxTcpState.TCP_LAST_ACK:
                     return TcpState.LastAck;
-                case LinuxTcpState.TCP_LISTEN:
+                case Interop.LinuxTcpState.TCP_LISTEN:
                     return TcpState.Listen;
-                case LinuxTcpState.TCP_CLOSING:
+                case Interop.LinuxTcpState.TCP_CLOSING:
                     return TcpState.Closing;
-                case LinuxTcpState.TCP_NEW_SYN_RECV:
+                case Interop.LinuxTcpState.TCP_NEW_SYN_RECV:
                     return TcpState.Unknown;
-                case LinuxTcpState.TCP_MAX_STATES:
+                case Interop.LinuxTcpState.TCP_MAX_STATES:
                     return TcpState.Unknown;
                 default:
                     throw new InvalidOperationException("Invalid LinuxTcpState: " + state);

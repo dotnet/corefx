@@ -41,4 +41,3 @@ namespace System.Net.NetworkInformation
         public abstract IPv6InterfaceProperties GetIPv6Properties();
     }
 }
-

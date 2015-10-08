@@ -16,4 +16,3 @@ namespace System.Net.NetworkInformation
         public abstract TcpState State { get; }
     }
 }
-

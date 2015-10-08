@@ -5,7 +5,7 @@ namespace System.Net.NetworkInformation
 {
     public class LinuxIPAddressInformation : IPAddressInformation
     {
-        private IPAddress _address;
+        private readonly IPAddress _address;
 
         public LinuxIPAddressInformation(IPAddress address)
         {

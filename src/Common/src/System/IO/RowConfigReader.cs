@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics;
 
-namespace System.Net.NetworkInformation
+namespace System.IO
 {
     /// <summary> 
     /// Helper for reading config files where each row is a key-value data pair.

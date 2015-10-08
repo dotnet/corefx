@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Sockets;
@@ -36,7 +35,7 @@ namespace System.Net.NetworkInformation
             get
             {
                 // /etc/nsswitchc.conf may be of use here.
-                // the absence of "dns" in that file could indicate that DNS is not enabled.
+                // The absence of "dns" in that file could indicate that DNS is not enabled.
                 return DnsAddresses.Count > 0;
             }
         }
@@ -154,7 +153,7 @@ namespace System.Net.NetworkInformation
             // These are the DNS servers the machine is configured to use.
             string data = File.ReadAllText(LinuxNetworkFiles.EtcResolvConfFile);
             RowConfigReader rcr = new RowConfigReader(data);
-            List<IPAddress> addresses = new List<IPAddress>();
+            InternalIPAddressCollection addresses = new InternalIPAddressCollection();
 
             string addressString = null;
             while (rcr.TryGetNextValue("nameserver", out addressString))
@@ -162,11 +161,11 @@ namespace System.Net.NetworkInformation
                 IPAddress parsedAddress;
                 if (IPAddress.TryParse(addressString, out parsedAddress))
                 {
-                    addresses.Add(parsedAddress);
+                    addresses.InternalAdd(parsedAddress);
                 }
             }
 
-            return new IPAddressCollectionImpl(addresses);
+            return addresses;
         }
 
         // /proc/net/route contains some information about gateway addresses,

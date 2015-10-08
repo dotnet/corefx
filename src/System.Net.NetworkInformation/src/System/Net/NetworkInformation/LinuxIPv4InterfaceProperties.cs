@@ -51,7 +51,7 @@ namespace System.Net.NetworkInformation
             get
             {
                 // /proc/sys/net/ipv4/conf/<name>/forwarding
-                string path = Path.Combine(LinuxNetworkFiles.ProcSysNetFolder, "ipv4", "conf", _linuxNetworkInterface.Name, "forwarding");
+                string path = Path.Combine(LinuxNetworkFiles.Ipv4ConfigFolder, _linuxNetworkInterface.Name, LinuxNetworkFiles.ForwardingFileName);
                 return int.Parse(File.ReadAllText(path)) == 1;
             }
         }
@@ -61,7 +61,7 @@ namespace System.Net.NetworkInformation
             get
             {
                 // /proc/sys/net/ipv4/conf/<name>/mtu
-                string path = Path.Combine(LinuxNetworkFiles.ProcSysNetFolder, "ipv4", "conf", _linuxNetworkInterface.Name, "mtu");
+                string path = Path.Combine(LinuxNetworkFiles.Ipv4ConfigFolder, _linuxNetworkInterface.Name, LinuxNetworkFiles.MtuFileName);
                 return int.Parse(File.ReadAllText(path));
             }
         }
