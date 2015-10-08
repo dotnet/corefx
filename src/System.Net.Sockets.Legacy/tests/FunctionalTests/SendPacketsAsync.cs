@@ -16,30 +16,29 @@ namespace System.Net.Sockets.Tests
         //       merged into corefx.
         private const int DummySendPacketsIssue = 123456;
 
-        private const int TestPortBase = TestPortBases.SendPacketsAsync;
         private readonly ITestOutputHelper _log;
 
-        private IPEndPoint Server = new IPEndPoint(IPAddress.IPv6Loopback, 8080); 
+        private IPAddress _serverAddress = IPAddress.IPv6Loopback;
         // In the current directory
         private const string TestFileName = "NCLTest.Socket.SendPacketsAsync.testpayload";
-        private static int TestFileSize = 1024;
-        
+        private static int s_testFileSize = 1024;
+
         #region Additional test attributes
 
         public SendPacketsAsync(ITestOutputHelper output)
         {
             _log = TestLogging.GetInstance();
-            
-            byte[] buffer = new byte[TestFileSize];
 
-            for (int i = 0; i < TestFileSize; i++)
+            byte[] buffer = new byte[s_testFileSize];
+
+            for (int i = 0; i < s_testFileSize; i++)
             {
                 buffer[i] = (byte)(i % 255);
             }
 
             try
             {
-                _log.WriteLine("Creating file {0} with size: {1}", TestFileName, TestFileSize);
+                _log.WriteLine("Creating file {0} with size: {1}", TestFileName, s_testFileSize);
                 using (FileStream fs = new FileStream(TestFileName, FileMode.CreateNew))
                 {
                     fs.Write(buffer, 0, buffer.Length);
@@ -61,11 +60,12 @@ namespace System.Net.Sockets.Tests
         [ActiveIssue(DummySendPacketsIssue, PlatformID.AnyUnix)]
         public void Disposed_Throw()
         {
-            using (SocketTestServer.SocketTestServerFactory(Server))
+            int port;
+            using (SocketTestServer.SocketTestServerFactory(_serverAddress, out port))
             {
                 using (Socket sock = new Socket(AddressFamily.InterNetworkV6, SocketType.Stream, ProtocolType.Tcp))
                 {
-                    sock.Connect(Server);
+                    sock.Connect(new IPEndPoint(_serverAddress, port));
                     sock.Dispose();
 
                     Assert.Throws<ObjectDisposedException>(() =>
@@ -80,11 +80,12 @@ namespace System.Net.Sockets.Tests
         [ActiveIssue(DummySendPacketsIssue, PlatformID.AnyUnix)]
         public void NullArgs_Throw()
         {
-            using (SocketTestServer.SocketTestServerFactory(Server))
+            int port;
+            using (SocketTestServer.SocketTestServerFactory(_serverAddress, out port))
             {
                 using (Socket sock = new Socket(AddressFamily.InterNetworkV6, SocketType.Stream, ProtocolType.Tcp))
                 {
-                    sock.Connect(Server);
+                    sock.Connect(new IPEndPoint(_serverAddress, port));
 
                     ArgumentNullException ex = Assert.Throws<ArgumentNullException>(() =>
                     {
@@ -179,7 +180,7 @@ namespace System.Net.Sockets.Tests
         [ActiveIssue(DummySendPacketsIssue, PlatformID.AnyUnix)]
         public void BufferMixedBuffers_ZeroCountBufferIgnored()
         {
-            SendPacketsElement[] elements = new SendPacketsElement[] 
+            SendPacketsElement[] elements = new SendPacketsElement[]
             {
                 new SendPacketsElement(new byte[10], 4, 0), // Ignored
                 new SendPacketsElement(new byte[10], 4, 4),
@@ -193,14 +194,15 @@ namespace System.Net.Sockets.Tests
         public void BufferZeroCountThenNormal_ZeroCountIgnored()
         {
             Assert.True(Capability.IPv6Support());
-            
+
             EventWaitHandle completed = new ManualResetEvent(false);
 
-            using (SocketTestServer.SocketTestServerFactory(Server))
+            int port;
+            using (SocketTestServer.SocketTestServerFactory(_serverAddress, out port))
             {
                 using (Socket sock = new Socket(AddressFamily.InterNetworkV6, SocketType.Stream, ProtocolType.Tcp))
                 {
-                    sock.Connect(Server);
+                    sock.Connect(new IPEndPoint(_serverAddress, port));
                     using (SocketAsyncEventArgs args = new SocketAsyncEventArgs())
                     {
                         args.Completed += OnCompleted;
@@ -209,12 +211,12 @@ namespace System.Net.Sockets.Tests
                         // First do an empty send, ignored
                         args.SendPacketsElements = new SendPacketsElement[]
                         {
-                            new SendPacketsElement(new byte[5], 3, 0)   
+                            new SendPacketsElement(new byte[5], 3, 0)
                         };
 
                         if (sock.SendPacketsAsync(args))
                         {
-                            Assert.True(completed.WaitOne(500), "Timed out");
+                            Assert.True(completed.WaitOne(Configuration.PassingTestTimeout), "Timed out");
                         }
                         Assert.Equal(SocketError.Success, args.SocketError);
                         Assert.Equal(0, args.BytesTransferred);
@@ -223,12 +225,12 @@ namespace System.Net.Sockets.Tests
                         // Now do a real send
                         args.SendPacketsElements = new SendPacketsElement[]
                         {
-                            new SendPacketsElement(new byte[5], 1, 4)   
+                            new SendPacketsElement(new byte[5], 1, 4)
                         };
 
                         if (sock.SendPacketsAsync(args))
                         {
-                            Assert.True(completed.WaitOne(500), "Timed out");
+                            Assert.True(completed.WaitOne(Configuration.PassingTestTimeout), "Timed out");
                         }
                         Assert.Equal(SocketError.Success, args.SocketError);
                         Assert.Equal(4, args.BytesTransferred);
@@ -261,7 +263,7 @@ namespace System.Net.Sockets.Tests
                 SendPackets(new SendPacketsElement(" \t  "), 0);
             });
         }
-        
+
         [Fact]
         [ActiveIssue(DummySendPacketsIssue, PlatformID.AnyUnix)]
         public void SendPacketsElement_BadCharactersFileName_Throws()
@@ -299,14 +301,14 @@ namespace System.Net.Sockets.Tests
         [ActiveIssue(DummySendPacketsIssue, PlatformID.AnyUnix)]
         public void SendPacketsElement_File_Success()
         {
-            SendPackets(new SendPacketsElement(TestFileName), TestFileSize); // Whole File
+            SendPackets(new SendPacketsElement(TestFileName), s_testFileSize); // Whole File
         }
 
         [Fact]
         [ActiveIssue(DummySendPacketsIssue, PlatformID.AnyUnix)]
         public void SendPacketsElement_FileZeroCount_Success()
         {
-            SendPackets(new SendPacketsElement(TestFileName, 0, 0), TestFileSize);  // Whole File
+            SendPackets(new SendPacketsElement(TestFileName, 0, 0), s_testFileSize);  // Whole File
         }
 
         [Fact]
@@ -321,7 +323,7 @@ namespace System.Net.Sockets.Tests
         [ActiveIssue(DummySendPacketsIssue, PlatformID.AnyUnix)]
         public void SendPacketsElement_FileMultiPart_Success()
         {
-            SendPacketsElement[] elements = new SendPacketsElement[] 
+            SendPacketsElement[] elements = new SendPacketsElement[]
             {
                 new SendPacketsElement(TestFileName, 10, 20),
                 new SendPacketsElement(TestFileName, 30, 10),
@@ -382,11 +384,12 @@ namespace System.Net.Sockets.Tests
 
             EventWaitHandle completed = new ManualResetEvent(false);
 
-            using (SocketTestServer.SocketTestServerFactory(Server))
+            int port;
+            using (SocketTestServer.SocketTestServerFactory(_serverAddress, out port))
             {
                 using (Socket sock = new Socket(AddressFamily.InterNetworkV6, SocketType.Stream, ProtocolType.Tcp))
                 {
-                    sock.Connect(Server);
+                    sock.Connect(new IPEndPoint(_serverAddress, port));
                     using (SocketAsyncEventArgs args = new SocketAsyncEventArgs())
                     {
                         args.Completed += OnCompleted;
@@ -395,7 +398,7 @@ namespace System.Net.Sockets.Tests
 
                         if (sock.SendPacketsAsync(args))
                         {
-                            Assert.True(completed.WaitOne(500), "Timed out");
+                            Assert.True(completed.WaitOne(Configuration.PassingTestTimeout), "Timed out");
                         }
                         Assert.Equal(expectedResut, args.SocketError);
                         Assert.Equal(bytesExpected, args.BytesTransferred);
@@ -404,7 +407,7 @@ namespace System.Net.Sockets.Tests
             }
         }
 
-        void OnCompleted(object sender, SocketAsyncEventArgs e)
+        private void OnCompleted(object sender, SocketAsyncEventArgs e)
         {
             EventWaitHandle handle = (EventWaitHandle)e.UserToken;
             handle.Set();

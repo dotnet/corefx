@@ -9,12 +9,10 @@ namespace System.Net.Sockets.Tests
 {
     public class ConnectAsync
     {
-        private const int TestPortBase = TestPortBases.ConnectAsync;
-
         public void OnConnectCompleted(object sender, SocketAsyncEventArgs args)
         {
             EventWaitHandle handle = (EventWaitHandle)args.UserToken;
-            handle.Set();            
+            handle.Set();
         }
 
         [Fact]
@@ -24,17 +22,18 @@ namespace System.Net.Sockets.Tests
 
             if (Socket.OSSupportsIPv4)
             {
-                using (SocketTestServer.SocketTestServerFactory(new IPEndPoint(IPAddress.Loopback, TestPortBase)))
+                int port;
+                using (SocketTestServer.SocketTestServerFactory(IPAddress.Loopback, out port))
                 {
                     SocketAsyncEventArgs args = new SocketAsyncEventArgs();
-                    args.RemoteEndPoint = new IPEndPoint(IPAddress.Loopback, TestPortBase);
+                    args.RemoteEndPoint = new IPEndPoint(IPAddress.Loopback, port);
                     args.Completed += OnConnectCompleted;
                     args.UserToken = completed;
 
                     Socket client = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
                     Assert.True(client.ConnectAsync(args));
 
-                    Assert.True(completed.WaitOne(5000), "IPv4: Timed out while waiting for connection");
+                    Assert.True(completed.WaitOne(Configuration.PassingTestTimeout), "IPv4: Timed out while waiting for connection");
 
                     Assert.Equal<SocketError>(SocketError.Success, args.SocketError);
 
@@ -44,17 +43,18 @@ namespace System.Net.Sockets.Tests
 
             if (Socket.OSSupportsIPv6)
             {
-                using (SocketTestServer.SocketTestServerFactory(new IPEndPoint(IPAddress.IPv6Loopback, TestPortBase)))
+                int port;
+                using (SocketTestServer.SocketTestServerFactory(IPAddress.IPv6Loopback, out port))
                 {
                     SocketAsyncEventArgs args = new SocketAsyncEventArgs();
-                    args.RemoteEndPoint = new IPEndPoint(IPAddress.IPv6Loopback, TestPortBase);
+                    args.RemoteEndPoint = new IPEndPoint(IPAddress.IPv6Loopback, port);
                     args.Completed += OnConnectCompleted;
                     args.UserToken = completed;
 
                     Socket client = new Socket(AddressFamily.InterNetworkV6, SocketType.Stream, ProtocolType.Tcp);
                     Assert.True(client.ConnectAsync(args));
 
-                    Assert.True(completed.WaitOne(5000), "IPv6: Timed out while waiting for connection");
+                    Assert.True(completed.WaitOne(Configuration.PassingTestTimeout), "IPv6: Timed out while waiting for connection");
 
                     Assert.Equal<SocketError>(SocketError.Success, args.SocketError);
 

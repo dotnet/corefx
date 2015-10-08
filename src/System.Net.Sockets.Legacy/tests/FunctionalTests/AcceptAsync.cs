@@ -11,7 +11,6 @@ namespace System.Net.Sockets.Tests
 {
     public class AcceptAsync
     {
-        private const int TestPortBase = TestPortBases.AcceptAsync;
         private readonly ITestOutputHelper _log;
 
         public AcceptAsync(ITestOutputHelper output)
@@ -35,9 +34,9 @@ namespace System.Net.Sockets.Tests
             {
                 using (Socket sock = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
                 {
-                    sock.Bind(new IPEndPoint(IPAddress.Loopback, TestPortBase));
+                    int port = sock.BindToAnonymousPort(IPAddress.Loopback);
                     sock.Listen(1);
-                    
+
                     SocketAsyncEventArgs args = new SocketAsyncEventArgs();
                     args.Completed += OnAcceptCompleted;
                     args.UserToken = completed;
@@ -47,10 +46,10 @@ namespace System.Net.Sockets.Tests
                     _log.WriteLine("IPv4 Server: Waiting for clients.");
 
                     Socket client = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-                    client.Connect(new IPEndPoint(IPAddress.Loopback, TestPortBase));
+                    client.Connect(new IPEndPoint(IPAddress.Loopback, port));
 
                     _log.WriteLine("IPv4 Client: Connecting.");
-                    Assert.True(completed.WaitOne(5000), "IPv4: Timed out while waiting for connection");
+                    Assert.True(completed.WaitOne(Configuration.PassingTestTimeout), "IPv4: Timed out while waiting for connection");
 
                     Assert.Equal<SocketError>(SocketError.Success, args.SocketError);
                     Assert.NotNull(args.AcceptSocket);
@@ -64,7 +63,7 @@ namespace System.Net.Sockets.Tests
             {
                 using (Socket sock = new Socket(AddressFamily.InterNetworkV6, SocketType.Stream, ProtocolType.Tcp))
                 {
-                    sock.Bind(new IPEndPoint(IPAddress.IPv6Loopback, TestPortBase));
+                    int port = sock.BindToAnonymousPort(IPAddress.IPv6Loopback);
                     sock.Listen(1);
 
                     SocketAsyncEventArgs args = new SocketAsyncEventArgs();
@@ -75,10 +74,10 @@ namespace System.Net.Sockets.Tests
                     _log.WriteLine("IPv6 Server: Waiting for clients.");
 
                     Socket client = new Socket(AddressFamily.InterNetworkV6, SocketType.Stream, ProtocolType.Tcp);
-                    client.Connect(new IPEndPoint(IPAddress.IPv6Loopback, TestPortBase));
-                    
+                    client.Connect(new IPEndPoint(IPAddress.IPv6Loopback, port));
+
                     _log.WriteLine("IPv6 Client: Connecting.");
-                    Assert.True(completed.WaitOne(5000), "IPv6: Timed out while waiting for connection");
+                    Assert.True(completed.WaitOne(Configuration.PassingTestTimeout), "IPv6: Timed out while waiting for connection");
 
                     Assert.Equal<SocketError>(SocketError.Success, args.SocketError);
                     Assert.NotNull(args.AcceptSocket);

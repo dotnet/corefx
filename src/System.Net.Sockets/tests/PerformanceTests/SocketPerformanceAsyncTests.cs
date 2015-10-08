@@ -12,8 +12,6 @@ namespace System.Net.Sockets.Performance.Tests
     [Trait("Perf", "true")]
     public class SocketPerformanceAsyncTests
     {
-        private const int DummyOSXPerfIssue = 123456;
-
         private readonly ITestOutputHelper _log;
 
         public SocketPerformanceAsyncTests(ITestOutputHelper output)
@@ -22,6 +20,7 @@ namespace System.Net.Sockets.Performance.Tests
         }
 
         [Fact]
+        [ActiveIssue(3635)] // disabling perf tests until we have appropriate infrastructure with which to run them
         public void SocketPerformance_SingleSocketClientAsync_LocalHostServerAsync()
         {
             SocketImplementationType serverType = SocketImplementationType.Async;
@@ -43,7 +42,7 @@ namespace System.Net.Sockets.Performance.Tests
         }
 
         [Fact]
-        [ActiveIssue(DummyOSXPerfIssue, PlatformID.OSX)]
+        [ActiveIssue(3635)] // disabling perf tests until we have appropriate infrastructure with which to run them
         public void SocketPerformance_MultipleSocketClientAsync_LocalHostServerAsync()
         {
             SocketImplementationType serverType = SocketImplementationType.Async;
@@ -56,11 +55,11 @@ namespace System.Net.Sockets.Performance.Tests
             var test = new SocketPerformanceTests(_log);
 
             test.ClientServerTest(
-                serverType, 
-                clientType, 
-                iterations, 
-                bufferSize, 
-                socket_instances, 
+                serverType,
+                clientType,
+                iterations,
+                bufferSize,
+                socket_instances,
                 expectedMilliseconds);
         }
     }

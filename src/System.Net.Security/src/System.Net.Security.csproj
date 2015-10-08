@@ -75,9 +75,6 @@
     </Compile>
 
     <!-- System.Net common -->
-    <Compile Include="$(CommonPath)\System\Net\_BufferOffsetSize.cs">
-      <Link>Common\System\Net\_BufferOffsetSize.cs</Link>
-    </Compile>
     <Compile Include="$(CommonPath)\System\Net\_ContextAwareResult.cs">
       <Link>Common\System\Net\_ContextAwareResult.cs</Link>
     </Compile>
@@ -176,6 +173,9 @@
     <Compile Include="$(CommonPath)\Interop\Unix\libssl\Interop.libssl_types.cs">
       <Link>Interop\Unix\libssl\Interop.libssl_types.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\libssl\Interop.SafeSslHandle.cs">
+      <Link>Interop\Unix\libssl\Interop.SafeSslHandle.cs</Link>
+    </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\libssl\Interop.OpenSsl.cs">
       <Link>Interop\Unix\libssl\Interop.OpenSsl.cs</Link>
     </Compile>
@@ -188,14 +188,14 @@
     <Compile Include="$(CommonPath)\Interop\Unix\libcrypto\Interop.BIO.cs">
       <Link>Interop\Unix\libcrypto\Interop.BIO.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Unix\libcrypto\Interop.ERR.cs">
-      <Link>Interop\Unix\libcrypto\Interop.ERR.cs</Link>
-    </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\libcrypto\Interop.ASN1.cs">
       <Link>Interop\Unix\libcrypto\Interop.ASN1.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\libcrypto\Interop.Pkcs7.cs">
       <Link>Interop\Unix\libcrypto\Interop.Pkcs7.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Security.Cryptography.Native\Interop.ERR.cs">
+      <Link>Common\Interop\Unix\System.Security.Cryptography.Native\Interop.ERR.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\System.Security.Cryptography.Native\Interop.Initialization.cs">
       <Link>Common\Interop\Unix\System.Security.Cryptography.Native\Interop.Initialization.cs</Link>

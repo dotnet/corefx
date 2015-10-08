@@ -9,8 +9,6 @@ namespace System.Net.Sockets.Tests
 {
     public class Disconnect
     {
-        private const int TestPortBase = TestPortBases.Disconnect;
-
         public void OnCompleted(object sender, SocketAsyncEventArgs args)
         {
             EventWaitHandle handle = (EventWaitHandle)args.UserToken;
@@ -25,27 +23,28 @@ namespace System.Net.Sockets.Tests
 
             if (Socket.OSSupportsIPv4)
             {
-                using (SocketTestServer.SocketTestServerFactory(new IPEndPoint(IPAddress.Loopback, TestPortBase)))
-                using (SocketTestServer.SocketTestServerFactory(new IPEndPoint(IPAddress.Loopback, TestPortBase + 1)))
+                int port, port1;
+                using (SocketTestServer.SocketTestServerFactory(IPAddress.Loopback, out port))
+                using (SocketTestServer.SocketTestServerFactory(IPAddress.Loopback, out port1))
                 {
                     SocketAsyncEventArgs args = new SocketAsyncEventArgs();
                     args.Completed += OnCompleted;
                     args.UserToken = completed;
-                    args.RemoteEndPoint = new IPEndPoint(IPAddress.Loopback, TestPortBase);
+                    args.RemoteEndPoint = new IPEndPoint(IPAddress.Loopback, port);
                     args.DisconnectReuseSocket = true;
 
                     Socket client = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 
                     Assert.True(client.ConnectAsync(args));
-                    Assert.True(completed.WaitOne(5000), "Timed out while waiting for connection");
+                    Assert.True(completed.WaitOne(Configuration.PassingTestTimeout), "Timed out while waiting for connection");
                     Assert.Equal<SocketError>(SocketError.Success, args.SocketError);
 
                     client.Disconnect(true);
 
-                    args.RemoteEndPoint = new IPEndPoint(IPAddress.Loopback, TestPortBase + 1);
+                    args.RemoteEndPoint = new IPEndPoint(IPAddress.Loopback, port1);
 
                     Assert.True(client.ConnectAsync(args));
-                    Assert.True(completed.WaitOne(5000), "Timed out while waiting for connection");
+                    Assert.True(completed.WaitOne(Configuration.PassingTestTimeout), "Timed out while waiting for connection");
                     Assert.Equal<SocketError>(SocketError.Success, args.SocketError);
 
                     client.Dispose();
@@ -57,8 +56,6 @@ namespace System.Net.Sockets.Tests
         [PlatformSpecific(PlatformID.AnyUnix)]
         public void DisconnectAsync_Throws_PlatformNotSupported()
         {
-            const int Port = TestPortBase + 2;
-
             IPAddress address = null;
             if (Socket.OSSupportsIPv4)
             {
@@ -73,21 +70,22 @@ namespace System.Net.Sockets.Tests
                 return;
             }
 
-            var endPoint = new IPEndPoint(address, Port);
-            using (SocketTestServer.SocketTestServerFactory(endPoint))
+            int port;
+            using (SocketTestServer.SocketTestServerFactory(address, out port))
             {
                 var completed = new AutoResetEvent(false);
 
-                var args = new SocketAsyncEventArgs {
+                var args = new SocketAsyncEventArgs
+                {
                     UserToken = completed,
-                    RemoteEndPoint = endPoint,
+                    RemoteEndPoint = new IPEndPoint(address, port),
                     DisconnectReuseSocket = true
                 };
                 args.Completed += OnCompleted;
 
                 var client = new Socket(address.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
                 Assert.True(client.ConnectAsync(args));
-                Assert.True(completed.WaitOne(5000), "Timed out while waiting for connection");
+                Assert.True(completed.WaitOne(Configuration.PassingTestTimeout), "Timed out while waiting for connection");
                 Assert.Equal<SocketError>(SocketError.Success, args.SocketError);
 
                 Assert.Throws<PlatformNotSupportedException>(() => client.Disconnect(true));
@@ -95,6 +93,5 @@ namespace System.Net.Sockets.Tests
                 client.Dispose();
             }
         }
-
     }
 }

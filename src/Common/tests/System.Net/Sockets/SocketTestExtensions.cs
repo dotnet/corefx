@@ -3,13 +3,22 @@
 
 namespace System.Net.Sockets.Tests
 {
-    static class SocketTestExtensions
+    internal static class SocketTestExtensions
     {
         // Binds to an IP address and OS-assigned port. Returns the chosen port.
         public static int BindToAnonymousPort(this Socket socket, IPAddress address)
         {
             socket.Bind(new IPEndPoint(address, 0));
             return ((IPEndPoint)socket.LocalEndPoint).Port;
+        }
+
+        // Binds to an OS-assigned port.
+        public static TcpListener CreateAndStartTcpListenerOnAnonymousPort(out int port)
+        {
+            TcpListener listener = TcpListener.Create(0);
+            listener.Start();
+            port = ((IPEndPoint)listener.LocalEndpoint).Port;
+            return listener;
         }
     }
 }
