@@ -243,9 +243,6 @@
     <Compile Include="$(CommonPath)\System\Net\NetworkInformation\HostInformationPal.Unix.cs">
       <Link>Common\System\Net\NetworkInformation\HostInformationPal.Unix.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Unix\libc\Interop.gethostname.cs">
-      <Link>Common\Interop\Unix\libc\Interop.gethostname.cs</Link>
-    </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\libc\Interop.getdomainname.cs">
       <Link>Common\Interop\Unix\libc\Interop.getdomainname.cs</Link>
     </Compile>
