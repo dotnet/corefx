@@ -49,4 +49,3 @@ namespace System.Net.NetworkInformation
         public abstract long ResetsSent { get; }
     }
 }
-

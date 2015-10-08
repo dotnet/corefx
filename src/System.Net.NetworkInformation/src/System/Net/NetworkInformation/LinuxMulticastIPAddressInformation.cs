@@ -42,4 +42,3 @@ namespace System.Net.NetworkInformation
         public override SuffixOrigin SuffixOrigin { get { throw new PlatformNotSupportedException(); } }
     }
 }
-

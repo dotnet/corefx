@@ -52,7 +52,6 @@ namespace System.Net.NetworkInformation
         /// </summary>
         public abstract NetBiosNodeType NodeType { get; }
 
-
         public abstract TcpStatistics GetTcpIPv4Statistics();
 
         public abstract TcpStatistics GetTcpIPv6Statistics();
