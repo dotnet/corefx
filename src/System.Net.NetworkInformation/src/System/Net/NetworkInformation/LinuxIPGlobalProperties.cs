@@ -177,12 +177,12 @@ namespace System.Net.NetworkInformation
 
         public override TcpStatistics GetTcpIPv4Statistics()
         {
-            return LinuxTcpStatistics.CreateTcpStatistics(false);
+            return new LinuxTcpStatistics(ipv6:false);
         }
 
         public override TcpStatistics GetTcpIPv6Statistics()
         {
-            return LinuxTcpStatistics.CreateTcpStatistics(true);
+            return new LinuxTcpStatistics(ipv6:true);
         }
 
         public override UdpStatistics GetUdpIPv4Statistics()
