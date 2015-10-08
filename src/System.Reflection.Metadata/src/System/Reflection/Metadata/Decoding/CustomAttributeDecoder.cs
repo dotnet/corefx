@@ -74,15 +74,15 @@ namespace System.Reflection.Metadata.Decoding
                 return ImmutableArray<CustomAttributeTypedArgument<TType>>.Empty;
             }
 
-            var arguments = ImmutableArray.CreateBuilder<CustomAttributeTypedArgument<TType>>(count);
+            var arguments = new CustomAttributeTypedArgument<TType>[count];
 
             for (int i = 0; i < count; i++)
             {
                 ArgumentTypeInfo info = DecodeFixedArgumentType(metadataReader, ref signatureReader);
-                arguments.Add(DecodeArgument(ref valueReader, info));
+                arguments[i] = DecodeArgument(ref valueReader, info);
             }
 
-            return arguments.MoveToImmutable();
+            return ImmutableArray.Create(arguments);
         }
 
         private ImmutableArray<CustomAttributeNamedArgument<TType>> DecodeNamedArguments(ref BlobReader valueReader)
@@ -93,7 +93,7 @@ namespace System.Reflection.Metadata.Decoding
                 return ImmutableArray<CustomAttributeNamedArgument<TType>>.Empty;
             }
 
-            var arguments = ImmutableArray.CreateBuilder<CustomAttributeNamedArgument<TType>>(count);
+            var arguments = new CustomAttributeNamedArgument<TType>[count];
             for (int i = 0; i < count; i++)
             {
                 CustomAttributeNamedArgumentKind kind = (CustomAttributeNamedArgumentKind)valueReader.ReadSerializationTypeCode();
@@ -105,10 +105,10 @@ namespace System.Reflection.Metadata.Decoding
                 ArgumentTypeInfo info = DecodeNamedArgumentType(ref valueReader);
                 string name = valueReader.ReadSerializedString();
                 CustomAttributeTypedArgument<TType> argument = DecodeArgument(ref valueReader, info);
-                arguments.Add(new CustomAttributeNamedArgument<TType>(name, kind, argument.Type, argument.Value));
+                arguments[i] = new CustomAttributeNamedArgument<TType>(name, kind, argument.Type, argument.Value);
             }
 
-            return arguments.MoveToImmutable();
+            return ImmutableArray.Create(arguments);
         }
 
         private struct ArgumentTypeInfo
@@ -347,14 +347,14 @@ namespace System.Reflection.Metadata.Decoding
                 TypeCode = info.ElementTypeCode,
             };
 
-            var arguments = ImmutableArray.CreateBuilder<CustomAttributeTypedArgument<TType>>(count);
+            var array = new CustomAttributeTypedArgument<TType>[count];
 
             for (int i = 0; i < count; i++)
             {
-                arguments.Add(DecodeArgument(ref blobReader, elementInfo));
+                array[i] = DecodeArgument(ref blobReader, elementInfo);
             }
 
-            return arguments.MoveToImmutable();
+            return ImmutableArray.Create(array);
         }
 
         private TType GetTypeFromReferenceOrDefinition(MetadataReader metadataReader, EntityHandle typeRefOrDefHandle)
