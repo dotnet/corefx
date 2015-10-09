@@ -31,7 +31,7 @@ internal static partial class Interop
         public unsafe delegate void LinkLayerAddressDiscoveredCallback(string ifaceName, LinkLayerAddressInfo* llAddress);
 
         [DllImport(Libraries.SystemNative)]
-        public static extern void EnumerateInterfaceAddresses(IPv4AddressDiscoveredCallback ipv4Found,
+        public static extern int EnumerateInterfaceAddresses(IPv4AddressDiscoveredCallback ipv4Found,
                                                                 IPv6AddressDiscoveredCallback ipv6Found,
                                                                 LinkLayerAddressDiscoveredCallback linkLayerFound);
 

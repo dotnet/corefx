@@ -402,14 +402,14 @@ extern "C" int32_t GetHostName(uint8_t* name, int32_t nameLength)
     return gethostname(reinterpret_cast<char*>(name), unsignedSize);
 }
 
-extern "C" void EnumerateInterfaceAddresses(IPv4AddressFound onIpv4Found,
+extern "C" int32_t EnumerateInterfaceAddresses(IPv4AddressFound onIpv4Found,
                                             IPv6AddressFound onIpv6Found,
                                             LinkLayerAddressFound onLinkLayerFound)
 {
     ifaddrs *headAddr, *current;
     if (getifaddrs(&headAddr) == -1)
     {
-        assert(false && "getifaddrs failed.");
+        return -1;
     }
 
     for (current = headAddr; current != nullptr; current = current->ifa_next)
@@ -438,8 +438,7 @@ extern "C" void EnumerateInterfaceAddresses(IPv4AddressFound onIpv4Found,
         }
         else if (family == AF_INET6)
         {
-            IpAddressInfo iai;
-            memset(&iai, 0, sizeof(iai));
+            IpAddressInfo iai = {};
             iai.InterfaceIndex = interfaceIndex;
             sockaddr_in6* sain6 = reinterpret_cast<sockaddr_in6*>(current->ifa_addr);
             memcpy(iai.AddressBytes, sain6->sin6_addr.s6_addr, sizeof(sain6->sin6_addr.s6_addr));
@@ -452,8 +451,7 @@ extern "C" void EnumerateInterfaceAddresses(IPv4AddressFound onIpv4Found,
 #if HAVE_AF_PACKET
         else if (family == AF_PACKET)
         {
-            LinkLayerAddressInfo lla;
-            memset(&lla, 0, sizeof(lla));
+            LinkLayerAddressInfo lla = {};
             lla.InterfaceIndex = interfaceIndex;
             sockaddr_ll* sall = reinterpret_cast<sockaddr_ll*>(current->ifa_addr);
             memcpy(&lla.AddressBytes, &sall->sll_addr, sall->sll_halen);
@@ -466,9 +464,8 @@ extern "C" void EnumerateInterfaceAddresses(IPv4AddressFound onIpv4Found,
         // OSX/BSD : AF_LINK = 18
         else if (family == AF_LINK)
         {
+            LinkLayerAddressInfo lla = {};
             sockaddr_dl* sadl = reinterpret_cast<sockaddr_dl*>(current->ifa_addr);
-            LinkLayerAddressInfo lla;
-            memset(&lla, 0, sizeof(lla));
             lla.InterfaceIndex = interfaceIndex;
             memcpy(&lla.AddressBytes, reinterpret_cast<uint8_t*>(LLADDR(sadl)), sadl->sdl_alen);
             lla.NumAddressBytes = sadl->sdl_alen;
@@ -481,4 +478,5 @@ extern "C" void EnumerateInterfaceAddresses(IPv4AddressFound onIpv4Found,
     }
 
     freeifaddrs(headAddr);
+    return 0;
 }

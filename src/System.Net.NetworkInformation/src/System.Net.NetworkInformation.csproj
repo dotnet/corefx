@@ -249,6 +249,9 @@
     <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.GetHostName.cs">
       <Link>Interop\Unix\System.Native\Interop.GetHostName.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\Interop.Errors.cs">
+      <Link>Interop\Unix\Interop.Errors.cs</Link>
+    </Compile>
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetsLinux)' == 'true' ">
     <Compile Include="System\Net\NetworkInformation\LinuxGatewayIPAddressInformation.cs" />

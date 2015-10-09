@@ -17,7 +17,10 @@ namespace System.Net.NetworkInformation
         public OsxTcpStatistics()
         {
             Interop.Sys.TcpGlobalStatistics statistics;
-            Interop.Sys.GetTcpGlobalStatistics(out statistics);
+            if (Interop.Sys.GetTcpGlobalStatistics(out statistics) != 0)
+            {
+                throw new NetworkInformationException((int)Interop.Sys.GetLastError());
+            }
 
             _connectionsAccepted = (long)statistics.ConnectionsAccepted;
             _connectionsInitiated = (long)statistics.ConnectionsInitiated;

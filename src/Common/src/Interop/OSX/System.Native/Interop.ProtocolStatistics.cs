@@ -20,6 +20,6 @@ internal static partial class Interop
 		}
 
 		[DllImport(Libraries.SystemNative)]
-		public static unsafe extern void GetTcpGlobalStatistics([Out] out TcpGlobalStatistics statistics);
+		public static unsafe extern int GetTcpGlobalStatistics(out TcpGlobalStatistics statistics);
 	}
 }

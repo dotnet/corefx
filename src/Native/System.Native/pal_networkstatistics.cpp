@@ -21,19 +21,19 @@
 #include <netinet/tcp.h>
 #include <netinet/tcp_var.h>
 
-extern "C" void GetTcpGlobalStatistics(TcpGlobalStatistics* retStats)
+extern "C" int32_t GetTcpGlobalStatistics(TcpGlobalStatistics* retStats)
 {
-    memset(retStats, 0, sizeof(TcpGlobalStatistics));
+    assert(retStats != nullptr);
 
-    uint8_t* oldp = new uint8_t[sizeof(tcpstat)];
-    size_t oldlenp = sizeof(ipstat);
+    uint8_t oldp[sizeof(tcpstat)];
+    size_t oldlenp = sizeof(tcpstat);
     void* newp = nullptr;
     size_t newlen = 0;
 
     int result = sysctlbyname("net.inet.tcp.stats", oldp, &oldlenp, newp, newlen);
     if (result != 0)
     {
-        perror("sysctlbyname failed.");
+        return -1;
     }
 
     tcpstat* systemStats = reinterpret_cast<tcpstat*>(oldp);
@@ -46,7 +46,7 @@ extern "C" void GetTcpGlobalStatistics(TcpGlobalStatistics* retStats)
     retStats->SegmentsResent = systemStats->tcps_sndrexmitpack;
     retStats->SegmentsSent = systemStats->tcps_sndtotal;
 
-    delete(oldp);
+    return 0;
 }
 
 #endif // HAVE_TCP_VAR_H

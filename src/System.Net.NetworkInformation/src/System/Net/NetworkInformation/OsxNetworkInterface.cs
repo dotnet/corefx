@@ -13,7 +13,7 @@ namespace System.Net.NetworkInformation
         public unsafe static NetworkInterface[] GetOsxNetworkInterfaces()
         {
             Dictionary<string, OsxNetworkInterface> interfacesByName = new Dictionary<string, OsxNetworkInterface>();
-            Interop.Sys.EnumerateInterfaceAddresses(
+            if (Interop.Sys.EnumerateInterfaceAddresses(
                 (name, ipAddr, maskAddr) =>
                 {
                     OsxNetworkInterface lni = GetOrCreate(interfacesByName, name);
@@ -28,7 +28,10 @@ namespace System.Net.NetworkInformation
                 {
                     OsxNetworkInterface lni = GetOrCreate(interfacesByName, name);
                     ProcessLinkLevelAddress(lni, llAddr);
-                });
+                }) != 0)
+            {
+                throw new NetworkInformationException((int)Interop.Sys.GetLastError());
+            }
 
             return interfacesByName.Values.ToArray();
         }

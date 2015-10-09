@@ -111,10 +111,6 @@ check_cxx_source_compiles(
     HAVE_AF_LINK)
 
 check_include_files(
-    net/if_dl.h
-    HAVE_AF_LINK)
-
-check_include_files(
     linux/if_packet.h
     HAVE_AF_PACKET)
 
