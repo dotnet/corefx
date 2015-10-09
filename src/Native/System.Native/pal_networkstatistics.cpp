@@ -1,10 +1,15 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-#define HAVE_TCP_VAR_H 1
+#include "pal_config.h"
+
+// These functions are only used for platforms which support
+// using sysctl to gather protocol statistics information.
+// Currently, this is all keyed off of whether the include tcp_var.h
+// exists, but we may want to make this more granular for differnet platforms.
+
 #if HAVE_TCP_VAR_H
 
-#include "pal_config.h"
 #include "pal_utilities.h"
 #include "pal_networkstatistics.h"
 

@@ -3,8 +3,6 @@
 
 #pragma once
 
-#include "pal_types.h"
-
 // Exchange types used to normalize Network protocol statistics information
 // from the OS, for use in the NetworkInformation library.
 

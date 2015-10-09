@@ -15,6 +15,7 @@
 #cmakedefine01 HAVE_IN6_U
 #cmakedefine01 HAVE_AF_PACKET
 #cmakedefine01 HAVE_AF_LINK
+#cmakedefine01 HAVE_TCP_VAR_H
 
 // Mac OS X has stat64, but it is deprecated since plain stat now
 // provides the same 64-bit aware struct when targeting OS X > 10.5

@@ -118,6 +118,18 @@ check_include_files(
     linux/if_packet.h
     HAVE_AF_PACKET)
 
+check_cxx_source_compiles(
+    "
+    #include <sys/types.h>
+    #include <sys/socketvar.h>
+    #include <netinet/ip.h>
+    #include <netinet/tcp.h>
+    #include <netinet/tcp_var.h>
+    int main() { return 0; }
+    "
+    HAVE_TCP_VAR_H
+)
+
 set (CMAKE_REQUIRED_LIBRARIES)
 
 configure_file(
