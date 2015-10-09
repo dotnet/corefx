@@ -32,10 +32,13 @@ extern "C" void GetTcpGlobalStatistics(TcpGlobalStatistics* retStats)
     }
 
     tcpstat* systemStats = reinterpret_cast<tcpstat*>(oldp);
-    printf("TCP packets received:  %d\n", systemStats->tcps_rcvtotal);
-    printf("TCP packets sent:      %d\n", systemStats->tcps_sndtotal);
-
+    
+    retStats->ConnectionsAccepted = systemStats->tcps_accepts;
+    retStats->ConnectionsInitiated = systemStats->tcps_connattempt;
+    retStats->ErrorsReceived = systemStats->tcps_rcvbadsum + systemStats->tcps_rcvbadoff;
+    retStats->FailedConnectionAttempts = systemStats->tcps_connattempt - systemStats->tcps_accepts;
     retStats->SegmentsReceived = systemStats->tcps_rcvtotal;
+    retStats->SegmentsResent = systemStats->tcps_sndrexmitpack;
     retStats->SegmentsSent = systemStats->tcps_sndtotal;
 
     free(oldp);

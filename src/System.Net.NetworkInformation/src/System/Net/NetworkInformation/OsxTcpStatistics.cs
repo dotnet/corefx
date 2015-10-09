@@ -2,11 +2,37 @@
 {
     internal class OsxTcpStatistics : TcpStatistics
     {
+        private readonly long _connectionsAccepted;
+        private readonly long _connectionsInitiated;
+        private readonly long _currentConnections;
+        private readonly long _errorsReceived;
+        private readonly long _failedConnectionAttempts;
+        private readonly long _segmentsSent;
+        private readonly long _segmentsResent;
+        private readonly long _segmentsReceived;
+
+        public OsxTcpStatistics()
+        {
+            Interop.Sys.TcpGlobalStatistics statistics;
+            Interop.Sys.GetTcpGlobalStatistics(out statistics);
+
+            _connectionsAccepted = (long)statistics.ConnectionsAccepted;
+            _connectionsInitiated = (long)statistics.ConnectionsInitiated;
+            _errorsReceived = (long)statistics.ErrorsReceived;
+            _failedConnectionAttempts = (long)statistics.FailedConnectionAttempts;
+            _segmentsSent = (long)statistics.SegmentsSent;
+            _segmentsResent = (long)statistics.SegmentsResent;
+            _segmentsReceived = (long)statistics.SegmentsReceived;
+
+            // TODO: This should be obtainable.
+            _currentConnections = 0;
+        }
+
         public override long ConnectionsAccepted
         {
             get
             {
-                throw new NotImplementedException();
+                return _connectionsAccepted;
             }
         }
 
@@ -14,7 +40,7 @@
         {
             get
             {
-                throw new NotImplementedException();
+                return _connectionsInitiated;
             }
         }
 
@@ -22,7 +48,7 @@
         {
             get
             {
-                throw new NotImplementedException();
+                throw new PlatformNotSupportedException();
             }
         }
 
@@ -30,7 +56,7 @@
         {
             get
             {
-                throw new NotImplementedException();
+                return _currentConnections;
             }
         }
 
@@ -38,7 +64,7 @@
         {
             get
             {
-                throw new NotImplementedException();
+                return _errorsReceived;
             }
         }
 
@@ -46,7 +72,7 @@
         {
             get
             {
-                throw new NotImplementedException();
+                return _failedConnectionAttempts;
             }
         }
 
@@ -54,7 +80,7 @@
         {
             get
             {
-                throw new NotImplementedException();
+                throw new PlatformNotSupportedException();
             }
         }
 
@@ -62,7 +88,7 @@
         {
             get
             {
-                throw new NotImplementedException();
+                throw new PlatformNotSupportedException();
             }
         }
 
@@ -70,7 +96,7 @@
         {
             get
             {
-                throw new NotImplementedException();
+                throw new PlatformNotSupportedException();
             }
         }
 
@@ -78,7 +104,7 @@
         {
             get
             {
-                throw new NotImplementedException();
+                throw new PlatformNotSupportedException();
             }
         }
 
@@ -86,7 +112,7 @@
         {
             get
             {
-                throw new NotImplementedException();
+                throw new PlatformNotSupportedException();
             }
         }
 
@@ -94,7 +120,7 @@
         {
             get
             {
-                throw new NotImplementedException();
+                return _segmentsReceived;
             }
         }
 
@@ -102,7 +128,7 @@
         {
             get
             {
-                throw new NotImplementedException();
+                return _segmentsResent;
             }
         }
 
@@ -110,7 +136,7 @@
         {
             get
             {
-                throw new NotImplementedException();
+                return _segmentsSent;
             }
         }
     }

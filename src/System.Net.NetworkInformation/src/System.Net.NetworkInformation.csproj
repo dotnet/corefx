@@ -294,6 +294,9 @@
     <Compile Include="System\Net\NetworkInformation\OsxIpInterfaceProperties.cs" />
     <Compile Include="System\Net\NetworkInformation\OsxNetworkInterface.cs" />
     <Compile Include="System\Net\NetworkInformation\OsxTcpStatistics.cs" />
+    <Compile Include="$(CommonPath)\Interop\OSX\System.Native\Interop.ProtocolStatistics.cs">
+      <Link>Interop\OSX\System.Native\Interop.ProtocolStatistics.cs</Link>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <None Include="project.json" />
