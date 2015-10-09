@@ -46,7 +46,7 @@ extern "C" void GetTcpGlobalStatistics(TcpGlobalStatistics* retStats)
     retStats->SegmentsResent = systemStats->tcps_sndrexmitpack;
     retStats->SegmentsSent = systemStats->tcps_sndtotal;
 
-    free(oldp);
+    delete(oldp);
 }
 
 #endif // HAVE_TCP_VAR_H
