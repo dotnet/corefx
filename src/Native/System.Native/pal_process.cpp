@@ -17,6 +17,12 @@
 #include <syslog.h>
 #include <unistd.h>
 
+#if HAVE_LIBPROC
+#include <libproc.h>
+#include <sys/proc_info.h>
+#include <sys/resource.h>
+#endif
+
 // Validate that our Signals enum values are correct for the platform
 static_assert(PAL_SIGKILL == SIGKILL, "");
 
@@ -58,6 +64,28 @@ static_assert(PAL_LOG_LOCAL7 == LOG_LOCAL7, "");
 static_assert(PAL_PRIO_PROCESS == static_cast<int>(PRIO_PROCESS), "");
 static_assert(PAL_PRIO_PGRP == static_cast<int>(PRIO_PGRP), "");
 static_assert(PAL_PRIO_USER == static_cast<int>(PRIO_USER), "");
+
+// Validate expected LIBPROC constants and enums
+#if HAVE_LIBPROC
+static_assert(MAXCOMLEN == 16, "");
+static_assert(MAXTHREADNAMESIZE == 64, "");
+static_assert(PROC_PIDTASKALLINFO == 2, "");
+static_assert(PROC_PIDTHREADINFO == 5, "");
+static_assert(PROC_PIDLISTTHREADS == 6, "");
+static_assert(TH_STATE_RUNNING == 1, "");
+static_assert(TH_STATE_STOPPED == 2, "");
+static_assert(TH_STATE_WAITING == 3, "");
+static_assert(TH_STATE_UNINTERRUPTIBLE == 4, "");
+static_assert(TH_STATE_HALTED == 5, "");
+static_assert(TH_FLAGS_SWAPPED == 0x1, "");
+static_assert(TH_FLAGS_IDLE == 0x2, "");
+static_assert(MAXPATHLEN == 1024, "");
+static_assert(PROC_PIDPATHINFO_MAXSIZE == 4 * MAXPATHLEN, "");
+static_assert(RUSAGE_SELF == 0, "");
+#endif
+
+// We make assumptions based on these being the same
+static_assert(sizeof(char) == sizeof(uint8_t), "");
 
 enum
 {
@@ -417,3 +445,25 @@ extern "C" char* GetCwd(char* buffer, int32_t bufferSize)
 
     return getcwd(buffer, UnsignedCast(bufferSize));
 }
+
+#if HAVE_LIBPROC
+extern "C" int32_t ProcListAllPids(int32_t* buffer, int32_t buffersize)
+{
+    return proc_listallpids(buffer, buffersize);
+}
+
+extern "C" int32_t ProcPidInfo(int32_t pid, int32_t flavor, uint64_t arg, void* buffer, int32_t buffersize)
+{
+    return proc_pidinfo(pid, flavor, arg, buffer, buffersize);
+}
+
+extern "C" int32_t ProcPidPath(int32_t pid, void* buffer, uint32_t buffersize)
+{
+    return proc_pidpath(pid, buffer, buffersize);
+}
+
+extern "C" int32_t ProcPidRUsage(int32_t pid, int32_t flavor, rusage_info_v3* buffer)
+{
+    return proc_pid_rusage(pid, flavor, reinterpret_cast<rusage_info_t*>(buffer));
+}
+#endif

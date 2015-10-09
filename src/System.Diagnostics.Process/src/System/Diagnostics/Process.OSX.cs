@@ -42,7 +42,7 @@ namespace System.Diagnostics
         {
             get
             {
-                Interop.libproc.rusage_info_v3 info = Interop.libproc.proc_pid_rusage(_processId);
+                Interop.Sys.RUsageInfo info = Interop.Sys.ProcPidRUsage(_processId);
                 return new TimeSpan(Convert.ToInt64(info.ri_system_time));
             }
         }
@@ -55,7 +55,7 @@ namespace System.Diagnostics
                 // Get the RUsage data and convert the process start time (which is the number of
                 // nanoseconds before Now that the process started) to a DateTime.
                 DateTime now = DateTime.UtcNow;
-                Interop.libproc.rusage_info_v3 info = Interop.libproc.proc_pid_rusage(_processId);
+                Interop.Sys.RUsageInfo info = Interop.Sys.ProcPidRUsage(_processId);
                 int milliseconds = Convert.ToInt32(info.ri_proc_start_abstime / MillisecondFactor);
                 TimeSpan ts = new TimeSpan(0, 0, 0, 0, milliseconds);
                 return now.Subtract(ts).ToLocalTime();
@@ -71,7 +71,7 @@ namespace System.Diagnostics
         {
             get
             {
-                Interop.libproc.rusage_info_v3 info = Interop.libproc.proc_pid_rusage(_processId);
+                Interop.Sys.RUsageInfo info = Interop.Sys.ProcPidRUsage(_processId);
                 return new TimeSpan(Convert.ToInt64(info.ri_system_time + info.ri_user_time));
             }
         }
@@ -84,7 +84,7 @@ namespace System.Diagnostics
         {
             get
             {
-                Interop.libproc.rusage_info_v3 info = Interop.libproc.proc_pid_rusage(_processId);
+                Interop.Sys.RUsageInfo info = Interop.Sys.ProcPidRUsage(_processId);
                 return new TimeSpan(Convert.ToInt64(info.ri_user_time));
             }
         }
@@ -177,7 +177,7 @@ namespace System.Diagnostics
         /// <summary>Gets the path to the current executable, or null if it could not be retrieved.</summary>
         private static string GetExePath()
         {
-            return Interop.libproc.proc_pidpath(Interop.Sys.GetPid());
+            return Interop.Sys.ProcPidPath(Interop.Sys.GetPid());
         }
 
         // ----------------------------------
@@ -188,9 +188,9 @@ namespace System.Diagnostics
         // the actual start time of the process.
         private const ulong MillisecondFactor = 100000000000;
 
-        private Interop.libproc.rusage_info_v3 GetCurrentProcessRUsage()
+        private Interop.Sys.RUsageInfo GetCurrentProcessRUsage()
         {
-            return Interop.libproc.proc_pid_rusage(Interop.Sys.GetPid());
+            return Interop.Sys.ProcPidRUsage(Interop.Sys.GetPid());
         }
 
     }

@@ -5,6 +5,9 @@
 
 #include "pal_types.h"
 #include <string.h>
+#include <sys/param.h>
+
+struct rusage_info_v3;
 
 /**
  * Used by System.Diagnostics.Process.Start to fork/exec a new process.
@@ -246,3 +249,36 @@ extern "C" int32_t SetPriority(PriorityWhich which, int32_t who, int32_t nice);
  * Gets the current working directory of the currently executing process.
  */
 extern "C" char* GetCwd(char* buffer, int32_t bufferSize);
+
+#if HAVE_LIBPROC
+/**
+ * Retrieves the Process IDs of all currently running processes
+ *
+ * Returns the number of elements (PIDs) in the buffer
+ */
+extern "C" int32_t ProcListAllPids(int32_t* buffer, int32_t buffersize);
+
+/**
+ * Retrieves information about the specified process, depending on what flavor and buffer
+ * is passed into the function.
+ *
+ * Returns the amount of data actually returned. If this size matches the bufferSize parameter then
+ * the data is valid. If the sizes do not match then the data is invalid, most likely due
+ * to not having enough permissions to query for the data of that specific process
+ */
+extern "C" int32_t ProcPidInfo(int32_t pid, int32_t flavor, uint64_t arg, void* buffer, int32_t buffersize);
+
+/**
+ * Retrieves the path of the executable running under the specified PID
+ *
+ * Returns non-zero value on success; otherwise, returns a negative value
+ */
+extern "C" int32_t ProcPidPath(int32_t pid, void* buffer, uint32_t buffersize);
+
+/**
+ * Retrieves process resource utilization statistics
+ *
+ * Returns 0 on success; on fail, -1 and errno is set with the error code
+ */
+extern "C" int32_t ProcPidRUsage(int32_t pid, int32_t flavor, rusage_info_v3* buffer);
+#endif

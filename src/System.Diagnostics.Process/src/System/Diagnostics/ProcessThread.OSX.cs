@@ -32,7 +32,7 @@ namespace System.Diagnostics
         {
             get
             {
-                Interop.libproc.proc_threadinfo? info = Interop.libproc.GetThreadInfoById(_processId, (ulong)_threadInfo._threadId);
+                Interop.Sys.ProcThreadInfo? info = Interop.Sys.GetThreadInfoById(_processId, (ulong)_threadInfo._threadId);
                 if (info.HasValue)
                     return new TimeSpan((long)info.Value.pth_system_time);
                 else
@@ -58,7 +58,7 @@ namespace System.Diagnostics
         {
             get
             {
-                Interop.libproc.proc_threadinfo? info = Interop.libproc.GetThreadInfoById(_processId, (ulong)_threadInfo._threadId);
+                Interop.Sys.ProcThreadInfo? info = Interop.Sys.GetThreadInfoById(_processId, (ulong)_threadInfo._threadId);
                 if (info.HasValue)
                     return new TimeSpan((long)(info.Value.pth_user_time + info.Value.pth_system_time));
                 else
@@ -74,7 +74,7 @@ namespace System.Diagnostics
         {
             get
             {
-                Interop.libproc.proc_threadinfo? info = Interop.libproc.GetThreadInfoById(_processId, (ulong)_threadInfo._threadId);
+                Interop.Sys.ProcThreadInfo? info = Interop.Sys.GetThreadInfoById(_processId, (ulong)_threadInfo._threadId);
                 if (info.HasValue)
                     return new TimeSpan((long)info.Value.pth_user_time);
                 else

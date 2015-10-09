@@ -56,6 +56,16 @@ check_struct_has_member(
     "netdb.h"
     HAVE_IN6_U)
 
+# cmake_check_include_cxx seems to be broken and doesn't
+# find header files on OS X, so use check_cxx_source_compiles instead
+
+check_cxx_source_compiles(
+    "
+    #include <libproc.h>
+    int main() { return 0; }
+    "
+    HAVE_LIBPROC)
+
 check_cxx_source_compiles(
     "
     #include <string.h>

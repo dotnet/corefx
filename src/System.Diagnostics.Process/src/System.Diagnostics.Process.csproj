@@ -282,8 +282,17 @@
     <Compile Include="System\Diagnostics\Process.OSX.cs" />
     <Compile Include="System\Diagnostics\ProcessManager.OSX.cs" />
     <Compile Include="System\Diagnostics\ProcessThread.OSX.cs" />
-    <Compile Include="$(CommonPath)\Interop\OSX\Interop.libproc.cs">
-      <Link>Common\Interop\OSX\Interop.libproc.cs</Link>
+    <Compile Include="$(CommonPath)\Interop\OSX\System.Native\Interop.ProcListAllPids.cs">
+      <Link>Common\Interop\OSX\Interop.ProcListAllPids.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\OSX\System.Native\Interop.ProcPidInfo.cs">
+      <Link>Common\Interop\OSX\Interop.ProcPidInfo.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\OSX\System.Native\Interop.ProcPidPath.cs">
+      <Link>Common\Interop\OSX\Interop.ProcPidPath.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\OSX\System.Native\Interop.ProcRUsage.cs">
+      <link>Common\Interop\OSX\Interop.ProcRUsage.cs</link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\OSX\Interop.Libraries.cs">
       <Link>Common\Interop\OSX\Interop.Libraries.cs</Link>
