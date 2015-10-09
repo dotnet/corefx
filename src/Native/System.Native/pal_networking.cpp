@@ -419,16 +419,14 @@ extern "C" int32_t EnumerateInterfaceAddresses(IPv4AddressFound onIpv4Found,
         if (family == AF_INET)
         {
             // IP Address
-            IpAddressInfo iai;
-            memset(&iai, 0, sizeof(iai));
+            IpAddressInfo iai = {};
             iai.InterfaceIndex = interfaceIndex;
             sockaddr_in* sain = reinterpret_cast<sockaddr_in*>(current->ifa_addr);
             memcpy(iai.AddressBytes, &sain->sin_addr.s_addr, sizeof(sain->sin_addr.s_addr));
             iai.NumAddressBytes = NUM_BYTES_IN_IPV4_ADDRESS;
 
             // Net Mask
-            IpAddressInfo maskInfo;
-            memset(&maskInfo, 0, sizeof(maskInfo));
+            IpAddressInfo maskInfo = {};
             maskInfo.InterfaceIndex = interfaceIndex;
             sockaddr_in* mask_sain = reinterpret_cast<sockaddr_in*>(current->ifa_netmask);
             memcpy(maskInfo.AddressBytes, &mask_sain->sin_addr.s_addr, sizeof(mask_sain->sin_addr.s_addr));
