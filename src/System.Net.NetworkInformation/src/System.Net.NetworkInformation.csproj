@@ -38,6 +38,7 @@
     <Compile Include="System\Net\NetworkInformation\NetworkInterfaceComponent.cs" />
     <Compile Include="System\Net\NetworkInformation\nodetype.cs" />
     <Compile Include="System\Net\NetworkInformation\OperationalStatus.cs" />
+    <Compile Include="System\Net\NetworkInformation\OsxIPGlobalProperties.cs" />
     <Compile Include="System\Net\NetworkInformation\PhysicalAddress.cs" />
     <Compile Include="System\Net\NetworkInformation\PrefixOrigin.cs" />
     <Compile Include="System\Net\NetworkInformation\ScopeLevel.cs" />

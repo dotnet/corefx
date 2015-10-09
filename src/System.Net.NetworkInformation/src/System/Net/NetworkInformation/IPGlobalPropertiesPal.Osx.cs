@@ -4,7 +4,7 @@
     {
         public static IPGlobalProperties GetIPGlobalProperties()
         {
-            throw new PlatformNotSupportedException();
+            return new OsxIPGlobalProperties();
         }
     }
 }
