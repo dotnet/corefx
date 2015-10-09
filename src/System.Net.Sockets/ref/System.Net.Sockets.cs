@@ -308,19 +308,6 @@ namespace System.Net.Sockets
         Peek = 2,
         Truncated = 256,
     }
-    [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
-    public partial struct SocketInformation
-    {
-        public System.Net.Sockets.SocketInformationOptions Options { get { return default(System.Net.Sockets.SocketInformationOptions); } set { } }
-        public byte[] ProtocolInformation { get { return default(byte[]); } set { } }
-    }
-    [System.FlagsAttribute]
-    public enum SocketInformationOptions
-    {
-        Connected = 2,
-        Listening = 4,
-        NonBlocking = 1,
-    }
     public enum SocketOptionLevel
     {
         IP = 0,
