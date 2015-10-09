@@ -238,28 +238,51 @@ namespace System.Threading.Tests
                 Assert.True(threadLocal.Values.Count == 1, "RunThreadLocalTest8_Values: Expected values count to still be 1 after updating existing value");
                 Assert.True(threadLocal.Values[0] == 42, "RunThreadLocalTest8_Values: Expected values to contain updated value");
 
-                ((IAsyncResult)Task.Run(() => threadLocal.Value = 43)).AsyncWaitHandle.WaitOne();
-                Assert.True(threadLocal.Values.Count == 2, "RunThreadLocalTest8_Values: Expected values count to be 2 now that another thread stored a value");
-                Assert.True(threadLocal.Values.Contains(42) && threadLocal.Values.Contains(43), "RunThreadLocalTest8_Values: Expected values to contain both thread's values");
-
-                int numTasks = 1000;
+                int numTasks = 10;
                 Task[] allTasks = new Task[numTasks];
+                Barrier allTasksBarrier = new Barrier(numTasks + 1);
                 for (int i = 0; i < numTasks; i++)
                 {
+                    int localValue = i;
+
                     // We are creating the task using TaskCreationOptions.LongRunning because...
                     // there is no guarantee that the Task will be created on another thread.
                     // There is also no guarantee that using this TaskCreationOption will force
                     // it to be run on another thread.
-                    var task = Task.Factory.StartNew(() => threadLocal.Value = i, CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default);
-                    task.Wait();
+                    allTasks[i] = Task.Factory.StartNew(
+                        () =>
+                        {
+                            threadLocal.Value = localValue;
+
+                            // Signal that our local value is set
+                            allTasksBarrier.SignalAndWait();
+
+                            // Wait for the values to be counted
+                            allTasksBarrier.SignalAndWait();
+
+                            // Keep the ThreadLocal alive during the waits above
+                            GC.KeepAlive(threadLocal);
+                        },
+                        CancellationToken.None,
+                        TaskCreationOptions.LongRunning,
+                        TaskScheduler.Default);
                 }
 
+                // Wait for all Tasks to set their local values
+                allTasksBarrier.SignalAndWait();
+
                 var values = threadLocal.Values;
-                Assert.True(values.Count == 1002, "RunThreadLocalTest8_Values: Expected values to contain both previous values and 1000 new values");
-                for (int i = 0; i < 1000; i++)
+                Assert.True(values.Count == numTasks + 1, "RunThreadLocalTest8_Values: Expected values to contain the previous value and " + numTasks + " new values");
+                for (int i = 0; i < numTasks; i++)
                 {
                     Assert.True(values.Contains(i), "RunThreadLocalTest8_Values: Expected values to contain value for thread #: " + i);
                 }
+
+                // Signal that we're done counting
+                allTasksBarrier.SignalAndWait();
+
+                // Wait until the Tasks are done.
+                Task.WaitAll(allTasks);
 
                 threadLocal.Dispose();
             }
