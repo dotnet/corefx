@@ -69,8 +69,8 @@ namespace System.Collections.Specialized.Tests
 
             sectionArgument = section;
             expected = 30;                  //expected offset
-            section = BitVector32.CreateSection(maxValue, sectionArgument);
-            if (section.Mask != maxValue || section.Offset != expected)
+            section = BitVector32.CreateSection(3, sectionArgument);
+            if (section.Mask != 3 || section.Offset != expected)
             {
                 Assert.False(true, string.Format("  Error, returned ({1}, {2}) instead of expected ({0}, {3})", maxValue, section.Mask, section.Offset, expected));
             }
@@ -158,6 +158,22 @@ namespace System.Collections.Specialized.Tests
             bv32 = new BitVector32(-1);
             sectionArgument = BitVector32.CreateSection(maxValue);
             section = BitVector32.CreateSection(maxValue, sectionArgument);
+        }
+
+        [Theory]
+        [InlineData(1, short.MaxValue)]
+        [InlineData(short.MaxValue, 1)]
+        [InlineData(short.MaxValue, short.MaxValue)]
+        [InlineData(byte.MaxValue, byte.MaxValue / 2 + 1)]
+        public static void CreateSection_Full(short prior, short invalid)
+        {
+            // BV32 can hold just over two shorts, so fill all but short.MaxValue first....
+            BitVector32.Section initial = BitVector32.CreateSection(short.MaxValue, BitVector32.CreateSection(2));
+            BitVector32.Section next = BitVector32.CreateSection(prior, initial);
+            Assert.NotNull(initial);
+            Assert.Equal(17, next.Offset);
+
+            Assert.Throws<InvalidOperationException>(() => BitVector32.CreateSection(invalid, next));
         }
     }
 }

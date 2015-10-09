@@ -172,16 +172,15 @@ namespace System.Collections.Specialized
                 throw new ArgumentException(SR.Format(SR.Argument_InvalidValue, "maxValue", 0), "maxValue");
             }
 #if DEBUG
-            int maskCheck = CreateMaskFromHighValue(maxValue);
-            int offsetCheck = priorOffset + CountBitsSet(priorMask);
-            Debug.Assert(maskCheck <= short.MaxValue && offsetCheck < 32, "Overflow on BitVector32");
+            Debug.Assert(CreateMaskFromHighValue(maxValue) <= short.MaxValue, "Mask out of range");
 #endif
             short offset = (short)(priorOffset + CountBitsSet(priorMask));
-            if (offset >= 32)
+            short mask = CreateMaskFromHighValue(maxValue);
+            if (offset >= 32 || offset + CountBitsSet(mask) > 32)
             {
                 throw new InvalidOperationException(SR.BitVectorFull);
             }
-            return new Section(CreateMaskFromHighValue(maxValue), offset);
+            return new Section(mask, offset);
         }
 
         public override bool Equals(object o)
