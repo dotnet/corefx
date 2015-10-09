@@ -9,6 +9,7 @@ set(NATIVE_SOURCES
     pal_string.cpp
     pal_time.cpp
     pal_uid.cpp
+    pal_networkstatistics.cpp
 )
 
 add_library(System.Native

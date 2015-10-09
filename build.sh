@@ -222,7 +222,7 @@ case $__HostOS in
         __monoroot=/usr/local
         ;;
     OSX)
-        __monoroot=/Library/Frameworks/Mono.framework/Versions/Current
+        __monoroot=/usr/local
         ;;
     *)
         __monoroot=/usr

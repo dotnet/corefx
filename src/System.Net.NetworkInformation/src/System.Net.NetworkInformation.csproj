@@ -293,6 +293,7 @@
     <Compile Include="System\Net\NetworkInformation\OsxIpInterfaceStatistics.cs" />
     <Compile Include="System\Net\NetworkInformation\OsxIpInterfaceProperties.cs" />
     <Compile Include="System\Net\NetworkInformation\OsxNetworkInterface.cs" />
+    <Compile Include="System\Net\NetworkInformation\OsxTcpStatistics.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="project.json" />
