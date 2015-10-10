@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 using Xunit.Abstractions;
 
-namespace System.Net.Sockets.Performance.Tests
+namespace System.Net.Sockets.Tests
 {
     public abstract class SocketTestClient
     {

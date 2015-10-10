@@ -5,7 +5,7 @@ using System.Diagnostics;
 
 using Xunit.Abstractions;
 
-namespace System.Net.Sockets.Performance.Tests
+namespace System.Net.Sockets.Tests
 {
     public class SocketTestClientAPM : SocketTestClient
     {

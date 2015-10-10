@@ -8,7 +8,7 @@ using System.Net.Sockets.Tests;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace System.Net.Sockets.Performance.Tests
+namespace System.Net.Sockets.Tests
 {
     public class SocketPerformanceTests
     {

@@ -3,7 +3,7 @@
 
 using System.Runtime.InteropServices;
 
-namespace System.Net.Sockets.Performance.Tests
+namespace System.Net.Sockets.Tests
 {
     internal static class SocketTestMemcmp
     {
