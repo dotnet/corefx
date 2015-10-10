@@ -1,11 +1,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
-using System.Threading;
-using System.Diagnostics;
 using System.Collections.Generic;
-using System.Diagnostics.Tracing;
 
 namespace System.Diagnostics.Tracing
 {
@@ -14,7 +10,7 @@ namespace System.Diagnostics.Tracing
     /// 
     /// Logger uses TelemetryListener in its implementation, which means that you can listen to the data presented here using TelemetryListener.AllListeners
     /// </summary>
-    public class Logger : DiagnosticListener
+    public class Logger : DiagnosticListener, ILogger
     {
         /// <summary>
         /// Creates a new logger with the given name.   A Logger is a TelemetrySource which understands LogLevel (verbosity levels)
@@ -38,7 +34,7 @@ namespace System.Diagnostics.Tracing
         /// value if this logging happens in a 'hot' code path you should have a 'IsEnabled' check before calling
         /// it to avoid having to make the object just to throw it away if logging is off.   
         /// </summary>
-        public void Log(LogLevel level, string logItemName, object arguments = null)
+        public void Log(string logItemName, LogLevel level, object arguments = null)
         {
             if (IsEnabled(level))
             {
@@ -51,11 +47,11 @@ namespace System.Diagnostics.Tracing
         /// It returns an IDisposable that when Disposed() will send a 'activityName'.Stop message with the SAME arguments 
         /// object.  Thus the arguments object itself can be used as an ID that links the two together.
         /// </summary>
-        public IDisposable ActivityStart(LogLevel level, string activityName, object arguments)
+        public IDisposable ActivityStart(string activityName, LogLevel level = LogLevel.Critical, object arguments = null)
         {
             var activity = new LoggerActivity(this, level, activityName, arguments);
             if (IsEnabled(level))
-                Log(level, activityName + ".Start", arguments);
+                Log(activityName + ".Start", level, arguments);
             else
                 activity.Disposed = true;
             return activity;
@@ -95,7 +91,7 @@ namespace System.Diagnostics.Tracing
                 if (!Disposed)
                 {
                     Disposed = true;
-                    _logger.Log(_level, _activityName + ".Stop", _arguments);
+                    _logger.Log(_activityName + ".Stop", _level, _arguments);
                 }
             }
             Logger _logger;

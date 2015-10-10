@@ -24,7 +24,7 @@ namespace System.Diagnostics.Tracing.Tests
             IObserver<kvp> listListener = new ObserverToList<kvp>(result);
             logger.Subscribe(listListener, LogLevel.Verbose);
 
-            logger.Log(LogLevel.Verbose, "IntPayLoad", 5);
+            logger.Log("IntPayLoad", LogLevel.Verbose, 5);
 
             Assert.Equal(result.Count, 1);
             Assert.Equal(result[0].Key, "IntPayLoad");
@@ -46,7 +46,7 @@ namespace System.Diagnostics.Tracing.Tests
             IObserver<kvp> listListener = new ObserverToList<kvp>(result);
             logger.Subscribe(listListener, LogLevel.Verbose);
 
-            logger.Log(LogLevel.Verbose, "StructPayLoad", new Payload() { Name = "Hi", Id = 67 });
+            logger.Log("StructPayLoad", LogLevel.Verbose, new Payload() { Name = "Hi", Id = 67 });
 
             Assert.Equal(result.Count, 1);
             Assert.Equal(result[0].Key, "StructPayLoad");
@@ -91,10 +91,10 @@ namespace System.Diagnostics.Tracing.Tests
             IObserver<kvp> listListener = new ObserverToList<kvp>(result);
             logger.Subscribe(listListener, LogLevel.Critical);
 
-            logger.Log(LogLevel.Verbose, "IntPayLoad", 5);
-            logger.Log(LogLevel.Critical, "IntPayLoad", 6);
-            logger.Log(LogLevel.Warning, "IntPayLoad", 7);
-            logger.Log(LogLevel.Error, "IntPayLoad", 8);
+            logger.Log("IntPayLoad", LogLevel.Verbose, 5);
+            logger.Log("IntPayLoad", LogLevel.Critical, 6);
+            logger.Log("IntPayLoad", LogLevel.Warning, 7);
+            logger.Log("IntPayLoad", LogLevel.Error, 8);
 
             Assert.Equal(result.Count, 1);
             Assert.Equal(result[0].Key, "IntPayLoad");
@@ -117,7 +117,7 @@ namespace System.Diagnostics.Tracing.Tests
             IObserver<kvp> listListener = new ObserverToList<kvp>(result);
             logger.Subscribe(listListener, LogLevel.Informational);
 
-            logger.LogFormat(LogLevel.Informational, "FormattedIntPayLoad", "payload value = %d", 5);
+            logger.LogFormat("FormattedIntPayLoad", LogLevel.Informational, "payload value = %d", 5);
             Assert.Equal(result.Count, 1);
             Assert.Equal(result[0].Key, "FormattedIntPayLoad");
 
@@ -140,9 +140,9 @@ namespace System.Diagnostics.Tracing.Tests
             IObserver<kvp> listListener = new ObserverToList<kvp>(result);
             logger.Subscribe(listListener, LogLevel.Verbose);
 
-            using (var i = logger.ActivityStart(LogLevel.Error, "Main", 4))
+            using (var i = logger.ActivityStart("Main", LogLevel.Error, 4))
             {
-                logger.Log(LogLevel.Verbose, "IntPayLoad", 5);
+                logger.Log("IntPayLoad", LogLevel.Verbose, 5);
             }
             Assert.Equal(result.Count, 3);
 
@@ -183,7 +183,7 @@ namespace System.Diagnostics.Tracing.Tests
             logger.Subscribe(listListener1, LogLevel.Verbose);
             logger.Subscribe(listListener2, LogLevel.Verbose);
 
-            logger.Log(LogLevel.Verbose, "IntPayLoad", 5);
+            logger.Log("IntPayLoad", LogLevel.Verbose, 5);
 
             Assert.Equal(result1.Count, 1);
             Assert.Equal(result1[0].Key, "IntPayLoad");
@@ -215,12 +215,12 @@ namespace System.Diagnostics.Tracing.Tests
             IObserver<kvp> listListener2 = new ObserverToList<kvp>(result2);
 
             logger.Subscribe(listListener1, LogLevel.Critical);
-            logger.Log(LogLevel.Error, "IntPayLoad", 5);
+            logger.Log("IntPayLoad", LogLevel.Error, 5);
             Assert.Equal(result1.Count, 0);
 
             // This causes effective log level of all subsribers to be Error
             logger.Subscribe(listListener2, LogLevel.Error);
-            logger.Log(LogLevel.Error, "IntPayLoad", 5);
+            logger.Log("IntPayLoad", LogLevel.Error, 5);
 
             // Both subscribers receive log information
             Assert.Equal(result1.Count, 1);
@@ -241,9 +241,9 @@ namespace System.Diagnostics.Tracing.Tests
             logger1.Subscribe(listListener, LogLevel.Critical);
             logger2.Subscribe(listListener, LogLevel.Error);
 
-            logger1.Log(LogLevel.Critical, "IntPayLoad", 5);
-            logger2.Log(LogLevel.Critical, "IntPayLoad", 6);
-            logger1.Log(LogLevel.Error, "IntPayLoad", 7);
+            logger1.Log("IntPayLoad", LogLevel.Critical, 5);
+            logger2.Log("IntPayLoad", LogLevel.Critical, 6);
+            logger1.Log("IntPayLoad", LogLevel.Error, 7);
 
             Assert.Equal(result.Count, 2);
             LoggerArguments loggerArgs = result[0].Value as LoggerArguments;
@@ -337,7 +337,7 @@ namespace System.Diagnostics.Tracing.Tests
 
     public static class LoggerExtensions
     {
-        public static void LogFormat(this Logger logger, LogLevel level, string logItemName, string format, object arguments = null)
+        public static void LogFormat(this Logger logger, string logItemName, LogLevel level, string format, object arguments = null)
         {
             if (logger.IsEnabled(level))
             {
