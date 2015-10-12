@@ -141,8 +141,12 @@ build_managed_corefx()
 
 build_native_corefx()
 {
+    # Format the Native Code to make sure it is format-compliant
+    echo "Formatting native source code..."
+    "$__nativeroot/format-code.sh"
+    echo "Done"
+    
     # All set to commence the build
-
     echo "Commencing build of corefx native components for $__BuildOS.$__BuildArch.$__BuildType"
     cd "$__IntermediatesDir"
 
