@@ -9,7 +9,6 @@
     <AssemblyName>System.Linq.Expressions.Tests</AssemblyName>
     <RootNamespace>System.Linq.Expressions.Tests</RootNamespace>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <UnsupportedPlatforms>OSX</UnsupportedPlatforms> <!-- [ActiveIssue(3712)] -->
   </PropertyGroup>
   <!-- Default configurations to help VS understand the configurations -->
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -133,7 +132,9 @@
     <Compile Include="Ternary\TernaryNullableTests.cs" />
     <Compile Include="Ternary\TernaryTests.cs" />
     <Compile Include="Unary\UnaryArithmeticNegateNullableOneOffTests.cs" />
+    <Compile Include="Unary\UnaryArithmeticNegateCheckedNullableTests.cs" />
     <Compile Include="Unary\UnaryArithmeticNegateNullableTests.cs" />
+    <Compile Include="Unary\UnaryArithmeticNegateCheckedTests.cs" />
     <Compile Include="Unary\UnaryArithmeticNegateTests.cs" />
     <Compile Include="Unary\UnaryBitwiseNotNullableTests.cs" />
     <Compile Include="Unary\UnaryBitwiseNotTests.cs" />
@@ -141,7 +142,9 @@
     <Compile Include="Unary\UnaryIsFalseTests.cs" />
     <Compile Include="Unary\UnaryIsTrueNullableTests.cs" />
     <Compile Include="Unary\UnaryIsTrueTests.cs" />
+    <Compile Include="Unary\UnaryOnesComplementNullableTests.cs" />
     <Compile Include="Unary\UnaryUnaryPlusNullableTests.cs" />
+    <Compile Include="Unary\UnaryOnesComplementTests.cs" />
     <Compile Include="Unary\UnaryUnaryPlusTests.cs" />
   </ItemGroup>
   <ItemGroup>
