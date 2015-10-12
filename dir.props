@@ -16,7 +16,6 @@
     <DnxPackageName Condition="'$(DnxPackageName)' == '' and '$(OsEnvironment)'=='Unix'">dnx-mono.$(DnxVersion)</DnxPackageName>
     <RoslynVersion>1.0.0-rc3-20150510-01</RoslynVersion>
     <RoslynPackageName>Microsoft.Net.ToolsetCompilers</RoslynPackageName>
-    <NuProjVersion>0.10.4-beta-gf7fc34e7d8</NuProjVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -42,7 +41,6 @@
     <!-- Input Directories -->
     <PackagesDir Condition="'$(PackagesDir)'==''">$(ProjectDir)packages/</PackagesDir>
     <ToolsDir Condition="'$(ToolsDir)'==''">$(PackagesDir)Microsoft.DotNet.BuildTools.$(BuildToolsVersion)/lib/</ToolsDir>
-    <NuProjDir Condition="'$(NuProjDir)'==''">$(PackagesDir)NuProj.$(NuProjVersion)/tools/</NuProjDir>
   </PropertyGroup>
 
   <!-- Test runtime -->
