@@ -35,8 +35,8 @@ namespace System.Diagnostics.Tracing
         /// Add an observer
         /// </summary>
         /// <param name="observer"></param>
-        /// <param name="level"></param>
+        /// <param name="filter"></param>
         /// <returns></returns>
-        IDisposable Subscribe(IObserver<KeyValuePair<string, object>> observer, LogLevel level);
+        IDisposable Subscribe(IObserver<KeyValuePair<string, object>> observer, Func<string, LogLevel, bool> filter);
     }
 }

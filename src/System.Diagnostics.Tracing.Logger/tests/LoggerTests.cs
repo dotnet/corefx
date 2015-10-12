@@ -22,7 +22,7 @@ namespace System.Diagnostics.Tracing.Tests
 
             List<kvp> result = new List<kvp>();
             IObserver<kvp> listListener = new ObserverToList<kvp>(result);
-            logger.Subscribe(listListener, LogLevel.Verbose);
+            logger.Subscribe(listListener, (name, level) => level <= LogLevel.Verbose);
 
             logger.Log("IntPayLoad", LogLevel.Verbose, 5);
 
@@ -44,7 +44,7 @@ namespace System.Diagnostics.Tracing.Tests
             Logger logger = new Logger("Component1");
             List<kvp> result = new List<kvp>();
             IObserver<kvp> listListener = new ObserverToList<kvp>(result);
-            logger.Subscribe(listListener, LogLevel.Verbose);
+            logger.Subscribe(listListener, (name, level) => level <= LogLevel.Verbose);
 
             logger.Log("StructPayLoad", LogLevel.Verbose, new Payload() { Name = "Hi", Id = 67 });
 
@@ -69,12 +69,12 @@ namespace System.Diagnostics.Tracing.Tests
             Assert.Equal(logger.IsEnabled(LogLevel.Critical), false);
 
             IObserver<kvp> listener1 = MakeObserver<kvp>();
-            logger.Subscribe(listener1, LogLevel.Critical);
+            logger.Subscribe(listener1, (name, level) => level <= LogLevel.Critical);
             Assert.Equal(logger.IsEnabled(LogLevel.Verbose), false);
             Assert.Equal(logger.IsEnabled(LogLevel.Critical), true);
 
             IObserver<kvp> listener2 = MakeObserver<kvp>();
-            logger.Subscribe(listener2, LogLevel.Verbose);
+            logger.Subscribe(listener2, (name, level) => level <= LogLevel.Verbose);
             Assert.Equal(logger.IsEnabled(LogLevel.Verbose), true);
             Assert.Equal(logger.IsEnabled(LogLevel.Critical), true);
         }
@@ -89,7 +89,7 @@ namespace System.Diagnostics.Tracing.Tests
 
             List<kvp> result = new List<kvp>();
             IObserver<kvp> listListener = new ObserverToList<kvp>(result);
-            logger.Subscribe(listListener, LogLevel.Critical);
+            logger.Subscribe(listListener, (name, level) => level <= LogLevel.Critical);
 
             logger.Log("IntPayLoad", LogLevel.Verbose, 5);
             logger.Log("IntPayLoad", LogLevel.Critical, 6);
@@ -115,7 +115,7 @@ namespace System.Diagnostics.Tracing.Tests
 
             List<kvp> result = new List<kvp>();
             IObserver<kvp> listListener = new ObserverToList<kvp>(result);
-            logger.Subscribe(listListener, LogLevel.Informational);
+            logger.Subscribe(listListener, (name, level) => level <= LogLevel.Informational);
 
             logger.LogFormat("FormattedIntPayLoad", LogLevel.Informational, "payload value = %d", 5);
             Assert.Equal(result.Count, 1);
@@ -138,7 +138,7 @@ namespace System.Diagnostics.Tracing.Tests
 
             List<kvp> result = new List<kvp>();
             IObserver<kvp> listListener = new ObserverToList<kvp>(result);
-            logger.Subscribe(listListener, LogLevel.Verbose);
+            logger.Subscribe(listListener, (name, level) => level <= LogLevel.Verbose);
 
             using (var i = logger.ActivityStart("Main", LogLevel.Error, 4))
             {
@@ -180,8 +180,8 @@ namespace System.Diagnostics.Tracing.Tests
             List<kvp> result2 = new List<kvp>();
             IObserver<kvp> listListener2 = new ObserverToList<kvp>(result2);
 
-            logger.Subscribe(listListener1, LogLevel.Verbose);
-            logger.Subscribe(listListener2, LogLevel.Verbose);
+            logger.Subscribe(listListener1, (name, level) => level <= LogLevel.Verbose);
+            logger.Subscribe(listListener2, (name, level) => level <= LogLevel.Verbose);
 
             logger.Log("IntPayLoad", LogLevel.Verbose, 5);
 
@@ -214,12 +214,12 @@ namespace System.Diagnostics.Tracing.Tests
             List<kvp> result2 = new List<kvp>();
             IObserver<kvp> listListener2 = new ObserverToList<kvp>(result2);
 
-            logger.Subscribe(listListener1, LogLevel.Critical);
+            logger.Subscribe(listListener1, (name, level) => level <= LogLevel.Critical);
             logger.Log("IntPayLoad", LogLevel.Error, 5);
             Assert.Equal(result1.Count, 0);
 
             // This causes effective log level of all subsribers to be Error
-            logger.Subscribe(listListener2, LogLevel.Error);
+            logger.Subscribe(listListener2, (name, level) => level <= LogLevel.Error);
             logger.Log("IntPayLoad", LogLevel.Error, 5);
 
             // Both subscribers receive log information
@@ -238,8 +238,8 @@ namespace System.Diagnostics.Tracing.Tests
 
             List<kvp> result = new List<kvp>();
             IObserver<kvp> listListener = new ObserverToList<kvp>(result);
-            logger1.Subscribe(listListener, LogLevel.Critical);
-            logger2.Subscribe(listListener, LogLevel.Error);
+            logger1.Subscribe(listListener, (name, level) => level <= LogLevel.Critical);
+            logger2.Subscribe(listListener, (name, level) => level <= LogLevel.Error);
 
             logger1.Log("IntPayLoad", LogLevel.Critical, 5);
             logger2.Log("IntPayLoad", LogLevel.Critical, 6);

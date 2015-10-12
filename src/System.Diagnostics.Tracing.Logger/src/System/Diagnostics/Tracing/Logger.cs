@@ -16,9 +16,10 @@ namespace System.Diagnostics.Tracing
         /// Creates a new logger with the given name.   A Logger is a TelemetrySource which understands LogLevel (verbosity levels)
         /// </summary>
         /// <param name="name"></param>
-        public Logger(string name) : base(name)
+        /// <param name="minLevel"></param>
+        public Logger(string name, LogLevel minLevel = Off) : base(name)
         {
-            _level = Off;     // Turn the verbosity to 'off' initially as there are no subscribers
+            _minLevel = minLevel;     // Turn the verbosity to 'off' initially as there are no subscribers
         }
 
         /// <summary>
@@ -26,7 +27,17 @@ namespace System.Diagnostics.Tracing
         /// </summary>
         public bool IsEnabled(LogLevel level)
         {
-            return (level <= _level);
+            if (level >= _minLevel)
+                return false;
+            if (_filter != null)
+            {
+                foreach (Func<string, LogLevel, bool> filter in _filter.GetInvocationList())
+                {
+                    if (filter(Name, level))
+                        return true;
+                }
+            }
+            return false;
         }
 
         /// <summary>
@@ -64,17 +75,13 @@ namespace System.Diagnostics.Tracing
         /// You can filter them out yourself.   If there is only one subscriber (or all subscribers subscribe at the 
         /// same verbosity.  It works fine.   
         /// </summary>
-        public virtual IDisposable Subscribe(IObserver<KeyValuePair<string, object>> observer, LogLevel level)
+        public virtual IDisposable Subscribe(IObserver<KeyValuePair<string, object>> observer, Func<string, LogLevel, bool> filter)
         {
-            // We turn up the volume to the maximum of any subscriber.
-            if (_level < level || _level == Off)
-                _level = level;
+            _filter += filter;
             return base.Subscribe(observer);
         }
 
         #region private
-        const LogLevel Off = (LogLevel)(-1);
-
         private sealed class LoggerActivity : IDisposable
         {
             public LoggerActivity(Logger logger, LogLevel level, string activityName, object arguments)
@@ -100,7 +107,9 @@ namespace System.Diagnostics.Tracing
             object _arguments;
         }
 
-        private LogLevel _level;
+        const LogLevel Off = (LogLevel)(6);
+        private LogLevel _minLevel;
+        private Func<string, LogLevel, bool> _filter;
         #endregion 
     }
 
