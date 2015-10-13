@@ -12,6 +12,7 @@ internal static partial class Interop
         {
             public readonly ulong ConnectionsAccepted;
             public readonly ulong ConnectionsInitiated;
+            public readonly ulong CumulativeConnections;
             public readonly ulong ErrorsReceived;
             public readonly ulong FailedConnectionAttempts;
             public readonly ulong SegmentsReceived;

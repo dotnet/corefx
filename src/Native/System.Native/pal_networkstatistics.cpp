@@ -48,6 +48,7 @@ extern "C" int32_t GetTcpGlobalStatistics(TcpGlobalStatistics* retStats)
 
     retStats->ConnectionsAccepted = systemStats.tcps_accepts;
     retStats->ConnectionsInitiated = systemStats.tcps_connattempt;
+    retStats->CumulativeConnections = systemStats.tcps_connects;
     retStats->ErrorsReceived = systemStats.tcps_rcvbadsum + systemStats.tcps_rcvbadoff;
     retStats->FailedConnectionAttempts = systemStats.tcps_connattempt - systemStats.tcps_accepts;
     retStats->SegmentsReceived = systemStats.tcps_rcvtotal;

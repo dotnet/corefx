@@ -7,6 +7,7 @@ namespace System.Net.NetworkInformation
     {
         private readonly long _connectionsAccepted;
         private readonly long _connectionsInitiated;
+        private readonly long _cumulativeConnections;
         private readonly long _errorsReceived;
         private readonly long _failedConnectionAttempts;
         private readonly long _segmentsSent;
@@ -24,6 +25,7 @@ namespace System.Net.NetworkInformation
 
             _connectionsAccepted = (long)statistics.ConnectionsAccepted;
             _connectionsInitiated = (long)statistics.ConnectionsInitiated;
+            _cumulativeConnections = (long)statistics.CumulativeConnections;
             _errorsReceived = (long)statistics.ErrorsReceived;
             _failedConnectionAttempts = (long)statistics.FailedConnectionAttempts;
             _segmentsSent = (long)statistics.SegmentsSent;
@@ -52,7 +54,7 @@ namespace System.Net.NetworkInformation
         {
             get
             {
-                throw new PlatformNotSupportedException();
+                return _cumulativeConnections;
             }
         }
 

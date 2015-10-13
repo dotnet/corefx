@@ -10,6 +10,7 @@ struct TcpGlobalStatistics
 {
     uint64_t ConnectionsAccepted;
     uint64_t ConnectionsInitiated;
+    uint64_t CumulativeConnections;
     uint64_t ErrorsReceived;
     uint64_t FailedConnectionAttempts;
     uint64_t SegmentsReceived;
