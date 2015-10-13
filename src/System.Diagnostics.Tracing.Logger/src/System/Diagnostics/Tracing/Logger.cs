@@ -8,22 +8,25 @@ namespace System.Diagnostics.Tracing
     /// <summary>
     /// 
     /// 
-    /// Logger uses TelemetryListener in its implementation, which means that you can listen to the data presented here using TelemetryListener.AllListeners
+    /// Logger uses DiagnosticListener in its implementation, which means that you can listen to the data presented here using DiagnosticListener.AllListeners
     /// </summary>
     public class Logger : DiagnosticListener, ILogger
     {
         /// <summary>
-        /// Creates a new logger with the given name.   A Logger is a TelemetrySource which understands LogLevel (verbosity levels)
+        /// Creates a new logger with the given name.   A Logger is a DiagnosticSource which understands LogLevel (verbosity levels)
         /// </summary>
-        /// <param name="name"></param>
-        /// <param name="maxLevel"></param>
+        /// <param name="name">The name of the logger.  This is often the comonent name.</param>
+        /// <param name="maxLevel">The most verbose message that will ever be logged.  It defaults to Debug which, being the most
+        /// verbose level, means any message will be logged.   Useful in the context of security to make it less likely that 
+        /// private (debug) information does not get logged.  It also increases the efficienctly of IsEnabled if you only wish
+        /// to EVER turn low-verbosity events.</param>
         public Logger(string name, LogLevel maxLevel = LogLevel.Debug) : base(name)
         {
-            _maxLevel = maxLevel;     // Turn the verbosity to 'off' initially as there are no subscribers
+            _maxLevel = maxLevel;  
         }
 
         /// <summary>
-        /// Returns true if 'level' is less verbose (more severe) than the current level for the Logger.  
+        /// Returns true if 'level' is less verbose (more important) than the current level for the Logger.  
         /// </summary>
         public virtual bool IsEnabled(LogLevel level)
         {
