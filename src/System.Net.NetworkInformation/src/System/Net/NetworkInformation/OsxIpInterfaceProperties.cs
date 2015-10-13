@@ -1,12 +1,12 @@
 ﻿namespace System.Net.NetworkInformation
 {
-    internal class OsxIpInterfaceProperties : IPInterfaceProperties
+    internal class OsxIpInterfaceProperties : UnixIPInterfaceProperties
     {
         private readonly string _name;
 
-        public OsxIpInterfaceProperties(string name)
+        public OsxIpInterfaceProperties(OsxNetworkInterface oni) : base(oni)
         {
-            _name = name;
+            _name = oni.Name;
         }
 
         public override IPAddressInformationCollection AnycastAddresses
@@ -58,22 +58,6 @@
         }
 
         public override bool IsDynamicDnsEnabled
-        {
-            get
-            {
-                throw new NotImplementedException();
-            }
-        }
-
-        public override MulticastIPAddressInformationCollection MulticastAddresses
-        {
-            get
-            {
-                throw new NotImplementedException();
-            }
-        }
-
-        public override UnicastIPAddressInformationCollection UnicastAddresses
         {
             get
             {

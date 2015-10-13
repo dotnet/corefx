@@ -233,7 +233,10 @@
   </ItemGroup>
   <!-- Unix Common -->
   <ItemGroup Condition=" '$(TargetsUnix)' == 'true' ">
+    <Compile Include="System\Net\NetworkInformation\UnixIPInterfaceProperties.cs" />
+    <Compile Include="System\Net\NetworkInformation\UnixMulticastIPAddressInformation.cs" />
     <Compile Include="System\Net\NetworkInformation\UnixNetworkInterface.cs" />
+    <Compile Include="System\Net\NetworkInformation\UnixUnicastIPAddressInformation.cs" />
     <Compile Include="$(CommonPath)\Interop\Unix\Interop.Libraries.cs">
       <Link>Interop\Unix\Interop.Libraries.cs</Link>
     </Compile>
@@ -263,7 +266,6 @@
     <Compile Include="System\Net\NetworkInformation\NetworkChange.Linux.cs" />
     <Compile Include="System\Net\NetworkInformation\IPGlobalPropertiesPal.Linux.cs" />
     <Compile Include="System\Net\NetworkInformation\LinuxIPAddressInformation.cs" />
-    <Compile Include="System\Net\NetworkInformation\LinuxMulticastIPAddressInformation.cs" />
     <Compile Include="System\Net\NetworkInformation\LinuxIPGlobalProperties.cs" />
     <Compile Include="System\Net\NetworkInformation\LinuxIPGlobalStatistics.cs" />
     <Compile Include="System\Net\NetworkInformation\LinuxIPInterfaceProperties.cs" />
@@ -273,7 +275,6 @@
     <Compile Include="System\Net\NetworkInformation\LinuxNetworkInterface.cs" />
     <Compile Include="System\Net\NetworkInformation\LinuxIPv4InterfaceProperties.cs" />
     <Compile Include="System\Net\NetworkInformation\LinuxIPv6InterfaceProperties.cs" />
-    <Compile Include="System\Net\NetworkInformation\LinuxUnicastIPAddressInformation.cs" />
     <!-- Linux Common -->
     <Compile Include="$(CommonPath)\System\IO\StringParser.cs">
       <Link>Common\System\IO\StringParser.cs</Link>

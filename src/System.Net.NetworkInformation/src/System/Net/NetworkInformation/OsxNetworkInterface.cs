@@ -57,7 +57,7 @@ namespace System.Net.NetworkInformation
 
         public override IPInterfaceProperties GetIPProperties()
         {
-            return new OsxIpInterfaceProperties(_name);
+            return new OsxIpInterfaceProperties(this);
         }
 
         public override IPInterfaceStatistics GetIPStatistics()

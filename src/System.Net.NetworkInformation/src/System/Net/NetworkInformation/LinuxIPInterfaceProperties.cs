@@ -2,32 +2,26 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.IO;
-using System.Linq;
-using System.Net.Sockets;
 
 namespace System.Net.NetworkInformation
 {
-    internal class LinuxIPInterfaceProperties : IPInterfaceProperties
+    internal class LinuxIPInterfaceProperties : UnixIPInterfaceProperties
     {
         private readonly LinuxNetworkInterface _linuxNetworkInterface;
         private readonly string _dnsSuffix;
-        private readonly UnicastIPAddressInformationCollection _unicastAddresses;
-        private readonly MulticastIPAddressInformationCollection _multicastAddreses;
         private readonly IPAddressCollection _dnsAddresses;
         private readonly GatewayIPAddressInformationCollection _gatewayAddresses;
         private readonly LinuxIPv4InterfaceProperties _ipv4Properties;
         private readonly LinuxIPv6InterfaceProperties _ipv6Properties;
 
-        public LinuxIPInterfaceProperties(LinuxNetworkInterface lni)
+        public LinuxIPInterfaceProperties(LinuxNetworkInterface lni) : base(lni)
         {
             _linuxNetworkInterface = lni;
             _dnsSuffix = GetDnsSuffix();
-            _unicastAddresses = GetUnicastAddresses();
-            _multicastAddreses = GetMulticastAddresses();
             _dnsAddresses = GetDnsAddresses();
             _gatewayAddresses = GetGatewayAddresses();
-            _ipv4Properties = new LinuxIPv4InterfaceProperties(_linuxNetworkInterface);
-            _ipv6Properties = new LinuxIPv6InterfaceProperties(_linuxNetworkInterface);
+            _ipv4Properties = new LinuxIPv4InterfaceProperties(lni);
+            _ipv6Properties = new LinuxIPv6InterfaceProperties(lni);
         }
 
         public override bool IsDnsEnabled
@@ -49,10 +43,6 @@ namespace System.Net.NetworkInformation
                 throw new NotImplementedException();
             }
         }
-
-        public override UnicastIPAddressInformationCollection UnicastAddresses { get { return _unicastAddresses; } }
-
-        public override MulticastIPAddressInformationCollection MulticastAddresses { get { return _multicastAddreses; } }
 
         public override IPAddressInformationCollection AnycastAddresses
         {
@@ -106,44 +96,6 @@ namespace System.Net.NetworkInformation
             else
             {
                 return string.Empty;
-            }
-        }
-
-        private UnicastIPAddressInformationCollection GetUnicastAddresses()
-        {
-            var collection = new UnicastIPAddressInformationCollection();
-            foreach (IPAddress address in _linuxNetworkInterface.Addresses.Where((addr) => !IsMulticast(addr)))
-            {
-                IPAddress netMask = (address.AddressFamily == AddressFamily.InterNetwork)
-                                    ? _linuxNetworkInterface.GetNetMaskForIPv4Address(address)
-                                    : IPAddress.Any; // Windows compatibility
-                collection.InternalAdd(new LinuxUnicastIPAddressInformation(address, netMask));
-            }
-
-            return collection;
-        }
-
-        private MulticastIPAddressInformationCollection GetMulticastAddresses()
-        {
-            var collection = new MulticastIPAddressInformationCollection();
-            foreach (IPAddress address in _linuxNetworkInterface.Addresses.Where(IsMulticast))
-            {
-                collection.InternalAdd(new LinuxMulticastIPAddressInformation(address));
-            }
-
-            return collection;
-        }
-
-        private static bool IsMulticast(IPAddress address)
-        {
-            if (address.AddressFamily == AddressFamily.InterNetworkV6)
-            {
-                return address.IsIPv6Multicast;
-            }
-            else
-            {
-                byte firstByte = address.GetAddressBytes()[0];
-                return firstByte >= 224 && firstByte <= 239;
             }
         }
 

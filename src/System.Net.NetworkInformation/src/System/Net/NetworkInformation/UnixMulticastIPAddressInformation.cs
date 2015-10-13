@@ -4,15 +4,13 @@
 namespace System.Net.NetworkInformation
 {
     /// Provides information about a network interface's unicast address
-    internal class LinuxUnicastIPAddressInformation : UnicastIPAddressInformation
+    internal class UnixMulticastIPAddressInformation : MulticastIPAddressInformation
     {
         private readonly IPAddress _address;
-        private readonly IPAddress _netMask;
 
-        public LinuxUnicastIPAddressInformation(IPAddress address, IPAddress netMask)
+        public UnixMulticastIPAddressInformation(IPAddress address)
         {
             _address = address;
-            _netMask = netMask;
         }
 
         public override IPAddress Address { get { return _address; } }
@@ -40,8 +38,5 @@ namespace System.Net.NetworkInformation
 
         /// Gets a value that identifies the source of a unicast IP address suffix.
         public override SuffixOrigin SuffixOrigin { get { throw new PlatformNotSupportedException(); } }
-
-        public override IPAddress IPv4Mask { get { return _netMask; } }
-
     }
 }
