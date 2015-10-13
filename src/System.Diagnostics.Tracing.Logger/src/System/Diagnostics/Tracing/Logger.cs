@@ -6,9 +6,31 @@ using System.Collections.Generic;
 namespace System.Diagnostics.Tracing
 {
     /// <summary>
+    /// Logger is meant for diagnostic logging.     It is meant to be reasonably familiar to both users of other
+    /// common logging APIs (e.g. NLOG, Log4Net etc), and act at as a front-end facade for them.   In particular 
+    /// it has the concept of a LogLevel (verbosity) and Logger names (thus you can have a logger per component).   
     /// 
+    /// System.Diagnostics.Tracing.Logger serves much the same purpose as System.Diagnostics.Tracing.EventSource.   
+    /// In general the guidance is to use EventSource if you have the choice.   There are two main reasons why
+    /// you may wish to use Logger rather than EventSource 
     /// 
-    /// Logger uses DiagnosticListener in its implementation, which means that you can listen to the data presented here using DiagnosticListener.AllListeners
+    ///   1) You need multi-tenancy.   There is a single 'hub' in a given appdomain/process for all EventSources 
+    ///      in that appdomain/process.   Thus there can only be one EventSource call 'MyProgram'.   This is a
+    ///      problem if like ASP.NET, which wishes to support many independent tenants in the same appdomain.  
+    ///      Because the events form one tenant will mix with the others.  
+    ///   2) Dependency Injection - Logger supports ILogger, which allows you to build your application so that
+    ///      the exact implemenation of the logging system can be passed into it.   Logger has support for this.
+    /// 
+    /// If you don't have these requirements you should seriously consider using EventSource instead.   However
+    /// if you are using ASP.NET 5, they support both (1) and (2) above, and it is best to stick with Logger.  
+    /// 
+    /// Logger leverages DiagnosticListener as its 'plumbing'.   Thus Every Logger is a DiagnosticListener which  
+    /// means that you can discover them using DiagnosticListener.AllListeners.   Once you have the Logger you want, 
+    /// you can use the Subscribe() method to connect to the stream of data.  
+    /// 
+    /// System.Diagnostics.Tracing.EventSource will have plumbing to treat all DiagnosticSource (and thus all 
+    /// Loggers), as EventSources (as long as the payloads are serializable).   Thus it is also possible access
+    /// the data stream of Loggers from an EventListener and therefore ETW and LTTng.  
     /// </summary>
     public class Logger : DiagnosticListener, ILogger
     {
@@ -26,7 +48,9 @@ namespace System.Diagnostics.Tracing
         }
 
         /// <summary>
-        /// Returns true if 'level' is less verbose (more important) than the current level for the Logger.  
+        /// Returns true if 'level' is less verbose (more important) than the current level for the Logger.  This
+        /// should be used on all hot code paths before 'Log' is called so that even argument setup is skipped if
+        /// logging is off.   
         /// </summary>
         public virtual bool IsEnabled(LogLevel level)
         {
@@ -44,15 +68,23 @@ namespace System.Diagnostics.Tracing
         }
 
         /// <summary>
+        /// Log a message.   A message has a name, level (verbosity) and optional data (arguments).  The arguments 
+        /// is typically a anonymous type with as many fields as needed by the message.   The expectation is that
+        /// you can process the result programatically (by subscribing to it), but you can also render the message
+        /// as a string of the from  MessageName Level=level FieldName1=Value1  FieldName2=Value2 ...
+        /// 
         /// Because calling this method typically requires a anonymous type to be generated for the 'arguments'
         /// value if this logging happens in a 'hot' code path you should have a 'IsEnabled' check before calling
         /// it to avoid having to make the object just to throw it away if logging is off.   
         /// </summary>
-        public virtual void Log(string logItemName, LogLevel level, object arguments = null)
+        /// <param name="messageName">The name for this logging message.  (e.g. ExceptionOccured, or DataItemRetrieved)</param>
+        /// <param name="level">The verbosity of this message.</param>
+        /// <param name="arguments">Any additional data.  Typically this is an anoymous type object.</param>
+        public virtual void Log(string messageName, LogLevel level, object arguments = null)
         {
             if (IsEnabled(level))
             {
-                 Write(logItemName, new LoggerArguments { Level = level, LoggerName = Name, Arguments = arguments });
+                 Write(messageName, new LoggerArguments { Level = level, LoggerName = Name, Arguments = arguments });
             }
         }
 
