@@ -30,13 +30,5 @@ namespace System.Diagnostics.Tracing
         /// <param name="arguments"></param>
         /// <returns></returns>
         IDisposable ActivityStart(string activityName, LogLevel level = LogLevel.Critical, object arguments = null);
-
-        /// <summary>
-        /// Add an observer
-        /// </summary>
-        /// <param name="observer"></param>
-        /// <param name="filter"></param>
-        /// <returns></returns>
-        IDisposable Subscribe(IObserver<KeyValuePair<string, object>> observer, Func<string, LogLevel, bool> filter);
     }
 }

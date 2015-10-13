@@ -16,18 +16,18 @@ namespace System.Diagnostics.Tracing
         /// Creates a new logger with the given name.   A Logger is a TelemetrySource which understands LogLevel (verbosity levels)
         /// </summary>
         /// <param name="name"></param>
-        /// <param name="minLevel"></param>
-        public Logger(string name, LogLevel minLevel = Off) : base(name)
+        /// <param name="maxLevel"></param>
+        public Logger(string name, LogLevel maxLevel = LogLevel.Debug) : base(name)
         {
-            _minLevel = minLevel;     // Turn the verbosity to 'off' initially as there are no subscribers
+            _maxLevel = maxLevel;     // Turn the verbosity to 'off' initially as there are no subscribers
         }
 
         /// <summary>
         /// Returns true if 'level' is less verbose (more severe) than the current level for the Logger.  
         /// </summary>
-        public bool IsEnabled(LogLevel level)
+        public virtual bool IsEnabled(LogLevel level)
         {
-            if (level >= _minLevel)
+            if (level > _maxLevel)
                 return false;
             if (_filter != null)
             {
@@ -45,7 +45,7 @@ namespace System.Diagnostics.Tracing
         /// value if this logging happens in a 'hot' code path you should have a 'IsEnabled' check before calling
         /// it to avoid having to make the object just to throw it away if logging is off.   
         /// </summary>
-        public void Log(string logItemName, LogLevel level, object arguments = null)
+        public virtual void Log(string logItemName, LogLevel level, object arguments = null)
         {
             if (IsEnabled(level))
             {
@@ -58,7 +58,7 @@ namespace System.Diagnostics.Tracing
         /// It returns an IDisposable that when Disposed() will send a 'activityName'.Stop message with the SAME arguments 
         /// object.  Thus the arguments object itself can be used as an ID that links the two together.
         /// </summary>
-        public IDisposable ActivityStart(string activityName, LogLevel level = LogLevel.Critical, object arguments = null)
+        public virtual IDisposable ActivityStart(string activityName, LogLevel level = LogLevel.Critical, object arguments = null)
         {
             var activity = new LoggerActivity(this, level, activityName, arguments);
             if (IsEnabled(level))
@@ -107,8 +107,7 @@ namespace System.Diagnostics.Tracing
             object _arguments;
         }
 
-        const LogLevel Off = (LogLevel)(6);
-        private LogLevel _minLevel;
+        private LogLevel _maxLevel;
         private Func<string, LogLevel, bool> _filter;
         #endregion 
     }
@@ -157,12 +156,16 @@ namespace System.Diagnostics.Tracing
         /// </summary>
         Warning,
         /// <summary>
-        /// All informational events, including previous levels
+        /// All informational, including previous levels
         /// </summary>
         Informational,
         /// <summary>
+        /// All verbose, including previous levels 
+        /// </summary>
+        Verbose,  // = 5
+        /// <summary>
         /// All events, including previous levels 
         /// </summary>
-        Verbose  // = 5
+        Debug  // = 6
     }
 }
