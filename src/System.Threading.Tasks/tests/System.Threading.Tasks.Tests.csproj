@@ -47,7 +47,7 @@
     <Compile Include="Task\TaskCancelWaitTest.cs" />
     <Compile Include="Task\TaskRtTests.cs" />
     <Compile Include="Task\TaskRtTests_Core.cs" />
-    <Compile Include="Task\TaskAPMTest.cs" />
+    <Compile Include="Task\TaskAPMTests.cs" />
     <!-- TaskFactory -->
     <Compile Include="TaskFactory\TaskFactory_FromAsyncTests.cs" />
     <Compile Include="TaskFactory\TaskFactoryTests.cs" />
