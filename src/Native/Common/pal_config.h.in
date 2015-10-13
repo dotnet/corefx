@@ -19,6 +19,11 @@
 #cmakedefine01 HAVE_SCHED_SETAFFINITY
 #cmakedefine01 HAVE_FDS_BITS
 #cmakedefine01 HAVE_PRIVATE_FDS_BITS
+#cmakedefine01 HAVE_TCGETATTR
+#cmakedefine01 HAVE_TCSETATTR
+#cmakedefine01 HAVE_ECHO
+#cmakedefine01 HAVE_ICANON
+#cmakedefine01 HAVE_TCSANOW
 
 // Mac OS X has stat64, but it is deprecated since plain stat now
 // provides the same 64-bit aware struct when targeting OS X > 10.5

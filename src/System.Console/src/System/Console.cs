@@ -39,17 +39,19 @@ namespace System
             {
                 return Volatile.Read(ref _in) ?? EnsureInitialized(ref _in, () =>
                 {
-                    Stream inputStream = OpenStandardInput();
-                    return SyncTextReader.GetSynchronizedTextReader(inputStream == Stream.Null ?
-                        StreamReader.Null :
-                        new StreamReader(
-                            stream: inputStream,
-                            encoding: ConsolePal.InputEncoding,
-                            detectEncodingFromByteOrderMarks: false,
-                            bufferSize: DefaultConsoleBufferSize,
-                            leaveOpen: true));
+                    return ConsolePal.In;
                 });
             }
+        }
+
+        public static ConsoleKeyInfo ReadKey()
+        {
+            return ConsolePal.ReadKey(false);
+        }
+
+        public static ConsoleKeyInfo ReadKey(bool intercept)
+        {
+            return ConsolePal.ReadKey(intercept);
         }
 
         public static TextWriter Out
