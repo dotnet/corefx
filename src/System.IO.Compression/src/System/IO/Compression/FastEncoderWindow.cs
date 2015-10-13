@@ -66,11 +66,22 @@ namespace System.IO.Compression
             ResetWindow();
         }
 
-        private void ResetWindow()
+        public void ResetWindow()
         {
-            _window = new byte[2 * FastEncoderWindowSize + MaxMatch + 4];
-            _prev = new ushort[FastEncoderWindowSize + MaxMatch];
-            _lookup = new ushort[FastEncoderHashtableSize];
+            if (_window == null)
+            {
+                _window = new byte[2 * FastEncoderWindowSize + MaxMatch + 4];
+                _prev = new ushort[FastEncoderWindowSize + MaxMatch];
+                _lookup = new ushort[FastEncoderHashtableSize];
+            }
+            else
+            {
+                // TODO: Check if we can get away with not clearing this. 
+                Array.Clear(_window, 0, _window.Length);
+                Array.Clear(_prev, 0, _prev.Length);
+                Array.Clear(_lookup, 0, _lookup.Length);
+            }
+
             _bufPos = FastEncoderWindowSize;
             _bufEnd = _bufPos;
         }

@@ -249,7 +249,7 @@ namespace System.IO.Compression.Tests
         }
 
         [Fact]
-        public void TestLevelOptimial()
+        public void TestLevelOptimal()
         {
             TestCtor(CompressionLevel.Optimal);
         }
@@ -515,10 +515,11 @@ namespace System.IO.Compression.Tests
             var decompressed = new MemoryStream();
             using (var decompressor = useGzip ? (Stream)new GZipStream(compressed, CompressionMode.Decompress, true) : new DeflateStream(compressed, CompressionMode.Decompress, true))
             {
-                if (useAsync)
-                    decompressor.CopyTo(decompressed, chunkSize);
-                else
-                    await decompressor.CopyToAsync(decompressed, chunkSize, CancellationToken.None);
+                switch (useAsync)
+                {
+                    case true: await decompressor.CopyToAsync(decompressed, chunkSize, CancellationToken.None); break;
+                    case false: decompressor.CopyTo(decompressed, chunkSize); break;
+                }
             }
 
             Assert.Equal<byte>(data, decompressed.ToArray());

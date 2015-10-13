@@ -1,7 +1,9 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.Collections.Generic;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -147,13 +149,27 @@ namespace System.IO.Compression.Tests
             await DecompressAsync(compareStream, gzStream);
         }
 
-        // Making this async since regular read/write are tested below
-        private static async Task DecompressAsync(MemoryStream compareStream, MemoryStream gzStream)
-        {
-            var ms = new MemoryStream();
-            var zip = new GZipStream(gzStream, CompressionMode.Decompress);
+        [Fact]
+        public async Task DecompressWorksWithReset()
+        {            
+            var gzStreamFirst = await LocalMemoryStream.readAppFileAsync(gzTestFile("GZTestDocument.pdf.gz"));
+            using (var stream = new GZipStream(gzStreamFirst, CompressionMode.Decompress))
+            {
+                var compareStreamFirst = await LocalMemoryStream.readAppFileAsync(gzTestFile("GZTestDocument.pdf"));
+                await DecompressAsync(compareStreamFirst, stream);
 
-            var GZipStream = new MemoryStream();
+                var gzStreamSecond = await LocalMemoryStream.readAppFileAsync(gzTestFile("GZTestDocument.docx.gz"));
+                stream.Reset(gzStreamSecond);
+
+                var compareStreamSecond = await LocalMemoryStream.readAppFileAsync(gzTestFile("GZTestDocument.docx"));
+                await DecompressAsync(compareStreamSecond, stream);
+            }               
+        }
+
+        // Making this async since regular read/write are tested below
+        private static async Task DecompressAsync(MemoryStream compareStream, GZipStream zip)
+        {         
+            var gzipOutputStream = new MemoryStream();
 
             int _bufferSize = 1024;
             var bytes = new Byte[_bufferSize];
@@ -164,22 +180,29 @@ namespace System.IO.Compression.Tests
                 retCount = await zip.ReadAsync(bytes, 0, _bufferSize);
 
                 if (retCount != 0)
-                    await GZipStream.WriteAsync(bytes, 0, retCount);
+                    await gzipOutputStream.WriteAsync(bytes, 0, retCount);
                 else
                     finished = true;
             }
 
-            GZipStream.Position = 0;
+            gzipOutputStream.Position = 0;
             compareStream.Position = 0;
 
             byte[] compareArray = compareStream.ToArray();
-            byte[] writtenArray = GZipStream.ToArray();
+            byte[] writtenArray = gzipOutputStream.ToArray();
 
             Assert.Equal(compareArray.Length, writtenArray.Length);
             for (int i = 0; i < compareArray.Length; i++)
             {
                 Assert.Equal(compareArray[i], writtenArray[i]);
             }
+        }
+
+        // Making this async since regular read/write are tested below
+        private static async Task DecompressAsync(MemoryStream compareStream, MemoryStream gzStream)
+        {
+            var zip = new GZipStream(gzStream, CompressionMode.Decompress);
+            await DecompressAsync(compareStream, zip);
         }
 
         [Fact]
@@ -388,5 +411,116 @@ namespace System.IO.Compression.Tests
             zip.Dispose();
             Assert.False(zip.CanSeek);
         }
+
+        public static IEnumerable<object[]> Configurations
+        {
+            get
+            {
+                foreach (bool useAsync in new[] { true, false }) // whether to use Read/Write or ReadAsync/WriteAsync
+                {
+                    foreach (var level in new[] { CompressionLevel.Fastest, CompressionLevel.Optimal, CompressionLevel.NoCompression }) // compression level
+                    {
+                        yield return new object[] { useAsync, 1, 5, level }; // smallest possible writes
+                        yield return new object[] { useAsync, 1023, 1023 * 10, level }; // overflowing internal buffer
+                        yield return new object[] { useAsync, 1024 * 1024, 1024 * 1024, level }; // large single write
+                    }
+                }
+            }
+        }
+
+        [Theory]
+        [MemberData("Configurations")]
+        public async Task SameCompressOutputWithReset(bool useAsync, int chunkSize, int totalSize, CompressionLevel level)
+        {
+            var rnd = new Random(42);
+            byte[] data = new byte[totalSize];
+            rnd.NextBytes(data);
+
+            var expected = new MemoryStream();            
+            var compressor = new GZipStream(expected, level, true);
+
+            for (int i = 0; i < data.Length; i += chunkSize)
+            {
+                switch (useAsync)
+                {
+                    case true: await compressor.WriteAsync(data, i, chunkSize); break;
+                    case false: compressor.Write(data, i, chunkSize); break;
+                }
+            }
+            compressor.Close();
+
+            var duplicated = new MemoryStream();
+            compressor.Reset(duplicated);
+
+            for (int i = 0; i < data.Length; i += chunkSize)
+            {
+                switch (useAsync)
+                {
+                    case true: await compressor.WriteAsync(data, i, chunkSize); break;
+                    case false: compressor.Write(data, i, chunkSize); break;
+                }
+            }
+
+            compressor.Close();
+
+            Assert.Equal<byte>(expected.ToArray(), duplicated.ToArray());
+        }
+
+        //[Theory]
+        //[MemberData("Configurations")]
+        //public async Task RoundtripCompressDecompressWithReset(bool useAsync, int chunkSize, int totalSize, CompressionLevel level)
+        //{
+        //    var rnd = new Random(42);
+
+        //    byte[][] data = new byte[5][]; // We have enough with 5 iterations to tryout Reset.            
+        //    for (int iteration = 0; iteration < data.Length; iteration++)
+        //    {
+        //        data[iteration] = new byte[totalSize];
+        //        rnd.NextBytes(data[iteration]);
+        //    }
+
+        //    var compressed = new MemoryStream();
+        //    var compressor = new GZipStream(compressed, level, true);
+        //    var decompressor = new GZipStream(compressed, CompressionMode.Decompress, true);
+
+        //    for ( int iteration = 0; iteration < data.Length; iteration++ )
+        //    {
+        //        compressed = new MemoryStream();               
+        //        compressor.Reset(compressed);
+        //        decompressor.Reset(compressed);
+
+        //        Assert.True(compressor.IsOpen);
+        //        Assert.True(decompressor.IsOpen);
+
+        //        for (int i = 0; i < data[iteration].Length; i += chunkSize)
+        //        {
+        //            switch (useAsync)
+        //            {
+        //                case true: await compressor.WriteAsync(data[iteration], i, chunkSize); break;
+        //                case false: compressor.Write(data[iteration], i, chunkSize); break;
+        //            }
+        //        }
+
+        //        compressor.Close();
+        //        Assert.False(compressor.IsOpen);
+
+        //        compressed.Position = 0;
+
+        //        var decompressed = new MemoryStream();
+        //        switch (useAsync)
+        //        {
+        //            case true: await decompressor.CopyToAsync(decompressed, chunkSize, CancellationToken.None); break;
+        //            case false: decompressor.CopyTo(decompressed, chunkSize); break;
+        //        }
+
+        //        decompressor.Close();
+        //        Assert.False(decompressor.IsOpen);
+
+        //        Assert.Equal<byte>(data[iteration], decompressed.ToArray());
+        //    }
+
+        //    compressor.Dispose();
+        //    decompressor.Dispose();
+        //}    
     }
 }

@@ -19,6 +19,12 @@ namespace System.IO.Compression
             _currentMatch = new Match();
         }
 
+        public void Reset()
+        {
+            _inputWindow.ResetWindow();
+            _currentMatch = new Match();
+        }
+
         internal int BytesInHistory
         {
             get

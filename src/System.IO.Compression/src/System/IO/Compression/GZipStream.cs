@@ -11,6 +11,16 @@ namespace System.IO.Compression
     {
         private DeflateStream _deflateStream;
 
+        public virtual bool IsOpen
+        {
+            get
+            {
+                if (_deflateStream == null)
+                    return false;
+
+                return _deflateStream.IsOpen;
+            }
+        }
 
         public GZipStream(Stream stream, CompressionMode mode)
 
@@ -46,6 +56,16 @@ namespace System.IO.Compression
         {
             _deflateStream = new DeflateStream(stream, compressionLevel, leaveOpen);
             _deflateStream.SetFileFormatWriter(new GZipFormatter());
+        }
+
+        public virtual void Close ()
+        {
+            _deflateStream.Close();
+        }
+
+        public virtual void Reset( Stream stream )
+        {
+            _deflateStream.Reset(stream);
         }
 
         public override bool CanRead

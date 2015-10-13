@@ -17,6 +17,11 @@ namespace System.IO.Compression
         private GCHandle _inputBufferHandle;
         private bool _isDisposed;
 
+        private ZLibNative.CompressionLevel _zlibCompressionLevel;
+        private int _windowBits;
+        private int _memLevel;
+        private ZLibNative.CompressionStrategy _strategy;
+
         // Note, DeflateStream or the deflater do not try to be thread safe.
         // The lock is just used to make writing to unmanaged structures atomic to make sure
         // that they do not get inconsistent fields that may lead to an unmanaged memory violation.
@@ -34,11 +39,6 @@ namespace System.IO.Compression
 
         internal DeflaterZLib(CompressionLevel compressionLevel)
         {
-            ZLibNative.CompressionLevel zlibCompressionLevel;
-            int windowBits;
-            int memLevel;
-            ZLibNative.CompressionStrategy strategy;
-
             switch (compressionLevel)
             {
                 // Note that ZLib currently exactly correspond to the optimal values.
@@ -51,26 +51,25 @@ namespace System.IO.Compression
                 // ZLibNative.Deflate_DefaultWindowBits = -15;
                 // ZLibNative.Deflate_DefaultMemLevel = 8;
 
-
                 case CompressionLevel.Optimal:
-                    zlibCompressionLevel = (ZLibNative.CompressionLevel)6;
-                    windowBits = -15;
-                    memLevel = 8;
-                    strategy = ZLibNative.CompressionStrategy.DefaultStrategy;
+                    _zlibCompressionLevel = (ZLibNative.CompressionLevel)6;
+                    _windowBits = -15;
+                    _memLevel = 8;
+                    _strategy = ZLibNative.CompressionStrategy.DefaultStrategy;
                     break;
 
                 case CompressionLevel.Fastest:
-                    zlibCompressionLevel = (ZLibNative.CompressionLevel)1;
-                    windowBits = -15;
-                    memLevel = 8;
-                    strategy = ZLibNative.CompressionStrategy.DefaultStrategy;
+                    _zlibCompressionLevel = (ZLibNative.CompressionLevel)1;
+                    _windowBits = -15;
+                    _memLevel = 8;
+                    _strategy = ZLibNative.CompressionStrategy.DefaultStrategy;
                     break;
 
                 case CompressionLevel.NoCompression:
-                    zlibCompressionLevel = (ZLibNative.CompressionLevel)0;
-                    windowBits = -15;
-                    memLevel = 7;
-                    strategy = ZLibNative.CompressionStrategy.DefaultStrategy;
+                    _zlibCompressionLevel = (ZLibNative.CompressionLevel)0;
+                    _windowBits = -15;
+                    _memLevel = 7;
+                    _strategy = ZLibNative.CompressionStrategy.DefaultStrategy;
                     break;
 
                 default:
@@ -78,7 +77,7 @@ namespace System.IO.Compression
             }
 
             _isDisposed = false;
-            DeflateInit(zlibCompressionLevel, windowBits, memLevel, strategy);
+            DeflateInit(_zlibCompressionLevel, _windowBits, _memLevel, _strategy);
         }
 
         ~DeflaterZLib()
@@ -104,6 +103,16 @@ namespace System.IO.Compression
                     DeallocateInputBufferHandle();
                 _isDisposed = true;
             }
+        }
+
+        public void Reset()
+        {
+            _zlibStream.Dispose();
+
+            if (_inputBufferHandle.IsAllocated)
+                DeallocateInputBufferHandle();
+
+            DeflateInit(_zlibCompressionLevel, _windowBits, _memLevel, _strategy);
         }
 
         public bool NeedsInput()

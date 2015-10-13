@@ -7,6 +7,7 @@ namespace System.IO.Compression
 {
     internal interface IDeflater : IDisposable
     {
+        void Reset();
         [Pure]
         bool NeedsInput();
         void SetInput(byte[] inputBuffer, int startIndex, int count);

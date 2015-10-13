@@ -34,15 +34,20 @@ namespace System.IO.Compression
 
         public GZipDecoder()
         {
-            Reset();
+            _gzipHeaderSubstate = GzipHeaderState.ReadingID1;
+            _gzipFooterSubstate = GzipHeaderState.ReadingCRC;
         }
 
         public void Reset()
         {
             _gzipHeaderSubstate = GzipHeaderState.ReadingID1;
             _gzipFooterSubstate = GzipHeaderState.ReadingCRC;
+
             _expectedCrc32 = 0;
             _expectedOutputStreamSizeModulo = 0;
+            _actualCrc32 = 0;
+            _actualStreamSizeModulo = 0;
+            _loopCounter = 0;
         }
 
         public bool ReadHeader(InputBuffer input)

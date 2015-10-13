@@ -14,6 +14,7 @@ namespace System.IO.Compression
 
         private Stream _stream;
         private CompressionMode _mode;
+        private CompressionLevel? _level;
         private bool _leaveOpen;
         private IInflater _inflater;
         private IDeflater _deflater;
@@ -21,6 +22,7 @@ namespace System.IO.Compression
 
         private int _asyncOperations;
 
+        private IFileFormatReader _formatReader;
         private IFileFormatWriter _formatWriter;
         private bool _wroteHeader;
         private bool _wroteBytes;
@@ -32,6 +34,8 @@ namespace System.IO.Compression
         // NOTE: If the name of this field changes, the test must also be updated.
         private static WorkerType s_forcedTestingDeflaterType = WorkerType.Unknown;
 #endif
+
+        public bool IsOpen { get; protected set; }
 
         public DeflateStream(Stream stream, CompressionMode mode)
             : this(stream, mode, false)
@@ -47,11 +51,15 @@ namespace System.IO.Compression
             if (!stream.CanRead)
                 throw new ArgumentException(SR.NotReadableStream, "stream");
 
-            _inflater = CreateInflater(reader);
-            _stream = stream;
+            _formatReader = reader;       
             _mode = CompressionMode.Decompress;
             _leaveOpen = leaveOpen;
             _buffer = new byte[DefaultBufferSize];
+
+            _inflater = CreateInflater(reader);
+            _stream = stream;
+
+            IsOpen = true;
         }
 
 
@@ -59,7 +67,13 @@ namespace System.IO.Compression
         {
             if (stream == null)
                 throw new ArgumentNullException("stream");
-            
+
+            _mode = mode;
+            _leaveOpen = leaveOpen;
+            _buffer = new byte[DefaultBufferSize];
+
+            _stream = stream;
+
             switch (mode)
             {
                 case CompressionMode.Decompress:
@@ -75,17 +89,14 @@ namespace System.IO.Compression
                     {
                         throw new ArgumentException(SR.NotWriteableStream, "stream");
                     }
-                    _deflater = CreateDeflater(null);
+                    _deflater = CreateDeflater(_level);
                     break;
 
                 default:
                     throw new ArgumentException(SR.ArgumentOutOfRange_Enum, "mode");
             }
 
-            _stream = stream;
-            _mode = mode;
-            _leaveOpen = leaveOpen;
-            _buffer = new byte[DefaultBufferSize];
+            IsOpen = true;
         }
 
         // Implies mode = Compress
@@ -108,14 +119,80 @@ namespace System.IO.Compression
             // is a pugable component that completely encapsulates the meaning of compressionLevel.
 
             Contract.EndContractBlock();
-
-            _stream = stream;
+        
             _mode = CompressionMode.Compress;
-            _leaveOpen = leaveOpen;
-
-            _deflater = CreateDeflater(compressionLevel);
-
+            _level = compressionLevel;
+            _leaveOpen = leaveOpen;            
             _buffer = new byte[DefaultBufferSize];
+            
+            _stream = stream;
+            _deflater = CreateDeflater(_level);
+
+            IsOpen = true;
+        }
+
+        public virtual void Close ()
+        {
+            if (!IsOpen)
+                return; 
+
+            try
+            {
+                DoClose();
+            }
+            finally
+            {
+                IsOpen = false;
+            }            
+        }
+
+        protected virtual void DoClose ()
+        {                        
+            if (_mode != CompressionMode.Compress)
+                return;
+
+            // Some deflaters (e.g. ZLib) write more than zero bytes for zero byte inputs.
+            // This round-trips and we should be ok with this, but our legacy managed deflater
+            // always wrote zero output for zero input and upstack code (e.g. GZipStream)
+            // took dependencies on it. Thus, make sure to only "flush" when we actually had
+            // some input:
+            if (_wroteBytes)
+            {
+                // Compress any bytes left:                        
+                WriteDeflaterOutput();
+
+                // Pull out any bytes left inside deflater:
+                bool finished;
+                do
+                {
+                    int compressedBytes;
+                    finished = _deflater.Finish(_buffer, out compressedBytes);
+
+                    if (compressedBytes > 0)
+                        DoWrite(_buffer, 0, compressedBytes);
+                } while (!finished);
+            }
+            else
+            {
+                // In case of zero length buffer, we still need to clean up the native created stream before 
+                // the object get disposed because eventually ZLibNative.ReleaseHandle will get called during 
+                // the dispose operation and although it frees the stream but it return error code because the 
+                // stream state was still marked as in use. The symptoms of this problem will not be seen except 
+                // if running any diagnostic tools which check for disposing safe handle objects
+                bool finished;
+                do
+                {
+                    int compressedBytes;
+                    finished = _deflater.Finish(_buffer, out compressedBytes);
+                } while (!finished);
+            }
+
+            // Write format footer:
+            if (_formatWriter != null && _wroteHeader)
+            {
+                byte[] b = _formatWriter.GetFooter();
+                _stream.Write(b, 0, b.Length);
+            }
         }
 
         private static IDeflater CreateDeflater(CompressionLevel? compressionLevel)
@@ -172,6 +249,24 @@ namespace System.IO.Compression
             {
                 return new InflaterManaged(reader);
             }
+        }
+
+        public void Reset(Stream stream)
+        {
+            Close();
+
+            _stream = stream;
+            _wroteHeader = false;
+            _wroteBytes = false;
+
+            if (_deflater != null)
+                _deflater.Reset();
+            if (_inflater != null)
+                _inflater.Reset();
+            if (_formatWriter != null)
+                _formatWriter.Reset();
+
+            IsOpen = true;
         }
 
         internal void SetFileFormatWriter(IFileFormatWriter writer)
@@ -247,12 +342,14 @@ namespace System.IO.Compression
 
         public override void Flush()
         {
-            EnsureNotDisposed();
+            EnsureNotDisposedAndOpen();
+
+            //TODO: Check if Flush shouldnt call the BaseStream Flush method here. 
         }
 
         public override Task FlushAsync(CancellationToken cancellationToken)
         {
-            EnsureNotDisposed();
+            EnsureNotDisposedAndOpen();
             return cancellationToken.IsCancellationRequested ?
                 Task.FromCanceled(cancellationToken) :
                 Task.CompletedTask;
@@ -272,7 +369,7 @@ namespace System.IO.Compression
         {
             EnsureDecompressionMode();
             ValidateParameters(array, offset, count);
-            EnsureNotDisposed();
+            EnsureNotDisposedAndOpen();
 
             int bytesRead;
             int currentOffset = offset;
@@ -329,9 +426,9 @@ namespace System.IO.Compression
                 throw new ArgumentException(SR.InvalidArgumentOffsetCount);
         }
 
-        private void EnsureNotDisposed()
+        private void EnsureNotDisposedAndOpen()
         {
-            if (_stream == null)
+            if (_stream == null || !IsOpen)
                 throw new ObjectDisposedException(null, SR.ObjectDisposed_StreamClosed);
         }
 
@@ -356,7 +453,7 @@ namespace System.IO.Compression
                 throw new InvalidOperationException(SR.InvalidBeginCall);
 
             ValidateParameters(array, offset, count);
-            EnsureNotDisposed();
+            EnsureNotDisposedAndOpen();
 
             if (cancellationToken.IsCancellationRequested)
             {
@@ -409,7 +506,7 @@ namespace System.IO.Compression
                 while (true)
                 {
                     int bytesRead = await readTask.ConfigureAwait(false);
-                    EnsureNotDisposed();
+                    EnsureNotDisposedAndOpen();
 
                     if (bytesRead <= 0)
                     {
@@ -455,7 +552,7 @@ namespace System.IO.Compression
         {
             EnsureCompressionMode();
             ValidateParameters(array, offset, count);
-            EnsureNotDisposed();
+            EnsureNotDisposedAndOpen();
             InternalWrite(array, offset, count);
         }
 
@@ -529,52 +626,7 @@ namespace System.IO.Compression
                 return;
 
             Flush();
-
-            if (_mode != CompressionMode.Compress)
-                return;
-
-            // Some deflaters (e.g. ZLib) write more than zero bytes for zero byte inputs.
-            // This round-trips and we should be ok with this, but our legacy managed deflater
-            // always wrote zero output for zero input and upstack code (e.g. GZipStream)
-            // took dependencies on it. Thus, make sure to only "flush" when we actually had
-            // some input:
-            if (_wroteBytes)
-            {
-                // Compress any bytes left:                        
-                WriteDeflaterOutput();
-
-                // Pull out any bytes left inside deflater:
-                bool finished;
-                do
-                {
-                    int compressedBytes;
-                    finished = _deflater.Finish(_buffer, out compressedBytes);
-
-                    if (compressedBytes > 0)
-                        DoWrite(_buffer, 0, compressedBytes);
-                } while (!finished);
-            }
-            else
-            {
-                // In case of zero length buffer, we still need to clean up the native created stream before 
-                // the object get disposed because eventually ZLibNative.ReleaseHandle will get called during 
-                // the dispose operation and although it frees the stream but it return error code because the 
-                // stream state was still marked as in use. The symptoms of this problem will not be seen except 
-                // if running any diagnostic tools which check for disposing safe handle objects
-                bool finished;
-                do
-                {
-                    int compressedBytes;
-                    finished = _deflater.Finish(_buffer, out compressedBytes);
-                } while (!finished);
-            }
-
-            // Write format footer:
-            if (_formatWriter != null && _wroteHeader)
-            {
-                byte[] b = _formatWriter.GetFooter();
-                _stream.Write(b, 0, b.Length);
-            }
+            DoClose();
         }
 
         protected override void Dispose(bool disposing)
@@ -623,7 +675,7 @@ namespace System.IO.Compression
                 throw new InvalidOperationException(SR.InvalidBeginCall);
 
             ValidateParameters(array, offset, count);
-            EnsureNotDisposed();
+            EnsureNotDisposedAndOpen();
 
             if (cancellationToken.IsCancellationRequested)
                 return Task.FromCanceled<int>(cancellationToken);
