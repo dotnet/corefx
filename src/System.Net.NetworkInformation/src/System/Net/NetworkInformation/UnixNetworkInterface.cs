@@ -22,51 +22,6 @@ namespace System.Net.NetworkInformation
             _name = name;
         }
 
-        // Maps ARPHRD_* values to analogous NetworkInterfaceType values, as closely as possible.
-        public static NetworkInterfaceType MapArpHardwareType(ushort arpHardwareType)
-        {
-            switch (arpHardwareType)
-            {
-                case Interop.Sys.ARPHRD_ETHER:
-                case Interop.Sys.ARPHRD_EETHER:
-                    return NetworkInterfaceType.Ethernet;
-
-                case Interop.Sys.ARPHRD_PRONET:
-                    return NetworkInterfaceType.TokenRing;
-
-                case Interop.Sys.ARPHRD_ATM:
-                    return NetworkInterfaceType.Atm;
-
-                case Interop.Sys.ARPHRD_SLIP:
-                case Interop.Sys.ARPHRD_CSLIP:
-                case Interop.Sys.ARPHRD_SLIP6:
-                case Interop.Sys.ARPHRD_CSLIP6:
-                    return NetworkInterfaceType.Slip;
-
-                case Interop.Sys.ARPHRD_PPP:
-                    return NetworkInterfaceType.Ppp;
-
-                case Interop.Sys.ARPHRD_TUNNEL:
-                case Interop.Sys.ARPHRD_TUNNEL6:
-                    return NetworkInterfaceType.Tunnel;
-
-                case Interop.Sys.ARPHRD_LOOPBACK:
-                    return NetworkInterfaceType.Loopback;
-
-                case Interop.Sys.ARPHRD_FDDI:
-                    return NetworkInterfaceType.Fddi;
-
-                case Interop.Sys.ARPHRD_IEEE80211:
-                case Interop.Sys.ARPHRD_IEEE80211_PRISM:
-                case Interop.Sys.ARPHRD_IEEE80211_RADIOTAP:
-                    return NetworkInterfaceType.Wireless80211;
-
-                default:
-                    Debug.WriteLine("Unmapped ARP Hardware type: " + arpHardwareType);
-                    return NetworkInterfaceType.Unknown;
-            }
-        }
-
         public override string Name { get { return _name; } }
 
         public override NetworkInterfaceType NetworkInterfaceType { get { return _networkInterfaceType; } }
@@ -147,7 +102,7 @@ namespace System.Net.NetworkInformation
 
             uni._index = llAddr->InterfaceIndex;
             uni._physicalAddress = physicalAddress;
-            uni._networkInterfaceType = MapArpHardwareType(llAddr->HardwareType);
+            uni._networkInterfaceType = (NetworkInterfaceType)llAddr->HardwareType;
         }
     }
 }

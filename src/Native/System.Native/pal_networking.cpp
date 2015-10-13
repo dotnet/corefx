@@ -21,6 +21,7 @@ static_assert(HAVE_AF_PACKET || HAVE_AF_LINK, "System must have AF_PACKET or AF_
 #include <linux/if_packet.h>
 #elif HAVE_AF_LINK
 #include <net/if_dl.h>
+#include <net/if_types  .h>
 #endif
 
 const int NUM_BYTES_IN_IPV4_ADDRESS = 4;
@@ -454,7 +455,7 @@ extern "C" int32_t EnumerateInterfaceAddresses(IPv4AddressFound onIpv4Found,
             sockaddr_ll* sall = reinterpret_cast<sockaddr_ll*>(current->ifa_addr);
             memcpy(&lla.AddressBytes, &sall->sll_addr, sall->sll_halen);
             lla.NumAddressBytes = sall->sll_halen;
-            lla.HardwareType = sall->sll_hatype;
+            lla.HardwareType = MapHardwareType(sall->sll_hatype);
             onLinkLayerFound(current->ifa_name, &lla);
         }
 
@@ -467,7 +468,7 @@ extern "C" int32_t EnumerateInterfaceAddresses(IPv4AddressFound onIpv4Found,
             lla.InterfaceIndex = interfaceIndex;
             memcpy(&lla.AddressBytes, reinterpret_cast<uint8_t*>(LLADDR(sadl)), sadl->sdl_alen);
             lla.NumAddressBytes = sadl->sdl_alen;
-            lla.HardwareType = sadl->sdl_type;
+            lla.HardwareType = MapHardwareType(sadl->sdl_type);
             onLinkLayerFound(current->ifa_name, &lla);
 
             // Do stuff for OSX
@@ -478,3 +479,71 @@ extern "C" int32_t EnumerateInterfaceAddresses(IPv4AddressFound onIpv4Found,
     freeifaddrs(headAddr);
     return 0;
 }
+
+NetworkInterfaceType MapHardwareType(uint16_t nativeType)
+{
+#if HAVE_AF_PACKET
+    switch (nativeType)
+    {
+        case ARPHRD_ETHER:
+        case ARPHRD_EETHER:
+            return Ethernet;
+        case ARPHRD_PRONET:
+            return TokenRing;
+        case ARPHRD_ATM:
+            return Atm;
+        case ARPHRD_SLIP:
+        case ARPHRD_CSLIP:
+        case ARPHRD_SLIP6:
+        case ARPHRD_CSLIP6:
+            return Slip;
+        case ARPHRD_PPP:
+            return Ppp;
+        case ARPHRD_TUNNEL:
+        case ARPHRD_TUNNEL6:
+            return Tunnel;
+        case ARPHRD_LOOPBACK:
+            return Loopback;
+        case ARPHRD_FDDI:
+            return Fddi;
+        case ARPHRD_IEEE80211:
+        case ARPHRD_IEEE80211_PRISM:
+        case ARPHRD_IEEE80211_RADIOTAP:
+            return Wireless80211;
+        default:
+            return Unknown;
+    }
+#else
+    switch (nativeType)
+    {
+        case IFT_ETHER:
+            return Ethernet;
+        case IFT_ISO88025:
+            return TokenRing;
+        case IFT_FDDI:
+            return Fddi;
+        case IFT_ISDNBASIC:
+            return Isdn;
+        case IFT_ISDNPRIMARY:
+            return PrimaryIsdn;
+        case IFT_PPP:
+            return Ppp;
+        case IFT_LOOP:
+            return Loopback;
+        case IFT_XETHER:
+            return Ethernet3Megabit;
+        case IFT_SLIP:
+            return Slip;
+        case IFT_ATM:
+            return Atm;
+        case IFT_MODEM:
+            return GenericModem;
+        case IFT_IEEE1394:
+            return HighPerformanceSerialBus;
+        default:
+            return Unknown;
+    }
+#endif
+
+}
+
