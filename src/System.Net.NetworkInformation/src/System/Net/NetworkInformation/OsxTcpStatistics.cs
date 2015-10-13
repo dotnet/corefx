@@ -7,12 +7,12 @@ namespace System.Net.NetworkInformation
     {
         private readonly long _connectionsAccepted;
         private readonly long _connectionsInitiated;
-        private readonly long _currentConnections;
         private readonly long _errorsReceived;
         private readonly long _failedConnectionAttempts;
         private readonly long _segmentsSent;
         private readonly long _segmentsResent;
         private readonly long _segmentsReceived;
+        private readonly int _currentConnections;
 
         public OsxTcpStatistics()
         {
@@ -29,9 +29,7 @@ namespace System.Net.NetworkInformation
             _segmentsSent = (long)statistics.SegmentsSent;
             _segmentsResent = (long)statistics.SegmentsResent;
             _segmentsReceived = (long)statistics.SegmentsReceived;
-
-            // TODO: This should be obtainable.
-            _currentConnections = 0;
+            _currentConnections = statistics.CurrentConnections;
         }
 
         public override long ConnectionsAccepted

@@ -292,11 +292,18 @@
     <Compile Include="System\Net\NetworkInformation\IPGlobalPropertiesPal.Osx.cs" />
     <Compile Include="System\Net\NetworkInformation\NetworkChange.OSX.cs" />
     <Compile Include="System\Net\NetworkInformation\NetworkInterfacePal.Osx.cs" />
+    <Compile Include="System\Net\NetworkInformation\OsxIcmpV4Statistics.cs" />
+    <Compile Include="System\Net\NetworkInformation\OsxIcmpV6Statistics.cs" />
     <Compile Include="System\Net\NetworkInformation\OsxIPGlobalProperties.cs" />
+    <Compile Include="System\Net\NetworkInformation\OsxIPv4GlobalStatistics.cs" />
+    <!--
+    <Compile Include="System\Net\NetworkInformation\OsxIPv6GlobalStatistics.cs" />
+  -->
     <Compile Include="System\Net\NetworkInformation\OsxIpInterfaceStatistics.cs" />
     <Compile Include="System\Net\NetworkInformation\OsxIpInterfaceProperties.cs" />
     <Compile Include="System\Net\NetworkInformation\OsxNetworkInterface.cs" />
     <Compile Include="System\Net\NetworkInformation\OsxTcpStatistics.cs" />
+    <Compile Include="System\Net\NetworkInformation\OsxUdpStatistics.cs" />
     <Compile Include="$(CommonPath)\Interop\OSX\System.Native\Interop.ProtocolStatistics.cs">
       <Link>Interop\OSX\System.Native\Interop.ProtocolStatistics.cs</Link>
     </Compile>

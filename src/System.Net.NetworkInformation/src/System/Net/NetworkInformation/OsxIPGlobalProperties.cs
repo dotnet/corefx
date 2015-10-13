@@ -17,7 +17,7 @@ namespace System.Net.NetworkInformation
         {
             get
             {
-                throw new NotImplementedException();
+                return HostInformation.DomainName;
             }
         }
 
@@ -25,7 +25,7 @@ namespace System.Net.NetworkInformation
         {
             get
             {
-                throw new NotImplementedException();
+                return HostInformation.HostName;
             }
         }
 
@@ -62,22 +62,23 @@ namespace System.Net.NetworkInformation
 
         public override IcmpV4Statistics GetIcmpV4Statistics()
         {
-            throw new NotImplementedException();
+            return new OsxIcmpV4Statistics();
         }
 
         public override IcmpV6Statistics GetIcmpV6Statistics()
         {
-            throw new NotImplementedException();
+            return new OsxIcmpV6Statistics();
         }
 
         public override IPGlobalStatistics GetIPv4GlobalStatistics()
         {
-            throw new NotImplementedException();
+            return new OsxIPv4GlobalStatistics();
         }
 
         public override IPGlobalStatistics GetIPv6GlobalStatistics()
         {
             throw new NotImplementedException();
+            //return new OsxIPv6GlobalStatistics();
         }
 
         public override TcpStatistics GetTcpIPv4Statistics()
@@ -94,12 +95,14 @@ namespace System.Net.NetworkInformation
 
         public override UdpStatistics GetUdpIPv4Statistics()
         {
-            throw new NotImplementedException();
+        	// OSX does not provide separated UDP-IPv4 and UDP-IPv6 stats.
+            return new OsxUdpStatistics();
         }
 
         public override UdpStatistics GetUdpIPv6Statistics()
         {
-            throw new NotImplementedException();
+        	// OSX does not provide separated UDP-IPv4 and UDP-IPv6 stats.
+            return new OsxUdpStatistics();
         }
     }
 }
