@@ -284,18 +284,5 @@ namespace System.Threading.Tasks.Tests
             await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => Task<object>.Factory.StartNew(() => new object(), (TaskCreationOptions)option));
             await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => Task.Factory.StartNew<object>(() => new object(), (TaskCreationOptions)option));
         }
-
-        public class Flag
-        {
-            private int _flag = 0;
-
-            public bool IsTripped { get { return _flag == 1; } }
-
-            public void Trip()
-            {
-                // Flip flag, and make sure it's only done once.
-                Assert.Equal(0, Interlocked.CompareExchange(ref _flag, 1, 0));
-            }
-        }
     }
 }

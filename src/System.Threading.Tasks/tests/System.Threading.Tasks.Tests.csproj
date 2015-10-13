@@ -21,6 +21,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Helpers\Flag.cs" />
     <Compile Include="XunitAssemblyAttributes.cs" />
     <Compile Include="UnwrapTests.cs" />
     <Compile Include="AggregateExceptionTests.cs" />

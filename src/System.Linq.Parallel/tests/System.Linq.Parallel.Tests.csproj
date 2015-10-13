@@ -22,6 +22,9 @@
     <Compile Include="$(CommonTestPath)\System\Diagnostics\Tracing\TestEventListener.cs">
       <Link>Common\System\Diagnostics\Tracing\TestEventListener.cs</Link>
     </Compile>
+    <Compile Include="$(CommonTestPath)\System\DeliberateTestException.cs">
+      <Link>Common\System\DeliberateTestException.cs</Link>
+    </Compile>
     <Compile Include="Combinatorial\CancellationParallelQueryCombinationTests.cs" />
     <Compile Include="Combinatorial\FailingParallelQueryCombinationTests.cs" />
     <Compile Include="Combinatorial\LabeledOperation.cs" />
@@ -29,7 +32,6 @@
     <Compile Include="Combinatorial\SourcesAndOperators.cs" />
     <Compile Include="Combinatorial\UnorderedParallelQueryCombinationTests.cs" />
     <Compile Include="Helpers\Comparers.cs" />
-    <Compile Include="Helpers\DeliberateTestException.cs" />
     <Compile Include="Helpers\Enumerables.cs" />
     <Compile Include="Helpers\Functions.cs" />
     <Compile Include="Helpers\IntegerRangeSet.cs" />
