@@ -27,7 +27,7 @@
           "lib/DNXCore50/System.Diagnostics.Debug.dll": {}
         }
       },
-      "System.Diagnostics.DiagnosticSource/4.0.0-beta-23413": {
+      "System.Diagnostics.DiagnosticSource/4.0.0-beta-23412": {
         "type": "package",
         "dependencies": {
           "System.Diagnostics.Tracing": "4.0.0",
@@ -396,17 +396,15 @@
         "System.Diagnostics.Debug.nuspec"
       ]
     },
-    "System.Diagnostics.DiagnosticSource/4.0.0-beta-23413": {
+    "System.Diagnostics.DiagnosticSource/4.0.0-beta-23412": {
       "type": "package",
       "serviceable": true,
-      "sha512": "1iN7EMAvI5vEGHoOZv+6vC8r0Wf6ruA3p6jGvSdhOi9SX0utwR6DCRNNO+OctDXvOGElZblqa/OfbalX0bsAew==",
+      "sha512": "ZIzF+hsqa7Ujp+8chy8qRA5HuxanvltJ6/Kb/TxPCQ8thgQ3BlbED8MKeK7SWWeJijAlhKMw7MOd3LzX7cs8eA==",
       "files": [
         "lib/dotnet/System.Diagnostics.DiagnosticSource.dll",
-        "lib/dotnet/System.Diagnostics.DiagnosticSource.xml",
         "lib/portable-net45+win8+wp8+wpa81/System.Diagnostics.DiagnosticSource.dll",
-        "lib/portable-net45+win8+wp8+wpa81/System.Diagnostics.DiagnosticSource.xml",
-        "System.Diagnostics.DiagnosticSource.4.0.0-beta-23413.nupkg",
-        "System.Diagnostics.DiagnosticSource.4.0.0-beta-23413.nupkg.sha512",
+        "System.Diagnostics.DiagnosticSource.4.0.0-beta-23412.nupkg",
+        "System.Diagnostics.DiagnosticSource.4.0.0-beta-23412.nupkg.sha512",
         "System.Diagnostics.DiagnosticSource.nuspec"
       ]
     },
