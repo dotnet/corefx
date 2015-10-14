@@ -79,8 +79,7 @@ namespace System.Net.NetworkInformation
 
         private int GetMtu()
         {
-            // /proc/sys/net/ipv4/conf/<name>/mtu
-            string path = Path.Combine(LinuxNetworkFiles.Ipv4ConfigFolder, _linuxNetworkInterface.Name, LinuxNetworkFiles.MtuFileName);
+            string path = path = Path.Combine(LinuxNetworkFiles.SysClassNetFolder, _linuxNetworkInterface.Name, LinuxNetworkFiles.MtuFileName);
             return int.Parse(File.ReadAllText(path));
         }
     }
