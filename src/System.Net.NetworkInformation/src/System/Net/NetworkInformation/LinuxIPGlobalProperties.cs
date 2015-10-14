@@ -73,10 +73,6 @@ namespace System.Net.NetworkInformation
             for (int i = 1; i < v6connections.Length; i++) // Skip first line header
             {
                 string line = v6connections[i];
-                IPAddress remoteIPAddress;
-                int remotePort;
-                ParseRemoteConnectionInformation(line, out remoteIPAddress, out remotePort);
-
                 connections[index++] = ParseTcpConnectionInformationFromLine(line);
             }
 
@@ -222,7 +218,7 @@ namespace System.Net.NetworkInformation
             IPEndPoint localEndPoint = new IPEndPoint(localAddress, localPort);
             IPEndPoint remoteEndPoint = new IPEndPoint(remoteAddress, remotePort);
 
-            return new LinuxTcpConnectionInformation(localEndPoint, remoteEndPoint, tcpState);
+            return new SimpleTcpConnectionInformation(localEndPoint, remoteEndPoint, tcpState);
         }
 
         // Maps from Linux TCP states (include/net/tcp_states.h) to .NET TcpStates

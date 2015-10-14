@@ -233,6 +233,7 @@
   </ItemGroup>
   <!-- Unix Common -->
   <ItemGroup Condition=" '$(TargetsUnix)' == 'true' ">
+    <Compile Include="System\Net\NetworkInformation\SimpleTcpConnectionInformation.cs" />
     <Compile Include="System\Net\NetworkInformation\UnixIPInterfaceProperties.cs" />
     <Compile Include="System\Net\NetworkInformation\UnixMulticastIPAddressInformation.cs" />
     <Compile Include="System\Net\NetworkInformation\UnixNetworkInterface.cs" />
@@ -260,7 +261,6 @@
     <Compile Include="System\Net\NetworkInformation\LinuxGatewayIPAddressInformation.cs" />
     <Compile Include="System\Net\NetworkInformation\LinuxIcmpV4Statistics.cs" />
     <Compile Include="System\Net\NetworkInformation\LinuxIcmpV6Statistics.cs" />
-    <Compile Include="System\Net\NetworkInformation\LinuxTcpConnectionInformation.cs" />
     <Compile Include="System\Net\NetworkInformation\LinuxTcpStatistics.cs" />
     <Compile Include="System\Net\NetworkInformation\LinuxUdpStatistics.cs" />
     <Compile Include="System\Net\NetworkInformation\NetworkChange.Linux.cs" />
@@ -307,6 +307,9 @@
     <Compile Include="System\Net\NetworkInformation\OsxUdpStatistics.cs" />
     <Compile Include="$(CommonPath)\Interop\OSX\System.Native\Interop.ProtocolStatistics.cs">
       <Link>Interop\OSX\System.Native\Interop.ProtocolStatistics.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\OSX\System.Native\Interop.TcpConnectionInfo.cs">
+      <Link>Interop\OSX\System.Native\Interop.TcpConnectionInfo.cs</Link>
     </Compile>
   </ItemGroup>
   <ItemGroup>

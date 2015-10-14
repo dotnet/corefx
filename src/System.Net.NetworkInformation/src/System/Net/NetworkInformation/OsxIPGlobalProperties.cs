@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.Linq;
+
 namespace System.Net.NetworkInformation
 {
     internal class OsxIPGlobalProperties : IPGlobalProperties
@@ -45,14 +47,59 @@ namespace System.Net.NetworkInformation
             }
         }
 
-        public override TcpConnectionInformation[] GetActiveTcpConnections()
+        public unsafe override TcpConnectionInformation[] GetActiveTcpConnections()
         {
-            throw new NotImplementedException();
+            int realCount = Interop.Sys.GetEstimatedTcpConnectionCount();
+            int estimatedCount = (int)(realCount * 1.5f);
+            estimatedCount = 2;
+            Interop.Sys.NativeTcpConnectionInformation* infos = stackalloc Interop.Sys.NativeTcpConnectionInformation[estimatedCount];
+            int infoCount = estimatedCount;
+            while (Interop.Sys.GetActiveTcpConnectionInfos(infos, &infoCount) == -1)
+            {
+                var newAlloc = stackalloc Interop.Sys.NativeTcpConnectionInformation[infoCount];
+                infos = newAlloc;
+            }
+
+            TcpConnectionInformation[] connectionInformations = new TcpConnectionInformation[infoCount];
+            for (int i = 0; i < infoCount; i++)
+            {
+                Interop.Sys.NativeTcpConnectionInformation nativeInfo = infos[i];
+                TcpState state = nativeInfo.State;
+
+                byte[] localBytes = new byte[nativeInfo.LocalEndPoint.NumAddressBytes];
+                fixed (byte* localBytesPtr = localBytes)
+                {
+                    Buffer.MemoryCopy(nativeInfo.LocalEndPoint.AddressBytes, localBytesPtr, localBytes.Length, localBytes.Length);
+                }
+                IPAddress localIPAddress = new IPAddress(localBytes);
+                IPEndPoint local = new IPEndPoint(localIPAddress, (int)nativeInfo.LocalEndPoint.Port);
+
+                IPAddress remoteIPAddress;
+                if (nativeInfo.RemoteEndPoint.NumAddressBytes == 0)
+                {
+                    remoteIPAddress = IPAddress.Any;
+                }
+                else
+                {
+                    byte[] remoteBytes = new byte[nativeInfo.RemoteEndPoint.NumAddressBytes];
+                    fixed (byte* remoteBytesPtr = remoteBytes)
+                    {
+                        Buffer.MemoryCopy(nativeInfo.RemoteEndPoint.AddressBytes, remoteBytesPtr, remoteBytes.Length, remoteBytes.Length);
+                    }
+                    remoteIPAddress = new IPAddress(remoteBytes);
+                }
+
+                IPEndPoint remote = new IPEndPoint(remoteIPAddress, (int)nativeInfo.RemoteEndPoint.Port);
+                connectionInformations[i] = new SimpleTcpConnectionInformation(local, remote, state);
+            }
+
+            return connectionInformations;
         }
 
         public override IPEndPoint[] GetActiveTcpListeners()
         {
-            throw new NotImplementedException();
+            TcpConnectionInformation[] allConnections = GetActiveTcpConnections();
+            return allConnections.Where(tci => tci.State != TcpState.Listen).Select(tci => tci.RemoteEndPoint).ToArray();
         }
 
         public override IPEndPoint[] GetActiveUdpListeners()

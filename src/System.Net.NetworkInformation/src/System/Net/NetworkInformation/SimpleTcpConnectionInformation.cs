@@ -5,13 +5,13 @@ namespace System.Net.NetworkInformation
 {
     // This class is not Linux-specific. It is just a data container.
     // TODO: Combine this with SystemTcpConnection. Make Windows construct that object differently.
-    internal class LinuxTcpConnectionInformation : TcpConnectionInformation
+    internal class SimpleTcpConnectionInformation : TcpConnectionInformation
     {
         private IPEndPoint _localEndPoint;
         private IPEndPoint _remoteEndPoint;
         private TcpState _state;
 
-        public LinuxTcpConnectionInformation(IPEndPoint localEndPoint, IPEndPoint remoteEndPoint, TcpState state)
+        public SimpleTcpConnectionInformation(IPEndPoint localEndPoint, IPEndPoint remoteEndPoint, TcpState state)
         {
             _localEndPoint = localEndPoint;
             _remoteEndPoint = remoteEndPoint;
