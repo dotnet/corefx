@@ -38,16 +38,13 @@ namespace Internal.Cryptography.Pal
             return TryReadPkcs7Der(bio, false, out ignored, out certPals);
         }
 
-        private static unsafe bool TryReadPkcs7Der(
+        private static bool TryReadPkcs7Der(
             byte[] rawData,
             bool single,
             out ICertificatePal certPal,
             out List<ICertificatePal> certPals)
         {
-            SafePkcs7Handle pkcs7 = Interop.libcrypto.OpenSslD2I(
-                (ptr, b, i) => Interop.libcrypto.d2i_PKCS7(ptr, b, i),
-                rawData,
-                checkHandle: false);
+            SafePkcs7Handle pkcs7 = Interop.Crypto.DecodePkcs7(rawData, rawData.Length);
 
             if (pkcs7.IsInvalid)
             {
@@ -117,11 +114,11 @@ namespace Internal.Cryptography.Pal
             out ICertificatePal certPal,
             out List<ICertificatePal> certPals)
         {
-            using (SafeBioHandle bio = Interop.libcrypto.BIO_new(Interop.libcrypto.BIO_s_mem()))
+            using (SafeBioHandle bio = Interop.Crypto.CreateMemoryBio())
             {
                 Interop.Crypto.CheckValidOpenSslHandle(bio);
 
-                Interop.libcrypto.BIO_write(bio, rawData, rawData.Length);
+                Interop.Crypto.BioWrite(bio, rawData, rawData.Length);
 
                 SafePkcs7Handle pkcs7 =
                     Interop.libcrypto.PEM_read_bio_PKCS7(bio, IntPtr.Zero, IntPtr.Zero, IntPtr.Zero);

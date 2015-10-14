@@ -74,7 +74,7 @@ namespace Internal.Cryptography.Pal
             get
             {
                 IntPtr oidPtr = Interop.Crypto.GetX509PublicKeyAlgorithm(_cert);
-                return Interop.libcrypto.OBJ_obj2txt_helper(oidPtr);
+                return Interop.Crypto.GetOidValue(oidPtr);
             }
         }
 
@@ -114,7 +114,7 @@ namespace Internal.Cryptography.Pal
             get
             {
                 IntPtr oidPtr = Interop.Crypto.GetX509SignatureAlgorithm(_cert);
-                return Interop.libcrypto.OBJ_obj2txt_helper(oidPtr);
+                return Interop.Crypto.GetOidValue(oidPtr);
             }
         }
 
@@ -211,7 +211,7 @@ namespace Internal.Cryptography.Pal
 
                     Interop.Crypto.CheckValidOpenSslHandle(oidPtr);
 
-                    string oidValue = Interop.libcrypto.OBJ_obj2txt_helper(oidPtr);
+                    string oidValue = Interop.Crypto.GetOidValue(oidPtr);
                     Oid oid = new Oid(oidValue);
 
                     IntPtr dataPtr = Interop.libcrypto.X509_EXTENSION_get_data(ext);
@@ -251,6 +251,14 @@ namespace Internal.Cryptography.Pal
             }
         }
 
+        public ECDsa GetECDsaPublicKey()
+        {
+            using (SafeEvpPKeyHandle publicKeyHandle = Interop.Crypto.GetX509EvpPublicKey(_cert))
+            {
+                return new ECDsaOpenSsl(publicKeyHandle);
+            }
+        }
+
         public ECDsa GetECDsaPrivateKey()
         {
             if (_privateKey == null || _privateKey.IsInvalid)
@@ -273,10 +281,10 @@ namespace Internal.Cryptography.Pal
                     return "";
                 }
 
-                int bioSize = Interop.libcrypto.GetMemoryBioSize(bioHandle);
+                int bioSize = Interop.Crypto.GetMemoryBioSize(bioHandle);
                 // Ensure space for the trailing \0
                 StringBuilder builder = new StringBuilder(bioSize + 1);
-                int read = Interop.libcrypto.BIO_gets(bioHandle, builder, builder.Capacity);
+                int read = Interop.Crypto.BioGets(bioHandle, builder, builder.Capacity);
 
                 if (read < 0)
                 {

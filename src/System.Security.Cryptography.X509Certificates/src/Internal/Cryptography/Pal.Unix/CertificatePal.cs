@@ -45,7 +45,7 @@ namespace Internal.Cryptography.Pal
         public static ICertificatePal FromFile(string fileName, string password, X509KeyStorageFlags keyStorageFlags)
         {
             // If we can't open the file, fail right away.
-            using (SafeBioHandle fileBio = Interop.libcrypto.BIO_new_file(fileName, "rb"))
+            using (SafeBioHandle fileBio = Interop.Crypto.BioNewFile(fileName, "rb"))
             {
                 Interop.Crypto.CheckValidOpenSslHandle(fileBio);
 
@@ -121,12 +121,9 @@ namespace Internal.Cryptography.Pal
             }
         }
 
-        internal static unsafe bool TryReadX509Der(byte[] rawData, out ICertificatePal certPal)
+        internal static bool TryReadX509Der(byte[] rawData, out ICertificatePal certPal)
         {
-            SafeX509Handle certHandle = Interop.libcrypto.OpenSslD2I(
-                (ptr, b, i) => Interop.libcrypto.d2i_X509(ptr, b, i),
-                rawData,
-                checkHandle: false);
+            SafeX509Handle certHandle = Interop.Crypto.DecodeX509(rawData, rawData.Length);
 
             if (certHandle.IsInvalid)
             {
@@ -155,11 +152,11 @@ namespace Internal.Cryptography.Pal
         internal static bool TryReadX509Pem(byte[] rawData, out ICertificatePal certPal)
         {
             SafeX509Handle certHandle;
-            using (SafeBioHandle bio = Interop.libcrypto.BIO_new(Interop.libcrypto.BIO_s_mem()))
+            using (SafeBioHandle bio = Interop.Crypto.CreateMemoryBio())
             {
                 Interop.Crypto.CheckValidOpenSslHandle(bio);
 
-                Interop.libcrypto.BIO_write(bio, rawData, rawData.Length);
+                Interop.Crypto.BioWrite(bio, rawData, rawData.Length);
                 certHandle = Interop.libcrypto.PEM_read_bio_X509_AUX(bio, IntPtr.Zero, IntPtr.Zero, IntPtr.Zero);
             }
 
