@@ -143,7 +143,6 @@ namespace System.Diagnostics.Tracing
 
         private LogLevel _maxLevel;
         private Predicate<LogLevel>[] _filters = new Predicate<LogLevel>[0];
-        private ILogger[] _loggers = new ILogger[0];
         #endregion 
     }
 
