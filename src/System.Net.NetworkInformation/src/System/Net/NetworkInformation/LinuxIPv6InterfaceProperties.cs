@@ -7,11 +7,13 @@ namespace System.Net.NetworkInformation
 {
     internal class LinuxIPv6InterfaceProperties : IPv6InterfaceProperties
     {
-        private LinuxNetworkInterface _linuxNetworkInterface;
+        private readonly LinuxNetworkInterface _linuxNetworkInterface;
+        private readonly int _mtu;
 
         public LinuxIPv6InterfaceProperties(LinuxNetworkInterface linuxNetworkInterface)
         {
             _linuxNetworkInterface = linuxNetworkInterface;
+            _mtu = GetMtu();
         }
 
         public override int Index
@@ -26,15 +28,20 @@ namespace System.Net.NetworkInformation
         {
             get
             {
-                // /proc/sys/net/ipv6/conf/<name>/mtu
-                string path = Path.Combine(LinuxNetworkFiles.Ipv6ConfigFolder, _linuxNetworkInterface.Name, LinuxNetworkFiles.MtuFileName);
-                return int.Parse(File.ReadAllText(path));
+                return _mtu;
             }
         }
 
         public override long GetScopeId(ScopeLevel scopeLevel)
         {
             throw new PlatformNotSupportedException();
+        }
+
+        private int GetMtu()
+        {
+            // /proc/sys/net/ipv6/conf/<name>/mtu
+            string path = Path.Combine(LinuxNetworkFiles.Ipv6ConfigFolder, _linuxNetworkInterface.Name, LinuxNetworkFiles.MtuFileName);
+            return int.Parse(File.ReadAllText(path));
         }
     }
 }

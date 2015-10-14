@@ -7,11 +7,15 @@ namespace System.Net.NetworkInformation
 {
     internal class LinuxIPv4InterfaceProperties : IPv4InterfaceProperties
     {
-        private LinuxNetworkInterface _linuxNetworkInterface;
+        private readonly LinuxNetworkInterface _linuxNetworkInterface;
+        private readonly bool _isForwardingEnabled;
+        private readonly int _mtu;
 
         public LinuxIPv4InterfaceProperties(LinuxNetworkInterface linuxNetworkInterface)
         {
             _linuxNetworkInterface = linuxNetworkInterface;
+            _isForwardingEnabled = GetIsForwardingEnabled();
+            _mtu = GetMtu();
         }
 
         public override int Index
@@ -46,23 +50,13 @@ namespace System.Net.NetworkInformation
             }
         }
 
-        public override bool IsForwardingEnabled
-        {
-            get
-            {
-                // /proc/sys/net/ipv4/conf/<name>/forwarding
-                string path = Path.Combine(LinuxNetworkFiles.Ipv4ConfigFolder, _linuxNetworkInterface.Name, LinuxNetworkFiles.ForwardingFileName);
-                return int.Parse(File.ReadAllText(path)) == 1;
-            }
-        }
+        public override bool IsForwardingEnabled { get { return _isForwardingEnabled; } }
 
         public override int Mtu
         {
             get
             {
-                // /proc/sys/net/ipv4/conf/<name>/mtu
-                string path = Path.Combine(LinuxNetworkFiles.Ipv4ConfigFolder, _linuxNetworkInterface.Name, LinuxNetworkFiles.MtuFileName);
-                return int.Parse(File.ReadAllText(path));
+                return _mtu;
             }
         }
 
@@ -70,9 +64,24 @@ namespace System.Net.NetworkInformation
         {
             get
             {
-                // TODO: This seems Windows-specific. Can we just return false?
-                throw new PlatformNotSupportedException();
+                // TODO: There is a configuration option in /etc/samba.smb.conf:
+                // # wins support = no (default value)
+                throw new NotImplementedException();
             }
+        }
+
+        private bool GetIsForwardingEnabled()
+        {
+            // /proc/sys/net/ipv4/conf/<name>/forwarding
+            string path = Path.Combine(LinuxNetworkFiles.Ipv4ConfigFolder, _linuxNetworkInterface.Name, LinuxNetworkFiles.ForwardingFileName);
+            return int.Parse(File.ReadAllText(path)) == 1;
+        }
+
+        private int GetMtu()
+        {
+            // /proc/sys/net/ipv4/conf/<name>/mtu
+            string path = Path.Combine(LinuxNetworkFiles.Ipv4ConfigFolder, _linuxNetworkInterface.Name, LinuxNetworkFiles.MtuFileName);
+            return int.Parse(File.ReadAllText(path));
         }
     }
 }

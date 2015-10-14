@@ -31,7 +31,7 @@ namespace System.Net.NetworkInformation
                 (name, llAddr) =>
                 {
                     LinuxNetworkInterface lni = GetOrCreate(interfacesByName, name);
-                    ProcessLinkLevelAddress(lni, llAddr);
+                    ProcessLinkLayerAddress(lni, llAddr);
                 });
 
             return interfacesByName.Values.ToArray();

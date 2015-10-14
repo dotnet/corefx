@@ -91,7 +91,7 @@ namespace System.Net.NetworkInformation
             uni._ipv6ScopeId = scopeId;
         }
 
-        protected static unsafe void ProcessLinkLevelAddress(UnixNetworkInterface uni, Interop.Sys.LinkLayerAddressInfo* llAddr)
+        protected static unsafe void ProcessLinkLayerAddress(UnixNetworkInterface uni, Interop.Sys.LinkLayerAddressInfo* llAddr)
         {
             byte[] macAddress = new byte[llAddr->NumAddressBytes];
             fixed (byte* macAddressPtr = macAddress)

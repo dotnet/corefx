@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 
@@ -14,7 +15,7 @@ namespace System.Net.NetworkInformation
         {
             get
             {
-                throw new NotImplementedException();
+                throw new PlatformNotSupportedException();
             }
         }
 
@@ -38,7 +39,7 @@ namespace System.Net.NetworkInformation
         {
             get
             {
-                return false;
+                throw new PlatformNotSupportedException();
             }
         }
 
@@ -46,8 +47,7 @@ namespace System.Net.NetworkInformation
         {
             get
             {
-                // Could return NetBiosNodeType.Unknown (?)
-                throw new NotImplementedException();
+                return NetBiosNodeType.Unknown;
             }
         }
 
@@ -306,9 +306,13 @@ namespace System.Net.NetworkInformation
             {
                 return ParseIPv4HexString(remoteAddressString);
             }
-            else // IPv6 Address
+            else if (remoteAddressString.Length == 32) // IPv6 Address
             {
                 return ParseIPv6HexString(remoteAddressString);
+            }
+            else
+            {
+                throw new NetworkInformationException("Invalid address string: " + remoteAddressString);
             }
         }
 
@@ -320,7 +324,7 @@ namespace System.Net.NetworkInformation
             long addressValue;
             if (!long.TryParse(hexAddress, NumberStyles.HexNumber, CultureInfo.InvariantCulture, out addressValue))
             {
-                throw new InvalidOperationException("Couldn't parse long from address string " + hexAddress);
+                throw new NetworkInformationException("Invalid address string: " + hexAddress);
             }
             ipAddress = new IPAddress(addressValue);
             return ipAddress;
@@ -330,30 +334,28 @@ namespace System.Net.NetworkInformation
         // Strings passed to this must be 32 characters in length.
         private static IPAddress ParseIPv6HexString(string hexAddress)
         {
-            IPAddress ipAddress;
-            // Dangerous Parsing Code
-            byte[] addressBytes = new byte[16]
+            Debug.Assert(hexAddress.Length == 32);
+            byte[] addressBytes = new byte[16];
+            for (int i = 0; i < 16; i++)
             {
-                Convert.ToByte(hexAddress.Substring(0, 2), 16),
-                Convert.ToByte(hexAddress.Substring(2, 2), 16),
-                Convert.ToByte(hexAddress.Substring(4, 2), 16),
-                Convert.ToByte(hexAddress.Substring(6, 2), 16),
-                Convert.ToByte(hexAddress.Substring(8, 2), 16),
-                Convert.ToByte(hexAddress.Substring(10, 2), 16),
-                Convert.ToByte(hexAddress.Substring(12, 2), 16),
-                Convert.ToByte(hexAddress.Substring(14, 2), 16),
-                Convert.ToByte(hexAddress.Substring(16, 2), 16),
-                Convert.ToByte(hexAddress.Substring(18, 2), 16),
-                Convert.ToByte(hexAddress.Substring(20, 2), 16),
-                Convert.ToByte(hexAddress.Substring(22, 2), 16),
-                Convert.ToByte(hexAddress.Substring(24, 2), 16),
-                Convert.ToByte(hexAddress.Substring(26, 2), 16),
-                Convert.ToByte(hexAddress.Substring(28, 2), 16),
-                Convert.ToByte(hexAddress.Substring(30, 2), 16),
-            };
+                addressBytes[i] = (byte)(HexToByte(hexAddress[(i * 2)])
+                                    + HexToByte(hexAddress[(i * 2) + 1]));
+            }
 
-            ipAddress = new IPAddress(addressBytes);
+            IPAddress ipAddress = new IPAddress(addressBytes);
             return ipAddress;
+        }
+
+        private static byte HexToByte(char val)
+        {
+            if (val <= '9' && val >= '0')
+                return (byte)(val - '0');
+            else if (val >= 'a' && val <= 'f')
+                return (byte)((val - 'a') + 10);
+            else if (val >= 'A' && val <= 'F')
+                return (byte)((val - 'A') + 10);
+            else
+                throw new InvalidOperationException("Invalid hex character.");
         }
     }
 }

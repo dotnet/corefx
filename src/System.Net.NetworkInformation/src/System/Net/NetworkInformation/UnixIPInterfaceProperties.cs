@@ -21,7 +21,6 @@ namespace System.Net.NetworkInformation
 
         public override MulticastIPAddressInformationCollection MulticastAddresses { get { return _multicastAddreses; } }
 
-
         private UnicastIPAddressInformationCollection GetUnicastAddresses(UnixNetworkInterface uni)
         {
             var collection = new UnicastIPAddressInformationCollection();
