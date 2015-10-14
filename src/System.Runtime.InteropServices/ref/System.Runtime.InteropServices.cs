@@ -305,6 +305,14 @@ namespace System.Runtime.InteropServices
     {
         object GetUnderlyingObject();
     }
+    public partial interface ICustomMarshaler
+    {
+        Object MarshalNativeToManaged(IntPtr pNativeData);
+        IntPtr MarshalManagedToNative(Object ManagedObj);
+        void CleanUpNativeData(IntPtr pNativeData);
+        void CleanUpManagedData(Object ManagedObj);
+        int GetNativeDataSize();
+    }
     [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
     [System.ObsoleteAttribute("ICustomQueryInterface may be unavailable in future releases.")]
     public partial interface ICustomQueryInterface
@@ -764,6 +772,7 @@ namespace System.Runtime.InteropServices
         [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
         [System.ObsoleteAttribute("Marshalling as Currency may be unavailable in future releases.")]
         Currency = 15,
+        CustomMarshaler = 44,
         Error = 45,
         FunctionPtr = 38,
         HString = 47,
