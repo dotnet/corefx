@@ -63,7 +63,6 @@ extern "C" int32_t GetTcpGlobalStatistics(TcpGlobalStatistics* retStats)
         retStats->CurrentConnections = 0;
         return -1;
     }
-    printf("Current Connections: %d\n", retStats->CurrentConnections);
 
     return 0;
 }
@@ -232,7 +231,7 @@ extern "C" int32_t GetEstimatedTcpConnectionCount()
     return count;
 }
 
-size_t GetEstimatedXtcbSize()
+size_t GetEstimatedTcpPcbSize()
 {
     void* oldp = nullptr;
     void* newp = nullptr;
@@ -244,19 +243,22 @@ size_t GetEstimatedXtcbSize()
 
 extern "C" int32_t GetActiveTcpConnectionInfos(NativeTcpConnectionInformation* infos, int32_t* infoCount)
 {
-    size_t estimatedXtcbSize = GetEstimatedXtcbSize();
-    uint8_t* buffer = new uint8_t[estimatedXtcbSize];
+    assert(infos != nullptr);
+    assert(infoCount != nullptr);
+
+    size_t estimatedSize = GetEstimatedTcpPcbSize();
+    uint8_t* buffer = new uint8_t[estimatedSize];
     void* newp = nullptr;
     size_t newlen = 0;
 
-    while (sysctlbyname("net.inet.tcp.pcblist", buffer, &estimatedXtcbSize, newp, newlen) != 0)
+    while (sysctlbyname("net.inet.tcp.pcblist", buffer, &estimatedSize, newp, newlen) != 0)
     {
         delete buffer;
-        estimatedXtcbSize = estimatedXtcbSize * 2;
-        buffer = new uint8_t[estimatedXtcbSize];
+        estimatedSize = estimatedSize * 2;
+        buffer = new uint8_t[estimatedSize];
     }
 
-    int32_t count = static_cast<int32_t>(estimatedXtcbSize / sizeof(xtcpcb));
+    int32_t count = static_cast<int32_t>(estimatedSize / sizeof(xtcpcb));
     if (count > *infoCount)
     {
         // Not enough space in caller-supplied buffer.
@@ -335,6 +337,79 @@ TcpState MapTcpState(int tcpState)
         default:
             return Unknown;
     }
+}
+
+extern "C" int32_t GetEstimatedUdpListenerCount()
+{
+    int32_t count;
+    ReadSysctlVar("net.inet.udp.pcbcount", &count);
+    return count;
+}
+
+size_t GetEstimatedUdpPcbSize()
+{
+    void* oldp = nullptr;
+    void* newp = nullptr;
+    size_t oldlenp, newlen = 0;
+
+    sysctlbyname("net.inet.udp.pcblist", oldp, &oldlenp, newp, newlen);
+    return oldlenp;
+}
+
+extern "C" int32_t GetActiveUdpListeners(IPEndPointInfo* infos, int32_t* infoCount)
+{
+    assert(infos != nullptr);
+    assert(infoCount != nullptr);
+
+    size_t estimatedSize = GetEstimatedUdpPcbSize();
+    uint8_t* buffer = new uint8_t[estimatedSize];
+    void* newp = nullptr;
+    size_t newlen = 0;
+
+    while (sysctlbyname("net.inet.tcp.pcblist", buffer, &estimatedSize, newp, newlen) != 0)
+    {
+        delete buffer;
+        estimatedSize = estimatedSize * 2;
+        buffer = new uint8_t[estimatedSize];
+    }
+    int32_t count = static_cast<int32_t>(estimatedSize / sizeof(xtcpcb));
+    if (count > *infoCount)
+    {
+        // Not enough space in caller-supplied buffer.
+        *infoCount = count;
+        return -1;
+    }
+    *infoCount = count;
+
+    inpcb in_pcb;
+    xinpgen* xHeadPtr;
+    int32_t connectionIndex = -1;
+    xHeadPtr = reinterpret_cast<xinpgen*>(buffer);
+    for (xHeadPtr = reinterpret_cast<xinpgen*>(reinterpret_cast<uint8_t*>(xHeadPtr) + xHeadPtr->xig_len);
+            xHeadPtr->xig_len >= sizeof(xinpcb);
+            xHeadPtr = reinterpret_cast<xinpgen*>(reinterpret_cast<uint8_t*>(xHeadPtr) + xHeadPtr->xig_len))
+    {
+        connectionIndex++;
+        xinpcb* head_xinpcb = reinterpret_cast<xinpcb*>(xHeadPtr);
+        in_pcb = head_xinpcb->xi_inp;
+        IPEndPointInfo* iepi = &infos[connectionIndex];
+
+        uint8_t vflag = in_pcb.inp_vflag; // INP_IPV4 or INP_IPV6
+        bool isIpv4 = (vflag & INP_IPV4) == INP_IPV4;
+        if (isIpv4)
+        {
+            memcpy(iepi->AddressBytes, &in_pcb.inp_laddr.s_addr, 4);
+            iepi->NumAddressBytes = 4;
+        }
+        else
+        {
+            memcpy(iepi->AddressBytes, &in_pcb.in6p_laddr.s6_addr, 16);
+            iepi->NumAddressBytes = 16;
+        }
+
+        iepi->Port = in_pcb.inp_lport;
+    }
+    return 0;
 }
 
 #endif // HAVE_TCP_VAR_H

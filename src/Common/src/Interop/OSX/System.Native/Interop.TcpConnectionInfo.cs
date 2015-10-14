@@ -13,7 +13,7 @@ internal static partial class Interop
         {
             public fixed byte AddressBytes[16];
             public uint NumAddressBytes;
-            public int Port;
+            public uint Port;
             private uint __padding1;
         }
 
@@ -30,5 +30,11 @@ internal static partial class Interop
 
         [DllImport(Libraries.SystemNative)]
         public unsafe static extern int GetActiveTcpConnectionInfos(NativeTcpConnectionInformation* infos, int* infoCount);
+
+        [DllImport(Libraries.SystemNative)]
+        public unsafe static extern int GetEstimatedUdpListenerCount();
+
+        [DllImport(Libraries.SystemNative)]
+        public unsafe static extern int GetActiveUdpListeners(IPEndPointInfo* infos, int* infoCount);
     }    
 }

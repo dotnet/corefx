@@ -50,10 +50,8 @@ namespace System.Net.NetworkInformation
         public unsafe override TcpConnectionInformation[] GetActiveTcpConnections()
         {
             int realCount = Interop.Sys.GetEstimatedTcpConnectionCount();
-            int estimatedCount = (int)(realCount * 1.5f);
-            estimatedCount = 2;
-            Interop.Sys.NativeTcpConnectionInformation* infos = stackalloc Interop.Sys.NativeTcpConnectionInformation[estimatedCount];
-            int infoCount = estimatedCount;
+            int infoCount = (int)(realCount * 1.5f);
+            Interop.Sys.NativeTcpConnectionInformation* infos = stackalloc Interop.Sys.NativeTcpConnectionInformation[infoCount];
             while (Interop.Sys.GetActiveTcpConnectionInfos(infos, &infoCount) == -1)
             {
                 var newAlloc = stackalloc Interop.Sys.NativeTcpConnectionInformation[infoCount];
@@ -102,9 +100,41 @@ namespace System.Net.NetworkInformation
             return allConnections.Where(tci => tci.State != TcpState.Listen).Select(tci => tci.RemoteEndPoint).ToArray();
         }
 
-        public override IPEndPoint[] GetActiveUdpListeners()
+        public unsafe override IPEndPoint[] GetActiveUdpListeners()
         {
-            throw new NotImplementedException();
+            int realCount = Interop.Sys.GetEstimatedUdpListenerCount();
+            int infoCount = (int)(realCount * 1.5f);
+            Interop.Sys.IPEndPointInfo* infos = stackalloc Interop.Sys.IPEndPointInfo[infoCount];
+            while (Interop.Sys.GetActiveUdpListeners(infos, &infoCount) == -1)
+            {
+                var newAlloc = stackalloc Interop.Sys.IPEndPointInfo[infoCount];
+                infos = newAlloc;
+            }
+
+            IPEndPoint[] endPoints = new IPEndPoint[infoCount];
+            for (int i = 0; i < infoCount; i++)
+            {
+                Interop.Sys.IPEndPointInfo endPointInfo = infos[i];
+                int port = (int)endPointInfo.Port;
+                IPAddress ipAddress;
+                if (endPointInfo.NumAddressBytes == 0)
+                {
+                    ipAddress = IPAddress.Any;
+                }
+                else
+                {
+                    byte[] bytes = new byte[endPointInfo.NumAddressBytes];
+                    fixed (byte* bytesPtr = bytes)
+                    {
+                        Buffer.MemoryCopy(endPointInfo.AddressBytes, bytesPtr, bytes.Length, bytes.Length);
+                    }
+                    ipAddress = new IPAddress(bytes);
+                }
+
+                endPoints[i] = new IPEndPoint(ipAddress, port);
+            }
+
+            return endPoints;
         }
 
         public override IcmpV4Statistics GetIcmpV4Statistics()
