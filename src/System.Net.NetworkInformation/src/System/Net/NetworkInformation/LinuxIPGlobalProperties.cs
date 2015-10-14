@@ -222,6 +222,7 @@ namespace System.Net.NetworkInformation
         }
 
         // Maps from Linux TCP states (include/net/tcp_states.h) to .NET TcpStates
+        // TODO: Move this to the native shim.
         private static TcpState MapTcpState(Interop.LinuxTcpState state)
         {
             switch (state)
