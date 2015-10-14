@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Collections.Generic;
+using System.Linq;
 
 namespace System.Diagnostics.Tracing
 {
@@ -56,14 +57,12 @@ namespace System.Diagnostics.Tracing
         {
             if (level > _maxLevel)
                 return false;
-            if (_filter != null)
+            foreach(var filter in _filters)
             {
-                foreach (Func<string, LogLevel, bool> filter in _filter.GetInvocationList())
-                {
-                    if (filter(Name, level))
-                        return true;
-                }
+                if (filter(level))
+                    return true;
             }
+
             return false;
         }
 
@@ -110,9 +109,9 @@ namespace System.Diagnostics.Tracing
         /// You can filter them out yourself.   If there is only one subscriber (or all subscribers subscribe at the 
         /// same verbosity.  It works fine.   
         /// </summary>
-        public virtual IDisposable Subscribe(IObserver<KeyValuePair<string, object>> observer, Func<string, LogLevel, bool> filter)
+        public virtual IDisposable Subscribe(IObserver<KeyValuePair<string, object>> observer, Predicate<LogLevel> filter)
         {
-            _filter += filter;
+            _filters = _filters.Concat(new[] { filter }).ToArray();
             return base.Subscribe(observer);
         }
 
@@ -143,7 +142,7 @@ namespace System.Diagnostics.Tracing
         }
 
         private LogLevel _maxLevel;
-        private Func<string, LogLevel, bool> _filter;
+        private Predicate<LogLevel>[] _filters = new Predicate<LogLevel>[0];
         #endregion 
     }
 
