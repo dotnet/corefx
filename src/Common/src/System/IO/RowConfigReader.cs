@@ -90,6 +90,7 @@ namespace System.IO
         /// </remarks>
         public int GetNextValueAsInt32(string key)
         {
+            // PERF: We don't need to allocate a new string here, we can parse an Int32 "in-place" in the existing string.
             string value = GetNextValue(key);
             int result;
             if (int.TryParse(value, out result))

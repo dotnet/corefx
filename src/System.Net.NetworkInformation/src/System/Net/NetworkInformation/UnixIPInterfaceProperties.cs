@@ -17,9 +17,9 @@ namespace System.Net.NetworkInformation
             _multicastAddreses = GetMulticastAddresses(uni);
         }
 
-        public override UnicastIPAddressInformationCollection UnicastAddresses { get { return _unicastAddresses; } }
+        public sealed override UnicastIPAddressInformationCollection UnicastAddresses { get { return _unicastAddresses; } }
 
-        public override MulticastIPAddressInformationCollection MulticastAddresses { get { return _multicastAddreses; } }
+        public sealed override MulticastIPAddressInformationCollection MulticastAddresses { get { return _multicastAddreses; } }
 
         private UnicastIPAddressInformationCollection GetUnicastAddresses(UnixNetworkInterface uni)
         {

@@ -4,6 +4,8 @@
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace System.Net.NetworkInformation
 {
@@ -189,6 +191,34 @@ namespace System.Net.NetworkInformation
         public override UdpStatistics GetUdpIPv6Statistics()
         {
             return LinuxUdpStatistics.CreateUdpIPv6Statistics();
+        }
+
+        public override UnicastIPAddressInformationCollection GetUnicastAddresses()
+        {
+            UnicastIPAddressInformationCollection collection = new UnicastIPAddressInformationCollection();
+            foreach (UnicastIPAddressInformation info in
+                LinuxNetworkInterface.GetLinuxNetworkInterfaces().SelectMany(lni => lni.GetIPProperties().UnicastAddresses))
+            {
+                // PERF: Use Interop.Sys.EnumerateInterfaceAddresses directly here.
+                collection.InternalAdd(info);
+            }
+
+            return collection;
+        }
+
+        public override IAsyncResult BeginGetUnicastAddresses(AsyncCallback callback, object state)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override UnicastIPAddressInformationCollection EndGetUnicastAddresses(IAsyncResult asyncResult)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override Task<UnicastIPAddressInformationCollection> GetUnicastAddressesAsync()
+        {
+            return Task.Run((Func<UnicastIPAddressInformationCollection>)GetUnicastAddresses);
         }
 
         // Parsing logic for local and remote addresses and ports, as well as socket state.

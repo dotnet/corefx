@@ -5,23 +5,16 @@ using System.IO;
 
 namespace System.Net.NetworkInformation
 {
-    internal class LinuxIPv6InterfaceProperties : IPv6InterfaceProperties
+    internal class LinuxIPv6InterfaceProperties : UnixIPv6InterfaceProperties
     {
         private readonly LinuxNetworkInterface _linuxNetworkInterface;
         private readonly int _mtu;
 
         public LinuxIPv6InterfaceProperties(LinuxNetworkInterface linuxNetworkInterface)
+            : base(linuxNetworkInterface)
         {
             _linuxNetworkInterface = linuxNetworkInterface;
             _mtu = GetMtu();
-        }
-
-        public override int Index
-        {
-            get
-            {
-                return _linuxNetworkInterface.Index;
-            }
         }
 
         public override int Mtu

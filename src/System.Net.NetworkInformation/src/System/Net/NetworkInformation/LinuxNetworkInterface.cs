@@ -12,7 +12,16 @@ namespace System.Net.NetworkInformation
     /// </summary>
     internal class LinuxNetworkInterface : UnixNetworkInterface
     {
-        internal LinuxNetworkInterface(string name) : base(name) { }
+        private readonly OperationalStatus _operationalStatus;
+        private readonly bool _supportsMulticast;
+        private readonly long? _speed;
+
+        internal LinuxNetworkInterface(string name) : base(name)
+        {
+            _operationalStatus = GetOperationalStatus(name);
+            _supportsMulticast = GetSupportsMulticast(name);
+            _speed = GetSpeed(name);
+        }
 
         public unsafe static NetworkInterface[] GetLinuxNetworkInterfaces()
         {
@@ -56,11 +65,11 @@ namespace System.Net.NetworkInformation
             return lni;
         }
 
-        public override bool SupportsMulticast { get { return GetSupportsMulticast(); } }
+        public override bool SupportsMulticast { get { return _supportsMulticast; } }
 
-        private bool GetSupportsMulticast()
+        private static bool GetSupportsMulticast(string name)
         {
-            string path = Path.Combine(LinuxNetworkFiles.SysClassNetFolder, _name, LinuxNetworkFiles.FlagsFileName);
+            string path = Path.Combine(LinuxNetworkFiles.SysClassNetFolder, name, LinuxNetworkFiles.FlagsFileName);
             string fileContents = File.ReadAllText(path).Trim();
             Interop.LinuxNetDeviceFlags flags = (Interop.LinuxNetDeviceFlags)Convert.ToInt32(fileContents, 16);
             return (flags & Interop.LinuxNetDeviceFlags.IFF_MULTICAST) == Interop.LinuxNetDeviceFlags.IFF_MULTICAST;
@@ -76,19 +85,61 @@ namespace System.Net.NetworkInformation
             return new LinuxIPInterfaceStatistics(_name);
         }
 
-        public override OperationalStatus OperationalStatus
+        public override OperationalStatus OperationalStatus { get { return _operationalStatus; } }
+
+        public override string Id { get { throw new PlatformNotSupportedException(); } }
+
+        public override string Description { get { throw new PlatformNotSupportedException(); } }
+
+        public override long Speed
         {
             get
             {
-                // /sys/class/net/<name>/operstate
-                string path = Path.Combine(LinuxNetworkFiles.SysClassNetFolder, _name, LinuxNetworkFiles.OperstateFileName);
-                string state = File.ReadAllText(path).Trim();
-                return MapState(state);
+                if (_speed.HasValue)
+                {
+                    return _speed.Value;
+                }
+                else
+                {
+                    throw new PlatformNotSupportedException();
+                }
             }
         }
 
+        public override bool IsReceiveOnly { get { throw new PlatformNotSupportedException(); } }
+
+        private static long? GetSpeed(string name)
+        {
+            try
+            {
+                string path = Path.Combine(LinuxNetworkFiles.SysClassNetFolder, name, LinuxNetworkFiles.SpeedFileName);
+                string contents = File.ReadAllText(path);
+                long val;
+                if (long.TryParse(contents, out val))
+                {
+                    return val;
+                }
+                else
+                {
+                    return null;
+                }
+            }
+            catch (IOException) // Some interfaces may give an "Invalid argument" error when opening this file.
+            {
+                return null;
+            }
+        }
+
+        private static OperationalStatus GetOperationalStatus(string name)
+        {
+            // /sys/class/net/<name>/operstate
+            string path = Path.Combine(LinuxNetworkFiles.SysClassNetFolder, name, LinuxNetworkFiles.OperstateFileName);
+            string state = File.ReadAllText(path).Trim();
+            return MapState(state);
+        }
+
         // Maps values from /sys/class/net/<interface>/operstate to OperationStatus values.
-        private OperationalStatus MapState(string state)
+        private static OperationalStatus MapState(string state)
         {
             // TODO: Figure out the possible values that Linux might return.
             switch (state)
@@ -101,46 +152,5 @@ namespace System.Net.NetworkInformation
                     return OperationalStatus.Unknown;
             }
         }
-
-        public override bool Supports(NetworkInterfaceComponent networkInterfaceComponent)
-        {
-            Sockets.AddressFamily family =
-                (networkInterfaceComponent == NetworkInterfaceComponent.IPv4)
-                ? Sockets.AddressFamily.InterNetwork
-                : Sockets.AddressFamily.InterNetworkV6;
-
-            return _addresses.Any(addr => addr.AddressFamily == family);
-        }
-
-        public override string Id { get { throw new PlatformNotSupportedException(); } }
-
-        public override string Description { get { throw new PlatformNotSupportedException(); } }
-
-        public override long Speed
-        {
-            get
-            {
-                try
-                {
-                    string path = Path.Combine(LinuxNetworkFiles.SysClassNetFolder, _name, LinuxNetworkFiles.SpeedFileName);
-                    string contents = File.ReadAllText(path);
-                    long val;
-                    if (long.TryParse(contents, out val))
-                    {
-                        return val;
-                    }
-                    else
-                    {
-                        throw new PlatformNotSupportedException();
-                    }
-                }
-                catch (IOException) // Some interfaces may give an "Invalid argument" error when opening this file.
-                {
-                    throw new PlatformNotSupportedException();
-                }
-            }
-        }
-
-        public override bool IsReceiveOnly { get { throw new PlatformNotSupportedException(); } }
     }
 }

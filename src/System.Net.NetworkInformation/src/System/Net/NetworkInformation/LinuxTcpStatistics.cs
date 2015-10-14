@@ -27,8 +27,8 @@ namespace System.Net.NetworkInformation
 
         public LinuxTcpStatistics(bool ipv6)
         {
-            // NOTE: There is no information in the snmp6 file regarding TCP statistics.
-            // Is /proc/net/snmp correct for IPv6?
+            // NOTE: There is no information in the snmp6 file regarding TCP statistics,
+            // so the statistics are always pulled from /proc/net/snmp.
             string fileContents = File.ReadAllText(LinuxNetworkFiles.SnmpV4StatsFile);
             int firstTcpHeader = fileContents.IndexOf("Tcp:");
             int secondTcpHeader = fileContents.IndexOf("Tcp:", firstTcpHeader + 1);
@@ -69,17 +69,17 @@ namespace System.Net.NetworkInformation
             _currentConnections = sockstatParser.ParseNextInt32();
         }
 
-        public override long ConnectionsAccepted { get { throw new NotImplementedException(); } }
-        public override long ConnectionsInitiated { get { throw new NotImplementedException(); } }
-        public override long CumulativeConnections { get { throw new NotImplementedException(); } }
+        public override long ConnectionsAccepted { get { throw new PlatformNotSupportedException(); } }
+        public override long ConnectionsInitiated { get { throw new PlatformNotSupportedException(); } }
+        public override long CumulativeConnections { get { throw new PlatformNotSupportedException(); } }
         public override long CurrentConnections { get { return _currentConnections; } }
         public override long ErrorsReceived { get { return _inErrs; } }
         public override long FailedConnectionAttempts { get { return _attemptFails; } }
         public override long MaximumConnections { get { return _maxConn; } }
-        public override long MaximumTransmissionTimeout { get { throw new NotImplementedException(); } }
-        public override long MinimumTransmissionTimeout { get { throw new NotImplementedException(); } }
+        public override long MaximumTransmissionTimeout { get { throw new PlatformNotSupportedException(); } }
+        public override long MinimumTransmissionTimeout { get { throw new PlatformNotSupportedException(); } }
         public override long ResetConnections { get { return _estabResets; } }
-        public override long ResetsSent { get { throw new NotImplementedException(); } }
+        public override long ResetsSent { get { throw new PlatformNotSupportedException(); } }
         public override long SegmentsReceived { get { return _inSegs; } }
         public override long SegmentsResent { get { return _retransSegs; } }
         public override long SegmentsSent { get { return _outSegs; } }

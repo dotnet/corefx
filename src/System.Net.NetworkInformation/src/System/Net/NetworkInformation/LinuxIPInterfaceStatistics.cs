@@ -107,7 +107,6 @@ namespace System.Net.NetworkInformation
 
         public override long NonUnicastPacketsReceived { get { return _multicastFramesReceived; } }
 
-        // Possibly obtainable
         public override long NonUnicastPacketsSent { get { throw new PlatformNotSupportedException(); } }
 
         public override long OutgoingPacketsDiscarded { get { return _outgoingPacketsDropped; } }
@@ -116,10 +115,8 @@ namespace System.Net.NetworkInformation
 
         public override long OutputQueueLength { get { return _transmitQueueLength; } }
 
-        // Probably wrong. Not sure about "Packets Received" vs "Multicast Frames Received"
         public override long UnicastPacketsReceived { get { return _packetsReceived; } }
 
-        // Probably wrong.
         public override long UnicastPacketsSent { get { return _packetsTransmitted; } }
     }
 }

@@ -5,25 +5,18 @@ using System.IO;
 
 namespace System.Net.NetworkInformation
 {
-    internal class LinuxIPv4InterfaceProperties : IPv4InterfaceProperties
+    internal class LinuxIPv4InterfaceProperties : UnixIPv4InterfaceProperties
     {
         private readonly LinuxNetworkInterface _linuxNetworkInterface;
         private readonly bool _isForwardingEnabled;
         private readonly int _mtu;
 
         public LinuxIPv4InterfaceProperties(LinuxNetworkInterface linuxNetworkInterface)
+            : base(linuxNetworkInterface)
         {
             _linuxNetworkInterface = linuxNetworkInterface;
             _isForwardingEnabled = GetIsForwardingEnabled();
             _mtu = GetMtu();
-        }
-
-        public override int Index
-        {
-            get
-            {
-                return _linuxNetworkInterface.Index;
-            }
         }
 
         public override bool IsAutomaticPrivateAddressingActive
@@ -65,7 +58,8 @@ namespace System.Net.NetworkInformation
             get
             {
                 // TODO: There is a configuration option in /etc/samba.smb.conf:
-                // # wins support = no (default value)
+                // # wins support = no
+                // "no" is the default value, it may be overridden depending on machine configuration.
                 throw new NotImplementedException();
             }
         }

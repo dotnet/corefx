@@ -3,6 +3,7 @@
 
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 
 namespace System.Net.NetworkInformation
 {
@@ -16,20 +17,33 @@ namespace System.Net.NetworkInformation
         protected Dictionary<IPAddress, IPAddress> _netMasks = new Dictionary<IPAddress, IPAddress>();
         // If this is an ipv6 device, contains the Scope ID.
         protected uint? _ipv6ScopeId = null;
+        private string _id;
 
         protected UnixNetworkInterface(string name)
         {
             _name = name;
         }
 
-        public override string Name { get { return _name; } }
+        public sealed override string Name { get { return _name; } }
 
-        public override NetworkInterfaceType NetworkInterfaceType { get { return _networkInterfaceType; } }
+        public sealed override NetworkInterfaceType NetworkInterfaceType { get { return _networkInterfaceType; } }
 
-        public override PhysicalAddress GetPhysicalAddress()
+        public sealed override PhysicalAddress GetPhysicalAddress()
         {
             Debug.Assert(_physicalAddress != null, "_physicalAddress was never initialized. This means no address with type AF_PACKET was discovered.");
             return _physicalAddress;
+        }
+
+        public override string Id { get { return _index.ToString(); } }
+
+        public override bool Supports(NetworkInterfaceComponent networkInterfaceComponent)
+        {
+            Sockets.AddressFamily family =
+                (networkInterfaceComponent == NetworkInterfaceComponent.IPv4)
+                ? Sockets.AddressFamily.InterNetwork
+                : Sockets.AddressFamily.InterNetworkV6;
+
+            return _addresses.Any(addr => addr.AddressFamily == family);
         }
 
         /// <summary>
@@ -101,6 +115,7 @@ namespace System.Net.NetworkInformation
             PhysicalAddress physicalAddress = new PhysicalAddress(macAddress);
 
             uni._index = llAddr->InterfaceIndex;
+            uni._id = uni._index.ToString();
             uni._physicalAddress = physicalAddress;
             uni._networkInterfaceType = (NetworkInterfaceType)llAddr->HardwareType;
         }

@@ -64,5 +64,25 @@ namespace System.Net.NetworkInformation
         {
             return new OsxIpInterfaceStatistics(_name);
         }
+
+        public override OperationalStatus OperationalStatus
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        public override string Description { get { throw new PlatformNotSupportedException(); } }
+
+        public override bool SupportsMulticast
+        {
+            get
+            {
+                return base.SupportsMulticast;
+            }
+        }
+
+        public override bool IsReceiveOnly { get { throw new PlatformNotSupportedException(); } }
     }
 }

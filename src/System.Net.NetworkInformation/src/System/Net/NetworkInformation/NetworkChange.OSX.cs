@@ -14,11 +14,11 @@ namespace System.Net.NetworkInformation
         {
             add
             {
-                throw new PlatformNotSupportedException();
+                throw new NotImplementedException();
             }
             remove
             {
-                throw new PlatformNotSupportedException();
+                throw new NotImplementedException();
             }
         }
 
@@ -26,11 +26,11 @@ namespace System.Net.NetworkInformation
         {
             add
             {
-                throw new PlatformNotSupportedException();
+                throw new NotImplementedException();
             }
             remove
             {
-                throw new PlatformNotSupportedException();
+                throw new NotImplementedException();
             }
         }
     }
