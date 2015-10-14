@@ -58,9 +58,9 @@ namespace System.Diagnostics.Tracing
                 return false;
             if (_filter != null)
             {
-                foreach (Func<string, LogLevel, bool> filter in _filter.GetInvocationList())
+                foreach (Predicate<LogLevel> filter in _filter.GetInvocationList())
                 {
-                    if (filter(Name, level))
+                    if (filter(level))
                         return true;
                 }
             }
@@ -110,7 +110,7 @@ namespace System.Diagnostics.Tracing
         /// You can filter them out yourself.   If there is only one subscriber (or all subscribers subscribe at the 
         /// same verbosity.  It works fine.   
         /// </summary>
-        public virtual IDisposable Subscribe(IObserver<KeyValuePair<string, object>> observer, Func<string, LogLevel, bool> filter)
+        public virtual IDisposable Subscribe(IObserver<KeyValuePair<string, object>> observer, Predicate<LogLevel> filter)
         {
             _filter += filter;
             return base.Subscribe(observer);
@@ -143,7 +143,7 @@ namespace System.Diagnostics.Tracing
         }
 
         private LogLevel _maxLevel;
-        private Func<string, LogLevel, bool> _filter;
+        private Predicate<LogLevel> _filter;
         #endregion 
     }
 
