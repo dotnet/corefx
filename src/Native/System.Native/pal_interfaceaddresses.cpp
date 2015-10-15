@@ -3,6 +3,7 @@
 
 #include "pal_config.h"
 #include "pal_utilities.h"
+#include "pal_interfaceaddresses.h"
 #include "pal_maphardwaretype.h"
 
 #include <assert.h>
@@ -10,6 +11,9 @@
 #include <sys/socket.h>
 #include <ifaddrs.h>
 #include <net/if.h>
+#include <sys/sysctl.h>
+#include <net/route.h>
+
 
 static_assert(HAVE_AF_PACKET || HAVE_AF_LINK, "System must have AF_PACKET or AF_LINK.");
 #if HAVE_AF_PACKET
@@ -96,5 +100,65 @@ extern "C" int32_t EnumerateInterfaceAddresses(IPv4AddressFound onIpv4Found,
     }
 
     freeifaddrs(headAddr);
+    return 0;
+}
+
+const char *byte_to_binary(int x)
+{
+    static char b[9];
+    b[0] = '\0';
+
+    int z;
+    for (z = 128; z > 0; z >>= 1)
+    {
+        strcat(b, ((x & z) == z) ? "1" : "0");
+    }
+
+    return b;
+}
+
+extern "C" int32_t EnumerateGatewayAddressesForInterface(uint32_t interfaceIndex, GatewayAddressFound onGatewayFound)
+{
+    int routeDumpName[] = { CTL_NET, AF_ROUTE, 0, AF_INET, NET_RT_DUMP, 0 };
+
+    size_t byteCount;
+
+    if (sysctl(routeDumpName, 6, nullptr, &byteCount, nullptr, 0) != 0)
+    {
+        perror("sysctl failed when querying the total data amount\n");
+        return -1;
+    }
+
+    uint8_t* buffer = new uint8_t[byteCount];
+
+    while (sysctl(routeDumpName, 6, buffer, &byteCount, nullptr, 0) != 0)
+    {
+        perror("sysctl failed when trying to actually dump route data.\n");
+        delete(buffer);
+        buffer = new uint8_t[byteCount];
+    }
+
+    rt_msghdr* hdr;
+    for (uint8_t* headerBytePtr = buffer;
+        static_cast<size_t>(headerBytePtr - buffer) < byteCount;
+        headerBytePtr += hdr->rtm_msglen)
+    {
+        hdr = reinterpret_cast<rt_msghdr*>(headerBytePtr);
+        int flags = hdr->rtm_flags;
+        int isGateway = flags & RTF_GATEWAY;
+        int gatewayPresent = hdr->rtm_addrs & RTA_GATEWAY;
+
+        if (isGateway && gatewayPresent)
+        {
+            IpAddressInfo iai = { };
+            iai.InterfaceIndex = interfaceIndex;
+            iai.NumAddressBytes = NUM_BYTES_IN_IPV4_ADDRESS;
+            sockaddr_in* sain = reinterpret_cast<sockaddr_in*>(headerBytePtr + sizeof(rt_msghdr));
+            sain = sain + 1;
+            memcpy(iai.AddressBytes, &sain->sin_addr.s_addr, sizeof(sain->sin_addr.s_addr));
+            onGatewayFound(&iai);
+        }
+    }
+
     return 0;
 }

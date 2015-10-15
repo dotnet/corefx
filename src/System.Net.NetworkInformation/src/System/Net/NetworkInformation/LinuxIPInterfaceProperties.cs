@@ -87,7 +87,7 @@ namespace System.Net.NetworkInformation
                     string gatewayIPHex = parser.MoveAndExtractNext();
                     long addressValue = Convert.ToInt64(gatewayIPHex, 16);
                     IPAddress address = new IPAddress(addressValue);
-                    collection.InternalAdd(new LinuxGatewayIPAddressInformation(address));
+                    collection.InternalAdd(new SimpleGatewayIPAddressInformation(address));
                 }
             }
 

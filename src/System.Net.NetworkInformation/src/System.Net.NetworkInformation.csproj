@@ -238,6 +238,7 @@
   <!-- Unix Common -->
   <ItemGroup Condition=" '$(TargetsUnix)' == 'true' ">
     <Compile Include="System\Net\NetworkInformation\NetworkFiles.cs" />
+    <Compile Include="System\Net\NetworkInformation\SimpleGatewayIPAddressInformation.cs" />
     <Compile Include="System\Net\NetworkInformation\SimpleTcpConnectionInformation.cs" />
     <Compile Include="System\Net\NetworkInformation\UnixIPInterfaceProperties.cs" />
     <Compile Include="System\Net\NetworkInformation\UnixIPv4InterfaceProperties.cs" />
@@ -268,7 +269,6 @@
     </Compile>
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetsLinux)' == 'true' ">
-    <Compile Include="System\Net\NetworkInformation\LinuxGatewayIPAddressInformation.cs" />
     <Compile Include="System\Net\NetworkInformation\LinuxIcmpV4Statistics.cs" />
     <Compile Include="System\Net\NetworkInformation\LinuxIcmpV6Statistics.cs" />
     <Compile Include="System\Net\NetworkInformation\LinuxTcpStatistics.cs" />
