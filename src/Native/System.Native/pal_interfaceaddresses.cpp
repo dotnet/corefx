@@ -12,8 +12,6 @@
 #include <ifaddrs.h>
 #include <net/if.h>
 #include <sys/sysctl.h>
-#include <net/route.h>
-
 
 static_assert(HAVE_AF_PACKET || HAVE_AF_LINK, "System must have AF_PACKET or AF_LINK.");
 #if HAVE_AF_PACKET
@@ -23,8 +21,9 @@ static_assert(HAVE_AF_PACKET || HAVE_AF_LINK, "System must have AF_PACKET or AF_
 #include <net/if_types.h>
 #endif
 
-const int NUM_BYTES_IN_IPV4_ADDRESS = 4;
-const int NUM_BYTES_IN_IPV6_ADDRESS = 16;
+#if HAVE_RT_MSGHDR
+#include <net/route.h>
+#endif
 
 extern "C" int32_t EnumerateInterfaceAddresses(IPv4AddressFound onIpv4Found,
                                             IPv6AddressFound onIpv6Found,
@@ -103,20 +102,7 @@ extern "C" int32_t EnumerateInterfaceAddresses(IPv4AddressFound onIpv4Found,
     return 0;
 }
 
-const char *byte_to_binary(int x)
-{
-    static char b[9];
-    b[0] = '\0';
-
-    int z;
-    for (z = 128; z > 0; z >>= 1)
-    {
-        strcat(b, ((x & z) == z) ? "1" : "0");
-    }
-
-    return b;
-}
-
+#if HAVE_RT_MSGHDR
 extern "C" int32_t EnumerateGatewayAddressesForInterface(uint32_t interfaceIndex, GatewayAddressFound onGatewayFound)
 {
     int routeDumpName[] = { CTL_NET, AF_ROUTE, 0, AF_INET, NET_RT_DUMP, 0 };
@@ -125,7 +111,6 @@ extern "C" int32_t EnumerateGatewayAddressesForInterface(uint32_t interfaceIndex
 
     if (sysctl(routeDumpName, 6, nullptr, &byteCount, nullptr, 0) != 0)
     {
-        perror("sysctl failed when querying the total data amount\n");
         return -1;
     }
 
@@ -133,7 +118,6 @@ extern "C" int32_t EnumerateGatewayAddressesForInterface(uint32_t interfaceIndex
 
     while (sysctl(routeDumpName, 6, buffer, &byteCount, nullptr, 0) != 0)
     {
-        perror("sysctl failed when trying to actually dump route data.\n");
         delete(buffer);
         buffer = new uint8_t[byteCount];
     }
@@ -162,3 +146,4 @@ extern "C" int32_t EnumerateGatewayAddressesForInterface(uint32_t interfaceIndex
 
     return 0;
 }
+#endif // HAVE_RT_MSGHDR
