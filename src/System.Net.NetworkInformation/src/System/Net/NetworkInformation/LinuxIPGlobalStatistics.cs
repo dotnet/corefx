@@ -51,7 +51,7 @@ namespace System.Net.NetworkInformation
         public static LinuxIPGlobalStatistics CreateIPv4Statistics()
         {
             LinuxIPGlobalStatistics stats = new LinuxIPGlobalStatistics();
-            string fileContents = File.ReadAllText(LinuxNetworkFiles.SnmpV4StatsFile);
+            string fileContents = File.ReadAllText(NetworkFiles.SnmpV4StatsFile);
             int firstIpHeader = fileContents.IndexOf("Ip:");
             int secondIpHeader = fileContents.IndexOf("Ip:", firstIpHeader + 1);
             int endOfSecondLine = fileContents.IndexOf(Environment.NewLine, secondIpHeader);
@@ -84,7 +84,7 @@ namespace System.Net.NetworkInformation
             stats._fragmentFails = parser.ParseNextInt32();
             stats._fragmentCreates = parser.ParseNextInt32();
 
-            string routeFile = ReadProcConfigFile(LinuxNetworkFiles.Ipv4RouteFile);
+            string routeFile = ReadProcConfigFile(NetworkFiles.Ipv4RouteFile);
             stats._numRoutes = CountOccurences(Environment.NewLine, routeFile) - 1; // File includes one-line header
 
             stats._numInterfaces = GetNumInterfaces();
@@ -100,13 +100,13 @@ namespace System.Net.NetworkInformation
             LinuxIPGlobalStatistics stats = new LinuxIPGlobalStatistics();
 
             // /proc/sys/net/ipv6/conf/default/forwarding
-            string path = Path.Combine(LinuxNetworkFiles.Ipv4ConfigFolder,
-                                        LinuxNetworkFiles.DefaultNetworkInterfaceFileName,
-                                        LinuxNetworkFiles.ForwardingFileName);
+            string path = Path.Combine(NetworkFiles.Ipv4ConfigFolder,
+                                        NetworkFiles.DefaultNetworkInterfaceFileName,
+                                        NetworkFiles.ForwardingFileName);
             stats._forwarding = int.Parse(File.ReadAllText(path)) == 1;
 
             // snmp6 does not include Default TTL info. Read it from snmp.
-            string snmp4FileContents = File.ReadAllText(LinuxNetworkFiles.SnmpV4StatsFile);
+            string snmp4FileContents = File.ReadAllText(NetworkFiles.SnmpV4StatsFile);
             int firstIpHeader = snmp4FileContents.IndexOf("Ip:");
             int secondIpHeader = snmp4FileContents.IndexOf("Ip:", firstIpHeader + 1);
             int endOfSecondLine = snmp4FileContents.IndexOf(Environment.NewLine, secondIpHeader);
@@ -118,7 +118,7 @@ namespace System.Net.NetworkInformation
             stats._defaultTtl = parser.ParseNextInt32();
 
             // Read the remainder of statistics from snmp6.
-            string fileContents = File.ReadAllText(LinuxNetworkFiles.SnmpV6StatsFile);
+            string fileContents = File.ReadAllText(NetworkFiles.SnmpV6StatsFile);
             RowConfigReader reader = new RowConfigReader(fileContents);
 
             stats._inReceives = reader.GetNextValueAsInt32("Ip6InReceives");
@@ -139,15 +139,15 @@ namespace System.Net.NetworkInformation
             stats._fragmentFails = reader.GetNextValueAsInt32("Ip6FragFails");
             stats._fragmentCreates = reader.GetNextValueAsInt32("Ip6FragCreates");
 
-            string routeFile = ReadProcConfigFile(LinuxNetworkFiles.Ipv6RouteFile);
+            string routeFile = ReadProcConfigFile(NetworkFiles.Ipv6RouteFile);
             stats._numRoutes = CountOccurences(Environment.NewLine, routeFile);
 
             int interfaceCount = 0;
-            var files = new DirectoryInfo(LinuxNetworkFiles.Ipv6ConfigFolder).GetFiles();
+            var files = new DirectoryInfo(NetworkFiles.Ipv6ConfigFolder).GetFiles();
             foreach (var file in files)
             {
-                if (file.Name != LinuxNetworkFiles.AllNetworkInterfaceFileName
-                    && file.Name != LinuxNetworkFiles.DefaultNetworkInterfaceFileName)
+                if (file.Name != NetworkFiles.AllNetworkInterfaceFileName
+                    && file.Name != NetworkFiles.DefaultNetworkInterfaceFileName)
                 {
                     interfaceCount++;
                 }
@@ -217,10 +217,10 @@ namespace System.Net.NetworkInformation
             // Just count the number of files under /proc/sys/net/ipv4/conf,
             // because GetAllNetworkInterfaces() is relatively expensive just for the count.
             int interfacesCount = 0;
-            var files = new DirectoryInfo(LinuxNetworkFiles.Ipv4ConfigFolder).GetFiles();
+            var files = new DirectoryInfo(NetworkFiles.Ipv4ConfigFolder).GetFiles();
             foreach (var file in files)
             {
-                if (file.Name != LinuxNetworkFiles.AllNetworkInterfaceFileName && file.Name != LinuxNetworkFiles.DefaultNetworkInterfaceFileName)
+                if (file.Name != NetworkFiles.AllNetworkInterfaceFileName && file.Name != NetworkFiles.DefaultNetworkInterfaceFileName)
                 {
                     interfacesCount++;
                 }

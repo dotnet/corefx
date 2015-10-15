@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.IO;
 using System.Linq;
 using System.Net.Sockets;
 
@@ -10,16 +11,32 @@ namespace System.Net.NetworkInformation
     {
         private readonly UnicastIPAddressInformationCollection _unicastAddresses;
         private readonly MulticastIPAddressInformationCollection _multicastAddreses;
+        private readonly string _dnsSuffix;
+        private readonly IPAddressCollection _dnsAddresses;
 
         public UnixIPInterfaceProperties(UnixNetworkInterface uni)
         {
             _unicastAddresses = GetUnicastAddresses(uni);
             _multicastAddreses = GetMulticastAddresses(uni);
+            _dnsSuffix = GetDnsSuffix();
+            _dnsAddresses = GetDnsAddresses();
         }
 
         public sealed override UnicastIPAddressInformationCollection UnicastAddresses { get { return _unicastAddresses; } }
 
         public sealed override MulticastIPAddressInformationCollection MulticastAddresses { get { return _multicastAddreses; } }
+
+        public override bool IsDnsEnabled
+        {
+            get
+            {
+                return DnsAddresses.Count > 0;
+            }
+        }
+
+        public sealed override string DnsSuffix { get { return _dnsSuffix; } }
+
+        public sealed override IPAddressCollection DnsAddresses { get { return _dnsAddresses; } }
 
         private UnicastIPAddressInformationCollection GetUnicastAddresses(UnixNetworkInterface uni)
         {
@@ -57,6 +74,39 @@ namespace System.Net.NetworkInformation
                 byte firstByte = address.GetAddressBytes()[0];
                 return firstByte >= 224 && firstByte <= 239;
             }
+        }
+
+        private static string GetDnsSuffix()
+        {
+            string data = File.ReadAllText(NetworkFiles.EtcResolvConfFile);
+            RowConfigReader rcr = new RowConfigReader(data);
+            string dnsSuffix;
+
+            return rcr.TryGetNextValue("search", out dnsSuffix) ? dnsSuffix : string.Empty;
+        }
+
+        private static IPAddressCollection GetDnsAddresses()
+        {
+            // Parse /etc/resolv.conf for all of the "nameserver" entries.
+            // These are the DNS servers the machine is configured to use.
+            // On OSX, this file is not directly used by most processes for DNS
+            // queries/routing, but it is automatically generated instead, with
+            // the machine's DNS servers listed in it.
+            string data = File.ReadAllText(NetworkFiles.EtcResolvConfFile);
+            RowConfigReader rcr = new RowConfigReader(data);
+            InternalIPAddressCollection addresses = new InternalIPAddressCollection();
+
+            string addressString = null;
+            while (rcr.TryGetNextValue("nameserver", out addressString))
+            {
+                IPAddress parsedAddress;
+                if (IPAddress.TryParse(addressString, out parsedAddress))
+                {
+                    addresses.InternalAdd(parsedAddress);
+                }
+            }
+
+            return addresses;
         }
     }
 }

@@ -44,7 +44,7 @@ namespace System.Net.NetworkInformation
         {
             LinuxIcmpV6Statistics stats = new LinuxIcmpV6Statistics();
 
-            string fileContents = File.ReadAllText(LinuxNetworkFiles.SnmpV6StatsFile);
+            string fileContents = File.ReadAllText(NetworkFiles.SnmpV6StatsFile);
 
             RowConfigReader reader = new RowConfigReader(fileContents);
 

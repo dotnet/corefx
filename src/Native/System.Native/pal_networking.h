@@ -185,60 +185,6 @@ extern "C" Error SetIPv4Address(uint8_t* socketAddress, int32_t socketAddressLen
 extern "C" Error GetIPv6Address(
     const uint8_t* socketAddress, int32_t socketAddressLen, uint8_t* address, int32_t addressLen, uint32_t* scopeId);
 
-// Managed interface types
-enum NetworkInterfaceType : uint16_t
-{
-    Unknown = 1,
-    Ethernet = 6,
-    TokenRing = 9,
-    Fddi = 15,
-    BasicIsdn = 20,
-    PrimaryIsdn = 21,
-    Ppp = 23,
-    Loopback = 24,
-    Ethernet3Megabit = 26,
-    Slip = 28, // GenericSlip
-    Atm = 37,
-    GenericModem = 48, // GenericModem
-    FastEthernetT = 62, // FastEthernet(100BaseT)
-    Isdn = 63, // ISDNandX.25
-    FastEthernetFx = 69, // FastEthernet(100BaseFX)
-    Wireless80211 = 71, // IEEE80211
-    AsymmetricDsl = 94, // AsymmetricDigitalSubscrbrLoop
-    RateAdaptDsl = 95, // Rate-AdaptDigitalSubscrbrLoop
-    SymmetricDsl = 96, // SymmetricDigitalSubscriberLoop
-    VeryHighSpeedDsl = 97, // VeryH-SpeedDigitalSubscrbLoop
-    IPOverAtm = 114,
-    GigabitEthernet = 117,
-    Tunnel = 131,
-    MultiRateSymmetricDsl = 143, // Multi-rate Symmetric DSL
-    HighPerformanceSerialBus = 144, // IEEE1394
-    Wman = 237, // IF_TYPE_IEEE80216_WMAN WIMAX
-    Wwanpp = 243, // IF_TYPE_WWANPP Mobile Broadband devices based on GSM technology
-    Wwanpp2 = 244, // IF_TYPE_WWANPP2 Mobile Broadband devices based on CDMA technology
-};
-
-struct LinkLayerAddressInfo
-{
-    uint32_t InterfaceIndex; // The index of the interface to which this address belongs.
-    uint8_t AddressBytes[8]; // A pointer to the bytes containing the address.
-    uint8_t NumAddressBytes; // The number of bytes actually stored in the address.
-    uint8_t __padding;
-    NetworkInterfaceType HardwareType;
-};
-
-struct IpAddressInfo
-{
-    uint32_t InterfaceIndex;
-    uint8_t AddressBytes[16];
-    uint8_t NumAddressBytes;
-    uint8_t __padding[3];
-};
-
-typedef void (*IPv4AddressFound)(const char* interfaceName, IpAddressInfo* addressInfo, IpAddressInfo* netMaskInfo);
-typedef void (*IPv6AddressFound)(const char* interfaceName, IpAddressInfo* info, uint32_t* scopeId);
-typedef void (*LinkLayerAddressFound)(const char* interfaceName, LinkLayerAddressInfo* llAddress);
-
 extern "C" int32_t GetControlMessageBufferSize(int32_t isIPv4, int32_t isIPv6);
 
 extern "C" int32_t

@@ -237,6 +237,8 @@
   </ItemGroup>
   <!-- Unix Common -->
   <ItemGroup Condition=" '$(TargetsUnix)' == 'true' ">
+    <Compile Include="System\Net\NetworkInformation\NetworkFiles.cs" />
+    <Compile Include="System\Net\NetworkInformation\SimpleGatewayIPAddressInformation.cs" />
     <Compile Include="System\Net\NetworkInformation\SimpleTcpConnectionInformation.cs" />
     <Compile Include="System\Net\NetworkInformation\UnixIPInterfaceProperties.cs" />
     <Compile Include="System\Net\NetworkInformation\UnixIPv4InterfaceProperties.cs" />
@@ -265,9 +267,11 @@
     <Compile Include="$(CommonPath)\System\Threading\Tasks\TaskToApm.cs">
       <Link>Common\System\Threading\Tasks\TaskToApm.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\System\IO\RowConfigReader.cs">
+      <Link>Common\System\IO\RowConfigReader.cs</Link>
+    </Compile>
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetsLinux)' == 'true' ">
-    <Compile Include="System\Net\NetworkInformation\LinuxGatewayIPAddressInformation.cs" />
     <Compile Include="System\Net\NetworkInformation\LinuxIcmpV4Statistics.cs" />
     <Compile Include="System\Net\NetworkInformation\LinuxIcmpV6Statistics.cs" />
     <Compile Include="System\Net\NetworkInformation\LinuxTcpStatistics.cs" />
@@ -279,7 +283,6 @@
     <Compile Include="System\Net\NetworkInformation\LinuxIPGlobalStatistics.cs" />
     <Compile Include="System\Net\NetworkInformation\LinuxIPInterfaceProperties.cs" />
     <Compile Include="System\Net\NetworkInformation\LinuxIPInterfaceStatistics.cs" />
-    <Compile Include="System\Net\NetworkInformation\LinuxNetworkFiles.cs" />
     <Compile Include="System\Net\NetworkInformation\NetworkInterfacePal.Linux.cs" />
     <Compile Include="System\Net\NetworkInformation\LinuxNetworkInterface.cs" />
     <Compile Include="System\Net\NetworkInformation\LinuxIPv4InterfaceProperties.cs" />
@@ -287,9 +290,6 @@
     <!-- Linux Common -->
     <Compile Include="$(CommonPath)\System\IO\StringParser.cs">
       <Link>Common\System\IO\StringParser.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\System\IO\RowConfigReader.cs">
-      <Link>Common\System\IO\RowConfigReader.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Linux\Interop.LinuxNetDeviceFlags.cs">
       <Link>Interop\Linux\Interop.LinuxNetDeviceFlags.cs</Link>

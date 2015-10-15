@@ -3,7 +3,7 @@
 
 namespace System.Net.NetworkInformation
 {
-    internal static class LinuxNetworkFiles
+    internal static class NetworkFiles
     {
         // Paths to specific directories and files
         public const string InterfaceListingFile = "/proc/net/dev";

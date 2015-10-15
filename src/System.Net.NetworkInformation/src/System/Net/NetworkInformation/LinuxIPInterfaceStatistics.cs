@@ -38,7 +38,7 @@ namespace System.Net.NetworkInformation
         public LinuxIPInterfaceStatistics(string name)
         {
             ParseTable(name);
-            string transmitQueueLengthFilePath = Path.Combine(LinuxNetworkFiles.SysClassNetFolder, name, LinuxNetworkFiles.TransmitQueueLengthFileName);
+            string transmitQueueLengthFilePath = Path.Combine(NetworkFiles.SysClassNetFolder, name, NetworkFiles.TransmitQueueLengthFileName);
             _transmitQueueLength = int.Parse(File.ReadAllText(transmitQueueLengthFilePath));
         }
 
@@ -52,7 +52,7 @@ namespace System.Net.NetworkInformation
                    There does not appear to be any additional information exposed there that is not exposed in /proc/net/dev
             */
 
-            using (StreamReader sr = File.OpenText(LinuxNetworkFiles.InterfaceListingFile))
+            using (StreamReader sr = File.OpenText(NetworkFiles.InterfaceListingFile))
             {
                 sr.ReadLine();
                 sr.ReadLine();
