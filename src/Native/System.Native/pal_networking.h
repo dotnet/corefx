@@ -4,6 +4,7 @@
 #pragma once
 
 #include "pal_types.h"
+#include "pal_errno.h"
 
 /**
  * These error values are different on every platform so make a
@@ -11,11 +12,14 @@
  */
 enum GetAddrInfoErrorFlags
 {
+    PAL_EAI_SUCCESS = 0,  // Success
     PAL_EAI_AGAIN = 1,    // Temporary failure in name resolution.
     PAL_EAI_BADFLAGS = 2, // Invalid value for `ai_flags' field.
     PAL_EAI_FAIL = 3,     // Non-recoverable failure in name resolution.
     PAL_EAI_FAMILY = 4,   // 'ai_family' not supported.
     PAL_EAI_NONAME = 5,   // NAME or SERVICE is unknown.
+    PAL_EAI_BADARG = 6,   // One or more input arguments were invalid.
+    PAL_EAI_NOMORE = 7,   // No more entries are present in the list.
 };
 
 /**
@@ -40,43 +44,122 @@ enum GetHostErrorCodes
     PAL_NO_ADDRESS = PAL_NO_DATA,
 };
 
-struct PalIpAddress
+/**
+ * Address families recognized by {Get,Set}AddressFamily.
+ *
+ * NOTE: these values are taken from System.Net.AddressFamily. If you add
+ *       new entries, be sure that the values are chosen accordingly.
+ */
+enum AddressFamily : int32_t
 {
-    uint8_t* Address;    // Buffer to fit IPv4 or IPv6 address
-    int32_t Count;       // Number of bytes in the address buffer
-    bool IsIpv6;         // If this is an IPv6 Address or IPv4
-    uint8_t reserved[3]; // Padding on 64 bit systems to align struct and not compile with a warning.
+    PAL_AF_UNSPEC = 0, // System.Net.AddressFamily.Unspecified
+    PAL_AF_UNIX = 1,   // System.Net.AddressFamily.Unix
+    PAL_AF_INET = 2,   // System.Net.AddressFamily.InterNetwork
+    PAL_AF_INET6 = 23, // System.Net.AddressFamily.InterNetworkV6
+};
+
+enum MulticastOption : int32_t
+{
+    PAL_MULTICAST_ADD = 0, // IP{,V6}_ADD_MEMBERSHIP
+    PAL_MULTICAST_DROP = 1 // IP{,V6}_DROP_MEMBERSHIP
+};
+
+/**
+ * IP address sizes.
+ */
+enum
+{
+    NUM_BYTES_IN_IPV4_ADDRESS = 4,
+    NUM_BYTES_IN_IPV6_ADDRESS = 16,
+    MAX_IP_ADDRESS_BYTES = 16,
+};
+
+struct IPAddress
+{
+    uint8_t Address[MAX_IP_ADDRESS_BYTES]; // Buffer to fit IPv4 or IPv6 address
+    uint32_t IsIPv6;                       // Non-zero if this is an IPv6 endpoint; zero for IPv4.
+    uint32_t ScopeId;                      // Scope ID (IPv6 only)
 };
 
 struct HostEntry
 {
     uint8_t* CanonicalName;  // Canonical Name of the Host
-    PalIpAddress* Addresses; // List of IP Addresses associated with this host
-    int32_t Count;           // Number of IP Addresses associated with this host
-    int32_t reserved;        // Padding on 64 bit systems to align struct and not compile with a warning.
+    void* AddressListHandle; // Handle for host socket addresses
+    int32_t IPAddressCount;  // Number of IP end points in the list
+    int32_t Padding;         // Pad out to 8-byte alignment
+};
+
+struct IPPacketInformation
+{
+    IPAddress Address;      // Destination IP address
+    int32_t InterfaceIndex; // Interface index
+    int32_t Padding;        // Pad out to 8-byte alignment
+};
+
+struct IPv4MulticastOption
+{
+    uint32_t MulticastAddress; // Multicast address
+    uint32_t LocalAddress;     // Local address
+    int32_t InterfaceIndex;    // Interface index
+    int32_t Padding;           // Pad out to 8-byte alignment
+};
+
+struct IPv6MulticastOption
+{
+    IPAddress Address;      // Multicast address
+    int32_t InterfaceIndex; // Interface index
+    int32_t Padding;        // Pad out to 8-byte alignment
+};
+
+struct LingerOption
+{
+    int32_t OnOff;   // Non-zero to enable linger
+    int32_t Seconds; // Number of seconds to linger for
+};
+
+// NOTE: the layout of this type is intended to exactly  match the layout of a `struct iovec`. There are
+//       assertions in pal_networking.cpp that validate this.
+struct IOVector
+{
+    uint8_t* Base;
+    uintptr_t Count;
+};
+
+struct MessageHeader
+{
+    uint8_t* SocketAddress;
+    IOVector* IOVectors;
+    uint8_t* ControlBuffer;
+    int32_t SocketAddressLen;
+    int32_t IOVectorCount;
+    int32_t ControlBufferLen;
+    int32_t Flags;
 };
 
 /**
  * Converts string-representations of IP Addresses to
  */
-extern "C" int32_t Ipv6StringToAddress(
+extern "C" int32_t IPv6StringToAddress(
     const uint8_t* address, const uint8_t* port, uint8_t* buffer, int32_t bufferLength, uint32_t* scope);
-extern "C" int32_t Ipv4StringToAddress(const uint8_t* address, uint8_t* buffer, int32_t bufferLength, uint16_t* port);
 
-extern "C" int32_t IpAddressToString(const uint8_t* address,
+extern "C" int32_t IPv4StringToAddress(const uint8_t* address, uint8_t* buffer, int32_t bufferLength, uint16_t* port);
+
+extern "C" int32_t IPAddressToString(const uint8_t* address,
                                      int32_t addressLength,
-                                     bool isIpv6,
+                                     bool isIPv6,
                                      uint8_t* string,
                                      int32_t stringLength,
                                      uint32_t scope = 0);
 
-extern "C" int32_t GetHostEntriesForName(const uint8_t* address, HostEntry** entry);
+extern "C" int32_t GetHostEntryForName(const uint8_t* address, HostEntry* entry);
 
-extern "C" void FreeHostEntriesForName(HostEntry* entry);
+extern "C" int32_t GetNextIPAddress(void** addressListHandle, IPAddress* endPoint);
+
+extern "C" void FreeHostEntry(HostEntry* entry);
 
 extern "C" int32_t GetNameInfo(const uint8_t* address,
                                int32_t addressLength,
-                               bool isIpv6,
+                               bool isIPv6,
                                uint8_t* host,
                                int32_t hostLength,
                                uint8_t* service,
@@ -84,6 +167,23 @@ extern "C" int32_t GetNameInfo(const uint8_t* address,
                                int32_t flags);
 
 extern "C" int32_t GetHostName(uint8_t* name, int32_t nameLength);
+
+extern "C" Error GetIPSocketAddressSizes(int32_t* ipv4SocketAddressSize, int32_t* ipv6SocketAddressSize);
+
+extern "C" Error GetAddressFamily(const uint8_t* socketAddress, int32_t socketAddressLen, int32_t* addressFamily);
+
+extern "C" Error SetAddressFamily(uint8_t* socketAddress, int32_t socketAddressLen, int32_t addressFamily);
+
+extern "C" Error GetPort(const uint8_t* socketAddress, int32_t socketAddressLen, uint16_t* port);
+
+extern "C" Error SetPort(uint8_t* socketAddress, int32_t socketAddressLen, uint16_t port);
+
+extern "C" Error GetIPv4Address(const uint8_t* socketAddress, int32_t socketAddressLen, uint32_t* address);
+
+extern "C" Error SetIPv4Address(uint8_t* socketAddress, int32_t socketAddressLen, uint32_t address);
+
+extern "C" Error GetIPv6Address(
+    const uint8_t* socketAddress, int32_t socketAddressLen, uint8_t* address, int32_t addressLen, uint32_t* scopeId);
 
 // Managed interface types
 enum NetworkInterfaceType : uint16_t
@@ -138,3 +238,24 @@ struct IpAddressInfo
 typedef void (*IPv4AddressFound)(const char* interfaceName, IpAddressInfo* addressInfo, IpAddressInfo* netMaskInfo);
 typedef void (*IPv6AddressFound)(const char* interfaceName, IpAddressInfo* info, uint32_t* scopeId);
 typedef void (*LinkLayerAddressFound)(const char* interfaceName, LinkLayerAddressInfo* llAddress);
+
+extern "C" int32_t GetControlMessageBufferSize(int32_t isIPv4, int32_t isIPv6);
+
+extern "C" int32_t
+TryGetIPPacketInformation(MessageHeader* messageHeader, int32_t isIPv4, IPPacketInformation* packetInfo);
+
+extern "C" Error GetIPv4MulticastOption(int32_t socket, int32_t multicastOption, IPv4MulticastOption* option);
+
+extern "C" Error SetIPv4MulticastOption(int32_t socket, int32_t multicastOption, IPv4MulticastOption* option);
+
+extern "C" Error GetIPv6MulticastOption(int32_t socket, int32_t multicastOption, IPv6MulticastOption* option);
+
+extern "C" Error SetIPv6MulticastOption(int32_t socket, int32_t multicastOption, IPv6MulticastOption* option);
+
+extern "C" Error GetLingerOption(int32_t socket, LingerOption* option);
+
+extern "C" Error SetLingerOption(int32_t socket, LingerOption* option);
+
+extern "C" Error ReceiveMessage(int32_t socket, MessageHeader* messageHeader, int32_t flags, int64_t* received);
+
+extern "C" Error SendMessage(int32_t socket, MessageHeader* messageHeader, int32_t flags, int64_t* sent);

@@ -9,11 +9,6 @@
     <AssemblyName>System.Text.Encoding.Tests</AssemblyName>
     <RootNamespace>System.Text.Encoding.Tests</RootNamespace>
   </PropertyGroup>
-  <!-- Performance tests require v5.0 portable tools -->
-  <PropertyGroup Condition="'$(RunPerfTestsForProject)' == 'true'">
-    <TargetFrameworkVersion>v5.0</TargetFrameworkVersion>
-    <TargetFrameworkProfile />
-  </PropertyGroup>
   <!-- Default configurations to help VS understand the configurations -->
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
   </PropertyGroup>
@@ -125,8 +120,8 @@
   <!-- Performance Tests -->
   <ItemGroup Condition="'$(RunPerfTestsForProject)' == 'true'">
     <Compile Include="Performance\Perf.Encoding.cs" />
-    <Compile Include="$(CommonTestPath)\Performance\PerfUtils.cs">
-      <Link>Common\Performance\PerfUtils.cs</Link>
+    <Compile Include="$(CommonTestPath)\System\PerfUtils.cs">
+      <Link>Common\System\PerfUtils.cs</Link>
     </Compile>
   </ItemGroup>
   <ItemGroup>

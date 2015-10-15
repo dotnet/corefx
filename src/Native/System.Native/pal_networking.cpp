@@ -16,6 +16,7 @@
 #include <vector>
 #include <ifaddrs.h>
 #include <net/if.h>
+#include <errno.h>
 
 static_assert(HAVE_AF_PACKET || HAVE_AF_LINK, "System must have AF_PACKET or AF_LINK.");
 #if HAVE_AF_PACKET
@@ -25,8 +26,14 @@ static_assert(HAVE_AF_PACKET || HAVE_AF_LINK, "System must have AF_PACKET or AF_
 #include <net/if_types.h>
 #endif
 
-const int NUM_BYTES_IN_IPV4_ADDRESS = 4;
-const int NUM_BYTES_IN_IPV6_ADDRESS = 16;
+#if !defined(IPV6_ADD_MEMBERSHIP) && defined(IPV6_JOIN_GROUP)
+#define IPV6_ADD_MEMBERSHIP IPV6_JOIN_GROUP
+#endif
+
+#if !defined(IPV6_DROP_MEMBERSHIP) && defined(IPV6_LEAVE_GROUP)
+#define IPV6_DROP_MEMBERSHIP IPV6_LEAVE_GROUP
+#endif
+
 const int INET6_ADDRSTRLEN_MANAGED = 65; // The C# code has a longer max string length
 
 static_assert(PAL_HOST_NOT_FOUND == HOST_NOT_FOUND, "");
@@ -34,59 +41,66 @@ static_assert(PAL_TRY_AGAIN == TRY_AGAIN, "");
 static_assert(PAL_NO_RECOVERY == NO_RECOVERY, "");
 static_assert(PAL_NO_DATA == NO_DATA, "");
 static_assert(PAL_NO_ADDRESS == NO_ADDRESS, "");
-static_assert(sizeof(uint8_t) == sizeof(char), ""); // We make casts from uint8_t to char for OS functions, make sure it's legal
+static_assert(sizeof(uint8_t) == sizeof(char), ""); // We make casts from uint8_t to char so make sure it's legal
 
-static void IpStringToAddressHelper(const uint8_t* address,
-                                    const uint8_t* port,
-                                    bool isIpV6,
-                                    int32_t* err,
-                                    const std::function<void(const addrinfo& info)>& lambda)
+// NOTE: clang has trouble with offsetof nested inside of static_assert. Instead, store
+//       the necessary field offsets in constants.
+const int OffsetOfIOVectorBase = offsetof(IOVector, Base);
+const int OffsetOfIOVectorCount = offsetof(IOVector, Count);
+const int OffsetOfIovecBase = offsetof(iovec, iov_base);
+const int OffsetOfIovecLen = offsetof(iovec, iov_len);
+
+// We require that IOVector have the same layout as iovec.
+static_assert(sizeof(IOVector) == sizeof(iovec), "");
+static_assert(sizeof(decltype(IOVector::Base)) == sizeof(decltype(iovec::iov_base)), "");
+static_assert(OffsetOfIOVectorBase == OffsetOfIovecBase, "");
+static_assert(sizeof(decltype(IOVector::Count)) == sizeof(decltype(iovec::iov_len)), "");
+static_assert(OffsetOfIOVectorCount == OffsetOfIovecLen, "");
+
+template <typename T>
+static T Min(T left, T right)
+{
+    return left < right ? left : right;
+}
+
+static int IpStringToAddressHelper(const uint8_t* address, const uint8_t* port, bool isIPv6, addrinfo*& info)
 {
     assert(address != nullptr);
-    assert(err != nullptr);
 
-    addrinfo hint = {
-        .ai_family = isIpV6 ? AF_INET6 : AF_INET,
-        .ai_flags = AI_NUMERICHOST | AI_NUMERICSERV
-    };
+    addrinfo hint = {.ai_family = isIPv6 ? AF_INET6 : AF_INET, .ai_flags = AI_NUMERICHOST | AI_NUMERICSERV};
 
-    addrinfo* info = nullptr;
-    int result = getaddrinfo(reinterpret_cast<const char*>(address), reinterpret_cast<const char*>(port), &hint, &info);
-    if (result == 0)
-    {
-        *err = 0;
-        lambda(*info);
-        freeaddrinfo(info);
-    }
-    else
-    {
-        *err = result;
-    }
+    info = nullptr;
+    return getaddrinfo(reinterpret_cast<const char*>(address), reinterpret_cast<const char*>(port), &hint, &info);
+}
+
+static void ConvertByteArrayToIn6Addr(in6_addr& addr, const uint8_t* buffer, int32_t bufferLength)
+{
+#if HAVE_IN6_U
+    assert(bufferLength == ARRAY_SIZE(addr.__in6_u.__u6_addr8));
+    memcpy(addr.__in6_u.__u6_addr8, buffer, UnsignedCast(bufferLength));
+#else
+    assert(bufferLength == ARRAY_SIZE(addr.__u6_addr.__u6_addr8));
+    memcpy(addr.__u6_addr.__u6_addr8, buffer, UnsignedCast(bufferLength));
+#endif
+}
+
+static void ConvertIn6AddrToByteArray(uint8_t* buffer, int32_t bufferLength, const in6_addr& addr)
+{
+#if HAVE_IN6_U
+    assert(bufferLength == ARRAY_SIZE(addr.__in6_u.__u6_addr8));
+    memcpy(buffer, addr.__in6_u.__u6_addr8, UnsignedCast(bufferLength));
+#else
+    assert(bufferLength == ARRAY_SIZE(addr.__u6_addr.__u6_addr8));
+    memcpy(buffer, addr.__u6_addr.__u6_addr8, UnsignedCast(bufferLength));
+#endif
 }
 
 static void ConvertByteArrayToV6SockAddrIn(sockaddr_in6& addr, const uint8_t* buffer, int32_t bufferLength)
 {
-#if HAVE_IN6_U
-    assert(bufferLength == ARRAY_SIZE(addr.sin6_addr.__in6_u.__u6_addr8));
-    memcpy(addr.sin6_addr.__in6_u.__u6_addr8, buffer, UnsignedCast(bufferLength));
-#else
-    assert(bufferLength == ARRAY_SIZE(addr.sin6_addr.__u6_addr.__u6_addr8));
-    memcpy(addr.sin6_addr.__u6_addr.__u6_addr8, buffer, UnsignedCast(bufferLength));
-#endif
+    ConvertByteArrayToIn6Addr(addr.sin6_addr, buffer, bufferLength);
 
     // Mark that this is INET6
     addr.sin6_family = AF_INET6;
-}
-
-static void ConvertV6SockAddrInToByteArray(uint8_t* buffer, int32_t bufferLength, const sockaddr_in6& addr)
-{
-#if HAVE_IN6_U
-    assert(bufferLength == ARRAY_SIZE(addr.sin6_addr.__in6_u.__u6_addr8));
-    memcpy(buffer, addr.sin6_addr.__in6_u.__u6_addr8, UnsignedCast(bufferLength));
-#else
-    assert(bufferLength == ARRAY_SIZE(addr.sin6_addr.__u6_addr.__u6_addr8));
-    memcpy(buffer, addr.sin6_addr.__u6_addr.__u6_addr8, UnsignedCast(bufferLength));
-#endif
 }
 
 static void ConvertByteArrayToSockAddrIn(sockaddr_in& addr, const uint8_t* buffer, int32_t bufferLength)
@@ -98,13 +112,12 @@ static void ConvertByteArrayToSockAddrIn(sockaddr_in& addr, const uint8_t* buffe
     addr.sin_family = AF_INET;
 }
 
-static void ConvertSockAddrInToByteArray(uint8_t* buffer, int32_t bufferLength, const sockaddr_in& addr)
+static void ConvertInAddrToByteArray(uint8_t* buffer, int32_t bufferLength, const in_addr& addr)
 {
     assert(bufferLength == NUM_BYTES_IN_IPV4_ADDRESS);
-    (void)bufferLength;  // Silence compiler warnings about unused variables on release mode
+    (void)bufferLength; // Silence compiler warnings about unused variables on release mode
 
-    uint32_t* output = reinterpret_cast<uint32_t*>(buffer);
-    *output = addr.sin_addr.s_addr; // Send back in network byte order
+    *reinterpret_cast<uint32_t*>(buffer) = addr.s_addr; // Send back in network byte order.
 }
 
 static int32_t ConvertGetAddrInfoAndGetNameInfoErrorsToPal(int32_t error)
@@ -122,6 +135,7 @@ static int32_t ConvertGetAddrInfoAndGetNameInfoErrorsToPal(int32_t error)
         case EAI_FAMILY:
             return PAL_EAI_FAMILY;
         case EAI_NONAME:
+        case EAI_NODATA:
             return PAL_EAI_NONAME;
     }
 
@@ -129,59 +143,52 @@ static int32_t ConvertGetAddrInfoAndGetNameInfoErrorsToPal(int32_t error)
     return -1;
 }
 
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wpadded"
-
 extern "C" int32_t
-Ipv6StringToAddress(const uint8_t* address, const uint8_t* port, uint8_t* buffer, int32_t bufferLength, uint32_t* scope)
+IPv6StringToAddress(const uint8_t* address, const uint8_t* port, uint8_t* buffer, int32_t bufferLength, uint32_t* scope)
 {
     assert(buffer != nullptr);
     assert(bufferLength == NUM_BYTES_IN_IPV6_ADDRESS);
     assert(scope != nullptr);
 
-    // Call our helper to do the getaddrinfo and freeaddrinfo calls for us; once we have the info, copy what we need
-    int32_t result;
-    IpStringToAddressHelper(address,
-                            port,
-                            true,
-                            &result,
-                            [buffer, scope, bufferLength](const addrinfo& info)
-                            {
-                                sockaddr_in6* addr = reinterpret_cast<sockaddr_in6*>(info.ai_addr);
-                                ConvertV6SockAddrInToByteArray(buffer, bufferLength, *addr);
-                                *scope = addr->sin6_scope_id;
-                            });
+    // Call our helper to do the getaddrinfo call for us; once we have the info, copy what we need
+    addrinfo* info;
+    int32_t result = IpStringToAddressHelper(address, port, true, info);
+    if (result == 0)
+    {
+        sockaddr_in6* addr = reinterpret_cast<sockaddr_in6*>(info->ai_addr);
+        ConvertIn6AddrToByteArray(buffer, bufferLength, addr->sin6_addr);
+        *scope = addr->sin6_scope_id;
+
+        freeaddrinfo(info);
+    }
 
     return ConvertGetAddrInfoAndGetNameInfoErrorsToPal(result);
 }
 
-extern "C" int32_t Ipv4StringToAddress(const uint8_t* address, uint8_t* buffer, int32_t bufferLength, uint16_t* port)
+extern "C" int32_t IPv4StringToAddress(const uint8_t* address, uint8_t* buffer, int32_t bufferLength, uint16_t* port)
 {
     assert(buffer != nullptr);
     assert(bufferLength == NUM_BYTES_IN_IPV4_ADDRESS);
     assert(port != nullptr);
 
-    // Call our helper to do the getaddrinfo and freeaddrinfo calls for us; once we have the info, copy what we need
-    int32_t result;
-    IpStringToAddressHelper(address,
-                            nullptr,
-                            false,
-                            &result,
-                            [buffer, port, bufferLength](const addrinfo& info)
-                            {
-                                sockaddr_in* addr = reinterpret_cast<sockaddr_in*>(info.ai_addr);
-                                ConvertSockAddrInToByteArray(buffer, bufferLength, *addr);
-                                *port = addr->sin_port;
-                            });
+    // Call our helper to do the getaddrinfo call for us; once we have the info, copy what we need
+    addrinfo* info;
+    int32_t result = IpStringToAddressHelper(address, nullptr, false, info);
+    if (result == 0)
+    {
+        sockaddr_in* addr = reinterpret_cast<sockaddr_in*>(info->ai_addr);
+        ConvertInAddrToByteArray(buffer, bufferLength, addr->sin_addr);
+        *port = addr->sin_port;
+
+        freeaddrinfo(info);
+    }
 
     return ConvertGetAddrInfoAndGetNameInfoErrorsToPal(result);
 }
 
-#pragma clang diagnostic pop
-
-extern "C" int32_t IpAddressToString(const uint8_t* address,
+extern "C" int32_t IPAddressToString(const uint8_t* address,
                                      int32_t addressLength,
-                                     bool isIpv6,
+                                     bool isIPv6,
                                      uint8_t* string,
                                      int32_t stringLength,
                                      uint32_t scope /* = 0*/)
@@ -193,55 +200,50 @@ extern "C" int32_t IpAddressToString(const uint8_t* address,
     // These constants differ per platform so the managed side uses the bigger value; therefore, check that
     // the length is between the two lengths
     assert((stringLength >= INET_ADDRSTRLEN) && (stringLength <= INET6_ADDRSTRLEN_MANAGED));
-    (void)addressLength;  // Silence compiler warnings about unused variables on release mode
+    (void)addressLength;            // Silence compiler warnings about unused variables on release mode
     (void)INET6_ADDRSTRLEN_MANAGED; // Silence compiler warnings about unused variables on release mode
 
     int32_t result;
     socklen_t len = UnsignedCast(stringLength);
 
-    if (isIpv6)
+    if (isIPv6)
     {
-        sockaddr_in6 addr = {
-            .sin6_scope_id = scope
-        };
+        sockaddr_in6 addr = {.sin6_scope_id = scope};
 
         ConvertByteArrayToV6SockAddrIn(addr, address, addressLength);
-        result = getnameinfo(
-            reinterpret_cast<const sockaddr*>(&addr), 
-            sizeof(sockaddr_in6), 
-            reinterpret_cast<char*>(string), 
-            len, 
-            nullptr, 
-            0, 
-            NI_NUMERICHOST);
+        result = getnameinfo(reinterpret_cast<const sockaddr*>(&addr),
+                             sizeof(sockaddr_in6),
+                             reinterpret_cast<char*>(string),
+                             len,
+                             nullptr,
+                             0,
+                             NI_NUMERICHOST);
     }
     else
     {
         sockaddr_in addr = {};
         ConvertByteArrayToSockAddrIn(addr, address, addressLength);
-        result = getnameinfo(
-            reinterpret_cast<const sockaddr*>(&addr), 
-            sizeof(sockaddr_in), 
-            reinterpret_cast<char*>(string), 
-            len, 
-            nullptr, 
-            0, 
-            NI_NUMERICHOST);
+        result = getnameinfo(reinterpret_cast<const sockaddr*>(&addr),
+                             sizeof(sockaddr_in),
+                             reinterpret_cast<char*>(string),
+                             len,
+                             nullptr,
+                             0,
+                             NI_NUMERICHOST);
     }
 
     return ConvertGetAddrInfoAndGetNameInfoErrorsToPal(result);
 }
 
-extern "C" int32_t GetHostEntriesForName(const uint8_t* address, HostEntry** entry)
+extern "C" int32_t GetHostEntryForName(const uint8_t* address, HostEntry* entry)
 {
-    assert(address != nullptr);
-    assert(entry != nullptr);
+    if (address == nullptr || entry == nullptr)
+    {
+        return PAL_EAI_BADARG;
+    }
 
     // Get all address families and the canonical name
-    addrinfo hint = {
-        .ai_family = AF_UNSPEC,
-        .ai_flags = AI_CANONNAME
-    };
+    addrinfo hint = {.ai_family = AF_UNSPEC, .ai_flags = AI_CANONNAME};
 
     addrinfo* info = nullptr;
     int result = getaddrinfo(reinterpret_cast<const char*>(address), nullptr, &hint, &info);
@@ -250,89 +252,76 @@ extern "C" int32_t GetHostEntriesForName(const uint8_t* address, HostEntry** ent
         return ConvertGetAddrInfoAndGetNameInfoErrorsToPal(result);
     }
 
-    // Allocate our data and ensure everything is 0
-    *entry = new HostEntry;
-    HostEntry* he = *entry;
-    memset(he, 0, sizeof(HostEntry));
+    *entry = {.CanonicalName = nullptr, .AddressListHandle = reinterpret_cast<void*>(info), .IPAddressCount = 0};
 
-    // Cache the first so we can walk the linked list again
-    addrinfo* first = info;
-
-    // Walk the linked-list of entries and get the IP Addresses
+    // Find the canonical name for this host (if any) and count the number of IP end points.
     for (addrinfo* ai = info; ai != nullptr; ai = ai->ai_next)
     {
         // If we haven't found a canonical name yet and this addrinfo has one, copy it
-        if ((he->CanonicalName == nullptr) && (ai->ai_canonname != nullptr))
+        if ((entry->CanonicalName == nullptr) && (ai->ai_canonname != nullptr))
         {
-            size_t len = strlen(ai->ai_canonname) + 1; // Name + null
-            he->CanonicalName = new uint8_t[len];
-            SafeStringCopy(reinterpret_cast<char*>(he->CanonicalName), len, ai->ai_canonname);
+            entry->CanonicalName = reinterpret_cast<uint8_t*>(ai->ai_canonname);
         }
 
-        // Skip non-IPv4 and non-IPv6 addresses
-        if ((ai->ai_family != AF_INET) && (ai->ai_family != AF_INET6))
+        if (ai->ai_family == AF_INET || ai->ai_family == AF_INET6)
         {
-            continue;
+            entry->IPAddressCount++;
         }
-
-        // Only increment the count of addresses here; don't try to parse on the first
-        // walk since we would (most likely) need to realloc the array, which is more
-        // expensive than just incrementing the limited number of IPs twice.
-        he->Count++;
     }
 
-    // Now that we have the final count of all IP Addresses for this host name, allocate them
-    he->Addresses = new PalIpAddress[he->Count];
-
-    // Walk the addrinfo's that we want and construct the IP Addresses for the managed side
-    int i = 0;
-    for (addrinfo* ai = first; ai != nullptr; ai = ai->ai_next)
-    {
-        // Skip non-IPv4 and non-IPv6 addresses
-        if ((ai->ai_family != AF_INET) && (ai->ai_family != AF_INET6))
-        {
-            continue;
-        }
-
-        bool isv6 = ai->ai_family == AF_INET6;
-        PalIpAddress* ip = &he->Addresses[i];
-        ip->IsIpv6 = isv6;
-        ip->Count = isv6 ? NUM_BYTES_IN_IPV6_ADDRESS : NUM_BYTES_IN_IPV4_ADDRESS;
-        ip->Address = new uint8_t[ip->Count];
-
-        // If this is an IPv6 address then get the addrinfo as a v6 address and
-        // copy the 128-bit value to our buffer. If this is an IPv4 address then
-        // get the addrinfo as a v4 address and copy the lone 32-bit value to our buffer.
-        if (isv6)
-        {
-            sockaddr_in6* addrin = reinterpret_cast<sockaddr_in6*>(ai->ai_addr);
-            ConvertV6SockAddrInToByteArray(ip->Address, ip->Count, *addrin);
-        }
-        else
-        {
-            sockaddr_in* addrin = reinterpret_cast<sockaddr_in*>(ai->ai_addr);
-            ConvertSockAddrInToByteArray(ip->Address, ip->Count, *addrin);
-        }
-
-        i++;
-    }
-
-    freeaddrinfo(info);
-    return 0;
+    return PAL_EAI_SUCCESS;
 }
 
-extern "C" void FreeHostEntriesForName(HostEntry* entry)
+extern "C" int32_t GetNextIPAddress(void** addressListHandle, IPAddress* endPoint)
 {
-    assert(entry != nullptr);
-
-    for (int i = 0; i < entry->Count; i++)
+    if (addressListHandle == nullptr || endPoint == nullptr)
     {
-        delete[] entry->Addresses[i].Address;
+        return PAL_EAI_BADARG;
     }
 
-    delete[] entry->Addresses;
-    delete[] entry->CanonicalName;
-    delete entry;
+    auto* ai = reinterpret_cast<addrinfo*>(*addressListHandle);
+    for (; ai != nullptr; ai = ai->ai_next)
+    {
+        switch (ai->ai_family)
+        {
+            case AF_INET:
+            {
+                auto* inetSockAddr = reinterpret_cast<sockaddr_in*>(ai->ai_addr);
+
+                ConvertInAddrToByteArray(endPoint->Address, NUM_BYTES_IN_IPV4_ADDRESS, inetSockAddr->sin_addr);
+                endPoint->IsIPv6 = 0;
+                break;
+            }
+
+            case AF_INET6:
+            {
+                auto* inet6SockAddr = reinterpret_cast<sockaddr_in6*>(ai->ai_addr);
+
+                ConvertIn6AddrToByteArray(endPoint->Address, NUM_BYTES_IN_IPV6_ADDRESS, inet6SockAddr->sin6_addr);
+                endPoint->IsIPv6 = 1;
+                endPoint->ScopeId = inet6SockAddr->sin6_scope_id;
+                break;
+            }
+
+            default:
+                // Skip non-IPv4 and non-IPv6 addresses
+                continue;
+        }
+
+        *addressListHandle = reinterpret_cast<void*>(ai->ai_next);
+        return PAL_EAI_SUCCESS;
+    }
+
+    return PAL_EAI_NOMORE;
+}
+
+extern "C" void FreeHostEntry(HostEntry* entry)
+{
+    if (entry != nullptr)
+    {
+        auto* ai = reinterpret_cast<addrinfo*>(entry->AddressListHandle);
+        freeaddrinfo(ai);
+    }
 }
 
 inline int32_t ConvertGetNameInfoFlagsToPal(int32_t flags)
@@ -352,7 +341,7 @@ inline int32_t ConvertGetNameInfoFlagsToPal(int32_t flags)
 
 extern "C" int32_t GetNameInfo(const uint8_t* address,
                                int32_t addressLength,
-                               bool isIpv6,
+                               bool isIPv6,
                                uint8_t* host,
                                int32_t hostLength,
                                uint8_t* service,
@@ -367,7 +356,7 @@ extern "C" int32_t GetNameInfo(const uint8_t* address,
     int32_t nativeFlags = ConvertGetNameInfoFlagsToPal(flags);
     int32_t result;
 
-    if (isIpv6)
+    if (isIPv6)
     {
         sockaddr_in6 addr = {};
         ConvertByteArrayToV6SockAddrIn(addr, address, addressLength);
@@ -402,6 +391,573 @@ extern "C" int32_t GetHostName(uint8_t* name, int32_t nameLength)
 
     size_t unsignedSize = UnsignedCast(nameLength);
     return gethostname(reinterpret_cast<char*>(name), unsignedSize);
+}
+
+template <typename TType, typename TField>
+static bool IsInBounds(const TType* base, size_t len, const TField* value)
+{
+    auto* baseAddr = reinterpret_cast<const uint8_t*>(base);
+    auto* valueAddr = reinterpret_cast<const uint8_t*>(value);
+    return valueAddr >= baseAddr && (valueAddr + sizeof(TField)) <= (baseAddr + len);
+}
+
+extern "C" Error GetIPSocketAddressSizes(int32_t* ipv4SocketAddressSize, int32_t* ipv6SocketAddressSize)
+{
+    if (ipv4SocketAddressSize == nullptr || ipv6SocketAddressSize == nullptr)
+    {
+        return PAL_EFAULT;
+    }
+
+    *ipv4SocketAddressSize = sizeof(sockaddr_in);
+    *ipv6SocketAddressSize = sizeof(sockaddr_in6);
+    return PAL_SUCCESS;
+}
+
+extern "C" Error GetAddressFamily(const uint8_t* socketAddress, int32_t socketAddressLen, int32_t* addressFamily)
+{
+    if (socketAddress == nullptr || addressFamily == nullptr || socketAddressLen < 0)
+    {
+        return PAL_EFAULT;
+    }
+
+    auto* sockAddr = reinterpret_cast<const sockaddr*>(socketAddress);
+    if (!IsInBounds(sockAddr, static_cast<size_t>(socketAddressLen), &sockAddr->sa_family))
+    {
+        return PAL_EFAULT;
+    }
+
+    switch (sockAddr->sa_family)
+    {
+        case AF_UNSPEC:
+            *addressFamily = PAL_AF_UNSPEC;
+            return PAL_SUCCESS;
+
+        case AF_UNIX:
+            *addressFamily = PAL_AF_UNIX;
+            return PAL_SUCCESS;
+
+        case AF_INET:
+            *addressFamily = PAL_AF_INET;
+            return PAL_SUCCESS;
+
+        case AF_INET6:
+            *addressFamily = PAL_AF_INET6;
+            return PAL_SUCCESS;
+
+        default:
+            return PAL_EAFNOSUPPORT;
+    }
+}
+
+extern "C" Error SetAddressFamily(uint8_t* socketAddress, int32_t socketAddressLen, int32_t addressFamily)
+{
+    auto* sockAddr = reinterpret_cast<sockaddr*>(socketAddress);
+    if (sockAddr == nullptr || socketAddressLen < 0 ||
+        !IsInBounds(sockAddr, static_cast<size_t>(socketAddressLen), &sockAddr->sa_family))
+    {
+        return PAL_EFAULT;
+    }
+
+    switch (addressFamily)
+    {
+        case PAL_AF_UNSPEC:
+            sockAddr->sa_family = AF_UNSPEC;
+            return PAL_SUCCESS;
+
+        case PAL_AF_UNIX:
+            sockAddr->sa_family = AF_UNIX;
+            return PAL_SUCCESS;
+
+        case PAL_AF_INET:
+            sockAddr->sa_family = AF_INET;
+            return PAL_SUCCESS;
+
+        case PAL_AF_INET6:
+            sockAddr->sa_family = AF_INET6;
+            return PAL_SUCCESS;
+
+        default:
+            return PAL_EAFNOSUPPORT;
+    }
+}
+
+extern "C" Error GetPort(const uint8_t* socketAddress, int32_t socketAddressLen, uint16_t* port)
+{
+    if (socketAddress == nullptr)
+    {
+        return PAL_EFAULT;
+    }
+
+    auto* sockAddr = reinterpret_cast<const sockaddr*>(socketAddress);
+    if (!IsInBounds(sockAddr, static_cast<size_t>(socketAddressLen), &sockAddr->sa_family))
+    {
+        return PAL_EFAULT;
+    }
+
+    switch (sockAddr->sa_family)
+    {
+        case AF_INET:
+        {
+            if (socketAddressLen < 0 || static_cast<size_t>(socketAddressLen) < sizeof(sockaddr_in))
+            {
+                return PAL_EFAULT;
+            }
+
+            *port = ntohs(reinterpret_cast<const sockaddr_in*>(socketAddress)->sin_port);
+            return PAL_SUCCESS;
+        }
+
+        case AF_INET6:
+        {
+            if (socketAddressLen < 0 || static_cast<size_t>(socketAddressLen) < sizeof(sockaddr_in6))
+            {
+                return PAL_EFAULT;
+            }
+
+            *port = ntohs(reinterpret_cast<const sockaddr_in6*>(socketAddress)->sin6_port);
+            return PAL_SUCCESS;
+        }
+
+        default:
+            return PAL_EAFNOSUPPORT;
+    }
+}
+
+extern "C" Error SetPort(uint8_t* socketAddress, int32_t socketAddressLen, uint16_t port)
+{
+    if (socketAddress == nullptr)
+    {
+        return PAL_EFAULT;
+    }
+
+    auto* sockAddr = reinterpret_cast<const sockaddr*>(socketAddress);
+    if (!IsInBounds(sockAddr, static_cast<size_t>(socketAddressLen), &sockAddr->sa_family))
+    {
+        return PAL_EFAULT;
+    }
+
+    switch (sockAddr->sa_family)
+    {
+        case AF_INET:
+        {
+            if (socketAddressLen < 0 || static_cast<size_t>(socketAddressLen) < sizeof(sockaddr_in))
+            {
+                return PAL_EFAULT;
+            }
+
+            reinterpret_cast<sockaddr_in*>(socketAddress)->sin_port = htons(port);
+            return PAL_SUCCESS;
+        }
+
+        case AF_INET6:
+        {
+            if (socketAddressLen < 0 || static_cast<size_t>(socketAddressLen) < sizeof(sockaddr_in6))
+            {
+                return PAL_EFAULT;
+            }
+
+            reinterpret_cast<sockaddr_in6*>(socketAddress)->sin6_port = htons(port);
+            return PAL_SUCCESS;
+        }
+
+        default:
+            return PAL_EAFNOSUPPORT;
+    }
+}
+
+extern "C" Error GetIPv4Address(const uint8_t* socketAddress, int32_t socketAddressLen, uint32_t* address)
+{
+    if (socketAddress == nullptr || address == nullptr || socketAddressLen < 0 ||
+        static_cast<size_t>(socketAddressLen) < sizeof(sockaddr_in))
+    {
+        return PAL_EFAULT;
+    }
+
+    auto* sockAddr = reinterpret_cast<const sockaddr*>(socketAddress);
+    if (!IsInBounds(sockAddr, static_cast<size_t>(socketAddressLen), &sockAddr->sa_family))
+    {
+        return PAL_EFAULT;
+    }
+
+    if (sockAddr->sa_family != AF_INET)
+    {
+        return PAL_EINVAL;
+    }
+
+    *address = reinterpret_cast<const sockaddr_in*>(socketAddress)->sin_addr.s_addr;
+    return PAL_SUCCESS;
+}
+
+extern "C" Error SetIPv4Address(uint8_t* socketAddress, int32_t socketAddressLen, uint32_t address)
+{
+    if (socketAddress == nullptr || socketAddressLen < 0 || static_cast<size_t>(socketAddressLen) < sizeof(sockaddr_in))
+    {
+        return PAL_EFAULT;
+    }
+
+    auto* sockAddr = reinterpret_cast<sockaddr*>(socketAddress);
+    if (!IsInBounds(sockAddr, static_cast<size_t>(socketAddressLen), &sockAddr->sa_family))
+    {
+        return PAL_EFAULT;
+    }
+
+    if (sockAddr->sa_family != AF_INET)
+    {
+        return PAL_EINVAL;
+    }
+
+    auto* inetSockAddr = reinterpret_cast<sockaddr_in*>(sockAddr);
+
+    inetSockAddr->sin_family = AF_INET;
+    inetSockAddr->sin_addr.s_addr = address;
+    return PAL_SUCCESS;
+}
+
+extern "C" Error GetIPv6Address(
+    const uint8_t* socketAddress, int32_t socketAddressLen, uint8_t* address, int32_t addressLen, uint32_t* scopeId)
+{
+    if (socketAddress == nullptr || address == nullptr || scopeId == nullptr || socketAddressLen < 0 ||
+        static_cast<size_t>(socketAddressLen) < sizeof(sockaddr_in6) || addressLen < NUM_BYTES_IN_IPV6_ADDRESS)
+    {
+        return PAL_EFAULT;
+    }
+
+    auto* sockAddr = reinterpret_cast<const sockaddr*>(socketAddress);
+    if (!IsInBounds(sockAddr, static_cast<size_t>(socketAddressLen), &sockAddr->sa_family))
+    {
+        return PAL_EFAULT;
+    }
+
+    if (sockAddr->sa_family != AF_INET6)
+    {
+        return PAL_EINVAL;
+    }
+
+    auto* inet6SockAddr = reinterpret_cast<const sockaddr_in6*>(sockAddr);
+    ConvertIn6AddrToByteArray(address, addressLen, inet6SockAddr->sin6_addr);
+    *scopeId = inet6SockAddr->sin6_scope_id;
+
+    return PAL_SUCCESS;
+}
+
+extern "C" Error
+SetIPv6Address(uint8_t* socketAddress, int32_t socketAddressLen, uint8_t* address, int32_t addressLen, uint32_t scopeId)
+{
+    if (socketAddress == nullptr || address == nullptr || socketAddressLen < 0 ||
+        static_cast<size_t>(socketAddressLen) < sizeof(sockaddr_in6) || addressLen < NUM_BYTES_IN_IPV6_ADDRESS)
+    {
+        return PAL_EFAULT;
+    }
+
+    auto* sockAddr = reinterpret_cast<sockaddr*>(socketAddress);
+    if (!IsInBounds(sockAddr, static_cast<size_t>(socketAddressLen), &sockAddr->sa_family))
+    {
+        return PAL_EFAULT;
+    }
+
+    if (sockAddr->sa_family != AF_INET6)
+    {
+        return PAL_EINVAL;
+    }
+
+    auto* inet6SockAddr = reinterpret_cast<sockaddr_in6*>(sockAddr);
+    ConvertByteArrayToV6SockAddrIn(*inet6SockAddr, address, addressLen);
+    inet6SockAddr->sin6_family = AF_INET6;
+    inet6SockAddr->sin6_flowinfo = 0;
+    inet6SockAddr->sin6_scope_id = scopeId;
+
+    return PAL_SUCCESS;
+}
+
+static void ConvertMessageHeaderToMsghdr(msghdr* header, const MessageHeader& messageHeader)
+{
+    *header = {
+        .msg_name = messageHeader.SocketAddress,
+        .msg_namelen = static_cast<unsigned int>(messageHeader.SocketAddressLen),
+        .msg_iov = reinterpret_cast<iovec*>(messageHeader.IOVectors),
+        .msg_iovlen = static_cast<decltype(header->msg_iovlen)>(messageHeader.IOVectorCount),
+        .msg_control = messageHeader.ControlBuffer,
+        .msg_controllen = static_cast<decltype(header->msg_controllen)>(messageHeader.ControlBufferLen),
+    };
+}
+
+extern "C" int32_t GetControlMessageBufferSize(int32_t isIPv4, int32_t isIPv6)
+{
+    // Note: it is possible that the address family of the socket is neither
+    //       AF_INET nor AF_INET6. In this case both inputs will be false and
+    //       the controll message buffer size should be zero.
+    return (isIPv4 != 0 ? CMSG_SPACE(sizeof(in_pktinfo)) : 0) + (isIPv6 != 0 ? CMSG_SPACE(sizeof(in6_pktinfo)) : 0);
+}
+
+static int32_t GetIPv4PacketInformation(cmsghdr* controlMessage, IPPacketInformation* packetInfo)
+{
+    assert(controlMessage != nullptr);
+    assert(packetInfo != nullptr);
+
+    if (controlMessage->cmsg_len < sizeof(in_pktinfo))
+    {
+        assert(false && "expected a control message large enough to hold an in_pktinfo value");
+        return 0;
+    }
+
+    auto* pktinfo = reinterpret_cast<in_pktinfo*>(CMSG_DATA(controlMessage));
+    ConvertInAddrToByteArray(&packetInfo->Address.Address[0], NUM_BYTES_IN_IPV4_ADDRESS, pktinfo->ipi_addr);
+    packetInfo->InterfaceIndex = static_cast<int32_t>(pktinfo->ipi_ifindex);
+
+    return 1;
+}
+
+static int32_t GetIPv6PacketInformation(cmsghdr* controlMessage, IPPacketInformation* packetInfo)
+{
+    assert(controlMessage != nullptr);
+    assert(packetInfo != nullptr);
+
+    if (controlMessage->cmsg_len < sizeof(in6_pktinfo))
+    {
+        assert(false && "expected a control message large enough to hold an in6_pktinfo value");
+        return 0;
+    }
+
+    auto* pktinfo = reinterpret_cast<in6_pktinfo*>(CMSG_DATA(controlMessage));
+    ConvertIn6AddrToByteArray(&packetInfo->Address.Address[0], NUM_BYTES_IN_IPV6_ADDRESS, pktinfo->ipi6_addr);
+    packetInfo->Address.IsIPv6 = 1;
+    packetInfo->InterfaceIndex = static_cast<int32_t>(pktinfo->ipi6_ifindex);
+
+    return 1;
+}
+
+extern "C" int32_t
+TryGetIPPacketInformation(MessageHeader* messageHeader, int32_t isIPv4, IPPacketInformation* packetInfo)
+{
+    if (messageHeader == nullptr || packetInfo == nullptr)
+    {
+        return 0;
+    }
+
+    msghdr header;
+    ConvertMessageHeaderToMsghdr(&header, *messageHeader);
+
+    cmsghdr* controlMessage = CMSG_FIRSTHDR(&header);
+    if (isIPv4 != 0)
+    {
+        for (; controlMessage != nullptr; controlMessage = CMSG_NXTHDR(&header, controlMessage))
+        {
+            if (controlMessage->cmsg_level == IPPROTO_IP && controlMessage->cmsg_type == IP_PKTINFO)
+            {
+                return GetIPv4PacketInformation(controlMessage, packetInfo);
+            }
+        }
+    }
+    else
+    {
+        for (; controlMessage != nullptr; controlMessage = CMSG_NXTHDR(&header, controlMessage))
+        {
+            if (controlMessage->cmsg_level == IPPROTO_IPV6 && controlMessage->cmsg_type == IPV6_PKTINFO)
+            {
+                return GetIPv6PacketInformation(controlMessage, packetInfo);
+            }
+        }
+    }
+
+    return 0;
+}
+
+static bool GetMulticastOptionName(int32_t multicastOption, bool isIPv6, int& optionName)
+{
+    switch (multicastOption)
+    {
+        case PAL_MULTICAST_ADD:
+            optionName = isIPv6 ? IPV6_ADD_MEMBERSHIP : IP_ADD_MEMBERSHIP;
+            return true;
+
+        case PAL_MULTICAST_DROP:
+            optionName = isIPv6 ? IPV6_DROP_MEMBERSHIP : IP_DROP_MEMBERSHIP;
+            return true;
+
+        default:
+            return false;
+    }
+}
+
+extern "C" Error GetIPv4MulticastOption(int32_t socket, int32_t multicastOption, IPv4MulticastOption* option)
+{
+    if (option == nullptr)
+    {
+        return PAL_EFAULT;
+    }
+
+    int optionName;
+    if (!GetMulticastOptionName(multicastOption, false, optionName))
+    {
+        return PAL_EINVAL;
+    }
+
+    ip_mreqn opt;
+    socklen_t len = sizeof(opt);
+    int err = getsockopt(socket, IPPROTO_IP, optionName, &opt, &len);
+    if (err != 0)
+    {
+        return ConvertErrorPlatformToPal(errno);
+    }
+
+    *option = {.MulticastAddress = opt.imr_multiaddr.s_addr,
+               .LocalAddress = opt.imr_address.s_addr,
+               .InterfaceIndex = opt.imr_ifindex};
+    return PAL_SUCCESS;
+}
+
+extern "C" Error SetIPv4MulticastOption(int32_t socket, int32_t multicastOption, IPv4MulticastOption* option)
+{
+    if (option == nullptr)
+    {
+        return PAL_EFAULT;
+    }
+
+    int optionName;
+    if (!GetMulticastOptionName(multicastOption, false, optionName))
+    {
+        return PAL_EINVAL;
+    }
+
+    ip_mreqn opt = {.imr_multiaddr = {.s_addr = option->MulticastAddress},
+                    .imr_address = {.s_addr = option->LocalAddress},
+                    .imr_ifindex = option->InterfaceIndex};
+    int err = setsockopt(socket, IPPROTO_IP, optionName, &opt, sizeof(opt));
+    return err == 0 ? PAL_SUCCESS : ConvertErrorPlatformToPal(errno);
+}
+
+extern "C" Error GetIPv6MulticastOption(int32_t socket, int32_t multicastOption, IPv6MulticastOption* option)
+{
+    if (option == nullptr)
+    {
+        return PAL_EFAULT;
+    }
+
+    int optionName;
+    if (!GetMulticastOptionName(multicastOption, false, optionName))
+    {
+        return PAL_EINVAL;
+    }
+
+    ipv6_mreq opt;
+    socklen_t len = sizeof(opt);
+    int err = getsockopt(socket, IPPROTO_IP, optionName, &opt, &len);
+    if (err != 0)
+    {
+        return ConvertErrorPlatformToPal(errno);
+    }
+
+    ConvertIn6AddrToByteArray(&option->Address.Address[0], NUM_BYTES_IN_IPV6_ADDRESS, opt.ipv6mr_multiaddr);
+    option->InterfaceIndex = static_cast<int32_t>(opt.ipv6mr_interface);
+    return PAL_SUCCESS;
+}
+
+extern "C" Error SetIPv6MulticastOption(int32_t socket, int32_t multicastOption, IPv6MulticastOption* option)
+{
+    if (option == nullptr)
+    {
+        return PAL_EFAULT;
+    }
+
+    int optionName;
+    if (!GetMulticastOptionName(multicastOption, false, optionName))
+    {
+        return PAL_EINVAL;
+    }
+
+    ipv6_mreq opt = {.ipv6mr_interface = static_cast<unsigned int>(option->InterfaceIndex)};
+    ConvertByteArrayToIn6Addr(opt.ipv6mr_multiaddr, &option->Address.Address[0], NUM_BYTES_IN_IPV6_ADDRESS);
+
+    int err = setsockopt(socket, IPPROTO_IP, optionName, &opt, sizeof(opt));
+    return err == 0 ? PAL_SUCCESS : ConvertErrorPlatformToPal(errno);
+}
+
+extern "C" Error GetLingerOption(int32_t socket, LingerOption* option)
+{
+    if (option == nullptr)
+    {
+        return PAL_EFAULT;
+    }
+
+    linger opt;
+    socklen_t len = sizeof(opt);
+    int err = getsockopt(socket, SOL_SOCKET, SO_LINGER, &opt, &len);
+    if (err != 0)
+    {
+        return ConvertErrorPlatformToPal(errno);
+    }
+
+    *option = {.OnOff = opt.l_onoff, .Seconds = opt.l_linger};
+    return PAL_SUCCESS;
+}
+
+extern "C" Error SetLingerOption(int32_t socket, LingerOption* option)
+{
+    if (option == nullptr)
+    {
+        return PAL_EFAULT;
+    }
+
+    linger opt = {.l_onoff = option->OnOff, .l_linger = option->Seconds};
+    int err = setsockopt(socket, SOL_SOCKET, SO_LINGER, &opt, sizeof(opt));
+    return err == 0 ? PAL_SUCCESS : ConvertErrorPlatformToPal(errno);
+}
+
+// TODO: shim flags
+extern "C" Error ReceiveMessage(int32_t socket, MessageHeader* messageHeader, int32_t flags, int64_t* received)
+{
+    if (messageHeader == nullptr || received == nullptr || messageHeader->SocketAddressLen < 0 ||
+        messageHeader->ControlBufferLen < 0 || messageHeader->IOVectorCount < 0)
+    {
+        return PAL_EFAULT;
+    }
+
+    msghdr header;
+    ConvertMessageHeaderToMsghdr(&header, *messageHeader);
+
+    ssize_t res = recvmsg(socket, &header, flags);
+
+    assert(static_cast<int32_t>(header.msg_namelen) <= messageHeader->SocketAddressLen);
+    messageHeader->SocketAddressLen = Min(static_cast<int32_t>(header.msg_namelen), messageHeader->SocketAddressLen);
+    memcpy(messageHeader->SocketAddress, header.msg_name, static_cast<size_t>(messageHeader->SocketAddressLen));
+
+    assert(header.msg_controllen <= static_cast<size_t>(messageHeader->ControlBufferLen));
+    messageHeader->ControlBufferLen = Min(static_cast<int32_t>(header.msg_controllen), messageHeader->ControlBufferLen);
+    memcpy(messageHeader->ControlBuffer, header.msg_control, static_cast<size_t>(messageHeader->ControlBufferLen));
+
+    messageHeader->Flags = header.msg_flags;
+
+    if (res != -1)
+    {
+        *received = res;
+        return PAL_SUCCESS;
+    }
+
+    *received = 0;
+    return ConvertErrorPlatformToPal(errno);
+}
+
+// TODO: shim flags
+extern "C" Error SendMessage(int32_t socket, MessageHeader* messageHeader, int32_t flags, int64_t* sent)
+{
+    if (messageHeader == nullptr || sent == nullptr || messageHeader->SocketAddressLen < 0 ||
+        messageHeader->ControlBufferLen < 0 || messageHeader->IOVectorCount < 0)
+    {
+        return PAL_EFAULT;
+    }
+
+    msghdr header;
+    ConvertMessageHeaderToMsghdr(&header, *messageHeader);
+
+    ssize_t res = sendmsg(socket, &header, flags);
+    if (res != -1)
+    {
+        *sent = res;
+        return PAL_SUCCESS;
+    }
+
+    *sent = 0;
+    return ConvertErrorPlatformToPal(errno);
 }
 
 extern "C" int32_t EnumerateInterfaceAddresses(IPv4AddressFound onIpv4Found,

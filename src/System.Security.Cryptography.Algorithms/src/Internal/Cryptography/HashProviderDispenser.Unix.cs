@@ -62,17 +62,15 @@ namespace Internal.Cryptography
                 _algorithmEvp = algorithmEvp;
                 Debug.Assert(algorithmEvp != IntPtr.Zero);
 
-                _hashSize = Interop.Crypto.EvpMdSize(algorithmEvp);
+                _hashSize = Interop.Crypto.EvpMdSize(_algorithmEvp);
                 if (_hashSize <= 0 || _hashSize > Interop.Crypto.EVP_MAX_MD_SIZE)
                 {
                     throw new CryptographicException();
                 }
 
-                _ctx = Interop.Crypto.EvpMdCtxCreate();
+                _ctx = Interop.Crypto.EvpMdCtxCreate(_algorithmEvp);
 
-                Interop.libcrypto.CheckValidOpenSslHandle(_ctx);
-
-                Check(Interop.Crypto.EvpDigestInitEx(_ctx, algorithmEvp, IntPtr.Zero));
+                Interop.Crypto.CheckValidOpenSslHandle(_ctx);
             }
 
             public sealed override unsafe void AppendHashDataCore(byte[] data, int offset, int count)
@@ -91,7 +89,7 @@ namespace Internal.Cryptography
                 Debug.Assert(length == _hashSize);
 
                 // Reset the algorithm provider.
-                Check(Interop.Crypto.EvpDigestInitEx(_ctx, _algorithmEvp, IntPtr.Zero));
+                Check(Interop.Crypto.EvpDigestReset(_ctx, _algorithmEvp));
 
                 byte[] result = new byte[(int)length];
                 Marshal.Copy((IntPtr)md, result, 0, (int)length);
@@ -131,7 +129,7 @@ namespace Internal.Cryptography
                 fixed (byte* keyPtr = key)
                 {
                     _hmacCtx = Interop.Crypto.HmacCreate(keyPtr, key.Length, algorithmEvp);
-                    Interop.libcrypto.CheckValidOpenSslHandle(_hmacCtx);
+                    Interop.Crypto.CheckValidOpenSslHandle(_hmacCtx);
                 }
             }
 
@@ -181,7 +179,7 @@ namespace Internal.Cryptography
             if (result != Success)
             {
                 Debug.Assert(result == 0);
-                throw Interop.libcrypto.CreateOpenSslCryptographicException();
+                throw Interop.Crypto.CreateOpenSslCryptographicException();
             }
         }
     }

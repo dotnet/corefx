@@ -30,7 +30,7 @@ namespace Internal.Cryptography.Pal
 
             if (!init)
             {
-                throw Interop.libcrypto.CreateOpenSslCryptographicException();
+                throw Interop.Crypto.CreateOpenSslCryptographicException();
             }
 
             _cert = handle;
@@ -74,7 +74,7 @@ namespace Internal.Cryptography.Pal
             get
             {
                 IntPtr oidPtr = Interop.Crypto.GetX509PublicKeyAlgorithm(_cert);
-                return Interop.libcrypto.OBJ_obj2txt_helper(oidPtr);
+                return Interop.Crypto.GetOidValue(oidPtr);
             }
         }
 
@@ -114,7 +114,7 @@ namespace Internal.Cryptography.Pal
             get
             {
                 IntPtr oidPtr = Interop.Crypto.GetX509SignatureAlgorithm(_cert);
-                return Interop.libcrypto.OBJ_obj2txt_helper(oidPtr);
+                return Interop.Crypto.GetOidValue(oidPtr);
             }
         }
 
@@ -174,7 +174,7 @@ namespace Internal.Cryptography.Pal
             {
                 if (_subjectName == null)
                 {
-                    _subjectName = LoadX500Name(Interop.libcrypto.X509_get_subject_name(_cert));
+                    _subjectName = Interop.Crypto.LoadX500Name(Interop.libcrypto.X509_get_subject_name(_cert));
                 }
 
                 return _subjectName;
@@ -187,7 +187,7 @@ namespace Internal.Cryptography.Pal
             {
                 if (_issuerName == null)
                 {
-                    _issuerName = LoadX500Name(Interop.libcrypto.X509_get_issuer_name(_cert));
+                    _issuerName = Interop.Crypto.LoadX500Name(Interop.libcrypto.X509_get_issuer_name(_cert));
                 }
 
                 return _issuerName;
@@ -205,18 +205,18 @@ namespace Internal.Cryptography.Pal
                 {
                     IntPtr ext = Interop.libcrypto.X509_get_ext(_cert, i);
 
-                    Interop.libcrypto.CheckValidOpenSslHandle(ext);
+                    Interop.Crypto.CheckValidOpenSslHandle(ext);
 
                     IntPtr oidPtr = Interop.libcrypto.X509_EXTENSION_get_object(ext);
 
-                    Interop.libcrypto.CheckValidOpenSslHandle(oidPtr);
+                    Interop.Crypto.CheckValidOpenSslHandle(oidPtr);
 
-                    string oidValue = Interop.libcrypto.OBJ_obj2txt_helper(oidPtr);
+                    string oidValue = Interop.Crypto.GetOidValue(oidPtr);
                     Oid oid = new Oid(oidValue);
 
                     IntPtr dataPtr = Interop.libcrypto.X509_EXTENSION_get_data(ext);
 
-                    Interop.libcrypto.CheckValidOpenSslHandle(dataPtr);
+                    Interop.Crypto.CheckValidOpenSslHandle(dataPtr);
 
                     byte[] extData = Interop.Crypto.GetAsn1StringBytes(dataPtr);
                     bool critical = Interop.libcrypto.X509_EXTENSION_get_critical(ext);
@@ -251,6 +251,14 @@ namespace Internal.Cryptography.Pal
             }
         }
 
+        public ECDsa GetECDsaPublicKey()
+        {
+            using (SafeEvpPKeyHandle publicKeyHandle = Interop.Crypto.GetX509EvpPublicKey(_cert))
+            {
+                return new ECDsaOpenSsl(publicKeyHandle);
+            }
+        }
+
         public ECDsa GetECDsaPrivateKey()
         {
             if (_privateKey == null || _privateKey.IsInvalid)
@@ -273,14 +281,14 @@ namespace Internal.Cryptography.Pal
                     return "";
                 }
 
-                int bioSize = Interop.libcrypto.GetMemoryBioSize(bioHandle);
+                int bioSize = Interop.Crypto.GetMemoryBioSize(bioHandle);
                 // Ensure space for the trailing \0
                 StringBuilder builder = new StringBuilder(bioSize + 1);
-                int read = Interop.libcrypto.BIO_gets(bioHandle, builder, builder.Capacity);
+                int read = Interop.Crypto.BioGets(bioHandle, builder, builder.Capacity);
 
                 if (read < 0)
                 {
-                    throw Interop.libcrypto.CreateOpenSslCryptographicException();
+                    throw Interop.Crypto.CreateOpenSslCryptographicException();
                 }
 
                 return builder.ToString();
@@ -327,14 +335,6 @@ namespace Internal.Cryptography.Pal
             }
 
             return duplicate;
-        }
-
-        private static X500DistinguishedName LoadX500Name(IntPtr namePtr)
-        {
-            Interop.libcrypto.CheckValidOpenSslHandle(namePtr);
-
-            byte[] buf = Interop.Crypto.GetX509NameRawBytes(namePtr);
-            return new X500DistinguishedName(buf);
         }
 
         internal static DateTime ExtractValidityDateTime(IntPtr validityDatePtr)

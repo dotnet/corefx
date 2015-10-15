@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
-using Validation;
 
 namespace System.Collections.Immutable
 {
@@ -311,7 +310,6 @@ namespace System.Collections.Immutable
             /// <returns>
             /// An <see cref="IDictionaryEnumerator"/> object for the <see cref="IDictionary"/> object.
             /// </returns>
-            /// <exception cref="System.NotImplementedException"></exception>
             IDictionaryEnumerator IDictionary.GetEnumerator()
             {
                 return new DictionaryEnumerator<TKey, TValue>(this.GetEnumerator());

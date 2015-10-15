@@ -2,12 +2,14 @@
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <PropertyGroup>
     <AssemblyName>System.Net.Sockets</AssemblyName>
-    <AssemblyVersion>4.0.10.0</AssemblyVersion>
+    <AssemblyVersion>4.1.0.0</AssemblyVersion>
     <OutputType>Library</OutputType>
     <ProjectGuid>{43311AFB-D7C4-4E5A-B1DE-855407F90D1B}</ProjectGuid>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <DefineConstants>$(DefineConstants);FEATURE_CORECLR</DefineConstants>
-  </PropertyGroup>
+    <PackageTargetFramework Condition="'$(PackageTargetFramework)' == ''">dnxcore50</PackageTargetFramework>
+    <UsePackageTargetRuntimeDefaults>true</UsePackageTargetRuntimeDefaults>
+</PropertyGroup>
   <!-- Help VS understand available configurations -->
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Linux_Debug|AnyCPU' " />
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Linux_Release|AnyCPU' " />
@@ -306,6 +308,9 @@
     <Compile Include="System\Net\Sockets\SocketAsyncEventArgs.Unix.cs" />
     <Compile Include="System\Net\Sockets\SocketPal.Unix.cs" />
 
+    <Compile Include="$(CommonPath)\System\Net\InteropIPAddressExtensions.Unix.cs">
+      <Link>Common\System\Net\InteropIPAddressExtensions.Unix.cs</Link>
+    </Compile>
     <Compile Include="$(CommonPath)\System\Net\SafeCloseSocket.Unix.cs">
       <Link>Common\System\Net\SafeCloseSocket.Unix.cs</Link>
     </Compile>    
@@ -346,35 +351,11 @@
     <Compile Include="$(CommonPath)\Interop\Unix\libc\Interop.ioctl.cs">
       <Link>Interop\Unix\libc\Interop.ioctl.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Unix\libc\Interop.iovec.cs">
-      <Link>Interop\Unix\libc\Interop.iovec.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\Interop\Unix\libc\Interop.linger.cs">
-      <Link>Interop\Unix\libc\Interop.linger.cs</Link>
-    </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\libc\Interop.listen.cs">
       <Link>Interop\Unix\libc\Interop.listen.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Unix\libc\Interop.recv.cs">
-      <Link>Interop\Unix\libc\Interop.recv.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\Interop\Unix\libc\Interop.recvfrom.cs">
-      <Link>Interop\Unix\libc\Interop.recvfrom.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\Interop\Unix\libc\Interop.recvmsg.cs">
-      <Link>Interop\Unix\libc\Interop.recvmsg.cs</Link>
-    </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\libc\Interop.select.cs">
       <Link>Interop\Unix\libc\Interop.select.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\Interop\Unix\libc\Interop.send.cs">
-      <Link>Interop\Unix\libc\Interop.send.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\Interop\Unix\libc\Interop.sendmsg.cs">
-      <Link>Interop\Unix\libc\Interop.sendmsg.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\Interop\Unix\libc\Interop.sendto.cs">
-      <Link>Interop\Unix\libc\Interop.sendto.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\libc\Interop.setsockopt.cs">
       <Link>Interop\Unix\libc\Interop.setsockopt.cs</Link>
@@ -391,6 +372,30 @@
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.Fcntl.cs">
       <Link>Interop\Unix\System.Native\Interop.Fcntl.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.IPAddress.cs">
+      <Link>Interop\Unix\System.Native\Interop.IPAddress.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.IPPacketInformation.cs">
+      <Link>Interop\Unix\System.Native\Interop.IPPacketInformation.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.LingerOption.cs">
+      <Link>Interop\Unix\System.Native\Interop.LingerOption.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.MessageHeader.cs">
+      <Link>Interop\Unix\System.Native\Interop.MessageHeader.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.MulticastOption.cs">
+      <Link>Interop\Unix\System.Native\Interop.MulticastOption.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.ReceiveMessage.cs">
+      <Link>Interop\Unix\System.Native\Interop.ReceiveMessage.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.SendMessage.cs">
+      <Link>Interop\Unix\System.Native\Interop.SendMessage.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.SocketAddress.cs">
+      <Link>Interop\Unix\System.Native\Interop.SocketAddress.cs</Link>
     </Compile>
   </ItemGroup>
 
@@ -413,9 +418,6 @@
     <Compile Include="$(CommonPath)\Interop\Linux\libc\Interop.SocketOptionName.cs">
       <Link>Interop\Linux\libc\Interop.SocketOptionName.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Linux\libc\Interop.cmsghdr.cs">
-      <Link>Interop\Linux\libc\Interop.cmsghdr.cs</Link>
-    </Compile>
     <Compile Include="$(CommonPath)\Interop\Linux\libc\Interop.epoll_create1.cs">
       <Link>Interop\Linux\libc\Interop.epoll_create1.cs</Link>
     </Compile>
@@ -430,21 +432,6 @@
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Linux\libc\Interop.fd_set.cs">
       <Link>Interop\Linux\libc\Interop.fd_set.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\Interop\Linux\libc\Interop.in_pktinfo.cs">
-      <Link>Interop\Linux\libc\Interop.in_pktinfo.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\Interop\Linux\libc\Interop.in6_pktinfo.cs">
-      <Link>Interop\Linux\libc\Interop.in6_pktinfo.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\Interop\Linux\libc\Interop.ip_mreqn.cs">
-      <Link>Interop\Linux\libc\Interop.ip_mreqn.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\Interop\Linux\libc\Interop.ipv6_mreq.cs">
-      <Link>Interop\Linux\libc\Interop.ipv6_mreq.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\Interop\Linux\libc\Interop.msghdr.cs">
-      <Link>Interop\Linux\libc\Interop.msghdr.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Linux\libc\Interop.sockaddr.cs">
       <Link>Interop\Linux\libc\Interop.sockaddr.cs</Link>
@@ -473,32 +460,14 @@
     <Compile Include="$(CommonPath)\Interop\OSX\libc\Interop.SocketOptionName.cs">
       <Link>Interop\OSX\libc\Interop.SocketOptionName.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\OSX\libc\Interop.cmsghdr.cs">
-      <Link>Interop\OSX\libc\Interop.cmsghdr.cs</Link>
-    </Compile>
     <Compile Include="$(CommonPath)\Interop\OSX\libc\Interop.fd_set.cs">
       <Link>Interop\OSX\libc\Interop.fd_set.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\Interop\OSX\libc\Interop.in_pktinfo.cs">
-      <Link>Interop\OSX\libc\Interop.in_pktinfo.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\Interop\OSX\libc\Interop.in6_pktinfo.cs">
-      <Link>Interop\OSX\libc\Interop.in6_pktinfo.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\Interop\OSX\libc\Interop.ip_mreqn.cs">
-      <Link>Interop\OSX\libc\Interop.ip_mreqn.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\Interop\OSX\libc\Interop.ipv6_mreq.cs">
-      <Link>Interop\OSX\libc\Interop.ipv6_mreq.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\OSX\libc\Interop.kqueue.cs">
       <Link>Interop\OSX\libc\Interop.kqueue.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\OSX\libc\Interop.kevent64.cs">
       <Link>Interop\OSX\libc\Interop.kevent.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\Interop\OSX\libc\Interop.msghdr.cs">
-      <Link>Interop\OSX\libc\Interop.msghdr.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\OSX\libc\Interop.sockaddr.cs">
       <Link>Interop\OSX\libc\Interop.sockaddr.cs</Link>

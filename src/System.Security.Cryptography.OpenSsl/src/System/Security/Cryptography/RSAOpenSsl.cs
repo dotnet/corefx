@@ -17,16 +17,6 @@ namespace System.Security.Cryptography
         // 65537 (0x10001) in big-endian form
         private static readonly byte[] s_defaultExponent = { 0x01, 0x00, 0x01 };
 
-        // OpenSSL seems to accept answers of all sizes.
-        // Choosing a non-multiple of 8 would make some calculations misalign
-        // (like assertions of (output.Length * 8) == KeySize).
-        // Choosing a number too small is insecure.
-        // Choosing a number too large will cause GenerateKey to take much
-        // longer than anyone would be willing to wait.
-        //
-        // So, copying the values from RSACryptoServiceProvider
-        private static readonly KeySizes s_legalKeySizes = new KeySizes(384, 16384, 8);
-
         private Lazy<SafeRsaHandle> _key;
 
         public RSAOpenSsl()
@@ -36,14 +26,12 @@ namespace System.Security.Cryptography
 
         public RSAOpenSsl(int keySize)
         {
-            _legalKeySizesValue = new[] { s_legalKeySizes };
             KeySize = keySize;
             _key = new Lazy<SafeRsaHandle>(GenerateKey);
         }
 
         public RSAOpenSsl(RSAParameters parameters)
         {
-            _legalKeySizesValue = new[] { s_legalKeySizes };
             ImportParameters(parameters);
         }
 
@@ -61,8 +49,6 @@ namespace System.Security.Cryptography
         {
             if (handle == IntPtr.Zero)
                 throw new ArgumentException(SR.Cryptography_OpenInvalidHandle, "handle");
-
-            _legalKeySizesValue = new[] { s_legalKeySizes };
 
             SafeRsaHandle rsaHandle = SafeRsaHandle.DuplicateHandle(handle);
 
@@ -94,10 +80,8 @@ namespace System.Security.Cryptography
 
             if (rsa.IsInvalid)
             {
-                throw Interop.libcrypto.CreateOpenSslCryptographicException();
+                throw Interop.Crypto.CreateOpenSslCryptographicException();
             }
-
-            _legalKeySizesValue = new[] { s_legalKeySizes };
 
             // Set base.KeySize rather than this.KeySize to avoid an unnecessary Lazy<> allocation.
             base.KeySize = BitsPerByte * Interop.libcrypto.RSA_size(rsa);
@@ -119,6 +103,22 @@ namespace System.Security.Cryptography
             }
         }
 
+        public override KeySizes[] LegalKeySizes
+        {
+            get
+            {
+                // OpenSSL seems to accept answers of all sizes.
+                // Choosing a non-multiple of 8 would make some calculations misalign
+                // (like assertions of (output.Length * 8) == KeySize).
+                // Choosing a number too small is insecure.
+                // Choosing a number too large will cause GenerateKey to take much
+                // longer than anyone would be willing to wait.
+                //
+                // So, copying the values from RSACryptoServiceProvider
+                return new[] { new KeySizes(384, 16384, 8) };
+            }
+        }
+
         /// <summary>
         /// Obtain a SafeHandle version of an EVP_PKEY* which wraps an RSA* equivalent
         /// to the current key for this instance.
@@ -136,7 +136,7 @@ namespace System.Security.Cryptography
                 // So everything should be copacetic.
                 if (!Interop.libcrypto.EVP_PKEY_set1_RSA(pkeyHandle, currentKey))
                 {
-                    throw Interop.libcrypto.CreateOpenSslCryptographicException();
+                    throw Interop.Crypto.CreateOpenSslCryptographicException();
                 }
 
                 return pkeyHandle;
@@ -277,7 +277,7 @@ namespace System.Security.Cryptography
             SafeRsaHandle key = Interop.libcrypto.RSA_new();
             bool imported = false;
 
-            Interop.libcrypto.CheckValidOpenSslHandle(key);
+            Interop.Crypto.CheckValidOpenSslHandle(key);
 
             try
             {
@@ -288,14 +288,14 @@ namespace System.Security.Cryptography
 
                 // CreateBignumPtr returns IntPtr.Zero for null input, so this just does the right thing
                 // on a public-key-only set of RSAParameters.
-                rsaStructure->n = Interop.libcrypto.CreateBignumPtr(parameters.Modulus);
-                rsaStructure->e = Interop.libcrypto.CreateBignumPtr(parameters.Exponent);
-                rsaStructure->d = Interop.libcrypto.CreateBignumPtr(parameters.D);
-                rsaStructure->p = Interop.libcrypto.CreateBignumPtr(parameters.P);
-                rsaStructure->dmp1 = Interop.libcrypto.CreateBignumPtr(parameters.DP);
-                rsaStructure->q = Interop.libcrypto.CreateBignumPtr(parameters.Q);
-                rsaStructure->dmq1 = Interop.libcrypto.CreateBignumPtr(parameters.DQ);
-                rsaStructure->iqmp = Interop.libcrypto.CreateBignumPtr(parameters.InverseQ);
+                rsaStructure->n = Interop.Crypto.CreateBignumPtr(parameters.Modulus);
+                rsaStructure->e = Interop.Crypto.CreateBignumPtr(parameters.Exponent);
+                rsaStructure->d = Interop.Crypto.CreateBignumPtr(parameters.D);
+                rsaStructure->p = Interop.Crypto.CreateBignumPtr(parameters.P);
+                rsaStructure->dmp1 = Interop.Crypto.CreateBignumPtr(parameters.DP);
+                rsaStructure->q = Interop.Crypto.CreateBignumPtr(parameters.Q);
+                rsaStructure->dmq1 = Interop.Crypto.CreateBignumPtr(parameters.DQ);
+                rsaStructure->iqmp = Interop.Crypto.CreateBignumPtr(parameters.InverseQ);
 
                 imported = true;
             }
@@ -387,7 +387,7 @@ namespace System.Security.Cryptography
         {
             if (returnValue == -1)
             {
-                throw Interop.libcrypto.CreateOpenSslCryptographicException();
+                throw Interop.Crypto.CreateOpenSslCryptographicException();
             }
         }
 
@@ -398,7 +398,7 @@ namespace System.Security.Cryptography
                 return;
             }
 
-            throw Interop.libcrypto.CreateOpenSslCryptographicException();
+            throw Interop.Crypto.CreateOpenSslCryptographicException();
         }
 
         private SafeRsaHandle GenerateKey()
@@ -406,11 +406,11 @@ namespace System.Security.Cryptography
             SafeRsaHandle key = Interop.libcrypto.RSA_new();
             bool generated = false;
 
-            Interop.libcrypto.CheckValidOpenSslHandle(key);
+            Interop.Crypto.CheckValidOpenSslHandle(key);
 
             try
             {
-                using (SafeBignumHandle exponent = Interop.libcrypto.CreateBignum(s_defaultExponent))
+                using (SafeBignumHandle exponent = Interop.Crypto.CreateBignum(s_defaultExponent))
                 {
                     // The documentation for RSA_generate_key_ex does not say that it returns only
                     // 0 or 1, so the call marshalls it back as a full Int32 and checks for a value
@@ -477,7 +477,7 @@ namespace System.Security.Cryptography
 
             if (!success)
             {
-                throw Interop.libcrypto.CreateOpenSslCryptographicException();
+                throw Interop.Crypto.CreateOpenSslCryptographicException();
             }
 
             Debug.Assert(
@@ -528,9 +528,9 @@ namespace System.Security.Cryptography
             // If there's ever a new one that doesn't, translate it here.
             string sn = hashAlgorithmName.Name;
 
-            int nid = Interop.libcrypto.OBJ_sn2nid(sn);
+            int nid = Interop.Crypto.ObjSn2Nid(sn);
 
-            if (nid == Interop.libcrypto.NID_undef)
+            if (nid == Interop.Crypto.NID_undef)
             {
                 throw new CryptographicException(SR.Cryptography_UnknownHashAlgorithm, hashAlgorithmName.Name);
             }

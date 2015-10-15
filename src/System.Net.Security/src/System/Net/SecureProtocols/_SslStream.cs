@@ -196,7 +196,7 @@ namespace System.Net.Security
         }
 
         //
-        // Combined sync/async write method. For sync case asyncRequest==null.
+        // Sync write method.
         //
         private void ProcessWrite(byte[] buffer, int offset, int count)
         {
@@ -207,7 +207,6 @@ namespace System.Net.Security
                 throw new NotSupportedException(SR.Format(SR.net_io_invalidnestedcall, "Write", "write"));
             }
 
-            bool failed = false;
             try
             {
                 StartWriting(buffer, offset, count);
@@ -216,7 +215,6 @@ namespace System.Net.Security
             {
                 _SslState.FinishWrite();
 
-                failed = true;
                 if (e is IOException)
                 {
                     throw;
@@ -226,10 +224,7 @@ namespace System.Net.Security
             }
             finally
             {
-                if (failed)
-                {
-                    _NestedWrite = 0;
-                }
+                _NestedWrite = 0;
             }
         }
 
@@ -273,8 +268,8 @@ namespace System.Net.Security
 
                     int chunkBytes = Math.Min(count, _SslState.MaxDataSize);
                     int encryptedBytes;
-                    SecurityStatus errorCode = _SslState.EncryptData(buffer, offset, chunkBytes, ref outBuffer, out encryptedBytes);
-                    if (errorCode != SecurityStatus.OK)
+                    SecurityStatusPal errorCode = _SslState.EncryptData(buffer, offset, chunkBytes, ref outBuffer, out encryptedBytes);
+                    if (errorCode != SecurityStatusPal.OK)
                     {
                         ProtocolToken message = new ProtocolToken(null, errorCode);
                         throw new IOException(SR.net_io_encrypt, message.GetException());
@@ -307,9 +302,7 @@ namespace System.Net.Security
         }
 
         //
-        // Combined sync/async read method. For sync request asyncRequest==null
-        // There is a little overhead because we need to pass buffer/offset/count used only in sync.
-        // Still the benefit is that we have a common sync/async code path.
+        // Sync read method.
         //
         private int ProcessRead(byte[] buffer, int offset, int count)
         {
@@ -320,7 +313,6 @@ namespace System.Net.Security
                 throw new NotSupportedException(SR.Format(SR.net_io_invalidnestedcall, "Read", "read"));
             }
 
-            bool failed = false;
             try
             {
                 int copyBytes;
@@ -341,7 +333,6 @@ namespace System.Net.Security
             catch (Exception e)
             {
                 _SslState.FinishRead(null);
-                failed = true;
                 if (e is IOException)
                 {
                     throw;
@@ -351,11 +342,7 @@ namespace System.Net.Security
             }
             finally
             {
-                // If sync request or exception.
-                if (failed)
-                {
-                    _NestedRead = 0;
-                }
+                _NestedRead = 0;
             }
         }
 
@@ -450,9 +437,9 @@ namespace System.Net.Security
             // Decrypt into internal buffer, change "readBytes" to count now _Decrypted Bytes_.
             int data_offset = 0;
 
-            SecurityStatus errorCode = _SslState.DecryptData(InternalBuffer, ref data_offset, ref readBytes);
+            SecurityStatusPal errorCode = _SslState.DecryptData(InternalBuffer, ref data_offset, ref readBytes);
 
-            if (errorCode != SecurityStatus.OK)
+            if (errorCode != SecurityStatusPal.OK)
             {
                 byte[] extraBuffer = null;
                 if (readBytes != 0)
@@ -496,7 +483,7 @@ namespace System.Net.Security
         //
         // Only processing SEC_I_RENEGOTIATE.
         //
-        private int ProcessReadErrorCode(SecurityStatus errorCode, byte[] buffer, int offset, int count, byte[] extraBuffer)
+        private int ProcessReadErrorCode(SecurityStatusPal errorCode, byte[] buffer, int offset, int count, byte[] extraBuffer)
         {
             // ERROR - examine what kind
             ProtocolToken message = new ProtocolToken(null, errorCode);

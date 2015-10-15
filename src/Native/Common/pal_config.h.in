@@ -13,6 +13,10 @@
 #cmakedefine01 HAVE_POSIX_ADVISE
 #cmakedefine01 PRIORITY_REQUIRES_INT_WHO
 #cmakedefine01 HAVE_IN6_U
+#cmakedefine01 HAVE_IOCTL
+#cmakedefine01 HAVE_TIOCGWINSZ
+#cmakedefine01 HAVE_SCHED_GETAFFINITY
+#cmakedefine01 HAVE_SCHED_SETAFFINITY
 #cmakedefine01 HAVE_AF_PACKET
 #cmakedefine01 HAVE_AF_LINK
 #cmakedefine01 HAVE_TCP_VAR_H
