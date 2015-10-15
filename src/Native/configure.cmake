@@ -4,11 +4,11 @@ include(CheckCXXSourceCompiles)
 include(CheckCXXSourceRuns)
 include(CheckPrototypeDefinition)
 include(CheckIncludeFiles)
+include(CheckSymbolExists)
 
 #CMake does not include /usr/local/include into the include search path
 #thus add it manually. This is required on FreeBSD.
 include_directories(SYSTEM /usr/local/include)
-include_directories(SYSTEM /usr/include)
 
 check_function_exists(
     stat64
@@ -33,6 +33,23 @@ check_function_exists(
 check_function_exists(
     posix_fadvise
     HAVE_POSIX_ADVISE)
+
+check_function_exists(
+    ioctl
+    HAVE_IOCTL)
+
+check_function_exists(
+    sched_getaffinity
+    HAVE_SCHED_GETAFFINITY)
+
+check_function_exists(
+    sched_setaffinity
+    HAVE_SCHED_SETAFFINITY)
+
+check_symbol_exists(
+    TIOCGWINSZ
+    "sys/ioctl.h"
+    HAVE_TIOCGWINSZ)
 
 check_struct_has_member(
     "struct stat"

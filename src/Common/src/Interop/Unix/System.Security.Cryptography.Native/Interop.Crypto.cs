@@ -5,6 +5,7 @@ using System;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
 using Microsoft.Win32.SafeHandles;
 
 internal static partial class Interop
@@ -120,6 +121,9 @@ internal static partial class Interop
             [MarshalAs(UnmanagedType.Bool)] bool isDst);
 
         [DllImport(Libraries.CryptoNative)]
+        internal static extern int CheckX509IpAddress(SafeX509Handle x509, [In]byte[] addressBytes, int addressLen, string hostname, int cchHostname);
+
+        [DllImport(Libraries.CryptoNative)]
         internal static extern int CheckX509Hostname(SafeX509Handle x509, string hostname, int cchHostname);
 
         internal static byte[] GetAsn1StringBytes(IntPtr asn1)
@@ -132,9 +136,12 @@ internal static partial class Interop
             return GetDynamicBuffer((handle, buf, i) => GetX509Thumbprint(handle, buf, i), x509);
         }
 
-        internal static byte[] GetX509NameRawBytes(IntPtr x509Name)
+        internal static X500DistinguishedName LoadX500Name(IntPtr namePtr)
         {
-            return GetDynamicBuffer((ptr, buf, i) => GetX509NameRawBytes(ptr, buf, i), x509Name);
+            CheckValidOpenSslHandle(namePtr);
+
+            byte[] buf = GetDynamicBuffer((ptr, buf1, i) => GetX509NameRawBytes(ptr, buf1, i), namePtr);
+            return new X500DistinguishedName(buf);
         }
 
         internal static byte[] GetX509PublicKeyParameterBytes(SafeX509Handle x509)
@@ -160,7 +167,7 @@ internal static partial class Interop
 
             if (succeeded != 1)
             {
-                throw Interop.libcrypto.CreateOpenSslCryptographicException();
+                throw Interop.Crypto.CreateOpenSslCryptographicException();
             }
         }
 
@@ -176,7 +183,7 @@ internal static partial class Interop
 
             if (result != 1)
             {
-                throw Interop.libcrypto.CreateOpenSslCryptographicException();
+                throw Interop.Crypto.CreateOpenSslCryptographicException();
             }
 
             // Track the parent relationship for the interior pointer so lifetime is well-managed.
@@ -191,7 +198,7 @@ internal static partial class Interop
 
             if (negativeSize > 0)
             {
-                throw Interop.libcrypto.CreateOpenSslCryptographicException();
+                throw Interop.Crypto.CreateOpenSslCryptographicException();
             }
 
             byte[] bytes = new byte[-negativeSize];
@@ -200,7 +207,7 @@ internal static partial class Interop
 
             if (ret != 1)
             {
-                throw Interop.libcrypto.CreateOpenSslCryptographicException();
+                throw Interop.Crypto.CreateOpenSslCryptographicException();
             }
 
             return bytes;

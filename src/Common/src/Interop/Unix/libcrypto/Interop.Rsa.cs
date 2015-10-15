@@ -19,9 +19,6 @@ internal static partial class Interop
         internal static extern SafeRsaHandle RSA_new();
 
         [DllImport(Libraries.LibCrypto)]
-        internal static unsafe extern SafeRsaHandle d2i_RSAPublicKey(IntPtr zero, byte** ppin, int len);
-
-        [DllImport(Libraries.LibCrypto)]
         [return: MarshalAs(UnmanagedType.Bool)]
         internal static extern bool RSA_up_ref(IntPtr rsa);
 
@@ -75,18 +72,18 @@ internal static partial class Interop
 
                 rsaParameters = new RSAParameters
                 {
-                    Modulus = ExtractBignum(rsaStructure->n, modulusSize),
-                    Exponent = ExtractBignum(rsaStructure->e, 0),
+                    Modulus = Crypto.ExtractBignum(rsaStructure->n, modulusSize),
+                    Exponent = Crypto.ExtractBignum(rsaStructure->e, 0),
                 };
 
                 if (includePrivateParameters)
                 {
-                    rsaParameters.D = ExtractBignum(rsaStructure->d, modulusSize);
-                    rsaParameters.P = ExtractBignum(rsaStructure->p, halfModulus);
-                    rsaParameters.DP = ExtractBignum(rsaStructure->dmp1, halfModulus);
-                    rsaParameters.Q = ExtractBignum(rsaStructure->q, halfModulus);
-                    rsaParameters.DQ = ExtractBignum(rsaStructure->dmq1, halfModulus);
-                    rsaParameters.InverseQ = ExtractBignum(rsaStructure->iqmp, halfModulus);
+                    rsaParameters.D = Crypto.ExtractBignum(rsaStructure->d, modulusSize);
+                    rsaParameters.P = Crypto.ExtractBignum(rsaStructure->p, halfModulus);
+                    rsaParameters.DP = Crypto.ExtractBignum(rsaStructure->dmp1, halfModulus);
+                    rsaParameters.Q = Crypto.ExtractBignum(rsaStructure->q, halfModulus);
+                    rsaParameters.DQ = Crypto.ExtractBignum(rsaStructure->dmq1, halfModulus);
+                    rsaParameters.InverseQ = Crypto.ExtractBignum(rsaStructure->iqmp, halfModulus);
                 }
             }
             finally

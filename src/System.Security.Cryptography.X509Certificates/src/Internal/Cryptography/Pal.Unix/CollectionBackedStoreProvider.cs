@@ -87,7 +87,7 @@ namespace Internal.Cryptography.Pal
                         {
                             if (!Interop.Crypto.PushX509StackField(publicCerts, certHandle))
                             {
-                                throw Interop.libcrypto.CreateOpenSslCryptographicException();
+                                throw Interop.Crypto.CreateOpenSslCryptographicException();
                             }
 
                             // The handle ownership has been transferred into the STACK_OF(X509).
@@ -117,15 +117,15 @@ namespace Internal.Cryptography.Pal
                     privateCertKeyHandle,
                     privateCertHandle,
                     publicCerts,
-                    Interop.libcrypto.NID_undef,
-                    Interop.libcrypto.NID_undef,
+                    Interop.Crypto.NID_undef,
+                    Interop.Crypto.NID_undef,
                     Interop.libcrypto.PKCS12_DEFAULT_ITER,
                     Interop.libcrypto.PKCS12_DEFAULT_ITER,
                     0))
                 {
                     if (pkcs12.IsInvalid)
                     {
-                        throw Interop.libcrypto.CreateOpenSslCryptographicException();
+                        throw Interop.Crypto.CreateOpenSslCryptographicException();
                     }
 
                     unsafe
