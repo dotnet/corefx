@@ -13,24 +13,6 @@ namespace System.Net.NetworkInformation
 
     public delegate void NetworkAvailabilityChangedEventHandler(object sender, NetworkAvailabilityEventArgs e);
 
-    public class NetworkAvailabilityEventArgs : EventArgs
-    {
-        private readonly bool _isAvailable;
-
-        internal NetworkAvailabilityEventArgs(bool isAvailable)
-        {
-            _isAvailable = isAvailable;
-        }
-
-        public bool IsAvailable
-        {
-            get
-            {
-                return _isAvailable;
-            }
-        }
-    }
-
     public class NetworkChange
     {
         public static event NetworkAvailabilityChangedEventHandler NetworkAvailabilityChanged

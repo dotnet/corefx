@@ -3,8 +3,10 @@ project(System.Native)
 set(NATIVE_SOURCES
     pal_errno.cpp
     pal_io.cpp
+    pal_maphardwaretype.cpp
     pal_mount.cpp
     pal_networking.cpp
+    pal_networkstatistics.cpp
     pal_process.cpp
     pal_string.cpp
     pal_time.cpp

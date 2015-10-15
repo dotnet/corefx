@@ -70,6 +70,16 @@
           "lib/dotnet/System.ComponentModel.EventBasedAsync.dll": {}
         }
       },
+      "System.Console/4.0.0-beta-23408": {
+        "type": "package",
+        "dependencies": {
+          "System.IO": "4.0.0",
+          "System.Runtime": "4.0.0"
+        },
+        "compile": {
+          "ref/dotnet/System.Console.dll": {}
+        }
+      },
       "System.Diagnostics.Contracts/4.0.0": {
         "type": "package",
         "dependencies": {
@@ -179,6 +189,22 @@
         },
         "runtime": {
           "lib/dotnet/System.IO.FileSystem.Primitives.dll": {}
+        }
+      },
+      "System.Linq/4.0.0": {
+        "type": "package",
+        "dependencies": {
+          "System.Collections": "4.0.10",
+          "System.Diagnostics.Debug": "4.0.10",
+          "System.Resources.ResourceManager": "4.0.0",
+          "System.Runtime": "4.0.20",
+          "System.Runtime.Extensions": "4.0.10"
+        },
+        "compile": {
+          "ref/dotnet/System.Linq.dll": {}
+        },
+        "runtime": {
+          "lib/dotnet/System.Linq.dll": {}
         }
       },
       "System.Net.Primitives/4.0.10": {
@@ -775,6 +801,28 @@
         "System.ComponentModel.EventBasedAsync.nuspec"
       ]
     },
+    "System.Console/4.0.0-beta-23408": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "iCGS/bP/CurTicT3HAhRn0CoxkxWjRsnG2ck+/S7j+dJFZVsbzPUzKIVrXpL3VkPMJMXxjR5UNumKTrAVXoQDQ==",
+      "files": [
+        "lib/MonoAndroid10/_._",
+        "lib/MonoTouch10/_._",
+        "lib/net46/System.Console.dll",
+        "lib/xamarinios10/_._",
+        "lib/xamarinmac20/_._",
+        "ref/dotnet/System.Console.dll",
+        "ref/MonoAndroid10/_._",
+        "ref/MonoTouch10/_._",
+        "ref/net46/System.Console.dll",
+        "ref/xamarinios10/_._",
+        "ref/xamarinmac20/_._",
+        "runtime.json",
+        "System.Console.4.0.0-beta-23408.nupkg",
+        "System.Console.4.0.0-beta-23408.nupkg.sha512",
+        "System.Console.nuspec"
+      ]
+    },
     "System.Diagnostics.Contracts/4.0.0": {
       "type": "package",
       "sha512": "lMc7HNmyIsu0pKTdA4wf+FMq5jvouUd+oUpV4BdtyqoV0Pkbg9u/7lTKFGqpjZRQosWHq1+B32Lch2wf4AmloA==",
@@ -1042,6 +1090,39 @@
         "ref/xamarinios10/_._",
         "ref/xamarinmac20/_._",
         "System.IO.FileSystem.Primitives.nuspec"
+      ]
+    },
+    "System.Linq/4.0.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "r6Hlc+ytE6m/9UBr+nNRRdoJEWjoeQiT3L3lXYFDHoXk3VYsRBCDNXrawcexw7KPLaH0zamQLiAb6avhZ50cGg==",
+      "files": [
+        "lib/dotnet/System.Linq.dll",
+        "lib/net45/_._",
+        "lib/netcore50/System.Linq.dll",
+        "lib/win8/_._",
+        "lib/wp80/_._",
+        "lib/wpa81/_._",
+        "ref/dotnet/de/System.Linq.xml",
+        "ref/dotnet/es/System.Linq.xml",
+        "ref/dotnet/fr/System.Linq.xml",
+        "ref/dotnet/it/System.Linq.xml",
+        "ref/dotnet/ja/System.Linq.xml",
+        "ref/dotnet/ko/System.Linq.xml",
+        "ref/dotnet/ru/System.Linq.xml",
+        "ref/dotnet/System.Linq.dll",
+        "ref/dotnet/System.Linq.xml",
+        "ref/dotnet/zh-hans/System.Linq.xml",
+        "ref/dotnet/zh-hant/System.Linq.xml",
+        "ref/net45/_._",
+        "ref/netcore50/System.Linq.dll",
+        "ref/netcore50/System.Linq.xml",
+        "ref/win8/_._",
+        "ref/wp80/_._",
+        "ref/wpa81/_._",
+        "System.Linq.4.0.0.nupkg",
+        "System.Linq.4.0.0.nupkg.sha512",
+        "System.Linq.nuspec"
       ]
     },
     "System.Net.Primitives/4.0.10": {
@@ -1885,7 +1966,9 @@
       "System.Diagnostics.Contracts >= 4.0.0-*",
       "System.Threading >= 4.0.0-*",
       "System.Net.Primitives >= 4.0.10-*",
-      "System.Net.Sockets >= 4.0.10-*"
+      "System.Net.Sockets >= 4.0.10-*",
+      "System.Linq >= 4.0.0",
+      "System.Console >= 4.0.0-*"
     ],
     "DNXCore,Version=v5.0": []
   }
