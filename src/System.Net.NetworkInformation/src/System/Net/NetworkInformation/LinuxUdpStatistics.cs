@@ -22,7 +22,7 @@ namespace System.Net.NetworkInformation
         public static UdpStatistics CreateUdpIPv4Statistics()
         {
             LinuxUdpStatistics stats = new LinuxUdpStatistics();
-            string fileContents = File.ReadAllText(LinuxNetworkFiles.SnmpV4StatsFile);
+            string fileContents = File.ReadAllText(NetworkFiles.SnmpV4StatsFile);
             int firstUdpHeader = fileContents.IndexOf("Udp:");
             int secondUdpHeader = fileContents.IndexOf("Udp:", firstUdpHeader + 1);
             int endOfSecondLine = fileContents.IndexOf(Environment.NewLine, secondUdpHeader);
@@ -43,7 +43,7 @@ namespace System.Net.NetworkInformation
             stats._inCsumErrors = parser.ParseNextInt32();
 
             // Parse the number of active connections out of /proc/net/sockstat
-            string sockstatFile = File.ReadAllText(LinuxNetworkFiles.SockstatFile);
+            string sockstatFile = File.ReadAllText(NetworkFiles.SockstatFile);
             int indexOfUdp = sockstatFile.IndexOf("UDP:");
             int endOfUdpLine = sockstatFile.IndexOf(Environment.NewLine, indexOfUdp + 1);
             string udpLineData = sockstatFile.Substring(indexOfUdp, endOfUdpLine - indexOfUdp);
@@ -59,7 +59,7 @@ namespace System.Net.NetworkInformation
         {
             LinuxUdpStatistics stats = new LinuxUdpStatistics();
 
-            string fileContents = File.ReadAllText(LinuxNetworkFiles.SnmpV6StatsFile);
+            string fileContents = File.ReadAllText(NetworkFiles.SnmpV6StatsFile);
 
             RowConfigReader reader = new RowConfigReader(fileContents);
 
@@ -72,7 +72,7 @@ namespace System.Net.NetworkInformation
             stats._inCsumErrors = reader.GetNextValueAsInt32("Udp6InCsumErrors");
 
             // Parse the number of active connections out of /proc/net/sockstat6
-            string sockstatFile = File.ReadAllText(LinuxNetworkFiles.Sockstat6File);
+            string sockstatFile = File.ReadAllText(NetworkFiles.Sockstat6File);
             int indexOfUdp = sockstatFile.IndexOf("UDP6:");
             int endOfUdpLine = sockstatFile.IndexOf(Environment.NewLine, indexOfUdp + 1);
             string udpLineData = sockstatFile.Substring(indexOfUdp, endOfUdpLine - indexOfUdp);

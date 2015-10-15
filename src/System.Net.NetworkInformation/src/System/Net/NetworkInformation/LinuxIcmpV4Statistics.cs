@@ -40,7 +40,7 @@ namespace System.Net.NetworkInformation
         public static IcmpV4Statistics CreateIcmpV4Statistics()
         {
             LinuxIcmpV4Statistics stats = new LinuxIcmpV4Statistics();
-            string fileContents = File.ReadAllText(LinuxNetworkFiles.SnmpV4StatsFile);
+            string fileContents = File.ReadAllText(NetworkFiles.SnmpV4StatsFile);
             int firstIpHeader = fileContents.IndexOf("Icmp:");
             int secondIpHeader = fileContents.IndexOf("Icmp:", firstIpHeader + 1);
             int endOfSecondLine = fileContents.IndexOf(Environment.NewLine, secondIpHeader);

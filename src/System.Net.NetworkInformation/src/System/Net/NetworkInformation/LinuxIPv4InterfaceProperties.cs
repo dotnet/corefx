@@ -67,13 +67,13 @@ namespace System.Net.NetworkInformation
         private bool GetIsForwardingEnabled()
         {
             // /proc/sys/net/ipv4/conf/<name>/forwarding
-            string path = Path.Combine(LinuxNetworkFiles.Ipv4ConfigFolder, _linuxNetworkInterface.Name, LinuxNetworkFiles.ForwardingFileName);
+            string path = Path.Combine(NetworkFiles.Ipv4ConfigFolder, _linuxNetworkInterface.Name, NetworkFiles.ForwardingFileName);
             return int.Parse(File.ReadAllText(path)) == 1;
         }
 
         private int GetMtu()
         {
-            string path = path = Path.Combine(LinuxNetworkFiles.SysClassNetFolder, _linuxNetworkInterface.Name, LinuxNetworkFiles.MtuFileName);
+            string path = path = Path.Combine(NetworkFiles.SysClassNetFolder, _linuxNetworkInterface.Name, NetworkFiles.MtuFileName);
             return int.Parse(File.ReadAllText(path));
         }
     }

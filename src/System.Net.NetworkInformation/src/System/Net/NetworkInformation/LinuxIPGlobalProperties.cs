@@ -55,10 +55,10 @@ namespace System.Net.NetworkInformation
 
         public override TcpConnectionInformation[] GetActiveTcpConnections()
         {
-            string tcp4FileContents = File.ReadAllText(LinuxNetworkFiles.Tcp4ConnectionsFile);
+            string tcp4FileContents = File.ReadAllText(NetworkFiles.Tcp4ConnectionsFile);
             string[] v4connections = tcp4FileContents.Split(s_newLineSeparator, StringSplitOptions.RemoveEmptyEntries);
 
-            string tcp6FileContents = File.ReadAllText(LinuxNetworkFiles.Tcp6ConnectionsFile);
+            string tcp6FileContents = File.ReadAllText(NetworkFiles.Tcp6ConnectionsFile);
             string[] v6connections = tcp6FileContents.Split(s_newLineSeparator, StringSplitOptions.RemoveEmptyEntries);
 
             TcpConnectionInformation[] connections = new TcpConnectionInformation[v4connections.Length + v6connections.Length - 2]; // First line is header in each file
@@ -83,10 +83,10 @@ namespace System.Net.NetworkInformation
 
         public override IPEndPoint[] GetActiveTcpListeners()
         {
-            string tcp4FileContents = File.ReadAllText(LinuxNetworkFiles.Tcp4ConnectionsFile);
+            string tcp4FileContents = File.ReadAllText(NetworkFiles.Tcp4ConnectionsFile);
             string[] v4connections = tcp4FileContents.Split(s_newLineSeparator, StringSplitOptions.RemoveEmptyEntries);
 
-            string tcp6FileContents = File.ReadAllText(LinuxNetworkFiles.Tcp6ConnectionsFile);
+            string tcp6FileContents = File.ReadAllText(NetworkFiles.Tcp6ConnectionsFile);
             string[] v6connections = tcp6FileContents.Split(s_newLineSeparator, StringSplitOptions.RemoveEmptyEntries);
 
             IPEndPoint[] endPoints = new IPEndPoint[v4connections.Length + v6connections.Length - 2]; // First line is header in each file
@@ -119,10 +119,10 @@ namespace System.Net.NetworkInformation
 
         public override IPEndPoint[] GetActiveUdpListeners()
         {
-            string udp4FileContents = File.ReadAllText(LinuxNetworkFiles.Udp4ConnectionsFile);
+            string udp4FileContents = File.ReadAllText(NetworkFiles.Udp4ConnectionsFile);
             string[] v4connections = udp4FileContents.Split(s_newLineSeparator, StringSplitOptions.RemoveEmptyEntries);
 
-            string udp6FileContents = File.ReadAllText(LinuxNetworkFiles.Udp6ConnectionsFile);
+            string udp6FileContents = File.ReadAllText(NetworkFiles.Udp6ConnectionsFile);
             string[] v6connections = udp6FileContents.Split(s_newLineSeparator, StringSplitOptions.RemoveEmptyEntries);
 
             IPEndPoint[] endPoints = new IPEndPoint[v4connections.Length + v6connections.Length - 2]; // First line is header in each file

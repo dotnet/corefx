@@ -30,22 +30,6 @@ namespace System.Net.NetworkInformation
             }
         }
 
-        public override IPAddressCollection DnsAddresses
-        {
-            get
-            {
-                throw new NotImplementedException();
-            }
-        }
-
-        public override string DnsSuffix
-        {
-            get
-            {
-                throw new NotImplementedException();
-            }
-        }
-
         public override GatewayIPAddressInformationCollection GatewayAddresses
         {
             get
