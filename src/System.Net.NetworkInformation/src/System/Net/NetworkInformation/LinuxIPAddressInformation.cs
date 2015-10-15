@@ -3,7 +3,7 @@
 
 namespace System.Net.NetworkInformation
 {
-    public class LinuxIPAddressInformation : IPAddressInformation
+    internal class LinuxIPAddressInformation : IPAddressInformation
     {
         private readonly IPAddress _address;
 

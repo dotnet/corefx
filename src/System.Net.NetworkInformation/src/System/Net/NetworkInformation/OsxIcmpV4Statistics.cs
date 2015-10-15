@@ -80,13 +80,13 @@ namespace System.Net.NetworkInformation
 
         public override long EchoRequestsSent { get { return _echoRequestsSent; } }
 
-        public override long ErrorsReceived { get { throw new NotImplementedException(); } }
+        public override long ErrorsReceived { get { throw new PlatformNotSupportedException(); } }
 
-        public override long ErrorsSent { get { throw new NotImplementedException(); } }
+        public override long ErrorsSent { get { throw new PlatformNotSupportedException(); } }
 
-        public override long MessagesReceived { get { throw new NotImplementedException(); } }
+        public override long MessagesReceived { get { throw new PlatformNotSupportedException(); } }
 
-        public override long MessagesSent { get { throw new NotImplementedException(); } }
+        public override long MessagesSent { get { throw new PlatformNotSupportedException(); } }
 
         public override long ParameterProblemsReceived { get { return _parameterProblemsReceived; } }
 

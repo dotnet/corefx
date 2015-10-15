@@ -1,12 +1,17 @@
-﻿namespace System.Net.NetworkInformation
+﻿// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+namespace System.Net.NetworkInformation
 {
     internal class OsxIpInterfaceProperties : UnixIPInterfaceProperties
     {
-        private readonly string _name;
+        private readonly OsxIPv4InterfaceProperties _ipv4Properties;
+        private readonly OsxIPv6InterfaceProperties _ipv6Properties;
 
         public OsxIpInterfaceProperties(OsxNetworkInterface oni) : base(oni)
         {
-            _name = oni.Name;
+            _ipv4Properties = new OsxIPv4InterfaceProperties(oni);
+            _ipv6Properties = new OsxIPv6InterfaceProperties(oni);
         }
 
         public override IPAddressInformationCollection AnycastAddresses
@@ -61,7 +66,7 @@
         {
             get
             {
-                throw new NotImplementedException();
+                throw new PlatformNotSupportedException();
             }
         }
 
@@ -75,12 +80,12 @@
 
         public override IPv4InterfaceProperties GetIPv4Properties()
         {
-            throw new NotImplementedException();
+            return _ipv4Properties;
         }
 
         public override IPv6InterfaceProperties GetIPv6Properties()
         {
-            throw new NotImplementedException();
+            return _ipv6Properties;
         }
     }
 }

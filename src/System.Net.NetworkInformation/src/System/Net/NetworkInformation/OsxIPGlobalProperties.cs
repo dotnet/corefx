@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace System.Net.NetworkInformation
 {
@@ -35,7 +36,7 @@ namespace System.Net.NetworkInformation
         {
             get
             {
-                throw new NotImplementedException();
+                return false;
             }
         }
 
@@ -43,7 +44,7 @@ namespace System.Net.NetworkInformation
         {
             get
             {
-                throw new NotImplementedException();
+                return NetBiosNodeType.Unknown;
             }
         }
 
@@ -172,14 +173,42 @@ namespace System.Net.NetworkInformation
 
         public override UdpStatistics GetUdpIPv4Statistics()
         {
-        	// OSX does not provide separated UDP-IPv4 and UDP-IPv6 stats.
+            // OSX does not provide separated UDP-IPv4 and UDP-IPv6 stats.
             return new OsxUdpStatistics();
         }
 
         public override UdpStatistics GetUdpIPv6Statistics()
         {
-        	// OSX does not provide separated UDP-IPv4 and UDP-IPv6 stats.
+            // OSX does not provide separated UDP-IPv4 and UDP-IPv6 stats.
             return new OsxUdpStatistics();
+        }
+
+        public override UnicastIPAddressInformationCollection GetUnicastAddresses()
+        {
+            UnicastIPAddressInformationCollection collection = new UnicastIPAddressInformationCollection();
+            foreach (UnicastIPAddressInformation info in
+                OsxNetworkInterface.GetOsxNetworkInterfaces().SelectMany(oni => oni.GetIPProperties().UnicastAddresses))
+            {
+                // PERF: Use Interop.Sys.EnumerateInterfaceAddresses directly here.
+                collection.InternalAdd(info);
+            }
+
+            return collection;
+        }
+
+        public override IAsyncResult BeginGetUnicastAddresses(AsyncCallback callback, object state)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override UnicastIPAddressInformationCollection EndGetUnicastAddresses(IAsyncResult asyncResult)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override Task<UnicastIPAddressInformationCollection> GetUnicastAddressesAsync()
+        {
+            return Task.Run((Func<UnicastIPAddressInformationCollection>)GetUnicastAddresses);
         }
     }
 }

@@ -40,7 +40,7 @@ namespace System.Net.NetworkInformation
         {
             get
             {
-                throw new NotImplementedException();
+                throw new PlatformNotSupportedException();
             }
         }
 
@@ -60,6 +60,9 @@ namespace System.Net.NetworkInformation
         {
             get
             {
+                // TODO: Check for the existence of /var/lib/dhcp/dhclient.leases,
+                // and use the "option dhcp-server-identifier" element.
+                // This should be available per-interface, per-lease.
                 throw new NotImplementedException();
             }
         }
@@ -68,8 +71,9 @@ namespace System.Net.NetworkInformation
         {
             get
             {
-                // TODO: Can we return false? Is this Windows-specific?
-                throw new PlatformNotSupportedException();
+                // TODO: Parse /etc/samba/dhcp.conf
+                // for 'wins server = <iface>:<name>' items.
+                throw new NotImplementedException();
             }
         }
 
@@ -89,14 +93,7 @@ namespace System.Net.NetworkInformation
             RowConfigReader rcr = new RowConfigReader(data);
             string dnsSuffix;
 
-            if (rcr.TryGetNextValue("search", out dnsSuffix))
-            {
-                return dnsSuffix;
-            }
-            else
-            {
-                return string.Empty;
-            }
+            return rcr.TryGetNextValue("search", out dnsSuffix) ? dnsSuffix : string.Empty;
         }
 
         private static IPAddressCollection GetDnsAddresses()
@@ -122,8 +119,6 @@ namespace System.Net.NetworkInformation
 
         // /proc/net/route contains some information about gateway addresses,
         // and seperates the information about by each interface.
-        // ** TODO: /proc/net/ipv6_route contains some other routing-related information,
-        //    but I don't believe it exposes any additional gateway IP addresses. **
         public GatewayIPAddressInformationCollection GetGatewayAddresses()
         {
             GatewayIPAddressInformationCollection collection = new GatewayIPAddressInformationCollection();

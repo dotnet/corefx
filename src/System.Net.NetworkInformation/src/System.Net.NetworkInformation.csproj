@@ -1,6 +1,10 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
+  <!-- Enable Intellisense in VS for Common files-->
+  <PropertyGroup>
+    <CommonPath>..\..\Common\src</CommonPath>
+  </PropertyGroup>
   <PropertyGroup>
     <AssemblyName>System.Net.NetworkInformation</AssemblyName>
     <AssemblyVersion>4.0.10.0</AssemblyVersion>
@@ -235,6 +239,8 @@
   <ItemGroup Condition=" '$(TargetsUnix)' == 'true' ">
     <Compile Include="System\Net\NetworkInformation\SimpleTcpConnectionInformation.cs" />
     <Compile Include="System\Net\NetworkInformation\UnixIPInterfaceProperties.cs" />
+    <Compile Include="System\Net\NetworkInformation\UnixIPv4InterfaceProperties.cs" />
+    <Compile Include="System\Net\NetworkInformation\UnixIPv6InterfaceProperties.cs" />
     <Compile Include="System\Net\NetworkInformation\UnixMulticastIPAddressInformation.cs" />
     <Compile Include="System\Net\NetworkInformation\UnixNetworkInterface.cs" />
     <Compile Include="System\Net\NetworkInformation\UnixUnicastIPAddressInformation.cs" />
@@ -301,6 +307,8 @@
     <Compile Include="System\Net\NetworkInformation\OsxIPv6GlobalStatistics.cs" />
   -->
     <Compile Include="System\Net\NetworkInformation\OsxIpInterfaceStatistics.cs" />
+    <Compile Include="System\Net\NetworkInformation\OsxIPv4InterfaceProperties.cs" />
+    <Compile Include="System\Net\NetworkInformation\OsxIPv6InterfaceProperties.cs" />
     <Compile Include="System\Net\NetworkInformation\OsxIpInterfaceProperties.cs" />
     <Compile Include="System\Net\NetworkInformation\OsxNetworkInterface.cs" />
     <Compile Include="System\Net\NetworkInformation\OsxTcpStatistics.cs" />

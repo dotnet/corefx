@@ -49,7 +49,8 @@ namespace System.Net.NetworkInformation
             _forwarding = statistics.Forwarding == 1;
 
             var interfaces = (UnixNetworkInterface[])NetworkInterface.GetAllNetworkInterfaces();
-            // TODO: Use sysctl: net.link.generic.system.ifcount = number of interfaces
+
+            // PERF: In native shim, use sysctl: net.link.generic.system.ifcount = number of network interfaces
             _numInterfaces = interfaces.Length;
             _numIPAddresses = interfaces.Sum(uni => uni.Addresses.Count);
         }

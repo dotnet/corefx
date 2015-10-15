@@ -41,6 +41,7 @@ namespace System.Net.NetworkInformation
         // Miscellaneous IP information, not defined in MIB-II.
         private int _numRoutes;
         private int _numInterfaces;
+        private int _numIPAddresses;
 
         private LinuxIPGlobalStatistics() { }
 
@@ -83,24 +84,11 @@ namespace System.Net.NetworkInformation
             stats._fragmentFails = parser.ParseNextInt32();
             stats._fragmentCreates = parser.ParseNextInt32();
 
-            // Experimental
             string routeFile = ReadProcConfigFile(LinuxNetworkFiles.Ipv4RouteFile);
             stats._numRoutes = CountOccurences(Environment.NewLine, routeFile) - 1; // File includes one-line header
 
-            // Just count the number of files under /proc/sys/net/ipv4/conf,
-            // because GetAllNetworkInterfaces() is relatively expensive just for the count.
-            int interfacesCount = 0;
-            var files = new DirectoryInfo(LinuxNetworkFiles.Ipv4ConfigFolder).GetFiles();
-            foreach (var file in files)
-            {
-                if (file.Name != LinuxNetworkFiles.AllNetworkInterfaceFileName && file.Name != LinuxNetworkFiles.DefaultNetworkInterfaceFileName)
-                {
-                    interfacesCount++;
-                }
-            }
-
-            stats._numInterfaces = interfacesCount;
-
+            stats._numInterfaces = GetNumInterfaces();
+            stats._numIPAddresses = GetNumIPAddresses();
             return stats;
         }
 
@@ -111,14 +99,28 @@ namespace System.Net.NetworkInformation
         {
             LinuxIPGlobalStatistics stats = new LinuxIPGlobalStatistics();
 
-            string fileContents = File.ReadAllText(LinuxNetworkFiles.SnmpV6StatsFile);
+            // /proc/sys/net/ipv6/conf/default/forwarding
+            string path = Path.Combine(LinuxNetworkFiles.Ipv4ConfigFolder,
+                                        LinuxNetworkFiles.DefaultNetworkInterfaceFileName,
+                                        LinuxNetworkFiles.ForwardingFileName);
+            stats._forwarding = int.Parse(File.ReadAllText(path)) == 1;
 
-            // Perf improvement: Read the data in order, and have the reader remember your position.
-            // Possibly add that functionality into StringParser as it does similar things.
+            // snmp6 does not include Default TTL info. Read it from snmp.
+            string snmp4FileContents = File.ReadAllText(LinuxNetworkFiles.SnmpV4StatsFile);
+            int firstIpHeader = snmp4FileContents.IndexOf("Ip:");
+            int secondIpHeader = snmp4FileContents.IndexOf("Ip:", firstIpHeader + 1);
+            int endOfSecondLine = snmp4FileContents.IndexOf(Environment.NewLine, secondIpHeader);
+            string ipData = snmp4FileContents.Substring(secondIpHeader, endOfSecondLine - secondIpHeader);
+            StringParser parser = new StringParser(ipData, ' ');
+            parser.MoveNextOrFail(); // Skip Ip:
+            // According to RFC 1213, "1" indicates "acting as a gateway". "2" indicates "NOT acting as a gateway".
+            parser.MoveNextOrFail(); // Skip forwarding
+            stats._defaultTtl = parser.ParseNextInt32();
+
+            // Read the remainder of statistics from snmp6.
+            string fileContents = File.ReadAllText(LinuxNetworkFiles.SnmpV6StatsFile);
             RowConfigReader reader = new RowConfigReader(fileContents);
 
-            stats._forwarding = false; // Same as IPv4?
-            stats._defaultTtl = 0; // Same as IPv4?
             stats._inReceives = reader.GetNextValueAsInt32("Ip6InReceives");
             stats._inHeaderErrors = reader.GetNextValueAsInt32("Ip6InHdrErrors");
             stats._inAddressErrors = reader.GetNextValueAsInt32("Ip6InAddrErrors");
@@ -137,22 +139,21 @@ namespace System.Net.NetworkInformation
             stats._fragmentFails = reader.GetNextValueAsInt32("Ip6FragFails");
             stats._fragmentCreates = reader.GetNextValueAsInt32("Ip6FragCreates");
 
-            // Experimental
             string routeFile = ReadProcConfigFile(LinuxNetworkFiles.Ipv6RouteFile);
             stats._numRoutes = CountOccurences(Environment.NewLine, routeFile);
 
-            // Just count the number of files under /proc/sys/net/ipv6/conf (?)
             int interfaceCount = 0;
             var files = new DirectoryInfo(LinuxNetworkFiles.Ipv6ConfigFolder).GetFiles();
             foreach (var file in files)
             {
-                if (file.Name != "all" && file.Name != "default")
+                if (file.Name != LinuxNetworkFiles.AllNetworkInterfaceFileName
+                    && file.Name != LinuxNetworkFiles.DefaultNetworkInterfaceFileName)
                 {
                     interfaceCount++;
                 }
             }
             stats._numInterfaces = interfaceCount;
-
+            stats._numIPAddresses = GetNumIPAddresses();
             return stats;
         }
 
@@ -162,39 +163,12 @@ namespace System.Net.NetworkInformation
 
         public override int NumberOfInterfaces { get { return _numInterfaces; } }
 
-        // Not sure how to determine this.
-        public override int NumberOfIPAddresses
-        {
-            get
-            {
-                int count = 0;
-                foreach (LinuxNetworkInterface lni in LinuxNetworkInterface.GetLinuxNetworkInterfaces())
-                {
-                    // Could there be duplicates, somehow?
-                    count += lni.Addresses.Count;
-                }
-                return count;
-            }
-        }
+        public override int NumberOfIPAddresses { get { return _numIPAddresses; } }
 
         public override int NumberOfRoutes { get { return _numRoutes; } }
 
         public override long OutputPacketRequests { get { return _outRequests; } }
 
-        /* Should be:
-
-            ipRoutingDiscards OBJECT-TYPE
-              SYNTAX Counter
-              ACCESS read-only
-              STATUS mandatory
-              DESCRIPTION
-                  "The number of routing entries which were chosen
-                  to be discarded even though they are valid.  One
-                  possible reason for discarding such an entry could
-                  be to free - up buffer space for other routing
-
-            Isn't exposed in snmp or snmp6, although it is listed as mandatory in the specification.
-        */
         public override long OutputPacketRoutingDiscards { get { throw new PlatformNotSupportedException(); } }
 
         public override long OutputPacketsDiscarded { get { return _outDiscards; } }
@@ -226,6 +200,34 @@ namespace System.Net.NetworkInformation
         public override long ReceivedPacketsWithHeadersErrors { get { return _inHeaderErrors; } }
 
         public override long ReceivedPacketsWithUnknownProtocol { get { return _inUnknownProtocols; } }
+
+        private static int GetNumIPAddresses()
+        {
+            // PERF: Use EnumerateInterfaceAddresses directly.
+            int count = 0;
+            foreach (LinuxNetworkInterface lni in LinuxNetworkInterface.GetLinuxNetworkInterfaces())
+            {
+                count += lni.Addresses.Count;
+            }
+            return count;
+        }
+
+        private static int GetNumInterfaces()
+        {
+            // Just count the number of files under /proc/sys/net/ipv4/conf,
+            // because GetAllNetworkInterfaces() is relatively expensive just for the count.
+            int interfacesCount = 0;
+            var files = new DirectoryInfo(LinuxNetworkFiles.Ipv4ConfigFolder).GetFiles();
+            foreach (var file in files)
+            {
+                if (file.Name != LinuxNetworkFiles.AllNetworkInterfaceFileName && file.Name != LinuxNetworkFiles.DefaultNetworkInterfaceFileName)
+                {
+                    interfacesCount++;
+                }
+            }
+
+            return interfacesCount;
+        }
 
         private static string ReadProcConfigFile(string v)
         {

@@ -16,18 +16,18 @@ namespace System.Net.NetworkInformation
             if (Interop.Sys.EnumerateInterfaceAddresses(
                 (name, ipAddr, maskAddr) =>
                 {
-                    OsxNetworkInterface lni = GetOrCreate(interfacesByName, name);
-                    ProcessIpv4Address(lni, ipAddr, maskAddr);
+                    OsxNetworkInterface oni = GetOrCreate(interfacesByName, name);
+                    ProcessIpv4Address(oni, ipAddr, maskAddr);
                 },
                 (name, ipAddr, scopeId) =>
                 {
-                    OsxNetworkInterface lni = GetOrCreate(interfacesByName, name);
-                    ProcessIpv6Address(lni, ipAddr, *scopeId);
+                    OsxNetworkInterface oni = GetOrCreate(interfacesByName, name);
+                    ProcessIpv6Address(oni, ipAddr, *scopeId);
                 },
                 (name, llAddr) =>
                 {
-                    OsxNetworkInterface lni = GetOrCreate(interfacesByName, name);
-                    ProcessLinkLevelAddress(lni, llAddr);
+                    OsxNetworkInterface oni = GetOrCreate(interfacesByName, name);
+                    ProcessLinkLayerAddress(oni, llAddr);
                 }) != 0)
             {
                 throw new NetworkInformationException((int)Interop.Sys.GetLastError());
@@ -64,5 +64,25 @@ namespace System.Net.NetworkInformation
         {
             return new OsxIpInterfaceStatistics(_name);
         }
+
+        public override OperationalStatus OperationalStatus
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        public override string Description { get { throw new PlatformNotSupportedException(); } }
+
+        public override bool SupportsMulticast
+        {
+            get
+            {
+                return base.SupportsMulticast;
+            }
+        }
+
+        public override bool IsReceiveOnly { get { throw new PlatformNotSupportedException(); } }
     }
 }

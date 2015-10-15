@@ -5,21 +5,18 @@ using System.IO;
 
 namespace System.Net.NetworkInformation
 {
-    internal class LinuxIPv4InterfaceProperties : IPv4InterfaceProperties
+    internal class LinuxIPv4InterfaceProperties : UnixIPv4InterfaceProperties
     {
-        private LinuxNetworkInterface _linuxNetworkInterface;
+        private readonly LinuxNetworkInterface _linuxNetworkInterface;
+        private readonly bool _isForwardingEnabled;
+        private readonly int _mtu;
 
         public LinuxIPv4InterfaceProperties(LinuxNetworkInterface linuxNetworkInterface)
+            : base(linuxNetworkInterface)
         {
             _linuxNetworkInterface = linuxNetworkInterface;
-        }
-
-        public override int Index
-        {
-            get
-            {
-                return _linuxNetworkInterface.Index;
-            }
+            _isForwardingEnabled = GetIsForwardingEnabled();
+            _mtu = GetMtu();
         }
 
         public override bool IsAutomaticPrivateAddressingActive
@@ -46,23 +43,13 @@ namespace System.Net.NetworkInformation
             }
         }
 
-        public override bool IsForwardingEnabled
-        {
-            get
-            {
-                // /proc/sys/net/ipv4/conf/<name>/forwarding
-                string path = Path.Combine(LinuxNetworkFiles.Ipv4ConfigFolder, _linuxNetworkInterface.Name, LinuxNetworkFiles.ForwardingFileName);
-                return int.Parse(File.ReadAllText(path)) == 1;
-            }
-        }
+        public override bool IsForwardingEnabled { get { return _isForwardingEnabled; } }
 
         public override int Mtu
         {
             get
             {
-                // /proc/sys/net/ipv4/conf/<name>/mtu
-                string path = Path.Combine(LinuxNetworkFiles.Ipv4ConfigFolder, _linuxNetworkInterface.Name, LinuxNetworkFiles.MtuFileName);
-                return int.Parse(File.ReadAllText(path));
+                return _mtu;
             }
         }
 
@@ -70,9 +57,24 @@ namespace System.Net.NetworkInformation
         {
             get
             {
-                // TODO: This seems Windows-specific. Can we just return false?
-                throw new PlatformNotSupportedException();
+                // TODO: There is a configuration option in /etc/samba.smb.conf:
+                // # wins support = no
+                // "no" is the default value, it may be overridden depending on machine configuration.
+                throw new NotImplementedException();
             }
+        }
+
+        private bool GetIsForwardingEnabled()
+        {
+            // /proc/sys/net/ipv4/conf/<name>/forwarding
+            string path = Path.Combine(LinuxNetworkFiles.Ipv4ConfigFolder, _linuxNetworkInterface.Name, LinuxNetworkFiles.ForwardingFileName);
+            return int.Parse(File.ReadAllText(path)) == 1;
+        }
+
+        private int GetMtu()
+        {
+            string path = path = Path.Combine(LinuxNetworkFiles.SysClassNetFolder, _linuxNetworkInterface.Name, LinuxNetworkFiles.MtuFileName);
+            return int.Parse(File.ReadAllText(path));
         }
     }
 }

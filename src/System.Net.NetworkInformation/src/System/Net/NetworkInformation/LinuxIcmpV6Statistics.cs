@@ -46,8 +46,6 @@ namespace System.Net.NetworkInformation
 
             string fileContents = File.ReadAllText(LinuxNetworkFiles.SnmpV6StatsFile);
 
-            // Perf improvement: Read the data in order, and have the reader remember your position.
-            // Possibly add that functionality into StringParser as it does similar things.
             RowConfigReader reader = new RowConfigReader(fileContents);
 
             stats._inMsgs = reader.GetNextValueAsInt32("Icmp6InMsgs");
