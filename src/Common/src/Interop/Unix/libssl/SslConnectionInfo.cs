@@ -31,6 +31,13 @@ namespace System.Net
         internal const int SSL_GOST89 = 229411;
         internal const int SSL_AEAD = 229412;
 
+        //Data Hash Key Sizes
+        internal const int MD5_HashKeySize = 128;
+        internal const int SHA1_HashKeySize = 160;
+        internal const int SHA256_HashKeySize = 256;
+        internal const int SHA384_HashKeySize = 384;
+        internal const int GOST_HashKeySize = 256;
+
         public readonly int Protocol;
         public readonly int DataCipherAlg;
         public readonly int DataKeySize = 0;
@@ -46,7 +53,12 @@ namespace System.Net
             KeyExchangeAlg = (int) MapExchangeAlgorithmType((Interop.libssl.KeyExchangeAlgorithm) cipher.algorithm_mkey);
             DataHashAlg = (int) MapHashAlgorithmType((Interop.libssl.DataHashAlgorithm) cipher.algorithm_mac);
             DataKeySize = cipher.alg_bits;
-            // TODO (Issue #3362) map key sizes
+            DataHashKeySize = GetHashAlgorithmBitSize((Interop.libssl.DataHashAlgorithm) cipher.algorithm_mac);
+
+            // TODO (Issue #3362) Map keyExchKeySize.
+            //There is no way we can get the key exchange size from the Openssl.
+            //It internally generates the key size in *_send_client_key_exchange method on the basis of the algorithm used.
+
         }
 
         private SslProtocols MapProtocolVersion(string protocolVersion)
@@ -188,6 +200,33 @@ namespace System.Net
 
                 default:
                     return HashAlgorithmType.None;
+            }
+        }
+        
+        private static int GetHashAlgorithmBitSize(Interop.libssl.DataHashAlgorithm mac)
+        {
+            switch (mac)
+            {
+                case Interop.libssl.DataHashAlgorithm.SSL_MD5:
+                    return MD5_HashKeySize;
+
+                case Interop.libssl.DataHashAlgorithm.SSL_SHA1:
+                    return SHA1_HashKeySize;
+
+                case Interop.libssl.DataHashAlgorithm.SSL_GOST94:
+                    return GOST_HashKeySize;
+
+                case Interop.libssl.DataHashAlgorithm.SSL_GOST89MAC:
+                    return GOST_HashKeySize;
+
+                case Interop.libssl.DataHashAlgorithm.SSL_SHA256:
+                    return SHA256_HashKeySize;
+
+                case Interop.libssl.DataHashAlgorithm.SSL_SHA384:
+                    return SHA384_HashKeySize;
+
+                default:
+                    return 0;
             }
         }
     }
