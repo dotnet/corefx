@@ -76,11 +76,21 @@ namespace System.Net
             streamSizes = new StreamSizes(Interop.libssl.SslSizes.HEADER_SIZE, Interop.libssl.SslSizes.TRAILER_SIZE, Interop.libssl.SslSizes.SSL3_RT_MAX_PLAIN_LENGTH);
         }
 
-        public static void QueryContextConnectionInfo(SafeDeleteContext securityContext, out SslConnectionInfo connectionInfo)
+        public static int QueryContextConnectionInfo(SafeDeleteContext securityContext, out SslConnectionInfo connectionInfo)
         {
+            string protocolVersion;
             connectionInfo = null;
-            Interop.libssl.SSL_CIPHER cipher = Interop.OpenSsl.GetConnectionInfo(securityContext.SslContext);
-            connectionInfo =  new SslConnectionInfo(cipher);
+            try
+            {
+                Interop.libssl.SSL_CIPHER cipher = Interop.OpenSsl.GetConnectionInfo(securityContext.SslContext, out protocolVersion);
+                connectionInfo =  new SslConnectionInfo(cipher, protocolVersion);
+               
+                return 0;
+            }
+            catch
+            {
+                return -1;
+            }
         }
 
         private static long GetOptions(SslProtocols protocols)
@@ -113,6 +123,28 @@ namespace System.Net
             return retVal;
         }
 
+        private static string GetCipherString(EncryptionPolicy encryptionPolicy)
+        {
+            string cipherString = null;
+
+            switch (encryptionPolicy)
+            {
+                case EncryptionPolicy.RequireEncryption:
+                    cipherString = Interop.libssl.CipherString.AllExceptNull;
+                    break;
+
+                case EncryptionPolicy.AllowNoEncryption:
+                    cipherString = Interop.libssl.CipherString.AllIncludingNull;
+                    break;
+
+                case EncryptionPolicy.NoEncryption:
+                    cipherString = Interop.libssl.CipherString.Null;
+                    break;
+            }
+
+            return cipherString;
+        }
+
         private static SecurityStatusPal HandshakeInternal(SafeFreeCredentials credential, ref SafeDeleteContext context,
             SecurityBuffer inputBuffer, SecurityBuffer outputBuffer, bool isServer, bool remoteCertRequired)
         {
@@ -123,7 +155,8 @@ namespace System.Net
                 if ((null == context) || context.IsInvalid)
                 {
                     long options = GetOptions(credential.Protocols);
-                    context = new SafeDeleteContext(credential, options, isServer, remoteCertRequired);
+                    string encryptionPolicy = GetCipherString(credential.Policy);
+                    context = new SafeDeleteContext(credential, options, encryptionPolicy, isServer, remoteCertRequired);
                 }
 
                 IntPtr inputPtr = IntPtr.Zero, outputPtr = IntPtr.Zero;

@@ -12,6 +12,9 @@ internal static partial class Interop
         internal const int SSL_CTRL_OPTIONS = 32;
         internal static bool OPENSSL_NO_COMP = true; //no compression true by default
 
+        [UnmanagedFunctionPointer(CallingConvention.StdCall)]
+        public delegate int verify_callback(int preverify_ok, IntPtr x509_ctx);
+
         internal const long ProtocolMask = Options.SSL_OP_NO_SSLv2 | Options.SSL_OP_NO_SSLv3 |
                                            Options.SSL_OP_NO_TLSv1 | Options.SSL_OP_NO_TLSv1_1 |
                                            Options.SSL_OP_NO_TLSv1_2;
@@ -41,22 +44,10 @@ internal static partial class Interop
             internal const long SSL_OP_NO_TLSv1_2 = 0x08000000;
             internal const long SSL_OP_NO_TLSv1_1 = 0x10000000;
         }
-      
+
         internal static class SslSizes
         {
-            //From /usr/include/openssl/ssl3.h
-            internal const int SSL3_RT_MAX_MD_SIZE = 64;
             internal const int SSL3_RT_MAX_PLAIN_LENGTH = 16384;
-            private const int SSL3_RT_MAX_COMPRESSED_OVERHEAD = 1024;
-            private const int SSL3_RT_MAX_ENCRYPTED_OVERHEAD = (256 + SSL3_RT_MAX_MD_SIZE);
-            // TODO (Issue #3362) compression is allowed? size will vary when compression is there
-
-            private static readonly int SSL3_RT_MAX_COMPRESSED_LENGTH = OPENSSL_NO_COMP
-                ? SSL3_RT_MAX_PLAIN_LENGTH
-                : SSL3_RT_MAX_PLAIN_LENGTH + SSL3_RT_MAX_COMPRESSED_OVERHEAD;
-
-            internal static int SSL3_RT_MAX_ENCRYPTED_LENGTH = (SSL3_RT_MAX_ENCRYPTED_OVERHEAD +
-                                                                SSL3_RT_MAX_COMPRESSED_LENGTH);
             internal const int HEADER_SIZE = 5;
 
             // TODO (Issue #3362) : Trailer size requirement is changing based on protocol
@@ -86,6 +77,19 @@ internal static partial class Interop
 #endif
         }
 
+        internal static class CipherString
+        {
+            private const string SSL_TXT_eNULL = "eNULL";
+            private const string SSL_TXT_ALL = "ALL";
+
+            internal const string AllExceptNull = SSL_TXT_ALL;
+
+            // delimiter ":" is used to allow more than one strings
+            // below string is corresponding to "AllowNoEncryption"
+            internal const string AllIncludingNull = SSL_TXT_ALL + ":" + SSL_TXT_eNULL;
+            internal const string Null = SSL_TXT_eNULL;
+        }
+
         internal enum SslErrorCode
         {
             SSL_ERROR_NONE = 0,
@@ -100,6 +104,66 @@ internal static partial class Interop
         internal enum SslState
         {
             SSL_ST_OK = 3
+        }
+
+        internal enum CipherAlgorithm
+        {
+            SSL_DES = 1,
+            SSL_3DES = 2,
+            SSL_RC4 = 4,
+            SSL_RC2 = 8,
+            SSL_IDEA = 16,
+            SSL_eNULL = 32,
+            SSL_AES128 = 64,
+            SSL_AES256 = 128,
+            SSL_CAMELLIA128 = 256,
+            SSL_CAMELLIA256 = 512,
+            SSL_eGOST2814789CNT = 1024,
+            SSL_SEED = 2048,
+            SSL_AES128GCM = 4096,
+            SSL_AES256GCM = 8192
+          
+        }
+
+        internal enum KeyExchangeAlgorithm
+        {
+            SSL_kRSA = 1,
+            /* DH cert, RSA CA cert */
+            SSL_kDHr = 2,
+            /* DH cert, DSA CA cert */
+            SSL_kDHd = 4,
+            /* tmp DH key no DH cert */
+            SSL_kEDH = 8,
+            /* Kerberos5 key exchange */
+            SSL_kKRB5 = 16,
+            /* ECDH cert, RSA CA cert */
+            SSL_kECDHr = 32,
+            /* ECDH cert, ECDSA CA cert */
+            SSL_kECDHe = 64,
+            SSL_kEECDH = 128,
+            SSL_kPSK = 256,
+            SSL_kGOST = 512,
+            SSL_kSRP = 1024,
+        }
+
+        internal enum DataHashAlgorithm
+        {
+            SSL_MD5 = 1,
+            SSL_SHA1 = 2,
+            SSL_GOST94 = 4,
+            SSL_GOST89MAC = 8,
+            SSL_SHA256 = 16,
+            SSL_SHA384 = 32,
+            SSL_AEAD = 64
+        }
+
+        [FlagsAttribute]
+        internal enum ClientCertOption
+        {
+            SSL_VERIFY_NONE = 0x00,
+            SSL_VERIFY_PEER = 0x01,
+            SSL_VERIFY_FAIL_IF_NO_PEER_CERT = 0x02,
+            SSL_VERIFY_CLIENT_ONCE = 0x04
         }
     }
 }

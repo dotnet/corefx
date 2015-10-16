@@ -23,7 +23,7 @@ internal static partial class Interop
         internal static extern IntPtr TLSv1_1_method();
 
         [DllImport(Interop.Libraries.LibSsl)]
-        internal static extern IntPtr TLSv1_2_method();     
+        internal static extern IntPtr TLSv1_2_method();
 
         [DllImport(Interop.Libraries.LibSsl)]
         internal static extern IntPtr SSL_CTX_new(IntPtr meth);
@@ -122,5 +122,17 @@ internal static partial class Interop
 
             return handle;
         }
+
+        [DllImport(Interop.Libraries.LibSsl)]
+        internal static extern IntPtr SSL_get_version(SafeSslHandle ssl);
+        
+        [DllImport(Interop.Libraries.LibSsl)]
+        internal static extern void SSL_CTX_set_verify(SafeSslContextHandle ctx, int mode, [MarshalAs(UnmanagedType.FunctionPtr)] verify_callback callback);
+
+        [DllImport(Interop.Libraries.LibSsl, CharSet = CharSet.Ansi)]
+        internal static extern int SSL_CTX_set_cipher_list(SafeSslContextHandle ctx, string policy);
+        
+        [DllImport(Interop.Libraries.LibSsl)]
+        internal static extern void SSL_CTX_set_client_CA_list(SafeSslContextHandle ctx, SafeX509NameStackHandle x509NameStackPtr);
     }
 }

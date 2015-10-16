@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
@@ -14,10 +15,11 @@ internal static partial class Interop
 {
     internal static class OpenSsl
     {
+        private static libssl.verify_callback s_verifyClientCertificate = VerifyClientCertificate;
+
         #region internal methods
 
-        //TODO (Issue #3362) Set remote certificate options
-        internal static SafeSslHandle AllocateSslContext(long options, SafeX509Handle certHandle, SafeEvpPKeyHandle certKeyHandle, bool isServer, bool remoteCertRequired)
+        internal static SafeSslHandle AllocateSslContext(long options, SafeX509Handle certHandle, SafeEvpPKeyHandle certKeyHandle, string encryptionPolicy, bool isServer, bool remoteCertRequired)
         {
             SafeSslHandle context = null;
 
@@ -34,9 +36,23 @@ internal static partial class Interop
 
                 libssl.SSL_CTX_set_quiet_shutdown(innerContext, 1);
 
+                libssl.SSL_CTX_set_cipher_list(innerContext, encryptionPolicy);
+
                 if (certHandle != null && certKeyHandle != null)
                 {
                     SetSslCertificate(innerContext, certHandle, certKeyHandle);
+                }
+
+                if (remoteCertRequired)
+                {
+                    Debug.Assert(isServer, "isServer flag should be true");
+                    libssl.SSL_CTX_set_verify(innerContext,
+                        (int) libssl.ClientCertOption.SSL_VERIFY_PEER |
+                        (int) libssl.ClientCertOption.SSL_VERIFY_FAIL_IF_NO_PEER_CERT,
+                        s_verifyClientCertificate);
+
+                    //update the client CA list 
+                    UpdateCAListFromRootStore(innerContext);
                 }
 
                 context = SafeSslHandle.Create(innerContext, isServer);
@@ -184,15 +200,17 @@ internal static partial class Interop
             return libssl.SSL_get_peer_cert_chain(context);
         }
 
-        internal static libssl.SSL_CIPHER GetConnectionInfo(SafeSslHandle context)
+        internal static libssl.SSL_CIPHER GetConnectionInfo(SafeSslHandle sslHandle, out string protocolVersion)
         {
-            IntPtr cipherPtr = libssl.SSL_get_current_cipher(context);
+            IntPtr cipherPtr = libssl.SSL_get_current_cipher(sslHandle);
             var cipher = new libssl.SSL_CIPHER();
             if (IntPtr.Zero != cipherPtr)
             {
                 cipher = Marshal.PtrToStructure<libssl.SSL_CIPHER>(cipherPtr);
             }
 
+            IntPtr versionPtr = libssl.SSL_get_version(sslHandle);
+            protocolVersion = Marshal.PtrToStringAnsi(versionPtr);
             return cipher;
         }
 
@@ -248,6 +266,91 @@ internal static partial class Interop
             }
 
             return method;
+        }
+
+        private static int VerifyClientCertificate(int preverify_ok, IntPtr x509_ctx_ptr)
+        {
+            using (SafeX509StoreCtxHandle storeHandle = new SafeX509StoreCtxHandle(x509_ctx_ptr, false))
+            {
+                using (var chain = new X509Chain())
+                {
+                    chain.ChainPolicy.RevocationMode = X509RevocationMode.Online;
+                    chain.ChainPolicy.RevocationFlag = X509RevocationFlag.ExcludeRoot;
+
+                    using (SafeX509StackHandle chainStack = Crypto.X509StoreCtxGetChain(storeHandle))
+                    {
+                        if (chainStack.IsInvalid)
+                        {
+                            Debug.Fail("Invalid chain stack handle");
+                            return 0;
+                        }
+
+                        IntPtr certPtr = Crypto.GetX509StackField(chainStack, 0);
+                        if (IntPtr.Zero == certPtr)
+                        {
+                            return 0;
+                        }
+
+                        using (X509Certificate2 cert = new X509Certificate2(certPtr))
+                        {
+                            return chain.Build(cert) ? 1 : 0;
+                        }
+                    }
+                }
+            }
+        }
+
+        private static void UpdateCAListFromRootStore(libssl.SafeSslContextHandle context)
+        {
+            using (SafeX509NameStackHandle nameStack = Crypto.NewX509NameStack())
+            {
+                //maintaining the HashSet of Certificate's issuer name to keep track of duplicates 
+                HashSet<string> issuerNameHashSet = new HashSet<string>();
+
+                //Enumerate Certificates from LocalMachine and CurrentUser root store 
+                AddX509Names(nameStack, StoreLocation.LocalMachine, issuerNameHashSet);
+                AddX509Names(nameStack, StoreLocation.CurrentUser, issuerNameHashSet);
+                
+                libssl.SSL_CTX_set_client_CA_list(context, nameStack);
+
+                // The handle ownership has been transferred into the CTX.
+                nameStack.SetHandleAsInvalid();
+            }
+
+        }
+
+        private static void AddX509Names(SafeX509NameStackHandle nameStack, StoreLocation storeLocation, HashSet<string> issuerNameHashSet)
+        {
+            using (var store = new X509Store(StoreName.Root, storeLocation))
+            {
+                store.Open(OpenFlags.ReadOnly);
+
+                foreach (var certificate in store.Certificates)
+                {
+                    //Check if issuer name is already present
+                    //Avoiding duplicate names
+                    if (!issuerNameHashSet.Add(certificate.Issuer))
+                    {
+                        continue;
+                    }
+
+                    using (SafeX509Handle certHandle = Crypto.X509Duplicate(certificate.Handle))
+                    {
+                        using (SafeX509NameHandle nameHandle = Crypto.DuplicateX509Name(Crypto.X509GetIssuerName(certHandle)))
+                        {
+                            if (Crypto.PushX509NameStackField(nameStack, nameHandle))
+                            {
+                                // The handle ownership has been transferred into the STACK_OF(X509_NAME).
+                                nameHandle.SetHandleAsInvalid();
+                            }
+                            else
+                            {
+                                throw new CryptographicException(SR.net_ssl_x509Name_push_failed_error);
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         private static void Disconnect(SafeSslHandle context)

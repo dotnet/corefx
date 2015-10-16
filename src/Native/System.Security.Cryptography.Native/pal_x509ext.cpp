@@ -5,9 +5,9 @@
 
 #include <assert.h>
 
-extern "C" X509_EXTENSION* X509ExtensionCreateByObj(ASN1_OBJECT* obj, ASN1_OCTET_STRING* data)
+extern "C" X509_EXTENSION* X509ExtensionCreateByObj(ASN1_OBJECT* obj, int32_t isCritical, ASN1_OCTET_STRING* data)
 {
-    return X509_EXTENSION_create_by_OBJ(nullptr, obj, /*crit*/ false, data);
+    return X509_EXTENSION_create_by_OBJ(nullptr, obj, isCritical, data);
 }
 
 extern "C" void X509ExtensionDestroy(X509_EXTENSION* a)
@@ -23,13 +23,17 @@ extern "C" int32_t X509V3ExtPrint(BIO* out, X509_EXTENSION* ext)
     return X509V3_EXT_print(out, ext, X509V3_EXT_DEFAULT, /*indent*/ 0);
 }
 
-extern "C" int32_t DecodeX509BasicConstraints2Extension(
-    const unsigned char* encoded,
-    int32_t encodedLength,
-    int32_t* certificateAuthority,
-    int32_t* hasPathLengthConstraint,
-    int32_t* pathLengthConstraint)
+extern "C" int32_t DecodeX509BasicConstraints2Extension(const unsigned char* encoded,
+                                                        int32_t encodedLength,
+                                                        int32_t* certificateAuthority,
+                                                        int32_t* hasPathLengthConstraint,
+                                                        int32_t* pathLengthConstraint)
 {
+    if (!certificateAuthority || !hasPathLengthConstraint || !pathLengthConstraint)
+    {
+        return false;
+    }
+
     *certificateAuthority = false;
     *hasPathLengthConstraint = false;
     *pathLengthConstraint = 0;
