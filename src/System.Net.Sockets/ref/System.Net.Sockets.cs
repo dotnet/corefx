@@ -182,27 +182,9 @@ namespace System.Net.Sockets
         public short Ttl { get { return default(short); } set { } }
         public System.Net.Sockets.Socket Accept() { return default(System.Net.Sockets.Socket); }
         public bool AcceptAsync(System.Net.Sockets.SocketAsyncEventArgs e) { return default(bool); }
-        public System.Threading.Tasks.Task<Socket> AcceptAsync() { return default(System.Threading.Tasks.Task<Socket>); }
-        public System.Threading.Tasks.Task<Socket> AcceptAsync(int receiveSize) { return default(System.Threading.Tasks.Task<Socket>); }
-        public System.Threading.Tasks.Task<Socket> AcceptAsync(System.Net.Sockets.Socket acceptSocket, int receiveSize) { return default(System.Threading.Tasks.Task<Socket>); }
-        public System.Threading.Tasks.Task ConnectAsync(System.Net.EndPoint remoteEP) { return default(System.Threading.Tasks.Task); }
-        public System.Threading.Tasks.Task ConnectAsync(System.Net.IPAddress address, int port) { return default(System.Threading.Tasks.Task); }
-        public System.Threading.Tasks.Task ConnectAsync(System.Net.IPAddress[] addresses, int port) { return default(System.Threading.Tasks.Task); }
-        public System.Threading.Tasks.Task ConnectAsync(string host, int port) { return default(System.Threading.Tasks.Task); }
-        public System.Threading.Tasks.Task<int> ReceiveAsync(byte[] buffer, int offset, int size, System.Net.Sockets.SocketFlags socketFlags) { return default(System.Threading.Tasks.Task<int>); }
-        public System.Threading.Tasks.Task<int> ReceiveAsync(byte[] buffer, int offset, int size, System.Net.Sockets.SocketFlags socketFlags, out System.Net.Sockets.SocketError errorCode) { errorCode = default(System.Net.Sockets.SocketError); return default(System.Threading.Tasks.Task<int>); }
-        public System.Threading.Tasks.Task<int> ReceiveAsync(System.Collections.Generic.IList<System.ArraySegment<byte>> buffers, System.Net.Sockets.SocketFlags socketFlags) { return default(System.Threading.Tasks.Task<int>); }
-        public System.Threading.Tasks.Task<int> ReceiveAsync(System.Collections.Generic.IList<System.ArraySegment<byte>> buffers, System.Net.Sockets.SocketFlags socketFlags, out System.Net.Sockets.SocketError errorCode) { errorCode = default(System.Net.Sockets.SocketError); return default(System.Threading.Tasks.Task<int>); }
-        public System.Threading.Tasks.Task<int> ReceiveFromAsync(byte[] buffer, int offset, int size, System.Net.Sockets.SocketFlags socketFlags, ref System.Net.EndPoint remoteEP) { return default(System.Threading.Tasks.Task<int>); }
-        public System.Threading.Tasks.Task<int> ReceiveMessageFromAsync(byte[] buffer, int offset, int size, System.Net.Sockets.SocketFlags socketFlags, ref System.Net.EndPoint remoteEP) { return default(System.Threading.Tasks.Task<int>); }
-        public System.Threading.Tasks.Task<int> SendAsync(byte[] buffer, int offset, int size, System.Net.Sockets.SocketFlags socketFlags) { return default(System.Threading.Tasks.Task<int>); }
-        public System.Threading.Tasks.Task<int> SendAsync(byte[] buffer, int offset, int size, System.Net.Sockets.SocketFlags socketFlags, out System.Net.Sockets.SocketError errorCode) { errorCode = default(System.Net.Sockets.SocketError); return default(System.Threading.Tasks.Task<int>); }
-        public System.Threading.Tasks.Task<int> SendAsync(System.Collections.Generic.IList<System.ArraySegment<byte>> buffers, System.Net.Sockets.SocketFlags socketFlags) { return default(System.Threading.Tasks.Task<int>); }
-        public System.Threading.Tasks.Task<int> SendAsync(System.Collections.Generic.IList<System.ArraySegment<byte>> buffers, System.Net.Sockets.SocketFlags socketFlags, out System.Net.Sockets.SocketError errorCode) { errorCode = default(System.Net.Sockets.SocketError); return default(System.Threading.Tasks.Task<int>); }
-        public System.Threading.Tasks.Task<int> SendToAsync(byte[] buffer, int offset, int size, System.Net.Sockets.SocketFlags socketFlags, System.Net.EndPoint remoteEP) { return default(System.Threading.Tasks.Task<int>); }
         public void Bind(System.Net.EndPoint localEP) { }
         public static void CancelConnectAsync(System.Net.Sockets.SocketAsyncEventArgs e) { }
-        public void Connect(System.Net.EndPoint remoteEP) { }
+        public void Connect(System.Net.EndPoint remoteEndPoint) { }
         public void Connect(System.Net.IPAddress address, int port) { }
         public void Connect(System.Net.IPAddress[] addresses, int port) { }
         public void Connect(string host, int port) { }
@@ -227,12 +209,12 @@ namespace System.Net.Sockets
         public int Receive(System.Collections.Generic.IList<System.ArraySegment<byte>> buffers, System.Net.Sockets.SocketFlags socketFlags) { return default(int); }
         public int Receive(System.Collections.Generic.IList<System.ArraySegment<byte>> buffers, System.Net.Sockets.SocketFlags socketFlags, out System.Net.Sockets.SocketError errorCode) { errorCode = default(System.Net.Sockets.SocketError); return default(int); }
         public bool ReceiveAsync(System.Net.Sockets.SocketAsyncEventArgs e) { return default(bool); }
-        public int ReceiveFrom(byte[] buffer, int offset, int size, System.Net.Sockets.SocketFlags socketFlags, ref System.Net.EndPoint remoteEP) { return default(int); }
-        public int ReceiveFrom(byte[] buffer, int size, System.Net.Sockets.SocketFlags socketFlags, ref System.Net.EndPoint remoteEP) { return default(int); }
-        public int ReceiveFrom(byte[] buffer, ref System.Net.EndPoint remoteEP) { return default(int); }
-        public int ReceiveFrom(byte[] buffer, System.Net.Sockets.SocketFlags socketFlags, ref System.Net.EndPoint remoteEP) { return default(int); }
+        public int ReceiveFrom(byte[] buffer, int offset, int size, System.Net.Sockets.SocketFlags socketFlags, ref System.Net.EndPoint remoteEndPoint) { return default(int); }
+        public int ReceiveFrom(byte[] buffer, int size, System.Net.Sockets.SocketFlags socketFlags, ref System.Net.EndPoint remoteEndPoint) { return default(int); }
+        public int ReceiveFrom(byte[] buffer, ref System.Net.EndPoint remoteEndPoint) { return default(int); }
+        public int ReceiveFrom(byte[] buffer, System.Net.Sockets.SocketFlags socketFlags, ref System.Net.EndPoint remoteEndPoint) { return default(int); }
         public bool ReceiveFromAsync(System.Net.Sockets.SocketAsyncEventArgs e) { return default(bool); }
-        public int ReceiveMessageFrom(byte[] buffer, int offset, int size, ref System.Net.Sockets.SocketFlags socketFlags, ref System.Net.EndPoint remoteEP, out System.Net.Sockets.IPPacketInformation ipPacketInformation) { ipPacketInformation = default(System.Net.Sockets.IPPacketInformation); return default(int); }
+        public int ReceiveMessageFrom(byte[] buffer, int offset, int size, ref System.Net.Sockets.SocketFlags socketFlags, ref System.Net.EndPoint remoteEndPoint, out System.Net.Sockets.IPPacketInformation ipPacketInformation) { ipPacketInformation = default(System.Net.Sockets.IPPacketInformation); return default(int); }
         public bool ReceiveMessageFromAsync(System.Net.Sockets.SocketAsyncEventArgs e) { return default(bool); }
         public static void Select(System.Collections.IList checkRead, System.Collections.IList checkWrite, System.Collections.IList checkError, int microSeconds) { }
         public int Send(byte[] buffer) { return default(int); }
@@ -245,16 +227,37 @@ namespace System.Net.Sockets
         public int Send(System.Collections.Generic.IList<System.ArraySegment<byte>> buffers, System.Net.Sockets.SocketFlags socketFlags, out System.Net.Sockets.SocketError errorCode) { errorCode = default(System.Net.Sockets.SocketError); return default(int); }
         public bool SendAsync(System.Net.Sockets.SocketAsyncEventArgs e) { return default(bool); }
         public bool SendPacketsAsync(System.Net.Sockets.SocketAsyncEventArgs e) { return default(bool); }
-        public int SendTo(byte[] buffer, int offset, int size, System.Net.Sockets.SocketFlags socketFlags, System.Net.EndPoint remoteEP) { return default(int); }
-        public int SendTo(byte[] buffer, int size, System.Net.Sockets.SocketFlags socketFlags, System.Net.EndPoint remoteEP) { return default(int); }
-        public int SendTo(byte[] buffer, System.Net.EndPoint remoteEP) { return default(int); }
-        public int SendTo(byte[] buffer, System.Net.Sockets.SocketFlags socketFlags, System.Net.EndPoint remoteEP) { return default(int); }
+        public int SendTo(byte[] buffer, int offset, int size, System.Net.Sockets.SocketFlags socketFlags, System.Net.EndPoint remoteEndPoint) { return default(int); }
+        public int SendTo(byte[] buffer, int size, System.Net.Sockets.SocketFlags socketFlags, System.Net.EndPoint remoteEndPoint) { return default(int); }
+        public int SendTo(byte[] buffer, System.Net.EndPoint remoteEndPoint) { return default(int); }
+        public int SendTo(byte[] buffer, System.Net.Sockets.SocketFlags socketFlags, System.Net.EndPoint remoteEndPoint) { return default(int); }
         public bool SendToAsync(System.Net.Sockets.SocketAsyncEventArgs e) { return default(bool); }
         public void SetSocketOption(System.Net.Sockets.SocketOptionLevel optionLevel, System.Net.Sockets.SocketOptionName optionName, bool optionValue) { }
         public void SetSocketOption(System.Net.Sockets.SocketOptionLevel optionLevel, System.Net.Sockets.SocketOptionName optionName, byte[] optionValue) { }
         public void SetSocketOption(System.Net.Sockets.SocketOptionLevel optionLevel, System.Net.Sockets.SocketOptionName optionName, int optionValue) { }
         public void SetSocketOption(System.Net.Sockets.SocketOptionLevel optionLevel, System.Net.Sockets.SocketOptionName optionName, object optionValue) { }
         public void Shutdown(System.Net.Sockets.SocketShutdown how) { }
+    }
+    
+    public static partial class SocketTaskExtensions
+    {
+        public static System.Threading.Tasks.Task<Socket> AcceptAsync(this System.Net.Sockets.Socket socket) { return default(System.Threading.Tasks.Task<Socket>); }
+        public static System.Threading.Tasks.Task<Socket> AcceptAsync(this System.Net.Sockets.Socket socket, System.Net.Sockets.Socket acceptSocket) { return default(System.Threading.Tasks.Task<Socket>); }
+        public static System.Threading.Tasks.Task ConnectAsync(this System.Net.Sockets.Socket socket, System.Net.EndPoint remoteEndPoint) { return default(System.Threading.Tasks.Task); }
+        public static System.Threading.Tasks.Task ConnectAsync(this System.Net.Sockets.Socket socket, System.Net.IPAddress address, int port) { return default(System.Threading.Tasks.Task); }
+        public static System.Threading.Tasks.Task ConnectAsync(this System.Net.Sockets.Socket socket, System.Net.IPAddress[] addresses, int port) { return default(System.Threading.Tasks.Task); }
+        public static System.Threading.Tasks.Task ConnectAsync(this System.Net.Sockets.Socket socket, string host, int port) { return default(System.Threading.Tasks.Task); }
+        public static System.Threading.Tasks.Task<int> ReceiveAsync(this System.Net.Sockets.Socket socket, byte[] buffer, int offset, int size, System.Net.Sockets.SocketFlags socketFlags) { return default(System.Threading.Tasks.Task<int>); }
+        public static System.Threading.Tasks.Task<int> ReceiveAsync(this System.Net.Sockets.Socket socket, byte[] buffer, int offset, int size, System.Net.Sockets.SocketFlags socketFlags, out System.Net.Sockets.SocketError errorCode) { errorCode = default(System.Net.Sockets.SocketError); return default(System.Threading.Tasks.Task<int>); }
+        public static System.Threading.Tasks.Task<int> ReceiveAsync(this System.Net.Sockets.Socket socket, System.Collections.Generic.IList<System.ArraySegment<byte>> buffers, System.Net.Sockets.SocketFlags socketFlags) { return default(System.Threading.Tasks.Task<int>); }
+        public static System.Threading.Tasks.Task<int> ReceiveAsync(this System.Net.Sockets.Socket socket, System.Collections.Generic.IList<System.ArraySegment<byte>> buffers, System.Net.Sockets.SocketFlags socketFlags, out System.Net.Sockets.SocketError errorCode) { errorCode = default(System.Net.Sockets.SocketError); return default(System.Threading.Tasks.Task<int>); }
+        public static System.Threading.Tasks.Task<int> ReceiveFromAsync(this System.Net.Sockets.Socket socket, byte[] buffer, int offset, int size, System.Net.Sockets.SocketFlags socketFlags, ref System.Net.EndPoint remoteEndPoint) { return default(System.Threading.Tasks.Task<int>); }
+        public static System.Threading.Tasks.Task<int> ReceiveMessageFromAsync(this System.Net.Sockets.Socket socket, byte[] buffer, int offset, int size, System.Net.Sockets.SocketFlags socketFlags, ref System.Net.EndPoint remoteEndPoint) { return default(System.Threading.Tasks.Task<int>); }
+        public static System.Threading.Tasks.Task<int> SendAsync(this System.Net.Sockets.Socket socket, byte[] buffer, int offset, int size, System.Net.Sockets.SocketFlags socketFlags) { return default(System.Threading.Tasks.Task<int>); }
+        public static System.Threading.Tasks.Task<int> SendAsync(this System.Net.Sockets.Socket socket, byte[] buffer, int offset, int size, System.Net.Sockets.SocketFlags socketFlags, out System.Net.Sockets.SocketError errorCode) { errorCode = default(System.Net.Sockets.SocketError); return default(System.Threading.Tasks.Task<int>); }
+        public static System.Threading.Tasks.Task<int> SendAsync(this System.Net.Sockets.Socket socket, System.Collections.Generic.IList<System.ArraySegment<byte>> buffers, System.Net.Sockets.SocketFlags socketFlags) { return default(System.Threading.Tasks.Task<int>); }
+        public static System.Threading.Tasks.Task<int> SendAsync(this System.Net.Sockets.Socket socket, System.Collections.Generic.IList<System.ArraySegment<byte>> buffers, System.Net.Sockets.SocketFlags socketFlags, out System.Net.Sockets.SocketError errorCode) { errorCode = default(System.Net.Sockets.SocketError); return default(System.Threading.Tasks.Task<int>); }
+        public static System.Threading.Tasks.Task<int> SendToAsync(this System.Net.Sockets.Socket socket, byte[] buffer, int offset, int size, System.Net.Sockets.SocketFlags socketFlags, System.Net.EndPoint remoteEndPoint) { return default(System.Threading.Tasks.Task<int>); }
     }
     public partial class SocketAsyncEventArgs : System.EventArgs, System.IDisposable
     {
