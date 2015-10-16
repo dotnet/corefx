@@ -396,11 +396,10 @@ namespace System.Linq.Expressions.Test
 
         [Theory]
         [MemberData("ConstantValuesAndSizes")]
-        [ActiveIssue(3883)]
         public void RewriteToSameWithSameValues(object value, int blockSize)
         {
             ConstantExpression constant = Expression.Constant(value, value.GetType());
-            IEnumerable<Expression> expressions = PadBlock(blockSize - 1, constant);
+            IEnumerable<Expression> expressions = PadBlock(blockSize - 1, constant).ToArray();
 
             BlockExpression block = Expression.Block(expressions);
             Assert.Same(block, block.Update(null, expressions));

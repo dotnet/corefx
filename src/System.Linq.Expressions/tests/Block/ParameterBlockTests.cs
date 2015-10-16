@@ -231,15 +231,14 @@ namespace System.Linq.Expressions.Test
 
         [Theory]
         [MemberData("ConstantValuesAndSizes")]
-        [ActiveIssue(3883)]
         public void RewriteToSameWithSameValues(object value, int blockSize)
         {
             ConstantExpression constant = Expression.Constant(value, value.GetType());
-            IEnumerable<Expression> expressions = PadBlock(blockSize - 1, constant);
+            IEnumerable<Expression> expressions = PadBlock(blockSize - 1, constant).ToArray();
 
             BlockExpression block = Expression.Block(SingleParameter, expressions);
-            Assert.Same(block, block.Update(SingleParameter.ToArray(), expressions));
-            Assert.Same(block, block.Update(SingleParameter.ToArray(), expressions));
+            Assert.Same(block, block.Update(block.Variables.ToArray(), expressions));
+            Assert.Same(block, block.Update(block.Variables.ToArray(), expressions));
         }
 
         [Theory]

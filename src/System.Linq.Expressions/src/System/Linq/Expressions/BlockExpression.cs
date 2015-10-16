@@ -93,7 +93,15 @@ namespace System.Linq.Expressions
                 return this;
             }
 
-            return Expression.Block(Type, variables, expressions);
+            IList<ParameterExpression> varList = variables as IList<ParameterExpression> ?? variables.ToReadOnly();
+            IList<Expression> expList = expressions as IList<Expression> ?? expressions.ToReadOnly();
+
+            if (expList.Count == Expressions.Count && varList.Count == Variables.Count && expList.SequenceEqual(Expressions) && varList.SequenceEqual(Variables))
+            {
+                return this;
+            }
+
+            return Expression.Block(Type, varList, expList);
         }
 
         internal virtual Expression GetExpression(int index)
