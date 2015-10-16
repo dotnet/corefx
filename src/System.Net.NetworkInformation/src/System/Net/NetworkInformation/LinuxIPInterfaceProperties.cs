@@ -9,13 +9,18 @@ namespace System.Net.NetworkInformation
     {
         private readonly LinuxNetworkInterface _linuxNetworkInterface;
         private readonly GatewayIPAddressInformationCollection _gatewayAddresses;
+        private readonly IPAddressCollection _dhcpServerAddresses;
+        private readonly IPAddressCollection _winsServerAddresses;
         private readonly LinuxIPv4InterfaceProperties _ipv4Properties;
         private readonly LinuxIPv6InterfaceProperties _ipv6Properties;
 
-        public LinuxIPInterfaceProperties(LinuxNetworkInterface lni) : base(lni)
+        public LinuxIPInterfaceProperties(LinuxNetworkInterface lni)
+            : base(lni)
         {
             _linuxNetworkInterface = lni;
             _gatewayAddresses = GetGatewayAddresses();
+            _dhcpServerAddresses = GetDhcpServerAddresses();
+            _winsServerAddresses = GetWinsServerAddresses();
             _ipv4Properties = new LinuxIPv4InterfaceProperties(lni);
             _ipv6Properties = new LinuxIPv6InterfaceProperties(lni);
         }
@@ -42,10 +47,7 @@ namespace System.Net.NetworkInformation
         {
             get
             {
-                // TODO: Check for the existence of /var/lib/dhcp/dhclient.leases,
-                // and use the "option dhcp-server-identifier" element.
-                // This should be available per-interface, per-lease.
-                throw new NotImplementedException();
+                return _dhcpServerAddresses;
             }
         }
 
@@ -53,9 +55,7 @@ namespace System.Net.NetworkInformation
         {
             get
             {
-                // TODO: Parse /etc/samba/dhcp.conf
-                // for 'wins server = <iface>:<name>' items.
-                throw new NotImplementedException();
+                return _winsServerAddresses;
             }
         }
 
@@ -89,6 +89,81 @@ namespace System.Net.NetworkInformation
                     IPAddress address = new IPAddress(addressValue);
                     collection.InternalAdd(new SimpleGatewayIPAddressInformation(address));
                 }
+            }
+
+            return collection;
+        }
+
+        private IPAddressCollection GetDhcpServerAddresses()
+        {
+            // Parse the /var/lib/dhcp/dhclient.leases file, if it exists.
+            // If any errors occur, like the file not existing or being
+            // improperly formatted, just bail and return an empty collection.
+            InternalIPAddressCollection collection = new InternalIPAddressCollection();
+            try
+            {
+                string fileContents = File.ReadAllText(NetworkFiles.DHClientLeasesFile);
+                int leaseIndex = -1;
+                int secondBrace = -1;
+                while ((leaseIndex = fileContents.IndexOf("lease", leaseIndex + 1)) != -1)
+                {
+                    int firstBrace = fileContents.IndexOf("{", leaseIndex);
+                    secondBrace = fileContents.IndexOf("}", leaseIndex);
+                    int blockLength = secondBrace - firstBrace;
+
+                    int interfaceIndex = fileContents.IndexOf("interface", firstBrace, blockLength);
+                    int afterName = fileContents.IndexOf(';', interfaceIndex);
+                    int beforeName = fileContents.LastIndexOf(' ', afterName);
+                    string interfaceName = fileContents.Substring(beforeName + 2, afterName - beforeName - 3);
+                    if (interfaceName != _linuxNetworkInterface.Name)
+                    {
+                        continue;
+                    }
+
+                    int indexOfDhcp = fileContents.IndexOf("dhcp-server-identifier", firstBrace, blockLength);
+                    int afterAddress = fileContents.IndexOf(";", indexOfDhcp);
+                    int beforeAddress = fileContents.LastIndexOf(' ', afterAddress);
+                    string dhcpAddressString = fileContents.Substring(beforeAddress + 1, afterAddress - beforeAddress - 1);
+                    IPAddress dhcpAddress;
+                    if (IPAddress.TryParse(dhcpAddressString, out dhcpAddress))
+                    {
+                        collection.InternalAdd(dhcpAddress);
+                    }
+                }
+            }
+            catch
+            {
+                // If any parsing or file reading exception occurs, just ignore it and return the collection.
+            }
+
+            return collection;
+        }
+
+        private IPAddressCollection GetWinsServerAddresses()
+        {
+            InternalIPAddressCollection collection = new InternalIPAddressCollection();
+            try
+            {
+                string fileContents = File.ReadAllText(NetworkFiles.SmbConfFile);
+                string label = "wins server = ";
+                int labelIndex = fileContents.IndexOf(label);
+                int labelLineStart = fileContents.LastIndexOf(Environment.NewLine, labelIndex);
+                if (labelLineStart < labelIndex)
+                {
+                    int commentIndex = fileContents.IndexOf(';', labelLineStart, labelIndex - labelLineStart);
+                    if (commentIndex != -1)
+                    {
+                        return collection;
+                    }
+                }
+                int endOfLine = fileContents.IndexOf(Environment.NewLine, labelIndex);
+                string addressString = fileContents.Substring(labelIndex + label.Length, endOfLine - (labelIndex + label.Length));
+                IPAddress address = IPAddress.Parse(addressString);
+                collection.InternalAdd(address);
+            }
+            catch
+            {
+                // If any parsing or file reading exception occurs, just ignore it and return the collection.
             }
 
             return collection;
