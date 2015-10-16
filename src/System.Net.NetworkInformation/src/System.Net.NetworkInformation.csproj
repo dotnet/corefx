@@ -297,6 +297,9 @@
     <Compile Include="$(CommonPath)\Interop\Linux\Interop.LinuxTcpState.cs">
       <Link>Interop\Linux\Interop.LinuxTcpState.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\Interop\Linux\System.Native\Interop.NetworkChange.cs">
+      <Link>Interop\Linux\System.Native\Interop.NetworkChange.cs</Link>
+    </Compile>
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetsOsx)' == 'true'">
     <Compile Include="System\Net\NetworkInformation\IPGlobalPropertiesPal.Osx.cs" />

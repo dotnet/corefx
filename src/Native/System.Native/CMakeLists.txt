@@ -6,6 +6,7 @@ set(NATIVE_SOURCES
     pal_io.cpp
     pal_maphardwaretype.cpp
     pal_mount.cpp
+    pal_networkchange.cpp
     pal_networking.cpp
     pal_networkstatistics.cpp
     pal_process.cpp

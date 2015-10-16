@@ -57,9 +57,7 @@ namespace System.Net.NetworkInformation
         {
             get
             {
-                // TODO: There is a configuration option in /etc/samba.smb.conf:
-                // # wins support = no
-                // "no" is the default value, it may be overridden depending on machine configuration.
+                // TODO: Parse /etc/samba/smb.conf and see if there are and Wins server addresses enabled.
                 throw new NotImplementedException();
             }
         }
