@@ -6,7 +6,7 @@
 #include "pal_types.h"
 #include <linux/netlink.h>
 
-enum NetworkChangeKind
+enum class NetworkChangeKind : int32_t
 {
     None = -1,
     AddressAdded = 0,

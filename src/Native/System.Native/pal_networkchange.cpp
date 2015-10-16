@@ -46,7 +46,7 @@ extern "C" NetworkChangeKind ReadSingleEvent(int sock)
     {
         // Probably means the socket has been closed.
         // If so, the managed side will ignore the return value.
-        return None;
+        return NetworkChangeKind::None;
     }
 
     for (hdr = reinterpret_cast<nlmsghdr*>(buffer); NLMSG_OK(hdr, len); hdr = NLMSG_NEXT(hdr, len))
@@ -54,23 +54,23 @@ extern "C" NetworkChangeKind ReadSingleEvent(int sock)
         switch (hdr->nlmsg_type)
         {
             case NLMSG_DONE:
-                return None;
+                return NetworkChangeKind::None;
             case NLMSG_ERROR:
-                return None;
+                return NetworkChangeKind::None;
             case RTM_NEWADDR:
-                return AddressAdded;
+                return NetworkChangeKind::AddressAdded;
             case RTM_DELADDR:
-                return AddressRemoved;
+                return NetworkChangeKind::AddressRemoved;
             case RTM_NEWLINK:
                 return ReadNewLinkMessage(hdr);
             case RTM_DELLINK:
-                return LinkRemoved;
+                return NetworkChangeKind::LinkRemoved;
             default:
-                return None;
+                return NetworkChangeKind::None;
         }
     }
 
-    return None;
+    return NetworkChangeKind::None;
 }
 
 NetworkChangeKind ReadNewLinkMessage(nlmsghdr* hdr)
@@ -81,11 +81,11 @@ NetworkChangeKind ReadNewLinkMessage(nlmsghdr* hdr)
     {
         if(ifimsg->ifi_flags & IFF_UP)
         {
-            return LinkAdded;
+            return NetworkChangeKind::LinkAdded;
         }
     }
 
-    return None;
+    return NetworkChangeKind::None;
 }
 
 #endif // HAVE_LINUX_NETLINK_H
