@@ -50,6 +50,71 @@ namespace System.Linq.Expressions.Test
             Assert.True(Expression.Lambda<Func<bool>>(equal).Compile()());
         }
 
+        [Fact]
+        public void NullExpicitType()
+        {
+            Assert.Throws<ArgumentNullException>("type", () => Expression.Block(null, SingleParameter, Expression.Constant(0)));
+            Assert.Throws<ArgumentNullException>("type", () => Expression.Block(null, SingleParameter, Enumerable.Repeat(Expression.Constant(0), 1)));
+        }
+
+        [Fact]
+        public void NullExpressionList()
+        {
+            Assert.Throws<ArgumentNullException>("expressions", () => Expression.Block(SingleParameter, default(Expression[])));
+            Assert.Throws<ArgumentNullException>("expressions", () => Expression.Block(SingleParameter, default(IEnumerable<Expression>)));
+            Assert.Throws<ArgumentNullException>("expressions", () => Expression.Block(typeof(int), SingleParameter, default(Expression[])));
+            Assert.Throws<ArgumentNullException>("expressions", () => Expression.Block(typeof(int), SingleParameter, default(IEnumerable<Expression>)));
+        }
+
+        [Theory]
+        [MemberData("BlockSizes")]
+        [ActiveIssue(3908)]
+        public void NullExpressionInExpressionList(int size)
+        {
+            List<Expression> expressionList = Enumerable.Range(0, size).Select(i => (Expression)Expression.Constant(1)).ToList();
+            for (int i = 0; i < expressionList.Count; ++i)
+            {
+                Expression[] expressions = expressionList.ToArray();
+                expressions[i] = null;
+                Assert.Throws<ArgumentNullException>("expressions", () => Expression.Block(SingleParameter, expressions));
+                Assert.Throws<ArgumentNullException>("expressions", () => Expression.Block(SingleParameter, expressions.Skip(0)));
+                Assert.Throws<ArgumentNullException>("expressions", () => Expression.Block(typeof(int), SingleParameter, expressions));
+                Assert.Throws<ArgumentNullException>("expressions", () => Expression.Block(typeof(int), SingleParameter, expressions.Skip(0)));
+            }
+        }
+
+        [Theory]
+        [MemberData("BlockSizes")]
+        public void NullExpressionInExpressionListTemp(int size)
+        {
+            List<Expression> expressionList = Enumerable.Range(0, size).Select(i => (Expression)Expression.Constant(1)).ToList();
+            for (int i = 0; i != expressionList.Count; ++i)
+            {
+                Expression[] expressions = expressionList.ToArray();
+                expressions[i] = null;
+                Assert.ThrowsAny<Exception>(() => Expression.Block(SingleParameter, expressions));
+                Assert.ThrowsAny<Exception>(() => Expression.Block(SingleParameter, expressions.Skip(0)));
+                Assert.ThrowsAny<Exception>(() => Expression.Block(typeof(int), SingleParameter, expressions));
+                Assert.ThrowsAny<Exception>(() => Expression.Block(typeof(int), SingleParameter, expressions.Skip(0)));
+            }
+        }
+
+        [Theory]
+        [MemberData("BlockSizes")]
+        public void UnreadableExpressionInExpressionList(int size)
+        {
+            List<Expression> expressionList = Enumerable.Range(0, size).Select(i => (Expression)Expression.Constant(1)).ToList();
+            for (int i = 0; i != expressionList.Count; ++i)
+            {
+                Expression[] expressions = expressionList.ToArray();
+                expressions[i] = UnreadableExpression;
+                Assert.Throws<ArgumentException>("expressions", () => Expression.Block(SingleParameter, expressions));
+                Assert.Throws<ArgumentException>("expressions", () => Expression.Block(SingleParameter, expressions.Skip(0)));
+                Assert.Throws<ArgumentException>("expressions", () => Expression.Block(typeof(int), SingleParameter, expressions));
+                Assert.Throws<ArgumentException>("expressions", () => Expression.Block(typeof(int), SingleParameter, expressions.Skip(0)));
+            }
+        }
+
         [Theory]
         [MemberData("ObjectAssignableConstantValuesAndSizes")]
         public void BlockExplicitType(object value, int blockSize)

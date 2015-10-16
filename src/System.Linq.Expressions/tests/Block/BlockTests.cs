@@ -73,5 +73,21 @@ namespace System.Linq.Expressions.Test
                 return Expression.Parameter(node.Type.IsByRef ? node.Type.MakeByRefType() : node.Type, node.Name);
             }
         }
+
+        private static class Unreadable<T>
+        {
+            public static T WriteOnly
+            {
+                set { }
+            }
+        }
+
+        protected static Expression UnreadableExpression
+        {
+            get
+            {
+                return Expression.Property(null, typeof(Unreadable<int>), "WriteOnly");
+            }
+        }
     }
 }
