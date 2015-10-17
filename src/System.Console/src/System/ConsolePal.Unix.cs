@@ -2,9 +2,12 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Microsoft.Win32.SafeHandles;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Runtime.InteropServices;
 
 namespace System
@@ -47,6 +50,75 @@ namespace System
         public static Encoding OutputEncoding
         {
             get { return GetConsoleEncoding(); }
+        }
+
+        private static readonly object InternalSyncObject = new object();
+        private static SyncTextReader s_stdInReader;
+        private const int DefaultBufferSize = 255;
+
+        public static SyncTextReader StdInReader
+        {
+            get
+            {
+                if (Console.IsInputRedirected)
+                    throw new InvalidOperationException();
+
+                SyncTextReader result = Volatile.Read(ref s_stdInReader);
+
+                if (result == null)
+                {
+                    lock (InternalSyncObject)
+                    {
+                        result = Volatile.Read(ref s_stdInReader);
+                        if (result == null)
+                        {
+                            result = SyncTextReader.GetSynchronizedTextReader(
+                            new StdInStreamReader(
+                                stream: OpenStandardInput(),
+                                encoding: InputEncoding,
+                                detectEncodingFromByteOrderMarks: false,
+                                bufferSize: DefaultBufferSize,
+                                leaveOpen: true));
+                            Volatile.Write(ref s_stdInReader, result);
+                        }
+                    }
+                }
+
+                return s_stdInReader;
+            }
+        }
+
+        private const int DefaultConsoleBufferSize = 256; // default size of buffer used in stream readers/writers
+        public static TextReader In
+        {
+            get
+            {
+                if (Console.IsInputRedirected)
+                {
+                    Stream inputStream = OpenStandardInput();
+                    return SyncTextReader.GetSynchronizedTextReader(inputStream == Stream.Null ?
+                        StreamReader.Null :
+                        new StreamReader(
+                            stream: inputStream,
+                            encoding: ConsolePal.InputEncoding,
+                            detectEncodingFromByteOrderMarks: false,
+                            bufferSize: DefaultConsoleBufferSize,
+                            leaveOpen: true)
+                            );
+                }
+                else
+                {
+                    return StdInReader;
+                }
+            }
+        }
+
+        public static ConsoleKeyInfo ReadKey(bool intercept)
+        {
+            ConsoleKeyInfo keyInfo = StdInReader.ReadKey();
+            if (!intercept) Console.Write(keyInfo.KeyChar);
+
+            return keyInfo;
         }
 
         public static ConsoleColor ForegroundColor
@@ -277,6 +349,34 @@ namespace System
         /// <summary>Cache of the format strings for foreground/background and ConsoleColor.</summary>
         private static readonly string[,] s_fgbgAndColorStrings = new string[2, 16]; // 2 == fg vs bg, 16 == ConsoleColor values
 
+        public static bool TryGetSpecialConsoleKey(char[] givenChars, int startIndex, int endIndex, out ConsoleKey key, out int keyLength)
+        {
+            key = (ConsoleKey)0;
+            keyLength = 0;
+            int unprocessedCharCount = endIndex - startIndex + 1;
+
+            if (unprocessedCharCount < TerminalKeyInfo.Instance.MinKeyLength)
+                return false;
+
+            int minRange = TerminalKeyInfo.Instance.MinKeyLength;
+            int maxRange = unprocessedCharCount > TerminalKeyInfo.Instance.MaxKeyLength ? TerminalKeyInfo.Instance.MaxKeyLength : unprocessedCharCount;
+
+            for (int i = maxRange; i >= minRange; i--)
+            {
+                string currentString = new string(givenChars, startIndex, i);
+
+                // Check if the string prefix matches.
+                if (TerminalKeyInfo.Instance.KeyFormatToConsoleKey.ContainsKey(currentString))
+                {
+                    key = TerminalKeyInfo.Instance.KeyFormatToConsoleKey[currentString];
+                    keyLength = currentString.Length;
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         /// <summary>Provides a cache of color information sourced from terminfo.</summary>
         private struct TerminalColorInfo
         {
@@ -340,6 +440,201 @@ namespace System
             {
                 TermInfo.Database db = TermInfo.Database.Instance; // Could be null if TERM is set to a file that doesn't exist
                 return new TerminalBasicInfo(db);
+            }, isThreadSafe: true);
+        }
+
+        /// <summary>Provides a cache of color information sourced from terminfo.</summary>
+        private struct TerminalKeyInfo
+        {
+            /// <summary>The format string for F1.</summary>
+            public string KeyF1Format;
+            /// <summary>The format string for F2.</summary>
+            public string KeyF2Format;
+            /// <summary>The format string for F3.</summary>
+            public string KeyF3Format;
+            /// <summary>The format string for F4</summary>
+            public string KeyF4Format;
+            /// <summary>The format string for F5.</summary>
+            public string KeyF5Format;
+            /// <summary>The format string for F6.</summary>
+            public string KeyF6Format;
+            /// <summary>The format string for F7.</summary>
+            public string KeyF7Format;
+            /// <summary>The format string for F8</summary>
+            public string KeyF8Format;
+            /// <summary>The format string for F9.</summary>
+            public string KeyF9Format;
+            /// <summary>The format string for F10.</summary>
+            public string KeyF10Format;
+            /// <summary>The format string for F11.</summary>
+            public string KeyF11Format;
+            /// <summary>The format string for F12</summary>
+            public string KeyF12Format;
+            /// <summary>The format string for F13.</summary>
+            public string KeyF13Format;
+            /// <summary>The format string for F14.</summary>
+            public string KeyF14Format;
+            /// <summary>The format string for F15.</summary>
+            public string KeyF15Format;
+            /// <summary>The format string for F16</summary>
+            public string KeyF16Format;
+            /// <summary>The format string for F17.</summary>
+            public string KeyF17Format;
+            /// <summary>The format string for F18.</summary>
+            public string KeyF18Format;
+            /// <summary>The format string for F19.</summary>
+            public string KeyF19Format;
+            /// <summary>The format string for F20</summary>
+            public string KeyF20Format;
+            /// <summary>The format string for F21.</summary>
+            public string KeyF21Format;
+            /// <summary>The format string for F22.</summary>
+            public string KeyF22Format;
+            /// <summary>The format string for F23.</summary>
+            public string KeyF23Format;
+            /// <summary>The format string for F24</summary>
+            public string KeyF24Format;
+            /// <summary>The format string for KeyBackspace</summary>
+            public string KeyBackspaceFormat;
+            /// <summary>The format string for KeyClear</summary>
+            public string KeyClearFormat;
+            /// <summary>The format string for KeyDown</summary>
+            public string KeyDownFormat;
+            /// <summary>The format string for KeyUp</summary>
+            public string KeyUpFormat;
+            /// <summary>The format string for KeyHome</summary>
+            public string KeyHomeFormat;
+            /// <summary>The format string for KeyLeft</summary>
+            public string KeyLeftFormat;
+            /// <summary>The format string for KeyPageDown</summary>
+            public string KeyPageDownFormat;
+            /// <summary>The format string for KeyPageUp</summary>
+            public string KeyPageUpFormat;
+            /// <summary>The format string for KeyRight</summary>
+            public string KeyRightFormat;
+            /// <summary>The format string for KeyEnd</summary>
+            public string KeyEndFormat;
+            /// <summary>The format string for KeyEnter</summary>
+            public string KeyEnterFormat;
+            /// <summary>The format string for KeyHelp</summary>
+            public string KeyHelpFormat;
+            /// <summary>The format string for KeyPrint</summary>
+            public string KeyPrintFormat;
+            /// <summary>The format string for KeyInsert</summary>
+            public string KeyInsertFormat;
+            /// <summary>The format string for KeyDelete</summary>
+            public string KeyDeleteFormat;
+            /// <summary> The dictionary of keystring to ConsoleKeyInfo. </summary>
+            public Dictionary<string, ConsoleKey> KeyFormatToConsoleKey;
+            /// <summary> Max key length </summary>
+            public int MaxKeyLength;
+            /// <summary> Min key length </summary>
+            public int MinKeyLength;
+
+            /// <summary>The cached instance.</summary>
+            public static TerminalKeyInfo Instance { get { return _instance.Value; } }
+
+            private void AddKey(string keyFormat, ConsoleKey key)
+            {
+                if (!string.IsNullOrEmpty(keyFormat))
+                    KeyFormatToConsoleKey[keyFormat] = key;
+            }
+
+            private TerminalKeyInfo(TermInfo.Database db)
+            {
+                KeyF1Format = db != null ? db.GetString(TermInfo.Database.KeyF1) : string.Empty;
+                KeyF2Format = db != null ? db.GetString(TermInfo.Database.KeyF2) : string.Empty;
+                KeyF3Format = db != null ? db.GetString(TermInfo.Database.KeyF3) : string.Empty;
+                KeyF4Format = db != null ? db.GetString(TermInfo.Database.KeyF4) : string.Empty;
+                KeyF5Format = db != null ? db.GetString(TermInfo.Database.KeyF5) : string.Empty;
+                KeyF6Format = db != null ? db.GetString(TermInfo.Database.KeyF6) : string.Empty;
+                KeyF7Format = db != null ? db.GetString(TermInfo.Database.KeyF7) : string.Empty;
+                KeyF8Format = db != null ? db.GetString(TermInfo.Database.KeyF8) : string.Empty;
+                KeyF9Format = db != null ? db.GetString(TermInfo.Database.KeyF9) : string.Empty;
+                KeyF10Format = db != null ? db.GetString(TermInfo.Database.KeyF10) : string.Empty;
+                KeyF11Format = db != null ? db.GetString(TermInfo.Database.KeyF11) : string.Empty;
+                KeyF12Format = db != null ? db.GetString(TermInfo.Database.KeyF12) : string.Empty;
+                KeyF13Format = db != null ? db.GetString(TermInfo.Database.KeyF13) : string.Empty;
+                KeyF14Format = db != null ? db.GetString(TermInfo.Database.KeyF14) : string.Empty;
+                KeyF15Format = db != null ? db.GetString(TermInfo.Database.KeyF15) : string.Empty;
+                KeyF16Format = db != null ? db.GetString(TermInfo.Database.KeyF16) : string.Empty;
+                KeyF17Format = db != null ? db.GetString(TermInfo.Database.KeyF17) : string.Empty;
+                KeyF18Format = db != null ? db.GetString(TermInfo.Database.KeyF18) : string.Empty;
+                KeyF19Format = db != null ? db.GetString(TermInfo.Database.KeyF19) : string.Empty;
+                KeyF20Format = db != null ? db.GetString(TermInfo.Database.KeyF20) : string.Empty;
+                KeyF21Format = db != null ? db.GetString(TermInfo.Database.KeyF21) : string.Empty;
+                KeyF22Format = db != null ? db.GetString(TermInfo.Database.KeyF22) : string.Empty;
+                KeyF23Format = db != null ? db.GetString(TermInfo.Database.KeyF23) : string.Empty;
+                KeyF24Format = db != null ? db.GetString(TermInfo.Database.KeyF24) : string.Empty;
+                KeyBackspaceFormat = db != null ? db.GetString(TermInfo.Database.KeyBackspace) : string.Empty;
+                KeyClearFormat = db != null ? db.GetString(TermInfo.Database.KeyClear) : string.Empty;
+                KeyDownFormat = db != null ? db.GetString(TermInfo.Database.KeyDown) : string.Empty;
+                KeyHomeFormat = db != null ? db.GetString(TermInfo.Database.KeyHome) : string.Empty;
+                KeyLeftFormat = db != null ? db.GetString(TermInfo.Database.KeyLeft) : string.Empty;
+                KeyPageDownFormat = db != null ? db.GetString(TermInfo.Database.KeyPageDown) : string.Empty;
+                KeyPageUpFormat = db != null ? db.GetString(TermInfo.Database.KeyPageUp) : string.Empty;
+                KeyRightFormat = db != null ? db.GetString(TermInfo.Database.KeyRight) : string.Empty;
+                KeyUpFormat = db != null ? db.GetString(TermInfo.Database.KeyUp) : string.Empty;
+                KeyEndFormat = db != null ? db.GetString(TermInfo.Database.KeyEnd) : string.Empty;
+                KeyEnterFormat = db != null ? db.GetString(TermInfo.Database.KeyEnter) : string.Empty;
+                KeyHelpFormat = db != null ? db.GetString(TermInfo.Database.KeyHelp) : string.Empty;
+                KeyPrintFormat = db != null ? db.GetString(TermInfo.Database.KeyPrint) : string.Empty;
+                KeyInsertFormat = db != null ? db.GetString(TermInfo.Database.KeyInsert) : string.Empty;
+                KeyDeleteFormat = db != null ? db.GetString(TermInfo.Database.KeyDelete) : string.Empty;
+
+                KeyFormatToConsoleKey = new Dictionary<string, ConsoleKey>();
+                MaxKeyLength = MinKeyLength = 0;
+                if (db != null)
+                {
+                    AddKey(KeyF1Format , ConsoleKey.F1);
+                    AddKey(KeyF2Format , ConsoleKey.F2);
+                    AddKey(KeyF3Format , ConsoleKey.F3);
+                    AddKey(KeyF4Format , ConsoleKey.F4);
+                    AddKey(KeyF5Format , ConsoleKey.F5);
+                    AddKey(KeyF6Format , ConsoleKey.F6);
+                    AddKey(KeyF7Format , ConsoleKey.F7);
+                    AddKey(KeyF8Format , ConsoleKey.F8);
+                    AddKey(KeyF9Format , ConsoleKey.F9);
+                    AddKey(KeyF10Format , ConsoleKey.F10);
+                    AddKey(KeyF11Format , ConsoleKey.F11);
+                    AddKey(KeyF12Format , ConsoleKey.F12);
+                    AddKey(KeyF13Format , ConsoleKey.F13);
+                    AddKey(KeyF14Format , ConsoleKey.F14);
+                    AddKey(KeyF15Format , ConsoleKey.F15);
+                    AddKey(KeyF16Format , ConsoleKey.F16);
+                    AddKey(KeyF17Format , ConsoleKey.F17);
+                    AddKey(KeyF18Format , ConsoleKey.F18);
+                    AddKey(KeyF19Format , ConsoleKey.F19);
+                    AddKey(KeyF20Format , ConsoleKey.F20);
+                    AddKey(KeyF21Format , ConsoleKey.F21);
+                    AddKey(KeyF22Format , ConsoleKey.F22);
+                    AddKey(KeyF23Format , ConsoleKey.F23);
+                    AddKey(KeyF24Format , ConsoleKey.F24);
+                    AddKey(KeyBackspaceFormat , ConsoleKey.Backspace);
+                    AddKey(KeyClearFormat, ConsoleKey.Clear);
+                    AddKey(KeyDownFormat , ConsoleKey.DownArrow);
+                    AddKey(KeyHomeFormat , ConsoleKey.Home);
+                    AddKey(KeyLeftFormat , ConsoleKey.LeftArrow);
+                    AddKey(KeyPageDownFormat , ConsoleKey.PageDown);
+                    AddKey(KeyPageUpFormat , ConsoleKey.PageUp);
+                    AddKey(KeyRightFormat , ConsoleKey.RightArrow);
+                    AddKey(KeyEndFormat , ConsoleKey.End);
+                    AddKey(KeyEnterFormat , ConsoleKey.Enter);
+                    AddKey(KeyHelpFormat, ConsoleKey.Help);
+                    AddKey(KeyPrintFormat, ConsoleKey.Print);
+                    AddKey(KeyInsertFormat, ConsoleKey.Insert);
+                    AddKey(KeyDeleteFormat , ConsoleKey.Delete);
+
+                    MaxKeyLength = KeyFormatToConsoleKey.Keys.Max(key => key.Length);
+                    MinKeyLength = KeyFormatToConsoleKey.Keys.Min(key => key.Length);
+                }
+            }
+
+            /// <summary>Lazy initialization of the terminal key information.</summary>
+            private static Lazy<TerminalKeyInfo> _instance = new Lazy<TerminalKeyInfo>(() =>
+            {
+                TermInfo.Database db = TermInfo.Database.Instance; // Could be null if TERM is set to a file that doesn't exist
+                return new TerminalKeyInfo(db);
             }, isThreadSafe: true);
         }
 
@@ -729,7 +1024,91 @@ namespace System
                 /// <summary>The well-known index of the cursor_normal string entry.</summary>
                 public const int CursorVisibleIndex = 16;
 
-
+                /// <summary>The well-known index of key_backspace</summary>
+                public const int KeyBackspace = 55;
+                /// <summary>The well-known index of key_clear</summary>
+                public const int KeyClear = 57;
+                /// <summary>The well-known index of key_dc</summary>
+                public const int KeyDelete = 59;
+                /// <summary>The well-known index of key_down</summary>
+                public const int KeyDown = 61;
+                /// <summary>The well-known index of key_f1</summary>
+                public const int KeyF1 = 66;
+                /// <summary>The well-known index of key_f10</summary>
+                public const int KeyF10 = 67;
+                /// <summary>The well-known index of key_f2</summary>
+                public const int KeyF2 = 68;
+                /// <summary>The well-known index of key_f3</summary>
+                public const int KeyF3 = 69;
+                /// <summary>The well-known index of key_f4</summary>
+                public const int KeyF4 = 70;
+                /// <summary>The well-known index of key_f5</summary>
+                public const int KeyF5 = 71;
+                /// <summary>The well-known index of key_f6</summary>
+                public const int KeyF6 = 72;
+                /// <summary>The well-known index of key_f7</summary>
+                public const int KeyF7 = 73;
+                /// <summary>The well-known index of key_f8</summary>
+                public const int KeyF8 = 74;
+                /// <summary>The well-known index of key_f9</summary>
+                public const int KeyF9 = 75;
+                /// <summary>The well-known index of key_home</summary>
+                public const int KeyHome = 76;
+                /// <summary>The well-known index of key_ic</summary>
+                public const int KeyInsert = 77;
+                /// <summary>The well-known index of key_left</summary>
+                public const int KeyLeft = 79;
+                /// <summary>The well-known index of key_right</summary>
+                public const int KeyPageDown = 81;
+                /// <summary>The well-known index of key_ppage</summary>
+                public const int KeyPageUp = 82;
+                /// <summary>The well-known index of key_up</summary>
+                public const int KeyRight = 83;
+                /// <summary>The well-known index of key_npage</summary>
+                public const int KeyUp = 87;
+                /// <summary>The well-known index of key_cancel</summary>
+                public const int KeyCancel = 159;
+                /// <summary>The well-known index of key_close</summary>
+                public const int KeyClose = 160;
+                /// <summary>The well-known index of key_end</summary>
+                public const int KeyEnd = 164;
+                /// <summary>The well-known index of key_enter</summary>
+                public const int KeyEnter = 165;
+                /// <summary>The well-known index of key_help</summary>
+                public const int KeyHelp = 168;
+                /// <summary>The well-known index of key_print</summary>
+                public const int KeyPrint = 176;
+                /// <summary>The well-known index of key_select</summary>
+                public const int KeySelect = 193;
+                /// <summary>The well-known index of key_f11</summary>
+                public const int KeyF11 = 216;
+                /// <summary>The well-known index of key_f12</summary>
+                public const int KeyF12 = 217;
+                /// <summary>The well-known index of key_f13</summary>
+                public const int KeyF13 = 218;
+                /// <summary>The well-known index of key_f14</summary>
+                public const int KeyF14 = 219;
+                /// <summary>The well-known index of key_f15</summary>
+                public const int KeyF15 = 220;
+                /// <summary>The well-known index of key_f16</summary>
+                public const int KeyF16 = 221;
+                /// <summary>The well-known index of key_f17</summary>
+                public const int KeyF17 = 222;
+                /// <summary>The well-known index of key_f18</summary>
+                public const int KeyF18 = 223;
+                /// <summary>The well-known index of key_f19</summary>
+                public const int KeyF19 = 224;
+                /// <summary>The well-known index of key_f20</summary>
+                public const int KeyF20 = 225;
+                /// <summary>The well-known index of key_f21</summary>
+                public const int KeyF21 = 226;
+                /// <summary>The well-known index of key_f22</summary>
+                public const int KeyF22 = 227;
+                /// <summary>The well-known index of key_f23</summary>
+                public const int KeyF23 = 228;
+                /// <summary>The well-known index of key_f24</summary>
+                public const int KeyF24 = 229;
+               
                 /// <summary>Read a 16-bit value from the buffer starting at the specified position.</summary>
                 /// <param name="buffer">The buffer from which to read.</param>
                 /// <param name="pos">The position at which to read.</param>

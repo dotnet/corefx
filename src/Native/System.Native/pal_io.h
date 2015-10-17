@@ -5,6 +5,7 @@
 
 #include "pal_types.h"
 #include <dirent.h>
+#include <termios.h>
 
 /**
  * File status returned by Stat or FStat.
@@ -23,7 +24,7 @@ struct FileStatus
 };
 
 /*
- * Window Size of the terminal
+* Window Size of the terminal
 */
 struct WinSize
 {
@@ -636,3 +637,8 @@ extern "C" int32_t GetWindowSize(WinSize* windowsSize);
  * otherwise returns 0 and sets errno.
  */
 extern "C" int32_t IsATty(int filedes);
+
+/**
+ * Reads stdin in non-echo and non-canonical mode.
+*/
+extern "C" int32_t ReadStdinUnbuffered(void* buffer, int32_t bufferSize);
