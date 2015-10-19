@@ -13,12 +13,13 @@
 #include <sys/socket.h>
 #include <sys/sysctl.h>
 
-static_assert(HAVE_AF_PACKET || HAVE_AF_LINK, "System must have AF_PACKET or AF_LINK.");
 #if HAVE_AF_PACKET
 #include <linux/if_packet.h>
 #elif HAVE_AF_LINK
 #include <net/if_dl.h>
 #include <net/if_types.h>
+#else
+#error System must have AF_PACKET or AF_LINK.
 #endif
 
 #if HAVE_RT_MSGHDR
@@ -29,41 +30,47 @@ extern "C" int32_t EnumerateInterfaceAddresses(IPv4AddressFound onIpv4Found,
                                             IPv6AddressFound onIpv6Found,
                                             LinkLayerAddressFound onLinkLayerFound)
 {
-    ifaddrs *headAddr, *current;
+    ifaddrs *headAddr;
     if (getifaddrs(&headAddr) == -1)
     {
         return -1;
     }
 
-    for (current = headAddr; current != nullptr; current = current->ifa_next)
+    for (ifaddrs* current = headAddr; current != nullptr; current = current->ifa_next)
     {
         uint32_t interfaceIndex = if_nametoindex(current->ifa_name);
         int family = current->ifa_addr->sa_family;
         if (family == AF_INET)
         {
             // IP Address
-            IpAddressInfo iai = {};
-            iai.InterfaceIndex = interfaceIndex;
+            IpAddressInfo iai = {
+                .InterfaceIndex = interfaceIndex,
+                .NumAddressBytes = NUM_BYTES_IN_IPV4_ADDRESS,
+            };
+
             sockaddr_in* sain = reinterpret_cast<sockaddr_in*>(current->ifa_addr);
             memcpy(iai.AddressBytes, &sain->sin_addr.s_addr, sizeof(sain->sin_addr.s_addr));
-            iai.NumAddressBytes = NUM_BYTES_IN_IPV4_ADDRESS;
 
             // Net Mask
-            IpAddressInfo maskInfo = {};
-            maskInfo.InterfaceIndex = interfaceIndex;
+            IpAddressInfo maskInfo = {
+                .InterfaceIndex = interfaceIndex,
+                .NumAddressBytes = NUM_BYTES_IN_IPV4_ADDRESS,
+            };
+
             sockaddr_in* mask_sain = reinterpret_cast<sockaddr_in*>(current->ifa_netmask);
             memcpy(maskInfo.AddressBytes, &mask_sain->sin_addr.s_addr, sizeof(mask_sain->sin_addr.s_addr));
-            maskInfo.NumAddressBytes = NUM_BYTES_IN_IPV4_ADDRESS;
 
             onIpv4Found(current->ifa_name, &iai, &maskInfo);
         }
         else if (family == AF_INET6)
         {
-            IpAddressInfo iai = {};
-            iai.InterfaceIndex = interfaceIndex;
+            IpAddressInfo iai = {
+                .InterfaceIndex = interfaceIndex,
+                .NumAddressBytes = NUM_BYTES_IN_IPV6_ADDRESS,
+            };
+
             sockaddr_in6* sain6 = reinterpret_cast<sockaddr_in6*>(current->ifa_addr);
             memcpy(iai.AddressBytes, sain6->sin6_addr.s6_addr, sizeof(sain6->sin6_addr.s6_addr));
-            iai.NumAddressBytes = NUM_BYTES_IN_IPV6_ADDRESS;
             uint32_t scopeId = sain6->sin6_scope_id;
             onIpv6Found(current->ifa_name, &iai, &scopeId);
         }
@@ -72,12 +79,15 @@ extern "C" int32_t EnumerateInterfaceAddresses(IPv4AddressFound onIpv4Found,
 #if HAVE_AF_PACKET
         else if (family == AF_PACKET)
         {
-            LinkLayerAddressInfo lla = {};
-            lla.InterfaceIndex = interfaceIndex;
             sockaddr_ll* sall = reinterpret_cast<sockaddr_ll*>(current->ifa_addr);
+
+            LinkLayerAddressInfo lla = {
+                .InterfaceIndex = interfaceIndex,
+                .NumAddressBytes = sall->sll_halen,
+                .HardwareType = MapHardwareType(sall->sll_hatype),
+            };
+
             memcpy(&lla.AddressBytes, &sall->sll_addr, sall->sll_halen);
-            lla.NumAddressBytes = sall->sll_halen;
-            lla.HardwareType = MapHardwareType(sall->sll_hatype);
             onLinkLayerFound(current->ifa_name, &lla);
         }
 
@@ -85,12 +95,15 @@ extern "C" int32_t EnumerateInterfaceAddresses(IPv4AddressFound onIpv4Found,
         // OSX/BSD : AF_LINK = 18
         else if (family == AF_LINK)
         {
-            LinkLayerAddressInfo lla = {};
             sockaddr_dl* sadl = reinterpret_cast<sockaddr_dl*>(current->ifa_addr);
-            lla.InterfaceIndex = interfaceIndex;
+
+            LinkLayerAddressInfo lla = {
+                .InterfaceIndex = interfaceIndex,
+                .NumAddressBytes = sadl->sdl_alen,
+                .HardwareType = MapHardwareType(sadl->sdl_type),
+            };
+
             memcpy(&lla.AddressBytes, reinterpret_cast<uint8_t*>(LLADDR(sadl)), sadl->sdl_alen);
-            lla.NumAddressBytes = sadl->sdl_alen;
-            lla.HardwareType = MapHardwareType(sadl->sdl_type);
             onLinkLayerFound(current->ifa_name, &lla);
         }
 #endif
@@ -121,11 +134,9 @@ extern "C" int32_t EnumerateGatewayAddressesForInterface(uint32_t interfaceIndex
     }
 
     rt_msghdr* hdr;
-    for (uint8_t* headerBytePtr = buffer;
-        static_cast<size_t>(headerBytePtr - buffer) < byteCount;
-        headerBytePtr += hdr->rtm_msglen)
+    for (size_t i = 0; i < byteCount; i += hdr->rtm_msglen)
     {
-        hdr = reinterpret_cast<rt_msghdr*>(headerBytePtr);
+        hdr = reinterpret_cast<rt_msghdr*>(&buffer[i]);
         int flags = hdr->rtm_flags;
         int isGateway = flags & RTF_GATEWAY;
         int gatewayPresent = hdr->rtm_addrs & RTA_GATEWAY;
@@ -135,8 +146,8 @@ extern "C" int32_t EnumerateGatewayAddressesForInterface(uint32_t interfaceIndex
             IpAddressInfo iai = { };
             iai.InterfaceIndex = interfaceIndex;
             iai.NumAddressBytes = NUM_BYTES_IN_IPV4_ADDRESS;
-            sockaddr_in* sain = reinterpret_cast<sockaddr_in*>(headerBytePtr + sizeof(rt_msghdr));
-            sain = sain + 1;
+            sockaddr_in* sain = reinterpret_cast<sockaddr_in*>(hdr + 1);
+            sain = sain + 1; // Skip over the first sockaddr, the destination address. The second is the gateway.
             memcpy(iai.AddressBytes, &sain->sin_addr.s_addr, sizeof(sain->sin_addr.s_addr));
             onGatewayFound(&iai);
         }

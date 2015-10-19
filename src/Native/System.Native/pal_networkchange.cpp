@@ -4,10 +4,13 @@
 #include "pal_config.h"
 
 #if HAVE_LINUX_RTNETLINK_H
+
+#include "pal_errno.h"
 #include "pal_networkchange.h"
 #include "pal_types.h"
 #include "pal_utilities.h"
 
+#include <errno.h>
 #include <linux/netlink.h>
 #include <linux/rtnetlink.h>
 #include <net/if.h>
@@ -18,23 +21,31 @@
 
 #pragma clang diagnostic ignored "-Wcast-align" // NLMSG_* macros trigger this
 
-extern "C" int32_t CreateNetworkChangeListenerSocket()
+extern "C" Error CreateNetworkChangeListenerSocket(int32_t* retSocket)
 {
     sockaddr_nl sa = { };
     sa.nl_family = AF_NETLINK;
     sa.nl_groups = RTMGRP_LINK | RTMGRP_IPV4_IFADDR;
     int32_t sock = socket(AF_NETLINK, SOCK_RAW, NETLINK_ROUTE);
+    if (sock == -1)
+    {
+        *retSocket = -1;
+        return ConvertErrorPlatformToPal(errno);
+    }
     if (bind(sock, reinterpret_cast<sockaddr*>(&sa), sizeof(sa)) != 0)
     {
-        return -1;
+        *retSocket = -1;
+        return ConvertErrorPlatformToPal(errno);
     }
-    return sock;
+
+    *retSocket = sock;
+    return PAL_SUCCESS;
 }
 
-extern "C" int32_t CloseNetworkChangeListenerSocket(int32_t socket)
+extern "C" Error CloseNetworkChangeListenerSocket(int32_t socket)
 {
-    int32_t result = close(socket);
-    return result;
+    int err = close(socket);
+    return err == 0 ? PAL_SUCCESS : ConvertErrorPlatformToPal(errno);
 }
 
 extern "C" NetworkChangeKind ReadSingleEvent(int32_t sock)
@@ -81,9 +92,9 @@ NetworkChangeKind ReadNewLinkMessage(nlmsghdr* hdr)
     assert(hdr != nullptr);
     ifinfomsg* ifimsg;
     ifimsg = reinterpret_cast<ifinfomsg*>(NLMSG_DATA(hdr));
-    if(ifimsg->ifi_family == AF_INET)
+    if (ifimsg->ifi_family == AF_INET)
     {
-        if(ifimsg->ifi_flags & IFF_UP)
+        if ((ifimsg->ifi_flags & IFF_UP) != 0)
         {
             return NetworkChangeKind::LinkAdded;
         }

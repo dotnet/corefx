@@ -451,8 +451,7 @@ extern "C" int32_t GetNativeIPInterfaceStatistics(char* interfaceName, NativeIPI
         return -1;
     }
 
-    uint8_t* headPtr = buffer;
-    for (headPtr = buffer; headPtr <= buffer + len; headPtr += reinterpret_cast<if_msghdr*>(headPtr)->ifm_msglen)
+    for (uint8_t*headPtr = buffer; headPtr <= buffer + len; headPtr += reinterpret_cast<if_msghdr*>(headPtr)->ifm_msglen)
     {
         if_msghdr* ifHdr = reinterpret_cast<if_msghdr*>(headPtr);
         if (ifHdr->ifm_index == interfaceIndex && ifHdr->ifm_type == RTM_IFINFO2)
@@ -508,16 +507,17 @@ extern "C" int32_t GetNumRoutes()
     }
 
     uint8_t* headPtr = buffer;
-    uint8_t* bufferLimit = buffer + len;
     rt_msghdr2* rtmsg;
     int32_t count = 0;
-    while (headPtr < bufferLimit)
+
+    for (size_t i = 0; i < len; i += rtmsg->rtm_msglen)
     {
-        rtmsg = reinterpret_cast<rt_msghdr2*>(headPtr);
+        rtmsg = reinterpret_cast<rt_msghdr2*>(&buffer[i]);
         if (rtmsg->rtm_flags & RTF_UP)
         {
             count++;
         }
+        
         headPtr += rtmsg->rtm_msglen;
     }
 

@@ -20,7 +20,7 @@ internal static partial class Interop
         public delegate void NetworkChangeEvent(NetworkChangeKind kind);
 
         [DllImport(Libraries.SystemNative)]
-        public static extern int CreateNetworkChangeListenerSocket();
+        public static extern Error CreateNetworkChangeListenerSocket(out int socket);
 
         [DllImport(Libraries.SystemNative)]
         public static extern Error CloseNetworkChangeListenerSocket(int socket);

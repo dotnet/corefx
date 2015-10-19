@@ -15,7 +15,7 @@ namespace System.Net.NetworkInformation
         private static int s_socket = 0;
         private static readonly object s_lockObj = new object();
 
-        static public event NetworkAddressChangedEventHandler NetworkAddressChanged
+        public static event NetworkAddressChangedEventHandler NetworkAddressChanged
         {
             add
             {
@@ -51,10 +51,12 @@ namespace System.Net.NetworkInformation
         private static void CreateSocket()
         {
             Debug.Assert(s_socket == 0);
-            int newSocket = Interop.Sys.CreateNetworkChangeListenerSocket();
-            if (newSocket == -1)
+            int newSocket;
+            Interop.Error result = Interop.Sys.CreateNetworkChangeListenerSocket(out newSocket);
+            if (result != Interop.Error.SUCCESS)
             {
-                throw new NetworkInformationException("Error creating the netlink socket.");
+                string message = Interop.Sys.GetLastErrorInfo().GetErrorMessage();
+                throw new NetworkInformationException(message);
             }
 
             s_socket = newSocket;
@@ -63,7 +65,12 @@ namespace System.Net.NetworkInformation
 
         private static void CloseSocket()
         {
-
+            Interop.Error result = Interop.Sys.CloseNetworkChangeListenerSocket(s_socket);
+            if (result != Interop.Error.SUCCESS)
+            {
+                string message = Interop.Sys.GetLastErrorInfo().GetErrorMessage();
+                throw new NetworkInformationException(message);
+            }
         }
 
         private static void LoopReadSocket(int socket)
