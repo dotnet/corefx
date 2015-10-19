@@ -16,8 +16,10 @@
 
 #include <errno.h>
 #include <net/route.h>
-#include <netinet/icmp_var.h>
-#include <netinet/icmp6.h>
+
+#include <sys/types.h>
+#include <sys/sysctl.h>
+#include <sys/socketvar.h>
 #include <netinet/ip.h>
 #include <netinet/ip_icmp.h>
 #include <netinet/ip_var.h>
@@ -26,9 +28,8 @@
 #include <netinet/tcp_var.h>
 #include <netinet/udp.h>
 #include <netinet/udp_var.h>
-#include <sys/socketvar.h>
-#include <sys/sysctl.h>
-#include <sys/types.h>
+#include <netinet/icmp6.h>
+#include <netinet/icmp_var.h>
 
 template <class RetType>
 int32_t ReadSysctlVar(const char* name, RetType* value)
