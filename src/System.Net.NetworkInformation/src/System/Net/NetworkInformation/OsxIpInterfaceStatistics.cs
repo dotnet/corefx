@@ -17,20 +17,25 @@ namespace System.Net.NetworkInformation
         private readonly long _outNonUnicastPackets;
         private readonly long _outErrors;
 
-        // NativeIPInterfaeStatistics is a massive structure, pass it by reference.
-        public OsxIpInterfaceStatistics(ref Interop.Sys.NativeIPInterfaceStatistics stats)
+        public OsxIpInterfaceStatistics(string name)
         {
-            _outputQueueLength = (long)stats.SendQueueLength;
-            _inPackets = (long)stats.InPackets;
-            _outPackets = (long)stats.OutPackets;
-            _inBytes = (long)stats.InBytes;
-            _outBytes = (long)stats.OutBytes;
-            _inPacketsDiscarded = (long)stats.InDrops;
-            _inErrors = (long)stats.InErrors;
-            _inUnknownProtocols = (long)stats.InNoProto;
-            _inNonUnicastPackets = (long)stats.InMulticastPackets;
-            _outNonUnicastPackets = (long)stats.OutMulticastPackets;
-            _outErrors = (long)stats.OutErrors;
+            Interop.Sys.NativeIPInterfaceStatistics nativeStats;
+            if (Interop.Sys.GetNativeIPInterfaceStatistics(name, out nativeStats) == -1)
+            {
+                throw new NetworkInformationException();
+            }
+
+            _outputQueueLength = (long)nativeStats.SendQueueLength;
+            _inPackets = (long)nativeStats.InPackets;
+            _outPackets = (long)nativeStats.OutPackets;
+            _inBytes = (long)nativeStats.InBytes;
+            _outBytes = (long)nativeStats.OutBytes;
+            _inPacketsDiscarded = (long)nativeStats.InDrops;
+            _inErrors = (long)nativeStats.InErrors;
+            _inUnknownProtocols = (long)nativeStats.InNoProto;
+            _inNonUnicastPackets = (long)nativeStats.InMulticastPackets;
+            _outNonUnicastPackets = (long)nativeStats.OutMulticastPackets;
+            _outErrors = (long)nativeStats.OutErrors;
         }
 
         public override long BytesReceived
