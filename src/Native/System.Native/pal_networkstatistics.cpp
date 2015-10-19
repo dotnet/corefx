@@ -27,6 +27,7 @@
 #include <netinet/ip_icmp.h>
 #include <netinet/icmp_var.h>
 #include <netinet/icmp6.h>
+#include <net/route.h>
 #include <errno.h>
 
 template <class RetType>
@@ -410,6 +411,72 @@ extern "C" int32_t GetActiveUdpListeners(IPEndPointInfo* infos, int32_t* infoCou
         iepi->Port = in_pcb.inp_lport;
     }
     return 0;
+}
+
+extern "C" int32_t GetNativeIPInterfaceStatistics(char* interfaceName, NativeIPInterfaceStatistics* retStats)
+{
+    unsigned int interfaceIndex = if_nametoindex(interfaceName);
+    if (interfaceIndex == 0)
+    {
+        // An invalid interface name was given (doesn't exist).
+        return -1;
+    }
+
+    int statisticsMib[] =
+    {
+        CTL_NET,
+        PF_ROUTE,
+        0,
+        0,
+        NET_RT_IFLIST2,
+        0
+    };
+    
+    size_t len;
+    // Get estimated data length
+    if (sysctl(statisticsMib, 6, nullptr, &len, nullptr, 0) == -1)
+    {
+        memset(retStats, 0, sizeof(NativeIPInterfaceStatistics));
+        return -1;
+    }
+
+    uint8_t* buffer = new uint8_t[len];
+    if (sysctl(statisticsMib, 6, buffer, &len, nullptr, 0) == -1)
+    {
+        // Not enough space.
+        memset(retStats, 0, sizeof(NativeIPInterfaceStatistics));
+        return -1;
+    }
+
+    uint8_t* headPtr = buffer;
+    for (headPtr = buffer; headPtr <= buffer + len; headPtr += reinterpret_cast<if_msghdr*>(headPtr)->ifm_msglen)
+    {
+        if_msghdr* ifHdr = reinterpret_cast<if_msghdr*>(headPtr);
+        if (ifHdr->ifm_index == interfaceIndex && ifHdr->ifm_type == RTM_IFINFO2)
+        {
+            if_msghdr2* ifHdr2 = reinterpret_cast<if_msghdr2*>(ifHdr);
+            retStats->SendQueueLength = static_cast<uint64_t>(ifHdr2->ifm_snd_maxlen);
+
+            if_data64 systemStats = ifHdr2->ifm_data;
+            retStats->Mtu = systemStats.ifi_mtu;
+            retStats->Speed = systemStats.ifi_baudrate; // bits per second.
+            retStats->InPackets = systemStats.ifi_ipackets;
+            retStats->InErrors = systemStats.ifi_ierrors;
+            retStats->OutPackets = systemStats.ifi_opackets;
+            retStats->OutErrors = systemStats.ifi_oerrors;
+            retStats->InBytes = systemStats.ifi_ibytes;
+            retStats->OutBytes = systemStats.ifi_obytes;
+            retStats->InMulticastPackets = systemStats.ifi_imcasts;
+            retStats->OutMulticastPackets = systemStats.ifi_omcasts;
+            retStats->InDrops = systemStats.ifi_iqdrops;
+            retStats->InNoProto = systemStats.ifi_noproto;
+            return 0;
+        }
+    }
+    
+    // No statistics were found with the given interface index; shouldn't happen.
+    memset(retStats, 0, sizeof(NativeIPInterfaceStatistics));
+    return -1;
 }
 
 #endif // HAVE_TCP_VAR_H

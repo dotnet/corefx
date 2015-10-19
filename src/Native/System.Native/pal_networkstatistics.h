@@ -143,3 +143,20 @@ struct NativeTcpConnectionInformation
 };
 
 TcpState MapTcpState(int tcpState);
+
+struct NativeIPInterfaceStatistics
+{
+    uint64_t SendQueueLength;
+    uint64_t Mtu;
+    uint64_t Speed;
+    uint64_t InPackets;
+    uint64_t InErrors;
+    uint64_t OutPackets;
+    uint64_t OutErrors;
+    uint64_t InBytes;
+    uint64_t OutBytes;
+    uint64_t InMulticastPackets;
+    uint64_t OutMulticastPackets;
+    uint64_t InDrops;
+    uint64_t InNoProto;
+};

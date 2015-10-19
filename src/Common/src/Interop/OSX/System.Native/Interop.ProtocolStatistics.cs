@@ -134,5 +134,25 @@ internal static partial class Interop
 
         [DllImport(Libraries.SystemNative)]
         public static unsafe extern int GetIcmpv6GlobalStatistics(out Icmpv6GlobalStatistics statistics);
+
+        public struct NativeIPInterfaceStatistics
+        {
+            public readonly ulong SendQueueLength;
+            public readonly ulong Mtu;
+            public readonly ulong Speed;
+            public readonly ulong InPackets;
+            public readonly ulong InErrors;
+            public readonly ulong OutPackets;
+            public readonly ulong OutErrors;
+            public readonly ulong InBytes;
+            public readonly ulong OutBytes;
+            public readonly ulong InMulticastPackets;
+            public readonly ulong OutMulticastPackets;
+            public readonly ulong InDrops;
+            public readonly ulong InNoProto;
+        }
+
+        [DllImport(Libraries.SystemNative)]
+        public static unsafe extern int GetNativeIPInterfaceStatistics(string name, out NativeIPInterfaceStatistics stats);
     }
 }

@@ -12,10 +12,10 @@ namespace System.Net.NetworkInformation
         private readonly OsxIPv6InterfaceProperties _ipv6Properties;
         private readonly GatewayIPAddressInformationCollection _gatewayAddresses;
 
-        public OsxIpInterfaceProperties(OsxNetworkInterface oni) : base(oni)
+        public OsxIpInterfaceProperties(OsxNetworkInterface oni, int mtu) : base(oni)
         {
-            _ipv4Properties = new OsxIPv4InterfaceProperties(oni);
-            _ipv6Properties = new OsxIPv6InterfaceProperties(oni);
+            _ipv4Properties = new OsxIPv4InterfaceProperties(oni, mtu);
+            _ipv6Properties = new OsxIPv6InterfaceProperties(oni, mtu);
             _gatewayAddresses = GetGatewayAddresses(oni.Index);
         }
 
@@ -23,7 +23,7 @@ namespace System.Net.NetworkInformation
         {
             get
             {
-                throw new NotImplementedException();
+                throw new PlatformNotSupportedException();
             }
         }
 
@@ -31,7 +31,7 @@ namespace System.Net.NetworkInformation
         {
             get
             {
-                throw new NotImplementedException();
+                throw new PlatformNotSupportedException();
             }
         }
 

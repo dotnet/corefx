@@ -15,12 +15,14 @@ namespace System.Net.NetworkInformation
         private readonly OperationalStatus _operationalStatus;
         private readonly bool _supportsMulticast;
         private readonly long? _speed;
+        private readonly LinuxIPInterfaceProperties _ipProperties;
 
         internal LinuxNetworkInterface(string name) : base(name)
         {
             _operationalStatus = GetOperationalStatus(name);
             _supportsMulticast = GetSupportsMulticast(name);
             _speed = GetSpeed(name);
+            _ipProperties = new LinuxIPInterfaceProperties(this);
         }
 
         public unsafe static NetworkInterface[] GetLinuxNetworkInterfaces()
@@ -77,7 +79,7 @@ namespace System.Net.NetworkInformation
 
         public override IPInterfaceProperties GetIPProperties()
         {
-            return new LinuxIPInterfaceProperties(this);
+            return _ipProperties;
         }
 
         public override IPInterfaceStatistics GetIPStatistics()

@@ -8,7 +8,20 @@ namespace System.Net.NetworkInformation
 {
     internal class OsxNetworkInterface : UnixNetworkInterface
     {
-        protected OsxNetworkInterface(string name) : base(name) { }
+        private readonly OsxIpInterfaceProperties _ipProperties;
+        private readonly long _speed;
+
+        protected unsafe OsxNetworkInterface(string name) : base(name)
+        {
+            Interop.Sys.NativeIPInterfaceStatistics nativeStats;
+            if (Interop.Sys.GetNativeIPInterfaceStatistics(name, out nativeStats) == -1)
+            {
+                throw new NetworkInformationException();
+            }
+
+            _speed = (long)nativeStats.Speed;
+            _ipProperties = new OsxIpInterfaceProperties(this, (int)nativeStats.Mtu);
+        }
 
         public unsafe static NetworkInterface[] GetOsxNetworkInterfaces()
         {
@@ -57,12 +70,18 @@ namespace System.Net.NetworkInformation
 
         public override IPInterfaceProperties GetIPProperties()
         {
-            return new OsxIpInterfaceProperties(this);
+            return _ipProperties;
         }
 
         public override IPInterfaceStatistics GetIPStatistics()
         {
-            return new OsxIpInterfaceStatistics(_name);
+            Interop.Sys.NativeIPInterfaceStatistics nativeStats;
+            if (Interop.Sys.GetNativeIPInterfaceStatistics(Name, out nativeStats) == -1)
+            {
+                throw new NetworkInformationException();
+            }
+
+            return new OsxIpInterfaceStatistics(ref nativeStats);
         }
 
         public override OperationalStatus OperationalStatus
@@ -73,13 +92,21 @@ namespace System.Net.NetworkInformation
             }
         }
 
+        public override long Speed
+        {
+            get
+            {
+                return _speed;
+            }
+        }
+
         public override string Description { get { throw new PlatformNotSupportedException(); } }
 
         public override bool SupportsMulticast
         {
             get
             {
-                return base.SupportsMulticast;
+                return _ipProperties.MulticastAddresses.Count > 0;
             }
         }
 
