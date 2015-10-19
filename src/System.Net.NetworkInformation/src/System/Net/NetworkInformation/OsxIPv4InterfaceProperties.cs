@@ -41,7 +41,8 @@ namespace System.Net.NetworkInformation
         {
             get
             {
-                throw new NotImplementedException();
+                // Doesn't seem to be exposed on a per-interface basis.
+                throw new PlatformNotSupportedException();
             }
         }
 
@@ -57,7 +58,7 @@ namespace System.Net.NetworkInformation
         {
             get
             {
-                throw new NotImplementedException();
+                throw new PlatformNotSupportedException();
             }
         }
     }

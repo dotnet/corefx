@@ -47,7 +47,7 @@ namespace System.Net.NetworkInformation
         {
             get
             {
-                throw new NotImplementedException();
+                throw new PlatformNotSupportedException();
             }
         }
 
@@ -63,7 +63,7 @@ namespace System.Net.NetworkInformation
         {
             get
             {
-                throw new NotImplementedException();
+                throw new PlatformNotSupportedException();
             }
         }
 

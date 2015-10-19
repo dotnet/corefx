@@ -7,21 +7,9 @@ namespace System.Net.NetworkInformation
 
     public delegate void NetworkAvailabilityChangedEventHandler(object sender, NetworkAvailabilityEventArgs e);
 
-    // Linux implementation of NetworkChange
+    // OSX implementation of NetworkChange
     public class NetworkChange
     {
-        static public event NetworkAvailabilityChangedEventHandler NetworkAvailabilityChanged
-        {
-            add
-            {
-                throw new NotImplementedException();
-            }
-            remove
-            {
-                throw new NotImplementedException();
-            }
-        }
-
         static public event NetworkAddressChangedEventHandler NetworkAddressChanged
         {
             add
