@@ -12,9 +12,9 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' " />
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' " />
   <ItemGroup>
-    <Compile Include="SocketPerformanceAsyncTests.cs" />
+    <Compile Include="SocketTestServerAPMMock.cs" />    
     <Compile Include="SocketTestClientAPMMock.cs" />    
-    <Compile Include="SocketTestServerAPMMock.cs" />
+    <Compile Include="Perf.Sockets.cs" />
 
     <!-- Common Sockets files -->
     <Compile Include="$(CommonTestPath)\System\Net\Sockets\Configuration.cs">
