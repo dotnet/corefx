@@ -57,8 +57,7 @@ namespace System.Net.NetworkInformation
         {
             get
             {
-                // TODO: Parse /etc/samba/smb.conf and see if there are and Wins server addresses enabled.
-                throw new NotImplementedException();
+                return _linuxNetworkInterface.GetIPProperties().WinsServersAddresses.Count > 0;
             }
         }
 
