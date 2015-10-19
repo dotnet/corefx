@@ -99,8 +99,8 @@ namespace Internal.Cryptography.Pal
         {
             get
             {
-                IntPtr serialNumberPtr = Interop.Crypto.X509GetSerialNumber(_cert);
-                byte[] serial = Interop.Crypto.GetAsn1StringBytes(serialNumberPtr);
+                SafeSharedAsn1IntegerHandle serialNumber = Interop.Crypto.X509GetSerialNumber(_cert);
+                byte[] serial = Interop.Crypto.GetAsn1IntegerBytes(serialNumber);
 
                 // Windows returns this in BigInteger Little-Endian,
                 // OpenSSL returns this in BigInteger Big-Endian.
@@ -138,7 +138,7 @@ namespace Internal.Cryptography.Pal
         {
             get
             {
-                return Interop.Crypto.OpenSslEnocde(
+                return Interop.Crypto.OpenSslEncode(
                     Interop.Crypto.GetX509DerSize,
                     Interop.Crypto.EncodeX509,
                     _cert);
@@ -251,10 +251,7 @@ namespace Internal.Cryptography.Pal
                 return null;
             }
 
-            using (SafeRsaHandle rsaHandle = Interop.libcrypto.EVP_PKEY_get1_RSA(_privateKey))
-            {
-                return new RSAOpenSsl(rsaHandle.DangerousGetHandle());
-            }
+            return new RSAOpenSsl(_privateKey);
         }
 
         public ECDsa GetECDsaPublicKey()
@@ -272,10 +269,7 @@ namespace Internal.Cryptography.Pal
                 return null;
             }
 
-            using (SafeEcKeyHandle ecKeyHandle = Interop.libcrypto.EVP_PKEY_get1_EC_KEY(_privateKey))
-            {
-                return new ECDsaOpenSsl(ecKeyHandle.DangerousGetHandle());
-            }
+            return new ECDsaOpenSsl(_privateKey);
         }
 
         public string GetNameInfo(X509NameType nameType, bool forIssuer)

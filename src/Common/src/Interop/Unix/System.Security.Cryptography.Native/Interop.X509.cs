@@ -38,8 +38,17 @@ internal static partial class Interop
         [DllImport(Libraries.CryptoNative)]
         internal static extern SafeX509Handle PemReadX509FromBio(SafeBioHandle bio);
 
-        [DllImport(Libraries.CryptoNative)]
-        internal static extern IntPtr X509GetSerialNumber(SafeX509Handle x);
+        [DllImport(Libraries.CryptoNative, EntryPoint = "X509GetSerialNumber")]
+        private static extern SafeSharedAsn1IntegerHandle X509GetSerialNumber_private(SafeX509Handle x);
+
+        internal static SafeSharedAsn1IntegerHandle X509GetSerialNumber(SafeX509Handle x)
+        {
+            CheckValidOpenSslHandle(x);
+
+            return SafeInteriorHandle.OpenInteriorHandle(
+                handle => X509GetSerialNumber_private(handle),
+                x);
+        }
 
         [DllImport(Libraries.CryptoNative)]
         internal static extern IntPtr X509GetIssuerName(SafeX509Handle x);
@@ -119,10 +128,7 @@ internal static partial class Interop
 
         internal static string GetX509VerifyCertErrorString(X509VerifyStatusCode n)
         {
-            IntPtr ptr = X509VerifyCertErrorString(n);
-            return ptr != null ?
-                Marshal.PtrToStringAnsi(ptr) :
-                null;
+            return Marshal.PtrToStringAnsi(X509VerifyCertErrorString(n));
         }
 
         [DllImport(Libraries.CryptoNative)]
@@ -136,6 +142,12 @@ internal static partial class Interop
 
         [DllImport(Libraries.CryptoNative)]
         internal static extern SafeX509CrlHandle PemReadBioX509Crl(SafeBioHandle bio);
+
+        [DllImport(Libraries.CryptoNative)]
+        internal static extern int GetX509SubjectPublicKeyInfoDerSize(SafeX509Handle x509);
+
+        [DllImport(Libraries.CryptoNative)]
+        internal static extern int EncodeX509SubjectPublicKeyInfo(SafeX509Handle x509, byte[] buf);
 
         internal enum X509VerifyStatusCode : int
         {
