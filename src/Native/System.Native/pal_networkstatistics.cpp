@@ -519,7 +519,6 @@ extern "C" int32_t GetNumRoutes()
         headPtr += rtmsg->rtm_msglen;
     }
 
-    printf("Possible count: %i\n.", count);
     return count;
 }
 
