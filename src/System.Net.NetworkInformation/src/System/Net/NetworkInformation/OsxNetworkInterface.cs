@@ -75,13 +75,7 @@ namespace System.Net.NetworkInformation
 
         public override IPInterfaceStatistics GetIPStatistics()
         {
-            Interop.Sys.NativeIPInterfaceStatistics nativeStats;
-            if (Interop.Sys.GetNativeIPInterfaceStatistics(Name, out nativeStats) == -1)
-            {
-                throw new NetworkInformationException();
-            }
-
-            return new OsxIpInterfaceStatistics(ref nativeStats);
+            return new OsxIpInterfaceStatistics(Name);
         }
 
         public override OperationalStatus OperationalStatus

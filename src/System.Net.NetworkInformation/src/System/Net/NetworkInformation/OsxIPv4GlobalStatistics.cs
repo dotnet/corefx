@@ -24,6 +24,7 @@ namespace System.Net.NetworkInformation
         private readonly bool _forwarding;
         private readonly int _numInterfaces;
         private readonly int _numIPAddresses;
+        private readonly int _numRoutes;
 
         public OsxIPv4GlobalStatistics()
         {
@@ -53,6 +54,12 @@ namespace System.Net.NetworkInformation
             // PERF: In native shim, use sysctl: net.link.generic.system.ifcount = number of network interfaces
             _numInterfaces = interfaces.Length;
             _numIPAddresses = interfaces.Sum(uni => uni.Addresses.Count);
+
+            _numRoutes = Interop.Sys.GetNumRoutes();
+            if (_numRoutes == -1)
+            {
+                throw new NetworkInformationException();
+            }
         }
 
         public override int DefaultTtl { get { return _defaultTtl; } }
@@ -97,6 +104,6 @@ namespace System.Net.NetworkInformation
 
         public override long ReceivedPacketsWithUnknownProtocol { get { return _unknownProtos; } }
 
-        public override int NumberOfRoutes { get { throw new NotImplementedException(); } }
+        public override int NumberOfRoutes { get { return _numRoutes; } }
     }
 }

@@ -154,5 +154,8 @@ internal static partial class Interop
 
         [DllImport(Libraries.SystemNative)]
         public static unsafe extern int GetNativeIPInterfaceStatistics(string name, out NativeIPInterfaceStatistics stats);
+
+        [DllImport(Libraries.SystemNative)]
+        public static extern int GetNumRoutes();
     }
 }

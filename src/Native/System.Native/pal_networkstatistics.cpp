@@ -444,6 +444,7 @@ extern "C" int32_t GetNativeIPInterfaceStatistics(char* interfaceName, NativeIPI
     if (sysctl(statisticsMib, 6, buffer, &len, nullptr, 0) == -1)
     {
         // Not enough space.
+        delete buffer;
         memset(retStats, 0, sizeof(NativeIPInterfaceStatistics));
         return -1;
     }
@@ -477,6 +478,49 @@ extern "C" int32_t GetNativeIPInterfaceStatistics(char* interfaceName, NativeIPI
     // No statistics were found with the given interface index; shouldn't happen.
     memset(retStats, 0, sizeof(NativeIPInterfaceStatistics));
     return -1;
+}
+
+extern "C" int32_t GetNumRoutes()
+{
+    int routeDumpMib[] =
+    {
+        CTL_NET,
+        PF_ROUTE,
+        0,
+        0,
+        NET_RT_DUMP,
+        0
+    };
+
+    size_t len;
+    if (sysctl(routeDumpMib, 6, nullptr, &len, nullptr, 0) == -1)
+    {
+        return -1;
+    }
+
+    uint8_t* buffer = new uint8_t[len];
+    if (sysctl(routeDumpMib, 6, buffer, &len, nullptr, 0) == -1)
+    {
+        delete buffer;
+        return -1;
+    }
+
+    uint8_t* headPtr = buffer;
+    uint8_t* bufferLimit = buffer + len;
+    rt_msghdr2* rtmsg;
+    int32_t count = 0;
+    while (headPtr < bufferLimit)
+    {
+        rtmsg = reinterpret_cast<rt_msghdr2*>(headPtr);
+        if (rtmsg->rtm_flags & RTF_UP)
+        {
+            count++;
+        }
+        headPtr += rtmsg->rtm_msglen;
+    }
+
+    printf("Possible count: %i\n.", count);
+    return count;
 }
 
 #endif // HAVE_TCP_VAR_H
