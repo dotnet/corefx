@@ -310,9 +310,6 @@
     <Compile Include="System\Net\NetworkInformation\OsxIcmpV6Statistics.cs" />
     <Compile Include="System\Net\NetworkInformation\OsxIPGlobalProperties.cs" />
     <Compile Include="System\Net\NetworkInformation\OsxIPv4GlobalStatistics.cs" />
-    <!--
-    <Compile Include="System\Net\NetworkInformation\OsxIPv6GlobalStatistics.cs" />
-  -->
     <Compile Include="System\Net\NetworkInformation\OsxIpInterfaceStatistics.cs" />
     <Compile Include="System\Net\NetworkInformation\OsxIPv4InterfaceProperties.cs" />
     <Compile Include="System\Net\NetworkInformation\OsxIPv6InterfaceProperties.cs" />

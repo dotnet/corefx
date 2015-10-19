@@ -12,7 +12,7 @@ namespace System.Net.NetworkInformation
         {
             get
             {
-                throw new PlatformNotSupportedException();
+                throw new NotImplementedException();
             }
         }
 
@@ -155,8 +155,9 @@ namespace System.Net.NetworkInformation
 
         public override IPGlobalStatistics GetIPv6GlobalStatistics()
         {
-            throw new NotImplementedException();
-            //return new OsxIPv6GlobalStatistics();
+            // Although there is a 'net.inet6.ip6.stats' sysctl variable, there
+            // is no header for the ip6stat structure and therefore isn't available.
+            throw new PlatformNotSupportedException();
         }
 
         public override TcpStatistics GetTcpIPv4Statistics()
