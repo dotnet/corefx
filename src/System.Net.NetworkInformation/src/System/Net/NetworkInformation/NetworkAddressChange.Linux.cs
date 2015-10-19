@@ -8,10 +8,6 @@ using System.Threading;
 
 namespace System.Net.NetworkInformation
 {
-    public delegate void NetworkAddressChangedEventHandler(object sender, EventArgs e);
-
-    public delegate void NetworkAvailabilityChangedEventHandler(object sender, NetworkAvailabilityEventArgs e);
-
     // Linux implementation of NetworkChange
     public class NetworkChange
     {

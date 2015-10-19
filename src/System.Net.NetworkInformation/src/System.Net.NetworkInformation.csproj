@@ -38,6 +38,7 @@
     <Compile Include="System\Net\NetworkInformation\MulticastIPAddressInformation.cs" />
     <Compile Include="System\Net\NetworkInformation\MulticastIPAddressInformationCollection.cs" />
     <Compile Include="System\Net\NetworkInformation\NetworkAvailabilityEventArgs.cs" />
+    <Compile Include="System\Net\NetworkInformation\NetworkChangeDelegates.cs" />
     <Compile Include="System\Net\NetworkInformation\NetworkInterface.cs" />
     <Compile Include="System\Net\NetworkInformation\NetworkInterfaceComponent.cs" />
     <Compile Include="System\Net\NetworkInformation\nodetype.cs" />
@@ -276,7 +277,7 @@
     <Compile Include="System\Net\NetworkInformation\LinuxIcmpV6Statistics.cs" />
     <Compile Include="System\Net\NetworkInformation\LinuxTcpStatistics.cs" />
     <Compile Include="System\Net\NetworkInformation\LinuxUdpStatistics.cs" />
-    <Compile Include="System\Net\NetworkInformation\NetworkChange.Linux.cs" />
+    <Compile Include="System\Net\NetworkInformation\NetworkAddressChange.Linux.cs" />
     <Compile Include="System\Net\NetworkInformation\IPGlobalPropertiesPal.Linux.cs" />
     <Compile Include="System\Net\NetworkInformation\LinuxIPAddressInformation.cs" />
     <Compile Include="System\Net\NetworkInformation\LinuxIPGlobalProperties.cs" />
@@ -303,7 +304,7 @@
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetsOsx)' == 'true'">
     <Compile Include="System\Net\NetworkInformation\IPGlobalPropertiesPal.Osx.cs" />
-    <Compile Include="System\Net\NetworkInformation\NetworkChange.OSX.cs" />
+    <Compile Include="System\Net\NetworkInformation\NetworkAddressChange.OSX.cs" />
     <Compile Include="System\Net\NetworkInformation\NetworkInterfacePal.Osx.cs" />
     <Compile Include="System\Net\NetworkInformation\OsxIcmpV4Statistics.cs" />
     <Compile Include="System\Net\NetworkInformation\OsxIcmpV6Statistics.cs" />
