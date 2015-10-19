@@ -26,7 +26,7 @@
     <Compile Include="System\Net\NetworkInformation\GatewayIPAddressInformationCollection.cs" />
     <Compile Include="System\Net\NetworkInformation\IcmpV4Statistics.cs" />
     <Compile Include="System\Net\NetworkInformation\IcmpV6Statistics.cs" />
-    <Compile Include="System\Net\NetworkInformation\interfacetype.cs" />
+    <Compile Include="System\Net\NetworkInformation\NetworkInterfaceType.cs" />
     <Compile Include="System\Net\NetworkInformation\IPAddressInformation.cs" />
     <Compile Include="System\Net\NetworkInformation\ipaddressinformationcollection.cs" />
     <Compile Include="System\Net\NetworkInformation\IPGlobalProperties.cs" />
@@ -41,7 +41,7 @@
     <Compile Include="System\Net\NetworkInformation\NetworkChangeDelegates.cs" />
     <Compile Include="System\Net\NetworkInformation\NetworkInterface.cs" />
     <Compile Include="System\Net\NetworkInformation\NetworkInterfaceComponent.cs" />
-    <Compile Include="System\Net\NetworkInformation\nodetype.cs" />
+    <Compile Include="System\Net\NetworkInformation\NetBiosNodeType.cs" />
     <Compile Include="System\Net\NetworkInformation\OperationalStatus.cs" />
     <Compile Include="System\Net\NetworkInformation\PhysicalAddress.cs" />
     <Compile Include="System\Net\NetworkInformation\PrefixOrigin.cs" />
