@@ -20,12 +20,12 @@ internal static partial class Interop
         public delegate void NetworkChangeEvent(NetworkChangeKind kind);
 
         [DllImport(Libraries.SystemNative)]
-        public static extern IntPtr CreateNetworkChangeListenerSocket();
+        public static extern int CreateNetworkChangeListenerSocket();
 
         [DllImport(Libraries.SystemNative)]
-        public static extern Error CloseNetworkChangeListenerSocket(IntPtr socket);
+        public static extern Error CloseNetworkChangeListenerSocket(int socket);
 
         [DllImport(Libraries.SystemNative)]
-        public static extern NetworkChangeKind ReadSingleEvent(IntPtr socket);
+        public static extern NetworkChangeKind ReadSingleEvent(int socket);
     }
 }

@@ -18,26 +18,26 @@
 
 #pragma clang diagnostic ignored "-Wcast-align" // NLMSG_* macros trigger this
 
-extern "C" int CreateNetworkChangeListenerSocket()
+extern "C" int32_t CreateNetworkChangeListenerSocket()
 {
     sockaddr_nl sa = { };
     sa.nl_family = AF_NETLINK;
     sa.nl_groups = RTMGRP_LINK | RTMGRP_IPV4_IFADDR;
-    int sock = socket(AF_NETLINK, SOCK_RAW, NETLINK_ROUTE);
-    if (bind(sock, reinterpret_cast<sockaddr*>(&sa), sizeof(sa) != 0))
+    int32_t sock = socket(AF_NETLINK, SOCK_RAW, NETLINK_ROUTE);
+    if (bind(sock, reinterpret_cast<sockaddr*>(&sa), sizeof(sa)) != 0)
     {
         return -1;
     }
     return sock;
 }
 
-extern "C" int32_t CloseNetworkChangeListenerSocket(int socket)
+extern "C" int32_t CloseNetworkChangeListenerSocket(int32_t socket)
 {
-    int result = close(socket);
+    int32_t result = close(socket);
     return result;
 }
 
-extern "C" NetworkChangeKind ReadSingleEvent(int sock)
+extern "C" NetworkChangeKind ReadSingleEvent(int32_t sock)
 {
     char buffer[4096];
     iovec iov = { buffer, sizeof(buffer) };

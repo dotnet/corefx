@@ -12,7 +12,7 @@ namespace System.Net.NetworkInformation
     public class NetworkChange
     {
         private static NetworkAddressChangedEventHandler s_addressChangedSubscribers;
-        private static IntPtr s_socket;
+        private static int s_socket = 0;
         private static readonly object s_lockObj = new object();
 
         static public event NetworkAddressChangedEventHandler NetworkAddressChanged
@@ -21,7 +21,7 @@ namespace System.Net.NetworkInformation
             {
                 lock (s_lockObj)
                 {
-                    if (s_socket == IntPtr.Zero)
+                    if (s_socket == 0)
                     {
                         CreateSocket();
                     }
@@ -35,7 +35,7 @@ namespace System.Net.NetworkInformation
                 {
                     if (s_addressChangedSubscribers == null)
                     {
-                        Debug.Assert(s_socket == IntPtr.Zero);
+                        Debug.Assert(s_socket == 0);
                         return;
                     }
 
@@ -50,12 +50,14 @@ namespace System.Net.NetworkInformation
 
         private static void CreateSocket()
         {
-            Debug.Assert(s_socket == IntPtr.Zero);
-            s_socket = Interop.Sys.CreateNetworkChangeListenerSocket();
-            if (s_socket == new IntPtr(-1))
+            Debug.Assert(s_socket == 0);
+            int newSocket = Interop.Sys.CreateNetworkChangeListenerSocket();
+            if (newSocket == -1)
             {
                 throw new NetworkInformationException("Error creating the netlink socket.");
             }
+
+            s_socket = newSocket;
             Task.Run(() => LoopReadSocket(s_socket));
         }
 
@@ -64,7 +66,7 @@ namespace System.Net.NetworkInformation
 
         }
 
-        private static void LoopReadSocket(IntPtr socket)
+        private static void LoopReadSocket(int socket)
         {
             while (socket == s_socket)
             {
