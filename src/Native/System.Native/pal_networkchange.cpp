@@ -4,27 +4,30 @@
 #include "pal_config.h"
 
 #if HAVE_LINUX_RTNETLINK_H
-#include "pal_types.h"
 #include "pal_networkchange.h"
+#include "pal_types.h"
 #include "pal_utilities.h"
 
-#include <unistd.h>
-#include <sys/types.h>
-#include <sys/uio.h>
-#include <sys/socket.h>
-#include <net/if.h>
 #include <linux/netlink.h>
 #include <linux/rtnetlink.h>
+#include <net/if.h>
+#include <sys/socket.h>
+#include <sys/types.h>
+#include <sys/uio.h>
+#include <unistd.h>
 
-#pragma clang diagnostic ignored "-Wcast-align"
+#pragma clang diagnostic ignored "-Wcast-align" // NLMSG_* macros trigger this
 
 extern "C" int CreateNetworkChangeListenerSocket()
 {
-    struct sockaddr_nl sa = { };
+    sockaddr_nl sa = { };
     sa.nl_family = AF_NETLINK;
     sa.nl_groups = RTMGRP_LINK | RTMGRP_IPV4_IFADDR;
     int sock = socket(AF_NETLINK, SOCK_RAW, NETLINK_ROUTE);
-    bind(sock, reinterpret_cast<sockaddr*>(&sa), sizeof(sa));
+    if (bind(sock, reinterpret_cast<sockaddr*>(&sa), sizeof(sa) != 0))
+    {
+        return -1;
+    }
     return sock;
 }
 
@@ -75,6 +78,7 @@ extern "C" NetworkChangeKind ReadSingleEvent(int sock)
 
 NetworkChangeKind ReadNewLinkMessage(nlmsghdr* hdr)
 {
+    assert(hdr != nullptr);
     ifinfomsg* ifimsg;
     ifimsg = reinterpret_cast<ifinfomsg*>(NLMSG_DATA(hdr));
     if(ifimsg->ifi_family == AF_INET)

@@ -14,21 +14,21 @@
 #include "pal_networkstatistics.h"
 #include "pal_errno.h"
 
-#include <sys/types.h>
-#include <sys/sysctl.h>
-#include <sys/socketvar.h>
-#include <netinet/ip.h>
-#include <netinet/ip_var.h>
-#include <netinet/tcp.h>
-#include <netinet/tcp_var.h>
-#include <netinet/tcp_fsm.h>
-#include <netinet/udp.h>
-#include <netinet/udp_var.h>
-#include <netinet/ip_icmp.h>
+#include <errno.h>
+#include <net/route.h>
 #include <netinet/icmp_var.h>
 #include <netinet/icmp6.h>
-#include <net/route.h>
-#include <errno.h>
+#include <netinet/ip.h>
+#include <netinet/ip_icmp.h>
+#include <netinet/ip_var.h>
+#include <netinet/tcp.h>
+#include <netinet/tcp_fsm.h>
+#include <netinet/tcp_var.h>
+#include <netinet/udp.h>
+#include <netinet/udp_var.h>
+#include <sys/socketvar.h>
+#include <sys/sysctl.h>
+#include <sys/types.h>
 
 template <class RetType>
 int32_t ReadSysctlVar(const char* name, RetType* value)
@@ -254,7 +254,7 @@ extern "C" int32_t GetActiveTcpConnectionInfos(NativeTcpConnectionInformation* i
 
     while (sysctlbyname("net.inet.tcp.pcblist", buffer, &estimatedSize, newp, newlen) != 0)
     {
-        delete buffer;
+        delete[](buffer);
         estimatedSize = estimatedSize * 2;
         buffer = new uint8_t[estimatedSize];
     }
@@ -369,7 +369,7 @@ extern "C" int32_t GetActiveUdpListeners(IPEndPointInfo* infos, int32_t* infoCou
 
     while (sysctlbyname("net.inet.tcp.pcblist", buffer, &estimatedSize, newp, newlen) != 0)
     {
-        delete buffer;
+        delete[](buffer);
         estimatedSize = estimatedSize * 2;
         buffer = new uint8_t[estimatedSize];
     }
@@ -415,6 +415,7 @@ extern "C" int32_t GetActiveUdpListeners(IPEndPointInfo* infos, int32_t* infoCou
 
 extern "C" int32_t GetNativeIPInterfaceStatistics(char* interfaceName, NativeIPInterfaceStatistics* retStats)
 {
+    assert(interfaceName != nullptr && retStats != nullptr);
     unsigned int interfaceIndex = if_nametoindex(interfaceName);
     if (interfaceIndex == 0)
     {
@@ -444,7 +445,7 @@ extern "C" int32_t GetNativeIPInterfaceStatistics(char* interfaceName, NativeIPI
     if (sysctl(statisticsMib, 6, buffer, &len, nullptr, 0) == -1)
     {
         // Not enough space.
-        delete buffer;
+        delete[](buffer);
         memset(retStats, 0, sizeof(NativeIPInterfaceStatistics));
         return -1;
     }
@@ -501,7 +502,7 @@ extern "C" int32_t GetNumRoutes()
     uint8_t* buffer = new uint8_t[len];
     if (sysctl(routeDumpMib, 6, buffer, &len, nullptr, 0) == -1)
     {
-        delete buffer;
+        delete[](buffer);
         return -1;
     }
 

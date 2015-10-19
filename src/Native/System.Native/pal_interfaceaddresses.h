@@ -3,8 +3,8 @@
 
 #pragma once
 
-#include "pal_types.h"
 #include "pal_maphardwaretype.h"
+#include "pal_types.h"
 
 struct LinkLayerAddressInfo
 {

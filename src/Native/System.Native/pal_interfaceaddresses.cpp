@@ -2,15 +2,15 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #include "pal_config.h"
-#include "pal_utilities.h"
 #include "pal_interfaceaddresses.h"
 #include "pal_maphardwaretype.h"
+#include "pal_utilities.h"
 
 #include <assert.h>
-#include <netinet/in.h>
-#include <sys/socket.h>
 #include <ifaddrs.h>
 #include <net/if.h>
+#include <netinet/in.h>
+#include <sys/socket.h>
 #include <sys/sysctl.h>
 
 static_assert(HAVE_AF_PACKET || HAVE_AF_LINK, "System must have AF_PACKET or AF_LINK.");
@@ -92,8 +92,6 @@ extern "C" int32_t EnumerateInterfaceAddresses(IPv4AddressFound onIpv4Found,
             lla.NumAddressBytes = sadl->sdl_alen;
             lla.HardwareType = MapHardwareType(sadl->sdl_type);
             onLinkLayerFound(current->ifa_name, &lla);
-
-            // Do stuff for OSX
         }
 #endif
     }
@@ -118,7 +116,7 @@ extern "C" int32_t EnumerateGatewayAddressesForInterface(uint32_t interfaceIndex
 
     while (sysctl(routeDumpName, 6, buffer, &byteCount, nullptr, 0) != 0)
     {
-        delete(buffer);
+        delete[](buffer);
         buffer = new uint8_t[byteCount];
     }
 
