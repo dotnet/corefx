@@ -1,14 +1,18 @@
-include(CheckFunctionExists)
-include(CheckStructHasMember)
 include(CheckCXXSourceCompiles)
 include(CheckCXXSourceRuns)
-include(CheckPrototypeDefinition)
+include(CheckFunctionExists)
 include(CheckIncludeFiles)
+include(CheckPrototypeDefinition)
+include(CheckStructHasMember)
 include(CheckSymbolExists)
 
 #CMake does not include /usr/local/include into the include search path
 #thus add it manually. This is required on FreeBSD.
 include_directories(SYSTEM /usr/local/include)
+
+check_include_files(
+    alloca.h
+    HAVE_ALLOCA_H)
 
 check_function_exists(
     stat64
@@ -82,9 +86,44 @@ check_cxx_source_compiles(
     "
     HAVE_GNU_STRERROR_R)
 
+check_struct_has_member(
+    "struct fd_set"
+    fds_bits
+    "sys/select.h"
+    HAVE_FDS_BITS)
+
+check_struct_has_member(
+    "struct fd_set"
+    __fds_bits
+    "sys/select.h"
+    HAVE_PRIVATE_FDS_BITS)
+
+check_function_exists(
+    epoll_create1
+    HAVE_EPOLL)
+
+check_function_exists(
+    kqueue
+    HAVE_KQUEUE)
+
+check_function_exists(
+    gethostbyname_r
+    HAVE_GETHOSTBYNAME_R)
+
+check_function_exists(
+    gethostbyaddr_r
+    HAVE_GETHOSTBYADDR_R)
+
+set(HAVE_SUPPORT_FOR_MULTIPLE_CONNECT_ATTEMPTS 0)
+set(HAVE_SUPPORT_FOR_DUAL_MODE_IPV4_PACKET_INFO 0)
+set(HAVE_THREAD_SAFE_GETHOSTBYNAME_AND_GETHOSTBYADDR 0)
 
 if (CMAKE_SYSTEM_NAME STREQUAL Linux)
-    set (CMAKE_REQUIRED_LIBRARIES rt)
+    set(CMAKE_REQUIRED_LIBRARIES rt)
+    set(HAVE_SUPPORT_FOR_MULTIPLE_CONNECT_ATTEMPTS 1)
+    set(HAVE_SUPPORT_FOR_DUAL_MODE_IPV4_PACKET_INFO 1)
+elseif (CMAKE_SYSTEM_NAME STREQUAL Darwin)
+    set(HAVE_THREAD_SAFE_GETHOSTBYNAME_AND_GETHOSTBYADDR 1)
 endif ()
 
 check_cxx_source_runs(
