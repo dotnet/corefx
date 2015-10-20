@@ -1854,7 +1854,7 @@ public static partial class DataContractSerializerTests
             dcs = (settings != null) ? new DataContractSerializer(typeof(T), settings) : new DataContractSerializer(typeof(T));
         }
 
-        Console.WriteLine("Testing input value : {0}", value);
+        Debug.WriteLine("Testing input value : {0}", value);
 
         using (MemoryStream ms = new MemoryStream())
         {
@@ -1865,7 +1865,7 @@ public static partial class DataContractSerializerTests
             }
             catch
             {
-                Console.WriteLine("Error while serializing value");
+                Debug.WriteLine("Error while serializing value");
                 throw;
             }
 
@@ -1874,7 +1874,7 @@ public static partial class DataContractSerializerTests
 
             if (!result.Equal && !skipStringCompare)
             {
-                Console.WriteLine(result.ErrorMessage);
+                Debug.WriteLine(result.ErrorMessage);
                 throw new Exception(string.Format("Test failed for input : {0}", value));
             }
 
@@ -1887,7 +1887,7 @@ public static partial class DataContractSerializerTests
             }
             catch
             {
-                Console.WriteLine("Error deserializing value. the serialized string was:\r\n" + actualOutput);
+                Debug.WriteLine("Error deserializing value. the serialized string was:\r\n" + actualOutput);
                 throw;
             }
 

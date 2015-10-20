@@ -4,6 +4,7 @@
 using SerializationTypes;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -1619,7 +1620,7 @@ public static partial class XmlSerializerTests
             serializer = serializerFactory();
         }
 
-        Console.WriteLine("Testing input value : {0}", value);
+        Debug.WriteLine("Testing input value : {0}", value);
 
         using (MemoryStream ms = new MemoryStream())
         {
@@ -1640,7 +1641,7 @@ public static partial class XmlSerializerTests
 
             if (!result.Equal)
             {
-                Console.WriteLine(result.ErrorMessage);
+                Debug.WriteLine(result.ErrorMessage);
                 throw new Exception(string.Format("Test failed for input : {0}", value));
             }
 
@@ -1652,7 +1653,7 @@ public static partial class XmlSerializerTests
             }
             catch
             {
-                Console.WriteLine("Error deserializing value. the serialized string was: " + actualOutput);
+                Debug.WriteLine("Error deserializing value. the serialized string was: " + actualOutput);
                 throw;
             }
 
