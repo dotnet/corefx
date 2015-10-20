@@ -1,0 +1,13 @@
+{
+  "dependencies": {
+    "System.Runtime": "4.0.0",
+    "System.Threading": "4.0.0",
+    "System.Collections": "4.0.0",
+    "System.Linq": "4.0.0",
+    "System.Diagnostics.Debug": "4.0.0",
+    "System.Diagnostics.DiagnosticSource": "4.0.0-beta-*"
+  },
+  "frameworks": {
+    "dnxcore50": {}
+  }
+}
