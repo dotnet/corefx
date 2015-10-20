@@ -9,22 +9,34 @@ namespace System.Net.NetworkInformation
 {
     internal abstract class UnixIPInterfaceProperties : IPInterfaceProperties
     {
-        private readonly UnicastIPAddressInformationCollection _unicastAddresses;
-        private readonly MulticastIPAddressInformationCollection _multicastAddreses;
+        private UnicastIPAddressInformationCollection _unicastAddresses;
+        private MulticastIPAddressInformationCollection _multicastAddreses;
+        private readonly UnixNetworkInterface _uni;
         private readonly string _dnsSuffix;
         private readonly IPAddressCollection _dnsAddresses;
 
         public UnixIPInterfaceProperties(UnixNetworkInterface uni)
         {
-            _unicastAddresses = GetUnicastAddresses(uni);
-            _multicastAddreses = GetMulticastAddresses(uni);
+            _uni = uni;
             _dnsSuffix = GetDnsSuffix();
             _dnsAddresses = GetDnsAddresses();
         }
 
-        public sealed override UnicastIPAddressInformationCollection UnicastAddresses { get { return _unicastAddresses; } }
+        public sealed override UnicastIPAddressInformationCollection UnicastAddresses
+        {
+            get
+            {
+                return _unicastAddresses ?? (_unicastAddresses = GetUnicastAddresses(_uni));
+            }
+        }
 
-        public sealed override MulticastIPAddressInformationCollection MulticastAddresses { get { return _multicastAddreses; } }
+        public sealed override MulticastIPAddressInformationCollection MulticastAddresses
+        {
+            get
+            {
+                return _multicastAddreses ?? (_multicastAddreses = GetMulticastAddresses(_uni));
+            }
+        }
 
         public override bool IsDnsEnabled
         {
@@ -38,7 +50,7 @@ namespace System.Net.NetworkInformation
 
         public sealed override IPAddressCollection DnsAddresses { get { return _dnsAddresses; } }
 
-        private UnicastIPAddressInformationCollection GetUnicastAddresses(UnixNetworkInterface uni)
+        private static UnicastIPAddressInformationCollection GetUnicastAddresses(UnixNetworkInterface uni)
         {
             var collection = new UnicastIPAddressInformationCollection();
             foreach (IPAddress address in uni.Addresses.Where((addr) => !IsMulticast(addr)))
@@ -52,7 +64,7 @@ namespace System.Net.NetworkInformation
             return collection;
         }
 
-        private MulticastIPAddressInformationCollection GetMulticastAddresses(UnixNetworkInterface uni)
+        private static MulticastIPAddressInformationCollection GetMulticastAddresses(UnixNetworkInterface uni)
         {
             var collection = new MulticastIPAddressInformationCollection();
             foreach (IPAddress address in uni.Addresses.Where(IsMulticast))
