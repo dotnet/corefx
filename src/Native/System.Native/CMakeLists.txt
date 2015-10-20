@@ -6,7 +6,6 @@ set(NATIVE_SOURCES
     pal_io.cpp
     pal_maphardwaretype.cpp
     pal_mount.cpp
-    pal_networkchange.cpp
     pal_networking.cpp
     pal_networkstatistics.cpp
     pal_process.cpp
@@ -14,6 +13,14 @@ set(NATIVE_SOURCES
     pal_time.cpp
     pal_uid.cpp
 )
+
+if (CMAKE_SYSTEM_NAME STREQUAL Linux)
+    set(NATIVE_SOURCES ${NATIVE_SOURCES} pal_networkchange.cpp)
+
+    if (!HAVE_LINUX_RTNETLINK_H)
+        message(FATAL_ERROR "Could not find linux/rtnetlink.h")
+    endif ()
+endif ()
 
 add_library(System.Native
     SHARED

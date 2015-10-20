@@ -3,8 +3,6 @@
 
 #include "pal_config.h"
 
-#if HAVE_LINUX_RTNETLINK_H
-
 #include "pal_errno.h"
 #include "pal_networkchange.h"
 #include "pal_types.h"
@@ -54,7 +52,6 @@ extern "C" NetworkChangeKind ReadSingleEvent(int32_t sock)
     iovec iov = { buffer, sizeof(buffer) };
     sockaddr_nl sanl;
     msghdr msg = { reinterpret_cast<void*>(&sanl), sizeof(sockaddr_nl), &iov, 1, NULL, 0, 0};
-    nlmsghdr* hdr;
     ssize_t len = recvmsg(sock, &msg, 0);
     if (len == -1)
     {
@@ -63,28 +60,26 @@ extern "C" NetworkChangeKind ReadSingleEvent(int32_t sock)
         return NetworkChangeKind::None;
     }
 
-    for (hdr = reinterpret_cast<nlmsghdr*>(buffer); NLMSG_OK(hdr, len); hdr = NLMSG_NEXT(hdr, len))
+    // This channel seems to broadcast only single messages at a time,
+    // so looping through the message headers isn't necessary.
+    nlmsghdr* hdr = reinterpret_cast<nlmsghdr*>(buffer);
+    switch (hdr->nlmsg_type)
     {
-        switch (hdr->nlmsg_type)
-        {
-            case NLMSG_DONE:
-                return NetworkChangeKind::None;
-            case NLMSG_ERROR:
-                return NetworkChangeKind::None;
-            case RTM_NEWADDR:
-                return NetworkChangeKind::AddressAdded;
-            case RTM_DELADDR:
-                return NetworkChangeKind::AddressRemoved;
-            case RTM_NEWLINK:
-                return ReadNewLinkMessage(hdr);
-            case RTM_DELLINK:
-                return NetworkChangeKind::LinkRemoved;
-            default:
-                return NetworkChangeKind::None;
-        }
+        case NLMSG_DONE:
+            return NetworkChangeKind::None;
+        case NLMSG_ERROR:
+            return NetworkChangeKind::None;
+        case RTM_NEWADDR:
+            return NetworkChangeKind::AddressAdded;
+        case RTM_DELADDR:
+            return NetworkChangeKind::AddressRemoved;
+        case RTM_NEWLINK:
+            return ReadNewLinkMessage(hdr);
+        case RTM_DELLINK:
+            return NetworkChangeKind::LinkRemoved;
+        default:
+            return NetworkChangeKind::None;
     }
-
-    return NetworkChangeKind::None;
 }
 
 NetworkChangeKind ReadNewLinkMessage(nlmsghdr* hdr)
@@ -102,5 +97,3 @@ NetworkChangeKind ReadNewLinkMessage(nlmsghdr* hdr)
 
     return NetworkChangeKind::None;
 }
-
-#endif // HAVE_LINUX_NETLINK_H
