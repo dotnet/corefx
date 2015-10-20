@@ -370,7 +370,7 @@ extern "C" int32_t GetActiveUdpListeners(IPEndPointInfo* infos, int32_t* infoCou
     void* newp = nullptr;
     size_t newlen = 0;
 
-    while (sysctlbyname("net.inet.tcp.pcblist", buffer, &estimatedSize, newp, newlen) != 0)
+    while (sysctlbyname("net.inet.udp.pcblist", buffer, &estimatedSize, newp, newlen) != 0)
     {
         delete[] buffer;
         estimatedSize = estimatedSize * 2;
