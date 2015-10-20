@@ -27,8 +27,8 @@
 #endif
 
 extern "C" int32_t EnumerateInterfaceAddresses(IPv4AddressFound onIpv4Found,
-                                            IPv6AddressFound onIpv6Found,
-                                            LinkLayerAddressFound onLinkLayerFound)
+                                                IPv6AddressFound onIpv6Found,
+                                                LinkLayerAddressFound onLinkLayerFound)
 {
     ifaddrs *headAddr;
     if (getifaddrs(&headAddr) == -1)
@@ -129,7 +129,7 @@ extern "C" int32_t EnumerateGatewayAddressesForInterface(uint32_t interfaceIndex
 
     while (sysctl(routeDumpName, 6, buffer, &byteCount, nullptr, 0) != 0)
     {
-        delete[](buffer);
+        delete[] buffer;
         buffer = new uint8_t[byteCount];
     }
 
@@ -153,6 +153,7 @@ extern "C" int32_t EnumerateGatewayAddressesForInterface(uint32_t interfaceIndex
         }
     }
 
+    delete[] buffer;
     return 0;
 }
 #endif // HAVE_RT_MSGHDR

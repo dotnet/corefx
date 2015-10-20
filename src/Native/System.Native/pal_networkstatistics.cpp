@@ -255,7 +255,7 @@ extern "C" int32_t GetActiveTcpConnectionInfos(NativeTcpConnectionInformation* i
 
     while (sysctlbyname("net.inet.tcp.pcblist", buffer, &estimatedSize, newp, newlen) != 0)
     {
-        delete[](buffer);
+        delete[] buffer;
         estimatedSize = estimatedSize * 2;
         buffer = new uint8_t[estimatedSize];
     }
@@ -264,6 +264,7 @@ extern "C" int32_t GetActiveTcpConnectionInfos(NativeTcpConnectionInformation* i
     if (count > *infoCount)
     {
         // Not enough space in caller-supplied buffer.
+        delete[] buffer;
         *infoCount = count;
         return -1;
     }
@@ -309,6 +310,7 @@ extern "C" int32_t GetActiveTcpConnectionInfos(NativeTcpConnectionInformation* i
         ntci->RemoteEndPoint.Port = in_pcb.inp_fport;
     }
 
+    delete[] buffer;
     return 0;
 }
 
@@ -370,7 +372,7 @@ extern "C" int32_t GetActiveUdpListeners(IPEndPointInfo* infos, int32_t* infoCou
 
     while (sysctlbyname("net.inet.tcp.pcblist", buffer, &estimatedSize, newp, newlen) != 0)
     {
-        delete[](buffer);
+        delete[] buffer;
         estimatedSize = estimatedSize * 2;
         buffer = new uint8_t[estimatedSize];
     }
@@ -378,6 +380,7 @@ extern "C" int32_t GetActiveUdpListeners(IPEndPointInfo* infos, int32_t* infoCou
     if (count > *infoCount)
     {
         // Not enough space in caller-supplied buffer.
+        delete[] buffer;
         *infoCount = count;
         return -1;
     }
@@ -411,6 +414,8 @@ extern "C" int32_t GetActiveUdpListeners(IPEndPointInfo* infos, int32_t* infoCou
 
         iepi->Port = in_pcb.inp_lport;
     }
+
+    delete[] buffer;
     return 0;
 }
 
@@ -446,7 +451,7 @@ extern "C" int32_t GetNativeIPInterfaceStatistics(char* interfaceName, NativeIPI
     if (sysctl(statisticsMib, 6, buffer, &len, nullptr, 0) == -1)
     {
         // Not enough space.
-        delete[](buffer);
+        delete[] buffer;
         memset(retStats, 0, sizeof(NativeIPInterfaceStatistics));
         return -1;
     }
@@ -472,11 +477,13 @@ extern "C" int32_t GetNativeIPInterfaceStatistics(char* interfaceName, NativeIPI
             retStats->OutMulticastPackets = systemStats.ifi_omcasts;
             retStats->InDrops = systemStats.ifi_iqdrops;
             retStats->InNoProto = systemStats.ifi_noproto;
+            delete[] buffer;
             return 0;
         }
     }
     
     // No statistics were found with the given interface index; shouldn't happen.
+    delete[] buffer;
     memset(retStats, 0, sizeof(NativeIPInterfaceStatistics));
     return -1;
 }
@@ -502,7 +509,7 @@ extern "C" int32_t GetNumRoutes()
     uint8_t* buffer = new uint8_t[len];
     if (sysctl(routeDumpMib, 6, buffer, &len, nullptr, 0) == -1)
     {
-        delete[](buffer);
+        delete[] buffer;
         return -1;
     }
 
@@ -521,6 +528,7 @@ extern "C" int32_t GetNumRoutes()
         headPtr += rtmsg->rtm_msglen;
     }
 
+    delete[] buffer;
     return count;
 }
 

@@ -6,13 +6,14 @@
 
 #include <sys/socket.h>
 
-static_assert(HAVE_AF_PACKET || HAVE_AF_LINK, "System must have AF_PACKET or AF_LINK.");
 #if HAVE_AF_PACKET
 #include <linux/if_packet.h>
 #include <linux/if_arp.h>
 #elif HAVE_AF_LINK
 #include <net/if_dl.h>
 #include <net/if_types.h>
+#else
+#error System must have AF_PACKET or AF_LINK.
 #endif
 
 NetworkInterfaceType MapHardwareType(uint16_t nativeType)
