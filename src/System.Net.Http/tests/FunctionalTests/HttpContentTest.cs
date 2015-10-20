@@ -392,7 +392,6 @@ namespace System.Net.Http.Functional.Tests
         }
 
         [Fact]
-        [ActiveIssue(3343, PlatformID.AnyUnix)]
         public async Task ReadAsStringAsync_SetInvalidCharset_ThrowsInvalidOperationException()
         {
             string sourceString = "some string";
@@ -458,7 +457,7 @@ namespace System.Net.Http.Functional.Tests
             byte[] rawBytes = encoding.GetBytes(str);
             byte[] preamble = encoding.GetPreamble(); // Get the correct BOM characters
             byte[] contentBytes = new byte[preamble.Length + rawBytes.Length];
-            Array.Copy(preamble, contentBytes, preamble.Length);
+            Array.Copy(preamble, 0, contentBytes, 0, preamble.Length);
             Array.Copy(rawBytes, 0, contentBytes, preamble.Length, rawBytes.Length);
             return contentBytes;
         }

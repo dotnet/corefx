@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace System.Net.Http.Functional.Tests
 {
-    public class ChannelBindingAwareContent : StringContent
+    public sealed class ChannelBindingAwareContent : StringContent
     {
         public ChannelBindingAwareContent(string content) : base(content)
         {

@@ -13,6 +13,15 @@
 #cmakedefine01 HAVE_POSIX_ADVISE
 #cmakedefine01 PRIORITY_REQUIRES_INT_WHO
 #cmakedefine01 HAVE_IN6_U
+#cmakedefine01 HAVE_IOCTL
+#cmakedefine01 HAVE_TIOCGWINSZ
+#cmakedefine01 HAVE_SCHED_GETAFFINITY
+#cmakedefine01 HAVE_SCHED_SETAFFINITY
+#cmakedefine01 HAVE_FDS_BITS
+#cmakedefine01 HAVE_PRIVATE_FDS_BITS
+#cmakedefine01 HAVE_ALLOCA_H
+#cmakedefine01 HAVE_EPOLL
+#cmakedefine01 HAVE_KQUEUE
 
 // Mac OS X has stat64, but it is deprecated since plain stat now
 // provides the same 64-bit aware struct when targeting OS X > 10.5

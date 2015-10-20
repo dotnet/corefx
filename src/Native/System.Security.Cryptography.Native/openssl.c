@@ -12,6 +12,7 @@
 #include <unistd.h>
 #include <openssl/asn1.h>
 #include <openssl/bio.h>
+#include <openssl/err.h>
 #include <openssl/evp.h>
 #include <openssl/rand.h>
 #include <openssl/x509.h>
@@ -880,7 +881,6 @@ CheckX509Hostname(
     // RFC2818 says that if ANY dNSName alternative name field is matched then we
     // should ignore the subject common name.
 
-    // TODO (3445): Match an input IP Address against the iPAddress SAN entries
     // TODO (3446): Match using IDNA rules.
 
     if (san)
@@ -936,6 +936,100 @@ CheckX509Hostname(
     return success;
 }
 
+/*
+Function:
+CheckX509IpAddress
+
+Used by System.Net.Security's Unix CertModule to identify if the certificate presented by
+the server is applicable to the hostname (an IP address) requested.
+
+Return values:
+1 if the hostname is a match
+0 if the hostname is not a match
+Any negative number indicates an error in the arguments.
+*/
+int
+CheckX509IpAddress(
+    X509* x509,
+    const unsigned char* addressBytes,
+    int addressBytesLen,
+    const char* hostname,
+    int cchHostname)
+{
+    if (!x509)
+        return -2;
+    if (cchHostname > 0 && !hostname)
+        return -3;
+    if (cchHostname < 0)
+        return -4;
+    if (addressBytesLen < 0)
+        return -5;
+    if (!addressBytes)
+        return -6;
+
+    int subjectNid = NID_commonName;
+    int sanGenType = GEN_IPADD;
+    GENERAL_NAMES* san = X509_get_ext_d2i(x509, NID_subject_alt_name, NULL, NULL);
+    int success = 0;
+
+    if (san)
+    {
+        int i;
+        int count = sk_GENERAL_NAME_num(san);
+
+        for (i = 0; i < count; ++i)
+        {
+            GENERAL_NAME* sanEntry = sk_GENERAL_NAME_value(san, i);
+            ASN1_OCTET_STRING* ipAddr;
+
+            if (sanEntry->type != sanGenType)
+            {
+                continue;
+            }
+
+            ipAddr = sanEntry->d.iPAddress;
+
+            if (!ipAddr || !ipAddr->data || ipAddr->length != addressBytesLen)
+            {
+                continue;
+            }
+
+            if (!memcmp(addressBytes, ipAddr->data, (size_t)addressBytesLen))
+            {
+                success = 1;
+                break;
+            }
+        }
+
+        GENERAL_NAMES_free(san);
+    }
+
+    if (!success)
+    {
+        // This is a shared/interor pointer, do not free!
+        X509_NAME* subject = X509_get_subject_name(x509);
+
+        if (subject)
+        {
+            int i = -1;
+
+            while ((i = X509_NAME_get_index_by_NID(subject, subjectNid, i)) >= 0)
+            {
+                // Shared/interior pointers, do not free!
+                X509_NAME_ENTRY* nameEnt = X509_NAME_get_entry(subject, i);
+                ASN1_STRING* cn = X509_NAME_ENTRY_get_data(nameEnt);
+
+                if (CheckX509HostnameMatch(cn, hostname, cchHostname, 0))
+                {
+                    success = 1;
+                    break;
+                }
+            }
+        }
+    }
+
+    return success;
+}
 /*
 Function:
 GetX509StackFieldCount
@@ -1171,64 +1265,6 @@ PushX509StackField(
 
 /*
 Function:
-UpRefEvpPkey
-
-Used by System.Security.Cryptography.X509Certificates' OpenSslX509CertificateReader when
-duplicating a private key context as part of duplicating the Pal object
-
-Return values:
-The number (as of this call) of references to the EVP_PKEY. Anything less than
-2 is an error, because the key is already in the process of being freed.
-*/
-int
-UpRefEvpPkey(
-    EVP_PKEY* pkey)
-{
-    if (!pkey)
-    {
-        return 0;
-    }
-
-    return CRYPTO_add(&pkey->references, 1, CRYPTO_LOCK_EVP_PKEY);
-}
-
-/*
-Function:
-GetPkcs7Certificates
-
-Used by System.Security.Cryptography.X509Certificates' CertificatePal when
-reading the contents of a PKCS#7 file or blob.
-
-Return values:
-0 on NULL inputs, or a PKCS#7 file whose layout is not understood
-1 when the file format is understood, and *certs is assigned to the
-certificate contents of the structure.
-*/
-int
-GetPkcs7Certificates(
-    PKCS7* p7,
-    STACK_OF(X509)** certs)
-{
-    if (!p7 || !certs)
-    {
-        return 0;
-    }
-
-    switch (OBJ_obj2nid(p7->type))
-    {
-        case NID_pkcs7_signed:
-            *certs = p7->d.sign->cert;
-            return 1;
-        case NID_pkcs7_signedAndEnveloped:
-            *certs = p7->d.signed_and_enveloped->cert;
-            return 1;
-    }
-
-    return 0;
-}
-
-/*
-Function:
 GetRandomBytes
 
 Puts num cryptographically strong pseudo-random bytes into buf.
@@ -1246,6 +1282,72 @@ GetRandomBytes(
     int ret = RAND_bytes(buf, num);
 
     return ret == 1;
+}
+
+/*
+Function:
+LookupFriendlyNameByOid
+
+Looks up the FriendlyName value for a given OID in string representation.
+For example, "1.3.14.3.2.26" => "sha1".
+
+Return values:
+1 indicates that *friendlyName contains a pointer to the friendly name value
+0 indicates that the OID was not found, or no friendly name exists for that OID
+-1 indicates OpenSSL signalled an error, CryptographicException should be raised.
+-2 indicates an error in the input arguments
+*/
+int
+LookupFriendlyNameByOid(
+    const char* oidValue,
+    const char** friendlyName)
+{
+    ASN1_OBJECT* oid;
+    int nid;
+    const char* ln;
+
+    if (!oidValue || !friendlyName)
+    {
+        return -2;
+    }
+
+    // Do a lookup with no_name set. The purpose of this function is to map only the
+    // dotted decimal to the friendly name. "sha1" in should not result in "sha1" out.
+    oid = OBJ_txt2obj(oidValue, 1);
+
+    if (!oid)
+    {
+        unsigned long err = ERR_peek_last_error();
+
+        // If the most recent error pushed onto the error queue is NOT from OID parsing
+        // then signal for an exception to be thrown.
+        if (err != 0 && ERR_GET_FUNC(err) != ASN1_F_A2D_ASN1_OBJECT)
+        {
+            return -1;
+        }
+
+        return 0;
+    }
+
+    // Look in the predefined, and late-registered, OIDs list to get the lookup table
+    // identifier for this OID.  The OBJ_txt2obj object will not have ln set.
+    nid = OBJ_obj2nid(oid);
+
+    if (nid == NID_undef)
+    {
+        return 0;
+    }
+
+    // Get back a shared pointer to the long name from the registration table.
+    ln = OBJ_nid2ln(nid);
+
+    if (ln)
+    {
+        *friendlyName = ln;
+        return 1;
+    }
+
+    return 0;
 }
 
 // Lock used to make sure EnsureopenSslInitialized itself is thread safe

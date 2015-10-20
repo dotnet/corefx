@@ -11,9 +11,9 @@
     <NugetTargetFrameworkMoniker>DNXCore,Version=v5.0</NugetTargetFrameworkMoniker>
     <IgnoreArchitectureMismatches>true</IgnoreArchitectureMismatches>
     <PostFilterNugetReferences>true</PostFilterNugetReferences>
-    <NoWarn>0436</NoWarn>
     <!-- Suppress warnings for type conflicts between SafeFileHandle in partial facade and mscorlib -->
-    <PackageTargetFramework>dotnet</PackageTargetFramework>
+    <NoWarn>0436</NoWarn>
+    <PackageTargetFramework>dotnet5.1</PackageTargetFramework>
     <UsePackageTargetRuntimeDefaults>true</UsePackageTargetRuntimeDefaults>
   </PropertyGroup>
   <!-- Default configurations to help VS understand the configurations -->
@@ -97,9 +97,6 @@
     </Compile>
     <Compile Include="$(CommonPath)\System\Diagnostics\Debug.Unix.cs">
       <Link>Common\System\Diagnostics\Debug.Unix.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\System\NotImplemented.cs">
-      <Link>Common\System\NotImplemented.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\Interop.Libraries.cs">
       <Link>Common\Interop\Unix\Interop.Libraries.cs</Link>

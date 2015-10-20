@@ -6,6 +6,8 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Runtime.Serialization;
@@ -1232,7 +1234,7 @@ public static partial class DataContractJsonSerializerTests
             dcjs.WriteObject(stream, obj);
             stream.Position = 0;
             var serializedStr = new StreamReader(stream).ReadToEnd();
-            Console.WriteLine("Serialized string is: {0}", serializedStr);
+            Debug.WriteLine("Serialized string is: {0}", serializedStr);
 
             stream.Position = 0;
             var obj2 = (TypeWithDateTimeStringProperty)dcjs.ReadObject(stream);

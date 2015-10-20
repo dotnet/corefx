@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <PropertyGroup>
@@ -10,8 +10,16 @@
     <AssemblyVersion>4.0.0.0</AssemblyVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <CLSCompliant>false</CLSCompliant>
-    <PackageTargetFramework Condition="'$(PackageTargetFramework)' == ''">dotnet</PackageTargetFramework>
+    <PackageTargetFramework Condition="'$(PackageTargetFramework)' == ''">dotnet5.4</PackageTargetFramework>
     <UsePackageTargetRuntimeDefaults>true</UsePackageTargetRuntimeDefaults>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(TargetsWindows)' == 'true' and '$(ProjectJson)' == '' ">
+    <ProjectJson>win\project.json</ProjectJson>
+    <ProjectLockJson>win\project.lock.json</ProjectLockJson>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(TargetsUnix)' == 'true' and '$(ProjectJson)' == '' ">
+    <ProjectJson>unix\project.json</ProjectJson>
+    <ProjectLockJson>unix\project.lock.json</ProjectLockJson>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Linux_Debug|AnyCPU' " />
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Linux_Release|AnyCPU' " />
@@ -20,47 +28,19 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Windows_Debug|AnyCPU' " />
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Windows_Release|AnyCPU' " />
   <ItemGroup>
-    <ProjectReference Include="..\..\System.Security.Cryptography.Primitives\src\System.Security.Cryptography.Primitives.csproj">
-      <Project>{D04A73AE-E418-4ACD-A132-7688435BE8B5}</Project>
-      <Name>System.Security.Cryptography.Primitives</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\System.Security.Cryptography.Encoding\src\System.Security.Cryptography.Encoding.csproj">
-      <Project>{AA81E343-5E54-40B0-9381-C459419BE780}</Project>
-      <Name>System.Security.Cryptography.Encoding</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\System.Security.Cryptography.Algorithms\src\System.Security.Cryptography.Algorithms.csproj">
-      <Project>{81A05E2E-E3AE-4246-B4E6-DD5F31FB71F9}</Project>
-      <Name>System.Security.Cryptography.Algorithms</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup Condition=" '$(TargetsWindows)' == 'true' ">
-    <ProjectReference Condition=" '$(ExcludeCSP)' != 'true' " Include="..\..\System.Security.Cryptography.Csp\src\System.Security.Cryptography.Csp.csproj">
-      <Project>{3B7F91D7-0677-40CA-B4E7-D4E09D89A74E}</Project>
-      <Name>System.Security.Cryptography.Csp</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\System.Security.Cryptography.Cng\src\System.Security.Cryptography.Cng.csproj">
-      <Project>{4C1BD451-6A99-45E7-9339-79C77C42EE9E}</Project>
-      <Name>System.Security.Cryptography.Cng</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup Condition=" '$(TargetsUnix)' == 'true' ">
-    <ProjectReference Include="..\..\System.Security.Cryptography.OpenSsl\src\System.Security.Cryptography.OpenSsl.csproj">
-      <Project>{78452F3E-BA91-47E7-BB0F-02E8A5C116C4}</Project>
-      <Name>System.Security.Cryptography.OpenSsl</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <Compile Include="Internal\Cryptography\ICertificatePal.cs" />
     <Compile Include="$(CommonPath)\Microsoft\Win32\SafeHandles\SafeHandleCache.cs">
       <Link>Common\Microsoft\Win32\SafeHandles\SafeHandleCache.cs</Link>
     </Compile>
-    <Compile Include="Internal\Cryptography\ErrorCode.cs" />
-    <Compile Include="Internal\Cryptography\Helpers.cs" />
-    <Compile Include="Internal\Cryptography\Oids.cs" />
-    <Compile Include="Internal\Cryptography\IX509Pal.cs" />
-    <Compile Include="Internal\Cryptography\IStorePal.cs" />
-    <Compile Include="Internal\Cryptography\IChainPal.cs" />
     <Compile Include="Internal\Cryptography\CertificateExtensionsCommon.cs" />
+    <Compile Include="Internal\Cryptography\ErrorCode.cs" />
+    <Compile Include="Internal\Cryptography\FindPal.cs" />
+    <Compile Include="Internal\Cryptography\Helpers.cs" />
+    <Compile Include="Internal\Cryptography\IChainPal.cs" />
+    <Compile Include="Internal\Cryptography\IFindPal.cs" />
+    <Compile Include="Internal\Cryptography\IStorePal.cs" />
+    <Compile Include="Internal\Cryptography\IX509Pal.cs" />
+    <Compile Include="Internal\Cryptography\Oids.cs" />
     <Compile Include="Microsoft\Win32\SafeHandles\SafeX509ChainHandle.cs" />
     <Compile Include="System\Security\Cryptography\X509Certificates\ECDsaCertificateExtensions.cs" />
     <Compile Include="System\Security\Cryptography\X509Certificates\OpenFlags.cs" />
@@ -110,6 +90,7 @@
     <Compile Include="Internal\Cryptography\Pal.Windows\ChainPal.BuildChain.cs" />
     <Compile Include="Internal\Cryptography\Pal.Windows\ChainPal.cs" />
     <Compile Include="Internal\Cryptography\Pal.Windows\ChainPal.GetChainStatusInformation.cs" />
+    <Compile Include="Internal\Cryptography\Pal.Windows\FindPal.cs" />
     <Compile Include="Internal\Cryptography\Pal.Windows\Native\Helpers.cs" />
     <Compile Include="Internal\Cryptography\Pal.Windows\Native\Interop.advapi32.cs" />
     <Compile Include="Internal\Cryptography\Pal.Windows\Native\Interop.crypt32.cs" />
@@ -118,7 +99,6 @@
     <Compile Include="Internal\Cryptography\Pal.Windows\Native\SafeHandles.cs" />
     <Compile Include="Internal\Cryptography\Pal.Windows\StorePal.cs" />
     <Compile Include="Internal\Cryptography\Pal.Windows\StorePal.Export.cs" />
-    <Compile Include="Internal\Cryptography\Pal.Windows\StorePal.Find.cs" />
     <Compile Include="Internal\Cryptography\Pal.Windows\StorePal.Import.cs" />
     <Compile Include="Internal\Cryptography\Pal.Windows\X509Pal.cs" />
     <Compile Include="Internal\Cryptography\Pal.Windows\X509Pal.CustomExtensions.cs" />
@@ -160,8 +140,9 @@
     <Compile Include="Internal\Cryptography\Pal.Unix\ChainPal.cs" />
     <Compile Include="Internal\Cryptography\Pal.Unix\CollectionBackedStoreProvider.cs" />
     <Compile Include="Internal\Cryptography\Pal.Unix\CrlCache.cs" />
-    <Compile Include="Internal\Cryptography\Pal.Unix\DerSequenceReader.cs" />
     <Compile Include="Internal\Cryptography\Pal.Unix\DirectoryBasedStoreProvider.cs" />
+    <Compile Include="Internal\Cryptography\Pal.Unix\FindPal.cs" />
+    <Compile Include="Internal\Cryptography\Pal.Unix\OpenSslCertificateFinder.cs" />
     <Compile Include="Internal\Cryptography\Pal.Unix\OpenSslPkcs12Reader.cs" />
     <Compile Include="Internal\Cryptography\Pal.Unix\OpenSslX509CertificateReader.cs" />
     <Compile Include="Internal\Cryptography\Pal.Unix\OpenSslX509ChainProcessor.cs" />
@@ -169,6 +150,7 @@
     <Compile Include="Internal\Cryptography\Pal.Unix\OpenSslX509StoreProvider.cs" />
     <Compile Include="Internal\Cryptography\Pal.Unix\PkcsFormatReader.cs" />
     <Compile Include="Internal\Cryptography\Pal.Unix\StorePal.cs" />
+    <Compile Include="Internal\Cryptography\Pal.Unix\X500NameEncoder.cs" />
     <Compile Include="Internal\Cryptography\Pal.Unix\X509Pal.cs" />
     <Compile Include="Internal\Cryptography\Pal.Unix\X509Persistence.cs" />
     <Compile Include="$(CommonPath)\Interop\Unix\Interop.Libraries.cs">
@@ -180,56 +162,56 @@
     <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.Permissions.cs">
       <Link>Common\Interop\Unix\System.Native\Interop.Permissions.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Unix\libcrypto\Interop.ASN1.cs">
-      <Link>Common\Interop\Unix\libcrypto\Interop.ASN1.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\Interop\Unix\libcrypto\Interop.Bignum.cs">
-      <Link>Common\Interop\Unix\libcrypto\Interop.Bignum.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\Interop\Unix\libcrypto\Interop.BIO.cs">
-      <Link>Common\Interop\Unix\libcrypto\Interop.BIO.cs</Link>
-    </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\libcurl\Interop.CURLcode.cs">
       <Link>Common\Interop\Unix\libcrypto\Interop.CURLcode.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\Interop\Unix\libcrypto\Interop.d2i.cs">
-      <Link>Common\Interop\Unix\libcrypto\Interop.d2i.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\Interop\Unix\libcrypto\Interop.EcKey.cs">
-      <Link>Common\Interop\Unix\libcrypto\Interop.EcKey.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\Interop\Unix\libcrypto\Interop.ERR.cs">
-      <Link>Common\Interop\Unix\libcrypto\Interop.ERR.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\Interop\Unix\libcrypto\Interop.EvpPkey.cs">
-      <Link>Common\Interop\Unix\libcrypto\Interop.EvpPkey.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\Interop\Unix\libcrypto\Interop.EvpPkey.EcKey.cs">
-      <Link>Common\Interop\Unix\libcrypto\Interop.EvpPkey.EcKey.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\Interop\Unix\libcrypto\Interop.EvpPkey.Rsa.cs">
-      <Link>Common\Interop\Unix\libcrypto\Interop.EvpPkey.Rsa.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\System.Net.Http.Native\Interop.Initialization.cs">
       <Link>Common\Interop\Unix\System.Net.Http.Native\Interop.Initialization.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Security.Cryptography.Native\Interop.ASN1.cs">
+      <Link>Common\Interop\Unix\System.Security.Cryptography.Native\Interop.ASN1.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Security.Cryptography.Native\Interop.ASN1.GetIntegerBytes.cs">
+      <Link>Common\Interop\Unix\System.Security.Cryptography.Native\Interop.ASN1.GetIntegerBytes.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Security.Cryptography.Native\Interop.ASN1.Print.cs">
+      <Link>Common\Interop\Unix\System.Security.Cryptography.Native\Interop.ASN1.Print.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Security.Cryptography.Native\Interop.Bignum.cs">
+      <Link>Common\Interop\Unix\System.Security.Cryptography.Native\Interop.Bignum.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Security.Cryptography.Native\Interop.BIO.cs">
+      <Link>Common\Interop\Unix\System.Security.Cryptography.Native\Interop.BIO.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Security.Cryptography.Native\Interop.Encode.cs">
+      <Link>Common\Interop\Unix\System.Security.Cryptography.Native\Interop.Encode.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Security.Cryptography.Native\Interop.ERR.cs">
+      <Link>Common\Interop\Unix\System.Security.Cryptography.Native\Interop.ERR.cs</Link>
+    </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\System.Security.Cryptography.Native\Interop.Initialization.cs">
       <Link>Common\Interop\Unix\System.Security.Cryptography.Native\Interop.Initialization.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Unix\libcrypto\Interop.Pkcs7.cs">
-      <Link>Common\Interop\Unix\libcrypto\Interop.Pkcs7.cs</Link>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Security.Cryptography.Native\Interop.Pkcs12.cs">
+      <Link>Common\Interop\Unix\System.Security.Cryptography.Native\Interop.Pkcs12.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Unix\libcrypto\Interop.Pkcs12.cs">
-      <Link>Common\Interop\Unix\libcrypto\Interop.Pkcs12.cs</Link>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Security.Cryptography.Native\Interop.Pkcs7.cs">
+      <Link>Common\Interop\Unix\System.Security.Cryptography.Native\Interop.Pkcs7.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Unix\libcrypto\Interop.Rsa.cs">
-      <Link>Common\Interop\Unix\libcrypto\Interop.Rsa.cs</Link>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Security.Cryptography.Native\Interop.Rsa.cs">
+      <Link>Common\Interop\Unix\System.Security.Cryptography.Native\Interop.Rsa.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Unix\libcrypto\Interop.X509.cs">
-      <Link>Common\Interop\Unix\libcrypto\Interop.X509.cs</Link>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Security.Cryptography.Native\Interop.X509.cs">
+      <Link>Common\Interop\Unix\System.Security.Cryptography.Native\Interop.X509.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Unix\libcrypto\Interop.X509Ext.cs">
-      <Link>Common\Interop\Unix\libcrypto\Interop.X509Ext.cs</Link>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Security.Cryptography.Native\Interop.X509Ext.cs">
+      <Link>Common\Interop\Unix\System.Security.Cryptography.Native\Interop.X509Ext.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Security.Cryptography.Native\Interop.X509Name.cs">
+      <Link>Common\Interop\Unix\System.Security.Cryptography.Native\Interop.X509Name.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Security.Cryptography.Native\Interop.X509NameEntry.cs">
+      <Link>Common\Interop\Unix\System.Security.Cryptography.Native\Interop.X509NameEntry.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\libcurl\Interop.SafeCurlHandle.cs">
       <Link>Common\Interop\Unix\libcrypto\Interop.SafeCurlHandle.cs</Link>
@@ -267,8 +249,8 @@
     <Compile Include="$(CommonPath)\Microsoft\Win32\SafeHandles\SafeBioHandle.Unix.cs">
       <Link>Common\Microsoft\Win32\SafeHandles\SafeBioHandle.Unix.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Microsoft\Win32\SafeHandles\SafeEcKeyHandle.Unix.cs">
-      <Link>Common\Microsoft\Win32\SafeHandles\SafeEcKeyHandle.Unix.cs</Link>
+    <Compile Include="$(CommonPath)\Microsoft\Win32\SafeHandles\SafeInteriorHandle.cs">
+      <Link>Common\Microsoft\Win32\SafeHandles\SafeInteriorHandle.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Microsoft\Win32\SafeHandles\SafePkcs12Handle.Unix.cs">
       <Link>Common\Microsoft\Win32\SafeHandles\SafePkcs12Handle.Unix.cs</Link>
@@ -293,6 +275,9 @@
     </Compile>
     <Compile Include="$(CommonPath)\System\IO\PersistedFiles.Names.Unix.cs">
       <Link>Common\System\IO\PersistedFiles.Names.Unix.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\Security\Cryptography\DerSequenceReader.cs">
+      <Link>Common\System\Security\Cryptography\DerSequenceReader.cs</Link>
     </Compile>
   </ItemGroup>
   <ItemGroup Condition="'$(TargetsFreeBSD)' == 'true'">

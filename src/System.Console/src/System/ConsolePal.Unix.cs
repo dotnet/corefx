@@ -63,44 +63,82 @@ namespace System
 
         public static void ResetColor()
         {
-            if (!ConsoleOutIsTerminal)
+            // We only want to reset colors if we're targeting a TTY device
+            if (Console.IsOutputRedirected)
                 return;
 
             string resetFormat = TerminalColorInfo.Instance.ResetFormat;
             if (resetFormat != null)
             {
-                Console.Write(resetFormat);
+                WriteStdoutAnsiString(resetFormat);
             }
         }
 
-        /// <summary>Gets whether Console.Out is targeting a terminal display.</summary>
-        private static bool ConsoleOutIsTerminal
+        public static int WindowWidth
         {
             get
             {
-                // We only want to write out ANSI escape sequences if we're targeting a TTY device,
-                // so we don't want to if the output stream is redirected, either redirected to another
-                // stream via Console.SetOut, or redirected via Unix stdout redirection.
-                // We make a best guess by unwrapping the TextWriter to get at the underlying
-                // UnixConsoleStream, and checking the type of the underlying file descriptor
-                // for that stream: we say it's a TTY if we can get the UnixConsoleStream and
-                // if its type is CHR (a "character device").
-
-                SyncTextWriter stw = Console.Out as SyncTextWriter;
-                if (stw != null)
-                {
-                    StreamWriter sw = stw._out as StreamWriter;
-                    if (sw != null)
-                    {
-                        UnixConsoleStream ucs = sw.BaseStream as UnixConsoleStream;
-                        if (ucs != null)
-                        {
-                            return ucs._handleType == Interop.Sys.FileTypes.S_IFCHR;
-                        }
-                    }
-                }
-                return false;
+                int cols = Interop.Sys.GetWindowWidth();
+                return (cols != -1) ? cols : TerminalBasicInfo.Instance.ColumnFormat;
             }
+            set
+            {
+                throw new PlatformNotSupportedException();
+            }
+        }
+        public static bool CursorVisible
+        {
+            get
+            {
+                throw new PlatformNotSupportedException();
+            }
+            set
+            {
+                if (Console.IsOutputRedirected)
+                    return;
+
+                string formatString = value ?
+                    TerminalBasicInfo.Instance.CursorVisibleFormat :
+                    TerminalBasicInfo.Instance.CursorInvisibleFormat;
+                if (!string.IsNullOrEmpty(formatString))
+                {
+                    WriteStdoutAnsiString(formatString);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets whether the specified file descriptor was redirected.
+        /// It's considered redirected if it doesn't refer to a terminal.
+        /// </summary>
+        private static bool IsHandleRedirected(int fd)
+        {
+            return !Interop.Sys.IsATty(fd);
+        }
+
+        /// <summary>
+        /// Gets whether Console.In is redirected.
+        /// We approximate the behaviorby checking whether the underlying stream is our UnixConsoleStream and it's wrapping a character device.
+        /// </summary>
+        public static bool IsInputRedirectedCore()
+        {
+            return IsHandleRedirected(Interop.Sys.FileDescriptors.STDIN_FILENO);
+        }
+
+        /// <summary>Gets whether Console.Out is redirected.
+        /// We approximate the behaviorby checking whether the underlying stream is our UnixConsoleStream and it's wrapping a character device.
+        /// </summary>
+        public static bool IsOutputRedirectedCore()
+        {
+            return IsHandleRedirected(Interop.Sys.FileDescriptors.STDOUT_FILENO);
+        }
+
+        /// <summary>Gets whether Console.Error is redirected.
+        /// We approximate the behaviorby checking whether the underlying stream is our UnixConsoleStream and it's wrapping a character device.
+        /// </summary>
+        public static bool IsErrorRedirectedCore()
+        {
+            return IsHandleRedirected(Interop.Sys.FileDescriptors.STDERR_FILENO);
         }
 
         /// <summary>Creates an encoding from the current environment.</summary>
@@ -176,10 +214,9 @@ namespace System
             }
 
             // Changing the color involves writing an ANSI character sequence out to the output stream.
-            // We only want to do this if we know that sequence will be interpreted by the output
-            // rather than simply displayed visibly.  A reasonable approximation for this is whether
-            // the underlying stream is our UnixConsoleStream and it's wrapping a character device.
-            if (!ConsoleOutIsTerminal)
+            // We only want to do this if we know that sequence will be interpreted by the output.
+            // rather than simply displayed visibly.
+            if (Console.IsOutputRedirected)
                 return;
 
             // See if we've already cached a format string for this foreground/background
@@ -188,7 +225,7 @@ namespace System
             string evaluatedString = s_fgbgAndColorStrings[fgbgIndex, ccValue]; // benign race
             if (evaluatedString != null)
             {
-                Console.Write(evaluatedString);
+                WriteStdoutAnsiString(evaluatedString);
                 return;
             }
 
@@ -202,7 +239,7 @@ namespace System
                     int ansiCode = _consoleColorToAnsiCode[ccValue] % maxColors;
                     evaluatedString = TermInfo.ParameterizedStrings.Evaluate(formatString, ansiCode);
 
-                    Console.Write(evaluatedString);
+                    WriteStdoutAnsiString(evaluatedString);
 
                     s_fgbgAndColorStrings[fgbgIndex, ccValue] = evaluatedString; // benign race
                 }
@@ -279,6 +316,33 @@ namespace System
             }, isThreadSafe: true);
         }
 
+        private struct TerminalBasicInfo
+        {
+            /// <summary>The no. of columns in a format</summary>
+            public int ColumnFormat;
+            /// <summary>The format string to use to make cursor visible.</summary>
+            public string CursorVisibleFormat;
+            /// <summary>The format string to use to make cursor invisible</summary>
+            public string CursorInvisibleFormat;
+
+            /// <summary>The cached instance.</summary>
+            public static TerminalBasicInfo Instance { get { return _instance.Value; } }
+
+            private TerminalBasicInfo(TermInfo.Database db)
+            {
+                ColumnFormat = db != null ? db.GetNumber(TermInfo.Database.ColumnIndex) : 0;
+                CursorVisibleFormat = db != null ? db.GetString(TermInfo.Database.CursorVisibleIndex) : string.Empty;
+                CursorInvisibleFormat = db != null ? db.GetString(TermInfo.Database.CursorInvisibleIndex) : string.Empty;
+            }
+
+            /// <summary>Lazy initialization of the terminal basic information.</summary>
+            private static Lazy<TerminalBasicInfo> _instance = new Lazy<TerminalBasicInfo>(() =>
+            {
+                TermInfo.Database db = TermInfo.Database.Instance; // Could be null if TERM is set to a file that doesn't exist
+                return new TerminalBasicInfo(db);
+            }, isThreadSafe: true);
+        }
+
         /// <summary>Reads data from the file descriptor into the buffer.</summary>
         /// <param name="fd">The file descriptor.</param>
         /// <param name="buffer">The buffer to read into.</param>
@@ -312,6 +376,17 @@ namespace System
                     count -= bytesWritten;
                     offset += bytesWritten;
                 }
+            }
+        }
+
+        /// <summary>Writes a terminfo-based ANSI escape string to stdout.</summary>
+        /// <param name="value">The string to write.</param>
+        private static unsafe void WriteStdoutAnsiString(string value)
+        {
+            byte[] data = Encoding.UTF8.GetBytes(value);
+            lock (Console.Out) // synchronize with other writers
+            {
+                Write(Interop.Sys.FileDescriptors.STDOUT_FILENO, data, 0, data.Length);
             }
         }
 
@@ -646,6 +721,14 @@ namespace System
                 public const int SetAnsiForegroundIndex = 359;
                 /// <summary>The well-known index of the set_a_background string entry.</summary>
                 public const int SetAnsiBackgroundIndex = 360;
+
+                /// <summary>The well-known index of the columns numeric entry.</summary>
+                public const int ColumnIndex = 0;
+                /// <summary>The well-known index of the cursor_invisible string entry.</summary>
+                public const int CursorInvisibleIndex = 13;
+                /// <summary>The well-known index of the cursor_normal string entry.</summary>
+                public const int CursorVisibleIndex = 16;
+
 
                 /// <summary>Read a 16-bit value from the buffer starting at the specified position.</summary>
                 /// <param name="buffer">The buffer from which to read.</param>

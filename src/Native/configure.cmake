@@ -1,12 +1,18 @@
-include(CheckFunctionExists)
-include(CheckStructHasMember)
 include(CheckCXXSourceCompiles)
 include(CheckCXXSourceRuns)
+include(CheckFunctionExists)
+include(CheckIncludeFiles)
 include(CheckPrototypeDefinition)
+include(CheckStructHasMember)
+include(CheckSymbolExists)
 
 #CMake does not include /usr/local/include into the include search path
 #thus add it manually. This is required on FreeBSD.
 include_directories(SYSTEM /usr/local/include)
+
+check_include_files(
+    alloca.h
+    HAVE_ALLOCA_H)
 
 check_function_exists(
     stat64
@@ -31,6 +37,23 @@ check_function_exists(
 check_function_exists(
     posix_fadvise
     HAVE_POSIX_ADVISE)
+
+check_function_exists(
+    ioctl
+    HAVE_IOCTL)
+
+check_function_exists(
+    sched_getaffinity
+    HAVE_SCHED_GETAFFINITY)
+
+check_function_exists(
+    sched_setaffinity
+    HAVE_SCHED_SETAFFINITY)
+
+check_symbol_exists(
+    TIOCGWINSZ
+    "sys/ioctl.h"
+    HAVE_TIOCGWINSZ)
 
 check_struct_has_member(
     "struct stat"
@@ -63,6 +86,25 @@ check_cxx_source_compiles(
     "
     HAVE_GNU_STRERROR_R)
 
+check_struct_has_member(
+    "struct fd_set"
+    fds_bits
+    "sys/select.h"
+    HAVE_FDS_BITS)
+
+check_struct_has_member(
+    "struct fd_set"
+    __fds_bits
+    "sys/select.h"
+    HAVE_PRIVATE_FDS_BITS)
+
+check_function_exists(
+    epoll_create1
+    HAVE_EPOLL)
+
+check_function_exists(
+    kqueue
+    HAVE_KQUEUE)
 
 if (CMAKE_SYSTEM_NAME STREQUAL Linux)
     set (CMAKE_REQUIRED_LIBRARIES rt)

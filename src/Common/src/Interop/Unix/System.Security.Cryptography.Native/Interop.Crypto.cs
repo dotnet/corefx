@@ -5,6 +5,7 @@ using System;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
 using Microsoft.Win32.SafeHandles;
 
 internal static partial class Interop
@@ -96,17 +97,11 @@ internal static partial class Interop
 
         internal static string GetX509RootStorePath()
         {
-            IntPtr ptr = GetX509RootStorePath_private();
-            return ptr != null ?
-                Marshal.PtrToStringAnsi(ptr) :
-                null;
+            return Marshal.PtrToStringAnsi(GetX509RootStorePath_private());
         }
 
         [DllImport(Libraries.CryptoNative, EntryPoint = "GetX509RootStorePath")]
         private static extern IntPtr GetX509RootStorePath_private();
-
-        [DllImport(Libraries.CryptoNative)]
-        private static extern int GetPkcs7Certificates(SafePkcs7Handle p7, out SafeSharedX509StackHandle certs);
 
         [DllImport(Libraries.CryptoNative)]
         private static extern int SetX509ChainVerifyTime(
@@ -118,6 +113,9 @@ internal static partial class Interop
             int minute,
             int second,
             [MarshalAs(UnmanagedType.Bool)] bool isDst);
+
+        [DllImport(Libraries.CryptoNative)]
+        internal static extern int CheckX509IpAddress(SafeX509Handle x509, [In]byte[] addressBytes, int addressLen, string hostname, int cchHostname);
 
         [DllImport(Libraries.CryptoNative)]
         internal static extern int CheckX509Hostname(SafeX509Handle x509, string hostname, int cchHostname);
@@ -132,9 +130,12 @@ internal static partial class Interop
             return GetDynamicBuffer((handle, buf, i) => GetX509Thumbprint(handle, buf, i), x509);
         }
 
-        internal static byte[] GetX509NameRawBytes(IntPtr x509Name)
+        internal static X500DistinguishedName LoadX500Name(IntPtr namePtr)
         {
-            return GetDynamicBuffer((ptr, buf, i) => GetX509NameRawBytes(ptr, buf, i), x509Name);
+            CheckValidOpenSslHandle(namePtr);
+
+            byte[] buf = GetDynamicBuffer((ptr, buf1, i) => GetX509NameRawBytes(ptr, buf1, i), namePtr);
+            return new X500DistinguishedName(buf);
         }
 
         internal static byte[] GetX509PublicKeyParameterBytes(SafeX509Handle x509)
@@ -160,29 +161,8 @@ internal static partial class Interop
 
             if (succeeded != 1)
             {
-                throw Interop.libcrypto.CreateOpenSslCryptographicException();
+                throw Interop.Crypto.CreateOpenSslCryptographicException();
             }
-        }
-
-        internal static SafeSharedX509StackHandle GetPkcs7Certificates(SafePkcs7Handle p7)
-        {
-            if (p7 == null || p7.IsInvalid)
-            {
-                return SafeSharedX509StackHandle.InvalidHandle;
-            }
-
-            SafeSharedX509StackHandle certs;
-            int result = GetPkcs7Certificates(p7, out certs);
-
-            if (result != 1)
-            {
-                throw Interop.libcrypto.CreateOpenSslCryptographicException();
-            }
-
-            // Track the parent relationship for the interior pointer so lifetime is well-managed.
-            certs.SetParent(p7);
-
-            return certs;
         }
 
         private static byte[] GetDynamicBuffer<THandle>(NegativeSizeReadMethod<THandle> method, THandle handle)
@@ -191,7 +171,7 @@ internal static partial class Interop
 
             if (negativeSize > 0)
             {
-                throw Interop.libcrypto.CreateOpenSslCryptographicException();
+                throw Interop.Crypto.CreateOpenSslCryptographicException();
             }
 
             byte[] bytes = new byte[-negativeSize];
@@ -200,7 +180,7 @@ internal static partial class Interop
 
             if (ret != 1)
             {
-                throw Interop.libcrypto.CreateOpenSslCryptographicException();
+                throw Interop.Crypto.CreateOpenSslCryptographicException();
             }
 
             return bytes;
