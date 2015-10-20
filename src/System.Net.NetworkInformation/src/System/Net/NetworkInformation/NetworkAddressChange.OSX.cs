@@ -4,6 +4,8 @@
 namespace System.Net.NetworkInformation
 {
     // OSX implementation of NetworkChange
+    // TODO: This can be implemented using the SystemConfiguration framework.
+    // See <SystemConfiguration/SystemConfiguration.h> and its documentation.
     public class NetworkChange
     {
         static public event NetworkAddressChangedEventHandler NetworkAddressChanged

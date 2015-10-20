@@ -12,7 +12,7 @@ namespace System.Net.NetworkInformation
     public class NetworkChange
     {
         private static NetworkAddressChangedEventHandler s_addressChangedSubscribers;
-        private static int s_socket = 0;
+        private static volatile int s_socket = 0;
         private static readonly object s_lockObj = new object();
 
         public static event NetworkAddressChangedEventHandler NetworkAddressChanged
@@ -60,7 +60,8 @@ namespace System.Net.NetworkInformation
             }
 
             s_socket = newSocket;
-            Task.Run(() => LoopReadSocket(s_socket));
+            Task.Factory.StartNew(s => LoopReadSocket((int)s), s_socket,
+                CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default);
         }
 
         private static void CloseSocket()
@@ -77,7 +78,7 @@ namespace System.Net.NetworkInformation
         {
             while (socket == s_socket)
             {
-                Interop.Sys.NetworkChangeKind kind = Interop.Sys.ReadSingleEvent(s_socket);
+                Interop.Sys.NetworkChangeKind kind = Interop.Sys.ReadSingleEvent(socket);
                 if (kind == Interop.Sys.NetworkChangeKind.None)
                 {
                     continue;
@@ -101,9 +102,10 @@ namespace System.Net.NetworkInformation
             {
                 case Interop.Sys.NetworkChangeKind.AddressAdded:
                 case Interop.Sys.NetworkChangeKind.AddressRemoved:
-                    if (s_addressChangedSubscribers != null)
+                    NetworkAddressChangedEventHandler handler = s_addressChangedSubscribers;
+                    if (handler != null)
                     {
-                        s_addressChangedSubscribers(null, EventArgs.Empty);
+                        handler(null, EventArgs.Empty);
                     }
                     break;
             }
