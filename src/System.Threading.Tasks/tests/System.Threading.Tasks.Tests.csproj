@@ -26,6 +26,8 @@
     </Compile>
     <Compile Include="Helpers\Flag.cs" />
     <Compile Include="Helpers\Functions.cs" />
+    <Compile Include="Helpers\Waits.cs" />
+    <Compile Include="Helpers\Workloads.cs" />
     <Compile Include="XunitAssemblyAttributes.cs" />
     <Compile Include="UnwrapTests.cs" />
     <Compile Include="AggregateExceptionTests.cs" />
@@ -39,7 +41,7 @@
     <Compile Include="Task\TaskStatusTests.cs" />
     <Compile Include="Task\TaskPropertiesTests.cs" />
     <Compile Include="Task\TaskCreateTests.cs" />
-    <Compile Include="Task\TaskWaitAllAnyTest.cs" />
+    <Compile Include="Task\TaskWaitAllAnyTests.cs" />
     <Compile Include="Task\TaskContinueWithTests.cs" />
     <Compile Include="Task\TaskContinueWithAllAnyTests.cs" />
     <Compile Include="Task\TaskContinueWith_ContFuncAndActionWithArgsTests.cs" />
