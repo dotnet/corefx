@@ -60,9 +60,10 @@ extern "C" NetworkChangeKind ReadSingleEvent(int32_t sock)
         return NetworkChangeKind::None;
     }
 
-    // This channel seems to broadcast only single messages at a time,
-    // so looping through the message headers isn't necessary.
     nlmsghdr* hdr = reinterpret_cast<nlmsghdr*>(buffer);
+    // This channel should only send a single message at a time.
+    // This means there should be no multi-part messages (NLM_F_MULTI).
+    assert ((hdr->nlmsg_flags & NLM_F_MULTI) == 0);
     switch (hdr->nlmsg_type)
     {
         case NLMSG_DONE:
