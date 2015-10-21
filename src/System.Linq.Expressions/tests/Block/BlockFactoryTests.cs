@@ -145,8 +145,6 @@ namespace Tests
 
             var res = node.Update(node.Variables, node.Expressions.ToArray());
 
-            Assert.NotSame(node, res);
-
             return res;
         }
 
