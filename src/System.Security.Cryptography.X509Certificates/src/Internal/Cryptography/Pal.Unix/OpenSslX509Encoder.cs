@@ -5,8 +5,6 @@ using System;
 using System.Diagnostics;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
-using System.Text;
-
 using Microsoft.Win32.SafeHandles;
 
 namespace Internal.Cryptography.Pal
@@ -29,40 +27,7 @@ namespace Internal.Cryptography.Pal
 
         public string X500DistinguishedNameDecode(byte[] encodedDistinguishedName, X500DistinguishedNameFlags flags)
         {
-            OpenSslX09NameFormatFlags nativeFlags = ConvertFormatFlags(flags);
-            return X500DistinguishedNameDecode(encodedDistinguishedName, nativeFlags);
-        }
-
-        internal static string X500DistinguishedNameDecode(byte[] encodedDistinguishedName, OpenSslX09NameFormatFlags nativeFlags)
-        {
-            using (SafeX509NameHandle x509Name = Interop.Crypto.DecodeX509Name(encodedDistinguishedName, encodedDistinguishedName.Length))
-            {
-                Interop.Crypto.CheckValidOpenSslHandle(x509Name);
-
-                using (SafeBioHandle bioHandle = Interop.Crypto.CreateMemoryBio())
-                {
-                    Interop.Crypto.CheckValidOpenSslHandle(bioHandle);
-
-                    int written = Interop.libcrypto.X509_NAME_print_ex(
-                        bioHandle,
-                        x509Name,
-                        0,
-                        new UIntPtr((uint)nativeFlags));
-
-                    // X509_NAME_print_ex returns how many bytes were written into the buffer.
-                    // BIO_gets wants to ensure that the response is NULL-terminated.
-                    // So add one to leave space for the NULL.
-                    StringBuilder builder = new StringBuilder(written + 1);
-                    int read = Interop.Crypto.BioGets(bioHandle, builder, builder.Capacity);
-
-                    if (read < 0)
-                    {
-                        throw Interop.Crypto.CreateOpenSslCryptographicException();
-                    }
-
-                    return builder.ToString();
-                }
-            }
+            return X500NameEncoder.X500DistinguishedNameDecode(encodedDistinguishedName, true, flags);
         }
 
         public byte[] X500DistinguishedNameEncode(string distinguishedName, X500DistinguishedNameFlags flag)
@@ -222,61 +187,13 @@ namespace Internal.Cryptography.Pal
 
         internal static byte[] DecodeX509SubjectKeyIdentifierExtension(byte[] encoded)
         {
-            using (SafeAsn1OctetStringHandle octetString = Interop.Crypto.DecodeAsn1OctetString(encoded, encoded.Length))
-            {
-                Interop.Crypto.CheckValidOpenSslHandle(octetString);
-
-                return Interop.Crypto.GetAsn1StringBytes(octetString.DangerousGetHandle());
-            }
+            DerSequenceReader reader = DerSequenceReader.CreateForPayload(encoded);
+            return reader.ReadOctetString();
         }
 
         public byte[] ComputeCapiSha1OfPublicKey(PublicKey key)
         {
             throw new NotImplementedException();
-        }
-
-        private static OpenSslX09NameFormatFlags ConvertFormatFlags(X500DistinguishedNameFlags inFlags)
-        {
-            OpenSslX09NameFormatFlags outFlags = 0;
-
-            if (inFlags.HasFlag(X500DistinguishedNameFlags.Reversed))
-            {
-                outFlags |= OpenSslX09NameFormatFlags.XN_FLAG_DN_REV;
-            }
-
-            if (inFlags.HasFlag(X500DistinguishedNameFlags.UseSemicolons))
-            {
-                outFlags |= OpenSslX09NameFormatFlags.XN_FLAG_SEP_SPLUS_SPC;
-            }
-            else if (inFlags.HasFlag(X500DistinguishedNameFlags.UseNewLines))
-            {
-                outFlags |= OpenSslX09NameFormatFlags.XN_FLAG_SEP_MULTILINE;
-            }
-            else
-            {
-                outFlags |= OpenSslX09NameFormatFlags.XN_FLAG_SEP_CPLUS_SPC;
-            }
-
-            if (inFlags.HasFlag(X500DistinguishedNameFlags.DoNotUseQuotes))
-            {
-                // TODO: Handle this.
-            }
-
-            if (inFlags.HasFlag(X500DistinguishedNameFlags.ForceUTF8Encoding))
-            {
-                // TODO: Handle this.
-            }
-
-            if (inFlags.HasFlag(X500DistinguishedNameFlags.UseUTF8Encoding))
-            {
-                // TODO: Handle this.
-            }
-            else if (inFlags.HasFlag(X500DistinguishedNameFlags.UseT61Encoding))
-            {
-                // TODO: Handle this.
-            }
-
-            return outFlags;
         }
 
         private static RSA BuildRsaPublicKey(byte[] encodedData)
@@ -285,58 +202,11 @@ namespace Internal.Cryptography.Pal
             {
                 Interop.Crypto.CheckValidOpenSslHandle(rsaHandle);
 
-                RSAParameters rsaParameters = Interop.libcrypto.ExportRsaParameters(rsaHandle, false);
+                RSAParameters rsaParameters = Interop.Crypto.ExportRsaParameters(rsaHandle, false);
                 RSA rsa = new RSAOpenSsl();
                 rsa.ImportParameters(rsaParameters);
                 return rsa;
             }
-        }
-
-        [Flags]
-        internal enum OpenSslX09NameFormatFlags : uint
-        {
-            XN_FLAG_SEP_MASK = (0xf << 16),
-
-            // O=Apache HTTP Server, OU=Test Certificate, CN=localhost
-            // Note that this is the only not-reversed value, since XN_FLAG_COMPAT | XN_FLAG_DN_REV produces nothing.
-            XN_FLAG_COMPAT = 0,
-
-            // CN=localhost,OU=Test Certificate,O=Apache HTTP Server
-            XN_FLAG_SEP_COMMA_PLUS = (1 << 16),
-
-            // CN=localhost, OU=Test Certificate, O=Apache HTTP Server
-            XN_FLAG_SEP_CPLUS_SPC = (2 << 16),
-
-            // CN=localhost; OU=Test Certificate; O=Apache HTTP Server
-            XN_FLAG_SEP_SPLUS_SPC = (3 << 16),
-
-            // CN=localhost
-            // OU=Test Certificate
-            // O=Apache HTTP Server
-            XN_FLAG_SEP_MULTILINE = (4 << 16),
-
-            XN_FLAG_DN_REV = (1 << 20),
-
-            XN_FLAG_FN_MASK = (0x3 << 21),
-
-            // CN=localhost, OU=Test Certificate, O=Apache HTTP Server
-            XN_FLAG_FN_SN = 0,
-
-            // commonName=localhost, organizationalUnitName=Test Certificate, organizationName=Apache HTTP Server
-            XN_FLAG_FN_LN = (1 << 21),
-
-            // 2.5.4.3=localhost, 2.5.4.11=Test Certificate, 2.5.4.10=Apache HTTP Server
-            XN_FLAG_FN_OID = (2 << 21),
-
-            // localhost, Test Certificate, Apache HTTP Server
-            XN_FLAG_FN_NONE = (3 << 21),
-
-            // CN = localhost, OU = Test Certificate, O = Apache HTTP Server
-            XN_FLAG_SPC_EQ = (1 << 23),
-
-            XN_FLAG_DUMP_UNKNOWN_FIELDS = (1 << 24),
-
-            XN_FLAG_FN_ALIGN = (1 << 25),
         }
     }
 }

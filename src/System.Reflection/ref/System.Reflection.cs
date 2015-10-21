@@ -19,6 +19,7 @@ namespace System.Reflection
         public virtual System.Collections.Generic.IEnumerable<System.Reflection.CustomAttributeData> CustomAttributes { get { return default(System.Collections.Generic.IEnumerable<System.Reflection.CustomAttributeData>); } }
         public abstract System.Collections.Generic.IEnumerable<System.Reflection.TypeInfo> DefinedTypes { get; }
         public virtual System.Collections.Generic.IEnumerable<System.Type> ExportedTypes { get { return default(System.Collections.Generic.IEnumerable<System.Type>); } }
+        public virtual MethodInfo EntryPoint { get { return default(MethodInfo); } }
         public virtual string FullName { get { return default(string); } }
         public virtual bool IsDynamic { get { return default(bool); } }
         public virtual System.Reflection.Module ManifestModule { get { return default(System.Reflection.Module); } }
@@ -32,6 +33,7 @@ namespace System.Reflection
         public virtual System.Type GetType(string name) { return default(System.Type); }
         public virtual System.Type GetType(string name, bool throwOnError, bool ignoreCase) { return default(System.Type); }
         public static System.Reflection.Assembly Load(System.Reflection.AssemblyName assemblyRef) { return default(System.Reflection.Assembly); }
+        public virtual string Location { get { return default(string); } }
         public override string ToString() { return default(string); }
     }
     public enum AssemblyContentType

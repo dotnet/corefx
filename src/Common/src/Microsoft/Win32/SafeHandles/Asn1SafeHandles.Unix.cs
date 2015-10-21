@@ -90,4 +90,20 @@ namespace Microsoft.Win32.SafeHandles
             get { return handle == IntPtr.Zero; }
         }
     }
+
+    internal sealed class SafeSharedAsn1StringHandle : SafeInteriorHandle
+    {
+        private SafeSharedAsn1StringHandle() :
+            base(IntPtr.Zero, ownsHandle: true)
+        {
+        }
+    }
+
+    internal sealed class SafeSharedAsn1IntegerHandle : SafeInteriorHandle
+    {
+        private SafeSharedAsn1IntegerHandle() :
+            base(IntPtr.Zero, ownsHandle: true)
+        {
+        }
+    }
 }

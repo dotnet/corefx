@@ -52,7 +52,7 @@ extern "C" void Asn1ObjectFree(ASN1_OBJECT* a);
 /*
 Shims the d2i_ASN1_BIT_STRING method and makes it easier to invoke from managed code.
 */
-extern "C" ASN1_BIT_STRING* DecodeAsn1BitString(const unsigned char* buf, int32_t len);
+extern "C" ASN1_BIT_STRING* DecodeAsn1BitString(const uint8_t* buf, int32_t len);
 
 /*
 Direct shim to ASN1_BIT_STRING_free.
@@ -62,7 +62,7 @@ extern "C" void Asn1BitStringFree(ASN1_STRING* a);
 /*
 Shims the d2i_ASN1_OCTET_STRING method and makes it easier to invoke from managed code.
 */
-extern "C" ASN1_OCTET_STRING* DecodeAsn1OctetString(const unsigned char* buf, int32_t len);
+extern "C" ASN1_OCTET_STRING* DecodeAsn1OctetString(const uint8_t* buf, int32_t len);
 
 /*
 Direct shim to ASN1_OCTET_STRING_new.
@@ -72,7 +72,7 @@ extern "C" ASN1_OCTET_STRING* Asn1OctetStringNew();
 /*
 Direct shim to ASN1_OCTET_STRING_set.
 */
-extern "C" int32_t Asn1OctetStringSet(ASN1_OCTET_STRING* s, const unsigned char* data, int32_t len);
+extern "C" int32_t Asn1OctetStringSet(ASN1_OCTET_STRING* s, const uint8_t* data, int32_t len);
 
 /*
 Direct shim to ASN1_OCTET_STRING_free.
@@ -83,3 +83,16 @@ extern "C" void Asn1OctetStringFree(ASN1_STRING* a);
 Direct shim to ASN1_STRING_free.
 */
 extern "C" void Asn1StringFree(ASN1_STRING* a);
+
+/*
+Returns the number of bytes it will take to convert
+the ASN1_INTEGER to a DER format.
+*/
+extern "C" int32_t GetAsn1IntegerDerSize(ASN1_INTEGER* i);
+
+/*
+Shims the i2d_ASN1_INTEGER method.
+
+Returns the number of bytes written to buf.
+*/
+extern "C" int32_t EncodeAsn1Integer(ASN1_INTEGER* i, uint8_t* buf);
