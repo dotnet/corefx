@@ -143,6 +143,19 @@ check_cxx_source_compiles(
     HAVE_TCP_VAR_H
 )
 
+check_cxx_source_compiles(
+    "
+    #include <sys/types.h>
+    #include <net/route.h>
+    int main() { rt_msghdr* hdr; return 0; }
+    "
+    HAVE_RT_MSGHDR
+)
+
+check_include_files(
+    linux/rtnetlink.h
+    HAVE_LINUX_RTNETLINK_H)
+
 set (CMAKE_REQUIRED_LIBRARIES)
 
 configure_file(

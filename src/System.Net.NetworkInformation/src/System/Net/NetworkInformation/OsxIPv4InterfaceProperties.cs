@@ -5,16 +5,19 @@ namespace System.Net.NetworkInformation
 {
     internal class OsxIPv4InterfaceProperties : UnixIPv4InterfaceProperties
     {
-        public OsxIPv4InterfaceProperties(OsxNetworkInterface oni)
+        private readonly int _mtu;
+
+        public OsxIPv4InterfaceProperties(OsxNetworkInterface oni, int mtu)
             : base(oni)
         {
+            _mtu = mtu;
         }
 
         public override bool IsAutomaticPrivateAddressingActive
         {
             get
             {
-                throw new NotImplementedException();
+                throw new PlatformNotSupportedException();
             }
         }
 
@@ -22,7 +25,7 @@ namespace System.Net.NetworkInformation
         {
             get
             {
-                throw new NotImplementedException();
+                throw new PlatformNotSupportedException();
             }
         }
 
@@ -30,7 +33,7 @@ namespace System.Net.NetworkInformation
         {
             get
             {
-                throw new NotImplementedException();
+                throw new PlatformNotSupportedException();
             }
         }
 
@@ -38,7 +41,8 @@ namespace System.Net.NetworkInformation
         {
             get
             {
-                throw new NotImplementedException();
+                // Doesn't seem to be exposed on a per-interface basis.
+                throw new PlatformNotSupportedException();
             }
         }
 
@@ -46,7 +50,7 @@ namespace System.Net.NetworkInformation
         {
             get
             {
-                throw new NotImplementedException();
+                return _mtu;
             }
         }
 
@@ -54,7 +58,7 @@ namespace System.Net.NetworkInformation
         {
             get
             {
-                throw new NotImplementedException();
+                throw new PlatformNotSupportedException();
             }
         }
     }

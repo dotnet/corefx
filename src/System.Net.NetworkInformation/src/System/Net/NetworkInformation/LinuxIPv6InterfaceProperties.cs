@@ -32,7 +32,7 @@ namespace System.Net.NetworkInformation
 
         private int GetMtu()
         {
-            string path = path = Path.Combine(LinuxNetworkFiles.SysClassNetFolder, _linuxNetworkInterface.Name, LinuxNetworkFiles.MtuFileName);
+            string path = path = Path.Combine(NetworkFiles.SysClassNetFolder, _linuxNetworkInterface.Name, NetworkFiles.MtuFileName);
             return int.Parse(File.ReadAllText(path));
         }
     }

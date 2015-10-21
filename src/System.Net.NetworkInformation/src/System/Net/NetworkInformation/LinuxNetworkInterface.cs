@@ -15,12 +15,14 @@ namespace System.Net.NetworkInformation
         private readonly OperationalStatus _operationalStatus;
         private readonly bool _supportsMulticast;
         private readonly long? _speed;
+        private readonly LinuxIPInterfaceProperties _ipProperties;
 
         internal LinuxNetworkInterface(string name) : base(name)
         {
             _operationalStatus = GetOperationalStatus(name);
             _supportsMulticast = GetSupportsMulticast(name);
             _speed = GetSpeed(name);
+            _ipProperties = new LinuxIPInterfaceProperties(this);
         }
 
         public unsafe static NetworkInterface[] GetLinuxNetworkInterfaces()
@@ -69,7 +71,7 @@ namespace System.Net.NetworkInformation
 
         private static bool GetSupportsMulticast(string name)
         {
-            string path = Path.Combine(LinuxNetworkFiles.SysClassNetFolder, name, LinuxNetworkFiles.FlagsFileName);
+            string path = Path.Combine(NetworkFiles.SysClassNetFolder, name, NetworkFiles.FlagsFileName);
             string fileContents = File.ReadAllText(path).Trim();
             Interop.LinuxNetDeviceFlags flags = (Interop.LinuxNetDeviceFlags)Convert.ToInt32(fileContents, 16);
             return (flags & Interop.LinuxNetDeviceFlags.IFF_MULTICAST) == Interop.LinuxNetDeviceFlags.IFF_MULTICAST;
@@ -77,7 +79,7 @@ namespace System.Net.NetworkInformation
 
         public override IPInterfaceProperties GetIPProperties()
         {
-            return new LinuxIPInterfaceProperties(this);
+            return _ipProperties;
         }
 
         public override IPInterfaceStatistics GetIPStatistics()
@@ -112,7 +114,7 @@ namespace System.Net.NetworkInformation
         {
             try
             {
-                string path = Path.Combine(LinuxNetworkFiles.SysClassNetFolder, name, LinuxNetworkFiles.SpeedFileName);
+                string path = Path.Combine(NetworkFiles.SysClassNetFolder, name, NetworkFiles.SpeedFileName);
                 string contents = File.ReadAllText(path);
                 long val;
                 if (long.TryParse(contents, out val))
@@ -133,7 +135,7 @@ namespace System.Net.NetworkInformation
         private static OperationalStatus GetOperationalStatus(string name)
         {
             // /sys/class/net/<name>/operstate
-            string path = Path.Combine(LinuxNetworkFiles.SysClassNetFolder, name, LinuxNetworkFiles.OperstateFileName);
+            string path = Path.Combine(NetworkFiles.SysClassNetFolder, name, NetworkFiles.OperstateFileName);
             string state = File.ReadAllText(path).Trim();
             return MapState(state);
         }

@@ -24,6 +24,7 @@ namespace System.Net.NetworkInformation
         private readonly bool _forwarding;
         private readonly int _numInterfaces;
         private readonly int _numIPAddresses;
+        private readonly int _numRoutes;
 
         public OsxIPv4GlobalStatistics()
         {
@@ -53,6 +54,12 @@ namespace System.Net.NetworkInformation
             // PERF: In native shim, use sysctl: net.link.generic.system.ifcount = number of network interfaces
             _numInterfaces = interfaces.Length;
             _numIPAddresses = interfaces.Sum(uni => uni.Addresses.Count);
+
+            _numRoutes = Interop.Sys.GetNumRoutes();
+            if (_numRoutes == -1)
+            {
+                throw new NetworkInformationException();
+            }
         }
 
         public override int DefaultTtl { get { return _defaultTtl; } }
@@ -65,19 +72,19 @@ namespace System.Net.NetworkInformation
 
         public override long OutputPacketRequests { get { return _outboundPackets; } }
 
-        public override long OutputPacketRoutingDiscards { get { throw new NotImplementedException(); } }
+        public override long OutputPacketRoutingDiscards { get { throw new PlatformNotSupportedException(); } }
 
-        public override long OutputPacketsDiscarded { get { throw new NotImplementedException(); } }
+        public override long OutputPacketsDiscarded { get { throw new PlatformNotSupportedException(); } }
 
         public override long OutputPacketsWithNoRoute { get { return _outputPacketsNoRoute; } }
 
-        public override long PacketFragmentFailures { get { throw new NotImplementedException(); } }
+        public override long PacketFragmentFailures { get { throw new PlatformNotSupportedException(); } }
 
-        public override long PacketReassembliesRequired { get { throw new NotImplementedException(); } }
+        public override long PacketReassembliesRequired { get { throw new PlatformNotSupportedException(); } }
 
         public override long PacketReassemblyFailures { get { return _cantFrags; } }
 
-        public override long PacketReassemblyTimeout { get { throw new NotImplementedException(); } }
+        public override long PacketReassemblyTimeout { get { throw new PlatformNotSupportedException(); ; } }
 
         public override long PacketsFragmented { get { return _datagramsFragmented; } }
 
@@ -97,6 +104,6 @@ namespace System.Net.NetworkInformation
 
         public override long ReceivedPacketsWithUnknownProtocol { get { return _unknownProtos; } }
 
-        public override int NumberOfRoutes { get { throw new NotImplementedException(); } }
+        public override int NumberOfRoutes { get { return _numRoutes; } }
     }
 }

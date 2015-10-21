@@ -26,7 +26,7 @@
     <Compile Include="System\Net\NetworkInformation\GatewayIPAddressInformationCollection.cs" />
     <Compile Include="System\Net\NetworkInformation\IcmpV4Statistics.cs" />
     <Compile Include="System\Net\NetworkInformation\IcmpV6Statistics.cs" />
-    <Compile Include="System\Net\NetworkInformation\interfacetype.cs" />
+    <Compile Include="System\Net\NetworkInformation\NetworkInterfaceType.cs" />
     <Compile Include="System\Net\NetworkInformation\IPAddressInformation.cs" />
     <Compile Include="System\Net\NetworkInformation\ipaddressinformationcollection.cs" />
     <Compile Include="System\Net\NetworkInformation\IPGlobalProperties.cs" />
@@ -38,9 +38,10 @@
     <Compile Include="System\Net\NetworkInformation\MulticastIPAddressInformation.cs" />
     <Compile Include="System\Net\NetworkInformation\MulticastIPAddressInformationCollection.cs" />
     <Compile Include="System\Net\NetworkInformation\NetworkAvailabilityEventArgs.cs" />
+    <Compile Include="System\Net\NetworkInformation\NetworkChangeDelegates.cs" />
     <Compile Include="System\Net\NetworkInformation\NetworkInterface.cs" />
     <Compile Include="System\Net\NetworkInformation\NetworkInterfaceComponent.cs" />
-    <Compile Include="System\Net\NetworkInformation\nodetype.cs" />
+    <Compile Include="System\Net\NetworkInformation\NetBiosNodeType.cs" />
     <Compile Include="System\Net\NetworkInformation\OperationalStatus.cs" />
     <Compile Include="System\Net\NetworkInformation\PhysicalAddress.cs" />
     <Compile Include="System\Net\NetworkInformation\PrefixOrigin.cs" />
@@ -237,6 +238,8 @@
   </ItemGroup>
   <!-- Unix Common -->
   <ItemGroup Condition=" '$(TargetsUnix)' == 'true' ">
+    <Compile Include="System\Net\NetworkInformation\NetworkFiles.cs" />
+    <Compile Include="System\Net\NetworkInformation\SimpleGatewayIPAddressInformation.cs" />
     <Compile Include="System\Net\NetworkInformation\SimpleTcpConnectionInformation.cs" />
     <Compile Include="System\Net\NetworkInformation\UnixIPInterfaceProperties.cs" />
     <Compile Include="System\Net\NetworkInformation\UnixIPv4InterfaceProperties.cs" />
@@ -262,21 +265,25 @@
     <Compile Include="$(CommonPath)\Interop\Unix\Interop.Errors.cs">
       <Link>Interop\Unix\Interop.Errors.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\System\Threading\Tasks\TaskToApm.cs">
+      <Link>Common\System\Threading\Tasks\TaskToApm.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\IO\RowConfigReader.cs">
+      <Link>Common\System\IO\RowConfigReader.cs</Link>
+    </Compile>
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetsLinux)' == 'true' ">
-    <Compile Include="System\Net\NetworkInformation\LinuxGatewayIPAddressInformation.cs" />
     <Compile Include="System\Net\NetworkInformation\LinuxIcmpV4Statistics.cs" />
     <Compile Include="System\Net\NetworkInformation\LinuxIcmpV6Statistics.cs" />
     <Compile Include="System\Net\NetworkInformation\LinuxTcpStatistics.cs" />
     <Compile Include="System\Net\NetworkInformation\LinuxUdpStatistics.cs" />
-    <Compile Include="System\Net\NetworkInformation\NetworkChange.Linux.cs" />
+    <Compile Include="System\Net\NetworkInformation\NetworkAddressChange.Linux.cs" />
     <Compile Include="System\Net\NetworkInformation\IPGlobalPropertiesPal.Linux.cs" />
     <Compile Include="System\Net\NetworkInformation\LinuxIPAddressInformation.cs" />
     <Compile Include="System\Net\NetworkInformation\LinuxIPGlobalProperties.cs" />
     <Compile Include="System\Net\NetworkInformation\LinuxIPGlobalStatistics.cs" />
     <Compile Include="System\Net\NetworkInformation\LinuxIPInterfaceProperties.cs" />
     <Compile Include="System\Net\NetworkInformation\LinuxIPInterfaceStatistics.cs" />
-    <Compile Include="System\Net\NetworkInformation\LinuxNetworkFiles.cs" />
     <Compile Include="System\Net\NetworkInformation\NetworkInterfacePal.Linux.cs" />
     <Compile Include="System\Net\NetworkInformation\LinuxNetworkInterface.cs" />
     <Compile Include="System\Net\NetworkInformation\LinuxIPv4InterfaceProperties.cs" />
@@ -285,27 +292,24 @@
     <Compile Include="$(CommonPath)\System\IO\StringParser.cs">
       <Link>Common\System\IO\StringParser.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\System\IO\RowConfigReader.cs">
-      <Link>Common\System\IO\RowConfigReader.cs</Link>
-    </Compile>
     <Compile Include="$(CommonPath)\Interop\Linux\Interop.LinuxNetDeviceFlags.cs">
       <Link>Interop\Linux\Interop.LinuxNetDeviceFlags.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Linux\Interop.LinuxTcpState.cs">
       <Link>Interop\Linux\Interop.LinuxTcpState.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\Interop\Linux\System.Native\Interop.NetworkChange.cs">
+      <Link>Interop\Linux\System.Native\Interop.NetworkChange.cs</Link>
+    </Compile>
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetsOsx)' == 'true'">
     <Compile Include="System\Net\NetworkInformation\IPGlobalPropertiesPal.Osx.cs" />
-    <Compile Include="System\Net\NetworkInformation\NetworkChange.OSX.cs" />
+    <Compile Include="System\Net\NetworkInformation\NetworkAddressChange.OSX.cs" />
     <Compile Include="System\Net\NetworkInformation\NetworkInterfacePal.Osx.cs" />
     <Compile Include="System\Net\NetworkInformation\OsxIcmpV4Statistics.cs" />
     <Compile Include="System\Net\NetworkInformation\OsxIcmpV6Statistics.cs" />
     <Compile Include="System\Net\NetworkInformation\OsxIPGlobalProperties.cs" />
     <Compile Include="System\Net\NetworkInformation\OsxIPv4GlobalStatistics.cs" />
-    <!--
-    <Compile Include="System\Net\NetworkInformation\OsxIPv6GlobalStatistics.cs" />
-  -->
     <Compile Include="System\Net\NetworkInformation\OsxIpInterfaceStatistics.cs" />
     <Compile Include="System\Net\NetworkInformation\OsxIPv4InterfaceProperties.cs" />
     <Compile Include="System\Net\NetworkInformation\OsxIPv6InterfaceProperties.cs" />

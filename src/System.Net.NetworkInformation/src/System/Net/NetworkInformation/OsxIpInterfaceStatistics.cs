@@ -5,18 +5,44 @@ namespace System.Net.NetworkInformation
 {
     internal class OsxIpInterfaceStatistics : IPInterfaceStatistics
     {
-        private readonly string _name;
+        private readonly long _outputQueueLength;
+        private readonly long _inPackets;
+        private readonly long _outPackets;
+        private readonly long _inBytes;
+        private readonly long _outBytes;
+        private readonly long _inPacketsDiscarded;
+        private readonly long _inErrors;
+        private readonly long _inUnknownProtocols;
+        private readonly long _inNonUnicastPackets;
+        private readonly long _outNonUnicastPackets;
+        private readonly long _outErrors;
 
         public OsxIpInterfaceStatistics(string name)
         {
-            _name = name;
+            Interop.Sys.NativeIPInterfaceStatistics nativeStats;
+            if (Interop.Sys.GetNativeIPInterfaceStatistics(name, out nativeStats) == -1)
+            {
+                throw new NetworkInformationException();
+            }
+
+            _outputQueueLength = (long)nativeStats.SendQueueLength;
+            _inPackets = (long)nativeStats.InPackets;
+            _outPackets = (long)nativeStats.OutPackets;
+            _inBytes = (long)nativeStats.InBytes;
+            _outBytes = (long)nativeStats.OutBytes;
+            _inPacketsDiscarded = (long)nativeStats.InDrops;
+            _inErrors = (long)nativeStats.InErrors;
+            _inUnknownProtocols = (long)nativeStats.InNoProto;
+            _inNonUnicastPackets = (long)nativeStats.InMulticastPackets;
+            _outNonUnicastPackets = (long)nativeStats.OutMulticastPackets;
+            _outErrors = (long)nativeStats.OutErrors;
         }
 
         public override long BytesReceived
         {
             get
             {
-                throw new NotImplementedException();
+                return _inBytes;
             }
         }
 
@@ -24,7 +50,7 @@ namespace System.Net.NetworkInformation
         {
             get
             {
-                throw new NotImplementedException();
+                return _outBytes;
             }
         }
 
@@ -32,7 +58,7 @@ namespace System.Net.NetworkInformation
         {
             get
             {
-                throw new NotImplementedException();
+                return _inPacketsDiscarded;
             }
         }
 
@@ -40,7 +66,7 @@ namespace System.Net.NetworkInformation
         {
             get
             {
-                throw new NotImplementedException();
+                return _inErrors;
             }
         }
 
@@ -48,7 +74,7 @@ namespace System.Net.NetworkInformation
         {
             get
             {
-                throw new NotImplementedException();
+                return _inUnknownProtocols;
             }
         }
 
@@ -56,7 +82,7 @@ namespace System.Net.NetworkInformation
         {
             get
             {
-                throw new NotImplementedException();
+                return _inNonUnicastPackets;
             }
         }
 
@@ -64,7 +90,7 @@ namespace System.Net.NetworkInformation
         {
             get
             {
-                throw new NotImplementedException();
+                return _outNonUnicastPackets;
             }
         }
 
@@ -72,7 +98,7 @@ namespace System.Net.NetworkInformation
         {
             get
             {
-                throw new NotImplementedException();
+                throw new PlatformNotSupportedException();
             }
         }
 
@@ -80,7 +106,7 @@ namespace System.Net.NetworkInformation
         {
             get
             {
-                throw new NotImplementedException();
+                return _outErrors;
             }
         }
 
@@ -88,7 +114,7 @@ namespace System.Net.NetworkInformation
         {
             get
             {
-                throw new NotImplementedException();
+                return _outputQueueLength;
             }
         }
 
@@ -96,7 +122,7 @@ namespace System.Net.NetworkInformation
         {
             get
             {
-                throw new NotImplementedException();
+                return _inPackets - _inNonUnicastPackets;
             }
         }
 
@@ -104,7 +130,7 @@ namespace System.Net.NetworkInformation
         {
             get
             {
-                throw new NotImplementedException();
+                return _outPackets - _outNonUnicastPackets;
             }
         }
     }

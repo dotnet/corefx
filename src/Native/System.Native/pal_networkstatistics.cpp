@@ -14,20 +14,22 @@
 #include "pal_networkstatistics.h"
 #include "pal_errno.h"
 
+#include <errno.h>
+#include <net/route.h>
+
 #include <sys/types.h>
 #include <sys/sysctl.h>
 #include <sys/socketvar.h>
 #include <netinet/ip.h>
+#include <netinet/ip_icmp.h>
 #include <netinet/ip_var.h>
 #include <netinet/tcp.h>
-#include <netinet/tcp_var.h>
 #include <netinet/tcp_fsm.h>
+#include <netinet/tcp_var.h>
 #include <netinet/udp.h>
 #include <netinet/udp_var.h>
-#include <netinet/ip_icmp.h>
-#include <netinet/icmp_var.h>
 #include <netinet/icmp6.h>
-#include <errno.h>
+#include <netinet/icmp_var.h>
 
 template <class RetType>
 int32_t ReadSysctlVar(const char* name, RetType* value)
@@ -253,7 +255,7 @@ extern "C" int32_t GetActiveTcpConnectionInfos(NativeTcpConnectionInformation* i
 
     while (sysctlbyname("net.inet.tcp.pcblist", buffer, &estimatedSize, newp, newlen) != 0)
     {
-        delete buffer;
+        delete[] buffer;
         estimatedSize = estimatedSize * 2;
         buffer = new uint8_t[estimatedSize];
     }
@@ -262,6 +264,7 @@ extern "C" int32_t GetActiveTcpConnectionInfos(NativeTcpConnectionInformation* i
     if (count > *infoCount)
     {
         // Not enough space in caller-supplied buffer.
+        delete[] buffer;
         *infoCount = count;
         return -1;
     }
@@ -307,6 +310,7 @@ extern "C" int32_t GetActiveTcpConnectionInfos(NativeTcpConnectionInformation* i
         ntci->RemoteEndPoint.Port = in_pcb.inp_fport;
     }
 
+    delete[] buffer;
     return 0;
 }
 
@@ -366,9 +370,9 @@ extern "C" int32_t GetActiveUdpListeners(IPEndPointInfo* infos, int32_t* infoCou
     void* newp = nullptr;
     size_t newlen = 0;
 
-    while (sysctlbyname("net.inet.tcp.pcblist", buffer, &estimatedSize, newp, newlen) != 0)
+    while (sysctlbyname("net.inet.udp.pcblist", buffer, &estimatedSize, newp, newlen) != 0)
     {
-        delete buffer;
+        delete[] buffer;
         estimatedSize = estimatedSize * 2;
         buffer = new uint8_t[estimatedSize];
     }
@@ -376,6 +380,7 @@ extern "C" int32_t GetActiveUdpListeners(IPEndPointInfo* infos, int32_t* infoCou
     if (count > *infoCount)
     {
         // Not enough space in caller-supplied buffer.
+        delete[] buffer;
         *infoCount = count;
         return -1;
     }
@@ -409,7 +414,122 @@ extern "C" int32_t GetActiveUdpListeners(IPEndPointInfo* infos, int32_t* infoCou
 
         iepi->Port = in_pcb.inp_lport;
     }
+
+    delete[] buffer;
     return 0;
+}
+
+extern "C" int32_t GetNativeIPInterfaceStatistics(char* interfaceName, NativeIPInterfaceStatistics* retStats)
+{
+    assert(interfaceName != nullptr && retStats != nullptr);
+    unsigned int interfaceIndex = if_nametoindex(interfaceName);
+    if (interfaceIndex == 0)
+    {
+        // An invalid interface name was given (doesn't exist).
+        return -1;
+    }
+
+    int statisticsMib[] =
+    {
+        CTL_NET,
+        PF_ROUTE,
+        0,
+        0,
+        NET_RT_IFLIST2,
+        0
+    };
+    
+    size_t len;
+    // Get estimated data length
+    if (sysctl(statisticsMib, 6, nullptr, &len, nullptr, 0) == -1)
+    {
+        memset(retStats, 0, sizeof(NativeIPInterfaceStatistics));
+        return -1;
+    }
+
+    uint8_t* buffer = new uint8_t[len];
+    if (sysctl(statisticsMib, 6, buffer, &len, nullptr, 0) == -1)
+    {
+        // Not enough space.
+        delete[] buffer;
+        memset(retStats, 0, sizeof(NativeIPInterfaceStatistics));
+        return -1;
+    }
+
+    for (uint8_t*headPtr = buffer; headPtr <= buffer + len; headPtr += reinterpret_cast<if_msghdr*>(headPtr)->ifm_msglen)
+    {
+        if_msghdr* ifHdr = reinterpret_cast<if_msghdr*>(headPtr);
+        if (ifHdr->ifm_index == interfaceIndex && ifHdr->ifm_type == RTM_IFINFO2)
+        {
+            if_msghdr2* ifHdr2 = reinterpret_cast<if_msghdr2*>(ifHdr);
+            retStats->SendQueueLength = static_cast<uint64_t>(ifHdr2->ifm_snd_maxlen);
+
+            if_data64 systemStats = ifHdr2->ifm_data;
+            retStats->Mtu = systemStats.ifi_mtu;
+            retStats->Speed = systemStats.ifi_baudrate; // bits per second.
+            retStats->InPackets = systemStats.ifi_ipackets;
+            retStats->InErrors = systemStats.ifi_ierrors;
+            retStats->OutPackets = systemStats.ifi_opackets;
+            retStats->OutErrors = systemStats.ifi_oerrors;
+            retStats->InBytes = systemStats.ifi_ibytes;
+            retStats->OutBytes = systemStats.ifi_obytes;
+            retStats->InMulticastPackets = systemStats.ifi_imcasts;
+            retStats->OutMulticastPackets = systemStats.ifi_omcasts;
+            retStats->InDrops = systemStats.ifi_iqdrops;
+            retStats->InNoProto = systemStats.ifi_noproto;
+            delete[] buffer;
+            return 0;
+        }
+    }
+    
+    // No statistics were found with the given interface index; shouldn't happen.
+    delete[] buffer;
+    memset(retStats, 0, sizeof(NativeIPInterfaceStatistics));
+    return -1;
+}
+
+extern "C" int32_t GetNumRoutes()
+{
+    int routeDumpMib[] =
+    {
+        CTL_NET,
+        PF_ROUTE,
+        0,
+        0,
+        NET_RT_DUMP,
+        0
+    };
+
+    size_t len;
+    if (sysctl(routeDumpMib, 6, nullptr, &len, nullptr, 0) == -1)
+    {
+        return -1;
+    }
+
+    uint8_t* buffer = new uint8_t[len];
+    if (sysctl(routeDumpMib, 6, buffer, &len, nullptr, 0) == -1)
+    {
+        delete[] buffer;
+        return -1;
+    }
+
+    uint8_t* headPtr = buffer;
+    rt_msghdr2* rtmsg;
+    int32_t count = 0;
+
+    for (size_t i = 0; i < len; i += rtmsg->rtm_msglen)
+    {
+        rtmsg = reinterpret_cast<rt_msghdr2*>(&buffer[i]);
+        if (rtmsg->rtm_flags & RTF_UP)
+        {
+            count++;
+        }
+        
+        headPtr += rtmsg->rtm_msglen;
+    }
+
+    delete[] buffer;
+    return count;
 }
 
 #endif // HAVE_TCP_VAR_H

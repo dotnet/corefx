@@ -2,22 +2,25 @@
 {
     internal class OsxIPv6InterfaceProperties : UnixIPv6InterfaceProperties
     {
-        public OsxIPv6InterfaceProperties(OsxNetworkInterface oni)
+        private readonly int _mtu;
+
+        public OsxIPv6InterfaceProperties(OsxNetworkInterface oni, int mtu)
             : base(oni)
         {
+            _mtu = mtu;
         }
 
         public override int Mtu
         {
             get
             {
-                throw new NotImplementedException();
+                return _mtu;
             }
         }
 
         public override long GetScopeId(ScopeLevel scopeLevel)
         {
-            throw new NotImplementedException();
+            throw new PlatformNotSupportedException();
         }
     }
 }

@@ -12,7 +12,7 @@ namespace System.Net.NetworkInformation
         {
             get
             {
-                throw new NotImplementedException();
+                throw new PlatformNotSupportedException();
             }
         }
 
@@ -155,8 +155,9 @@ namespace System.Net.NetworkInformation
 
         public override IPGlobalStatistics GetIPv6GlobalStatistics()
         {
-            throw new NotImplementedException();
-            //return new OsxIPv6GlobalStatistics();
+            // Although there is a 'net.inet6.ip6.stats' sysctl variable, there
+            // is no header for the ip6stat structure and therefore isn't available.
+            throw new PlatformNotSupportedException();
         }
 
         public override TcpStatistics GetTcpIPv4Statistics()
@@ -198,12 +199,13 @@ namespace System.Net.NetworkInformation
 
         public override IAsyncResult BeginGetUnicastAddresses(AsyncCallback callback, object state)
         {
-            throw new NotImplementedException();
+            Task<UnicastIPAddressInformationCollection> t = GetUnicastAddressesAsync();
+            return TaskToApm.Begin(t, callback, state);
         }
 
         public override UnicastIPAddressInformationCollection EndGetUnicastAddresses(IAsyncResult asyncResult)
         {
-            throw new NotImplementedException();
+            return TaskToApm.End<UnicastIPAddressInformationCollection>(asyncResult);
         }
 
         public override Task<UnicastIPAddressInformationCollection> GetUnicastAddressesAsync()

@@ -29,7 +29,7 @@ namespace System.Net.NetworkInformation
         {
             // NOTE: There is no information in the snmp6 file regarding TCP statistics,
             // so the statistics are always pulled from /proc/net/snmp.
-            string fileContents = File.ReadAllText(LinuxNetworkFiles.SnmpV4StatsFile);
+            string fileContents = File.ReadAllText(NetworkFiles.SnmpV4StatsFile);
             int firstTcpHeader = fileContents.IndexOf("Tcp:");
             int secondTcpHeader = fileContents.IndexOf("Tcp:", firstTcpHeader + 1);
             int endOfSecondLine = fileContents.IndexOf(Environment.NewLine, secondTcpHeader);
@@ -58,7 +58,7 @@ namespace System.Net.NetworkInformation
             _inCsumErrors = parser.ParseNextInt32();
 
             // Parse the number of active connections out of /proc/net/sockstat
-            string sockstatFile = File.ReadAllText(ipv6 ? LinuxNetworkFiles.Sockstat6File : LinuxNetworkFiles.SockstatFile);
+            string sockstatFile = File.ReadAllText(ipv6 ? NetworkFiles.Sockstat6File : NetworkFiles.SockstatFile);
             string tcpLabel = ipv6 ? "TCP6:" : "TCP:";
             int indexOfTcp = sockstatFile.IndexOf(tcpLabel);
             int endOfTcpLine = sockstatFile.IndexOf(Environment.NewLine, indexOfTcp + 1);

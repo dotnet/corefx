@@ -4,11 +4,11 @@
 namespace System.Net.NetworkInformation
 {
     /// Provides information about a network interface address.
-    internal class LinuxGatewayIPAddressInformation : GatewayIPAddressInformation
+    internal class SimpleGatewayIPAddressInformation : GatewayIPAddressInformation
     {
         private readonly IPAddress _address;
 
-        public LinuxGatewayIPAddressInformation(IPAddress address)
+        public SimpleGatewayIPAddressInformation(IPAddress address)
         {
             _address = address;
         }
