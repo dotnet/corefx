@@ -165,5 +165,10 @@ internal static partial class Interop
             SSL_VERIFY_FAIL_IF_NO_PEER_CERT = 0x02,
             SSL_VERIFY_CLIENT_ONCE = 0x04
         }
+
+        public delegate int client_cert_cb(
+            IntPtr ssl,
+            out IntPtr certificate,
+            out IntPtr privateKey);
     }
 }

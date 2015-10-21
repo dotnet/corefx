@@ -18,6 +18,10 @@ internal static partial class Interop
                 handle = SSL_CTX_new(method);
             }
 
+            private SafeSslContextHandle() : base(IntPtr.Zero, false)
+            {
+            }
+
             public override bool IsInvalid
             {
                 get { return handle == IntPtr.Zero; }
@@ -136,7 +140,11 @@ internal static partial class Interop
 
             private SafeSslHandle() : base(IntPtr.Zero, true)
             {
-            }   
+            }
+
+            public SafeSslHandle(IntPtr sslPointer, bool owns) : base(sslPointer, owns)
+            {
+            }
         }
     }
 }

@@ -291,9 +291,6 @@
   <data name="net_http_invalid_cookiecontainer_unix" xml:space="preserve">
     <value>CookieContainer property must not be null.</value>
   </data>
-  <data name="net_http_unix_invalid_client_cert_option" xml:space="preserve">
-    <value>libcurl supports only manual client certificate selection</value>
-  </data>
   <data name="net_http_unix_invalid_credential" xml:space="preserve">
     <value>libcurl does not support different credentials for different authentication schemes</value>
   </data>
@@ -302,6 +299,9 @@
   </data>
   <data name="net_http_unix_https_support_unavailable_libcurl" xml:space="preserve">
     <value>libcurl library available on the system does not support https</value>
+  </data>
+  <data name="net_http_unix_no_client_cert_support_libcurl" xml:space="preserve">
+    <value>automatic client certificate options is available only for libcurl with openssl compatible backend</value>
   </data>
   <data name="ArgumentOutOfRange_FileLengthTooBig" xml:space="preserve">
     <value>Specified file length was too large for the file system.</value>
@@ -345,4 +345,7 @@
   <data name="net_http_no_concurrent_io_allowed" xml:space="preserve">
     <value>The stream does not support concurrent I/O read or write operations.</value>
   </data>
+   <data name="PersistedFiles_NoHomeDirectory" xml:space="preserve">
+     <value>The home directory of the current user could not be determined.</value>
+   </data>
 </root>

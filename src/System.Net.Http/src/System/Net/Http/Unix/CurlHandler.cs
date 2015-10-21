@@ -14,6 +14,7 @@ using CurlFeatures = Interop.libcurl.CURL_VERSION_Features;
 using CURLMcode = Interop.libcurl.CURLMcode;
 using CURLoption = Interop.libcurl.CURLoption;
 using CurlVersionInfoData = Interop.libcurl.curl_version_info_data;
+using CurlSslBackend = Interop.libcurl.CurlSslBackend;
 
 namespace System.Net.Http
 {
@@ -36,7 +37,6 @@ namespace System.Net.Http
         private const string NoContentType = HttpKnownHeaderNames.ContentType + ":";
         private const int CurlAge = 5;
         private const int MinCurlAge = 3;
-
         #endregion
 
         #region Fields
@@ -48,6 +48,7 @@ namespace System.Net.Http
         private readonly static CurlVersionInfoData s_curlVersionInfoData;
         private readonly static bool s_supportsAutomaticDecompression;
         private readonly static bool s_supportsSSL;
+        private readonly static bool s_supportsSslCallbacks;
 
         private readonly MultiAgent _agent = new MultiAgent();
         private volatile bool _anyOperationStarted;
@@ -63,6 +64,7 @@ namespace System.Net.Http
         private bool _useCookie = HttpHandlerDefaults.DefaultUseCookies;
         private bool _automaticRedirection = HttpHandlerDefaults.DefaultAutomaticRedirection;
         private int _maxAutomaticRedirections = HttpHandlerDefaults.DefaultMaxAutomaticRedirections;
+        private ClientCertificateOption _clientCertificateOption = HttpHandlerDefaults.DefaultClientCertificateOption;
 
         private object LockObject { get { return _agent; } }
 
@@ -82,6 +84,9 @@ namespace System.Net.Http
             // Feature detection
             s_supportsSSL = (CurlFeatures.CURL_VERSION_SSL & s_curlVersionInfoData.features) != 0;
             s_supportsAutomaticDecompression = (CurlFeatures.CURL_VERSION_LIBZ & s_curlVersionInfoData.features) != 0;
+
+            s_supportsSslCallbacks = CurlSslBackend.AllowsSslCallback();
+            VerboseTrace("Support for Client Certificates : " + s_supportsSslCallbacks);
         }
 
         #region Properties
@@ -163,15 +168,18 @@ namespace System.Net.Http
         {
             get
             {
-                return ClientCertificateOption.Manual;
+                return _clientCertificateOption;
             }
 
             set
             {
-                if (ClientCertificateOption.Manual != value)
+                CheckDisposedOrStarted();
+                if (value == ClientCertificateOption.Automatic && !s_supportsSslCallbacks)
                 {
-                    throw new PlatformNotSupportedException(SR.net_http_unix_invalid_client_cert_option);
+                    throw new PlatformNotSupportedException(SR.net_http_unix_no_client_cert_support_libcurl);
                 }
+
+                _clientCertificateOption = value;
             }
         }
 
@@ -648,8 +656,8 @@ namespace System.Net.Http
 
         private static void HandleRedirectLocationHeader(EasyRequest state, string locationValue)
         {
-            Debug.Assert(state._isRedirect);
-            Debug.Assert(state._handler.AutomaticRedirection);
+            Debug.Assert(state._isRedirect, "Location header of response is read iff http status code = Redirect");
+            Debug.Assert(state._handler.AutomaticRedirection, "LocationHeader of response is ignored when AutomaticRedirection is switched off");
 
             string location = locationValue.Trim();
             //only for absolute redirects
