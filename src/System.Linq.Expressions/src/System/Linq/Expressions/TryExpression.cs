@@ -107,10 +107,23 @@ namespace System.Linq.Expressions
         /// <returns>This expression if no children changed, or an expression with the updated children.</returns>
         public TryExpression Update(Expression body, IEnumerable<CatchBlock> handlers, Expression @finally, Expression fault)
         {
-            if (body == Body && handlers == Handlers && @finally == Finally && fault == Fault)
+            if (body == Body && @finally == Finally && fault == Fault)
             {
-                return this;
+                if (handlers == null ? Handlers == EmptyReadOnlyCollection<CatchBlock>.Instance : handlers == Handlers)
+                {
+                    return this;
+                }
+
+                IList<CatchBlock> handlerList = handlers as IList<CatchBlock> ?? handlers.ToReadOnly();
+                
+                if (handlerList.Count == Handlers.Count && handlerList.SequenceEqual(Handlers))
+                {
+                    return this;
+                }
+
+                return Expression.MakeTry(Type, body, @finally, fault, handlerList);
             }
+
             return Expression.MakeTry(Type, body, @finally, fault, handlers);
         }
     }
@@ -202,6 +215,7 @@ namespace System.Linq.Expressions
         //Validate that the body of the try expression must have the same type as the body of every try block.
         private static void ValidateTryAndCatchHaveSameType(Type type, Expression tryBody, ReadOnlyCollection<CatchBlock> handlers)
         {
+            Debug.Assert(tryBody != null);
             // Type unification ... all parts must be reference assignable to "type"
             if (type != null)
             {
@@ -220,12 +234,13 @@ namespace System.Linq.Expressions
                     }
                 }
             }
-            else if (tryBody == null || tryBody.Type == typeof(void))
+            else if (tryBody.Type == typeof(void))
             {
                 //The body of every try block must be null or have void type.
                 foreach (CatchBlock cb in handlers)
                 {
-                    if (cb.Body != null && cb.Body.Type != typeof(void))
+                    Debug.Assert(cb.Body != null);
+                    if (cb.Body.Type != typeof(void))
                     {
                         throw Error.BodyOfCatchMustHaveSameTypeAsBodyOfTry();
                     }
@@ -237,7 +252,8 @@ namespace System.Linq.Expressions
                 type = tryBody.Type;
                 foreach (CatchBlock cb in handlers)
                 {
-                    if (cb.Body == null || !TypeUtils.AreEquivalent(cb.Body.Type, type))
+                    Debug.Assert(cb.Body != null);
+                    if (!TypeUtils.AreEquivalent(cb.Body.Type, type))
                     {
                         throw Error.BodyOfCatchMustHaveSameTypeAsBodyOfTry();
                     }
