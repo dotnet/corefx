@@ -1688,8 +1688,8 @@ public static partial class DataContractSerializerTests
     [Fact]
     public static void DCS_DuplicatedKeyDateTimeOffset()
     {
-        DateTimeOffset value = new DateTimeOffset(new DateTime(2013, 1, 2, 3, 4, 5, 6).AddMinutes(7));
-        var deserializedValue = SerializeAndDeserialize<DateTimeOffset>(value, @"<DateTimeOffset xmlns=""http://schemas.datacontract.org/2004/07/System"" xmlns:i=""http://www.w3.org/2001/XMLSchema-instance""><DateTime>2013-01-02T11:11:05.006Z</DateTime><OffsetMinutes>-480</OffsetMinutes></DateTimeOffset>");
+        DateTimeOffset value = new DateTimeOffset(new DateTime(2013, 1, 2, 3, 4, 5, 6, DateTimeKind.Utc).AddMinutes(7));
+        var deserializedValue = SerializeAndDeserialize<DateTimeOffset>(value, @"<DateTimeOffset xmlns=""http://schemas.datacontract.org/2004/07/System"" xmlns:i=""http://www.w3.org/2001/XMLSchema-instance""><DateTime>2013-01-02T03:11:05.006Z</DateTime><OffsetMinutes>0</OffsetMinutes></DateTimeOffset>");
 
         DataContractJsonSerializer dcjs = new DataContractJsonSerializer(typeof(DateTimeOffset));
         MemoryStream stream = new MemoryStream();
