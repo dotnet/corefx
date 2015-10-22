@@ -78,6 +78,7 @@
     <Compile Include="BinaryOperators\ReferenceComparison\ReferenceEqualityTests.cs" />
     <Compile Include="BinaryOperators\ReferenceComparison\ReferenceNotEqual.cs" />
     <Compile Include="Block\BlockFactoryTests.cs" />
+    <Compile Include="Block\BlockTests.cs" />
     <Compile Include="Call\CallFactoryTests.cs" />
     <Compile Include="Cast\AsNullable.cs" />
     <Compile Include="Cast\AsTests.cs" />
@@ -133,6 +134,7 @@
     <Compile Include="Lifted\NonLiftedComparisonLessThanNullableTests.cs" />
     <Compile Include="Lifted\NonLiftedComparisonLessThanOrEqualNullableTests.cs" />
     <Compile Include="Lifted\NonLiftedComparisonNotEqualNullableTests.cs" />
+    <Compile Include="MemberInit\MemberInitTests.cs" />
     <Compile Include="Member\MemberAccessTests.cs" />
     <Compile Include="New\NewTests.cs" />
     <Compile Include="New\NewWithParameterTests.cs" />
