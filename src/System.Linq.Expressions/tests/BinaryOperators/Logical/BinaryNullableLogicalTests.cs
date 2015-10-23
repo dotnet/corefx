@@ -76,7 +76,7 @@ namespace Tests.ExpressionCompiler.Binary
                         Expression.Constant(a, typeof(bool?)),
                         Expression.Constant(b, typeof(bool?))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<bool?> f = e.Compile();
+            Func<bool?> f = e.CompileForTest();
 
             // compute with expression tree
             bool? etResult = default(bool?);
@@ -123,7 +123,7 @@ namespace Tests.ExpressionCompiler.Binary
                         Expression.Constant(a, typeof(bool?)),
                         Expression.Constant(b, typeof(bool?))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<bool?> f = e.Compile();
+            Func<bool?> f = e.CompileForTest();
 
             // compute with expression tree
             bool? etResult = default(bool?);
@@ -170,7 +170,7 @@ namespace Tests.ExpressionCompiler.Binary
                         Expression.Constant(a, typeof(bool?)),
                         Expression.Constant(b, typeof(bool?))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<bool?> f = e.Compile();
+            Func<bool?> f = e.CompileForTest();
 
             // compute with expression tree
             bool? etResult = default(bool?);
@@ -217,7 +217,7 @@ namespace Tests.ExpressionCompiler.Binary
                         Expression.Constant(a, typeof(bool?)),
                         Expression.Constant(b, typeof(bool?))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<bool?> f = e.Compile();
+            Func<bool?> f = e.CompileForTest();
 
             // compute with expression tree
             bool? etResult = default(bool?);

@@ -305,7 +305,7 @@ namespace Tests.Expressions
     {
         public static int F(Expression<Func<int>> f)
         {
-            return f.Compile()();
+            return f.CompileForTest()();
         }
     }
 }

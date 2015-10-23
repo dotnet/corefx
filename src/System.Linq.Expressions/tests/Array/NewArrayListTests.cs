@@ -1014,7 +1014,7 @@ namespace Tests.ExpressionCompiler.Array
                 Expression.Lambda<Func<bool[]>>(
                     Expression.NewArrayInit(typeof(bool), exprs),
                     Enumerable.Empty<ParameterExpression>());
-            Func<bool[]> f = e.Compile();
+            Func<bool[]> f = e.CompileForTest();
             bool[] result = f();
             Assert.Equal(val.Length, result.Length);
             for (int i = 0; i < result.Length; i++)
@@ -1029,7 +1029,7 @@ namespace Tests.ExpressionCompiler.Array
                 Expression.Lambda<Func<byte[]>>(
                     Expression.NewArrayInit(typeof(byte), exprs),
                     Enumerable.Empty<ParameterExpression>());
-            Func<byte[]> f = e.Compile();
+            Func<byte[]> f = e.CompileForTest();
             byte[] result = f();
             Assert.Equal(val.Length, result.Length);
             for (int i = 0; i < result.Length; i++)
@@ -1044,7 +1044,7 @@ namespace Tests.ExpressionCompiler.Array
                 Expression.Lambda<Func<C[]>>(
                     Expression.NewArrayInit(typeof(C), exprs),
                     Enumerable.Empty<ParameterExpression>());
-            Func<C[]> f = e.Compile();
+            Func<C[]> f = e.CompileForTest();
             C[] result = f();
             Assert.Equal(val.Length, result.Length);
             for (int i = 0; i < result.Length; i++)
@@ -1059,7 +1059,7 @@ namespace Tests.ExpressionCompiler.Array
                 Expression.Lambda<Func<char[]>>(
                     Expression.NewArrayInit(typeof(char), exprs),
                     Enumerable.Empty<ParameterExpression>());
-            Func<char[]> f = e.Compile();
+            Func<char[]> f = e.CompileForTest();
             char[] result = f();
             Assert.Equal(val.Length, result.Length);
             for (int i = 0; i < result.Length; i++)
@@ -1074,7 +1074,7 @@ namespace Tests.ExpressionCompiler.Array
                 Expression.Lambda<Func<D[]>>(
                     Expression.NewArrayInit(typeof(D), exprs),
                     Enumerable.Empty<ParameterExpression>());
-            Func<D[]> f = e.Compile();
+            Func<D[]> f = e.CompileForTest();
             D[] result = f();
             Assert.Equal(val.Length, result.Length);
             for (int i = 0; i < result.Length; i++)
@@ -1089,7 +1089,7 @@ namespace Tests.ExpressionCompiler.Array
                 Expression.Lambda<Func<decimal[]>>(
                     Expression.NewArrayInit(typeof(decimal), exprs),
                     Enumerable.Empty<ParameterExpression>());
-            Func<decimal[]> f = e.Compile();
+            Func<decimal[]> f = e.CompileForTest();
             decimal[] result = f();
             Assert.Equal(val.Length, result.Length);
             for (int i = 0; i < result.Length; i++)
@@ -1104,7 +1104,7 @@ namespace Tests.ExpressionCompiler.Array
                 Expression.Lambda<Func<Delegate[]>>(
                     Expression.NewArrayInit(typeof(Delegate), exprs),
                     Enumerable.Empty<ParameterExpression>());
-            Func<Delegate[]> f = e.Compile();
+            Func<Delegate[]> f = e.CompileForTest();
             Delegate[] result = f();
             Assert.Equal(val.Length, result.Length);
             for (int i = 0; i < result.Length; i++)
@@ -1119,7 +1119,7 @@ namespace Tests.ExpressionCompiler.Array
                 Expression.Lambda<Func<double[]>>(
                     Expression.NewArrayInit(typeof(double), exprs),
                     Enumerable.Empty<ParameterExpression>());
-            Func<double[]> f = e.Compile();
+            Func<double[]> f = e.CompileForTest();
             double[] result = f();
             Assert.Equal(val.Length, result.Length);
             for (int i = 0; i < result.Length; i++)
@@ -1134,7 +1134,7 @@ namespace Tests.ExpressionCompiler.Array
                 Expression.Lambda<Func<E[]>>(
                     Expression.NewArrayInit(typeof(E), exprs),
                     Enumerable.Empty<ParameterExpression>());
-            Func<E[]> f = e.Compile();
+            Func<E[]> f = e.CompileForTest();
             E[] result = f();
             Assert.Equal(val.Length, result.Length);
             for (int i = 0; i < result.Length; i++)
@@ -1149,7 +1149,7 @@ namespace Tests.ExpressionCompiler.Array
                 Expression.Lambda<Func<El[]>>(
                     Expression.NewArrayInit(typeof(El), exprs),
                     Enumerable.Empty<ParameterExpression>());
-            Func<El[]> f = e.Compile();
+            Func<El[]> f = e.CompileForTest();
             El[] result = f();
             Assert.Equal(val.Length, result.Length);
             for (int i = 0; i < result.Length; i++)
@@ -1164,7 +1164,7 @@ namespace Tests.ExpressionCompiler.Array
                 Expression.Lambda<Func<float[]>>(
                     Expression.NewArrayInit(typeof(float), exprs),
                     Enumerable.Empty<ParameterExpression>());
-            Func<float[]> f = e.Compile();
+            Func<float[]> f = e.CompileForTest();
             float[] result = f();
             Assert.Equal(val.Length, result.Length);
             for (int i = 0; i < result.Length; i++)
@@ -1179,7 +1179,7 @@ namespace Tests.ExpressionCompiler.Array
                 Expression.Lambda<Func<Func<object>[]>>(
                     Expression.NewArrayInit(typeof(Func<object>), exprs),
                     Enumerable.Empty<ParameterExpression>());
-            Func<Func<object>[]> f = e.Compile();
+            Func<Func<object>[]> f = e.CompileForTest();
             Func<object>[] result = f();
             Assert.Equal(val.Length, result.Length);
             for (int i = 0; i < result.Length; i++)
@@ -1194,7 +1194,7 @@ namespace Tests.ExpressionCompiler.Array
                 Expression.Lambda<Func<I[]>>(
                     Expression.NewArrayInit(typeof(I), exprs),
                     Enumerable.Empty<ParameterExpression>());
-            Func<I[]> f = e.Compile();
+            Func<I[]> f = e.CompileForTest();
             I[] result = f();
             Assert.Equal(val.Length, result.Length);
             for (int i = 0; i < result.Length; i++)
@@ -1209,7 +1209,7 @@ namespace Tests.ExpressionCompiler.Array
                 Expression.Lambda<Func<IEquatable<C>[]>>(
                     Expression.NewArrayInit(typeof(IEquatable<C>), exprs),
                     Enumerable.Empty<ParameterExpression>());
-            Func<IEquatable<C>[]> f = e.Compile();
+            Func<IEquatable<C>[]> f = e.CompileForTest();
             IEquatable<C>[] result = f();
             Assert.Equal(val.Length, result.Length);
             for (int i = 0; i < result.Length; i++)
@@ -1224,7 +1224,7 @@ namespace Tests.ExpressionCompiler.Array
                 Expression.Lambda<Func<IEquatable<D>[]>>(
                     Expression.NewArrayInit(typeof(IEquatable<D>), exprs),
                     Enumerable.Empty<ParameterExpression>());
-            Func<IEquatable<D>[]> f = e.Compile();
+            Func<IEquatable<D>[]> f = e.CompileForTest();
             IEquatable<D>[] result = f();
             Assert.Equal(val.Length, result.Length);
             for (int i = 0; i < result.Length; i++)
@@ -1239,7 +1239,7 @@ namespace Tests.ExpressionCompiler.Array
                 Expression.Lambda<Func<int[]>>(
                     Expression.NewArrayInit(typeof(int), exprs),
                     Enumerable.Empty<ParameterExpression>());
-            Func<int[]> f = e.Compile();
+            Func<int[]> f = e.CompileForTest();
             int[] result = f();
             Assert.Equal(val.Length, result.Length);
             for (int i = 0; i < result.Length; i++)
@@ -1254,7 +1254,7 @@ namespace Tests.ExpressionCompiler.Array
                 Expression.Lambda<Func<long[]>>(
                     Expression.NewArrayInit(typeof(long), exprs),
                     Enumerable.Empty<ParameterExpression>());
-            Func<long[]> f = e.Compile();
+            Func<long[]> f = e.CompileForTest();
             long[] result = f();
             Assert.Equal(val.Length, result.Length);
             for (int i = 0; i < result.Length; i++)
@@ -1269,7 +1269,7 @@ namespace Tests.ExpressionCompiler.Array
                 Expression.Lambda<Func<object[]>>(
                     Expression.NewArrayInit(typeof(object), exprs),
                     Enumerable.Empty<ParameterExpression>());
-            Func<object[]> f = e.Compile();
+            Func<object[]> f = e.CompileForTest();
             object[] result = f();
             Assert.Equal(val.Length, result.Length);
             for (int i = 0; i < result.Length; i++)
@@ -1284,7 +1284,7 @@ namespace Tests.ExpressionCompiler.Array
                 Expression.Lambda<Func<S[]>>(
                     Expression.NewArrayInit(typeof(S), exprs),
                     Enumerable.Empty<ParameterExpression>());
-            Func<S[]> f = e.Compile();
+            Func<S[]> f = e.CompileForTest();
             S[] result = f();
             Assert.Equal(val.Length, result.Length);
             for (int i = 0; i < result.Length; i++)
@@ -1299,7 +1299,7 @@ namespace Tests.ExpressionCompiler.Array
                 Expression.Lambda<Func<sbyte[]>>(
                     Expression.NewArrayInit(typeof(sbyte), exprs),
                     Enumerable.Empty<ParameterExpression>());
-            Func<sbyte[]> f = e.Compile();
+            Func<sbyte[]> f = e.CompileForTest();
             sbyte[] result = f();
             Assert.Equal(val.Length, result.Length);
             for (int i = 0; i < result.Length; i++)
@@ -1314,7 +1314,7 @@ namespace Tests.ExpressionCompiler.Array
                 Expression.Lambda<Func<Sc[]>>(
                     Expression.NewArrayInit(typeof(Sc), exprs),
                     Enumerable.Empty<ParameterExpression>());
-            Func<Sc[]> f = e.Compile();
+            Func<Sc[]> f = e.CompileForTest();
             Sc[] result = f();
             Assert.Equal(val.Length, result.Length);
             for (int i = 0; i < result.Length; i++)
@@ -1329,7 +1329,7 @@ namespace Tests.ExpressionCompiler.Array
                 Expression.Lambda<Func<Scs[]>>(
                     Expression.NewArrayInit(typeof(Scs), exprs),
                     Enumerable.Empty<ParameterExpression>());
-            Func<Scs[]> f = e.Compile();
+            Func<Scs[]> f = e.CompileForTest();
             Scs[] result = f();
             Assert.Equal(val.Length, result.Length);
             for (int i = 0; i < result.Length; i++)
@@ -1344,7 +1344,7 @@ namespace Tests.ExpressionCompiler.Array
                 Expression.Lambda<Func<short[]>>(
                     Expression.NewArrayInit(typeof(short), exprs),
                     Enumerable.Empty<ParameterExpression>());
-            Func<short[]> f = e.Compile();
+            Func<short[]> f = e.CompileForTest();
             short[] result = f();
             Assert.Equal(val.Length, result.Length);
             for (int i = 0; i < result.Length; i++)
@@ -1359,7 +1359,7 @@ namespace Tests.ExpressionCompiler.Array
                 Expression.Lambda<Func<Sp[]>>(
                     Expression.NewArrayInit(typeof(Sp), exprs),
                     Enumerable.Empty<ParameterExpression>());
-            Func<Sp[]> f = e.Compile();
+            Func<Sp[]> f = e.CompileForTest();
             Sp[] result = f();
             Assert.Equal(val.Length, result.Length);
             for (int i = 0; i < result.Length; i++)
@@ -1374,7 +1374,7 @@ namespace Tests.ExpressionCompiler.Array
                 Expression.Lambda<Func<Ss[]>>(
                     Expression.NewArrayInit(typeof(Ss), exprs),
                     Enumerable.Empty<ParameterExpression>());
-            Func<Ss[]> f = e.Compile();
+            Func<Ss[]> f = e.CompileForTest();
             Ss[] result = f();
             Assert.Equal(val.Length, result.Length);
             for (int i = 0; i < result.Length; i++)
@@ -1389,7 +1389,7 @@ namespace Tests.ExpressionCompiler.Array
                 Expression.Lambda<Func<string[]>>(
                     Expression.NewArrayInit(typeof(string), exprs),
                     Enumerable.Empty<ParameterExpression>());
-            Func<string[]> f = e.Compile();
+            Func<string[]> f = e.CompileForTest();
             string[] result = f();
             Assert.Equal(val.Length, result.Length);
             for (int i = 0; i < result.Length; i++)
@@ -1404,7 +1404,7 @@ namespace Tests.ExpressionCompiler.Array
                 Expression.Lambda<Func<uint[]>>(
                     Expression.NewArrayInit(typeof(uint), exprs),
                     Enumerable.Empty<ParameterExpression>());
-            Func<uint[]> f = e.Compile();
+            Func<uint[]> f = e.CompileForTest();
             uint[] result = f();
             Assert.Equal(val.Length, result.Length);
             for (int i = 0; i < result.Length; i++)
@@ -1419,7 +1419,7 @@ namespace Tests.ExpressionCompiler.Array
                 Expression.Lambda<Func<ulong[]>>(
                     Expression.NewArrayInit(typeof(ulong), exprs),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ulong[]> f = e.Compile();
+            Func<ulong[]> f = e.CompileForTest();
             ulong[] result = f();
             Assert.Equal(val.Length, result.Length);
             for (int i = 0; i < result.Length; i++)
@@ -1434,7 +1434,7 @@ namespace Tests.ExpressionCompiler.Array
                 Expression.Lambda<Func<ushort[]>>(
                     Expression.NewArrayInit(typeof(ushort), exprs),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ushort[]> f = e.Compile();
+            Func<ushort[]> f = e.CompileForTest();
             ushort[] result = f();
             Assert.Equal(val.Length, result.Length);
             for (int i = 0; i < result.Length; i++)
@@ -1449,7 +1449,7 @@ namespace Tests.ExpressionCompiler.Array
                 Expression.Lambda<Func<T[]>>(
                     Expression.NewArrayInit(typeof(T), exprs),
                     Enumerable.Empty<ParameterExpression>());
-            Func<T[]> f = e.Compile();
+            Func<T[]> f = e.CompileForTest();
             T[] result = f();
             Assert.Equal(val.Length, result.Length);
             for (int i = 0; i < result.Length; i++)
@@ -1464,7 +1464,7 @@ namespace Tests.ExpressionCompiler.Array
                 Expression.Lambda<Func<Tc[]>>(
                     Expression.NewArrayInit(typeof(Tc), exprs),
                     Enumerable.Empty<ParameterExpression>());
-            Func<Tc[]> f = e.Compile();
+            Func<Tc[]> f = e.CompileForTest();
             Tc[] result = f();
             Assert.Equal(val.Length, result.Length);
             for (int i = 0; i < result.Length; i++)
@@ -1479,7 +1479,7 @@ namespace Tests.ExpressionCompiler.Array
                 Expression.Lambda<Func<TC[]>>(
                     Expression.NewArrayInit(typeof(TC), exprs),
                     Enumerable.Empty<ParameterExpression>());
-            Func<TC[]> f = e.Compile();
+            Func<TC[]> f = e.CompileForTest();
             TC[] result = f();
             Assert.Equal(val.Length, result.Length);
             for (int i = 0; i < result.Length; i++)
@@ -1494,7 +1494,7 @@ namespace Tests.ExpressionCompiler.Array
                 Expression.Lambda<Func<Tcn[]>>(
                     Expression.NewArrayInit(typeof(Tcn), exprs),
                     Enumerable.Empty<ParameterExpression>());
-            Func<Tcn[]> f = e.Compile();
+            Func<Tcn[]> f = e.CompileForTest();
             Tcn[] result = f();
             Assert.Equal(val.Length, result.Length);
             for (int i = 0; i < result.Length; i++)
@@ -1509,7 +1509,7 @@ namespace Tests.ExpressionCompiler.Array
                 Expression.Lambda<Func<TCn[]>>(
                     Expression.NewArrayInit(typeof(TCn), exprs),
                     Enumerable.Empty<ParameterExpression>());
-            Func<TCn[]> f = e.Compile();
+            Func<TCn[]> f = e.CompileForTest();
             TCn[] result = f();
             Assert.Equal(val.Length, result.Length);
             for (int i = 0; i < result.Length; i++)
@@ -1524,7 +1524,7 @@ namespace Tests.ExpressionCompiler.Array
                 Expression.Lambda<Func<Ts[]>>(
                     Expression.NewArrayInit(typeof(Ts), exprs),
                     Enumerable.Empty<ParameterExpression>());
-            Func<Ts[]> f = e.Compile();
+            Func<Ts[]> f = e.CompileForTest();
             Ts[] result = f();
             Assert.Equal(val.Length, result.Length);
             for (int i = 0; i < result.Length; i++)

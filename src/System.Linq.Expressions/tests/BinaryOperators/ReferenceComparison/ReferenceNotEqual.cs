@@ -16,7 +16,7 @@ namespace System.Linq.Expressions.Tests
                     Expression.Constant(item, item.GetType()),
                     Expression.Constant(item, item.GetType())
                 );
-            Assert.False(Expression.Lambda<Func<bool>>(exp).Compile()());
+            Assert.False(Expression.Lambda<Func<bool>>(exp).CompileForTest()());
         }
 
         [Theory]
@@ -27,7 +27,7 @@ namespace System.Linq.Expressions.Tests
                 Expression.Constant(null, type),
                 Expression.Constant(null, type)
                 );
-            Assert.False(Expression.Lambda<Func<bool>>(exp).Compile()());
+            Assert.False(Expression.Lambda<Func<bool>>(exp).CompileForTest()());
         }
 
         [Theory]
@@ -38,7 +38,7 @@ namespace System.Linq.Expressions.Tests
                     Expression.Constant(null, item.GetType()),
                     Expression.Constant(item, item.GetType())
                 );
-            Assert.True(Expression.Lambda<Func<bool>>(exp).Compile()());
+            Assert.True(Expression.Lambda<Func<bool>>(exp).CompileForTest()());
         }
 
         [Theory]
@@ -49,7 +49,7 @@ namespace System.Linq.Expressions.Tests
                     Expression.Constant(item, item.GetType()),
                     Expression.Constant(null, item.GetType())
                 );
-            Assert.True(Expression.Lambda<Func<bool>>(exp).Compile()());
+            Assert.True(Expression.Lambda<Func<bool>>(exp).CompileForTest()());
         }
 
         [Theory]
@@ -60,7 +60,7 @@ namespace System.Linq.Expressions.Tests
                     Expression.Constant(x, typeof(object)),
                     Expression.Constant(y, typeof(object))
                 );
-            Assert.True(Expression.Lambda<Func<bool>>(exp).Compile()());
+            Assert.True(Expression.Lambda<Func<bool>>(exp).CompileForTest()());
         }
 
         [Theory]
@@ -71,7 +71,7 @@ namespace System.Linq.Expressions.Tests
                     Expression.Constant(x),
                     Expression.Constant(y)
                 );
-            Assert.True(Expression.Lambda<Func<bool>>(exp).Compile()());
+            Assert.True(Expression.Lambda<Func<bool>>(exp).CompileForTest()());
         }
 
         [Theory]
@@ -102,7 +102,7 @@ namespace System.Linq.Expressions.Tests
                 Expression.Constant(item, typeof(IComparable)),
                 Expression.Constant(item, typeof(IComparable))
             );
-            Assert.False(Expression.Lambda<Func<bool>>(exp).Compile()());
+            Assert.False(Expression.Lambda<Func<bool>>(exp).CompileForTest()());
         }
 
         [Theory]
@@ -113,7 +113,7 @@ namespace System.Linq.Expressions.Tests
                 Expression.Constant(x, typeof(IComparable)),
                 Expression.Constant(y, typeof(IComparable))
             );
-            Assert.True(Expression.Lambda<Func<bool>>(exp).Compile()());
+            Assert.True(Expression.Lambda<Func<bool>>(exp).CompileForTest()());
         }
 
         [Theory]
@@ -124,7 +124,7 @@ namespace System.Linq.Expressions.Tests
                 Expression.Constant(item, typeof(IComparable)),
                 Expression.Constant(item)
             );
-            Assert.False(Expression.Lambda<Func<bool>>(exp).Compile()());
+            Assert.False(Expression.Lambda<Func<bool>>(exp).CompileForTest()());
         }
 
         [Theory]
@@ -135,7 +135,7 @@ namespace System.Linq.Expressions.Tests
                 Expression.Constant(item),
                 Expression.Constant(item, typeof(IComparable))
             );
-            Assert.False(Expression.Lambda<Func<bool>>(exp).Compile()());
+            Assert.False(Expression.Lambda<Func<bool>>(exp).CompileForTest()());
         }
 
         [Fact]

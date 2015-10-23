@@ -13,7 +13,7 @@ namespace Tests.ExpressionCompiler.Array
         public static void CompileWithCastTest()
         {
             Expression<Func<object[]>> expr = () => (object[])new BaseClass[1];
-            expr.Compile();
+            expr.CompileForTest();
         }
 
         [Fact]
@@ -22,7 +22,7 @@ namespace Tests.ExpressionCompiler.Array
             Expression<Func<int, object>> x = c => new double[c, c];
             Assert.Equal("c => new System.Double[,](c, c)", x.ToString());
 
-            object y = x.Compile()(2);
+            object y = x.CompileForTest()(2);
             Assert.Equal("System.Double[,]", y.ToString());
         }
 
@@ -30,7 +30,7 @@ namespace Tests.ExpressionCompiler.Array
         public static void ArrayBoundsVectorNegativeThrowsOverflowException()
         {
             Expression<Func<int, int[]>> e = a => new int[a];
-            Func<int, int[]> f = e.Compile();
+            Func<int, int[]> f = e.CompileForTest();
 
             Assert.Throws<OverflowException>(() => f(-1));
         }
@@ -39,7 +39,7 @@ namespace Tests.ExpressionCompiler.Array
         public static void ArrayBoundsMultiDimensionalNegativeThrowsOverflowException()
         {
             Expression<Func<int, int, int[,]>> e = (a, b) => new int[a, b];
-            Func<int, int, int[,]> f = e.Compile();
+            Func<int, int, int[,]> f = e.CompileForTest();
 
             Assert.Throws<OverflowException>(() => f(-1, 1));
             Assert.Throws<OverflowException>(() => f(1, -1));

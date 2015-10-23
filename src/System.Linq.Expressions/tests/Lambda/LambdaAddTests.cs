@@ -166,7 +166,7 @@ namespace Tests.ExpressionCompiler.Lambda
                     Expression.Constant((int)b, typeof(int))
                 }),
                     Enumerable.Empty<ParameterExpression>());
-            Func<int> f1 = e1.Compile();
+            Func<int> f1 = e1.CompileForTest();
 
             byte f1Result = default(byte);
             Exception f1Ex = null;
@@ -186,7 +186,7 @@ namespace Tests.ExpressionCompiler.Lambda
                         Expression.Add(p0, p1),
                         Enumerable.Empty<ParameterExpression>()),
                     new ParameterExpression[] { p0, p1 });
-            Func<int, int, Func<int>> f2 = e2.Compile();
+            Func<int, int, Func<int>> f2 = e2.CompileForTest();
 
             byte f2Result = default(byte);
             Exception f2Ex = null;
@@ -210,7 +210,7 @@ namespace Tests.ExpressionCompiler.Lambda
                             Enumerable.Empty<ParameterExpression>()),
                         Enumerable.Empty<Expression>()),
                     Enumerable.Empty<ParameterExpression>());
-            Func<int, int, int> f3 = e3.Compile()();
+            Func<int, int, int> f3 = e3.CompileForTest()();
 
             byte f3Result = default(byte);
             Exception f3Ex = null;
@@ -230,7 +230,7 @@ namespace Tests.ExpressionCompiler.Lambda
                         Expression.Add(p0, p1),
                         new ParameterExpression[] { p0, p1 }),
                     Enumerable.Empty<ParameterExpression>());
-            Func<Func<int, int, int>> f4 = e4.Compile();
+            Func<Func<int, int, int>> f4 = e4.CompileForTest();
 
             byte f4Result = default(byte);
             Exception f4Ex = null;
@@ -250,7 +250,7 @@ namespace Tests.ExpressionCompiler.Lambda
                         Expression.Add(p0, p1),
                         new ParameterExpression[] { p1 }),
                     new ParameterExpression[] { p0 });
-            Func<int, Func<int, int>> f5 = e5.Compile();
+            Func<int, Func<int, int>> f5 = e5.CompileForTest();
 
             byte f5Result = default(byte);
             Exception f5Ex = null;
@@ -274,7 +274,7 @@ namespace Tests.ExpressionCompiler.Lambda
                             new ParameterExpression[] { p0 }),
                         new Expression[] { Expression.Constant((int)a, typeof(int)) }),
                     Enumerable.Empty<ParameterExpression>());
-            Func<int, int> f6 = e6.Compile()();
+            Func<int, int> f6 = e6.CompileForTest()();
 
             byte f6Result = default(byte);
             Exception f6Ex = null;
@@ -350,7 +350,7 @@ namespace Tests.ExpressionCompiler.Lambda
                     Expression.Constant(b, typeof(decimal))
                 }),
                     Enumerable.Empty<ParameterExpression>());
-            Func<decimal> f1 = e1.Compile();
+            Func<decimal> f1 = e1.CompileForTest();
 
             decimal f1Result = default(decimal);
             Exception f1Ex = null;
@@ -370,7 +370,7 @@ namespace Tests.ExpressionCompiler.Lambda
                         Expression.Add(p0, p1),
                         Enumerable.Empty<ParameterExpression>()),
                     new ParameterExpression[] { p0, p1 });
-            Func<decimal, decimal, Func<decimal>> f2 = e2.Compile();
+            Func<decimal, decimal, Func<decimal>> f2 = e2.CompileForTest();
 
             decimal f2Result = default(decimal);
             Exception f2Ex = null;
@@ -394,7 +394,7 @@ namespace Tests.ExpressionCompiler.Lambda
                             Enumerable.Empty<ParameterExpression>()),
                         Enumerable.Empty<Expression>()),
                     Enumerable.Empty<ParameterExpression>());
-            Func<decimal, decimal, decimal> f3 = e3.Compile()();
+            Func<decimal, decimal, decimal> f3 = e3.CompileForTest()();
 
             decimal f3Result = default(decimal);
             Exception f3Ex = null;
@@ -414,7 +414,7 @@ namespace Tests.ExpressionCompiler.Lambda
                         Expression.Add(p0, p1),
                         new ParameterExpression[] { p0, p1 }),
                     Enumerable.Empty<ParameterExpression>());
-            Func<Func<decimal, decimal, decimal>> f4 = e4.Compile();
+            Func<Func<decimal, decimal, decimal>> f4 = e4.CompileForTest();
 
             decimal f4Result = default(decimal);
             Exception f4Ex = null;
@@ -434,7 +434,7 @@ namespace Tests.ExpressionCompiler.Lambda
                         Expression.Add(p0, p1),
                         new ParameterExpression[] { p1 }),
                     new ParameterExpression[] { p0 });
-            Func<decimal, Func<decimal, decimal>> f5 = e5.Compile();
+            Func<decimal, Func<decimal, decimal>> f5 = e5.CompileForTest();
 
             decimal f5Result = default(decimal);
             Exception f5Ex = null;
@@ -458,7 +458,7 @@ namespace Tests.ExpressionCompiler.Lambda
                             new ParameterExpression[] { p0 }),
                         new Expression[] { Expression.Constant(a, typeof(decimal)) }),
                     Enumerable.Empty<ParameterExpression>());
-            Func<decimal, decimal> f6 = e6.Compile()();
+            Func<decimal, decimal> f6 = e6.CompileForTest()();
 
             decimal f6Result = default(decimal);
             Exception f6Ex = null;
@@ -534,7 +534,7 @@ namespace Tests.ExpressionCompiler.Lambda
                     Expression.Constant(b, typeof(double))
                 }),
                     Enumerable.Empty<ParameterExpression>());
-            Func<double> f1 = e1.Compile();
+            Func<double> f1 = e1.CompileForTest();
 
             double f1Result = default(double);
             Exception f1Ex = null;
@@ -554,7 +554,7 @@ namespace Tests.ExpressionCompiler.Lambda
                         Expression.Add(p0, p1),
                         Enumerable.Empty<ParameterExpression>()),
                     new ParameterExpression[] { p0, p1 });
-            Func<double, double, Func<double>> f2 = e2.Compile();
+            Func<double, double, Func<double>> f2 = e2.CompileForTest();
 
             double f2Result = default(double);
             Exception f2Ex = null;
@@ -578,7 +578,7 @@ namespace Tests.ExpressionCompiler.Lambda
                             Enumerable.Empty<ParameterExpression>()),
                         Enumerable.Empty<Expression>()),
                     Enumerable.Empty<ParameterExpression>());
-            Func<double, double, double> f3 = e3.Compile()();
+            Func<double, double, double> f3 = e3.CompileForTest()();
 
             double f3Result = default(double);
             Exception f3Ex = null;
@@ -598,7 +598,7 @@ namespace Tests.ExpressionCompiler.Lambda
                         Expression.Add(p0, p1),
                         new ParameterExpression[] { p0, p1 }),
                     Enumerable.Empty<ParameterExpression>());
-            Func<Func<double, double, double>> f4 = e4.Compile();
+            Func<Func<double, double, double>> f4 = e4.CompileForTest();
 
             double f4Result = default(double);
             Exception f4Ex = null;
@@ -618,7 +618,7 @@ namespace Tests.ExpressionCompiler.Lambda
                         Expression.Add(p0, p1),
                         new ParameterExpression[] { p1 }),
                     new ParameterExpression[] { p0 });
-            Func<double, Func<double, double>> f5 = e5.Compile();
+            Func<double, Func<double, double>> f5 = e5.CompileForTest();
 
             double f5Result = default(double);
             Exception f5Ex = null;
@@ -642,7 +642,7 @@ namespace Tests.ExpressionCompiler.Lambda
                             new ParameterExpression[] { p0 }),
                         new Expression[] { Expression.Constant(a, typeof(double)) }),
                     Enumerable.Empty<ParameterExpression>());
-            Func<double, double> f6 = e6.Compile()();
+            Func<double, double> f6 = e6.CompileForTest()();
 
             double f6Result = default(double);
             Exception f6Ex = null;
@@ -718,7 +718,7 @@ namespace Tests.ExpressionCompiler.Lambda
                     Expression.Constant(b, typeof(float))
                 }),
                     Enumerable.Empty<ParameterExpression>());
-            Func<float> f1 = e1.Compile();
+            Func<float> f1 = e1.CompileForTest();
 
             float f1Result = default(float);
             Exception f1Ex = null;
@@ -738,7 +738,7 @@ namespace Tests.ExpressionCompiler.Lambda
                         Expression.Add(p0, p1),
                         Enumerable.Empty<ParameterExpression>()),
                     new ParameterExpression[] { p0, p1 });
-            Func<float, float, Func<float>> f2 = e2.Compile();
+            Func<float, float, Func<float>> f2 = e2.CompileForTest();
 
             float f2Result = default(float);
             Exception f2Ex = null;
@@ -762,7 +762,7 @@ namespace Tests.ExpressionCompiler.Lambda
                             Enumerable.Empty<ParameterExpression>()),
                         Enumerable.Empty<Expression>()),
                     Enumerable.Empty<ParameterExpression>());
-            Func<float, float, float> f3 = e3.Compile()();
+            Func<float, float, float> f3 = e3.CompileForTest()();
 
             float f3Result = default(float);
             Exception f3Ex = null;
@@ -782,7 +782,7 @@ namespace Tests.ExpressionCompiler.Lambda
                         Expression.Add(p0, p1),
                         new ParameterExpression[] { p0, p1 }),
                     Enumerable.Empty<ParameterExpression>());
-            Func<Func<float, float, float>> f4 = e4.Compile();
+            Func<Func<float, float, float>> f4 = e4.CompileForTest();
 
             float f4Result = default(float);
             Exception f4Ex = null;
@@ -802,7 +802,7 @@ namespace Tests.ExpressionCompiler.Lambda
                         Expression.Add(p0, p1),
                         new ParameterExpression[] { p1 }),
                     new ParameterExpression[] { p0 });
-            Func<float, Func<float, float>> f5 = e5.Compile();
+            Func<float, Func<float, float>> f5 = e5.CompileForTest();
 
             float f5Result = default(float);
             Exception f5Ex = null;
@@ -826,7 +826,7 @@ namespace Tests.ExpressionCompiler.Lambda
                             new ParameterExpression[] { p0 }),
                         new Expression[] { Expression.Constant(a, typeof(float)) }),
                     Enumerable.Empty<ParameterExpression>());
-            Func<float, float> f6 = e6.Compile()();
+            Func<float, float> f6 = e6.CompileForTest()();
 
             float f6Result = default(float);
             Exception f6Ex = null;
@@ -902,7 +902,7 @@ namespace Tests.ExpressionCompiler.Lambda
                     Expression.Constant(b, typeof(int))
                 }),
                     Enumerable.Empty<ParameterExpression>());
-            Func<int> f1 = e1.Compile();
+            Func<int> f1 = e1.CompileForTest();
 
             int f1Result = default(int);
             Exception f1Ex = null;
@@ -922,7 +922,7 @@ namespace Tests.ExpressionCompiler.Lambda
                         Expression.Add(p0, p1),
                         Enumerable.Empty<ParameterExpression>()),
                     new ParameterExpression[] { p0, p1 });
-            Func<int, int, Func<int>> f2 = e2.Compile();
+            Func<int, int, Func<int>> f2 = e2.CompileForTest();
 
             int f2Result = default(int);
             Exception f2Ex = null;
@@ -946,7 +946,7 @@ namespace Tests.ExpressionCompiler.Lambda
                             Enumerable.Empty<ParameterExpression>()),
                         Enumerable.Empty<Expression>()),
                     Enumerable.Empty<ParameterExpression>());
-            Func<int, int, int> f3 = e3.Compile()();
+            Func<int, int, int> f3 = e3.CompileForTest()();
 
             int f3Result = default(int);
             Exception f3Ex = null;
@@ -966,7 +966,7 @@ namespace Tests.ExpressionCompiler.Lambda
                         Expression.Add(p0, p1),
                         new ParameterExpression[] { p0, p1 }),
                     Enumerable.Empty<ParameterExpression>());
-            Func<Func<int, int, int>> f4 = e4.Compile();
+            Func<Func<int, int, int>> f4 = e4.CompileForTest();
 
             int f4Result = default(int);
             Exception f4Ex = null;
@@ -986,7 +986,7 @@ namespace Tests.ExpressionCompiler.Lambda
                         Expression.Add(p0, p1),
                         new ParameterExpression[] { p1 }),
                     new ParameterExpression[] { p0 });
-            Func<int, Func<int, int>> f5 = e5.Compile();
+            Func<int, Func<int, int>> f5 = e5.CompileForTest();
 
             int f5Result = default(int);
             Exception f5Ex = null;
@@ -1010,7 +1010,7 @@ namespace Tests.ExpressionCompiler.Lambda
                             new ParameterExpression[] { p0 }),
                         new Expression[] { Expression.Constant(a, typeof(int)) }),
                     Enumerable.Empty<ParameterExpression>());
-            Func<int, int> f6 = e6.Compile()();
+            Func<int, int> f6 = e6.CompileForTest()();
 
             int f6Result = default(int);
             Exception f6Ex = null;
@@ -1086,7 +1086,7 @@ namespace Tests.ExpressionCompiler.Lambda
                     Expression.Constant(b, typeof(long))
                 }),
                     Enumerable.Empty<ParameterExpression>());
-            Func<long> f1 = e1.Compile();
+            Func<long> f1 = e1.CompileForTest();
 
             long f1Result = default(long);
             Exception f1Ex = null;
@@ -1106,7 +1106,7 @@ namespace Tests.ExpressionCompiler.Lambda
                         Expression.Add(p0, p1),
                         Enumerable.Empty<ParameterExpression>()),
                     new ParameterExpression[] { p0, p1 });
-            Func<long, long, Func<long>> f2 = e2.Compile();
+            Func<long, long, Func<long>> f2 = e2.CompileForTest();
 
             long f2Result = default(long);
             Exception f2Ex = null;
@@ -1130,7 +1130,7 @@ namespace Tests.ExpressionCompiler.Lambda
                             Enumerable.Empty<ParameterExpression>()),
                         Enumerable.Empty<Expression>()),
                     Enumerable.Empty<ParameterExpression>());
-            Func<long, long, long> f3 = e3.Compile()();
+            Func<long, long, long> f3 = e3.CompileForTest()();
 
             long f3Result = default(long);
             Exception f3Ex = null;
@@ -1150,7 +1150,7 @@ namespace Tests.ExpressionCompiler.Lambda
                         Expression.Add(p0, p1),
                         new ParameterExpression[] { p0, p1 }),
                     Enumerable.Empty<ParameterExpression>());
-            Func<Func<long, long, long>> f4 = e4.Compile();
+            Func<Func<long, long, long>> f4 = e4.CompileForTest();
 
             long f4Result = default(long);
             Exception f4Ex = null;
@@ -1170,7 +1170,7 @@ namespace Tests.ExpressionCompiler.Lambda
                         Expression.Add(p0, p1),
                         new ParameterExpression[] { p1 }),
                     new ParameterExpression[] { p0 });
-            Func<long, Func<long, long>> f5 = e5.Compile();
+            Func<long, Func<long, long>> f5 = e5.CompileForTest();
 
             long f5Result = default(long);
             Exception f5Ex = null;
@@ -1194,7 +1194,7 @@ namespace Tests.ExpressionCompiler.Lambda
                             new ParameterExpression[] { p0 }),
                         new Expression[] { Expression.Constant(a, typeof(long)) }),
                     Enumerable.Empty<ParameterExpression>());
-            Func<long, long> f6 = e6.Compile()();
+            Func<long, long> f6 = e6.CompileForTest()();
 
             long f6Result = default(long);
             Exception f6Ex = null;
@@ -1270,7 +1270,7 @@ namespace Tests.ExpressionCompiler.Lambda
                     Expression.Constant(b, typeof(short))
                 }),
                     Enumerable.Empty<ParameterExpression>());
-            Func<short> f1 = e1.Compile();
+            Func<short> f1 = e1.CompileForTest();
 
             short f1Result = default(short);
             Exception f1Ex = null;
@@ -1290,7 +1290,7 @@ namespace Tests.ExpressionCompiler.Lambda
                         Expression.Add(p0, p1),
                         Enumerable.Empty<ParameterExpression>()),
                     new ParameterExpression[] { p0, p1 });
-            Func<short, short, Func<short>> f2 = e2.Compile();
+            Func<short, short, Func<short>> f2 = e2.CompileForTest();
 
             short f2Result = default(short);
             Exception f2Ex = null;
@@ -1314,7 +1314,7 @@ namespace Tests.ExpressionCompiler.Lambda
                             Enumerable.Empty<ParameterExpression>()),
                         Enumerable.Empty<Expression>()),
                     Enumerable.Empty<ParameterExpression>());
-            Func<short, short, short> f3 = e3.Compile()();
+            Func<short, short, short> f3 = e3.CompileForTest()();
 
             short f3Result = default(short);
             Exception f3Ex = null;
@@ -1334,7 +1334,7 @@ namespace Tests.ExpressionCompiler.Lambda
                         Expression.Add(p0, p1),
                         new ParameterExpression[] { p0, p1 }),
                     Enumerable.Empty<ParameterExpression>());
-            Func<Func<short, short, short>> f4 = e4.Compile();
+            Func<Func<short, short, short>> f4 = e4.CompileForTest();
 
             short f4Result = default(short);
             Exception f4Ex = null;
@@ -1354,7 +1354,7 @@ namespace Tests.ExpressionCompiler.Lambda
                         Expression.Add(p0, p1),
                         new ParameterExpression[] { p1 }),
                     new ParameterExpression[] { p0 });
-            Func<short, Func<short, short>> f5 = e5.Compile();
+            Func<short, Func<short, short>> f5 = e5.CompileForTest();
 
             short f5Result = default(short);
             Exception f5Ex = null;
@@ -1378,7 +1378,7 @@ namespace Tests.ExpressionCompiler.Lambda
                             new ParameterExpression[] { p0 }),
                         new Expression[] { Expression.Constant(a, typeof(short)) }),
                     Enumerable.Empty<ParameterExpression>());
-            Func<short, short> f6 = e6.Compile()();
+            Func<short, short> f6 = e6.CompileForTest()();
 
             short f6Result = default(short);
             Exception f6Ex = null;
@@ -1454,7 +1454,7 @@ namespace Tests.ExpressionCompiler.Lambda
                     Expression.Constant(b, typeof(uint))
                 }),
                     Enumerable.Empty<ParameterExpression>());
-            Func<uint> f1 = e1.Compile();
+            Func<uint> f1 = e1.CompileForTest();
 
             uint f1Result = default(uint);
             Exception f1Ex = null;
@@ -1474,7 +1474,7 @@ namespace Tests.ExpressionCompiler.Lambda
                         Expression.Add(p0, p1),
                         Enumerable.Empty<ParameterExpression>()),
                     new ParameterExpression[] { p0, p1 });
-            Func<uint, uint, Func<uint>> f2 = e2.Compile();
+            Func<uint, uint, Func<uint>> f2 = e2.CompileForTest();
 
             uint f2Result = default(uint);
             Exception f2Ex = null;
@@ -1498,7 +1498,7 @@ namespace Tests.ExpressionCompiler.Lambda
                             Enumerable.Empty<ParameterExpression>()),
                         Enumerable.Empty<Expression>()),
                     Enumerable.Empty<ParameterExpression>());
-            Func<uint, uint, uint> f3 = e3.Compile()();
+            Func<uint, uint, uint> f3 = e3.CompileForTest()();
 
             uint f3Result = default(uint);
             Exception f3Ex = null;
@@ -1518,7 +1518,7 @@ namespace Tests.ExpressionCompiler.Lambda
                         Expression.Add(p0, p1),
                         new ParameterExpression[] { p0, p1 }),
                     Enumerable.Empty<ParameterExpression>());
-            Func<Func<uint, uint, uint>> f4 = e4.Compile();
+            Func<Func<uint, uint, uint>> f4 = e4.CompileForTest();
 
             uint f4Result = default(uint);
             Exception f4Ex = null;
@@ -1538,7 +1538,7 @@ namespace Tests.ExpressionCompiler.Lambda
                         Expression.Add(p0, p1),
                         new ParameterExpression[] { p1 }),
                     new ParameterExpression[] { p0 });
-            Func<uint, Func<uint, uint>> f5 = e5.Compile();
+            Func<uint, Func<uint, uint>> f5 = e5.CompileForTest();
 
             uint f5Result = default(uint);
             Exception f5Ex = null;
@@ -1562,7 +1562,7 @@ namespace Tests.ExpressionCompiler.Lambda
                             new ParameterExpression[] { p0 }),
                         new Expression[] { Expression.Constant(a, typeof(uint)) }),
                     Enumerable.Empty<ParameterExpression>());
-            Func<uint, uint> f6 = e6.Compile()();
+            Func<uint, uint> f6 = e6.CompileForTest()();
 
             uint f6Result = default(uint);
             Exception f6Ex = null;
@@ -1638,7 +1638,7 @@ namespace Tests.ExpressionCompiler.Lambda
                     Expression.Constant(b, typeof(ulong))
                 }),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ulong> f1 = e1.Compile();
+            Func<ulong> f1 = e1.CompileForTest();
 
             ulong f1Result = default(ulong);
             Exception f1Ex = null;
@@ -1658,7 +1658,7 @@ namespace Tests.ExpressionCompiler.Lambda
                         Expression.Add(p0, p1),
                         Enumerable.Empty<ParameterExpression>()),
                     new ParameterExpression[] { p0, p1 });
-            Func<ulong, ulong, Func<ulong>> f2 = e2.Compile();
+            Func<ulong, ulong, Func<ulong>> f2 = e2.CompileForTest();
 
             ulong f2Result = default(ulong);
             Exception f2Ex = null;
@@ -1682,7 +1682,7 @@ namespace Tests.ExpressionCompiler.Lambda
                             Enumerable.Empty<ParameterExpression>()),
                         Enumerable.Empty<Expression>()),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ulong, ulong, ulong> f3 = e3.Compile()();
+            Func<ulong, ulong, ulong> f3 = e3.CompileForTest()();
 
             ulong f3Result = default(ulong);
             Exception f3Ex = null;
@@ -1702,7 +1702,7 @@ namespace Tests.ExpressionCompiler.Lambda
                         Expression.Add(p0, p1),
                         new ParameterExpression[] { p0, p1 }),
                     Enumerable.Empty<ParameterExpression>());
-            Func<Func<ulong, ulong, ulong>> f4 = e4.Compile();
+            Func<Func<ulong, ulong, ulong>> f4 = e4.CompileForTest();
 
             ulong f4Result = default(ulong);
             Exception f4Ex = null;
@@ -1722,7 +1722,7 @@ namespace Tests.ExpressionCompiler.Lambda
                         Expression.Add(p0, p1),
                         new ParameterExpression[] { p1 }),
                     new ParameterExpression[] { p0 });
-            Func<ulong, Func<ulong, ulong>> f5 = e5.Compile();
+            Func<ulong, Func<ulong, ulong>> f5 = e5.CompileForTest();
 
             ulong f5Result = default(ulong);
             Exception f5Ex = null;
@@ -1746,7 +1746,7 @@ namespace Tests.ExpressionCompiler.Lambda
                             new ParameterExpression[] { p0 }),
                         new Expression[] { Expression.Constant(a, typeof(ulong)) }),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ulong, ulong> f6 = e6.Compile()();
+            Func<ulong, ulong> f6 = e6.CompileForTest()();
 
             ulong f6Result = default(ulong);
             Exception f6Ex = null;
@@ -1822,7 +1822,7 @@ namespace Tests.ExpressionCompiler.Lambda
                     Expression.Constant(b, typeof(ushort))
                 }),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ushort> f1 = e1.Compile();
+            Func<ushort> f1 = e1.CompileForTest();
 
             ushort f1Result = default(ushort);
             Exception f1Ex = null;
@@ -1842,7 +1842,7 @@ namespace Tests.ExpressionCompiler.Lambda
                         Expression.Add(p0, p1),
                         Enumerable.Empty<ParameterExpression>()),
                     new ParameterExpression[] { p0, p1 });
-            Func<ushort, ushort, Func<ushort>> f2 = e2.Compile();
+            Func<ushort, ushort, Func<ushort>> f2 = e2.CompileForTest();
 
             ushort f2Result = default(ushort);
             Exception f2Ex = null;
@@ -1866,7 +1866,7 @@ namespace Tests.ExpressionCompiler.Lambda
                             Enumerable.Empty<ParameterExpression>()),
                         Enumerable.Empty<Expression>()),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ushort, ushort, ushort> f3 = e3.Compile()();
+            Func<ushort, ushort, ushort> f3 = e3.CompileForTest()();
 
             ushort f3Result = default(ushort);
             Exception f3Ex = null;
@@ -1886,7 +1886,7 @@ namespace Tests.ExpressionCompiler.Lambda
                         Expression.Add(p0, p1),
                         new ParameterExpression[] { p0, p1 }),
                     Enumerable.Empty<ParameterExpression>());
-            Func<Func<ushort, ushort, ushort>> f4 = e4.Compile();
+            Func<Func<ushort, ushort, ushort>> f4 = e4.CompileForTest();
 
             ushort f4Result = default(ushort);
             Exception f4Ex = null;
@@ -1906,7 +1906,7 @@ namespace Tests.ExpressionCompiler.Lambda
                         Expression.Add(p0, p1),
                         new ParameterExpression[] { p1 }),
                     new ParameterExpression[] { p0 });
-            Func<ushort, Func<ushort, ushort>> f5 = e5.Compile();
+            Func<ushort, Func<ushort, ushort>> f5 = e5.CompileForTest();
 
             ushort f5Result = default(ushort);
             Exception f5Ex = null;
@@ -1930,7 +1930,7 @@ namespace Tests.ExpressionCompiler.Lambda
                             new ParameterExpression[] { p0 }),
                         new Expression[] { Expression.Constant(a, typeof(ushort)) }),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ushort, ushort> f6 = e6.Compile()();
+            Func<ushort, ushort> f6 = e6.CompileForTest()();
 
             ushort f6Result = default(ushort);
             Exception f6Ex = null;

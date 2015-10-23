@@ -20,7 +20,7 @@ namespace Tests.ExpressionCompiler.Unary
                 )
             );
 
-            var f = e.Compile();
+            var f = e.CompileForTest();
 
             Assert.True(f() == 1.0m);
         }

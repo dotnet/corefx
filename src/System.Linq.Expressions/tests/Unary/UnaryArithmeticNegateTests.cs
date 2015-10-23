@@ -122,7 +122,7 @@ namespace Tests.ExpressionCompiler.Unary
                 Expression.Lambda<Func<decimal>>(
                     Expression.Negate(Expression.Constant(value, typeof(decimal))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<decimal> f = e.Compile();
+            Func<decimal> f = e.CompileForTest();
             Assert.Equal((decimal)(-value), f());
         }
 
@@ -132,7 +132,7 @@ namespace Tests.ExpressionCompiler.Unary
                 Expression.Lambda<Func<double>>(
                     Expression.Negate(Expression.Constant(value, typeof(double))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<double> f = e.Compile();
+            Func<double> f = e.CompileForTest();
             Assert.Equal((double)(-value), f());
         }
 
@@ -142,7 +142,7 @@ namespace Tests.ExpressionCompiler.Unary
                 Expression.Lambda<Func<float>>(
                     Expression.Negate(Expression.Constant(value, typeof(float))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<float> f = e.Compile();
+            Func<float> f = e.CompileForTest();
             Assert.Equal((float)(-value), f());
         }
 
@@ -152,7 +152,7 @@ namespace Tests.ExpressionCompiler.Unary
                 Expression.Lambda<Func<int>>(
                     Expression.Negate(Expression.Constant(value, typeof(int))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<int> f = e.Compile();
+            Func<int> f = e.CompileForTest();
             Assert.Equal((int)(-value), f());
         }
 
@@ -162,7 +162,7 @@ namespace Tests.ExpressionCompiler.Unary
                 Expression.Lambda<Func<long>>(
                     Expression.Negate(Expression.Constant(value, typeof(long))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<long> f = e.Compile();
+            Func<long> f = e.CompileForTest();
             Assert.Equal((long)(-value), f());
         }
 
@@ -177,7 +177,7 @@ namespace Tests.ExpressionCompiler.Unary
                 Expression.Lambda<Func<short>>(
                     Expression.Negate(Expression.Constant(value, typeof(short))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<short> f = e.Compile();
+            Func<short> f = e.CompileForTest();
             Assert.Equal((short)(-value), f());
         }
 

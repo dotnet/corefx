@@ -70,7 +70,7 @@ namespace Tests.ExpressionCompiler.New
                 Expression.Lambda<Func<Sp>>(
                     Expression.New(constructor, exprArgs),
                     Enumerable.Empty<ParameterExpression>());
-            Func<Sp> f = e.Compile();
+            Func<Sp> f = e.CompileForTest();
 
             Assert.Equal(new Sp(a, b), f());
         }
@@ -83,7 +83,7 @@ namespace Tests.ExpressionCompiler.New
                 Expression.Lambda<Func<D>>(
                     Expression.New(constructor, exprArgs),
                     Enumerable.Empty<ParameterExpression>());
-            Func<D> f = e.Compile();
+            Func<D> f = e.CompileForTest();
 
             Assert.Equal(new D(a, b), f());
         }
@@ -96,7 +96,7 @@ namespace Tests.ExpressionCompiler.New
                 Expression.Lambda<Func<Scs>>(
                     Expression.New(constructor, exprArgs),
                     Enumerable.Empty<ParameterExpression>());
-            Func<Scs> f = e.Compile();
+            Func<Scs> f = e.CompileForTest();
 
             Assert.Equal(new Scs(a, b), f());
         }

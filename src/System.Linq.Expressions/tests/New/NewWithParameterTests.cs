@@ -119,7 +119,7 @@ namespace Tests.ExpressionCompiler.New
                 Expression.Lambda<Func<E?>>(
                     Expression.New(constructor, exprArgs),
                     Enumerable.Empty<ParameterExpression>());
-            Func<E?> f = e.Compile();
+            Func<E?> f = e.CompileForTest();
             Assert.Equal(new E?(value), f());
         }
 
@@ -131,7 +131,7 @@ namespace Tests.ExpressionCompiler.New
                 Expression.Lambda<Func<int?>>(
                     Expression.New(constructor, exprArgs),
                     Enumerable.Empty<ParameterExpression>());
-            Func<int?> f = e.Compile();
+            Func<int?> f = e.CompileForTest();
             Assert.Equal(new int?(value), f());
         }
 
@@ -143,7 +143,7 @@ namespace Tests.ExpressionCompiler.New
                 Expression.Lambda<Func<S?>>(
                     Expression.New(constructor, exprArgs),
                     Enumerable.Empty<ParameterExpression>());
-            Func<S?> f = e.Compile();
+            Func<S?> f = e.CompileForTest();
             Assert.Equal(new S?(value), f());
         }
 
@@ -155,7 +155,7 @@ namespace Tests.ExpressionCompiler.New
                 Expression.Lambda<Func<Sc?>>(
                     Expression.New(constructor, exprArgs),
                     Enumerable.Empty<ParameterExpression>());
-            Func<Sc?> f = e.Compile();
+            Func<Sc?> f = e.CompileForTest();
             Assert.Equal(new Sc?(value), f());
         }
 
@@ -167,7 +167,7 @@ namespace Tests.ExpressionCompiler.New
                 Expression.Lambda<Func<Scs?>>(
                     Expression.New(constructor, exprArgs),
                     Enumerable.Empty<ParameterExpression>());
-            Func<Scs?> f = e.Compile();
+            Func<Scs?> f = e.CompileForTest();
             Assert.Equal(new Scs?(value), f());
         }
 
@@ -179,7 +179,7 @@ namespace Tests.ExpressionCompiler.New
                 Expression.Lambda<Func<Sc?>>(
                     Expression.New(constructor, exprArgs),
                     Enumerable.Empty<ParameterExpression>());
-            Func<Sc?> f = e.Compile();
+            Func<Sc?> f = e.CompileForTest();
             Assert.Equal(new Sc?(value), f());
         }
 
@@ -191,7 +191,7 @@ namespace Tests.ExpressionCompiler.New
                 Expression.Lambda<Func<Sp?>>(
                     Expression.New(constructor, exprArgs),
                     Enumerable.Empty<ParameterExpression>());
-            Func<Sp?> f = e.Compile();
+            Func<Sp?> f = e.CompileForTest();
             Assert.Equal(new Sp?(value), f());
         }
 
@@ -203,7 +203,7 @@ namespace Tests.ExpressionCompiler.New
                 Expression.Lambda<Func<Ts?>>(
                     Expression.New(constructor, exprArgs),
                     Enumerable.Empty<ParameterExpression>());
-            Func<Ts?> f = e.Compile();
+            Func<Ts?> f = e.CompileForTest();
             Assert.Equal(new Ts?(value), f());
         }
 

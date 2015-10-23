@@ -245,7 +245,7 @@ namespace Tests.ExpressionCompiler.Lifted
                         Expression.Constant(a, typeof(byte?)),
                         Expression.Constant(b, typeof(byte?)),
                         typeof(LiftedMultiplyNullableTests).GetTypeInfo().GetDeclaredMethod("MultiplyNullableByte")));
-            Func<byte?> f = e.Compile();
+            Func<byte?> f = e.CompileForTest();
 
             byte? result = default(byte);
             Exception fEx = null;
@@ -289,7 +289,7 @@ namespace Tests.ExpressionCompiler.Lifted
                         Expression.Constant(a, typeof(char?)),
                         Expression.Constant(b, typeof(char?)),
                         typeof(LiftedMultiplyNullableTests).GetTypeInfo().GetDeclaredMethod("MultiplyNullableChar")));
-            Func<char?> f = e.Compile();
+            Func<char?> f = e.CompileForTest();
 
             char? result = default(char);
             Exception fEx = null;
@@ -333,7 +333,7 @@ namespace Tests.ExpressionCompiler.Lifted
                         Expression.Constant(a, typeof(decimal?)),
                         Expression.Constant(b, typeof(decimal?)),
                         typeof(LiftedMultiplyNullableTests).GetTypeInfo().GetDeclaredMethod("MultiplyNullableDecimal")));
-            Func<decimal?> f = e.Compile();
+            Func<decimal?> f = e.CompileForTest();
 
             decimal? result = default(decimal);
             Exception fEx = null;
@@ -377,7 +377,7 @@ namespace Tests.ExpressionCompiler.Lifted
                         Expression.Constant(a, typeof(double?)),
                         Expression.Constant(b, typeof(double?)),
                         typeof(LiftedMultiplyNullableTests).GetTypeInfo().GetDeclaredMethod("MultiplyNullableDouble")));
-            Func<double?> f = e.Compile();
+            Func<double?> f = e.CompileForTest();
 
             double? result = default(double);
             Exception fEx = null;
@@ -421,7 +421,7 @@ namespace Tests.ExpressionCompiler.Lifted
                         Expression.Constant(a, typeof(float?)),
                         Expression.Constant(b, typeof(float?)),
                         typeof(LiftedMultiplyNullableTests).GetTypeInfo().GetDeclaredMethod("MultiplyNullableFloat")));
-            Func<float?> f = e.Compile();
+            Func<float?> f = e.CompileForTest();
 
             float? result = default(float);
             Exception fEx = null;
@@ -465,7 +465,7 @@ namespace Tests.ExpressionCompiler.Lifted
                         Expression.Constant(a, typeof(int?)),
                         Expression.Constant(b, typeof(int?)),
                         typeof(LiftedMultiplyNullableTests).GetTypeInfo().GetDeclaredMethod("MultiplyNullableInt")));
-            Func<int?> f = e.Compile();
+            Func<int?> f = e.CompileForTest();
 
             int? result = default(int);
             Exception fEx = null;
@@ -509,7 +509,7 @@ namespace Tests.ExpressionCompiler.Lifted
                         Expression.Constant(a, typeof(long?)),
                         Expression.Constant(b, typeof(long?)),
                         typeof(LiftedMultiplyNullableTests).GetTypeInfo().GetDeclaredMethod("MultiplyNullableLong")));
-            Func<long?> f = e.Compile();
+            Func<long?> f = e.CompileForTest();
 
             long? result = default(long);
             Exception fEx = null;
@@ -553,7 +553,7 @@ namespace Tests.ExpressionCompiler.Lifted
                         Expression.Constant(a, typeof(sbyte?)),
                         Expression.Constant(b, typeof(sbyte?)),
                         typeof(LiftedMultiplyNullableTests).GetTypeInfo().GetDeclaredMethod("MultiplyNullableSByte")));
-            Func<sbyte?> f = e.Compile();
+            Func<sbyte?> f = e.CompileForTest();
 
             sbyte? result = default(sbyte);
             Exception fEx = null;
@@ -597,7 +597,7 @@ namespace Tests.ExpressionCompiler.Lifted
                         Expression.Constant(a, typeof(short?)),
                         Expression.Constant(b, typeof(short?)),
                         typeof(LiftedMultiplyNullableTests).GetTypeInfo().GetDeclaredMethod("MultiplyNullableShort")));
-            Func<short?> f = e.Compile();
+            Func<short?> f = e.CompileForTest();
 
             short? result = default(short);
             Exception fEx = null;
@@ -641,7 +641,7 @@ namespace Tests.ExpressionCompiler.Lifted
                         Expression.Constant(a, typeof(uint?)),
                         Expression.Constant(b, typeof(uint?)),
                         typeof(LiftedMultiplyNullableTests).GetTypeInfo().GetDeclaredMethod("MultiplyNullableUInt")));
-            Func<uint?> f = e.Compile();
+            Func<uint?> f = e.CompileForTest();
 
             uint? result = default(uint);
             Exception fEx = null;
@@ -685,7 +685,7 @@ namespace Tests.ExpressionCompiler.Lifted
                         Expression.Constant(a, typeof(ulong?)),
                         Expression.Constant(b, typeof(ulong?)),
                         typeof(LiftedMultiplyNullableTests).GetTypeInfo().GetDeclaredMethod("MultiplyNullableULong")));
-            Func<ulong?> f = e.Compile();
+            Func<ulong?> f = e.CompileForTest();
 
             ulong? result = default(ulong);
             Exception fEx = null;
@@ -729,7 +729,7 @@ namespace Tests.ExpressionCompiler.Lifted
                         Expression.Constant(a, typeof(ushort?)),
                         Expression.Constant(b, typeof(ushort?)),
                         typeof(LiftedMultiplyNullableTests).GetTypeInfo().GetDeclaredMethod("MultiplyNullableUShort")));
-            Func<ushort?> f = e.Compile();
+            Func<ushort?> f = e.CompileForTest();
 
             ushort? result = default(ushort);
             Exception fEx = null;

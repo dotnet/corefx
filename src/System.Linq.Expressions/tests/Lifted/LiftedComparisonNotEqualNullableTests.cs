@@ -194,7 +194,7 @@ namespace Tests.ExpressionCompiler.Lifted
                         Expression.Constant(b, typeof(bool?)),
                         true,
                         null));
-            Func<bool?> f = e.Compile();
+            Func<bool?> f = e.CompileForTest();
 
             bool? expected = a != b;
             bool? result = f();
@@ -210,7 +210,7 @@ namespace Tests.ExpressionCompiler.Lifted
                         Expression.Constant(b, typeof(byte?)),
                         true,
                         null));
-            Func<bool?> f = e.Compile();
+            Func<bool?> f = e.CompileForTest();
 
             bool? expected = a != b;
             bool? result = f();
@@ -226,7 +226,7 @@ namespace Tests.ExpressionCompiler.Lifted
                         Expression.Constant(b, typeof(char?)),
                         true,
                         null));
-            Func<bool?> f = e.Compile();
+            Func<bool?> f = e.CompileForTest();
 
             bool? expected = a != b;
             bool? result = f();
@@ -242,7 +242,7 @@ namespace Tests.ExpressionCompiler.Lifted
                         Expression.Constant(b, typeof(decimal?)),
                         true,
                         null));
-            Func<bool?> f = e.Compile();
+            Func<bool?> f = e.CompileForTest();
 
             bool? expected = a != b;
             bool? result = f();
@@ -258,7 +258,7 @@ namespace Tests.ExpressionCompiler.Lifted
                         Expression.Constant(b, typeof(double?)),
                         true,
                         null));
-            Func<bool?> f = e.Compile();
+            Func<bool?> f = e.CompileForTest();
 
             bool? expected = a != b;
             bool? result = f();
@@ -274,7 +274,7 @@ namespace Tests.ExpressionCompiler.Lifted
                         Expression.Constant(b, typeof(float?)),
                         true,
                         null));
-            Func<bool?> f = e.Compile();
+            Func<bool?> f = e.CompileForTest();
 
             bool? expected = a != b;
             bool? result = f();
@@ -290,7 +290,7 @@ namespace Tests.ExpressionCompiler.Lifted
                         Expression.Constant(b, typeof(int?)),
                         true,
                         null));
-            Func<bool?> f = e.Compile();
+            Func<bool?> f = e.CompileForTest();
 
             bool? expected = a != b;
             bool? result = f();
@@ -306,7 +306,7 @@ namespace Tests.ExpressionCompiler.Lifted
                         Expression.Constant(b, typeof(long?)),
                         true,
                         null));
-            Func<bool?> f = e.Compile();
+            Func<bool?> f = e.CompileForTest();
 
             bool? expected = a != b;
             bool? result = f();
@@ -322,7 +322,7 @@ namespace Tests.ExpressionCompiler.Lifted
                         Expression.Constant(b, typeof(sbyte?)),
                         true,
                         null));
-            Func<bool?> f = e.Compile();
+            Func<bool?> f = e.CompileForTest();
 
             bool? expected = a != b;
             bool? result = f();
@@ -338,7 +338,7 @@ namespace Tests.ExpressionCompiler.Lifted
                         Expression.Constant(b, typeof(short?)),
                         true,
                         null));
-            Func<bool?> f = e.Compile();
+            Func<bool?> f = e.CompileForTest();
 
             bool? expected = a != b;
             bool? result = f();
@@ -354,7 +354,7 @@ namespace Tests.ExpressionCompiler.Lifted
                         Expression.Constant(b, typeof(uint?)),
                         true,
                         null));
-            Func<bool?> f = e.Compile();
+            Func<bool?> f = e.CompileForTest();
 
             bool? expected = a != b;
             bool? result = f();
@@ -370,7 +370,7 @@ namespace Tests.ExpressionCompiler.Lifted
                         Expression.Constant(b, typeof(ulong?)),
                         true,
                         null));
-            Func<bool?> f = e.Compile();
+            Func<bool?> f = e.CompileForTest();
 
             bool? expected = a != b;
             bool? result = f();
@@ -386,7 +386,7 @@ namespace Tests.ExpressionCompiler.Lifted
                         Expression.Constant(b, typeof(ushort?)),
                         true,
                         null));
-            Func<bool?> f = e.Compile();
+            Func<bool?> f = e.CompileForTest();
 
             bool? expected = a != b;
             bool? result = f();
