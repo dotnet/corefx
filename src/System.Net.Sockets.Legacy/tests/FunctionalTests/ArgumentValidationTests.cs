@@ -176,16 +176,14 @@ namespace System.Net.Sockets.Tests
             SocketError errorCode;
             Assert.Throws<ArgumentNullException>(() => GetSocket().BeginSend(null, 0, 0, SocketFlags.None, out errorCode, TheAsyncCallback, null));
         }
-
-        [Fact]
+        [Fact (Skip = "Change in behavior, tracked by Issue 4052")]
         public void BeginSend_Buffer_InvalidOffset_Throws_ArgumentOutOfRange()
         {
             SocketError errorCode;
             Assert.Throws<ArgumentOutOfRangeException>(() => GetSocket().BeginSend(s_buffer, -1, 0, SocketFlags.None, out errorCode, TheAsyncCallback, null));
             Assert.Throws<ArgumentOutOfRangeException>(() => GetSocket().BeginSend(s_buffer, s_buffer.Length + 1, 0, SocketFlags.None, out errorCode, TheAsyncCallback, null));
         }
-
-        [Fact]
+        [Fact (Skip = "Change in behavior, tracked by Issue 4052")]
         public void BeginSend_Buffer_InvalidCount_Throws_ArgumentOutOfRange()
         {
             SocketError errorCode;
@@ -225,16 +223,14 @@ namespace System.Net.Sockets.Tests
         {
             Assert.Throws<ArgumentNullException>(() => GetSocket().BeginSendTo(s_buffer, 0, 0, SocketFlags.None, null, TheAsyncCallback, null));
         }
-
-        [Fact]
+        [Fact (Skip = "Change in behavior, tracked by Issue 4052")]
         public void BeginSendTo_InvalidOffset_Throws_ArgumentOutOfRange()
         {
             EndPoint endpoint = new IPEndPoint(IPAddress.Loopback, 1);
             Assert.Throws<ArgumentOutOfRangeException>(() => GetSocket().BeginSendTo(s_buffer, -1, s_buffer.Length, SocketFlags.None, endpoint, TheAsyncCallback, null));
             Assert.Throws<ArgumentOutOfRangeException>(() => GetSocket().BeginSendTo(s_buffer, s_buffer.Length + 1, s_buffer.Length, SocketFlags.None, endpoint, TheAsyncCallback, null));
         }
-
-        [Fact]
+        [Fact (Skip = "Change in behavior, tracked by Issue 4052")]
         public void BeginSendTo_InvalidSize_Throws_ArgumentOutOfRange()
         {
             EndPoint endpoint = new IPEndPoint(IPAddress.Loopback, 1);
@@ -255,8 +251,7 @@ namespace System.Net.Sockets.Tests
             SocketError errorCode;
             Assert.Throws<ArgumentNullException>(() => GetSocket().BeginReceive(null, 0, 0, SocketFlags.None, out errorCode, TheAsyncCallback, null));
         }
-
-        [Fact]
+        [Fact (Skip = "Change in behavior, tracked by Issue 4052")]
         public void BeginReceive_Buffer_InvalidOffset_Throws_ArgumentOutOfRange()
         {
             SocketError errorCode;
@@ -264,7 +259,7 @@ namespace System.Net.Sockets.Tests
             Assert.Throws<ArgumentOutOfRangeException>(() => GetSocket().BeginReceive(s_buffer, s_buffer.Length + 1, 0, SocketFlags.None, out errorCode, TheAsyncCallback, null));
         }
 
-        [Fact]
+        [Fact (Skip = "Change in behavior, tracked by Issue 4052")]
         public void BeginReceive_Buffer_InvalidCount_Throws_ArgumentOutOfRange()
         {
             SocketError errorCode;
@@ -313,16 +308,14 @@ namespace System.Net.Sockets.Tests
             EndPoint endpoint = new IPEndPoint(IPAddress.IPv6Loopback, 1);
             Assert.Throws<ArgumentException>(() => GetSocket(AddressFamily.InterNetwork).BeginReceiveFrom(s_buffer, 0, 0, SocketFlags.None, ref endpoint, TheAsyncCallback, null));
         }
-
-        [Fact]
+        [Fact (Skip = "Change in behavior, tracked by Issue 4052")]
         public void BeginReceiveFrom_InvalidOffset_Throws_ArgumentOutOfRange()
         {
             EndPoint endpoint = new IPEndPoint(IPAddress.Loopback, 1);
             Assert.Throws<ArgumentOutOfRangeException>(() => GetSocket().BeginReceiveFrom(s_buffer, -1, s_buffer.Length, SocketFlags.None, ref endpoint, TheAsyncCallback, null));
             Assert.Throws<ArgumentOutOfRangeException>(() => GetSocket().BeginReceiveFrom(s_buffer, s_buffer.Length + 1, s_buffer.Length, SocketFlags.None, ref endpoint, TheAsyncCallback, null));
         }
-
-        [Fact]
+        [Fact (Skip = "Change in behavior, tracked by Issue 4052")]
         public void BeginReceiveFrom_InvalidSize_Throws_ArgumentOutOfRange()
         {
             EndPoint endpoint = new IPEndPoint(IPAddress.Loopback, 1);
@@ -368,8 +361,7 @@ namespace System.Net.Sockets.Tests
 
             Assert.Throws<ArgumentException>(() => GetSocket(AddressFamily.InterNetwork).BeginReceiveMessageFrom(s_buffer, 0, 0, SocketFlags.None, ref remote, TheAsyncCallback, null));
         }
-
-        [Fact]
+        [Fact (Skip = "Change in behavior, tracked by Issue 4052")]
         public void BeginReceiveMessageFrom_InvalidOffset_Throws_ArgumentOutOfRange()
         {
             EndPoint remote = new IPEndPoint(IPAddress.Loopback, 1);
@@ -377,8 +369,7 @@ namespace System.Net.Sockets.Tests
             Assert.Throws<ArgumentOutOfRangeException>(() => GetSocket().BeginReceiveMessageFrom(s_buffer, -1, s_buffer.Length, SocketFlags.None, ref remote, TheAsyncCallback, null));
             Assert.Throws<ArgumentOutOfRangeException>(() => GetSocket().BeginReceiveMessageFrom(s_buffer, s_buffer.Length + 1, s_buffer.Length, SocketFlags.None, ref remote, TheAsyncCallback, null));
         }
-
-        [Fact]
+        [Fact (Skip = "Change in behavior, tracked by Issue 4052")]
         public void BeginReceiveMessageFrom_InvalidSize_Throws_ArgumentOutOfRange()
         {
             EndPoint remote = new IPEndPoint(IPAddress.Loopback, 1);
