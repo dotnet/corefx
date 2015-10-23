@@ -56,7 +56,10 @@
     <Compile Include="System\StringComparer.cs" />
   </ItemGroup>
   <!-- Performance Tests -->
-  <ItemGroup Condition="'$(RunPerfTestsForProject)' == 'true'">
+  <PropertyGroup Condition="'$(Performance)' == 'true'">
+    <IncludePerformanceTests>true</IncludePerformanceTests>
+  </PropertyGroup>
+  <ItemGroup Condition="'$(IncludePerformanceTests)' == 'true'">
     <Compile Include="Performance\Perf.Environment.cs" />
     <Compile Include="Performance\Perf.Path.cs" />
     <Compile Include="Performance\Perf.Random.cs" />

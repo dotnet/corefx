@@ -40,7 +40,10 @@
     <Compile Include="QuaternionTests.cs" />
   </ItemGroup>
   <!-- Performance Tests -->
-  <ItemGroup Condition="'$(RunPerfTestsForProject)' == 'true'">
+  <PropertyGroup Condition="'$(Performance)' == 'true'">
+    <IncludePerformanceTests>true</IncludePerformanceTests>
+  </PropertyGroup>
+  <ItemGroup Condition="'$(IncludePerformanceTests)' == 'true'">
     <Compile Include="Performance\Perf.Vector2.cs" />
     <Compile Include="Performance\Perf.Vector3.cs" />
     <Compile Include="Performance\Perf.Vector4.cs" />

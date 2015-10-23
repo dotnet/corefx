@@ -90,7 +90,10 @@
     <Compile Include="System\WeakReference.cs" />
   </ItemGroup>
   <!-- Performance Tests -->
-  <ItemGroup Condition="'$(RunPerfTestsForProject)' == 'true'">
+  <PropertyGroup Condition="'$(Performance)' == 'true'">
+    <IncludePerformanceTests>true</IncludePerformanceTests>
+  </PropertyGroup>
+  <ItemGroup Condition="'$(IncludePerformanceTests)' == 'true'">
     <Compile Include="Performance\Perf.Boolean.cs" />
     <Compile Include="Performance\Perf.Enum.cs" />
     <Compile Include="Performance\Perf.Guid.cs" />
