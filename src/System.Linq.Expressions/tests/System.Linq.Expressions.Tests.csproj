@@ -13,6 +13,7 @@
     <AssemblyName>System.Linq.Expressions.Tests</AssemblyName>
     <RootNamespace>System.Linq.Expressions.Tests</RootNamespace>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <DefineConstants Condition=" '$(IsInterpreting)' != 'true' ">$(DefineConstants);FEATURE_COMPILE</DefineConstants>
     <DefineConstants Condition=" '$(FeatureInterpret)' == 'true' ">$(DefineConstants);FEATURE_INTERPRET</DefineConstants>
   </PropertyGroup>
   <!-- Default configurations to help VS understand the configurations -->
@@ -166,6 +167,7 @@
     <Compile Include="Lifted\NonLiftedComparisonLessThanNullableTests.cs" />
     <Compile Include="Lifted\NonLiftedComparisonLessThanOrEqualNullableTests.cs" />
     <Compile Include="Lifted\NonLiftedComparisonNotEqualNullableTests.cs" />
+    <Compile Include="ListEqualityComparer.cs" />
     <Compile Include="MemberInit\MemberInitTests.cs" />
     <Compile Include="Member\MemberAccessTests.cs" />
     <Compile Include="New\NewTests.cs" />
@@ -177,6 +179,7 @@
     <Compile Include="Ternary\TernaryArrayTests.cs" />
     <Compile Include="Ternary\TernaryNullableTests.cs" />
     <Compile Include="Ternary\TernaryTests.cs" />
+    <Compile Include="TestExtensions.cs" />
     <Compile Include="Unary\UnaryArithmeticNegateNullableOneOffTests.cs" />
     <Compile Include="Unary\UnaryArithmeticNegateCheckedNullableTests.cs" />
     <Compile Include="Unary\UnaryArithmeticNegateNullableTests.cs" />
