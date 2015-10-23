@@ -105,7 +105,10 @@
     <Compile Include="XmlTextTests\SplitTextTests.cs" />
   </ItemGroup>
   <!-- Performance Tests -->
-  <ItemGroup Condition="'$(RunPerfTestsForProject)' == 'true'">
+  <PropertyGroup Condition="'$(Performance)' == 'true'">
+    <IncludePerformanceTests>true</IncludePerformanceTests>
+  </PropertyGroup>
+  <ItemGroup Condition="'$(IncludePerformanceTests)' == 'true'">
     <Compile Include="Performance\Perf.XmlDocument.cs" />
     <Compile Include="Performance\Perf.XmlNode.cs" />
     <Compile Include="Performance\Perf.XmlNodeList.cs" />

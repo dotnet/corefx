@@ -69,7 +69,10 @@
     <Compile Include="ZipTests.cs" />
   </ItemGroup>
   <!-- Performance Tests -->
-  <ItemGroup Condition="'$(RunPerfTestsForProject)' == 'true'">
+  <PropertyGroup Condition="'$(Performance)' == 'true'">
+    <IncludePerformanceTests>true</IncludePerformanceTests>
+  </PropertyGroup>
+  <ItemGroup Condition="'$(IncludePerformanceTests)' == 'true'">
     <Compile Include="Performance\Perf.Linq.cs" />
     <Compile Include="Performance\Perf.LinqTestBase.cs" />
     <Compile Include="$(CommonTestPath)\System\PerfUtils.cs">

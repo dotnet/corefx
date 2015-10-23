@@ -38,7 +38,10 @@
     <Compile Include="PipeTest.Write.cs" />
   </ItemGroup>
   <!-- Performance Tests -->
-  <ItemGroup Condition="'$(RunPerfTestsForProject)' == 'true'">
+  <PropertyGroup Condition="'$(Performance)' == 'true'">
+    <IncludePerformanceTests>true</IncludePerformanceTests>
+  </PropertyGroup>
+  <ItemGroup Condition="'$(IncludePerformanceTests)' == 'true'">
     <Compile Include="Performance\Perf.AnonymousPipeStream.cs" />
     <Compile Include="Performance\Perf.NamedPipeStream.cs" />
     <Compile Include="Performance\Perf.PipeTest.cs" />

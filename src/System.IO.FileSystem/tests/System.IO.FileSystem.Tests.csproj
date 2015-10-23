@@ -165,7 +165,10 @@
     </Compile>
   </ItemGroup>
   <!-- Performance Tests -->
-  <ItemGroup Condition="'$(RunPerfTestsForProject)' == 'true'">
+  <PropertyGroup Condition="'$(Performance)' == 'true'">
+    <IncludePerformanceTests>true</IncludePerformanceTests>
+  </PropertyGroup>
+  <ItemGroup Condition="'$(IncludePerformanceTests)' == 'true'">
     <Compile Include="Performance\Perf.Directory.cs" />
     <Compile Include="Performance\Perf.File.cs" />
     <Compile Include="Performance\Perf.FileInfo.cs" />
