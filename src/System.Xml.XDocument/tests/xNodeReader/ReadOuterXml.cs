@@ -208,19 +208,17 @@ namespace CoreXml.Test.XLinq
                 }
 
                 [Fact]
-                [ActiveIssue(641)]
-                public void ReadOuterXmlOnXmlDeclarationAttributes()
+                public void MovingToNonExistingAttributeThrowsAndDoesntBreakReaderState()
                 {
-                    XmlReader DataReader = GetReader();//GetReader(pGenericXml);
-                    DataReader.Read();
-                    try
+                    using (XmlReader r = GetReader())
                     {
-                        DataReader.MoveToAttribute(DataReader.AttributeCount / 2);
-                        throw new TestException(TestResult.Failed, "");
+                        r.Read();
+                        Assert.Throws<ArgumentOutOfRangeException>(() =>
+                        {
+                            r.MoveToAttribute(r.AttributeCount / 2);
+                        });
+                        Assert.NotEqual(XmlNodeType.Attribute, r.NodeType);
                     }
-                    catch (ArgumentOutOfRangeException) { }
-                    Assert.True(TestLog.Compare(DataReader.ReadOuterXml(), String.Empty, "outer"));
-                    Assert.True(TestLog.Compare(VerifyNode(DataReader, XmlNodeType.Attribute, String.Empty, "UTF-8"), false, "vn"));
                 }
 
                 //[Variation("ReadOuterXml on element with entities, EntityHandling = ExpandCharEntities")]
