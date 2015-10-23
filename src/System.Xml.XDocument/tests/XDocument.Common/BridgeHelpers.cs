@@ -148,6 +148,7 @@ namespace CoreXml.Test.XLinq
             rs.DtdProcessing = DtdProcessing.Ignore;
             rs.CloseInput = true;
             _diff.Option = XmlDiffOption.IgnoreAttributeOrder;
+
             using (XmlReader r1 = doc.CreateReader())
             using (XmlReader r2 = XmlReader.Create(new StringReader(expectedXml), rs))
             {

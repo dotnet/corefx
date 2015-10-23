@@ -3399,8 +3399,7 @@ namespace CoreXml.Test.XLinq
 
                     if (!CompareReader(doc, "<Root><![CDATA[\uD812\uDD12]]></Root>")) throw new TestException(TestResult.Failed, "");
                 }
-
-                //[Variation(Id = 5, Desc = "WriteCData with ]]>", Priority = 1)]
+                
                 [Fact]
                 [ActiveIssue(4054, default(PlatformID))]
                 public void WriteCDataWithTwoClosingBrackets_5()
@@ -3591,8 +3590,7 @@ namespace CoreXml.Test.XLinq
                     TestLog.WriteLine("Did not throw error");
                     throw new TestException(TestResult.Failed, "");
                 }
-
-                //[Variation(Id = 6, Desc = "WriteComment with -- in value", Priority = 1)]
+                
                 [Fact]
                 [ActiveIssue(4057, default(PlatformID))]
                 public void WriteCommentWithDoubleHyphensInValue_6()
@@ -4192,8 +4190,7 @@ namespace CoreXml.Test.XLinq
                     TestLog.WriteLine("Did not throw exception");
                     throw new TestException(TestResult.Failed, "");
                 }
-
-                //[Variation(Id = 11, Desc = "Include PI end tag ?> as part of the text value", Priority = 1)]
+                
                 [Fact]
                 [ActiveIssue(4063, default(PlatformID))]
                 public void IncludePIEndTagAsPartOfTextValue()

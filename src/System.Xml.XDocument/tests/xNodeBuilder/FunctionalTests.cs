@@ -18,7 +18,6 @@ namespace CoreXml.Test.XLinq
         // Test Module
         [Fact]
         [OuterLoop]
-        [ActiveIssue(641)]
         public static void RunTests()
         {
             TestInput.CommandLine = "";
