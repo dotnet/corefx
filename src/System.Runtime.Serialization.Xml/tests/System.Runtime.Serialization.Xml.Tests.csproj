@@ -27,14 +27,6 @@
     </Compile>  
   </ItemGroup>  
   <ItemGroup>
-    <ProjectReference Include="..\..\System.Collections.Concurrent\src\System.Collections.Concurrent.csproj">
-      <Project>{96AA2060-C846-4E56-9509-E8CB9C114C8F}</Project>
-      <Name>System.Collections.Concurrent</Name>
-    </ProjectReference>
-     <ProjectReference Include="..\..\System.Collections.NonGeneric\src\System.Collections.NonGeneric.csproj">
-      <Project>{585E3764-534B-4A12-8BD5-8578CB826A45}</Project>
-      <Name>System.Collections.NonGeneric</Name>
-    </ProjectReference>
     <ProjectReference Include="..\..\System.Private.DataContractSerialization\src\System.Private.DataContractSerialization.csproj">
       <Project>{6B4C1660-D158-4820-BE1C-D7A29CEBEC9B}</Project>
       <Name>System.Private.DataContractSerialization</Name>
