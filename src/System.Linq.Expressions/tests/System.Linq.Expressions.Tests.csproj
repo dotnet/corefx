@@ -13,6 +13,7 @@
     <AssemblyName>System.Linq.Expressions.Tests</AssemblyName>
     <RootNamespace>System.Linq.Expressions.Tests</RootNamespace>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <DefineConstants Condition=" '$(EnableCrossCheckTests)' == 'true' ">$(DefineConstants);ENABLE_CROSSCHECK</DefineConstants>
     <DefineConstants Condition=" '$(IsInterpreting)' != 'true' ">$(DefineConstants);FEATURE_COMPILE</DefineConstants>
     <DefineConstants Condition=" '$(FeatureInterpret)' == 'true' ">$(DefineConstants);FEATURE_INTERPRET</DefineConstants>
   </PropertyGroup>

@@ -11,7 +11,7 @@ namespace System.Linq.Expressions
     {
         public static T CompileForTest<T>(this Expression<T> expr)
         {
-#if FEATURE_INTERPRET && FEATURE_COMPILE
+#if FEATURE_INTERPRET && FEATURE_COMPILE && ENABLE_CROSSCHECK
             var c = expr.Compile();
             var i = expr.Compile(true);
 
@@ -23,7 +23,7 @@ namespace System.Linq.Expressions
 
         public static Delegate CompileForTest(this LambdaExpression expr)
         {
-#if FEATURE_INTERPRET && FEATURE_COMPILE
+#if FEATURE_INTERPRET && FEATURE_COMPILE && ENABLE_CROSSCHECK
             var c = expr.Compile();
             var i = expr.Compile(true);
 
