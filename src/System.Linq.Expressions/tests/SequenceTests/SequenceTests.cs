@@ -2907,10 +2907,20 @@ namespace Tests
         [Fact]
         public static void CallCompiledLambdaWithTypeMissing()
         {
+            //
+            // NB: Using Compile here rather than CompileForTest.
+            //
+            //     See https://github.com/dotnet/corefx/issues/4112 for the issue with the interpreter
+            //     which gets triggered when passing Type.Missing. This only repros when the "compiled"
+            //     delegate below gets compiled while the "lambda" delegate gets interpreted. The reason
+            //     for this is that the Run method of the CallInstruction will go through the slow path
+            //     because TryGetLightLambdaTarget returns false, thus triggering a call to the Invoke
+            //     method on MethodInfo which doesn't like Type.Missing as an argument.
+            //
             Expression<Func<object, bool>> f = x => x == Type.Missing;
-            var compiled = f.CompileForTest();
+            var compiled = f.Compile();
             Expression<Func<object, bool>> lambda = x => compiled(x);
-            Func<object, bool> d = lambda.CompileForTest();
+            Func<object, bool> d = lambda.Compile();
             Assert.Equal(true, d(Type.Missing));
         }
 

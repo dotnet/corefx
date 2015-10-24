@@ -13,7 +13,7 @@ namespace System.Linq.Expressions
         {
 #if FEATURE_INTERPRET && FEATURE_COMPILE
             var c = expr.Compile();
-            var i = expr.Compile(/*true*/); // TODO: reenable
+            var i = expr.Compile(true);
 
             return (T)(object)Combine(typeof(T), c as Delegate, i as Delegate);
 #else
@@ -25,7 +25,7 @@ namespace System.Linq.Expressions
         {
 #if FEATURE_INTERPRET && FEATURE_COMPILE
             var c = expr.Compile();
-            var i = expr.Compile(/*true*/); // TODO: reenable
+            var i = expr.Compile(true);
 
             return Combine(expr.Type, c, i);
 #else
