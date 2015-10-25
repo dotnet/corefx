@@ -6,7 +6,7 @@ using System;
 
 namespace System.Threading.Tasks.Tests.CancelWait
 {
-    public sealed class TaskCancelWaitTests
+    public static class TaskCancelWaitTests
     {
         #region Test Methods
 
