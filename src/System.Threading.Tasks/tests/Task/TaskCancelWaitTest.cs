@@ -417,14 +417,12 @@ namespace System.Threading.Tasks.Tests.CancelWait
     /// </summary>
     public class TaskInfo
     {
-        private static TaskCreationOptions s_DEFAULT_OPTION = TaskCreationOptions.AttachedToParent;
         private static double s_UNINITIALED_RESULT = -42;
 
-        public TaskInfo(TaskInfo parent, string TaskInfo_CancelWaitName, WorkloadType workType, string optionsString)
+        public TaskInfo(TaskInfo parent, string TaskInfo_CancelWaitName, WorkloadType workType, TaskCreationOptions options)
         {
             Children = new LinkedList<TaskInfo>();
             Result = s_UNINITIALED_RESULT;
-            Option = s_DEFAULT_OPTION;
             Name = TaskInfo_CancelWaitName;
 
             WorkType = workType;
@@ -434,41 +432,17 @@ namespace System.Threading.Tasks.Tests.CancelWait
             CancellationTokenSource = new CancellationTokenSource();
             CancellationToken = CancellationTokenSource.Token;
 
-            if (string.IsNullOrEmpty(optionsString))
-                return;
-
-            //
-            // Parse Task CreationOptions, if RespectParentCancellation we would want to acknowledge that
-            // and passed the remaining options for creation
-            //
-            string[] options = optionsString.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
-
-            for (int i = 0; i < options.Length; i++)
-            {
-                string o = options[i].Trim(); // remove any white spaces.
-                options[i] = o;
-            }
-
-            if (options.Length > 0)
-            {
-                TaskCreationOptions parsedOptions;
-                string joinedOptions = string.Join(",", options);
-                bool parsed = Enum.TryParse<TaskCreationOptions>(joinedOptions, out parsedOptions);
-                if (!parsed)
-                    throw new NotSupportedException("could not parse the options string: " + joinedOptions);
-
-                Option = parsedOptions;
-            }
+            Option = options;
         }
 
-        public TaskInfo(TaskInfo parent, string TaskInfo_CancelWaitName, WorkloadType workType, string optionsString, bool cancelChildren, bool respectParentCancellation)
-            : this(parent, TaskInfo_CancelWaitName, workType, optionsString, respectParentCancellation)
+        public TaskInfo(TaskInfo parent, string TaskInfo_CancelWaitName, WorkloadType workType, TaskCreationOptions options, bool cancelChildren, bool respectParentCancellation)
+            : this(parent, TaskInfo_CancelWaitName, workType, options, respectParentCancellation)
         {
             CancelChildren = cancelChildren;
         }
 
-        public TaskInfo(TaskInfo parent, string TaskInfo_CancelWaitName, WorkloadType workType, string optionsString, bool respectParentCancellation)
-            : this(parent, TaskInfo_CancelWaitName, workType, optionsString)
+        public TaskInfo(TaskInfo parent, string TaskInfo_CancelWaitName, WorkloadType workType, TaskCreationOptions options, bool respectParentCancellation)
+            : this(parent, TaskInfo_CancelWaitName, workType, options)
         {
             IsRespectParentCancellation = respectParentCancellation;
         }
