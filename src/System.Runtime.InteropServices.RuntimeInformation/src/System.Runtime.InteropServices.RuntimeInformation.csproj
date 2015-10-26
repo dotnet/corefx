@@ -31,14 +31,39 @@
   <ItemGroup Condition=" '$(TargetsOSX)' == 'true' ">
     <Compile Include="RuntimeInformation.OSX.cs" />
   </ItemGroup>
+  <ItemGroup Condition=" '$(TargetsUnix)' == 'true' ">
+    <Compile Include="ArchitectureManager.Unix.cs" />
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.UName.cs">
+      <Link>Common\Interop\Unix\Interop.UName.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\Interop.Libraries.cs">
+      <Link>Common\Interop\Unix\Interop.Libraries.cs</Link>
+    </Compile>
+  </ItemGroup>
   <ItemGroup Condition=" '$(TargetsWindows)' == 'true' ">
     <Compile Include="RuntimeInformation.Windows.cs" />
+    <Compile Include="ArchitectureManager.Windows.cs" />
+    <Compile Include="$(CommonPath)\Interop\Windows\Interop.Libraries.cs">
+      <Link>Common\Interop\Windows\Interop.Libraries.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.IsWow64Process.cs">
+      <Link>Common\Interop\Windows\mincore\Interop.IsWow64Process.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.GetNativeSystemInfo.cs">
+      <Link>Common\Interop\Windows\mincore\Interop.GetNativeSystemInfo.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.SYSTEM_INFO.cs">
+      <Link>Common\Interop\Windows\mincore\Interop.SYSTEM_INFO.cs</Link>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <None Include="project.json" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Architecture.cs" />
+    <Compile Include="ArchitectureManager.cs" />
     <Compile Include="OSPlatform.cs" />
+    <Compile Include="RuntimeInformation.cs" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

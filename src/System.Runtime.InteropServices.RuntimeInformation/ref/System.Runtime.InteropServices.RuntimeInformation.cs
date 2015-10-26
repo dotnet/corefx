@@ -24,5 +24,8 @@ namespace System.Runtime.InteropServices
     public static partial class RuntimeInformation
     {
         public static bool IsOSPlatform(System.Runtime.InteropServices.OSPlatform osPlatform) { return default(bool); }
+        public static bool Is64BitProcess() { return default(bool); }
+        public static bool Is64BitOS() { return default(bool); }
+        public static bool IsArmProcessor() { return default(bool); }
     }
 }
