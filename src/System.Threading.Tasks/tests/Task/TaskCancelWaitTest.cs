@@ -336,18 +336,6 @@ namespace System.Threading.Tasks.Tests.CancelWait
             TaskInfo ti = current;
             WorkloadType workType = ti.WorkType;
 
-            if (workType == WorkloadType.Exceptional && _api != API.Cancel)
-            {
-                bool expCaught = FindException((ex) =>
-                {
-                    TPLTestException expectedExp = ex as TPLTestException;
-                    return expectedExp != null && expectedExp.FromTaskId == ti.Task.Id;
-                });
-
-                if (!expCaught)
-                    Assert.True(false, string.Format("expected TPLTestException in Task.Name = Task{0} NOT caught", current.Name));
-            }
-            else
             {
                 if (ti.Task.Exception != null && _api == API.Wait)
                     Assert.True(false, string.Format("UNEXPECTED exception in Task.Name = Task{0} caught. Exception: {1}", current.Name, ti.Task.Exception));
@@ -591,16 +579,6 @@ namespace System.Threading.Tasks.Tests.CancelWait
         public void RunWorkload()
         {
             //Thread = Thread.CurrentThread;
-
-            if (WorkType == WorkloadType.Exceptional)
-            {
-                ThrowException();
-            }
-            else if (WorkType == WorkloadType.Cancelled)
-            {
-                CancelSelf(this.CancellationTokenSource, this.CancellationToken);
-            }
-            else
             {
                 // run the workload
                 if (Result == s_UNINITIALED_RESULT)
@@ -623,23 +601,6 @@ namespace System.Threading.Tasks.Tests.CancelWait
             }
 
             return result;
-        }
-
-        /// <summary>
-        /// Cancel self workload. The CancellationToken has been wired such that the source passed to this method
-        /// is a source that can actually causes the Task CancellationToken to be canceled. The source could be the
-        /// Token's original source, or one of the sources in case of Linked Tokens
-        /// </summary>
-        /// <param name="cts"></param>
-        public static void CancelSelf(CancellationTokenSource cts, CancellationToken ct)
-        {
-            cts.Cancel();
-            throw new OperationCanceledException(ct);
-        }
-
-        public static void ThrowException()
-        {
-            throw new TPLTestException();
         }
 
         internal void AddChildren(TaskInfo[] children)
@@ -674,8 +635,6 @@ namespace System.Threading.Tasks.Tests.CancelWait
     /// </summary>
     public enum WorkloadType
     {
-        Exceptional = -2,
-        Cancelled = -1,
         VeryLight = 1000,     // the number is the N input to the ZetaSequence workload
         Light = 5000,
         Medium = 100000,
