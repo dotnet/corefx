@@ -443,27 +443,10 @@ namespace System.Threading.Tasks.Tests.CancelWait
             //
             string[] options = optionsString.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
 
-            int index = -1;
             for (int i = 0; i < options.Length; i++)
             {
                 string o = options[i].Trim(); // remove any white spaces.
                 options[i] = o;
-                if (o.Equals("RespectParentCancellation", StringComparison.OrdinalIgnoreCase))
-                {
-                    IsRespectParentCancellation = true;
-                    index = i;
-                }
-            }
-
-            if (index != -1)
-            {
-                string[] temp = new string[options.Length - 1];
-                int excludeIndex = index + 1;
-                Array.Copy(options, 0, temp, 0, index);
-                int leftToCopy = options.Length - excludeIndex;
-                Array.Copy(options, excludeIndex, temp, index, leftToCopy);
-
-                options = temp;
             }
 
             if (options.Length > 0)
@@ -478,10 +461,16 @@ namespace System.Threading.Tasks.Tests.CancelWait
             }
         }
 
-        public TaskInfo(TaskInfo parent, string TaskInfo_CancelWaitName, WorkloadType workType, string optionsString, bool cancelChildren)
-            : this(parent, TaskInfo_CancelWaitName, workType, optionsString)
+        public TaskInfo(TaskInfo parent, string TaskInfo_CancelWaitName, WorkloadType workType, string optionsString, bool cancelChildren, bool respectParentCancellation)
+            : this(parent, TaskInfo_CancelWaitName, workType, optionsString, respectParentCancellation)
         {
             CancelChildren = cancelChildren;
+        }
+
+        public TaskInfo(TaskInfo parent, string TaskInfo_CancelWaitName, WorkloadType workType, string optionsString, bool respectParentCancellation)
+            : this(parent, TaskInfo_CancelWaitName, workType, optionsString)
+        {
+            IsRespectParentCancellation = respectParentCancellation;
         }
 
         #region Properties
