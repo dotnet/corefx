@@ -12,7 +12,7 @@
           "ref/dotnet/System.Collections.dll": {}
         }
       },
-      "System.Console/4.0.0-beta-23420": {
+      "System.Console/4.0.0-beta-23426": {
         "type": "package",
         "dependencies": {
           "System.IO": "4.0.0",
@@ -121,10 +121,10 @@
         "System.Collections.nuspec"
       ]
     },
-    "System.Console/4.0.0-beta-23420": {
+    "System.Console/4.0.0-beta-23426": {
       "type": "package",
       "serviceable": true,
-      "sha512": "2dxC8xRy9QRE1kt+7zXeceAKIqWK+T3SghGNjY9Sk/hC+WOYRQo4x3Zci6sz2a17WHXDoTPjO1rBrEPMG/e2jQ==",
+      "sha512": "ptXt3GKdm0NveF2zGc25T1b/J4XOc+AELREu3OA6tqixhMZ6c5wWU+pBT1xfY3NHsQJfXTfM/Ud26TSDWpKjfQ==",
       "files": [
         "lib/MonoAndroid10/_._",
         "lib/MonoTouch10/_._",
@@ -148,8 +148,8 @@
         "ref/xamarinios10/_._",
         "ref/xamarinmac20/_._",
         "runtime.json",
-        "System.Console.4.0.0-beta-23420.nupkg",
-        "System.Console.4.0.0-beta-23420.nupkg.sha512",
+        "System.Console.4.0.0-beta-23426.nupkg",
+        "System.Console.4.0.0-beta-23426.nupkg.sha512",
         "System.Console.nuspec"
       ]
     },
@@ -440,7 +440,7 @@
       "System.Runtime >= 4.0.20",
       "System.Runtime.Extensions >= 4.0.10",
       "System.Diagnostics.Debug >= 4.0.10",
-      "System.Console >= 4.0.0-beta-23420"
+      "System.Console >= 4.0.0-beta-*"
     ],
     ".NETPlatform,Version=v5.1": []
   }

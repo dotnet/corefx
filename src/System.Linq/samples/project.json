@@ -5,10 +5,9 @@
     "System.Runtime": "4.0.20",
     "System.Runtime.Extensions": "4.0.10",
     "System.Diagnostics.Debug": "4.0.10",
-    "System.Console": "4.0.0-beta-23420"
+    "System.Console": "4.0.0-beta-*"
   },
   "frameworks": {
-    
     "dotnet51": {}
   }
 }

@@ -1,4 +1,6 @@
-﻿namespace System.Linq.Samples
+﻿using System;
+
+namespace System.Linq.Samples
 {
     public static class AggregateSamples
     {
