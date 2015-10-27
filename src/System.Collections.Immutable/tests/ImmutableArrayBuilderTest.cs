@@ -6,7 +6,7 @@ using System.Diagnostics;
 using System.Linq;
 using Xunit;
 
-namespace System.Collections.Immutable.Test
+namespace System.Collections.Immutable.Tests
 {
     public class ImmutableArrayBuilderTest : SimpleElementImmutablesTestBase
     {
@@ -133,7 +133,7 @@ namespace System.Collections.Immutable.Test
             Assert.Throws<ArgumentNullException>(() => builder1.AddRange((int[])null));
             Assert.Throws<ArgumentNullException>(() => builder1.AddRange(null, 42));
             Assert.Throws<ArgumentOutOfRangeException>(() => builder1.AddRange(new int[0], -1));
-            Assert.Throws<IndexOutOfRangeException>(() => builder1.AddRange(new int[0], 42));
+            Assert.Throws<ArgumentOutOfRangeException>(() => builder1.AddRange(new int[0], 42));
 
             Assert.Throws<ArgumentNullException>(() => builder1.AddRange((ImmutableArray<int>.Builder)null));
             Assert.Throws<ArgumentNullException>(() => builder1.AddRange((IEnumerable<int>)null));
@@ -287,10 +287,15 @@ namespace System.Collections.Immutable.Test
         [Fact]
         public void SortNullComparer()
         {
-            var builder = new ImmutableArray<int>.Builder();
-            builder.AddRange(2, 4, 1, 3);
+            var template = ImmutableArray.Create(2, 4, 1, 3);
+
+            var builder = template.ToBuilder();
             builder.Sort(null);
             Assert.Equal(new[] { 1, 2, 3, 4 }, builder);
+
+            builder = template.ToBuilder();
+            builder.Sort(1, 2, null);
+            Assert.Equal(new[] { 2, 1, 4, 3 }, builder);
         }
 
         [Fact]

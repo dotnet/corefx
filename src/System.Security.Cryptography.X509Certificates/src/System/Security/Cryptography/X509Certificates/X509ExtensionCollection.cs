@@ -25,12 +25,12 @@ namespace System.Security.Cryptography.X509Certificates
             get { return _list.Count; }
         }
 
-        public bool IsSynchronized
+        bool System.Collections.ICollection.IsSynchronized
         {
             get { return false; }
         }
 
-        public Object SyncRoot
+        object System.Collections.ICollection.SyncRoot
         {
             get { return this; }
         }
@@ -103,7 +103,7 @@ namespace System.Security.Cryptography.X509Certificates
             return new X509ExtensionEnumerator(this);
         }
 
-        private LowLevelListWithIList<X509Extension> _list = new LowLevelListWithIList<X509Extension>();
+        private readonly List<X509Extension> _list = new List<X509Extension>();
     }
 }
 

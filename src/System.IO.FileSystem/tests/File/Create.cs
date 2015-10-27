@@ -3,7 +3,7 @@
 
 using Xunit;
 
-namespace System.IO.FileSystem.Tests
+namespace System.IO.Tests
 {
     public class File_Create_str : FileSystemTest
     {
@@ -202,21 +202,6 @@ namespace System.IO.FileSystem.Tests
             Assert.Throws<ArgumentException>(() => Create(Path.Combine(testDir.FullName, "*")));
             Assert.Throws<ArgumentException>(() => Create(Path.Combine(testDir.FullName, "Test*t")));
             Assert.Throws<ArgumentException>(() => Create(Path.Combine(testDir.FullName, "*Tes*t")));
-        }
-
-        [Fact]
-        [PlatformSpecific(PlatformID.Windows)]
-        public void WindowsRemoveExtraneousWhitespace()
-        {
-            DirectoryInfo testDir = Directory.CreateDirectory(GetTestFilePath());
-            string testFile1 = Path.Combine(testDir.FullName, GetTestFileName());
-            string testFile2 = Path.Combine(" ", testDir.FullName, " ", GetTestFileName());
-            using (Create(string.Format(" {0}", testFile1)))
-            using (Create(testFile2))
-            {
-                Assert.True(File.Exists(testFile1));
-                Assert.True(File.Exists(testFile2));
-            }
         }
 
         [Fact]

@@ -5,7 +5,6 @@ namespace System.Security.Cryptography.X509Certificates.Tests
     public class X509StoreTests
     {
         [Fact]
-        [ActiveIssue(2820, PlatformID.AnyUnix)]
         public static void OpenMyStore()
         {
             using (X509Store store = new X509Store(StoreName.My, StoreLocation.CurrentUser))
@@ -15,7 +14,6 @@ namespace System.Security.Cryptography.X509Certificates.Tests
         }
 
         [Fact]
-        [ActiveIssue(2820, PlatformID.AnyUnix)]
         public static void ReadMyCertificates()
         {
             using (X509Store store = new X509Store(StoreName.My, StoreLocation.CurrentUser))
@@ -30,17 +28,15 @@ namespace System.Security.Cryptography.X509Certificates.Tests
         }
 
         [Fact]
-        [ActiveIssue(2820, PlatformID.AnyUnix)]
         public static void OpenNotExistant()
         {
             using (X509Store store = new X509Store(Guid.NewGuid().ToString("N"), StoreLocation.CurrentUser))
             {
-                Assert.Throws<CryptographicException>(() => store.Open(OpenFlags.OpenExistingOnly));
+                Assert.ThrowsAny<CryptographicException>(() => store.Open(OpenFlags.OpenExistingOnly));
             }
         }
 
         [Fact]
-        [ActiveIssue(2820, PlatformID.AnyUnix)]
         public static void AddReadOnlyThrows()
         {
             using (X509Store store = new X509Store(StoreName.My, StoreLocation.CurrentUser))
@@ -53,13 +49,12 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 // functionality.
                 if (!store.Certificates.Contains(cert))
                 {
-                    Assert.Throws<CryptographicException>(() => store.Add(cert));
+                    Assert.ThrowsAny<CryptographicException>(() => store.Add(cert));
                 }
             }
         }
 
         [Fact]
-        [ActiveIssue(2820, PlatformID.AnyUnix)]
         public static void AddReadOnlyThrowsWhenCertificateExists()
         {
             using (X509Store store = new X509Store(StoreName.My, StoreLocation.CurrentUser))
@@ -82,13 +77,12 @@ namespace System.Security.Cryptography.X509Certificates.Tests
 
                 if (toAdd != null)
                 {
-                    Assert.Throws<CryptographicException>(() => store.Add(toAdd));
+                    Assert.ThrowsAny<CryptographicException>(() => store.Add(toAdd));
                 }
             }
         }
 
         [Fact]
-        [ActiveIssue(2820, PlatformID.AnyUnix)]
         public static void RemoveReadOnlyThrowsWhenFound()
         {
             // This test is unfortunate, in that it will mostly never test.
@@ -107,13 +101,12 @@ namespace System.Security.Cryptography.X509Certificates.Tests
 
                 if (store.Certificates.Contains(cert))
                 {
-                    Assert.Throws<CryptographicException>(() => store.Remove(cert));
+                    Assert.ThrowsAny<CryptographicException>(() => store.Remove(cert));
                 }
             }
         }
 
         [Fact]
-        [ActiveIssue(2820, PlatformID.AnyUnix)]
         public static void EnumerateClosedIsEmpty()
         {
             using (X509Store store = new X509Store(StoreName.My, StoreLocation.CurrentUser))
@@ -124,24 +117,63 @@ namespace System.Security.Cryptography.X509Certificates.Tests
         }
 
         [Fact]
-        [ActiveIssue(2820, PlatformID.AnyUnix)]
         public static void AddClosedThrows()
         {
             using (X509Store store = new X509Store(StoreName.My, StoreLocation.CurrentUser))
             using (X509Certificate2 cert = new X509Certificate2(TestData.MsCertificate))
             {
-                Assert.Throws<CryptographicException>(() => store.Add(cert));
+                Assert.ThrowsAny<CryptographicException>(() => store.Add(cert));
             }
         }
 
         [Fact]
-        [ActiveIssue(2820, PlatformID.AnyUnix)]
         public static void RemoveClosedThrows()
         {
             using (X509Store store = new X509Store(StoreName.My, StoreLocation.CurrentUser))
             using (X509Certificate2 cert = new X509Certificate2(TestData.MsCertificate))
             {
-                Assert.Throws<CryptographicException>(() => store.Remove(cert));
+                Assert.ThrowsAny<CryptographicException>(() => store.Remove(cert));
+            }
+        }
+
+        [Fact]
+        [PlatformSpecific(PlatformID.Windows)]
+        public static void OpenMachineMyStore_Supported()
+        {
+            using (X509Store store = new X509Store(StoreName.My, StoreLocation.LocalMachine))
+            {
+                store.Open(OpenFlags.ReadOnly);
+            }
+        }
+
+        [Fact]
+        [PlatformSpecific(PlatformID.AnyUnix)]
+        public static void OpenMachineMyStore_NotSupported()
+        {
+            using (X509Store store = new X509Store(StoreName.My, StoreLocation.LocalMachine))
+            {
+                Assert.Throws<PlatformNotSupportedException>(() => store.Open(OpenFlags.ReadOnly));
+            }
+        }
+
+        [Theory]
+        [PlatformSpecific(PlatformID.AnyUnix)]
+        [InlineData(OpenFlags.ReadOnly, false)]
+        [InlineData(OpenFlags.MaxAllowed, false)]
+        [InlineData(OpenFlags.ReadWrite, true)]
+        public static void OpenMachineRootStore_Permissions(OpenFlags permissions, bool shouldThrow)
+        {
+            using (X509Store store = new X509Store(StoreName.Root, StoreLocation.LocalMachine))
+            {
+                if (shouldThrow)
+                {
+                    Assert.Throws<PlatformNotSupportedException>(() => store.Open(permissions));
+                }
+                else
+                {
+                    // Assert.DoesNotThrow
+                    store.Open(permissions);
+                }
             }
         }
     }

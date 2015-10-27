@@ -5,7 +5,7 @@
     <Configuration Condition="'$(Configuration)' == ''">Debug</Configuration>
     <Platform Condition="'$(Platform)' == ''">AnyCPU</Platform>
     <AssemblyName>System.Private.DataContractSerialization</AssemblyName>
-    <AssemblyVersion>4.0.1.0</AssemblyVersion>
+    <AssemblyVersion>4.1.0.0</AssemblyVersion>
     <RootNamespace>System.Private.DataContractSerialization</RootNamespace>
     <OutputType>Library</OutputType>
     <NoWarn>$(NoWarn);1634;1691;649</NoWarn>
@@ -77,6 +77,8 @@
     <Compile Include="$(RuntimeSerializationSources)\XmlObjectSerializerWriteContextComplex.cs" Condition="$(NetNative) Or $(MergeDcjs)" />
     <Compile Include="$(RuntimeSerializationSources)\BitFlagsGenerator.cs" Condition="!$(NetNative) And $(MergeDcjs)" />
     <Compile Include="$(XmlSources)\ArrayHelper.cs" />
+    <Compile Include="$(XmlSources)\BytesWithOffset.cs" />
+    <Compile Include="$(XmlSources)\XmlDictionaryAsyncCheckWriter.cs" />
     <Compile Include="$(XmlSources)\IStreamProvider.cs" />
     <Compile Include="$(XmlSources)\IXmlDictionary.cs" />
     <Compile Include="$(XmlSources)\PrefixHandle.cs" />

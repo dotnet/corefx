@@ -23,6 +23,7 @@
       <Link>Common\System\Diagnostics\Tracing\TestEventListener.cs</Link>
     </Compile>
     <Compile Include="Combinatorial\CancellationParallelQueryCombinationTests.cs" />
+    <Compile Include="Combinatorial\FailingParallelQueryCombinationTests.cs" />
     <Compile Include="Combinatorial\LabeledOperation.cs" />
     <Compile Include="Combinatorial\ParallelQueryCombinationTests.cs" />
     <Compile Include="Combinatorial\SourcesAndOperators.cs" />
@@ -86,11 +87,6 @@
     <Compile Include="XunitAssemblyAttributes.cs" />
   </ItemGroup>
   <!-- Common or Common-branched source files -->
-  <ItemGroup>
-    <Compile Include="$(CommonTestPath)\System\Console.cs">
-      <Link>Common\System\Console.cs</Link>
-    </Compile>
-  </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\src\System.Linq.Parallel.csproj">
       <Project>{be28323e-327a-4e0f-b7f9-16ab7eab59dd}</Project>

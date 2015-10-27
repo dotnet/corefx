@@ -6,7 +6,7 @@ using System.Diagnostics;
 using System.Linq;
 using Xunit;
 
-namespace System.Collections.Immutable.Test
+namespace System.Collections.Immutable.Tests
 {
     public class ImmutableListTest : ImmutableListTestBase
     {
@@ -317,6 +317,19 @@ namespace System.Collections.Immutable.Test
         }
 
         [Fact]
+        public void Remove_NullEqualityComparer()
+        {
+            var collection = ImmutableList.Create(1, 2, 3);
+            var modified = collection.Remove(2, null);
+            Assert.Equal(new[] { 1, 3 }, modified);
+
+            // Try again through the explicit interface implementation.
+            IImmutableList<int> collectionIface = collection;
+            var modified2 = collectionIface.Remove(2, null);
+            Assert.Equal(new[] { 1, 3 }, modified2);
+        }
+
+        [Fact]
         public void RemoveTest()
         {
             ImmutableList<int> list = ImmutableList<int>.Empty;
@@ -390,7 +403,7 @@ namespace System.Collections.Immutable.Test
         public void RemoveRangeDoesNotEnumerateSequenceIfThisIsEmpty()
         {
             var list = ImmutableList<int>.Empty;
-            list.RemoveRange(Enumerable.Range(1, 1).Select(n => { Assert.False(true, "Sequence should not have been enumerated."); return n; }));
+            list.RemoveRange(Enumerable.Range(1, 1).Select<int, int>(n => { throw new ShouldNotBeInvokedException(); }));
         }
 
         [Fact]
@@ -522,6 +535,15 @@ namespace System.Collections.Immutable.Test
             var newAge = new Person { Name = "Andrew", Age = 21 };
             var updatedList = list.Replace(newAge, newAge, new NameOnlyEqualityComparer());
             Assert.Equal(newAge.Age, updatedList[0].Age);
+
+            // Try again with a null equality comparer, which should use the default EQ.
+            updatedList = list.Replace(list[0], newAge);
+            Assert.NotSame(list, updatedList);
+
+            // Finally, try one last time using the interface implementation.
+            IImmutableList<Person> iface = list;
+            var updatedIface = iface.Replace(list[0], newAge);
+            Assert.NotSame(iface, updatedIface);
         }
 
         [Fact]
@@ -583,14 +605,24 @@ namespace System.Collections.Immutable.Test
         [Fact]
         public void RemoveRangeArrayTest()
         {
+            Assert.True(ImmutableList<int>.Empty.RemoveRange(0, 0).IsEmpty);
+
             var list = ImmutableList.Create(1, 2, 3);
             Assert.Throws<ArgumentOutOfRangeException>(() => list.RemoveRange(-1, 0));
             Assert.Throws<ArgumentOutOfRangeException>(() => list.RemoveRange(0, -1));
             Assert.Throws<ArgumentOutOfRangeException>(() => list.RemoveRange(4, 0));
             Assert.Throws<ArgumentOutOfRangeException>(() => list.RemoveRange(0, 4));
             Assert.Throws<ArgumentOutOfRangeException>(() => list.RemoveRange(2, 2));
-            list.RemoveRange(3, 0);
-            Assert.Equal(3, list.Count);
+            Assert.Equal(list, list.RemoveRange(3, 0));
+        }
+
+        [Fact]
+        public void RemoveRange_EnumerableEqualityComparer_AcceptsNullEQ()
+        {
+            var list = ImmutableList.Create(1, 2, 3);
+            var removed2eq = list.RemoveRange(new[] { 2 }, null);
+            Assert.Equal(2, removed2eq.Count);
+            Assert.Equal(new[] { 1, 3 }, removed2eq);
         }
 
         [Fact]

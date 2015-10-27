@@ -8,10 +8,10 @@ partial class Interop
 {
     partial class mincore
     {
-        [DllImport(Libraries.CoreFile_L1, SetLastError = true, CharSet = CharSet.Unicode, BestFitMapping = false)]
-        internal unsafe static extern int GetLongPathNameW(char* path, char* longPathBuffer, int bufferLength);
-
-        [DllImport(Libraries.CoreFile_L1, SetLastError = true, CharSet = CharSet.Unicode, BestFitMapping = false)]
-        internal static extern int GetLongPathNameW(string path, [Out]StringBuilder longPathBuffer, int bufferLength);
+        /// <summary>
+        /// WARNING: This method does not implicitly handle long paths. Use GetFullPath/PathHelper.
+        /// </summary>
+        [DllImport(Libraries.CoreFile_L1, SetLastError = true, CharSet = CharSet.Unicode, BestFitMapping = false, ExactSpelling = true)]
+        internal static extern int GetLongPathNameW(char[] path, [Out]StringBuilder longPathBuffer, int bufferLength);
     }
 }

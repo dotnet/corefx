@@ -1,16 +1,11 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using Xunit;
-using CoreFXTestLibrary;
-
-using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
+using Xunit;
 
-namespace System.Threading.Tasks.Test
+namespace System.Threading.Tasks.Tests
 {
 
     public static class ParallelLoopResultTests
@@ -181,15 +176,8 @@ Parallel.For(1L, 0L, delegate (long i, ParallelLoopState ps)
 
         private static void PLRcheck(ParallelLoopResult plr, string ttype, bool shouldComplete, Int32? expectedLBI)
         {
-            if ((plr.IsCompleted == shouldComplete) && (plr.LowestBreakIteration == expectedLBI))
-            {
-            }
-            else
-            {
-                string biString = "(null)";
-                if (plr.LowestBreakIteration != null) biString = plr.LowestBreakIteration.ToString();
-                Assert.False(true, String.Format("PLRcheck {0} test:  >> Failed. IsCompleted={1}, LowestBreakIteration={2}", ttype, plr.IsCompleted, biString));
-            }
+            Assert.Equal(shouldComplete, plr.IsCompleted);
+            Assert.Equal(expectedLBI, plr.LowestBreakIteration);
         }
 
         // Generalized test for testing For-loop results

@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Xunit;
 
-namespace System.Collections.Immutable.Test
+namespace System.Collections.Immutable.Tests
 {
     public static class IndexOfTests
     {
@@ -39,6 +39,7 @@ namespace System.Collections.Immutable.Test
             var list = ImmutableList<int>.Empty.AddRange(Enumerable.Range(100, 5).Concat(Enumerable.Range(100, 5)));
             var bclList = list.ToList();
             Assert.Equal(-1, indexOfItem(factory(list), 6));
+            Assert.Equal(2, indexOfItemIndexCountEQ(factory(list), 102, 0, 4, null));
 
             if (factory(list) is IList)
             {
@@ -106,6 +107,7 @@ namespace System.Collections.Immutable.Test
             var list = ImmutableList<int>.Empty.AddRange(Enumerable.Range(100, 5).Concat(Enumerable.Range(100, 5)));
             var bclList = list.ToList();
             Assert.Equal(-1, lastIndexOfItem(factory(list), 6));
+            Assert.Equal(2, lastIndexOfItemIndexCountEQ(factory(list), 102, 6, 5, null));
 
             for (int idx = 0; idx < list.Count; idx++)
             {

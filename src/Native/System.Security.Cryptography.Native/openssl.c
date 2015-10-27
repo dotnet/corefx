@@ -3,7 +3,10 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 //
 
+#include "pal_types.h"
+
 #include <assert.h>
+#include <limits.h>
 #include <pthread.h>
 #include <stdlib.h>
 #include <string.h>
@@ -11,7 +14,9 @@
 #include <unistd.h>
 #include <openssl/asn1.h>
 #include <openssl/bio.h>
+#include <openssl/err.h>
 #include <openssl/evp.h>
+#include <openssl/rand.h>
 #include <openssl/x509.h>
 #include <openssl/x509v3.h>
 
@@ -42,17 +47,17 @@ A time_t representation of the input date. See also man mktime(3).
 static
 time_t
 MakeTimeT(
-    int year,
-    int month,
-    int day,
-    int hour,
-    int minute,
-    int second,
-    int isDst)
+    int32_t year,
+    int32_t month,
+    int32_t day,
+    int32_t hour,
+    int32_t minute,
+    int32_t second,
+    int32_t isDst)
 {
     struct tm currentTm;
     currentTm.tm_year = year - 1900;
-    currentTm.tm_mon = month;
+    currentTm.tm_mon = month - 1;
     currentTm.tm_mday = day;
     currentTm.tm_hour = hour;
     currentTm.tm_min = minute;
@@ -73,11 +78,11 @@ Return values:
 1: Data was copied
 Any negative value: The input buffer size was reported as insufficient. A buffer of size ABS(return) is required.
 */
-int
+int32_t
 GetX509Thumbprint(
     X509* x509,
-    unsigned char* pBuf,
-    int cBuf)
+    uint8_t* pBuf,
+    int32_t cBuf)
 {
     if (!x509)
     {
@@ -134,6 +139,29 @@ GetX509NotAfter(
     if (x509 && x509->cert_info && x509->cert_info->validity)
     {
         return x509->cert_info->validity->notAfter;
+    }
+
+    return NULL;
+}
+
+/*
+Function:
+GetX509CrlNextUpdate
+
+Used by System.Security.Cryptography.X509Certificates' CrlCache to identify the
+end of the validity period of the certificate revocation list in question.
+
+Return values:
+NULL if the validity cannot be determined, a pointer to the ASN1_TIME structure for the NextUpdate value
+otherwise.
+*/
+ASN1_TIME*
+GetX509CrlNextUpdate(
+    X509_CRL* crl)
+{
+    if (crl)
+    {
+        return X509_CRL_get_nextUpdate(crl);
     }
 
     return NULL;
@@ -224,11 +252,11 @@ Return values:
 1: Data was copied
 Any negative value: The input buffer size was reported as insufficient. A buffer of size ABS(return) is required.
 */
-int
+int32_t
 GetX509PublicKeyParameterBytes(
     X509* x509,
-    unsigned char* pBuf,
-    int cBuf)
+    uint8_t* pBuf,
+    int32_t cBuf)
 {
     if (!x509 || !x509->cert_info || !x509->cert_info->key || !x509->cert_info->key->algor)
     {
@@ -310,23 +338,30 @@ Remarks:
 
  So this function will really work on all of them.
 */
-int
+int32_t
 GetAsn1StringBytes(
     ASN1_STRING* asn1,
-    unsigned char* pBuf,
-    int cBuf)
+    uint8_t* pBuf,
+    int32_t cBuf)
 {
-    if (!asn1)
+    if (!asn1 || cBuf < 0)
     {
         return 0;
     }
 
-    if (!pBuf || cBuf < asn1->length)
+    int length = asn1->length;
+    assert(length >= 0);
+    if (length < 0)
     {
-        return -asn1->length;
+        return 0;
     }
 
-    memcpy(pBuf, asn1->data, asn1->length);
+    if (!pBuf || cBuf < length)
+    {
+        return -length;
+    }
+
+    memcpy(pBuf, asn1->data, (unsigned int)length);
     return 1;
 }
 
@@ -342,23 +377,46 @@ Return values:
 1: Data was copied
 Any negative value: The input buffer size was reported as insufficient. A buffer of size ABS(return) is required.
 */
-int
+int32_t
 GetX509NameRawBytes(
     X509_NAME* x509Name,
-    unsigned char* pBuf,
-    int cBuf)
+    uint8_t* pBuf,
+    int32_t cBuf)
 {
-    if (!x509Name || !x509Name->bytes)
+    if (!x509Name || !x509Name->bytes || cBuf < 0)
     {
         return 0;
     }
 
-    if (!pBuf || cBuf < x509Name->bytes->length)
+    /* 
+     * length is size_t on some platforms and int on others, so the comparisons
+     * are not tautological everywhere. We can let the compiler optimize away
+     * any part of the check that is. We split the size checks into two checks
+     * so we can get around the warnings on Linux where the Length is unsigned
+     * whereas Length is signed on OS X. The first check makes sure the variable 
+     * value is less than INT_MAX in it's native format; once we know it is not
+     * too large, we can safely cast to an int to make sure it is not negative
+     */
+    if (x509Name->bytes->length > INT_MAX)
     {
-        return -x509Name->bytes->length;
+        assert(0 && "Huge length X509_NAME");
+        return 0;
     }
 
-    memcpy(pBuf, x509Name->bytes->data, x509Name->bytes->length);
+    int length = (int)(x509Name->bytes->length);
+
+    if (length < 0)
+    {
+        assert(0 && "Negative length X509_NAME");
+        return 0;
+    }
+
+    if (!pBuf || cBuf < length)
+    {
+        return -length;
+    }
+    
+    memcpy(pBuf, x509Name->bytes->data, (unsigned int)length);
     return 1;
 }
 
@@ -394,7 +452,7 @@ that particular OID.
 ASN1_OBJECT*
 GetX509EkuField(
     EXTENDED_KEY_USAGE* eku,
-    int loc)
+    int32_t loc)
 {
     return sk_ASN1_OBJECT_value(eku, loc);
 }
@@ -413,8 +471,8 @@ memory-backed BIO structure which contains the answer to the GetNameInfo query
 BIO*
 GetX509NameInfo(
     X509* x509,
-    int nameType,
-    int forIssuer)
+    int32_t nameType,
+    int32_t forIssuer)
 {
     static const char szOidUpn[] = "1.3.6.1.4.1.311.20.2.3";
 
@@ -664,6 +722,318 @@ GetX509NameInfo(
 
 /*
 Function:
+CheckX509HostnameMatch
+
+Checks if a particular ASN1_STRING represents the entry in a certificate which would match against
+the requested hostname.
+
+Prameter sanRules: 0 for match rules against the subject CN, 1 for match rules against a SAN entry
+
+Return values:
+1 if the hostname is a match
+0 if the hostname is not a match
+Any negative number indicates an error in the arguments.
+*/
+static
+int
+CheckX509HostnameMatch(ASN1_STRING* candidate, const char* hostname, int cchHostname, char sanRules)
+{
+    assert(candidate);
+    assert(hostname);
+
+    if (!candidate->data || !candidate->length)
+    {
+        return 0;
+    }
+
+    // If the candidate is *.example.org then the smallest we would match is a.example.org, which is the same
+    // length. So anything longer than what we're matching against isn't valid.
+
+    // This assumption might not hold under IDNA, it might need to be more sophisticated
+    // "UTF character string length"
+    if (candidate->length > cchHostname)
+    {
+        return 0;
+    }
+
+    if (sanRules)
+    {
+        // RFC2818 says to use RFC2595 matching rules, but then gives an example that f*.com would match foo.com
+        // RFC2595 says that '*' may be used as the left name component, in which case it is a wildcard that does
+        // not match a '.'.
+        //
+        // In the interest of time, and the idea that it's better to err on the side of more restrictive,
+        // this implementation does not support mid-string wildcards.
+        //
+        // TODO (3444): Determine if we're too restrictive here.
+
+        char* candidateStr;
+        int i;
+        int hostnameFirstDot = -1;
+
+        // A GEN_DNS name is supposed to be a V_ASN1_IA5STRING.  If it isn't, we don't know how to read it.
+        if (candidate->type != V_ASN1_IA5STRING)
+        {
+            return 0;
+        }
+
+        // Great, candidateStr is just candidate->data!
+        candidateStr = (char*)candidate->data;
+
+        // First, verify that the string is alphanumeric, plus hyphens or periods and maybe starting with an asterisk.
+        for (i = 0; i < candidate->length; ++i)
+        {
+            char c = candidateStr[i];
+
+            if ((c < 'a' || c > 'z') &&
+                (c < '0' || c > '9') &&
+                (c != '.') &&
+                (c != '-') &&
+                (c != '*' || i != 0))
+            {
+                return 0;
+            }
+        }
+
+        if (candidateStr[0] != '*')
+        {
+            if (candidate->length != cchHostname)
+            {
+                return 0;
+            }
+
+            return !memcmp(candidateStr, hostname, (size_t)cchHostname);
+        }
+
+        for (i = 0; i < cchHostname; ++i)
+        {
+            if (hostname[i] == '.')
+            {
+                hostnameFirstDot = i;
+                break;
+            }
+        }
+
+        if (hostnameFirstDot < 0)
+        {
+            // It's possible that this should be considered a match if the entire SAN entry is '*',
+            // aka candidate->length == 1; but nothing talks about this case.
+            return 0;
+        }
+
+        {
+            // Determine how many characters exist after the portion the wildcard would match. For example,
+            // if hostname is 10 bytes long, and the '.' was at index 3, then we eliminate the first 3
+            // characters (www) from the match constraint.  This forces the wildcard to be the last
+            // character before the . in its match group.
+            int matchLength = cchHostname - hostnameFirstDot;
+
+            // If what's left over from hostname isn't as long as what's left over from the candidate
+            // after the first character was an asterisk, it can't match.
+            if (matchLength != (candidate->length - 1))
+            {
+                return 0;
+            }
+
+            return !memcmp(candidateStr + 1, hostname + hostnameFirstDot, (size_t)matchLength);
+        }
+    }
+
+    // Not SAN-rules, much simpler:
+
+    if (candidate->length != cchHostname)
+    {
+        return 0;
+    }
+
+    return !memcmp(candidate->data, hostname, (size_t)cchHostname);
+}
+
+/*
+Function:
+CheckX509Hostname
+
+Used by System.Net.Security's Unix CertModule to identify if the certificate presented by
+the server is applicable to the hostname requested.
+
+Return values:
+1 if the hostname is a match
+0 if the hostname is not a match
+Any negative number indicates an error in the arguments.
+*/
+int32_t
+CheckX509Hostname(
+    X509* x509,
+    const char* hostname,
+    int32_t cchHostname)
+{
+    if (!x509)
+        return -2;
+    if (cchHostname > 0 && !hostname)
+        return -3;
+    if (cchHostname < 0)
+        return -4;
+
+    int subjectNid = NID_commonName;
+    int sanGenType = GEN_DNS;
+    GENERAL_NAMES* san = X509_get_ext_d2i(x509, NID_subject_alt_name, NULL, NULL);
+    char readSubject = 1;
+    int success = 0;
+
+    // RFC2818 says that if ANY dNSName alternative name field is matched then we
+    // should ignore the subject common name.
+
+    // TODO (3446): Match using IDNA rules.
+
+    if (san)
+    {
+        int i;
+        int count = sk_GENERAL_NAME_num(san);
+
+        for (i = 0; i < count; ++i)
+        {
+            GENERAL_NAME* sanEntry = sk_GENERAL_NAME_value(san, i);
+
+            if (sanEntry->type != sanGenType)
+            {
+                continue;
+            }
+
+            readSubject = 0;
+
+            if (CheckX509HostnameMatch(sanEntry->d.dNSName, hostname, cchHostname, 1))
+            {
+                success = 1;
+                break;
+            }
+        }
+
+        GENERAL_NAMES_free(san);
+    }
+
+    if (readSubject && !success)
+    {
+        // This is a shared/interor pointer, do not free!
+        X509_NAME* subject = X509_get_subject_name(x509);
+
+        if (subject)
+        {
+            int i = -1;
+
+            while ((i = X509_NAME_get_index_by_NID(subject, subjectNid, i)) >= 0)
+            {
+                // Shared/interior pointers, do not free!
+                X509_NAME_ENTRY* nameEnt = X509_NAME_get_entry(subject, i);
+                ASN1_STRING* cn = X509_NAME_ENTRY_get_data(nameEnt);
+
+                if (CheckX509HostnameMatch(cn, hostname, cchHostname, 0))
+                {
+                    success = 1;
+                    break;
+                }
+            }
+        }
+    }
+
+    return success;
+}
+
+/*
+Function:
+CheckX509IpAddress
+
+Used by System.Net.Security's Unix CertModule to identify if the certificate presented by
+the server is applicable to the hostname (an IP address) requested.
+
+Return values:
+1 if the hostname is a match
+0 if the hostname is not a match
+Any negative number indicates an error in the arguments.
+*/
+int32_t
+CheckX509IpAddress(
+    X509* x509,
+    const uint8_t* addressBytes,
+    int32_t addressBytesLen,
+    const char* hostname,
+    int32_t cchHostname)
+{
+    if (!x509)
+        return -2;
+    if (cchHostname > 0 && !hostname)
+        return -3;
+    if (cchHostname < 0)
+        return -4;
+    if (addressBytesLen < 0)
+        return -5;
+    if (!addressBytes)
+        return -6;
+
+    int subjectNid = NID_commonName;
+    int sanGenType = GEN_IPADD;
+    GENERAL_NAMES* san = X509_get_ext_d2i(x509, NID_subject_alt_name, NULL, NULL);
+    int success = 0;
+
+    if (san)
+    {
+        int i;
+        int count = sk_GENERAL_NAME_num(san);
+
+        for (i = 0; i < count; ++i)
+        {
+            GENERAL_NAME* sanEntry = sk_GENERAL_NAME_value(san, i);
+            ASN1_OCTET_STRING* ipAddr;
+
+            if (sanEntry->type != sanGenType)
+            {
+                continue;
+            }
+
+            ipAddr = sanEntry->d.iPAddress;
+
+            if (!ipAddr || !ipAddr->data || ipAddr->length != addressBytesLen)
+            {
+                continue;
+            }
+
+            if (!memcmp(addressBytes, ipAddr->data, (size_t)addressBytesLen))
+            {
+                success = 1;
+                break;
+            }
+        }
+
+        GENERAL_NAMES_free(san);
+    }
+
+    if (!success)
+    {
+        // This is a shared/interor pointer, do not free!
+        X509_NAME* subject = X509_get_subject_name(x509);
+
+        if (subject)
+        {
+            int i = -1;
+
+            while ((i = X509_NAME_get_index_by_NID(subject, subjectNid, i)) >= 0)
+            {
+                // Shared/interior pointers, do not free!
+                X509_NAME_ENTRY* nameEnt = X509_NAME_get_entry(subject, i);
+                ASN1_STRING* cn = X509_NAME_ENTRY_get_data(nameEnt);
+
+                if (CheckX509HostnameMatch(cn, hostname, cchHostname, 0))
+                {
+                    success = 1;
+                    break;
+                }
+            }
+        }
+    }
+
+    return success;
+}
+/*
+Function:
 GetX509StackFieldCount
 
 Used by System.Security.Cryptography.X509Certificates' OpenSslX509ChainProcessor to identify the
@@ -673,7 +1043,7 @@ Return values:
 0 if the field count cannot be determined, or the count of certificates in STACK_OF(X509)
 Note that 0 does not always indicate an error, merely that GetX509StackField should not be called.
 */
-int
+int32_t
 GetX509StackFieldCount(
     STACK_OF(X509)* stack)
 {
@@ -724,16 +1094,16 @@ Return values:
 0 if ctx is NULL, if ctx has no X509_VERIFY_PARAM, or the date inputs don't produce a valid time_t;
 1 on success.
 */
-int
+int32_t
 SetX509ChainVerifyTime(
     X509_STORE_CTX* ctx,
-    int year,
-    int month,
-    int day,
-    int hour,
-    int minute,
-    int second,
-    int isDst)
+    int32_t year,
+    int32_t month,
+    int32_t day,
+    int32_t hour,
+    int32_t minute,
+    int32_t second,
+    int32_t isDst)
 {
     if (!ctx)
     {
@@ -815,7 +1185,7 @@ behavior on non-file, non-null BIO objects.
 See also:
 OpenSSL's BIO_tell
 */
-int BioTell(
+int32_t BioTell(
     BIO* bio)
 {
     if (!bio)
@@ -843,9 +1213,9 @@ otherwise unspecified
 See also:
 OpenSSL's BIO_seek
 */
-int BioSeek(
+int32_t BioSeek(
     BIO* bio,
-    int ofs)
+    int32_t ofs)
 {
     if (!bio)
     {
@@ -882,7 +1252,7 @@ Return values:
 1 on success
 0 on a NULL stack, or an error within sk_X509_push
 */
-int
+int32_t
 PushX509StackField(
     STACK_OF(X509)* stack,
     X509* x509)
@@ -897,25 +1267,89 @@ PushX509StackField(
 
 /*
 Function:
-UpRefEvpPkey
+GetRandomBytes
 
-Used by System.Security.Cryptography.X509Certificates' OpenSslX509CertificateReader when
-duplicating a private key context as part of duplicating the Pal object
+Puts num cryptographically strong pseudo-random bytes into buf.
 
 Return values:
-The number (as of this call) of references to the EVP_PKEY. Anything less than
-2 is an error, because the key is already in the process of being freed.
+Returns a bool to managed code.
+1 for success
+0 for failure
 */
-int
-UpRefEvpPkey(
-    EVP_PKEY* pkey)
+int32_t
+GetRandomBytes(
+    uint8_t* buf,
+    int32_t num)
 {
-    if (!pkey)
+    int ret = RAND_bytes(buf, num);
+
+    return ret == 1;
+}
+
+/*
+Function:
+LookupFriendlyNameByOid
+
+Looks up the FriendlyName value for a given OID in string representation.
+For example, "1.3.14.3.2.26" => "sha1".
+
+Return values:
+1 indicates that *friendlyName contains a pointer to the friendly name value
+0 indicates that the OID was not found, or no friendly name exists for that OID
+-1 indicates OpenSSL signalled an error, CryptographicException should be raised.
+-2 indicates an error in the input arguments
+*/
+int32_t
+LookupFriendlyNameByOid(
+    const char* oidValue,
+    const char** friendlyName)
+{
+    ASN1_OBJECT* oid;
+    int nid;
+    const char* ln;
+
+    if (!oidValue || !friendlyName)
+    {
+        return -2;
+    }
+
+    // Do a lookup with no_name set. The purpose of this function is to map only the
+    // dotted decimal to the friendly name. "sha1" in should not result in "sha1" out.
+    oid = OBJ_txt2obj(oidValue, 1);
+
+    if (!oid)
+    {
+        unsigned long err = ERR_peek_last_error();
+
+        // If the most recent error pushed onto the error queue is NOT from OID parsing
+        // then signal for an exception to be thrown.
+        if (err != 0 && ERR_GET_FUNC(err) != ASN1_F_A2D_ASN1_OBJECT)
+        {
+            return -1;
+        }
+
+        return 0;
+    }
+
+    // Look in the predefined, and late-registered, OIDs list to get the lookup table
+    // identifier for this OID.  The OBJ_txt2obj object will not have ln set.
+    nid = OBJ_obj2nid(oid);
+
+    if (nid == NID_undef)
     {
         return 0;
     }
 
-    return CRYPTO_add(&pkey->references, 1, CRYPTO_LOCK_EVP_PKEY);
+    // Get back a shared pointer to the long name from the registration table.
+    ln = OBJ_nid2ln(nid);
+
+    if (ln)
+    {
+        *friendlyName = ln;
+        return 1;
+    }
+
+    return 0;
 }
 
 // Lock used to make sure EnsureopenSslInitialized itself is thread safe
@@ -934,6 +1368,8 @@ static
 void
 LockingCallback(int mode, int n, const char* file, int line)
 {
+    (void)file, (void)line; // deliberately unused parameters
+
     int result;
     if (mode & CRYPTO_LOCK)
     {
@@ -946,9 +1382,29 @@ LockingCallback(int mode, int n, const char* file, int line)
 
     if (result != 0)
     {
-        assert(!"LockingCallback failed.");
+        assert(0 && "LockingCallback failed.");
     }
 }
+
+#ifdef __APPLE__
+/*
+Function:
+GetCurrentThreadId
+
+Called back by OpenSSL to get the current thread id.
+
+This is necessary because OSX uses an earlier version of
+OpenSSL, which requires setting the CRYPTO_set_id_callback.
+*/
+static
+unsigned long
+GetCurrentThreadId()
+{
+    uint64_t tid;
+    pthread_threadid_np(pthread_self(), &tid);
+    return tid;
+}
+#endif // __APPLE__
 
 /*
 Function:
@@ -960,12 +1416,13 @@ Return values:
 0 on success
 non-zero on failure
 */
-int
+int32_t
 EnsureOpenSslInitialized()
 {
     int ret = 0;
     int numLocks = 0;
     int locksInitialized = 0;
+    int randPollResult = 0;
 
     pthread_mutex_lock(&g_initLock);
 
@@ -979,16 +1436,16 @@ EnsureOpenSslInitialized()
     numLocks = CRYPTO_num_locks();
     if (numLocks <= 0)
     {
-        assert(!"CRYPTO_num_locks returned invalid value.");
+        assert(0 && "CRYPTO_num_locks returned invalid value.");
         ret = 1;
         goto done;
     }
 
     // Create the locks array
-    g_locks = (pthread_mutex_t*)malloc(sizeof(pthread_mutex_t) * numLocks);
+    g_locks = (pthread_mutex_t*)malloc(sizeof(pthread_mutex_t) * (unsigned int)numLocks);
     if (g_locks == NULL)
     {
-        assert(!"malloc failed.");
+        assert(0 && "malloc failed.");
         ret = 2;
         goto done;
     }
@@ -998,7 +1455,7 @@ EnsureOpenSslInitialized()
     {
         if (pthread_mutex_init(&g_locks[locksInitialized], NULL) != 0)
         {
-            assert(!"pthread_mutex_init failed.");
+            assert(0 && "pthread_mutex_init failed.");
             ret = 3;
             goto done;
         }
@@ -1006,6 +1463,27 @@ EnsureOpenSslInitialized()
 
     // Initialize the callback
     CRYPTO_set_locking_callback(LockingCallback);
+
+#ifdef __APPLE__
+    // OSX uses an earlier version of OpenSSL which requires setting the CRYPTO_set_id_callback
+    CRYPTO_set_id_callback(GetCurrentThreadId);
+#endif
+
+    // Initialize the random number generator seed
+    randPollResult = RAND_poll();
+    if (randPollResult < 1)
+    {
+        assert(0 && "RAND_poll() failed.");
+        ret = 4;
+        goto done;
+    }
+
+    // Load the SHA-2 hash algorithms, and anything else not in the default
+    // support set.
+    OPENSSL_add_all_algorithms_conf();
+
+    // Ensure that the error message table is loaded.
+    ERR_load_crypto_strings();
 
 done:
     if (ret != 0)
@@ -1017,7 +1495,7 @@ done:
             {
                 if (pthread_mutex_destroy(&g_locks[i]) != 0)
                 {
-                    assert(!"Unable to pthread_mutex_destroy while cleaning up.");
+                    assert(0 && "Unable to pthread_mutex_destroy while cleaning up.");
                 }
             }
             free(g_locks);

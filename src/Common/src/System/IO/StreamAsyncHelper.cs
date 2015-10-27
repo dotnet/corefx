@@ -30,13 +30,21 @@ namespace System.IO
 
         internal IAsyncResult BeginRead(byte[] buffer, int offset, int count, AsyncCallback callback, object state)
         {
-            if (!_stream.CanRead) throw __Error.GetReadNotSupported();
+            if (!_stream.CanRead)
+            {
+                throw __Error.GetReadNotSupported();
+            }
+
             return BeginReadWrite(true, buffer, offset, count, callback, state);
         }
 
         internal IAsyncResult BeginWrite(byte[] buffer, int offset, int count, AsyncCallback callback, Object state)
         {
-            if (!_stream.CanWrite) throw __Error.GetWriteNotSupported();
+            if (!_stream.CanWrite)
+            {
+                throw __Error.GetWriteNotSupported();
+            }
+
             return BeginReadWrite(false, buffer, offset, count, callback, state);
         }
 
@@ -74,6 +82,7 @@ namespace System.IO
                     ar._stream.Write(ar._buffer, ar._offset, ar._count);
                 }, asyncResult, CancellationToken.None, TaskCreationOptions.DenyChildAttach);
             }
+
             asyncResult._task = t; // this doesn't happen in the async result's ctor because the Task needs to reference the AR, and vice versa
 
             if (callback != null)
@@ -94,7 +103,10 @@ namespace System.IO
         internal int EndRead(IAsyncResult asyncResult)
         {
             if (asyncResult == null)
+            {
                 throw new ArgumentNullException("asyncResult");
+            }
+
             Contract.Ensures(Contract.Result<int>() >= 0);
             Contract.EndContractBlock();
 
@@ -131,7 +143,10 @@ namespace System.IO
         internal void EndWrite(IAsyncResult asyncResult)
         {
             if (asyncResult == null)
+            {
                 throw new ArgumentNullException("asyncResult");
+            }
+
             Contract.EndContractBlock();
 
             var ar = asyncResult as StreamReadWriteAsyncResult;

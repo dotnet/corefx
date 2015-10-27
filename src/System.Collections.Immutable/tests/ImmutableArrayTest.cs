@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Xunit;
 
-namespace System.Collections.Immutable.Test
+namespace System.Collections.Immutable.Tests
 {
     public class ImmutableArrayTest : SimpleElementImmutablesTestBase
     {
@@ -837,6 +837,18 @@ namespace System.Collections.Immutable.Test
         }
 
         [Fact]
+        public void Remove_NullEqualityComparer()
+        {
+            var modified = s_manyElements.Remove(2, null);
+            Assert.Equal(new[] { 1, 3 }, modified);
+
+            // Try again through the explicit interface implementation.
+            IImmutableList<int> boxedCollection = s_manyElements;
+            var modified2 = boxedCollection.Remove(2, null);
+            Assert.Equal(new[] { 1, 3 }, modified2);
+        }
+
+        [Fact]
         public void Remove()
         {
             Assert.Throws<NullReferenceException>(() => s_emptyDefault.Remove(5));
@@ -851,11 +863,12 @@ namespace System.Collections.Immutable.Test
         [Fact]
         public void RemoveRange()
         {
-            Assert.Throws<ArgumentOutOfRangeException>(() => s_empty.RemoveRange(0, 0));
+            Assert.Equal(s_empty, s_empty.RemoveRange(0, 0));
             Assert.Throws<NullReferenceException>(() => s_emptyDefault.RemoveRange(0, 0));
             Assert.Throws<ArgumentOutOfRangeException>(() => s_emptyDefault.RemoveRange(-1, 0));
             Assert.Throws<NullReferenceException>(() => s_emptyDefault.RemoveRange(0, -1));
-            Assert.Throws<ArgumentOutOfRangeException>(() => s_oneElement.RemoveRange(1, 0));
+            Assert.Throws<ArgumentOutOfRangeException>(() => s_oneElement.RemoveRange(2, 0));
+            Assert.Equal(s_oneElement, s_oneElement.RemoveRange(1, 0));
             Assert.Throws<ArgumentOutOfRangeException>(() => s_empty.RemoveRange(-1, 0));
             Assert.Throws<ArgumentOutOfRangeException>(() => s_oneElement.RemoveRange(0, 2));
             Assert.Throws<ArgumentOutOfRangeException>(() => s_oneElement.RemoveRange(0, -1));
@@ -912,6 +925,15 @@ namespace System.Collections.Immutable.Test
 
             Assert.False(s_empty.RemoveAll(n => false).IsDefault);
             Assert.Throws<NullReferenceException>(() => s_emptyDefault.RemoveAll(n => false));
+        }
+
+        [Fact]
+        public void RemoveRange_EnumerableEqualityComparer_AcceptsNullEQ()
+        {
+            var array = ImmutableArray.Create(1, 2, 3);
+            var removed2eq = array.RemoveRange(new[] { 2 }, null);
+            Assert.Equal(2, removed2eq.Length);
+            Assert.Equal(new[] { 1, 3 }, removed2eq);
         }
 
         [Fact]
@@ -981,6 +1003,18 @@ namespace System.Collections.Immutable.Test
             Assert.Equal(new[] { 1, 2, 6 }, s_manyElements.Replace(3, 6));
 
             Assert.Equal(new[] { 1, 2, 3, 4 }, ImmutableArray.Create(1, 3, 3, 4).Replace(3, 2));
+        }
+
+        [Fact]
+        public void ReplaceWithEqualityComparerTest()
+        {
+            var updatedArray = s_manyElements.Replace(2, 10, null);
+            Assert.Equal(new[] { 1, 10, 3 }, updatedArray);
+
+            // Finally, try one last time using the interface implementation.
+            IImmutableList<int> iface = s_manyElements;
+            var updatedIFace = iface.Replace(2, 10, null);
+            Assert.Equal(new[] { 1, 10, 3 }, updatedIFace);
         }
 
         [Fact]
@@ -1132,6 +1166,7 @@ namespace System.Collections.Immutable.Test
         {
             var array = ImmutableArray.Create(2, 4, 1, 3);
             Assert.Equal(new[] { 1, 2, 3, 4 }, array.Sort(null));
+            Assert.Equal(new[] { 2, 1, 4, 3 }, array.Sort(1, 2, null));
             Assert.Equal(new[] { 2, 4, 1, 3 }, array); // original array unaffected.
         }
 
@@ -1307,11 +1342,11 @@ namespace System.Collections.Immutable.Test
             Assert.Throws<ArgumentNullException>(() => ImmutableArray.BinarySearch(default(ImmutableArray<int>), value));
 
             Assert.Equal(
-                Array.BinarySearch(array, value), 
+                Array.BinarySearch(array, value),
                 ImmutableArray.BinarySearch(ImmutableArray.Create(array), value));
 
             Assert.Equal(
-                Array.BinarySearch(array, value, Comparer<int>.Default), 
+                Array.BinarySearch(array, value, Comparer<int>.Default),
                 ImmutableArray.BinarySearch(ImmutableArray.Create(array), value, Comparer<int>.Default));
 
             Assert.Equal(

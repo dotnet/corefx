@@ -43,7 +43,7 @@ namespace Internal.Cryptography
 
         public static CryptographicException ToCryptographicException(this ErrorCode errorCode)
         {
-            return new CryptographicException((int)errorCode);
+            return ((int)errorCode).ToCryptographicException();
         }
 
         public static SafeNCryptProviderHandle OpenStorageProvider(this CngProvider provider)
@@ -152,6 +152,43 @@ namespace Internal.Cryptography
                 if (errorCode != ErrorCode.ERROR_SUCCESS)
                     throw errorCode.ToCryptographicException();
             }
+        }
+
+        public static bool IsLegalSize(this int size, KeySizes[] legalSizes)
+        {
+            for (int i = 0; i < legalSizes.Length; i++)
+            {
+                // If a cipher has only one valid key size, MinSize == MaxSize and SkipSize will be 0
+                if (legalSizes[i].SkipSize == 0)
+                {
+                    if (legalSizes[i].MinSize == size)
+                        return true;
+                }
+                else
+                {
+                    for (int j = legalSizes[i].MinSize; j <= legalSizes[i].MaxSize; j += legalSizes[i].SkipSize)
+                    {
+                        if (j == size)
+                            return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        public static int BitSizeToByteSize(this int bits)
+        {
+            return (bits + 7) / 8;
+        }
+
+        public static byte[] GenerateRandom(int count)
+        {
+            byte[] buffer = new byte[count];
+            using (RandomNumberGenerator rng = RandomNumberGenerator.Create())
+            {
+                rng.GetBytes(buffer);
+            }
+            return buffer;
         }
     }
 }

@@ -16,6 +16,35 @@ namespace System.Diagnostics
     public partial class Process : IDisposable
     {
         /// <summary>
+        /// Creates an array of <see cref="Process"/> components that are associated with process resources on a
+        /// remote computer. These process resources share the specified process name.
+        /// </summary>
+        public static Process[] GetProcessesByName(string processName, string machineName)
+        {
+            if (processName == null)
+            {
+                processName = string.Empty;
+            }
+
+            Process[] procs = GetProcesses(machineName);
+            var list = new List<Process>();
+
+            for (int i = 0; i < procs.Length; i++)
+            {
+                if (string.Equals(processName, procs[i].ProcessName, StringComparison.OrdinalIgnoreCase))
+                {
+                    list.Add(procs[i]);
+                }
+                else
+                {
+                    procs[i].Dispose();
+                }
+            }
+
+            return list.ToArray();
+        }
+
+        /// <summary>
         /// Puts a Process component in state to interact with operating system processes that run in a 
         /// special mode by enabling the native property SeDebugPrivilege on the current thread.
         /// </summary>
@@ -530,55 +559,36 @@ namespace System.Diagnostics
                             logonFlags = Interop.mincore.LogonFlags.LOGON_WITH_PROFILE;
                         }
 
-                        IntPtr password = IntPtr.Zero;
-                        try
-                        {
-                            if (startInfo.Password == null)
-                            {
-                                password = Marshal.StringToCoTaskMemUni(String.Empty);
-                            }
-                            else
-                            {
-                                password = SecureStringMarshal.SecureStringToCoTaskMemUnicode(startInfo.Password);
-                            }
 
-                            try { }
-                            finally
-                            {
-                                retVal = Interop.mincore.CreateProcessWithLogonW(
-                                        startInfo.UserName,
-                                        startInfo.Domain,
-                                        password,
-                                        logonFlags,
-                                        null,            // we don't need this since all the info is in commandLine
-                                        commandLine,
-                                        creationFlags,
-                                        environmentPtr,
-                                        workingDirectory,
-                                        startupInfo,        // pointer to STARTUPINFO
-                                        processInfo         // pointer to PROCESS_INFORMATION
-                                    );
-                                if (!retVal)
-                                    errorCode = Marshal.GetLastWin32Error();
-                                if (processInfo.hProcess != IntPtr.Zero && processInfo.hProcess != (IntPtr)INVALID_HANDLE_VALUE)
-                                    procSH.InitialSetHandle(processInfo.hProcess);
-                                if (processInfo.hThread != IntPtr.Zero && processInfo.hThread != (IntPtr)INVALID_HANDLE_VALUE)
-                                    threadSH.InitialSetHandle(processInfo.hThread);
-                            }
-                            if (!retVal)
-                            {
-                                if (errorCode == Interop.mincore.Errors.ERROR_BAD_EXE_FORMAT || errorCode == Interop.mincore.Errors.ERROR_EXE_MACHINE_TYPE_MISMATCH)
-                                    throw new Win32Exception(errorCode, SR.InvalidApplication);
-
-                                throw new Win32Exception(errorCode);
-                            }
-                        }
+                        try { }
                         finally
                         {
-                            if (password != IntPtr.Zero)
-                            {
-                                Marshal.ZeroFreeCoTaskMemUnicode(password);
-                            }
+                            retVal = Interop.mincore.CreateProcessWithLogonW(
+                                    startInfo.UserName,
+                                    startInfo.Domain,
+                                    startInfo.PasswordInClearText,
+                                    logonFlags,
+                                    null,            // we don't need this since all the info is in commandLine
+                                    commandLine,
+                                    creationFlags,
+                                    environmentPtr,
+                                    workingDirectory,
+                                    startupInfo,        // pointer to STARTUPINFO
+                                    processInfo         // pointer to PROCESS_INFORMATION
+                                );
+                            if (!retVal)
+                                errorCode = Marshal.GetLastWin32Error();
+                            if (processInfo.hProcess != IntPtr.Zero && processInfo.hProcess != (IntPtr)INVALID_HANDLE_VALUE)
+                                procSH.InitialSetHandle(processInfo.hProcess);
+                            if (processInfo.hThread != IntPtr.Zero && processInfo.hThread != (IntPtr)INVALID_HANDLE_VALUE)
+                                threadSH.InitialSetHandle(processInfo.hThread);
+                        }
+                        if (!retVal)
+                        {
+                            if (errorCode == Interop.mincore.Errors.ERROR_BAD_EXE_FORMAT || errorCode == Interop.mincore.Errors.ERROR_EXE_MACHINE_TYPE_MISMATCH)
+                                throw new Win32Exception(errorCode, SR.InvalidApplication);
+
+                            throw new Win32Exception(errorCode);
                         }
                     }
                     else
@@ -683,7 +693,7 @@ namespace System.Diagnostics
                 commandLine.Append("\"");
             }
 
-            if (!String.IsNullOrEmpty(arguments))
+            if (!string.IsNullOrEmpty(arguments))
             {
                 commandLine.Append(" ");
                 commandLine.Append(arguments);

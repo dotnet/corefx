@@ -11,6 +11,7 @@ namespace Internal.Cryptography.Pal
     internal class CollectionBackedStoreProvider : IStorePal
     {
         private readonly X509Certificate2[] _certs;
+        private static readonly SafeEvpPKeyHandle InvalidPKeyHandle = new SafeEvpPKeyHandle(IntPtr.Zero, false);
 
         internal CollectionBackedStoreProvider(X509Certificate2 cert)
         {
@@ -24,10 +25,6 @@ namespace Internal.Cryptography.Pal
         }
 
         public void Dispose()
-        {
-        }
-
-        public void FindAndCopyTo(X509FindType findType, object findValue, bool validOnly, X509Certificate2Collection collection)
         {
         }
 
@@ -86,11 +83,11 @@ namespace Internal.Cryptography.Pal
                     }
                     else
                     {
-                        using (SafeX509Handle certHandle = Interop.libcrypto.X509_dup(cert.Handle))
+                        using (SafeX509Handle certHandle = Interop.Crypto.X509Duplicate(cert.Handle))
                         {
                             if (!Interop.Crypto.PushX509StackField(publicCerts, certHandle))
                             {
-                                throw Interop.libcrypto.CreateOpenSslCryptographicException();
+                                throw Interop.Crypto.CreateOpenSslCryptographicException();
                             }
 
                             // The handle ownership has been transferred into the STACK_OF(X509).
@@ -100,43 +97,35 @@ namespace Internal.Cryptography.Pal
                 }
 
                 SafeX509Handle privateCertHandle;
-                SafeEvpPkeyHandle privateCertKeyHandle;
+                SafeEvpPKeyHandle privateCertKeyHandle;
 
                 if (privateCert != null)
                 {
                     OpenSslX509CertificateReader pal = (OpenSslX509CertificateReader)privateCert.Pal;
                     privateCertHandle = pal.SafeHandle;
-                    privateCertKeyHandle = pal.PrivateKeyHandle ?? SafeEvpPkeyHandle.InvalidHandle;
+                    privateCertKeyHandle = pal.PrivateKeyHandle ?? InvalidPKeyHandle;
                 }
                 else
                 {
                     privateCertHandle = SafeX509Handle.InvalidHandle;
-                    privateCertKeyHandle = SafeEvpPkeyHandle.InvalidHandle;
+                    privateCertKeyHandle = InvalidPKeyHandle;
                 }
 
-                using (SafePkcs12Handle pkcs12 = Interop.libcrypto.PKCS12_create(
+                using (SafePkcs12Handle pkcs12 = Interop.Crypto.Pkcs12Create(
                     password,
-                    null,
                     privateCertKeyHandle,
                     privateCertHandle,
-                    publicCerts,
-                    Interop.libcrypto.NID_undef,
-                    Interop.libcrypto.NID_undef,
-                    Interop.libcrypto.PKCS12_DEFAULT_ITER,
-                    Interop.libcrypto.PKCS12_DEFAULT_ITER,
-                    0))
+                    publicCerts))
                 {
                     if (pkcs12.IsInvalid)
                     {
-                        throw Interop.libcrypto.CreateOpenSslCryptographicException();
+                        throw Interop.Crypto.CreateOpenSslCryptographicException();
                     }
 
-                    unsafe
-                    {
-                        return Interop.libcrypto.OpenSslI2D(
-                            (handle, b) => Interop.libcrypto.i2d_PKCS12(handle, b),
-                            pkcs12);
-                    }
+                    return Interop.Crypto.OpenSslEncode(
+                        Interop.Crypto.GetPkcs12DerSize,
+                        Interop.Crypto.EncodePkcs12,
+                        pkcs12);
                 }
             }
         }

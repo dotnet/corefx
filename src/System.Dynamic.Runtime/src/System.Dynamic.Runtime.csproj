@@ -9,7 +9,7 @@
     <AssemblyName>System.Dynamic.Runtime</AssemblyName>
     <RootNamespace>System.Dynamic.Runtime</RootNamespace>
     <AssemblyVersion>4.0.11.0</AssemblyVersion>
-    <DefineConstants Condition=" '$(IsInterpreting)' != 'true' ">$(DefineConstants);FEATURE_CORECLR</DefineConstants>
+    <DefineConstants Condition=" '$(IsInterpreting)' != 'true' ">$(DefineConstants);FEATURE_COMPILER</DefineConstants>
   </PropertyGroup>
   <!-- Default configurations to help VS understand the configurations -->
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -65,9 +65,6 @@
     <Compile Include="$(CommonPath)\System\Linq\Expressions\Compiler\DelegateHelpers.Generated.cs">
       <Link>Common\System\Linq\Expressions\Compiler\DelegateHelpers.Generated.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\System\NotImplemented.cs">
-      <Link>Common\System\NotImplemented.cs</Link>
-    </Compile>
     <Compile Include="$(CommonPath)\System\Runtime\CompilerServices\ReadOnlyCollectionBuilder.cs">
       <Link>Common\System\Runtime\CompilerServices\ReadOnlyCollectionBuilder.cs</Link>
     </Compile>
@@ -115,12 +112,12 @@
     <Compile Include="System\Runtime\CompilerServices\DynamicAttribute.cs" />
     <Compile Include="System\Runtime\CompilerServices\RuleCache.cs" />
     <Compile Include="System\Runtime\CompilerServices\RuntimeOps.cs" />
+    <None Include="project.json" />
   </ItemGroup>
   <ItemGroup Condition=" '$(IsInterpreting)' != 'true' ">
     <Compile Include="$(CommonPath)\System\Linq\Expressions\Compiler\AssemblyGen.cs">
       <Link>Common\System\Linq\Expressions\Compiler\AssemblyGen.cs</Link>
     </Compile>
-    <None Include="project.json" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

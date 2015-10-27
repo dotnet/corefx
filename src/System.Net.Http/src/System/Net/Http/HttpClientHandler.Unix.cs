@@ -1,9 +1,6 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System.Collections.Generic;
-using System.Globalization;
-using System.Net.Http.Headers;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -15,89 +12,125 @@ namespace System.Net.Http
 
         public virtual bool SupportsAutomaticDecompression
         {
-            get { throw NotImplemented.ByDesignWithMessage("HTTP stack not implemented"); }
+            get { return _curlHandler.SupportsAutomaticDecompression; }
         }
 
         public virtual bool SupportsProxy
         {
-            get { throw NotImplemented.ByDesignWithMessage("HTTP stack not implemented"); }
+            get { return this._curlHandler.SupportsProxy; }
         }
 
         public virtual bool SupportsRedirectConfiguration
         {
-            get { throw NotImplemented.ByDesignWithMessage("HTTP stack not implemented"); }
+            get { return _curlHandler.SupportsRedirectConfiguration; }
         }
 
         public bool UseCookies
         {
-            get { throw NotImplemented.ByDesignWithMessage("HTTP stack not implemented"); }
-            set { throw NotImplemented.ByDesignWithMessage("HTTP stack not implemented"); }
+            get
+            {
+                return _curlHandler.UseCookie;
+            }
+
+            set
+            {
+                _curlHandler.UseCookie = value;
+            }          
         }
 
         public CookieContainer CookieContainer
         {
-            get { throw NotImplemented.ByDesignWithMessage("HTTP stack not implemented"); }
-            set { throw NotImplemented.ByDesignWithMessage("HTTP stack not implemented"); }
+            get
+            {
+                return _curlHandler.CookieContainer;
+            }
+
+            set
+            {
+                _curlHandler.CookieContainer = value;
+            }
         }
 
         public ClientCertificateOption ClientCertificateOptions
         {
-            get { throw NotImplemented.ByDesignWithMessage("HTTP stack not implemented"); }
-            set { throw NotImplemented.ByDesignWithMessage("HTTP stack not implemented"); }
+            get
+            {
+                return _curlHandler.ClientCertificateOptions;
+            }
+
+            set
+            {
+                _curlHandler.ClientCertificateOptions = value;
+            }
         }
 
         public DecompressionMethods AutomaticDecompression
         {
-            get { throw NotImplemented.ByDesignWithMessage("HTTP stack not implemented"); }
-            set { throw NotImplemented.ByDesignWithMessage("HTTP stack not implemented"); }
+            get { return _curlHandler.AutomaticDecompression; }
+            set { _curlHandler.AutomaticDecompression = value; }
         }
 
         public bool UseProxy
         {
-            get { throw NotImplemented.ByDesignWithMessage("HTTP stack not implemented"); }
-            set { throw NotImplemented.ByDesignWithMessage("HTTP stack not implemented"); }
+            get { return this._curlHandler.UseProxy; }
+            set { this._curlHandler.UseProxy = value; }
         }
 
         public IWebProxy Proxy
         {
-            get { throw NotImplemented.ByDesignWithMessage("HTTP stack not implemented"); }
-            set { throw NotImplemented.ByDesignWithMessage("HTTP stack not implemented"); }
+            get { return this._curlHandler.Proxy; }
+            set { this._curlHandler.Proxy = value; }
         }
 
         public bool PreAuthenticate
         {
-            get { throw NotImplemented.ByDesignWithMessage("HTTP stack not implemented"); }
-            set { throw NotImplemented.ByDesignWithMessage("HTTP stack not implemented"); }
+            get { return _curlHandler.PreAuthenticate; }
+            set { _curlHandler.PreAuthenticate = value;} 
         }
 
         public bool UseDefaultCredentials
         {
-            get { throw NotImplemented.ByDesignWithMessage("HTTP stack not implemented"); }
-            set { throw NotImplemented.ByDesignWithMessage("HTTP stack not implemented"); }
+            get { return _curlHandler.UseDefaultCredentials; }
+            set { _curlHandler.UseDefaultCredentials = value; }
         }
 
         public ICredentials Credentials
         {
-            get { throw NotImplemented.ByDesignWithMessage("HTTP stack not implemented"); }
-            set { throw NotImplemented.ByDesignWithMessage("HTTP stack not implemented"); }
+            get { return this._curlHandler.Credentials; }
+            set { this._curlHandler.Credentials = value; }
         }
 
         public bool AllowAutoRedirect
         {
-            get { throw NotImplemented.ByDesignWithMessage("HTTP stack not implemented"); }
-            set { throw NotImplemented.ByDesignWithMessage("HTTP stack not implemented"); }
+            get
+            {
+                return _curlHandler.AutomaticRedirection;
+            }
+
+            set
+            {
+                _curlHandler.AutomaticRedirection = value;
+            }
         }
 
         public int MaxAutomaticRedirections
         {
-            get { throw NotImplemented.ByDesignWithMessage("HTTP stack not implemented"); }
-            set { throw NotImplemented.ByDesignWithMessage("HTTP stack not implemented"); }
+            get
+            {
+                return _curlHandler.MaxAutomaticRedirections;
+            }
+
+            set
+            {
+                _curlHandler.MaxAutomaticRedirections = value;
+            }
         }
 
         public long MaxRequestContentBufferSize
         {
-            get { throw NotImplemented.ByDesignWithMessage("HTTP stack not implemented"); }
-            set { throw NotImplemented.ByDesignWithMessage("HTTP stack not implemented"); }
+            // See comments in HttpClientHandler.Windows.cs.  This behavior matches.
+            get { return 0; }
+            set { throw new PlatformNotSupportedException(); }
         }
 
         #endregion Properties
@@ -106,9 +139,18 @@ namespace System.Net.Http
 
         public HttpClientHandler()
         {
-            throw NotImplemented.ByDesignWithMessage("HTTP stack not implemented");
+            _curlHandler = new CurlHandler();
         }
 
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                _curlHandler.Dispose();
+            }
+
+            base.Dispose(disposing);
+        }
         #endregion De/Constructors
 
         #region Request Execution
@@ -116,9 +158,15 @@ namespace System.Net.Http
         protected internal override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request,
             CancellationToken cancellationToken)
         {
-            throw NotImplemented.ByDesignWithMessage("HTTP stack not implemented");
+            return _curlHandler.SendAsync(request, cancellationToken);
         }
 
         #endregion Request Execution
+
+        #region Private
+
+        private readonly CurlHandler _curlHandler;
+
+        #endregion Private
     }
 }

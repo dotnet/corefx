@@ -48,7 +48,13 @@ internal static partial class Interop
         internal static unsafe extern ErrorCode NCryptEncrypt(SafeNCryptKeyHandle hKey, [In] byte[] pbInput, int cbInput, void* pPaddingInfo, [Out] byte[] pbOutput, int cbOutput, out int pcbResult, AsymmetricPaddingMode dwFlags);
 
         [DllImport(Interop.Libraries.NCrypt, CharSet = CharSet.Unicode)]
+        internal static unsafe extern ErrorCode NCryptEncrypt(SafeNCryptKeyHandle hKey, byte* pbInput, int cbInput, void* pPaddingInfo, byte* pbOutput, int cbOutput, out int pcbResult, AsymmetricPaddingMode dwFlags);
+
+        [DllImport(Interop.Libraries.NCrypt, CharSet = CharSet.Unicode)]
         internal static unsafe extern ErrorCode NCryptDecrypt(SafeNCryptKeyHandle hKey, [In] byte[] pbInput, int cbInput, void* pPaddingInfo, [Out] byte[] pbOutput, int cbOutput, out int pcbResult, AsymmetricPaddingMode dwFlags);
+
+        [DllImport(Interop.Libraries.NCrypt, CharSet = CharSet.Unicode)]
+        internal static unsafe extern ErrorCode NCryptDecrypt(SafeNCryptKeyHandle hKey, byte* pbInput, int cbInput, void* pPaddingInfo, byte* pbOutput, int cbOutput, out int pcbResult, AsymmetricPaddingMode dwFlags);
 
         [DllImport(Interop.Libraries.NCrypt, CharSet = CharSet.Unicode)]
         internal static unsafe extern ErrorCode NCryptSignHash(SafeNCryptKeyHandle hKey, void* pPaddingInfo, [In] byte[] pbHashValue, int cbHashValue, [Out] byte[] pbSignature, int cbSignature, out int pcbResult, AsymmetricPaddingMode dwFlags);
@@ -83,6 +89,7 @@ internal static partial class Interop
 
         internal enum AsymmetricPaddingMode : int
         {
+            None = 0x00000000,
             NCRYPT_NO_PADDING_FLAG = 0x00000001,
             NCRYPT_PAD_PKCS1_FLAG = 0x00000002,    // NCryptEncrypt/Decrypt or NCryptSignHash/VerifySignature
             NCRYPT_PAD_OAEP_FLAG = 0x00000004,     // NCryptEncrypt/Decrypt

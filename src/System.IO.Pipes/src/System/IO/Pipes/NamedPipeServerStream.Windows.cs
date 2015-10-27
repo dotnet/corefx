@@ -146,7 +146,7 @@ namespace System.IO.Pipes
             if (!Interop.mincore.GetNamedPipeHandleState(InternalHandle, IntPtr.Zero, IntPtr.Zero,
                 IntPtr.Zero, IntPtr.Zero, userName, userName.Capacity))
             {
-                WinIOError(Marshal.GetLastWin32Error());
+                throw WinIOError(Marshal.GetLastWin32Error());
             }
 
             return userName.ToString();
@@ -297,6 +297,16 @@ namespace System.IO.Pipes
                 throw new InvalidOperationException(SR.InvalidOperation_PipeHandleNotSet);
             }
             CheckConnectOperationsServer();
+        }
+
+        private void ValidateMaxNumberOfServerInstances(int maxNumberOfServerInstances)
+        {
+            // win32 allows fixed values of 1-254 or 255 to mean max allowed by system. We expose 255 as -1 (unlimited)
+            // through the MaxAllowedServerInstances constant. This is consistent e.g. with -1 as infinite timeout, etc
+            if ((maxNumberOfServerInstances < 1 || maxNumberOfServerInstances > 254) && (maxNumberOfServerInstances != MaxAllowedServerInstances))
+            {
+                throw new ArgumentOutOfRangeException("maxNumberOfServerInstances", SR.ArgumentOutOfRange_MaxNumServerInstances);
+            }
         }
     }
 }

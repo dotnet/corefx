@@ -36,7 +36,7 @@ namespace Internal.Cryptography.Pal
         public void Add(ICertificatePal certificate)
         {
             if (!Interop.crypt32.CertAddCertificateContextToStore(_certStore, ((CertificatePal)certificate).CertContext, CertStoreAddDisposition.CERT_STORE_ADD_REPLACE_EXISTING_INHERIT_PROPERTIES, IntPtr.Zero))
-                throw new CryptographicException(Marshal.GetLastWin32Error());
+                throw Marshal.GetLastWin32Error().ToCryptographicException();
             return;
         }
 
@@ -52,7 +52,7 @@ namespace Internal.Cryptography.Pal
 
                 CERT_CONTEXT* pCertContextToDelete = enumCertContext.Disconnect();  // CertDeleteCertificateFromContext always frees the context (even on error)
                 if (!Interop.crypt32.CertDeleteCertificateFromStore(pCertContextToDelete))
-                    throw new CryptographicException(Marshal.GetLastWin32Error());
+                    throw Marshal.GetLastWin32Error().ToCryptographicException();
 
                 GC.KeepAlive(existingCertContext);
                 return;
@@ -73,7 +73,7 @@ namespace Internal.Cryptography.Pal
             get { return _certStore; }
         }
 
-        private StorePal(SafeCertStoreHandle certStore)
+        internal StorePal(SafeCertStoreHandle certStore)
         {
             _certStore = certStore;
         }

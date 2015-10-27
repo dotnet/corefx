@@ -4,6 +4,8 @@
 using System;
 using System.Diagnostics;
 
+using Internal.Cryptography;
+
 namespace System.Security.Cryptography
 {
     public sealed partial class RSACng : RSA
@@ -25,7 +27,6 @@ namespace System.Security.Cryptography
         /// <exception cref="CryptographicException">if <paramref name="keySize" /> is not valid</exception>
         public RSACng(int keySize)
         {
-            _legalKeySizesValue = s_legalKeySizes;
             KeySize = keySize;
         }
 
@@ -46,28 +47,28 @@ namespace System.Security.Cryptography
             if (key.AlgorithmGroup != CngAlgorithmGroup.Rsa)
                 throw new ArgumentException(SR.Cryptography_ArgRSAaRequiresRSAKey, "key");
 
-            _legalKeySizesValue = s_legalKeySizes;
-            Key = CngKey.Open(key.Handle, key.IsEphemeral ? CngKeyHandleOpenOptions.EphemeralKey : CngKeyHandleOpenOptions.None);
+            Key = CngAlgorithmCore.Duplicate(key);
+        }
+
+        public override KeySizes[] LegalKeySizes
+        {
+            get
+            {
+                // See https://msdn.microsoft.com/en-us/library/windows/desktop/bb931354(v=vs.85).aspx
+                return new KeySizes[] 
+                {
+                    // All values are in bits.
+                    new KeySizes(minSize: 512, maxSize: 16384, skipSize: 64), 
+                }; 
+            }
         }
 
         protected override void Dispose(bool disposing)
         {
-            if (disposing && _lazyKey != null)
-            {
-                _lazyKey.Dispose();
-            }
+            _core.Dispose();
         }
 
-        // Key handle
-        private CngKey _lazyKey;
-
-        // See https://msdn.microsoft.com/en-us/library/windows/desktop/bb931354(v=vs.85).aspx
-        private static readonly KeySizes[] s_legalKeySizes = 
-            new KeySizes[] 
-            {
-                // All values are in bits.
-                new KeySizes(minSize: 512, maxSize: 16384, skipSize: 64), 
-            }; 
+        private CngAlgorithmCore _core;
     }
 }
 

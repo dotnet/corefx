@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
-using Validation;
 
 namespace System.Collections.Immutable
 {
@@ -640,7 +639,10 @@ namespace System.Collections.Immutable
             /// <param name="count">
             /// The number of elements in the section to search.
             /// </param>
-            /// <param name="equalityComparer">The equality comparer to use in the search.</param>
+            /// <param name="equalityComparer">
+            /// The equality comparer to use in the search.
+            /// If <c>null</c>, <see cref="EqualityComparer{T}.Default"/> is used.
+            /// </param>
             /// <returns>
             /// The zero-based index of the first occurrence of item within the range of
             /// elements in the ImmutableList&lt;T&gt; that starts at index and
@@ -649,8 +651,6 @@ namespace System.Collections.Immutable
             [Pure]
             public int IndexOf(T item, int index, int count, IEqualityComparer<T> equalityComparer)
             {
-                Requires.NotNull(equalityComparer, "equalityComparer");
-
                 return _root.IndexOf(item, index, count, equalityComparer);
             }
 
@@ -868,8 +868,9 @@ namespace System.Collections.Immutable
             /// the specified System.Comparison&lt;T&gt;.
             /// </summary>
             /// <param name="comparison">
-            /// The System.Comparison&lt;T&gt; to use when comparing elements.
+            /// The <see cref="Comparison{T}"/> to use when comparing elements.
             /// </param>
+            /// <exception cref="ArgumentNullException"><paramref name="comparison"/> is null.</exception>
             public void Sort(Comparison<T> comparison)
             {
                 Requires.NotNull(comparison, "comparison");
@@ -881,12 +882,11 @@ namespace System.Collections.Immutable
             /// the specified comparer.
             /// </summary>
             /// <param name="comparer">
-            /// The System.Collections.Generic.IComparer&lt;T&gt; implementation to use when comparing
-            /// elements, or null to use the default comparer System.Collections.Generic.Comparer&lt;T&gt;.Default.
+            /// The <see cref="IComparer{T}"/> implementation to use when comparing
+            /// elements, or null to use <see cref="Comparer{T}.Default"/>.
             /// </param>
             public void Sort(IComparer<T> comparer)
             {
-                Requires.NotNull(comparer, "comparer");
                 this.Root = this.Root.Sort(comparer);
             }
 
@@ -901,15 +901,14 @@ namespace System.Collections.Immutable
             /// The length of the range to sort.
             /// </param>
             /// <param name="comparer">
-            /// The System.Collections.Generic.IComparer&lt;T&gt; implementation to use when comparing
-            /// elements, or null to use the default comparer System.Collections.Generic.Comparer&lt;T&gt;.Default.
+            /// The <see cref="IComparer{T}"/> implementation to use when comparing
+            /// elements, or null to use <see cref="Comparer{T}.Default"/>.
             /// </param>
             public void Sort(int index, int count, IComparer<T> comparer)
             {
                 Requires.Range(index >= 0, "index");
                 Requires.Range(count >= 0, "count");
                 Requires.Range(index + count <= this.Count, "count");
-                Requires.NotNull(comparer, "comparer");
                 this.Root = this.Root.Sort(index, count, comparer);
             }
 
@@ -1025,7 +1024,6 @@ namespace System.Collections.Immutable
             /// <returns>
             /// The position into which the new element was inserted, or -1 to indicate that the item was not inserted into the collection,
             /// </returns>
-            /// <exception cref="System.NotImplementedException"></exception>
             int IList.Add(object value)
             {
                 this.Add((T)value);
@@ -1035,7 +1033,6 @@ namespace System.Collections.Immutable
             /// <summary>
             /// Clears this instance.
             /// </summary>
-            /// <exception cref="System.NotImplementedException"></exception>
             void IList.Clear()
             {
                 this.Clear();
@@ -1048,10 +1045,14 @@ namespace System.Collections.Immutable
             /// <returns>
             /// true if the <see cref="object"/> is found in the <see cref="IList"/>; otherwise, false.
             /// </returns>
-            /// <exception cref="System.NotImplementedException"></exception>
             bool IList.Contains(object value)
             {
-                return this.Contains((T)value);
+                if (IsCompatibleObject(value))
+                {
+                    return this.Contains((T)value);
+                }
+
+                return false;
             }
 
             /// <summary>
@@ -1061,10 +1062,14 @@ namespace System.Collections.Immutable
             /// <returns>
             /// The index of <paramref name="value"/> if found in the list; otherwise, -1.
             /// </returns>
-            /// <exception cref="System.NotImplementedException"></exception>
             int IList.IndexOf(object value)
             {
-                return this.IndexOf((T)value);
+                if (IsCompatibleObject(value))
+                {
+                    return this.IndexOf((T)value);
+                }
+
+                return -1;
             }
 
             /// <summary>
@@ -1072,7 +1077,6 @@ namespace System.Collections.Immutable
             /// </summary>
             /// <param name="index">The zero-based index at which <paramref name="value"/> should be inserted.</param>
             /// <param name="value">The object to insert into the <see cref="IList"/>.</param>
-            /// <exception cref="System.NotImplementedException"></exception>
             void IList.Insert(int index, object value)
             {
                 this.Insert(index, (T)value);
@@ -1082,7 +1086,6 @@ namespace System.Collections.Immutable
             /// Gets a value indicating whether the <see cref="IList"/> has a fixed size.
             /// </summary>
             /// <returns>true if the <see cref="IList"/> has a fixed size; otherwise, false.</returns>
-            /// <exception cref="System.NotImplementedException"></exception>
             bool IList.IsFixedSize
             {
                 get { return false; }
@@ -1093,7 +1096,6 @@ namespace System.Collections.Immutable
             /// </summary>
             /// <returns>true if the <see cref="ICollection{T}"/> is read-only; otherwise, false.
             ///   </returns>
-            /// <exception cref="System.NotImplementedException"></exception>
             bool IList.IsReadOnly
             {
                 get { return false; }
@@ -1103,10 +1105,12 @@ namespace System.Collections.Immutable
             /// Removes the first occurrence of a specific object from the <see cref="IList"/>.
             /// </summary>
             /// <param name="value">The object to remove from the <see cref="IList"/>.</param>
-            /// <exception cref="System.NotImplementedException"></exception>
             void IList.Remove(object value)
             {
-                this.Remove((T)value);
+                if (IsCompatibleObject(value))
+                {
+                    this.Remove((T)value);
+                }
             }
 
             /// <summary>
@@ -1117,7 +1121,6 @@ namespace System.Collections.Immutable
             /// </value>
             /// <param name="index">The index.</param>
             /// <returns></returns>
-            /// <exception cref="System.NotImplementedException"></exception>
             object IList.this[int index]
             {
                 get { return this[index]; }
@@ -1133,7 +1136,6 @@ namespace System.Collections.Immutable
             /// </summary>
             /// <param name="array">The one-dimensional <see cref="Array"/> that is the destination of the elements copied from <see cref="ICollection"/>. The <see cref="Array"/> must have zero-based indexing.</param>
             /// <param name="arrayIndex">The zero-based index in <paramref name="array"/> at which copying begins.</param>
-            /// <exception cref="System.NotImplementedException"></exception>
             void ICollection.CopyTo(Array array, int arrayIndex)
             {
                 this.Root.CopyTo(array, arrayIndex);
@@ -1143,7 +1145,6 @@ namespace System.Collections.Immutable
             /// Gets a value indicating whether access to the <see cref="ICollection"/> is synchronized (thread safe).
             /// </summary>
             /// <returns>true if access to the <see cref="ICollection"/> is synchronized (thread safe); otherwise, false.</returns>
-            /// <exception cref="System.NotImplementedException"></exception>
             [DebuggerBrowsable(DebuggerBrowsableState.Never)]
             bool ICollection.IsSynchronized
             {
@@ -1154,7 +1155,6 @@ namespace System.Collections.Immutable
             /// Gets an object that can be used to synchronize access to the <see cref="ICollection"/>.
             /// </summary>
             /// <returns>An object that can be used to synchronize access to the <see cref="ICollection"/>.</returns>
-            /// <exception cref="System.NotImplementedException"></exception>
             [DebuggerBrowsable(DebuggerBrowsableState.Never)]
             object ICollection.SyncRoot
             {

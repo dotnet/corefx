@@ -7,8 +7,10 @@
     <ProjectGuid>{1D422B1D-D7C4-41B9-862D-EB3D98DF37DE}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AssemblyName>System.Net.Http</AssemblyName>
+    <AssemblyVersion>4.0.1.0</AssemblyVersion>
+    <PackageTargetFramework>dotnet5.4</PackageTargetFramework>
+    <UsePackageTargetRuntimeDefaults>true</UsePackageTargetRuntimeDefaults>
   </PropertyGroup>
-  
   <!-- Help VS understand available configurations -->
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'FreeBSD_Debug|AnyCPU' " />
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'FreeBSD_Release|AnyCPU' " />
@@ -18,12 +20,10 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'OSX_Release|AnyCPU' " />
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Windows_Debug|AnyCPU' " />
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Windows_Release|AnyCPU' " />
-
   <!-- Shims -->
   <ItemGroup>
     <Compile Include="Shims\Uri.cs" />
   </ItemGroup>
-
   <ItemGroup>
     <Compile Include="System\Net\Http\ByteArrayContent.cs" />
     <Compile Include="System\Net\Http\ClientCertificateOption.cs" />
@@ -89,10 +89,8 @@
     <Compile Include="System\Net\Http\Headers\UriHeaderParser.cs" />
     <Compile Include="System\Net\Http\Headers\ViaHeaderValue.cs" />
     <Compile Include="System\Net\Http\Headers\WarningHeaderValue.cs" />
-
     <!-- TODO: Must be moved to the Common/System/Net folder -->
     <Compile Include="Internal\ICloneable.cs" />
-    <Compile Include="Internal\HttpVersion.cs" />
     <Compile Include="Internal\HttpStatusDescription.cs" />
     <Compile Include="Internal\MailAddress.cs" />
     <Compile Include="Internal\Mail\DomainLiteralReader.cs" />
@@ -102,7 +100,6 @@
     <Compile Include="Internal\Mail\QuotedPairReader.cs" />
     <Compile Include="Internal\Mail\QuotedStringFormatReader.cs" />
     <Compile Include="Internal\Mail\WhitespaceReader.cs" />
-
     <Compile Include="$(CommonPath)\System\Net\HttpKnownHeaderNames.cs">
       <Link>Common\System\Net\HttpKnownHeaderNames.cs</Link>
     </Compile>
@@ -110,41 +107,84 @@
       <Link>Common\System\Net\Logging.cs</Link>
     </Compile>
   </ItemGroup>
-  
   <ItemGroup Condition=" '$(TargetsWindows)' == 'true' ">
     <Compile Include="System\Net\Http\HttpClientHandler.Windows.cs" />
   </ItemGroup>
   <PropertyGroup Condition=" '$(TargetsWindows)' == 'true' ">
     <DefineConstants>$(DefineConstants);HTTP_DLL</DefineConstants>
   </PropertyGroup>
-    <!-- Compile the WinHttpHandler implementation into the System.Net.Http.dll binary.  This is a 
+  <!-- Compile the WinHttpHandler implementation into the System.Net.Http.dll binary.  This is a 
          temporary solution to remove the cycle dependency between HttpClient and WinHttpHandler. 
          As part of that, we need to define HTTP_DLL in order to compile the 'protected' SendAsync()
          method in WinHttpHandler.cs as 'protected internal' to match the internal definition in
          HttpMessageHandler.cs. We also use the HTTP_DLL define to change public classes into 
          internal ones to remove confusion if someone looks at the implementation dlls. They are
          public in the separate WinHttpHandler.dll binary.  -->
-  <Import Project="..\..\System.Net.Http.WinHttpHandler\src\System.Net.Http.WinHttpHandler.msbuild" Condition=" '$(TargetsWindows)' == 'true' "/>
-   <!--  For source files to be shown within the visual tree in Solution Explorer, the items must be
+  <Import Project="..\..\System.Net.Http.WinHttpHandler\src\System.Net.Http.WinHttpHandler.msbuild" Condition=" '$(TargetsWindows)' == 'true' " />
+  <!--  For source files to be shown within the visual tree in Solution Explorer, the items must be
          included directly in the project file. We have the *.msbuild define the Compile items in a made
          up item called CompileItem and then just include it here. -->
   <ItemGroup Condition=" '$(TargetsWindows)' == 'true' ">
     <Compile Include="@(CompileItem)" />
   </ItemGroup>
-  
   <PropertyGroup Condition=" '$(TargetsUnix)' == 'true' ">
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup Condition=" '$(TargetsUnix)' == 'true' ">
-    <Compile Include="System\Net\Http\Unix\CurlCallbacks.cs" />
+    <Compile Include="System\Net\Http\HttpClientHandler.Unix.cs" />
     <Compile Include="System\Net\Http\Unix\CurlHandler.cs" />
-    <Compile Include="System\Net\Http\Unix\CurlResponseMessage.cs" />
-    <Compile Include="System\Net\Http\Unix\HttpClientHandler.Unix.cs" />
+    <Compile Include="System\Net\Http\Unix\CurlHandler.EasyRequest.cs" />
+    <Compile Include="System\Net\Http\Unix\CurlHandler.HttpContentAsyncStream.cs" />
+    <Compile Include="System\Net\Http\Unix\CurlHandler.MultiAgent.cs" />
+    <Compile Include="System\Net\Http\Unix\CurlException.cs" />
+    <Compile Include="System\Net\Http\Unix\CurlHandler.CurlResponseMessage.cs" />
+    <Compile Include="$(CommonPath)\Interop\Unix\libcurl\Interop.CURLcode.cs">
+      <Link>Common\Interop\Unix\libcurl\Interop.CURLcode.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\Interop.Errors.cs">
+      <Link>Common\Interop\Unix\Interop.Errors.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\Interop.IOErrors.cs">
+      <Link>Common\Interop\Unix\Interop.IOErrors.cs</Link>
+    </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\Interop.Libraries.cs">
       <Link>Common\Interop\Unix\Interop.Libraries.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.Close.cs">
+      <Link>Common\Interop\Unix\System.Native\Interop.Close.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.Open.cs">
+      <Link>Common\Interop\Unix\System.Native\Interop.Open.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.OpenFlags.cs">
+      <Link>Common\Interop\Unix\System.Native\Interop.OpenFlags.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.Pipe.cs">
+      <Link>Common\Interop\Unix\System.Native\Interop.Pipe.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.Poll.cs">
+      <Link>Common\Interop\Unix\libc\Interop.Poll.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.PrintF.cs">
+      <Link>Common\Interop\Unix\libc\Interop.PrintF.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.Read.cs">
+      <Link>Common\Interop\Unix\libc\Interop.Read.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.Write.cs">
+      <Link>Common\Interop\Unix\libc\Interop.Write.cs</Link>
+    </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\libcurl\Interop.libcurl.cs">
       <Link>Common\Interop\Unix\libcurl\Interop.libcurl.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\libcurl\Interop.libcurl_easy.cs">
+      <Link>Common\Interop\Unix\libcurl\Interop.libcurl_easy.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\libcurl\Interop.libcurl_multi.cs">
+      <Link>Common\Interop\Unix\libcurl\Interop.libcurl_multi.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\libcurl\Interop.libcurl_slist.cs">
+      <Link>Common\Interop\Unix\libcurl\Interop.libcurl_slist.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\libcurl\Interop.libcurl_types.cs">
       <Link>Common\Interop\Unix\libcurl\Interop.libcurl_types.cs</Link>
@@ -152,11 +192,40 @@
     <Compile Include="$(CommonPath)\Interop\Unix\libcurl\Interop.SafeCurlHandle.cs">
       <Link>Common\Interop\Unix\libcurl\Interop.SafeCurlHandle.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\System\NotImplemented.cs">
-      <Link>Common\System\NotImplemented.cs</Link>
-    </Compile>    
+    <Compile Include="$(CommonPath)\Interop\Unix\libcurl\Interop.SafeCurlMultiHandle.cs">
+      <Link>Common\Interop\Unix\libcurl\Interop.SafeCurlMultiHandle.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\libcurl\Interop.SafeCurlSlistHandle.cs">
+      <Link>Common\Interop\Unix\libcurl\Interop.SafeCurlSlistHandle.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Net.Http.Native\Interop.Initialization.cs">
+      <Link>Common\Interop\Unix\System.Net.Http.Native\Interop.Initialization.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Security.Cryptography.Native\Interop.Initialization.cs">
+      <Link>Common\Interop\Unix\System.Security.Cryptography.Native\Interop.Initialization.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\Net\HttpVersion.cs">
+      <Link>Common\System\Net\HttpVersion.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\Net\Http\HttpHandlerDefaults.cs">
+      <Link>Common\System\Net\Http\HttpHandlerDefaults.cs</Link>
+    </Compile>
   </ItemGroup>
-  
+  <ItemGroup Condition="'$(TargetsFreeBSD)' == 'true'">
+    <Compile Include="$(CommonPath)\Interop\FreeBSD\Interop.Libraries.cs">
+      <Link>Common\Interop\FreeBSD\Interop.Libraries.cs</Link>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetsOSX)' == 'true'">
+    <Compile Include="$(CommonPath)\Interop\OSX\Interop.Libraries.cs">
+      <Link>Common\Interop\OSX\Interop.Libraries.cs</Link>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetsLinux)' == 'true'">
+    <Compile Include="$(CommonPath)\Interop\Linux\Interop.Libraries.cs">
+      <Link>Common\Interop\Linux\Interop.Libraries.cs</Link>
+    </Compile>
+  </ItemGroup>
   <ItemGroup>
     <None Include="project.json" />
   </ItemGroup>

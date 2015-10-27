@@ -275,59 +275,117 @@ namespace System.Numerics
         // return an array of one byte whose element is 0x00.
         public byte[] ToByteArray()
         {
-            if (_bits == null && _sign == 0)
+            int sign = _sign;
+            if (sign == 0)
+            {
                 return new byte[] { 0 };
-
-            // We could probably make this more efficient by eliminating one of the passes.
-            // The current code does one pass for uint array -> byte array conversion,
-            // and then another pass to remove unneeded bytes at the top of the array.
-            uint[] dwords;
-            byte highByte;
-
-            if (_bits == null)
-            {
-                dwords = new uint[] { (uint)_sign };
-                highByte = (byte)((_sign < 0) ? 0xff : 0x00);
             }
-            else if (_sign == -1)
+
+            byte highByte;
+            int nonZeroDwordIndex = 0;
+            uint highDword;
+            uint[] bits = _bits;
+            if (bits == null)
             {
-                dwords = (uint[])_bits.Clone();
-                NumericsHelpers.DangerousMakeTwosComplement(dwords);  // mutates dwords
+                highByte = (byte)((sign < 0) ? 0xff : 0x00);
+                highDword = unchecked((uint)sign);
+            }
+            else if (sign == -1)
+            {
                 highByte = 0xff;
+
+                // If sign is -1, we will need to two's complement bits.
+                // Previously this was accomplished via NumericsHelpers.DangerousMakeTwosComplement(),
+                // however, we can do the two's complement on the stack so as to avoid
+                // creating a temporary copy of bits just to hold the two's complement.
+                // One special case in DangerousMakeTwosComplement() is that if the array
+                // is all zeros, then it would allocate a new array with the high-order
+                // uint set to 1 (for the carry). In our usage, we will not hit this case
+                // because a bits array of all zeros would represent 0, and this case
+                // would be encoded as _bits = null and _sign = 0.
+                Debug.Assert(bits.Length > 0);
+                Debug.Assert(bits[bits.Length - 1] != 0);
+                while (bits[nonZeroDwordIndex] == 0U)
+                {
+                    nonZeroDwordIndex++;
+                }
+
+                highDword = ~bits[bits.Length - 1];
+                if (bits.Length - 1 == nonZeroDwordIndex)
+                {
+                    // This will not overflow because highDword is less than or equal to uint.MaxValue - 1.
+                    Debug.Assert(highDword <= uint.MaxValue - 1);
+                    highDword += 1U;
+                }
             }
             else
             {
-                dwords = _bits;
+                Debug.Assert(sign == 1);
                 highByte = 0x00;
+                highDword = bits[bits.Length - 1];
             }
 
-            byte[] bytes = new byte[checked(4 * dwords.Length)];
-            int curByte = 0;
-            uint dword;
-            for (int i = 0; i < dwords.Length; i++)
+            byte msb;
+            int msbIndex;
+            if ((msb = unchecked((byte)(highDword >> 24))) != highByte)
             {
-                dword = dwords[i];
-                for (int j = 0; j < 4; j++)
+                msbIndex = 3;
+            }
+            else if ((msb = unchecked((byte)(highDword >> 16))) != highByte)
+            {
+                msbIndex = 2;
+            }
+            else if ((msb = unchecked((byte)(highDword >> 8))) != highByte)
+            {
+                msbIndex = 1;
+            }
+            else
+            {
+                msb = unchecked((byte)highDword);
+                msbIndex = 0;
+            }
+
+            // ensure high bit is 0 if positive, 1 if negative
+            bool needExtraByte = (msb & 0x80) != (highByte & 0x80);
+            byte[] bytes;
+            int curByte = 0;
+            if (bits == null)
+            {
+                bytes = new byte[msbIndex + 1 + (needExtraByte ? 1 : 0)];
+                Debug.Assert(bytes.Length <= 4);
+            }
+            else
+            {
+                bytes = new byte[checked(4 * (bits.Length - 1) + msbIndex + 1 + (needExtraByte ? 1 : 0))];
+
+                for (int i = 0; i < bits.Length - 1; i++)
                 {
-                    bytes[curByte++] = (byte)(dword & 0xff);
-                    dword >>= 8;
+                    uint dword = bits[i];
+                    if (sign == -1)
+                    {
+                        dword = ~dword;
+                        if (i <= nonZeroDwordIndex)
+                        {
+                            dword = unchecked(dword + 1U);
+                        }
+                    }
+                    for (int j = 0; j < 4; j++)
+                    {
+                        bytes[curByte++] = unchecked((byte)dword);
+                        dword >>= 8;
+                    }
                 }
             }
-
-            // find highest significant byte
-            int msb;
-            for (msb = bytes.Length - 1; msb > 0; msb--)
+            for (int j = 0; j <= msbIndex; j++)
             {
-                if (bytes[msb] != highByte) break;
+                bytes[curByte++] = unchecked((byte)highDword);
+                highDword >>= 8;
             }
-            // ensure high bit is 0 if positive, 1 if negative
-            bool needExtraByte = (bytes[msb] & 0x80) != (highByte & 0x80);
-
-            byte[] trimmedBytes = new byte[msb + 1 + (needExtraByte ? 1 : 0)];
-            Array.Copy(bytes, trimmedBytes, msb + 1);
-
-            if (needExtraByte) trimmedBytes[trimmedBytes.Length - 1] = highByte;
-            return trimmedBytes;
+            if (needExtraByte)
+            {
+                bytes[bytes.Length - 1] = highByte;
+            }
+            return bytes;
         }
 
         // Return the value of this BigInteger as a little-endian twos-complement
@@ -368,7 +426,7 @@ namespace System.Numerics
             bool needExtraByte = (dwords[msb] & 0x80000000) != (highDWord & 0x80000000);
 
             uint[] trimmed = new uint[msb + 1 + (needExtraByte ? 1 : 0)];
-            Array.Copy(dwords, trimmed, msb + 1);
+            Array.Copy(dwords, 0, trimmed, 0, msb + 1);
 
             if (needExtraByte) trimmed[trimmed.Length - 1] = highDWord;
             return trimmed;
@@ -676,7 +734,7 @@ namespace System.Numerics
                     {
                         _sign = -1;
                         _bits = new uint[len];
-                        Array.Copy(val, _bits, len);
+                        Array.Copy(val, 0, _bits, 0, len);
                     }
                     else
                     {
@@ -737,7 +795,7 @@ namespace System.Numerics
             {
                 _sign = negative ? -1 : +1;
                 _bits = new uint[len];
-                Array.Copy(value, _bits, len);
+                Array.Copy(value, 0, _bits, 0, len);
             }
             AssertValid();
         }
@@ -795,7 +853,7 @@ namespace System.Numerics
                 {
                     _sign = +1;
                     _bits = new uint[dwordCount];
-                    Array.Copy(value, _bits, dwordCount);
+                    Array.Copy(value, 0, _bits, 0, dwordCount);
                 }
                 // no trimming is possible.  Assign value directly to _bits.  
                 else
@@ -838,7 +896,7 @@ namespace System.Numerics
             {
                 _sign = -1;
                 _bits = new uint[len];
-                Array.Copy(value, _bits, len);
+                Array.Copy(value, 0, _bits, 0, len);
             }
             // no trimming is possible.  Assign value directly to _bits.  
             else
@@ -990,26 +1048,20 @@ namespace System.Numerics
             if (value._bits == null)
                 return Math.Log((double)value._sign, baseValue);
 
-            Double c = 0, d = 0.5D;
-            const Double log2 = 0.69314718055994529D;
+            ulong h = value._bits[value._bits.Length - 1];
+            ulong m = value._bits.Length > 1 ? value._bits[value._bits.Length - 2] : 0;
+            ulong l = value._bits.Length > 2 ? value._bits[value._bits.Length - 3] : 0;
 
-            int uintLength = Length(value._bits);
-            int topbits = BitLengthOfUInt(value._bits[uintLength - 1]);
-            int bitlen = (uintLength - 1) * kcbitUint + topbits;
-            uint indbit = (uint)(1 << (topbits - 1));
+            // measure the exact bit count
+            int c = NumericsHelpers.CbitHighZero((uint)h);
+            int b = value._bits.Length * 32 - c;
 
-            for (int index = uintLength - 1; index >= 0; --index)
-            {
-                while (indbit != 0)
-                {
-                    if ((value._bits[index] & indbit) != 0)
-                        c += d;
-                    d *= 0.5;
-                    indbit >>= 1;
-                }
-                indbit = 0x80000000;
-            }
-            return (Math.Log(c) + log2 * bitlen) / Math.Log(baseValue);
+            // extract most significant bits
+            ulong x = (h << 32 + c) | (m << c) | (l >> 32 - c);
+
+            // let v = value, b = bit count, x = v/2^b-64
+            // log ( v/2^b-64 * 2^b-64 ) = log ( x ) + log ( 2^b-64 )
+            return Math.Log(x, baseValue) + (b - 64) / Math.Log(baseValue, 2);
         }
 
 
@@ -1023,16 +1075,62 @@ namespace System.Numerics
             left.AssertValid();
             right.AssertValid();
 
-            // gcd(0, 0) =  0 
-            // gcd(a, 0) = |a|, for a != 0, since any number is a divisor of 0, and the greatest divisor of a is |a|
-            if (left._sign == 0) return BigInteger.Abs(right);
-            if (right._sign == 0) return BigInteger.Abs(left);
+            bool trivialLeft = left._bits == null;
+            bool trivialRight = right._bits == null;
 
-            BigIntegerBuilder reg1 = new BigIntegerBuilder(left);
-            BigIntegerBuilder reg2 = new BigIntegerBuilder(right);
-            BigIntegerBuilder.GCD(ref reg1, ref reg2);
+            if (trivialLeft && trivialRight)
+            {
+                return BigIntegerCalculator.Gcd(NumericsHelpers.Abs(left._sign), NumericsHelpers.Abs(right._sign));
+            }
 
-            return reg1.GetInteger(+1);
+            if (trivialLeft)
+            {
+                return left._sign != 0
+                    ? BigIntegerCalculator.Gcd(right._bits, NumericsHelpers.Abs(left._sign))
+                    : new BigInteger(right._bits, false);
+            }
+
+            if (trivialRight)
+            {
+                return right._sign != 0
+                    ? BigIntegerCalculator.Gcd(left._bits, NumericsHelpers.Abs(right._sign))
+                    : new BigInteger(left._bits, false);
+            }
+
+            if (BigIntegerCalculator.Compare(left._bits, right._bits) < 0)
+            {
+                return GreatestCommonDivisor(right._bits, left._bits);
+            }
+            else
+            {
+                return GreatestCommonDivisor(left._bits, right._bits);
+            }
+        }
+
+        private static BigInteger GreatestCommonDivisor(uint[] leftBits, uint[] rightBits)
+        {
+            Debug.Assert(BigIntegerCalculator.Compare(leftBits, rightBits) >= 0);
+
+            // Short circuits to spare some allocations...
+
+            if (rightBits.Length == 1)
+            {
+                uint temp = BigIntegerCalculator.Remainder(leftBits, rightBits[0]);
+                return BigIntegerCalculator.Gcd(rightBits[0], temp);
+            }
+
+            if (rightBits.Length == 2)
+            {
+                uint[] tempBits = BigIntegerCalculator.Remainder(leftBits, rightBits);
+
+                ulong left = ((ulong)rightBits[1] << 32) | rightBits[0];
+                ulong right = ((ulong)tempBits[1] << 32) | tempBits[0];
+
+                return BigIntegerCalculator.Gcd(left, right);
+            }
+
+            uint[] bits = BigIntegerCalculator.Gcd(leftBits, rightBits);
+            return new BigInteger(bits, false);
         }
 
         public static BigInteger Max(BigInteger left, BigInteger right)
@@ -1310,14 +1408,22 @@ namespace System.Numerics
         public static explicit operator Double(BigInteger value)
         {
             value.AssertValid();
-            if (value._bits == null)
-                return value._sign;
 
-            ulong man;
-            int exp;
-            int sign = +1;
-            BigIntegerBuilder reg = new BigIntegerBuilder(value, ref sign);
-            reg.GetApproxParts(out exp, out man);
+            int sign = value._sign;
+            uint[] bits = value._bits;
+
+            if (bits == null)
+                return sign;
+
+            ulong h = bits[bits.Length - 1];
+            ulong m = bits.Length > 1 ? bits[bits.Length - 2] : 0;
+            ulong l = bits.Length > 2 ? bits[bits.Length - 3] : 0;
+
+            int z = NumericsHelpers.CbitHighZero((uint)h);
+
+            int exp = (bits.Length - 2) * 32 - z;
+            ulong man = (h << 32 + z) | (m << z) | (l >> 32 - z);
+
             return NumericsHelpers.GetDoubleFromParts(sign, exp, man);
         }
 
@@ -1458,7 +1564,7 @@ namespace System.Numerics
                     return BigInteger.MinusOne;
                 }
                 uint[] temp = new uint[xl];
-                Array.Copy(xd /* sourceArray */, temp /* destinationArray */, xl /* length */);  // make a copy of immutable value._bits
+                Array.Copy(xd /* sourceArray */, 0 /* sourceIndex */, temp /* destinationArray */, 0 /* destinationIndex */, xl /* length */);  // make a copy of immutable value._bits
                 xd = temp;
                 NumericsHelpers.DangerousMakeTwosComplement(xd); // mutates xd
             }
@@ -1945,10 +2051,6 @@ namespace System.Numerics
             // no leading zeros
             return rgu.Length;
         }
-
-        internal int _Sign { get { return _sign; } }
-        internal uint[] _Bits { get { return _bits; } }
-
 
         internal static int BitLengthOfUInt(uint x)
         {

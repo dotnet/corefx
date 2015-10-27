@@ -4,13 +4,16 @@
 using System.Collections.Generic;
 using System.Linq;
 using Xunit;
-using Validation;
 using System.Diagnostics;
 
-namespace System.Collections.Immutable.Test
+namespace System.Collections.Immutable.Tests
 {
     public abstract class ImmutableListTestBase : SimpleElementImmutablesTestBase
     {
+        protected static readonly Func<IList, object, object> IndexOfFunc = (l, v) => l.IndexOf(v);
+        protected static readonly Func<IList, object, object> ContainsFunc = (l, v) => l.Contains(v);
+        protected static readonly Func<IList, object, object> RemoveFunc = (l, v) => { l.Remove(v); return l.Count; };
+
         internal abstract IImmutableListQueries<T> GetListQuery<T>(ImmutableList<T> list);
 
         [Fact]
@@ -57,7 +60,7 @@ namespace System.Collections.Immutable.Test
         [Fact]
         public void ForEachTest()
         {
-            this.GetListQuery(ImmutableList<int>.Empty).ForEach(n => Assert.True(false, "Empty list should not invoke this."));
+            this.GetListQuery(ImmutableList<int>.Empty).ForEach(n => { throw new ShouldNotBeInvokedException(); });
 
             var list = ImmutableList<int>.Empty.AddRange(Enumerable.Range(5, 3));
             var hitTest = new bool[list.Max() + 1];
@@ -105,11 +108,7 @@ namespace System.Collections.Immutable.Test
         [Fact]
         public void FindLastTest()
         {
-            Assert.Equal(0, this.GetListQuery(ImmutableList<int>.Empty).FindLast(n =>
-            {
-                Assert.True(false, "Predicate should not have been invoked.");
-                return true;
-            }));
+            Assert.Equal(0, this.GetListQuery(ImmutableList<int>.Empty).FindLast(n => { throw new ShouldNotBeInvokedException(); }));
             var list = ImmutableList<int>.Empty.AddRange(new[] { 2, 3, 4, 5, 6 });
             Assert.Equal(5, this.GetListQuery(list).FindLast(n => (n % 2) == 1));
         }
@@ -223,6 +222,60 @@ namespace System.Collections.Immutable.Test
         }
 
         [Fact]
+        public void IList_IndexOf_NullArgument()
+        {
+            this.AssertIListBaseline(IndexOfFunc, 1, null);
+            this.AssertIListBaseline(IndexOfFunc, "item", null);
+            this.AssertIListBaseline(IndexOfFunc, new int?(1), null);
+            this.AssertIListBaseline(IndexOfFunc, new int?(), null);
+        }
+
+        [Fact]
+        public void IList_IndexOf_ArgTypeMismatch()
+        {
+            this.AssertIListBaseline(IndexOfFunc, "first item", new object());
+            this.AssertIListBaseline(IndexOfFunc, 1, 1.0);
+
+            this.AssertIListBaseline(IndexOfFunc, new int?(1), 1);
+            this.AssertIListBaseline(IndexOfFunc, new int?(1), new int?(1));
+            this.AssertIListBaseline(IndexOfFunc, new int?(1), string.Empty);
+        }
+
+        [Fact]
+        public void IList_IndexOf_EqualsOverride()
+        {
+            this.AssertIListBaseline(IndexOfFunc, new ProgrammaticEquals(v => v is string), "foo");
+            this.AssertIListBaseline(IndexOfFunc, new ProgrammaticEquals(v => v is string), 3);
+        }
+
+        [Fact]
+        public void IList_Contains_NullArgument()
+        {
+            this.AssertIListBaseline(ContainsFunc, 1, null);
+            this.AssertIListBaseline(ContainsFunc, "item", null);
+            this.AssertIListBaseline(ContainsFunc, new int?(1), null);
+            this.AssertIListBaseline(ContainsFunc, new int?(), null);
+        }
+
+        [Fact]
+        public void IList_Contains_ArgTypeMismatch()
+        {
+            this.AssertIListBaseline(ContainsFunc, "first item", new object());
+            this.AssertIListBaseline(ContainsFunc, 1, 1.0);
+
+            this.AssertIListBaseline(ContainsFunc, new int?(1), 1);
+            this.AssertIListBaseline(ContainsFunc, new int?(1), new int?(1));
+            this.AssertIListBaseline(ContainsFunc, new int?(1), string.Empty);
+        }
+
+        [Fact]
+        public void IList_Contains_EqualsOverride()
+        {
+            this.AssertIListBaseline(ContainsFunc, new ProgrammaticEquals(v => v is string), "foo");
+            this.AssertIListBaseline(ContainsFunc, new ProgrammaticEquals(v => v is string), 3);
+        }
+
+        [Fact]
         public void ConvertAllTest()
         {
             Assert.True(this.GetListQuery(ImmutableList<int>.Empty).ConvertAll<float>(n => n).IsEmpty);
@@ -287,6 +340,12 @@ namespace System.Collections.Immutable.Test
         }
 
         [Fact]
+        public void Sort_NullComparison_Throws()
+        {
+            Assert.Throws<ArgumentNullException>(() => this.SortTestHelper(ImmutableList<int>.Empty, (Comparison<int>)null));
+        }
+
+        [Fact]
         public void SortTest()
         {
             var scenarios = new[] {
@@ -309,7 +368,13 @@ namespace System.Collections.Immutable.Test
                 Assert.Equal<int>(expected, actual);
 
                 expected = scenario.ToList();
-                IComparer<int> comparer = Comparer<int>.Default;
+                IComparer<int> comparer = null;
+                expected.Sort(comparer);
+                actual = this.SortTestHelper(scenario, comparer);
+                Assert.Equal<int>(expected, actual);
+
+                expected = scenario.ToList();
+                comparer = Comparer<int>.Create(comparison);
                 expected.Sort(comparer);
                 actual = this.SortTestHelper(scenario, comparer);
                 Assert.Equal<int>(expected, actual);
@@ -319,7 +384,7 @@ namespace System.Collections.Immutable.Test
                     for (int j = 0; j < scenario.Count - i; j++)
                     {
                         expected = scenario.ToList();
-                        comparer = Comparer<int>.Default;
+                        comparer = null;
                         expected.Sort(i, j, comparer);
                         actual = this.SortTestHelper(scenario, i, j, comparer);
                         Assert.Equal<int>(expected, actual);
@@ -417,12 +482,62 @@ namespace System.Collections.Immutable.Test
 
         protected abstract List<T> SortTestHelper<T>(ImmutableList<T> list, int index, int count, IComparer<T> comparer);
 
+        protected void AssertIListBaselineBothDirections<T1, T2>(Func<IList, object, object> operation, T1 item, T2 other)
+        {
+            this.AssertIListBaseline(operation, item, other);
+            this.AssertIListBaseline(operation, other, item);
+        }
+
+        /// <summary>
+        /// Asserts that the <see cref="ImmutableList{T}"/> or <see cref="ImmutableList{T}.Builder"/>'s
+        /// implementation of <see cref="IList"/> behave the same way <see cref="List{T}"/> does.
+        /// </summary>
+        /// <typeparam name="T">The type of the element for one collection to test with.</typeparam>
+        /// <param name="operation">
+        /// The <see cref="IList"/> operation to perform.
+        /// The function is provided with the <see cref="IList"/> implementation to test
+        /// and the item to use as the argument to the operation.
+        /// The function should return some equatable value by which to compare the effects
+        /// of the operation across <see cref="IList"/> implementations.
+        /// </param>
+        /// <param name="item">The item to add to the collection.</param>
+        /// <param name="other">The item to pass to the <paramref name="operation"/> function as the second parameter.</param>
+        protected void AssertIListBaseline<T>(Func<IList, object, object> operation, T item, object other)
+        {
+            IList bclList = new List<T> { item };
+            IList testedList = (IList)this.GetListQuery(ImmutableList.Create(item));
+
+            object expected = operation(bclList, other);
+            object actual = operation(testedList, other);
+            Assert.Equal(expected, actual);
+        }
+
         private void TrueForAllTestHelper<T>(ImmutableList<T> list, Predicate<T> test)
         {
             var bclList = list.ToList();
             var expected = bclList.TrueForAll(test);
             var actual = this.GetListQuery(list).TrueForAll(test);
             Assert.Equal(expected, actual);
+        }
+
+        protected class ProgrammaticEquals
+        {
+            private readonly Func<object, bool> equalsCallback;
+
+            internal ProgrammaticEquals(Func<object, bool> equalsCallback)
+            {
+                this.equalsCallback = equalsCallback;
+            }
+
+            public override bool Equals(object obj)
+            {
+                return this.equalsCallback(obj);
+            }
+
+            public override int GetHashCode()
+            {
+                throw new NotImplementedException();
+            }
         }
     }
 }

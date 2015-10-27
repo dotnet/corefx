@@ -5,48 +5,14 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Tests.Helpers;
 using System.Text;
 using System.Threading.Tasks;
 using Xunit;
 
 namespace System.Linq.Tests
 {
-    public class ToArrayTests
+    public class ToArrayTests : EnumerableTests
     {
-        private class TestLargeSequence : IEnumerable<byte>
-        {
-            public long MaxSize = 2 * (long)int.MaxValue;
-            public IEnumerator<byte> GetEnumerator()
-            {
-                for (long i = 0; i < MaxSize; i++) yield return (byte)1;
-            }
-            IEnumerator IEnumerable.GetEnumerator() { return this.GetEnumerator(); }
-        }
-
-        /// <summary>
-        /// Emulation of async collection change.
-        /// It adds a new element to the sequence each time the Count property touched,
-        /// so the further call of CopyTo method will fail.
-        /// </summary>
-        private class GrowingAfterCountReadCollection : TestCollection<int>
-        {
-            public GrowingAfterCountReadCollection(int[] items) : base(items) { }
-
-            public override int Count
-            {
-                get
-                {
-                    var result = base.Count;
-                    Array.Resize(ref Items, Items.Length + 1);
-                    return result;
-                }
-            }
-        }
-
-        // =====================
-
-
         [Fact]
         public void ToArray_AlwaysCreateACopy()
         {
@@ -120,7 +86,7 @@ namespace System.Linq.Tests
         public void ToArray_ThrowArgumentNullExceptionWhenSourceIsNull()
         {
             int[] source = null;
-            Assert.Throws<ArgumentNullException>(() => source.ToArray());
+            Assert.Throws<ArgumentNullException>("source", () => source.ToArray());
         }
 
 
@@ -151,12 +117,11 @@ namespace System.Linq.Tests
             Assert.Equal(4, resultArray[0]);
         }
 
-
         [Fact]
-        [OuterLoop]
+        [ActiveIssue("Valid test but too intensive to enable even in OuterLoop")]
         public void ToArray_FailOnExtremelyLargeCollection()
         {
-            TestLargeSequence largeSeq = new TestLargeSequence();
+            var largeSeq = new FastInfiniteEnumerator<byte>();
             var thrownException = Assert.ThrowsAny<Exception>(() => { largeSeq.ToArray(); });
             Assert.True(thrownException.GetType() == typeof(OverflowException) || thrownException.GetType() == typeof(OutOfMemoryException));
         }
@@ -199,5 +164,103 @@ namespace System.Linq.Tests
             Assert.Equal(Array.Empty<string>(), sourceList.Select(i => i.ToString()).Where(s => s == null).ToArray());
         }
 
+        [Fact]
+        public void SameResultsRepeatCallsFromWhereOnIntQuery()
+        {
+            var q = from x in new[] { 9999, 0, 888, -1, 66, -777, 1, 2, -12345 }
+                    where x > Int32.MinValue
+                    select x;
+
+            Assert.Equal(q.ToArray(), q.ToArray());
+        }
+        
+        [Fact]
+        public void SameResultsRepeatCallsFromWhereOnStringQuery()
+        {
+            var q = from x in new[] { "!@#$%^", "C", "AAA", "", "Calling Twice", "SoS", String.Empty }
+                        where !String.IsNullOrEmpty(x)
+                        select x;
+
+            Assert.Equal(q.ToArray(), q.ToArray());
+        }
+        
+        [Fact]
+        public void SameResultsButNotSameObject()
+        {
+            var qInt = from x in new[] { 9999, 0, 888, -1, 66, -777, 1, 2, -12345 }
+                    where x > Int32.MinValue
+                    select x;
+
+            var qString = from x in new[] { "!@#$%^", "C", "AAA", "", "Calling Twice", "SoS", String.Empty }
+                        where !String.IsNullOrEmpty(x)
+                        select x;
+
+            Assert.NotSame(qInt.ToArray(), qInt.ToArray());
+            Assert.NotSame(qString.ToArray(), qString.ToArray());
+        }
+        
+        [Fact]
+        public void EmptyArraysNotSameObject()
+        {
+            Assert.NotSame(Enumerable.Empty<int>().ToArray(), Enumerable.Empty<int>().ToArray());
+            
+            var array = new int[0];
+            Assert.NotSame(array, array.ToArray());
+        }
+
+        [Fact]
+        public void SourceIsEmptyICollectionT()
+        {
+            int[] source = { };
+
+            ICollection<int> collection = source as ICollection<int>;
+
+            Assert.Empty(source.ToArray());
+            Assert.Empty(collection.ToArray());
+        }
+
+        [Fact]
+        public void SourceIsICollectionTWithFewElements()
+        {
+            int?[] source = { -5, null, 0, 10, 3, -1, null, 4, 9 };
+            int?[] expected = { -5, null, 0, 10, 3, -1, null, 4, 9 };
+
+            ICollection<int?> collection = source as ICollection<int?>;
+
+            Assert.Equal(expected, source.ToArray());
+            Assert.Equal(expected, collection.ToArray());
+        }
+
+        [Fact]
+        public void SourceNotICollectionAndIsEmpty()
+        {
+            IEnumerable<int> source = NumberRangeGuaranteedNotCollectionType(-4, 0);
+            
+            Assert.Null(source as ICollection<int>);
+
+            Assert.Empty(source.ToArray());
+        }
+
+        [Fact]
+        public void SourceNotICollectionAndHasElements()
+        {
+            IEnumerable<int> source = NumberRangeGuaranteedNotCollectionType(-4, 10);
+            int[] expected = { -4, -3, -2, -1, 0, 1, 2, 3, 4, 5 };
+
+            Assert.Null(source as ICollection<int>);
+
+            Assert.Equal(expected, source.ToArray());
+        }
+
+        [Fact]
+        public void SourceNotICollectionAndAllNull()
+        {
+            IEnumerable<int?> source = RepeatedNullableNumberGuaranteedNotCollectionType(null, 5);
+            int?[] expected = { null, null, null, null, null };
+
+            Assert.Null(source as ICollection<int>);
+    
+            Assert.Equal(expected, source.ToArray());
+        }
     }
 }

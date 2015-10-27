@@ -61,12 +61,22 @@ namespace System.Reflection.Metadata.Ecma335
         MethodSpec = 1UL << TableIndex.MethodSpec,
         GenericParamConstraint = 1UL << TableIndex.GenericParamConstraint,
 
+        Document = 1UL << TableIndex.Document,
+        MethodDebugInformation = 1UL << TableIndex.MethodDebugInformation,
+        LocalScope = 1UL << TableIndex.LocalScope,
+        LocalVariable = 1UL << TableIndex.LocalVariable,
+        LocalConstant = 1UL << TableIndex.LocalConstant,
+        ImportScope = 1UL << TableIndex.ImportScope,
+        StateMachineMethod = 1UL << TableIndex.StateMachineMethod,
+        CustomDebugInformation = 1UL << TableIndex.CustomDebugInformation,
+
         PtrTables =
             FieldPtr
           | MethodPtr
           | ParamPtr
           | EventPtr
           | PropertyPtr,
+
         V2_0_TablesMask =
             Module
           | TypeRef
@@ -109,15 +119,28 @@ namespace System.Reflection.Metadata.Ecma335
           | GenericParam
           | MethodSpec
           | GenericParamConstraint,
+
+        PortablePdb_TablesMask =
+            Document
+          | MethodDebugInformation
+          | LocalScope
+          | LocalVariable
+          | LocalConstant
+          | ImportScope
+          | StateMachineMethod
+          | CustomDebugInformation,
+
+        V3_0_TablesMask =
+            V2_0_TablesMask
+          | PortablePdb_TablesMask,
     }
 
-    internal enum HeapSizeFlag : byte
+    internal enum HeapSizes : byte
     {
         StringHeapLarge = 0x01, // 4 byte uint indexes used for string heap offsets
         GuidHeapLarge = 0x02,   // 4 byte uint indexes used for GUID heap offsets
         BlobHeapLarge = 0x04,   // 4 byte uint indexes used for Blob heap offsets
-        EnCDeltas = 0x20,       // Indicates only EnC Deltas are present
-        DeletedMarks = 0x80,    // Indicates metadata might contain items marked deleted
+        ExtraData = 0x40,       // Indicates that there is an extra 4 bytes of data immediately after the row counts
     }
 
     internal enum StringKind : byte
@@ -130,25 +153,31 @@ namespace System.Reflection.Metadata.Ecma335
 
     internal static class StringHandleType
     {
+        // The 3 high bits above the offset that specify the full string type (including virtual bit)
+        internal const uint TypeMask = ~(HeapHandleType.OffsetMask);
+
+        // The string type bits excluding the virtual bit.
+        internal const uint NonVirtualTypeMask = TypeMask & ~(HeapHandleType.VirtualBit);
+
         // NUL-terminated UTF8 string on a #String heap.
-        internal const uint String = 0;
+        internal const uint String = (0 << HeapHandleType.OffsetBitCount);
 
         // String on #String heap whose terminator is NUL and '.', whichever comes first.
-        internal const uint DotTerminatedString = String | (1 << HeapHandleType.OffsetBitCount);
+        internal const uint DotTerminatedString = (1 << HeapHandleType.OffsetBitCount);
 
         // Reserved values that can be used for future strings:
-        internal const uint ReservedString1 = String | (2 << HeapHandleType.OffsetBitCount);
-        internal const uint ReservedString2 = String | (3 << HeapHandleType.OffsetBitCount);
+        internal const uint ReservedString1 = (2 << HeapHandleType.OffsetBitCount);
+        internal const uint ReservedString2 = (3 << HeapHandleType.OffsetBitCount);
 
         // Virtual string identified by a virtual index
-        internal const uint VirtualString = HeapHandleType.VirtualBit | String;
+        internal const uint VirtualString = HeapHandleType.VirtualBit | (0 << HeapHandleType.OffsetBitCount);
 
-        // Virtual string whose value is a "<WinRT>" prefixed string found at the specified heap offset.          
-        internal const uint WinRTPrefixedString = HeapHandleType.VirtualBit | String | (1 << HeapHandleType.OffsetBitCount);
+        // Virtual string whose value is a "<WinRT>" prefixed string found at the specified heap offset.
+        internal const uint WinRTPrefixedString = HeapHandleType.VirtualBit | (1 << HeapHandleType.OffsetBitCount);
 
         // Reserved virtual strings that can be used in future:
-        internal const uint ReservedVirtualString1 = HeapHandleType.VirtualBit | String | (2 << HeapHandleType.OffsetBitCount);
-        internal const uint ReservedVirtualString2 = HeapHandleType.VirtualBit | String | (3 << HeapHandleType.OffsetBitCount);
+        internal const uint ReservedVirtualString1 = HeapHandleType.VirtualBit | (2 << HeapHandleType.OffsetBitCount);
+        internal const uint ReservedVirtualString2 = HeapHandleType.VirtualBit | (3 << HeapHandleType.OffsetBitCount);
     }
 
     internal static class HeapHandleType
@@ -157,8 +186,6 @@ namespace System.Reflection.Metadata.Ecma335
         internal const int OffsetBitCount = 29;
         internal const uint OffsetMask = (1 << OffsetBitCount) - 1;
         internal const uint VirtualBit = 0x80000000;
-        internal const uint NonVirtualTypeMask = 3u << OffsetBitCount;
-        internal const uint TypeMask = VirtualBit | NonVirtualTypeMask;
 
         internal static bool IsValidHeapOffset(uint offset)
         {
@@ -166,59 +193,78 @@ namespace System.Reflection.Metadata.Ecma335
         }
     }
 
+    /// <summary>
+    /// These contants are all in the byte range and apply to the interpretation of <see cref="Handle.VType"/>,
+    /// </summary>
     internal static class HandleType
     {
-        internal const uint Module = 0x00;
-        internal const uint TypeRef = 0x01;
-        internal const uint TypeDef = 0x02;
-        internal const uint FieldDef = 0x04;
-        internal const uint MethodDef = 0x06;
-        internal const uint ParamDef = 0x08;
-        internal const uint InterfaceImpl = 0x09;
-        internal const uint MemberRef = 0x0a;
-        internal const uint Constant = 0x0b;
-        internal const uint CustomAttribute = 0x0c;
-        internal const uint DeclSecurity = 0x0e;
-        internal const uint Signature = 0x11;
-        internal const uint EventMap = 0x12;
-        internal const uint Event = 0x14;
-        internal const uint PropertyMap = 0x15;
-        internal const uint Property = 0x17;
-        internal const uint MethodSemantics = 0x18;
-        internal const uint MethodImpl = 0x19;
-        internal const uint ModuleRef = 0x1a;
-        internal const uint TypeSpec = 0x1b;
-        internal const uint Assembly = 0x20;
-        internal const uint AssemblyRef = 0x23;
-        internal const uint File = 0x26;
-        internal const uint ExportedType = 0x27;
-        internal const uint ManifestResource = 0x28;
-        internal const uint NestedClass = 0x29;
-        internal const uint GenericParam = 0x2a;
-        internal const uint MethodSpec = 0x2b;
-        internal const uint GenericParamConstraint = 0x2c;
+        internal const uint Module = (uint)TableIndex.Module;
+        internal const uint TypeRef = (uint)TableIndex.TypeRef;
+        internal const uint TypeDef = (uint)TableIndex.TypeDef;
+        internal const uint FieldDef = (uint)TableIndex.Field;
+        internal const uint MethodDef = (uint)TableIndex.MethodDef;
+        internal const uint ParamDef = (uint)TableIndex.Param;
+        internal const uint InterfaceImpl = (uint)TableIndex.InterfaceImpl;
+        internal const uint MemberRef = (uint)TableIndex.MemberRef;
+        internal const uint Constant = (uint)TableIndex.Constant;
+        internal const uint CustomAttribute = (uint)TableIndex.CustomAttribute;
+        internal const uint DeclSecurity = (uint)TableIndex.DeclSecurity;
+        internal const uint Signature = (uint)TableIndex.StandAloneSig;
+        internal const uint EventMap = (uint)TableIndex.EventMap;
+        internal const uint Event = (uint)TableIndex.Event;
+        internal const uint PropertyMap = (uint)TableIndex.PropertyMap;
+        internal const uint Property = (uint)TableIndex.Property;
+        internal const uint MethodSemantics = (uint)TableIndex.MethodSemantics;
+        internal const uint MethodImpl = (uint)TableIndex.MethodImpl;
+        internal const uint ModuleRef = (uint)TableIndex.ModuleRef;
+        internal const uint TypeSpec = (uint)TableIndex.TypeSpec;
+        internal const uint Assembly = (uint)TableIndex.Assembly;
+        internal const uint AssemblyRef = (uint)TableIndex.AssemblyRef;
+        internal const uint File = (uint)TableIndex.File;
+        internal const uint ExportedType = (uint)TableIndex.ExportedType;
+        internal const uint ManifestResource = (uint)TableIndex.ManifestResource;
+        internal const uint NestedClass = (uint)TableIndex.NestedClass;
+        internal const uint GenericParam = (uint)TableIndex.GenericParam;
+        internal const uint MethodSpec = (uint)TableIndex.MethodSpec;
+        internal const uint GenericParamConstraint = (uint)TableIndex.GenericParamConstraint;
+
+        // debug tables:
+        internal const uint Document = (uint)TableIndex.Document;
+        internal const uint MethodDebugInformation = (uint)TableIndex.MethodDebugInformation;
+        internal const uint LocalScope = (uint)TableIndex.LocalScope;
+        internal const uint LocalVariable = (uint)TableIndex.LocalVariable;
+        internal const uint LocalConstant = (uint)TableIndex.LocalConstant;
+        internal const uint ImportScope = (uint)TableIndex.ImportScope;
+        internal const uint AsyncMethod = (uint)TableIndex.StateMachineMethod;
+        internal const uint CustomDebugInformation = (uint)TableIndex.CustomDebugInformation;
 
         internal const uint UserString = 0x70;     // #UserString heap
 
         // The following values never appear in a token stored in metadata, 
         // they are just helper values to identify the type of a handle.
+        // Note, however, that even though they do not come from the spec,
+        // they are surfaced as public constants via HandleKind enum and 
+        // therefore cannot change!
 
         internal const uint Blob = 0x71;        // #Blob heap
         internal const uint Guid = 0x72;        // #Guid heap
-        internal const uint Namespace = 0x73;   // #String heap but known to be the full name of a namespace
 
-        // #String heap and its modifications (up to 8 string kinds, virtual and non-virtual)
-        internal const uint String = 0x7c;
-        internal const uint DotTerminatedString = String | ((StringHandleType.DotTerminatedString & ~HeapHandleType.VirtualBit) >> HeapHandleType.OffsetBitCount);
-        internal const uint ReservedString1 = String | ((StringHandleType.ReservedString1 & ~HeapHandleType.VirtualBit) >> HeapHandleType.OffsetBitCount); 
-        internal const uint ReservedString2 = String | ((StringHandleType.ReservedString2 & ~HeapHandleType.VirtualBit) >> HeapHandleType.OffsetBitCount); 
-        internal const uint VirtualString = VirtualBit | String;
-        internal const uint WinRTPrefixedString = VirtualBit | String | ((StringHandleType.WinRTPrefixedString & ~HeapHandleType.VirtualBit) >> HeapHandleType.OffsetBitCount);
-        internal const uint ReservedVirtualString1 = VirtualBit | String | ((StringHandleType.ReservedString1 & ~HeapHandleType.VirtualBit) >> HeapHandleType.OffsetBitCount);
-        internal const uint ReservedVirtualString2 = VirtualBit | String | ((StringHandleType.ReservedString2 & ~HeapHandleType.VirtualBit) >> HeapHandleType.OffsetBitCount);
+        // #String heap and its modifications
+        //
+        // Multiple values are reserved for string handles so that we can encode special
+        // handling with more than just the virtual bit. See StringHandleType for how
+        // the two extra bits are actually interpreted. The extra String1,2,3 values here are 
+        // not used directly, but serve as a reminder that they are not available for use
+        // by another handle type.
+        internal const uint String  = 0x78;
+        internal const uint String1 = 0x79;
+        internal const uint String2 = 0x7a;
+        internal const uint String3 = 0x7b;
 
-        internal const uint StringHeapTypeMask = HeapHandleType.NonVirtualTypeMask >> HeapHandleType.OffsetBitCount;
-        internal const uint StringOrNamespaceMask = 0x7c;
+        // Namespace handles also have offsets into the #String heap (when non-virtual)
+        // to their full name. However, this is an implementation detail and they are
+        // surfaced with first-class HandleKind.Namespace and strongly-typed NamespaceHandle.
+        internal const uint Namespace = 0x7c;
 
         internal const uint HeapMask = 0x70;
         internal const uint TypeMask = 0x7F;
@@ -229,19 +275,11 @@ namespace System.Reflection.Metadata.Ecma335
         /// </summary>
         internal const uint VirtualBit = 0x80;
 
-        public static HandleKind ToHandleKind(uint handleType)
-        {
-            Debug.Assert((handleType & VirtualBit) == 0);
-
-            // Do not surface special string token sub-types (e.g. dot terminated, winrt prefixed) 
-            // in public-facing handle type. Pretend that all strings are just plain strings.
-            if (handleType > String)
-            {
-                return HandleKind.String;
-            }
-
-            return (HandleKind)handleType;
-        }
+        /// <summary>
+        /// In the case of string handles, the two lower bits that (in addition to the 
+        /// virtual bit not included in this mask) encode how to obtain the string value.
+        /// </summary>
+        internal const uint NonVirtualStringTypeMask = 0x03;
     }
 
     internal static class TokenTypeIds
@@ -275,6 +313,16 @@ namespace System.Reflection.Metadata.Ecma335
         internal const uint GenericParam = HandleType.GenericParam << RowIdBitCount;
         internal const uint MethodSpec = HandleType.MethodSpec << RowIdBitCount;
         internal const uint GenericParamConstraint = HandleType.GenericParamConstraint << RowIdBitCount;
+
+        // debug tables:
+        internal const uint Document = HandleType.Document << RowIdBitCount;
+        internal const uint MethodDebugInformation = HandleType.MethodDebugInformation << RowIdBitCount;
+        internal const uint LocalScope = HandleType.LocalScope << RowIdBitCount;
+        internal const uint LocalVariable = HandleType.LocalVariable << RowIdBitCount;
+        internal const uint LocalConstant = HandleType.LocalConstant << RowIdBitCount;
+        internal const uint ImportScope = HandleType.ImportScope << RowIdBitCount;
+        internal const uint AsyncMethod = HandleType.AsyncMethod << RowIdBitCount;
+        internal const uint CustomDebugInformation = HandleType.CustomDebugInformation << RowIdBitCount;
 
         internal const uint UserString = HandleType.UserString << RowIdBitCount;
 

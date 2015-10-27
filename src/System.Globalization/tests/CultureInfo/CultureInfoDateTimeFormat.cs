@@ -3,6 +3,7 @@
 
 using System;
 using System.Globalization;
+using System.Runtime.InteropServices;
 using Xunit;
 
 namespace System.Globalization.Tests
@@ -35,6 +36,17 @@ namespace System.Globalization.Tests
 
             myCultureInfo.DateTimeFormat.ShortTimePattern = "HH|mm";
             Assert.Equal("HH|mm", myCultureInfo.DateTimeFormat.ShortTimePattern);
+        }
+
+        [Theory]
+        [InlineData("fi-FI")]
+        public void TestLongTimePatternLocale2(string locale)
+        {
+            CultureInfo myTestCulture = new CultureInfo(locale);
+            DateTimeFormatInfo myDateTimeFormat = new DateTimeFormatInfo();
+            myDateTimeFormat.LongTimePattern = "H:mm:ss";
+            myTestCulture.DateTimeFormat = myDateTimeFormat;
+            Assert.Equal("H:mm:ss", myTestCulture.DateTimeFormat.LongTimePattern);
         }
 
         [Fact]

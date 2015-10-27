@@ -4,7 +4,7 @@
 using System.Linq;
 using Xunit;
 
-namespace System.IO.FileSystem.Tests
+namespace System.IO.Tests
 {
     public class Directory_CreateDirectory : FileSystemTest
     {
@@ -59,8 +59,17 @@ namespace System.IO.FileSystem.Tests
         public void PathAlreadyExistsAsDirectory(FileAttributes attributes)
         {
             DirectoryInfo testDir = Create(GetTestFilePath());
-            testDir.Attributes = attributes;
-            Assert.Equal(testDir.FullName, Create(testDir.FullName).FullName);
+            FileAttributes original = testDir.Attributes;
+
+            try
+            {
+                testDir.Attributes = attributes;
+                Assert.Equal(testDir.FullName, Create(testDir.FullName).FullName);
+            }
+            finally
+            {
+                testDir.Attributes = original;
+            }
         }
 
         [Fact]
@@ -210,9 +219,32 @@ namespace System.IO.FileSystem.Tests
 
         [Fact]
         [PlatformSpecific(PlatformID.Windows)]
-        public void DirectoryLongerThanMaxPathAsPath_ThrowsPathTooLongException()
+        public void PathWithInvalidColons_ThrowsNotSupportedException()
         {
-            var paths = IOInputs.GetPathsLongerThanMaxPath();
+            var paths = IOInputs.GetPathsWithInvalidColons();
+            Assert.All(paths, (path) =>
+            {
+                Assert.Throws<NotSupportedException>(() => Create(path));
+            });
+        }
+
+        [Fact]
+        [PlatformSpecific(PlatformID.Windows)]
+        public void DirectoryLongerThanMaxPath_Succeeds()
+        {
+            var paths = IOInputs.GetPathsLongerThanMaxPath(GetTestFilePath());
+            Assert.All(paths, (path) =>
+            {
+                DirectoryInfo result = Create(path);
+                Assert.True(Directory.Exists(result.FullName));
+            });
+        }
+
+        [Fact]
+        [PlatformSpecific(PlatformID.Windows)]
+        public void DirectoryLongerThanMaxLongPath_ThrowsPathTooLongException()
+        {
+            var paths = IOInputs.GetPathsLongerThanMaxLongPath(GetTestFilePath());
             Assert.All(paths, (path) =>
             {
                 Assert.Throws<PathTooLongException>(() => Create(path));
@@ -221,9 +253,21 @@ namespace System.IO.FileSystem.Tests
 
         [Fact]
         [PlatformSpecific(PlatformID.Windows)]
-        public void ExtendedDirectoryLongerThanLegacyMaxPathSucceeds()
+        public void DirectoryLongerThanMaxLongPathWithExtendedSyntax_ThrowsPathTooLongException()
         {
-            var paths = IOInputs.GetPathsLongerThanMaxPath(useExtendedSyntax: true, includeExtendedMaxPath: false);
+            var paths = IOInputs.GetPathsLongerThanMaxLongPath(GetTestFilePath(), useExtendedSyntax: true);
+            Assert.All(paths, (path) =>
+            {
+                Assert.Throws<PathTooLongException>(() => Create(path));
+            });
+        }
+
+
+        [Fact]
+        [PlatformSpecific(PlatformID.Windows)]
+        public void ExtendedDirectoryLongerThanLegacyMaxPath_Succeeds()
+        {
+            var paths = IOInputs.GetPathsLongerThanMaxPath(GetTestFilePath(), useExtendedSyntax: true);
             Assert.All(paths, (path) =>
             {
                 Assert.True(Create(path).Exists);
@@ -232,12 +276,13 @@ namespace System.IO.FileSystem.Tests
 
         [Fact]
         [PlatformSpecific(PlatformID.Windows)]
-        public void DirectoryLongerThanMaxDirectoryAsPath_ThrowsPathTooLongException()
+        public void DirectoryLongerThanMaxDirectoryAsPath_Succeeds()
         {
-            var paths = IOInputs.GetPathsLongerThanMaxDirectory();
+            var paths = IOInputs.GetPathsLongerThanMaxDirectory(GetTestFilePath());
             Assert.All(paths, (path) =>
             {
-                Assert.Throws<PathTooLongException>(() => Create(path));
+                var result = Create(path);
+                Assert.True(Directory.Exists(result.FullName));
             });
         }
 

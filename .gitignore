@@ -136,6 +136,7 @@ publish/
 *.publishproj
 
 # NuGet Packages
+*.nuget.props
 *.nupkg
 **/packages/*
 
@@ -147,7 +148,6 @@ csx/
 AppPackages/
 
 # Others
-sql/
 *.Cache
 ClientBin/
 [Ss]tyle[Cc]op.*

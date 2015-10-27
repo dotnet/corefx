@@ -3,7 +3,6 @@
 
 using System.Reflection.Internal;
 using System.Text;
-using TestUtilities;
 using Xunit;
 
 namespace System.Reflection.Metadata.Tests
@@ -27,6 +26,21 @@ namespace System.Reflection.Metadata.Tests
             Assert.Equal(0, new BlobReader(null, 0).Length); // this is valid
             Assert.Throws<BadImageFormatException>(() => new BlobReader(null, 0).ReadByte()); // but can't read anything non-empty from it...
             Assert.Same(String.Empty, new BlobReader(null, 0).ReadUtf8NullTerminated()); // can read empty string.
+        }
+
+        [Fact]
+        public unsafe void ReadBoolean1()
+        {
+            byte[] buffer = new byte[] { 1, 0xff, 0, 2 };
+            fixed (byte* bufferPtr = buffer)
+            {
+                var reader = new BlobReader(new MemoryBlock(bufferPtr, buffer.Length));
+
+                Assert.True(reader.ReadBoolean());
+                Assert.True(reader.ReadBoolean());
+                Assert.False(reader.ReadBoolean());
+                Assert.True(reader.ReadBoolean());
+            }
         }
 
         [Fact]
@@ -103,7 +117,7 @@ namespace System.Reflection.Metadata.Tests
                 Assert.Equal(0, reader.Offset);
 
                 Assert.True(reader.SeekOffset(0));
-                AssertEx.Equal(buffer, reader.ReadBytes(4));
+                Assert.Equal(buffer, reader.ReadBytes(4));
                 Assert.Equal(4, reader.Offset);
 
                 Assert.True(reader.SeekOffset(0));
@@ -230,16 +244,16 @@ namespace System.Reflection.Metadata.Tests
                 Assert.Equal(0x01FFU, block.PeekTaggedReference(6, smallRefSize: true));
 
                 // large ref size throws on > RIDMask when tagged variant is not used.
-                AssertEx.Throws<BadImageFormatException>(() => block.PeekReference(0, smallRefSize: false), SR.RowIdOrHeapOffsetTooLarge);
-                AssertEx.Throws<BadImageFormatException>(() => block.PeekReference(4, smallRefSize: false), SR.RowIdOrHeapOffsetTooLarge);
+                Assert.Throws<BadImageFormatException>(() => block.PeekReference(0, smallRefSize: false));
+                Assert.Throws<BadImageFormatException>(() => block.PeekReference(4, smallRefSize: false));
 
                 // large ref size does not throw when Tagged variant is used.
                 Assert.Equal(0xFFFFFFFFU, block.PeekTaggedReference(0, smallRefSize: false));
                 Assert.Equal(0x01FFFFFFU, block.PeekTaggedReference(4, smallRefSize: false));
 
                 // bounds check applies in all cases
-                AssertEx.Throws<BadImageFormatException>(() => block.PeekReference(7, smallRefSize: true), SR.OutOfBoundsRead);
-                AssertEx.Throws<BadImageFormatException>(() => block.PeekReference(5, smallRefSize: false), SR.OutOfBoundsRead);
+                Assert.Throws<BadImageFormatException>(() => block.PeekReference(7, smallRefSize: true));
+                Assert.Throws<BadImageFormatException>(() => block.PeekReference(5, smallRefSize: false));
             }
         }
 

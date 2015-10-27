@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.IO;
+using System.Text;
 using Test.Cryptography;
 using Xunit;
 
@@ -101,30 +103,127 @@ namespace System.Security.Cryptography.X509Certificates.Tests
             Assert.Equal(expectedParameters, pk.EncodedParameters.RawData);
         }
 
-        /*
-         * TODO: Move the spirit of this method to a GetRSAPublicKey test
         [Fact]
         public static void TestKey_RSA()
         {
-            PublicKey pk = GetTestRsaKey();
-            RSA rsa = (RSA)pk.Key;
-            RSAParameters rsaParameters = rsa.ExportParameters(false);
+            using (X509Certificate2 cert = new X509Certificate2(TestData.MsCertificate))
+            {
+                RSA rsa = cert.GetRSAPublicKey();
+                RSAParameters rsaParameters = rsa.ExportParameters(false);
 
-            byte[] expectedModulus = (
-                "E8AF5CA2200DF8287CBC057B7FADEEEB76AC28533F3ADB407DB38E33E6573FA5" +
-                "51153454A5CFB48BA93FA837E12D50ED35164EEF4D7ADB137688B02CF0595CA9" +
-                "EBE1D72975E41B85279BF3F82D9E41362B0B40FBBE3BBAB95C759316524BCA33" +
-                "C537B0F3EB7EA8F541155C08651D2137F02CBA220B10B1109D772285847C4FB9" +
-                "1B90B0F5A3FE8BF40C9A4EA0F5C90A21E2AAE3013647FD2F826A8103F5A935DC" +
-                "94579DFB4BD40E82DB388F12FEE3D67A748864E162C4252E2AAE9D181F0E1EB6" +
-                "C2AF24B40E50BCDE1C935C49A679B5B6DBCEF9707B280184B82A29CFBFA90505" +
-                "E1E00F714DFDAD5C238329EBC7C54AC8E82784D37EC6430B950005B14F6571C5").HexToByteArray();
+                byte[] expectedModulus = (
+                    "E8AF5CA2200DF8287CBC057B7FADEEEB76AC28533F3ADB407DB38E33E6573FA5" +
+                    "51153454A5CFB48BA93FA837E12D50ED35164EEF4D7ADB137688B02CF0595CA9" +
+                    "EBE1D72975E41B85279BF3F82D9E41362B0B40FBBE3BBAB95C759316524BCA33" +
+                    "C537B0F3EB7EA8F541155C08651D2137F02CBA220B10B1109D772285847C4FB9" +
+                    "1B90B0F5A3FE8BF40C9A4EA0F5C90A21E2AAE3013647FD2F826A8103F5A935DC" +
+                    "94579DFB4BD40E82DB388F12FEE3D67A748864E162C4252E2AAE9D181F0E1EB6" +
+                    "C2AF24B40E50BCDE1C935C49A679B5B6DBCEF9707B280184B82A29CFBFA90505" +
+                    "E1E00F714DFDAD5C238329EBC7C54AC8E82784D37EC6430B950005B14F6571C5").HexToByteArray();
 
-            byte[] expectedExponent = new byte[] { 0x01, 0x00, 0x01 };
+                byte[] expectedExponent = new byte[] { 0x01, 0x00, 0x01 };
 
-            Assert.Equal(expectedModulus, rsaParameters.Modulus);
-            Assert.Equal(expectedExponent, rsaParameters.Exponent);
+                Assert.Equal(expectedModulus, rsaParameters.Modulus);
+                Assert.Equal(expectedExponent, rsaParameters.Exponent);
+            }
         }
-        */
+
+        [Fact]
+        public static void TestECDsaPublicKey()
+        {
+            byte[] helloBytes = Encoding.ASCII.GetBytes("Hello");
+
+            using (var cert = new X509Certificate2(TestData.ECDsa384Certificate))
+            using (ECDsa publicKey = cert.GetECDsaPublicKey())
+            {
+                Assert.Equal(384, publicKey.KeySize);
+
+                // The public key should be unable to sign.
+                Assert.ThrowsAny<CryptographicException>(() => publicKey.SignData(helloBytes, HashAlgorithmName.SHA256));
+            }
+        }
+
+        [Fact]
+        public static void TestECDsaPublicKey_ValidatesSignature()
+        {
+            // This signature was produced as the output of ECDsaCng.SignData with the same key
+            // on .NET 4.6.  Ensure it is verified here as a data compatibility test.
+            //
+            // Note that since ECDSA signatures contain randomness as an input, this value is unlikely
+            // to be reproduced by another equivalent program.
+            byte[] existingSignature =
+            {
+                // r:
+                0x7E, 0xD7, 0xEF, 0x46, 0x04, 0x92, 0x61, 0x27,
+                0x9F, 0xC9, 0x1B, 0x7B, 0x8A, 0x41, 0x6A, 0xC6,
+                0xCF, 0xD4, 0xD4, 0xD1, 0x73, 0x05, 0x1F, 0xF3,
+                0x75, 0xB2, 0x13, 0xFA, 0x82, 0x2B, 0x55, 0x11,
+                0xBE, 0x57, 0x4F, 0x20, 0x07, 0x24, 0xB7, 0xE5,
+                0x24, 0x44, 0x33, 0xC3, 0xB6, 0x8F, 0xBC, 0x1F,
+
+                // s:
+                0x48, 0x57, 0x25, 0x39, 0xC0, 0x84, 0xB9, 0x0E,
+                0xDA, 0x32, 0x35, 0x16, 0xEF, 0xA0, 0xE2, 0x34,
+                0x35, 0x7E, 0x10, 0x38, 0xA5, 0xE4, 0x8B, 0xD3,
+                0xFC, 0xE7, 0x60, 0x25, 0x4E, 0x63, 0xF7, 0xDB,
+                0x7C, 0xBF, 0x18, 0xD6, 0xD3, 0x49, 0xD0, 0x93,
+                0x08, 0xC5, 0xAA, 0xA6, 0xE5, 0xFD, 0xD0, 0x96,
+            };
+
+            byte[] helloBytes = Encoding.ASCII.GetBytes("Hello");
+
+            using (var cert = new X509Certificate2(TestData.ECDsa384Certificate))
+            using (ECDsa publicKey = cert.GetECDsaPublicKey())
+            {
+                Assert.Equal(384, publicKey.KeySize);
+
+                bool isSignatureValid = publicKey.VerifyData(helloBytes, existingSignature, HashAlgorithmName.SHA256);
+                Assert.True(isSignatureValid, "isSignatureValid");
+            }
+        }
+
+        [Fact]
+        [PlatformSpecific(PlatformID.Windows)]
+        public static void TestKey_ECDsaCng256()
+        {
+            TestKey_ECDsaCng(TestData.ECDsa256Certificate, TestData.ECDsaCng256PublicKey);
+        }
+
+        [Fact]
+        [PlatformSpecific(PlatformID.Windows)]
+        public static void TestKey_ECDsaCng384()
+        {
+            TestKey_ECDsaCng(TestData.ECDsa384Certificate, TestData.ECDsaCng384PublicKey);
+        }
+
+        [Fact]
+        [PlatformSpecific(PlatformID.Windows)]
+        public static void TestKey_ECDsaCng521()
+        {
+            TestKey_ECDsaCng(TestData.ECDsa521Certificate, TestData.ECDsaCng521PublicKey);
+        }
+
+        private static void TestKey_ECDsaCng(byte[] certBytes, TestData.ECDsaCngKeyValues expected)
+        {
+#if !NETNATIVE
+            using (X509Certificate2 cert = new X509Certificate2(certBytes))
+            {
+                ECDsaCng e = (ECDsaCng)(cert.GetECDsaPublicKey());
+                CngKey k = e.Key;
+                byte[] blob = k.Export(CngKeyBlobFormat.EccPublicBlob);
+                using (BinaryReader br = new BinaryReader(new MemoryStream(blob)))
+                {
+                    int magic = br.ReadInt32();
+                    int cbKey = br.ReadInt32();
+                    Assert.Equal(expected.QX.Length, cbKey);
+
+                    byte[] qx = br.ReadBytes(cbKey);
+                    byte[] qy = br.ReadBytes(cbKey);
+                    Assert.Equal<byte>(expected.QX, qx);
+                    Assert.Equal<byte>(expected.QY, qy);
+                }
+            }
+#endif //!NETNATIVE
+        }
     }
 }

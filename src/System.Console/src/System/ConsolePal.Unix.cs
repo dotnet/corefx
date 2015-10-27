@@ -2,9 +2,12 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Microsoft.Win32.SafeHandles;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Runtime.InteropServices;
 
 namespace System
@@ -26,17 +29,17 @@ namespace System
     {
         public static Stream OpenStandardInput()
         {
-            return new UnixConsoleStream(Interop.Devices.stdin, FileAccess.Read);
+            return new UnixConsoleStream(SafeFileHandle.Open(() => Interop.Sys.Dup(Interop.Sys.FileDescriptors.STDIN_FILENO)), FileAccess.Read);
         }
 
         public static Stream OpenStandardOutput()
         {
-            return new UnixConsoleStream(Interop.Devices.stdout, FileAccess.Write);
+            return new UnixConsoleStream(SafeFileHandle.Open(() => Interop.Sys.Dup(Interop.Sys.FileDescriptors.STDOUT_FILENO)), FileAccess.Write);
         }
 
         public static Stream OpenStandardError()
         {
-            return new UnixConsoleStream(Interop.Devices.stderr, FileAccess.Write);
+            return new UnixConsoleStream(SafeFileHandle.Open(() => Interop.Sys.Dup(Interop.Sys.FileDescriptors.STDERR_FILENO)), FileAccess.Write);
         }
 
         public static Encoding InputEncoding
@@ -47,6 +50,63 @@ namespace System
         public static Encoding OutputEncoding
         {
             get { return GetConsoleEncoding(); }
+        }
+
+        private static readonly object s_stdInReaderSyncObject = new object();
+        private static SyncTextReader s_stdInReader;
+        private const int DefaultBufferSize = 255;
+
+        private static SyncTextReader StdInReader
+        {
+            get
+            {
+                return Volatile.Read(ref s_stdInReader) ??
+                    Console.EnsureInitialized(
+                        ref s_stdInReader,
+                        () => SyncTextReader.GetSynchronizedTextReader(
+                            new StdInStreamReader(
+                                stream: OpenStandardInput(),
+                                encoding: InputEncoding,
+                                bufferSize: DefaultBufferSize)));
+            }
+        }
+
+        private const int DefaultConsoleBufferSize = 256; // default size of buffer used in stream readers/writers
+        internal static TextReader GetOrCreateReader()
+        {
+            if (Console.IsInputRedirected)
+            {
+                Stream inputStream = OpenStandardInput();
+                return SyncTextReader.GetSynchronizedTextReader(
+                    inputStream == Stream.Null ?
+                    StreamReader.Null :
+                    new StreamReader(
+                        stream: inputStream,
+                        encoding: ConsolePal.InputEncoding,
+                        detectEncodingFromByteOrderMarks: false,
+                        bufferSize: DefaultConsoleBufferSize,
+                        leaveOpen: true)
+                        );
+            }
+            else
+            {
+                return StdInReader;
+            }
+        }
+
+        public static ConsoleKeyInfo ReadKey(bool intercept)
+        {
+            if (Console.IsInputRedirected)
+            {
+                // We could leverage Console.Read() here however
+                // windows fails when stdin is redirected.
+                throw new InvalidOperationException(SR.InvalidOperation_ConsoleReadKeyOnFile);
+            }
+
+            ConsoleKeyInfo keyInfo = StdInReader.ReadKey();
+            if (!intercept) Console.Write(keyInfo.KeyChar);
+
+            return keyInfo;
         }
 
         public static ConsoleColor ForegroundColor
@@ -63,44 +123,82 @@ namespace System
 
         public static void ResetColor()
         {
-            if (!ConsoleOutIsTerminal)
+            // We only want to reset colors if we're targeting a TTY device
+            if (Console.IsOutputRedirected)
                 return;
 
             string resetFormat = TerminalColorInfo.Instance.ResetFormat;
             if (resetFormat != null)
             {
-                Console.Write(resetFormat);
+                WriteStdoutAnsiString(resetFormat);
             }
         }
 
-        /// <summary>Gets whether Console.Out is targeting a terminal display.</summary>
-        private static bool ConsoleOutIsTerminal
+        public static int WindowWidth
         {
             get
             {
-                // We only want to write out ANSI escape sequences if we're targeting a TTY device,
-                // so we don't want to if the output stream is redirected, either redirected to another
-                // stream via Console.SetOut, or redirected via Unix stdout redirection.
-                // We make a best guess by unwrapping the TextWriter to get at the underlying
-                // UnixConsoleStream, and checking the type of the underlying file descriptor
-                // for that stream: we say it's a TTY if we can get the UnixConsoleStream and
-                // if its type is CHR (a "character device").
-
-                SyncTextWriter stw = Console.Out as SyncTextWriter;
-                if (stw != null)
-                {
-                    StreamWriter sw = stw._out as StreamWriter;
-                    if (sw != null)
-                    {
-                        UnixConsoleStream ucs = sw.BaseStream as UnixConsoleStream;
-                        if (ucs != null)
-                        {
-                            return ucs._handleType == Interop.Sys.FileTypes.S_IFCHR;
-                        }
-                    }
-                }
-                return false;
+                int cols = Interop.Sys.GetWindowWidth();
+                return (cols != -1) ? cols : TerminalBasicInfo.Instance.ColumnFormat;
             }
+            set
+            {
+                throw new PlatformNotSupportedException();
+            }
+        }
+        public static bool CursorVisible
+        {
+            get
+            {
+                throw new PlatformNotSupportedException();
+            }
+            set
+            {
+                if (Console.IsOutputRedirected)
+                    return;
+
+                string formatString = value ?
+                    TerminalBasicInfo.Instance.CursorVisibleFormat :
+                    TerminalBasicInfo.Instance.CursorInvisibleFormat;
+                if (!string.IsNullOrEmpty(formatString))
+                {
+                    WriteStdoutAnsiString(formatString);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets whether the specified file descriptor was redirected.
+        /// It's considered redirected if it doesn't refer to a terminal.
+        /// </summary>
+        private static bool IsHandleRedirected(int fd)
+        {
+            return !Interop.Sys.IsATty(fd);
+        }
+
+        /// <summary>
+        /// Gets whether Console.In is redirected.
+        /// We approximate the behaviorby checking whether the underlying stream is our UnixConsoleStream and it's wrapping a character device.
+        /// </summary>
+        public static bool IsInputRedirectedCore()
+        {
+            return IsHandleRedirected(Interop.Sys.FileDescriptors.STDIN_FILENO);
+        }
+
+        /// <summary>Gets whether Console.Out is redirected.
+        /// We approximate the behaviorby checking whether the underlying stream is our UnixConsoleStream and it's wrapping a character device.
+        /// </summary>
+        public static bool IsOutputRedirectedCore()
+        {
+            return IsHandleRedirected(Interop.Sys.FileDescriptors.STDOUT_FILENO);
+        }
+
+        /// <summary>Gets whether Console.Error is redirected.
+        /// We approximate the behaviorby checking whether the underlying stream is our UnixConsoleStream and it's wrapping a character device.
+        /// </summary>
+        public static bool IsErrorRedirectedCore()
+        {
+            return IsHandleRedirected(Interop.Sys.FileDescriptors.STDERR_FILENO);
         }
 
         /// <summary>Creates an encoding from the current environment.</summary>
@@ -176,10 +274,9 @@ namespace System
             }
 
             // Changing the color involves writing an ANSI character sequence out to the output stream.
-            // We only want to do this if we know that sequence will be interpreted by the output
-            // rather than simply displayed visibly.  A reasonable approximation for this is whether
-            // the underlying stream is our UnixConsoleStream and it's wrapping a character device.
-            if (!ConsoleOutIsTerminal)
+            // We only want to do this if we know that sequence will be interpreted by the output.
+            // rather than simply displayed visibly.
+            if (Console.IsOutputRedirected)
                 return;
 
             // See if we've already cached a format string for this foreground/background
@@ -188,7 +285,7 @@ namespace System
             string evaluatedString = s_fgbgAndColorStrings[fgbgIndex, ccValue]; // benign race
             if (evaluatedString != null)
             {
-                Console.Write(evaluatedString);
+                WriteStdoutAnsiString(evaluatedString);
                 return;
             }
 
@@ -202,7 +299,7 @@ namespace System
                     int ansiCode = _consoleColorToAnsiCode[ccValue] % maxColors;
                     evaluatedString = TermInfo.ParameterizedStrings.Evaluate(formatString, ansiCode);
 
-                    Console.Write(evaluatedString);
+                    WriteStdoutAnsiString(evaluatedString);
 
                     s_fgbgAndColorStrings[fgbgIndex, ccValue] = evaluatedString; // benign race
                 }
@@ -239,6 +336,33 @@ namespace System
 
         /// <summary>Cache of the format strings for foreground/background and ConsoleColor.</summary>
         private static readonly string[,] s_fgbgAndColorStrings = new string[2, 16]; // 2 == fg vs bg, 16 == ConsoleColor values
+
+        public static bool TryGetSpecialConsoleKey(char[] givenChars, int startIndex, int endIndex, out ConsoleKey key, out int keyLength)
+        {
+            key = (ConsoleKey)0;
+            keyLength = 0;
+            int unprocessedCharCount = endIndex - startIndex + 1;
+
+            if (unprocessedCharCount < TerminalKeyInfo.Instance.MinKeyLength)
+                return false;
+
+            int minRange = TerminalKeyInfo.Instance.MinKeyLength;
+            int maxRange = Math.Min(unprocessedCharCount, TerminalKeyInfo.Instance.MaxKeyLength);
+
+            for (int i = maxRange; i >= minRange; i--)
+            {
+                string currentString = new string(givenChars, startIndex, i);
+
+                // Check if the string prefix matches.
+                if (TerminalKeyInfo.Instance.KeyFormatToConsoleKey.TryGetValue(currentString, out key))
+                {
+                    keyLength = currentString.Length;
+                    return true;
+                }
+            }
+
+            return false;
+        }
 
         /// <summary>Provides a cache of color information sourced from terminfo.</summary>
         private struct TerminalColorInfo
@@ -279,6 +403,111 @@ namespace System
             }, isThreadSafe: true);
         }
 
+        private struct TerminalBasicInfo
+        {
+            /// <summary>The no. of columns in a format</summary>
+            public int ColumnFormat;
+            /// <summary>The format string to use to make cursor visible.</summary>
+            public string CursorVisibleFormat;
+            /// <summary>The format string to use to make cursor invisible</summary>
+            public string CursorInvisibleFormat;
+
+            /// <summary>The cached instance.</summary>
+            public static TerminalBasicInfo Instance { get { return _instance.Value; } }
+
+            private TerminalBasicInfo(TermInfo.Database db)
+            {
+                ColumnFormat = db != null ? db.GetNumber(TermInfo.Database.ColumnIndex) : 0;
+                CursorVisibleFormat = db != null ? db.GetString(TermInfo.Database.CursorVisibleIndex) : string.Empty;
+                CursorInvisibleFormat = db != null ? db.GetString(TermInfo.Database.CursorInvisibleIndex) : string.Empty;
+            }
+
+            /// <summary>Lazy initialization of the terminal basic information.</summary>
+            private static Lazy<TerminalBasicInfo> _instance = new Lazy<TerminalBasicInfo>(() =>
+            {
+                TermInfo.Database db = TermInfo.Database.Instance; // Could be null if TERM is set to a file that doesn't exist
+                return new TerminalBasicInfo(db);
+            }, isThreadSafe: true);
+        }
+
+        /// <summary>Provides a cache of color information sourced from terminfo.</summary>
+        private struct TerminalKeyInfo
+        {
+            /// <summary> The dictionary of keystring to ConsoleKeyInfo. </summary>
+            public Dictionary<string, ConsoleKey> KeyFormatToConsoleKey;
+            /// <summary> Max key length </summary>
+            public int MaxKeyLength;
+            /// <summary> Min key length </summary>
+            public int MinKeyLength;
+
+            /// <summary>The cached instance.</summary>
+            public static TerminalKeyInfo Instance { get { return _instance.Value; } }
+
+            private void AddKey(TermInfo.Database db, int keyId, ConsoleKey key)
+            {
+                string keyFormat = db.GetString(keyId);
+                if (!string.IsNullOrEmpty(keyFormat))
+                    KeyFormatToConsoleKey[keyFormat] = key;
+            }
+
+            private TerminalKeyInfo(TermInfo.Database db)
+            {
+                KeyFormatToConsoleKey = new Dictionary<string, ConsoleKey>();
+                MaxKeyLength = MinKeyLength = 0;
+                if (db != null)
+                {
+                    AddKey(db, TermInfo.Database.KeyF1, ConsoleKey.F1);
+                    AddKey(db, TermInfo.Database.KeyF2, ConsoleKey.F2);
+                    AddKey(db, TermInfo.Database.KeyF3, ConsoleKey.F3);
+                    AddKey(db, TermInfo.Database.KeyF4, ConsoleKey.F4);
+                    AddKey(db, TermInfo.Database.KeyF5, ConsoleKey.F5);
+                    AddKey(db, TermInfo.Database.KeyF6, ConsoleKey.F6);
+                    AddKey(db, TermInfo.Database.KeyF7, ConsoleKey.F7);
+                    AddKey(db, TermInfo.Database.KeyF8, ConsoleKey.F8);
+                    AddKey(db, TermInfo.Database.KeyF9, ConsoleKey.F9);
+                    AddKey(db, TermInfo.Database.KeyF10, ConsoleKey.F10);
+                    AddKey(db, TermInfo.Database.KeyF11, ConsoleKey.F11);
+                    AddKey(db, TermInfo.Database.KeyF12, ConsoleKey.F12);
+                    AddKey(db, TermInfo.Database.KeyF13, ConsoleKey.F13);
+                    AddKey(db, TermInfo.Database.KeyF14, ConsoleKey.F14);
+                    AddKey(db, TermInfo.Database.KeyF15, ConsoleKey.F15);
+                    AddKey(db, TermInfo.Database.KeyF16, ConsoleKey.F16);
+                    AddKey(db, TermInfo.Database.KeyF17, ConsoleKey.F17);
+                    AddKey(db, TermInfo.Database.KeyF18, ConsoleKey.F18);
+                    AddKey(db, TermInfo.Database.KeyF19, ConsoleKey.F19);
+                    AddKey(db, TermInfo.Database.KeyF20, ConsoleKey.F20);
+                    AddKey(db, TermInfo.Database.KeyF21, ConsoleKey.F21);
+                    AddKey(db, TermInfo.Database.KeyF22, ConsoleKey.F22);
+                    AddKey(db, TermInfo.Database.KeyF23, ConsoleKey.F23);
+                    AddKey(db, TermInfo.Database.KeyF24, ConsoleKey.F24);
+                    AddKey(db, TermInfo.Database.KeyBackspace, ConsoleKey.Backspace);
+                    AddKey(db, TermInfo.Database.KeyClear, ConsoleKey.Clear);
+                    AddKey(db, TermInfo.Database.KeyDown, ConsoleKey.DownArrow);
+                    AddKey(db, TermInfo.Database.KeyHome, ConsoleKey.Home);
+                    AddKey(db, TermInfo.Database.KeyLeft, ConsoleKey.LeftArrow);
+                    AddKey(db, TermInfo.Database.KeyPageDown, ConsoleKey.PageDown);
+                    AddKey(db, TermInfo.Database.KeyPageUp, ConsoleKey.PageUp);
+                    AddKey(db, TermInfo.Database.KeyRight, ConsoleKey.RightArrow);
+                    AddKey(db, TermInfo.Database.KeyEnd, ConsoleKey.End);
+                    AddKey(db, TermInfo.Database.KeyEnter, ConsoleKey.Enter);
+                    AddKey(db, TermInfo.Database.KeyHelp, ConsoleKey.Help);
+                    AddKey(db, TermInfo.Database.KeyPrint, ConsoleKey.Print);
+                    AddKey(db, TermInfo.Database.KeyInsert, ConsoleKey.Insert);
+                    AddKey(db, TermInfo.Database.KeyDelete, ConsoleKey.Delete);
+
+                    MaxKeyLength = KeyFormatToConsoleKey.Keys.Max(key => key.Length);
+                    MinKeyLength = KeyFormatToConsoleKey.Keys.Min(key => key.Length);
+                }
+            }
+
+            /// <summary>Lazy initialization of the terminal key information.</summary>
+            private static Lazy<TerminalKeyInfo> _instance = new Lazy<TerminalKeyInfo>(() =>
+            {
+                TermInfo.Database db = TermInfo.Database.Instance; // Could be null if TERM is set to a file that doesn't exist
+                return new TerminalKeyInfo(db);
+            }, isThreadSafe: true);
+        }
+
         /// <summary>Reads data from the file descriptor into the buffer.</summary>
         /// <param name="fd">The file descriptor.</param>
         /// <param name="buffer">The buffer to read into.</param>
@@ -289,8 +518,8 @@ namespace System
         {
             fixed (byte* bufPtr = buffer)
             {
-                long result;
-                while (Interop.CheckIo(result = (long)Interop.libc.read(fd, (byte*)bufPtr + offset, (IntPtr)count))) ;
+                int result;
+                while (Interop.CheckIo(result = Interop.Sys.Read(fd, (byte*)bufPtr + offset, count))) ;
                 Debug.Assert(result <= count);
                 return (int)result;
             }
@@ -308,10 +537,21 @@ namespace System
                 while (count > 0)
                 {
                     int bytesWritten;
-                    while (Interop.CheckIo(bytesWritten = (int)Interop.libc.write(fd, bufPtr + offset, (IntPtr)count))) ;
+                    while (Interop.CheckIo(bytesWritten = Interop.Sys.Write(fd, bufPtr + offset, count))) ;
                     count -= bytesWritten;
                     offset += bytesWritten;
                 }
+            }
+        }
+
+        /// <summary>Writes a terminfo-based ANSI escape string to stdout.</summary>
+        /// <param name="value">The string to write.</param>
+        private static unsafe void WriteStdoutAnsiString(string value)
+        {
+            byte[] data = Encoding.UTF8.GetBytes(value);
+            lock (Console.Out) // synchronize with other writers
+            {
+                Write(Interop.Sys.FileDescriptors.STDOUT_FILENO, data, 0, data.Length);
             }
         }
 
@@ -324,22 +564,14 @@ namespace System
             internal readonly int _handleType;
 
             /// <summary>Initialize the stream.</summary>
-            /// <param name="devPath">A path to a "/dev/std*" file.</param>
+            /// <param name="handle">The file handle wrapped by this stream.</param>
             /// <param name="access">FileAccess.Read or FileAccess.Write.</param>
-            internal UnixConsoleStream(string devPath, FileAccess access)
+            internal UnixConsoleStream(SafeFileHandle handle, FileAccess access)
                 : base(access)
             {
-                Debug.Assert(devPath != null && devPath.StartsWith("/dev/std"));
-                Debug.Assert(access == FileAccess.Read || access == FileAccess.Write);
-                
-                // Open the file descriptor for this stream
-                Interop.libc.OpenFlags flags = 0;
-                switch (access)
-                {
-                    case FileAccess.Read: flags = Interop.libc.OpenFlags.O_RDONLY; break;
-                    case FileAccess.Write: flags = Interop.libc.OpenFlags.O_WRONLY; break;
-                }
-                _handle = SafeFileHandle.Open(devPath, flags, 0);
+                Debug.Assert(handle != null, "Expected non-null console handle");
+                Debug.Assert(!handle.IsInvalid, "Expected valid console handle");
+                _handle = handle;
 
                 // Determine the type of the descriptor (e.g. regular file, character file, pipe, etc.)
                 bool gotFd = false;
@@ -490,7 +722,7 @@ namespace System
                     }
 
                     // Then try in the user's home directory.
-                    string home = Environment.GetEnvironmentVariable("HOME");
+                    string home = PersistedFiles.GetHomeDirectory();
                     if (!string.IsNullOrWhiteSpace(home) && (db = ReadDatabase(term, home + "/.terminfo")) != null)
                     {
                         return db;
@@ -516,7 +748,7 @@ namespace System
                 private static bool TryOpen(string filePath, out int fd)
                 {
                     int tmpFd;
-                    while ((tmpFd = Interop.libc.open(filePath, Interop.libc.OpenFlags.O_RDONLY, 0)) < 0)
+                    while ((tmpFd = Interop.Sys.Open(filePath, Interop.Sys.OpenFlags.O_RDONLY, 0)) < 0)
                     {
                         // Don't throw in this case, as we'll be polling multiple locations looking for the file.
                         // But we still want to retry if the open is interrupted by a signal.
@@ -552,8 +784,8 @@ namespace System
                     {
                         // Read in all of the terminfo data
                         long termInfoLength;
-                        while (Interop.CheckIo(termInfoLength = Interop.libc.lseek(fd, 0, Interop.libc.SeekWhence.SEEK_END))) ; // jump to the end to get the file length
-                        while (Interop.CheckIo(Interop.libc.lseek(fd, 0, Interop.libc.SeekWhence.SEEK_SET))) ; // reset back to beginning
+                        while (Interop.CheckIo(termInfoLength = Interop.Sys.LSeek(fd, 0, Interop.Sys.SeekWhence.SEEK_END))) ; // jump to the end to get the file length
+                        while (Interop.CheckIo(Interop.Sys.LSeek(fd, 0, Interop.Sys.SeekWhence.SEEK_SET))) ; // reset back to beginning
                         const int MaxTermInfoLength = 4096; // according to the term and tic man pages, 4096 is the terminfo file size max
                         const int HeaderLength = 12;
                         if (termInfoLength <= HeaderLength || termInfoLength > MaxTermInfoLength)
@@ -573,7 +805,7 @@ namespace System
                     }
                     finally
                     {
-                        Interop.CheckIo(Interop.libc.close(fd)); // Avoid retrying close on EINTR, e.g. https://lkml.org/lkml/2005/9/11/49
+                        Interop.CheckIo(Interop.Sys.Close(fd)); // Avoid retrying close on EINTR, e.g. https://lkml.org/lkml/2005/9/11/49
                     }
                 }
 
@@ -655,6 +887,98 @@ namespace System
                 /// <summary>The well-known index of the set_a_background string entry.</summary>
                 public const int SetAnsiBackgroundIndex = 360;
 
+                /// <summary>The well-known index of the columns numeric entry.</summary>
+                public const int ColumnIndex = 0;
+                /// <summary>The well-known index of the cursor_invisible string entry.</summary>
+                public const int CursorInvisibleIndex = 13;
+                /// <summary>The well-known index of the cursor_normal string entry.</summary>
+                public const int CursorVisibleIndex = 16;
+
+                /// <summary>The well-known index of key_backspace</summary>
+                public const int KeyBackspace = 55;
+                /// <summary>The well-known index of key_clear</summary>
+                public const int KeyClear = 57;
+                /// <summary>The well-known index of key_dc</summary>
+                public const int KeyDelete = 59;
+                /// <summary>The well-known index of key_down</summary>
+                public const int KeyDown = 61;
+                /// <summary>The well-known index of key_f1</summary>
+                public const int KeyF1 = 66;
+                /// <summary>The well-known index of key_f10</summary>
+                public const int KeyF10 = 67;
+                /// <summary>The well-known index of key_f2</summary>
+                public const int KeyF2 = 68;
+                /// <summary>The well-known index of key_f3</summary>
+                public const int KeyF3 = 69;
+                /// <summary>The well-known index of key_f4</summary>
+                public const int KeyF4 = 70;
+                /// <summary>The well-known index of key_f5</summary>
+                public const int KeyF5 = 71;
+                /// <summary>The well-known index of key_f6</summary>
+                public const int KeyF6 = 72;
+                /// <summary>The well-known index of key_f7</summary>
+                public const int KeyF7 = 73;
+                /// <summary>The well-known index of key_f8</summary>
+                public const int KeyF8 = 74;
+                /// <summary>The well-known index of key_f9</summary>
+                public const int KeyF9 = 75;
+                /// <summary>The well-known index of key_home</summary>
+                public const int KeyHome = 76;
+                /// <summary>The well-known index of key_ic</summary>
+                public const int KeyInsert = 77;
+                /// <summary>The well-known index of key_left</summary>
+                public const int KeyLeft = 79;
+                /// <summary>The well-known index of key_right</summary>
+                public const int KeyPageDown = 81;
+                /// <summary>The well-known index of key_ppage</summary>
+                public const int KeyPageUp = 82;
+                /// <summary>The well-known index of key_up</summary>
+                public const int KeyRight = 83;
+                /// <summary>The well-known index of key_npage</summary>
+                public const int KeyUp = 87;
+                /// <summary>The well-known index of key_cancel</summary>
+                public const int KeyCancel = 159;
+                /// <summary>The well-known index of key_close</summary>
+                public const int KeyClose = 160;
+                /// <summary>The well-known index of key_end</summary>
+                public const int KeyEnd = 164;
+                /// <summary>The well-known index of key_enter</summary>
+                public const int KeyEnter = 165;
+                /// <summary>The well-known index of key_help</summary>
+                public const int KeyHelp = 168;
+                /// <summary>The well-known index of key_print</summary>
+                public const int KeyPrint = 176;
+                /// <summary>The well-known index of key_select</summary>
+                public const int KeySelect = 193;
+                /// <summary>The well-known index of key_f11</summary>
+                public const int KeyF11 = 216;
+                /// <summary>The well-known index of key_f12</summary>
+                public const int KeyF12 = 217;
+                /// <summary>The well-known index of key_f13</summary>
+                public const int KeyF13 = 218;
+                /// <summary>The well-known index of key_f14</summary>
+                public const int KeyF14 = 219;
+                /// <summary>The well-known index of key_f15</summary>
+                public const int KeyF15 = 220;
+                /// <summary>The well-known index of key_f16</summary>
+                public const int KeyF16 = 221;
+                /// <summary>The well-known index of key_f17</summary>
+                public const int KeyF17 = 222;
+                /// <summary>The well-known index of key_f18</summary>
+                public const int KeyF18 = 223;
+                /// <summary>The well-known index of key_f19</summary>
+                public const int KeyF19 = 224;
+                /// <summary>The well-known index of key_f20</summary>
+                public const int KeyF20 = 225;
+                /// <summary>The well-known index of key_f21</summary>
+                public const int KeyF21 = 226;
+                /// <summary>The well-known index of key_f22</summary>
+                public const int KeyF22 = 227;
+                /// <summary>The well-known index of key_f23</summary>
+                public const int KeyF23 = 228;
+                /// <summary>The well-known index of key_f24</summary>
+                public const int KeyF24 = 229;
+               
                 /// <summary>Read a 16-bit value from the buffer starting at the specified position.</summary>
                 /// <param name="buffer">The buffer from which to read.</param>
                 /// <param name="pos">The position at which to read.</param>
@@ -1005,8 +1329,8 @@ namespace System
                     // Determine how much space is needed to store the formatted string.
                     string stringArg = arg as string;
                     int neededLength = stringArg != null ?
-                        Interop.libc.snprintf(null, IntPtr.Zero, format, stringArg) :
-                        Interop.libc.snprintf(null, IntPtr.Zero, format, (int)arg);
+                        Interop.Sys.SNPrintF(null, 0, format, stringArg) :
+                        Interop.Sys.SNPrintF(null, 0, format, (int)arg);
                     if (neededLength == 0)
                     {
                         return string.Empty;
@@ -1021,8 +1345,8 @@ namespace System
                     fixed (byte* ptr = bytes)
                     {
                         int length = stringArg != null ?
-                            Interop.libc.snprintf(ptr, (IntPtr)bytes.Length, format, stringArg) :
-                            Interop.libc.snprintf(ptr, (IntPtr)bytes.Length, format, (int)arg);
+                            Interop.Sys.SNPrintF(ptr, bytes.Length, format, stringArg) :
+                            Interop.Sys.SNPrintF(ptr, bytes.Length, format, (int)arg);
                         if (length != neededLength)
                         {
                             throw new InvalidOperationException(SR.InvalidOperation_PrintF);

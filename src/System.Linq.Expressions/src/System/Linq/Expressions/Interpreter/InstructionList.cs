@@ -879,6 +879,11 @@ namespace System.Linq.Expressions.Interpreter
             Emit(NegateCheckedInstruction.Create(type));
         }
 
+        public void EmitOnesComplement(Type type)
+        {
+            Emit(OnesComplementInstruction.Create(type));
+        }
+
         public void EmitIncrement(Type type)
         {
             Emit(IncrementInstruction.Create(type));
@@ -963,10 +968,6 @@ namespace System.Linq.Expressions.Interpreter
             Emit(NullableMethodCallInstruction.Create(method.Name, parameters.Length, method));
         }
 
-        public void EmitNullCheck(int stackOffset)
-        {
-            Emit(NullCheckInstruction.Create(stackOffset));
-        }
         #endregion
 
         #region Control Flow

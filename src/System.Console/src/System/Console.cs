@@ -19,7 +19,7 @@ namespace System
         private static ConsoleCancelEventHandler _cancelCallbacks;
         private static ConsolePal.ControlCHandlerRegistrar _registrar;
 
-        private static T EnsureInitialized<T>(ref T field, Func<T> initializer) where T : class
+        internal static T EnsureInitialized<T>(ref T field, Func<T> initializer) where T : class
         {
             lock (InternalSyncObject)
             {
@@ -39,17 +39,19 @@ namespace System
             {
                 return Volatile.Read(ref _in) ?? EnsureInitialized(ref _in, () =>
                 {
-                    Stream inputStream = OpenStandardInput();
-                    return SyncTextReader.GetSynchronizedTextReader(inputStream == Stream.Null ?
-                        StreamReader.Null :
-                        new StreamReader(
-                            stream: inputStream,
-                            encoding: ConsolePal.InputEncoding,
-                            detectEncodingFromByteOrderMarks: false,
-                            bufferSize: DefaultConsoleBufferSize,
-                            leaveOpen: true));
+                    return ConsolePal.GetOrCreateReader();
                 });
             }
+        }
+
+        public static ConsoleKeyInfo ReadKey()
+        {
+            return ConsolePal.ReadKey(false);
+        }
+
+        public static ConsoleKeyInfo ReadKey(bool intercept)
+        {
+            return ConsolePal.ReadKey(intercept);
         }
 
         public static TextWriter Out
@@ -73,6 +75,40 @@ namespace System
                     leaveOpen: true) { AutoFlush = true });
         }
 
+        private static StrongBox<bool> _isStdInRedirected;
+        private static StrongBox<bool> _isStdOutRedirected;
+        private static StrongBox<bool> _isStdErrRedirected;
+
+        public static bool IsInputRedirected
+        {
+            get
+            {
+                StrongBox<bool> redirected = Volatile.Read(ref _isStdInRedirected) ??
+                    EnsureInitialized(ref _isStdInRedirected, () => new StrongBox<bool>(ConsolePal.IsInputRedirectedCore()));
+                return redirected.Value;
+            }
+        }
+
+        public static bool IsOutputRedirected
+        {
+            get
+            {
+                StrongBox<bool> redirected = Volatile.Read(ref _isStdOutRedirected) ??
+                    EnsureInitialized(ref _isStdOutRedirected, () => new StrongBox<bool>(ConsolePal.IsOutputRedirectedCore()));
+                return redirected.Value;
+            }
+        }
+
+        public static bool IsErrorRedirected
+        {
+            get
+            {
+                StrongBox<bool> redirected = Volatile.Read(ref _isStdErrRedirected) ??
+                    EnsureInitialized(ref _isStdErrRedirected, () => new StrongBox<bool>(ConsolePal.IsErrorRedirectedCore()));
+                return redirected.Value;
+            }
+        }
+
         public static ConsoleColor BackgroundColor
         {
             get { return ConsolePal.BackgroundColor; }
@@ -88,6 +124,30 @@ namespace System
         public static void ResetColor()
         {
             ConsolePal.ResetColor();
+        }
+
+        public static int WindowWidth
+        {
+            get
+            {
+                return ConsolePal.WindowWidth;
+            }
+            set
+            {
+                ConsolePal.WindowWidth = value;
+            }
+        }
+
+        public static bool CursorVisible
+        {
+            get
+            {
+                return ConsolePal.CursorVisible;
+            }
+            set
+            {
+                ConsolePal.CursorVisible = value;
+            }
         }
 
         public static event ConsoleCancelEventHandler CancelKeyPress

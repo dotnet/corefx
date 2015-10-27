@@ -67,6 +67,7 @@
     <Compile Include="System\MulticastDelegate.cs" />
     <Compile Include="System\Nullable.cs" />
     <Compile Include="System\Object.cs" />
+    <Compile Include="System\Runtime\CompilerServices\ConditionalWeakTable.cs" />
     <Compile Include="System\Runtime\CompilerServices\StrongBox.cs" />
     <Compile Include="System\Runtime\CompilerServices\RuntimeHelpers.cs" />
     <Compile Include="System\SByte.cs" />
@@ -83,9 +84,28 @@
     <Compile Include="System\UInt32.cs" />
     <Compile Include="System\UInt64.cs" />
     <Compile Include="System\UIntPtr.cs" />
+    <Compile Include="System\Uri.cs" />
     <Compile Include="System\ValueType.cs" />
     <Compile Include="System\Version.cs" />
     <Compile Include="System\WeakReference.cs" />
+  </ItemGroup>
+  <!-- Performance Tests -->
+  <ItemGroup Condition="'$(RunPerfTestsForProject)' == 'true'">
+    <Compile Include="Performance\Perf.Boolean.cs" />
+    <Compile Include="Performance\Perf.Enum.cs" />
+    <Compile Include="Performance\Perf.Guid.cs" />
+    <Compile Include="Performance\Perf.Object.cs" />
+    <Compile Include="Performance\Perf.String.cs" />
+    <Compile Include="Performance\Perf.TimeSpan.cs" />
+    <Compile Include="Performance\Perf.Type.cs" />
+    <Compile Include="Performance\Perf.UInt32.cs" />
+    <Compile Include="Performance\Perf.DateTime.cs" />
+    <Compile Include="Performance\Perf.Int32.cs" />
+    <Compile Include="Performance\Perf.IntPtr.cs" />
+    <Compile Include="Performance\Perf.StringBuilder.cs" />
+    <Compile Include="$(CommonTestPath)\System\PerfUtils.cs">
+      <Link>Common\System\PerfUtils.cs</Link>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <None Include="project.json" />
@@ -93,6 +113,12 @@
   <ItemGroup>
     <!-- Compile tests against the System.Runtime contract, but copy our local-built implementation for testing -->
     <ProjectReference Include="..\src\System.Runtime.CoreCLR.csproj">
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <OutputItemType>Content</OutputItemType>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Targets>Build;DebugSymbolsProjectOutputGroup</Targets>
+    </ProjectReference>
+    <ProjectReference Include="..\..\System.Private.Uri\src\System.Private.Uri.CoreCLR.csproj">
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
       <OutputItemType>Content</OutputItemType>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

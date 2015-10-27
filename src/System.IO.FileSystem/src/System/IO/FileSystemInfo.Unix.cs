@@ -106,21 +106,21 @@ namespace System.IO
         {
             get
             {
-                Interop.libc.Permissions readBit, writeBit;
-                if (_fileStatus.Uid == Interop.libc.geteuid())      // does the user effectively own the file?
+                Interop.Sys.Permissions readBit, writeBit;
+                if (_fileStatus.Uid == Interop.Sys.GetEUid())      // does the user effectively own the file?
                 {
-                    readBit  = Interop.libc.Permissions.S_IRUSR;
-                    writeBit = Interop.libc.Permissions.S_IWUSR;
+                    readBit  = Interop.Sys.Permissions.S_IRUSR;
+                    writeBit = Interop.Sys.Permissions.S_IWUSR;
                 }
-                else if (_fileStatus.Gid == Interop.libc.getegid()) // does the user belong to a group that effectively owns the file?
+                else if (_fileStatus.Gid == Interop.Sys.GetEGid()) // does the user belong to a group that effectively owns the file?
                 {
-                    readBit  = Interop.libc.Permissions.S_IRGRP;
-                    writeBit = Interop.libc.Permissions.S_IWGRP;
+                    readBit  = Interop.Sys.Permissions.S_IRGRP;
+                    writeBit = Interop.Sys.Permissions.S_IWGRP;
                 }
                 else                                              // everyone else
                 {
-                    readBit  = Interop.libc.Permissions.S_IROTH;
-                    writeBit = Interop.libc.Permissions.S_IWOTH;
+                    readBit  = Interop.Sys.Permissions.S_IROTH;
+                    writeBit = Interop.Sys.Permissions.S_IWOTH;
                 }
 
                 return
@@ -133,19 +133,19 @@ namespace System.IO
                 if (value) // true if going from writable to readable, false if going from readable to writable
                 {
                     // Take away all write permissions from user/group/everyone
-                    newMode &= ~(int)(Interop.libc.Permissions.S_IWUSR | Interop.libc.Permissions.S_IWGRP | Interop.libc.Permissions.S_IWOTH);
+                    newMode &= ~(int)(Interop.Sys.Permissions.S_IWUSR | Interop.Sys.Permissions.S_IWGRP | Interop.Sys.Permissions.S_IWOTH);
                 }
-                else if ((newMode & (int)Interop.libc.Permissions.S_IRUSR) != 0)
+                else if ((newMode & (int)Interop.Sys.Permissions.S_IRUSR) != 0)
                 {
                     // Give write permission to the owner if the owner has read permission
-                    newMode |= (int)Interop.libc.Permissions.S_IWUSR;
+                    newMode |= (int)Interop.Sys.Permissions.S_IWUSR;
                 }
 
                 // Change the permissions on the file
                 if (newMode != _fileStatus.Mode)
                 {
                     bool isDirectory = this is DirectoryInfo;
-                    while (Interop.CheckIo(Interop.libc.chmod(FullPath, newMode), FullPath, isDirectory)) ;
+                    while (Interop.CheckIo(Interop.Sys.ChMod(FullPath, newMode), FullPath, isDirectory)) ;
                 }
             }
         }
@@ -170,7 +170,7 @@ namespace System.IO
             {
                 EnsureStatInitialized();
                 return (_fileStatus.Flags & Interop.Sys.FileStatusFlags.HasBirthTime) != 0 ?
-                    DateTimeOffset.FromUnixTimeSeconds(_fileStatus.BirthTime) :
+                    DateTimeOffset.FromUnixTimeSeconds(_fileStatus.BirthTime).ToLocalTime() :
                     default(DateTimeOffset);
             }
             set
@@ -190,7 +190,7 @@ namespace System.IO
                 EnsureStatInitialized();
                 return DateTimeOffset.FromUnixTimeSeconds(_fileStatus.ATime).ToLocalTime();
             }
-            set { SetAccessWriteTimes((IntPtr)value.ToUnixTimeSeconds(), null); }
+            set { SetAccessWriteTimes(value.ToUnixTimeSeconds(), null); }
         }
 
         DateTimeOffset IFileSystemObject.LastWriteTime
@@ -200,18 +200,18 @@ namespace System.IO
                 EnsureStatInitialized();
                 return DateTimeOffset.FromUnixTimeSeconds(_fileStatus.MTime).ToLocalTime();
             }
-            set { SetAccessWriteTimes(null, (IntPtr)value.ToUnixTimeSeconds()); }
+            set { SetAccessWriteTimes(null, value.ToUnixTimeSeconds()); }
         }
 
-        private void SetAccessWriteTimes(IntPtr? accessTime, IntPtr? writeTime)
+        private void SetAccessWriteTimes(long? accessTime, long? writeTime)
         {
             _fileStatusInitialized = -1; // force a refresh so that we have an up-to-date times for values not being overwritten
             EnsureStatInitialized();
-            Interop.libc.utimbuf buf;
-            buf.actime = accessTime ?? new IntPtr(_fileStatus.ATime);
-            buf.modtime = writeTime ?? new IntPtr(_fileStatus.MTime);
+            Interop.Sys.UTimBuf buf;
+            buf.AcTime = accessTime ?? _fileStatus.ATime;
+            buf.ModTime = writeTime ?? _fileStatus.MTime;
             bool isDirectory = this is DirectoryInfo;
-            while (Interop.CheckIo(Interop.libc.utime(FullPath, ref buf), FullPath, isDirectory)) ;
+            while (Interop.CheckIo(Interop.Sys.UTime(FullPath, ref buf), FullPath, isDirectory)) ;
             _fileStatusInitialized = -1;
         }
 

@@ -230,6 +230,19 @@ namespace System.Security.Cryptography
         None = 0,
         ProtectKey = 1,
     }
+    public sealed partial class ECDsaCng : System.Security.Cryptography.ECDsa
+    {
+        public ECDsaCng() {}
+        public ECDsaCng(int keySize) {}
+        public ECDsaCng(CngKey key) {}
+        public System.Security.Cryptography.CngKey Key { get { return default(System.Security.Cryptography.CngKey); } }
+        public override System.Security.Cryptography.KeySizes[] LegalKeySizes { get { return default(System.Security.Cryptography.KeySizes[]); } }
+        protected override void Dispose(bool disposing) {}
+        protected override byte[] HashData(byte[] data, int offset, int count, System.Security.Cryptography.HashAlgorithmName hashAlgorithm) { return default(byte[]); }
+        protected override byte[] HashData(System.IO.Stream data, System.Security.Cryptography.HashAlgorithmName hashAlgorithm) { return default(byte[]); }
+        public override byte[] SignHash(byte[] hash) { return default(byte[]); }
+        public override bool VerifyHash(byte[] hash, byte[] signature) { return default(bool); }
+    }
     public sealed partial class RSACng : System.Security.Cryptography.RSA
     {
         public RSACng() { }
@@ -243,6 +256,7 @@ namespace System.Security.Cryptography
         protected override byte[] HashData(byte[] data, int offset, int count, System.Security.Cryptography.HashAlgorithmName hashAlgorithm) { return default(byte[]); }
         protected override byte[] HashData(System.IO.Stream data, System.Security.Cryptography.HashAlgorithmName hashAlgorithm) { return default(byte[]); }
         public override void ImportParameters(System.Security.Cryptography.RSAParameters parameters) { }
+        public override System.Security.Cryptography.KeySizes[] LegalKeySizes { get { return default(System.Security.Cryptography.KeySizes[]); } }
         public override byte[] SignHash(byte[] hash, System.Security.Cryptography.HashAlgorithmName hashAlgorithm, System.Security.Cryptography.RSASignaturePadding padding) { return default(byte[]); }
         public override bool VerifyHash(byte[] hash, byte[] signature, System.Security.Cryptography.HashAlgorithmName hashAlgorithm, System.Security.Cryptography.RSASignaturePadding padding) { return default(bool); }
     }

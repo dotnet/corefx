@@ -57,8 +57,6 @@ namespace System.IO
                                                            NotifyFilters.Security |
                                                            NotifyFilters.Size);
 
-        internal static bool CaseSensitive { get; set; }
-
 #if DEBUG
         static FileSystemWatcher()
         {
@@ -81,7 +79,6 @@ namespace System.IO
         {
             _directory = string.Empty;
             _filter = "*.*";
-            CaseSensitive = false;
         }
 
         /// <devdoc>
@@ -106,11 +103,10 @@ namespace System.IO
 
             // Early check for directory parameter so that an exception can be thrown as early as possible.
             if (path.Length == 0 || !Directory.Exists(path))
-                throw new ArgumentException(SR.InvalidDirName, path);
+                throw new ArgumentException(SR.Format(SR.InvalidDirName, path), "path");
 
             _directory = path;
             _filter = filter;
-            CaseSensitive = false;
         }
 
         /// <devdoc>
@@ -152,15 +148,13 @@ namespace System.IO
                     return;
                 }
 
-                _enabled = value;
-
-                if (_enabled)
+                if (value)
                 {
-                    StartRaisingEventsIfNotDisposed();
+                    StartRaisingEventsIfNotDisposed(); // will set _enabled to true once successfully started
                 }
                 else
                 {
-                    StopRaisingEvents();
+                    StopRaisingEvents(); // will set _enabled to false
                 }
             }
         }
@@ -182,7 +176,7 @@ namespace System.IO
                     // the case-sensitive representation.
                     _filter = "*.*";
                 }
-                else if (!string.Equals(_filter, value, CaseSensitive ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase))
+                else if (!string.Equals(_filter, value, PathInternal.StringComparison))
                 {
                     _filter = value;
                 }
@@ -262,7 +256,7 @@ namespace System.IO
             set
             {
                 value = (value == null) ? string.Empty : value;
-                if (!string.Equals(_directory, value, CaseSensitive ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase))
+                if (!string.Equals(_directory, value, PathInternal.StringComparison))
                 {
                     if (!Directory.Exists(value))
                     {

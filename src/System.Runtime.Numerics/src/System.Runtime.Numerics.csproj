@@ -11,6 +11,7 @@
     <AssemblyVersion>4.0.1.0</AssemblyVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <ProjectGuid>{D2C99D27-0BEF-4319-ADB3-05CBEBA8F69B}</ProjectGuid>
+    <PackageTargetFramework>dotnet5.4</PackageTargetFramework>
   </PropertyGroup>
   <!-- Default configurations to help VS understand the configurations -->
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -22,10 +23,10 @@
     <Compile Include="System\Numerics\BigIntegerCalculator.BitsBuffer.cs" />
     <Compile Include="System\Numerics\BigIntegerCalculator.DivRem.cs" />
     <Compile Include="System\Numerics\BigIntegerCalculator.FastReducer.cs" />
+    <Compile Include="System\Numerics\BigIntegerCalculator.GcdInv.cs" />
     <Compile Include="System\Numerics\BigIntegerCalculator.PowMod.cs" />
     <Compile Include="System\Numerics\BigIntegerCalculator.SquMul.cs" />
     <Compile Include="System\Numerics\BigInteger.cs" />
-    <Compile Include="System\Numerics\BigIntegerBuilder.cs" />
     <Compile Include="System\Numerics\BigNumber.cs" />
     <Compile Include="System\Numerics\NumericsHelpers.cs" />
     <Compile Include="System\Numerics\Complex.cs" />

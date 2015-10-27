@@ -779,17 +779,7 @@ namespace System.Linq.Expressions
         {
             ContractUtils.RequiresNotNull(expressions, "expressions");
 
-            switch (expressions.Length)
-            {
-                case 2: return Block(expressions[0], expressions[1]);
-                case 3: return Block(expressions[0], expressions[1], expressions[2]);
-                case 4: return Block(expressions[0], expressions[1], expressions[2], expressions[3]);
-                case 5: return Block(expressions[0], expressions[1], expressions[2], expressions[3], expressions[4]);
-                default:
-                    ContractUtils.RequiresNotEmpty(expressions, "expressions");
-                    RequiresCanRead(expressions, "expressions");
-                    return new BlockN(expressions.Copy());
-            }
+            return GetOptimizedBlockExpression(expressions);
         }
 
         /// <summary>
@@ -857,11 +847,15 @@ namespace System.Linq.Expressions
         public static BlockExpression Block(IEnumerable<ParameterExpression> variables, IEnumerable<Expression> expressions)
         {
             ContractUtils.RequiresNotNull(expressions, "expressions");
-            var expressionList = expressions.ToReadOnly();
-            ContractUtils.RequiresNotEmpty(expressionList, "expressions");
-            RequiresCanRead(expressionList, "expressions");
+            var variableList = variables.ToReadOnly();
 
-            return Block(expressionList.Last().Type, variables, expressionList);
+            if (variableList.Count == 0)
+            {
+                return GetOptimizedBlockExpression(expressions as IReadOnlyList<Expression> ?? expressions.ToReadOnly());
+            }
+
+            var expressionList = expressions.ToReadOnly();
+            return BlockCore(expressionList.Last().Type, variableList, expressionList);
         }
 
         /// <summary>
@@ -879,6 +873,26 @@ namespace System.Linq.Expressions
             var expressionList = expressions.ToReadOnly();
             var variableList = variables.ToReadOnly();
 
+            if (variableList.Count == 0)
+            {
+                var expressionCount = expressionList.Count;
+
+                if (expressionCount != 0)
+                {
+                    var lastExpression = expressionList[expressionCount - 1];
+
+                    if (lastExpression.Type == type)
+                    {
+                        return GetOptimizedBlockExpression(expressionList);
+                    }
+                }
+            }
+
+            return BlockCore(type, variableList, expressionList);
+        }
+
+        private static BlockExpression BlockCore(Type type, ReadOnlyCollection<ParameterExpression> variableList, ReadOnlyCollection<Expression> expressionList)
+        {
             ContractUtils.RequiresNotEmpty(expressionList, "expressions");
             RequiresCanRead(expressionList, "expressions");
             ValidateVariables(variableList, "variables");
@@ -935,6 +949,21 @@ namespace System.Linq.Expressions
                     throw Error.DuplicateVariable(v);
                 }
                 set.Add(v);
+            }
+        }
+
+        private static BlockExpression GetOptimizedBlockExpression(IReadOnlyList<Expression> expressions)
+        {
+            switch (expressions.Count)
+            {
+                case 2: return Block(expressions[0], expressions[1]);
+                case 3: return Block(expressions[0], expressions[1], expressions[2]);
+                case 4: return Block(expressions[0], expressions[1], expressions[2], expressions[3]);
+                case 5: return Block(expressions[0], expressions[1], expressions[2], expressions[3], expressions[4]);
+                default:
+                    ContractUtils.RequiresNotEmptyList(expressions, "expressions");
+                    RequiresCanRead(expressions, "expressions");
+                    return new BlockN(expressions as ReadOnlyCollection<Expression> ?? (IList<Expression>)expressions.ToArray());
             }
         }
     }

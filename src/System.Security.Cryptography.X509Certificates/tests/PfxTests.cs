@@ -24,6 +24,18 @@ namespace System.Security.Cryptography.X509Certificates.Tests
         }
 
         [Fact]
+        public static void EnsurePrivateKeyPreferred()
+        {
+            using (var cert = new X509Certificate2(TestData.ChainPfxBytes, TestData.ChainPfxPassword))
+            {
+                // While checking cert.HasPrivateKey first is most matching of the test description, asserting
+                // on the certificate's simple name will provide a more diagnosable failure.
+                Assert.Equal("test.local", cert.GetNameInfo(X509NameType.SimpleName, false));
+                Assert.True(cert.HasPrivateKey, "cert.HasPrivateKey");
+            }
+        }
+
+        [Fact]
         public static void TestRawData()
         {
             byte[] expectedRawData = (
@@ -57,6 +69,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
         }
 
         [Fact]
+        [ActiveIssue(2583, PlatformID.Windows)]
         public static void TestPrivateKey()
         {
             using (var c = new X509Certificate2(TestData.PfxData, TestData.PfxDataPassword))
@@ -74,6 +87,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
         }
 
         [Fact]
+        [ActiveIssue(2885, PlatformID.Windows)]
         public static void ExportWithPrivateKey()
         {
             using (var cert = new X509Certificate2(TestData.PfxData, TestData.PfxDataPassword, X509KeyStorageFlags.Exportable))

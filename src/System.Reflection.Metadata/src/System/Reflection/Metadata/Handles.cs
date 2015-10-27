@@ -123,7 +123,18 @@ namespace System.Reflection.Metadata
 
         public HandleKind Kind
         {
-            get { return HandleType.ToHandleKind(_vType & HandleType.TypeMask); }
+            get
+            {
+                uint type = Type;
+
+                // Do not surface extra non-virtual string type bits in public handle kind
+                if ((type & ~HandleType.NonVirtualStringTypeMask) == HandleType.String)
+                {
+                    return HandleKind.String;
+                }
+
+                return (HandleKind)type;
+            }
         }
 
         public bool IsNil
@@ -257,7 +268,12 @@ namespace System.Reflection.Metadata
 
         public HandleKind Kind
         {
-            get { return HandleType.ToHandleKind(Type >> TokenTypeIds.RowIdBitCount); }
+            get 
+            { 
+                // EntityHandles cannot be StringHandles and therefore we do not need
+                // to handle stripping the extra non-virtual string type bits here.
+                return (HandleKind)(Type >> TokenTypeIds.RowIdBitCount);
+            }
         }
 
         internal int Token
@@ -635,6 +651,18 @@ namespace System.Reflection.Metadata
         public static bool operator !=(MethodDefinitionHandle left, MethodDefinitionHandle right)
         {
             return left._rowId != right._rowId;
+        }
+
+        /// <summary>
+        /// Returns a handle to <see cref="MethodDebugInformation"/> corresponding to this handle.
+        /// </summary>
+        /// <remarks>
+        /// The resulting handle is only valid within the context of a <see cref="MetadataReader"/> open on the Portable PDB blob,
+        /// which in case of standalone PDB file is a different reader than the one containing this method definition.
+        /// </remarks>
+        public MethodDebugInformationHandle ToDebugInformationHandle()
+        {
+            return MethodDebugInformationHandle.FromRowId(_rowId);
         }
     }
 
@@ -2578,10 +2606,10 @@ namespace System.Reflection.Metadata
 
         private StringHandle(uint value)
         {
-            Debug.Assert((value & HeapHandleType.TypeMask) == StringHandleType.String ||
-                         (value & HeapHandleType.TypeMask) == StringHandleType.VirtualString ||
-                         (value & HeapHandleType.TypeMask) == StringHandleType.WinRTPrefixedString ||
-                         (value & HeapHandleType.TypeMask) == StringHandleType.DotTerminatedString);
+            Debug.Assert((value & StringHandleType.TypeMask) == StringHandleType.String ||
+                         (value & StringHandleType.TypeMask) == StringHandleType.VirtualString ||
+                         (value & StringHandleType.TypeMask) == StringHandleType.WinRTPrefixedString ||
+                         (value & StringHandleType.TypeMask) == StringHandleType.DotTerminatedString);
 
             _value = value;
         }
@@ -2620,13 +2648,13 @@ namespace System.Reflection.Metadata
         {
             // VTT... -> V111 10TT
             return new Handle(
-                (byte)((handle._value & HeapHandleType.VirtualBit) >> 24 | HandleType.String | (handle._value & HeapHandleType.NonVirtualTypeMask) >> 26),
+                (byte)((handle._value & HeapHandleType.VirtualBit) >> 24 | HandleType.String | (handle._value & StringHandleType.NonVirtualTypeMask) >> 26),
                 (int)(handle._value & HeapHandleType.OffsetMask));
         }
 
         public static explicit operator StringHandle(Handle handle)
         {
-            if ((handle.VType & HandleType.StringOrNamespaceMask) != HandleType.String)
+            if ((handle.VType & ~(HandleType.VirtualBit | HandleType.NonVirtualStringTypeMask)) != HandleType.String)
             {
                 Throw.InvalidCast();
             }
@@ -2634,7 +2662,7 @@ namespace System.Reflection.Metadata
             // V111 10TT -> VTT...
             return new StringHandle(
                 (handle.VType & HandleType.VirtualBit) << 24 | 
-                (handle.VType & HandleType.StringHeapTypeMask) << HeapHandleType.OffsetBitCount | 
+                (handle.VType & HandleType.NonVirtualStringTypeMask) << HeapHandleType.OffsetBitCount | 
                 (uint)handle.Offset);
         }
 

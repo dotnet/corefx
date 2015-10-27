@@ -1,14 +1,13 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using Microsoft.Win32.SafeHandles;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
-using System.Diagnostics.Contracts;
 using System.Runtime.InteropServices;
 using System.Security;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Win32.SafeHandles;
 
 namespace System.IO.Pipes
 {
@@ -56,19 +55,6 @@ namespace System.IO.Pipes
         [SecurityCritical]
         private unsafe int ReadCore(byte[] buffer, int offset, int count)
         {
-            Debug.Assert(_handle != null, "_handle is null");
-            Debug.Assert(!_handle.IsClosed, "_handle is closed");
-            Debug.Assert(CanRead, "can't read");
-            Debug.Assert(buffer != null, "buffer is null");
-            Debug.Assert(offset >= 0, "offset is negative");
-            Debug.Assert(count >= 0, "count is negative");
-
-            if (_isAsync)
-            {
-                IAsyncResult result = BeginReadCore(buffer, offset, count, null, null);
-                return EndRead(result);
-            }
-
             int errorCode = 0;
             int r = ReadFileNative(_handle, buffer, offset, count, null, out errorCode);
 
@@ -96,43 +82,102 @@ namespace System.IO.Pipes
         [SecuritySafeCritical]
         private Task<int> ReadAsyncCore(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
         {
-            ReadWriteAsyncParams state = new ReadWriteAsyncParams(buffer, offset, count, cancellationToken);
-            return Task.Factory.FromAsync<int>(BeginRead, EndRead, state);
+            var completionSource = new ReadWriteCompletionSource(this, buffer, cancellationToken, isWrite: false);
+
+            // Queue an async ReadFile operation and pass in a packed overlapped
+            int errorCode = 0;
+            int r;
+            unsafe
+            {
+                r = ReadFileNative(_handle, buffer, offset, count, completionSource.Overlapped, out errorCode);
+            }
+
+            // ReadFile, the OS version, will return 0 on failure, but this ReadFileNative wrapper
+            // returns -1. This will return the following:
+            // - On error, r==-1.
+            // - On async requests that are still pending, r==-1 w/ hr==ERROR_IO_PENDING
+            // - On async requests that completed sequentially, r==0
+            // 
+            // You will NEVER RELIABLY be able to get the number of buffer read back from this call 
+            // when using overlapped structures!  You must not pass in a non-null lpNumBytesRead to
+            // ReadFile when using overlapped structures!  This is by design NT behavior.
+            if (r == -1)
+            {
+                switch (errorCode)
+                {
+                    // One side has closed its handle or server disconnected.
+                    // Set the state to Broken and do some cleanup work
+                    case Interop.mincore.Errors.ERROR_BROKEN_PIPE:
+                    case Interop.mincore.Errors.ERROR_PIPE_NOT_CONNECTED:
+                        State = PipeState.Broken;
+
+                        unsafe
+                        {
+                            // Clear the overlapped status bit for this special case. Failure to do so looks 
+                            // like we are freeing a pending overlapped.
+                            completionSource.Overlapped->InternalLow = IntPtr.Zero;
+                        }
+
+                        completionSource.ReleaseResources();
+                        UpdateMessageCompletion(true);
+                        return s_zeroTask;
+
+                    case Interop.mincore.Errors.ERROR_IO_PENDING:
+                        break;
+
+                    default:
+                        throw Win32Marshal.GetExceptionForWin32Error(errorCode);
+                }
+            }
+
+            completionSource.RegisterForCancellation();
+            return completionSource.Task;
         }
 
         [SecurityCritical]
         private unsafe void WriteCore(byte[] buffer, int offset, int count)
         {
-            Debug.Assert(_handle != null, "_handle is null");
-            Debug.Assert(!_handle.IsClosed, "_handle is closed");
-            Debug.Assert(CanWrite, "can't write");
-            Debug.Assert(buffer != null, "buffer is null");
-            Debug.Assert(offset >= 0, "offset is negative");
-            Debug.Assert(count >= 0, "count is negative");
-
-            if (_isAsync)
-            {
-                IAsyncResult result = BeginWriteCore(buffer, offset, count, null, null);
-                EndWrite(result);
-                return;
-            }
-
             int errorCode = 0;
             int r = WriteFileNative(_handle, buffer, offset, count, null, out errorCode);
 
             if (r == -1)
             {
-                WinIOError(errorCode);
+                throw WinIOError(errorCode);
             }
             Debug.Assert(r >= 0, "PipeStream's WriteCore is likely broken.");
-            return;
         }
 
         [SecuritySafeCritical]
         private Task WriteAsyncCore(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
         {
-            ReadWriteAsyncParams state = new ReadWriteAsyncParams(buffer, offset, count, cancellationToken);
-            return Task.Factory.FromAsync(BeginWrite, EndWrite, state);
+            var completionSource = new ReadWriteCompletionSource(this, buffer, cancellationToken, isWrite: true);
+            int errorCode = 0;
+
+            // Queue an async WriteFile operation and pass in a packed overlapped
+            int r;
+            unsafe
+            {
+                r = WriteFileNative(_handle, buffer, offset, count, completionSource.Overlapped, out errorCode);
+            }
+
+            // WriteFile, the OS version, will return 0 on failure, but this WriteFileNative 
+            // wrapper returns -1. This will return the following:
+            // - On error, r==-1.
+            // - On async requests that are still pending, r==-1 w/ hr==ERROR_IO_PENDING
+            // - On async requests that completed sequentially, r==0
+            // 
+            // You will NEVER RELIABLY be able to get the number of buffer written back from this 
+            // call when using overlapped structures!  You must not pass in a non-null 
+            // lpNumBytesWritten to WriteFile when using overlapped structures!  This is by design 
+            // NT behavior.
+            if (r == -1 && errorCode != Interop.mincore.Errors.ERROR_IO_PENDING)
+            {
+                completionSource.ReleaseResources();
+                throw WinIOError(errorCode);
+            }
+
+            completionSource.RegisterForCancellation();
+            return completionSource.Task;
         }
 
         // Blocks until the other end of the pipe has read in all written buffer.
@@ -148,7 +193,7 @@ namespace System.IO.Pipes
             // Block until other end of the pipe has read everything.
             if (!Interop.mincore.FlushFileBuffers(_handle))
             {
-                WinIOError(Marshal.GetLastWin32Error());
+                throw WinIOError(Marshal.GetLastWin32Error());
             }
         }
 
@@ -168,7 +213,7 @@ namespace System.IO.Pipes
                     if (!Interop.mincore.GetNamedPipeInfo(_handle, out pipeFlags, IntPtr.Zero, IntPtr.Zero,
                             IntPtr.Zero))
                     {
-                        WinIOError(Marshal.GetLastWin32Error());
+                        throw WinIOError(Marshal.GetLastWin32Error());
                     }
                     if ((pipeFlags & Interop.mincore.PipeOptions.PIPE_TYPE_MESSAGE) != 0)
                     {
@@ -203,7 +248,7 @@ namespace System.IO.Pipes
                 int inBufferSize;
                 if (!Interop.mincore.GetNamedPipeInfo(_handle, IntPtr.Zero, IntPtr.Zero, out inBufferSize, IntPtr.Zero))
                 {
-                    WinIOError(Marshal.GetLastWin32Error());
+                    throw WinIOError(Marshal.GetLastWin32Error());
                 }
 
                 return inBufferSize;
@@ -236,7 +281,7 @@ namespace System.IO.Pipes
                 else if (!Interop.mincore.GetNamedPipeInfo(_handle, IntPtr.Zero, out outBufferSize,
                     IntPtr.Zero, IntPtr.Zero))
                 {
-                    WinIOError(Marshal.GetLastWin32Error());
+                    throw WinIOError(Marshal.GetLastWin32Error());
                 }
 
                 return outBufferSize;
@@ -275,7 +320,7 @@ namespace System.IO.Pipes
                     int pipeReadType = (int)value << 1;
                     if (!Interop.mincore.SetNamedPipeHandleState(_handle, &pipeReadType, IntPtr.Zero, IntPtr.Zero))
                     {
-                        WinIOError(Marshal.GetLastWin32Error());
+                        throw WinIOError(Marshal.GetLastWin32Error());
                     }
                     else
                     {
@@ -289,228 +334,12 @@ namespace System.IO.Pipes
         // ---- PAL layer ends here ----
         // -----------------------------
 
-        private class ReadWriteAsyncParams
-        {
-            public ReadWriteAsyncParams() { }
-            public ReadWriteAsyncParams(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
-            {
-                this.Buffer = buffer;
-                this.Offset = offset;
-                this.Count = count;
-                this.CancellationHelper = cancellationToken.CanBeCanceled ? new IOCancellationHelper(cancellationToken) : null;
-            }
-            public byte[] Buffer { get; set; }
-            public int Offset { get; set; }
-            public int Count { get; set; }
-            public IOCancellationHelper CancellationHelper { get; private set; }
-        }
-
-        [SecurityCritical]
-        private unsafe static readonly IOCompletionCallback s_IOCallback = new IOCompletionCallback(PipeStream.AsyncPSCallback);
-
-        [SecurityCritical]
-        private IAsyncResult BeginWrite(AsyncCallback callback, Object state)
-        {
-            ReadWriteAsyncParams readWriteParams = state as ReadWriteAsyncParams;
-            Debug.Assert(readWriteParams != null);
-            byte[] buffer = readWriteParams.Buffer;
-            int offset = readWriteParams.Offset;
-            int count = readWriteParams.Count;
-
-            if (buffer == null)
-            {
-                throw new ArgumentNullException("buffer", SR.ArgumentNull_Buffer);
-            }
-            if (offset < 0)
-            {
-                throw new ArgumentOutOfRangeException("offset", SR.ArgumentOutOfRange_NeedNonNegNum);
-            }
-            if (count < 0)
-            {
-                throw new ArgumentOutOfRangeException("count", SR.ArgumentOutOfRange_NeedNonNegNum);
-            }
-            if (buffer.Length - offset < count)
-            {
-                throw new ArgumentException(SR.Argument_InvalidOffLen);
-            }
-            if (!CanWrite)
-            {
-                throw __Error.GetWriteNotSupported();
-            }
-            CheckWriteOperations();
-
-            if (!_isAsync)
-            {
-                return _streamAsyncHelper.BeginWrite(buffer, offset, count, callback, state);
-            }
-            else
-            {
-                return BeginWriteCore(buffer, offset, count, callback, state);
-            }
-        }
-
-        [SecurityCritical]
-        unsafe private PipeStreamAsyncResult BeginWriteCore(byte[] buffer, int offset, int count,
-                AsyncCallback callback, Object state)
-        {
-            Debug.Assert(_handle != null, "_handle is null");
-            Debug.Assert(!_handle.IsClosed, "_handle is closed");
-            Debug.Assert(CanWrite, "can't write");
-            Debug.Assert(buffer != null, "buffer == null");
-            Debug.Assert(_isAsync, "BeginWriteCore doesn't work on synchronous file streams!");
-            Debug.Assert(offset >= 0, "offset is negative");
-            Debug.Assert(count >= 0, "count is negative");
-
-            // Create and store async stream class library specific data in the async result
-            PipeStreamAsyncResult asyncResult = new PipeStreamAsyncResult();
-            asyncResult._userCallback = callback;
-            asyncResult._userStateObject = state;
-            asyncResult._isWrite = true;
-            asyncResult._handle = _handle;
-
-            // fixed doesn't work well with zero length arrays. Set the zero-byte flag in case
-            // caller needs to do any cleanup
-            if (buffer.Length == 0)
-            {
-                //intOverlapped->InternalLow = IntPtr.Zero;
-
-                // EndRead will free the Overlapped struct
-                asyncResult.CallUserCallback();
-            }
-            else
-            {
-                // For Synchronous IO, I could go with either a userCallback and using the managed 
-                // Monitor class, or I could create a handle and wait on it.
-                ManualResetEvent waitHandle = new ManualResetEvent(false);
-                asyncResult._waitHandle = waitHandle;
-
-                NativeOverlapped* intOverlapped = _threadPoolBinding.AllocateNativeOverlapped(s_IOCallback, asyncResult, buffer);
-                asyncResult._overlapped = intOverlapped;
-
-                int errorCode = 0;
-
-                // Queue an async WriteFile operation and pass in a packed overlapped
-                int r = WriteFileNative(_handle, buffer, offset, count, intOverlapped, out errorCode);
-
-                // WriteFile, the OS version, will return 0 on failure, but this WriteFileNative 
-                // wrapper returns -1. This will return the following:
-                // - On error, r==-1.
-                // - On async requests that are still pending, r==-1 w/ hr==ERROR_IO_PENDING
-                // - On async requests that completed sequentially, r==0
-                // 
-                // You will NEVER RELIABLY be able to get the number of buffer written back from this 
-                // call when using overlapped structures!  You must not pass in a non-null 
-                // lpNumBytesWritten to WriteFile when using overlapped structures!  This is by design 
-                // NT behavior.
-                if (r == -1 && errorCode != Interop.mincore.Errors.ERROR_IO_PENDING)
-                {
-                    // Clean up
-                    if (intOverlapped != null) _threadPoolBinding.FreeNativeOverlapped(intOverlapped);
-                    WinIOError(errorCode);
-                }
-
-                ReadWriteAsyncParams readWriteParams = state as ReadWriteAsyncParams;
-                if (readWriteParams != null)
-                {
-                    if (readWriteParams.CancellationHelper != null)
-                    {
-                        readWriteParams.CancellationHelper.AllowCancellation(_handle, intOverlapped);
-                    }
-                }
-            }
-
-            return asyncResult;
-        }
-
-        [SecurityCritical]
-        private unsafe void EndWrite(IAsyncResult asyncResult)
-        {
-            if (asyncResult == null)
-            {
-                throw new ArgumentNullException("asyncResult");
-            }
-
-            if (!_isAsync)
-            {
-                _streamAsyncHelper.EndWrite(asyncResult);
-                return;
-            }
-
-            PipeStreamAsyncResult afsar = asyncResult as PipeStreamAsyncResult;
-            if (afsar == null || !afsar._isWrite)
-            {
-                throw __Error.GetWrongAsyncResult();
-            }
-
-            // Ensure we can't get into any races by doing an interlocked
-            // CompareExchange here.  Avoids corrupting memory via freeing the
-            // NativeOverlapped class or GCHandle twice.  -- 
-            if (1 == Interlocked.CompareExchange(ref afsar._EndXxxCalled, 1, 0))
-            {
-                throw __Error.GetEndWriteCalledTwice();
-            }
-
-            ReadWriteAsyncParams readWriteParams = afsar.AsyncState as ReadWriteAsyncParams;
-            IOCancellationHelper cancellationHelper = null;
-            if (readWriteParams != null)
-            {
-                cancellationHelper = readWriteParams.CancellationHelper;
-                if (cancellationHelper != null)
-                {
-                    cancellationHelper.SetOperationCompleted();
-                }
-            }
-
-            // Obtain the WaitHandle, but don't use public property in case we
-            // delay initialize the manual reset event in the future.
-            WaitHandle wh = afsar._waitHandle;
-            if (wh != null)
-            {
-                // We must block to ensure that AsyncPSCallback has completed,
-                // and we should close the WaitHandle in here.  AsyncPSCallback
-                // and the hand-ported imitation version in COMThreadPool.cpp 
-                // are the only places that set this event.
-                using (wh)
-                {
-                    wh.WaitOne();
-                    Debug.Assert(afsar._isComplete == true, "PipeStream::EndWrite - AsyncPSCallback didn't set _isComplete to true!");
-                }
-            }
-
-            // Free memory & GC handles.
-            NativeOverlapped* overlappedPtr = afsar._overlapped;
-            if (overlappedPtr != null)
-            {
-                _threadPoolBinding.FreeNativeOverlapped(overlappedPtr);
-            }
-
-            // Now check for any error during the write.
-            if (afsar._errorCode != 0)
-            {
-                if (afsar._errorCode == Interop.mincore.Errors.ERROR_OPERATION_ABORTED)
-                {
-                    if (cancellationHelper != null)
-                    {
-                        cancellationHelper.ThrowIOOperationAborted();
-                    }
-                }
-                WinIOError(afsar._errorCode);
-            }
-
-            // Number of buffer written is afsar._numBytes.
-            return;
-        }
-
         [SecurityCritical]
         private unsafe int ReadFileNative(SafePipeHandle handle, byte[] buffer, int offset, int count,
                 NativeOverlapped* overlapped, out int errorCode)
         {
-            Debug.Assert(handle != null, "handle is null");
-            Debug.Assert(offset >= 0, "offset is negative");
-            Debug.Assert(count >= 0, "count is negative");
-            Debug.Assert(buffer != null, "buffer == null");
+            DebugAssertReadWriteArgs(buffer, offset, count, handle);
             Debug.Assert((_isAsync && overlapped != null) || (!_isAsync && overlapped == null), "Async IO parameter screwup in call to ReadFileNative.");
-            Debug.Assert(buffer.Length - offset >= count, "offset + count >= buffer length");
 
             // You can't use the fixed statement on an array of length 0. Note that async callers
             // check to avoid calling this first, so they can call user's callback
@@ -537,10 +366,6 @@ namespace System.IO.Pipes
 
             if (r == 0)
             {
-                // We should never silently swallow an error here without some
-                // extra work.  We must make sure that BeginReadCore won't return an 
-                // IAsyncResult that will cause EndRead to block, since the OS won't
-                // call AsyncPSCallback for us.  
                 errorCode = Marshal.GetLastWin32Error();
 
                 // In message mode, the ReadFile can inform us that there is more data to come.
@@ -563,12 +388,8 @@ namespace System.IO.Pipes
         private unsafe int WriteFileNative(SafePipeHandle handle, byte[] buffer, int offset, int count,
                 NativeOverlapped* overlapped, out int errorCode)
         {
-            Debug.Assert(handle != null, "handle is null");
-            Debug.Assert(offset >= 0, "offset is negative");
-            Debug.Assert(count >= 0, "count is negative");
-            Debug.Assert(buffer != null, "buffer == null");
+            DebugAssertReadWriteArgs(buffer, offset, count, handle);
             Debug.Assert((_isAsync && overlapped != null) || (!_isAsync && overlapped == null), "Async IO parameter screwup in call to WriteFileNative.");
-            Debug.Assert(buffer.Length - offset >= count, "offset + count >= buffer length");
 
             // You can't use the fixed statement on an array of length 0. Note that async callers
             // check to avoid calling this first, so they can call user's callback
@@ -595,10 +416,6 @@ namespace System.IO.Pipes
 
             if (r == 0)
             {
-                // We should never silently swallow an error here without some
-                // extra work.  We must make sure that BeginWriteCore won't return an 
-                // IAsyncResult that will cause EndWrite to block, since the OS won't
-                // call AsyncPSCallback for us.  
                 errorCode = Marshal.GetLastWin32Error();
                 return -1;
             }
@@ -608,230 +425,6 @@ namespace System.IO.Pipes
             }
 
             return numBytesWritten;
-        }
-
-        [SecurityCritical]
-        private IAsyncResult BeginRead(AsyncCallback callback, Object state)
-        {
-            ReadWriteAsyncParams readWriteParams = state as ReadWriteAsyncParams;
-            Debug.Assert(readWriteParams != null);
-            byte[] buffer = readWriteParams.Buffer;
-            int offset = readWriteParams.Offset;
-            int count = readWriteParams.Count;
-
-            if (buffer == null)
-            {
-                throw new ArgumentNullException("buffer", SR.ArgumentNull_Buffer);
-            }
-            if (offset < 0)
-            {
-                throw new ArgumentOutOfRangeException("offset", SR.ArgumentOutOfRange_NeedNonNegNum);
-            }
-            if (count < 0)
-            {
-                throw new ArgumentOutOfRangeException("count", SR.ArgumentOutOfRange_NeedNonNegNum);
-            }
-            if (buffer.Length - offset < count)
-            {
-                throw new ArgumentException(SR.Argument_InvalidOffLen);
-            }
-            if (!CanRead)
-            {
-                throw __Error.GetReadNotSupported();
-            }
-            CheckReadOperations();
-
-            if (!_isAsync)
-            {
-                // special case when this is called for sync broken pipes because otherwise Stream's
-                // Begin/EndRead hang. Reads return 0 bytes in this case so we can call the user's
-                // callback immediately
-                if (_state == PipeState.Broken)
-                {
-                    PipeStreamAsyncResult asyncResult = new PipeStreamAsyncResult();
-                    asyncResult._handle = _handle;
-                    asyncResult._userCallback = callback;
-                    asyncResult._userStateObject = state;
-                    asyncResult._isWrite = false;
-                    asyncResult.CallUserCallback();
-                    return asyncResult;
-                }
-                else
-                {
-                    return _streamAsyncHelper.BeginRead(buffer, offset, count, callback, state);
-                }
-            }
-            else
-            {
-                return BeginReadCore(buffer, offset, count, callback, state);
-            }
-        }
-
-        [SecurityCritical]
-        unsafe private PipeStreamAsyncResult BeginReadCore(byte[] buffer, int offset, int count,
-                AsyncCallback callback, Object state)
-        {
-            Debug.Assert(_handle != null, "_handle is null");
-            Debug.Assert(!_handle.IsClosed, "_handle is closed");
-            Debug.Assert(CanRead, "can't read");
-            Debug.Assert(buffer != null, "buffer == null");
-            Debug.Assert(_isAsync, "BeginReadCore doesn't work on synchronous file streams!");
-            Debug.Assert(offset >= 0, "offset is negative");
-            Debug.Assert(count >= 0, "count is negative");
-
-            // Create and store async stream class library specific data in the async result
-            PipeStreamAsyncResult asyncResult = new PipeStreamAsyncResult();
-            asyncResult._handle = _handle;
-            asyncResult._userCallback = callback;
-            asyncResult._userStateObject = state;
-            asyncResult._isWrite = false;
-
-            // handle zero-length buffers separately; fixed keyword ReadFileNative doesn't like
-            // 0-length buffers. Call user callback and we're done
-            if (buffer.Length == 0)
-            {
-                asyncResult.CallUserCallback();
-            }
-            else
-            {
-                // For Synchronous IO, I could go with either a userCallback and using
-                // the managed Monitor class, or I could create a handle and wait on it.
-                ManualResetEvent waitHandle = new ManualResetEvent(false);
-                asyncResult._waitHandle = waitHandle;
-
-                NativeOverlapped* intOverlapped = _threadPoolBinding.AllocateNativeOverlapped(s_IOCallback, asyncResult, buffer);
-                asyncResult._overlapped = intOverlapped;
-
-                // Queue an async ReadFile operation and pass in a packed overlapped
-                int errorCode = 0;
-                int r = ReadFileNative(_handle, buffer, offset, count, intOverlapped, out errorCode);
-
-                // ReadFile, the OS version, will return 0 on failure, but this ReadFileNative wrapper
-                // returns -1. This will return the following:
-                // - On error, r==-1.
-                // - On async requests that are still pending, r==-1 w/ hr==ERROR_IO_PENDING
-                // - On async requests that completed sequentially, r==0
-                // 
-                // You will NEVER RELIABLY be able to get the number of buffer read back from this call 
-                // when using overlapped structures!  You must not pass in a non-null lpNumBytesRead to
-                // ReadFile when using overlapped structures!  This is by design NT behavior.
-                if (r == -1)
-                {
-                    // One side has closed its handle or server disconnected. Set the state to Broken 
-                    // and do some cleanup work
-                    if (errorCode == Interop.mincore.Errors.ERROR_BROKEN_PIPE ||
-                        errorCode == Interop.mincore.Errors.ERROR_PIPE_NOT_CONNECTED)
-                    {
-                        State = PipeState.Broken;
-
-                        // Clear the overlapped status bit for this special case. Failure to do so looks 
-                        // like we are freeing a pending overlapped.
-                        intOverlapped->InternalLow = IntPtr.Zero;
-
-                        // EndRead will free the Overlapped struct
-                        asyncResult.CallUserCallback();
-                    }
-                    else if (errorCode != Interop.mincore.Errors.ERROR_IO_PENDING)
-                    {
-                        throw Win32Marshal.GetExceptionForWin32Error(errorCode);
-                    }
-                }
-                ReadWriteAsyncParams readWriteParams = state as ReadWriteAsyncParams;
-                if (readWriteParams != null)
-                {
-                    if (readWriteParams.CancellationHelper != null)
-                    {
-                        readWriteParams.CancellationHelper.AllowCancellation(_handle, intOverlapped);
-                    }
-                }
-            }
-            return asyncResult;
-        }
-
-        [SecurityCritical]
-        private unsafe int EndRead(IAsyncResult asyncResult)
-        {
-            // There are 3 significantly different IAsyncResults we'll accept
-            // here.  One is from Stream::BeginRead.  The other two are variations
-            // on our PipeStreamAsyncResult.  One is from BeginReadCore,
-            // while the other is from the BeginRead buffering wrapper.
-            if (asyncResult == null)
-            {
-                throw new ArgumentNullException("asyncResult");
-            }
-            if (!_isAsync)
-            {
-                return _streamAsyncHelper.EndRead(asyncResult);
-            }
-
-            PipeStreamAsyncResult afsar = asyncResult as PipeStreamAsyncResult;
-            if (afsar == null || afsar._isWrite)
-            {
-                throw __Error.GetWrongAsyncResult();
-            }
-
-            // Ensure we can't get into any races by doing an interlocked
-            // CompareExchange here.  Avoids corrupting memory via freeing the
-            // NativeOverlapped class or GCHandle twice. 
-            if (1 == Interlocked.CompareExchange(ref afsar._EndXxxCalled, 1, 0))
-            {
-                throw __Error.GetEndReadCalledTwice();
-            }
-
-            ReadWriteAsyncParams readWriteParams = asyncResult.AsyncState as ReadWriteAsyncParams;
-            IOCancellationHelper cancellationHelper = null;
-            if (readWriteParams != null)
-            {
-                cancellationHelper = readWriteParams.CancellationHelper;
-                if (cancellationHelper != null)
-                {
-                    readWriteParams.CancellationHelper.SetOperationCompleted();
-                }
-            }
-
-            // Obtain the WaitHandle, but don't use public property in case we
-            // delay initialize the manual reset event in the future.
-            WaitHandle wh = afsar._waitHandle;
-            if (wh != null)
-            {
-                // We must block to ensure that AsyncPSCallback has completed,
-                // and we should close the WaitHandle in here.  AsyncPSCallback
-                // and the hand-ported imitation version in COMThreadPool.cpp 
-                // are the only places that set this event.
-                using (wh)
-                {
-                    wh.WaitOne();
-                    Debug.Assert(afsar._isComplete == true,
-                        "FileStream::EndRead - AsyncPSCallback didn't set _isComplete to true!");
-                }
-            }
-
-            // Free memory & GC handles.
-            NativeOverlapped* overlappedPtr = afsar._overlapped;
-            if (overlappedPtr != null)
-            {
-                _threadPoolBinding.FreeNativeOverlapped(overlappedPtr);
-            }
-
-            // Now check for any error during the read.
-            if (afsar._errorCode != 0)
-            {
-                if (afsar._errorCode == Interop.mincore.Errors.ERROR_OPERATION_ABORTED)
-                {
-                    if (cancellationHelper != null)
-                    {
-                        cancellationHelper.ThrowIOOperationAborted();
-                    }
-                }
-                WinIOError(afsar._errorCode);
-            }
-
-            // set message complete to true if the pipe is broken as well; need this to signal to readers
-            // to stop reading
-            _isMessageComplete = _state == PipeState.Broken ||
-                                  afsar._isMessageComplete;
-
-            return afsar._numBytes;
         }
 
         [SecurityCritical]
@@ -847,71 +440,6 @@ namespace System.IO.Pipes
             return secAttrs;
         }
 
-        // When doing IO asynchronously (i.e., _isAsync==true), this callback is 
-        // called by a free thread in the threadpool when the IO operation 
-        // completes.  
-        [SecurityCritical]
-        unsafe private static void AsyncPSCallback(uint errorCode, uint numBytes, NativeOverlapped* pOverlapped)
-        {
-            // Extract async result from overlapped 
-            PipeStreamAsyncResult asyncResult = (PipeStreamAsyncResult)ThreadPoolBoundHandle.GetNativeOverlappedState(pOverlapped);
-            asyncResult._numBytes = (int)numBytes;
-
-            // Allow async read to finish
-            if (!asyncResult._isWrite)
-            {
-                if (errorCode == Interop.mincore.Errors.ERROR_BROKEN_PIPE ||
-                    errorCode == Interop.mincore.Errors.ERROR_PIPE_NOT_CONNECTED ||
-                    errorCode == Interop.mincore.Errors.ERROR_NO_DATA)
-                {
-                    errorCode = 0;
-                    numBytes = 0;
-                }
-            }
-
-            // For message type buffer.
-            if (errorCode == Interop.mincore.Errors.ERROR_MORE_DATA)
-            {
-                errorCode = 0;
-                asyncResult._isMessageComplete = false;
-            }
-            else
-            {
-                asyncResult._isMessageComplete = true;
-            }
-
-            asyncResult._errorCode = (int)errorCode;
-
-            // Call the user-provided callback.  It can and often should
-            // call EndRead or EndWrite.  There's no reason to use an async 
-            // delegate here - we're already on a threadpool thread.  
-            // IAsyncResult's completedSynchronously property must return
-            // false here, saying the user callback was called on another thread.
-            asyncResult._completedSynchronously = false;
-            asyncResult._isComplete = true;
-
-            // The OS does not signal this event.  We must do it ourselves.
-            ManualResetEvent wh = asyncResult._waitHandle;
-            if (wh != null)
-            {
-                Debug.Assert(!wh.GetSafeWaitHandle().IsClosed, "ManualResetEvent already closed!");
-                bool r = wh.Set();
-                Debug.Assert(r, "ManualResetEvent::Set failed!");
-                if (!r)
-                {
-                    throw Win32Marshal.GetExceptionForLastWin32Error();
-                }
-            }
-
-            AsyncCallback callback = asyncResult._userCallback;
-            if (callback != null)
-            {
-                callback(asyncResult);
-            }
-        }
-
-
-
         /// <summary>
         /// Determine pipe read mode from Win32 
         /// </summary>
@@ -922,7 +450,7 @@ namespace System.IO.Pipes
             if (!Interop.mincore.GetNamedPipeHandleState(SafePipeHandle, out flags, IntPtr.Zero, IntPtr.Zero,
                     IntPtr.Zero, IntPtr.Zero, 0))
             {
-                WinIOError(Marshal.GetLastWin32Error());
+                throw WinIOError(Marshal.GetLastWin32Error());
             }
 
             if ((flags & Interop.mincore.PipeOptions.PIPE_READMODE_MESSAGE) != 0)
@@ -940,37 +468,30 @@ namespace System.IO.Pipes
         /// </summary>
         /// <param name="errorCode"></param>
         [SecurityCritical]
-        internal void WinIOError(int errorCode)
+        internal Exception WinIOError(int errorCode)
         {
-            if (errorCode == Interop.mincore.Errors.ERROR_BROKEN_PIPE ||
-                errorCode == Interop.mincore.Errors.ERROR_PIPE_NOT_CONNECTED ||
-                errorCode == Interop.mincore.Errors.ERROR_NO_DATA
-                )
+            switch (errorCode)
             {
-                // Other side has broken the connection
-                _state = PipeState.Broken;
-                throw new IOException(SR.IO_PipeBroken, Win32Marshal.MakeHRFromErrorCode(errorCode));
-            }
-            else if (errorCode == Interop.mincore.Errors.ERROR_HANDLE_EOF)
-            {
-                throw __Error.GetEndOfFile();
-            }
-            else
-            {
-                // For invalid handles, detect the error and mark our handle
-                // as invalid to give slightly better error messages.  Also
-                // help ensure we avoid handle recycling bugs.
-                if (errorCode == Interop.mincore.Errors.ERROR_INVALID_HANDLE)
-                {
+                case Interop.mincore.Errors.ERROR_BROKEN_PIPE:
+                case Interop.mincore.Errors.ERROR_PIPE_NOT_CONNECTED:
+                case Interop.mincore.Errors.ERROR_NO_DATA:
+                    // Other side has broken the connection
+                    _state = PipeState.Broken;
+                    return new IOException(SR.IO_PipeBroken, Win32Marshal.MakeHRFromErrorCode(errorCode));
+
+                case Interop.mincore.Errors.ERROR_HANDLE_EOF:
+                    return __Error.GetEndOfFile();
+
+                case Interop.mincore.Errors.ERROR_INVALID_HANDLE:
+                    // For invalid handles, detect the error and mark our handle
+                    // as invalid to give slightly better error messages.  Also
+                    // help ensure we avoid handle recycling bugs.
                     _handle.SetHandleAsInvalid();
                     _state = PipeState.Broken;
-                }
-
-                throw Win32Marshal.GetExceptionForWin32Error(errorCode);
+                    break;
             }
-        }
 
+            return Win32Marshal.GetExceptionForWin32Error(errorCode);
+        }
     }
 }
-
-

@@ -83,8 +83,6 @@ namespace System.Diagnostics
         public static System.Diagnostics.Process Start(System.Diagnostics.ProcessStartInfo startInfo) { return default(System.Diagnostics.Process); }
         public static System.Diagnostics.Process Start(string fileName) { return default(System.Diagnostics.Process); }
         public static System.Diagnostics.Process Start(string fileName, string arguments) { return default(System.Diagnostics.Process); }
-        public static System.Diagnostics.Process Start(string fileName, string userName, System.Security.SecureString password, string domain) { return default(System.Diagnostics.Process); }
-        public static System.Diagnostics.Process Start(string fileName, string arguments, string userName, System.Security.SecureString password, string domain) { return default(System.Diagnostics.Process); }
         public void WaitForExit() { }
         public bool WaitForExit(int milliseconds) { return default(bool); }
     }
@@ -128,7 +126,6 @@ namespace System.Diagnostics
         public System.Collections.Generic.IDictionary<string, string> Environment { get { return default(System.Collections.Generic.IDictionary<string, string>); } }
         public string FileName { get { return default(string); } set { } }
         public bool LoadUserProfile { get { return default(bool); } set { } }
-        public System.Security.SecureString Password { get { return default(System.Security.SecureString); } set { } }
         public bool RedirectStandardError { get { return default(bool); } set { } }
         public bool RedirectStandardInput { get { return default(bool); } set { } }
         public bool RedirectStandardOutput { get { return default(bool); } set { } }

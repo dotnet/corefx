@@ -11,17 +11,18 @@ namespace System.Net
     internal static class GlobalLog
     {
         [ThreadStatic]
-        private static Stack<ThreadKinds> t_ThreadKindStack;
+        private static Stack<ThreadKinds> t_threadKindStack;
 
         private static Stack<ThreadKinds> ThreadKindStack
         {
             get
             {
-                if (t_ThreadKindStack == null)
+                if (t_threadKindStack == null)
                 {
-                    t_ThreadKindStack = new Stack<ThreadKinds>();
+                    t_threadKindStack = new Stack<ThreadKinds>();
                 }
-                return t_ThreadKindStack;
+
+                return t_threadKindStack;
             }
         }
 
@@ -133,7 +134,6 @@ namespace System.Net
 
             if (ThreadKindStack.Peek() != source)
             {
-                // SQL can fail to clean up the stack, leaving the default Other at the bottom.  Replace it.
                 EventSourceLogging.Log.WarningMessage("The stack has been corrupted.");
                 ThreadKinds last = ThreadKindStack.Pop() & ThreadKinds.SourceMask;
                 Assert(last == source || last == ThreadKinds.Other, "Thread source changed.|Was:({0}) Now:({1})", last, source);
@@ -240,21 +240,25 @@ namespace System.Net
                 EventSourceLogging.Log.WarningDumpArray("buffer is null");
                 return;
             }
+
             if (offset >= buffer.Length)
             {
                 EventSourceLogging.Log.WarningDumpArray("offset out of range");
                 return;
             }
+
             if ((length < 0) || (length > buffer.Length - offset))
             {
                 EventSourceLogging.Log.WarningDumpArray("length out of range");
                 return;
             }
+
             var bufferSegment = new byte[length];
             for (int i = 0; i < length; i++)
             {
                 bufferSegment[i] = buffer[offset + i];
             }
+
             EventSourceLogging.Log.DebugDumpArray(bufferSegment);
         }
     }

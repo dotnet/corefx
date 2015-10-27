@@ -456,7 +456,7 @@ namespace Internal.Cryptography.Pal.Native
 
     internal enum CryptDecodeObjectStructType : int
     {
-        RSA_CSP_PUBLICKEYBLOB = 19,
+        CNG_RSA_PUBLIC_KEY_BLOB = 72,
         X509_DSS_PUBLICKEY = 38,
         X509_DSS_PARAMETERS = 39,
         X509_KEY_USAGE = 14,
@@ -768,6 +768,11 @@ namespace Internal.Cryptography.Pal.Native
         // Predefined verify chain policies
         CERT_CHAIN_POLICY_BASE = 1,
     }
+
+    internal enum CryptAcquireFlags : int
+    {
+        CRYPT_ACQUIRE_ONLY_NCRYPT_KEY_FLAG = 0x00040000,
+    }
 }
 
- 
+

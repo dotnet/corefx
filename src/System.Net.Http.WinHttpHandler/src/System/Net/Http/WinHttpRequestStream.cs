@@ -1,10 +1,12 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
+using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 
 using SafeWinHttpHandle = Interop.WinHttp.SafeWinHttpHandle;
 
@@ -15,15 +17,16 @@ namespace System.Net.Http
         private static byte[] s_crLfTerminator = new byte[] { 0x0d, 0x0a }; // "\r\n"
         private static byte[] s_endChunk = new byte[] { 0x30, 0x0d, 0x0a, 0x0d, 0x0a }; // "0\r\n\r\n"
 
-        private volatile bool _disposed = false;
-        private SafeWinHttpHandle _requestHandle = null;
-        private bool _chunkedMode = false;
+        private volatile bool _disposed;
+        private WinHttpRequestState _state;
+        private bool _chunkedMode;
 
-        internal WinHttpRequestStream(SafeWinHttpHandle requestHandle, bool chunkedMode)
+        // TODO (Issue 2505): temporary pinned buffer caches of 1 item. Will be replaced by PinnableBufferCache.
+        private GCHandle _cachedSendPinnedBuffer;
+
+        internal WinHttpRequestStream(WinHttpRequestState state, bool chunkedMode)
         {
-            bool ignore = false;
-            requestHandle.DangerousAddRef(ref ignore);
-            _requestHandle = requestHandle;
+            _state = state;
             _chunkedMode = chunkedMode;
         }
 
@@ -77,13 +80,17 @@ namespace System.Net.Http
 
         public override void Flush()
         {
-            if (_chunkedMode)
-            {
-                WriteData(s_endChunk, 0, s_endChunk.Length);
-            }
+            // Nothing to do.
         }
 
-        public override void Write(byte[] buffer, int offset, int count)
+        public override Task FlushAsync(CancellationToken cancellationToken)
+        {
+            return cancellationToken.IsCancellationRequested ?
+                Task.FromCanceled(cancellationToken) :
+                Task.CompletedTask;
+        }
+
+        public override Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken token)
         {
             if (buffer == null)
             {
@@ -105,9 +112,27 @@ namespace System.Net.Http
                 throw new ArgumentException("buffer");
             }
 
+            if (token.IsCancellationRequested)
+            {
+                var tcs = new TaskCompletionSource<int>();
+                tcs.TrySetCanceled(token);
+                return tcs.Task;
+            }
+
             CheckDisposed();
 
-            WriteInternal(buffer, offset, count);
+            if (_state.TcsInternalWriteDataToRequestStream != null && 
+                !_state.TcsInternalWriteDataToRequestStream.Task.IsCompleted)
+            {
+                throw new InvalidOperationException(SR.net_http_no_concurrent_io_allowed);
+            }
+
+            return InternalWriteAsync(buffer, offset, count, token);
+        }
+
+        public override void Write(byte[] buffer, int offset, int count)
+        {
+            WriteAsync(buffer, offset, count, CancellationToken.None).GetAwaiter().GetResult();
         }
 
         public override long Seek(long offset, SeekOrigin origin)
@@ -128,15 +153,26 @@ namespace System.Net.Http
             throw new NotSupportedException();
         }
 
+        internal async Task EndUploadAsync(CancellationToken token)
+        {
+            if (_chunkedMode)
+            {
+                await InternalWriteDataAsync(s_endChunk, 0, s_endChunk.Length, token).ConfigureAwait(false);
+            }
+        }
+        
         protected override void Dispose(bool disposing)
         {
-            if (disposing && !_disposed)
+            if (!_disposed)
             {
                 _disposed = true;
 
-                _requestHandle.DangerousRelease();
-
-                SafeWinHttpHandle.DisposeAndClearHandle(ref _requestHandle);
+                // TODO (Issue 2508): Pinned buffers must be released in the callback, when it is guaranteed no further
+                // operations will be made to the send/receive buffers.
+                if (_cachedSendPinnedBuffer.IsAllocated)
+                {
+                    _cachedSendPinnedBuffer.Free();
+                }
             }
 
             base.Dispose(disposing);
@@ -150,38 +186,68 @@ namespace System.Net.Http
             }
         }
 
-        private void WriteInternal(byte[] buffer, int offset, int count)
+        private Task InternalWriteAsync(byte[] buffer, int offset, int count, CancellationToken token)
         {
-            if (_chunkedMode)
-            {
-                string chunkSizeString = String.Format("{0:x}\r\n", count);
-                byte[] chunkSize = Encoding.UTF8.GetBytes(chunkSizeString);
-
-                WriteData(chunkSize, 0, chunkSize.Length);
-
-                WriteData(buffer, offset, count);
-                WriteData(s_crLfTerminator, 0, s_crLfTerminator.Length);
-            }
-            else
-            {
-                WriteData(buffer, offset, count);
-            }
+            return _chunkedMode ?
+                InternalWriteChunkedModeAsync(buffer, offset, count, token) :
+                InternalWriteDataAsync(buffer, offset, count, token);            
         }
 
-        private void WriteData(byte[] buffer, int offset, int count)
+        private async Task InternalWriteChunkedModeAsync(byte[] buffer, int offset, int count, CancellationToken token)
         {
-            uint bytesWritten = 0;
-            GCHandle pinnedHandle = GCHandle.Alloc(buffer, GCHandleType.Pinned);
-            bool result = Interop.WinHttp.WinHttpWriteData(
-                _requestHandle,
-                Marshal.UnsafeAddrOfPinnedArrayElement(buffer, offset),
-                (uint)count,
-                out bytesWritten);
-            pinnedHandle.Free();
-            if (!result)
+            // WinHTTP does not fully support chunked uploads. It simply allows one to omit the 'Content-Length' header
+            // and instead use the 'Transfer-Encoding: chunked' header. The caller is still required to encode the
+            // request body according to chunking rules.
+            Debug.Assert(_chunkedMode);
+
+            string chunkSizeString = String.Format("{0:x}\r\n", count);
+            byte[] chunkSize = Encoding.UTF8.GetBytes(chunkSizeString);
+
+            await InternalWriteDataAsync(chunkSize, 0, chunkSize.Length, token).ConfigureAwait(false);
+
+            await InternalWriteDataAsync(buffer, offset, count, token).ConfigureAwait(false);
+            await InternalWriteDataAsync(s_crLfTerminator, 0, s_crLfTerminator.Length, token).ConfigureAwait(false);
+        }
+
+        private Task<bool> InternalWriteDataAsync(byte[] buffer, int offset, int count, CancellationToken token)
+        {
+            Debug.Assert(count >= 0);
+            
+            if (count == 0)
             {
-                throw new IOException(SR.net_http_io_read, WinHttpException.CreateExceptionUsingLastError());
+                return Task.FromResult<bool>(true);
             }
+            
+            // TODO (Issue 2505): replace with PinnableBufferCache.
+            if (!_cachedSendPinnedBuffer.IsAllocated || _cachedSendPinnedBuffer.Target != buffer)
+            {
+                if (_cachedSendPinnedBuffer.IsAllocated)
+                {
+                    _cachedSendPinnedBuffer.Free();
+                }
+
+                _cachedSendPinnedBuffer = GCHandle.Alloc(buffer, GCHandleType.Pinned);
+            }
+
+            _state.TcsInternalWriteDataToRequestStream = 
+                new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+            
+            lock (_state.Lock)
+            {
+                if (!Interop.WinHttp.WinHttpWriteData(
+                    _state.RequestHandle,
+                    Marshal.UnsafeAddrOfPinnedArrayElement(buffer, offset),
+                    (uint)count,
+                    IntPtr.Zero))
+                {
+                    _state.TcsInternalWriteDataToRequestStream.TrySetException(
+                        new IOException(SR.net_http_io_write, WinHttpException.CreateExceptionUsingLastError()));
+                }
+            }
+
+            // TODO: Issue #2165. Register callback on cancellation token to cancel WinHTTP operation.
+
+            return _state.TcsInternalWriteDataToRequestStream.Task;
         }
     }
 }

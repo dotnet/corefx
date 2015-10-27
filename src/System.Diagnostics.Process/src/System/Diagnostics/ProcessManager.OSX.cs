@@ -14,6 +14,28 @@ namespace System.Diagnostics
             return Interop.libproc.proc_listallpids();
         }
 
+        /// <summary>Gets process infos for each process on the specified machine.</summary>
+        /// <param name="machineName">The target machine.</param>
+        /// <returns>An array of process infos, one per found process.</returns>
+        public static ProcessInfo[] GetProcessInfos(string machineName)
+        {
+            ThrowIfRemoteMachine(machineName);
+            int[] procIds = GetProcessIds(machineName);
+
+            // Iterate through all process IDs to load information about each process
+            var processes = new List<ProcessInfo>(procIds.Length);
+            foreach (int pid in procIds)
+            {
+                ProcessInfo pi = CreateProcessInfo(pid);
+                if (pi != null)
+                {
+                    processes.Add(pi);
+                }
+            }
+
+            return processes.ToArray();
+        }
+
         // -----------------------------
         // ---- PAL layer ends here ----
         // -----------------------------
@@ -45,7 +67,7 @@ namespace System.Diagnostics
             }
 
             // Get the sessionId for the given pid, getsid returns -1 on error
-            int sessionId = Interop.libc.getsid(pid);
+            int sessionId = Interop.Sys.GetSid(pid);
             if (sessionId != -1)
                 procInfo.SessionId = sessionId;
             
