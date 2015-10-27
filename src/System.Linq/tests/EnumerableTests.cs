@@ -192,6 +192,17 @@ namespace System.Linq.Tests
             Assert.Equal(Enumerable.Range(0, 10), outOfOrder.OrderBy(i => i, new ExtremeComparer()));
             Assert.Equal(Enumerable.Range(0, 10).Reverse(), outOfOrder.OrderByDescending(i => i, new ExtremeComparer()));
         }
+
+        [Fact]
+        public void CovariantOrdered()
+        {
+            var ordered = Enumerable.Range(0, 100).Select(i => i.ToString()).OrderBy(i => i.Length);
+            IOrderedEnumerable<IComparable> o = ordered;
+            Assert.Equal(
+                Enumerable.Range(0, 100).Select(i => i.ToString()).OrderBy(i => i.Length).ThenBy(i => i).ToList(),
+                o.ThenBy(i => i).Cast<string>().ToList()
+                );
+        }
     }
 }
 
