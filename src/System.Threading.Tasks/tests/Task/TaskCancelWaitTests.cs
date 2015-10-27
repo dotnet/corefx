@@ -20,171 +20,68 @@ namespace System.Threading.Tasks.Tests.CancelWait
 
         public static IEnumerable<object[]> Task_Cancel_Data()
         {
-            yield return new object[] {
-                new TaskInfo(null, "node", WorkloadType.VeryLight, TaskCreationOptions.None)
-            }; // 14
-            yield return new object[] {
-                new TaskInfo(null, "node", WorkloadType.Light, TaskCreationOptions.None)
-            }; // 5
-            yield return new object[]
+            foreach (WorkloadType load in Enum.GetValues(typeof(WorkloadType)))
             {
-                new TaskInfo(null, "node", WorkloadType.Medium, TaskCreationOptions.LongRunning)
-            }; // 19
-            yield return new object[] {
-                new TaskInfo(null, "node", WorkloadType.Heavy, TaskCreationOptions.LongRunning)
-            }; // 16
-            yield return new object[] {
-            Nest(new TaskInfo(null, "node", WorkloadType.Light, TaskCreationOptions.None),
-                node => new TaskInfo(node, "node_1", WorkloadType.Heavy, TaskCreationOptions.AttachedToParent, true))
-            }; // 22
-            yield return new object[] {
-                Nest(new TaskInfo(null, "node", WorkloadType.Light, TaskCreationOptions.None),
-                    node => new TaskInfo(node, "node_1", WorkloadType.VeryHeavy, TaskCreationOptions.AttachedToParent, true))
-            }; // 4
-            yield return new object[] {
-                Nest(new TaskInfo(null, "node", WorkloadType.Heavy, TaskCreationOptions.None, true, false),
-                    node => new TaskInfo(node, "node_1", WorkloadType.Light, TaskCreationOptions.AttachedToParent))
-            }; // 1
-            yield return new object[] {
-                Nest(new TaskInfo(null, "node", WorkloadType.Heavy, TaskCreationOptions.None),
-                    node => new TaskInfo(node, "node_1", WorkloadType.Light, TaskCreationOptions.AttachedToParent))
-            }; // 9
-            yield return new object[] {
-            Nest(new TaskInfo(null, "node", WorkloadType.VeryHeavy, TaskCreationOptions.LongRunning),
-                node => new TaskInfo(node, "node_1", WorkloadType.Heavy, TaskCreationOptions.AttachedToParent))
-            }; // 23
-            yield return new object[] {
-                Nest(new TaskInfo(null, "node", WorkloadType.Light, TaskCreationOptions.None),
-                    node => new TaskInfo(node, "node_1", WorkloadType.VeryLight, TaskCreationOptions.LongRunning),
-                    node => new TaskInfo(node, "node_2", WorkloadType.Medium, TaskCreationOptions.LongRunning, true))
-            }; // 2
-            yield return new object[] {
-            Nest(new TaskInfo(null, "node", WorkloadType.Medium, TaskCreationOptions.LongRunning),
-                node => new TaskInfo(node, "node_1", WorkloadType.Medium, TaskCreationOptions.LongRunning | TaskCreationOptions.AttachedToParent),
-                node => new TaskInfo(node, "node_2", WorkloadType.Light, TaskCreationOptions.None))
-            }; // 24
-            yield return new object[] {
-                Nest(new TaskInfo(null, "node", WorkloadType.Medium, TaskCreationOptions.None),
-                    node => new TaskInfo(node, "node_1", WorkloadType.VeryHeavy,  TaskCreationOptions.AttachedToParent, true),
-                    node => new TaskInfo(node, "node_2", WorkloadType.VeryHeavy, TaskCreationOptions.LongRunning, true))
-            }; // 12
-            yield return new object[] {
-                Nest(new TaskInfo(null, "node", WorkloadType.VeryHeavy, TaskCreationOptions.None),
-                    node => new TaskInfo(node, "node_1", WorkloadType.VeryLight, TaskCreationOptions.LongRunning | TaskCreationOptions.AttachedToParent),
-                    node => new TaskInfo(node, "node_2", WorkloadType.Medium, TaskCreationOptions.LongRunning, true))
-            }; // 10
-            yield return new object[] {
-                Nest(new TaskInfo(null, "node", WorkloadType.VeryLight, TaskCreationOptions.LongRunning),
-                    node => Nest(new TaskInfo(node, "node_1", WorkloadType.VeryLight, TaskCreationOptions.None),
-                        node_1 => new TaskInfo(node_1, "node_1_1", WorkloadType.Heavy, TaskCreationOptions.AttachedToParent, true),
-                        node_1 => new TaskInfo(node_1, "node_1_2", WorkloadType.VeryHeavy, TaskCreationOptions.AttachedToParent, true)),
-                    node => Nest(new TaskInfo(node, "node_2", WorkloadType.Heavy, TaskCreationOptions.LongRunning),
-                        node_2 => new TaskInfo(node_2, "node_2_1", WorkloadType.VeryHeavy, TaskCreationOptions.LongRunning),
-                        node_2 => new TaskInfo(node_2, "node_2_2", WorkloadType.Heavy, TaskCreationOptions.None)))
-            }; // 20
-            yield return new object[] {
-                Nest(new TaskInfo(null, "node", WorkloadType.Medium, TaskCreationOptions.None),
-                    node => Nest(new TaskInfo(node, "node_1", WorkloadType.Heavy, TaskCreationOptions.LongRunning),
-                        node_1 => new TaskInfo(node_1, "node_1_1", WorkloadType.Heavy, TaskCreationOptions.AttachedToParent,true),
-                        node_1 => new TaskInfo(node_1, "node_1_2", WorkloadType.VeryHeavy, TaskCreationOptions.LongRunning, true)),
-                    node => Nest(new TaskInfo(node, "node_2", WorkloadType.Medium, TaskCreationOptions.AttachedToParent, true),
-                        node_2 => new TaskInfo(node_2, "node_2_1", WorkloadType.Medium, TaskCreationOptions.LongRunning | TaskCreationOptions.AttachedToParent),
-                        node_2 => new TaskInfo(node_2, "node_2_2", WorkloadType.Light, TaskCreationOptions.None)))
-            }; // 6
-            yield return new object[] {
-                Nest(new TaskInfo(null, "node", WorkloadType.Heavy, TaskCreationOptions.None),
-                    node => Nest(new TaskInfo(node, "node_1", WorkloadType.VeryLight, TaskCreationOptions.AttachedToParent),
-                        node_1 => new TaskInfo(node_1, "node_1_1", WorkloadType.VeryLight, TaskCreationOptions.LongRunning, true),
-                        node_1 => new TaskInfo(node_1, "node_1_2", WorkloadType.VeryLight, TaskCreationOptions.LongRunning, true)),
-                    node => Nest(new TaskInfo(node, "node_2", WorkloadType.Medium, TaskCreationOptions.AttachedToParent, true),
-                        node_2 => new TaskInfo(node_2, "node_2_1", WorkloadType.VeryHeavy, TaskCreationOptions.LongRunning | TaskCreationOptions.AttachedToParent),
-                        node_2 => new TaskInfo(node_2, "node_2_2", WorkloadType.VeryLight, TaskCreationOptions.LongRunning, true)))
-            }; // 15
-            yield return new object[] {
-                Nest(new TaskInfo(null, "node", WorkloadType.VeryHeavy, TaskCreationOptions.LongRunning),
-                    node => Nest(new TaskInfo(node, "node_1", WorkloadType.Heavy, TaskCreationOptions.LongRunning, true),
-                        node_1 => new TaskInfo(node_1, "node_1_1", WorkloadType.VeryHeavy, TaskCreationOptions.AttachedToParent),
-                        node_1 => new TaskInfo(node_1, "node_1_2", WorkloadType.Light, TaskCreationOptions.LongRunning)),
-                    node => Nest(new TaskInfo(node, "node_2", WorkloadType.VeryHeavy, TaskCreationOptions.LongRunning, true),
-                        node_2 => new TaskInfo(node_2, "node_2_1", WorkloadType.Heavy, TaskCreationOptions.LongRunning, true),
-                        node_2 => new TaskInfo(node_2, "node_2_2", WorkloadType.VeryHeavy, TaskCreationOptions.AttachedToParent, true)))
-            }; // 3
-            yield return new object[] {
-                Nest(new TaskInfo(null, "node", WorkloadType.Light, TaskCreationOptions.LongRunning),
-                    node => Nest(new TaskInfo(node, "node_1", WorkloadType.VeryLight, TaskCreationOptions.AttachedToParent, true),
-                        node_1 => new TaskInfo(node_1, "node_1_1", WorkloadType.Medium, TaskCreationOptions.AttachedToParent)),
-                    node => new TaskInfo(node, "node_2", WorkloadType.Heavy, TaskCreationOptions.AttachedToParent, true),
-                    node => Nest(new TaskInfo(node, "node_3", WorkloadType.Heavy, TaskCreationOptions.AttachedToParent),
-                        node_3 => new TaskInfo(node_3, "node_3_1", WorkloadType.VeryHeavy, TaskCreationOptions.AttachedToParent),
-                        node_3 => new TaskInfo(node_3, "node_3_2", WorkloadType.Medium, TaskCreationOptions.LongRunning)))
-            }; // 17
-            yield return new object[] {
-                Nest(new TaskInfo(null, "node", WorkloadType.Heavy, TaskCreationOptions.None),
-                    node => Nest(new TaskInfo(node, "node_1", WorkloadType.Light, TaskCreationOptions.LongRunning | TaskCreationOptions.AttachedToParent),
-                        node_1 => new TaskInfo(node_1, "node_1_1", WorkloadType.VeryLight, TaskCreationOptions.LongRunning, true)),
-                    node => new TaskInfo(node, "node_2", WorkloadType.Light, TaskCreationOptions.LongRunning, true),
-                    node => Nest(new TaskInfo(node, "node_3", WorkloadType.VeryHeavy, TaskCreationOptions.AttachedToParent, true),
-                        node_3 => new TaskInfo(node_3, "node_3_1", WorkloadType.VeryLight, TaskCreationOptions.AttachedToParent, true),
-                        node_3 => new TaskInfo(node_3, "node_3_2", WorkloadType.Medium, TaskCreationOptions.AttachedToParent, true)))
-            }; // 11
-            yield return new object[] {
-                Nest(new TaskInfo(null, "node", WorkloadType.Heavy, TaskCreationOptions.None),
-                    node => Nest(new TaskInfo(node, "node_1", WorkloadType.Heavy, TaskCreationOptions.AttachedToParent),
-                        node_1 => new TaskInfo(node_1, "node_1_1", WorkloadType.VeryHeavy, TaskCreationOptions.LongRunning, true)),
-                    node => new TaskInfo(node, "node_2", WorkloadType.VeryHeavy, TaskCreationOptions.AttachedToParent, true),
-                    node => Nest(new TaskInfo(node, "node_3", WorkloadType.VeryLight, TaskCreationOptions.AttachedToParent),
-                        node_3 => new TaskInfo(node_3, "node_3_1", WorkloadType.VeryLight, TaskCreationOptions.LongRunning | TaskCreationOptions.AttachedToParent),
-                        node_3 => new TaskInfo(node_3, "node_3_2", WorkloadType.VeryHeavy, TaskCreationOptions.AttachedToParent, true)))
-            }; // 25
-            yield return new object[] {
-                Nest(new TaskInfo(null, "node", WorkloadType.VeryHeavy, TaskCreationOptions.LongRunning),
-                    node => Nest(new TaskInfo(node, "node_1", WorkloadType.Medium, TaskCreationOptions.LongRunning, true),
-                        node_1 => new TaskInfo(node_1, "node_1_1", WorkloadType.VeryHeavy, TaskCreationOptions.LongRunning, true)),
-                    node => new TaskInfo(node, "node_2", WorkloadType.Light, TaskCreationOptions.LongRunning),
-                    node => Nest(new TaskInfo(node, "node_3", WorkloadType.VeryHeavy, TaskCreationOptions.LongRunning, true),
-                        node_3 => new TaskInfo(node_3, "node_3_1", WorkloadType.Light, TaskCreationOptions.LongRunning, true),
-                        node_3 => new TaskInfo(node_3, "node_3_2", WorkloadType.VeryLight, TaskCreationOptions.AttachedToParent, true)))
-            }; // 7
-            yield return new object[] {
-                Nest(new TaskInfo(null, "node", WorkloadType.Heavy, TaskCreationOptions.None),
-                    node => new TaskInfo(node, "node_1", WorkloadType.Light, TaskCreationOptions.AttachedToParent, true),
-                    node => new TaskInfo(node, "node_2", WorkloadType.Heavy, TaskCreationOptions.LongRunning, true),
-                    node => new TaskInfo(node, "node_3", WorkloadType.Light, TaskCreationOptions.LongRunning, true),
-                    node => new TaskInfo(node, "node_4", WorkloadType.Medium, TaskCreationOptions.AttachedToParent, true),
-                    node => new TaskInfo(node, "node_5", WorkloadType.Light, TaskCreationOptions.LongRunning, true),
-                    node => new TaskInfo(node, "node_6", WorkloadType.Heavy, TaskCreationOptions.AttachedToParent, true),
-                    node => new TaskInfo(node, "node_7", WorkloadType.VeryLight, TaskCreationOptions.LongRunning | TaskCreationOptions.AttachedToParent))
-            }; // 18
-            yield return new object[] {
-            Nest(new TaskInfo(null, "node", WorkloadType.Heavy, TaskCreationOptions.LongRunning),
-                node => new TaskInfo(node, "node_1", WorkloadType.Medium, TaskCreationOptions.LongRunning),
-                node => new TaskInfo(node, "node_2", WorkloadType.Light, TaskCreationOptions.LongRunning, true),
-                node => new TaskInfo(node, "node_3", WorkloadType.Medium, TaskCreationOptions.AttachedToParent),
-                node => new TaskInfo(node, "node_4", WorkloadType.Medium, TaskCreationOptions.AttachedToParent, true),
-                node => new TaskInfo(node, "node_5", WorkloadType.Heavy, TaskCreationOptions.LongRunning),
-                node => new TaskInfo(node, "node_6", WorkloadType.VeryLight, TaskCreationOptions.AttachedToParent),
-                node => new TaskInfo(node, "node_7", WorkloadType.Heavy, TaskCreationOptions.LongRunning, true))
-            }; // 21
-            yield return new object[] {
-                Nest(new TaskInfo(null, "node", WorkloadType.Heavy, TaskCreationOptions.LongRunning),
-                    node => new TaskInfo(node, "node_1", WorkloadType.VeryHeavy, TaskCreationOptions.AttachedToParent, true),
-                    node => new TaskInfo(node, "node_2", WorkloadType.Medium, TaskCreationOptions.LongRunning),
-                    node => new TaskInfo(node, "node_3", WorkloadType.Light, TaskCreationOptions.LongRunning, true),
-                    node => new TaskInfo(node, "node_4", WorkloadType.Light, TaskCreationOptions.AttachedToParent),
-                    node => new TaskInfo(node, "node_5", WorkloadType.VeryLight, TaskCreationOptions.AttachedToParent),
-                    node => new TaskInfo(node, "node_6", WorkloadType.VeryLight, TaskCreationOptions.LongRunning),
-                    node => new TaskInfo(node, "node_7", WorkloadType.Medium, TaskCreationOptions.LongRunning, true))
-            }; // 8
-            yield return new object[] {
-                Nest(new TaskInfo(null, "node", WorkloadType.VeryHeavy, TaskCreationOptions.None),
-                    node => new TaskInfo(node, "node_1", WorkloadType.Medium, TaskCreationOptions.LongRunning | TaskCreationOptions.AttachedToParent),
-                    node => new TaskInfo(node, "node_2", WorkloadType.Light, TaskCreationOptions.AttachedToParent, true),
-                    node => new TaskInfo(node, "node_3", WorkloadType.VeryHeavy, TaskCreationOptions.AttachedToParent, true),
-                    node => new TaskInfo(node, "node_4", WorkloadType.VeryHeavy, TaskCreationOptions.LongRunning, true),
-                    node => new TaskInfo(node, "node_5", WorkloadType.VeryLight, TaskCreationOptions.LongRunning | TaskCreationOptions.AttachedToParent),
-                    node => new TaskInfo(node, "node_6", WorkloadType.VeryLight, TaskCreationOptions.LongRunning, true),
-                    node => new TaskInfo(node, "node_7", WorkloadType.Medium, TaskCreationOptions.AttachedToParent, true))
-            }; // 13
+                foreach (TaskCreationOptions option in new[] { TaskCreationOptions.None, TaskCreationOptions.LongRunning })
+                {
+                    // 14, 5, 19, 16
+                    yield return new object[] { new TaskInfo(null, "node", load, option) };
+
+                    foreach (WorkloadType work in Enum.GetValues(typeof(WorkloadType)))
+                    {
+                        // 22, 4, 1, 9, 23
+                        yield return new object[] {
+                            Nest(new TaskInfo(null, "node", load, option),
+                                node => new TaskInfo(node, "node_1", work, option))
+                            };
+                        yield return new object[] {
+                            Nest(new TaskInfo(null, "node", load, option),
+                                node => new TaskInfo(node, "node_1", work, option, true))
+                            };
+                        yield return new object[] {
+                            Nest(new TaskInfo(null, "node", load, option, true, false),
+                                node => new TaskInfo(node, "node_1", work, option))
+                            };
+                        yield return new object[] {
+                            Nest(new TaskInfo(null, "node", load, option),
+                                node => new TaskInfo(node, "node_1", work, option | TaskCreationOptions.AttachedToParent))
+                            };
+                        yield return new object[] {
+                            Nest(new TaskInfo(null, "node", load, option),
+                                node => new TaskInfo(node, "node_1", work, option| TaskCreationOptions.AttachedToParent, true))
+                            };
+                    }
+
+                    // 18, 21, 8, 13, 2, 24, 12, 10
+                    yield return new object[] {
+                        Nest(new TaskInfo(null, "node", load, option),
+                            node => new TaskInfo(node, "node_1", WorkloadType.Medium, TaskCreationOptions.LongRunning | TaskCreationOptions.AttachedToParent),
+                            node => new TaskInfo(node, "node_2", WorkloadType.Light, TaskCreationOptions.AttachedToParent, true),
+                            node => new TaskInfo(node, "node_3", WorkloadType.VeryHeavy, TaskCreationOptions.AttachedToParent, true),
+                            node => new TaskInfo(node, "node_4", WorkloadType.VeryHeavy, TaskCreationOptions.LongRunning, true),
+                            node => new TaskInfo(node, "node_5", WorkloadType.VeryLight, TaskCreationOptions.LongRunning | TaskCreationOptions.AttachedToParent),
+                            node => new TaskInfo(node, "node_6", WorkloadType.VeryLight, TaskCreationOptions.LongRunning, true),
+                            node => new TaskInfo(node, "node_7", WorkloadType.Medium, TaskCreationOptions.AttachedToParent, true))
+                    };
+
+                    // 20, 6, 15, 3, 17, 11, 25, 7
+                    yield return new object[] {
+                        Nest(new TaskInfo(null, "node", load, option),
+                            node => Nest(new TaskInfo(node, "node_1", WorkloadType.VeryLight, TaskCreationOptions.None),
+                                node_1 => new TaskInfo(node_1, "node_1_1", WorkloadType.Heavy, TaskCreationOptions.AttachedToParent, true),
+                                node_1 => new TaskInfo(node_1, "node_1_2", WorkloadType.VeryHeavy, TaskCreationOptions.LongRunning, true),
+                                node_1 => new TaskInfo(node_1, "node_1_3", WorkloadType.Medium, TaskCreationOptions.LongRunning | TaskCreationOptions.AttachedToParent)),
+                            node => Nest(new TaskInfo(node, "node_2", WorkloadType.Heavy, TaskCreationOptions.LongRunning),
+                                node_2 => new TaskInfo(node_2, "node_2_1", WorkloadType.VeryHeavy, TaskCreationOptions.LongRunning),
+                                node_2 => new TaskInfo(node_2, "node_2_2", WorkloadType.Heavy, TaskCreationOptions.None),
+                                node_2 => new TaskInfo(node_2, "node_2_3", WorkloadType.Heavy, TaskCreationOptions.AttachedToParent)),
+                            node => Nest(new TaskInfo(node, "node_3", WorkloadType.Heavy, TaskCreationOptions.AttachedToParent),
+                                node_3 => new TaskInfo(node_3, "node_3_1", WorkloadType.Heavy, TaskCreationOptions.None, true),
+                                node_3 => new TaskInfo(node_3, "node_3_2", WorkloadType.Heavy, TaskCreationOptions.AttachedToParent)),
+                            node => new TaskInfo(node, "node_4", WorkloadType.Medium, TaskCreationOptions.AttachedToParent, true))
+                    };
+                }
+            }
         }
 
         [Theory]
