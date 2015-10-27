@@ -1,7 +1,9 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
+using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -189,16 +191,21 @@ namespace System.IO.Pipes.Tests
         }
 
         [Fact]
-        public virtual void ReadFromPipeWithClosedPartner_ReadNoBytes()
+        public virtual async Task ReadFromPipeWithClosedPartner_ReadNoBytes()
         {
             using (ServerClientPair pair = CreateServerClientPair())
             {
                 pair.writeablePipe.Dispose();
                 byte[] buffer = new byte[] { 0, 0, 0, 0 };
 
-                int length = pair.readablePipe.Read(buffer, 0, buffer.Length);
-                Assert.Equal(0, length);
-                pair.readablePipe.ReadByte();
+                // The pipe won't be marked as Broken until the first read, so prime it
+                // to test both the case where it's not yet marked as "Broken" and then 
+                // where it is.
+                Assert.Equal(0, pair.readablePipe.Read(buffer, 0, buffer.Length));
+
+                Assert.Equal(0, pair.readablePipe.Read(buffer, 0, buffer.Length));
+                Assert.Equal(-1, pair.readablePipe.ReadByte());
+                Assert.Equal(0, await pair.readablePipe.ReadAsync(buffer, 0, buffer.Length));
             }
         }
 
@@ -251,5 +258,52 @@ namespace System.IO.Pipes.Tests
                 Assert.Equal(123, pair.readablePipe.ReadByte());
             }
         }
+
+        [Theory]
+        [MemberData("AsyncReadWriteChain_MemberData")]
+        public async Task AsyncReadWriteChain(int iterations, int writeBufferSize, int readBufferSize, bool cancelableToken)
+        {
+            var writeBuffer = new byte[writeBufferSize];
+            var readBuffer = new byte[readBufferSize];
+            var rand = new Random();
+            var cancellationToken = cancelableToken ? new CancellationTokenSource().Token : CancellationToken.None;
+
+            using (ServerClientPair pair = CreateServerClientPair())
+            {
+                // Repeatedly and asynchronously write to the writeable pipe and read from the readable pipe,
+                // verifying that the correct data made it through.
+                for (int iter = 0; iter < iterations; iter++)
+                {
+                    rand.NextBytes(writeBuffer);
+                    Task writerTask = pair.writeablePipe.WriteAsync(writeBuffer, 0, writeBuffer.Length, cancellationToken);
+
+                    int totalRead = 0;
+                    while (totalRead < writeBuffer.Length)
+                    {
+                        int numRead = await pair.readablePipe.ReadAsync(readBuffer, 0, readBuffer.Length, cancellationToken);
+                        Assert.True(numRead > 0);
+                        Assert.Equal<byte>(
+                            new ArraySegment<byte>(writeBuffer, totalRead, numRead),
+                            new ArraySegment<byte>(readBuffer, 0, numRead));
+                        totalRead += numRead;
+                    }
+                    Assert.Equal(writeBuffer.Length, totalRead);
+
+                    await writerTask;
+                }
+            }
+        }
+
+        public static IEnumerable<object[]> AsyncReadWriteChain_MemberData()
+        {
+            foreach (bool cancelableToken in new[] { true, false })
+            {
+                yield return new object[] { 5000, 1, 1, cancelableToken };  // very small buffers
+                yield return new object[] { 500, 21, 18, cancelableToken }; // lots of iterations, with read buffer smaller than write buffer
+                yield return new object[] { 500, 18, 21, cancelableToken }; // lots of iterations, with write buffer smaller than read buffer
+                yield return new object[] { 5, 128000, 64000, cancelableToken }; // very large buffers
+            }
+        }
+
     }
 }

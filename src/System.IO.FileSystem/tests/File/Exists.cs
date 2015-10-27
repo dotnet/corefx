@@ -3,7 +3,7 @@
 
 using Xunit;
 
-namespace System.IO.FileSystem.Tests
+namespace System.IO.Tests
 {
     public class File_Exists : FileSystemTest
     {
@@ -96,7 +96,7 @@ namespace System.IO.FileSystem.Tests
         [Fact]
         public void DirectoryLongerThanMaxDirectoryAsPath_DoesntThrow()
         {
-            Assert.All((IOInputs.GetPathsLongerThanMaxDirectory()), (path) =>
+            Assert.All((IOInputs.GetPathsLongerThanMaxDirectory(GetTestFilePath())), (path) =>
             {
                 Assert.False(Exists(path));
             });
@@ -105,7 +105,7 @@ namespace System.IO.FileSystem.Tests
         [Fact]
         public void DirectoryLongerThanMaxPathAsPath_DoesntThrow()
         {
-            Assert.All((IOInputs.GetPathsLongerThanMaxPath()), (path) =>
+            Assert.All((IOInputs.GetPathsLongerThanMaxPath(GetTestFilePath())), (path) =>
             {
                 Assert.False(Exists(path), path);
             });

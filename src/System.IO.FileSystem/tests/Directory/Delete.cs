@@ -3,7 +3,7 @@
 
 using Xunit;
 
-namespace System.IO.FileSystem.Tests
+namespace System.IO.Tests
 {
     public class Directory_Delete_str : FileSystemTest
     {
@@ -201,5 +201,12 @@ namespace System.IO.FileSystem.Tests
             Assert.False(testDir.Exists);
         }
 
+        [Fact]
+        public void RecursiveDeleteWithTrailingSlash()
+        {
+            DirectoryInfo testDir = Directory.CreateDirectory(GetTestFilePath());
+            Delete(testDir.FullName + Path.DirectorySeparatorChar, true);
+            Assert.False(testDir.Exists);
+        }
     }
 }

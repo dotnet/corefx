@@ -262,8 +262,26 @@ namespace System.IO.Pipes.Tests
         }
 
         [Fact]
-        [PlatformSpecific(~PlatformID.Linux)]
-        public static void BufferSizeRoundtripping()
+        [PlatformSpecific(PlatformID.OSX)]
+        public static void OSX_BufferSizeNotSupported()
+        {
+            int desiredBufferSize = 10;
+            string pipeName = GetUniquePipeName();
+            using (var server = new NamedPipeServerStream(pipeName, PipeDirection.In, 1, PipeTransmissionMode.Byte, PipeOptions.Asynchronous, desiredBufferSize, desiredBufferSize))
+            using (var client = new NamedPipeClientStream(".", pipeName, PipeDirection.Out))
+            {
+                Task clientConnect = client.ConnectAsync();
+                server.WaitForConnection();
+                clientConnect.Wait();
+
+                Assert.Throws<PlatformNotSupportedException>(() => server.InBufferSize);
+                Assert.Throws<PlatformNotSupportedException>(() => client.OutBufferSize);
+            }
+        }
+
+        [Fact]
+        [PlatformSpecific(PlatformID.Windows)]
+        public static void Windows_BufferSizeRoundtripping()
         {
             int desiredBufferSize = 10;
             string pipeName = GetUniquePipeName();
@@ -397,5 +415,40 @@ namespace System.IO.Pipes.Tests
                 Assert.Throws<ArgumentOutOfRangeException>(() => client.ReadMode = (PipeTransmissionMode)999);
             }
         }
+
+        [Fact]
+        [PlatformSpecific(PlatformID.AnyUnix)]
+        public void Unix_MultipleServerDisposal_DoesntDeletePipe()
+        {
+            // Test for when multiple servers are created and linked to the same FIFO. The original ServerStream
+            // that created the FIFO is disposed. The other servers should still be valid and useable.
+            string serverName = GetUniquePipeName();
+
+            var server1 = new NamedPipeServerStream(serverName, PipeDirection.In); // Creates the FIFO
+            var server2 = new NamedPipeServerStream(serverName, PipeDirection.In);
+            var client1 = new NamedPipeClientStream(".", serverName, PipeDirection.Out);
+            var client2 = new NamedPipeClientStream(".", serverName, PipeDirection.Out);
+
+            Task server1Task = server1.WaitForConnectionAsync(); // Opens a handle to the FIFO
+            Task server2Task = server2.WaitForConnectionAsync(); // Opens a handle to the same FIFO as server1
+
+            Task client1Task = client1.ConnectAsync();
+            Task.WaitAll(server1Task, server2Task, client1Task); // client1 connects to server1 AND server2
+
+            Assert.True(server1.IsConnected);
+            Assert.True(server2.IsConnected);
+
+            // Get rid of client1/server1 and make sure server2 isn't connected (so that it can connect to client2)
+            server1.Dispose();
+            client1.Dispose();
+            server2.Disconnect();
+            Assert.False(server2.IsConnected);
+
+            server2Task = server2.WaitForConnectionAsync(); // Opens a handle to the same FIFO
+            Task client2Task = client2.ConnectAsync(); 
+            Task.WaitAll(server2Task, client2Task); // Should not block!
+            Assert.True(server2.IsConnected);
+        }
+
     }
 }

@@ -2,7 +2,7 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <PropertyGroup>
-    <UseECMAKey>true</UseECMAKey>
+    <UseECMAKey Condition="'$(UseECMAKey)' == ''">true</UseECMAKey>
     <!-- 
          NOTE: Suppress false positive warning for the special case where we're building System.Runtime.WindowsRuntime itself
                at a version other than 4.0.0.0, which is referenced indirectly via the mscorlib.dll design-time facade, which
@@ -15,6 +15,8 @@
     <NoWarn>1698</NoWarn>
     <AssemblyVersion>4.0.11.0</AssemblyVersion>
     <OutputType>Library</OutputType>
+    <PackageTargetFramework>dotnet5.3</PackageTargetFramework>
+    <NuGetTargetMoniker>.NETPlatform,Version=v5.3</NuGetTargetMoniker>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="System.Runtime.WindowsRuntime.cs" />

@@ -9,11 +9,14 @@
     <Configuration Condition="'$(Configuration)' == ''">Windows_Debug</Configuration>
     <Platform Condition="'$(Platform)' == ''">AnyCPU</Platform>
     <AssemblyName>System.IO.Compression</AssemblyName>
-    <AssemblyVersion>4.0.1.0</AssemblyVersion>
+    <AssemblyVersion>4.1.0.0</AssemblyVersion>
     <OutputType>Library</OutputType>
     <ProjectGuid>{5471BFE8-8071-466F-838E-5ADAA779E742}</ProjectGuid>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <UseECMAKey Condition="'$(UseECMAKey)'==''">true</UseECMAKey>
+    <PackageTargetFramework>dotnet5.4</PackageTargetFramework>
+    <UsePackageTargetRuntimeDefaults>true</UsePackageTargetRuntimeDefaults>
+    <DefineConstants>$(DefineConstants);FEATURE_ZLIB_CRC32</DefineConstants>
   </PropertyGroup>
   <!-- Default configurations to help VS understand the options -->
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Linux_Debug|AnyCPU'" />
@@ -41,8 +44,10 @@
     <Compile Include="System\IO\Compression\GZipUtils.cs" />
     <Compile Include="System\IO\Compression\HuffmanTree.cs" />
     <Compile Include="System\IO\Compression\IDeflater.cs" />
-    <Compile Include="System\IO\Compression\Inflater.cs" />
+    <Compile Include="System\IO\Compression\IInflater.cs" />
+    <Compile Include="System\IO\Compression\InflaterManaged.cs" />
     <Compile Include="System\IO\Compression\InflaterState.cs" />
+    <Compile Include="System\IO\Compression\InflaterZlib.cs" />
     <Compile Include="System\IO\Compression\InputBuffer.cs" />
     <Compile Include="System\IO\Compression\Match.cs" />
     <Compile Include="System\IO\Compression\MatchState.cs" />

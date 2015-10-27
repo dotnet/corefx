@@ -174,44 +174,16 @@ namespace Tests.ExpressionCompiler.Binary
 
         private static void VerifyByteDivide(byte a, byte b)
         {
-            bool failed = false;
-            try
-            {
-                Expression<Func<byte>> e =
-                    Expression.Lambda<Func<byte>>(
-                        Expression.Divide(
-                            Expression.Constant(a, typeof(byte)),
-                            Expression.Constant(b, typeof(byte))),
-                        Enumerable.Empty<ParameterExpression>());
-            }
-            catch (InvalidOperationException)
-            {
-                // this is expected
-                failed = true;
-            }
-
-            Assert.True(failed);
+            Expression aExp = Expression.Constant(a, typeof(byte));
+            Expression bExp = Expression.Constant(b, typeof(byte));
+            Assert.Throws<InvalidOperationException>(() => Expression.Divide(aExp, bExp));
         }
 
         private static void VerifySByteDivide(sbyte a, sbyte b)
         {
-            bool failed = false;
-            try
-            {
-                Expression<Func<sbyte>> e =
-                    Expression.Lambda<Func<sbyte>>(
-                        Expression.Divide(
-                            Expression.Constant(a, typeof(sbyte)),
-                            Expression.Constant(b, typeof(sbyte))),
-                        Enumerable.Empty<ParameterExpression>());
-            }
-            catch (InvalidOperationException)
-            {
-                // this is expected
-                failed = true;
-            }
-
-            Assert.True(failed);
+            Expression aExp = Expression.Constant(a, typeof(sbyte));
+            Expression bExp = Expression.Constant(b, typeof(sbyte));
+            Assert.Throws<InvalidOperationException>(() => Expression.Divide(aExp, bExp));
         }
 
         private static void VerifyUShortDivide(ushort a, ushort b)
@@ -639,25 +611,54 @@ namespace Tests.ExpressionCompiler.Binary
 
         private static void VerifyCharDivide(char a, char b)
         {
-            bool failed = false;
-            try
-            {
-                Expression<Func<char>> e =
-                    Expression.Lambda<Func<char>>(
-                        Expression.Divide(
-                            Expression.Constant(a, typeof(char)),
-                            Expression.Constant(b, typeof(char))),
-                        Enumerable.Empty<ParameterExpression>());
-            }
-            catch (InvalidOperationException)
-            {
-                // this is expected
-                failed = true;
-            }
-
-            Assert.True(failed);
+            Expression aExp = Expression.Constant(a, typeof(char));
+            Expression bExp = Expression.Constant(b, typeof(char));
+            Assert.Throws<InvalidOperationException>(() => Expression.Divide(aExp, bExp));
         }
 
         #endregion
+
+        [Fact]
+        public static void CannotReduce()
+        {
+            Expression exp = Expression.Divide(Expression.Constant(0), Expression.Constant(0));
+            Assert.False(exp.CanReduce);
+            Assert.Same(exp, exp.Reduce());
+            Assert.Throws<ArgumentException>(null, () => exp.ReduceAndCheck());
+        }
+
+        [Fact]
+        public static void ThrowsOnLeftNull()
+        {
+            Assert.Throws<ArgumentNullException>("left", () => Expression.Divide(null, Expression.Constant("")));
+        }
+
+        [Fact]
+        public static void ThrowsOnRightNull()
+        {
+            Assert.Throws<ArgumentNullException>("right", () => Expression.Divide(Expression.Constant(""), null));
+        }
+
+        private static class Unreadable<T>
+        {
+            public static T WriteOnly
+            {
+                set { }
+            }
+        }
+
+        [Fact]
+        public static void ThrowsOnLeftUnreadable()
+        {
+            Expression value = Expression.Property(null, typeof(Unreadable<int>), "WriteOnly");
+            Assert.Throws<ArgumentException>("left", () => Expression.Divide(value, Expression.Constant(1)));
+        }
+
+        [Fact]
+        public static void ThrowsOnRightUnreadable()
+        {
+            Expression value = Expression.Property(null, typeof(Unreadable<int>), "WriteOnly");
+            Assert.Throws<ArgumentException>("right", () => Expression.Divide(Expression.Constant(1), value));
+        }
     }
 }

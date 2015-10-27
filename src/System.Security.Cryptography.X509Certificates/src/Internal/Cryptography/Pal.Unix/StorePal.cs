@@ -19,37 +19,100 @@ namespace Internal.Cryptography.Pal
 
         public static IStorePal FromBlob(byte[] rawData, string password, X509KeyStorageFlags keyStorageFlags)
         {
-            OpenSslPkcs12Reader pfx;
+            ICertificatePal singleCert;
 
-            if (OpenSslPkcs12Reader.TryRead(rawData, out pfx))
+            if (CertificatePal.TryReadX509Der(rawData, out singleCert) ||
+                CertificatePal.TryReadX509Pem(rawData, out singleCert))
             {
-                using (pfx)
-                {
-                    return PfxToCollection(pfx, password);
-                }
+                // The single X509 structure methods shouldn't return true and out null, only empty
+                // collections have that behavior.
+                Debug.Assert(singleCert != null);
+
+                return SingleCertToStorePal(singleCert);
             }
 
+            List<ICertificatePal> certPals;
+
+            if (PkcsFormatReader.TryReadPkcs7Der(rawData, out certPals) ||
+                PkcsFormatReader.TryReadPkcs7Pem(rawData, out certPals) ||
+                PkcsFormatReader.TryReadPkcs12(rawData, password, out certPals))
+            {
+                Debug.Assert(certPals != null);
+
+                return ListToStorePal(certPals);
+            }
+            
             return null;
         }
 
         public static IStorePal FromFile(string fileName, string password, X509KeyStorageFlags keyStorageFlags)
         {
-            using (SafeBioHandle fileBio = Interop.libcrypto.BIO_new_file(fileName, "rb"))
+            using (SafeBioHandle bio = Interop.Crypto.BioNewFile(fileName, "rb"))
             {
-                Interop.libcrypto.CheckValidOpenSslHandle(fileBio);
+                Interop.Crypto.CheckValidOpenSslHandle(bio);
 
-                OpenSslPkcs12Reader pfx;
+                return FromBio(bio, password);
+            }
+        }
 
-                if (OpenSslPkcs12Reader.TryRead(fileBio, out pfx))
-                {
-                    using (pfx)
-                    {
-                        return PfxToCollection(pfx, password);
-                    }
-                }
+        private static IStorePal FromBio(SafeBioHandle bio, string password)
+        {
+            int bioPosition = Interop.Crypto.BioTell(bio);
+            Debug.Assert(bioPosition >= 0);
+
+            ICertificatePal singleCert;
+
+            if (CertificatePal.TryReadX509Pem(bio, out singleCert))
+            {
+                return SingleCertToStorePal(singleCert);
             }
 
-            return null;
+            // Rewind, try again.
+            CertificatePal.RewindBio(bio, bioPosition);
+
+            if (CertificatePal.TryReadX509Der(bio, out singleCert))
+            {
+                return SingleCertToStorePal(singleCert);
+            }
+
+            // Rewind, try again.
+            CertificatePal.RewindBio(bio, bioPosition);
+
+            List<ICertificatePal> certPals;
+
+            if (PkcsFormatReader.TryReadPkcs7Pem(bio, out certPals))
+            {
+                return ListToStorePal(certPals);
+            }
+
+            // Rewind, try again.
+            CertificatePal.RewindBio(bio, bioPosition);
+
+            if (PkcsFormatReader.TryReadPkcs7Der(bio, out certPals))
+            {
+                return ListToStorePal(certPals);
+            }
+
+            // Rewind, try again.
+            CertificatePal.RewindBio(bio, bioPosition);
+
+            if (PkcsFormatReader.TryReadPkcs12(bio, password, out certPals))
+            {
+                return ListToStorePal(certPals);
+            }
+
+            // Since we aren't going to finish reading, leaving the buffer where it was when we got
+            // it seems better than leaving it in some arbitrary other position.
+            // 
+            // But, before seeking back to start, save the Exception representing the last reported
+            // OpenSSL error in case the last BioSeek would change it.
+            Exception openSslException = Interop.Crypto.CreateOpenSslCryptographicException();
+
+            // Use BioSeek directly for the last seek attempt, because any failure here should instead
+            // report the already created (but not yet thrown) exception.
+            Interop.Crypto.BioSeek(bio, bioPosition);
+
+            throw openSslException;
         }
 
         public static IStorePal FromCertificate(ICertificatePal cert)
@@ -73,9 +136,7 @@ namespace Internal.Cryptography.Pal
 
             if (openFlags.HasFlag(OpenFlags.ReadWrite))
             {
-                // TODO (#2206): Support CurrentUser persisted stores
-                // (they'd not be very useful without the ability to add/remove content)
-                throw new NotImplementedException();
+                throw new PlatformNotSupportedException(SR.Cryptography_Unix_X509_MachineStoresReadOnly);
             }
 
             // The static store approach here is making an optimization based on not
@@ -102,8 +163,26 @@ namespace Internal.Cryptography.Pal
                 return CloneStore(s_machineIntermediateStore);
             }
 
-            // TODO (#2207): Support the rest of the stores, or throw PlatformNotSupportedException.
-            throw new NotImplementedException();
+            throw new PlatformNotSupportedException(SR.Cryptography_Unix_X509_MachineStoresRootOnly);
+        }
+
+        private static IStorePal SingleCertToStorePal(ICertificatePal singleCert)
+        {
+            return new OpenSslX509StoreProvider(
+                new X509Certificate2Collection(
+                    new X509Certificate2(singleCert)));
+        }
+
+        private static IStorePal ListToStorePal(List<ICertificatePal> certPals)
+        {
+            X509Certificate2Collection coll = new X509Certificate2Collection();
+
+            for (int i = 0; i < certPals.Count; i++)
+            {
+                coll.Add(new X509Certificate2(certPals[i]));
+            }
+
+            return new OpenSslX509StoreProvider(coll);
         }
 
         private static IStorePal PfxToCollection(OpenSslPkcs12Reader pfx, string password)

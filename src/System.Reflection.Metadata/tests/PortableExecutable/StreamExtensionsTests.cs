@@ -3,11 +3,9 @@
 
 using System.IO;
 using System.Runtime.InteropServices;
-using System.Reflection.Internal;
-using TestUtilities;
 using Xunit;
 
-namespace System.Reflection.Metadata.Tests
+namespace System.Reflection.Internal.Tests
 {
     public class StreamExtensionsTests
     {
@@ -45,17 +43,17 @@ namespace System.Reflection.Metadata.Tests
                 InvalidateMemory(buffer, bufferSize);
                 s.Seek(0, SeekOrigin.Begin);
                 s.CopyTo(buffer, 3);
-                AssertEx.Equal(new byte[] { 0, 1, 2 }, ReadBuffer(buffer, bufferSize));
+                Assert.Equal(new byte[] { 0, 1, 2 }, ReadBuffer(buffer, bufferSize));
 
                 InvalidateMemory(buffer, bufferSize);
                 s.Seek(0, SeekOrigin.Begin);
                 s.CopyTo(buffer, 0);
-                AssertEx.Equal(new byte[0], ReadBuffer(buffer, bufferSize));
+                Assert.Equal(new byte[0], ReadBuffer(buffer, bufferSize));
 
                 InvalidateMemory(buffer, bufferSize);
                 s.Seek(0, SeekOrigin.Begin);
                 s.CopyTo(buffer, 5);
-                AssertEx.Equal(new byte[] { 0, 1, 2, 3, 4 }, ReadBuffer(buffer, bufferSize));
+                Assert.Equal(new byte[] { 0, 1, 2, 3, 4 }, ReadBuffer(buffer, bufferSize));
 
                 Assert.Throws<IOException>(() => s.CopyTo(buffer, 6));
             }
@@ -88,7 +86,7 @@ namespace System.Reflection.Metadata.Tests
                 s.Seek(0, SeekOrigin.Begin);
                 s.CopyTo(buffer, a.Length);
 
-                AssertEx.Equal(a, ReadBuffer(buffer, bufferSize));
+                Assert.Equal(a, ReadBuffer(buffer, bufferSize));
             }
             finally
             {
@@ -142,7 +140,7 @@ namespace System.Reflection.Metadata.Tests
                 InvalidateMemory(buffer, bufferSize);
                 s.CopyTo(buffer, 8);
 
-                AssertEx.Equal(new byte[] { 0, 1, 2, 3, 4, 5, 6, 7 }, ReadBuffer(buffer, bufferSize));
+                Assert.Equal(new byte[] { 0, 1, 2, 3, 4, 5, 6, 7 }, ReadBuffer(buffer, bufferSize));
             }
             finally
             {

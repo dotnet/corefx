@@ -2,10 +2,8 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Xunit;
-using System;
-using System.Xml;
 
-namespace XmlDocumentTests.XmlNodeTests
+namespace System.Xml.Tests
 {
     public class RemoveChildTests
     {
@@ -385,8 +383,7 @@ namespace XmlDocumentTests.XmlNodeTests
                     VerifySiblings(refChild, newChild);
                     break;
                 default:
-                    Assert.True(false, "Wrong InsertType: '" + insertType + "'");
-                    break;
+                    throw new ArgumentException("Wrong InsertType: '" + insertType + "'");
             }
         }
 
@@ -415,8 +412,7 @@ namespace XmlDocumentTests.XmlNodeTests
                 case XmlNodeType.SignificantWhitespace:
                     return doc.CreateSignificantWhitespace("	");
                 default:
-                    Assert.True(false, "Wrong XmlNodeType: '" + nodeType + "'");
-                    return null;
+                    throw new ArgumentException("Wrong XmlNodeType: '" + nodeType + "'");
             }
         }
 
@@ -444,8 +440,7 @@ namespace XmlDocumentTests.XmlNodeTests
                     return InsertAfter;
             }
 
-            Assert.True(false, "Unknown type");
-            return null;
+            throw new ArgumentException("Unknown type");
         }
     }
 }

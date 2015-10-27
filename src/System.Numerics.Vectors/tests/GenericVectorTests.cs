@@ -1201,6 +1201,7 @@ namespace System.Numerics.Tests
         [Fact]
         public void GreaterThanOrEqualAnyByte() { TestVectorGreaterThanOrEqualAny<Byte>(); }
         [Fact]
+        [ActiveIssue(3262)]
         public void GreaterThanOrEqualAnySByte() { TestVectorGreaterThanOrEqualAny<SByte>(); }
         [Fact]
         public void GreaterThanOrEqualAnyUInt16() { TestVectorGreaterThanOrEqualAny<UInt16>(); }
@@ -1256,6 +1257,7 @@ namespace System.Numerics.Tests
         [Fact]
         public void GreaterThanOrEqualAllByte() { TestVectorGreaterThanOrEqualAll<Byte>(); }
         [Fact]
+        [ActiveIssue(3262)]
         public void GreaterThanOrEqualAllSByte() { TestVectorGreaterThanOrEqualAll<SByte>(); }
         [Fact]
         public void GreaterThanOrEqualAllUInt16() { TestVectorGreaterThanOrEqualAll<UInt16>(); }
@@ -2197,6 +2199,34 @@ namespace System.Numerics.Tests
                 Assert.Equal(values[g], array[g + offset]);
                 Assert.Equal(vector[g], array[g + offset]);
             }
+        }
+
+        [Fact]
+        public void CountViaReflectionConsistencyByte() { TestCountViaReflectionConsistency<Byte>(); }
+        [Fact]
+        public void CountViaReflectionConsistencySByte() { TestCountViaReflectionConsistency<SByte>(); }
+        [Fact]
+        public void CountViaReflectionConsistencyUInt16() { TestCountViaReflectionConsistency<UInt16>(); }
+        [Fact]
+        public void CountViaReflectionConsistencyInt16() { TestCountViaReflectionConsistency<Int16>(); }
+        [Fact]
+        public void CountViaReflectionConsistencyUInt32() { TestCountViaReflectionConsistency<UInt32>(); }
+        [Fact]
+        public void CountViaReflectionConsistencyInt32() { TestCountViaReflectionConsistency<Int32>(); }
+        [Fact]
+        public void CountViaReflectionConsistencyUInt64() { TestCountViaReflectionConsistency<UInt64>(); }
+        [Fact]
+        public void CountViaReflectionConsistencyInt64() { TestCountViaReflectionConsistency<Int64>(); }
+        [Fact]
+        public void CountViaReflectionConsistencySingle() { TestCountViaReflectionConsistency<Single>(); }
+        [Fact]
+        public void CountViaReflectionConsistencyDouble() { TestCountViaReflectionConsistency<Double>(); }
+        private void TestCountViaReflectionConsistency<T>() where T : struct
+        {
+            MethodInfo countMethod = typeof(Vector<T>).GetTypeInfo().GetDeclaredProperty("Count").GetMethod;
+            int valueFromReflection = (int)countMethod.Invoke(null, null);
+            int valueFromNormalCall = Vector<T>.Count;
+            Assert.Equal(valueFromNormalCall, valueFromReflection);
         }
         #endregion Reflection Tests
 

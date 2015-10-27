@@ -4,9 +4,9 @@
 using System.Diagnostics;
 using Xunit;
 
-namespace System.Collections.ArrayListTests
+namespace System.Collections.Tests
 {
-    public class CtorTests
+    public class ArrayList_CtorTests
     {
         [Fact]
         public void CtorTest()
@@ -89,7 +89,7 @@ namespace System.Collections.ArrayListTests
         public void DebuggerAttributeTests()
         {
             DebuggerAttributes.ValidateDebuggerDisplayReferences(new ArrayList());
-            DebuggerAttributes.ValidateDebuggerTypeProxyProperties(new ArrayList());
+            DebuggerAttributes.ValidateDebuggerTypeProxyProperties(new ArrayList() { "a", 1, "b", 2 });
         }
     }
 }

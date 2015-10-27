@@ -74,7 +74,7 @@ namespace Internal.Cryptography.Pal
                             if (!success)
                             {
                                 int hr = Marshal.GetHRForLastWin32Error();
-                                throw new CryptographicException(hr);
+                                throw hr.ToCryptographicException();
                             }
                         }
                     }
@@ -112,18 +112,18 @@ namespace Internal.Cryptography.Pal
             int dwSigners;
             int cbSigners = sizeof(int);
             if (!Interop.crypt32.CryptMsgGetParam(hCryptMsg, CryptMessageParameterType.CMSG_SIGNER_COUNT_PARAM, 0, out dwSigners, ref cbSigners))
-                throw new CryptographicException(Marshal.GetHRForLastWin32Error());
+                throw Marshal.GetHRForLastWin32Error().ToCryptographicException();;
             if (dwSigners == 0)
-                throw new CryptographicException(ErrorCode.CRYPT_E_SIGNER_NOT_FOUND);
+                throw ErrorCode.CRYPT_E_SIGNER_NOT_FOUND.ToCryptographicException();
 
             // get the first signer from the store, and use that as the loaded certificate
             int cbData = 0;
             if (!Interop.crypt32.CryptMsgGetParam(hCryptMsg, CryptMessageParameterType.CMSG_SIGNER_INFO_PARAM, 0, null, ref cbData))
-                throw new CryptographicException(Marshal.GetHRForLastWin32Error());
+                throw Marshal.GetHRForLastWin32Error().ToCryptographicException();;
 
             byte[] cmsgSignerBytes = new byte[cbData];
             if (!Interop.crypt32.CryptMsgGetParam(hCryptMsg, CryptMessageParameterType.CMSG_SIGNER_INFO_PARAM, 0, cmsgSignerBytes, ref cbData))
-                throw new CryptographicException(Marshal.GetHRForLastWin32Error());
+                throw Marshal.GetHRForLastWin32Error().ToCryptographicException();;
 
             CERT_INFO certInfo = default(CERT_INFO);
             unsafe
@@ -139,7 +139,7 @@ namespace Internal.Cryptography.Pal
 
                 SafeCertContextHandle pCertContext = null;
                 if (!Interop.crypt32.CertFindCertificateInStore(hCertStore, CertFindType.CERT_FIND_SUBJECT_CERT, &certInfo, ref pCertContext))
-                    throw new CryptographicException(Marshal.GetHRForLastWin32Error());
+                    throw Marshal.GetHRForLastWin32Error().ToCryptographicException();;
 
                 return pCertContext;
             }
@@ -155,7 +155,7 @@ namespace Internal.Cryptography.Pal
                     CRYPTOAPI_BLOB certBlob = new CRYPTOAPI_BLOB(rawData.Length, pbRawData);
                     hStore = Interop.crypt32.PFXImportCertStore(ref certBlob, password, pfxCertStoreFlags);
                     if (hStore.IsInvalid)
-                        throw new CryptographicException(Marshal.GetHRForLastWin32Error());
+                        throw Marshal.GetHRForLastWin32Error().ToCryptographicException();;
                 }
             }
 
@@ -192,7 +192,7 @@ namespace Internal.Cryptography.Pal
                 if (pCertContext.IsInvalid)
                 {
                     // For compat, setting "hr" to ERROR_INVALID_PARAMETER even though ERROR_INVALID_PARAMETER is not actually an HRESULT.
-                    throw new CryptographicException(ErrorCode.ERROR_INVALID_PARAMETER);
+                    throw ErrorCode.ERROR_INVALID_PARAMETER.ToCryptographicException();
                 }
 
                 return pCertContext;
@@ -218,6 +218,18 @@ namespace Internal.Cryptography.Pal
                 pfxCertStoreFlags |= PfxCertStoreFlags.CRYPT_EXPORTABLE;
             if ((keyStorageFlags & X509KeyStorageFlags.UserProtected) == X509KeyStorageFlags.UserProtected)
                 pfxCertStoreFlags |= PfxCertStoreFlags.CRYPT_USER_PROTECTED;
+
+            // In the full .NET Framework loading a PFX then adding the key to the Windows Certificate Store would
+            // enable a native application compiled against CAPI to find that private key and interoperate with it.
+            //
+            // For CoreFX this behavior is being retained.
+            //
+            // For .NET Native (UWP) the API used to delete the private key (if it wasn't added to a store) is not
+            // allowed to be called if the key is stored in CAPI.  So for UWP force the key to be stored in the
+            // CNG Key Storage Provider, then deleting the key with CngKey.Delete will clean up the file on disk, too.
+#if NETNATIVE
+            pfxCertStoreFlags |= PfxCertStoreFlags.PKCS12_ALWAYS_CNG_KSP;
+#endif
 
             return pfxCertStoreFlags;
         }

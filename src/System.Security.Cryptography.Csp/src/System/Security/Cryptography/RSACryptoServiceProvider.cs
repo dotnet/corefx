@@ -3,7 +3,6 @@
 
 using System;
 using System.Diagnostics;
-using System.Diagnostics.Contracts;
 using System.Security.Cryptography;
 using System.IO;
 using System.Runtime.CompilerServices;
@@ -21,7 +20,6 @@ namespace System.Security.Cryptography
         private SafeKeyHandle _safeKeyHandle;
         private SafeProvHandle _safeProvHandle;
         private static volatile CspProviderFlags s_UseMachineKeyStore = 0;
-
 
         public RSACryptoServiceProvider()
             : this(0, new CspParameters(CapiHelper.DefaultRsaProviderType,
@@ -59,7 +57,6 @@ namespace System.Security.Cryptography
             }
             _parameters = CapiHelper.SaveCspParameters(CapiHelper.CspAlgorithmType.Rsa, parameters, s_UseMachineKeyStore, ref _randomKeyContainer);
 
-            _legalKeySizesValue = new KeySizes[] { new KeySizes(384, 16384, 8) };
             _keySize = useDefaultKeySize ? 1024 : keySize;
 
             // If this is not a random container we generate, create it eagerly 
@@ -116,6 +113,14 @@ namespace System.Security.Cryptography
                 byte[] keySize = (byte[])CapiHelper.GetKeyParameter(_safeKeyHandle, Constants.CLR_KEYLEN);
                 _keySize = (keySize[0] | (keySize[1] << 8) | (keySize[2] << 16) | (keySize[3] << 24));
                 return _keySize;
+            }
+        }
+
+        public override KeySizes[] LegalKeySizes
+        {
+            get
+            {
+                return new[] { new KeySizes(384, 16384, 8) };
             }
         }
 
@@ -470,10 +475,10 @@ namespace System.Security.Cryptography
         protected override byte[] HashData(byte[] data, int offset, int count, HashAlgorithmName hashAlgorithm)
         {
             // we're sealed and the base should have checked this already
-            Contract.Assert(data != null);
-            Contract.Assert(count >= 0 && count <= data.Length);
-            Contract.Assert(offset >= 0 && offset <= data.Length - count);
-            Contract.Assert(!string.IsNullOrEmpty(hashAlgorithm.Name));
+            Debug.Assert(data != null);
+            Debug.Assert(count >= 0 && count <= data.Length);
+            Debug.Assert(offset >= 0 && offset <= data.Length - count);
+            Debug.Assert(!string.IsNullOrEmpty(hashAlgorithm.Name));
 
             using (HashAlgorithm hash = GetHashAlgorithm(hashAlgorithm))
             {
@@ -484,8 +489,8 @@ namespace System.Security.Cryptography
         protected override byte[] HashData(Stream data, HashAlgorithmName hashAlgorithm)
         {
             // we're sealed and the base should have checked this already
-            Contract.Assert(data != null);
-            Contract.Assert(!string.IsNullOrEmpty(hashAlgorithm.Name));
+            Debug.Assert(data != null);
+            Debug.Assert(!string.IsNullOrEmpty(hashAlgorithm.Name));
 
             using (HashAlgorithm hash = GetHashAlgorithm(hashAlgorithm))
             {

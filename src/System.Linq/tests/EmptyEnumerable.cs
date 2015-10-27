@@ -7,9 +7,9 @@ using Xunit;
 
 namespace System.Linq.Tests
 {
-    public partial class EmptyEnumerableTest
+    public class EmptyEnumerableTest : EnumerableTests
     {
-        private void TestEmpty<T>()
+        private void TestEmptyCached<T>()
         {
             var enumerable1 = Enumerable.Empty<T>();
             var enumerable2 = Enumerable.Empty<T>();
@@ -20,10 +20,26 @@ namespace System.Linq.Tests
         [Fact]
         public void EmptyEnumerableCachedTest()
         {
-            TestEmpty<int>();
-            TestEmpty<string>();
-            TestEmpty<object>();
-            TestEmpty<EmptyEnumerableTest>();
+            TestEmptyCached<int>();
+            TestEmptyCached<string>();
+            TestEmptyCached<object>();
+            TestEmptyCached<EmptyEnumerableTest>();
+        }
+        
+        private void TestEmptyEmpty<T>()
+        {
+            Assert.Equal(new T[0], Enumerable.Empty<T>());
+            Assert.Equal(0, Enumerable.Empty<T>().Count());
+            Assert.Same(Enumerable.Empty<T>().GetEnumerator(), ((IList<T>)Enumerable.Empty<T>()).GetEnumerator());
+        }
+
+        [Fact]
+        public void EmptyEnumerableIsIndeedEmpty()
+        {
+            TestEmptyEmpty<int>();
+            TestEmptyEmpty<string>();
+            TestEmptyEmpty<object>();
+            TestEmptyEmpty<EmptyEnumerableTest>();
         }
 
         [Fact]
@@ -48,5 +64,3 @@ namespace System.Linq.Tests
         }
     }
 }
-
-

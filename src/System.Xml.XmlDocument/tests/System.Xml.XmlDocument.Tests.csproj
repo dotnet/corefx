@@ -16,6 +16,10 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="$(CommonTestPath)\System\ShouldNotBeInvokedException.cs">
+      <Link>Common\System\ShouldNotBeInvokedException.cs</Link>
+    </Compile>
+    <Compile Include="XmlDocumentTests\LoadTests.cs" />
     <Compile Include="XmlAttributeCollectionTests\AppendTests.cs" />
     <Compile Include="XmlAttributeCollectionTests\CollectionInterfaceTests.cs" />
     <Compile Include="XmlAttributeCollectionTests\CopyToTests.cs" />
@@ -100,6 +104,15 @@
     <Compile Include="XmlProcessingInstructionTests\TargetTests.cs" />
     <Compile Include="XmlTextTests\SplitTextTests.cs" />
   </ItemGroup>
+  <!-- Performance Tests -->
+  <ItemGroup Condition="'$(RunPerfTestsForProject)' == 'true'">
+    <Compile Include="Performance\Perf.XmlDocument.cs" />
+    <Compile Include="Performance\Perf.XmlNode.cs" />
+    <Compile Include="Performance\Perf.XmlNodeList.cs" />
+    <Compile Include="$(CommonTestPath)\System\PerfUtils.cs">
+      <Link>Common\System\PerfUtils.cs</Link>
+    </Compile>
+  </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\src\System.Xml.XmlDocument.csproj">
       <Project>{16EE5522-F387-4C9E-9EF2-B5134B043F37}</Project>
@@ -111,6 +124,11 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="project.json" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="example.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

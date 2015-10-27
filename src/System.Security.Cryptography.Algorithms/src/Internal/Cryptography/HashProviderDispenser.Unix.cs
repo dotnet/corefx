@@ -16,15 +16,15 @@ namespace Internal.Cryptography
             switch (hashAlgorithmId)
             {
                 case HashAlgorithmNames.SHA1:
-                    return new EvpHashProvider(Interop.libcrypto.EVP_sha1());
+                    return new EvpHashProvider(Interop.Crypto.EvpSha1());
                 case HashAlgorithmNames.SHA256:
-                    return new EvpHashProvider(Interop.libcrypto.EVP_sha256());
+                    return new EvpHashProvider(Interop.Crypto.EvpSha256());
                 case HashAlgorithmNames.SHA384:
-                    return new EvpHashProvider(Interop.libcrypto.EVP_sha384());
+                    return new EvpHashProvider(Interop.Crypto.EvpSha384());
                 case HashAlgorithmNames.SHA512:
-                    return new EvpHashProvider(Interop.libcrypto.EVP_sha512());
+                    return new EvpHashProvider(Interop.Crypto.EvpSha512());
                 case HashAlgorithmNames.MD5:
-                    return new EvpHashProvider(Interop.libcrypto.EVP_md5());
+                    return new EvpHashProvider(Interop.Crypto.EvpMd5());
             }
             throw new CryptographicException();
         }
@@ -34,15 +34,15 @@ namespace Internal.Cryptography
             switch (hashAlgorithmId)
             {
                 case HashAlgorithmNames.SHA1:
-                    return new HmacHashProvider(Interop.libcrypto.EVP_sha1(), key);
+                    return new HmacHashProvider(Interop.Crypto.EvpSha1(), key);
                 case HashAlgorithmNames.SHA256:
-                    return new HmacHashProvider(Interop.libcrypto.EVP_sha256(), key);
+                    return new HmacHashProvider(Interop.Crypto.EvpSha256(), key);
                 case HashAlgorithmNames.SHA384:
-                    return new HmacHashProvider(Interop.libcrypto.EVP_sha384(), key);
+                    return new HmacHashProvider(Interop.Crypto.EvpSha384(), key);
                 case HashAlgorithmNames.SHA512:
-                    return new HmacHashProvider(Interop.libcrypto.EVP_sha512(), key);
+                    return new HmacHashProvider(Interop.Crypto.EvpSha512(), key);
                 case HashAlgorithmNames.MD5:
-                    return new HmacHashProvider(Interop.libcrypto.EVP_md5(), key);
+                    return new HmacHashProvider(Interop.Crypto.EvpMd5(), key);
             }
             throw new CryptographicException();
         }
@@ -62,36 +62,34 @@ namespace Internal.Cryptography
                 _algorithmEvp = algorithmEvp;
                 Debug.Assert(algorithmEvp != IntPtr.Zero);
 
-                _hashSize = Interop.libcrypto.EVP_MD_size(algorithmEvp);
-                if (_hashSize <= 0 || _hashSize > Interop.libcrypto.EVP_MAX_MD_SIZE)
+                _hashSize = Interop.Crypto.EvpMdSize(_algorithmEvp);
+                if (_hashSize <= 0 || _hashSize > Interop.Crypto.EVP_MAX_MD_SIZE)
                 {
                     throw new CryptographicException();
                 }
 
-                _ctx = Interop.libcrypto.EVP_MD_CTX_create();
+                _ctx = Interop.Crypto.EvpMdCtxCreate(_algorithmEvp);
 
-                Interop.libcrypto.CheckValidOpenSslHandle(_ctx);
-
-                Check(Interop.libcrypto.EVP_DigestInit_ex(_ctx, algorithmEvp, IntPtr.Zero));
+                Interop.Crypto.CheckValidOpenSslHandle(_ctx);
             }
 
             public sealed override unsafe void AppendHashDataCore(byte[] data, int offset, int count)
             {
                 fixed (byte* md = data)
                 {
-                    Check(Interop.libcrypto.EVP_DigestUpdate(_ctx, md + offset, (IntPtr)count));
+                    Check(Interop.Crypto.EvpDigestUpdate(_ctx, md + offset, count));
                 }
             }
 
             public sealed override unsafe byte[] FinalizeHashAndReset()
             {
-                byte* md = stackalloc byte[Interop.libcrypto.EVP_MAX_MD_SIZE];
-                uint length = Interop.libcrypto.EVP_MAX_MD_SIZE;
-                Check(Interop.libcrypto.EVP_DigestFinal_ex(_ctx, md, ref length));
+                byte* md = stackalloc byte[Interop.Crypto.EVP_MAX_MD_SIZE];
+                uint length = (uint)Interop.Crypto.EVP_MAX_MD_SIZE;
+                Check(Interop.Crypto.EvpDigestFinalEx(_ctx, md, ref length));
                 Debug.Assert(length == _hashSize);
 
                 // Reset the algorithm provider.
-                Check(Interop.libcrypto.EVP_DigestInit_ex(_ctx, _algorithmEvp, IntPtr.Zero));
+                Check(Interop.Crypto.EvpDigestReset(_ctx, _algorithmEvp));
 
                 byte[] result = new byte[(int)length];
                 Marshal.Copy((IntPtr)md, result, 0, (int)length);
@@ -115,22 +113,23 @@ namespace Internal.Cryptography
         private sealed class HmacHashProvider : HashProvider
         {
             private readonly int _hashSize;
-            private Interop.libcrypto.HMAC_CTX _hmacCtx;
+            private SafeHmacCtxHandle _hmacCtx;
 
             public unsafe HmacHashProvider(IntPtr algorithmEvp, byte[] key)
             {
                 Debug.Assert(algorithmEvp != IntPtr.Zero);
                 Debug.Assert(key != null);
 
-                _hashSize = Interop.libcrypto.EVP_MD_size(algorithmEvp);
-                if (_hashSize <= 0 || _hashSize > Interop.libcrypto.EVP_MAX_MD_SIZE)
+                _hashSize = Interop.Crypto.EvpMdSize(algorithmEvp);
+                if (_hashSize <= 0 || _hashSize > Interop.Crypto.EVP_MAX_MD_SIZE)
                 {
                     throw new CryptographicException();
                 }
 
                 fixed (byte* keyPtr = key)
                 {
-                    Check(Interop.libcrypto.HMAC_Init(out _hmacCtx, keyPtr, key.Length, algorithmEvp));
+                    _hmacCtx = Interop.Crypto.HmacCreate(keyPtr, key.Length, algorithmEvp);
+                    Interop.Crypto.CheckValidOpenSslHandle(_hmacCtx);
                 }
             }
 
@@ -138,23 +137,21 @@ namespace Internal.Cryptography
             {
                 fixed (byte* md = data)
                 {
-                    Check(Interop.libcrypto.HMAC_Update(ref _hmacCtx, md + offset, count));
+                    Check(Interop.Crypto.HmacUpdate(_hmacCtx, md + offset, count));
                 }
             }
 
             public sealed override unsafe byte[] FinalizeHashAndReset()
             {
-                byte* md = stackalloc byte[Interop.libcrypto.EVP_MAX_MD_SIZE];
-                uint length = Interop.libcrypto.EVP_MAX_MD_SIZE;
-                Check(Interop.libcrypto.HMAC_Final(ref _hmacCtx, md, ref length));
+                byte* md = stackalloc byte[Interop.Crypto.EVP_MAX_MD_SIZE];
+                int length = Interop.Crypto.EVP_MAX_MD_SIZE;
+                Check(Interop.Crypto.HmacFinal(_hmacCtx, md, ref length));
                 Debug.Assert(length == _hashSize);
 
-                // HMAC_Init_ex with all NULL values keeps the key and algorithm (and engine) intact,
-                // but resets the values for another computation.
-                Check(Interop.libcrypto.HMAC_Init_ex(ref _hmacCtx, null, 0, IntPtr.Zero, IntPtr.Zero));
+                Check(Interop.Crypto.HmacReset(_hmacCtx));
 
-                byte[] result = new byte[(int)length];
-                Marshal.Copy((IntPtr)md, result, 0, (int)length);
+                byte[] result = new byte[length];
+                Marshal.Copy((IntPtr)md, result, 0, length);
                 return result;
             }
 
@@ -165,7 +162,14 @@ namespace Internal.Cryptography
 
             public sealed override void Dispose(bool disposing)
             {
-                Interop.libcrypto.HMAC_CTX_cleanup(ref _hmacCtx);
+                if (disposing)
+                {
+                    if (_hmacCtx != null)
+                    {
+                        _hmacCtx.Dispose();
+                        _hmacCtx = null;
+                    }
+                }
             }
         }
 
@@ -175,7 +179,7 @@ namespace Internal.Cryptography
             if (result != Success)
             {
                 Debug.Assert(result == 0);
-                throw Interop.libcrypto.CreateOpenSslCryptographicException();
+                throw Interop.Crypto.CreateOpenSslCryptographicException();
             }
         }
     }

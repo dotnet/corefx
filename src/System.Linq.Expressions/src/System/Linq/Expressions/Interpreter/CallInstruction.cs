@@ -224,6 +224,7 @@ namespace System.Linq.Expressions.Interpreter
             return pi.Length != index || (pi.Length == index && !target.IsStatic);
         }
 
+#if FEATURE_DLG_INVOKE
         /// <summary>
         /// Uses reflection to create new instance of the appropriate ReflectedCaller
         /// </summary>
@@ -250,6 +251,7 @@ namespace System.Linq.Expressions.Interpreter
                 throw ExceptionHelpers.UpdateForRethrow(e.InnerException);
             }
         }
+#endif
 
         #endregion
 
@@ -349,7 +351,7 @@ namespace System.Linq.Expressions.Interpreter
                     throw ExceptionHelpers.UpdateForRethrow(e.InnerException);
                 }
             }
-            
+
             LightLambda targetLambda;
             if (TryGetLightLambdaTarget(instance, out targetLambda))
             {
@@ -359,6 +361,7 @@ namespace System.Linq.Expressions.Interpreter
 
             try
             {
+                NullCheck(instance);
                 return _target.Invoke(instance, args);
             }
             catch (TargetInvocationException e)
@@ -390,7 +393,9 @@ namespace System.Linq.Expressions.Interpreter
 
             try
             {
-                return _target.Invoke(args[0], SkipFirstArg(args));
+                var instance = args[0];
+                NullCheck(instance);
+                return _target.Invoke(instance, SkipFirstArg(args));
             }
             catch (TargetInvocationException e)
             {
@@ -452,7 +457,7 @@ namespace System.Linq.Expressions.Interpreter
         {
             int first = frame.StackIndex - _argumentCount;
             object[] args = null;
-            object instance = null; 
+            object instance = null;
             try
             {
                 object ret;
@@ -492,6 +497,7 @@ namespace System.Linq.Expressions.Interpreter
                     {
                         try
                         {
+                            NullCheck(instance);
                             ret = _target.Invoke(instance, args);
                         }
                         catch (TargetInvocationException e)

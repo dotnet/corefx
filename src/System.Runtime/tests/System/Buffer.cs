@@ -4,6 +4,8 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Reflection;
+using System.Runtime.InteropServices;
 using Xunit;
 
 public static unsafe class BufferTests
@@ -32,53 +34,52 @@ public static unsafe class BufferTests
         Assert.Equal(b2[3], 0x3c);
         Assert.Equal(b2[4], 0x5e);
 
-        try
-        {
-            Buffer.BlockCopy(new String[3], 0, new int[3], 0, 0);
-            Assert.True(false, "BlockCopy should have thrown.");  //Array not primitive
-        }
-        catch (ArgumentException)
-        {
-        }
+        Assert.Throws<ArgumentException>(() => Buffer.BlockCopy(new String[3], 0, new int[3], 0, 0));
+        Assert.Throws<ArgumentException>(() => Buffer.BlockCopy(new byte[3], 3, new byte[3], 0, 1));
+        Assert.Throws<ArgumentException>(() => Buffer.BlockCopy(new byte[3], 0, new byte[3], 3, 1));
+        Assert.Throws<ArgumentException>(() => Buffer.BlockCopy(new byte[3], 0, new byte[3], 4, 0));
+    }
 
-        try
+    public static IEnumerable<object[]> ByteLengthTestData
+    {
+        get
         {
-            Buffer.BlockCopy(new byte[3], 3, new byte[3], 0, 1);
-            Assert.True(false, "BlockCopy should have thrown.");  // Buffer overrun
-        }
-        catch (ArgumentException)
-        {
-        }
-
-        try
-        {
-            Buffer.BlockCopy(new byte[3], 0, new byte[3], 3, 1);
-            Assert.True(false, "BlockCopy should have thrown.");  // Buffer overrun
-        }
-        catch (ArgumentException)
-        {
-        }
-
-        try
-        {
-            Buffer.BlockCopy(new byte[3], 0, new byte[3], 4, 0);  // Buffer overrun
-            Assert.True(false, "BlockCopy should have thrown.");
-        }
-        catch (ArgumentException)
-        {
+           return new[]
+           {
+               new object[] {typeof(byte), sizeof(byte) },
+               new object[] {typeof(sbyte), sizeof(sbyte) },
+               new object[] {typeof(short), sizeof(short) },
+               new object[] {typeof(ushort), sizeof(ushort) },
+               new object[] {typeof(int), sizeof(int) },
+               new object[] {typeof(uint), sizeof(uint) },
+               new object[] {typeof(long), sizeof(long) },
+               new object[] {typeof(ulong), sizeof(ulong) },
+               new object[] {typeof(IntPtr), sizeof(IntPtr) },
+               new object[] {typeof(UIntPtr), sizeof(UIntPtr) },
+               new object[] {typeof(double), sizeof(double) },
+               new object[] {typeof(float), sizeof(float) },
+               new object[] {typeof(bool), sizeof(bool) },
+               new object[] {typeof(char), sizeof(char) },
+               new object[] {typeof(decimal), sizeof(decimal) },
+               new object[] {typeof(DateTime), sizeof(DateTime) },
+               new object[] {typeof(string), -1 },
+           };
         }
     }
 
-    [Fact]
-    public static void TestByteLength()
+    [Theory, MemberData("ByteLengthTestData")]
+    public static void TestByteLength(Type type, int size)
     {
-        int i;
-
-        i = Buffer.ByteLength(new int[7]);
-        Assert.Equal(i, 7 * sizeof(int));
-
-        i = Buffer.ByteLength(new double[33]);
-        Assert.Equal(i, 33 * sizeof(double));
+        const int length = 25;
+        Array array = Array.CreateInstance(type, length);
+        if (type.GetTypeInfo().IsPrimitive)
+        {
+            Assert.Equal(length * size, Buffer.ByteLength(array));
+        }
+        else
+        {
+            Assert.Throws<ArgumentException>(() => Buffer.ByteLength(array));
+        }
     }
 
     [Fact]

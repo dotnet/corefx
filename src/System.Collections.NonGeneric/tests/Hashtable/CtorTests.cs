@@ -4,9 +4,9 @@
 using System.Diagnostics;
 using Xunit;
 
-namespace System.Collections.HashtableTests
+namespace System.Collections.Tests
 {
-    public class CtorTests
+    public class Hashtable_CtorTests
     {
         [Fact]
         public void TestCtorDefault()
@@ -311,7 +311,7 @@ namespace System.Collections.HashtableTests
         public void DebuggerAttributeTests()
         {
             DebuggerAttributes.ValidateDebuggerDisplayReferences(new Hashtable());
-            DebuggerAttributes.ValidateDebuggerTypeProxyProperties(new Hashtable());
+            DebuggerAttributes.ValidateDebuggerTypeProxyProperties(new Hashtable() { { "a", 1 }, { "b", 2 } });
         }
     }
 }

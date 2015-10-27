@@ -226,4 +226,86 @@ public class GCTests
             }
         }
     }
+
+    [Fact]
+    public static void ReRegisterForFinalize()
+    {
+        ReRegisterForFinalizeTest.Run();
+    }
+
+    private class ReRegisterForFinalizeTest
+    {
+        public static void Run()
+        {
+            TestObject.Finalized = false;
+            CreateObject();
+
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+
+            Assert.True(TestObject.Finalized);
+        }
+
+        private static void CreateObject()
+        {
+            using (var obj = new TestObject())
+            {
+                GC.SuppressFinalize(obj);
+            }
+        }
+
+        private class TestObject : IDisposable
+        {
+            public static bool Finalized { get; set; }
+
+            ~TestObject()
+            {
+                Finalized = true;
+            }
+
+            public void Dispose()
+            {
+                GC.ReRegisterForFinalize(this);
+            }
+        }
+    }
+
+    [Fact]
+    public static void GetTotalMemoryTest_ForceCollection()
+    {
+        GC.Collect();
+
+        int gen0 = GC.CollectionCount(0);
+        int gen1 = GC.CollectionCount(1);
+        int gen2 = GC.CollectionCount(2);
+
+        Assert.InRange(GC.GetTotalMemory(true), 1, long.MaxValue);
+
+        Assert.InRange(GC.CollectionCount(0), gen0 + 1, int.MaxValue);
+        Assert.InRange(GC.CollectionCount(1), gen1 + 1, int.MaxValue);
+        Assert.InRange(GC.CollectionCount(2), gen2 + 1, int.MaxValue);
+
+        // We don't test GetTotalMemory(false) at all because a collection
+        // could still occur even if not due to the GetTotalMemory call,
+        // and as such there's no way to validate the behavior.  We also
+        // don't verify a tighter bound for the result of GetTotalMemory
+        // because collections could cause significant fluctuations.
+    }
+
+    [Fact]
+    public static void GetGenerationTest()
+    {
+        GC.Collect();
+        object obj = new object();
+
+        for (int i = 0; i <= GC.MaxGeneration + 1; i++)
+        {
+            Assert.InRange(GC.GetGeneration(obj), 0, GC.MaxGeneration);
+            GC.Collect();
+        }
+
+        // We don't test a tighter bound on GetGeneration as objects
+        // can actually get demoted or stay in the same generation
+        // across collections.
+    }
 }

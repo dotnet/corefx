@@ -11,10 +11,17 @@ using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace System.Net.Http.WinHttpHandlerTests
+// Can't use "WinHttpHandler.Functional.Tests" in namespace as it won't compile.
+// WinHttpHandler is a class and not a namespace and can't be part of namespace paths.
+namespace System.Net.Http.WinHttpHandlerFunctional.Tests
 {
+    // Note:  Disposing the HttpClient object automatically disposes the handler within. So, it is not necessary
+    // to separately Dispose (or have a 'using' statement) for the handler.
     public class WinHttpHandlerTest
     {
+        // TODO: This is a placeholder until GitHub Issue #2383 gets resolved.
+        private const string SlowServer = "http://httpbin.org/drip?numbytes=1&duration=1&delay=40&code=200";
+        
         readonly ITestOutputHelper _output;
 
         public WinHttpHandlerTest(ITestOutputHelper output)
@@ -26,35 +33,45 @@ namespace System.Net.Http.WinHttpHandlerTests
         public void SendAsync_SimpleGet_Success()
         {
             var handler = new WinHttpHandler();
-            var client = new HttpClient(handler);
-            
-            // TODO: This is a placeholder until GitHub Issue #2383 gets resolved.
-            var response = client.GetAsync(HttpTestServers.RemoteGetServer).Result;
-            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            var responseContent = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
-            _output.WriteLine(responseContent);
+            using (var client = new HttpClient(handler))
+            {
+                // TODO: This is a placeholder until GitHub Issue #2383 gets resolved.
+                var response = client.GetAsync(HttpTestServers.RemoteGetServer).Result;
+                Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                var responseContent = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+                _output.WriteLine(responseContent);
+            }
         }
 
         [Fact]
-        public async Task GetAsync_Cancel_CancellationTokenPropagates()
+        [OuterLoop]
+        public async Task SendAsync_SlowServerAndCancel_ThrowsTaskCanceledException()
         {
-            var cts = new CancellationTokenSource();
-            cts.Cancel();
-            try
+            var handler = new WinHttpHandler();
+            using (var client = new HttpClient(handler))
             {
-                var handler = new SendAsyncWinHttpMockHandler();
-                Task <HttpResponseMessage> task = handler.SendAsyncPublic(new HttpRequestMessage(HttpMethod.Post, HttpTestServers.RemoteGetServer), cts.Token);       
-                await task;
+                var cts = new CancellationTokenSource();
+                Task<HttpResponseMessage> t = client.GetAsync(SlowServer, cts.Token);
 
-                Assert.True(false, "Expected TaskCanceledException to be thrown.");
+                await Task.Delay(500);
+                cts.Cancel();
+                
+                AggregateException ag = Assert.Throws<AggregateException>(() => t.Wait());
+                Assert.IsType<TaskCanceledException>(ag.InnerException);
             }
-            catch (TaskCanceledException ex)
+        }        
+        
+        [Fact]
+        [OuterLoop]
+        public void SendAsync_SlowServerRespondsAfterDefaultReceiveTimeout_ThrowsHttpRequestException()
+        {
+            var handler = new WinHttpHandler();
+            using (var client = new HttpClient(handler))
             {
-                Assert.True(cts.Token.IsCancellationRequested,
-                    "Expected cancellation requested on original token.");
-
-                Assert.True(ex.CancellationToken.IsCancellationRequested,
-                    "Expected cancellation requested on token attached to exception.");
+                Task<HttpResponseMessage> t = client.GetAsync(SlowServer);
+                
+                AggregateException ag = Assert.Throws<AggregateException>(() => t.Wait());
+                Assert.IsType<HttpRequestException>(ag.InnerException);
             }
         }
     }

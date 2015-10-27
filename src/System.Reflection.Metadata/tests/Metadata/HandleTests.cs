@@ -10,6 +10,44 @@ namespace System.Reflection.Metadata.Tests
     public class HandleTests
     {
         [Fact]
+        public void HandleKindsMatchSpecAndDoNotChange()
+        {
+            // These are chosen to match their encoding in metadata tokens as specified by the CLI spec
+            Assert.Equal(0x00, (int)HandleKind.ModuleDefinition);
+            Assert.Equal(0x01, (int)HandleKind.TypeReference);
+            Assert.Equal(0x02, (int)HandleKind.TypeDefinition);
+            Assert.Equal(0x04, (int)HandleKind.FieldDefinition);
+            Assert.Equal(0x06, (int)HandleKind.MethodDefinition);
+            Assert.Equal(0x08, (int)HandleKind.Parameter);
+            Assert.Equal(0x09, (int)HandleKind.InterfaceImplementation);
+            Assert.Equal(0x0A, (int)HandleKind.MemberReference);
+            Assert.Equal(0x0B, (int)HandleKind.Constant);
+            Assert.Equal(0x0C, (int)HandleKind.CustomAttribute);
+            Assert.Equal(0x0E, (int)HandleKind.DeclarativeSecurityAttribute);
+            Assert.Equal(0x11, (int)HandleKind.StandaloneSignature);
+            Assert.Equal(0x14, (int)HandleKind.EventDefinition);
+            Assert.Equal(0x17, (int)HandleKind.PropertyDefinition);
+            Assert.Equal(0x19, (int)HandleKind.MethodImplementation);
+            Assert.Equal(0x1A, (int)HandleKind.ModuleReference);
+            Assert.Equal(0x1B, (int)HandleKind.TypeSpecification);
+            Assert.Equal(0x20, (int)HandleKind.AssemblyDefinition);
+            Assert.Equal(0x26, (int)HandleKind.AssemblyFile);
+            Assert.Equal(0x23, (int)HandleKind.AssemblyReference);
+            Assert.Equal(0x27, (int)HandleKind.ExportedType);
+            Assert.Equal(0x2A, (int)HandleKind.GenericParameter);
+            Assert.Equal(0x2B, (int)HandleKind.MethodSpecification);
+            Assert.Equal(0x2C, (int)HandleKind.GenericParameterConstraint);
+            Assert.Equal(0x28, (int)HandleKind.ManifestResource);
+            Assert.Equal(0x70, (int)HandleKind.UserString);
+
+            // These values were chosen arbitrarily, but must still never change
+            Assert.Equal(0x71, (int)HandleKind.Blob);
+            Assert.Equal(0x72, (int)HandleKind.Guid);
+            Assert.Equal(0x78, (int)HandleKind.String);
+            Assert.Equal(0x7c, (int)HandleKind.NamespaceDefinition);
+        }
+
+        [Fact]
         public void HandleConversionGivesCorrectKind()
         {
             var expectedKinds = new SortedSet<HandleKind>((HandleKind[])Enum.GetValues(typeof(HandleKind)));
@@ -56,6 +94,12 @@ namespace System.Reflection.Metadata.Tests
             assert(default(GuidHandle), HandleKind.Guid);
             assert(default(BlobHandle), HandleKind.Blob);
             assert(default(NamespaceDefinitionHandle), HandleKind.NamespaceDefinition);
+            assert(default(DocumentHandle), HandleKind.Document);
+            assert(default(MethodDebugInformationHandle), HandleKind.MethodDebugInformation);
+            assert(default(LocalScopeHandle), HandleKind.LocalScope);
+            assert(default(LocalConstantHandle), HandleKind.LocalConstant);
+            assert(default(ImportScopeHandle), HandleKind.ImportScope);
+            assert(default(CustomDebugInformationHandle), HandleKind.CustomDebugInformation);
 
             Assert.True(expectedKinds.Count == 0, "Some handles are missing from this test: " + string.Join("," + Environment.NewLine, expectedKinds));
         }
@@ -408,11 +452,13 @@ namespace System.Reflection.Metadata.Tests
             Assert.False(BlobHandle.FromOffset(1).IsNil);
             Assert.False(UserStringHandle.FromOffset(1).IsNil);
             Assert.False(GuidHandle.FromIndex(1).IsNil);
+            Assert.False(DocumentNameBlobHandle.FromOffset(1).IsNil);
 
             Assert.False(((Handle)StringHandle.FromOffset(1)).IsNil);
             Assert.False(((Handle)BlobHandle.FromOffset(1)).IsNil);
             Assert.False(((Handle)UserStringHandle.FromOffset(1)).IsNil);
             Assert.False(((Handle)GuidHandle.FromIndex(1)).IsNil);
+            Assert.False(((BlobHandle)DocumentNameBlobHandle.FromOffset(1)).IsNil);
 
             Assert.True(ModuleDefinitionHandle.FromRowId(0).IsNil);
             Assert.True(AssemblyDefinitionHandle.FromRowId(0).IsNil);
@@ -481,11 +527,13 @@ namespace System.Reflection.Metadata.Tests
             Assert.True(BlobHandle.FromOffset(0).IsNil);
             Assert.True(UserStringHandle.FromOffset(0).IsNil);
             Assert.True(GuidHandle.FromIndex(0).IsNil);
+            Assert.True(DocumentNameBlobHandle.FromOffset(0).IsNil);
 
             Assert.True(((Handle)StringHandle.FromOffset(0)).IsNil);
             Assert.True(((Handle)BlobHandle.FromOffset(0)).IsNil);
             Assert.True(((Handle)UserStringHandle.FromOffset(0)).IsNil);
             Assert.True(((Handle)GuidHandle.FromIndex(0)).IsNil);
+            Assert.True(((BlobHandle)DocumentNameBlobHandle.FromOffset(0)).IsNil);
 
             // virtual:
             Assert.False(AssemblyReferenceHandle.FromVirtualIndex(0).IsNil);
@@ -577,6 +625,18 @@ namespace System.Reflection.Metadata.Tests
                     }
                 }
             }
+        }
+
+        [Fact]
+        public void MethodDefToDebugInfo()
+        {
+            Assert.Equal(
+                MethodDefinitionHandle.FromRowId(123).ToDebugInformationHandle(), 
+                MethodDebugInformationHandle.FromRowId(123));
+
+            Assert.Equal(
+                MethodDebugInformationHandle.FromRowId(123).ToDefinitionHandle(),
+                MethodDefinitionHandle.FromRowId(123));
         }
     }
 }

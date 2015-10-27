@@ -11,7 +11,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 
-using AstUtils = System.Linq.Expressions.Interpreter.Utils;
+using AstUtils = System.Linq.Expressions.Utils;
 
 namespace System.Linq.Expressions.Interpreter
 {
@@ -1187,6 +1187,17 @@ namespace System.Linq.Expressions.Interpreter
                         Compile(node.Operand);
                         _instructions.EmitDecrement(node.Type);
                         break;
+                    case ExpressionType.UnaryPlus:
+                        Compile(node.Operand);
+                        break;
+                    case ExpressionType.IsTrue:
+                    case ExpressionType.IsFalse:
+                        EmitUnaryBoolCheck(node);
+                        break;
+                    case ExpressionType.OnesComplement:
+                        Compile(node.Operand);
+                        _instructions.EmitOnesComplement(node.Type);
+                        break;
                     default:
                         throw new PlatformNotSupportedException(SR.Format(SR.UnsupportedExpressionType, node.NodeType));
                 }
@@ -1198,31 +1209,44 @@ namespace System.Linq.Expressions.Interpreter
             Compile(node.Operand);
             if (node.IsLifted)
             {
-                LocalDefinition temp = _locals.DefineLocal(
-                    Expression.Parameter(node.Operand.Type),
-                    _instructions.Count
-                );
                 var notNull = _instructions.MakeLabel();
                 var computed = _instructions.MakeLabel();
 
-                _instructions.EmitStoreLocal(temp.Index);
-                _instructions.EmitLoadLocal(temp.Index);
-                _instructions.EmitLoad(null, typeof(object));
-                _instructions.EmitEqual(typeof(object));
-                _instructions.EmitBranchFalse(notNull);
-
-                _instructions.EmitLoad(null, typeof(object));
+                _instructions.EmitCoalescingBranch(notNull);
                 _instructions.EmitBranch(computed);
 
                 _instructions.MarkLabel(notNull);
                 _instructions.EmitCall(node.Method);
 
                 _instructions.MarkLabel(computed);
-                _locals.UndefineLocal(temp, _instructions.Count);
             }
             else
             {
                 _instructions.EmitCall(node.Method);
+            }
+        }
+
+        private void EmitUnaryBoolCheck(UnaryExpression node)
+        {
+            Compile(node.Operand);
+            if (node.IsLifted)
+            {
+                var notNull = _instructions.MakeLabel();
+                var computed = _instructions.MakeLabel();
+
+                _instructions.EmitCoalescingBranch(notNull);
+                _instructions.EmitBranch(computed);
+
+                _instructions.MarkLabel(notNull);
+                _instructions.EmitLoad(node.NodeType == ExpressionType.IsTrue);
+                _instructions.EmitEqual(typeof(bool));
+
+                _instructions.MarkLabel(computed);
+            }
+            else
+            {
+                _instructions.EmitLoad(node.NodeType == ExpressionType.IsTrue);
+                _instructions.EmitEqual(typeof(bool));
             }
         }
 
@@ -2118,13 +2142,6 @@ namespace System.Linq.Expressions.Interpreter
             }
             else
             {
-                if (!node.Method.IsStatic)
-                {
-                    // emit null check, our instructions don't always do this when they're
-                    // calling via a delegate.  
-                    _instructions.EmitNullCheck(node.Arguments.Count);
-                }
-
                 if (updaters == null)
                 {
                     _instructions.EmitCall(node.Method, parameters);
@@ -2229,17 +2246,19 @@ namespace System.Linq.Expressions.Interpreter
                         _instructions.EmitStoreLocal(memberTemp.Value.Index);
                     }
 
-                    if (member.Member is FieldInfo)
+                    FieldInfo field = member.Member as FieldInfo;
+                    if (field != null)
                     {
-                        _instructions.EmitLoadField((FieldInfo)member.Member);
-                        return new FieldByRefUpdater(memberTemp, (FieldInfo)member.Member, index);
+                        _instructions.EmitLoadField(field);
+                        return new FieldByRefUpdater(memberTemp, field, index);
                     }
-                    else if (member.Member is PropertyInfo)
+                    PropertyInfo property = member.Member as PropertyInfo;
+                    if (property != null)
                     {
-                        _instructions.EmitCall(((PropertyInfo)member.Member).GetGetMethod(true));
-                        if (((PropertyInfo)member.Member).CanWrite)
+                        _instructions.EmitCall(property.GetGetMethod(true));
+                        if (property.CanWrite)
                         {
-                            return new PropertyByRefUpdater(memberTemp, (PropertyInfo)member.Member, index);
+                            return new PropertyByRefUpdater(memberTemp, property, index);
                         }
                         return null;
                     }
@@ -2379,7 +2398,6 @@ namespace System.Linq.Expressions.Interpreter
                     }
                     _instructions.EmitLoadField(fi);
                 }
-                return;
             }
             else
             {
@@ -2394,7 +2412,7 @@ namespace System.Linq.Expressions.Interpreter
                     }
 
                     if (!method.IsStatic &&
-                        from.Type.IsNullableType())
+                        (from != null && from.Type.IsNullableType()))
                     {
                         // reflection doesn't let us call methods on Nullable<T> when the value
                         // is null...  so we get to special case those methods!
@@ -2404,8 +2422,6 @@ namespace System.Linq.Expressions.Interpreter
                     {
                         _instructions.EmitCall(method);
                     }
-
-                    return;
                 }
             }
         }
@@ -2752,8 +2768,13 @@ namespace System.Linq.Expressions.Interpreter
         private void CompileUnboxUnaryExpression(Expression expr)
         {
             var node = (UnaryExpression)expr;
-            // unboxing is a nop:
+            
             Compile(node.Operand);
+
+            if (expr.Type.GetTypeInfo().IsValueType && !TypeUtils.IsNullableType(expr.Type))
+            {
+                _instructions.Emit(NullCheckInstruction.Instance);
+            }
         }
 
         private void CompileTypeEqualExpression(Expression expr)

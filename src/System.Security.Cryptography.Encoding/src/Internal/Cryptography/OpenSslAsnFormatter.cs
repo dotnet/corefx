@@ -22,39 +22,44 @@ namespace Internal.Cryptography
             // or to return null and let rawData get hex-encoded.  CryptographicException should not
             // be raised.
 
-            using (SafeAsn1ObjectHandle asnOid = Interop.libcrypto.OBJ_txt2obj(oid.Value, true))
-            using (SafeAsn1OctetStringHandle octetString = Interop.libcrypto.ASN1_OCTET_STRING_new())
+            using (SafeAsn1ObjectHandle asnOid = Interop.Crypto.ObjTxt2Obj(oid.Value))
+            using (SafeAsn1OctetStringHandle octetString = Interop.Crypto.Asn1OctetStringNew())
             {
                 if (asnOid.IsInvalid || octetString.IsInvalid)
                 {
                     return null;
                 }
 
-                if (!Interop.libcrypto.ASN1_OCTET_STRING_set(octetString, rawData, rawData.Length))
+                if (!Interop.Crypto.Asn1OctetStringSet(octetString, rawData, rawData.Length))
                 {
                     return null;
                 }
 
-                using (SafeBioHandle bio = Interop.libcrypto.BIO_new(Interop.libcrypto.BIO_s_mem()))
-                using (SafeX509ExtensionHandle x509Ext = Interop.libcrypto.X509_EXTENSION_create_by_OBJ(IntPtr.Zero, asnOid, false, octetString))
+                using (SafeBioHandle bio = Interop.Crypto.CreateMemoryBio())
+                using (SafeX509ExtensionHandle x509Ext = Interop.Crypto.X509ExtensionCreateByObj(asnOid, false, octetString))
                 {
                     if (bio.IsInvalid || x509Ext.IsInvalid)
                     {
                         return null;
                     }
 
-                    if (!Interop.libcrypto.X509V3_EXT_print(bio, x509Ext, Interop.libcrypto.X509V3ExtPrintFlags.None, 0))
+                    if (!Interop.Crypto.X509V3ExtPrint(bio, x509Ext))
                     {
                         return null;
                     }
 
-                    int printLen = Interop.libcrypto.GetMemoryBioSize(bio);
+                    int printLen = Interop.Crypto.GetMemoryBioSize(bio);
 
                     // Account for the null terminator that it'll want to write.
-                    StringBuilder builder = new StringBuilder(printLen + 1);
-                    Interop.libcrypto.BIO_gets(bio, builder, builder.Capacity);
+                    var buf = new byte[printLen + 1];
+                    int read = Interop.Crypto.BioGets(bio, buf, buf.Length);
 
-                    return builder.ToString();
+                    if (read < 0)
+                    {
+                        throw Interop.Crypto.CreateOpenSslCryptographicException();
+                    }
+
+                    return Encoding.UTF8.GetString(buf, 0, read);
                 }
             }
         }

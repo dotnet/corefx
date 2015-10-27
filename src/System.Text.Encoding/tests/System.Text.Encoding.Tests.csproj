@@ -9,7 +9,7 @@
     <AssemblyName>System.Text.Encoding.Tests</AssemblyName>
     <RootNamespace>System.Text.Encoding.Tests</RootNamespace>
   </PropertyGroup>
-   <!-- Default configurations to help VS understand the configurations -->
+  <!-- Default configurations to help VS understand the configurations -->
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
@@ -116,6 +116,13 @@
     <Compile Include="UTF8Encoding\UTF8EncodingGetPreamble.cs" />
     <Compile Include="UTF8Encoding\UTF8EncodingGetString.cs" />
     <Compile Include="$(CommonTestPath)\System\RandomDataGenerator.cs" />
+  </ItemGroup>
+  <!-- Performance Tests -->
+  <ItemGroup Condition="'$(RunPerfTestsForProject)' == 'true'">
+    <Compile Include="Performance\Perf.Encoding.cs" />
+    <Compile Include="$(CommonTestPath)\System\PerfUtils.cs">
+      <Link>Common\System\PerfUtils.cs</Link>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <None Include="project.json" />

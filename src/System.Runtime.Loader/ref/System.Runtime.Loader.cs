@@ -5,6 +5,14 @@
 // ------------------------------------------------------------------------------
 
 
+namespace System.Reflection.Metadata
+{
+    public static partial class AssemblyExtensions
+    {
+        [CLSCompliant(false)] // out byte* blob
+        public unsafe static bool TryGetRawMetadata(this System.Reflection.Assembly assembly, out byte* blob, out int length) { blob = default(byte*); length = default(int); return default(bool); }
+    }
+}
 namespace System.Runtime.Loader
 {
     public abstract partial class AssemblyLoadContext
@@ -20,6 +28,7 @@ namespace System.Runtime.Loader
         protected System.Reflection.Assembly LoadFromNativeImagePath(string nativeImagePath, string assemblyPath) { return default(System.Reflection.Assembly); }
         protected System.Reflection.Assembly LoadFromStream(System.IO.Stream assembly) { return default(System.Reflection.Assembly); }
         protected System.Reflection.Assembly LoadFromStream(System.IO.Stream assembly, System.IO.Stream assemblySymbols) { return default(System.Reflection.Assembly); }
+        protected System.IntPtr LoadUnmanagedDllFromPath(string unmanagedDllPath) { return default(System.IntPtr); }
         protected virtual System.IntPtr LoadUnmanagedDll(string unmanagedDllName) { return default(System.IntPtr); }
         public void SetProfileOptimizationRoot(string directoryPath) { }
         public void StartProfileOptimization(string profile) { }

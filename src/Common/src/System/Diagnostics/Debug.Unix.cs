@@ -41,7 +41,7 @@ namespace System.Diagnostics
                 string assertMessage = FormatAssert(stackTrace, message, detailMessage) + Environment.NewLine;
                 if (!s_shouldWriteToStdErr)
                 {
-                    WriteToFile(Interop.Devices.stderr, assertMessage);
+                    WriteToStderr(assertMessage);
                 }
             }
 
@@ -53,16 +53,16 @@ namespace System.Diagnostics
 
                 if (s_shouldWriteToStdErr)
                 {
-                    WriteToFile(Interop.Devices.stderr, message);
+                    WriteToStderr(message);
                 }
             }
 
             private static void WriteToSyslog(string message)
             {
-                Interop.libc.syslog(Interop.libc.LOG_USER | Interop.libc.LOG_DEBUG, "%s", message);
+                Interop.Sys.SysLog(Interop.Sys.SysLogPriority.LOG_USER | Interop.Sys.SysLogPriority.LOG_DEBUG, "%s", message);
             }
 
-            private static void WriteToFile(string filePath, string message)
+            private static void WriteToStderr(string message)
             {
                 // We don't want to write UTF-16 to a file like standard error.  Ideally we would transcode this
                 // to UTF8, but the downside of that is it pulls in a bunch of stuff into what is ideally
@@ -77,7 +77,7 @@ namespace System.Diagnostics
                     int bufCount;
                     int i = 0;
 
-                    using (SafeFileHandle fileHandle = SafeFileHandle.Open(filePath, Interop.libc.OpenFlags.O_WRONLY, 0))
+                    using (SafeFileHandle fileHandle = SafeFileHandle.Open(() => Interop.Sys.Dup(Interop.Sys.FileDescriptors.STDERR_FILENO)))
                     {
                         while (i < message.Length)
                         {
@@ -94,7 +94,7 @@ namespace System.Diagnostics
                             while (bufCount > 0)
                             {
                                 int bytesWritten;
-                                while (Interop.CheckIo(bytesWritten = (int)Interop.libc.write((int)fileHandle.DangerousGetHandle(), buf + totalBytesWritten, new IntPtr(bufCount)))) ;
+                                while (Interop.CheckIo(bytesWritten = Interop.Sys.Write((int)fileHandle.DangerousGetHandle(), buf + totalBytesWritten, bufCount))) ;
                                 bufCount -= bytesWritten;
                                 totalBytesWritten += bytesWritten;
                             }

@@ -894,35 +894,6 @@ namespace System.Diagnostics
 
         /// <devdoc>
         ///    <para>
-        ///       Creates an array of <see cref='System.Diagnostics.Process'/> components that are associated with process resources on a
-        ///       remote computer. These process resources share the specified process name.
-        ///    </para>
-        /// </devdoc>
-        public static Process[] GetProcessesByName(string processName, string machineName)
-        {
-            if (processName == null) processName = String.Empty;
-            Process[] procs = GetProcesses(machineName);
-            List<Process> list = new List<Process>();
-
-            for (int i = 0; i < procs.Length; i++)
-            {
-                if (String.Equals(processName, procs[i].ProcessName, StringComparison.OrdinalIgnoreCase))
-                {
-                    list.Add(procs[i]);
-                }
-                else
-                {
-                    procs[i].Dispose();
-                }
-            }
-
-            Process[] temp = new Process[list.Count];
-            list.CopyTo(temp, 0);
-            return temp;
-        }
-
-        /// <devdoc>
-        ///    <para>
         ///       Creates a new <see cref='System.Diagnostics.Process'/>
         ///       component for each process resource on the local computer.
         ///    </para>
@@ -1112,24 +1083,6 @@ namespace System.Diagnostics
         private static Encoding GetEncoding(int codePage)
         {
             return EncodingHelper.GetSupportedConsoleEncoding(codePage);
-        }
-
-        public static Process Start(string fileName, string userName, SecureString password, string domain)
-        {
-            ProcessStartInfo startInfo = new ProcessStartInfo(fileName);
-            startInfo.UserName = userName;
-            startInfo.Password = password;
-            startInfo.Domain = domain;
-            return Start(startInfo);
-        }
-
-        public static Process Start(string fileName, string arguments, string userName, SecureString password, string domain)
-        {
-            ProcessStartInfo startInfo = new ProcessStartInfo(fileName, arguments);
-            startInfo.UserName = userName;
-            startInfo.Password = password;
-            startInfo.Domain = domain;
-            return Start(startInfo);
         }
 
         /// <devdoc>

@@ -127,7 +127,8 @@ namespace System.Net.Http
             // 'Transfer-Encoding: chunked'. The handler will never automatically buffer in the request content.
             get { return 0; }
             
-            // TODO: Add message/link to exception explaining the deprecation.
+            // TODO: Add message/link to exception explaining the deprecation. 
+            // Update corresponding exception in HttpClientHandler.Unix.cs if/when this is updated.
             set { throw new PlatformNotSupportedException(); }
         }
 
@@ -150,6 +151,13 @@ namespace System.Net.Http
             // WPAD protocol and PAC file. So, for app-compat, we will do the same for the default proxy setting.
             _winHttpHandler.WindowsProxyUsePolicy = WindowsProxyUsePolicy.UseWinInetProxy;
             _winHttpHandler.Proxy = null;
+            
+            // Since the granular WinHttpHandler timeout properties are not exposed via the HttpClientHandler API,
+            // we need to set them to infinite and allow the HttpClient.Timeout property to have precedence.
+            _winHttpHandler.ConnectTimeout = Timeout.InfiniteTimeSpan;
+            _winHttpHandler.ReceiveHeadersTimeout = Timeout.InfiniteTimeSpan;
+            _winHttpHandler.ReceiveDataTimeout = Timeout.InfiniteTimeSpan;
+            _winHttpHandler.SendTimeout = Timeout.InfiniteTimeSpan;
         }
 
         protected override void Dispose(bool disposing)

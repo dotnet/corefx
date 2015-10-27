@@ -108,34 +108,12 @@ namespace Tests.ExpressionCompiler.Unary
 
         private static void VerifyArithmeticNegateByte(byte value)
         {
-            try
-            {
-                Expression<Func<byte>> e =
-                   Expression.Lambda<Func<byte>>(
-                       Expression.Negate(Expression.Constant(value, typeof(byte))),
-                       Enumerable.Empty<ParameterExpression>());
-                Assert.False(true); // shouldn't get here
-            }
-            catch (InvalidOperationException)
-            {
-                // success
-            }
+            Assert.Throws<InvalidOperationException>(() => Expression.Negate(Expression.Constant(value, typeof(byte))));
         }
 
         private static void VerifyArithmeticNegateChar(char value)
         {
-            try
-            {
-                Expression<Func<char>> e =
-                   Expression.Lambda<Func<char>>(
-                       Expression.Negate(Expression.Constant(value, typeof(char))),
-                       Enumerable.Empty<ParameterExpression>());
-                Assert.False(true); // shouldn't get here
-            }
-            catch (InvalidOperationException)
-            {
-                // success
-            }
+            Assert.Throws<InvalidOperationException>(() => Expression.Negate(Expression.Constant(value, typeof(char))));
         }
 
         private static void VerifyArithmeticNegateDecimal(decimal value)
@@ -145,7 +123,7 @@ namespace Tests.ExpressionCompiler.Unary
                     Expression.Negate(Expression.Constant(value, typeof(decimal))),
                     Enumerable.Empty<ParameterExpression>());
             Func<decimal> f = e.Compile();
-            Assert.Equal((decimal)(0 - value), f());
+            Assert.Equal((decimal)(-value), f());
         }
 
         private static void VerifyArithmeticNegateDouble(double value)
@@ -155,7 +133,7 @@ namespace Tests.ExpressionCompiler.Unary
                     Expression.Negate(Expression.Constant(value, typeof(double))),
                     Enumerable.Empty<ParameterExpression>());
             Func<double> f = e.Compile();
-            Assert.Equal((double)(0 - value), f());
+            Assert.Equal((double)(-value), f());
         }
 
         private static void VerifyArithmeticNegateFloat(float value)
@@ -165,7 +143,7 @@ namespace Tests.ExpressionCompiler.Unary
                     Expression.Negate(Expression.Constant(value, typeof(float))),
                     Enumerable.Empty<ParameterExpression>());
             Func<float> f = e.Compile();
-            Assert.Equal((float)(0 - value), f());
+            Assert.Equal((float)(-value), f());
         }
 
         private static void VerifyArithmeticNegateInt(int value)
@@ -175,7 +153,7 @@ namespace Tests.ExpressionCompiler.Unary
                     Expression.Negate(Expression.Constant(value, typeof(int))),
                     Enumerable.Empty<ParameterExpression>());
             Func<int> f = e.Compile();
-            Assert.Equal((int)(0 - value), f());
+            Assert.Equal((int)(-value), f());
         }
 
         private static void VerifyArithmeticNegateLong(long value)
@@ -185,23 +163,12 @@ namespace Tests.ExpressionCompiler.Unary
                     Expression.Negate(Expression.Constant(value, typeof(long))),
                     Enumerable.Empty<ParameterExpression>());
             Func<long> f = e.Compile();
-            Assert.Equal((long)(0 - value), f());
+            Assert.Equal((long)(-value), f());
         }
 
         private static void VerifyArithmeticNegateSByte(sbyte value)
         {
-            try
-            {
-                Expression<Func<sbyte>> e =
-                   Expression.Lambda<Func<sbyte>>(
-                       Expression.Negate(Expression.Constant(value, typeof(sbyte))),
-                       Enumerable.Empty<ParameterExpression>());
-                Assert.False(true); // shouldn't get here
-            }
-            catch (InvalidOperationException)
-            {
-                // success
-            }
+            Assert.Throws<InvalidOperationException>(() => Expression.Negate(Expression.Constant(value, typeof(sbyte))));
         }
 
         private static void VerifyArithmeticNegateShort(short value)
@@ -211,7 +178,7 @@ namespace Tests.ExpressionCompiler.Unary
                     Expression.Negate(Expression.Constant(value, typeof(short))),
                     Enumerable.Empty<ParameterExpression>());
             Func<short> f = e.Compile();
-            Assert.Equal((short)(0 - value), f());
+            Assert.Equal((short)(-value), f());
         }
 
         #endregion

@@ -32,7 +32,7 @@ namespace Internal.Cryptography.Pal.Native
             // Copy the oid strings to a local list to prevent a security race condition where
             // the OidCollection or individual oids can be modified by another thread and
             // potentially cause a buffer overflow
-            LowLevelListWithIList<byte[]> oidStrings = new LowLevelListWithIList<byte[]>();
+            List<byte[]> oidStrings = new List<byte[]>();
             foreach (Oid oid in oids)
             {
                 byte[] oidString = oid.ValueAsAscii();
@@ -82,11 +82,11 @@ namespace Internal.Cryptography.Pal.Native
                 int cb = 0;
 
                 if (!Interop.crypt32.CryptDecodeObjectPointer(CertEncodingType.All, lpszStructType, encoded, encoded.Length, CryptDecodeObjectFlags.None, null, ref cb))
-                    throw new CryptographicException(Marshal.GetLastWin32Error());
+                    throw Marshal.GetLastWin32Error().ToCryptographicException();
 
                 byte* decoded = stackalloc byte[cb];
                 if (!Interop.crypt32.CryptDecodeObjectPointer(CertEncodingType.All, lpszStructType, encoded, encoded.Length, CryptDecodeObjectFlags.None, (byte*)decoded, ref cb))
-                    throw new CryptographicException(Marshal.GetLastWin32Error());
+                    throw Marshal.GetLastWin32Error().ToCryptographicException();
 
                 receiver(decoded);
             }
@@ -100,11 +100,11 @@ namespace Internal.Cryptography.Pal.Native
                 int cb = 0;
 
                 if (!Interop.crypt32.CryptDecodeObjectPointer(CertEncodingType.All, lpszStructType, encoded, encoded.Length, CryptDecodeObjectFlags.None, null, ref cb))
-                    throw new CryptographicException(Marshal.GetLastWin32Error());
+                    throw Marshal.GetLastWin32Error().ToCryptographicException();
 
                 byte* decoded = stackalloc byte[cb];
                 if (!Interop.crypt32.CryptDecodeObjectPointer(CertEncodingType.All, lpszStructType, encoded, encoded.Length, CryptDecodeObjectFlags.None, (byte*)decoded, ref cb))
-                    throw new CryptographicException(Marshal.GetLastWin32Error());
+                    throw Marshal.GetLastWin32Error().ToCryptographicException();
 
                 receiver(decoded);
             }

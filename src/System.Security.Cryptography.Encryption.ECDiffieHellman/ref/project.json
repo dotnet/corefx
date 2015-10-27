@@ -4,10 +4,9 @@
     "System.Security.Cryptography.Encryption": "4.0.0-beta-*",
     "System.Security.Cryptography.Primitives": "4.0.0-beta-*",
     "System.Runtime.Handles": "4.0.0",
-    "System.Security.SecureString": "4.0.0-beta-*",
     "System.IO": "4.0.0"
   },
   "frameworks": {
-    "dotnet": {}
+    "dotnet5.4": {}
   }
 }

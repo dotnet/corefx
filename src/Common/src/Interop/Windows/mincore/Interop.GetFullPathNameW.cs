@@ -5,14 +5,14 @@ using System;
 using System.Runtime.InteropServices;
 using System.Text;
 
-partial class Interop
+internal partial class Interop
 {
-    partial class mincore
+    internal partial class mincore
     {
-        [DllImport(Libraries.CoreFile_L1, SetLastError = true, CharSet = CharSet.Unicode, BestFitMapping = false)]
-        internal unsafe static extern int GetFullPathNameW(char* path, int numBufferChars, char* buffer, IntPtr mustBeZero);
-
-        [DllImport(Libraries.CoreFile_L1, SetLastError = true, CharSet = CharSet.Unicode, BestFitMapping = false)]
-        internal static extern int GetFullPathNameW(string path, int numBufferChars, [Out]StringBuilder buffer, IntPtr mustBeZero);
+        /// <summary>
+        /// WARNING: This method does not implicitly handle long paths. Use GetFullPathName or PathHelper.
+        /// </summary>
+        [DllImport(Libraries.CoreFile_L1, SetLastError = true, CharSet = CharSet.Unicode, BestFitMapping = false, ExactSpelling = true)]
+        unsafe internal static extern int GetFullPathNameW(char* path, int numBufferChars, [Out]StringBuilder buffer, IntPtr mustBeZero);
     }
 }

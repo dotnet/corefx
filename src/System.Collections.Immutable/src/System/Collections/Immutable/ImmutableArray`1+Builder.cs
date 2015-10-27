@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
-using Validation;
 
 namespace System.Collections.Immutable
 {
@@ -269,11 +268,7 @@ namespace System.Collections.Immutable
                 var offset = this.Count;
                 this.Count += items.Length;
 
-                var nodes = _elements;
-                for (int i = 0; i < items.Length; i++)
-                {
-                    nodes[offset + i] = items[i];
-                }
+                Array.Copy(items, 0, _elements, offset, items.Length);
             }
 
             /// <summary>
@@ -287,11 +282,7 @@ namespace System.Collections.Immutable
                 var offset = this.Count;
                 this.Count += items.Length;
 
-                var nodes = _elements;
-                for (int i = 0; i < items.Length; i++)
-                {
-                    nodes[offset + i] = items[i];
-                }
+                Array.Copy(items, 0, _elements, offset, items.Length);
             }
 
             /// <summary>
@@ -302,16 +293,12 @@ namespace System.Collections.Immutable
             public void AddRange(T[] items, int length)
             {
                 Requires.NotNull(items, "items");
-                Requires.Range(length >= 0, "length");
+                Requires.Range(length >= 0 && length <= items.Length, "length");
 
                 var offset = this.Count;
                 this.Count += length;
 
-                var nodes = _elements;
-                for (int i = 0; i < length; i++)
-                {
-                    nodes[offset + i] = items[i];
-                }
+                Array.Copy(items, 0, _elements, offset, length);
             }
 
             /// <summary>
@@ -420,14 +407,9 @@ namespace System.Collections.Immutable
             /// </summary>
             public T[] ToArray()
             {
-                var tmp = new T[this.Count];
-                var elements = _elements;
-                for (int i = 0; i < tmp.Length; i++)
-                {
-                    tmp[i] = elements[i];
-                }
-
-                return tmp;
+                T[] result = new T[this.Count];
+                Array.Copy(_elements, 0, result, 0, this.Count);
+                return result;
             }
 
             /// <summary>
@@ -499,13 +481,14 @@ namespace System.Collections.Immutable
             /// <param name="item">The item to search for.</param>
             /// <param name="startIndex">The index at which to begin the search.</param>
             /// <param name="count">The number of elements to search.</param>
-            /// <param name="equalityComparer">The equality comparer to use in the search.</param>
+            /// <param name="equalityComparer">
+            /// The equality comparer to use in the search.
+            /// If <c>null</c>, <see cref="EqualityComparer{T}.Default"/> is used.
+            /// </param>
             /// <returns>The 0-based index into the array where the item was found; or -1 if it could not be found.</returns>
             [Pure]
             public int IndexOf(T item, int startIndex, int count, IEqualityComparer<T> equalityComparer)
             {
-                Requires.NotNull(equalityComparer, "equalityComparer");
-
                 if (count == 0 && startIndex == 0)
                 {
                     return -1;
@@ -514,6 +497,7 @@ namespace System.Collections.Immutable
                 Requires.Range(startIndex >= 0 && startIndex < this.Count, "startIndex");
                 Requires.Range(count >= 0 && startIndex + count <= this.Count, "count");
 
+                equalityComparer = equalityComparer ?? EqualityComparer<T>.Default;
                 if (equalityComparer == EqualityComparer<T>.Default)
                 {
                     return Array.IndexOf(_elements, item, startIndex, count);
@@ -591,8 +575,6 @@ namespace System.Collections.Immutable
             [Pure]
             public int LastIndexOf(T item, int startIndex, int count, IEqualityComparer<T> equalityComparer)
             {
-                Requires.NotNull(equalityComparer, "equalityComparer");
-
                 if (count == 0 && startIndex == 0)
                 {
                     return -1;
@@ -601,6 +583,7 @@ namespace System.Collections.Immutable
                 Requires.Range(startIndex >= 0 && startIndex < this.Count, "startIndex");
                 Requires.Range(count >= 0 && startIndex - count + 1 >= 0, "count");
 
+                equalityComparer = equalityComparer ?? EqualityComparer<T>.Default;
                 if (equalityComparer == EqualityComparer<T>.Default)
                 {
                     return Array.LastIndexOf(_elements, item, startIndex, count);

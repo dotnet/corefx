@@ -5,16 +5,16 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Xunit;
 
-namespace System.IO.FileSystem.Tests
+namespace System.IO.Tests
 {
     public class FileInfo_GetSetTimes : FileSystemTest
     {
         public delegate void SetTime(FileInfo testFile, DateTime time);
         public delegate DateTime GetTime(FileInfo testFile);
 
-        public IEnumerable<Tuple<SetTime, GetTime, DateTimeKind>> TimeFunctions()
+        public IEnumerable<Tuple<SetTime, GetTime, DateTimeKind>> TimeFunctions(bool requiresRoundtripping = false)
         {
-            if (IOInputs.SupportsCreationTime)
+            if (IOInputs.SupportsGettingCreationTime && (!requiresRoundtripping || IOInputs.SupportsSettingCreationTime))
             {
                 yield return Tuple.Create<SetTime, GetTime, DateTimeKind>(
                     ((testFile, time) => { testFile.CreationTime = time; }),
@@ -49,7 +49,7 @@ namespace System.IO.FileSystem.Tests
             FileInfo testFile = new FileInfo(GetTestFilePath());
             testFile.Create().Dispose();
 
-            Assert.All(TimeFunctions(), (tuple) =>
+            Assert.All(TimeFunctions(requiresRoundtripping: true), (tuple) =>
             {
                 DateTime dt = new DateTime(2014, 12, 1, 12, 0, 0, tuple.Item3);
                 tuple.Item1(testFile, dt);
@@ -64,16 +64,22 @@ namespace System.IO.FileSystem.Tests
         public void CreationSetsAllTimes()
         {
             string path = GetTestFilePath();
-            long beforeTime = DateTime.UtcNow.AddSeconds(-3).Ticks;
+            DateTime beforeTime = DateTime.UtcNow.AddSeconds(-3);
 
             FileInfo testFile = new FileInfo(GetTestFilePath());
             testFile.Create().Dispose();
 
-            long afterTime = DateTime.UtcNow.AddSeconds(3).Ticks;
+            DateTime afterTime = DateTime.UtcNow.AddSeconds(3);
 
             Assert.All(TimeFunctions(), (tuple) =>
             {
-                Assert.InRange(tuple.Item2(testFile).ToUniversalTime().Ticks, beforeTime, afterTime);
+                // We want to test all possible DateTimeKind conversions to ensure they function as expected
+                if (tuple.Item3 == DateTimeKind.Utc)
+                    Assert.InRange(tuple.Item2(testFile).Ticks, beforeTime.Ticks, afterTime.Ticks);
+                else
+                    Assert.InRange(tuple.Item2(testFile).Ticks, beforeTime.ToLocalTime().Ticks, afterTime.ToLocalTime().Ticks);
+                Assert.InRange(tuple.Item2(testFile).ToLocalTime().Ticks, beforeTime.ToLocalTime().Ticks, afterTime.ToLocalTime().Ticks);
+                Assert.InRange(tuple.Item2(testFile).ToUniversalTime().Ticks, beforeTime.Ticks, afterTime.Ticks);
             });
         }
     }
