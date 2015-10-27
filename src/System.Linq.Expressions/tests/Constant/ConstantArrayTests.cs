@@ -419,7 +419,7 @@ namespace Tests.ExpressionCompiler.Constant
                 Expression.Lambda<Func<bool[]>>(
                     Expression.Constant(value, typeof(bool[])),
                     Enumerable.Empty<ParameterExpression>());
-            Func<bool[]> f = e.Compile();
+            Func<bool[]> f = e.CompileForTest();
             Assert.Equal(value, f());
         }
 
@@ -429,7 +429,7 @@ namespace Tests.ExpressionCompiler.Constant
                 Expression.Lambda<Func<byte[]>>(
                     Expression.Constant(value, typeof(byte[])),
                     Enumerable.Empty<ParameterExpression>());
-            Func<byte[]> f = e.Compile();
+            Func<byte[]> f = e.CompileForTest();
             Assert.Equal(value, f());
         }
 
@@ -439,7 +439,7 @@ namespace Tests.ExpressionCompiler.Constant
                 Expression.Lambda<Func<C[]>>(
                     Expression.Constant(value, typeof(C[])),
                     Enumerable.Empty<ParameterExpression>());
-            Func<C[]> f = e.Compile();
+            Func<C[]> f = e.CompileForTest();
             Assert.Equal(value, f());
         }
 
@@ -449,7 +449,7 @@ namespace Tests.ExpressionCompiler.Constant
                 Expression.Lambda<Func<char[]>>(
                     Expression.Constant(value, typeof(char[])),
                     Enumerable.Empty<ParameterExpression>());
-            Func<char[]> f = e.Compile();
+            Func<char[]> f = e.CompileForTest();
             Assert.Equal(value, f());
         }
 
@@ -459,7 +459,7 @@ namespace Tests.ExpressionCompiler.Constant
                 Expression.Lambda<Func<D[]>>(
                     Expression.Constant(value, typeof(D[])),
                     Enumerable.Empty<ParameterExpression>());
-            Func<D[]> f = e.Compile();
+            Func<D[]> f = e.CompileForTest();
             Assert.Equal(value, f());
         }
 
@@ -469,7 +469,7 @@ namespace Tests.ExpressionCompiler.Constant
                 Expression.Lambda<Func<decimal[]>>(
                     Expression.Constant(value, typeof(decimal[])),
                     Enumerable.Empty<ParameterExpression>());
-            Func<decimal[]> f = e.Compile();
+            Func<decimal[]> f = e.CompileForTest();
             Assert.Equal(value, f());
         }
 
@@ -479,7 +479,7 @@ namespace Tests.ExpressionCompiler.Constant
                 Expression.Lambda<Func<Delegate[]>>(
                     Expression.Constant(value, typeof(Delegate[])),
                     Enumerable.Empty<ParameterExpression>());
-            Func<Delegate[]> f = e.Compile();
+            Func<Delegate[]> f = e.CompileForTest();
             Assert.Equal(value, f());
         }
 
@@ -489,7 +489,7 @@ namespace Tests.ExpressionCompiler.Constant
                 Expression.Lambda<Func<double[]>>(
                     Expression.Constant(value, typeof(double[])),
                     Enumerable.Empty<ParameterExpression>());
-            Func<double[]> f = e.Compile();
+            Func<double[]> f = e.CompileForTest();
             Assert.Equal(value, f());
         }
 
@@ -499,7 +499,7 @@ namespace Tests.ExpressionCompiler.Constant
                 Expression.Lambda<Func<E[]>>(
                     Expression.Constant(value, typeof(E[])),
                     Enumerable.Empty<ParameterExpression>());
-            Func<E[]> f = e.Compile();
+            Func<E[]> f = e.CompileForTest();
             Assert.Equal(value, f());
         }
 
@@ -509,7 +509,7 @@ namespace Tests.ExpressionCompiler.Constant
                 Expression.Lambda<Func<El[]>>(
                     Expression.Constant(value, typeof(El[])),
                     Enumerable.Empty<ParameterExpression>());
-            Func<El[]> f = e.Compile();
+            Func<El[]> f = e.CompileForTest();
             Assert.Equal(value, f());
         }
 
@@ -519,7 +519,7 @@ namespace Tests.ExpressionCompiler.Constant
                 Expression.Lambda<Func<float[]>>(
                     Expression.Constant(value, typeof(float[])),
                     Enumerable.Empty<ParameterExpression>());
-            Func<float[]> f = e.Compile();
+            Func<float[]> f = e.CompileForTest();
             Assert.Equal(value, f());
         }
 
@@ -529,7 +529,7 @@ namespace Tests.ExpressionCompiler.Constant
                 Expression.Lambda<Func<Func<object>[]>>(
                     Expression.Constant(value, typeof(Func<object>[])),
                     Enumerable.Empty<ParameterExpression>());
-            Func<Func<object>[]> f = e.Compile();
+            Func<Func<object>[]> f = e.CompileForTest();
             Assert.Equal(value, f());
         }
 
@@ -539,7 +539,7 @@ namespace Tests.ExpressionCompiler.Constant
                 Expression.Lambda<Func<I[]>>(
                     Expression.Constant(value, typeof(I[])),
                     Enumerable.Empty<ParameterExpression>());
-            Func<I[]> f = e.Compile();
+            Func<I[]> f = e.CompileForTest();
             Assert.Equal(value, f());
         }
 
@@ -549,7 +549,7 @@ namespace Tests.ExpressionCompiler.Constant
                 Expression.Lambda<Func<IEquatable<C>[]>>(
                     Expression.Constant(value, typeof(IEquatable<C>[])),
                     Enumerable.Empty<ParameterExpression>());
-            Func<IEquatable<C>[]> f = e.Compile();
+            Func<IEquatable<C>[]> f = e.CompileForTest();
             Assert.Equal(value, f());
         }
 
@@ -559,7 +559,7 @@ namespace Tests.ExpressionCompiler.Constant
                 Expression.Lambda<Func<IEquatable<D>[]>>(
                     Expression.Constant(value, typeof(IEquatable<D>[])),
                     Enumerable.Empty<ParameterExpression>());
-            Func<IEquatable<D>[]> f = e.Compile();
+            Func<IEquatable<D>[]> f = e.CompileForTest();
             Assert.Equal(value, f());
         }
 
@@ -569,7 +569,7 @@ namespace Tests.ExpressionCompiler.Constant
                 Expression.Lambda<Func<int[]>>(
                     Expression.Constant(value, typeof(int[])),
                     Enumerable.Empty<ParameterExpression>());
-            Func<int[]> f = e.Compile();
+            Func<int[]> f = e.CompileForTest();
             Assert.Equal(value, f());
         }
 
@@ -579,7 +579,7 @@ namespace Tests.ExpressionCompiler.Constant
                 Expression.Lambda<Func<long[]>>(
                     Expression.Constant(value, typeof(long[])),
                     Enumerable.Empty<ParameterExpression>());
-            Func<long[]> f = e.Compile();
+            Func<long[]> f = e.CompileForTest();
             Assert.Equal(value, f());
         }
 
@@ -589,7 +589,7 @@ namespace Tests.ExpressionCompiler.Constant
                 Expression.Lambda<Func<object[]>>(
                     Expression.Constant(value, typeof(object[])),
                     Enumerable.Empty<ParameterExpression>());
-            Func<object[]> f = e.Compile();
+            Func<object[]> f = e.CompileForTest();
             Assert.Equal(value, f());
         }
 
@@ -599,7 +599,7 @@ namespace Tests.ExpressionCompiler.Constant
                 Expression.Lambda<Func<S[]>>(
                     Expression.Constant(value, typeof(S[])),
                     Enumerable.Empty<ParameterExpression>());
-            Func<S[]> f = e.Compile();
+            Func<S[]> f = e.CompileForTest();
             Assert.Equal(value, f());
         }
 
@@ -609,7 +609,7 @@ namespace Tests.ExpressionCompiler.Constant
                 Expression.Lambda<Func<sbyte[]>>(
                     Expression.Constant(value, typeof(sbyte[])),
                     Enumerable.Empty<ParameterExpression>());
-            Func<sbyte[]> f = e.Compile();
+            Func<sbyte[]> f = e.CompileForTest();
             Assert.Equal(value, f());
         }
 
@@ -619,7 +619,7 @@ namespace Tests.ExpressionCompiler.Constant
                 Expression.Lambda<Func<Sc[]>>(
                     Expression.Constant(value, typeof(Sc[])),
                     Enumerable.Empty<ParameterExpression>());
-            Func<Sc[]> f = e.Compile();
+            Func<Sc[]> f = e.CompileForTest();
             Assert.Equal(value, f());
         }
 
@@ -629,7 +629,7 @@ namespace Tests.ExpressionCompiler.Constant
                 Expression.Lambda<Func<Scs[]>>(
                     Expression.Constant(value, typeof(Scs[])),
                     Enumerable.Empty<ParameterExpression>());
-            Func<Scs[]> f = e.Compile();
+            Func<Scs[]> f = e.CompileForTest();
             Assert.Equal(value, f());
         }
 
@@ -639,7 +639,7 @@ namespace Tests.ExpressionCompiler.Constant
                 Expression.Lambda<Func<short[]>>(
                     Expression.Constant(value, typeof(short[])),
                     Enumerable.Empty<ParameterExpression>());
-            Func<short[]> f = e.Compile();
+            Func<short[]> f = e.CompileForTest();
             Assert.Equal(value, f());
         }
 
@@ -649,7 +649,7 @@ namespace Tests.ExpressionCompiler.Constant
                 Expression.Lambda<Func<Sp[]>>(
                     Expression.Constant(value, typeof(Sp[])),
                     Enumerable.Empty<ParameterExpression>());
-            Func<Sp[]> f = e.Compile();
+            Func<Sp[]> f = e.CompileForTest();
             Assert.Equal(value, f());
         }
 
@@ -659,7 +659,7 @@ namespace Tests.ExpressionCompiler.Constant
                 Expression.Lambda<Func<Ss[]>>(
                     Expression.Constant(value, typeof(Ss[])),
                     Enumerable.Empty<ParameterExpression>());
-            Func<Ss[]> f = e.Compile();
+            Func<Ss[]> f = e.CompileForTest();
             Assert.Equal(value, f());
         }
 
@@ -669,7 +669,7 @@ namespace Tests.ExpressionCompiler.Constant
                 Expression.Lambda<Func<string[]>>(
                     Expression.Constant(value, typeof(string[])),
                     Enumerable.Empty<ParameterExpression>());
-            Func<string[]> f = e.Compile();
+            Func<string[]> f = e.CompileForTest();
             Assert.Equal(value, f());
         }
 
@@ -679,7 +679,7 @@ namespace Tests.ExpressionCompiler.Constant
                 Expression.Lambda<Func<uint[]>>(
                     Expression.Constant(value, typeof(uint[])),
                     Enumerable.Empty<ParameterExpression>());
-            Func<uint[]> f = e.Compile();
+            Func<uint[]> f = e.CompileForTest();
             Assert.Equal(value, f());
         }
 
@@ -689,7 +689,7 @@ namespace Tests.ExpressionCompiler.Constant
                 Expression.Lambda<Func<ulong[]>>(
                     Expression.Constant(value, typeof(ulong[])),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ulong[]> f = e.Compile();
+            Func<ulong[]> f = e.CompileForTest();
             Assert.Equal(value, f());
         }
 
@@ -699,7 +699,7 @@ namespace Tests.ExpressionCompiler.Constant
                 Expression.Lambda<Func<ushort[]>>(
                     Expression.Constant(value, typeof(ushort[])),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ushort[]> f = e.Compile();
+            Func<ushort[]> f = e.CompileForTest();
             Assert.Equal(value, f());
         }
 
@@ -709,7 +709,7 @@ namespace Tests.ExpressionCompiler.Constant
                 Expression.Lambda<Func<Ts[]>>(
                     Expression.Constant(value, typeof(Ts[])),
                     Enumerable.Empty<ParameterExpression>());
-            Func<Ts[]> f = e.Compile();
+            Func<Ts[]> f = e.CompileForTest();
             Assert.Equal(value, f());
         }
 
@@ -719,7 +719,7 @@ namespace Tests.ExpressionCompiler.Constant
                 Expression.Lambda<Func<T[]>>(
                     Expression.Constant(value, typeof(T[])),
                     Enumerable.Empty<ParameterExpression>());
-            Func<T[]> f = e.Compile();
+            Func<T[]> f = e.CompileForTest();
             Assert.Equal(value, f());
         }
 
@@ -729,7 +729,7 @@ namespace Tests.ExpressionCompiler.Constant
                 Expression.Lambda<Func<Tc[]>>(
                     Expression.Constant(value, typeof(Tc[])),
                     Enumerable.Empty<ParameterExpression>());
-            Func<Tc[]> f = e.Compile();
+            Func<Tc[]> f = e.CompileForTest();
             Assert.Equal(value, f());
         }
 
@@ -739,7 +739,7 @@ namespace Tests.ExpressionCompiler.Constant
                 Expression.Lambda<Func<Tcn[]>>(
                     Expression.Constant(value, typeof(Tcn[])),
                     Enumerable.Empty<ParameterExpression>());
-            Func<Tcn[]> f = e.Compile();
+            Func<Tcn[]> f = e.CompileForTest();
             Assert.Equal(value, f());
         }
 
@@ -749,7 +749,7 @@ namespace Tests.ExpressionCompiler.Constant
                 Expression.Lambda<Func<TC[]>>(
                     Expression.Constant(value, typeof(TC[])),
                     Enumerable.Empty<ParameterExpression>());
-            Func<TC[]> f = e.Compile();
+            Func<TC[]> f = e.CompileForTest();
             Assert.Equal(value, f());
         }
 
@@ -759,7 +759,7 @@ namespace Tests.ExpressionCompiler.Constant
                 Expression.Lambda<Func<TCn[]>>(
                     Expression.Constant(value, typeof(TCn[])),
                     Enumerable.Empty<ParameterExpression>());
-            Func<TCn[]> f = e.Compile();
+            Func<TCn[]> f = e.CompileForTest();
             Assert.Equal(value, f());
         }
 

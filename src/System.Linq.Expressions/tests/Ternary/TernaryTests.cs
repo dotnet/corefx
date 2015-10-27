@@ -702,7 +702,7 @@ namespace Tests.ExpressionCompiler.Ternary
                         Expression.Constant(a, typeof(bool)),
                         Expression.Constant(b, typeof(bool))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<bool> f = e.Compile();
+            Func<bool> f = e.CompileForTest();
 
             bool result = default(bool);
             Exception fEx = null;
@@ -747,7 +747,7 @@ namespace Tests.ExpressionCompiler.Ternary
                         Expression.Constant(a, typeof(byte)),
                         Expression.Constant(b, typeof(byte))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<byte> f = e.Compile();
+            Func<byte> f = e.CompileForTest();
 
             byte result = default(byte);
             Exception fEx = null;
@@ -792,7 +792,7 @@ namespace Tests.ExpressionCompiler.Ternary
                         Expression.Constant(a, typeof(C)),
                         Expression.Constant(b, typeof(C))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<C> f = e.Compile();
+            Func<C> f = e.CompileForTest();
 
             C result = default(C);
             Exception fEx = null;
@@ -837,7 +837,7 @@ namespace Tests.ExpressionCompiler.Ternary
                         Expression.Constant(a, typeof(char)),
                         Expression.Constant(b, typeof(char))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<char> f = e.Compile();
+            Func<char> f = e.CompileForTest();
 
             char result = default(char);
             Exception fEx = null;
@@ -882,7 +882,7 @@ namespace Tests.ExpressionCompiler.Ternary
                         Expression.Constant(a, typeof(D)),
                         Expression.Constant(b, typeof(D))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<D> f = e.Compile();
+            Func<D> f = e.CompileForTest();
 
             D result = default(D);
             Exception fEx = null;
@@ -927,7 +927,7 @@ namespace Tests.ExpressionCompiler.Ternary
                         Expression.Constant(a, typeof(decimal)),
                         Expression.Constant(b, typeof(decimal))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<decimal> f = e.Compile();
+            Func<decimal> f = e.CompileForTest();
 
             decimal result = default(decimal);
             Exception fEx = null;
@@ -972,7 +972,7 @@ namespace Tests.ExpressionCompiler.Ternary
                         Expression.Constant(a, typeof(Delegate)),
                         Expression.Constant(b, typeof(Delegate))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<Delegate> f = e.Compile();
+            Func<Delegate> f = e.CompileForTest();
 
             Delegate result = default(Delegate);
             Exception fEx = null;
@@ -1017,7 +1017,7 @@ namespace Tests.ExpressionCompiler.Ternary
                         Expression.Constant(a, typeof(double)),
                         Expression.Constant(b, typeof(double))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<double> f = e.Compile();
+            Func<double> f = e.CompileForTest();
 
             double result = default(double);
             Exception fEx = null;
@@ -1062,7 +1062,7 @@ namespace Tests.ExpressionCompiler.Ternary
                         Expression.Constant(a, typeof(E)),
                         Expression.Constant(b, typeof(E))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<E> f = e.Compile();
+            Func<E> f = e.CompileForTest();
 
             E result = default(E);
             Exception fEx = null;
@@ -1107,7 +1107,7 @@ namespace Tests.ExpressionCompiler.Ternary
                         Expression.Constant(a, typeof(El)),
                         Expression.Constant(b, typeof(El))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<El> f = e.Compile();
+            Func<El> f = e.CompileForTest();
 
             El result = default(El);
             Exception fEx = null;
@@ -1152,7 +1152,7 @@ namespace Tests.ExpressionCompiler.Ternary
                         Expression.Constant(a, typeof(float)),
                         Expression.Constant(b, typeof(float))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<float> f = e.Compile();
+            Func<float> f = e.CompileForTest();
 
             float result = default(float);
             Exception fEx = null;
@@ -1197,7 +1197,7 @@ namespace Tests.ExpressionCompiler.Ternary
                         Expression.Constant(a, typeof(Func<object>)),
                         Expression.Constant(b, typeof(Func<object>))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<Func<object>> f = e.Compile();
+            Func<Func<object>> f = e.CompileForTest();
 
             Func<object> result = default(Func<object>);
             Exception fEx = null;
@@ -1242,7 +1242,7 @@ namespace Tests.ExpressionCompiler.Ternary
                         Expression.Constant(a, typeof(I)),
                         Expression.Constant(b, typeof(I))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<I> f = e.Compile();
+            Func<I> f = e.CompileForTest();
 
             I result = default(I);
             Exception fEx = null;
@@ -1287,7 +1287,7 @@ namespace Tests.ExpressionCompiler.Ternary
                         Expression.Constant(a, typeof(IEquatable<C>)),
                         Expression.Constant(b, typeof(IEquatable<C>))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<IEquatable<C>> f = e.Compile();
+            Func<IEquatable<C>> f = e.CompileForTest();
 
             IEquatable<C> result = default(IEquatable<C>);
             Exception fEx = null;
@@ -1332,7 +1332,7 @@ namespace Tests.ExpressionCompiler.Ternary
                         Expression.Constant(a, typeof(IEquatable<D>)),
                         Expression.Constant(b, typeof(IEquatable<D>))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<IEquatable<D>> f = e.Compile();
+            Func<IEquatable<D>> f = e.CompileForTest();
 
             IEquatable<D> result = default(IEquatable<D>);
             Exception fEx = null;
@@ -1377,7 +1377,7 @@ namespace Tests.ExpressionCompiler.Ternary
                         Expression.Constant(a, typeof(int)),
                         Expression.Constant(b, typeof(int))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<int> f = e.Compile();
+            Func<int> f = e.CompileForTest();
 
             int result = default(int);
             Exception fEx = null;
@@ -1422,7 +1422,7 @@ namespace Tests.ExpressionCompiler.Ternary
                         Expression.Constant(a, typeof(long)),
                         Expression.Constant(b, typeof(long))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<long> f = e.Compile();
+            Func<long> f = e.CompileForTest();
 
             long result = default(long);
             Exception fEx = null;
@@ -1467,7 +1467,7 @@ namespace Tests.ExpressionCompiler.Ternary
                         Expression.Constant(a, typeof(object)),
                         Expression.Constant(b, typeof(object))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<object> f = e.Compile();
+            Func<object> f = e.CompileForTest();
 
             object result = default(object);
             Exception fEx = null;
@@ -1512,7 +1512,7 @@ namespace Tests.ExpressionCompiler.Ternary
                         Expression.Constant(a, typeof(S)),
                         Expression.Constant(b, typeof(S))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<S> f = e.Compile();
+            Func<S> f = e.CompileForTest();
 
             S result = default(S);
             Exception fEx = null;
@@ -1557,7 +1557,7 @@ namespace Tests.ExpressionCompiler.Ternary
                         Expression.Constant(a, typeof(sbyte)),
                         Expression.Constant(b, typeof(sbyte))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<sbyte> f = e.Compile();
+            Func<sbyte> f = e.CompileForTest();
 
             sbyte result = default(sbyte);
             Exception fEx = null;
@@ -1602,7 +1602,7 @@ namespace Tests.ExpressionCompiler.Ternary
                         Expression.Constant(a, typeof(Sc)),
                         Expression.Constant(b, typeof(Sc))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<Sc> f = e.Compile();
+            Func<Sc> f = e.CompileForTest();
 
             Sc result = default(Sc);
             Exception fEx = null;
@@ -1647,7 +1647,7 @@ namespace Tests.ExpressionCompiler.Ternary
                         Expression.Constant(a, typeof(Scs)),
                         Expression.Constant(b, typeof(Scs))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<Scs> f = e.Compile();
+            Func<Scs> f = e.CompileForTest();
 
             Scs result = default(Scs);
             Exception fEx = null;
@@ -1692,7 +1692,7 @@ namespace Tests.ExpressionCompiler.Ternary
                         Expression.Constant(a, typeof(short)),
                         Expression.Constant(b, typeof(short))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<short> f = e.Compile();
+            Func<short> f = e.CompileForTest();
 
             short result = default(short);
             Exception fEx = null;
@@ -1737,7 +1737,7 @@ namespace Tests.ExpressionCompiler.Ternary
                         Expression.Constant(a, typeof(Sp)),
                         Expression.Constant(b, typeof(Sp))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<Sp> f = e.Compile();
+            Func<Sp> f = e.CompileForTest();
 
             Sp result = default(Sp);
             Exception fEx = null;
@@ -1782,7 +1782,7 @@ namespace Tests.ExpressionCompiler.Ternary
                         Expression.Constant(a, typeof(Ss)),
                         Expression.Constant(b, typeof(Ss))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<Ss> f = e.Compile();
+            Func<Ss> f = e.CompileForTest();
 
             Ss result = default(Ss);
             Exception fEx = null;
@@ -1827,7 +1827,7 @@ namespace Tests.ExpressionCompiler.Ternary
                         Expression.Constant(a, typeof(string)),
                         Expression.Constant(b, typeof(string))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<string> f = e.Compile();
+            Func<string> f = e.CompileForTest();
 
             string result = default(string);
             Exception fEx = null;
@@ -1872,7 +1872,7 @@ namespace Tests.ExpressionCompiler.Ternary
                         Expression.Constant(a, typeof(uint)),
                         Expression.Constant(b, typeof(uint))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<uint> f = e.Compile();
+            Func<uint> f = e.CompileForTest();
 
             uint result = default(uint);
             Exception fEx = null;
@@ -1917,7 +1917,7 @@ namespace Tests.ExpressionCompiler.Ternary
                         Expression.Constant(a, typeof(ulong)),
                         Expression.Constant(b, typeof(ulong))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ulong> f = e.Compile();
+            Func<ulong> f = e.CompileForTest();
 
             ulong result = default(ulong);
             Exception fEx = null;
@@ -1962,7 +1962,7 @@ namespace Tests.ExpressionCompiler.Ternary
                         Expression.Constant(a, typeof(ushort)),
                         Expression.Constant(b, typeof(ushort))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ushort> f = e.Compile();
+            Func<ushort> f = e.CompileForTest();
 
             ushort result = default(ushort);
             Exception fEx = null;
@@ -2007,7 +2007,7 @@ namespace Tests.ExpressionCompiler.Ternary
                         Expression.Constant(a, typeof(T)),
                         Expression.Constant(b, typeof(T))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<T> f = e.Compile();
+            Func<T> f = e.CompileForTest();
 
             T result = default(T);
             Exception fEx = null;
@@ -2052,7 +2052,7 @@ namespace Tests.ExpressionCompiler.Ternary
                         Expression.Constant(a, typeof(Tc)),
                         Expression.Constant(b, typeof(Tc))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<Tc> f = e.Compile();
+            Func<Tc> f = e.CompileForTest();
 
             Tc result = default(Tc);
             Exception fEx = null;
@@ -2097,7 +2097,7 @@ namespace Tests.ExpressionCompiler.Ternary
                         Expression.Constant(a, typeof(TC)),
                         Expression.Constant(b, typeof(TC))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<TC> f = e.Compile();
+            Func<TC> f = e.CompileForTest();
 
             TC result = default(TC);
             Exception fEx = null;
@@ -2142,7 +2142,7 @@ namespace Tests.ExpressionCompiler.Ternary
                         Expression.Constant(a, typeof(Tcn)),
                         Expression.Constant(b, typeof(Tcn))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<Tcn> f = e.Compile();
+            Func<Tcn> f = e.CompileForTest();
 
             Tcn result = default(Tcn);
             Exception fEx = null;
@@ -2187,7 +2187,7 @@ namespace Tests.ExpressionCompiler.Ternary
                         Expression.Constant(a, typeof(TCn)),
                         Expression.Constant(b, typeof(TCn))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<TCn> f = e.Compile();
+            Func<TCn> f = e.CompileForTest();
 
             TCn result = default(TCn);
             Exception fEx = null;
@@ -2232,7 +2232,7 @@ namespace Tests.ExpressionCompiler.Ternary
                         Expression.Constant(a, typeof(Ts)),
                         Expression.Constant(b, typeof(Ts))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<Ts> f = e.Compile();
+            Func<Ts> f = e.CompileForTest();
 
             Ts result = default(Ts);
             Exception fEx = null;

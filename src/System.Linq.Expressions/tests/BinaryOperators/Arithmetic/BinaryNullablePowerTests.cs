@@ -182,7 +182,7 @@ namespace Tests.ExpressionCompiler.Binary
                         Expression.Constant(b, typeof(byte?)),
                         typeof(BinaryNullablePowerTests).GetTypeInfo().GetDeclaredMethod("PowerByte")
                     ));
-            Func<byte?> f = e.Compile();
+            Func<byte?> f = e.CompileForTest();
 
             // compute with expression tree
             byte? etResult = default(byte);
@@ -237,7 +237,7 @@ namespace Tests.ExpressionCompiler.Binary
                         Expression.Constant(b, typeof(sbyte?)),
                         typeof(BinaryNullablePowerTests).GetTypeInfo().GetDeclaredMethod("PowerSByte")
                     ));
-            Func<sbyte?> f = e.Compile();
+            Func<sbyte?> f = e.CompileForTest();
 
             // compute with expression tree
             sbyte? etResult = default(sbyte);
@@ -292,7 +292,7 @@ namespace Tests.ExpressionCompiler.Binary
                         Expression.Constant(b, typeof(ushort?)),
                         typeof(BinaryNullablePowerTests).GetTypeInfo().GetDeclaredMethod("PowerUShort")
                     ));
-            Func<ushort?> f = e.Compile();
+            Func<ushort?> f = e.CompileForTest();
 
             // compute with expression tree
             ushort? etResult = default(ushort);
@@ -347,7 +347,7 @@ namespace Tests.ExpressionCompiler.Binary
                         Expression.Constant(b, typeof(short?)),
                         typeof(BinaryNullablePowerTests).GetTypeInfo().GetDeclaredMethod("PowerShort")
                     ));
-            Func<short?> f = e.Compile();
+            Func<short?> f = e.CompileForTest();
 
             // compute with expression tree
             short? etResult = default(short);
@@ -402,7 +402,7 @@ namespace Tests.ExpressionCompiler.Binary
                         Expression.Constant(b, typeof(uint?)),
                         typeof(BinaryNullablePowerTests).GetTypeInfo().GetDeclaredMethod("PowerUInt")
                     ));
-            Func<uint?> f = e.Compile();
+            Func<uint?> f = e.CompileForTest();
 
             // compute with expression tree
             uint? etResult = default(uint);
@@ -457,7 +457,7 @@ namespace Tests.ExpressionCompiler.Binary
                         Expression.Constant(b, typeof(int?)),
                         typeof(BinaryNullablePowerTests).GetTypeInfo().GetDeclaredMethod("PowerInt")
                     ));
-            Func<int?> f = e.Compile();
+            Func<int?> f = e.CompileForTest();
 
             // compute with expression tree
             int? etResult = default(int);
@@ -512,7 +512,7 @@ namespace Tests.ExpressionCompiler.Binary
                         Expression.Constant(b, typeof(ulong?)),
                         typeof(BinaryNullablePowerTests).GetTypeInfo().GetDeclaredMethod("PowerULong")
                     ));
-            Func<ulong?> f = e.Compile();
+            Func<ulong?> f = e.CompileForTest();
 
             // compute with expression tree
             ulong? etResult = default(ulong);
@@ -567,7 +567,7 @@ namespace Tests.ExpressionCompiler.Binary
                         Expression.Constant(b, typeof(long?)),
                         typeof(BinaryNullablePowerTests).GetTypeInfo().GetDeclaredMethod("PowerLong")
                     ));
-            Func<long?> f = e.Compile();
+            Func<long?> f = e.CompileForTest();
 
             // compute with expression tree
             long? etResult = default(long);
@@ -622,7 +622,7 @@ namespace Tests.ExpressionCompiler.Binary
                         Expression.Constant(b, typeof(float?)),
                         typeof(BinaryNullablePowerTests).GetTypeInfo().GetDeclaredMethod("PowerFloat")
                     ));
-            Func<float?> f = e.Compile();
+            Func<float?> f = e.CompileForTest();
 
             // compute with expression tree
             float? etResult = default(float);
@@ -677,7 +677,7 @@ namespace Tests.ExpressionCompiler.Binary
                         Expression.Constant(b, typeof(double?)),
                         typeof(BinaryNullablePowerTests).GetTypeInfo().GetDeclaredMethod("PowerDouble")
                     ));
-            Func<double?> f = e.Compile();
+            Func<double?> f = e.CompileForTest();
 
             // compute with expression tree
             double? etResult = default(double);
@@ -732,7 +732,7 @@ namespace Tests.ExpressionCompiler.Binary
                         Expression.Constant(b, typeof(decimal?)),
                         typeof(BinaryNullablePowerTests).GetTypeInfo().GetDeclaredMethod("PowerDecimal")
                     ));
-            Func<decimal?> f = e.Compile();
+            Func<decimal?> f = e.CompileForTest();
 
             // compute with expression tree
             decimal? etResult = default(decimal);
@@ -787,7 +787,7 @@ namespace Tests.ExpressionCompiler.Binary
                         Expression.Constant(b, typeof(char?)),
                         typeof(BinaryNullablePowerTests).GetTypeInfo().GetDeclaredMethod("PowerChar")
                     ));
-            Func<char?> f = e.Compile();
+            Func<char?> f = e.CompileForTest();
 
             // compute with expression tree
             char? etResult = default(char);

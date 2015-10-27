@@ -111,7 +111,7 @@ namespace Tests.ExpressionCompiler.Block
                 Expression.Lambda<Func<object>>(
                     Expression.Convert(e, typeof(object)));
 
-            Func<object> c = f.Compile();
+            Func<object> c = f.CompileForTest();
             Assert.Equal(o, c());
 
 #if FEATURE_INTERPRET

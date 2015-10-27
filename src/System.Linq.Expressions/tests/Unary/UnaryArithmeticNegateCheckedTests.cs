@@ -123,7 +123,7 @@ namespace Tests.ExpressionCompiler.Unary
                     Expression.NegateChecked(Expression.Constant(value, typeof(decimal))),
                     Enumerable.Empty<ParameterExpression>());
 
-            Func<decimal> f = e.Compile();
+            Func<decimal> f = e.CompileForTest();
 
             // add with expression tree
             decimal etResult = default(decimal);
@@ -169,7 +169,7 @@ namespace Tests.ExpressionCompiler.Unary
                     Expression.NegateChecked(Expression.Constant(value, typeof(double))),
                     Enumerable.Empty<ParameterExpression>());
 
-            Func<double> f = e.Compile();
+            Func<double> f = e.CompileForTest();
 
             // add with expression tree
             double etResult = default(double);
@@ -215,7 +215,7 @@ namespace Tests.ExpressionCompiler.Unary
                     Expression.NegateChecked(Expression.Constant(value, typeof(float))),
                     Enumerable.Empty<ParameterExpression>());
 
-            Func<float> f = e.Compile();
+            Func<float> f = e.CompileForTest();
 
             // add with expression tree
             float etResult = default(float);
@@ -261,7 +261,7 @@ namespace Tests.ExpressionCompiler.Unary
                     Expression.NegateChecked(Expression.Constant(value, typeof(int))),
                     Enumerable.Empty<ParameterExpression>());
 
-            Func<int> f = e.Compile();
+            Func<int> f = e.CompileForTest();
 
             // add with expression tree
             int etResult = default(int);
@@ -307,7 +307,7 @@ namespace Tests.ExpressionCompiler.Unary
                     Expression.NegateChecked(Expression.Constant(value, typeof(long))),
                     Enumerable.Empty<ParameterExpression>());
 
-            Func<long> f = e.Compile();
+            Func<long> f = e.CompileForTest();
 
             // add with expression tree
             long etResult = default(long);
@@ -358,7 +358,7 @@ namespace Tests.ExpressionCompiler.Unary
                     Expression.NegateChecked(Expression.Constant(value, typeof(short))),
                     Enumerable.Empty<ParameterExpression>());
 
-            Func<short> f = e.Compile();
+            Func<short> f = e.CompileForTest();
 
             // add with expression tree
             short etResult = default(short);

@@ -151,7 +151,7 @@ namespace Tests.ExpressionCompiler.Cast
                 Expression.Lambda<Func<Enum>>(
                     Expression.TypeAs(Expression.Constant(value, typeof(E?)), typeof(Enum)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<Enum> f = e.Compile();
+            Func<Enum> f = e.CompileForTest();
 
             // compute the value with the expression tree
             Enum etResult = default(Enum);
@@ -196,7 +196,7 @@ namespace Tests.ExpressionCompiler.Cast
                 Expression.Lambda<Func<object>>(
                     Expression.TypeAs(Expression.Constant(value, typeof(E?)), typeof(object)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<object> f = e.Compile();
+            Func<object> f = e.CompileForTest();
 
             // compute the value with the expression tree
             object etResult = default(object);
@@ -241,7 +241,7 @@ namespace Tests.ExpressionCompiler.Cast
                 Expression.Lambda<Func<object>>(
                     Expression.TypeAs(Expression.Constant(value, typeof(int?)), typeof(object)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<object> f = e.Compile();
+            Func<object> f = e.CompileForTest();
 
             // compute the value with the expression tree
             object etResult = default(object);
@@ -286,7 +286,7 @@ namespace Tests.ExpressionCompiler.Cast
                 Expression.Lambda<Func<ValueType>>(
                     Expression.TypeAs(Expression.Constant(value, typeof(int?)), typeof(ValueType)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ValueType> f = e.Compile();
+            Func<ValueType> f = e.CompileForTest();
 
             // compute the value with the expression tree
             ValueType etResult = default(ValueType);
@@ -331,7 +331,7 @@ namespace Tests.ExpressionCompiler.Cast
                 Expression.Lambda<Func<IEquatable<S>>>(
                     Expression.TypeAs(Expression.Constant(value, typeof(S?)), typeof(IEquatable<S>)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<IEquatable<S>> f = e.Compile();
+            Func<IEquatable<S>> f = e.CompileForTest();
 
             // compute the value with the expression tree
             IEquatable<S> etResult = default(IEquatable<S>);
@@ -376,7 +376,7 @@ namespace Tests.ExpressionCompiler.Cast
                 Expression.Lambda<Func<object>>(
                     Expression.TypeAs(Expression.Constant(value, typeof(S?)), typeof(object)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<object> f = e.Compile();
+            Func<object> f = e.CompileForTest();
 
             // compute the value with the expression tree
             object etResult = default(object);
@@ -421,7 +421,7 @@ namespace Tests.ExpressionCompiler.Cast
                 Expression.Lambda<Func<ValueType>>(
                     Expression.TypeAs(Expression.Constant(value, typeof(S?)), typeof(ValueType)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ValueType> f = e.Compile();
+            Func<ValueType> f = e.CompileForTest();
 
             // compute the value with the expression tree
             ValueType etResult = default(ValueType);
@@ -466,7 +466,7 @@ namespace Tests.ExpressionCompiler.Cast
                 Expression.Lambda<Func<object>>(
                     Expression.TypeAs(Expression.Constant(value, typeof(Ts)), typeof(object)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<object> f = e.Compile();
+            Func<object> f = e.CompileForTest();
 
             // compute the value with the expression tree
             object etResult = default(object);
@@ -511,7 +511,7 @@ namespace Tests.ExpressionCompiler.Cast
                 Expression.Lambda<Func<ValueType>>(
                     Expression.TypeAs(Expression.Constant(value, typeof(Ts)), typeof(ValueType)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ValueType> f = e.Compile();
+            Func<ValueType> f = e.CompileForTest();
 
             // compute the value with the expression tree
             ValueType etResult = default(ValueType);

@@ -1075,7 +1075,7 @@ namespace Tests.ExpressionCompiler.Cast
                 Expression.Lambda<Func<bool>>(
                     Expression.TypeIs(Expression.Constant(value, typeof(C)), typeof(D)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<bool> f = e.Compile();
+            Func<bool> f = e.CompileForTest();
 
             // compute the value with the expression tree
             bool etResult = default(bool);
@@ -1120,7 +1120,7 @@ namespace Tests.ExpressionCompiler.Cast
                 Expression.Lambda<Func<bool>>(
                     Expression.TypeIs(Expression.Constant(value, typeof(C)), typeof(I)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<bool> f = e.Compile();
+            Func<bool> f = e.CompileForTest();
 
             // compute the value with the expression tree
             bool etResult = default(bool);
@@ -1165,7 +1165,7 @@ namespace Tests.ExpressionCompiler.Cast
                 Expression.Lambda<Func<bool>>(
                     Expression.TypeIs(Expression.Constant(value, typeof(C)), typeof(IEquatable<C>)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<bool> f = e.Compile();
+            Func<bool> f = e.CompileForTest();
 
             // compute the value with the expression tree
             bool etResult = default(bool);
@@ -1210,7 +1210,7 @@ namespace Tests.ExpressionCompiler.Cast
                 Expression.Lambda<Func<bool>>(
                     Expression.TypeIs(Expression.Constant(value, typeof(C)), typeof(IEquatable<D>)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<bool> f = e.Compile();
+            Func<bool> f = e.CompileForTest();
 
             // compute the value with the expression tree
             bool etResult = default(bool);
@@ -1255,7 +1255,7 @@ namespace Tests.ExpressionCompiler.Cast
                 Expression.Lambda<Func<bool>>(
                     Expression.TypeIs(Expression.Constant(value, typeof(C)), typeof(object)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<bool> f = e.Compile();
+            Func<bool> f = e.CompileForTest();
 
             // compute the value with the expression tree
             bool etResult = default(bool);
@@ -1300,7 +1300,7 @@ namespace Tests.ExpressionCompiler.Cast
                 Expression.Lambda<Func<bool>>(
                     Expression.TypeIs(Expression.Constant(value, typeof(C[])), typeof(D[])),
                     Enumerable.Empty<ParameterExpression>());
-            Func<bool> f = e.Compile();
+            Func<bool> f = e.CompileForTest();
 
             // compute the value with the expression tree
             bool etResult = default(bool);
@@ -1345,7 +1345,7 @@ namespace Tests.ExpressionCompiler.Cast
                 Expression.Lambda<Func<bool>>(
                     Expression.TypeIs(Expression.Constant(value, typeof(C[])), typeof(IEnumerable<C>)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<bool> f = e.Compile();
+            Func<bool> f = e.CompileForTest();
 
             // compute the value with the expression tree
             bool etResult = default(bool);
@@ -1390,7 +1390,7 @@ namespace Tests.ExpressionCompiler.Cast
                 Expression.Lambda<Func<bool>>(
                     Expression.TypeIs(Expression.Constant(value, typeof(C[])), typeof(IEnumerable<D>)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<bool> f = e.Compile();
+            Func<bool> f = e.CompileForTest();
 
             // compute the value with the expression tree
             bool etResult = default(bool);
@@ -1435,7 +1435,7 @@ namespace Tests.ExpressionCompiler.Cast
                 Expression.Lambda<Func<bool>>(
                     Expression.TypeIs(Expression.Constant(value, typeof(C[])), typeof(IEnumerable<I>)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<bool> f = e.Compile();
+            Func<bool> f = e.CompileForTest();
 
             // compute the value with the expression tree
             bool etResult = default(bool);
@@ -1480,7 +1480,7 @@ namespace Tests.ExpressionCompiler.Cast
                 Expression.Lambda<Func<bool>>(
                     Expression.TypeIs(Expression.Constant(value, typeof(C[])), typeof(IEnumerable<object>)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<bool> f = e.Compile();
+            Func<bool> f = e.CompileForTest();
 
             // compute the value with the expression tree
             bool etResult = default(bool);
@@ -1525,7 +1525,7 @@ namespace Tests.ExpressionCompiler.Cast
                 Expression.Lambda<Func<bool>>(
                     Expression.TypeIs(Expression.Constant(value, typeof(C[])), typeof(IList<C>)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<bool> f = e.Compile();
+            Func<bool> f = e.CompileForTest();
 
             // compute the value with the expression tree
             bool etResult = default(bool);
@@ -1570,7 +1570,7 @@ namespace Tests.ExpressionCompiler.Cast
                 Expression.Lambda<Func<bool>>(
                     Expression.TypeIs(Expression.Constant(value, typeof(C[])), typeof(IList<D>)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<bool> f = e.Compile();
+            Func<bool> f = e.CompileForTest();
 
             // compute the value with the expression tree
             bool etResult = default(bool);
@@ -1615,7 +1615,7 @@ namespace Tests.ExpressionCompiler.Cast
                 Expression.Lambda<Func<bool>>(
                     Expression.TypeIs(Expression.Constant(value, typeof(C[])), typeof(IList<I>)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<bool> f = e.Compile();
+            Func<bool> f = e.CompileForTest();
 
             // compute the value with the expression tree
             bool etResult = default(bool);
@@ -1660,7 +1660,7 @@ namespace Tests.ExpressionCompiler.Cast
                 Expression.Lambda<Func<bool>>(
                     Expression.TypeIs(Expression.Constant(value, typeof(C[])), typeof(IList<object>)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<bool> f = e.Compile();
+            Func<bool> f = e.CompileForTest();
 
             // compute the value with the expression tree
             bool etResult = default(bool);
@@ -1705,7 +1705,7 @@ namespace Tests.ExpressionCompiler.Cast
                 Expression.Lambda<Func<bool>>(
                     Expression.TypeIs(Expression.Constant(value, typeof(C[])), typeof(object[])),
                     Enumerable.Empty<ParameterExpression>());
-            Func<bool> f = e.Compile();
+            Func<bool> f = e.CompileForTest();
 
             // compute the value with the expression tree
             bool etResult = default(bool);
@@ -1750,7 +1750,7 @@ namespace Tests.ExpressionCompiler.Cast
                 Expression.Lambda<Func<bool>>(
                     Expression.TypeIs(Expression.Constant(value, typeof(D)), typeof(C)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<bool> f = e.Compile();
+            Func<bool> f = e.CompileForTest();
 
             // compute the value with the expression tree
             bool etResult = default(bool);
@@ -1795,7 +1795,7 @@ namespace Tests.ExpressionCompiler.Cast
                 Expression.Lambda<Func<bool>>(
                     Expression.TypeIs(Expression.Constant(value, typeof(D)), typeof(I)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<bool> f = e.Compile();
+            Func<bool> f = e.CompileForTest();
 
             // compute the value with the expression tree
             bool etResult = default(bool);
@@ -1840,7 +1840,7 @@ namespace Tests.ExpressionCompiler.Cast
                 Expression.Lambda<Func<bool>>(
                     Expression.TypeIs(Expression.Constant(value, typeof(D)), typeof(IEquatable<C>)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<bool> f = e.Compile();
+            Func<bool> f = e.CompileForTest();
 
             // compute the value with the expression tree
             bool etResult = default(bool);
@@ -1885,7 +1885,7 @@ namespace Tests.ExpressionCompiler.Cast
                 Expression.Lambda<Func<bool>>(
                     Expression.TypeIs(Expression.Constant(value, typeof(D)), typeof(IEquatable<D>)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<bool> f = e.Compile();
+            Func<bool> f = e.CompileForTest();
 
             // compute the value with the expression tree
             bool etResult = default(bool);
@@ -1930,7 +1930,7 @@ namespace Tests.ExpressionCompiler.Cast
                 Expression.Lambda<Func<bool>>(
                     Expression.TypeIs(Expression.Constant(value, typeof(D)), typeof(object)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<bool> f = e.Compile();
+            Func<bool> f = e.CompileForTest();
 
             // compute the value with the expression tree
             bool etResult = default(bool);
@@ -1975,7 +1975,7 @@ namespace Tests.ExpressionCompiler.Cast
                 Expression.Lambda<Func<bool>>(
                     Expression.TypeIs(Expression.Constant(value, typeof(D[])), typeof(C[])),
                     Enumerable.Empty<ParameterExpression>());
-            Func<bool> f = e.Compile();
+            Func<bool> f = e.CompileForTest();
 
             // compute the value with the expression tree
             bool etResult = default(bool);
@@ -2020,7 +2020,7 @@ namespace Tests.ExpressionCompiler.Cast
                 Expression.Lambda<Func<bool>>(
                     Expression.TypeIs(Expression.Constant(value, typeof(Delegate)), typeof(Func<object>)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<bool> f = e.Compile();
+            Func<bool> f = e.CompileForTest();
 
             // compute the value with the expression tree
             bool etResult = default(bool);
@@ -2065,7 +2065,7 @@ namespace Tests.ExpressionCompiler.Cast
                 Expression.Lambda<Func<bool>>(
                     Expression.TypeIs(Expression.Constant(value, typeof(Delegate)), typeof(object)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<bool> f = e.Compile();
+            Func<bool> f = e.CompileForTest();
 
             // compute the value with the expression tree
             bool etResult = default(bool);
@@ -2110,7 +2110,7 @@ namespace Tests.ExpressionCompiler.Cast
                 Expression.Lambda<Func<bool>>(
                     Expression.TypeIs(Expression.Constant(value, typeof(E)), typeof(Enum)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<bool> f = e.Compile();
+            Func<bool> f = e.CompileForTest();
             Assert.True(f());
         }
 
@@ -2120,7 +2120,7 @@ namespace Tests.ExpressionCompiler.Cast
                 Expression.Lambda<Func<bool>>(
                     Expression.TypeIs(Expression.Constant(value, typeof(E)), typeof(object)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<bool> f = e.Compile();
+            Func<bool> f = e.CompileForTest();
             Assert.True(f());
         }
 
@@ -2130,7 +2130,7 @@ namespace Tests.ExpressionCompiler.Cast
                 Expression.Lambda<Func<bool>>(
                     Expression.TypeIs(Expression.Constant(value, typeof(Enum)), typeof(E)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<bool> f = e.Compile();
+            Func<bool> f = e.CompileForTest();
 
             // compute the value with the expression tree
             bool etResult = default(bool);
@@ -2175,7 +2175,7 @@ namespace Tests.ExpressionCompiler.Cast
                 Expression.Lambda<Func<bool>>(
                     Expression.TypeIs(Expression.Constant(value, typeof(Enum)), typeof(object)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<bool> f = e.Compile();
+            Func<bool> f = e.CompileForTest();
 
             // compute the value with the expression tree
             bool etResult = default(bool);
@@ -2220,7 +2220,7 @@ namespace Tests.ExpressionCompiler.Cast
                 Expression.Lambda<Func<bool>>(
                     Expression.TypeIs(Expression.Constant(value, typeof(Func<object>)), typeof(Delegate)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<bool> f = e.Compile();
+            Func<bool> f = e.CompileForTest();
 
             // compute the value with the expression tree
             bool etResult = default(bool);
@@ -2265,7 +2265,7 @@ namespace Tests.ExpressionCompiler.Cast
                 Expression.Lambda<Func<bool>>(
                     Expression.TypeIs(Expression.Constant(value, typeof(I)), typeof(C)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<bool> f = e.Compile();
+            Func<bool> f = e.CompileForTest();
 
             // compute the value with the expression tree
             bool etResult = default(bool);
@@ -2310,7 +2310,7 @@ namespace Tests.ExpressionCompiler.Cast
                 Expression.Lambda<Func<bool>>(
                     Expression.TypeIs(Expression.Constant(value, typeof(I)), typeof(D)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<bool> f = e.Compile();
+            Func<bool> f = e.CompileForTest();
 
             // compute the value with the expression tree
             bool etResult = default(bool);
@@ -2355,7 +2355,7 @@ namespace Tests.ExpressionCompiler.Cast
                 Expression.Lambda<Func<bool>>(
                     Expression.TypeIs(Expression.Constant(value, typeof(I)), typeof(object)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<bool> f = e.Compile();
+            Func<bool> f = e.CompileForTest();
 
             // compute the value with the expression tree
             bool etResult = default(bool);
@@ -2400,7 +2400,7 @@ namespace Tests.ExpressionCompiler.Cast
                 Expression.Lambda<Func<bool>>(
                     Expression.TypeIs(Expression.Constant(value, typeof(IEnumerable<C>)), typeof(C[])),
                     Enumerable.Empty<ParameterExpression>());
-            Func<bool> f = e.Compile();
+            Func<bool> f = e.CompileForTest();
 
             // compute the value with the expression tree
             bool etResult = default(bool);
@@ -2445,7 +2445,7 @@ namespace Tests.ExpressionCompiler.Cast
                 Expression.Lambda<Func<bool>>(
                     Expression.TypeIs(Expression.Constant(value, typeof(IEnumerable<C>)), typeof(object[])),
                     Enumerable.Empty<ParameterExpression>());
-            Func<bool> f = e.Compile();
+            Func<bool> f = e.CompileForTest();
 
             // compute the value with the expression tree
             bool etResult = default(bool);
@@ -2490,7 +2490,7 @@ namespace Tests.ExpressionCompiler.Cast
                 Expression.Lambda<Func<bool>>(
                     Expression.TypeIs(Expression.Constant(value, typeof(IEnumerable<D>)), typeof(C[])),
                     Enumerable.Empty<ParameterExpression>());
-            Func<bool> f = e.Compile();
+            Func<bool> f = e.CompileForTest();
 
             // compute the value with the expression tree
             bool etResult = default(bool);
@@ -2535,7 +2535,7 @@ namespace Tests.ExpressionCompiler.Cast
                 Expression.Lambda<Func<bool>>(
                     Expression.TypeIs(Expression.Constant(value, typeof(IEnumerable<I>)), typeof(C[])),
                     Enumerable.Empty<ParameterExpression>());
-            Func<bool> f = e.Compile();
+            Func<bool> f = e.CompileForTest();
 
             // compute the value with the expression tree
             bool etResult = default(bool);
@@ -2580,7 +2580,7 @@ namespace Tests.ExpressionCompiler.Cast
                 Expression.Lambda<Func<bool>>(
                     Expression.TypeIs(Expression.Constant(value, typeof(IEnumerable<I>)), typeof(object[])),
                     Enumerable.Empty<ParameterExpression>());
-            Func<bool> f = e.Compile();
+            Func<bool> f = e.CompileForTest();
 
             // compute the value with the expression tree
             bool etResult = default(bool);
@@ -2625,7 +2625,7 @@ namespace Tests.ExpressionCompiler.Cast
                 Expression.Lambda<Func<bool>>(
                     Expression.TypeIs(Expression.Constant(value, typeof(IEnumerable<object>)), typeof(C[])),
                     Enumerable.Empty<ParameterExpression>());
-            Func<bool> f = e.Compile();
+            Func<bool> f = e.CompileForTest();
 
             // compute the value with the expression tree
             bool etResult = default(bool);
@@ -2670,7 +2670,7 @@ namespace Tests.ExpressionCompiler.Cast
                 Expression.Lambda<Func<bool>>(
                     Expression.TypeIs(Expression.Constant(value, typeof(IEnumerable<object>)), typeof(object[])),
                     Enumerable.Empty<ParameterExpression>());
-            Func<bool> f = e.Compile();
+            Func<bool> f = e.CompileForTest();
 
             // compute the value with the expression tree
             bool etResult = default(bool);
@@ -2715,7 +2715,7 @@ namespace Tests.ExpressionCompiler.Cast
                 Expression.Lambda<Func<bool>>(
                     Expression.TypeIs(Expression.Constant(value, typeof(IEnumerable<S>)), typeof(S[])),
                     Enumerable.Empty<ParameterExpression>());
-            Func<bool> f = e.Compile();
+            Func<bool> f = e.CompileForTest();
 
             // compute the value with the expression tree
             bool etResult = default(bool);
@@ -2760,7 +2760,7 @@ namespace Tests.ExpressionCompiler.Cast
                 Expression.Lambda<Func<bool>>(
                     Expression.TypeIs(Expression.Constant(value, typeof(IEquatable<C>)), typeof(C)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<bool> f = e.Compile();
+            Func<bool> f = e.CompileForTest();
 
             // compute the value with the expression tree
             bool etResult = default(bool);
@@ -2805,7 +2805,7 @@ namespace Tests.ExpressionCompiler.Cast
                 Expression.Lambda<Func<bool>>(
                     Expression.TypeIs(Expression.Constant(value, typeof(IEquatable<C>)), typeof(D)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<bool> f = e.Compile();
+            Func<bool> f = e.CompileForTest();
 
             // compute the value with the expression tree
             bool etResult = default(bool);
@@ -2850,7 +2850,7 @@ namespace Tests.ExpressionCompiler.Cast
                 Expression.Lambda<Func<bool>>(
                     Expression.TypeIs(Expression.Constant(value, typeof(IEquatable<C>)), typeof(object)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<bool> f = e.Compile();
+            Func<bool> f = e.CompileForTest();
 
             // compute the value with the expression tree
             bool etResult = default(bool);
@@ -2895,7 +2895,7 @@ namespace Tests.ExpressionCompiler.Cast
                 Expression.Lambda<Func<bool>>(
                     Expression.TypeIs(Expression.Constant(value, typeof(IEquatable<D>)), typeof(C)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<bool> f = e.Compile();
+            Func<bool> f = e.CompileForTest();
 
             // compute the value with the expression tree
             bool etResult = default(bool);
@@ -2940,7 +2940,7 @@ namespace Tests.ExpressionCompiler.Cast
                 Expression.Lambda<Func<bool>>(
                     Expression.TypeIs(Expression.Constant(value, typeof(IEquatable<D>)), typeof(D)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<bool> f = e.Compile();
+            Func<bool> f = e.CompileForTest();
 
             // compute the value with the expression tree
             bool etResult = default(bool);
@@ -2985,7 +2985,7 @@ namespace Tests.ExpressionCompiler.Cast
                 Expression.Lambda<Func<bool>>(
                     Expression.TypeIs(Expression.Constant(value, typeof(IEquatable<D>)), typeof(object)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<bool> f = e.Compile();
+            Func<bool> f = e.CompileForTest();
 
             // compute the value with the expression tree
             bool etResult = default(bool);
@@ -3030,7 +3030,7 @@ namespace Tests.ExpressionCompiler.Cast
                 Expression.Lambda<Func<bool>>(
                     Expression.TypeIs(Expression.Constant(value, typeof(IEquatable<S>)), typeof(S)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<bool> f = e.Compile();
+            Func<bool> f = e.CompileForTest();
 
             // compute the value with the expression tree
             bool etResult = default(bool);
@@ -3075,7 +3075,7 @@ namespace Tests.ExpressionCompiler.Cast
                 Expression.Lambda<Func<bool>>(
                     Expression.TypeIs(Expression.Constant(value, typeof(IList<C>)), typeof(C[])),
                     Enumerable.Empty<ParameterExpression>());
-            Func<bool> f = e.Compile();
+            Func<bool> f = e.CompileForTest();
 
             // compute the value with the expression tree
             bool etResult = default(bool);
@@ -3120,7 +3120,7 @@ namespace Tests.ExpressionCompiler.Cast
                 Expression.Lambda<Func<bool>>(
                     Expression.TypeIs(Expression.Constant(value, typeof(IList<C>)), typeof(object[])),
                     Enumerable.Empty<ParameterExpression>());
-            Func<bool> f = e.Compile();
+            Func<bool> f = e.CompileForTest();
 
             // compute the value with the expression tree
             bool etResult = default(bool);
@@ -3165,7 +3165,7 @@ namespace Tests.ExpressionCompiler.Cast
                 Expression.Lambda<Func<bool>>(
                     Expression.TypeIs(Expression.Constant(value, typeof(IList<D>)), typeof(C[])),
                     Enumerable.Empty<ParameterExpression>());
-            Func<bool> f = e.Compile();
+            Func<bool> f = e.CompileForTest();
 
             // compute the value with the expression tree
             bool etResult = default(bool);
@@ -3210,7 +3210,7 @@ namespace Tests.ExpressionCompiler.Cast
                 Expression.Lambda<Func<bool>>(
                     Expression.TypeIs(Expression.Constant(value, typeof(IList<I>)), typeof(C[])),
                     Enumerable.Empty<ParameterExpression>());
-            Func<bool> f = e.Compile();
+            Func<bool> f = e.CompileForTest();
 
             // compute the value with the expression tree
             bool etResult = default(bool);
@@ -3255,7 +3255,7 @@ namespace Tests.ExpressionCompiler.Cast
                 Expression.Lambda<Func<bool>>(
                     Expression.TypeIs(Expression.Constant(value, typeof(IList<I>)), typeof(object[])),
                     Enumerable.Empty<ParameterExpression>());
-            Func<bool> f = e.Compile();
+            Func<bool> f = e.CompileForTest();
 
             // compute the value with the expression tree
             bool etResult = default(bool);
@@ -3300,7 +3300,7 @@ namespace Tests.ExpressionCompiler.Cast
                 Expression.Lambda<Func<bool>>(
                     Expression.TypeIs(Expression.Constant(value, typeof(IList<object>)), typeof(C[])),
                     Enumerable.Empty<ParameterExpression>());
-            Func<bool> f = e.Compile();
+            Func<bool> f = e.CompileForTest();
 
             // compute the value with the expression tree
             bool etResult = default(bool);
@@ -3345,7 +3345,7 @@ namespace Tests.ExpressionCompiler.Cast
                 Expression.Lambda<Func<bool>>(
                     Expression.TypeIs(Expression.Constant(value, typeof(IList<object>)), typeof(object[])),
                     Enumerable.Empty<ParameterExpression>());
-            Func<bool> f = e.Compile();
+            Func<bool> f = e.CompileForTest();
 
             // compute the value with the expression tree
             bool etResult = default(bool);
@@ -3390,7 +3390,7 @@ namespace Tests.ExpressionCompiler.Cast
                 Expression.Lambda<Func<bool>>(
                     Expression.TypeIs(Expression.Constant(value, typeof(IList<S>)), typeof(S[])),
                     Enumerable.Empty<ParameterExpression>());
-            Func<bool> f = e.Compile();
+            Func<bool> f = e.CompileForTest();
 
             // compute the value with the expression tree
             bool etResult = default(bool);
@@ -3435,7 +3435,7 @@ namespace Tests.ExpressionCompiler.Cast
                 Expression.Lambda<Func<bool>>(
                     Expression.TypeIs(Expression.Constant(value, typeof(int)), typeof(object)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<bool> f = e.Compile();
+            Func<bool> f = e.CompileForTest();
             Assert.True(f());
         }
 
@@ -3445,7 +3445,7 @@ namespace Tests.ExpressionCompiler.Cast
                 Expression.Lambda<Func<bool>>(
                     Expression.TypeIs(Expression.Constant(value, typeof(int)), typeof(ValueType)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<bool> f = e.Compile();
+            Func<bool> f = e.CompileForTest();
             Assert.True(f());
         }
 
@@ -3455,7 +3455,7 @@ namespace Tests.ExpressionCompiler.Cast
                 Expression.Lambda<Func<bool>>(
                     Expression.TypeIs(Expression.Constant(value, typeof(object)), typeof(C)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<bool> f = e.Compile();
+            Func<bool> f = e.CompileForTest();
 
             // compute the value with the expression tree
             bool etResult = default(bool);
@@ -3500,7 +3500,7 @@ namespace Tests.ExpressionCompiler.Cast
                 Expression.Lambda<Func<bool>>(
                     Expression.TypeIs(Expression.Constant(value, typeof(object)), typeof(D)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<bool> f = e.Compile();
+            Func<bool> f = e.CompileForTest();
 
             // compute the value with the expression tree
             bool etResult = default(bool);
@@ -3545,7 +3545,7 @@ namespace Tests.ExpressionCompiler.Cast
                 Expression.Lambda<Func<bool>>(
                     Expression.TypeIs(Expression.Constant(value, typeof(object)), typeof(Delegate)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<bool> f = e.Compile();
+            Func<bool> f = e.CompileForTest();
 
             // compute the value with the expression tree
             bool etResult = default(bool);
@@ -3590,7 +3590,7 @@ namespace Tests.ExpressionCompiler.Cast
                 Expression.Lambda<Func<bool>>(
                     Expression.TypeIs(Expression.Constant(value, typeof(object)), typeof(E)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<bool> f = e.Compile();
+            Func<bool> f = e.CompileForTest();
 
             // compute the value with the expression tree
             bool etResult = default(bool);
@@ -3635,7 +3635,7 @@ namespace Tests.ExpressionCompiler.Cast
                 Expression.Lambda<Func<bool>>(
                     Expression.TypeIs(Expression.Constant(value, typeof(object)), typeof(Enum)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<bool> f = e.Compile();
+            Func<bool> f = e.CompileForTest();
 
             // compute the value with the expression tree
             bool etResult = default(bool);
@@ -3680,7 +3680,7 @@ namespace Tests.ExpressionCompiler.Cast
                 Expression.Lambda<Func<bool>>(
                     Expression.TypeIs(Expression.Constant(value, typeof(object)), typeof(I)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<bool> f = e.Compile();
+            Func<bool> f = e.CompileForTest();
 
             // compute the value with the expression tree
             bool etResult = default(bool);
@@ -3725,7 +3725,7 @@ namespace Tests.ExpressionCompiler.Cast
                 Expression.Lambda<Func<bool>>(
                     Expression.TypeIs(Expression.Constant(value, typeof(object)), typeof(IEquatable<C>)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<bool> f = e.Compile();
+            Func<bool> f = e.CompileForTest();
 
             // compute the value with the expression tree
             bool etResult = default(bool);
@@ -3770,7 +3770,7 @@ namespace Tests.ExpressionCompiler.Cast
                 Expression.Lambda<Func<bool>>(
                     Expression.TypeIs(Expression.Constant(value, typeof(object)), typeof(IEquatable<D>)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<bool> f = e.Compile();
+            Func<bool> f = e.CompileForTest();
 
             // compute the value with the expression tree
             bool etResult = default(bool);
@@ -3815,7 +3815,7 @@ namespace Tests.ExpressionCompiler.Cast
                 Expression.Lambda<Func<bool>>(
                     Expression.TypeIs(Expression.Constant(value, typeof(object)), typeof(int)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<bool> f = e.Compile();
+            Func<bool> f = e.CompileForTest();
 
             // compute the value with the expression tree
             bool etResult = default(bool);
@@ -3860,7 +3860,7 @@ namespace Tests.ExpressionCompiler.Cast
                 Expression.Lambda<Func<bool>>(
                     Expression.TypeIs(Expression.Constant(value, typeof(object)), typeof(S)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<bool> f = e.Compile();
+            Func<bool> f = e.CompileForTest();
 
             // compute the value with the expression tree
             bool etResult = default(bool);
@@ -3905,7 +3905,7 @@ namespace Tests.ExpressionCompiler.Cast
                 Expression.Lambda<Func<bool>>(
                     Expression.TypeIs(Expression.Constant(value, typeof(object)), typeof(ValueType)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<bool> f = e.Compile();
+            Func<bool> f = e.CompileForTest();
 
             // compute the value with the expression tree
             bool etResult = default(bool);
@@ -3950,7 +3950,7 @@ namespace Tests.ExpressionCompiler.Cast
                 Expression.Lambda<Func<bool>>(
                     Expression.TypeIs(Expression.Constant(value, typeof(object[])), typeof(C[])),
                     Enumerable.Empty<ParameterExpression>());
-            Func<bool> f = e.Compile();
+            Func<bool> f = e.CompileForTest();
 
             // compute the value with the expression tree
             bool etResult = default(bool);
@@ -3995,7 +3995,7 @@ namespace Tests.ExpressionCompiler.Cast
                 Expression.Lambda<Func<bool>>(
                     Expression.TypeIs(Expression.Constant(value, typeof(object[])), typeof(IEnumerable<C>)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<bool> f = e.Compile();
+            Func<bool> f = e.CompileForTest();
 
             // compute the value with the expression tree
             bool etResult = default(bool);
@@ -4040,7 +4040,7 @@ namespace Tests.ExpressionCompiler.Cast
                 Expression.Lambda<Func<bool>>(
                     Expression.TypeIs(Expression.Constant(value, typeof(object[])), typeof(IEnumerable<I>)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<bool> f = e.Compile();
+            Func<bool> f = e.CompileForTest();
 
             // compute the value with the expression tree
             bool etResult = default(bool);
@@ -4085,7 +4085,7 @@ namespace Tests.ExpressionCompiler.Cast
                 Expression.Lambda<Func<bool>>(
                     Expression.TypeIs(Expression.Constant(value, typeof(object[])), typeof(IEnumerable<object>)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<bool> f = e.Compile();
+            Func<bool> f = e.CompileForTest();
 
             // compute the value with the expression tree
             bool etResult = default(bool);
@@ -4130,7 +4130,7 @@ namespace Tests.ExpressionCompiler.Cast
                 Expression.Lambda<Func<bool>>(
                     Expression.TypeIs(Expression.Constant(value, typeof(object[])), typeof(IList<C>)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<bool> f = e.Compile();
+            Func<bool> f = e.CompileForTest();
 
             // compute the value with the expression tree
             bool etResult = default(bool);
@@ -4175,7 +4175,7 @@ namespace Tests.ExpressionCompiler.Cast
                 Expression.Lambda<Func<bool>>(
                     Expression.TypeIs(Expression.Constant(value, typeof(object[])), typeof(IList<I>)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<bool> f = e.Compile();
+            Func<bool> f = e.CompileForTest();
 
             // compute the value with the expression tree
             bool etResult = default(bool);
@@ -4220,7 +4220,7 @@ namespace Tests.ExpressionCompiler.Cast
                 Expression.Lambda<Func<bool>>(
                     Expression.TypeIs(Expression.Constant(value, typeof(object[])), typeof(IList<object>)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<bool> f = e.Compile();
+            Func<bool> f = e.CompileForTest();
 
             // compute the value with the expression tree
             bool etResult = default(bool);
@@ -4265,7 +4265,7 @@ namespace Tests.ExpressionCompiler.Cast
                 Expression.Lambda<Func<bool>>(
                     Expression.TypeIs(Expression.Constant(value, typeof(S)), typeof(IEquatable<S>)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<bool> f = e.Compile();
+            Func<bool> f = e.CompileForTest();
             Assert.True(f());
         }
 
@@ -4275,7 +4275,7 @@ namespace Tests.ExpressionCompiler.Cast
                 Expression.Lambda<Func<bool>>(
                     Expression.TypeIs(Expression.Constant(value, typeof(S)), typeof(object)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<bool> f = e.Compile();
+            Func<bool> f = e.CompileForTest();
             Assert.True(f());
         }
 
@@ -4285,7 +4285,7 @@ namespace Tests.ExpressionCompiler.Cast
                 Expression.Lambda<Func<bool>>(
                     Expression.TypeIs(Expression.Constant(value, typeof(S)), typeof(ValueType)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<bool> f = e.Compile();
+            Func<bool> f = e.CompileForTest();
             Assert.True(f());
         }
 
@@ -4295,7 +4295,7 @@ namespace Tests.ExpressionCompiler.Cast
                 Expression.Lambda<Func<bool>>(
                     Expression.TypeIs(Expression.Constant(value, typeof(S[])), typeof(IEnumerable<S>)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<bool> f = e.Compile();
+            Func<bool> f = e.CompileForTest();
 
             // compute the value with the expression tree
             bool etResult = default(bool);
@@ -4340,7 +4340,7 @@ namespace Tests.ExpressionCompiler.Cast
                 Expression.Lambda<Func<bool>>(
                     Expression.TypeIs(Expression.Constant(value, typeof(S[])), typeof(IList<S>)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<bool> f = e.Compile();
+            Func<bool> f = e.CompileForTest();
 
             // compute the value with the expression tree
             bool etResult = default(bool);
@@ -4385,7 +4385,7 @@ namespace Tests.ExpressionCompiler.Cast
                 Expression.Lambda<Func<bool>>(
                     Expression.TypeIs(Expression.Constant(value, typeof(ValueType)), typeof(int)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<bool> f = e.Compile();
+            Func<bool> f = e.CompileForTest();
 
             // compute the value with the expression tree
             bool etResult = default(bool);
@@ -4430,7 +4430,7 @@ namespace Tests.ExpressionCompiler.Cast
                 Expression.Lambda<Func<bool>>(
                     Expression.TypeIs(Expression.Constant(value, typeof(ValueType)), typeof(object)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<bool> f = e.Compile();
+            Func<bool> f = e.CompileForTest();
 
             // compute the value with the expression tree
             bool etResult = default(bool);
@@ -4475,7 +4475,7 @@ namespace Tests.ExpressionCompiler.Cast
                 Expression.Lambda<Func<bool>>(
                     Expression.TypeIs(Expression.Constant(value, typeof(ValueType)), typeof(S)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<bool> f = e.Compile();
+            Func<bool> f = e.CompileForTest();
 
             // compute the value with the expression tree
             bool etResult = default(bool);
@@ -4520,7 +4520,7 @@ namespace Tests.ExpressionCompiler.Cast
                 Expression.Lambda<Func<bool>>(
                     Expression.TypeIs(Expression.Constant(value, typeof(object)), typeof(T)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<bool> f = e.Compile();
+            Func<bool> f = e.CompileForTest();
 
             // compute the value with the expression tree
             bool etResult = default(bool);
@@ -4565,7 +4565,7 @@ namespace Tests.ExpressionCompiler.Cast
                 Expression.Lambda<Func<bool>>(
                     Expression.TypeIs(Expression.Constant(value, typeof(object)), typeof(Tc)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<bool> f = e.Compile();
+            Func<bool> f = e.CompileForTest();
 
             // compute the value with the expression tree
             bool etResult = default(bool);
@@ -4610,7 +4610,7 @@ namespace Tests.ExpressionCompiler.Cast
                 Expression.Lambda<Func<bool>>(
                     Expression.TypeIs(Expression.Constant(value, typeof(object)), typeof(Ts)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<bool> f = e.Compile();
+            Func<bool> f = e.CompileForTest();
 
             // compute the value with the expression tree
             bool etResult = default(bool);
@@ -4655,7 +4655,7 @@ namespace Tests.ExpressionCompiler.Cast
                 Expression.Lambda<Func<bool>>(
                     Expression.TypeIs(Expression.Constant(value, typeof(T)), typeof(object)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<bool> f = e.Compile();
+            Func<bool> f = e.CompileForTest();
 
             // compute the value with the expression tree
             bool etResult = default(bool);
@@ -4700,7 +4700,7 @@ namespace Tests.ExpressionCompiler.Cast
                 Expression.Lambda<Func<bool>>(
                     Expression.TypeIs(Expression.Constant(value, typeof(Tc)), typeof(object)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<bool> f = e.Compile();
+            Func<bool> f = e.CompileForTest();
 
             // compute the value with the expression tree
             bool etResult = default(bool);
@@ -4745,7 +4745,7 @@ namespace Tests.ExpressionCompiler.Cast
                 Expression.Lambda<Func<bool>>(
                     Expression.TypeIs(Expression.Constant(value, typeof(Ts)), typeof(object)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<bool> f = e.Compile();
+            Func<bool> f = e.CompileForTest();
             Assert.True(f());
         }
 
@@ -4755,7 +4755,7 @@ namespace Tests.ExpressionCompiler.Cast
                 Expression.Lambda<Func<bool>>(
                     Expression.TypeIs(Expression.Constant(value, typeof(Ts)), typeof(ValueType)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<bool> f = e.Compile();
+            Func<bool> f = e.CompileForTest();
             Assert.True(f());
         }
 
@@ -4765,7 +4765,7 @@ namespace Tests.ExpressionCompiler.Cast
                 Expression.Lambda<Func<bool>>(
                     Expression.TypeIs(Expression.Constant(value, typeof(ValueType)), typeof(Ts)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<bool> f = e.Compile();
+            Func<bool> f = e.CompileForTest();
 
             // compute the value with the expression tree
             bool etResult = default(bool);

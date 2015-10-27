@@ -6935,7 +6935,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<byte>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(byte)), typeof(byte)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<byte> f = e.Compile();
+            Func<byte> f = e.CompileForTest();
 
             // compute the value with the expression tree
             byte etResult = default(byte);
@@ -6983,7 +6983,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<byte?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(byte)), typeof(byte?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<byte?> f = e.Compile();
+            Func<byte?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             byte? etResult = default(byte?);
@@ -7031,7 +7031,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<char>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(byte)), typeof(char)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<char> f = e.Compile();
+            Func<char> f = e.CompileForTest();
 
             // compute the value with the expression tree
             char etResult = default(char);
@@ -7079,7 +7079,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<char?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(byte)), typeof(char?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<char?> f = e.Compile();
+            Func<char?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             char? etResult = default(char?);
@@ -7127,7 +7127,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<decimal>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(byte)), typeof(decimal)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<decimal> f = e.Compile();
+            Func<decimal> f = e.CompileForTest();
 
             // compute the value with the expression tree
             decimal etResult = default(decimal);
@@ -7175,7 +7175,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<decimal?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(byte)), typeof(decimal?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<decimal?> f = e.Compile();
+            Func<decimal?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             decimal? etResult = default(decimal?);
@@ -7223,7 +7223,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<double>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(byte)), typeof(double)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<double> f = e.Compile();
+            Func<double> f = e.CompileForTest();
 
             // compute the value with the expression tree
             double etResult = default(double);
@@ -7271,7 +7271,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<double?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(byte)), typeof(double?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<double?> f = e.Compile();
+            Func<double?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             double? etResult = default(double?);
@@ -7319,7 +7319,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<E>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(byte)), typeof(E)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<E> f = e.Compile();
+            Func<E> f = e.CompileForTest();
 
             // compute the value with the expression tree
             E etResult = default(E);
@@ -7367,7 +7367,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<E?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(byte)), typeof(E?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<E?> f = e.Compile();
+            Func<E?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             E? etResult = default(E?);
@@ -7415,7 +7415,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<El>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(byte)), typeof(El)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<El> f = e.Compile();
+            Func<El> f = e.CompileForTest();
 
             // compute the value with the expression tree
             El etResult = default(El);
@@ -7463,7 +7463,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<El?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(byte)), typeof(El?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<El?> f = e.Compile();
+            Func<El?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             El? etResult = default(El?);
@@ -7511,7 +7511,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<float>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(byte)), typeof(float)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<float> f = e.Compile();
+            Func<float> f = e.CompileForTest();
 
             // compute the value with the expression tree
             float etResult = default(float);
@@ -7559,7 +7559,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<float?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(byte)), typeof(float?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<float?> f = e.Compile();
+            Func<float?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             float? etResult = default(float?);
@@ -7607,7 +7607,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<int>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(byte)), typeof(int)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<int> f = e.Compile();
+            Func<int> f = e.CompileForTest();
 
             // compute the value with the expression tree
             int etResult = default(int);
@@ -7655,7 +7655,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<int?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(byte)), typeof(int?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<int?> f = e.Compile();
+            Func<int?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             int? etResult = default(int?);
@@ -7703,7 +7703,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<long>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(byte)), typeof(long)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<long> f = e.Compile();
+            Func<long> f = e.CompileForTest();
 
             // compute the value with the expression tree
             long etResult = default(long);
@@ -7751,7 +7751,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<long?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(byte)), typeof(long?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<long?> f = e.Compile();
+            Func<long?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             long? etResult = default(long?);
@@ -7799,7 +7799,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<sbyte>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(byte)), typeof(sbyte)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<sbyte> f = e.Compile();
+            Func<sbyte> f = e.CompileForTest();
 
             // compute the value with the expression tree
             sbyte etResult = default(sbyte);
@@ -7847,7 +7847,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<sbyte?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(byte)), typeof(sbyte?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<sbyte?> f = e.Compile();
+            Func<sbyte?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             sbyte? etResult = default(sbyte?);
@@ -7895,7 +7895,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<short>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(byte)), typeof(short)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<short> f = e.Compile();
+            Func<short> f = e.CompileForTest();
 
             // compute the value with the expression tree
             short etResult = default(short);
@@ -7943,7 +7943,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<short?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(byte)), typeof(short?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<short?> f = e.Compile();
+            Func<short?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             short? etResult = default(short?);
@@ -7991,7 +7991,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<uint>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(byte)), typeof(uint)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<uint> f = e.Compile();
+            Func<uint> f = e.CompileForTest();
 
             // compute the value with the expression tree
             uint etResult = default(uint);
@@ -8039,7 +8039,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<uint?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(byte)), typeof(uint?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<uint?> f = e.Compile();
+            Func<uint?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             uint? etResult = default(uint?);
@@ -8087,7 +8087,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<ulong>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(byte)), typeof(ulong)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ulong> f = e.Compile();
+            Func<ulong> f = e.CompileForTest();
 
             // compute the value with the expression tree
             ulong etResult = default(ulong);
@@ -8135,7 +8135,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<ulong?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(byte)), typeof(ulong?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ulong?> f = e.Compile();
+            Func<ulong?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             ulong? etResult = default(ulong?);
@@ -8183,7 +8183,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<ushort>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(byte)), typeof(ushort)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ushort> f = e.Compile();
+            Func<ushort> f = e.CompileForTest();
 
             // compute the value with the expression tree
             ushort etResult = default(ushort);
@@ -8231,7 +8231,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<ushort?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(byte)), typeof(ushort?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ushort?> f = e.Compile();
+            Func<ushort?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             ushort? etResult = default(ushort?);
@@ -8279,7 +8279,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<byte>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(byte?)), typeof(byte)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<byte> f = e.Compile();
+            Func<byte> f = e.CompileForTest();
 
             // compute the value with the expression tree
             byte etResult = default(byte);
@@ -8327,7 +8327,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<byte?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(byte?)), typeof(byte?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<byte?> f = e.Compile();
+            Func<byte?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             byte? etResult = default(byte?);
@@ -8375,7 +8375,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<char>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(byte?)), typeof(char)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<char> f = e.Compile();
+            Func<char> f = e.CompileForTest();
 
             // compute the value with the expression tree
             char etResult = default(char);
@@ -8423,7 +8423,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<char?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(byte?)), typeof(char?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<char?> f = e.Compile();
+            Func<char?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             char? etResult = default(char?);
@@ -8471,7 +8471,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<decimal>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(byte?)), typeof(decimal)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<decimal> f = e.Compile();
+            Func<decimal> f = e.CompileForTest();
 
             // compute the value with the expression tree
             decimal etResult = default(decimal);
@@ -8519,7 +8519,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<decimal?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(byte?)), typeof(decimal?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<decimal?> f = e.Compile();
+            Func<decimal?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             decimal? etResult = default(decimal?);
@@ -8567,7 +8567,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<double>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(byte?)), typeof(double)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<double> f = e.Compile();
+            Func<double> f = e.CompileForTest();
 
             // compute the value with the expression tree
             double etResult = default(double);
@@ -8615,7 +8615,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<double?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(byte?)), typeof(double?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<double?> f = e.Compile();
+            Func<double?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             double? etResult = default(double?);
@@ -8663,7 +8663,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<E>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(byte?)), typeof(E)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<E> f = e.Compile();
+            Func<E> f = e.CompileForTest();
 
             // compute the value with the expression tree
             E etResult = default(E);
@@ -8711,7 +8711,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<E?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(byte?)), typeof(E?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<E?> f = e.Compile();
+            Func<E?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             E? etResult = default(E?);
@@ -8759,7 +8759,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<El>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(byte?)), typeof(El)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<El> f = e.Compile();
+            Func<El> f = e.CompileForTest();
 
             // compute the value with the expression tree
             El etResult = default(El);
@@ -8807,7 +8807,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<El?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(byte?)), typeof(El?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<El?> f = e.Compile();
+            Func<El?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             El? etResult = default(El?);
@@ -8855,7 +8855,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<float>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(byte?)), typeof(float)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<float> f = e.Compile();
+            Func<float> f = e.CompileForTest();
 
             // compute the value with the expression tree
             float etResult = default(float);
@@ -8903,7 +8903,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<float?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(byte?)), typeof(float?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<float?> f = e.Compile();
+            Func<float?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             float? etResult = default(float?);
@@ -8951,7 +8951,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<int>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(byte?)), typeof(int)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<int> f = e.Compile();
+            Func<int> f = e.CompileForTest();
 
             // compute the value with the expression tree
             int etResult = default(int);
@@ -8999,7 +8999,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<int?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(byte?)), typeof(int?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<int?> f = e.Compile();
+            Func<int?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             int? etResult = default(int?);
@@ -9047,7 +9047,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<long>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(byte?)), typeof(long)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<long> f = e.Compile();
+            Func<long> f = e.CompileForTest();
 
             // compute the value with the expression tree
             long etResult = default(long);
@@ -9095,7 +9095,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<long?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(byte?)), typeof(long?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<long?> f = e.Compile();
+            Func<long?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             long? etResult = default(long?);
@@ -9143,7 +9143,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<sbyte>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(byte?)), typeof(sbyte)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<sbyte> f = e.Compile();
+            Func<sbyte> f = e.CompileForTest();
 
             // compute the value with the expression tree
             sbyte etResult = default(sbyte);
@@ -9191,7 +9191,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<sbyte?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(byte?)), typeof(sbyte?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<sbyte?> f = e.Compile();
+            Func<sbyte?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             sbyte? etResult = default(sbyte?);
@@ -9239,7 +9239,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<short>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(byte?)), typeof(short)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<short> f = e.Compile();
+            Func<short> f = e.CompileForTest();
 
             // compute the value with the expression tree
             short etResult = default(short);
@@ -9287,7 +9287,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<short?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(byte?)), typeof(short?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<short?> f = e.Compile();
+            Func<short?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             short? etResult = default(short?);
@@ -9335,7 +9335,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<uint>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(byte?)), typeof(uint)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<uint> f = e.Compile();
+            Func<uint> f = e.CompileForTest();
 
             // compute the value with the expression tree
             uint etResult = default(uint);
@@ -9383,7 +9383,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<uint?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(byte?)), typeof(uint?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<uint?> f = e.Compile();
+            Func<uint?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             uint? etResult = default(uint?);
@@ -9431,7 +9431,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<ulong>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(byte?)), typeof(ulong)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ulong> f = e.Compile();
+            Func<ulong> f = e.CompileForTest();
 
             // compute the value with the expression tree
             ulong etResult = default(ulong);
@@ -9479,7 +9479,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<ulong?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(byte?)), typeof(ulong?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ulong?> f = e.Compile();
+            Func<ulong?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             ulong? etResult = default(ulong?);
@@ -9527,7 +9527,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<ushort>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(byte?)), typeof(ushort)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ushort> f = e.Compile();
+            Func<ushort> f = e.CompileForTest();
 
             // compute the value with the expression tree
             ushort etResult = default(ushort);
@@ -9575,7 +9575,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<ushort?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(byte?)), typeof(ushort?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ushort?> f = e.Compile();
+            Func<ushort?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             ushort? etResult = default(ushort?);
@@ -9623,7 +9623,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<byte>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(char)), typeof(byte)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<byte> f = e.Compile();
+            Func<byte> f = e.CompileForTest();
 
             // compute the value with the expression tree
             byte etResult = default(byte);
@@ -9671,7 +9671,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<byte?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(char)), typeof(byte?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<byte?> f = e.Compile();
+            Func<byte?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             byte? etResult = default(byte?);
@@ -9719,7 +9719,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<char>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(char)), typeof(char)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<char> f = e.Compile();
+            Func<char> f = e.CompileForTest();
 
             // compute the value with the expression tree
             char etResult = default(char);
@@ -9767,7 +9767,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<char?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(char)), typeof(char?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<char?> f = e.Compile();
+            Func<char?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             char? etResult = default(char?);
@@ -9815,7 +9815,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<decimal>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(char)), typeof(decimal)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<decimal> f = e.Compile();
+            Func<decimal> f = e.CompileForTest();
 
             // compute the value with the expression tree
             decimal etResult = default(decimal);
@@ -9863,7 +9863,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<decimal?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(char)), typeof(decimal?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<decimal?> f = e.Compile();
+            Func<decimal?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             decimal? etResult = default(decimal?);
@@ -9911,7 +9911,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<double>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(char)), typeof(double)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<double> f = e.Compile();
+            Func<double> f = e.CompileForTest();
 
             // compute the value with the expression tree
             double etResult = default(double);
@@ -9959,7 +9959,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<double?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(char)), typeof(double?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<double?> f = e.Compile();
+            Func<double?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             double? etResult = default(double?);
@@ -10007,7 +10007,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<E>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(char)), typeof(E)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<E> f = e.Compile();
+            Func<E> f = e.CompileForTest();
 
             // compute the value with the expression tree
             E etResult = default(E);
@@ -10055,7 +10055,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<E?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(char)), typeof(E?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<E?> f = e.Compile();
+            Func<E?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             E? etResult = default(E?);
@@ -10103,7 +10103,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<El>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(char)), typeof(El)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<El> f = e.Compile();
+            Func<El> f = e.CompileForTest();
 
             // compute the value with the expression tree
             El etResult = default(El);
@@ -10151,7 +10151,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<El?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(char)), typeof(El?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<El?> f = e.Compile();
+            Func<El?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             El? etResult = default(El?);
@@ -10199,7 +10199,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<float>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(char)), typeof(float)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<float> f = e.Compile();
+            Func<float> f = e.CompileForTest();
 
             // compute the value with the expression tree
             float etResult = default(float);
@@ -10247,7 +10247,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<float?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(char)), typeof(float?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<float?> f = e.Compile();
+            Func<float?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             float? etResult = default(float?);
@@ -10295,7 +10295,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<int>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(char)), typeof(int)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<int> f = e.Compile();
+            Func<int> f = e.CompileForTest();
 
             // compute the value with the expression tree
             int etResult = default(int);
@@ -10343,7 +10343,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<int?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(char)), typeof(int?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<int?> f = e.Compile();
+            Func<int?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             int? etResult = default(int?);
@@ -10391,7 +10391,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<long>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(char)), typeof(long)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<long> f = e.Compile();
+            Func<long> f = e.CompileForTest();
 
             // compute the value with the expression tree
             long etResult = default(long);
@@ -10439,7 +10439,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<long?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(char)), typeof(long?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<long?> f = e.Compile();
+            Func<long?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             long? etResult = default(long?);
@@ -10487,7 +10487,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<sbyte>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(char)), typeof(sbyte)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<sbyte> f = e.Compile();
+            Func<sbyte> f = e.CompileForTest();
 
             // compute the value with the expression tree
             sbyte etResult = default(sbyte);
@@ -10535,7 +10535,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<sbyte?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(char)), typeof(sbyte?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<sbyte?> f = e.Compile();
+            Func<sbyte?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             sbyte? etResult = default(sbyte?);
@@ -10583,7 +10583,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<short>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(char)), typeof(short)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<short> f = e.Compile();
+            Func<short> f = e.CompileForTest();
 
             // compute the value with the expression tree
             short etResult = default(short);
@@ -10631,7 +10631,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<short?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(char)), typeof(short?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<short?> f = e.Compile();
+            Func<short?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             short? etResult = default(short?);
@@ -10679,7 +10679,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<uint>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(char)), typeof(uint)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<uint> f = e.Compile();
+            Func<uint> f = e.CompileForTest();
 
             // compute the value with the expression tree
             uint etResult = default(uint);
@@ -10727,7 +10727,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<uint?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(char)), typeof(uint?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<uint?> f = e.Compile();
+            Func<uint?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             uint? etResult = default(uint?);
@@ -10775,7 +10775,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<ulong>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(char)), typeof(ulong)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ulong> f = e.Compile();
+            Func<ulong> f = e.CompileForTest();
 
             // compute the value with the expression tree
             ulong etResult = default(ulong);
@@ -10823,7 +10823,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<ulong?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(char)), typeof(ulong?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ulong?> f = e.Compile();
+            Func<ulong?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             ulong? etResult = default(ulong?);
@@ -10871,7 +10871,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<ushort>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(char)), typeof(ushort)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ushort> f = e.Compile();
+            Func<ushort> f = e.CompileForTest();
 
             // compute the value with the expression tree
             ushort etResult = default(ushort);
@@ -10919,7 +10919,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<ushort?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(char)), typeof(ushort?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ushort?> f = e.Compile();
+            Func<ushort?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             ushort? etResult = default(ushort?);
@@ -10967,7 +10967,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<byte>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(char?)), typeof(byte)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<byte> f = e.Compile();
+            Func<byte> f = e.CompileForTest();
 
             // compute the value with the expression tree
             byte etResult = default(byte);
@@ -11015,7 +11015,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<byte?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(char?)), typeof(byte?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<byte?> f = e.Compile();
+            Func<byte?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             byte? etResult = default(byte?);
@@ -11063,7 +11063,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<char>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(char?)), typeof(char)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<char> f = e.Compile();
+            Func<char> f = e.CompileForTest();
 
             // compute the value with the expression tree
             char etResult = default(char);
@@ -11111,7 +11111,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<char?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(char?)), typeof(char?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<char?> f = e.Compile();
+            Func<char?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             char? etResult = default(char?);
@@ -11159,7 +11159,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<decimal>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(char?)), typeof(decimal)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<decimal> f = e.Compile();
+            Func<decimal> f = e.CompileForTest();
 
             // compute the value with the expression tree
             decimal etResult = default(decimal);
@@ -11207,7 +11207,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<decimal?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(char?)), typeof(decimal?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<decimal?> f = e.Compile();
+            Func<decimal?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             decimal? etResult = default(decimal?);
@@ -11255,7 +11255,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<double>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(char?)), typeof(double)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<double> f = e.Compile();
+            Func<double> f = e.CompileForTest();
 
             // compute the value with the expression tree
             double etResult = default(double);
@@ -11303,7 +11303,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<double?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(char?)), typeof(double?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<double?> f = e.Compile();
+            Func<double?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             double? etResult = default(double?);
@@ -11351,7 +11351,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<E>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(char?)), typeof(E)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<E> f = e.Compile();
+            Func<E> f = e.CompileForTest();
 
             // compute the value with the expression tree
             E etResult = default(E);
@@ -11399,7 +11399,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<E?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(char?)), typeof(E?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<E?> f = e.Compile();
+            Func<E?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             E? etResult = default(E?);
@@ -11447,7 +11447,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<El>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(char?)), typeof(El)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<El> f = e.Compile();
+            Func<El> f = e.CompileForTest();
 
             // compute the value with the expression tree
             El etResult = default(El);
@@ -11495,7 +11495,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<El?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(char?)), typeof(El?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<El?> f = e.Compile();
+            Func<El?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             El? etResult = default(El?);
@@ -11543,7 +11543,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<float>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(char?)), typeof(float)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<float> f = e.Compile();
+            Func<float> f = e.CompileForTest();
 
             // compute the value with the expression tree
             float etResult = default(float);
@@ -11591,7 +11591,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<float?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(char?)), typeof(float?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<float?> f = e.Compile();
+            Func<float?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             float? etResult = default(float?);
@@ -11639,7 +11639,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<int>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(char?)), typeof(int)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<int> f = e.Compile();
+            Func<int> f = e.CompileForTest();
 
             // compute the value with the expression tree
             int etResult = default(int);
@@ -11687,7 +11687,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<int?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(char?)), typeof(int?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<int?> f = e.Compile();
+            Func<int?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             int? etResult = default(int?);
@@ -11735,7 +11735,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<long>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(char?)), typeof(long)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<long> f = e.Compile();
+            Func<long> f = e.CompileForTest();
 
             // compute the value with the expression tree
             long etResult = default(long);
@@ -11783,7 +11783,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<long?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(char?)), typeof(long?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<long?> f = e.Compile();
+            Func<long?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             long? etResult = default(long?);
@@ -11831,7 +11831,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<sbyte>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(char?)), typeof(sbyte)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<sbyte> f = e.Compile();
+            Func<sbyte> f = e.CompileForTest();
 
             // compute the value with the expression tree
             sbyte etResult = default(sbyte);
@@ -11879,7 +11879,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<sbyte?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(char?)), typeof(sbyte?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<sbyte?> f = e.Compile();
+            Func<sbyte?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             sbyte? etResult = default(sbyte?);
@@ -11927,7 +11927,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<short>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(char?)), typeof(short)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<short> f = e.Compile();
+            Func<short> f = e.CompileForTest();
 
             // compute the value with the expression tree
             short etResult = default(short);
@@ -11975,7 +11975,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<short?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(char?)), typeof(short?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<short?> f = e.Compile();
+            Func<short?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             short? etResult = default(short?);
@@ -12023,7 +12023,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<uint>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(char?)), typeof(uint)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<uint> f = e.Compile();
+            Func<uint> f = e.CompileForTest();
 
             // compute the value with the expression tree
             uint etResult = default(uint);
@@ -12071,7 +12071,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<uint?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(char?)), typeof(uint?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<uint?> f = e.Compile();
+            Func<uint?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             uint? etResult = default(uint?);
@@ -12119,7 +12119,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<ulong>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(char?)), typeof(ulong)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ulong> f = e.Compile();
+            Func<ulong> f = e.CompileForTest();
 
             // compute the value with the expression tree
             ulong etResult = default(ulong);
@@ -12167,7 +12167,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<ulong?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(char?)), typeof(ulong?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ulong?> f = e.Compile();
+            Func<ulong?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             ulong? etResult = default(ulong?);
@@ -12215,7 +12215,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<ushort>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(char?)), typeof(ushort)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ushort> f = e.Compile();
+            Func<ushort> f = e.CompileForTest();
 
             // compute the value with the expression tree
             ushort etResult = default(ushort);
@@ -12263,7 +12263,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<ushort?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(char?)), typeof(ushort?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ushort?> f = e.Compile();
+            Func<ushort?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             ushort? etResult = default(ushort?);
@@ -12311,7 +12311,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<byte>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(decimal)), typeof(byte)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<byte> f = e.Compile();
+            Func<byte> f = e.CompileForTest();
 
             // compute the value with the expression tree
             byte etResult = default(byte);
@@ -12359,7 +12359,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<byte?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(decimal)), typeof(byte?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<byte?> f = e.Compile();
+            Func<byte?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             byte? etResult = default(byte?);
@@ -12407,7 +12407,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<char>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(decimal)), typeof(char)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<char> f = e.Compile();
+            Func<char> f = e.CompileForTest();
 
             // compute the value with the expression tree
             char etResult = default(char);
@@ -12455,7 +12455,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<char?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(decimal)), typeof(char?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<char?> f = e.Compile();
+            Func<char?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             char? etResult = default(char?);
@@ -12503,7 +12503,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<decimal>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(decimal)), typeof(decimal)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<decimal> f = e.Compile();
+            Func<decimal> f = e.CompileForTest();
 
             // compute the value with the expression tree
             decimal etResult = default(decimal);
@@ -12551,7 +12551,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<decimal?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(decimal)), typeof(decimal?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<decimal?> f = e.Compile();
+            Func<decimal?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             decimal? etResult = default(decimal?);
@@ -12599,7 +12599,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<double>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(decimal)), typeof(double)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<double> f = e.Compile();
+            Func<double> f = e.CompileForTest();
 
             // compute the value with the expression tree
             double etResult = default(double);
@@ -12647,7 +12647,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<double?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(decimal)), typeof(double?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<double?> f = e.Compile();
+            Func<double?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             double? etResult = default(double?);
@@ -12695,7 +12695,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<float>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(decimal)), typeof(float)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<float> f = e.Compile();
+            Func<float> f = e.CompileForTest();
 
             // compute the value with the expression tree
             float etResult = default(float);
@@ -12743,7 +12743,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<float?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(decimal)), typeof(float?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<float?> f = e.Compile();
+            Func<float?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             float? etResult = default(float?);
@@ -12791,7 +12791,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<int>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(decimal)), typeof(int)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<int> f = e.Compile();
+            Func<int> f = e.CompileForTest();
 
             // compute the value with the expression tree
             int etResult = default(int);
@@ -12839,7 +12839,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<int?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(decimal)), typeof(int?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<int?> f = e.Compile();
+            Func<int?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             int? etResult = default(int?);
@@ -12887,7 +12887,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<long>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(decimal)), typeof(long)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<long> f = e.Compile();
+            Func<long> f = e.CompileForTest();
 
             // compute the value with the expression tree
             long etResult = default(long);
@@ -12935,7 +12935,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<long?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(decimal)), typeof(long?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<long?> f = e.Compile();
+            Func<long?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             long? etResult = default(long?);
@@ -12983,7 +12983,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<sbyte>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(decimal)), typeof(sbyte)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<sbyte> f = e.Compile();
+            Func<sbyte> f = e.CompileForTest();
 
             // compute the value with the expression tree
             sbyte etResult = default(sbyte);
@@ -13031,7 +13031,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<sbyte?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(decimal)), typeof(sbyte?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<sbyte?> f = e.Compile();
+            Func<sbyte?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             sbyte? etResult = default(sbyte?);
@@ -13079,7 +13079,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<short>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(decimal)), typeof(short)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<short> f = e.Compile();
+            Func<short> f = e.CompileForTest();
 
             // compute the value with the expression tree
             short etResult = default(short);
@@ -13127,7 +13127,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<short?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(decimal)), typeof(short?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<short?> f = e.Compile();
+            Func<short?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             short? etResult = default(short?);
@@ -13175,7 +13175,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<uint>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(decimal)), typeof(uint)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<uint> f = e.Compile();
+            Func<uint> f = e.CompileForTest();
 
             // compute the value with the expression tree
             uint etResult = default(uint);
@@ -13223,7 +13223,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<uint?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(decimal)), typeof(uint?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<uint?> f = e.Compile();
+            Func<uint?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             uint? etResult = default(uint?);
@@ -13271,7 +13271,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<ulong>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(decimal)), typeof(ulong)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ulong> f = e.Compile();
+            Func<ulong> f = e.CompileForTest();
 
             // compute the value with the expression tree
             ulong etResult = default(ulong);
@@ -13319,7 +13319,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<ulong?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(decimal)), typeof(ulong?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ulong?> f = e.Compile();
+            Func<ulong?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             ulong? etResult = default(ulong?);
@@ -13367,7 +13367,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<ushort>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(decimal)), typeof(ushort)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ushort> f = e.Compile();
+            Func<ushort> f = e.CompileForTest();
 
             // compute the value with the expression tree
             ushort etResult = default(ushort);
@@ -13415,7 +13415,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<ushort?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(decimal)), typeof(ushort?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ushort?> f = e.Compile();
+            Func<ushort?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             ushort? etResult = default(ushort?);
@@ -13463,7 +13463,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<byte>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(decimal?)), typeof(byte)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<byte> f = e.Compile();
+            Func<byte> f = e.CompileForTest();
 
             // compute the value with the expression tree
             byte etResult = default(byte);
@@ -13511,7 +13511,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<byte?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(decimal?)), typeof(byte?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<byte?> f = e.Compile();
+            Func<byte?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             byte? etResult = default(byte?);
@@ -13559,7 +13559,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<char>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(decimal?)), typeof(char)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<char> f = e.Compile();
+            Func<char> f = e.CompileForTest();
 
             // compute the value with the expression tree
             char etResult = default(char);
@@ -13607,7 +13607,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<char?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(decimal?)), typeof(char?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<char?> f = e.Compile();
+            Func<char?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             char? etResult = default(char?);
@@ -13655,7 +13655,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<decimal>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(decimal?)), typeof(decimal)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<decimal> f = e.Compile();
+            Func<decimal> f = e.CompileForTest();
 
             // compute the value with the expression tree
             decimal etResult = default(decimal);
@@ -13703,7 +13703,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<decimal?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(decimal?)), typeof(decimal?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<decimal?> f = e.Compile();
+            Func<decimal?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             decimal? etResult = default(decimal?);
@@ -13751,7 +13751,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<double>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(decimal?)), typeof(double)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<double> f = e.Compile();
+            Func<double> f = e.CompileForTest();
 
             // compute the value with the expression tree
             double etResult = default(double);
@@ -13799,7 +13799,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<double?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(decimal?)), typeof(double?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<double?> f = e.Compile();
+            Func<double?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             double? etResult = default(double?);
@@ -13847,7 +13847,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<float>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(decimal?)), typeof(float)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<float> f = e.Compile();
+            Func<float> f = e.CompileForTest();
 
             // compute the value with the expression tree
             float etResult = default(float);
@@ -13895,7 +13895,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<float?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(decimal?)), typeof(float?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<float?> f = e.Compile();
+            Func<float?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             float? etResult = default(float?);
@@ -13943,7 +13943,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<int>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(decimal?)), typeof(int)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<int> f = e.Compile();
+            Func<int> f = e.CompileForTest();
 
             // compute the value with the expression tree
             int etResult = default(int);
@@ -13991,7 +13991,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<int?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(decimal?)), typeof(int?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<int?> f = e.Compile();
+            Func<int?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             int? etResult = default(int?);
@@ -14039,7 +14039,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<long>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(decimal?)), typeof(long)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<long> f = e.Compile();
+            Func<long> f = e.CompileForTest();
 
             // compute the value with the expression tree
             long etResult = default(long);
@@ -14087,7 +14087,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<long?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(decimal?)), typeof(long?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<long?> f = e.Compile();
+            Func<long?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             long? etResult = default(long?);
@@ -14135,7 +14135,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<sbyte>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(decimal?)), typeof(sbyte)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<sbyte> f = e.Compile();
+            Func<sbyte> f = e.CompileForTest();
 
             // compute the value with the expression tree
             sbyte etResult = default(sbyte);
@@ -14183,7 +14183,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<sbyte?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(decimal?)), typeof(sbyte?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<sbyte?> f = e.Compile();
+            Func<sbyte?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             sbyte? etResult = default(sbyte?);
@@ -14231,7 +14231,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<short>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(decimal?)), typeof(short)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<short> f = e.Compile();
+            Func<short> f = e.CompileForTest();
 
             // compute the value with the expression tree
             short etResult = default(short);
@@ -14279,7 +14279,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<short?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(decimal?)), typeof(short?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<short?> f = e.Compile();
+            Func<short?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             short? etResult = default(short?);
@@ -14327,7 +14327,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<uint>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(decimal?)), typeof(uint)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<uint> f = e.Compile();
+            Func<uint> f = e.CompileForTest();
 
             // compute the value with the expression tree
             uint etResult = default(uint);
@@ -14375,7 +14375,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<uint?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(decimal?)), typeof(uint?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<uint?> f = e.Compile();
+            Func<uint?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             uint? etResult = default(uint?);
@@ -14423,7 +14423,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<ulong>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(decimal?)), typeof(ulong)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ulong> f = e.Compile();
+            Func<ulong> f = e.CompileForTest();
 
             // compute the value with the expression tree
             ulong etResult = default(ulong);
@@ -14471,7 +14471,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<ulong?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(decimal?)), typeof(ulong?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ulong?> f = e.Compile();
+            Func<ulong?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             ulong? etResult = default(ulong?);
@@ -14519,7 +14519,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<ushort>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(decimal?)), typeof(ushort)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ushort> f = e.Compile();
+            Func<ushort> f = e.CompileForTest();
 
             // compute the value with the expression tree
             ushort etResult = default(ushort);
@@ -14567,7 +14567,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<ushort?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(decimal?)), typeof(ushort?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ushort?> f = e.Compile();
+            Func<ushort?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             ushort? etResult = default(ushort?);
@@ -14615,7 +14615,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<byte>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(double)), typeof(byte)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<byte> f = e.Compile();
+            Func<byte> f = e.CompileForTest();
 
             // compute the value with the expression tree
             byte etResult = default(byte);
@@ -14663,7 +14663,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<byte?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(double)), typeof(byte?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<byte?> f = e.Compile();
+            Func<byte?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             byte? etResult = default(byte?);
@@ -14711,7 +14711,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<char>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(double)), typeof(char)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<char> f = e.Compile();
+            Func<char> f = e.CompileForTest();
 
             // compute the value with the expression tree
             char etResult = default(char);
@@ -14759,7 +14759,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<char?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(double)), typeof(char?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<char?> f = e.Compile();
+            Func<char?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             char? etResult = default(char?);
@@ -14807,7 +14807,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<decimal>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(double)), typeof(decimal)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<decimal> f = e.Compile();
+            Func<decimal> f = e.CompileForTest();
 
             // compute the value with the expression tree
             decimal etResult = default(decimal);
@@ -14855,7 +14855,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<decimal?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(double)), typeof(decimal?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<decimal?> f = e.Compile();
+            Func<decimal?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             decimal? etResult = default(decimal?);
@@ -14903,7 +14903,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<double>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(double)), typeof(double)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<double> f = e.Compile();
+            Func<double> f = e.CompileForTest();
 
             // compute the value with the expression tree
             double etResult = default(double);
@@ -14951,7 +14951,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<double?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(double)), typeof(double?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<double?> f = e.Compile();
+            Func<double?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             double? etResult = default(double?);
@@ -14999,7 +14999,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<E>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(double)), typeof(E)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<E> f = e.Compile();
+            Func<E> f = e.CompileForTest();
 
             // compute the value with the expression tree
             E etResult = default(E);
@@ -15047,7 +15047,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<E?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(double)), typeof(E?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<E?> f = e.Compile();
+            Func<E?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             E? etResult = default(E?);
@@ -15095,7 +15095,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<El>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(double)), typeof(El)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<El> f = e.Compile();
+            Func<El> f = e.CompileForTest();
 
             // compute the value with the expression tree
             El etResult = default(El);
@@ -15143,7 +15143,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<El?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(double)), typeof(El?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<El?> f = e.Compile();
+            Func<El?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             El? etResult = default(El?);
@@ -15191,7 +15191,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<float>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(double)), typeof(float)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<float> f = e.Compile();
+            Func<float> f = e.CompileForTest();
 
             // compute the value with the expression tree
             float etResult = default(float);
@@ -15239,7 +15239,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<float?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(double)), typeof(float?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<float?> f = e.Compile();
+            Func<float?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             float? etResult = default(float?);
@@ -15287,7 +15287,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<int>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(double)), typeof(int)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<int> f = e.Compile();
+            Func<int> f = e.CompileForTest();
 
             // compute the value with the expression tree
             int etResult = default(int);
@@ -15335,7 +15335,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<int?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(double)), typeof(int?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<int?> f = e.Compile();
+            Func<int?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             int? etResult = default(int?);
@@ -15383,7 +15383,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<long>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(double)), typeof(long)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<long> f = e.Compile();
+            Func<long> f = e.CompileForTest();
 
             // compute the value with the expression tree
             long etResult = default(long);
@@ -15431,7 +15431,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<long?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(double)), typeof(long?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<long?> f = e.Compile();
+            Func<long?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             long? etResult = default(long?);
@@ -15479,7 +15479,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<sbyte>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(double)), typeof(sbyte)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<sbyte> f = e.Compile();
+            Func<sbyte> f = e.CompileForTest();
 
             // compute the value with the expression tree
             sbyte etResult = default(sbyte);
@@ -15527,7 +15527,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<sbyte?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(double)), typeof(sbyte?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<sbyte?> f = e.Compile();
+            Func<sbyte?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             sbyte? etResult = default(sbyte?);
@@ -15575,7 +15575,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<short>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(double)), typeof(short)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<short> f = e.Compile();
+            Func<short> f = e.CompileForTest();
 
             // compute the value with the expression tree
             short etResult = default(short);
@@ -15623,7 +15623,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<short?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(double)), typeof(short?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<short?> f = e.Compile();
+            Func<short?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             short? etResult = default(short?);
@@ -15671,7 +15671,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<uint>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(double)), typeof(uint)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<uint> f = e.Compile();
+            Func<uint> f = e.CompileForTest();
 
             // compute the value with the expression tree
             uint etResult = default(uint);
@@ -15719,7 +15719,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<uint?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(double)), typeof(uint?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<uint?> f = e.Compile();
+            Func<uint?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             uint? etResult = default(uint?);
@@ -15767,7 +15767,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<ulong>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(double)), typeof(ulong)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ulong> f = e.Compile();
+            Func<ulong> f = e.CompileForTest();
 
             // compute the value with the expression tree
             ulong etResult = default(ulong);
@@ -15815,7 +15815,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<ulong?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(double)), typeof(ulong?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ulong?> f = e.Compile();
+            Func<ulong?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             ulong? etResult = default(ulong?);
@@ -15863,7 +15863,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<ushort>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(double)), typeof(ushort)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ushort> f = e.Compile();
+            Func<ushort> f = e.CompileForTest();
 
             // compute the value with the expression tree
             ushort etResult = default(ushort);
@@ -15911,7 +15911,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<ushort?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(double)), typeof(ushort?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ushort?> f = e.Compile();
+            Func<ushort?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             ushort? etResult = default(ushort?);
@@ -15959,7 +15959,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<byte>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(double?)), typeof(byte)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<byte> f = e.Compile();
+            Func<byte> f = e.CompileForTest();
 
             // compute the value with the expression tree
             byte etResult = default(byte);
@@ -16007,7 +16007,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<byte?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(double?)), typeof(byte?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<byte?> f = e.Compile();
+            Func<byte?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             byte? etResult = default(byte?);
@@ -16055,7 +16055,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<char>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(double?)), typeof(char)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<char> f = e.Compile();
+            Func<char> f = e.CompileForTest();
 
             // compute the value with the expression tree
             char etResult = default(char);
@@ -16103,7 +16103,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<char?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(double?)), typeof(char?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<char?> f = e.Compile();
+            Func<char?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             char? etResult = default(char?);
@@ -16151,7 +16151,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<decimal>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(double?)), typeof(decimal)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<decimal> f = e.Compile();
+            Func<decimal> f = e.CompileForTest();
 
             // compute the value with the expression tree
             decimal etResult = default(decimal);
@@ -16199,7 +16199,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<decimal?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(double?)), typeof(decimal?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<decimal?> f = e.Compile();
+            Func<decimal?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             decimal? etResult = default(decimal?);
@@ -16247,7 +16247,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<double>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(double?)), typeof(double)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<double> f = e.Compile();
+            Func<double> f = e.CompileForTest();
 
             // compute the value with the expression tree
             double etResult = default(double);
@@ -16295,7 +16295,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<double?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(double?)), typeof(double?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<double?> f = e.Compile();
+            Func<double?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             double? etResult = default(double?);
@@ -16343,7 +16343,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<E>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(double?)), typeof(E)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<E> f = e.Compile();
+            Func<E> f = e.CompileForTest();
 
             // compute the value with the expression tree
             E etResult = default(E);
@@ -16391,7 +16391,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<E?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(double?)), typeof(E?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<E?> f = e.Compile();
+            Func<E?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             E? etResult = default(E?);
@@ -16439,7 +16439,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<El>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(double?)), typeof(El)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<El> f = e.Compile();
+            Func<El> f = e.CompileForTest();
 
             // compute the value with the expression tree
             El etResult = default(El);
@@ -16487,7 +16487,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<El?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(double?)), typeof(El?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<El?> f = e.Compile();
+            Func<El?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             El? etResult = default(El?);
@@ -16535,7 +16535,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<float>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(double?)), typeof(float)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<float> f = e.Compile();
+            Func<float> f = e.CompileForTest();
 
             // compute the value with the expression tree
             float etResult = default(float);
@@ -16583,7 +16583,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<float?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(double?)), typeof(float?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<float?> f = e.Compile();
+            Func<float?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             float? etResult = default(float?);
@@ -16631,7 +16631,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<int>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(double?)), typeof(int)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<int> f = e.Compile();
+            Func<int> f = e.CompileForTest();
 
             // compute the value with the expression tree
             int etResult = default(int);
@@ -16679,7 +16679,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<int?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(double?)), typeof(int?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<int?> f = e.Compile();
+            Func<int?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             int? etResult = default(int?);
@@ -16727,7 +16727,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<long>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(double?)), typeof(long)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<long> f = e.Compile();
+            Func<long> f = e.CompileForTest();
 
             // compute the value with the expression tree
             long etResult = default(long);
@@ -16775,7 +16775,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<long?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(double?)), typeof(long?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<long?> f = e.Compile();
+            Func<long?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             long? etResult = default(long?);
@@ -16823,7 +16823,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<sbyte>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(double?)), typeof(sbyte)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<sbyte> f = e.Compile();
+            Func<sbyte> f = e.CompileForTest();
 
             // compute the value with the expression tree
             sbyte etResult = default(sbyte);
@@ -16871,7 +16871,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<sbyte?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(double?)), typeof(sbyte?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<sbyte?> f = e.Compile();
+            Func<sbyte?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             sbyte? etResult = default(sbyte?);
@@ -16919,7 +16919,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<short>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(double?)), typeof(short)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<short> f = e.Compile();
+            Func<short> f = e.CompileForTest();
 
             // compute the value with the expression tree
             short etResult = default(short);
@@ -16967,7 +16967,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<short?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(double?)), typeof(short?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<short?> f = e.Compile();
+            Func<short?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             short? etResult = default(short?);
@@ -17015,7 +17015,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<uint>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(double?)), typeof(uint)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<uint> f = e.Compile();
+            Func<uint> f = e.CompileForTest();
 
             // compute the value with the expression tree
             uint etResult = default(uint);
@@ -17063,7 +17063,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<uint?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(double?)), typeof(uint?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<uint?> f = e.Compile();
+            Func<uint?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             uint? etResult = default(uint?);
@@ -17111,7 +17111,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<ulong>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(double?)), typeof(ulong)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ulong> f = e.Compile();
+            Func<ulong> f = e.CompileForTest();
 
             // compute the value with the expression tree
             ulong etResult = default(ulong);
@@ -17159,7 +17159,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<ulong?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(double?)), typeof(ulong?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ulong?> f = e.Compile();
+            Func<ulong?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             ulong? etResult = default(ulong?);
@@ -17207,7 +17207,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<ushort>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(double?)), typeof(ushort)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ushort> f = e.Compile();
+            Func<ushort> f = e.CompileForTest();
 
             // compute the value with the expression tree
             ushort etResult = default(ushort);
@@ -17255,7 +17255,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<ushort?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(double?)), typeof(ushort?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ushort?> f = e.Compile();
+            Func<ushort?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             ushort? etResult = default(ushort?);
@@ -17303,7 +17303,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<byte>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(E)), typeof(byte)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<byte> f = e.Compile();
+            Func<byte> f = e.CompileForTest();
 
             // compute the value with the expression tree
             byte etResult = default(byte);
@@ -17351,7 +17351,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<byte?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(E)), typeof(byte?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<byte?> f = e.Compile();
+            Func<byte?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             byte? etResult = default(byte?);
@@ -17399,7 +17399,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<char>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(E)), typeof(char)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<char> f = e.Compile();
+            Func<char> f = e.CompileForTest();
 
             // compute the value with the expression tree
             char etResult = default(char);
@@ -17447,7 +17447,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<char?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(E)), typeof(char?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<char?> f = e.Compile();
+            Func<char?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             char? etResult = default(char?);
@@ -17495,7 +17495,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<double>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(E)), typeof(double)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<double> f = e.Compile();
+            Func<double> f = e.CompileForTest();
 
             // compute the value with the expression tree
             double etResult = default(double);
@@ -17543,7 +17543,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<double?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(E)), typeof(double?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<double?> f = e.Compile();
+            Func<double?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             double? etResult = default(double?);
@@ -17591,7 +17591,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<E>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(E)), typeof(E)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<E> f = e.Compile();
+            Func<E> f = e.CompileForTest();
 
             // compute the value with the expression tree
             E etResult = default(E);
@@ -17639,7 +17639,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<E?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(E)), typeof(E?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<E?> f = e.Compile();
+            Func<E?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             E? etResult = default(E?);
@@ -17687,7 +17687,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<El>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(E)), typeof(El)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<El> f = e.Compile();
+            Func<El> f = e.CompileForTest();
 
             // compute the value with the expression tree
             El etResult = default(El);
@@ -17735,7 +17735,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<El?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(E)), typeof(El?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<El?> f = e.Compile();
+            Func<El?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             El? etResult = default(El?);
@@ -17783,7 +17783,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<float>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(E)), typeof(float)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<float> f = e.Compile();
+            Func<float> f = e.CompileForTest();
 
             // compute the value with the expression tree
             float etResult = default(float);
@@ -17831,7 +17831,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<float?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(E)), typeof(float?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<float?> f = e.Compile();
+            Func<float?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             float? etResult = default(float?);
@@ -17879,7 +17879,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<int>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(E)), typeof(int)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<int> f = e.Compile();
+            Func<int> f = e.CompileForTest();
 
             // compute the value with the expression tree
             int etResult = default(int);
@@ -17927,7 +17927,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<int?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(E)), typeof(int?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<int?> f = e.Compile();
+            Func<int?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             int? etResult = default(int?);
@@ -17975,7 +17975,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<long>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(E)), typeof(long)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<long> f = e.Compile();
+            Func<long> f = e.CompileForTest();
 
             // compute the value with the expression tree
             long etResult = default(long);
@@ -18023,7 +18023,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<long?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(E)), typeof(long?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<long?> f = e.Compile();
+            Func<long?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             long? etResult = default(long?);
@@ -18071,7 +18071,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<sbyte>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(E)), typeof(sbyte)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<sbyte> f = e.Compile();
+            Func<sbyte> f = e.CompileForTest();
 
             // compute the value with the expression tree
             sbyte etResult = default(sbyte);
@@ -18119,7 +18119,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<sbyte?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(E)), typeof(sbyte?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<sbyte?> f = e.Compile();
+            Func<sbyte?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             sbyte? etResult = default(sbyte?);
@@ -18167,7 +18167,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<short>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(E)), typeof(short)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<short> f = e.Compile();
+            Func<short> f = e.CompileForTest();
 
             // compute the value with the expression tree
             short etResult = default(short);
@@ -18215,7 +18215,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<short?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(E)), typeof(short?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<short?> f = e.Compile();
+            Func<short?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             short? etResult = default(short?);
@@ -18263,7 +18263,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<uint>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(E)), typeof(uint)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<uint> f = e.Compile();
+            Func<uint> f = e.CompileForTest();
 
             // compute the value with the expression tree
             uint etResult = default(uint);
@@ -18311,7 +18311,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<uint?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(E)), typeof(uint?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<uint?> f = e.Compile();
+            Func<uint?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             uint? etResult = default(uint?);
@@ -18359,7 +18359,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<ulong>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(E)), typeof(ulong)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ulong> f = e.Compile();
+            Func<ulong> f = e.CompileForTest();
 
             // compute the value with the expression tree
             ulong etResult = default(ulong);
@@ -18407,7 +18407,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<ulong?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(E)), typeof(ulong?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ulong?> f = e.Compile();
+            Func<ulong?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             ulong? etResult = default(ulong?);
@@ -18455,7 +18455,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<ushort>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(E)), typeof(ushort)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ushort> f = e.Compile();
+            Func<ushort> f = e.CompileForTest();
 
             // compute the value with the expression tree
             ushort etResult = default(ushort);
@@ -18503,7 +18503,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<ushort?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(E)), typeof(ushort?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ushort?> f = e.Compile();
+            Func<ushort?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             ushort? etResult = default(ushort?);
@@ -18551,7 +18551,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<byte>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(E?)), typeof(byte)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<byte> f = e.Compile();
+            Func<byte> f = e.CompileForTest();
 
             // compute the value with the expression tree
             byte etResult = default(byte);
@@ -18599,7 +18599,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<byte?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(E?)), typeof(byte?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<byte?> f = e.Compile();
+            Func<byte?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             byte? etResult = default(byte?);
@@ -18647,7 +18647,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<char>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(E?)), typeof(char)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<char> f = e.Compile();
+            Func<char> f = e.CompileForTest();
 
             // compute the value with the expression tree
             char etResult = default(char);
@@ -18695,7 +18695,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<char?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(E?)), typeof(char?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<char?> f = e.Compile();
+            Func<char?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             char? etResult = default(char?);
@@ -18743,7 +18743,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<double>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(E?)), typeof(double)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<double> f = e.Compile();
+            Func<double> f = e.CompileForTest();
 
             // compute the value with the expression tree
             double etResult = default(double);
@@ -18791,7 +18791,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<double?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(E?)), typeof(double?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<double?> f = e.Compile();
+            Func<double?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             double? etResult = default(double?);
@@ -18839,7 +18839,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<E>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(E?)), typeof(E)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<E> f = e.Compile();
+            Func<E> f = e.CompileForTest();
 
             // compute the value with the expression tree
             E etResult = default(E);
@@ -18887,7 +18887,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<E?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(E?)), typeof(E?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<E?> f = e.Compile();
+            Func<E?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             E? etResult = default(E?);
@@ -18935,7 +18935,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<El>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(E?)), typeof(El)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<El> f = e.Compile();
+            Func<El> f = e.CompileForTest();
 
             // compute the value with the expression tree
             El etResult = default(El);
@@ -18983,7 +18983,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<El?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(E?)), typeof(El?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<El?> f = e.Compile();
+            Func<El?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             El? etResult = default(El?);
@@ -19031,7 +19031,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<float>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(E?)), typeof(float)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<float> f = e.Compile();
+            Func<float> f = e.CompileForTest();
 
             // compute the value with the expression tree
             float etResult = default(float);
@@ -19079,7 +19079,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<float?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(E?)), typeof(float?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<float?> f = e.Compile();
+            Func<float?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             float? etResult = default(float?);
@@ -19127,7 +19127,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<int>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(E?)), typeof(int)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<int> f = e.Compile();
+            Func<int> f = e.CompileForTest();
 
             // compute the value with the expression tree
             int etResult = default(int);
@@ -19175,7 +19175,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<int?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(E?)), typeof(int?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<int?> f = e.Compile();
+            Func<int?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             int? etResult = default(int?);
@@ -19223,7 +19223,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<long>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(E?)), typeof(long)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<long> f = e.Compile();
+            Func<long> f = e.CompileForTest();
 
             // compute the value with the expression tree
             long etResult = default(long);
@@ -19271,7 +19271,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<long?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(E?)), typeof(long?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<long?> f = e.Compile();
+            Func<long?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             long? etResult = default(long?);
@@ -19319,7 +19319,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<sbyte>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(E?)), typeof(sbyte)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<sbyte> f = e.Compile();
+            Func<sbyte> f = e.CompileForTest();
 
             // compute the value with the expression tree
             sbyte etResult = default(sbyte);
@@ -19367,7 +19367,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<sbyte?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(E?)), typeof(sbyte?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<sbyte?> f = e.Compile();
+            Func<sbyte?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             sbyte? etResult = default(sbyte?);
@@ -19415,7 +19415,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<short>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(E?)), typeof(short)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<short> f = e.Compile();
+            Func<short> f = e.CompileForTest();
 
             // compute the value with the expression tree
             short etResult = default(short);
@@ -19463,7 +19463,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<short?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(E?)), typeof(short?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<short?> f = e.Compile();
+            Func<short?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             short? etResult = default(short?);
@@ -19511,7 +19511,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<uint>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(E?)), typeof(uint)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<uint> f = e.Compile();
+            Func<uint> f = e.CompileForTest();
 
             // compute the value with the expression tree
             uint etResult = default(uint);
@@ -19559,7 +19559,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<uint?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(E?)), typeof(uint?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<uint?> f = e.Compile();
+            Func<uint?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             uint? etResult = default(uint?);
@@ -19607,7 +19607,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<ulong>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(E?)), typeof(ulong)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ulong> f = e.Compile();
+            Func<ulong> f = e.CompileForTest();
 
             // compute the value with the expression tree
             ulong etResult = default(ulong);
@@ -19655,7 +19655,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<ulong?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(E?)), typeof(ulong?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ulong?> f = e.Compile();
+            Func<ulong?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             ulong? etResult = default(ulong?);
@@ -19703,7 +19703,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<ushort>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(E?)), typeof(ushort)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ushort> f = e.Compile();
+            Func<ushort> f = e.CompileForTest();
 
             // compute the value with the expression tree
             ushort etResult = default(ushort);
@@ -19751,7 +19751,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<ushort?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(E?)), typeof(ushort?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ushort?> f = e.Compile();
+            Func<ushort?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             ushort? etResult = default(ushort?);
@@ -19799,7 +19799,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<byte>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(El)), typeof(byte)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<byte> f = e.Compile();
+            Func<byte> f = e.CompileForTest();
 
             // compute the value with the expression tree
             byte etResult = default(byte);
@@ -19847,7 +19847,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<byte?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(El)), typeof(byte?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<byte?> f = e.Compile();
+            Func<byte?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             byte? etResult = default(byte?);
@@ -19895,7 +19895,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<char>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(El)), typeof(char)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<char> f = e.Compile();
+            Func<char> f = e.CompileForTest();
 
             // compute the value with the expression tree
             char etResult = default(char);
@@ -19943,7 +19943,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<char?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(El)), typeof(char?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<char?> f = e.Compile();
+            Func<char?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             char? etResult = default(char?);
@@ -19991,7 +19991,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<double>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(El)), typeof(double)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<double> f = e.Compile();
+            Func<double> f = e.CompileForTest();
 
             // compute the value with the expression tree
             double etResult = default(double);
@@ -20039,7 +20039,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<double?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(El)), typeof(double?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<double?> f = e.Compile();
+            Func<double?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             double? etResult = default(double?);
@@ -20087,7 +20087,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<E>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(El)), typeof(E)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<E> f = e.Compile();
+            Func<E> f = e.CompileForTest();
 
             // compute the value with the expression tree
             E etResult = default(E);
@@ -20135,7 +20135,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<E?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(El)), typeof(E?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<E?> f = e.Compile();
+            Func<E?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             E? etResult = default(E?);
@@ -20183,7 +20183,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<El>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(El)), typeof(El)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<El> f = e.Compile();
+            Func<El> f = e.CompileForTest();
 
             // compute the value with the expression tree
             El etResult = default(El);
@@ -20231,7 +20231,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<El?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(El)), typeof(El?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<El?> f = e.Compile();
+            Func<El?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             El? etResult = default(El?);
@@ -20279,7 +20279,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<float>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(El)), typeof(float)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<float> f = e.Compile();
+            Func<float> f = e.CompileForTest();
 
             // compute the value with the expression tree
             float etResult = default(float);
@@ -20327,7 +20327,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<float?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(El)), typeof(float?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<float?> f = e.Compile();
+            Func<float?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             float? etResult = default(float?);
@@ -20375,7 +20375,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<int>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(El)), typeof(int)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<int> f = e.Compile();
+            Func<int> f = e.CompileForTest();
 
             // compute the value with the expression tree
             int etResult = default(int);
@@ -20423,7 +20423,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<int?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(El)), typeof(int?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<int?> f = e.Compile();
+            Func<int?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             int? etResult = default(int?);
@@ -20471,7 +20471,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<long>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(El)), typeof(long)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<long> f = e.Compile();
+            Func<long> f = e.CompileForTest();
 
             // compute the value with the expression tree
             long etResult = default(long);
@@ -20519,7 +20519,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<long?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(El)), typeof(long?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<long?> f = e.Compile();
+            Func<long?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             long? etResult = default(long?);
@@ -20567,7 +20567,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<sbyte>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(El)), typeof(sbyte)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<sbyte> f = e.Compile();
+            Func<sbyte> f = e.CompileForTest();
 
             // compute the value with the expression tree
             sbyte etResult = default(sbyte);
@@ -20615,7 +20615,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<sbyte?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(El)), typeof(sbyte?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<sbyte?> f = e.Compile();
+            Func<sbyte?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             sbyte? etResult = default(sbyte?);
@@ -20663,7 +20663,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<short>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(El)), typeof(short)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<short> f = e.Compile();
+            Func<short> f = e.CompileForTest();
 
             // compute the value with the expression tree
             short etResult = default(short);
@@ -20711,7 +20711,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<short?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(El)), typeof(short?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<short?> f = e.Compile();
+            Func<short?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             short? etResult = default(short?);
@@ -20759,7 +20759,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<uint>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(El)), typeof(uint)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<uint> f = e.Compile();
+            Func<uint> f = e.CompileForTest();
 
             // compute the value with the expression tree
             uint etResult = default(uint);
@@ -20807,7 +20807,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<uint?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(El)), typeof(uint?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<uint?> f = e.Compile();
+            Func<uint?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             uint? etResult = default(uint?);
@@ -20855,7 +20855,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<ulong>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(El)), typeof(ulong)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ulong> f = e.Compile();
+            Func<ulong> f = e.CompileForTest();
 
             // compute the value with the expression tree
             ulong etResult = default(ulong);
@@ -20903,7 +20903,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<ulong?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(El)), typeof(ulong?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ulong?> f = e.Compile();
+            Func<ulong?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             ulong? etResult = default(ulong?);
@@ -20951,7 +20951,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<ushort>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(El)), typeof(ushort)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ushort> f = e.Compile();
+            Func<ushort> f = e.CompileForTest();
 
             // compute the value with the expression tree
             ushort etResult = default(ushort);
@@ -20999,7 +20999,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<ushort?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(El)), typeof(ushort?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ushort?> f = e.Compile();
+            Func<ushort?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             ushort? etResult = default(ushort?);
@@ -21047,7 +21047,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<byte>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(El?)), typeof(byte)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<byte> f = e.Compile();
+            Func<byte> f = e.CompileForTest();
 
             // compute the value with the expression tree
             byte etResult = default(byte);
@@ -21095,7 +21095,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<byte?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(El?)), typeof(byte?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<byte?> f = e.Compile();
+            Func<byte?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             byte? etResult = default(byte?);
@@ -21143,7 +21143,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<char>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(El?)), typeof(char)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<char> f = e.Compile();
+            Func<char> f = e.CompileForTest();
 
             // compute the value with the expression tree
             char etResult = default(char);
@@ -21191,7 +21191,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<char?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(El?)), typeof(char?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<char?> f = e.Compile();
+            Func<char?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             char? etResult = default(char?);
@@ -21239,7 +21239,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<double>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(El?)), typeof(double)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<double> f = e.Compile();
+            Func<double> f = e.CompileForTest();
 
             // compute the value with the expression tree
             double etResult = default(double);
@@ -21287,7 +21287,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<double?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(El?)), typeof(double?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<double?> f = e.Compile();
+            Func<double?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             double? etResult = default(double?);
@@ -21335,7 +21335,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<E>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(El?)), typeof(E)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<E> f = e.Compile();
+            Func<E> f = e.CompileForTest();
 
             // compute the value with the expression tree
             E etResult = default(E);
@@ -21383,7 +21383,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<E?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(El?)), typeof(E?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<E?> f = e.Compile();
+            Func<E?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             E? etResult = default(E?);
@@ -21431,7 +21431,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<El>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(El?)), typeof(El)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<El> f = e.Compile();
+            Func<El> f = e.CompileForTest();
 
             // compute the value with the expression tree
             El etResult = default(El);
@@ -21479,7 +21479,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<El?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(El?)), typeof(El?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<El?> f = e.Compile();
+            Func<El?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             El? etResult = default(El?);
@@ -21527,7 +21527,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<float>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(El?)), typeof(float)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<float> f = e.Compile();
+            Func<float> f = e.CompileForTest();
 
             // compute the value with the expression tree
             float etResult = default(float);
@@ -21575,7 +21575,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<float?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(El?)), typeof(float?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<float?> f = e.Compile();
+            Func<float?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             float? etResult = default(float?);
@@ -21623,7 +21623,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<int>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(El?)), typeof(int)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<int> f = e.Compile();
+            Func<int> f = e.CompileForTest();
 
             // compute the value with the expression tree
             int etResult = default(int);
@@ -21671,7 +21671,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<int?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(El?)), typeof(int?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<int?> f = e.Compile();
+            Func<int?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             int? etResult = default(int?);
@@ -21719,7 +21719,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<long>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(El?)), typeof(long)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<long> f = e.Compile();
+            Func<long> f = e.CompileForTest();
 
             // compute the value with the expression tree
             long etResult = default(long);
@@ -21767,7 +21767,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<long?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(El?)), typeof(long?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<long?> f = e.Compile();
+            Func<long?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             long? etResult = default(long?);
@@ -21815,7 +21815,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<sbyte>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(El?)), typeof(sbyte)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<sbyte> f = e.Compile();
+            Func<sbyte> f = e.CompileForTest();
 
             // compute the value with the expression tree
             sbyte etResult = default(sbyte);
@@ -21863,7 +21863,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<sbyte?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(El?)), typeof(sbyte?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<sbyte?> f = e.Compile();
+            Func<sbyte?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             sbyte? etResult = default(sbyte?);
@@ -21911,7 +21911,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<short>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(El?)), typeof(short)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<short> f = e.Compile();
+            Func<short> f = e.CompileForTest();
 
             // compute the value with the expression tree
             short etResult = default(short);
@@ -21959,7 +21959,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<short?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(El?)), typeof(short?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<short?> f = e.Compile();
+            Func<short?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             short? etResult = default(short?);
@@ -22007,7 +22007,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<uint>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(El?)), typeof(uint)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<uint> f = e.Compile();
+            Func<uint> f = e.CompileForTest();
 
             // compute the value with the expression tree
             uint etResult = default(uint);
@@ -22055,7 +22055,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<uint?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(El?)), typeof(uint?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<uint?> f = e.Compile();
+            Func<uint?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             uint? etResult = default(uint?);
@@ -22103,7 +22103,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<ulong>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(El?)), typeof(ulong)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ulong> f = e.Compile();
+            Func<ulong> f = e.CompileForTest();
 
             // compute the value with the expression tree
             ulong etResult = default(ulong);
@@ -22151,7 +22151,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<ulong?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(El?)), typeof(ulong?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ulong?> f = e.Compile();
+            Func<ulong?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             ulong? etResult = default(ulong?);
@@ -22199,7 +22199,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<ushort>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(El?)), typeof(ushort)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ushort> f = e.Compile();
+            Func<ushort> f = e.CompileForTest();
 
             // compute the value with the expression tree
             ushort etResult = default(ushort);
@@ -22247,7 +22247,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<ushort?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(El?)), typeof(ushort?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ushort?> f = e.Compile();
+            Func<ushort?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             ushort? etResult = default(ushort?);
@@ -22295,7 +22295,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<byte>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(float)), typeof(byte)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<byte> f = e.Compile();
+            Func<byte> f = e.CompileForTest();
 
             // compute the value with the expression tree
             byte etResult = default(byte);
@@ -22343,7 +22343,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<byte?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(float)), typeof(byte?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<byte?> f = e.Compile();
+            Func<byte?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             byte? etResult = default(byte?);
@@ -22391,7 +22391,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<char>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(float)), typeof(char)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<char> f = e.Compile();
+            Func<char> f = e.CompileForTest();
 
             // compute the value with the expression tree
             char etResult = default(char);
@@ -22439,7 +22439,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<char?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(float)), typeof(char?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<char?> f = e.Compile();
+            Func<char?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             char? etResult = default(char?);
@@ -22487,7 +22487,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<decimal>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(float)), typeof(decimal)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<decimal> f = e.Compile();
+            Func<decimal> f = e.CompileForTest();
 
             // compute the value with the expression tree
             decimal etResult = default(decimal);
@@ -22535,7 +22535,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<decimal?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(float)), typeof(decimal?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<decimal?> f = e.Compile();
+            Func<decimal?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             decimal? etResult = default(decimal?);
@@ -22583,7 +22583,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<double>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(float)), typeof(double)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<double> f = e.Compile();
+            Func<double> f = e.CompileForTest();
 
             // compute the value with the expression tree
             double etResult = default(double);
@@ -22631,7 +22631,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<double?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(float)), typeof(double?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<double?> f = e.Compile();
+            Func<double?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             double? etResult = default(double?);
@@ -22679,7 +22679,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<E>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(float)), typeof(E)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<E> f = e.Compile();
+            Func<E> f = e.CompileForTest();
 
             // compute the value with the expression tree
             E etResult = default(E);
@@ -22727,7 +22727,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<E?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(float)), typeof(E?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<E?> f = e.Compile();
+            Func<E?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             E? etResult = default(E?);
@@ -22775,7 +22775,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<El>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(float)), typeof(El)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<El> f = e.Compile();
+            Func<El> f = e.CompileForTest();
 
             // compute the value with the expression tree
             El etResult = default(El);
@@ -22823,7 +22823,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<El?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(float)), typeof(El?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<El?> f = e.Compile();
+            Func<El?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             El? etResult = default(El?);
@@ -22871,7 +22871,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<float>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(float)), typeof(float)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<float> f = e.Compile();
+            Func<float> f = e.CompileForTest();
 
             // compute the value with the expression tree
             float etResult = default(float);
@@ -22919,7 +22919,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<float?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(float)), typeof(float?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<float?> f = e.Compile();
+            Func<float?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             float? etResult = default(float?);
@@ -22967,7 +22967,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<int>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(float)), typeof(int)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<int> f = e.Compile();
+            Func<int> f = e.CompileForTest();
 
             // compute the value with the expression tree
             int etResult = default(int);
@@ -23015,7 +23015,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<int?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(float)), typeof(int?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<int?> f = e.Compile();
+            Func<int?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             int? etResult = default(int?);
@@ -23063,7 +23063,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<long>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(float)), typeof(long)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<long> f = e.Compile();
+            Func<long> f = e.CompileForTest();
 
             // compute the value with the expression tree
             long etResult = default(long);
@@ -23111,7 +23111,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<long?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(float)), typeof(long?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<long?> f = e.Compile();
+            Func<long?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             long? etResult = default(long?);
@@ -23159,7 +23159,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<sbyte>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(float)), typeof(sbyte)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<sbyte> f = e.Compile();
+            Func<sbyte> f = e.CompileForTest();
 
             // compute the value with the expression tree
             sbyte etResult = default(sbyte);
@@ -23207,7 +23207,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<sbyte?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(float)), typeof(sbyte?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<sbyte?> f = e.Compile();
+            Func<sbyte?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             sbyte? etResult = default(sbyte?);
@@ -23255,7 +23255,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<short>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(float)), typeof(short)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<short> f = e.Compile();
+            Func<short> f = e.CompileForTest();
 
             // compute the value with the expression tree
             short etResult = default(short);
@@ -23303,7 +23303,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<short?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(float)), typeof(short?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<short?> f = e.Compile();
+            Func<short?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             short? etResult = default(short?);
@@ -23351,7 +23351,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<uint>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(float)), typeof(uint)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<uint> f = e.Compile();
+            Func<uint> f = e.CompileForTest();
 
             // compute the value with the expression tree
             uint etResult = default(uint);
@@ -23399,7 +23399,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<uint?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(float)), typeof(uint?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<uint?> f = e.Compile();
+            Func<uint?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             uint? etResult = default(uint?);
@@ -23447,7 +23447,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<ulong>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(float)), typeof(ulong)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ulong> f = e.Compile();
+            Func<ulong> f = e.CompileForTest();
 
             // compute the value with the expression tree
             ulong etResult = default(ulong);
@@ -23495,7 +23495,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<ulong?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(float)), typeof(ulong?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ulong?> f = e.Compile();
+            Func<ulong?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             ulong? etResult = default(ulong?);
@@ -23543,7 +23543,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<ushort>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(float)), typeof(ushort)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ushort> f = e.Compile();
+            Func<ushort> f = e.CompileForTest();
 
             // compute the value with the expression tree
             ushort etResult = default(ushort);
@@ -23591,7 +23591,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<ushort?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(float)), typeof(ushort?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ushort?> f = e.Compile();
+            Func<ushort?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             ushort? etResult = default(ushort?);
@@ -23639,7 +23639,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<byte>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(float?)), typeof(byte)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<byte> f = e.Compile();
+            Func<byte> f = e.CompileForTest();
 
             // compute the value with the expression tree
             byte etResult = default(byte);
@@ -23687,7 +23687,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<byte?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(float?)), typeof(byte?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<byte?> f = e.Compile();
+            Func<byte?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             byte? etResult = default(byte?);
@@ -23735,7 +23735,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<char>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(float?)), typeof(char)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<char> f = e.Compile();
+            Func<char> f = e.CompileForTest();
 
             // compute the value with the expression tree
             char etResult = default(char);
@@ -23783,7 +23783,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<char?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(float?)), typeof(char?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<char?> f = e.Compile();
+            Func<char?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             char? etResult = default(char?);
@@ -23831,7 +23831,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<decimal>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(float?)), typeof(decimal)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<decimal> f = e.Compile();
+            Func<decimal> f = e.CompileForTest();
 
             // compute the value with the expression tree
             decimal etResult = default(decimal);
@@ -23879,7 +23879,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<decimal?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(float?)), typeof(decimal?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<decimal?> f = e.Compile();
+            Func<decimal?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             decimal? etResult = default(decimal?);
@@ -23927,7 +23927,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<double>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(float?)), typeof(double)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<double> f = e.Compile();
+            Func<double> f = e.CompileForTest();
 
             // compute the value with the expression tree
             double etResult = default(double);
@@ -23975,7 +23975,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<double?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(float?)), typeof(double?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<double?> f = e.Compile();
+            Func<double?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             double? etResult = default(double?);
@@ -24023,7 +24023,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<E>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(float?)), typeof(E)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<E> f = e.Compile();
+            Func<E> f = e.CompileForTest();
 
             // compute the value with the expression tree
             E etResult = default(E);
@@ -24071,7 +24071,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<E?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(float?)), typeof(E?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<E?> f = e.Compile();
+            Func<E?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             E? etResult = default(E?);
@@ -24119,7 +24119,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<El>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(float?)), typeof(El)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<El> f = e.Compile();
+            Func<El> f = e.CompileForTest();
 
             // compute the value with the expression tree
             El etResult = default(El);
@@ -24167,7 +24167,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<El?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(float?)), typeof(El?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<El?> f = e.Compile();
+            Func<El?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             El? etResult = default(El?);
@@ -24215,7 +24215,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<float>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(float?)), typeof(float)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<float> f = e.Compile();
+            Func<float> f = e.CompileForTest();
 
             // compute the value with the expression tree
             float etResult = default(float);
@@ -24263,7 +24263,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<float?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(float?)), typeof(float?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<float?> f = e.Compile();
+            Func<float?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             float? etResult = default(float?);
@@ -24311,7 +24311,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<int>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(float?)), typeof(int)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<int> f = e.Compile();
+            Func<int> f = e.CompileForTest();
 
             // compute the value with the expression tree
             int etResult = default(int);
@@ -24359,7 +24359,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<int?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(float?)), typeof(int?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<int?> f = e.Compile();
+            Func<int?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             int? etResult = default(int?);
@@ -24407,7 +24407,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<long>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(float?)), typeof(long)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<long> f = e.Compile();
+            Func<long> f = e.CompileForTest();
 
             // compute the value with the expression tree
             long etResult = default(long);
@@ -24455,7 +24455,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<long?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(float?)), typeof(long?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<long?> f = e.Compile();
+            Func<long?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             long? etResult = default(long?);
@@ -24503,7 +24503,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<sbyte>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(float?)), typeof(sbyte)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<sbyte> f = e.Compile();
+            Func<sbyte> f = e.CompileForTest();
 
             // compute the value with the expression tree
             sbyte etResult = default(sbyte);
@@ -24551,7 +24551,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<sbyte?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(float?)), typeof(sbyte?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<sbyte?> f = e.Compile();
+            Func<sbyte?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             sbyte? etResult = default(sbyte?);
@@ -24599,7 +24599,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<short>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(float?)), typeof(short)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<short> f = e.Compile();
+            Func<short> f = e.CompileForTest();
 
             // compute the value with the expression tree
             short etResult = default(short);
@@ -24647,7 +24647,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<short?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(float?)), typeof(short?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<short?> f = e.Compile();
+            Func<short?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             short? etResult = default(short?);
@@ -24695,7 +24695,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<uint>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(float?)), typeof(uint)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<uint> f = e.Compile();
+            Func<uint> f = e.CompileForTest();
 
             // compute the value with the expression tree
             uint etResult = default(uint);
@@ -24743,7 +24743,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<uint?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(float?)), typeof(uint?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<uint?> f = e.Compile();
+            Func<uint?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             uint? etResult = default(uint?);
@@ -24791,7 +24791,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<ulong>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(float?)), typeof(ulong)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ulong> f = e.Compile();
+            Func<ulong> f = e.CompileForTest();
 
             // compute the value with the expression tree
             ulong etResult = default(ulong);
@@ -24839,7 +24839,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<ulong?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(float?)), typeof(ulong?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ulong?> f = e.Compile();
+            Func<ulong?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             ulong? etResult = default(ulong?);
@@ -24887,7 +24887,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<ushort>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(float?)), typeof(ushort)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ushort> f = e.Compile();
+            Func<ushort> f = e.CompileForTest();
 
             // compute the value with the expression tree
             ushort etResult = default(ushort);
@@ -24935,7 +24935,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<ushort?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(float?)), typeof(ushort?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ushort?> f = e.Compile();
+            Func<ushort?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             ushort? etResult = default(ushort?);
@@ -24983,7 +24983,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<byte>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(int)), typeof(byte)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<byte> f = e.Compile();
+            Func<byte> f = e.CompileForTest();
 
             // compute the value with the expression tree
             byte etResult = default(byte);
@@ -25031,7 +25031,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<byte?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(int)), typeof(byte?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<byte?> f = e.Compile();
+            Func<byte?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             byte? etResult = default(byte?);
@@ -25079,7 +25079,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<char>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(int)), typeof(char)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<char> f = e.Compile();
+            Func<char> f = e.CompileForTest();
 
             // compute the value with the expression tree
             char etResult = default(char);
@@ -25127,7 +25127,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<char?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(int)), typeof(char?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<char?> f = e.Compile();
+            Func<char?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             char? etResult = default(char?);
@@ -25175,7 +25175,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<decimal>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(int)), typeof(decimal)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<decimal> f = e.Compile();
+            Func<decimal> f = e.CompileForTest();
 
             // compute the value with the expression tree
             decimal etResult = default(decimal);
@@ -25223,7 +25223,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<decimal?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(int)), typeof(decimal?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<decimal?> f = e.Compile();
+            Func<decimal?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             decimal? etResult = default(decimal?);
@@ -25271,7 +25271,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<double>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(int)), typeof(double)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<double> f = e.Compile();
+            Func<double> f = e.CompileForTest();
 
             // compute the value with the expression tree
             double etResult = default(double);
@@ -25319,7 +25319,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<double?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(int)), typeof(double?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<double?> f = e.Compile();
+            Func<double?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             double? etResult = default(double?);
@@ -25367,7 +25367,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<E>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(int)), typeof(E)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<E> f = e.Compile();
+            Func<E> f = e.CompileForTest();
 
             // compute the value with the expression tree
             E etResult = default(E);
@@ -25415,7 +25415,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<E?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(int)), typeof(E?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<E?> f = e.Compile();
+            Func<E?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             E? etResult = default(E?);
@@ -25463,7 +25463,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<El>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(int)), typeof(El)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<El> f = e.Compile();
+            Func<El> f = e.CompileForTest();
 
             // compute the value with the expression tree
             El etResult = default(El);
@@ -25511,7 +25511,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<El?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(int)), typeof(El?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<El?> f = e.Compile();
+            Func<El?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             El? etResult = default(El?);
@@ -25559,7 +25559,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<float>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(int)), typeof(float)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<float> f = e.Compile();
+            Func<float> f = e.CompileForTest();
 
             // compute the value with the expression tree
             float etResult = default(float);
@@ -25607,7 +25607,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<float?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(int)), typeof(float?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<float?> f = e.Compile();
+            Func<float?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             float? etResult = default(float?);
@@ -25655,7 +25655,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<int>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(int)), typeof(int)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<int> f = e.Compile();
+            Func<int> f = e.CompileForTest();
 
             // compute the value with the expression tree
             int etResult = default(int);
@@ -25703,7 +25703,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<int?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(int)), typeof(int?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<int?> f = e.Compile();
+            Func<int?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             int? etResult = default(int?);
@@ -25751,7 +25751,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<long>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(int)), typeof(long)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<long> f = e.Compile();
+            Func<long> f = e.CompileForTest();
 
             // compute the value with the expression tree
             long etResult = default(long);
@@ -25799,7 +25799,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<long?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(int)), typeof(long?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<long?> f = e.Compile();
+            Func<long?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             long? etResult = default(long?);
@@ -25847,7 +25847,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<sbyte>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(int)), typeof(sbyte)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<sbyte> f = e.Compile();
+            Func<sbyte> f = e.CompileForTest();
 
             // compute the value with the expression tree
             sbyte etResult = default(sbyte);
@@ -25895,7 +25895,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<sbyte?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(int)), typeof(sbyte?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<sbyte?> f = e.Compile();
+            Func<sbyte?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             sbyte? etResult = default(sbyte?);
@@ -25943,7 +25943,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<short>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(int)), typeof(short)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<short> f = e.Compile();
+            Func<short> f = e.CompileForTest();
 
             // compute the value with the expression tree
             short etResult = default(short);
@@ -25991,7 +25991,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<short?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(int)), typeof(short?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<short?> f = e.Compile();
+            Func<short?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             short? etResult = default(short?);
@@ -26039,7 +26039,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<uint>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(int)), typeof(uint)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<uint> f = e.Compile();
+            Func<uint> f = e.CompileForTest();
 
             // compute the value with the expression tree
             uint etResult = default(uint);
@@ -26087,7 +26087,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<uint?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(int)), typeof(uint?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<uint?> f = e.Compile();
+            Func<uint?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             uint? etResult = default(uint?);
@@ -26135,7 +26135,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<ulong>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(int)), typeof(ulong)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ulong> f = e.Compile();
+            Func<ulong> f = e.CompileForTest();
 
             // compute the value with the expression tree
             ulong etResult = default(ulong);
@@ -26183,7 +26183,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<ulong?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(int)), typeof(ulong?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ulong?> f = e.Compile();
+            Func<ulong?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             ulong? etResult = default(ulong?);
@@ -26231,7 +26231,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<ushort>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(int)), typeof(ushort)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ushort> f = e.Compile();
+            Func<ushort> f = e.CompileForTest();
 
             // compute the value with the expression tree
             ushort etResult = default(ushort);
@@ -26279,7 +26279,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<ushort?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(int)), typeof(ushort?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ushort?> f = e.Compile();
+            Func<ushort?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             ushort? etResult = default(ushort?);
@@ -26327,7 +26327,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<byte>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(int?)), typeof(byte)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<byte> f = e.Compile();
+            Func<byte> f = e.CompileForTest();
 
             // compute the value with the expression tree
             byte etResult = default(byte);
@@ -26375,7 +26375,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<byte?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(int?)), typeof(byte?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<byte?> f = e.Compile();
+            Func<byte?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             byte? etResult = default(byte?);
@@ -26423,7 +26423,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<char>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(int?)), typeof(char)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<char> f = e.Compile();
+            Func<char> f = e.CompileForTest();
 
             // compute the value with the expression tree
             char etResult = default(char);
@@ -26471,7 +26471,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<char?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(int?)), typeof(char?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<char?> f = e.Compile();
+            Func<char?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             char? etResult = default(char?);
@@ -26519,7 +26519,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<decimal>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(int?)), typeof(decimal)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<decimal> f = e.Compile();
+            Func<decimal> f = e.CompileForTest();
 
             // compute the value with the expression tree
             decimal etResult = default(decimal);
@@ -26567,7 +26567,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<decimal?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(int?)), typeof(decimal?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<decimal?> f = e.Compile();
+            Func<decimal?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             decimal? etResult = default(decimal?);
@@ -26615,7 +26615,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<double>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(int?)), typeof(double)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<double> f = e.Compile();
+            Func<double> f = e.CompileForTest();
 
             // compute the value with the expression tree
             double etResult = default(double);
@@ -26663,7 +26663,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<double?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(int?)), typeof(double?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<double?> f = e.Compile();
+            Func<double?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             double? etResult = default(double?);
@@ -26711,7 +26711,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<E>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(int?)), typeof(E)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<E> f = e.Compile();
+            Func<E> f = e.CompileForTest();
 
             // compute the value with the expression tree
             E etResult = default(E);
@@ -26759,7 +26759,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<E?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(int?)), typeof(E?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<E?> f = e.Compile();
+            Func<E?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             E? etResult = default(E?);
@@ -26807,7 +26807,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<El>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(int?)), typeof(El)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<El> f = e.Compile();
+            Func<El> f = e.CompileForTest();
 
             // compute the value with the expression tree
             El etResult = default(El);
@@ -26855,7 +26855,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<El?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(int?)), typeof(El?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<El?> f = e.Compile();
+            Func<El?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             El? etResult = default(El?);
@@ -26903,7 +26903,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<float>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(int?)), typeof(float)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<float> f = e.Compile();
+            Func<float> f = e.CompileForTest();
 
             // compute the value with the expression tree
             float etResult = default(float);
@@ -26951,7 +26951,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<float?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(int?)), typeof(float?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<float?> f = e.Compile();
+            Func<float?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             float? etResult = default(float?);
@@ -26999,7 +26999,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<int>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(int?)), typeof(int)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<int> f = e.Compile();
+            Func<int> f = e.CompileForTest();
 
             // compute the value with the expression tree
             int etResult = default(int);
@@ -27047,7 +27047,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<int?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(int?)), typeof(int?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<int?> f = e.Compile();
+            Func<int?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             int? etResult = default(int?);
@@ -27095,7 +27095,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<long>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(int?)), typeof(long)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<long> f = e.Compile();
+            Func<long> f = e.CompileForTest();
 
             // compute the value with the expression tree
             long etResult = default(long);
@@ -27143,7 +27143,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<long?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(int?)), typeof(long?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<long?> f = e.Compile();
+            Func<long?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             long? etResult = default(long?);
@@ -27191,7 +27191,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<sbyte>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(int?)), typeof(sbyte)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<sbyte> f = e.Compile();
+            Func<sbyte> f = e.CompileForTest();
 
             // compute the value with the expression tree
             sbyte etResult = default(sbyte);
@@ -27239,7 +27239,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<sbyte?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(int?)), typeof(sbyte?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<sbyte?> f = e.Compile();
+            Func<sbyte?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             sbyte? etResult = default(sbyte?);
@@ -27287,7 +27287,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<short>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(int?)), typeof(short)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<short> f = e.Compile();
+            Func<short> f = e.CompileForTest();
 
             // compute the value with the expression tree
             short etResult = default(short);
@@ -27335,7 +27335,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<short?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(int?)), typeof(short?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<short?> f = e.Compile();
+            Func<short?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             short? etResult = default(short?);
@@ -27383,7 +27383,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<uint>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(int?)), typeof(uint)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<uint> f = e.Compile();
+            Func<uint> f = e.CompileForTest();
 
             // compute the value with the expression tree
             uint etResult = default(uint);
@@ -27431,7 +27431,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<uint?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(int?)), typeof(uint?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<uint?> f = e.Compile();
+            Func<uint?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             uint? etResult = default(uint?);
@@ -27479,7 +27479,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<ulong>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(int?)), typeof(ulong)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ulong> f = e.Compile();
+            Func<ulong> f = e.CompileForTest();
 
             // compute the value with the expression tree
             ulong etResult = default(ulong);
@@ -27527,7 +27527,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<ulong?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(int?)), typeof(ulong?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ulong?> f = e.Compile();
+            Func<ulong?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             ulong? etResult = default(ulong?);
@@ -27575,7 +27575,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<ushort>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(int?)), typeof(ushort)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ushort> f = e.Compile();
+            Func<ushort> f = e.CompileForTest();
 
             // compute the value with the expression tree
             ushort etResult = default(ushort);
@@ -27623,7 +27623,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<ushort?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(int?)), typeof(ushort?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ushort?> f = e.Compile();
+            Func<ushort?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             ushort? etResult = default(ushort?);
@@ -27671,7 +27671,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<byte>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(long)), typeof(byte)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<byte> f = e.Compile();
+            Func<byte> f = e.CompileForTest();
 
             // compute the value with the expression tree
             byte etResult = default(byte);
@@ -27719,7 +27719,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<byte?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(long)), typeof(byte?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<byte?> f = e.Compile();
+            Func<byte?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             byte? etResult = default(byte?);
@@ -27767,7 +27767,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<char>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(long)), typeof(char)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<char> f = e.Compile();
+            Func<char> f = e.CompileForTest();
 
             // compute the value with the expression tree
             char etResult = default(char);
@@ -27815,7 +27815,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<char?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(long)), typeof(char?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<char?> f = e.Compile();
+            Func<char?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             char? etResult = default(char?);
@@ -27863,7 +27863,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<decimal>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(long)), typeof(decimal)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<decimal> f = e.Compile();
+            Func<decimal> f = e.CompileForTest();
 
             // compute the value with the expression tree
             decimal etResult = default(decimal);
@@ -27911,7 +27911,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<decimal?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(long)), typeof(decimal?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<decimal?> f = e.Compile();
+            Func<decimal?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             decimal? etResult = default(decimal?);
@@ -27959,7 +27959,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<double>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(long)), typeof(double)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<double> f = e.Compile();
+            Func<double> f = e.CompileForTest();
 
             // compute the value with the expression tree
             double etResult = default(double);
@@ -28007,7 +28007,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<double?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(long)), typeof(double?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<double?> f = e.Compile();
+            Func<double?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             double? etResult = default(double?);
@@ -28055,7 +28055,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<E>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(long)), typeof(E)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<E> f = e.Compile();
+            Func<E> f = e.CompileForTest();
 
             // compute the value with the expression tree
             E etResult = default(E);
@@ -28103,7 +28103,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<E?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(long)), typeof(E?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<E?> f = e.Compile();
+            Func<E?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             E? etResult = default(E?);
@@ -28151,7 +28151,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<El>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(long)), typeof(El)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<El> f = e.Compile();
+            Func<El> f = e.CompileForTest();
 
             // compute the value with the expression tree
             El etResult = default(El);
@@ -28199,7 +28199,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<El?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(long)), typeof(El?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<El?> f = e.Compile();
+            Func<El?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             El? etResult = default(El?);
@@ -28247,7 +28247,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<float>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(long)), typeof(float)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<float> f = e.Compile();
+            Func<float> f = e.CompileForTest();
 
             // compute the value with the expression tree
             float etResult = default(float);
@@ -28295,7 +28295,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<float?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(long)), typeof(float?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<float?> f = e.Compile();
+            Func<float?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             float? etResult = default(float?);
@@ -28343,7 +28343,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<int>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(long)), typeof(int)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<int> f = e.Compile();
+            Func<int> f = e.CompileForTest();
 
             // compute the value with the expression tree
             int etResult = default(int);
@@ -28391,7 +28391,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<int?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(long)), typeof(int?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<int?> f = e.Compile();
+            Func<int?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             int? etResult = default(int?);
@@ -28439,7 +28439,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<long>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(long)), typeof(long)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<long> f = e.Compile();
+            Func<long> f = e.CompileForTest();
 
             // compute the value with the expression tree
             long etResult = default(long);
@@ -28487,7 +28487,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<long?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(long)), typeof(long?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<long?> f = e.Compile();
+            Func<long?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             long? etResult = default(long?);
@@ -28535,7 +28535,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<sbyte>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(long)), typeof(sbyte)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<sbyte> f = e.Compile();
+            Func<sbyte> f = e.CompileForTest();
 
             // compute the value with the expression tree
             sbyte etResult = default(sbyte);
@@ -28583,7 +28583,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<sbyte?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(long)), typeof(sbyte?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<sbyte?> f = e.Compile();
+            Func<sbyte?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             sbyte? etResult = default(sbyte?);
@@ -28631,7 +28631,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<short>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(long)), typeof(short)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<short> f = e.Compile();
+            Func<short> f = e.CompileForTest();
 
             // compute the value with the expression tree
             short etResult = default(short);
@@ -28679,7 +28679,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<short?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(long)), typeof(short?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<short?> f = e.Compile();
+            Func<short?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             short? etResult = default(short?);
@@ -28727,7 +28727,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<uint>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(long)), typeof(uint)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<uint> f = e.Compile();
+            Func<uint> f = e.CompileForTest();
 
             // compute the value with the expression tree
             uint etResult = default(uint);
@@ -28775,7 +28775,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<uint?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(long)), typeof(uint?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<uint?> f = e.Compile();
+            Func<uint?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             uint? etResult = default(uint?);
@@ -28823,7 +28823,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<ulong>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(long)), typeof(ulong)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ulong> f = e.Compile();
+            Func<ulong> f = e.CompileForTest();
 
             // compute the value with the expression tree
             ulong etResult = default(ulong);
@@ -28871,7 +28871,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<ulong?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(long)), typeof(ulong?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ulong?> f = e.Compile();
+            Func<ulong?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             ulong? etResult = default(ulong?);
@@ -28919,7 +28919,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<ushort>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(long)), typeof(ushort)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ushort> f = e.Compile();
+            Func<ushort> f = e.CompileForTest();
 
             // compute the value with the expression tree
             ushort etResult = default(ushort);
@@ -28967,7 +28967,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<ushort?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(long)), typeof(ushort?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ushort?> f = e.Compile();
+            Func<ushort?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             ushort? etResult = default(ushort?);
@@ -29015,7 +29015,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<byte>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(long?)), typeof(byte)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<byte> f = e.Compile();
+            Func<byte> f = e.CompileForTest();
 
             // compute the value with the expression tree
             byte etResult = default(byte);
@@ -29063,7 +29063,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<byte?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(long?)), typeof(byte?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<byte?> f = e.Compile();
+            Func<byte?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             byte? etResult = default(byte?);
@@ -29111,7 +29111,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<char>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(long?)), typeof(char)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<char> f = e.Compile();
+            Func<char> f = e.CompileForTest();
 
             // compute the value with the expression tree
             char etResult = default(char);
@@ -29159,7 +29159,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<char?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(long?)), typeof(char?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<char?> f = e.Compile();
+            Func<char?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             char? etResult = default(char?);
@@ -29207,7 +29207,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<decimal>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(long?)), typeof(decimal)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<decimal> f = e.Compile();
+            Func<decimal> f = e.CompileForTest();
 
             // compute the value with the expression tree
             decimal etResult = default(decimal);
@@ -29255,7 +29255,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<decimal?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(long?)), typeof(decimal?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<decimal?> f = e.Compile();
+            Func<decimal?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             decimal? etResult = default(decimal?);
@@ -29303,7 +29303,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<double>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(long?)), typeof(double)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<double> f = e.Compile();
+            Func<double> f = e.CompileForTest();
 
             // compute the value with the expression tree
             double etResult = default(double);
@@ -29351,7 +29351,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<double?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(long?)), typeof(double?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<double?> f = e.Compile();
+            Func<double?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             double? etResult = default(double?);
@@ -29399,7 +29399,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<E>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(long?)), typeof(E)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<E> f = e.Compile();
+            Func<E> f = e.CompileForTest();
 
             // compute the value with the expression tree
             E etResult = default(E);
@@ -29447,7 +29447,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<E?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(long?)), typeof(E?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<E?> f = e.Compile();
+            Func<E?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             E? etResult = default(E?);
@@ -29495,7 +29495,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<El>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(long?)), typeof(El)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<El> f = e.Compile();
+            Func<El> f = e.CompileForTest();
 
             // compute the value with the expression tree
             El etResult = default(El);
@@ -29543,7 +29543,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<El?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(long?)), typeof(El?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<El?> f = e.Compile();
+            Func<El?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             El? etResult = default(El?);
@@ -29591,7 +29591,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<float>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(long?)), typeof(float)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<float> f = e.Compile();
+            Func<float> f = e.CompileForTest();
 
             // compute the value with the expression tree
             float etResult = default(float);
@@ -29639,7 +29639,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<float?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(long?)), typeof(float?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<float?> f = e.Compile();
+            Func<float?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             float? etResult = default(float?);
@@ -29687,7 +29687,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<int>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(long?)), typeof(int)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<int> f = e.Compile();
+            Func<int> f = e.CompileForTest();
 
             // compute the value with the expression tree
             int etResult = default(int);
@@ -29735,7 +29735,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<int?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(long?)), typeof(int?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<int?> f = e.Compile();
+            Func<int?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             int? etResult = default(int?);
@@ -29783,7 +29783,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<long>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(long?)), typeof(long)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<long> f = e.Compile();
+            Func<long> f = e.CompileForTest();
 
             // compute the value with the expression tree
             long etResult = default(long);
@@ -29831,7 +29831,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<long?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(long?)), typeof(long?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<long?> f = e.Compile();
+            Func<long?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             long? etResult = default(long?);
@@ -29879,7 +29879,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<sbyte>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(long?)), typeof(sbyte)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<sbyte> f = e.Compile();
+            Func<sbyte> f = e.CompileForTest();
 
             // compute the value with the expression tree
             sbyte etResult = default(sbyte);
@@ -29927,7 +29927,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<sbyte?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(long?)), typeof(sbyte?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<sbyte?> f = e.Compile();
+            Func<sbyte?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             sbyte? etResult = default(sbyte?);
@@ -29975,7 +29975,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<short>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(long?)), typeof(short)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<short> f = e.Compile();
+            Func<short> f = e.CompileForTest();
 
             // compute the value with the expression tree
             short etResult = default(short);
@@ -30023,7 +30023,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<short?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(long?)), typeof(short?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<short?> f = e.Compile();
+            Func<short?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             short? etResult = default(short?);
@@ -30071,7 +30071,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<uint>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(long?)), typeof(uint)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<uint> f = e.Compile();
+            Func<uint> f = e.CompileForTest();
 
             // compute the value with the expression tree
             uint etResult = default(uint);
@@ -30119,7 +30119,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<uint?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(long?)), typeof(uint?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<uint?> f = e.Compile();
+            Func<uint?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             uint? etResult = default(uint?);
@@ -30167,7 +30167,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<ulong>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(long?)), typeof(ulong)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ulong> f = e.Compile();
+            Func<ulong> f = e.CompileForTest();
 
             // compute the value with the expression tree
             ulong etResult = default(ulong);
@@ -30215,7 +30215,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<ulong?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(long?)), typeof(ulong?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ulong?> f = e.Compile();
+            Func<ulong?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             ulong? etResult = default(ulong?);
@@ -30263,7 +30263,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<ushort>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(long?)), typeof(ushort)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ushort> f = e.Compile();
+            Func<ushort> f = e.CompileForTest();
 
             // compute the value with the expression tree
             ushort etResult = default(ushort);
@@ -30311,7 +30311,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<ushort?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(long?)), typeof(ushort?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ushort?> f = e.Compile();
+            Func<ushort?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             ushort? etResult = default(ushort?);
@@ -30359,7 +30359,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<byte>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(sbyte)), typeof(byte)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<byte> f = e.Compile();
+            Func<byte> f = e.CompileForTest();
 
             // compute the value with the expression tree
             byte etResult = default(byte);
@@ -30407,7 +30407,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<byte?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(sbyte)), typeof(byte?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<byte?> f = e.Compile();
+            Func<byte?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             byte? etResult = default(byte?);
@@ -30455,7 +30455,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<char>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(sbyte)), typeof(char)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<char> f = e.Compile();
+            Func<char> f = e.CompileForTest();
 
             // compute the value with the expression tree
             char etResult = default(char);
@@ -30503,7 +30503,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<char?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(sbyte)), typeof(char?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<char?> f = e.Compile();
+            Func<char?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             char? etResult = default(char?);
@@ -30551,7 +30551,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<decimal>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(sbyte)), typeof(decimal)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<decimal> f = e.Compile();
+            Func<decimal> f = e.CompileForTest();
 
             // compute the value with the expression tree
             decimal etResult = default(decimal);
@@ -30599,7 +30599,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<decimal?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(sbyte)), typeof(decimal?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<decimal?> f = e.Compile();
+            Func<decimal?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             decimal? etResult = default(decimal?);
@@ -30647,7 +30647,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<double>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(sbyte)), typeof(double)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<double> f = e.Compile();
+            Func<double> f = e.CompileForTest();
 
             // compute the value with the expression tree
             double etResult = default(double);
@@ -30695,7 +30695,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<double?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(sbyte)), typeof(double?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<double?> f = e.Compile();
+            Func<double?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             double? etResult = default(double?);
@@ -30743,7 +30743,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<E>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(sbyte)), typeof(E)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<E> f = e.Compile();
+            Func<E> f = e.CompileForTest();
 
             // compute the value with the expression tree
             E etResult = default(E);
@@ -30791,7 +30791,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<E?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(sbyte)), typeof(E?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<E?> f = e.Compile();
+            Func<E?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             E? etResult = default(E?);
@@ -30839,7 +30839,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<El>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(sbyte)), typeof(El)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<El> f = e.Compile();
+            Func<El> f = e.CompileForTest();
 
             // compute the value with the expression tree
             El etResult = default(El);
@@ -30887,7 +30887,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<El?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(sbyte)), typeof(El?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<El?> f = e.Compile();
+            Func<El?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             El? etResult = default(El?);
@@ -30935,7 +30935,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<float>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(sbyte)), typeof(float)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<float> f = e.Compile();
+            Func<float> f = e.CompileForTest();
 
             // compute the value with the expression tree
             float etResult = default(float);
@@ -30983,7 +30983,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<float?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(sbyte)), typeof(float?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<float?> f = e.Compile();
+            Func<float?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             float? etResult = default(float?);
@@ -31031,7 +31031,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<int>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(sbyte)), typeof(int)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<int> f = e.Compile();
+            Func<int> f = e.CompileForTest();
 
             // compute the value with the expression tree
             int etResult = default(int);
@@ -31079,7 +31079,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<int?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(sbyte)), typeof(int?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<int?> f = e.Compile();
+            Func<int?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             int? etResult = default(int?);
@@ -31127,7 +31127,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<long>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(sbyte)), typeof(long)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<long> f = e.Compile();
+            Func<long> f = e.CompileForTest();
 
             // compute the value with the expression tree
             long etResult = default(long);
@@ -31175,7 +31175,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<long?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(sbyte)), typeof(long?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<long?> f = e.Compile();
+            Func<long?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             long? etResult = default(long?);
@@ -31223,7 +31223,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<sbyte>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(sbyte)), typeof(sbyte)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<sbyte> f = e.Compile();
+            Func<sbyte> f = e.CompileForTest();
 
             // compute the value with the expression tree
             sbyte etResult = default(sbyte);
@@ -31271,7 +31271,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<sbyte?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(sbyte)), typeof(sbyte?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<sbyte?> f = e.Compile();
+            Func<sbyte?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             sbyte? etResult = default(sbyte?);
@@ -31319,7 +31319,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<short>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(sbyte)), typeof(short)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<short> f = e.Compile();
+            Func<short> f = e.CompileForTest();
 
             // compute the value with the expression tree
             short etResult = default(short);
@@ -31367,7 +31367,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<short?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(sbyte)), typeof(short?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<short?> f = e.Compile();
+            Func<short?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             short? etResult = default(short?);
@@ -31415,7 +31415,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<uint>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(sbyte)), typeof(uint)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<uint> f = e.Compile();
+            Func<uint> f = e.CompileForTest();
 
             // compute the value with the expression tree
             uint etResult = default(uint);
@@ -31463,7 +31463,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<uint?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(sbyte)), typeof(uint?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<uint?> f = e.Compile();
+            Func<uint?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             uint? etResult = default(uint?);
@@ -31511,7 +31511,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<ulong>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(sbyte)), typeof(ulong)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ulong> f = e.Compile();
+            Func<ulong> f = e.CompileForTest();
 
             // compute the value with the expression tree
             ulong etResult = default(ulong);
@@ -31559,7 +31559,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<ulong?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(sbyte)), typeof(ulong?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ulong?> f = e.Compile();
+            Func<ulong?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             ulong? etResult = default(ulong?);
@@ -31607,7 +31607,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<ushort>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(sbyte)), typeof(ushort)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ushort> f = e.Compile();
+            Func<ushort> f = e.CompileForTest();
 
             // compute the value with the expression tree
             ushort etResult = default(ushort);
@@ -31655,7 +31655,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<ushort?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(sbyte)), typeof(ushort?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ushort?> f = e.Compile();
+            Func<ushort?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             ushort? etResult = default(ushort?);
@@ -31703,7 +31703,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<byte>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(sbyte?)), typeof(byte)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<byte> f = e.Compile();
+            Func<byte> f = e.CompileForTest();
 
             // compute the value with the expression tree
             byte etResult = default(byte);
@@ -31751,7 +31751,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<byte?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(sbyte?)), typeof(byte?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<byte?> f = e.Compile();
+            Func<byte?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             byte? etResult = default(byte?);
@@ -31799,7 +31799,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<char>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(sbyte?)), typeof(char)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<char> f = e.Compile();
+            Func<char> f = e.CompileForTest();
 
             // compute the value with the expression tree
             char etResult = default(char);
@@ -31847,7 +31847,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<char?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(sbyte?)), typeof(char?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<char?> f = e.Compile();
+            Func<char?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             char? etResult = default(char?);
@@ -31895,7 +31895,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<decimal>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(sbyte?)), typeof(decimal)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<decimal> f = e.Compile();
+            Func<decimal> f = e.CompileForTest();
 
             // compute the value with the expression tree
             decimal etResult = default(decimal);
@@ -31943,7 +31943,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<decimal?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(sbyte?)), typeof(decimal?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<decimal?> f = e.Compile();
+            Func<decimal?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             decimal? etResult = default(decimal?);
@@ -31991,7 +31991,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<double>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(sbyte?)), typeof(double)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<double> f = e.Compile();
+            Func<double> f = e.CompileForTest();
 
             // compute the value with the expression tree
             double etResult = default(double);
@@ -32039,7 +32039,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<double?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(sbyte?)), typeof(double?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<double?> f = e.Compile();
+            Func<double?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             double? etResult = default(double?);
@@ -32087,7 +32087,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<E>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(sbyte?)), typeof(E)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<E> f = e.Compile();
+            Func<E> f = e.CompileForTest();
 
             // compute the value with the expression tree
             E etResult = default(E);
@@ -32135,7 +32135,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<E?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(sbyte?)), typeof(E?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<E?> f = e.Compile();
+            Func<E?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             E? etResult = default(E?);
@@ -32183,7 +32183,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<El>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(sbyte?)), typeof(El)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<El> f = e.Compile();
+            Func<El> f = e.CompileForTest();
 
             // compute the value with the expression tree
             El etResult = default(El);
@@ -32231,7 +32231,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<El?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(sbyte?)), typeof(El?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<El?> f = e.Compile();
+            Func<El?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             El? etResult = default(El?);
@@ -32279,7 +32279,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<float>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(sbyte?)), typeof(float)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<float> f = e.Compile();
+            Func<float> f = e.CompileForTest();
 
             // compute the value with the expression tree
             float etResult = default(float);
@@ -32327,7 +32327,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<float?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(sbyte?)), typeof(float?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<float?> f = e.Compile();
+            Func<float?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             float? etResult = default(float?);
@@ -32375,7 +32375,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<int>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(sbyte?)), typeof(int)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<int> f = e.Compile();
+            Func<int> f = e.CompileForTest();
 
             // compute the value with the expression tree
             int etResult = default(int);
@@ -32423,7 +32423,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<int?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(sbyte?)), typeof(int?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<int?> f = e.Compile();
+            Func<int?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             int? etResult = default(int?);
@@ -32471,7 +32471,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<long>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(sbyte?)), typeof(long)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<long> f = e.Compile();
+            Func<long> f = e.CompileForTest();
 
             // compute the value with the expression tree
             long etResult = default(long);
@@ -32519,7 +32519,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<long?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(sbyte?)), typeof(long?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<long?> f = e.Compile();
+            Func<long?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             long? etResult = default(long?);
@@ -32567,7 +32567,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<sbyte>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(sbyte?)), typeof(sbyte)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<sbyte> f = e.Compile();
+            Func<sbyte> f = e.CompileForTest();
 
             // compute the value with the expression tree
             sbyte etResult = default(sbyte);
@@ -32615,7 +32615,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<sbyte?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(sbyte?)), typeof(sbyte?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<sbyte?> f = e.Compile();
+            Func<sbyte?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             sbyte? etResult = default(sbyte?);
@@ -32663,7 +32663,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<short>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(sbyte?)), typeof(short)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<short> f = e.Compile();
+            Func<short> f = e.CompileForTest();
 
             // compute the value with the expression tree
             short etResult = default(short);
@@ -32711,7 +32711,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<short?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(sbyte?)), typeof(short?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<short?> f = e.Compile();
+            Func<short?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             short? etResult = default(short?);
@@ -32759,7 +32759,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<uint>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(sbyte?)), typeof(uint)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<uint> f = e.Compile();
+            Func<uint> f = e.CompileForTest();
 
             // compute the value with the expression tree
             uint etResult = default(uint);
@@ -32807,7 +32807,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<uint?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(sbyte?)), typeof(uint?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<uint?> f = e.Compile();
+            Func<uint?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             uint? etResult = default(uint?);
@@ -32855,7 +32855,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<ulong>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(sbyte?)), typeof(ulong)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ulong> f = e.Compile();
+            Func<ulong> f = e.CompileForTest();
 
             // compute the value with the expression tree
             ulong etResult = default(ulong);
@@ -32903,7 +32903,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<ulong?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(sbyte?)), typeof(ulong?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ulong?> f = e.Compile();
+            Func<ulong?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             ulong? etResult = default(ulong?);
@@ -32951,7 +32951,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<ushort>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(sbyte?)), typeof(ushort)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ushort> f = e.Compile();
+            Func<ushort> f = e.CompileForTest();
 
             // compute the value with the expression tree
             ushort etResult = default(ushort);
@@ -32999,7 +32999,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<ushort?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(sbyte?)), typeof(ushort?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ushort?> f = e.Compile();
+            Func<ushort?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             ushort? etResult = default(ushort?);
@@ -33047,7 +33047,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<byte>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(short)), typeof(byte)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<byte> f = e.Compile();
+            Func<byte> f = e.CompileForTest();
 
             // compute the value with the expression tree
             byte etResult = default(byte);
@@ -33095,7 +33095,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<byte?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(short)), typeof(byte?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<byte?> f = e.Compile();
+            Func<byte?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             byte? etResult = default(byte?);
@@ -33143,7 +33143,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<char>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(short)), typeof(char)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<char> f = e.Compile();
+            Func<char> f = e.CompileForTest();
 
             // compute the value with the expression tree
             char etResult = default(char);
@@ -33191,7 +33191,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<char?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(short)), typeof(char?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<char?> f = e.Compile();
+            Func<char?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             char? etResult = default(char?);
@@ -33239,7 +33239,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<decimal>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(short)), typeof(decimal)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<decimal> f = e.Compile();
+            Func<decimal> f = e.CompileForTest();
 
             // compute the value with the expression tree
             decimal etResult = default(decimal);
@@ -33287,7 +33287,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<decimal?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(short)), typeof(decimal?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<decimal?> f = e.Compile();
+            Func<decimal?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             decimal? etResult = default(decimal?);
@@ -33335,7 +33335,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<double>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(short)), typeof(double)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<double> f = e.Compile();
+            Func<double> f = e.CompileForTest();
 
             // compute the value with the expression tree
             double etResult = default(double);
@@ -33383,7 +33383,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<double?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(short)), typeof(double?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<double?> f = e.Compile();
+            Func<double?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             double? etResult = default(double?);
@@ -33431,7 +33431,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<E>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(short)), typeof(E)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<E> f = e.Compile();
+            Func<E> f = e.CompileForTest();
 
             // compute the value with the expression tree
             E etResult = default(E);
@@ -33479,7 +33479,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<E?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(short)), typeof(E?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<E?> f = e.Compile();
+            Func<E?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             E? etResult = default(E?);
@@ -33527,7 +33527,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<El>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(short)), typeof(El)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<El> f = e.Compile();
+            Func<El> f = e.CompileForTest();
 
             // compute the value with the expression tree
             El etResult = default(El);
@@ -33575,7 +33575,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<El?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(short)), typeof(El?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<El?> f = e.Compile();
+            Func<El?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             El? etResult = default(El?);
@@ -33623,7 +33623,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<float>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(short)), typeof(float)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<float> f = e.Compile();
+            Func<float> f = e.CompileForTest();
 
             // compute the value with the expression tree
             float etResult = default(float);
@@ -33671,7 +33671,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<float?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(short)), typeof(float?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<float?> f = e.Compile();
+            Func<float?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             float? etResult = default(float?);
@@ -33719,7 +33719,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<int>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(short)), typeof(int)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<int> f = e.Compile();
+            Func<int> f = e.CompileForTest();
 
             // compute the value with the expression tree
             int etResult = default(int);
@@ -33767,7 +33767,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<int?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(short)), typeof(int?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<int?> f = e.Compile();
+            Func<int?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             int? etResult = default(int?);
@@ -33815,7 +33815,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<long>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(short)), typeof(long)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<long> f = e.Compile();
+            Func<long> f = e.CompileForTest();
 
             // compute the value with the expression tree
             long etResult = default(long);
@@ -33863,7 +33863,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<long?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(short)), typeof(long?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<long?> f = e.Compile();
+            Func<long?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             long? etResult = default(long?);
@@ -33911,7 +33911,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<sbyte>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(short)), typeof(sbyte)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<sbyte> f = e.Compile();
+            Func<sbyte> f = e.CompileForTest();
 
             // compute the value with the expression tree
             sbyte etResult = default(sbyte);
@@ -33959,7 +33959,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<sbyte?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(short)), typeof(sbyte?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<sbyte?> f = e.Compile();
+            Func<sbyte?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             sbyte? etResult = default(sbyte?);
@@ -34007,7 +34007,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<short>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(short)), typeof(short)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<short> f = e.Compile();
+            Func<short> f = e.CompileForTest();
 
             // compute the value with the expression tree
             short etResult = default(short);
@@ -34055,7 +34055,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<short?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(short)), typeof(short?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<short?> f = e.Compile();
+            Func<short?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             short? etResult = default(short?);
@@ -34103,7 +34103,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<uint>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(short)), typeof(uint)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<uint> f = e.Compile();
+            Func<uint> f = e.CompileForTest();
 
             // compute the value with the expression tree
             uint etResult = default(uint);
@@ -34151,7 +34151,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<uint?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(short)), typeof(uint?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<uint?> f = e.Compile();
+            Func<uint?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             uint? etResult = default(uint?);
@@ -34199,7 +34199,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<ulong>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(short)), typeof(ulong)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ulong> f = e.Compile();
+            Func<ulong> f = e.CompileForTest();
 
             // compute the value with the expression tree
             ulong etResult = default(ulong);
@@ -34247,7 +34247,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<ulong?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(short)), typeof(ulong?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ulong?> f = e.Compile();
+            Func<ulong?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             ulong? etResult = default(ulong?);
@@ -34295,7 +34295,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<ushort>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(short)), typeof(ushort)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ushort> f = e.Compile();
+            Func<ushort> f = e.CompileForTest();
 
             // compute the value with the expression tree
             ushort etResult = default(ushort);
@@ -34343,7 +34343,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<ushort?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(short)), typeof(ushort?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ushort?> f = e.Compile();
+            Func<ushort?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             ushort? etResult = default(ushort?);
@@ -34391,7 +34391,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<byte>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(short?)), typeof(byte)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<byte> f = e.Compile();
+            Func<byte> f = e.CompileForTest();
 
             // compute the value with the expression tree
             byte etResult = default(byte);
@@ -34439,7 +34439,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<byte?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(short?)), typeof(byte?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<byte?> f = e.Compile();
+            Func<byte?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             byte? etResult = default(byte?);
@@ -34487,7 +34487,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<char>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(short?)), typeof(char)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<char> f = e.Compile();
+            Func<char> f = e.CompileForTest();
 
             // compute the value with the expression tree
             char etResult = default(char);
@@ -34535,7 +34535,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<char?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(short?)), typeof(char?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<char?> f = e.Compile();
+            Func<char?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             char? etResult = default(char?);
@@ -34583,7 +34583,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<decimal>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(short?)), typeof(decimal)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<decimal> f = e.Compile();
+            Func<decimal> f = e.CompileForTest();
 
             // compute the value with the expression tree
             decimal etResult = default(decimal);
@@ -34631,7 +34631,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<decimal?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(short?)), typeof(decimal?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<decimal?> f = e.Compile();
+            Func<decimal?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             decimal? etResult = default(decimal?);
@@ -34679,7 +34679,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<double>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(short?)), typeof(double)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<double> f = e.Compile();
+            Func<double> f = e.CompileForTest();
 
             // compute the value with the expression tree
             double etResult = default(double);
@@ -34727,7 +34727,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<double?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(short?)), typeof(double?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<double?> f = e.Compile();
+            Func<double?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             double? etResult = default(double?);
@@ -34775,7 +34775,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<E>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(short?)), typeof(E)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<E> f = e.Compile();
+            Func<E> f = e.CompileForTest();
 
             // compute the value with the expression tree
             E etResult = default(E);
@@ -34823,7 +34823,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<E?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(short?)), typeof(E?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<E?> f = e.Compile();
+            Func<E?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             E? etResult = default(E?);
@@ -34871,7 +34871,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<El>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(short?)), typeof(El)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<El> f = e.Compile();
+            Func<El> f = e.CompileForTest();
 
             // compute the value with the expression tree
             El etResult = default(El);
@@ -34919,7 +34919,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<El?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(short?)), typeof(El?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<El?> f = e.Compile();
+            Func<El?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             El? etResult = default(El?);
@@ -34967,7 +34967,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<float>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(short?)), typeof(float)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<float> f = e.Compile();
+            Func<float> f = e.CompileForTest();
 
             // compute the value with the expression tree
             float etResult = default(float);
@@ -35015,7 +35015,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<float?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(short?)), typeof(float?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<float?> f = e.Compile();
+            Func<float?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             float? etResult = default(float?);
@@ -35063,7 +35063,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<int>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(short?)), typeof(int)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<int> f = e.Compile();
+            Func<int> f = e.CompileForTest();
 
             // compute the value with the expression tree
             int etResult = default(int);
@@ -35111,7 +35111,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<int?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(short?)), typeof(int?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<int?> f = e.Compile();
+            Func<int?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             int? etResult = default(int?);
@@ -35159,7 +35159,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<long>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(short?)), typeof(long)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<long> f = e.Compile();
+            Func<long> f = e.CompileForTest();
 
             // compute the value with the expression tree
             long etResult = default(long);
@@ -35207,7 +35207,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<long?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(short?)), typeof(long?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<long?> f = e.Compile();
+            Func<long?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             long? etResult = default(long?);
@@ -35255,7 +35255,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<sbyte>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(short?)), typeof(sbyte)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<sbyte> f = e.Compile();
+            Func<sbyte> f = e.CompileForTest();
 
             // compute the value with the expression tree
             sbyte etResult = default(sbyte);
@@ -35303,7 +35303,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<sbyte?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(short?)), typeof(sbyte?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<sbyte?> f = e.Compile();
+            Func<sbyte?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             sbyte? etResult = default(sbyte?);
@@ -35351,7 +35351,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<short>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(short?)), typeof(short)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<short> f = e.Compile();
+            Func<short> f = e.CompileForTest();
 
             // compute the value with the expression tree
             short etResult = default(short);
@@ -35399,7 +35399,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<short?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(short?)), typeof(short?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<short?> f = e.Compile();
+            Func<short?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             short? etResult = default(short?);
@@ -35447,7 +35447,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<uint>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(short?)), typeof(uint)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<uint> f = e.Compile();
+            Func<uint> f = e.CompileForTest();
 
             // compute the value with the expression tree
             uint etResult = default(uint);
@@ -35495,7 +35495,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<uint?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(short?)), typeof(uint?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<uint?> f = e.Compile();
+            Func<uint?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             uint? etResult = default(uint?);
@@ -35543,7 +35543,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<ulong>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(short?)), typeof(ulong)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ulong> f = e.Compile();
+            Func<ulong> f = e.CompileForTest();
 
             // compute the value with the expression tree
             ulong etResult = default(ulong);
@@ -35591,7 +35591,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<ulong?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(short?)), typeof(ulong?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ulong?> f = e.Compile();
+            Func<ulong?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             ulong? etResult = default(ulong?);
@@ -35639,7 +35639,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<ushort>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(short?)), typeof(ushort)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ushort> f = e.Compile();
+            Func<ushort> f = e.CompileForTest();
 
             // compute the value with the expression tree
             ushort etResult = default(ushort);
@@ -35687,7 +35687,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<ushort?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(short?)), typeof(ushort?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ushort?> f = e.Compile();
+            Func<ushort?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             ushort? etResult = default(ushort?);
@@ -35735,7 +35735,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<byte>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(uint)), typeof(byte)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<byte> f = e.Compile();
+            Func<byte> f = e.CompileForTest();
 
             // compute the value with the expression tree
             byte etResult = default(byte);
@@ -35783,7 +35783,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<byte?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(uint)), typeof(byte?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<byte?> f = e.Compile();
+            Func<byte?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             byte? etResult = default(byte?);
@@ -35831,7 +35831,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<char>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(uint)), typeof(char)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<char> f = e.Compile();
+            Func<char> f = e.CompileForTest();
 
             // compute the value with the expression tree
             char etResult = default(char);
@@ -35879,7 +35879,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<char?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(uint)), typeof(char?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<char?> f = e.Compile();
+            Func<char?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             char? etResult = default(char?);
@@ -35927,7 +35927,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<decimal>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(uint)), typeof(decimal)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<decimal> f = e.Compile();
+            Func<decimal> f = e.CompileForTest();
 
             // compute the value with the expression tree
             decimal etResult = default(decimal);
@@ -35975,7 +35975,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<decimal?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(uint)), typeof(decimal?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<decimal?> f = e.Compile();
+            Func<decimal?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             decimal? etResult = default(decimal?);
@@ -36023,7 +36023,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<double>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(uint)), typeof(double)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<double> f = e.Compile();
+            Func<double> f = e.CompileForTest();
 
             // compute the value with the expression tree
             double etResult = default(double);
@@ -36071,7 +36071,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<double?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(uint)), typeof(double?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<double?> f = e.Compile();
+            Func<double?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             double? etResult = default(double?);
@@ -36119,7 +36119,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<E>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(uint)), typeof(E)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<E> f = e.Compile();
+            Func<E> f = e.CompileForTest();
 
             // compute the value with the expression tree
             E etResult = default(E);
@@ -36167,7 +36167,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<E?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(uint)), typeof(E?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<E?> f = e.Compile();
+            Func<E?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             E? etResult = default(E?);
@@ -36215,7 +36215,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<El>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(uint)), typeof(El)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<El> f = e.Compile();
+            Func<El> f = e.CompileForTest();
 
             // compute the value with the expression tree
             El etResult = default(El);
@@ -36263,7 +36263,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<El?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(uint)), typeof(El?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<El?> f = e.Compile();
+            Func<El?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             El? etResult = default(El?);
@@ -36311,7 +36311,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<float>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(uint)), typeof(float)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<float> f = e.Compile();
+            Func<float> f = e.CompileForTest();
 
             // compute the value with the expression tree
             float etResult = default(float);
@@ -36359,7 +36359,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<float?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(uint)), typeof(float?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<float?> f = e.Compile();
+            Func<float?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             float? etResult = default(float?);
@@ -36407,7 +36407,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<int>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(uint)), typeof(int)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<int> f = e.Compile();
+            Func<int> f = e.CompileForTest();
 
             // compute the value with the expression tree
             int etResult = default(int);
@@ -36455,7 +36455,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<int?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(uint)), typeof(int?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<int?> f = e.Compile();
+            Func<int?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             int? etResult = default(int?);
@@ -36503,7 +36503,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<long>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(uint)), typeof(long)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<long> f = e.Compile();
+            Func<long> f = e.CompileForTest();
 
             // compute the value with the expression tree
             long etResult = default(long);
@@ -36551,7 +36551,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<long?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(uint)), typeof(long?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<long?> f = e.Compile();
+            Func<long?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             long? etResult = default(long?);
@@ -36599,7 +36599,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<sbyte>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(uint)), typeof(sbyte)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<sbyte> f = e.Compile();
+            Func<sbyte> f = e.CompileForTest();
 
             // compute the value with the expression tree
             sbyte etResult = default(sbyte);
@@ -36647,7 +36647,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<sbyte?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(uint)), typeof(sbyte?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<sbyte?> f = e.Compile();
+            Func<sbyte?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             sbyte? etResult = default(sbyte?);
@@ -36695,7 +36695,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<short>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(uint)), typeof(short)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<short> f = e.Compile();
+            Func<short> f = e.CompileForTest();
 
             // compute the value with the expression tree
             short etResult = default(short);
@@ -36743,7 +36743,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<short?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(uint)), typeof(short?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<short?> f = e.Compile();
+            Func<short?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             short? etResult = default(short?);
@@ -36791,7 +36791,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<uint>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(uint)), typeof(uint)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<uint> f = e.Compile();
+            Func<uint> f = e.CompileForTest();
 
             // compute the value with the expression tree
             uint etResult = default(uint);
@@ -36839,7 +36839,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<uint?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(uint)), typeof(uint?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<uint?> f = e.Compile();
+            Func<uint?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             uint? etResult = default(uint?);
@@ -36887,7 +36887,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<ulong>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(uint)), typeof(ulong)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ulong> f = e.Compile();
+            Func<ulong> f = e.CompileForTest();
 
             // compute the value with the expression tree
             ulong etResult = default(ulong);
@@ -36935,7 +36935,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<ulong?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(uint)), typeof(ulong?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ulong?> f = e.Compile();
+            Func<ulong?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             ulong? etResult = default(ulong?);
@@ -36983,7 +36983,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<ushort>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(uint)), typeof(ushort)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ushort> f = e.Compile();
+            Func<ushort> f = e.CompileForTest();
 
             // compute the value with the expression tree
             ushort etResult = default(ushort);
@@ -37031,7 +37031,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<ushort?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(uint)), typeof(ushort?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ushort?> f = e.Compile();
+            Func<ushort?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             ushort? etResult = default(ushort?);
@@ -37079,7 +37079,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<byte>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(uint?)), typeof(byte)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<byte> f = e.Compile();
+            Func<byte> f = e.CompileForTest();
 
             // compute the value with the expression tree
             byte etResult = default(byte);
@@ -37127,7 +37127,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<byte?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(uint?)), typeof(byte?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<byte?> f = e.Compile();
+            Func<byte?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             byte? etResult = default(byte?);
@@ -37175,7 +37175,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<char>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(uint?)), typeof(char)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<char> f = e.Compile();
+            Func<char> f = e.CompileForTest();
 
             // compute the value with the expression tree
             char etResult = default(char);
@@ -37223,7 +37223,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<char?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(uint?)), typeof(char?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<char?> f = e.Compile();
+            Func<char?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             char? etResult = default(char?);
@@ -37271,7 +37271,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<decimal>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(uint?)), typeof(decimal)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<decimal> f = e.Compile();
+            Func<decimal> f = e.CompileForTest();
 
             // compute the value with the expression tree
             decimal etResult = default(decimal);
@@ -37319,7 +37319,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<decimal?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(uint?)), typeof(decimal?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<decimal?> f = e.Compile();
+            Func<decimal?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             decimal? etResult = default(decimal?);
@@ -37367,7 +37367,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<double>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(uint?)), typeof(double)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<double> f = e.Compile();
+            Func<double> f = e.CompileForTest();
 
             // compute the value with the expression tree
             double etResult = default(double);
@@ -37415,7 +37415,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<double?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(uint?)), typeof(double?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<double?> f = e.Compile();
+            Func<double?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             double? etResult = default(double?);
@@ -37463,7 +37463,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<E>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(uint?)), typeof(E)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<E> f = e.Compile();
+            Func<E> f = e.CompileForTest();
 
             // compute the value with the expression tree
             E etResult = default(E);
@@ -37511,7 +37511,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<E?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(uint?)), typeof(E?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<E?> f = e.Compile();
+            Func<E?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             E? etResult = default(E?);
@@ -37559,7 +37559,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<El>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(uint?)), typeof(El)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<El> f = e.Compile();
+            Func<El> f = e.CompileForTest();
 
             // compute the value with the expression tree
             El etResult = default(El);
@@ -37607,7 +37607,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<El?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(uint?)), typeof(El?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<El?> f = e.Compile();
+            Func<El?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             El? etResult = default(El?);
@@ -37655,7 +37655,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<float>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(uint?)), typeof(float)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<float> f = e.Compile();
+            Func<float> f = e.CompileForTest();
 
             // compute the value with the expression tree
             float etResult = default(float);
@@ -37703,7 +37703,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<float?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(uint?)), typeof(float?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<float?> f = e.Compile();
+            Func<float?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             float? etResult = default(float?);
@@ -37751,7 +37751,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<int>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(uint?)), typeof(int)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<int> f = e.Compile();
+            Func<int> f = e.CompileForTest();
 
             // compute the value with the expression tree
             int etResult = default(int);
@@ -37799,7 +37799,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<int?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(uint?)), typeof(int?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<int?> f = e.Compile();
+            Func<int?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             int? etResult = default(int?);
@@ -37847,7 +37847,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<long>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(uint?)), typeof(long)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<long> f = e.Compile();
+            Func<long> f = e.CompileForTest();
 
             // compute the value with the expression tree
             long etResult = default(long);
@@ -37895,7 +37895,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<long?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(uint?)), typeof(long?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<long?> f = e.Compile();
+            Func<long?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             long? etResult = default(long?);
@@ -37943,7 +37943,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<sbyte>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(uint?)), typeof(sbyte)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<sbyte> f = e.Compile();
+            Func<sbyte> f = e.CompileForTest();
 
             // compute the value with the expression tree
             sbyte etResult = default(sbyte);
@@ -37991,7 +37991,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<sbyte?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(uint?)), typeof(sbyte?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<sbyte?> f = e.Compile();
+            Func<sbyte?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             sbyte? etResult = default(sbyte?);
@@ -38039,7 +38039,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<short>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(uint?)), typeof(short)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<short> f = e.Compile();
+            Func<short> f = e.CompileForTest();
 
             // compute the value with the expression tree
             short etResult = default(short);
@@ -38087,7 +38087,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<short?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(uint?)), typeof(short?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<short?> f = e.Compile();
+            Func<short?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             short? etResult = default(short?);
@@ -38135,7 +38135,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<uint>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(uint?)), typeof(uint)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<uint> f = e.Compile();
+            Func<uint> f = e.CompileForTest();
 
             // compute the value with the expression tree
             uint etResult = default(uint);
@@ -38183,7 +38183,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<uint?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(uint?)), typeof(uint?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<uint?> f = e.Compile();
+            Func<uint?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             uint? etResult = default(uint?);
@@ -38231,7 +38231,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<ulong>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(uint?)), typeof(ulong)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ulong> f = e.Compile();
+            Func<ulong> f = e.CompileForTest();
 
             // compute the value with the expression tree
             ulong etResult = default(ulong);
@@ -38279,7 +38279,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<ulong?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(uint?)), typeof(ulong?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ulong?> f = e.Compile();
+            Func<ulong?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             ulong? etResult = default(ulong?);
@@ -38327,7 +38327,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<ushort>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(uint?)), typeof(ushort)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ushort> f = e.Compile();
+            Func<ushort> f = e.CompileForTest();
 
             // compute the value with the expression tree
             ushort etResult = default(ushort);
@@ -38375,7 +38375,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<ushort?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(uint?)), typeof(ushort?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ushort?> f = e.Compile();
+            Func<ushort?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             ushort? etResult = default(ushort?);
@@ -38423,7 +38423,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<byte>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(ulong)), typeof(byte)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<byte> f = e.Compile();
+            Func<byte> f = e.CompileForTest();
 
             // compute the value with the expression tree
             byte etResult = default(byte);
@@ -38471,7 +38471,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<byte?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(ulong)), typeof(byte?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<byte?> f = e.Compile();
+            Func<byte?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             byte? etResult = default(byte?);
@@ -38519,7 +38519,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<char>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(ulong)), typeof(char)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<char> f = e.Compile();
+            Func<char> f = e.CompileForTest();
 
             // compute the value with the expression tree
             char etResult = default(char);
@@ -38567,7 +38567,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<char?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(ulong)), typeof(char?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<char?> f = e.Compile();
+            Func<char?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             char? etResult = default(char?);
@@ -38615,7 +38615,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<decimal>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(ulong)), typeof(decimal)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<decimal> f = e.Compile();
+            Func<decimal> f = e.CompileForTest();
 
             // compute the value with the expression tree
             decimal etResult = default(decimal);
@@ -38663,7 +38663,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<decimal?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(ulong)), typeof(decimal?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<decimal?> f = e.Compile();
+            Func<decimal?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             decimal? etResult = default(decimal?);
@@ -38711,7 +38711,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<double>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(ulong)), typeof(double)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<double> f = e.Compile();
+            Func<double> f = e.CompileForTest();
 
             // compute the value with the expression tree
             double etResult = default(double);
@@ -38759,7 +38759,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<double?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(ulong)), typeof(double?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<double?> f = e.Compile();
+            Func<double?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             double? etResult = default(double?);
@@ -38807,7 +38807,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<E>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(ulong)), typeof(E)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<E> f = e.Compile();
+            Func<E> f = e.CompileForTest();
 
             // compute the value with the expression tree
             E etResult = default(E);
@@ -38855,7 +38855,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<E?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(ulong)), typeof(E?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<E?> f = e.Compile();
+            Func<E?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             E? etResult = default(E?);
@@ -38903,7 +38903,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<El>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(ulong)), typeof(El)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<El> f = e.Compile();
+            Func<El> f = e.CompileForTest();
 
             // compute the value with the expression tree
             El etResult = default(El);
@@ -38951,7 +38951,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<El?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(ulong)), typeof(El?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<El?> f = e.Compile();
+            Func<El?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             El? etResult = default(El?);
@@ -38999,7 +38999,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<float>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(ulong)), typeof(float)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<float> f = e.Compile();
+            Func<float> f = e.CompileForTest();
 
             // compute the value with the expression tree
             float etResult = default(float);
@@ -39047,7 +39047,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<float?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(ulong)), typeof(float?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<float?> f = e.Compile();
+            Func<float?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             float? etResult = default(float?);
@@ -39095,7 +39095,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<int>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(ulong)), typeof(int)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<int> f = e.Compile();
+            Func<int> f = e.CompileForTest();
 
             // compute the value with the expression tree
             int etResult = default(int);
@@ -39143,7 +39143,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<int?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(ulong)), typeof(int?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<int?> f = e.Compile();
+            Func<int?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             int? etResult = default(int?);
@@ -39191,7 +39191,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<long>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(ulong)), typeof(long)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<long> f = e.Compile();
+            Func<long> f = e.CompileForTest();
 
             // compute the value with the expression tree
             long etResult = default(long);
@@ -39239,7 +39239,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<long?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(ulong)), typeof(long?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<long?> f = e.Compile();
+            Func<long?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             long? etResult = default(long?);
@@ -39287,7 +39287,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<sbyte>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(ulong)), typeof(sbyte)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<sbyte> f = e.Compile();
+            Func<sbyte> f = e.CompileForTest();
 
             // compute the value with the expression tree
             sbyte etResult = default(sbyte);
@@ -39335,7 +39335,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<sbyte?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(ulong)), typeof(sbyte?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<sbyte?> f = e.Compile();
+            Func<sbyte?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             sbyte? etResult = default(sbyte?);
@@ -39383,7 +39383,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<short>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(ulong)), typeof(short)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<short> f = e.Compile();
+            Func<short> f = e.CompileForTest();
 
             // compute the value with the expression tree
             short etResult = default(short);
@@ -39431,7 +39431,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<short?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(ulong)), typeof(short?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<short?> f = e.Compile();
+            Func<short?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             short? etResult = default(short?);
@@ -39479,7 +39479,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<uint>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(ulong)), typeof(uint)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<uint> f = e.Compile();
+            Func<uint> f = e.CompileForTest();
 
             // compute the value with the expression tree
             uint etResult = default(uint);
@@ -39527,7 +39527,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<uint?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(ulong)), typeof(uint?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<uint?> f = e.Compile();
+            Func<uint?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             uint? etResult = default(uint?);
@@ -39575,7 +39575,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<ulong>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(ulong)), typeof(ulong)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ulong> f = e.Compile();
+            Func<ulong> f = e.CompileForTest();
 
             // compute the value with the expression tree
             ulong etResult = default(ulong);
@@ -39623,7 +39623,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<ulong?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(ulong)), typeof(ulong?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ulong?> f = e.Compile();
+            Func<ulong?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             ulong? etResult = default(ulong?);
@@ -39671,7 +39671,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<ushort>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(ulong)), typeof(ushort)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ushort> f = e.Compile();
+            Func<ushort> f = e.CompileForTest();
 
             // compute the value with the expression tree
             ushort etResult = default(ushort);
@@ -39719,7 +39719,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<ushort?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(ulong)), typeof(ushort?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ushort?> f = e.Compile();
+            Func<ushort?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             ushort? etResult = default(ushort?);
@@ -39767,7 +39767,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<byte>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(ulong?)), typeof(byte)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<byte> f = e.Compile();
+            Func<byte> f = e.CompileForTest();
 
             // compute the value with the expression tree
             byte etResult = default(byte);
@@ -39815,7 +39815,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<byte?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(ulong?)), typeof(byte?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<byte?> f = e.Compile();
+            Func<byte?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             byte? etResult = default(byte?);
@@ -39863,7 +39863,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<char>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(ulong?)), typeof(char)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<char> f = e.Compile();
+            Func<char> f = e.CompileForTest();
 
             // compute the value with the expression tree
             char etResult = default(char);
@@ -39911,7 +39911,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<char?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(ulong?)), typeof(char?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<char?> f = e.Compile();
+            Func<char?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             char? etResult = default(char?);
@@ -39959,7 +39959,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<decimal>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(ulong?)), typeof(decimal)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<decimal> f = e.Compile();
+            Func<decimal> f = e.CompileForTest();
 
             // compute the value with the expression tree
             decimal etResult = default(decimal);
@@ -40007,7 +40007,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<decimal?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(ulong?)), typeof(decimal?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<decimal?> f = e.Compile();
+            Func<decimal?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             decimal? etResult = default(decimal?);
@@ -40055,7 +40055,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<double>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(ulong?)), typeof(double)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<double> f = e.Compile();
+            Func<double> f = e.CompileForTest();
 
             // compute the value with the expression tree
             double etResult = default(double);
@@ -40103,7 +40103,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<double?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(ulong?)), typeof(double?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<double?> f = e.Compile();
+            Func<double?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             double? etResult = default(double?);
@@ -40151,7 +40151,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<E>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(ulong?)), typeof(E)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<E> f = e.Compile();
+            Func<E> f = e.CompileForTest();
 
             // compute the value with the expression tree
             E etResult = default(E);
@@ -40199,7 +40199,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<E?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(ulong?)), typeof(E?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<E?> f = e.Compile();
+            Func<E?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             E? etResult = default(E?);
@@ -40247,7 +40247,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<El>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(ulong?)), typeof(El)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<El> f = e.Compile();
+            Func<El> f = e.CompileForTest();
 
             // compute the value with the expression tree
             El etResult = default(El);
@@ -40295,7 +40295,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<El?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(ulong?)), typeof(El?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<El?> f = e.Compile();
+            Func<El?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             El? etResult = default(El?);
@@ -40343,7 +40343,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<float>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(ulong?)), typeof(float)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<float> f = e.Compile();
+            Func<float> f = e.CompileForTest();
 
             // compute the value with the expression tree
             float etResult = default(float);
@@ -40391,7 +40391,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<float?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(ulong?)), typeof(float?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<float?> f = e.Compile();
+            Func<float?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             float? etResult = default(float?);
@@ -40439,7 +40439,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<int>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(ulong?)), typeof(int)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<int> f = e.Compile();
+            Func<int> f = e.CompileForTest();
 
             // compute the value with the expression tree
             int etResult = default(int);
@@ -40487,7 +40487,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<int?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(ulong?)), typeof(int?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<int?> f = e.Compile();
+            Func<int?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             int? etResult = default(int?);
@@ -40535,7 +40535,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<long>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(ulong?)), typeof(long)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<long> f = e.Compile();
+            Func<long> f = e.CompileForTest();
 
             // compute the value with the expression tree
             long etResult = default(long);
@@ -40583,7 +40583,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<long?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(ulong?)), typeof(long?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<long?> f = e.Compile();
+            Func<long?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             long? etResult = default(long?);
@@ -40631,7 +40631,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<sbyte>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(ulong?)), typeof(sbyte)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<sbyte> f = e.Compile();
+            Func<sbyte> f = e.CompileForTest();
 
             // compute the value with the expression tree
             sbyte etResult = default(sbyte);
@@ -40679,7 +40679,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<sbyte?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(ulong?)), typeof(sbyte?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<sbyte?> f = e.Compile();
+            Func<sbyte?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             sbyte? etResult = default(sbyte?);
@@ -40727,7 +40727,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<short>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(ulong?)), typeof(short)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<short> f = e.Compile();
+            Func<short> f = e.CompileForTest();
 
             // compute the value with the expression tree
             short etResult = default(short);
@@ -40775,7 +40775,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<short?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(ulong?)), typeof(short?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<short?> f = e.Compile();
+            Func<short?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             short? etResult = default(short?);
@@ -40823,7 +40823,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<uint>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(ulong?)), typeof(uint)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<uint> f = e.Compile();
+            Func<uint> f = e.CompileForTest();
 
             // compute the value with the expression tree
             uint etResult = default(uint);
@@ -40871,7 +40871,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<uint?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(ulong?)), typeof(uint?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<uint?> f = e.Compile();
+            Func<uint?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             uint? etResult = default(uint?);
@@ -40919,7 +40919,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<ulong>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(ulong?)), typeof(ulong)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ulong> f = e.Compile();
+            Func<ulong> f = e.CompileForTest();
 
             // compute the value with the expression tree
             ulong etResult = default(ulong);
@@ -40967,7 +40967,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<ulong?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(ulong?)), typeof(ulong?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ulong?> f = e.Compile();
+            Func<ulong?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             ulong? etResult = default(ulong?);
@@ -41015,7 +41015,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<ushort>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(ulong?)), typeof(ushort)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ushort> f = e.Compile();
+            Func<ushort> f = e.CompileForTest();
 
             // compute the value with the expression tree
             ushort etResult = default(ushort);
@@ -41063,7 +41063,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<ushort?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(ulong?)), typeof(ushort?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ushort?> f = e.Compile();
+            Func<ushort?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             ushort? etResult = default(ushort?);
@@ -41111,7 +41111,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<byte>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(ushort)), typeof(byte)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<byte> f = e.Compile();
+            Func<byte> f = e.CompileForTest();
 
             // compute the value with the expression tree
             byte etResult = default(byte);
@@ -41159,7 +41159,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<byte?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(ushort)), typeof(byte?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<byte?> f = e.Compile();
+            Func<byte?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             byte? etResult = default(byte?);
@@ -41207,7 +41207,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<char>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(ushort)), typeof(char)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<char> f = e.Compile();
+            Func<char> f = e.CompileForTest();
 
             // compute the value with the expression tree
             char etResult = default(char);
@@ -41255,7 +41255,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<char?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(ushort)), typeof(char?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<char?> f = e.Compile();
+            Func<char?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             char? etResult = default(char?);
@@ -41303,7 +41303,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<decimal>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(ushort)), typeof(decimal)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<decimal> f = e.Compile();
+            Func<decimal> f = e.CompileForTest();
 
             // compute the value with the expression tree
             decimal etResult = default(decimal);
@@ -41351,7 +41351,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<decimal?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(ushort)), typeof(decimal?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<decimal?> f = e.Compile();
+            Func<decimal?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             decimal? etResult = default(decimal?);
@@ -41399,7 +41399,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<double>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(ushort)), typeof(double)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<double> f = e.Compile();
+            Func<double> f = e.CompileForTest();
 
             // compute the value with the expression tree
             double etResult = default(double);
@@ -41447,7 +41447,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<double?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(ushort)), typeof(double?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<double?> f = e.Compile();
+            Func<double?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             double? etResult = default(double?);
@@ -41495,7 +41495,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<E>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(ushort)), typeof(E)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<E> f = e.Compile();
+            Func<E> f = e.CompileForTest();
 
             // compute the value with the expression tree
             E etResult = default(E);
@@ -41543,7 +41543,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<E?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(ushort)), typeof(E?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<E?> f = e.Compile();
+            Func<E?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             E? etResult = default(E?);
@@ -41591,7 +41591,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<El>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(ushort)), typeof(El)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<El> f = e.Compile();
+            Func<El> f = e.CompileForTest();
 
             // compute the value with the expression tree
             El etResult = default(El);
@@ -41639,7 +41639,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<El?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(ushort)), typeof(El?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<El?> f = e.Compile();
+            Func<El?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             El? etResult = default(El?);
@@ -41687,7 +41687,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<float>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(ushort)), typeof(float)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<float> f = e.Compile();
+            Func<float> f = e.CompileForTest();
 
             // compute the value with the expression tree
             float etResult = default(float);
@@ -41735,7 +41735,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<float?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(ushort)), typeof(float?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<float?> f = e.Compile();
+            Func<float?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             float? etResult = default(float?);
@@ -41783,7 +41783,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<int>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(ushort)), typeof(int)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<int> f = e.Compile();
+            Func<int> f = e.CompileForTest();
 
             // compute the value with the expression tree
             int etResult = default(int);
@@ -41831,7 +41831,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<int?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(ushort)), typeof(int?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<int?> f = e.Compile();
+            Func<int?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             int? etResult = default(int?);
@@ -41879,7 +41879,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<long>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(ushort)), typeof(long)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<long> f = e.Compile();
+            Func<long> f = e.CompileForTest();
 
             // compute the value with the expression tree
             long etResult = default(long);
@@ -41927,7 +41927,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<long?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(ushort)), typeof(long?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<long?> f = e.Compile();
+            Func<long?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             long? etResult = default(long?);
@@ -41975,7 +41975,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<sbyte>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(ushort)), typeof(sbyte)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<sbyte> f = e.Compile();
+            Func<sbyte> f = e.CompileForTest();
 
             // compute the value with the expression tree
             sbyte etResult = default(sbyte);
@@ -42023,7 +42023,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<sbyte?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(ushort)), typeof(sbyte?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<sbyte?> f = e.Compile();
+            Func<sbyte?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             sbyte? etResult = default(sbyte?);
@@ -42071,7 +42071,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<short>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(ushort)), typeof(short)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<short> f = e.Compile();
+            Func<short> f = e.CompileForTest();
 
             // compute the value with the expression tree
             short etResult = default(short);
@@ -42119,7 +42119,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<short?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(ushort)), typeof(short?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<short?> f = e.Compile();
+            Func<short?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             short? etResult = default(short?);
@@ -42167,7 +42167,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<uint>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(ushort)), typeof(uint)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<uint> f = e.Compile();
+            Func<uint> f = e.CompileForTest();
 
             // compute the value with the expression tree
             uint etResult = default(uint);
@@ -42215,7 +42215,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<uint?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(ushort)), typeof(uint?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<uint?> f = e.Compile();
+            Func<uint?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             uint? etResult = default(uint?);
@@ -42263,7 +42263,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<ulong>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(ushort)), typeof(ulong)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ulong> f = e.Compile();
+            Func<ulong> f = e.CompileForTest();
 
             // compute the value with the expression tree
             ulong etResult = default(ulong);
@@ -42311,7 +42311,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<ulong?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(ushort)), typeof(ulong?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ulong?> f = e.Compile();
+            Func<ulong?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             ulong? etResult = default(ulong?);
@@ -42359,7 +42359,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<ushort>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(ushort)), typeof(ushort)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ushort> f = e.Compile();
+            Func<ushort> f = e.CompileForTest();
 
             // compute the value with the expression tree
             ushort etResult = default(ushort);
@@ -42407,7 +42407,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<ushort?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(ushort)), typeof(ushort?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ushort?> f = e.Compile();
+            Func<ushort?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             ushort? etResult = default(ushort?);
@@ -42455,7 +42455,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<byte>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(ushort?)), typeof(byte)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<byte> f = e.Compile();
+            Func<byte> f = e.CompileForTest();
 
             // compute the value with the expression tree
             byte etResult = default(byte);
@@ -42503,7 +42503,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<byte?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(ushort?)), typeof(byte?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<byte?> f = e.Compile();
+            Func<byte?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             byte? etResult = default(byte?);
@@ -42551,7 +42551,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<char>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(ushort?)), typeof(char)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<char> f = e.Compile();
+            Func<char> f = e.CompileForTest();
 
             // compute the value with the expression tree
             char etResult = default(char);
@@ -42599,7 +42599,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<char?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(ushort?)), typeof(char?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<char?> f = e.Compile();
+            Func<char?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             char? etResult = default(char?);
@@ -42647,7 +42647,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<decimal>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(ushort?)), typeof(decimal)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<decimal> f = e.Compile();
+            Func<decimal> f = e.CompileForTest();
 
             // compute the value with the expression tree
             decimal etResult = default(decimal);
@@ -42695,7 +42695,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<decimal?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(ushort?)), typeof(decimal?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<decimal?> f = e.Compile();
+            Func<decimal?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             decimal? etResult = default(decimal?);
@@ -42743,7 +42743,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<double>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(ushort?)), typeof(double)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<double> f = e.Compile();
+            Func<double> f = e.CompileForTest();
 
             // compute the value with the expression tree
             double etResult = default(double);
@@ -42791,7 +42791,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<double?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(ushort?)), typeof(double?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<double?> f = e.Compile();
+            Func<double?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             double? etResult = default(double?);
@@ -42839,7 +42839,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<E>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(ushort?)), typeof(E)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<E> f = e.Compile();
+            Func<E> f = e.CompileForTest();
 
             // compute the value with the expression tree
             E etResult = default(E);
@@ -42887,7 +42887,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<E?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(ushort?)), typeof(E?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<E?> f = e.Compile();
+            Func<E?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             E? etResult = default(E?);
@@ -42935,7 +42935,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<El>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(ushort?)), typeof(El)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<El> f = e.Compile();
+            Func<El> f = e.CompileForTest();
 
             // compute the value with the expression tree
             El etResult = default(El);
@@ -42983,7 +42983,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<El?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(ushort?)), typeof(El?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<El?> f = e.Compile();
+            Func<El?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             El? etResult = default(El?);
@@ -43031,7 +43031,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<float>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(ushort?)), typeof(float)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<float> f = e.Compile();
+            Func<float> f = e.CompileForTest();
 
             // compute the value with the expression tree
             float etResult = default(float);
@@ -43079,7 +43079,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<float?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(ushort?)), typeof(float?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<float?> f = e.Compile();
+            Func<float?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             float? etResult = default(float?);
@@ -43127,7 +43127,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<int>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(ushort?)), typeof(int)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<int> f = e.Compile();
+            Func<int> f = e.CompileForTest();
 
             // compute the value with the expression tree
             int etResult = default(int);
@@ -43175,7 +43175,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<int?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(ushort?)), typeof(int?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<int?> f = e.Compile();
+            Func<int?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             int? etResult = default(int?);
@@ -43223,7 +43223,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<long>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(ushort?)), typeof(long)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<long> f = e.Compile();
+            Func<long> f = e.CompileForTest();
 
             // compute the value with the expression tree
             long etResult = default(long);
@@ -43271,7 +43271,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<long?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(ushort?)), typeof(long?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<long?> f = e.Compile();
+            Func<long?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             long? etResult = default(long?);
@@ -43319,7 +43319,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<sbyte>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(ushort?)), typeof(sbyte)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<sbyte> f = e.Compile();
+            Func<sbyte> f = e.CompileForTest();
 
             // compute the value with the expression tree
             sbyte etResult = default(sbyte);
@@ -43367,7 +43367,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<sbyte?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(ushort?)), typeof(sbyte?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<sbyte?> f = e.Compile();
+            Func<sbyte?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             sbyte? etResult = default(sbyte?);
@@ -43415,7 +43415,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<short>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(ushort?)), typeof(short)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<short> f = e.Compile();
+            Func<short> f = e.CompileForTest();
 
             // compute the value with the expression tree
             short etResult = default(short);
@@ -43463,7 +43463,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<short?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(ushort?)), typeof(short?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<short?> f = e.Compile();
+            Func<short?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             short? etResult = default(short?);
@@ -43511,7 +43511,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<uint>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(ushort?)), typeof(uint)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<uint> f = e.Compile();
+            Func<uint> f = e.CompileForTest();
 
             // compute the value with the expression tree
             uint etResult = default(uint);
@@ -43559,7 +43559,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<uint?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(ushort?)), typeof(uint?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<uint?> f = e.Compile();
+            Func<uint?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             uint? etResult = default(uint?);
@@ -43607,7 +43607,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<ulong>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(ushort?)), typeof(ulong)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ulong> f = e.Compile();
+            Func<ulong> f = e.CompileForTest();
 
             // compute the value with the expression tree
             ulong etResult = default(ulong);
@@ -43655,7 +43655,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<ulong?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(ushort?)), typeof(ulong?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ulong?> f = e.Compile();
+            Func<ulong?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             ulong? etResult = default(ulong?);
@@ -43703,7 +43703,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<ushort>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(ushort?)), typeof(ushort)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ushort> f = e.Compile();
+            Func<ushort> f = e.CompileForTest();
 
             // compute the value with the expression tree
             ushort etResult = default(ushort);
@@ -43751,7 +43751,7 @@ namespace Tests.ExpressionCompiler.Convert
                 Expression.Lambda<Func<ushort?>>(
                     Expression.ConvertChecked(Expression.Constant(value, typeof(ushort?)), typeof(ushort?)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ushort?> f = e.Compile();
+            Func<ushort?> f = e.CompileForTest();
 
             // compute the value with the expression tree
             ushort? etResult = default(ushort?);

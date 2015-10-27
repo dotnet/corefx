@@ -132,7 +132,7 @@ namespace Tests.ExpressionCompiler.Lifted
                         Expression.Constant(b, typeof(bool?)),
                         null),
                     Enumerable.Empty<ParameterExpression>());
-            Func<bool?> f = e.Compile();
+            Func<bool?> f = e.CompileForTest();
 
             bool? expected = a & b;
 
@@ -151,7 +151,7 @@ namespace Tests.ExpressionCompiler.Lifted
                         Expression.Constant(b, typeof(bool?)),
                         null),
                     Enumerable.Empty<ParameterExpression>());
-            Func<bool?> f = e.Compile();
+            Func<bool?> f = e.CompileForTest();
 
             bool? expected = a == false ? false : a & b;
 
@@ -170,7 +170,7 @@ namespace Tests.ExpressionCompiler.Lifted
                         Expression.Constant(b, typeof(bool?)),
                         null),
                     Enumerable.Empty<ParameterExpression>());
-            Func<bool?> f = e.Compile();
+            Func<bool?> f = e.CompileForTest();
 
             bool? expected = a | b;
 
@@ -189,7 +189,7 @@ namespace Tests.ExpressionCompiler.Lifted
                         Expression.Constant(b, typeof(bool?)),
                         null),
                     Enumerable.Empty<ParameterExpression>());
-            Func<bool?> f = e.Compile();
+            Func<bool?> f = e.CompileForTest();
 
             bool? expected = a == true ? true : a | b;
 
@@ -208,7 +208,7 @@ namespace Tests.ExpressionCompiler.Lifted
                         Expression.Constant(b, typeof(bool?)),
                         null),
                     Enumerable.Empty<ParameterExpression>());
-            Func<bool?> f = e.Compile();
+            Func<bool?> f = e.CompileForTest();
 
             bool? expected = a & b;
 
@@ -227,7 +227,7 @@ namespace Tests.ExpressionCompiler.Lifted
                         Expression.Constant(b, typeof(bool?)),
                         null),
                     Enumerable.Empty<ParameterExpression>());
-            Func<bool?> f = e.Compile();
+            Func<bool?> f = e.CompileForTest();
 
             bool? expected = a == false ? false : a & b;
 
@@ -246,7 +246,7 @@ namespace Tests.ExpressionCompiler.Lifted
                         Expression.Constant(b, typeof(bool?)),
                         null),
                     Enumerable.Empty<ParameterExpression>());
-            Func<bool?> f = e.Compile();
+            Func<bool?> f = e.CompileForTest();
 
             bool? expected = a | b;
 
@@ -265,7 +265,7 @@ namespace Tests.ExpressionCompiler.Lifted
                         Expression.Constant(b, typeof(bool?)),
                         null),
                     Enumerable.Empty<ParameterExpression>());
-            Func<bool?> f = e.Compile();
+            Func<bool?> f = e.CompileForTest();
 
             bool? expected = a == true ? true : a | b;
 

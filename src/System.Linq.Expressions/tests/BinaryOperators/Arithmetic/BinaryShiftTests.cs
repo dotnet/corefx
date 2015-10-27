@@ -121,7 +121,7 @@ namespace Tests.ExpressionCompiler.Binary
                         Expression.Constant(b, typeof(int)))
                     );
 
-            Func<byte> f = e.Compile();
+            Func<byte> f = e.CompileForTest();
 
             // shift with expression tree
             byte etResult = default(byte);
@@ -184,7 +184,7 @@ namespace Tests.ExpressionCompiler.Binary
                         Expression.Constant(b, typeof(int)))
                     );
 
-            Func<sbyte> f = e.Compile();
+            Func<sbyte> f = e.CompileForTest();
 
             // shift with expression tree
             sbyte etResult = default(sbyte);
@@ -247,7 +247,7 @@ namespace Tests.ExpressionCompiler.Binary
                         Expression.Constant(b, typeof(int)))
                     );
 
-            Func<ushort> f = e.Compile();
+            Func<ushort> f = e.CompileForTest();
 
             // shift with expression tree
             ushort etResult = default(ushort);
@@ -310,7 +310,7 @@ namespace Tests.ExpressionCompiler.Binary
                         Expression.Constant(b, typeof(int)))
                     );
 
-            Func<short> f = e.Compile();
+            Func<short> f = e.CompileForTest();
 
             // shift with expression tree
             short etResult = default(short);
@@ -373,7 +373,7 @@ namespace Tests.ExpressionCompiler.Binary
                         Expression.Constant(b, typeof(int)))
                     );
 
-            Func<uint> f = e.Compile();
+            Func<uint> f = e.CompileForTest();
 
             // shift with expression tree
             uint etResult = default(uint);
@@ -436,7 +436,7 @@ namespace Tests.ExpressionCompiler.Binary
                         Expression.Constant(b, typeof(int)))
                     );
 
-            Func<int> f = e.Compile();
+            Func<int> f = e.CompileForTest();
 
             // shift with expression tree
             int etResult = default(int);
@@ -499,7 +499,7 @@ namespace Tests.ExpressionCompiler.Binary
                         Expression.Constant(b, typeof(int)))
                     );
 
-            Func<ulong> f = e.Compile();
+            Func<ulong> f = e.CompileForTest();
 
             // shift with expression tree
             ulong etResult = default(ulong);
@@ -562,7 +562,7 @@ namespace Tests.ExpressionCompiler.Binary
                         Expression.Constant(b, typeof(int)))
                     );
 
-            Func<long> f = e.Compile();
+            Func<long> f = e.CompileForTest();
 
             // shift with expression tree
             long etResult = default(long);

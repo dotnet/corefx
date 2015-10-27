@@ -35,7 +35,7 @@ namespace Tests.ExpressionCompiler.Unary
                         typeof(object)),
                     Enumerable.Empty<ParameterExpression>());
 
-            Func<object> f = e.Compile();
+            Func<object> f = e.CompileForTest();
 
             if (shouldThrow)
             {

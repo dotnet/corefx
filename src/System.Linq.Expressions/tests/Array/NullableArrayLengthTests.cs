@@ -690,7 +690,7 @@ namespace Tests.ExpressionCompiler.Array
                 Expression.Lambda<Func<int>>(
                     Expression.ArrayLength(Expression.Constant(array, typeof(bool?[]))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<int> f = e.Compile();
+            Func<int> f = e.CompileForTest();
             Assert.Equal(array.Length, f());
         }
 
@@ -700,7 +700,7 @@ namespace Tests.ExpressionCompiler.Array
                 Expression.Lambda<Func<int>>(
                     Expression.ArrayLength(Expression.Constant(array, typeof(byte?[]))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<int> f = e.Compile();
+            Func<int> f = e.CompileForTest();
             Assert.Equal(array.Length, f());
         }
 
@@ -710,7 +710,7 @@ namespace Tests.ExpressionCompiler.Array
                 Expression.Lambda<Func<int>>(
                     Expression.ArrayLength(Expression.Constant(array, typeof(char?[]))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<int> f = e.Compile();
+            Func<int> f = e.CompileForTest();
             Assert.Equal(array.Length, f());
         }
 
@@ -720,7 +720,7 @@ namespace Tests.ExpressionCompiler.Array
                 Expression.Lambda<Func<int>>(
                     Expression.ArrayLength(Expression.Constant(array, typeof(decimal?[]))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<int> f = e.Compile();
+            Func<int> f = e.CompileForTest();
             Assert.Equal(array.Length, f());
         }
 
@@ -730,7 +730,7 @@ namespace Tests.ExpressionCompiler.Array
                 Expression.Lambda<Func<int>>(
                     Expression.ArrayLength(Expression.Constant(array, typeof(double?[]))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<int> f = e.Compile();
+            Func<int> f = e.CompileForTest();
             Assert.Equal(array.Length, f());
         }
 
@@ -740,7 +740,7 @@ namespace Tests.ExpressionCompiler.Array
                 Expression.Lambda<Func<int>>(
                     Expression.ArrayLength(Expression.Constant(array, typeof(E?[]))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<int> f = e.Compile();
+            Func<int> f = e.CompileForTest();
             Assert.Equal(array.Length, f());
         }
 
@@ -750,7 +750,7 @@ namespace Tests.ExpressionCompiler.Array
                 Expression.Lambda<Func<int>>(
                     Expression.ArrayLength(Expression.Constant(array, typeof(El?[]))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<int> f = e.Compile();
+            Func<int> f = e.CompileForTest();
             Assert.Equal(array.Length, f());
         }
 
@@ -760,7 +760,7 @@ namespace Tests.ExpressionCompiler.Array
                 Expression.Lambda<Func<int>>(
                     Expression.ArrayLength(Expression.Constant(array, typeof(float?[]))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<int> f = e.Compile();
+            Func<int> f = e.CompileForTest();
             Assert.Equal(array.Length, f());
         }
 
@@ -770,7 +770,7 @@ namespace Tests.ExpressionCompiler.Array
                 Expression.Lambda<Func<int>>(
                     Expression.ArrayLength(Expression.Constant(array, typeof(int?[]))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<int> f = e.Compile();
+            Func<int> f = e.CompileForTest();
             Assert.Equal(array.Length, f());
         }
 
@@ -780,7 +780,7 @@ namespace Tests.ExpressionCompiler.Array
                 Expression.Lambda<Func<int>>(
                     Expression.ArrayLength(Expression.Constant(array, typeof(long?[]))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<int> f = e.Compile();
+            Func<int> f = e.CompileForTest();
             Assert.Equal(array.Length, f());
         }
 
@@ -790,7 +790,7 @@ namespace Tests.ExpressionCompiler.Array
                 Expression.Lambda<Func<int>>(
                     Expression.ArrayLength(Expression.Constant(array, typeof(sbyte?[]))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<int> f = e.Compile();
+            Func<int> f = e.CompileForTest();
             Assert.Equal(array.Length, f());
         }
 
@@ -800,7 +800,7 @@ namespace Tests.ExpressionCompiler.Array
                 Expression.Lambda<Func<int>>(
                     Expression.ArrayLength(Expression.Constant(array, typeof(S?[]))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<int> f = e.Compile();
+            Func<int> f = e.CompileForTest();
             Assert.Equal(array.Length, f());
         }
 
@@ -810,7 +810,7 @@ namespace Tests.ExpressionCompiler.Array
                 Expression.Lambda<Func<int>>(
                     Expression.ArrayLength(Expression.Constant(array, typeof(Sc?[]))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<int> f = e.Compile();
+            Func<int> f = e.CompileForTest();
             Assert.Equal(array.Length, f());
         }
 
@@ -820,7 +820,7 @@ namespace Tests.ExpressionCompiler.Array
                 Expression.Lambda<Func<int>>(
                     Expression.ArrayLength(Expression.Constant(array, typeof(Scs?[]))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<int> f = e.Compile();
+            Func<int> f = e.CompileForTest();
             Assert.Equal(array.Length, f());
         }
 
@@ -830,7 +830,7 @@ namespace Tests.ExpressionCompiler.Array
                 Expression.Lambda<Func<int>>(
                     Expression.ArrayLength(Expression.Constant(array, typeof(Sp?[]))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<int> f = e.Compile();
+            Func<int> f = e.CompileForTest();
             Assert.Equal(array.Length, f());
         }
 
@@ -840,7 +840,7 @@ namespace Tests.ExpressionCompiler.Array
                 Expression.Lambda<Func<int>>(
                     Expression.ArrayLength(Expression.Constant(array, typeof(Ss?[]))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<int> f = e.Compile();
+            Func<int> f = e.CompileForTest();
             Assert.Equal(array.Length, f());
         }
 
@@ -850,7 +850,7 @@ namespace Tests.ExpressionCompiler.Array
                 Expression.Lambda<Func<int>>(
                     Expression.ArrayLength(Expression.Constant(array, typeof(short?[]))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<int> f = e.Compile();
+            Func<int> f = e.CompileForTest();
             Assert.Equal(array.Length, f());
         }
 
@@ -860,7 +860,7 @@ namespace Tests.ExpressionCompiler.Array
                 Expression.Lambda<Func<int>>(
                     Expression.ArrayLength(Expression.Constant(array, typeof(uint?[]))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<int> f = e.Compile();
+            Func<int> f = e.CompileForTest();
             Assert.Equal(array.Length, f());
         }
 
@@ -870,7 +870,7 @@ namespace Tests.ExpressionCompiler.Array
                 Expression.Lambda<Func<int>>(
                     Expression.ArrayLength(Expression.Constant(array, typeof(ulong?[]))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<int> f = e.Compile();
+            Func<int> f = e.CompileForTest();
             Assert.Equal(array.Length, f());
         }
 
@@ -880,7 +880,7 @@ namespace Tests.ExpressionCompiler.Array
                 Expression.Lambda<Func<int>>(
                     Expression.ArrayLength(Expression.Constant(array, typeof(ushort?[]))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<int> f = e.Compile();
+            Func<int> f = e.CompileForTest();
             Assert.Equal(array.Length, f());
         }
 
@@ -890,7 +890,7 @@ namespace Tests.ExpressionCompiler.Array
                 Expression.Lambda<Func<int>>(
                     Expression.ArrayLength(Expression.Constant(array, typeof(Ts?[]))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<int> f = e.Compile();
+            Func<int> f = e.CompileForTest();
             Assert.Equal(array.Length, f());
         }
 

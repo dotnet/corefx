@@ -1354,7 +1354,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(bool),
                         Expression.Constant(size, typeof(byte))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<bool[]> f = e.Compile();
+            Func<bool[]> f = e.CompileForTest();
 
             // get the array
             bool[] result = null;
@@ -1406,7 +1406,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(byte),
                         Expression.Constant(size, typeof(byte))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<byte[]> f = e.Compile();
+            Func<byte[]> f = e.CompileForTest();
 
             // get the array
             byte[] result = null;
@@ -1458,7 +1458,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(char),
                         Expression.Constant(size, typeof(byte))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<char[]> f = e.Compile();
+            Func<char[]> f = e.CompileForTest();
 
             // get the array
             char[] result = null;
@@ -1510,7 +1510,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(decimal),
                         Expression.Constant(size, typeof(byte))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<decimal[]> f = e.Compile();
+            Func<decimal[]> f = e.CompileForTest();
 
             // get the array
             decimal[] result = null;
@@ -1562,7 +1562,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(double),
                         Expression.Constant(size, typeof(byte))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<double[]> f = e.Compile();
+            Func<double[]> f = e.CompileForTest();
 
             // get the array
             double[] result = null;
@@ -1614,7 +1614,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(float),
                         Expression.Constant(size, typeof(byte))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<float[]> f = e.Compile();
+            Func<float[]> f = e.CompileForTest();
 
             // get the array
             float[] result = null;
@@ -1666,7 +1666,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(int),
                         Expression.Constant(size, typeof(byte))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<int[]> f = e.Compile();
+            Func<int[]> f = e.CompileForTest();
 
             // get the array
             int[] result = null;
@@ -1718,7 +1718,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(long),
                         Expression.Constant(size, typeof(byte))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<long[]> f = e.Compile();
+            Func<long[]> f = e.CompileForTest();
 
             // get the array
             long[] result = null;
@@ -1770,7 +1770,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(S),
                         Expression.Constant(size, typeof(byte))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<S[]> f = e.Compile();
+            Func<S[]> f = e.CompileForTest();
 
             // get the array
             S[] result = null;
@@ -1822,7 +1822,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(sbyte),
                         Expression.Constant(size, typeof(byte))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<sbyte[]> f = e.Compile();
+            Func<sbyte[]> f = e.CompileForTest();
 
             // get the array
             sbyte[] result = null;
@@ -1874,7 +1874,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(Sc),
                         Expression.Constant(size, typeof(byte))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<Sc[]> f = e.Compile();
+            Func<Sc[]> f = e.CompileForTest();
 
             // get the array
             Sc[] result = null;
@@ -1926,7 +1926,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(Scs),
                         Expression.Constant(size, typeof(byte))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<Scs[]> f = e.Compile();
+            Func<Scs[]> f = e.CompileForTest();
 
             // get the array
             Scs[] result = null;
@@ -1978,7 +1978,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(short),
                         Expression.Constant(size, typeof(byte))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<short[]> f = e.Compile();
+            Func<short[]> f = e.CompileForTest();
 
             // get the array
             short[] result = null;
@@ -2030,7 +2030,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(Sp),
                         Expression.Constant(size, typeof(byte))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<Sp[]> f = e.Compile();
+            Func<Sp[]> f = e.CompileForTest();
 
             // get the array
             Sp[] result = null;
@@ -2082,7 +2082,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(Ss),
                         Expression.Constant(size, typeof(byte))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<Ss[]> f = e.Compile();
+            Func<Ss[]> f = e.CompileForTest();
 
             // get the array
             Ss[] result = null;
@@ -2134,7 +2134,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(uint),
                         Expression.Constant(size, typeof(byte))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<uint[]> f = e.Compile();
+            Func<uint[]> f = e.CompileForTest();
 
             // get the array
             uint[] result = null;
@@ -2186,7 +2186,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(ulong),
                         Expression.Constant(size, typeof(byte))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ulong[]> f = e.Compile();
+            Func<ulong[]> f = e.CompileForTest();
 
             // get the array
             ulong[] result = null;
@@ -2238,7 +2238,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(ushort),
                         Expression.Constant(size, typeof(byte))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ushort[]> f = e.Compile();
+            Func<ushort[]> f = e.CompileForTest();
 
             // get the array
             ushort[] result = null;
@@ -2294,7 +2294,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(bool),
                         Expression.Constant(size, typeof(int))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<bool[]> f = e.Compile();
+            Func<bool[]> f = e.CompileForTest();
 
             // get the array
             bool[] result = null;
@@ -2346,7 +2346,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(byte),
                         Expression.Constant(size, typeof(int))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<byte[]> f = e.Compile();
+            Func<byte[]> f = e.CompileForTest();
 
             // get the array
             byte[] result = null;
@@ -2398,7 +2398,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(char),
                         Expression.Constant(size, typeof(int))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<char[]> f = e.Compile();
+            Func<char[]> f = e.CompileForTest();
 
             // get the array
             char[] result = null;
@@ -2450,7 +2450,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(decimal),
                         Expression.Constant(size, typeof(int))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<decimal[]> f = e.Compile();
+            Func<decimal[]> f = e.CompileForTest();
 
             // get the array
             decimal[] result = null;
@@ -2502,7 +2502,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(double),
                         Expression.Constant(size, typeof(int))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<double[]> f = e.Compile();
+            Func<double[]> f = e.CompileForTest();
 
             // get the array
             double[] result = null;
@@ -2554,7 +2554,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(float),
                         Expression.Constant(size, typeof(int))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<float[]> f = e.Compile();
+            Func<float[]> f = e.CompileForTest();
 
             // get the array
             float[] result = null;
@@ -2606,7 +2606,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(int),
                         Expression.Constant(size, typeof(int))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<int[]> f = e.Compile();
+            Func<int[]> f = e.CompileForTest();
 
             // get the array
             int[] result = null;
@@ -2658,7 +2658,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(long),
                         Expression.Constant(size, typeof(int))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<long[]> f = e.Compile();
+            Func<long[]> f = e.CompileForTest();
 
             // get the array
             long[] result = null;
@@ -2710,7 +2710,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(S),
                         Expression.Constant(size, typeof(int))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<S[]> f = e.Compile();
+            Func<S[]> f = e.CompileForTest();
 
             // get the array
             S[] result = null;
@@ -2762,7 +2762,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(sbyte),
                         Expression.Constant(size, typeof(int))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<sbyte[]> f = e.Compile();
+            Func<sbyte[]> f = e.CompileForTest();
 
             // get the array
             sbyte[] result = null;
@@ -2814,7 +2814,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(Sc),
                         Expression.Constant(size, typeof(int))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<Sc[]> f = e.Compile();
+            Func<Sc[]> f = e.CompileForTest();
 
             // get the array
             Sc[] result = null;
@@ -2866,7 +2866,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(Scs),
                         Expression.Constant(size, typeof(int))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<Scs[]> f = e.Compile();
+            Func<Scs[]> f = e.CompileForTest();
 
             // get the array
             Scs[] result = null;
@@ -2918,7 +2918,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(short),
                         Expression.Constant(size, typeof(int))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<short[]> f = e.Compile();
+            Func<short[]> f = e.CompileForTest();
 
             // get the array
             short[] result = null;
@@ -2970,7 +2970,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(Sp),
                         Expression.Constant(size, typeof(int))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<Sp[]> f = e.Compile();
+            Func<Sp[]> f = e.CompileForTest();
 
             // get the array
             Sp[] result = null;
@@ -3022,7 +3022,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(Ss),
                         Expression.Constant(size, typeof(int))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<Ss[]> f = e.Compile();
+            Func<Ss[]> f = e.CompileForTest();
 
             // get the array
             Ss[] result = null;
@@ -3074,7 +3074,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(uint),
                         Expression.Constant(size, typeof(int))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<uint[]> f = e.Compile();
+            Func<uint[]> f = e.CompileForTest();
 
             // get the array
             uint[] result = null;
@@ -3126,7 +3126,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(ulong),
                         Expression.Constant(size, typeof(int))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ulong[]> f = e.Compile();
+            Func<ulong[]> f = e.CompileForTest();
 
             // get the array
             ulong[] result = null;
@@ -3178,7 +3178,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(ushort),
                         Expression.Constant(size, typeof(int))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ushort[]> f = e.Compile();
+            Func<ushort[]> f = e.CompileForTest();
 
             // get the array
             ushort[] result = null;
@@ -3234,7 +3234,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(bool),
                         Expression.Constant(size, typeof(long))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<bool[]> f = e.Compile();
+            Func<bool[]> f = e.CompileForTest();
 
             // get the array
             bool[] result = null;
@@ -3286,7 +3286,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(byte),
                         Expression.Constant(size, typeof(long))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<byte[]> f = e.Compile();
+            Func<byte[]> f = e.CompileForTest();
 
             // get the array
             byte[] result = null;
@@ -3338,7 +3338,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(char),
                         Expression.Constant(size, typeof(long))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<char[]> f = e.Compile();
+            Func<char[]> f = e.CompileForTest();
 
             // get the array
             char[] result = null;
@@ -3390,7 +3390,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(decimal),
                         Expression.Constant(size, typeof(long))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<decimal[]> f = e.Compile();
+            Func<decimal[]> f = e.CompileForTest();
 
             // get the array
             decimal[] result = null;
@@ -3442,7 +3442,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(double),
                         Expression.Constant(size, typeof(long))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<double[]> f = e.Compile();
+            Func<double[]> f = e.CompileForTest();
 
             // get the array
             double[] result = null;
@@ -3494,7 +3494,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(float),
                         Expression.Constant(size, typeof(long))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<float[]> f = e.Compile();
+            Func<float[]> f = e.CompileForTest();
 
             // get the array
             float[] result = null;
@@ -3546,7 +3546,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(int),
                         Expression.Constant(size, typeof(long))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<int[]> f = e.Compile();
+            Func<int[]> f = e.CompileForTest();
 
             // get the array
             int[] result = null;
@@ -3598,7 +3598,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(long),
                         Expression.Constant(size, typeof(long))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<long[]> f = e.Compile();
+            Func<long[]> f = e.CompileForTest();
 
             // get the array
             long[] result = null;
@@ -3650,7 +3650,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(S),
                         Expression.Constant(size, typeof(long))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<S[]> f = e.Compile();
+            Func<S[]> f = e.CompileForTest();
 
             // get the array
             S[] result = null;
@@ -3702,7 +3702,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(sbyte),
                         Expression.Constant(size, typeof(long))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<sbyte[]> f = e.Compile();
+            Func<sbyte[]> f = e.CompileForTest();
 
             // get the array
             sbyte[] result = null;
@@ -3754,7 +3754,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(Sc),
                         Expression.Constant(size, typeof(long))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<Sc[]> f = e.Compile();
+            Func<Sc[]> f = e.CompileForTest();
 
             // get the array
             Sc[] result = null;
@@ -3806,7 +3806,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(Scs),
                         Expression.Constant(size, typeof(long))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<Scs[]> f = e.Compile();
+            Func<Scs[]> f = e.CompileForTest();
 
             // get the array
             Scs[] result = null;
@@ -3858,7 +3858,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(short),
                         Expression.Constant(size, typeof(long))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<short[]> f = e.Compile();
+            Func<short[]> f = e.CompileForTest();
 
             // get the array
             short[] result = null;
@@ -3910,7 +3910,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(Sp),
                         Expression.Constant(size, typeof(long))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<Sp[]> f = e.Compile();
+            Func<Sp[]> f = e.CompileForTest();
 
             // get the array
             Sp[] result = null;
@@ -3962,7 +3962,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(Ss),
                         Expression.Constant(size, typeof(long))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<Ss[]> f = e.Compile();
+            Func<Ss[]> f = e.CompileForTest();
 
             // get the array
             Ss[] result = null;
@@ -4014,7 +4014,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(uint),
                         Expression.Constant(size, typeof(long))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<uint[]> f = e.Compile();
+            Func<uint[]> f = e.CompileForTest();
 
             // get the array
             uint[] result = null;
@@ -4066,7 +4066,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(ulong),
                         Expression.Constant(size, typeof(long))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ulong[]> f = e.Compile();
+            Func<ulong[]> f = e.CompileForTest();
 
             // get the array
             ulong[] result = null;
@@ -4118,7 +4118,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(ushort),
                         Expression.Constant(size, typeof(long))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ushort[]> f = e.Compile();
+            Func<ushort[]> f = e.CompileForTest();
 
             // get the array
             ushort[] result = null;
@@ -4174,7 +4174,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(bool),
                         Expression.Constant(size, typeof(sbyte))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<bool[]> f = e.Compile();
+            Func<bool[]> f = e.CompileForTest();
 
             // get the array
             bool[] result = null;
@@ -4226,7 +4226,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(byte),
                         Expression.Constant(size, typeof(sbyte))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<byte[]> f = e.Compile();
+            Func<byte[]> f = e.CompileForTest();
 
             // get the array
             byte[] result = null;
@@ -4278,7 +4278,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(char),
                         Expression.Constant(size, typeof(sbyte))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<char[]> f = e.Compile();
+            Func<char[]> f = e.CompileForTest();
 
             // get the array
             char[] result = null;
@@ -4330,7 +4330,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(decimal),
                         Expression.Constant(size, typeof(sbyte))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<decimal[]> f = e.Compile();
+            Func<decimal[]> f = e.CompileForTest();
 
             // get the array
             decimal[] result = null;
@@ -4382,7 +4382,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(double),
                         Expression.Constant(size, typeof(sbyte))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<double[]> f = e.Compile();
+            Func<double[]> f = e.CompileForTest();
 
             // get the array
             double[] result = null;
@@ -4434,7 +4434,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(float),
                         Expression.Constant(size, typeof(sbyte))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<float[]> f = e.Compile();
+            Func<float[]> f = e.CompileForTest();
 
             // get the array
             float[] result = null;
@@ -4486,7 +4486,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(int),
                         Expression.Constant(size, typeof(sbyte))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<int[]> f = e.Compile();
+            Func<int[]> f = e.CompileForTest();
 
             // get the array
             int[] result = null;
@@ -4538,7 +4538,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(long),
                         Expression.Constant(size, typeof(sbyte))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<long[]> f = e.Compile();
+            Func<long[]> f = e.CompileForTest();
 
             // get the array
             long[] result = null;
@@ -4590,7 +4590,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(S),
                         Expression.Constant(size, typeof(sbyte))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<S[]> f = e.Compile();
+            Func<S[]> f = e.CompileForTest();
 
             // get the array
             S[] result = null;
@@ -4642,7 +4642,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(sbyte),
                         Expression.Constant(size, typeof(sbyte))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<sbyte[]> f = e.Compile();
+            Func<sbyte[]> f = e.CompileForTest();
 
             // get the array
             sbyte[] result = null;
@@ -4694,7 +4694,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(Sc),
                         Expression.Constant(size, typeof(sbyte))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<Sc[]> f = e.Compile();
+            Func<Sc[]> f = e.CompileForTest();
 
             // get the array
             Sc[] result = null;
@@ -4746,7 +4746,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(Scs),
                         Expression.Constant(size, typeof(sbyte))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<Scs[]> f = e.Compile();
+            Func<Scs[]> f = e.CompileForTest();
 
             // get the array
             Scs[] result = null;
@@ -4798,7 +4798,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(short),
                         Expression.Constant(size, typeof(sbyte))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<short[]> f = e.Compile();
+            Func<short[]> f = e.CompileForTest();
 
             // get the array
             short[] result = null;
@@ -4850,7 +4850,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(Sp),
                         Expression.Constant(size, typeof(sbyte))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<Sp[]> f = e.Compile();
+            Func<Sp[]> f = e.CompileForTest();
 
             // get the array
             Sp[] result = null;
@@ -4902,7 +4902,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(Ss),
                         Expression.Constant(size, typeof(sbyte))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<Ss[]> f = e.Compile();
+            Func<Ss[]> f = e.CompileForTest();
 
             // get the array
             Ss[] result = null;
@@ -4954,7 +4954,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(uint),
                         Expression.Constant(size, typeof(sbyte))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<uint[]> f = e.Compile();
+            Func<uint[]> f = e.CompileForTest();
 
             // get the array
             uint[] result = null;
@@ -5006,7 +5006,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(ulong),
                         Expression.Constant(size, typeof(sbyte))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ulong[]> f = e.Compile();
+            Func<ulong[]> f = e.CompileForTest();
 
             // get the array
             ulong[] result = null;
@@ -5058,7 +5058,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(ushort),
                         Expression.Constant(size, typeof(sbyte))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ushort[]> f = e.Compile();
+            Func<ushort[]> f = e.CompileForTest();
 
             // get the array
             ushort[] result = null;
@@ -5114,7 +5114,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(bool),
                         Expression.Constant(size, typeof(short))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<bool[]> f = e.Compile();
+            Func<bool[]> f = e.CompileForTest();
 
             // get the array
             bool[] result = null;
@@ -5166,7 +5166,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(byte),
                         Expression.Constant(size, typeof(short))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<byte[]> f = e.Compile();
+            Func<byte[]> f = e.CompileForTest();
 
             // get the array
             byte[] result = null;
@@ -5218,7 +5218,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(char),
                         Expression.Constant(size, typeof(short))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<char[]> f = e.Compile();
+            Func<char[]> f = e.CompileForTest();
 
             // get the array
             char[] result = null;
@@ -5270,7 +5270,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(decimal),
                         Expression.Constant(size, typeof(short))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<decimal[]> f = e.Compile();
+            Func<decimal[]> f = e.CompileForTest();
 
             // get the array
             decimal[] result = null;
@@ -5322,7 +5322,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(double),
                         Expression.Constant(size, typeof(short))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<double[]> f = e.Compile();
+            Func<double[]> f = e.CompileForTest();
 
             // get the array
             double[] result = null;
@@ -5374,7 +5374,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(float),
                         Expression.Constant(size, typeof(short))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<float[]> f = e.Compile();
+            Func<float[]> f = e.CompileForTest();
 
             // get the array
             float[] result = null;
@@ -5426,7 +5426,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(int),
                         Expression.Constant(size, typeof(short))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<int[]> f = e.Compile();
+            Func<int[]> f = e.CompileForTest();
 
             // get the array
             int[] result = null;
@@ -5478,7 +5478,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(long),
                         Expression.Constant(size, typeof(short))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<long[]> f = e.Compile();
+            Func<long[]> f = e.CompileForTest();
 
             // get the array
             long[] result = null;
@@ -5530,7 +5530,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(S),
                         Expression.Constant(size, typeof(short))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<S[]> f = e.Compile();
+            Func<S[]> f = e.CompileForTest();
 
             // get the array
             S[] result = null;
@@ -5582,7 +5582,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(sbyte),
                         Expression.Constant(size, typeof(short))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<sbyte[]> f = e.Compile();
+            Func<sbyte[]> f = e.CompileForTest();
 
             // get the array
             sbyte[] result = null;
@@ -5634,7 +5634,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(Sc),
                         Expression.Constant(size, typeof(short))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<Sc[]> f = e.Compile();
+            Func<Sc[]> f = e.CompileForTest();
 
             // get the array
             Sc[] result = null;
@@ -5686,7 +5686,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(Scs),
                         Expression.Constant(size, typeof(short))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<Scs[]> f = e.Compile();
+            Func<Scs[]> f = e.CompileForTest();
 
             // get the array
             Scs[] result = null;
@@ -5738,7 +5738,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(short),
                         Expression.Constant(size, typeof(short))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<short[]> f = e.Compile();
+            Func<short[]> f = e.CompileForTest();
 
             // get the array
             short[] result = null;
@@ -5790,7 +5790,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(Sp),
                         Expression.Constant(size, typeof(short))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<Sp[]> f = e.Compile();
+            Func<Sp[]> f = e.CompileForTest();
 
             // get the array
             Sp[] result = null;
@@ -5842,7 +5842,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(Ss),
                         Expression.Constant(size, typeof(short))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<Ss[]> f = e.Compile();
+            Func<Ss[]> f = e.CompileForTest();
 
             // get the array
             Ss[] result = null;
@@ -5894,7 +5894,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(uint),
                         Expression.Constant(size, typeof(short))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<uint[]> f = e.Compile();
+            Func<uint[]> f = e.CompileForTest();
 
             // get the array
             uint[] result = null;
@@ -5946,7 +5946,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(ulong),
                         Expression.Constant(size, typeof(short))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ulong[]> f = e.Compile();
+            Func<ulong[]> f = e.CompileForTest();
 
             // get the array
             ulong[] result = null;
@@ -5998,7 +5998,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(ushort),
                         Expression.Constant(size, typeof(short))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ushort[]> f = e.Compile();
+            Func<ushort[]> f = e.CompileForTest();
 
             // get the array
             ushort[] result = null;
@@ -6054,7 +6054,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(bool),
                         Expression.Constant(size, typeof(uint))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<bool[]> f = e.Compile();
+            Func<bool[]> f = e.CompileForTest();
 
             // get the array
             bool[] result = null;
@@ -6106,7 +6106,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(byte),
                         Expression.Constant(size, typeof(uint))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<byte[]> f = e.Compile();
+            Func<byte[]> f = e.CompileForTest();
 
             // get the array
             byte[] result = null;
@@ -6158,7 +6158,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(char),
                         Expression.Constant(size, typeof(uint))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<char[]> f = e.Compile();
+            Func<char[]> f = e.CompileForTest();
 
             // get the array
             char[] result = null;
@@ -6210,7 +6210,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(decimal),
                         Expression.Constant(size, typeof(uint))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<decimal[]> f = e.Compile();
+            Func<decimal[]> f = e.CompileForTest();
 
             // get the array
             decimal[] result = null;
@@ -6262,7 +6262,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(double),
                         Expression.Constant(size, typeof(uint))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<double[]> f = e.Compile();
+            Func<double[]> f = e.CompileForTest();
 
             // get the array
             double[] result = null;
@@ -6314,7 +6314,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(float),
                         Expression.Constant(size, typeof(uint))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<float[]> f = e.Compile();
+            Func<float[]> f = e.CompileForTest();
 
             // get the array
             float[] result = null;
@@ -6366,7 +6366,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(int),
                         Expression.Constant(size, typeof(uint))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<int[]> f = e.Compile();
+            Func<int[]> f = e.CompileForTest();
 
             // get the array
             int[] result = null;
@@ -6418,7 +6418,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(long),
                         Expression.Constant(size, typeof(uint))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<long[]> f = e.Compile();
+            Func<long[]> f = e.CompileForTest();
 
             // get the array
             long[] result = null;
@@ -6470,7 +6470,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(S),
                         Expression.Constant(size, typeof(uint))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<S[]> f = e.Compile();
+            Func<S[]> f = e.CompileForTest();
 
             // get the array
             S[] result = null;
@@ -6522,7 +6522,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(sbyte),
                         Expression.Constant(size, typeof(uint))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<sbyte[]> f = e.Compile();
+            Func<sbyte[]> f = e.CompileForTest();
 
             // get the array
             sbyte[] result = null;
@@ -6574,7 +6574,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(Sc),
                         Expression.Constant(size, typeof(uint))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<Sc[]> f = e.Compile();
+            Func<Sc[]> f = e.CompileForTest();
 
             // get the array
             Sc[] result = null;
@@ -6626,7 +6626,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(Scs),
                         Expression.Constant(size, typeof(uint))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<Scs[]> f = e.Compile();
+            Func<Scs[]> f = e.CompileForTest();
 
             // get the array
             Scs[] result = null;
@@ -6678,7 +6678,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(short),
                         Expression.Constant(size, typeof(uint))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<short[]> f = e.Compile();
+            Func<short[]> f = e.CompileForTest();
 
             // get the array
             short[] result = null;
@@ -6730,7 +6730,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(Sp),
                         Expression.Constant(size, typeof(uint))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<Sp[]> f = e.Compile();
+            Func<Sp[]> f = e.CompileForTest();
 
             // get the array
             Sp[] result = null;
@@ -6782,7 +6782,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(Ss),
                         Expression.Constant(size, typeof(uint))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<Ss[]> f = e.Compile();
+            Func<Ss[]> f = e.CompileForTest();
 
             // get the array
             Ss[] result = null;
@@ -6834,7 +6834,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(uint),
                         Expression.Constant(size, typeof(uint))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<uint[]> f = e.Compile();
+            Func<uint[]> f = e.CompileForTest();
 
             // get the array
             uint[] result = null;
@@ -6886,7 +6886,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(ulong),
                         Expression.Constant(size, typeof(uint))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ulong[]> f = e.Compile();
+            Func<ulong[]> f = e.CompileForTest();
 
             // get the array
             ulong[] result = null;
@@ -6938,7 +6938,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(ushort),
                         Expression.Constant(size, typeof(uint))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ushort[]> f = e.Compile();
+            Func<ushort[]> f = e.CompileForTest();
 
             // get the array
             ushort[] result = null;
@@ -6994,7 +6994,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(bool),
                         Expression.Constant(size, typeof(ulong))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<bool[]> f = e.Compile();
+            Func<bool[]> f = e.CompileForTest();
 
             // get the array
             bool[] result = null;
@@ -7046,7 +7046,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(byte),
                         Expression.Constant(size, typeof(ulong))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<byte[]> f = e.Compile();
+            Func<byte[]> f = e.CompileForTest();
 
             // get the array
             byte[] result = null;
@@ -7098,7 +7098,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(char),
                         Expression.Constant(size, typeof(ulong))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<char[]> f = e.Compile();
+            Func<char[]> f = e.CompileForTest();
 
             // get the array
             char[] result = null;
@@ -7150,7 +7150,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(decimal),
                         Expression.Constant(size, typeof(ulong))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<decimal[]> f = e.Compile();
+            Func<decimal[]> f = e.CompileForTest();
 
             // get the array
             decimal[] result = null;
@@ -7202,7 +7202,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(double),
                         Expression.Constant(size, typeof(ulong))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<double[]> f = e.Compile();
+            Func<double[]> f = e.CompileForTest();
 
             // get the array
             double[] result = null;
@@ -7254,7 +7254,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(float),
                         Expression.Constant(size, typeof(ulong))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<float[]> f = e.Compile();
+            Func<float[]> f = e.CompileForTest();
 
             // get the array
             float[] result = null;
@@ -7306,7 +7306,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(int),
                         Expression.Constant(size, typeof(ulong))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<int[]> f = e.Compile();
+            Func<int[]> f = e.CompileForTest();
 
             // get the array
             int[] result = null;
@@ -7358,7 +7358,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(long),
                         Expression.Constant(size, typeof(ulong))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<long[]> f = e.Compile();
+            Func<long[]> f = e.CompileForTest();
 
             // get the array
             long[] result = null;
@@ -7410,7 +7410,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(S),
                         Expression.Constant(size, typeof(ulong))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<S[]> f = e.Compile();
+            Func<S[]> f = e.CompileForTest();
 
             // get the array
             S[] result = null;
@@ -7462,7 +7462,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(sbyte),
                         Expression.Constant(size, typeof(ulong))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<sbyte[]> f = e.Compile();
+            Func<sbyte[]> f = e.CompileForTest();
 
             // get the array
             sbyte[] result = null;
@@ -7514,7 +7514,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(Sc),
                         Expression.Constant(size, typeof(ulong))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<Sc[]> f = e.Compile();
+            Func<Sc[]> f = e.CompileForTest();
 
             // get the array
             Sc[] result = null;
@@ -7566,7 +7566,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(Scs),
                         Expression.Constant(size, typeof(ulong))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<Scs[]> f = e.Compile();
+            Func<Scs[]> f = e.CompileForTest();
 
             // get the array
             Scs[] result = null;
@@ -7618,7 +7618,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(short),
                         Expression.Constant(size, typeof(ulong))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<short[]> f = e.Compile();
+            Func<short[]> f = e.CompileForTest();
 
             // get the array
             short[] result = null;
@@ -7670,7 +7670,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(Sp),
                         Expression.Constant(size, typeof(ulong))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<Sp[]> f = e.Compile();
+            Func<Sp[]> f = e.CompileForTest();
 
             // get the array
             Sp[] result = null;
@@ -7722,7 +7722,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(Ss),
                         Expression.Constant(size, typeof(ulong))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<Ss[]> f = e.Compile();
+            Func<Ss[]> f = e.CompileForTest();
 
             // get the array
             Ss[] result = null;
@@ -7774,7 +7774,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(uint),
                         Expression.Constant(size, typeof(ulong))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<uint[]> f = e.Compile();
+            Func<uint[]> f = e.CompileForTest();
 
             // get the array
             uint[] result = null;
@@ -7826,7 +7826,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(ulong),
                         Expression.Constant(size, typeof(ulong))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ulong[]> f = e.Compile();
+            Func<ulong[]> f = e.CompileForTest();
 
             // get the array
             ulong[] result = null;
@@ -7878,7 +7878,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(ushort),
                         Expression.Constant(size, typeof(ulong))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ushort[]> f = e.Compile();
+            Func<ushort[]> f = e.CompileForTest();
 
             // get the array
             ushort[] result = null;
@@ -7934,7 +7934,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(bool),
                         Expression.Constant(size, typeof(ushort))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<bool[]> f = e.Compile();
+            Func<bool[]> f = e.CompileForTest();
 
             // get the array
             bool[] result = null;
@@ -7986,7 +7986,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(byte),
                         Expression.Constant(size, typeof(ushort))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<byte[]> f = e.Compile();
+            Func<byte[]> f = e.CompileForTest();
 
             // get the array
             byte[] result = null;
@@ -8038,7 +8038,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(char),
                         Expression.Constant(size, typeof(ushort))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<char[]> f = e.Compile();
+            Func<char[]> f = e.CompileForTest();
 
             // get the array
             char[] result = null;
@@ -8090,7 +8090,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(decimal),
                         Expression.Constant(size, typeof(ushort))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<decimal[]> f = e.Compile();
+            Func<decimal[]> f = e.CompileForTest();
 
             // get the array
             decimal[] result = null;
@@ -8142,7 +8142,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(double),
                         Expression.Constant(size, typeof(ushort))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<double[]> f = e.Compile();
+            Func<double[]> f = e.CompileForTest();
 
             // get the array
             double[] result = null;
@@ -8194,7 +8194,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(float),
                         Expression.Constant(size, typeof(ushort))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<float[]> f = e.Compile();
+            Func<float[]> f = e.CompileForTest();
 
             // get the array
             float[] result = null;
@@ -8246,7 +8246,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(int),
                         Expression.Constant(size, typeof(ushort))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<int[]> f = e.Compile();
+            Func<int[]> f = e.CompileForTest();
 
             // get the array
             int[] result = null;
@@ -8298,7 +8298,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(long),
                         Expression.Constant(size, typeof(ushort))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<long[]> f = e.Compile();
+            Func<long[]> f = e.CompileForTest();
 
             // get the array
             long[] result = null;
@@ -8350,7 +8350,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(S),
                         Expression.Constant(size, typeof(ushort))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<S[]> f = e.Compile();
+            Func<S[]> f = e.CompileForTest();
 
             // get the array
             S[] result = null;
@@ -8402,7 +8402,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(sbyte),
                         Expression.Constant(size, typeof(ushort))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<sbyte[]> f = e.Compile();
+            Func<sbyte[]> f = e.CompileForTest();
 
             // get the array
             sbyte[] result = null;
@@ -8454,7 +8454,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(Sc),
                         Expression.Constant(size, typeof(ushort))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<Sc[]> f = e.Compile();
+            Func<Sc[]> f = e.CompileForTest();
 
             // get the array
             Sc[] result = null;
@@ -8506,7 +8506,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(Scs),
                         Expression.Constant(size, typeof(ushort))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<Scs[]> f = e.Compile();
+            Func<Scs[]> f = e.CompileForTest();
 
             // get the array
             Scs[] result = null;
@@ -8558,7 +8558,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(short),
                         Expression.Constant(size, typeof(ushort))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<short[]> f = e.Compile();
+            Func<short[]> f = e.CompileForTest();
 
             // get the array
             short[] result = null;
@@ -8610,7 +8610,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(Sp),
                         Expression.Constant(size, typeof(ushort))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<Sp[]> f = e.Compile();
+            Func<Sp[]> f = e.CompileForTest();
 
             // get the array
             Sp[] result = null;
@@ -8662,7 +8662,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(Ss),
                         Expression.Constant(size, typeof(ushort))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<Ss[]> f = e.Compile();
+            Func<Ss[]> f = e.CompileForTest();
 
             // get the array
             Ss[] result = null;
@@ -8714,7 +8714,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(uint),
                         Expression.Constant(size, typeof(ushort))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<uint[]> f = e.Compile();
+            Func<uint[]> f = e.CompileForTest();
 
             // get the array
             uint[] result = null;
@@ -8766,7 +8766,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(ulong),
                         Expression.Constant(size, typeof(ushort))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ulong[]> f = e.Compile();
+            Func<ulong[]> f = e.CompileForTest();
 
             // get the array
             ulong[] result = null;
@@ -8818,7 +8818,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.NewArrayBounds(typeof(ushort),
                         Expression.Constant(size, typeof(ushort))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ushort[]> f = e.Compile();
+            Func<ushort[]> f = e.CompileForTest();
 
             // get the array
             ushort[] result = null;

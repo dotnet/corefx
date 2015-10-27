@@ -101,7 +101,7 @@ namespace Tests.ExpressionCompiler.Lambda
                             new ParameterExpression[] { p }),
                         new Expression[] { Expression.Constant(value, typeof(byte)) }),
                     Enumerable.Empty<ParameterExpression>());
-            Func<byte> f1 = e1.Compile();
+            Func<byte> f1 = e1.CompileForTest();
 
             // function generator that takes a parameter
             Expression<Func<byte, Func<byte>>> e2 =
@@ -110,7 +110,7 @@ namespace Tests.ExpressionCompiler.Lambda
                         Expression.Not(p),
                         Enumerable.Empty<ParameterExpression>()),
                     new ParameterExpression[] { p });
-            Func<byte, Func<byte>> f2 = e2.Compile();
+            Func<byte, Func<byte>> f2 = e2.CompileForTest();
 
             // function generator
             Expression<Func<Func<byte, byte>>> e3 =
@@ -123,7 +123,7 @@ namespace Tests.ExpressionCompiler.Lambda
                             Enumerable.Empty<ParameterExpression>()),
                         Enumerable.Empty<Expression>()),
                     Enumerable.Empty<ParameterExpression>());
-            Func<byte, byte> f3 = e3.Compile()();
+            Func<byte, byte> f3 = e3.CompileForTest()();
 
             // parameter-taking function generator
             Expression<Func<Func<byte, byte>>> e4 =
@@ -132,7 +132,7 @@ namespace Tests.ExpressionCompiler.Lambda
                         Expression.Not(p),
                         new ParameterExpression[] { p }),
                     Enumerable.Empty<ParameterExpression>());
-            Func<Func<byte, byte>> f4 = e4.Compile();
+            Func<Func<byte, byte>> f4 = e4.CompileForTest();
 
             byte expected = (byte)~value;
 
@@ -155,7 +155,7 @@ namespace Tests.ExpressionCompiler.Lambda
                             new ParameterExpression[] { p }),
                         new Expression[] { Expression.Constant(value, typeof(int)) }),
                     Enumerable.Empty<ParameterExpression>());
-            Func<int> f1 = e1.Compile();
+            Func<int> f1 = e1.CompileForTest();
 
             // function generator that takes a parameter
             Expression<Func<int, Func<int>>> e2 =
@@ -164,7 +164,7 @@ namespace Tests.ExpressionCompiler.Lambda
                         Expression.Not(p),
                         Enumerable.Empty<ParameterExpression>()),
                     new ParameterExpression[] { p });
-            Func<int, Func<int>> f2 = e2.Compile();
+            Func<int, Func<int>> f2 = e2.CompileForTest();
 
             // function generator
             Expression<Func<Func<int, int>>> e3 =
@@ -177,7 +177,7 @@ namespace Tests.ExpressionCompiler.Lambda
                             Enumerable.Empty<ParameterExpression>()),
                         Enumerable.Empty<Expression>()),
                     Enumerable.Empty<ParameterExpression>());
-            Func<int, int> f3 = e3.Compile()();
+            Func<int, int> f3 = e3.CompileForTest()();
 
             // parameter-taking function generator
             Expression<Func<Func<int, int>>> e4 =
@@ -186,7 +186,7 @@ namespace Tests.ExpressionCompiler.Lambda
                         Expression.Not(p),
                         new ParameterExpression[] { p }),
                     Enumerable.Empty<ParameterExpression>());
-            Func<Func<int, int>> f4 = e4.Compile();
+            Func<Func<int, int>> f4 = e4.CompileForTest();
 
             int expected = (int)~value;
 
@@ -209,7 +209,7 @@ namespace Tests.ExpressionCompiler.Lambda
                             new ParameterExpression[] { p }),
                         new Expression[] { Expression.Constant(value, typeof(long)) }),
                     Enumerable.Empty<ParameterExpression>());
-            Func<long> f1 = e1.Compile();
+            Func<long> f1 = e1.CompileForTest();
 
             // function generator that takes a parameter
             Expression<Func<long, Func<long>>> e2 =
@@ -218,7 +218,7 @@ namespace Tests.ExpressionCompiler.Lambda
                         Expression.Not(p),
                         Enumerable.Empty<ParameterExpression>()),
                     new ParameterExpression[] { p });
-            Func<long, Func<long>> f2 = e2.Compile();
+            Func<long, Func<long>> f2 = e2.CompileForTest();
 
             // function generator
             Expression<Func<Func<long, long>>> e3 =
@@ -231,7 +231,7 @@ namespace Tests.ExpressionCompiler.Lambda
                             Enumerable.Empty<ParameterExpression>()),
                         Enumerable.Empty<Expression>()),
                     Enumerable.Empty<ParameterExpression>());
-            Func<long, long> f3 = e3.Compile()();
+            Func<long, long> f3 = e3.CompileForTest()();
 
             // parameter-taking function generator
             Expression<Func<Func<long, long>>> e4 =
@@ -240,7 +240,7 @@ namespace Tests.ExpressionCompiler.Lambda
                         Expression.Not(p),
                         new ParameterExpression[] { p }),
                     Enumerable.Empty<ParameterExpression>());
-            Func<Func<long, long>> f4 = e4.Compile();
+            Func<Func<long, long>> f4 = e4.CompileForTest();
 
             long expected = (long)~value;
 
@@ -263,7 +263,7 @@ namespace Tests.ExpressionCompiler.Lambda
                             new ParameterExpression[] { p }),
                         new Expression[] { Expression.Constant(value, typeof(sbyte)) }),
                     Enumerable.Empty<ParameterExpression>());
-            Func<sbyte> f1 = e1.Compile();
+            Func<sbyte> f1 = e1.CompileForTest();
 
             // function generator that takes a parameter
             Expression<Func<sbyte, Func<sbyte>>> e2 =
@@ -272,7 +272,7 @@ namespace Tests.ExpressionCompiler.Lambda
                         Expression.Not(p),
                         Enumerable.Empty<ParameterExpression>()),
                     new ParameterExpression[] { p });
-            Func<sbyte, Func<sbyte>> f2 = e2.Compile();
+            Func<sbyte, Func<sbyte>> f2 = e2.CompileForTest();
 
             // function generator
             Expression<Func<Func<sbyte, sbyte>>> e3 =
@@ -285,7 +285,7 @@ namespace Tests.ExpressionCompiler.Lambda
                             Enumerable.Empty<ParameterExpression>()),
                         Enumerable.Empty<Expression>()),
                     Enumerable.Empty<ParameterExpression>());
-            Func<sbyte, sbyte> f3 = e3.Compile()();
+            Func<sbyte, sbyte> f3 = e3.CompileForTest()();
 
             // parameter-taking function generator
             Expression<Func<Func<sbyte, sbyte>>> e4 =
@@ -294,7 +294,7 @@ namespace Tests.ExpressionCompiler.Lambda
                         Expression.Not(p),
                         new ParameterExpression[] { p }),
                     Enumerable.Empty<ParameterExpression>());
-            Func<Func<sbyte, sbyte>> f4 = e4.Compile();
+            Func<Func<sbyte, sbyte>> f4 = e4.CompileForTest();
 
             sbyte expected = (sbyte)~value;
 
@@ -317,7 +317,7 @@ namespace Tests.ExpressionCompiler.Lambda
                             new ParameterExpression[] { p }),
                         new Expression[] { Expression.Constant(value, typeof(short)) }),
                     Enumerable.Empty<ParameterExpression>());
-            Func<short> f1 = e1.Compile();
+            Func<short> f1 = e1.CompileForTest();
 
             // function generator that takes a parameter
             Expression<Func<short, Func<short>>> e2 =
@@ -326,7 +326,7 @@ namespace Tests.ExpressionCompiler.Lambda
                         Expression.Not(p),
                         Enumerable.Empty<ParameterExpression>()),
                     new ParameterExpression[] { p });
-            Func<short, Func<short>> f2 = e2.Compile();
+            Func<short, Func<short>> f2 = e2.CompileForTest();
 
             // function generator
             Expression<Func<Func<short, short>>> e3 =
@@ -339,7 +339,7 @@ namespace Tests.ExpressionCompiler.Lambda
                             Enumerable.Empty<ParameterExpression>()),
                         Enumerable.Empty<Expression>()),
                     Enumerable.Empty<ParameterExpression>());
-            Func<short, short> f3 = e3.Compile()();
+            Func<short, short> f3 = e3.CompileForTest()();
 
             // parameter-taking function generator
             Expression<Func<Func<short, short>>> e4 =
@@ -348,7 +348,7 @@ namespace Tests.ExpressionCompiler.Lambda
                         Expression.Not(p),
                         new ParameterExpression[] { p }),
                     Enumerable.Empty<ParameterExpression>());
-            Func<Func<short, short>> f4 = e4.Compile();
+            Func<Func<short, short>> f4 = e4.CompileForTest();
 
             short expected = (short)~value;
 
@@ -371,7 +371,7 @@ namespace Tests.ExpressionCompiler.Lambda
                             new ParameterExpression[] { p }),
                         new Expression[] { Expression.Constant(value, typeof(uint)) }),
                     Enumerable.Empty<ParameterExpression>());
-            Func<uint> f1 = e1.Compile();
+            Func<uint> f1 = e1.CompileForTest();
 
             // function generator that takes a parameter
             Expression<Func<uint, Func<uint>>> e2 =
@@ -380,7 +380,7 @@ namespace Tests.ExpressionCompiler.Lambda
                         Expression.Not(p),
                         Enumerable.Empty<ParameterExpression>()),
                     new ParameterExpression[] { p });
-            Func<uint, Func<uint>> f2 = e2.Compile();
+            Func<uint, Func<uint>> f2 = e2.CompileForTest();
 
             // function generator
             Expression<Func<Func<uint, uint>>> e3 =
@@ -393,7 +393,7 @@ namespace Tests.ExpressionCompiler.Lambda
                             Enumerable.Empty<ParameterExpression>()),
                         Enumerable.Empty<Expression>()),
                     Enumerable.Empty<ParameterExpression>());
-            Func<uint, uint> f3 = e3.Compile()();
+            Func<uint, uint> f3 = e3.CompileForTest()();
 
             // parameter-taking function generator
             Expression<Func<Func<uint, uint>>> e4 =
@@ -402,7 +402,7 @@ namespace Tests.ExpressionCompiler.Lambda
                         Expression.Not(p),
                         new ParameterExpression[] { p }),
                     Enumerable.Empty<ParameterExpression>());
-            Func<Func<uint, uint>> f4 = e4.Compile();
+            Func<Func<uint, uint>> f4 = e4.CompileForTest();
 
             uint expected = (uint)~value;
 
@@ -425,7 +425,7 @@ namespace Tests.ExpressionCompiler.Lambda
                             new ParameterExpression[] { p }),
                         new Expression[] { Expression.Constant(value, typeof(ulong)) }),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ulong> f1 = e1.Compile();
+            Func<ulong> f1 = e1.CompileForTest();
 
             // function generator that takes a parameter
             Expression<Func<ulong, Func<ulong>>> e2 =
@@ -434,7 +434,7 @@ namespace Tests.ExpressionCompiler.Lambda
                         Expression.Not(p),
                         Enumerable.Empty<ParameterExpression>()),
                     new ParameterExpression[] { p });
-            Func<ulong, Func<ulong>> f2 = e2.Compile();
+            Func<ulong, Func<ulong>> f2 = e2.CompileForTest();
 
             // function generator
             Expression<Func<Func<ulong, ulong>>> e3 =
@@ -447,7 +447,7 @@ namespace Tests.ExpressionCompiler.Lambda
                             Enumerable.Empty<ParameterExpression>()),
                         Enumerable.Empty<Expression>()),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ulong, ulong> f3 = e3.Compile()();
+            Func<ulong, ulong> f3 = e3.CompileForTest()();
 
             // parameter-taking function generator
             Expression<Func<Func<ulong, ulong>>> e4 =
@@ -456,7 +456,7 @@ namespace Tests.ExpressionCompiler.Lambda
                         Expression.Not(p),
                         new ParameterExpression[] { p }),
                     Enumerable.Empty<ParameterExpression>());
-            Func<Func<ulong, ulong>> f4 = e4.Compile();
+            Func<Func<ulong, ulong>> f4 = e4.CompileForTest();
 
             ulong expected = (ulong)~value;
 
@@ -479,7 +479,7 @@ namespace Tests.ExpressionCompiler.Lambda
                             new ParameterExpression[] { p }),
                         new Expression[] { Expression.Constant(value, typeof(ushort)) }),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ushort> f1 = e1.Compile();
+            Func<ushort> f1 = e1.CompileForTest();
 
             // function generator that takes a parameter
             Expression<Func<ushort, Func<ushort>>> e2 =
@@ -488,7 +488,7 @@ namespace Tests.ExpressionCompiler.Lambda
                         Expression.Not(p),
                         Enumerable.Empty<ParameterExpression>()),
                     new ParameterExpression[] { p });
-            Func<ushort, Func<ushort>> f2 = e2.Compile();
+            Func<ushort, Func<ushort>> f2 = e2.CompileForTest();
 
             // function generator
             Expression<Func<Func<ushort, ushort>>> e3 =
@@ -501,7 +501,7 @@ namespace Tests.ExpressionCompiler.Lambda
                             Enumerable.Empty<ParameterExpression>()),
                         Enumerable.Empty<Expression>()),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ushort, ushort> f3 = e3.Compile()();
+            Func<ushort, ushort> f3 = e3.CompileForTest()();
 
             // parameter-taking function generator
             Expression<Func<Func<ushort, ushort>>> e4 =
@@ -510,7 +510,7 @@ namespace Tests.ExpressionCompiler.Lambda
                         Expression.Not(p),
                         new ParameterExpression[] { p }),
                     Enumerable.Empty<ParameterExpression>());
-            Func<Func<ushort, ushort>> f4 = e4.Compile();
+            Func<Func<ushort, ushort>> f4 = e4.CompileForTest();
 
             ushort expected = (ushort)~value;
 

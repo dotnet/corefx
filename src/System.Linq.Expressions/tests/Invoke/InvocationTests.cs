@@ -20,12 +20,12 @@ namespace Tests
             Expression<X> f = Expression.Lambda<X>(Expression.Empty(), Expression.Parameter(typeof(X)));
             var a = Expression.Lambda(Expression.Invoke(f, f));
 
-            a.Compile().DynamicInvoke();
+            a.CompileForTest().DynamicInvoke();
 
             var it = Expression.Parameter(f.Type);
             var b = Expression.Lambda(Expression.Invoke(Expression.Lambda(Expression.Invoke(it, it), it), f));
 
-            b.Compile().DynamicInvoke();
+            b.CompileForTest().DynamicInvoke();
         }
     }
 }

@@ -1966,7 +1966,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.ArrayIndex(Expression.Constant(array, typeof(bool[])),
                         Expression.Constant(index, typeof(int))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<bool> f = e.Compile();
+            Func<bool> f = e.CompileForTest();
             return object.Equals(f(), array[index]);
         }
 
@@ -1977,7 +1977,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.ArrayIndex(Expression.Constant(array, typeof(byte[])),
                         Expression.Constant(index, typeof(int))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<byte> f = e.Compile();
+            Func<byte> f = e.CompileForTest();
             return object.Equals(f(), array[index]);
         }
 
@@ -1988,7 +1988,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.ArrayIndex(Expression.Constant(array, typeof(C[])),
                         Expression.Constant(index, typeof(int))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<C> f = e.Compile();
+            Func<C> f = e.CompileForTest();
             return object.Equals(f(), array[index]);
         }
 
@@ -1999,7 +1999,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.ArrayIndex(Expression.Constant(array, typeof(char[])),
                         Expression.Constant(index, typeof(int))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<char> f = e.Compile();
+            Func<char> f = e.CompileForTest();
             return object.Equals(f(), array[index]);
         }
 
@@ -2010,7 +2010,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.ArrayIndex(Expression.Constant(array, typeof(D[])),
                         Expression.Constant(index, typeof(int))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<D> f = e.Compile();
+            Func<D> f = e.CompileForTest();
             return object.Equals(f(), array[index]);
         }
 
@@ -2021,7 +2021,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.ArrayIndex(Expression.Constant(array, typeof(decimal[])),
                         Expression.Constant(index, typeof(int))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<decimal> f = e.Compile();
+            Func<decimal> f = e.CompileForTest();
             return object.Equals(f(), array[index]);
         }
 
@@ -2032,7 +2032,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.ArrayIndex(Expression.Constant(array, typeof(Delegate[])),
                         Expression.Constant(index, typeof(int))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<Delegate> f = e.Compile();
+            Func<Delegate> f = e.CompileForTest();
             return object.Equals(f(), array[index]);
         }
 
@@ -2043,7 +2043,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.ArrayIndex(Expression.Constant(array, typeof(double[])),
                         Expression.Constant(index, typeof(int))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<double> f = e.Compile();
+            Func<double> f = e.CompileForTest();
             return object.Equals(f(), array[index]);
         }
 
@@ -2054,7 +2054,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.ArrayIndex(Expression.Constant(array, typeof(E[])),
                         Expression.Constant(index, typeof(int))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<E> f = e.Compile();
+            Func<E> f = e.CompileForTest();
             return object.Equals(f(), array[index]);
         }
 
@@ -2065,7 +2065,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.ArrayIndex(Expression.Constant(array, typeof(El[])),
                         Expression.Constant(index, typeof(int))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<El> f = e.Compile();
+            Func<El> f = e.CompileForTest();
             return object.Equals(f(), array[index]);
         }
 
@@ -2076,7 +2076,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.ArrayIndex(Expression.Constant(array, typeof(float[])),
                         Expression.Constant(index, typeof(int))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<float> f = e.Compile();
+            Func<float> f = e.CompileForTest();
             return object.Equals(f(), array[index]);
         }
 
@@ -2087,7 +2087,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.ArrayIndex(Expression.Constant(array, typeof(Func<object>[])),
                         Expression.Constant(index, typeof(int))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<Func<object>> f = e.Compile();
+            Func<Func<object>> f = e.CompileForTest();
             return object.Equals(f(), array[index]);
         }
 
@@ -2098,7 +2098,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.ArrayIndex(Expression.Constant(array, typeof(I[])),
                         Expression.Constant(index, typeof(int))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<I> f = e.Compile();
+            Func<I> f = e.CompileForTest();
             return object.Equals(f(), array[index]);
         }
 
@@ -2109,7 +2109,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.ArrayIndex(Expression.Constant(array, typeof(IEquatable<C>[])),
                         Expression.Constant(index, typeof(int))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<IEquatable<C>> f = e.Compile();
+            Func<IEquatable<C>> f = e.CompileForTest();
             return object.Equals(f(), array[index]);
         }
 
@@ -2120,7 +2120,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.ArrayIndex(Expression.Constant(array, typeof(IEquatable<D>[])),
                         Expression.Constant(index, typeof(int))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<IEquatable<D>> f = e.Compile();
+            Func<IEquatable<D>> f = e.CompileForTest();
             return object.Equals(f(), array[index]);
         }
 
@@ -2131,7 +2131,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.ArrayIndex(Expression.Constant(array, typeof(int[])),
                         Expression.Constant(index, typeof(int))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<int> f = e.Compile();
+            Func<int> f = e.CompileForTest();
             return object.Equals(f(), array[index]);
         }
 
@@ -2142,7 +2142,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.ArrayIndex(Expression.Constant(array, typeof(long[])),
                         Expression.Constant(index, typeof(int))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<long> f = e.Compile();
+            Func<long> f = e.CompileForTest();
             return object.Equals(f(), array[index]);
         }
 
@@ -2153,7 +2153,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.ArrayIndex(Expression.Constant(array, typeof(object[])),
                         Expression.Constant(index, typeof(int))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<object> f = e.Compile();
+            Func<object> f = e.CompileForTest();
             return object.Equals(f(), array[index]);
         }
 
@@ -2164,7 +2164,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.ArrayIndex(Expression.Constant(array, typeof(S[])),
                         Expression.Constant(index, typeof(int))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<S> f = e.Compile();
+            Func<S> f = e.CompileForTest();
             return object.Equals(f(), array[index]);
         }
 
@@ -2175,7 +2175,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.ArrayIndex(Expression.Constant(array, typeof(sbyte[])),
                         Expression.Constant(index, typeof(int))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<sbyte> f = e.Compile();
+            Func<sbyte> f = e.CompileForTest();
             return object.Equals(f(), array[index]);
         }
 
@@ -2186,7 +2186,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.ArrayIndex(Expression.Constant(array, typeof(Sc[])),
                         Expression.Constant(index, typeof(int))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<Sc> f = e.Compile();
+            Func<Sc> f = e.CompileForTest();
             return object.Equals(f(), array[index]);
         }
 
@@ -2197,7 +2197,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.ArrayIndex(Expression.Constant(array, typeof(Scs[])),
                         Expression.Constant(index, typeof(int))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<Scs> f = e.Compile();
+            Func<Scs> f = e.CompileForTest();
             return object.Equals(f(), array[index]);
         }
 
@@ -2208,7 +2208,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.ArrayIndex(Expression.Constant(array, typeof(short[])),
                         Expression.Constant(index, typeof(int))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<short> f = e.Compile();
+            Func<short> f = e.CompileForTest();
             return object.Equals(f(), array[index]);
         }
 
@@ -2219,7 +2219,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.ArrayIndex(Expression.Constant(array, typeof(Sp[])),
                         Expression.Constant(index, typeof(int))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<Sp> f = e.Compile();
+            Func<Sp> f = e.CompileForTest();
             return object.Equals(f(), array[index]);
         }
 
@@ -2230,7 +2230,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.ArrayIndex(Expression.Constant(array, typeof(Ss[])),
                         Expression.Constant(index, typeof(int))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<Ss> f = e.Compile();
+            Func<Ss> f = e.CompileForTest();
             return object.Equals(f(), array[index]);
         }
 
@@ -2241,7 +2241,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.ArrayIndex(Expression.Constant(array, typeof(string[])),
                         Expression.Constant(index, typeof(int))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<string> f = e.Compile();
+            Func<string> f = e.CompileForTest();
             return object.Equals(f(), array[index]);
         }
 
@@ -2252,7 +2252,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.ArrayIndex(Expression.Constant(array, typeof(uint[])),
                         Expression.Constant(index, typeof(int))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<uint> f = e.Compile();
+            Func<uint> f = e.CompileForTest();
             return object.Equals(f(), array[index]);
         }
 
@@ -2263,7 +2263,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.ArrayIndex(Expression.Constant(array, typeof(ulong[])),
                         Expression.Constant(index, typeof(int))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ulong> f = e.Compile();
+            Func<ulong> f = e.CompileForTest();
             return object.Equals(f(), array[index]);
         }
 
@@ -2274,7 +2274,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.ArrayIndex(Expression.Constant(array, typeof(ushort[])),
                         Expression.Constant(index, typeof(int))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ushort> f = e.Compile();
+            Func<ushort> f = e.CompileForTest();
             return object.Equals(f(), array[index]);
         }
 
@@ -2285,7 +2285,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.ArrayIndex(Expression.Constant(array, typeof(T[])),
                         Expression.Constant(index, typeof(int))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<T> f = e.Compile();
+            Func<T> f = e.CompileForTest();
             return object.Equals(f(), array[index]);
         }
 
@@ -2296,7 +2296,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.ArrayIndex(Expression.Constant(array, typeof(Tc[])),
                         Expression.Constant(index, typeof(int))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<Tc> f = e.Compile();
+            Func<Tc> f = e.CompileForTest();
             return object.Equals(f(), array[index]);
         }
 
@@ -2307,7 +2307,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.ArrayIndex(Expression.Constant(array, typeof(Tc[])),
                         Expression.Constant(index, typeof(int))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<Tc> f = e.Compile();
+            Func<Tc> f = e.CompileForTest();
             return object.Equals(f(), array[index]);
         }
 
@@ -2318,7 +2318,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.ArrayIndex(Expression.Constant(array, typeof(Tcn[])),
                         Expression.Constant(index, typeof(int))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<Tcn> f = e.Compile();
+            Func<Tcn> f = e.CompileForTest();
             return object.Equals(f(), array[index]);
         }
 
@@ -2329,7 +2329,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.ArrayIndex(Expression.Constant(array, typeof(Tcn[])),
                         Expression.Constant(index, typeof(int))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<Tcn> f = e.Compile();
+            Func<Tcn> f = e.CompileForTest();
             return object.Equals(f(), array[index]);
         }
 
@@ -2340,7 +2340,7 @@ namespace Tests.ExpressionCompiler.Array
                     Expression.ArrayIndex(Expression.Constant(array, typeof(Ts[])),
                         Expression.Constant(index, typeof(int))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<Ts> f = e.Compile();
+            Func<Ts> f = e.CompileForTest();
             return object.Equals(f(), array[index]);
         }
 

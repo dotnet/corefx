@@ -172,7 +172,7 @@ namespace Tests.ExpressionCompiler.Lifted
                         Expression.Constant(a, typeof(byte?)),
                         Expression.Constant(b, typeof(byte?)),
                         typeof(LiftedBitwiseAndNullableTests).GetTypeInfo().GetDeclaredMethod("AndNullableByte")));
-            Func<byte?> f = e.Compile();
+            Func<byte?> f = e.CompileForTest();
 
             byte? result = default(byte);
             Exception fEx = null;
@@ -216,7 +216,7 @@ namespace Tests.ExpressionCompiler.Lifted
                         Expression.Constant(a, typeof(int?)),
                         Expression.Constant(b, typeof(int?)),
                         typeof(LiftedBitwiseAndNullableTests).GetTypeInfo().GetDeclaredMethod("AndNullableInt")));
-            Func<int?> f = e.Compile();
+            Func<int?> f = e.CompileForTest();
 
             int? result = default(int);
             Exception fEx = null;
@@ -260,7 +260,7 @@ namespace Tests.ExpressionCompiler.Lifted
                         Expression.Constant(a, typeof(long?)),
                         Expression.Constant(b, typeof(long?)),
                         typeof(LiftedBitwiseAndNullableTests).GetTypeInfo().GetDeclaredMethod("AndNullableLong")));
-            Func<long?> f = e.Compile();
+            Func<long?> f = e.CompileForTest();
 
             long? result = default(long);
             Exception fEx = null;
@@ -304,7 +304,7 @@ namespace Tests.ExpressionCompiler.Lifted
                         Expression.Constant(a, typeof(sbyte?)),
                         Expression.Constant(b, typeof(sbyte?)),
                         typeof(LiftedBitwiseAndNullableTests).GetTypeInfo().GetDeclaredMethod("AndNullableSByte")));
-            Func<sbyte?> f = e.Compile();
+            Func<sbyte?> f = e.CompileForTest();
 
             sbyte? result = default(sbyte);
             Exception fEx = null;
@@ -348,7 +348,7 @@ namespace Tests.ExpressionCompiler.Lifted
                         Expression.Constant(a, typeof(short?)),
                         Expression.Constant(b, typeof(short?)),
                         typeof(LiftedBitwiseAndNullableTests).GetTypeInfo().GetDeclaredMethod("AndNullableShort")));
-            Func<short?> f = e.Compile();
+            Func<short?> f = e.CompileForTest();
 
             short? result = default(short);
             Exception fEx = null;
@@ -392,7 +392,7 @@ namespace Tests.ExpressionCompiler.Lifted
                         Expression.Constant(a, typeof(uint?)),
                         Expression.Constant(b, typeof(uint?)),
                         typeof(LiftedBitwiseAndNullableTests).GetTypeInfo().GetDeclaredMethod("AndNullableUInt")));
-            Func<uint?> f = e.Compile();
+            Func<uint?> f = e.CompileForTest();
 
             uint? result = default(uint);
             Exception fEx = null;
@@ -436,7 +436,7 @@ namespace Tests.ExpressionCompiler.Lifted
                         Expression.Constant(a, typeof(ulong?)),
                         Expression.Constant(b, typeof(ulong?)),
                         typeof(LiftedBitwiseAndNullableTests).GetTypeInfo().GetDeclaredMethod("AndNullableULong")));
-            Func<ulong?> f = e.Compile();
+            Func<ulong?> f = e.CompileForTest();
 
             ulong? result = default(ulong);
             Exception fEx = null;
@@ -480,7 +480,7 @@ namespace Tests.ExpressionCompiler.Lifted
                         Expression.Constant(a, typeof(ushort?)),
                         Expression.Constant(b, typeof(ushort?)),
                         typeof(LiftedBitwiseAndNullableTests).GetTypeInfo().GetDeclaredMethod("AndNullableUShort")));
-            Func<ushort?> f = e.Compile();
+            Func<ushort?> f = e.CompileForTest();
 
             ushort? result = default(ushort);
             Exception fEx = null;

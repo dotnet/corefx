@@ -112,7 +112,7 @@ namespace Tests.ExpressionCompiler.Unary
                 Expression.Lambda<Func<bool>>(
                     Expression.Not(Expression.Constant(value, typeof(bool))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<bool> f = e.Compile();
+            Func<bool> f = e.CompileForTest();
             Assert.Equal((bool)(!value), f());
         }
 
@@ -122,7 +122,7 @@ namespace Tests.ExpressionCompiler.Unary
                 Expression.Lambda<Func<byte>>(
                     Expression.Not(Expression.Constant(value, typeof(byte))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<byte> f = e.Compile();
+            Func<byte> f = e.CompileForTest();
             Assert.Equal((byte)(~value), f());
         }
 
@@ -132,7 +132,7 @@ namespace Tests.ExpressionCompiler.Unary
                 Expression.Lambda<Func<int>>(
                     Expression.Not(Expression.Constant(value, typeof(int))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<int> f = e.Compile();
+            Func<int> f = e.CompileForTest();
             Assert.Equal((int)(~value), f());
         }
 
@@ -142,7 +142,7 @@ namespace Tests.ExpressionCompiler.Unary
                 Expression.Lambda<Func<long>>(
                     Expression.Not(Expression.Constant(value, typeof(long))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<long> f = e.Compile();
+            Func<long> f = e.CompileForTest();
             Assert.Equal((long)(~value), f());
         }
 
@@ -152,7 +152,7 @@ namespace Tests.ExpressionCompiler.Unary
                 Expression.Lambda<Func<sbyte>>(
                     Expression.Not(Expression.Constant(value, typeof(sbyte))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<sbyte> f = e.Compile();
+            Func<sbyte> f = e.CompileForTest();
             Assert.Equal((sbyte)(~value), f());
         }
 
@@ -162,7 +162,7 @@ namespace Tests.ExpressionCompiler.Unary
                 Expression.Lambda<Func<short>>(
                     Expression.Not(Expression.Constant(value, typeof(short))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<short> f = e.Compile();
+            Func<short> f = e.CompileForTest();
             Assert.Equal((short)(~value), f());
         }
 
@@ -172,7 +172,7 @@ namespace Tests.ExpressionCompiler.Unary
                 Expression.Lambda<Func<uint>>(
                     Expression.Not(Expression.Constant(value, typeof(uint))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<uint> f = e.Compile();
+            Func<uint> f = e.CompileForTest();
             Assert.Equal((uint)(~value), f());
         }
 
@@ -182,7 +182,7 @@ namespace Tests.ExpressionCompiler.Unary
                 Expression.Lambda<Func<ulong>>(
                     Expression.Not(Expression.Constant(value, typeof(ulong))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ulong> f = e.Compile();
+            Func<ulong> f = e.CompileForTest();
             Assert.Equal((ulong)(~value), f());
         }
 
@@ -192,7 +192,7 @@ namespace Tests.ExpressionCompiler.Unary
                 Expression.Lambda<Func<ushort>>(
                     Expression.Not(Expression.Constant(value, typeof(ushort))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ushort> f = e.Compile();
+            Func<ushort> f = e.CompileForTest();
             Assert.Equal((ushort)(~value), f());
         }
 

@@ -19,7 +19,7 @@ namespace System.Linq.Expressions.Tests
                 Expression.Return(target, variable),
                 Expression.Label(target, Expression.Default(typeof(int)))
                 );
-            Assert.Equal(42, Expression.Lambda<Func<int>>(exp).Compile()());
+            Assert.Equal(42, Expression.Lambda<Func<int>>(exp).CompileForTest()());
         }
 
         [Fact]
@@ -30,7 +30,7 @@ namespace System.Linq.Expressions.Tests
                 new ParameterExpression[] { variable },
                 Expression.Assign(variable, Expression.Constant(42))
                 );
-            Assert.Equal(42, Expression.Lambda<Func<int>>(exp).Compile()());
+            Assert.Equal(42, Expression.Lambda<Func<int>>(exp).CompileForTest()());
         }
 
         [Fact]
@@ -83,7 +83,7 @@ namespace System.Linq.Expressions.Tests
                 Expression.Return(target, variable),
                 Expression.Label(target, Expression.Default(typeof(object)))
                 );
-            Assert.Equal("Hello", Expression.Lambda<Func<object>>(exp).Compile()());
+            Assert.Equal("Hello", Expression.Lambda<Func<object>>(exp).CompileForTest()());
         }
 
         [Fact]

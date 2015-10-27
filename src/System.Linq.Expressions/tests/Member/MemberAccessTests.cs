@@ -19,7 +19,7 @@ namespace Tests.ExpressionCompiler.MemberAccess
                         Expression.Constant(new FS() { II = 42 }),
                         "II"),
                     Enumerable.Empty<ParameterExpression>());
-            Func<int> f = e.Compile();
+            Func<int> f = e.CompileForTest();
 
             Assert.Equal(42, f());
         }
@@ -37,7 +37,7 @@ namespace Tests.ExpressionCompiler.MemberAccess
                             typeof(FS),
                             "SI"),
                         Enumerable.Empty<ParameterExpression>());
-                Func<int> f = e.Compile();
+                Func<int> f = e.CompileForTest();
 
                 Assert.Equal(42, f());
             }
@@ -57,7 +57,7 @@ namespace Tests.ExpressionCompiler.MemberAccess
                         typeof(FS),
                         "CI"),
                     Enumerable.Empty<ParameterExpression>());
-            Func<int> f = e.Compile();
+            Func<int> f = e.CompileForTest();
 
             Assert.Equal(42, f());
         }
@@ -72,7 +72,7 @@ namespace Tests.ExpressionCompiler.MemberAccess
                         typeof(FS),
                         "RI"),
                     Enumerable.Empty<ParameterExpression>());
-            Func<int> f = e.Compile();
+            Func<int> f = e.CompileForTest();
 
             Assert.Equal(42, f());
         }
@@ -86,7 +86,7 @@ namespace Tests.ExpressionCompiler.MemberAccess
                         Expression.Constant(new PS() { II = 42 }),
                         "II"),
                     Enumerable.Empty<ParameterExpression>());
-            Func<int> f = e.Compile();
+            Func<int> f = e.CompileForTest();
 
             Assert.Equal(42, f());
         }
@@ -104,7 +104,7 @@ namespace Tests.ExpressionCompiler.MemberAccess
                             typeof(PS),
                             "SI"),
                         Enumerable.Empty<ParameterExpression>());
-                Func<int> f = e.Compile();
+                Func<int> f = e.CompileForTest();
 
                 Assert.Equal(42, f());
             }
@@ -123,7 +123,7 @@ namespace Tests.ExpressionCompiler.MemberAccess
                         Expression.Constant(new FC() { II = 42 }),
                         "II"),
                     Enumerable.Empty<ParameterExpression>());
-            Func<int> f = e.Compile();
+            Func<int> f = e.CompileForTest();
 
             Assert.Equal(42, f());
         }
@@ -141,7 +141,7 @@ namespace Tests.ExpressionCompiler.MemberAccess
                             typeof(FC),
                             "SI"),
                         Enumerable.Empty<ParameterExpression>());
-                Func<int> f = e.Compile();
+                Func<int> f = e.CompileForTest();
 
                 Assert.Equal(42, f());
             }
@@ -161,7 +161,7 @@ namespace Tests.ExpressionCompiler.MemberAccess
                         typeof(FC),
                         "CI"),
                     Enumerable.Empty<ParameterExpression>());
-            Func<int> f = e.Compile();
+            Func<int> f = e.CompileForTest();
 
             Assert.Equal(42, f());
         }
@@ -176,7 +176,7 @@ namespace Tests.ExpressionCompiler.MemberAccess
                         typeof(FC),
                         "RI"),
                     Enumerable.Empty<ParameterExpression>());
-            Func<int> f = e.Compile();
+            Func<int> f = e.CompileForTest();
 
             Assert.Equal(42, f());
         }
@@ -190,7 +190,7 @@ namespace Tests.ExpressionCompiler.MemberAccess
                         Expression.Constant(new PC() { II = 42 }),
                         "II"),
                     Enumerable.Empty<ParameterExpression>());
-            Func<int> f = e.Compile();
+            Func<int> f = e.CompileForTest();
 
             Assert.Equal(42, f());
         }
@@ -208,7 +208,7 @@ namespace Tests.ExpressionCompiler.MemberAccess
                             typeof(PC),
                             "SI"),
                         Enumerable.Empty<ParameterExpression>());
-                Func<int> f = e.Compile();
+                Func<int> f = e.CompileForTest();
 
                 Assert.Equal(42, f());
             }
@@ -227,7 +227,7 @@ namespace Tests.ExpressionCompiler.MemberAccess
                         Expression.Constant(null, typeof(FC)),
                         "II"),
                     Enumerable.Empty<ParameterExpression>());
-            Func<int> f = e.Compile();
+            Func<int> f = e.CompileForTest();
 
             Assert.Throws<NullReferenceException>(()=>f());
         }
@@ -243,7 +243,7 @@ namespace Tests.ExpressionCompiler.MemberAccess
                             "II"),
                         Expression.Constant(1)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<int> f = e.Compile();
+            Func<int> f = e.CompileForTest();
 
             Assert.Throws<NullReferenceException>(() => f());
         }
@@ -257,7 +257,7 @@ namespace Tests.ExpressionCompiler.MemberAccess
                         Expression.Constant(null, typeof(PC)),
                         "II"),
                     Enumerable.Empty<ParameterExpression>());
-            Func<int> f = e.Compile();
+            Func<int> f = e.CompileForTest();
 
             Assert.Throws<NullReferenceException>(() => f());
         }
@@ -272,7 +272,7 @@ namespace Tests.ExpressionCompiler.MemberAccess
                         "Item",
                         Expression.Constant(1)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<int> f = e.Compile();
+            Func<int> f = e.CompileForTest();
 
             Assert.Throws<NullReferenceException>(() => f());
         }
@@ -289,7 +289,7 @@ namespace Tests.ExpressionCompiler.MemberAccess
                             Expression.Constant(1)),
                         Expression.Constant(1)),
                     Enumerable.Empty<ParameterExpression>());
-            Func<int> f = e.Compile();
+            Func<int> f = e.CompileForTest();
 
             Assert.Throws<NullReferenceException>(() => f());
         }

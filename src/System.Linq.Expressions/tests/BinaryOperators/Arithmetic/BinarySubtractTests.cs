@@ -200,7 +200,7 @@ namespace Tests.ExpressionCompiler.Binary
                         Expression.Constant(a, typeof(ushort)),
                         Expression.Constant(b, typeof(ushort))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ushort> f = e.Compile();
+            Func<ushort> f = e.CompileForTest();
 
             // add with expression tree
             ushort etResult = default(ushort);
@@ -247,7 +247,7 @@ namespace Tests.ExpressionCompiler.Binary
                         Expression.Constant(a, typeof(ushort)),
                         Expression.Constant(b, typeof(ushort))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ushort> f = e.Compile();
+            Func<ushort> f = e.CompileForTest();
 
             // add with expression tree
             ushort etResult = default(ushort);
@@ -294,7 +294,7 @@ namespace Tests.ExpressionCompiler.Binary
                         Expression.Constant(a, typeof(short)),
                         Expression.Constant(b, typeof(short))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<short> f = e.Compile();
+            Func<short> f = e.CompileForTest();
 
             // add with expression tree
             short etResult = default(short);
@@ -341,7 +341,7 @@ namespace Tests.ExpressionCompiler.Binary
                         Expression.Constant(a, typeof(short)),
                         Expression.Constant(b, typeof(short))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<short> f = e.Compile();
+            Func<short> f = e.CompileForTest();
 
             // add with expression tree
             short etResult = default(short);
@@ -388,7 +388,7 @@ namespace Tests.ExpressionCompiler.Binary
                         Expression.Constant(a, typeof(uint)),
                         Expression.Constant(b, typeof(uint))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<uint> f = e.Compile();
+            Func<uint> f = e.CompileForTest();
 
             // add with expression tree
             uint etResult = default(uint);
@@ -435,7 +435,7 @@ namespace Tests.ExpressionCompiler.Binary
                         Expression.Constant(a, typeof(uint)),
                         Expression.Constant(b, typeof(uint))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<uint> f = e.Compile();
+            Func<uint> f = e.CompileForTest();
 
             // add with expression tree
             uint etResult = default(uint);
@@ -482,7 +482,7 @@ namespace Tests.ExpressionCompiler.Binary
                         Expression.Constant(a, typeof(int)),
                         Expression.Constant(b, typeof(int))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<int> f = e.Compile();
+            Func<int> f = e.CompileForTest();
 
             // add with expression tree
             int etResult = default(int);
@@ -529,7 +529,7 @@ namespace Tests.ExpressionCompiler.Binary
                         Expression.Constant(a, typeof(int)),
                         Expression.Constant(b, typeof(int))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<int> f = e.Compile();
+            Func<int> f = e.CompileForTest();
 
             // add with expression tree
             int etResult = default(int);
@@ -576,7 +576,7 @@ namespace Tests.ExpressionCompiler.Binary
                         Expression.Constant(a, typeof(ulong)),
                         Expression.Constant(b, typeof(ulong))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ulong> f = e.Compile();
+            Func<ulong> f = e.CompileForTest();
 
             // add with expression tree
             ulong etResult = default(ulong);
@@ -623,7 +623,7 @@ namespace Tests.ExpressionCompiler.Binary
                         Expression.Constant(a, typeof(ulong)),
                         Expression.Constant(b, typeof(ulong))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ulong> f = e.Compile();
+            Func<ulong> f = e.CompileForTest();
 
             // add with expression tree
             ulong etResult = default(ulong);
@@ -670,7 +670,7 @@ namespace Tests.ExpressionCompiler.Binary
                         Expression.Constant(a, typeof(long)),
                         Expression.Constant(b, typeof(long))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<long> f = e.Compile();
+            Func<long> f = e.CompileForTest();
 
             // add with expression tree
             long etResult = default(long);
@@ -717,7 +717,7 @@ namespace Tests.ExpressionCompiler.Binary
                         Expression.Constant(a, typeof(long)),
                         Expression.Constant(b, typeof(long))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<long> f = e.Compile();
+            Func<long> f = e.CompileForTest();
 
             // add with expression tree
             long etResult = default(long);
@@ -764,7 +764,7 @@ namespace Tests.ExpressionCompiler.Binary
                         Expression.Constant(a, typeof(float)),
                         Expression.Constant(b, typeof(float))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<float> f = e.Compile();
+            Func<float> f = e.CompileForTest();
 
             // add with expression tree
             float etResult = default(float);
@@ -811,7 +811,7 @@ namespace Tests.ExpressionCompiler.Binary
                         Expression.Constant(a, typeof(double)),
                         Expression.Constant(b, typeof(double))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<double> f = e.Compile();
+            Func<double> f = e.CompileForTest();
 
             // add with expression tree
             double etResult = default(double);
@@ -858,7 +858,7 @@ namespace Tests.ExpressionCompiler.Binary
                         Expression.Constant(a, typeof(decimal)),
                         Expression.Constant(b, typeof(decimal))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<decimal> f = e.Compile();
+            Func<decimal> f = e.CompileForTest();
 
             // add with expression tree
             decimal etResult = default(decimal);

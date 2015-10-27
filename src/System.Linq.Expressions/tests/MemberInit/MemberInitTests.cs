@@ -25,7 +25,7 @@ namespace Tests.ExpressionCompiler.MemberInit
 
         private static void VerifyMemberInit<T>(Expression<Func<T>> expr, Func<T, bool> check)
         {
-            Func<T> c = expr.Compile();
+            Func<T> c = expr.CompileForTest();
             Assert.True(check(c()));
 
 #if FEATURE_INTERPRET
@@ -38,7 +38,7 @@ namespace Tests.ExpressionCompiler.MemberInit
 
         #region Helpers
 
-        class X
+        class X : IEquatable<X>
         {
             private readonly Y _y = new Y();
             private readonly List<int> _xs = new List<int>();
@@ -49,15 +49,49 @@ namespace Tests.ExpressionCompiler.MemberInit
             }
 
             public List<int> XS { get { return _xs; } }
+
+            public bool Equals(X obj)
+            {
+                return
+                    EqualityComparer<Y>.Default.Equals(obj.Y, this.Y) &&
+                    ListEqualityComparer<int>.Default.Equals(obj.XS, this.XS);
+            }
+
+            public override bool Equals(object obj)
+            {
+                return Equals(obj as X);
+            }
+
+            public override int GetHashCode()
+            {
+                return 0; // just for testing equality
+            }
         }
 
-        class Y
+        class Y : IEquatable<Y>
         {
             private readonly List<int> _ys = new List<int>();
 
             public int Z { get; set; }
 
             public List<int> YS { get { return _ys; } }
+
+            public bool Equals(Y obj)
+            {
+                return
+                    obj.Z == this.Z &&
+                    ListEqualityComparer<int>.Default.Equals(obj.YS, this.YS);
+            }
+
+            public override bool Equals(object obj)
+            {
+                return Equals(obj as Y);
+            }
+
+            public override int GetHashCode()
+            {
+                return 0; // just for testing equality
+            }
         }
 
         #endregion

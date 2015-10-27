@@ -1,7 +1,7 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-#if FEATURE_INTERPRET
+#if FEATURE_INTERPRET && ENABLE_CROSSCHECK
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using Xunit;

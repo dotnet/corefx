@@ -33,7 +33,7 @@ namespace Tests.ExpressionCompiler.Unary
                 Expression.Lambda<Func<bool?>>(
                     Expression.IsFalse(Expression.Constant(value, typeof(bool?))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<bool?> f = e.Compile();
+            Func<bool?> f = e.CompileForTest();
             Assert.Equal((bool?)(value == default(bool?) ? default(bool?) : value == false), f());
         }
 
