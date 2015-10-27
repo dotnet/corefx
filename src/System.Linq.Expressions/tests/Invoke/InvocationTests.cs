@@ -92,7 +92,6 @@ namespace Tests
         }
 
         [Fact]
-        [ActiveIssue(4150)]
         public static void InvocationDoesNotChangeFunctionInvokedInterpreted()
         {
             FuncHolder holder = new FuncHolder();
