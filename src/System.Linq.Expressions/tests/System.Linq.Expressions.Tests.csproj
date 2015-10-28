@@ -12,7 +12,6 @@
     <OutputType>Library</OutputType>
     <AssemblyName>System.Linq.Expressions.Tests</AssemblyName>
     <RootNamespace>System.Linq.Expressions.Tests</RootNamespace>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <DefineConstants Condition=" '$(FeatureInterpret)' == 'true' ">$(DefineConstants);FEATURE_INTERPRET</DefineConstants>
   </PropertyGroup>
   <!-- Default configurations to help VS understand the configurations -->
@@ -24,6 +23,7 @@
     <None Include="project.json" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Array\ArrayAccessTests.cs" />
     <Compile Include="Array\ArrayArrayIndexTests.cs" />
     <Compile Include="Array\ArrayArrayLengthTests.cs" />
     <Compile Include="Array\ArrayBoundsOneOffTests.cs" />
@@ -124,6 +124,7 @@
     <Compile Include="Convert\ConvertCheckedTests.cs" />
     <Compile Include="Convert\ConvertTests.cs" />
     <Compile Include="HelperTypes.cs" />
+    <Compile Include="Interpreter\InterpreterTests.Address.cs" />
     <Compile Include="Interpreter\InterpreterTests.cs" />
     <Compile Include="Interpreter\InterpreterTests.Generated.cs" />
     <Compile Include="Invoke\InvocationTests.cs" />

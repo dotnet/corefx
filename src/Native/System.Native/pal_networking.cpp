@@ -24,6 +24,9 @@
 #include <stdlib.h>
 #include <sys/ioctl.h>
 #include <sys/socket.h>
+#if defined(__APPLE__) && __APPLE__
+#include <sys/socketvar.h>
+#endif
 #include <unistd.h>
 #include <vector>
 
@@ -45,6 +48,15 @@ struct in_pktinfo
 #if !defined(IPV6_DROP_MEMBERSHIP) && defined(IPV6_LEAVE_GROUP)
 #define IPV6_DROP_MEMBERSHIP IPV6_LEAVE_GROUP
 #endif
+
+enum
+{
+#if defined(__APPLE__) && __APPLE__
+    LINGER_OPTION_NAME = SO_LINGER_SEC
+#else
+    LINGER_OPTION_NAME = SO_LINGER,
+#endif
+};
 
 enum
 {
@@ -92,7 +104,6 @@ constexpr T Max(T left, T right)
 {
     return left > right ? left : right;
 }
-
 
 static int IpStringToAddressHelper(const uint8_t* address, const uint8_t* port, bool isIPv6, addrinfo*& info)
 {
@@ -248,12 +259,8 @@ static void AppendScopeIfNecessary(uint8_t* string, int32_t stringLength, uint32
     (void)n; // Silence an unused variable warning in release mode
 }
 
-extern "C" int32_t IPAddressToString(const uint8_t* address,
-                                     int32_t addressLength,
-                                     bool isIPv6,
-                                     uint8_t* string,
-                                     int32_t stringLength,
-                                     uint32_t scope)
+extern "C" int32_t IPAddressToString(
+    const uint8_t* address, int32_t addressLength, bool isIPv6, uint8_t* string, int32_t stringLength, uint32_t scope)
 {
     assert(address != nullptr);
     assert((addressLength == NUM_BYTES_IN_IPV6_ADDRESS) || (addressLength == NUM_BYTES_IN_IPV4_ADDRESS));
@@ -316,7 +323,11 @@ extern "C" int32_t GetHostEntryForName(const uint8_t* address, HostEntry* entry)
         return ConvertGetAddrInfoAndGetNameInfoErrorsToPal(result);
     }
 
-    *entry = {.CanonicalName = nullptr, .Aliases = nullptr, .AddressListHandle = reinterpret_cast<void*>(info), .IPAddressCount = 0, .HandleType = HOST_ENTRY_HANDLE_ADDRINFO };
+    *entry = {.CanonicalName = nullptr,
+              .Aliases = nullptr,
+              .AddressListHandle = reinterpret_cast<void*>(info),
+              .IPAddressCount = 0,
+              .HandleType = HOST_ENTRY_HANDLE_ADDRINFO};
 
     // Find the canonical name for this host (if any) and count the number of IP end points.
     for (addrinfo* ai = info; ai != nullptr; ai = ai->ai_next)
@@ -360,13 +371,11 @@ static int ConvertGetHostErrorPlatformToPal(int error)
 
 static void ConvertHostEntPlatformToPal(HostEntry& hostEntry, hostent& entry)
 {
-    hostEntry = {
-        .CanonicalName = reinterpret_cast<uint8_t*>(entry.h_name),
-        .Aliases = reinterpret_cast<uint8_t**>(entry.h_aliases),
-        .AddressListHandle = reinterpret_cast<void*>(&entry),
-        .IPAddressCount = 0,
-        .HandleType = HOST_ENTRY_HANDLE_HOSTENT
-    };
+    hostEntry = {.CanonicalName = reinterpret_cast<uint8_t*>(entry.h_name),
+                 .Aliases = reinterpret_cast<uint8_t**>(entry.h_aliases),
+                 .AddressListHandle = reinterpret_cast<void*>(&entry),
+                 .IPAddressCount = 0,
+                 .HandleType = HOST_ENTRY_HANDLE_HOSTENT};
 
     for (int i = 0; entry.h_addr_list[i] != nullptr; i++)
     {
@@ -394,7 +403,8 @@ static int GetHostByNameHelper(const uint8_t* hostname, hostent** entry)
         char* scratch = reinterpret_cast<char*>(&buffer[sizeof(hostent)]);
 
         int getHostErrno;
-        int err = gethostbyname_r(reinterpret_cast<const char*>(hostname), result, scratch, scratchLen, entry, &getHostErrno);
+        int err =
+            gethostbyname_r(reinterpret_cast<const char*>(hostname), result, scratch, scratchLen, entry, &getHostErrno);
         switch (err)
         {
             case 0:
@@ -629,7 +639,7 @@ extern "C" int32_t GetNextIPAddress(const HostEntry* hostEntry, void** addressLi
 
         case HOST_ENTRY_HANDLE_HOSTENT:
             return GetNextIPAddressFromHostEnt(reinterpret_cast<hostent**>(addressListHandle), endPoint);
-            
+
         default:
             return PAL_EAI_BADARG;
     }
@@ -653,7 +663,7 @@ extern "C" void FreeHostEntry(HostEntry* entry)
 #if !HAVE_THREAD_SAFE_GETHOSTBYNAME_AND_GETHOSTBYADDR
                 free(entry->AddressListHandle);
 #endif
-                break;   
+                break;
             }
 
             default:
@@ -1112,7 +1122,8 @@ TryGetIPPacketInformation(MessageHeader* messageHeader, int32_t isIPv4, IPPacket
     cmsghdr* controlMessage = CMSG_FIRSTHDR(&header);
     if (isIPv4 != 0)
     {
-        for (; controlMessage != nullptr && controlMessage->cmsg_len > 0; controlMessage = CMSG_NXTHDR(&header, controlMessage))
+        for (; controlMessage != nullptr && controlMessage->cmsg_len > 0;
+             controlMessage = CMSG_NXTHDR(&header, controlMessage))
         {
             if (controlMessage->cmsg_level == IPPROTO_IP && controlMessage->cmsg_type == IP_PKTINFO)
             {
@@ -1122,7 +1133,8 @@ TryGetIPPacketInformation(MessageHeader* messageHeader, int32_t isIPv4, IPPacket
     }
     else
     {
-        for (; controlMessage != nullptr && controlMessage->cmsg_len > 0; controlMessage = CMSG_NXTHDR(&header, controlMessage))
+        for (; controlMessage != nullptr && controlMessage->cmsg_len > 0;
+             controlMessage = CMSG_NXTHDR(&header, controlMessage))
         {
             if (controlMessage->cmsg_level == IPPROTO_IPV6 && controlMessage->cmsg_type == IPV6_PKTINFO)
             {
@@ -1244,6 +1256,43 @@ extern "C" Error SetIPv6MulticastOption(int32_t socket, int32_t multicastOption,
     return err == 0 ? PAL_SUCCESS : ConvertErrorPlatformToPal(errno);
 }
 
+#if defined(__APPLE__) && __APPLE__
+static int32_t GetMaxLingerTime()
+{
+    static volatile int32_t MaxLingerTime = -1;
+    static_assert(sizeof(xsocket::so_linger) == 2, "");
+
+    // OS X does not define the linger time in seconds by default, but in ticks.
+    // Furthermore, when SO_LINGER_SEC is used, the value is simply scaled by
+    // the number of ticks per second and then the result is used to set the
+    // underlying linger time. Unfortunately, the underlying linger time is
+    // stored as a `short` and out-of-range values are simply truncated to fit
+    // within 16 bits and then reinterpreted as 2's complement signed integers.
+    // This results in some *very* strange behavior and a rather low limit for
+    // the linger time. Instead of admitting this behavior, we determine the
+    // maximum linger time in seconds and return an error if the input is out
+    // of range.
+    int32_t maxLingerTime = MaxLingerTime;
+    if (maxLingerTime == -1)
+    {
+        long ticksPerSecond = sysconf(_SC_CLK_TCK);
+        maxLingerTime = static_cast<int32_t>(32767 / ticksPerSecond);
+        MaxLingerTime = maxLingerTime;
+    }
+
+    return maxLingerTime;
+}
+#else
+constexpr int32_t GetMaxLingerTime()
+{
+    // On other platforms, the maximum linger time is locked to the smaller of
+    // 65535 (the maximum time for winsock) and the maximum signed value that
+    // will fit in linger::l_linger.
+
+    return Min(65535U, (1U << (sizeof(linger::l_linger) * 8 - 1)) - 1);
+}
+#endif
+
 extern "C" Error GetLingerOption(int32_t socket, LingerOption* option)
 {
     if (option == nullptr)
@@ -1253,7 +1302,7 @@ extern "C" Error GetLingerOption(int32_t socket, LingerOption* option)
 
     linger opt;
     socklen_t len = sizeof(opt);
-    int err = getsockopt(socket, SOL_SOCKET, SO_LINGER, &opt, &len);
+    int err = getsockopt(socket, SOL_SOCKET, LINGER_OPTION_NAME, &opt, &len);
     if (err != 0)
     {
         return ConvertErrorPlatformToPal(errno);
@@ -1270,18 +1319,19 @@ extern "C" Error SetLingerOption(int32_t socket, LingerOption* option)
         return PAL_EFAULT;
     }
 
+    if (option->OnOff != 0 && (option->Seconds < 0 || option->Seconds > GetMaxLingerTime()))
+    {
+        return PAL_EINVAL;
+    }
+
     linger opt = {.l_onoff = option->OnOff, .l_linger = option->Seconds};
-    int err = setsockopt(socket, SOL_SOCKET, SO_LINGER, &opt, sizeof(opt));
+    int err = setsockopt(socket, SOL_SOCKET, LINGER_OPTION_NAME, &opt, sizeof(opt));
     return err == 0 ? PAL_SUCCESS : ConvertErrorPlatformToPal(errno);
 }
 
 static bool ConvertSocketFlagsPalToPlatform(int32_t palFlags, int& platformFlags)
 {
-    const int32_t SupportedFlagsMask = PAL_MSG_OOB |
-        PAL_MSG_PEEK |
-        PAL_MSG_DONTROUTE |
-        PAL_MSG_TRUNC |
-        PAL_MSG_CTRUNC;
+    const int32_t SupportedFlagsMask = PAL_MSG_OOB | PAL_MSG_PEEK | PAL_MSG_DONTROUTE | PAL_MSG_TRUNC | PAL_MSG_CTRUNC;
 
     if ((palFlags & ~SupportedFlagsMask) != 0)
     {
@@ -1289,30 +1339,24 @@ static bool ConvertSocketFlagsPalToPlatform(int32_t palFlags, int& platformFlags
         return false;
     }
 
-    platformFlags = ((palFlags & PAL_MSG_OOB) == 0 ? 0 : MSG_OOB) |
-        ((palFlags & PAL_MSG_PEEK) == 0 ? 0 : MSG_PEEK) |
-        ((palFlags & PAL_MSG_DONTROUTE) == 0 ? 0 : MSG_DONTROUTE) |
-        ((palFlags & PAL_MSG_TRUNC) == 0 ? 0 : MSG_TRUNC) |
-        ((palFlags & PAL_MSG_CTRUNC) == 0 ? 0 : MSG_CTRUNC);
+    platformFlags = ((palFlags & PAL_MSG_OOB) == 0 ? 0 : MSG_OOB) | ((palFlags & PAL_MSG_PEEK) == 0 ? 0 : MSG_PEEK) |
+                    ((palFlags & PAL_MSG_DONTROUTE) == 0 ? 0 : MSG_DONTROUTE) |
+                    ((palFlags & PAL_MSG_TRUNC) == 0 ? 0 : MSG_TRUNC) |
+                    ((palFlags & PAL_MSG_CTRUNC) == 0 ? 0 : MSG_CTRUNC);
 
     return true;
 }
 
 static int32_t ConvertSocketFlagsPlatformToPal(int platformFlags)
 {
-    const int SupportedFlagsMask = MSG_OOB |
-        MSG_PEEK |
-        MSG_DONTROUTE |
-        MSG_TRUNC |
-        MSG_CTRUNC;
+    const int SupportedFlagsMask = MSG_OOB | MSG_PEEK | MSG_DONTROUTE | MSG_TRUNC | MSG_CTRUNC;
 
     platformFlags &= SupportedFlagsMask;
 
-    return ((platformFlags & MSG_OOB) == 0 ? 0 : PAL_MSG_OOB) |
-        ((platformFlags & MSG_PEEK) == 0 ? 0 : PAL_MSG_PEEK) |
-        ((platformFlags & MSG_DONTROUTE) == 0 ? 0 : PAL_MSG_DONTROUTE) |
-        ((platformFlags & MSG_TRUNC) == 0 ? 0 : PAL_MSG_TRUNC) |
-        ((platformFlags & MSG_CTRUNC) == 0 ? 0 : PAL_MSG_CTRUNC);
+    return ((platformFlags & MSG_OOB) == 0 ? 0 : PAL_MSG_OOB) | ((platformFlags & MSG_PEEK) == 0 ? 0 : PAL_MSG_PEEK) |
+           ((platformFlags & MSG_DONTROUTE) == 0 ? 0 : PAL_MSG_DONTROUTE) |
+           ((platformFlags & MSG_TRUNC) == 0 ? 0 : PAL_MSG_TRUNC) |
+           ((platformFlags & MSG_CTRUNC) == 0 ? 0 : PAL_MSG_CTRUNC);
 }
 
 extern "C" Error ReceiveMessage(int32_t socket, MessageHeader* messageHeader, int32_t flags, int64_t* received)
@@ -1726,7 +1770,8 @@ static bool TryGetPlatformSocketOption(int32_t socketOptionName, int32_t socketO
     }
 }
 
-extern "C" Error GetSockOpt(int32_t socket, int32_t socketOptionLevel, int32_t socketOptionName, uint8_t* optionValue, int32_t* optionLen)
+extern "C" Error GetSockOpt(
+    int32_t socket, int32_t socketOptionLevel, int32_t socketOptionName, uint8_t* optionValue, int32_t* optionLen)
 {
     if (optionLen == nullptr || *optionLen < 0)
     {
@@ -1751,7 +1796,8 @@ extern "C" Error GetSockOpt(int32_t socket, int32_t socketOptionLevel, int32_t s
     return PAL_SUCCESS;
 }
 
-extern "C" Error SetSockOpt(int32_t socket, int32_t socketOptionLevel, int32_t socketOptionName, uint8_t* optionValue, int32_t optionLen)
+extern "C" Error
+SetSockOpt(int32_t socket, int32_t socketOptionLevel, int32_t socketOptionName, uint8_t* optionValue, int32_t optionLen)
 {
     if (optionLen < 0)
     {
@@ -1775,7 +1821,7 @@ static bool TryConvertSocketTypePalToPlatform(int32_t palSocketType, int* platfo
     switch (palSocketType)
     {
         case PAL_SOCK_STREAM:
-           *platformSocketType = SOCK_STREAM;
+            *platformSocketType = SOCK_STREAM;
             return true;
 
         case PAL_SOCK_DGRAM:
@@ -1793,10 +1839,10 @@ static bool TryConvertSocketTypePalToPlatform(int32_t palSocketType, int* platfo
         case PAL_SOCK_SEQPACKET:
             *platformSocketType = SOCK_SEQPACKET;
             return true;
- 
+
         default:
             *platformSocketType = static_cast<int>(palSocketType);
-            return false;           
+            return false;
     }
 }
 
@@ -1918,7 +1964,8 @@ static void ConvertFdSetPalToPlatform(fd_set& platformSet, FdSet& palSet, int32_
 #endif
 }
 
-extern "C" Error Select(int32_t fdCount, FdSet* readFdSet, FdSet* writeFdSet, FdSet* errorFdSet, int32_t microseconds, int32_t* selected)
+extern "C" Error
+Select(int32_t fdCount, FdSet* readFdSet, FdSet* writeFdSet, FdSet* errorFdSet, int32_t microseconds, int32_t* selected)
 {
     if (selected == nullptr)
     {
@@ -2010,22 +2057,18 @@ const size_t SocketEventBufferElementSize = Max(sizeof(epoll_event), sizeof(Sock
 
 static SocketEvents GetSocketEvents(uint32_t events)
 {
-    int asyncEvents = (((events & EPOLLIN) != 0) ? PAL_SA_READ : 0) |
-        (((events & EPOLLOUT) != 0) ? PAL_SA_WRITE : 0) |
-        (((events & EPOLLRDHUP) != 0) ? PAL_SA_READCLOSE : 0) |
-        (((events & EPOLLHUP) != 0) ? PAL_SA_CLOSE : 0) |
-        (((events & EPOLLERR) != 0) ? PAL_SA_ERROR : 0);
+    int asyncEvents = (((events & EPOLLIN) != 0) ? PAL_SA_READ : 0) | (((events & EPOLLOUT) != 0) ? PAL_SA_WRITE : 0) |
+                      (((events & EPOLLRDHUP) != 0) ? PAL_SA_READCLOSE : 0) |
+                      (((events & EPOLLHUP) != 0) ? PAL_SA_CLOSE : 0) | (((events & EPOLLERR) != 0) ? PAL_SA_ERROR : 0);
 
     return static_cast<SocketEvents>(asyncEvents);
 }
 
 static uint32_t GetEPollEvents(SocketEvents events)
 {
-     return (((events & PAL_SA_READ) != 0) ? EPOLLIN : 0) |
-        (((events & PAL_SA_WRITE) != 0) ? EPOLLOUT : 0) |
-        (((events & PAL_SA_READCLOSE) != 0) ? EPOLLRDHUP : 0) |
-        (((events & PAL_SA_CLOSE) != 0) ? EPOLLHUP : 0) |
-        (((events & PAL_SA_ERROR) != 0) ? EPOLLERR : 0);
+    return (((events & PAL_SA_READ) != 0) ? EPOLLIN : 0) | (((events & PAL_SA_WRITE) != 0) ? EPOLLOUT : 0) |
+           (((events & PAL_SA_READCLOSE) != 0) ? EPOLLRDHUP : 0) | (((events & PAL_SA_CLOSE) != 0) ? EPOLLHUP : 0) |
+           (((events & PAL_SA_ERROR) != 0) ? EPOLLERR : 0);
 }
 
 static Error CreateSocketEventPortInner(int32_t* port)
@@ -2049,7 +2092,8 @@ static Error CloseSocketEventPortInner(int32_t port)
     return err == 0 ? PAL_SUCCESS : ConvertErrorPlatformToPal(errno);
 }
 
-static Error TryChangeSocketEventRegistrationInner(int32_t port, int32_t socket, SocketEvents currentEvents, SocketEvents newEvents, uintptr_t data)
+static Error TryChangeSocketEventRegistrationInner(
+    int32_t port, int32_t socket, SocketEvents currentEvents, SocketEvents newEvents, uintptr_t data)
 {
     assert(currentEvents != newEvents);
 
@@ -2063,10 +2107,7 @@ static Error TryChangeSocketEventRegistrationInner(int32_t port, int32_t socket,
         op = EPOLL_CTL_DEL;
     }
 
-    epoll_event evt = {
-        .events = GetEPollEvents(newEvents) | EPOLLET,
-        .data = { .ptr = reinterpret_cast<void*>(data) }
-    };
+    epoll_event evt = {.events = GetEPollEvents(newEvents) | EPOLLET, .data = {.ptr = reinterpret_cast<void*>(data)}};
     int err = epoll_ctl(port, op, socket, &evt);
     return err == 0 ? PAL_SUCCESS : ConvertErrorPlatformToPal(errno);
 }
@@ -2086,10 +2127,7 @@ static void ConvertEventEPollToSocketAsync(SocketEvent* sae, epoll_event* epoll)
         events = (events & ~EPOLLHUP) | EPOLLIN | EPOLLOUT;
     }
 
-    *sae = {
-        .Data = reinterpret_cast<uintptr_t>(epoll->data.ptr),
-        .Events = GetSocketEvents(events)
-    };
+    *sae = {.Data = reinterpret_cast<uintptr_t>(epoll->data.ptr), .Events = GetSocketEvents(events)};
 }
 
 static Error WaitForSocketEventsInner(int32_t port, SocketEvent* buffer, int32_t* count)
@@ -2140,8 +2178,8 @@ static Error WaitForSocketEventsInner(int32_t port, SocketEvent* buffer, int32_t
 
 #elif HAVE_KQUEUE
 
-static_assert(sizeof(SocketEvent) <= sizeof(kevent64_s), "");
-const size_t SocketEventBufferElementSize = sizeof(kevent64_s);
+static_assert(sizeof(SocketEvent) <= sizeof(struct kevent), "");
+const size_t SocketEventBufferElementSize = sizeof(struct kevent);
 
 static SocketEvents GetSocketEvents(int16_t filter, uint16_t flags)
 {
@@ -2203,7 +2241,8 @@ static Error CloseSocketEventPortInner(int32_t port)
     return err == 0 ? PAL_SUCCESS : ConvertErrorPlatformToPal(errno);
 }
 
-static Error TryChangeSocketEventRegistrationInner(int32_t port, int32_t socket, SocketEvents currentEvents, SocketEvents newEvents, uintptr_t data)
+static Error TryChangeSocketEventRegistrationInner(
+    int32_t port, int32_t socket, SocketEvents currentEvents, SocketEvents newEvents, uintptr_t data)
 {
     const uint16_t AddFlags = EV_ADD | EV_CLEAR | EV_RECEIPT;
     const uint16_t RemoveFlags = EV_DELETE | EV_RECEIPT;
@@ -2214,30 +2253,32 @@ static Error TryChangeSocketEventRegistrationInner(int32_t port, int32_t socket,
     bool readChanged = (changes & PAL_SA_READ) != 0;
     bool writeChanged = (changes & PAL_SA_WRITE) != 0;
 
-    kevent64_s events[2];
+    struct kevent events[2];
 
     int i = 0;
     if (readChanged)
     {
-        events[i++] =  {
-            .ident = static_cast<uint64_t>(socket),
-            .filter = EVFILT_READ,
-            .flags = (newEvents & PAL_SA_READ) == 0 ? RemoveFlags : AddFlags,
-            .udata = data
-        };
+        EV_SET(&events[i++],
+               static_cast<uint64_t>(socket),
+               EVFILT_READ,
+               (newEvents & PAL_SA_READ) == 0 ? RemoveFlags : AddFlags,
+               0,
+               0,
+               reinterpret_cast<void*>(data));
     }
 
     if (writeChanged)
     {
-        events[i++] = {
-            .ident = static_cast<uint64_t>(socket),
-            .filter = EVFILT_WRITE,
-            .flags = (newEvents & PAL_SA_WRITE) == 0 ? RemoveFlags : AddFlags,
-            .udata = data
-        };
+        EV_SET(&events[i++],
+               static_cast<uint64_t>(socket),
+               EVFILT_WRITE,
+               (newEvents & PAL_SA_WRITE) == 0 ? RemoveFlags : AddFlags,
+               0,
+               0,
+               reinterpret_cast<void*>(data));
     }
 
-    int err = kevent64(port, events, i, nullptr, 0, 0, nullptr);
+    int err = kevent(port, events, i, nullptr, 0, nullptr);
     return err == 0 ? PAL_SUCCESS : ConvertErrorPlatformToPal(errno);
 }
 
@@ -2247,15 +2288,15 @@ static Error WaitForSocketEventsInner(int32_t port, SocketEvent* buffer, int32_t
     assert(count != nullptr);
     assert(*count >= 0);
 
-    auto* events = reinterpret_cast<kevent64_s*>(buffer);
-    int numEvents = kevent64(port, nullptr, 0, events, *count, 0, nullptr);
+    auto* events = reinterpret_cast<struct kevent*>(buffer);
+    int numEvents = kevent(port, nullptr, 0, events, *count, nullptr);
     if (numEvents == -1)
     {
         *count = -1;
         return ConvertErrorPlatformToPal(errno);
     }
 
-    // We should never see 0 events. Given an infinite timeout, kevent64 will never return
+    // We should never see 0 events. Given an infinite timeout, kevent will never return
     // 0 events even if there are no file descriptors registered with the kqueue fd. In
     // that case, the wait will block until a file descriptor is added and an event occurs
     // on the added file descriptor.
@@ -2265,11 +2306,8 @@ static Error WaitForSocketEventsInner(int32_t port, SocketEvent* buffer, int32_t
     for (int i = 0; i < numEvents; i++)
     {
         // This copy is made deliberately to avoid overwriting data.
-        kevent64_s evt = events[i];
-        buffer[i] = {
-            .Data = static_cast<uintptr_t>(evt.udata),
-            .Events = GetSocketEvents(evt.filter, evt.flags)
-        };
+        struct kevent evt = events[i];
+        buffer[i] = {.Data = reinterpret_cast<uintptr_t>(evt.udata), .Events = GetSocketEvents(evt.filter, evt.flags)};
     }
 
     *count = numEvents;
@@ -2319,13 +2357,10 @@ extern "C" Error FreeSocketEventBuffer(SocketEvent* buffer)
     return PAL_SUCCESS;
 }
 
-extern "C" Error TryChangeSocketEventRegistration(int32_t port, int32_t socket, int32_t currentEvents, int32_t newEvents, uintptr_t data)
+extern "C" Error
+TryChangeSocketEventRegistration(int32_t port, int32_t socket, int32_t currentEvents, int32_t newEvents, uintptr_t data)
 {
-    const int32_t SupportedEvents = PAL_SA_READ |
-        PAL_SA_WRITE |
-        PAL_SA_READCLOSE |
-        PAL_SA_CLOSE |
-        PAL_SA_ERROR;
+    const int32_t SupportedEvents = PAL_SA_READ | PAL_SA_WRITE | PAL_SA_READCLOSE | PAL_SA_CLOSE | PAL_SA_ERROR;
 
     if ((currentEvents & ~SupportedEvents) != 0 || (newEvents & ~SupportedEvents) != 0)
     {
@@ -2337,7 +2372,8 @@ extern "C" Error TryChangeSocketEventRegistration(int32_t port, int32_t socket, 
         return PAL_SUCCESS;
     }
 
-    return TryChangeSocketEventRegistrationInner(port, socket, static_cast<SocketEvents>(currentEvents), static_cast<SocketEvents>(newEvents), data);
+    return TryChangeSocketEventRegistrationInner(
+        port, socket, static_cast<SocketEvents>(currentEvents), static_cast<SocketEvents>(newEvents), data);
 }
 
 extern "C" Error WaitForSocketEvents(int32_t port, SocketEvent* buffer, int32_t* count)

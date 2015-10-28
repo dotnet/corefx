@@ -8,7 +8,7 @@ using Xunit;
 
 namespace Tests.ExpressionCompiler.Binary
 {
-    public static unsafe class BinaryMultiplyTests
+    public static class BinaryMultiplyTests
     {
         #region Test methods
 
@@ -123,7 +123,6 @@ namespace Tests.ExpressionCompiler.Binary
             }
         }
 
-        [ActiveIssue(3164, PlatformID.AnyUnix)]
         [Fact]
         public static void CheckLongMultiplyTestOvf()
         {
@@ -751,7 +750,7 @@ namespace Tests.ExpressionCompiler.Binary
             Exception csException = null;
             try
             {
-                csResult = checked((long)(a * b)); 
+                csResult = checked((long)(a * b));
             }
             catch (Exception ex)
             {

@@ -157,7 +157,7 @@ namespace System.Net.Http
         {
             if (_chunkedMode)
             {
-                await InternalWriteDataAsync(s_endChunk, 0, s_endChunk.Length, token);
+                await InternalWriteDataAsync(s_endChunk, 0, s_endChunk.Length, token).ConfigureAwait(false);
             }
         }
         
@@ -203,14 +203,21 @@ namespace System.Net.Http
             string chunkSizeString = String.Format("{0:x}\r\n", count);
             byte[] chunkSize = Encoding.UTF8.GetBytes(chunkSizeString);
 
-            await InternalWriteDataAsync(chunkSize, 0, chunkSize.Length, token);
+            await InternalWriteDataAsync(chunkSize, 0, chunkSize.Length, token).ConfigureAwait(false);
 
-            await InternalWriteDataAsync(buffer, offset, count, token);
-            await InternalWriteDataAsync(s_crLfTerminator, 0, s_crLfTerminator.Length, token);
+            await InternalWriteDataAsync(buffer, offset, count, token).ConfigureAwait(false);
+            await InternalWriteDataAsync(s_crLfTerminator, 0, s_crLfTerminator.Length, token).ConfigureAwait(false);
         }
 
         private Task<bool> InternalWriteDataAsync(byte[] buffer, int offset, int count, CancellationToken token)
         {
+            Debug.Assert(count >= 0);
+            
+            if (count == 0)
+            {
+                return Task.FromResult<bool>(true);
+            }
+            
             // TODO (Issue 2505): replace with PinnableBufferCache.
             if (!_cachedSendPinnedBuffer.IsAllocated || _cachedSendPinnedBuffer.Target != buffer)
             {
@@ -222,7 +229,8 @@ namespace System.Net.Http
                 _cachedSendPinnedBuffer = GCHandle.Alloc(buffer, GCHandleType.Pinned);
             }
 
-            _state.TcsInternalWriteDataToRequestStream = new TaskCompletionSource<bool>();
+            _state.TcsInternalWriteDataToRequestStream = 
+                new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
             
             lock (_state.Lock)
             {

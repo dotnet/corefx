@@ -4,11 +4,12 @@
 using System;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 using Xunit;
 
 namespace Tests.ExpressionCompiler.New
 {
-    public static unsafe class NewTests
+    public static class NewTests
     {
         #region Test methods
 
@@ -229,7 +230,7 @@ namespace Tests.ExpressionCompiler.New
         class TestPrivateDefaultConstructor
         {
             private TestPrivateDefaultConstructor()
-            { 
+            {
             }
 
             public static Func<TestPrivateDefaultConstructor> GetInstanceFunc()
@@ -241,6 +242,39 @@ namespace Tests.ExpressionCompiler.New
             public override string ToString()
             {
                 return "Test instance";
+            }
+        }
+
+        [Fact]
+        public static void CheckNewWithStaticCtor()
+        {
+            var cctor = typeof(StaticCtor).GetTypeInfo().DeclaredConstructors.Single(c => c.IsStatic);
+            Assert.Throws<ArgumentException>(() => Expression.New(cctor));
+        }
+
+        [Fact]
+        public static void CheckNewWithAbstractCtor()
+        {
+            var ctor = typeof(AbstractCtor).GetTypeInfo().DeclaredConstructors.Single();
+            var f = Expression.Lambda<Func<AbstractCtor>>(Expression.New(ctor));
+
+            foreach (var preferInterpretation in new[] { false, true })
+            {
+                Assert.Throws<InvalidOperationException>(() => f.Compile(preferInterpretation));
+            }
+        }
+
+        static class StaticCtor
+        {
+            static StaticCtor()
+            {
+            }
+        }
+
+        abstract class AbstractCtor
+        {
+            public AbstractCtor()
+            {
             }
         }
     }

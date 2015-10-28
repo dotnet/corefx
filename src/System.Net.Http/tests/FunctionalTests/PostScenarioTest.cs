@@ -43,6 +43,27 @@ namespace System.Net.Http.Functional.Tests
         }
 
         [Theory, MemberData("EchoServers")]
+        public async Task PostNoContentUsingContentLengthSemantics_Success(Uri serverUri)
+        {
+            await PostHelper(serverUri, string.Empty, null,
+                useContentLengthUpload: true, useChunkedEncodingUpload: false);
+        }
+
+        [Theory, MemberData("EchoServers")]
+        public async Task PostEmptyContentUsingContentLengthSemantics_Success(Uri serverUri)
+        {
+            await PostHelper(serverUri, string.Empty, new StringContent(string.Empty),
+                useContentLengthUpload: true, useChunkedEncodingUpload: false);
+        }
+
+        [Theory, MemberData("EchoServers")]
+        public async Task PostEmptyContentUsingChunkedEncoding_Success(Uri serverUri)
+        {
+            await PostHelper(serverUri, string.Empty, new StringContent(string.Empty),
+                useContentLengthUpload: false, useChunkedEncodingUpload: true);
+        }
+
+        [Theory, MemberData("EchoServers")]
         public async Task PostUsingContentLengthSemantics_Success(Uri serverUri)
         {
             await PostHelper(serverUri, ExpectedContent, new StringContent(ExpectedContent),
@@ -53,6 +74,13 @@ namespace System.Net.Http.Functional.Tests
         public async Task PostUsingChunkedEncoding_Success(Uri serverUri)
         {
             await PostHelper(serverUri, ExpectedContent, new StringContent(ExpectedContent),
+                useContentLengthUpload: false, useChunkedEncodingUpload: true);
+        }
+
+        [Theory, MemberData("EchoServers")]
+        public async Task PostSyncBlockingContentUsingChunkedEncoding_Success(Uri serverUri)
+        {
+            await PostHelper(serverUri, ExpectedContent, new SyncBlockingContent(ExpectedContent),
                 useContentLengthUpload: false, useChunkedEncodingUpload: true);
         }
 
@@ -111,7 +139,7 @@ namespace System.Net.Http.Functional.Tests
         {
             using (var client = new HttpClient())
             {
-                if (!useContentLengthUpload)
+                if (!useContentLengthUpload && requestContent != null)
                 {
                     requestContent.Headers.ContentLength = null;
                 }
