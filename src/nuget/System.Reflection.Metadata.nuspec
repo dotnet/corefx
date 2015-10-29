@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2013/01/nuspec.xsd">
   <metadata minClientVersion="2.8.6">
     <id>System.Reflection.Metadata</id>
-    <version>1.1.0-alpha</version>
+    <version>1.2.0-alpha</version>
     <title>System.Reflection.Metadata</title>
     <authors>Microsoft</authors>
     <owners>microsoft,dotnetframework</owners>
