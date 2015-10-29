@@ -18,7 +18,7 @@ namespace System.Threading.Tasks.Tests.CancelWait
             return root;
         }
 
-        public static IEnumerable<object[]> Task_Cancel_Data()
+        public static IEnumerable<object[]> Task_Data()
         {
             foreach (WorkloadType load in Enum.GetValues(typeof(WorkloadType)))
             {
@@ -85,7 +85,7 @@ namespace System.Threading.Tasks.Tests.CancelWait
         }
 
         [Theory]
-        [MemberData("Task_Cancel_Data")]
+        [MemberData("Task_Data")]
         public static void Task_Cancel_Test(TaskInfo node)
         {
             TestParameters parameters = new TestParameters(node, API.Cancel, WaitBy.None, -1);
@@ -207,112 +207,10 @@ namespace System.Threading.Tasks.Tests.CancelWait
             test.RealRun();
         }
 
-        [Fact]
+        [Theory]
         [OuterLoop]
-        public static void TaskCancelWait32()
-        {
-            TaskInfo node = new TaskInfo(null, "node", WorkloadType.Light, TaskCreationOptions.AttachedToParent, true);
-
-            Task_Wait_Test(node);
-        }
-
-        [Fact]
-        [OuterLoop]
-        public static void TaskCancelWait33()
-        {
-            TaskInfo node = new TaskInfo(null, "node", WorkloadType.VeryLight, TaskCreationOptions.None);
-
-            TaskInfo node_1 = new TaskInfo(node, "node_1", WorkloadType.Medium, TaskCreationOptions.AttachedToParent);
-            TaskInfo node_1_1 = new TaskInfo(node_1, "node_1_1", WorkloadType.Light, TaskCreationOptions.None);
-            TaskInfo node_1_2 = new TaskInfo(node_1, "node_1_2", WorkloadType.Heavy, TaskCreationOptions.LongRunning, true);
-            node_1.AddChildren(new[] { node_1_1, node_1_2, });
-
-            TaskInfo node_2 = new TaskInfo(node, "node_2", WorkloadType.Medium, TaskCreationOptions.None);
-            TaskInfo node_2_1 = new TaskInfo(node_2, "node_2_1", WorkloadType.Light, TaskCreationOptions.LongRunning, true);
-            TaskInfo node_2_2 = new TaskInfo(node_2, "node_2_2", WorkloadType.Light, TaskCreationOptions.AttachedToParent);
-            node_2.AddChildren(new[] { node_2_1, node_2_2, });
-
-            node.AddChildren(new[] { node_1, node_2, });
-
-            Task_Wait_Test(node);
-        }
-
-        [Fact]
-        [OuterLoop]
-        public static void TaskCancelWait34()
-        {
-            TaskInfo node = new TaskInfo(null, "node", WorkloadType.VeryHeavy, TaskCreationOptions.LongRunning, true);
-
-            TaskInfo node_1 = new TaskInfo(node, "node_1", WorkloadType.Light, TaskCreationOptions.LongRunning | TaskCreationOptions.AttachedToParent);
-            TaskInfo node_1_1 = new TaskInfo(node_1, "node_1_1", WorkloadType.Medium, TaskCreationOptions.AttachedToParent, true);
-            node_1.AddChildren(new[] { node_1_1, });
-
-            TaskInfo node_2 = new TaskInfo(node, "node_2", WorkloadType.VeryHeavy, TaskCreationOptions.LongRunning, true);
-
-            TaskInfo node_3 = new TaskInfo(node, "node_3", WorkloadType.Light, TaskCreationOptions.AttachedToParent);
-            TaskInfo node_3_1 = new TaskInfo(node_3, "node_3_1", WorkloadType.Heavy, TaskCreationOptions.LongRunning, true);
-            TaskInfo node_3_2 = new TaskInfo(node_3, "node_3_2", WorkloadType.VeryHeavy, TaskCreationOptions.None);
-            node_3.AddChildren(new[] { node_3_1, node_3_2, });
-
-            node.AddChildren(new[] { node_1, node_2, node_3, });
-
-            Task_Wait_Test(node);
-        }
-
-        [Fact]
-        [OuterLoop]
-        public static void TaskCancelWait35()
-        {
-            TaskInfo node = new TaskInfo(null, "node", WorkloadType.VeryHeavy, TaskCreationOptions.AttachedToParent, true);
-
-            TaskInfo node_1 = new TaskInfo(node, "node_1", WorkloadType.VeryHeavy, TaskCreationOptions.AttachedToParent);
-
-            node.AddChildren(new[] { node_1, });
-
-            Task_Wait_Test(node);
-        }
-
-        [Fact]
-        [OuterLoop]
-        public static void TaskCancelWait36()
-        {
-            TaskInfo node = new TaskInfo(null, "node", WorkloadType.VeryHeavy, TaskCreationOptions.AttachedToParent);
-
-            TaskInfo node_1 = new TaskInfo(node, "node_1", WorkloadType.Light, TaskCreationOptions.LongRunning | TaskCreationOptions.AttachedToParent);
-
-            TaskInfo node_2 = new TaskInfo(node, "node_2", WorkloadType.Light, TaskCreationOptions.AttachedToParent, true);
-
-            TaskInfo node_3 = new TaskInfo(node, "node_3", WorkloadType.Heavy, TaskCreationOptions.None);
-
-            TaskInfo node_4 = new TaskInfo(node, "node_4", WorkloadType.VeryHeavy, TaskCreationOptions.LongRunning | TaskCreationOptions.AttachedToParent);
-
-            TaskInfo node_5 = new TaskInfo(node, "node_5", WorkloadType.Heavy, TaskCreationOptions.AttachedToParent, true);
-
-            TaskInfo node_6 = new TaskInfo(node, "node_6", WorkloadType.Heavy, TaskCreationOptions.AttachedToParent);
-
-            TaskInfo node_7 = new TaskInfo(node, "node_7", WorkloadType.Heavy, TaskCreationOptions.LongRunning, true);
-
-            node.AddChildren(new[] { node_1, node_2, node_3, node_4, node_5, node_6, node_7, });
-
-            Task_Wait_Test(node);
-        }
-
-        [Fact]
-        [OuterLoop]
-        public static void TaskCancelWait37()
-        {
-            TaskInfo node = new TaskInfo(null, "node", WorkloadType.VeryHeavy, TaskCreationOptions.LongRunning, true);
-
-            TaskInfo node_1 = new TaskInfo(node, "node_1", WorkloadType.Medium, TaskCreationOptions.LongRunning | TaskCreationOptions.AttachedToParent);
-
-            TaskInfo node_2 = new TaskInfo(node, "node_2", WorkloadType.Heavy, TaskCreationOptions.LongRunning, true);
-
-            node.AddChildren(new[] { node_1, node_2, });
-
-            Task_Wait_Test(node);
-        }
-
-        private static void Task_Wait_Test(TaskInfo node)
+        [MemberData("Task_Data")]
+        public static void Task_Wait_Test(TaskInfo node)
         {
             TestParameters parameters = new TestParameters(node, API.Wait, WaitBy.None, -1);
 
