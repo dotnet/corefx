@@ -20,12 +20,9 @@ namespace Internal.Cryptography.Pal
             _pkcs12Handle = pkcs12Handle;
         }
 
-        public unsafe static bool TryRead(byte[] data, out OpenSslPkcs12Reader pkcs12Reader)
+        public static bool TryRead(byte[] data, out OpenSslPkcs12Reader pkcs12Reader)
         {
-            SafePkcs12Handle handle = Interop.libcrypto.OpenSslD2I(
-                (ptr, b, i) => Interop.libcrypto.d2i_PKCS12(ptr, b, i),
-                data,
-                checkHandle: false);
+            SafePkcs12Handle handle = Interop.Crypto.DecodePkcs12(data, data.Length);
 
             if (!handle.IsInvalid)
             {
@@ -39,7 +36,7 @@ namespace Internal.Cryptography.Pal
 
         public static bool TryRead(SafeBioHandle fileBio, out OpenSslPkcs12Reader pkcs12Reader)
         {
-            SafePkcs12Handle p12 = Interop.libcrypto.d2i_PKCS12_bio(fileBio, IntPtr.Zero);
+            SafePkcs12Handle p12 = Interop.Crypto.DecodePkcs12FromBio(fileBio);
 
             if (!p12.IsInvalid)
             {
@@ -79,7 +76,7 @@ namespace Internal.Cryptography.Pal
 
         public void Decrypt(string password)
         {
-            bool parsed = Interop.libcrypto.PKCS12_parse(
+            bool parsed = Interop.Crypto.Pkcs12Parse(
                 _pkcs12Handle,
                 password,
                 out _evpPkeyHandle,
@@ -88,7 +85,7 @@ namespace Internal.Cryptography.Pal
 
             if (!parsed)
             {
-                throw Interop.libcrypto.CreateOpenSslCryptographicException();
+                throw Interop.Crypto.CreateOpenSslCryptographicException();
             }
         }
 
@@ -107,7 +104,7 @@ namespace Internal.Cryptography.Pal
                     if (certPtr != IntPtr.Zero)
                     {
                         // The STACK_OF(X509) still needs to be cleaned up, so duplicate the handle out of it.
-                        certs.Add(new OpenSslX509CertificateReader(Interop.libcrypto.X509_dup(certPtr)));
+                        certs.Add(new OpenSslX509CertificateReader(Interop.Crypto.X509Duplicate(certPtr)));
                     }
                 }
             }

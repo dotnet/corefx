@@ -9,6 +9,7 @@
     <AssemblyName>System.Linq.Queryable</AssemblyName>
     <AssemblyVersion>4.0.1.0</AssemblyVersion>
     <RootNamespace>System.Linq.Queryable</RootNamespace>
+    <PackageTargetFramework>dotnet5.4</PackageTargetFramework>
   </PropertyGroup>
   <!-- Default configurations to help VS understand the configurations -->
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -24,7 +25,6 @@
     <Compile Include="System\Linq\EnumerableRewriter.cs" />
     <Compile Include="System\Linq\Error.cs" />
     <Compile Include="System\Linq\Expressions\OldExpressionVisitor.cs" />
-    <Compile Include="System\Linq\Expressions\ReadOnlyCollectionExtensions.cs" />
     <Compile Include="System\Linq\Queryable.cs" />
     <Compile Include="System\Linq\Strings.cs" />
     <Compile Include="System\Linq\TypeHelper.cs" />

@@ -71,6 +71,9 @@
     <Compile Include="..\..\src\System\Net\Sockets\SocketError.cs" >
       <Link>ProductionCode\System\Net\Sockets\SocketError.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\System\StringExtensions.cs">
+      <Link>Common\System\StringExtensions.cs</Link>
+    </Compile>
     <Compile Include="$(CommonPath)\System\Net\ByteOrder.cs" >
       <Link>ProductionCode\Common\System\Net\ByteOrder.cs</Link>
     </Compile>
@@ -132,20 +135,14 @@
       <Link>Common\System\Net\SocketAddressPal.Unix.cs</Link>
     </Compile>
 
-    <Compile Include="$(CommonPath)\Interop\Interop.CheckedAccess.cs" >
-      <Link>ProductionCode\Common\Interop\Interop.CheckedAccess.cs</Link>
+    <Compile Include="$(CommonPath)\Interop\Unix\Interop.Libraries.cs" >
+      <Link>ProductionCode\Common\Interop\Unix\Interop.Libraries.cs</Link>
     </Compile>
-  </ItemGroup>
-
-  <ItemGroup Condition=" '$(TargetsLinux)' == 'true' ">
-    <Compile Include="$(CommonPath)\Interop\Linux\libc\Interop.sockaddr.cs" >
-      <Link>ProductionCode\Common\Interop\Linux\libc\Interop.sockaddr.cs</Link>
+    <Compile Include="$(CommonPath)\Interop\Unix\Interop.Errors.cs" >
+      <Link>ProductionCode\Common\Interop\Unix\Interop.Errors.cs</Link>
     </Compile>
-  </ItemGroup>
-
-  <ItemGroup Condition=" '$(TargetsOSX)' == 'true' ">
-    <Compile Include="$(CommonPath)\Interop\OSX\libc\Interop.sockaddr.cs" >
-      <Link>ProductionCode\Common\Interop\OSX\libc\Interop.sockaddr.cs</Link>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.SocketAddress.cs">
+      <Link>ProductionCode\Common\Interop\Unix\System.Native\Interop.SocketAddress.cs</Link>
     </Compile>
   </ItemGroup>
 

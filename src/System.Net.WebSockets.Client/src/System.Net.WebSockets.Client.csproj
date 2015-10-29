@@ -2,25 +2,57 @@
 <Project ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <PropertyGroup>
+    <AssemblyVersion>4.0.0.0</AssemblyVersion>
     <Configuration Condition=" '$(Configuration)' == '' ">Windows_Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{B8AD98AE-84C3-4313-B3F1-EE8BD5BFF69B}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+    <PackageTargetFramework>dotnet5.4</PackageTargetFramework>
+    <PackageTargetRuntime Condition="'$(TargetsWindows)' == 'true'">win7</PackageTargetRuntime>
+    <PackageTargetRuntime Condition="'$(TargetsUnix)' == 'true'">unix</PackageTargetRuntime>
   </PropertyGroup>
 
   <!-- Help VS understand available configurations -->
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Linux_Debug|AnyCPU' " />
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Linux_Release|AnyCPU' " />
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'OSX_Debug|AnyCPU' " />
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'OSX_Release|AnyCPU' " />
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Windows_Debug|AnyCPU' " />
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Windows_Release|AnyCPU' " />
 
   <ItemGroup>
-    <Compile Include="System\Net\Http\WinHttpException.cs" />
     <Compile Include="System\Net\WebSockets\ClientWebSocket.cs" />
     <Compile Include="System\Net\WebSockets\ClientWebSocketOptions.cs" />
-    <Compile Include="System\Net\WebSockets\WebSocketMessageTypeAdapter.cs" />
+
+    <Compile Include="$(CommonPath)\System\Net\Logging.cs">
+      <Link>Common\System\Net\Logging.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\Net\UriScheme.cs">
+      <Link>Common\System\Net\UriScheme.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\Net\WebSockets\WebSocketValidate.cs">
+      <Link>Common\System\Net\WebSockets\WebSocketValidate.cs</Link>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(TargetsWindows)' == 'true' ">
+    <Compile Include="System\Net\WebSockets\WebSocketHandle.Windows.cs" />
+    <Compile Include="System\Net\WebSockets\WebSocketHandle.Win32.cs" />
     <Compile Include="System\Net\WebSockets\WinHttpWebSocket.cs" />
     <Compile Include="System\Net\WebSockets\WinHttpWebSocketCallback.cs" />
     <Compile Include="System\Net\WebSockets\WinHttpWebSocketState.cs" />
+    <Compile Include="System\Net\WebSockets\WebSocketMessageTypeAdapter.cs" />
+
+    <Compile Include="$(CommonPath)\Microsoft\Win32\SafeHandles\SafeHandleZeroOrMinusOneIsInvalid.cs">
+      <Link>Common\Microsoft\Win32\SafeHandles\SafeHandleZeroOrMinusOneIsInvalid.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Microsoft\Win32\SafeHandles\SafeLibraryHandle.cs">
+      <Link>Common\Microsoft\Win32\SafeHandles\SafeLibraryHandle.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\Net\Http\WinHttpException.cs">
+      <Link>Common\System\Net\Http\WinHttpException.cs</Link>
+    </Compile>
 
     <Compile Include="$(CommonPath)\Interop\Windows\Interop.Libraries.cs">
       <Link>Interop\Windows\Interop.Libraries.cs</Link>
@@ -52,24 +84,10 @@
     <Compile Include="$(CommonPath)\Interop\Windows\winhttp\Interop.winhttp_types.cs">
       <Link>Interop\Windows\winhttp\Interop.winhttp_types.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Microsoft\Win32\SafeHandles\SafeHandleZeroOrMinusOneIsInvalid.cs">
-      <Link>Common\Microsoft\Win32\SafeHandles\SafeHandleZeroOrMinusOneIsInvalid.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\Microsoft\Win32\SafeHandles\SafeLibraryHandle.cs">
-      <Link>Common\Microsoft\Win32\SafeHandles\SafeLibraryHandle.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\System\NotImplemented.cs">
-      <Link>Common\System\NotImplemented.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\System\Net\Logging.cs">
-      <Link>Common\System\Net\Logging.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\System\Net\UriScheme.cs">
-      <Link>Common\System\Net\UriScheme.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\System\Net\WebSockets\WebSocketValidate.cs">
-      <Link>Common\System\Net\WebSockets\WebSocketValidate.cs</Link>
-    </Compile>
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(TargetsUnix)' == 'true' ">
+    <Compile Include="System\Net\WebSockets\WebSocketHandle.Unix.cs" />
   </ItemGroup>
 
   <ItemGroup>

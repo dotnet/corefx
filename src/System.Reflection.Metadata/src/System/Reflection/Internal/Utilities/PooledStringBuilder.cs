@@ -1,4 +1,5 @@
-﻿// Copyright (c) Microsoft.  All Rights Reserved.  Licensed under the Apache License, Version 2.0.  See License.txt in the project root for license information.
+﻿// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Diagnostics;
 using System.Text;
@@ -41,23 +42,9 @@ namespace System.Reflection.Internal
             }
         }
 
-        [Obsolete("Consider calling ToStringAndFree instead.")]
-        public new string ToString()
-        {
-            return this.Builder.ToString();
-        }
-
         public string ToStringAndFree()
         {
             string result = this.Builder.ToString();
-            this.Free();
-
-            return result;
-        }
-
-        public string ToStringAndFree(int startIndex, int length)
-        {
-            string result = this.Builder.ToString(startIndex, length);
             this.Free();
 
             return result;
@@ -79,11 +66,6 @@ namespace System.Reflection.Internal
             var builder = s_poolInstance.Allocate();
             Debug.Assert(builder.Builder.Length == 0);
             return builder;
-        }
-
-        public static implicit operator StringBuilder(PooledStringBuilder obj)
-        {
-            return obj.Builder;
         }
     }
 }

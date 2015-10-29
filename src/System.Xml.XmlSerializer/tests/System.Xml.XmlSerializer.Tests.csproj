@@ -14,12 +14,8 @@
   <ItemGroup>
     <Compile Include="..\..\System.Runtime.Serialization.Xml\tests\Utils.cs" />
     <Compile Include="..\..\System.Runtime.Serialization.Xml\tests\SerializationTypes.cs" />
+    <Compile Include="XmlSerializerTests.Internal.cs" />
     <Compile Include="XmlSerializerTests.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="$(CommonTestPath)\System\Console.cs">
-      <Link>Common\System\Console.cs</Link>
-    </Compile>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\System.Private.DataContractSerialization\src\System.Private.DataContractSerialization.csproj">

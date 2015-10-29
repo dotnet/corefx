@@ -17,10 +17,8 @@ using System.Security.Authentication;
 
 namespace System.Net.Security
 {
-    //
     // SecureChannel - a wrapper on SSPI based functionality. 
     // Provides an additional abstraction layer over SSPI for SslStream.
-    //
     internal class SecureChannel
     {
         // When reading a frame from the wire first read this many bytes for the header.
@@ -59,11 +57,11 @@ namespace System.Net.Security
         {
             GlobalLog.Enter("SecureChannel#" + Logging.HashString(this) + "::.ctor", "hostname:" + hostname + " #clientCertificates=" + ((clientCertificates == null) ? "0" : clientCertificates.Count.ToString(NumberFormatInfo.InvariantInfo)));
             if (Logging.On)
-            { 
+            {
                 Logging.PrintInfo(Logging.Web, this, ".ctor", "hostname=" + hostname + ", #clientCertificates=" + ((clientCertificates == null) ? "0" : clientCertificates.Count.ToString(NumberFormatInfo.InvariantInfo)) + ", encryptionPolicy=" + encryptionPolicy);
             }
-          
-            SSPIWrapper.VerifyPackageInfo(GlobalSSPI.SSPISecureChannel);
+
+            SslStreamPal.VerifyPackageInfo();
 
             _destination = hostname;
 
@@ -116,7 +114,7 @@ namespace System.Net.Security
             {
                 return _isRemoteCertificateAvailable;
             }
-        }     
+        }
 
         internal ChannelBinding GetChannelBinding(ChannelBindingKind kind)
         {
@@ -125,7 +123,7 @@ namespace System.Net.Security
             ChannelBinding result = null;
             if (_securityContext != null)
             {
-                result = SSPIWrapper.QueryContextChannelBinding(GlobalSSPI.SSPISecureChannel, _securityContext, kind);
+                result = SslStreamPal.QueryContextChannelBinding(_securityContext, kind);
             }
 
             GlobalLog.Leave("SecureChannel#" + Logging.HashString(this) + "::GetChannelBindingToken", Logging.HashString(result));
@@ -261,7 +259,7 @@ namespace System.Net.Security
 
                 // ELSE Try the MY user and machine stores for private key check.
                 // For server side mode MY machine store takes priority.
-                X509Store store = CertWrapper.EnsureStoreOpened(_serverMode);
+                X509Store store = CertificateValidationPal.EnsureStoreOpened(_serverMode);
                 if (store != null)
                 {
                     collectionEx = store.Certificates.Find(X509FindType.FindByThumbprint, certHash, false);
@@ -276,7 +274,7 @@ namespace System.Net.Security
                     }
                 }
 
-                store = CertWrapper.EnsureStoreOpened(!_serverMode);
+                store = CertificateValidationPal.EnsureStoreOpened(!_serverMode);
                 if (store != null)
                 {
                     collectionEx = store.Certificates.Find(X509FindType.FindByThumbprint, certHash, false);
@@ -336,7 +334,7 @@ namespace System.Net.Security
 
             if (IsValidContext)
             {
-                issuers = CertWrapper.GetRequestCertificateAuthorities(_securityContext);
+                issuers = CertificateValidationPal.GetRequestCertificateAuthorities(_securityContext);
             }
             return issuers;
         }
@@ -399,7 +397,7 @@ namespace System.Net.Security
                 try
                 {
                     X509Certificate2Collection dummyCollection;
-                    remoteCert = CertWrapper.GetRemoteCertificate(_securityContext, out dummyCollection);
+                    remoteCert = CertificateValidationPal.GetRemoteCertificate(_securityContext, out dummyCollection);
                     clientCertificate = _certSelectionDelegate(_hostName, ClientCertificates, remoteCert, issuers);
                 }
                 finally
@@ -630,7 +628,7 @@ namespace System.Net.Security
                 }
                 else
                 {
-                     _credentialsHandle = SSPIWrapper.AcquireCredentialsHandle(GlobalSSPI.SSPISecureChannel, selectedCert, _sslProtocols, _encryptionPolicy, _serverMode);                    
+                    _credentialsHandle = SslStreamPal.AcquireCredentialsHandle(selectedCert, _sslProtocols, _encryptionPolicy, _serverMode);
 
                     thumbPrint = guessedThumbPrint; // Delay until here in case something above threw.
                     _selectedClientCertificate = clientCertificate;
@@ -705,7 +703,7 @@ namespace System.Net.Security
                 }
                 else
                 {
-                    _credentialsHandle = SSPIWrapper.AcquireCredentialsHandle(GlobalSSPI.SSPISecureChannel, selectedCert, _sslProtocols, _encryptionPolicy, _serverMode);
+                    _credentialsHandle = SslStreamPal.AcquireCredentialsHandle(selectedCert, _sslProtocols, _encryptionPolicy, _serverMode);
                     thumbPrint = guessedThumbPrint;
                     _serverCertificate = localCertificate;
                 }
@@ -714,25 +712,25 @@ namespace System.Net.Security
             {
                 // An extra cert could have been created, dispose it now.
                 if ((object)localCertificate != (object)selectedCert)
-                { 
+                {
                     selectedCert.Dispose();
                 }
             }
 
             GlobalLog.Leave("SecureChannel#" + Logging.HashString(this) + "::AcquireServerCredentials, cachedCreds = " + cachedCred.ToString(), Logging.ObjectToString(_credentialsHandle));
             return cachedCred;
-        }     
+        }
 
         //
         internal ProtocolToken NextMessage(byte[] incoming, int offset, int count)
         {
             GlobalLog.Enter("SecureChannel#" + Logging.HashString(this) + "::NextMessage");
             byte[] nextmsg = null;
-            SecurityStatus errorCode = GenerateToken(incoming, offset, count, ref nextmsg);
+            SecurityStatusPal errorCode = GenerateToken(incoming, offset, count, ref nextmsg);
 
-            if (!_serverMode && errorCode == SecurityStatus.CredentialsNeeded)
+            if (!_serverMode && errorCode == SecurityStatusPal.CredentialsNeeded)
             {
-                GlobalLog.Print("SecureChannel#" + Logging.HashString(this) + "::NextMessage() returned SecurityStatus.CredentialsNeeded");
+                GlobalLog.Print("SecureChannel#" + Logging.HashString(this) + "::NextMessage() returned SecurityStatusPal.CredentialsNeeded");
                 SetRefreshCredentialNeeded();
                 errorCode = GenerateToken(incoming, offset, count, ref nextmsg);
             }
@@ -757,7 +755,7 @@ namespace System.Net.Security
             Return:
                 errorCode - an SSPI error code
         --*/
-        private SecurityStatus GenerateToken(byte[] input, int offset, int count, ref byte[] output)
+        private SecurityStatusPal GenerateToken(byte[] input, int offset, int count, ref byte[] output)
         {
 #if TRACE_VERBOSE
             GlobalLog.Enter("SecureChannel#" + Logging.HashString(this) + "::GenerateToken, _refreshCredentialNeeded = " + _refreshCredentialNeeded);
@@ -790,7 +788,7 @@ namespace System.Net.Security
 
             SecurityBuffer outgoingSecurity = new SecurityBuffer(null, SecurityBufferType.Token);
 
-            SecurityStatus errorCode = 0;
+            SecurityStatusPal errorCode = 0;
 
             bool cachedCreds = false;
             byte[] thumbPrint = null;
@@ -813,38 +811,32 @@ namespace System.Net.Security
 
                     if (_serverMode)
                     {
-                        errorCode = SSPIWrapper.AcceptSecurityContext(
-                                      GlobalSSPI.SSPISecureChannel,
+                        errorCode = SslStreamPal.AcceptSecurityContext(
                                       ref _credentialsHandle,
                                       ref _securityContext,
                                       incomingSecurity,
                                       outgoingSecurity,
-                                      _remoteCertRequired
-                                      );
+                                      _remoteCertRequired);
                     }
                     else
                     {
                         if (incomingSecurity == null)
                         {
-                            errorCode = SSPIWrapper.InitializeSecurityContext(
-                                           GlobalSSPI.SSPISecureChannel,
+                            errorCode = SslStreamPal.InitializeSecurityContext(
                                            ref _credentialsHandle,
                                            ref _securityContext,
                                            _destination,
                                            incomingSecurity,
-                                           outgoingSecurity
-                                           );
+                                           outgoingSecurity);
                         }
                         else
                         {
-                            errorCode = SSPIWrapper.InitializeSecurityContext(
-                                           GlobalSSPI.SSPISecureChannel,
+                            errorCode = SslStreamPal.InitializeSecurityContext(
                                            _credentialsHandle,
                                            ref _securityContext,
                                            _destination,
                                            incomingSecurityBuffers,
-                                           outgoingSecurity
-                                           );
+                                           outgoingSecurity);
                         }
                     }
                 } while (cachedCreds && _credentialsHandle == null);
@@ -880,7 +872,7 @@ namespace System.Net.Security
 #if TRACE_VERBOSE
             GlobalLog.Leave("SecureChannel#" + Logging.HashString(this) + "::GenerateToken()", Interop.MapSecurityStatus((uint)errorCode));
 #endif
-            return (SecurityStatus)errorCode;
+            return (SecurityStatusPal)errorCode;
         }
 
         /*++
@@ -895,8 +887,7 @@ namespace System.Net.Security
             GlobalLog.Enter("SecureChannel#" + Logging.HashString(this) + "::ProcessHandshakeSuccess");
 
             StreamSizes streamSizes;
-
-            SSPIWrapper.QueryContextStreamSizes(GlobalSSPI.SSPISecureChannel, _securityContext, out streamSizes);
+            SslStreamPal.QueryContextStreamSizes(_securityContext, out streamSizes);
 
             if (streamSizes != null)
             {
@@ -917,7 +908,7 @@ namespace System.Net.Security
                 }
             }
 
-            SSPIWrapper.QueryContextConnectionInfo(GlobalSSPI.SSPISecureChannel, _securityContext, out _connectionInfo);
+            SslStreamPal.QueryContextConnectionInfo(_securityContext, out _connectionInfo);
             GlobalLog.Leave("SecureChannel#" + Logging.HashString(this) + "::ProcessHandshakeSuccess");
         }
 
@@ -933,7 +924,7 @@ namespace System.Net.Security
                 size   -
                 output - Encrypted bytes
         --*/
-        internal SecurityStatus Encrypt(byte[] buffer, int offset, int size, ref byte[] output, out int resultSize)
+        internal SecurityStatusPal Encrypt(byte[] buffer, int offset, int size, ref byte[] output, out int resultSize)
         {
             GlobalLog.Enter("SecureChannel#" + Logging.HashString(this) + "::Encrypt");
             GlobalLog.Print("SecureChannel#" + Logging.HashString(this) + "::Encrypt() - offset: " + offset.ToString() + " size: " + size.ToString() + " buffersize: " + buffer.Length.ToString());
@@ -947,6 +938,7 @@ namespace System.Net.Security
                 {
                     throw new ArgumentOutOfRangeException("offset");
                 }
+
                 if (size < 0 || size > (buffer == null ? 0 : buffer.Length - offset))
                 {
                     throw new ArgumentOutOfRangeException("size");
@@ -963,6 +955,7 @@ namespace System.Net.Security
                 {
                     writeBuffer = new byte[bufferSizeNeeded];
                 }
+
                 Buffer.BlockCopy(buffer, offset, writeBuffer, _headerSize, size);
             }
             catch (Exception e)
@@ -971,25 +964,26 @@ namespace System.Net.Security
                 {
                     GlobalLog.Assert(false, "SecureChannel#" + Logging.HashString(this) + "::Encrypt", "Arguments out of range.");
                 }
+
                 throw;
             }
 
-            SecurityStatus secStatus = SSPIWrapper.EncryptMessage(GlobalSSPI.SSPISecureChannel, _securityContext, writeBuffer, size, _headerSize, _trailerSize, out resultSize);
+            SecurityStatusPal secStatus = SslStreamPal.EncryptMessage(_securityContext, writeBuffer, size, _headerSize, _trailerSize, out resultSize);
 
-            if (secStatus != 0)
+            if (secStatus != SecurityStatusPal.OK)
             {
-                GlobalLog.Leave("SecureChannel#" + Logging.HashString(this) + "::Encrypt ERROR", secStatus.ToString("x"));
+                GlobalLog.Leave("SecureChannel#" + Logging.HashString(this) + "::Encrypt ERROR", secStatus.ToString());
             }
             else
             {
-                output = writeBuffer;                
-                GlobalLog.Leave("SecureChannel#" + Logging.HashString(this) + "::Encrypt OK", "data size:" + resultSize.ToString());               
+                output = writeBuffer;
+                GlobalLog.Leave("SecureChannel#" + Logging.HashString(this) + "::Encrypt OK", "data size:" + resultSize.ToString());
             }
 
             return secStatus;
         }
 
-        internal SecurityStatus Decrypt(byte[] payload, ref int offset, ref int count)
+        internal SecurityStatusPal Decrypt(byte[] payload, ref int offset, ref int count)
         {
             GlobalLog.Print("SecureChannel#" + Logging.HashString(this) + "::Decrypt() - offset: " + offset.ToString() + " size: " + count.ToString() + " buffersize: " + payload.Length.ToString());
 
@@ -1005,7 +999,7 @@ namespace System.Net.Security
                 throw new ArgumentOutOfRangeException("count");
             }
 
-            SecurityStatus secStatus = SSPIWrapper.DecryptMessage(GlobalSSPI.SSPISecureChannel, _securityContext, payload, ref offset, ref count);
+            SecurityStatusPal secStatus = SslStreamPal.DecryptMessage(_securityContext, payload, ref offset, ref count);
 
             return secStatus;
         }
@@ -1034,7 +1028,7 @@ namespace System.Net.Security
             try
             {
                 X509Certificate2Collection remoteCertificateStore;
-                remoteCertificateEx = CertWrapper.GetRemoteCertificate(_securityContext, out remoteCertificateStore);
+                remoteCertificateEx = CertificateValidationPal.GetRemoteCertificate(_securityContext, out remoteCertificateStore);
                 _isRemoteCertificateAvailable = remoteCertificateEx != null;
 
                 if (remoteCertificateEx == null)
@@ -1051,12 +1045,8 @@ namespace System.Net.Security
                     {
                         chain.ChainPolicy.ExtraStore.AddRange(remoteCertificateStore);
                     }
-
-                    // Don't call chain.Build here in the common code, because the Windows version
-                    // is potentially going to check for GetLastWin32Error, and that call needs to be
-                    // guaranteed to be right after the call to chain.Build.
-
-                    sslPolicyErrors |= CertWrapper.VerifyCertificateProperties(
+                    
+                    sslPolicyErrors |= CertificateValidationPal.VerifyCertificateProperties(
                         chain,
                         remoteCertificateEx,
                         _checkCertName,
@@ -1140,17 +1130,13 @@ namespace System.Net.Security
             }
             GlobalLog.Leave("SecureChannel#" + Logging.HashString(this) + "::VerifyRemoteCertificate", success.ToString());
             return success;
-        }     
+        }
     }
 
-    //
-    // ProtocolToken - used to process and handle the return codes
-    //   from the SSPI wrapper
-    //
-
+    // ProtocolToken - used to process and handle the return codes from the SSPI wrapper
     internal class ProtocolToken
     {
-        internal SecurityStatus Status;
+        internal SecurityStatusPal Status;
         internal byte[] Payload;
         internal int Size;
 
@@ -1158,7 +1144,7 @@ namespace System.Net.Security
         {
             get
             {
-                return ((Status != SecurityStatus.OK) && (Status != SecurityStatus.ContinueNeeded));
+                return ((Status != SecurityStatusPal.OK) && (Status != SecurityStatusPal.ContinueNeeded));
             }
         }
 
@@ -1166,7 +1152,7 @@ namespace System.Net.Security
         {
             get
             {
-                return (Status == SecurityStatus.OK);
+                return (Status == SecurityStatusPal.OK);
             }
         }
 
@@ -1174,7 +1160,7 @@ namespace System.Net.Security
         {
             get
             {
-                return (Status == SecurityStatus.Renegotiate);
+                return (Status == SecurityStatusPal.Renegotiate);
             }
         }
 
@@ -1182,11 +1168,11 @@ namespace System.Net.Security
         {
             get
             {
-                return (Status == SecurityStatus.ContextExpired);
+                return (Status == SecurityStatusPal.ContextExpired);
             }
         }
 
-        internal ProtocolToken(byte[] data, SecurityStatus errorCode)
+        internal ProtocolToken(byte[] data, SecurityStatusPal errorCode)
         {
             Status = errorCode;
             Payload = data;
@@ -1197,7 +1183,7 @@ namespace System.Net.Security
         {
             // If it's not done, then there's got to be an error, even if it's
             // a Handshake message up, and we only have a Warning message.
-            return this.Done ? null : SSPIWrapper.GetException(GlobalSSPI.SSPISecureChannel, Status);
+            return this.Done ? null : SslStreamPal.GetException(Status);
         }
 
 #if TRACE_VERBOSE

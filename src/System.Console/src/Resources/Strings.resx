@@ -117,8 +117,17 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="ArgumentOutOfRange_ConsoleWindowBufferSize" xml:space="preserve">
+    <value>The value must be less than the console's current maximum window size of {0} in that dimension. Note that this value depends on screen resolution and the console font.</value>
+  </data>
+  <data name="ArgumentOutOfRange_ConsoleWindowSize_Size" xml:space="preserve">
+    <value>The new console window size would force the console buffer size to be too large.</value>
+  </data>
   <data name="ArgumentOutOfRange_NeedNonNegNum" xml:space="preserve">
     <value>Non-negative number required.</value>
+  </data>
+  <data name="ArgumentOutOfRange_NeedPosNum" xml:space="preserve">
+    <value>Positive number required.</value>
   </data>
   <data name="ArgumentNull_Buffer" xml:space="preserve">
     <value>Buffer cannot be null.</value>
@@ -195,10 +204,16 @@
   <data name="InvalidOperation_PrintF" xml:space="preserve">
     <value>The printf operation failed.</value>
   </data>
+  <data name="InvalidOperation_ConsoleReadKeyOnFile" xml:space="preserve">
+    <value>Cannot read keys when either application does not have a console or when console input has been redirected. Try Console.Read.</value>
+  </data>
   <data name="PlatformNotSupported_GettingColor" xml:space="preserve">
     <value>This platform does not support getting the current color.</value>
   </data>
   <data name="PersistedFiles_NoHomeDirectory" xml:space="preserve">
     <value>The home directory of the current user could not be determined.</value>
+  </data>
+  <data name="ArgumentOutOfRange_ConsoleKey" xml:space="preserve">
+    <value>Console key values must be between 0 and 255 inclusive.</value>
   </data>
 </root>

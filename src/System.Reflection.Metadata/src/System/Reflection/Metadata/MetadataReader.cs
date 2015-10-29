@@ -418,7 +418,7 @@ namespace System.Reflection.Metadata
 
         // debug tables
         internal DocumentTableReader DocumentTable;
-        internal MethodBodyTableReader MethodBodyTable;
+        internal MethodDebugInformationTableReader MethodDebugInformationTable;
         internal LocalScopeTableReader LocalScopeTable;
         internal LocalVariableTableReader LocalVariableTable;
         internal LocalConstantTableReader LocalConstantTable;
@@ -477,6 +477,13 @@ namespace System.Reflection.Metadata
             }
 
             metadataTableRowCounts = ReadMetadataTableRowCounts(ref reader, presentTables);
+
+            if ((heapSizes & HeapSizes.ExtraData) == HeapSizes.ExtraData)
+            {
+                // Skip "extra data" used by some obfuscators. Although it is not mentioned in the CLI spec,
+                // it is honored by the native metadata reader.
+                reader.ReadUInt32();
+            }
         }
 
         private int[] ReadMetadataTableRowCounts(ref BlobReader memReader, ulong presentTableMask)
@@ -511,7 +518,10 @@ namespace System.Reflection.Metadata
         private void ReadStandalonePortablePdbStream(MemoryBlock block, out DebugMetadataHeader debugMetadataHeader, out int[] externalTableRowCounts)
         {
             var reader = new BlobReader(block);
-            
+
+            const int PdbIdSize = 20;
+            byte[] pdbId = reader.ReadBytes(PdbIdSize);
+
             // ECMA-335 15.4.1.2:
             // The entry point to an application shall be static.
             // This entry point method can be a global method or it can appear inside a type. 
@@ -537,6 +547,7 @@ namespace System.Reflection.Metadata
             externalTableRowCounts = ReadMetadataTableRowCounts(ref reader, externalTableMask);
 
             debugMetadataHeader = new DebugMetadataHeader(
+                ImmutableByteArrayInterop.DangerousCreateFromUnderlyingArray(ref pdbId),
                 MethodDefinitionHandle.FromRowId((int)(entryPointToken & TokenTypeIds.RIDMask)));
         }
 
@@ -737,10 +748,10 @@ namespace System.Reflection.Metadata
             this.DocumentTable = new DocumentTableReader(rowCounts[(int)TableIndex.Document], guidHeapRefSize, blobHeapRefSize, metadataTablesMemoryBlock, totalRequiredSize);
             totalRequiredSize += this.DocumentTable.Block.Length;
 
-            this.MethodBodyTable = new MethodBodyTableReader(rowCounts[(int)TableIndex.MethodBody], blobHeapRefSize, metadataTablesMemoryBlock, totalRequiredSize);
-            totalRequiredSize += this.MethodBodyTable.Block.Length;
+            this.MethodDebugInformationTable = new MethodDebugInformationTableReader(rowCounts[(int)TableIndex.MethodDebugInformation], GetReferenceSize(rowCounts, TableIndex.Document), blobHeapRefSize, metadataTablesMemoryBlock, totalRequiredSize);
+            totalRequiredSize += this.MethodDebugInformationTable.Block.Length;
 
-            this.LocalScopeTable = new LocalScopeTableReader(rowCounts[(int)TableIndex.LocalScope], methodRefSizeCombined, GetReferenceSize(rowCounts, TableIndex.ImportScope), GetReferenceSize(rowCounts, TableIndex.LocalVariable), GetReferenceSize(rowCounts, TableIndex.LocalConstant), metadataTablesMemoryBlock, totalRequiredSize);
+            this.LocalScopeTable = new LocalScopeTableReader(rowCounts[(int)TableIndex.LocalScope], IsDeclaredSorted(TableMask.LocalScope), methodRefSizeCombined, GetReferenceSize(rowCounts, TableIndex.ImportScope), GetReferenceSize(rowCounts, TableIndex.LocalVariable), GetReferenceSize(rowCounts, TableIndex.LocalConstant), metadataTablesMemoryBlock, totalRequiredSize);
             totalRequiredSize += this.LocalScopeTable.Block.Length;
 
             this.LocalVariableTable = new LocalVariableTableReader(rowCounts[(int)TableIndex.LocalVariable], stringHeapRefSize, metadataTablesMemoryBlock, totalRequiredSize);
@@ -752,7 +763,7 @@ namespace System.Reflection.Metadata
             this.ImportScopeTable = new ImportScopeTableReader(rowCounts[(int)TableIndex.ImportScope], GetReferenceSize(rowCounts, TableIndex.ImportScope), blobHeapRefSize, metadataTablesMemoryBlock, totalRequiredSize);
             totalRequiredSize += this.ImportScopeTable.Block.Length;
 
-            this.StateMachineMethodTable = new StateMachineMethodTableReader(rowCounts[(int)TableIndex.StateMachineMethod], methodRefSizeCombined, metadataTablesMemoryBlock, totalRequiredSize);
+            this.StateMachineMethodTable = new StateMachineMethodTableReader(rowCounts[(int)TableIndex.StateMachineMethod], IsDeclaredSorted(TableMask.StateMachineMethod), methodRefSizeCombined, metadataTablesMemoryBlock, totalRequiredSize);
             totalRequiredSize += this.StateMachineMethodTable.Block.Length;
 
             this.CustomDebugInformationTable = new CustomDebugInformationTableReader(rowCounts[(int)TableIndex.CustomDebugInformation], IsDeclaredSorted(TableMask.CustomDebugInformation), hasCustomDebugInformationRefSizeCombined, guidHeapRefSize, blobHeapRefSize, metadataTablesMemoryBlock, totalRequiredSize);
@@ -985,19 +996,6 @@ namespace System.Reflection.Metadata
             }
         }
 
-        // TODO: move throw helpers to common place.
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        private static void ThrowValueArgumentNull()
-        {
-            throw new ArgumentNullException("value");
-        }
-
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        internal static void ThrowTableNotSorted(TableIndex tableIndex)
-        {
-            throw new BadImageFormatException(string.Format(SR.MetadataTableNotSorted, (int)tableIndex));
-        }
-
         #endregion
 
         #region Public APIs
@@ -1105,9 +1103,9 @@ namespace System.Reflection.Metadata
             get { return new DocumentHandleCollection(this); }
         }
 
-        public MethodBodyHandleCollection MethodBodies
+        public MethodDebugInformationHandleCollection MethodDebugInformation
         {
-            get { return new MethodBodyHandleCollection(this); }
+            get { return new MethodDebugInformationHandleCollection(this); }
         }
 
         public LocalScopeHandleCollection LocalScopes
@@ -1433,16 +1431,6 @@ namespace System.Reflection.Metadata
             return TypeDefTable.FindTypeContainingField(fieldRowId, FieldTable.NumberOfRows);
         }
 
-        public SequencePointBlobReader GetSequencePointsReader(BlobHandle handle)
-        {
-            return new SequencePointBlobReader(BlobStream.GetMemoryBlock(handle));
-        }
-
-        public ImportsBlobReader GetImportsReader(BlobHandle handle)
-        {
-            return new ImportsBlobReader(BlobStream.GetMemoryBlock(handle));
-        }
-
         private static readonly ObjectPool<StringBuilder> s_stringBuilderPool = new ObjectPool<StringBuilder>(() => new StringBuilder());
 
         public string GetString(DocumentNameBlobHandle handle)
@@ -1455,14 +1443,14 @@ namespace System.Reflection.Metadata
             return new Document(this, handle);
         }
 
-        public MethodBody GetMethodBody(MethodBodyHandle handle)
+        public MethodDebugInformation GetMethodDebugInformation(MethodDebugInformationHandle handle)
         {
-            return new MethodBody(this, handle);
+            return new MethodDebugInformation(this, handle);
         }
 
-        public MethodBody GetMethodBody(MethodDefinitionHandle handle)
+        public MethodDebugInformation GetMethodDebugInformation(MethodDefinitionHandle handle)
         {
-            return new MethodBody(this, MethodBodyHandle.FromRowId(handle.RowId));
+            return new MethodDebugInformation(this, MethodDebugInformationHandle.FromRowId(handle.RowId));
         }
 
         public LocalScope GetLocalScope(LocalScopeHandle handle)
@@ -1501,7 +1489,7 @@ namespace System.Reflection.Metadata
             return new LocalScopeHandleCollection(this, handle.RowId);
         }
 
-        public LocalScopeHandleCollection GetLocalScopes(MethodBodyHandle handle)
+        public LocalScopeHandleCollection GetLocalScopes(MethodDebugInformationHandle handle)
         {
             return new LocalScopeHandleCollection(this, handle.RowId);
         }

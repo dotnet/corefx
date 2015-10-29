@@ -6,7 +6,6 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
-using Validation;
 
 namespace System.Collections.Immutable
 {
@@ -210,6 +209,7 @@ namespace System.Collections.Immutable
         /// </summary>
         /// <param name="index">The 0-based index of the element in the set to return.</param>
         /// <returns>The element at the given position.</returns>
+        /// <exception cref="IndexOutOfRangeException">Thrown from getter when <paramref name="index"/> is negative or not less than <see cref="Count"/>.</exception>
         public T this[int index]
         {
             get
@@ -344,7 +344,7 @@ namespace System.Collections.Immutable
         [Pure]
         public ImmutableList<T> RemoveRange(int index, int count)
         {
-            Requires.Range(index >= 0 && (index < this.Count || (index == this.Count && count == 0)), "index");
+            Requires.Range(index >= 0 && index <= this.Count, "index");
             Requires.Range(count >= 0 && index + count <= this.Count, "count");
             Contract.Ensures(Contract.Result<ImmutableList<T>>() != null);
 
@@ -377,6 +377,7 @@ namespace System.Collections.Immutable
         /// <param name="items">The items to remove if matches are found in this list.</param>
         /// <param name="equalityComparer">
         /// The equality comparer to use in the search.
+        /// If <c>null</c>, <see cref="EqualityComparer{T}.Default"/> is used.
         /// </param>
         /// <returns>
         /// A new list with the elements removed.
@@ -385,7 +386,6 @@ namespace System.Collections.Immutable
         public ImmutableList<T> RemoveRange(IEnumerable<T> items, IEqualityComparer<T> equalityComparer)
         {
             Requires.NotNull(items, "items");
-            Requires.NotNull(equalityComparer, "equalityComparer");
             Contract.Ensures(Contract.Result<ImmutableList<T>>() != null);
             Contract.Ensures(Contract.Result<ImmutableList<T>>().Count <= this.Count);
 
@@ -467,7 +467,6 @@ namespace System.Collections.Immutable
         [Pure]
         public ImmutableList<T> Replace(T oldValue, T newValue, IEqualityComparer<T> equalityComparer)
         {
-            Requires.NotNull(equalityComparer, "equalityComparer");
             Contract.Ensures(Contract.Result<ImmutableList<T>>() != null);
             Contract.Ensures(Contract.Result<ImmutableList<T>>().Count == this.Count);
 
@@ -522,6 +521,7 @@ namespace System.Collections.Immutable
         /// The <see cref="Comparison{T}"/> to use when comparing elements.
         /// </param>
         /// <returns>The sorted list.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="comparison"/> is null.</exception>
         [Pure]
         public ImmutableList<T> Sort(Comparison<T> comparison)
         {
@@ -542,7 +542,6 @@ namespace System.Collections.Immutable
         [Pure]
         public ImmutableList<T> Sort(IComparer<T> comparer)
         {
-            Requires.NotNull(comparer, "comparer");
             Contract.Ensures(Contract.Result<ImmutableList<T>>() != null);
             return this.Wrap(_root.Sort(comparer));
         }
@@ -568,7 +567,6 @@ namespace System.Collections.Immutable
             Requires.Range(index >= 0, "index");
             Requires.Range(count >= 0, "count");
             Requires.Range(index + count <= this.Count, "count");
-            Requires.NotNull(comparer, "comparer");
             Contract.Ensures(Contract.Result<ImmutableList<T>>() != null);
 
             return this.Wrap(_root.Sort(index, count, comparer));
@@ -1097,10 +1095,10 @@ namespace System.Collections.Immutable
         /// <param name="newValue">The element to replace the old element with.</param>
         /// <param name="equalityComparer">
         /// The equality comparer to use in the search.
+        /// If <c>null</c>, <see cref="EqualityComparer{T}.Default"/> is used.
         /// </param>
         /// <returns>The new list.</returns>
         /// <exception cref="ArgumentException">Thrown when the old value does not exist in the list.</exception>
-        [ExcludeFromCodeCoverage]
         IImmutableList<T> IImmutableList<T>.Replace(T oldValue, T newValue, IEqualityComparer<T> equalityComparer)
         {
             return this.Replace(oldValue, newValue, equalityComparer);
@@ -1145,7 +1143,7 @@ namespace System.Collections.Immutable
         /// </summary>
         /// <param name="index">The index.</param>
         /// <param name="item">The item.</param>
-        /// <exception cref="System.NotSupportedException"></exception>
+        /// <exception cref="NotSupportedException">Always thrown.</exception>
         void IList<T>.Insert(int index, T item)
         {
             throw new NotSupportedException();
@@ -1155,7 +1153,7 @@ namespace System.Collections.Immutable
         /// Removes the value at the specified index.
         /// </summary>
         /// <param name="index">The index.</param>
-        /// <exception cref="System.NotSupportedException"></exception>
+        /// <exception cref="NotSupportedException">Always thrown.</exception>
         void IList<T>.RemoveAt(int index)
         {
             throw new NotSupportedException();
@@ -1164,6 +1162,8 @@ namespace System.Collections.Immutable
         /// <summary>
         /// Gets or sets the value at the specified index.
         /// </summary>
+        /// <exception cref="IndexOutOfRangeException">Thrown from getter when <paramref name="index"/> is negative or not less than <see cref="Count"/>.</exception>
+        /// <exception cref="NotSupportedException">Always thrown from the setter.</exception>
         T IList<T>.this[int index]
         {
             get { return this[index]; }
@@ -1178,7 +1178,7 @@ namespace System.Collections.Immutable
         /// Adds the specified item.
         /// </summary>
         /// <param name="item">The item.</param>
-        /// <exception cref="System.NotImplementedException"></exception>
+        /// <exception cref="NotSupportedException">Always thrown.</exception>
         void ICollection<T>.Add(T item)
         {
             throw new NotSupportedException();
@@ -1187,7 +1187,7 @@ namespace System.Collections.Immutable
         /// <summary>
         /// Clears this instance.
         /// </summary>
-        /// <exception cref="System.NotSupportedException"></exception>
+        /// <exception cref="NotSupportedException">Always thrown.</exception>
         void ICollection<T>.Clear()
         {
             throw new NotSupportedException();
@@ -1207,8 +1207,8 @@ namespace System.Collections.Immutable
         /// Removes the specified item.
         /// </summary>
         /// <param name="item">The item.</param>
-        /// <returns></returns>
-        /// <exception cref="System.NotSupportedException"></exception>
+        /// <returns>Nothing. An exception is always thrown.</returns>
+        /// <exception cref="NotSupportedException">Always thrown.</exception>
         bool ICollection<T>.Remove(T item)
         {
             throw new NotSupportedException();
@@ -1235,9 +1235,9 @@ namespace System.Collections.Immutable
         /// </summary>
         /// <param name="value">The object to add to the <see cref="IList"/>.</param>
         /// <returns>
-        /// The position into which the new element was inserted, or -1 to indicate that the item was not inserted into the collection,
+        /// Nothing. An exception is always thrown.
         /// </returns>
-        /// <exception cref="System.NotImplementedException"></exception>
+        /// <exception cref="NotSupportedException">Always thrown.</exception>
         int IList.Add(object value)
         {
             throw new NotSupportedException();
@@ -1247,7 +1247,7 @@ namespace System.Collections.Immutable
         /// Removes the <see cref="IList"/> item at the specified index.
         /// </summary>
         /// <param name="index">The zero-based index of the item to remove.</param>
-        /// <exception cref="System.NotSupportedException"></exception>
+        /// <exception cref="NotSupportedException">Always thrown.</exception>
         void IList.RemoveAt(int index)
         {
             throw new NotSupportedException();
@@ -1256,7 +1256,7 @@ namespace System.Collections.Immutable
         /// <summary>
         /// Clears this instance.
         /// </summary>
-        /// <exception cref="System.NotImplementedException"></exception>
+        /// <exception cref="NotSupportedException">Always thrown.</exception>
         void IList.Clear()
         {
             throw new NotSupportedException();
@@ -1269,10 +1269,14 @@ namespace System.Collections.Immutable
         /// <returns>
         /// true if the <see cref="object"/> is found in the <see cref="IList"/>; otherwise, false.
         /// </returns>
-        /// <exception cref="System.NotImplementedException"></exception>
         bool IList.Contains(object value)
         {
-            return this.Contains((T)value);
+            if (IsCompatibleObject(value))
+            {
+                return this.Contains((T)value);
+            }
+
+            return false;
         }
 
         /// <summary>
@@ -1282,10 +1286,14 @@ namespace System.Collections.Immutable
         /// <returns>
         /// The index of <paramref name="value"/> if found in the list; otherwise, -1.
         /// </returns>
-        /// <exception cref="System.NotImplementedException"></exception>
         int IList.IndexOf(object value)
         {
-            return this.IndexOf((T)value);
+            if (IsCompatibleObject(value))
+            {
+                return this.IndexOf((T)value);
+            }
+
+            return -1;
         }
 
         /// <summary>
@@ -1293,7 +1301,7 @@ namespace System.Collections.Immutable
         /// </summary>
         /// <param name="index">The zero-based index at which <paramref name="value"/> should be inserted.</param>
         /// <param name="value">The object to insert into the <see cref="IList"/>.</param>
-        /// <exception cref="System.NotImplementedException"></exception>
+        /// <exception cref="NotSupportedException">Always thrown.</exception>
         void IList.Insert(int index, object value)
         {
             throw new NotSupportedException();
@@ -1303,7 +1311,6 @@ namespace System.Collections.Immutable
         /// Gets a value indicating whether the <see cref="IList"/> has a fixed size.
         /// </summary>
         /// <returns>true if the <see cref="IList"/> has a fixed size; otherwise, false.</returns>
-        /// <exception cref="System.NotImplementedException"></exception>
         bool IList.IsFixedSize
         {
             get { return true; }
@@ -1314,7 +1321,6 @@ namespace System.Collections.Immutable
         /// </summary>
         /// <returns>true if the <see cref="ICollection{T}"/> is read-only; otherwise, false.
         ///   </returns>
-        /// <exception cref="System.NotImplementedException"></exception>
         bool IList.IsReadOnly
         {
             get { return true; }
@@ -1324,7 +1330,7 @@ namespace System.Collections.Immutable
         /// Removes the first occurrence of a specific object from the <see cref="IList"/>.
         /// </summary>
         /// <param name="value">The object to remove from the <see cref="IList"/>.</param>
-        /// <exception cref="System.NotImplementedException"></exception>
+        /// <exception cref="NotSupportedException">Always thrown.</exception>
         void IList.Remove(object value)
         {
             throw new NotSupportedException();
@@ -1337,8 +1343,9 @@ namespace System.Collections.Immutable
         /// The <see cref="System.Object"/>.
         /// </value>
         /// <param name="index">The index.</param>
-        /// <returns></returns>
-        /// <exception cref="System.NotImplementedException"></exception>
+        /// <returns>The value at the specified index.</returns>
+        /// <exception cref="IndexOutOfRangeException">Thrown from getter when <paramref name="index"/> is negative or not less than <see cref="Count"/>.</exception>
+        /// <exception cref="NotSupportedException">Always thrown from the setter.</exception>
         object IList.this[int index]
         {
             get { return this[index]; }
@@ -1412,6 +1419,21 @@ namespace System.Collections.Immutable
             }
 
             return false;
+        }
+
+        /// <summary>
+        /// Tests whether a value is one that might be found in this collection.
+        /// </summary>
+        /// <param name="value">The value to test.</param>
+        /// <returns><c>true</c> if this value might appear in the collection.</returns>
+        /// <devremarks>
+        /// This implementation comes from <see cref="List{T}"/>.
+        /// </devremarks>
+        private static bool IsCompatibleObject(object value)
+        {
+            // Non-null values are fine.  Only accept nulls if T is a class or Nullable<U>.
+            // Note that default(T) is not equal to null for value types except when T is Nullable<U>. 
+            return ((value is T) || (value == null && default(T) == null));
         }
 
         /// <summary>
@@ -1729,7 +1751,7 @@ namespace System.Collections.Immutable
 
                 if (_root == null || (_stack != null && !_stack.IsOwned(ref this)))
                 {
-                    Validation.Requires.FailObjectDisposed(this);
+                    Requires.FailObjectDisposed(this);
                 }
             }
 
@@ -2333,7 +2355,6 @@ namespace System.Collections.Immutable
             /// <returns>The sorted list.</returns>
             internal Node Sort(IComparer<T> comparer)
             {
-                Requires.NotNull(comparer, "comparer");
                 Contract.Ensures(Contract.Result<Node>() != null);
                 return this.Sort(0, this.Count, comparer);
             }
@@ -2358,7 +2379,6 @@ namespace System.Collections.Immutable
                 Requires.Range(index >= 0, "index");
                 Requires.Range(count >= 0, "count");
                 Requires.Argument(index + count <= this.Count);
-                Requires.NotNull(comparer, "comparer");
 
                 // PERF: Eventually this might be reimplemented in a way that does not require allocating an array.
                 var array = new T[this.Count];
@@ -2486,7 +2506,10 @@ namespace System.Collections.Immutable
             /// <param name="count">
             /// The number of elements in the section to search.
             /// </param>
-            /// <param name="equalityComparer">The equality comparer to use for testing the match of two elements.</param>
+            /// <param name="equalityComparer">
+            /// The equality comparer to use in the search.
+            /// If <c>null</c>, <see cref="EqualityComparer{T}.Default"/> is used.
+            /// </param>
             /// <returns>
             /// The zero-based index of the first occurrence of <paramref name="item"/> within the range of
             /// elements in the <see cref="ImmutableList{T}"/> that starts at <paramref name="index"/> and
@@ -2499,8 +2522,8 @@ namespace System.Collections.Immutable
                 Requires.Range(count >= 0, "count");
                 Requires.Range(count <= this.Count, "count");
                 Requires.Range(index + count <= this.Count, "count");
-                Requires.NotNull(equalityComparer, "equalityComparer");
 
+                equalityComparer = equalityComparer ?? EqualityComparer<T>.Default;
                 using (var enumerator = new Enumerator(this, startIndex: index, count: count))
                 {
                     while (enumerator.MoveNext())
@@ -2538,11 +2561,11 @@ namespace System.Collections.Immutable
             [Pure]
             internal int LastIndexOf(T item, int index, int count, IEqualityComparer<T> equalityComparer)
             {
-                Requires.NotNull(equalityComparer, "ValueComparer");
                 Requires.Range(index >= 0, "index");
                 Requires.Range(count >= 0 && count <= this.Count, "count");
                 Requires.Argument(index - count + 1 >= 0);
 
+                equalityComparer = equalityComparer ?? EqualityComparer<T>.Default;
                 using (var enumerator = new Enumerator(this, startIndex: index, count: count, reversed: true))
                 {
                     while (enumerator.MoveNext())

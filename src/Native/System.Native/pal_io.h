@@ -22,6 +22,17 @@ struct FileStatus
     int64_t BirthTime; // time the file was created
 };
 
+/*
+ * Window Size of the terminal
+*/
+struct WinSize
+{
+    uint16_t Row;
+    uint16_t Col;
+    uint16_t XPixel;
+    uint16_t YPixel;
+};
+
 /************
  * The values below in the header are fixed and correct for managed callers to use forever.
  * We must never change them. The implementation must either static_assert that they are equal
@@ -255,6 +266,26 @@ struct PollFD
     int32_t FD;      // The file descriptor to poll
     int16_t Events;  // The events to poll for
     int16_t REvents; // The events that occurred which triggered the poll
+};
+
+/**
+* Constants passed in the mask argument of INotifyAddWatch which identify inotify events.
+*/
+enum NotifyEvents : int32_t
+{
+    PAL_IN_ACCESS = 0x00000001,
+    PAL_IN_MODIFY = 0x00000002,
+    PAL_IN_ATTRIB = 0x00000004,
+    PAL_IN_MOVED_FROM = 0x00000040,
+    PAL_IN_MOVED_TO = 0x00000080,
+    PAL_IN_CREATE = 0x00000100,
+    PAL_IN_DELETE = 0x00000200,
+    PAL_IN_Q_OVERFLOW = 0x00004000,
+    PAL_IN_IGNORED = 0x00008000,
+    PAL_IN_ONLYDIR = 0x01000000,
+    PAL_IN_DONT_FOLLOW = 0x02000000,
+    PAL_IN_EXCL_UNLINK = 0x04000000,
+    PAL_IN_ISDIR = 0x40000000,
 };
 
 /**
@@ -610,3 +641,51 @@ extern "C" void Sync();
  * Returns the number of bytes written on success; otherwise, returns -1 and sets errno
  */
 extern "C" int32_t Write(int32_t fd, const void* buffer, int32_t bufferSize);
+
+/**
+ * Gets the windows size of the terminal
+ *
+ * Returns 0 on success; otherwise, returns errorNo.
+ */
+extern "C" int32_t GetWindowSize(WinSize* windowsSize);
+
+/**
+ * Gets whether the specified file descriptor is for a terminal.
+ *
+ * Returns 1 if the file descriptor is referring to a terminal;
+ * otherwise returns 0 and sets errno.
+ */
+extern "C" int32_t IsATty(int filedes);
+
+/**
+* Reads the number of bytes specified into the provided buffer from stdin.
+* in a non-echo and non-canonical mode.
+* Returns the number of bytes read on success; otherwise, -1 is returned an errno is set.
+*/
+extern "C" int32_t ReadStdinUnbuffered(void* buffer, int32_t bufferSize);
+
+/**
+* Initializes a new inotify instance and returns a file
+* descriptor associated with a new inotify event queue.
+*
+* Returns a new file descriptor on success.
+* On error, -1 is returned, and errno is set to indicate the error.
+*/
+extern "C" int32_t INotifyInit();
+
+/**
+* Adds a new watch, or modifies an existing watch,
+* for the file whose location is specified in pathname.
+*
+* Returns a nonnegative watch descriptor on success.
+* On error -1 is returned and errno is set appropriately.
+*/
+extern "C" int32_t INotifyAddWatch(int32_t fd, const char* pathName, uint32_t mask);
+
+/**
+* Removes the watch associated with the watch descriptor wd
+* from the inotify instance associated with the file descriptor fd.
+*
+* Returns 0 on success, or -1 if an error occurred (in which case, errno is set appropriately).
+*/
+extern "C" int32_t INotifyRemoveWatch(int32_t fd, int32_t wd);

@@ -36,9 +36,9 @@ namespace System.Linq.Expressions.Interpreter
 
         public abstract int Run(InterpretedFrame frame);
 
-        public virtual string InstructionName
+        public abstract string InstructionName
         {
-            get { return "<Unknown>"; }
+            get;
         }
 
         public override string ToString()
@@ -63,6 +63,33 @@ namespace System.Linq.Expressions.Interpreter
             {
                 o.GetType();
             }
+        }
+    }
+
+    internal class NullCheckInstruction : Instruction
+    {
+        public static readonly Instruction Instance = new NullCheckInstruction();
+
+        private NullCheckInstruction() { }
+        public override int ConsumedStack { get { return 1; } }
+        public override int ProducedStack { get { return 1; } }
+
+        public override string InstructionName
+        {
+            get
+            {
+                return "Unbox";
+            }
+        }
+
+        public override int Run(InterpretedFrame frame)
+        {
+            if (frame.Peek() == null)
+            {
+                throw new NullReferenceException();
+            }
+
+            return +1;
         }
     }
 

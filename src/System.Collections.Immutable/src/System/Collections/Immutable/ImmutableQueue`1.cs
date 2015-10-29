@@ -7,7 +7,6 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.Linq;
-using Validation;
 
 namespace System.Collections.Immutable
 {
@@ -127,7 +126,7 @@ namespace System.Collections.Immutable
         /// <summary>
         /// Gets the element at the front of the queue.
         /// </summary>
-        /// <exception cref="InvalidOperationException">Thrown when the stack is empty.</exception>
+        /// <exception cref="InvalidOperationException">Thrown when the queue is empty.</exception>
         [Pure]
         public T Peek()
         {
@@ -178,7 +177,7 @@ namespace System.Collections.Immutable
         /// Returns a queue that is missing the front element.
         /// </summary>
         /// <returns>A queue; never <c>null</c>.</returns>
-        /// <exception cref="InvalidOperationException">Thrown when the stack is empty.</exception>
+        /// <exception cref="InvalidOperationException">Thrown when the queue is empty.</exception>
         [Pure]
         public ImmutableQueue<T> Dequeue()
         {
@@ -207,7 +206,7 @@ namespace System.Collections.Immutable
         /// </summary>
         /// <param name="value">Receives the value from the head of the queue.</param>
         /// <returns>The new queue with the head element removed.</returns>
-        /// <exception cref="InvalidOperationException">Thrown when the stack is empty.</exception>
+        /// <exception cref="InvalidOperationException">Thrown when the queue is empty.</exception>
         [SuppressMessage("Microsoft.Design", "CA1021:AvoidOutParameters", MessageId = "0#")]
         [Pure]
         public ImmutableQueue<T> Dequeue(out T value)
@@ -220,7 +219,7 @@ namespace System.Collections.Immutable
         /// Returns a queue that is missing the front element.
         /// </summary>
         /// <returns>A queue; never <c>null</c>.</returns>
-        /// <exception cref="InvalidOperationException">Thrown when the stack is empty.</exception>
+        /// <exception cref="InvalidOperationException">Thrown when the queue is empty.</exception>
         [Pure]
         IImmutableQueue<T> IImmutableQueue<T>.Dequeue()
         {
@@ -478,7 +477,7 @@ namespace System.Collections.Immutable
             {
                 if (_disposed)
                 {
-                    Validation.Requires.FailObjectDisposed(this);
+                    Requires.FailObjectDisposed(this);
                 }
             }
         }

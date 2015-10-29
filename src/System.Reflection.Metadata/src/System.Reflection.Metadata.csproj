@@ -14,13 +14,11 @@
     <DefaultLanguage>en-US</DefaultLanguage>
     <NoWarn>1591</NoWarn>
     <CLSCompliant>false</CLSCompliant>
-    <AssemblyFileVersion>1.1.1.0</AssemblyFileVersion>
-    <AssemblyVersion>1.1.0.0</AssemblyVersion>
+    <AssemblyVersion>1.2.0.0</AssemblyVersion>
+    <PackageTargetFramework>dotnet5.2</PackageTargetFramework>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
     <PlatformTarget>AnyCPU</PlatformTarget>
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
@@ -28,7 +26,6 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
     <PlatformTarget>AnyCPU</PlatformTarget>
-    <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
@@ -167,21 +164,21 @@
     <Compile Include="System\Reflection\Metadata\PortablePdb\CustomDebugInformation.cs" />
     <Compile Include="System\Reflection\Metadata\PortablePdb\DebugMetadataHeader.cs" />
     <Compile Include="System\Reflection\Metadata\PortablePdb\Document.cs" />
-    <Compile Include="System\Reflection\Metadata\PortablePdb\DocumentNameHandle.cs" />
+    <Compile Include="System\Reflection\Metadata\PortablePdb\DocumentNameBlobHandle.cs" />
     <Compile Include="System\Reflection\Metadata\PortablePdb\HandleCollections.Debug.cs" />
     <Compile Include="System\Reflection\Metadata\PortablePdb\Handles.Debug.cs" />
     <Compile Include="System\Reflection\Metadata\PortablePdb\HasCustomDebugInformationTag.cs" />
     <Compile Include="System\Reflection\Metadata\PortablePdb\ImportDefinition.cs" />
     <Compile Include="System\Reflection\Metadata\PortablePdb\ImportDefinitionKind.cs" />
-    <Compile Include="System\Reflection\Metadata\PortablePdb\ImportsBlobReader.cs" />
+    <Compile Include="System\Reflection\Metadata\PortablePdb\ImportDefinitionCollection.cs" />
     <Compile Include="System\Reflection\Metadata\PortablePdb\LocalConstant.cs" />
     <Compile Include="System\Reflection\Metadata\PortablePdb\ImportScope.cs" />
     <Compile Include="System\Reflection\Metadata\PortablePdb\LocalScope.cs" />
     <Compile Include="System\Reflection\Metadata\PortablePdb\LocalVariable.cs" />
     <Compile Include="System\Reflection\Metadata\PortablePdb\LocalVariableAttributes.cs" />
-    <Compile Include="System\Reflection\Metadata\PortablePdb\MethodBody.cs" />
+    <Compile Include="System\Reflection\Metadata\PortablePdb\MethodDebugInformation.cs" />
     <Compile Include="System\Reflection\Metadata\PortablePdb\SequencePoint.cs" />
-    <Compile Include="System\Reflection\Metadata\PortablePdb\SequencePointBlobReader.cs" />
+    <Compile Include="System\Reflection\Metadata\PortablePdb\SequencePointCollection.cs" />
     <Compile Include="System\Reflection\Metadata\PortablePdb\Tables.Debug.cs" />
     <Compile Include="System\Reflection\Metadata\PEReaderExtensions.cs" />
     <Compile Include="System\Reflection\Metadata\PropertyDefinition.cs" />
@@ -212,11 +209,6 @@
     <Compile Include="System\Reflection\PortableExecutable\SectionHeader.cs" />
     <Compile Include="System\Reflection\Throw.cs" />
     <Compile Include="System\Reflection\System.Reflection.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <Reference Include="System.Collections.Immutable, Version=1.1.36.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-      <HintPath>$(PackagesDir)\System.Collections.Immutable.1.1.36\lib\portable-net45+win8+wp8+wpa81\System.Collections.Immutable.dll</HintPath>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
     <None Include="project.json" />

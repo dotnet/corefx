@@ -18,7 +18,7 @@ namespace Microsoft.Win32.SafeHandles
 
         protected override bool ReleaseHandle()
         {
-            Interop.libcrypto.EC_KEY_free(handle);
+            Interop.Crypto.EcKeyDestroy(handle);
             SetHandle(IntPtr.Zero);
             return true;
         }
@@ -36,9 +36,9 @@ namespace Microsoft.Win32.SafeHandles
             // that we don't lose a tracked reference in low-memory situations.
             SafeEcKeyHandle safeHandle = new SafeEcKeyHandle();
 
-            if (!Interop.libcrypto.EC_KEY_up_ref(handle))
+            if (!Interop.Crypto.EcKeyUpRef(handle))
             {
-                throw Interop.libcrypto.CreateOpenSslCryptographicException();
+                throw Interop.Crypto.CreateOpenSslCryptographicException();
             }
 
             safeHandle.SetHandle(handle);

@@ -16,8 +16,14 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/file.h>
+#include <sys/ioctl.h>
 #include <syslog.h>
+#include <termios.h>
 #include <unistd.h>
+
+#if HAVE_INOTIFY
+#include <sys/inotify.h>
+#endif
 
 #if HAVE_STAT64
 #define stat_ stat64
@@ -101,6 +107,23 @@ static_assert(PAL_POSIX_FADV_SEQUENTIAL == POSIX_FADV_SEQUENTIAL, "");
 static_assert(PAL_POSIX_FADV_WILLNEED == POSIX_FADV_WILLNEED, "");
 static_assert(PAL_POSIX_FADV_DONTNEED == POSIX_FADV_DONTNEED, "");
 static_assert(PAL_POSIX_FADV_NOREUSE == POSIX_FADV_NOREUSE, "");
+#endif
+
+// Validate our NotifyEvents enum values are correct for the platform
+#if HAVE_INOTIFY
+static_assert(PAL_IN_ACCESS == IN_ACCESS, "");
+static_assert(PAL_IN_MODIFY == IN_MODIFY, "");
+static_assert(PAL_IN_ATTRIB == IN_ATTRIB, "");
+static_assert(PAL_IN_MOVED_FROM == IN_MOVED_FROM, "");
+static_assert(PAL_IN_MOVED_TO == IN_MOVED_TO, "");
+static_assert(PAL_IN_CREATE == IN_CREATE, "");
+static_assert(PAL_IN_DELETE == IN_DELETE, "");
+static_assert(PAL_IN_Q_OVERFLOW == IN_Q_OVERFLOW, "");
+static_assert(PAL_IN_IGNORED == IN_IGNORED, "");
+static_assert(PAL_IN_ONLYDIR == IN_ONLYDIR, "");
+static_assert(PAL_IN_DONT_FOLLOW == IN_DONT_FOLLOW, "");
+static_assert(PAL_IN_EXCL_UNLINK == IN_EXCL_UNLINK, "");
+static_assert(PAL_IN_ISDIR == IN_ISDIR, "");
 #endif
 
 static void ConvertFileStatus(const struct stat_& src, FileStatus* dst)
@@ -792,4 +815,99 @@ extern "C" int32_t Write(int32_t fd, const void* buffer, int32_t bufferSize)
     ssize_t count = write(fd, buffer, UnsignedCast(bufferSize));
     assert(count >= -1 && count <= bufferSize);
     return static_cast<int32_t>(count);
+}
+
+extern "C" int32_t GetWindowSize(WinSize* windowSize)
+{
+    assert(windowSize != nullptr);
+
+#if HAVE_IOCTL && HAVE_TIOCGWINSZ
+    int error = ioctl(STDOUT_FILENO, TIOCGWINSZ, windowSize);
+
+    if (error != 0)
+    {
+        *windowSize = {}; // managed out param must be initialized
+    }
+
+    return error;
+#else
+    errno = ENOTSUP;
+    return -1;
+#endif
+}
+
+extern "C" int32_t IsATty(int fd)
+{
+    return isatty(fd);
+}
+
+extern "C" int32_t ReadStdinUnbuffered(void* buffer, int32_t bufferSize)
+{
+    assert(buffer != nullptr || bufferSize == 0);
+    assert(bufferSize >= 0);
+
+    if (bufferSize < 0)
+    {
+        errno = EINVAL;
+        return -1;
+    }
+
+#if HAVE_TCGETATTR && HAVE_TCSETATTR && HAVE_ECHO && HAVE_ICANON && HAVE_TCSANOW
+    struct termios oldtermios = {};
+    struct termios newtermios = {};
+
+    if (tcgetattr(STDIN_FILENO, &oldtermios) < 0)
+        return -1;
+
+    newtermios = oldtermios;
+    newtermios.c_lflag &= static_cast<uint32_t>(~(ECHO | ICANON));
+    newtermios.c_cc[VMIN] = 1;
+    newtermios.c_cc[VTIME] = 0;
+    if (tcsetattr(STDIN_FILENO, TCSANOW, &newtermios) < 0)
+        return -1;
+    ssize_t count = read(STDIN_FILENO, buffer, UnsignedCast(bufferSize));
+    tcsetattr(STDIN_FILENO, TCSANOW, &oldtermios);
+    return static_cast<int32_t>(count);
+#else
+    errno = ENOTSUP;
+    return -1;
+#endif
+}
+
+extern "C" int32_t INotifyInit()
+{
+#if HAVE_INOTIFY
+    return inotify_init();
+#else
+    errno = ENOTSUP;
+    return -1;
+#endif
+}
+
+extern "C" int32_t INotifyAddWatch(int32_t fd, const char* pathName, uint32_t mask)
+{
+    assert(fd >= 0);
+    assert(pathName != nullptr);
+
+#if HAVE_INOTIFY
+    return inotify_add_watch(fd, pathName, mask);
+#else
+    (void)fd, (void)pathName, (void)mask;
+    errno = ENOTSUP;
+    return -1;
+#endif
+}
+
+extern "C" int32_t INotifyRemoveWatch(int32_t fd, int32_t wd)
+{
+    assert(fd >= 0);
+    assert(wd >= 0);
+
+#if HAVE_INOTIFY
+    return inotify_rm_watch(fd, wd);
+#else
+    (void)fd, (void)wd;
+    errno = ENOTSUP;
+    return -1;
+#endif
 }

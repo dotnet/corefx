@@ -13,6 +13,7 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <DebugSymbols>true</DebugSymbols>
     <PlatformTarget>AnyCPU</PlatformTarget>
+    <PackageTargetFramework>dotnet5.4</PackageTargetFramework>
   </PropertyGroup>
   <!-- Default configurations to help VS understand the configurations -->
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -99,11 +100,6 @@
     <Compile Include="System\Xml\Dom\XmlWhitespace.cs" />
     <Compile Include="System\Xml\EmptyEnumerator.cs" />
     <Compile Include="System\Xml\XmlTextEncoder.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="$(CommonPath)\System\NotImplemented.cs">
-      <Link>Common\System\NotImplemented.cs</Link>
-    </Compile>
   </ItemGroup>
   <ItemGroup>
     <None Include="project.json" />

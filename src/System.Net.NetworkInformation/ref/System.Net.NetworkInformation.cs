@@ -129,8 +129,6 @@ namespace System.Net.NetworkInformation
         public abstract string HostName { get; }
         public abstract bool IsWinsProxy { get; }
         public abstract System.Net.NetworkInformation.NetBiosNodeType NodeType { get; }
-        public virtual System.IAsyncResult BeginGetUnicastAddresses(System.AsyncCallback callback, object state) { return default(System.IAsyncResult); }
-        public virtual System.Net.NetworkInformation.UnicastIPAddressInformationCollection EndGetUnicastAddresses(System.IAsyncResult asyncResult) { return default(System.Net.NetworkInformation.UnicastIPAddressInformationCollection); }
         public abstract System.Net.NetworkInformation.TcpConnectionInformation[] GetActiveTcpConnections();
         public abstract System.Net.IPEndPoint[] GetActiveTcpListeners();
         public abstract System.Net.IPEndPoint[] GetActiveUdpListeners();
@@ -143,7 +141,6 @@ namespace System.Net.NetworkInformation
         public abstract System.Net.NetworkInformation.TcpStatistics GetTcpIPv6Statistics();
         public abstract System.Net.NetworkInformation.UdpStatistics GetUdpIPv4Statistics();
         public abstract System.Net.NetworkInformation.UdpStatistics GetUdpIPv6Statistics();
-        public virtual System.Net.NetworkInformation.UnicastIPAddressInformationCollection GetUnicastAddresses() { return default(System.Net.NetworkInformation.UnicastIPAddressInformationCollection); }
         public virtual System.Threading.Tasks.Task<System.Net.NetworkInformation.UnicastIPAddressInformationCollection> GetUnicastAddressesAsync() { return default(System.Threading.Tasks.Task<System.Net.NetworkInformation.UnicastIPAddressInformationCollection>); }
     }
     public abstract partial class IPGlobalStatistics
@@ -215,22 +212,6 @@ namespace System.Net.NetworkInformation
         public abstract int Mtu { get; }
         public abstract bool UsesWins { get; }
     }
-    public abstract partial class IPv4InterfaceStatistics
-    {
-        protected IPv4InterfaceStatistics() { }
-        public abstract long BytesReceived { get; }
-        public abstract long BytesSent { get; }
-        public abstract long IncomingPacketsDiscarded { get; }
-        public abstract long IncomingPacketsWithErrors { get; }
-        public abstract long IncomingUnknownProtocolPackets { get; }
-        public abstract long NonUnicastPacketsReceived { get; }
-        public abstract long NonUnicastPacketsSent { get; }
-        public abstract long OutgoingPacketsDiscarded { get; }
-        public abstract long OutgoingPacketsWithErrors { get; }
-        public abstract long OutputQueueLength { get; }
-        public abstract long UnicastPacketsReceived { get; }
-        public abstract long UnicastPacketsSent { get; }
-    }
     public abstract partial class IPv6InterfaceProperties
     {
         protected IPv6InterfaceProperties() { }
@@ -296,7 +277,6 @@ namespace System.Net.NetworkInformation
         public static System.Net.NetworkInformation.NetworkInterface[] GetAllNetworkInterfaces() { return default(System.Net.NetworkInformation.NetworkInterface[]); }
         public virtual System.Net.NetworkInformation.IPInterfaceProperties GetIPProperties() { return default(System.Net.NetworkInformation.IPInterfaceProperties); }
         public virtual System.Net.NetworkInformation.IPInterfaceStatistics GetIPStatistics() { return default(System.Net.NetworkInformation.IPInterfaceStatistics); }
-        public virtual System.Net.NetworkInformation.IPv4InterfaceStatistics GetIPv4Statistics() { return default(System.Net.NetworkInformation.IPv4InterfaceStatistics); }
         public static bool GetIsNetworkAvailable() { return default(bool); }
         public virtual System.Net.NetworkInformation.PhysicalAddress GetPhysicalAddress() { return default(System.Net.NetworkInformation.PhysicalAddress); }
         public virtual bool Supports(System.Net.NetworkInformation.NetworkInterfaceComponent networkInterfaceComponent) { return default(bool); }

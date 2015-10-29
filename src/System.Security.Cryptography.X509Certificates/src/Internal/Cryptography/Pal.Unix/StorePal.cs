@@ -47,9 +47,9 @@ namespace Internal.Cryptography.Pal
 
         public static IStorePal FromFile(string fileName, string password, X509KeyStorageFlags keyStorageFlags)
         {
-            using (SafeBioHandle bio = Interop.libcrypto.BIO_new_file(fileName, "rb"))
+            using (SafeBioHandle bio = Interop.Crypto.BioNewFile(fileName, "rb"))
             {
-                Interop.libcrypto.CheckValidOpenSslHandle(bio);
+                Interop.Crypto.CheckValidOpenSslHandle(bio);
 
                 return FromBio(bio, password);
             }
@@ -106,7 +106,7 @@ namespace Internal.Cryptography.Pal
             // 
             // But, before seeking back to start, save the Exception representing the last reported
             // OpenSSL error in case the last BioSeek would change it.
-            Exception openSslException = Interop.libcrypto.CreateOpenSslCryptographicException();
+            Exception openSslException = Interop.Crypto.CreateOpenSslCryptographicException();
 
             // Use BioSeek directly for the last seek attempt, because any failure here should instead
             // report the already created (but not yet thrown) exception.
@@ -136,9 +136,7 @@ namespace Internal.Cryptography.Pal
 
             if (openFlags.HasFlag(OpenFlags.ReadWrite))
             {
-                // TODO (#2206): Support CurrentUser persisted stores
-                // (they'd not be very useful without the ability to add/remove content)
-                throw new NotImplementedException();
+                throw new PlatformNotSupportedException(SR.Cryptography_Unix_X509_MachineStoresReadOnly);
             }
 
             // The static store approach here is making an optimization based on not
@@ -165,8 +163,7 @@ namespace Internal.Cryptography.Pal
                 return CloneStore(s_machineIntermediateStore);
             }
 
-            // TODO (#2207): Support the rest of the stores, or throw PlatformNotSupportedException.
-            throw new NotImplementedException();
+            throw new PlatformNotSupportedException(SR.Cryptography_Unix_X509_MachineStoresRootOnly);
         }
 
         private static IStorePal SingleCertToStorePal(ICertificatePal singleCert)

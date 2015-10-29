@@ -8,7 +8,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.Globalization;
 using System.Linq;
-using Validation;
 
 namespace System.Collections.Immutable
 {
@@ -646,7 +645,6 @@ namespace System.Collections.Immutable
         /// <returns>
         /// An <see cref="IDictionaryEnumerator"/> object for the <see cref="IDictionary"/> object.
         /// </returns>
-        /// <exception cref="System.NotImplementedException"></exception>
         IDictionaryEnumerator IDictionary.GetEnumerator()
         {
             return new DictionaryEnumerator<TKey, TValue>(this.GetEnumerator());
@@ -1114,7 +1112,7 @@ namespace System.Collections.Immutable
 
                 if (_root == null || (_stack != null && !_stack.IsOwned(ref this)))
                 {
-                    Validation.Requires.FailObjectDisposed(this);
+                    Requires.FailObjectDisposed(this);
                 }
             }
 
