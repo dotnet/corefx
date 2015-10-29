@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Net.Test.Common;
+using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -14,12 +15,6 @@ namespace System.Net.Sockets.Tests
     [Trait("IPv6", "true")]
     public class DualMode
     {
-        // TODO: This is a stand-in for an issue that will need to be filed when this code is
-        //       merged into corefx.
-        private const int DummySendToThrowsIssue = 123456;
-        private const int DummyOSXPacketInfoIssue = 123457;
-        private const int DummyLoopbackV6Issue = 123456;
-
         // Ports 8 and 8887 are unassigned as per https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.txt
         private const int UnusedPort = 8;
         private const int UnusedBindablePort = 8887;
@@ -81,19 +76,19 @@ namespace System.Net.Sockets.Tests
         [Fact]
         public void ConnectAsyncV4IPEndPointToV6Host_Fails()
         {
-            Assert.Throws<SocketException>( () =>
-            {
-                DualModeConnectAsync_IPEndPointToHost_Helper(IPAddress.Loopback, IPAddress.IPv6Loopback, false);
-            });
+            Assert.Throws<SocketException>(() =>
+           {
+               DualModeConnectAsync_IPEndPointToHost_Helper(IPAddress.Loopback, IPAddress.IPv6Loopback, false);
+           });
         }
 
         [Fact]
         public void ConnectAsyncV6IPEndPointToV4Host_Fails()
         {
-            Assert.Throws<SocketException> ( () =>
-            {
-                DualModeConnectAsync_IPEndPointToHost_Helper(IPAddress.IPv6Loopback, IPAddress.Loopback, false);
-            });
+            Assert.Throws<SocketException>(() =>
+          {
+              DualModeConnectAsync_IPEndPointToHost_Helper(IPAddress.IPv6Loopback, IPAddress.Loopback, false);
+          });
         }
 
         [Fact]
@@ -142,7 +137,7 @@ namespace System.Net.Sockets.Tests
         }
 
         [Fact]
-        [ActiveIssue(DummyLoopbackV6Issue, PlatformID.AnyUnix)]
+        [ActiveIssue(4002, PlatformID.AnyUnix)]
         public void DualModeSocket_ConnectAsyncDnsEndPointToV6Host_Success()
         {
             DualModeConnectAsync_DnsEndPointToHost_Helper(IPAddress.IPv6Loopback, false);
@@ -318,7 +313,7 @@ namespace System.Net.Sockets.Tests
                 }
 
                 SocketClient client = new SocketClient(_log, serverSocket, connectTo, port);
-                
+
                 var waitHandles = new WaitHandle[2];
                 waitHandles[0] = waitHandle;
                 waitHandles[1] = client.WaitHandle;
@@ -331,7 +326,7 @@ namespace System.Net.Sockets.Tests
                 }
 
                 if (completedHandle == 1)   // Client finished
-                {       
+                {
                     if (client.Error != SocketError.Success)
                     {
                         // Client SocketException
@@ -345,7 +340,7 @@ namespace System.Net.Sockets.Tests
                 }
 
                 _log.WriteLine(args.SocketError.ToString());
-                
+
 
                 if (args.SocketError != SocketError.Success)
                 {
@@ -370,7 +365,6 @@ namespace System.Net.Sockets.Tests
         #region SendTo Async/Event
 
         [Fact] // Base case
-        [ActiveIssue(DummySendToThrowsIssue, PlatformID.AnyUnix)]
         public void Socket_SendToAsyncV4IPEndPointToV4Host_Throws()
         {
             Socket socket = new Socket(AddressFamily.InterNetworkV6, SocketType.Dgram, ProtocolType.Udp);
@@ -379,7 +373,23 @@ namespace System.Net.Sockets.Tests
             args.SetBuffer(new byte[1], 0, 1);
             bool async = socket.SendToAsync(args);
             Assert.False(async);
-            Assert.Equal(SocketError.Fault, args.SocketError);
+
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                Assert.Equal(SocketError.Fault, args.SocketError);
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            {
+                // NOTE: on Linux, this API returns ENETUNREACH instead of EFAULT: this platform
+                //       checks the family of the provided socket address before checking its size
+                //       (as long as the socket address is large enough to store an address family).
+                Assert.Equal(SocketError.NetworkUnreachable, args.SocketError);
+            }
+            else
+            {
+                // NOTE: on other Unix platforms, this API returns EINVAL instead of EFAULT.
+                Assert.Equal(SocketError.InvalidArgument, args.SocketError);
+            }
         }
 
         [Fact] // Base case
@@ -462,7 +472,7 @@ namespace System.Net.Sockets.Tests
                     throw new SocketException((int)args.SocketError);
                 }
 
-                bool success = server.WaitHandle.WaitOne(100); // Make sure the bytes were received
+                bool success = server.WaitHandle.WaitOne(Configuration.FailingTestTimeout); // Make sure the bytes were received
                 if (!success)
                 {
                     throw new TimeoutException();
@@ -514,7 +524,7 @@ namespace System.Net.Sockets.Tests
         }
 
         [Fact]
-        [ActiveIssue(DummyOSXPacketInfoIssue, PlatformID.OSX)]
+        [ActiveIssue(4004, PlatformID.OSX)]
         public void ReceiveFromAsyncV4BoundToAnyV4_Success()
         {
             ReceiveFromAsync_Helper(IPAddress.Any, IPAddress.Loopback);
@@ -781,7 +791,7 @@ namespace System.Net.Sockets.Tests
                 _output.WriteLine(
                     "Received: " + e.GetHashCode() + " SocketAsyncEventArgs with manual event " +
                     handle.GetHashCode() + " error: " + e.SocketError);
-                
+
                 handle.Set();
             }
 

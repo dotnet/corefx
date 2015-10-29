@@ -94,6 +94,12 @@ namespace System.Reflection.Metadata.Tests
             assert(default(GuidHandle), HandleKind.Guid);
             assert(default(BlobHandle), HandleKind.Blob);
             assert(default(NamespaceDefinitionHandle), HandleKind.NamespaceDefinition);
+            assert(default(DocumentHandle), HandleKind.Document);
+            assert(default(MethodDebugInformationHandle), HandleKind.MethodDebugInformation);
+            assert(default(LocalScopeHandle), HandleKind.LocalScope);
+            assert(default(LocalConstantHandle), HandleKind.LocalConstant);
+            assert(default(ImportScopeHandle), HandleKind.ImportScope);
+            assert(default(CustomDebugInformationHandle), HandleKind.CustomDebugInformation);
 
             Assert.True(expectedKinds.Count == 0, "Some handles are missing from this test: " + string.Join("," + Environment.NewLine, expectedKinds));
         }
@@ -619,6 +625,18 @@ namespace System.Reflection.Metadata.Tests
                     }
                 }
             }
+        }
+
+        [Fact]
+        public void MethodDefToDebugInfo()
+        {
+            Assert.Equal(
+                MethodDefinitionHandle.FromRowId(123).ToDebugInformationHandle(), 
+                MethodDebugInformationHandle.FromRowId(123));
+
+            Assert.Equal(
+                MethodDebugInformationHandle.FromRowId(123).ToDefinitionHandle(),
+                MethodDefinitionHandle.FromRowId(123));
         }
     }
 }

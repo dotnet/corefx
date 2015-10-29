@@ -3,7 +3,6 @@
 
 using System.Diagnostics;
 using System.IO;
-using System.Runtime.InteropServices;
 
 using Microsoft.Win32.SafeHandles;
 using Internal.Cryptography;
@@ -61,11 +60,11 @@ namespace System.Security.Cryptography
                 throw new ArgumentException(SR.Cryptography_OpenInvalidHandle, "pkeyHandle");
 
             // If ecKey is valid it has already been up-ref'd, so we can just use this handle as-is.
-            SafeEcKeyHandle ecKey = Interop.libcrypto.EVP_PKEY_get1_EC_KEY(pkeyHandle);
+            SafeEcKeyHandle ecKey = Interop.Crypto.EvpPkeyGetEcKey(pkeyHandle);
 
             if (ecKey.IsInvalid)
             {
-                throw Interop.libcrypto.CreateOpenSslCryptographicException();
+                throw Interop.Crypto.CreateOpenSslCryptographicException();
             }
 
             // Set base.KeySize rather than this.KeySize to avoid an unnecessary Lazy<> allocation.
@@ -81,16 +80,16 @@ namespace System.Security.Cryptography
         public SafeEvpPKeyHandle DuplicateKeyHandle()
         {
             SafeEcKeyHandle currentKey = _key.Value;
-            SafeEvpPKeyHandle pkeyHandle = Interop.libcrypto.EVP_PKEY_new();
+            SafeEvpPKeyHandle pkeyHandle = Interop.Crypto.EvpPkeyCreate();
 
             try
             {
                 // Wrapping our key in an EVP_PKEY will up_ref our key.
                 // When the EVP_PKEY is Disposed it will down_ref the key.
                 // So everything should be copacetic.
-                if (!Interop.libcrypto.EVP_PKEY_set1_EC_KEY(pkeyHandle, currentKey))
+                if (!Interop.Crypto.EvpPkeySetEcKey(pkeyHandle, currentKey))
                 {
-                    throw Interop.libcrypto.CreateOpenSslCryptographicException();
+                    throw Interop.Crypto.CreateOpenSslCryptographicException();
                 }
 
                 return pkeyHandle;
@@ -137,12 +136,14 @@ namespace System.Security.Cryptography
                 throw new ArgumentNullException("hash");
 
             SafeEcKeyHandle key = _key.Value;
-            int signatureLength = Interop.libcrypto.ECDSA_size(key);
+            int signatureLength = Interop.Crypto.EcDsaSize(key);
             byte[] signature = new byte[signatureLength];
-            if (!Interop.libcrypto.ECDSA_sign(0, hash, hash.Length, signature, ref signatureLength, key))
-                throw Interop.libcrypto.CreateOpenSslCryptographicException();
-            Array.Resize(ref signature, signatureLength);
-            return signature;
+            if (!Interop.Crypto.EcDsaSign(hash, hash.Length, signature, ref signatureLength, key))
+                throw Interop.Crypto.CreateOpenSslCryptographicException();
+
+            byte[] converted = ConvertToApiFormat(signature, 0, signatureLength);
+
+            return converted;
         }
 
         public override bool VerifyHash(byte[] hash, byte[] signature)
@@ -152,8 +153,22 @@ namespace System.Security.Cryptography
             if (signature == null)
                 throw new ArgumentNullException("signature");
 
+            // The signature format for .NET is r.Concat(s). Each of r and s are of length BitsToBytes(KeySize), even
+            // when they would have leading zeroes.  If it's the correct size, then we need to encode it from
+            // r.Concat(s) to SEQUENCE(INTEGER(r), INTEGER(s)), because that's the format that OpenSSL expects.
+
+            int expectedBytes = 2 * GetSignatureFieldSize();
+
+            if (signature.Length != expectedBytes)
+            {
+                // The input isn't of the right length, so we can't sensibly re-encode it.
+                return false;
+            }
+
+            byte[] openSslFormat = ConvertToOpenSslFormat(signature);
+
             SafeEcKeyHandle key = _key.Value;
-            int verifyResult = Interop.libcrypto.ECDSA_verify(0, hash, hash.Length, signature, signature.Length, key);
+            int verifyResult = Interop.Crypto.EcDsaVerify(hash, hash.Length, openSslFormat, openSslFormat.Length, key);
             return verifyResult == 1;
         }
 
@@ -177,6 +192,77 @@ namespace System.Security.Cryptography
             base.Dispose(disposing);
         }
 
+        private int GetSignatureFieldSize()
+        {
+            int keySizeBits = KeySize;
+            int keySizeBytes = (keySizeBits + 7) / 8;
+            return keySizeBytes;
+        }
+
+        private static byte[] ConvertToOpenSslFormat(byte[] input)
+        {
+            Debug.Assert(input != null);
+            Debug.Assert(input.Length % 2 == 0);
+            Debug.Assert(input.Length > 1);
+
+            // Input is (r, s), each of them exactly half of the array.
+            // Output is the DER encoded value of CONSTRUCTEDSEQUENCE(INTEGER(r), INTEGER(s)).
+            int halfLength = input.Length / 2;
+
+            byte[][] rEncoded = DerEncoder.SegmentedEncodeUnsignedInteger(input, 0, halfLength);
+            byte[][] sEncoded = DerEncoder.SegmentedEncodeUnsignedInteger(input, halfLength, halfLength);
+
+            return DerEncoder.ConstructSequence(rEncoded, sEncoded);
+        }
+
+        private byte[] ConvertToApiFormat(byte[] input, int inputOffset, int inputCount)
+        {
+            int size = GetSignatureFieldSize();
+
+            try
+            {
+                DerSequenceReader reader = new DerSequenceReader(input, inputOffset, inputCount);
+                byte[] rDer = reader.ReadIntegerBytes();
+                byte[] sDer = reader.ReadIntegerBytes();
+                byte[] response = new byte[2 * size];
+
+                CopySignatureField(rDer, response, 0, size);
+                CopySignatureField(sDer, response, size, size);
+                
+                return response;
+            }
+            catch (InvalidOperationException e)
+            {
+                throw new CryptographicException(SR.Arg_CryptographyException, e);
+            }
+        }
+
+        private static void CopySignatureField(byte[] signatureField, byte[] response, int offset, int fieldLength)
+        {
+            if (signatureField.Length > fieldLength)
+            {
+                // The only way this should be true is if the value required a zero-byte-pad.
+                Debug.Assert(signatureField.Length == fieldLength + 1, "signatureField.Length == fieldLength + 1");
+                Debug.Assert(signatureField[0] == 0, "signatureField[0] == 0");
+                Debug.Assert(signatureField[1] > 0x7F, "signatureField[1] > 0x7F");
+
+                Buffer.BlockCopy(signatureField, 1, response, offset, fieldLength);
+            }
+            else if (signatureField.Length == fieldLength)
+            {
+                Buffer.BlockCopy(signatureField, 0, response, offset, fieldLength);
+            }
+            else
+            {
+                // If the field is too short then it needs to be prepended
+                // with zeroes in the response.  Since the array was already
+                // zeroed out, just figure out where we need to start copying.
+                int writeOffset = fieldLength - signatureField.Length;
+
+                Buffer.BlockCopy(signatureField, 0, response, offset + writeOffset, signatureField.Length);
+            }
+        }
+
         private void FreeKey()
         {
             if (_key != null && _key.IsValueCreated)
@@ -192,7 +278,7 @@ namespace System.Security.Cryptography
 
         private static int GetKeySize(SafeEcKeyHandle ecKeyHandle)
         {
-            int nid = Interop.libcrypto.EcKeyGetCurveName(ecKeyHandle);
+            int nid = Interop.Crypto.EcKeyGetCurveName(ecKeyHandle);
             int keySize = 0;
 
             for (int i = 0; i < s_supportedAlgorithms.Length; i++)
@@ -206,7 +292,7 @@ namespace System.Security.Cryptography
 
             if (keySize == 0)
             {
-                string curveNameOid = Interop.libcrypto.OBJ_obj2txt_helper(Interop.libcrypto.OBJ_nid2obj(nid));
+                string curveNameOid = Interop.Crypto.GetOidValue(Interop.Crypto.ObjNid2Obj(nid));
                 throw new NotSupportedException(SR.Format(SR.Cryptography_UnsupportedEcKeyAlgorithm, curveNameOid));
             }
 
@@ -221,12 +307,12 @@ namespace System.Security.Cryptography
                 if (keySize == s_supportedAlgorithms[i].KeySize)
                 {
                     int nid = s_supportedAlgorithms[i].Nid;
-                    SafeEcKeyHandle key = Interop.libcrypto.EC_KEY_new_by_curve_name(nid);
+                    SafeEcKeyHandle key = Interop.Crypto.EcKeyCreateByCurveName(nid);
                     if (key == null || key.IsInvalid)
-                        throw Interop.libcrypto.CreateOpenSslCryptographicException();
+                        throw Interop.Crypto.CreateOpenSslCryptographicException();
 
-                    if (!Interop.libcrypto.EC_KEY_generate_key(key))
-                        throw Interop.libcrypto.CreateOpenSslCryptographicException();
+                    if (!Interop.Crypto.EcKeyGenerateKey(key))
+                        throw Interop.Crypto.CreateOpenSslCryptographicException();
 
                     return key;
                 }
@@ -255,9 +341,10 @@ namespace System.Security.Cryptography
         private static readonly SupportedAlgorithm[] s_supportedAlgorithms =
             new SupportedAlgorithm[]
             {
-                new SupportedAlgorithm(keySize: 224, nid: Interop.libcrypto.NID_secp224r1),
-                new SupportedAlgorithm(keySize: 384, nid: Interop.libcrypto.NID_secp384r1),
-                new SupportedAlgorithm(keySize: 521, nid: Interop.libcrypto.NID_secp521r1),
+                new SupportedAlgorithm(keySize: 224, nid: Interop.Crypto.NID_secp224r1),
+                new SupportedAlgorithm(keySize: 256, nid: Interop.Crypto.NID_X9_62_prime256v1),
+                new SupportedAlgorithm(keySize: 384, nid: Interop.Crypto.NID_secp384r1),
+                new SupportedAlgorithm(keySize: 521, nid: Interop.Crypto.NID_secp521r1),
             };
     }
 }

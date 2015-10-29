@@ -8,7 +8,7 @@ using Xunit;
 
 namespace Tests.ExpressionCompiler.Binary
 {
-    public static unsafe class BinaryMultiplyTests
+    public static class BinaryMultiplyTests
     {
         #region Test methods
 
@@ -123,7 +123,6 @@ namespace Tests.ExpressionCompiler.Binary
             }
         }
 
-        [ActiveIssue(3164, PlatformID.AnyUnix)]
         [Fact]
         public static void CheckLongMultiplyTestOvf()
         {
@@ -751,7 +750,7 @@ namespace Tests.ExpressionCompiler.Binary
             Exception csException = null;
             try
             {
-                csResult = checked((long)(a * b)); 
+                csResult = checked((long)(a * b));
             }
             catch (Exception ex)
             {
@@ -920,5 +919,83 @@ namespace Tests.ExpressionCompiler.Binary
         }
 
         #endregion
+
+        [Fact]
+        public static void CannotReduce()
+        {
+            Expression exp = Expression.Multiply(Expression.Constant(0), Expression.Constant(0));
+            Assert.False(exp.CanReduce);
+            Assert.Same(exp, exp.Reduce());
+            Assert.Throws<ArgumentException>(null, () => exp.ReduceAndCheck());
+        }
+
+        [Fact]
+        public static void CannotReduceChecked()
+        {
+            Expression exp = Expression.MultiplyChecked(Expression.Constant(0), Expression.Constant(0));
+            Assert.False(exp.CanReduce);
+            Assert.Same(exp, exp.Reduce());
+            Assert.Throws<ArgumentException>(null, () => exp.ReduceAndCheck());
+        }
+
+        [Fact]
+        public static void ThrowsOnLeftNull()
+        {
+            Assert.Throws<ArgumentNullException>("left", () => Expression.Multiply(null, Expression.Constant("")));
+        }
+
+        [Fact]
+        public static void ThrowsOnRightNull()
+        {
+            Assert.Throws<ArgumentNullException>("right", () => Expression.Multiply(Expression.Constant(""), null));
+        }
+
+        [Fact]
+        public static void CheckedThrowsOnLeftNull()
+        {
+            Assert.Throws<ArgumentNullException>("left", () => Expression.MultiplyChecked(null, Expression.Constant("")));
+        }
+
+        [Fact]
+        public static void CheckedThrowsOnRightNull()
+        {
+            Assert.Throws<ArgumentNullException>("right", () => Expression.MultiplyChecked(Expression.Constant(""), null));
+        }
+
+        private static class Unreadable<T>
+        {
+            public static T WriteOnly
+            {
+                set { }
+            }
+        }
+
+        [Fact]
+        public static void ThrowsOnLeftUnreadable()
+        {
+            Expression value = Expression.Property(null, typeof(Unreadable<int>), "WriteOnly");
+            Assert.Throws<ArgumentException>("left", () => Expression.Multiply(value, Expression.Constant(1)));
+        }
+
+        [Fact]
+        public static void ThrowsOnRightUnreadable()
+        {
+            Expression value = Expression.Property(null, typeof(Unreadable<int>), "WriteOnly");
+            Assert.Throws<ArgumentException>("right", () => Expression.Multiply(Expression.Constant(1), value));
+        }
+
+        [Fact]
+        public static void CheckedThrowsOnLeftUnreadable()
+        {
+            Expression value = Expression.Property(null, typeof(Unreadable<int>), "WriteOnly");
+            Assert.Throws<ArgumentException>("left", () => Expression.MultiplyChecked(value, Expression.Constant(1)));
+        }
+
+        [Fact]
+        public static void CheckedThrowsOnRightUnreadable()
+        {
+            Expression value = Expression.Property(null, typeof(Unreadable<int>), "WriteOnly");
+            Assert.Throws<ArgumentException>("right", () => Expression.MultiplyChecked(Expression.Constant(1), value));
+        }
     }
 }

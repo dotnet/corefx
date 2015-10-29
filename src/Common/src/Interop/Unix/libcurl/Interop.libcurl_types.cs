@@ -43,6 +43,7 @@ internal static partial class Interop
             internal const int CURLOPT_COOKIE = CurlOptionObjectPointBase + 22;
             internal const int CURLOPT_HTTPHEADER = CurlOptionObjectPointBase + 23;
             internal const int CURLOPT_HEADERDATA = CurlOptionObjectPointBase + 29;
+            internal const int CURLOPT_CUSTOMREQUEST = CurlOptionObjectPointBase + 36;
             internal const int CURLOPT_ACCEPTENCODING = CurlOptionObjectPointBase + 102;
             internal const int CURLOPT_PRIVATE = CurlOptionObjectPointBase + 103;
             internal const int CURLOPT_COPYPOSTFIELDS = CurlOptionObjectPointBase + 165;
@@ -53,6 +54,7 @@ internal static partial class Interop
             internal const int CURLOPT_WRITEFUNCTION = CurlOptionFunctionPointBase + 11;
             internal const int CURLOPT_READFUNCTION = CurlOptionFunctionPointBase + 12;
             internal const int CURLOPT_HEADERFUNCTION = CurlOptionFunctionPointBase + 79;
+            internal const int CURLOPT_SSL_CTX_FUNCTION = CurlOptionFunctionPointBase + 108;
             internal const int CURLOPT_SEEKFUNCTION = CurlOptionFunctionPointBase + 167;
         }
 
@@ -111,30 +113,6 @@ internal static partial class Interop
             internal const ulong AuthAny = ~DigestIE;
         }
 
-        internal static partial class CURL_VERSION_Features
-        {
-            internal const int CURL_VERSION_IPV6         = (1<<0);
-            internal const int CURL_VERSION_KERBEROS4    = (1<<1);
-            internal const int CURL_VERSION_SSL          = (1<<2);
-            internal const int CURL_VERSION_LIBZ         = (1<<3);
-            internal const int CURL_VERSION_NTLM         = (1<<4);
-            internal const int CURL_VERSION_GSSNEGOTIATE = (1<<5);
-            internal const int CURL_VERSION_DEBUG        = (1<<6);
-            internal const int CURL_VERSION_ASYNCHDNS    = (1<<7);
-            internal const int CURL_VERSION_SPNEGO       = (1<<8);
-            internal const int CURL_VERSION_LARGEFILE    = (1<<9);
-            internal const int CURL_VERSION_IDN          = (1<<10);
-            internal const int CURL_VERSION_SSPI         = (1<<11);
-            internal const int CURL_VERSION_CONV         = (1<<12);
-            internal const int CURL_VERSION_CURLDEBUG    = (1<<13);
-            internal const int CURL_VERSION_TLSAUTH_SRP  = (1<<14);
-            internal const int CURL_VERSION_NTLM_WB      = (1<<15);
-            internal const int CURL_VERSION_HTTP2        = (1<<16);
-            internal const int CURL_VERSION_GSSAPI       = (1<<17);
-            internal const int CURL_VERSION_KERBEROS5    = (1<<18);
-            internal const int CURL_VERSION_UNIX_SOCKETS = (1<<19);
-        }
-
         internal static partial class CURLPROTO_Definitions
         {
             internal const int CURLPROTO_HTTP  =  (1<<0);
@@ -153,19 +131,6 @@ internal static partial class Interop
             internal IntPtr data;
             [FieldOffset(16)]
             internal int result;
-        }
-
-        // NOTE: The definition of this structure in Curl/curl.h is larger than
-        // than what is defined below. This definition is only valid for use with
-        // Marshal.PtrToStructure and not for general use in P/Invoke signatures.
-        [StructLayout(LayoutKind.Sequential)]
-        internal struct curl_version_info_data
-        {
-            internal int age;
-            private unsafe char *version;
-            private int versionNum;
-            private unsafe char *host;
-            internal int features;
         }
 
         // Poll values used with curl_multi_wait and curl_waitfd.events/revents

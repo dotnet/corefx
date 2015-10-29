@@ -2,12 +2,14 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Net;
 using System.Net.Http;
 using System.Runtime.InteropServices;
 using System.Security.Authentication;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -16,29 +18,43 @@ using Xunit;
 
 namespace System.Net.Http.WinHttpHandlerUnitTests
 {
-    public class WinHttpHandlerTest : IDisposable
+    public class WinHttpHandlerTest
     {
-        private const string ExpectedResponseBody = "This is the response body.";
-        private const string FakeServerEndpoint = "http://www.contoso.com/";
-        private const string FakeSecureServerEndpoint = "https://www.contoso.com/";
         private const string FakeProxy = "http://proxy.contoso.com";
-
+        
         public WinHttpHandlerTest()
         {
             TestControl.ResetAll();
         }
 
-        public void Dispose()
-        {
-            TestControl.ResponseDelayCompletedEvent.WaitOne();
-        }
-
         [Fact]
-        public void AutomaticRedirection_CtorAndGet_DefaultValueIsTrue()
+        public void Ctor_ExpectedDefaultPropertyValues()
         {
             var handler = new WinHttpHandler();
-            
-            Assert.True(handler.AutomaticRedirection);
+
+            Assert.Equal(SslProtocols.Tls | SslProtocols.Tls11 | SslProtocols.Tls12, handler.SslProtocols);
+            Assert.Equal(true, handler.AutomaticRedirection);
+            Assert.Equal(50, handler.MaxAutomaticRedirections);
+            Assert.Equal(DecompressionMethods.Deflate | DecompressionMethods.GZip, handler.AutomaticDecompression);
+            Assert.Equal(CookieUsePolicy.UseInternalCookieStoreOnly, handler.CookieUsePolicy);
+            Assert.Equal(null, handler.CookieContainer);
+            Assert.Equal(null, handler.ServerCertificateValidationCallback);
+            Assert.Equal(false, handler.CheckCertificateRevocationList);
+            Assert.Equal(ClientCertificateOption.Manual, handler.ClientCertificateOption);
+            X509Certificate2Collection certs = handler.ClientCertificates;
+            Assert.True(certs.Count == 0);
+            Assert.Equal(false, handler.PreAuthenticate);
+            Assert.Equal(null, handler.ServerCredentials);
+            Assert.Equal(WindowsProxyUsePolicy.UseWinHttpProxy, handler.WindowsProxyUsePolicy);
+            Assert.Equal(CredentialCache.DefaultCredentials, handler.DefaultProxyCredentials);
+            Assert.Equal(null, handler.Proxy);
+            Assert.Equal(Int32.MaxValue, handler.MaxConnectionsPerServer);
+            Assert.Equal(TimeSpan.FromSeconds(60), handler.ConnectTimeout);
+            Assert.Equal(TimeSpan.FromSeconds(30), handler.SendTimeout);
+            Assert.Equal(TimeSpan.FromSeconds(30), handler.ReceiveHeadersTimeout);
+            Assert.Equal(TimeSpan.FromSeconds(30), handler.ReceiveDataTimeout);
+            Assert.Equal(64 * 1024, handler.MaxResponseHeadersLength);
+            Assert.Equal(64 * 1024, handler.MaxResponseDrainSize);
         }
 
         [Fact]
@@ -55,7 +71,7 @@ namespace System.Net.Http.WinHttpHandlerUnitTests
         {
             var handler = new WinHttpHandler();
 
-            SendRequestHelper(
+            SendRequestHelper.Send(
                 handler,
                 delegate { handler.AutomaticRedirection = true; });
 
@@ -69,7 +85,7 @@ namespace System.Net.Http.WinHttpHandlerUnitTests
         {
             var handler = new WinHttpHandler();
 
-            SendRequestHelper(
+            SendRequestHelper.Send(
                 handler,
                 delegate { handler.AutomaticRedirection = false; });
 
@@ -83,7 +99,7 @@ namespace System.Net.Http.WinHttpHandlerUnitTests
         {
             var handler = new WinHttpHandler();
 
-            SendRequestHelper(handler, delegate { handler.CheckCertificateRevocationList = true; });
+            SendRequestHelper.Send(handler, delegate { handler.CheckCertificateRevocationList = true; });
 
             Assert.True(APICallHistory.WinHttpOptionEnableSslRevocation.Value);
         }
@@ -93,7 +109,7 @@ namespace System.Net.Http.WinHttpHandlerUnitTests
         {
             var handler = new WinHttpHandler();
 
-            SendRequestHelper(handler, delegate { handler.CheckCertificateRevocationList = false; });
+            SendRequestHelper.Send(handler, delegate { handler.CheckCertificateRevocationList = false; });
 
             Assert.Equal(false, APICallHistory.WinHttpOptionEnableSslRevocation.HasValue);
         }
@@ -140,16 +156,16 @@ namespace System.Net.Http.WinHttpHandlerUnitTests
         }
 
         [Fact]
-        public async Task CookieUsePolicy_UseSpecifiedCookieContainerAndNullContainer_ThrowsInvalidOperationException()
+        public async void CookieUsePolicy_UseSpecifiedCookieContainerAndNullContainer_ThrowsInvalidOperationException()
         {
             var handler = new WinHttpHandler();
             Assert.Null(handler.CookieContainer);
             handler.CookieUsePolicy = CookieUsePolicy.UseSpecifiedCookieContainer;
             var client = new HttpClient(handler);
 
-            TestServer.SetResponse(DecompressionMethods.None, ExpectedResponseBody);
+            TestServer.SetResponse(DecompressionMethods.None, TestServer.ExpectedResponseBody);
 
-            var request = new HttpRequestMessage(HttpMethod.Post, FakeServerEndpoint);
+            var request = new HttpRequestMessage(HttpMethod.Post, TestServer.FakeServerEndpoint);
 
             await Assert.ThrowsAsync<InvalidOperationException>(() => client.SendAsync(request));
         }
@@ -200,7 +216,7 @@ namespace System.Net.Http.WinHttpHandlerUnitTests
         {
             var handler = new WinHttpHandler();
 
-            SendRequestHelper(handler, delegate { handler.CookieUsePolicy = CookieUsePolicy.IgnoreCookies; });
+            SendRequestHelper.Send(handler, delegate { handler.CookieUsePolicy = CookieUsePolicy.IgnoreCookies; });
 
             Assert.True(APICallHistory.WinHttpOptionDisableCookies.Value);
         }
@@ -210,7 +226,7 @@ namespace System.Net.Http.WinHttpHandlerUnitTests
         {
             var handler = new WinHttpHandler();
 
-            SendRequestHelper(
+            SendRequestHelper.Send(
                 handler,
                 delegate { handler.CookieUsePolicy = CookieUsePolicy.UseInternalCookieStoreOnly; });
 
@@ -218,12 +234,11 @@ namespace System.Net.Http.WinHttpHandlerUnitTests
         }
 
         [Fact]
-        [ActiveIssue(2165, PlatformID.AnyUnix)]
         public void CookieUsePolicy_SetUseSpecifiedCookieContainerAndContainer_ExpectedWinHttpHandleSettings()
         {
             var handler = new WinHttpHandler();
 
-            SendRequestHelper(
+            SendRequestHelper.Send(
                 handler,
                 delegate {
                     handler.CookieUsePolicy = CookieUsePolicy.UseSpecifiedCookieContainer;
@@ -282,9 +297,9 @@ namespace System.Net.Http.WinHttpHandlerUnitTests
             handler.WindowsProxyUsePolicy = WindowsProxyUsePolicy.DoNotUseProxy;
             var client = new HttpClient(handler);
 
-            TestServer.SetResponse(DecompressionMethods.None, ExpectedResponseBody);
+            TestServer.SetResponse(DecompressionMethods.None, TestServer.ExpectedResponseBody);
 
-            var request = new HttpRequestMessage(HttpMethod.Post, FakeServerEndpoint);
+            var request = new HttpRequestMessage(HttpMethod.Post, TestServer.FakeServerEndpoint);
 
             await Assert.ThrowsAsync<InvalidOperationException>(() => client.SendAsync(request));
         }
@@ -298,9 +313,9 @@ namespace System.Net.Http.WinHttpHandlerUnitTests
             handler.Proxy = null;
             var client = new HttpClient(handler);
 
-            TestServer.SetResponse(DecompressionMethods.None, ExpectedResponseBody);
+            TestServer.SetResponse(DecompressionMethods.None, TestServer.ExpectedResponseBody);
 
-            var request = new HttpRequestMessage(HttpMethod.Post, FakeServerEndpoint);
+            var request = new HttpRequestMessage(HttpMethod.Post, TestServer.FakeServerEndpoint);
 
             await Assert.ThrowsAsync<InvalidOperationException>(() => client.SendAsync(request));
         }
@@ -325,7 +340,7 @@ namespace System.Net.Http.WinHttpHandlerUnitTests
             var handler = new WinHttpHandler();
             int redirections = 35;
 
-            SendRequestHelper(handler, delegate { handler.MaxAutomaticRedirections = redirections; });
+            SendRequestHelper.Send(handler, delegate { handler.MaxAutomaticRedirections = redirections; });
 
             Assert.Equal((uint)redirections, APICallHistory.WinHttpOptionMaxHttpAutomaticRedirects);
         }
@@ -457,7 +472,7 @@ namespace System.Net.Http.WinHttpHandlerUnitTests
         {
             var handler = new WinHttpHandler();
 
-            SendRequestHelper(
+            SendRequestHelper.Send(
                 handler,
                 delegate
                 {
@@ -479,13 +494,13 @@ namespace System.Net.Http.WinHttpHandlerUnitTests
         {
             var handler = new WinHttpHandler();
             var client = new HttpClient(handler);
-            TestServer.SetResponse(DecompressionMethods.None, ExpectedResponseBody);
+            TestServer.SetResponse(DecompressionMethods.None, TestServer.ExpectedResponseBody);
 
-            HttpResponseMessage response = await client.GetAsync(FakeServerEndpoint);
+            HttpResponseMessage response = await client.GetAsync(TestServer.FakeServerEndpoint);
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            response = await client.GetAsync(FakeServerEndpoint);
+            response = await client.GetAsync(TestServer.FakeServerEndpoint);
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            response = await client.GetAsync(FakeServerEndpoint);
+            response = await client.GetAsync(TestServer.FakeServerEndpoint);
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             client.Dispose();
         }
@@ -496,11 +511,11 @@ namespace System.Net.Http.WinHttpHandlerUnitTests
             var handler = new WinHttpHandler();
             var client = new HttpClient(handler);
             client.DefaultRequestHeaders.TransferEncodingChunked = true;
-            TestServer.SetResponse(DecompressionMethods.None, ExpectedResponseBody);
+            TestServer.SetResponse(DecompressionMethods.None, TestServer.ExpectedResponseBody);
 
-            var content = new StringContent(ExpectedResponseBody);
+            var content = new StringContent(TestServer.ExpectedResponseBody);
             Assert.True(content.Headers.ContentLength.HasValue);
-            var request = new HttpRequestMessage(HttpMethod.Post, FakeServerEndpoint);
+            var request = new HttpRequestMessage(HttpMethod.Post, TestServer.FakeServerEndpoint);
             request.Content = content;
 
             HttpResponseMessage response = await client.SendAsync(request);
@@ -512,57 +527,51 @@ namespace System.Net.Http.WinHttpHandlerUnitTests
             var handler = new WinHttpHandler();
             var client = new HttpClient(handler);
             client.DefaultRequestHeaders.TransferEncodingChunked = true;
-            TestServer.SetResponse(DecompressionMethods.None, ExpectedResponseBody);
+            TestServer.SetResponse(DecompressionMethods.None, TestServer.ExpectedResponseBody);
 
-            var request = new HttpRequestMessage(HttpMethod.Post, FakeServerEndpoint);
+            var request = new HttpRequestMessage(HttpMethod.Post, TestServer.FakeServerEndpoint);
 
             await Assert.ThrowsAsync<InvalidOperationException>(() => client.SendAsync(request));
         }
 
-        // TODO: Need to skip this test due to missing native dependency clrcompression.dll.
-        // https://github.com/dotnet/corefx/issues/1298
         [Fact]
-        [ActiveIssue(1298)]
         public async Task SendAsync_NoWinHttpDecompressionSupportAndResponseBodyIsDeflateCompressed_ExpectedResponse()
         {
             TestControl.WinHttpDecompressionSupport = false;
             var handler = new WinHttpHandler();
 
-            HttpResponseMessage response = SendRequestHelper(
+            HttpResponseMessage response = SendRequestHelper.Send(
                 handler,
                 delegate
                 {
                     handler.AutomaticDecompression = DecompressionMethods.Deflate | DecompressionMethods.GZip;
-                    TestServer.SetResponse(DecompressionMethods.Deflate, ExpectedResponseBody);
+                    TestServer.SetResponse(DecompressionMethods.Deflate, TestServer.ExpectedResponseBody);
                 });
 
             Assert.Null(response.Content.Headers.ContentLength);
             string responseBody = await response.Content.ReadAsStringAsync();
             Assert.Equal(0, response.Content.Headers.ContentEncoding.Count);
-            Assert.Equal(ExpectedResponseBody, responseBody);
+            Assert.Equal(TestServer.ExpectedResponseBody, responseBody);
         }
 
-        // TODO: Need to skip this test due to missing native dependency clrcompression.dll.
-        // https://github.com/dotnet/corefx/issues/1298
         [Fact]
-        [ActiveIssue(1298)]
         public async Task SendAsync_NoWinHttpDecompressionSupportAndResponseBodyIsGZipCompressed_ExpectedResponse()
         {
             TestControl.WinHttpDecompressionSupport = false;
             var handler = new WinHttpHandler();
 
-            HttpResponseMessage response = SendRequestHelper(
+            HttpResponseMessage response = SendRequestHelper.Send(
                 handler,
                 delegate
                 {
                     handler.AutomaticDecompression = DecompressionMethods.Deflate | DecompressionMethods.GZip;
-                    TestServer.SetResponse(DecompressionMethods.GZip, ExpectedResponseBody);
+                    TestServer.SetResponse(DecompressionMethods.GZip, TestServer.ExpectedResponseBody);
                 });
 
             Assert.Null(response.Content.Headers.ContentLength);
             string responseBody = await response.Content.ReadAsStringAsync();
             Assert.Equal(0, response.Content.Headers.ContentEncoding.Count);
-            Assert.Equal(ExpectedResponseBody, responseBody);
+            Assert.Equal(TestServer.ExpectedResponseBody, responseBody);
         }
 
         [Fact]
@@ -571,7 +580,7 @@ namespace System.Net.Http.WinHttpHandlerUnitTests
             TestControl.WinHttpDecompressionSupport = false;
             var handler = new WinHttpHandler();
 
-            HttpResponseMessage response = SendRequestHelper(
+            HttpResponseMessage response = SendRequestHelper.Send(
                 handler,
                 delegate
                 {
@@ -580,7 +589,7 @@ namespace System.Net.Http.WinHttpHandlerUnitTests
 
             Assert.NotNull(response.Content.Headers.ContentLength);
             string responseBody = await response.Content.ReadAsStringAsync();
-            Assert.Equal(ExpectedResponseBody, responseBody);
+            Assert.Equal(TestServer.ExpectedResponseBody, responseBody);
         }
 
         [Fact]
@@ -589,7 +598,7 @@ namespace System.Net.Http.WinHttpHandlerUnitTests
             TestControl.WinHttpAutomaticProxySupport = true;
             var handler = new WinHttpHandler();
 
-            SendRequestHelper(
+            SendRequestHelper.Send(
                 handler,
                 delegate
                 {
@@ -606,7 +615,7 @@ namespace System.Net.Http.WinHttpHandlerUnitTests
             FakeRegistry.WinInetProxySettings.AutoDetect = true;
             var handler = new WinHttpHandler();
 
-            SendRequestHelper(
+            SendRequestHelper.Send(
                 handler,
                 delegate
                 {
@@ -623,7 +632,7 @@ namespace System.Net.Http.WinHttpHandlerUnitTests
             TestControl.WinHttpAutomaticProxySupport = false;
             var handler = new WinHttpHandler();
 
-            SendRequestHelper(
+            SendRequestHelper.Send(
                 handler,
                 delegate
                 {
@@ -641,7 +650,7 @@ namespace System.Net.Http.WinHttpHandlerUnitTests
             FakeRegistry.WinInetProxySettings.Proxy = FakeProxy;
             var handler = new WinHttpHandler();
 
-            SendRequestHelper(
+            SendRequestHelper.Send(
                 handler,
                 delegate
                 {
@@ -659,7 +668,7 @@ namespace System.Net.Http.WinHttpHandlerUnitTests
             FakeRegistry.WinInetProxySettings.RegistryKeyMissing = true;
             var handler = new WinHttpHandler();
 
-            SendRequestHelper(
+            SendRequestHelper.Send(
                 handler,
                 delegate
                 {
@@ -678,7 +687,7 @@ namespace System.Net.Http.WinHttpHandlerUnitTests
             FakeRegistry.WinInetProxySettings.AutoDetect = true;
             var handler = new WinHttpHandler();
 
-            SendRequestHelper(
+            SendRequestHelper.Send(
                 handler,
                 delegate
                 {
@@ -699,7 +708,7 @@ namespace System.Net.Http.WinHttpHandlerUnitTests
             TestControl.PACFileNotDetectedOnNetwork = true;
             var handler = new WinHttpHandler();
 
-            SendRequestHelper(
+            SendRequestHelper.Send(
                 handler,
                 delegate
                 {
@@ -718,7 +727,7 @@ namespace System.Net.Http.WinHttpHandlerUnitTests
         {
             var handler = new WinHttpHandler();
 
-            SendRequestHelper(handler, delegate { handler.WindowsProxyUsePolicy = WindowsProxyUsePolicy.DoNotUseProxy; });
+            SendRequestHelper.Send(handler, delegate { handler.WindowsProxyUsePolicy = WindowsProxyUsePolicy.DoNotUseProxy; });
 
             Assert.Equal(Interop.WinHttp.WINHTTP_ACCESS_TYPE_NO_PROXY, APICallHistory.SessionProxySettings.AccessType);
         }
@@ -729,7 +738,7 @@ namespace System.Net.Http.WinHttpHandlerUnitTests
             var handler = new WinHttpHandler();
             var customProxy = new CustomProxy(false);
 
-            SendRequestHelper(
+            SendRequestHelper.Send(
                 handler,
                 delegate
                 {
@@ -748,7 +757,7 @@ namespace System.Net.Http.WinHttpHandlerUnitTests
             var handler = new WinHttpHandler();
             var customProxy = new CustomProxy(true);
 
-            SendRequestHelper(
+            SendRequestHelper.Send(
                 handler,
                 delegate
                 {
@@ -766,7 +775,7 @@ namespace System.Net.Http.WinHttpHandlerUnitTests
             TestControl.WinHttpAutomaticProxySupport = true;
             var handler = new WinHttpHandler();
 
-            SendRequestHelper(
+            SendRequestHelper.Send(
                 handler,
                 delegate
                 {
@@ -778,37 +787,13 @@ namespace System.Net.Http.WinHttpHandlerUnitTests
         }
 
         [Fact]
-        public void SendAsync_SecureRequestToServerWithNoCertificates_ExpectZeroIntPtrClientCertContext()
-        {
-            var handler = new WinHttpHandler();
-            SendRequestHelper(
-                handler,
-                () => { },
-                FakeSecureServerEndpoint);
-
-            Assert.Equal(1, APICallHistory.WinHttpOptionClientCertContext.Count);
-            Assert.Equal(IntPtr.Zero, APICallHistory.WinHttpOptionClientCertContext[0]);
-        }
-
-        [Fact]
-        public void SendAsync_NonSecureRequestToServer_ExpectNoClientCertContext()
-        {
-            var handler = new WinHttpHandler();
-            SendRequestHelper(
-                handler,
-                () => { });
-
-            Assert.Equal(0, APICallHistory.WinHttpOptionClientCertContext.Count);
-        }
-
-        [Fact]
         public async Task SendAsync_SlowPostRequestWithTimedCancellation_ExpectTaskCanceledException()
         {
             var handler = new WinHttpHandler();
-            TestControl.ResponseDelayTime = 500;
-            CancellationTokenSource cts = new CancellationTokenSource(100);
+            TestControl.WinHttpReceiveResponse.Delay = 5000;
+            CancellationTokenSource cts = new CancellationTokenSource(50);
             var client = new HttpClient(handler);
-            var request = new HttpRequestMessage(HttpMethod.Post, FakeServerEndpoint);
+            var request = new HttpRequestMessage(HttpMethod.Post, TestServer.FakeServerEndpoint);
             var content = new StringContent(new String('a', 1000));
             request.Content = content;
             
@@ -820,10 +805,10 @@ namespace System.Net.Http.WinHttpHandlerUnitTests
         public async Task SendAsync_SlowGetRequestWithTimedCancellation_ExpectTaskCanceledException()
         {
             var handler = new WinHttpHandler();
-            TestControl.ResponseDelayTime = 500;
-            CancellationTokenSource cts = new CancellationTokenSource(100);
+            TestControl.WinHttpReceiveResponse.Delay = 5000;
+            CancellationTokenSource cts = new CancellationTokenSource(50);
             var client = new HttpClient(handler);
-            var request = new HttpRequestMessage(HttpMethod.Get, FakeServerEndpoint);
+            var request = new HttpRequestMessage(HttpMethod.Get, TestServer.FakeServerEndpoint);
             
             await Assert.ThrowsAsync<TaskCanceledException>(() =>
                 client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cts.Token));
@@ -836,7 +821,7 @@ namespace System.Net.Http.WinHttpHandlerUnitTests
             CancellationTokenSource cts = new CancellationTokenSource();
             cts.Cancel();
             var client = new HttpClient(handler);
-            var request = new HttpRequestMessage(HttpMethod.Get, FakeServerEndpoint);
+            var request = new HttpRequestMessage(HttpMethod.Get, TestServer.FakeServerEndpoint);
             
             await Assert.ThrowsAsync<TaskCanceledException>(() =>
                 client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cts.Token));
@@ -847,9 +832,9 @@ namespace System.Net.Http.WinHttpHandlerUnitTests
         {
             var handler = new WinHttpHandler();
             var client = new HttpClient(handler);
-            var request = new HttpRequestMessage(HttpMethod.Get, FakeServerEndpoint);
+            var request = new HttpRequestMessage(HttpMethod.Get, TestServer.FakeServerEndpoint);
 
-            TestControl.Fail.WinHttpOpen = true;
+            TestControl.WinHttpOpen.ErrorWithApiCall = true;
 
             Exception ex = await Assert.ThrowsAsync<HttpRequestException>(() => client.SendAsync(request));
             Assert.Equal(typeof(WinHttpException), ex.InnerException.GetType());
@@ -863,7 +848,7 @@ namespace System.Net.Http.WinHttpHandlerUnitTests
             for (int i = 0; i < 50; i++)
             {
                 handler = new WinHttpHandler();
-                response = SendRequestHelper(handler, () => { });
+                response = SendRequestHelper.Send(handler, () => { });
                 response.Dispose();
                 handler.Dispose();
             }
@@ -877,28 +862,10 @@ namespace System.Net.Http.WinHttpHandlerUnitTests
             for (int i = 0; i < 50; i++)
             {
                 handler = new WinHttpHandler();
-                response = SendRequestHelper(handler, () => { });
+                response = SendRequestHelper.Send(handler, () => { });
             }
         }
-        
-        private HttpResponseMessage SendRequestHelper(WinHttpHandler handler, Action setup)
-        {
-            return SendRequestHelper(handler, setup, FakeServerEndpoint);
-        }
 
-        private HttpResponseMessage SendRequestHelper(WinHttpHandler handler, Action setup, string fakeServerEndpoint)
-        {
-            TestServer.SetResponse(DecompressionMethods.None, ExpectedResponseBody);
-
-            setup();
-
-            var invoker = new HttpMessageInvoker(handler, false);
-            var request = new HttpRequestMessage(HttpMethod.Get, fakeServerEndpoint);
-            Task<HttpResponseMessage> task = invoker.SendAsync(request, CancellationToken.None);
-            
-            return task.GetAwaiter().GetResult();
-        }
-        
         public class CustomProxy : IWebProxy
         {
             private const string DefaultDomain = "domain";

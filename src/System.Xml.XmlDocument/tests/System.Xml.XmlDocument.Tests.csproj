@@ -10,11 +10,6 @@
     <AssemblyName>System.Xml.XmlDocument.Tests</AssemblyName>
     <RootNamespace>System.Xml.XmlDocument.UnitTests</RootNamespace>
   </PropertyGroup>
-  <!-- Performance tests require v5.0 portable tools -->
-  <PropertyGroup Condition="'$(RunPerfTestsForProject)' == 'true'">
-    <TargetFrameworkVersion>v5.0</TargetFrameworkVersion>
-    <TargetFrameworkProfile />
-  </PropertyGroup>
   <!-- Default configurations to help VS understand the configurations -->
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
   </PropertyGroup>
@@ -24,6 +19,7 @@
     <Compile Include="$(CommonTestPath)\System\ShouldNotBeInvokedException.cs">
       <Link>Common\System\ShouldNotBeInvokedException.cs</Link>
     </Compile>
+    <Compile Include="XmlDocumentTests\LoadTests.cs" />
     <Compile Include="XmlAttributeCollectionTests\AppendTests.cs" />
     <Compile Include="XmlAttributeCollectionTests\CollectionInterfaceTests.cs" />
     <Compile Include="XmlAttributeCollectionTests\CopyToTests.cs" />
@@ -113,8 +109,8 @@
     <Compile Include="Performance\Perf.XmlDocument.cs" />
     <Compile Include="Performance\Perf.XmlNode.cs" />
     <Compile Include="Performance\Perf.XmlNodeList.cs" />
-    <Compile Include="$(CommonTestPath)\Performance\PerfUtils.cs">
-      <Link>Common\Performance\PerfUtils.cs</Link>
+    <Compile Include="$(CommonTestPath)\System\PerfUtils.cs">
+      <Link>Common\System\PerfUtils.cs</Link>
     </Compile>
   </ItemGroup>
   <ItemGroup>
@@ -128,6 +124,11 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="project.json" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="example.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

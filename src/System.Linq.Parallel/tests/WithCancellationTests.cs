@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
@@ -26,7 +27,7 @@ namespace System.Linq.Parallel.Tests
                 throwOnFirstEnumerable
                     .AsParallel()
                     .WithCancellation(cs.Token)
-                    .ForAll((x) => { Console.WriteLine(x.ToString()); });
+                    .ForAll((x) => { Debug.WriteLine(x.ToString()); });
             }
             catch (OperationCanceledException ex)
             {
@@ -115,7 +116,7 @@ namespace System.Linq.Parallel.Tests
         /// <summary>
         ///
         /// [Regression Test]
-        ///   This issue occured because the QuerySettings structure was not being deep-cloned during
+        ///   This issue occurred because the QuerySettings structure was not being deep-cloned during
         ///   query-opening.  As a result, the concurrent inner-enumerators (for the RHS operators)
         ///   that occur in SelectMany were sharing CancellationState that they should not have.
         ///   The result was that enumerators could falsely believe they had been canceled when
@@ -161,9 +162,9 @@ namespace System.Linq.Parallel.Tests
         [OuterLoop]  // explicit timeouts / delays
         public static void ChannelCancellation_ProducerBlocked()
         {
-            Console.WriteLine("PlinqCancellationTests.ChannelCancellation_ProducerBlocked()");
+            Debug.WriteLine("PlinqCancellationTests.ChannelCancellation_ProducerBlocked()");
 
-            Console.WriteLine("        Query running (should be few seconds max)..");
+            Debug.WriteLine("        Query running (should be few seconds max)..");
             var query1 = Enumerable.Range(0, 100000000)  //provide 100million elements to ensure all the cores get >64K ints. Good up to 1600cores
                 .AsParallel()
                 .Select(x => x);
@@ -173,7 +174,7 @@ namespace System.Linq.Parallel.Tests
             enumerator1.MoveNext();
             enumerator1.Dispose(); //can potentially hang
 
-            Console.WriteLine("        Done (success).");
+            Debug.WriteLine("        Done (success).");
         }
 
         /// <summary>
@@ -201,7 +202,7 @@ namespace System.Linq.Parallel.Tests
                 Assert.True(false, string.Format("PlinqCancellationTests.AggregatesShouldntWrapOCE:  > Failed: got {0}, expected OperationCanceledException", e.GetType().ToString()));
             }
 
-            Assert.True(false, string.Format("PlinqCancellationTests.AggregatesShouldntWrapOCE:  > Failed: no exception occured, expected OperationCanceledException"));
+            Assert.True(false, string.Format("PlinqCancellationTests.AggregatesShouldntWrapOCE:  > Failed: no exception occurred, expected OperationCanceledException"));
         }
 
         // Plinq suppresses OCE(externalCT) occurring in worker threads and then throws a single OCE(ct)
@@ -404,7 +405,7 @@ namespace System.Linq.Parallel.Tests
                 {
                     var item = walker.Current;
                 }
-                Assert.True(false, string.Format("PlinqCancellationTests.SetOperationsThrowAggregateOnCancelOrDispose_1:  OperationCanceledException was expected, but no exception occured."));
+                Assert.True(false, string.Format("PlinqCancellationTests.SetOperationsThrowAggregateOnCancelOrDispose_1:  OperationCanceledException was expected, but no exception occurred."));
             }
             catch (OperationCanceledException)
             {
@@ -412,7 +413,7 @@ namespace System.Linq.Parallel.Tests
             }
             catch (Exception e)
             {
-                Assert.True(false, string.Format("PlinqCancellationTests.SetOperationsThrowAggregateOnCancelOrDispose_1:  OperationCanceledException was expected, but a different exception occured.  " + e.ToString()));
+                Assert.True(false, string.Format("PlinqCancellationTests.SetOperationsThrowAggregateOnCancelOrDispose_1:  OperationCanceledException was expected, but a different exception occurred.  " + e.ToString()));
             }
         }
 
@@ -432,7 +433,7 @@ namespace System.Linq.Parallel.Tests
                 while (walker.MoveNext())
                 {
                 }
-                Assert.True(false, string.Format("PlinqCancellationTests.SetOperationsThrowAggregateOnCancelOrDispose_2:  failed.  AggregateException was expected, but no exception occured."));
+                Assert.True(false, string.Format("PlinqCancellationTests.SetOperationsThrowAggregateOnCancelOrDispose_2:  failed.  AggregateException was expected, but no exception occurred."));
             }
             catch (AggregateException)
             {
@@ -440,7 +441,7 @@ namespace System.Linq.Parallel.Tests
             }
             catch (Exception e)
             {
-                Assert.True(false, string.Format("PlinqCancellationTests.SetOperationsThrowAggregateOnCancelOrDispose_2.  failed.  AggregateException was expected, but some other exception occured." + e.ToString()));
+                Assert.True(false, string.Format("PlinqCancellationTests.SetOperationsThrowAggregateOnCancelOrDispose_2.  failed.  AggregateException was expected, but some other exception occurred." + e.ToString()));
             }
         }
 

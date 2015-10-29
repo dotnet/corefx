@@ -17,6 +17,8 @@ namespace System
     // - ForegroundColor, BackgroundColor, ResetColor
     internal static class ConsolePal
     {
+        private const int DefaultConsoleBufferSize = 256; // default size of buffer used in stream readers/writers
+
         private static IntPtr s_InvalidHandleValue = new IntPtr(-1);
 
         public static Stream OpenStandardInput()
@@ -110,6 +112,207 @@ namespace System
             return new ConsoleEncoding(enc); // ensure encoding doesn't output a preamble
         }
 
+        /// <summary>Gets whether Console.In is targeting a terminal display.</summary>
+        public static bool IsInputRedirectedCore()
+        {
+            return IsHandleRedirected(InputHandle);
+        }
+
+        /// <summary>Gets whether Console.Out is targeting a terminal display.</summary>
+        public static bool IsOutputRedirectedCore()
+        {
+            return IsHandleRedirected(OutputHandle);
+        }
+
+        /// <summary>Gets whether Console.In is targeting a terminal display.</summary>
+        public static bool IsErrorRedirectedCore()
+        {
+            return IsHandleRedirected(ErrorHandle);
+        }
+
+        private static bool IsHandleRedirected(IntPtr handle)
+        {
+            // If handle is not to a character device, we must be redirected:
+            uint fileType = Interop.mincore.GetFileType(handle);
+            if ((fileType & Interop.mincore.FileTypes.FILE_TYPE_CHAR) != Interop.mincore.FileTypes.FILE_TYPE_CHAR)
+                return true;
+
+            // We are on a char device if GetConsoleMode succeeds and so we are not redirected.
+            return (!Interop.mincore.IsGetConsoleModeCallSuccessful(handle));
+        }
+
+        internal static TextReader GetOrCreateReader()
+        {
+            Stream inputStream = OpenStandardInput();
+            return SyncTextReader.GetSynchronizedTextReader(inputStream == Stream.Null ?
+                StreamReader.Null :
+                new StreamReader(
+                    stream: inputStream,
+                    encoding: InputEncoding,
+                    detectEncodingFromByteOrderMarks: false,
+                    bufferSize: DefaultConsoleBufferSize,
+                    leaveOpen: true));
+        }
+
+        // Use this for blocking in Console.ReadKey, which needs to protect itself in case multiple threads call it simultaneously.
+        // Use a ReadKey-specific lock though, to allow other fields to be initialized on this type.
+        private static readonly Object s_readKeySyncObject = new object();
+
+        // ReadLine & Read can't use this because they need to use ReadFile
+        // to be able to handle redirected input.  We have to accept that
+        // we will lose repeated keystrokes when someone switches from
+        // calling ReadKey to calling Read or ReadLine.  Those methods should 
+        // ideally flush this cache as well.
+        [System.Security.SecurityCritical] // auto-generated
+        private static Interop.InputRecord _cachedInputRecord;
+
+        // Skip non key events. Generally we want to surface only KeyDown event 
+        // and suppress KeyUp event from the same Key press but there are cases
+        // where the assumption of KeyDown-KeyUp pairing for a given key press 
+        // is invalid. For example in IME Unicode keyboard input, we often see
+        // only KeyUp until the key is released.  
+        [System.Security.SecurityCritical]  // auto-generated
+        private static bool IsKeyDownEvent(Interop.InputRecord ir)
+        {
+            return (ir.eventType == Interop.KEY_EVENT && ir.keyEvent.keyDown);
+        }
+
+        [System.Security.SecurityCritical]  // auto-generated
+        private static bool IsModKey(Interop.InputRecord ir)
+        {
+            // We should also skip over Shift, Control, and Alt, as well as caps lock.
+            // Apparently we don't need to check for 0xA0 through 0xA5, which are keys like 
+            // Left Control & Right Control. See the ConsoleKey enum for these values.
+            short keyCode = ir.keyEvent.virtualKeyCode;
+            return ((keyCode >= 0x10 && keyCode <= 0x12)
+                    || keyCode == 0x14 || keyCode == 0x90 || keyCode == 0x91);
+        }
+
+        [Flags]
+        internal enum ControlKeyState
+        {
+            RightAltPressed = 0x0001,
+            LeftAltPressed = 0x0002,
+            RightCtrlPressed = 0x0004,
+            LeftCtrlPressed = 0x0008,
+            ShiftPressed = 0x0010,
+            NumLockOn = 0x0020,
+            ScrollLockOn = 0x0040,
+            CapsLockOn = 0x0080,
+            EnhancedKey = 0x0100
+        }
+
+        // For tracking Alt+NumPad unicode key sequence. When you press Alt key down 
+        // and press a numpad unicode decimal sequence and then release Alt key, the
+        // desired effect is to translate the sequence into one Unicode KeyPress. 
+        // We need to keep track of the Alt+NumPad sequence and surface the final
+        // unicode char alone when the Alt key is released. 
+        [System.Security.SecurityCritical]  // auto-generated
+        private static bool IsAltKeyDown(Interop.InputRecord ir)
+        {
+            return (((ControlKeyState)ir.keyEvent.controlKeyState)
+                              & (ControlKeyState.LeftAltPressed | ControlKeyState.RightAltPressed)) != 0;
+        }
+
+
+        private const short AltVKCode = 0x12;
+
+        public static ConsoleKeyInfo ReadKey(bool intercept)
+        {
+            Interop.InputRecord ir;
+            int numEventsRead = -1;
+            bool r;
+
+            lock (s_readKeySyncObject)
+            {
+                if (_cachedInputRecord.eventType == Interop.KEY_EVENT)
+                {
+                    // We had a previous keystroke with repeated characters.
+                    ir = _cachedInputRecord;
+                    if (_cachedInputRecord.keyEvent.repeatCount == 0)
+                        _cachedInputRecord.eventType = -1;
+                    else
+                    {
+                        _cachedInputRecord.keyEvent.repeatCount--;
+                    }
+                    // We will return one key from this method, so we decrement the
+                    // repeatCount here, leaving the cachedInputRecord in the "queue".
+
+                }
+                else
+                { // We did NOT have a previous keystroke with repeated characters:
+
+                    while (true)
+                    {
+                        r = Interop.mincore.ReadConsoleInput(InputHandle, out ir, 1, out numEventsRead);
+                        if (!r || numEventsRead == 0)
+                        {
+                            // This will fail when stdin is redirected from a file or pipe. 
+                            // We could theoretically call Console.Read here, but I 
+                            // think we might do some things incorrectly then.
+                            throw new InvalidOperationException(SR.InvalidOperation_ConsoleReadKeyOnFile);
+                        }
+
+                        short keyCode = ir.keyEvent.virtualKeyCode;
+
+                        // First check for non-keyboard events & discard them. Generally we tap into only KeyDown events and ignore the KeyUp events
+                        // but it is possible that we are dealing with a Alt+NumPad unicode key sequence, the final unicode char is revealed only when 
+                        // the Alt key is released (i.e when the sequence is complete). To avoid noise, when the Alt key is down, we should eat up 
+                        // any intermediate key strokes (from NumPad) that collectively forms the Unicode character.  
+
+                        if (!IsKeyDownEvent(ir))
+                        {
+                            // REVIEW: Unicode IME input comes through as KeyUp event with no accompanying KeyDown.
+                            if (keyCode != AltVKCode)
+                                continue;
+                        }
+
+                        char ch = (char)ir.keyEvent.uChar;
+
+                        // In a Alt+NumPad unicode sequence, when the alt key is released uChar will represent the final unicode character, we need to 
+                        // surface this. VirtualKeyCode for this event will be Alt from the Alt-Up key event. This is probably not the right code, 
+                        // especially when we don't expose ConsoleKey.Alt, so this will end up being the hex value (0x12). VK_PACKET comes very 
+                        // close to being useful and something that we could look into using for this purpose... 
+
+                        if (ch == 0)
+                        {
+                            // Skip mod keys.
+                            if (IsModKey(ir))
+                                continue;
+                        }
+
+                        // When Alt is down, it is possible that we are in the middle of a Alt+NumPad unicode sequence.
+                        // Escape any intermediate NumPad keys whether NumLock is on or not (notepad behavior)
+                        ConsoleKey key = (ConsoleKey)keyCode;
+                        if (IsAltKeyDown(ir) && ((key >= ConsoleKey.NumPad0 && key <= ConsoleKey.NumPad9)
+                                             || (key == ConsoleKey.Clear) || (key == ConsoleKey.Insert)
+                                             || (key >= ConsoleKey.PageUp && key <= ConsoleKey.DownArrow)))
+                        {
+                            continue;
+                        }
+
+                        if (ir.keyEvent.repeatCount > 1)
+                        {
+                            ir.keyEvent.repeatCount--;
+                            _cachedInputRecord = ir;
+                        }
+                        break;
+                    }
+                }  // we did NOT have a previous keystroke with repeated characters.
+            }
+
+            ControlKeyState state = (ControlKeyState)ir.keyEvent.controlKeyState;
+            bool shift = (state & ControlKeyState.ShiftPressed) != 0;
+            bool alt = (state & (ControlKeyState.LeftAltPressed | ControlKeyState.RightAltPressed)) != 0;
+            bool control = (state & (ControlKeyState.LeftCtrlPressed | ControlKeyState.RightCtrlPressed)) != 0;
+
+            ConsoleKeyInfo info = new ConsoleKeyInfo((char)ir.keyEvent.uChar, (ConsoleKey)ir.keyEvent.virtualKeyCode, shift, alt, control);
+
+            if (!intercept)
+                Console.Write(ir.keyEvent.uChar);
+            return info;
+        }
+
         // For ResetColor
         private static volatile bool _haveReadDefaultColors;
         private static volatile byte _defaultColors;
@@ -194,6 +397,117 @@ namespace System
             Interop.mincore.SetConsoleTextAttribute(OutputHandle, (short)(ushort)_defaultColors);
         }
 
+        public static bool CursorVisible
+        {
+            get
+            {
+                Interop.mincore.CONSOLE_CURSOR_INFO cci;
+                if (!Interop.mincore.GetConsoleCursorInfo(OutputHandle, out cci))
+                    throw Win32Marshal.GetExceptionForWin32Error(Marshal.GetLastWin32Error());
+
+                return cci.bVisible;
+            }
+            set
+            {
+                Interop.mincore.CONSOLE_CURSOR_INFO cci;
+                if (!Interop.mincore.GetConsoleCursorInfo(OutputHandle, out cci))
+                    throw Win32Marshal.GetExceptionForWin32Error(Marshal.GetLastWin32Error());
+
+                cci.bVisible = value;
+                if (!Interop.mincore.SetConsoleCursorInfo(OutputHandle, ref cci))
+                    throw Win32Marshal.GetExceptionForWin32Error(Marshal.GetLastWin32Error());
+            }
+        }
+
+        public static int WindowWidth
+        {
+            get
+            {
+                Interop.mincore.CONSOLE_SCREEN_BUFFER_INFO csbi = GetBufferInfo();
+                return csbi.srWindow.Right - csbi.srWindow.Left + 1;
+            }
+            set
+            {
+                SetWindowSize(value, WindowHeight);
+            }
+        }
+
+        private static int WindowHeight
+        {
+            get
+            {
+                Interop.mincore.CONSOLE_SCREEN_BUFFER_INFO csbi = GetBufferInfo();
+                return csbi.srWindow.Bottom - csbi.srWindow.Top + 1;
+            }
+            set
+            {
+                SetWindowSize(WindowWidth, value);
+            }
+        }
+
+        public static unsafe void SetWindowSize(int width, int height)
+        {
+            if (width <= 0)
+                throw new ArgumentOutOfRangeException("width", width, SR.ArgumentOutOfRange_NeedPosNum);
+            if (height <= 0)
+                throw new ArgumentOutOfRangeException("height", height, SR.ArgumentOutOfRange_NeedPosNum);
+
+            // Get the position of the current console window
+            Interop.mincore.CONSOLE_SCREEN_BUFFER_INFO csbi = GetBufferInfo();
+
+            // If the buffer is smaller than this new window size, resize the
+            // buffer to be large enough.  Include window position.
+            bool resizeBuffer = false;
+            Interop.mincore.COORD size = new Interop.mincore.COORD();
+            size.X = csbi.dwSize.X;
+            size.Y = csbi.dwSize.Y;
+            if (csbi.dwSize.X < csbi.srWindow.Left + width)
+            {
+                if (csbi.srWindow.Left >= Int16.MaxValue - width)
+                    throw new ArgumentOutOfRangeException("width", SR.ArgumentOutOfRange_ConsoleWindowBufferSize);
+                size.X = (short)(csbi.srWindow.Left + width);
+                resizeBuffer = true;
+            }
+            if (csbi.dwSize.Y < csbi.srWindow.Top + height)
+            {
+                if (csbi.srWindow.Top >= Int16.MaxValue - height)
+                    throw new ArgumentOutOfRangeException("height", SR.ArgumentOutOfRange_ConsoleWindowBufferSize);
+                size.Y = (short)(csbi.srWindow.Top + height);
+                resizeBuffer = true;
+            }
+            if (resizeBuffer)
+            {
+                if (!Interop.mincore.SetConsoleScreenBufferSize(OutputHandle, size))
+                    throw Win32Marshal.GetExceptionForWin32Error(Marshal.GetLastWin32Error());
+            }
+
+            Interop.mincore.SMALL_RECT srWindow = csbi.srWindow;
+            // Preserve the position, but change the size.
+            srWindow.Bottom = (short)(srWindow.Top + height - 1);
+            srWindow.Right = (short)(srWindow.Left + width - 1);
+
+            if (!Interop.mincore.SetConsoleWindowInfo(OutputHandle, true, &srWindow))
+            {
+                int errorCode = Marshal.GetLastWin32Error();
+
+                // If we resized the buffer, un-resize it.
+                if (resizeBuffer)
+                {
+                    Interop.mincore.SetConsoleScreenBufferSize(OutputHandle, csbi.dwSize);
+                }
+
+                // Try to give a better error message here
+               Interop.mincore.COORD bounds = Interop.mincore.GetLargestConsoleWindowSize(OutputHandle);
+                if (width > bounds.X)
+                    throw new ArgumentOutOfRangeException("width", width, SR.Format(SR.ArgumentOutOfRange_ConsoleWindowSize_Size, bounds.X));
+                if (height > bounds.Y)
+                    throw new ArgumentOutOfRangeException("height", height, SR.Format(SR.ArgumentOutOfRange_ConsoleWindowSize_Size, bounds.Y));
+
+                throw Win32Marshal.GetExceptionForWin32Error(errorCode);
+            }
+        }
+
+
         private static Interop.mincore.Color ConsoleColorToColorAttribute(ConsoleColor color, bool isBackground)
         {
             if ((((int)color) & ~0xf) != 0)
@@ -216,6 +530,12 @@ namespace System
                 c = (Interop.mincore.Color)(((int)c) >> 4);
             }
             return (ConsoleColor)c;
+        }
+
+        private static Interop.mincore.CONSOLE_SCREEN_BUFFER_INFO GetBufferInfo()
+        {
+            bool unused;
+            return GetBufferInfo(true, out unused);
         }
 
         // For apps that don't have a console (like Windows apps), they might

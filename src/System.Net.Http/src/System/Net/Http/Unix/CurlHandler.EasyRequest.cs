@@ -27,11 +27,11 @@ namespace System.Net.Http
             internal readonly HttpRequestMessage _requestMessage;
             internal readonly CurlResponseMessage _responseMessage;
             internal readonly CancellationToken _cancellationToken;
+            internal readonly HttpContentAsyncStream _requestContentStream;
 
             internal SafeCurlHandle _easyHandle;
             private SafeCurlSlistHandle _requestHeaders;
 
-            internal Stream _requestContentStream;
             internal NetworkCredential _networkCredential;
 
             internal MultiAgent _associatedMultiAgent;
@@ -43,8 +43,14 @@ namespace System.Net.Http
             {
                 _handler = handler;
                 _requestMessage = requestMessage;
-                _responseMessage = new CurlResponseMessage(this);
                 _cancellationToken = cancellationToken;
+
+                if (requestMessage.Content != null)
+                {
+                    _requestContentStream = new HttpContentAsyncStream(requestMessage.Content);
+                }
+
+                _responseMessage = new CurlResponseMessage(this);
             }
 
             /// <summary>
@@ -75,6 +81,7 @@ namespace System.Net.Http
                 SetCredentialsOptions(_handler.GetNetworkCredentials(_handler._serverCredentials,_requestMessage.RequestUri));
                 SetCookieOption(_requestMessage.RequestUri);
                 SetRequestHeaders();
+                SetSslOptions();
             }
 
             public void EnsureResponseMessagePublished()
@@ -96,7 +103,11 @@ namespace System.Net.Http
                 }
                 else
                 {
-                    TrySetException(error as HttpRequestException ?? CreateHttpRequestException(error));
+                    if (error is IOException || error is CurlException || error == null)
+                    {
+                        error = CreateHttpRequestException(error);
+                    }
+                    TrySetException(error);
                 }
                 // There's not much we can reasonably assert here about the result of TrySet*.
                 // It's possible that the task wasn't yet completed (e.g. a failure while initiating the request),
@@ -195,6 +206,19 @@ namespace System.Net.Http
                         SetCurlOption(CURLoption.CURLOPT_COPYPOSTFIELDS, string.Empty);
                     }
                 }
+                else if (_requestMessage.Method == HttpMethod.Trace)
+                {
+                    SetCurlOption(CURLoption.CURLOPT_CUSTOMREQUEST, _requestMessage.Method.Method);
+                    SetCurlOption(CURLoption.CURLOPT_NOBODY, 1L);
+                }
+                else
+                {
+                    SetCurlOption(CURLoption.CURLOPT_CUSTOMREQUEST, _requestMessage.Method.Method);
+                    if (_requestMessage.Content != null)
+                    {
+                        SetCurlOption(CURLoption.CURLOPT_UPLOAD, 1L);
+                    }
+                }
             }
 
             private void SetDecompressionOptions()
@@ -254,7 +278,8 @@ namespace System.Net.Http
                 SetCurlOption(CURLoption.CURLOPT_PROXYPORT, proxyUri.Port);
                 VerboseTrace("Set proxy: " + proxyUri.ToString());
 
-                NetworkCredential credentials = GetCredentials(_handler.Proxy.Credentials, _requestMessage.RequestUri);
+                KeyValuePair<NetworkCredential, ulong> credentialScheme = GetCredentials(_handler.Proxy.Credentials, _requestMessage.RequestUri);
+                NetworkCredential credentials = credentialScheme.Key;
                 if (credentials != null)
                 {
                     if (string.IsNullOrEmpty(credentials.UserName))
@@ -270,20 +295,22 @@ namespace System.Net.Http
                 }
             }
 
-            internal void SetCredentialsOptions(NetworkCredential credentials)
+            internal void SetCredentialsOptions(KeyValuePair<NetworkCredential, ulong> credentialSchemePair)
             {
-                if (credentials == null)
+                if (credentialSchemePair.Key == null)
                 {
                     _networkCredential = null;
                     return;
                 }
 
+                NetworkCredential credentials = credentialSchemePair.Key;
+                ulong authScheme = credentialSchemePair.Value;
                 string userName = string.IsNullOrEmpty(credentials.Domain) ?
                     credentials.UserName :
                     string.Format("{0}\\{1}", credentials.Domain, credentials.UserName);
 
                 SetCurlOption(CURLoption.CURLOPT_USERNAME, userName);
-                SetCurlOption(CURLoption.CURLOPT_HTTPAUTH, CURLAUTH.AuthAny);
+                SetCurlOption(CURLoption.CURLOPT_HTTPAUTH, authScheme);
                 if (credentials.Password != null)
                 {
                     SetCurlOption(CURLoption.CURLOPT_PASSWORD, credentials.Password);
@@ -301,7 +328,7 @@ namespace System.Net.Http
                 }
 
                 string cookieValues = _handler.CookieContainer.GetCookieHeader(uri);
-                if (cookieValues != null)
+                if (!string.IsNullOrEmpty(cookieValues))
                 {
                     SetCurlOption(CURLoption.CURLOPT_COOKIE, cookieValues);
                     VerboseTrace("Set cookies");
@@ -366,6 +393,17 @@ namespace System.Net.Http
                 {
                     slist.Dispose();
                 }
+            }
+
+            private void SetSslOptions()
+            {
+                // SSL Options should be set regardless of the type of the original request,
+                // in case an http->https redirection occurs.
+                //
+                // While this does slow down the theoretical best path of the request the code
+                // to decide that we need to register the callback is more complicated than, and
+                // potentially more expensive than, just always setting the callback.
+                SslProvider.SetSslOptions(this);
             }
 
             private static void AddRequestHeaders(HttpHeaders headers, SafeCurlSlistHandle handle)

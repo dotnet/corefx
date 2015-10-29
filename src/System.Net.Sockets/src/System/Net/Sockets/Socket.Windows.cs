@@ -70,22 +70,6 @@ namespace System.Net.Sockets
                 out remoteSocketAddressLength);
         }
 
-        internal bool DisconnectEx(SafeCloseSocket socketHandle, SafeHandle overlapped, int flags, int reserved)
-        {
-            EnsureDynamicWinsockMethods();
-            DisconnectExDelegate disconnectEx = _dynamicWinsockMethods.GetDelegate<DisconnectExDelegate>(socketHandle);
-
-            return disconnectEx(socketHandle, overlapped, flags, reserved);
-        }
-
-        internal bool DisconnectExBlocking(IntPtr socketHandle, IntPtr overlapped, int flags, int reserved)
-        {
-            EnsureDynamicWinsockMethods();
-            DisconnectExDelegateBlocking disconnectEx_Blocking = _dynamicWinsockMethods.GetDelegate<DisconnectExDelegateBlocking>(_handle);
-
-            return disconnectEx_Blocking(socketHandle, overlapped, flags, reserved);
-        }
-
         internal bool ConnectEx(SafeCloseSocket socketHandle,
             IntPtr socketAddress,
             int socketAddressSize,
@@ -116,12 +100,13 @@ namespace System.Net.Sockets
             return recvMsg_Blocking(socketHandle, msg, out bytesTransferred, overlapped, completionRoutine);
         }
 
-        internal bool TransmitPackets(SafeCloseSocket socketHandle, IntPtr packetArray, int elementCount, int sendSize, SafeNativeOverlapped overlapped, TransmitFileOptions flags)
+        internal bool TransmitPackets(SafeCloseSocket socketHandle, IntPtr packetArray, int elementCount, int sendSize, SafeNativeOverlapped overlapped)
         {
             EnsureDynamicWinsockMethods();
             TransmitPacketsDelegate transmitPackets = _dynamicWinsockMethods.GetDelegate<TransmitPacketsDelegate>(socketHandle);
 
-            return transmitPackets(socketHandle, packetArray, elementCount, sendSize, overlapped, flags);
+            // UseDefaultWorkerThread = 0.
+            return transmitPackets(socketHandle, packetArray, elementCount, sendSize, overlapped, 0);
         }
 
         internal static IntPtr[] SocketListToFileDescriptorSet(IList socketList)

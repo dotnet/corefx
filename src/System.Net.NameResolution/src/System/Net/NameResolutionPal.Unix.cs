@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Diagnostics;
+using System.Net.Internals;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -39,6 +40,7 @@ namespace System.Net
                 case (int)Interop.Sys.GetAddrInfoErrorFlags.EAI_AGAIN:
                     return SocketError.TryAgain;
                 case (int)Interop.Sys.GetAddrInfoErrorFlags.EAI_BADFLAGS:
+                case (int)Interop.Sys.GetAddrInfoErrorFlags.EAI_BADARG:
                     return SocketError.InvalidArgument;
                 case (int)Interop.Sys.GetAddrInfoErrorFlags.EAI_FAIL:
                     return SocketError.NoRecovery;
@@ -52,18 +54,15 @@ namespace System.Net
             }
         }
 
-        private static unsafe IPHostEntry CreateHostEntry(Interop.libc.hostent* hostent)
+        private static unsafe IPHostEntry CreateIPHostEntry(Interop.Sys.HostEntry hostEntry)
         {
             string hostName = null;
-            if (hostent->h_name != null)
+            if (hostEntry.CanonicalName != null)
             {
-                hostName = Marshal.PtrToStringAnsi((IntPtr)hostent->h_name);
+                hostName = Marshal.PtrToStringAnsi((IntPtr)hostEntry.CanonicalName);
             }
 
-            int numAddresses;
-            for (numAddresses = 0; hostent->h_addr_list[numAddresses] != null; numAddresses++)
-            {
-            }
+            int numAddresses = hostEntry.IPAddressCount;
 
             IPAddress[] ipAddresses;
             if (numAddresses == 0)
@@ -73,15 +72,20 @@ namespace System.Net
             else
             {
                 ipAddresses = new IPAddress[numAddresses];
+
+                void* addressListHandle = hostEntry.AddressListHandle;
+                var nativeIPAddress = default(Interop.Sys.IPAddress);
                 for (int i = 0; i < numAddresses; i++)
                 {
-                    Debug.Assert(hostent->h_addr_list[i] != null);
-                    ipAddresses[i] = new IPAddress(*(int*)hostent->h_addr_list[i]);
+                    int err = Interop.Sys.GetNextIPAddress(&hostEntry, &addressListHandle, &nativeIPAddress);
+                    Debug.Assert(err == 0);
+
+                    ipAddresses[i] = nativeIPAddress.GetIPAddress();
                 }
             }
 
             int numAliases;
-            for (numAliases = 0; hostent->h_aliases[numAliases] != null; numAliases++)
+            for (numAliases = 0; hostEntry.Aliases[numAliases] != null; numAliases++)
             {
             }
 
@@ -95,10 +99,12 @@ namespace System.Net
                 aliases = new string[numAliases];
                 for (int i = 0; i < numAliases; i++)
                 {
-                    Debug.Assert(hostent->h_aliases[i] != null);
-                    aliases[i] = Marshal.PtrToStringAnsi((IntPtr)hostent->h_aliases[i]);
+                    Debug.Assert(hostEntry.Aliases[i] != null);
+                    aliases[i] = Marshal.PtrToStringAnsi((IntPtr)hostEntry.Aliases[i]);
                 }
             }
+
+            Interop.Sys.FreeHostEntry(&hostEntry);
 
             return new IPHostEntry
             {
@@ -108,10 +114,36 @@ namespace System.Net
             };
         }
 
+        public static unsafe IPHostEntry GetHostByName(string hostName)
+        {
+            Interop.Sys.HostEntry entry;
+            int err = Interop.Sys.GetHostByName(hostName, &entry);
+            if (err != 0)
+            {
+                throw new InternalSocketException(GetSocketErrorForErrno(err), err);
+            }
+
+            return CreateIPHostEntry(entry);
+        }
+
+        public static unsafe IPHostEntry GetHostByAddr(IPAddress addr)
+        {
+            // TODO #2891: Optimize this (or decide if this legacy code can be removed):
+            Interop.Sys.IPAddress address = addr.GetNativeIPAddress();
+            Interop.Sys.HostEntry entry;
+            int err = Interop.Sys.GetHostByAddress(&address, &entry);
+            if (err != 0)
+            {
+                throw new InternalSocketException(GetSocketErrorForErrno(err), err);
+            }
+
+            return CreateIPHostEntry(entry);
+        }
+
         public static unsafe SocketError TryGetAddrInfo(string name, out IPHostEntry hostinfo, out int nativeErrorCode)
         {
-            Interop.Sys.HostEntry* entry = null;
-            int result = Interop.Sys.GetHostEntriesForName(name, &entry);
+            Interop.Sys.HostEntry entry;
+            int result = Interop.Sys.GetHostEntryForName(name, &entry);
             if (result != 0)
             {
                 hostinfo = NameResolutionUtilities.GetUnresolvedAnswer(name);
@@ -121,54 +153,28 @@ namespace System.Net
 
             try
             {
-                string canonicalName = Marshal.PtrToStringAnsi((IntPtr)entry->CanonicalName);
+                string canonicalName = Marshal.PtrToStringAnsi((IntPtr)entry.CanonicalName);
 
                 hostinfo = new IPHostEntry
                 {
                     HostName = string.IsNullOrEmpty(canonicalName) ? name : canonicalName,
                     Aliases = Array.Empty<string>(),
-                    AddressList = new IPAddress[entry->Count]
+                    AddressList = new IPAddress[entry.IPAddressCount]
                 };
 
-                // Clean this up when fixing #3570
-                var buffer = new byte[SocketAddressPal.IPv6AddressSize];
-                for (int i = 0; i < entry->Count; i++)
+                void* addressListHandle = entry.AddressListHandle;
+                var nativeIPAddress = default(Interop.Sys.IPAddress);
+                for (int i = 0; i < entry.IPAddressCount; i++)
                 {
-                    SocketAddress sockaddr;
-                    IPEndPoint factory;
-                    int bufferLength;
-                    if (entry->Addresses[i].IsIpv6)
-                    {
-                        sockaddr = new SocketAddress(AddressFamily.InterNetworkV6);
-                        factory = IPEndPointStatics.IPv6Any;
-                        bufferLength = SocketAddressPal.IPv6AddressSize;
+                    int err = Interop.Sys.GetNextIPAddress(&entry, &addressListHandle, &nativeIPAddress);
+                    Debug.Assert(err == 0);
 
-                        SocketAddressPal.SetAddressFamily(buffer, AddressFamily.InterNetworkV6);
-                        SocketAddressPal.SetIPv6Address(buffer, entry->Addresses[i].Address, entry->Addresses[i].Count, 0);
-                        SocketAddressPal.SetPort(buffer, 0);
-                    }
-                    else
-                    {
-                        sockaddr = new SocketAddress(AddressFamily.InterNetwork);
-                        factory = IPEndPointStatics.Any;
-                        bufferLength = SocketAddressPal.IPv4AddressSize;
-
-                        SocketAddressPal.SetAddressFamily(buffer, AddressFamily.InterNetwork);
-                        SocketAddressPal.SetIPv4Address(buffer, entry->Addresses[i].Address);
-                        SocketAddressPal.SetPort(buffer, 0);
-                    }
-
-                    for (int d = 0; d < bufferLength; d++)
-                    {
-                        sockaddr[d] = buffer[d];
-                    }
-
-                    hostinfo.AddressList[i] = ((IPEndPoint)factory.Create(sockaddr)).Address;
+                    hostinfo.AddressList[i] = nativeIPAddress.GetIPAddress();
                 }
             }
             finally
             {
-                Interop.Sys.FreeHostEntriesForName(entry);
+                Interop.Sys.FreeHostEntry(&entry);
             }
 
             nativeErrorCode = 0;

@@ -4,7 +4,6 @@
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
-using Validation;
 using Xunit;
 
 namespace System.Collections.Immutable.Tests
@@ -190,6 +189,7 @@ namespace System.Collections.Immutable.Tests
             Assert.Throws<NotSupportedException>(() => map[3] = 5);
         }
 
+        [ActiveIssue(780)]
         [Fact]
         public void EqualsTest()
         {

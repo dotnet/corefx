@@ -7,7 +7,7 @@
     <ProjectGuid>{35FA1FA9-A504-4B9E-93F0-E5D03C21BECA}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AssemblyName>System.Xml.XDocument.Misc.Tests</AssemblyName>
-    <RootNamespace>CoreXml.Test.XLinq</RootNamespace>
+    <RootNamespace>System.Xml.Linq.Tests</RootNamespace>
   </PropertyGroup>
   <!-- Default configurations to help VS understand the configurations -->
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -24,11 +24,11 @@
     <Compile Include="XNameAPI.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="$(CommonTestPath)\SystemXml\XmlCoreTest\XmlCoreTest.csproj">
+    <ProjectReference Include="$(CommonTestPath)\System\Xml\XmlCoreTest\XmlCoreTest.csproj">
       <Project>{89701565-f68b-46d9-bd78-95b0f052c50b}</Project>
       <Name>XmlCoreTest</Name>
     </ProjectReference>
-    <ProjectReference Include="$(CommonTestPath)\SystemXml\XmlDiff\XmlDiff.csproj">
+    <ProjectReference Include="$(CommonTestPath)\System\Xml\XmlDiff\XmlDiff.csproj">
       <Project>{466d87df-bdec-4e6c-bacd-317d79b8edbe}</Project>
       <Name>XmlDiff</Name>
     </ProjectReference>

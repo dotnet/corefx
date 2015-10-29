@@ -321,6 +321,9 @@
   <data name="TooManySubnamespaces" xml:space="preserve">
     <value>There are too many subnamespaces.</value>
   </data>
+  <data name="SequencePointValueOutOfRange" xml:space="preserve">
+    <value>Sequence point value is out of range.</value>
+  </data>
   <data name="TypeFormat_DelimiterExpected" xml:space="preserve">
     <value>Expected '{0}', but found '{1}'.</value>
   </data>

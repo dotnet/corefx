@@ -84,6 +84,23 @@ namespace System.Dynamic.Utils
             }
         }
 
+        public static bool IsInteger64(Type type)
+        {
+            type = GetNonNullableType(type);
+            if (type.GetTypeInfo().IsEnum)
+            {
+                return false;
+            }
+            switch (type.GetTypeCode())
+            {
+                case TypeCode.Int64:
+                case TypeCode.UInt64:
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
         public static bool IsArithmetic(Type type)
         {
             type = GetNonNullableType(type);
@@ -683,7 +700,7 @@ namespace System.Dynamic.Utils
             return type.IsByRef ? type.GetElementType() : type;
         }
 
-#if FEATURE_CORECLR
+#if FEATURE_COMPILE
         internal static bool IsUnsigned(Type type)
         {
             type = GetNonNullableType(type);
@@ -713,5 +730,12 @@ namespace System.Dynamic.Utils
             }
         }
 #endif 
+
+        public static bool IsVector(this Type type)
+        {
+            // Unfortunately, the IsSzArray property of System.Type is inaccessible to us,
+            // so we use a little equality comparison trick instead:
+            return type == type.GetElementType().MakeArrayType();
+        }
     }
 }

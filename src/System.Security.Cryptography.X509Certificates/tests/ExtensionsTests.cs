@@ -129,70 +129,60 @@ namespace System.Security.Cryptography.X509Certificates.Tests
         }
 
         [Fact]
-        [ActiveIssue(1993, PlatformID.AnyUnix)]
         public static void KeyUsageExtension_CrlSign()
         {
             TestKeyUsageExtension(X509KeyUsageFlags.CrlSign, false, "03020102".HexToByteArray());
         }
 
         [Fact]
-        [ActiveIssue(1993, PlatformID.AnyUnix)]
         public static void KeyUsageExtension_DataEncipherment()
         {
             TestKeyUsageExtension(X509KeyUsageFlags.DataEncipherment, false, "03020410".HexToByteArray());
         }
 
         [Fact]
-        [ActiveIssue(1993, PlatformID.AnyUnix)]
         public static void KeyUsageExtension_DecipherOnly()
         {
             TestKeyUsageExtension(X509KeyUsageFlags.DecipherOnly, false, "0303070080".HexToByteArray());
         }
 
         [Fact]
-        [ActiveIssue(1993, PlatformID.AnyUnix)]
         public static void KeyUsageExtension_DigitalSignature()
         {
             TestKeyUsageExtension(X509KeyUsageFlags.DigitalSignature, false, "03020780".HexToByteArray());
         }
 
         [Fact]
-        [ActiveIssue(1993, PlatformID.AnyUnix)]
         public static void KeyUsageExtension_EncipherOnly()
         {
             TestKeyUsageExtension(X509KeyUsageFlags.EncipherOnly, false, "03020001".HexToByteArray());
         }
 
         [Fact]
-        [ActiveIssue(1993, PlatformID.AnyUnix)]
         public static void KeyUsageExtension_KeyAgreement()
         {
             TestKeyUsageExtension(X509KeyUsageFlags.KeyAgreement, false, "03020308".HexToByteArray());
         }
 
         [Fact]
-        [ActiveIssue(1993, PlatformID.AnyUnix)]
         public static void KeyUsageExtension_KeyCertSign()
         {
             TestKeyUsageExtension(X509KeyUsageFlags.KeyCertSign, false, "03020204".HexToByteArray());
         }
 
         [Fact]
-        [ActiveIssue(1993, PlatformID.AnyUnix)]
         public static void KeyUsageExtension_KeyEncipherment()
         {
             TestKeyUsageExtension(X509KeyUsageFlags.KeyEncipherment, false, "03020520".HexToByteArray());
         }
 
         [Fact]
-        [ActiveIssue(1993, PlatformID.AnyUnix)]
         public static void KeyUsageExtension_None()
         {
             TestKeyUsageExtension(X509KeyUsageFlags.None, false, "030100".HexToByteArray());
         }
 
         [Fact]
-        [ActiveIssue(1993, PlatformID.AnyUnix)]
         public static void KeyUsageExtension_NonRepudiation()
         {
             TestKeyUsageExtension(X509KeyUsageFlags.NonRepudiation, false, "03020640".HexToByteArray());
@@ -213,40 +203,51 @@ namespace System.Security.Cryptography.X509Certificates.Tests
             Assert.Equal(0, e.PathLengthConstraint);
         }
 
-        [Fact]
+        [Theory]
+        [MemberData("BasicConstraintsData")]
         [ActiveIssue(1993, PlatformID.AnyUnix)]
-        public static void BasicConstraintsExtension_Leaf()
+        public static void BasicConstraintsExtensionEncode(
+            bool certificateAuthority,
+            bool hasPathLengthConstraint,
+            int pathLengthConstraint,
+            bool critical,
+            string expectedDerString)
         {
-            TestBasicConstraintsExtension(false, false, 0, false, "3000".HexToByteArray());
+            X509BasicConstraintsExtension ext = new X509BasicConstraintsExtension(
+                certificateAuthority,
+                hasPathLengthConstraint,
+                pathLengthConstraint,
+                critical);
+
+            byte[] expectedDer = expectedDerString.HexToByteArray();
+            Assert.Equal(expectedDer, ext.RawData);
         }
 
-        [Fact]
-        [ActiveIssue(1993, PlatformID.AnyUnix)]
-        public static void BasicConstraintsExtension_CA_NoLength()
+        [Theory]
+        [MemberData("BasicConstraintsData")]
+        public static void BasicConstraintsExtensionDecode(
+            bool certificateAuthority,
+            bool hasPathLengthConstraint,
+            int pathLengthConstraint,
+            bool critical,
+            string rawDataString)
         {
-            TestBasicConstraintsExtension(true, false, 0, false, "30030101ff".HexToByteArray());
+            byte[] rawData = rawDataString.HexToByteArray();
+
+            X509BasicConstraintsExtension ext = new X509BasicConstraintsExtension(new AsnEncodedData(rawData), critical);
+            Assert.Equal(certificateAuthority, ext.CertificateAuthority);
+            Assert.Equal(hasPathLengthConstraint, ext.HasPathLengthConstraint);
+            Assert.Equal(pathLengthConstraint, ext.PathLengthConstraint);
         }
 
-        [Fact]
-        [ActiveIssue(1993, PlatformID.AnyUnix)]
-        public static void BasicConstraintsExtension_Leaf_Length0()
+        public static object[][] BasicConstraintsData = new object[][]
         {
-            TestBasicConstraintsExtension(false, true, 0, false, "3003020100".HexToByteArray());
-        }
-
-        [Fact]
-        [ActiveIssue(1993, PlatformID.AnyUnix)]
-        public static void BasicConstraintsExtension_LeafLongPath()
-        {
-            TestBasicConstraintsExtension(false, true, 7654321, false, "3005020374cbb1".HexToByteArray());
-        }
-
-        [Fact]
-        [ActiveIssue(1993, PlatformID.AnyUnix)]
-        public static void BasicConstraintsExtension_CA_559()
-        {
-            TestBasicConstraintsExtension(true, true, 559, false, "30070101ff0202022f".HexToByteArray());
-        }
+            new object[] { false, false, 0, false, "3000" },
+            new object[] { true, false, 0, false, "30030101ff" },
+            new object[] { false, true, 0, false, "3003020100" },
+            new object[] { false, true, 7654321, false, "3005020374cbb1" },
+            new object[] { true, true, 559, false, "30070101ff0202022f" },
+        };
 
         [Fact]
         public static void EnhancedKeyUsageExtensionDefault()
@@ -391,28 +392,6 @@ namespace System.Security.Cryptography.X509Certificates.Tests
             // Rebuild it from the RawData.
             ext = new X509KeyUsageExtension(new AsnEncodedData(rawData), critical);
             Assert.Equal(flags, ext.KeyUsages);
-        }
-
-        private static void TestBasicConstraintsExtension(
-            bool certificateAuthority,
-            bool hasPathLengthConstraint,
-            int pathLengthConstraint,
-            bool critical,
-            byte[] expectedDer)
-        {
-            X509BasicConstraintsExtension ext = new X509BasicConstraintsExtension(
-                certificateAuthority,
-                hasPathLengthConstraint,
-                pathLengthConstraint,
-                critical);
-
-            byte[] rawData = ext.RawData;
-            Assert.Equal(expectedDer, rawData);
-
-            ext = new X509BasicConstraintsExtension(new AsnEncodedData(rawData), critical);
-            Assert.Equal(certificateAuthority, ext.CertificateAuthority);
-            Assert.Equal(hasPathLengthConstraint, ext.HasPathLengthConstraint);
-            Assert.Equal(pathLengthConstraint, ext.PathLengthConstraint);
         }
 
         private static void TestEnhancedKeyUsageExtension(

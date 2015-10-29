@@ -62,12 +62,12 @@ namespace System.Reflection.Metadata.Ecma335
         GenericParamConstraint = 1UL << TableIndex.GenericParamConstraint,
 
         Document = 1UL << TableIndex.Document,
-        MethodBody = 1UL << TableIndex.MethodBody,
+        MethodDebugInformation = 1UL << TableIndex.MethodDebugInformation,
         LocalScope = 1UL << TableIndex.LocalScope,
         LocalVariable = 1UL << TableIndex.LocalVariable,
         LocalConstant = 1UL << TableIndex.LocalConstant,
         ImportScope = 1UL << TableIndex.ImportScope,
-        AsyncMethod = 1UL << TableIndex.StateMachineMethod,
+        StateMachineMethod = 1UL << TableIndex.StateMachineMethod,
         CustomDebugInformation = 1UL << TableIndex.CustomDebugInformation,
 
         PtrTables =
@@ -122,12 +122,12 @@ namespace System.Reflection.Metadata.Ecma335
 
         PortablePdb_TablesMask =
             Document
-          | MethodBody
+          | MethodDebugInformation
           | LocalScope
           | LocalVariable
           | LocalConstant
           | ImportScope
-          | AsyncMethod
+          | StateMachineMethod
           | CustomDebugInformation,
 
         V3_0_TablesMask =
@@ -140,6 +140,7 @@ namespace System.Reflection.Metadata.Ecma335
         StringHeapLarge = 0x01, // 4 byte uint indexes used for string heap offsets
         GuidHeapLarge = 0x02,   // 4 byte uint indexes used for GUID heap offsets
         BlobHeapLarge = 0x04,   // 4 byte uint indexes used for Blob heap offsets
+        ExtraData = 0x40,       // Indicates that there is an extra 4 bytes of data immediately after the row counts
     }
 
     internal enum StringKind : byte
@@ -229,7 +230,7 @@ namespace System.Reflection.Metadata.Ecma335
 
         // debug tables:
         internal const uint Document = (uint)TableIndex.Document;
-        internal const uint MethodBody = (uint)TableIndex.MethodBody;
+        internal const uint MethodDebugInformation = (uint)TableIndex.MethodDebugInformation;
         internal const uint LocalScope = (uint)TableIndex.LocalScope;
         internal const uint LocalVariable = (uint)TableIndex.LocalVariable;
         internal const uint LocalConstant = (uint)TableIndex.LocalConstant;
@@ -315,7 +316,7 @@ namespace System.Reflection.Metadata.Ecma335
 
         // debug tables:
         internal const uint Document = HandleType.Document << RowIdBitCount;
-        internal const uint MethodBody = HandleType.MethodBody << RowIdBitCount;
+        internal const uint MethodDebugInformation = HandleType.MethodDebugInformation << RowIdBitCount;
         internal const uint LocalScope = HandleType.LocalScope << RowIdBitCount;
         internal const uint LocalVariable = HandleType.LocalVariable << RowIdBitCount;
         internal const uint LocalConstant = HandleType.LocalConstant << RowIdBitCount;
