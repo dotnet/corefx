@@ -1,6 +1,7 @@
 {
   "dependencies": {
     "System.Runtime": "4.0.20",
+    "System.Runtime.InteropServices.RuntimeInformation": "4.0.0-beta-*",
     "System.AppContext": "4.0.0",
     "System.Collections": "4.0.10",
     "System.IO": "4.0.10",

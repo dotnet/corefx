@@ -353,7 +353,7 @@
           "lib/DNXCore50/System.Threading.Tasks.dll": {}
         }
       },
-      "System.Threading.Thread/4.0.0-beta-23420": {
+      "System.Threading.Thread/4.0.0-beta-23427": {
         "type": "package",
         "dependencies": {
           "System.Runtime": "4.0.0"
@@ -827,7 +827,7 @@
           "lib/netcore50/System.Threading.Tasks.dll": {}
         }
       },
-      "System.Threading.Thread/4.0.0-beta-23420": {
+      "System.Threading.Thread/4.0.0-beta-23427": {
         "type": "package",
         "dependencies": {
           "System.Runtime": "4.0.0"
@@ -1234,7 +1234,7 @@
           "lib/DNXCore50/System.Threading.Tasks.dll": {}
         }
       },
-      "System.Threading.Thread/4.0.0-beta-23420": {
+      "System.Threading.Thread/4.0.0-beta-23427": {
         "type": "package",
         "dependencies": {
           "System.Runtime": "4.0.0"
@@ -1644,7 +1644,7 @@
           "lib/DNXCore50/System.Threading.Tasks.dll": {}
         }
       },
-      "System.Threading.Thread/4.0.0-beta-23420": {
+      "System.Threading.Thread/4.0.0-beta-23427": {
         "type": "package",
         "dependencies": {
           "System.Runtime": "4.0.0"
@@ -2118,7 +2118,7 @@
           "lib/netcore50/System.Threading.Tasks.dll": {}
         }
       },
-      "System.Threading.Thread/4.0.0-beta-23420": {
+      "System.Threading.Thread/4.0.0-beta-23427": {
         "type": "package",
         "dependencies": {
           "System.Runtime": "4.0.0"
@@ -2589,7 +2589,7 @@
           "lib/netcore50/System.Threading.Tasks.dll": {}
         }
       },
-      "System.Threading.Thread/4.0.0-beta-23420": {
+      "System.Threading.Thread/4.0.0-beta-23427": {
         "type": "package",
         "dependencies": {
           "System.Runtime": "4.0.0"
@@ -3589,10 +3589,10 @@
         "System.Threading.Tasks.nuspec"
       ]
     },
-    "System.Threading.Thread/4.0.0-beta-23420": {
+    "System.Threading.Thread/4.0.0-beta-23427": {
       "type": "package",
       "serviceable": true,
-      "sha512": "d8eFZQv7ASAGW7nfFvhs4f3QfS9UkmN9cKxdNO0WNmEjIrHazKC7xuKQj8Idna90mN7uYF4kh51NLK1jIK1FaA==",
+      "sha512": "DtTC+vbmTdrC0k2vQpzRHswaGAD6csUJnmVSjXna8+7aCob9on1gHgEyZ1dG/n5txgwf9h/3OiDnWLltlSj7gQ==",
       "files": [
         "lib/DNXCore50/System.Threading.Thread.dll",
         "lib/MonoAndroid10/_._",
@@ -3616,8 +3616,8 @@
         "ref/net46/System.Threading.Thread.dll",
         "ref/xamarinios10/_._",
         "ref/xamarinmac20/_._",
-        "System.Threading.Thread.4.0.0-beta-23420.nupkg",
-        "System.Threading.Thread.4.0.0-beta-23420.nupkg.sha512",
+        "System.Threading.Thread.4.0.0-beta-23427.nupkg",
+        "System.Threading.Thread.4.0.0-beta-23427.nupkg.sha512",
         "System.Threading.Thread.nuspec"
       ]
     },

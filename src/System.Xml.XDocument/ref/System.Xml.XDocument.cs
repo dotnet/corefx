@@ -120,6 +120,7 @@ namespace System.Xml.Linq
         public XCData(System.Xml.Linq.XCData other) : base(default(string)) { }
         public override System.Xml.XmlNodeType NodeType { get { return default(System.Xml.XmlNodeType); } }
         public override void WriteTo(System.Xml.XmlWriter writer) { }
+        public override System.Threading.Tasks.Task WriteToAsync(System.Xml.XmlWriter writer, System.Threading.CancellationToken cancellationToken) { return default(System.Threading.Tasks.Task); }
     }
     public partial class XComment : System.Xml.Linq.XNode
     {
@@ -128,6 +129,7 @@ namespace System.Xml.Linq
         public override System.Xml.XmlNodeType NodeType { get { return default(System.Xml.XmlNodeType); } }
         public string Value { get { return default(string); } set { } }
         public override void WriteTo(System.Xml.XmlWriter writer) { }
+        public override System.Threading.Tasks.Task WriteToAsync(System.Xml.XmlWriter writer, System.Threading.CancellationToken cancellationToken) { return default(System.Threading.Tasks.Task); }
     }
     public abstract partial class XContainer : System.Xml.Linq.XNode
     {
@@ -177,6 +179,9 @@ namespace System.Xml.Linq
         public static System.Xml.Linq.XDocument Load(string uri, System.Xml.Linq.LoadOptions options) { return default(System.Xml.Linq.XDocument); }
         public static System.Xml.Linq.XDocument Load(System.Xml.XmlReader reader) { return default(System.Xml.Linq.XDocument); }
         public static System.Xml.Linq.XDocument Load(System.Xml.XmlReader reader, System.Xml.Linq.LoadOptions options) { return default(System.Xml.Linq.XDocument); }
+        public static System.Threading.Tasks.Task<System.Xml.Linq.XDocument> LoadAsync(System.IO.Stream stream, System.Xml.Linq.LoadOptions options, System.Threading.CancellationToken cancellationToken) { return default(System.Threading.Tasks.Task<System.Xml.Linq.XDocument>); }
+        public static System.Threading.Tasks.Task<System.Xml.Linq.XDocument> LoadAsync(System.IO.TextReader textReader, System.Xml.Linq.LoadOptions options, System.Threading.CancellationToken cancellationToken) { return default(System.Threading.Tasks.Task<System.Xml.Linq.XDocument>); }
+        public static System.Threading.Tasks.Task<System.Xml.Linq.XDocument> LoadAsync(System.Xml.XmlReader reader, System.Xml.Linq.LoadOptions options, System.Threading.CancellationToken cancellationToken) { return default(System.Threading.Tasks.Task<System.Xml.Linq.XDocument>); }
         public static System.Xml.Linq.XDocument Parse(string text) { return default(System.Xml.Linq.XDocument); }
         public static System.Xml.Linq.XDocument Parse(string text, System.Xml.Linq.LoadOptions options) { return default(System.Xml.Linq.XDocument); }
         public void Save(System.IO.Stream stream) { }
@@ -184,7 +189,11 @@ namespace System.Xml.Linq
         public void Save(System.IO.TextWriter textWriter) { }
         public void Save(System.IO.TextWriter textWriter, System.Xml.Linq.SaveOptions options) { }
         public void Save(System.Xml.XmlWriter writer) { }
+        public System.Threading.Tasks.Task SaveAsync(System.IO.Stream stream, System.Xml.Linq.SaveOptions options, System.Threading.CancellationToken cancellationToken) { return default(System.Threading.Tasks.Task); }
+        public System.Threading.Tasks.Task SaveAsync(System.IO.TextWriter textWriter, System.Xml.Linq.SaveOptions options, System.Threading.CancellationToken cancellationToken) { return default(System.Threading.Tasks.Task); }
+        public System.Threading.Tasks.Task SaveAsync(System.Xml.XmlWriter writer, System.Threading.CancellationToken cancellationToken) { return default(System.Threading.Tasks.Task); }
         public override void WriteTo(System.Xml.XmlWriter writer) { }
+        public override System.Threading.Tasks.Task WriteToAsync(System.Xml.XmlWriter writer, System.Threading.CancellationToken cancellationToken) { return default(System.Threading.Tasks.Task); }
     }
     public partial class XDocumentType : System.Xml.Linq.XNode
     {
@@ -196,6 +205,7 @@ namespace System.Xml.Linq
         public string PublicId { get { return default(string); } set { } }
         public string SystemId { get { return default(string); } set { } }
         public override void WriteTo(System.Xml.XmlWriter writer) { }
+        public override System.Threading.Tasks.Task WriteToAsync(System.Xml.XmlWriter writer, System.Threading.CancellationToken cancellationToken) { return default(System.Threading.Tasks.Task); }
     }
     public partial class XElement : System.Xml.Linq.XContainer, System.Xml.Serialization.IXmlSerializable
     {
@@ -232,6 +242,9 @@ namespace System.Xml.Linq
         public static System.Xml.Linq.XElement Load(string uri, System.Xml.Linq.LoadOptions options) { return default(System.Xml.Linq.XElement); }
         public static System.Xml.Linq.XElement Load(System.Xml.XmlReader reader) { return default(System.Xml.Linq.XElement); }
         public static System.Xml.Linq.XElement Load(System.Xml.XmlReader reader, System.Xml.Linq.LoadOptions options) { return default(System.Xml.Linq.XElement); }
+        public static System.Threading.Tasks.Task<System.Xml.Linq.XElement> LoadAsync(System.IO.Stream stream, System.Xml.Linq.LoadOptions options, System.Threading.CancellationToken cancellationToken) { return default(System.Threading.Tasks.Task<System.Xml.Linq.XElement>); }
+        public static System.Threading.Tasks.Task<System.Xml.Linq.XElement> LoadAsync(System.IO.TextReader textReader, System.Xml.Linq.LoadOptions options, System.Threading.CancellationToken cancellationToken) { return default(System.Threading.Tasks.Task<System.Xml.Linq.XElement>); }
+        public static System.Threading.Tasks.Task<System.Xml.Linq.XElement> LoadAsync(System.Xml.XmlReader reader, System.Xml.Linq.LoadOptions options, System.Threading.CancellationToken cancellationToken) { return default(System.Threading.Tasks.Task<System.Xml.Linq.XElement>); }
         [System.CLSCompliantAttribute(false)]
         public static explicit operator bool (System.Xml.Linq.XElement element) { return default(bool); }
         [System.CLSCompliantAttribute(false)]
@@ -295,6 +308,9 @@ namespace System.Xml.Linq
         public void Save(System.IO.TextWriter textWriter) { }
         public void Save(System.IO.TextWriter textWriter, System.Xml.Linq.SaveOptions options) { }
         public void Save(System.Xml.XmlWriter writer) { }
+        public System.Threading.Tasks.Task SaveAsync(System.IO.Stream stream, System.Xml.Linq.SaveOptions options, System.Threading.CancellationToken cancellationToken) { return default(System.Threading.Tasks.Task); }
+        public System.Threading.Tasks.Task SaveAsync(System.IO.TextWriter textWriter, System.Xml.Linq.SaveOptions options, System.Threading.CancellationToken cancellationToken) { return default(System.Threading.Tasks.Task); }
+        public System.Threading.Tasks.Task SaveAsync(System.Xml.XmlWriter writer, System.Threading.CancellationToken cancellationToken) { return default(System.Threading.Tasks.Task); }
         public void SetAttributeValue(System.Xml.Linq.XName name, object value) { }
         public void SetElementValue(System.Xml.Linq.XName name, object value) { }
         public void SetValue(object value) { }
@@ -302,6 +318,7 @@ namespace System.Xml.Linq
         void System.Xml.Serialization.IXmlSerializable.ReadXml(System.Xml.XmlReader reader) { }
         void System.Xml.Serialization.IXmlSerializable.WriteXml(System.Xml.XmlWriter writer) { }
         public override void WriteTo(System.Xml.XmlWriter writer) { }
+        public override System.Threading.Tasks.Task WriteToAsync(System.Xml.XmlWriter writer, System.Threading.CancellationToken cancellationToken) { return default(System.Threading.Tasks.Task); }
     }
     public sealed partial class XName : System.IEquatable<System.Xml.Linq.XName>
     {
@@ -364,12 +381,14 @@ namespace System.Xml.Linq
         public System.Collections.Generic.IEnumerable<System.Xml.Linq.XNode> NodesAfterSelf() { return default(System.Collections.Generic.IEnumerable<System.Xml.Linq.XNode>); }
         public System.Collections.Generic.IEnumerable<System.Xml.Linq.XNode> NodesBeforeSelf() { return default(System.Collections.Generic.IEnumerable<System.Xml.Linq.XNode>); }
         public static System.Xml.Linq.XNode ReadFrom(System.Xml.XmlReader reader) { return default(System.Xml.Linq.XNode); }
+        public static System.Threading.Tasks.Task<System.Xml.Linq.XNode> ReadFromAsync(System.Xml.XmlReader reader, System.Threading.CancellationToken cancellationToken) { return default(System.Threading.Tasks.Task<System.Xml.Linq.XNode>); }
         public void Remove() { }
         public void ReplaceWith(object content) { }
         public void ReplaceWith(params object[] content) { }
         public override string ToString() { return default(string); }
         public string ToString(System.Xml.Linq.SaveOptions options) { return default(string); }
         public abstract void WriteTo(System.Xml.XmlWriter writer);
+        public abstract System.Threading.Tasks.Task WriteToAsync(System.Xml.XmlWriter writer, System.Threading.CancellationToken cancellationToken);
     }
     public sealed partial class XNodeDocumentOrderComparer : System.Collections.Generic.IComparer<System.Xml.Linq.XNode>, System.Collections.IComparer
     {
@@ -429,6 +448,7 @@ namespace System.Xml.Linq
         public override System.Xml.XmlNodeType NodeType { get { return default(System.Xml.XmlNodeType); } }
         public string Target { get { return default(string); } set { } }
         public override void WriteTo(System.Xml.XmlWriter writer) { }
+        public override System.Threading.Tasks.Task WriteToAsync(System.Xml.XmlWriter writer, System.Threading.CancellationToken cancellationToken) { return default(System.Threading.Tasks.Task); }
     }
     public partial class XStreamingElement
     {
@@ -454,5 +474,6 @@ namespace System.Xml.Linq
         public override System.Xml.XmlNodeType NodeType { get { return default(System.Xml.XmlNodeType); } }
         public string Value { get { return default(string); } set { } }
         public override void WriteTo(System.Xml.XmlWriter writer) { }
+        public override System.Threading.Tasks.Task WriteToAsync(System.Xml.XmlWriter writer, System.Threading.CancellationToken cancellationToken) { return default(System.Threading.Tasks.Task); }
     }
 }
