@@ -1,14 +1,10 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using Xunit;
-using System;
 using System.Collections.Generic;
-using System.Security;
-// TPL namespaces
-using System.Threading;
-using System.Threading.Tasks;
 using System.Diagnostics;
+using System.Security;
+using Xunit;
 
 namespace System.Threading.Tasks.Tests
 {
@@ -23,280 +19,213 @@ namespace System.Threading.Tasks.Tests
         {
             Debug.WriteLine("* RunBlockedInjectionTest() -- if it deadlocks, it failed");
 
-            ManualResetEvent mre = new ManualResetEvent(false);
-
-            // we need to run this test in a local task scheduler, because it needs to to perform 
-            // the verification based on a known number of initially available threads.
-            //
-            //
-            // @TODO: When we reach the _planB branch we need to add a trick here using ThreadPool.SetMaxThread
-            //        to bring down the TP worker count. This is because previous activity in the test process might have 
-            //        injected workers.
-            TaskScheduler tm = TaskScheduler.Default;
-
-            // Create many tasks blocked on the MRE.
-
-            int processorCount = Environment.ProcessorCount;
-            Task[] tasks = new Task[processorCount];
-            for (int i = 0; i < tasks.Length; i++)
+            using (ManualResetEvent mre = new ManualResetEvent(false))
             {
-                tasks[i] = Task.Factory.StartNew(delegate { mre.WaitOne(); }, CancellationToken.None, TaskCreationOptions.None, tm);
+                // This test needs to be run with a local task scheduler, because it needs to perform
+                // the verification based on a known number of initially available threads.
+                //
+                //
+                // @TODO: When we reach the _planB branch we need to add a trick here using ThreadPool.SetMaxThread
+                //        to bring down the TP worker count. This is because previous activity in the test process might have
+                //        injected workers.
+                TaskScheduler tm = TaskScheduler.Default;
+
+                // Create many tasks blocked on the MRE.
+
+                int processorCount = Environment.ProcessorCount;
+                Task[] tasks = new Task[processorCount];
+                for (int i = 0; i < tasks.Length; i++)
+                {
+                    tasks[i] = Task.Factory.StartNew(() => mre.WaitOne(), CancellationToken.None, TaskCreationOptions.None, tm);
+                }
+
+                // TODO: Evaluate use of safety valve.
+                // Create one task that signals the MRE, and wait for it.
+                Assert.True(Task.Factory.StartNew(() => mre.Set(), CancellationToken.None, TaskCreationOptions.None, tm).Wait(TimeSpan.FromMinutes(10)));
+
+                // Lastly, wait for the others to complete.
+                Assert.True(Task.WaitAll(tasks, TimeSpan.FromMinutes(10)));
             }
-
-            // Create one task that signals the MRE, and wait for it.
-            Task.Factory.StartNew(delegate { mre.Set(); }, CancellationToken.None, TaskCreationOptions.None, tm).Wait();
-
-            // Lastly, wait for the others to complete.
-            Task.WaitAll(tasks);
         }
 
         [Fact]
-        public static void RunBuggySchedulerTests()
+        public static void BuggyScheduler_Start_Test()
         {
-            Debug.WriteLine("* RunBuggySchedulerTests()");
-
             BuggyTaskScheduler bts = new BuggyTaskScheduler();
-            Task t1 = new Task(delegate { });
-            Task t2 = new Task(delegate { });
+            Task task = new Task(() => { /* do nothing */ });
 
-            //
-            // Test Task.Start(buggy scheduler)
-            //
-            Debug.WriteLine("  -- testing Task.Start(buggy scheduler)");
-            try
-            {
-                t1.Start(bts);
-                Assert.True(false, string.Format("    > FAILED.  No exception thrown."));
-            }
-            catch (TaskSchedulerException)
-            {
-            }
-            catch (Exception e)
-            {
-                Assert.True(false, string.Format("    > FAILED. Wrong exception thrown (expected TaskSchedulerException): {0}", e));
-            }
+            Assert.Throws<TaskSchedulerException>(() => task.Start(bts));
+            Assert.Equal(TaskStatus.Faulted, task.Status);
+            AggregateException ae = Assert.Throws<AggregateException>(() => task.Wait());
+            Assert.IsType<TaskSchedulerException>(ae.InnerException);
+        }
 
-            if (t1.Status != TaskStatus.Faulted)
-            {
-                Assert.True(false, string.Format("    > FAILED. Task ended up in wrong status (expected Faulted): {0}", t1.Status));
-            }
+        [Fact]
+        public static void BuggyScheduler_RunSynchronously_Test()
+        {
+            BuggyTaskScheduler bts = new BuggyTaskScheduler();
+            Task task = new Task(() => { /* do nothing */ });
 
+            Assert.Throws<TaskSchedulerException>(() => task.RunSynchronously(bts));
+            Assert.Equal(TaskStatus.Faulted, task.Status);
+            AggregateException ae = Assert.Throws<AggregateException>(() => task.Wait());
+            Assert.IsType<TaskSchedulerException>(ae.InnerException);
+        }
 
-            Debug.WriteLine("    -- Waiting on Faulted task (there's a problem if we deadlock)...");
-            try
-            {
-                t1.Wait();
-                Assert.True(false, string.Format("    > FAILED.  No exception thrown from Wait()."));
-            }
-            catch (AggregateException ae)
-            {
-                if (!(ae.InnerExceptions[0] is TaskSchedulerException))
-                {
-                    Assert.True(false, string.Format("    > FAILED.  Wrong inner exception thrown from Wait(): {0}", ae.InnerExceptions[0].GetType().Name));
-                }
-            }
+        [Fact]
+        public async static void BuggyScheduler_StartNew_Test()
+        {
+            BuggyTaskScheduler bts = new BuggyTaskScheduler();
 
-            //
-            // Test Task.RunSynchronously(buggy scheduler)
-            //
-            Debug.WriteLine("  -- testing Task.RunSynchronously(buggy scheduler)");
-            try
-            {
-                t2.RunSynchronously(bts);
-                Assert.True(false, string.Format("    > FAILED.  No exception thrown."));
-            }
-            catch (TaskSchedulerException) { }
-            catch (Exception e)
-            {
-                Assert.True(false, string.Format("    > FAILED. Wrong exception thrown (expected TaskSchedulerException): {0}", e));
-            }
+            await Assert.ThrowsAsync<TaskSchedulerException>(() => Task.Factory.StartNew(() => { /* do nothing */ },
+                CancellationToken.None, TaskCreationOptions.None, bts));
+        }
 
-            if (t2.Status != TaskStatus.Faulted)
-            {
-                Assert.True(false, string.Format("    > FAILED. Task ended up in wrong status (expected Faulted): {0}", t1.Status));
-            }
+        [Fact]
+        public static void BuggyScheduler_ContinueWith_Synchronous_Test()
+        {
+            BuggyTaskScheduler bts = new BuggyTaskScheduler();
 
-            Debug.WriteLine("    -- Waiting on Faulted task (there's a problem if we deadlock)...");
-            try
-            {
-                t2.Wait();
-                Assert.True(false, string.Format("    > FAILED.  No exception thrown from Wait()."));
-            }
-            catch (AggregateException ae)
-            {
-                if (!(ae.InnerExceptions[0] is TaskSchedulerException))
-                {
-                    Assert.True(false, string.Format("    > FAILED.  Wrong inner exception thrown from Wait(): {0}", ae.InnerExceptions[0].GetType().Name));
-                }
-            }
-
-            //
-            // Test StartNew(buggy scheduler)
-            //
-            Debug.WriteLine("  -- testing Task.Factory.StartNew(buggy scheduler)");
-            try
-            {
-                Task t3 = Task.Factory.StartNew(delegate { }, CancellationToken.None, TaskCreationOptions.None, bts);
-                Assert.True(false, string.Format("    > FAILED.  No exception thrown."));
-            }
-            catch (TaskSchedulerException) { }
-            catch (Exception e)
-            {
-                Assert.True(false, string.Format("    > FAILED. Wrong exception thrown (expected TaskSchedulerException): {0}", e));
-            }
-
-            //
-            // Test continuations
-            //
-            Debug.WriteLine("  -- testing Task.ContinueWith(buggy scheduler)");
-            Task completedTask = Task.Factory.StartNew(delegate { });
+            Task completedTask = Task.Factory.StartNew(() => { /* do nothing */ });
             completedTask.Wait();
 
-            Task tc1 = completedTask.ContinueWith(delegate { }, CancellationToken.None, TaskContinuationOptions.ExecuteSynchronously, bts);
+            Task continuation = completedTask.ContinueWith(ignore => { /* do nothing */ }, CancellationToken.None, TaskContinuationOptions.ExecuteSynchronously, bts);
 
-            Debug.WriteLine("    -- Waiting on Faulted task (there's a problem if we deadlock)...");
+            AggregateException ae = Assert.Throws<AggregateException>(() => continuation.Wait());
+            Assert.IsType<TaskSchedulerException>(ae.InnerException);
+        }
+
+        [Fact]
+        public static void BuggyScheduler_ContinueWith_Test()
+        {
+            BuggyTaskScheduler bts = new BuggyTaskScheduler();
+
+            Task completedTask = Task.Factory.StartNew(() => { /* do nothing */ });
+            completedTask.Wait();
+
+            Task continuation = completedTask.ContinueWith(ignore => { /* do nothing */ }, CancellationToken.None, TaskContinuationOptions.None, bts);
+
+            AggregateException ae = Assert.Throws<AggregateException>(() => continuation.Wait());
+            Assert.IsType<TaskSchedulerException>(ae.InnerException);
+        }
+
+        [Fact]
+        public static void BuggyScheduler_Inlining_Test()
+        {
+            // won't throw on QueueTask
+            BuggyTaskScheduler bts2 = new BuggyTaskScheduler(false);
+
+            Task task = new Task(() => { /* do nothing */ });
+            task.Start(bts2);
+
+            Assert.Throws<TaskSchedulerException>(() => task.Wait());
+        }
+
+        [Fact]
+        [OuterLoop]
+        public static void SynchronizationContext_TaskScheduler_Wait_Test()
+        {
+            // Remember the current SynchronizationContext, so it can be restored
+            SynchronizationContext previousSC = SynchronizationContext.Current;
             try
             {
-                tc1.Wait();
-                Assert.True(false, string.Format("    > FAILED.  No exception thrown (sync)."));
-            }
-            catch (AggregateException ae)
-            {
-                if (!(ae.InnerExceptions[0] is TaskSchedulerException))
-                {
-                    Assert.True(false, string.Format("    > FAILED.  Wrong inner exception thrown from Wait() (sync): {0}", ae.InnerExceptions[0].GetType().Name));
-                }
-            }
-            catch (Exception e)
-            {
-                Assert.True(false, string.Format("    > FAILED.  Wrong exception thrown (sync): {0}", e));
-            }
+                // Now make up a "real" SynchronizationContext and install it
+                SimpleSynchronizationContext newSC = new SimpleSynchronizationContext();
+                SynchronizationContext.SetSynchronizationContext(newSC);
 
-            Task tc2 = completedTask.ContinueWith(delegate { }, CancellationToken.None, TaskContinuationOptions.None, bts);
+                // Create a scheduler based on the current SC
+                TaskScheduler scTS = TaskScheduler.FromCurrentSynchronizationContext();
 
-            Debug.WriteLine("    -- Waiting on Faulted task (there's a problem if we deadlock)...");
-            try
-            {
-                tc2.Wait();
-                Assert.True(false, string.Format("    > FAILED.  No exception thrown (async)."));
-            }
-            catch (AggregateException ae)
-            {
-                if (!(ae.InnerExceptions[0] is TaskSchedulerException))
-                {
-                    Assert.True(false, string.Format("    > FAILED.  Wrong inner exception thrown from Wait() (async): {0}", ae.InnerExceptions[0].GetType().Name));
-                }
-            }
-            catch (Exception e)
-            {
-                Assert.True(false, string.Format("    > FAILED.  Wrong exception thrown (async): {0}", e));
-            }
+                //
+                // Launch a Task on scTS, make sure that it is processed in the expected fashion
+                //
+                bool sideEffect = false;
+                Task task = Task.Factory.StartNew(() => { sideEffect = true; }, CancellationToken.None, TaskCreationOptions.None, scTS);
 
-            // Test Wait()/inlining
-            Debug.WriteLine("  -- testing Task.Wait(task started on buggy scheduler)");
-            BuggyTaskScheduler bts2 = new BuggyTaskScheduler(false); // won't throw on QueueTask
-            Task t4 = new Task(delegate { });
-            t4.Start(bts2);
-            try
-            {
-                t4.Wait();
-                Assert.True(false, string.Format("    > FAILED.  Expected inlining exception"));
+                task.Wait();
+
+                Assert.True(task.IsCompleted, "Expected task to have completed");
+                Assert.True(sideEffect, "Task appears not to have run");
+                Assert.Equal(1, newSC.PostCount);
+
+                Assert.Equal(1, scTS.MaximumConcurrencyLevel);
             }
-            catch (TaskSchedulerException) { }
-            catch (Exception e)
+            finally
             {
-                Assert.True(false, string.Format("    > FAILED.  Wrong exception thrown: {0}", e));
+                // restore original SC
+                SynchronizationContext.SetSynchronizationContext(previousSC);
             }
         }
 
         [Fact]
         [OuterLoop]
-        public static void RunSynchronizationContextTaskSchedulerTests()
+        public static void SynchronizationContext_TaskScheduler_Synchronous_Test()
         {
-            // Remember the current SynchronizationContext, so that we can restore it
+            // Remember the current SynchronizationContext, so it can be restored
             SynchronizationContext previousSC = SynchronizationContext.Current;
-
-            // Now make up a "real" SynchronizationContext abd install it
-            SimpleSynchronizationContext newSC = new SimpleSynchronizationContext();
-            SetSynchronizationContext(newSC);
-
-            // Create a scheduler based on the current SC
-            TaskScheduler scTS = TaskScheduler.FromCurrentSynchronizationContext();
-
-            //
-            // Launch a Task on scTS, make sure that it is processed in the expected fashion
-            //
-            bool sideEffect = false;
-            Task task = Task.Factory.StartNew(() => { sideEffect = true; }, CancellationToken.None, TaskCreationOptions.None, scTS);
-
-            Exception ex = null;
-
             try
             {
-                task.Wait();
-            }
-            catch (Exception e)
-            {
-                ex = e;
-            }
+                // Now make up a "real" SynchronizationContext and install it
+                SimpleSynchronizationContext newSC = new SimpleSynchronizationContext();
+                SynchronizationContext.SetSynchronizationContext(newSC);
 
-            Assert.True(task.IsCompleted, "Expected task to have completed");
-            Assert.True(ex == null, "Did not expect exception on Wait");
-            Assert.True(sideEffect, "Task appears not to have run");
-            Assert.True(newSC.PostCount == 1, "Expected exactly one post to underlying SynchronizationContext");
+                // Create a scheduler based on the current SC
+                TaskScheduler scTS = TaskScheduler.FromCurrentSynchronizationContext();
 
-            // 
-            // Run a Task synchronously on scTS, make sure that it completes
-            //
-            sideEffect = false;
-            Task syncTask = new Task(() => { sideEffect = true; });
+                //
+                // Run a Task synchronously on scTS, make sure that it completes
+                //
+                bool sideEffect = false;
+                Task syncTask = new Task(() => { sideEffect = true; });
 
-            ex = null;
-            try
-            {
                 syncTask.RunSynchronously(scTS);
+
+                Assert.True(syncTask.IsCompleted, "Expected task to have completed");
+                Assert.True(sideEffect, "Task appears not to have run");
+                Assert.Equal(0, newSC.PostCount);
+
+                //
+                // Miscellaneous things to test
+                //
+                Assert.Equal(1, scTS.MaximumConcurrencyLevel);
             }
-            catch (Exception e)
+            finally
             {
-                ex = e;
+                // restore original SC
+                SynchronizationContext.SetSynchronizationContext(previousSC);
             }
-
-            Assert.True(task.IsCompleted, "Expected task to have completed");
-            Assert.True(ex == null, "Did not expect exception on RunSynchronously");
-            Assert.True(sideEffect, "Task appears not to have run");
-            Assert.True(newSC.PostCount == 1, "Did not expect a new Post to underlying SynchronizationContext");
-
-            //
-            // Miscellaneous things to test
-            //
-            Assert.True(scTS.MaximumConcurrencyLevel == 1, "Expected scTS.MaximumConcurrencyLevel to be 1");
-
-            // restore original SC
-            SetSynchronizationContext(previousSC);
         }
 
         [Fact]
         public static void RunSynchronizationContextTaskSchedulerTests_Negative()
         {
-            // Remember the current SynchronizationContext, so that we can restore it
+            // Remember the current SynchronizationContext, so it can be restored
             SynchronizationContext previousSC = SynchronizationContext.Current;
-
-            //
-            // Test exceptions on construction of SCTaskScheduler
-            //
-            SetSynchronizationContext(null);
-            Assert.Throws<InvalidOperationException>(
-               () => { TaskScheduler.FromCurrentSynchronizationContext(); });
+            try
+            {
+                //
+                // Test exceptions on construction of SCTaskScheduler
+                //
+                SynchronizationContext.SetSynchronizationContext(null);
+                Assert.Throws<InvalidOperationException>(
+                   () => { TaskScheduler.FromCurrentSynchronizationContext(); });
+            }
+            finally
+            {
+                // restore original SC
+                SynchronizationContext.SetSynchronizationContext(previousSC);
+            }
         }
 
         #region Helper Methods / Helper Classes
 
-        // Buggy task scheduler to make sure that we handle QueueTask()/TryExecuteTaskInline()
-        // exceptions correctly.  Used in RunBuggySchedulerTests() below.
+        // Buggy task scheduler to make sure that QueueTask()/TryExecuteTaskInline()
+        // exceptions are handled correctly.  Used in RunBuggySchedulerTests() below.
         [SecuritySafeCritical]
-        public class BuggyTaskScheduler : TaskScheduler
+        private class BuggyTaskScheduler : TaskScheduler
         {
             private bool _faultQueues;
+
             [SecurityCritical]
             protected override void QueueTask(Task task)
             {
@@ -334,16 +263,11 @@ namespace System.Threading.Tasks.Tests
 
             public override void Post(SendOrPostCallback d, object state)
             {
-                _postCount++;
+                Interlocked.Increment(ref _postCount);
                 base.Post(d, state);
             }
 
             public int PostCount { get { return _postCount; } }
-        }
-
-        private static void SetSynchronizationContext(SynchronizationContext sc)
-        {
-            SynchronizationContext.SetSynchronizationContext(sc);
         }
 
         #endregion
