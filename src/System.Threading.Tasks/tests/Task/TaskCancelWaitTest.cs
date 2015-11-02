@@ -107,11 +107,6 @@ namespace System.Threading.Tasks.Tests.CancelWait
                     Debug.WriteLine("WaitTime= {0} ms, ElapsedTime= {1} ms, Allowed Descrepancy = {2} ms", _waitTimeout, sw.ElapsedMilliseconds, s_delatTimeOut);
                     Debug.WriteLine("Delta= {0} ms", delta);
                 }
-                else
-                {
-                    var delaytask = Task.Delay((int)Math.Abs(delta));  // give delay to allow Context being collected before verification
-                    delaytask.Wait();
-                }
             }
 
             Verify();
