@@ -26,6 +26,8 @@
     </Compile>
     <Compile Include="Helpers\Flag.cs" />
     <Compile Include="Helpers\Functions.cs" />
+    <Compile Include="Helpers\QUWITaskScheduler.cs" />
+    <Compile Include="Helpers\ValidateCorrectContextSynchronizationContext.cs" />
     <Compile Include="Helpers\Waits.cs" />
     <Compile Include="Helpers\Workloads.cs" />
     <Compile Include="XunitAssemblyAttributes.cs" />

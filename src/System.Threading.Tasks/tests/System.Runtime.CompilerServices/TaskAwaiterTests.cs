@@ -423,56 +423,6 @@ namespace System.Threading.Tasks.Tests
 
         #region Helper Methods / Classes
 
-        private class ValidateCorrectContextSynchronizationContext : SynchronizationContext
-        {
-            [ThreadStatic]
-            internal static bool IsPostedInContext;
-
-            internal int PostCount;
-            internal int SendCount;
-
-            public override void Post(SendOrPostCallback d, object state)
-            {
-                Interlocked.Increment(ref PostCount);
-                Task.Run(() =>
-                {
-                    IsPostedInContext = true;
-                    d(state);
-                    IsPostedInContext = false;
-                });
-            }
-
-            public override void Send(SendOrPostCallback d, object state)
-            {
-                Interlocked.Increment(ref SendCount);
-                d(state);
-            }
-        }
-
-        /// <summary>A scheduler that queues to the TP and tracks the number of times QueueTask and TryExecuteTaskInline are invoked.</summary>
-        private class QUWITaskScheduler : TaskScheduler
-        {
-            private int _queueTaskCount;
-            private int _tryExecuteTaskInlineCount;
-
-            public int QueueTaskCount { get { return _queueTaskCount; } }
-            public int TryExecuteTaskInlineCount { get { return _tryExecuteTaskInlineCount; } }
-
-            protected override IEnumerable<Task> GetScheduledTasks() { return null; }
-
-            protected override void QueueTask(Task task)
-            {
-                Interlocked.Increment(ref _queueTaskCount);
-                Task.Run(() => TryExecuteTask(task));
-            }
-
-            protected override bool TryExecuteTaskInline(Task task, bool taskWasPreviouslyQueued)
-            {
-                Interlocked.Increment(ref _tryExecuteTaskInlineCount);
-                return TryExecuteTask(task);
-            }
-        }
-
         /// <summary>Runs the action with TaskScheduler.Current equal to the specified scheduler.</summary>
         private static void RunWithSchedulerAsCurrent(TaskScheduler scheduler, Action action)
         {
