@@ -206,18 +206,6 @@ namespace System.Threading.Tasks.Tests.CancelWait
 
                 //root task was calling wait
                 case API.Wait:
-                    //will be true if the root cancelled itself - through its workload
-                    if (_taskTree.CancellationToken.IsCancellationRequested)
-                    {
-                        _taskTree.Traversal(current =>
-                        {
-                            if (current.Task == null)
-                                return;
-
-                            VerifyTaskCanceledException(current);
-                        });
-                    }
-                    else
                     {
                         _taskTree.Traversal(current =>
                         {
@@ -295,36 +283,7 @@ namespace System.Threading.Tasks.Tests.CancelWait
                 }
             }
         }
-
-        private void VerifyTaskCanceledException(TaskInfo current)
-        {
-            bool expCaught;
-
-            TaskInfo ti = current;
-            //a task will get into cancelled state only if:
-            //1.Its token was cancelled before as its action to get invoked
-            //2.The token was cancelled before the task's action to finish, task observed the cancelled token and threw OCE(token)
-            if (ti.Task.Status == TaskStatus.Canceled)
-            {
-                expCaught = FindException((ex) =>
-                {
-                    TaskCanceledException expectedExp = ex as TaskCanceledException;
-                    return expectedExp != null && expectedExp.Task == ti.Task;
-                });
-
-                Assert.True(expCaught, "expected TaskCanceledException in Task.Name = Task " + current.Name + " NOT caught");
-            }
-            else
-            {
-                expCaught = FindException((ex) =>
-                {
-                    TaskCanceledException expectedExp = ex as TaskCanceledException;
-                    return expectedExp != null && expectedExp.Task == ti.Task;
-                });
-
-                Assert.False(expCaught, "NON-expected TaskCanceledException in Task.Name = Task " + current.Name + " caught");
-            }
-        }
+        
 
         private void VerifyResult(TaskInfo current)
         {
