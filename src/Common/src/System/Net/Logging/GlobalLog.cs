@@ -264,6 +264,7 @@ namespace System.Net
             {
                 bufferSegment[i] = buffer[offset + i];
             }
+
             EventSourceLogging.Log.DebugDumpArray(bufferSegment);
         }
     }
