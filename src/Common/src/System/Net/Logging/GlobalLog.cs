@@ -253,10 +253,18 @@ namespace System.Net
                 return;
             }
 
-            ArraySegment<byte> bufferSegment = new ArraySegment<byte>(buffer, offset, length);
-            byte[] bufferSegmentArray = bufferSegment.Array;
+            if (length == 0)
+            {
+                EventSourceLogging.Log.DebugMessage("lenth of ArraySegment in Dump is 0");
+                return;
+            }
 
-            EventSourceLogging.Log.DebugDumpArray(bufferSegmentArray);
+            var bufferSegment = new byte[length];
+            for (int i = 0; i < length; i++)
+            {
+                bufferSegment[i] = buffer[offset + i];
+            }
+            EventSourceLogging.Log.DebugDumpArray(bufferSegment);
         }
     }
 
