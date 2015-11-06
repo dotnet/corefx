@@ -255,7 +255,7 @@ namespace System.Net
 
             if (length == 0)
             {
-                EventSourceLogging.Log.DebugMessage("lenth of ArraySegment in Dump is 0");
+                EventSourceLogging.Log.DebugMessage("length of ArraySegment in Dump is 0");
                 return;
             }
 
