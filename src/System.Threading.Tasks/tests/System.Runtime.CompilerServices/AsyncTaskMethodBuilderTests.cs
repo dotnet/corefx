@@ -1,13 +1,9 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using Xunit;
-using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Diagnostics;
+using Xunit;
 
 namespace System.Threading.Tasks.Tests
 {
@@ -193,7 +189,7 @@ namespace System.Threading.Tasks.Tests
             Assert.Equal(TaskStatus.WaitingForActivation, t.Status);
             atmb.SetException(new InvalidCastException());
             Assert.Equal(TaskStatus.Faulted, t.Status);
-            Assert.True(t.Exception.InnerException is InvalidCastException, "Wrong exception found in builder (ATMB, build then fault)");
+            Assert.IsType<InvalidCastException>(t.Exception.InnerException);
             Assert.Throws<InvalidOperationException>(() => { atmb.SetResult(); });
             Assert.Throws<InvalidOperationException>(() => { atmb.SetException(new Exception()); });
         }
@@ -206,7 +202,7 @@ namespace System.Threading.Tasks.Tests
             atmb.SetException(new InvalidCastException());
             var t = atmb.Task;
             Assert.Equal(TaskStatus.Faulted, t.Status);
-            Assert.True(t.Exception.InnerException is InvalidCastException, "Wrong exception found in builder (ATMB, fault then build)");
+            Assert.IsType<InvalidCastException>(t.Exception.InnerException);
             Assert.Throws<InvalidOperationException>(() => { atmb.SetResult(); });
             Assert.Throws<InvalidOperationException>(() => { atmb.SetException(new Exception()); });
         }
