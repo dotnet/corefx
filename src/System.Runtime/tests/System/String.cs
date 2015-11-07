@@ -1513,7 +1513,11 @@ public static unsafe class StringTests
     {
         String s;
 
-        s = "  Foo  ".Trim();
+        // Test for multiple values passed to char array
+        s = "ab,.Foo.,ba".Trim('a', 'b', ',', '.');
+        Assert.Equal("Foo", s);
+
+        s = "  Foo  ".Trim(' ');
         Assert.Equal("Foo", s);
 
         s = ". Foo .".Trim('.');
