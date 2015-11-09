@@ -112,13 +112,40 @@ namespace System
         public static ConsoleColor BackgroundColor
         {
             get { return ConsolePal.BackgroundColor; }
-            set { ConsolePal.BackgroundColor = value; }
+            set
+            {
+                if (value == ConsoleColor.Unknown)
+                {
+                    // When setting the color to Unknown (which typically will have come
+                    // from a call to get_BackgroundColor when it couldn't be determined),
+                    // we call ResetColor(), even though this will reset both the
+                    // Background and ForegroundColor.  This was deemed less problematic
+                    // than removing get_*Color from the contract, throwing PlatformNotSupportedException
+                    // from the get_*Color or set_*Color members, or any other available solution.
+                    ResetColor();
+                }
+                else
+                {
+                    ConsolePal.BackgroundColor = value;
+                }
+            }
         }
 
         public static ConsoleColor ForegroundColor
         {
             get { return ConsolePal.ForegroundColor; }
-            set { ConsolePal.ForegroundColor = value; }
+            set
+            {
+                if (value == ConsoleColor.Unknown)
+                {
+                    // See comments in set_BackgroundColor
+                    ResetColor();
+                }
+                else
+                {
+                    ConsolePal.ForegroundColor = value;
+                }
+            }
         }
 
         public static void ResetColor()

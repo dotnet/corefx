@@ -8,6 +8,8 @@ namespace System
 
     public enum ConsoleColor
     {
+        Unknown = -1,
+
         Black = 0,
         DarkBlue = 1,
         DarkGreen = 2,
