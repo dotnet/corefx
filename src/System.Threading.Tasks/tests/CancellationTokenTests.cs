@@ -1,11 +1,8 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Threading;
-using System.Threading.Tasks;
 using Xunit;
 
 namespace System.Threading.Tasks.Tests
@@ -86,70 +83,27 @@ namespace System.Threading.Tasks.Tests
         }
 
         [Fact]
+        public static void CancellationToken_AfterSourceDisposed()
+        {
+            CancellationTokenSource source = new CancellationTokenSource();
+            source.Dispose();
+            Assert.Throws<ObjectDisposedException>(() => source.Token);
+        }
+
+        [Fact]
         public static void CancellationToken_EqualityAndDispose()
         {
-            //hashcode.
-            Assert.Throws<ObjectDisposedException>(
-               () =>
-               {
-                   CancellationTokenSource cts = new CancellationTokenSource();
-                   cts.Dispose();
-                   cts.Token.GetHashCode();
-               });
+            CancellationTokenSource s = new CancellationTokenSource();
+            CancellationToken token = s.Token;
+            s.Dispose();
 
-            //x.Equals(y)
-            Assert.Throws<ObjectDisposedException>(
-               () =>
-               {
-                   CancellationTokenSource cts = new CancellationTokenSource();
-                   cts.Dispose();
-                   cts.Token.Equals(new CancellationToken());
-               });
-
-            //x.Equals(y)
-            Assert.Throws<ObjectDisposedException>(
-               () =>
-               {
-                   CancellationTokenSource cts = new CancellationTokenSource();
-                   cts.Dispose();
-                   new CancellationToken().Equals(cts.Token);
-               });
-
-            //x==y
-            Assert.Throws<ObjectDisposedException>(
-               () =>
-               {
-                   CancellationTokenSource cts = new CancellationTokenSource();
-                   cts.Dispose();
-                   bool result = cts.Token == new CancellationToken();
-               });
-
-            //x==y
-            Assert.Throws<ObjectDisposedException>(
-               () =>
-               {
-                   CancellationTokenSource cts = new CancellationTokenSource();
-                   cts.Dispose();
-                   bool result = new CancellationToken() == cts.Token;
-               });
-
-            //x!=y
-            Assert.Throws<ObjectDisposedException>(
-               () =>
-               {
-                   CancellationTokenSource cts = new CancellationTokenSource();
-                   cts.Dispose();
-                   bool result = cts.Token != new CancellationToken();
-               });
-
-            //x!=y
-            Assert.Throws<ObjectDisposedException>(
-               () =>
-               {
-                   CancellationTokenSource cts = new CancellationTokenSource();
-                   cts.Dispose();
-                   bool result = new CancellationToken() != cts.Token;
-               });
+            token.GetHashCode();
+            token.Equals(new CancellationToken());
+            new CancellationToken().Equals(token);
+            bool result = token == new CancellationToken();
+            result = new CancellationToken() == token;
+            result = token != new CancellationToken();
+            result = new CancellationToken() != token;
         }
 
         [Fact]
@@ -166,14 +120,7 @@ namespace System.Threading.Tasks.Tests
             tokenSource.Dispose();
 
             // Regression test: allow ctr.Dispose() to succeed when the backing cts has already been disposed.
-            try
-            {
-                preDisposeRegistration.Dispose();
-            }
-            catch
-            {
-                Assert.True(false, string.Format("TokenSourceDispose:    > ctr.Dispose() failed when referring to a disposed CTS"));
-            }
+            preDisposeRegistration.Dispose();
 
             bool cr = tokenSource.IsCancellationRequested; //this is ok after dispose.
             tokenSource.Dispose(); //Repeat calls to Dispose should be ok.
@@ -495,13 +442,10 @@ namespace System.Threading.Tasks.Tests
         [Fact]
         public static void Cancel_ThrowOnFirstException()
         {
-            ManualResetEvent mre_CancelHasBeenEnacted = new ManualResetEvent(false);
-
             CancellationTokenSource tokenSource = new CancellationTokenSource();
             CancellationToken token = tokenSource.Token;
 
-            // Main test body 
-            ArgumentException caughtException = null;
+            // Main test body
             token.Register(() =>
                                {
                                    throw new InvalidOperationException();
@@ -512,171 +456,122 @@ namespace System.Threading.Tasks.Tests
                                    throw new ArgumentException();
                                });  // !!NOTE: Due to LIFO ordering, this delegate should be the only one to run.
 
-
-            Task.Run(() =>
-                {
-                    try
-                    {
-                        tokenSource.Cancel(true);
-                    }
-                    catch (ArgumentException ex)
-                    {
-                        caughtException = ex;
-                    }
-                    catch (Exception ex)
-                    {
-                        Assert.True(false, string.Format("Cancel_ThrowOnFirstException:  The wrong exception type was thrown. ex=" + ex));
-                    }
-                    mre_CancelHasBeenEnacted.Set();
-                });
-
-            mre_CancelHasBeenEnacted.WaitOne();
-            Assert.NotNull(caughtException);
+            Assert.Throws<ArgumentException>(() => tokenSource.Cancel(true));
         }
 
         [Fact]
         public static void Cancel_DontThrowOnFirstException()
         {
-            ManualResetEvent mre_CancelHasBeenEnacted = new ManualResetEvent(false);
-
             CancellationTokenSource tokenSource = new CancellationTokenSource();
             CancellationToken token = tokenSource.Token;
 
-            // Main test body 
-            AggregateException caughtException = null;
+            // Main test body
             token.Register(() => { throw new ArgumentException(); });
             token.Register(() => { throw new InvalidOperationException(); });
 
-
-            Task.Run(
-                () =>
-                {
-                    try
-                    {
-                        tokenSource.Cancel(false);
-                    }
-                    catch (AggregateException ex)
-                    {
-                        caughtException = ex;
-                    }
-                    mre_CancelHasBeenEnacted.Set();
-                }
-                );
-
-            mre_CancelHasBeenEnacted.WaitOne();
-            Assert.NotNull(caughtException);
+            AggregateException caughtException = Assert.Throws<AggregateException>(() => tokenSource.Cancel(false));
             Assert.Equal(2, caughtException.InnerExceptions.Count);
-            Assert.True(caughtException.InnerExceptions[0] is InvalidOperationException,
-               "Cancel_ThrowOnFirstException:  Due to LIFO call order, the first inner exception should be an InvalidOperationException.");
-            Assert.True(caughtException.InnerExceptions[1] is ArgumentException,
-               "Cancel_ThrowOnFirstException:  Due to LIFO call order, the second inner exception should be an ArgumentException.");
+            Assert.IsType<InvalidOperationException>(caughtException.InnerExceptions[0]);
+            Assert.IsType<ArgumentException>(caughtException.InnerExceptions[1]);
         }
 
         [Fact]
         public static void CancellationRegistration_RepeatDispose()
         {
-            Exception caughtException = null;
-
             CancellationTokenSource cts = new CancellationTokenSource();
             CancellationToken ct = cts.Token;
 
             CancellationTokenRegistration registration = ct.Register(() => { });
-            try
-            {
-                registration.Dispose();
-                registration.Dispose();
-            }
-            catch (Exception ex)
-            {
-                caughtException = ex;
-            }
 
-            Assert.Null(caughtException);
+            registration.Dispose();
+            registration.Dispose();
         }
 
         [Fact]
-        public static void CancellationTokenRegistration_EqualityAndHashCode()
+        public static void CancellationTokenRegistration_DefaultTokenSource_Equal()
         {
-            CancellationTokenSource outerCTS = new CancellationTokenSource();
+            // different registrations on 'different' default tokens
+            CancellationToken ct1 = new CancellationToken();
+            CancellationToken ct2 = new CancellationToken();
 
-            {
-                // different registrations on 'different' default tokens
-                CancellationToken ct1 = new CancellationToken();
-                CancellationToken ct2 = new CancellationToken();
+            CancellationTokenRegistration ctr1 = ct1.Register(() => { });
+            CancellationTokenRegistration ctr2 = ct2.Register(() => { });
 
-                CancellationTokenRegistration ctr1 = ct1.Register(() => outerCTS.Cancel());
-                CancellationTokenRegistration ctr2 = ct2.Register(() => outerCTS.Cancel());
+            Assert.True(ctr1.Equals(ctr2),
+               "CancellationTokenRegistration_EqualityAndHashCode:  [1]The two registrations should compare equal, as they are both dummies.");
+            Assert.True(ctr1 == ctr2,
+               "CancellationTokenRegistration_EqualityAndHashCode:  [2]The two registrations should compare equal, as they are both dummies.");
+            Assert.False(ctr1 != ctr2,
+               "CancellationTokenRegistration_EqualityAndHashCode:  [3]The two registrations should compare equal, as they are both dummies.");
+            Assert.True(ctr1.GetHashCode() == ctr2.GetHashCode(),
+               "CancellationTokenRegistration_EqualityAndHashCode:  [4]The two registrations should have the same hashcode, as they are both dummies.");
+        }
 
-                Assert.True(ctr1.Equals(ctr2),
-                   "CancellationTokenRegistration_EqualityAndHashCode:  [1]The two registrations should compare equal, as they are both dummies.");
-                Assert.True(ctr1 == ctr2,
-                   "CancellationTokenRegistration_EqualityAndHashCode:  [2]The two registrations should compare equal, as they are both dummies.");
-                Assert.False(ctr1 != ctr2,
-                   "CancellationTokenRegistration_EqualityAndHashCode:  [3]The two registrations should compare equal, as they are both dummies.");
-                Assert.True(ctr1.GetHashCode() == ctr2.GetHashCode(),
-                   "CancellationTokenRegistration_EqualityAndHashCode:  [4]The two registrations should have the same hashcode, as they are both dummies.");
-            }
+        [Fact]
+        public static void CancellationTokenRegistration_CancelledSource_Equal()
+        {
+            // different registrations on the same already cancelled token
+            CancellationTokenSource cts = new CancellationTokenSource();
+            cts.Cancel();
+            CancellationToken ct = cts.Token;
 
-            {
-                // different registrations on the same already cancelled token
-                CancellationTokenSource cts = new CancellationTokenSource();
-                cts.Cancel();
-                CancellationToken ct = cts.Token;
+            CancellationTokenRegistration ctr1 = ct.Register(() => { });
+            CancellationTokenRegistration ctr2 = ct.Register(() => { });
 
-                CancellationTokenRegistration ctr1 = ct.Register(() => outerCTS.Cancel());
-                CancellationTokenRegistration ctr2 = ct.Register(() => outerCTS.Cancel());
+            Assert.True(ctr1.Equals(ctr2),
+               "CancellationTokenRegistration_EqualityAndHashCode:  [1]The two registrations should compare equal, as they are both dummies due to CTS being already canceled.");
+            Assert.True(ctr1 == ctr2,
+               "CancellationTokenRegistration_EqualityAndHashCode:  [2]The two registrations should compare equal, as they are both dummies due to CTS being already canceled.");
+            Assert.False(ctr1 != ctr2,
+               "CancellationTokenRegistration_EqualityAndHashCode:  [3]The two registrations should compare equal, as they are both dummies due to CTS being already canceled.");
+            Assert.True(ctr1.GetHashCode() == ctr2.GetHashCode(),
+               "CancellationTokenRegistration_EqualityAndHashCode:  [4]The two registrations should have the same hashcode, as they are both dummies due to CTS being already canceled.");
+        }
 
-                Assert.True(ctr1.Equals(ctr2),
-                   "CancellationTokenRegistration_EqualityAndHashCode:  [1]The two registrations should compare equal, as they are both dummies due to CTS being already canceled.");
-                Assert.True(ctr1 == ctr2,
-                   "CancellationTokenRegistration_EqualityAndHashCode:  [2]The two registrations should compare equal, as they are both dummies due to CTS being already canceled.");
-                Assert.False(ctr1 != ctr2,
-                   "CancellationTokenRegistration_EqualityAndHashCode:  [3]The two registrations should compare equal, as they are both dummies due to CTS being already canceled.");
-                Assert.True(ctr1.GetHashCode() == ctr2.GetHashCode(),
-                   "CancellationTokenRegistration_EqualityAndHashCode:  [4]The two registrations should have the same hashcode, as they are both dummies due to CTS being already canceled.");
-            }
+        [Fact]
+        public static void CancellationTokenRegistration_NewSource_Unequal()
+        {
+            // different registrations on one real token
+            CancellationTokenSource cts1 = new CancellationTokenSource();
 
-            {
-                // different registrations on one real token    
-                CancellationTokenSource cts1 = new CancellationTokenSource();
+            CancellationTokenRegistration ctr1 = cts1.Token.Register(() => { });
+            CancellationTokenRegistration ctr2 = cts1.Token.Register(() => { });
 
-                CancellationTokenRegistration ctr1 = cts1.Token.Register(() => outerCTS.Cancel());
-                CancellationTokenRegistration ctr2 = cts1.Token.Register(() => outerCTS.Cancel());
+            Assert.False(ctr1.Equals(ctr2),
+               "CancellationTokenRegistration_EqualityAndHashCode:  The two registrations should not compare equal.");
+            Assert.False(ctr1 == ctr2,
+               "CancellationTokenRegistration_EqualityAndHashCode:  The two registrations should not compare equal.");
+            Assert.True(ctr1 != ctr2,
+               "CancellationTokenRegistration_EqualityAndHashCode:  The two registrations should not compare equal.");
+            Assert.False(ctr1.GetHashCode() == ctr2.GetHashCode(),
+               "CancellationTokenRegistration_EqualityAndHashCode:  The two registrations should not have the same hashcode.");
 
-                Assert.False(ctr1.Equals(ctr2),
-                   "CancellationTokenRegistration_EqualityAndHashCode:  The two registrations should not compare equal.");
-                Assert.False(ctr1 == ctr2,
-                   "CancellationTokenRegistration_EqualityAndHashCode:  The two registrations should not compare equal.");
-                Assert.True(ctr1 != ctr2,
-                   "CancellationTokenRegistration_EqualityAndHashCode:  The two registrations should not compare equal.");
-                Assert.False(ctr1.GetHashCode() == ctr2.GetHashCode(),
-                   "CancellationTokenRegistration_EqualityAndHashCode:  The two registrations should not have the same hashcode.");
+            CancellationTokenRegistration ctr1copy = ctr1;
+            Assert.True(ctr1 == ctr1copy, "The two registrations should be equal.");
+        }
 
-                CancellationTokenRegistration ctr1copy = ctr1;
-                Assert.True(ctr1 == ctr1copy, "The two registrations should be equal.");
-            }
+        [Fact]
+        public static void CancellationTokenRegistration_DifferentTokenSource_Unequal()
+        {
+            // registrations on different real tokens.
+            // different registrations on one token
+            CancellationTokenSource cts1 = new CancellationTokenSource();
+            CancellationTokenSource cts2 = new CancellationTokenSource();
 
-            {
-                // registrations on different real tokens.
-                // different registrations on one token    
-                CancellationTokenSource cts1 = new CancellationTokenSource();
-                CancellationTokenSource cts2 = new CancellationTokenSource();
+            CancellationTokenRegistration ctr1 = cts1.Token.Register(() => { });
+            CancellationTokenRegistration ctr2 = cts2.Token.Register(() => { });
 
-                CancellationTokenRegistration ctr1 = cts1.Token.Register(() => outerCTS.Cancel());
-                CancellationTokenRegistration ctr2 = cts2.Token.Register(() => outerCTS.Cancel());
+            Assert.False(ctr1.Equals(ctr2),
+               "CancellationTokenRegistration_EqualityAndHashCode:  The two registrations should not compare equal.");
+            Assert.False(ctr1 == ctr2,
+               "CancellationTokenRegistration_EqualityAndHashCode:  The two registrations should not compare equal.");
+            Assert.True(ctr1 != ctr2,
+               "CancellationTokenRegistration_EqualityAndHashCode:  The two registrations should not compare equal.");
+            Assert.False(ctr1.GetHashCode() == ctr2.GetHashCode(),
+               "CancellationTokenRegistration_EqualityAndHashCode:  The two registrations should not have the same hashcode.");
 
-                Assert.False(ctr1.Equals(ctr2),
-                   "CancellationTokenRegistration_EqualityAndHashCode:  The two registrations should not compare equal.");
-                Assert.False(ctr1 == ctr2,
-                   "CancellationTokenRegistration_EqualityAndHashCode:  The two registrations should not compare equal.");
-                Assert.True(ctr1 != ctr2,
-                   "CancellationTokenRegistration_EqualityAndHashCode:  The two registrations should not compare equal.");
-                Assert.False(ctr1.GetHashCode() == ctr2.GetHashCode(),
-                   "CancellationTokenRegistration_EqualityAndHashCode:  The two registrations should not have the same hashcode.");
-
-                CancellationTokenRegistration ctr1copy = ctr1;
-                Assert.True(ctr1.Equals(ctr1copy), "The two registrations should be equal.");
-            }
+            CancellationTokenRegistration ctr1copy = ctr1;
+            Assert.True(ctr1.Equals(ctr1copy), "The two registrations should be equal.");
         }
 
         [Fact]
@@ -684,31 +579,17 @@ namespace System.Threading.Tasks.Tests
         {
             CancellationTokenSource cts1 = new CancellationTokenSource();
             CancellationTokenSource cts2 = CancellationTokenSource.CreateLinkedTokenSource(cts1.Token, new CancellationToken());
-            Exception caughtException = null;
 
             cts2.Token.Register(() => { throw new ObjectDisposedException("myException"); });
 
-            try
-            {
-                cts1.Cancel(true);
-            }
-            catch (Exception ex)
-            {
-                caughtException = ex;
-            }
-
-            Assert.True(
-               caughtException is AggregateException
-                  && caughtException.InnerException is ObjectDisposedException
-                  && caughtException.InnerException.Message.Contains("myException"),
-               "CancellationTokenLinking_ODEinTarget:  The users ODE should be caught. Actual:" + caughtException);
+            AggregateException ae = Assert.Throws<AggregateException>(() => cts1.Cancel(true));
+            Assert.IsType<ObjectDisposedException>(ae.InnerException);
+            Assert.Contains("myException", ae.InnerException.Message);
         }
 
         [Fact]
         public static void ThrowIfCancellationRequested()
         {
-            OperationCanceledException caughtEx = null;
-
             CancellationTokenSource cts = new CancellationTokenSource();
             CancellationToken ct = cts.Token;
 
@@ -717,16 +598,7 @@ namespace System.Threading.Tasks.Tests
 
             cts.Cancel();
 
-            try
-            {
-                ct.ThrowIfCancellationRequested();
-            }
-            catch (OperationCanceledException oce)
-            {
-                caughtEx = oce;
-            }
-
-            Assert.NotNull(caughtEx);
+            OperationCanceledException caughtEx = Assert.Throws<OperationCanceledException>(() => ct.ThrowIfCancellationRequested());
             Assert.Equal(ct, caughtEx.CancellationToken);
         }
 
@@ -756,134 +628,129 @@ namespace System.Threading.Tasks.Tests
         [Fact]
         public static void ODEWhenDisposingLinkedCTS()
         {
-            try
-            {
-                // User passes a cancellation token (CT) to component A. 
-                CancellationTokenSource userTokenSource = new CancellationTokenSource();
-                CancellationToken userToken = userTokenSource.Token;
+            // User passes a cancellation token (CT) to component A.
+            CancellationTokenSource userTokenSource = new CancellationTokenSource();
+            CancellationToken userToken = userTokenSource.Token;
 
-                // Component A implements "timeout", by creating its own cancellation token source (CTS) and invoking cts.Cancel() when the timeout timer fires.
-                CancellationTokenSource cts2 = new CancellationTokenSource();
-                CancellationToken cts2Token = cts2.Token;
+            // Component A implements "timeout", by creating its own cancellation token source (CTS) and invoking cts.Cancel() when the timeout timer fires.
+            CancellationTokenSource cts2 = new CancellationTokenSource();
+            CancellationToken cts2Token = cts2.Token;
 
-                // Component A creates a linked token source representing the CT from the user and the "timeout" CT.
-                var linkedTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cts2Token, userToken);
+            // Component A creates a linked token source representing the CT from the user and the "timeout" CT.
+            var linkedTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cts2Token, userToken);
 
-                // User calls Cancel() on his CTS and then Dispose()
-                userTokenSource.Cancel();
-                userTokenSource.Dispose();
+            // User calls Cancel() on his CTS and then Dispose()
+            userTokenSource.Cancel();
+            userTokenSource.Dispose();
 
-                // Component B correctly cancels the operation, returns to component A. 
-                // ...
+            // Component B correctly cancels the operation, returns to component A.
+            // ...
 
-                // Component A now disposes the linked CTS => ObjectDisposedException is thrown by cts.Dispose() because the user CTS was already disposed.
-                linkedTokenSource.Dispose();
-            }
-            catch (Exception ex)
-            {
-                if (ex is ObjectDisposedException)
-                {
-                    Assert.True(false, string.Format("Bug901737_ODEWhenDisposingLinkedCTS:  - ODE Occurred!"));
-                }
-                else
-                {
-                    Assert.True(false, string.Format("Bug901737_ODEWhenDisposingLinkedCTS:  - Exception Occurred (not an ODE!!): " + ex));
-                }
-            }
+            // Component A now disposes the linked CTS => ObjectDisposedException was thrown previously by cts.Dispose() because the user CTS was already disposed.
+            linkedTokenSource.Dispose();
         }
 
         // Several tests for deriving custom user types from CancellationTokenSource
         [Fact]
-        public static void DerivedCancellationTokenSource()
+        public static void DerivedCancellationTokenSource_CancellationRequested()
         {
             // Verify that a derived CTS is functional
-            {
-                CancellationTokenSource c = new DerivedCTS(null);
-                CancellationToken token = c.Token;
+            CancellationTokenSource c = new DerivedCTS(null);
+            CancellationToken token = c.Token;
 
-                var task = Task.Factory.StartNew(() => c.Cancel());
-                task.Wait();
+            var task = Task.Factory.StartNew(() => c.Cancel());
+            task.Wait();
 
-                Assert.True(token.IsCancellationRequested,
-                   "DerivedCancellationTokenSource:  The token should have been cancelled.");
-            }
+            Assert.True(token.IsCancellationRequested,
+               "DerivedCancellationTokenSource:  The token should have been cancelled.");
+        }
 
+        [Fact]
+        public static void DerivedCancellationTokenSource_Callback()
+        {
             // Verify that callback list on a derived CTS is functional
-            {
-                CancellationTokenSource c = new DerivedCTS(null);
-                CancellationToken token = c.Token;
-                int callbackRan = 0;
 
-                token.Register(() => Interlocked.Increment(ref callbackRan));
+            CancellationTokenSource c = new DerivedCTS(null);
+            CancellationToken token = c.Token;
+            int callbackRan = 0;
 
-                var task = Task.Factory.StartNew(() => c.Cancel());
-                task.Wait();
-                SpinWait.SpinUntil(() => callbackRan > 0, 1000);
+            token.Register(() => Interlocked.Increment(ref callbackRan));
 
-                Assert.True(callbackRan == 1,
-                   "DerivedCancellationTokenSource:  Expected the callback to run once. Instead, it ran " + callbackRan + " times.");
-            }
+            var task = Task.Factory.StartNew(() => c.Cancel());
+            task.Wait();
+            SpinWait.SpinUntil(() => callbackRan > 0, 1000);
 
+            Assert.Equal(1, callbackRan);
+        }
+
+        [Fact]
+        public static void DerivedCancellationTokenSource_Dispose()
+        {
             // Test the Dispose path for a class derived from CancellationTokenSource
+
+            var disposeTracker = new DisposeTracker();
+            CancellationTokenSource c = new DerivedCTS(disposeTracker);
+            Assert.True(c.Token.CanBeCanceled,
+                "DerivedCancellationTokenSource:  The token should be cancellable.");
+
+            c.Dispose();
+
+            // Dispose() should have prevented the finalizer from running. Give the finalizer a chance to run. If this
+            // results in Dispose(false) getting called, we'll catch the issue.
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+
+            Assert.True(disposeTracker.DisposeTrueCalled,
+                "DerivedCancellationTokenSource:  Dispose(true) should have been called.");
+            Assert.False(disposeTracker.DisposeFalseCalled,
+                "DerivedCancellationTokenSource:  Dispose(false) should not have been called.");
+        }
+
+        [Fact]
+        public static void DerivedCancellationTokenSource_Finalize()
+        {
+            // Test the finalization code path for a class derived from CancellationTokenSource
+
+            var disposeTracker = new DisposeTracker();
+
+            // Since the object is not assigned into a variable, it can be GC'd before the current method terminates.
+            // (This is only an issue in the Debug build)
+            new DerivedCTS(disposeTracker);
+
+            // Wait until the DerivedCTS object is finalized
+            SpinWait.SpinUntil(() =>
             {
-                var disposeTracker = new DisposeTracker();
-                CancellationTokenSource c = new DerivedCTS(disposeTracker);
-                Assert.True(c.Token.CanBeCanceled,
-                    "DerivedCancellationTokenSource:  The token should be cancellable.");
-
-                c.Dispose();
-
-                // Dispose() should have prevented the finalizer from running. Give the finalizer a chance to run. If this
-                // results in Dispose(false) getting called, we'll catch the issue.
                 GC.Collect();
                 GC.WaitForPendingFinalizers();
+                GC.Collect();
+                return disposeTracker.DisposeTrueCalled;
+            }, 500);
 
-                Assert.True(disposeTracker.DisposeTrueCalled,
-                    "DerivedCancellationTokenSource:  Dispose(true) should have been called.");
-                Assert.False(disposeTracker.DisposeFalseCalled,
-                    "DerivedCancellationTokenSource:  Dispose(false) should not have been called.");
-            }
+            Assert.False(disposeTracker.DisposeTrueCalled,
+                "DerivedCancellationTokenSource:  Dispose(true) should not have been called.");
+            Assert.True(disposeTracker.DisposeFalseCalled,
+                "DerivedCancellationTokenSource:  Dispose(false) should have been called.");
+        }
 
-            // Test the finalization code path for a class derived from CancellationTokenSource
-            {
-                var disposeTracker = new DisposeTracker();
-
-                // Since the object is not assigned into a variable, it can be GC'd before the current method terminates.
-                // (This is only an issue in the Debug build)
-                new DerivedCTS(disposeTracker);
-
-                // Wait until the DerivedCTS object is finalized
-                SpinWait.SpinUntil(() =>
-                {
-                    GC.Collect();
-                    GC.WaitForPendingFinalizers();
-                    GC.Collect();
-                    return disposeTracker.DisposeTrueCalled;
-                }, 500);
-
-                Assert.False(disposeTracker.DisposeTrueCalled,
-                    "DerivedCancellationTokenSource:  Dispose(true) should not have been called.");
-                Assert.True(disposeTracker.DisposeFalseCalled,
-                    "DerivedCancellationTokenSource:  Dispose(false) should have been called.");
-            }
-
+        [Fact]
+        public static void DerivedCancellationTokenSource_UnmanagedDispose()
+        {
             // Verify that Dispose(false) is a no-op on the CTS. Dispose(false) should only release any unmanaged resources, and
             // CTS does not currently hold any unmanaged resources.
-            {
-                var disposeTracker = new DisposeTracker();
 
-                DerivedCTS c = new DerivedCTS(disposeTracker);
-                c.DisposeUnmanaged();
+            var disposeTracker = new DisposeTracker();
 
-                // No exception expected - the CancellationTokenSource should be valid
-                Assert.True(c.Token.CanBeCanceled,
-                   "DerivedCancellationTokenSource:  The token should still be cancellable.");
+            DerivedCTS c = new DerivedCTS(disposeTracker);
+            c.DisposeUnmanaged();
 
-                Assert.False(disposeTracker.DisposeTrueCalled,
-                   "DerivedCancellationTokenSource:  Dispose(true) should not have been called.");
-                Assert.True(disposeTracker.DisposeFalseCalled,
-                   "DerivedCancellationTokenSource:  Dispose(false) should have run.");
-            }
+            // No exception expected - the CancellationTokenSource should be valid
+            Assert.True(c.Token.CanBeCanceled,
+               "DerivedCancellationTokenSource:  The token should still be cancellable.");
+
+            Assert.False(disposeTracker.DisposeTrueCalled,
+               "DerivedCancellationTokenSource:  Dispose(true) should not have been called.");
+            Assert.True(disposeTracker.DisposeFalseCalled,
+               "DerivedCancellationTokenSource:  Dispose(false) should have run.");
         }
 
         // Several tests for deriving custom user types from CancellationTokenSource
@@ -891,26 +758,18 @@ namespace System.Threading.Tasks.Tests
         public static void DerivedCancellationTokenSource_Negative()
         {
             // Test the Dispose path for a class derived from CancellationTokenSource
-            {
-                var disposeTracker = new DisposeTracker();
-                CancellationTokenSource c = new DerivedCTS(disposeTracker);
 
-                c.Dispose();
+            var disposeTracker = new DisposeTracker();
+            CancellationTokenSource c = new DerivedCTS(disposeTracker);
 
-                // Dispose() should have prevented the finalizer from running. Give the finalizer a chance to run. If this
-                // results in Dispose(false) getting called, we'll catch the issue.
-                GC.Collect();
-                GC.WaitForPendingFinalizers();
-                Assert.Throws<ObjectDisposedException>(
-                    () =>
-                    {
-                        // Accessing the Token property should throw an ObjectDisposedException
-                        if (c.Token.CanBeCanceled)
-                            Assert.True(false, string.Format("DerivedCancellationTokenSource: Accessing the Token property should throw an ObjectDisposedException, but it did not."));
-                        else
-                            Assert.True(false, string.Format("DerivedCancellationTokenSource: Accessing the Token property should throw an ObjectDisposedException, but it did not."));
-                    });
-            }
+            c.Dispose();
+
+            // Dispose() should have prevented the finalizer from running. Give the finalizer a chance to run. If this
+            // results in Dispose(false) getting called, we'll catch the issue.
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+            // Accessing the Token property should throw an ObjectDisposedException
+            Assert.Throws<ObjectDisposedException>(() => c.Token.CanBeCanceled);
         }
 
         [Fact]
@@ -1005,32 +864,36 @@ namespace System.Threading.Tasks.Tests
             CancellationTokenSource tokenSource = new CancellationTokenSource();
             CancellationToken token = tokenSource.Token;
 
-
             // Install a SynchronizationContext...
             SynchronizationContext prevailingSyncCtx = SynchronizationContext.Current;
-            TestingSynchronizationContext testContext = new TestingSynchronizationContext();
-            SetSynchronizationContext(testContext);
+            try
+            {
+                TestingSynchronizationContext testContext = new TestingSynchronizationContext();
+                SynchronizationContext.SetSynchronizationContext(testContext);
 
-            // Main test body 
+                // Main test body
 
-            // register a null delegate, but use the currently registered syncContext.
-            // the testSyncContext will track that it was used when the delegate is invoked.
-            token.Register(() => { }, true);
+                // register a null delegate, but use the currently registered syncContext.
+                // the testSyncContext will track that it was used when the delegate is invoked.
+                token.Register(() => { }, true);
 
-            Task.Run(
-                () =>
-                {
-                    tokenSource.Cancel();
-                    mre_CancelHasBeenEnacted.Set();
-                }
-                );
+                Task.Run(
+                    () =>
+                    {
+                        tokenSource.Cancel();
+                        mre_CancelHasBeenEnacted.Set();
+                    }
+                    );
 
-            mre_CancelHasBeenEnacted.WaitOne();
-            Assert.True(testContext.DidSendOccur,
-               "EnlistWithSyncContext_BeforeCancel:  the delegate should have been called via Send to SyncContext.");
-
-            //Cleanup.
-            SetSynchronizationContext(prevailingSyncCtx);
+                mre_CancelHasBeenEnacted.WaitOne();
+                Assert.True(testContext.DidSendOccur,
+                   "EnlistWithSyncContext_BeforeCancel:  the delegate should have been called via Send to SyncContext.");
+            }
+            finally
+            {
+                //Cleanup.
+                SynchronizationContext.SetSynchronizationContext(prevailingSyncCtx);
+            }
         }
 
         [Fact]
@@ -1044,41 +907,46 @@ namespace System.Threading.Tasks.Tests
 
             // Install a SynchronizationContext...
             SynchronizationContext prevailingSyncCtx = SynchronizationContext.Current;
-            TestingSynchronizationContext testContext = new TestingSynchronizationContext();
-            SetSynchronizationContext(testContext);
+            try
+            {
+                TestingSynchronizationContext testContext = new TestingSynchronizationContext();
+                SynchronizationContext.SetSynchronizationContext(testContext);
 
-            // Main test body 
-            AggregateException caughtException = null;
+                // Main test body
+                AggregateException caughtException = null;
 
-            // register a null delegate, but use the currently registered syncContext.
-            // the testSyncContext will track that it was used when the delegate is invoked.
-            token.Register(() => { throw new ArgumentException(); }, true);
+                // register a null delegate, but use the currently registered syncContext.
+                // the testSyncContext will track that it was used when the delegate is invoked.
+                token.Register(() => { throw new ArgumentException(); }, true);
 
-            Task.Run(
-                () =>
-                {
-                    try
+                Task.Run(
+                    () =>
                     {
-                        tokenSource.Cancel();
+                        try
+                        {
+                            tokenSource.Cancel();
+                        }
+                        catch (AggregateException ex)
+                        {
+                            caughtException = ex;
+                        }
+                        mre_CancelHasBeenEnacted.Set();
                     }
-                    catch (AggregateException ex)
-                    {
-                        caughtException = ex;
-                    }
-                    mre_CancelHasBeenEnacted.Set();
-                }
-                );
+                    );
 
-            mre_CancelHasBeenEnacted.WaitOne();
-            Assert.True(testContext.DidSendOccur,
-               "EnlistWithSyncContext_BeforeCancel_ThrowingExceptionInSyncContextDelegate:  the delegate should have been called via Send to SyncContext.");
-            Assert.NotNull(caughtException);
-            Assert.Equal(1, caughtException.InnerExceptions.Count);
-            Assert.True(caughtException.InnerExceptions[0] is ArgumentException,
-               "EnlistWithSyncContext_BeforeCancel_ThrowingExceptionInSyncContextDelegate:  The inner exception should be an ArgumentException.");
-
-            //Cleanup.
-            SetSynchronizationContext(prevailingSyncCtx);
+                mre_CancelHasBeenEnacted.WaitOne();
+                Assert.True(testContext.DidSendOccur,
+                   "EnlistWithSyncContext_BeforeCancel_ThrowingExceptionInSyncContextDelegate:  the delegate should have been called via Send to SyncContext.");
+                Assert.NotNull(caughtException);
+                Assert.Equal(1, caughtException.InnerExceptions.Count);
+                Assert.True(caughtException.InnerExceptions[0] is ArgumentException,
+                   "EnlistWithSyncContext_BeforeCancel_ThrowingExceptionInSyncContextDelegate:  The inner exception should be an ArgumentException.");
+            }
+            finally
+            {
+                //Cleanup.
+                SynchronizationContext.SetSynchronizationContext(prevailingSyncCtx);
+            }
         }
         [Fact]
         public static void EnlistWithSyncContext_BeforeCancel_ThrowingExceptionInSyncContextDelegate_ThrowOnFirst()
@@ -1091,86 +959,67 @@ namespace System.Threading.Tasks.Tests
 
             // Install a SynchronizationContext...
             SynchronizationContext prevailingSyncCtx = SynchronizationContext.Current;
-            TestingSynchronizationContext testContext = new TestingSynchronizationContext();
-            SetSynchronizationContext(testContext);
+            try
+            {
+                TestingSynchronizationContext testContext = new TestingSynchronizationContext();
+                SynchronizationContext.SetSynchronizationContext(testContext);
 
-            // Main test body 
-            ArgumentException caughtException = null;
+                // Main test body
+                ArgumentException caughtException = null;
 
-            // register a null delegate, but use the currently registered syncContext.
-            // the testSyncContext will track that it was used when the delegate is invoked.
-            token.Register(() => { throw new ArgumentException(); }, true);
+                // register a null delegate, but use the currently registered syncContext.
+                // the testSyncContext will track that it was used when the delegate is invoked.
+                token.Register(() => { throw new ArgumentException(); }, true);
 
-            Task.Run(
-                () =>
-                {
-                    try
+                Task.Run(
+                    () =>
                     {
-                        tokenSource.Cancel(true);
+                        try
+                        {
+                            tokenSource.Cancel(true);
+                        }
+                        catch (ArgumentException ex)
+                        {
+                            caughtException = ex;
+                        }
+                        mre_CancelHasBeenEnacted.Set();
                     }
-                    catch (ArgumentException ex)
-                    {
-                        caughtException = ex;
-                    }
-                    mre_CancelHasBeenEnacted.Set();
-                }
-                );
+                    );
 
-            mre_CancelHasBeenEnacted.WaitOne();
-            Assert.True(testContext.DidSendOccur,
-               "EnlistWithSyncContext_BeforeCancel_ThrowingExceptionInSyncContextDelegate_ThrowOnFirst:  the delegate should have been called via Send to SyncContext.");
-            Assert.NotNull(caughtException);
-
-            //Cleanup
-            SetSynchronizationContext(prevailingSyncCtx);
+                mre_CancelHasBeenEnacted.WaitOne();
+                Assert.True(testContext.DidSendOccur,
+                   "EnlistWithSyncContext_BeforeCancel_ThrowingExceptionInSyncContextDelegate_ThrowOnFirst:  the delegate should have been called via Send to SyncContext.");
+                Assert.NotNull(caughtException);
+            }
+            finally
+            {
+                //Cleanup
+                SynchronizationContext.SetSynchronizationContext(prevailingSyncCtx);
+            }
         }
 
         // Test that we marshal exceptions back if we run callbacks on a sync context.
         // (This assumes that a syncContext.Send() may not be doing the marshalling itself).
-        [Fact]
-        public static void SyncContextWithExceptionThrowingCallback()
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public static void SyncContextWithExceptionThrowingCallback(bool throwOnFirst)
         {
-            Exception caughtEx1 = null;
-            AggregateException caughtEx2 = null;
-
             SynchronizationContext prevailingSyncCtx = SynchronizationContext.Current;
-            SetSynchronizationContext(new ThreadCrossingSynchronizationContext());
-
-
-            // -- Test 1 -- //
-            CancellationTokenSource cts = new CancellationTokenSource();
-            cts.Token.Register(
-                () => { throw new Exception("testEx1"); }, true);
-
             try
             {
-                cts.Cancel(true); //throw on first exception
+                SynchronizationContext.SetSynchronizationContext(new ThreadCrossingSynchronizationContext());
+
+                CancellationTokenSource cts = new CancellationTokenSource();
+                cts.Token.Register(() => { throw new Exception("testEx"); }, true);
+                AggregateException ae = Assert.Throws<AggregateException>(() => cts.Cancel(throwOnFirst));
+                Assert.Equal(1, ae.InnerExceptions.Count);
             }
-            catch (Exception ex)
+            finally
             {
-                caughtEx1 = (AggregateException)ex;
+                // clean up
+                SynchronizationContext.SetSynchronizationContext(prevailingSyncCtx);
             }
-
-            Assert.NotNull(caughtEx1);
-
-            // -- Test 2 -- //
-            cts = new CancellationTokenSource();
-            cts.Token.Register(
-               () => { throw new ArgumentException("testEx2"); }, true);
-
-            try
-            {
-                cts.Cancel(false); //do not throw on first exception
-            }
-            catch (AggregateException ex)
-            {
-                caughtEx2 = (AggregateException)ex;
-            }
-            Assert.NotNull(caughtEx2);
-            Assert.Equal(1, caughtEx2.InnerExceptions.Count);
-
-            // clean up
-            SetSynchronizationContext(prevailingSyncCtx);
         }
 
         [Fact]
@@ -1181,27 +1030,32 @@ namespace System.Threading.Tasks.Tests
 
             //Install our syncContext.
             SynchronizationContext prevailingSyncCtx = SynchronizationContext.Current;
-            ThreadCrossingSynchronizationContext threadCrossingSyncCtx = new ThreadCrossingSynchronizationContext();
-            SetSynchronizationContext(threadCrossingSyncCtx);
+            try
+            {
+                ThreadCrossingSynchronizationContext threadCrossingSyncCtx = new ThreadCrossingSynchronizationContext();
+                SynchronizationContext.SetSynchronizationContext(threadCrossingSyncCtx);
 
-            CancellationTokenSource cts = new CancellationTokenSource();
-            CancellationToken ct = cts.Token;
+                CancellationTokenSource cts = new CancellationTokenSource();
+                CancellationToken ct = cts.Token;
 
-            CancellationTokenRegistration ctr1 = ct.Register(() => { });
-            CancellationTokenRegistration ctr2 = ct.Register(() => { });
-            CancellationTokenRegistration ctr3 = ct.Register(() => { });
-            CancellationTokenRegistration ctr4 = ct.Register(() => { });
+                CancellationTokenRegistration ctr1 = ct.Register(() => { });
+                CancellationTokenRegistration ctr2 = ct.Register(() => { });
+                CancellationTokenRegistration ctr3 = ct.Register(() => { });
+                CancellationTokenRegistration ctr4 = ct.Register(() => { });
 
-            ct.Register(() => { ctr1.Dispose(); }, true);  // with a custom syncContext
-            ct.Register(() => { ctr2.Dispose(); }, false);  // without
-            ct.Register(() => { ctr3.Dispose(); }, true);  // with a custom syncContext
-            ct.Register(() => { ctr4.Dispose(); }, false);  // without
+                ct.Register(() => { ctr1.Dispose(); }, true);  // with a custom syncContext
+                ct.Register(() => { ctr2.Dispose(); }, false);  // without
+                ct.Register(() => { ctr3.Dispose(); }, true);  // with a custom syncContext
+                ct.Register(() => { ctr4.Dispose(); }, false);  // without
 
-            cts.Cancel();
-            Debug.WriteLine("  - Completed OK.");
-
-            //cleanup
-            SetSynchronizationContext(prevailingSyncCtx);
+                cts.Cancel();
+                Debug.WriteLine("  - Completed OK.");
+            }
+            finally
+            {
+                //cleanup
+                SynchronizationContext.SetSynchronizationContext(prevailingSyncCtx);
+            }
         }
 
         #region Helper Classes and Methods
@@ -1305,11 +1159,6 @@ namespace System.Threading.Tasks.Tests
         {
             public bool DisposeTrueCalled = false;
             public bool DisposeFalseCalled = false;
-        }
-
-        public static void SetSynchronizationContext(SynchronizationContext sc)
-        {
-            SynchronizationContext.SetSynchronizationContext(sc);
         }
 
         #endregion
