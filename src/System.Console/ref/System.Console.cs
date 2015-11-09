@@ -9,10 +9,10 @@ namespace System
 {
     public static partial class Console
     {
-        public static System.ConsoleColor BackgroundColor { get { return default(System.ConsoleColor); } set { } }
+        public static System.ConsoleColor BackgroundColor { set { } }
         public static bool CursorVisible { get { return default(bool); } set { } }
         public static System.IO.TextWriter Error { get { return default(System.IO.TextWriter); } }
-        public static System.ConsoleColor ForegroundColor { get { return default(System.ConsoleColor); } set { } }
+        public static System.ConsoleColor ForegroundColor { set { } }
         public static bool IsInputRedirected { get { return false; } }
         public static bool IsOutputRedirected { get { return false; } }
         public static bool IsErrorRedirected { get { return false; } }

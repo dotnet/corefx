@@ -111,13 +111,11 @@ namespace System
 
         public static ConsoleColor ForegroundColor
         {
-            get { throw new PlatformNotSupportedException(SR.PlatformNotSupported_GettingColor); } // no general mechanism for getting the current color
             set { ChangeColor(foreground: true, color:  value); }
         }
 
         public static ConsoleColor BackgroundColor
         {
-            get { throw new PlatformNotSupportedException(SR.PlatformNotSupported_GettingColor); } // no general mechanism for getting the current color
             set { ChangeColor(foreground: false, color: value); }
         }
 

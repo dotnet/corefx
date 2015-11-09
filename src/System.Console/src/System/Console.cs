@@ -111,13 +111,11 @@ namespace System
 
         public static ConsoleColor BackgroundColor
         {
-            get { return ConsolePal.BackgroundColor; }
             set { ConsolePal.BackgroundColor = value; }
         }
 
         public static ConsoleColor ForegroundColor
         {
-            get { return ConsolePal.ForegroundColor; }
             set { ConsolePal.ForegroundColor = value; }
         }
 
