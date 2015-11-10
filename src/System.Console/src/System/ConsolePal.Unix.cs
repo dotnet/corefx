@@ -111,13 +111,23 @@ namespace System
 
         public static ConsoleColor ForegroundColor
         {
-            get { throw new PlatformNotSupportedException(SR.PlatformNotSupported_GettingColor); } // no general mechanism for getting the current color
+            get
+            {
+                // There's no general mechanism for getting the current color.  We could
+                // try to remember what the last set color was, but a) that doesn't help
+                // with the most common case where the getter is accessed first to get the
+                // color to reset back to, and b) it's not necessarily still the current
+                // color, as it could have been changed through another means, such as
+                // writing out the ANSI escape string manually.  As such, we always
+                // simply return Unknown.
+                return ConsoleColor.Unknown;
+            }
             set { ChangeColor(foreground: true, color:  value); }
         }
 
         public static ConsoleColor BackgroundColor
         {
-            get { throw new PlatformNotSupportedException(SR.PlatformNotSupported_GettingColor); } // no general mechanism for getting the current color
+            get { return ConsoleColor.Unknown; } // See comments in get_ForegroundColor.
             set { ChangeColor(foreground: false, color: value); }
         }
 
