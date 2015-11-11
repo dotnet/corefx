@@ -122,16 +122,6 @@ namespace System.Threading.Tasks.Tests
         }
 
         [Theory]
-        [MemberData("Task_Data")]
-        public static void Task_Cancel_Test(CW.TaskInfo node)
-        {
-            CW.TestParameters parameters = new CW.TestParameters(node, CW.API.Cancel, CW.WaitBy.None, -1);
-
-            CW.TaskCancelWaitTest test = new CW.TaskCancelWaitTest(parameters);
-            test.RealRun();
-        }
-
-        [Theory]
         [MemberData("Task_Wait_Data")]
         public static void Task_Wait_Millisecond_Test(CW.TaskInfo node, int duration)
         {

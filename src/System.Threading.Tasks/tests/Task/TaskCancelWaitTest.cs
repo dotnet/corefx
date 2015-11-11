@@ -67,10 +67,6 @@ namespace System.Threading.Tasks.Tests.CancelWait
             {
                 switch (_api)
                 {
-                    case API.Cancel:
-                        _taskTree.CancellationTokenSource.Cancel();
-                        break;
-
                     case API.Wait:
                         switch (_waitBy)
                         {
@@ -192,18 +188,6 @@ namespace System.Threading.Tasks.Tests.CancelWait
         {
             switch (_api)
             {
-                //root task had the token source cancelled
-                case API.Cancel:
-                    _taskTree.Traversal(current =>
-                    {
-                        if (current.Task == null)
-                            return;
-
-                        VerifyCancel(current);
-                        VerifyResult(current);
-                    });
-                    break;
-
                 //root task was calling wait
                 case API.Wait:
                     {
@@ -221,43 +205,6 @@ namespace System.Threading.Tasks.Tests.CancelWait
                 default:
                     throw new ArgumentOutOfRangeException(string.Format("unknown API_CancelWait of", _api));
             }
-        }
-
-        /// <summary>
-        /// Cancel Verification
-        /// </summary>
-        private void VerifyCancel(TaskInfo current)
-        {
-            TaskInfo ti = current;
-
-            if (current.Parent == null)
-            {
-                if (!ti.CancellationToken.IsCancellationRequested)
-                    Assert.True(false, string.Format("Root task must be cancel-requested"));
-                else if (_countdownEvent.IsSet && ti.Task.IsCanceled)
-                    Assert.True(false, string.Format("Root task should not be cancelled when the whole tree has been created"));
-            }
-            else if (current.Parent.CancelChildren)
-            {
-                // need to make sure the parent task at least called .Cancel() on the child
-                if (!ti.CancellationToken.IsCancellationRequested)
-                    Assert.True(false, string.Format("Task which has been explictly cancel-requested either by parent must have CancellationRequested set as true"));
-            }
-            else if (ti.IsRespectParentCancellation)
-            {
-                if (ti.CancellationToken.IsCancellationRequested != current.Parent.CancellationToken.IsCancellationRequested)
-                    Assert.True(false, string.Format("Task with RespectParentCancellationcontract is broken"));
-            }
-            else
-            {
-                if (ti.CancellationToken.IsCancellationRequested || ti.Task.IsCanceled)
-                    Assert.True(false, string.Format("Inner non-directly canceled task which opts out RespectParentCancellationshould not be cancelled"));
-            }
-
-            // verify IsCanceled indicate successfully dequeued based on the observing that
-            // - Thread is recorded the first thing in the RunWorkload from user delegate
-            //if (ti.Task.IsCompleted && (ti.Thread == null) != ti.Task.IsCanceled)
-            //    Assert.Fail("IsCanceled contract is broken -- completed task which has the delegate executed can't have IsCanceled return true")
         }
 
         /// <summary>
@@ -531,7 +478,6 @@ namespace System.Threading.Tasks.Tests.CancelWait
 
     public enum API
     {
-        Cancel,
         Wait,
     }
 
