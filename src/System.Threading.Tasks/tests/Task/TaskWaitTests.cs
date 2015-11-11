@@ -11,8 +11,6 @@ namespace System.Threading.Tasks.Tests
 {
     public static class TaskWaitTests
     {
-        #region Test Methods
-
         private static CW.TaskInfo Nest(CW.TaskInfo root, params Func<CW.TaskInfo, CW.TaskInfo>[] children)
         {
             root.AddChildren(children.Select(f => f(root)).ToArray());
@@ -167,7 +165,5 @@ namespace System.Threading.Tasks.Tests
         {
             Task_Wait_TimeSpan_Test(node, duration);
         }
-
-        #endregion
     }
 }
