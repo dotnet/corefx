@@ -52,7 +52,7 @@
     <Compile Include="Task\TaskContinueWhenAllTests.cs" />
     <Compile Include="Task\TaskFromAsyncWork.cs" />
     <Compile Include="Task\TaskFromAsyncTest.cs" />
-    <Compile Include="Task\TaskCancelWaitTests.cs" />
+    <Compile Include="Task\TaskWaitTests.cs" />
     <Compile Include="Task\TaskCancelWaitTest.cs" />
     <Compile Include="Task\TaskRtTests.cs" />
     <Compile Include="Task\TaskRtTests_Core.cs" />

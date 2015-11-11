@@ -9,7 +9,7 @@ using CW = System.Threading.Tasks.Tests.CancelWait;
 
 namespace System.Threading.Tasks.Tests
 {
-    public static class TaskCancelWaitTests
+    public static class TaskWaitTests
     {
         #region Test Methods
 
