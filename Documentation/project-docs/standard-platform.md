@@ -23,9 +23,9 @@ The .NET Platform Standard version represents binary portability across platform
 
 
 ## Terms
-- **.NET Platform Standard** - versioned sets of the reference assemblies that all .NET Platforms must support.
+- **.NET Platform Standard** - a specific versioned set of reference assemblies that all .NET Platforms must support as defined in the [CoreFX repo](https://github.com/dotnet/corefx).
 - **PCL** - Portable Class Library
-- **Platform** - e.g. .NET Framework 4.5, Windows Phone 8.1
+- **Platform** - e.g. .NET Framework 4.5, Windows Phone 8.1, MonoTouch, UWP, etc.
 - **Reference Assembly** - An assembly that contains API surface only. There is no IL in the method bodies. It is used for compilation only, and cannot be used to run. Also commonly referred to as "Contracts".
 - **Implementation Assembly** - An assembly that contains an implementation of a reference assembly. These can be implemented as standalone assemblies but can sometimes be anchored by a platform and cannot be updated without updating the platform.
 - **Anchored Assembly** - An implementation assembly where at least one platform provides the implementation as part of the platform rather than on top of it. Such an "anchored assembly" may only be updated on that platform by updating the platform itself.
@@ -39,7 +39,7 @@ The .NET Platform Standard version represents binary portability across platform
 - Lower versions are always compatible with higher versions.
 
 ## Relationship to Platforms
-The .NET Platform Standard is not a platform in and of itself. It is a standard that platforms are implemented against. The .NET Platform Standard defines reference assemblies (contracts) that platforms implement. [These contracts are defined by CoreFX](https://github.com/dotnet/corefx/blob/master/Documentation/project-docs/standard-platform.md#list-of-net-corefx-apis-and-their-associated-net-standard-platform-version-tentative) and are either implemented in CoreFX as stand-alone managed code, or provided by a specific platform. For example, [System.Xml.XDocument](https://github.com/dotnet/corefx/tree/master/src/System.Xml.XDocument/src) is implemented as stand-alone managed code in CoreFx, but is an anchored assembly in .NET Framework.
+The .NET Platform Standard is not a platform in and of itself. It is a standard that platforms are implemented to. The .NET Platform Standard defines reference assemblies (contracts) that platforms must implement. These reference assemblies (ie. the standard) are defined in the [CoreFX repo](https://github.com/dotnet/corefx).
 
 ![Platform Standard and Library](https://cloud.githubusercontent.com/assets/8228359/11072769/52bc69d6-879c-11e5-8640-d92f9ee1e2d9.png)
 
