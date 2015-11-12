@@ -319,14 +319,6 @@ namespace System
 
         public static ConsoleColor BackgroundColor
         {
-            get
-            {
-                bool succeeded;
-                Interop.mincore.CONSOLE_SCREEN_BUFFER_INFO csbi = GetBufferInfo(false, out succeeded);
-                return succeeded ?
-                    ColorAttributeToConsoleColor((Interop.mincore.Color)csbi.wAttributes & Interop.mincore.Color.BackgroundMask) :
-                    ConsoleColor.Black; // for code that may be used from Windows app w/ no console
-            }
             set
             {
                 Interop.mincore.Color c = ConsoleColorToColorAttribute(value, true);
@@ -351,16 +343,6 @@ namespace System
 
         public static ConsoleColor ForegroundColor
         {
-            get
-            {
-                bool succeeded;
-                Interop.mincore.CONSOLE_SCREEN_BUFFER_INFO csbi = GetBufferInfo(false, out succeeded);
-
-                // For code that may be used from Windows app w/ no console
-                return succeeded ?
-                    ColorAttributeToConsoleColor((Interop.mincore.Color)csbi.wAttributes & Interop.mincore.Color.ForegroundMask) :
-                    ConsoleColor.Gray;
-            }
             set
             {
                 Interop.mincore.Color c = ConsoleColorToColorAttribute(value, false);
@@ -520,16 +502,6 @@ namespace System
             if (isBackground)
                 c = (Interop.mincore.Color)((int)c << 4);
             return c;
-        }
-
-        private static ConsoleColor ColorAttributeToConsoleColor(Interop.mincore.Color c)
-        {
-            // Turn background colors into foreground colors.
-            if ((c & Interop.mincore.Color.BackgroundMask) != 0)
-            {
-                c = (Interop.mincore.Color)(((int)c) >> 4);
-            }
-            return (ConsoleColor)c;
         }
 
         private static Interop.mincore.CONSOLE_SCREEN_BUFFER_INFO GetBufferInfo()
