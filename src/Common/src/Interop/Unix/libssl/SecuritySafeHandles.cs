@@ -292,7 +292,7 @@ namespace System.Net.Security
 
         public override bool IsInvalid
         {
-            get { return _channelBinding.IsInvalid; }
+            get { return (null == _channelBinding) || _channelBinding.IsInvalid; }
         }
 
         public SafeFreeContextBufferChannelBinding(SafeChannelBindingHandle binding)
