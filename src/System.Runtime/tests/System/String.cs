@@ -1544,6 +1544,48 @@ public static unsafe class StringTests
 
         s = ". Foo .".TrimEnd('.');
         Assert.Equal(". Foo ", s);
+
+        s = "".Trim('c');
+        Assert.Equal("", s);
+        s = "".TrimStart('c');
+        Assert.Equal("", s);
+        s = "".TrimEnd('c');
+        Assert.Equal("", s);
+
+        s = "".Trim(null);
+        Assert.Equal("", s);
+        s = "".TrimStart(null);
+        Assert.Equal("", s);
+        s = "".TrimEnd(null);
+        Assert.Equal("", s);
+
+        s = "SSSSSSSSSSS".Trim('S');
+        Assert.Equal("", s);
+        s = "SSSSSSSSSSS".TrimStart('S');
+        Assert.Equal("", s);
+        s = "SSSSSSSSSSS".TrimEnd('S');
+        Assert.Equal("", s);
+
+        s = "TTthe test string ".Trim(' ', 'T');
+        Assert.Equal("the test string", s);
+        s = "TTthe test string ".TrimStart(' ', 'T');
+        Assert.Equal("the test string ", s);
+        s = "TTthe test string ".TrimEnd(' ', 'T');
+        Assert.Equal("TTthe test string", s);
+
+        s = "6".Trim('0');
+        Assert.Equal("6", s);
+        s = "6".TrimStart('0');
+        Assert.Equal("6", s);
+        s = "6".TrimEnd('0');
+        Assert.Equal("6", s);
+
+        s = "my'\\$%^&RW()# 0".Trim('5', 'm', 'y', (char)39, (char)92);
+        Assert.Equal("$%^&RW()# 0",s);
+        s = "my'\\$%^&RW()# 0".TrimStart('5', 'm', 'y', (char)92, (char)39);
+        Assert.Equal("$%^&RW()# 0", s);
+        s = "my'\\$%^&RW()# 0".TrimEnd('5', 'm', 'y', (char)92, (char)39);
+        Assert.Equal("my'\\$%^&RW()# 0", s);
     }
 
     [Fact]

@@ -1617,6 +1617,7 @@ namespace System
         public string ToUpper() { return default(string); }
         public string ToUpperInvariant() { return default(string); }
         public string Trim() { return default(string); }
+        public string Trim(char c) { return default(string); }
         public string Trim(params char[] trimChars) { return default(string); }
         public string TrimEnd(params char[] trimChars) { return default(string); }
         public string TrimStart(params char[] trimChars) { return default(string); }
