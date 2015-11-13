@@ -38,10 +38,6 @@ namespace System.Threading.Tasks.Tests
                                 node => new CW.TaskInfo(node, "node_1", work, option, true))
                             };
                         yield return new object[] {
-                            Nest(new CW.TaskInfo(null, "node", load, option, true, false),
-                                node => new CW.TaskInfo(node, "node_1", work, option))
-                            };
-                        yield return new object[] {
                             Nest(new CW.TaskInfo(null, "node", load, option),
                                 node => new CW.TaskInfo(node, "node_1", work, option | TaskCreationOptions.AttachedToParent))
                             };

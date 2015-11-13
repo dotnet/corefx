@@ -141,25 +141,6 @@ namespace System.Threading.Tasks.Tests.CancelWait
                         }
                     }
 
-                    if (current.CancelChildren)
-                    {
-                        try
-                        {
-                            foreach (TaskInfo child in current.Children)
-                            {
-                                child.CancellationTokenSource.Cancel();
-                            }
-                        }
-                        finally
-                        {
-                            // stop the tree creation and let the main thread proceed
-                            if (!_countdownEvent.IsSet)
-                            {
-                                _countdownEvent.Signal(_countdownEvent.CurrentCount);
-                            }
-                        }
-                    }
-
                     // run the workload
                     current.RunWorkload();
                 }, treeNode, treeNode.CancellationToken, treeNode.Option, tm);
@@ -240,14 +221,6 @@ namespace System.Threading.Tasks.Tests.CancelWait
             {
                 if (ti.Task.Exception != null && _api == API.Wait)
                     Assert.True(false, string.Format("UNEXPECTED exception in Task.Name = Task{0} caught. Exception: {1}", current.Name, ti.Task.Exception));
-
-
-                if (ti.Task.IsCanceled && ti.Result != -42)
-                {
-                    //this means that the task was not scheduled - it was cancelled or it is still in the queue
-                    //-42 = UNINITIALED_RESULT
-                    Assert.True(false, string.Format("Result must remain uninitialized for unstarted task"));
-                }
                 else if (ti.Task.IsCompleted)
                 {
                     //Function point comparison cant be done by rounding off to nearest decimal points since
