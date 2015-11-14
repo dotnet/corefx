@@ -19,14 +19,17 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Targets>Build;DebugSymbolsProjectOutputGroup</Targets>
     </ProjectReference>
-    <ProjectReference Include="..\..\System.Diagnostics.Debug\src\System.Diagnostics.Debug.csproj">
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-      <OutputItemType>Content</OutputItemType>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <Targets>Build;DebugSymbolsProjectOutputGroup</Targets>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="$(CommonTestPath)\System\DeliberateTestException.cs">
+      <Link>Common\System\DeliberateTestException.cs</Link>
+    </Compile>
+    <Compile Include="Helpers\Flag.cs" />
+    <Compile Include="Helpers\Functions.cs" />
+    <Compile Include="Helpers\QUWITaskScheduler.cs" />
+    <Compile Include="Helpers\ValidateCorrectContextSynchronizationContext.cs" />
+    <Compile Include="Helpers\Waits.cs" />
+    <Compile Include="Helpers\Workloads.cs" />
     <Compile Include="XunitAssemblyAttributes.cs" />
     <Compile Include="UnwrapTests.cs" />
     <Compile Include="AggregateExceptionTests.cs" />
@@ -37,10 +40,10 @@
     <!-- Task -->
     <Compile Include="Task\TPLTestException.cs" />
     <Compile Include="Task\TaskRunSyncTests.cs" />
-    <Compile Include="Task\TaskStatusTest.cs" />
+    <Compile Include="Task\TaskStatusTests.cs" />
     <Compile Include="Task\TaskPropertiesTests.cs" />
-    <Compile Include="Task\TaskCreateTest.cs" />
-    <Compile Include="Task\TaskWaitAllAnyTest.cs" />
+    <Compile Include="Task\TaskCreateTests.cs" />
+    <Compile Include="Task\TaskWaitAllAnyTests.cs" />
     <Compile Include="Task\TaskContinueWithTests.cs" />
     <Compile Include="Task\TaskContinueWithAllAnyTests.cs" />
     <Compile Include="Task\TaskContinueWith_ContFuncAndActionWithArgsTests.cs" />
@@ -49,11 +52,11 @@
     <Compile Include="Task\TaskContinueWhenAllTests.cs" />
     <Compile Include="Task\TaskFromAsyncWork.cs" />
     <Compile Include="Task\TaskFromAsyncTest.cs" />
-    <Compile Include="Task\TaskCancelWaitTests.cs" />
+    <Compile Include="Task\TaskWaitTests.cs" />
     <Compile Include="Task\TaskCancelWaitTest.cs" />
     <Compile Include="Task\TaskRtTests.cs" />
     <Compile Include="Task\TaskRtTests_Core.cs" />
-    <Compile Include="Task\TaskAPMTest.cs" />
+    <Compile Include="Task\TaskAPMTests.cs" />
     <!-- TaskFactory -->
     <Compile Include="TaskFactory\TaskFactory_FromAsyncTests.cs" />
     <Compile Include="TaskFactory\TaskFactoryTests.cs" />

@@ -67,10 +67,6 @@ namespace System.Threading.Tasks.Tests.CancelWait
             {
                 switch (_api)
                 {
-                    case API.Cancel:
-                        _taskTree.CancellationTokenSource.Cancel();
-                        break;
-
                     case API.Wait:
                         switch (_waitBy)
                         {
@@ -106,11 +102,6 @@ namespace System.Threading.Tasks.Tests.CancelWait
                     Debug.WriteLine("ElapsedMilliseconds way more than requested Timeout.");
                     Debug.WriteLine("WaitTime= {0} ms, ElapsedTime= {1} ms, Allowed Descrepancy = {2} ms", _waitTimeout, sw.ElapsedMilliseconds, s_delatTimeOut);
                     Debug.WriteLine("Delta= {0} ms", delta);
-                }
-                else
-                {
-                    var delaytask = Task.Delay((int)Math.Abs(delta));  // give delay to allow Context being collected before verification
-                    delaytask.Wait();
                 }
             }
 
@@ -150,25 +141,6 @@ namespace System.Threading.Tasks.Tests.CancelWait
                         }
                     }
 
-                    if (current.CancelChildren)
-                    {
-                        try
-                        {
-                            foreach (TaskInfo child in current.Children)
-                            {
-                                child.CancellationTokenSource.Cancel();
-                            }
-                        }
-                        finally
-                        {
-                            // stop the tree creation and let the main thread proceed
-                            if (!_countdownEvent.IsSet)
-                            {
-                                _countdownEvent.Signal(_countdownEvent.CurrentCount);
-                            }
-                        }
-                    }
-
                     // run the workload
                     current.RunWorkload();
                 }, treeNode, treeNode.CancellationToken, treeNode.Option, tm);
@@ -197,32 +169,8 @@ namespace System.Threading.Tasks.Tests.CancelWait
         {
             switch (_api)
             {
-                //root task had the token source cancelled
-                case API.Cancel:
-                    _taskTree.Traversal(current =>
-                    {
-                        if (current.Task == null)
-                            return;
-
-                        VerifyCancel(current);
-                        VerifyResult(current);
-                    });
-                    break;
-
                 //root task was calling wait
                 case API.Wait:
-                    //will be true if the root cancelled itself - through its workload
-                    if (_taskTree.CancellationToken.IsCancellationRequested)
-                    {
-                        _taskTree.Traversal(current =>
-                        {
-                            if (current.Task == null)
-                                return;
-
-                            VerifyTaskCanceledException(current);
-                        });
-                    }
-                    else
                     {
                         _taskTree.Traversal(current =>
                         {
@@ -238,43 +186,6 @@ namespace System.Threading.Tasks.Tests.CancelWait
                 default:
                     throw new ArgumentOutOfRangeException(string.Format("unknown API_CancelWait of", _api));
             }
-        }
-
-        /// <summary>
-        /// Cancel Verification
-        /// </summary>
-        private void VerifyCancel(TaskInfo current)
-        {
-            TaskInfo ti = current;
-
-            if (current.Parent == null)
-            {
-                if (!ti.CancellationToken.IsCancellationRequested)
-                    Assert.True(false, string.Format("Root task must be cancel-requested"));
-                else if (_countdownEvent.IsSet && ti.Task.IsCanceled)
-                    Assert.True(false, string.Format("Root task should not be cancelled when the whole tree has been created"));
-            }
-            else if (current.Parent.CancelChildren)
-            {
-                // need to make sure the parent task at least called .Cancel() on the child
-                if (!ti.CancellationToken.IsCancellationRequested)
-                    Assert.True(false, string.Format("Task which has been explictly cancel-requested either by parent must have CancellationRequested set as true"));
-            }
-            else if (ti.IsRespectParentCancellation)
-            {
-                if (ti.CancellationToken.IsCancellationRequested != current.Parent.CancellationToken.IsCancellationRequested)
-                    Assert.True(false, string.Format("Task with RespectParentCancellationcontract is broken"));
-            }
-            else
-            {
-                if (ti.CancellationToken.IsCancellationRequested || ti.Task.IsCanceled)
-                    Assert.True(false, string.Format("Inner non-directly canceled task which opts out RespectParentCancellationshould not be cancelled"));
-            }
-
-            // verify IsCanceled indicate successfully dequeued based on the observing that
-            // - Thread is recorded the first thing in the RunWorkload from user delegate
-            //if (ti.Task.IsCompleted && (ti.Thread == null) != ti.Task.IsCanceled)
-            //    Assert.Fail("IsCanceled contract is broken -- completed task which has the delegate executed can't have IsCanceled return true")
         }
 
         /// <summary>
@@ -300,65 +211,16 @@ namespace System.Threading.Tasks.Tests.CancelWait
                 }
             }
         }
-
-        private void VerifyTaskCanceledException(TaskInfo current)
-        {
-            bool expCaught;
-
-            TaskInfo ti = current;
-            //a task will get into cancelled state only if:
-            //1.Its token was cancelled before as its action to get invoked
-            //2.The token was cancelled before the task's action to finish, task observed the cancelled token and threw OCE(token)
-            if (ti.Task.Status == TaskStatus.Canceled)
-            {
-                expCaught = FindException((ex) =>
-                {
-                    TaskCanceledException expectedExp = ex as TaskCanceledException;
-                    return expectedExp != null && expectedExp.Task == ti.Task;
-                });
-
-                Assert.True(expCaught, "expected TaskCanceledException in Task.Name = Task " + current.Name + " NOT caught");
-            }
-            else
-            {
-                expCaught = FindException((ex) =>
-                {
-                    TaskCanceledException expectedExp = ex as TaskCanceledException;
-                    return expectedExp != null && expectedExp.Task == ti.Task;
-                });
-
-                Assert.False(expCaught, "NON-expected TaskCanceledException in Task.Name = Task " + current.Name + " caught");
-            }
-        }
+        
 
         private void VerifyResult(TaskInfo current)
         {
             TaskInfo ti = current;
             WorkloadType workType = ti.WorkType;
 
-            if (workType == WorkloadType.Exceptional && _api != API.Cancel)
-            {
-                bool expCaught = FindException((ex) =>
-                {
-                    TPLTestException expectedExp = ex as TPLTestException;
-                    return expectedExp != null && expectedExp.FromTaskId == ti.Task.Id;
-                });
-
-                if (!expCaught)
-                    Assert.True(false, string.Format("expected TPLTestException in Task.Name = Task{0} NOT caught", current.Name));
-            }
-            else
             {
                 if (ti.Task.Exception != null && _api == API.Wait)
                     Assert.True(false, string.Format("UNEXPECTED exception in Task.Name = Task{0} caught. Exception: {1}", current.Name, ti.Task.Exception));
-
-
-                if (ti.Task.IsCanceled && ti.Result != -42)
-                {
-                    //this means that the task was not scheduled - it was cancelled or it is still in the queue
-                    //-42 = UNINITIALED_RESULT
-                    Assert.True(false, string.Format("Result must remain uninitialized for unstarted task"));
-                }
                 else if (ti.Task.IsCompleted)
                 {
                     //Function point comparison cant be done by rounding off to nearest decimal points since
@@ -429,14 +291,12 @@ namespace System.Threading.Tasks.Tests.CancelWait
     /// </summary>
     public class TaskInfo
     {
-        private static TaskCreationOptions s_DEFAULT_OPTION = TaskCreationOptions.AttachedToParent;
         private static double s_UNINITIALED_RESULT = -42;
 
-        public TaskInfo(TaskInfo parent, string TaskInfo_CancelWaitName, WorkloadType workType, string optionsString)
+        public TaskInfo(TaskInfo parent, string TaskInfo_CancelWaitName, WorkloadType workType, TaskCreationOptions options)
         {
             Children = new LinkedList<TaskInfo>();
             Result = s_UNINITIALED_RESULT;
-            Option = s_DEFAULT_OPTION;
             Name = TaskInfo_CancelWaitName;
 
             WorkType = workType;
@@ -446,54 +306,19 @@ namespace System.Threading.Tasks.Tests.CancelWait
             CancellationTokenSource = new CancellationTokenSource();
             CancellationToken = CancellationTokenSource.Token;
 
-            if (string.IsNullOrEmpty(optionsString))
-                return;
-
-            //
-            // Parse Task CreationOptions, if RespectParentCancellation we would want to acknowledge that
-            // and passed the remaining options for creation
-            //
-            string[] options = optionsString.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
-
-            int index = -1;
-            for (int i = 0; i < options.Length; i++)
-            {
-                string o = options[i].Trim(); // remove any white spaces.
-                options[i] = o;
-                if (o.Equals("RespectParentCancellation", StringComparison.OrdinalIgnoreCase))
-                {
-                    IsRespectParentCancellation = true;
-                    index = i;
-                }
-            }
-
-            if (index != -1)
-            {
-                string[] temp = new string[options.Length - 1];
-                int excludeIndex = index + 1;
-                Array.Copy(options, 0, temp, 0, index);
-                int leftToCopy = options.Length - excludeIndex;
-                Array.Copy(options, excludeIndex, temp, index, leftToCopy);
-
-                options = temp;
-            }
-
-            if (options.Length > 0)
-            {
-                TaskCreationOptions parsedOptions;
-                string joinedOptions = string.Join(",", options);
-                bool parsed = Enum.TryParse<TaskCreationOptions>(joinedOptions, out parsedOptions);
-                if (!parsed)
-                    throw new NotSupportedException("could not parse the options string: " + joinedOptions);
-
-                Option = parsedOptions;
-            }
+            Option = options;
         }
 
-        public TaskInfo(TaskInfo parent, string TaskInfo_CancelWaitName, WorkloadType workType, string optionsString, bool cancelChildren)
-            : this(parent, TaskInfo_CancelWaitName, workType, optionsString)
+        public TaskInfo(TaskInfo parent, string TaskInfo_CancelWaitName, WorkloadType workType, TaskCreationOptions options, bool cancelChildren, bool respectParentCancellation)
+            : this(parent, TaskInfo_CancelWaitName, workType, options, respectParentCancellation)
         {
             CancelChildren = cancelChildren;
+        }
+
+        public TaskInfo(TaskInfo parent, string TaskInfo_CancelWaitName, WorkloadType workType, TaskCreationOptions options, bool respectParentCancellation)
+            : this(parent, TaskInfo_CancelWaitName, workType, options)
+        {
+            IsRespectParentCancellation = respectParentCancellation;
         }
 
         #region Properties
@@ -591,16 +416,6 @@ namespace System.Threading.Tasks.Tests.CancelWait
         public void RunWorkload()
         {
             //Thread = Thread.CurrentThread;
-
-            if (WorkType == WorkloadType.Exceptional)
-            {
-                ThrowException();
-            }
-            else if (WorkType == WorkloadType.Cancelled)
-            {
-                CancelSelf(this.CancellationTokenSource, this.CancellationToken);
-            }
-            else
             {
                 // run the workload
                 if (Result == s_UNINITIALED_RESULT)
@@ -625,23 +440,6 @@ namespace System.Threading.Tasks.Tests.CancelWait
             return result;
         }
 
-        /// <summary>
-        /// Cancel self workload. The CancellationToken has been wired such that the source passed to this method
-        /// is a source that can actually causes the Task CancellationToken to be canceled. The source could be the
-        /// Token's original source, or one of the sources in case of Linked Tokens
-        /// </summary>
-        /// <param name="cts"></param>
-        public static void CancelSelf(CancellationTokenSource cts, CancellationToken ct)
-        {
-            cts.Cancel();
-            throw new OperationCanceledException(ct);
-        }
-
-        public static void ThrowException()
-        {
-            throw new TPLTestException();
-        }
-
         internal void AddChildren(TaskInfo[] children)
         {
             foreach (var child in children)
@@ -653,7 +451,6 @@ namespace System.Threading.Tasks.Tests.CancelWait
 
     public enum API
     {
-        Cancel,
         Wait,
     }
 
@@ -674,8 +471,6 @@ namespace System.Threading.Tasks.Tests.CancelWait
     /// </summary>
     public enum WorkloadType
     {
-        Exceptional = -2,
-        Cancelled = -1,
         VeryLight = 1000,     // the number is the N input to the ZetaSequence workload
         Light = 5000,
         Medium = 100000,

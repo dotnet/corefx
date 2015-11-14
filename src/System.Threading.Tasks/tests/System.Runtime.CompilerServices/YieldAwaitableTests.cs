@@ -1,136 +1,153 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using Xunit;
-using System;
-using System.Collections.Generic;
 using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
+using Xunit;
 
 namespace System.Threading.Tasks.Tests
 {
     public class YieldAwaitableTests
     {
         // awaiting Task.Yield
-        [Fact]
-        public static void RunAsyncYieldAwaiterTests()
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public static void AsyncYieldAwaiter_Direct_Test(bool useYieldAwaiter)
         {
-            // Test direct usage works even though it's not encouraged
+            SynchronizationContext previous = SynchronizationContext.Current;
+            try
             {
-                for (int i = 0; i < 2; i++)
-                {
-                    SynchronizationContext.SetSynchronizationContext(new ValidateCorrectContextSynchronizationContext());
-                    var ya = i == 0 ? new YieldAwaitable.YieldAwaiter() : new YieldAwaitable().GetAwaiter();
-                    var mres = new ManualResetEventSlim();
-                    Assert.False(ya.IsCompleted, "RunAsyncYieldAwaiterTests     > FAILURE. YieldAwaiter.IsCompleted should always be false.");
-                    ya.OnCompleted(() =>
-                    {
-                        Assert.True(ValidateCorrectContextSynchronizationContext.IsPostedInContext, "RunAsyncYieldAwaiterTests     > FAILURE. Expected to post in target context.");
-                        mres.Set();
-                    });
-                    mres.Wait();
-                    ya.GetResult();
-                    SynchronizationContext.SetSynchronizationContext(null);
-                }
-            }
-
-            {
-                // Yield when there's a current sync context
                 SynchronizationContext.SetSynchronizationContext(new ValidateCorrectContextSynchronizationContext());
-                var ya = Task.Yield().GetAwaiter();
-                try { ya.GetResult(); }
-                catch
-                {
-                    Assert.True(false, string.Format("RunAsyncYieldAwaiterTests     > FAILURE. YieldAwaiter.GetResult threw inappropriately"));
-                }
+                var ya = useYieldAwaiter ? new YieldAwaitable.YieldAwaiter() : new YieldAwaitable().GetAwaiter();
                 var mres = new ManualResetEventSlim();
-                Assert.False(ya.IsCompleted, "RunAsyncYieldAwaiterTests     > FAILURE. YieldAwaiter.IsCompleted should always be false.");
+                Assert.False(ya.IsCompleted);
                 ya.OnCompleted(() =>
                 {
-                    Assert.True(ValidateCorrectContextSynchronizationContext.IsPostedInContext, "     > FAILURE. Expected to post in target context.");
+                    Assert.True(ValidateCorrectContextSynchronizationContext.IsPostedInContext);
                     mres.Set();
                 });
                 mres.Wait();
                 ya.GetResult();
-                SynchronizationContext.SetSynchronizationContext(null);
             }
-
+            finally
             {
+                SynchronizationContext.SetSynchronizationContext(previous);
+            }
+        }
+
+        [Fact]
+        public static void AsyncYieldAwaiter_Indirect_Test()
+        {
+            SynchronizationContext previous = SynchronizationContext.Current;
+            try
+            {
+                // Yield when there's a current sync context
+                SynchronizationContext.SetSynchronizationContext(new ValidateCorrectContextSynchronizationContext());
+                var ya = Task.Yield().GetAwaiter();
+                ya.GetResult();
+                var mres = new ManualResetEventSlim();
+                Assert.False(ya.IsCompleted);
+                ya.OnCompleted(() =>
+                {
+                    Assert.True(ValidateCorrectContextSynchronizationContext.IsPostedInContext);
+                    mres.Set();
+                });
+                mres.Wait();
+                ya.GetResult();
+            }
+            finally
+            {
+                SynchronizationContext.SetSynchronizationContext(previous);
+            }
+        }
+
+        [Fact]
+        public static void AsyncYieldAwaiter_WithContext_Test()
+        {
+            SynchronizationContext previous = SynchronizationContext.Current;
+            try
+            {
+                // TODO: Figure out why the test locks without the next line.
+                SynchronizationContext.SetSynchronizationContext(null);
+
                 // Yield when there's a current TaskScheduler
                 Task.Factory.StartNew(() =>
                 {
-                    try
+                    var ya = Task.Yield().GetAwaiter();
+                    ya.GetResult();
+                    var mres = new ManualResetEventSlim();
+                    Assert.False(ya.IsCompleted);
+                    ya.OnCompleted(() =>
                     {
-                        var ya = Task.Yield().GetAwaiter();
-                        try { ya.GetResult(); }
-                        catch
-                        {
-                            Assert.True(false, string.Format("     > FAILURE. YieldAwaiter.GetResult threw inappropriately"));
-                        }
-                        var mres = new ManualResetEventSlim();
-                        Assert.False(ya.IsCompleted, "     > FAILURE. YieldAwaiter.IsCompleted should always be false.");
-                        ya.OnCompleted(() =>
-                        {
-                            Assert.True(TaskScheduler.Current is QUWITaskScheduler, "     > FAILURE. Expected to queue into target scheduler.");
-                            mres.Set();
-                        });
-                        mres.Wait();
-                        ya.GetResult();
-                    }
-                    catch { Assert.True(false, string.Format("     > FAILURE. Unexpected exception from Yield")); }
+                        Assert.IsType<QUWITaskScheduler>(TaskScheduler.Current);
+                        mres.Set();
+                    });
+                    mres.Wait();
+                    ya.GetResult();
                 }, CancellationToken.None, TaskCreationOptions.None, new QUWITaskScheduler()).Wait();
             }
+            finally
+            {
+                SynchronizationContext.SetSynchronizationContext(previous);
+            }
+        }
 
+        [Fact]
+        public static void AsyncYieldAwaiter_SetInsideTask_Test()
+        {
+            SynchronizationContext previous = SynchronizationContext.Current;
+            try
             {
                 // Yield when there's a current TaskScheduler and SynchronizationContext.Current is the base SynchronizationContext
                 Task.Factory.StartNew(() =>
                 {
                     SynchronizationContext.SetSynchronizationContext(new SynchronizationContext());
-                    try
+
+                    var ya = Task.Yield().GetAwaiter();
+                    ya.GetResult();
+                    var mres = new ManualResetEventSlim();
+                    Assert.False(ya.IsCompleted);
+                    ya.OnCompleted(() =>
                     {
-                        var ya = Task.Yield().GetAwaiter();
-                        try { ya.GetResult(); }
-                        catch
-                        {
-                            Assert.True(false, string.Format("     > FAILURE. YieldAwaiter.GetResult threw inappropriately"));
-                        }
-                        var mres = new ManualResetEventSlim();
-                        Assert.False(ya.IsCompleted, "     > FAILURE. YieldAwaiter.IsCompleted should always be false.");
-                        ya.OnCompleted(() =>
-                        {
-                            Assert.True(TaskScheduler.Current is QUWITaskScheduler, "     > FAILURE. Expected to queue into target scheduler.");
-                            mres.Set();
-                        });
-                        mres.Wait();
-                        ya.GetResult();
-                    }
-                    catch { Assert.True(false, string.Format("     > FAILURE. Unexpected exception from Yield")); }
+                        Assert.IsType<QUWITaskScheduler>(TaskScheduler.Current);
+                        mres.Set();
+                    });
+                    mres.Wait();
+                    ya.GetResult();
+
                     SynchronizationContext.SetSynchronizationContext(null);
                 }, CancellationToken.None, TaskCreationOptions.None, new QUWITaskScheduler()).Wait();
             }
+            finally
+            {
+                SynchronizationContext.SetSynchronizationContext(previous);
+            }
+        }
 
+        [Fact]
+        public static void AsyncYieldAwaiter_GrabbedByOncompleted_Test()
+        {
+            SynchronizationContext previous = SynchronizationContext.Current;
+            try
             {
                 // OnCompleted grabs the current context, not Task.Yield nor GetAwaiter
                 SynchronizationContext.SetSynchronizationContext(new SynchronizationContext());
                 var ya = Task.Yield().GetAwaiter();
                 SynchronizationContext.SetSynchronizationContext(new ValidateCorrectContextSynchronizationContext());
-                try { ya.GetResult(); }
-                catch
-                {
-                    Assert.True(false, string.Format("     > FAILURE. YieldAwaiter.GetResult threw inappropriately"));
-                }
+                ya.GetResult();
                 var mres = new ManualResetEventSlim();
-                Assert.False(ya.IsCompleted, "     > FAILURE. YieldAwaiter.IsCompleted should always be false.");
+                Assert.False(ya.IsCompleted);
                 ya.OnCompleted(() =>
                 {
-                    Assert.True(ValidateCorrectContextSynchronizationContext.IsPostedInContext, "     > FAILURE. Expected to post in target context.");
+                    Assert.True(ValidateCorrectContextSynchronizationContext.IsPostedInContext);
                     mres.Set();
                 });
                 mres.Wait();
                 ya.GetResult();
-                SynchronizationContext.SetSynchronizationContext(null);
+            }
+            finally
+            {
+                SynchronizationContext.SetSynchronizationContext(previous);
             }
         }
 
@@ -138,64 +155,8 @@ namespace System.Threading.Tasks.Tests
         [Fact]
         public static void RunAsyncYieldAwaiterTests_Negative()
         {
-            // Yield when there's a current sync context
-            SynchronizationContext.SetSynchronizationContext(new ValidateCorrectContextSynchronizationContext());
             var ya = Task.Yield().GetAwaiter();
             Assert.Throws<ArgumentNullException>(() => { ya.OnCompleted(null); });
         }
-
-        #region Helper Methods / Classes
-
-        private class ValidateCorrectContextSynchronizationContext : SynchronizationContext
-        {
-            [ThreadStatic]
-            internal static bool IsPostedInContext;
-
-            internal int PostCount;
-            internal int SendCount;
-
-            public override void Post(SendOrPostCallback d, object state)
-            {
-                Interlocked.Increment(ref PostCount);
-                Task.Run(() =>
-                {
-                    IsPostedInContext = true;
-                    d(state);
-                    IsPostedInContext = false;
-                });
-            }
-
-            public override void Send(SendOrPostCallback d, object state)
-            {
-                Interlocked.Increment(ref SendCount);
-                d(state);
-            }
-        }
-
-        /// <summary>A scheduler that queues to the TP and tracks the number of times QueueTask and TryExecuteTaskInline are invoked.</summary>
-        private class QUWITaskScheduler : TaskScheduler
-        {
-            private int _queueTaskCount;
-            private int _tryExecuteTaskInlineCount;
-
-            public int QueueTaskCount { get { return _queueTaskCount; } }
-            public int TryExecuteTaskInlineCount { get { return _tryExecuteTaskInlineCount; } }
-
-            protected override IEnumerable<Task> GetScheduledTasks() { return null; }
-
-            protected override void QueueTask(Task task)
-            {
-                Interlocked.Increment(ref _queueTaskCount);
-                Task.Run(() => TryExecuteTask(task));
-            }
-
-            protected override bool TryExecuteTaskInline(Task task, bool taskWasPreviouslyQueued)
-            {
-                Interlocked.Increment(ref _tryExecuteTaskInlineCount);
-                return TryExecuteTask(task);
-            }
-        }
-
-        #endregion
     }
 }

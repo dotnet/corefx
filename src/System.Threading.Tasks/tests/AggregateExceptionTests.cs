@@ -1,130 +1,163 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using Xunit;
-using System;
 using System.Collections.Generic;
-using System.Diagnostics;
+using System.Linq;
+using Xunit;
 
 namespace System.Threading.Tasks.Tests
 {
-    public class AggregateExceptionTests
+    public static class AggregateExceptionTests
     {
+        private const string TestMessage = "AggregateException Test Message";
+
         [Fact]
-        public static void ConstructorBasic()
+        public static void Constructor_Default()
         {
             AggregateException ex = new AggregateException();
-            Assert.Equal(ex.InnerExceptions.Count, 0);
-            Assert.True(ex.Message != null, "RunAggregateException_Constructor:  FAILED. Message property is null when the default constructor is used, expected a default message");
+            Assert.Empty(ex.InnerExceptions);
+            Assert.NotNull(ex.Message);
+        }
 
-            ex = new AggregateException("message");
-            Assert.Equal(ex.InnerExceptions.Count, 0);
-            Assert.True(ex.Message != null, "RunAggregateException_Constructor:  FAILED. Message property is  null when the default constructor(string) is used");
+        [Fact]
+        public static void Constructor_Message()
+        {
+            AggregateException ex = new AggregateException(TestMessage);
+            Assert.Empty(ex.InnerExceptions);
+            Assert.Equal(TestMessage, ex.Message);
+        }
 
-            ex = new AggregateException("message", new Exception());
-            Assert.Equal(ex.InnerExceptions.Count, 1);
-            Assert.True(ex.Message != null, "RunAggregateException_Constructor:  FAILED. Message property is  null when the default constructor(string, Exception) is used");
+        [Fact]
+        public static void Constructor_Exception()
+        {
+            DeliberateTestException inner = new DeliberateTestException();
+            AggregateException ex = new AggregateException(inner);
+            Assert.Single(ex.InnerExceptions);
+            Assert.Equal(inner, ex.InnerException);
+            Assert.NotNull(ex.Message);
+        }
+
+        [Fact]
+        public static void Constructor_Message_Exception()
+        {
+            DeliberateTestException inner = new DeliberateTestException();
+            AggregateException ex = new AggregateException(TestMessage, inner);
+            Assert.Single(ex.InnerExceptions);
+            Assert.Equal(inner, ex.InnerException);
+            Assert.Equal(TestMessage, ex.Message);
         }
 
         [Fact]
         public static void ConstructorInvalidArguments()
         {
-            AggregateException ex = new AggregateException();
-            Assert.Throws<ArgumentNullException>(
-               () => ex = new AggregateException("message", (Exception)null));
-
-            Assert.Throws<ArgumentNullException>(
-               () => ex = new AggregateException("message", (IEnumerable<Exception>)null));
-
-            Assert.Throws<ArgumentException>(
-               () => ex = new AggregateException("message", new[] { new Exception(), null }));
+            Assert.Throws<ArgumentNullException>(() => new AggregateException((Exception[])null));
+            Assert.Throws<ArgumentNullException>(() => new AggregateException((IEnumerable<Exception>)null));
+            Assert.Throws<ArgumentNullException>(() => new AggregateException("message", (Exception)null));
+            Assert.Throws<ArgumentNullException>(() => new AggregateException("message", (Exception[])null));
+            Assert.Throws<ArgumentNullException>(() => new AggregateException("message", (IEnumerable<Exception>)null));
+            Assert.Throws<ArgumentException>(() => new AggregateException(new Exception[] { null }));
+            Assert.Throws<ArgumentException>(() => new AggregateException(Enumerable.Repeat((Exception)null, 1)));
+            Assert.Throws<ArgumentException>(() => new AggregateException("message", new Exception[] { null }));
+            Assert.Throws<ArgumentException>(() => new AggregateException("message", Enumerable.Repeat((Exception)null, 1)));
         }
 
         [Fact]
-        public static void BaseExceptions()
+        public static void BaseException_Empty()
         {
             AggregateException ex = new AggregateException();
             Assert.Equal(ex.GetBaseException(), ex);
 
-            Exception[] innerExceptions = new Exception[0];
-            ex = new AggregateException(innerExceptions);
+            ex = new AggregateException(new Exception[] { /* empty */ });
             Assert.Equal(ex.GetBaseException(), ex);
 
-            innerExceptions = new Exception[1] { new AggregateException() };
-            ex = new AggregateException(innerExceptions);
-            Assert.Equal(ex.GetBaseException(), innerExceptions[0]);
-
-            innerExceptions = new Exception[2] { new AggregateException(), new AggregateException() };
-            ex = new AggregateException(innerExceptions);
+            ex = new AggregateException(Enumerable.Empty<Exception>());
             Assert.Equal(ex.GetBaseException(), ex);
         }
 
         [Fact]
-        public static void Handle()
+        public static void BaseException_Single()
         {
-            AggregateException ex = new AggregateException();
-            ex = new AggregateException(new[] { new ArgumentException(), new ArgumentException(), new ArgumentException() });
+            Exception inner = new AggregateException();
+            Assert.Equal(new AggregateException(inner).GetBaseException(), inner);
+
+            inner = new DeliberateTestException();
+            Assert.Equal(new AggregateException(inner).GetBaseException(), inner);
+
+            inner = new DeliberateTestException();
+            AggregateException nest = new AggregateException(inner);
+            Assert.Equal(new AggregateException(nest).GetBaseException(), inner);
+        }
+
+        [Fact]
+        public static void BaseException_Multiple()
+        {
+            AggregateException ex = new AggregateException(Enumerable.Repeat(new AggregateException(), 2));
+            Assert.Equal(ex.GetBaseException(), ex);
+
+            ex = new AggregateException(Enumerable.Repeat(new DeliberateTestException(), 2));
+            Assert.Equal(ex.GetBaseException(), ex);
+
+            ex = new AggregateException(new AggregateException(), new DeliberateTestException());
+            Assert.Equal(ex.GetBaseException(), ex);
+        }
+
+        [Theory]
+        [InlineData(0)]
+        [InlineData(1)]
+        [InlineData(3)]
+        public static void Handle(int count)
+        {
+            AggregateException ex = new AggregateException(Enumerable.Repeat(new DeliberateTestException(), count));
             int handledCount = 0;
-            ex.Handle((e) =>
+
+            ex.Handle(e =>
             {
-                if (e is ArgumentException)
+                if (e is DeliberateTestException)
                 {
                     handledCount++;
                     return true;
                 }
                 return false;
             });
-            Assert.Equal(handledCount, ex.InnerExceptions.Count);
+
+            Assert.Equal(count, handledCount);
+            Assert.Equal(count, ex.InnerExceptions.Count);
         }
 
         [Fact]
         public static void HandleInvalidCases()
         {
-            AggregateException ex = new AggregateException();
-            Assert.Throws<ArgumentNullException>(() => ex.Handle(null));
+            Assert.Throws<ArgumentNullException>(() => new AggregateException().Handle(null));
 
-            ex = new AggregateException(new[] { new Exception(), new ArgumentException(), new ArgumentException() });
-            int handledCount = 0;
-            Assert.Throws<AggregateException>(
-               () => ex.Handle((e) =>
-               {
-                   if (e is ArgumentException)
-                   {
-                       handledCount++;
-                       return true;
-                   }
-                   return false;
-               }));
+            AggregateException ex = new AggregateException(new[] { new Exception(), new DeliberateTestException() });
+            Assert.Throws<AggregateException>(() => ex.Handle(e => e is DeliberateTestException));
+
+            ex = new AggregateException(new Exception());
+            Assert.Throws<DeliberateTestException>(() => ex.Handle(e => { throw new DeliberateTestException(); }));
         }
 
-        // Validates that flattening (including recursive) works.
         [Fact]
-        public static void Flatten()
+        public static void Flatten_SingleLevel()
         {
-            Exception exceptionA = new Exception("A");
-            Exception exceptionB = new Exception("B");
-            Exception exceptionC = new Exception("C");
+            Exception[] exceptions = new[] { new DeliberateTestException(), new DeliberateTestException(), new DeliberateTestException() };
 
-            AggregateException aggExceptionBase = new AggregateException(exceptionA, exceptionB, exceptionC);
+            AggregateException ae = new AggregateException(exceptions);
 
-            // Verify flattening one with another.
-            // > Flattening (no recursion)...
+            Assert.Equal(exceptions, ae.InnerExceptions);
+            Assert.Equal(exceptions, ae.Flatten().InnerExceptions);
+        }
 
-            AggregateException flattened1 = aggExceptionBase.Flatten();
-            Exception[] expected1 = new Exception[] {
-                exceptionA, exceptionB, exceptionC
-            };
+        [Fact]
+        public static void Flatten_Nested()
+        {
+            Exception[] exceptions = new[] { new DeliberateTestException(), new DeliberateTestException(), new DeliberateTestException() };
 
-            Assert.Equal(expected1, flattened1.InnerExceptions);
+            AggregateException ae = new AggregateException(new AggregateException(exceptions), new AggregateException(exceptions));
 
-            // Verify flattening one with another, accounting for recursion.
-            AggregateException aggExceptionRecurse = new AggregateException(aggExceptionBase, aggExceptionBase);
-            AggregateException flattened2 = aggExceptionRecurse.Flatten();
-            Exception[] expected2 = new Exception[] {
-                exceptionA, exceptionB, exceptionC, exceptionA, exceptionB, exceptionC,
-            };
-
-            Assert.Equal(expected2, flattened2.InnerExceptions);
+            Assert.NotEqual(exceptions, ae.InnerExceptions);
+            Assert.All(ae.InnerExceptions, e => Assert.Equal(exceptions, ((AggregateException)e).InnerExceptions));
+            // Exceptions are not de-duplicated.
+            Assert.Equal(exceptions.Concat(exceptions), ae.Flatten().InnerExceptions);
         }
     }
 }

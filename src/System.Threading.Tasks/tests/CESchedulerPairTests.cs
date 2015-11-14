@@ -11,78 +11,14 @@
 //
 // =+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
 
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Collections.Generic;
-using System.Security;
-
-using Xunit;
 using System.Diagnostics;
+using System.Security;
+using Xunit;
 
 namespace System.Threading.Tasks.Tests
 {
-    public class TrackingTaskScheduler : TaskScheduler
-    {
-        public TrackingTaskScheduler(int maxConLevel)
-        {
-            //We need to set the value to 1 so that each time a scheduler is created, its tasks will start with one. 
-            _counter = 1;
-            if (maxConLevel < 1 && maxConLevel != -1/*infinite*/)
-                throw new ArgumentException("Maximum concurrency level should between 1 and int32.Maxvalue");
-
-            _maxConcurrencyLevel = maxConLevel;
-        }
-
-
-        [SecurityCritical]
-        protected override void QueueTask(Task task)
-        {
-            if (task == null) throw new ArgumentNullException("When reqeusting to QueueTask, the input task can not be null");
-            Task.Factory.StartNew(() =>
-            {
-                lock (_lockObj) //Locking so that if mutliple threads in threadpool does not incorrectly increment the counter.
-                {
-                    //store the current value of the counter (This becomes the unique ID for this scheduler's Task)
-                    SchedulerID.Value = _counter;
-                    _counter++;
-                }
-                ExecuteTask(task); //Extracted out due to security attribute reason.
-            }, CancellationToken.None, TaskCreationOptions.None, TaskScheduler.Default);
-        }
-
-        [SecuritySafeCritical] //This has to be SecuritySafeCritical since its accesses TaskScheduler.TryExecuteTask (which is safecritical)
-        private void ExecuteTask(Task task)
-        {
-            base.TryExecuteTask(task);
-        }
-
-        [SecurityCritical]
-        protected override bool TryExecuteTaskInline(Task task, bool taskWasPreviouslyQueued)
-        {
-            if (taskWasPreviouslyQueued) return false;
-            return TryExecuteTask(task);
-        }
-
-
-        //public int SchedulerID
-        //{
-        //	get;
-        //	set;
-        //}
-
-        [SecurityCritical]
-        protected override IEnumerable<Task> GetScheduledTasks() { return null; }
-        private Object _lockObj = new Object();
-        private int _counter = 1; //This is used ot keep track of how many scheduler tasks were created
-        public ThreadLocal<int> SchedulerID = new ThreadLocal<int>(); //This is the ID of the scheduler. 
-
-        /// <summary>The maximum concurrency level for the scheduler.</summary>
-        private readonly int _maxConcurrencyLevel;
-        public override int MaximumConcurrencyLevel { get { return _maxConcurrencyLevel; } }
-    }
-
-    public class CESchedulerPairTests
+    public static class CESchedulerPairTests
     {
         #region Test cases
 
@@ -90,13 +26,13 @@ namespace System.Threading.Tasks.Tests
         /// Test to ensure that ConcurrentExclusiveSchedulerPair can be created using user defined parameters
         /// and those parameters are respected when tasks are executed
         /// </summary>
-        /// <remarks>maxItemsPerTask and which scheduler is used are verified in other testcases</remarks>
+        /// <remarks>maxItemsPerTask and which scheduler is used are verified in other test cases</remarks>
         [Theory]
         [InlineData("default")]
         [InlineData("scheduler")]
         [InlineData("maxconcurrent")]
         [InlineData("all")]
-        public static void TestCreationOptions(String ctorType)
+        public static async void TestCreationOptions(String ctorType)
         {
             ConcurrentExclusiveSchedulerPair schedPair = null;
             //Need to define the default values since these values are passed to the verification methods
@@ -135,7 +71,7 @@ namespace System.Threading.Tasks.Tests
             for (int i = 0; i < 50; i++)
             {
                 //In the current design, when there are no more tasks to execute, the Task used by concurrentexclusive scheduler dies
-                //by sleeping we simulate some non trival work that takes time and causes the concurrentexclusive scheduler Task 
+                //by sleeping we simulate some non trivial work that takes time and causes the concurrentexclusive scheduler Task
                 //to stay around for addition work.
                 taskList.Add(readers.StartNew(() => { new ManualResetEvent(false).WaitOne(10); }));
             }
@@ -148,7 +84,7 @@ namespace System.Threading.Tasks.Tests
                 item.Wait();
             }
 
-            //verify that maxconcurrency was respected.
+            //verify that max concurrency was respected.
             if (ctorType == "maxconcurrent")
             {
                 Assert.Equal(maxConcurrentLevel, schedPair.ConcurrentScheduler.MaximumConcurrencyLevel);
@@ -165,23 +101,14 @@ namespace System.Threading.Tasks.Tests
             //make sure no additional work may be scheduled
             foreach (var schedPairScheduler in new TaskScheduler[] { schedPair.ConcurrentScheduler, schedPair.ExclusiveScheduler })
             {
-                Exception caughtException = null;
-                try
-                {
-                    Task.Factory.StartNew(() => { }, CancellationToken.None, TaskCreationOptions.None, schedPairScheduler);
-                }
-                catch (Exception exc)
-                {
-                    caughtException = exc;
-                }
-                Assert.True(
-                    caughtException is TaskSchedulerException && caughtException.InnerException is InvalidOperationException,
-                    "Queueing after completion should fail");
+                TaskSchedulerException caughtException =
+                    await Assert.ThrowsAsync<TaskSchedulerException>(() => Task.Factory.StartNew(() => { }, CancellationToken.None, TaskCreationOptions.None, schedPairScheduler));
+                Assert.IsType<InvalidOperationException>(caughtException.InnerException);
             }
         }
 
         /// <summary>
-        /// Test to verify that only upto maxItemsPerTask are executed by a single ConcurrentExclusiveScheduler Task
+        /// Test to verify that only up to maxItemsPerTask are executed by a single ConcurrentExclusiveScheduler Task
         /// </summary>
         /// <remarks>In ConcurrentExclusiveSchedulerPair, each tasks scheduled are run under an internal Task. The basic idea for the test
         /// is that each time ConcurrentExclusiveScheduler is called QueueTasK a counter (which acts as scheduler's Task id) is incremented.
@@ -216,11 +143,10 @@ namespace System.Threading.Tasks.Tests
                     itemsExecutedCount.Value = ++itemsExecutedCount.Value;
                     //This does not need to be thread safe since we are looking to ensure that only n number of tasks were executed and not the order
                     //in which they were executed. Also asserting inside the thread is fine since we just want the test to be marked as failure
-                    Assert.True(itemsExecutedCount.Value <= maxItemsPerTask, string.Format("itemsExecutedCount={0} cant be greater than maxValue={1}. Parent TaskID={2}",
-                        itemsExecutedCount, maxItemsPerTask, id));
+                    Assert.InRange(itemsExecutedCount.Value, 0, maxItemsPerTask);
                 }
                 else
-                { //Since ids dont match, this is the first Task being executed in the CEScheduler Task
+                { //Since ids don't match, this is the first Task being executed in the CEScheduler Task
                     schedulerIDInsideTask.Value = id; //cache the scheduler ID seen by the thread, so other tasks running in same thread can see this
                     itemsExecutedCount.Value = 1;
                 }
@@ -244,7 +170,7 @@ namespace System.Threading.Tasks.Tests
             {
                 schedPair.Complete();
                 schedPair.Completion.Wait();
-                Assert.True(taskList.TrueForAll(t => t.IsCompleted), "All tasks should have completed for scheduler to complete");
+                Assert.All(taskList, t => Assert.True(t.IsCompleted));
             }
 
             //finally wait for all of the tasks, to ensure they all executed properly
@@ -254,13 +180,13 @@ namespace System.Threading.Tasks.Tests
             {
                 schedPair.Complete();
                 schedPair.Completion.Wait();
-                Assert.True(taskList.TrueForAll(t => t.IsCompleted), "All tasks should have completed for scheduler to complete");
+                Assert.All(taskList, t => Assert.True(t.IsCompleted));
             }
         }
 
         /// <summary>
-        /// When user specfices a concurrency level above the level allowed by the task scheduler, the concurrency level should be set
-        /// to the concurrencylevel specified in the taskscheduler. Also tests that the maxConcurrencyLevel specified was respected
+        /// When user specifies a concurrency level above the level allowed by the task scheduler, the concurrency level should be set
+        /// to the concurrency level specified in the task scheduler. Also tests that the maxConcurrencyLevel specified was respected
         /// </summary>
         [Fact]
         public static void TestLowerConcurrencyLevel()
@@ -288,11 +214,12 @@ namespace System.Threading.Tasks.Tests
             for (int i = 0; i < maxConcurrentTasks; i++)
                 taskList.Add(readers.StartNew(() => { })); //schedule some dummy reader tasks
 
-            foreach (Task task in taskList)
+            Assert.All(taskList, task =>
             {
-                bool wasTaskStarted = (task.Status != TaskStatus.Running) && (task.Status != TaskStatus.RanToCompletion);
-                Assert.True(wasTaskStarted, string.Format("Additional reader tasks should not start when scheduler concurrency is {0} and a reader task is blocked", customSchedulerConcurrency));
-            }
+                // Additional reader tasks should not start when scheduler concurrency is 1 and a reader task is blocked
+                Assert.NotEqual(TaskStatus.Running, task.Status);
+                Assert.NotEqual(TaskStatus.RanToCompletion, task.Status);
+            });
 
             //finally unblock the blocjedTask and wait for all of the tasks, to ensure they all executed properly
             blockReaderTaskEvent.Set();
@@ -314,9 +241,9 @@ namespace System.Threading.Tasks.Tests
             //Schedule a concurrent task and ensure that it is executed, just for fun
             Task<bool> conTask = readers.StartNew<bool>(() => { new ManualResetEvent(false).WaitOne(10); ; return true; });
             conTask.Wait();
-            Assert.True(conTask.Result, "The concurrenttask when executed successfully should have returned true");
+            Assert.True(conTask.Result, "The concurrent task when executed successfully should have returned true");
 
-            //Now scehdule a exclusive task that is blocked(thereby preventing other concurrent tasks to finish)
+            //Now schedule a exclusive task that is blocked(thereby preventing other concurrent tasks to finish)
             Task<bool> exclusiveTask = writers.StartNew<bool>(() => { blockMainThreadEvent.Set(); blockExclusiveTaskEvent.WaitOne(); return true; });
 
             //With exclusive task in execution mode, schedule a number of concurrent tasks and ensure they are not executed
@@ -324,11 +251,12 @@ namespace System.Threading.Tasks.Tests
             List<Task> taskList = new List<Task>();
             for (int i = 0; i < 20; i++) taskList.Add(readers.StartNew<bool>(() => { blockMre.WaitOne(10); return true; }));
 
-            foreach (Task task in taskList)
+            Assert.All(taskList, task =>
             {
-                bool wasTaskStarted = (task.Status != TaskStatus.Running) && (task.Status != TaskStatus.RanToCompletion);
-                Assert.True(wasTaskStarted, "Concurrent tasks should not be executed when a exclusive task is getting executed");
-            }
+                // Concurrent tasks should not be executed when a exclusive task is getting executed
+                Assert.NotEqual(TaskStatus.Running, task.Status);
+                Assert.NotEqual(TaskStatus.RanToCompletion, task.Status);
+            });
 
             blockExclusiveTaskEvent.Set();
             Task.WaitAll(taskList.ToArray());
@@ -372,50 +300,50 @@ namespace System.Threading.Tasks.Tests
         public static void TestCompletionTask()
         {
             // Completion tasks is valid after initialization
-            {
-                var cesp = new ConcurrentExclusiveSchedulerPair();
-                Assert.True(cesp.Completion != null, "CompletionTask should never be null (after initialization)");
-                Assert.True(!cesp.Completion.IsCompleted, "CompletionTask should not have completed");
-            }
+            var cesp = new ConcurrentExclusiveSchedulerPair();
+            Assert.NotNull(cesp.Completion);
+            Assert.False(cesp.Completion.IsCompleted);
+        }
 
-            // Completion task is valid after complete is called
-            {
-                var cesp = new ConcurrentExclusiveSchedulerPair();
-                cesp.Complete();
-                Assert.True(cesp.Completion != null, "CompletionTask should never be null (after complete)");
-                cesp.Completion.Wait();
-            }
+        [Theory]
+        [InlineData(1)]
+        [InlineData(20)]
+        public static void TestCompletionTask_CompleteBeforeTaskAccess(int timesCalled)
+        {
+            // Complete method may be called one or multiple times, and CompletionTask still completes
+            var cesp = new ConcurrentExclusiveSchedulerPair();
+            for (int i = 0; i < timesCalled; i++) cesp.Complete(); // ensure multiple calls to Complete succeed
+            Assert.NotNull(cesp.Completion);
+            cesp.Completion.Wait();
+        }
 
-            // Complete method may be called multiple times, and CompletionTask still completes
-            {
-                var cesp = new ConcurrentExclusiveSchedulerPair();
-                for (int i = 0; i < 20; i++) cesp.Complete(); // ensure multiple calls to Complete succeed
-                Assert.True(cesp.Completion != null, "CompletionTask should never be null (after multiple completes)");
-                cesp.Completion.Wait();
-            }
-
+        [Fact]
+        public static void TestCompletionTask_MultipleTasks()
+        {
             // Can create a bunch of schedulers, do work on them all, complete them all, and they all complete
+            var cesps = new ConcurrentExclusiveSchedulerPair[100];
+            for (int i = 0; i < cesps.Length; i++)
             {
-                var cesps = new ConcurrentExclusiveSchedulerPair[100];
-                for (int i = 0; i < cesps.Length; i++)
-                {
-                    cesps[i] = new ConcurrentExclusiveSchedulerPair();
-                }
-                for (int i = 0; i < cesps.Length; i++)
-                {
-                    Action work = () => new ManualResetEvent(false).WaitOne(2); ;
-                    Task.Factory.StartNew(work, CancellationToken.None, TaskCreationOptions.None, cesps[i].ConcurrentScheduler);
-                    Task.Factory.StartNew(work, CancellationToken.None, TaskCreationOptions.None, cesps[i].ExclusiveScheduler);
-                }
-                for (int i = 0; i < cesps.Length; i++)
-                {
-                    cesps[i].Complete();
-                    cesps[i].Completion.Wait();
-                }
+                cesps[i] = new ConcurrentExclusiveSchedulerPair();
             }
+            for (int i = 0; i < cesps.Length; i++)
+            {
+                Action work = () => new ManualResetEvent(false).WaitOne(2); ;
+                Task.Factory.StartNew(work, CancellationToken.None, TaskCreationOptions.None, cesps[i].ConcurrentScheduler);
+                Task.Factory.StartNew(work, CancellationToken.None, TaskCreationOptions.None, cesps[i].ExclusiveScheduler);
+            }
+            for (int i = 0; i < cesps.Length; i++)
+            {
+                cesps[i].Complete();
+                cesps[i].Completion.Wait();
+            }
+        }
 
+        [Fact]
+        public static void TestCompletionTask_NotDisposable()
+        {
             // Validate that CESP does not implement IDisposable
-            Assert.Equal(null, new ConcurrentExclusiveSchedulerPair() as IDisposable);
+            Assert.IsNotType<IDisposable>(new ConcurrentExclusiveSchedulerPair());
         }
 
         /// <summary>
@@ -502,28 +430,31 @@ namespace System.Threading.Tasks.Tests
         [Theory]
         [InlineData(true)]
         [InlineData(false)]
-        public static void TestConcurrentExclusiveChain(bool syncContinuations)
+        public static void TestConcurrentExclusiveChain_Continuations(bool syncContinuations)
         {
-            var scheduler = new TrackingTaskScheduler(Environment.ProcessorCount);
-            var cesp = new ConcurrentExclusiveSchedulerPair(scheduler);
+            var cesp = new ConcurrentExclusiveSchedulerPair();
 
             // continuations
+            var starter = new Task(() => { });
+            var t = starter;
+            for (int i = 0; i < 10; i++)
             {
-                var starter = new Task(() => { });
-                var t = starter;
-                for (int i = 0; i < 10; i++)
-                {
-                    t = t.ContinueWith(delegate { }, CancellationToken.None, syncContinuations ? TaskContinuationOptions.ExecuteSynchronously : TaskContinuationOptions.None, cesp.ConcurrentScheduler);
-                    t = t.ContinueWith(delegate { }, CancellationToken.None, syncContinuations ? TaskContinuationOptions.ExecuteSynchronously : TaskContinuationOptions.None, cesp.ExclusiveScheduler);
-                }
-                starter.Start(cesp.ExclusiveScheduler);
-                t.Wait();
+                t = t.ContinueWith(delegate { }, CancellationToken.None, syncContinuations ? TaskContinuationOptions.ExecuteSynchronously : TaskContinuationOptions.None, cesp.ConcurrentScheduler);
+                t = t.ContinueWith(delegate { }, CancellationToken.None, syncContinuations ? TaskContinuationOptions.ExecuteSynchronously : TaskContinuationOptions.None, cesp.ExclusiveScheduler);
             }
+            starter.Start(cesp.ExclusiveScheduler);
+            t.Wait();
+        }
 
+        [Fact]
+        public static void TestConcurrentExclusiveChain_Nested()
+        {
+            var cesp = new ConcurrentExclusiveSchedulerPair();
             // parent/child
+            var errorString = "hello faulty world";
+            var root = Task.Factory.StartNew(() =>
             {
-                var errorString = "hello faulty world";
-                var root = Task.Factory.StartNew(() =>
+                Task.Factory.StartNew(() =>
                 {
                     Task.Factory.StartNew(() =>
                     {
@@ -535,23 +466,20 @@ namespace System.Threading.Tasks.Tests
                                 {
                                     Task.Factory.StartNew(() =>
                                     {
-                                        Task.Factory.StartNew(() =>
-                                        {
-                                            throw new InvalidOperationException(errorString);
-                                        }, CancellationToken.None, TaskCreationOptions.AttachedToParent, cesp.ExclusiveScheduler).Wait();
-                                    }, CancellationToken.None, TaskCreationOptions.AttachedToParent, cesp.ExclusiveScheduler);
-                                }, CancellationToken.None, TaskCreationOptions.AttachedToParent, cesp.ConcurrentScheduler);
-                            }, CancellationToken.None, TaskCreationOptions.AttachedToParent, cesp.ExclusiveScheduler);
-                        }, CancellationToken.None, TaskCreationOptions.AttachedToParent, cesp.ConcurrentScheduler);
-                    }, CancellationToken.None, TaskCreationOptions.AttachedToParent, cesp.ExclusiveScheduler);
-                }, CancellationToken.None, TaskCreationOptions.None, cesp.ConcurrentScheduler);
+                                        throw new InvalidOperationException(errorString);
+                                    }, CancellationToken.None, TaskCreationOptions.AttachedToParent, cesp.ExclusiveScheduler).Wait();
+                                }, CancellationToken.None, TaskCreationOptions.AttachedToParent, cesp.ExclusiveScheduler);
+                            }, CancellationToken.None, TaskCreationOptions.AttachedToParent, cesp.ConcurrentScheduler);
+                        }, CancellationToken.None, TaskCreationOptions.AttachedToParent, cesp.ExclusiveScheduler);
+                    }, CancellationToken.None, TaskCreationOptions.AttachedToParent, cesp.ConcurrentScheduler);
+                }, CancellationToken.None, TaskCreationOptions.AttachedToParent, cesp.ExclusiveScheduler);
+            }, CancellationToken.None, TaskCreationOptions.None, cesp.ConcurrentScheduler);
 
-                ((IAsyncResult)root).AsyncWaitHandle.WaitOne();
-                Assert.True(root.IsFaulted, "Root should have been faulted by child's error");
-                var ae = root.Exception.Flatten();
-                Assert.True(ae.InnerException is InvalidOperationException && ae.InnerException.Message == errorString,
-                    "Child's exception should have propagated to the root.");
-            }
+            ((IAsyncResult)root).AsyncWaitHandle.WaitOne();
+            Assert.True(root.IsFaulted, "Root should have been faulted by child's error");
+            var ae = root.Exception.Flatten();
+            Assert.IsType<InvalidOperationException>(ae.InnerException);
+            Assert.Equal(errorString, ae.InnerException.Message);
         }
         #endregion
 
@@ -618,5 +546,59 @@ namespace System.Threading.Tasks.Tests
         }
 
         #endregion
+
+        private class TrackingTaskScheduler : TaskScheduler
+        {
+            public TrackingTaskScheduler(int maxConLevel)
+            {
+                //We need to set the value to 1 so that each time a scheduler is created, its tasks will start with one.
+                _counter = 1;
+                if (maxConLevel < 1 && maxConLevel != -1/*infinite*/)
+                    throw new ArgumentException("Maximum concurrency level should between 1 and int32.Maxvalue");
+
+                _maxConcurrencyLevel = maxConLevel;
+            }
+
+            [SecurityCritical]
+            protected override void QueueTask(Task task)
+            {
+                if (task == null) throw new ArgumentNullException("When requesting to QueueTask, the input task can not be null");
+                Task.Factory.StartNew(() =>
+                {
+                    lock (_lockObj) //Locking so that if multiple threads in thread pool does not incorrectly increment the counter.
+                    {
+                        //store the current value of the counter (This becomes the unique ID for this scheduler's Task)
+                        SchedulerID.Value = _counter;
+                        _counter++;
+                    }
+                    ExecuteTask(task); //Extracted out due to security attribute reason.
+                }, CancellationToken.None, TaskCreationOptions.None, TaskScheduler.Default);
+            }
+
+            [SecuritySafeCritical] //This has to be SecuritySafeCritical since its accesses TaskScheduler.TryExecuteTask (which is safecritical)
+            private void ExecuteTask(Task task)
+            {
+                base.TryExecuteTask(task);
+            }
+
+            [SecurityCritical]
+            protected override bool TryExecuteTaskInline(Task task, bool taskWasPreviouslyQueued)
+            {
+                if (taskWasPreviouslyQueued) return false;
+                return TryExecuteTask(task);
+            }
+
+            [SecurityCritical]
+            protected override IEnumerable<Task> GetScheduledTasks() { return null; }
+
+            private Object _lockObj = new Object();
+            private int _counter = 1; //This is used to keep track of how many scheduler tasks were created
+            public ThreadLocal<int> SchedulerID = new ThreadLocal<int>(); //This is the ID of the scheduler.
+
+            /// <summary>The maximum concurrency level for the scheduler.</summary>
+            private readonly int _maxConcurrencyLevel;
+
+            public override int MaximumConcurrencyLevel { get { return _maxConcurrencyLevel; } }
+        }
     }
 }
