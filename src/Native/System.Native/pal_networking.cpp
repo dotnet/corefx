@@ -1856,6 +1856,8 @@ static void ConvertFdSetPlatformToPal(FdSet& palSet, fd_set& platformSet, int32_
 {
     assert(fdCount >= 0);
 
+    memset(&palSet.Bits[0], 0, sizeof(palSet.Bits));
+
 #if !HAVE_FDS_BITS && !HAVE_PRIVATE_FDS_BITS
     for (int i = 0; i < fdCount; i++)
     {
@@ -1969,17 +1971,17 @@ extern "C" Error Select(int32_t fdCount, FdSet* readFdSet, FdSet* writeFdSet, Fd
 
     if (readFdSet != nullptr)
     {
-        ConvertFdSetPlatformToPal(*writeFdSet, *writeFds, fdCount);
+        ConvertFdSetPlatformToPal(*writeFdSet, *writeFds, rv);
     }
 
     if (writeFdSet != nullptr)
     {
-        ConvertFdSetPlatformToPal(*writeFdSet, *writeFds, fdCount);
+        ConvertFdSetPlatformToPal(*writeFdSet, *writeFds, rv);
     }
 
     if (errorFdSet != nullptr)
     {
-        ConvertFdSetPlatformToPal(*errorFdSet, *errorFds, fdCount);
+        ConvertFdSetPlatformToPal(*errorFdSet, *errorFds, rv);
     }
 
     *selected = rv;
