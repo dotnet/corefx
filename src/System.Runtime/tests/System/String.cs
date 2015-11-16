@@ -816,7 +816,7 @@ public static unsafe class StringTests
             Assert.Equal(10, source.IndexOf(target, StringComparison.CurrentCulture));
             Assert.Equal(8, source.IndexOf(target, StringComparison.CurrentCultureIgnoreCase));
         });
-        
+
         target = "\u0300";
         WithCulture(new CultureInfo("en-US"), () =>
         {
@@ -1329,7 +1329,7 @@ public static unsafe class StringTests
     }
 
     [Theory]
-    [InlineData(StringComparison.CurrentCulture, "Hello", "Hel",  true)]
+    [InlineData(StringComparison.CurrentCulture, "Hello", "Hel", true)]
     [InlineData(StringComparison.CurrentCulture, "Hello", "Hello", true)]
     [InlineData(StringComparison.CurrentCulture, "Hello", "", true)]
     [InlineData(StringComparison.CurrentCulture, "Hello", "HELLO", false)]
@@ -1503,10 +1503,10 @@ public static unsafe class StringTests
         char[] asciiCharsUpper = new char[128];
         char[] asciiCharsLower = new char[128];
 
-        for (int i = 0; i < asciiChars.Length; i++)  
+        for (int i = 0; i < asciiChars.Length; i++)
         {
             char c = (char)i;
-            asciiChars[i] = c;  
+            asciiChars[i] = c;
 
             // Purposefully avoiding char.ToUpper/ToLower here so as not  
             // to use the same thing we're testing.  
@@ -1522,72 +1522,120 @@ public static unsafe class StringTests
         Assert.Equal(asciiUpper, ascii.ToUpperInvariant());
     }
 
-    [Fact]
-    public static void TestTrim()
+    //Testing String Trim 
+    //test string trim white space only
+    [Theory]
+    [InlineData("", "")]
+    [InlineData("No Trim", "No Trim")]
+    [InlineData("  Should Trim   ", "Should Trim")]
+    public static void TestTrimWhiteSpace(string input, string trimmed)
     {
-        String s;
-
-        s = "  Foo  ".Trim();
-        Assert.Equal("Foo", s);
-
-        s = ". Foo .".Trim('.');
-        Assert.Equal(" Foo ", s);
-
-        s = "  Foo  ".TrimStart();
-        Assert.Equal("Foo  ", s);
-
-        s = ". Foo .".TrimStart('.');
-        Assert.Equal(" Foo .", s);
-
-        s = "  Foo  ".TrimEnd();
-        Assert.Equal("  Foo", s);
-
-        s = ". Foo .".TrimEnd('.');
-        Assert.Equal(". Foo ", s);
-
-        s = "".Trim('c');
-        Assert.Equal("", s);
-        s = "".TrimStart('c');
-        Assert.Equal("", s);
-        s = "".TrimEnd('c');
-        Assert.Equal("", s);
-
-        s = "".Trim(null);
-        Assert.Equal("", s);
-        s = "".TrimStart(null);
-        Assert.Equal("", s);
-        s = "".TrimEnd(null);
-        Assert.Equal("", s);
-
-        s = "SSSSSSSSSSS".Trim('S');
-        Assert.Equal("", s);
-        s = "SSSSSSSSSSS".TrimStart('S');
-        Assert.Equal("", s);
-        s = "SSSSSSSSSSS".TrimEnd('S');
-        Assert.Equal("", s);
-
-        s = "TTthe test string ".Trim(' ', 'T');
-        Assert.Equal("the test string", s);
-        s = "TTthe test string ".TrimStart(' ', 'T');
-        Assert.Equal("the test string ", s);
-        s = "TTthe test string ".TrimEnd(' ', 'T');
-        Assert.Equal("TTthe test string", s);
-
-        s = "6".Trim('0');
-        Assert.Equal("6", s);
-        s = "6".TrimStart('0');
-        Assert.Equal("6", s);
-        s = "6".TrimEnd('0');
-        Assert.Equal("6", s);
-
-        s = "my'\\$%^&RW()# 0".Trim('5', 'm', 'y', (char)39, (char)92);
-        Assert.Equal("$%^&RW()# 0",s);
-        s = "my'\\$%^&RW()# 0".TrimStart('5', 'm', 'y', (char)92, (char)39);
-        Assert.Equal("$%^&RW()# 0", s);
-        s = "my'\\$%^&RW()# 0".TrimEnd('5', 'm', 'y', (char)92, (char)39);
-        Assert.Equal("my'\\$%^&RW()# 0", s);
+        var actual = input.Trim();
+        Assert.Equal(trimmed, actual);
     }
 
+    // test string trim single char
+    [Theory]
+    [InlineData("", '.', 0, "")]
+    [InlineData("", null, 0, "")]
+    [InlineData("TTTTTTT", 'T', 0, "")]
+    [InlineData("T", 'T', 0, "")]
+    [InlineData("  Should Trim  ", ' ', 0, "Should Trim")]
+    [InlineData(".  Should Trim  .", '.', 0, "  Should Trim  ")]
+    [InlineData("\\ Should Trim \\", '\\', 0, " Should Trim ")]
+    [InlineData("  No Trim  ", null, 0, "  No Trim  ")]
+    [InlineData(" NoTrim ", '.', 0, " NoTrim ")]
+    [InlineData("", '.', 1, "")]
+    [InlineData("", null, 1, "")]
+    [InlineData("TTTTTTT", 'T', 1, "")]
+    [InlineData("T", 'T', 1, "")]
+    [InlineData("  Should Trim  ", ' ', 1, "Should Trim  ")]
+    [InlineData(".  Should Trim  .", '.', 1, "  Should Trim  .")]
+    [InlineData("\\ Should Trim \\", '\\', 1, " Should Trim \\")]
+    [InlineData("  No Trim  ", null, 1, "  No Trim  ")]
+    [InlineData(" NoTrim ", '.', 1, " NoTrim ")]
+    [InlineData("", '.', 2, "")]
+    [InlineData("", null, 2, "")]
+    [InlineData("TTTTTTT", 'T', 2, "")]
+    [InlineData("T", 'T', 2, "")]
+    [InlineData("  No Trim  ", null, 2, "  No Trim  ")]
+    [InlineData("  Should Trim  ", ' ', 2, "  Should Trim")]
+    [InlineData(".  Should Trim  .", '.', 2, ".  Should Trim  ")]
+    [InlineData(" No Trim ", '.', 2, " No Trim ")]
+    public static void TestTrimSingleChar(string input, char trimchar, int trimtype, string trimmed)
+    {
+        if (trimtype == 0)
+        {
+            var actual = input.Trim(trimchar);
+            Assert.Equal(trimmed, actual);
+        }
+        else if (trimtype == 1)
+        {
+            var actual = input.TrimStart(trimchar);
+            Assert.Equal(trimmed, actual);
+        }
+        else if (trimtype == 2)
+        {
+            var actual = input.TrimEnd(trimchar);
+            Assert.Equal(trimmed, actual);
+        }
+    }
+
+    //test string trim array of chars
+    [Theory]
+    [InlineData("", null, 0, "")]
+    [InlineData("", new char[] { '.' }, 0, "")]
+    [InlineData("T All", new char[] { 'T','A','l', ' ', '.' }, 0, "")]
+    [InlineData("  Should Trim  ", null, 0, "Should Trim")]
+    [InlineData(".  Should . Trim  .", new char[] { '.', ' ' }, 0, "Should . Trim")]
+    [InlineData("  ..Should Trim..   ", new char[] { ' ', '.' }, 0, "Should Trim")]
+    [InlineData(".  .Should Trim.  .", new char[] { '.' }, 0, "  .Should Trim.  ")]
+    [InlineData("\\ Should Trim \\", new char[] { ' ', '\\' }, 0, "Should Trim")]
+    [InlineData("^# Should Trim \\", new char[] { '^', (char)32, '\\' }, 0, "# Should Trim")]
+    [InlineData("No Trim", null, 0, "No Trim")]
+    [InlineData(" No Trim ", new char[] { '.', 'T' }, 0, " No Trim ")]
+    [InlineData(" No Trim ", new char[] { 'N' }, 0, " No Trim ")]
+    [InlineData("", null, 1, "")]
+    [InlineData("", new char[] { '.' }, 1, "")]
+    [InlineData("T All", new char[] { 'T', 'A', 'l', ' ', '.' }, 1, "")]
+    [InlineData("  Should Trim  ", new char[] { ' ' }, 1, "Should Trim  ")]
+    [InlineData(".  Should Trim  .", new char[] { ' ', '.' }, 1, "Should Trim  .")]
+    [InlineData("  ..Should Trim..  ", new char[] { '.' , ' '}, 1, "Should Trim..  ")]
+    [InlineData("\\ Should Trim \\", new char[] { ' ', '\\' }, 1, "Should Trim \\")]
+    [InlineData("^# Should Trim \\", new char[] { '^', (char)32, '\\' }, 1, "# Should Trim \\")]
+    [InlineData("No Trim", null, 1, "No Trim")]
+    [InlineData(" NoTrim ", new char[] { '.', 'T' }, 1, " NoTrim ")]
+    [InlineData(" No Trim ", new char[] { 'N' }, 1, " No Trim ")]
+    [InlineData("", null, 2, "")]
+    [InlineData("", new char[] { '.' }, 2, "")]
+    [InlineData("T All", new char[] { 'T', 'A', 'l', '.', ' ' }, 2, "")]
+    [InlineData("  Should Trim  ", new char[] { ' ' }, 2, "  Should Trim")]
+    [InlineData(".  Should Trim  .", new char[] { ' ', '.' }, 2, ".  Should Trim")]
+    [InlineData("  ..Should Trim..  ", new char[] { '.', ' ' }, 2, "  ..Should Trim")]
+    [InlineData("\\ Should Trim \\", new char[] { ' ', '\\' }, 2, "\\ Should Trim")]
+    [InlineData("^# Should Trim \\", new char[] { '^', (char)32, '\\' }, 2, "^# Should Trim")]
+    [InlineData("No Trim", null, 2, "No Trim")]
+    [InlineData(" No Trim ", new char[] { 'T', '.' }, 2, " No Trim ")]
+    [InlineData(" No Trim ", new char[] { 'N' }, 2, " No Trim ")]
+    public static void TestTrimArrayChars(string input, char[] trimchars, int trimtype, string trimmed)
+    {
+        if (trimtype == 0)
+        {
+            var actual = input.Trim(trimchars);
+            Assert.Equal(trimmed, actual);
+        }
+        else if (trimtype == 1)
+        {
+            var actual = input.TrimStart(trimchars);
+            Assert.Equal(trimmed, actual);
+        }
+        else if (trimtype == 2)
+        {
+            var actual = input.TrimEnd(trimchars);
+            Assert.Equal(trimmed, actual);
+        }
+    }
+    
     [Fact]
     public static void TestCompareWithLongString()
     {
