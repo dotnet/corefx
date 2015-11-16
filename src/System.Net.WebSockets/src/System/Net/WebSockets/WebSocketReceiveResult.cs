@@ -30,11 +30,11 @@ namespace System.Net.WebSockets
             CloseStatusDescription = closeStatusDescription;
         }
 
-        public int Count { get; private set; }
-        public bool EndOfMessage { get; private set; }
-        public WebSocketMessageType MessageType { get; private set; }
-        public WebSocketCloseStatus? CloseStatus { get; private set; }
-        public string CloseStatusDescription { get; private set; }
+        public int Count { get; protected set; }
+        public bool EndOfMessage { get; protected set; }
+        public WebSocketMessageType MessageType { get; protected set; }
+        public WebSocketCloseStatus? CloseStatus { get; protected set; }
+        public string CloseStatusDescription { get; protected set; }
 
         internal WebSocketReceiveResult Copy(int count)
         {
