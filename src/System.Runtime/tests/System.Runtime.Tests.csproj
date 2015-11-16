@@ -115,8 +115,8 @@
        <ReferenceOutputAssembly>true</ReferenceOutputAssembly>  
        <OutputItemType>None</OutputItemType>  
        <CopyToOutputDirectory>Never</CopyToOutputDirectory>  
-     </ProjectReference>  
-<ProjectReference Include="..\src\System.Runtime.CoreCLR.csproj">
+    </ProjectReference>  
+    <ProjectReference Include="..\src\System.Runtime.CoreCLR.csproj">
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
       <OutputItemType>Content</OutputItemType>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
