@@ -283,6 +283,7 @@ namespace Microsoft.Win32.SafeHandles
             {
                 _writeBio.SetHandleAsInvalid(); // BIO got freed in SslDestroy
             }
+            SetHandle(IntPtr.Zero);
             return true;
         }
 

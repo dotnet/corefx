@@ -47,6 +47,7 @@ namespace System.Net.Security
         {
             _certificate.DangerousRelease();
             _certificate.Dispose();
+            SetHandle(IntPtr.Zero);
             return true;
         }
     }
@@ -150,6 +151,8 @@ namespace System.Net.Security
                 _certKeyHandle.Dispose();
             }
 
+            _certHandle = null;
+            _certKeyHandle = null;
             _protocols = SslProtocols.None;
             return true;
         }
@@ -213,7 +216,7 @@ namespace System.Net.Security
     {
 #endif
         private readonly SafeFreeCredentials _credential;
-        private readonly SafeSslHandle _sslContext;
+        private SafeSslHandle _sslContext;
 
         public SafeSslHandle SslContext
         {
@@ -268,6 +271,7 @@ namespace System.Net.Security
             Interop.OpenSsl.FreeSslContext(_sslContext);
             Debug.Assert((null != _credential) && !_credential.IsInvalid, "Invalid credential saved in SafeDeleteContext");
             _credential.DangerousRelease();
+            _sslContext = null;
             return true;
         }
 
@@ -279,7 +283,7 @@ namespace System.Net.Security
 
     internal sealed class SafeFreeContextBufferChannelBinding : ChannelBinding
     {
-        private readonly SafeChannelBindingHandle _channelBinding = null;
+        private SafeChannelBindingHandle _channelBinding = null;
 
         public override int Size
         {
@@ -288,7 +292,7 @@ namespace System.Net.Security
 
         public override bool IsInvalid
         {
-            get { return _channelBinding.IsInvalid; }
+            get { return (null == _channelBinding) || _channelBinding.IsInvalid; }
         }
 
         public SafeFreeContextBufferChannelBinding(SafeChannelBindingHandle binding)
@@ -304,6 +308,7 @@ namespace System.Net.Security
         {
             _channelBinding.DangerousRelease();
             _channelBinding.Dispose();
+            _channelBinding = null;
             return true;
         }
     }
