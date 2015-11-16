@@ -19,7 +19,7 @@ namespace System.Net.Http
     {
         #region Fields
 
-        private const string crlf = "\r\n";
+        private string crlf;
 
         private List<HttpContent> _nestedContent;
         private string _boundary;
@@ -34,19 +34,26 @@ namespace System.Net.Http
         #region Construction
 
         public MultipartContent()
-            : this("mixed", GetDefaultBoundary())
+            : this("mixed", GetDefaultBoundary(), "\r\n")
         { }
 
         public MultipartContent(string subtype)
-            : this(subtype, GetDefaultBoundary())
+            : this(subtype, GetDefaultBoundary(), "\r\n")
         { }
-
+        
         public MultipartContent(string subtype, string boundary)
+            : this(subtype, GetDefaultBoundary, "\r\n")
+        { }
+        
+        public MultipartContent(string subtype, string boundary, string crlf)
         {
             if (string.IsNullOrWhiteSpace(subtype))
             {
                 throw new ArgumentException(SR.net_http_argument_empty_string, "subtype");
             }
+            
+            this.crlf = string.IsNullOrWhiteSpace(crlf) ? "\r\n" : crlf;
+            
             Contract.EndContractBlock();
             ValidateBoundary(boundary);
 
