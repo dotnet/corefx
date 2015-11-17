@@ -1512,9 +1512,7 @@ public static unsafe class StringTests
     public static void TestTrim()
     {
         String s;
-        // Tests added on 11/14 to test new Trim() single char overload
-        // and to test for multiple-value scenarios of the existing Trim()
-        // function with char[] parameter
+        char[] c = { 'a' };
 
         // Tests for single character
         s = "aFooa".Trim('a');
@@ -1563,6 +1561,10 @@ public static unsafe class StringTests
         Assert.Equal("Foo", s);
 
         s = ", Foo,".Trim(',', ' ');
+        Assert.Equal("Foo", s);
+
+        // Tests for single character passed specifically to the char[] overload
+        s = "aFooa".Trim(c);
         Assert.Equal("Foo", s);
 
         // Tests for TrimStart and TrimEnd functions,
