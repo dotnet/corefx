@@ -1527,25 +1527,50 @@ public static unsafe class StringTests
     {
         String s;
 
-        s = "  Foo  ".Trim();
+        //Test Trim()
+        s = "  ".Trim(); //Empty Trim with given string of only white spaces
+        Assert.Equal("", s);
+
+        s = "  Foo  ".Trim(); //Empty Trim to remove white spaces
         Assert.Equal("Foo", s);
 
+        //Test Trim,Trimstart, TrimEnd CharArray
+        s = " Foo ".Trim(null); //test null string
+        Assert.Equal("Foo", s);
+
+        s = ". Foo ,.".Trim(',', '.'); // multiple TrimCharacters
+        Assert.Equal(" Foo ", s);
+
+        s = "  Foo  ".TrimStart(); //EmptyTrimStart
+        Assert.Equal("Foo  ", s);
+
+        s = "., Foo ".TrimStart(',', '.'); //multiple TrimStart Characters
+        Assert.Equal(" Foo ", s);
+
+        s = " Foo .,".TrimStart(',', '.'); //multiple TrimStart Characters
+        Assert.Equal(" Foo .,", s);
+
+        s = "  Foo  ".TrimEnd(); //Empty TrimEnd
+        Assert.Equal("  Foo", s);
+
+        s = " Foo .,".TrimEnd(',', '.'); //multiple TrimEnd Characters
+        Assert.Equal(" Foo ", s);
+
+        //Test Trim,TrimStart,TrimEnd Char
         s = ". Foo .".Trim('.');
         Assert.Equal(" Foo ", s);
 
-        s = "  Foo  ".TrimStart();
-        Assert.Equal("Foo  ", s);
+        s = " .Foo. ".Trim('.');
+        Assert.Equal(" .Foo. ", s);
 
-        s = ". Foo .".TrimStart('.');
+        s = ". Foo .".TrimStart('.'); //Single trim start Character
         Assert.Equal(" Foo .", s);
 
-        s = "  Foo  ".TrimEnd();
-        Assert.Equal("  Foo", s);
-
-        s = ". Foo .".TrimEnd('.');
+        s = ". Foo .".TrimEnd('.');//single Trim End character
         Assert.Equal(". Foo ", s);
-    }
 
+    }
+        
     [Fact]
     public static void TestCompareWithLongString()
     {
