@@ -1,4 +1,5 @@
-﻿<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <PropertyGroup>
     <AssemblyName>System.Net.Security</AssemblyName>
@@ -10,6 +11,14 @@
     <PackageTargetFramework Condition="'$(PackageTargetFramework)' == ''">dnxcore50</PackageTargetFramework>
     <UsePackageTargetRuntimeDefaults>true</UsePackageTargetRuntimeDefaults>
   </PropertyGroup>
+  <PropertyGroup Condition=" '$(TargetsWindows)' == 'true' and '$(ProjectJson)' == '' ">
+    <ProjectJson>win\project.json</ProjectJson>
+    <ProjectLockJson>win\project.lock.json</ProjectLockJson>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(TargetsUnix)' == 'true' and '$(ProjectJson)' == '' ">
+    <ProjectJson>unix\project.json</ProjectJson>
+    <ProjectLockJson>unix\project.lock.json</ProjectLockJson>
+  </PropertyGroup>
   <!-- Help VS understand available configurations -->
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'FreeBSD_Debug|AnyCPU' " />
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'FreeBSD_Release|AnyCPU' " />
@@ -19,31 +28,31 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'OSX_Release|AnyCPU' " />
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Windows_Debug|AnyCPU' " />
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Windows_Release|AnyCPU' " />
-
+  
   <ItemGroup>
     <Compile Include="System\PinnableBufferCache.cs" />
-    <Compile Include="System\Net\_SecurityBuffer.cs" />
-    <Compile Include="System\Net\_SecurityBufferType.cs" />
-    <Compile Include="System\Net\_SecureChannel.cs" />
+    <Compile Include="System\Net\SecurityBuffer.cs" />
+    <Compile Include="System\Net\SecurityBufferType.cs" />
+    <Compile Include="System\Net\SecureChannel.cs" />
     <Compile Include="System\Net\SecurityStatusPal.cs" />
-    <Compile Include="System\Net\_SslSessionsCache.cs" />
+    <Compile Include="System\Net\SslSessionsCache.cs" />
     <Compile Include="System\Net\SecureProtocols\SslStream.cs" />
     <Compile Include="System\Net\SecureProtocols\AuthenticatedStream.cs" />
-    <Compile Include="System\Net\SecureProtocols\_SslState.cs" />
-    <Compile Include="System\Net\SecureProtocols\_SslStream.cs" />
-    <Compile Include="System\Net\SecureProtocols\_HelperAsyncResults.cs" />
+    <Compile Include="System\Net\SecureProtocols\SslState.cs" />
+    <Compile Include="System\Net\SecureProtocols\SslStreamInternal.cs" />
+    <Compile Include="System\Net\SecureProtocols\HelperAsyncResults.cs" />
     <Compile Include="System\Net\SecureProtocols\SslStreamContext.cs" />
     <Compile Include="System\Net\SecureProtocols\AuthenticationException.cs" />
-    <Compile Include="System\Net\SecureProtocols\_FixedSizeReader.cs" />
+    <Compile Include="System\Net\SecureProtocols\FixedSizeReader.cs" />
     <Compile Include="System\Net\SecureProtocols\ProtectionLevel.cs" />
     <Compile Include="System\Security\Authentication\ExtendedProtection\ExtendedProtectionPolicy.cs" />
     <Compile Include="System\Security\Authentication\ExtendedProtection\PolicyEnforcement.cs" />
     <Compile Include="System\Security\Authentication\ExtendedProtection\ProtectionScenario.cs" />
     <Compile Include="System\Security\Authentication\ExtendedProtection\ServiceNameCollection.cs" />
-
+	
     <!-- TODO: Shims -->
     <Compile Include="Shims\NegotiateStream.cs" />
-    
+	
     <!-- Logging -->
     <Compile Include="$(CommonPath)\System\Net\Shims\TraceSource.cs">
       <Link>Common\System\Net\Shims\TraceSource.cs</Link>
@@ -60,8 +69,8 @@
     <Compile Include="$(CommonPath)\System\Net\InternalException.cs">
       <Link>Common\System\Net\InternalException.cs</Link>
     </Compile>
-
-    <!-- Debug only --> 
+	
+    <!-- Debug only -->
     <Compile Include="$(CommonPath)\System\Net\DebugSafeHandle.cs">
       <Link>Common\System\Net\DebugSafeHandle.cs</Link>
     </Compile>
@@ -71,10 +80,10 @@
     <Compile Include="$(CommonPath)\System\Net\DebugCriticalHandleZeroOrMinusOneIsInvalid.cs">
       <Link>Common\System\Net\DebugCriticalHandleZeroOrMinusOneIsInvalid.cs</Link>
     </Compile>
-
+	
     <!-- System.Net common -->
-    <Compile Include="$(CommonPath)\System\Net\_ContextAwareResult.cs">
-      <Link>Common\System\Net\_ContextAwareResult.cs</Link>
+    <Compile Include="$(CommonPath)\System\Net\ContextAwareResult.cs">
+      <Link>Common\System\Net\ContextAwareResult.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\System\Net\ExceptionCheck.cs">
       <Link>Common\System\Net\ExceptionCheck.cs</Link>
@@ -82,9 +91,9 @@
     <Compile Include="$(CommonPath)\System\Net\IntPtrHelper.cs">
       <Link>Common\System\Net\IntPtrHelper.cs</Link>
     </Compile>
-
-    <Compile Include="$(CommonPath)\System\Net\_LazyAsyncResult.cs">
-      <Link>Common\System\Net\_LazyAsyncResult.cs</Link>
+	
+    <Compile Include="$(CommonPath)\System\Net\LazyAsyncResult.cs">
+      <Link>Common\System\Net\LazyAsyncResult.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\System\Net\Shims\ExecutionContext.cs">
       <Link>Common\System\Net\Shims\ExecutionContext.cs</Link>
@@ -92,9 +101,12 @@
     <Compile Include="$(CommonPath)\System\Net\Shims\DBNull.cs">
       <Link>Common\System\Net\Shims\DBNull.cs</Link>
     </Compile>
-    
-    <Compile Include="$(CommonPath)\System\Net\UriScheme.cs" >
+	
+    <Compile Include="$(CommonPath)\System\Net\UriScheme.cs">
       <Link>Common\System\Net\UriScheme.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\Net\SecurityProtocol.cs" >
+      <Link>Common\System\Net\SecurityProtocol.cs</Link>
     </Compile>
 
     <!-- Common -->
@@ -104,7 +116,7 @@
     <Compile Include="$(CommonPath)\Microsoft\Win32\SafeHandles\CriticalHandleZeroOrMinusOneIsInvalid.cs">
       <Link>Common\Microsoft\Win32\SafeHandles\CriticalHandleZeroOrMinusOneIsInvalid.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\System\NotImplemented.cs" >
+    <Compile Include="$(CommonPath)\System\NotImplemented.cs">
       <Link>Common\System\NotImplemented.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Microsoft\Win32\SafeHandles\SafeHandleZeroOrMinusOneIsInvalid.cs">
@@ -113,18 +125,17 @@
     <Compile Include="$(CommonPath)\System\IO\StreamAsyncHelper.cs">
       <Link>Common\System\IO\StreamAsyncHelper.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\System\IO\__Error.cs">
-      <Link>Common\System\IO\__Error.cs</Link>
+    <Compile Include="$(CommonPath)\System\IO\Error.cs">
+      <Link>Common\System\IO\Error.cs</Link>
     </Compile>
-
-   
+	
+	
   </ItemGroup>
-
-  <ItemGroup Condition=" '$(TargetsWindows)' == 'true' ">  
+  <ItemGroup Condition=" '$(TargetsWindows)' == 'true' ">
     <Compile Include="System\Net\SslStreamPal.Windows.cs" />
     <Compile Include="System\Net\SecurityContextTokenHandle.cs" />
     <Compile Include="System\Net\CertificateValidationPal.Windows.cs" />
-    
+	
     <!-- Interop -->
     <Compile Include="$(CommonPath)\Interop\Windows\Interop.Libraries.cs">
       <Link>Common\Interop\Windows\Interop.Libraries.cs</Link>
@@ -196,11 +207,9 @@
       <Link>Common\Interop\Windows\secur32\StreamSizes.cs</Link>
     </Compile>
   </ItemGroup>
-  
   <ItemGroup Condition=" '$(TargetsUnix)' == 'true' ">
     <Compile Include="System\Net\SslStreamPal.Unix.cs" />
     <Compile Include="System\Net\CertificateValidationPal.Unix.cs" />
-
     <!-- Interop -->
     <Compile Include="$(CommonPath)\Interop\Unix\Interop.Libraries.cs">
       <Link>Common\Interop\Unix\Interop.Libraries.cs</Link>
@@ -278,5 +287,5 @@
   <ItemGroup>
     <None Include="project.json" />
   </ItemGroup>
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />  
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

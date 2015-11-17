@@ -27,6 +27,7 @@
     <Compile Include="System\Array.SystemArrayKeyValueSortTests.cs" />
     <Compile Include="System\Array.TestTypes.cs" />
     <Compile Include="System\Array.Util.cs" />
+    <Compile Include="System\Attribute.cs" />
     <Compile Include="System\ArraySegment.cs" />
     <Compile Include="System\Boolean.cs" />
     <Compile Include="System\Buffer.cs" />
@@ -89,6 +90,9 @@
     <Compile Include="System\ValueType.cs" />
     <Compile Include="System\Version.cs" />
     <Compile Include="System\WeakReference.cs" />
+    <Compile Include="$(CommonTestPath)\System\RandomDataGenerator.cs">
+      <Link>Common\System\RandomDataGenerator.cs</Link>
+    </Compile>
     <!-- Performance Tests -->
     <Compile Include="Performance\Perf.Boolean.cs" />
     <Compile Include="Performance\Perf.Enum.cs" />
