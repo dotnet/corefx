@@ -1591,17 +1591,68 @@ public static unsafe class StringTests
         s = ". Foo .".Trim('.');
         Assert.Equal(" Foo ", s);
 
+        s = "..Foo.".Trim('.');
+        Assert.Equal("Foo", s);
+
+        s = ".Foo .".Trim('.');
+        Assert.Equal("Foo ", s);
+
         s = "  Foo  ".TrimStart();
         Assert.Equal("Foo  ", s);
 
         s = ". Foo .".TrimStart('.');
         Assert.Equal(" Foo .", s);
 
+        s = "..Foo.".TrimStart('.');
+        Assert.Equal("Foo.", s);
+
+        s = ".Foo .".TrimStart('.');
+        Assert.Equal("Foo .", s);
+
         s = "  Foo  ".TrimEnd();
         Assert.Equal("  Foo", s);
 
         s = ". Foo .".TrimEnd('.');
         Assert.Equal(". Foo ", s);
+
+        s = "..Foo.".TrimEnd('.');
+        Assert.Equal("..Foo", s);
+
+        s = ".Foo .".TrimEnd('.');
+        Assert.Equal(".Foo ", s);
+
+        s = ".  Foo  .".Trim('.', 'F');
+        Assert.Equal("  Foo  ", s);
+
+        s = ".Foo  .".Trim('.', 'F');
+        Assert.Equal("oo  ", s);
+
+        s = "..  FFoo  .".TrimStart('.', 'F');
+        Assert.Equal("  FFoo  .", s);
+
+        s = "..FFoo  .".TrimStart('.', 'F');
+        Assert.Equal("oo  .", s);
+        
+        s = "..  FFoo  ..".TrimEnd('.','o');
+        Assert.Equal("..  FFoo  ", s);
+
+        s = "..  FFoo..".TrimEnd('.', 'o');
+        Assert.Equal("..  FF", s);
+
+        s = ".Foo  .".Trim('.', 'F', 'x');
+        Assert.Equal("oo  ", s);
+
+        s = "..  FFoo  .".TrimStart('.', 'F', 'x');
+        Assert.Equal("  FFoo  .", s);
+
+        s = "..  FFoo  ..".TrimEnd('.', 'o', 'x');
+        Assert.Equal("..  FFoo  ", s);
+
+        s = ".xFoo  .".Trim('.', 'F', 'x');
+        Assert.Equal("oo  ", s);
+
+        s = ".Fxoo  .".Trim('.', 'F', 'x');
+        Assert.Equal("oo  ", s);
     }
 
     [Fact]
