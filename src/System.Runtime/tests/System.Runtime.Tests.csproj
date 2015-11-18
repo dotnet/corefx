@@ -115,6 +115,11 @@
   </ItemGroup>
   <ItemGroup>
     <!-- Compile tests against the System.Runtime contract, but copy our local-built implementation for testing -->
+    <ProjectReference Include="..\ref\System.Runtime.csproj">  
+       <ReferenceOutputAssembly>true</ReferenceOutputAssembly>  
+       <OutputItemType>None</OutputItemType>  
+       <CopyToOutputDirectory>Never</CopyToOutputDirectory>  
+    </ProjectReference>  
     <ProjectReference Include="..\src\System.Runtime.CoreCLR.csproj">
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
       <OutputItemType>Content</OutputItemType>
