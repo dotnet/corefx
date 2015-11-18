@@ -1620,6 +1620,9 @@ namespace System
         public string Trim(params char[] trimChars) { return default(string); }
         public string TrimEnd(params char[] trimChars) { return default(string); }
         public string TrimStart(params char[] trimChars) { return default(string); }
+        public string Trim(char trimChar) { return default(string); }
+        public string TrimEnd(char trimChar) { return default(string); }
+        public string TrimStart(char trimChar) { return default(string); }
     }
     public enum StringComparison
     {
