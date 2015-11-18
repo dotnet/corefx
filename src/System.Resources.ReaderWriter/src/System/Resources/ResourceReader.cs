@@ -1,34 +1,29 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.Text;
+
 namespace System.Resources
 {
-    using System;
-    using System.IO;
-    using System.Globalization;
-    using System.Collections;
-    using System.Text;
-    using System.Threading;
-    using System.Collections.Generic;
-    using System.Diagnostics;
     public sealed class ResourceReader : IDisposable
     {
-
         private const int ResSetVersion = 2;
         private const int ResourceTypeCodeString = 1;
         private const int ResourceManagerMagicNumber = unchecked((int)0xBEEFCACE);
         private const int ResourceManagerHeaderVersionNumber = 1;
 
-        private BinaryReader _store;    // backing store we're reading from.
+        private BinaryReader _store;      // backing store we're reading from.
         private long _nameSectionOffset;  // Offset to name section of file.
         private long _dataSectionOffset;  // Offset to Data section of file.
 
-        private int[] _namePositions; // relative locations of names
-        private Type[] _typeTable;    // Lazy array of Types for resource values.
-        private int[] _typeNamePositions;  // To delay initialize type table
-        private int _numResources;    // Num of resources files, in case arrays aren't allocated.      
+        private int[] _namePositions;     // relative locations of names
+        private Type[] _typeTable;        // Lazy array of Types for resource values.
+        private int[] _typeNamePositions; // To delay initialize type table
+        private int _numResources;        // Num of resources files, in case arrays aren't allocated.      
         private int _version;
-
 
         public ResourceReader(Stream stream)
         {
@@ -67,6 +62,7 @@ namespace System.Resources
 
             }
         }
+
         private void SkipString()
         {
             int stringLength = Read7BitEncodedInt();
@@ -90,15 +86,96 @@ namespace System.Resources
             }
             return r;
         }
-        public IDictionaryEnumerator GetEnumerator()
+
+        public Enumerator GetEnumerator()
         {
             if (_store == null)
                 throw new InvalidOperationException(SR.ResourceReaderIsClosed);
-            return new ResourceEnumerator(this);
+            return new Enumerator(this);
         }
 
+        public struct Enumerator
+        {
+            private const int ENUM_DONE = Int32.MinValue;
+            private const int ENUM_NOT_STARTED = -1;
 
-        private unsafe String AllocateStringForNameIndex(int index, out int dataOffset)
+            private ResourceReader _reader;
+            private bool _currentIsValid;
+            private int _currentName;
+
+            internal Enumerator(ResourceReader reader)
+            {
+                _currentIsValid = false;
+                _currentName = ENUM_NOT_STARTED;
+                _reader = reader;
+            }
+
+            public bool MoveNext()
+            {
+                if (_currentName == _reader._numResources - 1 || _currentName == ENUM_DONE)
+                {
+                    _currentIsValid = false;
+                    _currentName = ENUM_DONE;
+                    return false;
+                }
+                _currentIsValid = true;
+                _currentName++;
+                return true;
+            }
+
+            public KeyValuePair<string, object> Current
+            {
+                get
+                {
+                    if (_currentName == ENUM_DONE) throw new InvalidOperationException(SR.InvalidOperation_EnumEnded);
+                    if (!_currentIsValid) throw new InvalidOperationException(SR.InvalidOperation_EnumNotStarted);
+
+                    String key;
+                    Object value = null;
+                    int _dataPosition;
+                    key = _reader.AllocateStringForNameIndex(_currentName, out _dataPosition);
+                    value = _reader.GetValueForNameIndex(_currentName);
+
+                    return new KeyValuePair<string, object>(key, value);
+                }
+            }
+
+            public string Key
+            {
+                [System.Security.SecuritySafeCritical]  // auto-generated
+                get
+                {
+                    if (_currentName == ENUM_DONE) throw new InvalidOperationException(SR.InvalidOperation_EnumEnded);
+                    if (!_currentIsValid) throw new InvalidOperationException(SR.InvalidOperation_EnumNotStarted);
+
+                    int _dataPosition;
+                    return _reader.AllocateStringForNameIndex(_currentName, out _dataPosition);
+                }
+            }
+
+            public Object Value
+            {
+                get
+                {
+                    if (_currentName == ENUM_DONE) throw new InvalidOperationException(SR.InvalidOperation_EnumEnded);
+                    if (!_currentIsValid) throw new InvalidOperationException(SR.InvalidOperation_EnumNotStarted);
+
+
+                    return _reader.GetValueForNameIndex(_currentName);
+                }
+
+            }
+
+            public void Reset()
+            {
+
+                if (_reader._store == null) throw new InvalidOperationException(SR.ResourceReaderIsClosed);
+                _currentIsValid = false;
+                _currentName = ENUM_NOT_STARTED;
+            }
+        }
+
+        private unsafe string AllocateStringForNameIndex(int index, out int dataOffset)
         {
             Debug.Assert(_store != null, "ResourceReader is closed!");
             byte[] bytes;
@@ -154,7 +231,6 @@ namespace System.Resources
 
                 try
                 {
-
                     return LoadString(dataPos);
                 }
                 catch (EndOfStreamException eof)
@@ -165,8 +241,6 @@ namespace System.Resources
                 {
                     throw new BadImageFormatException(SR.BadImageFormat_TypeMismatch, e);
                 }
-
-
             }
         }
         
@@ -204,7 +278,7 @@ namespace System.Resources
             {
                 // mega try-catch performs exceptionally bad on x64; factored out body into 
                 // _ReadResources and wrap here.
-                _ReadResources();
+                ReadResourcesCore();
             }
             catch (EndOfStreamException eof)
             {
@@ -216,8 +290,7 @@ namespace System.Resources
             }
         }
 
-
-        private void _ReadResources()
+        private void ReadResourcesCore()
         {
             // Read out the ResourceManager header
             // Read out magic number
@@ -388,100 +461,6 @@ namespace System.Resources
                 shift += 7;
             } while ((b & 0x80) != 0);
             return count;
-        }
-
-        internal sealed class ResourceEnumerator : IDictionaryEnumerator
-        {
-            private const int ENUM_DONE = Int32.MinValue;
-            private const int ENUM_NOT_STARTED = -1;
-
-            private ResourceReader _reader;
-            private bool _currentIsValid;
-            private int _currentName;
-            
-
-            internal ResourceEnumerator(ResourceReader reader)
-            {
-                _currentName = ENUM_NOT_STARTED;
-                _reader = reader;
-               
-            }
-
-            public bool MoveNext()
-            {
-                if (_currentName == _reader._numResources - 1 || _currentName == ENUM_DONE)
-                {
-                    _currentIsValid = false;
-                    _currentName = ENUM_DONE;
-                    return false;
-                }
-                _currentIsValid = true;
-                _currentName++;
-                return true;
-            }
-
-            public Object Key
-            {
-                [System.Security.SecuritySafeCritical]  // auto-generated
-                get
-                {
-                    if (_currentName == ENUM_DONE) throw new InvalidOperationException(SR.InvalidOperation_EnumEnded);
-                    if (!_currentIsValid) throw new InvalidOperationException(SR.InvalidOperation_EnumNotStarted);
-
-                    int _dataPosition;
-                    return _reader.AllocateStringForNameIndex(_currentName, out _dataPosition);
-                }
-            }
-
-            public Object Current
-            {
-                get
-                {
-                    return Entry;
-                }
-            }
-
-
-            public DictionaryEntry Entry
-            {
-                [System.Security.SecuritySafeCritical]  // auto-generated
-                get
-                {
-                    if (_currentName == ENUM_DONE) throw new InvalidOperationException(SR.InvalidOperation_EnumEnded);
-                    if (!_currentIsValid) throw new InvalidOperationException(SR.InvalidOperation_EnumNotStarted);
-
-
-                    String key;
-                    Object value = null;
-                    int _dataPosition;
-                    key = _reader.AllocateStringForNameIndex(_currentName, out _dataPosition);
-
-
-                    value = _reader.GetValueForNameIndex(_currentName);
-
-                    return new DictionaryEntry(key, value);
-                }
-            }
-
-            public Object Value
-            {
-                get
-                {
-                    if (_currentName == ENUM_DONE) throw new InvalidOperationException(SR.InvalidOperation_EnumEnded);
-                    if (!_currentIsValid) throw new InvalidOperationException(SR.InvalidOperation_EnumNotStarted);
-
-
-                    return _reader.GetValueForNameIndex(_currentName);
-                }
-
-            }
-            public void Reset()
-            {
-
-                if (_reader._store == null) throw new InvalidOperationException(SR.ResourceReaderIsClosed);
-                _currentIsValid = false;
-                _currentName = ENUM_NOT_STARTED;
-            }
         }
     }
 }

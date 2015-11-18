@@ -1,15 +1,8 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
 using System.Collections.Generic;
-using System.Collections;
 using System.IO;
-using System.Text;
-using System.Linq;
-using System.Collections.ObjectModel;
-using System.Globalization;
-using System.Resources;
 using Xunit;
 
 namespace System.Resources.ResourceWriterTests
@@ -40,35 +33,35 @@ namespace System.Resources.ResourceWriterTests
             return rw;
         }
 
-        [Fact]
-        public static void ReadResource()
-        {
 
-            using (var ms2 = new MemoryStream())
+        [Fact]
+        public static void ReadResourceUsingTypedEnumerator()
+        {
+            using (var stream = new MemoryStream())
             {
-                using (var rw = GenerateResourceStream(s_dict, ms2))
+                using (var resourceWriter = GenerateResourceStream(s_dict, stream))
                 {
                     //Rewind to begining of stream
 
-                    ms2.Seek(0L, SeekOrigin.Begin);
+                    stream.Seek(0L, SeekOrigin.Begin);
 
-                    var reder = new ResourceReader(ms2);
+                    var reader = new ResourceReader(stream);
 
-                    var s_found_list = new List<string>();
-                    foreach (DictionaryEntry entry in reder)
+                    var foundList = new List<string>();
+                    foreach (KeyValuePair<string, object> entry in reader)
                     {
-                        string key = (string)entry.Key;
+                        string found = s_dict[entry.Key];
                         string value = (string)entry.Value;
-                        string found = s_dict[key];
+
                         Assert.True(string.Compare(value, found) == 0, "expected: " + value + ", but got : " + found);
-                        s_found_list.Add(key);
+                        foundList.Add(entry.Key);
                     }
 
-                    Assert.True(s_found_list.Count == s_dict.Count);
+                    Assert.True(foundList.Count == s_dict.Count);
                 }
             }
-
         }
+
         [Fact]
         public static void ReadResource1()
         {
@@ -137,7 +130,7 @@ namespace System.Resources.ResourceWriterTests
 
                         rr1.Dispose();
                         var s_found_list = new List<string>();
-                        foreach (DictionaryEntry entry in rr1)
+                        foreach (KeyValuePair<string, object> entry in rr1)
                         {
                             string key = (string)entry.Key;
                             string value = (string)entry.Value;
@@ -163,7 +156,7 @@ namespace System.Resources.ResourceWriterTests
                         ms2.Seek(0L, SeekOrigin.Begin);
                         var rr1 = new ResourceReader(ms2);
 
-                        IDictionaryEnumerator enumarator = rr1.GetEnumerator();
+                        ResourceReader.Enumerator enumarator = rr1.GetEnumerator();
                         rr1.Dispose();
                         var shouldnotgethere = enumarator.Current;
 
@@ -184,9 +177,9 @@ namespace System.Resources.ResourceWriterTests
                         ms2.Seek(0L, SeekOrigin.Begin);
                         var rr1 = new ResourceReader(ms2);
 
-                        IDictionaryEnumerator enumarator = rr1.GetEnumerator();
+                        ResourceReader.Enumerator enumarator = rr1.GetEnumerator();
                         rr1.Dispose();
-                        var shouldnotgethere = enumarator.Entry;
+                        var shouldnotgethere = enumarator.Current;
 
 
                     }
@@ -205,7 +198,7 @@ namespace System.Resources.ResourceWriterTests
                         ms2.Seek(0L, SeekOrigin.Begin);
                         var rr1 = new ResourceReader(ms2);
 
-                        IDictionaryEnumerator enumarator = rr1.GetEnumerator();
+                        ResourceReader.Enumerator enumarator = rr1.GetEnumerator();
                         rr1.Dispose();
                         var shouldnotgethere = enumarator.Key;
 
@@ -226,7 +219,7 @@ namespace System.Resources.ResourceWriterTests
                         ms2.Seek(0L, SeekOrigin.Begin);
                         var rr1 = new ResourceReader(ms2);
 
-                        IDictionaryEnumerator enumarator = rr1.GetEnumerator();
+                        ResourceReader.Enumerator enumarator = rr1.GetEnumerator();
                         rr1.Dispose();
                         enumarator.Reset();
 
@@ -247,7 +240,7 @@ namespace System.Resources.ResourceWriterTests
                         ms2.Seek(0L, SeekOrigin.Begin);
                         var rr1 = new ResourceReader(ms2);
 
-                        IDictionaryEnumerator enumarator = rr1.GetEnumerator();
+                        ResourceReader.Enumerator enumarator = rr1.GetEnumerator();
                         rr1.Dispose();
                         var shouldnotgethere = enumarator.Value;
 
@@ -291,7 +284,7 @@ namespace System.Resources.ResourceWriterTests
                     var reder = new ResourceReader(ms2);
 
                     var s_found_list = new List<string>();
-                    foreach (DictionaryEntry entry in reder)
+                    foreach (KeyValuePair<string, object> entry in reder)
                     {
                         string key = (string)entry.Key;
                         string value = (string)entry.Value;
@@ -339,9 +332,9 @@ namespace System.Resources.ResourceWriterTests
                     var s_found_list = new List<string>();
                     Assert.Throws<FormatException>(() =>
                     {
-                        foreach (DictionaryEntry entry in reader)
+                        foreach (KeyValuePair<string, object> entry in reader)
                         {
-                            string key = (string)entry.Key;
+                            string key = entry.Key;
                             s_found_list.Add(key);
                         }
                     });
@@ -357,14 +350,14 @@ namespace System.Resources.ResourceWriterTests
                 using (var reader = new ResourceReader(ms2))
                 {
 
-                    var s_found_list = new List<DictionaryEntry>();
+                    var s_found_list = new List<KeyValuePair<string, object>>();
                     Assert.Throws<BadImageFormatException>(() =>
                     {
                         var enume = reader.GetEnumerator();
 
                         while (enume.MoveNext())
                         {
-                            s_found_list.Add(enume.Entry);
+                            s_found_list.Add(enume.Current);
                         }
 
                     });
@@ -414,9 +407,9 @@ namespace System.Resources.ResourceWriterTests
 
                     var s_found_list = new List<string>();
 
-                    foreach (DictionaryEntry entry in reader)
+                    foreach (KeyValuePair<string, object> entry in reader)
                     {
-                        string key = (string)entry.Key;
+                        string key = entry.Key;
                         string found = (string)entry.Value;
                         string value = s_dict_expected[key];
                         Assert.True(string.Compare(value, found) == 0, "expected: " + value + ", but got : " + found);

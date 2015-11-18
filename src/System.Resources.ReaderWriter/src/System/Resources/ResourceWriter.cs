@@ -13,15 +13,11 @@
 ** 
 ===========================================================*/
 
-using System;
-using System.IO;
-using System.Text;
-using System.Collections;
 using System.Collections.Generic;
-using System.Globalization;
-using System.Runtime.Versioning;
 using System.Diagnostics;
 using System.Diagnostics.Contracts;
+using System.IO;
+using System.Text;
 
 namespace System.Resources
 {
@@ -36,7 +32,7 @@ namespace System.Resources
     // See the RuntimeResourceSet overview for details on the system 
     // default file format.
     // 
-    public sealed class ResourceWriter : System.IDisposable
+    public sealed class ResourceWriter : IDisposable
     {
         // An initial size for our internal sorted list, to avoid extra resizes.
         private const int AverageNameSize = 20 * 2;  // chars in little endian Unicode
