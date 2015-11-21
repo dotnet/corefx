@@ -1508,86 +1508,62 @@ public static unsafe class StringTests
         Assert.Equal(asciiUpper, ascii.ToUpperInvariant());
     }
 
-    [Fact]
-    public static void TestTrim()
+    // Tests of the single char overload for Trim, TrimEnd, and TrimStart
+    public class trimTests
     {
-        String s;
+        [Theory, MemberData("trimData")]
+        public void trimCheck(string testString, char c, string expTrim, string expTrimEnd, string expTrimStart)
+        {
+            string result = testString.Trim(c);
+            Assert.Equal(result, expTrim);
+
+            string resultEnd = testString.TrimEnd(c);
+            Assert.Equal(resultEnd, expTrimEnd);
+
+            string resultStart = testString.TrimStart(c);
+            Assert.Equal(resultStart, expTrimStart);
+        }
+
+        public static IEnumerable<object[]> trimData
+        {
+            get
+            {
+                return new[]
+                {
+                    new object[] {"aFooa", 'a', "Foo", "aFoo", "Fooa"}, // tests for single char
+                    new object[] {"aaaFooaaa", 'a', "Foo", "aaaFoo", "Fooaaa"}, // tests for multiple copies of single char
+                    new object[] {"abFooba", 'b', "abFooba", "abFooba", "abFooba"}, // tests for single char blocked
+                    new object[] {" Foo ", " ", "Foo", " Foo", "Foo "}, // tests for single whitespace
+                    new object[] {"   Foo   ", " ", "Foo", "   Foo", "Foo   "}, // tests for multiple copies of whitespace
+                    new object[] {"Foo", "a", "Foo", "Foo", "Foo"}, // tests for nothing to trim
+                    new object[] {".Foo.", ".", "Foo", ".Foo", "Foo."}, // tests for common scenario, period
+                    new object[] {",Foo,", ",", "Foo", ",Foo", "Foo,"}, // tests for common scenario, comma
+                    new object[] {", Foo, ", ",", " Foo, ", ", Foo, ", " Foo, " } // tests for common scenario, comma and whitespace
+                };
+            }
+        }
+    }
+    // Tests of the char[] overload for Trim, TrimEnd, and TrimStart
+    [Fact]
+    public static void TestTrimArray()
+    {
+        string s;
         char[] c = { 'a' };
-
-        // Tests for single character
-        s = "aFooa".Trim('a');
-        Assert.Equal("Foo", s);
-
-        // Tests for multiple instances of a single character
-        s = "aaFooaa".Trim('a');
-        Assert.Equal("Foo", s);
-
-        // Tests for single white space
-        s = " Foo ".Trim(' ');
-        Assert.Equal("Foo", s);
-
-        // Tests for multiple instances of white space
-        s = "  Foo  ".Trim(' ');
-        Assert.Equal("Foo", s);
-
-        // Tests for absence of anything to trim
-        s = "Foo".Trim(' ');
-        Assert.Equal("Foo", s);
-
-        // Tests for common scenarios (period, comma
-        // white space + period or comma)
-        s = ".Foo.".Trim('.');
-        Assert.Equal("Foo", s);
-
-        s = ". Foo .".Trim('.');
-        Assert.Equal(" Foo ", s);
-
-        s = ", Foo,".Trim(',');
-        Assert.Equal(" Foo", s);
-
-        s = ", Foo,".Trim(',');
-        Assert.Equal(" Foo", s);
-
-        // Test for multiple values passed to char array
-        s = "abFooba".Trim('a', 'b');
-        Assert.Equal("Foo", s);
-
-        // Tests for absence of anything to trim
-        s = "Foo".Trim('a', 'b', ' ');
-        Assert.Equal("Foo", s);
-
-        // Tests for order of multiple values passed to char array
-        s = "abFooba".Trim('b', 'a');
-        Assert.Equal("Foo", s);
-
-        s = ", Foo,".Trim(',', ' ');
-        Assert.Equal("Foo", s);
+        char[] d = { 'a', 'b', 'c' };
 
         // Tests for single character passed specifically to the char[] overload
         s = "aFooa".Trim(c);
         Assert.Equal("Foo", s);
 
-        // Tests for TrimStart and TrimEnd functions,
-        // single char overload
-        s = "aFooa".TrimStart('a');
-        Assert.Equal("Fooa", s);
+        // Tests char array overload
+        s = "abcFooabc";
+        Assert.Equal("Foo", s.Trim(d));
 
-        s = ". Foo .".TrimEnd('.');
-        Assert.Equal(". Foo ", s);
+        s = "abcFooabc";
+        Assert.Equal("abcFoo", s.TrimEnd(d));
 
-        // Tests for TrimStart and TrimEnd functions,
-        // char array overload
-        s = "aFooa".TrimEnd('c', 'a', 'b');
-        Assert.Equal("aFoo", s);
-
-        s = ",  Foo  ".TrimStart(' ', '.');
-        Assert.Equal(",  Foo  ", s);
-
-        s = ".,Foo,.".TrimStart('.', ',');
-        Assert.Equal("Foo,.", s);
-
-        s = "..Foo,,".TrimEnd(',', '.');
-        Assert.Equal("..Foo", s);
+        s = "abcFooabc";
+        Assert.Equal("Fooabc", s.TrimStart(d));
     }
 
     [Fact]
