@@ -1,6 +1,8 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.Collections;
+
 using Xunit;
 
 namespace System.Net.Primitives.Functional.Tests
@@ -151,6 +153,62 @@ namespace System.Net.Primitives.Functional.Tests
         {
             CookieCollection cc = new CookieCollection();
             Assert.Equal(cc, cc.SyncRoot);
+        }
+        
+        [Fact]
+        public static void CopyTo_Array_Success()
+        {
+            CookieCollection cc = CreateCookieCollection1();
+            Array c = new object[cc.Count];
+            cc.CopyTo(c, 0);
+            EnsureEqual(cc, c);
+        }
+
+        [Fact]
+        public static void CopyTo_CookieArray_Success()
+        {
+            CookieCollection cc = CreateCookieCollection1();
+            Cookie[] c = new Cookie[cc.Count];
+            cc.CopyTo(c, 0);
+            EnsureEqual(cc, c);
+        }
+
+        private static void EnsureEqual(CookieCollection cc, Array cookies)
+        {
+            Assert.Equal(cc.Count, cookies.Length);
+            for (int i = 0; i < cookies.Length; i++)
+            {
+                Assert.Equal(cc[i], cookies.GetValue(i));
+            }
+        }
+
+        [Fact]
+        public static void Enumerator_Index_Invalid()
+        {
+            CookieCollection cc = CreateCookieCollection1();
+            IEnumerator enumerator = cc.GetEnumerator();
+
+            Assert.Throws<InvalidOperationException>(() => enumerator.Current); // Index < 0
+
+            enumerator.MoveNext(); enumerator.MoveNext(); enumerator.MoveNext();
+            enumerator.MoveNext(); enumerator.MoveNext(); enumerator.MoveNext();
+
+            Assert.Throws<InvalidOperationException>(() => enumerator.Current); // Index >= count
+
+            enumerator.Reset();
+            Assert.Throws<InvalidOperationException>(() => enumerator.Current); // Index should be -1
+        }
+
+        [Fact]
+        public static void Enumerator_Version_Invalid()
+        {
+            CookieCollection cc = CreateCookieCollection1();
+            IEnumerator enumerator = cc.GetEnumerator();
+            enumerator.MoveNext();
+
+            cc.Add(new Cookie("name5", "value"));
+            Assert.Throws<InvalidOperationException>(() => enumerator.Current); // Enumerator out of sync
+            Assert.Throws<InvalidOperationException>(() => enumerator.MoveNext()); // Enumerator out of sunc
         }
     }
 }

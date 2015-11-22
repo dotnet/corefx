@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System.Runtime.InteropServices;
 
 namespace System.Net
 {
@@ -19,6 +18,6 @@ namespace System.Net
         ///     is available for the specified host and realm.
         ///   </para>
         /// </devdoc>
-        NetworkCredential GetCredential(Uri uri, String authType);
+        NetworkCredential GetCredential(Uri uri, string authType);
     }
 }

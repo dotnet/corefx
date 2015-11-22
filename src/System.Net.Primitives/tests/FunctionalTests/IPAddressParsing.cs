@@ -103,14 +103,14 @@ namespace System.Net.Primitives.Functional.Tests
         [Fact]
         public void Parse_Empty_Throws()
         {
-            Assert.Throws<FormatException>(() => { IPAddress.Parse(String.Empty); });
+            Assert.Throws<FormatException>(() => { IPAddress.Parse(string.Empty); });
         }
 
         [Fact]
         public void TryParse_Empty_False()
         {
             IPAddress ipAddress;
-            Assert.False(IPAddress.TryParse(String.Empty, out ipAddress));
+            Assert.False(IPAddress.TryParse(string.Empty, out ipAddress));
         }
     }
 }
