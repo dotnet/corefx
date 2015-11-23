@@ -1,0 +1,11 @@
+LIBRARY System.IO.Compression.Native.dll
+
+EXPORTS
+	crc32
+	deflateInit2_
+	deflate
+	deflateEnd
+	inflateInit2_
+	inflate
+	inflateEnd
+	zlibCompileFlags
