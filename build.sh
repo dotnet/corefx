@@ -181,7 +181,7 @@ build_native_corefx()
 }
 
 __scriptpath=$(cd "$(dirname "$0")"; pwd -P)
-__nativeroot=$__scriptpath/src/Native
+__nativeroot=$__scriptpath/src/Native/Unix
 __packageroot=$__scriptpath/packages
 __sourceroot=$__scriptpath/src
 __nugetpath=$__packageroot/NuGet.exe
