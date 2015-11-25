@@ -17,6 +17,7 @@ namespace System.Net.Security
         Stream = 0x0A,
         ChannelBindings = 0x0E,
         TargetHost = 0x10,
+        ApplicationProtocols = 0x12,
         ReadOnlyFlag = unchecked((int)0x80000000),
         ReadOnlyWithChecksum = 0x10000000
     }

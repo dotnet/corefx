@@ -206,6 +206,12 @@
     <Compile Include="$(CommonPath)\Interop\Windows\secur32\StreamSizes.cs">
       <Link>Common\Interop\Windows\secur32\StreamSizes.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\secur32\ApplicationProtocolContext.cs">
+      <Link>Common\Interop\Windows\secur32\ApplicationProtocolContext.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\secur32\ApplicationProtocols.cs">
+      <Link>Common\Interop\Windows\secur32\ApplicationProtocols.cs</Link>
+    </Compile>
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetsUnix)' == 'true' ">
     <Compile Include="System\Net\SslStreamPal.Unix.cs" />
@@ -222,6 +228,12 @@
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\libssl\SslConnectionInfo.cs">
       <Link>Common\Interop\Unix\libssl\SslConnectionInfo.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\libssl\ApplicationProtocolContext.cs">
+      <Link>Common\Interop\Unix\libssl\ApplicationProtocolContext.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\libssl\ApplicationProtocols.cs">
+      <Link>Common\Interop\Unix\libssl\ApplicationProtocols.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\libssl\Interop.OpenSsl.cs">
       <Link>Common\Interop\Unix\libssl\Interop.OpenSsl.cs</Link>

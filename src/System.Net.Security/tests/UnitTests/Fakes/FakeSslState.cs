@@ -20,7 +20,7 @@ namespace System.Net.Security
         //
         //
         //
-        internal void ValidateCreateContext(bool isServer, string targetHost, SslProtocols enabledSslProtocols, X509Certificate serverCertificate, X509CertificateCollection clientCertificates, bool remoteCertRequired, bool checkCertRevocationStatus)
+        internal void ValidateCreateContext(bool isServer, string targetHost, SslProtocols enabledSslProtocols, X509Certificate serverCertificate, X509CertificateCollection clientCertificates, bool remoteCertRequired, bool checkCertRevocationStatus, string[] applicationProtocols)
         {
         }
 
@@ -125,6 +125,14 @@ namespace System.Net.Security
             get
             {
                 return 0;
+            }
+        }
+
+        internal string NegotiatedApplicationProtocol
+        {
+            get
+            {
+                return null; 
             }
         }
 

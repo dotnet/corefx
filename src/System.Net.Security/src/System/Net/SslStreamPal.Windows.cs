@@ -53,6 +53,23 @@ namespace System.Net
             return GetSecurityStatusPalFromWin32Int(errorCode);
         }
 
+        public static SecurityStatusPal AcceptSecurityContext(SafeFreeCredentials credentialsHandle, ref SafeDeleteContext context, SecurityBuffer[] inputBuffers, SecurityBuffer outputBuffer, bool remoteCertRequired)
+        {
+            Interop.Secur32.ContextFlags unusedAttributes = default(Interop.Secur32.ContextFlags);
+
+            int errorCode = SSPIWrapper.AcceptSecurityContext(
+                GlobalSSPI.SSPISecureChannel,
+                credentialsHandle,
+                ref context,
+                ServerRequiredFlags | (remoteCertRequired ? Interop.Secur32.ContextFlags.MutualAuth : Interop.Secur32.ContextFlags.Zero),
+                Interop.Secur32.Endianness.Native,
+                inputBuffers,
+                outputBuffer,
+                ref unusedAttributes);
+
+            return GetSecurityStatusPalFromWin32Int(errorCode);
+        }
+
         public static SecurityStatusPal InitializeSecurityContext(ref SafeFreeCredentials credentialsHandle, ref SafeDeleteContext context, string targetName, SecurityBuffer inputBuffer, SecurityBuffer outputBuffer)
         {
             Interop.Secur32.ContextFlags unusedAttributes = default(Interop.Secur32.ContextFlags);
@@ -200,6 +217,14 @@ namespace System.Net
                 GlobalSSPI.SSPISecureChannel, 
                 securityContext, 
                 Interop.Secur32.ContextAttribute.ConnectionInfo) as SslConnectionInfo;
+        }
+
+        public static void QueryContextApplicationProtocol(SafeDeleteContext securityContext, out ApplicationProtocolContext applicationProtocolContext)
+        {
+            applicationProtocolContext = SSPIWrapper.QueryContextAttributes(
+                GlobalSSPI.SSPISecureChannel,
+                securityContext,
+                Interop.Secur32.ContextAttribute.ApplicationProtocol) as ApplicationProtocolContext;
         }
 
         private static int GetProtocolFlagsFromSslProtocols(SslProtocols protocols, bool isServer)
@@ -380,6 +405,8 @@ namespace System.Net
                     return SecurityStatusPal.UnsupportedPreauth;
                 case Interop.SecurityStatus.BadBinding:
                     return SecurityStatusPal.BadBinding;
+                case Interop.SecurityStatus.ApplicationProtocolMismatch:
+                    return SecurityStatusPal.ApplicationProtocolMismatch;
                 default:
                     Debug.Fail("Unknown Interop.SecurityStatus value: " + win32SecurityStatus);
                     throw new InternalException();
@@ -471,6 +498,8 @@ namespace System.Net
                     return Interop.SecurityStatus.UnsupportedPreauth;
                 case SecurityStatusPal.BadBinding:
                     return Interop.SecurityStatus.BadBinding;
+                case SecurityStatusPal.ApplicationProtocolMismatch:
+                    return Interop.SecurityStatus.ApplicationProtocolMismatch;
                 default:
                     Debug.Fail("Unknown Interop.SecurityStatus value: " + status);
                     throw new InternalException();

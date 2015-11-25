@@ -12,6 +12,7 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' " />
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' " />
   <ItemGroup>
+    <Compile Include="ApplicationProtocolNegotiationTest.cs" />
     <Compile Include="CertificateChainValidation.cs" />
     <Compile Include="CertificateValidationClientServer.cs" />
     <Compile Include="CertificateValidationRemoteServer.cs" />
