@@ -68,44 +68,22 @@ namespace System.Net.NetworkInformation
             return _netMasks[address];
         }
 
-        protected static unsafe void ProcessIpv4Address(UnixNetworkInterface uni,
-                                                Interop.Sys.IpAddressInfo* addressInfo,
-                                                Interop.Sys.IpAddressInfo* netMask)
+        protected unsafe void ProcessIpv4Address(Interop.Sys.IpAddressInfo* addressInfo, Interop.Sys.IpAddressInfo* netMask)
         {
-            byte[] ipBytes = new byte[addressInfo->NumAddressBytes];
-            fixed (byte* ipArrayPtr = ipBytes)
-            {
-                Buffer.MemoryCopy(addressInfo->AddressBytes, ipArrayPtr, ipBytes.Length, ipBytes.Length);
-            }
-            IPAddress ipAddress = new IPAddress(ipBytes);
-
-            byte[] ipBytes2 = new byte[netMask->NumAddressBytes];
-            fixed (byte* ipArrayPtr = ipBytes2)
-            {
-                Buffer.MemoryCopy(netMask->AddressBytes, ipArrayPtr, ipBytes2.Length, ipBytes2.Length);
-            }
-            IPAddress netMaskAddress = new IPAddress(ipBytes2);
-
-            uni.AddAddress(ipAddress);
-            uni._netMasks[ipAddress] = netMaskAddress;
+            IPAddress ipAddress = IPAddressUtil.GetIPAddressFromNativeInfo(addressInfo);
+            IPAddress netMaskAddress = IPAddressUtil.GetIPAddressFromNativeInfo(netMask);
+            AddAddress(ipAddress);
+            _netMasks[ipAddress] = netMaskAddress;
         }
 
-        protected static unsafe void ProcessIpv6Address(UnixNetworkInterface uni,
-                                                        Interop.Sys.IpAddressInfo* addressInfo,
-                                                        uint scopeId)
+        protected unsafe void ProcessIpv6Address(Interop.Sys.IpAddressInfo* addressInfo, uint scopeId)
         {
-            byte[] ipBytes = new byte[addressInfo->NumAddressBytes];
-            fixed (byte* ipArrayPtr = ipBytes)
-            {
-                Buffer.MemoryCopy(addressInfo->AddressBytes, ipArrayPtr, ipBytes.Length, ipBytes.Length);
-            }
-            IPAddress address = new IPAddress(ipBytes);
-
-            uni.AddAddress(address);
-            uni._ipv6ScopeId = scopeId;
+            IPAddress address = IPAddressUtil.GetIPAddressFromNativeInfo(addressInfo);
+            AddAddress(address);
+            _ipv6ScopeId = scopeId;
         }
 
-        protected static unsafe void ProcessLinkLayerAddress(UnixNetworkInterface uni, Interop.Sys.LinkLayerAddressInfo* llAddr)
+        protected unsafe void ProcessLinkLayerAddress(Interop.Sys.LinkLayerAddressInfo* llAddr)
         {
             byte[] macAddress = new byte[llAddr->NumAddressBytes];
             fixed (byte* macAddressPtr = macAddress)
@@ -114,10 +92,10 @@ namespace System.Net.NetworkInformation
             }
             PhysicalAddress physicalAddress = new PhysicalAddress(macAddress);
 
-            uni._index = llAddr->InterfaceIndex;
-            uni._id = uni._index.ToString();
-            uni._physicalAddress = physicalAddress;
-            uni._networkInterfaceType = (NetworkInterfaceType)llAddr->HardwareType;
+            _index = llAddr->InterfaceIndex;
+            _id = _index.ToString();
+            _physicalAddress = physicalAddress;
+            _networkInterfaceType = (NetworkInterfaceType)llAddr->HardwareType;
         }
     }
 }

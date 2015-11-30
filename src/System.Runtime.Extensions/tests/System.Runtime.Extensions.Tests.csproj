@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <PropertyGroup>
@@ -10,6 +10,7 @@
     <AssemblyName>System.Runtime.Extensions.Tests</AssemblyName>
     <RestorePackages>true</RestorePackages>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <IncludePerformanceTests>true</IncludePerformanceTests>
   </PropertyGroup>
   <!-- Default configurations to help VS understand the configurations -->
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -45,18 +46,31 @@
     <Compile Include="System\Convert.ToUInt64.cs" />
     <Compile Include="System\Environment.ExpandEnvironmentVariables.cs" />
     <Compile Include="System\Environment.GetEnvironmentVariable.cs" />
+    <Compile Include="System\Environment.GetCommandLineArgs.cs" />
     <Compile Include="System\Environment.NewLine.cs" />
     <Compile Include="System\Environment.ProcessorCount.cs" />
     <Compile Include="System\Environment.SetEnvironmentVariable.cs" />
     <Compile Include="System\Environment.StackTrace.cs" />
     <Compile Include="System\Environment.TickCount.cs" />
+    <Compile Include="System\Environment.Exit.cs" />
     <Compile Include="System\Math.cs" />
     <Compile Include="System\Progress.cs" />
     <Compile Include="System\Random.cs" />
     <Compile Include="System\StringComparer.cs" />
-  </ItemGroup>
-  <!-- Performance Tests -->
-  <ItemGroup Condition="'$(RunPerfTestsForProject)' == 'true'">
+	
+    <Compile Include="$(CommonTestPath)\System\Diagnostics\AssertWithCallerAttributes.cs">
+      <Link>Common\tests\System\Diagnostics\AssertWithCallerAttributes.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonTestPath)\System\Diagnostics\RemoteExecutorTestBase.cs">
+      <Link>Common\System\Diagnostics\RemoteExecutorTestBase.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonTestPath)\System\IO\FileCleanupTestBase.cs">
+      <Link>Common\System\IO\FileCleanupTestBase.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonTestPath)\System\ShouldNotBeInvokedException.cs">
+      <Link>Common\System\ShouldNotBeInvokedException.cs</Link>
+    </Compile>
+    <!-- Performance Tests -->
     <Compile Include="Performance\Perf.Environment.cs" />
     <Compile Include="Performance\Perf.Path.cs" />
     <Compile Include="Performance\Perf.Random.cs" />
@@ -68,11 +82,18 @@
     <None Include="project.json" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\ref\System.Runtime.Extensions.csproj">
+      <Project>{da96367e-04d1-4057-997e-aed4a2773f0d}</Project>
+      <Name>System.Runtime.Extensions</Name>
+      <!-- Don't deploy reference assembly -->
+      <Private>false</Private>
+    </ProjectReference>
     <ProjectReference Include="..\src\System.Runtime.Extensions.CoreCLR.csproj">
+      <Project>{1e689c1b-690c-4799-bde9-6e7990585894}</Project>
+      <Name>System.Runtime.Extensions.CoreCLR</Name>
+      <!-- Don't reference implementation assembly, but do deploy it. -->
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
       <OutputItemType>Content</OutputItemType>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <Targets>Build;DebugSymbolsProjectOutputGroup</Targets>
     </ProjectReference>
     <ProjectReference Include="..\..\System.Private.Uri\src\System.Private.Uri.CoreCLR.csproj">
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
@@ -85,6 +106,14 @@
       <OutputItemType>Content</OutputItemType>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Targets>Build;DebugSymbolsProjectOutputGroup</Targets>
+    </ProjectReference>
+    <ProjectReference Include="..\..\System.Diagnostics.Process\src\System.Diagnostics.Process.csproj">
+      <Project>{63634289-90D7-4947-8BF3-DBBE98D76C85}</Project>
+      <Name>System.Diagnostics.Process</Name>
+    </ProjectReference>
+    <ProjectReference Include="$(CommonTestPath)\System\Diagnostics\RemoteExecutorConsoleApp\RemoteExecutorConsoleApp.csproj">
+      <Project>{69e46a6f-9966-45a5-8945-2559fe337827}</Project>
+      <Name>RemoteExecutorConsoleApp</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />

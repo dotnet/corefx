@@ -171,6 +171,25 @@ endif ()
 
 check_cxx_source_runs(
     "
+    #include <stdlib.h>
+    #include <time.h>
+    #include <sys/time.h>
+    int main()
+    {
+        int ret; 
+        struct timespec ts;
+        ret = clock_gettime(CLOCK_MONOTONIC, &ts);
+        exit(ret);
+    }
+    " 
+    HAVE_CLOCK_MONOTONIC)
+
+check_function_exists(
+    mach_absolute_time
+    HAVE_MACH_ABSOLUTE_TIME)
+
+check_cxx_source_runs(
+    "
     #include <sys/mman.h>
     #include <fcntl.h>
     #include <unistd.h>
@@ -211,6 +230,20 @@ check_cxx_source_compiles(
     int main() { return 0; }
     "
     HAVE_TCP_VAR_H
+)
+
+check_cxx_source_compiles(
+    "
+    #include <netinet/tcp.h>
+    int main() { int x = TCP_ESTABLISHED; return x; }
+    "
+    HAVE_TCP_H_TCPSTATE_ENUM
+)
+
+check_symbol_exists(
+    TCPS_ESTABLISHED
+    "netinet/tcp_fsm.h"
+    HAVE_TCP_FSM_H
 )
 
 check_cxx_source_compiles(
@@ -257,6 +290,13 @@ if (HAVE_INOTIFY_INIT AND HAVE_INOTIFY_ADD_WATCH AND HAVE_INOTIFY_RM_WATCH)
 elseif (CMAKE_SYSTEM_NAME STREQUAL Linux)
 	message(FATAL_ERROR "Cannot find inotify functions on a Linux platform.")
 endif()
+
+check_cxx_source_compiles(
+    "
+    #include <curl/multi.h>
+    int main() { int i = CURLM_ADDED_ALREADY; }
+    "
+    HAVE_CURLM_ADDED_ALREADY)
 
 set (CMAKE_REQUIRED_LIBRARIES)
 

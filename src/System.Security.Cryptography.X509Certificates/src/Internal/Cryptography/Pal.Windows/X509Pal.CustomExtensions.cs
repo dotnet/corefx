@@ -59,6 +59,11 @@ namespace Internal.Cryptography.Pal
             }
         }
 
+        public bool SupportsLegacyBasicConstraintsExtension
+        {
+            get { return true; }
+        }
+
         public byte[] EncodeX509BasicConstraints2Extension(bool certificateAuthority, bool hasPathLengthConstraint, int pathLengthConstraint)
         {
             unsafe
@@ -157,7 +162,7 @@ namespace Internal.Cryptography.Pal
                         for (int i = 0; i < count; i++)
                         {
                             IntPtr oidValuePointer = pEnhKeyUsage->rgpszUsageIdentifier[i];
-                            String oidValue = Marshal.PtrToStringAnsi(oidValuePointer);
+                            string oidValue = Marshal.PtrToStringAnsi(oidValuePointer);
                             Oid oid = new Oid(oidValue);
                             localUsages.Add(oid);
                         }
@@ -166,7 +171,6 @@ namespace Internal.Cryptography.Pal
             }
 
             usages = localUsages;
-            return;
         }
 
         public byte[] EncodeX509SubjectKeyIdentifierExtension(byte[] subjectKeyIdentifier)

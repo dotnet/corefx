@@ -81,7 +81,7 @@
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetsLinux)' == 'true'">
     <Compile Include="System\IO\FileSystemWatcher.Linux.cs" />
-    <Compile Include="$(CommonPath)\Interop\Linux\System.Native\Interop.inotify.cs">
+    <Compile Include="$(CommonPath)\Interop\Linux\System.Native\Interop.INotify.cs">
       <Link>Common\Interop\Linux\Interop.inotify.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.Poll.cs">
@@ -114,6 +114,9 @@
     <Compile Include="$(CommonPath)\Microsoft\Win32\SafeHandles\SafeEventStreamHandle.OSX.cs">
       <Link>Common\Microsoft\Win32\SafeHandles\SafeEventStreamHandle.OSX.cs</Link>
     </Compile>
+  </ItemGroup>
+  <ItemGroup Condition=" '$(TargetsFreeBSD)' == 'true' OR '$(TargetsUnknownUnix)' == 'true' ">
+    <Compile Include="System\IO\FileSystemWatcher.UnknownUnix.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="project.json" />

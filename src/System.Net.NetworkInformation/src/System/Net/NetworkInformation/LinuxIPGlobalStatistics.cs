@@ -55,7 +55,7 @@ namespace System.Net.NetworkInformation
 
         public override long OutputPacketRequests { get { return _table.OutRequests; } }
 
-        public override long OutputPacketRoutingDiscards { get { throw new PlatformNotSupportedException(); } }
+        public override long OutputPacketRoutingDiscards { get { throw new PlatformNotSupportedException(SR.net_InformationUnavailableOnPlatform); } }
 
         public override long OutputPacketsDiscarded { get { return _table.OutDiscards; } }
 
@@ -87,14 +87,21 @@ namespace System.Net.NetworkInformation
 
         public override long ReceivedPacketsWithUnknownProtocol { get { return _table.InUnknownProtocols; } }
 
-        private static int GetNumIPAddresses()
+        private static unsafe int GetNumIPAddresses()
         {
-            // PERF: Use EnumerateInterfaceAddresses directly.
             int count = 0;
-            foreach (LinuxNetworkInterface lni in LinuxNetworkInterface.GetLinuxNetworkInterfaces())
-            {
-                count += lni.Addresses.Count;
-            }
+            Interop.Sys.EnumerateInterfaceAddresses(
+                (name, ipAddressInfo, netmaskInfo) =>
+                {
+                    count++;
+                },
+                (name, ipAddressInfo, scopeId) =>
+                {
+                    count++;
+                },
+                // Ignore link-layer addresses that are discovered; don't create a callback.
+                null);
+
             return count;
         }
     }

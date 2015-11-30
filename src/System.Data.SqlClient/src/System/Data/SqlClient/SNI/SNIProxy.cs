@@ -12,30 +12,11 @@ namespace System.Data.SqlClient.SNI
     {
         public static readonly SNIProxy Singleton = new SNIProxy();
 
-        private readonly GCHandle _gcHandle;
-
         /// <summary>
         /// Terminate SNI
         /// </summary>
         public void Terminate()
         {
-        }
-
-        /// <summary>
-        /// Check if GC handle is allocated
-        /// </summary>
-        /// <returns></returns>
-        public bool IsGcHandleAllocated()
-        {
-            return _gcHandle.IsAllocated;
-        }
-
-        /// <summary>
-        /// Free GC handle
-        /// </summary>
-        public void FreeGcHandle()
-        {
-            _gcHandle.Free();
         }
 
         /// <summary>
@@ -64,10 +45,9 @@ namespace System.Data.SqlClient.SNI
             {
                 return handle.EnableSsl(options);
             }
-            catch
+            catch (Exception e)
             {
-                SNILoadHandle.SingletonInstance.LastError = new SNIError(SNIProviders.SSL_PROV, 0, 31, SR.SNI_ERROR_31);
-                return TdsEnums.SNI_ERROR;
+                return SNICommon.ReportSNIError(SNIProviders.SSL_PROV, SNICommon.HandshakeFailureError, e);
             }
         }
 
@@ -116,11 +96,7 @@ namespace System.Data.SqlClient.SNI
         /// <returns>SNI error code</returns>
         public uint SetConnectionBufferSize(SNIHandle handle, uint bufferSize)
         {
-            if (handle is SNITCPHandle)
-            {
-                (handle as SNITCPHandle).SetBufferSize((int)bufferSize);
-            }
-
+            handle.SetBufferSize((int)bufferSize);
             return TdsEnums.SNI_SUCCESS;
         }
 
@@ -147,9 +123,9 @@ namespace System.Data.SqlClient.SNI
         /// <param name="packet">SNI packet</param>
         /// <param name="timeout">Timeout</param>
         /// <returns>SNI error status</returns>
-        public uint ReadSyncOverAsync(SNIHandle handle, ref SNIPacket packet, int timeout)
+        public uint ReadSyncOverAsync(SNIHandle handle, out SNIPacket packet, int timeout)
         {
-            return handle.Receive(ref packet, timeout);
+            return handle.Receive(out packet, timeout);
         }
 
         /// <summary>
@@ -217,7 +193,7 @@ namespace System.Data.SqlClient.SNI
 
             if (serverNameParts.Length > 2)
             {
-                SNILoadHandle.SingletonInstance.LastError = new SNIError(SNIProviders.INVALID_PROV, 0, 0, "Connection string is not formatted correctly");
+                SNILoadHandle.SingletonInstance.LastError = new SNIError(SNIProviders.INVALID_PROV, 0, SNICommon.InvalidConnStringError, string.Empty);
                 return null;
             }
 
@@ -235,11 +211,11 @@ namespace System.Data.SqlClient.SNI
                 default:
                     if (parallel)
                     {
-                        SNICommon.ReportSNIError(SNIProviders.INVALID_PROV, 0, (int)SNINativeMethodWrapper.SniSpecialErrors.MultiSubnetFailoverWithNonTcpProtocol, SR.SNI_ERROR_49);
+                        SNICommon.ReportSNIError(SNIProviders.INVALID_PROV, 0, (int)SNINativeMethodWrapper.SniSpecialErrors.MultiSubnetFailoverWithNonTcpProtocol, string.Empty);
                     }
                     else
                     {
-                        SNICommon.ReportSNIError(SNIProviders.INVALID_PROV, 0, 8, SR.SNI_ERROR_8);
+                        SNICommon.ReportSNIError(SNIProviders.INVALID_PROV, 0, SNICommon.ProtocolNotSupportedError, string.Empty);
                     }
                     return null;
             }
@@ -266,15 +242,15 @@ namespace System.Data.SqlClient.SNI
                 {
                     portNumber = ushort.Parse(serverAndPortParts[1]);
                 }
-                catch (Exception)
+                catch (Exception e)
                 {
-                    SNILoadHandle.SingletonInstance.LastError = new SNIError(SNIProviders.TCP_PROV, 0, 0, "Port number is malformed");
+                    SNILoadHandle.SingletonInstance.LastError = new SNIError(SNIProviders.TCP_PROV, SNICommon.InvalidConnStringError, e);
                     return null;
                 }
             }
             else if (serverAndPortParts.Length > 2)
             {
-                SNILoadHandle.SingletonInstance.LastError = new SNIError(SNIProviders.TCP_PROV, 0, 0, "Connection string is not formatted correctly");
+                SNILoadHandle.SingletonInstance.LastError = new SNIError(SNIProviders.TCP_PROV, 0, SNICommon.InvalidConnStringError, string.Empty);
                 return null;
             }
 

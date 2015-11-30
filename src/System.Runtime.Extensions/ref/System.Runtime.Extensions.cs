@@ -437,6 +437,7 @@ namespace System
         public static string StackTrace { get { return default(string); } }
         public static int TickCount { get { return default(int); } }
         public static string ExpandEnvironmentVariables(string name) { return default(string); }
+        public static void Exit(int exitCode) {}
         [System.Security.SecurityCriticalAttribute]
         public static void FailFast(string message) { }
         [System.Security.SecurityCriticalAttribute]
@@ -444,6 +445,7 @@ namespace System
         public static string GetEnvironmentVariable(string variable) { return default(string); }
         public static System.Collections.IDictionary GetEnvironmentVariables() { return default(System.Collections.IDictionary); }
         public static void SetEnvironmentVariable(string variable, string value) { }
+        public static string[] GetCommandLineArgs() { return default(string[]); }
     }
     public static partial class Math
     {

@@ -6,15 +6,11 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{F75E3008-0562-42DF-BE72-C1384F12157E}</ProjectGuid>
     <OutputType>Library</OutputType>
+    <AssemblyName>System.Net.Http.WinHttpHandler</AssemblyName>
+    <AssemblyVersion>4.0.0.0</AssemblyVersion>    
   </PropertyGroup>
   
   <!-- Help VS understand available configurations -->
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'FreeBSD_Debug|AnyCPU' " />
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'FreeBSD_Release|AnyCPU' " />
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Linux_Debug|AnyCPU' " />
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Linux_Release|AnyCPU' " />
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'OSX_Debug|AnyCPU' " />
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'OSX_Release|AnyCPU' " />
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Windows_Debug|AnyCPU' " />
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Windows_Release|AnyCPU' " />
 
@@ -25,19 +21,6 @@
   <ItemGroup Condition=" '$(TargetsWindows)' == 'true' ">
     <Compile Include="@(CompileItem)" />
   </ItemGroup>
-  
-  <ItemGroup Condition=" '$(TargetsUnix)' == 'true' ">
-  </ItemGroup>
-  
-  <ItemGroup Condition=" '$(TargetsFreeBSD)' == 'true' ">
-  </ItemGroup>
-  
-  <ItemGroup Condition=" '$(TargetsLinux)' == 'true' ">
-  </ItemGroup>
-  
-  <ItemGroup Condition=" '$(TargetsOSX)' == 'true' ">
-  </ItemGroup>
-  
   
   <ItemGroup>
     <None Include="project.json" />

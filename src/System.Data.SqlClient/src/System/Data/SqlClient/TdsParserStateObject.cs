@@ -898,19 +898,12 @@ namespace System.Data.SqlClient
         {
             int remaining = Interlocked.Decrement(ref _pendingCallbacks);
 
-#if MANAGED_SNI
-            if ((0 == remaining || release) && SNIProxy.Singleton.IsGcHandleAllocated())
-#else	
+#if !MANAGED_SNI
             if ((0 == remaining || release) && _gcHandle.IsAllocated)
-#endif // MANAGED_SNI
-
             {
-#if MANAGED_SNI
-                SNIProxy.Singleton.FreeGcHandle();				
-#else
                 _gcHandle.Free();
-#endif // MANAGED_SNI
             }
+#endif // !MANAGED_SNI
 
             // NOTE: TdsParserSessionPool may call DecrementPendingCallbacks on a TdsParserStateObject which is already disposed
             // This is not dangerous (since the stateObj is no longer in use), but we need to add a workaround in the assert for it
@@ -2193,7 +2186,7 @@ namespace System.Data.SqlClient
                 }
 
 #if MANAGED_SNI
-                error = SNIProxy.Singleton.ReadSyncOverAsync(handle, ref readPacket, GetTimeoutRemaining());
+                error = SNIProxy.Singleton.ReadSyncOverAsync(handle, out readPacket, GetTimeoutRemaining());
 #else
                 error = SNINativeMethodWrapper.SNIReadSyncOverAsync(handle, ref readPacket, GetTimeoutRemaining());
 #endif // MANAGED_SNI
@@ -2702,7 +2695,7 @@ namespace System.Data.SqlClient
                                 {
                                     IncrementPendingCallbacks();
                                 }
-                                error = SNIProxy.Singleton.ReadSyncOverAsync(handle, ref syncReadPacket, stateObj.GetTimeoutRemaining());
+                                error = SNIProxy.Singleton.ReadSyncOverAsync(handle, out syncReadPacket, stateObj.GetTimeoutRemaining());
 #else								
                                 error = SNINativeMethodWrapper.SNIReadSyncOverAsync(handle, ref syncReadPacket, stateObj.GetTimeoutRemaining());
 #endif // MANAGED_SNI

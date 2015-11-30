@@ -2,12 +2,12 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.IO;
 using System.Net.Sockets;
 using System.Net.Test.Common;
 using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
+using System.Threading.Tasks;
 
 using Xunit;
 using Xunit.Abstractions;
@@ -18,166 +18,141 @@ namespace System.Net.Security.Tests
     {
         private readonly ITestOutputHelper _log;
 
-        private const SslProtocols AllSslProtocols =
-            SslProtocols.Ssl2
-            | SslProtocols.Ssl3
-            | SslProtocols.Tls
-            | SslProtocols.Tls11
-            | SslProtocols.Tls12;
-
-        private static readonly SslProtocols[] s_eachSslProtocol = new SslProtocols[]
-        {
-            SslProtocols.Ssl2,
-            SslProtocols.Ssl3,
-            SslProtocols.Tls,
-            SslProtocols.Tls11,
-            SslProtocols.Tls12,
-        };
-
-        public static IEnumerable<object[]> ProtocolMismatchData()
-        {
-            yield return new object[] { SslProtocols.Ssl2, SslProtocols.Ssl3, typeof(IOException) };
-            yield return new object[] { SslProtocols.Ssl2, SslProtocols.Tls, typeof(IOException) };
-            yield return new object[] { SslProtocols.Ssl2, SslProtocols.Tls11, typeof(IOException) };
-            yield return new object[] { SslProtocols.Ssl2, SslProtocols.Tls12, typeof(IOException) };
-
-            yield return new object[] { SslProtocols.Ssl3, SslProtocols.Ssl2, typeof(IOException) };
-            yield return new object[] { SslProtocols.Ssl3, SslProtocols.Tls, typeof(IOException) };
-            yield return new object[] { SslProtocols.Ssl3, SslProtocols.Tls11, typeof(IOException) };
-            yield return new object[] { SslProtocols.Ssl3, SslProtocols.Tls12, typeof(IOException) };
-
-            yield return new object[] { SslProtocols.Tls, SslProtocols.Ssl2, typeof(IOException) };
-            yield return new object[] { SslProtocols.Tls, SslProtocols.Ssl3, typeof(AuthenticationException) };
-            yield return new object[] { SslProtocols.Tls, SslProtocols.Tls11, typeof(IOException) };
-            yield return new object[] { SslProtocols.Tls, SslProtocols.Tls12, typeof(IOException) };
-
-            yield return new object[] { SslProtocols.Tls11, SslProtocols.Ssl2, typeof(IOException) };
-            yield return new object[] { SslProtocols.Tls11, SslProtocols.Ssl3, typeof(AuthenticationException) };
-            yield return new object[] { SslProtocols.Tls11, SslProtocols.Tls, typeof(AuthenticationException) };
-            yield return new object[] { SslProtocols.Tls11, SslProtocols.Tls12, typeof(IOException) };
-
-            yield return new object[] { SslProtocols.Tls12, SslProtocols.Ssl2, typeof(IOException) };
-            yield return new object[] { SslProtocols.Tls12, SslProtocols.Ssl3, typeof(AuthenticationException) };
-            yield return new object[] { SslProtocols.Tls12, SslProtocols.Tls, typeof(AuthenticationException) };
-            yield return new object[] { SslProtocols.Tls12, SslProtocols.Tls11, typeof(AuthenticationException) };
-        }
-
         public ClientAsyncAuthenticateTest()
         {
             _log = TestLogging.GetInstance();
         }
 
         [Fact]
-        public void ClientAsyncAuthenticate_ServerRequireEncryption_ConnectWithEncryption()
+        public async Task ClientAsyncAuthenticate_ServerRequireEncryption_ConnectWithEncryption()
         {
-            ClientAsyncSslHelper(EncryptionPolicy.RequireEncryption);
+            await ClientAsyncSslHelper(EncryptionPolicy.RequireEncryption);
         }
 
         [Fact]
-        public void ClientAsyncAuthenticate_ServerNoEncryption_NoConnect()
+        public async Task ClientAsyncAuthenticate_ServerNoEncryption_NoConnect()
         {
-            Assert.Throws<IOException>(() =>
-            {
-                ClientAsyncSslHelper(EncryptionPolicy.NoEncryption);
+            await Assert.ThrowsAsync<IOException>(() => ClientAsyncSslHelper(EncryptionPolicy.NoEncryption));
+        }
+
+        [Theory]
+        [ClassData(typeof(SslProtocolSupport.SupportedSslProtocolsTestData))]
+        public async Task ClientAsyncAuthenticate_EachSupportedProtocol_Success(SslProtocols protocol)
+        {
+            await ClientAsyncSslHelper(protocol, protocol);
+        }
+
+        [Theory]
+        [ClassData(typeof(SslProtocolSupport.UnsupportedSslProtocolsTestData))]
+        public async Task ClientAsyncAuthenticate_EachClientUnsupportedProtocol_Fail(SslProtocols protocol)
+        {
+            await Assert.ThrowsAsync<NotSupportedException>( () => {
+                return ClientAsyncSslHelper(protocol, SslProtocolSupport.SupportedSslProtocols);
             });
-        }
-
-        [Fact]
-        public void ClientAsyncAuthenticate_EachProtocol_Success()
-        {
-            foreach (SslProtocols protocol in s_eachSslProtocol)
-            {
-                ClientAsyncSslHelper(protocol, protocol);
-            }
         }
 
         [Theory]
         [MemberData("ProtocolMismatchData")]
-        public void ClientAsyncAuthenticate_MismatchProtocols_Fails(SslProtocols server, SslProtocols client, Type expected)
+        public async Task ClientAsyncAuthenticate_MismatchProtocols_Fails(
+            SslProtocols serverProtocol,
+            SslProtocols clientProtocol,
+            Type expectedException)
         {
-            Assert.Throws(expected, () => ClientAsyncSslHelper(server, client));
+            await Assert.ThrowsAsync(expectedException, () => ClientAsyncSslHelper(serverProtocol, clientProtocol));
+        }
+
+        [Theory]
+        [MemberData("ProtocolMismatchData_Tls11_Tls12_Windows_Linux")]
+        [PlatformSpecific(PlatformID.Windows | PlatformID.Linux)]
+        public async Task ClientAsyncAuthenticate_MismatchProtocols_Tls11_Tls12_Fails_Linux_Windows(
+            SslProtocols serverProtocol,
+            SslProtocols clientProtocol,
+            Type expectedException)
+        {
+            await Assert.ThrowsAsync(expectedException, () => ClientAsyncSslHelper(serverProtocol, clientProtocol));
+        }
+
+        [Theory]
+        [MemberData("ProtocolMismatchData_Tls11_Tls12_OSX")]
+        [PlatformSpecific(PlatformID.OSX)]
+        public async Task ClientAsyncAuthenticate_MismatchProtocols_Tls11_Tls12_Fails_OSX(
+            SslProtocols serverProtocols,
+            SslProtocols clientProtocols,
+            Type expectedException)
+        {
+            await Assert.ThrowsAsync(expectedException, () => ClientAsyncSslHelper(serverProtocols, clientProtocols));
         }
 
         [Fact]
-        public void ClientAsyncAuthenticate_Ssl2Tls12ServerSsl2Client_Fails()
+        public async Task ClientAsyncAuthenticate_AllServerAllClient_Success()
         {
-            Assert.Throws<Win32Exception>(() =>
-            {
-                // Ssl2 and Tls 1.2 are mutually exclusive.
-                ClientAsyncSslHelper(SslProtocols.Ssl2 | SslProtocols.Tls12, SslProtocols.Ssl2);
+            await ClientAsyncSslHelper(
+                SslProtocolSupport.SupportedSslProtocols,
+                SslProtocolSupport.SupportedSslProtocols);
+        }
+
+        [Fact]
+        public async Task ClientAsyncAuthenticate_UnsuportedAllClient_Fail()
+        {
+            await Assert.ThrowsAsync<NotSupportedException>(() => {
+                return ClientAsyncSslHelper(
+                    SslProtocolSupport.UnsupportedSslProtocols,
+                    SslProtocolSupport.SupportedSslProtocols);
             });
         }
 
-        [Fact]
-        public void ClientAsyncAuthenticate_Ssl2Tls12ServerTls12Client_Fails()
+        [Theory]
+        [ClassData(typeof(SslProtocolSupport.SupportedSslProtocolsTestData))]
+        public async Task ClientAsyncAuthenticate_AllServerVsIndividualClientSupportedProtocols_Success(
+            SslProtocols clientProtocol)
         {
-            Assert.Throws<Win32Exception>(() =>
-            {
-                // Ssl2 and Tls 1.2 are mutually exclusive.
-                ClientAsyncSslHelper(SslProtocols.Ssl2 | SslProtocols.Tls12, SslProtocols.Tls12);
-            });
+            await ClientAsyncSslHelper(clientProtocol, SslProtocolSupport.SupportedSslProtocols);
         }
 
-        [Fact]
-        public void ClientAsyncAuthenticate_Ssl2ServerSsl2Tls12Client_Success()
+        [Theory]
+        [ClassData(typeof(SslProtocolSupport.SupportedSslProtocolsTestData))]
+        public async Task ClientAsyncAuthenticate_IndividualServerVsAllClientSupportedProtocols_Success(
+            SslProtocols serverProtocol)
         {
-            ClientAsyncSslHelper(SslProtocols.Ssl2, SslProtocols.Ssl2 | SslProtocols.Tls12);
+            await ClientAsyncSslHelper(SslProtocolSupport.SupportedSslProtocols, serverProtocol);
+            // Cached Tls creds fail when used against Tls servers of higher versions.
+            // Servers are not expected to dynamically change versions.
         }
 
-        [Fact]
-        public void ClientAsyncAuthenticate_Tls12ServerSsl2Tls12Client_Success()
+        private static IEnumerable<object[]> ProtocolMismatchData()
         {
-            ClientAsyncSslHelper(SslProtocols.Tls12, SslProtocols.Ssl2 | SslProtocols.Tls12);
+            yield return new object[] { SslProtocols.Tls, SslProtocols.Tls11, typeof(IOException) };
+            yield return new object[] { SslProtocols.Tls, SslProtocols.Tls12, typeof(IOException) };
+            yield return new object[] { SslProtocols.Tls11, SslProtocols.Tls, typeof(AuthenticationException) };
+            yield return new object[] { SslProtocols.Tls12, SslProtocols.Tls, typeof(AuthenticationException) };
+            yield return new object[] { SslProtocols.Tls12, SslProtocols.Tls11, typeof(AuthenticationException) };
         }
 
-        [Fact]
-        public void ClientAsyncAuthenticate_AllServerAllClient_Success()
+        private static IEnumerable<object[]> ProtocolMismatchData_Tls11_Tls12_Windows_Linux()
         {
-            // Drop Ssl2, it's incompatible with Tls 1.2
-            SslProtocols sslProtocols = AllSslProtocols & ~SslProtocols.Ssl2;
-            ClientAsyncSslHelper(sslProtocols, sslProtocols);
+            yield return new object[] { SslProtocols.Tls11, SslProtocols.Tls12, typeof(IOException) };
         }
 
-        [Fact]
-        public void ClientAsyncAuthenticate_AllServerVsIndividualClientProtocols_Success()
+        private static IEnumerable<object[]> ProtocolMismatchData_Tls11_Tls12_OSX()
         {
-            foreach (SslProtocols clientProtocol in s_eachSslProtocol)
-            {
-                if (clientProtocol != SslProtocols.Ssl2) // Incompatible with Tls 1.2
-                {
-                    ClientAsyncSslHelper(clientProtocol, AllSslProtocols);
-                }
-            }
-        }
-
-        [Fact]
-        public void ClientAsyncAuthenticate_IndividualServerVsAllClientProtocols_Success()
-        {
-            SslProtocols clientProtocols = AllSslProtocols & ~SslProtocols.Ssl2; // Incompatible with Tls 1.2
-            foreach (SslProtocols serverProtocol in s_eachSslProtocol)
-            {
-                if (serverProtocol != SslProtocols.Ssl2) // Incompatible with Tls 1.2
-                {
-                    ClientAsyncSslHelper(clientProtocols, serverProtocol);
-                    // Cached Tls creds fail when used against Tls servers of higher versions.
-                    // Servers are not expected to dynamically change versions.
-                }
-            }
+            yield return new object[] { SslProtocols.Tls11, SslProtocols.Tls12, typeof(AuthenticationException) };
         }
 
         #region Helpers
 
-        private void ClientAsyncSslHelper(EncryptionPolicy encryptionPolicy)
+        private Task ClientAsyncSslHelper(EncryptionPolicy encryptionPolicy)
         {
-            ClientAsyncSslHelper(encryptionPolicy, TestConfiguration.DefaultSslProtocols, TestConfiguration.DefaultSslProtocols);
+            return ClientAsyncSslHelper(encryptionPolicy, SslProtocolSupport.DefaultSslProtocols, SslProtocolSupport.DefaultSslProtocols);
         }
 
-        private void ClientAsyncSslHelper(SslProtocols clientSslProtocols, SslProtocols serverSslProtocols)
+        private Task ClientAsyncSslHelper(SslProtocols clientSslProtocols, SslProtocols serverSslProtocols)
         {
-            ClientAsyncSslHelper(EncryptionPolicy.RequireEncryption, clientSslProtocols, serverSslProtocols);
+            return ClientAsyncSslHelper(EncryptionPolicy.RequireEncryption, clientSslProtocols, serverSslProtocols);
         }
 
-        private void ClientAsyncSslHelper(EncryptionPolicy encryptionPolicy, SslProtocols clientSslProtocols,
+        private async Task ClientAsyncSslHelper(
+            EncryptionPolicy encryptionPolicy, 
+            SslProtocols clientSslProtocols,
             SslProtocols serverSslProtocols)
         {
             _log.WriteLine("Server: " + serverSslProtocols + "; Client: " + clientSslProtocols);
@@ -188,12 +163,12 @@ namespace System.Net.Security.Tests
             using (var client = new TcpClient(AddressFamily.InterNetworkV6))
             {
                 server.SslProtocols = serverSslProtocols;
-                client.Connect(server.RemoteEndPoint);
+                await client.ConnectAsync(server.RemoteEndPoint.Address, server.RemoteEndPoint.Port);
                 using (SslStream sslStream = new SslStream(client.GetStream(), false, AllowAnyServerCertificate, null))
                 {
-                    IAsyncResult async = sslStream.BeginAuthenticateAsClient("localhost", null, clientSslProtocols, false, null, null);
-                    Assert.True(async.AsyncWaitHandle.WaitOne(TestConfiguration.TestTimeoutSeconds * 1000), "Timed Out");
-                    sslStream.EndAuthenticateAsClient(async);
+                    Task async = sslStream.AuthenticateAsClientAsync("localhost", null, clientSslProtocols, false);
+                    Assert.True(((IAsyncResult)async).AsyncWaitHandle.WaitOne(TestConfiguration.PassingTestTimeoutMilliseconds), "Timed Out");
+                    async.GetAwaiter().GetResult();
 
                     _log.WriteLine("Client({0}) authenticated to server({1}) with encryption cipher: {2} {3}-bit strength",
                         client.Client.LocalEndPoint, client.Client.RemoteEndPoint,
@@ -205,7 +180,7 @@ namespace System.Net.Security.Tests
         }
 
         // The following method is invoked by the RemoteCertificateValidationDelegate.
-        public bool AllowAnyServerCertificate(
+        private bool AllowAnyServerCertificate(
               object sender,
               X509Certificate certificate,
               X509Chain chain,

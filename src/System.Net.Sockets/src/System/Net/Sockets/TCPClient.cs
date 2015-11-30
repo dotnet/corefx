@@ -178,17 +178,32 @@ namespace System.Net.Sockets
 
         public Task ConnectAsync(IPAddress address, int port)
         {
-            return Task.Factory.FromAsync(BeginConnect, EndConnect, address, port, null);
+            return Task.Factory.FromAsync(
+                (targetAddess, targetPort, callback, state) => ((TcpClient)state).BeginConnect(targetAddess, targetPort, callback, state),
+                asyncResult => ((TcpClient)asyncResult.AsyncState).EndConnect(asyncResult),
+                address,
+                port,
+                state: this);
         }
 
         public Task ConnectAsync(string host, int port)
         {
-            return Task.Factory.FromAsync(BeginConnect, EndConnect, host, port, null);
+            return Task.Factory.FromAsync(
+                (targetHost, targetPort, callback, state) => ((TcpClient)state).BeginConnect(targetHost, targetPort, callback, state),
+                asyncResult => ((TcpClient)asyncResult.AsyncState).EndConnect(asyncResult),
+                host,
+                port,
+                state: this);
         }
 
         public Task ConnectAsync(IPAddress[] addresses, int port)
         {
-            return Task.Factory.FromAsync(BeginConnect, EndConnect, addresses, port, null);
+            return Task.Factory.FromAsync(
+                (targetAddresses, targetPort, callback, state) => ((TcpClient)state).BeginConnect(targetAddresses, targetPort, callback, state),
+                asyncResult => ((TcpClient)asyncResult.AsyncState).EndConnect(asyncResult),
+                addresses,
+                port,
+                state: this);
         }
 
         // Returns the stream used to read and write data to the remote host.
@@ -325,7 +340,7 @@ namespace System.Net.Sockets
             }
         }
 
-        // Gets or sets the receive time out value of the connection in seconds.
+        // Gets or sets the receive time out value of the connection in milliseconds.
         public int ReceiveTimeout
         {
             get
@@ -340,7 +355,7 @@ namespace System.Net.Sockets
             }
         }
 
-        // Gets or sets the send time out value of the connection in seconds.
+        // Gets or sets the send time out value of the connection in milliseconds.
         public int SendTimeout
         {
             get

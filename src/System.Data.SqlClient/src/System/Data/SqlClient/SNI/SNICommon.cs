@@ -54,6 +54,17 @@ namespace System.Data.SqlClient.SNI
 
     internal class SNICommon
     {
+        // Each error number maps to SNI_ERROR_* in String.resx
+        internal const int ConnTerminatedError = 2;
+        internal const int InvalidParameterError = 5;
+        internal const int ProtocolNotSupportedError = 8;
+        internal const int ConnTimeoutError = 11;
+        internal const int ConnNotUsableError = 19;
+        internal const int InvalidConnStringError = 25;
+        internal const int HandshakeFailureError = 31;
+        internal const int InternalExceptionError = 35;
+        internal const int ConnOpenFailedError = 40;
+
         /// <summary>
         /// Validate server certificate callback for SSL
         /// </summary>
@@ -122,7 +133,29 @@ namespace System.Data.SqlClient.SNI
         /// <returns></returns>
         internal static uint ReportSNIError(SNIProviders provider, uint nativeError, uint sniError, string errorMessage)
         {
-            SNILoadHandle.SingletonInstance.LastError = new SNIError(provider, nativeError, sniError, errorMessage);
+            return ReportSNIError(new SNIError(provider, nativeError, sniError, errorMessage));
+        }
+
+        /// <summary>
+        /// Sets last error encountered for SNI
+        /// </summary>
+        /// <param name="provider">SNI provider</param>
+        /// <param name="sniError">SNI error code</param>
+        /// <param name="sniException">SNI Exception</param>
+        /// <returns></returns>
+        internal static uint ReportSNIError(SNIProviders provider, uint sniError, Exception sniException)
+        {
+            return ReportSNIError(new SNIError(provider, sniError, sniException));
+        }
+
+        /// <summary>
+        /// Sets last error encountered for SNI
+        /// </summary>
+        /// <param name="error">SNI error</param>
+        /// <returns></returns>
+        internal static uint ReportSNIError(SNIError error)
+        {
+            SNILoadHandle.SingletonInstance.LastError = error;
             return TdsEnums.SNI_ERROR;
         }
     }

@@ -2,21 +2,19 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 
 namespace System.Net.NetworkInformation
 {
     public class GatewayIPAddressInformationCollection : ICollection<GatewayIPAddressInformation>
     {
-        private readonly Collection<GatewayIPAddressInformation> _addresses;
-            
+        private readonly List<GatewayIPAddressInformation> _addresses;
 
         protected internal GatewayIPAddressInformationCollection()
         {
-            _addresses = new Collection<GatewayIPAddressInformation>();
+            _addresses = new List<GatewayIPAddressInformation>();
         }
 
-        internal GatewayIPAddressInformationCollection(Collection<GatewayIPAddressInformation> addresses)
+        internal GatewayIPAddressInformationCollection(List<GatewayIPAddressInformation> addresses)
         {
             _addresses = addresses;
         }
@@ -83,19 +81,6 @@ namespace System.Net.NetworkInformation
         public virtual void Clear()
         {
             throw new NotSupportedException(SR.net_collection_readonly);
-        }
-
-        internal bool Contains(IPAddress ipAddress)
-        {
-            foreach (var info in _addresses)
-            {
-                if (info.Address == ipAddress)
-                {
-                    return true;
-                }
-            }
-
-            return false;
         }
     }
 }

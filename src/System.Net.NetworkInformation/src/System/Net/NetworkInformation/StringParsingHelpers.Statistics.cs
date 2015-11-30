@@ -175,14 +175,11 @@ namespace System.Net.NetworkInformation
         public static Icmpv4StatisticsTable ParseIcmpv4FromSnmpFile(string filePath)
         {
             string fileContents = File.ReadAllText(filePath);
-            int firstIpHeader = fileContents.IndexOf("Icmp:");
-            int secondIpHeader = fileContents.IndexOf("Icmp:", firstIpHeader + 1);
-            int endOfSecondLine = fileContents.IndexOf(Environment.NewLine, secondIpHeader);
+            int firstIpHeader = fileContents.IndexOf("Icmp:", StringComparison.Ordinal);
+            int secondIpHeader = fileContents.IndexOf("Icmp:", firstIpHeader + 1, StringComparison.Ordinal);
+            int endOfSecondLine = fileContents.IndexOf(Environment.NewLine, secondIpHeader, StringComparison.Ordinal);
             string icmpData = fileContents.Substring(secondIpHeader, endOfSecondLine - secondIpHeader);
             StringParser parser = new StringParser(icmpData, ' ');
-
-            // NOTE: Need to verify that this order is consistent. Otherwise, we need to parse the first-line header
-            // to determine the order of information contained in the file.
 
             parser.MoveNextOrFail(); // Skip Icmp:
 
@@ -264,14 +261,11 @@ namespace System.Net.NetworkInformation
         {
             string fileContents = File.ReadAllText(filePath);
 
-            int firstIpHeader = fileContents.IndexOf("Ip:");
-            int secondIpHeader = fileContents.IndexOf("Ip:", firstIpHeader + 1);
-            int endOfSecondLine = fileContents.IndexOf(Environment.NewLine, secondIpHeader);
+            int firstIpHeader = fileContents.IndexOf("Ip:", StringComparison.Ordinal);
+            int secondIpHeader = fileContents.IndexOf("Ip:", firstIpHeader + 1, StringComparison.Ordinal);
+            int endOfSecondLine = fileContents.IndexOf(Environment.NewLine, secondIpHeader, StringComparison.Ordinal);
             string ipData = fileContents.Substring(secondIpHeader, endOfSecondLine - secondIpHeader);
             StringParser parser = new StringParser(ipData, ' ');
-
-            // NOTE: Need to verify that this order is consistent. Otherwise, we need to parse the first-line header
-            // to determine the order of information contained in the file.
 
             parser.MoveNextOrFail(); // Skip Ip:
 
@@ -333,14 +327,11 @@ namespace System.Net.NetworkInformation
             // NOTE: There is no information in the snmp6 file regarding TCP statistics,
             // so the statistics are always pulled from /proc/net/snmp.
             string fileContents = File.ReadAllText(filePath);
-            int firstTcpHeader = fileContents.IndexOf("Tcp:");
-            int secondTcpHeader = fileContents.IndexOf("Tcp:", firstTcpHeader + 1);
-            int endOfSecondLine = fileContents.IndexOf(Environment.NewLine, secondTcpHeader);
+            int firstTcpHeader = fileContents.IndexOf("Tcp:", StringComparison.Ordinal);
+            int secondTcpHeader = fileContents.IndexOf("Tcp:", firstTcpHeader + 1, StringComparison.Ordinal);
+            int endOfSecondLine = fileContents.IndexOf(Environment.NewLine, secondTcpHeader, StringComparison.Ordinal);
             string tcpData = fileContents.Substring(secondTcpHeader, endOfSecondLine - secondTcpHeader);
             StringParser parser = new StringParser(tcpData, ' ');
-
-            // NOTE: Need to verify that this order is consistent. Otherwise, we need to parse the first-line header
-            // to determine the order of information contained in the row.
 
             parser.MoveNextOrFail(); // Skip Tcp:
 
@@ -367,14 +358,11 @@ namespace System.Net.NetworkInformation
         internal static UdpGlobalStatisticsTable ParseUdpv4GlobalStatisticsFromSnmpFile(string filePath)
         {
             string fileContents = File.ReadAllText(filePath);
-            int firstUdpHeader = fileContents.IndexOf("Udp:");
-            int secondUdpHeader = fileContents.IndexOf("Udp:", firstUdpHeader + 1);
-            int endOfSecondLine = fileContents.IndexOf(Environment.NewLine, secondUdpHeader);
+            int firstUdpHeader = fileContents.IndexOf("Udp:", StringComparison.Ordinal);
+            int secondUdpHeader = fileContents.IndexOf("Udp:", firstUdpHeader + 1, StringComparison.Ordinal);
+            int endOfSecondLine = fileContents.IndexOf(Environment.NewLine, secondUdpHeader, StringComparison.Ordinal);
             string tcpData = fileContents.Substring(secondUdpHeader, endOfSecondLine - secondUdpHeader);
             StringParser parser = new StringParser(tcpData, ' ');
-
-            // NOTE: Need to verify that this order is consistent. Otherwise, we need to parse the first-line header
-            // to determine the order of information contained in the file.
 
             parser.MoveNextOrFail(); // Skip Udp:
 
@@ -423,30 +411,35 @@ namespace System.Net.NetworkInformation
 
                         return new IPInterfaceStatisticsTable()
                         {
-                            BytesReceived = uint.Parse(pieces[1]),
-                            PacketsReceived = uint.Parse(pieces[2]),
-                            ErrorsReceived = uint.Parse(pieces[3]),
-                            IncomingPacketsDropped = uint.Parse(pieces[4]),
-                            FifoBufferErrorsReceived = uint.Parse(pieces[5]),
-                            PacketFramingErrorsReceived = uint.Parse(pieces[6]),
-                            CompressedPacketsReceived = uint.Parse(pieces[7]),
-                            MulticastFramesReceived = uint.Parse(pieces[8]),
+                            BytesReceived = ParseUInt64AndClampToUInt32(pieces[1]),
+                            PacketsReceived = ParseUInt64AndClampToUInt32(pieces[2]),
+                            ErrorsReceived = ParseUInt64AndClampToUInt32(pieces[3]),
+                            IncomingPacketsDropped = ParseUInt64AndClampToUInt32(pieces[4]),
+                            FifoBufferErrorsReceived = ParseUInt64AndClampToUInt32(pieces[5]),
+                            PacketFramingErrorsReceived = ParseUInt64AndClampToUInt32(pieces[6]),
+                            CompressedPacketsReceived = ParseUInt64AndClampToUInt32(pieces[7]),
+                            MulticastFramesReceived = ParseUInt64AndClampToUInt32(pieces[8]),
 
-                            BytesTransmitted = uint.Parse(pieces[9]),
-                            PacketsTransmitted = uint.Parse(pieces[10]),
-                            ErrorsTransmitted = uint.Parse(pieces[11]),
-                            OutgoingPacketsDropped = uint.Parse(pieces[12]),
-                            FifoBufferErrorsTransmitted = uint.Parse(pieces[13]),
-                            CollisionsDetected = uint.Parse(pieces[14]),
-                            CarrierLosses = uint.Parse(pieces[15]),
-                            CompressedPacketsTransmitted = uint.Parse(pieces[16])
+                            BytesTransmitted = ParseUInt64AndClampToUInt32(pieces[9]),
+                            PacketsTransmitted = ParseUInt64AndClampToUInt32(pieces[10]),
+                            ErrorsTransmitted = ParseUInt64AndClampToUInt32(pieces[11]),
+                            OutgoingPacketsDropped = ParseUInt64AndClampToUInt32(pieces[12]),
+                            FifoBufferErrorsTransmitted = ParseUInt64AndClampToUInt32(pieces[13]),
+                            CollisionsDetected = ParseUInt64AndClampToUInt32(pieces[14]),
+                            CarrierLosses = ParseUInt64AndClampToUInt32(pieces[15]),
+                            CompressedPacketsTransmitted = ParseUInt64AndClampToUInt32(pieces[16]),
                         };
                     }
                     index += 1;
                 }
 
-                throw new NetworkInformationException();
+                throw ExceptionHelper.CreateForParseFailure();
             }
+        }
+
+        private static uint ParseUInt64AndClampToUInt32(string value)
+        {
+            return (uint)Math.Min(uint.MaxValue, ulong.Parse(value));
         }
     }
 }

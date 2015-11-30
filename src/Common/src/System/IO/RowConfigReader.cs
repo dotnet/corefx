@@ -1,4 +1,7 @@
-﻿using System.Diagnostics;
+﻿// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System.Diagnostics;
 
 namespace System.IO
 {
@@ -8,7 +11,8 @@ namespace System.IO
     /// </summary>
     internal struct RowConfigReader
     {
-        private string _buffer;
+        private readonly string _buffer;
+        private readonly StringComparison _comparisonKind;
         private int _currentIndex;
 
         /// <summary>
@@ -18,6 +22,19 @@ namespace System.IO
         public RowConfigReader(string buffer)
         {
             _buffer = buffer;
+            _comparisonKind = StringComparison.Ordinal;
+            _currentIndex = 0;
+        }
+
+        /// <summary>
+        /// Constructs a new RowConfigReader which reads from the given string.
+        /// <param name="buffer">The string to parse through.</param>
+        /// <param name="comparisonKind">The comparison kind to use.</param>
+        /// </summary>
+        public RowConfigReader(string buffer, StringComparison comparisonKind)
+        {
+            _buffer = buffer;
+            _comparisonKind = comparisonKind;
             _currentIndex = 0;
         }
 
@@ -52,7 +69,7 @@ namespace System.IO
             }
 
             // First, find the key
-            int keyIndex = _buffer.IndexOf(key, _currentIndex);
+            int keyIndex = _buffer.IndexOf(key, _currentIndex, _comparisonKind);
             if (keyIndex == -1)
             {
                 value = null;
@@ -63,7 +80,7 @@ namespace System.IO
             // NOTE: This assumes that the "value" does not have any whitespace in it, nor is there any
             // after. This is the format of most "row-based" config files in /proc/net, etc.
             int afterKey = keyIndex + key.Length;
-            int endOfLine = _buffer.IndexOf(Environment.NewLine, afterKey);
+            int endOfLine = _buffer.IndexOf(Environment.NewLine, afterKey, _comparisonKind);
             Debug.Assert(endOfLine != -1, "RowConfigReader needs a newline after the key, and one was not found.");
 
             int valueIndex = _buffer.LastIndexOf('\t', endOfLine);
@@ -71,6 +88,7 @@ namespace System.IO
             {
                 valueIndex = _buffer.LastIndexOf(' ', endOfLine); // try space as well
             }
+
             Debug.Assert(valueIndex != -1, "Key " + key + " was found, but no value on the same line.");
             valueIndex++; // Get the first character after the whitespace.
             value = _buffer.Substring(valueIndex, endOfLine - valueIndex); // Grab the whole value string.

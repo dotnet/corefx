@@ -378,7 +378,7 @@ namespace System.Xml.Serialization
             // (ie. XmlNodeType.Whitespace), deemed as insignificant for the XML infoset, is not 
             // reported by the reader. This mode corresponds to XmlReaderSettings.IgnoreWhitespace = true. 
             settings.IgnoreWhitespace = true;
-            settings.DtdProcessing = (DtdProcessing) 2; /* DtdProcessing.Parse */
+            settings.DtdProcessing = (DtdProcessing)2; /* DtdProcessing.Parse */
             // Normalization = true, that's the default for the readers created with XmlReader.Create(). 
             // The XmlTextReader has as default a non-conformant mode according to the XML spec 
             // which skips some of the required processing for new lines, hence the need for the explicit 
@@ -399,7 +399,7 @@ namespace System.Xml.Serialization
             // (ie. XmlNodeType.Whitespace), deemed as insignificant for the XML infoset, is not 
             // reported by the reader. This mode corresponds to XmlReaderSettings.IgnoreWhitespace = true. 
             settings.IgnoreWhitespace = true;
-            settings.DtdProcessing = (DtdProcessing) 2; /* DtdProcessing.Parse */
+            settings.DtdProcessing = (DtdProcessing)2; /* DtdProcessing.Parse */
             // Normalization = true, that's the default for the readers created with XmlReader.Create(). 
             // The XmlTextReader has as default a non-conformant mode according to the XML spec 
             // which skips some of the required processing for new lines, hence the need for the explicit 
@@ -760,6 +760,10 @@ namespace System.Xml.Serialization
                     {
                         writer.Write_guid(o);
                     }
+                    else if (_primitiveType == typeof(TimeSpan))
+                    {
+                        writer.Write_TimeSpan(o);
+                    }
                     else
                     {
                         throw new InvalidOperationException(SR.Format(SR.XmlUnxpectedType, _primitiveType.FullName));
@@ -833,6 +837,10 @@ namespace System.Xml.Serialization
                     else if (_primitiveType == typeof(Guid))
                     {
                         o = reader.Read_guid();
+                    }
+                    else if (_primitiveType == typeof(TimeSpan))
+                    {
+                        o = reader.Read_TimeSpan();
                     }
                     else
                     {

@@ -123,6 +123,9 @@
   <data name="net_securitypackagesupport" xml:space="preserve">
     <value>The requested security package is not supported.</value>
   </data>
+  <data name="net_securityprotocolnotsupported" xml:space="preserve">
+    <value>The requested security protocol is not supported.</value>
+  </data>
   <data name="net_MethodNotImplementedException" xml:space="preserve">
     <value>This method is not implemented by this class.</value>
   </data>
@@ -368,5 +371,11 @@
   </data>
   <data name="net_ssl_get_connection_info_failed" xml:space="preserve">
     <value>Getting SSL connection info failed with OpenSSL error - {0}.</value>
+  </data>
+  <data name="net_ssl_get_channel_binding_token_failed" xml:space="preserve">
+    <value>Fetching channel binding token failed with OpenSSL error - {0}.</value>
+  </data>
+  <data name="net_ssl_invalid_certificate" xml:space="preserve">
+    <value>SSL certificate returned is invalid, OpenSSL error - {0}.</value>
   </data>
 </root>

@@ -26,7 +26,7 @@
     <Compile Include="System\Net\NetworkInformation\IcmpV6Statistics.cs" />
     <Compile Include="System\Net\NetworkInformation\NetworkInterfaceType.cs" />
     <Compile Include="System\Net\NetworkInformation\IPAddressInformation.cs" />
-    <Compile Include="System\Net\NetworkInformation\ipaddressinformationcollection.cs" />
+    <Compile Include="System\Net\NetworkInformation\IPAddressInformationCollection.cs" />
     <Compile Include="System\Net\NetworkInformation\IPGlobalProperties.cs" />
     <Compile Include="System\Net\NetworkInformation\IPGlobalStatistics.cs" />
     <Compile Include="System\Net\NetworkInformation\IPInterfaceProperties.cs" />
@@ -98,11 +98,11 @@
       <Link>Common\System\Net\Sockets\SocketType.cs</Link>
     </Compile>
     <!-- System.Net common -->
-    <Compile Include="$(CommonPath)\System\Net\_ContextAwareResult.cs">
-      <Link>Common\System\Net\_ContextAwareResult.cs</Link>
+    <Compile Include="$(CommonPath)\System\Net\ContextAwareResult.cs">
+      <Link>Common\System\Net\ContextAwareResult.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\System\Net\_LazyAsyncResult.cs">
-      <Link>Common\System\Net\_LazyAsyncResult.cs</Link>
+    <Compile Include="$(CommonPath)\System\Net\LazyAsyncResult.cs">
+      <Link>Common\System\Net\LazyAsyncResult.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\System\Net\Shims\ExecutionContext.cs">
       <Link>Common\System\Net\Shims\ExecutionContext.cs</Link>
@@ -236,10 +236,12 @@
   </ItemGroup>
   <!-- Unix -->
   <ItemGroup Condition=" '$(TargetsUnix)' == 'true' ">
+    <Compile Include="System\Net\NetworkInformation\IPAddressUtil.cs" />
     <Compile Include="System\Net\NetworkInformation\NetworkFiles.cs" />
-    <Compile Include="System\Net\NetworkInformation\SimpleGatewayIPAddressInformation.cs" />
-    <Compile Include="System\Net\NetworkInformation\SimpleTcpConnectionInformation.cs" />
+    <Compile Include="System\Net\NetworkInformation\SimpleGatewayIPAddressInformation.Unix.cs" />
+    <Compile Include="System\Net\NetworkInformation\SimpleTcpConnectionInformation.Unix.cs" />
     <Compile Include="System\Net\NetworkInformation\StringParsingHelpers.Dns.cs" />
+    <Compile Include="System\Net\NetworkInformation\UnixIPGlobalProperties.cs" />
     <Compile Include="System\Net\NetworkInformation\UnixIPInterfaceProperties.cs" />
     <Compile Include="System\Net\NetworkInformation\UnixIPv4InterfaceProperties.cs" />
     <Compile Include="System\Net\NetworkInformation\UnixIPv6InterfaceProperties.cs" />
@@ -251,7 +253,7 @@
       <Link>Interop\Unix\Interop.Libraries.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.EnumerateInterfaceAddresses.cs">
-      <Link>Interop\Unix\System.Native\Interop.EnumerateInterfaceAddresses.cs" </Link>
+      <Link>Interop\Unix\System.Native\Interop.EnumerateInterfaceAddresses.cs"</Link>
     </Compile>
     <Compile Include="$(CommonPath)\System\Net\NetworkInformation\HostInformationPal.Unix.cs">
       <Link>System\Net\NetworkInformation\HostInformationPal.Unix.cs</Link>
@@ -261,6 +263,9 @@
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.GetHostName.cs">
       <Link>Interop\Unix\System.Native\Interop.GetHostName.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.MapTcpState.cs">
+      <Link>Interop\Unix\System.Native\Interop.MapTcpState.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\Interop.Errors.cs">
       <Link>Interop\Unix\Interop.Errors.cs</Link>
@@ -274,6 +279,7 @@
   </ItemGroup>
   <!-- Linux -->
   <ItemGroup Condition=" '$(TargetsLinux)' == 'true' ">
+    <Compile Include="System\Net\NetworkInformation\ExceptionHelper.Linux.cs" />
     <Compile Include="System\Net\NetworkInformation\LinuxIcmpV4Statistics.cs" />
     <Compile Include="System\Net\NetworkInformation\LinuxIcmpV6Statistics.cs" />
     <Compile Include="System\Net\NetworkInformation\LinuxTcpStatistics.cs" />
@@ -299,9 +305,6 @@
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Linux\Interop.LinuxNetDeviceFlags.cs">
       <Link>Interop\Linux\Interop.LinuxNetDeviceFlags.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\Interop\Linux\Interop.LinuxTcpState.cs">
-      <Link>Interop\Linux\Interop.LinuxTcpState.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Linux\System.Native\Interop.NetworkChange.cs">
       <Link>Interop\Linux\System.Native\Interop.NetworkChange.cs</Link>
@@ -330,6 +333,27 @@
     <Compile Include="$(CommonPath)\Interop\OSX\System.Native\Interop.TcpConnectionInfo.cs">
       <Link>Interop\OSX\System.Native\Interop.TcpConnectionInfo.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\Interop\OSX\Interop.CoreFoundation.cs">
+      <Link>Interop\OSX\Interop.CoreFoundation.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\OSX\Interop.Libraries.cs">
+      <Link>Interop\OSX\Interop.Libraries.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\OSX\Interop.RunLoop.cs">
+      <Link>Interop\OSX\Interop.RunLoop.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\OSX\Interop.SystemConfiguration.cs">
+      <Link>Interop\OSX\Interop.SystemConfiguration.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Microsoft\Win32\SafeHandles\SafeCreateHandle.OSX.cs">
+      <Link>Common\Microsoft\Win32\SafeHandles\SafeCreateHandle.OSX.cs</Link>
+    </Compile>
+  </ItemGroup>
+  <!-- Unknown Unix -->
+  <ItemGroup Condition=" '$(TargetsFreeBSD)' == 'true' OR '$(TargetsUnknownUnix)' == 'true' ">
+    <Compile Include="System\Net\NetworkInformation\IPGlobalPropertiesPal.UnknownUnix.cs" />
+    <Compile Include="System\Net\NetworkInformation\NetworkInterfacePal.UnknownUnix.cs" />
+    <Compile Include="System\Net\NetworkInformation\NetworkAddressChange.UnknownUnix.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="project.json" />

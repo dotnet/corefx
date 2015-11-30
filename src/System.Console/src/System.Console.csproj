@@ -33,7 +33,7 @@
     <Compile Include="System\IO\ConsoleStream.cs" />
     <Compile Include="System\IO\SyncTextReader.cs" />
     <Compile Include="System\IO\SyncTextWriter.cs" />
-    <Compile Include="System\IO\__Error.cs" />
+    <Compile Include="System\IO\Error.cs" />
     <Compile Include="System\Text\ConsoleEncoding.cs" />
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetsWindows)' == 'true' ">
@@ -44,7 +44,7 @@
     <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.FormatMessage.cs">
       <Link>Common\Interop\Windows\Interop.FormatMessage.cs</Link>
     </Compile>
-	<Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.ConsoleCursorInfo.cs">
+    <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.ConsoleCursorInfo.cs">
       <Link>Common\Interop\Windows\Interop.ConsoleCursorInfo.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.ConsoleScreenBufferInfo.cs">
@@ -89,7 +89,7 @@
     <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.ReadConsoleInput.cs">
       <Link>Common\Interop\Windows\Interop.ReadConsoleInput.cs</Link>
     </Compile>
-	<Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.SetConsoleCtrlHandler.cs">
+    <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.SetConsoleCtrlHandler.cs">
       <Link>Common\Interop\Windows\Interop.SetConsoleCtrlHandler.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.SetConsoleScreenBufferSize.cs">
@@ -116,7 +116,7 @@
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetsUnix)' == 'true' ">
     <Compile Include="System\ConsolePal.Unix.cs" />
-	<Compile Include="System\IO\StdInStreamReader.cs" />
+    <Compile Include="System\IO\StdInStreamReader.cs" />
     <Compile Include="System\IO\SyncTextReader.Unix.cs" />
     <Compile Include="$(CommonPath)\Microsoft\Win32\SafeHandles\SafeFileHandle.Unix.cs">
       <Link>Common\Microsoft\Win32\SafeHandles\SafeFileHandle.Unix.cs</Link>
@@ -169,6 +169,9 @@
     <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.GetPwUid.cs">
       <Link>Common\Interop\Unix\Interop.GetPwUid.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.RegisterForCtrlC.cs">
+      <Link>Common\Interop\Unix\Interop.RegisterForCtrlC.cs</Link>
+    </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.SNPrintF.cs">
       <Link>Common\Interop\Unix\Interop.SNPrintF.cs</Link>
     </Compile>
@@ -181,14 +184,17 @@
     <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.Write.cs">
       <Link>Common\Interop\Unix\Interop.Write.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Unix\libcoreclr\Interop.SetConsoleCtrlHandler.cs">
-      <Link>Common\Interop\Unix\Interop.SetConsoleCtrlHandler.cs"</Link>
-    </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.GetWindowWidth.cs">
       <Link>Common\Interop\Unix\Interop.GetWindowWidth.cs"</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.InitializeConsole.cs">
+      <Link>Common\Interop\Unix\Interop.InitializeConsole.cs"</Link>
+    </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.ReadStdinUnbuffered.cs">
       <Link>Common\Interop\Unix\Interop.ReadStdinUnbuffered.cs"</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.StdinReady.cs">
+      <Link>Common\Interop\Unix\Interop.StdinReady.cs"</Link>
     </Compile>
   </ItemGroup>
   <ItemGroup>

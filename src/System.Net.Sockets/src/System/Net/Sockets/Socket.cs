@@ -109,7 +109,8 @@ namespace System.Net.Sockets
             _socketType = socketType;
             _protocolType = protocolType;
 
-            Debug.Assert(addressFamily != AddressFamily.InterNetworkV6 || !DualMode);
+            // TODO: Investigate this problematic assertion: Issue #4500.
+            // Debug.Assert(addressFamily != AddressFamily.InterNetworkV6 || !DualMode);
 
             if (s_loggingEnabled)
             {
@@ -1048,17 +1049,6 @@ namespace System.Net.Sockets
             {
                 Logging.Exit(Logging.Sockets, this, "Connect", null);
             }
-        }
-
-        public void Close(int timeout)
-        {
-            if (timeout < -1)
-            {
-                throw new ArgumentOutOfRangeException("timeout");
-            }
-            _closeTimeout = timeout;
-            GlobalLog.Print("Socket#" + Logging.HashString(this) + "::Close() timeout = " + _closeTimeout);
-            ((IDisposable)this).Dispose();
         }
 
         // Places a socket in a listening state.

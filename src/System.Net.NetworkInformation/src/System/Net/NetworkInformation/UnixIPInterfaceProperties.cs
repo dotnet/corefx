@@ -1,8 +1,7 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System.Collections.ObjectModel;
-using System.IO;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net.Sockets;
 
@@ -39,13 +38,7 @@ namespace System.Net.NetworkInformation
             }
         }
 
-        public override bool IsDnsEnabled
-        {
-            get
-            {
-                return DnsAddresses.Count > 0;
-            }
-        }
+        public override bool IsDnsEnabled { get { return DnsAddresses.Count > 0; } }
 
         public sealed override string DnsSuffix { get { return _dnsSuffix; } }
 
@@ -54,7 +47,7 @@ namespace System.Net.NetworkInformation
         private static UnicastIPAddressInformationCollection GetUnicastAddresses(UnixNetworkInterface uni)
         {
             var collection = new UnicastIPAddressInformationCollection();
-            foreach (IPAddress address in uni.Addresses.Where((addr) => !IsMulticast(addr)))
+            foreach (IPAddress address in uni.Addresses.Where((addr) => !IPAddressUtil.IsMulticast(addr)))
             {
                 IPAddress netMask = (address.AddressFamily == AddressFamily.InterNetwork)
                                     ? uni.GetNetMaskForIPv4Address(address)
@@ -68,25 +61,12 @@ namespace System.Net.NetworkInformation
         private static MulticastIPAddressInformationCollection GetMulticastAddresses(UnixNetworkInterface uni)
         {
             var collection = new MulticastIPAddressInformationCollection();
-            foreach (IPAddress address in uni.Addresses.Where(IsMulticast))
+            foreach (IPAddress address in uni.Addresses.Where(IPAddressUtil.IsMulticast))
             {
                 collection.InternalAdd(new UnixMulticastIPAddressInformation(address));
             }
 
             return collection;
-        }
-
-        private static bool IsMulticast(IPAddress address)
-        {
-            if (address.AddressFamily == AddressFamily.InterNetworkV6)
-            {
-                return address.IsIPv6Multicast;
-            }
-            else
-            {
-                byte firstByte = address.GetAddressBytes()[0];
-                return firstByte >= 224 && firstByte <= 239;
-            }
         }
 
         private static string GetDnsSuffix()
@@ -96,7 +76,7 @@ namespace System.Net.NetworkInformation
 
         private static IPAddressCollection GetDnsAddresses()
         {
-            Collection<IPAddress> internalAddresses = StringParsingHelpers.ParseDnsAddressesFromResolvConfFile(NetworkFiles.EtcResolvConfFile);
+            List<IPAddress> internalAddresses = StringParsingHelpers.ParseDnsAddressesFromResolvConfFile(NetworkFiles.EtcResolvConfFile);
             return new InternalIPAddressCollection(internalAddresses);
         }
     }

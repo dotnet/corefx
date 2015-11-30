@@ -18,41 +18,26 @@ namespace System.IO.Compression
     {
         #region Constants defined in zlib.h
 
-        /*
-            public const string ZLibVersion = "1.2.3";        
-        */
-        public static byte[] ZLibVersion = new byte[] { (byte)'1', (byte)'.', (byte)'2', (byte)'.', (byte)'3', 0 };
-
         // This is the NULL pointer for using with ZLib pointers;
         // we prefer it to IntPtr.Zero to mimic the definition of Z_NULL in zlib.h:
         internal static readonly IntPtr ZNullPtr = (IntPtr)((Int32)0);
 
-
         public enum FlushCode : int
         {
             NoFlush = 0,
-            PartialFlush = 1,
-            SyncFlush = 2,
-            FullFlush = 3,
             Finish = 4,
-            Block = 5,
-            //Trees = 6 // Only in ZLib 1.2.4 and later
         }
-
 
         public enum ErrorCode : int
         {
             Ok = 0,
             StreamEnd = 1,
-            NeedDictionary = 2,
-            ErrorNo = -1,
             StreamError = -2,
             DataError = -3,
             MemError = -4,
             BufError = -5,
             VersionError = -6
         }
-
 
         /// <summary>
         /// <p>ZLib can accept any integer value between 0 and 9 (inclusive) as a valid compression level parameter:
@@ -63,37 +48,21 @@ namespace System.IO.Compression
         /// <p><strong>How to choose a compression level:</strong></p>
         /// 
         /// <p>The names <code>NoCompression</code>, <code>BestSpeed</code>, <code>BestCompression</code> are taken over from the corresponding
-        /// ZLib definitions. However, extensive compression performance tests on real data show that they do not describe the reality well.
-        /// We have run a large number of tests on different data sets including binary data, English language text, JPEG images and source code.
-        /// The results show:</p>
-        /// <ul>
-        ///   <li><code>CompressionStrategy.DefaultStrategy</code> is the best strategy in most scenarios.</li>
-        ///   <li><code>CompressionLevel</code> values over 6 do not significantly improve the compression rate,
-        ///       however such values require additional compression time.</li>
-        ///   <li>Thus it is not recommended to use a compression level higher than 6, including the
-        ///       value <code>CompressionLevel.BestCompression</code>.</li>
-        ///   <li>The optimal compression performance (time/rate ratio) tends to occur at compression level 6
-        ///       (<code>CompressionLevel.DefaultCompression</code>).</li>
-        ///   <li>In scenarios where runtime performance takes precedence over compression rate, smaller compression level values
-        ///       can be considered.</li>
-        /// </ul>
-        /// <p>We recommend using one of the three following combinations:<br />
-        /// (See also the constants <code>Deflate_DefaultWindowBits</code> and <code>Deflate_DefaultMemLevel</code> below.)</p>
-        /// 
+        /// ZLib definitions, which map to our public NoCompression, Fastest, and Optimal respectively.
         /// <p><em>Optimal Compression:</em></p>
-        /// <p><code>ZLibNative.CompressionLevel compressionLevel = (ZLibNative.CompressionLevel) 6;</code> <br />
+        /// <p><code>ZLibNative.CompressionLevel compressionLevel = ZLibNative.CompressionLevel.BestCompression;</code> <br />
         ///    <code>Int32 windowBits = 15;  // or -15 if no headers required</code> <br />
         ///    <code>Int32 memLevel = 8;</code> <br />
         ///    <code>ZLibNative.CompressionStrategy strategy = ZLibNative.CompressionStrategy.DefaultStrategy;</code> </p>
         /// 
         ///<p><em>Fastest compression:</em></p>
-        ///<p><code>ZLibNative.CompressionLevel compressionLevel = (ZLibNative.CompressionLevel) 1;</code> <br />
+        ///<p><code>ZLibNative.CompressionLevel compressionLevel = ZLibNative.CompressionLevel.BestSpeed;</code> <br />
         ///   <code>Int32 windowBits = 15;  // or -15 if no headers required</code> <br />
         ///   <code>Int32 memLevel = 8; </code> <br />
         ///   <code>ZLibNative.CompressionStrategy strategy = ZLibNative.CompressionStrategy.DefaultStrategy;</code> </p>
         ///
         /// <p><em>No compression (even faster, useful for data that cannot be compressed such some image formats):</em></p>
-        /// <p><code>ZLibNative.CompressionLevel compressionLevel = (ZLibNative.CompressionLevel) 0;</code> <br />
+        /// <p><code>ZLibNative.CompressionLevel compressionLevel = ZLibNative.CompressionLevel.NoCompression;</code> <br />
         ///    <code>Int32 windowBits = 15;  // or -15 if no headers required</code> <br />
         ///    <code>Int32 memLevel = 7;</code> <br />
         ///    <code>ZLibNative.CompressionStrategy strategy = ZLibNative.CompressionStrategy.DefaultStrategy;</code> </p>
@@ -103,9 +72,7 @@ namespace System.IO.Compression
             NoCompression = 0,
             BestSpeed = 1,
             BestCompression = 9,    // Refer to "How to choose a compression level" above.
-            DefaultCompression = -1
         }
-
 
         /// <summary>
         /// <p><strong>From the ZLib manual:</strong></p>
@@ -126,13 +93,8 @@ namespace System.IO.Compression
         /// </summary>
         public enum CompressionStrategy : int
         {
-            Filtered = 1,
-            HuffmanOnly = 2,
-            Rle = 3,
-            Fixed = 4,
             DefaultStrategy = 0
         }
-
 
         /// <summary>
         /// In version 1.2.3, ZLib provides on the <code>Deflated</code>-<code>CompressionMethod</code>.
@@ -173,6 +135,7 @@ namespace System.IO.Compression
         /// </summary>
         public const int Deflate_DefaultMemLevel = 8;     // Memory usage by deflate. Legal range: [1..9]. 8 is ZLib default.
                                                           // More is faster and better compression with more memory usage.
+        public const int Deflate_NoCompressionMemLevel = 7;
         #endregion  // Defaults for ZLib parameters
 
         /**
@@ -224,9 +187,7 @@ namespace System.IO.Compression
                 : base(new IntPtr(-1), true)
             {
                 _zStream = new ZStream();
-                _zStream.zalloc = ZNullPtr;
-                _zStream.zfree = ZNullPtr;
-                _zStream.opaque = ZNullPtr;
+                _zStream.Init();
 
                 _initializationState = State.NotInitialized;
                 this.SetHandle(IntPtr.Zero);
@@ -272,8 +233,8 @@ namespace System.IO.Compression
 
             public UInt32 AvailIn
             {
-                [SecurityCritical] get { return (uint)_zStream.availIn; }
-                [SecurityCritical] set { _zStream.availIn = CastUInt32ToNativeuLong(value); }
+                [SecurityCritical] get { return _zStream.availIn; }
+                [SecurityCritical] set { _zStream.availIn = value; }
             }
 
             public IntPtr NextOut
@@ -284,8 +245,8 @@ namespace System.IO.Compression
 
             public UInt32 AvailOut
             {
-                [SecurityCritical] get { return (uint)_zStream.availOut; }
-                [SecurityCritical] set { _zStream.availOut = CastUInt32ToNativeuLong(value); }
+                [SecurityCritical] get { return _zStream.availOut; }
+                [SecurityCritical] set { _zStream.availOut = value; }
             }
 
             #endregion  // Expose fields on ZStream for use by user / Fx code (add more as required)
@@ -317,14 +278,8 @@ namespace System.IO.Compression
                 EnsureNotDisposed();
                 EnsureState(State.NotInitialized);
 
-                ErrorCode errC;
-
-                try { }
-                finally
-                {
-                    errC = Interop.zlib.DeflateInit2_(ref _zStream, level, CompressionMethod.Deflated, windowBits, memLevel, strategy, ZLibVersion);
-                    _initializationState = State.InitializedForDeflate;
-                }
+                ErrorCode errC = Interop.zlib.DeflateInit2_(ref _zStream, level, CompressionMethod.Deflated, windowBits, memLevel, strategy);
+                _initializationState = State.InitializedForDeflate;
 
                 return errC;
             }
@@ -345,14 +300,9 @@ namespace System.IO.Compression
                 EnsureNotDisposed();
                 EnsureState(State.InitializedForDeflate);
 
-                ErrorCode errC;
+                ErrorCode errC = Interop.zlib.DeflateEnd(ref _zStream);
+                _initializationState = State.Disposed;
 
-                try { }
-                finally
-                {
-                    errC = Interop.zlib.DeflateEnd(ref _zStream);
-                    _initializationState = State.Disposed;
-                }
                 return errC;
             }
 
@@ -363,14 +313,8 @@ namespace System.IO.Compression
                 EnsureNotDisposed();
                 EnsureState(State.NotInitialized);
 
-                ErrorCode errC;
-
-                try { }
-                finally
-                {
-                    errC = Interop.zlib.InflateInit2_(ref _zStream, windowBits, ZLibVersion);
-                    _initializationState = State.InitializedForInflate;
-                }
+                ErrorCode errC = Interop.zlib.InflateInit2_(ref _zStream, windowBits);
+                _initializationState = State.InitializedForInflate;
 
                 return errC;
             }
@@ -391,14 +335,8 @@ namespace System.IO.Compression
                 EnsureNotDisposed();
                 EnsureState(State.InitializedForInflate);
 
-                ErrorCode errC;
-
-                try { }
-                finally
-                {
-                    errC = Interop.zlib.InflateEnd(ref _zStream);
-                    _initializationState = State.Disposed;
-                }
+                ErrorCode errC = Interop.zlib.InflateEnd(ref _zStream);
+                _initializationState = State.Disposed;
 
                 return errC;
             }
@@ -420,7 +358,7 @@ namespace System.IO.Compression
                     return errC;
                 }
 
-                errC = Interop.zlib.InflateInit2_(ref _zStream, windowBits, ZLibVersion);
+                errC = Interop.zlib.InflateInit2_(ref _zStream, windowBits);
                 _initializationState = State.InitializedForInflate;
 
                 return errC;

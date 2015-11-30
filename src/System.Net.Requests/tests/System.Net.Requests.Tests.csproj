@@ -22,13 +22,11 @@
   <ItemGroup>
     <Compile Include="HttpWebRequestTest.cs" />
     <Compile Include="HttpWebResponseTest.cs" />
+    <Compile Include="RequestStreamTest.cs" />
     <Compile Include="WebRequestTest.cs" />
 
     <Compile Include="$(CommonTestPath)\System\Net\HttpTestServers.cs">
       <Link>Common\System\Net\HttpTestServers.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonTestPath)\System\Net\HttpTestServers2.cs">
-      <Link>Common\System\Net\HttpTestServers2.cs</Link>
     </Compile>
   </ItemGroup>
 

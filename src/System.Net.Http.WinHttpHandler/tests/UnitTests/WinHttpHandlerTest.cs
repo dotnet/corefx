@@ -7,6 +7,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Net;
 using System.Net.Http;
+using System.Net.Test.Common;
 using System.Runtime.InteropServices;
 using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
@@ -15,6 +16,7 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using Xunit;
+using Xunit.Abstractions;
 
 namespace System.Net.Http.WinHttpHandlerUnitTests
 {
@@ -22,8 +24,11 @@ namespace System.Net.Http.WinHttpHandlerUnitTests
     {
         private const string FakeProxy = "http://proxy.contoso.com";
         
-        public WinHttpHandlerTest()
+        private readonly ITestOutputHelper _output;
+
+        public WinHttpHandlerTest(ITestOutputHelper output)
         {
+            _output = output;
             TestControl.ResetAll();
         }
 
@@ -32,7 +37,7 @@ namespace System.Net.Http.WinHttpHandlerUnitTests
         {
             var handler = new WinHttpHandler();
 
-            Assert.Equal(SslProtocols.Tls | SslProtocols.Tls11 | SslProtocols.Tls12, handler.SslProtocols);
+            Assert.Equal(SslProtocolSupport.DefaultSslProtocols, handler.SslProtocols);
             Assert.Equal(true, handler.AutomaticRedirection);
             Assert.Equal(50, handler.MaxAutomaticRedirections);
             Assert.Equal(DecompressionMethods.Deflate | DecompressionMethods.GZip, handler.AutomaticDecompression);
@@ -435,36 +440,37 @@ namespace System.Net.Http.WinHttpHandlerUnitTests
             handler.ConnectTimeout = Timeout.InfiniteTimeSpan;
         }
 
-        [Fact]
-        public void SslProtocols_SetUsingSsl2_ThrowsArgumentOutOfRangeException()
+        [Theory]
+        [ClassData(typeof(SslProtocolSupport.UnsupportedSslProtocolsTestData))]
+        public void SslProtocols_SetUsingUnsupported_Throws(SslProtocols protocol)
         {
             var handler = new WinHttpHandler();
 
-            Assert.Throws<ArgumentOutOfRangeException>(() => { handler.SslProtocols = SslProtocols.Ssl2; });
+            Assert.Throws<NotSupportedException>(() => { handler.SslProtocols = protocol; });
+        }
+
+        [Theory]
+        [ClassData(typeof(SslProtocolSupport.SupportedSslProtocolsTestData))]
+        public void SslProtocols_SetUsingSupported_Success(SslProtocols protocol)
+        {
+            var handler = new WinHttpHandler();
+            handler.SslProtocols = protocol;
         }
 
         [Fact]
-        public void SslProtocols_SetUsingSsl3_ThrowsArgumentOutOfRangeException()
+        public void SslProtocols_SetUsingNone_Throws()
         {
             var handler = new WinHttpHandler();
 
-            Assert.Throws<ArgumentOutOfRangeException>(() => { handler.SslProtocols = SslProtocols.Ssl3; });
+            Assert.Throws<NotSupportedException>(() => { handler.SslProtocols = SslProtocols.None; });
         }
 
         [Fact]
-        public void SslProtocols_SetUsingNone_ThrowsArgumentOutOfRangeException()
+        public void SslProtocols_SetUsingInvalidEnum_Throws()
         {
             var handler = new WinHttpHandler();
 
-            Assert.Throws<ArgumentOutOfRangeException>(() => { handler.SslProtocols = SslProtocols.None; });
-        }
-
-        [Fact]
-        public void SslProtocols_SetUsingInvalidEnum_ThrowsArgumentOutOfRangeException()
-        {
-            var handler = new WinHttpHandler();
-
-            Assert.Throws<ArgumentOutOfRangeException>(() => { handler.SslProtocols = (SslProtocols)4096; });
+            Assert.Throws<NotSupportedException>(() => { handler.SslProtocols = (SslProtocols)4096; });
         }
 
         [Fact]
@@ -503,6 +509,55 @@ namespace System.Net.Http.WinHttpHandlerUnitTests
             response = await client.GetAsync(TestServer.FakeServerEndpoint);
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             client.Dispose();
+        }
+
+        [Fact]
+        public async Task SendAsync_ReadFromStreamingServer_PartialDataRead()
+        {
+            var handler = new WinHttpHandler();
+            var client = new HttpClient(handler);
+            TestServer.SetResponse(DecompressionMethods.None, TestServer.ExpectedResponseBody);
+            TestServer.DataAvailablePercentage = 0.25;
+
+            int bytesRead;
+            byte[] buffer = new byte[TestServer.ExpectedResponseBody.Length];
+            var request = new HttpRequestMessage(HttpMethod.Get, TestServer.FakeServerEndpoint);
+            using (var response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead))
+            {
+                Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                var stream = await response.Content.ReadAsStreamAsync();
+                bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length);
+                _output.WriteLine("bytesRead={0}", bytesRead);
+            }
+            client.Dispose();
+            Assert.True(bytesRead < buffer.Length, "bytesRead should be less than buffer.Length");
+        }
+
+        [Fact]
+        public async Task SendAsync_ReadAllDataFromStreamingServer_AllDataRead()
+        {
+            var handler = new WinHttpHandler();
+            var client = new HttpClient(handler);
+            TestServer.SetResponse(DecompressionMethods.None, TestServer.ExpectedResponseBody);
+            TestServer.DataAvailablePercentage = 0.25;
+
+            int totalBytesRead = 0;
+            int bytesRead;
+            byte[] buffer = new byte[TestServer.ExpectedResponseBody.Length];
+            var request = new HttpRequestMessage(HttpMethod.Get, TestServer.FakeServerEndpoint);
+            using (var response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead))
+            {
+                Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                var stream = await response.Content.ReadAsStreamAsync();
+                do
+                {
+                    bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length);
+                    _output.WriteLine("bytesRead={0}", bytesRead);
+                    totalBytesRead += bytesRead;
+                } while (bytesRead != 0);
+            }
+            client.Dispose();
+            Assert.Equal(buffer.Length, totalBytesRead);
         }
 
         [Fact]

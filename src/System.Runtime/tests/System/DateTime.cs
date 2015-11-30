@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using System.Threading.Tasks;
+
 using Xunit;
 
 public static unsafe class DateTimeTests
@@ -188,9 +188,9 @@ public static unsafe class DateTimeTests
     public static void TestParse1()
     {
         DateTime src = DateTime.MaxValue;
-        String s = src.ToString();
+        string s = src.ToString();
         DateTime in_1 = DateTime.Parse(s);
-        String actual = in_1.ToString();
+        string actual = in_1.ToString();
         Assert.Equal(s, actual);
     }
 
@@ -198,9 +198,9 @@ public static unsafe class DateTimeTests
     public static void TestParse2()
     {
         DateTime src = DateTime.MaxValue;
-        String s = src.ToString();
+        string s = src.ToString();
         DateTime in_1 = DateTime.Parse(s, null);
-        String actual = in_1.ToString();
+        string actual = in_1.ToString();
         Assert.Equal(s, actual);
     }
 
@@ -208,9 +208,9 @@ public static unsafe class DateTimeTests
     public static void TestParse3()
     {
         DateTime src = DateTime.MaxValue;
-        String s = src.ToString();
+        string s = src.ToString();
         DateTime in_1 = DateTime.Parse(s, null, DateTimeStyles.None);
-        String actual = in_1.ToString();
+        string actual = in_1.ToString();
         Assert.Equal(s, actual);
     }
 
@@ -218,9 +218,9 @@ public static unsafe class DateTimeTests
     public static void TestParseExact3()
     {
         DateTime src = DateTime.MaxValue;
-        String s = src.ToString("g");
+        string s = src.ToString("g");
         DateTime in_1 = DateTime.ParseExact(s, "g", null);
-        String actual = in_1.ToString("g");
+        string actual = in_1.ToString("g");
         Assert.Equal(s, actual);
     }
 
@@ -228,9 +228,9 @@ public static unsafe class DateTimeTests
     public static void TestParseExact4()
     {
         DateTime src = DateTime.MaxValue;
-        String s = src.ToString("g");
+        string s = src.ToString("g");
         DateTime in_1 = DateTime.ParseExact(s, "g", null, DateTimeStyles.None);
-        String actual = in_1.ToString("g");
+        string actual = in_1.ToString("g");
         Assert.Equal(s, actual);
     }
 
@@ -238,10 +238,10 @@ public static unsafe class DateTimeTests
     public static void TestParseExact4a()
     {
         DateTime src = DateTime.MaxValue;
-        String s = src.ToString("g");
-        String[] formats = { "g" };
+        string s = src.ToString("g");
+        string[] formats = { "g" };
         DateTime in_1 = DateTime.ParseExact(s, formats, null, DateTimeStyles.None);
-        String actual = in_1.ToString("g");
+        string actual = in_1.ToString("g");
         Assert.Equal(s, actual);
     }
 
@@ -249,11 +249,11 @@ public static unsafe class DateTimeTests
     public static void TestTryParse2()
     {
         DateTime src = DateTime.MaxValue;
-        String s = src.ToString("g");
+        string s = src.ToString("g");
         DateTime in_1;
         bool b = DateTime.TryParse(s, out in_1);
         Assert.True(b);
-        String actual = in_1.ToString("g");
+        string actual = in_1.ToString("g");
         Assert.Equal(s, actual);
     }
 
@@ -261,11 +261,11 @@ public static unsafe class DateTimeTests
     public static void TestTryParse4()
     {
         DateTime src = DateTime.MaxValue;
-        String s = src.ToString("g");
+        string s = src.ToString("g");
         DateTime in_1;
         bool b = DateTime.TryParse(s, null, DateTimeStyles.None, out in_1);
         Assert.True(b);
-        String actual = in_1.ToString("g");
+        string actual = in_1.ToString("g");
         Assert.Equal(s, actual);
     }
 
@@ -273,11 +273,11 @@ public static unsafe class DateTimeTests
     public static void TestTryParseExact()
     {
         DateTime src = DateTime.MaxValue;
-        String s = src.ToString("g");
+        string s = src.ToString("g");
         DateTime in_1;
         bool b = DateTime.TryParseExact(s, "g", null, DateTimeStyles.None, out in_1);
         Assert.True(b);
-        String actual = in_1.ToString("g");
+        string actual = in_1.ToString("g");
         Assert.Equal(s, actual);
     }
 
@@ -285,18 +285,18 @@ public static unsafe class DateTimeTests
     public static void TestTryParseExactA()
     {
         DateTime src = DateTime.MaxValue;
-        String s = src.ToString("g");
-        String[] formats = { "g" };
+        string s = src.ToString("g");
+        string[] formats = { "g" };
         DateTime in_1;
         bool b = DateTime.TryParseExact(s, formats, null, DateTimeStyles.None, out in_1);
         Assert.True(b);
-        String actual = in_1.ToString("g");
+        string actual = in_1.ToString("g");
         Assert.Equal(s, actual);
     }
 
     [Fact]
     public static void TestGetDateTimeFormats()
-    {        
+    {
         char[] allStandardFormats =
         {
             'd', 'D', 'f', 'F', 'g', 'G',
@@ -330,23 +330,11 @@ public static unsafe class DateTimeTests
     [InlineData("fi-FI")]
     [InlineData("nb-NO")]
     [InlineData("nb-SJ")]
-    public static void TestSpecialCulturesParsing(string cultureName)
-    {
-        TestDateTimeParsingWithSpecialCultures(cultureName);
-    }
-
-    [Theory]
     [InlineData("sr-Cyrl-XK")]
     [InlineData("sr-Latn-ME")]
     [InlineData("sr-Latn-RS")]
     [InlineData("sr-Latn-XK")]
-    [ActiveIssue(3616, PlatformID.AnyUnix)] 
-    public static void TestSerbianCulturesParsing(string cultureName)
-    {
-        TestDateTimeParsingWithSpecialCultures(cultureName);
-    }
-
-    internal static void TestDateTimeParsingWithSpecialCultures(string cultureName)
+    public static void TestSpecialCulturesParsing(string cultureName)
     {
         // Test DateTime parsing with cultures which has the date separator and time separator are same
 
@@ -361,15 +349,24 @@ public static unsafe class DateTimeTests
             return;
         }
 
-        DateTime date = DateTime.Now;
-
-        // truncate the milliseconds as it is not showing in time formatting patterns
-        date = new DateTime(date.Year, date.Month, date.Day, date.Hour, date.Minute, date.Second);
+        DateTime date = new DateTime(2015, 11, 20, 11, 49, 50);
         string dateString = date.ToString(ci.DateTimeFormat.ShortDatePattern, ci);
 
         DateTime parsedDate;
         Assert.True(DateTime.TryParse(dateString, ci, DateTimeStyles.None, out parsedDate));
-        Assert.Equal(date.Date, parsedDate);
+        if (ci.DateTimeFormat.ShortDatePattern.Contains("yyyy") || HasDifferentDateTimeSeparators(ci.DateTimeFormat))
+        {
+            Assert.Equal(date.Date, parsedDate);
+        }
+        else
+        {
+            // When the date separator and time separator are the same, DateTime.TryParse cannot 
+            // tell the difference between a short date like dd.MM.yy and a short time
+            // like HH.mm.ss. So it assumes that if it gets 03.04.11, that must be a time
+            // and uses the current date to construct the date time.
+            DateTime now = DateTime.Now;
+            Assert.Equal(new DateTime(now.Year, now.Month, now.Day, date.Day, date.Month, date.Year % 100), parsedDate);
+        }
 
         dateString = date.ToString(ci.DateTimeFormat.LongDatePattern, ci);
         Assert.True(DateTime.TryParse(dateString, ci, DateTimeStyles.None, out parsedDate));
@@ -382,6 +379,23 @@ public static unsafe class DateTimeTests
         dateString = date.ToString(ci.DateTimeFormat.LongTimePattern, ci);
         Assert.True(DateTime.TryParse(dateString, ci, DateTimeStyles.None, out parsedDate));
         Assert.Equal(date.TimeOfDay, parsedDate.TimeOfDay);
+    }
+
+    /// <summary>
+    /// Since .NET Core doesn't expose DateTimeFormatInfo DateSeparator and TimeSeparator properties,
+    /// this method gets the separators using DateTime.ToString by passing in the invariant separators.
+    /// The invariant separators will then get turned into the culture's separators by ToString,
+    /// which are then compared.
+    /// </summary>
+    private static bool HasDifferentDateTimeSeparators(DateTimeFormatInfo dateTimeFormat)
+    {
+        DateTime d = new DateTime(2015, 11, 24, 17, 57, 29);
+        string separators = d.ToString("/@:", dateTimeFormat);
+
+        int delimiterIndex = separators.IndexOf('@');
+        string dateSeparator = separators.Substring(0, delimiterIndex);
+        string timeSeparator = separators.Substring(delimiterIndex + 1);
+        return dateSeparator != timeSeparator;
     }
 
     [Fact]
@@ -413,4 +427,3 @@ public static unsafe class DateTimeTests
         Assert.Equal(dt.Millisecond, millisecond);
     }
 }
-

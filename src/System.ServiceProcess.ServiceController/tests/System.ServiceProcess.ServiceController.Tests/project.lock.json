@@ -16,7 +16,7 @@
           "lib/dotnet/Microsoft.Win32.Primitives.dll": {}
         }
       },
-      "Microsoft.Win32.Registry/4.0.0-beta-23420": {
+      "Microsoft.Win32.Registry/4.0.0-beta-23511": {
         "type": "package",
         "dependencies": {
           "System.Collections": "4.0.10",
@@ -28,7 +28,7 @@
           "System.Runtime.InteropServices": "4.0.20"
         },
         "compile": {
-          "ref/dotnet5.2/Microsoft.Win32.Registry.dll": {}
+          "ref/dotnet5.4/Microsoft.Win32.Registry.dll": {}
         },
         "runtime": {
           "lib/DNXCore50/Microsoft.Win32.Registry.dll": {}
@@ -44,16 +44,6 @@
         },
         "runtime": {
           "lib/DNXCore50/System.Collections.dll": {}
-        }
-      },
-      "System.Console/4.0.0-beta-23420": {
-        "type": "package",
-        "dependencies": {
-          "System.IO": "4.0.0",
-          "System.Runtime": "4.0.0"
-        },
-        "compile": {
-          "ref/dotnet5.1/System.Console.dll": {}
         }
       },
       "System.Diagnostics.Debug/4.0.10": {
@@ -321,6 +311,60 @@
           "lib/dotnet/System.Runtime.InteropServices.RuntimeInformation.dll": {}
         }
       },
+      "System.Security.Claims/4.0.0": {
+        "type": "package",
+        "dependencies": {
+          "System.Collections": "4.0.0",
+          "System.Diagnostics.Debug": "4.0.0",
+          "System.Globalization": "4.0.0",
+          "System.IO": "4.0.0",
+          "System.Resources.ResourceManager": "4.0.0",
+          "System.Runtime": "4.0.20",
+          "System.Runtime.Extensions": "4.0.0",
+          "System.Security.Principal": "4.0.0"
+        },
+        "compile": {
+          "ref/dotnet/System.Security.Claims.dll": {}
+        },
+        "runtime": {
+          "lib/dotnet/System.Security.Claims.dll": {}
+        }
+      },
+      "System.Security.Principal/4.0.0": {
+        "type": "package",
+        "dependencies": {
+          "System.Runtime": "4.0.0"
+        },
+        "compile": {
+          "ref/dotnet/System.Security.Principal.dll": {}
+        },
+        "runtime": {
+          "lib/dotnet/System.Security.Principal.dll": {}
+        }
+      },
+      "System.Security.Principal.Windows/4.0.0-beta-23511": {
+        "type": "package",
+        "dependencies": {
+          "System.Collections": "4.0.0",
+          "System.Diagnostics.Debug": "4.0.0",
+          "System.Reflection": "4.0.10",
+          "System.Resources.ResourceManager": "4.0.0",
+          "System.Runtime": "4.0.20",
+          "System.Runtime.Extensions": "4.0.0",
+          "System.Runtime.Handles": "4.0.0",
+          "System.Runtime.InteropServices": "4.0.20",
+          "System.Security.Claims": "4.0.0",
+          "System.Security.Principal": "4.0.0",
+          "System.Text.Encoding": "4.0.10",
+          "System.Threading": "4.0.10"
+        },
+        "compile": {
+          "ref/dotnet5.4/System.Security.Principal.Windows.dll": {}
+        },
+        "runtime": {
+          "lib/DNXCore50/System.Security.Principal.Windows.dll": {}
+        }
+      },
       "System.Text.Encoding/4.0.10": {
         "type": "package",
         "dependencies": {
@@ -513,7 +557,7 @@
           "lib/dotnet/xunit.execution.dotnet.dll": {}
         }
       },
-      "xunit.netcore.extensions/1.0.0-prerelease-00108": {
+      "xunit.netcore.extensions/1.0.0-prerelease-00121": {
         "type": "package",
         "dependencies": {
           "System.Diagnostics.Debug": "4.0.10",
@@ -553,7 +597,7 @@
           "lib/dotnet/Microsoft.Win32.Primitives.dll": {}
         }
       },
-      "Microsoft.Win32.Registry/4.0.0-beta-23420": {
+      "Microsoft.Win32.Registry/4.0.0-beta-23511": {
         "type": "package",
         "dependencies": {
           "System.Collections": "4.0.10",
@@ -565,30 +609,10 @@
           "System.Runtime.InteropServices": "4.0.20"
         },
         "compile": {
-          "ref/dotnet5.2/Microsoft.Win32.Registry.dll": {}
+          "ref/dotnet5.4/Microsoft.Win32.Registry.dll": {}
         },
         "runtime": {
           "lib/DNXCore50/Microsoft.Win32.Registry.dll": {}
-        }
-      },
-      "runtime.win7.System.Console/4.0.0-beta-23420": {
-        "type": "package",
-        "dependencies": {
-          "System.IO": "4.0.10",
-          "System.IO.FileSystem.Primitives": "4.0.0",
-          "System.Resources.ResourceManager": "4.0.0",
-          "System.Runtime": "4.0.20",
-          "System.Runtime.InteropServices": "4.0.20",
-          "System.Text.Encoding": "4.0.10",
-          "System.Text.Encoding.Extensions": "4.0.10",
-          "System.Threading": "4.0.10",
-          "System.Threading.Tasks": "4.0.10"
-        },
-        "compile": {
-          "ref/dotnet/_._": {}
-        },
-        "runtime": {
-          "runtimes/win7/lib/dotnet5.4/System.Console.dll": {}
         }
       },
       "System.Collections/4.0.10": {
@@ -601,16 +625,6 @@
         },
         "runtime": {
           "lib/DNXCore50/System.Collections.dll": {}
-        }
-      },
-      "System.Console/4.0.0-beta-23420": {
-        "type": "package",
-        "dependencies": {
-          "System.IO": "4.0.0",
-          "System.Runtime": "4.0.0"
-        },
-        "compile": {
-          "ref/dotnet5.1/System.Console.dll": {}
         }
       },
       "System.Diagnostics.Debug/4.0.10": {
@@ -878,6 +892,60 @@
           "lib/dotnet/System.Runtime.InteropServices.RuntimeInformation.dll": {}
         }
       },
+      "System.Security.Claims/4.0.0": {
+        "type": "package",
+        "dependencies": {
+          "System.Collections": "4.0.0",
+          "System.Diagnostics.Debug": "4.0.0",
+          "System.Globalization": "4.0.0",
+          "System.IO": "4.0.0",
+          "System.Resources.ResourceManager": "4.0.0",
+          "System.Runtime": "4.0.20",
+          "System.Runtime.Extensions": "4.0.0",
+          "System.Security.Principal": "4.0.0"
+        },
+        "compile": {
+          "ref/dotnet/System.Security.Claims.dll": {}
+        },
+        "runtime": {
+          "lib/dotnet/System.Security.Claims.dll": {}
+        }
+      },
+      "System.Security.Principal/4.0.0": {
+        "type": "package",
+        "dependencies": {
+          "System.Runtime": "4.0.0"
+        },
+        "compile": {
+          "ref/dotnet/System.Security.Principal.dll": {}
+        },
+        "runtime": {
+          "lib/dotnet/System.Security.Principal.dll": {}
+        }
+      },
+      "System.Security.Principal.Windows/4.0.0-beta-23511": {
+        "type": "package",
+        "dependencies": {
+          "System.Collections": "4.0.0",
+          "System.Diagnostics.Debug": "4.0.0",
+          "System.Reflection": "4.0.10",
+          "System.Resources.ResourceManager": "4.0.0",
+          "System.Runtime": "4.0.20",
+          "System.Runtime.Extensions": "4.0.0",
+          "System.Runtime.Handles": "4.0.0",
+          "System.Runtime.InteropServices": "4.0.20",
+          "System.Security.Claims": "4.0.0",
+          "System.Security.Principal": "4.0.0",
+          "System.Text.Encoding": "4.0.10",
+          "System.Threading": "4.0.10"
+        },
+        "compile": {
+          "ref/dotnet5.4/System.Security.Principal.Windows.dll": {}
+        },
+        "runtime": {
+          "lib/DNXCore50/System.Security.Principal.Windows.dll": {}
+        }
+      },
       "System.Text.Encoding/4.0.10": {
         "type": "package",
         "dependencies": {
@@ -1070,7 +1138,7 @@
           "lib/dotnet/xunit.execution.dotnet.dll": {}
         }
       },
-      "xunit.netcore.extensions/1.0.0-prerelease-00108": {
+      "xunit.netcore.extensions/1.0.0-prerelease-00121": {
         "type": "package",
         "dependencies": {
           "System.Diagnostics.Debug": "4.0.10",
@@ -1110,7 +1178,7 @@
           "lib/dotnet/Microsoft.Win32.Primitives.dll": {}
         }
       },
-      "Microsoft.Win32.Registry/4.0.0-beta-23420": {
+      "Microsoft.Win32.Registry/4.0.0-beta-23511": {
         "type": "package",
         "dependencies": {
           "System.Collections": "4.0.10",
@@ -1122,30 +1190,10 @@
           "System.Runtime.InteropServices": "4.0.20"
         },
         "compile": {
-          "ref/dotnet5.2/Microsoft.Win32.Registry.dll": {}
+          "ref/dotnet5.4/Microsoft.Win32.Registry.dll": {}
         },
         "runtime": {
           "lib/DNXCore50/Microsoft.Win32.Registry.dll": {}
-        }
-      },
-      "runtime.win7.System.Console/4.0.0-beta-23420": {
-        "type": "package",
-        "dependencies": {
-          "System.IO": "4.0.10",
-          "System.IO.FileSystem.Primitives": "4.0.0",
-          "System.Resources.ResourceManager": "4.0.0",
-          "System.Runtime": "4.0.20",
-          "System.Runtime.InteropServices": "4.0.20",
-          "System.Text.Encoding": "4.0.10",
-          "System.Text.Encoding.Extensions": "4.0.10",
-          "System.Threading": "4.0.10",
-          "System.Threading.Tasks": "4.0.10"
-        },
-        "compile": {
-          "ref/dotnet/_._": {}
-        },
-        "runtime": {
-          "runtimes/win7/lib/dotnet5.4/System.Console.dll": {}
         }
       },
       "System.Collections/4.0.10": {
@@ -1158,16 +1206,6 @@
         },
         "runtime": {
           "lib/DNXCore50/System.Collections.dll": {}
-        }
-      },
-      "System.Console/4.0.0-beta-23420": {
-        "type": "package",
-        "dependencies": {
-          "System.IO": "4.0.0",
-          "System.Runtime": "4.0.0"
-        },
-        "compile": {
-          "ref/dotnet5.1/System.Console.dll": {}
         }
       },
       "System.Diagnostics.Debug/4.0.10": {
@@ -1435,6 +1473,60 @@
           "lib/dotnet/System.Runtime.InteropServices.RuntimeInformation.dll": {}
         }
       },
+      "System.Security.Claims/4.0.0": {
+        "type": "package",
+        "dependencies": {
+          "System.Collections": "4.0.0",
+          "System.Diagnostics.Debug": "4.0.0",
+          "System.Globalization": "4.0.0",
+          "System.IO": "4.0.0",
+          "System.Resources.ResourceManager": "4.0.0",
+          "System.Runtime": "4.0.20",
+          "System.Runtime.Extensions": "4.0.0",
+          "System.Security.Principal": "4.0.0"
+        },
+        "compile": {
+          "ref/dotnet/System.Security.Claims.dll": {}
+        },
+        "runtime": {
+          "lib/dotnet/System.Security.Claims.dll": {}
+        }
+      },
+      "System.Security.Principal/4.0.0": {
+        "type": "package",
+        "dependencies": {
+          "System.Runtime": "4.0.0"
+        },
+        "compile": {
+          "ref/dotnet/System.Security.Principal.dll": {}
+        },
+        "runtime": {
+          "lib/dotnet/System.Security.Principal.dll": {}
+        }
+      },
+      "System.Security.Principal.Windows/4.0.0-beta-23511": {
+        "type": "package",
+        "dependencies": {
+          "System.Collections": "4.0.0",
+          "System.Diagnostics.Debug": "4.0.0",
+          "System.Reflection": "4.0.10",
+          "System.Resources.ResourceManager": "4.0.0",
+          "System.Runtime": "4.0.20",
+          "System.Runtime.Extensions": "4.0.0",
+          "System.Runtime.Handles": "4.0.0",
+          "System.Runtime.InteropServices": "4.0.20",
+          "System.Security.Claims": "4.0.0",
+          "System.Security.Principal": "4.0.0",
+          "System.Text.Encoding": "4.0.10",
+          "System.Threading": "4.0.10"
+        },
+        "compile": {
+          "ref/dotnet5.4/System.Security.Principal.Windows.dll": {}
+        },
+        "runtime": {
+          "lib/DNXCore50/System.Security.Principal.Windows.dll": {}
+        }
+      },
       "System.Text.Encoding/4.0.10": {
         "type": "package",
         "dependencies": {
@@ -1627,7 +1719,7 @@
           "lib/dotnet/xunit.execution.dotnet.dll": {}
         }
       },
-      "xunit.netcore.extensions/1.0.0-prerelease-00108": {
+      "xunit.netcore.extensions/1.0.0-prerelease-00121": {
         "type": "package",
         "dependencies": {
           "System.Diagnostics.Debug": "4.0.10",
@@ -1687,41 +1779,28 @@
         "ref/xamarinmac20/_._"
       ]
     },
-    "Microsoft.Win32.Registry/4.0.0-beta-23420": {
+    "Microsoft.Win32.Registry/4.0.0-beta-23511": {
       "type": "package",
       "serviceable": true,
-      "sha512": "1uLm0I85dCdCq49RmJ0zxT6x44RYd9PG3zHYVOOv/Iu+5NQQCzSrdJsJIt9EZvObH5Pwax6dMXg35TEhbKtq+A==",
+      "sha512": "6EmB+/s1W3uXo/sWicrf6/M4+iHJ7A8AZwmCGZitsmPb6Pu9gev8cZALvjw4fSwrpwxUvc6W5azNRjJXXrD80A==",
       "files": [
         "lib/DNXCore50/Microsoft.Win32.Registry.dll",
         "lib/net46/Microsoft.Win32.Registry.dll",
-        "Microsoft.Win32.Registry.4.0.0-beta-23420.nupkg",
-        "Microsoft.Win32.Registry.4.0.0-beta-23420.nupkg.sha512",
+        "Microsoft.Win32.Registry.4.0.0-beta-23511.nupkg",
+        "Microsoft.Win32.Registry.4.0.0-beta-23511.nupkg.sha512",
         "Microsoft.Win32.Registry.nuspec",
-        "ref/dotnet5.2/de/Microsoft.Win32.Registry.xml",
-        "ref/dotnet5.2/es/Microsoft.Win32.Registry.xml",
-        "ref/dotnet5.2/fr/Microsoft.Win32.Registry.xml",
-        "ref/dotnet5.2/it/Microsoft.Win32.Registry.xml",
-        "ref/dotnet5.2/ja/Microsoft.Win32.Registry.xml",
-        "ref/dotnet5.2/ko/Microsoft.Win32.Registry.xml",
-        "ref/dotnet5.2/Microsoft.Win32.Registry.dll",
-        "ref/dotnet5.2/Microsoft.Win32.Registry.xml",
-        "ref/dotnet5.2/ru/Microsoft.Win32.Registry.xml",
-        "ref/dotnet5.2/zh-hans/Microsoft.Win32.Registry.xml",
-        "ref/dotnet5.2/zh-hant/Microsoft.Win32.Registry.xml",
+        "ref/dotnet5.4/de/Microsoft.Win32.Registry.xml",
+        "ref/dotnet5.4/es/Microsoft.Win32.Registry.xml",
+        "ref/dotnet5.4/fr/Microsoft.Win32.Registry.xml",
+        "ref/dotnet5.4/it/Microsoft.Win32.Registry.xml",
+        "ref/dotnet5.4/ja/Microsoft.Win32.Registry.xml",
+        "ref/dotnet5.4/ko/Microsoft.Win32.Registry.xml",
+        "ref/dotnet5.4/Microsoft.Win32.Registry.dll",
+        "ref/dotnet5.4/Microsoft.Win32.Registry.xml",
+        "ref/dotnet5.4/ru/Microsoft.Win32.Registry.xml",
+        "ref/dotnet5.4/zh-hans/Microsoft.Win32.Registry.xml",
+        "ref/dotnet5.4/zh-hant/Microsoft.Win32.Registry.xml",
         "ref/net46/Microsoft.Win32.Registry.dll"
-      ]
-    },
-    "runtime.win7.System.Console/4.0.0-beta-23420": {
-      "type": "package",
-      "serviceable": true,
-      "sha512": "lW/nQAzE+15qR8y4btjxAdBUI8FH9iA9PQ2B4XzxBNq5E2UbXU5s9w6B7jTV3twEklJtT1R0MoS/9HRL1qp1kw==",
-      "files": [
-        "ref/dotnet/_._",
-        "runtime.win7.System.Console.4.0.0-beta-23420.nupkg",
-        "runtime.win7.System.Console.4.0.0-beta-23420.nupkg.sha512",
-        "runtime.win7.System.Console.nuspec",
-        "runtimes/win7/lib/dotnet5.4/System.Console.dll",
-        "runtimes/win7/lib/net/_._"
       ]
     },
     "System.Collections/4.0.10": {
@@ -1756,38 +1835,6 @@
         "System.Collections.4.0.10.nupkg",
         "System.Collections.4.0.10.nupkg.sha512",
         "System.Collections.nuspec"
-      ]
-    },
-    "System.Console/4.0.0-beta-23420": {
-      "type": "package",
-      "serviceable": true,
-      "sha512": "2dxC8xRy9QRE1kt+7zXeceAKIqWK+T3SghGNjY9Sk/hC+WOYRQo4x3Zci6sz2a17WHXDoTPjO1rBrEPMG/e2jQ==",
-      "files": [
-        "lib/MonoAndroid10/_._",
-        "lib/MonoTouch10/_._",
-        "lib/net46/System.Console.dll",
-        "lib/xamarinios10/_._",
-        "lib/xamarinmac20/_._",
-        "ref/dotnet5.1/de/System.Console.xml",
-        "ref/dotnet5.1/es/System.Console.xml",
-        "ref/dotnet5.1/fr/System.Console.xml",
-        "ref/dotnet5.1/it/System.Console.xml",
-        "ref/dotnet5.1/ja/System.Console.xml",
-        "ref/dotnet5.1/ko/System.Console.xml",
-        "ref/dotnet5.1/ru/System.Console.xml",
-        "ref/dotnet5.1/System.Console.dll",
-        "ref/dotnet5.1/System.Console.xml",
-        "ref/dotnet5.1/zh-hans/System.Console.xml",
-        "ref/dotnet5.1/zh-hant/System.Console.xml",
-        "ref/MonoAndroid10/_._",
-        "ref/MonoTouch10/_._",
-        "ref/net46/System.Console.dll",
-        "ref/xamarinios10/_._",
-        "ref/xamarinmac20/_._",
-        "runtime.json",
-        "System.Console.4.0.0-beta-23420.nupkg",
-        "System.Console.4.0.0-beta-23420.nupkg.sha512",
-        "System.Console.nuspec"
       ]
     },
     "System.Diagnostics.Debug/4.0.10": {
@@ -2423,6 +2470,95 @@
         "System.Runtime.InteropServices.RuntimeInformation.nuspec"
       ]
     },
+    "System.Security.Claims/4.0.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "94NFR/7JN3YdyTH7hl2iSvYmdA8aqShriTHectcK+EbizT71YczMaG6LuqJBQP/HWo66AQyikYYM9aw+4EzGXg==",
+      "files": [
+        "lib/dotnet/System.Security.Claims.dll",
+        "lib/MonoAndroid10/_._",
+        "lib/MonoTouch10/_._",
+        "lib/net46/System.Security.Claims.dll",
+        "lib/xamarinios10/_._",
+        "lib/xamarinmac20/_._",
+        "ref/dotnet/de/System.Security.Claims.xml",
+        "ref/dotnet/es/System.Security.Claims.xml",
+        "ref/dotnet/fr/System.Security.Claims.xml",
+        "ref/dotnet/it/System.Security.Claims.xml",
+        "ref/dotnet/ja/System.Security.Claims.xml",
+        "ref/dotnet/ko/System.Security.Claims.xml",
+        "ref/dotnet/ru/System.Security.Claims.xml",
+        "ref/dotnet/System.Security.Claims.dll",
+        "ref/dotnet/System.Security.Claims.xml",
+        "ref/dotnet/zh-hans/System.Security.Claims.xml",
+        "ref/dotnet/zh-hant/System.Security.Claims.xml",
+        "ref/MonoAndroid10/_._",
+        "ref/MonoTouch10/_._",
+        "ref/net46/System.Security.Claims.dll",
+        "ref/xamarinios10/_._",
+        "ref/xamarinmac20/_._",
+        "System.Security.Claims.4.0.0.nupkg",
+        "System.Security.Claims.4.0.0.nupkg.sha512",
+        "System.Security.Claims.nuspec"
+      ]
+    },
+    "System.Security.Principal/4.0.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "FOhq3jUOONi6fp5j3nPYJMrKtSJlqAURpjiO3FaDIV4DJNEYymWW5uh1pfxySEB8dtAW+I66IypzNge/w9OzZQ==",
+      "files": [
+        "lib/dotnet/System.Security.Principal.dll",
+        "lib/net45/_._",
+        "lib/netcore50/System.Security.Principal.dll",
+        "lib/win8/_._",
+        "lib/wp80/_._",
+        "lib/wpa81/_._",
+        "ref/dotnet/de/System.Security.Principal.xml",
+        "ref/dotnet/es/System.Security.Principal.xml",
+        "ref/dotnet/fr/System.Security.Principal.xml",
+        "ref/dotnet/it/System.Security.Principal.xml",
+        "ref/dotnet/ja/System.Security.Principal.xml",
+        "ref/dotnet/ko/System.Security.Principal.xml",
+        "ref/dotnet/ru/System.Security.Principal.xml",
+        "ref/dotnet/System.Security.Principal.dll",
+        "ref/dotnet/System.Security.Principal.xml",
+        "ref/dotnet/zh-hans/System.Security.Principal.xml",
+        "ref/dotnet/zh-hant/System.Security.Principal.xml",
+        "ref/net45/_._",
+        "ref/netcore50/System.Security.Principal.dll",
+        "ref/netcore50/System.Security.Principal.xml",
+        "ref/win8/_._",
+        "ref/wp80/_._",
+        "ref/wpa81/_._",
+        "System.Security.Principal.4.0.0.nupkg",
+        "System.Security.Principal.4.0.0.nupkg.sha512",
+        "System.Security.Principal.nuspec"
+      ]
+    },
+    "System.Security.Principal.Windows/4.0.0-beta-23511": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "r9s1wfUOJ67SetTMLc1GrWW+idBHn8TvC5BbfzNLyY6MiA9XgdW4Yvb7HmRSEhsWkHEugKQyxYugxHfGRJpVuw==",
+      "files": [
+        "lib/DNXCore50/System.Security.Principal.Windows.dll",
+        "lib/net46/System.Security.Principal.Windows.dll",
+        "ref/dotnet5.4/de/System.Security.Principal.Windows.xml",
+        "ref/dotnet5.4/es/System.Security.Principal.Windows.xml",
+        "ref/dotnet5.4/fr/System.Security.Principal.Windows.xml",
+        "ref/dotnet5.4/it/System.Security.Principal.Windows.xml",
+        "ref/dotnet5.4/ja/System.Security.Principal.Windows.xml",
+        "ref/dotnet5.4/ko/System.Security.Principal.Windows.xml",
+        "ref/dotnet5.4/ru/System.Security.Principal.Windows.xml",
+        "ref/dotnet5.4/System.Security.Principal.Windows.dll",
+        "ref/dotnet5.4/System.Security.Principal.Windows.xml",
+        "ref/dotnet5.4/zh-hans/System.Security.Principal.Windows.xml",
+        "ref/dotnet5.4/zh-hant/System.Security.Principal.Windows.xml",
+        "ref/net46/System.Security.Principal.Windows.dll",
+        "System.Security.Principal.Windows.4.0.0-beta-23511.nupkg",
+        "System.Security.Principal.Windows.4.0.0-beta-23511.nupkg.sha512",
+        "System.Security.Principal.Windows.nuspec"
+      ]
+    },
     "System.Text.Encoding/4.0.10": {
       "type": "package",
       "sha512": "fNlSFgy4OuDlJrP9SFFxMlaLazq6ipv15sU5TiEgg9UCVnA/OgoVUfymFp4AOk1jOkW5SVxWbeeIUptcM+m/Vw==",
@@ -2811,34 +2947,27 @@
         "xunit.extensibility.execution.nuspec"
       ]
     },
-    "xunit.netcore.extensions/1.0.0-prerelease-00108": {
+    "xunit.netcore.extensions/1.0.0-prerelease-00121": {
       "type": "package",
       "serviceable": true,
-      "sha512": "rNaXYaJhr7Vh28CjaKZoUgOXf9wIXYXYEyWvdyCr2NgrjTEaQwx+fn/PYD6BSt6orxNjgwrsQdAGzFJrhallQw==",
+      "sha512": "mNlM09rW84INiukmuUCukBf+MW/VZWsy6Nhnc7l7WqAwzkvdIS3BEzA7tQvfaL6XN2bFEULqsDaW5kapvmAzOg==",
       "files": [
         "lib/dotnet/Xunit.NetCore.Extensions.dll",
-        "xunit.netcore.extensions.1.0.0-prerelease-00108.nupkg",
-        "xunit.netcore.extensions.1.0.0-prerelease-00108.nupkg.sha512",
+        "xunit.netcore.extensions.1.0.0-prerelease-00121.nupkg",
+        "xunit.netcore.extensions.1.0.0-prerelease-00121.nupkg.sha512",
         "xunit.netcore.extensions.nuspec"
       ]
     }
   },
   "projectFileDependencyGroups": {
     "": [
-      "Microsoft.Win32.Primitives >= 4.0.0",
       "Microsoft.Win32.Registry >= 4.0.0-beta-*",
-      "System.Console >= 4.0.0-beta-*",
       "System.Diagnostics.Process >= 4.0.0-beta-*",
-      "System.IO >= 4.0.10",
-      "System.Reflection >= 4.0.10",
-      "System.Reflection.Primitives >= 4.0.0",
       "System.Runtime >= 4.0.20",
-      "System.Runtime.Handles >= 4.0.0",
-      "System.Runtime.InteropServices >= 4.0.20",
-      "System.Text.Encoding >= 4.0.10",
       "System.Threading.Tasks >= 4.0.10",
       "xunit >= 2.1.0",
-      "xunit.netcore.extensions >= 1.0.0-prerelease-*"
+      "xunit.netcore.extensions >= 1.0.0-prerelease-*",
+      "System.Security.Principal.Windows >= 4.0.0-beta-*"
     ],
     "DNXCore,Version=v5.0": []
   }

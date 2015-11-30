@@ -6,7 +6,9 @@ using System.Diagnostics;
 using System.Net.Security;
 using System.Runtime.InteropServices;
 using System.Security.Authentication;
+using System.Security.Authentication.ExtendedProtection;
 using System.Security.Cryptography;
+using System.Text;
 using Microsoft.Win32.SafeHandles;
 
 internal static partial class Interop
@@ -34,13 +36,13 @@ internal static partial class Interop
         internal static extern IntPtr TlsV1_2Method();
 
         [DllImport(Libraries.CryptoNative)]
-        internal static extern void SetProtocolOptions(SafeSslContextHandle ctx, SslProtocols protocols);
-
-        [DllImport(Libraries.CryptoNative)]
         internal static extern SafeSslHandle SslCreate(SafeSslContextHandle ctx);
 
         [DllImport(Libraries.CryptoNative)]
         internal static extern SslErrorCode SslGetError(SafeSslHandle ssl, int ret);
+
+        [DllImport(Libraries.CryptoNative)]
+        internal static extern SslErrorCode SslGetError(IntPtr ssl, int ret);
 
         [DllImport(Libraries.CryptoNative)]
         internal static extern void SslDestroy(IntPtr ssl);
@@ -79,7 +81,7 @@ internal static partial class Interop
         internal static extern bool IsSslRenegotiatePending(SafeSslHandle ssl);
 
         [DllImport(Libraries.CryptoNative)]
-        internal static extern int SslShutdown(SafeSslHandle ssl);
+        internal static extern int SslShutdown(IntPtr ssl);
 
         [DllImport(Libraries.CryptoNative)]
         internal static extern void SslSetBio(SafeSslHandle ssl, SafeBioHandle rbio, SafeBioHandle wbio);
@@ -102,16 +104,19 @@ internal static partial class Interop
         internal static extern SafeSharedX509StackHandle SslGetPeerCertChain(SafeSslHandle ssl);
 
         [DllImport(Libraries.CryptoNative)]
-        internal static extern int SslCtxUseCertificate(SafeSslContextHandle ctx, SafeX509Handle certPtr);
+        internal static extern void GetStreamSizes(out int header, out int trailer, out int maximumMessage);
 
         [DllImport(Libraries.CryptoNative)]
-        internal static extern int SslCtxUsePrivateKey(SafeSslContextHandle ctx, SafeEvpPKeyHandle keyPtr);
+        internal static extern int SslGetPeerFinished(SafeSslHandle ssl, IntPtr buf, int count);
 
         [DllImport(Libraries.CryptoNative)]
-        internal static extern int SslCtxCheckPrivateKey(SafeSslContextHandle ctx);
+        internal static extern int SslGetFinished(SafeSslHandle ssl, IntPtr buf, int count);
 
         [DllImport(Libraries.CryptoNative)]
-        internal static extern void SslCtxSetQuietShutdown(SafeSslContextHandle ctx);
+        internal static extern bool SslSessionReused(SafeSslHandle ssl);
+
+        [DllImport(Libraries.CryptoNative)]
+        internal static extern bool SslAddExtraChainCert(SafeSslHandle ssl, SafeX509Handle x509);
 
         [DllImport(Libraries.CryptoNative, EntryPoint = "SslGetClientCAList")]
         private static extern SafeSharedX509NameStackHandle SslGetClientCAList_private(SafeSslHandle ssl);
@@ -129,18 +134,6 @@ internal static partial class Interop
 
             return handle;
         }
-
-        [DllImport(Libraries.CryptoNative)]
-        internal static extern void SslCtxSetVerify(SafeSslContextHandle ctx, SslCtxSetVerifyCallback callback);
-
-        [DllImport(Libraries.CryptoNative)]
-        internal static extern void SetEncryptionPolicy(SafeSslContextHandle ctx, EncryptionPolicy policy);
-
-        [DllImport(Libraries.CryptoNative)]
-        internal static extern void SslCtxSetClientCAList(SafeSslContextHandle ctx, SafeX509NameStackHandle x509NameStackPtr);
-
-        [DllImport(Libraries.CryptoNative)]
-        internal static extern void GetStreamSizes(out int header, out int trailer, out int maximumMessage);
 
         internal static class SslMethods
         {
@@ -176,6 +169,7 @@ namespace Microsoft.Win32.SafeHandles
         private SafeBioHandle _readBio;
         private SafeBioHandle _writeBio;
         private bool _isServer;
+        private bool _handshakeCompleted = false;
 
         public bool IsServer
         {
@@ -196,6 +190,11 @@ namespace Microsoft.Win32.SafeHandles
             {
                 return _writeBio;
             }
+        }
+
+        internal void MarkHandshakeCompleted()
+        {
+            _handshakeCompleted = true;
         }
 
         public static SafeSslHandle Create(SafeSslContextHandle context, bool isServer)
@@ -263,6 +262,11 @@ namespace Microsoft.Win32.SafeHandles
 
         protected override bool ReleaseHandle()
         {
+            if (_handshakeCompleted)
+            {
+                Disconnect();
+            }
+
             Interop.Ssl.SslDestroy(handle);
             if (_readBio != null)
             {
@@ -275,8 +279,118 @@ namespace Microsoft.Win32.SafeHandles
             return true;
         }
 
+        private void Disconnect()
+        {
+            Debug.Assert(!IsInvalid, "Expected a valid context in Disconnect");
+            int retVal = Interop.Ssl.SslShutdown(handle);
+            if (retVal < 0)
+            {
+                //TODO (Issue #4031) check this error
+                Interop.Ssl.SslGetError(handle, retVal);
+            }
+        }
+
         private SafeSslHandle() : base(IntPtr.Zero, true)
         {
+        }
+
+        internal SafeSslHandle(IntPtr validSslPointer, bool ownsHandle) : base(IntPtr.Zero, ownsHandle)
+        {
+            handle = validSslPointer;
+        }
+    }
+
+    internal sealed class SafeChannelBindingHandle : SafeHandle
+    {
+        [StructLayout(LayoutKind.Sequential)]
+        private struct SecChannelBindings
+        {
+            internal int InitiatorLength;
+            internal int InitiatorOffset;
+            internal int AcceptorAddrType;
+            internal int AcceptorLength;
+            internal int AcceptorOffset;
+            internal int ApplicationDataLength;
+            internal int ApplicationDataOffset;
+        }
+
+        private static readonly byte[] s_tlsServerEndPointByteArray = Encoding.UTF8.GetBytes("tls-server-end-point:");
+        private static readonly byte[] s_tlsUniqueByteArray = Encoding.UTF8.GetBytes("tls-unique:");
+        private static readonly int s_secChannelBindingSize = Marshal.SizeOf<SecChannelBindings>();
+        private readonly int _cbtPrefixByteArraySize;
+        private const int CertHashMaxSize = 128;
+
+        internal int Length
+        {
+            get;
+            private set;
+        }
+
+        internal IntPtr CertHashPtr
+        {
+            get;
+            private set;
+        }
+
+        internal void SetCertHash(byte[] certHashBytes)
+        {
+            Debug.Assert(certHashBytes != null, "check certHashBytes is not null");
+            int length = certHashBytes.Length;
+            Marshal.Copy(certHashBytes, 0, CertHashPtr, length);
+            SetCertHashLength(length);
+        }
+
+        private byte[] GetPrefixBytes(ChannelBindingKind kind)
+        {
+            if (kind == ChannelBindingKind.Endpoint)
+            {
+                return s_tlsServerEndPointByteArray;
+            }
+            else if (kind == ChannelBindingKind.Unique)
+            {
+                return s_tlsUniqueByteArray;
+            }
+            else
+            {
+                throw new NotSupportedException();
+            }
+        }
+
+        internal SafeChannelBindingHandle(ChannelBindingKind kind)
+            : base(IntPtr.Zero, true)
+        {
+            byte[] cbtPrefix = GetPrefixBytes(kind);
+            _cbtPrefixByteArraySize = cbtPrefix.Length;
+            handle = Marshal.AllocHGlobal(s_secChannelBindingSize + _cbtPrefixByteArraySize + CertHashMaxSize);
+            IntPtr cbtPrefixPtr = handle + s_secChannelBindingSize;
+            Marshal.Copy(cbtPrefix, 0, cbtPrefixPtr, _cbtPrefixByteArraySize);
+            CertHashPtr = cbtPrefixPtr + _cbtPrefixByteArraySize;
+            Length = CertHashMaxSize;
+        }
+
+        internal void SetCertHashLength(int certHashLength)
+        {
+            int cbtLength = _cbtPrefixByteArraySize + certHashLength;
+            Length = s_secChannelBindingSize + cbtLength;
+
+            SecChannelBindings channelBindings = new SecChannelBindings()
+            {
+                ApplicationDataLength = cbtLength,
+                ApplicationDataOffset = s_secChannelBindingSize
+            };
+            Marshal.StructureToPtr(channelBindings, handle, true);
+        }
+
+        public override bool IsInvalid
+        {
+            get { return handle == IntPtr.Zero; }
+        }
+
+        protected override bool ReleaseHandle()
+        {
+            Marshal.FreeHGlobal(handle);
+            SetHandle(IntPtr.Zero);
+            return true;
         }
     }
 }

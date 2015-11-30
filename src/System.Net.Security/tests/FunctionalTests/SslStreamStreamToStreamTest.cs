@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Linq;
+using System.Net.Test.Common;
 using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
@@ -14,7 +15,6 @@ namespace System.Net.Security.Tests
     public class SslStreamStreamToStreamTest
     {
         private readonly byte[] sampleMsg = Encoding.UTF8.GetBytes("Sample Test Message");
-        private readonly TimeSpan TestTimeoutSpan = TimeSpan.FromSeconds(TestConfiguration.TestTimeoutSeconds);
 
         [Fact]
         public void SslStream_StreamToStream_Authentication_Success()
@@ -28,10 +28,10 @@ namespace System.Net.Security.Tests
             {
                 X509Certificate2 certificate = TestConfiguration.GetServerCertificate();
                 Task[] auth = new Task[2];
-                auth[0] = client.AuthenticateAsClientAsync(certificate.Subject);
+                auth[0] = client.AuthenticateAsClientAsync(certificate.GetNameInfo(X509NameType.SimpleName, false));
                 auth[1] = server.AuthenticateAsServerAsync(certificate);
 
-                bool finished = Task.WaitAll(auth, TestTimeoutSpan);
+                bool finished = Task.WaitAll(auth, TestConfiguration.PassingTestTimeoutMilliseconds);
                 Assert.True(finished, "Handshake completed in the allotted time");
             }
         }
@@ -78,13 +78,9 @@ namespace System.Net.Security.Tests
 
                 serverSslStream.Read(recvBuf, 0, sampleMsg.Length);
 
-                clientSslStream.Write(sampleMsg);
+                Assert.True(VerifyOutput(recvBuf, sampleMsg), "verify first read data is as expected.");
 
-                // TODO Test Issue #3802
-                // The condition on which read method (UpdateReadStream) in FakeNetworkStream does a network read is flawed.
-                // That works fine in single read/write but fails in multi read write as stream size can be more, but real data can be < stream size.
-                // So I am doing an explicit read here. This issue is specific to test only & irrespective of xplat.
-                serverStream.DoNetworkRead();
+                clientSslStream.Write(sampleMsg);
 
                 serverSslStream.Read(recvBuf, 0, sampleMsg.Length);
 
@@ -103,12 +99,23 @@ namespace System.Net.Security.Tests
             X509Chain chain,
             SslPolicyErrors sslPolicyErrors)
         {
-            if (sslPolicyErrors != SslPolicyErrors.RemoteCertificateNameMismatch)
+            SslPolicyErrors expectedSslPolicyErrors = SslPolicyErrors.None;
+
+            if (!Capability.IsTrustedRootCertificateInstalled())
+            {
+                expectedSslPolicyErrors = SslPolicyErrors.RemoteCertificateChainErrors;
+            }
+
+            Assert.Equal(expectedSslPolicyErrors, sslPolicyErrors);
+
+            if (sslPolicyErrors == expectedSslPolicyErrors)
             {
                 return true;
             }
-
-            return false;
+            else
+            {
+                return false;
+            }
         }
 
         private bool DoHandshake(SslStream clientSslStream, SslStream serverSslStream)
@@ -119,7 +126,7 @@ namespace System.Net.Security.Tests
             auth[0] = clientSslStream.AuthenticateAsClientAsync(certificate.GetNameInfo(X509NameType.SimpleName, false));
             auth[1] = serverSslStream.AuthenticateAsServerAsync(certificate);
 
-            bool finished = Task.WaitAll(auth, TestTimeoutSpan);
+            bool finished = Task.WaitAll(auth, TestConfiguration.PassingTestTimeoutMilliseconds);
             return finished;
         }
     }

@@ -1,8 +1,7 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System.Collections.ObjectModel;
-using System.IO;
+using System.Collections.Generic;
 
 namespace System.Net.NetworkInformation
 {
@@ -26,39 +25,15 @@ namespace System.Net.NetworkInformation
             _ipv6Properties = new LinuxIPv6InterfaceProperties(lni);
         }
 
-        public override bool IsDynamicDnsEnabled
-        {
-            get
-            {
-                throw new PlatformNotSupportedException();
-            }
-        }
+        public override bool IsDynamicDnsEnabled { get { throw new PlatformNotSupportedException(SR.net_InformationUnavailableOnPlatform); } }
 
-        public override IPAddressInformationCollection AnycastAddresses
-        {
-            get
-            {
-                throw new PlatformNotSupportedException();
-            }
-        }
+        public override IPAddressInformationCollection AnycastAddresses { get { throw new PlatformNotSupportedException(SR.net_InformationUnavailableOnPlatform); } }
 
         public override GatewayIPAddressInformationCollection GatewayAddresses { get { return _gatewayAddresses; } }
 
-        public override IPAddressCollection DhcpServerAddresses
-        {
-            get
-            {
-                return _dhcpServerAddresses;
-            }
-        }
+        public override IPAddressCollection DhcpServerAddresses { get { return _dhcpServerAddresses; } }
 
-        public override IPAddressCollection WinsServersAddresses
-        {
-            get
-            {
-                return _winsServerAddresses;
-            }
-        }
+        public override IPAddressCollection WinsServersAddresses { get { return _winsServerAddresses; } }
 
         public override IPv4InterfaceProperties GetIPv4Properties()
         {
@@ -74,21 +49,21 @@ namespace System.Net.NetworkInformation
         // and seperates the information about by each interface.
         public GatewayIPAddressInformationCollection GetGatewayAddresses()
         {
-            Collection<GatewayIPAddressInformation> innerCollection
+            List<GatewayIPAddressInformation> innerCollection
                 = StringParsingHelpers.ParseGatewayAddressesFromRouteFile(NetworkFiles.Ipv4RouteFile, _linuxNetworkInterface.Name);
             return new GatewayIPAddressInformationCollection(innerCollection);
         }
 
         private IPAddressCollection GetDhcpServerAddresses()
         {
-            Collection<IPAddress> internalCollection
+            List<IPAddress> internalCollection
                 = StringParsingHelpers.ParseDhcpServerAddressesFromLeasesFile(NetworkFiles.DHClientLeasesFile, _linuxNetworkInterface.Name);
             return new InternalIPAddressCollection(internalCollection);
         }
 
         private IPAddressCollection GetWinsServerAddresses()
         {
-            Collection<IPAddress> internalCollection
+            List<IPAddress> internalCollection
                 = StringParsingHelpers.ParseWinsServerAddressesFromSmbConfFile(NetworkFiles.SmbConfFile);
             return new InternalIPAddressCollection(internalCollection);
         }

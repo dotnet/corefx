@@ -61,11 +61,12 @@ namespace System.Data.SqlClient.SNI
         {
             try
             {
-                SendControlPacket(SNISMUXFlags.SMUX_FIN, false);
+                SendControlPacket(SNISMUXFlags.SMUX_FIN);
             }
             catch (Exception e)
             {
-                SNICommon.ReportSNIError(SNIProviders.SMUX_PROV, 0, 0, e.Message);
+                SNICommon.ReportSNIError(SNIProviders.SMUX_PROV, SNICommon.InternalExceptionError, e);
+                throw;
             }
         }
 
@@ -81,7 +82,7 @@ namespace System.Data.SqlClient.SNI
             _sessionId = sessionId;
             _connection = connection;
             _callbackObject = callbackObject;
-            SendControlPacket(SNISMUXFlags.SMUX_SYN, async);
+            SendControlPacket(SNISMUXFlags.SMUX_SYN);
             _status = TdsEnums.SNI_SUCCESS;
         }
 
@@ -89,8 +90,7 @@ namespace System.Data.SqlClient.SNI
         /// Send control packet
         /// </summary>
         /// <param name="flags">SMUX header flags</param>
-        /// <param name="async">true if packet should be sent asynchronously</param>
-        private void SendControlPacket(SNISMUXFlags flags, bool async)
+        private void SendControlPacket(SNISMUXFlags flags)
         {
             byte[] headerBytes = null;
 
@@ -101,15 +101,8 @@ namespace System.Data.SqlClient.SNI
 
             SNIPacket packet = new SNIPacket(null);
             packet.SetData(headerBytes, SNISMUXHeader.HEADER_LENGTH);
-
-            if (async)
-            {
-                _connection.SendAsync(packet, (sentPacket, error) => { });
-            }
-            else
-            {
-                _connection.Send(packet);
-            }
+            
+            _connection.Send(packet);
         }
 
         /// <summary>
@@ -287,8 +280,7 @@ namespace System.Data.SqlClient.SNI
 
                 if (_connectionError != null)
                 {
-                    SNILoadHandle.SingletonInstance.LastError = _connectionError;
-                    return TdsEnums.SNI_ERROR;
+                    return SNICommon.ReportSNIError(_connectionError);
                 }
 
                 if (queueCount == 0)
@@ -419,7 +411,7 @@ namespace System.Data.SqlClient.SNI
 
             if (receiveHighwater - receiveHighwaterLastAck > ACK_THRESHOLD)
             {
-                SendControlPacket(SNISMUXFlags.SMUX_ACK, true);
+                SendControlPacket(SNISMUXFlags.SMUX_ACK);
             }
         }
 
@@ -427,10 +419,11 @@ namespace System.Data.SqlClient.SNI
         /// Receive a packet synchronously
         /// </summary>
         /// <param name="packet">SNI packet</param>
-        /// <param name="timeout">Timeout</param>
+        /// <param name="timeoutInMilliseconds">Timeout in Milliseconds</param>
         /// <returns>SNI error code</returns>
-        public override uint Receive(ref SNIPacket packet, int timeout)
+        public override uint Receive(out SNIPacket packet, int timeoutInMilliseconds)
         {
+            packet = null;
             int queueCount;
             uint result = TdsEnums.SNI_SUCCESS_IO_PENDING;
 
@@ -440,8 +433,7 @@ namespace System.Data.SqlClient.SNI
                 {
                     if (_connectionError != null)
                     {
-                        SNILoadHandle.SingletonInstance.LastError = _connectionError;
-                        return TdsEnums.SNI_ERROR;
+                        return SNICommon.ReportSNIError(_connectionError);
                     }
 
                     queueCount = _receivedPacketQueue.Count;
@@ -470,9 +462,9 @@ namespace System.Data.SqlClient.SNI
                     return result;
                 }
 
-                if (!_packetEvent.Wait(timeout))
+                if (!_packetEvent.Wait(timeoutInMilliseconds))
                 {
-                    SNILoadHandle.SingletonInstance.LastError = new SNIError(SNIProviders.SMUX_PROV, 0, 0, "Timeout error");
+                    SNILoadHandle.SingletonInstance.LastError = new SNIError(SNIProviders.SMUX_PROV, 0, SNICommon.ConnTimeoutError, string.Empty);
                     return TdsEnums.SNI_WAIT_TIMEOUT;
                 }
             }
@@ -494,6 +486,14 @@ namespace System.Data.SqlClient.SNI
         /// <param name="receiveCallback">Receive callback</param>
         /// <param name="sendCallback">Send callback</param>
         public override void SetAsyncCallbacks(SNIAsyncCallback receiveCallback, SNIAsyncCallback sendCallback)
+        {
+        }
+
+        /// <summary>
+        /// Set buffer size
+        /// </summary>
+        /// <param name="bufferSize">Buffer size</param>
+        public override void SetBufferSize(int bufferSize)
         {
         }
 

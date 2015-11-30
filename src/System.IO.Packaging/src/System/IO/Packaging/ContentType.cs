@@ -80,7 +80,7 @@ namespace System.IO.Packaging
             if (contentType == null)
                 throw new ArgumentNullException("contentType");
 
-            if (String.CompareOrdinal(contentType, String.Empty) == 0)
+            if (contentType.Length == 0)
             {
                 _contentType = String.Empty;
             }
@@ -231,8 +231,8 @@ namespace System.IO.Packaging
                 // safe comparison because the _type and _subType strings have been restricted to
                 // ASCII characters, digits, and a small set of symbols.  This is not a safe comparison
                 // for the broader set of strings that have not been restricted in the same way.
-                result = (String.Compare(_type, contentType.TypeComponent, StringComparison.OrdinalIgnoreCase) == 0 &&
-                          String.Compare(_subType, contentType.SubTypeComponent, StringComparison.OrdinalIgnoreCase) == 0);
+                result = (String.Equals(_type, contentType.TypeComponent, StringComparison.OrdinalIgnoreCase) &&
+                          String.Equals(_subType, contentType.SubTypeComponent, StringComparison.OrdinalIgnoreCase));
             }
             return result;
         }
@@ -259,14 +259,14 @@ namespace System.IO.Packaging
 
                 if (_parameterDictionary != null && _parameterDictionary.Count > 0)
                 {
-                    foreach (string paramterKey in _parameterDictionary.Keys)
+                    foreach (string parameterKey in _parameterDictionary.Keys)
                     {
                         stringBuilder.Append(s_linearWhiteSpaceChars[0]);
                         stringBuilder.Append(SemicolonSeparator);
                         stringBuilder.Append(s_linearWhiteSpaceChars[0]);
-                        stringBuilder.Append(paramterKey);
+                        stringBuilder.Append(parameterKey);
                         stringBuilder.Append(EqualSeparator);
-                        stringBuilder.Append(_parameterDictionary[paramterKey]);
+                        stringBuilder.Append(_parameterDictionary[parameterKey]);
                     }
                 }
 
@@ -387,7 +387,7 @@ namespace System.IO.Packaging
         }
 
         /// <summary>
-        /// Parses the type ans subType tokens from the string. 
+        /// Parses the type and subType tokens from the string. 
         /// Also verifies if the Tokens are valid as per the grammar.
         /// </summary>
         /// <param name="typeAndSubType">substring that has the type and subType of the content type</param>
@@ -524,25 +524,14 @@ namespace System.IO.Packaging
         /// <exception cref="ArgumentException">If the token is Empty</exception>
         private static string ValidateToken(string token)
         {
-            if (String.CompareOrdinal(token, String.Empty) == 0)
+            if (String.IsNullOrEmpty(token))
                 throw new ArgumentException(SR.InvalidToken);
 
             for (int i = 0; i < token.Length; i++)
             {
-                if (IsAsciiLetterOrDigit(token[i]))
+                if (!IsAsciiLetterOrDigit(token[i]) && !IsAllowedCharacter(token[i]))
                 {
-                    continue;
-                }
-                else
-                {
-                    if (IsAllowedCharacter(token[i]))
-                    {
-                        continue;
-                    }
-                    else
-                    {
-                        throw new ArgumentException(SR.InvalidToken);
-                    }
+                    throw new ArgumentException(SR.InvalidToken);
                 }
             }
 
@@ -558,7 +547,7 @@ namespace System.IO.Packaging
         /// <exception cref="ArgumentException">If the paramter value is empty</exception>
         private static string ValidateQuotedStringOrToken(string parameterValue)
         {
-            if (String.CompareOrdinal(parameterValue, String.Empty) == 0)
+            if (String.IsNullOrEmpty(parameterValue))
                 throw new ArgumentException(SR.InvalidParameterValue);
 
             if (parameterValue.Length >= 2 &&
@@ -619,15 +608,7 @@ namespace System.IO.Packaging
         /// <returns></returns>
         private static bool IsAsciiLetterOrDigit(char character)
         {
-            if (IsAsciiLetter(character))
-            {
-                return true;
-            }
-            if (character >= '0')
-            {
-                return (character <= '9');
-            }
-            return false;
+            return (IsAsciiLetter(character) || (character >= '0' && character <= '9'));
         }
 
         /// <summary>
@@ -662,14 +643,9 @@ namespace System.IO.Packaging
             {
                 return false;
             }
-
-            foreach (char c in s_linearWhiteSpaceChars)
-            {
-                if (ch == c)
-                    return true;
-            }
-
-            return false;
+            
+            int whiteSpaceIndex = Array.IndexOf(s_linearWhiteSpaceChars, ch);
+            return whiteSpaceIndex != -1;
         }
 
         /// <summary>

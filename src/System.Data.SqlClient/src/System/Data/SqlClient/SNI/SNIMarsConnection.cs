@@ -68,8 +68,7 @@ namespace System.Data.SqlClient.SNI
                 return TdsEnums.SNI_SUCCESS_IO_PENDING;
             }
 
-            SNILoadHandle.SingletonInstance.LastError = new SNIError(SNIProviders.SMUX_PROV, 0, 0, "Could not start MARS async receive");
-            return TdsEnums.SNI_ERROR;
+            return SNICommon.ReportSNIError(SNIProviders.SMUX_PROV, 0, SNICommon.ConnNotUsableError, string.Empty);
         }
 
         /// <summary>
@@ -158,7 +157,6 @@ namespace System.Data.SqlClient.SNI
             SNIPacket currentPacket = null;
             SNIMarsHandle currentSession = null;
 
-
             if (sniErrorCode != TdsEnums.SNI_SUCCESS)
             {
                 lock (this)
@@ -210,11 +208,6 @@ namespace System.Data.SqlClient.SNI
                         _dataBytesLeft = (int)_currentHeader.length;
                         _currentPacket = new SNIPacket(null);
                         _currentPacket.Allocate((int)_currentHeader.length);
-
-                        if (_currentHeader.flags == (byte)SNISMUXFlags.SMUX_FIN)
-                        {
-                            _sessions.Remove(_currentHeader.sessionId);
-                        }
                     }
 
                     currentHeader = _currentHeader;
@@ -246,14 +239,21 @@ namespace System.Data.SqlClient.SNI
 
                     if (!_sessions.ContainsKey(_currentHeader.sessionId))
                     {
-                        SNILoadHandle.SingletonInstance.LastError = new SNIError(SNIProviders.SMUX_PROV, 0, 0, "Packet for unknown MARS session received");
+                        SNILoadHandle.SingletonInstance.LastError = new SNIError(SNIProviders.SMUX_PROV, 0, SNICommon.InvalidParameterError, string.Empty);
                         HandleReceiveError();
                         _lowerHandle.Dispose();
                         _lowerHandle = null;
                         return;
                     }
 
-                    currentSession = _sessions[_currentHeader.sessionId];
+                    if (_currentHeader.flags == (byte)SNISMUXFlags.SMUX_FIN)
+                    {
+                        _sessions.Remove(_currentHeader.sessionId);
+                    }
+                    else
+                    {
+                        currentSession = _sessions[_currentHeader.sessionId];
+                    }
                 }
 
                 if (currentHeader.flags == (byte)SNISMUXFlags.SMUX_DATA)
@@ -269,7 +269,7 @@ namespace System.Data.SqlClient.SNI
                     }
                     catch (Exception e)
                     {
-                        SNICommon.ReportSNIError(SNIProviders.TCP_PROV, 0, 0, e.Message);
+                        SNICommon.ReportSNIError(SNIProviders.SMUX_PROV, SNICommon.InternalExceptionError, e);
                     }
                 }
 

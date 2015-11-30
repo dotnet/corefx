@@ -3,15 +3,14 @@
 
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 
-using CURLAUTH = Interop.libcurl.CURLAUTH;
-using CURLcode = Interop.libcurl.CURLcode;
-using CURLMcode = Interop.libcurl.CURLMcode;
-using CURLoption = Interop.libcurl.CURLoption;
+using CURLAUTH = Interop.Http.CURLAUTH;
+using CURLcode = Interop.Http.CURLcode;
+using CURLMcode = Interop.Http.CURLMcode;
+using CURLoption = Interop.Http.CURLoption;
 
 namespace System.Net.Http
 {
@@ -20,7 +19,6 @@ namespace System.Net.Http
         #region Constants
 
         private const string VerboseDebuggingConditional = "CURLHANDLER_VERBOSE";
-        private const string HttpPrefix = "HTTP/";
         private const char SpaceChar = ' ';
         private const int StatusCodeLength = 3;
 
@@ -41,7 +39,7 @@ namespace System.Net.Http
 
         private readonly static char[] s_newLineCharArray = new char[] { HttpRuleParser.CR, HttpRuleParser.LF };
         private readonly static string[] s_authenticationSchemes = { "Negotiate", "Digest", "Basic" }; // the order in which libcurl goes over authentication schemes
-        private readonly static ulong[] s_authSchemePriorityOrder = { CURLAUTH.Negotiate, CURLAUTH.Digest, CURLAUTH.Basic };
+        private readonly static CURLAUTH[] s_authSchemePriorityOrder = { CURLAUTH.Negotiate, CURLAUTH.Digest, CURLAUTH.Basic };
 
         private readonly static bool s_supportsAutomaticDecompression;
         private readonly static bool s_supportsSSL;
@@ -60,6 +58,7 @@ namespace System.Net.Http
         private bool _useCookie = HttpHandlerDefaults.DefaultUseCookies;
         private bool _automaticRedirection = HttpHandlerDefaults.DefaultAutomaticRedirection;
         private int _maxAutomaticRedirections = HttpHandlerDefaults.DefaultMaxAutomaticRedirections;
+        private ClientCertificateOption _clientCertificateOption = HttpHandlerDefaults.DefaultClientCertificateOption;
 
         private object LockObject { get { return _agent; } }
 
@@ -70,7 +69,7 @@ namespace System.Net.Http
             // curl_global_init call handled by Interop.LibCurl's cctor
 
             int age;
-            if (!Interop.LibCurl.GetCurlVersionInfo(out age, out s_supportsSSL, out s_supportsAutomaticDecompression))
+            if (!Interop.Http.GetCurlVersionInfo(out age, out s_supportsSSL, out s_supportsAutomaticDecompression))
             {
                 throw new InvalidOperationException(SR.net_http_unix_https_libcurl_no_versioninfo);  
             }
@@ -161,15 +160,13 @@ namespace System.Net.Http
         {
             get
             {
-                return ClientCertificateOption.Manual;
+                return _clientCertificateOption;
             }
 
             set
             {
-                if (ClientCertificateOption.Manual != value)
-                {
-                    throw new PlatformNotSupportedException(SR.net_http_unix_invalid_client_cert_option);
-                }
+                CheckDisposedOrStarted();
+                _clientCertificateOption = value;
             }
         }
 
@@ -355,11 +352,11 @@ namespace System.Net.Http
             }
         }
 
-        private KeyValuePair<NetworkCredential, ulong> GetNetworkCredentials(ICredentials credentials, Uri requestUri)
+        private KeyValuePair<NetworkCredential, CURLAUTH> GetNetworkCredentials(ICredentials credentials, Uri requestUri)
         {
             if (_preAuthenticate)
             {
-                KeyValuePair<NetworkCredential, ulong> ncAndScheme;
+                KeyValuePair<NetworkCredential, CURLAUTH> ncAndScheme;
                 lock (LockObject)
                 {
                     Debug.Assert(_credentialCache != null, "Expected non-null credential cache");
@@ -374,7 +371,7 @@ namespace System.Net.Http
             return GetCredentials(credentials, requestUri);
         }
 
-        private void AddCredentialToCache(Uri serverUri, ulong authAvail, NetworkCredential nc)
+        private void AddCredentialToCache(Uri serverUri, CURLAUTH authAvail, NetworkCredential nc)
         {
             lock (LockObject)
             {
@@ -424,10 +421,10 @@ namespace System.Net.Http
             }
         }
 
-        private static KeyValuePair<NetworkCredential, ulong> GetCredentials(ICredentials credentials, Uri requestUri)
+        private static KeyValuePair<NetworkCredential, CURLAUTH> GetCredentials(ICredentials credentials, Uri requestUri)
         {
             NetworkCredential nc = null;
-            ulong curlAuthScheme = CURLAUTH.None;
+            CURLAUTH curlAuthScheme = CURLAUTH.None;
 
             if (credentials != null)
             {
@@ -453,7 +450,7 @@ namespace System.Net.Http
             }
 
             VerboseTrace("curlAuthScheme = " + curlAuthScheme);
-            return new KeyValuePair<NetworkCredential, ulong>(nc, curlAuthScheme); ;
+            return new KeyValuePair<NetworkCredential, CURLAUTH>(nc, curlAuthScheme); ;
         }
 
         private void CheckDisposed()
@@ -473,21 +470,21 @@ namespace System.Net.Http
             }
         }
 
-        private static void ThrowIfCURLEError(int error)
+        private static void ThrowIfCURLEError(CURLcode error)
         {
             if (error != CURLcode.CURLE_OK)
             {
-                var inner = new CurlException(error, isMulti: false);
+                var inner = new CurlException((int)error, isMulti: false);
                 VerboseTrace(inner.Message);
                 throw inner;
             }
         }
 
-        private static void ThrowIfCURLMError(int error)
+        private static void ThrowIfCURLMError(CURLMcode error)
         {
             if (error != CURLMcode.CURLM_OK)
             {
-                string msg = CurlException.GetCurlErrorString(error, true);
+                string msg = CurlException.GetCurlErrorString((int)error, true);
                 VerboseTrace(msg);
                 switch (error)
                 {
@@ -502,7 +499,7 @@ namespace System.Net.Http
                         throw new OutOfMemoryException(msg);
                     case CURLMcode.CURLM_INTERNAL_ERROR:
                     default:
-                        throw new CurlException(error, msg);
+                        throw new CurlException((int)error, msg);
                 }
             }
         }
@@ -557,90 +554,20 @@ namespace System.Net.Http
 
         private static bool TryParseStatusLine(HttpResponseMessage response, string responseHeader, EasyRequest state)
         {
-            if (!responseHeader.StartsWith(HttpPrefix, StringComparison.OrdinalIgnoreCase))
+            if (!responseHeader.StartsWith(CurlResponseParseUtils.HttpPrefix, StringComparison.OrdinalIgnoreCase))
             {
                 return false;
             }
 
             // Clear the header if status line is recieved again. This signifies that there are multiple response headers (like in redirection).
             response.Headers.Clear();
-
             response.Content.Headers.Clear();
 
-            int responseHeaderLength = responseHeader.Length;
-
-            // Check if line begins with HTTP/1.1 or HTTP/1.0
-            int prefixLength = HttpPrefix.Length;
-            int versionIndex = prefixLength + 2;
-
-            if ((versionIndex < responseHeaderLength) && (responseHeader[prefixLength] == '1') && (responseHeader[prefixLength + 1] == '.'))
-            {
-                response.Version =
-                    responseHeader[versionIndex] == '1' ? HttpVersion.Version11 :
-                    responseHeader[versionIndex] == '0' ? HttpVersion.Version10 :
-                    new Version(0, 0);
-            }
-            else
-            {
-                response.Version = new Version(0, 0);
-            }
-
-            // TODO: Parsing errors are treated as fatal. Find right behaviour
-
-            int spaceIndex = responseHeader.IndexOf(SpaceChar);
-
-            if (spaceIndex > -1)
-            {
-                int codeStartIndex = spaceIndex + 1;
-                int statusCode = 0;
-
-                // Parse first 3 characters after a space as status code
-                if (TryParseStatusCode(responseHeader, codeStartIndex, out statusCode))
-                {
-                    response.StatusCode = (HttpStatusCode)statusCode;
-
-                    int codeEndIndex = codeStartIndex + StatusCodeLength;
-
-                    int reasonPhraseIndex = codeEndIndex + 1;
-
-                    if (reasonPhraseIndex < responseHeaderLength && responseHeader[codeEndIndex] == SpaceChar)
-                    {
-                        int newLineCharIndex = responseHeader.IndexOfAny(s_newLineCharArray, reasonPhraseIndex);
-                        int reasonPhraseEnd = newLineCharIndex >= 0 ? newLineCharIndex : responseHeaderLength;
-                        response.ReasonPhrase = responseHeader.Substring(reasonPhraseIndex, reasonPhraseEnd - reasonPhraseIndex);
-                    }
-                    state._isRedirect = state._handler.AutomaticRedirection &&
+            CurlResponseParseUtils.ReadStatusLine(response, responseHeader);
+            state._isRedirect = state._handler.AutomaticRedirection &&
                          (response.StatusCode == HttpStatusCode.Redirect ||
                          response.StatusCode == HttpStatusCode.RedirectKeepVerb ||
                          response.StatusCode == HttpStatusCode.RedirectMethod) ;
-                }
-            }
-
-            return true;
-        }
-
-        private static bool TryParseStatusCode(string responseHeader, int statusCodeStartIndex, out int statusCode)
-        {
-            if (statusCodeStartIndex + StatusCodeLength > responseHeader.Length)
-            {
-                statusCode = 0;
-                return false;
-            }
-
-            char c100 = responseHeader[statusCodeStartIndex];
-            char c10 = responseHeader[statusCodeStartIndex + 1];
-            char c1 = responseHeader[statusCodeStartIndex + 2];
-
-            if (c100 < '0' || c100 > '9' ||
-                c10 < '0' || c10 > '9' ||
-                c1 < '0' || c1 > '9')
-            {
-                statusCode = 0;
-                return false;
-            }
-
-            statusCode = (c100 - '0') * 100 + (c10 - '0') * 10 + (c1 - '0');
-
             return true;
         }
 
@@ -654,7 +581,7 @@ namespace System.Net.Http
             Uri forwardUri;
             if (Uri.TryCreate(location, UriKind.RelativeOrAbsolute, out forwardUri) && forwardUri.IsAbsoluteUri)
             {
-                KeyValuePair<NetworkCredential, ulong> ncAndScheme = GetCredentials(state._handler.Credentials as CredentialCache, forwardUri);
+                KeyValuePair<NetworkCredential, CURLAUTH> ncAndScheme = GetCredentials(state._handler.Credentials as CredentialCache, forwardUri);
                 if (ncAndScheme.Key != null)
                 {
                     state.SetCredentialsOptions(ncAndScheme);
@@ -677,6 +604,9 @@ namespace System.Net.Http
                     state.SetCookieOption(forwardUri);
                 }
             }
+
+            // set the headers again. This is a workaround for libcurl's limitation in handling headers with empty values
+            state.SetRequestHeaders();
         }
 
         private static void SetChunkedModeForSend(HttpRequestMessage request)

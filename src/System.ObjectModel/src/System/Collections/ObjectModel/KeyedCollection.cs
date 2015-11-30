@@ -25,6 +25,8 @@ namespace System.Collections.ObjectModel
 
 
         protected KeyedCollection(IEqualityComparer<TKey> comparer, int dictionaryCreationThreshold)
+            : base(new List<TItem>()) // Be explicit about the use of List<T> so we can foreach over
+                                      // Items internally without enumerator allocations.
         {
             if (comparer == null)
             {
@@ -43,6 +45,19 @@ namespace System.Collections.ObjectModel
 
             _comparer = comparer;
             _threshold = dictionaryCreationThreshold;
+        }
+
+        /// <summary>
+        /// Enables the use of foreach internally without allocations using <see cref="List{T}"/>'s struct enumerator.
+        /// </summary>
+        new private List<TItem> Items
+        {
+            get
+            {
+                Debug.Assert(base.Items is List<TItem>);
+
+                return (List<TItem>)base.Items;
+            }
         }
 
         public IEqualityComparer<TKey> Comparer
@@ -88,12 +103,9 @@ namespace System.Collections.ObjectModel
                 return _dict.ContainsKey(key);
             }
 
-            if (key != null)
+            foreach (TItem item in Items)
             {
-                foreach (TItem item in Items)
-                {
-                    if (_comparer.Equals(GetKeyForItem(item), key)) return true;
-                }
+                if (_comparer.Equals(GetKeyForItem(item), key)) return true;
             }
             return false;
         }
@@ -128,15 +140,12 @@ namespace System.Collections.ObjectModel
                 return _dict.TryGetValue(key, out item) && Remove(item);
             }
 
-            if (key != null)
+            for (int i = 0; i < Items.Count; i++)
             {
-                for (int i = 0; i < Items.Count; i++)
+                if (_comparer.Equals(GetKeyForItem(Items[i]), key))
                 {
-                    if (_comparer.Equals(GetKeyForItem(Items[i]), key))
-                    {
-                        RemoveItem(i);
-                        return true;
-                    }
+                    RemoveItem(i);
+                    return true;
                 }
             }
             return false;
@@ -149,7 +158,7 @@ namespace System.Collections.ObjectModel
 
         protected void ChangeItemKey(TItem item, TKey newKey)
         {
-            // check if the item exists in the collection
+            // Check if the item exists in the collection
             if (!ContainsItem(item))
             {
                 throw new ArgumentException(SR.Argument_ItemNotExist);

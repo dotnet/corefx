@@ -7,17 +7,42 @@ using System.Diagnostics;
 using System.Net.Security;
 using System.Runtime.InteropServices;
 using System.Security.Authentication;
+using System.Security.Authentication.ExtendedProtection;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.Win32.SafeHandles;
 
 internal static partial class Interop
 {
-    internal static class OpenSsl
+    internal static partial class OpenSsl
     {
         private static Ssl.SslCtxSetVerifyCallback s_verifyClientCertificate = VerifyClientCertificate;
 
         #region internal methods
+
+        internal static SafeChannelBindingHandle QueryChannelBinding(SafeSslHandle context, ChannelBindingKind bindingType)
+        {
+            SafeChannelBindingHandle bindingHandle;
+            switch (bindingType)
+            {
+                case ChannelBindingKind.Endpoint:
+                    bindingHandle = new SafeChannelBindingHandle(bindingType);
+                    QueryEndPointChannelBinding(context, bindingHandle);
+                    break;
+
+                case ChannelBindingKind.Unique:
+                    bindingHandle = new SafeChannelBindingHandle(bindingType);
+                    QueryUniqueChannelBinding(context, bindingHandle);
+                    break;
+
+                default:
+                    // Keeping parity with windows, we should return null in this case.
+                    bindingHandle = null;
+                    break;
+            }
+
+            return bindingHandle;
+        }
 
         internal static SafeSslHandle AllocateSslContext(SslProtocols protocols, SafeX509Handle certHandle, SafeEvpPKeyHandle certKeyHandle, EncryptionPolicy policy, bool isServer, bool remoteCertRequired)
         {
@@ -107,7 +132,12 @@ internal static partial class Interop
                 }
             }
 
-            return Ssl.IsSslStateOK(context);
+            bool stateOk = Ssl.IsSslStateOK(context);
+            if (stateOk)
+            {
+                context.MarkHandshakeCompleted();
+            }
+            return stateOk;
         }
 
         internal static int Encrypt(SafeSslHandle context, byte[] buffer, int offset, int count, out Ssl.SslErrorCode errorCode)
@@ -209,16 +239,56 @@ internal static partial class Interop
             return Ssl.SslGetPeerCertChain(context);
         }
 
-        internal static void FreeSslContext(SafeSslHandle context)
-        {
-            Debug.Assert((context != null) && !context.IsInvalid, "Expected a valid context in FreeSslContext");
-            Disconnect(context);
-            context.Dispose();
-        }
-
         #endregion
 
         #region private methods
+
+        private static void QueryEndPointChannelBinding(SafeSslHandle context, SafeChannelBindingHandle bindingHandle)
+        {
+            using (SafeX509Handle certSafeHandle = GetPeerCertificate(context))
+            {
+                if (certSafeHandle == null || certSafeHandle.IsInvalid)
+                {
+                    throw CreateSslException(SR.net_ssl_invalid_certificate);
+                }
+
+                bool gotReference = false;
+
+                try
+                {
+                    certSafeHandle.DangerousAddRef(ref gotReference);
+                    using (X509Certificate2 cert = new X509Certificate2(certSafeHandle.DangerousGetHandle()))
+                    using (HashAlgorithm hashAlgo = GetHashForChannelBinding(cert))
+                    {
+                        byte[] bindingHash = hashAlgo.ComputeHash(cert.RawData);
+                        bindingHandle.SetCertHash(bindingHash);
+                    }
+                }
+                finally
+                {
+                    if (gotReference)
+                    {
+                        certSafeHandle.DangerousRelease();
+                    }
+                }
+            }
+        }
+
+        private static void QueryUniqueChannelBinding(SafeSslHandle context, SafeChannelBindingHandle bindingHandle)
+        {
+            bool sessionReused = Ssl.SslSessionReused(context);
+            int certHashLength = context.IsServer ^ sessionReused ?
+                                 Ssl.SslGetPeerFinished(context, bindingHandle.CertHashPtr, bindingHandle.Length) :
+                                 Ssl.SslGetFinished(context, bindingHandle.CertHashPtr, bindingHandle.Length);
+
+            if (0 == certHashLength)
+            {
+                throw CreateSslException(SR.net_ssl_get_channel_binding_token_failed);
+            }
+
+            bindingHandle.SetCertHashLength(certHashLength);
+        }
+
         private static IntPtr GetSslMethod(SslProtocols protocols)
         {
             Debug.Assert(protocols != SslProtocols.None, "All protocols are disabled");
@@ -352,17 +422,6 @@ internal static partial class Interop
             }
         }
 
-        private static void Disconnect(SafeSslHandle context)
-        {
-            int retVal = Ssl.SslShutdown(context);
-            if (retVal < 0)
-            {
-                //TODO (Issue #4031) check this error
-                Ssl.SslGetError(context, retVal);
-            }
-        }
-
-        //TODO (Issue #3362) should we check Bio should retry?
         private static int BioRead(SafeBioHandle bio, byte[] buffer, int count)
         {
             Debug.Assert(buffer != null);
@@ -377,7 +436,6 @@ internal static partial class Interop
             return bytes;
         }
 
-        //TODO (Issue #3362) should we check Bio should retry?
         private static int BioWrite(SafeBioHandle bio, byte[] buffer, int offset, int count)
         {
             Debug.Assert(buffer != null);

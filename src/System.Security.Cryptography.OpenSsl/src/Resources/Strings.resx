@@ -120,6 +120,9 @@
   <data name="Arg_CryptographyException" xml:space="preserve">
     <value>Error occurred during a cryptographic operation.</value>
   </data>
+  <data name="Argument_InvalidOidValue" xml:space="preserve">
+    <value>The OID value was invalid.</value>
+  </data>
   <data name="Argument_InvalidValue" xml:space="preserve">
     <value>Value was invalid.</value>
   </data>

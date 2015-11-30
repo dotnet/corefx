@@ -1,6 +1,7 @@
 project(System.Native)
 
 set(NATIVE_SOURCES
+    pal_console.cpp
     pal_errno.cpp
     pal_interfaceaddresses.cpp
     pal_io.cpp
@@ -10,6 +11,7 @@ set(NATIVE_SOURCES
     pal_networkstatistics.cpp
     pal_process.cpp
     pal_string.cpp
+    pal_tcpstate.cpp
     pal_time.cpp
     pal_uid.cpp
 )

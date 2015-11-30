@@ -22,6 +22,12 @@ namespace System.Data.SqlClient.SNI
         public abstract void SetAsyncCallbacks(SNIAsyncCallback receiveCallback, SNIAsyncCallback sendCallback);
 
         /// <summary>
+        /// Set buffer size
+        /// </summary>
+        /// <param name="bufferSize">Buffer size</param>
+        public abstract void SetBufferSize(int bufferSize);
+
+        /// <summary>
         /// Send a packet synchronously
         /// </summary>
         /// <param name="packet">SNI packet</param>
@@ -40,9 +46,9 @@ namespace System.Data.SqlClient.SNI
         /// Receive a packet synchronously
         /// </summary>
         /// <param name="packet">SNI packet</param>
-        /// <param name="timeout">Timeout</param>
+        /// <param name="timeoutInMilliseconds">Timeout in Milliseconds</param>
         /// <returns>SNI error code</returns>
-        public abstract uint Receive(ref SNIPacket packet, int timeout);
+        public abstract uint Receive(out SNIPacket packet, int timeoutInMilliseconds);
 
         /// <summary>
         /// Receive a packet asynchronously

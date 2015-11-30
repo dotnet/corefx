@@ -103,7 +103,7 @@ namespace System.Runtime.Serialization
         }
 #endif
 
-#if !NET_NATIVE && MERGE_DCJS
+#if !NET_NATIVE
         internal MethodInfo ParseMethod
         {
             get { return _helper.ParseMethod; }
@@ -529,7 +529,7 @@ namespace System.Runtime.Serialization
             private XmlDictionaryString _name;
             private XmlDictionaryString _ns;
 
-#if !NET_NATIVE && MERGE_DCJS
+#if !NET_NATIVE
             private MethodInfo _parseMethod;
             private bool _parseMethodSet;
 #endif
@@ -737,7 +737,7 @@ namespace System.Runtime.Serialization
                 return dataContract;
             }
 
-            private static Type GetDataContractAdapterType(Type type)
+            internal static Type GetDataContractAdapterType(Type type)
             {
                 // Replace the DataTimeOffset ISerializable type passed in with the internal DateTimeOffsetAdapter DataContract type.
                 // DateTimeOffsetAdapter is used for serialization/deserialization purposes to bypass the ISerializable implementation
@@ -1162,7 +1162,7 @@ namespace System.Runtime.Serialization
                 get { return false; }
             }
 
-#if !NET_NATIVE && MERGE_DCJS
+#if !NET_NATIVE
             internal MethodInfo ParseMethod
             {
                 get
@@ -2057,7 +2057,7 @@ namespace System.Runtime.Serialization
             else if (nameToDataContractTable.TryGetValue(dataContract.StableName, out alreadyExistingContract))
             {
                 //Dont throw duplicate if its a KeyValuePair<K,T> as it could have been added by Dictionary<K,T>
-                if (alreadyExistingContract.UnderlyingType != type &&
+                if (alreadyExistingContract.UnderlyingType != DataContractCriticalHelper.GetDataContractAdapterType(type) &&
                     !(alreadyExistingContract is ClassDataContract && ((ClassDataContract)alreadyExistingContract).IsKeyValuePairAdapter))
                     throw System.Runtime.Serialization.DiagnosticUtility.ExceptionUtility.ThrowHelperError(new InvalidOperationException(SR.Format(SR.DupContractInKnownTypes, type, alreadyExistingContract.UnderlyingType, dataContract.StableName.Namespace, dataContract.StableName.Name)));
                 return;
@@ -2206,7 +2206,7 @@ namespace System.Runtime.Serialization
             return false;
         }
 
-#if !NET_NATIVE && MERGE_DCJS
+#if !NET_NATIVE
         internal static string SanitizeTypeName(string typeName)
         {
             return typeName.Replace('.', '_');

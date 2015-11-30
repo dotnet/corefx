@@ -9,48 +9,8 @@ using System.Threading.Tasks;
 
 namespace System.Net.NetworkInformation
 {
-    internal class LinuxIPGlobalProperties : IPGlobalProperties
+    internal class LinuxIPGlobalProperties : UnixIPGlobalProperties
     {
-        public override string DhcpScopeName
-        {
-            get
-            {
-                throw new PlatformNotSupportedException();
-            }
-        }
-
-        public override string DomainName
-        {
-            get
-            {
-                return HostInformation.DomainName;
-            }
-        }
-
-        public override string HostName
-        {
-            get
-            {
-                return HostInformation.HostName;
-            }
-        }
-
-        public override bool IsWinsProxy
-        {
-            get
-            {
-                throw new PlatformNotSupportedException();
-            }
-        }
-
-        public override NetBiosNodeType NodeType
-        {
-            get
-            {
-                return NetBiosNodeType.Unknown;
-            }
-        }
-
         public override TcpConnectionInformation[] GetActiveTcpConnections()
         {
             return StringParsingHelpers.ParseActiveTcpConnectionsFromFiles(NetworkFiles.Tcp4ConnectionsFile, NetworkFiles.Tcp6ConnectionsFile);
@@ -104,24 +64,6 @@ namespace System.Net.NetworkInformation
         public override UdpStatistics GetUdpIPv6Statistics()
         {
             return new LinuxUdpStatistics(false);
-        }
-
-        private UnicastIPAddressInformationCollection GetUnicastAddresses()
-        {
-            UnicastIPAddressInformationCollection collection = new UnicastIPAddressInformationCollection();
-            foreach (UnicastIPAddressInformation info in
-                LinuxNetworkInterface.GetLinuxNetworkInterfaces().SelectMany(lni => lni.GetIPProperties().UnicastAddresses))
-            {
-                // PERF: Use Interop.Sys.EnumerateInterfaceAddresses directly here.
-                collection.InternalAdd(info);
-            }
-
-            return collection;
-        }
-
-        public override Task<UnicastIPAddressInformationCollection> GetUnicastAddressesAsync()
-        {
-            return Task.Run((Func<UnicastIPAddressInformationCollection>)GetUnicastAddresses);
         }
     }
 }

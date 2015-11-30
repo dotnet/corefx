@@ -6,7 +6,7 @@ using System.Net.Sockets;
 using System.Net.Test.Common;
 using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
-
+using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -32,36 +32,36 @@ namespace System.Net.Security.Tests
         }
 
         [Fact]
-        public void ServerNoEncryption_ClientRequireEncryption_NoConnect()
+        public async Task ServerNoEncryption_ClientRequireEncryption_NoConnect()
         {
             using (var serverNoEncryption = new DummyTcpServer(
                 new IPEndPoint(IPAddress.Loopback, 0), EncryptionPolicy.NoEncryption))
             using (var client = new TcpClient())
             {
-                client.Connect(serverNoEncryption.RemoteEndPoint);
+                await client.ConnectAsync(serverNoEncryption.RemoteEndPoint.Address, serverNoEncryption.RemoteEndPoint.Port);
 
                 using (var sslStream = new SslStream(client.GetStream(), false, AllowAnyServerCertificate, null, EncryptionPolicy.RequireEncryption))
                 {
                     Assert.Throws<IOException>(() =>
                     {
-                        sslStream.AuthenticateAsClient("localhost", null, TestConfiguration.DefaultSslProtocols, false);
+                        sslStream.AuthenticateAsClient("localhost", null, SslProtocolSupport.DefaultSslProtocols, false);
                     });
                 }
             }
         }
 
         [Fact]
-        public void ServerNoEncryption_ClientAllowNoEncryption_ConnectWithNoEncryption()
+        public async Task ServerNoEncryption_ClientAllowNoEncryption_ConnectWithNoEncryption()
         {
             using (var serverNoEncryption = new DummyTcpServer(
                 new IPEndPoint(IPAddress.Loopback, 0), EncryptionPolicy.NoEncryption))
             using (var client = new TcpClient())
             {
-                client.Connect(serverNoEncryption.RemoteEndPoint);
+                await client.ConnectAsync(serverNoEncryption.RemoteEndPoint.Address, serverNoEncryption.RemoteEndPoint.Port);
 
                 using (var sslStream = new SslStream(client.GetStream(), false, AllowAnyServerCertificate, null, EncryptionPolicy.AllowNoEncryption))
                 {
-                    sslStream.AuthenticateAsClient("localhost", null, TestConfiguration.DefaultSslProtocols, false);
+                    sslStream.AuthenticateAsClient("localhost", null, SslProtocolSupport.DefaultSslProtocols, false);
 
                     _log.WriteLine("Client({0}) authenticated to server({1}) with encryption cipher: {2} {3}-bit strength",
                         client.Client.LocalEndPoint, client.Client.RemoteEndPoint,
@@ -75,17 +75,17 @@ namespace System.Net.Security.Tests
         }
 
         [Fact]
-        public void ServerNoEncryption_ClientNoEncryption_ConnectWithNoEncryption()
+        public async Task ServerNoEncryption_ClientNoEncryption_ConnectWithNoEncryption()
         {
             using (var serverNoEncryption = new DummyTcpServer(
                 new IPEndPoint(IPAddress.Loopback, 0), EncryptionPolicy.NoEncryption))
             using (var client = new TcpClient())
             {
-                client.Connect(serverNoEncryption.RemoteEndPoint);
+                await client.ConnectAsync(serverNoEncryption.RemoteEndPoint.Address, serverNoEncryption.RemoteEndPoint.Port);
 
                 using (var sslStream = new SslStream(client.GetStream(), false, AllowAnyServerCertificate, null, EncryptionPolicy.NoEncryption))
                 {
-                    sslStream.AuthenticateAsClient("localhost", null, TestConfiguration.DefaultSslProtocols, false);
+                    sslStream.AuthenticateAsClient("localhost", null, SslProtocolSupport.DefaultSslProtocols, false);
                     _log.WriteLine("Client({0}) authenticated to server({1}) with encryption cipher: {2} {3}-bit strength",
                         client.Client.LocalEndPoint, client.Client.RemoteEndPoint,
                         sslStream.CipherAlgorithm, sslStream.CipherStrength);

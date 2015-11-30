@@ -3,8 +3,15 @@
 
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography.X509Certificates;
+using System.Security.Cryptography;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.Win32.SafeHandles;
+
+using CURLcode = Interop.Http.CURLcode;
+using CURLINFO = Interop.Http.CURLINFO;
 
 namespace System.Net.Http
 {
@@ -12,24 +19,43 @@ namespace System.Net.Http
     {
         private static class SslProvider
         {
-            private delegate int SslCtxCallback(IntPtr curl, IntPtr sslCtx, IntPtr userPtr);
-
-            private static readonly SslCtxCallback s_sslCtxCallback = SetSslCtxVerifyCallback;
+            private static readonly Interop.Http.SslCtxCallback s_sslCtxCallback = SetSslCtxVerifyCallback;
             private static readonly Interop.Ssl.AppVerifyCallback s_sslVerifyCallback = VerifyCertChain;
 
-            internal static void SetSslOptions(EasyRequest easy)
+            internal static void SetSslOptions(EasyRequest easy, ClientCertificateOption clientCertOption)
             {
-                int answer = Interop.libcurl.curl_easy_setopt(
-                    easy._easyHandle,
-                    Interop.libcurl.CURLoption.CURLOPT_SSL_CTX_FUNCTION,
-                    s_sslCtxCallback);
+                IntPtr userPointer = IntPtr.Zero;
+                if (clientCertOption == ClientCertificateOption.Automatic)
+                {
+                    ClientCertificateProvider certProvider = new ClientCertificateProvider();
+                    userPointer = GCHandle.ToIntPtr(certProvider._gcHandle);
+                    easy.Task.ContinueWith((_, state) => ((IDisposable)state).Dispose(),
+                                           certProvider,
+                                           CancellationToken.None,
+                                           TaskContinuationOptions.ExecuteSynchronously,
+                                           TaskScheduler.Default);
+                }
+                else
+                {
+                    Debug.Assert(clientCertOption == ClientCertificateOption.Manual, "ClientCertificateOption is manual or automatic");
+                }
+
+                CURLcode answer = easy.SetSslCtxCallback(s_sslCtxCallback, userPointer);
 
                 switch (answer)
                 {
-                    case Interop.libcurl.CURLcode.CURLE_OK:
+                    case CURLcode.CURLE_OK:
                         break;
-                    case Interop.libcurl.CURLcode.CURLE_NOT_BUILT_IN:
+                    // Curl 7.38 and prior
+                    case CURLcode.CURLE_UNKNOWN_OPTION:
+                    // Curl 7.39 and later
+                    case CURLcode.CURLE_NOT_BUILT_IN:
                         VerboseTrace("CURLOPT_SSL_CTX_FUNCTION is not supported, platform default https chain building in use");
+                        if (clientCertOption == ClientCertificateOption.Automatic)
+                        {
+                            throw new PlatformNotSupportedException(SR.net_http_unix_invalid_client_cert_option);
+                        }
+
                         break;
                     default:
                         ThrowIfCURLEError(answer);
@@ -37,17 +63,61 @@ namespace System.Net.Http
                 }
             }
 
-            private static int SetSslCtxVerifyCallback(
+            private static CURLcode SetSslCtxVerifyCallback(
                 IntPtr curl,
                 IntPtr sslCtx,
-                IntPtr userPtr)
+                IntPtr userPointer)
             {
                 using (SafeSslContextHandle ctx = new SafeSslContextHandle(sslCtx, ownsHandle: false))
                 {
-                    Interop.Ssl.SslCtxSetCertVerifyCallback(ctx, s_sslVerifyCallback, userPtr);
-                }
+                    Interop.Ssl.SslCtxSetCertVerifyCallback(ctx, s_sslVerifyCallback, curl);
 
-                return Interop.libcurl.CURLcode.CURLE_OK;
+                    if (userPointer == IntPtr.Zero)
+                    {
+                        VerboseTrace("Not using client Certificate callback ");
+                    }
+                    else
+                    {
+                        ClientCertificateProvider provider = null;
+                        try
+                        {
+                            GCHandle handle = GCHandle.FromIntPtr(userPointer);
+                            provider = (ClientCertificateProvider)handle.Target;
+                        }
+                        catch (InvalidCastException)
+                        {
+                            Debug.Fail("ClientCertificateProvider wasn't the GCHandle's Target");
+                            return CURLcode.CURLE_ABORTED_BY_CALLBACK;
+                        }
+                        catch (InvalidOperationException)
+                        {
+                            Debug.Fail("Invalid GCHandle in CurlSslCallback");
+                            return CURLcode.CURLE_ABORTED_BY_CALLBACK;
+                        }
+
+                        Debug.Assert(provider != null, "Expected non-null sslCallback in curlCallBack");
+                        Interop.Ssl.SslCtxSetClientCertCallback(ctx, provider._callback);
+                    }
+                }
+                return CURLcode.CURLE_OK;
+            }
+
+            private static void AddChannelBindingToken(X509Certificate2 certificate, IntPtr curlPtr)
+            {
+                Debug.Assert(curlPtr != IntPtr.Zero, "curlPtr is not null");
+                IntPtr gcHandlePtr;
+                CURLcode getInfoResult = Interop.Http.EasyGetInfoPointer(curlPtr, CURLINFO.CURLINFO_PRIVATE, out gcHandlePtr);
+                Debug.Assert(getInfoResult == CURLcode.CURLE_OK, "Failed to get info on a completing easy handle");
+                if (getInfoResult == CURLcode.CURLE_OK)
+                {
+                    GCHandle handle = GCHandle.FromIntPtr(gcHandlePtr);
+                    EasyRequest easy = handle.Target as EasyRequest;
+                    Debug.Assert(easy != null, "Expected non-null EasyRequest in GCHandle");
+                    if (easy._requestContentStream != null)
+                    {
+                        easy._requestContentStream.SetChannelBindingToken(certificate);
+                    }
+                }
             }
 
             private static int VerifyCertChain(IntPtr storeCtxPtr, IntPtr arg)
@@ -90,6 +160,7 @@ namespace System.Net.Http
                     using (X509Certificate2 leafCert = new X509Certificate2(leafCertPtr))
                     {
                         success = chain.Build(leafCert);
+                        AddChannelBindingToken(leafCert, arg);
                     }
                 }
 

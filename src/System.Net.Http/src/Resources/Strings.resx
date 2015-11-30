@@ -117,6 +117,9 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="net_securityprotocolnotsupported" xml:space="preserve">
+    <value>The requested security protocol is not supported.</value>
+  </data>
   <data name="net_http_httpmethod_format_error" xml:space="preserve">
     <value>The format of the HTTP method is invalid.</value>
   </data>
@@ -292,7 +295,7 @@
     <value>CookieContainer property must not be null.</value>
   </data>
   <data name="net_http_unix_invalid_client_cert_option" xml:space="preserve">
-    <value>libcurl supports only manual client certificate selection</value>
+    <value>ClientCertificateOption.Automatic is supported only with libcurl with libssl compatible backend.</value>
   </data>
   <data name="net_http_unix_invalid_credential" xml:space="preserve">
     <value>libcurl does not support different credentials for different authentication schemes</value>
@@ -347,5 +350,8 @@
   </data>
   <data name="net_http_no_concurrent_io_allowed" xml:space="preserve">
     <value>The stream does not support concurrent I/O read or write operations.</value>
+  </data>
+  <data name="net_http_unix_invalid_response" xml:space="preserve">
+    <value>The server returned an invalid or unrecognized response.</value>
   </data>
 </root>

@@ -1,12 +1,11 @@
 {
   "dependencies": {
-    "Microsoft.DotNet.xunit.performance": "1.0.0-*",
-    "System.Console": "4.0.0-beta-*",
+    "Microsoft.DotNet.xunit.performance": "1.0.0-alpha-build0025",
     "System.IO.FileSystem": "4.0.0",
     "System.Globalization": "4.0.10",
     "System.Runtime": "4.0.20",
     "System.Runtime.Extensions": "4.0.10",
-    "System.Runtime.InteropServices": "4.0.20",
+    "System.Reflection.TypeExtensions" :  "4.1.0-beta-*",
     "System.Runtime.InteropServices.RuntimeInformation": "4.0.0-beta-*",
     "System.Threading": "4.0.10",
     "System.Threading.Tasks": "4.0.10",
