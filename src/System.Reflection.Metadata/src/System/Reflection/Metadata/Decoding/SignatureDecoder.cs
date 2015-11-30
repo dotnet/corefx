@@ -214,19 +214,17 @@ namespace System.Reflection.Metadata.Decoding
             }
 
             var parameterTypes = new TType[parameterCount];
-            SignatureTypeCode typeCode;
             int parameterIndex;
 
             for (parameterIndex = 0; parameterIndex < parameterCount; parameterIndex++)
             {
-                var reader = blobReader;
-                typeCode = reader.ReadSignatureTypeCode();
+                int typeCode = blobReader.ReadCompressedInteger();
 
-                if (typeCode == SignatureTypeCode.Sentinel)
+                if (typeCode == (int)SignatureTypeCode.Sentinel)
                 {
                     break;
                 }
-                parameterTypes[parameterIndex] = DecodeType(ref blobReader, provider);
+                parameterTypes[parameterIndex] = DecodeType(ref blobReader, typeCode, provider);
             }
 
             int requiredParameterCount = parameterIndex;
