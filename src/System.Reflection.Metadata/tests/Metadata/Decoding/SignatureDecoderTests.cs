@@ -3,9 +3,11 @@
 
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.IO;
 using System.Linq;
 using System.Reflection.Metadata;
 using System.Reflection.Metadata.Decoding;
+using System.Reflection.PortableExecutable;
 using Xunit;
 
 namespace System.Reflection.Metadata.Tests
@@ -76,6 +78,57 @@ namespace System.Reflection.Metadata.Tests
             }
         }
 
+        [Fact]
+        public void DecodeVarArgsDefAndRef()
+        {
+            using (FileStream stream = File.OpenRead(typeof(VarArgsToDecode).GetTypeInfo().Assembly.Location))
+            using (var peReader = new PEReader(stream))
+            {
+                MetadataReader metadataReader = peReader.GetMetadataReader();
+                TypeDefinitionHandle typeDefHandle = TestMetadataResolver.FindTestType(metadataReader, typeof(VarArgsToDecode));
+                TypeDefinition typeDef = metadataReader.GetTypeDefinition(typeDefHandle);
+                MethodDefinition methodDef = metadataReader.GetMethodDefinition(typeDef.GetMethods().First());
+
+                Assert.Equal("VarArgsCallee", metadataReader.GetString(methodDef.Name));
+                var provider = new TestSignatureTypeProvider { Reader = metadataReader };
+
+                MethodSignature<string> defSignature = SignatureDecoder.DecodeMethodSignature(methodDef.Signature, provider);
+                Assert.Equal(SignatureCallingConvention.VarArgs, defSignature.Header.CallingConvention);
+                Assert.Equal(1, defSignature.RequiredParameterCount);
+                Assert.Equal(new[] { "Int32" }, defSignature.ParameterTypes);
+
+                int refCount = 0;
+                foreach (MemberReferenceHandle memberRefHandle in metadataReader.MemberReferences)
+                {
+                    MemberReference memberRef = metadataReader.GetMemberReference(memberRefHandle);
+
+                    if (metadataReader.StringComparer.Equals(memberRef.Name, "VarArgsCallee"))
+                    {
+                        Assert.Equal(MemberReferenceKind.Method, memberRef.GetKind());
+                        MethodSignature<string> refSignature = SignatureDecoder.DecodeMethodSignature(memberRef.Signature, provider);
+                        Assert.Equal(SignatureCallingConvention.VarArgs, refSignature.Header.CallingConvention);
+                        Assert.Equal(1, refSignature.RequiredParameterCount);
+                        Assert.Equal(new[] { "Int32", "Boolean", "String", "Double" }, refSignature.ParameterTypes);
+                        refCount++;
+                    }
+                }
+
+                Assert.Equal(1, refCount);
+            }
+        }
+
+        private static class VarArgsToDecode
+        {
+            public static void VarArgsCallee(int i, __arglist)
+            {
+            }
+
+            public static void VarArgsCaller()
+            {
+                VarArgsCallee(1, __arglist(true, "hello", 0.42));
+            }
+        }
+
         // Simple test implementation of ISignatureTypeProvider to check that the right types are decoded
         private class TestSignatureTypeProvider : ISignatureTypeProvider<string>
         {
@@ -91,7 +144,7 @@ namespace System.Reflection.Metadata.Tests
             public string GetSZArrayType(string elemenstring) { return elemenstring + "[]"; }
             public string GetPointerType(string elemenstring) { return elemenstring + "*"; }
 
-            public MetadataReader Reader { get { return null; } } // Not needed, currently
+            public MetadataReader Reader { get; set; }
             public string GetFunctionPointerType(MethodSignature<string> signature) { return null; } // Not needed, currently
             public string GetGenericMethodParameter(int index) { return null; } // Not needed, currently
             public string GetGenericTypeParameter(int index) { return null; } // Not needed, currently
