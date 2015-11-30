@@ -144,6 +144,13 @@
             "#import": [ "osx", "unix-x64" ]
         },
 
+        "osx.10.9": {
+            "#import": [ "osx" ]
+        },
+        "osx.10.9-x64": {
+            "#import": [ "osx.10.9", "osx-x64" ]
+        },
+
         "osx.10.10": {
             "#import": [ "osx" ]
         },
