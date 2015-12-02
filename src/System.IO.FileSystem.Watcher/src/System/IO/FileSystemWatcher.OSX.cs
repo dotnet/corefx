@@ -76,22 +76,8 @@ namespace System.IO
                 // Make sure there's a loop to clear
                 if (_watcherRunLoop != IntPtr.Zero)
                 {
-                    // Stop the RunLoop and wait for the thread to exit gracefully
+                    // Stop the background Thread from pumping FS events
                     Interop.RunLoop.CFRunLoopStop(_watcherRunLoop);
-                    _watcherThread.Join();
-                    _watcherRunLoop = IntPtr.Zero;
-                }
-
-                // Clean up the EventStream, if it exists
-                if (!_eventStream.IsInvalid)
-                {
-                    _eventStream = new SafeEventStreamHandle(IntPtr.Zero);
-                }             
-
-                // Cleanup the callback
-                if (_callback != null)
-                {
-                    _callback = null;
                 }
             }
         }
@@ -223,6 +209,10 @@ namespace System.IO
                 Interop.EventStream.FSEventStreamUnscheduleFromRunLoop(_eventStream, _watcherRunLoop, Interop.RunLoop.kCFRunLoopDefaultMode);
                 OnError(new ErrorEventArgs(new IOException(SR.EventStream_FailedToStart, Marshal.GetLastWin32Error())));
             }
+
+            _eventStream = new SafeEventStreamHandle(IntPtr.Zero);
+            _watcherRunLoop = IntPtr.Zero;
+            _callback = null;
         }
 
         private void FileSystemEventCallback( 
