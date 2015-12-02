@@ -3,8 +3,11 @@
 
 using System.Collections.Immutable;
 
-namespace System.Reflection.Metadata
+namespace System.Reflection.Metadata.Decoding
 {
+    /// <summary>
+    /// Represents the shape of an array type.
+    /// </summary>
     public struct ArrayShape
     {
         private readonly int _rank;
@@ -18,16 +21,25 @@ namespace System.Reflection.Metadata
             _lowerBounds = lowerBounds;
         }
 
+        /// <summary>
+        /// Gets the number of dimensions in the array.
+        /// </summary>
         public int Rank
         {
             get { return _rank; }
         }
 
+        /// <summary>
+        /// Gets the sizes of each dimension. Length may be smaller than rank, in which case the trailing dimensions have unspecified sizes.
+        /// </summary>
         public ImmutableArray<int> Sizes
         {
             get { return _sizes; }
         }
 
+        /// <summary>
+        /// Gets the lower-bounds of each dimension. Length may be smaller than rank, in which case the trailing dimensions have unspecified lower bounds.
+        /// </summary>
         public ImmutableArray<int> LowerBounds
         {
             get { return _lowerBounds; }

@@ -9,23 +9,29 @@ namespace System.Reflection.Metadata.Decoding
     /// <summary>
     /// Decodes custom attribute blobs.
     /// </summary>
-    public static class CustomAttributeDecoder
+    internal struct CustomAttributeDecoder<TType>
     {
-        public static CustomAttributeValue<TType> DecodeCustomAttribute<TType>(CustomAttributeHandle handle, ICustomAttributeTypeProvider<TType> provider)
-        {
-            CustomAttribute attribute = provider.Reader.GetCustomAttribute(handle);
-            EntityHandle constructor = attribute.Constructor;
-            BlobHandle signature;
+        private ICustomAttributeTypeProvider<TType> _provider;
+        private MetadataReader _reader;
 
+        public CustomAttributeDecoder(ICustomAttributeTypeProvider<TType> provider, MetadataReader reader)
+        {
+            _reader = reader;
+            _provider = provider;
+        }
+
+        public CustomAttributeValue<TType> DecodeValue(EntityHandle constructor, BlobHandle value)
+        {
+            BlobHandle signature;
             switch (constructor.Kind)
             {
                 case HandleKind.MethodDefinition:
-                    MethodDefinition definition = provider.Reader.GetMethodDefinition((MethodDefinitionHandle)constructor);
+                    MethodDefinition definition = _reader.GetMethodDefinition((MethodDefinitionHandle)constructor);
                     signature = definition.Signature;
                     break;
 
                 case HandleKind.MemberReference:
-                    MemberReference reference = provider.Reader.GetMemberReference((MemberReferenceHandle)constructor);
+                    MemberReference reference = _reader.GetMemberReference((MemberReferenceHandle)constructor);
                     signature = reference.Signature;
                     break;
 
@@ -33,8 +39,8 @@ namespace System.Reflection.Metadata.Decoding
                     throw new BadImageFormatException();
             }
 
-            BlobReader signatureReader = provider.Reader.GetBlobReader(signature);
-            BlobReader valueReader = provider.Reader.GetBlobReader(attribute.Value);
+            BlobReader signatureReader = _reader.GetBlobReader(signature);
+            BlobReader valueReader = _reader.GetBlobReader(value);
 
             ushort prolog = valueReader.ReadUInt16();
             if (prolog != 1)
@@ -55,12 +61,12 @@ namespace System.Reflection.Metadata.Decoding
                 throw new BadImageFormatException();
             }
 
-            ImmutableArray<CustomAttributeTypedArgument<TType>> fixedArguments = DecodeFixedArguments(ref signatureReader, ref valueReader, parameterCount, provider);
-            ImmutableArray<CustomAttributeNamedArgument<TType>> namedArguments = DecodeNamedArguments(ref valueReader, provider);
+            ImmutableArray<CustomAttributeTypedArgument<TType>> fixedArguments = DecodeFixedArguments(ref signatureReader, ref valueReader, parameterCount);
+            ImmutableArray<CustomAttributeNamedArgument<TType>> namedArguments = DecodeNamedArguments(ref valueReader);
             return new CustomAttributeValue<TType>(fixedArguments, namedArguments);
         }
 
-        private static ImmutableArray<CustomAttributeTypedArgument<TType>> DecodeFixedArguments<TType>(ref BlobReader signatureReader, ref BlobReader valueReader, int count, ICustomAttributeTypeProvider<TType> provider)
+        private ImmutableArray<CustomAttributeTypedArgument<TType>> DecodeFixedArguments(ref BlobReader signatureReader, ref BlobReader valueReader, int count)
         {
             if (count == 0)
             {
@@ -71,14 +77,14 @@ namespace System.Reflection.Metadata.Decoding
 
             for (int i = 0; i < count; i++)
             {
-                ArgumentTypeInfo<TType> info = DecodeFixedArgumentType(ref signatureReader, provider);
-                arguments[i] = DecodeArgument(ref valueReader, info, provider);
+                ArgumentTypeInfo info = DecodeFixedArgumentType(ref signatureReader);
+                arguments[i] = DecodeArgument(ref valueReader, info);
             }
 
             return ImmutableArray.Create(arguments);
         }
 
-        private static ImmutableArray<CustomAttributeNamedArgument<TType>> DecodeNamedArguments<TType>(ref BlobReader valueReader, ICustomAttributeTypeProvider<TType> provider)
+        private ImmutableArray<CustomAttributeNamedArgument<TType>> DecodeNamedArguments(ref BlobReader valueReader)
         {
             int count = valueReader.ReadUInt16();
             if (count == 0)
@@ -95,16 +101,16 @@ namespace System.Reflection.Metadata.Decoding
                     throw new BadImageFormatException();
                 }
 
-                ArgumentTypeInfo<TType> info = DecodeNamedArgumentType(ref valueReader, provider);
+                ArgumentTypeInfo info = DecodeNamedArgumentType(ref valueReader);
                 string name = valueReader.ReadSerializedString();
-                CustomAttributeTypedArgument<TType> argument = DecodeArgument(ref valueReader, info, provider);
+                CustomAttributeTypedArgument<TType> argument = DecodeArgument(ref valueReader, info);
                 arguments[i] = new CustomAttributeNamedArgument<TType>(name, kind, argument.Type, argument.Value);
             }
 
             return ImmutableArray.Create(arguments);
         }
 
-        private struct ArgumentTypeInfo<TType>
+        private struct ArgumentTypeInfo
         {
             public TType Type;
             public TType ElementType;
@@ -118,12 +124,12 @@ namespace System.Reflection.Metadata.Decoding
         // but instead decode one parameter at a time as we read the value blob. This is both
         // better perf-wise, but even more important is that we can't actually reason about
         // a method signature with opaque TType values without adding some unecessary chatter
-        // with the concrete subclass.
-        private static ArgumentTypeInfo<TType> DecodeFixedArgumentType<TType>(ref BlobReader signatureReader, ICustomAttributeTypeProvider<TType> provider, bool isElementType = false)
+        // with the provider.
+        private ArgumentTypeInfo DecodeFixedArgumentType(ref BlobReader signatureReader, bool isElementType = false)
         {
             SignatureTypeCode signatureTypeCode = signatureReader.ReadSignatureTypeCode();
 
-            var info = new ArgumentTypeInfo<TType>
+            var info = new ArgumentTypeInfo
             {
                 TypeCode = (SerializationTypeCode)signatureTypeCode,
             };
@@ -143,19 +149,19 @@ namespace System.Reflection.Metadata.Decoding
                 case SignatureTypeCode.UInt16:
                 case SignatureTypeCode.UInt32:
                 case SignatureTypeCode.UInt64:
-                    info.Type = provider.GetPrimitiveType((PrimitiveTypeCode)signatureTypeCode);
+                    info.Type = _provider.GetPrimitiveType((PrimitiveTypeCode)signatureTypeCode);
                     break;
 
                 case SignatureTypeCode.Object:
                     info.TypeCode = SerializationTypeCode.TaggedObject;
-                    info.Type = provider.GetPrimitiveType(PrimitiveTypeCode.Object);
+                    info.Type = _provider.GetPrimitiveType(PrimitiveTypeCode.Object);
                     break;
 
                 case SignatureTypeCode.TypeHandle:
                     // Parameter is type def or ref and is only allowed to be System.Type or Enum.
                     EntityHandle handle = signatureReader.ReadTypeHandle();
-                    info.Type = GetTypeFromReferenceOrDefinition(handle, provider);
-                    info.TypeCode = provider.IsSystemType(info.Type) ? SerializationTypeCode.Type : (SerializationTypeCode)provider.GetUnderlyingEnumType(info.Type);
+                    info.Type = GetTypeFromHandle(handle);
+                    info.TypeCode = _provider.IsSystemType(info.Type) ? SerializationTypeCode.Type : (SerializationTypeCode)_provider.GetUnderlyingEnumType(info.Type);
                     break;
 
                 case SignatureTypeCode.SZArray:
@@ -165,10 +171,10 @@ namespace System.Reflection.Metadata.Decoding
                         throw new BadImageFormatException();
                     }
 
-                    var elementInfo = DecodeFixedArgumentType(ref signatureReader, provider, isElementType: true);
+                    var elementInfo = DecodeFixedArgumentType(ref signatureReader, isElementType: true);
                     info.ElementType = elementInfo.Type;
                     info.ElementTypeCode = elementInfo.TypeCode;
-                    info.Type = provider.GetSZArrayType(info.ElementType);
+                    info.Type = _provider.GetSZArrayType(info.ElementType);
                     break;
 
                 default:
@@ -178,9 +184,9 @@ namespace System.Reflection.Metadata.Decoding
             return info;
         }
 
-        private static ArgumentTypeInfo<TType> DecodeNamedArgumentType<TType>(ref BlobReader valueReader, ICustomAttributeTypeProvider<TType> provider, bool isElementType = false)
+        private ArgumentTypeInfo DecodeNamedArgumentType(ref BlobReader valueReader, bool isElementType = false)
         {
-            var info = new ArgumentTypeInfo<TType>
+            var info = new ArgumentTypeInfo
             {
                 TypeCode = valueReader.ReadSerializationTypeCode(),
             };
@@ -200,15 +206,15 @@ namespace System.Reflection.Metadata.Decoding
                 case SerializationTypeCode.UInt16:
                 case SerializationTypeCode.UInt32:
                 case SerializationTypeCode.UInt64:
-                    info.Type = provider.GetPrimitiveType((PrimitiveTypeCode)info.TypeCode);
+                    info.Type = _provider.GetPrimitiveType((PrimitiveTypeCode)info.TypeCode);
                     break;
 
                 case SerializationTypeCode.Type:
-                    info.Type = provider.GetSystemType();
+                    info.Type = _provider.GetSystemType();
                     break;
 
                 case SerializationTypeCode.TaggedObject:
-                    info.Type = provider.GetPrimitiveType(PrimitiveTypeCode.Object);
+                    info.Type = _provider.GetPrimitiveType(PrimitiveTypeCode.Object);
                     break;
 
                 case SerializationTypeCode.SZArray:
@@ -218,16 +224,16 @@ namespace System.Reflection.Metadata.Decoding
                         throw new BadImageFormatException();
                     }
 
-                    var elementInfo = DecodeNamedArgumentType(ref valueReader, provider, isElementType: true);
+                    var elementInfo = DecodeNamedArgumentType(ref valueReader, isElementType: true);
                     info.ElementType = elementInfo.Type;
                     info.ElementTypeCode = elementInfo.TypeCode;
-                    info.Type = provider.GetSZArrayType(info.ElementType);
+                    info.Type = _provider.GetSZArrayType(info.ElementType);
                     break;
 
                 case SerializationTypeCode.Enum:
                     string typeName = valueReader.ReadSerializedString();
-                    info.Type = provider.GetTypeFromSerializedName(typeName);
-                    info.TypeCode = (SerializationTypeCode)provider.GetUnderlyingEnumType(info.Type);
+                    info.Type = _provider.GetTypeFromSerializedName(typeName);
+                    info.TypeCode = (SerializationTypeCode)_provider.GetUnderlyingEnumType(info.Type);
                     break;
 
                 default:
@@ -237,15 +243,15 @@ namespace System.Reflection.Metadata.Decoding
             return info;
         }
 
-        private static CustomAttributeTypedArgument<TType> DecodeArgument<TType>(ref BlobReader valueReader, ArgumentTypeInfo<TType> info, ICustomAttributeTypeProvider<TType> provider)
+        private CustomAttributeTypedArgument<TType> DecodeArgument(ref BlobReader valueReader, ArgumentTypeInfo info)
         {
             if (info.TypeCode == SerializationTypeCode.TaggedObject)
             {
-                info = DecodeNamedArgumentType(ref valueReader, provider);
+                info = DecodeNamedArgumentType(ref valueReader);
             }
 
+            // PERF_TODO: Cache/reuse common arguments to avoid boxing (small integers, true, false).
             object value;
-
             switch (info.TypeCode)
             {
                 case SerializationTypeCode.Boolean:
@@ -302,11 +308,11 @@ namespace System.Reflection.Metadata.Decoding
 
                 case SerializationTypeCode.Type:
                     string typeName = valueReader.ReadSerializedString();
-                    value = provider.GetTypeFromSerializedName(typeName);
+                    value = _provider.GetTypeFromSerializedName(typeName);
                     break;
 
                 case SerializationTypeCode.SZArray:
-                    value = DecodeArrayArgument(ref valueReader, info, provider);
+                    value = DecodeArrayArgument(ref valueReader, info);
                     break;
 
                 default:
@@ -316,7 +322,7 @@ namespace System.Reflection.Metadata.Decoding
             return new CustomAttributeTypedArgument<TType>(info.Type, value);
         }
 
-        private static ImmutableArray<CustomAttributeTypedArgument<TType>>? DecodeArrayArgument<TType>(ref BlobReader blobReader, ArgumentTypeInfo<TType> info, ICustomAttributeTypeProvider<TType> provider)
+        private ImmutableArray<CustomAttributeTypedArgument<TType>>? DecodeArrayArgument(ref BlobReader blobReader, ArgumentTypeInfo info)
         {
             int count = blobReader.ReadInt32();
             if (count == -1)
@@ -334,7 +340,7 @@ namespace System.Reflection.Metadata.Decoding
                 throw new BadImageFormatException();
             }
 
-            var elementInfo = new ArgumentTypeInfo<TType>
+            var elementInfo = new ArgumentTypeInfo
             {
                 Type = info.ElementType,
                 TypeCode = info.ElementTypeCode,
@@ -344,26 +350,24 @@ namespace System.Reflection.Metadata.Decoding
 
             for (int i = 0; i < count; i++)
             {
-                array[i] = DecodeArgument(ref blobReader, elementInfo, provider);
+                array[i] = DecodeArgument(ref blobReader, elementInfo);
             }
 
             return ImmutableArray.Create(array);
         }
 
-        private static TType GetTypeFromReferenceOrDefinition<TType>(EntityHandle typeRefOrDefHandle, ICustomAttributeTypeProvider<TType> provider)
+        private TType GetTypeFromHandle(EntityHandle handle)
         {
-            switch (typeRefOrDefHandle.Kind)
+            switch (handle.Kind)
             {
                 case HandleKind.TypeDefinition:
-                    TypeDefinitionHandle typeDefHandle = (TypeDefinitionHandle)typeRefOrDefHandle;
-                    return provider.GetTypeFromDefinition(typeDefHandle, null);
+                    return _provider.GetTypeFromDefinition(_reader, (TypeDefinitionHandle)handle, SignatureTypeHandleCode.Unresolved);
 
                 case HandleKind.TypeReference:
-                    TypeReferenceHandle typeRefHandle = (TypeReferenceHandle)typeRefOrDefHandle;
-                    return provider.GetTypeFromReference(typeRefHandle, null);
+                    return _provider.GetTypeFromReference(_reader, (TypeReferenceHandle)handle, SignatureTypeHandleCode.Unresolved);
 
                 default:
-                    throw new BadImageFormatException();
+                    throw new BadImageFormatException(SR.NotTypeDefOrRefHandle);
             }
         }
     }

@@ -4,7 +4,7 @@
 using System.Collections.Immutable;
 using Xunit;
 
-namespace System.Reflection.Metadata.Tests
+namespace System.Reflection.Metadata.Decoding.Tests
 {
     public class MethodSignatureTests
     {

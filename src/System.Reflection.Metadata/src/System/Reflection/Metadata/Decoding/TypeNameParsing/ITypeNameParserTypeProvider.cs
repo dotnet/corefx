@@ -6,7 +6,7 @@ using System.Collections.Immutable;
 
 namespace System.Reflection.Metadata.Decoding
 {
-    public interface ITypeNameParserTypeProvider<TType> : ITypeProvider<TType>
+    public interface ITypeNameParserTypeProvider<TType> : IConstructedTypeProvider<TType>
     {
         TType GetTypeFromName(AssemblyNameComponents? name, string declaringTypeFullName, ImmutableArray<string> nestedTypeNames);
     }

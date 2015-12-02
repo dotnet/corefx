@@ -12,7 +12,7 @@ namespace System.Reflection.Metadata.Decoding
         {
             private string _name;
             // TODO: Replace this with something a little more efficient
-            private readonly Dictionary<string, string> _components = new Dictionary<string, string>(StringComparers.AssemblyNameComponent);
+            private readonly Dictionary<string, string> _components = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
             public AssemblyNameBuilder()
             {
