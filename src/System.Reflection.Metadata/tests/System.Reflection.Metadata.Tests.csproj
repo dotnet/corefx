@@ -40,7 +40,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Metadata\ClassLayoutRow.cs" />
+    <Compile Include="Metadata\Decoding\DisassemblingTypeProvider.cs" />
     <Compile Include="Metadata\Decoding\MethodSignatureTests.cs" />
+    <Compile Include="Metadata\Decoding\OpaqueHandleTypeProvider.cs" />
     <Compile Include="Metadata\Decoding\SignatureDecoderTests.cs" />
     <Compile Include="Metadata\Decoding\StringBasedTypeProvider.cs" />
     <Compile Include="Metadata\Decoding\TypeNameParserTests.cs" />
@@ -95,6 +97,7 @@
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
   <PropertyGroup>
-     <ProjectPackagesConfigFile /> <!-- buildtools get tripped up by packages.config for desktop project -->
+    <!-- buildtools get tripped up by packages.config for desktop project -->
+    <ProjectPackagesConfigFile />
   </PropertyGroup>
 </Project>
