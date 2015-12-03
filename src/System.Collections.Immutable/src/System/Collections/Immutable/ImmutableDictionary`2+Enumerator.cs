@@ -23,7 +23,7 @@ namespace System.Collections.Immutable
             /// <summary>
             /// The enumerator over the sorted dictionary whose keys are hash values.
             /// </summary>
-            private SortedInt32KeyNode<HashBucket>.Enumerator _mapEnumerator;
+            private readonly SortedInt32KeyNode<HashBucket>.Enumerator _mapEnumerator;
 
             /// <summary>
             /// The enumerator in use within an individual <see cref="HashBucket"/>.
