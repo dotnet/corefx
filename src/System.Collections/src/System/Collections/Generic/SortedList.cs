@@ -1042,7 +1042,7 @@ namespace System.Collections.Generic
 
         [DebuggerTypeProxy(typeof(DictionaryKeyCollectionDebugView<,>))]
         [DebuggerDisplay("Count = {Count}")]
-        private sealed class KeyList : IList<TKey>, System.Collections.ICollection
+        private sealed class KeyList : IList<TKey>, IReadOnlyList<TKey>, System.Collections.ICollection
         {
             private SortedList<TKey, TValue> _dict;
 
