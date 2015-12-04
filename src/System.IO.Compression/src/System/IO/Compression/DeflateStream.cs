@@ -5,11 +5,14 @@ using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Diagnostics.Contracts;
+using System.IO.Compression.Internal;
 
 namespace System.IO.Compression
 {
     public partial class DeflateStream : Stream
     {
+        private static readonly ObjectPool<byte[]> s_byteBufferPool = new ObjectPool<byte[]>(() => new byte[DefaultBufferSize], 32);  
+
         internal const int DefaultBufferSize = 8192;
 
         private Stream _stream;
@@ -17,7 +20,7 @@ namespace System.IO.Compression
         private bool _leaveOpen;
         private IInflater _inflater;
         private IDeflater _deflater;
-        private byte[] _buffer;
+        private readonly byte[] _buffer;
 
         private int _asyncOperations;
 
@@ -50,8 +53,8 @@ namespace System.IO.Compression
             _inflater = CreateInflater(reader);
             _stream = stream;
             _mode = CompressionMode.Decompress;
-            _leaveOpen = leaveOpen;
-            _buffer = new byte[DefaultBufferSize];
+            _leaveOpen = leaveOpen;            
+            _buffer = s_byteBufferPool.Allocate();
         }
 
 
@@ -85,7 +88,7 @@ namespace System.IO.Compression
             _stream = stream;
             _mode = mode;
             _leaveOpen = leaveOpen;
-            _buffer = new byte[DefaultBufferSize];
+            _buffer = s_byteBufferPool.Allocate();
         }
 
         // Implies mode = Compress
@@ -115,7 +118,7 @@ namespace System.IO.Compression
 
             _deflater = CreateDeflater(compressionLevel);
 
-            _buffer = new byte[DefaultBufferSize];
+            _buffer = s_byteBufferPool.Allocate();
         }
 
         private static IDeflater CreateDeflater(CompressionLevel? compressionLevel)
@@ -611,6 +614,8 @@ namespace System.IO.Compression
                         base.Dispose(disposing);
                     }
                 }  // finally
+
+                s_byteBufferPool.Free(_buffer);
             }  // finally
         }  // Dispose
 
