@@ -3,8 +3,6 @@
 
 using System.Collections;
 using System.Collections.Generic;
-using System.Threading;
-using System.Globalization;
 using System.Net.NetworkInformation;
 using System.Text;
 
@@ -127,7 +125,7 @@ namespace System.Net
 
         public CookieContainer(int capacity, int perDomainCapacity, int maxCookieSize) : this(capacity)
         {
-            if (perDomainCapacity != Int32.MaxValue && (perDomainCapacity <= 0 || perDomainCapacity > capacity))
+            if (perDomainCapacity != int.MaxValue && (perDomainCapacity <= 0 || perDomainCapacity > capacity))
             {
                 throw new ArgumentOutOfRangeException("perDomainCapacity", SR.Format(SR.net_cookie_capacity_range, "PerDomainCapacity", 0, capacity));
             }
@@ -148,7 +146,7 @@ namespace System.Net
             }
             set
             {
-                if (value <= 0 || (value < _maxCookiesPerDomain && _maxCookiesPerDomain != Int32.MaxValue))
+                if (value <= 0 || (value < _maxCookiesPerDomain && _maxCookiesPerDomain != int.MaxValue))
                 {
                     throw new ArgumentOutOfRangeException("value", SR.Format(SR.net_cookie_capacity_range, "Capacity", 0, _maxCookiesPerDomain));
                 }
@@ -199,7 +197,7 @@ namespace System.Net
             }
             set
             {
-                if (value <= 0 || (value > _maxCookies && value != Int32.MaxValue))
+                if (value <= 0 || (value > _maxCookies && value != int.MaxValue))
                 {
                     throw new ArgumentOutOfRangeException("value");
                 }
@@ -253,13 +251,13 @@ namespace System.Net
             uriSb.Append(cookie.Path);
 
             if (!Uri.TryCreate(uriSb.ToString(), UriKind.Absolute, out uri))
-                throw new CookieException(SR.Format(SR.net_cookie_attribute, "Domain", cookie.Domain));
+                throw new CookieException(SR.Format(SR.net_cookie_attribute, Cookie.DomainAttributeName, cookie.Domain));
 
             // We don't know cookie verification status, so re-create the cookie and verify it.
-            Cookie new_cookie = cookie.Clone();
-            new_cookie.VerifySetDefaults(new_cookie.Variant, uri, IsLocalDomain(uri.Host), _fqdnMyDomain, true, true);
+            Cookie newCookie = cookie.Clone();
+            newCookie.VerifySetDefaults(newCookie.Variant, uri, IsLocalDomain(uri.Host), _fqdnMyDomain, true, true);
 
-            Add(new_cookie, true);
+            Add(newCookie, true);
         }
 
         private void AddRemoveDomain(string key, PathList value)
@@ -303,7 +301,7 @@ namespace System.Net
                         AddRemoveDomain(cookie.DomainKey, pathList);
                     }
                 }
-                int domain_count = pathList.GetCookiesCount();
+                int domainCount = pathList.GetCookiesCount();
 
                 CookieCollection cookies;
                 lock (pathList.SyncRoot)
@@ -326,14 +324,14 @@ namespace System.Net
                         if (idx != -1)
                         {
                             cookies.RemoveAt(idx);
-                            --_count;
+                            _count--;
                         }
                     }
                 }
                 else
                 {
                     // This is about real cookie adding, check Capacity first
-                    if (domain_count >= _maxCookiesPerDomain && !AgeCookies(cookie.DomainKey))
+                    if (domainCount >= _maxCookiesPerDomain && !AgeCookies(cookie.DomainKey))
                     {
                         return; // Cannot age: reject new cookie
                     }
@@ -373,14 +371,6 @@ namespace System.Net
         // Param. 'domain' == null means to age in the whole container.
         private bool AgeCookies(string domain)
         {
-            // Border case: shrunk to zero
-            if (_maxCookies == 0 || _maxCookiesPerDomain == 0)
-            {
-                _domainTable = new Dictionary<string, PathList>();
-                _count = 0;
-                return false;
-            }
-
             int removed = 0;
             DateTime oldUsed = DateTime.MaxValue;
             DateTime tempUsed;
@@ -390,7 +380,7 @@ namespace System.Net
             string tempDomain = null;
 
             PathList pathList;
-            int domain_count = 0;
+            int domainCount = 0;
             int itemp = 0;
             float remainingFraction = 1.0F;
 
@@ -416,7 +406,7 @@ namespace System.Net
                         _domainTable.TryGetValue(domain, out pathList);
                     }
 
-                    domain_count = 0; // Cookies in the domain
+                    domainCount = 0; // Cookies in the domain
                     lock (pathList.SyncRoot)
                     {
                         foreach (CookieCollection cc in pathList.Values)
@@ -424,7 +414,7 @@ namespace System.Net
                             itemp = ExpireCollection(cc);
                             removed += itemp;
                             _count -= itemp; // Update this container's count
-                            domain_count += cc.Count;
+                            domainCount += cc.Count;
 
                             // We also find the least used cookie collection in ENTIRE container.
                             // We count the collection as LRU only if it holds 1+ elements.
@@ -438,8 +428,8 @@ namespace System.Net
                     }
 
                     // Check if we have reduced to the limit of the domain by expiration only.
-                    int min_count = Math.Min((int)(domain_count * remainingFraction), Math.Min(_maxCookiesPerDomain, _maxCookies) - 1);
-                    if (domain_count > min_count)
+                    int minCount = Math.Min((int)(domainCount * remainingFraction), Math.Min(_maxCookiesPerDomain, _maxCookies) - 1);
+                    if (domainCount > minCount)
                     {
                         // This case requires sorting all domain collections by timestamp.
                         KeyValuePair<DateTime, CookieCollection>[] cookies;
@@ -449,7 +439,7 @@ namespace System.Net
                             foreach (CookieCollection cc in pathList.Values)
                             {
                                 cookies[itemp] = new KeyValuePair<DateTime, CookieCollection>(cc.TimeStamp(CookieCollection.Stamp.Check), cc);
-                                ++itemp;
+                                itemp++;
                             }
                         }
                         Array.Sort(cookies,
@@ -457,27 +447,27 @@ namespace System.Net
                                 { return a.Key.CompareTo(b.Key); });
 
                         itemp = 0;
-                        for (int i = 0; i < cookies.Length; ++i)
+                        for (int i = 0; i < cookies.Length; i++)
                         {
                             CookieCollection cc = cookies[i].Value;
 
                             lock (cc)
                             {
-                                while (domain_count > min_count && cc.Count > 0)
+                                while (domainCount > minCount && cc.Count > 0)
                                 {
                                     cc.RemoveAt(0);
-                                    --domain_count;
-                                    --_count;
-                                    ++removed;
+                                    domainCount--;
+                                    _count--;
+                                    removed++;
                                 }
                             }
-                            if (domain_count <= min_count)
+                            if (domainCount <= minCount)
                             {
                                 break;
                             }
                         }
 
-                        if (domain_count > min_count && domain != null)
+                        if (domainCount > minCount && domain != null)
                         {
                             // Cannot complete aging of explicit domain (no cookie adding allowed).
                             return false;
@@ -513,7 +503,7 @@ namespace System.Net
                 while (_count >= _maxCookies && lruCc.Count > 0)
                 {
                     lruCc.RemoveAt(0);
-                    --_count;
+                    _count--;
                 }
             }
             return true;
@@ -535,7 +525,7 @@ namespace System.Net
                     {
                         cc.RemoveAt(idx);
                     }
-                    --idx;
+                    idx--;
                 }
                 return oldCount - cc.Count;
             }
@@ -630,10 +620,10 @@ namespace System.Net
             {
                 throw new ArgumentNullException("cookie");
             }
-            Cookie new_cookie = cookie.Clone();
-            new_cookie.VerifySetDefaults(new_cookie.Variant, uri, IsLocalDomain(uri.Host), _fqdnMyDomain, true, true);
+            Cookie newCookie = cookie.Clone();
+            newCookie.VerifySetDefaults(newCookie.Variant, uri, IsLocalDomain(uri.Host), _fqdnMyDomain, true, true);
 
-            Add(new_cookie, true);
+            Add(newCookie, true);
         }
 
         public void Add(Uri uri, CookieCollection cookies)
@@ -650,15 +640,15 @@ namespace System.Net
             bool isLocalDomain = IsLocalDomain(uri.Host);
             foreach (Cookie c in cookies)
             {
-                Cookie new_cookie = c.Clone();
-                new_cookie.VerifySetDefaults(new_cookie.Variant, uri, isLocalDomain, _fqdnMyDomain, true, true);
-                Add(new_cookie, true);
+                Cookie newCookie = c.Clone();
+                newCookie.VerifySetDefaults(newCookie.Variant, uri, isLocalDomain, _fqdnMyDomain, true, true);
+                Add(newCookie, true);
             }
         }
 
-        internal CookieCollection CookieCutter(Uri uri, string headerName, string setCookieHeader, bool isThrow)
+        internal CookieCollection CookieCutter(Uri uri, string headerName, string setCookieHeader, bool shouldThrow)
         {
-            GlobalLog.Print("CookieContainer#" + Logging.HashString(this) + "::CookieCutter() uri:" + uri + " headerName:" + headerName + " setCookieHeader:" + setCookieHeader + " isThrow:" + isThrow);
+            GlobalLog.Print("CookieContainer#" + Logging.HashString(this) + "::CookieCutter() uri:" + uri + " headerName:" + headerName + " setCookieHeader:" + setCookieHeader + " isThrow:" + shouldThrow);
             CookieCollection cookies = new CookieCollection();
             CookieVariant variant = CookieVariant.Unknown;
             if (headerName == null)
@@ -667,9 +657,9 @@ namespace System.Net
             }
             else
             {
-                for (int i = 0; i < s_headerInfo.Length; ++i)
+                for (int i = 0; i < s_headerInfo.Length; i++)
                 {
-                    if ((String.Compare(headerName, s_headerInfo[i].Name, StringComparison.OrdinalIgnoreCase) == 0))
+                    if (string.Compare(headerName, s_headerInfo[i].Name, StringComparison.OrdinalIgnoreCase) == 0)
                     {
                         variant = s_headerInfo[i].Variant;
                     }
@@ -689,21 +679,12 @@ namespace System.Net
                         break;
                     }
 
-                    // Parser marks invalid cookies this way
-                    if (String.IsNullOrEmpty(cookie.Name))
-                    {
-                        if (isThrow)
-                        {
-                            throw new CookieException(SR.net_cookie_format);
-                        }
-                        // Otherwise, ignore (reject) cookie
-                        continue;
-                    }
-
+                    // Invalid cookies from the parser will definitely fail this test and throw. 
                     // This will set the default values from the response URI
                     // AND will check for cookie validity
-                    if (!cookie.VerifySetDefaults(variant, uri, isLocalDomain, _fqdnMyDomain, true, isThrow))
+                    if (!cookie.VerifySetDefaults(variant, uri, isLocalDomain, _fqdnMyDomain, true, shouldThrow))
                     {
+                        // Otherwise, ignore (reject) the cookie
                         continue;
                     }
                     // If many same cookies arrive we collapse them into just one, hence setting
@@ -717,7 +698,7 @@ namespace System.Net
             }
             catch (Exception e)
             {
-                if (isThrow)
+                if (shouldThrow)
                 {
                     throw new CookieException(SR.Format(SR.net_cookie_parse_header, uri.AbsoluteUri), e);
                 }
@@ -725,7 +706,7 @@ namespace System.Net
 
             foreach (Cookie c in cookies)
             {
-                Add(c, isThrow);
+                Add(c, shouldThrow);
             }
 
             return cookies;
@@ -762,7 +743,7 @@ namespace System.Net
                 // DNS.resolve may return short names even for other inet domains ;-(
                 // We _don't_ know what the exact domain is, so try also grab short hostname cookies.
                 // Grab long name from the local domain
-                if (_fqdnMyDomain != null && _fqdnMyDomain.Length != 0)
+                if (!string.IsNullOrEmpty(_fqdnMyDomain))
                 {
                     domainAttributeMatchAnyCookieVariant.Add(fqdnRemote + _fqdnMyDomain);
                     // Grab the local domain itself
@@ -869,9 +850,9 @@ namespace System.Net
             lock (source)
             {
                 // Cannot use foreach as we going update 'source'
-                for (int idx = 0; idx < source.Count; ++idx)
+                for (int idx = 0; idx < source.Count; idx++)
                 {
-                    bool to_add = false;
+                    bool shouldAdd = false;
 
                     Cookie cookie = source[idx];
 
@@ -879,8 +860,8 @@ namespace System.Net
                     {
                         // If expired, remove from container and don't add to the destination
                         source.RemoveAt(idx);
-                        --_count;
-                        --idx;
+                        _count--;
+                        idx--;
                     }
                     else
                     {
@@ -896,7 +877,7 @@ namespace System.Net
                             {
                                 if (p == port)
                                 {
-                                    to_add = true;
+                                    shouldAdd = true;
                                     break;
                                 }
                             }
@@ -904,16 +885,16 @@ namespace System.Net
                         else
                         {
                             // It was implicit Port, always OK to add.
-                            to_add = true;
+                            shouldAdd = true;
                         }
 
                         // Refuse to add a secure cookie into an 'unsecure' destination
                         if (cookie.Secure && !isSecure)
                         {
-                            to_add = false;
+                            shouldAdd = false;
                         }
 
-                        if (to_add)
+                        if (shouldAdd)
                         {
                             // In 'source' are already orederd.
                             // If two same cookies come from different 'source' then they
@@ -1046,7 +1027,7 @@ namespace System.Net
                 int lr = pathRight.Length;
                 int length = Math.Min(ll, lr);
 
-                for (int i = 0; i < length; ++i)
+                for (int i = 0; i < length; i++)
                 {
                     if (pathLeft[i] != pathRight[i])
                     {

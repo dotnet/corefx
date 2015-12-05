@@ -1,8 +1,9 @@
 {
   "dependencies": {
     "System.Diagnostics.Contracts": "4.0.0",
-    "System.Runtime": "4.0.20",
-    "System.Threading.Tasks": "4.0.0",
+    "System.Runtime": "4.0.21-beta-*",
+    "System.Threading.Tasks": "4.0.10-beta-*",
+    "System.Threading.Thread": "4.0.0-beta-*",
     "xunit": "2.1.0",
     "xunit.netcore.extensions": "1.0.0-prerelease-*"
   },

@@ -1,12 +1,6 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System.IO;
-using System.Runtime.InteropServices;
-using System.Security;
-using System.Text;
-using System.Threading;
-using Microsoft.Win32;
 
 namespace System.Net
 {
@@ -131,12 +125,12 @@ namespace System.Net
         ///       authentication type.
         ///    </para>
         /// </devdoc>
-        public NetworkCredential GetCredential(Uri uri, String authenticationType)
+        public NetworkCredential GetCredential(Uri uri, string authenticationType)
         {
             return this;
         }
 
-        public NetworkCredential GetCredential(string host, int port, String authenticationType)
+        public NetworkCredential GetCredential(string host, int port, string authenticationType)
         {
             return this;
         }

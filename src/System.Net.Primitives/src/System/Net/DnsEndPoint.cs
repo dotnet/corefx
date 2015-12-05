@@ -20,7 +20,7 @@ namespace System.Net
                 throw new ArgumentNullException("host");
             }
 
-            if (String.IsNullOrEmpty(host))
+            if (string.IsNullOrEmpty(host))
             {
                 throw new ArgumentException(SR.Format(SR.net_emptystringcall, "host"));
             }
