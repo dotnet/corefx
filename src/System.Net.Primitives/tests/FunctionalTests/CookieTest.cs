@@ -9,32 +9,6 @@ namespace System.Net.Primitives.Functional.Tests
 {
     public static class CookieTest
     {
-        public static Cookie[] InvalidCookies()
-        {
-            List<Cookie> cookies = new List<Cookie>();
-
-            const string DefaultName = "name";
-            const string DefaultValue = "value";
-            const string DefaultPath = "path";
-            const string DefaultDomain = "domain.com";
-
-            cookies.Add(new Cookie(DefaultName, null, DefaultPath, DefaultDomain)); //Null value
-            cookies.Add(new Cookie(DefaultName, ";", DefaultPath, DefaultDomain)); //Value contains reserved characters
-            cookies.Add(new Cookie(DefaultName, DefaultValue, "\"/a", DefaultDomain)); //Semi escaped path
-
-            cookies.Add(new Cookie(DefaultName, DefaultValue, ";", DefaultDomain)); //Path contains reserved characters
-            
-            cookies.Add(new Cookie(DefaultName, DefaultValue, DefaultPath, " ")); //Invalid domain
-            cookies.Add(new Cookie(DefaultName, DefaultValue, DefaultPath, "П.com")); //Invalid domain
-
-            cookies.Add(new Cookie(DefaultName, DefaultValue, DefaultPath, "domain")); //Plain cookie, explicit domain without version doesn't start with '.'
-            cookies.Add(new Cookie(DefaultName, DefaultValue, DefaultPath, "domain") { Version = 100 }); //Rfc2965 cookie, explcit domain with version doesn't start with '.'
-
-            cookies.Add(new Cookie(DefaultName, DefaultValue, DefaultPath, DefaultDomain) { Comment = ";" }); //Comment contains reserved characters
-
-            return cookies.ToArray();
-        }
-
         [Fact]
         public static void Ctor_Empty_Success()
         {
@@ -69,16 +43,22 @@ namespace System.Net.Primitives.Functional.Tests
         }
 
         [Fact]
+        public static void CookieException_Ctor_Success()
+        {
+            CookieException c = new CookieException();
+        }
+
+        [Fact]
         public static void Comment_GetSet_Success()
         {
             Cookie c = new Cookie();
-            Assert.Equal(String.Empty, c.Comment);
+            Assert.Equal(string.Empty, c.Comment);
 
             c.Comment = "hello";
             Assert.Equal("hello", c.Comment);
 
             c.Comment = null;
-            Assert.Equal(String.Empty, c.Comment);
+            Assert.Equal(string.Empty, c.Comment);
         }
 
         [Fact]
@@ -121,13 +101,13 @@ namespace System.Net.Primitives.Functional.Tests
         public static void Domain_GetSet_Success()
         {
             Cookie c = new Cookie();
-            Assert.Equal(String.Empty, c.Domain);
+            Assert.Equal(string.Empty, c.Domain);
 
             c.Domain = "hello";
             Assert.Equal("hello", c.Domain);
 
             c.Domain = null;
-            Assert.Equal(String.Empty, c.Domain);
+            Assert.Equal(string.Empty, c.Domain);
         }
 
         [Fact]
@@ -135,7 +115,7 @@ namespace System.Net.Primitives.Functional.Tests
         {
             Cookie c = new Cookie();
             Assert.False(c.Expired);
-            
+
             c.Expires = DateTime.Now.AddDays(-1);
             Assert.True(c.Expired);
 
@@ -164,7 +144,7 @@ namespace System.Net.Primitives.Functional.Tests
         public static void Name_GetSet_Success()
         {
             Cookie c = new Cookie();
-            Assert.Equal(String.Empty, c.Name);
+            Assert.Equal(string.Empty, c.Name);
 
             c.Name = "hello";
             Assert.Equal("hello", c.Name);
@@ -191,26 +171,26 @@ namespace System.Net.Primitives.Functional.Tests
         public static void Path_GetSet_Success()
         {
             Cookie c = new Cookie();
-            Assert.Equal(String.Empty, c.Path);
+            Assert.Equal(string.Empty, c.Path);
 
             c.Path = "path";
             Assert.Equal("path", c.Path);
 
             c.Path = null;
-            Assert.Equal(String.Empty, c.Path);
+            Assert.Equal(string.Empty, c.Path);
         }
-        
+
         [Fact]
         public static void Port_GetSet_Success()
         {
             Cookie c = new Cookie();
-            Assert.Equal(String.Empty, c.Port);
+            Assert.Equal(string.Empty, c.Port);
 
             c.Port = "\"80 110, 1050, 1090 ,110\"";
             Assert.Equal("\"80 110, 1050, 1090 ,110\"", c.Port);
 
             c.Port = null;
-            Assert.Equal(String.Empty, c.Port);
+            Assert.Equal(string.Empty, c.Port);
         }
 
         [Theory]
@@ -250,13 +230,13 @@ namespace System.Net.Primitives.Functional.Tests
         public static void Value_GetSet_Success()
         {
             Cookie c = new Cookie();
-            Assert.Equal(String.Empty, c.Value);
+            Assert.Equal(string.Empty, c.Value);
 
             c.Value = "hello";
             Assert.Equal("hello", c.Value);
 
             c.Value = null;
-            Assert.Equal(String.Empty, c.Value);
+            Assert.Equal(string.Empty, c.Value);
         }
 
         [Fact]
@@ -310,7 +290,7 @@ namespace System.Net.Primitives.Functional.Tests
             Assert.NotEqual(c2, c5);
             Assert.NotEqual(c2, c6);
             Assert.NotEqual(c2, c9);
-            
+
             Assert.NotEqual(c2.GetHashCode(), c4.GetHashCode());
             Assert.NotEqual(c2.GetHashCode(), c5.GetHashCode());
             Assert.NotEqual(c2.GetHashCode(), c6.GetHashCode());
@@ -319,7 +299,7 @@ namespace System.Net.Primitives.Functional.Tests
             Assert.Equal(c6, c7);
             Assert.NotEqual(c6, c8);
             Assert.NotEqual(c6, c9);
-            
+
             Assert.NotEqual(c6.GetHashCode(), c8.GetHashCode());
             Assert.NotEqual(c6.GetHashCode(), c9.GetHashCode());
 
@@ -340,7 +320,7 @@ namespace System.Net.Primitives.Functional.Tests
         public static void ToString_Compare_Success()
         {
             Cookie c = new Cookie();
-            Assert.Equal(String.Empty, c.ToString());
+            Assert.Equal(string.Empty, c.ToString());
 
             c = new Cookie("name", "value");
             Assert.Equal("name=value", c.ToString());
@@ -352,6 +332,9 @@ namespace System.Net.Primitives.Functional.Tests
 
             c.Version = 0;
             Assert.Equal("name=value; $Path=path; $Domain=domain; $Port=\"80\"", c.ToString());
+
+            c.Port = "";
+            Assert.Equal("name=value; $Path=path; $Domain=domain; $Port", c.ToString());
         }
     }
 }

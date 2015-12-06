@@ -2,7 +2,9 @@
   "dependencies": {
     "System.Diagnostics.Contracts": "4.0.0",
     "System.Runtime": "4.0.20",
-    "System.Threading.Tasks": "4.0.0",
+    "System.Threading.Tasks": "4.0.11-rc2-23604",
+    "System.Threading.Thread": "4.0.0-rc2-23604",
+    "System.Reflection.Extensions": "4.0.1-rc2-23604",
     "xunit": "2.1.0",
     "xunit.netcore.extensions": "1.0.0-prerelease-*"
   },
