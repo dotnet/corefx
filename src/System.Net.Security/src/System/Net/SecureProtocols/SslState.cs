@@ -88,13 +88,13 @@ namespace System.Net.Security
         //
         //
         //
-        internal void ValidateCreateContext(bool isServer, string targetHost, SslProtocols enabledSslProtocols, X509Certificate serverCertificate, X509CertificateCollection clientCertificates, bool remoteCertRequired, bool checkCertRevocationStatus)
+        internal void ValidateCreateContext(bool isServer, string targetHost, SslProtocols enabledSslProtocols, X509Certificate serverCertificate, X509CertificateCollection clientCertificates, bool remoteCertRequired, bool checkCertRevocationStatus, string[] applicationProtocols)
         {
             ValidateCreateContext(isServer, targetHost, enabledSslProtocols, serverCertificate, clientCertificates, remoteCertRequired,
-                                   checkCertRevocationStatus, !isServer);
+                                   checkCertRevocationStatus, !isServer, applicationProtocols);
         }
 
-        internal void ValidateCreateContext(bool isServer, string targetHost, SslProtocols enabledSslProtocols, X509Certificate serverCertificate, X509CertificateCollection clientCertificates, bool remoteCertRequired, bool checkCertRevocationStatus, bool checkCertName)
+        internal void ValidateCreateContext(bool isServer, string targetHost, SslProtocols enabledSslProtocols, X509Certificate serverCertificate, X509CertificateCollection clientCertificates, bool remoteCertRequired, bool checkCertRevocationStatus, bool checkCertName, string[] applicationProtocols)
         {
             //
             // We don't support SSL alerts right now, hence any exception is fatal and cannot be retried.
@@ -143,7 +143,7 @@ namespace System.Net.Security
             try
             {
                 _context = new SecureChannel(targetHost, isServer, enabledSslProtocols, serverCertificate, clientCertificates, remoteCertRequired,
-                                                                 checkCertName, checkCertRevocationStatus, _encryptionPolicy, _certSelectionDelegate);
+                                                                 checkCertName, checkCertRevocationStatus, _encryptionPolicy, _certSelectionDelegate, applicationProtocols);
             }
             catch (Win32Exception e)
             {
@@ -377,6 +377,15 @@ namespace System.Net.Security
                 }
 
                 return ret;
+            }
+        }
+
+        internal string NegotiatedApplicationProtocol
+        {
+            get
+            {
+                CheckThrow(true);
+                return Context.NegotiatedApplicationProtocol;
             }
         }
 

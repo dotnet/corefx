@@ -46,7 +46,8 @@ internal static partial class Interop
         SecurityQosFailed = unchecked((int)0x80090332),
         SmartcardLogonRequired = unchecked((int)0x8009033E),
         UnsupportedPreauth = unchecked((int)0x80090343),
-        BadBinding = unchecked((int)0x80090346)
+        BadBinding = unchecked((int)0x80090346),
+        ApplicationProtocolMismatch = unchecked((int)0x80090367)
     }
 
 #if TRACE_VERBOSE

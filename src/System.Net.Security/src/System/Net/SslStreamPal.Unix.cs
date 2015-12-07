@@ -28,6 +28,13 @@ namespace System.Net
             return HandshakeInternal(credential, ref context, inputBuffer, outputBuffer, true, remoteCertRequired);
         }
 
+        public static SecurityStatusPal AcceptSecurityContext(SafeFreeCredentials credential,
+            ref SafeDeleteContext context, SecurityBuffer[] inputBuffers, SecurityBuffer outputBuffer,
+            bool remoteCertRequired)
+        {
+            return HandshakeInternal(credential, ref context, inputBuffers[0], outputBuffer, true, remoteCertRequired);
+        }
+
         public static SecurityStatusPal InitializeSecurityContext(ref SafeFreeCredentials credential, ref SafeDeleteContext context,
             string targetName, SecurityBuffer inputBuffer, SecurityBuffer outputBuffer)
         {        
@@ -79,6 +86,11 @@ namespace System.Net
         public static void QueryContextConnectionInfo(SafeDeleteContext securityContext, out SslConnectionInfo connectionInfo)
         {
             connectionInfo = new SslConnectionInfo(securityContext.SslContext);
+        }
+
+        public static void QueryContextApplicationProtocol(SafeDeleteContext securityContext, out ApplicationProtocolContext applicationProtocolContext)
+        {
+            applicationProtocolContext = null;
         }
 
         private static SecurityStatusPal HandshakeInternal(SafeFreeCredentials credential, ref SafeDeleteContext context,

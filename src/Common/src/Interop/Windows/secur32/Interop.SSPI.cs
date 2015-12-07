@@ -79,6 +79,7 @@ internal static partial class Interop
             UniqueBindings = 0x19,
             EndpointBindings = 0x1A,
             ClientSpecifiedSpn = 0x1B, // SECPKG_ATTR_CLIENT_SPECIFIED_TARGET = 27
+            ApplicationProtocol = 0x23, // SECPKG_ATTR_APPLICATION_PROTOCOL = 35
             RemoteCertificate = 0x53,
             LocalCertificate = 0x54,
             RootStore = 0x55,

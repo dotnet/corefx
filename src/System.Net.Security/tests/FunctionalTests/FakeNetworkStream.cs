@@ -91,6 +91,12 @@ namespace System.Net.Security.Tests
             _network.WriteFrame(_isServer, innerBuffer);
         }
 
+        protected override void Dispose(bool disposing)
+        {
+            _network.WriteFrame(_isServer, new byte[0]);
+            base.Dispose(disposing);
+        }
+
         private void UpdateReadStream()
         {
             if (_readStream != null && (_readStream.Position < _readStream.Length))

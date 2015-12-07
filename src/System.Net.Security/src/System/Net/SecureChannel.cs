@@ -33,6 +33,8 @@ namespace System.Net.Security
         private readonly SslProtocols _sslProtocols;
         private readonly EncryptionPolicy _encryptionPolicy;
         private SslConnectionInfo _connectionInfo;
+        private SecurityBuffer _applicationProtocolsBuffer;
+        private string _negotiatedApplicationProtocol;
 
         private X509Certificate _serverCertificate;
         private X509Certificate _selectedClientCertificate;
@@ -53,7 +55,7 @@ namespace System.Net.Security
 
 
         internal SecureChannel(string hostname, bool serverMode, SslProtocols sslProtocols, X509Certificate serverCertificate, X509CertificateCollection clientCertificates, bool remoteCertRequired, bool checkCertName,
-                                                  bool checkCertRevocationStatus, EncryptionPolicy encryptionPolicy, LocalCertSelectionCallback certSelectionDelegate)
+                                                  bool checkCertRevocationStatus, EncryptionPolicy encryptionPolicy, LocalCertSelectionCallback certSelectionDelegate, string[] applicationProtocols)
         {
             GlobalLog.Enter("SecureChannel#" + Logging.HashString(this) + "::.ctor", "hostname:" + hostname + " #clientCertificates=" + ((clientCertificates == null) ? "0" : clientCertificates.Count.ToString(NumberFormatInfo.InvariantInfo)));
             if (Logging.On)
@@ -80,6 +82,11 @@ namespace System.Net.Security
             _certSelectionDelegate = certSelectionDelegate;
             _refreshCredentialNeeded = true;
             _encryptionPolicy = encryptionPolicy;
+            if (applicationProtocols != null)
+            {
+                byte[] alpnBytes = ApplicationProtocols.ToByteArray(applicationProtocols);
+                _applicationProtocolsBuffer = new SecurityBuffer(alpnBytes, 0, alpnBytes.Length, SecurityBufferType.ApplicationProtocols); 
+            }
             GlobalLog.Leave("SecureChannel#" + Logging.HashString(this) + "::.ctor");
         }
 
@@ -167,6 +174,14 @@ namespace System.Net.Security
             get
             {
                 return _connectionInfo;
+            }
+        }
+
+        internal string NegotiatedApplicationProtocol
+        {
+            get
+            {
+                return _negotiatedApplicationProtocol;
             }
         }
 
@@ -779,11 +794,31 @@ namespace System.Net.Security
             if (input != null)
             {
                 incomingSecurity = new SecurityBuffer(input, offset, count, SecurityBufferType.Token);
-                incomingSecurityBuffers = new SecurityBuffer[]
+
+                if (_applicationProtocolsBuffer == null)
                 {
-                    incomingSecurity,
-                    new SecurityBuffer(null, 0, 0, SecurityBufferType.Empty)
-                };
+                    incomingSecurityBuffers = new SecurityBuffer[]
+                    {
+                        incomingSecurity,
+                        new SecurityBuffer(null, 0, 0, SecurityBufferType.Empty)
+                    };
+                }
+                else
+                {
+                    incomingSecurityBuffers = new SecurityBuffer[]
+                    {
+                        incomingSecurity,
+                        new SecurityBuffer(null, 0, 0, SecurityBufferType.Empty),
+                        _applicationProtocolsBuffer
+                    };
+                }
+            }
+            else
+            {
+                if (_applicationProtocolsBuffer != null)
+                {
+                    incomingSecurity = _applicationProtocolsBuffer;
+                }
             }
 
             SecurityBuffer outgoingSecurity = new SecurityBuffer(null, SecurityBufferType.Token);
@@ -812,15 +847,15 @@ namespace System.Net.Security
                     if (_serverMode)
                     {
                         errorCode = SslStreamPal.AcceptSecurityContext(
-                                      ref _credentialsHandle,
+                                      _credentialsHandle,
                                       ref _securityContext,
-                                      incomingSecurity,
+                                      incomingSecurityBuffers,
                                       outgoingSecurity,
                                       _remoteCertRequired);
                     }
                     else
                     {
-                        if (incomingSecurity == null)
+                        if (incomingSecurityBuffers == null)
                         {
                             errorCode = SslStreamPal.InitializeSecurityContext(
                                            ref _credentialsHandle,
@@ -909,7 +944,32 @@ namespace System.Net.Security
             }
 
             SslStreamPal.QueryContextConnectionInfo(_securityContext, out _connectionInfo);
+            if (_applicationProtocolsBuffer != null)
+            {
+                _negotiatedApplicationProtocol = GetNegotiatedApplicationProtocol();
+            }
             GlobalLog.Leave("SecureChannel#" + Logging.HashString(this) + "::ProcessHandshakeSuccess");
+        }
+
+        /*++
+            GetNegotiatedApplicationProtocol - Fills in the negotiated application protocol
+
+            If there is no match, this point will not be reached since the handshake will fail on server. 
+            Returns null in case the remote side did not specify application protocols. 
+        --*/
+        internal string GetNegotiatedApplicationProtocol()
+        {
+            ApplicationProtocolContext applicationProtocolContext;
+            SslStreamPal.QueryContextApplicationProtocol(_securityContext, out applicationProtocolContext);
+
+            if (applicationProtocolContext == null ||
+                applicationProtocolContext.NegotiationExtension != ApplicationProtocolNegotiationExt.ALPN ||
+                applicationProtocolContext.NegotiationStatus != ApplicationProtocolNegotiationStatus.Success)
+            {
+                return null;
+            }
+
+            return applicationProtocolContext.GetProtocolId();
         }
 
         /*++

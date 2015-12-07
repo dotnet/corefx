@@ -561,6 +561,10 @@ namespace System.Net
                     nativeBlockSize = Marshal.SizeOf<SslConnectionInfo>();
                     break;
 
+                case Interop.Secur32.ContextAttribute.ApplicationProtocol:
+                    nativeBlockSize = Marshal.SizeOf<ApplicationProtocolContext>();
+                    break;
+
                 default:
                     throw new ArgumentException(SR.Format(SR.net_invalid_enum, "ContextAttribute"), "contextAttribute");
             }
@@ -625,6 +629,17 @@ namespace System.Net
                     case Interop.Secur32.ContextAttribute.ConnectionInfo:
                         attribute = new SslConnectionInfo(nativeBuffer);
                         break;
+
+                    case Interop.Secur32.ContextAttribute.ApplicationProtocol:
+                        unsafe
+                        {
+                            fixed (void* ptr = nativeBuffer)
+                            {
+                                attribute = Marshal.PtrToStructure<ApplicationProtocolContext>(new IntPtr(ptr));
+                            }
+                        }
+                        break;
+
                     default:
                         // Will return null.
                         break;
