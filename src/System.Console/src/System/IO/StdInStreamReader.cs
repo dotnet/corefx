@@ -75,7 +75,7 @@ namespace System.IO
         internal unsafe int ReadStdinUnbuffered(byte* buffer, int bufferSize)
         {
             int result;
-            Interop.CheckIo(result = Interop.Sys.ReadStdinUnbuffered(buffer, bufferSize));
+            while (Interop.CheckIo(result = Interop.Sys.ReadStdinUnbuffered(buffer, bufferSize))) ;
             Debug.Assert(result > 0 && result <= bufferSize);
             return result;
         }

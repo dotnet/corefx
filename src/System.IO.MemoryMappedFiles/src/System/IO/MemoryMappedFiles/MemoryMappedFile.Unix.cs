@@ -184,13 +184,13 @@ namespace System.IO.MemoryMappedFiles
                 // Unlink the shared memory object immediatley so that it'll go away once all handles 
                 // to it are closed (as with opened then unlinked files, it'll remain usable via
                 // the open handles even though it's unlinked and can't be opened anew via its name).
-                Interop.CheckIo(Interop.Sys.ShmUnlink(mapName));
+                while (Interop.CheckIo(Interop.Sys.ShmUnlink(mapName)));
 
                 // Give it the right capacity.  We do this directly with ftruncate rather
                 // than via FileStream.SetLength after the FileStream is created because, on some systems,
                 // lseek fails on shared memory objects, causing the FileStream to think it's unseekable,
                 // causing it to preemptively throw from SetLength.
-                Interop.CheckIo(Interop.Sys.FTruncate(fd, capacity));
+                while (Interop.CheckIo(Interop.Sys.FTruncate(fd, capacity)));
 
                 // Wrap the file descriptor in a stream and return it.
                 return new FileStream(fd, TranslateProtectionsToFileAccess(protections));
@@ -221,7 +221,7 @@ namespace System.IO.MemoryMappedFiles
             var fs = new FileStream(path, FileMode.CreateNew, TranslateProtectionsToFileAccess(protections), FileShare.ReadWrite, DefaultBufferSize);
             try
             {
-                Interop.CheckIo(Interop.Sys.Unlink(path));
+                while (Interop.CheckIo(Interop.Sys.Unlink(path))) ;
                 fs.SetLength(capacity);
             }
             catch
