@@ -9,18 +9,18 @@ include (GenerateExportHeader)
 
 set(NATIVECOMPRESSION_SOURCES
     System.IO.Compression.Native.def
-    ZLib-1.2.8/adler32.c
-    ZLib-1.2.8/compress.c
-    ZLib-1.2.8/crc32.c
-    ZLib-1.2.8/deflate.c
-    ZLib-1.2.8/inffast.c
-    ZLib-1.2.8/inflate.c
-    ZLib-1.2.8/inftrees.c
-    ZLib-1.2.8/trees.c
-    ZLib-1.2.8/zutil.c
-    #ZLib-1.2.8/gzio.c
-    #ZLib-1.2.8/infback.c
-    #ZLib-1.2.8/uncompr.c
+    zlib/adler32.c
+    zlib/compress.c
+    zlib/crc32.c
+    zlib/deflate.c
+    zlib/inffast.c
+    zlib/inflate.c
+    zlib/inftrees.c
+    zlib/trees.c
+    zlib/zutil.c
+    #zlib/gzio.c
+    #zlib/infback.c
+    #zlib/uncompr.c
 )
 
 if ($ENV{__VSVersion} STREQUAL vs2015)
