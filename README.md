@@ -54,8 +54,9 @@ or in coreclr.
 
 ## Daily Builds
 
-Daily builds of .NET Core components are published to [dotnet-core MyGet gallery](https://www.myget.org/gallery/dotnet-core).
-The latest version number of each library can be seen in that gallery.
+Daily builds of .NET Core components are published to myget.org:
+- "Dev" builds: [dotnet-core MyGet gallery](https://www.myget.org/gallery/dotnet-core)
+- Release builds: [dotnet-core-rel MyGet gallery](https://www.myget.org/gallery/dotnet-core-rel)
 
 ## License
 
