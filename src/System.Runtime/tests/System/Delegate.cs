@@ -2,8 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using DelegateTestInternal;
 using Xunit;
@@ -33,10 +31,6 @@ public static unsafe class DelegateTests
     }
 
     public delegate int SomeDelegate(int x);
-    private static int SquareNumber(int x)
-    {
-        return x * x;
-    }
 
     private static void EmptyFunc()
     {
