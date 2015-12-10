@@ -597,16 +597,16 @@ namespace System.Diagnostics
                         finally
                         {
                             retVal = Interop.mincore.CreateProcess(
-                                    null,                // we don't need this since all the info is in commandLine
-                                    commandLine,         // pointer to the command line string
-                                    ref unused_SecAttrs, // address to process security attributes, we don't need to inheriat the handle
-                                    ref unused_SecAttrs, // address to thread security attributes.
-                                    true,                // handle inheritance flag
-                                    creationFlags,       // creation flags
-                                    environmentPtr,      // pointer to new environment block
-                                    workingDirectory,    // pointer to current directory name
-                                    startupInfo,         // pointer to STARTUPINFO
-                                    processInfo      // pointer to PROCESS_INFORMATION
+                                    null,                     // we don't need this since all the info is in commandLine
+                                    commandLine,              // pointer to the command line string
+                                    ref unused_SecAttrs,      // address to process security attributes, we don't need to inheriat the handle
+                                    ref unused_SecAttrs,      // address to thread security attributes.
+                                    startInfo.InheritHandles, // handle inheritance flag
+                                    creationFlags,            // creation flags
+                                    environmentPtr,           // pointer to new environment block
+                                    workingDirectory,         // pointer to current directory name
+                                    startupInfo,              // pointer to STARTUPINFO
+                                    processInfo               // pointer to PROCESS_INFORMATION
                                 );
                             if (!retVal)
                                 errorCode = Marshal.GetLastWin32Error();
