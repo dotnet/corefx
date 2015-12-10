@@ -23,6 +23,7 @@ namespace System.Diagnostics
         private bool _redirectStandardError = false;
         private Encoding _standardOutputEncoding;
         private Encoding _standardErrorEncoding;
+        private bool _inheritHandles = true;
 
         private bool _createNoWindow = false;
         internal Dictionary<string, string> _environmentVariables;
@@ -134,6 +135,13 @@ namespace System.Diagnostics
             get { return _standardErrorEncoding; }
             set { _standardErrorEncoding = value; }
         }
+
+        public bool InheritHandles
+        {
+            get { return _inheritHandles; }
+            set { _inheritHandles = value; }
+        }
+
 
         public Encoding StandardOutputEncoding
         {
