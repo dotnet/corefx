@@ -3,6 +3,7 @@
 
 using System.Collections.Concurrent;
 using System.Data.Common;
+using System.Data.SqlClient;
 using System.Diagnostics;
 using System.Globalization;
 using System.Runtime.InteropServices;
@@ -14,15 +15,16 @@ namespace System.Data
     {
         // Maps between LCIDs and LocaleName+AnsiCodePages+Encodings
         private static readonly ConcurrentDictionary<int, Tuple<string, int, Encoding>> s_cachedEncodings = new ConcurrentDictionary<int, Tuple<string, int, Encoding>>();
-
+#if !MANAGED_SNI
         private const string ApiWinCoreLocalization = "api-ms-win-core-localization-l1-2-0.dll";
         private const string ApiWinCoreLocalizationObsolete = "api-ms-win-core-localization-obsolete-l1-2-0.dll";
-
+#endif
         private const int LOCALE_NAME_MAX_LENGTH = 85;
         private const int ERROR_INVALID_PARAMETER = 0x57;
         private const uint LOCALE_IDEFAULTANSICODEPAGE = 0x00001004;
         private const uint LOCALE_RETURN_NUMBER = 0x20000000;
 
+#if !MANAGED_SNI
         [DllImport(ApiWinCoreLocalization, SetLastError = true, CharSet = CharSet.Unicode)]
         private static extern int GetLocaleInfoEx(string lpLocaleName, uint LCType, [Out] out uint lpLCData, int cchData);
 
@@ -87,26 +89,58 @@ namespace System.Data
             }
             return s_cachedEncodings.GetOrAdd(lcid, GetDetailsInternal);
         }
+#endif
 
         internal static Encoding GetEncodingForLcid(int lcid)
         {
+#if MANAGED_SNI
+            if (lcid != TdsEnums.DEFAULT_ENGLISH_LOCALE_ID)
+            {
+                throw new NotSupportedException("Only the English-US locale is currently supported on non-Windows systems. Invalid Locale ID: " + lcid);
+            }
+            return Encoding.UTF8;
+#else
             return GetDetailsForLcid(lcid).Item3;
+#endif
         }
 
         internal static int GetCodePageForLcid(int lcid)
         {
+#if MANAGED_SNI
+            if (lcid != TdsEnums.DEFAULT_ENGLISH_LOCALE_ID)
+            {
+                throw new NotSupportedException("Only the English-US locale is currently supported on non-Windows systems. Invalid Locale ID: " + lcid);
+            }
+            return TdsEnums.DEFAULT_ENGLISH_CODE_PAGE_VALUE;
+#else
             return GetDetailsForLcid(lcid).Item2;
+#endif
         }
 
         internal static string GetLocaleNameForLcid(int lcid)
         {
+#if MANAGED_SNI
+            if (lcid != TdsEnums.DEFAULT_ENGLISH_LOCALE_ID)
+            {
+                throw new NotSupportedException("Only the English-US locale is currently supported on non-Windows systems. Invalid Locale ID: " + lcid);
+            }
+            return TdsEnums.DEFAULT_ENGLISH_LOCALE_NAME;
+#else
             return GetDetailsForLcid(lcid).Item1;
+#endif
         }
 
         internal static int GetLcidForLocaleName(string localeName)
         {
             Debug.Assert(localeName != null, "Locale name should never be null");
 
+#if MANAGED_SNI
+            if(!localeName.Equals(TdsEnums.DEFAULT_ENGLISH_LOCALE_NAME))
+            {
+                throw new NotSupportedException("Only the English-US locale is currently supported on non-Windows systems. Invalid Locale Name: " + localeName);
+            }
+            return TdsEnums.DEFAULT_ENGLISH_LOCALE_ID;
+#else
             uint lcid = LocaleNameToLCID(localeName, 0);
             if (lcid != 0)
             {
@@ -120,11 +154,16 @@ namespace System.Data
 
                 throw new CultureNotFoundException("localeName", localeName, message: null);
             }
+#endif
         }
 
         internal static int GetCurrentCultureLcid()
         {
+#if MANAGED_SNI
+            return TdsEnums.DEFAULT_ENGLISH_LOCALE_ID;
+#else
             return GetLcidForLocaleName(CultureInfo.CurrentCulture.ToString());
+#endif
         }
     }
 }

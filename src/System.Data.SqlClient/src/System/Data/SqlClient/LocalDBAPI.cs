@@ -101,6 +101,7 @@ namespace System.Data
         {
             get
             {
+#if !MANAGED_SNI
                 if (s_localDBFormatMessage == null)
                 {
                     bool lockTaken = false;
@@ -110,7 +111,6 @@ namespace System.Data
                         if (s_localDBFormatMessage == null)
                         {
                             IntPtr functionAddr = SafeNativeMethods.GetProcAddress(UserInstanceDLLHandle, "LocalDBFormatMessage");
-
                             if (functionAddr == IntPtr.Zero)
                             {
                                 int hResult = Marshal.GetLastWin32Error();
@@ -125,6 +125,7 @@ namespace System.Data
                             Monitor.Exit(s_dllLock);
                     }
                 }
+#endif
                 return s_localDBFormatMessage;
             }
         }

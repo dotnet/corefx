@@ -531,6 +531,8 @@ namespace System.Data.SqlClient
 
         public const string DEFAULT_ENGLISH_CODE_PAGE_STRING = "iso_1";
         public const short DEFAULT_ENGLISH_CODE_PAGE_VALUE = 1252;
+        public const short DEFAULT_ENGLISH_LOCALE_ID = 1033;
+        public const string DEFAULT_ENGLISH_LOCALE_NAME = "en-US";
         public const short CHARSET_CODE_PAGE_OFFSET = 2;
         internal const int MAX_SERVERNAME = 255;
 
