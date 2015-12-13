@@ -25,7 +25,6 @@
       <Link>System\StringBuilderCache.cs</Link>
     </Compile>
     <Compile Include="Properties\InternalsVisibleTo.cs" />
-    <Compile Include="System\Xml\Linq\BaseUriAnnotation.cs" />
     <Compile Include="System\Xml\Linq\Extensions.cs" />
     <Compile Include="System\Xml\Linq\LineInfoAnnotation.cs" />
     <Compile Include="System\Xml\Linq\LineInfoEndElementAnnotation.cs" />
