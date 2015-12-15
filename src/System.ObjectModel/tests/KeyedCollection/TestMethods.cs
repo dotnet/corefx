@@ -1828,6 +1828,53 @@ namespace System.Collections.ObjectModel.Tests
         }
 
         [Theory]
+        [MemberData("ContainsKeyData")]
+        public void TryGetItem(
+            int collectionSize,
+            Named<KeyedCollectionGetKeyedValue<TKey, TValue>>
+                generateKeyedItem)
+        {
+            TKey[] keys;
+            IKeyedItem<TKey, TValue>[] items;
+            IKeyedItem<TKey, TValue>[] itemsWithKeys;
+            var collection =
+                new TestKeyedCollectionOfIKeyedItem<TKey, TValue>();
+            collection.AddItems(
+                generateKeyedItem.Value.Bind(
+                    GenerateValue,
+                    GetKeyForItem),
+                ki => ki.Key,
+                collectionSize,
+                out keys,
+                out items,
+                out itemsWithKeys);
+            IKeyedItem<TKey, TValue> itemNotIn =
+                generateKeyedItem.Value(GenerateValue, GetKeyForItem);
+            // this is to make overload resolution pick the correct Contains function. replacing keyNotIn with null causes the Contains<TValue> overload to be used. We want the Contains<TKey> version.
+            TKey keyNotIn = itemNotIn.Key;
+            IKeyedItem<TKey, TValue> outItem = null;
+            if (keyNotIn == null)
+            {
+                Assert.Throws<ArgumentNullException>(() => collection.TryGetItem(keyNotIn, out outItem));
+            }
+            else
+            {
+                Assert.False(collection.TryGetItem(keyNotIn, out outItem));
+            }
+            foreach (TKey k in keys)
+            {
+                TKey key = k;
+                if (key == null)
+                {
+                    Assert.Throws<ArgumentNullException>(
+                        () => collection.TryGetItem(key, out outItem));
+                    continue;
+                }
+                Assert.True(collection.TryGetItem(key, out outItem));
+            }
+        }
+
+        [Theory]
         [MemberData("CollectionSizes")]
         public void KeyIndexerSet(int collectionSize)
         {

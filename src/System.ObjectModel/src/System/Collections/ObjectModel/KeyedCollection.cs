@@ -72,21 +72,11 @@ namespace System.Collections.ObjectModel
         {
             get
             {
-                if (key == null)
+                TItem item;
+                if (TryGetItem(key, out item))
                 {
-                    throw new ArgumentNullException("key");
+                    return item;
                 }
-
-                if (_dict != null)
-                {
-                    return _dict[key];
-                }
-
-                foreach (TItem item in Items)
-                {
-                    if (_comparer.Equals(GetKeyForItem(item), key)) return item;
-                }
-
                 throw new KeyNotFoundException();
             }
         }
@@ -148,6 +138,31 @@ namespace System.Collections.ObjectModel
                     return true;
                 }
             }
+            return false;
+        }
+
+        public bool TryGetItem(TKey key, out TItem item)
+        {
+            if (key == null)
+            {
+                throw new ArgumentNullException("key");
+            }
+
+            if (_dict != null)
+            {
+                return _dict.TryGetValue(key, out item);
+            }
+
+            foreach (TItem itemIterator in Items)
+            {
+                if (_comparer.Equals(GetKeyForItem(itemIterator), key))
+                {
+                    item = itemIterator;
+                    return true;
+                }
+            }
+
+            item = default(TItem);
             return false;
         }
 
