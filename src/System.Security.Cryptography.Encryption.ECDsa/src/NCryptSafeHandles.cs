@@ -1,8 +1,5 @@
-// ==++==
-// 
-//   Copyright (c) Microsoft Corporation.  All rights reserved.
-// 
-// ==--==
+// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
 using System.Diagnostics;
@@ -13,7 +10,6 @@ using System.Diagnostics.Contracts;
 
 namespace Microsoft.Win32.SafeHandles
 {
-
     /// <summary>
     ///     Base class for NCrypt handles which need to support being pseudo-duplicated. This class is not for
     ///     external use (instead applications should consume the concrete subclasses of this class).
@@ -39,7 +35,6 @@ namespace Microsoft.Win32.SafeHandles
     ///                       anything but a duplicate handle.
     /// </remarks>
 #pragma warning disable 618    // Have not migrated to v4 transparency yet
-    [SecurityCritical]
 #pragma warning restore 618
     internal abstract class SafeNCryptHandle : SafeHandle
     {
@@ -71,7 +66,6 @@ namespace Microsoft.Win32.SafeHandles
 
         public override bool IsInvalid
         {
-            [SecurityCritical]
             get
             {
                 if (handle != IntPtr.Zero)
@@ -132,46 +126,46 @@ namespace Microsoft.Win32.SafeHandles
                 {
                     // Owner handles do not have a holder
                     case OwnershipState.Owner:
-                    return Holder == null && !IsInvalid && !IsClosed;
+                        return Holder == null && !IsInvalid && !IsClosed;
 
                     // Duplicate handles have valid open holders with the same raw handle value
                     case OwnershipState.Duplicate:
-                    bool acquiredHolder = false;
+                        bool acquiredHolder = false;
 
-                    try
-                    {
-                        IntPtr holderRawHandle = IntPtr.Zero;
-
-                        if (Holder != null)
+                        try
                         {
-                            Holder.DangerousAddRef(ref acquiredHolder);
-                            holderRawHandle = Holder.DangerousGetHandle();
+                            IntPtr holderRawHandle = IntPtr.Zero;
+
+                            if (Holder != null)
+                            {
+                                Holder.DangerousAddRef(ref acquiredHolder);
+                                holderRawHandle = Holder.DangerousGetHandle();
+                            }
+
+
+                            bool holderValid = Holder != null &&
+                                               !Holder.IsInvalid &&
+                                               !Holder.IsClosed &&
+                                               holderRawHandle != IntPtr.Zero &&
+                                               holderRawHandle == handle;
+
+                            return holderValid && !IsInvalid && !IsClosed;
                         }
-
-
-                        bool holderValid = Holder != null &&
-                                           !Holder.IsInvalid &&
-                                           !Holder.IsClosed &&
-                                           holderRawHandle != IntPtr.Zero &&
-                                           holderRawHandle == handle;
-
-                        return holderValid && !IsInvalid && !IsClosed;
-                    }
-                    finally
-                    {
-                        if (acquiredHolder)
+                        finally
                         {
-                            Holder.DangerousRelease();
+                            if (acquiredHolder)
+                            {
+                                Holder.DangerousRelease();
+                            }
                         }
-                    }
 
                     // Holder handles do not have a holder
                     case OwnershipState.Holder:
-                    return Holder == null && !IsInvalid && !IsClosed;
+                        return Holder == null && !IsInvalid && !IsClosed;
 
                     // Unknown ownership state
                     default:
-                    return false;
+                        return false;
                 }
             }
         }
@@ -332,7 +326,6 @@ namespace Microsoft.Win32.SafeHandles
     ///     Safe handle representing an NCRYPT_KEY_HANDLE
     /// </summary>
 #pragma warning disable 618    // Have not migrated to v4 transparency yet
-    [SecurityCritical]
 #pragma warning restore 618
     internal sealed class SafeNCryptKeyHandle : SafeNCryptHandle
     {
@@ -354,7 +347,6 @@ namespace Microsoft.Win32.SafeHandles
     ///     Safe handle representing an NCRYPT_PROV_HANDLE
     /// </summary>
 #pragma warning disable 618    // Have not migrated to v4 transparency yet
-    [SecurityCritical]
 #pragma warning restore 618
     internal sealed class SafeNCryptProviderHandle : SafeNCryptHandle
     {
@@ -386,7 +378,6 @@ namespace Microsoft.Win32.SafeHandles
     ///     Safe handle representing an NCRYPT_SECRET_HANDLE
     /// </summary>
 #pragma warning disable 618    // Have not migrated to v4 transparency yet
-    [SecurityCritical]
 #pragma warning restore 618
     internal sealed class SafeNCryptSecretHandle : SafeNCryptHandle
     {

@@ -1,42 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build">
-  <Import Project="..\dir.settings.targets" />
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <PropertyGroup>
     <AssemblyName>System.Security.Cryptography.Encryption.ECDsa</AssemblyName>
-    <AssemblyVersion>4.0.0.0</AssemblyVersion>
-    <OutputType>Library</OutputType>
     <ProjectGuid>{2EEB552A-0293-4824-B8A5-6725C3055215}</ProjectGuid>
-    <TargetProjectKFramework>true</TargetProjectKFramework>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <CLSCompliant>false</CLSCompliant>
   </PropertyGroup>
   <!-- Default configurations to help VS understand the options -->
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|amd64' ">
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|amd64' ">
-  </PropertyGroup>
-  <PropertyGroup>
-  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net46_Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net46_Release|AnyCPU'" />
 
-  <ItemGroup>
-    <Reference Include="System.Collections" />
-    <Reference Include="System.Diagnostics.Contracts" />
-    <Reference Include="System.Runtime.Numerics" />
-    <Reference Include="System.Resources.ResourceManager" />
-    <Reference Include="System.Runtime" />
-    <Reference Include="System.Runtime.Extensions" />
-    <Reference Include="System.Runtime.InteropServices" />
-    <Reference Include="System.Security.Cryptography.Encoding" />
-    <Reference Include="System.Security.Cryptography.Primitives" />
-  </ItemGroup>
-
-  <ItemGroup>
+  <ItemGroup Condition="'$(TargetGroup)'!='net46'">
     <Compile Include="ECDsa.cs" />
-    <Compile Include="..\Common\Internal\NativeCrypto\Cng.cs" />
+    <Compile Include="..\..\Common\src\Internal\NativeCrypto\Cng.cs" />
     <Compile Include="CngKey.cs" />
     <Compile Include="CngAlgorithm.cs" />
     <Compile Include="CngAlgorithmGroup.cs" />
@@ -46,14 +25,16 @@
     <Compile Include="CngProvider.cs" />
     <Compile Include="CngUIPolicy.cs" />
     <Compile Include="ECDsaCng.cs" />
-
     <Compile Include="BCryptNativeExtensions.cs" />
     <Compile Include="NCryptNative.cs" />
     <Compile Include="NCryptSafeHandles.cs" />
   </ItemGroup>
 
-  <ItemGroup>
+  <ItemGroup Condition="'$(TargetGroup)'=='net46'">
+    <TargetingPackReference Include="mscorlib" />
   </ItemGroup>
-
-  <Import Project="..\dir.targets" />
+  <ItemGroup>
+    <None Include="project.json" />
+  </ItemGroup>
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

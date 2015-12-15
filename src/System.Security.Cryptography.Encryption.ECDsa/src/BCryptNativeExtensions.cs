@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using System;
 using System.Diagnostics.Contracts;
 
@@ -12,10 +13,12 @@ namespace Internal.NativeCrypto
         /// </summary>
         internal static void MapAlgorithmIdToMagic(string algorithm,
                                                    out KeyBlobMagicNumber algorithmMagic,
-                                                   out int keySize) {
+                                                   out int keySize)
+        {
             Contract.Requires(!String.IsNullOrEmpty(algorithm));
 
-            switch (algorithm) {
+            switch (algorithm)
+            {
                 case AlgorithmName.ECDHP256:
                     algorithmMagic = KeyBlobMagicNumber.ECDHPublicP256;
                     keySize = 256;

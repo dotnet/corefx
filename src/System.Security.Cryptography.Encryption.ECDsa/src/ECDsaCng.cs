@@ -1,8 +1,5 @@
-// ==++==
-// 
-//   Copyright (c) Microsoft Corporation.  All rights reserved.
-// 
-// ==--==
+// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
 using System.Diagnostics;
@@ -33,7 +30,6 @@ namespace System.Security.Cryptography
 
         public ECDsaCng(int keySize)
         {
-
             if (!NCryptNative.NCryptSupported)
             {
                 throw new PlatformNotSupportedException(SR.Cryptography_PlatformNotSupported);
@@ -42,7 +38,6 @@ namespace System.Security.Cryptography
             KeySize = keySize;
         }
 
-        [SecuritySafeCritical]
         public ECDsaCng(CngKey key)
         {
             Contract.Ensures(_key != null && _key.AlgorithmGroup == CngAlgorithmGroup.ECDsa);
@@ -138,20 +133,20 @@ namespace System.Security.Cryptography
                     switch (KeySize)
                     {
                         case 256:
-                        algorithm = CngAlgorithm.ECDsaP256;
-                        break;
+                            algorithm = CngAlgorithm.ECDsaP256;
+                            break;
 
                         case 384:
-                        algorithm = CngAlgorithm.ECDsaP384;
-                        break;
+                            algorithm = CngAlgorithm.ECDsaP384;
+                            break;
 
                         case 521:
-                        algorithm = CngAlgorithm.ECDsaP521;
-                        break;
+                            algorithm = CngAlgorithm.ECDsaP521;
+                            break;
 
                         default:
-                        Debug.Assert(false, "Illegal key size set");
-                        break;
+                            Debug.Assert(false, "Illegal key size set");
+                            break;
                     }
 
                     _key = CngKey.Create(algorithm);
@@ -204,7 +199,6 @@ namespace System.Security.Cryptography
             }
         }
 
-        [SecuritySafeCritical]
         public override byte[] SignHash(byte[] hash)
         {
             if (hash == null)
@@ -219,7 +213,6 @@ namespace System.Security.Cryptography
             }
         }
 
-        [SecuritySafeCritical]
         public override bool VerifyHash(byte[] hash, byte[] signature)
         {
             if (hash == null)

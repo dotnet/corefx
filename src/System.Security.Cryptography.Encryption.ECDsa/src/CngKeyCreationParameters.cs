@@ -1,8 +1,5 @@
-// ==++==
-// 
-//   Copyright (c) Microsoft Corporation.  All rights reserved.
-// 
-// ==--==
+// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
 using System.Collections.Generic;
@@ -59,7 +56,6 @@ namespace System.Security.Cryptography
         {
             get { return _parentWindowHandle; }
 
-            [SecuritySafeCritical]
             set { _parentWindowHandle = value; }
         }
 
@@ -68,7 +64,6 @@ namespace System.Security.Cryptography
         /// </summary>
         public CngPropertyCollection Parameters
         {
-            [SecuritySafeCritical]
             get
             {
                 Contract.Ensures(Contract.Result<CngPropertyCollection>() != null);
@@ -117,7 +112,6 @@ namespace System.Security.Cryptography
         {
             get { return _uiPolicy; }
 
-            [SecuritySafeCritical]
             set { _uiPolicy = value; }
         }
     }

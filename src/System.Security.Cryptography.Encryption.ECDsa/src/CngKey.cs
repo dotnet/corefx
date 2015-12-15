@@ -1,8 +1,5 @@
-// ==++==
-// 
-//   Copyright (c) Microsoft Corporation.  All rights reserved.
-// 
-// ==--==
+// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
 using System.Diagnostics.CodeAnalysis;
@@ -56,7 +53,6 @@ namespace System.Security.Cryptography
         /// </summary>
         internal CngAlgorithmGroup AlgorithmGroup
         {
-            [SecuritySafeCritical]
             [Pure]
             get
             {
@@ -81,7 +77,6 @@ namespace System.Security.Cryptography
         /// </summary>
         internal CngAlgorithm Algorithm
         {
-            [SecuritySafeCritical]
             get
             {
                 Contract.Assert(_keyHandle != null);
@@ -97,7 +92,6 @@ namespace System.Security.Cryptography
         /// </summary>
         internal CngExportPolicies ExportPolicy
         {
-            [SecuritySafeCritical]
             get
             {
                 Contract.Assert(_keyHandle != null);
@@ -114,7 +108,6 @@ namespace System.Security.Cryptography
         /// </summary>
         internal SafeNCryptKeyHandle Handle
         {
-            [SecurityCritical]
             get
             {
                 Contract.Assert(_keyHandle != null);
@@ -132,7 +125,6 @@ namespace System.Security.Cryptography
         /// </remarks>
         internal bool IsEphemeral
         {
-            [SecuritySafeCritical]
             [Pure]
             get
             {
@@ -161,7 +153,6 @@ namespace System.Security.Cryptography
                        ephemeralProperty[0] == 1;
             }
 
-            [System.Security.SecurityCritical]
             private set
             {
                 Contract.Assert(_keyHandle != null);
@@ -178,7 +169,6 @@ namespace System.Security.Cryptography
         /// </summary>
         internal bool IsMachineKey
         {
-            [SecuritySafeCritical]
             get
             {
                 Contract.Assert(_keyHandle != null);
@@ -197,7 +187,6 @@ namespace System.Security.Cryptography
         /// </summary>
         internal string KeyName
         {
-            [SecuritySafeCritical]
             get
             {
                 Contract.Assert(_keyHandle != null);
@@ -220,7 +209,6 @@ namespace System.Security.Cryptography
         /// </summary>
         internal int KeySize
         {
-            [SecuritySafeCritical]
             get
             {
                 Contract.Assert(_keyHandle != null);
@@ -235,7 +223,6 @@ namespace System.Security.Cryptography
         /// </summary>
         internal CngKeyUsages KeyUsage
         {
-            [SecuritySafeCritical]
             get
             {
                 Contract.Assert(_keyHandle != null);
@@ -251,7 +238,6 @@ namespace System.Security.Cryptography
         /// </summary>
         internal IntPtr ParentWindowHandle
         {
-            [SecuritySafeCritical]
             get
             {
                 Contract.Assert(_keyHandle != null);
@@ -260,7 +246,6 @@ namespace System.Security.Cryptography
                                                         CngPropertyOptions.None);
             }
 
-            [SecuritySafeCritical]
             set
             {
                 Contract.Assert(_keyHandle != null);
@@ -276,7 +261,6 @@ namespace System.Security.Cryptography
         /// </summary>
         internal CngProvider Provider
         {
-            [SecuritySafeCritical]
             get
             {
                 Contract.Assert(_kspHandle != null);
@@ -300,7 +284,6 @@ namespace System.Security.Cryptography
         /// </summary>
         internal SafeNCryptProviderHandle ProviderHandle
         {
-            [SecurityCritical]
             get
             {
                 Contract.Assert(_kspHandle != null);
@@ -314,7 +297,6 @@ namespace System.Security.Cryptography
         /// </summary>
         internal string UniqueName
         {
-            [SecuritySafeCritical]
             get
             {
                 Contract.Assert(_keyHandle != null);
@@ -337,7 +319,6 @@ namespace System.Security.Cryptography
         /// </summary>
         internal CngUIPolicy UIPolicy
         {
-            [SecuritySafeCritical]
             get
             {
                 Contract.Ensures(Contract.Result<CngUIPolicy>() != null);
@@ -376,7 +357,6 @@ namespace System.Security.Cryptography
             return Create(algorithm, keyName, null);
         }
 
-        [SecuritySafeCritical]
         internal static CngKey Create(CngAlgorithm algorithm, string keyName, CngKeyCreationParameters creationParameters)
         {
             Contract.Ensures(Contract.Result<CngKey>() != null);
@@ -425,7 +405,6 @@ namespace System.Security.Cryptography
         /// <summary>
         ///     Delete this key
         /// </summary>
-        [SecuritySafeCritical]
         internal void Delete()
         {
             Contract.Assert(_keyHandle != null);
@@ -437,7 +416,6 @@ namespace System.Security.Cryptography
             Dispose();
         }
 
-        [SecuritySafeCritical]
         [SuppressMessage("Microsoft.Security", "CA2122:DoNotIndirectlyExposeMethodsWithLinkDemands", Justification = "Reviewed")]
         public void Dispose()
         {
@@ -466,7 +444,6 @@ namespace System.Security.Cryptography
             return Exists(keyName, provider, CngKeyOpenOptions.None);
         }
 
-        [SecuritySafeCritical]
         [SuppressMessage("Microsoft.Security", "CA2122:DoNotIndirectlyExposeMethodsWithLinkDemands", Justification = "Reviewed")]
         internal static bool Exists(string keyName, CngProvider provider, CngKeyOpenOptions options)
         {
@@ -487,7 +464,6 @@ namespace System.Security.Cryptography
 
             using (SafeNCryptProviderHandle kspHandle = NCryptNative.OpenStorageProvider(provider.Provider))
             {
-
                 SafeNCryptKeyHandle keyHandle = null;
 
                 try
@@ -530,7 +506,6 @@ namespace System.Security.Cryptography
             return Import(keyBlob, format, CngProvider.MicrosoftSoftwareKeyStorageProvider);
         }
 
-        [SecuritySafeCritical]
         internal static CngKey Import(byte[] keyBlob, CngKeyBlobFormat format, CngProvider provider)
         {
             Contract.Ensures(Contract.Result<CngKey>() != null);
@@ -576,7 +551,6 @@ namespace System.Security.Cryptography
         /// <summary>
         ///     Export the key out of the KSP
         /// </summary>
-        [SecuritySafeCritical]
         internal byte[] Export(CngKeyBlobFormat format)
         {
             Contract.Assert(_keyHandle != null);
@@ -592,7 +566,6 @@ namespace System.Security.Cryptography
         /// <summary>
         ///     Get the value of an arbitrary property
         /// </summary>
-        [SecuritySafeCritical]
         internal CngProperty GetProperty(string name, CngPropertyOptions options)
         {
             Contract.Assert(_keyHandle != null);
@@ -616,7 +589,6 @@ namespace System.Security.Cryptography
         /// <summary>
         ///     Determine if a property exists on the key
         /// </summary>
-        [SecuritySafeCritical]
         internal bool HasProperty(string name, CngPropertyOptions options)
         {
             Contract.Assert(_keyHandle != null);
@@ -648,7 +620,6 @@ namespace System.Security.Cryptography
             return Open(keyName, provider, CngKeyOpenOptions.None);
         }
 
-        [SecuritySafeCritical]
         internal static CngKey Open(string keyName, CngProvider provider, CngKeyOpenOptions openOptions)
         {
             Contract.Ensures(Contract.Result<CngKey>() != null);
@@ -678,7 +649,6 @@ namespace System.Security.Cryptography
         /// <summary>
         ///     Wrap an existing key handle with a CngKey object
         /// </summary>
-        [SecurityCritical]
         internal static CngKey Open(SafeNCryptKeyHandle keyHandle, CngKeyHandleOpenOptions keyHandleOpenOptions)
         {
             if (keyHandle == null)
@@ -753,7 +723,6 @@ namespace System.Security.Cryptography
         /// </summary>
         /// <param name="keyHandle"></param>
         /// <param name="creationParameters"></param>
-        [System.Security.SecurityCritical]
         private static void SetKeyProperties(SafeNCryptKeyHandle keyHandle,
                                              CngKeyCreationParameters creationParameters)
         {
@@ -822,7 +791,6 @@ namespace System.Security.Cryptography
         /// <summary>
         ///     Set an arbitrary property on the key
         /// </summary>
-        [SecuritySafeCritical]
         internal void SetProperty(CngProperty property)
         {
             Contract.Assert(_keyHandle != null);

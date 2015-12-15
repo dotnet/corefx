@@ -1,8 +1,5 @@
-// ==++==
-// 
-//   Copyright (c) Microsoft Corporation.  All rights reserved.
-// 
-// ==--==
+// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Internal.NativeCrypto;
 using System;
@@ -17,8 +14,8 @@ using System.Diagnostics.Contracts;
 using Microsoft.Win32;
 using Microsoft.Win32.SafeHandles;
 
-namespace System.Security.Cryptography {
-
+namespace System.Security.Cryptography
+{
     //
     // Public facing enumerations
     //
@@ -27,7 +24,8 @@ namespace System.Security.Cryptography {
     ///     Flags to control how often and in which format a key is allowed to be exported
     /// </summary>
     [Flags]
-    internal enum CngExportPolicies {
+    internal enum CngExportPolicies
+    {
         None = 0x00000000,
         AllowExport = 0x00000001,                       // NCRYPT_ALLOW_EXPORT_FLAG
         AllowPlaintextExport = 0x00000002,              // NCRYPT_ALLOW_PLAINTEXT_EXPORT_FLAG
@@ -63,7 +61,8 @@ namespace System.Security.Cryptography {
     ///     Flags indicating the type of key
     /// </summary>
     [Flags]
-    internal enum CngKeyTypes {
+    internal enum CngKeyTypes
+    {
         None = 0x00000000,
         MachineKey = 0x00000020                         // NCRYPT_MACHINE_KEY_FLAG
     }
@@ -73,7 +72,8 @@ namespace System.Security.Cryptography {
     /// </summary>
     [Flags]
     [SuppressMessage("Microsoft.Usage", "CA2217:DoNotMarkEnumsWithFlags", Justification = "Flags are defined by the native ncrypt API")]
-    internal enum CngKeyUsages {
+    internal enum CngKeyUsages
+    {
         None = 0x00000000,
         Decryption = 0x00000001,                        // NCRYPT_ALLOW_DECRYPT_FLAG
         Signing = 0x00000002,                           // NCRYPT_ALLOW_SIGNING_FLAG
@@ -86,7 +86,8 @@ namespace System.Security.Cryptography {
     /// </summary>
     [Flags]
     [SuppressMessage("Microsoft.Usage", "CA2217:DoNotMarkEnumsWithFlags", Justification = "Flags are defined by the native ncrypt API")]
-    internal enum CngPropertyOptions {
+    internal enum CngPropertyOptions
+    {
         None = 0x00000000,
         CustomProperty = 0x40000000,                    // NCRYPT_PERSIST_ONLY_FLAG
         Persist = unchecked((int)0x80000000)            // NCRYPT_PERSIST_FLAG
@@ -96,7 +97,8 @@ namespace System.Security.Cryptography {
     ///     Levels of UI protection available for a key
     /// </summary>
     [Flags]
-    internal enum CngUIProtectionLevels {
+    internal enum CngUIProtectionLevels
+    {
         None = 0x00000000,
         ProtectKey = 0x00000001,                        // NCRYPT_UI_PROTECT_KEY_FLAG    
         ForceHighProtection = 0x00000002                // NCRYPT_UI_FORCE_HIGH_PROTECTION_FLAG
@@ -105,7 +107,8 @@ namespace System.Security.Cryptography {
     /// <summary>
     ///     Native interop with CNG's NCrypt layer. Native definitions are in ncrypt.h
     /// </summary>
-    internal static class NCryptNative {
+    internal static class NCryptNative
+    {
         //
         // Enumerations
         //
@@ -113,7 +116,8 @@ namespace System.Security.Cryptography {
         /// <summary>
         ///     Types of NCryptBuffers
         /// </summary>
-        internal enum BufferType {
+        internal enum BufferType
+        {
             KdfHashAlgorithm = 0x00000000,              // KDF_HASH_ALGORITHM
             KdfSecretPrepend = 0x00000001,              // KDF_SECRET_PREPEND
             KdfSecretAppend = 0x00000002,               // KDF_SECRET_APPEND
@@ -125,7 +129,8 @@ namespace System.Security.Cryptography {
         /// <summary>
         ///     Result codes from NCrypt APIs
         /// </summary>
-        internal enum ErrorCode {
+        internal enum ErrorCode
+        {
             Success = 0,                                            // ERROR_SUCCESS
             BadSignature = unchecked((int)0x80090006),              // NTE_BAD_SIGNATURE
             NotFound = unchecked((int)0x80090011),                  // NTE_NOT_FOUND
@@ -136,7 +141,8 @@ namespace System.Security.Cryptography {
         /// <summary>
         ///     Well known names of key properties
         /// </summary>
-        internal static class KeyPropertyName {
+        internal static class KeyPropertyName
+        {
             internal const string Algorithm = "Algorithm Name";                 // NCRYPT_ALGORITHM_PROPERTY
             internal const string AlgorithmGroup = "Algorithm Group";           // NCRYPT_ALGORITHM_GROUP_PROPERTY
             internal const string ExportPolicy = "Export Policy";               // NCRYPT_EXPORT_POLICY_PROPERTY
@@ -164,7 +170,8 @@ namespace System.Security.Cryptography {
         /// <summary>
         ///     Well known names of provider properties
         /// </summary>
-        internal static class ProviderPropertyName {
+        internal static class ProviderPropertyName
+        {
             internal const string Name = "Name";        // NCRYPT_NAME_PROPERTY
         }
 
@@ -172,7 +179,8 @@ namespace System.Security.Cryptography {
         ///     Flags for code:System.Security.Cryptography.NCryptNative.UnsafeNativeMethods.NCryptSecretAgreement
         /// </summary>
         [Flags]
-        internal enum SecretAgreementFlags {
+        internal enum SecretAgreementFlags
+        {
             None = 0x00000000,
             UseSecretAsHmacKey = 0x00000001             // KDF_USE_SECRET_AS_HMAC_KEY_FLAG
         }
@@ -182,7 +190,8 @@ namespace System.Security.Cryptography {
         //
 
         [StructLayout(LayoutKind.Sequential)]
-        internal struct NCRYPT_UI_POLICY {
+        internal struct NCRYPT_UI_POLICY
+        {
             public int dwVersion;
             public CngUIProtectionLevels dwFlags;
 
@@ -197,24 +206,26 @@ namespace System.Security.Cryptography {
         }
 
         [StructLayout(LayoutKind.Sequential)]
-        internal struct NCryptBuffer {
+        internal struct NCryptBuffer
+        {
             public int cbBuffer;
             public BufferType BufferType;
             public IntPtr pvBuffer;
         }
 
         [StructLayout(LayoutKind.Sequential)]
-        internal struct NCryptBufferDesc {
+        internal struct NCryptBufferDesc
+        {
             public int ulVersion;
             public int cBuffers;
             public IntPtr pBuffers;         // NCryptBuffer[cBuffers]
         }
 
 #pragma warning disable 618 // System.Core.dll still uses SecurityRuleSet.Level1
-        [SecurityCritical]
 #pragma warning restore 618
-        internal static class UnsafeNativeMethods {
-            const string NCRYPT_DLL = "ncrypt.dll";
+        internal static class UnsafeNativeMethods
+        {
+            private const string NCRYPT_DLL = "ncrypt.dll";
             /// <summary>
             ///     Create an NCrypt key
             /// </summary>
@@ -297,7 +308,7 @@ namespace System.Security.Cryptography {
                                                              [MarshalAs(UnmanagedType.LPArray)] byte[] pbData,
                                                              int cbData,
                                                              int dwFlags);
-                                
+
             /// <summary>
             ///     Open an existing key
             /// </summary>
@@ -389,10 +400,11 @@ namespace System.Security.Cryptography {
         /// <summary>
         ///     Determine if NCrypt is supported on the current machine
         /// </summary>
-        internal static bool NCryptSupported {
-            [SecuritySafeCritical]
+        internal static bool NCryptSupported
+        {
             [SuppressMessage("Microsoft.Security", "CA2122:DoNotIndirectlyExposeMethodsWithLinkDemands", Justification = "Reviewed")]
-            get {
+            get
+            {
                 // TFS 1114292: do we support CNG everywhere this code will run?
                 return true;
             }
@@ -400,7 +412,8 @@ namespace System.Security.Cryptography {
         /// <summary>
         ///     Build an ECC public key blob to represent the given parameters
         /// </summary>
-        internal static byte[] BuildEccPublicBlob(string algorithm, BigInteger x, BigInteger y) {
+        internal static byte[] BuildEccPublicBlob(string algorithm, BigInteger x, BigInteger y)
+        {
             Contract.Requires(!String.IsNullOrEmpty(algorithm));
             Contract.Ensures(Contract.Result<byte[]>() != null);
 
@@ -440,7 +453,8 @@ namespace System.Security.Cryptography {
         internal static SafeNCryptKeyHandle CreatePersistedKey(SafeNCryptProviderHandle provider,
                                                                string algorithm,
                                                                string name,
-                                                               CngKeyCreationOptions options) {
+                                                               CngKeyCreationOptions options)
+        {
             Contract.Requires(provider != null && !provider.IsInvalid && !provider.IsClosed);
             Contract.Requires(!String.IsNullOrEmpty(algorithm));
             Contract.Ensures(Contract.Result<SafeNCryptKeyHandle>() != null &&
@@ -454,7 +468,8 @@ namespace System.Security.Cryptography {
                                                                            name,
                                                                            0,
                                                                            options);
-            if (error != ErrorCode.Success) {
+            if (error != ErrorCode.Success)
+            {
                 throw new CryptographicException((int)error);
             }
 
@@ -465,11 +480,13 @@ namespace System.Security.Cryptography {
         ///     Delete a key
         /// </summary>
         [System.Security.SecurityCritical]
-        internal static void DeleteKey(SafeNCryptKeyHandle key) {
+        internal static void DeleteKey(SafeNCryptKeyHandle key)
+        {
             Contract.Requires(key != null);
 
             ErrorCode error = UnsafeNativeMethods.NCryptDeleteKey(key, 0);
-            if (error != ErrorCode.Success) {
+            if (error != ErrorCode.Success)
+            {
                 throw new CryptographicException((int)error);
             }
 
@@ -489,7 +506,8 @@ namespace System.Security.Cryptography {
                                                 byte[] hmacKey,
                                                 byte[] secretPrepend,
                                                 byte[] secretAppend,
-                                                SecretAgreementFlags flags) {
+                                                SecretAgreementFlags flags)
+        {
             Contract.Requires(secretAgreement != null);
             Contract.Requires(!String.IsNullOrEmpty(kdf));
             Contract.Requires(!String.IsNullOrEmpty(hashAlgorithm));
@@ -501,7 +519,8 @@ namespace System.Security.Cryptography {
             // First marshal the hash algoritm
             IntPtr hashAlgorithmString = IntPtr.Zero;
 
-            try {
+            try
+            {
                 hashAlgorithmString = Marshal.StringToCoTaskMemUni(hashAlgorithm);
 
                 // We always need to marshal the hashing function
@@ -511,13 +530,16 @@ namespace System.Security.Cryptography {
                 hashAlgorithmBuffer.pvBuffer = hashAlgorithmString;
                 parameters.Add(hashAlgorithmBuffer);
 
-                unsafe {
-                    fixed (byte* pHmacKey = hmacKey, pSecretPrepend = secretPrepend, pSecretAppend = secretAppend) {
+                unsafe
+                {
+                    fixed (byte* pHmacKey = hmacKey, pSecretPrepend = secretPrepend, pSecretAppend = secretAppend)
+                    {
                         //
                         // Now marshal the other parameters
                         //
 
-                        if (pHmacKey != null) {
+                        if (pHmacKey != null)
+                        {
                             NCryptBuffer hmacKeyBuffer = new NCryptBuffer();
                             hmacKeyBuffer.cbBuffer = hmacKey.Length;
                             hmacKeyBuffer.BufferType = BufferType.KdfHmacKey;
@@ -525,7 +547,8 @@ namespace System.Security.Cryptography {
                             parameters.Add(hmacKeyBuffer);
                         }
 
-                        if (pSecretPrepend != null) {
+                        if (pSecretPrepend != null)
+                        {
                             NCryptBuffer secretPrependBuffer = new NCryptBuffer();
                             secretPrependBuffer.cbBuffer = secretPrepend.Length;
                             secretPrependBuffer.BufferType = BufferType.KdfSecretPrepend;
@@ -533,7 +556,8 @@ namespace System.Security.Cryptography {
                             parameters.Add(secretPrependBuffer);
                         }
 
-                        if (pSecretAppend != null) {
+                        if (pSecretAppend != null)
+                        {
                             NCryptBuffer secretAppendBuffer = new NCryptBuffer();
                             secretAppendBuffer.cbBuffer = secretAppend.Length;
                             secretAppendBuffer.BufferType = BufferType.KdfSecretAppend;
@@ -548,8 +572,10 @@ namespace System.Security.Cryptography {
                     }
                 }
             }
-            finally {
-                if (hashAlgorithmString != IntPtr.Zero) {
+            finally
+            {
+                if (hashAlgorithmString != IntPtr.Zero)
+                {
                     Marshal.FreeCoTaskMem(hashAlgorithmString);
                 }
             }
@@ -562,14 +588,17 @@ namespace System.Security.Cryptography {
         private static byte[] DeriveKeyMaterial(SafeNCryptSecretHandle secretAgreement,
                                                 string kdf,
                                                 NCryptBuffer[] parameters,
-                                                SecretAgreementFlags flags) {
+                                                SecretAgreementFlags flags)
+        {
             Contract.Requires(secretAgreement != null);
             Contract.Requires(!String.IsNullOrEmpty(kdf));
             Contract.Requires(parameters != null);
             Contract.Ensures(Contract.Result<byte[]>() != null);
 
-            unsafe {
-                fixed (NCryptBuffer* pParameters = parameters) {
+            unsafe
+            {
+                fixed (NCryptBuffer* pParameters = parameters)
+                {
                     NCryptBufferDesc parameterDesc = new NCryptBufferDesc();
                     parameterDesc.ulVersion = 0;
                     parameterDesc.cBuffers = parameters.Length;
@@ -584,7 +613,8 @@ namespace System.Security.Cryptography {
                                                                           0,
                                                                           out keySize,
                                                                           flags);
-                    if (error != ErrorCode.Success && error != ErrorCode.BufferTooSmall) {
+                    if (error != ErrorCode.Success && error != ErrorCode.BufferTooSmall)
+                    {
                         throw new CryptographicException((int)error);
                     }
 
@@ -598,7 +628,8 @@ namespace System.Security.Cryptography {
                                                                 out keySize,
                                                                 flags);
 
-                    if (error != ErrorCode.Success) {
+                    if (error != ErrorCode.Success)
+                    {
                         throw new CryptographicException((int)error);
                     }
 
@@ -615,7 +646,8 @@ namespace System.Security.Cryptography {
                                                      string hashAlgorithm,
                                                      byte[] secretPrepend,
                                                      byte[] secretAppend,
-                                                     SecretAgreementFlags flags) {
+                                                     SecretAgreementFlags flags)
+        {
             Contract.Requires(secretAgreement != null);
             Contract.Requires(!String.IsNullOrEmpty(hashAlgorithm));
             Contract.Ensures(Contract.Result<byte[]>() != null);
@@ -638,7 +670,8 @@ namespace System.Security.Cryptography {
                                                      byte[] hmacKey,
                                                      byte[] secretPrepend,
                                                      byte[] secretAppend,
-                                                     SecretAgreementFlags flags) {
+                                                     SecretAgreementFlags flags)
+        {
             Contract.Requires(secretAgreement != null);
             Contract.Requires(!String.IsNullOrEmpty(hashAlgorithm));
             Contract.Ensures(Contract.Result<byte[]>() != null);
@@ -659,15 +692,18 @@ namespace System.Security.Cryptography {
         internal static byte[] DeriveKeyMaterialTls(SafeNCryptSecretHandle secretAgreement,
                                                     byte[] label,
                                                     byte[] seed,
-                                                    SecretAgreementFlags flags) {
+                                                    SecretAgreementFlags flags)
+        {
             Contract.Requires(secretAgreement != null);
             Contract.Requires(label != null && seed != null);
             Contract.Ensures(Contract.Result<byte[]>() != null);
 
             NCryptBuffer[] buffers = new NCryptBuffer[2];
 
-            unsafe {
-                fixed (byte* pLabel = label, pSeed = seed) {
+            unsafe
+            {
+                fixed (byte* pLabel = label, pSeed = seed)
+                {
                     NCryptBuffer labelBuffer = new NCryptBuffer();
                     labelBuffer.cbBuffer = label.Length;
                     labelBuffer.BufferType = BufferType.KdfTlsLabel;
@@ -693,7 +729,8 @@ namespace System.Security.Cryptography {
         /// </summary>
         [System.Security.SecurityCritical]
         internal static SafeNCryptSecretHandle DeriveSecretAgreement(SafeNCryptKeyHandle privateKey,
-                                                                     SafeNCryptKeyHandle otherPartyPublicKey) {
+                                                                     SafeNCryptKeyHandle otherPartyPublicKey)
+        {
             Contract.Requires(privateKey != null);
             Contract.Requires(otherPartyPublicKey != null);
             Contract.Ensures(Contract.Result<SafeNCryptSecretHandle>() != null &&
@@ -706,7 +743,8 @@ namespace System.Security.Cryptography {
                                                                         out secretAgreement,
                                                                         0);
 
-            if (error != ErrorCode.Success) {
+            if (error != ErrorCode.Success)
+            {
                 throw new CryptographicException((int)error);
             }
 
@@ -717,7 +755,8 @@ namespace System.Security.Cryptography {
         ///     Export a key from the KSP
         /// </summary>
         [System.Security.SecurityCritical]
-        internal static byte[] ExportKey(SafeNCryptKeyHandle key, string format) {
+        internal static byte[] ExportKey(SafeNCryptKeyHandle key, string format)
+        {
             Contract.Requires(key != null);
             Contract.Requires(!String.IsNullOrEmpty(format));
             Contract.Ensures(Contract.Result<byte[]>() != null);
@@ -733,7 +772,8 @@ namespace System.Security.Cryptography {
                                                                   out bufferSize,
                                                                   0);
 
-            if (error != ErrorCode.Success && error != ErrorCode.BufferTooSmall) {
+            if (error != ErrorCode.Success && error != ErrorCode.BufferTooSmall)
+            {
                 throw new CryptographicException((int)error);
             }
 
@@ -749,7 +789,8 @@ namespace System.Security.Cryptography {
                                                         out bufferSize,
                                                         0);
 
-            if (error != ErrorCode.Success) {
+            if (error != ErrorCode.Success)
+            {
                 throw new CryptographicException((int)error);
             }
 
@@ -759,20 +800,24 @@ namespace System.Security.Cryptography {
         /// <summary>
         ///     Make sure that a key is padded out to be its full size
         /// </summary>
-        private static byte[] FillKeyParameter(byte[] key, int keySize) {
+        private static byte[] FillKeyParameter(byte[] key, int keySize)
+        {
             Contract.Requires(key != null);
             Contract.Requires(keySize > 0);
             Contract.Ensures(Contract.Result<byte[]>() != null && Contract.Result<byte[]>().Length >= keySize / 8);
 
             int bytesRequired = (keySize / 8) + (keySize % 8 == 0 ? 0 : 1);
-            if (key.Length == bytesRequired) {
+            if (key.Length == bytesRequired)
+            {
                 return key;
             }
 
 #if DEBUG
             // If the key is longer than required, it should have been padded out with zeros
-            if (key.Length > bytesRequired) {
-                for (int i = bytesRequired; i < key.Length; i++) {
+            if (key.Length > bytesRequired)
+            {
+                for (int i = bytesRequired; i < key.Length; i++)
+                {
                     Debug.Assert(key[i] == 0, "key[i] == 0");
                 }
             }
@@ -786,11 +831,13 @@ namespace System.Security.Cryptography {
         ///     Finalize a key and prepare it for use
         /// </summary>
         [System.Security.SecurityCritical]
-        internal static void FinalizeKey(SafeNCryptKeyHandle key) {
+        internal static void FinalizeKey(SafeNCryptKeyHandle key)
+        {
             Contract.Requires(key != null && !key.IsInvalid && !key.IsClosed);
 
             ErrorCode error = UnsafeNativeMethods.NCryptFinalizeKey(key, 0);
-            if (error != ErrorCode.Success) {
+            if (error != ErrorCode.Success)
+            {
                 throw new CryptographicException((int)error);
             }
         }
@@ -802,7 +849,8 @@ namespace System.Security.Cryptography {
         internal static byte[] GetProperty(SafeNCryptHandle ncryptObject,
                                            string propertyName,
                                            CngPropertyOptions propertyOptions,
-                                           out bool foundProperty) {
+                                           out bool foundProperty)
+        {
             Contract.Requires(ncryptObject != null);
             Contract.Requires(propertyName != null);
 
@@ -820,15 +868,17 @@ namespace System.Security.Cryptography {
             // indicates a real problem.
             //
 
-            if (error != ErrorCode.Success && error != ErrorCode.BufferTooSmall && error != ErrorCode.NotFound) {
-                    throw new CryptographicException((int)error);
+            if (error != ErrorCode.Success && error != ErrorCode.BufferTooSmall && error != ErrorCode.NotFound)
+            {
+                throw new CryptographicException((int)error);
             }
 
             foundProperty = error != ErrorCode.NotFound;
 
             // Pull back the property value
             byte[] value = null;
-            if (error != ErrorCode.NotFound && bufferSize > 0) {
+            if (error != ErrorCode.NotFound && bufferSize > 0)
+            {
                 value = new byte[bufferSize];
                 error = UnsafeNativeMethods.NCryptGetProperty(ncryptObject,
                                                               propertyName,
@@ -836,7 +886,8 @@ namespace System.Security.Cryptography {
                                                               value.Length,
                                                               out bufferSize,
                                                               propertyOptions);
-                if (error != ErrorCode.Success) {
+                if (error != ErrorCode.Success)
+                {
                     throw new CryptographicException((int)error);
                 }
 
@@ -852,17 +903,20 @@ namespace System.Security.Cryptography {
         [System.Security.SecurityCritical]
         internal static int GetPropertyAsDWord(SafeNCryptHandle ncryptObject,
                                                string propertyName,
-                                               CngPropertyOptions propertyOptions) {
+                                               CngPropertyOptions propertyOptions)
+        {
             Contract.Requires(ncryptObject != null);
             Contract.Requires(propertyName != null);
 
             bool foundProperty;
             byte[] valueBytes = GetProperty(ncryptObject, propertyName, propertyOptions, out foundProperty);
 
-            if (!foundProperty || valueBytes == null) {
+            if (!foundProperty || valueBytes == null)
+            {
                 return 0;
             }
-            else {
+            else
+            {
                 return BitConverter.ToInt32(valueBytes, 0);
             }
         }
@@ -870,10 +924,10 @@ namespace System.Security.Cryptography {
         /// <summary>
         ///     Get the value of a pointer NCrypt property
         /// </summary>
-        [SecurityCritical]
         internal static IntPtr GetPropertyAsIntPtr(SafeNCryptHandle ncryptObject,
                                                    string propertyName,
-                                                   CngPropertyOptions propertyOptions) {
+                                                   CngPropertyOptions propertyOptions)
+        {
             Contract.Requires(ncryptObject != null);
             Contract.Requires(propertyName != null);
 
@@ -888,11 +942,13 @@ namespace System.Security.Cryptography {
                                                                     propertyOptions);
 
             // NTE_NOT_FOUND means this property was not set, so return a NULL pointer
-            if (error == ErrorCode.NotFound) {
+            if (error == ErrorCode.NotFound)
+            {
                 return IntPtr.Zero;
             }
 
-            if (error != ErrorCode.Success) {
+            if (error != ErrorCode.Success)
+            {
                 throw new CryptographicException((int)error);
             }
 
@@ -906,22 +962,28 @@ namespace System.Security.Cryptography {
         [SuppressMessage("Microsoft.Security", "CA2122:DoNotIndirectlyExposeMethodsWithLinkDemands", Justification = "Reviewed")]
         internal static string GetPropertyAsString(SafeNCryptHandle ncryptObject,
                                                    string propertyName,
-                                                   CngPropertyOptions propertyOptions) {
+                                                   CngPropertyOptions propertyOptions)
+        {
             Contract.Requires(ncryptObject != null);
             Contract.Requires(propertyName != null);
 
             bool foundProperty;
             byte[] valueBytes = GetProperty(ncryptObject, propertyName, propertyOptions, out foundProperty);
 
-            if (!foundProperty || valueBytes == null) {
+            if (!foundProperty || valueBytes == null)
+            {
                 return null;
             }
-            else if (valueBytes.Length == 0) {
+            else if (valueBytes.Length == 0)
+            {
                 return String.Empty;
             }
-            else {
-                unsafe {
-                    fixed (byte* pValueBytes = valueBytes) {
+            else
+            {
+                unsafe
+                {
+                    fixed (byte* pValueBytes = valueBytes)
+                    {
                         return Marshal.PtrToStringUni(new IntPtr(pValueBytes));
                     }
                 }
@@ -936,19 +998,23 @@ namespace System.Security.Cryptography {
         [SuppressMessage("Microsoft.Security", "CA2122:DoNotIndirectlyExposeMethodsWithLinkDemands", Justification = "Reviewed")]
         internal static T GetPropertyAsStruct<T>(SafeNCryptHandle ncryptObject,
                                                  string propertyName,
-                                                 CngPropertyOptions propertyOptions) where T : struct {
+                                                 CngPropertyOptions propertyOptions) where T : struct
+        {
             Contract.Requires(ncryptObject != null);
             Contract.Requires(propertyName != null);
 
             bool foundProperty;
             byte[] valueBytes = GetProperty(ncryptObject, propertyName, propertyOptions, out foundProperty);
 
-            if (!foundProperty || valueBytes == null) {
+            if (!foundProperty || valueBytes == null)
+            {
                 return new T();
             }
 
-            unsafe {
-                fixed (byte *pValue = valueBytes) {
+            unsafe
+            {
+                fixed (byte* pValue = valueBytes)
+                {
                     return (T)Marshal.PtrToStructure(new IntPtr(pValue), typeof(T));
                 }
             }
@@ -960,7 +1026,8 @@ namespace System.Security.Cryptography {
         [System.Security.SecurityCritical]
         internal static SafeNCryptKeyHandle ImportKey(SafeNCryptProviderHandle provider,
                                                       byte[] keyBlob,
-                                                      string format) {
+                                                      string format)
+        {
             Contract.Requires(provider != null);
             Contract.Requires(keyBlob != null);
             Contract.Requires(!String.IsNullOrEmpty(format));
@@ -978,7 +1045,8 @@ namespace System.Security.Cryptography {
                                                                   keyBlob.Length,
                                                                   0);
 
-            if (error != ErrorCode.Success) {
+            if (error != ErrorCode.Success)
+            {
                 throw new CryptographicException((int)error);
             }
 
@@ -991,14 +1059,16 @@ namespace System.Security.Cryptography {
         [System.Security.SecurityCritical]
         internal static SafeNCryptKeyHandle OpenKey(SafeNCryptProviderHandle provider,
                                                     string name,
-                                                    CngKeyOpenOptions options) {
+                                                    CngKeyOpenOptions options)
+        {
             Contract.Requires(provider != null && !provider.IsInvalid && !provider.IsClosed);
             Contract.Requires(name != null);
 
             SafeNCryptKeyHandle key = null;
             ErrorCode error = UnsafeNativeMethods.NCryptOpenKey(provider, out key, name, 0, options);
 
-            if (error != ErrorCode.Success) {
+            if (error != ErrorCode.Success)
+            {
                 throw new CryptographicException((int)error);
             }
 
@@ -1009,7 +1079,8 @@ namespace System.Security.Cryptography {
         ///     Open the specified key storage provider
         /// </summary>
         [System.Security.SecurityCritical]
-        internal static SafeNCryptProviderHandle OpenStorageProvider(string providerName) {
+        internal static SafeNCryptProviderHandle OpenStorageProvider(string providerName)
+        {
             Contract.Requires(!String.IsNullOrEmpty(providerName));
             Contract.Ensures(Contract.Result<SafeNCryptProviderHandle>() != null &&
                              !Contract.Result<SafeNCryptProviderHandle>().IsInvalid &&
@@ -1020,7 +1091,8 @@ namespace System.Security.Cryptography {
                                                                             providerName,
                                                                             0);
 
-            if (error != ErrorCode.Success) {
+            if (error != ErrorCode.Success)
+            {
                 throw new CryptographicException((int)error);
             }
 
@@ -1030,7 +1102,8 @@ namespace System.Security.Cryptography {
         /// <summary>
         ///     Reverse the bytes in a buffer
         /// </summary>
-        private static byte[] ReverseBytes(byte[] buffer) {
+        private static byte[] ReverseBytes(byte[] buffer)
+        {
             Contract.Requires(buffer != null);
             Contract.Ensures(Contract.Result<byte[]>() != null && Contract.Result<byte[]>().Length == buffer.Length);
             return ReverseBytes(buffer, 0, buffer.Length, false);
@@ -1039,11 +1112,13 @@ namespace System.Security.Cryptography {
         /// <summary>
         ///     Reverse a section of bytes within a buffer
         /// </summary>
-        private static byte[] ReverseBytes(byte[] buffer, int offset, int count) {
+        private static byte[] ReverseBytes(byte[] buffer, int offset, int count)
+        {
             return ReverseBytes(buffer, offset, count, false);
         }
-        
-        private static byte[] ReverseBytes(byte[] buffer, int offset, int count, bool padWithZeroByte) {
+
+        private static byte[] ReverseBytes(byte[] buffer, int offset, int count, bool padWithZeroByte)
+        {
             Contract.Requires(buffer != null);
             Contract.Requires(offset >= 0 && offset < buffer.Length);
             Contract.Requires(count >= 0 && buffer.Length - count >= offset);
@@ -1052,9 +1127,9 @@ namespace System.Security.Cryptography {
             Contract.Ensures(padWithZeroByte ? Contract.Result<byte[]>()[count] == 0 : true);
 
             byte[] reversed;
-            if(padWithZeroByte)
+            if (padWithZeroByte)
             {
-                reversed = new byte[count+1]; // the last (most-significant) byte will be left as 0x00
+                reversed = new byte[count + 1]; // the last (most-significant) byte will be left as 0x00
             }
             else
             {
@@ -1062,7 +1137,8 @@ namespace System.Security.Cryptography {
             }
 
             int lastByte = offset + count - 1;
-            for (int i = 0; i < count; i++) {
+            for (int i = 0; i < count; i++)
+            {
                 reversed[i] = buffer[lastByte - i];
             }
 
@@ -1076,7 +1152,8 @@ namespace System.Security.Cryptography {
         internal static void SetProperty(SafeNCryptHandle ncryptObject,
                                          string propertyName,
                                          int value,
-                                         CngPropertyOptions propertyOptions) {
+                                         CngPropertyOptions propertyOptions)
+        {
             Contract.Requires(ncryptObject != null);
             Contract.Requires(propertyName != null);
 
@@ -1090,7 +1167,8 @@ namespace System.Security.Cryptography {
         internal static void SetProperty(SafeNCryptHandle ncryptObject,
                                          string propertyName,
                                          string value,
-                                         CngPropertyOptions propertyOptions) {
+                                         CngPropertyOptions propertyOptions)
+        {
             Contract.Requires(ncryptObject != null);
             Contract.Requires(propertyName != null);
 
@@ -1100,7 +1178,8 @@ namespace System.Security.Cryptography {
                                                                     (value.Length + 1) * sizeof(char),
                                                                     propertyOptions);
 
-            if (error != ErrorCode.Success) {
+            if (error != ErrorCode.Success)
+            {
                 throw new CryptographicException((int)error);
             }
         }
@@ -1112,25 +1191,30 @@ namespace System.Security.Cryptography {
         internal static void SetProperty<T>(SafeNCryptHandle ncryptObject,
                                             string propertyName,
                                             T value,
-                                            CngPropertyOptions propertyOptions) where T : struct {
+                                            CngPropertyOptions propertyOptions) where T : struct
+        {
             Contract.Requires(ncryptObject != null);
             Contract.Requires(propertyName != null);
 
             byte[] buffer = new byte[Marshal.SizeOf(typeof(T))];
-           
-            unsafe {
-                fixed (byte *pBuffer = buffer) {
 
+            unsafe
+            {
+                fixed (byte* pBuffer = buffer)
+                {
                     bool marshaledStructure = false;
-                    try {
+                    try
+                    {
                         // If we successfully marshal into the buffer, make sure to destroy the buffer when we're done
                         Marshal.StructureToPtr(value, new IntPtr(pBuffer), false);
                         marshaledStructure = true;
 
                         SetProperty(ncryptObject, propertyName, buffer, propertyOptions);
                     }
-                    finally {
-                        if (marshaledStructure) {
+                    finally
+                    {
+                        if (marshaledStructure)
+                        {
                             Marshal.DestroyStructure(new IntPtr(pBuffer), typeof(T));
                         }
                     }
@@ -1145,7 +1229,8 @@ namespace System.Security.Cryptography {
         internal static void SetProperty(SafeNCryptHandle ncryptObject,
                                          string propertyName,
                                          byte[] value,
-                                         CngPropertyOptions propertyOptions) {
+                                         CngPropertyOptions propertyOptions)
+        {
             Contract.Requires(ncryptObject != null);
             Contract.Requires(propertyName != null);
 
@@ -1155,7 +1240,8 @@ namespace System.Security.Cryptography {
                                                                     value != null ? value.Length : 0,
                                                                     propertyOptions);
 
-            if (error != ErrorCode.Success) {
+            if (error != ErrorCode.Success)
+            {
                 throw new CryptographicException((int)error);
             }
         }
@@ -1164,7 +1250,8 @@ namespace System.Security.Cryptography {
         ///     Sign a hash using no padding
         /// </summary>
         [System.Security.SecurityCritical]
-        internal static byte[] SignHash(SafeNCryptKeyHandle key, byte[] hash) {
+        internal static byte[] SignHash(SafeNCryptKeyHandle key, byte[] hash)
+        {
             Contract.Requires(key != null);
             Contract.Requires(hash != null);
             Contract.Ensures(Contract.Result<byte[]>() != null);
@@ -1180,7 +1267,8 @@ namespace System.Security.Cryptography {
                                                                  out signatureSize,
                                                                  0);
 
-            if (error != ErrorCode.Success && error != ErrorCode.BufferTooSmall) {
+            if (error != ErrorCode.Success && error != ErrorCode.BufferTooSmall)
+            {
                 throw new CryptographicException((int)error);
             }
 
@@ -1197,7 +1285,8 @@ namespace System.Security.Cryptography {
                                                        out signatureSize,
                                                        0);
 
-            if (error != ErrorCode.Success) {
+            if (error != ErrorCode.Success)
+            {
                 throw new CryptographicException((int)error);
             }
 
@@ -1207,8 +1296,8 @@ namespace System.Security.Cryptography {
         /// <summary>
         ///     Verify a signature created with no padding
         /// </summary>
-        [SecurityCritical]
-        internal static bool VerifySignature(SafeNCryptKeyHandle key, byte[] hash, byte[] signature) {
+        internal static bool VerifySignature(SafeNCryptKeyHandle key, byte[] hash, byte[] signature)
+        {
             Contract.Requires(key != null);
             Contract.Requires(hash != null);
             Contract.Requires(signature != null);
@@ -1221,7 +1310,8 @@ namespace System.Security.Cryptography {
                                                                         signature.Length,
                                                                         0);
 
-            if (error != ErrorCode.Success && error != ErrorCode.BadSignature) {
+            if (error != ErrorCode.Success && error != ErrorCode.BadSignature)
+            {
                 throw new CryptographicException((int)error);
             }
 
