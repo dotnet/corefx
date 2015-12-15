@@ -47,5 +47,10 @@ namespace System.Net.Test.Common
         {
             return Socket.OSSupportsIPv4;
         }
+
+        public static bool UnixDomainSocketsSupport()
+        {
+            return !RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
+        }
     }
 }
