@@ -211,5 +211,18 @@ namespace System.Buffers.ArrayPool.Tests
             Assert.NotNull(rented1);
             Assert.NotNull(rented2);
         }
+
+        [Fact]
+        public static void ReturningARentedBufferTwiceThrowsAnException()
+        {
+            using (ArrayPoolEventListener listener = new ArrayPoolEventListener())
+            {
+                ArrayPool<byte> pool = ArrayPool<byte>.Create(maxArrayLength: 16, numberOfArrays: 2);
+                listener.EnableEvents(pool.TraceEventSource, Diagnostics.Tracing.EventLevel.Verbose);
+                byte[] rented1 = pool.Rent(16);
+                pool.Return(rented1);
+                Assert.Throws<InvalidOperationException>(() => pool.Return(rented1));
+            }
+        }
     }
 }
