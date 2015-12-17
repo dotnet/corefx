@@ -161,5 +161,12 @@ namespace Tests.ExpressionCompiler.Block
                 );
             Assert.NotSame(block, new ParameterChangingVisitor().Visit(block));
         }
+
+        [Fact]
+        public static void CannotCreateLoopWithSameLabelForBreakAndContinue()
+        {
+            LabelTarget target = Expression.Label();
+            Assert.Throws<ArgumentException>(() => Expression.Loop(Expression.Empty(), target, target));
+        }
     }
 }

@@ -127,7 +127,11 @@ namespace System.Linq.Expressions
         public static LoopExpression Loop(Expression body, LabelTarget @break, LabelTarget @continue)
         {
             RequiresCanRead(body, "body");
-            if (@continue != null && @continue.Type != typeof(void)) throw Error.LabelTypeMustBeVoid();
+            if (@continue != null)
+            {
+                if (@continue.Type != (typeof(void))) throw Error.LabelTypeMustBeVoid();
+                if (@continue == @break) throw Error.LabelTargetDuplicateArguments(@continue.Name);
+            }
             return new LoopExpression(body, @break, @continue);
         }
     }
