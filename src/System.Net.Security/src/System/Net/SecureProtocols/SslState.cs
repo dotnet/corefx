@@ -705,10 +705,7 @@ namespace System.Net.Security
                 throw new ArgumentException(SR.Format(SR.net_io_async_result, result.GetType().FullName), "asyncResult");
             }
 
-            if (Interlocked.Exchange(ref _nestedAuth, 0) == 0)
-            {
-                throw new InvalidOperationException(SR.Format(SR.net_io_invalidendcall, "EndAuthenticate"));
-            }
+            _nestedAuth = 0;
 
             InternalEndProcessAuthentication(lazyResult);
 

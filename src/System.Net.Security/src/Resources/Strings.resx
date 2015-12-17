@@ -141,9 +141,6 @@
   <data name="net_io_invalidnestedcall" xml:space="preserve">
     <value> The {0} method cannot be called when another {1} operation is pending.</value>
   </data>
-  <data name="net_io_invalidendcall" xml:space="preserve">
-    <value>{0} can only be called once for each asynchronous operation.</value>
-  </data>
   <data name="net_io_must_be_rw_stream" xml:space="preserve">
     <value>The stream has to be read/write.</value>
   </data>
