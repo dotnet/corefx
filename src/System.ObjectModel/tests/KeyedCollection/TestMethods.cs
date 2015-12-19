@@ -1827,6 +1827,19 @@ namespace System.Collections.ObjectModel.Tests
             }
         }
 
+        [Fact]
+        public void TryGetItemWithNull()
+        {
+            var collection =
+                new TestKeyedCollectionOfIKeyedItem<TKey, TValue>();
+            IKeyedItem<TKey, TValue> outItem = null;
+            TKey key = default(TKey);
+            if (key == null)
+            {
+                Assert.Throws<ArgumentNullException>(() => collection.TryGetItem(key, out outItem));
+            }
+        }
+
         [Theory]
         [MemberData("ContainsKeyData")]
         public void TryGetItem(
@@ -1850,7 +1863,7 @@ namespace System.Collections.ObjectModel.Tests
                 out itemsWithKeys);
             IKeyedItem<TKey, TValue> itemNotIn =
                 generateKeyedItem.Value(GenerateValue, GetKeyForItem);
-            // this is to make overload resolution pick the correct Contains function. replacing keyNotIn with null causes the Contains<TValue> overload to be used. We want the Contains<TKey> version.
+            // this is to make overload resolution pick the correct Contains function. replacing keyNotIn with null causes the Contains<TValue> overload to be used.
             TKey keyNotIn = itemNotIn.Key;
             IKeyedItem<TKey, TValue> outItem = null;
             if (keyNotIn == null)
