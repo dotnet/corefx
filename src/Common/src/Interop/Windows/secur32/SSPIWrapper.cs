@@ -31,18 +31,14 @@ namespace System.Net
                             }
 
                             SecurityPackageInfoClass[] securityPackages = new SecurityPackageInfoClass[moduleCount];
-                            if (Logging.On)
-                            {
-                                Logging.PrintInfo(Logging.Web, SR.net_log_sspi_enumerating_security_packages);
-                            }
 
                             int i;
                             for (i = 0; i < moduleCount; i++)
                             {
                                 securityPackages[i] = new SecurityPackageInfoClass(arrayBaseHandle, i);
-                                if (Logging.On)
+                                if (SecurityEventSource.Log.IsEnabled())
                                 {
-                                    Logging.PrintInfo(Logging.Web, "    " + securityPackages[i].Name);
+                                    SecurityEventSource.Log.EnumerateSecurityPackages(securityPackages[i].Name);
                                 }
                             }
 
