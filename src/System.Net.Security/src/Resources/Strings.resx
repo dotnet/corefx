@@ -219,7 +219,7 @@
   <data name="net_log_exception" xml:space="preserve">
     <value>Exception in {0}::{1} - {2}.</value>
   </data>
-  <data name="net_log_sspi_enumerating_security_packages" xml:space="preserve">
+  <data name="event_EnumerateSecurityPackages" xml:space="preserve">
     <value>Enumerating security packages:</value>
   </data>
   <data name="net_log_sspi_security_package_not_found" xml:space="preserve">
