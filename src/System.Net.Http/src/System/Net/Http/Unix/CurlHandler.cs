@@ -398,31 +398,26 @@ namespace System.Net.Http
             }
         }
 
-        private void AddResponseCookies(Uri serverUri, HttpResponseMessage response)
+        private void AddResponseCookies(EasyRequest state, string cookieHeader)
         {
             if (!_useCookie)
             {
                 return;
             }
 
-            if (response.Headers.Contains(HttpKnownHeaderNames.SetCookie))
+            Uri serverUri = state._requestMessage.RequestUri;
+            try
             {
-                IEnumerable<string> cookieHeaders = response.Headers.GetValues(HttpKnownHeaderNames.SetCookie);
-                foreach (var cookieHeader in cookieHeaders)
-                {
-                    try
-                    {
-                        _cookieContainer.SetCookies(serverUri, cookieHeader);
-                    }
-                    catch (CookieException e)
-                    {
-                        string msg = string.Format("Malformed cookie: SetCookies Failed with {0}, server: {1}, cookie:{2}",
-                                                   e.Message,
-                                                   serverUri.OriginalString,
-                                                   cookieHeader);
-                        VerboseTrace(msg);
-                    }
-                }
+                _cookieContainer.SetCookies(serverUri, cookieHeader);
+                state.SetCookieOption(serverUri);
+            }
+            catch (CookieException e)
+            {
+                string msg = string.Format("Malformed cookie: SetCookies Failed with {0}, server: {1}, cookie:{2}",
+                                           e.Message,
+                                           serverUri.OriginalString,
+                                           cookieHeader);
+                VerboseTrace(msg);
             }
         }
 
