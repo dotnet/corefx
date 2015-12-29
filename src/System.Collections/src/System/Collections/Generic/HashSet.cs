@@ -115,6 +115,12 @@ namespace System.Collections.Generic
             var otherAsHashSet = collection as HashSet<T>;
             if (otherAsHashSet != null && AreEqualityComparersEqual(this, otherAsHashSet))
             {
+                if (otherAsHashSet._buckets == null)
+                {
+                    // Source hasn't initialized buckets yet, so neither need this.
+                    Debug.Assert(otherAsHashSet._slots == null);
+                    return;
+                }
                 _buckets = (int[])otherAsHashSet._buckets.Clone();
                 _slots = (Slot[])otherAsHashSet._slots.Clone();
 
