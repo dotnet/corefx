@@ -127,7 +127,6 @@ namespace System.Collections.Generic
                 _count = otherAsHashSet._count;
                 _lastIndex = otherAsHashSet._lastIndex;
                 _freeList = otherAsHashSet._freeList;
-                _version = otherAsHashSet._version;
 
                 // _comparer is already the same
             }
