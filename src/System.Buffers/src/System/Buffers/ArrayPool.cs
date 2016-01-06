@@ -2,8 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Reflection;
-using System.Runtime.InteropServices;
+using System.Diagnostics.Tracing;
 using System.Threading;
 
 namespace System.Buffers
@@ -61,6 +60,12 @@ namespace System.Buffers
         {
             return new DefaultArrayPool<T>(maxArrayLength, numberOfArrays);
         }
+
+        /// <summary>
+        /// Gets the EventSource responsible for tracing events in the ArrayPool used for debugging
+        /// and diagnostics around Pool usage.
+        /// </summary>
+        public abstract EventSource TraceEventSource { get; }
 
         /// <summary>
         /// Retrieves a buffer from the pool that is at least the requested length. This buffer is loaned

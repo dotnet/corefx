@@ -11,8 +11,9 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'" />
   <ItemGroup>
     <Compile Include="System\Buffers\ArrayPool.cs" />
-    <Compile Include="System\Buffers\ArrayPoolBucket.cs" />
+    <Compile Include="System\Buffers\ArrayPoolEventSource.cs" />
     <Compile Include="System\Buffers\DefaultArrayPool.cs" />
+    <Compile Include="System\Buffers\DefaultArrayPoolBucket.cs" />
     <Compile Include="System\Buffers\Utilities.cs" />
   </ItemGroup>
   <ItemGroup>

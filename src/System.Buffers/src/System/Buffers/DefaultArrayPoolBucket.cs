@@ -11,21 +11,27 @@ namespace System.Buffers
     /// Provides a thread-safe bucket containing buffers that can be Rented and Returned as part 
     /// of a buffer pool; it should not be used independent of the pool.
     /// </summary>
-    internal sealed class ArrayPoolBucket<T>
+    internal sealed class DefaultArrayPoolBucket<T>
     {
         private int _index;
         private readonly T[][] _data;
         private readonly int _bufferLength;
         private SpinLock _lock;
+        private ArrayPoolEventSource _eventSource;
+        private bool _exhaustedEventSent;
+
+        internal int BucketSize { get { return _bufferLength; } }
 
         /// <summary>
         /// Creates the pool with numberOfBuffers arrays where each buffer is of bufferLength length.
         /// </summary>
-        internal ArrayPoolBucket(int bufferLength, int numberOfBuffers)
+        internal DefaultArrayPoolBucket(int bufferLength, int numberOfBuffers, ArrayPoolEventSource eventSource)
         {
             _lock = new SpinLock();
             _data = new T[numberOfBuffers][];
             _bufferLength = bufferLength;
+            _eventSource = eventSource;
+            _exhaustedEventSent = false;
         }
 
         /// <summary>
@@ -48,8 +54,18 @@ namespace System.Buffers
                 // Check if all of our buffers have been rented
                 if (_index < _data.Length)
                 {
-                    buffer = _data[_index] ?? new T[_bufferLength];
+                    buffer = _data[_index];
+                    if (buffer == null)
+                    {
+                        buffer = new T[_bufferLength];
+                        _eventSource.BufferCreated(buffer.GetHashCode(), _bufferLength, GetHashCode());
+                    }
                     _data[_index++] = null;
+                }
+                else if (_exhaustedEventSent == false)
+                {
+                    _eventSource.BucketExhausted(GetHashCode(), _bufferLength, _data.Length);
+                    _exhaustedEventSent = true;
                 }
             }
             finally
@@ -80,7 +96,17 @@ namespace System.Buffers
                 // we can just drop this buffer
                 if (_index != 0)
                 {
+                    // If we have an event listener, we are in "debug" mode, so do a safety check
+                    // to prevent a double-return scenario
+                    if (_eventSource.IsEnabled())
+                    {
+                        for (int i = 0; i < _data.Length; i++)
+                            if (_data[i] == buffer)
+                                throw new InvalidOperationException(SR.InvalidDoubleReturn);
+                    }
+
                     _data[--_index] = buffer;
+                    _exhaustedEventSent = false; // always setting this should be cheaper than a branch
                 }
             }
             finally
