@@ -3094,7 +3094,7 @@ namespace System.Xml
                     case ParseTextFunction.NoValue:
                         return await ParseTextAsync_NoValue(outOrChars, pos).ConfigureAwait(false);
                     case ParseTextFunction.PartialValue:
-                        return await ParseTextAsync_PartialValue(pos, rcount, rpos, orChars, c);
+                        return await ParseTextAsync_PartialValue(pos, rcount, rpos, orChars, c).ConfigureAwait(false);
                 }
             }
         }
