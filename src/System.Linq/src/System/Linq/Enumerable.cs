@@ -1293,10 +1293,7 @@ namespace System.Linq
                 if (capacity == 0)
                     return new Dictionary<TKey, TSource>(comparer);
 
-                TSource[] array = collection as TSource[];
-                if (array != null)
-                    return ToDictionary(array, keySelector, comparer);
-                List<TSource> list = collection as List<TSource>;
+                IList<TSource> list = collection as IList<TSource>;
                 if (list != null)
                     return ToDictionary(list, keySelector, comparer);
             }
@@ -1305,20 +1302,13 @@ namespace System.Linq
             foreach (TSource element in source) d.Add(keySelector(element), element);
             return d;
         }
-
-        private static Dictionary<TKey, TSource> ToDictionary<TSource, TKey>(TSource[] source, Func<TSource, TKey> keySelector, IEqualityComparer<TKey> comparer)
-        {
-            Dictionary<TKey, TSource> d = new Dictionary<TKey, TSource>(source.Length, comparer);
-            for (int i = 0; i < source.Length; i++) d.Add(keySelector(source[i]), source[i]);
-            return d;
-        }
-        private static Dictionary<TKey, TSource> ToDictionary<TSource, TKey>(List<TSource> source, Func<TSource, TKey> keySelector, IEqualityComparer<TKey> comparer)
+        
+        private static Dictionary<TKey, TSource> ToDictionary<TSource, TKey>(IList<TSource> source, Func<TSource, TKey> keySelector, IEqualityComparer<TKey> comparer)
         {
             Dictionary<TKey, TSource> d = new Dictionary<TKey, TSource>(source.Count, comparer);
-            foreach (TSource element in source) d.Add(keySelector(element), element);
+            for (int i = 0; i < source.Count; i++) d.Add(keySelector(source[i]), source[i]);
             return d;
         }
-
 
         public static Dictionary<TKey, TElement> ToDictionary<TSource, TKey, TElement>(this IEnumerable<TSource> source, Func<TSource, TKey> keySelector, Func<TSource, TElement> elementSelector)
         {
@@ -1339,10 +1329,7 @@ namespace System.Linq
                 if (capacity == 0)
                     return new Dictionary<TKey, TElement>(comparer);
 
-                TSource[] array = collection as TSource[];
-                if (array != null)
-                    return ToDictionary(array, keySelector, elementSelector, comparer);
-                List<TSource> list = collection as List<TSource>;
+                IList<TSource> list = collection as IList<TSource>;
                 if (list != null)
                     return ToDictionary(list, keySelector, elementSelector, comparer);
             }
@@ -1351,17 +1338,11 @@ namespace System.Linq
             foreach (TSource element in source) d.Add(keySelector(element), elementSelector(element));
             return d;
         }
-
-        private static Dictionary<TKey, TElement> ToDictionary<TSource, TKey, TElement>(TSource[] source, Func<TSource, TKey> keySelector, Func<TSource, TElement> elementSelector, IEqualityComparer<TKey> comparer)
-        {
-            Dictionary<TKey, TElement> d = new Dictionary<TKey, TElement>(source.Length, comparer);
-            for (int i = 0; i < source.Length; i++) d.Add(keySelector(source[i]), elementSelector(source[i]));
-            return d;
-        }
-        private static Dictionary<TKey, TElement> ToDictionary<TSource, TKey, TElement>(List<TSource> source, Func<TSource, TKey> keySelector, Func<TSource, TElement> elementSelector, IEqualityComparer<TKey> comparer)
+        
+        private static Dictionary<TKey, TElement> ToDictionary<TSource, TKey, TElement>(IList<TSource> source, Func<TSource, TKey> keySelector, Func<TSource, TElement> elementSelector, IEqualityComparer<TKey> comparer)
         {
             Dictionary<TKey, TElement> d = new Dictionary<TKey, TElement>(source.Count, comparer);
-            foreach (TSource element in source) d.Add(keySelector(element), elementSelector(element));
+            for (int i = 0; i < source.Count; i++) d.Add(keySelector(source[i]), elementSelector(source[i]));
             return d;
         }
 
