@@ -102,7 +102,7 @@ namespace System.Xml
                 // parse DTD
                 if (_laterInitParam.inputContext != null && _laterInitParam.inputContext.HasDtdInfo)
                 {
-                    await ProcessDtdFromParserContextAsync(_laterInitParam.inputContext).ConfigureAwait(false);
+                    ProcessDtdFromParserContext(_laterInitParam.inputContext);
                 }
             }
             _laterInitParam = null;
@@ -126,7 +126,7 @@ namespace System.Xml
             // parse DTD
             if (_laterInitParam.inputContext != null && _laterInitParam.inputContext.HasDtdInfo)
             {
-                await ProcessDtdFromParserContextAsync(_laterInitParam.inputContext).ConfigureAwait(false);
+                ProcessDtdFromParserContext(_laterInitParam.inputContext);
             }
             _laterInitParam = null;
         }
@@ -141,7 +141,7 @@ namespace System.Xml
             // parse DTD
             if (_laterInitParam.inputContext != null && _laterInitParam.inputContext.HasDtdInfo)
             {
-                await ProcessDtdFromParserContextAsync(_laterInitParam.inputContext).ConfigureAwait(false);
+                ProcessDtdFromParserContext(_laterInitParam.inputContext);
             }
 
             _laterInitParam = null;
@@ -932,26 +932,6 @@ namespace System.Xml
             // read first characters
             _ps.appendMode = true;
             return ReadDataAsync();
-        }
-
-        private Task ProcessDtdFromParserContextAsync(XmlParserContext context)
-        {
-            Debug.Assert(context != null && context.HasDtdInfo);
-
-            switch (_dtdProcessing)
-            {
-                case DtdProcessing.Prohibit:
-                    ThrowWithoutLineInfo(SR.Xml_DtdIsProhibitedEx);
-                    break;
-                case DtdProcessing.Ignore:
-                    // do nothing
-                    break;
-                default:
-                    Debug.Assert(false, "Unhandled DtdProcessing enumeration value.");
-                    break;
-            }
-
-            return Task.CompletedTask;
         }
 
         // Switches the reader's encoding
@@ -3092,9 +3072,9 @@ namespace System.Xml
                         task = ParseTextAsync_Surrogate(outOrChars, chars, pos, rcount, rpos, orChars, c);
                         break;
                     case ParseTextFunction.NoValue:
-                        return await ParseTextAsync_NoValue(outOrChars, pos).ConfigureAwait(false);
+                        return ParseTextAsync_NoValue(outOrChars, pos);
                     case ParseTextFunction.PartialValue:
-                        return await ParseTextAsync_PartialValue(pos, rcount, rpos, orChars, c).ConfigureAwait(false);
+                        return ParseTextAsync_PartialValue(pos, rcount, rpos, orChars, c);
                 }
             }
         }
@@ -3341,12 +3321,12 @@ namespace System.Xml
             return _parseText_dummyTask.Result;
         }
 
-        private Task<ValueTuple<int, int, int, bool>> ParseTextAsync_NoValue(int outOrChars, int pos)
+        private ValueTuple<int, int, int, bool> ParseTextAsync_NoValue(int outOrChars, int pos)
         {
-            return Task.FromResult(new ValueTuple<int, int, int, bool>(pos, pos, outOrChars, true));
+            return new ValueTuple<int, int, int, bool>(pos, pos, outOrChars, true);
         }
 
-        private ValueTask<ValueTuple<int, int, int, bool>> ParseTextAsync_PartialValue(int pos, int rcount, int rpos, int orChars, char c)
+        private ValueTuple<int, int, int, bool> ParseTextAsync_PartialValue(int pos, int rcount, int rpos, int orChars, char c)
         {
             if (_parsingMode == ParsingMode.Full && rcount > 0)
             {
