@@ -2,11 +2,12 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Runtime.InteropServices;
+using System.Buffers;
 using System.Diagnostics;
+using System.Diagnostics.Contracts;
+using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Diagnostics.Contracts;
 
 namespace System.IO
 {
@@ -133,8 +134,9 @@ namespace System.IO
             if (_buffer.Length != _bufferSize || _bufferSize >= MaxShadowBufferSize)
                 return;
 
-            byte[] shadowBuffer = new byte[Math.Min(_bufferSize + _bufferSize, MaxShadowBufferSize)];
+            byte[] shadowBuffer = ArrayPool<byte>.Shared.Rent(Math.Min(_bufferSize + _bufferSize, MaxShadowBufferSize));
             Array.Copy(_buffer, 0, shadowBuffer, 0, _writePos);
+            ArrayPool<byte>.Shared.Return(_buffer);
             _buffer = shadowBuffer;
         }
 
@@ -144,7 +146,7 @@ namespace System.IO
 
             // BufferedStream is not intended for multi-threaded use, so no worries about the get/set race on _buffer.
             if (_buffer == null)
-                _buffer = new byte[_bufferSize];
+                _buffer = ArrayPool<byte>.Shared.Rent(_bufferSize);
         }
 
         public override bool CanRead
@@ -233,7 +235,11 @@ namespace System.IO
             finally
             {
                 _stream = null;
-                _buffer = null;
+                if (_buffer != null)
+                {
+                    ArrayPool<byte>.Shared.Return(_buffer);
+                    _buffer = null;
+                }
 
                 // Call base.Dispose(bool) to cleanup async IO resources
                 base.Dispose(disposing);

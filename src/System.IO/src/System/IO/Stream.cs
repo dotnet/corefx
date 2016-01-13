@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Buffers;
 using System.Diagnostics;
 using System.Diagnostics.Contracts;
 using System.Threading;
@@ -139,11 +140,18 @@ namespace System.IO
             Debug.Assert(CanRead);
             Debug.Assert(destination.CanWrite);
 
-            byte[] buffer = new byte[bufferSize];
-            int bytesRead;
-            while ((bytesRead = await ReadAsync(buffer, 0, buffer.Length, cancellationToken).ConfigureAwait(false)) != 0)
+            byte[] buffer = ArrayPool<byte>.Shared.Rent(bufferSize);
+            try
             {
-                await destination.WriteAsync(buffer, 0, bytesRead, cancellationToken).ConfigureAwait(false);
+                int bytesRead;
+                while ((bytesRead = await ReadAsync(buffer, 0, buffer.Length, cancellationToken).ConfigureAwait(false)) != 0)
+                {
+                    await destination.WriteAsync(buffer, 0, bytesRead, cancellationToken).ConfigureAwait(false);
+                }
+            }
+            finally
+            {
+                ArrayPool<byte>.Shared.Return(buffer);
             }
         }
 
@@ -213,11 +221,18 @@ namespace System.IO
             Debug.Assert(destination.CanWrite);
             Debug.Assert(bufferSize > 0);
 
-            byte[] buffer = new byte[bufferSize];
-            int read;
-            while ((read = Read(buffer, 0, buffer.Length)) != 0)
+            byte[] buffer = ArrayPool<byte>.Shared.Rent(bufferSize);
+            try
             {
-                destination.Write(buffer, 0, read);
+                int read;
+                while ((read = Read(buffer, 0, buffer.Length)) != 0)
+                {
+                    destination.Write(buffer, 0, read);
+                }
+            }
+            finally
+            {
+                ArrayPool<byte>.Shared.Return(buffer);
             }
         }
 

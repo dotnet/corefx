@@ -5,8 +5,12 @@
     <AssemblyName>System.IO</AssemblyName>
     <ProjectGuid>{07390899-C8F6-4e83-A3A9-6867B8CB46A0}</ProjectGuid>
     <AssemblyVersion>4.1.0.0</AssemblyVersion>
-    <IsPartialFacadeAssembly>true</IsPartialFacadeAssembly>
+    <IsPartialFacadeAssembly Condition="'$(TargetGroup)' != 'netcore50aot'">true</IsPartialFacadeAssembly>
     <PackageTargetFramework Condition="'$(PackageTargetFramework)' == ''">dotnet5.4</PackageTargetFramework>
+    <!-- We don't want System.Buffer's transitive dependencies since those are 
+         contract based, instead we'll provide the facades via project references
+         to ensure we all agree on core assembly -->
+    <OmitTransitiveCompileReferences Condition="'$(TargetGroup)' == ''">true</OmitTransitiveCompileReferences>
   </PropertyGroup>
 
   <!-- Default configurations to help VS understand the options -->
@@ -34,6 +38,7 @@
       <Name>System.Diagnostics.Debug</Name>
       <OSGroup>Windows_NT</OSGroup>
     </ProjectReference>
+    <ProjectReference Include="..\..\System.Runtime\src\System.Runtime.csproj"/>
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetGroup)' != 'net46'">

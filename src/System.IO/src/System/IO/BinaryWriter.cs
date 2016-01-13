@@ -2,8 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Text;
+using System.Buffers;
 using System.Diagnostics;
+using System.Text;
 
 namespace System.IO
 {
@@ -33,7 +34,7 @@ namespace System.IO
         protected BinaryWriter()
         {
             OutStream = Stream.Null;
-            _buffer = new byte[16];
+            _buffer = ArrayPool<byte>.Shared.Rent(16);
             _encoding = new UTF8Encoding(false, true);
             _encoder = _encoding.GetEncoder();
         }
@@ -62,7 +63,7 @@ namespace System.IO
             }
 
             OutStream = output;
-            _buffer = new byte[16];
+            _buffer = ArrayPool<byte>.Shared.Rent(16);
             _encoding = encoding;
             _encoder = _encoding.GetEncoder();
             _leaveOpen = leaveOpen;
@@ -80,6 +81,18 @@ namespace System.IO
                 {
                     OutStream.Dispose();
                 }
+            }
+            
+            if (_buffer != null)
+            {
+                ArrayPool<byte>.Shared.Return(_buffer);
+                _buffer = null;
+            }
+                
+            if (_largeByteBuffer != null)
+            {
+                ArrayPool<byte>.Shared.Return(_largeByteBuffer);
+                _largeByteBuffer = null;
             }
         }
 
@@ -371,7 +384,7 @@ namespace System.IO
 
             if (_largeByteBuffer == null)
             {
-                _largeByteBuffer = new byte[LargeByteBufferSize];
+                _largeByteBuffer = ArrayPool<byte>.Shared.Rent(LargeByteBufferSize);
                 _maxChars = LargeByteBufferSize / _encoding.GetMaxByteCount(1);
             }
 
