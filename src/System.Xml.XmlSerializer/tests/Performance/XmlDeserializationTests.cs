@@ -12,7 +12,7 @@ namespace System.Runtime.Tests.Performance
 {
     public class XmlDeserializationTests
     {
-        public void RunXmlDeserializeTest(object obj, int iterations)
+        public void RunXmlDeserializationTest(object obj, int iterations)
         {
             var serializer = new XmlSerializer(obj.GetType());
 
@@ -20,18 +20,22 @@ namespace System.Runtime.Tests.Performance
             {
                 serializer.Serialize(stream, obj);
                 foreach (var iteration in Benchmark.Iterations)
+                {
                     using (iteration.StartMeasurement())
+                    {
                         for (int i = 0; i < iterations; i++)
                         {
                             stream.Position = 0;
                             serializer.Deserialize(stream);
                         }
+                    }
+                }
             }
         }
 
-        public static Byte[] CreateByteArray(int size)
+        public static byte[] CreateByteArray(int size)
         {
-            Byte[] obj = new byte[size];
+            byte[] obj = new byte[size];
             for (int i = 0; i < obj.Length; ++i)
             {
                 obj[i] = (byte)(i % 256);
@@ -43,28 +47,28 @@ namespace System.Runtime.Tests.Performance
         public void DeserializeByteArrayOf1K()
         {
             byte[] byteArrayOf1K = CreateByteArray(1024);
-            RunXmlDeserializeTest(byteArrayOf1K, 10000);
+            RunXmlDeserializationTest(byteArrayOf1K, 10000);
         }
 
         [Benchmark]
         public void DeserializeByteArrayOf1M()
         {
             byte[] byteArrayOf1M = CreateByteArray(1024 * 1024);
-            RunXmlDeserializeTest(byteArrayOf1M, 10);
+            RunXmlDeserializationTest(byteArrayOf1M, 10);
         }
 
         [Benchmark]
         public void DeserializeStringOf128Byte()
         {
             string stringOf128Bytes = new string('a', 1024);
-            RunXmlDeserializeTest(stringOf128Bytes, 10000);
+            RunXmlDeserializationTest(stringOf128Bytes, 10000);
         }
 
         [Benchmark]
         public void DeserializeStringOf1024Byte()
         {
-            string stringOf1024Bytes = new string('k', 1024);
-            RunXmlDeserializeTest(stringOf1024Bytes, 10000);
+            string stringOf1024Bytes = new string('k', 128);
+            RunXmlDeserializationTest(stringOf1024Bytes, 10000);
         }
 
         private static List<int> CreateListOfInt(int count)
@@ -82,35 +86,35 @@ namespace System.Runtime.Tests.Performance
         public void DeserializeListOfInt128()
         {
             List<int> listOfInt = CreateListOfInt(128);
-            RunXmlDeserializeTest(listOfInt, 1000);
+            RunXmlDeserializationTest(listOfInt, 1000);
         }
 
         [Benchmark]
         public void DeserializeListOfInt1K()
         {
             List<int> listOfInt = CreateListOfInt(1024);
-            RunXmlDeserializeTest(listOfInt, 1000);
+            RunXmlDeserializationTest(listOfInt, 1000);
         }
 
         [Benchmark]
         public void DeserializeListOfInt1M()
         {
             List<int> listOfInt = CreateListOfInt(1024 * 1024);
-            RunXmlDeserializeTest(listOfInt, 1);
+            RunXmlDeserializationTest(listOfInt, 1);
         }
 
         [Benchmark]
         public void DeserializeSimpleType()
         {
             SimpleType simpleType = new SimpleType() { P1 = "Foo", P2 = 123 };
-            RunXmlDeserializeTest(simpleType, 10000);
+            RunXmlDeserializationTest(simpleType, 10000);
         }
 
         [Benchmark]
         public void DeserializeIXmlSerializable()
         {
             var value = new ClassImplementingIXmlSerialiable() { StringValue = "Hello world" };
-            RunXmlDeserializeTest(value, 10000);
+            RunXmlDeserializationTest(value, 10000);
         }
 
         [Benchmark]
@@ -120,7 +124,7 @@ namespace System.Runtime.Tests.Performance
             xmlDoc.LoadXml(@"<html></html>");
             XmlElement xmlElement = xmlDoc.CreateElement("Element");
             xmlElement.InnerText = "Element innertext";
-            RunXmlDeserializeTest(xmlElement, 10000);
+            RunXmlDeserializationTest(xmlElement, 10000);
         }
 
     }

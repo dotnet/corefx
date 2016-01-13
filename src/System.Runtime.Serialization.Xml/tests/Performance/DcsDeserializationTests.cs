@@ -12,7 +12,7 @@ namespace System.Runtime.Tests.Performance
 {
     public class DcsDeserializationTests
     {
-        public void RunDcjsDeserializeTest(object obj, int iterations)
+        public void RunDcjsDeserializationTest(object obj, int iterations)
         {
             var serializer = new DataContractSerializer(obj.GetType());
 
@@ -20,18 +20,22 @@ namespace System.Runtime.Tests.Performance
             {
                 serializer.WriteObject(stream, obj);
                 foreach (var iteration in Benchmark.Iterations)
+                {
                     using (iteration.StartMeasurement())
+                    {
                         for (int i = 0; i < iterations; i++)
                         {
                             stream.Position = 0;
                             serializer.ReadObject(stream);
                         }
+                    }
+                }
             }
         }
 
-        public static Byte[] CreateByteArray(int size)
+        public static byte[] CreateByteArray(int size)
         {
-            Byte[] obj = new byte[size];
+            byte[] obj = new byte[size];
             for (int i = 0; i < obj.Length; ++i)
             {
                 obj[i] = (byte)(i % 256);
@@ -43,28 +47,28 @@ namespace System.Runtime.Tests.Performance
         public void DeserializeByteArrayOf1K()
         {
             byte[] byteArrayOf1K = CreateByteArray(1024);
-            RunDcjsDeserializeTest(byteArrayOf1K, 10000);
+            RunDcjsDeserializationTest(byteArrayOf1K, 10000);
         }
 
         [Benchmark]
         public void DeserializeByteArrayOf1M()
         {
             byte[] byteArrayOf1M = CreateByteArray(1024 * 1024);
-            RunDcjsDeserializeTest(byteArrayOf1M, 10);
+            RunDcjsDeserializationTest(byteArrayOf1M, 10);
         }
 
         [Benchmark]
         public void DeserializeStringOf128Byte()
         {
-            string stringOf128Bytes = new string('a', 1024);
-            RunDcjsDeserializeTest(stringOf128Bytes, 10000);
+            string stringOf128Bytes = new string('a', 128);
+            RunDcjsDeserializationTest(stringOf128Bytes, 10000);
         }
 
         [Benchmark]
         public void DeserializeStringOf1024Byte()
         {
             string stringOf1024Bytes = new string('k', 1024);
-            RunDcjsDeserializeTest(stringOf1024Bytes, 10000);
+            RunDcjsDeserializationTest(stringOf1024Bytes, 10000);
         }
 
         private static List<int> CreateListOfInt(int count)
@@ -82,21 +86,21 @@ namespace System.Runtime.Tests.Performance
         public void DeserializeListOfInt128()
         {
             List<int> listOfInt = CreateListOfInt(128);
-            RunDcjsDeserializeTest(listOfInt, 1000);
+            RunDcjsDeserializationTest(listOfInt, 1000);
         }
 
         [Benchmark]
         public void DeserializeListOfInt1K()
         {
             List<int> listOfInt = CreateListOfInt(1024);
-            RunDcjsDeserializeTest(listOfInt, 1000);
+            RunDcjsDeserializationTest(listOfInt, 1000);
         }
 
         [Benchmark]
         public void DeserializeListOfInt1M()
         {
             List<int> listOfInt = CreateListOfInt(1024 * 1024);
-            RunDcjsDeserializeTest(listOfInt, 1);
+            RunDcjsDeserializationTest(listOfInt, 1);
         }
 
         private static Dictionary<int, string> CreateDictionaryOfIntString(int count)
@@ -114,28 +118,28 @@ namespace System.Runtime.Tests.Performance
         public void DeserilaizeDictionary128()
         {
             Dictionary<int, string> dictOfIntString = CreateDictionaryOfIntString(128);
-            RunDcjsDeserializeTest(dictOfIntString, 1000);
+            RunDcjsDeserializationTest(dictOfIntString, 1000);
         }
 
         [Benchmark]
         public void DeserilaizeDictionary1024()
         {
             Dictionary<int, string> dictOfIntString = CreateDictionaryOfIntString(1024);
-            RunDcjsDeserializeTest(dictOfIntString, 100);
+            RunDcjsDeserializationTest(dictOfIntString, 100);
         }
 
         [Benchmark]
         public void DeserializeSimpleType()
         {
             SimpleType simpleType = new SimpleType() { P1 = "Foo", P2 = 123 };
-            RunDcjsDeserializeTest(simpleType, 10000);
+            RunDcjsDeserializationTest(simpleType, 10000);
         }
 
         [Benchmark]
         public void DeserializeIXmlSerializable()
         {
             var value = new ClassImplementingIXmlSerialiable() { StringValue = "Hello world" };
-            RunDcjsDeserializeTest(value, 100000);
+            RunDcjsDeserializationTest(value, 100000);
         }
     }
 }

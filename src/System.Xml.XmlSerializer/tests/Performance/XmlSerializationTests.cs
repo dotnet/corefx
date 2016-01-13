@@ -12,25 +12,29 @@ namespace System.Runtime.Tests.Performance
 {
     public class XmlSerializationTests
     {
-        public void RunXmlSerializeTest(object obj, int iterations)
+        public void RunXmlSerializationTest(object obj, int iterations)
         {
             var serializer = new XmlSerializer(obj.GetType());
 
             using (var stream = new MemoryStream())
             {
                 foreach (var iteration in Benchmark.Iterations)
+                {
                     using (iteration.StartMeasurement())
+                    {
                         for (int i = 0; i < iterations; i++)
                         {
                             serializer.Serialize(stream, obj);
                             stream.Position = 0;
                         }
+                    }
+                }
             }
         }
 
-        public static Byte[] CreateByteArray(int size)
+        public static byte[] CreateByteArray(int size)
         {
-            Byte[] obj = new byte[size];
+            byte[] obj = new byte[size];
             for (int i = 0; i < obj.Length; ++i)
             {
                 obj[i] = (byte)(i % 256);
@@ -42,28 +46,28 @@ namespace System.Runtime.Tests.Performance
         public void SerializeByteArrayOf1K()
         {
             byte[] byteArrayOf1K = CreateByteArray(1024);
-            RunXmlSerializeTest(byteArrayOf1K, 10000);
+            RunXmlSerializationTest(byteArrayOf1K, 10000);
         }
 
         [Benchmark]
         public void SerializeByteArrayOf1M()
         {
             byte[] byteArrayOf1M = CreateByteArray(1024 * 1024);
-            RunXmlSerializeTest(byteArrayOf1M, 100);
+            RunXmlSerializationTest(byteArrayOf1M, 100);
         }
 
         [Benchmark]
         public void SerializeStringOf128Byte()
         {
-            string stringOf128Bytes = new string('a', 1024);
-            RunXmlSerializeTest(stringOf128Bytes, 10000);
+            string stringOf128Bytes = new string('a', 128);
+            RunXmlSerializationTest(stringOf128Bytes, 10000);
         }
 
         [Benchmark]
         public void SerializeStringOf1024Byte()
         {
             string stringOf1024Bytes = new string('k', 1024);
-            RunXmlSerializeTest(stringOf1024Bytes, 10000);
+            RunXmlSerializationTest(stringOf1024Bytes, 10000);
         }
 
         private static List<int> CreateListOfInt(int count)
@@ -81,35 +85,35 @@ namespace System.Runtime.Tests.Performance
         public void SerializeListOfInt128()
         {
             List<int> listOfInt = CreateListOfInt(128);
-            RunXmlSerializeTest(listOfInt, 1000);
+            RunXmlSerializationTest(listOfInt, 1000);
         }
 
         [Benchmark]
         public void SerializeListOfInt1K()
         {
             List<int> listOfInt = CreateListOfInt(1024);
-            RunXmlSerializeTest(listOfInt, 1000);
+            RunXmlSerializationTest(listOfInt, 1000);
         }
 
         [Benchmark]
         public void SerializeListOfInt1M()
         {
             List<int> listOfInt = CreateListOfInt(1024 * 1024);
-            RunXmlSerializeTest(listOfInt, 1);
+            RunXmlSerializationTest(listOfInt, 1);
         }
 
         [Benchmark]
         public void SerializeSimpleType()
         {
             SimpleType simpleType = new SimpleType() { P1 = "Foo", P2 = 123 };
-            RunXmlSerializeTest(simpleType, 10000);
+            RunXmlSerializationTest(simpleType, 10000);
         }
 
         [Benchmark]
         public void SerializeIXmlSerializable()
         {
             var value = new ClassImplementingIXmlSerialiable() { StringValue = "Hello world" };
-            RunXmlSerializeTest(value, 10000);
+            RunXmlSerializationTest(value, 10000);
         }
 
         [Benchmark]
@@ -119,7 +123,7 @@ namespace System.Runtime.Tests.Performance
             xmlDoc.LoadXml(@"<html></html>");
             XmlElement xmlElement = xmlDoc.CreateElement("Element");
             xmlElement.InnerText = "Element innertext";
-            RunXmlSerializeTest(xmlElement, 10000);
+            RunXmlSerializationTest(xmlElement, 10000);
         }
 
     }

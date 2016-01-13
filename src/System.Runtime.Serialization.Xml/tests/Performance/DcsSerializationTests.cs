@@ -12,25 +12,29 @@ namespace System.Runtime.Tests.Performance
 {
     public class DcsSerializationTests
     {
-        public void RunDcjsSerializeTest(object obj, int iterations)
+        public void RunDcjsSerializationTest(object obj, int iterations)
         {
             var serializer = new DataContractSerializer(obj.GetType());
 
             using (var stream = new MemoryStream())
             {
                 foreach (var iteration in Benchmark.Iterations)
+                {
                     using (iteration.StartMeasurement())
+                    {
                         for (int i = 0; i < iterations; i++)
                         {
                             serializer.WriteObject(stream, obj);
                             stream.Position = 0;
                         }
+                    }
+                }
             }
         }
 
-        public static Byte[] CreateByteArray(int size)
+        public static byte[] CreateByteArray(int size)
         {
-            Byte[] obj = new byte[size];
+            byte[] obj = new byte[size];
             for (int i = 0; i < obj.Length; ++i)
             {
                 obj[i] = (byte)(i % 256);
@@ -42,28 +46,28 @@ namespace System.Runtime.Tests.Performance
         public void SerializeByteArrayOf1K()
         {
             byte[] byteArrayOf1K = CreateByteArray(1024);
-            RunDcjsSerializeTest(byteArrayOf1K, 10000);
+            RunDcjsSerializationTest(byteArrayOf1K, 10000);
         }
 
         [Benchmark]
         public void SerializeByteArrayOf1M()
         {
             byte[] byteArrayOf1M = CreateByteArray(1024 * 1024);
-            RunDcjsSerializeTest(byteArrayOf1M, 100);
+            RunDcjsSerializationTest(byteArrayOf1M, 100);
         }
 
         [Benchmark]
         public void SerializeStringOf128Byte()
         {
-            string stringOf128Bytes = new string('a', 1024);
-            RunDcjsSerializeTest(stringOf128Bytes, 10000);
+            string stringOf128Bytes = new string('a', 128);
+            RunDcjsSerializationTest(stringOf128Bytes, 10000);
         }
 
         [Benchmark]
         public void SerializeStringOf1024Byte()
         {
             string stringOf1024Bytes = new string('k', 1024);
-            RunDcjsSerializeTest(stringOf1024Bytes, 10000);
+            RunDcjsSerializationTest(stringOf1024Bytes, 10000);
         }
 
         private static List<int> CreateListOfInt(int count)
@@ -81,21 +85,21 @@ namespace System.Runtime.Tests.Performance
         public void SerializeListOfInt128()
         {
             List<int> listOfInt = CreateListOfInt(128);
-            RunDcjsSerializeTest(listOfInt, 1000);
+            RunDcjsSerializationTest(listOfInt, 1000);
         }
 
         [Benchmark]
         public void SerializeListOfInt1K()
         {
             List<int> listOfInt = CreateListOfInt(1024);
-            RunDcjsSerializeTest(listOfInt, 1000);
+            RunDcjsSerializationTest(listOfInt, 1000);
         }
 
         [Benchmark]
         public void SerializeListOfInt1M()
         {
             List<int> listOfInt = CreateListOfInt(1024 * 1024);
-            RunDcjsSerializeTest(listOfInt, 1);
+            RunDcjsSerializationTest(listOfInt, 1);
         }
 
         private static Dictionary<int, string> CreateDictionaryOfIntString(int count)
@@ -113,28 +117,28 @@ namespace System.Runtime.Tests.Performance
         public void SerilaizeDictionary128()
         {
             Dictionary<int, string> dictOfIntString = CreateDictionaryOfIntString(128);
-            RunDcjsSerializeTest(dictOfIntString, 1000);
+            RunDcjsSerializationTest(dictOfIntString, 1000);
         }
 
         [Benchmark]
         public void SerilaizeDictionary1024()
         {
             Dictionary<int, string> dictOfIntString = CreateDictionaryOfIntString(1024);
-            RunDcjsSerializeTest(dictOfIntString, 100);
+            RunDcjsSerializationTest(dictOfIntString, 100);
         }
 
         [Benchmark]
         public void SerializeSimpleType()
         {
             SimpleType simpleType = new SimpleType() { P1 = "Foo", P2 = 123 };
-            RunDcjsSerializeTest(simpleType, 10000);
+            RunDcjsSerializationTest(simpleType, 10000);
         }
 
         [Benchmark]
         public void SerializeIXmlSerializable()
         {
             var value = new ClassImplementingIXmlSerialiable() { StringValue = "Hello world" };
-            RunDcjsSerializeTest(value, 100000);
+            RunDcjsSerializationTest(value, 100000);
         }
     }
 }
