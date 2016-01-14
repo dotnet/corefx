@@ -879,6 +879,13 @@ namespace System.Linq.Expressions
         {
             return new InvalidOperationException(Strings.LabelTargetAlreadyDefined(p0));
         }
+        /// ArgumentException with message like "Cannot redefine label '{0}' in an inner block."
+        /// </summary>
+        internal static Exception LabelTargetDuplicateArguments(object p0)
+        {
+            return new ArgumentException(Strings.LabelTargetAlreadyDefined(p0));
+        }
+        /// <summary>
         /// <summary>
         /// InvalidOperationException with message like "Cannot jump to undefined label '{0}'."
         /// </summary>
