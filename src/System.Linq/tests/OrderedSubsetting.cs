@@ -303,9 +303,21 @@ namespace System.Linq.Tests
         }
 
         [Fact]
+        public void ToList()
+        {
+            Assert.Equal(Enumerable.Range(10, 20), Enumerable.Range(0, 100).Shuffle().OrderBy(i => i).Skip(10).Take(20).ToList());
+        }
+
+        [Fact]
         public void EmptyToArray()
         {
             Assert.Empty(Enumerable.Range(0, 100).Shuffle().OrderBy(i => i).Skip(100).ToArray());
+        }
+
+        [Fact]
+        public void EmptyToList()
+        {
+            Assert.Empty(Enumerable.Range(0, 100).Shuffle().OrderBy(i => i).Skip(100).ToList());
         }
 
         [Fact]
@@ -315,9 +327,21 @@ namespace System.Linq.Tests
         }
 
         [Fact]
+        public void AttemptedMoreToList()
+        {
+            Assert.Equal(Enumerable.Range(0, 20), Enumerable.Range(0, 20).Shuffle().OrderBy(i => i).Take(30).ToList());
+        }
+
+        [Fact]
         public void SingleElementToArray()
         {
             Assert.Equal(Enumerable.Repeat(10, 1), Enumerable.Range(0, 20).Shuffle().OrderBy(i => i).Skip(10).Take(1).ToArray());
+        }
+
+        [Fact]
+        public void SingleElementToList()
+        {
+            Assert.Equal(Enumerable.Repeat(10, 1), Enumerable.Range(0, 20).Shuffle().OrderBy(i => i).Skip(10).Take(1).ToList());
         }
 
         [Fact]
