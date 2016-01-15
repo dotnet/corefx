@@ -836,6 +836,8 @@ namespace System.Linq
             if (count <= 0) return new EmptyPartition<TSource>();
             IPartition<TSource> partition = source as IPartition<TSource>;
             if (partition != null) return partition.Take(count);
+            IList<TSource> sourceList = source as IList<TSource>;
+            if (sourceList != null) return new SkipListIterator<TSource>(sourceList, 0, count - 1);
             return TakeIterator<TSource>(source, count);
         }
 
@@ -889,14 +891,127 @@ namespace System.Linq
             IPartition<TSource> partition = source as IPartition<TSource>;
             if (partition != null) return partition.Skip(count);
             IList<TSource> sourceList = source as IList<TSource>;
-            return sourceList != null ? SkipList(sourceList, count) : SkipIterator<TSource>(source, count);
+            return sourceList != null ? new SkipListIterator<TSource>(sourceList, count, int.MaxValue) : SkipIterator<TSource>(source, count);
         }
 
-        private static IEnumerable<TSource> SkipList<TSource>(IList<TSource> source, int count)
+        private sealed class SkipListIterator<TSource> : Iterator<TSource>, IPartition<TSource>
         {
-            while (count < source.Count)
+            private readonly IList<TSource> _source;
+            private readonly int _minIndex;
+            private readonly int _maxIndex;
+            private int _index;
+
+            public SkipListIterator(IList<TSource> source, int minIndex, int maxIndex)
             {
-                yield return source[count++];
+                Debug.Assert(source != null);
+                Debug.Assert(minIndex >= 0);
+                Debug.Assert(minIndex <= maxIndex);
+                _source = source;
+                _minIndex = minIndex;
+                _maxIndex = maxIndex;
+            }
+
+            public override Iterator<TSource> Clone()
+            {
+                return new SkipListIterator<TSource>(_source, _minIndex, _maxIndex);
+            }
+
+            public override bool MoveNext()
+            {
+                switch(state)
+                {
+                    case 1:
+                        _index = _minIndex;
+                        state = 2;
+                        goto case 2;
+                    case 2:
+                        if (_index <= _maxIndex && _index < _source.Count)
+                        {
+                            current = _source[_index];
+                            ++_index;
+                            return true;
+                        }
+                        break;
+                }
+                Dispose();
+                return false;
+            }
+
+            public IPartition<TSource> Skip(int count)
+            {
+                int minIndex = _minIndex + count;
+                return minIndex >= _maxIndex
+                    ? (IPartition<TSource>)new EmptyPartition<TSource>()
+                    : new SkipListIterator<TSource>(_source, minIndex, _maxIndex);
+            }
+
+            public IPartition<TSource> Take(int count)
+            {
+                int maxIndex = _minIndex + count - 1;
+                if (maxIndex >= _maxIndex) maxIndex = _maxIndex;
+                return new SkipListIterator<TSource>(_source, _minIndex, maxIndex);
+            }
+
+            public TSource ElementAt(int index)
+            {
+                if ((uint)index > (uint)_maxIndex - _minIndex || index >= _source.Count - _minIndex) throw Error.ArgumentOutOfRange("index");
+                return _source[_minIndex + index];
+            }
+
+            public TSource ElementAtOrDefault(int index)
+            {
+                return (uint)index > (uint)_maxIndex - _minIndex || index >= _source.Count - _minIndex ? default(TSource) : _source[_minIndex + index];
+            }
+
+            public TSource First()
+            {
+                if (_source.Count <=  _minIndex) throw Error.NoElements();
+                return _source[_minIndex];
+            }
+
+            public TSource FirstOrDefault()
+            {
+                return _source.Count <= _minIndex ? default(TSource) : _source[_minIndex];
+            }
+
+            public TSource Last()
+            {
+                int lastIndex = _source.Count - 1;
+                if (lastIndex < _minIndex) throw Error.NoElements();
+                return _source[lastIndex > _maxIndex ? _maxIndex : lastIndex];
+            }
+
+            public TSource LastOrDefault()
+            {
+                int lastIndex = _source.Count - 1;
+                if (lastIndex < _minIndex) return default(TSource);
+                return _source[lastIndex > _maxIndex ? _maxIndex : lastIndex];
+            }
+
+            public TSource[] ToArray()
+            {
+                int lastIndex = _source.Count - 1;
+                if (lastIndex < _minIndex) return new TSource[0];
+                if (lastIndex > _maxIndex) lastIndex = _maxIndex;
+                TSource[] array = new TSource[lastIndex - _minIndex + 1];
+                int curIdx = _minIndex;
+                for (int i = 0; i != array.Length; ++i)
+                {
+                    array[i] = _source[curIdx];
+                    ++curIdx;
+                }
+                return array;
+            }
+
+            public List<TSource> ToList()
+            {
+                int lastIndex = _source.Count - 1;
+                if (lastIndex < _minIndex) return new List<TSource>(0);
+                if (lastIndex > _maxIndex) lastIndex = _maxIndex;
+                List<TSource> list = new List<TSource>(lastIndex - _minIndex + 1);
+                for (int i = _minIndex; i <= lastIndex; ++i)
+                    list.Add(_source[i]);
+                return list;
             }
         }
 
