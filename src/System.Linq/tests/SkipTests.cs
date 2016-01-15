@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -432,6 +433,39 @@ namespace System.Linq.Tests
             var source = GuaranteeNotIList(new[] { 1, 2, 3, 4, 5 });
             var remaining = source.Skip(1);
             Assert.Equal(remaining, remaining);
+        }
+
+        [Fact]
+        public void ArraySelectSource()
+        {
+            var source = new[] { 1, 2, 3, 4 }.Select(i => i * 2);
+            Assert.Equal(new[] { 6, 8 }, source.Skip(2));
+            Assert.Empty(source.Skip(4));
+            Assert.Empty(source.Skip(20));
+            Assert.Equal(source, source.Skip(0));
+            Assert.Equal(source, source.Skip(-1));
+        }
+
+        [Fact]
+        public void ListSelectSource()
+        {
+            var source = new[] { 1, 2, 3, 4 }.ToList().Select(i => i * 2);
+            Assert.Equal(new[] { 6, 8 }, source.Skip(2));
+            Assert.Empty(source.Skip(4));
+            Assert.Empty(source.Skip(20));
+            Assert.Equal(source, source.Skip(0));
+            Assert.Equal(source, source.Skip(-1));
+        }
+
+        [Fact]
+        public void IListSelectSource()
+        {
+            var source = new ReadOnlyCollection<int>(new[] { 1, 2, 3, 4 }).Select(i => i * 2);
+            Assert.Equal(new[] { 6, 8 }, source.Skip(2));
+            Assert.Empty(source.Skip(4));
+            Assert.Empty(source.Skip(20));
+            Assert.Equal(source, source.Skip(0));
+            Assert.Equal(source, source.Skip(-1));
         }
     }
 }

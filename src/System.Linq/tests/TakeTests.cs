@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using Xunit;
 
 namespace System.Linq.Tests
@@ -416,6 +417,39 @@ namespace System.Linq.Tests
             var source = GuaranteeNotIList(new[] { 1, 2, 3, 4, 5 });
             var taken = source.Take(3);
             Assert.Equal(taken, taken);
+        }
+
+        [Fact]
+        public void ArraySelectSource()
+        {
+            var source = new[] { 1, 2, 3, 4 }.Select(i => i * 2);
+            Assert.Equal(new[] { 2, 4 }, source.Take(2));
+            Assert.Empty(source.Take(0));
+            Assert.Empty(source.Take(-20));
+            Assert.Equal(source, source.Take(4));
+            Assert.Equal(source, source.Take(40));
+        }
+
+        [Fact]
+        public void ListSelectSource()
+        {
+            var source = new[] { 1, 2, 3, 4 }.ToList().Select(i => i * 2);
+            Assert.Equal(new[] { 2, 4 }, source.Take(2));
+            Assert.Empty(source.Take(0));
+            Assert.Empty(source.Take(-20));
+            Assert.Equal(source, source.Take(4));
+            Assert.Equal(source, source.Take(40));
+        }
+
+        [Fact]
+        public void IListSelectSource()
+        {
+            var source = new ReadOnlyCollection<int>(new[] { 1, 2, 3, 4 }).Select(i => i * 2);
+            Assert.Equal(new[] { 2, 4 }, source.Take(2));
+            Assert.Empty(source.Take(0));
+            Assert.Empty(source.Take(-20));
+            Assert.Equal(source, source.Take(4));
+            Assert.Equal(source, source.Take(40));
         }
     }
 }
