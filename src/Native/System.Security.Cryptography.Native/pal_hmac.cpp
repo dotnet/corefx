@@ -9,30 +9,15 @@
 #include <memory>
 #include <openssl/hmac.h>
 
-// Return values of certain HMAC functions vary per platform/OpenSSL
-// version. On some platforms, void is returned and success must be
-// assumed as there is no provision for failure. On others, int is
-// returned with 1 signifying success and 0 signifying failure.
-//
-// We call these functions indirectly via overloaded HmacCall helper
-// that will synthesize a successful result of 1 on platforms where
-// the functions return void and otherwise just forward along the
-// actual return value.
-
-template <typename F, typename... Args>
-inline static auto HmacCall(F func, Args... args) -> ReplaceVoidResultOf<F(Args...), int>
-{
-    func(args...);
-    return 1;
-}
-
-template <typename F, typename... Args>
-inline static auto HmacCall(F func, Args... args) -> NonVoidResultOf<F(Args...)>
-{
-    return func(args...);
-}
-
+// TODO: temporarily keeping the un-prefixed signature of this method  
+// to keep tests running in CI. This will be removed once the managed assemblies  
+// are synced up with the native assemblies.
 extern "C" HMAC_CTX* HmacCreate(const uint8_t* key, int32_t keyLen, const EVP_MD* md)
+{
+    return CryptoNative_HmacCreate(key, keyLen, md);
+}
+
+extern "C" HMAC_CTX* CryptoNative_HmacCreate(const uint8_t* key, int32_t keyLen, const EVP_MD* md)
 {
     assert(key != nullptr || keyLen == 0);
     assert(keyLen >= 0);
@@ -52,7 +37,7 @@ extern "C" HMAC_CTX* HmacCreate(const uint8_t* key, int32_t keyLen, const EVP_MD
         key = &_;
 
     HMAC_CTX_init(ctx.get());
-    int ret = HmacCall(HMAC_Init_ex, ctx.get(), key, keyLen, md, nullptr);
+    int ret = HMAC_Init_ex(ctx.get(), key, keyLen, md, nullptr);
 
     if (!ret)
     {
@@ -62,7 +47,15 @@ extern "C" HMAC_CTX* HmacCreate(const uint8_t* key, int32_t keyLen, const EVP_MD
     return ctx.release();
 }
 
+// TODO: temporarily keeping the un-prefixed signature of this method  
+// to keep tests running in CI. This will be removed once the managed assemblies  
+// are synced up with the native assemblies.
 extern "C" void HmacDestroy(HMAC_CTX* ctx)
+{
+    return CryptoNative_HmacDestroy(ctx);
+}
+
+extern "C" void CryptoNative_HmacDestroy(HMAC_CTX* ctx)
 {
     if (ctx != nullptr)
     {
@@ -71,14 +64,30 @@ extern "C" void HmacDestroy(HMAC_CTX* ctx)
     }
 }
 
+// TODO: temporarily keeping the un-prefixed signature of this method  
+// to keep tests running in CI. This will be removed once the managed assemblies  
+// are synced up with the native assemblies.
 extern "C" int32_t HmacReset(HMAC_CTX* ctx)
+{
+    return CryptoNative_HmacReset(ctx);
+}
+
+extern "C" int32_t CryptoNative_HmacReset(HMAC_CTX* ctx)
 {
     assert(ctx != nullptr);
 
-    return HmacCall(HMAC_Init_ex, ctx, nullptr, 0, nullptr, nullptr);
+    return HMAC_Init_ex(ctx, nullptr, 0, nullptr, nullptr);
 }
 
+// TODO: temporarily keeping the un-prefixed signature of this method  
+// to keep tests running in CI. This will be removed once the managed assemblies  
+// are synced up with the native assemblies.
 extern "C" int32_t HmacUpdate(HMAC_CTX* ctx, const uint8_t* data, int32_t len)
+{
+    return CryptoNative_HmacUpdate(ctx, data, len);
+}
+
+extern "C" int32_t CryptoNative_HmacUpdate(HMAC_CTX* ctx, const uint8_t* data, int32_t len)
 {
     assert(ctx != nullptr);
     assert(data != nullptr || len == 0);
@@ -89,10 +98,18 @@ extern "C" int32_t HmacUpdate(HMAC_CTX* ctx, const uint8_t* data, int32_t len)
         return 0;
     }
 
-    return HmacCall(HMAC_Update, ctx, data, UnsignedCast(len));
+    return HMAC_Update(ctx, data, UnsignedCast(len));
 }
 
+// TODO: temporarily keeping the un-prefixed signature of this method  
+// to keep tests running in CI. This will be removed once the managed assemblies  
+// are synced up with the native assemblies.
 extern "C" int32_t HmacFinal(HMAC_CTX* ctx, uint8_t* md, int32_t* len)
+{
+    return CryptoNative_HmacFinal(ctx, md, len);
+}
+
+extern "C" int32_t CryptoNative_HmacFinal(HMAC_CTX* ctx, uint8_t* md, int32_t* len)
 {
     assert(ctx != nullptr);
     assert(len != nullptr);
@@ -105,7 +122,7 @@ extern "C" int32_t HmacFinal(HMAC_CTX* ctx, uint8_t* md, int32_t* len)
     }
 
     unsigned int unsignedLen = UnsignedCast(*len);
-    int ret = HmacCall(HMAC_Final, ctx, md, &unsignedLen);
+    int ret = HMAC_Final(ctx, md, &unsignedLen);
     *len = SignedCast(unsignedLen);
     return ret;
 }

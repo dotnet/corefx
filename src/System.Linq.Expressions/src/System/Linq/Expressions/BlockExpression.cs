@@ -118,14 +118,6 @@ namespace System.Linq.Expressions
             throw ContractUtils.Unreachable;
         }
 
-        internal virtual int VariableCount
-        {
-            get
-            {
-                return 0;
-            }
-        }
-
         internal virtual ReadOnlyCollection<ParameterExpression> GetOrMakeVariables()
         {
             return EmptyReadOnlyCollection<ParameterExpression>.Instance;
@@ -197,7 +189,7 @@ namespace System.Linq.Expressions
             {
                 case 0: return ReturnObject<Expression>(_arg0);
                 case 1: return _arg1;
-                default: throw new InvalidOperationException();
+                default: throw Error.ArgumentOutOfRange("index");
             }
         }
 
@@ -243,7 +235,7 @@ namespace System.Linq.Expressions
                 case 0: return ReturnObject<Expression>(_arg0);
                 case 1: return _arg1;
                 case 2: return _arg2;
-                default: throw new InvalidOperationException();
+                default: throw Error.ArgumentOutOfRange("index");
             }
         }
 
@@ -291,7 +283,7 @@ namespace System.Linq.Expressions
                 case 1: return _arg1;
                 case 2: return _arg2;
                 case 3: return _arg3;
-                default: throw new InvalidOperationException();
+                default: throw Error.ArgumentOutOfRange("index");
             }
         }
 
@@ -341,7 +333,7 @@ namespace System.Linq.Expressions
                 case 2: return _arg2;
                 case 3: return _arg3;
                 case 4: return _arg4;
-                default: throw new InvalidOperationException();
+                default: throw Error.ArgumentOutOfRange("index");
             }
         }
 
@@ -417,14 +409,6 @@ namespace System.Linq.Expressions
             _variables = variables;
         }
 
-        internal override int VariableCount
-        {
-            get
-            {
-                return _variables.Count;
-            }
-        }
-
         internal override ReadOnlyCollection<ParameterExpression> GetOrMakeVariables()
         {
             return ReturnReadOnly(ref _variables);
@@ -474,7 +458,7 @@ namespace System.Linq.Expressions
             switch (index)
             {
                 case 0: return ReturnObject<Expression>(_body);
-                default: throw new InvalidOperationException();
+                default: throw Error.ArgumentOutOfRange("index");
             }
         }
 
@@ -495,12 +479,12 @@ namespace System.Linq.Expressions
         {
             if (args == null)
             {
-                Debug.Assert(variables.Count == VariableCount);
+                Debug.Assert(variables.Count == Variables.Count);
                 ValidateVariables(variables, "variables");
                 return new Scope1(variables, _body);
             }
             Debug.Assert(args.Length == 1);
-            Debug.Assert(variables == null || variables.Count == VariableCount);
+            Debug.Assert(variables == null || variables.Count == Variables.Count);
 
             return new Scope1(ReuseOrValidateVariables(variables), args[0]);
         }
@@ -543,12 +527,12 @@ namespace System.Linq.Expressions
         {
             if (args == null)
             {
-                Debug.Assert(variables.Count == VariableCount);
+                Debug.Assert(variables.Count == Variables.Count);
                 ValidateVariables(variables, "variables");
                 return new ScopeN(variables, _body);
             }
             Debug.Assert(args.Length == ExpressionCount);
-            Debug.Assert(variables == null || variables.Count == VariableCount);
+            Debug.Assert(variables == null || variables.Count == Variables.Count);
 
             return new ScopeN(ReuseOrValidateVariables(variables), args);
         }
@@ -573,12 +557,12 @@ namespace System.Linq.Expressions
         {
             if (args == null)
             {
-                Debug.Assert(variables.Count == VariableCount);
+                Debug.Assert(variables.Count == Variables.Count);
                 ValidateVariables(variables, "variables");
                 return new ScopeWithType(variables, Body, _type);
             }
             Debug.Assert(args.Length == ExpressionCount);
-            Debug.Assert(variables == null || variables.Count == VariableCount);
+            Debug.Assert(variables == null || variables.Count == Variables.Count);
 
             return new ScopeWithType(ReuseOrValidateVariables(variables), args, _type);
         }
@@ -729,12 +713,7 @@ namespace System.Linq.Expressions
 
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
         {
-            yield return _arg0;
-
-            for (int i = 1; i < _block.ExpressionCount; i++)
-            {
-                yield return _block.GetExpression(i);
-            }
+            return GetEnumerator();
         }
         #endregion
     }
@@ -893,7 +872,7 @@ namespace System.Linq.Expressions
             }
 
             var expressionList = expressions.ToReadOnly();
-            return BlockCore(expressionList.Last().Type, variableList, expressionList);
+            return BlockCore(null, variableList, expressionList);
         }
 
         /// <summary>
@@ -919,6 +898,11 @@ namespace System.Linq.Expressions
                 {
                     var lastExpression = expressionList[expressionCount - 1];
 
+                    if (lastExpression == null)
+                    {
+                        throw Error.ArgumentNull("expressions");
+                    }
+
                     if (lastExpression.Type == type)
                     {
                         return GetOptimizedBlockExpression(expressionList);
@@ -935,29 +919,30 @@ namespace System.Linq.Expressions
             RequiresCanRead(expressionList, "expressions");
             ValidateVariables(variableList, "variables");
 
-            Expression last = expressionList.Last();
-            if (type != typeof(void))
+            if (type != null)
             {
-                if (!TypeUtils.AreReferenceAssignable(type, last.Type))
+                Expression last = expressionList.Last();
+                if (type != typeof(void))
                 {
-                    throw Error.ArgumentTypesMustMatch();
+                    if (!TypeUtils.AreReferenceAssignable(type, last.Type))
+                    {
+                        throw Error.ArgumentTypesMustMatch();
+                    }
+                }
+
+                if (!TypeUtils.AreEquivalent(type, last.Type))
+                {
+                    return new ScopeWithType(variableList, expressionList, type);
                 }
             }
 
-            if (!TypeUtils.AreEquivalent(type, last.Type))
+            if (expressionList.Count == 1)
             {
-                return new ScopeWithType(variableList, expressionList, type);
+                return new Scope1(variableList, expressionList[0]);
             }
             else
             {
-                if (expressionList.Count == 1)
-                {
-                    return new Scope1(variableList, expressionList[0]);
-                }
-                else
-                {
-                    return new ScopeN(variableList, expressionList);
-                }
+                return new ScopeN(variableList, expressionList);
             }
         }
 
@@ -992,15 +977,15 @@ namespace System.Linq.Expressions
 
         private static BlockExpression GetOptimizedBlockExpression(IReadOnlyList<Expression> expressions)
         {
+            RequiresCanRead(expressions, "expressions");
             switch (expressions.Count)
             {
-                case 2: return Block(expressions[0], expressions[1]);
-                case 3: return Block(expressions[0], expressions[1], expressions[2]);
-                case 4: return Block(expressions[0], expressions[1], expressions[2], expressions[3]);
-                case 5: return Block(expressions[0], expressions[1], expressions[2], expressions[3], expressions[4]);
+                case 2: return new Block2(expressions[0], expressions[1]);
+                case 3: return new Block3(expressions[0], expressions[1], expressions[2]);
+                case 4: return new Block4(expressions[0], expressions[1], expressions[2], expressions[3]);
+                case 5: return new Block5(expressions[0], expressions[1], expressions[2], expressions[3], expressions[4]);
                 default:
                     ContractUtils.RequiresNotEmptyList(expressions, "expressions");
-                    RequiresCanRead(expressions, "expressions");
                     return new BlockN(expressions as ReadOnlyCollection<Expression> ?? (IList<Expression>)expressions.ToArray());
             }
         }

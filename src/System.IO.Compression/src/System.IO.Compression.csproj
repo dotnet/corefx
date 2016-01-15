@@ -7,7 +7,6 @@
   <PropertyGroup>
     <AssemblyName>System.IO.Compression</AssemblyName>
     <AssemblyVersion>4.1.0.0</AssemblyVersion>
-    <UseECMAKey>true</UseECMAKey>
     <OutputType>Library</OutputType>
     <ProjectGuid>{5471BFE8-8071-466F-838E-5ADAA779E742}</ProjectGuid>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -26,7 +25,9 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Windows_Release|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net46_Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net46_Release|AnyCPU'" />
+  <!-- Files shared between net46 and core -->
   <ItemGroup>
+    <Compile Include="AssemblyInfo.cs" />
     <Compile Include="$(SharedOpenSourcePath)System\IO\Compression\Crc32Helper.cs" />
     <Compile Include="$(SharedOpenSourcePath)System\IO\Compression\ZipArchive.cs" />
     <Compile Include="$(SharedOpenSourcePath)System\IO\Compression\ZipArchiveEntry.cs" />
@@ -34,8 +35,12 @@
     <Compile Include="$(SharedOpenSourcePath)System\IO\Compression\ZipBlocks.cs" />
     <Compile Include="$(SharedOpenSourcePath)System\IO\Compression\ZipCustomStreams.cs" />
     <Compile Include="$(SharedOpenSourcePath)System\IO\Compression\ZipHelper.cs" />
-    <Compile Include="$(SharedOpenSourcePath)System\IO\Compression\ZipVersionNeededValues.cs" />
+    <Compile Include="$(SharedOpenSourcePath)System\IO\Compression\ZipVersion.cs" />
+    <Compile Include="$(CommonPath)\System\IO\PathInternal.cs">
+      <Link>Common\System\IO\PathInternal.cs</Link>
+    </Compile>
   </ItemGroup>
+  <!-- Files exclusive to Core -->
   <ItemGroup Condition="'$(TargetGroup)' != 'net46'">
     <Compile Include="System\IO\Compression\CompressionLevel.cs" />
     <Compile Include="System\IO\Compression\CompressionMode.cs" />
@@ -46,6 +51,14 @@
     <Compile Include="System\IO\Compression\ZLibException.cs" />
     <Compile Include="System\IO\Compression\ZLibNative.cs" />
   </ItemGroup>
+  <!-- Windows specific files common to both net46 and Core -->
+  <ItemGroup Condition=" '$(TargetsWindows)' == 'true'">
+    <Compile Include="System\IO\Compression\ZipArchiveEntry.Windows.cs" />
+    <Compile Include="$(CommonPath)\System\IO\PathInternal.Windows.cs">
+      <Link>Common\System\IO\PathInternal.Windows.cs</Link>
+    </Compile>
+  </ItemGroup>
+  <!-- Windows specific files exclusive to Core -->
   <ItemGroup Condition=" '$(TargetsWindows)' == 'true' And '$(TargetGroup)' != 'net46'">
     <Compile Include="System\IO\Compression\ZLibNative.Windows.cs" />
     <Compile Include="Interop\Interop.zlib.Windows.cs" />
@@ -53,13 +66,22 @@
       <Link>Common\Interop\Windows\Interop.Libraries.cs</Link>
     </Compile>
   </ItemGroup>
+  <!-- Unix specific files -->
   <ItemGroup Condition=" '$(TargetsUnix)' == 'true' ">
     <Compile Include="System\IO\Compression\ZLibNative.Unix.cs" />
+    <Compile Include="System\IO\Compression\ZipArchiveEntry.Unix.cs" />
     <Compile Include="Interop\Interop.zlib.Unix.cs" />
     <Compile Include="$(CommonPath)\Interop\Unix\Interop.Libraries.cs">
       <Link>Common\Interop\Unix\Interop.Libraries.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\System\IO\PathInternal.Unix.cs">
+      <Link>Common\System\IO\PathInternal.Unix.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.PathConf.cs">
+      <Link>Common\Interop\Unix\System.Native\Interop.PathConf.cs</Link>
+    </Compile>
   </ItemGroup>
+  <!-- Files exclusive to net46 -->
   <ItemGroup Condition="'$(TargetGroup)' == 'net46'">
     <TargetingPackReference Include="mscorlib" />
     <TargetingPackReference Include="System" />

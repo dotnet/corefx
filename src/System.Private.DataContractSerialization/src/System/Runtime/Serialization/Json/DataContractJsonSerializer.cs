@@ -25,20 +25,13 @@ namespace System.Runtime.Serialization.Json
         private const char LOW_SURROGATE_END = (char)0xdfff;
         private const char MAX_CHAR = (char)0xfffe;
         private const char WHITESPACE = ' ';
-        private const char CARRIAGE_RETURN = '\r';
-        private const char NEWLINE = '\n';
 
 
         internal IList<Type> knownTypeList;
         internal DataContractDictionary knownDataContracts;
         private EmitTypeInformation _emitTypeInformation;
-        private bool _ignoreExtensionDataObject;
         private ReadOnlyCollection<Type> _knownTypeCollection;
         private int _maxItemsInObjectGraph;
-        private DataContract _rootContract; // post-surrogate
-        private XmlDictionaryString _rootName;
-        private bool _rootNameRequiresMapping;
-        private Type _rootType;
         private bool _serializeReadOnlyTypes;
         private DateTimeFormat _dateTimeFormat;
         private bool _useSimpleDictionaryFormat;
@@ -136,106 +129,6 @@ namespace System.Runtime.Serialization.Json
             {
                 return _useSimpleDictionaryFormat;
             }
-        }
-        private DataContract RootContract
-        {
-            get
-            {
-                if (_rootContract == null)
-                {
-                    _rootContract = DataContract.GetDataContract(_rootType);
-                    CheckIfTypeIsReference(_rootContract);
-                }
-                return _rootContract;
-            }
-        }
-
-        private void AddCollectionItemTypeToKnownTypes(Type knownType)
-        {
-            Type itemType;
-            Type typeToCheck = knownType;
-            while (CollectionDataContract.IsCollection(typeToCheck, out itemType))
-            {
-                if (itemType.GetTypeInfo().IsGenericType && (itemType.GetGenericTypeDefinition() == Globals.TypeOfKeyValue))
-                {
-                    itemType = Globals.TypeOfKeyValuePair.MakeGenericType(itemType.GetGenericArguments());
-                }
-                this.knownTypeList.Add(itemType);
-                typeToCheck = itemType;
-            }
-        }
-
-        private void Initialize(Type type,
- IEnumerable<Type> knownTypes)
-        {
-            XmlObjectSerializer.CheckNull(type, "type");
-            _rootType = type;
-
-            if (knownTypes != null)
-            {
-                this.knownTypeList = new List<Type>();
-                foreach (Type knownType in knownTypes)
-                {
-                    this.knownTypeList.Add(knownType);
-                    if (knownType != null)
-                    {
-                        AddCollectionItemTypeToKnownTypes(knownType);
-                    }
-                }
-            }
-        }
-
-
-        private void Initialize(Type type,
-            IEnumerable<Type> knownTypes,
-            int maxItemsInObjectGraph,
-            bool ignoreExtensionDataObject,
-            EmitTypeInformation emitTypeInformation,
-            bool serializeReadOnlyTypes,
-            DateTimeFormat dateTimeFormat,
-            bool useSimpleDictionaryFormat)
-        {
-            CheckNull(type, "type");
-            _rootType = type;
-
-            if (knownTypes != null)
-            {
-                this.knownTypeList = new List<Type>();
-                foreach (Type knownType in knownTypes)
-                {
-                    this.knownTypeList.Add(knownType);
-                    if (knownType != null)
-                    {
-                        AddCollectionItemTypeToKnownTypes(knownType);
-                    }
-                }
-            }
-
-            if (maxItemsInObjectGraph < 0)
-            {
-                throw DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentOutOfRangeException("maxItemsInObjectGraph", SR.Format(SR.ValueMustBeNonNegative)));
-            }
-            _maxItemsInObjectGraph = maxItemsInObjectGraph;
-            _ignoreExtensionDataObject = ignoreExtensionDataObject;
-            _emitTypeInformation = emitTypeInformation;
-            _serializeReadOnlyTypes = serializeReadOnlyTypes;
-            _dateTimeFormat = dateTimeFormat;
-            _useSimpleDictionaryFormat = useSimpleDictionaryFormat;
-        }
-
-        private void Initialize(Type type,
-            XmlDictionaryString rootName,
-            IEnumerable<Type> knownTypes,
-            int maxItemsInObjectGraph,
-            bool ignoreExtensionDataObject,
-            EmitTypeInformation emitTypeInformation,
-            bool serializeReadOnlyTypes,
-            DateTimeFormat dateTimeFormat,
-            bool useSimpleDictionaryFormat)
-        {
-            Initialize(type, knownTypes, maxItemsInObjectGraph, ignoreExtensionDataObject, emitTypeInformation, serializeReadOnlyTypes, dateTimeFormat, useSimpleDictionaryFormat);
-            _rootName = ConvertXmlNameToJsonName(rootName);
-            _rootNameRequiresMapping = CheckIfJsonNameRequiresMapping(_rootName);
         }
 
         internal static void CheckIfTypeIsReference(DataContract dataContract)
@@ -521,49 +414,6 @@ namespace System.Runtime.Serialization.Json
             return knownTypesList;
         }
 
-        private void AddCollectionItemContractsToKnownDataContracts(DataContract traditionalDataContract)
-        {
-            if (traditionalDataContract.KnownDataContracts != null)
-            {
-                foreach (KeyValuePair<XmlQualifiedName, DataContract> knownDataContract in traditionalDataContract.KnownDataContracts)
-                {
-                    if (!object.ReferenceEquals(knownDataContract, null))
-                    {
-                        CollectionDataContract collectionDataContract = knownDataContract.Value as CollectionDataContract;
-                        while (collectionDataContract != null)
-                        {
-                            DataContract itemContract = collectionDataContract.ItemContract;
-                            if (knownDataContracts == null)
-                            {
-                                knownDataContracts = new Dictionary<XmlQualifiedName, DataContract>();
-                            }
-
-                            if (!knownDataContracts.ContainsKey(itemContract.StableName))
-                            {
-                                knownDataContracts.Add(itemContract.StableName, itemContract);
-                            }
-
-                            if (collectionDataContract.ItemType.GetTypeInfo().IsGenericType
-                                && collectionDataContract.ItemType.GetGenericTypeDefinition() == typeof(KeyValue<,>))
-                            {
-                                DataContract itemDataContract = DataContract.GetDataContract(Globals.TypeOfKeyValuePair.MakeGenericType(collectionDataContract.ItemType.GetGenericArguments()));
-                                if (!knownDataContracts.ContainsKey(itemDataContract.StableName))
-                                {
-                                    knownDataContracts.Add(itemDataContract.StableName, itemDataContract);
-                                }
-                            }
-
-                            if (!(itemContract is CollectionDataContract))
-                            {
-                                break;
-                            }
-                            collectionDataContract = itemContract as CollectionDataContract;
-                        }
-                    }
-                }
-            }
-        }
-
         static internal void InvokeOnSerializing(Object value, DataContract contract, XmlObjectSerializerWriteContextComplexJson context)
         {
             if (contract is ClassDataContract)
@@ -574,7 +424,7 @@ namespace System.Runtime.Serialization.Json
                     InvokeOnSerializing(value, classContract.BaseContract, context);
                 if (classContract.OnSerializing != null)
                 {
-                    bool memberAccessFlag = classContract.RequiresMemberAccessForWrite(null, JsonGlobals.JsonSerializationPatterns);
+                    bool memberAccessFlag = classContract.RequiresMemberAccessForWrite(null);
                     try
                     {
                         classContract.OnSerializing.Invoke(value, new object[] { context.GetStreamingContext() });
@@ -583,7 +433,7 @@ namespace System.Runtime.Serialization.Json
                     {
                         if (memberAccessFlag)
                         {
-                            classContract.RequiresMemberAccessForWrite(securityException, JsonGlobals.JsonSerializationPatterns);
+                            classContract.RequiresMemberAccessForWrite(securityException);
                         }
                         else
                         {
@@ -612,7 +462,7 @@ namespace System.Runtime.Serialization.Json
                     InvokeOnSerialized(value, classContract.BaseContract, context);
                 if (classContract.OnSerialized != null)
                 {
-                    bool memberAccessFlag = classContract.RequiresMemberAccessForWrite(null, JsonGlobals.JsonSerializationPatterns);
+                    bool memberAccessFlag = classContract.RequiresMemberAccessForWrite(null);
                     try
                     {
                         classContract.OnSerialized.Invoke(value, new object[] { context.GetStreamingContext() });
@@ -621,7 +471,7 @@ namespace System.Runtime.Serialization.Json
                     {
                         if (memberAccessFlag)
                         {
-                            classContract.RequiresMemberAccessForWrite(securityException, JsonGlobals.JsonSerializationPatterns);
+                            classContract.RequiresMemberAccessForWrite(securityException);
                         }
                         else
                         {
@@ -650,7 +500,7 @@ namespace System.Runtime.Serialization.Json
                     InvokeOnDeserializing(value, classContract.BaseContract, context);
                 if (classContract.OnDeserializing != null)
                 {
-                    bool memberAccessFlag = classContract.RequiresMemberAccessForRead(null, JsonGlobals.JsonSerializationPatterns);
+                    bool memberAccessFlag = classContract.RequiresMemberAccessForRead(null);
                     try
                     {
                         classContract.OnDeserializing.Invoke(value, new object[] { context.GetStreamingContext() });
@@ -659,7 +509,7 @@ namespace System.Runtime.Serialization.Json
                     {
                         if (memberAccessFlag)
                         {
-                            classContract.RequiresMemberAccessForRead(securityException, JsonGlobals.JsonSerializationPatterns);
+                            classContract.RequiresMemberAccessForRead(securityException);
                         }
                         else
                         {
@@ -688,7 +538,7 @@ namespace System.Runtime.Serialization.Json
                     InvokeOnDeserialized(value, classContract.BaseContract, context);
                 if (classContract.OnDeserialized != null)
                 {
-                    bool memberAccessFlag = classContract.RequiresMemberAccessForRead(null, JsonGlobals.JsonSerializationPatterns);
+                    bool memberAccessFlag = classContract.RequiresMemberAccessForRead(null);
                     try
                     {
                         classContract.OnDeserialized.Invoke(value, new object[] { context.GetStreamingContext() });
@@ -697,7 +547,7 @@ namespace System.Runtime.Serialization.Json
                     {
                         if (memberAccessFlag)
                         {
-                            classContract.RequiresMemberAccessForRead(securityException, JsonGlobals.JsonSerializationPatterns);
+                            classContract.RequiresMemberAccessForRead(securityException);
                         }
                         else
                         {

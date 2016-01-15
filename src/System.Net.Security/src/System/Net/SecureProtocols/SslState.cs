@@ -48,14 +48,14 @@ namespace System.Net.Security
         }
         private CachedSessionStatus _CachedSession;
 
-        // This block is used by rehandshake code to buffer data decryptred with the old key.
+        // This block is used by re-handshake code to buffer data decrypted with the old key.
         private byte[] _queuedReadData;
         private int _queuedReadCount;
         private bool _pendingReHandshake;
         private const int MaxQueuedReadBytes = 1024 * 128;
 
         //
-        // This block is used to rule the >>re-handshakes<< that are concurent with read/write io requests.
+        // This block is used to rule the >>re-handshakes<< that are concurrent with read/write I/O requests.
         //
         private const int LockNone = 0;
         private const int LockWrite = 1;
@@ -85,9 +85,7 @@ namespace System.Net.Security
             _certSelectionDelegate = certSelectionCallback;
             _encryptionPolicy = encryptionPolicy;
         }
-        //
-        //
-        //
+
         internal void ValidateCreateContext(bool isServer, string targetHost, SslProtocols enabledSslProtocols, X509Certificate serverCertificate, X509CertificateCollection clientCertificates, bool remoteCertRequired, bool checkCertRevocationStatus)
         {
             ValidateCreateContext(isServer, targetHost, enabledSslProtocols, serverCertificate, clientCertificates, remoteCertRequired,
@@ -998,20 +996,30 @@ namespace System.Net.Security
         //
         private bool CompleteHandshake()
         {
-            GlobalLog.Enter("CompleteHandshake");
+            if (GlobalLog.IsEnabled)
+            {
+                GlobalLog.Enter("CompleteHandshake");
+            }
+
             Context.ProcessHandshakeSuccess();
 
             if (!Context.VerifyRemoteCertificate(_certValidationDelegate))
             {
                 _handshakeCompleted = false;
                 _certValidationFailed = true;
-                GlobalLog.Leave("CompleteHandshake", false);
+                if (GlobalLog.IsEnabled)
+                {
+                    GlobalLog.Leave("CompleteHandshake", false);
+                }
                 return false;
             }
 
             _certValidationFailed = false;
             _handshakeCompleted = true;
-            GlobalLog.Leave("CompleteHandshake", true);
+            if (GlobalLog.IsEnabled)
+            {
+                GlobalLog.Leave("CompleteHandshake", true);
+            }
             return true;
         }
 
@@ -1037,7 +1045,11 @@ namespace System.Net.Security
             {
                 if (!ExceptionCheck.IsFatal(exception))
                 {
-                    GlobalLog.Assert("SslState::WriteCallback", "Exception while decoding context. type:" + exception.GetType().ToString() + " message:" + exception.Message);
+                    if (GlobalLog.IsEnabled)
+                    {
+                        GlobalLog.Assert("SslState::WriteCallback", "Exception while decoding context. type:" + exception.GetType().ToString() + " message:" + exception.Message);
+                    }
+                    Debug.Fail("SslState::WriteCallback", "Exception while decoding context. type:" + exception.GetType().ToString() + " message:" + exception.Message);
                 }
 
                 throw;
@@ -1073,7 +1085,10 @@ namespace System.Net.Security
 
         private static void PartialFrameCallback(AsyncProtocolRequest asyncRequest)
         {
-            GlobalLog.Print("SslState::PartialFrameCallback()");
+            if (GlobalLog.IsEnabled)
+            {
+                GlobalLog.Print("SslState::PartialFrameCallback()");
+            }
 
             // Async ONLY completion.
             SslState sslState = (SslState)asyncRequest.AsyncObject;
@@ -1097,7 +1112,10 @@ namespace System.Net.Security
         //
         private static void ReadFrameCallback(AsyncProtocolRequest asyncRequest)
         {
-            GlobalLog.Print("SslState::ReadFrameCallback()");
+            if (GlobalLog.IsEnabled)
+            {
+                GlobalLog.Print("SslState::ReadFrameCallback()");
+            }
 
             // Async ONLY completion.
             SslState sslState = (SslState)asyncRequest.AsyncObject;
@@ -1550,7 +1568,14 @@ namespace System.Net.Security
 
             int version = -1;
 
-            GlobalLog.Assert((bytes != null && bytes.Length > 0), "SslState::DetectFraming()|Header buffer is not allocated will boom shortly.");
+            if ((bytes == null || bytes.Length == 0))
+            {
+                if (GlobalLog.IsEnabled)
+                {
+                    GlobalLog.Assert("SslState::DetectFraming()|Header buffer is not allocated will boom shortly.");
+                }
+                Debug.Fail("SslState::DetectFraming()|Header buffer is not allocated will boom shortly.");
+            }
 
             // If the first byte is SSL3 HandShake, then check if we have a SSLv3 Type3 client hello.
             if (bytes[0] == (byte)FrameType.Handshake || bytes[0] == (byte)FrameType.AppData
@@ -1564,7 +1589,10 @@ namespace System.Net.Security
 #if TRACE_VERBOSE
                 if (bytes[1] != 3) 
                 {
-                    GlobalLog.Print("WARNING: SslState::DetectFraming() SSL protocol is > 3, trying SSL3 framing in retail = " + bytes[1].ToString("x", NumberFormatInfo.InvariantInfo));
+                    if (GlobalLog.IsEnabled)
+                    {
+                        GlobalLog.Print("WARNING: SslState::DetectFraming() SSL protocol is > 3, trying SSL3 framing in retail = " + bytes[1].ToString("x", NumberFormatInfo.InvariantInfo));
+                    }
                 }
 #endif
 
@@ -1581,7 +1609,7 @@ namespace System.Net.Security
             }
 
 #if TRACE_VERBOSE
-            if ((bytes[0] & 0x80) == 0)
+            if ((bytes[0] & 0x80) == 0 && GlobalLog.IsEnabled)
             {
                 // We have a three-byte header format
                 GlobalLog.Print("WARNING: SslState::DetectFraming() SSL v <=2 HELLO has no high bit set for 3 bytes header, we are broken, received byte = " + bytes[0].ToString("x", NumberFormatInfo.InvariantInfo));
@@ -1647,7 +1675,11 @@ namespace System.Net.Security
         // This is called from SslStream class too.
         internal int GetRemainingFrameSize(byte[] buffer, int dataSize)
         {
-            GlobalLog.Enter("GetRemainingFrameSize", "dataSize = " + dataSize);
+            if (GlobalLog.IsEnabled)
+            {
+                GlobalLog.Enter("GetRemainingFrameSize", "dataSize = " + dataSize);
+            }
+
             int payloadSize = -1;
             switch (_Framing)
             {
@@ -1685,7 +1717,11 @@ namespace System.Net.Security
                 default:
                     break;
             }
-            GlobalLog.Leave("GetRemainingFrameSize", payloadSize);
+
+            if (GlobalLog.IsEnabled)
+            {
+                GlobalLog.Leave("GetRemainingFrameSize", payloadSize);
+            }
             return payloadSize;
         }
 
@@ -1757,8 +1793,22 @@ namespace System.Net.Security
         private void RehandshakeCompleteCallback(IAsyncResult result)
         {
             LazyAsyncResult lazyAsyncResult = (LazyAsyncResult)result;
-            GlobalLog.Assert(lazyAsyncResult != null, "SslState::RehandshakeCompleteCallback()|result is null!");
-            GlobalLog.Assert(lazyAsyncResult.InternalPeekCompleted, "SslState::RehandshakeCompleteCallback()|result is not completed!");
+            if (lazyAsyncResult == null)
+            {
+                if (GlobalLog.IsEnabled)
+                {
+                    GlobalLog.Assert("SslState::RehandshakeCompleteCallback()|result is null!");
+                }
+                Debug.Fail("SslState::RehandshakeCompleteCallback()|result is null!");
+            }
+            if (!lazyAsyncResult.InternalPeekCompleted)
+            {
+                if (GlobalLog.IsEnabled)
+                {
+                    GlobalLog.Assert("SslState::RehandshakeCompleteCallback()|result is not completed!");
+                }
+                Debug.Fail("SslState::RehandshakeCompleteCallback()|result is not completed!");
+            }
 
             // If the rehandshake succeeded, FinishHandshake has already been called; if there was a SocketException
             // during the handshake, this gets called directly from FixedSizeReader, and we need to call

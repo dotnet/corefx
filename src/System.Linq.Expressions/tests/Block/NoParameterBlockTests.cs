@@ -6,7 +6,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Xunit;
 
-namespace System.Linq.Expressions.Test
+namespace System.Linq.Expressions.Tests
 {
     public class NoParameterBlockTests : SharedBlockTests
     {
@@ -205,8 +205,6 @@ namespace System.Linq.Expressions.Test
 
         [Theory]
         [MemberData("BlockSizes")]
-        [ActiveIssue(3909)]
-        [ActiveIssue(3908)]
         public void NullExpressionInExpressionList(int size)
         {
             List<Expression> expressionList = Enumerable.Range(0, size).Select(i => (Expression)Expression.Constant(1)).ToList();
@@ -225,25 +223,6 @@ namespace System.Linq.Expressions.Test
 
         [Theory]
         [MemberData("BlockSizes")]
-        public void NullExpressionInExpressionListTemp(int size)
-        {
-            List<Expression> expressionList = Enumerable.Range(0, size).Select(i => (Expression)Expression.Constant(1)).ToList();
-            for (int i = 0; i != expressionList.Count; ++i)
-            {
-                Expression[] expressions = expressionList.ToArray();
-                expressions[i] = null;
-                Assert.Throws<ArgumentNullException>(() => Expression.Block(expressions));
-                Assert.Throws<ArgumentNullException>(() => Expression.Block(expressions.Skip(0)));
-                Assert.ThrowsAny<Exception>(() => Expression.Block(typeof(int), expressions));
-                Assert.ThrowsAny<Exception>(() => Expression.Block(typeof(int), expressions.Skip(0)));
-                Assert.ThrowsAny<Exception>(() => Expression.Block(typeof(int), null, expressions));
-                Assert.ThrowsAny<Exception>(() => Expression.Block(typeof(int), null, expressions.Skip(0)));
-            }
-        }
-
-        [Theory]
-        [MemberData("BlockSizes")]
-        [ActiveIssue(3909)]
         public void UnreadableExpressionInExpressionList(int size)
         {
             List<Expression> expressionList = Enumerable.Range(0, size).Select(i => (Expression)Expression.Constant(1)).ToList();
@@ -257,24 +236,6 @@ namespace System.Linq.Expressions.Test
                 Assert.Throws<ArgumentException>("expressions", () => Expression.Block(typeof(int), expressions.Skip(0)));
                 Assert.Throws<ArgumentException>("expressions", () => Expression.Block(typeof(int), null, expressions));
                 Assert.Throws<ArgumentException>("expressions", () => Expression.Block(typeof(int), null, expressions.Skip(0)));
-            }
-        }
-
-        [Theory]
-        [MemberData("BlockSizes")]
-        public void UnreadableExpressionInExpressionListTemp(int size)
-        {
-            List<Expression> expressionList = Enumerable.Range(0, size).Select(i => (Expression)Expression.Constant(1)).ToList();
-            for (int i = 0; i != expressionList.Count; ++i)
-            {
-                Expression[] expressions = expressionList.ToArray();
-                expressions[i] = UnreadableExpression;
-                Assert.Throws<ArgumentException>(() => Expression.Block(expressions));
-                Assert.Throws<ArgumentException>(() => Expression.Block(expressions.Skip(0)));
-                Assert.Throws<ArgumentException>(() => Expression.Block(typeof(int), expressions));
-                Assert.Throws<ArgumentException>(() => Expression.Block(typeof(int), expressions.Skip(0)));
-                Assert.Throws<ArgumentException>(() => Expression.Block(typeof(int), null, expressions));
-                Assert.Throws<ArgumentException>(() => Expression.Block(typeof(int), null, expressions.Skip(0)));
             }
         }
 
@@ -303,22 +264,11 @@ namespace System.Linq.Expressions.Test
 
         [Theory]
         [MemberData("ConstantValuesAndSizes")]
-        [ActiveIssue(3881)]
         public void InvalidExpressionIndex(object value, int blockSize)
         {
             BlockExpression block = Expression.Block(PadBlock(blockSize - 1, Expression.Constant(value, value.GetType())));
-            Assert.Throws<ArgumentOutOfRangeException>(() => block.Expressions[-1]);
-            Assert.Throws<ArgumentOutOfRangeException>(() => block.Expressions[blockSize]);
-        }
-
-        // Remove below if issue blocking above is fixed.
-        [Theory]
-        [MemberData("ConstantValuesAndSizes")]
-        public void InvalidExpressionIndexVaryingExceptin(object value, int blockSize)
-        {
-            BlockExpression block = Expression.Block(PadBlock(blockSize - 1, Expression.Constant(value, value.GetType())));
-            Assert.ThrowsAny<Exception>(() => block.Expressions[-1]);
-            Assert.ThrowsAny<Exception>(() => block.Expressions[blockSize]);
+            Assert.Throws<ArgumentOutOfRangeException>("index", () => block.Expressions[-1]);
+            Assert.Throws<ArgumentOutOfRangeException>("index", () => block.Expressions[blockSize]);
         }
 
         // See https://github.com/dotnet/corefx/issues/3043
@@ -332,7 +282,6 @@ namespace System.Linq.Expressions.Test
         }
 
         [Fact]
-        [ActiveIssue(3882)]
         public void EmptyBlockWithParametersNotAllowed()
         {
             Assert.Throws<ArgumentException>("expressions", () => Expression.Block(Enumerable.Repeat<ParameterExpression>(Expression.Parameter(typeof(int)), 1)));
@@ -342,7 +291,6 @@ namespace System.Linq.Expressions.Test
         }
 
         // If https://github.com/dotnet/corefx/issues/3043 is ever actioned, this case would still be prohibited.
-
         [Fact]
         public void EmptyBlockWithNonVoidTypeNotAllowed()
         {
@@ -351,7 +299,6 @@ namespace System.Linq.Expressions.Test
         }
 
         [Fact]
-        [ActiveIssue(3882)]
         public void EmptyBlockWithParametersAndNonVoidTypeNotAllowed()
         {
             Assert.Throws<ArgumentException>("expressions", () => Expression.Block(typeof(int), Enumerable.Repeat<ParameterExpression>(Expression.Parameter(typeof(int)), 1)));

@@ -62,7 +62,7 @@ namespace System.Runtime.Serialization.Json
             internal JsonFormatClassWriterDelegate GenerateClassWriter(ClassDataContract classContract)
             {
                 _ilg = new CodeGenerator();
-                bool memberAccessFlag = classContract.RequiresMemberAccessForWrite(null, JsonGlobals.JsonSerializationPatterns);
+                bool memberAccessFlag = classContract.RequiresMemberAccessForWrite(null);
                 try
                 {
                     BeginMethod(_ilg, "Write" + DataContract.SanitizeTypeName(classContract.StableName.Name) + "ToJson", typeof(JsonFormatClassWriterDelegate), memberAccessFlag);
@@ -71,7 +71,7 @@ namespace System.Runtime.Serialization.Json
                 {
                     if (memberAccessFlag)
                     {
-                        classContract.RequiresMemberAccessForWrite(securityException, JsonGlobals.JsonSerializationPatterns);
+                        classContract.RequiresMemberAccessForWrite(securityException);
                     }
                     else
                     {
@@ -87,7 +87,7 @@ namespace System.Runtime.Serialization.Json
             internal JsonFormatCollectionWriterDelegate GenerateCollectionWriter(CollectionDataContract collectionContract)
             {
                 _ilg = new CodeGenerator();
-                bool memberAccessFlag = collectionContract.RequiresMemberAccessForWrite(null, JsonGlobals.JsonSerializationPatterns);
+                bool memberAccessFlag = collectionContract.RequiresMemberAccessForWrite(null);
                 try
                 {
                     BeginMethod(_ilg, "Write" + DataContract.SanitizeTypeName(collectionContract.StableName.Name) + "ToJson", typeof(JsonFormatCollectionWriterDelegate), memberAccessFlag);
@@ -96,7 +96,7 @@ namespace System.Runtime.Serialization.Json
                 {
                     if (memberAccessFlag)
                     {
-                        collectionContract.RequiresMemberAccessForWrite(securityException, JsonGlobals.JsonSerializationPatterns);
+                        collectionContract.RequiresMemberAccessForWrite(securityException);
                     }
                     else
                     {
@@ -155,28 +155,6 @@ namespace System.Runtime.Serialization.Json
                     _ilg.ConvertValue(objectArg.ArgType, objType);
                 }
                 _ilg.Stloc(_objectLocal);
-            }
-
-            private void ThrowIfCannotSerializeReadOnlyTypes(ClassDataContract classContract)
-            {
-                ThrowIfCannotSerializeReadOnlyTypes(XmlFormatGeneratorStatics.ClassSerializationExceptionMessageProperty);
-            }
-
-            private void ThrowIfCannotSerializeReadOnlyTypes(CollectionDataContract classContract)
-            {
-                ThrowIfCannotSerializeReadOnlyTypes(XmlFormatGeneratorStatics.CollectionSerializationExceptionMessageProperty);
-            }
-
-            private void ThrowIfCannotSerializeReadOnlyTypes(PropertyInfo serializationExceptionMessageProperty)
-            {
-                _ilg.Load(_contextArg);
-                _ilg.LoadMember(XmlFormatGeneratorStatics.SerializeReadOnlyTypesProperty);
-                _ilg.IfNot();
-                _ilg.Load(_dataContractArg);
-                _ilg.LoadMember(serializationExceptionMessageProperty);
-                _ilg.Load(null);
-                _ilg.Call(XmlFormatGeneratorStatics.ThrowInvalidDataContractExceptionMethod);
-                _ilg.EndIf();
             }
 
             private void InvokeOnSerializing(ClassDataContract classContract)

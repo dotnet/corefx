@@ -3,6 +3,7 @@
 
 using System;
 using Xunit;
+using System.Runtime.InteropServices;
 
 public class WindowAndCursorProps
 {
@@ -56,12 +57,19 @@ public class WindowAndCursorProps
 
     [Fact]
     [PlatformSpecific(PlatformID.AnyUnix)]
-    public static void WindowLeftTop()
+    public static void WindowLeftTop_AnyUnix()
     {
         Assert.Equal(0, Console.WindowLeft);
         Assert.Equal(0, Console.WindowTop);
         Assert.Throws<PlatformNotSupportedException>(() => Console.WindowLeft = 0);
         Assert.Throws<PlatformNotSupportedException>(() => Console.WindowTop = 0);
+    }
+
+    [PlatformSpecific(PlatformID.Windows)]
+    public static void WindowLeftTop_Windows()
+    {
+        Helpers.RunInNonRedirectedOutput((data) => Console.WriteLine(Console.WindowLeft));
+        Helpers.RunInNonRedirectedOutput((data) => Console.WriteLine(Console.WindowTop));
     }
 
     //[Fact] //CI system makes it difficult to run things in a non-redirected environments.
@@ -91,12 +99,41 @@ public class WindowAndCursorProps
         Assert.Throws<PlatformNotSupportedException>(() => Console.Title);
     }
 
-    [ActiveIssue(4636, PlatformID.Windows)]
     [Fact]
     [OuterLoop] // changes the title and we can't change it back automatically in the test
     public static void Title_Set()
     {
         Console.Title = "Title set by unit test";
+    }
+
+    [Fact]
+    [PlatformSpecific(PlatformID.Windows)]
+    public static void Title()
+    {
+        Assert.NotNull(Console.Title);
+        string origTitle = Console.Title;
+        try
+        {
+            string newTitle = "Title set by unit test";
+
+            // Try to set the title to some other value.
+            Console.Title = newTitle;
+            
+            Assert.Equal(newTitle, Console.Title);
+
+            //// Try setting a Title greater than 256 chars.
+            newTitle = new string('a', 1024);
+            Console.Title = newTitle;
+            Assert.Equal(newTitle, Console.Title);
+
+            //// Try setting a title greater than 24500 chars and check that it fails.
+            newTitle = new string('a', 24501);
+            Assert.Throws<ArgumentOutOfRangeException>(() => { Console.Title = newTitle; });
+        }
+        finally
+        {
+            Console.Title = origTitle;
+        }
     }
 
     [Fact]
@@ -111,21 +148,32 @@ public class WindowAndCursorProps
     [OuterLoop] // clears the screen, not very inner-loop friendly
     public static void Clear()
     {
-        // Nothing to verify; just run the code.
-        Console.Clear();
+        if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows) || (!Console.IsInputRedirected && !Console.IsOutputRedirected))
+        {
+            // Nothing to verify; just run the code.
+            Console.Clear();
+        }
     }
 
     [Fact]
     public static void SetCursorPosition()
     {
-        // Nothing to verify; just run the code.
-        Console.SetCursorPosition(0, 0);
-        Console.SetCursorPosition(1, 2);
+        if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows) || (!Console.IsInputRedirected && !Console.IsOutputRedirected))
+        {
+            int origLeft = Console.CursorLeft;
+            int origTop = Console.CursorTop;
+
+            // Nothing to verify; just run the code.
+            // On windows, we might end of throwing IOException, since the handles are redirected.
+            Console.SetCursorPosition(0, 0);
+            Console.SetCursorPosition(1, 2);
+
+            Console.SetCursorPosition(origLeft, origTop);
+        }
         Assert.Throws<ArgumentOutOfRangeException>("left", () => Console.SetCursorPosition(-1, 100));
         Assert.Throws<ArgumentOutOfRangeException>("top", () => Console.SetCursorPosition(100, -1));
     }
 
-    [ActiveIssue(4636, PlatformID.Windows)]
     [Fact]
     public static void GetCursorPosition()
     {
@@ -141,7 +189,7 @@ public class WindowAndCursorProps
             Assert.Equal(origLeft, Console.CursorLeft);
             Assert.Equal(origTop, Console.CursorTop);
         }
-        else
+        else if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
             Assert.Equal(0, Console.CursorLeft);
             Assert.Equal(0, Console.CursorTop);

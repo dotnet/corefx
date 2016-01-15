@@ -96,7 +96,10 @@ namespace System.Net.Sockets
             SafeCloseSocket ret = new SafeCloseSocket();
             CreateSocket(socket, ret);
 
-            GlobalLog.Print("SafeCloseSocket#" + LoggingHash.HashString(ret) + "::CreateSocket()");
+            if (GlobalLog.IsEnabled)
+            {
+                GlobalLog.Print("SafeCloseSocket#" + LoggingHash.HashString(ret) + "::CreateSocket()");
+            }
 
             return ret;
         }
@@ -138,9 +141,12 @@ namespace System.Net.Sockets
 
         protected override bool ReleaseHandle()
         {
-            GlobalLog.Print(
-                "SafeCloseSocket#" + LoggingHash.HashString(this) + "::ReleaseHandle() m_InnerSocket=" +
-                _innerSocket == null ? "null" : LoggingHash.HashString(_innerSocket));
+            if (GlobalLog.IsEnabled)
+            {
+                GlobalLog.Print(
+                    "SafeCloseSocket#" + LoggingHash.HashString(this) + "::ReleaseHandle() m_InnerSocket=" +
+                    _innerSocket == null ? "null" : LoggingHash.HashString(_innerSocket));
+            }
 
             _released = true;
             InnerSafeCloseSocket innerSocket = _innerSocket == null ? null : Interlocked.Exchange<InnerSafeCloseSocket>(ref _innerSocket, null);
@@ -162,9 +168,12 @@ namespace System.Net.Sockets
 
         internal void CloseAsIs()
         {
-            GlobalLog.Print(
-                "SafeCloseSocket#" + LoggingHash.HashString(this) + "::CloseAsIs() m_InnerSocket=" +
-                _innerSocket == null ? "null" : LoggingHash.HashString(_innerSocket));
+            if (GlobalLog.IsEnabled)
+            {
+                GlobalLog.Print(
+                    "SafeCloseSocket#" + LoggingHash.HashString(this) + "::CloseAsIs() m_InnerSocket=" +
+                    _innerSocket == null ? "null" : LoggingHash.HashString(_innerSocket));
+            }
 
 #if DEBUG
             // If this throws it could be very bad.
@@ -194,7 +203,11 @@ namespace System.Net.Sockets
             {
                 if (!ExceptionCheck.IsFatal(exception))
                 {
-                    GlobalLog.Assert("SafeCloseSocket::CloseAsIs(handle:" + handle.ToString("x") + ")", exception.Message);
+                    if (GlobalLog.IsEnabled)
+                    {
+                        GlobalLog.Assert("SafeCloseSocket::CloseAsIs(handle:" + handle.ToString("x") + ")", exception.Message);
+                    }
+                    Debug.Fail("SafeCloseSocket::CloseAsIs(handle:" + handle.ToString("x") + ")", exception.Message);
                 }
                 throw;
             }
@@ -224,7 +237,10 @@ namespace System.Net.Sockets
                 try
                 {
 #endif
-                    GlobalLog.Print("SafeCloseSocket::ReleaseHandle(handle:" + handle.ToString("x") + ")");
+                    if (GlobalLog.IsEnabled)
+                    {
+                        GlobalLog.Print("SafeCloseSocket::ReleaseHandle(handle:" + handle.ToString("x") + ")");
+                    }
 
                     SocketError errorCode = InnerReleaseHandle();
                     return ret = errorCode == SocketError.Success;
@@ -234,7 +250,11 @@ namespace System.Net.Sockets
                 {
                     if (!ExceptionCheck.IsFatal(exception))
                     {
-                        GlobalLog.Assert("SafeCloseSocket::ReleaseHandle(handle:" + handle.ToString("x") + ")", exception.Message);
+                        if (GlobalLog.IsEnabled)
+                        {
+                            GlobalLog.Assert("SafeCloseSocket::ReleaseHandle(handle:" + handle.ToString("x") + ")", exception.Message);
+                        }
+                        Debug.Fail("SafeCloseSocket::ReleaseHandle(handle:" + handle.ToString("x") + ")", exception.Message);
                     }
                     ret = true;  // Avoid a second assert.
                     throw;
@@ -243,7 +263,14 @@ namespace System.Net.Sockets
                 {
                     _closeSocketThread = Environment.CurrentManagedThreadId;
                     _closeSocketTick = Environment.TickCount;
-                    GlobalLog.Assert(ret, "SafeCloseSocket::ReleaseHandle(handle:{0:x})|ReleaseHandle failed.", handle);
+                    if (!ret)
+                    {
+                        if (GlobalLog.IsEnabled)
+                        {
+                            GlobalLog.AssertFormat("SafeCloseSocket::ReleaseHandle(handle:{0:x})|ReleaseHandle failed.", handle);
+                        }
+                        Debug.Fail("SafeCloseSocket::ReleaseHandle(handle:" + handle.ToString("x") + ")|ReleaseHandle failed.");
+                    }
                 }
 #endif
             }
@@ -272,7 +299,10 @@ namespace System.Net.Sockets
             public void LogRemainingOperations()
             {
                 Interlocked.MemoryBarrier();
-                GlobalLog.Print("InnerSafeCloseSocket: Releasing with pending operations: " + _refCount);
+                if (GlobalLog.IsEnabled)
+                {
+                    GlobalLog.Print("InnerSafeCloseSocket: Releasing with pending operations: " + _refCount);
+                }
             }
 #endif
 

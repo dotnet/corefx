@@ -276,9 +276,6 @@
   <data name="IndexedPropertyCannotBeSerialized" xml:space="preserve">
     <value>Property '{1}' in type '{0}' cannot be serialized because serialization of indexed properties is not supported.</value>
   </data>
-  <data name="InterfaceTypeCannotBeCreated" xml:space="preserve">
-    <value>Interface type '{0}' cannot be created. Consider replacing with a non-interface serializable type.</value>
-  </data>
   <data name="InvalidCollectionContractItemName" xml:space="preserve">
     <value>Type '{0}' cannot have CollectionDataContractAttribute attribute ItemName set to null or empty string.</value>
   </data>
@@ -398,9 +395,6 @@
   </data>
   <data name="KnownTypeAttributeOneScheme" xml:space="preserve">
     <value>Type '{0}': If a KnownTypeAttribute attribute specifies a method it must be the only KnownTypeAttribute attribute on that type.</value>
-  </data>
-  <data name="KnownTypeConfigClosedGenericDeclared" xml:space="preserve">
-    <value>Declared type '{0}' in config cannot be a closed or partial generic type.</value>
   </data>
   <data name="KnownTypeAttributeValidMethodTypes" xml:space="preserve">
     <value>Method specified by KnownTypeAttribute attribute on type '{0}' does not expose valid types.</value>
@@ -800,6 +794,12 @@
   </data>
   <data name="XmlMaxNameTableCharCountExceeded" xml:space="preserve">
     <value>The maximum nametable character count quota ({0}) has been exceeded while reading XML data. The nametable is a data structure used to store strings encountered during XML processing - long XML documents with non-repeating element names, attribute names and attribute values may trigger this quota. This quota may be increased by changing the MaxNameTableCharCount property on the XmlDictionaryReaderQuotas object used when creating the XML reader.</value>
+  </data>
+  <data name="XmlMaxDepthExceeded" xml:space="preserve">
+    <value>The maximum read depth ({0}) has been exceeded because XML data being read has more levels of nesting than is allowed by the quota. This quota may be increased by changing the MaxDepth property on the XmlDictionaryReaderQuotas object used when creating the XML reader.</value>
+  </data>
+  <data name="XmlMaxStringContentLengthExceeded" xml:space="preserve">
+    <value>The maximum string content length quota ({0}) has been exceeded while reading XML data. This quota may be increased by changing the MaxStringContentLength property on the XmlDictionaryReaderQuotas object used when creating the XML reader.</value>
   </data>
   <data name="XmlMethodNotSupported" xml:space="preserve">
     <value>This XmlWriter implementation does not support the '{0}' method.</value>

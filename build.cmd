@@ -9,12 +9,12 @@ setlocal
 if not defined VisualStudioVersion (
     if defined VS140COMNTOOLS (
         call "%VS140COMNTOOLS%\VsDevCmd.bat"
-        goto :EnvSet
+        goto :CheckNative
     )
 
     if defined VS120COMNTOOLS (
         call "%VS120COMNTOOLS%\VsDevCmd.bat"
-        goto :EnvSet
+        goto :CheckNative
     )
 
     echo Error: build.cmd requires Visual Studio 2013 or 2015.  
@@ -22,7 +22,18 @@ if not defined VisualStudioVersion (
     exit /b 1
 )
 
+:CheckNative
+:: Run the Native Windows build
+echo Building Native Libraries...
+call %~dp0src\native\Windows\build-native.cmd %* >nativebuild.log
+IF ERRORLEVEL 1 (
+    echo Native component build failed see nativebuild.log for more details.
+)
+
 :EnvSet
+
+call init-tools.cmd
+
 :: Clear the 'Platform' env variable for this session,
 :: as it's a per-project setting within the build, and
 :: misleading value (such as 'MCD' in HP PCs) may lead

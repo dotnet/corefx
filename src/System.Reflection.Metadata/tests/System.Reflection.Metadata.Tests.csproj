@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <PropertyGroup>
     <Configuration Condition="'$(Configuration)' == ''">Debug</Configuration>
@@ -13,6 +13,7 @@
     <ExternallyShipping>false</ExternallyShipping>
     <NuGetPackageImportStamp>83230753</NuGetPackageImportStamp>
     <CLSCompliant>false</CLSCompliant>
+    <LangVersion>6</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -34,6 +35,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Metadata\ClassLayoutRow.cs" />
+    <Compile Include="Metadata\Decoding\DisassemblingTypeProvider.cs" />
+    <Compile Include="Metadata\Decoding\MethodSignatureTests.cs" />
+    <Compile Include="Metadata\Decoding\OpaqueHandleTypeProvider.cs" />
+    <Compile Include="Metadata\Decoding\SignatureDecoderTests.cs" />
     <Compile Include="Metadata\Ecma335\MetadataAggregatorTests.cs" />
     <Compile Include="Metadata\Ecma335\MetadataTokensTests.cs" />
     <Compile Include="Metadata\HandleComparerTests.cs" />
@@ -45,6 +50,7 @@
     <Compile Include="Metadata\PortablePdb\DocumentNameTests.cs" />
     <Compile Include="PortableExecutable\AbstractMemoryBlockTests.cs" />
     <Compile Include="PortableExecutable\BadImageFormat.cs" />
+    <Compile Include="PortableExecutable\DebugDirectoryTests.cs" />
     <Compile Include="PortableExecutable\PEBinaryReaderTests.cs" />
     <Compile Include="PortableExecutable\PEReaderTests.cs" />
     <Compile Include="PortableExecutable\SectionHeaderTests.cs" />
@@ -52,6 +58,7 @@
     <Compile Include="Resources\TestResources.cs" />
     <Compile Include="TestUtilities\AssertEx.cs" />
     <Compile Include="TestUtilities\DiffUtil.cs" />
+    <Compile Include="TestUtilities\TestMetadataResolver.cs" />
     <Compile Include="Utilities\StringUtilsTests.cs" />
     <Compile Include="Utilities\BlobReaderTests.cs" />
     <Compile Include="Utilities\CompressedIntegerTests.cs" />
@@ -74,6 +81,10 @@
     <EmbeddedResource Include="Resources\Misc\EmptyType.dll" />
     <None Include="Resources\Misc\Members.cs" />
     <EmbeddedResource Include="Resources\Misc\Members.dll" />
+    <None Include="Resources\Misc\Deterministic.cs" />
+    <EmbeddedResource Include="Resources\Misc\Deterministic.dll" />
+    <None Include="Resources\Misc\Debug.cs" />
+    <EmbeddedResource Include="Resources\Misc\Debug.dll" />
     <EmbeddedResource Include="Resources\Namespace\NamespaceForwardedCS.dll" />
     <EmbeddedResource Include="Resources\Namespace\NamespaceTests.dll" />
     <None Include="Resources\NetModule\AppCS.cs" />

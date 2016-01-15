@@ -16,7 +16,7 @@
 #include <unistd.h>
 #include <poll.h>
 
-extern "C" int32_t GetWindowSize(WinSize* windowSize)
+extern "C" int32_t SystemNative_GetWindowSize(WinSize* windowSize)
 {
     assert(windowSize != nullptr);
 
@@ -35,7 +35,15 @@ extern "C" int32_t GetWindowSize(WinSize* windowSize)
 #endif
 }
 
+// TODO: temporarily keeping the un-prefixed signature of this method
+// to keep tests running in CI. This will be removed once the managed assemblies
+// are synced up with the native assemblies.
 extern "C" int32_t IsATty(intptr_t fd)
+{
+    return SystemNative_IsATty(fd);
+}
+
+extern "C" int32_t SystemNative_IsATty(intptr_t fd)
 {
     return isatty(ToFileDescriptor(fd));
 }
@@ -53,7 +61,7 @@ static void UninitializeConsole()
     }
 }
 
-extern "C" void InitializeConsole()
+extern "C" void SystemNative_InitializeConsole()
 {
     assert(!g_initialized);
 
@@ -74,7 +82,7 @@ extern "C" void InitializeConsole()
 #endif
 }
 
-extern "C" int32_t StdinReady()
+extern "C" int32_t SystemNative_StdinReady()
 {
     struct pollfd fd;
     fd.fd = STDIN_FILENO;
@@ -82,7 +90,7 @@ extern "C" int32_t StdinReady()
     return poll(&fd, 1, 0) > 0 ? 1 : 0;
 }
 
-extern "C" int32_t ReadStdinUnbuffered(void* buffer, int32_t bufferSize)
+extern "C" int32_t SystemNative_ReadStdinUnbuffered(void* buffer, int32_t bufferSize)
 {
     assert(buffer != nullptr || bufferSize == 0);
     assert(bufferSize >= 0);
@@ -98,6 +106,7 @@ extern "C" int32_t ReadStdinUnbuffered(void* buffer, int32_t bufferSize)
     return static_cast<int32_t>(count);
 }
 
+static struct sigaction g_origSigIntHandler, g_origSigQuitHandler; // saved signal handlers
 static volatile CtrlCallback g_ctrlCallback = nullptr; // Callback invoked for SIGINT/SIGQUIT
 static bool g_signalHandlingInitialized = false; // Whether signal handling is initialized
 static int g_signalPipe[2] = {-1, -1}; // Pipe used between signal handler and worker
@@ -156,15 +165,9 @@ void* CtrlHandleLoop(void* arg)
         int rv = callback != nullptr ? callback(signalCode == SIGQUIT ? Break : Interrupt) : 0;
         if (rv == 0) // callback removed or was invoked and didn't handle the signal
         {
-            // The proper behavior for unhandled SIGINT/SIGQUIT is to set the signal
-            // handler to the default and then send the signal to self and let the
-            // default handler do its work.
-            struct sigaction resetAction = {.sa_handler = SIG_DFL, .sa_flags = 0};
-            sigemptyset(&resetAction.sa_mask);
-
-            sigaction(SIGINT, &resetAction, nullptr);
-            sigaction(SIGQUIT, &resetAction, nullptr);
-
+            // restore original handlers, then reissue the signal
+            sigaction(SIGINT, &g_origSigIntHandler, NULL);
+            sigaction(SIGQUIT, &g_origSigQuitHandler, NULL);
             kill(getpid(), signalCode);
         }
     }
@@ -222,16 +225,24 @@ static bool InitializeSignalHandling()
     };
     sigemptyset(&newAction.sa_mask);
 
-    int rv = sigaction(SIGINT, &newAction, nullptr);
+    int rv = sigaction(SIGINT, &newAction, &g_origSigIntHandler);
     assert(rv == 0);
-    rv = sigaction(SIGQUIT, &newAction, nullptr);
+    rv = sigaction(SIGQUIT, &newAction, &g_origSigQuitHandler);
     assert(rv == 0);
 
     g_signalHandlingInitialized = true;
     return true;
 }
 
+// TODO: temporarily keeping the un-prefixed signature of this method
+// to keep tests running in CI. This will be removed once the managed assemblies
+// are synced up with the native assemblies.
 extern "C" int32_t RegisterForCtrl(CtrlCallback callback)
+{
+    return SystemNative_RegisterForCtrl(callback);
+}
+
+extern "C" int32_t SystemNative_RegisterForCtrl(CtrlCallback callback)
 {
     assert(callback != nullptr);
     assert(g_ctrlCallback == nullptr);
@@ -247,7 +258,15 @@ extern "C" int32_t RegisterForCtrl(CtrlCallback callback)
     return 1;
 }
 
+// TODO: temporarily keeping the un-prefixed signature of this method
+// to keep tests running in CI. This will be removed once the managed assemblies
+// are synced up with the native assemblies.
 extern "C" void UnregisterForCtrl()
+{
+    SystemNative_UnregisterForCtrl();
+}
+
+extern "C" void SystemNative_UnregisterForCtrl()
 {
     assert(g_ctrlCallback != nullptr);
     g_ctrlCallback = nullptr;

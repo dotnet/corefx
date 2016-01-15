@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.Diagnostics;
 using System.IO;
 using System.Threading;
 
@@ -353,7 +354,14 @@ namespace System.Net.Security
         {
             int result = 0;
 
-            GlobalLog.Assert(InternalBufferCount == 0, "SslStream::StartReading()|Previous frame was not consumed. InternalBufferCount:{0}", InternalBufferCount);
+            if (InternalBufferCount != 0)
+            {
+                if (GlobalLog.IsEnabled)
+                {
+                    GlobalLog.AssertFormat("SslStream::StartReading()|Previous frame was not consumed. InternalBufferCount:{0}", InternalBufferCount);
+                }
+                Debug.Fail("SslStream::StartReading()|Previous frame was not consumed. InternalBufferCount:" + InternalBufferCount);
+            }
 
             do
             {
@@ -488,7 +496,10 @@ namespace System.Net.Security
             // ERROR - examine what kind
             ProtocolToken message = new ProtocolToken(null, errorCode);
 
-            GlobalLog.Print("SecureChannel#" + LoggingHash.HashString(this) + "::***Processing an error Status = " + message.Status.ToString());
+            if (GlobalLog.IsEnabled)
+            {
+                GlobalLog.Print("SecureChannel#" + LoggingHash.HashString(this) + "::***Processing an error Status = " + message.Status.ToString());
+            }
 
             if (message.Renegotiate)
             {

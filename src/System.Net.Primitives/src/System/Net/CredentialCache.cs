@@ -56,7 +56,10 @@ namespace System.Net
 
             CredentialKey key = new CredentialKey(uriPrefix, authenticationType);
 
-            GlobalLog.Print("CredentialCache::Add() Adding key:[" + key.ToString() + "], cred:[" + credential.Domain + "],[" + credential.UserName + "]");
+            if (GlobalLog.IsEnabled)
+            {
+                GlobalLog.Print("CredentialCache::Add() Adding key:[" + key.ToString() + "], cred:[" + credential.Domain + "],[" + credential.UserName + "]");
+            }
 
             _cache.Add(key, credential);
             if (credential is SystemNetworkCredential)
@@ -93,7 +96,10 @@ namespace System.Net
 
             CredentialHostKey key = new CredentialHostKey(host, port, authenticationType);
 
-            GlobalLog.Print("CredentialCache::Add() Adding key:[" + key.ToString() + "], cred:[" + credential.Domain + "],[" + credential.UserName + "]");
+            if (GlobalLog.IsEnabled)
+            {
+                GlobalLog.Print("CredentialCache::Add() Adding key:[" + key.ToString() + "], cred:[" + credential.Domain + "],[" + credential.UserName + "]");
+            }
 
             _cacheForHosts.Add(key, credential);
             if (credential is SystemNetworkCredential)
@@ -121,7 +127,10 @@ namespace System.Net
 
             CredentialKey key = new CredentialKey(uriPrefix, authenticationType);
 
-            GlobalLog.Print("CredentialCache::Remove() Removing key:[" + key.ToString() + "]");
+            if (GlobalLog.IsEnabled)
+            {
+                GlobalLog.Print("CredentialCache::Remove() Removing key:[" + key.ToString() + "]");
+            }
 
             if (_cache[key] is SystemNetworkCredential)
             {
@@ -149,7 +158,10 @@ namespace System.Net
 
             CredentialHostKey key = new CredentialHostKey(host, port, authenticationType);
 
-            GlobalLog.Print("CredentialCache::Remove() Removing key:[" + key.ToString() + "]");
+            if (GlobalLog.IsEnabled)
+            {
+                GlobalLog.Print("CredentialCache::Remove() Removing key:[" + key.ToString() + "]");
+            }
 
             if (_cacheForHosts[key] is SystemNetworkCredential)
             {
@@ -176,7 +188,10 @@ namespace System.Net
                 throw new ArgumentNullException("authenticationType");
             }
 
-            GlobalLog.Print("CredentialCache::GetCredential(uriPrefix=\"" + uriPrefix + "\", authType=\"" + authenticationType + "\")");
+            if (GlobalLog.IsEnabled)
+            {
+                GlobalLog.Print("CredentialCache::GetCredential(uriPrefix=\"" + uriPrefix + "\", authType=\"" + authenticationType + "\")");
+            }
 
             int longestMatchPrefix = -1;
             NetworkCredential mostSpecificMatch = null;
@@ -202,8 +217,10 @@ namespace System.Net
                 }
             }
 
-            GlobalLog.Print("CredentialCache::GetCredential returning " + ((mostSpecificMatch == null) ? "null" : "(" + mostSpecificMatch.UserName + ":" + mostSpecificMatch.Domain + ")"));
-
+            if (GlobalLog.IsEnabled)
+            {
+                GlobalLog.Print("CredentialCache::GetCredential returning " + ((mostSpecificMatch == null) ? "null" : "(" + mostSpecificMatch.UserName + ":" + mostSpecificMatch.Domain + ")"));
+            }
             return mostSpecificMatch;
         }
 
@@ -227,7 +244,10 @@ namespace System.Net
                 throw new ArgumentOutOfRangeException("port");
             }
 
-            GlobalLog.Print("CredentialCache::GetCredential(host=\"" + host + ":" + port.ToString() + "\", authenticationType=\"" + authenticationType + "\")");
+            if (GlobalLog.IsEnabled)
+            {
+                GlobalLog.Print("CredentialCache::GetCredential(host=\"" + host + ":" + port.ToString() + "\", authenticationType=\"" + authenticationType + "\")");
+            }
 
             NetworkCredential match = null;
 
@@ -245,7 +265,10 @@ namespace System.Net
                 }
             }
 
-            GlobalLog.Print("CredentialCache::GetCredential returning " + ((match == null) ? "null" : "(" + match.UserName + ":" + match.Domain + ")"));
+            if (GlobalLog.IsEnabled)
+            {
+                GlobalLog.Print("CredentialCache::GetCredential returning " + ((match == null) ? "null" : "(" + match.UserName + ":" + match.Domain + ")"));
+            }
             return match;
         }
 
@@ -376,7 +399,10 @@ namespace System.Net
                 return false;
             }
 
-            GlobalLog.Print("CredentialKey::Match(" + Host.ToString() + ":" + Port.ToString() + " & " + host.ToString() + ":" + port.ToString() + ")");
+            if (GlobalLog.IsEnabled)
+            {
+                GlobalLog.Print("CredentialKey::Match(" + Host.ToString() + ":" + Port.ToString() + " & " + host.ToString() + ":" + port.ToString() + ")");
+            }
             return true;
         }
 
@@ -405,7 +431,10 @@ namespace System.Net
                 string.Equals(Host, other.Host, StringComparison.OrdinalIgnoreCase) &&
                 Port == other.Port;
 
-            GlobalLog.Print("CredentialKey::Equals(" + ToString() + ", " + other.ToString() + ") returns " + equals.ToString());
+            if (GlobalLog.IsEnabled)
+            {
+                GlobalLog.Print("CredentialKey::Equals(" + ToString() + ", " + other.ToString() + ") returns " + equals.ToString());
+            }
             return equals;
         }
 
@@ -416,7 +445,7 @@ namespace System.Net
 
         public override string ToString()
         {
-            return "[" + Host.Length.ToString(NumberFormatInfo.InvariantInfo) + "]:" + Host + ":" + Port.ToString(NumberFormatInfo.InvariantInfo) + ":" + Logging.ObjectToString(AuthenticationType);
+            return "[" + Host.Length.ToString(NumberFormatInfo.InvariantInfo) + "]:" + Host + ":" + Port.ToString(NumberFormatInfo.InvariantInfo) + ":" + LoggingHash.ObjectToString(AuthenticationType);
         }
     }
 
@@ -448,7 +477,10 @@ namespace System.Net
                 return false;
             }
 
-            GlobalLog.Print("CredentialKey::Match(" + UriPrefix.ToString() + " & " + uri.ToString() + ")");
+            if (GlobalLog.IsEnabled)
+            {
+                GlobalLog.Print("CredentialKey::Match(" + UriPrefix.ToString() + " & " + uri.ToString() + ")");
+            }
 
             return IsPrefix(uri, UriPrefix);
         }
@@ -503,8 +535,10 @@ namespace System.Net
                 string.Equals(AuthenticationType, other.AuthenticationType, StringComparison.OrdinalIgnoreCase) &&
                 UriPrefix.Equals(other.UriPrefix);
 
-            GlobalLog.Print("CredentialKey::Equals(" + ToString() + ", " + other.ToString() + ") returns " + equals.ToString());
-
+            if (GlobalLog.IsEnabled)
+            {
+                GlobalLog.Print("CredentialKey::Equals(" + ToString() + ", " + other.ToString() + ") returns " + equals.ToString());
+            }
             return equals;
         }
 
@@ -515,7 +549,7 @@ namespace System.Net
 
         public override string ToString()
         {
-            return "[" + UriPrefixLength.ToString(NumberFormatInfo.InvariantInfo) + "]:" + Logging.ObjectToString(UriPrefix) + ":" + Logging.ObjectToString(AuthenticationType);
+            return "[" + UriPrefixLength.ToString(NumberFormatInfo.InvariantInfo) + "]:" + LoggingHash.ObjectToString(UriPrefix) + ":" + LoggingHash.ObjectToString(AuthenticationType);
         }
     }
 }

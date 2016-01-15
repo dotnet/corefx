@@ -505,6 +505,7 @@ namespace System.Xml.Serialization
                 TypeDesc typeDesc = (TypeDesc)TypeScope.PrimtiveTypes[_primitiveType];
                 return xmlReader.IsStartElement(typeDesc.DataType.Name, string.Empty);
             }
+#if !NET_NATIVE
             else if (_tempAssembly != null)
             {
                 return _tempAssembly.CanRead(_mapping, xmlReader);
@@ -513,6 +514,14 @@ namespace System.Xml.Serialization
             {
                 return false;
             }
+#else
+            if (this.innerSerializer == null)
+            {
+                return false;
+            }
+
+            return this.innerSerializer.CanDeserialize(xmlReader);
+#endif
         }
 
         /// <include file='doc\XmlSerializer.uex' path='docs/doc[@for="XmlSerializer.FromMappings"]/*' />
@@ -628,6 +637,16 @@ namespace System.Xml.Serialization
         {
             if (types == null)
                 return Array.Empty<XmlSerializer>();
+
+#if NET_NATIVE
+            var serializers = new XmlSerializer[types.Length];
+            for (int i = 0; i < types.Length; i++)
+            {
+                serializers[i] = new XmlSerializer(types[i]);
+            }
+
+            return serializers;
+#else
             XmlReflectionImporter importer = new XmlReflectionImporter();
             XmlTypeMapping[] mappings = new XmlTypeMapping[types.Length];
             for (int i = 0; i < types.Length; i++)
@@ -635,6 +654,7 @@ namespace System.Xml.Serialization
                 mappings[i] = importer.ImportTypeMapping(types[i]);
             }
             return FromMappings(mappings);
+#endif
         }
 
 #if NET_NATIVE

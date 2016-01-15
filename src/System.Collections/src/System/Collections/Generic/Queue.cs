@@ -31,7 +31,6 @@ namespace System.Collections.Generic
 
         private const int MinimumGrow = 4;
         private const int GrowFactor = 200;  // double each time
-        private const int DefaultCapacity = 4;
 
         // Creates a queue with room for capacity objects. The default initial
         // capacity and grow factor are used.
@@ -61,15 +60,8 @@ namespace System.Collections.Generic
             if (collection == null)
                 throw new ArgumentNullException("collection");
 
-            _array = new T[DefaultCapacity];
-
-            using (IEnumerator<T> en = collection.GetEnumerator())
-            {
-                while (en.MoveNext())
-                {
-                    Enqueue(en.Current);
-                }
-            }
+            _array = EnumerableHelpers.ToArray(collection, out _size);
+            _tail = (_size == _array.Length) ? 0 : _size;
         }
 
 
@@ -274,7 +266,6 @@ namespace System.Collections.Generic
         // Returns true if the queue contains at least one object equal to item.
         // Equality is determined using item.Equals().
         //
-        // Exceptions: ArgumentNullException if item == null.
         /// <include file='doc\Queue.uex' path='docs/doc[@for="Queue.Contains"]/*' />
         public bool Contains(T item)
         {
@@ -284,12 +275,7 @@ namespace System.Collections.Generic
             EqualityComparer<T> c = EqualityComparer<T>.Default;
             while (count-- > 0)
             {
-                if (((Object)item) == null)
-                {
-                    if (((Object)_array[index]) == null)
-                        return true;
-                }
-                else if (_array[index] != null && c.Equals(_array[index], item))
+                if (c.Equals(_array[index], item))
                 {
                     return true;
                 }

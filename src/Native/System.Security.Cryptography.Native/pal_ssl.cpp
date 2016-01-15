@@ -13,34 +13,74 @@ static_assert(PAL_SSL_ERROR_WANT_WRITE == SSL_ERROR_WANT_WRITE, "");
 static_assert(PAL_SSL_ERROR_SYSCALL == SSL_ERROR_SYSCALL, "");
 static_assert(PAL_SSL_ERROR_ZERO_RETURN == SSL_ERROR_ZERO_RETURN, "");
 
+// TODO: temporarily keeping the un-prefixed signature of this method  
+// to keep tests running in CI. This will be removed once the managed assemblies  
+// are synced up with the native assemblies.
 extern "C" void EnsureLibSslInitialized()
+{
+    return CryptoNative_EnsureLibSslInitialized();
+}
+
+extern "C" void CryptoNative_EnsureLibSslInitialized()
 {
     SSL_library_init();
     SSL_load_error_strings();
 }
 
+// TODO: temporarily keeping the un-prefixed signature of this method  
+// to keep tests running in CI. This will be removed once the managed assemblies  
+// are synced up with the native assemblies.
 extern "C" const SSL_METHOD* SslV2_3Method()
+{
+    return CryptoNative_SslV2_3Method();
+}
+
+extern "C" const SSL_METHOD* CryptoNative_SslV2_3Method()
 {
     const SSL_METHOD* method = SSLv23_method();
     assert(method != nullptr);
     return method;
 }
 
+// TODO: temporarily keeping the un-prefixed signature of this method  
+// to keep tests running in CI. This will be removed once the managed assemblies  
+// are synced up with the native assemblies.
 extern "C" const SSL_METHOD* SslV3Method()
+{
+    return CryptoNative_SslV3Method();
+}
+
+extern "C" const SSL_METHOD* CryptoNative_SslV3Method()
 {
     const SSL_METHOD* method = SSLv3_method();
     assert(method != nullptr);
     return method;
 }
 
+// TODO: temporarily keeping the un-prefixed signature of this method  
+// to keep tests running in CI. This will be removed once the managed assemblies  
+// are synced up with the native assemblies.
 extern "C" const SSL_METHOD* TlsV1Method()
+{
+    return CryptoNative_TlsV1Method();
+}
+
+extern "C" const SSL_METHOD* CryptoNative_TlsV1Method()
 {
     const SSL_METHOD* method = TLSv1_method();
     assert(method != nullptr);
     return method;
 }
 
+// TODO: temporarily keeping the un-prefixed signature of this method  
+// to keep tests running in CI. This will be removed once the managed assemblies  
+// are synced up with the native assemblies.
 extern "C" const SSL_METHOD* TlsV1_1Method()
+{
+    return CryptoNative_TlsV1_1Method();
+}
+
+extern "C" const SSL_METHOD* CryptoNative_TlsV1_1Method()
 {
 #if HAVE_TLS_V1_1
     const SSL_METHOD* method = TLSv1_1_method();
@@ -51,7 +91,15 @@ extern "C" const SSL_METHOD* TlsV1_1Method()
 #endif
 }
 
+// TODO: temporarily keeping the un-prefixed signature of this method  
+// to keep tests running in CI. This will be removed once the managed assemblies  
+// are synced up with the native assemblies.
 extern "C" const SSL_METHOD* TlsV1_2Method()
+{
+    return CryptoNative_TlsV1_2Method();
+}
+
+extern "C" const SSL_METHOD* CryptoNative_TlsV1_2Method()
 {
 #if HAVE_TLS_V1_2
     const SSL_METHOD* method = TLSv1_2_method();
@@ -62,12 +110,28 @@ extern "C" const SSL_METHOD* TlsV1_2Method()
 #endif
 }
 
+// TODO: temporarily keeping the un-prefixed signature of this method  
+// to keep tests running in CI. This will be removed once the managed assemblies  
+// are synced up with the native assemblies.
 extern "C" SSL_CTX* SslCtxCreate(SSL_METHOD* method)
+{
+    return CryptoNative_SslCtxCreate(method);
+}
+
+extern "C" SSL_CTX* CryptoNative_SslCtxCreate(SSL_METHOD* method)
 {
     return SSL_CTX_new(method);
 }
 
+// TODO: temporarily keeping the un-prefixed signature of this method  
+// to keep tests running in CI. This will be removed once the managed assemblies  
+// are synced up with the native assemblies.
 extern "C" void SetProtocolOptions(SSL_CTX* ctx, SslProtocols protocols)
+{
+    return CryptoNative_SetProtocolOptions(ctx, protocols);
+}
+
+extern "C" void CryptoNative_SetProtocolOptions(SSL_CTX* ctx, SslProtocols protocols)
 {
     long protocolOptions = 0;
 
@@ -99,17 +163,41 @@ extern "C" void SetProtocolOptions(SSL_CTX* ctx, SslProtocols protocols)
     SSL_CTX_set_options(ctx, protocolOptions);
 }
 
+// TODO: temporarily keeping the un-prefixed signature of this method  
+// to keep tests running in CI. This will be removed once the managed assemblies  
+// are synced up with the native assemblies.
 extern "C" SSL* SslCreate(SSL_CTX* ctx)
+{
+    return CryptoNative_SslCreate(ctx);
+}
+
+extern "C" SSL* CryptoNative_SslCreate(SSL_CTX* ctx)
 {
     return SSL_new(ctx);
 }
 
+// TODO: temporarily keeping the un-prefixed signature of this method  
+// to keep tests running in CI. This will be removed once the managed assemblies  
+// are synced up with the native assemblies.
 extern "C" int32_t SslGetError(SSL* ssl, int32_t ret)
+{
+    return CryptoNative_SslGetError(ssl, ret);
+}
+
+extern "C" int32_t CryptoNative_SslGetError(SSL* ssl, int32_t ret)
 {
     return SSL_get_error(ssl, ret);
 }
 
+// TODO: temporarily keeping the un-prefixed signature of this method  
+// to keep tests running in CI. This will be removed once the managed assemblies  
+// are synced up with the native assemblies.
 extern "C" void SslDestroy(SSL* ssl)
+{
+    return CryptoNative_SslDestroy(ssl);
+}
+
+extern "C" void CryptoNative_SslDestroy(SSL* ssl)
 {
     if (ssl)
     {
@@ -117,7 +205,15 @@ extern "C" void SslDestroy(SSL* ssl)
     }
 }
 
+// TODO: temporarily keeping the un-prefixed signature of this method  
+// to keep tests running in CI. This will be removed once the managed assemblies  
+// are synced up with the native assemblies.
 extern "C" void SslCtxDestroy(SSL_CTX* ctx)
+{
+    return CryptoNative_SslCtxDestroy(ctx);
+}
+
+extern "C" void CryptoNative_SslCtxDestroy(SSL_CTX* ctx)
 {
     if (ctx)
     {
@@ -125,38 +221,86 @@ extern "C" void SslCtxDestroy(SSL_CTX* ctx)
     }
 }
 
+// TODO: temporarily keeping the un-prefixed signature of this method  
+// to keep tests running in CI. This will be removed once the managed assemblies  
+// are synced up with the native assemblies.
 extern "C" void SslSetConnectState(SSL* ssl)
+{
+    return CryptoNative_SslSetConnectState(ssl);
+}
+
+extern "C" void CryptoNative_SslSetConnectState(SSL* ssl)
 {
     SSL_set_connect_state(ssl);
 }
 
+// TODO: temporarily keeping the un-prefixed signature of this method  
+// to keep tests running in CI. This will be removed once the managed assemblies  
+// are synced up with the native assemblies.
 extern "C" void SslSetAcceptState(SSL* ssl)
+{
+    return CryptoNative_SslSetAcceptState(ssl);
+}
+
+extern "C" void CryptoNative_SslSetAcceptState(SSL* ssl)
 {
     SSL_set_accept_state(ssl);
 }
 
+// TODO: temporarily keeping the un-prefixed signature of this method  
+// to keep tests running in CI. This will be removed once the managed assemblies  
+// are synced up with the native assemblies.
 extern "C" const char* SslGetVersion(SSL* ssl)
+{
+    return CryptoNative_SslGetVersion(ssl);
+}
+
+extern "C" const char* CryptoNative_SslGetVersion(SSL* ssl)
 {
     return SSL_get_version(ssl);
 }
 
+// TODO: temporarily keeping the un-prefixed signature of this method  
+// to keep tests running in CI. This will be removed once the managed assemblies  
+// are synced up with the native assemblies.
 extern "C" int32_t SslGetFinished(SSL* ssl, void* buf, int32_t count)
 {
-	size_t result = SSL_get_finished(ssl, buf, size_t(count));
-	assert(result <= INT32_MAX);
-	return static_cast<int32_t>(result);
+    return CryptoNative_SslGetFinished(ssl, buf, count);
 }
 
+extern "C" int32_t CryptoNative_SslGetFinished(SSL* ssl, void* buf, int32_t count)
+{
+    size_t result = SSL_get_finished(ssl, buf, size_t(count));
+    assert(result <= INT32_MAX);
+    return static_cast<int32_t>(result);
+}
+
+// TODO: temporarily keeping the un-prefixed signature of this method  
+// to keep tests running in CI. This will be removed once the managed assemblies  
+// are synced up with the native assemblies.
 extern "C" int32_t SslGetPeerFinished(SSL* ssl, void* buf, int32_t count)
 {
-	size_t result = SSL_get_peer_finished(ssl, buf, size_t(count));
-	assert(result <= INT32_MAX);
-	return static_cast<int32_t>(result);
+    return CryptoNative_SslGetPeerFinished(ssl, buf, count);
 }
 
+extern "C" int32_t CryptoNative_SslGetPeerFinished(SSL* ssl, void* buf, int32_t count)
+{
+    size_t result = SSL_get_peer_finished(ssl, buf, size_t(count));
+    assert(result <= INT32_MAX);
+    return static_cast<int32_t>(result);
+}
+
+// TODO: temporarily keeping the un-prefixed signature of this method  
+// to keep tests running in CI. This will be removed once the managed assemblies  
+// are synced up with the native assemblies.
 extern "C" int32_t SslSessionReused(SSL* ssl)
 {
-	return SSL_session_reused(ssl) == 1;
+    return CryptoNative_SslSessionReused(ssl);
+}
+
+extern "C" int32_t CryptoNative_SslSessionReused(SSL* ssl)
+{
+    return SSL_session_reused(ssl) == 1;
 }
 
 /*
@@ -164,7 +308,6 @@ The values used in OpenSSL for SSL_CIPHER algorithm_enc.
 */
 enum class SSL_CipherAlgorithm : int64_t
 {
-#if HAVE_SSL_CIPHER_SPLIT_ALGORITHMS
     SSL_DES = 1,
     SSL_3DES = 2,
     SSL_RC4 = 4,
@@ -179,29 +322,11 @@ enum class SSL_CipherAlgorithm : int64_t
     SSL_SEED = 2048,
     SSL_AES128GCM = 4096,
     SSL_AES256GCM = 8192
-#else
-    SSL_DES = 0x00008000L,
-    SSL_3DES = 0x00010000L,
-    SSL_RC4 = 0x00020000L,
-    SSL_RC2 = 0x00040000L,
-    SSL_IDEA = 0x00080000L,
-    // SSL_eFZA = 0x00100000L,  this value is defined in ssl_locl.h, but has no match
-    SSL_eNULL = 0x00200000L,
-    SSL_AES = 0x04000000L,
-    SSL_CAMELLIA = 0x08000000L,
-    SSL_SEED = 0x10000000L,
-#endif
 };
 
 static CipherAlgorithmType MapCipherAlgorithmType(const SSL_CIPHER* cipher)
 {
-    unsigned long enc;
-#if HAVE_SSL_CIPHER_SPLIT_ALGORITHMS
-    enc = cipher->algorithm_enc;
-#else
-    const unsigned long SSL_ENC_MASK = 0x1C3F8000L;
-    enc = cipher->algorithms & SSL_ENC_MASK;
-#endif
+    unsigned long enc = cipher->algorithm_enc;
 
     SSL_CipherAlgorithm sslEnc = static_cast<SSL_CipherAlgorithm>(enc);
     switch (sslEnc)
@@ -227,7 +352,6 @@ static CipherAlgorithmType MapCipherAlgorithmType(const SSL_CIPHER* cipher)
         case SSL_CipherAlgorithm::SSL_SEED:
             return CipherAlgorithmType::SSL_SEED;
 
-#if HAVE_SSL_CIPHER_SPLIT_ALGORITHMS
         case SSL_CipherAlgorithm::SSL_AES128:
             return CipherAlgorithmType::Aes128;
 
@@ -248,24 +372,6 @@ static CipherAlgorithmType MapCipherAlgorithmType(const SSL_CIPHER* cipher)
 
         case SSL_CipherAlgorithm::SSL_AES256GCM:
             return CipherAlgorithmType::Aes256;
-#else
-        case SSL_CipherAlgorithm::SSL_AES:
-            switch (cipher->alg_bits)
-            {
-                case 128:
-                    return CipherAlgorithmType::Aes128;
-                case 256:
-                    return CipherAlgorithmType::Aes256;
-            }
-        case SSL_CipherAlgorithm::SSL_CAMELLIA:
-            switch (cipher->alg_bits)
-            {
-                case 128:
-                    return CipherAlgorithmType::SSL_CAMELLIA128;
-                case 256:
-                    return CipherAlgorithmType::SSL_CAMELLIA256;
-            }
-#endif
     }
 
     return CipherAlgorithmType::None;
@@ -276,7 +382,6 @@ The values used in OpenSSL for SSL_CIPHER algorithm_mkey.
 */
 enum class SSL_KeyExchangeAlgorithm : int64_t
 {
-#if HAVE_SSL_CIPHER_SPLIT_ALGORITHMS
     SSL_kRSA = 1,
     /* DH cert, RSA CA cert */
     SSL_kDHr = 2,
@@ -294,27 +399,11 @@ enum class SSL_KeyExchangeAlgorithm : int64_t
     SSL_kPSK = 256,
     SSL_kGOST = 512,
     SSL_kSRP = 1024,
-#else
-    SSL_kRSA = 0x00000001L,
-    SSL_kDHr = 0x00000002L,
-    SSL_kDHd = 0x00000004L,
-    // SSL_kFZA = 0x00000008L,  this value is defined in ssl_locl.h, but has no match
-    SSL_kEDH = 0x00000010L,
-    SSL_kKRB5 = 0x00000020L,
-    SSL_kECDH = 0x00000040L,
-    SSL_kECDHE = 0x00000080L,
-#endif
 };
 
 static ExchangeAlgorithmType MapExchangeAlgorithmType(const SSL_CIPHER* cipher)
 {
-    unsigned long mkey;
-#if HAVE_SSL_CIPHER_SPLIT_ALGORITHMS
-    mkey = cipher->algorithm_mkey;
-#else
-    const unsigned long SSL_MKEY_MASK = 0x000000FFL;
-    mkey = cipher->algorithms & SSL_MKEY_MASK;
-#endif
+    unsigned long mkey = cipher->algorithm_mkey;
 
     SSL_KeyExchangeAlgorithm sslMkey = static_cast<SSL_KeyExchangeAlgorithm>(mkey);
     switch (sslMkey)
@@ -334,7 +423,6 @@ static ExchangeAlgorithmType MapExchangeAlgorithmType(const SSL_CIPHER* cipher)
         case SSL_KeyExchangeAlgorithm::SSL_kKRB5:
             return ExchangeAlgorithmType::SSL_kKRB5;
 
-#if HAVE_SSL_CIPHER_SPLIT_ALGORITHMS
         case SSL_KeyExchangeAlgorithm::SSL_kECDHr:
             return ExchangeAlgorithmType::SSL_ECDH;
 
@@ -352,13 +440,6 @@ static ExchangeAlgorithmType MapExchangeAlgorithmType(const SSL_CIPHER* cipher)
 
         case SSL_KeyExchangeAlgorithm::SSL_kSRP:
             return ExchangeAlgorithmType::SSL_kSRP;
-#else
-        case SSL_KeyExchangeAlgorithm::SSL_kECDH:
-            return ExchangeAlgorithmType::SSL_ECDH;
-
-        case SSL_KeyExchangeAlgorithm::SSL_kECDHE:
-            return ExchangeAlgorithmType::SSL_ECDSA;
-#endif
     }
 
     return ExchangeAlgorithmType::None;
@@ -369,7 +450,6 @@ The values used in OpenSSL for SSL_CIPHER algorithm_mac.
 */
 enum class SSL_DataHashAlgorithm : int64_t
 {
-#if HAVE_SSL_CIPHER_SPLIT_ALGORITHMS
     SSL_MD5 = 1,
     SSL_SHA1 = 2,
     SSL_GOST94 = 4,
@@ -377,22 +457,12 @@ enum class SSL_DataHashAlgorithm : int64_t
     SSL_SHA256 = 16,
     SSL_SHA384 = 32,
     SSL_AEAD = 64
-#else
-    SSL_MD5 = 0x00400000L,
-    SSL_SHA1 = 0x00800000L,
-#endif
 };
 
 static void
 GetHashAlgorithmTypeAndSize(const SSL_CIPHER* cipher, HashAlgorithmType* dataHashAlg, DataHashSize* hashKeySize)
 {
-    unsigned long mac;
-#if HAVE_SSL_CIPHER_SPLIT_ALGORITHMS
-    mac = cipher->algorithm_mac;
-#else
-    const unsigned long SSL_MAC_MASK = 0x00c00000L;
-    mac = cipher->algorithms & SSL_MAC_MASK;
-#endif
+    unsigned long mac = cipher->algorithm_mac;
 
     SSL_DataHashAlgorithm sslMac = static_cast<SSL_DataHashAlgorithm>(mac);
     switch (sslMac)
@@ -407,7 +477,6 @@ GetHashAlgorithmTypeAndSize(const SSL_CIPHER* cipher, HashAlgorithmType* dataHas
             *hashKeySize = DataHashSize::SHA1_HashKeySize;
             return;
 
-#if HAVE_SSL_CIPHER_SPLIT_ALGORITHMS
         case SSL_DataHashAlgorithm::SSL_GOST94:
             *dataHashAlg = HashAlgorithmType::SSL_GOST94;
             *hashKeySize = DataHashSize::GOST_HashKeySize;
@@ -432,7 +501,6 @@ GetHashAlgorithmTypeAndSize(const SSL_CIPHER* cipher, HashAlgorithmType* dataHas
             *dataHashAlg = HashAlgorithmType::SSL_AEAD;
             *hashKeySize = DataHashSize::Default;
             return;
-#endif
     }
 
     *dataHashAlg = HashAlgorithmType::None;
@@ -440,12 +508,25 @@ GetHashAlgorithmTypeAndSize(const SSL_CIPHER* cipher, HashAlgorithmType* dataHas
     return;
 }
 
+// TODO: temporarily keeping the un-prefixed signature of this method  
+// to keep tests running in CI. This will be removed once the managed assemblies  
+// are synced up with the native assemblies.
 extern "C" int32_t GetSslConnectionInfo(SSL* ssl,
                                         CipherAlgorithmType* dataCipherAlg,
                                         ExchangeAlgorithmType* keyExchangeAlg,
                                         HashAlgorithmType* dataHashAlg,
                                         int32_t* dataKeySize,
                                         DataHashSize* hashKeySize)
+{
+    return CryptoNative_GetSslConnectionInfo(ssl, dataCipherAlg, keyExchangeAlg, dataHashAlg, dataKeySize, hashKeySize);
+}
+
+extern "C" int32_t CryptoNative_GetSslConnectionInfo(SSL* ssl,
+                                                     CipherAlgorithmType* dataCipherAlg,
+                                                     ExchangeAlgorithmType* keyExchangeAlg,
+                                                     HashAlgorithmType* dataHashAlg,
+                                                     int32_t* dataKeySize,
+                                                     DataHashSize* hashKeySize)
 {
     const SSL_CIPHER* cipher;
 
@@ -484,84 +565,214 @@ err:
     return 0;
 }
 
+// TODO: temporarily keeping the un-prefixed signature of this method  
+// to keep tests running in CI. This will be removed once the managed assemblies  
+// are synced up with the native assemblies.
 extern "C" int32_t SslWrite(SSL* ssl, const void* buf, int32_t num)
+{
+    return CryptoNative_SslWrite(ssl, buf, num);
+}
+
+extern "C" int32_t CryptoNative_SslWrite(SSL* ssl, const void* buf, int32_t num)
 {
     return SSL_write(ssl, buf, num);
 }
 
+// TODO: temporarily keeping the un-prefixed signature of this method  
+// to keep tests running in CI. This will be removed once the managed assemblies  
+// are synced up with the native assemblies.
 extern "C" int32_t SslRead(SSL* ssl, void* buf, int32_t num)
+{
+    return CryptoNative_SslRead(ssl, buf, num);
+}
+
+extern "C" int32_t CryptoNative_SslRead(SSL* ssl, void* buf, int32_t num)
 {
     return SSL_read(ssl, buf, num);
 }
 
+// TODO: temporarily keeping the un-prefixed signature of this method  
+// to keep tests running in CI. This will be removed once the managed assemblies  
+// are synced up with the native assemblies.
 extern "C" int32_t IsSslRenegotiatePending(SSL* ssl)
+{
+    return CryptoNative_IsSslRenegotiatePending(ssl);
+}
+
+extern "C" int32_t CryptoNative_IsSslRenegotiatePending(SSL* ssl)
 {
     return SSL_renegotiate_pending(ssl) != 0;
 }
 
+// TODO: temporarily keeping the un-prefixed signature of this method  
+// to keep tests running in CI. This will be removed once the managed assemblies  
+// are synced up with the native assemblies.
 extern "C" int32_t SslShutdown(SSL* ssl)
+{
+    return CryptoNative_SslShutdown(ssl);
+}
+
+extern "C" int32_t CryptoNative_SslShutdown(SSL* ssl)
 {
     return SSL_shutdown(ssl);
 }
 
+// TODO: temporarily keeping the un-prefixed signature of this method  
+// to keep tests running in CI. This will be removed once the managed assemblies  
+// are synced up with the native assemblies.
 extern "C" void SslSetBio(SSL* ssl, BIO* rbio, BIO* wbio)
+{
+    return CryptoNative_SslSetBio(ssl, rbio, wbio);
+}
+
+extern "C" void CryptoNative_SslSetBio(SSL* ssl, BIO* rbio, BIO* wbio)
 {
     SSL_set_bio(ssl, rbio, wbio);
 }
 
+// TODO: temporarily keeping the un-prefixed signature of this method  
+// to keep tests running in CI. This will be removed once the managed assemblies  
+// are synced up with the native assemblies.
 extern "C" int32_t SslDoHandshake(SSL* ssl)
+{
+    return CryptoNative_SslDoHandshake(ssl);
+}
+
+extern "C" int32_t CryptoNative_SslDoHandshake(SSL* ssl)
 {
     return SSL_do_handshake(ssl);
 }
 
+// TODO: temporarily keeping the un-prefixed signature of this method  
+// to keep tests running in CI. This will be removed once the managed assemblies  
+// are synced up with the native assemblies.
 extern "C" int32_t IsSslStateOK(SSL* ssl)
+{
+    return CryptoNative_IsSslStateOK(ssl);
+}
+
+extern "C" int32_t CryptoNative_IsSslStateOK(SSL* ssl)
 {
     return SSL_state(ssl) == SSL_ST_OK;
 }
 
+// TODO: temporarily keeping the un-prefixed signature of this method  
+// to keep tests running in CI. This will be removed once the managed assemblies  
+// are synced up with the native assemblies.
 extern "C" X509* SslGetPeerCertificate(SSL* ssl)
+{
+    return CryptoNative_SslGetPeerCertificate(ssl);
+}
+
+extern "C" X509* CryptoNative_SslGetPeerCertificate(SSL* ssl)
 {
     return SSL_get_peer_certificate(ssl);
 }
 
+// TODO: temporarily keeping the un-prefixed signature of this method  
+// to keep tests running in CI. This will be removed once the managed assemblies  
+// are synced up with the native assemblies.
 extern "C" X509Stack* SslGetPeerCertChain(SSL* ssl)
+{
+    return CryptoNative_SslGetPeerCertChain(ssl);
+}
+
+extern "C" X509Stack* CryptoNative_SslGetPeerCertChain(SSL* ssl)
 {
     return SSL_get_peer_cert_chain(ssl);
 }
 
+// TODO: temporarily keeping the un-prefixed signature of this method  
+// to keep tests running in CI. This will be removed once the managed assemblies  
+// are synced up with the native assemblies.
 extern "C" int32_t SslCtxUseCertificate(SSL_CTX* ctx, X509* x)
+{
+    return CryptoNative_SslCtxUseCertificate(ctx, x);
+}
+
+extern "C" int32_t CryptoNative_SslCtxUseCertificate(SSL_CTX* ctx, X509* x)
 {
     return SSL_CTX_use_certificate(ctx, x);
 }
 
+// TODO: temporarily keeping the un-prefixed signature of this method  
+// to keep tests running in CI. This will be removed once the managed assemblies  
+// are synced up with the native assemblies.
 extern "C" int32_t SslCtxUsePrivateKey(SSL_CTX* ctx, EVP_PKEY* pkey)
+{
+    return CryptoNative_SslCtxUsePrivateKey(ctx, pkey);
+}
+
+extern "C" int32_t CryptoNative_SslCtxUsePrivateKey(SSL_CTX* ctx, EVP_PKEY* pkey)
 {
     return SSL_CTX_use_PrivateKey(ctx, pkey);
 }
 
+// TODO: temporarily keeping the un-prefixed signature of this method  
+// to keep tests running in CI. This will be removed once the managed assemblies  
+// are synced up with the native assemblies.
 extern "C" int32_t SslCtxCheckPrivateKey(SSL_CTX* ctx)
+{
+    return CryptoNative_SslCtxCheckPrivateKey(ctx);
+}
+
+extern "C" int32_t CryptoNative_SslCtxCheckPrivateKey(SSL_CTX* ctx)
 {
     return SSL_CTX_check_private_key(ctx);
 }
 
+// TODO: temporarily keeping the un-prefixed signature of this method  
+// to keep tests running in CI. This will be removed once the managed assemblies  
+// are synced up with the native assemblies.
 extern "C" void SslCtxSetQuietShutdown(SSL_CTX* ctx)
+{
+    return CryptoNative_SslCtxSetQuietShutdown(ctx);
+}
+
+extern "C" void CryptoNative_SslCtxSetQuietShutdown(SSL_CTX* ctx)
 {
     SSL_CTX_set_quiet_shutdown(ctx, 1);
 }
 
+// TODO: temporarily keeping the un-prefixed signature of this method  
+// to keep tests running in CI. This will be removed once the managed assemblies  
+// are synced up with the native assemblies.
 extern "C" X509NameStack* SslGetClientCAList(SSL* ssl)
+{
+    return CryptoNative_SslGetClientCAList(ssl);
+}
+
+extern "C" X509NameStack* CryptoNative_SslGetClientCAList(SSL* ssl)
 {
     return SSL_get_client_CA_list(ssl);
 }
 
+// TODO: temporarily keeping the un-prefixed signature of this method  
+// to keep tests running in CI. This will be removed once the managed assemblies  
+// are synced up with the native assemblies.
 extern "C" void SslCtxSetVerify(SSL_CTX* ctx, SslCtxSetVerifyCallback callback)
+{
+    return CryptoNative_SslCtxSetVerify(ctx, callback);
+}
+
+extern "C" void CryptoNative_SslCtxSetVerify(SSL_CTX* ctx, SslCtxSetVerifyCallback callback)
 {
     int mode = SSL_VERIFY_PEER | SSL_VERIFY_FAIL_IF_NO_PEER_CERT;
 
     SSL_CTX_set_verify(ctx, mode, callback);
 }
 
-extern "C" void SslCtxSetCertVerifyCallback(SSL_CTX* ctx, SslCtxSetCertVerifyCallbackCallback callback, void* arg)
+// TODO: temporarily keeping the un-prefixed signature of this method  
+// to keep tests running in CI. This will be removed once the managed assemblies  
+// are synced up with the native assemblies.
+extern "C" void
+SslCtxSetCertVerifyCallback(SSL_CTX* ctx, SslCtxSetCertVerifyCallbackCallback callback, void* arg)
+{
+    return CryptoNative_SslCtxSetCertVerifyCallback(ctx, callback, arg);
+}
+
+extern "C" void
+CryptoNative_SslCtxSetCertVerifyCallback(SSL_CTX* ctx, SslCtxSetCertVerifyCallbackCallback callback, void* arg)
 {
     SSL_CTX_set_cert_verify_callback(ctx, callback, arg);
 }
@@ -571,7 +782,15 @@ extern "C" void SslCtxSetCertVerifyCallback(SSL_CTX* ctx, SslCtxSetCertVerifyCal
 #define SSL_TXT_Separator ":"
 #define SSL_TXT_AllIncludingNull SSL_TXT_ALL SSL_TXT_Separator SSL_TXT_eNULL
 
+// TODO: temporarily keeping the un-prefixed signature of this method  
+// to keep tests running in CI. This will be removed once the managed assemblies  
+// are synced up with the native assemblies.
 extern "C" void SetEncryptionPolicy(SSL_CTX* ctx, EncryptionPolicy policy)
+{
+    return CryptoNative_SetEncryptionPolicy(ctx, policy);
+}
+
+extern "C" void CryptoNative_SetEncryptionPolicy(SSL_CTX* ctx, EncryptionPolicy policy)
 {
     const char* cipherString = nullptr;
     switch (policy)
@@ -594,17 +813,41 @@ extern "C" void SetEncryptionPolicy(SSL_CTX* ctx, EncryptionPolicy policy)
     SSL_CTX_set_cipher_list(ctx, cipherString);
 }
 
+// TODO: temporarily keeping the un-prefixed signature of this method  
+// to keep tests running in CI. This will be removed once the managed assemblies  
+// are synced up with the native assemblies.
 extern "C" void SslCtxSetClientCAList(SSL_CTX* ctx, X509NameStack* list)
+{
+    return CryptoNative_SslCtxSetClientCAList(ctx, list);
+}
+
+extern "C" void CryptoNative_SslCtxSetClientCAList(SSL_CTX* ctx, X509NameStack* list)
 {
     SSL_CTX_set_client_CA_list(ctx, list);
 }
 
+// TODO: temporarily keeping the un-prefixed signature of this method  
+// to keep tests running in CI. This will be removed once the managed assemblies  
+// are synced up with the native assemblies.
 extern "C" void SslCtxSetClientCertCallback(SSL_CTX* ctx, SslClientCertCallback callback)
+{
+    return CryptoNative_SslCtxSetClientCertCallback(ctx, callback);
+}
+
+extern "C" void CryptoNative_SslCtxSetClientCertCallback(SSL_CTX* ctx, SslClientCertCallback callback)
 {
     SSL_CTX_set_client_cert_cb(ctx, callback);
 }
 
+// TODO: temporarily keeping the un-prefixed signature of this method  
+// to keep tests running in CI. This will be removed once the managed assemblies  
+// are synced up with the native assemblies.
 extern "C" void GetStreamSizes(int32_t* header, int32_t* trailer, int32_t* maximumMessage)
+{
+    return CryptoNative_GetStreamSizes(header, trailer, maximumMessage);
+}
+
+extern "C" void CryptoNative_GetStreamSizes(int32_t* header, int32_t* trailer, int32_t* maximumMessage)
 {
     if (header)
     {
@@ -627,15 +870,22 @@ extern "C" void GetStreamSizes(int32_t* header, int32_t* trailer, int32_t* maxim
     }
 }
 
-
+// TODO: temporarily keeping the un-prefixed signature of this method  
+// to keep tests running in CI. This will be removed once the managed assemblies  
+// are synced up with the native assemblies.
 extern "C" int32_t SslAddExtraChainCert(SSL* ssl, X509* x509)
+{
+    return CryptoNative_SslAddExtraChainCert(ssl, x509);
+}
+
+extern "C" int32_t CryptoNative_SslAddExtraChainCert(SSL* ssl, X509* x509)
 {
     if (!x509 || !ssl)
     {
         return 0;
     }
 
-    SSL_CTX *ssl_ctx = SSL_get_SSL_CTX(ssl);
+    SSL_CTX* ssl_ctx = SSL_get_SSL_CTX(ssl);
     if (SSL_CTX_add_extra_chain_cert(ssl_ctx, x509) == 1)
     {
         return 1;

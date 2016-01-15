@@ -79,7 +79,7 @@ namespace System.Net.NetworkInformation
                             }
                             else
                             {
-                                ExecutionContext.Run(context.CreateCopy(), s_RunHandlerCallback, handler);
+                                ExecutionContext.Run(context, s_RunHandlerCallback, handler);
                             }
                         }
                     }
@@ -157,9 +157,9 @@ namespace System.Net.NetworkInformation
                     }
                     catch (NetworkInformationException nie)
                     {
-                        if (Logging.On)
+                        if (NetEventSource.Log.IsEnabled())
                         {
-                            Logging.Exception(Logging.Web, "AddressChangeListener", "AddressChangedCallback", nie);
+                            NetEventSource.Exception(NetEventSource.ComponentType.NetworkInformation, "AddressChangeListener", "AddressChangedCallback", nie);
                         }
                     }
 
@@ -172,7 +172,7 @@ namespace System.Net.NetworkInformation
                         }
                         else
                         {
-                            ExecutionContext.Run(context.CreateCopy(), s_runHandlerCallback, handler);
+                            ExecutionContext.Run(context, s_runHandlerCallback, handler);
                         }
                     }
                 }

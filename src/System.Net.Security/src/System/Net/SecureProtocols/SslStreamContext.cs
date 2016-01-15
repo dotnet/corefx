@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.Diagnostics;
 using System.Net.Security;
 using System.Security.Authentication.ExtendedProtection;
 
@@ -10,7 +11,15 @@ namespace System.Net
     {
         internal SslStreamContext(SslStream sslStream)
         {
-            GlobalLog.Assert(sslStream != null, "SslStreamContext..ctor(): Not expecting a null sslStream!");
+            if (sslStream == null)
+            {
+                if (GlobalLog.IsEnabled)
+                {
+                    GlobalLog.Assert("SslStreamContext..ctor(): Not expecting a null sslStream!");
+                }
+                Debug.Fail("SslStreamContext..ctor(): Not expecting a null sslStream!");
+            }
+
             _sslStream = sslStream;
         }
 

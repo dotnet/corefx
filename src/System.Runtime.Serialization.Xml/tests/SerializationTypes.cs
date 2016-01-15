@@ -2707,3 +2707,25 @@ public class TypeWithTimeSpanProperty
 {
     public TimeSpan TimeSpanProperty;
 }
+
+public class TypeWithByteProperty
+{
+    public byte ByteProperty;
+}
+
+[DataContract(Name = "TypeWithIntAndStringProperty", Namespace = "")]
+public class TypeWithIntAndStringProperty
+{
+    [DataMember]
+    public int SampleInt { get; set; }
+
+    [DataMember]
+    public string SampleString { get; set; }
+}
+
+[DataContract(Name = "TypeWithTypeWithIntAndStringPropertyProperty", Namespace = "")]
+public class TypeWithTypeWithIntAndStringPropertyProperty
+{
+    [DataMember]
+    public TypeWithIntAndStringProperty ObjectProperty { get; set; }
+}
