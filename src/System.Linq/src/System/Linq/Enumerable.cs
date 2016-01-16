@@ -3895,8 +3895,10 @@ namespace System.Linq
         private int[] _buckets;
         private Slot[] _slots;
         private int _count;
-        private int _freeList;
-        private IEqualityComparer<TElement> _comparer;
+        private readonly IEqualityComparer<TElement> _comparer;
+#if DEBUG
+        private bool _haveRemoved;
+#endif
 
         public Set(IEqualityComparer<TElement> comparer)
         {
@@ -3904,18 +3906,36 @@ namespace System.Linq
             _comparer = comparer;
             _buckets = new int[7];
             _slots = new Slot[7];
-            _freeList = -1;
         }
 
         // If value is not in set, add it and return true; otherwise return false
         public bool Add(TElement value)
         {
-            return !Find(value, true);
+#if DEBUG
+            Debug.Assert(!_haveRemoved, "This set assumes no adds after a removal. If your use requires adds after removal undo that optimization.");
+#endif
+            int hashCode = InternalGetHashCode(value);
+            for (int i = _buckets[hashCode % _buckets.Length] - 1; i >= 0; i = _slots[i].next)
+            {
+                if (_slots[i].hashCode == hashCode && _comparer.Equals(_slots[i].value, value)) return false;
+            }
+            if (_count == _slots.Length) Resize();
+            int index = _count;
+            _count++;
+            int bucket = hashCode % _buckets.Length;
+            _slots[index].hashCode = hashCode;
+            _slots[index].value = value;
+            _slots[index].next = _buckets[bucket] - 1;
+            _buckets[bucket] = index + 1;
+            return true;
         }
 
         // If value is in set, remove it and return true; otherwise return false
         public bool Remove(TElement value)
         {
+#if DEBUG
+            _haveRemoved = true;
+#endif
             int hashCode = InternalGetHashCode(value);
             int bucket = hashCode % _buckets.Length;
             int last = -1;
@@ -3933,40 +3953,8 @@ namespace System.Linq
                     }
                     _slots[i].hashCode = -1;
                     _slots[i].value = default(TElement);
-                    _slots[i].next = _freeList;
-                    _freeList = i;
                     return true;
                 }
-            }
-            return false;
-        }
-
-        private bool Find(TElement value, bool add)
-        {
-            int hashCode = InternalGetHashCode(value);
-            for (int i = _buckets[hashCode % _buckets.Length] - 1; i >= 0; i = _slots[i].next)
-            {
-                if (_slots[i].hashCode == hashCode && _comparer.Equals(_slots[i].value, value)) return true;
-            }
-            if (add)
-            {
-                int index;
-                if (_freeList >= 0)
-                {
-                    index = _freeList;
-                    _freeList = _slots[index].next;
-                }
-                else
-                {
-                    if (_count == _slots.Length) Resize();
-                    index = _count;
-                    _count++;
-                }
-                int bucket = hashCode % _buckets.Length;
-                _slots[index].hashCode = hashCode;
-                _slots[index].value = value;
-                _slots[index].next = _buckets[bucket] - 1;
-                _buckets[bucket] = index + 1;
             }
             return false;
         }
