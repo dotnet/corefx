@@ -14,6 +14,7 @@ namespace System.Net.Security.Tests
     {
         private readonly byte[] _sampleMsg = Encoding.UTF8.GetBytes("Sample Test Message");
 
+        [ActiveIssue(5284, PlatformID.Windows)]
         [Fact]
         [PlatformSpecific(PlatformID.Windows)]
         public void NegotiateStream_StreamToStream_Authentication_Success()
@@ -66,6 +67,7 @@ namespace System.Net.Security.Tests
             }
         }
 
+        [ActiveIssue(5284, PlatformID.Windows)]
         [Fact]
         [PlatformSpecific(PlatformID.Windows)]
         public void NegotiateStream_StreamToStream_Authentication_TargetName_Success()
@@ -121,6 +123,7 @@ namespace System.Net.Security.Tests
             }
         }
 
+        [ActiveIssue(5284, PlatformID.Windows)]
         [Fact]
         [PlatformSpecific(PlatformID.Windows)]
         public void NegotiateStream_StreamToStream_Authentication_EmptyCredentials_Fails()

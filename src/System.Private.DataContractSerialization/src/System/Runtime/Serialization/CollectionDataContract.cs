@@ -1,6 +1,8 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.Diagnostics;
+
 namespace System.Runtime.Serialization
 {
     using System;
@@ -524,6 +526,11 @@ namespace System.Runtime.Serialization
                     {
                         if (_helper.XmlFormatGetOnlyCollectionReaderDelegate == null)
                         {
+                            if (UnderlyingType.GetTypeInfo().IsInterface && (Kind == CollectionKind.Enumerable || Kind == CollectionKind.Collection || Kind == CollectionKind.GenericEnumerable))
+                            {
+                                throw DiagnosticUtility.ExceptionUtility.ThrowHelperError(new InvalidDataContractException(SR.Format(SR.GetOnlyCollectionMustHaveAddMethod, GetClrTypeFullName(UnderlyingType))));
+                            }
+                            Debug.Assert(AddMethod != null || Kind == CollectionKind.Array, "Add method cannot be null if the collection is being used as a get-only property");
                             XmlFormatGetOnlyCollectionReaderDelegate tempDelegate = new XmlFormatReaderGenerator().GenerateGetOnlyCollectionReader(this);
                             Interlocked.MemoryBarrier();
                             _helper.XmlFormatGetOnlyCollectionReaderDelegate = tempDelegate;
@@ -1298,9 +1305,9 @@ namespace System.Runtime.Serialization
         ///          since this information is used to determine whether to give the generated code access
         ///          permissions to private members, any changes to the logic should be reviewed.
         /// </SecurityNote>
-        internal bool RequiresMemberAccessForRead(SecurityException securityException, string[] serializationAssemblyPatterns)
+        internal bool RequiresMemberAccessForRead(SecurityException securityException)
         {
-            if (!IsTypeVisible(UnderlyingType, serializationAssemblyPatterns))
+            if (!IsTypeVisible(UnderlyingType))
             {
                 if (securityException != null)
                 {
@@ -1312,7 +1319,7 @@ namespace System.Runtime.Serialization
                 }
                 return true;
             }
-            if (ItemType != null && !IsTypeVisible(ItemType, serializationAssemblyPatterns))
+            if (ItemType != null && !IsTypeVisible(ItemType))
             {
                 if (securityException != null)
                 {
@@ -1324,7 +1331,7 @@ namespace System.Runtime.Serialization
                 }
                 return true;
             }
-            if (ConstructorRequiresMemberAccess(Constructor, serializationAssemblyPatterns))
+            if (ConstructorRequiresMemberAccess(Constructor))
             {
                 if (securityException != null)
                 {
@@ -1336,7 +1343,7 @@ namespace System.Runtime.Serialization
                 }
                 return true;
             }
-            if (MethodRequiresMemberAccess(this.AddMethod, serializationAssemblyPatterns))
+            if (MethodRequiresMemberAccess(this.AddMethod))
             {
                 if (securityException != null)
                 {
@@ -1358,9 +1365,9 @@ namespace System.Runtime.Serialization
         ///          since this information is used to determine whether to give the generated code access
         ///          permissions to private members, any changes to the logic should be reviewed.
         /// </SecurityNote>
-        internal bool RequiresMemberAccessForWrite(SecurityException securityException, string[] serializationAssemblyPatterns)
+        internal bool RequiresMemberAccessForWrite(SecurityException securityException)
         {
-            if (!IsTypeVisible(UnderlyingType, serializationAssemblyPatterns))
+            if (!IsTypeVisible(UnderlyingType))
             {
                 if (securityException != null)
                 {
@@ -1372,7 +1379,7 @@ namespace System.Runtime.Serialization
                 }
                 return true;
             }
-            if (ItemType != null && !IsTypeVisible(ItemType, serializationAssemblyPatterns))
+            if (ItemType != null && !IsTypeVisible(ItemType))
             {
                 if (securityException != null)
                 {
@@ -1403,6 +1410,12 @@ namespace System.Runtime.Serialization
             {
                 // IsGetOnlyCollection value has already been used to create current collectiondatacontract, value can now be reset. 
                 context.IsGetOnlyCollection = false;
+#if NET_NATIVE
+                if (XmlFormatGetOnlyCollectionReaderDelegate == null)
+                {
+                    throw new InvalidDataContractException(SR.Format(SR.SerializationCodeIsMissingForType, UnderlyingType.ToString()));
+                }
+#endif
                 XmlFormatGetOnlyCollectionReaderDelegate(xmlReader, context, CollectionItemName, Namespace, this);
             }
             else

@@ -468,9 +468,11 @@ namespace System.Runtime.Serialization
             get { return false; }
         }
 
+#if NET_NATIVE
         public bool TypeIsInterface;
         public bool TypeIsCollectionInterface;
         public Type GenericTypeDefinition;
+#endif
 
         internal virtual void WriteRootElement(XmlWriterDelegator writer, XmlDictionaryString name, XmlDictionaryString ns)
         {
@@ -2049,14 +2051,14 @@ namespace System.Runtime.Serialization
         ///          since this information is used to determine whether to give the generated code access
         ///          permissions to private members, any changes to the logic should be reviewed.
         /// </SecurityNote>
-        static internal bool IsTypeVisible(Type t, string[] serializationAssemblyPatterns)
+        static internal bool IsTypeVisible(Type t)
         {
-            if (!t.GetTypeInfo().IsVisible && !IsTypeVisibleInSerializationModule(t, serializationAssemblyPatterns))
+            if (!t.GetTypeInfo().IsVisible && !IsTypeVisibleInSerializationModule(t))
                 return false;
 
             foreach (Type genericType in t.GetGenericArguments())
             {
-                if (!genericType.IsGenericParameter && !IsTypeVisible(genericType, serializationAssemblyPatterns))
+                if (!genericType.IsGenericParameter && !IsTypeVisible(genericType))
                     return false;
             }
 
@@ -2069,9 +2071,9 @@ namespace System.Runtime.Serialization
         ///          since this information is used to determine whether to give the generated code access
         ///          permissions to private members, any changes to the logic should be reviewed.
         /// </SecurityNote>
-        static internal bool ConstructorRequiresMemberAccess(ConstructorInfo ctor, string[] serializationAssemblyPatterns)
+        static internal bool ConstructorRequiresMemberAccess(ConstructorInfo ctor)
         {
-            return ctor != null && !ctor.IsPublic && !IsMemberVisibleInSerializationModule(ctor, serializationAssemblyPatterns);
+            return ctor != null && !ctor.IsPublic && !IsMemberVisibleInSerializationModule(ctor);
         }
 
         /// <SecurityNote>
@@ -2080,9 +2082,9 @@ namespace System.Runtime.Serialization
         ///          since this information is used to determine whether to give the generated code access
         ///          permissions to private members, any changes to the logic should be reviewed.
         /// </SecurityNote>
-        static internal bool MethodRequiresMemberAccess(MethodInfo method, string[] serializationAssemblyPatterns)
+        static internal bool MethodRequiresMemberAccess(MethodInfo method)
         {
-            return method != null && !method.IsPublic && !IsMemberVisibleInSerializationModule(method, serializationAssemblyPatterns);
+            return method != null && !method.IsPublic && !IsMemberVisibleInSerializationModule(method);
         }
 
         /// <SecurityNote>
@@ -2091,9 +2093,9 @@ namespace System.Runtime.Serialization
         ///          since this information is used to determine whether to give the generated code access
         ///          permissions to private members, any changes to the logic should be reviewed.
         /// </SecurityNote>
-        static internal bool FieldRequiresMemberAccess(FieldInfo field, string[] serializationAssemblyPatterns)
+        static internal bool FieldRequiresMemberAccess(FieldInfo field)
         {
-            return field != null && !field.IsPublic && !IsMemberVisibleInSerializationModule(field, serializationAssemblyPatterns);
+            return field != null && !field.IsPublic && !IsMemberVisibleInSerializationModule(field);
         }
 
         /// <SecurityNote>
@@ -2101,9 +2103,9 @@ namespace System.Runtime.Serialization
         ///          since this information is used to determine whether to give the generated code access
         ///          permissions to private members, any changes to the logic should be reviewed.
         /// </SecurityNote>
-        private static bool IsTypeVisibleInSerializationModule(Type type, string[] serializationAssemblyPatterns)
+        private static bool IsTypeVisibleInSerializationModule(Type type)
         {
-            return (type.GetTypeInfo().Module.Equals(typeof(DataContract).GetTypeInfo().Module) || IsAssemblyFriendOfSerialization(type.GetTypeInfo().Assembly, serializationAssemblyPatterns)) && !type.GetTypeInfo().IsNestedPrivate;
+            return (type.GetTypeInfo().Module.Equals(typeof(DataContract).GetTypeInfo().Module) || IsAssemblyFriendOfSerialization(type.GetTypeInfo().Assembly)) && !type.GetTypeInfo().IsNestedPrivate;
         }
 
         /// <SecurityNote>
@@ -2111,9 +2113,9 @@ namespace System.Runtime.Serialization
         ///          since this information is used to determine whether to give the generated code access
         ///          permissions to private members, any changes to the logic should be reviewed.
         /// </SecurityNote>
-        private static bool IsMemberVisibleInSerializationModule(MemberInfo member, string[] serializationAssemblyPatterns)
+        private static bool IsMemberVisibleInSerializationModule(MemberInfo member)
         {
-            if (!IsTypeVisibleInSerializationModule(member.DeclaringType, serializationAssemblyPatterns))
+            if (!IsTypeVisibleInSerializationModule(member.DeclaringType))
                 return false;
 
             if (member is MethodInfo)
@@ -2124,7 +2126,7 @@ namespace System.Runtime.Serialization
             else if (member is FieldInfo)
             {
                 FieldInfo field = (FieldInfo)member;
-                return (field.IsAssembly || field.IsFamilyOrAssembly) && IsTypeVisible(field.FieldType, serializationAssemblyPatterns);
+                return (field.IsAssembly || field.IsFamilyOrAssembly) && IsTypeVisible(field.FieldType);
             }
             else if (member is ConstructorInfo)
             {
@@ -2140,33 +2142,15 @@ namespace System.Runtime.Serialization
         ///          since this information is used to determine whether to give the generated code access
         ///          permissions to private members, any changes to the logic should be reviewed.
         /// </SecurityNote>
-        internal static bool IsAssemblyFriendOfSerialization(Assembly assembly, string[] serializationAssemblyPatterns)
-        {
-            Fx.Assert(serializationAssemblyPatterns.Length % 2 == 0, "serializationAssemblyPatterns must have a length divisible by two");
-            for (int patternIndex = 0; patternIndex < serializationAssemblyPatterns.Length; patternIndex += 2)
-            {
-                if (!IsAssemblyFriendOfSerializationAssembly(assembly, serializationAssemblyPatterns[patternIndex], serializationAssemblyPatterns[patternIndex + 1]))
-                {
-                    return false;
-                }
-            }
-            return true;
-        }
-
-        /// <SecurityNote>
-        /// Review - checks member visibility to calculate if access to it requires MemberAccessPermission.
-        ///          since this information is used to determine whether to give the generated code access
-        ///          permissions to private members, any changes to the logic should be reviewed.
-        /// </SecurityNote>
-        internal static bool IsAssemblyFriendOfSerializationAssembly(Assembly assembly, string simpleSerializationAssemblyInternalsVisiblePattern, string fullSerializationAssemblyInternalsVisiblePattern)
+        internal static bool IsAssemblyFriendOfSerialization(Assembly assembly)
         {
             InternalsVisibleToAttribute[] internalsVisibleAttributes = (InternalsVisibleToAttribute[])assembly.GetCustomAttributes(typeof(InternalsVisibleToAttribute));
             foreach (InternalsVisibleToAttribute internalsVisibleAttribute in internalsVisibleAttributes)
             {
                 string internalsVisibleAttributeAssemblyName = internalsVisibleAttribute.AssemblyName;
 
-                if (Regex.IsMatch(internalsVisibleAttributeAssemblyName, simpleSerializationAssemblyInternalsVisiblePattern) ||
-                    Regex.IsMatch(internalsVisibleAttributeAssemblyName, fullSerializationAssemblyInternalsVisiblePattern))
+                if (Regex.IsMatch(internalsVisibleAttributeAssemblyName, Globals.SimpleSRSInternalsVisiblePattern) ||
+                    Regex.IsMatch(internalsVisibleAttributeAssemblyName, Globals.FullSRSInternalsVisiblePattern))
                 {
                     return true;
                 }

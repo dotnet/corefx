@@ -6,7 +6,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Xunit;
 
-namespace System.Linq.Expressions.Test
+namespace System.Linq.Expressions.Tests
 {
     public class ParameterBlockTests : SharedBlockTests
     {
@@ -68,7 +68,6 @@ namespace System.Linq.Expressions.Test
 
         [Theory]
         [MemberData("BlockSizes")]
-        [ActiveIssue(3908)]
         public void NullExpressionInExpressionList(int size)
         {
             List<Expression> expressionList = Enumerable.Range(0, size).Select(i => (Expression)Expression.Constant(1)).ToList();
@@ -80,22 +79,6 @@ namespace System.Linq.Expressions.Test
                 Assert.Throws<ArgumentNullException>("expressions", () => Expression.Block(SingleParameter, expressions.Skip(0)));
                 Assert.Throws<ArgumentNullException>("expressions", () => Expression.Block(typeof(int), SingleParameter, expressions));
                 Assert.Throws<ArgumentNullException>("expressions", () => Expression.Block(typeof(int), SingleParameter, expressions.Skip(0)));
-            }
-        }
-
-        [Theory]
-        [MemberData("BlockSizes")]
-        public void NullExpressionInExpressionListTemp(int size)
-        {
-            List<Expression> expressionList = Enumerable.Range(0, size).Select(i => (Expression)Expression.Constant(1)).ToList();
-            for (int i = 0; i != expressionList.Count; ++i)
-            {
-                Expression[] expressions = expressionList.ToArray();
-                expressions[i] = null;
-                Assert.ThrowsAny<Exception>(() => Expression.Block(SingleParameter, expressions));
-                Assert.ThrowsAny<Exception>(() => Expression.Block(SingleParameter, expressions.Skip(0)));
-                Assert.ThrowsAny<Exception>(() => Expression.Block(typeof(int), SingleParameter, expressions));
-                Assert.ThrowsAny<Exception>(() => Expression.Block(typeof(int), SingleParameter, expressions.Skip(0)));
             }
         }
 
@@ -156,27 +139,15 @@ namespace System.Linq.Expressions.Test
 
         [Theory]
         [MemberData("ConstantValuesAndSizes")]
-        [ActiveIssue(3881)]
         public void InvalidExpressionIndex(object value, int blockSize)
         {
             BlockExpression block = Expression.Block(SingleParameter, PadBlock(blockSize - 1, Expression.Constant(value, value.GetType())));
-            Assert.Throws<ArgumentOutOfRangeException>(() => block.Expressions[-1]);
-            Assert.Throws<ArgumentOutOfRangeException>(() => block.Expressions[blockSize]);
-        }
-
-        // Remove below if issue blocking above is fixed.
-        [Theory]
-        [MemberData("ConstantValuesAndSizes")]
-        public void InvalidExpressionIndexVaryingExceptin(object value, int blockSize)
-        {
-            BlockExpression block = Expression.Block(SingleParameter, PadBlock(blockSize - 1, Expression.Constant(value, value.GetType())));
-            Assert.ThrowsAny<Exception>(() => block.Expressions[-1]);
-            Assert.ThrowsAny<Exception>(() => block.Expressions[blockSize]);
+            Assert.Throws<ArgumentOutOfRangeException>("index", () => block.Expressions[-1]);
+            Assert.Throws<ArgumentOutOfRangeException>("index", () => block.Expressions[blockSize]);
         }
 
         // See https://github.com/dotnet/corefx/issues/3043
         [Fact]
-        [ActiveIssue(3882)]
         public void EmptyBlockWithParametersNotAllowed()
         {
             Assert.Throws<ArgumentException>("expressions", () => Expression.Block(SingleParameter));
@@ -186,9 +157,7 @@ namespace System.Linq.Expressions.Test
         }
 
         // If https://github.com/dotnet/corefx/issues/3043 is ever actioned, this case would still be prohibited.
-
         [Fact]
-        [ActiveIssue(3882)]
         public void EmptyBlockWithParametersAndNonVoidTypeNotAllowed()
         {
             Assert.Throws<ArgumentException>("expressions", () => Expression.Block(typeof(int), SingleParameter));

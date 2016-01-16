@@ -758,10 +758,15 @@ namespace System.Net.Sockets
             if (GlobalLog.IsEnabled)
             {
                 GlobalLog.Print("Socket#" + LoggingHash.HashString(this) + "::InternalBind() localEP:" + localEP.ToString());
-                if (localEP is DnsEndPoint)
+            }
+
+            if (localEP is DnsEndPoint)
+            {
+                if (GlobalLog.IsEnabled)
                 {
                     GlobalLog.Assert("Calling InternalBind with a DnsEndPoint, about to get NotImplementedException");
                 }
+                Debug.Fail("Calling InternalBind with a DnsEndPoint, about to get NotImplementedException");
             }
 
             // Ask the EndPoint to generate a SocketAddress that we can pass down to native code.
@@ -797,11 +802,14 @@ namespace System.Net.Sockets
                 socketAddress.Size);
 
 #if TRACE_VERBOSE
-            try
+            if (GlobalLog.IsEnabled)
             {
-                GlobalLog.Print("Socket#" + LoggingHash.HashString(this) + "::Bind() SRC:" + LoggingHash.ObjectToString(LocalEndPoint) + " Interop.Winsock.bind returns errorCode:" + errorCode);
+                try
+                {
+                    GlobalLog.Print("Socket#" + LoggingHash.HashString(this) + "::Bind() SRC:" + LoggingHash.ObjectToString(LocalEndPoint) + " Interop.Winsock.bind returns errorCode:" + errorCode);
+                }
+                catch (ObjectDisposedException) { }
             }
-            catch (ObjectDisposedException) { }
 #endif
 
             // Throw an appropriate SocketException if the native call fails.
@@ -1097,11 +1105,14 @@ namespace System.Net.Sockets
                 backlog);
 
 #if TRACE_VERBOSE
-            try
+            if (GlobalLog.IsEnabled)
             {
-                GlobalLog.Print("Socket#" + LoggingHash.HashString(this) + "::Listen() SRC:" + LoggingHash.ObjectToString(LocalEndPoint) + " Interop.Winsock.listen returns errorCode:" + errorCode);
+                try
+                {
+                    GlobalLog.Print("Socket#" + LoggingHash.HashString(this) + "::Listen() SRC:" + LoggingHash.ObjectToString(LocalEndPoint) + " Interop.Winsock.listen returns errorCode:" + errorCode);
+                }
+                catch (ObjectDisposedException) { }
             }
-            catch (ObjectDisposedException) { }
 #endif
 
             // Throw an appropriate SocketException if the native call fails.
@@ -1257,11 +1268,14 @@ namespace System.Net.Sockets
             errorCode = SocketPal.Send(_handle, buffers, socketFlags, out bytesTransferred);
 
 #if TRACE_VERBOSE
-            try
+            if (GlobalLog.IsEnabled)
             {
-                GlobalLog.Print("Socket#" + LoggingHash.HashString(this) + "::Send() SRC:" + LoggingHash.ObjectToString(LocalEndPoint) + " DST:" + LoggingHash.ObjectToString(RemoteEndPoint) + " Interop.Winsock.send returns errorCode:" + errorCode + " bytesTransferred:" + bytesTransferred);
+                try
+                {
+                    GlobalLog.Print("Socket#" + LoggingHash.HashString(this) + "::Send() SRC:" + LoggingHash.ObjectToString(LocalEndPoint) + " DST:" + LoggingHash.ObjectToString(RemoteEndPoint) + " Interop.Winsock.send returns errorCode:" + errorCode + " bytesTransferred:" + bytesTransferred);
+                }
+                catch (ObjectDisposedException) { }
             }
-            catch (ObjectDisposedException) { }
 #endif
 
             if (errorCode != SocketError.Success)
@@ -1375,7 +1389,7 @@ namespace System.Net.Sockets
             }
             if (s_loggingEnabled)
             {
-                SocketsEventSource.Dump(SocketsEventSource.MethodType.Send, buffer, offset, size);
+                SocketsEventSource.Dump(buffer, offset, size);
                 NetEventSource.Exit(NetEventSource.ComponentType.Socket, this, "Send", bytesTransferred);
             }
             return bytesTransferred;
@@ -1462,7 +1476,7 @@ namespace System.Net.Sockets
             }
             if (s_loggingEnabled)
             {
-                SocketsEventSource.Dump(SocketsEventSource.MethodType.SendTo, buffer, offset, size);
+                SocketsEventSource.Dump(buffer, offset, size);
                 NetEventSource.Exit(NetEventSource.ComponentType.Socket, this, "SendTo", bytesTransferred);
             }
             return bytesTransferred;
@@ -1572,20 +1586,20 @@ namespace System.Net.Sockets
                 }
             }
 
-#if TRACE_VERBOSE
-            try
-            {
-                GlobalLog.Print("Socket#" + LoggingHash.HashString(this) + "::Receive() SRC:" + LoggingHash.ObjectToString(LocalEndPoint) + " DST:" + LoggingHash.ObjectToString(RemoteEndPoint) + " bytesTransferred:" + bytesTransferred);
-            }
-            catch (ObjectDisposedException) { }
-#endif
             if (GlobalLog.IsEnabled)
             {
+#if TRACE_VERBOSE
+                try
+                {
+                    GlobalLog.Print("Socket#" + LoggingHash.HashString(this) + "::Receive() SRC:" + LoggingHash.ObjectToString(LocalEndPoint) + " DST:" + LoggingHash.ObjectToString(RemoteEndPoint) + " bytesTransferred:" + bytesTransferred);
+                }
+                catch (ObjectDisposedException) { }
+#endif
                 GlobalLog.Dump(buffer, offset, bytesTransferred);
             }
             if (s_loggingEnabled)
             {
-                SocketsEventSource.Dump(SocketsEventSource.MethodType.Receive, buffer, offset, bytesTransferred);
+                SocketsEventSource.Dump(buffer, offset, bytesTransferred);
             }
             if (s_loggingEnabled)
             {
@@ -1643,11 +1657,14 @@ namespace System.Net.Sockets
             errorCode = SocketPal.Receive(_handle, buffers, ref socketFlags, out bytesTransferred);
 
 #if TRACE_VERBOSE
-            try
+            if (GlobalLog.IsEnabled)
             {
-                GlobalLog.Print("Socket#" + LoggingHash.HashString(this) + "::Receive() SRC:" + LoggingHash.ObjectToString(LocalEndPoint) + " DST:" + LoggingHash.ObjectToString(RemoteEndPoint) + " Interop.Winsock.send returns errorCode:" + errorCode + " bytesTransferred:" + bytesTransferred);
+                try
+                {
+                    GlobalLog.Print("Socket#" + LoggingHash.HashString(this) + "::Receive() SRC:" + LoggingHash.ObjectToString(LocalEndPoint) + " DST:" + LoggingHash.ObjectToString(RemoteEndPoint) + " Interop.Winsock.send returns errorCode:" + errorCode + " bytesTransferred:" + bytesTransferred);
+                }
+                catch (ObjectDisposedException) { }
             }
-            catch (ObjectDisposedException) { }
 #endif
 
             if (errorCode != SocketError.Success)
@@ -1677,11 +1694,14 @@ namespace System.Net.Sockets
             }
 
 #if TRACE_VERBOSE
-            try
+            if (GlobalLog.IsEnabled)
             {
-                GlobalLog.Print("Socket#" + LoggingHash.HashString(this) + "::Receive() SRC:" + LoggingHash.ObjectToString(LocalEndPoint) + " DST:" + LoggingHash.ObjectToString(RemoteEndPoint) + " bytesTransferred:" + bytesTransferred);
+                try
+                {
+                    GlobalLog.Print("Socket#" + LoggingHash.HashString(this) + "::Receive() SRC:" + LoggingHash.ObjectToString(LocalEndPoint) + " DST:" + LoggingHash.ObjectToString(RemoteEndPoint) + " bytesTransferred:" + bytesTransferred);
+                }
+                catch (ObjectDisposedException) { }
             }
-            catch (ObjectDisposedException) { }
 #endif
 
             if (s_loggingEnabled)
@@ -1896,7 +1916,7 @@ namespace System.Net.Sockets
             }
             if (s_loggingEnabled)
             {
-                SocketsEventSource.Dump(SocketsEventSource.MethodType.ReceiveFrom, buffer, offset, size);
+                SocketsEventSource.Dump(buffer, offset, size);
             }
             if (s_loggingEnabled)
             {
@@ -2704,8 +2724,7 @@ namespace System.Net.Sockets
 
         private SocketError DoBeginSend(byte[] buffer, int offset, int size, SocketFlags socketFlags, OverlappedAsyncResult asyncResult)
         {
-            bool globalLogEnabled = GlobalLog.IsEnabled;
-            if (globalLogEnabled)
+            if (GlobalLog.IsEnabled)
             {
                 GlobalLog.Print("Socket#" + LoggingHash.HashString(this) + "::BeginSend() SRC:" + LoggingHash.ObjectToString(LocalEndPoint) + " DST:" + LoggingHash.ObjectToString(RemoteEndPoint) + " size:" + size.ToString());
             }
@@ -2716,14 +2735,14 @@ namespace System.Net.Sockets
             try
             {
                 // Get the Send going.
-                if (globalLogEnabled)
+                if (GlobalLog.IsEnabled)
                 {
                     GlobalLog.Print("BeginSend: asyncResult:" + LoggingHash.HashString(asyncResult) + " size:" + size.ToString());
                 }
 
                 errorCode = SocketPal.SendAsync(_handle, buffer, offset, size, socketFlags, asyncResult);
 
-                if (globalLogEnabled)
+                if (GlobalLog.IsEnabled)
                 {
                     GlobalLog.Print("Socket#" + LoggingHash.HashString(this) + "::BeginSend() Interop.Winsock.WSASend returns:" + errorCode.ToString() + " size:" + size.ToString() + " returning AsyncResult:" + LoggingHash.HashString(asyncResult));
                 }
@@ -2804,8 +2823,7 @@ namespace System.Net.Sockets
 
         private SocketError DoBeginSend(IList<ArraySegment<byte>> buffers, SocketFlags socketFlags, OverlappedAsyncResult asyncResult)
         {
-            bool globalLogEnabled = GlobalLog.IsEnabled;
-            if (globalLogEnabled)
+            if (GlobalLog.IsEnabled)
             {
                 GlobalLog.Print("Socket#" + LoggingHash.HashString(this) + "::BeginSend() SRC:" + LoggingHash.ObjectToString(LocalEndPoint) + " DST:" + LoggingHash.ObjectToString(RemoteEndPoint) + " buffers:" + buffers);
             }
@@ -2815,14 +2833,14 @@ namespace System.Net.Sockets
             SocketError errorCode = SocketError.SocketError;
             try
             {
-                if (globalLogEnabled)
+                if (GlobalLog.IsEnabled)
                 {
                     GlobalLog.Print("BeginSend: asyncResult:" + LoggingHash.HashString(asyncResult));
                 }
 
                 errorCode = SocketPal.SendAsync(_handle, buffers, socketFlags, asyncResult);
 
-                if (globalLogEnabled)
+                if (GlobalLog.IsEnabled)
                 {
                     GlobalLog.Print("Socket#" + LoggingHash.HashString(this) + "::BeginSend() Interop.Winsock.WSASend returns:" + errorCode.ToString() + " returning AsyncResult:" + LoggingHash.HashString(asyncResult));
                 }
@@ -3276,10 +3294,11 @@ namespace System.Net.Sockets
             // Throw an appropriate SocketException if the native call fails synchronously.
             if (errorCode != SocketError.Success)
             {
-                if (GlobalLog.IsEnabled)
-                {
-                    GlobalLog.AssertFormat("Socket#{0}::DoBeginReceive()|GetLastWin32Error() returned zero.", LoggingHash.HashString(this));
-                }
+                // TODO: https://github.com/dotnet/corefx/issues/5426
+                //if (GlobalLog.IsEnabled)
+                //{
+                //    GlobalLog.AssertFormat("Socket#{0}::DoBeginReceive()|GetLastWin32Error() returned zero.", LoggingHash.HashString(this));
+                //}
 
                 // Update the internal state of this socket according to the error before throwing.
                 UpdateStatusAfterSocketError(errorCode);
@@ -3477,11 +3496,14 @@ namespace System.Net.Sockets
             }
 
 #if TRACE_VERBOSE
-            try
+            if (GlobalLog.IsEnabled)
             {
-                GlobalLog.Print("Socket#" + LoggingHash.HashString(this) + "::EndReceive() SRC:" + LoggingHash.ObjectToString(LocalEndPoint) + " DST:" + LoggingHash.ObjectToString(RemoteEndPoint) + " bytesTransferred:" + bytesTransferred.ToString());
+                try
+                {
+                    GlobalLog.Print("Socket#" + LoggingHash.HashString(this) + "::EndReceive() SRC:" + LoggingHash.ObjectToString(LocalEndPoint) + " DST:" + LoggingHash.ObjectToString(RemoteEndPoint) + " bytesTransferred:" + bytesTransferred.ToString());
+                }
+                catch (ObjectDisposedException) { }
             }
-            catch (ObjectDisposedException) { }
 #endif
 
             // Throw an appropriate SocketException if the native call failed asynchronously.
@@ -3587,6 +3609,7 @@ namespace System.Net.Sockets
                         {
                             GlobalLog.Assert("Socket#" + LoggingHash.HashString(this) + "::BeginReceiveMessageFrom()|Returned WSAEMSGSIZE!");
                         }
+                        Debug.Fail("Socket#" + LoggingHash.HashString(this) + "::BeginReceiveMessageFrom()|Returned WSAEMSGSIZE!");
 
                         errorCode = SocketError.IOPending;
                     }
@@ -3838,6 +3861,7 @@ namespace System.Net.Sockets
         private void DoBeginReceiveFrom(byte[] buffer, int offset, int size, SocketFlags socketFlags, EndPoint endPointSnapshot, Internals.SocketAddress socketAddress, OverlappedAsyncResult asyncResult)
         {
             EndPoint oldEndPoint = _rightEndPoint;
+
             if (GlobalLog.IsEnabled)
             {
                 GlobalLog.Print("Socket#" + LoggingHash.HashString(this) + "::DoBeginReceiveFrom() size:" + size.ToString());
@@ -4198,11 +4222,14 @@ namespace System.Net.Sockets
             }
 
 #if TRACE_VERBOSE
-            try
+            if (GlobalLog.IsEnabled)
             {
-                GlobalLog.Print("Socket#" + LoggingHash.HashString(this) + "::EndAccept() SRC:" + LoggingHash.ObjectToString(LocalEndPoint) + " acceptedSocket:" + LoggingHash.HashString(socket) + " acceptedSocket.SRC:" + LoggingHash.ObjectToString(socket.LocalEndPoint) + " acceptedSocket.DST:" + LoggingHash.ObjectToString(socket.RemoteEndPoint) + " bytesTransferred:" + bytesTransferred.ToString());
+                try
+                {
+                    GlobalLog.Print("Socket#" + LoggingHash.HashString(this) + "::EndAccept() SRC:" + LoggingHash.ObjectToString(LocalEndPoint) + " acceptedSocket:" + LoggingHash.HashString(socket) + " acceptedSocket.SRC:" + LoggingHash.ObjectToString(socket.LocalEndPoint) + " acceptedSocket.DST:" + LoggingHash.ObjectToString(socket.RemoteEndPoint) + " bytesTransferred:" + bytesTransferred.ToString());
+                }
+                catch (ObjectDisposedException) { }
             }
-            catch (ObjectDisposedException) { }
 #endif
 
             if (s_loggingEnabled)
@@ -5133,11 +5160,14 @@ namespace System.Net.Sockets
             // This can throw ObjectDisposedException.
             SocketError errorCode = SocketPal.Connect(_handle, socketAddress.Buffer, socketAddress.Size);
 #if TRACE_VERBOSE
-            try
+            if (GlobalLog.IsEnabled)
             {
-                GlobalLog.Print("Socket#" + LoggingHash.HashString(this) + "::InternalConnect() SRC:" + LoggingHash.ObjectToString(LocalEndPoint) + " DST:" + LoggingHash.ObjectToString(RemoteEndPoint) + " Interop.Winsock.WSAConnect returns errorCode:" + errorCode);
+                try
+                {
+                    GlobalLog.Print("Socket#" + LoggingHash.HashString(this) + "::InternalConnect() SRC:" + LoggingHash.ObjectToString(LocalEndPoint) + " DST:" + LoggingHash.ObjectToString(RemoteEndPoint) + " Interop.Winsock.WSAConnect returns errorCode:" + errorCode);
+                }
+                catch (ObjectDisposedException) { }
             }
-            catch (ObjectDisposedException) { }
 #endif
 
             // Throw an appropriate SocketException if the native call fails.
@@ -5340,6 +5370,7 @@ namespace System.Net.Sockets
                 {
                     GlobalLog.Assert("SafeCloseSocket::Dispose(handle:" + _handle.DangerousGetHandle().ToString("x") + ")", "Closing the handle threw ObjectDisposedException.");
                 }
+                Debug.Fail("SafeCloseSocket::Dispose(handle:" + _handle.DangerousGetHandle().ToString("x") + ")", "Closing the handle threw ObjectDisposedException.");
             }
         }
 
@@ -5631,11 +5662,18 @@ namespace System.Net.Sockets
         // error code, and will update internal state on success.
         private SocketError InternalSetBlocking(bool desired, out bool current)
         {
-            GlobalLog.Enter("Socket#" + LoggingHash.HashString(this) + "::InternalSetBlocking", "desired:" + desired.ToString() + " willBlock:" + _willBlock.ToString() + " willBlockInternal:" + _willBlockInternal.ToString());
+            if (GlobalLog.IsEnabled)
+            {
+                GlobalLog.Enter("Socket#" + LoggingHash.HashString(this) + "::InternalSetBlocking", "desired:" + desired.ToString() + " willBlock:" + _willBlock.ToString() + " willBlockInternal:" + _willBlockInternal.ToString());
+            }
 
             if (CleanedUp)
             {
-                GlobalLog.Leave("Socket#" + LoggingHash.HashString(this) + "::InternalSetBlocking", "ObjectDisposed");
+                if (GlobalLog.IsEnabled)
+                {
+                    GlobalLog.Leave("Socket#" + LoggingHash.HashString(this) + "::InternalSetBlocking", "ObjectDisposed");
+                }
+
                 current = _willBlock;
                 return SocketError.Success;
             }
@@ -5664,7 +5702,11 @@ namespace System.Net.Sockets
                 _willBlockInternal = willBlock;
             }
 
-            GlobalLog.Leave("Socket#" + LoggingHash.HashString(this) + "::InternalSetBlocking", "errorCode:" + errorCode.ToString() + " willBlock:" + _willBlock.ToString() + " willBlockInternal:" + _willBlockInternal.ToString());
+            if (GlobalLog.IsEnabled)
+            {
+                GlobalLog.Leave("Socket#" + LoggingHash.HashString(this) + "::InternalSetBlocking", "errorCode:" + errorCode.ToString() + " willBlock:" + _willBlock.ToString() + " willBlockInternal:" + _willBlockInternal.ToString());
+            }
+
             current = _willBlockInternal;
             return errorCode;
         }
@@ -5694,9 +5736,13 @@ namespace System.Net.Sockets
             // called if _rightEndPoint is not null, of that the endpoint is an IPEndPoint.
             if (_rightEndPoint == null)
             {
-                if (endPointSnapshot.GetType() != typeof(IPEndPoint) && GlobalLog.IsEnabled)
+                if (endPointSnapshot.GetType() != typeof(IPEndPoint))
                 {
-                    GlobalLog.AssertFormat("Socket#{0}::BeginConnectEx()|Socket not bound and endpoint not IPEndPoint.", LoggingHash.HashString(this));
+                    if (GlobalLog.IsEnabled)
+                    {
+                        GlobalLog.AssertFormat("Socket#{0}::BeginConnectEx()|Socket not bound and endpoint not IPEndPoint.", LoggingHash.HashString(this));
+                    }
+                    Debug.Fail("Socket#" + LoggingHash.HashString(this) + "::BeginConnectEx()|Socket not bound and endpoint not IPEndPoint.");
                 }
 
                 if (endPointSnapshot.AddressFamily == AddressFamily.InterNetwork)
@@ -6137,8 +6183,11 @@ namespace System.Net.Sockets
         [System.Diagnostics.Conditional("TRACE_VERBOSE")]
         internal void DebugMembers()
         {
-            GlobalLog.Print("_handle:" + _handle.DangerousGetHandle().ToString("x") );
-            GlobalLog.Print("_isConnected: " + _isConnected);
+            if (GlobalLog.IsEnabled)
+            {
+                GlobalLog.Print("_handle:" + _handle.DangerousGetHandle().ToString("x"));
+                GlobalLog.Print("_isConnected: " + _isConnected);
+            }
         }
     }
 }

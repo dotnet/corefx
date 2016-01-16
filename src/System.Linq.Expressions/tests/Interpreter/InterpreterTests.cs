@@ -3,12 +3,10 @@
 
 #if FEATURE_INTERPRET
 using System;
-using System.Linq;
-using System.Linq.Expressions;
 using System.Reflection;
 using Xunit;
 
-namespace Tests.Expressions
+namespace System.Linq.Expressions.Tests
 {
     public static partial class InterpreterTests
     {
@@ -101,7 +99,7 @@ namespace Tests.Expressions
             }
             catch (Exception ex)
             {
-                throw new Exception(string.Format("Error for expression '{0}':\r\n\r\n{1}", expr.DebugView, ex.ToString()));
+                throw new Exception(string.Format("Error for expression '{0}':\r\n\r\n{1}", typeof(Expression).GetType().GetProperty("DebugView").GetValue(expr), ex.ToString()));
             }
         }
 

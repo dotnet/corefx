@@ -996,8 +996,7 @@ namespace System.Net.Security
         //
         private bool CompleteHandshake()
         {
-            bool globalLogEnabled = GlobalLog.IsEnabled;
-            if (globalLogEnabled)
+            if (GlobalLog.IsEnabled)
             {
                 GlobalLog.Enter("CompleteHandshake");
             }
@@ -1008,13 +1007,16 @@ namespace System.Net.Security
             {
                 _handshakeCompleted = false;
                 _certValidationFailed = true;
-                GlobalLog.Leave("CompleteHandshake", false);
+                if (GlobalLog.IsEnabled)
+                {
+                    GlobalLog.Leave("CompleteHandshake", false);
+                }
                 return false;
             }
 
             _certValidationFailed = false;
             _handshakeCompleted = true;
-            if (globalLogEnabled)
+            if (GlobalLog.IsEnabled)
             {
                 GlobalLog.Leave("CompleteHandshake", true);
             }
@@ -1041,9 +1043,13 @@ namespace System.Net.Security
             }
             catch (Exception exception)
             {
-                if (!ExceptionCheck.IsFatal(exception) && GlobalLog.IsEnabled)
+                if (!ExceptionCheck.IsFatal(exception))
                 {
-                    GlobalLog.Assert("SslState::WriteCallback", "Exception while decoding context. type:" + exception.GetType().ToString() + " message:" + exception.Message);
+                    if (GlobalLog.IsEnabled)
+                    {
+                        GlobalLog.Assert("SslState::WriteCallback", "Exception while decoding context. type:" + exception.GetType().ToString() + " message:" + exception.Message);
+                    }
+                    Debug.Fail("SslState::WriteCallback", "Exception while decoding context. type:" + exception.GetType().ToString() + " message:" + exception.Message);
                 }
 
                 throw;
@@ -1562,9 +1568,13 @@ namespace System.Net.Security
 
             int version = -1;
 
-            if (GlobalLog.IsEnabled && (bytes == null || bytes.Length == 0))
+            if ((bytes == null || bytes.Length == 0))
             {
-                GlobalLog.Assert("SslState::DetectFraming()|Header buffer is not allocated will boom shortly.");
+                if (GlobalLog.IsEnabled)
+                {
+                    GlobalLog.Assert("SslState::DetectFraming()|Header buffer is not allocated will boom shortly.");
+                }
+                Debug.Fail("SslState::DetectFraming()|Header buffer is not allocated will boom shortly.");
             }
 
             // If the first byte is SSL3 HandShake, then check if we have a SSLv3 Type3 client hello.
@@ -1579,7 +1589,10 @@ namespace System.Net.Security
 #if TRACE_VERBOSE
                 if (bytes[1] != 3) 
                 {
-                    GlobalLog.Print("WARNING: SslState::DetectFraming() SSL protocol is > 3, trying SSL3 framing in retail = " + bytes[1].ToString("x", NumberFormatInfo.InvariantInfo));
+                    if (GlobalLog.IsEnabled)
+                    {
+                        GlobalLog.Print("WARNING: SslState::DetectFraming() SSL protocol is > 3, trying SSL3 framing in retail = " + bytes[1].ToString("x", NumberFormatInfo.InvariantInfo));
+                    }
                 }
 #endif
 
@@ -1596,7 +1609,7 @@ namespace System.Net.Security
             }
 
 #if TRACE_VERBOSE
-            if ((bytes[0] & 0x80) == 0)
+            if ((bytes[0] & 0x80) == 0 && GlobalLog.IsEnabled)
             {
                 // We have a three-byte header format
                 GlobalLog.Print("WARNING: SslState::DetectFraming() SSL v <=2 HELLO has no high bit set for 3 bytes header, we are broken, received byte = " + bytes[0].ToString("x", NumberFormatInfo.InvariantInfo));
@@ -1662,8 +1675,7 @@ namespace System.Net.Security
         // This is called from SslStream class too.
         internal int GetRemainingFrameSize(byte[] buffer, int dataSize)
         {
-            bool globalLogRemaining = GlobalLog.IsEnabled;
-            if (globalLogRemaining)
+            if (GlobalLog.IsEnabled)
             {
                 GlobalLog.Enter("GetRemainingFrameSize", "dataSize = " + dataSize);
             }
@@ -1706,7 +1718,7 @@ namespace System.Net.Security
                     break;
             }
 
-            if (globalLogRemaining)
+            if (GlobalLog.IsEnabled)
             {
                 GlobalLog.Leave("GetRemainingFrameSize", payloadSize);
             }
@@ -1781,16 +1793,21 @@ namespace System.Net.Security
         private void RehandshakeCompleteCallback(IAsyncResult result)
         {
             LazyAsyncResult lazyAsyncResult = (LazyAsyncResult)result;
-            if (GlobalLog.IsEnabled)
+            if (lazyAsyncResult == null)
             {
-                if (lazyAsyncResult == null)
+                if (GlobalLog.IsEnabled)
                 {
                     GlobalLog.Assert("SslState::RehandshakeCompleteCallback()|result is null!");
                 }
-                if (!lazyAsyncResult.InternalPeekCompleted)
+                Debug.Fail("SslState::RehandshakeCompleteCallback()|result is null!");
+            }
+            if (!lazyAsyncResult.InternalPeekCompleted)
+            {
+                if (GlobalLog.IsEnabled)
                 {
                     GlobalLog.Assert("SslState::RehandshakeCompleteCallback()|result is not completed!");
                 }
+                Debug.Fail("SslState::RehandshakeCompleteCallback()|result is not completed!");
             }
 
             // If the rehandshake succeeded, FinishHandshake has already been called; if there was a SocketException

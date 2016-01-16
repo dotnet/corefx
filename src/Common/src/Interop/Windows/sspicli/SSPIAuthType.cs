@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.Diagnostics;
 using System.Globalization;
 using System.Net.Security;
 using System.Runtime.InteropServices;
@@ -26,7 +27,10 @@ namespace System.Net
 
         public int EnumerateSecurityPackages(out int pkgnum, out SafeFreeContextBuffer pkgArray)
         {
-            GlobalLog.Print("SSPIAuthType::EnumerateSecurityPackages()");
+            if (GlobalLog.IsEnabled)
+            {
+                GlobalLog.Print("SSPIAuthType::EnumerateSecurityPackages()");
+            }
             return SafeFreeContextBuffer.EnumeratePackages(out pkgnum, out pkgArray);
         }
 
@@ -104,7 +108,11 @@ namespace System.Net
 
             if (status == 0 && qop == Interop.SspiCli.SECQOP_WRAP_NO_ENCRYPT)
             {
-                GlobalLog.Assert("SspiCli.DecryptMessage", "Expected qop = 0, returned value = " + qop.ToString("x", CultureInfo.InvariantCulture));
+                if (GlobalLog.IsEnabled)
+                {
+                    GlobalLog.Assert("SspiCli.DecryptMessage", "Expected qop = 0, returned value = " + qop.ToString("x", CultureInfo.InvariantCulture));
+                }
+                Debug.Fail("SspiCli.DecryptMessage", "Expected qop = 0, returned value = " + qop.ToString("x", CultureInfo.InvariantCulture));
                 throw new InvalidOperationException(SR.net_auth_message_not_encrypted);
             }
 
