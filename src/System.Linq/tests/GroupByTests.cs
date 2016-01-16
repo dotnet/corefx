@@ -630,5 +630,17 @@ namespace System.Linq.Tests
             Assert.Equal(4, groupedList.Count);
             Assert.Equal(source.GroupBy(r => r.Name, (r, e) => e), groupedList);
         }
+
+        [Fact]
+        public void EmptyGroupingToArray()
+        {
+            Assert.Empty(Enumerable.Empty<int>().GroupBy(i => i).ToArray());
+        }
+
+        [Fact]
+        public void EmptyGroupingToList()
+        {
+            Assert.Empty(Enumerable.Empty<int>().GroupBy(i => i).ToList());
+        }
     }
 }
