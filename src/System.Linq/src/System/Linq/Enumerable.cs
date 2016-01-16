@@ -1392,43 +1392,189 @@ namespace System.Linq
         public static IEnumerable<TSource> Distinct<TSource>(this IEnumerable<TSource> source)
         {
             if (source == null) throw Error.ArgumentNull("source");
-            return DistinctIterator<TSource>(source, null);
+            return new DistinctIterator<TSource>(source, null);
         }
 
         public static IEnumerable<TSource> Distinct<TSource>(this IEnumerable<TSource> source, IEqualityComparer<TSource> comparer)
         {
             if (source == null) throw Error.ArgumentNull("source");
-            return DistinctIterator<TSource>(source, comparer);
+            return new DistinctIterator<TSource>(source, comparer);
         }
 
-        private static IEnumerable<TSource> DistinctIterator<TSource>(IEnumerable<TSource> source, IEqualityComparer<TSource> comparer)
+        private sealed class DistinctIterator<TSource> : Iterator<TSource>, IIListProvider<TSource>
         {
-            Set<TSource> set = new Set<TSource>(comparer);
-            foreach (TSource element in source)
-                if (set.Add(element)) yield return element;
+            private readonly IEnumerable<TSource> _source;
+            private readonly IEqualityComparer<TSource> _comparer;
+            private Set<TSource> _set;
+            private IEnumerator<TSource> _enumerator;
+
+            public DistinctIterator(IEnumerable<TSource> source, IEqualityComparer<TSource> comparer)
+            {
+                _source = source;
+                _comparer = comparer;
+            }
+
+            public override Iterator<TSource> Clone()
+            {
+                return new DistinctIterator<TSource>(_source, _comparer);
+            }
+
+            public override bool MoveNext()
+            {
+                switch (state)
+                {
+                    case 1:
+                        _set = new Set<TSource>(_comparer);
+                        _enumerator = _source.GetEnumerator();
+                        state = 2;
+                        goto case 2;
+                    case 2:
+                        while (_enumerator.MoveNext())
+                        {
+                            TSource element = _enumerator.Current;
+                            if (_set.Add(element))
+                            {
+                                current = element;
+                                return true;
+                            }
+                        }
+                        Dispose();
+                        break;
+                }
+                return false;
+            }
+
+            public override void Dispose()
+            {
+                if (_enumerator != null)
+                {
+                    _enumerator.Dispose();
+                    _enumerator = null;
+                }
+                base.Dispose();
+            }
+
+            private Set<TSource> FillList()
+            {
+                Set<TSource> set = new Set<TSource>(_comparer);
+                foreach (TSource element in _source)
+                    set.Add(element);
+                return set;
+            }
+
+            public TSource[] ToArray()
+            {
+                return FillList().ToArray();
+            }
+
+            public List<TSource> ToList()
+            {
+                return FillList().ToList();
+            }
         }
 
         public static IEnumerable<TSource> Union<TSource>(this IEnumerable<TSource> first, IEnumerable<TSource> second)
         {
             if (first == null) throw Error.ArgumentNull("first");
             if (second == null) throw Error.ArgumentNull("second");
-            return UnionIterator<TSource>(first, second, null);
+            return new UnionIterator<TSource>(first, second, null);
         }
 
         public static IEnumerable<TSource> Union<TSource>(this IEnumerable<TSource> first, IEnumerable<TSource> second, IEqualityComparer<TSource> comparer)
         {
             if (first == null) throw Error.ArgumentNull("first");
             if (second == null) throw Error.ArgumentNull("second");
-            return UnionIterator<TSource>(first, second, comparer);
+            return new UnionIterator<TSource>(first, second, comparer);
         }
 
-        private static IEnumerable<TSource> UnionIterator<TSource>(IEnumerable<TSource> first, IEnumerable<TSource> second, IEqualityComparer<TSource> comparer)
+        private sealed class UnionIterator<TSource> : Iterator<TSource>, IIListProvider<TSource>
         {
-            Set<TSource> set = new Set<TSource>(comparer);
-            foreach (TSource element in first)
-                if (set.Add(element)) yield return element;
-            foreach (TSource element in second)
-                if (set.Add(element)) yield return element;
+            private readonly IEnumerable<TSource> _first;
+            private readonly IEnumerable<TSource> _second;
+            private readonly IEqualityComparer<TSource> _comparer;
+            private Set<TSource> _set;
+            private IEnumerator<TSource> _enumerator;
+
+            public UnionIterator(IEnumerable<TSource> first, IEnumerable<TSource> second, IEqualityComparer<TSource> comparer)
+            {
+                _first = first;
+                _second = second;
+                _comparer = comparer;
+            }
+
+            public override Iterator<TSource> Clone()
+            {
+                return new UnionIterator<TSource>(_first, _second, _comparer);
+            }
+
+            private bool GetNext()
+            {
+                while (_enumerator.MoveNext())
+                {
+                    TSource element = _enumerator.Current;
+                    if (_set.Add(element))
+                    {
+                        current = element;
+                        return true;
+                    }
+                }
+                return false;
+            }
+
+            public override bool MoveNext()
+            {
+                switch (state)
+                {
+                    case 1:
+                        _set = new Set<TSource>(_comparer);
+                        _enumerator = _first.GetEnumerator();
+                        state = 2;
+                        goto case 2;
+                    case 2:
+                        if (GetNext())
+                            return true;
+                        _enumerator.Dispose();
+                        _enumerator = _second.GetEnumerator();
+                        state = 3;
+                        goto case 3;
+                    case 3:
+                        if (GetNext())
+                            return true;
+                        Dispose();
+                        break;
+                }
+                return false;
+            }
+
+            public override void Dispose()
+            {
+                if (_enumerator != null)
+                {
+                    _enumerator.Dispose();
+                    _enumerator = null;
+                }
+                base.Dispose();
+            }
+
+            private Set<TSource> FillList()
+            {
+                Set<TSource> set = new Set<TSource>(_comparer);
+                foreach (TSource element in _first)
+                    set.Add(element);
+                foreach (TSource element in _second)
+                    set.Add(element);
+                return set;
+            }
+
+            public TSource[] ToArray()
+            {
+                return FillList().ToArray();
+            }
+
+            public List<TSource> ToList()
+            {
+                return FillList().ToList();
+            }
         }
 
         public static IEnumerable<TSource> Intersect<TSource>(this IEnumerable<TSource> first, IEnumerable<TSource> second)
@@ -3973,6 +4119,29 @@ namespace System.Linq
             }
             _buckets = newBuckets;
             _slots = newSlots;
+        }
+
+        internal TElement[] ToArray()
+        {
+#if DEBUG
+            Debug.Assert(!_haveRemoved, "Optimised ToArray cannot be called if Remove has been called.");
+#endif
+            TElement[] array = new TElement[_count];
+            for (int i = 0; i != array.Length; ++i)
+                array[i] = _slots[i].value;
+            return array;
+        }
+
+        internal List<TElement> ToList()
+        {
+#if DEBUG
+            Debug.Assert(!_haveRemoved, "Optimised ToList cannot be called if Remove has been called.");
+#endif
+            int count = _count;
+            List<TElement> list = new List<TElement>(count);
+            for (int i = 0; i != count; ++i)
+                list.Add(_slots[i].value);
+            return list;
         }
 
         internal int InternalGetHashCode(TElement value)
