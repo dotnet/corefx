@@ -6,7 +6,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
-using System.Threading;
 
 namespace System.Linq
 {
@@ -48,6 +47,8 @@ namespace System.Linq
             if (selector == null) throw Error.ArgumentNull("selector");
             Iterator<TSource> iterator = source as Iterator<TSource>;
             if (iterator != null) return iterator.Select(selector);
+            IPartition<TSource> partition = source as IPartition<TSource>;
+            if (partition != null) return new SelectIPartitionIterator<TSource, TResult>(partition, selector);
             IList<TSource> ilist = source as IList<TSource>;
             if (ilist != null)
             {
@@ -530,7 +531,7 @@ namespace System.Linq
         }
 
 
-        internal sealed class SelectArrayIterator<TSource, TResult> : Iterator<TResult>, IPartition<TResult>
+        internal sealed class SelectArrayIterator<TSource, TResult> : Iterator<TResult>, IPartition<TResult>, IIListProvider<TResult>
         {
             private readonly TSource[] _source;
             private readonly Func<TSource, TResult> _selector;
@@ -586,55 +587,58 @@ namespace System.Linq
                 return results;
             }
 
-            public IEnumerable<TResult> Skip(int count)
+            public IPartition<TResult> Skip(int count)
             {
                 return count == 0
-                    ? (IEnumerable<TResult>)new SelectArrayIterator<TSource, TResult>(_source, _selector)
-                    : new SelectEnumerableIterator<TSource, TResult>(new SkipListIterator<TSource>(_source, count, int.MaxValue), _selector);
+                    ? (IPartition<TResult>)new SelectArrayIterator<TSource, TResult>(_source, _selector)
+                    : new SelectIPartitionIterator<TSource, TResult>(new SkipListIterator<TSource>(_source, count, int.MaxValue), _selector);
             }
 
-            public IEnumerable<TResult> Take(int count)
+            public IPartition<TResult> Take(int count)
             {
                 return count >= _source.Length
-                    ? (IEnumerable<TResult>)new SelectArrayIterator<TSource, TResult>(_source, _selector)
-                    : new SelectEnumerableIterator<TSource, TResult>(new SkipListIterator<TSource>(_source, 0, count - 1), _selector);
+                    ? (IPartition<TResult>)new SelectArrayIterator<TSource, TResult>(_source, _selector)
+                    : new SelectIPartitionIterator<TSource, TResult>(new SkipListIterator<TSource>(_source, 0, count - 1), _selector);
             }
 
-            public TResult ElementAt(int index)
+            public bool TryGetElementAt(int index, out TResult element)
             {
-                if ((uint)index >= (uint)_source.Length) throw Error.ArgumentOutOfRange("index");
-                return _selector(_source[index]);
+                if ((uint)index >= (uint)_source.Length)
+                {
+                    element = default(TResult);
+                    return false;
+                }
+
+                element = _selector(_source[index]);
+                return true;
             }
 
-            public TResult ElementAtOrDefault(int index)
+            public bool TryGetFirst(out TResult first)
             {
-                return (uint)index >= (uint)_source.Length ? default(TResult) : _selector(_source[index]);
+                if (_source.Length == 0)
+                {
+                    first = default(TResult);
+                    return false;
+                }
+
+                first = _selector(_source[0]);
+                return true;
             }
 
-            public TResult First()
+            public bool TryGetLast(out TResult last)
             {
-                if (_source.Length == 0) throw Error.NoElements();
-                return _selector(_source[0]);
-            }
+                if (_source.Length == 0)
+                {
+                    last = default(TResult);
+                    return false;
+                }
 
-            public TResult FirstOrDefault()
-            {
-                return _source.Length == 0 ? default(TResult) : _selector(_source[0]);
-            }
-
-            public TResult Last()
-            {
-                if (_source.Length == 0) throw Error.NoElements();
-                return _selector(_source[_source.Length - 1]);
-            }
-
-            public TResult LastOrDefault()
-            {
-                return _source.Length == 0 ? default(TResult) : _selector(_source[_source.Length - 1]);
+                last = _selector(_source[_source.Length - 1]);
+                return true;
             }
         }
 
-        internal sealed class SelectListIterator<TSource, TResult> : Iterator<TResult>, IPartition<TResult>
+        internal sealed class SelectListIterator<TSource, TResult> : Iterator<TResult>, IPartition<TResult>, IIListProvider<TResult>
         {
             private readonly List<TSource> _source;
             private readonly Func<TSource, TResult> _selector;
@@ -699,53 +703,56 @@ namespace System.Linq
                 return results;
             }
 
-            public IEnumerable<TResult> Skip(int count)
+            public IPartition<TResult> Skip(int count)
             {
                 return count == 0
-                    ? (IEnumerable<TResult>)new SelectListIterator<TSource, TResult>(_source, _selector)
-                    : new SelectEnumerableIterator<TSource, TResult>(new SkipListIterator<TSource>(_source, count, int.MaxValue), _selector);
+                    ? (IPartition<TResult>)new SelectListIterator<TSource, TResult>(_source, _selector)
+                    : new SelectIPartitionIterator<TSource, TResult>(new SkipListIterator<TSource>(_source, count, int.MaxValue), _selector);
             }
 
-            public IEnumerable<TResult> Take(int count)
+            public IPartition<TResult> Take(int count)
             {
-                return new SelectEnumerableIterator<TSource, TResult>(new SkipListIterator<TSource>(_source, 0, count - 1), _selector);
+                return new SelectIPartitionIterator<TSource, TResult>(new SkipListIterator<TSource>(_source, 0, count - 1), _selector);
             }
 
-            public TResult ElementAt(int index)
+            public bool TryGetElementAt(int index, out TResult element)
             {
-                // out of range throws correct exception with correct parameter name
-                return _selector(_source[index]);
+                if ((uint)index >= (uint)_source.Count)
+                {
+                    element = default(TResult);
+                    return false;
+                }
+
+                element = _selector(_source[index]);
+                return true;
             }
 
-            public TResult ElementAtOrDefault(int index)
+            public bool TryGetFirst(out TResult first)
             {
-                return (uint)index >= (uint)_source.Count ? default(TResult) : _selector(_source[index]);
+                if (_source.Count == 0)
+                {
+                    first = default(TResult);
+                    return false;
+                }
+
+                first = _selector(_source[0]);
+                return true;
             }
 
-            public TResult First()
+            public bool TryGetLast(out TResult result)
             {
-                if (_source.Count == 0) throw Error.NoElements();
-                return _selector(_source[0]);
-            }
+                if (_source.Count == 0)
+                {
+                    result = default(TResult);
+                    return false;
+                }
 
-            public TResult FirstOrDefault()
-            {
-                return _source.Count == 0 ? default(TResult) : _selector(_source[0]);
-            }
-
-            public TResult Last()
-            {
-                if (_source.Count == 0) throw Error.NoElements();
-                return _selector(_source[_source.Count - 1]);
-            }
-
-            public TResult LastOrDefault()
-            {
-                return _source.Count == 0 ? default(TResult) : _selector(_source[_source.Count - 1]);
+                result = _selector(_source[_source.Count - 1]);
+                return true;
             }
         }
 
-        internal sealed class SelectIListIterator<TSource, TResult> : Iterator<TResult>, IPartition<TResult>
+        internal sealed class SelectIListIterator<TSource, TResult> : Iterator<TResult>, IPartition<TResult>, IIListProvider<TResult>
         {
             private readonly IList<TSource> _source;
             private readonly Func<TSource, TResult> _selector;
@@ -820,77 +827,158 @@ namespace System.Linq
                 return results;
             }
 
-            public IEnumerable<TResult> Skip(int count)
+            public IPartition<TResult> Skip(int count)
             {
                 return count == 0
-                    ? (IEnumerable<TResult>)new SelectIListIterator<TSource, TResult>(_source, _selector)
-                    : new SelectEnumerableIterator<TSource, TResult>(new SkipListIterator<TSource>(_source, count, int.MaxValue), _selector);
+                    ? (IPartition<TResult>)new SelectIListIterator<TSource, TResult>(_source, _selector)
+                    : new SelectIPartitionIterator<TSource, TResult>(new SkipListIterator<TSource>(_source, count, int.MaxValue), _selector);
             }
 
-            public IEnumerable<TResult> Take(int count)
+            public IPartition<TResult> Take(int count)
             {
-                return new SelectEnumerableIterator<TSource, TResult>(new SkipListIterator<TSource>(_source, 0, count - 1), _selector);
+                return new SelectIPartitionIterator<TSource, TResult>(new SkipListIterator<TSource>(_source, 0, count - 1), _selector);
             }
 
-            public TResult ElementAt(int index)
+            public bool TryGetElementAt(int index, out TResult element)
             {
-                // IList implementation should throw correct argument with correct parameter name
-                // but lean on the side of caution and assume some do not.
-                if ((uint)index >= (uint)_source.Count) throw Error.ArgumentOutOfRange("index");
-                return _selector(_source[index]);
+                if ((uint)index >= (uint)_source.Count)
+                {
+                    element = default(TResult);
+                    return false;
+                }
+
+                element = _selector(_source[index]);
+                return true;
             }
 
-            public TResult ElementAtOrDefault(int index)
+            public bool TryGetFirst(out TResult first)
             {
-                return (uint)index >= (uint)_source.Count ? default(TResult) : _selector(_source[index]);
+                if (_source.Count == 0)
+                {
+                    first = default(TResult);
+                    return false;
+                }
+
+                first = _selector(_source[0]);
+                return true;
             }
 
-            public TResult First()
+            public bool TryGetLast(out TResult last)
             {
-                if (_source.Count == 0) throw Error.NoElements();
-                return _selector(_source[0]);
-            }
+                if (_source.Count == 0)
+                {
+                    last = default(TResult);
+                    return false;
+                }
 
-            public TResult FirstOrDefault()
-            {
-                return _source.Count == 0 ? default(TResult) : _selector(_source[0]);
-            }
-
-            public TResult Last()
-            {
-                if (_source.Count == 0) throw Error.NoElements();
-                return _selector(_source[_source.Count - 1]);
-            }
-
-            public TResult LastOrDefault()
-            {
-                return _source.Count == 0 ? default(TResult) : _selector(_source[_source.Count - 1]);
+                last = _selector(_source[_source.Count - 1]);
+                return true;
             }
         }
 
-        //public static IEnumerable<TSource> Where<TSource>(this IEnumerable<TSource> source, Func<TSource, bool> predicate) {
-        //    if (source == null) throw Error.ArgumentNull("source");
-        //    if (predicate == null) throw Error.ArgumentNull("predicate");
-        //    return WhereIterator<TSource>(source, predicate);
-        //}
+        internal sealed class SelectIPartitionIterator<TSource, TResult> : Iterator<TResult>, IPartition<TResult>
+        {
+            private readonly IPartition<TSource> _source;
+            private readonly Func<TSource, TResult> _selector;
+            private IEnumerator<TSource> _enumerator;
 
-        //static IEnumerable<TSource> WhereIterator<TSource>(IEnumerable<TSource> source, Func<TSource, bool> predicate) {
-        //    foreach (TSource element in source) {
-        //        if (predicate(element)) yield return element;
-        //    }
-        //}
+            public SelectIPartitionIterator(IPartition<TSource> source, Func<TSource, TResult> selector)
+            {
+                Debug.Assert(source != null);
+                Debug.Assert(selector != null);
+                _source = source;
+                _selector = selector;
+            }
 
-        //public static IEnumerable<TResult> Select<TSource, TResult>(this IEnumerable<TSource> source, Func<TSource, TResult> selector) {
-        //    if (source == null) throw Error.ArgumentNull("source");
-        //    if (selector == null) throw Error.ArgumentNull("selector");
-        //    return SelectIterator<TSource, TResult>(source, selector);
-        //}
+            public override Iterator<TResult> Clone()
+            {
+                return new SelectIPartitionIterator<TSource, TResult>(_source, _selector);
+            }
 
-        //static IEnumerable<TResult> SelectIterator<TSource, TResult>(IEnumerable<TSource> source, Func<TSource, TResult> selector) {
-        //    foreach (TSource element in source) {
-        //        yield return selector(element);
-        //    }
-        //}
+            public override bool MoveNext()
+            {
+                switch (state)
+                {
+                    case 1:
+                        _enumerator = _source.GetEnumerator();
+                        state = 2;
+                        goto case 2;
+                    case 2:
+                        if (_enumerator.MoveNext())
+                        {
+                            current = _selector(_enumerator.Current);
+                            return true;
+                        }
+                        Dispose();
+                        break;
+                }
+                return false;
+            }
+
+            public override void Dispose()
+            {
+                if (_enumerator != null)
+                {
+                    _enumerator.Dispose();
+                    _enumerator = null;
+                }
+                base.Dispose();
+            }
+
+            public override IEnumerable<TResult2> Select<TResult2>(Func<TResult, TResult2> selector)
+            {
+                return new SelectIPartitionIterator<TSource, TResult2>(_source, CombineSelectors(_selector, selector));
+            }
+
+            public IPartition<TResult> Skip(int count)
+            {
+                return new SelectIPartitionIterator<TSource, TResult>(_source.Skip(count), _selector);
+            }
+
+            public IPartition<TResult> Take(int count)
+            {
+                return new SelectIPartitionIterator<TSource, TResult>(_source.Take(count), _selector);
+            }
+
+            public bool TryGetElementAt(int index, out TResult element)
+            {
+                TSource input;
+                if (_source.TryGetElementAt(index, out input))
+                {
+                    element = _selector(input);
+                    return true;
+                }
+
+                element = default(TResult);
+                return false;
+            }
+
+            public bool TryGetFirst(out TResult first)
+            {
+                TSource input;
+                if (_source.TryGetFirst(out input))
+                {
+                    first = _selector(input);
+                    return true;
+                }
+
+                first = default(TResult);
+                return false;
+            }
+
+            public bool TryGetLast(out TResult last)
+            {
+                TSource input;
+                if (_source.TryGetLast(out input))
+                {
+                    last = _selector(input);
+                    return true;
+                }
+
+                last = default(TResult);
+                return false;
+            }
+        }
 
         public static IEnumerable<TResult> SelectMany<TSource, TResult>(this IEnumerable<TSource> source, Func<TSource, IEnumerable<TResult>> selector)
         {
@@ -1033,7 +1121,7 @@ namespace System.Linq
             return sourceList != null ? new SkipListIterator<TSource>(sourceList, count, int.MaxValue) : SkipIterator<TSource>(source, count);
         }
 
-        private sealed class SkipListIterator<TSource> : Iterator<TSource>, IPartition<TSource>
+        private sealed class SkipListIterator<TSource> : Iterator<TSource>, IPartition<TSource>, IIListProvider<TSource>
         {
             private readonly IList<TSource> _source;
             private readonly int _minIndex;
@@ -1076,7 +1164,7 @@ namespace System.Linq
                 return false;
             }
 
-            public IEnumerable<TSource> Skip(int count)
+            public IPartition<TSource> Skip(int count)
             {
                 int minIndex = _minIndex + count;
                 return minIndex >= _maxIndex
@@ -1084,47 +1172,48 @@ namespace System.Linq
                     : new SkipListIterator<TSource>(_source, minIndex, _maxIndex);
             }
 
-            public IEnumerable<TSource> Take(int count)
+            public IPartition<TSource> Take(int count)
             {
                 int maxIndex = _minIndex + count - 1;
                 if (maxIndex >= _maxIndex) maxIndex = _maxIndex;
                 return new SkipListIterator<TSource>(_source, _minIndex, maxIndex);
             }
 
-            public TSource ElementAt(int index)
+            public bool TryGetElementAt(int index, out TSource element)
             {
-                if ((uint)index > (uint)_maxIndex - _minIndex || index >= _source.Count - _minIndex) throw Error.ArgumentOutOfRange("index");
-                return _source[_minIndex + index];
+                if ((uint)index > (uint)_maxIndex - _minIndex || index >= _source.Count - _minIndex)
+                {
+                    element = default(TSource);
+                    return false;
+                }
+
+                element = _source[_minIndex + index];
+                return true;
             }
 
-            public TSource ElementAtOrDefault(int index)
+            public bool TryGetFirst(out TSource first)
             {
-                return (uint)index > (uint)_maxIndex - _minIndex || index >= _source.Count - _minIndex ? default(TSource) : _source[_minIndex + index];
+                if (_source.Count <= _minIndex)
+                {
+                    first = default(TSource);
+                    return false;
+                }
+
+                first = _source[_minIndex];
+                return true;
             }
 
-            public TSource First()
-            {
-                if (_source.Count <=  _minIndex) throw Error.NoElements();
-                return _source[_minIndex];
-            }
-
-            public TSource FirstOrDefault()
-            {
-                return _source.Count <= _minIndex ? default(TSource) : _source[_minIndex];
-            }
-
-            public TSource Last()
+            public bool TryGetLast(out TSource last)
             {
                 int lastIndex = _source.Count - 1;
-                if (lastIndex < _minIndex) throw Error.NoElements();
-                return _source[lastIndex > _maxIndex ? _maxIndex : lastIndex];
-            }
+                if (lastIndex < _minIndex)
+                {
+                    last = default(TSource);
+                    return false;
+                }
 
-            public TSource LastOrDefault()
-            {
-                int lastIndex = _source.Count - 1;
-                if (lastIndex < _minIndex) return default(TSource);
-                return _source[lastIndex > _maxIndex ? _maxIndex : lastIndex];
+                last = _source[lastIndex > _maxIndex ? _maxIndex : lastIndex];
+                return true;
             }
 
             public TSource[] ToArray()
@@ -1908,17 +1997,25 @@ namespace System.Linq
         {
             if (source == null) throw Error.ArgumentNull("source");
             IPartition<TSource> partition = source as IPartition<TSource>;
-            if (partition != null) return partition.First();
-            IList<TSource> list = source as IList<TSource>;
-            if (list != null)
+            if (partition != null)
             {
-                if (list.Count > 0) return list[0];
+                TSource result;
+                if (partition.TryGetFirst(out result))
+                    return result;
             }
             else
             {
-                using (IEnumerator<TSource> e = source.GetEnumerator())
+                IList<TSource> list = source as IList<TSource>;
+                if (list != null)
                 {
-                    if (e.MoveNext()) return e.Current;
+                    if (list.Count > 0) return list[0];
+                }
+                else
+                {
+                    using (IEnumerator<TSource> e = source.GetEnumerator())
+                    {
+                        if (e.MoveNext()) return e.Current;
+                    }
                 }
             }
             throw Error.NoElements();
@@ -1941,7 +2038,12 @@ namespace System.Linq
         {
             if (source == null) throw Error.ArgumentNull("source");
             IPartition<TSource> partition = source as IPartition<TSource>;
-            if (partition != null) return partition.FirstOrDefault();
+            if (partition != null)
+            {
+                TSource result;
+                partition.TryGetFirst(out result);
+                return result;
+            }
             IList<TSource> list = source as IList<TSource>;
             if (list != null)
             {
@@ -1974,25 +2076,33 @@ namespace System.Linq
         {
             if (source == null) throw Error.ArgumentNull("source");
             IPartition<TSource> partition = source as IPartition<TSource>;
-            if (partition != null) return partition.Last();
-            IList<TSource> list = source as IList<TSource>;
-            if (list != null)
+            if (partition != null)
             {
-                int count = list.Count;
-                if (count > 0) return list[count - 1];
+                TSource result;
+                if (partition.TryGetLast(out result))
+                    return result;
             }
             else
             {
-                using (IEnumerator<TSource> e = source.GetEnumerator())
+                IList<TSource> list = source as IList<TSource>;
+                if (list != null)
                 {
-                    if (e.MoveNext())
+                    int count = list.Count;
+                    if (count > 0) return list[count - 1];
+                }
+                else
+                {
+                    using (IEnumerator<TSource> e = source.GetEnumerator())
                     {
-                        TSource result;
-                        do
+                        if (e.MoveNext())
                         {
-                            result = e.Current;
-                        } while (e.MoveNext());
-                        return result;
+                            TSource result;
+                            do
+                            {
+                                result = e.Current;
+                            } while (e.MoveNext());
+                            return result;
+                        }
                     }
                 }
             }
@@ -2040,7 +2150,12 @@ namespace System.Linq
         {
             if (source == null) throw Error.ArgumentNull("source");
             IPartition<TSource> partition = source as IPartition<TSource>;
-            if (partition != null) return partition.LastOrDefault();
+            if (partition != null)
+            {
+                TSource result;
+                partition.TryGetLast(out result);
+                return result;
+            }
             IList<TSource> list = source as IList<TSource>;
             if (list != null)
             {
@@ -2191,17 +2306,25 @@ namespace System.Linq
         {
             if (source == null) throw Error.ArgumentNull("source");
             IPartition<TSource> partition = source as IPartition<TSource>;
-            if (partition != null) return partition.ElementAt(index);
-            IList<TSource> list = source as IList<TSource>;
-            if (list != null) return list[index];
-            if (index >= 0)
+            if (partition != null)
             {
-                using (IEnumerator<TSource> e = source.GetEnumerator())
+                TSource result;
+                if (partition.TryGetElementAt(index, out result))
+                    return result;
+            }
+            else
+            {
+                IList<TSource> list = source as IList<TSource>;
+                if (list != null) return list[index];
+                if (index >= 0)
                 {
-                    while (e.MoveNext())
+                    using (IEnumerator<TSource> e = source.GetEnumerator())
                     {
-                        if (index == 0) return e.Current;
-                        index--;
+                        while (e.MoveNext())
+                        {
+                            if (index == 0) return e.Current;
+                            index--;
+                        }
                     }
                 }
             }
@@ -2212,7 +2335,12 @@ namespace System.Linq
         {
             if (source == null) throw Error.ArgumentNull("source");
             IPartition<TSource> partition = source as IPartition<TSource>;
-            if (partition != null) return partition.ElementAtOrDefault(index);
+            if (partition != null)
+            {
+                TSource result;
+                partition.TryGetElementAt(index, out result);
+                return result;
+            }
             if (index >= 0)
             {
                 IList<TSource> list = source as IList<TSource>;
@@ -2243,7 +2371,7 @@ namespace System.Linq
             return new RangeIterator(start, count);
         }
 
-        private sealed class RangeIterator : Iterator<int>, IPartition<int>
+        private sealed class RangeIterator : Iterator<int>, IPartition<int>, IIListProvider<int>
         {
             private readonly int _start;
             private readonly int _end;
@@ -2305,48 +2433,41 @@ namespace System.Linq
                 return list;
             }
 
-            public IEnumerable<int> Skip(int count)
+            public IPartition<int> Skip(int count)
             {
                 if (count >= _end - _start) return new EmptyPartition<int>();
                 return new RangeIterator(_start + count, _end - _start - count);
             }
 
-            public IEnumerable<int> Take(int count)
+            public IPartition<int> Take(int count)
             {
                 int curCount = _end - _start;
                 if (count > curCount) count = curCount;
                 return new RangeIterator(_start, count);
             }
 
-            public int ElementAt(int index)
+            public bool TryGetElementAt(int index, out int element)
             {
-                if ((uint)index >= (uint)(_end - _start)) throw Error.ArgumentOutOfRange("index");
-                return _start + index;
+                if ((uint)index >= (uint)(_end - _start))
+                {
+                    element = 0;
+                    return false;
+                }
+
+                element = _start + index;
+                return true;
             }
 
-            public int ElementAtOrDefault(int index)
+            public bool TryGetFirst(out int first)
             {
-                return (uint)index >= (uint)(_end - _start) ? 0 : _start + index;
+                first = _start;
+                return true;
             }
 
-            public int First()
+            public bool TryGetLast(out int last)
             {
-                return _start;
-            }
-
-            public int FirstOrDefault()
-            {
-                return _start;
-            }
-
-            public int Last()
-            {
-                return _end - 1;
-            }
-
-            public int LastOrDefault()
-            {
-                return _end - 1;
+                last = _end - 1;
+                return true;
             }
         }
 
@@ -2357,7 +2478,7 @@ namespace System.Linq
             return new RepeatIterator<TResult>(element, count);
         }
 
-        private sealed class RepeatIterator<TResult> : Iterator<TResult>, IPartition<TResult>
+        private sealed class RepeatIterator<TResult> : Iterator<TResult>, IPartition<TResult>, IIListProvider<TResult>
         {
             private readonly int _count;
             private int _sent;
@@ -2409,47 +2530,40 @@ namespace System.Linq
                 return list;
             }
 
-            public IEnumerable<TResult> Skip(int count)
+            public IPartition<TResult> Skip(int count)
             {
                 if (count >= _count) return new EmptyPartition<TResult>();
                 return new RepeatIterator<TResult>(current, _count - count);
             }
 
-            public IEnumerable<TResult> Take(int count)
+            public IPartition<TResult> Take(int count)
             {
                 if (count > _count) count = _count;
                 return new RepeatIterator<TResult>(current, count);
             }
 
-            public TResult ElementAt(int index)
+            public bool TryGetElementAt(int index, out TResult element)
             {
-                if ((uint)index >= (uint)_count) throw Error.ArgumentOutOfRange("index");
-                return current;
+                if ((uint)index >= (uint)_count)
+                {
+                    element = default(TResult);
+                    return false;
+                }
+
+                element = current;
+                return true;
             }
 
-            public TResult ElementAtOrDefault(int index)
+            public bool TryGetFirst(out TResult first)
             {
-                return (uint)index >= (uint)_count ? default(TResult) : current;
+                first = current;
+                return true;
             }
 
-            public TResult First()
+            public bool TryGetLast(out TResult last)
             {
-                return current;
-            }
-
-            public TResult FirstOrDefault()
-            {
-                return current;
-            }
-
-            public TResult Last()
-            {
-                return current;
-            }
-
-            public TResult LastOrDefault()
-            {
-                return current;
+                last = current;
+                return true;
             }
         }
 
@@ -4288,26 +4402,20 @@ namespace System.Linq
         }
     }
 
-    internal interface IPartition<TElement> : IEnumerable<TElement>, IIListProvider<TElement>
+    internal interface IPartition<TElement> : IEnumerable<TElement>
     {
-        IEnumerable<TElement> Skip(int count);
+        IPartition<TElement> Skip(int count);
 
-        IEnumerable<TElement> Take(int count);
+        IPartition<TElement> Take(int count);
 
-        TElement ElementAt(int index);
+        bool TryGetElementAt(int index, out TElement element);
 
-        TElement ElementAtOrDefault(int index);
+        bool TryGetFirst(out TElement first);
 
-        TElement First();
-
-        TElement FirstOrDefault();
-
-        TElement Last();
-
-        TElement LastOrDefault();
+        bool TryGetLast(out TElement last);
     }
 
-    internal sealed class EmptyPartition<TElement> : IPartition<TElement>, IEnumerator<TElement>
+    internal sealed class EmptyPartition<TElement> : IPartition<TElement>, IEnumerator<TElement>, IIListProvider<TElement>
     {
         public EmptyPartition()
         {
@@ -4350,44 +4458,32 @@ namespace System.Linq
             // Do nothing.
         }
 
-        public IEnumerable<TElement> Skip(int count)
+        public IPartition<TElement> Skip(int count)
         {
             return new EmptyPartition<TElement>();
         }
 
-        public IEnumerable<TElement> Take(int count)
+        public IPartition<TElement> Take(int count)
         {
             return new EmptyPartition<TElement>();
         }
 
-        public TElement ElementAt(int index)
+        public bool TryGetElementAt(int index, out TElement element)
         {
-            throw Error.ArgumentOutOfRange("index");
+            element = default(TElement);
+            return false;
         }
 
-        public TElement ElementAtOrDefault(int index)
+        public bool TryGetFirst(out TElement first)
         {
-            return default(TElement);
+            first = default(TElement);
+            return false;
         }
 
-        public TElement First()
+        public bool TryGetLast(out TElement last)
         {
-            throw Error.NoElements();
-        }
-
-        public TElement FirstOrDefault()
-        {
-            return default(TElement);
-        }
-
-        public TElement Last()
-        {
-            throw Error.NoElements();
-        }
-
-        public TElement LastOrDefault()
-        {
-            return default(TElement);
+            last = default(TElement);
+            return false;
         }
 
         public TElement[] ToArray()
@@ -4401,7 +4497,7 @@ namespace System.Linq
         }
     }
 
-    internal sealed class OrderedPartition<TElement> : IPartition<TElement>
+    internal sealed class OrderedPartition<TElement> : IPartition<TElement>, IIListProvider<TElement>
     {
         private readonly OrderedEnumerable<TElement> _source;
         private readonly int _minIndex;
@@ -4424,7 +4520,7 @@ namespace System.Linq
             return GetEnumerator();
         }
 
-        public IEnumerable<TElement> Skip(int count)
+        public IPartition<TElement> Skip(int count)
         {
             int minIndex = _minIndex + count;
             return minIndex >= _maxIndex
@@ -4432,44 +4528,32 @@ namespace System.Linq
                 : new OrderedPartition<TElement>(_source, minIndex, _maxIndex);
         }
 
-        public IEnumerable<TElement> Take(int count)
+        public IPartition<TElement> Take(int count)
         {
             int maxIndex = _minIndex + count - 1;
             if (maxIndex >= _maxIndex) maxIndex = _maxIndex;
             return new OrderedPartition<TElement>(_source, _minIndex, maxIndex);
         }
 
-        public TElement ElementAt(int index)
+        public bool TryGetElementAt(int index, out TElement element)
         {
-            if ((uint)index > (uint)_maxIndex - _minIndex) throw Error.ArgumentOutOfRange("index");
-            return _source.ElementAt(index + _minIndex);
+            if ((uint)index > (uint)_maxIndex - _minIndex)
+            {
+                element = default(TElement);
+                return false;
+            }
+
+            return _source.TryGetElementAt(index + _minIndex, out element);
         }
 
-        public TElement ElementAtOrDefault(int index)
+        public bool TryGetFirst(out TElement first)
         {
-            return (uint)index <= (uint)_maxIndex - _minIndex ? _source.ElementAtOrDefault(index + _minIndex) : default(TElement);
+            return _source.TryGetElementAt(_minIndex, out first);
         }
 
-        public TElement First()
+        public bool TryGetLast(out TElement element)
         {
-            TElement result;
-            if (!_source.TryGetElementAt(_minIndex, out result)) throw Error.NoElements();
-            return result;
-        }
-
-        public TElement FirstOrDefault()
-        {
-            return _source.ElementAtOrDefault(_minIndex);
-        }
-
-        public TElement Last()
-        {
-            return _source.Last(_minIndex, _maxIndex);
-        }
-
-        public TElement LastOrDefault()
-        {
-            return _source.LastOrDefault(_minIndex, _maxIndex);
+            return _source.TryGetLast(_minIndex, _maxIndex, out element);
         }
 
         public TElement[] ToArray()
@@ -4483,7 +4567,7 @@ namespace System.Linq
         }
     }
 
-    internal abstract class OrderedEnumerable<TElement> : IOrderedEnumerable<TElement>, IPartition<TElement>
+    internal abstract class OrderedEnumerable<TElement> : IOrderedEnumerable<TElement>, IPartition<TElement>, IIListProvider<TElement>
     {
         internal IEnumerable<TElement> source;
 
@@ -4617,12 +4701,12 @@ namespace System.Linq
             return result;
         }
 
-        public IEnumerable<TElement> Skip(int count)
+        public IPartition<TElement> Skip(int count)
         {
             return new OrderedPartition<TElement>(this, count, int.MaxValue);
         }
 
-        public IEnumerable<TElement> Take(int count)
+        public IPartition<TElement> Take(int count)
         {
             return new OrderedPartition<TElement>(this, 0, count - 1);
         }
@@ -4644,21 +4728,7 @@ namespace System.Linq
             return false;
         }
 
-        public TElement ElementAt(int index)
-        {
-            TElement result;
-            if (!TryGetElementAt(index, out result)) throw Error.ArgumentOutOfRange("index");
-            return result;
-        }
-
-        public TElement ElementAtOrDefault(int index)
-        {
-            TElement result;
-            TryGetElementAt(index, out result);
-            return result;
-        }
-
-        private bool TryGetFirst(out TElement result)
+        public bool TryGetFirst(out TElement result)
         {
             CachingComparer<TElement> comparer = GetComparer();
             using (IEnumerator<TElement> e = source.GetEnumerator())
@@ -4678,20 +4748,6 @@ namespace System.Linq
                 result = value;
                 return true;
             }
-        }
-
-        public TElement FirstOrDefault()
-        {
-            TElement result;
-            TryGetFirst(out result);
-            return result;
-        }
-
-        public TElement First()
-        {
-            TElement result;
-            if (!TryGetFirst(out result)) throw Error.NoElements();
-            return result;
         }
 
         public TElement First(Func<TElement, bool> predicate)
@@ -4736,12 +4792,16 @@ namespace System.Linq
             }
         }
 
-        public TElement Last()
+        public bool TryGetLast(out TElement element)
         {
             CachingComparer<TElement> comparer = GetComparer();
             using (IEnumerator<TElement> e = source.GetEnumerator())
             {
-                if (!e.MoveNext()) throw Error.NoElements();
+                if (!e.MoveNext())
+                {
+                    element = default(TElement);
+                    return false;
+                }
                 TElement value = e.Current;
                 comparer.SetElement(value);
                 while (e.MoveNext())
@@ -4749,45 +4809,28 @@ namespace System.Linq
                     TElement x = e.Current;
                     if (comparer.Compare(x, false) >= 0) value = x;
                 }
-                return value;
+                element = value;
+                return true;
             }
+
         }
 
-        public TElement LastOrDefault()
-        {
-            CachingComparer<TElement> comparer = GetComparer();
-            using (IEnumerator<TElement> e = source.GetEnumerator())
-            {
-                if (!e.MoveNext()) return default(TElement);
-                TElement value = e.Current;
-                comparer.SetElement(value);
-                while (e.MoveNext())
-                {
-                    TElement x = e.Current;
-                    if (comparer.Compare(x, false) >= 0) value = x;
-                }
-                return value;
-            }
-        }
-
-        public TElement Last(int minIdx, int maxIdx)
+        public bool TryGetLast(int minIdx, int maxIdx, out TElement last)
         {
             Buffer<TElement> buffer = new Buffer<TElement>(source);
             int count = buffer.count;
-            if (minIdx >= count) throw Error.NoElements();
-            if (maxIdx < count - 1) return GetEnumerableSorter().ElementAt(buffer.items, count, maxIdx);
+            if (minIdx >= count)
+            {
+                last = default(TElement);
+                return false;
+            }
+            if (maxIdx < count - 1)
+                last = GetEnumerableSorter().ElementAt(buffer.items, count, maxIdx);
             // If we're here, we want the same results we would have got from
             // Last(), but we've already buffered our source.
-            return Last(buffer);
-        }
-
-        public TElement LastOrDefault(int minIdx, int maxIdx)
-        {
-            Buffer<TElement> buffer = new Buffer<TElement>(source);
-            int count = buffer.count;
-            if (minIdx >= count) return default(TElement);
-            if (maxIdx < count - 1) return GetEnumerableSorter().ElementAt(buffer.items, count, maxIdx);
-            return Last(buffer);
+            else
+                last = Last(buffer);
+            return true;
         }
 
         private TElement Last(Buffer<TElement> buffer)

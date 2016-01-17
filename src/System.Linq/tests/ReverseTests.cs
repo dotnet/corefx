@@ -77,5 +77,31 @@ namespace System.Linq.Tests
             var en = iterator as IEnumerator<int>;
             Assert.False(en != null && en.MoveNext());
         }
+
+        [Fact]
+        public void ToArray()
+        {
+            int?[] source = new int?[] { -10, 0, 5, null, 0, 9, 100, null, 9 };
+            int?[] expected = new int?[] { 9, null, 100, 9, 0, null, 5, 0, -10 };
+
+            Assert.Equal(expected, source.Reverse().ToArray());
+        }
+
+        [Fact]
+        public void ToList()
+        {
+            int?[] source = new int?[] { -10, 0, 5, null, 0, 9, 100, null, 9 };
+            int?[] expected = new int?[] { 9, null, 100, 9, 0, null, 5, 0, -10 };
+
+            Assert.Equal(expected, source.Reverse().ToList());
+        }
+
+        [Fact]
+        public void RepeatEnumerating()
+        {
+            var reversed = new int?[] { -10, 0, 5, null, 0, 9, 100, null, 9 }.Reverse();
+
+            Assert.Equal(reversed, reversed);
+        }
     }
 }

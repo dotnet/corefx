@@ -351,5 +351,35 @@ namespace System.Linq.Tests
             while (enumerator.MoveNext()) { }
             Assert.False(enumerator.MoveNext());
         }
+
+        [Fact]
+        public void SubsetAfterSelect()
+        {
+            var page = Enumerable.Range(0, 50).Shuffle().OrderBy(i => i).Select(i => i * 2).Skip(20).Take(5);
+            Assert.Equal(new[] { 40, 42, 44, 46, 48 }, page);
+            Assert.Equal(new[] { 41, 43, 45, 47, 49 }, page.Select(i => i + 1));
+            Assert.Equal(40, page.First());
+            Assert.Equal(48, page.Last());
+            Assert.Equal(42, page.ElementAt(1));
+            Assert.Throws<ArgumentOutOfRangeException>("index", () => page.ElementAt(20));
+            page = Enumerable.Range(0, 50).Shuffle().OrderBy(i => i).Select(i => i * 2).Skip(100).Take(5);
+            Assert.Throws<InvalidOperationException>(() => page.First());
+            Assert.Throws<InvalidOperationException>(() => page.Last());
+        }
+
+        [Fact]
+        public void SubsetAfterSelectEnumeratorDoesntContinue()
+        {
+            var enumerator = NumberRangeGuaranteedNotCollectionType(0, 3).Shuffle().OrderBy(i => i).Select(i => i * 2).Take(1).GetEnumerator();
+            while (enumerator.MoveNext()) { }
+            Assert.False(enumerator.MoveNext());
+        }
+
+        [Fact]
+        public void SubsetAfterSelectRepeatEnumerating()
+        {
+            var page = NumberRangeGuaranteedNotCollectionType(0, 3).Shuffle().OrderBy(i => i).Select(i => i * 2).Take(1);
+            Assert.Equal(page, page);
+        }
     }
 }
