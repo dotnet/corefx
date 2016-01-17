@@ -1624,13 +1624,69 @@ namespace System.Linq
         public static IEnumerable<TSource> Reverse<TSource>(this IEnumerable<TSource> source)
         {
             if (source == null) throw Error.ArgumentNull("source");
-            return ReverseIterator<TSource>(source);
+            return new ReverseIterator<TSource>(source);
         }
 
-        private static IEnumerable<TSource> ReverseIterator<TSource>(IEnumerable<TSource> source)
+        private sealed class ReverseIterator<TSource> : Iterator<TSource>, IIListProvider<TSource>
         {
-            Buffer<TSource> buffer = new Buffer<TSource>(source);
-            for (int i = buffer.count - 1; i >= 0; i--) yield return buffer.items[i];
+            private readonly IEnumerable<TSource> _source;
+            private Buffer<TSource> _buffer;
+            private int _index;
+
+            public ReverseIterator(IEnumerable<TSource> source)
+            {
+                Debug.Assert(source != null);
+                _source = source;
+            }
+
+            public override Iterator<TSource> Clone()
+            {
+                return new ReverseIterator<TSource>(_source);
+            }
+
+            public override bool MoveNext()
+            {
+                switch(state)
+                {
+                    case 1:
+                        _buffer = new Buffer<TSource>(_source);
+                        _index = _buffer.count - 1;
+                        state = 2;
+                        goto case 2;
+                    case 2:
+                        if (_index >= 0)
+                        {
+                            current = _buffer.items[_index];
+                            --_index;
+                            return true;
+                        }
+                        break;
+                }
+                Dispose();
+                return false;
+            }
+
+            public TSource[] ToArray()
+            {
+                Buffer<TSource> buffer = new Buffer<TSource>(_source);
+                int count = buffer.count;
+                TSource[] sourceArray = buffer.items;
+                TSource[] array = new TSource[count];
+                for (int i = 0, sourceIdx = count - 1; i != array.Length; ++i, --sourceIdx)
+                    array[i] = sourceArray[sourceIdx];
+                return array;
+            }
+
+            public List<TSource> ToList()
+            {
+                Buffer<TSource> buffer = new Buffer<TSource>(_source);
+                int count = buffer.count;
+                TSource[] sourceArray = buffer.items;
+                List<TSource> list = new List<TSource>(count);
+                for (int i = count - 1; i >= 0; --i)
+                    list.Add(sourceArray[i]);
+                return list;
+            }
         }
 
         public static bool SequenceEqual<TSource>(this IEnumerable<TSource> first, IEnumerable<TSource> second)
