@@ -86,11 +86,25 @@ namespace System.Net.Security
 
         internal void Write(byte[] buffer, int offset, int count)
         {
+            ValidateParameters(buffer, offset, count);
+
+            if (Interlocked.Exchange(ref _NestedWrite, 1) == 1)
+            {
+                throw new NotSupportedException(SR.Format(SR.net_io_invalidnestedcall, "Write", "write"));
+            }
+
             ProcessWrite(buffer, offset, count);
         }
 
         internal Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
         {
+            ValidateParameters(buffer, offset, count);
+
+            if (Interlocked.Exchange(ref _NestedWrite, 1) == 1)
+            {
+                throw new NotSupportedException(SR.Format(SR.net_io_invalidnestedcall, "Write", "write"));
+            }
+
             return ProcessWriteAsync(buffer, offset, count, cancellationToken);
         }
 
@@ -207,13 +221,6 @@ namespace System.Net.Security
         //
         private void ProcessWrite(byte[] buffer, int offset, int count)
         {
-            ValidateParameters(buffer, offset, count);
-
-            if (Interlocked.Exchange(ref _NestedWrite, 1) == 1)
-            {
-                throw new NotSupportedException(SR.Format(SR.net_io_invalidnestedcall, "Write", "write"));
-            }
-
             try
             {
                 StartWriting(buffer, offset, count);
@@ -237,16 +244,9 @@ namespace System.Net.Security
 
         private async Task ProcessWriteAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
         {
-            ValidateParameters(buffer, offset, count);
-
-            if (Interlocked.Exchange(ref _NestedWrite, 1) == 1)
-            {
-                throw new NotSupportedException(SR.Format(SR.net_io_invalidnestedcall, "Write", "write"));
-            }
-
             try
             {
-                await StartWritingAsync(buffer, offset, count, cancellationToken);
+                await StartWritingAsync(buffer, offset, count, cancellationToken).ConfigureAwait(false);
             }
             catch (Exception e)
             {
@@ -371,7 +371,7 @@ namespace System.Net.Security
                     int chunkBytes = Math.Min(count, _SslState.MaxDataSize);
                     int encryptedBytes = EncryptWritingBuffer(buffer, offset, outBuffer, chunkBytes);
 
-                    await _SslState.InnerStream.WriteAsync(outBuffer, 0, encryptedBytes, cancellationToken);
+                    await _SslState.InnerStream.WriteAsync(outBuffer, 0, encryptedBytes, cancellationToken).ConfigureAwait(false);
 
                     offset += chunkBytes;
                     count -= chunkBytes;
