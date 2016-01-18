@@ -429,6 +429,11 @@ namespace System.Net.Security
         {
             return _sslState.SecureStream.Read(buffer, offset, count);
         }
+        
+        public override Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
+        {
+            return _sslState.SecureStream.ReadAsync(buffer, offset, count, cancellationToken);
+        }
 
         public void Write(byte[] buffer)
         {
@@ -438,6 +443,11 @@ namespace System.Net.Security
         public override void Write(byte[] buffer, int offset, int count)
         {
             _sslState.SecureStream.Write(buffer, offset, count);
+        }
+
+        public override Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
+        {
+            return _sslState.SecureStream.WriteAsync(buffer, offset, count, cancellationToken);
         }
     }
 }
