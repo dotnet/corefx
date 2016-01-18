@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -413,5 +413,20 @@
   </data>
   <data name="net_ssl_invalid_certificate" xml:space="preserve">
     <value>SSL certificate returned is invalid, OpenSSL error - {0}.</value>
+  </data>
+  <data name="net_gssapi_operation_failed" xml:space="preserve">
+    <value>GSSAPI operation failed with status: {0} (Minor status: {1})</value>
+  </data>
+  <data name="net_context_establishment_failed" xml:space="preserve">
+    <value>GSSAPI security context establishment failed with status: {0} (Minor status: {1})</value>
+  </data>
+  <data name="net_context_wrap_failed" xml:space="preserve">
+    <value>GSSAPI encryption or signing failed with status: {0} (Minor status: {1})</value>
+  </data>
+  <data name="net_context_unwrap_failed" xml:space="preserve">
+    <value>GSSAPI decryption or signature verification failed with status: {0} (Minor status: {1})</value>
+  </data>
+  <data name="net_context_buffer_too_small" xml:space="preserve">
+    <value>Insufficient buffer space. Required: {0} Actual: {1}</value>
   </data>
 </root>
