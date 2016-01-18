@@ -445,9 +445,9 @@ namespace System.Net.Security
             _sslState.SecureStream.Write(buffer, offset, count);
         }
 
-        public override Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken token)
+        public override Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
         {
-            return _sslState.SecureStream.WriteAsync(buffer, offset, count, token);
+            return _sslState.SecureStream.WriteAsync(buffer, offset, count, cancellationToken);
         }
     }
 }
