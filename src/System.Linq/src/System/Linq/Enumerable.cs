@@ -1234,7 +1234,7 @@ namespace System.Linq
             public List<TSource> ToList()
             {
                 int lastIndex = _source.Count - 1;
-                if (lastIndex < _minIndex) return new List<TSource>(0);
+                if (lastIndex < _minIndex) return new List<TSource>();
                 if (lastIndex > _maxIndex) lastIndex = _maxIndex;
                 List<TSource> list = new List<TSource>(lastIndex - _minIndex + 1);
                 for (int i = _minIndex; i <= lastIndex; ++i)
@@ -4493,7 +4493,7 @@ namespace System.Linq
 
         public List<TElement> ToList()
         {
-            return new List<TElement>(0);
+            return new List<TElement>();
         }
     }
 
@@ -4662,7 +4662,7 @@ namespace System.Linq
         {
             Buffer<TElement> buffer = new Buffer<TElement>(source);
             int count = buffer.count;
-            if (count <= minIdx) return new List<TElement>(0);
+            if (count <= minIdx) return new List<TElement>();
             if (count <= maxIdx) maxIdx = count - 1;
             if (minIdx == maxIdx) return new List<TElement>(1) { GetEnumerableSorter().ElementAt(buffer.items, count, minIdx) };
             int[] map = SortedMap(buffer, minIdx, maxIdx);
