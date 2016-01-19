@@ -24,12 +24,16 @@ if not defined VisualStudioVersion (
 
 :CheckNative
 :: Run the Native Windows build
-call %~dp0src\native\Windows\build-native.cmd %*
+echo Building Native Libraries...
+call %~dp0src\native\Windows\build-native.cmd %* >nativebuild.log
 IF ERRORLEVEL 1 (
-    echo Native component build failed.
+    echo Native component build failed see nativebuild.log for more details.
 )
 
 :EnvSet
+
+call init-tools.cmd
+
 :: Clear the 'Platform' env variable for this session,
 :: as it's a per-project setting within the build, and
 :: misleading value (such as 'MCD' in HP PCs) may lead

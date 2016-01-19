@@ -82,6 +82,7 @@
   </ItemGroup>
   <!-- Files exclusive to net46 -->
   <ItemGroup Condition="'$(TargetGroup)' == 'net46'">
+    <Compile Include="AssemblyInfo.cs" />
     <TargetingPackReference Include="mscorlib" />
     <TargetingPackReference Include="System" />
   </ItemGroup>

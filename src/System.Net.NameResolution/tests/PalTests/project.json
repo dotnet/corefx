@@ -1,7 +1,7 @@
 {
   "dependencies": {
     "System.Collections": "4.0.10",
-    "System.Console": "4.0.0-rc2-23616",
+    "System.Console": "4.0.0-rc2-23712",
     "System.Diagnostics.Contracts": "4.0.0",
     "System.Diagnostics.Tracing": "4.0.20",
     "System.Net.Primitives": "4.0.10",
@@ -25,6 +25,8 @@
     "xunit.netcore.extensions": "1.0.0-prerelease-00123"
   },
   "frameworks": {
-    "dnxcore50": {}
+    "dnxcore50": {
+      "imports": "portable-net45+win8"
+    }
   }
 }

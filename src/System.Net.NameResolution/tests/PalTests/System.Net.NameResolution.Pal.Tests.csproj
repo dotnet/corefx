@@ -24,7 +24,6 @@
   <ItemGroup>
     <Compile Include="NameResolutionPalTests.cs" />
     <Compile Include="Fakes\GlobalLog.cs" />
-    <Compile Include="Fakes\Logging.cs" />
     
     <Compile Include="$(CommonPath)\System\Net\Logging\LoggingHash.cs">
       <Link>Common\System\Net\Logging\LoggingHash.cs</Link>
@@ -49,6 +48,10 @@
 
     <Compile Include="$(CommonPath)\System\Net\IPEndPointStatics.cs">
       <Link>Common\System\Net\IPEndPointStatics.cs</Link>
+    </Compile>
+
+    <Compile Include="$(CommonTestPath)\System\Net\HttpTestServers.cs">
+      <Link>Common\System\Net\HttpTestServers.cs</Link>
     </Compile>
   </ItemGroup>
 

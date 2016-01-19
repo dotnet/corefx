@@ -718,9 +718,13 @@ namespace System.Net
             {
                 // Only set by HttpListenerRequest::Cookies_get()
 #if !NETNative_SystemNetHttp
-                if (GlobalLog.IsEnabled && value != CookieVariant.Rfc2965)
+                if (value != CookieVariant.Rfc2965)
                 {
-                    GlobalLog.AssertFormat("Cookie#{0}::set_Variant()|value:{1}", Logging.HashString(this), value);
+                    if (GlobalLog.IsEnabled)
+                    {
+                        GlobalLog.AssertFormat("Cookie#{0}::set_Variant()|value:{1}", LoggingHash.HashString(this), value);
+                    }
+                    Debug.Fail("Cookie#" + LoggingHash.HashString(this) + "::set_Variant()|value:" + value);
                 }
 #endif
                 _cookieVariant = value;
@@ -772,14 +776,10 @@ namespace System.Net
 
         public override bool Equals(object comparand)
         {
-            if (!(comparand is Cookie))
-            {
-                return false;
-            }
+            Cookie other = comparand as Cookie;
 
-            Cookie other = (Cookie)comparand;
-
-            return string.Equals(Name, other.Name, StringComparison.OrdinalIgnoreCase)
+            return other != null
+                    && string.Equals(Name, other.Name, StringComparison.OrdinalIgnoreCase)
                     && string.Equals(Value, other.Value, StringComparison.Ordinal)
                     && string.Equals(Path, other.Path, StringComparison.Ordinal)
                     && string.Equals(Domain, other.Domain, StringComparison.OrdinalIgnoreCase)

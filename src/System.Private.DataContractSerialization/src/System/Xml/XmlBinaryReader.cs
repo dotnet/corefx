@@ -98,8 +98,8 @@ namespace System.Xml
                     value = base.ReadElementContentAsString();
                     break;
             }
-
-            DiagnosticUtility.DebugAssert(value.Length < Quotas.MaxStringContentLength, "");
+            if (value.Length > Quotas.MaxStringContentLength)
+                XmlExceptionHelper.ThrowMaxStringContentLengthExceeded(this, Quotas.MaxStringContentLength);
             return value;
         }
 
@@ -382,13 +382,14 @@ namespace System.Xml
 
         private bool ReadNode()
         {
+            if (!_buffered)
+                BufferReader.SetWindow(ElementNode.BufferOffset, _maxBytesPerRead);
+
             if (BufferReader.EndOfFile)
             {
                 MoveToEndOfFile();
                 return false;
             }
-            if (!_buffered)
-                BufferReader.SetWindow(ElementNode.BufferOffset, _maxBytesPerRead);
 
             XmlBinaryNodeType nodeType;
             if (_arrayState == ArrayState.None)

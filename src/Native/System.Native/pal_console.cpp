@@ -106,6 +106,7 @@ extern "C" int32_t SystemNative_ReadStdinUnbuffered(void* buffer, int32_t buffer
     return static_cast<int32_t>(count);
 }
 
+static struct sigaction g_origSigIntHandler, g_origSigQuitHandler; // saved signal handlers
 static volatile CtrlCallback g_ctrlCallback = nullptr; // Callback invoked for SIGINT/SIGQUIT
 static bool g_signalHandlingInitialized = false; // Whether signal handling is initialized
 static int g_signalPipe[2] = {-1, -1}; // Pipe used between signal handler and worker
@@ -164,16 +165,35 @@ void* CtrlHandleLoop(void* arg)
         int rv = callback != nullptr ? callback(signalCode == SIGQUIT ? Break : Interrupt) : 0;
         if (rv == 0) // callback removed or was invoked and didn't handle the signal
         {
-            // The proper behavior for unhandled SIGINT/SIGQUIT is to set the signal
-            // handler to the default and then send the signal to self and let the
-            // default handler do its work.
-            struct sigaction resetAction = {.sa_handler = SIG_DFL, .sa_flags = 0};
-            sigemptyset(&resetAction.sa_mask);
+            // In general, we now want to remove our handler and reissue the signal to
+            // be picked up by the previously registered handler.  In the most common case,
+            // this will be the default handler, causing the process to be torn down.
+            // It could also be a custom handle registered by other code before us.
+            // In the rare case where the signal is set to be ignored, though, we don't
+            // want to do that, as we know our process will simply remain running yet our
+            // handlers will never end up being invoked again. (It's possible that can
+            // happen as well in the custom case, but we can't detect that or handle it well,
+            // at which point we'll just stop responding to the relevant signal here if the
+            // process does remain alive. We only unregister from the relevant handler, though,
+            // so the handler(s) for the other signal(s) will still remain registered.)
 
-            sigaction(SIGINT, &resetAction, nullptr);
-            sigaction(SIGQUIT, &resetAction, nullptr);
+            if (signalCode == SIGINT)
+            {
+                if (g_origSigIntHandler.sa_handler != SIG_IGN)
+                {
+                    sigaction(SIGINT, &g_origSigIntHandler, NULL);
+                    kill(getpid(), SIGINT);
+                }
+            } 
+            else if (signalCode == SIGQUIT)
+            {
+                if (g_origSigQuitHandler.sa_handler != SIG_IGN)
+                {
+                    sigaction(SIGQUIT, &g_origSigQuitHandler, NULL);
+                    kill(getpid(), SIGQUIT);
+                }
+            }
 
-            kill(getpid(), signalCode);
         }
     }
 }
@@ -230,9 +250,9 @@ static bool InitializeSignalHandling()
     };
     sigemptyset(&newAction.sa_mask);
 
-    int rv = sigaction(SIGINT, &newAction, nullptr);
+    int rv = sigaction(SIGINT, &newAction, &g_origSigIntHandler);
     assert(rv == 0);
-    rv = sigaction(SIGQUIT, &newAction, nullptr);
+    rv = sigaction(SIGQUIT, &newAction, &g_origSigQuitHandler);
     assert(rv == 0);
 
     g_signalHandlingInitialized = true;

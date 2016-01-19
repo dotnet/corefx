@@ -93,6 +93,7 @@ namespace System.Net.Sockets
                     return SocketError.ProtocolType;
 
                 case Interop.Error.ENOPROTOOPT:
+                case Interop.Error.ENOTSUP:
                     return SocketError.ProtocolOption;
 
                 case Interop.Error.EPROTONOSUPPORT:
@@ -142,18 +143,6 @@ namespace System.Net.Sockets
             }
         }
 
-        private static SocketError GetSocketOptionErrorForErrorCode(Interop.Error error)
-        {
-            // Interop.Sys.{Get,Set}SockOpt return Interop.Error.ENOTSUP for unsupported
-            // socket options. In this case we want to throw PlatformNotSupportedException.
-            if (error == Interop.Error.ENOTSUP)
-            {
-                throw new PlatformNotSupportedException();
-            }
-
-            return GetSocketErrorForErrorCode(error);
-        }
-
         private static unsafe IPPacketInformation GetIPPacketInformation(Interop.Sys.MessageHeader* messageHeader, bool isIPv4, bool isIPv6)
         {
             if (!isIPv4 && !isIPv6)
@@ -179,45 +168,32 @@ namespace System.Net.Sockets
         {
             Debug.Assert(socketAddress != null || socketAddressLen == 0);
 
-            var pinnedSocketAddress = default(GCHandle);
-            byte* sockAddr = null;
-            int sockAddrLen = 0;
-
             long received;
-            try
+
+            int sockAddrLen = 0;
+            if (socketAddress != null)
             {
-                if (socketAddress != null)
-                {
-                    pinnedSocketAddress = GCHandle.Alloc(socketAddress, GCHandleType.Pinned);
-                    sockAddr = (byte*)pinnedSocketAddress.AddrOfPinnedObject();
-                    sockAddrLen = socketAddressLen;
-                }
-
-                fixed (byte* b = buffer)
-                {
-                    var iov = new Interop.Sys.IOVector {
-                        Base = &b[offset],
-                        Count = (UIntPtr)count
-                    };
-
-                    var messageHeader = new Interop.Sys.MessageHeader {
-                        SocketAddress = sockAddr,
-                        SocketAddressLen = sockAddrLen,
-                        IOVectors = &iov,
-                        IOVectorCount = 1
-                    };
-
-                    errno = Interop.Sys.ReceiveMessage(fd, &messageHeader, flags, &received);
-                    receivedFlags = messageHeader.Flags;
-                    sockAddrLen = messageHeader.SocketAddressLen;
-                }
+                sockAddrLen = socketAddressLen;
             }
-            finally
+
+            fixed (byte* sockAddr = socketAddress)
+            fixed (byte* b = buffer)
             {
-                if (pinnedSocketAddress.IsAllocated)
-                {
-                    pinnedSocketAddress.Free();
-                }
+                var iov = new Interop.Sys.IOVector {
+                    Base = &b[offset],
+                    Count = (UIntPtr)count
+                };
+
+                var messageHeader = new Interop.Sys.MessageHeader {
+                    SocketAddress = sockAddr,
+                    SocketAddressLen = sockAddrLen,
+                    IOVectors = &iov,
+                    IOVectorCount = 1
+                };
+
+                errno = Interop.Sys.ReceiveMessage(fd, &messageHeader, flags, &received);
+                receivedFlags = messageHeader.Flags;
+                sockAddrLen = messageHeader.SocketAddressLen;
             }
 
             if (errno != Interop.Error.SUCCESS)
@@ -231,46 +207,33 @@ namespace System.Net.Sockets
 
         private static unsafe int Send(int fd, SocketFlags flags, byte[] buffer, ref int offset, ref int count, byte[] socketAddress, int socketAddressLen, out Interop.Error errno)
         {
-            var pinnedSocketAddress = default(GCHandle);
-            byte* sockAddr = null;
-            int sockAddrLen = 0;
-
             int sent;
-            try
+
+            int sockAddrLen = 0;
+            if (socketAddress != null)
             {
-                if (socketAddress != null)
-                {
-                    pinnedSocketAddress = GCHandle.Alloc(socketAddress, GCHandleType.Pinned);
-                    sockAddr = (byte*)pinnedSocketAddress.AddrOfPinnedObject();
-                    sockAddrLen = socketAddressLen;
-                }
-
-                fixed (byte* b = buffer)
-                {
-                    var iov = new Interop.Sys.IOVector {
-                        Base = &b[offset],
-                        Count = (UIntPtr)count
-                    };
-
-                    var messageHeader = new Interop.Sys.MessageHeader {
-                        SocketAddress = sockAddr,
-                        SocketAddressLen = sockAddrLen,
-                        IOVectors = &iov,
-                        IOVectorCount = 1
-                    };
-
-                    long bytesSent;
-                    errno = Interop.Sys.SendMessage(fd, &messageHeader, flags, &bytesSent);
-
-                    sent = checked((int)bytesSent);
-                }
+                sockAddrLen = socketAddressLen;
             }
-            finally
+
+            fixed (byte* sockAddr = socketAddress)
+            fixed (byte* b = buffer)
             {
-                if (pinnedSocketAddress.IsAllocated)
-                {
-                    pinnedSocketAddress.Free();
-                }
+                var iov = new Interop.Sys.IOVector {
+                    Base = &b[offset],
+                    Count = (UIntPtr)count
+                };
+
+                var messageHeader = new Interop.Sys.MessageHeader {
+                    SocketAddress = sockAddr,
+                    SocketAddressLen = sockAddrLen,
+                    IOVectors = &iov,
+                    IOVectorCount = 1
+                };
+
+                long bytesSent;
+                errno = Interop.Sys.SendMessage(fd, &messageHeader, flags, &bytesSent);
+
+                sent = checked((int)bytesSent);
             }
 
             if (errno != Interop.Error.SUCCESS)
@@ -289,9 +252,11 @@ namespace System.Net.Sockets
             // Pin buffers and set up iovecs.
             int startIndex = bufferIndex, startOffset = offset;
 
-            var pinnedSocketAddress = default(GCHandle);
-            byte* sockAddr = null;
             int sockAddrLen = 0;
+            if (socketAddress != null)
+            {
+                sockAddrLen = socketAddressLen;
+            }
 
             int maxBuffers = buffers.Count - startIndex;
             var handles = new GCHandle[maxBuffers];
@@ -313,14 +278,8 @@ namespace System.Net.Sockets
                     iovecs[i].Count = (UIntPtr)(buffer.Count - startOffset);
                 }
 
-                if (socketAddress != null)
-                {
-                    pinnedSocketAddress = GCHandle.Alloc(socketAddress, GCHandleType.Pinned);
-                    sockAddr = (byte*)pinnedSocketAddress.AddrOfPinnedObject();
-                    sockAddrLen = socketAddressLen;
-                }
-
                 // Make the call
+                fixed (byte* sockAddr = socketAddress)
                 fixed (Interop.Sys.IOVector* iov = iovecs)
                 {
                     var messageHeader = new Interop.Sys.MessageHeader {
@@ -345,11 +304,6 @@ namespace System.Net.Sockets
                     {
                         handles[i].Free();
                     }
-                }
-
-                if (pinnedSocketAddress.IsAllocated)
-                {
-                    pinnedSocketAddress.Free();
                 }
             }
 
@@ -384,9 +338,11 @@ namespace System.Net.Sockets
             var handles = new GCHandle[maxBuffers];
             var iovecs = new Interop.Sys.IOVector[maxBuffers];
 
-            var pinnedSocketAddress = default(GCHandle);
-            byte* sockAddr = null;
             int sockAddrLen = 0;
+            if (socketAddress != null)
+            {
+                sockAddrLen = socketAddressLen;
+            }
 
             long received = 0;
             int toReceive = 0, iovCount = maxBuffers;
@@ -411,14 +367,8 @@ namespace System.Net.Sockets
                     iovecs[i].Count = (UIntPtr)space;
                 }
 
-                if (socketAddress != null)
-                {
-                    pinnedSocketAddress = GCHandle.Alloc(socketAddress, GCHandleType.Pinned);
-                    sockAddr = (byte*)pinnedSocketAddress.AddrOfPinnedObject();
-                    sockAddrLen = socketAddressLen;
-                }
-
                 // Make the call.
+                fixed (byte* sockAddr = socketAddress)
                 fixed (Interop.Sys.IOVector* iov = iovecs)
                 {
                     var messageHeader = new Interop.Sys.MessageHeader {
@@ -442,11 +392,6 @@ namespace System.Net.Sockets
                     {
                         handles[i].Free();
                     }
-                }
-
-                if (pinnedSocketAddress.IsAllocated)
-                {
-                    pinnedSocketAddress.Free();
                 }
             }
 
@@ -996,7 +941,7 @@ namespace System.Net.Sockets
             }
 
             Interop.Error err = Interop.Sys.SetSockOpt(handle.FileDescriptor, optionLevel, optionName, (byte*)&optionValue, sizeof(int));
-            return err == Interop.Error.SUCCESS ? SocketError.Success : GetSocketOptionErrorForErrorCode(err);
+            return err == Interop.Error.SUCCESS ? SocketError.Success : GetSocketErrorForErrorCode(err);
         }
 
         public static unsafe SocketError SetSockOpt(SafeCloseSocket handle, SocketOptionLevel optionLevel, SocketOptionName optionName, byte[] optionValue)
@@ -1014,7 +959,7 @@ namespace System.Net.Sockets
                 }
             }
 
-            return err == Interop.Error.SUCCESS ? SocketError.Success : GetSocketOptionErrorForErrorCode(err);
+            return err == Interop.Error.SUCCESS ? SocketError.Success : GetSocketErrorForErrorCode(err);
         }
 
         public static unsafe SocketError SetMulticastOption(SafeCloseSocket handle, SocketOptionName optionName, MulticastOption optionValue)
@@ -1094,7 +1039,7 @@ namespace System.Net.Sockets
             Interop.Error err = Interop.Sys.GetSockOpt(handle.FileDescriptor, optionLevel, optionName, (byte*)&value, &optLen);
 
             optionValue = value;
-            return err == Interop.Error.SUCCESS ? SocketError.Success : GetSocketOptionErrorForErrorCode(err);
+            return err == Interop.Error.SUCCESS ? SocketError.Success : GetSocketErrorForErrorCode(err);
         }
 
         public static unsafe SocketError GetSockOpt(SafeCloseSocket handle, SocketOptionLevel optionLevel, SocketOptionName optionName, byte[] optionValue, ref int optionLength)
@@ -1121,7 +1066,7 @@ namespace System.Net.Sockets
                 return SocketError.Success;
             }
 
-            return GetSocketOptionErrorForErrorCode(err);
+            return GetSocketErrorForErrorCode(err);
         }
 
         public static unsafe SocketError GetMulticastOption(SafeCloseSocket handle, SocketOptionName optionName, out MulticastOption optionValue)

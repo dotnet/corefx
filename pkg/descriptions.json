@@ -170,6 +170,13 @@
         ]
     },
     {
+        "Name": "System.Buffers",
+        "Description": "Provides resource pooling of any type for performance-critical applications that allocate and deallocate objects frequently.",
+        "CommonTypes": [
+            "System.Buffers.ArrayPool<T>"
+        ]
+    },
+    {
         "Name": "System.Collections",
         "Description": "Provides classes that define generic collections, which allow developers to create strongly typed collections that provide better type safety and performance than non-generic strongly typed collections.",
         "CommonTypes": [
@@ -524,9 +531,7 @@
         "Description": "Provides base input and output (I/O) types, including System.IO.Stream, System.IO.StreamReader and System.IO.StreamWriter, that allow reading and writing to data streams",
         "CommonTypes": [
             "System.IO.Stream",
-            "System.IO.IOException",
             "System.IO.EndOfStreamException",
-            "System.IO.FileNotFoundException",
             "System.IO.MemoryStream",
             "System.IO.StreamReader",
             "System.IO.StreamWriter",
@@ -1026,10 +1031,24 @@
         ]
     },
     {
+        "Name": "System.Resources.Reader",
+        "Description": "Provides classes which read resources from streams in the system-default format.",
+        "CommonTypes": [
+            "System.Resources.ResourceReader"
+        ]
+    },
+    {
         "Name": "System.Resources.ReaderWriter",
         "Description": "Provides classes which read and write resources to streams in the system-default format.",
         "CommonTypes": [
             "System.Resources.ResourceReader",
+            "System.Resources.ResourceWriter"
+        ]
+    },
+    {
+        "Name": "System.Resources.Writer",
+        "Description": "Provides classes which write resources to streams in the system-default format.",
+        "CommonTypes": [
             "System.Resources.ResourceWriter"
         ]
     },
