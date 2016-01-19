@@ -5,6 +5,7 @@ using System.IO;
 using System.Security.Authentication;
 using System.Security.Authentication.ExtendedProtection;
 using System.Security.Cryptography.X509Certificates;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace System.Net.Security
@@ -438,6 +439,11 @@ namespace System.Net.Security
         public override void Write(byte[] buffer, int offset, int count)
         {
             _sslState.SecureStream.Write(buffer, offset, count);
+        }
+
+        public override Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
+        {
+            return _sslState.SecureStream.WriteAsync(buffer, offset, count, cancellationToken);
         }
     }
 }
