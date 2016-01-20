@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using Xunit;
 
 namespace System.Linq.Tests
@@ -130,6 +131,36 @@ namespace System.Linq.Tests
         public void NullSource()
         {
             Assert.Throws<ArgumentNullException>("source", () => ((IEnumerable<int>)null).ElementAt(2));
+        }
+
+        [Fact]
+        public void ArraySelectSource()
+        {
+            var source = new[] { 1, 2, 3, 4 }.Select(i => i * 2);
+            for (int i = 0; i != 4; ++i)
+                Assert.Equal((i + 1) * 2, source.ElementAt(i));
+            Assert.Throws<ArgumentOutOfRangeException>("index", () => source.ElementAt(-1));
+            Assert.Throws<ArgumentOutOfRangeException>("index", () => source.ElementAt(4));
+        }
+
+        [Fact]
+        public void ListSelectSource()
+        {
+            var source = new[] { 1, 2, 3, 4 }.ToList().Select(i => i * 2);
+            for (int i = 0; i != 4; ++i)
+                Assert.Equal((i + 1) * 2, source.ElementAt(i));
+            Assert.Throws<ArgumentOutOfRangeException>("index", () => source.ElementAt(-1));
+            Assert.Throws<ArgumentOutOfRangeException>("index", () => source.ElementAt(4));
+        }
+
+        [Fact]
+        public void IListSelectSource()
+        {
+            var source = new ReadOnlyCollection<int>(new[] { 1, 2, 3, 4 }).Select(i => i * 2);
+            for (int i = 0; i != 4; ++i)
+                Assert.Equal((i + 1) * 2, source.ElementAt(i));
+            Assert.Throws<ArgumentOutOfRangeException>("index", () => source.ElementAt(-1));
+            Assert.Throws<ArgumentOutOfRangeException>("index", () => source.ElementAt(4));
         }
     }
 }

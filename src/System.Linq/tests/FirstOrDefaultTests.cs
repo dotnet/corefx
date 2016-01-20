@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using Xunit;
 
 namespace System.Linq.Tests
@@ -193,6 +194,27 @@ namespace System.Linq.Tests
         {
             Func<int, bool> predicate = null;
             Assert.Throws<ArgumentNullException>("predicate", () => Enumerable.Range(0, 3).FirstOrDefault(predicate));
+        }
+
+        [Fact]
+        public void ArraySelectSource()
+        {
+            Assert.Equal(11, new[] { 5, 6, 7, 8 }.Select(i => i * 2 + 1).FirstOrDefault());
+            Assert.Equal(0, new int[0].Select(i => i * 2 + 1).FirstOrDefault());
+        }
+
+        [Fact]
+        public void ListSelectSource()
+        {
+            Assert.Equal(11, new[] { 5, 6, 7, 8 }.ToList().Select(i => i * 2 + 1).FirstOrDefault());
+            Assert.Equal(0, new List<int>(0).Select(i => i * 2 + 1).FirstOrDefault());
+        }
+
+        [Fact]
+        public void IListSelectSource()
+        {
+            Assert.Equal(11, new ReadOnlyCollection<int>(new[] { 5, 6, 7, 8 }).Select(i => i * 2 + 1).FirstOrDefault());
+            Assert.Equal(0, new ReadOnlyCollection<int>(new int[0]).Select(i => i * 2 + 1).FirstOrDefault());
         }
     }
 }

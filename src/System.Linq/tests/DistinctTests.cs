@@ -198,5 +198,33 @@ namespace System.Linq.Tests
             var en = iterator as IEnumerator<int>;
             Assert.False(en != null && en.MoveNext());
         }
+
+        [Fact]
+        public void ToArray()
+        {
+            int?[] source = { 1, 1, 1, 2, 2, 2, null, null };
+            int?[] expected = { 1, 2, null };
+
+            Assert.Equal(expected, source.Distinct().ToArray());
+        }
+
+        [Fact]
+        public void ToList()
+        {
+            int?[] source = { 1, 1, 1, 2, 2, 2, null, null };
+            int?[] expected = { 1, 2, null };
+
+            Assert.Equal(expected, source.Distinct().ToList());
+        }
+
+        [Fact]
+        public void RepeatEnumerating()
+        {
+            int?[] source = { 1, 1, 1, 2, 2, 2, null, null };
+
+            var result = source.Distinct();
+
+            Assert.Equal(result, result);
+        }
     }
 }

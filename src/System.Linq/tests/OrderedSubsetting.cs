@@ -303,9 +303,21 @@ namespace System.Linq.Tests
         }
 
         [Fact]
+        public void ToList()
+        {
+            Assert.Equal(Enumerable.Range(10, 20), Enumerable.Range(0, 100).Shuffle().OrderBy(i => i).Skip(10).Take(20).ToList());
+        }
+
+        [Fact]
         public void EmptyToArray()
         {
             Assert.Empty(Enumerable.Range(0, 100).Shuffle().OrderBy(i => i).Skip(100).ToArray());
+        }
+
+        [Fact]
+        public void EmptyToList()
+        {
+            Assert.Empty(Enumerable.Range(0, 100).Shuffle().OrderBy(i => i).Skip(100).ToList());
         }
 
         [Fact]
@@ -315,9 +327,21 @@ namespace System.Linq.Tests
         }
 
         [Fact]
+        public void AttemptedMoreToList()
+        {
+            Assert.Equal(Enumerable.Range(0, 20), Enumerable.Range(0, 20).Shuffle().OrderBy(i => i).Take(30).ToList());
+        }
+
+        [Fact]
         public void SingleElementToArray()
         {
             Assert.Equal(Enumerable.Repeat(10, 1), Enumerable.Range(0, 20).Shuffle().OrderBy(i => i).Skip(10).Take(1).ToArray());
+        }
+
+        [Fact]
+        public void SingleElementToList()
+        {
+            Assert.Equal(Enumerable.Repeat(10, 1), Enumerable.Range(0, 20).Shuffle().OrderBy(i => i).Skip(10).Take(1).ToList());
         }
 
         [Fact]
@@ -326,6 +350,36 @@ namespace System.Linq.Tests
             var enumerator = NumberRangeGuaranteedNotCollectionType(0, 3).Shuffle().OrderBy(i => i).Skip(1).GetEnumerator();
             while (enumerator.MoveNext()) { }
             Assert.False(enumerator.MoveNext());
+        }
+
+        [Fact]
+        public void SubsetAfterSelect()
+        {
+            var page = Enumerable.Range(0, 50).Shuffle().OrderBy(i => i).Select(i => i * 2).Skip(20).Take(5);
+            Assert.Equal(new[] { 40, 42, 44, 46, 48 }, page);
+            Assert.Equal(new[] { 41, 43, 45, 47, 49 }, page.Select(i => i + 1));
+            Assert.Equal(40, page.First());
+            Assert.Equal(48, page.Last());
+            Assert.Equal(42, page.ElementAt(1));
+            Assert.Throws<ArgumentOutOfRangeException>("index", () => page.ElementAt(20));
+            page = Enumerable.Range(0, 50).Shuffle().OrderBy(i => i).Select(i => i * 2).Skip(100).Take(5);
+            Assert.Throws<InvalidOperationException>(() => page.First());
+            Assert.Throws<InvalidOperationException>(() => page.Last());
+        }
+
+        [Fact]
+        public void SubsetAfterSelectEnumeratorDoesntContinue()
+        {
+            var enumerator = NumberRangeGuaranteedNotCollectionType(0, 3).Shuffle().OrderBy(i => i).Select(i => i * 2).Take(1).GetEnumerator();
+            while (enumerator.MoveNext()) { }
+            Assert.False(enumerator.MoveNext());
+        }
+
+        [Fact]
+        public void SubsetAfterSelectRepeatEnumerating()
+        {
+            var page = NumberRangeGuaranteedNotCollectionType(0, 3).Shuffle().OrderBy(i => i).Select(i => i * 2).Take(1);
+            Assert.Equal(page, page);
         }
     }
 }
