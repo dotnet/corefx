@@ -2,13 +2,14 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using Microsoft.Win32.SafeHandles;
 
 internal static partial class Interop
 {
-    internal static partial class libgssapi
+    internal static partial class NetSecurity
     {
         internal sealed class GssApiException : Exception
         {
@@ -35,27 +36,11 @@ internal static partial class Interop
                 _minorStatus = minorStatus;
             }
 
-
-            public static GssApiException Create(string message)
-            {
-                return new GssApiException(message);
-            }
-
-            public static GssApiException Create(Status majorStatus, Status minorStatus)
-            {
-                return new GssApiException(majorStatus, minorStatus);
-            }
-
-            public static GssApiException Create(string message, Status majorStatus, Status minorStatus)
-            {
-                return new GssApiException(SR.Format(message, majorStatus, minorStatus), majorStatus, minorStatus);
-            }
-
             public static void AssertOrThrowIfError(string message, Status majorStatus, Status minorStatus)
             {
                 if (majorStatus != Status.GSS_S_COMPLETE)
                 {
-                    GssApiException ex = Create(majorStatus, minorStatus);
+                    GssApiException ex = new GssApiException(majorStatus, minorStatus);
                     Debug.Fail(message + ": " + ex);
                     throw ex;
                 }
@@ -69,22 +54,29 @@ internal static partial class Interop
 
             private static string GetGssApiDisplayStatus(Status majorStatus, Status minorStatus)
             {
-                Tuple<Status, bool>[] statusArr = { Tuple.Create(majorStatus, false), Tuple.Create(minorStatus, true) };
+                KeyValuePair<Status, bool>[] statusArr = { new KeyValuePair<Status, bool>(majorStatus, false), new KeyValuePair<Status, bool>(minorStatus, true) };
                 int length = statusArr.Length;
                 string[] msgStrings = new string[length];
 
                 for (int i = 0; i < length; i++)
                 {
-                    using (SafeGssBufferHandle msgBuffer = new SafeGssBufferHandle())
+                    SafeGssBufferHandle msgBuffer;
+                    Interop.NetSecurity.Status minStat;
+                    int statusLength;
+                    if (Status.GSS_S_COMPLETE != DisplayStatus(out minStat, statusArr[i].Key, statusArr[i].Value, out msgBuffer, out statusLength))
                     {
-                        Interop.libgssapi.Status minStat;
-                        if (Status.GSS_S_COMPLETE != GssDisplayStatus(out minStat, statusArr[i].Item1, statusArr[i].Item2, msgBuffer))
-                        {
-                            continue;
-                        }
-                        msgStrings[i] = Marshal.PtrToStringAnsi(msgBuffer.Value);
+                        msgStrings[i] = "Unknown Error";
+                        continue;
+                    }
+                    using (msgBuffer)
+                    {
+                        byte[] statusBytes = new byte[statusLength];
+                        Interop.NetSecurity.CopyBuffer(msgBuffer, statusBytes, 0);
+                        var encoding = new System.Text.ASCIIEncoding();
+                        msgStrings[i] = encoding.GetString(statusBytes);
                     }
                 }
+
                 return msgStrings[0] + " (" + msgStrings[1] + ") \nStatus: " + majorStatus.ToString("x8") + " (" + minorStatus.ToString("x8") + ")";
             }
         }

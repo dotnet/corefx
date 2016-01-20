@@ -6,7 +6,6 @@ add_definitions(-DPIC=1)
 
 if (APPLE)
    find_library(LIBGSS NAMES GSS)
-   add_definitions(-DGSSFW)
 else()
    find_library(LIBGSS NAMES gssapi_krb5)
 endif()
@@ -17,7 +16,7 @@ if(LIBGSS STREQUAL LIBGSS-NOTFOUND)
 endif()
 
 set(NATIVEGSS_SOURCES
-	pal_gssapi.cpp
+    pal_gssapi.cpp
 )
 
 add_library(System.Net.Security.Native
@@ -26,7 +25,7 @@ add_library(System.Net.Security.Native
 )
 
 target_link_libraries(System.Net.Security.Native
-	${LIBGSS}
+    ${LIBGSS}
 )
 
 install (TARGETS System.Net.Security.Native DESTINATION .)
