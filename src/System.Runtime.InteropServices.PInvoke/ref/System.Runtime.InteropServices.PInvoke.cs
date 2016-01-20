@@ -101,11 +101,11 @@ namespace System.Runtime.InteropServices
         public static readonly int SystemDefaultCharSize;
         public static readonly int SystemMaxDBCSCharSize;
         [System.Security.SecurityCriticalAttribute]
-        public static System.IntPtr AllocateMemory(int cb) { return default(System.IntPtr); }
+        public static System.IntPtr AllocateMemory(int sizeInBytes) { return default(System.IntPtr); }
         [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
         [System.ObsoleteAttribute("DestroyStructure(IntPtr, Type) may be unavailable in future releases. Instead, use DestroyStructure<T>(IntPtr). For more info, go to http://go.microsoft.com/fwlink/?LinkID=296520")]
         [System.Security.SecurityCriticalAttribute]
-        public static void DestroyStructure(System.IntPtr ptr, System.Type structuretype) { }
+        public static void DestroyStructure(System.IntPtr ptr, System.Type structureType) { }
         [System.Security.SecurityCriticalAttribute]
         public static void DestroyStructure<T>(System.IntPtr ptr) { }
         [System.Security.SecurityCriticalAttribute]
@@ -113,7 +113,7 @@ namespace System.Runtime.InteropServices
         [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
         [System.ObsoleteAttribute("GetDelegateForFunctionPointer(IntPtr, Type) may be unavailable in future releases. Instead, use GetDelegateForFunctionPointer<T>(IntPtr). For more info, go to http://go.microsoft.com/fwlink/?LinkID=296521")]
         [System.Security.SecurityCriticalAttribute]
-        public static System.Delegate GetDelegateForFunctionPointer(System.IntPtr ptr, System.Type t) { return default(System.Delegate); }
+        public static System.Delegate GetDelegateForFunctionPointer(System.IntPtr ptr, System.Type delegateType) { return default(System.Delegate); }
         [System.Security.SecurityCriticalAttribute]
         public static TDelegate GetDelegateForFunctionPointer<TDelegate>(System.IntPtr ptr) { return default(TDelegate); }
         [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
@@ -126,7 +126,7 @@ namespace System.Runtime.InteropServices
         public static int GetLastWin32Error() { return default(int); }
         [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
         [System.ObsoleteAttribute("OffsetOf(Type, string) may be unavailable in future releases. Instead, use OffsetOf<T>(string). For more info, go to http://go.microsoft.com/fwlink/?LinkID=296511")]
-        public static System.IntPtr OffsetOf(System.Type t, string fieldName) { return default(System.IntPtr); }
+        public static System.IntPtr OffsetOf(System.Type type, string fieldName) { return default(System.IntPtr); }
         public static System.IntPtr OffsetOf<T>(string fieldName) { return default(System.IntPtr); }
         [System.Security.SecurityCriticalAttribute]
         public static string PtrToStringAnsi(System.IntPtr ptr) { return default(string); }
@@ -151,51 +151,51 @@ namespace System.Runtime.InteropServices
         [System.Security.SecurityCriticalAttribute]
         public static byte ReadByte(System.IntPtr ptr) { return default(byte); }
         [System.Security.SecurityCriticalAttribute]
-        public static byte ReadByte(System.IntPtr ptr, int ofs) { return default(byte); }
+        public static byte ReadByte(System.IntPtr ptr, int offset) { return default(byte); }
         [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
         [System.ObsoleteAttribute("ReadByte(Object, Int32) may be unavailable in future releases.")]
         [System.Security.SecurityCriticalAttribute]
-        public static byte ReadByte(object ptr, int ofs) { return default(byte); }
+        public static byte ReadByte(object ptr, int offset) { return default(byte); }
         [System.Security.SecurityCriticalAttribute]
         public static short ReadInt16(System.IntPtr ptr) { return default(short); }
         [System.Security.SecurityCriticalAttribute]
-        public static short ReadInt16(System.IntPtr ptr, int ofs) { return default(short); }
+        public static short ReadInt16(System.IntPtr ptr, int offset) { return default(short); }
         [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
         [System.ObsoleteAttribute("ReadInt16(Object, Int32) may be unavailable in future releases.")]
         [System.Security.SecurityCriticalAttribute]
-        public static short ReadInt16(object ptr, int ofs) { return default(short); }
+        public static short ReadInt16(object ptr, int offset) { return default(short); }
         [System.Security.SecurityCriticalAttribute]
         public static int ReadInt32(System.IntPtr ptr) { return default(int); }
         [System.Security.SecurityCriticalAttribute]
-        public static int ReadInt32(System.IntPtr ptr, int ofs) { return default(int); }
+        public static int ReadInt32(System.IntPtr ptr, int offset) { return default(int); }
         [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
         [System.ObsoleteAttribute("ReadInt32(Object, Int32) may be unavailable in future releases.")]
         [System.Security.SecurityCriticalAttribute]
-        public static int ReadInt32(object ptr, int ofs) { return default(int); }
+        public static int ReadInt32(object ptr, int offset) { return default(int); }
         [System.Security.SecurityCriticalAttribute]
         public static long ReadInt64(System.IntPtr ptr) { return default(long); }
         [System.Security.SecurityCriticalAttribute]
-        public static long ReadInt64(System.IntPtr ptr, int ofs) { return default(long); }
+        public static long ReadInt64(System.IntPtr ptr, int offset) { return default(long); }
         [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
         [System.ObsoleteAttribute("ReadInt64(Object, Int32) may be unavailable in future releases.")]
         [System.Security.SecurityCriticalAttribute]
-        public static long ReadInt64(object ptr, int ofs) { return default(long); }
+        public static long ReadInt64(object ptr, int offset) { return default(long); }
         [System.Security.SecurityCriticalAttribute]
         public static System.IntPtr ReadIntPtr(System.IntPtr ptr) { return default(System.IntPtr); }
         [System.Security.SecurityCriticalAttribute]
-        public static System.IntPtr ReadIntPtr(System.IntPtr ptr, int ofs) { return default(System.IntPtr); }
+        public static System.IntPtr ReadIntPtr(System.IntPtr ptr, int offset) { return default(System.IntPtr); }
         [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
         [System.ObsoleteAttribute("ReadIntPtr(Object, Int32) may be unavailable in future releases.")]
         [System.Security.SecurityCriticalAttribute]
-        public static System.IntPtr ReadIntPtr(object ptr, int ofs) { return default(System.IntPtr); }
+        public static System.IntPtr ReadIntPtr(object ptr, int offset) { return default(System.IntPtr); }
         [System.Security.SecurityCriticalAttribute]
-        public static System.IntPtr ReallocateMemory(System.IntPtr pv, int cb) { return default(System.IntPtr); }
+        public static System.IntPtr ReallocateMemory(System.IntPtr ptr, int sizeInBytes) { return default(System.IntPtr); }
         [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
         [System.ObsoleteAttribute("SizeOf(Object) may be unavailable in future releases. Instead, use SizeOf<T>(). For more info, go to http://go.microsoft.com/fwlink/?LinkID=296514")]
         public static int SizeOf(object structure) { return default(int); }
         [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
         [System.ObsoleteAttribute("SizeOf(Type) may be unavailable in future releases. Instead, use SizeOf<T>(). For more info, go to http://go.microsoft.com/fwlink/?LinkID=296515")]
-        public static int SizeOf(System.Type t) { return default(int); }
+        public static int SizeOf(System.Type type) { return default(int); }
         public static int SizeOf<T>() { return default(int); }
         [System.Security.SecurityCriticalAttribute]
         public static System.IntPtr StringToBSTR(string s) { return default(System.IntPtr); }
@@ -218,7 +218,7 @@ namespace System.Runtime.InteropServices
         [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
         [System.ObsoleteAttribute("WriteInt32(Object, Int32, Int32) may be unavailable in future releases.")]
         [System.Security.SecurityCriticalAttribute]
-        public static void WriteInt32(object ptr, int ofs, int val) { ptr = default(object); }
+        public static void WriteInt32(object ptr, int offset, int value) { ptr = default(object); }
         [System.Security.SecurityCriticalAttribute]
         public static void ZeroFreeBSTR(System.IntPtr s) { }
         [System.Security.SecurityCriticalAttribute]

@@ -19,13 +19,13 @@ namespace System.Runtime.InteropServices
                 return Marshal.SystemMaxDBCSCharSize;
             }
         }
-        public static System.IntPtr AllocateMemory(int cb)
+        public static System.IntPtr AllocateMemory(int sizeInBytes)
         {
-            return Marshal.AllocCoTaskMem(cb);
+            return Marshal.AllocCoTaskMem(sizeInBytes);
         }
-        public static void DestroyStructure(System.IntPtr ptr, System.Type structuretype)
+        public static void DestroyStructure(System.IntPtr ptr, System.Type structureType)
         {
-            Marshal.DestroyStructure(ptr, structuretype);
+            Marshal.DestroyStructure(ptr, structureType);
         }
         public static void DestroyStructure<T>(System.IntPtr ptr)
         {
@@ -35,9 +35,9 @@ namespace System.Runtime.InteropServices
         {
             Marshal.FreeCoTaskMem(ptr);
         }
-        public static System.Delegate GetDelegateForFunctionPointer(System.IntPtr ptr, System.Type t)
+        public static System.Delegate GetDelegateForFunctionPointer(System.IntPtr ptr, System.Type delegateType)
         {
-            return Marshal.GetDelegateForFunctionPointer(ptr, t);
+            return Marshal.GetDelegateForFunctionPointer(ptr, delegateType);
         }
         public static TDelegate GetDelegateForFunctionPointer<TDelegate>(System.IntPtr ptr)
         {
@@ -55,9 +55,9 @@ namespace System.Runtime.InteropServices
         {
             return Marshal.GetLastWin32Error();
         }
-        public static System.IntPtr OffsetOf(System.Type t, string fieldName)
+        public static System.IntPtr OffsetOf(System.Type type, string fieldName)
         {
-            return Marshal.OffsetOf(t, fieldName);
+            return Marshal.OffsetOf(type, fieldName);
         }
         public static System.IntPtr OffsetOf<T>(string fieldName)
         {
@@ -99,73 +99,73 @@ namespace System.Runtime.InteropServices
         {
             return Marshal.ReadByte(ptr);
         }
-        public static byte ReadByte(System.IntPtr ptr, int ofs)
+        public static byte ReadByte(System.IntPtr ptr, int offset)
         {
-            return Marshal.ReadByte(ptr, ofs);
+            return Marshal.ReadByte(ptr, offset);
         }
-        public static byte ReadByte(object ptr, int ofs)
+        public static byte ReadByte(object ptr, int offset)
         {
-            return Marshal.ReadByte(ptr, ofs);
+            return Marshal.ReadByte(ptr, offset);
         }
         public static short ReadInt16(System.IntPtr ptr)
         {
             return Marshal.ReadInt16(ptr);
         }
-        public static short ReadInt16(System.IntPtr ptr, int ofs)
+        public static short ReadInt16(System.IntPtr ptr, int offset)
         {
-            return Marshal.ReadInt16(ptr, ofs);
+            return Marshal.ReadInt16(ptr, offset);
         }
-        public static short ReadInt16(object ptr, int ofs)
+        public static short ReadInt16(object ptr, int offset)
         {
-            return Marshal.ReadInt16(ptr, ofs);
+            return Marshal.ReadInt16(ptr, offset);
         }
         public static int ReadInt32(System.IntPtr ptr)
         {
             return Marshal.ReadInt32(ptr);
         }
-        public static int ReadInt32(System.IntPtr ptr, int ofs)
+        public static int ReadInt32(System.IntPtr ptr, int offset)
         {
-            return Marshal.ReadInt32(ptr, ofs);
+            return Marshal.ReadInt32(ptr, offset);
         }
-        public static int ReadInt32(object ptr, int ofs)
+        public static int ReadInt32(object ptr, int offset)
         {
-            return Marshal.ReadInt32(ptr, ofs);
+            return Marshal.ReadInt32(ptr, offset);
         }
         public static long ReadInt64(System.IntPtr ptr)
         {
             return Marshal.ReadInt64(ptr);
         }
-        public static long ReadInt64(System.IntPtr ptr, int ofs)
+        public static long ReadInt64(System.IntPtr ptr, int offset)
         {
-            return Marshal.ReadInt64(ptr, ofs);
+            return Marshal.ReadInt64(ptr, offset);
         }
-        public static long ReadInt64(object ptr, int ofs)
+        public static long ReadInt64(object ptr, int offset)
         {
-            return Marshal.ReadInt64(ptr, ofs);
+            return Marshal.ReadInt64(ptr, offset);
         }
         public static System.IntPtr ReadIntPtr(System.IntPtr ptr)
         {
             return Marshal.ReadIntPtr(ptr);
         }
-        public static System.IntPtr ReadIntPtr(System.IntPtr ptr, int ofs)
+        public static System.IntPtr ReadIntPtr(System.IntPtr ptr, int offset)
         {
-            return Marshal.ReadIntPtr(ptr, ofs);
+            return Marshal.ReadIntPtr(ptr, offset);
         }
-        public static System.IntPtr ReadIntPtr(object ptr, int ofs)
+        public static System.IntPtr ReadIntPtr(object ptr, int offset)
         {
-            return Marshal.ReadIntPtr(ptr, ofs);
+            return Marshal.ReadIntPtr(ptr, offset);
         }
-        public static System.IntPtr ReallocateMemory(System.IntPtr pv, int cb)
+        public static System.IntPtr ReallocateMemory(System.IntPtr ptr, int sizeInBytes)
         {
-            return Marshal.ReAllocCoTaskMem(pv, cb);
+            return Marshal.ReAllocCoTaskMem(ptr, sizeInBytes);
         }
         public static int SizeOf(object structure)
         {
             return Marshal.SizeOf(structure);
         }
-        public static int SizeOf(System.Type t)
+        public static int SizeOf(System.Type type)
         {
-            return Marshal.SizeOf(t);
+            return Marshal.SizeOf(type);
         }
         public static int SizeOf<T>()
         {
@@ -199,9 +199,9 @@ namespace System.Runtime.InteropServices
         {
             return Marshal.UnsafeAddrOfPinnedArrayElement<T>(arr, index);
         }
-        public static void WriteInt32(object ptr, int ofs, int val)
+        public static void WriteInt32(object ptr, int offset, int value)
         {
-            Marshal.WriteInt32(ptr, ofs, val);
+            Marshal.WriteInt32(ptr, offset, value);
         }
         public static void ZeroFreeBSTR(System.IntPtr s)
         {
