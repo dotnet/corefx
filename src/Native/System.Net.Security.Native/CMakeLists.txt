@@ -4,7 +4,7 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 add_definitions(-DPIC=1)
 
-if (APPLE)
+if (HAVE_GSSFW_HEADERS)
    find_library(LIBGSS NAMES GSS)
 else()
    find_library(LIBGSS NAMES gssapi_krb5)
