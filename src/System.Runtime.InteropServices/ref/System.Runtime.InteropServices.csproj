@@ -8,7 +8,7 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <AssemblyVersion>4.1.0.0</AssemblyVersion>
     <OutputType>Library</OutputType>
-    <PackageTargetFramework>dotnet5.4</PackageTargetFramework>
+    <PackageTargetFramework>dotnet5.6</PackageTargetFramework>
     <NuGetTargetMoniker>.NETPlatform,Version=v5.4</NuGetTargetMoniker>
     <ProjectGuid>{B17014F1-D902-417F-89B0-271204695831}</ProjectGuid>
   </PropertyGroup>
