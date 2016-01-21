@@ -48,8 +48,13 @@
     <Compile Include="System\Net\SecureProtocols\ProtectionLevel.cs" />
 
     <!-- NegotiateStream -->    
+    <Compile Include="System\Net\ContextFlagsPal.cs" />
+    <Compile Include="System\Net\NTAuthentication.cs" />
+    <Compile Include="System\Net\SSPIHandleCache.cs" />
+    <Compile Include="System\Net\StreamFramer.cs" />
     <Compile Include="System\Net\SecureProtocols\BufferAsyncResult.cs" />
     <Compile Include="System\Net\SecureProtocols\NegotiateStream.cs" />
+    <Compile Include="System\Net\SecureProtocols\InternalNegoState.cs" />
     <Compile Include="System\Net\SecureProtocols\InternalNegotiateStream.cs" />
     
     <Compile Include="System\Security\Authentication\ExtendedProtection\ExtendedProtectionPolicy.cs" />
@@ -143,11 +148,8 @@
     <Compile Include="System\Net\CertificateValidationPal.Windows.cs" />
 	
     <!-- NegotiateStream -->
-    <Compile Include="System\Net\NTAuthentication.cs" />
     <Compile Include="System\Net\SpnDictionary.cs" />
-    <Compile Include="System\Net\SSPIHandleCache.cs" />
-    <Compile Include="System\Net\StreamFramer.cs" />
-    <Compile Include="System\Net\SecureProtocols\InternalNegoState.cs" />
+    <Compile Include="System\Net\SecureProtocols\NegoState.Windows.cs" />
    
     <!-- Interop -->
     <Compile Include="$(CommonPath)\Interop\Windows\Interop.Libraries.cs">
@@ -291,6 +293,9 @@
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\System.Net.Security.Native\Interop.Initialization.cs">
       <Link>Common\Interop\Unix\System.Net.Security.Native\Interop.Initialization.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Net.Security.Native\NegotiationInfoClass.cs">
+      <Link>Common\Interop\Unix\System.Net.Security.Native\NegotiationInfoClass.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Microsoft\Win32\SafeHandles\SafeX509Handles.Unix.cs">
       <Link>Common\Microsoft\Win32\SafeHandles\SafeX509Handles.Unix.cs</Link>

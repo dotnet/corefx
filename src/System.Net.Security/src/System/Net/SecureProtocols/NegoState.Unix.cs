@@ -18,140 +18,136 @@ namespace System.Net.Security
     //
     // This is part of the NegotiateStream PAL.
     //
-    internal class NegoState
+    internal partial class NegoState
     {
-        internal const int MaxReadFrameSize = 64 * 1024;
-        internal const int MaxWriteDataSize = 63 * 1024; // 1k for the framing and trailer that is always less as per SSPI.
-
-        internal NegoState(Stream innerStream, bool leaveStreamOpen)
-        {
-            throw new PlatformNotSupportedException();
-        }
-
-        internal static string DefaultPackage
-        {
-            get
-            {
-                throw new PlatformNotSupportedException();
-            }
-        }
-
-        internal void ValidateCreateContext(string package,
-                                            NetworkCredential credential,
-                                            string servicePrincipalName,
-                                            ExtendedProtectionPolicy policy,
-                                            ProtectionLevel protectionLevel,
-                                            TokenImpersonationLevel impersonationLevel)
-        {
-            throw new PlatformNotSupportedException();
-        }
-
-        internal void ValidateCreateContext(
-                                            string package,
-                                            bool isServer,
-                                            NetworkCredential credential,
-                                            string servicePrincipalName,
-                                            ChannelBinding channelBinding,
-                                            ProtectionLevel protectionLevel,
-                                            TokenImpersonationLevel impersonationLevel
-                                            )
-        {
-            throw new PlatformNotSupportedException();
-        }
-
-        internal bool IsAuthenticated
-        {
-            get
-            {
-                throw new PlatformNotSupportedException();
-            }
-        }
-
-        internal bool IsMutuallyAuthenticated
-        {
-            get
-            {
-                throw new PlatformNotSupportedException();
-            }
-        }
-
-        internal bool IsEncrypted
-        {
-            get
-            {
-                throw new PlatformNotSupportedException();
-            }
-        }
-
-        internal bool IsSigned
-        {
-            get
-            {
-                throw new PlatformNotSupportedException();
-            }
-        }
-
-        internal bool IsServer
-        {
-            get
-            {
-                throw new PlatformNotSupportedException();
-            }
-        }
-
-        internal bool CanGetSecureStream
-        {
-            get
-            {
-                throw new PlatformNotSupportedException();
-            }
-        }
-
-        internal TokenImpersonationLevel AllowedImpersonation
-        {
-            get
-            {
-                throw new PlatformNotSupportedException();
-            }
-        }
-
         internal IIdentity GetIdentity()
         {
             throw new PlatformNotSupportedException();
         }
 
-        internal void CheckThrow(bool authSucessCheck)
+        internal static string QueryContextAssociatedName(SafeDeleteContext securityContext)
         {
             throw new PlatformNotSupportedException();
         }
 
-        //
-        // This is to not depend on GC&SafeHandle class if the context is not needed anymore.
-        //
-        internal void Close()
+        internal static string QueryContextAuthenticationPackage(SafeDeleteContext securityContext)
         {
             throw new PlatformNotSupportedException();
         }
 
-        internal void ProcessAuthentication(LazyAsyncResult lazyResult)
+        internal static object QueryContextSizes(SafeDeleteContext securityContext)
         {
             throw new PlatformNotSupportedException();
         }
 
-        internal void EndProcessAuthentication(IAsyncResult result)
+        internal static int QueryMaxTokenSize(string package)
         {
             throw new PlatformNotSupportedException();
         }
 
-
-        internal int EncryptData(byte[] buffer, int offset, int count, ref byte[] outBuffer)
+        internal static string QueryContextClientSpecifiedSpn(SafeDeleteContext securityContext)
         {
             throw new PlatformNotSupportedException();
         }
 
-        internal int DecryptData(byte[] buffer, int offset, int count, out int newOffset)
+        internal static SafeFreeCredentials AcquireDefaultCredential(string package, bool isServer)
         {
             throw new PlatformNotSupportedException();
         }
+
+        internal static SafeFreeCredentials AcquireCredentialsHandle(string package, bool isServer, NetworkCredential credential)
+        {
+            throw new PlatformNotSupportedException();
+        }
+
+        internal static SecurityStatusPal InitializeSecurityContext(
+            SafeFreeCredentials credentialsHandle,
+            ref SafeDeleteContext securityContext,
+            string spn,
+            ContextFlagsPal requestedContextFlags,
+            SecurityBuffer[] inSecurityBufferArray,
+            SecurityBuffer outSecurityBuffer,
+            ref ContextFlagsPal contextFlags)
+        {
+            throw new PlatformNotSupportedException();
+        }
+
+        internal static SecurityStatusPal CompleteAuthToken(
+            ref SafeDeleteContext securityContext,
+            SecurityBuffer[] inSecurityBufferArray)
+        {
+            throw new PlatformNotSupportedException();
+        }
+
+        internal static SecurityStatusPal AcceptSecurityContext(
+            SafeFreeCredentials credentialsHandle,
+            ref SafeDeleteContext securityContext,
+            ContextFlagsPal requestedContextFlags,
+            SecurityBuffer[] inSecurityBufferArray,
+            SecurityBuffer outSecurityBuffer,
+            ref ContextFlagsPal contextFlags)
+        {
+            throw new PlatformNotSupportedException();
+        }
+
+        private static void ValidateImpersonationLevel(TokenImpersonationLevel impersonationLevel)
+        {
+            throw new PlatformNotSupportedException();
+        }
+
+        private static void ThrowCredentialException(long error)
+        {
+            throw new PlatformNotSupportedException();
+        }
+
+        private static bool IsLogonDeniedException(Exception exception)
+        {
+            throw new PlatformNotSupportedException();
+        }
+
+        internal static Exception CreateExceptionFromError(SecurityStatusPal statusCode)
+        {
+            throw new PlatformNotSupportedException();
+        }
+
+        internal static int Encrypt(
+            SafeDeleteContext securityContext,
+            byte[] buffer,
+            int offset,
+            int count,
+            object secSizes,
+            bool isConfidential,
+            bool isNtlm,
+            ref byte[] output,
+            uint sequenceNumber)
+        {
+            throw new PlatformNotSupportedException();
+        }
+
+        internal static int Decrypt(
+            SafeDeleteContext securityContext,
+            byte[] buffer,
+            int offset,
+            int count,
+            bool isConfidential,
+            bool isNtlm,
+            out int newOffset,
+            uint sequenceNumber)
+        {
+            throw new PlatformNotSupportedException();
+        }
+
+        internal static int DecryptNtlm(
+            SafeDeleteContext securityContext,
+            byte[] buffer,
+            int offset,
+            int count,
+            bool isConfidential,
+            out int newOffset,
+            uint sequenceNumber)
+        {
+            throw new PlatformNotSupportedException();
+        }
+
     }
 }
