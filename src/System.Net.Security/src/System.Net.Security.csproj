@@ -147,7 +147,7 @@
     <Compile Include="System\Net\SpnDictionary.cs" />
     <Compile Include="System\Net\SSPIHandleCache.cs" />
     <Compile Include="System\Net\StreamFramer.cs" />
-    <Compile Include="System\Net\SecureProtocols\NegoState.Windows.cs" />
+    <Compile Include="System\Net\SecureProtocols\InternalNegoState.cs" />
    
     <!-- Interop -->
     <Compile Include="$(CommonPath)\Interop\Windows\Interop.Libraries.cs">
