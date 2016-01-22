@@ -14,6 +14,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="System\Data\Common\DbColumn.cs" />
+    <Compile Include="System\Data\DbSchemaFactory.cs" />
     <Compile Include="System\DBNull.cs" />
     <Compile Include="System\Data\CommandBehavior.cs" />
     <Compile Include="System\Data\CommandType.cs" />
