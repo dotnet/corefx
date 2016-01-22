@@ -115,7 +115,6 @@ namespace System.Net.Security
             byte[] buffer,
             int offset,
             int count,
-            object secSizes,
             bool isConfidential,
             bool isNtlm,
             ref byte[] output,

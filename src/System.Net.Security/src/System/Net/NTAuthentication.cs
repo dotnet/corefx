@@ -28,7 +28,6 @@ namespace System.Net
 
         private bool _isCompleted;
         private string _protocolName;
-        private object _sizes;
         private string _lastProtocolName;
         private string _package;
 
@@ -188,28 +187,6 @@ namespace System.Net
                 }
 
                 return _protocolName;
-            }
-        }
-
-        internal object Sizes
-        {
-            get
-            {
-                if ((IsCompleted && IsValidContext))
-                {
-                    if (GlobalLog.IsEnabled)
-                    {
-                        GlobalLog.Assert("NTAuthentication#{0}::MaxDataSize|The context is not completed or invalid.", LoggingHash.HashString(this));
-                    }
-                    Debug.Fail("NTAuthentication#" + LoggingHash.HashString(this) + "::MaxDataSize |The context is not completed or invalid.");
-                }
-
-                if (_sizes == null)
-                {
-                    _sizes = NegoState.QueryContextSizes(_securityContext);
-                }
-
-                return _sizes;
             }
         }
 
@@ -483,7 +460,6 @@ namespace System.Net
                 buffer,
                 offset,
                 count,
-                Sizes,
                 IsConfidentialityFlag,
                 IsNTLM,
                 ref output,

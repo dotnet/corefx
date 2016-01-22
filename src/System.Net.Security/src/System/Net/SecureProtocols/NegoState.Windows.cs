@@ -35,7 +35,6 @@ namespace System.Net.Security
                 SecurityContextTokenHandle token = null;
                 try
                 {
-                    //token = _context.GetContextToken();
                     SecurityStatusPal status;
                     SafeDeleteContext securityContext = _context.GetContext(out status);
                     if (status != SecurityStatusPal.OK)
@@ -92,15 +91,6 @@ namespace System.Net.Security
                 return negotiationInfoClass.AuthenticationPackage;
             }
             return null;
-        }
-
-        internal static object QueryContextSizes(SafeDeleteContext securityContext)
-        {
-            return SSPIWrapper.QueryContextAttributes(
-              GlobalSSPI.SSPIAuth,
-              securityContext,
-              Interop.SspiCli.ContextAttribute.Sizes
-              ) as SecSizes;
         }
 
         internal static int QueryMaxTokenSize(string package)
@@ -263,13 +253,16 @@ namespace System.Net.Security
             byte[] buffer,
             int offset,
             int count,
-            object secSizes,
             bool isConfidential,
             bool isNtlm,
             ref byte[] output,
             uint sequenceNumber)
         {
-            SecSizes sizes = secSizes as SecSizes;
+            SecSizes sizes = SSPIWrapper.QueryContextAttributes(
+                GlobalSSPI.SSPIAuth,
+                securityContext,
+                Interop.SspiCli.ContextAttribute.Sizes
+                ) as SecSizes;
 
             try
             {
