@@ -118,7 +118,7 @@
   <ItemGroup Condition="'$(ExcludeInternetFeeds)' != 'true'">
     <!-- Need to escape double forward slash (%2F) or MSBuild will normalize to one slash on Unix. -->
 
-    <DnuSourceList Include="https:%2F%2Fwww.myget.org/F/dotnet-core/" />
+    <DnuSourceList Include="https:%2F%2Fwww.myget.org/F/dotnet-core-rel/" />
     <DnuSourceList Include="https:%2F%2Fwww.myget.org/F/dotnet-coreclr/" />
     <DnuSourceList Include="https:%2F%2Fwww.myget.org/F/dotnet-corefxtestdata/" />
     <DnuSourceList Include="https:%2F%2Fwww.myget.org/F/dotnet-buildtools/" />
@@ -128,7 +128,6 @@
   <!-- list of directories to perform batch restore -->
   <ItemGroup>
     <DnuRestoreDir Include="$(MSBuildProjectDirectory)\src" />
-    <DnuRestoreDir Include="$(ToolsDir)" />
     <!-- workaround to address issue where DNX won't recurse directories under a project.json
          https://github.com/aspnet/dnx/commit/0dda8bf86863364cc20421f1af7494f1b2a3256f -->
     <DnuRestoreDir Include="$(MSBuildProjectDirectory)\src\*\src\**\project.json" />
