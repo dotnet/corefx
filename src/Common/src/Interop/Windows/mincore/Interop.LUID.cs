@@ -15,6 +15,5 @@ internal partial class Interop
             internal int LowPart;
             internal int HighPart;
         }
-
     }
 }
