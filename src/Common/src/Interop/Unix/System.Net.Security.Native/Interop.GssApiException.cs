@@ -41,7 +41,6 @@ internal static partial class Interop
                 if (majorStatus != Status.GSS_S_COMPLETE)
                 {
                     GssApiException ex = new GssApiException(majorStatus, minorStatus);
-                    Debug.Fail(message + ": " + ex);
                     throw ex;
                 }
             }
@@ -71,7 +70,7 @@ internal static partial class Interop
                     using (msgBuffer)
                     {
                         byte[] statusBytes = new byte[statusLength];
-                        Interop.NetSecurity.CopyBuffer(msgBuffer, statusBytes, 0);
+                        msgBuffer.Copy(statusBytes, 0);
                         var encoding = new System.Text.ASCIIEncoding();
                         msgStrings[i] = encoding.GetString(statusBytes);
                     }

@@ -13,7 +13,7 @@ namespace Microsoft.Win32.SafeHandles
     /// </summary>
     internal sealed class SafeGssBufferHandle : SafeHandle
     {
-        public SafeGssBufferHandle() : base(IntPtr.Zero, true)
+        private SafeGssBufferHandle() : base(IntPtr.Zero, true)
         {
         }
 
@@ -22,17 +22,21 @@ namespace Microsoft.Win32.SafeHandles
             get { return handle == IntPtr.Zero; }
         }
 
+        internal void Copy(byte[] destination, int offset)
+        {
+            Debug.Assert(destination != null, "destination buffer cannot be null");
+            Debug.Assert(offset <= destination.Length , "offset in the destination buffer must be valid");
+            if (destination.Length > 0)
+            {
+                Interop.NetSecurity.CopyBuffer(this, destination, capacity: destination.Length, offset: offset);
+            }
+        }
+
         protected override bool ReleaseHandle()
         {
-            if (handle != IntPtr.Zero)
-            {
-                Interop.NetSecurity.Status minorStatus;
-                Interop.NetSecurity.Status status = Interop.NetSecurity.ReleaseBuffer(out minorStatus, handle);
-                return status == Interop.NetSecurity.Status.GSS_S_COMPLETE;
-            }
-
-            SetHandle(IntPtr.Zero);
-            return true;
+            Interop.NetSecurity.Status minorStatus;
+            Interop.NetSecurity.Status status = Interop.NetSecurity.ReleaseBuffer(out minorStatus, handle);
+            return status == Interop.NetSecurity.Status.GSS_S_COMPLETE;
         }
     }
 
@@ -66,9 +70,7 @@ namespace Microsoft.Win32.SafeHandles
         {
             Interop.NetSecurity.Status minorStatus;
             Interop.NetSecurity.Status status = Interop.NetSecurity.ReleaseName(out minorStatus, ref handle);
-            Interop.NetSecurity.GssApiException.AssertOrThrowIfError("GssReleaseName failed", status, minorStatus);
-            SetHandle(IntPtr.Zero);
-            return true;
+            return status == Interop.NetSecurity.Status.GSS_S_COMPLETE;
         }
 
         private SafeGssNameHandle()
@@ -126,9 +128,7 @@ namespace Microsoft.Win32.SafeHandles
         {
             Interop.NetSecurity.Status minorStatus;
             Interop.NetSecurity.Status status = Interop.NetSecurity.ReleaseCred(out minorStatus, ref handle);
-            Interop.NetSecurity.GssApiException.AssertOrThrowIfError("GssReleaseCred failed", status, minorStatus);
-            SetHandle(IntPtr.Zero);
-            return true;
+            return status == Interop.NetSecurity.Status.GSS_S_COMPLETE;
         }
     }
 
@@ -148,9 +148,7 @@ namespace Microsoft.Win32.SafeHandles
         {
             Interop.NetSecurity.Status minorStatus;
             Interop.NetSecurity.Status status = Interop.NetSecurity.DeleteSecContext(out minorStatus, ref handle);
-            Interop.NetSecurity.GssApiException.AssertOrThrowIfError("GssDeleteSecContext failed", status, minorStatus);
-            SetHandle(IntPtr.Zero);
-            return true;
+            return status == Interop.NetSecurity.Status.GSS_S_COMPLETE;
         }
     }
 }

@@ -53,23 +53,18 @@ internal static partial class Interop
                 }
 
                 outputBuffer = new byte[outputLength];
-                if (outputLength > 0)
-                {
-                    Interop.NetSecurity.CopyBuffer(outputToken, outputBuffer, 0);
-                }
+                outputToken.Copy(outputBuffer, 0);
             }
             return (status == NetSecurity.Status.GSS_S_COMPLETE) ? true : false;
         }
 
-        internal static int Encrypt(
+        internal static byte[] Encrypt(
             SafeGssContextHandle context,
             bool encrypt,
             byte[] buffer,
             int offset,
-            int count,
-            out byte[] outputBuffer)
+            int count)
         {
-            outputBuffer = null;
             Debug.Assert((buffer != null) && (buffer.Length > 0), "Invalid input buffer passed to Encrypt");
             Debug.Assert((offset >= 0) && (offset < buffer.Length), "Invalid input offset passed to Encrypt");
             Debug.Assert((count > 0) && (count <= (buffer.Length - offset)), "Invalid input count passed to Encrypt");
@@ -84,13 +79,10 @@ internal static partial class Interop
                 {
                     throw new NetSecurity.GssApiException(SR.net_context_wrap_failed, status, minorStatus);
                 }
-                outputBuffer = new byte[msgLength]; // Always return non-null
-                if (msgLength > 0)
-                {
-                    NetSecurity.CopyBuffer(outputToken, outputBuffer, 0);
-                }
 
-                return outputBuffer.Length;
+                byte[] outputBuffer = new byte[msgLength];
+                outputToken.Copy(outputBuffer, 0);
+                return outputBuffer;
             }
         }
 
@@ -122,10 +114,7 @@ internal static partial class Interop
                     throw new NetSecurity.GssApiException(SR.Format(SR.net_context_buffer_too_small, msgLength, length));
                 }
 
-                if (msgLength > 0)
-                {
-                    NetSecurity.CopyBuffer(outputToken, buffer, offset);
-                }
+                outputToken.Copy(buffer, offset);
             }
 
             return msgLength;

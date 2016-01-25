@@ -20,6 +20,7 @@ internal static partial class Interop
         internal static extern Status CopyBuffer(
             SafeGssBufferHandle handle,
             byte[] buffer,
+            int capacity,
             int offset);
 
         [DllImport(Interop.Libraries.NetSecurityNative, EntryPoint="NetSecurity_DisplayStatus")]
