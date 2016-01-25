@@ -23,6 +23,8 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Targets>Build;DebugSymbolsProjectOutputGroup</Targets>
     </ProjectReference>
+    <ProjectReference Include="..\ref\System.Collections.csproj">
+    </ProjectReference>
     <ProjectReference Include="..\..\System.Runtime\src\System.Runtime.csproj">
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
       <OutputItemType>Content</OutputItemType>
@@ -71,6 +73,7 @@
     <Compile Include="Generic\HashSet\SetCollectionComparerTests.cs" />
     <Compile Include="Generic\HashSet\SetCollectionDuplicateItemTests.cs" />
     <Compile Include="Generic\HashSet\SetCollectionRelationshipTests.cs" />
+    <Compile Include="Generic\IListExtensions\IListBinarySearch.cs" />
     <Compile Include="Generic\LinkedList\LinkedListNodeTests.cs" />
     <Compile Include="Generic\LinkedList\LinkedList_AddBeforeAfterTests.cs" />
     <Compile Include="Generic\LinkedList\LinkedList_AddTests.cs" />

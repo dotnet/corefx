@@ -595,4 +595,10 @@ namespace System.Collections.Generic
             void System.Collections.IEnumerator.Reset() { }
         }
     }
+    public static partial class IListExtensions
+    {
+        public static int BinarySearch<T>(this IList<T> list, int index, int count, T item, IComparer<T> comparer) { return default(int); }
+        public static int BinarySearch<T>(this IList<T> list, T item) { return default(int); }
+        public static int BinarySearch<T>(this IList<T> list, T item, IComparer<T> comparer) { return default(int); }
+    }
 }
