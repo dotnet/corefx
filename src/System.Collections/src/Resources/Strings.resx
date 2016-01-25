@@ -228,4 +228,10 @@
   <data name="NotSupported_SortedListNestedWrite" xml:space="preserve">
     <value>This operation is not supported on SortedList nested types because they require modifying the original SortedList.</value>
   </data>
+  <data name="ArgumentNull_IList" xml:space="preserve">
+    <value>IList instance cannot be null</value>
+  </data>
+  <data name="InvalidOperation_IComparerFailed" xml:space="preserve">
+    <value>Failed to compare two elements</value>
+  </data>
 </root>

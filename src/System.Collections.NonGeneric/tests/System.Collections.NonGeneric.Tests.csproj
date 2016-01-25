@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <PropertyGroup>
@@ -10,7 +10,6 @@
     <ProjectGuid>{EE95AE39-845A-42D3-86D0-8065DBE56612}</ProjectGuid>
     <IncludePerformanceTests>true</IncludePerformanceTests>
   </PropertyGroup>
-
   <!-- Default configurations to help VS understand the configurations -->
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
   </PropertyGroup>
@@ -91,6 +90,7 @@
     <Compile Include="Hashtable\PropertyValuesTests.cs" />
     <Compile Include="Hashtable\RemoveTests.cs" />
     <Compile Include="Hashtable\SynchronizedTests.cs" />
+    <Compile Include="IListExtensions\IListBinarySearch.cs" />
     <Compile Include="Queue\Queue_Clear.cs" />
     <Compile Include="Queue\Queue_Clone.cs" />
     <Compile Include="Queue\Queue_Contains.cs" />
@@ -162,5 +162,6 @@
   <ItemGroup>
     <None Include="project.json" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>
