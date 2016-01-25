@@ -48,9 +48,15 @@
     <Compile Include="System\Net\SecureProtocols\ProtectionLevel.cs" />
 
     <!-- NegotiateStream -->    
+    <Compile Include="System\Net\ContextFlagsPal.cs" />
+    <Compile Include="System\Net\NTAuthentication.cs" />
+    <Compile Include="System\Net\SSPIHandleCache.cs" />
+    <Compile Include="System\Net\StreamFramer.cs" />
     <Compile Include="System\Net\SecureProtocols\BufferAsyncResult.cs" />
     <Compile Include="System\Net\SecureProtocols\NegotiateStream.cs" />
+    <Compile Include="System\Net\SecureProtocols\InternalNegoState.cs" />
     <Compile Include="System\Net\SecureProtocols\InternalNegotiateStream.cs" />
+    <Compile Include="System\Net\NegotiationInfoClass.cs" />
     
     <Compile Include="System\Security\Authentication\ExtendedProtection\ExtendedProtectionPolicy.cs" />
     <Compile Include="System\Security\Authentication\ExtendedProtection\PolicyEnforcement.cs" />
@@ -143,10 +149,7 @@
     <Compile Include="System\Net\CertificateValidationPal.Windows.cs" />
 	
     <!-- NegotiateStream -->
-    <Compile Include="System\Net\NTAuthentication.cs" />
     <Compile Include="System\Net\SpnDictionary.cs" />
-    <Compile Include="System\Net\SSPIHandleCache.cs" />
-    <Compile Include="System\Net\StreamFramer.cs" />
     <Compile Include="System\Net\SecureProtocols\NegoState.Windows.cs" />
    
     <!-- Interop -->
