@@ -12,7 +12,6 @@ namespace System.Net.Security.Tests
 {
     public class CertificateValidationRemoteServer
     {
-        [ActiveIssue(5555, PlatformID.Linux)]
         [Fact]
         public async Task CertificateValidationRemoteServer_EndToEnd_Ok()
         {
@@ -29,7 +28,23 @@ namespace System.Net.Security.Tests
 
         private bool RemoteHttpsCertValidation(object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors)
         {
-            Assert.Equal(SslPolicyErrors.None, sslPolicyErrors);
+            // If the local machine doesn't trust this remote machine, it will either be
+            // * UntrustedRoot (it sent the whole chain, I don't trust it)
+            // * PartialChain (it didn't send the root, and we couldn't complete it)
+            if (sslPolicyErrors == SslPolicyErrors.RemoteCertificateChainErrors)
+            {
+                X509ChainStatusFlags[] permittedFlags = new[]
+                {
+                    X509ChainStatusFlags.UntrustedRoot,
+                    X509ChainStatusFlags.PartialChain,
+                };
+
+                Assert.Contains(chain.ChainStatus[0].Status, permittedFlags);
+            }
+            else
+            {
+                Assert.Equal(SslPolicyErrors.None, sslPolicyErrors);
+            }
 
             return true;
         }
