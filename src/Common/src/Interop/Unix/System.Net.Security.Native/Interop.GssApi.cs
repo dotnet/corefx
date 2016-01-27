@@ -55,7 +55,7 @@ internal static partial class Interop
                 outputBuffer = new byte[outputLength];
                 outputToken.Copy(outputBuffer, 0);
             }
-            return (status == NetSecurity.Status.GSS_S_COMPLETE) ? true : false;
+            return status == NetSecurity.Status.GSS_S_COMPLETE;
         }
 
         internal static byte[] Encrypt(

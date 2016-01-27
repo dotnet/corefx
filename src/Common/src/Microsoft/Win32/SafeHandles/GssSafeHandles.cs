@@ -36,6 +36,7 @@ namespace Microsoft.Win32.SafeHandles
         {
             Interop.NetSecurity.Status minorStatus;
             Interop.NetSecurity.Status status = Interop.NetSecurity.ReleaseBuffer(out minorStatus, handle);
+            SetHandle(IntPtr.Zero);
             return status == Interop.NetSecurity.Status.GSS_S_COMPLETE;
         }
     }
@@ -70,6 +71,7 @@ namespace Microsoft.Win32.SafeHandles
         {
             Interop.NetSecurity.Status minorStatus;
             Interop.NetSecurity.Status status = Interop.NetSecurity.ReleaseName(out minorStatus, ref handle);
+            SetHandle(IntPtr.Zero);
             return status == Interop.NetSecurity.Status.GSS_S_COMPLETE;
         }
 
@@ -128,6 +130,7 @@ namespace Microsoft.Win32.SafeHandles
         {
             Interop.NetSecurity.Status minorStatus;
             Interop.NetSecurity.Status status = Interop.NetSecurity.ReleaseCred(out minorStatus, ref handle);
+            SetHandle(IntPtr.Zero);
             return status == Interop.NetSecurity.Status.GSS_S_COMPLETE;
         }
     }
@@ -148,6 +151,7 @@ namespace Microsoft.Win32.SafeHandles
         {
             Interop.NetSecurity.Status minorStatus;
             Interop.NetSecurity.Status status = Interop.NetSecurity.DeleteSecContext(out minorStatus, ref handle);
+            SetHandle(IntPtr.Zero);
             return status == Interop.NetSecurity.Status.GSS_S_COMPLETE;
         }
     }

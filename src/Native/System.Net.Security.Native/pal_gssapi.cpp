@@ -35,10 +35,12 @@ static_assert(PAL_GSS_CONTINUE_NEEDED == GSS_S_CONTINUE_NEEDED, "");
 #if !(HAVE_GSS_SPNEGO_MECHANISM)
 static char gss_mech_value[] = "\x2b\x06\x01\x05\x05\x02"; // Binary representation of SPNEGO Oid (RFC 4178)
 #endif
+
 static void NetSecurity_HandleError(uint32_t majorStatus, gss_buffer_t* outBufferHandle, uint32_t* outBufferLength)
 {
     assert(outBufferHandle != nullptr);
-    if (GSS_ERROR(majorStatus) || (*outBufferHandle)->length > UnsignedCast(std::numeric_limits<int>::max()))
+    assert(outBufferLength != nullptr);
+    if (GSS_ERROR(majorStatus) || (*outBufferHandle)->length > UnsignedCast(std::numeric_limits<uint32_t>::max()))
     {
         uint32_t relBufferStatus;
         gss_release_buffer(&relBufferStatus, *outBufferHandle);
@@ -56,6 +58,7 @@ extern "C" uint32_t NetSecurity_AcquireCredSpNego(uint32_t* minorStatus,
                                                   int32_t isInitiate,
                                                   gss_cred_id_t* outputCredHandle)
 {
+    assert(minorStatus != nullptr);
     assert(outputCredHandle != nullptr);
     assert(isInitiate == 0 || isInitiate == 1);
 #if HAVE_GSS_SPNEGO_MECHANISM
@@ -72,6 +75,7 @@ extern "C" uint32_t NetSecurity_AcquireCredSpNego(uint32_t* minorStatus,
 extern "C" uint32_t NetSecurity_DeleteSecContext(uint32_t* minorStatus, gss_ctx_id_t* contextHandle)
 {
     assert(contextHandle != nullptr);
+    assert(minorStatus != nullptr);
     return gss_delete_sec_context(minorStatus, contextHandle, GSS_C_NO_BUFFER);
 }
 
@@ -134,11 +138,11 @@ extern "C" uint32_t NetSecurity_InitSecContext(uint32_t* minorStatus,
     assert(outBufferHandle != nullptr);
     assert(outTokenLength != nullptr);
     assert(retFlags != nullptr);
+
 #if HAVE_GSS_SPNEGO_MECHANISM
     gss_OID desiredMech = isNtlm ? GSS_NTLM_MECHANISM : GSS_SPNEGO_MECHANISM;
 #else
     assert(!isNtlm && "NTLM is not supported by MIT libgssapi_krb5");
-    char gss_mech_value[] = "\x2b\x06\x01\x05\x05\x02"; // Binary representation of SPNEGO Oid (RFC 4178)
     gss_OID_desc gss_mech_spnego_OID_desc = {.length = 6, .value = static_cast<void*>(gss_mech_value)};
     gss_OID desiredMech = &gss_mech_spnego_OID_desc;
 #endif
