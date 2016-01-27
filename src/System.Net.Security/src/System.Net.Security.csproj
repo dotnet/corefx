@@ -295,6 +295,21 @@
     <Compile Include="$(CommonPath)\Interop\Unix\System.Net.Security.Native\Interop.Initialization.cs">
       <Link>Common\Interop\Unix\System.Net.Security.Native\Interop.Initialization.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Net.Security.Native\Interop.GssApi.cs">
+      <Link>Common\Interop\Unix\System.Net.Security.Native\Interop.GssApi.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Net.Security.Native\Interop.GssApiException.cs"> 
+      <Link>Common\Interop\Unix\System.Net.Security.Native\Interop.GssApiException.cs</Link> 
+    </Compile> 
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Net.Security.Native\SecuritySafeHandles.cs"> 
+       <Link>Common\Interop\Unix\System.Net.Security.Native\SecuritySafeHandles.cs</Link>
+    </Compile> 
+    <Compile Include="$(CommonPath)\Microsoft\Win32\SafeHandles\GssSafeHandles.cs"> 
+       <Link>Common\Microsoft\Win32\SafeHandles\GssSafeHandles.cs</Link> 
+    </Compile> 
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Net.Security.Native\Interop.NetSecurity.cs"> 
+      <Link>Common\Interop\Unix\System.Net.Security.Native\Interop.NetSecurity.cs</Link> 
+    </Compile>
     <Compile Include="$(CommonPath)\Microsoft\Win32\SafeHandles\SafeX509Handles.Unix.cs">
       <Link>Common\Microsoft\Win32\SafeHandles\SafeX509Handles.Unix.cs</Link>
     </Compile>
