@@ -123,3 +123,13 @@ extern "C" const EVP_CIPHER* CryptoNative_EvpDes3Cbc()
 {
     return EVP_des_ede3_cbc();
 }
+
+extern "C" const EVP_CIPHER* CryptoNative_EvpRc4()
+{
+    return EVP_rc4();
+}
+
+extern "C" void CryptoNative_EvpCipher(EVP_CIPHER_CTX* ctx, uint8_t* out, const uint8_t *in, uint32_t inl)
+{
+    EVP_Cipher(ctx, out, in, inl);
+}

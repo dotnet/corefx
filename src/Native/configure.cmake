@@ -317,6 +317,14 @@ check_symbol_exists(
     "sys/syslimits.h"
     HAVE_OPEN_MAX)
 
+if (CMAKE_SYSTEM_NAME STREQUAL Linux)
+    check_include_files(
+        heimntlm.h
+        HAVE_HEIMNTLM_HEADERS)
+else ()
+    set(HAVE_HEIMNTLM_HEADERS 0)
+endif ()
+
 set (CMAKE_REQUIRED_LIBRARIES)
 
 configure_file(
