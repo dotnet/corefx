@@ -79,8 +79,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ValidationPattern Include="^((System\..*)|(Microsoft\.CSharp)|(Microsoft\.NETCore.*)|(Microsoft\.Win32\..*)|(Microsoft\.VisualBasic))(?&lt;!TestData)$">
-      <ExpectedPrerelease>rc2-23713</ExpectedPrerelease>
+    <ValidationPattern Include="^((System\..%2A)|(Microsoft\.CSharp)|(Microsoft\.NETCore.%2A)|(Microsoft\.TargetingPack\.Private.%2A)|(Microsoft\.Win32\..%2A)|(Microsoft\.VisualBasic))(?&lt;!TestData)$">
+      <ExpectedPrerelease>rc3-23726</ExpectedPrerelease>
     </ValidationPattern>
     <ValidationPattern Include="^(System\..*TestData)$">
       <ExpectedVersion>1.0.0-prerelease</ExpectedVersion>
