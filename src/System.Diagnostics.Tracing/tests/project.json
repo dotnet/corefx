@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "System.Diagnostics.Tracing": "4.0.21-rc3-23728",
+    "System.Diagnostics.Tracing": "4.1.0-rc3-23728",
     "System.Diagnostics.Contracts": "4.0.0",
     "System.Diagnostics.Process": "4.1.0-rc3-23728",
     "System.Console": "4.0.0-rc3-23728",
