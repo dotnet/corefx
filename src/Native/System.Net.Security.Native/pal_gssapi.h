@@ -3,17 +3,17 @@
 
 #pragma once
 
-struct gss_name_t_desc_struct;
-typedef struct gss_name_t_desc_struct* gss_name_t;
-
-struct gss_ctx_id_t_desc_struct;
-typedef struct gss_ctx_id_t_desc_struct* gss_ctx_id_t;
-
-struct gss_cred_id_t_desc_struct;
-typedef struct gss_cred_id_t_desc_struct* gss_cred_id_t;
-
-struct gss_buffer_desc_struct;
-typedef struct gss_buffer_desc_struct* gss_buffer_t;
+#if HAVE_GSSFW_HEADERS
+typedef struct gss_name_t_desc_struct GssName;
+typedef struct gss_ctx_id_t_desc_struct GssCtxId;
+typedef struct gss_cred_id_t_desc_struct GssCredId;
+typedef struct gss_buffer_desc_struct GssBuffer;
+#else
+typedef struct gss_name_struct GssName;
+typedef struct gss_ctx_id_struct GssCtxId;
+typedef struct gss_cred_id_struct GssCredId;
+typedef struct gss_buffer_desc_struct GssBuffer;
+#endif
 
 enum PAL_GssStatus : uint32_t
 {
@@ -41,12 +41,12 @@ enum PAL_GssFlags : uint32_t
 /*
 Shims the gss_release_buffer method.
 */
-extern "C" uint32_t NetSecurity_ReleaseBuffer(uint32_t* minorStatus, gss_buffer_t buffer);
+extern "C" uint32_t NetSecurity_ReleaseBuffer(uint32_t* minorStatus, GssBuffer* buffer);
 
 /*
 Copies gss_buffer_t->value to the given byte array
 */
-extern "C" void NetSecurity_CopyBuffer(gss_buffer_t bufferHandle, uint8_t* bytes, uint32_t capacity, uint32_t offset);
+extern "C" void NetSecurity_CopyBuffer(GssBuffer* bufferHandle, uint8_t* bytes, uint32_t capacity, uint32_t offset);
 
 /*
 Shims the gss_display_status method.
@@ -54,88 +54,88 @@ Shims the gss_display_status method.
 extern "C" uint32_t NetSecurity_DisplayStatus(uint32_t* minorStatus,
                                               uint32_t statusValue,
                                               int32_t isGssMechCode,
-                                              gss_buffer_t* outBufferHandle,
+                                              GssBuffer** outBufferHandle,
                                               uint32_t* statusLength);
 
 /*
 Shims the gss_import_name method with nametype = GSS_C_NT_USER_NAME.
 */
 extern "C" uint32_t
-NetSecurity_ImportUserName(uint32_t* minorStatus, char* inputName, uint32_t inputNameLen, gss_name_t* outputName);
+NetSecurity_ImportUserName(uint32_t* minorStatus, char* inputName, uint32_t inputNameLen, GssName** outputName);
 
 /*
 Shims the gss_import_name method with nametype = GSS_C_NT_USER_NAME.
 */
 extern "C" uint32_t
-NetSecurity_ImportPrincipalName(uint32_t* minorStatus, char* inputName, uint32_t inputNameLen, gss_name_t* outputName);
+NetSecurity_ImportPrincipalName(uint32_t* minorStatus, char* inputName, uint32_t inputNameLen, GssName** outputName);
 
 /*
 Shims the gss_release_name method.
 */
-extern "C" uint32_t NetSecurity_ReleaseName(uint32_t* minorStatus, gss_name_t* inputName);
+extern "C" uint32_t NetSecurity_ReleaseName(uint32_t* minorStatus, GssName** inputName);
 
 /*
 Shims the gss_acquire_cred method with SPNEGO oids.
 */
 extern "C" uint32_t NetSecurity_AcquireCredSpNego(uint32_t* minorStatus,
-                                                  gss_name_t desiredName,
+                                                  GssName* desiredName,
                                                   int32_t isInitiate,
-                                                  gss_cred_id_t* outputCredHandle);
+                                                  GssCredId** outputCredHandle);
 
 /*
 Shims the gss_release_cred method.
 */
-extern "C" uint32_t NetSecurity_ReleaseCred(uint32_t* minorStatus, gss_cred_id_t* credHandle);
+extern "C" uint32_t NetSecurity_ReleaseCred(uint32_t* minorStatus, GssCredId** credHandle);
 
 /*
 Shims the gss_init_sec_context method with SPNEGO oids.
 */
 extern "C" uint32_t NetSecurity_InitSecContext(uint32_t* minorStatus,
-                                               gss_cred_id_t claimantCredHandle,
-                                               gss_ctx_id_t* contextHandle,
+                                               GssCredId* claimantCredHandle,
+                                               GssCtxId** contextHandle,
                                                uint32_t isNtlm,
-                                               gss_name_t targetName,
+                                               GssName* targetName,
                                                uint32_t reqFlags,
                                                uint8_t* inputBytes,
                                                uint32_t inputLength,
-                                               gss_buffer_t* outBufferHandle,
+                                               GssBuffer** outBufferHandle,
                                                uint32_t* outTokenLength,
                                                uint32_t* retFlags);
 
 /*
 Shims the gss_delete_sec_context method.
 */
-extern "C" uint32_t NetSecurity_DeleteSecContext(uint32_t* minorStatus, gss_ctx_id_t* contextHandle);
+extern "C" uint32_t NetSecurity_DeleteSecContext(uint32_t* minorStatus, GssCtxId** contextHandle);
 
 /*
 Shims the gss_wrap method.
 */
 extern "C" uint32_t NetSecurity_Wrap(uint32_t* minorStatus,
-                                     gss_ctx_id_t contextHandle,
+                                     GssCtxId* contextHandle,
                                      int32_t isEncrypt,
                                      uint8_t* inputBytes,
                                      int32_t offset,
                                      int32_t count,
-                                     gss_buffer_t* outBufferHandle,
+                                     GssBuffer** outBufferHandle,
                                      uint32_t* outMsgLength);
 
 /*
 Shims the gss_unwrap method.
 */
 extern "C" uint32_t NetSecurity_Unwrap(uint32_t* minorStatus,
-                                       gss_ctx_id_t contextHandle,
+                                       GssCtxId* contextHandle,
                                        uint8_t* inputBytes,
                                        int32_t offset,
                                        int32_t count,
-                                       gss_buffer_t* outBufferHandle,
+                                       GssBuffer** outBufferHandle,
                                        uint32_t* outMsgLength);
 
 /*
 Shims the gss_acquire_cred_with_password method.
 */
 extern "C" uint32_t NetSecurity_AcquireCredWithPassword(uint32_t* minorStatus,
-                                                        const gss_name_t desiredName,
+                                                        GssName* desiredName,
                                                         char* password,
                                                         uint32_t passwdLen,
                                                         int32_t isInitiate,
-                                                        gss_cred_id_t* outputCredHandle);
+                                                        GssCredId** outputCredHandle);

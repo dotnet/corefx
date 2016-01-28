@@ -36,7 +36,7 @@ static_assert(PAL_GSS_CONTINUE_NEEDED == GSS_S_CONTINUE_NEEDED, "");
 static char gss_mech_value[] = "\x2b\x06\x01\x05\x05\x02"; // Binary representation of SPNEGO Oid (RFC 4178)
 #endif
 
-static void NetSecurity_HandleError(uint32_t majorStatus, gss_buffer_t* outBufferHandle, uint32_t* outBufferLength)
+static void NetSecurity_HandleError(uint32_t majorStatus, GssBuffer** outBufferHandle, uint32_t* outBufferLength)
 {
     assert(outBufferHandle != nullptr);
     assert(outBufferLength != nullptr);
@@ -54,9 +54,9 @@ static void NetSecurity_HandleError(uint32_t majorStatus, gss_buffer_t* outBuffe
 }
 
 extern "C" uint32_t NetSecurity_AcquireCredSpNego(uint32_t* minorStatus,
-                                                  gss_name_t desiredName,
+                                                  GssName* desiredName,
                                                   int32_t isInitiate,
-                                                  gss_cred_id_t* outputCredHandle)
+                                                  GssCredId** outputCredHandle)
 {
     assert(minorStatus != nullptr);
     assert(outputCredHandle != nullptr);
@@ -64,7 +64,7 @@ extern "C" uint32_t NetSecurity_AcquireCredSpNego(uint32_t* minorStatus,
 #if HAVE_GSS_SPNEGO_MECHANISM
     gss_OID_set_desc gss_mech_spnego_OID_set_desc = {.count = 1, .elements = GSS_SPNEGO_MECHANISM};
 #else
-    gss_OID_desc gss_mech_spnego_OID_desc = {.length = 6, .value = static_cast<void*>(gss_mech_value)};
+    gss_OID_desc gss_mech_spnego_OID_desc = {.length = 6, .elements = static_cast<void*>(gss_mech_value)};
     gss_OID_set_desc gss_mech_spnego_OID_set_desc = {.count = 1, .elements = &gss_mech_spnego_OID_desc};
 #endif
     gss_cred_usage_t credUsage = isInitiate ? GSS_C_INITIATE : GSS_C_ACCEPT;
@@ -72,7 +72,7 @@ extern "C" uint32_t NetSecurity_AcquireCredSpNego(uint32_t* minorStatus,
         minorStatus, desiredName, 0, &gss_mech_spnego_OID_set_desc, credUsage, outputCredHandle, nullptr, nullptr);
 }
 
-extern "C" uint32_t NetSecurity_DeleteSecContext(uint32_t* minorStatus, gss_ctx_id_t* contextHandle)
+extern "C" uint32_t NetSecurity_DeleteSecContext(uint32_t* minorStatus, GssCtxId** contextHandle)
 {
     assert(contextHandle != nullptr);
     assert(minorStatus != nullptr);
@@ -82,7 +82,7 @@ extern "C" uint32_t NetSecurity_DeleteSecContext(uint32_t* minorStatus, gss_ctx_
 extern "C" uint32_t NetSecurity_DisplayStatus(uint32_t* minorStatus,
                                               uint32_t statusValue,
                                               int32_t isGssMechCode,
-                                              gss_buffer_t* outBufferHandle,
+                                              GssBuffer** outBufferHandle,
                                               uint32_t* statusLength)
 {
     assert(minorStatus != nullptr);
@@ -90,7 +90,7 @@ extern "C" uint32_t NetSecurity_DisplayStatus(uint32_t* minorStatus,
     assert(statusLength != nullptr);
     assert(isGssMechCode == 0 || isGssMechCode == 1);
     int statusType = isGssMechCode ? GSS_C_MECH_CODE : GSS_C_GSS_CODE;
-    *outBufferHandle = new gss_buffer_desc();
+    *outBufferHandle = new GssBuffer();
     uint32_t majorStatus =
         gss_display_status(minorStatus, statusValue, statusType, GSS_C_NO_OID, nullptr, *outBufferHandle);
     NetSecurity_HandleError(majorStatus, outBufferHandle, statusLength);
@@ -98,7 +98,7 @@ extern "C" uint32_t NetSecurity_DisplayStatus(uint32_t* minorStatus,
 }
 
 extern "C" uint32_t
-NetSecurity_ImportUserName(uint32_t* minorStatus, char* inputName, uint32_t inputNameLen, gss_name_t* outputName)
+NetSecurity_ImportUserName(uint32_t* minorStatus, char* inputName, uint32_t inputNameLen, GssName** outputName)
 {
     assert(outputName != nullptr);
     assert(minorStatus != nullptr);
@@ -110,7 +110,7 @@ NetSecurity_ImportUserName(uint32_t* minorStatus, char* inputName, uint32_t inpu
 }
 
 extern "C" uint32_t
-NetSecurity_ImportPrincipalName(uint32_t* minorStatus, char* inputName, uint32_t inputNameLen, gss_name_t* outputName)
+NetSecurity_ImportPrincipalName(uint32_t* minorStatus, char* inputName, uint32_t inputNameLen, GssName** outputName)
 {
     assert(minorStatus != nullptr);
     assert(inputNameLen >= 0);
@@ -121,14 +121,14 @@ NetSecurity_ImportPrincipalName(uint32_t* minorStatus, char* inputName, uint32_t
 }
 
 extern "C" uint32_t NetSecurity_InitSecContext(uint32_t* minorStatus,
-                                               gss_cred_id_t claimantCredHandle,
-                                               gss_ctx_id_t* contextHandle,
+                                               GssCredId* claimantCredHandle,
+                                               GssCtxId** contextHandle,
                                                uint32_t isNtlm,
-                                               gss_name_t targetName,
+                                               GssName* targetName,
                                                uint32_t reqFlags,
                                                uint8_t* inputBytes,
                                                uint32_t inputLength,
-                                               gss_buffer_t* outBufferHandle,
+                                               GssBuffer** outBufferHandle,
                                                uint32_t* outTokenLength,
                                                uint32_t* retFlags)
 {
@@ -143,12 +143,12 @@ extern "C" uint32_t NetSecurity_InitSecContext(uint32_t* minorStatus,
     gss_OID desiredMech = isNtlm ? GSS_NTLM_MECHANISM : GSS_SPNEGO_MECHANISM;
 #else
     assert(!isNtlm && "NTLM is not supported by MIT libgssapi_krb5");
-    gss_OID_desc gss_mech_spnego_OID_desc = {.length = 6, .value = static_cast<void*>(gss_mech_value)};
+    gss_OID_desc gss_mech_spnego_OID_desc = {.length = 6, .elements = static_cast<void*>(gss_mech_value)};
     gss_OID desiredMech = &gss_mech_spnego_OID_desc;
 #endif
 
     gss_buffer_desc inputToken{.length = UnsignedCast(inputLength), .value = inputBytes};
-    *outBufferHandle = new gss_buffer_desc();
+    *outBufferHandle = new GssBuffer();
 
     uint32_t majorStatus = gss_init_sec_context(minorStatus,
                                                 claimantCredHandle,
@@ -168,14 +168,14 @@ extern "C" uint32_t NetSecurity_InitSecContext(uint32_t* minorStatus,
     return majorStatus;
 }
 
-extern "C" uint32_t NetSecurity_ReleaseCred(uint32_t* minorStatus, gss_cred_id_t* credHandle)
+extern "C" uint32_t NetSecurity_ReleaseCred(uint32_t* minorStatus, GssCredId** credHandle)
 {
     assert(minorStatus != nullptr);
     assert(credHandle != nullptr);
     return gss_release_cred(minorStatus, credHandle);
 }
 
-extern "C" uint32_t NetSecurity_ReleaseBuffer(uint32_t* minorStatus, gss_buffer_t buffer)
+extern "C" uint32_t NetSecurity_ReleaseBuffer(uint32_t* minorStatus, GssBuffer* buffer)
 {
     assert(minorStatus != nullptr);
     assert(buffer != nullptr);
@@ -184,7 +184,7 @@ extern "C" uint32_t NetSecurity_ReleaseBuffer(uint32_t* minorStatus, gss_buffer_
     return status;
 }
 
-extern "C" void NetSecurity_CopyBuffer(gss_buffer_t bufferHandle, uint8_t* bytes, uint32_t capacity, uint32_t offset)
+extern "C" void NetSecurity_CopyBuffer(GssBuffer* bufferHandle, uint8_t* bytes, uint32_t capacity, uint32_t offset)
 {
     assert(bufferHandle != nullptr);
     printf("capacity = %d, offset = %d, length = %zu \n", capacity, offset, bufferHandle->length);
@@ -192,7 +192,7 @@ extern "C" void NetSecurity_CopyBuffer(gss_buffer_t bufferHandle, uint8_t* bytes
     memcpy(bytes + offset, bufferHandle->value, bufferHandle->length);
 }
 
-extern "C" uint32_t NetSecurity_ReleaseName(uint32_t* minorStatus, gss_name_t* inputName)
+extern "C" uint32_t NetSecurity_ReleaseName(uint32_t* minorStatus, GssName** inputName)
 {
     assert(minorStatus != nullptr);
     assert(inputName != nullptr);
@@ -200,12 +200,12 @@ extern "C" uint32_t NetSecurity_ReleaseName(uint32_t* minorStatus, gss_name_t* i
 }
 
 extern "C" uint32_t NetSecurity_Wrap(uint32_t* minorStatus,
-                                     gss_ctx_id_t contextHandle,
+                                     GssCtxId* contextHandle,
                                      int32_t isEncrypt,
                                      uint8_t* inputBytes,
                                      int32_t offset,
                                      int32_t count,
-                                     gss_buffer_t* outBufferHandle,
+                                     GssBuffer** outBufferHandle,
                                      uint32_t* outMsgLength)
 {
     assert(minorStatus != nullptr);
@@ -213,7 +213,7 @@ extern "C" uint32_t NetSecurity_Wrap(uint32_t* minorStatus,
     assert(isEncrypt == 1 || isEncrypt == 0);
     int confState;
     gss_buffer_desc inputMessageBuffer{.length = UnsignedCast(count), .value = inputBytes + offset};
-    *outBufferHandle = new gss_buffer_desc();
+    *outBufferHandle = new GssBuffer();
     uint32_t majorStatus = gss_wrap(
         minorStatus, contextHandle, isEncrypt, GSS_C_QOP_DEFAULT, &inputMessageBuffer, &confState, *outBufferHandle);
     NetSecurity_HandleError(majorStatus, outBufferHandle, outMsgLength);
@@ -221,11 +221,11 @@ extern "C" uint32_t NetSecurity_Wrap(uint32_t* minorStatus,
 }
 
 extern "C" uint32_t NetSecurity_Unwrap(uint32_t* minorStatus,
-                                       gss_ctx_id_t contextHandle,
+                                       GssCtxId* contextHandle,
                                        uint8_t* inputBytes,
                                        int32_t offset,
                                        int32_t count,
-                                       gss_buffer_t* outBufferHandle,
+                                       GssBuffer** outBufferHandle,
                                        uint32_t* outMsgLength)
 {
     assert(minorStatus != nullptr);
@@ -235,7 +235,7 @@ extern "C" uint32_t NetSecurity_Unwrap(uint32_t* minorStatus,
     assert(outMsgLength != nullptr);
 
     gss_buffer_desc inputMessageBuffer{.length = UnsignedCast(count), .value = inputBytes + offset};
-    *outBufferHandle = new gss_buffer_desc();
+    *outBufferHandle = new GssBuffer();
     uint32_t majorStatus =
         gss_unwrap(minorStatus, contextHandle, &inputMessageBuffer, *outBufferHandle, nullptr, nullptr);
     NetSecurity_HandleError(majorStatus, outBufferHandle, outMsgLength);
@@ -243,11 +243,11 @@ extern "C" uint32_t NetSecurity_Unwrap(uint32_t* minorStatus,
 }
 
 extern "C" uint32_t NetSecurity_AcquireCredWithPassword(uint32_t* minorStatus,
-                                                        const gss_name_t desiredName,
+                                                        GssName* desiredName,
                                                         char* password,
                                                         uint32_t passwdLen,
                                                         int32_t isInitiate,
-                                                        gss_cred_id_t* outputCredHandle)
+                                                        GssCredId** outputCredHandle)
 {
     assert(minorStatus != nullptr);
     assert(desiredName != nullptr);
