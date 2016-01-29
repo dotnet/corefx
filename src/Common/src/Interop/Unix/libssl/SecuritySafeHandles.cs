@@ -242,6 +242,7 @@ namespace System.Net.Security
 
         protected override bool ReleaseHandle()
         {
+            Debug.Assert((null != _credential), "Null credential in SafeDeleteContext");
             _credential.DangerousRelease();
             _credential = null;
             return true;

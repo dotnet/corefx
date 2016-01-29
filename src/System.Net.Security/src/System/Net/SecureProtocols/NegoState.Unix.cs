@@ -90,7 +90,11 @@ namespace System.Net.Security
 
         internal static SafeFreeCredentials AcquireCredentialsHandle(string package, bool isServer, NetworkCredential credential)
         {
-            Debug.Assert(!isServer, "AcquireCredentialsHandle: Server is not yet supported");
+            if (isServer)
+            {
+                throw new NotImplementedException("AcquireCredentialsHandle: Server is not yet supported");
+            }
+
             SafeFreeCredentials outCredential;
             bool isNtlm = string.Equals(package, NegotiationInfoClass.NTLM);
 
