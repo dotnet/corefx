@@ -27,7 +27,7 @@ namespace Microsoft.Win32.SafeHandles
             Debug.Assert(length >= 0, "negative length of buffer");
             Debug.Assert(offset < length, "invalid offset for  buffer");
             byte[] target = new byte[length];
-            Interop.NetSecurity.CopyBuffer(this, target, capacity: length, offset: offset);
+            Interop.NetSecurity.ExtractNtlmBuffer(this, target, capacity: length, offset: offset);
             return target;
         }
 
@@ -49,10 +49,9 @@ namespace Microsoft.Win32.SafeHandles
     /// </summary>
     internal sealed class SafeNtlmKeyHandle : SafeHandle
     {
-        private GCHandle _gch;
-        private uint _digestLength;
         private uint _sequenceNumber;
-        private bool _isSealingKey;
+        private readonly bool _isSealingKey;
+        private readonly byte[] _digest;
         private SafeEvpCipherCtxHandle _cipherContext;
 
         // From MS_NLMP SIGNKEY at https://msdn.microsoft.com/en-us/library/cc236711.aspx
@@ -68,21 +67,23 @@ namespace Microsoft.Win32.SafeHandles
             string keyMagic = string.Format(s_keyMagic, isClient ? s_client : s_server,
                     isClient ? s_server : s_client, isSealingKey ? s_sealing : s_signing);
 
-            byte[] magic = Encoding.UTF8.GetBytes(keyMagic);
+            using (IncrementalHash incremental = IncrementalHash.CreateHash(HashAlgorithmName.MD5))
+            {
+                 incremental.AppendData(key);
+                 incremental.AppendData(Encoding.UTF8.GetBytes(keyMagic));
+                 _digest = incremental.GetHashAndReset();
+            }
 
-            byte[] digest = Interop.NetSecurity.EVPDigest(key, magic, magic.Length, out _digestLength);
             _isSealingKey = isSealingKey;
             if (_isSealingKey)
             {
-                _cipherContext = Interop.Crypto.EvpCipherCreate(Interop.Crypto.EvpRc4(), digest, null, 1);
+                _cipherContext = Interop.Crypto.EvpCipherCreate(Interop.Crypto.EvpRc4(), _digest, null, 1);
             }
-            _gch = GCHandle.Alloc(digest, GCHandleType.Pinned);
-            handle = _gch.AddrOfPinnedObject();
         }
 
         public override bool IsInvalid
         {
-            get { return handle == IntPtr.Zero; }
+            get { return true; }
         }
 
         protected override void Dispose(bool disposing)
@@ -97,8 +98,6 @@ namespace Microsoft.Win32.SafeHandles
 
         protected override bool ReleaseHandle()
         {
-            _gch.Free();
-            SetHandle(IntPtr.Zero);
             return true;
         }
 
@@ -116,24 +115,19 @@ namespace Microsoft.Win32.SafeHandles
 
             byte[] output = new byte[Interop.NetSecurity.MD5DigestLength];
             Array.Clear(output, 0, output.Length);
+            MarshalUint(output, 0, Version); // version
+            MarshalUint(output, SequenceNumberOffset, _sequenceNumber);
             byte[] hash;
-            unsafe
-            {
 
-                fixed (byte* outPtr = output)
-                fixed (byte* bytePtr = buffer)
-                {
-                    MarshalUint(outPtr, Version); // version
-                    MarshalUint(outPtr + SequenceNumberOffset, _sequenceNumber);
-                    int hashLength;
-                    hash = Interop.NetSecurity.HMACDigest((byte*) handle.ToPointer(), (int)_digestLength, (bytePtr + offset), count,
-                                                          outPtr + SequenceNumberOffset, ChecksumOffset, out hashLength);
-                    Debug.Assert(hash != null && hashLength >= HMacDigestLength, "HMACDigest has a length of at least " + HMacDigestLength);
-                    _sequenceNumber++;
-                }
+            using (var incremental = IncrementalHash.CreateHMAC(HashAlgorithmName.MD5, _digest))
+            {
+                incremental.AppendData(output, SequenceNumberOffset, ChecksumOffset);
+                incremental.AppendData(buffer, offset, count);
+                hash = incremental.GetHashAndReset();
+                _sequenceNumber++;
             }
 
-            if ((sealingKey == null) || sealingKey.IsInvalid)
+            if (sealingKey == null)
             {
                 Array.Copy(hash, 0, output, ChecksumOffset, HMacDigestLength);
             }
@@ -163,16 +157,15 @@ namespace Microsoft.Win32.SafeHandles
 
                     Interop.Crypto.EvpCipher(_cipherContext, output, (bytePtr + offset), count);
                     return  output;
-
                 }
             }
         }
 
-        private static unsafe void MarshalUint(byte* ptr, uint num)
+        private static void MarshalUint(byte[] ptr, int offset, uint num)
         {
             for (int i = 0; i < 4; i++)
             {
-                ptr[i] = (byte) (num & 0xff);
+                ptr[offset + i] = (byte) (num & 0xff);
                 num >>= 8;
             }
         }
