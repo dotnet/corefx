@@ -46,14 +46,15 @@ extern "C" void NetSecurity_HeimNtlmFreeBuf(ntlm_buf* data)
     delete data;
 }
 
-extern "C" void NetSecurity_CopyBuffer(const ntlm_buf* bufferHandle, uint8_t* bytes, uint32_t capacity, uint32_t offset)
+extern "C" void NetSecurity_ExtractNtlmBuffer(const ntlm_buf* bufferHandle, uint8_t* destination, uint32_t capacity, uint32_t offset)
 {
     if (bufferHandle == nullptr)
     {
         return;
     }
+    assert(destination != nullptr);
     assert(bufferHandle->length <= (capacity - offset));
-    memcpy(bytes + UnsignedCast(offset), bufferHandle->data, bufferHandle->length);
+    memcpy(destination + UnsignedCast(offset), bufferHandle->data, bufferHandle->length);
 }
 
 extern "C" int32_t NetSecurity_HeimNtlmEncodeType1(uint32_t flags, ntlm_buf** outBufferHandle, int32_t* outLength)

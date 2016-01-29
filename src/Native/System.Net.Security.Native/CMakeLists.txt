@@ -24,6 +24,7 @@ if (HAVE_HEIMNTLM_HEADERS)
 
    target_link_libraries(System.Net.Security.Native
            ${LIB_HEIMNTLM}
+           ${OPENSSL_CRYPTO_LIBRARY}
    )
 
    install (TARGETS System.Net.Security.Native DESTINATION .)
