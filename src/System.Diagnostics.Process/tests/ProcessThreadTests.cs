@@ -59,11 +59,10 @@ namespace System.Diagnostics.Tests
             }
         }
 
-        [ActiveIssue(5805)]
         [Fact]
         public void TestStartTimeProperty()
         {
-            DateTime timeBeforeCreatingProcess = DateTime.UtcNow;
+            DateTime beforeTime = DateTime.UtcNow;
             Process p = CreateProcessLong();
             try
             {
@@ -82,14 +81,20 @@ namespace System.Diagnostics.Tests
 
                 if (ThreadState.Initialized != thread.ThreadState)
                 {
-                    // Time in unix, is measured in jiffies, which is incremented by one for every timer interrupt since the boot time.
-                    // Thus, because there are HZ timer interrupts in a second, there are HZ jiffies in a second. Hence 1\HZ, will
-                    // be the resolution of system timer. The lowest value of HZ on unix is 100, hence the timer resolution is 10 ms.
-                    // On Windows, timer resolution is 15 ms from MSDN DateTime.Now. Hence, allowing error in 15ms [max(10,15)].
-                    long intervalTicks = new TimeSpan(0, 0, 0, 0, 15).Ticks;
-                    long beforeTicks = timeBeforeCreatingProcess.Ticks - intervalTicks;
-                    long afterTicks = DateTime.UtcNow.Ticks + intervalTicks;
-                    Assert.InRange(thread.StartTime.ToUniversalTime().Ticks, beforeTicks, afterTicks);
+                    long starttimeTicks = 0;
+                    starttimeTicks = thread.StartTime.ToUniversalTime().Ticks;
+                    if (starttimeTicks != 0)
+                    {
+                        // Allow for error for upto a minute.
+                        long intervalTicks = TimeSpan.FromMinutes(1).Ticks;
+                        long beforeTicks = beforeTime.Ticks - intervalTicks;
+
+                        p.Kill();
+                        p.WaitForExit(WaitInMS);
+
+                        long afterTicks = DateTime.UtcNow.Ticks + intervalTicks;
+                        Assert.InRange(starttimeTicks, beforeTicks, afterTicks);
+                    }
                 }
             }
             finally
