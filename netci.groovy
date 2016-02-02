@@ -156,7 +156,7 @@ branchList.each { branchName ->
         def newJobName = "perf_${osShortName[os]}_${configurationGroup.toLowerCase()}"
 
         def newJob = job(Utilities.getFullJobName(project, newJobName, /* isPR */ false)) {
-            steps { 
+            steps {
                 helix("Build.cmd /p:Creator=dotnet-bot /p:ArchiveTests=true /p:ConfigurationGroup=${configurationGroup} /p:Configuration=Windows_${configurationGroup} /p:TestDisabled=true /p:EnableCloudTest=true /p:BuildMoniker={uniqueId} /p:TargetQueue=Windows.10.Amd64 /p:TestProduct=CoreFx /p:Branch=master /p:OSGroup=Windows_NT /p:CloudDropAccountName=dotnetbuilddrops /p:CloudResultsAccountName=dotnetjobresults /p:CloudDropAccessToken={CloudDropAccessToken} /p:CloudResultsAccessToken={CloudResultsAccessToken} /p:BuildCompleteConnection={BuildCompleteConnection} /p:BuildIsOfficialConnection={BuildIsOfficialConnection} /p:DocumentDbKey={DocumentDbKey} /p:DocumentDbUri=https://hms.documents.azure.com:443/ /p:FuncTestsDisabled=true /p:Performance=true")
             }
             // perf tests can be built on any Windows
@@ -357,13 +357,13 @@ branchList.each { branchName ->
                 // Set up standard options.
                 Utilities.standardJobSetup(newFlowJob, project, isPR, getFullBranchName(branchName))
                 // Set up triggers
-				if (isStressMode) {
-					Utilities.addGithubPRTrigger(newFlowJob, "Innerloop ${os} ${configurationGroup} Build and Test", "(?i).*test\\W+${os}\\W+${scenario}.*")
-				}
-                else if (isPR) {
+                if (isPR) {
                     // Set PR trigger.
-                    // Set of OS's that work currently. 
-                    if (os in ['OSX', 'Ubuntu', 'OpenSUSE13.2', 'CentOS7.1']) {
+					if (isStressMode) {
+						Utilities.addGithubPRTrigger(newFlowJob, "Innerloop ${os} ${configurationGroup} Build and Test (${scenario})", "(?i).*test\\W+${os}\\W+${scenario}.*")
+					}
+					// Set of OS's that work currently. 
+                    else if (os in ['OSX', 'Ubuntu', 'OpenSUSE13.2', 'CentOS7.1']) {
                         Utilities.addGithubPRTrigger(newFlowJob, "Innerloop ${os} ${configurationGroup} Build and Test")
                     }
                     else {
