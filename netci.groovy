@@ -189,7 +189,7 @@ branchList.each { branchName ->
                 def scenario = 'default'
                 if (isStressMode) {
                     // Jit stress testing only with corefx release build
-                    isStressMode = !isPR && configurationGroup == 'Release' && os == 'Ubuntu'
+                    isStressMode = configurationGroup == 'Release' && os == 'Ubuntu'
                     if (!isStressMode) {
                         return
                     }
@@ -357,7 +357,10 @@ branchList.each { branchName ->
                 // Set up standard options.
                 Utilities.standardJobSetup(newFlowJob, project, isPR, getFullBranchName(branchName))
                 // Set up triggers
-                if (isPR) {
+				if (isStressMode) {
+					Utilities.addGithubPRTrigger(newFlowJob, "Innerloop ${os} ${configurationGroup} Build and Test", "(?i).*test\\W+${os}\\W+${scenario}.*")
+				}
+                else if (isPR) {
                     // Set PR trigger.
                     // Set of OS's that work currently. 
                     if (os in ['OSX', 'Ubuntu', 'OpenSUSE13.2', 'CentOS7.1']) {
