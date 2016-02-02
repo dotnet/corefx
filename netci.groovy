@@ -24,6 +24,10 @@ def targetNugetRuntimeMap = ['OSX' : 'osx.10.10-x64',
 
 def branchList = ['master', 'rc2', 'pr']
 
+def jitStressModeScenarios = [ 'none' : ['' : ''], 
+                               'minopts' : ['COMPLUS_JitMinOpts' : '1'],
+                               'jitstress1' : ['COMPLUS_JitStress' : '1'] ]
+
 def static getFullBranchName(def branch) {
     def branchMap = ['master':'*/master',
         'rc2':'*/release/1.0.0-rc2',
@@ -33,12 +37,14 @@ def static getFullBranchName(def branch) {
     return branchMap[branch]
 }
 
-def static getJobName(def name, def branchName) {
+def static getJobName(def name, def branchName, def scenario='default') {
+    def suffix = scenario != 'default' ? "_${scenario}" : '';
+
     def baseName = name
     if (branchName == 'rc2') {
         baseName += "_rc2"
     }
-    return baseName
+    return baseName + suffix
 }
 
 // **************************
@@ -150,7 +156,7 @@ branchList.each { branchName ->
         def newJobName = "perf_${osShortName[os]}_${configurationGroup.toLowerCase()}"
 
         def newJob = job(Utilities.getFullJobName(project, newJobName, /* isPR */ false)) {
-            steps {
+            steps { 
                 helix("Build.cmd /p:Creator=dotnet-bot /p:ArchiveTests=true /p:ConfigurationGroup=${configurationGroup} /p:Configuration=Windows_${configurationGroup} /p:TestDisabled=true /p:EnableCloudTest=true /p:BuildMoniker={uniqueId} /p:TargetQueue=Windows.10.Amd64 /p:TestProduct=CoreFx /p:Branch=master /p:OSGroup=Windows_NT /p:CloudDropAccountName=dotnetbuilddrops /p:CloudResultsAccountName=dotnetjobresults /p:CloudDropAccessToken={CloudDropAccessToken} /p:CloudResultsAccessToken={CloudResultsAccessToken} /p:BuildCompleteConnection={BuildCompleteConnection} /p:BuildIsOfficialConnection={BuildIsOfficialConnection} /p:DocumentDbKey={DocumentDbKey} /p:DocumentDbUri=https://hms.documents.azure.com:443/ /p:FuncTestsDisabled=true /p:Performance=true")
             }
             // perf tests can be built on any Windows
@@ -165,6 +171,7 @@ branchList.each { branchName ->
     }
 }
 
+
 // Here are the OS's that needs separate builds and tests.
 // We create a build for the native compilation, a build for the build of corefx itself (on Windows)
 // and then a build for the test of corefx on the target platform.  Then we link them with a build
@@ -174,168 +181,196 @@ def innerLoopNonWindowsOSs = ['Ubuntu', 'Debian8.2', 'OSX', 'FreeBSD', 'CentOS7.
 branchList.each { branchName ->
     ['Debug', 'Release'].each { configurationGroup ->
         innerLoopNonWindowsOSs.each { os ->
-            def isPR = (branchName == 'pr')  
-            def osGroup = osGroupMap[os]
-            
-            //
-            // First define the nativecomp build
-            //
-            
-            def newNativeCompBuildJobName = "nativecomp_${os.toLowerCase()}_${configurationGroup.toLowerCase()}"
-            
-            def newNativeCompJob = job(getJobName(Utilities.getFullJobName(project, newNativeCompBuildJobName, isPR), branchName)) {
-                steps {
-                    shell("./build.sh native x64 ${configurationGroup.toLowerCase()}")
+            jitStressModeScenarios.keySet().each { stressMode -> 
+                def isPR = (branchName == 'pr')  
+                def osGroup = osGroupMap[os]
+                
+                def isStressMode = stressMode != 'none'
+                def scenario = 'default'
+                if (isStressMode) {
+                    // Jit stress testing only with corefx release build
+                    isStressMode = !isPR && configurationGroup == 'Release' && os == 'Ubuntu'
+                    if (!isStressMode) {
+                        return
+                    }
+                    scenario = stressMode
                 }
-            }
-            
-            // Set the affinity.  All of these run on Windows currently.
-            Utilities.setMachineAffinity(newNativeCompJob, os)
-            // Set up standard options.
-            Utilities.standardJobSetup(newNativeCompJob, project, isPR, getFullBranchName(branchName))
-            // Add archival for the built data.
-            Utilities.addArchival(newNativeCompJob, "bin/**")
-            
-            //
-            // First we set up a build job that builds the corefx repo on Windows
-            //
-            
-            def newBuildJobName = "${os.toLowerCase()}_${configurationGroup.toLowerCase()}_bld"
-
-            def newBuildJob = job(getJobName(Utilities.getFullJobName(project, newBuildJobName, isPR), branchName)) {
-                steps {
-                    batchFile("call \"C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat\" x86 && build.cmd /p:ConfigurationGroup=${configurationGroup} /p:OSGroup=${osGroup} /p:SkipTests=true /p:TestNugetRuntimeId=${targetNugetRuntimeMap[os]}")
-                    // Package up the results.
-                    batchFile("C:\\Packer\\Packer.exe .\\bin\\build.pack .\\bin")
+                
+                    
+                //
+                // First define the nativecomp build
+                //
+                
+                def newNativeCompBuildJobName = "nativecomp_${os.toLowerCase()}_${configurationGroup.toLowerCase()}"
+                
+                def newNativeCompJob = job(getJobName(Utilities.getFullJobName(project, newNativeCompBuildJobName, isPR), branchName, scenario)) {
+                    steps {
+                        shell("./build.sh native x64 ${configurationGroup.toLowerCase()}")
+                    }
                 }
-            }
+                
+                // Set the affinity.  All of these run on Windows currently.
+                Utilities.setMachineAffinity(newNativeCompJob, os)
+                // Set up standard options.
+                Utilities.standardJobSetup(newNativeCompJob, project, isPR, getFullBranchName(branchName))
+                // Add archival for the built data.
+                Utilities.addArchival(newNativeCompJob, "bin/**")
+                
+                //
+                // First we set up a build job that builds the corefx repo on Windows
+                //
+                
+                def newBuildJobName = "${os.toLowerCase()}_${configurationGroup.toLowerCase()}_bld"
 
-            // Set the affinity.  All of these run on Windows currently.
-            Utilities.setMachineAffinity(newBuildJob, 'Windows_NT')
-            // Set up standard options.
-            Utilities.standardJobSetup(newBuildJob, project, isPR, getFullBranchName(branchName))
-            // Archive the results
-            Utilities.addArchival(newBuildJob, "bin/build.pack,bin/osGroup.AnyCPU.${configurationGroup}/**,bin/ref/**,bin/packages/**,msbuild.log")
-            
-            //
-            // Then we set up a job that runs the test on the target OS
-            //
-            
-            def fullNativeCompBuildJobName = Utilities.getFolderName(project) + '/' + newNativeCompJob.name
-            def fullCoreFXBuildJobName = Utilities.getFolderName(project) + '/' + newBuildJob.name
-            
-            def newTestJobName = "${os.toLowerCase()}_${configurationGroup.toLowerCase()}_tst"
-            
-            def newTestJob = job(getJobName(Utilities.getFullJobName(project, newTestJobName, isPR), branchName)) {
-                steps {
-                    // Copy data from other builds.
-                    // TODO: Add a new job or allow for copying coreclr from debug build
-                    
-                    // CoreCLR
-                    copyArtifacts("dotnet_coreclr/release_${os.toLowerCase()}") {
-                        excludePatterns('**/testResults.xml', '**/*.ni.dll')
-                        buildSelector {
-                            latestSuccessful(true)
+                def newBuildJob = job(getJobName(Utilities.getFullJobName(project, newBuildJobName, isPR), branchName, scenario)) {
+                    steps {
+                        batchFile("call \"C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat\" x86 && build.cmd /p:ConfigurationGroup=${configurationGroup} /p:OSGroup=${osGroup} /p:SkipTests=true /p:TestNugetRuntimeId=${targetNugetRuntimeMap[os]}")
+                        // Package up the results.
+                        batchFile("C:\\Packer\\Packer.exe .\\bin\\build.pack .\\bin")
+                    }
+                }
+
+                // Set the affinity.  All of these run on Windows currently.
+                Utilities.setMachineAffinity(newBuildJob, 'Windows_NT')
+                // Set up standard options.
+                Utilities.standardJobSetup(newBuildJob, project, isPR, getFullBranchName(branchName))
+                // Archive the results
+                Utilities.addArchival(newBuildJob, "bin/build.pack,bin/osGroup.AnyCPU.${configurationGroup}/**,bin/ref/**,bin/packages/**,msbuild.log")
+                
+                //
+                // Then we set up a job that runs the test on the target OS
+                //
+                
+                def fullNativeCompBuildJobName = Utilities.getFolderName(project) + '/' + newNativeCompJob.name
+                def fullCoreFXBuildJobName = Utilities.getFolderName(project) + '/' + newBuildJob.name
+                
+                def newTestJobName = "${os.toLowerCase()}_${configurationGroup.toLowerCase()}_tst"
+                
+                def newTestJob = job(getJobName(Utilities.getFullJobName(project, newTestJobName, isPR), branchName, scenario)) {
+                    steps {
+                        // Copy data from other builds.
+                        // TODO: Add a new job or allow for copying coreclr from debug build
+                        
+                        // CoreCLR
+                        def coreclrBasePath = (isStressMode) ? "dotnet_coreclr/checked_${os.toLowerCase()}"
+                            : "dotnet_coreclr/release_${os.toLowerCase()}"
+                        copyArtifacts(coreclrBasePath) {
+                            excludePatterns('**/testResults.xml', '**/*.ni.dll')
+                            buildSelector {
+                                latestSuccessful(true)
+                            }
                         }
+                        
+                        // MSCorlib
+                        def mscorelibPath = (isStressMode) ? "dotnet_coreclr/checked_windows_nt"
+                            : "dotnet_coreclr/release_windows_nt"
+                        copyArtifacts(mscorelibPath) {
+                            includePatterns("bin/Product/${osGroup}*/**")
+                            excludePatterns('**/testResults.xml', '**/*.ni.dll')
+                            buildSelector {
+                                latestSuccessful(true)
+                            }
+                        }
+                        
+                        // Native components
+                        copyArtifacts(fullNativeCompBuildJobName) {
+                            includePatterns("bin/**")
+                            buildSelector {
+                                buildNumber('\${COREFX_NATIVECOMP_BUILD}')
+                            }
+                        }
+                        
+                        // The tests/corefx components
+                        copyArtifacts(fullCoreFXBuildJobName) {
+                            includePatterns('bin/build.pack')
+                            buildSelector {
+                                buildNumber('\${COREFX_BUILD}')
+                            }
+                        }
+                        
+                        // Unpack the build data
+                        shell("unpacker ./bin/build.pack ./bin")
+                        
+                        // Set stress modes
+                        if (isStressMode) {
+                            def stressModeEnvVars = jitStressModeScenarios[stressMode]
+                            stressModeEnvVars.each{ VarName, Value   ->
+                                def setEnvStrCmd = "export ${VarName}=${Value}"
+                                shell("${setEnvStrCmd}")
+                            }                       
+                        }
+                        
+                        // Export the LTTNG environment variable and then run the tests
+                        shell("""export LTTNG_HOME=/home/dotnet-bot
+                        ./run-test.sh \\
+                            --configurationGroup ${configurationGroup} \\
+                            --os ${osGroup} \\
+                            --corefx-tests \${WORKSPACE}/bin/tests/${osGroup}.AnyCPU.${configurationGroup} \\
+                            --coreclr-bins \${WORKSPACE}/bin/Product/${osGroup}.x64.Release/ \\
+                            --mscorlib-bins \${WORKSPACE}/bin/Product/${osGroup}.x64.Release/
+                        """)
                     }
                     
-                    // MSCorlib
-                    copyArtifacts("dotnet_coreclr/release_windows_nt") {
-                        includePatterns("bin/Product/${osGroup}*/**")
-                        excludePatterns('**/testResults.xml', '**/*.ni.dll')
-                        buildSelector {
-                            latestSuccessful(true)
-                        }
+                    // Add parameters for the input jobs
+                    parameters {
+                        stringParam('COREFX_BUILD', '', 'Build number to copy CoreFX test binaries from')
+                        stringParam('COREFX_NATIVECOMP_BUILD', '', 'Build number to copy CoreFX native components from')
                     }
-                    
-                    // Native components
-                    copyArtifacts(fullNativeCompBuildJobName) {
-                        includePatterns("bin/**")
-                        buildSelector {
-                            buildNumber('\${COREFX_NATIVECOMP_BUILD}')
-                        }
-                    }
-                    
-                    // The tests/corefx components
-                    copyArtifacts(fullCoreFXBuildJobName) {
-                        includePatterns('bin/build.pack')
-                        buildSelector {
-                            buildNumber('\${COREFX_BUILD}')
-                        }
-                    }
-                    
-                    // Unpack the build data
-                    shell("unpacker ./bin/build.pack ./bin")
-                    // Export the LTTNG environment variable and then run the tests
-                    shell("""export LTTNG_HOME=/home/dotnet-bot
-                    ./run-test.sh \\
-                        --configurationGroup ${configurationGroup} \\
-                        --os ${osGroup} \\
-                        --corefx-tests \${WORKSPACE}/bin/tests/${osGroup}.AnyCPU.${configurationGroup} \\
-                        --coreclr-bins \${WORKSPACE}/bin/Product/${osGroup}.x64.Release/ \\
-                        --mscorlib-bins \${WORKSPACE}/bin/Product/${osGroup}.x64.Release/
+                }
+                
+                // Set the affinity.  All of these run on the target
+                Utilities.setMachineAffinity(newTestJob, os)
+                // Set up standard options.
+                Utilities.standardJobSetup(newTestJob, project, isPR, getFullBranchName(branchName))
+                // Add the unit test results
+                Utilities.addXUnitDotNETResults(newTestJob, '**/testResults.xml')
+                
+                //
+                // Then we set up a flow job that runs the build and the nativecomp build in parallel and then executes.
+                // the test job
+                //
+                
+                def fullCoreFXTestJobName = Utilities.getFolderName(project) + '/' + newTestJob.name
+                def flowJobName = "${os.toLowerCase()}_${configurationGroup.toLowerCase()}"
+                def newFlowJob = buildFlowJob(getJobName(Utilities.getFullJobName(project, flowJobName, isPR), branchName, scenario)) {
+                    buildFlow("""
+                        parallel (
+                            { nativeCompBuild = build(params, '${fullNativeCompBuildJobName}') },
+                            { coreFXBuild = build(params, '${fullCoreFXBuildJobName}') }
+                        )
+                        
+                        // Then run the test job
+                        build(params + 
+                            [COREFX_BUILD: coreFXBuild.build.number,
+                             COREFX_NATIVECOMP_BUILD : nativeCompBuild.build.number], '${fullCoreFXTestJobName}')
                     """)
-                }
-                
-                // Add parameters for the input jobs
-                parameters {
-                    stringParam('COREFX_BUILD', '', 'Build number to copy CoreFX test binaries from')
-                    stringParam('COREFX_NATIVECOMP_BUILD', '', 'Build number to copy CoreFX native components from')
-                }
-            }
-            
-            // Set the affinity.  All of these run on the target
-            Utilities.setMachineAffinity(newTestJob, os)
-            // Set up standard options.
-            Utilities.standardJobSetup(newTestJob, project, isPR, getFullBranchName(branchName))
-            // Add the unit test results
-            Utilities.addXUnitDotNETResults(newTestJob, '**/testResults.xml')
-            
-            //
-            // Then we set up a flow job that runs the build and the nativecomp build in parallel and then executes.
-            // the test job
-            //
-            
-            def fullCoreFXTestJobName = Utilities.getFolderName(project) + '/' + newTestJob.name
-            def flowJobName = "${os.toLowerCase()}_${configurationGroup.toLowerCase()}"
-            def newFlowJob = buildFlowJob(getJobName(Utilities.getFullJobName(project, flowJobName, isPR), branchName)) {
-                buildFlow("""
-                    parallel (
-                        { nativeCompBuild = build(params, '${fullNativeCompBuildJobName}') },
-                        { coreFXBuild = build(params, '${fullCoreFXBuildJobName}') }
-                    )
                     
-                    // Then run the test job
-                    build(params + 
-                        [COREFX_BUILD: coreFXBuild.build.number,
-                         COREFX_NATIVECOMP_BUILD : nativeCompBuild.build.number], '${fullCoreFXTestJobName}')
-                """)
-                
-                // Needs a workspace
-                configure {
-                    def buildNeedsWorkspace = it / 'buildNeedsWorkspace'
-                    buildNeedsWorkspace.setValue('true')
+                    // Needs a workspace
+                    configure {
+                        def buildNeedsWorkspace = it / 'buildNeedsWorkspace'
+                        buildNeedsWorkspace.setValue('true')
+                    }
                 }
-            }
-            
-            // Set the affinity.  All of these run on the target
-            Utilities.setMachineAffinity(newFlowJob, os)
-            // Set up standard options.
-            Utilities.standardJobSetup(newFlowJob, project, isPR, getFullBranchName(branchName))
-            // Set up triggers
-            if (isPR) {
-                // Set PR trigger.
-                // Set of OS's that work currently. 
-                if (os in ['OSX', 'Ubuntu', 'OpenSUSE13.2', 'CentOS7.1']) {
-                    Utilities.addGithubPRTrigger(newFlowJob, "Innerloop ${os} ${configurationGroup} Build and Test")
+                
+                // Set the affinity.  All of these run on the target
+                Utilities.setMachineAffinity(newFlowJob, os)
+                // Set up standard options.
+                Utilities.standardJobSetup(newFlowJob, project, isPR, getFullBranchName(branchName))
+                // Set up triggers
+                if (isPR) {
+                    // Set PR trigger.
+                    // Set of OS's that work currently. 
+                    if (os in ['OSX', 'Ubuntu', 'OpenSUSE13.2', 'CentOS7.1']) {
+                        Utilities.addGithubPRTrigger(newFlowJob, "Innerloop ${os} ${configurationGroup} Build and Test")
+                    }
+                    else {
+                        Utilities.addGithubPRTrigger(newFlowJob, "Innerloop ${os} ${configurationGroup} Build and Test", "(?i).*test\\W+${os}.*")
+                    }
                 }
                 else {
-                    Utilities.addGithubPRTrigger(newFlowJob, "Innerloop ${os} ${configurationGroup} Build and Test", "(?i).*test\\W+${os}.*")
+                    // Set a push trigger
+                    Utilities.addGithubPushTrigger(newFlowJob)
                 }
-            }
-            else {
-                // Set a push trigger
-                Utilities.addGithubPushTrigger(newFlowJob)
             }
         }
     }
