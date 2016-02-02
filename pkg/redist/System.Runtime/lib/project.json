@@ -1,0 +1,12 @@
+{
+  "dependencies": {
+    "System.Runtime": "4.0.20"
+  },
+  "frameworks": {
+    "netcore50": {}
+  },
+  "runtimes": {
+    "win8": {},
+    "win8-aot": {}
+  }
+}
