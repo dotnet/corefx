@@ -28,6 +28,9 @@ namespace System.Collections.Generic
         internal int version;
         private Object _syncRoot;
 
+        /// <summary>
+        /// Creates an empty doubly linked list.
+        /// </summary>
         public LinkedList()
         {
         }
@@ -94,6 +97,11 @@ namespace System.Collections.Generic
             AddLast(value);
         }
 
+        /// <summary>
+        /// Adds the specified value after the specified node.
+        /// </summary>
+        /// <param name="node">The node used as reference.</param>
+        /// <param name="value">The value to add.</param>
         public LinkedListNode<T> AddAfter(LinkedListNode<T> node, T value)
         {
             ValidateNode(node);
@@ -102,6 +110,11 @@ namespace System.Collections.Generic
             return result;
         }
 
+        /// <summary>
+        /// Adds the specified new node after the specified node.
+        /// </summary>
+        /// <param name="node">The node used as reference.</param>
+        /// <param name="newNode">The new node to add.</param>
         public void AddAfter(LinkedListNode<T> node, LinkedListNode<T> newNode)
         {
             ValidateNode(node);
@@ -110,6 +123,11 @@ namespace System.Collections.Generic
             newNode.list = this;
         }
 
+        /// <summary>
+        /// Adds the specified value before the specified node.
+        /// </summary>
+        /// <param name="node">The node used as reference.</param>
+        /// <param name="value">The value to add.</param>
         public LinkedListNode<T> AddBefore(LinkedListNode<T> node, T value)
         {
             ValidateNode(node);
@@ -122,6 +140,11 @@ namespace System.Collections.Generic
             return result;
         }
 
+        /// <summary>
+        /// Adds the specified new node before the specified node.
+        /// </summary>
+        /// <param name="node">The node used as reference.</param>
+        /// <param name="newNode">The new node to add.</param>
         public void AddBefore(LinkedListNode<T> node, LinkedListNode<T> newNode)
         {
             ValidateNode(node);
