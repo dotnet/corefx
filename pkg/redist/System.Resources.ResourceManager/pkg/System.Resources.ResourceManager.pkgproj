@@ -6,8 +6,7 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="$(SourceDir)System.Resources.ResourceManager\ref\4.0.0\System.Resources.ResourceManager.depproj">
-      <!-- Intentionally omit dnxcore50 because it requires a different lineup -->
-      <SupportedFramework>net45;netcore45;wp8;wpa81</SupportedFramework>
+      <SupportedFramework>net45;netcore45;wp8;wpa81;dnxcore50</SupportedFramework>
     </ProjectReference>
     <ProjectReference Include="any\System.Resources.ResourceManager.pkgproj" />
     <ProjectReference Include="aot\System.Resources.ResourceManager.pkgproj" />

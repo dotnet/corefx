@@ -3,6 +3,7 @@
     "System.Dynamic.Runtime": "4.0.10"
   },
   "frameworks": {
+    "dnxcore50": {},
     "netcore50": {}
   },
   "runtimes": {

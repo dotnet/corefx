@@ -3,6 +3,7 @@
     "System.Reflection.Primitives": "4.0.0"
   },
   "frameworks": {
+    "dnxcore50": {},
     "netcore50": {}
   },
   "runtimes": {

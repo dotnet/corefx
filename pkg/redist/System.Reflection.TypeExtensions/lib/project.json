@@ -4,6 +4,7 @@
   },
   "frameworks": {
     "net46": {},
+    "dnxcore50": {},
     "netcore50": {}
   },
   "runtimes": {

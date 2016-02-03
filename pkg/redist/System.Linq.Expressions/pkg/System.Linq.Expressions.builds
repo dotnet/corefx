@@ -2,6 +2,7 @@
 <Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <ItemGroup>
+    <Project Include="System.Linq.Expressions.pkgproj" />
     <Project Include="any\System.Linq.Expressions.pkgproj" />
     <Project Include="aot\System.Linq.Expressions.pkgproj" />
   </ItemGroup>

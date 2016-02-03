@@ -24,6 +24,9 @@
       <!-- Transform back to original -->
       <IndirectReference Include="@(_IndirectReferenceAsPackageId->'%(OriginalIdentity)')" />
       <ReferenceCopyLocalPaths Remove="@(IndirectReference)" />
+
+      <!-- Don't pass anything to RAR -->
+      <Reference Remove="@(Reference)" />
     </ItemGroup>
   </Target>
 </Project>

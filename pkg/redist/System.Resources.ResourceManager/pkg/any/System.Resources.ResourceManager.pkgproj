@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\lib\System.Resources.ResourceManager.depproj" />
     <ProjectReference Include="..\..\lib\System.Resources.ResourceManager.depproj">
       <TargetGroup>netcore50</TargetGroup>
     </ProjectReference>

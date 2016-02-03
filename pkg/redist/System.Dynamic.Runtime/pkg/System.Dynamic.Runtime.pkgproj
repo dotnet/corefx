@@ -9,8 +9,7 @@
       <SupportedFramework>net45;netcore45;wp8;wpa81</SupportedFramework>
     </ProjectReference>
     <ProjectReference Include="$(SourceDir)System.Dynamic.Runtime\ref\4.0.10\System.Dynamic.Runtime.depproj">
-      <!-- Intentionally omit dnxcore50 because it requires a different lineup -->
-      <SupportedFramework>net46;netcore50</SupportedFramework>
+      <SupportedFramework>net46;netcore50;dnxcore50</SupportedFramework>
     </ProjectReference>
     <ProjectReference Include="any\System.Dynamic.Runtime.pkgproj" />
     <ProjectReference Include="aot\System.Dynamic.Runtime.pkgproj" />

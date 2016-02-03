@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\lib\System.Diagnostics.Tracing.depproj" />
     <ProjectReference Include="..\..\lib\System.Diagnostics.Tracing.depproj">
       <TargetGroup>netcore50</TargetGroup>
     </ProjectReference>
