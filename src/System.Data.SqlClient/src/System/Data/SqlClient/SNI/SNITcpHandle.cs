@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.IO;
 using System.Net;
@@ -125,7 +126,7 @@ namespace System.Data.SqlClient.SNI
                     if (serverAddresses.Length > MaxParallelIpAddresses)
                     {
                         // Fail if above 64 to match legacy behavior
-                        ReportTcpSNIError(0, (int)SNINativeMethodWrapper.SniSpecialErrors.MultiSubnetFailoverWithMoreThan64IPs, string.Empty);
+                        ReportTcpSNIError(0, SNICommon.MultiSubnetFailoverWithMoreThan64IPs, string.Empty);
                         return;
                     }
 

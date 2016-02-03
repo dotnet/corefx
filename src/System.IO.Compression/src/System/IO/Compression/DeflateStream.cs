@@ -1,10 +1,13 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
+using System.Buffers;
 using System.Diagnostics;
+using System.Diagnostics.Contracts;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Diagnostics.Contracts;
 
 namespace System.IO.Compression
 {
@@ -94,7 +97,7 @@ namespace System.IO.Compression
             _stream = stream;
             _mode = CompressionMode.Decompress;
             _leaveOpen = leaveOpen;
-            _buffer = new byte[DefaultBufferSize];
+            _buffer = ArrayPool<byte>.Shared.Rent(DefaultBufferSize);
         }
 
         /// <summary>
@@ -111,7 +114,7 @@ namespace System.IO.Compression
             _stream = stream;
             _mode = CompressionMode.Compress;
             _leaveOpen = leaveOpen;
-            _buffer = new byte[DefaultBufferSize];
+            _buffer = ArrayPool<byte>.Shared.Rent(DefaultBufferSize);
         }
 
         #endregion
@@ -222,6 +225,17 @@ namespace System.IO.Compression
             throw new NotSupportedException(SR.NotSupported);
         }
 
+        public override int ReadByte()
+        {
+            EnsureDecompressionMode();
+            EnsureNotDisposed();
+
+            // Try to read a single byte from zlib without allocating an array, pinning an array, etc.
+            // If zlib doesn't have any data, fall back to the base stream implementation, which will do that.
+            byte b;
+            return _inflater.Inflate(out b) ? b : base.ReadByte();
+        }
+
         public override int Read(byte[] array, int offset, int count)
         {
             EnsureDecompressionMode();
@@ -286,19 +300,37 @@ namespace System.IO.Compression
         private void EnsureNotDisposed()
         {
             if (_stream == null)
-                throw new ObjectDisposedException(null, SR.ObjectDisposed_StreamClosed);
+                ThrowStreamClosedException();
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private static void ThrowStreamClosedException()
+        {
+            throw new ObjectDisposedException(null, SR.ObjectDisposed_StreamClosed);
         }
 
         private void EnsureDecompressionMode()
         {
             if (_mode != CompressionMode.Decompress)
-                throw new InvalidOperationException(SR.CannotReadFromDeflateStream);
+                ThrowCannotReadFromDeflateStreamException();
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private static void ThrowCannotReadFromDeflateStreamException()
+        {
+            throw new InvalidOperationException(SR.CannotReadFromDeflateStream);
         }
 
         private void EnsureCompressionMode()
         {
             if (_mode != CompressionMode.Compress)
-                throw new InvalidOperationException(SR.CannotWriteToDeflateStream);
+                ThrowCannotWriteToDeflateStreamException();
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private static void ThrowCannotWriteToDeflateStreamException()
+        {
+            throw new InvalidOperationException(SR.CannotWriteToDeflateStream);
         }
 
         public override Task<int> ReadAsync(Byte[] array, int offset, int count, CancellationToken cancellationToken)
@@ -531,6 +563,9 @@ namespace System.IO.Compression
                     }
                     finally
                     {
+                        if (_buffer != null)
+                            ArrayPool<byte>.Shared.Return(_buffer, clearArray: true);
+                        _buffer = null;
                         _deflater = null;
                         _inflater = null;
                         base.Dispose(disposing);

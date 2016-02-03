@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
 using System.Collections;
@@ -20,13 +21,8 @@ namespace System.Net.Sockets
         // PlatformNotSupportedException instead.
         public const int ProtocolInformationSize = 0;
 
-        public readonly static bool SupportsMultipleConnectAttempts = GetPlatformSupportsMultipleConnectAttempts();
+        public const bool SupportsMultipleConnectAttempts = false;
         private readonly static bool SupportsDualModeIPv4PacketInfo = GetPlatformSupportsDualModeIPv4PacketInfo();
-
-        private static bool GetPlatformSupportsMultipleConnectAttempts()
-        {
-            return Interop.Sys.PlatformSupportsMultipleConnectAttempts();
-        }
 
         private static bool GetPlatformSupportsDualModeIPv4PacketInfo()
         {
@@ -521,22 +517,6 @@ namespace System.Net.Sockets
             return false;
         }
 
-        private static unsafe void PrimeForNextConnectAttempt(int fileDescriptor, int socketAddressLen)
-        {
-            Debug.Assert(SupportsMultipleConnectAttempts);
-
-            // On some platforms (e.g. Linux), a non-blocking socket that fails a connect() attempt
-            // needs to be kicked with another connect to AF_UNSPEC before further connect() attempts
-            // will return valid errors. Otherwise, further connect() attempts will return ECONNABORTED.
-            
-            var sockAddr = stackalloc byte[socketAddressLen];
-            Interop.Error afErr = Interop.Sys.SetAddressFamily(sockAddr, socketAddressLen, (int)AddressFamily.Unspecified);
-            Debug.Assert(afErr == Interop.Error.SUCCESS, "PrimeForNextConnectAttempt: failed to set address family");
-
-            Interop.Error err = Interop.Sys.Connect(fileDescriptor, sockAddr, socketAddressLen);
-            Debug.Assert(err == Interop.Error.SUCCESS, "PrimeForNextConnectAttempt: failed to disassociate socket after failed connect()");
-        }
-
         public static unsafe bool TryCompleteConnect(int fileDescriptor, int socketAddressLen, out SocketError errorCode)
         {
             Interop.Error socketError;
@@ -560,11 +540,6 @@ namespace System.Net.Sockets
             }
 
             errorCode = GetSocketErrorForErrorCode(socketError);
-            if (SupportsMultipleConnectAttempts)
-            {
-                PrimeForNextConnectAttempt(fileDescriptor, socketAddressLen);
-            }
-
             return true;
         }
 

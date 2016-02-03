@@ -1,6 +1,8 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
+using System.Buffers;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
@@ -157,7 +159,7 @@ namespace System.IO.Compression
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope")]  // See comment in the body.
         public static ZipArchive Open(String archiveFileName, ZipArchiveMode mode, Encoding entryNameEncoding)
         {
-            // Relies on File.Open for checking of archiveFileName
+            // Relies on FileStream's ctor for checking of archiveFileName
 
             FileMode fileMode;
             FileAccess access;
@@ -192,7 +194,7 @@ namespace System.IO.Compression
             // If the ctor completes without throwing, we know fs has been successfully stores in the archive;
             // If the ctor throws, we need to close it here.
 
-            FileStream fs = File.Open(archiveFileName, fileMode, access, fileShare);
+            FileStream fs = new FileStream(archiveFileName, fileMode, access, fileShare, bufferSize: 0x1000, useAsync: false);
 
             try
             {
@@ -504,38 +506,45 @@ namespace System.IO.Compression
                 // to be greater than the length of typical entry names from the file system, even
                 // on non-Windows platforms. The capacity will be increased, if needed.
                 const int DefaultCapacity = 260;
-                char[] entryNameBuffer = new char[DefaultCapacity];
+                char[] entryNameBuffer = ArrayPool<char>.Shared.Rent(DefaultCapacity);
 
-                foreach (FileSystemInfo file in di.EnumerateFileSystemInfos("*", SearchOption.AllDirectories))
+                try
                 {
-                    directoryIsEmpty = false;
-
-                    Int32 entryNameLength = file.FullName.Length - basePath.Length;
-                    Debug.Assert(entryNameLength > 0);
-
-                    if (file is FileInfo)
+                    foreach (FileSystemInfo file in di.EnumerateFileSystemInfos("*", SearchOption.AllDirectories))
                     {
-                        // Create entry for file:
-                        String entryName = EntryFromPath(file.FullName, basePath.Length, entryNameLength, ref entryNameBuffer);
-                        ZipFileExtensions.DoCreateEntryFromFile(archive, file.FullName, entryName, compressionLevel);
-                    }
-                    else
-                    {
-                        // Entry marking an empty dir:
-                        DirectoryInfo possiblyEmpty = file as DirectoryInfo;
-                        if (possiblyEmpty != null && IsDirEmpty(possiblyEmpty))
+                        directoryIsEmpty = false;
+
+                        Int32 entryNameLength = file.FullName.Length - basePath.Length;
+                        Debug.Assert(entryNameLength > 0);
+
+                        if (file is FileInfo)
                         {
-                            // FullName never returns a directory separator character on the end,
-                            // but Zip archives require it to specify an explicit directory:
-                            String entryName = EntryFromPath(file.FullName, basePath.Length, entryNameLength, ref entryNameBuffer, appendPathSeparator: true);
-                            archive.CreateEntry(entryName);
+                            // Create entry for file:
+                            String entryName = EntryFromPath(file.FullName, basePath.Length, entryNameLength, ref entryNameBuffer);
+                            ZipFileExtensions.DoCreateEntryFromFile(archive, file.FullName, entryName, compressionLevel);
                         }
-                    }
-                }  // foreach
+                        else
+                        {
+                            // Entry marking an empty dir:
+                            DirectoryInfo possiblyEmpty = file as DirectoryInfo;
+                            if (possiblyEmpty != null && IsDirEmpty(possiblyEmpty))
+                            {
+                                // FullName never returns a directory separator character on the end,
+                                // but Zip archives require it to specify an explicit directory:
+                                String entryName = EntryFromPath(file.FullName, basePath.Length, entryNameLength, ref entryNameBuffer, appendPathSeparator: true);
+                                archive.CreateEntry(entryName);
+                            }
+                        }
+                    }  // foreach
 
-                // If no entries create an empty root directory entry:
-                if (includeBaseDirectory && directoryIsEmpty)
-                    archive.CreateEntry(EntryFromPath(di.Name, 0, di.Name.Length, ref entryNameBuffer, appendPathSeparator: true));
+                    // If no entries create an empty root directory entry:
+                    if (includeBaseDirectory && directoryIsEmpty)
+                        archive.CreateEntry(EntryFromPath(di.Name, 0, di.Name.Length, ref entryNameBuffer, appendPathSeparator: true));
+                }
+                finally
+                {
+                    ArrayPool<char>.Shared.Return(entryNameBuffer);
+                }
 
             } // using
         }  // DoCreateFromDirectory
@@ -588,7 +597,8 @@ namespace System.IO.Compression
             {
                 int newCapacity = buffer.Length * 2;
                 if (newCapacity < min) newCapacity = min;
-                buffer = new char[newCapacity];
+                ArrayPool<char>.Shared.Return(buffer);
+                buffer = ArrayPool<char>.Shared.Rent(newCapacity);
             }
         }
 

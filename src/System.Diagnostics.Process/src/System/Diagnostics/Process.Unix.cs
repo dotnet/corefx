@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using Microsoft.Win32.SafeHandles;
 using System.Collections.Generic;
@@ -384,6 +385,22 @@ namespace System.Diagnostics
                 throw new Win32Exception();
             }
             return TimeSpan.FromSeconds(ticks / (double)ticksPerSecond);
+        }
+
+        /// <summary>Computes a time based on a number of ticks since boot.</summary>
+        /// <param name="timespanAfterBoot">The timespan since boot.</param>
+        /// <returns>The converted time.</returns>
+        internal static DateTime BootTimeToDateTime(TimeSpan timespanAfterBoot)
+        {
+            // Use the uptime and the current time to determine the absolute boot time
+            DateTime bootTime = DateTime.UtcNow - TimeSpan.FromMilliseconds(Environment.TickCount);
+
+            // And use that to determine the absolute time for timespan.
+            DateTime dt = bootTime + timespanAfterBoot;
+
+            // The return value is expected to be in the local time zone.
+            // It is converted here (rather than starting with DateTime.Now) to avoid DST issues.
+            return dt.ToLocalTime();
         }
 
         /// <summary>Opens a stream around the specified file descriptor and with the specified access.</summary>

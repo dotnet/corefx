@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 #include "pal_config.h"
 #include "pal_uid.h"
@@ -11,14 +12,6 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <pwd.h>
-
-// TODO: temporarily keeping the un-prefixed signature of this method
-// to keep tests running in CI. This will be removed once the managed assemblies
-// are synced up with the native assemblies.
-extern "C" int32_t GetPwUidR(uint32_t uid, Passwd* pwd, char* buf, int32_t buflen)
-{
-    return SystemNative_GetPwUidR(uid, pwd, buf, buflen);
-}
 
 extern "C" int32_t SystemNative_GetPwUidR(uint32_t uid, Passwd* pwd, char* buf, int32_t buflen)
 {
@@ -61,25 +54,9 @@ extern "C" int32_t SystemNative_GetPwUidR(uint32_t uid, Passwd* pwd, char* buf, 
     return 0;
 }
 
-// TODO: temporarily keeping the un-prefixed signature of this method
-// to keep tests running in CI. This will be removed once the managed assemblies
-// are synced up with the native assemblies.
-extern "C" uint32_t GetEUid()
-{
-    return SystemNative_GetEUid();
-}
-
 extern "C" uint32_t SystemNative_GetEUid()
 {
     return geteuid();
-}
-
-// TODO: temporarily keeping the un-prefixed signature of this method
-// to keep tests running in CI. This will be removed once the managed assemblies
-// are synced up with the native assemblies.
-extern "C" uint32_t GetEGid()
-{
-    return SystemNative_GetEGid();
 }
 
 extern "C" uint32_t SystemNative_GetEGid()

@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Collections.Generic;
@@ -243,6 +244,19 @@ public static unsafe class DateTimeTests
         DateTime in_1 = DateTime.ParseExact(s, formats, null, DateTimeStyles.None);
         string actual = in_1.ToString("g");
         Assert.Equal(s, actual);
+    }
+
+    [Fact]
+    public static void TestParseExact_EscapedSingleQuotes()
+    {
+        var formatInfo = DateTimeFormatInfo.GetInstance(new CultureInfo("mt-MT"));
+        const string format = @"dddd, d' ta\' 'MMMM yyyy";
+
+        DateTime expected = new DateTime(1999, 2, 28, 17, 00, 01);
+        string formatted = expected.ToString(format, formatInfo);
+        DateTime actual = DateTime.ParseExact(formatted, format, formatInfo);
+
+        Assert.Equal(expected.Date, actual.Date);
     }
 
     [Fact]

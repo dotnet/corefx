@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Collections.Generic;
@@ -112,6 +113,25 @@ namespace System.Net.Http.Functional.Tests
             using (var handler = new HttpClientHandler())
             {
                 Assert.Throws<PlatformNotSupportedException>(() => handler.MaxRequestContentBufferSize = 1024);
+            }
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public async Task UseDefaultCredentials_SetToFalseAndServerNeedsAuth_StatusCodeUnauthorized(bool useProxy)
+        {
+            var handler = new HttpClientHandler();
+            handler.UseProxy = useProxy;
+            handler.UseDefaultCredentials = false;
+            using (var client = new HttpClient(handler))
+            {
+                Uri uri = HttpTestServers.NegotiateAuthUriForDefaultCreds(secure:false);
+                _output.WriteLine("Uri: {0}", uri);
+                using (HttpResponseMessage response = await client.GetAsync(uri))
+                {
+                    Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+                }
             }
         }
 

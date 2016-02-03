@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 namespace System.IO.Tests
 {
@@ -13,9 +14,14 @@ namespace System.IO.Tests
         private bool _canRead;
         private bool _canSeek;
 
-        public WrappedMemoryStream(bool canRead, bool canWrite, bool canSeek)
+        public WrappedMemoryStream(bool canRead, bool canWrite, bool canSeek) : 
+            this(canRead, canWrite, canSeek, null)
         {
-            wrapped = new MemoryStream();
+        }
+
+        public WrappedMemoryStream(bool canRead, bool canWrite, bool canSeek, byte[] data)
+        {
+            wrapped = data != null ? new MemoryStream(data) : new MemoryStream();
             _canWrite = canWrite;
             _canRead = canRead;
             _canSeek = canSeek;

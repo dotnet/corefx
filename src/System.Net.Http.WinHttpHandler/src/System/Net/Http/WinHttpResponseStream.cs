@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.IO;
 using System.Runtime.InteropServices;
@@ -139,9 +140,9 @@ namespace System.Net.Http
                     {
                         _state.TcsReadFromResponseStream.TrySetException(previousTask.Exception.InnerException);
                     }
-                    else if (previousTask.IsCanceled)
+                    else if (previousTask.IsCanceled || token.IsCancellationRequested)
                     {
-                        _state.TcsReadFromResponseStream.TrySetCanceled();
+                        _state.TcsReadFromResponseStream.TrySetCanceled(token);
                     }
                     else
                     {
@@ -170,7 +171,7 @@ namespace System.Net.Http
                         }
                     }
                 }, 
-                token, TaskContinuationOptions.None, TaskScheduler.Default);
+                CancellationToken.None, TaskContinuationOptions.None, TaskScheduler.Default);
 
             // TODO: Issue #2165. Register callback on cancellation token to cancel WinHTTP operation.
                 

@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Diagnostics;
@@ -42,7 +43,7 @@ namespace System.Security.Cryptography
             if (key == null)
                 throw new ArgumentNullException("key");
 
-            if (key.AlgorithmGroup != CngAlgorithmGroup.ECDsa)
+            if (!IsEccAlgorithmGroup(key.AlgorithmGroup))
                 throw new ArgumentException(SR.Cryptography_ArgECDsaRequiresECDsaKey, "key");
 
             Key = CngAlgorithmCore.Duplicate(key);
@@ -59,6 +60,16 @@ namespace System.Security.Cryptography
         protected override void Dispose(bool disposing)
         {
             _core.Dispose();
+        }
+
+        private static bool IsEccAlgorithmGroup(CngAlgorithmGroup algorithmGroup)
+        {
+            // Sometimes, when reading from certificates, ECDSA keys get identified as ECDH.
+            // Windows allows the ECDH keys to perform both key exchange (ECDH) and signing (ECDSA),
+            // so either value is acceptable for the ECDSA wrapper object.
+            //
+            // It is worth noting, however, that ECDSA-identified keys cannot be used for key exchange (ECDH) in CNG.
+            return algorithmGroup == CngAlgorithmGroup.ECDsa || algorithmGroup == CngAlgorithmGroup.ECDiffieHellman;
         }
 
         private CngAlgorithmCore _core;

@@ -82,7 +82,7 @@
       </a>
       <br />
       <a href="http://dotnet-ci.cloudapp.net/job/dotnet_corefx/job/code_coverage_windows/Code_Coverage_Report">
-        <img src="http://dotnet-ci.cloudapp.net/job/dotnet_corefx/job/code_coverage_windows/Code_Coverage_Report/badge_combined.svg" alt="Code coverage" />
+        <img src="https://img.shields.io/jenkins/s/http/dotnet-ci.cloudapp.net/job/dotnet_corefx/code_coverage_windows.svg?label=coverage" alt="Code coverage" />
       </a>
     </td>
     <td>
@@ -211,6 +211,12 @@ Looking for something to work on? The list of [up-for-grabs issues](https://gith
 * [Contributing Guide](Documentation/project-docs/contributing.md)
 * [Developer Guide](Documentation/project-docs/developer-guide.md)
 * [Issue Guide](Documentation/project-docs/issue-guide.md)
+
+We've also started to share some of our direction via more higher-level documentation, specifically:
+
+* [Road to RTM](Documentation/project-docs/rtm.md)
+* [How we triage](Documentation/project-docs/triage.md)
+* [Porting to .NET Core](Documentation/project-docs/porting.md)
 
 You are also encouraged to start a discussion by filing an issue or creating a
 gist.

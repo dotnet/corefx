@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Collections;
 using System.Data.Common;
@@ -1135,10 +1136,10 @@ namespace System.Data.SqlClient
         // this only happens once per connection
         // SxS: using named file mapping APIs
 
-        internal void RegisterForConnectionCloseNotification<T>(ref Task<T> outterTask, object value, int tag)
+        internal void RegisterForConnectionCloseNotification<T>(ref Task<T> outerTask, object value, int tag)
         {
             // Connection exists,  schedule removal, will be added to ref collection after calling ValidateAndReconnect
-            outterTask = outterTask.ContinueWith(task =>
+            outerTask = outerTask.ContinueWith(task =>
             {
                 RemoveWeakReference(value);
                 return task;

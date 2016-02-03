@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Linq;
 using System.Security.Principal;
@@ -152,6 +153,7 @@ namespace System.Net.Security.Tests
                 auth[1] = server.AuthenticateAsServerAsync();
 
                 bool finished = Task.WaitAll(auth, TestConfiguration.PassingTestTimeoutMilliseconds);
+                Assert.True(finished, "Handshake completed in the allotted time");
 
                 // Expected Client property values:
                 Assert.True(client.IsAuthenticated);

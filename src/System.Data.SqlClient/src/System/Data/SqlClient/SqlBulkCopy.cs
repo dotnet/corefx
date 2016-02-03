@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 
 
@@ -1704,7 +1705,7 @@ namespace System.Data.SqlClient
             return writeTask;
         }
 
-        private void RegisterForConnectionCloseNotification<T>(ref Task<T> outterTask)
+        private void RegisterForConnectionCloseNotification<T>(ref Task<T> outerTask)
         {
             SqlConnection connection = _connection;
             if (connection == null)
@@ -1713,7 +1714,7 @@ namespace System.Data.SqlClient
                 throw ADP.ClosedConnectionError();
             }
 
-            connection.RegisterForConnectionCloseNotification<T>(ref outterTask, this, SqlReferenceCollection.BulkCopyTag);
+            connection.RegisterForConnectionCloseNotification<T>(ref outerTask, this, SqlReferenceCollection.BulkCopyTag);
         }
 
         // Runs a loop to copy all columns of a single row.

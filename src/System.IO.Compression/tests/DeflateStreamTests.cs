@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
 using System.Text;
@@ -677,7 +678,6 @@ namespace System.IO.Compression.Tests
             }
             compressed.Position = 0;
 
-            var decompressed = new MemoryStream();
             using (var decompressor = new DeflateStream(compressed, CompressionMode.Decompress, true))
             {
                 int i, j;
@@ -693,6 +693,26 @@ namespace System.IO.Compression.Tests
                 decompressor.Read(array2, 0, array2.Length);
                 for (j = 0; j < array2.Length; j++)
                     Assert.Equal(data[j], array[j]);
+            }
+        }
+
+        [Fact]
+        public void Roundtrip_Write_ReadByte()
+        {
+            byte[] data = new byte[1024 * 10];
+            new Random(42).NextBytes(data);
+
+            var compressed = new MemoryStream();
+            using (var compressor = new DeflateStream(compressed, CompressionMode.Compress, true))
+            {
+                compressor.Write(data, 0, data.Length);
+            }
+            compressed.Position = 0;
+
+            using (var decompressor = new DeflateStream(compressed, CompressionMode.Decompress, true))
+            {
+                for (int i = 0; i < data.Length; i++)
+                    Assert.Equal(data[i], decompressor.ReadByte());
             }
         }
 

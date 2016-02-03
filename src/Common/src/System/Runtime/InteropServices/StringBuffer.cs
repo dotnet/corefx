@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 namespace System.Runtime.InteropServices
 {
@@ -268,9 +269,9 @@ namespace System.Runtime.InteropServices
 
             char* end = CharPointer + _length - 1;
 
-            while (Array.IndexOf(values, *end) >= 0)
+            while (_length > 0 && Array.IndexOf(values, *end) >= 0)
             {
-                Length--;
+                Length = _length - 1;
                 end--;
             }
         }

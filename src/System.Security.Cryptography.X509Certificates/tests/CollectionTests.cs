@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Linq;
 using System.Collections;
@@ -798,6 +799,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 cc.Remove(c2);
                 Assert.Equal(0, cc.Count);
 
+                Assert.Throws<ArgumentException>(() => cc.Remove(c2));
 
                 IList il = new X509CertificateCollection(new X509Certificate[] { c1, c2 });
 
@@ -807,6 +809,8 @@ namespace System.Security.Cryptography.X509Certificates.Tests
 
                 il.Remove(c2);
                 Assert.Equal(0, il.Count);
+
+                Assert.Throws<ArgumentException>(() => il.Remove(c2));
             }
         }
 
@@ -851,8 +855,9 @@ namespace System.Security.Cryptography.X509Certificates.Tests
         [Fact]
         public static void X509Certificate2CollectionRemoveRangeArray()
         {
-            using (X509Certificate2 c1 = new X509Certificate2())
-            using (X509Certificate2 c2 = new X509Certificate2(TestData.PfxData, TestData.PfxDataPassword))
+            using (X509Certificate2 c1 = new X509Certificate2(TestData.MsCertificate))
+            using (X509Certificate2 c2 = new X509Certificate2(TestData.DssCer))
+            using (X509Certificate2 c1Clone = new X509Certificate2(TestData.MsCertificate))
             {
                 X509Certificate2[] array = new X509Certificate2[] { c1, c2 };
 
@@ -880,14 +885,25 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 Assert.Equal(2, cc.Count);
                 Assert.Same(c2, cc[0]);
                 Assert.Same(c1, cc[1]);
+
+                // Remove c1Clone (success)
+                // Remove c1 (exception)
+                // Add c1Clone back
+                // End state: { c1, c2 } => { c2, c1Clone }
+                cc = new X509Certificate2Collection(array);
+                Assert.Throws<ArgumentException>(() => cc.RemoveRange(new X509Certificate2[] { c1Clone, c1, c2 }));
+                Assert.Equal(2, cc.Count);
+                Assert.Same(c2, cc[0]);
+                Assert.Same(c1Clone, cc[1]);
             }
         }
 
         [Fact]
         public static void X509Certificate2CollectionRemoveRangeCollection()
         {
-            using (X509Certificate2 c1 = new X509Certificate2())
-            using (X509Certificate2 c2 = new X509Certificate2(TestData.PfxData, TestData.PfxDataPassword))
+            using (X509Certificate2 c1 = new X509Certificate2(TestData.MsCertificate))
+            using (X509Certificate2 c2 = new X509Certificate2(TestData.DssCer))
+            using (X509Certificate2 c1Clone = new X509Certificate2(TestData.MsCertificate))
             using (X509Certificate c3 = new X509Certificate())
             {
                 X509Certificate2[] array = new X509Certificate2[] { c1, c2 };
@@ -924,6 +940,22 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 Assert.Equal(2, cc.Count);
                 Assert.Same(c2, cc[0]);
                 Assert.Same(c1, cc[1]);
+
+                // Remove c1Clone (success)
+                // Remove c1 (exception)
+                // Add c1Clone back
+                // End state: { c1, c2 } => { c2, c1Clone }
+                cc = new X509Certificate2Collection(array);
+                collection = new X509Certificate2Collection
+                {
+                    c1Clone,
+                    c1,
+                    c2,
+                };
+                Assert.Throws<ArgumentException>(() => cc.RemoveRange(collection));
+                Assert.Equal(2, cc.Count);
+                Assert.Same(c2, cc[0]);
+                Assert.Same(c1Clone, cc[1]);
             }
         }
 

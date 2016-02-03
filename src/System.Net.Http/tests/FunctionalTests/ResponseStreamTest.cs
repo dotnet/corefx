@@ -1,9 +1,11 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.IO;
 using System.Net.Tests;
+using System.Threading;
 using System.Threading.Tasks;
 
 using Xunit;
@@ -65,6 +67,26 @@ namespace System.Net.Http.Functional.Tests
                 string responseBody = reader.ReadToEnd();
                 _output.WriteLine(responseBody);
                 Assert.True(IsValidResponseBody(responseBody));
+            }
+        }
+
+        [Fact]
+        public async Task ReadAsStreamAsync_Cancel_TaskIsCanceled()
+        {
+            var cts = new CancellationTokenSource();
+
+            using (var client = new HttpClient())
+            using (HttpResponseMessage response =
+                    await client.GetAsync(HttpTestServers.RemoteEchoServer, HttpCompletionOption.ResponseHeadersRead))
+            using (Stream stream = await response.Content.ReadAsStreamAsync())
+            {
+                var buffer = new byte[2048];
+                Task task = stream.ReadAsync(buffer, 0, buffer.Length, cts.Token);
+                cts.Cancel();
+
+                // Verify that the task completes successfully or is canceled.
+                Assert.True(((IAsyncResult)task).AsyncWaitHandle.WaitOne(new TimeSpan(0, 0, 3)));
+                Assert.True(task.Status == TaskStatus.RanToCompletion || task.Status == TaskStatus.Canceled);
             }
         }
 

@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
 using System.Net.Sockets;
@@ -192,6 +193,9 @@ namespace System.Net.Security.Tests
               X509Chain chain,
               SslPolicyErrors sslPolicyErrors)
         {
+            Assert.True(
+                (sslPolicyErrors & SslPolicyErrors.RemoteCertificateNotAvailable) == SslPolicyErrors.RemoteCertificateNotAvailable,
+                "Client didn't supply a cert, the server required one, yet sslPolicyErrors is " + sslPolicyErrors);
             return true;  // allow everything
         }
 

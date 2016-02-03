@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Runtime;
@@ -600,7 +601,7 @@ namespace System.Collections.Generic
         {
             if (action == null)
             {
-                throw new ArgumentNullException("match");
+                throw new ArgumentNullException("action");
             }
 
             int version = _version;
@@ -1131,6 +1132,11 @@ namespace System.Collections.Generic
             Contract.Ensures(Contract.Result<T[]>() != null);
             Contract.Ensures(Contract.Result<T[]>().Length == Count);
 
+            if (_size == 0)
+            {
+                return _emptyArray;
+            }
+
             T[] array = new T[_size];
             Array.Copy(_items, 0, array, 0, _size);
             return array;
@@ -1170,140 +1176,6 @@ namespace System.Collections.Generic
                 }
             }
             return true;
-        }
-
-        internal static IList<T> Synchronized(List<T> list)
-        {
-            return new SynchronizedList(list);
-        }
-
-        internal class SynchronizedList : IList<T>
-        {
-            private List<T> _list;
-            private Object _root;
-
-            internal SynchronizedList(List<T> list)
-            {
-                _list = list;
-                _root = ((System.Collections.ICollection)list).SyncRoot;
-            }
-
-            public int Count
-            {
-                get
-                {
-                    lock (_root)
-                    {
-                        return _list.Count;
-                    }
-                }
-            }
-
-            public bool IsReadOnly
-            {
-                get
-                {
-                    return ((ICollection<T>)_list).IsReadOnly;
-                }
-            }
-
-            public void Add(T item)
-            {
-                lock (_root)
-                {
-                    _list.Add(item);
-                }
-            }
-
-            public void Clear()
-            {
-                lock (_root)
-                {
-                    _list.Clear();
-                }
-            }
-
-            public bool Contains(T item)
-            {
-                lock (_root)
-                {
-                    return _list.Contains(item);
-                }
-            }
-
-            public void CopyTo(T[] array, int arrayIndex)
-            {
-                lock (_root)
-                {
-                    _list.CopyTo(array, arrayIndex);
-                }
-            }
-
-            public bool Remove(T item)
-            {
-                lock (_root)
-                {
-                    return _list.Remove(item);
-                }
-            }
-
-            System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
-            {
-                lock (_root)
-                {
-                    return _list.GetEnumerator();
-                }
-            }
-
-            IEnumerator<T> IEnumerable<T>.GetEnumerator()
-            {
-                lock (_root)
-                {
-                    return ((IEnumerable<T>)_list).GetEnumerator();
-                }
-            }
-
-            public T this[int index]
-            {
-                get
-                {
-                    lock (_root)
-                    {
-                        return _list[index];
-                    }
-                }
-                set
-                {
-                    lock (_root)
-                    {
-                        _list[index] = value;
-                    }
-                }
-            }
-
-            public int IndexOf(T item)
-            {
-                lock (_root)
-                {
-                    return _list.IndexOf(item);
-                }
-            }
-
-            public void Insert(int index, T item)
-            {
-                lock (_root)
-                {
-                    _list.Insert(index, item);
-                }
-            }
-
-            public void RemoveAt(int index)
-            {
-                lock (_root)
-                {
-                    _list.RemoveAt(index);
-                }
-            }
         }
 
         public struct Enumerator : IEnumerator<T>, System.Collections.IEnumerator

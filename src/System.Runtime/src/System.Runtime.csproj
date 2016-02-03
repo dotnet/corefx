@@ -4,7 +4,7 @@
   <PropertyGroup>
     <ProjectGuid>{56B9D0A9-44D3-488E-8B42-C14A6E30CAB2}</ProjectGuid>
     <AssemblyName>System.Runtime</AssemblyName>
-    <AssemblyVersion>4.0.21.0</AssemblyVersion>
+    <AssemblyVersion>4.1.0.0</AssemblyVersion>
     <IsPartialFacadeAssembly>true</IsPartialFacadeAssembly>
     <PackageTargetFramework Condition="'$(PackageTargetFramework)'==''">dotnet5.4</PackageTargetFramework>
   </PropertyGroup>
@@ -28,7 +28,7 @@
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' != 'net46'">
     <ProjectReference Include="..\..\System.Private.Uri\src\System.Private.Uri.csproj">
-      <AdditionalProperties>OSGroup=Windows_NT</AdditionalProperties>
+      <OSGroup>Windows_NT</OSGroup>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)'!='netcore50aot'">

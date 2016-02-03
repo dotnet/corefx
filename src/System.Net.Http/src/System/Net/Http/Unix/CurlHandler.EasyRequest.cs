@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -330,7 +331,8 @@ namespace System.Net.Http
 
                 KeyValuePair<NetworkCredential, CURLAUTH> credentialScheme = GetCredentials(_handler.Proxy.Credentials, _requestMessage.RequestUri);
                 NetworkCredential credentials = credentialScheme.Key;
-                if (credentials != null)
+                if (credentials != null && // no credentials to set
+                    credentials != CredentialCache.DefaultCredentials) // no "default credentials" on Unix; nop just like UseDefaultCredentials
                 {
                     if (string.IsNullOrEmpty(credentials.UserName))
                     {

@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.IO;
 using System.Net.Http;
@@ -7,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 using Xunit;
+using Xunit.Abstractions;
 
 namespace System.Net.Tests
 {
@@ -22,8 +24,14 @@ namespace System.Net.Tests
         private Exception _savedResponseException = null;
         private int _requestStreamCallbackCallCount = 0;
         private int _responseCallbackCallCount = 0;
+        private readonly ITestOutputHelper _output;
 
         public readonly static object[][] EchoServers = HttpTestServers.EchoServers;
+
+        public HttpWebRequestTest(ITestOutputHelper output)
+        {
+            _output = output;
+        }
 
         [Theory, MemberData("EchoServers")]
         public void Ctor_VerifyDefaults_Success(Uri remoteServer)
@@ -479,6 +487,25 @@ namespace System.Net.Tests
             }
 
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        }
+
+        [Theory, MemberData("EchoServers")]
+        public async Task ContentType_AddHeaderWithNoContent_SendRequest_HeaderGetsSent(Uri remoteServer)
+        {
+            HttpWebRequest request = HttpWebRequest.CreateHttp(remoteServer);
+            request.ContentType = "application/json";
+            
+            HttpWebResponse response = (HttpWebResponse) await request.GetResponseAsync();
+            Stream responseStream = response.GetResponseStream();
+            String responseBody;
+            using (var sr = new StreamReader(responseStream))
+            {
+                responseBody = sr.ReadToEnd();
+            }
+            _output.WriteLine(responseBody);
+
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            Assert.True(responseBody.Contains("Content-Type"));
         }
 
         [Theory, MemberData("EchoServers")]

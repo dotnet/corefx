@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
 using System.IO;
@@ -400,15 +401,16 @@ namespace System.Net
             {
                 // The System.Net.Http APIs require HttpRequestMessage headers to be properly divided between the request headers
                 // collection and the request content headers colllection for all well-known header names.  And custom headers
-                // are only allowed in the request headers collection and not in the request content headers collection.  If a well-known
-                // content related (entity-body) header is found and there is no actual content being sent (i.e. it's a GET verb),
-                // then we'll need to drop the header on the floor.
+                // are only allowed in the request headers collection and not in the request content headers collection.
                 if (IsWellKnownContentHeader(headerName))
                 {
-                    if (request.Content != null)
+                    if (request.Content == null)
                     {
-                        request.Content.Headers.TryAddWithoutValidation(headerName, _webHeaderCollection[headerName]);
+                        // Create empty content so that we can send the entity-body header.
+                        request.Content = new ByteArrayContent(Array.Empty<byte>());
                     }
+
+                    request.Content.Headers.TryAddWithoutValidation(headerName, _webHeaderCollection[headerName]);
                 }
                 else
                 {

@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
 using System.Threading;
@@ -18,8 +19,7 @@ namespace System
             UnknownValue = 0x8 // Not used on .NET Native
         }
 
-        private static Dictionary<string, SwitchValueState> s_switchMap = new Dictionary<string, SwitchValueState>();
-        private static readonly object s_syncLock = new object();
+        private static readonly Dictionary<string, SwitchValueState> s_switchMap = new Dictionary<string, SwitchValueState>();
 
         public static string BaseDirectory
         {
@@ -57,15 +57,13 @@ namespace System
             SwitchValueState switchValue;
             lock (s_switchMap)
             {
-                if (s_switchMap.TryGetValue(switchName, out switchValue))
-                {
-                    // We get the value of isEnabled from the value that we stored in the dictionary
-                    isEnabled = (switchValue & SwitchValueState.HasTrueValue) == SwitchValueState.HasTrueValue;
-                    return true;
-                }
+                if (!s_switchMap.TryGetValue(switchName, out switchValue))
+                    return false; // we did not find a value for the switch
             }
 
-            return false; // we did not find a value for the switch
+            // We get the value of isEnabled from the value that we stored in the dictionary
+            isEnabled = (switchValue & SwitchValueState.HasTrueValue) == SwitchValueState.HasTrueValue;
+            return true;
         }
 
         /// <summary>
@@ -80,10 +78,12 @@ namespace System
             if (switchName.Length == 0)
                 throw new ArgumentException(SR.Argument_EmptyName, "switchName");
 
-            lock (s_syncLock)
+            SwitchValueState switchValue = isEnabled ? SwitchValueState.HasTrueValue : SwitchValueState.HasFalseValue;
+
+            lock (s_switchMap)
             {
                 // Store the new value and the fact that we checked in the dictionary
-                s_switchMap[switchName] = (isEnabled ? SwitchValueState.HasTrueValue : SwitchValueState.HasFalseValue);
+                s_switchMap[switchName] = switchValue;
             }
         }
     }

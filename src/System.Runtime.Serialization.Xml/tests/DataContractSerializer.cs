@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using SerializationTypes;
 using System;
@@ -2006,6 +2007,14 @@ public static partial class DataContractSerializerTests
         {
             Assert.StrictEqual(expected.Elements[i].InnerText, actual.Elements[i].InnerText);
         }
+    }
+
+    [Fact]
+    public static void DCS_DifferentCollectionsOfSameTypeAsKnownTypes()
+    {
+        Assert.Throws<InvalidOperationException>(() => { 
+            (new DataContractSerializer(typeof(TypeWithKnownTypesOfCollectionsWithConflictingXmlName))).WriteObject(new MemoryStream(), new TypeWithKnownTypesOfCollectionsWithConflictingXmlName());
+        });
     }
 
     private static T SerializeAndDeserialize<T>(T value, string baseline, DataContractSerializerSettings settings = null, Func<DataContractSerializer> serializerFactory = null, bool skipStringCompare = false)

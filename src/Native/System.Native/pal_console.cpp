@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 #include "pal_config.h"
 #include "pal_console.h"
@@ -33,14 +34,6 @@ extern "C" int32_t SystemNative_GetWindowSize(WinSize* windowSize)
     errno = ENOTSUP;
     return -1;
 #endif
-}
-
-// TODO: temporarily keeping the un-prefixed signature of this method
-// to keep tests running in CI. This will be removed once the managed assemblies
-// are synced up with the native assemblies.
-extern "C" int32_t IsATty(intptr_t fd)
-{
-    return SystemNative_IsATty(fd);
 }
 
 extern "C" int32_t SystemNative_IsATty(intptr_t fd)
@@ -259,14 +252,6 @@ static bool InitializeSignalHandling()
     return true;
 }
 
-// TODO: temporarily keeping the un-prefixed signature of this method
-// to keep tests running in CI. This will be removed once the managed assemblies
-// are synced up with the native assemblies.
-extern "C" int32_t RegisterForCtrl(CtrlCallback callback)
-{
-    return SystemNative_RegisterForCtrl(callback);
-}
-
 extern "C" int32_t SystemNative_RegisterForCtrl(CtrlCallback callback)
 {
     assert(callback != nullptr);
@@ -281,14 +266,6 @@ extern "C" int32_t SystemNative_RegisterForCtrl(CtrlCallback callback)
     }
 
     return 1;
-}
-
-// TODO: temporarily keeping the un-prefixed signature of this method
-// to keep tests running in CI. This will be removed once the managed assemblies
-// are synced up with the native assemblies.
-extern "C" void UnregisterForCtrl()
-{
-    SystemNative_UnregisterForCtrl();
 }
 
 extern "C" void SystemNative_UnregisterForCtrl()

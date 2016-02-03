@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 #include "pal_config.h"
 #include "pal_process.h"
@@ -84,32 +85,11 @@ static void CloseIfOpen(int fd)
     }
 }
 
-// TODO: temporarily keeping the un-prefixed signature of this method
-// to keep tests running in CI. This will be removed once the managed assemblies
-// are synced up with the native assemblies.
-extern "C" int32_t ForkAndExecProcess(const char* filename,
-    char* const argv[],
-    char* const envp[],
-    const char* cwd,
-    int32_t redirectStdin,
-    int32_t redirectStdout,
-    int32_t redirectStderr,
-    int32_t* childPid,
-    int32_t* stdinFd,
-    int32_t* stdoutFd,
-    int32_t* stderrFd)
+static int Dup2WithInterruptedRetry(int oldfd, int newfd)
 {
-    return SystemNative_ForkAndExecProcess(filename,
-        argv,
-        envp,
-        cwd,
-        redirectStdin,
-        redirectStdout,
-        redirectStderr,
-        childPid,
-        stdinFd,
-        stdoutFd,
-        stderrFd);
+    int result;
+    while (CheckInterrupted(result = dup2(oldfd, newfd)));
+    return result;
 }
 
 extern "C" int32_t SystemNative_ForkAndExecProcess(const char* filename,
@@ -182,9 +162,9 @@ extern "C" int32_t SystemNative_ForkAndExecProcess(const char* filename,
 
         // For any redirections that should happen, dup the pipe descriptors onto stdin/out/err.
         // Then close out the old pipe descriptrs, which we no longer need.
-        if ((redirectStdin && dup2(stdinFds[READ_END_OF_PIPE], STDIN_FILENO) == -1) ||
-            (redirectStdout && dup2(stdoutFds[WRITE_END_OF_PIPE], STDOUT_FILENO) == -1) ||
-            (redirectStderr && dup2(stderrFds[WRITE_END_OF_PIPE], STDERR_FILENO) == -1))
+        if ((redirectStdin && Dup2WithInterruptedRetry(stdinFds[READ_END_OF_PIPE], STDIN_FILENO) == -1) ||
+            (redirectStdout && Dup2WithInterruptedRetry(stdoutFds[WRITE_END_OF_PIPE], STDOUT_FILENO) == -1) ||
+            (redirectStderr && Dup2WithInterruptedRetry(stderrFds[WRITE_END_OF_PIPE], STDERR_FILENO) == -1))
         {
             _exit(errno != 0 ? errno : EXIT_FAILURE);
         }
@@ -193,9 +173,14 @@ extern "C" int32_t SystemNative_ForkAndExecProcess(const char* filename,
         CloseIfOpen(stderrFds[WRITE_END_OF_PIPE]);
 
         // Change to the designated working directory, if one was specified
-        if (nullptr != cwd && chdir(cwd) == -1)
+        if (nullptr != cwd)
         {
-            _exit(errno != 0 ? errno : EXIT_FAILURE);
+            int result;
+            while (CheckInterrupted(result = chdir(cwd)));
+            if (result == -1)
+            {
+                _exit(errno != 0 ? errno : EXIT_FAILURE);
+            }
         }
 
         // Finally, execute the new process.  execve will not return if it's successful.
@@ -318,14 +303,6 @@ static void ConvertFromPalRLimitToManaged(const rlimit& native, RLimit& pal)
     pal.MaximumLimit = ConvertFromNativeRLimitInfinityToManagedIfNecessary(native.rlim_max);
 }
 
-// TODO: temporarily keeping the un-prefixed signature of this method
-// to keep tests running in CI. This will be removed once the managed assemblies
-// are synced up with the native assemblies.
-extern "C" int32_t GetRLimit(RLimitResources resourceType, RLimit* limits)
-{
-    return SystemNative_GetRLimit(resourceType, limits);
-}
-
 extern "C" int32_t SystemNative_GetRLimit(RLimitResources resourceType, RLimit* limits)
 {
     assert(limits != nullptr);
@@ -345,14 +322,6 @@ extern "C" int32_t SystemNative_GetRLimit(RLimitResources resourceType, RLimit* 
     return result;
 }
 
-// TODO: temporarily keeping the un-prefixed signature of this method
-// to keep tests running in CI. This will be removed once the managed assemblies
-// are synced up with the native assemblies.
-extern "C" int32_t SetRLimit(RLimitResources resourceType, const RLimit* limits)
-{
-    return SystemNative_SetRLimit(resourceType, limits);
-}
-
 extern "C" int32_t SystemNative_SetRLimit(RLimitResources resourceType, const RLimit* limits)
 {
     assert(limits != nullptr);
@@ -363,25 +332,9 @@ extern "C" int32_t SystemNative_SetRLimit(RLimitResources resourceType, const RL
     return setrlimit(platformLimit, &internalLimit);
 }
 
-// TODO: temporarily keeping the un-prefixed signature of this method
-// to keep tests running in CI. This will be removed once the managed assemblies
-// are synced up with the native assemblies.
-extern "C" int32_t Kill(int32_t pid, int32_t signal)
-{
-    return SystemNative_Kill(pid, signal);
-}
-
 extern "C" int32_t SystemNative_Kill(int32_t pid, int32_t signal)
 {
     return kill(pid, signal);
-}
-
-// TODO: temporarily keeping the un-prefixed signature of this method
-// to keep tests running in CI. This will be removed once the managed assemblies
-// are synced up with the native assemblies.
-extern "C" int32_t GetPid()
-{
-    return SystemNative_GetPid();
 }
 
 extern "C" int32_t SystemNative_GetPid()
@@ -389,38 +342,14 @@ extern "C" int32_t SystemNative_GetPid()
     return getpid();
 }
 
-// TODO: temporarily keeping the un-prefixed signature of this method
-// to keep tests running in CI. This will be removed once the managed assemblies
-// are synced up with the native assemblies.
-extern "C" int32_t GetSid(int32_t pid)
-{
-    return SystemNative_GetSid(pid);
-}
-
 extern "C" int32_t SystemNative_GetSid(int32_t pid)
 {
     return getsid(pid);
 }
 
-// TODO: temporarily keeping the un-prefixed signature of this method
-// to keep tests running in CI. This will be removed once the managed assemblies
-// are synced up with the native assemblies.
-extern "C" void SysLog(SysLogPriority priority, const char* message, const char* arg1)
-{
-    SystemNative_SysLog(priority, message, arg1);
-}
-
 extern "C" void SystemNative_SysLog(SysLogPriority priority, const char* message, const char* arg1)
 {
     syslog(static_cast<int>(priority), message, arg1);
-}
-
-// TODO: temporarily keeping the un-prefixed signature of this method
-// to keep tests running in CI. This will be removed once the managed assemblies
-// are synced up with the native assemblies.
-extern "C" int32_t WaitPid(int32_t pid, int32_t* status, WaitPidOptions options)
-{
-    return SystemNative_WaitPid(pid, status, options);
 }
 
 extern "C" int32_t SystemNative_WaitPid(int32_t pid, int32_t* status, WaitPidOptions options)
@@ -432,25 +361,9 @@ extern "C" int32_t SystemNative_WaitPid(int32_t pid, int32_t* status, WaitPidOpt
     return result;
 }
 
-// TODO: temporarily keeping the un-prefixed signature of this method
-// to keep tests running in CI. This will be removed once the managed assemblies
-// are synced up with the native assemblies.
-extern "C" int32_t WExitStatus(int32_t status)
-{
-    return SystemNative_WExitStatus(status);
-}
-
 extern "C" int32_t SystemNative_WExitStatus(int32_t status)
 {
     return WEXITSTATUS(status);
-}
-
-// TODO: temporarily keeping the un-prefixed signature of this method
-// to keep tests running in CI. This will be removed once the managed assemblies
-// are synced up with the native assemblies.
-extern "C" int32_t WIfExited(int32_t status)
-{
-    return SystemNative_WIfExited(status);
 }
 
 extern "C" int32_t SystemNative_WIfExited(int32_t status)
@@ -458,38 +371,14 @@ extern "C" int32_t SystemNative_WIfExited(int32_t status)
     return WIFEXITED(status);
 }
 
-// TODO: temporarily keeping the un-prefixed signature of this method
-// to keep tests running in CI. This will be removed once the managed assemblies
-// are synced up with the native assemblies.
-extern "C" int32_t WIfSignaled(int32_t status)
-{
-    return SystemNative_WIfSignaled(status);
-}
-
 extern "C" int32_t SystemNative_WIfSignaled(int32_t status)
 {
     return WIFSIGNALED(status);
 }
 
-// TODO: temporarily keeping the un-prefixed signature of this method
-// to keep tests running in CI. This will be removed once the managed assemblies
-// are synced up with the native assemblies.
-extern "C" int32_t WTermSig(int32_t status)
-{
-    return SystemNative_WTermSig(status);
-}
-
 extern "C" int32_t SystemNative_WTermSig(int32_t status)
 {
     return WTERMSIG(status);
-}
-
-// TODO: temporarily keeping the un-prefixed signature of this method
-// to keep tests running in CI. This will be removed once the managed assemblies
-// are synced up with the native assemblies.
-extern "C" int64_t PathConf(const char* path, PathConfName name)
-{
-    return SystemNative_PathConf(path, name);
 }
 
 extern "C" int64_t SystemNative_PathConf(const char* path, PathConfName name)
@@ -536,14 +425,6 @@ extern "C" int64_t SystemNative_PathConf(const char* path, PathConfName name)
     return pathconf(path, confValue);
 }
 
-// TODO: temporarily keeping the un-prefixed signature of this method
-// to keep tests running in CI. This will be removed once the managed assemblies
-// are synced up with the native assemblies.
-extern "C" int64_t GetMaximumPath()
-{
-    return SystemNative_GetMaximumPath();
-}
-
 extern "C" int64_t SystemNative_GetMaximumPath()
 {
     int64_t result = pathconf("/", _PC_PATH_MAX);
@@ -573,14 +454,6 @@ extern "C" int32_t SystemNative_SetPriority(PriorityWhich which, int32_t who, in
 #else
     return setpriority(which, static_cast<id_t>(who), nice);
 #endif
-}
-
-// TODO: temporarily keeping the un-prefixed signature of this method
-// to keep tests running in CI. This will be removed once the managed assemblies
-// are synced up with the native assemblies.
-extern "C" char* GetCwd(char* buffer, int32_t bufferSize)
-{
-    return SystemNative_GetCwd(buffer, bufferSize);
 }
 
 extern "C" char* SystemNative_GetCwd(char* buffer, int32_t bufferSize)
