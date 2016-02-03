@@ -8,12 +8,22 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace System.Collections.Generic
 {
+    /// <summary>
+    /// A circular doubly linked list.
+    /// </summary>
+     /// <typeparam name="T">Type of data it holds.</typeparam>
     [DebuggerTypeProxy(typeof(ICollectionDebugView<>))]
     [DebuggerDisplay("Count = {Count}")]
     public class LinkedList<T> : ICollection<T>, System.Collections.ICollection, IReadOnlyCollection<T>
     {
-        // This LinkedList is a doubly-Linked circular list.
+        /// <summary>
+        /// The first node in the doubly linked list.
+        /// </summary>
         internal LinkedListNode<T> head;
+
+        /// <summary>
+        /// The number of nodes in the doubly linked list.
+        /// </summary>
         internal int count;
         internal int version;
         private Object _syncRoot;
@@ -22,6 +32,13 @@ namespace System.Collections.Generic
         {
         }
 
+        /// <summary>
+        /// Creates a doubly linked list with the items
+        /// in the IEnumerable collection as nodes.
+        /// </summary>
+        /// <param name="collection">
+        /// The IEnumerable collection to create the doubly linked list with.
+        /// </param>
         public LinkedList(IEnumerable<T> collection)
         {
             if (collection == null)
@@ -35,26 +52,43 @@ namespace System.Collections.Generic
             }
         }
 
+        /// <summary>
+        /// Number of nodes currently in the doubly linked list
+        /// </summary>
         public int Count
         {
             get { return count; }
         }
 
+        /// <summary>
+        /// Returns the head of the doubly linked list.
+        /// </summary>
         public LinkedListNode<T> First
         {
             get { return head; }
         }
 
+        /// <summary>
+        /// Returns the tail of the doubly linked list;
+        /// the previous node from the head.
+        /// </summary>
         public LinkedListNode<T> Last
         {
             get { return head == null ? null : head.prev; }
         }
 
+        /// <summary>
+        /// Returns false since the doubly linked list is not read only.
+        /// </summary>
         bool ICollection<T>.IsReadOnly
         {
             get { return false; }
         }
 
+        /// <summary>
+        /// Adds the specified value to the end of the doubly linked list.
+        /// </summary>
+        /// <param name="value">The value to add.</param>
         void ICollection<T>.Add(T value)
         {
             AddLast(value);
@@ -436,7 +470,7 @@ namespace System.Collections.Generic
             }
             else
             {
-                // No need to use reflection to verify that the types are compatible because it isn't 100% correct and we can rely 
+                // No need to use reflection to verify that the types are compatible because it isn't 100% correct and we can rely
                 // on the runtime validation during the cast that happens below (i.e. we will get an ArrayTypeMismatchException).
                 object[] objects = array as object[];
                 if (objects == null)
@@ -544,7 +578,7 @@ namespace System.Collections.Generic
         }
     }
 
-    // Note following class is not serializable since we customized the serialization of LinkedList. 
+    // Note following class is not serializable since we customized the serialization of LinkedList.
     public sealed class LinkedListNode<T>
     {
         internal LinkedList<T> list;
@@ -592,4 +626,3 @@ namespace System.Collections.Generic
         }
     }
 }
-
