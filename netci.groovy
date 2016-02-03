@@ -355,6 +355,9 @@ branchList.each { branchName ->
                 steps {
                     batchFile("call \"C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat\" x86 && build.cmd /p:ConfigurationGroup=${configurationGroup} /p:OSGroup=${osGroup}")
                     batchFile("C:\\Packer\\Packer.exe .\\bin\\build.pack .\\bin")
+					if (configurationGroup == 'Release') {
+						batchFile("C:\\Packer\\Packer.exe .\\corefx.pack .\\")
+					}
                 }
             }
 
@@ -365,7 +368,12 @@ branchList.each { branchName ->
             // Add the unit test results
             Utilities.addXUnitDotNETResults(newJob, 'bin/tests/**/testResults.xml')
             // Add archival for the built data.
-            Utilities.addArchival(newJob, "bin/build.pack,bin/${osGroup}.AnyCPU.Debug/**,bin/ref/**,bin/packages/**,msbuild.log")
+			if (configurationGroup == 'Release') {
+				Utilities.addArchival(newJob, "bin/build.pack,corefx.pack,bin/${osGroup}.AnyCPU.Debug/**,bin/ref/**,bin/packages/**,msbuild.log")
+			}
+			else {
+				Utilities.addArchival(newJob, "bin/build.pack,bin/${osGroup}.AnyCPU.Debug/**,bin/ref/**,bin/packages/**,msbuild.log")
+			}
             // Set up triggers
             if (isPR) {
                 // Set PR trigger.
