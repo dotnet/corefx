@@ -18,6 +18,11 @@ namespace System.Data.Common
         {
         }
 
+        ~DbTransaction()
+        {
+            Dispose(disposing: false);
+        }
+
         public DbConnection Connection
         {
             get

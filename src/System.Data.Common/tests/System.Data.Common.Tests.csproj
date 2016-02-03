@@ -9,7 +9,9 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'" />
   <ItemGroup>
+    <Compile Include="DbDataReaderTests.cs" />
     <Compile Include="DbExceptionTests.cs" />
+    <Compile Include="DbTransactionTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\src\System.Data.Common.csproj">
