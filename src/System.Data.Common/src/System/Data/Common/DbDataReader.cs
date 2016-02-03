@@ -23,6 +23,11 @@ namespace System.Data.Common
         {
         }
 
+        ~DbDataReader()
+        {
+            Dispose(disposing: false);
+        }
+
         abstract public int Depth
         {
             get;

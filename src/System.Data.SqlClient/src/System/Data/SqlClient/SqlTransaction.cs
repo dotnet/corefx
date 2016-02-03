@@ -23,6 +23,7 @@ namespace System.Data.SqlClient
         internal SqlTransaction(SqlInternalConnection internalConnection, SqlConnection con,
                                 IsolationLevel iso, SqlInternalTransaction internalTransaction)
         {
+            GC.SuppressFinalize(this);
             _isolationLevel = iso;
             _connection = con;
 

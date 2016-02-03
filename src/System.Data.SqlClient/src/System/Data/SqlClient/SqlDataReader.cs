@@ -93,6 +93,7 @@ namespace System.Data.SqlClient
 
         internal SqlDataReader(SqlCommand command, CommandBehavior behavior)
         {
+            GC.SuppressFinalize(this);
             _command = command;
             _commandBehavior = behavior;
             if (_command != null)
