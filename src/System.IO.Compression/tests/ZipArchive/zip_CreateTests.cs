@@ -59,9 +59,22 @@ namespace System.IO.Compression.Tests
         [InlineData("empty", false)]
         [InlineData("emptydir", true)]
         [InlineData("emptydir", false)]
+        public static async Task CreateNormal(string folder, bool seekable)
+        {
+            using (var s = new MemoryStream())
+            {
+                var testStream = new WrappedStream(s, false, true, seekable, null);
+                await ZipTest.CreateFromDir(ZipTest.zfolder(folder), testStream, ZipArchiveMode.Create);
+
+                ZipTest.IsZipSameAsDir(s, ZipTest.zfolder(folder), ZipArchiveMode.Read, false, false);
+            }
+        }
+
+        [Theory]
         [InlineData("unicode", true)]
         [InlineData("unicode", false)]
-        public static async Task CreateNormal(string folder, bool seekable)
+        [OuterLoop] // #5639 - Jenkins Bug with non-ascii file names
+        public static async Task CreateUnicode(string folder, bool seekable)
         {
             using (var s = new MemoryStream())
             {

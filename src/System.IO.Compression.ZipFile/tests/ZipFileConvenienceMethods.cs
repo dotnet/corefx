@@ -14,6 +14,12 @@ namespace System.IO.Compression.Tests
         public async Task CreateFromDirectoryNormal()
         {
             await TestCreateDirectory(zfolder("normal"), true);
+        }
+        
+        [Fact]
+        [OuterLoop] // #5639 - Jenkins Bug with non-ascii file names
+        public async Task CreateFromDirectoryUnicode()
+        {
             await TestCreateDirectory(zfolder("unicode"), true);
         }
 
@@ -63,13 +69,19 @@ namespace System.IO.Compression.Tests
         public void ExtractToDirectoryNormal()
         {
             TestExtract(zfile("normal.zip"), zfolder("normal"));
-            TestExtract(zfile("unicode.zip"), zfolder("unicode"));
             TestExtract(zfile("empty.zip"), zfolder("empty"));
             TestExtract(zfile("explicitdir1.zip"), zfolder("explicitdir"));
             TestExtract(zfile("explicitdir2.zip"), zfolder("explicitdir"));
             TestExtract(zfile("appended.zip"), zfolder("small"));
             TestExtract(zfile("prepended.zip"), zfolder("small"));
             TestExtract(zfile("noexplicitdir.zip"), zfolder("explicitdir"));
+        }
+        
+        [Fact]
+        [OuterLoop] // #5639 - Jenkins Bug with non-ascii file names
+        public void ExtractToDirectoryUnicode()
+        {
+            TestExtract(zfile("unicode.zip"), zfolder("unicode"));
         }
 
         private void TestExtract(string zipFileName, string folderName)
@@ -144,7 +156,7 @@ namespace System.IO.Compression.Tests
         }
 
         [Fact]
-        public void ExtractToDirectoryTest()
+        public void ExtractToDirectoryTestNormal()
         {
             using (ZipArchive archive = ZipFile.Open(zfile("normal.zip"), ZipArchiveMode.Read))
             {
@@ -155,7 +167,12 @@ namespace System.IO.Compression.Tests
 
                 DirsEqual(tempFolder, zfolder("normal"));
             }
+        }
 
+        [Fact]
+        [OuterLoop] // #5639 - Jenkins Bug with non-ascii file names
+        public void ExtractToDirectoryTestUnicode()
+        {
             using (ZipArchive archive = ZipFile.OpenRead(zfile("unicode.zip")))
             {
                 string tempFolder = GetTmpDirPath(false);
