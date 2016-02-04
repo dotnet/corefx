@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Runtime.InteropServices;
@@ -11,13 +12,17 @@ internal static partial class Interop
     {
         internal static byte[] CreateNegotiateMessage(uint flags)
         {
-            SafeNtlmBufferHandle data;
-            int dataLen;
-            int status = NetSecurity.HeimNtlmEncodeType1(flags, out data, out dataLen);
-            NetSecurity.HeimdalNtlmException.AssertOrThrowIfError("HeimNtlmEncodeType1 failed", status);
-            using (data)
+            NetSecurityNative.NtlmBuffer buffer = default(NetSecurityNative.NtlmBuffer);
+            try
             {
-                return data.ToByteArray(dataLen,0);
+                int status = NetSecurityNative.HeimNtlmEncodeType1(flags, ref buffer);
+                NetSecurityNative.HeimdalNtlmException.ThrowIfError(status);
+                MockUtils.MockLogging.PrintInfo("kapilash", "created negotiate message");
+                return buffer.ToByteArray();
+            }
+            finally
+            {
+                buffer.Dispose();
             }
         }
 
@@ -26,16 +31,16 @@ internal static partial class Interop
         {
             using (SafeNtlmType3Handle challengeMessage = new SafeNtlmType3Handle(type2Data, offset, count))
             {
-                return  challengeMessage.GetResponse(flags, username, password, domain, out sessionKey);
+                return challengeMessage.GetResponse(flags, username, password, domain, out sessionKey);
             }
         }
 
         internal static void CreateKeys(byte[] sessionKey, out SafeNtlmKeyHandle serverSignKey, out SafeNtlmKeyHandle serverSealKey, out SafeNtlmKeyHandle clientSignKey, out SafeNtlmKeyHandle clientSealKey)
         {
-            serverSignKey = new SafeNtlmKeyHandle(sessionKey, false, false);
-            serverSealKey = new SafeNtlmKeyHandle(sessionKey, false, true);
-            clientSignKey = new SafeNtlmKeyHandle(sessionKey, true, false);
-            clientSealKey = new SafeNtlmKeyHandle(sessionKey, true, true);
+            serverSignKey = new SafeNtlmKeyHandle(sessionKey, isClient: false, isSealingKey: false);
+            serverSealKey = new SafeNtlmKeyHandle(sessionKey, isClient: false, isSealingKey: true);
+            clientSignKey = new SafeNtlmKeyHandle(sessionKey, isClient: true, isSealingKey: false);
+            clientSealKey = new SafeNtlmKeyHandle(sessionKey, isClient: true, isSealingKey: true);
         }
     }
 }

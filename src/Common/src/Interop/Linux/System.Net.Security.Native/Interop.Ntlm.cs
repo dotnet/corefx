@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Diagnostics;
@@ -10,57 +11,51 @@ using Microsoft.Win32.SafeHandles;
 
 internal static partial class Interop
 {
-    internal static partial class NetSecurity
+    internal static partial class NetSecurityNative
     {
         // The following constant is used in calculation of NTOWF2
-        // ref: https://msdn.microsoft.com/en-us/library/cc236700.aspx
+        // reference: https://msdn.microsoft.com/en-us/library/cc236700.aspx
         public const int MD5DigestLength = 16;
-        [DllImport(Interop.Libraries.NetSecurityNative, EntryPoint="NetSecurity_HeimNtlmFreeBuf")]
-        internal static extern int HeimNtlmFreeBuf(IntPtr bufferHandle);
 
-        [DllImport(Interop.Libraries.NetSecurityNative, EntryPoint="NetSecurity_ExtractNtlmBuffer")]
-        internal static extern int ExtractNtlmBuffer(SafeNtlmBufferHandle data, byte[] buffer, int capacity, int offset);
+        [DllImport(Interop.Libraries.NetSecurityNative, EntryPoint="NetSecurityNative_ReleaseNtlmBuffer")]
+        internal static extern int ReleaseNtlmBuffer(IntPtr bufferPtr, UInt64 length);
 
-        [DllImport(Interop.Libraries.NetSecurityNative, EntryPoint="NetSecurity_HeimNtlmEncodeType1")]
-        internal static extern int HeimNtlmEncodeType1(uint flags, out SafeNtlmBufferHandle data, out int length);
+        [DllImport(Interop.Libraries.NetSecurityNative, EntryPoint="NetSecurityNative_HeimNtlmEncodeType1")]
+        internal static extern int HeimNtlmEncodeType1(uint flags, ref NtlmBuffer buffer);
 
-        [DllImport(Interop.Libraries.NetSecurityNative, EntryPoint="NetSecurity_HeimNtlmDecodeType2")]
+        [DllImport(Interop.Libraries.NetSecurityNative, EntryPoint="NetSecurityNative_HeimNtlmDecodeType2")]
         internal static extern int HeimNtlmDecodeType2(byte[] data, int offset, int count, out SafeNtlmType2Handle type2Handle);
 
-        [DllImport(Interop.Libraries.NetSecurityNative, EntryPoint="NetSecurity_HeimNtlmFreeType2")]
+        [DllImport(Interop.Libraries.NetSecurityNative, EntryPoint="NetSecurityNative_HeimNtlmFreeType2")]
         internal static extern int HeimNtlmFreeType2(IntPtr type2Handle);
 
-        [DllImport(Interop.Libraries.NetSecurityNative, EntryPoint="NetSecurity_HeimNtlmNtKey", CharSet = CharSet.Ansi)]
-        internal static extern int HeimNtlmNtKey(string password, out SafeNtlmBufferHandle key, out int length);
+        [DllImport(Interop.Libraries.NetSecurityNative, EntryPoint="NetSecurityNative_HeimNtlmNtKey", CharSet = CharSet.Ansi)]
+        internal static extern int HeimNtlmNtKey(string password, ref NtlmBuffer key);
 
-        [DllImport(Interop.Libraries.NetSecurityNative, EntryPoint="NetSecurity_HeimNtlmCalculateResponse", CharSet = CharSet.Ansi)]
+        [DllImport(Interop.Libraries.NetSecurityNative, EntryPoint="NetSecurityNative_HeimNtlmCalculateResponse", CharSet = CharSet.Ansi)]
         internal static extern int HeimNtlmCalculateResponse(
             bool isLM,
-            SafeNtlmBufferHandle key,
+            ref NtlmBuffer key,
             SafeNtlmType2Handle type2Handle,
             string username,
             string target,
             byte[] baseSessionKey,
             int baseSessionKeyLen,
-            out SafeNtlmBufferHandle answer,
-            out int ansLength);
+            ref NtlmBuffer answer);
 
-        [DllImport(Interop.Libraries.NetSecurityNative, EntryPoint="NetSecurity_CreateType3Message", CharSet = CharSet.Ansi)]
+        [DllImport(Interop.Libraries.NetSecurityNative, EntryPoint="NetSecurityNative_CreateType3Message", CharSet = CharSet.Ansi)]
         internal static extern int CreateType3Message(
-            SafeNtlmBufferHandle key,
+            ref NtlmBuffer key,
             SafeNtlmType2Handle type2Handle,
             string username,
             string domain,
             uint flags,
-            SafeNtlmBufferHandle lmResponse,
-            SafeNtlmBufferHandle ntlmResponse,
+            ref NtlmBuffer lmResponse,
+            ref NtlmBuffer ntlmResponse,
             byte [] baseSessionKey,
             int baseSessionKeyLen,
-            out SafeNtlmBufferHandle sessionKey,
-            out int sessionKeyLen,
-            out SafeNtlmBufferHandle data,
-            out int dataLen
-            );
+            ref NtlmBuffer sessionKey,
+            ref NtlmBuffer data);
 
         internal partial class NtlmFlags
         {

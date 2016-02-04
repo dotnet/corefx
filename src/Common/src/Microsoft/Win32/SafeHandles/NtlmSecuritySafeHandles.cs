@@ -13,38 +13,6 @@ using System.Text;
 namespace Microsoft.Win32.SafeHandles
 {
     /// <summary>
-    /// Wrapper around a ntlm_buf*
-    /// </summary>
-    internal sealed class SafeNtlmBufferHandle : SafeHandle
-    {
-        public SafeNtlmBufferHandle()
-           : base(IntPtr.Zero, true)
-        {
-        }
-
-        public byte[] ToByteArray(int length, int offset)
-        {
-            Debug.Assert(length >= 0, "negative length of buffer");
-            Debug.Assert(offset < length, "invalid offset for  buffer");
-            byte[] target = new byte[length];
-            Interop.NetSecurity.ExtractNtlmBuffer(this, target, capacity: length, offset: offset);
-            return target;
-        }
-
-        public override bool IsInvalid
-        {
-            get { return handle == IntPtr.Zero; }
-        }
-
-        protected override bool ReleaseHandle()
-        {
-            Interop.NetSecurity.HeimNtlmFreeBuf(handle);
-            SetHandle(IntPtr.Zero);
-            return true;
-        }
-    }
-
-    /// <summary>
     /// Wrapper around a session key used for signing
     /// </summary>
     internal sealed class SafeNtlmKeyHandle : SafeHandle
@@ -55,22 +23,21 @@ namespace Microsoft.Win32.SafeHandles
         private SafeEvpCipherCtxHandle _cipherContext;
 
         // From MS_NLMP SIGNKEY at https://msdn.microsoft.com/en-us/library/cc236711.aspx
-        private const string s_keyMagic = "session key to {0}-to-{1} {2} key magic constant\0";
-        private const string s_client = "client";
-        private const string s_server = "server";
-        private const string s_signing = "signing";
-        private const string s_sealing = "sealing";
+        private const string ClientToServerSigningMagicKey = "session key to client-to-server signing key magic constant\0";
+        private const string ServerToClientSigningMagicKey = "session key to server-to-client signing key magic constant\0";
+        private const string ServerToClientSealingMagicKey = "session key to server-to-client sealing key magic constant\0";
+        private const string ClientToServerSealingMagicKey = "session key to client-to-server sealing key magic constant\0";
 
         public SafeNtlmKeyHandle(byte[] key, bool isClient, bool isSealingKey)
             : base(IntPtr.Zero, true)
         {
-            string keyMagic = string.Format(s_keyMagic, isClient ? s_client : s_server,
-                    isClient ? s_server : s_client, isSealingKey ? s_sealing : s_signing);
+            string magicKey = isClient ? (isSealingKey ? ClientToServerSealingMagicKey : ClientToServerSigningMagicKey) :
+                              (isSealingKey ? ServerToClientSealingMagicKey : ServerToClientSigningMagicKey);
 
             using (IncrementalHash incremental = IncrementalHash.CreateHash(HashAlgorithmName.MD5))
             {
                  incremental.AppendData(key);
-                 incremental.AppendData(Encoding.UTF8.GetBytes(keyMagic));
+                 incremental.AppendData(Encoding.UTF8.GetBytes(magicKey));
                  _digest = incremental.GetHashAndReset();
             }
 
@@ -83,7 +50,10 @@ namespace Microsoft.Win32.SafeHandles
 
         public override bool IsInvalid
         {
-            get { return true; }
+            get
+            {
+                return (null == _cipherContext) ? false : _cipherContext.IsInvalid;
+            }
         }
 
         protected override void Dispose(bool disposing)
@@ -105,7 +75,7 @@ namespace Microsoft.Win32.SafeHandles
         {
             Debug.Assert(!_isSealingKey, "Cannot sign with sealing key");
             Debug.Assert(offset >= 0 && offset < buffer.Length, "Cannot sign with invalid offset " + offset);
-            Debug.Assert((count + offset) <= buffer.Length, "Cannot sign with invalid count " + count);
+            Debug.Assert(count <= buffer.Length - offset, "Cannot sign with invalid count " + count);
 
             // reference for signing a message: https://msdn.microsoft.com/en-us/library/cc236702.aspx
             const uint Version = 0x00000001;
@@ -113,7 +83,7 @@ namespace Microsoft.Win32.SafeHandles
             const int SequenceNumberOffset = 12;
             const int HMacDigestLength = 8;
 
-            byte[] output = new byte[Interop.NetSecurity.MD5DigestLength];
+            byte[] output = new byte[Interop.NetSecurityNative.MD5DigestLength];
             Array.Clear(output, 0, output.Length);
             MarshalUint(output, 0, Version); // version
             MarshalUint(output, SequenceNumberOffset, _sequenceNumber);
@@ -136,6 +106,7 @@ namespace Microsoft.Win32.SafeHandles
                 byte[] cipher = sealingKey.SealOrUnseal(true, hash, 0, HMacDigestLength);
                 Array.Copy(cipher, 0, output, ChecksumOffset, cipher.Length);
             }
+            MockUtils.MockLogging.PrintInfo(null, "returning from Sign");
 
             return output;
         }
@@ -144,8 +115,9 @@ namespace Microsoft.Win32.SafeHandles
         {
             //Message Confidentiality. Reference: https://msdn.microsoft.com/en-us/library/cc236707.aspx
             Debug.Assert(_isSealingKey, "Cannot seal or unseal with signing key");
-            Debug.Assert(offset >= 0 && offset < buffer.Length, "Cannot sign with invalid offset " + offset);
-            Debug.Assert((count + offset) <= buffer.Length, "Cannot sign with invalid count ");
+            Debug.Assert(offset >= 0 && offset <= buffer.Length, "Cannot sign with invalid offset " + offset);
+            Debug.Assert(count >= 0, "cannot sign with invalid count");
+            Debug.Assert(count <= (buffer.Length - offset), "Cannot sign with invalid count ");
 
             unsafe
             {
@@ -156,6 +128,7 @@ namespace Microsoft.Win32.SafeHandles
                     byte[] output = new byte[count];
 
                     Interop.Crypto.EvpCipher(_cipherContext, output, (bytePtr + offset), count);
+                    MockUtils.MockLogging.PrintInfo(null, "returning from seal");
                     return  output;
                 }
             }
@@ -183,7 +156,7 @@ namespace Microsoft.Win32.SafeHandles
 
         protected override bool ReleaseHandle()
         {
-            Interop.NetSecurity.HeimNtlmFreeType2(handle);
+            Interop.NetSecurityNative.HeimNtlmFreeType2(handle);
             SetHandle(IntPtr.Zero);
             return true;
         }
@@ -201,8 +174,13 @@ namespace Microsoft.Win32.SafeHandles
         private SafeNtlmType2Handle _type2Handle;
         public SafeNtlmType3Handle(byte[] type2Data, int offset, int count) : base(IntPtr.Zero, true)
         {
-            int status = Interop.NetSecurity.HeimNtlmDecodeType2(type2Data, offset, count, out _type2Handle);
-            Interop.NetSecurity.HeimdalNtlmException.AssertOrThrowIfError("HeimNtlmDecodeType2 failed", status);
+            Debug.Assert(type2Data != null, "type2Data cannot be null");
+            Debug.Assert(offset >= 0 && offset <= type2Data.Length, "offset must be a valid value");
+            Debug.Assert(count >= 0 , " count must be a valid value");
+            Debug.Assert(type2Data.Length >= offset + count, " count and offset must match the given buffer");
+
+            int status = Interop.NetSecurityNative.HeimNtlmDecodeType2(type2Data, offset, count, out _type2Handle);
+            Interop.NetSecurityNative.HeimdalNtlmException.ThrowIfError(status);
         }
 
         public override bool IsInvalid
@@ -213,43 +191,52 @@ namespace Microsoft.Win32.SafeHandles
         public byte[] GetResponse(uint flags, string username, string password, string domain,
                                   out byte[] sessionKey)
         {
+            Debug.Assert(username != null, "username cannot be null");
+            Debug.Assert(password != null, "password cannot be null");
+            Debug.Assert(domain != null,  "domain cannot be null");
+            MockUtils.MockLogging.PrintInfo("kapilash", "GetResponse.1");
+
             // reference for NTLM response: https://msdn.microsoft.com/en-us/library/cc236700.aspx
+
             sessionKey = null;
-            SafeNtlmBufferHandle key;
-            int keyLen;
-            int status = Interop.NetSecurity.HeimNtlmNtKey(password, out key, out keyLen);
-            Interop.NetSecurity.HeimdalNtlmException.AssertOrThrowIfError("HeimNtlmKey failed", status);
+            Interop.NetSecurityNative.NtlmBuffer key = default(Interop.NetSecurityNative.NtlmBuffer);
+            Interop.NetSecurityNative.NtlmBuffer lmResponse = default(Interop.NetSecurityNative.NtlmBuffer);
+            Interop.NetSecurityNative.NtlmBuffer ntResponse = default(Interop.NetSecurityNative.NtlmBuffer);
+            Interop.NetSecurityNative.NtlmBuffer sessionKeyBuffer = default(Interop.NetSecurityNative.NtlmBuffer);
+            Interop.NetSecurityNative.NtlmBuffer outputData = default(Interop.NetSecurityNative.NtlmBuffer);
 
-            using (key)
+            try
             {
-                byte[] baseSessionKey = new byte[Interop.NetSecurity.MD5DigestLength];
-                SafeNtlmBufferHandle lmResponse;
-                int lmResponseLength;
+                int status = Interop.NetSecurityNative.HeimNtlmNtKey(password, ref key);
+                Interop.NetSecurityNative.HeimdalNtlmException.ThrowIfError(status);
+                MockUtils.MockLogging.PrintInfo("kapilash", "GetResponse.2");
 
-                status = Interop.NetSecurity.HeimNtlmCalculateResponse(true, key, _type2Handle, username, domain,
-                         baseSessionKey, baseSessionKey.Length, out lmResponse, out lmResponseLength);
-                Interop.NetSecurity.HeimdalNtlmException.AssertOrThrowIfError("HeimNtlmCalculateResponse lm1 failed",status);
+                byte[] baseSessionKey = new byte[Interop.NetSecurityNative.MD5DigestLength];
+                status = Interop.NetSecurityNative.HeimNtlmCalculateResponse(true, ref key, _type2Handle, username, domain,
+                         baseSessionKey, baseSessionKey.Length, ref lmResponse);
+                Interop.NetSecurityNative.HeimdalNtlmException.ThrowIfError(status);
+                MockUtils.MockLogging.PrintInfo("kapilash", "GetResponse.3");
 
-                SafeNtlmBufferHandle ntResponse;
-                int ntResponseLength;
-                status = Interop.NetSecurity.HeimNtlmCalculateResponse(false, key, _type2Handle, username, domain,
-                                                                       baseSessionKey, baseSessionKey.Length, out ntResponse, out ntResponseLength);
-                Interop.NetSecurity.HeimdalNtlmException.AssertOrThrowIfError("HeimNtlmCalculateResponse lm2 failed", status);
+                status = Interop.NetSecurityNative.HeimNtlmCalculateResponse(false, ref key, _type2Handle, username, domain,
+                                                                       baseSessionKey, baseSessionKey.Length, ref ntResponse);
+                Interop.NetSecurityNative.HeimdalNtlmException.ThrowIfError(status);
+                MockUtils.MockLogging.PrintInfo("kapilash", "GetResponse.4");
 
-                SafeNtlmBufferHandle sessionKeyHandle = null;
-                int sessionKeyLen;
-                SafeNtlmBufferHandle outputData = null;
-                int outputDataLen = 0;
-                status = Interop.NetSecurity.CreateType3Message(key, _type2Handle, username, domain, flags, lmResponse, ntResponse, baseSessionKey,
-                                                                baseSessionKey.Length, out sessionKeyHandle, out sessionKeyLen, out outputData,
-                                                                out outputDataLen);
-                Interop.NetSecurity.HeimdalNtlmException.AssertOrThrowIfError("CreateType3Message failed", status);
-                using (sessionKeyHandle)
-                using (outputData)
-                {
-                    sessionKey = sessionKeyHandle.ToByteArray(sessionKeyLen,0);
-                    return outputData.ToByteArray(outputDataLen, 0);
-                }
+                status = Interop.NetSecurityNative.CreateType3Message(ref key, _type2Handle, username, domain, flags,
+                    ref lmResponse, ref ntResponse, baseSessionKey,baseSessionKey.Length, ref sessionKeyBuffer, ref outputData);
+                Interop.NetSecurityNative.HeimdalNtlmException.ThrowIfError(status);
+                MockUtils.MockLogging.PrintInfo("kapilash", "GetResponse.5");
+
+                sessionKey = sessionKeyBuffer.ToByteArray();
+                return outputData.ToByteArray();
+            }
+            finally
+            {
+                key.Dispose();
+                lmResponse.Dispose();
+                ntResponse.Dispose();
+                sessionKeyBuffer.Dispose();
+                outputData.Dispose();
             }
         }
 
