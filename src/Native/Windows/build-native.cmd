@@ -11,8 +11,7 @@ set __BuildArch=AnyCPU
 set __VCBuildArch=x86_amd64
 set CMAKE_BUILD_TYPE=Release
 set __EnvironmentSet=false
-set __VSVersion=vs2013
-set __PlatformToolset="v120"
+set __VSVersion=vs2015
 
 REM Force PDB generation for all builds
 set "__LinkArgs=/DEBUG /DEBUGTYPE:cv,fixup /PDBCOMPRESS"
@@ -36,13 +35,14 @@ if /i [%1] == [/p:Platform]         (
     echo Error: Invalid platform args "%1 and %2"
     exit /b 1
 )
-if /i [%1] == [-intermediateDir]    ( set __IntermediatesDir=%2&&shift&&shift&goto Arg_Loop)
-if /i [%1] == [-binDir]             ( set __CMakeBinDir=%2&&shift&&shift&goto Arg_Loop)
-if /i [%1] == [-EnvironmentSet]     ( set __EnvironmentSet=true&&shift&goto Arg_Loop)
-if /i [%1] == [-VCTargetsPath]      ( set VCTargetsPath=%2&&shift&&shift&goto Arg_Loop)
-if /i [%1] == [-LinkArgument]       ( set "__LinkArgs=%__LinkArgs% %2"&&shift&&shift&goto Arg_Loop)
-if /i [%1] == [-Compiler]           ( set __CCompiler=%2&&set __CXXCompiler=%2&&shift&&shift&goto Arg_Loop)
-if /i [%1] == [-LinkLibrary]        (
+if /i [%1] == [/p:NativeIntermediateDir]    ( set __IntermediatesDir=%2&&shift&&shift&goto Arg_Loop)
+if /i [%1] == [/p:NativeBinDir]             ( set __CMakeBinDir=%2&&shift&&shift&goto Arg_Loop)
+if /i [%1] == [/p:NativeEnvironmentSet]     ( set __EnvironmentSet=true&&shift&goto Arg_Loop)
+if /i [%1] == [/p:NativeVCTargetsPath]      ( set VCTargetsPath=%2&&shift&&shift&goto Arg_Loop)
+if /i [%1] == [/p:NativeLinkArgument]       ( set "__LinkArgs=%__LinkArgs% %2"&&shift&&shift&goto Arg_Loop)
+if /i [%1] == [/p:NativeCompiler]           ( set __CCompiler=%2&&set __CXXCompiler=%2&&shift&&shift&goto Arg_Loop)
+if /i [%1] == [/p:PlatformToolset]          ( set __PlatformToolset=%2&&shift&&shift&goto Arg_Loop)
+if /i [%1] == [/p:NativeLinkLibrary]        (
     if defined __LinkLibraries      (
         set "__LinkLibraries=%__LinkLibraries% %2"
     )
