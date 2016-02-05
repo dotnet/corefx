@@ -317,6 +317,24 @@ check_symbol_exists(
     "sys/syslimits.h"
     HAVE_OPEN_MAX)
 
+check_include_files(
+    GSS/GSS.h
+    HAVE_GSSFW_HEADERS)
+
+if (HAVE_GSSFW_HEADERS)
+    check_symbol_exists(
+        GSS_SPNEGO_MECHANISM
+        "GSS/GSS.h"
+        HAVE_GSS_SPNEGO_MECHANISM)
+else ()
+    check_symbol_exists(
+        GSS_SPNEGO_MECHANISM
+        "gssapi/gssapi.h"
+        HAVE_GSS_SPNEGO_MECHANISM)
+endif ()
+
+
+
 set (CMAKE_REQUIRED_LIBRARIES)
 
 configure_file(
