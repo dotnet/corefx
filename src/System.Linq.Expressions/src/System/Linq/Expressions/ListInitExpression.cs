@@ -126,9 +126,7 @@ namespace System.Linq.Expressions
         /// <returns>A <see cref="ListInitExpression"/> that has the <see cref="P:ListInitExpression.NodeType"/> property equal to ListInit and the <see cref="P:ListInitExpression.NewExpression"/> property set to the specified value.</returns>
         public static ListInitExpression ListInit(NewExpression newExpression, params Expression[] initializers)
         {
-            ContractUtils.RequiresNotNull(newExpression, "newExpression");
-            ContractUtils.RequiresNotNull(initializers, "initializers");
-            return ListInit(newExpression, initializers as IEnumerable<Expression>);
+            return ListInit(newExpression, (IEnumerable<Expression>)initializers);
         }
 
         /// <summary>
@@ -187,13 +185,7 @@ namespace System.Linq.Expressions
         /// <returns>A <see cref="ListInitExpression"/> that has the <see cref="P:ListInitExpression.NodeType"/> property equal to ListInit and the <see cref="P:ListInitExpression.NewExpression"/> property set to the specified value.</returns>
         public static ListInitExpression ListInit(NewExpression newExpression, MethodInfo addMethod, params Expression[] initializers)
         {
-            if (addMethod == null)
-            {
-                return ListInit(newExpression, initializers as IEnumerable<Expression>);
-            }
-            ContractUtils.RequiresNotNull(newExpression, "newExpression");
-            ContractUtils.RequiresNotNull(initializers, "initializers");
-            return ListInit(newExpression, addMethod, initializers as IEnumerable<Expression>);
+            return ListInit(newExpression, addMethod, (IEnumerable<Expression>)initializers);
         }
 
         /// <summary>
@@ -217,12 +209,21 @@ namespace System.Linq.Expressions
             {
                 throw Error.ListInitializerWithZeroMembers();
             }
+
+            Type newType = newExpression.Type;
+            if (!typeof(IEnumerable).IsAssignableFrom(newType))
+            {
+                throw Error.TypeNotIEnumerable(newType);
+            }
+
+            ValidateCallInstanceType(newType, addMethod);
+
             ElementInit[] initList = new ElementInit[initializerlist.Count];
             for (int i = 0; i < initializerlist.Count; i++)
             {
                 initList[i] = ElementInit(addMethod, initializerlist[i]);
             }
-            return ListInit(newExpression, new TrueReadOnlyCollection<ElementInit>(initList));
+            return new ListInitExpression(newExpression, new TrueReadOnlyCollection<ElementInit>(initList));
         }
 
         /// <summary>
