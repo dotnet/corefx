@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
@@ -142,13 +143,39 @@ namespace System.Linq.Expressions
             ContractUtils.RequiresNotNull(initializers, "initializers");
 
             var initializerlist = initializers.ToReadOnly();
-            if (initializerlist.Count == 0)
+            int count = initializerlist.Count;
+            if (count == 0)
             {
                 throw Error.ListInitializerWithZeroMembers();
             }
 
-            MethodInfo addMethod = FindMethod(newExpression.Type, "Add", null, new Expression[] { initializerlist[0] }, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-            return ListInit(newExpression, addMethod, initializers);
+            Type newType = newExpression.Type;
+            if (!typeof(IEnumerable).IsAssignableFrom(newType))
+            {
+                throw Error.TypeNotIEnumerable(newType);
+            }
+
+            ElementInit[] inits = new ElementInit[count];
+            Expression initializer = initializerlist[0];
+            MethodInfo addMethod = FindMethod(newType, "Add", null, new Expression[] { initializer }, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+            inits[0] = ElementInit(addMethod, initializer);
+            Type argType = initializer.Type;
+
+            // With heterogeneous initializer types it would be more efficient to memoize the adders in a Dictionary<Type, MethodInfo> but
+            // memoizing just the last used would be lighter on homogeneous initializer types, which would be much more common.
+
+            for (int i = 1; i != count; ++i)
+            {
+                Expression nextInit = initializerlist[i];
+                if (argType != nextInit.Type)
+                {
+                    addMethod = FindMethod(newType, "Add", null, new Expression[] { nextInit }, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+                    argType = nextInit.Type;
+                }
+                inits[i] = ElementInit(addMethod, nextInit);
+            }
+
+            return new ListInitExpression(newExpression, new TrueReadOnlyCollection<ElementInit>(inits));
         }
 
         /// <summary>
