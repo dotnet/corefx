@@ -123,11 +123,10 @@ namespace System.Linq.Expressions
             {
                 throw Error.TypeNotIEnumerable(listType);
             }
+            ContractUtils.RequiresNotNullItems(initializers, "initializers");
             for (int i = 0, n = initializers.Count; i < n; i++)
             {
-                ElementInit element = initializers[i];
-                ContractUtils.RequiresNotNull(element, "initializers");
-                ValidateCallInstanceType(listType, element.AddMethod);
+                ValidateCallInstanceType(listType, initializers[i].AddMethod);
             }
         }
     }

@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
@@ -125,9 +126,7 @@ namespace System.Linq.Expressions
         /// <returns>A <see cref="ListInitExpression"/> that has the <see cref="P:ListInitExpression.NodeType"/> property equal to ListInit and the <see cref="P:ListInitExpression.NewExpression"/> property set to the specified value.</returns>
         public static ListInitExpression ListInit(NewExpression newExpression, params Expression[] initializers)
         {
-            ContractUtils.RequiresNotNull(newExpression, "newExpression");
-            ContractUtils.RequiresNotNull(initializers, "initializers");
-            return ListInit(newExpression, initializers as IEnumerable<Expression>);
+            return ListInit(newExpression, (IEnumerable<Expression>)initializers);
         }
 
         /// <summary>
@@ -142,13 +141,40 @@ namespace System.Linq.Expressions
             ContractUtils.RequiresNotNull(initializers, "initializers");
 
             var initializerlist = initializers.ToReadOnly();
-            if (initializerlist.Count == 0)
+            int count = initializerlist.Count;
+            if (count == 0)
             {
                 throw Error.ListInitializerWithZeroMembers();
             }
+            ContractUtils.RequiresNotNullItems(initializerlist, "initializers");
 
-            MethodInfo addMethod = FindMethod(newExpression.Type, "Add", null, new Expression[] { initializerlist[0] }, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-            return ListInit(newExpression, addMethod, initializers);
+            Type newType = newExpression.Type;
+            if (!typeof(IEnumerable).IsAssignableFrom(newType))
+            {
+                throw Error.TypeNotIEnumerable(newType);
+            }
+
+            ElementInit[] inits = new ElementInit[count];
+            Expression initializer = initializerlist[0];
+            MethodInfo addMethod = FindMethod(newType, "Add", null, new Expression[] { initializer }, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+            inits[0] = ElementInit(addMethod, initializer);
+            Type argType = initializer.Type;
+
+            // With heterogeneous initializer types it would be more efficient to memoize the adders in a Dictionary<Type, MethodInfo> but
+            // memoizing just the last used would be lighter on homogeneous initializer types, which would be much more common.
+
+            for (int i = 1; i != count; ++i)
+            {
+                Expression nextInit = initializerlist[i];
+                if (argType != nextInit.Type)
+                {
+                    addMethod = FindMethod(newType, "Add", null, new Expression[] { nextInit }, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+                    argType = nextInit.Type;
+                }
+                inits[i] = ElementInit(addMethod, nextInit);
+            }
+
+            return new ListInitExpression(newExpression, new TrueReadOnlyCollection<ElementInit>(inits));
         }
 
         /// <summary>
@@ -160,13 +186,7 @@ namespace System.Linq.Expressions
         /// <returns>A <see cref="ListInitExpression"/> that has the <see cref="P:ListInitExpression.NodeType"/> property equal to ListInit and the <see cref="P:ListInitExpression.NewExpression"/> property set to the specified value.</returns>
         public static ListInitExpression ListInit(NewExpression newExpression, MethodInfo addMethod, params Expression[] initializers)
         {
-            if (addMethod == null)
-            {
-                return ListInit(newExpression, initializers as IEnumerable<Expression>);
-            }
-            ContractUtils.RequiresNotNull(newExpression, "newExpression");
-            ContractUtils.RequiresNotNull(initializers, "initializers");
-            return ListInit(newExpression, addMethod, initializers as IEnumerable<Expression>);
+            return ListInit(newExpression, addMethod, (IEnumerable<Expression>)initializers);
         }
 
         /// <summary>
@@ -190,12 +210,22 @@ namespace System.Linq.Expressions
             {
                 throw Error.ListInitializerWithZeroMembers();
             }
+            ContractUtils.RequiresNotNullItems(initializerlist, "initializers");
+
+            Type newType = newExpression.Type;
+            if (!typeof(IEnumerable).IsAssignableFrom(newType))
+            {
+                throw Error.TypeNotIEnumerable(newType);
+            }
+
+            ValidateCallInstanceType(newType, addMethod);
+
             ElementInit[] initList = new ElementInit[initializerlist.Count];
             for (int i = 0; i < initializerlist.Count; i++)
             {
                 initList[i] = ElementInit(addMethod, initializerlist[i]);
             }
-            return ListInit(newExpression, new TrueReadOnlyCollection<ElementInit>(initList));
+            return new ListInitExpression(newExpression, new TrueReadOnlyCollection<ElementInit>(initList));
         }
 
         /// <summary>

@@ -106,7 +106,6 @@ namespace System.Linq.Expressions
 
             var argumentsRO = arguments.ToReadOnly();
 
-            RequiresCanRead(argumentsRO, "arguments");
             ValidateElementInitAddMethodInfo(addMethod);
             ValidateArgumentTypes(addMethod, ExpressionType.Call, ref argumentsRO);
             return new ElementInit(addMethod, argumentsRO);
