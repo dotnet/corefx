@@ -80,6 +80,23 @@ namespace System.Linq.Expressions.Tests
         }
 
         [Fact]
+        public void NullInitializerInList()
+        {
+            var validNew = Expression.New(typeof(List<int>));
+            Assert.Throws<ArgumentNullException>("initializers[0]", () => Expression.ListInit(validNew, default(Expression)));
+            Assert.Throws<ArgumentNullException>("initializers[0]", () => Expression.ListInit(validNew, Enumerable.Repeat(default(Expression), 1)));
+            Assert.Throws<ArgumentNullException>("initializers[0]", () => Expression.ListInit(validNew, default(ElementInit)));
+            Assert.Throws<ArgumentNullException>("initializers[0]", () => Expression.ListInit(validNew, Enumerable.Repeat(default(ElementInit), 1)));
+
+            var validMethod = typeof(List<int>).GetMethod("Add");
+            Assert.Throws<ArgumentNullException>("initializers[0]", () => Expression.ListInit(validNew, validMethod, default(Expression)));
+            Assert.Throws<ArgumentNullException>("initializers[0]", () => Expression.ListInit(validNew, validMethod, Enumerable.Repeat(default(Expression), 1)));
+
+            Assert.Throws<ArgumentNullException>("initializers[0]", () => Expression.ListInit(validNew, default(MethodInfo), default(Expression)));
+            Assert.Throws<ArgumentNullException>("initializers[0]", () => Expression.ListInit(validNew, null, Enumerable.Repeat(default(Expression), 1)));
+        }
+
+        [Fact]
         public void ZeroInitializers()
         {
             var validNew = Expression.New(typeof(List<int>));

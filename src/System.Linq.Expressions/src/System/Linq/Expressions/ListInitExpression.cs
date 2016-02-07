@@ -146,6 +146,7 @@ namespace System.Linq.Expressions
             {
                 throw Error.ListInitializerWithZeroMembers();
             }
+            ContractUtils.RequiresNotNullItems(initializerlist, "initializers");
 
             Type newType = newExpression.Type;
             if (!typeof(IEnumerable).IsAssignableFrom(newType))
@@ -209,6 +210,7 @@ namespace System.Linq.Expressions
             {
                 throw Error.ListInitializerWithZeroMembers();
             }
+            ContractUtils.RequiresNotNullItems(initializerlist, "initializers");
 
             Type newType = newExpression.Type;
             if (!typeof(IEnumerable).IsAssignableFrom(newType))
