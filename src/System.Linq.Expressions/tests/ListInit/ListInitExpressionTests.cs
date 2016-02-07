@@ -112,6 +112,8 @@ namespace System.Linq.Expressions.Tests
             // () => new NonEnumerableAddable { 1, 2, 4, 16, 42 } isn't allowed because list initialization
             // is allowed only with enumerable types.
             Assert.Throws<ArgumentException>(null, () => Expression.ListInit(Expression.New(typeof(NonEnumerableAddable)), Expression.Constant(1)));
+            Assert.Throws<ArgumentException>(null, () => Expression.ListInit(Expression.New(typeof(NonEnumerableAddable)), typeof(NonEnumerableAddable).GetMethod("Add"), Expression.Constant(1)));
+            Assert.Throws<ArgumentException>(null, () => Expression.ListInit(Expression.New(typeof(NonEnumerableAddable)), Expression.ElementInit(typeof(NonEnumerableAddable).GetMethod("Add"), Expression.Constant(1))));
         }
 
         [Fact]
@@ -194,6 +196,38 @@ namespace System.Linq.Expressions.Tests
                 { "a", 1 }, {"b", 2 }, {"c", 3 }
             };
             Assert.Equal(expected.OrderBy(kvp => kvp.Key), func().OrderBy(kvp => kvp.Key));
+        }
+
+        [Fact]
+        public void ExplicitAddMethodCompiler()
+        {
+            Expression<Func<List<int>>> exp = Expression.Lambda<Func<List<int>>>(
+                Expression.ListInit(
+                    Expression.New(typeof(List<int>)),
+                    typeof(List<int>).GetMethod("Add"),
+                    Expression.Constant(1),
+                    Expression.Constant(4),
+                    Expression.Constant(9)
+                    )
+                );
+            Func<List<int>> func = exp.Compile(false);
+            Assert.Equal(new[] { 1, 4, 9 }, func());
+        }
+
+        [Fact]
+        public void ExplicitAddMethodInterpreter()
+        {
+            Expression<Func<List<int>>> exp = Expression.Lambda<Func<List<int>>>(
+                Expression.ListInit(
+                    Expression.New(typeof(List<int>)),
+                    typeof(List<int>).GetMethod("Add"),
+                    Expression.Constant(1),
+                    Expression.Constant(4),
+                    Expression.Constant(9)
+                    )
+                );
+            Func<List<int>> func = exp.Compile(true);
+            Assert.Equal(new[] { 1, 4, 9 }, func());
         }
 
         public static IEnumerable<object[]> MixedAddableExpressions()
