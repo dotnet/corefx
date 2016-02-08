@@ -2,25 +2,26 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.IO;
 using System.Runtime.InteropServices;
 
 using Xunit;
 
-public partial class DirectoryNotFoundException_Interop_40100_Tests
+namespace System.IO.Tests
 {
-    [Fact]
-    public static void DirectoryNotFoundException_from_HR()
+    public static class DirectoryNotFoundExceptionInteropTests
     {
-        int[] hrs = { HResults.COR_E_DIRECTORYNOTFOUND, HResults.STG_E_PATHNOTFOUND, HResults.CTL_E_PATHNOTFOUND };
-        foreach (var hr in hrs)
+        [Fact]
+        public static void TestFrom_HR()
         {
-            var e = Marshal.GetExceptionForHR(hr);
-            var dnfe = e as DirectoryNotFoundException;
-            Assert.NotNull(dnfe);
+            var hrs = new int[] { HResults.COR_E_DIRECTORYNOTFOUND, HResults.STG_E_PATHNOTFOUND, HResults.CTL_E_PATHNOTFOUND };
+            foreach (var hr in hrs)
+            {
+                DirectoryNotFoundException exception = Marshal.GetExceptionForHR(hr) as DirectoryNotFoundException;
+                Assert.NotNull(exception);
 
-            // Don't validate the message.  Currently .NET Native does not produce HR-specific messages
-            Utility.ValidateExceptionProperties(dnfe, hResult: hr, validateMessage: false);
+                // Don't validate the message.  Currently .NET Native does not produce HR-specific messages
+                ExceptionUtility.ValidateExceptionProperties(exception, hResult: hr, validateMessage: false);
+            }
         }
     }
 }

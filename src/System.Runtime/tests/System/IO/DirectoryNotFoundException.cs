@@ -2,34 +2,34 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
-using System.IO;
-
 using Xunit;
 
-public partial class DirectoryNotFoundException_40100_Tests
+namespace System.IO.Tests
 {
-    [Fact]
-    public static void DirectoryNotFoundException_ctor()
+    public static class DirectoryNotFoundExceptionTests
     {
-        DirectoryNotFoundException dnfe = new DirectoryNotFoundException();
-        Utility.ValidateExceptionProperties(dnfe, hResult: HResults.COR_E_DIRECTORYNOTFOUND, validateMessage: false);
-    }
+        [Fact]
+        public static void TestCtor_Empty()
+        {
+            var excpetion = new DirectoryNotFoundException();
+            ExceptionUtility.ValidateExceptionProperties(excpetion, hResult: HResults.COR_E_DIRECTORYNOTFOUND, validateMessage: false);
+        }
 
-    [Fact]
-    public static void DirectoryNotFoundException_ctor_string()
-    {
-        string message = "That page was missing from the directory.";
-        DirectoryNotFoundException dnfe = new DirectoryNotFoundException(message);
-        Utility.ValidateExceptionProperties(dnfe, hResult: HResults.COR_E_DIRECTORYNOTFOUND, message: message);
-    }
+        [Fact]
+        public static void TestCtor_Message()
+        {
+            string message = "That page was missing from the directory.";
+            var exception = new DirectoryNotFoundException(message);
+            ExceptionUtility.ValidateExceptionProperties(exception, hResult: HResults.COR_E_DIRECTORYNOTFOUND, message: message);
+        }
 
-    [Fact]
-    public static void DirectoryNotFoundException_ctor_string_exception()
-    {
-        string message = "That page was missing from the directory.";
-        Exception innerException = new Exception("Inner exception");
-        DirectoryNotFoundException dnfe = new DirectoryNotFoundException(message, innerException);
-        Utility.ValidateExceptionProperties(dnfe, hResult: HResults.COR_E_DIRECTORYNOTFOUND, innerException: innerException, message: message);
+        [Fact]
+        public static void TestCtor_Message_InnerException()
+        {
+            string message = "That page was missing from the directory.";
+            var innerException = new Exception("Inner exception");
+            var exception = new DirectoryNotFoundException(message, innerException);
+            ExceptionUtility.ValidateExceptionProperties(exception, hResult: HResults.COR_E_DIRECTORYNOTFOUND, innerException: innerException, message: message);
+        }
     }
 }

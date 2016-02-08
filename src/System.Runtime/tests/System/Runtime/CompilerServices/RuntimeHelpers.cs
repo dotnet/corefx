@@ -2,113 +2,111 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
-using System.Runtime.CompilerServices;
-
 using Xunit;
 
-public static class RuntimeHelpersTests
+namespace System.Runtime.CompilerServices.Tests
 {
-    [Fact]
-    public static void TestGetHashCode()
+    public static class RuntimeHelpersTests
     {
-        // Int32 RuntimeHelpers.GetHashCode(Object)
-        object obj1 = new object();
-        int h1 = RuntimeHelpers.GetHashCode(obj1);
-        int h2 = RuntimeHelpers.GetHashCode(obj1);
-
-        Assert.Equal(h1, h2);
-
-        object obj2 = new object();
-        int h3 = RuntimeHelpers.GetHashCode(obj2);
-        Assert.NotEqual(h1, h3); // Could potentially clash but very unlikely
-
-        int i123 = 123;
-        int h4 = RuntimeHelpers.GetHashCode(i123);
-        Assert.NotEqual(i123.GetHashCode(), h4);
-
-        int h5 = RuntimeHelpers.GetHashCode(null);
-        Assert.Equal(h5, 0);
-    }
-
-    public struct TestStruct
-    {
-        public int i1;
-        public int i2;
-        public override bool Equals(object obj)
+        [Fact]
+        public static void TestGetHashCode()
         {
-            if (!(obj is TestStruct))
-                return false;
+            var obj1 = new object();
+            int h1 = RuntimeHelpers.GetHashCode(obj1);
+            int h2 = RuntimeHelpers.GetHashCode(obj1);
 
-            TestStruct that = (TestStruct)obj;
+            Assert.Equal(h1, h2);
 
-            return this.i1 == that.i1 && this.i2 == that.i2;
+            var obj2 = new object();
+            int h3 = RuntimeHelpers.GetHashCode(obj2);
+            Assert.NotEqual(h1, h3); // Could potentially clash but very unlikely
+
+            int i123 = 123;
+            int h4 = RuntimeHelpers.GetHashCode(i123);
+            Assert.NotEqual(i123.GetHashCode(), h4);
+
+            int h5 = RuntimeHelpers.GetHashCode(null);
+            Assert.Equal(h5, 0);
         }
-        public override int GetHashCode()
+        
+        [Fact]
+        public static unsafe void TestGetObjectValue()
         {
-            return i1 ^ i2;
+            var t = new TestStruct() { intValue1 = 2, intValue2 = 4 };
+            object tOV = RuntimeHelpers.GetObjectValue(t);
+            Assert.Equal(t, (TestStruct)tOV);
+
+            var o = new object();
+            object oOV = RuntimeHelpers.GetObjectValue(o);
+            Assert.Equal(o, oOV);
+
+            int i = 3;
+            object iOV = RuntimeHelpers.GetObjectValue(i);
+            Assert.Equal(i, (int)iOV);
         }
-    }
 
-    [Fact]
-    public static unsafe void TestGetObjectValue()
-    {
-        // Object RuntimeHelpers.GetObjectValue(Object)
-        TestStruct t = new TestStruct() { i1 = 2, i2 = 4 };
-        object tOV = RuntimeHelpers.GetObjectValue(t);
-        Assert.Equal(t, (TestStruct)tOV);
-
-        object o = new object();
-        object oOV = RuntimeHelpers.GetObjectValue(o);
-        Assert.Equal(o, oOV);
-
-        int i = 3;
-        object iOV = RuntimeHelpers.GetObjectValue(i);
-        Assert.Equal(i, (int)iOV);
-    }
-
-    [Fact]
-    public static unsafe void TestOffsetToStringData()
-    {
-        // RuntimeHelpers.OffsetToStringData
-        char[] expectedValues = new char[] { 'a', 'b', 'c', 'd', 'e', 'f' };
-        string s = "abcdef";
-
-        fixed (char* values = s) // Compiler will use OffsetToStringData with fixed statements
+        [Fact]
+        public static unsafe void TestOffsetToStringData()
         {
-            for (int i = 0; i < expectedValues.Length; i++)
+            // RuntimeHelpers.OffsetToStringData
+            var expectedValues = new char[] { 'a', 'b', 'c', 'd', 'e', 'f' };
+            string s = "abcdef";
+
+            fixed (char* values = s) // Compiler will use OffsetToStringData with fixed statements
             {
-                Assert.Equal(expectedValues[i], values[i]);
+                for (int i = 0; i < expectedValues.Length; i++)
+                {
+                    Assert.Equal(expectedValues[i], values[i]);
+                }
             }
         }
-    }
 
-    [Fact]
-    public static void TestInitializeArray()
-    {
-        // Void RuntimeHelpers.InitializeArray(Array, RuntimeFieldHandle)
-        char[] expected = new char[] { 'a', 'b', 'c' }; // Compiler will use RuntimeHelpers.InitializeArrary these
-    }
-
-    [Fact]
-    public static void TestRunClassConstructor()
-    {
-        RuntimeTypeHandle t = typeof(HasCctor).TypeHandle;
-        RuntimeHelpers.RunClassConstructor(t);
-        Assert.Equal(HasCctorReceiver.S, "Hello");
-        return;
-    }
-
-    internal class HasCctor
-    {
-        static HasCctor()
+        [Fact]
+        public static void TestInitializeArray()
         {
-            HasCctorReceiver.S = "Hello" + (Guid.NewGuid().ToString().Substring(string.Empty.Length, 0));  // Make sure the preinitialization optimization doesn't eat this.
+            var expected = new char[] { 'a', 'b', 'c' }; // Compiler will use RuntimeHelpers.InitializeArrary these
         }
-    }
 
-    internal class HasCctorReceiver
-    {
-        public static string S;
+        [Fact]
+        public static void TestRunClassConstructor()
+        {
+            RuntimeTypeHandle t = typeof(HasCtor).TypeHandle;
+            RuntimeHelpers.RunClassConstructor(t);
+            Assert.Equal(HasCctorReceiver.stringValue, "Hello");
+        }
+
+        private struct TestStruct
+        {
+            public int intValue1;
+            public int intValue2;
+
+            public override bool Equals(object obj)
+            {
+                if (!(obj is TestStruct))
+                    return false;
+
+                TestStruct other = (TestStruct)obj;
+
+                return intValue1 == other.intValue1 && intValue2 == other.intValue2;
+            }
+
+            public override int GetHashCode()
+            {
+                return intValue1 ^ intValue2;
+            }
+        }
+
+        private class HasCtor
+        {
+            static HasCtor()
+            {
+                HasCctorReceiver.stringValue = "Hello" + (Guid.NewGuid().ToString().Substring(string.Empty.Length, 0));  // Make sure the preinitialization optimization doesn't eat this.
+            }
+        }
+
+        private class HasCctorReceiver
+        {
+            public static string stringValue;
+        }
     }
 }
