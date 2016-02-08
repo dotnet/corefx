@@ -39,8 +39,8 @@ namespace System.Net.Http
         #region Fields
 
         private readonly static char[] s_newLineCharArray = new char[] { HttpRuleParser.CR, HttpRuleParser.LF };
-        private readonly static string[] s_authenticationSchemes = { "Negotiate", "Digest", "Basic" }; // the order in which libcurl goes over authentication schemes
-        private readonly static CURLAUTH[] s_authSchemePriorityOrder = { CURLAUTH.Negotiate, CURLAUTH.Digest, CURLAUTH.Basic };
+        private readonly static string[] s_authenticationSchemes = { "Negotiate", "NTLM", "Digest", "Basic" }; // the order in which libcurl goes over authentication schemes
+        private readonly static CURLAUTH[] s_authSchemePriorityOrder = { CURLAUTH.Negotiate, CURLAUTH.NTLM, CURLAUTH.Digest, CURLAUTH.Basic };
 
         private readonly static bool s_supportsAutomaticDecompression;
         private readonly static bool s_supportsSSL;

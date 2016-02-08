@@ -144,6 +144,7 @@ internal static partial class Interop
             Basic = 1 << 0,
             Digest = 1 << 1,
             Negotiate = 1 << 2,
+            NTLM = 1 << 3,
         }
 
         // Enum for constants defined for the enum curl_proxytype in curl.h
