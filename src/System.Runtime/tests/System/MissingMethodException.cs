@@ -2,41 +2,42 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
-
 using Xunit;
 
-public static class MissingMethodExceptionTests
+namespace System.Runtime.Tests
 {
-    internal const int COR_E_MISSINGMETHOD = unchecked((int)0x80131513);
-    internal const int COR_E_MISSINGFIELD = unchecked((int)0x80131511);
-
-    [Fact]
-    public static void MissingMethodException_Ctor1()
+    public static class MissingMethodExceptionTests
     {
-        MissingMethodException i = new MissingMethodException();
-        //Assert.Equal("Attempted to access a missing method.", i.Message, "TestCtor1_001 failed");
-        Assert.Equal(COR_E_MISSINGMETHOD, i.HResult);
-    }
+        private const int COR_E_MISSINGMETHOD = unchecked((int)0x80131513);
 
-    [Fact]
-    public static void MissingMethodException_Ctor2()
-    {
-        MissingMethodException i = new MissingMethodException("Created MissingMethodException");
+        [Fact]
+        public static void TestCtor_Empty()
+        {
+            var exception = new MissingMethodException();
 
-        Assert.Equal("Created MissingMethodException", i.Message);
-        Assert.Equal(COR_E_MISSINGMETHOD, i.HResult);
-    }
+            Assert.Equal("Attempted to access a missing method.", exception.Message);
+            Assert.Equal(COR_E_MISSINGMETHOD, exception.HResult);
+        }
 
-    [Fact]
-    public static void MissingMethodException_Ctor3()
-    {
-        Exception ex = new Exception("Created inner exception");
-        MissingMethodException i = new MissingMethodException("Created MissingMethodException", ex);
+        [Fact]
+        public static void TestCtor_String()
+        {
+            var exception = new MissingMethodException("Created MissingMethodException");
 
-        Assert.Equal("Created MissingMethodException", i.Message);
-        Assert.Equal(COR_E_MISSINGMETHOD, i.HResult);
-        Assert.Equal(i.InnerException.Message, "Created inner exception");
-        Assert.Equal(i.InnerException.HResult, ex.HResult);
+            Assert.Equal("Created MissingMethodException", exception.Message);
+            Assert.Equal(COR_E_MISSINGMETHOD, exception.HResult);
+        }
+
+        [Fact]
+        public static void TestCtor_Exception()
+        {
+            var innerException = new Exception("Created inner exception");
+            var exception = new MissingMethodException("Created MissingMethodException", innerException);
+
+            Assert.Equal("Created MissingMethodException", exception.Message);
+            Assert.Equal(COR_E_MISSINGMETHOD, exception.HResult);
+            Assert.Equal("Created inner exception", exception.InnerException.Message);
+            Assert.Equal(innerException.HResult, exception.InnerException.HResult);
+        }
     }
 }
