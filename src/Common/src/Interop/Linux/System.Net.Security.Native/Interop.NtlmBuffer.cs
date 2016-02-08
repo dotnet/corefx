@@ -14,7 +14,7 @@ internal static partial class Interop
         [StructLayout(LayoutKind.Sequential)]
         internal unsafe struct NtlmBuffer : IDisposable
         {
-            internal UInt64 length;
+            internal ulong length;
             internal IntPtr data;
 
             internal int Copy(byte[] destination, int offset)

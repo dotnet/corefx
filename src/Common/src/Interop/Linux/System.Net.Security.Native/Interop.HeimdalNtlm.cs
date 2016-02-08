@@ -16,22 +16,22 @@ internal static partial class Interop
 {
     internal static partial class HeimdalNtlm
     {
-        private const string ClientToServerSigningMagicKey = "session key to client-to-server signing key magic constant\0";
-        private const string ServerToClientSigningMagicKey = "session key to server-to-client signing key magic constant\0";
-        private const string ServerToClientSealingMagicKey = "session key to server-to-client sealing key magic constant\0";
-        private const string ClientToServerSealingMagicKey = "session key to client-to-server sealing key magic constant\0";
+        private static readonly byte[] ClientToServerSigningMagicKey = Encoding.UTF8.GetBytes("session key to client-to-server signing key magic constant\0");
+        private static readonly byte[] ServerToClientSigningMagicKey = Encoding.UTF8.GetBytes("session key to server-to-client signing key magic constant\0");
+        private static readonly byte[] ServerToClientSealingMagicKey = Encoding.UTF8.GetBytes("session key to server-to-client sealing key magic constant\0");
+        private static readonly byte[] ClientToServerSealingMagicKey = Encoding.UTF8.GetBytes("session key to client-to-server sealing key magic constant\0");
 
         internal sealed class SigningKey
         {
             private uint _sequenceNumber;
             private readonly byte[] _digest;
 
-            public SigningKey(byte[] key, string magicKey)
+            public SigningKey(byte[] key, byte[] magicKey)
             {
                using (IncrementalHash incremental = IncrementalHash.CreateHash(HashAlgorithmName.MD5))
                {
                    incremental.AppendData(key);
-                   incremental.AppendData(Encoding.UTF8.GetBytes(magicKey));
+                   incremental.AppendData(magicKey);
                    _digest = incremental.GetHashAndReset();
                 }
             }
@@ -48,8 +48,8 @@ internal static partial class Interop
                 const int HMacDigestLength = 8;
 
                 byte[] output = new byte[Interop.NetSecurityNative.MD5DigestLength];
-                MarshalUint(output, 0, Version); // version
-                MarshalUint(output, SequenceNumberOffset, _sequenceNumber);
+                MarshalUint32(output, 0, Version); // version
+                MarshalUint32(output, SequenceNumberOffset, _sequenceNumber);
                 byte[] hash;
 
                 using (var incremental = IncrementalHash.CreateHMAC(HashAlgorithmName.MD5, _digest))
@@ -79,7 +79,7 @@ internal static partial class Interop
             private readonly byte[] _digest;
             private SafeEvpCipherCtxHandle _cipherContext;
 
-            public SealingKey(byte[] key, string magicKey)
+            public SealingKey(byte[] key, byte[] magicKey)
             {
                 _digest = NtlmKeyDigest(key, magicKey);
                 _cipherContext = Interop.Crypto.EvpCipherCreate(Interop.Crypto.EvpRc4(), _digest, null, 1);
@@ -117,17 +117,17 @@ internal static partial class Interop
             }
         }
 
-        private static byte[] NtlmKeyDigest(byte[] key, string magicKey)
+        private static byte[] NtlmKeyDigest(byte[] key, byte[] magicKey)
         {
             using (IncrementalHash incremental = IncrementalHash.CreateHash(HashAlgorithmName.MD5))
             {
                 incremental.AppendData(key);
-                incremental.AppendData(Encoding.UTF8.GetBytes(magicKey));
+                incremental.AppendData(magicKey);
                 return incremental.GetHashAndReset();
             }
         }
 
-        private static void MarshalUint(byte[] ptr, int offset, uint num)
+        private static void MarshalUint32(byte[] ptr, int offset, uint num)
         {
             for (int i = 0; i < 4; i++)
             {
