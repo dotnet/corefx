@@ -6,32 +6,40 @@ using Microsoft.Xunit.Performance;
 
 namespace System.Runtime.Tests
 {
-    public class Perf_TimeSpan
+    public static class Perf_TimeSpan
     {
         [Benchmark]
-        public void ctor_int_int_int()
+        public static void Ctor_Int_Int_Int()
         {
             foreach (var iteration in Benchmark.Iterations)
+            {
                 using (iteration.StartMeasurement())
+                {
                     for (int i = 0; i < 10000; i++)
                     {
                         new TimeSpan(7, 8, 10); new TimeSpan(7, 8, 10); new TimeSpan(7, 8, 10);
                         new TimeSpan(7, 8, 10); new TimeSpan(7, 8, 10); new TimeSpan(7, 8, 10);
                         new TimeSpan(7, 8, 10); new TimeSpan(7, 8, 10); new TimeSpan(7, 8, 10);
                     }
+                }
+            }
         }
 
         [Benchmark]
-        public void FromSeconds()
+        public static void FromSeconds()
         {
             foreach (var iteration in Benchmark.Iterations)
+            {
                 using (iteration.StartMeasurement())
+                {
                     for (int i = 0; i < 10000; i++)
                     {
                         TimeSpan.FromSeconds(50); TimeSpan.FromSeconds(50); TimeSpan.FromSeconds(50);
                         TimeSpan.FromSeconds(50); TimeSpan.FromSeconds(50); TimeSpan.FromSeconds(50);
                         TimeSpan.FromSeconds(50); TimeSpan.FromSeconds(50); TimeSpan.FromSeconds(50);
                     }
+                }
+            }
         }
     }
 }

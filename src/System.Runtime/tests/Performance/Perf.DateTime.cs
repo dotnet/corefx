@@ -6,64 +6,80 @@ using Microsoft.Xunit.Performance;
 
 namespace System.Runtime.Tests
 {
-    public class Perf_DateTime
+    public static class Perf_DateTime
     {
         [Benchmark]
-        public void GetNow()
+        public static void GetNow()
         {
-            DateTime dt;
+            DateTime dateTime;
             foreach (var iteration in Benchmark.Iterations)
+            {
                 using (iteration.StartMeasurement())
+                {
                     for (int i = 0; i < 10000; i++)
                     {
-                        dt = DateTime.Now; dt = DateTime.Now; dt = DateTime.Now;
-                        dt = DateTime.Now; dt = DateTime.Now; dt = DateTime.Now;
-                        dt = DateTime.Now; dt = DateTime.Now; dt = DateTime.Now;
+                        dateTime = DateTime.Now; dateTime = DateTime.Now; dateTime = DateTime.Now;
+                        dateTime = DateTime.Now; dateTime = DateTime.Now; dateTime = DateTime.Now;
+                        dateTime = DateTime.Now; dateTime = DateTime.Now; dateTime = DateTime.Now;
                     }
+                }
+            }
         }
 
         [Benchmark]
-        public void GetUtcNow()
+        public static void GetUtcNow()
         {
-            DateTime dt;
+            DateTime dateTime;
             foreach (var iteration in Benchmark.Iterations)
+            {
                 using (iteration.StartMeasurement())
+                {
                     for (int i = 0; i < 10000; i++)
                     {
-                        dt = DateTime.UtcNow; dt = DateTime.UtcNow; dt = DateTime.UtcNow;
-                        dt = DateTime.UtcNow; dt = DateTime.UtcNow; dt = DateTime.UtcNow;
-                        dt = DateTime.UtcNow; dt = DateTime.UtcNow; dt = DateTime.UtcNow;
+                        dateTime = DateTime.UtcNow; dateTime = DateTime.UtcNow; dateTime = DateTime.UtcNow;
+                        dateTime = DateTime.UtcNow; dateTime = DateTime.UtcNow; dateTime = DateTime.UtcNow;
+                        dateTime = DateTime.UtcNow; dateTime = DateTime.UtcNow; dateTime = DateTime.UtcNow;
                     }
+                }
+            }
         }
 
         [Benchmark]
-        public void ToString_str()
+        public static void ToString_String()
         {
-            DateTime dt = DateTime.Now;
+            DateTime dateTime = DateTime.Now;
             foreach (var iteration in Benchmark.Iterations)
+            {
                 using (iteration.StartMeasurement())
+                {
                     for (int i = 0; i < 10000; i++)
                     {
-                        dt.ToString("g"); dt.ToString("g"); dt.ToString("g");
-                        dt.ToString("g"); dt.ToString("g"); dt.ToString("g");
-                        dt.ToString("g"); dt.ToString("g"); dt.ToString("g");
+                        dateTime.ToString("g"); dateTime.ToString("g"); dateTime.ToString("g");
+                        dateTime.ToString("g"); dateTime.ToString("g"); dateTime.ToString("g");
+                        dateTime.ToString("g"); dateTime.ToString("g"); dateTime.ToString("g");
                     }
+                }
+            }
         }
 
         [Benchmark]
-        public void op_Subtraction()
+        public static void Operation_Subtract()
         {
             TimeSpan result;
-            DateTime date1 = new DateTime(1996, 6, 3, 22, 15, 0);
-            DateTime date2 = new DateTime(1996, 12, 6, 13, 2, 0);
+            var dateTime1 = new DateTime(1996, 6, 3, 22, 15, 0);
+            var dateTime2 = new DateTime(1996, 12, 6, 13, 2, 0);
             foreach (var iteration in Benchmark.Iterations)
+            {
                 using (iteration.StartMeasurement())
+                {
                     for (int i = 0; i < 100000; i++)
                     {
-                        result = date1 - date2; result = date1 - date2; result = date1 - date2;
-                        result = date1 - date2; result = date1 - date2; result = date1 - date2;
-                        result = date1 - date2; result = date1 - date2; result = date1 - date2;
+                        result = dateTime1 - dateTime2; result = dateTime1 - dateTime2; result = dateTime1 - dateTime2;
+                        result = dateTime1 - dateTime2; result = dateTime1 - dateTime2; result = dateTime1 - dateTime2;
+                        result = dateTime1 - dateTime2; result = dateTime1 - dateTime2; result = dateTime1 - dateTime2;
                     }
+                }
+            }
         }
     }
 }
