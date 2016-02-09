@@ -154,8 +154,9 @@ namespace System.Runtime.Tests
         [InlineData("System.Runtime.Tests.Outside`1[System.Nullable`1[System.Boolean]]", typeof(Outside<bool?>))]
         public static void TestGetType(string typeName, Type expectedType)
         {
-            Assert.Equal(expectedType, Type.GetType(typeName, throwOnError: false, ignoreCase: false));
-            Assert.Equal(expectedType, Type.GetType(typeName.ToLower(), throwOnError: false, ignoreCase: true));
+            Assert.Equal(expectedType, Type.GetType(typeName));
+            Assert.Equal(expectedType, Type.GetType(typeName, false, false));
+            Assert.Equal(expectedType, Type.GetType(typeName.ToLower(), false, true));
         }
 
         [Theory]
@@ -169,9 +170,9 @@ namespace System.Runtime.Tests
         {
             if (!alwaysThrowsException)
             {
-                Assert.Null(Type.GetType(typeName, throwOnError: false, ignoreCase: false));
+                Assert.Null(Type.GetType(typeName, false, false));
             }
-            Assert.Throws(expectedException, () => Type.GetType(typeName, throwOnError: true, ignoreCase: false));
+            Assert.Throws(expectedException, () => Type.GetType(typeName, true, false));
         }
 
         [Theory]
@@ -184,6 +185,10 @@ namespace System.Runtime.Tests
             RuntimeTypeHandle typeHandle1 = type1.TypeHandle;
             RuntimeTypeHandle typeHandle2 = type2.TypeHandle;
             Assert.Equal(typeHandle1, typeHandle2);
+            Assert.True(typeHandle1 == (object)typeHandle2);
+            Assert.True((object)typeHandle2 == typeHandle1);
+            Assert.False(typeHandle1 != (object)typeHandle2);
+            Assert.False((object)typeHandle2 != typeHandle1);
 
             Assert.Equal(type1, Type.GetTypeFromHandle(typeHandle1));
             Assert.Equal(type1, Type.GetTypeFromHandle(typeHandle2));

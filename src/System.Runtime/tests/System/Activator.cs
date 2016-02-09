@@ -107,6 +107,8 @@ namespace System.Runtime.Tests
         [Fact]
         public static void TestCreateInstance_Generic_Invalid()
         {
+            Assert.ThrowsAny<MissingMemberException>(() => Activator.CreateInstance<int[]>()); // Cannot create array type
+
             Assert.ThrowsAny<MissingMemberException>(() => Activator.CreateInstance<TypeWithoutDefaultCtor>());
             Assert.Throws<TargetInvocationException>(() => Activator.CreateInstance<TypeWithDefaultCtorThatThrows>());
         }
