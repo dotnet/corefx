@@ -71,12 +71,11 @@ namespace System.IO.Compression.Tests
             }
         }
 
-
         [Theory]
         [InlineData("unicode", true)]
         [InlineData("unicode", false)]
-        [ActiveIssue(5096, PlatformID.AnyUnix)]
-        public static async Task CreateNormal_Unicode(string folder, bool seekable)
+        [OuterLoop] // #5639 - Jenkins Bug with non-ascii file names
+        public static async Task CreateUnicode(string folder, bool seekable)
         {
             using (var s = new MemoryStream())
             {
