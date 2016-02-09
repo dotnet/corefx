@@ -101,7 +101,6 @@ internal static partial class Interop
                           byte[] output = new byte[count];
 
                           Interop.Crypto.EvpCipher(_cipherContext, output, (bytePtr + offset), count);
-                          MockUtils.MockLogging.PrintInfo(null, "returning from seal");
                           return  output;
                     }
                 }
@@ -143,7 +142,6 @@ internal static partial class Interop
             {
                 int status = NetSecurityNative.HeimNtlmEncodeType1(flags, ref buffer);
                 NetSecurityNative.HeimdalNtlmException.ThrowIfError(status);
-                MockUtils.MockLogging.PrintInfo("kapilash", "created negotiate message");
                 return buffer.ToByteArray();
             }
             finally

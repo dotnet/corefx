@@ -57,17 +57,17 @@ internal static partial class Interop
             ref NtlmBuffer sessionKey,
             ref NtlmBuffer data);
 
-        internal partial class NtlmFlags
+        internal enum NtlmFlags
         {
-            internal const uint NTLMSSP_NEGOTIATE_UNICODE = 0x1;
-            internal const uint NTLMSSP_REQUEST_TARGET = 0x4;
-            internal const uint NTLMSSP_NEGOTIATE_SIGN = 0x10;
-            internal const uint NTLMSSP_NEGOTIATE_SEAL = 0x20;
-            internal const uint NTLMSSP_NEGOTIATE_NTLM = 0x200;
-            internal const uint NTLMSSP_NEGOTIATE_ALWAYS_SIGN = 0x8000;
-            internal const uint NTLMSSP_NEGOTIATE_EXTENDED_SESSIONSECURITY = 0x80000;
-            internal const uint NTLMSSP_NEGOTIATE_128 = 0x20000000;
-            internal const uint NTLMSSP_NEGOTIATE_KEY_EXCH = 0x40000000;
+            NTLMSSP_NEGOTIATE_UNICODE = 0x1,
+            NTLMSSP_REQUEST_TARGET = 0x4,
+            NTLMSSP_NEGOTIATE_SIGN = 0x10,
+            NTLMSSP_NEGOTIATE_SEAL = 0x20,
+            NTLMSSP_NEGOTIATE_NTLM = 0x200,
+            NTLMSSP_NEGOTIATE_ALWAYS_SIGN = 0x8000,
+            NTLMSSP_NEGOTIATE_EXTENDED_SESSIONSECURITY = 0x80000,
+            NTLMSSP_NEGOTIATE_128 = 0x20000000,
+            NTLMSSP_NEGOTIATE_KEY_EXCH = 0x40000000
         }
     }
 }

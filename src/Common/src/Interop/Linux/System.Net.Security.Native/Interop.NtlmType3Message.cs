@@ -40,7 +40,6 @@ internal static partial class Interop
                 Debug.Assert(username != null, "username cannot be null");
                 Debug.Assert(password != null, "password cannot be null");
                 Debug.Assert(domain != null,  "domain cannot be null");
-                MockUtils.MockLogging.PrintInfo("kapilash", "GetResponse.1");
 
                 // reference for NTLM response: https://msdn.microsoft.com/en-us/library/cc236700.aspx
 
@@ -55,23 +54,19 @@ internal static partial class Interop
                 {
                     int status = Interop.NetSecurityNative.HeimNtlmNtKey(password, ref key);
                     Interop.NetSecurityNative.HeimdalNtlmException.ThrowIfError(status);
-                    MockUtils.MockLogging.PrintInfo("kapilash", "GetResponse.2");
 
                     byte[] baseSessionKey = new byte[Interop.NetSecurityNative.MD5DigestLength];
                     status = Interop.NetSecurityNative.HeimNtlmCalculateResponse(true, ref key, _type2Handle, username, domain,
                              baseSessionKey, baseSessionKey.Length, ref lmResponse);
                     Interop.NetSecurityNative.HeimdalNtlmException.ThrowIfError(status);
-                    MockUtils.MockLogging.PrintInfo("kapilash", "GetResponse.3");
 
                     status = Interop.NetSecurityNative.HeimNtlmCalculateResponse(false, ref key, _type2Handle, username, domain,
                                                                            baseSessionKey, baseSessionKey.Length, ref ntResponse);
                     Interop.NetSecurityNative.HeimdalNtlmException.ThrowIfError(status);
-                    MockUtils.MockLogging.PrintInfo("kapilash", "GetResponse.4");
 
                     status = Interop.NetSecurityNative.CreateType3Message(ref key, _type2Handle, username, domain, flags,
                         ref lmResponse, ref ntResponse, baseSessionKey,baseSessionKey.Length, ref sessionKeyBuffer, ref outputData);
                     Interop.NetSecurityNative.HeimdalNtlmException.ThrowIfError(status);
-                    MockUtils.MockLogging.PrintInfo("kapilash", "GetResponse.5");
 
                     sessionKey = sessionKeyBuffer.ToByteArray();
                     return outputData.ToByteArray();
