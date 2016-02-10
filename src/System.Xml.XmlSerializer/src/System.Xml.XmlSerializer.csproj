@@ -77,7 +77,6 @@
     <Compile Include="System\Xml\Serialization\XmlSerializationReaderILGen.cs" />
     <Compile Include="System\Xml\Serialization\XmlSerializationWriterILGen.cs" />
     <Compile Include="System\Xml\Serialization\SourceInfo.cs" />
-    <Compile Include="System\Xml\Serialization\XmlSchema.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' == 'netcore50'">
   <EmbeddedResource Include="$(MsBuildThisFileDirectory)Resources\$(AssemblyName).rd.xml" />

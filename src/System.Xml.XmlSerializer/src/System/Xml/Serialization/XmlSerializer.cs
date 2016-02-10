@@ -18,7 +18,7 @@ namespace System.Xml.Serialization
     using System.CodeDom.Compiler;
     using System.Collections.Generic;
     using Hashtable = System.Collections.IDictionary;
-    using XmlSchema = System.ServiceModel.Dispatcher.XmlSchemaConstants;
+    using XmlSchema = XmlSchemaConstants;
     using XmlDeserializationEvents = System.Object;
 
 

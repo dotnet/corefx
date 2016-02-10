@@ -15,7 +15,7 @@ namespace System.Xml.Serialization
     using System.Threading;
     using System.Diagnostics;
     using System.Xml.Extensions;
-    using XmlSchema = System.ServiceModel.Dispatcher.XmlSchemaConstants;
+    using XmlSchema = XmlSchemaConstants;
     // this[key] api throws KeyNotFoundException
     using Hashtable = System.Collections.InternalHashtable;
 

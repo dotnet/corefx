@@ -50,4 +50,10 @@ namespace System.Xml.Serialization
         [SuppressMessage("Microsoft.Security", "CA2122:DoNotIndirectlyExposeMethodsWithLinkDemands", Justification = "Method does validation only without any user input")]
         internal static bool IsValidLanguageIndependentIdentifier(string ident) { return System.CodeDom.Compiler.CodeGenerator.IsValidLanguageIndependentIdentifier(ident); }
     }
+
+    internal static class XmlSchemaConstants
+    {
+        public const string Namespace = "http://www.w3.org/2001/XMLSchema";
+        public const string InstanceNamespace = "http://www.w3.org/2001/XMLSchema-instance";
+    }
 }

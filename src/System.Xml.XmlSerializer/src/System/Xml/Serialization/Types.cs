@@ -18,7 +18,7 @@ namespace System.Xml.Serialization
     // this[key] api throws KeyNotFoundException
     using Hashtable = System.Collections.InternalHashtable;
     using DictionaryEntry = System.Collections.Generic.KeyValuePair<object, object>;
-    using XmlSchema = System.ServiceModel.Dispatcher.XmlSchemaConstants;
+    using XmlSchema = XmlSchemaConstants;
     using XmlSchemaFacet = System.Object;
     using XmlSchemaSimpleType = System.Xml.Schema.XmlSchemaType;
 
