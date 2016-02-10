@@ -2,8 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Text;
+using System.Buffers;
 using System.Diagnostics;
+using System.Text;
 
 namespace System.IO
 {
@@ -56,7 +57,7 @@ namespace System.IO
                 minBufferSize = 16;
             }
 
-            _buffer = new byte[minBufferSize];
+            _buffer = ArrayPool<byte>.Shared.Rent(minBufferSize);
             // _charBuffer and _charBytes will be left null.
 
             // For Encodings that always use 2 bytes per char (or more), 
@@ -89,12 +90,25 @@ namespace System.IO
                     copyOfStream.Dispose();
                 }
             }
+
             _stream = null;
-            _buffer = null;
             _decoder = null;
-            _charBytes = null;
             _singleChar = null;
-            _charBuffer = null;
+            if (_buffer != null)
+            {
+                ArrayPool<byte>.Shared.Return(_buffer);
+                _buffer = null;
+            }
+            if (_charBytes != null)
+            {
+                ArrayPool<byte>.Shared.Return(_charBytes);
+                _charBytes = null;
+            }
+            if (_charBuffer != null)
+            {
+                ArrayPool<char>.Shared.Return(_charBuffer);
+                _charBuffer = null;
+            }
         }
 
         public void Dispose()
@@ -294,12 +308,12 @@ namespace System.IO
 
             if (_charBytes == null)
             {
-                _charBytes = new byte[MaxCharBytesSize];
+                _charBytes = ArrayPool<byte>.Shared.Rent(MaxCharBytesSize);
             }
 
             if (_charBuffer == null)
             {
-                _charBuffer = new char[_maxCharsSize];
+                _charBuffer = ArrayPool<char>.Shared.Rent(_maxCharsSize);
             }
 
             StringBuilder sb = null;
@@ -370,7 +384,7 @@ namespace System.IO
 
             if (_charBytes == null)
             {
-                _charBytes = new byte[MaxCharBytesSize];
+                _charBytes = ArrayPool<byte>.Shared.Rent(MaxCharBytesSize);
             }
 
             while (charsRemaining > 0)
@@ -451,7 +465,7 @@ namespace System.IO
 
             if (_charBytes == null)
             {
-                _charBytes = new byte[MaxCharBytesSize]; //REVIEW: We need atmost 2 bytes/char here? 
+                _charBytes = ArrayPool<byte>.Shared.Rent(MaxCharBytesSize);
             }
             if (_singleChar == null)
             {

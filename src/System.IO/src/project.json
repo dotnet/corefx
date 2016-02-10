@@ -2,11 +2,13 @@
   "frameworks": {
     "dnxcore50": {
       "dependencies": {
-        "Microsoft.TargetingPack.Private.CoreCLR": "1.0.0-rc3-23808"
+        "Microsoft.TargetingPack.Private.CoreCLR": "1.0.0-rc3-23808",
+        "System.Buffers" : "4.0.0-rc3-23808"
       }
     },
     "netcore50": {
       "dependencies": {
+        "System.Buffers" : "4.0.0-rc3-23808",
         "System.Diagnostics.Contracts": "4.0.0",
         "System.Diagnostics.Debug": "4.0.10",
         "System.Diagnostics.Tools": "4.0.0",
