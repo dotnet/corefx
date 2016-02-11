@@ -38,7 +38,7 @@ internal static partial class Interop
 
                 return (majorError != null && minorError != null) ?
                     SR.Format(SR.net_gssapi_operation_failed_detailed, majorError, minorError) :
-                    SR.Format(SR.net_gssapi_operation_failed, majorStatus.ToString("x8"), minorStatus.ToString("x8"));
+                    SR.Format(SR.net_gssapi_operation_failed, majorStatus.ToString("x"), minorStatus.ToString("x"));
             }
 
             private static string GetGssApiDisplayStatus(Status status, bool isMinor)
