@@ -61,6 +61,18 @@ add_library(clrcompression
     ${NATIVECOMPRESSION_SOURCES}
 )
 
+# Allow specification of arguments that should be passed to the linker
+if (DEFINED ENV{__LinkArgs})
+    SET_TARGET_PROPERTIES(clrcompression PROPERTIES LINK_FLAGS $ENV{__LinkArgs})
+endif()
+
+# Allow specification of libarries that should be linked against
+if (DEFINED ENV{__LinkLibraries})
+    # CMake doesn't like space delimiters as input to target_link_libraries
+    separate_arguments(linker_libs_sanitized WINDOWS_COMMAND $ENV{__LinkLibraries})
+    target_link_libraries(clrcompression ${linker_libs_sanitized})
+endif()
+
 GENERATE_EXPORT_HEADER( clrcompression
      BASE_NAME clrcompression
      EXPORT_MACRO_NAME clrcompression_EXPORT

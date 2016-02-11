@@ -10,36 +10,53 @@ set __IntermediatesDir=""
 set __BuildArch=AnyCPU
 set __VCBuildArch=x86_amd64
 set CMAKE_BUILD_TYPE=Release
+set __EnvironmentSet=false
+set __VSVersion=vs2015
+
+REM Force PDB generation for all builds
+set "__LinkArgs=/DEBUG /DEBUGTYPE:cv,fixup /PDBCOMPRESS"
 
 :Arg_Loop
 :: Since the native build requires some configuration information before msbuild is called, we have to do some manual args parsing
-:: For consistency with building the managed components, args are taken in the msbuild style i.e. /p:
+:: For consistency with building the managed components, some args are taken in the msbuild style i.e. /p:
 if [%1] == [] goto :ToolsVersion
 if /i [%1] == [/p:ConfigurationGroup]    (
-    if /i [%2] == [Release] (set CMAKE_BUILD_TYPE=Release&&shift&&shift&goto Arg_Loop)
-    if /i [%2] == [Debug]   (set CMAKE_BUILD_TYPE=Debug&&shift&&shift&goto Arg_Loop)
+    if /i [%2] == [Release]         ( set CMAKE_BUILD_TYPE=Release&&shift&&shift&goto Arg_Loop)
+    if /i [%2] == [Debug]           ( set CMAKE_BUILD_TYPE=Debug&&shift&&shift&goto Arg_Loop)
     echo Error: Invalid configuration args "%1 and %2"
     exit /b 1
 )
-if /i [%1] == [/p:Platform]    (
-    if /i [%2] == [AnyCPU]  (set __BuildArch=AnyCPU&&set __VCBuildArch=x86_amd64&&shift&&shift&goto Arg_Loop)
-    if /i [%2] == [x86]     (set __BuildArch=x86&&set __VCBuildArch=x86&&shift&&shift&goto Arg_Loop)
-    if /i [%2] == [arm]     (set __BuildArch=arm&&set __VCBuildArch=x86_arm&&shift&&shift&goto Arg_Loop)
-    if /i [%2] == [x64]     (set __BuildArch=x64&&set __VCBuildArch=x86_amd64&&shift&&shift&goto Arg_Loop)
+if /i [%1] == [/p:Platform]         (
+    if /i [%2] == [AnyCPU]          ( set __BuildArch=AnyCPU&&set __VCBuildArch=x86_amd64&&shift&&shift&goto Arg_Loop)
+    if /i [%2] == [x86]             ( set __BuildArch=x86&&set __VCBuildArch=x86&&shift&&shift&goto Arg_Loop)
+    if /i [%2] == [arm]             ( set __BuildArch=arm&&set __VCBuildArch=x86_arm&&shift&&shift&goto Arg_Loop)
+    if /i [%2] == [x64]             ( set __BuildArch=x64&&set __VCBuildArch=x86_amd64&&shift&&shift&goto Arg_Loop)
+    if /i [%2] == [amd64]           ( set __BuildArch=x64&&set __VCBuildArch=x86_amd64&&shift&&shift&goto Arg_Loop)
     echo Error: Invalid platform args "%1 and %2"
     exit /b 1
 )
-if /i [%1] == [-intermediateDir]    (
-    set __IntermediatesDir=%2
+if /i [%1] == [/p:NativeIntermediateDir]    ( set __IntermediatesDir=%2&&shift&&shift&goto Arg_Loop)
+if /i [%1] == [/p:NativeBinDir]             ( set __CMakeBinDir=%2&&shift&&shift&goto Arg_Loop)
+if /i [%1] == [/p:NativeEnvironmentSet]     ( set __EnvironmentSet=true&&shift&goto Arg_Loop)
+if /i [%1] == [/p:NativeVCTargetsPath]      ( set VCTargetsPath=%2&&shift&&shift&goto Arg_Loop)
+if /i [%1] == [/p:NativeLinkArgument]       ( set "__LinkArgs=%__LinkArgs% %2"&&shift&&shift&goto Arg_Loop)
+if /i [%1] == [/p:NativeCompiler]           ( set __CCompiler=%2&&set __CXXCompiler=%2&&shift&&shift&goto Arg_Loop)
+if /i [%1] == [/p:PlatformToolset]          ( set __PlatformToolset=%2&&shift&&shift&goto Arg_Loop)
+if /i [%1] == [/p:NativeLinkLibrary]        (
+    if defined __LinkLibraries      (
+        set "__LinkLibraries=%__LinkLibraries% %2"
+    )
+    if not defined __LinkLibraries  (
+        set "__LinkLibraries=%2"
+    )
 )
-if /i [%1] == [-binDir]    (
-    set __CMakeBinDir=%2
-)
+
 shift
 goto :Arg_Loop
 
 :ToolsVersion
 :: Determine the tools version to pass to cmake/msbuild
+if "%__EnvironmentSet%"=="true" goto SetupDirs
 if not defined VisualStudioVersion (
     if defined VS140COMNTOOLS (
         goto :VS2015
@@ -97,12 +114,12 @@ if %__IntermediatesDir% == "" (
 if "%__BuildArch%" == "AnyCPU" (
     set __BuildArch=x64
 )
-echo %__CMakeBinDir%
 
 :: Check that the intermediate directory exists so we can place our cmake build tree there
 if exist "%__IntermediatesDir%" rd /s /q "%__IntermediatesDir%"
 if not exist "%__IntermediatesDir%" md "%__IntermediatesDir%"
 
+if "%__EnvironmentSet%"=="true" goto GenVSSolution
 if exist "%VSINSTALLDIR%DIA SDK" goto GenVSSolution
 echo Error: DIA SDK is missing at "%VSINSTALLDIR%DIA SDK". ^
 This is due to a bug in the Visual Studio installer. It does not install DIA SDK at "%VSINSTALLDIR%" but rather ^
