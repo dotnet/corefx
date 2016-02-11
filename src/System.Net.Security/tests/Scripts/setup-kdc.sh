@@ -27,33 +27,33 @@ kdc_setup()
 {
 	#Create/copy krb5.conf in /etc/ and kdc.conf in /etc/krb5kdc/	
 	echo "Copying krb5.conf and kdc.conf.."
-	/bin/cp ${krb_conf} ${krb_conf_location}
-	/bin/cp ${kdc_conf} ${kdc_conf_location}
+	sudo /bin/cp ${krb_conf} ${krb_conf_location}
+	sudo /bin/cp ${kdc_conf} ${kdc_conf_location}
 	
 	echo "Creating KDC database for realm ${realm}.."
-	${kdb5_util} create -r ${realm} -P ${password} -s
+	sudo ${kdb5_util} create -r ${realm} -P ${password} -s
 	
 	echo "Adding principal ${principal1}.."
-	${kadmin} -q "${add_principal_cmd} ${principal1}@${realm}"
+	sudo ${kadmin} -q "${add_principal_cmd} ${principal1}@${realm}"
 	
 	echo "Adding principal ${principal2}.."
-	${kadmin} -q "${add_principal_cmd} ${principal2}@${realm}"
+	sudo ${kadmin} -q "${add_principal_cmd} ${principal2}@${realm}"
 	
 	echo "Adding user ${krb_user}.."
-	${kadmin} -q "${add_principal_cmd} ${krb_user}@${realm}"
+	sudo ${kadmin} -q "${add_principal_cmd} ${krb_user}@${realm}"
 	
 	echo "Exporting keytab for ${principal1}"
-	${kadmin} -q "ktadd ${principal1}@${realm}"
+	sudo ${kadmin} -q "ktadd ${principal1}@${realm}"
 	
 	echo "Exporting keytab for ${principal2}"
-	${kadmin} -q "ktadd ${principal2}@${realm}"
+	sudo ${kadmin} -q "ktadd ${principal2}@${realm}"
 	
 	echo "Exporting keytab for ${krb_user}"
-	${kadmin} -q "ktadd ${krb_user}@${realm}"
+	sudo ${kadmin} -q "ktadd ${krb_user}@${realm}"
 }
 
 echo "Removing existing database"
-rm -rf ${database_file}
+sudo rm -rf ${database_file}
 
 case ${OS} in
 	"Ubuntu")
@@ -73,7 +73,7 @@ case ${OS} in
 		kdc_setup
 		
 		echo "Starting KDC.."
-		${krb5kdc}
+		sudo ${krb5kdc}
 		
 		;;
 		
@@ -94,4 +94,4 @@ case ${OS} in
 		;;
 esac
 	
-chmod +r ${keytabfile}
+sudo chmod +r ${keytabfile}

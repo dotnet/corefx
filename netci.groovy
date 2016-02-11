@@ -6,6 +6,8 @@ def project = GithubProject
 
 // Globals
 
+// List of all CI OS
+def allOSs = ['Ubuntu', 'Debian8.2', 'OSX', 'FreeBSD', 'CentOS7.1', 'OpenSUSE13.2', 'Windows 10', 'Windows 7', 'Windows_NT']
 // Map of os -> osGroup.
 def osGroupMap = ['Ubuntu':'Linux',
                   'Ubuntu15.10':'Linux',
@@ -102,36 +104,36 @@ branchList.each { branchName ->
 }
 
 // **************************
-// Define outerloop windows testing.  Run locally on each machine.
+// Define outerloop windows/ubuntu testing.  Run locally on each machine.
 // **************************
 
-def osShortName = ['Windows 10': 'win10', 'Windows 7' : 'win7', 'Windows_NT' : 'windows_nt', 'Ubuntu' : 'ubuntu', 'OSX' : 'osx']
+def osShortName = ['Windows 10': 'win10', 'Windows 7' : 'win7', 'Windows_NT' : 'windows_nt', 'Ubuntu14.04' : 'ubuntu14.04']
+def outerloopOSs = ['Windows 10', 'Windows 7', 'Windows_NT', 'Ubuntu14.04']
 branchList.each { branchName ->
-    ['Windows 10', 'Windows 7', 'Windows_NT', 'Ubuntu', 'OSX'].each { os ->
+    outerloopOSs.each { os ->
         ['Debug', 'Release'].each { configurationGroup ->
 
             def isPR = (branchName == 'pr')  
             def newJobName = "outerloop_${osShortName[os]}_${configurationGroup.toLowerCase()}"
 
-            def newJob
-            if (os != 'Ubuntu' && os != 'OSX') {
-                newJob = job(getJobName(Utilities.getFullJobName(project, newJobName, isPR), branchName)) {
-                    steps {
-                        batchFile("call \"C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat\" x86 && Build.cmd /p:ConfigurationGroup=${configurationGroup} /p:WithCategories=\"InnerLoop;OuterLoop\" /p:TestWithLocalLibraries=true")
+            def newJob = job(getJobName(Utilities.getFullJobName(project, newJobName, isPR), branchName)) {
+                steps {
+                    if (os == 'Ubuntu14.04') {
+                        shell("sudo HOME=\$WORKSPACE/tempHome ./build.sh x64 ${configurationGroup.toLowerCase()} /p:WithCategories=\\\"Innerloop;OuterLoop\\\" /p:TestWithLocalLibraries=true")
                     }
-                }
-            } else {
-                newJob = job(getJobName(Utilities.getFullJobName(project, newJobName, isPR), branchName)) {
-                    // Jobs run as a service in unix, which means that HOME variable is not set, and it is required for restoring packages
-                    // so we set it first, and then call build.sh
-                    steps {
-                        shell("HOME=\$WORKSPACE/tempHome ./build.sh /p:ConfigurationGroup=${configurationGroup} /p:WithCategories=\"\\\"InnerLoop;OuterLoop\\\"\" /p:TestWithLocalLibraries=true")
+                    else {
+                        batchFile("call \"C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat\" x86 && Build.cmd /p:ConfigurationGroup=${configurationGroup} /p:WithCategories=\"InnerLoop;OuterLoop\" /p:TestWithLocalLibraries=true")    
                     }
                 }
             }
 
             // Set the affinity.  OS name matches the machine affinity.
-            Utilities.setMachineAffinity(newJob, os)
+            if (os == 'Ubuntu14.04') {
+                Utilities.setMachineAffinity(newJob, os, '201626test')
+            }
+            else {
+                Utilities.setMachineAffinity(newJob, os)
+            }
             // Set up standard options.
             Utilities.standardJobSetup(newJob, project, isPR, getFullBranchName(branchName))
             // Add the unit test results
