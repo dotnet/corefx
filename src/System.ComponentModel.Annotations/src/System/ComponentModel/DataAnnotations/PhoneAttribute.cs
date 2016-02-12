@@ -7,7 +7,7 @@ namespace System.ComponentModel.DataAnnotations
 {
     [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field | AttributeTargets.Parameter,
         AllowMultiple = false)]
-    public sealed class PhoneAttribute : DataTypeAttribute
+    public class PhoneAttribute : DataTypeAttribute
     {
         // see unit tests for examples
         private static readonly Regex _regex =
