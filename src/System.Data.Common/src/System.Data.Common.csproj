@@ -38,11 +38,13 @@
     <Compile Include="System\Data\Common\DbConnectionStringBuilder.cs" />
     <Compile Include="System\Data\Common\DbConnectionStringCommon.cs" />
     <Compile Include="System\Data\Common\DbDataReader.cs" />
+    <Compile Include="System\Data\Common\DbDataReaderExtensions.cs" />
     <Compile Include="System\Data\Common\DbException.cs" />
     <Compile Include="System\Data\Common\DbParameter.cs" />
     <Compile Include="System\Data\Common\DbParameterCollection.cs" />
     <Compile Include="System\Data\Common\DbProviderFactory.cs" />
     <Compile Include="System\Data\Common\DbTransaction.cs" />
+    <Compile Include="System\Data\Common\IDbColumnSchemaGenerator.cs" />
     <Compile Include="System\Data\Common\NameValuePair.cs" />
     <Compile Include="$(CommonPath)\System\Threading\Tasks\TaskHelpers.cs">
       <Link>Common\System\Threading\Tasks\TaskHelpers.cs</Link>
@@ -57,10 +59,6 @@
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' == ''">
     <EmbeddedResource Include="Resources\$(AssemblyName).rd.xml" />
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="System\Data\Common\DbDataReaderExtensions.cs" />
-    <Compile Include="System\Data\Common\IDbColumnSchemaGenerator.cs" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>
