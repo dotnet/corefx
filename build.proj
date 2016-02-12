@@ -48,6 +48,13 @@
 
   <UsingTask TaskName="GatherDirectoriesToRestore" AssemblyFile="$(BuildToolsTaskDir)Microsoft.DotNet.Build.Tasks.dll" />
 
+  <Target Name="CheckInnerOuter" BeforeTargets="Build" Condition="'$(TestCategories)'=='Both'">
+    <ItemGroup>
+      <WithCategories Include="InnerLoop" />
+      <WithCategories Include="OuterLoop" />
+    </ItemGroup>
+  </Target>
+
   <Target Name="BatchRestorePackages">
     <Message Importance="High" Text="[$([System.DateTime]::Now.ToString('HH:mm:ss.ff'))] Restoring all packages..." />
 
