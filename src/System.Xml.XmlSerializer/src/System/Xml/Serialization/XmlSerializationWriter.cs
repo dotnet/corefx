@@ -93,7 +93,10 @@ namespace System.Xml.Serialization
                 }
                 else
                 {
-                    XmlQualifiedName[] qnames = (XmlQualifiedName[])ArrayList.ToArray(value, typeof(XmlQualifiedName));
+                    Array array = Array.CreateInstance(typeof(XmlQualifiedName), value.Count);
+                    value.CopyTo(array, 0);
+                    XmlQualifiedName[] qnames = (XmlQualifiedName[])array;
+                    
                     _namespaces = new XmlSerializerNamespaces(qnames);
                 }
             }
