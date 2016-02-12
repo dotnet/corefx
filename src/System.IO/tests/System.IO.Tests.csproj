@@ -45,6 +45,7 @@
       <OutputItemType>Content</OutputItemType>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Targets>Build;DebugSymbolsProjectOutputGroup</Targets>
+      <OSGroup>$(OSGroup)</OSGroup>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
