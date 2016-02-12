@@ -19,11 +19,17 @@ namespace System.Data.SqlClient.SNI
     /// </summary>
     internal enum SNIProviders
     {
-        NP_PROV = 1,        // Named Pipes Provider
-        SMUX_PROV = 5,      // MARS Provider
-        SSL_PROV = 6,       // SSL Provider
-        TCP_PROV = 7,       // TCP Provider
-        INVALID_PROV = 10,  // Invalid Provider
+        HTTP_PROV = 0, // HTTP Provider
+        NP_PROV = 1, // Named Pipes Provider
+        SESSION_PROV = 2, // Session Provider
+        SIGN_PROV = 3, // Sign Provider
+        SM_PROV = 4, // Shared Memory Provider
+        SMUX_PROV = 5, // SMUX Provider
+        SSL_PROV = 6, // SSL Provider
+        TCP_PROV = 7, // TCP Provider
+        VIA_PROV = 8, // VIA Provider
+        MAX_PROVS = 9,
+        INVALID_PROV = 10 // SQL Network Interfaces
     }
 
     /// <summary>
@@ -65,6 +71,11 @@ namespace System.Data.SqlClient.SNI
         internal const int HandshakeFailureError = 31;
         internal const int InternalExceptionError = 35;
         internal const int ConnOpenFailedError = 40;
+        internal const int LocalDBErrorCode = 50;
+        internal const int MultiSubnetFailoverWithMoreThan64IPs = 47;
+        internal const int MultiSubnetFailoverWithInstanceSpecified = 48;
+        internal const int MultiSubnetFailoverWithNonTcpProtocol = 49;
+        internal const int MaxErrorValue = 50157;
 
         /// <summary>
         /// Validate server certificate callback for SSL

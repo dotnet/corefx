@@ -68,7 +68,6 @@ namespace System.Net.Sockets.Tests
             DualModeConnectAsync_IPEndPointToHost_Helper(IPAddress.Loopback, IPAddress.Loopback, false);
         }
 
-        [ActiveIssue(5291, PlatformID.AnyUnix)]
         [Fact]
         public void ConnectAsyncV6IPEndPointToV6Host_Success()
         {
@@ -132,26 +131,10 @@ namespace System.Net.Sockets.Tests
 
         #region ConnectAsync to DnsEndPoint
 
-        [Fact]
-        public void DualModeSocket_ConnectAsyncDnsEndPointToV4Host_Success()
-        {
-            DualModeConnectAsync_DnsEndPointToHost_Helper(IPAddress.Loopback, false);
-        }
-
-        [Fact]
-        [ActiveIssue(4002, PlatformID.AnyUnix)]
-        public void DualModeSocket_ConnectAsyncDnsEndPointToV6Host_Success()
-        {
-            DualModeConnectAsync_DnsEndPointToHost_Helper(IPAddress.IPv6Loopback, false);
-        }
-
-        [Fact]
-        public void DualModeSocket_ConnectAsyncDnsEndPointToDualHost_Success()
-        {
-            DualModeConnectAsync_DnsEndPointToHost_Helper(IPAddress.IPv6Any, true);
-        }
-
-        private void DualModeConnectAsync_DnsEndPointToHost_Helper(IPAddress listenOn, bool dualModeServer)
+        [Theory]
+        [MemberData("DualMode_Connect_IPAddress_DualMode_Data")]
+        [PlatformSpecific(PlatformID.Windows)]
+        public void DualModeConnectAsync_DnsEndPointToHost_Helper(IPAddress listenOn, bool dualModeServer)
         {
             int port;
             using (Socket socket = new Socket(SocketType.Stream, ProtocolType.Tcp))
@@ -628,14 +611,21 @@ namespace System.Net.Sockets.Tests
                 GC.WaitForPendingFinalizers();
             }
         }
-        #endregion 
+        #endregion
 
         #region Helpers
+
+        public static readonly object[][] DualMode_Connect_IPAddress_DualMode_Data = {
+            new object[] { IPAddress.Loopback, false },
+            new object[] { IPAddress.IPv6Loopback, false },
+            new object[] { IPAddress.IPv6Any, true },
+        };
 
         private class SocketServer : IDisposable
         {
             private readonly ITestOutputHelper _output;
             private Socket _server;
+            private Socket _acceptedSocket;
             private EventWaitHandle _waitHandle = new AutoResetEvent(false);
 
             public EventWaitHandle WaitHandle
@@ -676,6 +666,8 @@ namespace System.Net.Sockets.Tests
                     "Accepted: " + e.GetHashCode() + " SocketAsyncEventArgs with manual event " +
                     handle.GetHashCode() + " error: " + e.SocketError);
 
+                _acceptedSocket = e.AcceptSocket;
+
                 handle.Set();
             }
 
@@ -684,6 +676,8 @@ namespace System.Net.Sockets.Tests
                 try
                 {
                     _server.Dispose();
+                    if (_acceptedSocket != null)
+                        _acceptedSocket.Dispose();
                 }
                 catch (Exception) { }
             }

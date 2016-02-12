@@ -117,6 +117,27 @@ check_struct_has_member(
     HAVE_STATFS_FSTYPENAME)
 
 check_struct_has_member(
+    "struct statvfs"
+    f_fstypename
+    "sys/mount.h"
+    HAVE_STATVFS_FSTYPENAME)
+
+# statfs: Find whether this struct exists
+if (HAVE_STATFS_FSTYPENAME OR HAVE_STATVFS_FSTYPENAME)
+    set (STATFS_INCLUDES sys/mount.h)
+else ()
+    set (STATFS_INCLUDES sys/statfs.h)
+endif ()
+
+set(CMAKE_EXTRA_INCLUDE_FILES ${STATFS_INCLUDES})
+check_type_size(
+    "struct statfs"
+    HAVE_STATFS
+    BUILTIN_TYPES_ONLY)
+set(CMAKE_EXTRA_INCLUDE_FILES) # reset CMAKE_EXTRA_INCLUDE_FILES
+# /statfs
+
+check_struct_has_member(
     "struct in6_addr"
     __in6_u
     "netdb.h"
@@ -157,13 +178,11 @@ check_function_exists(
     gethostbyaddr_r
     HAVE_GETHOSTBYADDR_R)
 
-set(HAVE_SUPPORT_FOR_MULTIPLE_CONNECT_ATTEMPTS 0)
 set(HAVE_SUPPORT_FOR_DUAL_MODE_IPV4_PACKET_INFO 0)
 set(HAVE_THREAD_SAFE_GETHOSTBYNAME_AND_GETHOSTBYADDR 0)
 
 if (CMAKE_SYSTEM_NAME STREQUAL Linux)
     set(CMAKE_REQUIRED_LIBRARIES rt)
-    set(HAVE_SUPPORT_FOR_MULTIPLE_CONNECT_ATTEMPTS 1)
     set(HAVE_SUPPORT_FOR_DUAL_MODE_IPV4_PACKET_INFO 1)
 elseif (CMAKE_SYSTEM_NAME STREQUAL Darwin)
     set(HAVE_THREAD_SAFE_GETHOSTBYNAME_AND_GETHOSTBYADDR 1)

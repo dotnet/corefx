@@ -206,6 +206,8 @@ _StartOffset_ + _Length_ shall be in range (0..0x80000000).
 
 Each scope spans IL instructions in range [_StartOffset_, _StartOffset_ + _Length_).
 
+The first scope of each _Method_ shall span all IL instructions of the _Method_, i.e. _StartOffset_ shall be 0 and _Length_ shall be equal to the size of the IL stream of the _Method_.
+
 _StartOffset_ shall point to the starting byte of an instruction of the _Method_.
 
 _StartOffset_ + _Length_ shall point to the starting byte of an instruction of the _Method_ or be equal to the size of the IL stream of the _Method_.
@@ -291,7 +293,7 @@ The numeric values of the type codes are defined by ECMA-335 §II.23.1.16.
 
 _EnumType_ must be an enum type as defined in ECMA-335 §II.14.3. The value of _EnumTypeCode_ must match the underlying type of the _EnumType_.
 
-The encoding of the _GeneralValue_ is determined based upon the type expressed by _TypeDefOrRefOrSpecEncoded_ specified in _GeneralConstant_. If the _GeneralValue_ is not present the value of the constant is the default value of the type. If the type is a reference type the value is a null reference, if the type is a pointer type the value is a null pointer, etc. 
+The encoding of the _GeneralValue_ is determined based upon the type expressed by _TypeDefOrRefOrSpecEncoded_ specified in _GeneralConstant_. _GeneralValue_ for special types listed in the table below has to be present and is encoded as specified. If the _GeneralValue_ is not present the value of the constant is the default value of the type. If the type is a reference type the value is a null reference, if the type is a pointer type the value is a null pointer, etc. 
 
 | Namespace     | Name     | _GeneralValue_ encoding  |
 |:--------------|:---------|:-------------------------|

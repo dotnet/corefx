@@ -364,6 +364,10 @@ extern "C" Error SystemNative_GetLingerOption(int32_t socket, LingerOption* opti
 
 extern "C" Error SystemNative_SetLingerOption(int32_t socket, LingerOption* option);
 
+extern "C" Error SystemNative_SetReceiveTimeout(int32_t socket, int32_t millisecondsTimeout);
+
+extern "C" Error SystemNative_SetSendTimeout(int32_t socket, int32_t millisecondsTimeout);
+
 extern "C" Error SystemNative_ReceiveMessage(int32_t socket, MessageHeader* messageHeader, int32_t flags, int64_t* received);
 
 extern "C" Error SystemNative_SendMessage(int32_t socket, MessageHeader* messageHeader, int32_t flags, int64_t* sent);
@@ -411,7 +415,5 @@ extern "C" Error SystemNative_TryChangeSocketEventRegistration(
     int32_t port, int32_t socket, int32_t currentEvents, int32_t newEvents, uintptr_t data);
 
 extern "C" Error SystemNative_WaitForSocketEvents(int32_t port, SocketEvent* buffer, int32_t* count);
-
-extern "C" int32_t SystemNative_PlatformSupportsMultipleConnectAttempts();
 
 extern "C" int32_t SystemNative_PlatformSupportsDualModeIPv4PacketInfo();

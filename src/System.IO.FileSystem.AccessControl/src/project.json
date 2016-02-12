@@ -13,14 +13,14 @@
         "System.Runtime.Extensions": "4.0.10.0",
         "System.Runtime.Handles": "4.0.0.0",
         "System.Runtime.InteropServices": "4.0.20.0",
-        "System.Security.AccessControl": "4.0.0-rc3-23729",
+        "System.Security.AccessControl": "4.0.0-rc3-23808",
         "System.Security.Principal": "4.0.0.0",
-        "System.Security.Principal.Windows": "4.0.0-rc3-23729"
+        "System.Security.Principal.Windows": "4.0.0-rc3-23808"
       }
     },
     "net46": {
       "dependencies": {
-        "Microsoft.TargetingPack.NetFramework.v4.6": "1.0.0"
+        "Microsoft.TargetingPack.NETFramework.v4.6": "1.0.1"
       }
     }
   }

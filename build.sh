@@ -36,27 +36,6 @@ clean()
 
 # Check the system to ensure the right pre-reqs are in place
 
-check_managed_prereqs()
-{
-    __monoversion=$(mono --version | grep "version 4.[1-9]")
-
-    if [ $? -ne 0 ]; then
-        # if built from tarball, mono only identifies itself as 4.0.1
-        __monoversion=$(mono --version | egrep "version 4.0.[1-9]+(.[0-9]+)?")
-        if [ $? -ne 0 ]; then
-            echo "Mono 4.0.1.44 or later is required to build corefx. Please see https://github.com/dotnet/corefx/blob/master/Documentation/building/unix-instructions.md for more details."
-            exit 1
-        else
-            echo "WARNING: Mono 4.0.1.44 or later is required to build corefx. Unable to assess if current version is supported."
-        fi
-    fi
-
-    if [ ! -e "$__referenceassemblyroot/.NETPortable" ]; then
-        echo "PCL reference assemblies not found. Please see https://github.com/dotnet/corefx/blob/master/Documentation/building/unix-instructions.md for more details."
-        exit 1
-    fi
-}
-
 check_native_prereqs()
 {
     echo "Checking pre-requisites..."
@@ -96,19 +75,8 @@ prepare_managed_build()
         fi
     fi
 
-    # Grab the MSBuild package if we don't have it already
-    if [ ! -e "$__msbuildpath" ]; then
-        echo "Restoring MSBuild..."
-        mono "$__nugetpath" install $__msbuildpackageid -Version $__msbuildpackageversion -source "https://www.myget.org/F/dotnet-buildtools/" -OutputDirectory "$__packageroot"
-        if [ $? -ne 0 ]; then
-            echo "Failed to restore MSBuild."
-            exit 1
-        fi
-    fi
-
     # Run Init-Tools to restore BuildTools and ToolRuntime
-    chmod a+x $__scriptpath/init-tools.sh
-    sh $__scriptpath/init-tools.sh
+    $__scriptpath/init-tools.sh
 }
 
 prepare_native_build()
@@ -132,8 +100,10 @@ build_managed_corefx()
 {
     __buildproj=$__scriptpath/build.proj
     __buildlog=$__scriptpath/msbuild.log
+    __binclashlog=$__scriptpath/binclash.log
+    __binclashloggerdll=$__scriptpath/Tools/Microsoft.DotNet.Build.Tasks.dll
 
-    ReferenceAssemblyRoot=$__referenceassemblyroot $__scriptpath/Tools/corerun $__scriptpath/Tools/MSBuild.exe "$__buildproj" /nologo /verbosity:minimal "/fileloggerparameters:Verbosity=normal;LogFile=$__buildlog" /t:Build /p:OSGroup=$__BuildOS /p:COMPUTERNAME=$(hostname) /p:USERNAME=$(id -un) /p:TestNugetRuntimeId=$__TestNugetRuntimeId /p:ToolNugetRuntimeId=$__TestNugetRuntimeId $__UnprocessedBuildArgs
+    ReferenceAssemblyRoot=$__referenceassemblyroot $__scriptpath/Tools/corerun $__scriptpath/Tools/MSBuild.exe "$__buildproj" /nologo /verbosity:minimal "/fileloggerparameters:Verbosity=normal;LogFile=$__buildlog" "/l:BinClashLogger,$__binclashloggerdll;LogFile=$__binclashlog" /t:Build /p:OSGroup=$__BuildOS /p:COMPUTERNAME=$(hostname) /p:USERNAME=$(id -un) /p:TestNugetRuntimeId=$__TestNugetRuntimeId $__UnprocessedBuildArgs
     BUILDERRORLEVEL=$?
 
     echo
@@ -217,7 +187,19 @@ case $OSName in
 
     Linux)
         __HostOS=Linux
-        __TestNugetRuntimeId=ubuntu.14.04-x64
+        source /etc/os-release
+        if [ "$ID" == "centos" ]; then
+            __TestNugetRuntimeId=centos.7-x64
+        elif [ "$ID" == "rhel" ]; then
+            __TestNugetRuntimeId=rhel.7-x64
+        elif [ "$ID" == "ubuntu" ]; then
+            __TestNugetRuntimeId=ubuntu.14.04-x64
+        elif [ "$ID" == "debian" ]; then
+            __TestNugetRuntimeId=debian.8.2-x64
+        else
+            echo "Unsupported Linux distribution '$ID' detected. Configuring as if for Ubuntu."
+            __TestNugetRuntimeId=ubuntu.14.04-x64
+        fi
         ;;
 
     NetBSD)
@@ -227,7 +209,7 @@ case $OSName in
         ;;
 
     *)
-        echo "Unsupported OS $OSName detected, configuring as if for Linux"
+        echo "Unsupported OS '$OSName' detected. Configuring as if for Ubuntu."
         __HostOS=Linux
         __TestNugetRuntimeId=ubuntu.14.04-x64
         ;;
@@ -307,13 +289,19 @@ for i in "$@"
             ;;
         freebsd)
             __BuildOS=FreeBSD
+            __TestNugetRuntimeId=osx.10.10-x64
             ;;
         linux)
             __BuildOS=Linux
-            __TestNugetRuntimeId=ubuntu.14.04-x64
+            # If the Host OS is also Linux, then use the RID of the host.
+            # Otherwise, override it to Ubuntu by default.
+            if [ "$__HostOS" != "Linux" ]; then
+                __TestNugetRuntimeId=ubuntu.14.04-x64
+            fi
             ;;
         netbsd)
             __BuildOS=NetBSD
+            __TestNugetRuntimeId=osx.10.10-x64
             ;;
         osx)
             __BuildOS=OSX
@@ -321,6 +309,7 @@ for i in "$@"
             ;;
         windows)
             __BuildOS=Windows_NT
+            __TestNugetRuntimeId=win7-x64
             ;;
         *)
           __UnprocessedBuildArgs="$__UnprocessedBuildArgs $i"
@@ -350,10 +339,6 @@ __BinDir="$__rootbinpath/$__BuildOS.$__BuildArch.$__BuildType/Native"
 setup_dirs
 
 if $__buildmanaged; then
-
-    # Check prereqs.
-
-    check_managed_prereqs
 
     # Prepare the system
 
