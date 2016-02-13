@@ -200,7 +200,7 @@ namespace System.Drawing
 
         public override string ToString()
         {
-            return "{X=" + _x.ToString() + ", Y=" + _y.ToString() + "}";
+            return "{X=" + _x.ToString() + ",Y=" + _y.ToString() + "}";
         }
     }
 }

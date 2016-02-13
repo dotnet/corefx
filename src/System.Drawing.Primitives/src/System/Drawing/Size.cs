@@ -239,7 +239,7 @@ namespace System.Drawing
         /// </summary>
         public override string ToString()
         {
-            return "{Width=" + _width.ToString() + ", Height=" + _height.ToString() + "}";
+            return "{Width=" + _width.ToString() + ",Height=" + _height.ToString() + "}";
         }
     }
 

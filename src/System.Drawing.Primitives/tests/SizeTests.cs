@@ -165,7 +165,7 @@ namespace System.Drawing.PrimitivesTests
         public void ToStringTest()
         {
             Size sz = new Size(0, 0);
-            Assert.Equal(string.Format(CultureInfo.CurrentCulture, "{{Width={0}, Height={1}}}", sz.Width, sz.Height), sz.ToString());
+            Assert.Equal(string.Format(CultureInfo.CurrentCulture, "{{Width={0},Height={1}}}", sz.Width, sz.Height), sz.ToString());
         }
     }
 }

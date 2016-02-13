@@ -138,7 +138,7 @@ namespace System.Drawing.PrimitivesTest
         public void ToStringTest()
         {
             SizeF s = new SizeF(0, 0);
-            Assert.Equal(string.Format(CultureInfo.CurrentCulture, "{{Width={0}, Height={1}}}", s.Width, s.Height), s.ToString());
+            Assert.Equal(string.Format(CultureInfo.CurrentCulture, "{{Width={0},Height={1}}}", s.Width, s.Height), s.ToString());
         }
     }
 }
