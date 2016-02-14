@@ -23,6 +23,15 @@ public class GetEnvironmentVariable
         Assert.Null(Environment.GetEnvironmentVariable(String.Empty));
     }
 
+    [Fact, PlatformSpecific(PlatformID.AnyUnix)]
+    public void NonWindowsNotEmpty()
+    {
+        string varName = "GetEnvironmentVariable_Test_NonWindowsNotEmpty";
+        SetEnvironmentVariableWithPInvoke(varName, string.Empty);
+
+        Assert.Null(Environment.GetEnvironmentVariable(varName));
+    }
+
     [Fact]
     [ActiveIssue("https://github.com/dotnet/coreclr/issues/635", PlatformID.AnyUnix)]
     public void RandomLongVariableNameCanRoundTrip()

@@ -168,13 +168,15 @@ public class SetEnvironmentVariable
     [Fact]
     public void DeleteNonExistentEnvironmentVariable()
     {
-        const string varName = "Test_TestDeletingNonExistingEnvironmentVariable";
+        const string varName = "TestDeletingNonExistingEnvironmentVariable";
 
-        if (Environment.GetEnvironmentVariable(varName) != null)
-        {
-            Environment.SetEnvironmentVariable(varName, null);
-        }
+        Environment.SetEnvironmentVariable(varName, null);
+        Assert.Null(Environment.GetEnvironmentVariable(varName));
 
-        Environment.SetEnvironmentVariable("TestDeletingNonExistingEnvironmentVariable", String.Empty);
+        Environment.SetEnvironmentVariable(varName, String.Empty);
+        Assert.Null(Environment.GetEnvironmentVariable(varName));
+
+        Environment.SetEnvironmentVariable(varName, "\u0000");
+        Assert.Null(Environment.GetEnvironmentVariable(varName));
     }
 }
