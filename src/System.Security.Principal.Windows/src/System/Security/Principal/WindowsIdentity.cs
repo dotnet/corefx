@@ -30,7 +30,7 @@ namespace System.Security.Principal
         private SecurityIdentifier _user = null;
         private IdentityReferenceCollection _groups = null;
 
-        private SafeAccessTokenHandle _safeTokenHandle = SafeAccessTokenHandle.InvalidHandle;
+        private SafeTokenHandle _safeTokenHandle = SafeTokenHandle.InvalidHandle;
         private string _authType = null;
         private int _isAuthenticated = -1;
         private volatile TokenImpersonationLevel _impersonationLevel;
@@ -129,7 +129,7 @@ namespace System.Security.Principal
                             SafeLsaReturnBufferHandle profileBuffer;
                             int profileBufferLength;
                             LUID logonId;
-                            SafeAccessTokenHandle accessTokenHandle;
+                            SafeTokenHandle accessTokenHandle;
                             QUOTA_LIMITS quota;
                             int subStatus;
                             int ntStatus = Interop.SspiCli.LsaLogonUser(
@@ -361,7 +361,7 @@ namespace System.Security.Principal
                 return false;
 
             // CheckTokenMembership expects an impersonation token
-            SafeAccessTokenHandle token = SafeAccessTokenHandle.InvalidHandle;
+            SafeTokenHandle token = SafeTokenHandle.InvalidHandle;
             TokenImpersonationLevel til = ImpersonationLevel;
             bool isMember = false;
 
@@ -387,7 +387,7 @@ namespace System.Security.Principal
             }
             finally
             {
-                if (token != SafeAccessTokenHandle.InvalidHandle)
+                if (token != SafeTokenHandle.InvalidHandle)
                 {
                     token.Dispose();
                 }
@@ -458,7 +458,7 @@ namespace System.Security.Principal
             if (_name == null)
             {
                 // revert thread impersonation for the duration of the call to get the name.
-                RunImpersonated(SafeAccessTokenHandle.InvalidHandle, delegate
+                RunImpersonated(SafeTokenHandle.InvalidHandle, delegate
                 {
                     NTAccount ntAccount = this.User.Translate(typeof(NTAccount)) as NTAccount;
                     _name = ntAccount.ToString();
@@ -548,7 +548,7 @@ namespace System.Security.Principal
             }
         }
 
-        public SafeAccessTokenHandle AccessToken
+        public SafeTokenHandle AccessToken
         {
             get
             {
@@ -560,7 +560,7 @@ namespace System.Security.Principal
         // Public methods.
         //
 
-        public static void RunImpersonated(SafeAccessTokenHandle safeAccessTokenHandle, Action action)
+        public static void RunImpersonated(SafeTokenHandle safeAccessTokenHandle, Action action)
         {
             if (action == null)
                 throw new ArgumentNullException("action");
@@ -569,7 +569,7 @@ namespace System.Security.Principal
         }
 
 
-        public static T RunImpersonated<T>(SafeAccessTokenHandle safeAccessTokenHandle, Func<T> func)
+        public static T RunImpersonated<T>(SafeTokenHandle safeAccessTokenHandle, Func<T> func)
         {
             if (func == null)
                 throw new ArgumentNullException("func");
@@ -601,13 +601,13 @@ namespace System.Security.Principal
         // internal.
         //
         
-        private static AsyncLocal<SafeAccessTokenHandle> s_currentImpersonatedToken = new AsyncLocal<SafeAccessTokenHandle>(CurrentImpersonatedTokenChanged);
+        private static AsyncLocal<SafeTokenHandle> s_currentImpersonatedToken = new AsyncLocal<SafeTokenHandle>(CurrentImpersonatedTokenChanged);
         
-        private static void RunImpersonatedInternal(SafeAccessTokenHandle token, Action action)
+        private static void RunImpersonatedInternal(SafeTokenHandle token, Action action)
         {
             bool isImpersonating;
             int hr;
-            SafeAccessTokenHandle previousToken = GetCurrentToken(TokenAccessLevels.MaximumAllowed, false, out isImpersonating, out hr);
+            SafeTokenHandle previousToken = GetCurrentToken(TokenAccessLevels.MaximumAllowed, false, out isImpersonating, out hr);
             if (previousToken == null || previousToken.IsInvalid)
                 throw new SecurityException(new Win32Exception(hr).Message);
 
@@ -636,7 +636,7 @@ namespace System.Security.Principal
                 null);
         }
         
-        private static void CurrentImpersonatedTokenChanged(AsyncLocalValueChangedArgs<SafeAccessTokenHandle> args)
+        private static void CurrentImpersonatedTokenChanged(AsyncLocalValueChangedArgs<SafeTokenHandle> args)
         {
             if (!args.ThreadContextChanged)
                 return; // we handle explicit Value property changes elsewhere.
@@ -655,7 +655,7 @@ namespace System.Security.Principal
         {
             int hr = 0;
             bool isImpersonating;
-            SafeAccessTokenHandle safeTokenHandle = GetCurrentToken(desiredAccess, threadOnly, out isImpersonating, out hr);
+            SafeTokenHandle safeTokenHandle = GetCurrentToken(desiredAccess, threadOnly, out isImpersonating, out hr);
             if (safeTokenHandle == null || safeTokenHandle.IsInvalid)
             {
                 // either we wanted only ThreadToken - return null
@@ -693,10 +693,10 @@ namespace System.Security.Principal
             return new SecurityException(new Win32Exception(win32ErrorCode).Message);
         }
         
-        private static SafeAccessTokenHandle GetCurrentToken(TokenAccessLevels desiredAccess, bool threadOnly, out bool isImpersonating, out int hr)
+        private static SafeTokenHandle GetCurrentToken(TokenAccessLevels desiredAccess, bool threadOnly, out bool isImpersonating, out int hr)
         {
             isImpersonating = true;
-            SafeAccessTokenHandle safeTokenHandle;
+            SafeTokenHandle safeTokenHandle;
             hr = 0;
             bool success = Interop.mincore.OpenThreadToken(desiredAccess, WinSecurityContext.Both, out safeTokenHandle);
             if (!success)
@@ -711,10 +711,10 @@ namespace System.Security.Principal
             return safeTokenHandle;
         }
 
-        private static SafeAccessTokenHandle GetCurrentProcessToken(TokenAccessLevels desiredAccess, out int hr)
+        private static SafeTokenHandle GetCurrentProcessToken(TokenAccessLevels desiredAccess, out int hr)
         {
             hr = 0;
-            SafeAccessTokenHandle safeTokenHandle;
+            SafeTokenHandle safeTokenHandle;
             if (!Interop.mincore.OpenProcessToken(Interop.mincore.GetCurrentProcess(), desiredAccess, out safeTokenHandle))
                 hr = GetHRForWin32Error(Marshal.GetLastWin32Error());
             return safeTokenHandle;
@@ -746,7 +746,7 @@ namespace System.Security.Principal
 
         internal static ImpersonationQueryResult QueryImpersonation()
         {
-            SafeAccessTokenHandle safeTokenHandle = null;
+            SafeTokenHandle safeTokenHandle = null;
             bool success = Interop.mincore.OpenThreadToken(TokenAccessLevels.Query, WinSecurityContext.Thread, out safeTokenHandle);
 
             if (safeTokenHandle != null)
@@ -775,7 +775,7 @@ namespace System.Security.Principal
         }
 
 
-        private static Interop.LUID GetLogonAuthId(SafeAccessTokenHandle safeTokenHandle)
+        private static Interop.LUID GetLogonAuthId(SafeTokenHandle safeTokenHandle)
         {
             using (SafeLocalAllocHandle pStatistics = GetTokenInformation(safeTokenHandle, TokenInformationClass.TokenStatistics))
             {
@@ -785,7 +785,7 @@ namespace System.Security.Principal
         }
 
 
-        private static SafeLocalAllocHandle GetTokenInformation(SafeAccessTokenHandle tokenHandle, TokenInformationClass tokenInformationClass)
+        private static SafeLocalAllocHandle GetTokenInformation(SafeTokenHandle tokenHandle, TokenInformationClass tokenInformationClass)
         {
             SafeLocalAllocHandle safeLocalAllocHandle = SafeLocalAllocHandle.InvalidHandle;
             uint dwLength = (uint)Marshal.SizeOf<uint>();
@@ -836,7 +836,7 @@ namespace System.Security.Principal
 
             try
             {
-                if (!identity._safeTokenHandle.IsInvalid && identity._safeTokenHandle != SafeAccessTokenHandle.InvalidHandle && identity._safeTokenHandle.DangerousGetHandle() != IntPtr.Zero)
+                if (!identity._safeTokenHandle.IsInvalid && identity._safeTokenHandle != SafeTokenHandle.InvalidHandle && identity._safeTokenHandle.DangerousGetHandle() != IntPtr.Zero)
                 {
                     identity._safeTokenHandle.DangerousAddRef(ref mustDecrement);
 

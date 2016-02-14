@@ -12,9 +12,9 @@ internal static partial class Interop
     internal static partial class mincore
     {
         [DllImport(Interop.Libraries.ProcessThread_L1, SetLastError = true)]
-        private static extern bool OpenThreadToken(IntPtr ThreadHandle, TokenAccessLevels dwDesiredAccess, bool bOpenAsSelf, out SafeAccessTokenHandle phThreadToken);
+        private static extern bool OpenThreadToken(IntPtr ThreadHandle, TokenAccessLevels dwDesiredAccess, bool bOpenAsSelf, out SafeTokenHandle phThreadToken);
 
-        internal static bool OpenThreadToken(TokenAccessLevels desiredAccess, WinSecurityContext openAs, out SafeAccessTokenHandle tokenHandle)
+        internal static bool OpenThreadToken(TokenAccessLevels desiredAccess, WinSecurityContext openAs, out SafeTokenHandle tokenHandle)
         {
             bool openAsSelf = true;
             if (openAs == WinSecurityContext.Thread)

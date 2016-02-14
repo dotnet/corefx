@@ -12,11 +12,11 @@ internal static partial class Interop
     {
         [DllImport(Interop.Libraries.SecurityBase, SetLastError = true)]
         internal static extern bool DuplicateTokenEx(
-            SafeAccessTokenHandle hExistingToken,
+            SafeTokenHandle hExistingToken,
             uint dwDesiredAccess,
             IntPtr lpTokenAttributes,   // LPSECURITY_ATTRIBUTES
             uint ImpersonationLevel,
             uint TokenType,
-            ref SafeAccessTokenHandle phNewToken);
+            ref SafeTokenHandle phNewToken);
     }
 }

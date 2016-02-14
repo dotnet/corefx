@@ -160,7 +160,7 @@ namespace System.Security.Principal
                 return false;
 
             // CheckTokenMembership expects an impersonation token
-            SafeAccessTokenHandle token = SafeAccessTokenHandle.InvalidHandle;
+            SafeTokenHandle token = SafeTokenHandle.InvalidHandle;
             if (_identity.ImpersonationLevel == TokenImpersonationLevel.None)
             {
                 if (!Interop.mincore.DuplicateTokenEx(_identity.AccessToken,

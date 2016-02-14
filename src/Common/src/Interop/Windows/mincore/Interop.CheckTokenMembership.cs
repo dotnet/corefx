@@ -11,6 +11,6 @@ internal static partial class Interop
     internal static partial class mincore
     {
         [DllImport(Interop.Libraries.SecurityBase, SetLastError = true)]
-        internal static extern bool CheckTokenMembership(SafeAccessTokenHandle TokenHandle, byte[] SidToCheck, ref bool IsMember);
+        internal static extern bool CheckTokenMembership(SafeTokenHandle TokenHandle, byte[] SidToCheck, ref bool IsMember);
     }
 }
