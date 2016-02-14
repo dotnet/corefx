@@ -21,18 +21,16 @@ namespace Microsoft.Win32.SafeHandles
     [SecurityCritical]
     public sealed class SafeTokenHandle : SafeHandle
     {
-        private const int DefaultInvalidHandleValue = 0;
-
-        private SafeTokenHandle() : base(new IntPtr(DefaultInvalidHandleValue), true) { }
+        private SafeTokenHandle() : base(IntPtr.Zero, true) { }
 
         public SafeTokenHandle(IntPtr handle)
-            : base(new IntPtr(DefaultInvalidHandleValue), true)
+            : base(IntPtr.Zero, true)
         {
             SetHandle(handle);
         }
 
         public SafeTokenHandle(IntPtr handle, bool ownsHandle)
-            : base(new IntPtr(DefaultInvalidHandleValue), ownsHandle)
+            : base(IntPtr.Zero, ownsHandle)
         {
             SetHandle(handle);
         }
