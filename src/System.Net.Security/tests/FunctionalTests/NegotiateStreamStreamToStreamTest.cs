@@ -261,7 +261,8 @@ namespace System.Net.Security.Tests
                 Assert.True(_sampleMsg.SequenceEqual(recvBuf));
             }
         }
-        
+
+        [ActiveIssue(6072, PlatformID.Linux | PlatformID.OSX)]
         [Fact]
         [PlatformSpecific(PlatformID.Linux | PlatformID.OSX)]
         public void NegotiateStream_Ctor_Throws()
