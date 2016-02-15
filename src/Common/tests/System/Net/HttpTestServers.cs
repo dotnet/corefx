@@ -2,9 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
-
-namespace System.Net.Tests
+namespace System.Net.Test.Common
 {
     internal class HttpTestServers
     {
@@ -36,6 +34,16 @@ namespace System.Net.Tests
         public readonly static object[][] VerifyUploadServers = { new object[] { RemoteVerifyUploadServer }, new object[] { SecureRemoteVerifyUploadServer } };
         public readonly static object[][] CompressedServers = { new object[] { RemoteDeflateServer }, new object[] { RemoteGZipServer } };
         public readonly static object[][] Http2Servers = { new object[] { new Uri("https://" + Http2Host) } };
+
+        public static Uri NegotiateAuthUriForDefaultCreds(bool secure)
+        {
+            return new Uri(
+                string.Format(
+                    "{0}://{1}/{2}?auth=negotiate",
+                    secure ? HttpsScheme : HttpScheme,
+                    Host,
+                    EchoHandler));
+        }
 
         public static Uri BasicAuthUriForCreds(bool secure, string userName, string password)
         {

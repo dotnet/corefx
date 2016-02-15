@@ -15,7 +15,7 @@ namespace System.Buffers
     {
         private int _index;
         private readonly T[][] _data;
-        private readonly int _bufferLength;
+        internal readonly int _bufferLength;
         private SpinLock _lock;
         private bool _exhaustedEventSent;
         private readonly int _poolId;
@@ -88,6 +88,10 @@ namespace System.Buffers
         /// </summary>
         internal void Return(T[] buffer)
         {
+            // Check to see if the buffer is the correct size for this bucket
+            if (buffer.Length != _bufferLength)
+                throw new ArgumentException(SR.ArgumentException_BufferNotFromPool, "buffer");
+
             // Use a SpinLock since it is super lightweight
             // and our lock is very short lived. Wrap in try-finally
             // to protect against thread-aborts

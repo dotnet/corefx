@@ -22,6 +22,12 @@ namespace System.Net.Sockets.Tests
 
         private readonly ITestOutputHelper _log;
 
+        private static IPAddress[] ValidIPv6Loopbacks = new IPAddress[] {
+            new IPAddress(new byte[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 127, 0, 0, 1 }, 0),  // ::127.0.0.1
+            IPAddress.Loopback.MapToIPv6(),                                                     // ::ffff:127.0.0.1
+            IPAddress.IPv6Loopback                                                              // ::1
+        };
+
         public DualMode(ITestOutputHelper output)
         {
             _log = TestLogging.GetInstance();
@@ -68,7 +74,6 @@ namespace System.Net.Sockets.Tests
             DualModeConnectAsync_IPEndPointToHost_Helper(IPAddress.Loopback, IPAddress.Loopback, false);
         }
 
-        [ActiveIssue(5291, PlatformID.AnyUnix)]
         [Fact]
         public void ConnectAsyncV6IPEndPointToV6Host_Success()
         {
@@ -132,26 +137,10 @@ namespace System.Net.Sockets.Tests
 
         #region ConnectAsync to DnsEndPoint
 
-        [Fact]
-        public void DualModeSocket_ConnectAsyncDnsEndPointToV4Host_Success()
-        {
-            DualModeConnectAsync_DnsEndPointToHost_Helper(IPAddress.Loopback, false);
-        }
-
-        [Fact]
-        [ActiveIssue(4002, PlatformID.AnyUnix)]
-        public void DualModeSocket_ConnectAsyncDnsEndPointToV6Host_Success()
-        {
-            DualModeConnectAsync_DnsEndPointToHost_Helper(IPAddress.IPv6Loopback, false);
-        }
-
-        [Fact]
-        public void DualModeSocket_ConnectAsyncDnsEndPointToDualHost_Success()
-        {
-            DualModeConnectAsync_DnsEndPointToHost_Helper(IPAddress.IPv6Any, true);
-        }
-
-        private void DualModeConnectAsync_DnsEndPointToHost_Helper(IPAddress listenOn, bool dualModeServer)
+        [Theory]
+        [MemberData("DualMode_Connect_IPAddress_DualMode_Data")]
+        [PlatformSpecific(PlatformID.Windows)]
+        public void DualModeConnectAsync_DnsEndPointToHost_Helper(IPAddress listenOn, bool dualModeServer)
         {
             int port;
             using (Socket socket = new Socket(SocketType.Stream, ProtocolType.Tcp))
@@ -353,7 +342,10 @@ namespace System.Net.Sockets.Tests
                 Assert.NotNull(clientSocket);
                 Assert.True(clientSocket.Connected);
                 Assert.Equal(AddressFamily.InterNetworkV6, clientSocket.AddressFamily);
-                Assert.Equal(connectTo.MapToIPv6(), ((IPEndPoint)clientSocket.LocalEndPoint).Address);
+                if (connectTo == IPAddress.Loopback)
+                    Assert.Contains(((IPEndPoint)clientSocket.LocalEndPoint).Address, ValidIPv6Loopbacks);
+                else
+                    Assert.Equal(connectTo.MapToIPv6(), ((IPEndPoint)clientSocket.LocalEndPoint).Address);
                 clientSocket.Dispose();
             }
         }
@@ -628,14 +620,21 @@ namespace System.Net.Sockets.Tests
                 GC.WaitForPendingFinalizers();
             }
         }
-        #endregion 
+        #endregion
 
         #region Helpers
+
+        public static readonly object[][] DualMode_Connect_IPAddress_DualMode_Data = {
+            new object[] { IPAddress.Loopback, false },
+            new object[] { IPAddress.IPv6Loopback, false },
+            new object[] { IPAddress.IPv6Any, true },
+        };
 
         private class SocketServer : IDisposable
         {
             private readonly ITestOutputHelper _output;
             private Socket _server;
+            private Socket _acceptedSocket;
             private EventWaitHandle _waitHandle = new AutoResetEvent(false);
 
             public EventWaitHandle WaitHandle
@@ -676,6 +675,8 @@ namespace System.Net.Sockets.Tests
                     "Accepted: " + e.GetHashCode() + " SocketAsyncEventArgs with manual event " +
                     handle.GetHashCode() + " error: " + e.SocketError);
 
+                _acceptedSocket = e.AcceptSocket;
+
                 handle.Set();
             }
 
@@ -684,6 +685,8 @@ namespace System.Net.Sockets.Tests
                 try
                 {
                     _server.Dispose();
+                    if (_acceptedSocket != null)
+                        _acceptedSocket.Dispose();
                 }
                 catch (Exception) { }
             }

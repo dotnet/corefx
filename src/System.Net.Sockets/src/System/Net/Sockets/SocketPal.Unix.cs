@@ -2,16 +2,10 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Collections.Generic;
 using System.Collections;
-using System.ComponentModel;
+using System.Collections.Generic;
 using System.Diagnostics;
-using System.Globalization;
-using System.IO;
-using System.Net;
 using System.Runtime.InteropServices;
-using System.Threading.Tasks;
-using System.Threading;
 
 namespace System.Net.Sockets
 {
@@ -21,13 +15,8 @@ namespace System.Net.Sockets
         // PlatformNotSupportedException instead.
         public const int ProtocolInformationSize = 0;
 
-        public readonly static bool SupportsMultipleConnectAttempts = GetPlatformSupportsMultipleConnectAttempts();
+        public const bool SupportsMultipleConnectAttempts = false;
         private readonly static bool SupportsDualModeIPv4PacketInfo = GetPlatformSupportsDualModeIPv4PacketInfo();
-
-        private static bool GetPlatformSupportsMultipleConnectAttempts()
-        {
-            return Interop.Sys.PlatformSupportsMultipleConnectAttempts();
-        }
 
         private static bool GetPlatformSupportsDualModeIPv4PacketInfo()
         {
@@ -43,7 +32,6 @@ namespace System.Net.Sockets
             //       - SocketError.OperationNotSupported
             //       - SocketError.ProtocolFamilyNotSupported
             //       - SocketError.NoBufferSpaceAvailable
-            //       - SocketError.Shutdown
             //       - SocketError.HostDown
             //       - SocketError.ProcessLimit
             //
@@ -65,6 +53,7 @@ namespace System.Net.Sockets
                 case Interop.Error.EFAULT:
                     return SocketError.Fault;
 
+                case Interop.Error.EBADF:
                 case Interop.Error.EINVAL:
                     return SocketError.InvalidArgument;
 
@@ -138,6 +127,9 @@ namespace System.Net.Sockets
 
                 case Interop.Error.EHOSTUNREACH:
                     return SocketError.HostUnreachable;
+
+                case Interop.Error.EPIPE:
+                    return SocketError.Shutdown;
 
                 default:
                     return SocketError.SocketError;
@@ -466,20 +458,9 @@ namespace System.Net.Sockets
             {
                 Debug.Assert(fd != -1);
 
-                // If the accept completed successfully, ensure that the accepted socket is non-blocking.
-                int err = Interop.Sys.Fcntl.SetIsNonBlocking((IntPtr)fd, 1);
-                if (err == 0)
-                {
-                    socketAddressLen = sockAddrLen;
-                    errorCode = SocketError.Success;
-                    acceptedFd = fd;
-                }
-                else
-                {
-                    errorCode = GetSocketErrorForErrorCode(Interop.Sys.GetLastError());
-                    acceptedFd = -1;
-                    Interop.Sys.Close((IntPtr)fd);
-                }
+                socketAddressLen = sockAddrLen;
+                errorCode = SocketError.Success;
+                acceptedFd = fd;
 
                 return true;
             }
@@ -522,22 +503,6 @@ namespace System.Net.Sockets
             return false;
         }
 
-        private static unsafe void PrimeForNextConnectAttempt(int fileDescriptor, int socketAddressLen)
-        {
-            Debug.Assert(SupportsMultipleConnectAttempts);
-
-            // On some platforms (e.g. Linux), a non-blocking socket that fails a connect() attempt
-            // needs to be kicked with another connect to AF_UNSPEC before further connect() attempts
-            // will return valid errors. Otherwise, further connect() attempts will return ECONNABORTED.
-            
-            var sockAddr = stackalloc byte[socketAddressLen];
-            Interop.Error afErr = Interop.Sys.SetAddressFamily(sockAddr, socketAddressLen, (int)AddressFamily.Unspecified);
-            Debug.Assert(afErr == Interop.Error.SUCCESS, "PrimeForNextConnectAttempt: failed to set address family");
-
-            Interop.Error err = Interop.Sys.Connect(fileDescriptor, sockAddr, socketAddressLen);
-            Debug.Assert(err == Interop.Error.SUCCESS, "PrimeForNextConnectAttempt: failed to disassociate socket after failed connect()");
-        }
-
         public static unsafe bool TryCompleteConnect(int fileDescriptor, int socketAddressLen, out SocketError errorCode)
         {
             Interop.Error socketError;
@@ -561,11 +526,6 @@ namespace System.Net.Sockets
             }
 
             errorCode = GetSocketErrorForErrorCode(socketError);
-            if (SupportsMultipleConnectAttempts)
-            {
-                PrimeForNextConnectAttempt(fileDescriptor, socketAddressLen);
-            }
-
             return true;
         }
 
@@ -718,10 +678,6 @@ namespace System.Net.Sockets
 
         public static SocketError SetBlocking(SafeCloseSocket handle, bool shouldBlock, out bool willBlock)
         {
-            // NOTE: since we need to emulate blocking I/O on *nix (!), this does NOT change the blocking
-            //       mode of the socket. Instead, it toggles a bit on the handle to indicate whether or not
-            //       the PAL methods with blocking semantics should retry in the case of an operation that
-            //       cannot be completed synchronously.
             handle.IsNonBlocking = !shouldBlock;
             willBlock = shouldBlock;
             return SocketError.Success;
@@ -791,9 +747,19 @@ namespace System.Net.Sockets
                 return handle.AsyncContext.Connect(socketAddress, socketAddressLen, -1);
             }
 
+            handle.AsyncContext.CheckForPriorConnectFailure();
+
             SocketError errorCode;
             bool completed = TryStartConnect(handle.FileDescriptor, socketAddress, socketAddressLen, out errorCode);
-            return completed ? errorCode : SocketError.WouldBlock;
+            if (completed)
+            {
+                handle.AsyncContext.RegisterConnectResult(errorCode);
+                return errorCode;
+            }
+            else
+            {
+                return SocketError.WouldBlock;
+            }
         }
 
         public static SocketError Disconnect(Socket socket, SafeCloseSocket handle, bool reuseSocket)
@@ -927,21 +893,25 @@ namespace System.Net.Sockets
 
         public static unsafe SocketError SetSockOpt(SafeCloseSocket handle, SocketOptionLevel optionLevel, SocketOptionName optionName, int optionValue)
         {
+            Interop.Error err;
+
             if (optionLevel == SocketOptionLevel.Socket)
             {
                 if (optionName == SocketOptionName.ReceiveTimeout)
                 {
                     handle.ReceiveTimeout = optionValue == 0 ? -1 : optionValue;
-                    return SocketError.Success;
+                    err = Interop.Sys.SetReceiveTimeout(handle.FileDescriptor, optionValue);
+                    return err == Interop.Error.SUCCESS ? SocketError.Success : GetSocketErrorForErrorCode(err);
                 }
                 else if (optionName == SocketOptionName.SendTimeout)
                 {
                     handle.SendTimeout = optionValue == 0 ? -1 : optionValue;
-                    return SocketError.Success;
+                    err = Interop.Sys.SetSendTimeout(handle.FileDescriptor, optionValue);
+                    return err == Interop.Error.SUCCESS ? SocketError.Success : GetSocketErrorForErrorCode(err);
                 }
             }
 
-            Interop.Error err = Interop.Sys.SetSockOpt(handle.FileDescriptor, optionLevel, optionName, (byte*)&optionValue, sizeof(int));
+            err = Interop.Sys.SetSockOpt(handle.FileDescriptor, optionLevel, optionName, (byte*)&optionValue, sizeof(int));
             return err == Interop.Error.SUCCESS ? SocketError.Success : GetSocketErrorForErrorCode(err);
         }
 

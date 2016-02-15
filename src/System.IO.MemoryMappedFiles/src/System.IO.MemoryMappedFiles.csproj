@@ -97,6 +97,9 @@
     <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.PipeOptions.cs">
       <Link>Common\Interop\Windows\Interop.PipeOptions.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\Interop.BOOL.cs">
+      <Link>Common\Interop\Windows\Interop.BOOL.cs</Link>
+    </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.SECURITY_ATTRIBUTES.cs">
       <Link>Common\Interop\Windows\Interop.SECURITY_ATTRIBUTES.cs</Link>
     </Compile>
@@ -126,6 +129,9 @@
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\Interop.Errors.cs">
       <Link>Common\Interop\Unix\Interop.Errors.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.Fcntl.SetCloseOnExec.cs">
+      <Link>Common\Interop\Unix\Interop.Fcntl.SetCloseOnExec.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\Interop.IOErrors.cs">
       <Link>Common\Interop\Unix\Interop.IOErrors.cs</Link>

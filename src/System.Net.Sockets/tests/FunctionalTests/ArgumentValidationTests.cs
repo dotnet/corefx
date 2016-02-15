@@ -8,6 +8,7 @@ using System.Collections;
 using System.Collections.Generic;
 
 using Xunit;
+using System.Threading;
 
 namespace System.Net.Sockets.Tests
 {
@@ -698,5 +699,118 @@ namespace System.Net.Sockets.Tests
         {
             Assert.Throws<ArgumentNullException>(() => GetSocket().SendToAsync(s_eventArgs));
         }
+
+        [Fact]
+        [PlatformSpecific(PlatformID.AnyUnix)]
+        public void Socket_Connect_DnsEndPoint_NotSupported()
+        {
+            using (Socket s = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
+            {
+                Assert.Throws<PlatformNotSupportedException>(() => s.Connect(new DnsEndPoint("localhost", 12345)));
+            }
+        }
+
+        [Fact]
+        [PlatformSpecific(PlatformID.AnyUnix)]
+        public void Socket_Connect_StringHost_NotSupported()
+        {
+            using (Socket s = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
+            {
+                Assert.Throws<PlatformNotSupportedException>(() => s.Connect("localhost", 12345));
+            }
+        }
+
+        [Fact]
+        [PlatformSpecific(PlatformID.AnyUnix)]
+        public void Socket_Connect_MultipleAddresses_NotSupported()
+        {
+            using (Socket s = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
+            {
+                Assert.Throws<PlatformNotSupportedException>(() => s.Connect(new[] { IPAddress.Loopback }, 12345));
+            }
+        }
+
+        [Fact]
+        [PlatformSpecific(PlatformID.AnyUnix)]
+        public void Socket_ConnectAsync_DnsEndPoint_NotSupported()
+        {
+            using (Socket s = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
+            {
+                Assert.Throws<PlatformNotSupportedException>(() => { s.ConnectAsync(new DnsEndPoint("localhost", 12345)); });
+            }
+        }
+
+        [Fact]
+        [PlatformSpecific(PlatformID.AnyUnix)]
+        public void Socket_ConnectAsync_StringHost_NotSupported()
+        {
+            using (Socket s = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
+            {
+                Assert.Throws<PlatformNotSupportedException>(() => { s.ConnectAsync("localhost", 12345); });
+            }
+        }
+
+        [Fact]
+        [PlatformSpecific(PlatformID.AnyUnix)]
+        public void Socket_ConnectAsync_MultipleAddresses_NotSupported()
+        {
+            using (Socket s = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
+            {
+                Assert.Throws<PlatformNotSupportedException>(() => { s.ConnectAsync(new[] { IPAddress.Loopback }, 12345); });
+            }
+        }
+
+        [Fact]
+        [PlatformSpecific(PlatformID.AnyUnix)]
+        public void Connect_ConnectTwice_NotSupported()
+        {
+            using (Socket client = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
+            {
+                //
+                // Connect once, to an invalid address, expecting failure
+                //
+                EndPoint ep = new IPEndPoint(IPAddress.Broadcast, 1234);
+                Assert.Throws<SocketException>(() => client.Connect(ep));
+
+                //
+                // Connect again, expecting PlatformNotSupportedException
+                //
+                Assert.Throws<PlatformNotSupportedException>(() => client.Connect(ep));
+            }
+        }
+
+        [Fact]
+        [PlatformSpecific(PlatformID.AnyUnix)]
+        public void ConnectAsync_ConnectTwice_NotSupported()
+        {
+            AutoResetEvent completed = new AutoResetEvent(false);
+
+            using (Socket client = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
+            {
+                //
+                // Connect once, to an invalid address, expecting failure
+                //
+                SocketAsyncEventArgs args = new SocketAsyncEventArgs();
+                args.RemoteEndPoint = new IPEndPoint(IPAddress.Broadcast, 1234);
+                args.Completed += delegate
+                {
+                    completed.Set();
+                };
+
+                if (client.ConnectAsync(args))
+                {
+                    Assert.True(completed.WaitOne(5000), "IPv4: Timed out while waiting for connection");
+                }
+
+                Assert.NotEqual(SocketError.Success, args.SocketError);
+
+                //
+                // Connect again, expecting PlatformNotSupportedException
+                //
+                Assert.Throws<PlatformNotSupportedException>(() => client.ConnectAsync(args));
+            }
+        }
+
+
     }
 }

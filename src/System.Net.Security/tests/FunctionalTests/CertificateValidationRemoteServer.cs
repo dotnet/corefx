@@ -3,7 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Net.Sockets;
-using System.Net.Tests;
+using System.Net.Test.Common;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 
@@ -13,7 +13,6 @@ namespace System.Net.Security.Tests
 {
     public class CertificateValidationRemoteServer
     {
-        [ActiveIssue(5555, PlatformID.OSX)]
         [Fact]
         public async Task CertificateValidationRemoteServer_EndToEnd_Ok()
         {

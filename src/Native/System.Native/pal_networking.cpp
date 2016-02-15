@@ -6,9 +6,7 @@
 #include "pal_networking.h"
 #include "pal_utilities.h"
 
-#if HAVE_ALLOCA_H
-#include <alloca.h>
-#endif
+#include <stdlib.h>
 #include <arpa/inet.h>
 #include <assert.h>
 #if HAVE_EPOLL
@@ -1188,7 +1186,11 @@ extern "C" Error SystemNative_GetIPv4MulticastOption(int32_t socket, int32_t mul
         return PAL_EINVAL;
     }
 
+#if HAVE_IP_MREQN
     ip_mreqn opt;
+#else
+    ip_mreq opt;
+#endif
     socklen_t len = sizeof(opt);
     int err = getsockopt(socket, IPPROTO_IP, optionName, &opt, &len);
     if (err != 0)
@@ -1197,8 +1199,13 @@ extern "C" Error SystemNative_GetIPv4MulticastOption(int32_t socket, int32_t mul
     }
 
     *option = {.MulticastAddress = opt.imr_multiaddr.s_addr,
+#if HAVE_IP_MREQN
                .LocalAddress = opt.imr_address.s_addr,
                .InterfaceIndex = opt.imr_ifindex};
+#else
+               .LocalAddress = opt.imr_interface.s_addr,
+               .InterfaceIndex = 0};
+#endif
     return PAL_SUCCESS;
 }
 
@@ -1215,9 +1222,14 @@ extern "C" Error SystemNative_SetIPv4MulticastOption(int32_t socket, int32_t mul
         return PAL_EINVAL;
     }
 
+#if HAVE_IP_MREQN
     ip_mreqn opt = {.imr_multiaddr = {.s_addr = option->MulticastAddress},
                     .imr_address = {.s_addr = option->LocalAddress},
                     .imr_ifindex = option->InterfaceIndex};
+#else
+    ip_mreq opt = {.imr_multiaddr = {.s_addr = option->MulticastAddress},
+                   .imr_interface = {.s_addr = option->LocalAddress}};
+#endif
     int err = setsockopt(socket, IPPROTO_IP, optionName, &opt, sizeof(opt));
     return err == 0 ? PAL_SUCCESS : SystemNative_ConvertErrorPlatformToPal(errno);
 }
@@ -1339,6 +1351,33 @@ extern "C" Error SystemNative_SetLingerOption(int32_t socket, LingerOption* opti
     linger opt = {.l_onoff = option->OnOff, .l_linger = option->Seconds};
     int err = setsockopt(socket, SOL_SOCKET, LINGER_OPTION_NAME, &opt, sizeof(opt));
     return err == 0 ? PAL_SUCCESS : SystemNative_ConvertErrorPlatformToPal(errno);
+}
+
+Error SetTimeoutOption(int32_t socket, int32_t millisecondsTimeout, int optionName)
+{
+    if (millisecondsTimeout < 0)
+    {
+        return PAL_EINVAL;
+    }
+
+    timeval timeout =
+    {
+        timeout.tv_sec = millisecondsTimeout / 1000,
+        timeout.tv_usec = (millisecondsTimeout % 1000) * 1000
+    };
+
+    int err = setsockopt(socket, SOL_SOCKET, optionName, &timeout, sizeof(timeout));
+    return err == 0 ? PAL_SUCCESS : SystemNative_ConvertErrorPlatformToPal(errno);
+}
+
+extern "C" Error SystemNative_SetReceiveTimeout(int32_t socket, int32_t millisecondsTimeout)
+{
+    return SetTimeoutOption(socket, millisecondsTimeout, SO_RCVTIMEO);
+}
+
+extern "C" Error SystemNative_SetSendTimeout(int32_t socket, int32_t millisecondsTimeout)
+{
+    return SetTimeoutOption(socket, millisecondsTimeout, SO_SNDTIMEO);
 }
 
 static bool ConvertSocketFlagsPalToPlatform(int32_t palFlags, int& platformFlags)
@@ -2432,15 +2471,6 @@ extern "C" Error SystemNative_WaitForSocketEvents(int32_t port, SocketEvent* buf
     }
 
     return WaitForSocketEventsInner(port, buffer, count);
-}
-
-extern "C" int32_t SystemNative_PlatformSupportsMultipleConnectAttempts()
-{
-#if HAVE_SUPPORT_FOR_MULTIPLE_CONNECT_ATTEMPTS
-    return 1;
-#else
-    return 0;
-#endif
 }
 
 extern "C" int32_t SystemNative_PlatformSupportsDualModeIPv4PacketInfo()

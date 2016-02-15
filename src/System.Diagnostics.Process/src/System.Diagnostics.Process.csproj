@@ -16,6 +16,7 @@
     <PackageTargetFramework Condition="'$(TargetGroup)'==''">dotnet5.5</PackageTargetFramework>
     <UsePackageTargetRuntimeDefaults>true</UsePackageTargetRuntimeDefaults>
     <IsPartialFacadeAssembly Condition="'$(TargetGroup)'=='net46' OR '$(TargetGroup)'=='net461'">true</IsPartialFacadeAssembly>
+    <NuGetTargetMoniker Condition="'$(TargetGroup)' == ''">.NETPlatform,Version=v5.5</NuGetTargetMoniker>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(TargetsFreeBSD)' == 'true' OR '$(TargetsUnknownUnix)' == 'true' ">
     <!-- Suppress unused field warnings when using PlatformNotSupportedException stubs -->
@@ -50,9 +51,6 @@
     <Compile Include="System\Diagnostics\ThreadPriorityLevel.cs" />
     <Compile Include="System\Diagnostics\ThreadState.cs" />
     <Compile Include="System\Diagnostics\ThreadWaitReason.cs" />
-    <Compile Include="$(CommonPath)\System\Text\EncodingHelper.cs">
-      <Link>Common\System\Text\EncodingHelper.cs</Link>
-    </Compile>
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetsWindows)' == 'true' AND '$(IsPartialFacadeAssembly)'!='true'">
     <Compile Include="$(CommonPath)\Interop\Windows\Interop.Libraries.cs">
@@ -184,6 +182,9 @@
     <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.CreateProcessWithLogon.cs">
       <Link>Common\Interop\Windows\Interop.CreateProcessWithLogon.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\Interop.BOOL.cs">
+      <Link>Common\Interop\Windows\Interop.BOOL.cs</Link>
+    </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.SECURITY_ATTRIBUTES.cs">
       <Link>Common\Interop\Windows\Interop.SECURITY_ATTRIBUTES.cs</Link>
     </Compile>
@@ -207,6 +208,12 @@
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.HandleOptions.cs">
       <Link>Common\Interop\Windows\Interop.ProcessOptions.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\Text\ConsoleEncoding.cs">
+      <Link>Common\System\Text\ConsoleEncoding.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\Text\EncodingHelper.Windows.cs">
+      <Link>Common\System\Text\EncodingHelper.cs</Link>
     </Compile>
     <Compile Include="Microsoft\Win32\SafeHandles\SafeProcessHandle.Windows.cs" />
     <Compile Include="Microsoft\Win32\SafeHandles\SafeThreadHandle.cs" />
