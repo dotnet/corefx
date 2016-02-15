@@ -163,64 +163,32 @@ namespace System.Runtime.Tests
             Assert.Throws<ArgumentException>(null, () => Array.BinarySearch(new string[3], 3, 1, "", null)); // Index + length > array.Length
         }
         
-        [Fact]
-        public static void TestClear_PrimitiveValuesWithoutGCRefs()
+        [Theory]
+        [InlineData(new int[] { 7, 8, 9 }, 0, 3, new int[] { 0, 0, 0 })]
+        [InlineData(new int[] { 0x1234567, 0x789abcde, 0x22334455, 0x66778899, 0x11335577, 0x22446688 }, 0, 6, new int[] { 0, 0, 0, 0, 0, 0 })]
+        [InlineData(new int[] { 0x1234567, 0x789abcde, 0x22334455, 0x66778899, 0x11335577, 0x22446688 }, 2, 3, new int[] { 0x1234567, 0x789abcde, 0, 0, 0, 0x22446688 })]
+        [InlineData(new int[] { 0x1234567, 0x789abcde, 0x22334455, 0x66778899, 0x11335577, 0x22446688 }, 6, 0, new int[] { 0x1234567, 0x789abcde, 0x22334455, 0x66778899, 0x11335577, 0x22446688 })]
+        [InlineData(new int[] { 0x1234567, 0x789abcde, 0x22334455, 0x66778899, 0x11335577, 0x22446688 }, 0, 0, new int[] { 0x1234567, 0x789abcde, 0x22334455, 0x66778899, 0x11335577, 0x22446688 })]
+        [InlineData(new string[] { "7", "8", "9" }, 0, 3, new string[] { null, null, null })]
+        [InlineData(new string[] { "0x1234567", "0x789abcde", "0x22334455", "0x66778899", "0x11335577", "0x22446688" }, 0, 6, new string[] { null, null, null, null, null, null })]
+        [InlineData(new string[] { "0x1234567", "0x789abcde", "0x22334455", "0x66778899", "0x11335577", "0x22446688" }, 2, 3, new string[] { "0x1234567", "0x789abcde", null, null, null, "0x22446688" })]
+        [InlineData(new string[] { "0x1234567", "0x789abcde", "0x22334455", "0x66778899", "0x11335577", "0x22446688" }, 6, 0, new string[] { "0x1234567", "0x789abcde", "0x22334455", "0x66778899", "0x11335577", "0x22446688" })]
+        [InlineData(new string[] { "0x1234567", "0x789abcde", "0x22334455", "0x66778899", "0x11335577", "0x22446688" }, 0, 0, new string[] { "0x1234567", "0x789abcde", "0x22334455", "0x66778899", "0x11335577", "0x22446688" })]
+        public static void TestClear(Array array, int index, int length, Array expected)
         {
-            var array = new int[] { 7, 8, 9 };
-            Array.Clear(array, 0, 3);
-            Assert.Equal(new int[] { 0, 0, 0 }, array);
-
-            array = new int[] { 7, 8, 9 };
-            ((IList)array).Clear();
-            Assert.Equal(new int[] { 0, 0, 0 }, array);
-
-            array = new int[] { 0x1234567, 0x789abcde, 0x22334455, 0x66778899, 0x11335577, 0x22446688 };
-            Array.Clear(array, 2, 3);
-            Assert.Equal(new int[] { 0x1234567, 0x789abcde, 0, 0, 0, 0x22446688 }, array);
-
-            array = new int[] { 0x1234567, 0x789abcde, 0x22334455, 0x66778899, 0x11335577, 0x22446688 };
-            Array.Clear(array, 0, 6);
-            Assert.Equal(new int[] { 0, 0, 0, 0, 0, 0 }, array);
-
-            array = new int[] { 0x1234567, 0x789abcde, 0x22334455, 0x66778899, 0x11335577, 0x22446688 };
-            Array.Clear(array, 6, 0);
-            Assert.Equal(new int[] { 0x1234567, 0x789abcde, 0x22334455, 0x66778899, 0x11335577, 0x22446688 }, array);
-
-            array = new int[] { 0x1234567, 0x789abcde, 0x22334455, 0x66778899, 0x11335577, 0x22446688 };
-            Array.Clear(array, 0, 0);
-            Assert.Equal(new int[] { 0x1234567, 0x789abcde, 0x22334455, 0x66778899, 0x11335577, 0x22446688 }, array);
+            if (index == 0 && length == array.Length)
+            {
+                // Use IList.Clear()
+                Array testArray = (Array)array.Clone();
+                ((IList)testArray).Clear();
+                Assert.Equal(expected, testArray);
+            }
+            Array.Clear(array, index, length);
+            Assert.Equal(expected, array);
         }
 
         [Fact]
-        public static void TestClear_ValuesWithGCRefs()
-        {
-            var array = new string[] { "7", "8", "9" };
-            Array.Clear(array, 0, 3);
-            Assert.Equal(new string[] { null, null, null }, array);
-
-            array = new string[] { "7", "8", "9" };
-            ((IList)array).Clear();
-            Assert.Equal(new string[] { null, null, null }, array);
-
-            array = new string[] { "0x1234567", "0x789abcde", "0x22334455", "0x66778899", "0x11335577", "0x22446688" };
-            Array.Clear(array, 2, 3);
-            Assert.Equal(new string[] { "0x1234567", "0x789abcde", null, null, null, "0x22446688" }, array);
-
-            array = new string[] { "0x1234567", "0x789abcde", "0x22334455", "0x66778899", "0x11335577", "0x22446688" };
-            Array.Clear(array, 0, 6);
-            Assert.Equal(new string[] { null, null, null, null, null, null }, array);
-
-            array = new string[] { "0x1234567", "0x789abcde", "0x22334455", "0x66778899", "0x11335577", "0x22446688" };
-            Array.Clear(array, 6, 0);
-            Assert.Equal(new string[] { "0x1234567", "0x789abcde", "0x22334455", "0x66778899", "0x11335577", "0x22446688" }, array);
-
-            array = new string[] { "0x1234567", "0x789abcde", "0x22334455", "0x66778899", "0x11335577", "0x22446688" };
-            Array.Clear(array, 0, 0);
-            Assert.Equal(new string[] { "0x1234567", "0x789abcde", "0x22334455", "0x66778899", "0x11335577", "0x22446688" }, array);
-        }
-
-        [Fact]
-        public static void TestClear_ValuesWithEmbeddedGCRefs()
+        public static void TestClear_Struct_WithReferenceAndValueTypeFields_Array()
         {
             var array = new G[]
             {
@@ -292,22 +260,32 @@ namespace System.Runtime.Tests
             Assert.NotSame(clone, array);
         }
 
-        [Fact]
-        public static void TestConstrainedCopy_GCReferenceArray()
+        public static IEnumerable<object[]> ConstrainedCopyTestData()
         {
-            var s = new string[] { "Red", "Green", null, "Blue" };
-            var d = new string[] { "X", "X", "X", "X" };
-            Array.ConstrainedCopy(s, 0, d, 0, 4);
-            Assert.Equal(new string[] { "Red", "Green", null, "Blue" }, d);
+            yield return new object[] { new string[] { "Red", "Green", null, "Blue" }, 0, new string[] { "X", "X", "X", "X" }, 0, 4, new string[] { "Red", "Green", null, "Blue" } };
 
-            // With reverse overlap
-            s = new string[] { "Red", "Green", null, "Blue" };
-            Array.ConstrainedCopy(s, 1, s, 2, 2);
-            Assert.Equal(new string[] { "Red", "Green", "Green", null }, s);
+            string[] stringArray = new string[] { "Red", "Green", null, "Blue" };
+            yield return new object[] { stringArray, 1, stringArray, 2, 2, new string[] { "Red", "Green", "Green", null } };
+
+            yield return new object[] { new int[] { 0x12345678, 0x22334455, 0x778899aa }, 0, new int[3], 0, 3, new int[] { 0x12345678, 0x22334455, 0x778899aa } };
+            
+            int[] intArray1 = new int[] { 0x12345678, 0x22334455, 0x778899aa, 0x55443322, 0x33445566 };
+            yield return new object[] { intArray1, 3, intArray1, 2, 2, new int[] { 0x12345678, 0x22334455, 0x55443322, 0x33445566, 0x33445566 } };
+
+            int[] intArray2 = new int[] { 0x12345678, 0x22334455, 0x778899aa, 0x55443322, 0x33445566 };
+            yield return new object[] { intArray2, 2, intArray2, 3, 2, new int[] { 0x12345678, 0x22334455, 0x778899aa, 0x778899aa, 0x55443322 } };
+        }
+
+        [Theory]
+        [MemberData("ConstrainedCopyTestData")]
+        public static void TestConstrainedCopy(Array sourceArray, int sourceIndex, Array destinationArray, int destinationIndex, int length, Array expected)
+        {
+            Array.ConstrainedCopy(sourceArray, sourceIndex, destinationArray, destinationIndex, length);
+            Assert.Equal(expected, destinationArray);
         }
 
         [Fact]
-        public static void TestConstrainedCopy_ValueTypeArray_WithGCReferences()
+        public static void TestConstrainedCopy_Struct_WithReferenceAndValueTypeFields_Array()
         {
             var src = new G[]
             {
@@ -351,27 +329,6 @@ namespace System.Runtime.Tests
         }
 
         [Fact]
-        public static void TestConstrainedCopy_ValueTypeArray_WithNoCGReferences()
-        {
-            var src = new int[] { 0x12345678, 0x22334455, 0x778899aa };
-            var dst = new int[3];
-
-            // Value-type to value-type array ConstrainedCopy.
-            Array.ConstrainedCopy(src, 0, dst, 0, 3);
-            Assert.Equal(new int[] { 0x12345678, 0x22334455, 0x778899aa }, dst);
-
-            // Value-type to value-type array ConstrainedCopy (in place, with overlap)
-            src = new int[] { 0x12345678, 0x22334455, 0x778899aa, 0x55443322, 0x33445566 };
-            Array.ConstrainedCopy(src, 3, src, 2, 2);
-            Assert.Equal(new int[] { 0x12345678, 0x22334455, 0x55443322, 0x33445566, 0x33445566 }, src);
-
-            // Value-type to value-type array ConstrainedCopy (in place, with reverse overlap)
-            src = new int[] { 0x12345678, 0x22334455, 0x778899aa, 0x55443322, 0x33445566 };
-            Array.ConstrainedCopy(src, 2, src, 3, 2);
-            Assert.Equal(new int[] { 0x12345678, 0x22334455, 0x778899aa, 0x778899aa, 0x55443322 }, src);
-        }
-
-        [Fact]
         public static void TestConstrainedCopy_Invalid()
         {
             Assert.Throws<ArgumentNullException>("source", () => Array.ConstrainedCopy(null, 0, new string[10], 0, 0)); // Source array is null
@@ -391,133 +348,48 @@ namespace System.Runtime.Tests
             Assert.Throws<ArgumentOutOfRangeException>("length", () => Array.ConstrainedCopy(new string[10], 0, new string[10], 0, -1)); // Length < 0
         }
 
-        [Fact]
-        public static void TestCopy_GCReferenceArray()
+        public static IEnumerable<object[]> CopyTestData()
         {
-            var src = new string[] { "Red", "Green", null, "Blue" };
-            var dst = new string[] { "X", "X", "X", "X" };
-            Array.Copy(src, 0, dst, 0, 4);
-            Assert.Equal(new string[] { "Red", "Green", null, "Blue" }, dst);
+            yield return new object[] { new int[] { 0x12345678, 0x22334455, 0x778899aa }, 0, new int[3], 0, 3, new int[] { 0x12345678, 0x22334455, 0x778899aa } };
 
-            // With reverse overlap
-            src = new string[] { "Red", "Green", null, "Blue" };
-            Array.Copy(src, 1, src, 2, 2);
-            Assert.Equal(new string[] { "Red", "Green", "Green", null }, src);
+            int[] intArray1 = new int[] { 0x12345678, 0x22334455, 0x778899aa, 0x55443322, 0x33445566 };
+            yield return new object[] { intArray1, 3, intArray1, 2, 2, new int[] { 0x12345678, 0x22334455, 0x55443322, 0x33445566, 0x33445566 } };
+
+            int[] intArray2 = new int[] { 0x12345678, 0x22334455, 0x778899aa, 0x55443322, 0x33445566 };
+            yield return new object[] { intArray2, 2, intArray2, 3, 2, new int[] { 0x12345678, 0x22334455, 0x778899aa, 0x778899aa, 0x55443322 } };
+
+            yield return new object[] { new string[] { "Red", "Green", null, "Blue" }, 0, new string[] { "X", "X", "X", "X" }, 0, 4, new string[] { "Red", "Green", null, "Blue" } };
+
+            string[] stringArray = new string[] { "Red", "Green", null, "Blue" };
+            yield return new object[] { stringArray, 1, stringArray, 2, 2, new string[] { "Red", "Green", "Green", null } };
+
+            // Value type array to reference type array
+            yield return new object[] { new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 }, 2, new object[10], 5, 3, new object[] { null, null, null, null, null, 2, 3, 4, null, null } };
+            yield return new object[] { new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 }, 2, new IEquatable<int>[10], 5, 3, new IEquatable<int>[] { null, null, null, null, null, 2, 3, 4, null, null } };
+            yield return new object[] { new int?[] { 0, 1, 2, default(int?), 4, 5, 6, 7, 8, 9 }, 2, new object[10], 5, 3, new object[] { null, null, null, null, null, 2, null, 4, null, null } };
+
+            // Reference type array to value type array
+            yield return new object[] { new object[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 }, 2, new int[] { 0xcc, 0xcc, 0xcc, 0xcc, 0xcc, 0xcc, 0xcc, 0xcc, 0xcc, 0xcc }, 5, 3, new int[] { 0xcc, 0xcc, 0xcc, 0xcc, 0xcc, 2, 3, 4, 0xcc, 0xcc } };
+            yield return new object[] { new IEquatable<int>[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 }, 2, new int[] { 0xcc, 0xcc, 0xcc, 0xcc, 0xcc, 0xcc, 0xcc, 0xcc, 0xcc, 0xcc }, 5, 3, new int[] { 0xcc, 0xcc, 0xcc, 0xcc, 0xcc, 2, 3, 4, 0xcc, 0xcc } };
+            yield return new object[] { new IEquatable<int>[] { 0, new NotInt32(), 2, 3, 4, new NotInt32(), 6, 7, 8, 9 }, 2, new int[] { 0xcc, 0xcc, 0xcc, 0xcc, 0xcc, 0xcc, 0xcc, 0xcc, 0xcc, 0xcc }, 5, 3, new int[] { 0xcc, 0xcc, 0xcc, 0xcc, 0xcc, 2, 3, 4, 0xcc, 0xcc } };
+
+            yield return new object[] { new object[] { 0, 1, 2, 3, null, 5, 6, 7, 8, 9 }, 2, new int?[] { 0xcc, 0xcc, 0xcc, 0xcc, 0xcc, 0xcc, 0xcc, 0xcc, 0xcc, 0xcc }, 5, 3, new int?[] { 0xcc, 0xcc, 0xcc, 0xcc, 0xcc, 2, 3, null, 0xcc, 0xcc } };
         }
 
-        [Fact]
-        public static void TestCopy_ValueTypeArray_ToReferenceTypeArray()
+        [Theory]
+        [MemberData("CopyTestData")]
+        public static void TestCopy(Array sourceArray, int sourceIndex, Array destinationArray, int destinationIndex, int length, Array expected)
         {
-            var src1 = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
-            object[] dst1 = new object[10];
-            Array.Copy(src1, 2, dst1, 5, 3);
-            Assert.Equal(new object[] { null, null, null, null, null, 2, 3, 4, null, null }, dst1);
-
-            var src2 = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
-            object[] dst2 = new IEquatable<int>[10];
-            Array.Copy(src2, 2, dst2, 5, 3);
-            Assert.Equal(new IEquatable<int>[] { null, null, null, null, null, 2, 3, 4, null, null }, dst2);
-
-            var src3 = new int?[] { 0, 1, 2, default(int?), 4, 5, 6, 7, 8, 9 };
-            object[] dst3 = new object[10];
-            Array.Copy(src3, 2, dst3, 5, 3);
-            Assert.Equal(new object[] { null, null, null, null, null, 2, null, 4, null, null }, dst3);
-        }
-
-        [Fact]
-        public static void TestCopy_ValueTypeArray_ToReferenceTypeArray_Invalid()
-        {
-            var src = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
-            object[] dst = new IEnumerable<int>[10];
-            Assert.Throws<ArrayTypeMismatchException>(() => Array.Copy(src, 0, dst, 0, 10));
-        }
-
-        [Fact]
-        public static void TestCopy_ReferenceTypeArray_ToValueTypeArray()
-        {
-            const int cc = unchecked((int)0xcccccccc);
-
-            // Test 1: simple compatible array types
-            var src = new object[10];
-            for (int i = 0; i < src.Length; i++)
-                src[i] = i;
-
-            var dst = new int[10];
-            for (int i = 0; i < dst.Length; i++)
-                dst[i] = cc;
-
-            Array.Copy(src, 2, dst, 5, 3);
-            Assert.Equal(new int[] { cc, cc, cc, cc, cc, 2, 3, 4, cc, cc }, dst);
-
-            // Test 2: more complex compatible array types
-            src = new IEquatable<int>[10];
-            for (int i = 0; i < src.Length; i++)
-                src[i] = i;
-
-            dst = new int[10];
-            for (int i = 0; i < dst.Length; i++)
-                dst[i] = cc;
-
-            Array.Copy(src, 2, dst, 5, 3);
-            Assert.Equal(new int[] { cc, cc, cc, cc, cc, 2, 3, 4, cc, cc }, dst);
-
-            // Test 3: array contains incompatible types that are ignored by the method (not in index range)
-            src = new IEquatable<int>[10];
-            for (int i = 0; i < src.Length; i++)
-                src[i] = i;
-            src[1] = new NotInt32();
-            src[5] = new NotInt32();
-
-            dst = new int[10];
-            for (int i = 0; i < dst.Length; i++)
-                dst[i] = cc;
-
-            Array.Copy(src, 2, dst, 5, 3);
-            Assert.Equal(new int[] { cc, cc, cc, cc, cc, 2, 3, 4, cc, cc }, dst);
-
-            // Test 4: compatible array types (nullables)
-            src = new object[10];
-            for (int i = 0; i < src.Length; i++)
-                src[i] = i;
-            src[4] = null;
-
-            var dNullable = new int?[10];
-            for (int i = 0; i < dNullable.Length; i++)
-                dNullable[i] = cc;
-
-            Array.Copy(src, 2, dNullable, 5, 3);
-            Assert.True(dNullable[0].HasValue && dNullable[0].Value == cc);
-            Assert.True(dNullable[1].HasValue && dNullable[1].Value == cc);
-            Assert.True(dNullable[2].HasValue && dNullable[2].Value == cc);
-            Assert.True(dNullable[3].HasValue && dNullable[3].Value == cc);
-            Assert.True(dNullable[4].HasValue && dNullable[4].Value == cc);
-            Assert.True(dNullable[5].HasValue && dNullable[5].Value == 2);
-            Assert.True(dNullable[6].HasValue && dNullable[6].Value == 3);
-            Assert.False(dNullable[7].HasValue);
-            Assert.True(dNullable[8].HasValue && dNullable[8].Value == cc);
-            Assert.True(dNullable[9].HasValue && dNullable[9].Value == cc);
-        }
-
-        [Fact]
-        public static void TestCopy_ReferenceTypeArray_ToValueTypeArray_Invalid()
-        {
-            object[] src = new string[10];
-            int[] dst = new int[10];
-            Assert.Throws<ArrayTypeMismatchException>(() => Array.Copy(src, 0, dst, 0, 10)); // Different array types
-
-            src = new IEquatable<int>[10];
-            src[4] = new NotInt32();
-            dst = new int[10];
-            // Legacy: Note that the cast checks are done during copying, so some elements in the destination
-            // array may already have been overwritten.
-            Assert.Throws<InvalidCastException>(() => Array.Copy(src, 2, dst, 5, 3));
-
-            src = new IEquatable<int>[10];
-            src[4] = null;
-            dst = new int[10];
-            // Legacy: Note that the cast checks are done during copying, so some elements in the destination
-            // array may already have been overwritten.
-            Assert.Throws<InvalidCastException>(() => Array.Copy(src, 2, dst, 5, 3));
+            if (sourceIndex == 0 && destinationIndex == 0)
+            {
+                // Use Copy(Array, Array, int)
+                Array testArray = (Array)sourceArray.Clone();
+                Array.Copy(sourceArray, destinationArray, length);
+                Assert.Equal(expected, destinationArray);
+            }
+            // Use Copy(Array, int, Array, int, int)
+            Array.Copy(sourceArray, sourceIndex, destinationArray, destinationIndex, length);
+            Assert.Equal(expected, destinationArray);
         }
 
         [Fact]
@@ -545,7 +417,7 @@ namespace System.Runtime.Tests
         }
 
         [Fact]
-        public static void TestCopy_ValueTypeArray_WithGCReferences()
+        public static void TestCopy_Struct_WithReferenceAndValueTypeFields_Array()
         {
             var src = new G[]
             {
@@ -589,23 +461,30 @@ namespace System.Runtime.Tests
         }
 
         [Fact]
-        public static void TestCopy_ValueTypeArray_WithNoGCReferences()
+        public static void TestCopy_Invalid()
         {
-            // Value-type to value-type array copy.
-            var src = new int[] { 0x12345678, 0x22334455, 0x778899aa };
-            var dst = new int[3];
-            Array.Copy(src, 0, dst, 0, 3);
-            Assert.Equal(new int[] { 0x12345678, 0x22334455, 0x778899aa }, dst);
+            Assert.Throws<ArrayTypeMismatchException>(() => Array.Copy(new int[10], 0, new IEnumerable<int>[10], 0, 10)); // Different array types
+            Assert.Throws<ArrayTypeMismatchException>(() => Array.Copy(new string[10], 0, new int[10], 0, 10)); // Different array types
 
-            // Value-type to value-type array copy (in place, with overlap)
-            src = new int[] { 0x12345678, 0x22334455, 0x778899aa, 0x55443322, 0x33445566 };
-            Array.Copy(src, 3, src, 2, 2);
-            Assert.Equal(new int[] { 0x12345678, 0x22334455, 0x55443322, 0x33445566, 0x33445566 }, src);
+            Assert.Throws<InvalidCastException>(() =>
+            {
+                IEquatable<int>[] sourceArray = new IEquatable<int>[10];
+                sourceArray[4] = new NotInt32();
+                int[] destinationArray = new int[10];
+                // Legacy: Note that the cast checks are done during copying, so some elements in the destination
+                // array may already have been overwritten.
+                Array.Copy(sourceArray, 2, destinationArray, 5, 3);
+            });
 
-            // Value-type to value-type array copy (in place, with reverse overlap)
-            src = new int[] { 0x12345678, 0x22334455, 0x778899aa, 0x55443322, 0x33445566 };
-            Array.Copy(src, 2, src, 3, 2);
-            Assert.Equal(new int[] { 0x12345678, 0x22334455, 0x778899aa, 0x778899aa, 0x55443322 }, src);
+            Assert.Throws<InvalidCastException>(() =>
+            {
+                IEquatable<int>[] sourceArray = new IEquatable<int>[10];
+                sourceArray[4] = null;
+                int[] destinationArray = new int[10];
+                // Legacy: Note that the cast checks are done during copying, so some elements in the destination
+                // array may already have been overwritten.
+                Array.Copy(sourceArray, 2, destinationArray, 5, 3);
+            });
         }
 
         [Fact]
@@ -787,12 +666,12 @@ namespace System.Runtime.Tests
             Assert.True(Array.Empty<int>() != null);
             Assert.Equal(0, Array.Empty<int>().Length);
             Assert.Equal(1, Array.Empty<int>().Rank);
-            Assert.Equal(Array.Empty<int>(), Array.Empty<int>());
+            Assert.Same(Array.Empty<int>(), Array.Empty<int>());
 
             Assert.True(Array.Empty<object>() != null);
             Assert.Equal(0, Array.Empty<object>().Length);
             Assert.Equal(1, Array.Empty<object>().Rank);
-            Assert.Equal(Array.Empty<object>(), Array.Empty<object>());
+            Assert.Same(Array.Empty<object>(), Array.Empty<object>());
         }
 
         [Fact]
@@ -1265,12 +1144,12 @@ namespace System.Runtime.Tests
             Assert.Throws<ArgumentException>(null, () => Array.Reverse(new int[10], 9, 2)); // Index + length > array.Length
         }
 
-        public static IEnumerable<object[]> Sort_Array_TestData()
+        public static IEnumerable<object[]> Sort_Array_NonGeneric_TestData()
         {
             yield return new object[] { new int[0], 0, 0, new IntegerComparer(), new int[0] };
             yield return new object[] { new int[] { 5 }, 0, 1, new IntegerComparer(), new int[] { 5 } };
             yield return new object[] { new int[] { 5, 2 }, 0, 2, new IntegerComparer(), new int[] { 2, 5 } };
-            yield return new object[] { new int[] { 5, 2, 9, 8, 4, 3, 2, 4, 6 }, 0, 9, new IntegerComparer(), new int[] { 2, 2, 3, 4, 4, 5, 6, 8, 9} };
+            yield return new object[] { new int[] { 5, 2, 9, 8, 4, 3, 2, 4, 6 }, 0, 9, new IntegerComparer(), new int[] { 2, 2, 3, 4, 4, 5, 6, 8, 9 } };
             yield return new object[] { new int[] { 5, 2, 9, 8, 4, 3, 2, 4, 6 }, 3, 4, new IntegerComparer(), new int[] { 5, 2, 9, 2, 3, 4, 8, 4, 6 } };
             yield return new object[] { new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9 }, 0, 9, new IntegerComparer(), new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9 } };
 
@@ -1279,7 +1158,10 @@ namespace System.Runtime.Tests
 
             yield return new object[] { new int[] { 5, 2, 9, 8, 4, 3, 2, 4, 6 }, 0, 0, null, new int[] { 5, 2, 9, 8, 4, 3, 2, 4, 6 } };
             yield return new object[] { new int[] { 5, 2, 9, 8, 4, 3, 2, 4, 6 }, 9, 0, null, new int[] { 5, 2, 9, 8, 4, 3, 2, 4, 6 } };
+        }
 
+        public static IEnumerable<object[]> Sort_Array_Generic_TestData()
+        {
             yield return new object[] { new string[0], 0, 0, new StringComparer(), new string[0] };
             yield return new object[] { new string[] { "5" }, 0, 1, new StringComparer(), new string[] { "5" } };
             yield return new object[] { new string[] { "5", "2" }, 0, 2, new StringComparer(), new string[] { "2", "5" } };
@@ -1288,64 +1170,71 @@ namespace System.Runtime.Tests
             yield return new object[] { new string[] { "5", null, "2", "9", "8", "4", "3", "2", "4", "6"}, 3, 4, new StringComparer(), new string[] { "5", null, "2", "3", "4", "8", "9", "2", "4", "6" } };
         }
 
-        [Theory, MemberData("Sort_Array_TestData")]
-        public static void TestSort_Array(Array array, int index, int length, IComparer comparer, Array expected)
+        [Theory]
+        [MemberData("Sort_Array_NonGeneric_TestData")]
+        [MemberData("Sort_Array_Generic_TestData")]
+        public static void TestSort_Array_NonGeneric(Array array, int index, int length, IComparer comparer, Array expected)
         {
             Array sortedArray;
-            string[] sortedStringArray = new string[0];
             if (index == 0 && length == array.Length)
             {
+                // Use Sort(Array) or Sort(Array, IComparer)
                 if (comparer == null)
                 {
+                    // Use Sort(Array)
                     sortedArray = (Array)array.Clone();
                     Array.Sort(sortedArray);
                     Assert.Equal(expected, sortedArray);
-
-                    // Make Sort(...) generic for string[]
-                    sortedStringArray = array.Clone() as string[];
-                    if (sortedStringArray != null)
-                    {
-                        Array.Sort(sortedStringArray);
-                        Assert.Equal(expected, sortedStringArray);
-                    }
-                }                
+                }
+                // Use Sort(Array, IComparer)
                 sortedArray = (Array)array.Clone();
                 Array.Sort(sortedArray, comparer);
                 Assert.Equal(expected, sortedArray);
-
-                // Make Sort(...) generic for string[]
-                sortedStringArray = array.Clone() as string[];
-                if (sortedStringArray != null)
-                {
-                    Array.Sort(sortedStringArray, comparer);
-                    Assert.Equal(expected, sortedStringArray);
-                }
             }
             if (comparer == null)
             {
+                // Use Sort(Array, int, int)
                 sortedArray = (Array)array.Clone();
                 Array.Sort(sortedArray, index, length);
                 Assert.Equal(expected, sortedArray);
-
-                // Make Sort(...) generic for string[]
-                sortedStringArray = array.Clone() as string[];
-                if (sortedStringArray != null)
-                {
-                    Array.Sort(sortedStringArray, index, length);
-                    Assert.Equal(expected, sortedStringArray);
-                }
             }
+            // Use Sort(Array, int, int, IComparer)
             sortedArray = (Array)array.Clone();
             Array.Sort(sortedArray, index, length, comparer);
             Assert.Equal(expected, sortedArray);
+        }
 
-            // Make Sort(...) generic for string[]
-            sortedStringArray = array.Clone() as string[];
-            if (sortedStringArray != null)
+        [Theory]
+        [MemberData("Sort_Array_Generic_TestData")]
+        public static void TestSort_Array_Generic(string[] array, int index, int length, IComparer comparer, string[] expected)
+        {
+            string[] sortedArray;
+            if (index == 0 && length == array.Length)
             {
-                Array.Sort(sortedStringArray, index, length, comparer);
-                Assert.Equal(expected, sortedStringArray);
+                // Use Sort<T>(T[]) or Sort<T>(T[], IComparer)
+                if (comparer == null)
+                {
+                    // Use Sort(Array)
+                    sortedArray = (string[])array.Clone();
+                    Array.Sort(sortedArray);
+                    Assert.Equal(expected, sortedArray);
+                }
+                // Use Sort<T>(T[], IComparer)
+                sortedArray = (string[])array.Clone();
+                Array.Sort(sortedArray, comparer);
+                Assert.Equal(expected, sortedArray);
             }
+            if (comparer == null)
+            {
+                // Use Sort<T>(T[], int, int)
+                sortedArray = (string[])array.Clone();
+                Array.Sort(sortedArray, index, length);
+                Assert.Equal(expected, sortedArray);
+            }
+            // Use Sort<T>(T[], int, int, IComparer)
+            sortedArray = (string[])array.Clone();
+            Array.Sort(sortedArray, index, length, comparer);
+            Assert.Equal(expected, sortedArray);
         }
 
         [Fact]
@@ -1361,7 +1250,7 @@ namespace System.Runtime.Tests
         }
 
         [Fact]
-        public static void TestSort_Array_Comparer_Invalid()
+        public static void TestSort_Array_IComparer_Invalid()
         {
             Assert.Throws<ArgumentNullException>("array", () => Array.Sort(null, (IComparer)null)); // Array is null
             Assert.Throws<ArgumentNullException>("array", () => Array.Sort(null, (IComparer<int>)null)); // Array is null
@@ -1407,7 +1296,7 @@ namespace System.Runtime.Tests
         }
 
         [Fact]
-        public static void TestSort_Array_Int_Int_Comparer_Invalid()
+        public static void TestSort_Array_Int_Int_IComparer_Invalid()
         {
             Assert.Throws<ArgumentNullException>("keys", () => Array.Sort(null, 0, 0, null)); // Array is null
             Assert.Throws<ArgumentNullException>("array", () => Array.Sort((int[])null, 0, 0, null)); // Array is null
@@ -1433,11 +1322,11 @@ namespace System.Runtime.Tests
             Assert.Throws<ArgumentException>(null, () => Array.Sort(new int[10], 9, 2, null)); // Index + length > list.Count
         }
 
-        public static IEnumerable<object[]> Sort_Array_Array_TestData()
+        public static IEnumerable<object[]> Sort_Array_Array_NonGeneric_TestData()
         {
             yield return new object[] { new int[] { 3, 1, 2 }, new int[] { 4, 5, 6 }, 0, 3, new IntegerComparer(), new int[] { 1, 2, 3 }, new int[] { 5, 6, 4 } };
             yield return new object[] { new int[] { 3, 1, 2 }, new string[] { "a", "b", "c" }, 0, 3, new IntegerComparer(), new int[] { 1, 2, 3 }, new string[] { "b", "c", "a" } };
-            yield return new object[] { new string[] { "bcd", "bc", "c", "ab" }, new string[] { "a", "b", "c", "d" }, 0, 4, new StringComparer(), new string[] { "ab", "bc", "bcd", "c" }, new string[] { "d", "b", "a", "c" } };
+
             yield return new object[] { new string[] { "bcd", "bc", "c", "ab" }, new int[] { 1, 2, 3, 4 }, 0, 4, new StringComparer(), new string[] { "ab", "bc", "bcd", "c" }, new int[] { 4, 2, 1, 3 } };
             yield return new object[] { new string[] { "bcd", "bc", "c", "ab" }, new int[] { 1, 2, 3, 4 }, 1, 2, new StringComparer(), new string[] { "bcd", "bc", "c", "ab" }, new int[] { 1, 2, 3, 4 } };
 
@@ -1473,17 +1362,24 @@ namespace System.Runtime.Tests
             yield return new object[] { refArray, null, 0, 6, null, sortedRefArray, null }; // Null items
         }
 
-        [Theory, MemberData("Sort_Array_Array_TestData")]
-        public static void TestSort_Array_Array(Array keys, Array items, int index, int length, IComparer comparer, Array expectedKeys, Array expectedItems)
+        public static IEnumerable<object[]> Sort_Array_Array_Generic_TestData()
+        {
+            yield return new object[] { new string[] { "bcd", "bc", "c", "ab" }, new string[] { "a", "b", "c", "d" }, 0, 4, new StringComparer(), new string[] { "ab", "bc", "bcd", "c" }, new string[] { "d", "b", "a", "c" } };
+        }
+
+        [Theory]
+        [MemberData("Sort_Array_Array_NonGeneric_TestData")]
+        [MemberData("Sort_Array_Array_Generic_TestData")]
+        public static void TestSort_Array_Array_NonGeneric(Array keys, Array items, int index, int length, IComparer comparer, Array expectedKeys, Array expectedItems)
         {
             Array sortedKeysArray = null;
             Array sortedItemsArray = null;
-            string[] sortedKeysStringArray = null;
-            string[] sortedItemsStringArray = null;
             if (index == 0 && length == keys.Length)
             {
+                // Use Sort(Array, Array) or Sort(Array, Array, IComparer)
                 if (comparer == null)
                 {
+                    // Use Sort(Array, Array)
                     sortedKeysArray = (Array)keys.Clone();
                     if (items != null)
                     {
@@ -1492,20 +1388,8 @@ namespace System.Runtime.Tests
                     Array.Sort(sortedKeysArray, sortedItemsArray);
                     Assert.Equal(expectedKeys, sortedKeysArray);
                     Assert.Equal(expectedItems, sortedItemsArray);
-
-                    // Make Sort(...) generic for string[]
-                    sortedKeysStringArray = keys.Clone() as string[];
-                    if (items != null)
-                    {
-                        sortedItemsStringArray = items.Clone() as string[];
-                    }
-                    if (sortedKeysStringArray != null && sortedItemsStringArray != null)
-                    {
-                        Array.Sort(sortedKeysStringArray, sortedItemsStringArray);
-                        Assert.Equal(expectedKeys, sortedKeysStringArray);
-                        Assert.Equal(expectedItems, sortedItemsStringArray);
-                    }
                 }
+                // Use Sort(Array, Array, IComparer)
                 sortedKeysArray = (Array)keys.Clone();
                 if (items != null)
                 {
@@ -1514,22 +1398,10 @@ namespace System.Runtime.Tests
                 Array.Sort(sortedKeysArray, sortedItemsArray, comparer);
                 Assert.Equal(expectedKeys, sortedKeysArray);
                 Assert.Equal(expectedItems, sortedItemsArray);
-
-                // Make Sort(...) generic for string[]
-                sortedKeysStringArray = keys.Clone() as string[];
-                if (items != null)
-                {
-                    sortedItemsStringArray = items.Clone() as string[];
-                }
-                if (sortedKeysStringArray != null && sortedItemsStringArray != null)
-                {
-                    Array.Sort(sortedKeysStringArray, sortedItemsStringArray, comparer);
-                    Assert.Equal(expectedKeys, sortedKeysStringArray);
-                    Assert.Equal(expectedItems, sortedItemsStringArray);
-                }
             }
             if (comparer == null)
             {
+                // Use Sort(Array, Array, int, int)
                 sortedKeysArray = (Array)keys.Clone();
                 if (items != null)
                 {
@@ -1538,20 +1410,8 @@ namespace System.Runtime.Tests
                 Array.Sort(sortedKeysArray, sortedItemsArray, index, length);
                 Assert.Equal(expectedKeys, sortedKeysArray);
                 Assert.Equal(expectedItems, sortedItemsArray);
-
-                // Make Sort(...) generic for string[]
-                sortedKeysStringArray = keys.Clone() as string[];
-                if (items != null)
-                {
-                    sortedItemsStringArray = items.Clone() as string[];
-                }
-                if (sortedKeysStringArray != null && sortedItemsStringArray != null)
-                {
-                    Array.Sort(sortedKeysStringArray, sortedItemsStringArray, index, length);
-                    Assert.Equal(expectedKeys, sortedKeysStringArray);
-                    Assert.Equal(expectedItems, sortedItemsStringArray);
-                }
             }
+            // Use Sort(Array, Array, int, int, IComparer)
             sortedKeysArray = (Array)keys.Clone();
             if (items != null)
             {
@@ -1560,19 +1420,60 @@ namespace System.Runtime.Tests
             Array.Sort(sortedKeysArray, sortedItemsArray, index, length, comparer);
             Assert.Equal(expectedKeys, sortedKeysArray);
             Assert.Equal(expectedItems, sortedItemsArray);
+        }
 
-            // Make Sort(...) generic for string[]
-            sortedKeysStringArray = keys.Clone() as string[];
+        [Theory]
+        [MemberData("Sort_Array_Array_Generic_TestData")]
+        public static void TestSort_Array_Array_Generic(string[] keys, string[] items, int index, int length, IComparer comparer, string[] expectedKeys, string[] expectedItems)
+        {
+            string[] sortedKeysArray = null;
+            string[] sortedItemsArray = null;
+            if (index == 0 && length == keys.Length)
+            {
+                // Use Sort<T>(T[], T[]) or Sort<T>(T[], T[], IComparer)
+                if (comparer == null)
+                {
+                    // Use Sort<T>(T[], T[])
+                    sortedKeysArray = (string[])keys.Clone();
+                    if (items != null)
+                    {
+                        sortedItemsArray = (string[])items.Clone();
+                    }
+                    Array.Sort(sortedKeysArray, sortedItemsArray);
+                    Assert.Equal(expectedKeys, sortedKeysArray);
+                    Assert.Equal(expectedItems, sortedItemsArray);
+                }
+                // Use Sort<T>(T[], T[], IComparer)
+                sortedKeysArray = (string[])keys.Clone();
+                if (items != null)
+                {
+                    sortedItemsArray = (string[])items.Clone();
+                }
+                Array.Sort(sortedKeysArray, sortedItemsArray, comparer);
+                Assert.Equal(expectedKeys, sortedKeysArray);
+                Assert.Equal(expectedItems, sortedItemsArray);
+            }
+            if (comparer == null)
+            {
+                // Use Sort<T>(T[], T[], int, int)
+                sortedKeysArray = (string[])keys.Clone();
+                if (items != null)
+                {
+                    sortedItemsArray = (string[])items.Clone();
+                }
+                Array.Sort(sortedKeysArray, sortedItemsArray, index, length);
+                Assert.Equal(expectedKeys, sortedKeysArray);
+                Assert.Equal(expectedItems, sortedItemsArray);
+            }
+            // Use Sort(Array, Array, int, int, IComparer)
+            sortedKeysArray = (string[])keys.Clone();
             if (items != null)
             {
-                sortedItemsStringArray = items.Clone() as string[];
+                sortedItemsArray = (string[])items.Clone();
             }
-            if (sortedKeysStringArray != null && sortedItemsStringArray != null)
-            {
-                Array.Sort(sortedKeysStringArray, sortedItemsStringArray, index, length, comparer);
-                Assert.Equal(expectedKeys, sortedKeysStringArray);
-                Assert.Equal(expectedItems, sortedItemsStringArray);
-            }
+            Array.Sort(sortedKeysArray, sortedItemsArray, index, length, comparer);
+            Assert.Equal(expectedKeys, sortedKeysArray);
+            Assert.Equal(expectedItems, sortedItemsArray);
         }
 
         [Fact]
@@ -1599,7 +1500,7 @@ namespace System.Runtime.Tests
         }
 
         [Fact]
-        public static void TestSort_Array_Array_Comparer_Invalid()
+        public static void TestSort_Array_Array_IComparer_Invalid()
         {
             Assert.Throws<ArgumentNullException>("keys", () => Array.Sort(null, new int[10], null)); // Keys is null
             Assert.Throws<ArgumentNullException>("keys", () => Array.Sort((int[])null, new int[10], null)); // Keys is null
@@ -1654,7 +1555,7 @@ namespace System.Runtime.Tests
         }
 
         [Fact]
-        public static void TestSort_Array_Array_Int_Int_Comparer_Invalid()
+        public static void TestSort_Array_Array_Int_Int_IComparer_Invalid()
         {
             Assert.Throws<ArgumentNullException>("keys", () => Array.Sort(null, new int[10], 0, 0, null)); // Keys is null
             Assert.Throws<ArgumentNullException>("keys", () => Array.Sort((int[])null, new int[10], 0, 0, null)); // Keys is null

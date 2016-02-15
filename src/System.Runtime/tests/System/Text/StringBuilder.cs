@@ -702,6 +702,7 @@ namespace System.Runtime.Tests
             StringBuilder builder;
             if (values != null && values.Length == 1)
             {
+                // Use AppendFormat(string, object) or AppendFormat(IFormatProvider, string, object)
                 if (provider == null)
                 {
                     builder = new StringBuilder(original);
@@ -710,9 +711,11 @@ namespace System.Runtime.Tests
                 }
                 builder = new StringBuilder(original);
                 builder.AppendFormat(provider, format, values[0]);
+                Assert.Equal(expected, builder.ToString());
             }
             else if (values != null && values.Length == 2)
             {
+                // Use AppendFormat(string, object, object) or AppendFormat(IFormatProvider, string, object, object)
                 if (provider == null)
                 {
                     builder = new StringBuilder(original);
@@ -721,9 +724,11 @@ namespace System.Runtime.Tests
                 }
                 builder = new StringBuilder(original);
                 builder.AppendFormat(provider, format, values[0], values[1]);
+                Assert.Equal(expected, builder.ToString());
             }
             else if (values != null && values.Length == 3)
             {
+                // Use AppendFormat(string, object, object, object) or AppendFormat(IFormatProvider, string, object, object, object)
                 if (provider == null)
                 {
                     builder = new StringBuilder(original);
@@ -732,8 +737,10 @@ namespace System.Runtime.Tests
                 }
                 builder = new StringBuilder(original);
                 builder.AppendFormat(provider, format, values[0], values[1], values[2]);
+                Assert.Equal(expected, builder.ToString());
             }
-            
+
+            // Use AppendFormat(string, object[]) or AppendFormat(IFormatProvider, string, object[])
             if (provider == null)
             {
                 builder = new StringBuilder(original);
@@ -840,9 +847,12 @@ namespace System.Runtime.Tests
             StringBuilder builder;
             if (string.IsNullOrEmpty(value))
             {
+                // Use AppendLine()
                 builder = new StringBuilder(original);
                 builder.AppendLine();
+                Assert.Equal(expected, builder.ToString());
             }
+            // Use AppendLine(string)
             builder = new StringBuilder(original);
             builder.AppendLine(value);
             Assert.Equal(expected, builder.ToString());

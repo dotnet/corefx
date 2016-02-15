@@ -10,18 +10,17 @@ namespace System.IO.Tests
 {
     public static class DirectoryNotFoundExceptionInteropTests
     {
-        [Fact]
-        public static void TestFrom_HR()
+        [Theory]
+        [InlineData(HResults.COR_E_DIRECTORYNOTFOUND)]
+        [InlineData(HResults.STG_E_PATHNOTFOUND)]
+        [InlineData(HResults.CTL_E_PATHNOTFOUND)]
+        public static void TestFrom_HR(int hr)
         {
-            var hrs = new int[] { HResults.COR_E_DIRECTORYNOTFOUND, HResults.STG_E_PATHNOTFOUND, HResults.CTL_E_PATHNOTFOUND };
-            foreach (var hr in hrs)
-            {
-                DirectoryNotFoundException exception = Marshal.GetExceptionForHR(hr) as DirectoryNotFoundException;
-                Assert.NotNull(exception);
+            DirectoryNotFoundException exception = Marshal.GetExceptionForHR(hr) as DirectoryNotFoundException;
+            Assert.NotNull(exception);
 
-                // Don't validate the message.  Currently .NET Native does not produce HR-specific messages
-                ExceptionUtility.ValidateExceptionProperties(exception, hResult: hr, validateMessage: false);
-            }
+            // Don't validate the message.  Currently .NET Native does not produce HR-specific messages
+            ExceptionUtility.ValidateExceptionProperties(exception, hResult: hr, validateMessage: false);
         }
     }
 }

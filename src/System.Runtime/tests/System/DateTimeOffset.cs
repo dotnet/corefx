@@ -544,10 +544,10 @@ namespace System.Runtime.Tests
         public static void TestParseExact_String_String_FormatProvider()
         {
             DateTimeOffset expected = DateTimeOffset.MaxValue;
-            string expectedString = expected.ToString("G");
+            string expectedString = expected.ToString("u");
 
-            DateTimeOffset result = DateTimeOffset.ParseExact(expectedString, "G", null);
-            Assert.Equal(expectedString, result.ToString("G"));
+            DateTimeOffset result = DateTimeOffset.ParseExact(expectedString, "u", null);
+            Assert.Equal(expectedString, result.ToString("u"));
         }
 
         [Fact]

@@ -113,7 +113,7 @@ namespace System.Runtime.Tests
             Assert.Throws<TargetInvocationException>(() => Activator.CreateInstance<TypeWithDefaultCtorThatThrows>());
         }
         
-        private class Choice1 : Attribute
+        public class Choice1 : Attribute
         {
             public Choice1()
             {
@@ -153,28 +153,28 @@ namespace System.Runtime.Tests
             public int I;
         }
 
-        private class VarArgs
+        public class VarArgs
         {
         }
 
-        private class VarStringArgs
+        public class VarStringArgs
         {
         }
 
-        private class VarIntArgs
+        public class VarIntArgs
         {
         }
         
-        private struct StructTypeWithoutReflectionMetadata
+        public struct StructTypeWithoutReflectionMetadata
         {
         }
 
-        private class TypeWithoutDefaultCtor
+        public class TypeWithoutDefaultCtor
         {
             private TypeWithoutDefaultCtor(int x) { }
         }
 
-        private class TypeWithDefaultCtorThatThrows
+        public class TypeWithDefaultCtorThatThrows
         {
             public TypeWithDefaultCtorThatThrows() { throw new Exception(); }
         }

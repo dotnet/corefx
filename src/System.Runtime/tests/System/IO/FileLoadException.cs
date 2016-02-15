@@ -13,7 +13,7 @@ namespace System.IO.Tests
         {
             var exception = new FileLoadException();
             ExceptionUtility.ValidateExceptionProperties(exception, hResult: HResults.COR_E_FILELOAD, validateMessage: false);
-            Assert.Equal(null, exception.FileName);
+            Assert.Null(exception.FileName);
         }
 
         [Fact]
@@ -22,7 +22,7 @@ namespace System.IO.Tests
             string message = "this is not the file you're looking for";
             var exception = new FileLoadException(message);
             ExceptionUtility.ValidateExceptionProperties(exception, hResult: HResults.COR_E_FILELOAD, message: message);
-            Assert.Equal(null, exception.FileName);
+            Assert.Null(exception.FileName);
         }
 
         [Fact]

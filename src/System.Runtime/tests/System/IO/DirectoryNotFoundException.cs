@@ -11,8 +11,8 @@ namespace System.IO.Tests
         [Fact]
         public static void TestCtor_Empty()
         {
-            var excpetion = new DirectoryNotFoundException();
-            ExceptionUtility.ValidateExceptionProperties(excpetion, hResult: HResults.COR_E_DIRECTORYNOTFOUND, validateMessage: false);
+            var exception = new DirectoryNotFoundException();
+            ExceptionUtility.ValidateExceptionProperties(exception, hResult: HResults.COR_E_DIRECTORYNOTFOUND, validateMessage: false);
         }
 
         [Fact]
