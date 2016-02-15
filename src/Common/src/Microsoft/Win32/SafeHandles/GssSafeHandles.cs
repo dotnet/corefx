@@ -86,32 +86,33 @@ namespace Microsoft.Win32.SafeHandles
         /// </summary>
         public static SafeGssCredHandle Create(string username, string password, string domain)
         {
-            SafeGssCredHandle retHandle = null;
-
-            if (!string.IsNullOrEmpty(username))
+            if (string.IsNullOrEmpty(username))
             {
-                using (SafeGssNameHandle userHandle = SafeGssNameHandle.CreateUser(username))
+                return new SafeGssCredHandle();
+            }
+
+            SafeGssCredHandle retHandle = null;
+            using (SafeGssNameHandle userHandle = SafeGssNameHandle.CreateUser(username))
+            {
+                Interop.NetSecurityNative.Status status;
+                Interop.NetSecurityNative.Status minorStatus;
+                if (string.IsNullOrEmpty(password))
                 {
-                    Interop.NetSecurityNative.Status status;
-                    Interop.NetSecurityNative.Status minorStatus;
-                    if (string.IsNullOrEmpty(password))
+                    status = Interop.NetSecurityNative.InitiateCredSpNego(out minorStatus, userHandle, out retHandle);
+                }
+                else
+                {
+                    status = Interop.NetSecurityNative.InitiateCredWithPassword(out minorStatus, userHandle, password, Encoding.UTF8.GetByteCount(password), out retHandle);
+                }
+
+                if (status != Interop.NetSecurityNative.Status.GSS_S_COMPLETE)
+                {
+                    if (retHandle != null)
                     {
-                        status = Interop.NetSecurityNative.InitiateCredSpNego(out minorStatus, userHandle, out retHandle);
-                    }
-                    else
-                    {
-                        status = Interop.NetSecurityNative.InitiateCredWithPassword(out minorStatus, userHandle, password, Encoding.UTF8.GetByteCount(password), out retHandle);
+                        retHandle.Dispose();
                     }
 
-                    if (status != Interop.NetSecurityNative.Status.GSS_S_COMPLETE)
-                    {
-                        if (retHandle != null)
-                        {
-                            retHandle.Dispose();
-                        }
-
-                        throw new Interop.NetSecurityNative.GssApiException(status, minorStatus);
-                    }
+                    throw new Interop.NetSecurityNative.GssApiException(status, minorStatus);
                 }
             }
 

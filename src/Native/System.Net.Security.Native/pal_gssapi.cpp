@@ -147,7 +147,6 @@ extern "C" uint32_t NetSecurityNative_InitSecContext(uint32_t* minorStatus,
                                                      uint32_t* retFlags)
 {
     assert(minorStatus != nullptr);
-    assert(claimantCredHandle != nullptr);
     assert(contextHandle != nullptr);
     assert(isNtlm == 0 || isNtlm == 1);
     assert(targetName != nullptr);
@@ -155,6 +154,8 @@ extern "C" uint32_t NetSecurityNative_InitSecContext(uint32_t* minorStatus,
     assert(outBuffer != nullptr);
     assert(retFlags != nullptr);
     assert (inputBytes  != nullptr || inputLength == 0);
+
+    //Note: claimantCredHandle can be null
 
 #if HAVE_GSS_SPNEGO_MECHANISM
     gss_OID desiredMech = isNtlm ? GSS_NTLM_MECHANISM : GSS_SPNEGO_MECHANISM;
