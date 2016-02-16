@@ -2,7 +2,12 @@
 
 import jobs.generation.Utilities;
 
+// The input project name (e.g. dotnet/corefx)
 def project = GithubProject
+// The input branch name (e.g. master)
+def branch = GithubBranchName
+
+// TODO: Can we add a C++ style #error if addGithubPRTrigger is used???
 
 // Globals
 
@@ -15,6 +20,10 @@ def osGroupMap = ['Ubuntu':'Linux',
                   'FreeBSD':'FreeBSD',
                   'CentOS7.1': 'Linux',
                   'OpenSUSE13.2': 'Linux']
+                  
+// List of short names for OSs (used in job names)
+def osShortName = ['Windows 10': 'win10', 'Windows 7' : 'win7', 'Windows_NT' : 'windows_nt', 'Ubuntu' : 'ubuntu', 'OSX' : 'osx']
+                  
 // Map of os -> nuget runtime
 def targetNugetRuntimeMap = ['OSX' : 'osx.10.10-x64',
                              'Ubuntu' : 'ubuntu.14.04-x64',
@@ -24,40 +33,19 @@ def targetNugetRuntimeMap = ['OSX' : 'osx.10.10-x64',
                              'CentOS7.1' : 'ubuntu.14.04-x64',
                              'OpenSUSE13.2' : 'ubuntu.14.04-x64']
 
-def branchList = ['master', 'rc2', 'pr']
-
-def static getFullBranchName(def branch) {
-    def branchMap = ['master':'*/master',
-        'rc2':'*/release/1.0.0-rc2',
-        'pr':'*/master']
-    def fullBranchName = branchMap.get(branch, null)
-    assert fullBranchName != null : "Could not find a full branch name for ${branch}"
-    return branchMap[branch]
-}
-
-def static getJobName(def name, def branchName) {
-    def baseName = name
-    if (branchName == 'rc2') {
-        baseName += "_rc2"
-    }
-    return baseName
-}
-
 // **************************
 // Define code coverage build
 // **************************
 
-branchList.each { branchName ->
-    def isPR = (branchName == 'pr') 
-    def newJob = job(getJobName(Utilities.getFullJobName(project, 'code_coverage_windows', isPR), branchName)) {
+[true, false].each { isPR ->
+    def newJob = job(Utilities.getFullJobName(project, 'code_coverage_windows', isPR)) {
         steps {
             batchFile('call "C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\Common7\\Tools\\VsDevCmd.bat" && build.cmd /p:Coverage=true')
         }
     }
     
-
     // Set up standard options
-    Utilities.standardJobSetup(newJob, project, isPR, getFullBranchName(branchName))
+    Utilities.standardJobSetup(newJob, project, isPR, "*/${branch}")
     // Set the machine affinity to windows machines
     Utilities.setMachineAffinity(newJob, 'Windows_NT', 'latest-or-auto')
     // Publish reports
@@ -66,8 +54,8 @@ branchList.each { branchName ->
     Utilities.addArchival(newJob, '**/coverage/*,msbuild.log')
     // Set triggers
     if (isPR) {
-        // Set PR trigger
-        Utilities.addGithubPRTrigger(newJob, 'Code Coverage Windows Debug', '(?i).*test\\W+code\\W+coverage.*')
+        // Set branch specific PR trigger
+        Utilities.addGithubPRTriggerForBranch(newJob, branch, 'Code Coverage Windows Debug', '(?i).*test\\W+code\\W+coverage.*')
     }
     else {
         // Set a periodic trigger
@@ -79,21 +67,20 @@ branchList.each { branchName ->
 // Define code formatter check build
 // **************************
 
-branchList.each { branchName ->
-    def isPR = (branchName == 'pr')  
-    def newJob = job(getJobName(Utilities.getFullJobName(project, 'native_code_format_check', isPR), branchName)) {
+[true, false].each { isPR ->
+    def newJob = job(Utilities.getFullJobName(project, 'native_code_format_check', isPR))) {
         steps {
             shell('python src/Native/format-code.py checkonly')
         }
     }
     
     // Set up standard options.
-    Utilities.standardJobSetup(newJob, project, isPR, getFullBranchName(branchName))
+    Utilities.standardJobSetup(newJob, project, isPR, "*/${branch}")
     // Set the machine affinity to Ubuntu machines
     Utilities.setMachineAffinity(newJob, 'Ubuntu', 'latest-or-auto')
     if (isPR) {
         // Set PR trigger.  Only trigger when the phrase is said.
-        Utilities.addGithubPRTrigger(newJob, 'Code Formatter Check', '(?i).*test\\W+code\\W+formatter\\W+check.*', true)
+        Utilities.addGithubPRTriggerForBranch(newJob, branch, 'Code Formatter Check', '(?i).*test\\W+code\\W+formatter\\W+check.*', true)
     }
     else {
         // Set a push trigger
@@ -105,23 +92,21 @@ branchList.each { branchName ->
 // Define outerloop windows testing.  Run locally on each machine.
 // **************************
 
-def osShortName = ['Windows 10': 'win10', 'Windows 7' : 'win7', 'Windows_NT' : 'windows_nt', 'Ubuntu' : 'ubuntu', 'OSX' : 'osx']
-branchList.each { branchName ->
+[true, false].each { isPR ->
     ['Windows 10', 'Windows 7', 'Windows_NT', 'Ubuntu', 'OSX'].each { os ->
         ['Debug', 'Release'].each { configurationGroup ->
 
-            def isPR = (branchName == 'pr')  
             def newJobName = "outerloop_${osShortName[os]}_${configurationGroup.toLowerCase()}"
 
             def newJob
             if (os != 'Ubuntu' && os != 'OSX') {
-                newJob = job(getJobName(Utilities.getFullJobName(project, newJobName, isPR), branchName)) {
+                newJob = job(Utilities.getFullJobName(project, newJobName, isPR)) {
                     steps {
                         batchFile("call \"C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat\" x86 && Build.cmd /p:ConfigurationGroup=${configurationGroup} /p:WithCategories=\"InnerLoop;OuterLoop\" /p:TestWithLocalLibraries=true")
                     }
                 }
             } else {
-                newJob = job(getJobName(Utilities.getFullJobName(project, newJobName, isPR), branchName)) {
+                newJob = job(Utilities.getFullJobName(project, newJobName, isPR)) {
                     // Jobs run as a service in unix, which means that HOME variable is not set, and it is required for restoring packages
                     // so we set it first, and then call build.sh
                     steps {
@@ -133,7 +118,7 @@ branchList.each { branchName ->
             // Set the affinity.  OS name matches the machine affinity.
             Utilities.setMachineAffinity(newJob, os)
             // Set up standard options.
-            Utilities.standardJobSetup(newJob, project, isPR, getFullBranchName(branchName))
+            Utilities.standardJobSetup(newJob, project, isPR, "*/${branch}")
             // Add the unit test results
             Utilities.addXUnitDotNETResults(newJob, 'bin/tests/**/testResults.xml')
 
@@ -146,7 +131,7 @@ branchList.each { branchName ->
             if (isPR) {
                 // Set PR trigger.
                 // TODO: More elaborate regex trigger?
-                Utilities.addGithubPRTrigger(newJob, "OuterLoop ${os} ${configurationGroup}", "(?i).*test\\W+outerloop.*")
+                Utilities.addGithubPRTriggerForBranch(newJob, branch, "OuterLoop ${os} ${configurationGroup}", "(?i).*test\\W+outerloop.*")
             }
             else {
                 // Set a periodic trigger
@@ -176,7 +161,7 @@ branchList.each { branchName ->
         }
 
         // Set up standard options.
-        Utilities.standardJobSetup(newJob, project, /* isPR */ false)
+        Utilities.standardJobSetup(newJob, project, /* isPR */ false, "*/${branch}")
         
         // Set a periodic trigger
         Utilities.addPeriodicTrigger(newJob, '@daily')
@@ -189,10 +174,9 @@ branchList.each { branchName ->
 // flow job.
 
 def innerLoopNonWindowsOSs = ['Ubuntu', 'Ubuntu15.10', 'Debian8.2', 'OSX', 'FreeBSD', 'CentOS7.1', 'OpenSUSE13.2']
-branchList.each { branchName ->
+[true, false].each { isPR ->
     ['Debug', 'Release'].each { configurationGroup ->
         innerLoopNonWindowsOSs.each { os ->
-            def isPR = (branchName == 'pr')  
             def osGroup = osGroupMap[os]
             
             //
@@ -201,7 +185,7 @@ branchList.each { branchName ->
             
             def newNativeCompBuildJobName = "nativecomp_${os.toLowerCase()}_${configurationGroup.toLowerCase()}"
             
-            def newNativeCompJob = job(getJobName(Utilities.getFullJobName(project, newNativeCompBuildJobName, isPR), branchName)) {
+            def newNativeCompJob = job(Utilities.getFullJobName(project, newNativeCompBuildJobName, isPR)) {
                 steps {
                     shell("./build.sh native x64 ${configurationGroup.toLowerCase()}")
                 }
@@ -211,7 +195,7 @@ branchList.each { branchName ->
             // new auto images.
             Utilities.setMachineAffinity(newNativeCompJob, os, 'latest-or-auto')
             // Set up standard options.
-            Utilities.standardJobSetup(newNativeCompJob, project, isPR, getFullBranchName(branchName))
+            Utilities.standardJobSetup(newNativeCompJob, project, isPR, "*/${branch}")
             // Add archival for the built data.
             Utilities.addArchival(newNativeCompJob, "bin/**")
             
@@ -221,7 +205,7 @@ branchList.each { branchName ->
             
             def newBuildJobName = "${os.toLowerCase()}_${configurationGroup.toLowerCase()}_bld"
 
-            def newBuildJob = job(getJobName(Utilities.getFullJobName(project, newBuildJobName, isPR), branchName)) {
+            def newBuildJob = job(Utilities.getFullJobName(project, newBuildJobName, isPR))) {
                 steps {
                     batchFile("call \"C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat\" x86 && build.cmd /p:ConfigurationGroup=${configurationGroup} /p:OSGroup=${osGroup} /p:SkipTests=true /p:TestNugetRuntimeId=${targetNugetRuntimeMap[os]}")
                     // Package up the results.
@@ -232,7 +216,7 @@ branchList.each { branchName ->
             // Set the affinity.  All of these run on Windows currently.
             Utilities.setMachineAffinity(newBuildJob, 'Windows_NT')
             // Set up standard options.
-            Utilities.standardJobSetup(newBuildJob, project, isPR, getFullBranchName(branchName))
+            Utilities.standardJobSetup(newBuildJob, project, isPR, "*/${branch}")
             // Archive the results
             Utilities.addArchival(newBuildJob, "bin/build.pack,bin/osGroup.AnyCPU.${configurationGroup}/**,bin/ref/**,bin/packages/**,msbuild.log")
 
@@ -246,18 +230,20 @@ branchList.each { branchName ->
             // Then we set up a job that runs the test on the target OS
             //
             
-            def fullNativeCompBuildJobName = Utilities.getFolderName(project) + '/' + newNativeCompJob.name
-            def fullCoreFXBuildJobName = Utilities.getFolderName(project) + '/' + newBuildJob.name
+            def jobFolder = Utilities.getFolderName(project) + '/' + Utilities.getFolderName(branch)
+            def fullNativeCompBuildJobName = jobFolder + '/' + newNativeCompJob.name
+            def fullCoreFXBuildJobName = jobFolder + '/' + newBuildJob.name
             
             def newTestJobName = "${os.toLowerCase()}_${configurationGroup.toLowerCase()}_tst"
             
-            def newTestJob = job(getJobName(Utilities.getFullJobName(project, newTestJobName, isPR), branchName)) {
+            def newTestJob = job(Utilities.getFullJobName(project, newTestJobName, isPR)) {
                 steps {
-                    // Copy data from other builds.
+                    // Copy data from other builds.  Copy from correspoding branch of coreclr build
                     // TODO: Add a new job or allow for copying coreclr from debug build
                     
+                    def coreClrJobFolder = Utilities.getFolderName("dotnet/coreclr") + '/' + Utilities.getFolderName(branch)
                     // CoreCLR
-                    copyArtifacts("dotnet_coreclr/release_${os.toLowerCase()}") {
+                    copyArtifacts("${coreClrJobFolder}/release_${os.toLowerCase()}") {
                         excludePatterns('**/testResults.xml', '**/*.ni.dll')
                         buildSelector {
                             latestSuccessful(true)
@@ -265,7 +251,7 @@ branchList.each { branchName ->
                     }
                     
                     // MSCorlib
-                    copyArtifacts("dotnet_coreclr/release_windows_nt") {
+                    copyArtifacts("${coreClrJobFolder}/release_windows_nt") {
                         includePatterns("bin/Product/${osGroup}*/**")
                         excludePatterns('**/testResults.xml', '**/*.ni.dll')
                         buildSelector {
@@ -313,7 +299,7 @@ branchList.each { branchName ->
             // Set the affinity.  All of these run on the target
             Utilities.setMachineAffinity(newTestJob, os, 'latest-or-auto')
             // Set up standard options.
-            Utilities.standardJobSetup(newTestJob, project, isPR, getFullBranchName(branchName))
+            Utilities.standardJobSetup(newTestJob, project, isPR, "*/${branch}")
             // Add the unit test results
             Utilities.addXUnitDotNETResults(newTestJob, '**/testResults.xml')
             
@@ -322,9 +308,9 @@ branchList.each { branchName ->
             // the test job
             //
             
-            def fullCoreFXTestJobName = Utilities.getFolderName(project) + '/' + newTestJob.name
+            def fullCoreFXTestJobName = jobFolder + '/' + newTestJob.name
             def flowJobName = "${os.toLowerCase()}_${configurationGroup.toLowerCase()}"
-            def newFlowJob = buildFlowJob(getJobName(Utilities.getFullJobName(project, flowJobName, isPR), branchName)) {
+            def newFlowJob = buildFlowJob(Utilities.getFullJobName(project, flowJobName, isPR)) {
                 buildFlow("""
                     parallel (
                         { nativeCompBuild = build(params, '${fullNativeCompBuildJobName}') },
@@ -347,7 +333,7 @@ branchList.each { branchName ->
             // Set the affinity.  All of these run on the target
             Utilities.setMachineAffinity(newFlowJob, os, 'latest-or-auto')
             // Set up standard options.
-            Utilities.standardJobSetup(newFlowJob, project, isPR, getFullBranchName(branchName))
+            Utilities.standardJobSetup(newFlowJob, project, isPR, "*/${branch}")
             // Set up triggers
             if (isPR) {
                 // Set PR trigger.
@@ -355,11 +341,11 @@ branchList.each { branchName ->
                 if (os in ['OSX', 'Ubuntu', 'OpenSUSE13.2', 'CentOS7.1']) {
                     // TODO #6070: Temporarily disabled due to failing globalization tests on OpenSUSE.
                     if (os != 'OpenSUSE13.2') {
-                        Utilities.addGithubPRTrigger(newFlowJob, "Innerloop ${os} ${configurationGroup} Build and Test")
+                        Utilities.addGithubPRTriggerForBranch(newFlowJob, branch, "Innerloop ${os} ${configurationGroup} Build and Test")
                     }
                 }
                 else {
-                    Utilities.addGithubPRTrigger(newFlowJob, "Innerloop ${os} ${configurationGroup} Build and Test", "(?i).*test\\W+${os}.*")
+                    Utilities.addGithubPRTriggerForBranch(newFlowJob, branch, "Innerloop ${os} ${configurationGroup} Build and Test", "(?i).*test\\W+${os}.*")
                 }
             }
             else {
@@ -374,13 +360,12 @@ branchList.each { branchName ->
 // could be removed from above and then added in below.
 def supportedFullCyclePlatforms = ['Windows_NT']
 
-branchList.each { branchName ->
+[true, false].isPR { isPR ->
     ['Debug', 'Release'].each { configurationGroup ->
         supportedFullCyclePlatforms.each { osGroup ->
-            def isPR = (branchName == 'pr') 
             def newJobName = "${osGroup.toLowerCase()}_${configurationGroup.toLowerCase()}"
 
-            def newJob = job(getJobName(Utilities.getFullJobName(project, newJobName, isPR), branchName)) {
+            def newJob = job(Utilities.getFullJobName(project, newJobName, isPR)) {
                 steps {
                     batchFile("call \"C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat\" x86 && build.cmd /p:ConfigurationGroup=${configurationGroup} /p:OSGroup=${osGroup}")
                     batchFile("C:\\Packer\\Packer.exe .\\bin\\build.pack .\\bin")
@@ -390,7 +375,7 @@ branchList.each { branchName ->
             // Set the affinity.  All of these run on Windows currently.
             Utilities.setMachineAffinity(newJob, osGroup, 'latest-or-auto')
             // Set up standard options.
-            Utilities.standardJobSetup(newJob, project, isPR, getFullBranchName(branchName))
+            Utilities.standardJobSetup(newJob, project, isPR, "*/${branch}")
             // Add the unit test results
             Utilities.addXUnitDotNETResults(newJob, 'bin/tests/**/testResults.xml')
             // Add archival for the built data.
@@ -398,7 +383,7 @@ branchList.each { branchName ->
             // Set up triggers
             if (isPR) {
                 // Set PR trigger.
-                Utilities.addGithubPRTrigger(newJob, "Innerloop ${osGroup} ${configurationGroup} Build and Test")
+                Utilities.addGithubPRTriggerBranch(newJob, branch, "Innerloop ${osGroup} ${configurationGroup} Build and Test")
             }
             else {
                 // Set a push trigger
