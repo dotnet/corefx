@@ -75,6 +75,14 @@ internal static partial class Interop
             ref GssBuffer token,
             out uint retFlags);
 
+        [DllImport(Interop.Libraries.NetSecurityNative, EntryPoint="NetSecurityNative_AcceptSecContext")]
+        internal static extern Status AcceptSecContext(
+            out Status minorStatus,
+            ref SafeGssContextHandle acceptContextHandle,
+            byte[] inputBytes,
+            int inputLength,
+            ref GssBuffer token);
+
         [DllImport(Interop.Libraries.NetSecurityNative, EntryPoint="NetSecurityNative_DeleteSecContext")]
         internal static extern Status DeleteSecContext(
             out Status minorStatus,

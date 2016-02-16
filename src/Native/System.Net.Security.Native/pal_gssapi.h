@@ -80,9 +80,8 @@ extern "C" uint32_t NetSecurityNative_ReleaseName(uint32_t* minorStatus, GssName
 /*
 Shims the gss_acquire_cred method with SPNEGO oids with  GSS_C_INITIATE
 */
-extern "C" uint32_t NetSecurityNative_InitiateCredSpNego(uint32_t* minorStatus,
-                                                        GssName* desiredName,
-                                                        GssCredId** outputCredHandle);
+extern "C" uint32_t
+NetSecurityNative_InitiateCredSpNego(uint32_t* minorStatus, GssName* desiredName, GssCredId** outputCredHandle);
 
 /*
 Shims the gss_release_cred method.
@@ -104,6 +103,16 @@ extern "C" uint32_t NetSecurityNative_InitSecContext(uint32_t* minorStatus,
                                                      uint32_t* retFlags);
 
 /*
+Shims the gss_accept_sec_context method
+*/
+extern "C" uint32_t NetSecurityNative_AcceptSecContext(uint32_t* minorStatus,
+                                                       GssCtxId** contextHandle,
+                                                       uint8_t* inputBytes,
+                                                       uint32_t inputLength,
+                                                       struct PAL_GssBuffer* outBuffer);
+
+/*
+
 Shims the gss_delete_sec_context method.
 */
 extern "C" uint32_t NetSecurityNative_DeleteSecContext(uint32_t* minorStatus, GssCtxId** contextHandle);
@@ -132,8 +141,5 @@ extern "C" uint32_t NetSecurityNative_Unwrap(uint32_t* minorStatus,
 /*
 Shims the gss_acquire_cred_with_password method with GSS_C_INITIATE
 */
-extern "C" uint32_t NetSecurityNative_InitiateCredWithPassword(uint32_t* minorStatus,
-                                                               GssName* desiredName,
-                                                               char* password,
-                                                               uint32_t passwdLen,
-                                                               GssCredId** outputCredHandle);
+extern "C" uint32_t NetSecurityNative_InitiateCredWithPassword(
+    uint32_t* minorStatus, GssName* desiredName, char* password, uint32_t passwdLen, GssCredId** outputCredHandle);
