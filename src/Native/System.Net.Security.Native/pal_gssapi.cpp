@@ -102,9 +102,11 @@ extern "C" uint32_t NetSecurityNative_DisplayStatus(uint32_t* minorStatus,
     assert(outBuffer != nullptr);
 
     int statusType = isGssMechCode ? GSS_C_MECH_CODE : GSS_C_GSS_CODE;
+    uint32_t messageContext;
     GssBuffer gssBuffer {.length = 0, .value = nullptr};
     uint32_t majorStatus =
-        gss_display_status(minorStatus, statusValue, statusType, GSS_C_NO_OID, nullptr, &gssBuffer);
+        gss_display_status(minorStatus, statusValue, statusType, GSS_C_NO_OID, &messageContext, &gssBuffer);
+
     return NetSecurityNative_HandleError(majorStatus, &gssBuffer, outBuffer);
 }
 
@@ -161,6 +163,8 @@ extern "C" uint32_t NetSecurityNative_InitSecContext(uint32_t* minorStatus,
     gss_OID desiredMech = isNtlm ? GSS_NTLM_MECHANISM : GSS_SPNEGO_MECHANISM;
 #else
     assert(!isNtlm && "NTLM is not supported by MIT libgssapi_krb5");
+    (void)isNtlm; // unused
+
     gss_OID_desc gss_mech_spnego_OID_desc = {.length = 6, .elements = static_cast<void*>(gss_mech_value)};
     gss_OID desiredMech = &gss_mech_spnego_OID_desc;
 #endif
