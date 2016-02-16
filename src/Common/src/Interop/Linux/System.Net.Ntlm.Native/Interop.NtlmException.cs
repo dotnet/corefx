@@ -10,14 +10,14 @@ internal static partial class Interop
 {
     internal static partial class NetNtlmNative
     {
-        internal sealed class HeimdalNtlmException : Exception
+        internal sealed class NtlmException : Exception
         {
-            public HeimdalNtlmException(string message) : base(message)
+            public NtlmException(string message) : base(message)
             {
             }
 
-            public HeimdalNtlmException(int error)
-                : base(SR.Format(SR.net_generic_heimntlm_operation_failed, error))
+            public NtlmException(int error)
+                : base(SR.Format(SR.net_generic_ntlm_operation_failed, error))
             {
                 HResult = error;
             }
@@ -26,7 +26,7 @@ internal static partial class Interop
             {
                 if (error != 0)
                 {
-                    var ex = new HeimdalNtlmException(error);
+                    var ex = new NtlmException(error);
                     throw ex;
                 }
             }

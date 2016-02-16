@@ -5,69 +5,167 @@
 using System;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using System.Security.Authentication;
+using System.Security.Authentication.ExtendedProtection;
 using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using Microsoft.Win32.SafeHandles;
 
 internal static partial class Interop
 {
-    internal static partial class NetNtlmNative
+    internal static partial class Ntlm
     {
-        // The following constant is used in calculation of NTOWF2
-        // reference: https://msdn.microsoft.com/en-us/library/cc236700.aspx
-        public const int MD5DigestLength = 16;
+        private static readonly byte[] ClientToServerSigningMagicKey = Encoding.UTF8.GetBytes("session key to client-to-server signing key magic constant\0");
+        private static readonly byte[] ServerToClientSigningMagicKey = Encoding.UTF8.GetBytes("session key to server-to-client signing key magic constant\0");
+        private static readonly byte[] ServerToClientSealingMagicKey = Encoding.UTF8.GetBytes("session key to server-to-client sealing key magic constant\0");
+        private static readonly byte[] ClientToServerSealingMagicKey = Encoding.UTF8.GetBytes("session key to client-to-server sealing key magic constant\0");
 
-        [DllImport(Interop.Libraries.NetNtlmNative, EntryPoint="NetNtlmNative_ReleaseNtlmBuffer")]
-        internal static extern int ReleaseNtlmBuffer(IntPtr bufferPtr, UInt64 length);
-
-        [DllImport(Interop.Libraries.NetNtlmNative, EntryPoint="NetNtlmNative_HeimNtlmEncodeType1")]
-        internal static extern int HeimNtlmEncodeType1(uint flags, ref NtlmBuffer buffer);
-
-        [DllImport(Interop.Libraries.NetNtlmNative, EntryPoint="NetNtlmNative_HeimNtlmDecodeType2")]
-        internal static extern int HeimNtlmDecodeType2(byte[] data, int offset, int count, out SafeNtlmType2Handle type2Handle);
-
-        [DllImport(Interop.Libraries.NetNtlmNative, EntryPoint="NetNtlmNative_HeimNtlmFreeType2")]
-        internal static extern int HeimNtlmFreeType2(IntPtr type2Handle);
-
-        [DllImport(Interop.Libraries.NetNtlmNative, EntryPoint="NetNtlmNative_HeimNtlmNtKey", CharSet = CharSet.Ansi)]
-        internal static extern int HeimNtlmNtKey(string password, ref NtlmBuffer key);
-
-        [DllImport(Interop.Libraries.NetNtlmNative, EntryPoint="NetNtlmNative_HeimNtlmCalculateResponse", CharSet = CharSet.Ansi)]
-        internal static extern int HeimNtlmCalculateResponse(
-            bool isLM,
-            ref NtlmBuffer key,
-            SafeNtlmType2Handle type2Handle,
-            string username,
-            string target,
-            byte[] baseSessionKey,
-            int baseSessionKeyLen,
-            ref NtlmBuffer answer);
-
-        [DllImport(Interop.Libraries.NetNtlmNative, EntryPoint="NetNtlmNative_CreateType3Message", CharSet = CharSet.Ansi)]
-        internal static extern int CreateType3Message(
-            ref NtlmBuffer key,
-            SafeNtlmType2Handle type2Handle,
-            string username,
-            string domain,
-            uint flags,
-            ref NtlmBuffer lmResponse,
-            ref NtlmBuffer ntlmResponse,
-            byte [] baseSessionKey,
-            int baseSessionKeyLen,
-            ref NtlmBuffer sessionKey,
-            ref NtlmBuffer data);
-
-        internal enum NtlmFlags
+        internal sealed class SigningKey
         {
-            NTLMSSP_NEGOTIATE_UNICODE = 0x1,
-            NTLMSSP_REQUEST_TARGET = 0x4,
-            NTLMSSP_NEGOTIATE_SIGN = 0x10,
-            NTLMSSP_NEGOTIATE_SEAL = 0x20,
-            NTLMSSP_NEGOTIATE_NTLM = 0x200,
-            NTLMSSP_NEGOTIATE_ALWAYS_SIGN = 0x8000,
-            NTLMSSP_NEGOTIATE_EXTENDED_SESSIONSECURITY = 0x80000,
-            NTLMSSP_NEGOTIATE_128 = 0x20000000,
-            NTLMSSP_NEGOTIATE_KEY_EXCH = 0x40000000
+            private uint _sequenceNumber;
+            private readonly byte[] _digest;
+
+            public SigningKey(byte[] key, byte[] magicKey)
+            {
+               using (IncrementalHash incremental = IncrementalHash.CreateHash(HashAlgorithmName.MD5))
+               {
+                   incremental.AppendData(key);
+                   incremental.AppendData(magicKey);
+                   _digest = incremental.GetHashAndReset();
+                }
+            }
+
+            public byte[] Sign(SealingKey sealingKey, byte[] buffer, int offset, int count)
+            {
+                Debug.Assert(offset >= 0 && offset <= buffer.Length, "cannot sign with invalid offset");
+                Debug.Assert(count <= buffer.Length - offset, "cannot sign with invalid count");
+
+                // reference for signing a message: https://msdn.microsoft.com/en-us/library/cc236702.aspx
+                const uint Version = 0x00000001;
+                const int ChecksumOffset = 4;
+                const int SequenceNumberOffset = 12;
+                const int HMacDigestLength = 8;
+
+                byte[] output = new byte[Interop.NetNtlmNative.MD5DigestLength];
+                MarshalUint32(output, 0, Version); // version
+                MarshalUint32(output, SequenceNumberOffset, _sequenceNumber);
+                byte[] hash;
+
+                using (var incremental = IncrementalHash.CreateHMAC(HashAlgorithmName.MD5, _digest))
+                {
+                    incremental.AppendData(output, SequenceNumberOffset, ChecksumOffset);
+                    incremental.AppendData(buffer, offset, count);
+                    hash = incremental.GetHashAndReset();
+                    _sequenceNumber++;
+                }
+
+                if (sealingKey == null)
+                {
+                    Array.Copy(hash, 0, output, ChecksumOffset, HMacDigestLength);
+                }
+                else
+                {
+                    byte[] cipher = sealingKey.SealOrUnseal(hash, 0, HMacDigestLength); 
+                    Array.Copy(cipher, 0, output, ChecksumOffset, cipher.Length);
+                }
+
+                return output;
+            }
+        }
+
+        internal sealed class SealingKey : IDisposable
+        {
+            private readonly byte[] _digest;
+            private SafeEvpCipherCtxHandle _cipherContext;
+
+            public SealingKey(byte[] key, byte[] magicKey)
+            {
+                _digest = NtlmKeyDigest(key, magicKey);
+                _cipherContext = Interop.Crypto.EvpCipherCreate(Interop.Crypto.EvpRc4(), _digest, null, 1);
+            }
+
+            public byte[] SealOrUnseal(byte[] buffer, int offset, int count)
+            {
+                // Message Confidentiality. Reference: https://msdn.microsoft.com/en-us/library/cc236707.aspx
+                Debug.Assert(offset >= 0 && offset <= buffer.Length, "Cannot sign with invalid offset " + offset);
+                Debug.Assert(count >= 0, "cannot sign with invalid count");
+                Debug.Assert(count <= (buffer.Length - offset), "Cannot sign with invalid count ");
+
+                unsafe
+                {
+                    fixed (byte *bytePtr = buffer)
+                    {
+                         // Since RC4 is XOR-based, encrypt or decrypt is relative to input data
+                         // reference: https://msdn.microsoft.com/en-us/library/cc236707.aspx
+                          byte[] output = new byte[count];
+
+                          Interop.Crypto.EvpCipher(_cipherContext, output, (bytePtr + offset), count);
+                          return  output;
+                    }
+                }
+            }
+
+            public void Dispose()
+            {
+                if (_cipherContext != null)
+                {
+                    _cipherContext.Dispose();
+                    _cipherContext = null;
+                }
+            }
+        }
+
+        private static byte[] NtlmKeyDigest(byte[] key, byte[] magicKey)
+        {
+            using (IncrementalHash incremental = IncrementalHash.CreateHash(HashAlgorithmName.MD5))
+            {
+                incremental.AppendData(key);
+                incremental.AppendData(magicKey);
+                return incremental.GetHashAndReset();
+            }
+        }
+
+        private static void MarshalUint32(byte[] ptr, int offset, uint num)
+        {
+            for (int i = 0; i < 4; i++)
+            {
+                ptr[offset + i] = (byte) (num & 0xff);
+                num >>= 8;
+            }
+        }
+
+        internal static byte[] CreateNegotiateMessage(uint flags)
+        {
+            NetNtlmNative.NtlmBuffer buffer = default(NetNtlmNative.NtlmBuffer);
+            try
+            {
+                int status = NetNtlmNative.NtlmEncodeType1(flags, ref buffer);
+                NetNtlmNative.NtlmException.ThrowIfError(status);
+                return buffer.ToByteArray();
+            }
+            finally
+            {
+                buffer.Dispose();
+            }
+        }
+
+        internal static byte[] CreateAuthenticateMessage(uint flags, string username, string password, string domain,
+                                                         byte[] type2Data, int offset, int count, out byte[] sessionKey)
+        {
+            using (NtlmType3Message challengeMessage = new NtlmType3Message(type2Data, offset, count))
+            {
+                return challengeMessage.GetResponse(flags, username, password, domain, out sessionKey);
+            }
+        }
+
+        internal static void CreateKeys(byte[] sessionKey, out SigningKey serverSignKey, out SealingKey serverSealKey, out SigningKey clientSignKey, out SealingKey clientSealKey)
+        {
+            serverSignKey = new SigningKey(sessionKey, ServerToClientSigningMagicKey);
+            serverSealKey = new SealingKey(sessionKey, ServerToClientSealingMagicKey);
+            clientSignKey = new SigningKey(sessionKey, ClientToServerSigningMagicKey);
+            clientSealKey = new SealingKey(sessionKey, ClientToServerSealingMagicKey);
         }
     }
 }
+

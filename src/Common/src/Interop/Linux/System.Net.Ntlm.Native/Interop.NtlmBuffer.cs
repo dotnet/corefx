@@ -31,7 +31,7 @@ internal static partial class Interop
                 int available = destination.Length - offset;  // amount of space in the given buffer
                 if (bufferLength > available)
                 {
-                    throw new NetNtlmNative.HeimdalNtlmException(SR.Format(SR.net_context_buffer_too_small, bufferLength, available));
+                    throw new NetNtlmNative.NtlmException(SR.Format(SR.net_context_buffer_too_small, bufferLength, available));
                 }
 
                 Marshal.Copy(data, destination, offset, bufferLength);

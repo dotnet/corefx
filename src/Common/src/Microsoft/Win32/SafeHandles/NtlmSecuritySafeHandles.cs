@@ -25,7 +25,7 @@ namespace Microsoft.Win32.SafeHandles
 
         protected override bool ReleaseHandle()
         {
-            Interop.NetNtlmNative.HeimNtlmFreeType2(handle);
+            Interop.NetNtlmNative.NtlmFreeType2(handle);
             SetHandle(IntPtr.Zero);
             return true;
         }
