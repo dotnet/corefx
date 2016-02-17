@@ -1764,6 +1764,29 @@ namespace SerializationTypes
         public string TestProperty;
     }
 
+    public class TypeWithVirtualProperty
+    {
+        public virtual string StringProperty { get; set; }
+        public virtual int IntProperty { get; set; }
+    }
+
+    public class TypeWithOverridenPropertyWithGetterOrSetterOnly : TypeWithVirtualProperty
+    {
+        public override string StringProperty
+        {
+            get
+            {
+                return base.StringProperty;
+            }
+        }
+        public override int IntProperty
+        {
+            set
+            {
+                base.IntProperty = value;
+            }
+        }
+    }
 
     #endregion
 
