@@ -7,14 +7,15 @@
         "System.IO": "4.0.10",
         "System.Resources.ResourceManager": "4.0.0",
         "System.Runtime": "4.0.20",
+        "System.Runtime.Extensions": "4.0.0",
         "System.Runtime.InteropServices": "4.0.20",
-        "System.Security.Cryptography.Primitives": "4.0.0-rc3-23729",
+        "System.Security.Cryptography.Primitives": "4.0.0-rc3-23816",
         "System.Text.Encoding.Extensions": "4.0.0"
       }
     },
     "net46": {
       "dependencies": {
-        "Microsoft.TargetingPack.NetFramework.v4.6": "1.0.0"
+        "Microsoft.TargetingPack.NETFramework.v4.6": "1.0.1"
       }
     }
   }

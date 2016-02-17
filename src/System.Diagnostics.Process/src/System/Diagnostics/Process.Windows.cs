@@ -666,6 +666,12 @@ namespace System.Diagnostics
             return ret;
         }
 
+        private static Encoding GetEncoding(int codePage)
+        {
+            Encoding enc = EncodingHelper.GetSupportedConsoleEncoding(codePage);
+            return new ConsoleEncoding(enc); // ensure encoding doesn't output a preamble
+        }
+
         // -----------------------------
         // ---- PAL layer ends here ----
         // -----------------------------
@@ -859,7 +865,7 @@ namespace System.Diagnostics
         private void CreatePipe(out SafeFileHandle parentHandle, out SafeFileHandle childHandle, bool parentInputs)
         {
             Interop.mincore.SECURITY_ATTRIBUTES securityAttributesParent = new Interop.mincore.SECURITY_ATTRIBUTES();
-            securityAttributesParent.bInheritHandle = true;
+            securityAttributesParent.bInheritHandle = Interop.BOOL.TRUE;
 
             SafeFileHandle hTmp = null;
             try

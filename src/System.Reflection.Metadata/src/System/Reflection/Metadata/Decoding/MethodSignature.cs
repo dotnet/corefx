@@ -3,14 +3,22 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Immutable;
+using System.Reflection.Metadata;
 
+#if SRM
 namespace System.Reflection.Metadata.Decoding
+#else
+namespace Roslyn.Reflection.Metadata.Decoding
+#endif
 {
     /// <summary>
     /// Represents a method (definition, reference, or standalone) or property signature.
     /// In the case of properties, the signature matches that of a getter with a distinguishing <see cref="SignatureHeader"/>.
     /// </summary>
-    public struct MethodSignature<TType>
+#if SRM && FUTURE
+    public
+#endif
+    struct MethodSignature<TType>
     {
         private readonly SignatureHeader _header;
         private readonly TType _returnType;

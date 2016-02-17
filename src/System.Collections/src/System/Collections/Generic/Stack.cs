@@ -43,7 +43,7 @@ namespace System.Collections.Generic
         public Stack(int capacity)
         {
             if (capacity < 0)
-                throw new ArgumentOutOfRangeException("capacity", SR.ArgumentOutOfRange_NeedNonNegNumRequired);
+                throw new ArgumentOutOfRangeException("capacity", capacity, SR.ArgumentOutOfRange_NeedNonNegNum);
             _array = new T[capacity];
         }
 
@@ -124,7 +124,7 @@ namespace System.Collections.Generic
 
             if (arrayIndex < 0 || arrayIndex > array.Length)
             {
-                throw new ArgumentOutOfRangeException("arrayIndex", SR.ArgumentOutOfRange_NeedNonNegNum);
+                throw new ArgumentOutOfRangeException("arrayIndex", arrayIndex, SR.ArgumentOutOfRange_Index);
             }
 
             if (array.Length - arrayIndex < _size)
@@ -132,19 +132,11 @@ namespace System.Collections.Generic
                 throw new ArgumentException(SR.Argument_InvalidOffLen);
             }
 
-            if (array != _array)
-            {
-                int srcIndex = 0;
-                int dstIndex = arrayIndex + _size;
-                for (int i = 0; i < _size; i++)
-                    array[--dstIndex] = _array[srcIndex++];
-            }
-            else
-            {
-                // Legacy fallback in case we ever end up copying within the same array.
-                Array.Copy(_array, 0, array, arrayIndex, _size);
-                Array.Reverse(array, arrayIndex, _size);
-            }
+            Debug.Assert(array != _array);
+            int srcIndex = 0;
+            int dstIndex = arrayIndex + _size;
+            for (int i = 0; i < _size; i++)
+                array[--dstIndex] = _array[srcIndex++];
         }
 
         void System.Collections.ICollection.CopyTo(Array array, int arrayIndex)
@@ -156,17 +148,17 @@ namespace System.Collections.Generic
 
             if (array.Rank != 1)
             {
-                throw new ArgumentException(SR.Arg_RankMultiDimNotSupported);
+                throw new ArgumentException(SR.Arg_RankMultiDimNotSupported, "array");
             }
 
             if (array.GetLowerBound(0) != 0)
             {
-                throw new ArgumentException(SR.Arg_NonZeroLowerBound);
+                throw new ArgumentException(SR.Arg_NonZeroLowerBound, "array");
             }
 
             if (arrayIndex < 0 || arrayIndex > array.Length)
             {
-                throw new ArgumentOutOfRangeException("arrayIndex", SR.ArgumentOutOfRange_NeedNonNegNum);
+                throw new ArgumentOutOfRangeException("arrayIndex", arrayIndex, SR.ArgumentOutOfRange_Index);
             }
 
             if (array.Length - arrayIndex < _size)
@@ -181,7 +173,7 @@ namespace System.Collections.Generic
             }
             catch (ArrayTypeMismatchException)
             {
-                throw new ArgumentException(SR.Argument_InvalidArrayType);
+                throw new ArgumentException(SR.Argument_InvalidArrayType, "array");
             }
         }
 
@@ -254,9 +246,7 @@ namespace System.Collections.Generic
         public T[] ToArray()
         {
             if (_size == 0)
-            {
                 return Array.Empty<T>();
-            }
 
             T[] objArray = new T[_size];
             int i = 0;

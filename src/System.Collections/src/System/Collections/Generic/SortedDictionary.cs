@@ -589,7 +589,7 @@ namespace System.Collections.Generic
 
                 if (index < 0)
                 {
-                    throw new ArgumentOutOfRangeException("index");
+                    throw new ArgumentOutOfRangeException("index", index , SR.ArgumentOutOfRange_NeedNonNegNum);
                 }
 
                 if (array.Length - index < Count)
@@ -609,17 +609,17 @@ namespace System.Collections.Generic
 
                 if (array.Rank != 1)
                 {
-                    throw new ArgumentException(SR.Arg_RankMultiDimNotSupported);
+                    throw new ArgumentException(SR.Arg_RankMultiDimNotSupported, "array");
                 }
 
                 if (array.GetLowerBound(0) != 0)
                 {
-                    throw new ArgumentException(SR.Arg_NonZeroLowerBound);
+                    throw new ArgumentException(SR.Arg_NonZeroLowerBound, "array");
                 }
 
                 if (index < 0)
                 {
-                    throw new ArgumentOutOfRangeException("arrayIndex", SR.ArgumentOutOfRange_NeedNonNegNum);
+                    throw new ArgumentOutOfRangeException("index", index, SR.ArgumentOutOfRange_NeedNonNegNum);
                 }
 
                 if (array.Length - index < _dictionary.Count)
@@ -634,19 +634,14 @@ namespace System.Collections.Generic
                 }
                 else
                 {
-                    object[] objects = (object[])array;
-                    if (objects == null)
-                    {
-                        throw new ArgumentException(SR.Argument_InvalidArrayType);
-                    }
-
                     try
                     {
+                        object[] objects = (object[])array;
                         _dictionary._set.InOrderTreeWalk(delegate (TreeSet<KeyValuePair<TKey, TValue>>.Node node) { objects[index++] = node.Item.Key; return true; });
                     }
                     catch (ArrayTypeMismatchException)
                     {
-                        throw new ArgumentException(SR.Argument_InvalidArrayType);
+                        throw new ArgumentException(SR.Argument_InvalidArrayType, "array");
                     }
                 }
             }
@@ -778,7 +773,7 @@ namespace System.Collections.Generic
 
                 if (index < 0)
                 {
-                    throw new ArgumentOutOfRangeException("index");
+                    throw new ArgumentOutOfRangeException("index", index, SR.ArgumentOutOfRange_NeedNonNegNum);
                 }
 
                 if (array.Length - index < Count)
@@ -798,17 +793,17 @@ namespace System.Collections.Generic
 
                 if (array.Rank != 1)
                 {
-                    throw new ArgumentException(SR.Arg_RankMultiDimNotSupported);
+                    throw new ArgumentException(SR.Arg_RankMultiDimNotSupported, "array");
                 }
 
                 if (array.GetLowerBound(0) != 0)
                 {
-                    throw new ArgumentException(SR.Arg_NonZeroLowerBound);
+                    throw new ArgumentException(SR.Arg_NonZeroLowerBound, "array");
                 }
 
                 if (index < 0)
                 {
-                    throw new ArgumentOutOfRangeException("arrayIndex", SR.ArgumentOutOfRange_NeedNonNegNum);
+                    throw new ArgumentOutOfRangeException("index", index, SR.ArgumentOutOfRange_NeedNonNegNum);
                 }
 
                 if (array.Length - index < _dictionary.Count)
@@ -823,19 +818,14 @@ namespace System.Collections.Generic
                 }
                 else
                 {
-                    object[] objects = (object[])array;
-                    if (objects == null)
-                    {
-                        throw new ArgumentException(SR.Argument_InvalidArrayType);
-                    }
-
                     try
                     {
+                        object[] objects = (object[])array;
                         _dictionary._set.InOrderTreeWalk(delegate (TreeSet<KeyValuePair<TKey, TValue>>.Node node) { objects[index++] = node.Item.Value; return true; });
                     }
                     catch (ArrayTypeMismatchException)
                     {
-                        throw new ArgumentException(SR.Argument_InvalidArrayType);
+                        throw new ArgumentException(SR.Argument_InvalidArrayType, "array");
                     }
                 }
             }

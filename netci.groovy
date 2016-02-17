@@ -59,7 +59,7 @@ branchList.each { branchName ->
     // Set up standard options
     Utilities.standardJobSetup(newJob, project, isPR, getFullBranchName(branchName))
     // Set the machine affinity to windows machines
-    Utilities.setMachineAffinity(newJob, 'Windows_NT')
+    Utilities.setMachineAffinity(newJob, 'Windows_NT', 'latest-or-auto')
     // Publish reports
     Utilities.addHtmlPublisher(newJob, 'bin/tests/coverage', 'Code Coverage Report', 'index.htm')
     // Archive results.
@@ -90,7 +90,7 @@ branchList.each { branchName ->
     // Set up standard options.
     Utilities.standardJobSetup(newJob, project, isPR, getFullBranchName(branchName))
     // Set the machine affinity to Ubuntu machines
-    Utilities.setMachineAffinity(newJob, 'Ubuntu')
+    Utilities.setMachineAffinity(newJob, 'Ubuntu', 'latest-or-auto')
     if (isPR) {
         // Set PR trigger.  Only trigger when the phrase is said.
         Utilities.addGithubPRTrigger(newJob, 'Code Formatter Check', '(?i).*test\\W+code\\W+formatter\\W+check.*', true)
@@ -105,17 +105,28 @@ branchList.each { branchName ->
 // Define outerloop windows testing.  Run locally on each machine.
 // **************************
 
-def osShortName = ['Windows 10': 'win10', 'Windows 7' : 'win7', 'Windows_NT' : 'windows_nt']
+def osShortName = ['Windows 10': 'win10', 'Windows 7' : 'win7', 'Windows_NT' : 'windows_nt', 'Ubuntu' : 'ubuntu', 'OSX' : 'osx']
 branchList.each { branchName ->
-    ['Windows 10', 'Windows 7', 'Windows_NT'].each { os ->
+    ['Windows 10', 'Windows 7', 'Windows_NT', 'Ubuntu', 'OSX'].each { os ->
         ['Debug', 'Release'].each { configurationGroup ->
 
             def isPR = (branchName == 'pr')  
             def newJobName = "outerloop_${osShortName[os]}_${configurationGroup.toLowerCase()}"
 
-            def newJob = job(getJobName(Utilities.getFullJobName(project, newJobName, isPR), branchName)) {
-                steps {
-                    batchFile("call \"C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat\" x86 && Build.cmd /p:ConfigurationGroup=${configurationGroup} /p:WithCategories=\"InnerLoop;OuterLoop\" /p:TestWithLocalLibraries=true")
+            def newJob
+            if (os != 'Ubuntu' && os != 'OSX') {
+                newJob = job(getJobName(Utilities.getFullJobName(project, newJobName, isPR), branchName)) {
+                    steps {
+                        batchFile("call \"C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat\" x86 && Build.cmd /p:ConfigurationGroup=${configurationGroup} /p:WithCategories=\"InnerLoop;OuterLoop\" /p:TestWithLocalLibraries=true")
+                    }
+                }
+            } else {
+                newJob = job(getJobName(Utilities.getFullJobName(project, newJobName, isPR), branchName)) {
+                    // Jobs run as a service in unix, which means that HOME variable is not set, and it is required for restoring packages
+                    // so we set it first, and then call build.sh
+                    steps {
+                        shell("HOME=\$WORKSPACE/tempHome ./build.sh /p:ConfigurationGroup=${configurationGroup} /p:WithCategories=\"\\\"InnerLoop;OuterLoop\\\"\" /p:TestWithLocalLibraries=true")
+                    }
                 }
             }
 
@@ -125,6 +136,11 @@ branchList.each { branchName ->
             Utilities.standardJobSetup(newJob, project, isPR, getFullBranchName(branchName))
             // Add the unit test results
             Utilities.addXUnitDotNETResults(newJob, 'bin/tests/**/testResults.xml')
+
+            // Unix runs take more than 2 hours to run, so we set the timeout to be longer.
+            if (os == 'Ubuntu' || os == 'OSX') {
+                Utilities.setJobTimeout(newJob, 240)
+            }
 
             // Set up appropriate triggers.  PR on demand, otherwise nightly
             if (isPR) {
@@ -191,8 +207,9 @@ branchList.each { branchName ->
                 }
             }
             
-            // Set the affinity.  All of these run on Windows currently.
-            Utilities.setMachineAffinity(newNativeCompJob, os)
+            // Set the affinity.  Use the 'latest or auto' version to pick up
+            // new auto images.
+            Utilities.setMachineAffinity(newNativeCompJob, os, 'latest-or-auto')
             // Set up standard options.
             Utilities.standardJobSetup(newNativeCompJob, project, isPR, getFullBranchName(branchName))
             // Add archival for the built data.
@@ -218,6 +235,13 @@ branchList.each { branchName ->
             Utilities.standardJobSetup(newBuildJob, project, isPR, getFullBranchName(branchName))
             // Archive the results
             Utilities.addArchival(newBuildJob, "bin/build.pack,bin/osGroup.AnyCPU.${configurationGroup}/**,bin/ref/**,bin/packages/**,msbuild.log")
+
+            // Use Server GC for Ubuntu/OSX Debug PR build & test
+            def serverGCString = ''
+                     
+            if ((os == 'Ubuntu' || os == 'OSX') && configurationGroup == 'Release' && isPR){
+                serverGCString = '--useServerGC'
+            }
             
             //
             // Then we set up a job that runs the test on the target OS
@@ -275,7 +299,8 @@ branchList.each { branchName ->
                         --os ${osGroup} \\
                         --corefx-tests \${WORKSPACE}/bin/tests/${osGroup}.AnyCPU.${configurationGroup} \\
                         --coreclr-bins \${WORKSPACE}/bin/Product/${osGroup}.x64.Release/ \\
-                        --mscorlib-bins \${WORKSPACE}/bin/Product/${osGroup}.x64.Release/
+                        --mscorlib-bins \${WORKSPACE}/bin/Product/${osGroup}.x64.Release/ \\
+                        ${serverGCString}
                     """)
                 }
                 
@@ -287,7 +312,7 @@ branchList.each { branchName ->
             }
             
             // Set the affinity.  All of these run on the target
-            Utilities.setMachineAffinity(newTestJob, os)
+            Utilities.setMachineAffinity(newTestJob, os, 'latest-or-auto')
             // Set up standard options.
             Utilities.standardJobSetup(newTestJob, project, isPR, getFullBranchName(branchName))
             // Add the unit test results
@@ -321,7 +346,7 @@ branchList.each { branchName ->
             }
             
             // Set the affinity.  All of these run on the target
-            Utilities.setMachineAffinity(newFlowJob, os)
+            Utilities.setMachineAffinity(newFlowJob, os, 'latest-or-auto')
             // Set up standard options.
             Utilities.standardJobSetup(newFlowJob, project, isPR, getFullBranchName(branchName))
             // Set up triggers
@@ -329,7 +354,10 @@ branchList.each { branchName ->
                 // Set PR trigger.
                 // Set of OS's that work currently. 
                 if (os in ['OSX', 'Ubuntu', 'OpenSUSE13.2', 'CentOS7.1']) {
-                    Utilities.addGithubPRTrigger(newFlowJob, "Innerloop ${os} ${configurationGroup} Build and Test")
+                    // TODO #6070: Temporarily disabled due to failing globalization tests on OpenSUSE.
+                    if (os != 'OpenSUSE13.2') {
+                        Utilities.addGithubPRTrigger(newFlowJob, "Innerloop ${os} ${configurationGroup} Build and Test")
+                    }
                 }
                 else {
                     Utilities.addGithubPRTrigger(newFlowJob, "Innerloop ${os} ${configurationGroup} Build and Test", "(?i).*test\\W+${os}.*")
@@ -361,7 +389,7 @@ branchList.each { branchName ->
             }
 
             // Set the affinity.  All of these run on Windows currently.
-            Utilities.setMachineAffinity(newJob, osGroup)
+            Utilities.setMachineAffinity(newJob, osGroup, 'latest-or-auto')
             // Set up standard options.
             Utilities.standardJobSetup(newJob, project, isPR, getFullBranchName(branchName))
             // Add the unit test results

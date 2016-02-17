@@ -2,17 +2,17 @@
   "frameworks": {
     "dnxcore50": {
       "dependencies": {
-        "Microsoft.TargetingPack.Private.CoreCLR": "1.0.0-rc3-23729"
+        "Microsoft.TargetingPack.Private.CoreCLR": "1.0.0-rc3-23816"
       }
     },
     "netcore50": {
       "dependencies": {
-        "Microsoft.TargetingPack.Private.CoreCLR": "1.0.0-rc3-23729"
+        "Microsoft.TargetingPack.Private.CoreCLR": "1.0.0-rc3-23816"
       }
     },
     "net46": {
       "dependencies": {
-        "Microsoft.TargetingPack.NETFramework.v4.6": "1.0.0-rc2-23530"
+        "Microsoft.TargetingPack.NETFramework.v4.6": "1.0.1"
       }
     }
   }

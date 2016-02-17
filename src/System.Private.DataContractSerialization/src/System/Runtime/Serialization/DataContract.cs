@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -505,8 +505,8 @@ namespace System.Runtime.Serialization
         [SecurityCritical]
         internal class DataContractCriticalHelper
         {
-            private static Dictionary<TypeHandleRef, IntRef> s_typeToIDCache;
-            private static DataContract[] s_dataContractCache;
+            private static Dictionary<TypeHandleRef, IntRef> s_typeToIDCache = new Dictionary<TypeHandleRef, IntRef>(new TypeHandleRefEqualityComparer());
+            private static DataContract[] s_dataContractCache = new DataContract[32];
             private static int s_dataContractID;
             private static Dictionary<Type, DataContract> s_typeToBuiltInContract;
             private static Dictionary<XmlQualifiedName, DataContract> s_nameToBuiltInContract;
@@ -537,13 +537,6 @@ namespace System.Runtime.Serialization
             /// Critical - in deserialization, we initialize an object instance passing this Type to GetUninitializedObject method
             /// </SecurityNote>
             private Type _typeForInitialization;
-
-            static DataContractCriticalHelper()
-            {
-                s_typeToIDCache = new Dictionary<TypeHandleRef, IntRef>(new TypeHandleRefEqualityComparer());
-                s_dataContractCache = new DataContract[32];
-                s_dataContractID = 0;
-            }
 
             internal static DataContract GetDataContractSkipValidation(int id, RuntimeTypeHandle typeHandle, Type type)
             {
@@ -822,22 +815,6 @@ namespace System.Runtime.Serialization
                     return false;
                 }
                 dataContract = null;
-
-#if NET_NATIVE
-                // ProjectN pre-generates all the primitive data contract types.
-                // Special-case only the remaining possibilities.
-                if (!DataContract.TryGetDataContractFromGeneratedAssembly(type, out dataContract))
-                {
-                    if (type == typeof(Enum) || type == typeof(ValueType))
-                    {
-                        dataContract = new SpecialTypeDataContract(type, DictionaryGlobals.ObjectLocalName, DictionaryGlobals.SchemaNamespace);
-                    }
-                    else if (type == typeof(Array))
-                    {
-                        dataContract = new CollectionDataContract(type);
-                    }
-                }
-#else
                 switch (type.GetTypeCode())
                 {
                     case TypeCode.Boolean:
@@ -908,7 +885,6 @@ namespace System.Runtime.Serialization
                             dataContract = new XmlDataContract(type);
                         break;
                 }
-#endif
                 return dataContract != null;
             }
 
