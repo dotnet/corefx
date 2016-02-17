@@ -3,25 +3,21 @@
 // See the LICENSE file in the project root for more information.
 
 using Xunit;
-using System;
-using System.Reflection;
-using System.Collections.Generic;
 
 namespace System.Reflection.Tests
 {
     public class ReflectionContextTests
     {
         [Fact]
-        public static void ReflectionContextTestsGetTypeForObject()
+        public void ReflectionContextTestsGetTypeForObject()
         {
             MyRC rc = new MyRC();
-            TypeInfo ti = rc.MapType(typeof(int).GetTypeInfo());
+            TypeInfo typeInfo = rc.MapType(typeof(int).GetTypeInfo());
 
             Assembly asm = rc.MapAssembly(typeof(int).GetTypeInfo().Assembly);
 
-            ti = rc.GetTypeForObject(rc);
-
-            Assert.Equal(ti, typeof(MyRC).GetTypeInfo());
+            typeInfo = rc.GetTypeForObject(rc);
+            Assert.Equal(typeInfo, typeof(MyRC).GetTypeInfo());
         }
     }
 

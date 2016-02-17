@@ -1,52 +1,30 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using Xunit;
-using System;
-using System.Text;
-using System.Reflection;
-using System.Collections;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-
-//
-// This is the "Type Library" we are going to reflect on
-//
-
-namespace System.Reflection.CustomAttributesTests.Data
+namespace System.Reflection.Tests
 {
-    public enum MyColorEnum
-    {
-        RED = 1,
-        BLUE = 2,
-        GREEN = 3
-    }
-
     public class Util
     {
-        public static string ObjectToString(Object o)
+        public static string ObjectToString(object o)
         {
+            if (o == null)
+                return string.Empty;
+
+            if (!(o is Array))
+                return o.ToString();
+
             string s = string.Empty;
-            if (o != null)
+            Array a = (Array)o;
+            for (int i = 0; i < a.Length; i += 1)
             {
-                if (o is Array)
-                {
-                    Array a = (Array)o;
-                    for (int i = 0; i < a.Length; i += 1)
-                    {
-                        if (i > 0)
-                        {
-                            s = s + ", ";
-                        }
-                        if (a.GetValue(i) is Array)
-                            s = s + Util.ObjectToString((Array)a.GetValue(i));
-                        else
-                            s = s + a.GetValue(i).ToString();
-                    }
-                }
+                if (i > 0)
+                    s = s + ", ";
+
+                if (a.GetValue(i) is Array)
+                    s = s + ObjectToString((Array)a.GetValue(i));
                 else
-                    s = s + o.ToString();
+                    s = s + a.GetValue(i).ToString();
             }
             return s;
         }
@@ -55,10 +33,6 @@ namespace System.Reflection.CustomAttributesTests.Data
     [AttributeUsage(AttributeTargets.All, AllowMultiple = true, Inherited = false)]
     public class Attr : Attribute
     {
-        public Attr()
-        {
-        }
-
         public Attr(int i)
         {
             value = i;
@@ -109,9 +83,9 @@ namespace System.Reflection.CustomAttributesTests.Data
         public override string ToString()
         {
             return GetType().ToString() + " - name : " + name
-                    + "; value : " + Util.ObjectToString(value)
-                    + "; field : " + Util.ObjectToString(field)
-                    + "; property : " + Util.ObjectToString(property)
+                                        + "; value : " + Util.ObjectToString(value)
+                                        + "; field : " + Util.ObjectToString(field)
+                                        + "; property : " + Util.ObjectToString(property)
                                         + "; array value : " + Util.ObjectToString(arrayValue)
                                         + "; array field : " + Util.ObjectToString(arrayField)
                                         + "; array property : " + Util.ObjectToString(arrayProperty);
@@ -146,9 +120,9 @@ namespace System.Reflection.CustomAttributesTests.Data
         public override string ToString()
         {
             return GetType().ToString() + " - name : " + name
-                    + "; value : " + Util.ObjectToString(value)
-                    + "; field : " + Util.ObjectToString(field)
-                    + "; property : " + Util.ObjectToString(property)
+                                        + "; value : " + Util.ObjectToString(value)
+                                        + "; field : " + Util.ObjectToString(field)
+                                        + "; property : " + Util.ObjectToString(property)
                                         + "; array value : " + Util.ObjectToString(arrayValue)
                                         + "; array field : " + Util.ObjectToString(arrayField)
                                         + "; array property : " + Util.ObjectToString(arrayProperty);
@@ -158,34 +132,34 @@ namespace System.Reflection.CustomAttributesTests.Data
     [AttributeUsage(AttributeTargets.All, AllowMultiple = true, Inherited = false)]
     public class EnumAttr : Attribute
     {
-        public EnumAttr(MyColorEnum e)
+        public EnumAttr(MyEnum e)
         {
             value = e;
             arrayValue = null;
         }
 
-        public EnumAttr(MyColorEnum e, MyColorEnum[] a)
+        public EnumAttr(MyEnum e, MyEnum[] a)
         {
             value = e;
             arrayValue = a;
         }
 
         public string name;
-        public readonly MyColorEnum value;
-        public MyColorEnum field;
-        public readonly MyColorEnum[] arrayValue;
-        public MyColorEnum[] arrayField;
-        private MyColorEnum _property = 0;
-        public MyColorEnum property { get { return _property; } set { _property = value; } }
-        private MyColorEnum[] _arrayProperty;
-        public MyColorEnum[] arrayProperty { get { return _arrayProperty; } set { _arrayProperty = value; } }
+        public readonly MyEnum value;
+        public MyEnum field;
+        public readonly MyEnum[] arrayValue;
+        public MyEnum[] arrayField;
+        private MyEnum _property = 0;
+        public MyEnum property { get { return _property; } set { _property = value; } }
+        private MyEnum[] _arrayProperty;
+        public MyEnum[] arrayProperty { get { return _arrayProperty; } set { _arrayProperty = value; } }
 
         public override string ToString()
         {
             return GetType().ToString() + " - name : " + name
-                    + "; value : " + Util.ObjectToString(value)
-                    + "; field : " + Util.ObjectToString(field)
-                    + "; property : " + Util.ObjectToString(property)
+                                        + "; value : " + Util.ObjectToString(value)
+                                        + "; field : " + Util.ObjectToString(field)
+                                        + "; property : " + Util.ObjectToString(property)
                                         + "; array value : " + Util.ObjectToString(arrayValue)
                                         + "; array field : " + Util.ObjectToString(arrayField)
                                         + "; array property : " + Util.ObjectToString(arrayProperty);
@@ -220,9 +194,9 @@ namespace System.Reflection.CustomAttributesTests.Data
         public override string ToString()
         {
             return GetType().ToString() + " - name : " + name
-                    + "; value : " + Util.ObjectToString(value)
-                    + "; field : " + Util.ObjectToString(field)
-                    + "; property : " + Util.ObjectToString(property)
+                                        + "; value : " + Util.ObjectToString(value)
+                                        + "; field : " + Util.ObjectToString(field)
+                                        + "; property : " + Util.ObjectToString(property)
                                         + "; array value : " + Util.ObjectToString(arrayValue)
                                         + "; array field : " + Util.ObjectToString(arrayField)
                                         + "; array property : " + Util.ObjectToString(arrayProperty);
@@ -232,18 +206,17 @@ namespace System.Reflection.CustomAttributesTests.Data
     [AttributeUsage(AttributeTargets.All, AllowMultiple = true, Inherited = false)]
     public class TypeAttr : Attribute
     {
-        public TypeAttr(Type t)
+        public TypeAttr(Type type)
         {
-            value = t;
+            value = type;
             arrayValue = null;
         }
 
-        public TypeAttr(Type t, Type[] a)
+        public TypeAttr(Type type, Type[] array)
         {
-            value = t;
-            arrayValue = a;
+            value = type;
+            arrayValue = array;
         }
-
 
         public string name;
         public readonly Type value;
@@ -270,27 +243,27 @@ namespace System.Reflection.CustomAttributesTests.Data
     [AttributeUsage(AttributeTargets.All, AllowMultiple = true, Inherited = false)]
     public class ObjectAttr : Attribute
     {
-        public ObjectAttr(Object v)
+        public ObjectAttr(object v)
         {
             value = v;
             arrayValue = null;
         }
 
-        public ObjectAttr(Object v, Object[] a)
+        public ObjectAttr(object v, object[] a)
         {
             value = v;
             arrayValue = a;
         }
 
         public string name;
-        public readonly Object value;
-        public Object field;
-        public readonly Object[] arrayValue;
-        public Object[] arrayField;
-        private Object _property = 0;
-        public Object property { get { return _property; } set { _property = value; } }
-        private Object[] _arrayProperty;
-        public Object[] arrayProperty { get { return _arrayProperty; } set { _arrayProperty = value; } }
+        public readonly object value;
+        public object field;
+        public readonly object[] arrayValue;
+        public object[] arrayField;
+        private object _property = 0;
+        public object property { get { return _property; } set { _property = value; } }
+        private object[] _arrayProperty;
+        public object[] arrayProperty { get { return _arrayProperty; } set { _arrayProperty = value; } }
 
         public override string ToString()
         {
@@ -307,13 +280,9 @@ namespace System.Reflection.CustomAttributesTests.Data
     [AttributeUsage(AttributeTargets.All, AllowMultiple = true, Inherited = false)]
     public class NullAttr : Attribute
     {
-        public NullAttr(string s, Type t, int[] a)
-        {
-        }
+        public NullAttr(string s, Type type, int[] array) { }
 
-        public NullAttr(String s)
-        {
-        }
+        public NullAttr(string s) { }
 
         public string name;
 
@@ -325,4 +294,3 @@ namespace System.Reflection.CustomAttributesTests.Data
         public int[] arrayProperty { get { return null; } set { } }
     }
 }
-

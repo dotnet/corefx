@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.23107.0
+VisualStudioVersion = 14.0.24720.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Reflection.Tests", "tests\System.Reflection.Tests.csproj", "{B027C72E-F04E-42E0-A7F7-993AEF8400D2}"
 EndProject
@@ -10,6 +10,10 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Reflection.CoreCLR.Tests", "tests\CoreCLR\System.Reflection.CoreCLR.Tests.csproj", "{C8049356-559D-4F34-AC17-56F3AE62C897}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Reflection.Tests.TestExe", "tests\TestExe\System.Reflection.Tests.TestExe.csproj", "{8C19B991-41E9-4B38-9602-E19375397F1D}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{6D2358D9-664A-4E67-924E-9CA58C638B7E}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ref", "ref", "{69A52CE7-FB71-4F91-9C28-296DAA94DDCF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -36,5 +40,11 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{B027C72E-F04E-42E0-A7F7-993AEF8400D2} = {6D2358D9-664A-4E67-924E-9CA58C638B7E}
+		{446DE6F0-47A0-4C2F-A918-768A76CCF461} = {69A52CE7-FB71-4F91-9C28-296DAA94DDCF}
+		{C8049356-559D-4F34-AC17-56F3AE62C897} = {6D2358D9-664A-4E67-924E-9CA58C638B7E}
+		{8C19B991-41E9-4B38-9602-E19375397F1D} = {6D2358D9-664A-4E67-924E-9CA58C638B7E}
 	EndGlobalSection
 EndGlobal
