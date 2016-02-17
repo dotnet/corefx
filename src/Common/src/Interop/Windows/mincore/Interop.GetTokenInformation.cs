@@ -12,7 +12,7 @@ internal static partial class Interop
     {
         [DllImport(Interop.Libraries.SecurityBase, SetLastError = true)]
         internal static extern bool GetTokenInformation(
-            SafeAccessTokenHandle TokenHandle,
+            SafeTokenHandle TokenHandle,
             uint TokenInformationClass,
             SafeLocalAllocHandle TokenInformation,
             uint TokenInformationLength,

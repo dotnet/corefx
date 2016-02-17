@@ -15,7 +15,7 @@ internal static partial class Interop
             IntPtr hSourceProcessHandle,
             IntPtr hSourceHandle,
             IntPtr hTargetProcessHandle,
-            ref SafeAccessTokenHandle lpTargetHandle,
+            ref SafeTokenHandle lpTargetHandle,
             uint dwDesiredAccess,
             bool bInheritHandle,
             uint dwOptions);

@@ -19,30 +19,28 @@ using System.Security;
 namespace Microsoft.Win32.SafeHandles
 {
     [SecurityCritical]
-    internal sealed class SafeTokenHandle : SafeHandle
+    public sealed class SafeTokenHandle : SafeHandle
     {
-        private const int DefaultInvalidHandleValue = 0;
+        private SafeTokenHandle() : base(IntPtr.Zero, true) { }
 
-        internal static readonly SafeTokenHandle InvalidHandle = new SafeTokenHandle(new IntPtr(DefaultInvalidHandleValue));
-
-        internal SafeTokenHandle() : base(new IntPtr(DefaultInvalidHandleValue), true) { }
-
-        internal SafeTokenHandle(IntPtr handle)
-            : base(new IntPtr(DefaultInvalidHandleValue), true)
+        public SafeTokenHandle(IntPtr handle)
+            : base(IntPtr.Zero, true)
         {
             SetHandle(handle);
         }
 
         public SafeTokenHandle(IntPtr handle, bool ownsHandle)
-            : base(new IntPtr(DefaultInvalidHandleValue), ownsHandle)
+            : base(IntPtr.Zero, ownsHandle)
         {
             SetHandle(handle);
         }
 
-        internal void InitialSetHandle(IntPtr h)
+        public static SafeTokenHandle InvalidHandle
         {
-            Debug.Assert(IsInvalid, "Safe handle should only be set once");
-            base.handle = h;
+            get
+            {
+                return new SafeTokenHandle(IntPtr.Zero);
+            }
         }
 
         public override bool IsInvalid

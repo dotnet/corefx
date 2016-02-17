@@ -11,6 +11,6 @@ internal static partial class Interop
     internal static partial class mincore
     {
         [DllImport(Interop.Libraries.SecurityBase, CharSet = CharSet.Unicode, SetLastError = true)]
-        internal static extern bool ImpersonateLoggedOnUser(SafeAccessTokenHandle userToken);
+        internal static extern bool ImpersonateLoggedOnUser(SafeTokenHandle userToken);
     }
 }

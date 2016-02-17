@@ -24,7 +24,7 @@ internal partial class Interop
             [Out] out SafeLsaReturnBufferHandle ProfileBuffer,
             [Out] out int ProfileBufferLength,
             [Out] out LUID LogonId,
-            [Out] out SafeAccessTokenHandle Token,
+            [Out] out SafeTokenHandle Token,
             [Out] out QUOTA_LIMITS Quotas,
             [Out] out int SubStatus
             );
