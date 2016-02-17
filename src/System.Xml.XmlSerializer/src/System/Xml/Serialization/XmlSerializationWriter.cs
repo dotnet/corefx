@@ -21,7 +21,7 @@ namespace System.Xml.Serialization
     using System.Xml.Extensions;
     using Hashtable = System.Collections.Generic.Dictionary<object, object>;
     using DictionaryEntry = System.Collections.Generic.KeyValuePair<object, object>;
-    using XmlSchema = System.ServiceModel.Dispatcher.XmlSchemaConstants;
+    using XmlSchema = XmlSchemaConstants;
 
     /// <include file='doc\XmlSerializationWriter.uex' path='docs/doc[@for="XmlSerializationWriter"]/*' />
     ///<internalonly/>

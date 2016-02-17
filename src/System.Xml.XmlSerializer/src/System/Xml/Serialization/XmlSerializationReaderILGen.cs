@@ -19,7 +19,7 @@ namespace System.Xml.Serialization
     using System.Xml.Schema;
     using System.Xml.Extensions;
     using Hashtable = System.Collections.Generic.Dictionary<object, object>;
-    using XmlSchema = System.ServiceModel.Dispatcher.XmlSchemaConstants;
+    using XmlSchema = XmlSchemaConstants;
 
     internal class XmlSerializationReaderILGen : XmlSerializationILGen
     {
