@@ -1662,6 +1662,18 @@ public static partial class XmlSerializerTests
         Assert.StrictEqual(obj.IntProperty, deserializedObj.IntProperty);
     }
 
+    [Fact]
+    public static void Xml_CircularReference()
+    {
+        var objA = new CircularReferenceType() { StringProperty = "Value A" };
+        var objB = new CircularReferenceType() { StringProperty = "Value B", Object = objA };
+        objA.Object = objB;
+        Assert.Throws<InvalidOperationException>(() =>
+        {
+            var obj = SerializeAndDeserialize<CircularReferenceType>(objA, string.Empty);
+        });
+    }
+
     private static T SerializeAndDeserialize<T>(T value, string baseline, Func<XmlSerializer> serializerFactory = null,
         bool skipStringCompare = false, XmlSerializerNamespaces xns = null)
     {
