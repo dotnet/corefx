@@ -342,18 +342,21 @@ namespace System.Net.Sockets.Tests
             });
         }
 
+        [ActiveIssue(6218, PlatformID.AnyUnix)]
         [Fact]
         public void BeginConnectV4IPAddressToV4Host_Success()
         {
             DualModeBeginConnect_IPAddressToHost_Helper(IPAddress.Loopback, IPAddress.Loopback, false);
         }
 
+        [ActiveIssue(6218, PlatformID.AnyUnix)]
         [Fact]
         public void BeginConnectV6IPAddressToV6Host_Success()
         {
             DualModeBeginConnect_IPAddressToHost_Helper(IPAddress.IPv6Loopback, IPAddress.IPv6Loopback, false);
         }
 
+        [ActiveIssue(6218, PlatformID.AnyUnix)]
         [Fact]
         public void BeginConnectV4IPAddressToV6Host_Fails()
         {
@@ -363,6 +366,7 @@ namespace System.Net.Sockets.Tests
             });
         }
 
+        [ActiveIssue(6218, PlatformID.AnyUnix)]
         [Fact]
         public void BeginConnectV6IPAddressToV4Host_Fails()
         {
@@ -372,12 +376,14 @@ namespace System.Net.Sockets.Tests
             });
         }
 
+        [ActiveIssue(6218, PlatformID.AnyUnix)]
         [Fact]
         public void BeginConnectV4IPAddressToDualHost_Success()
         {
             DualModeBeginConnect_IPAddressToHost_Helper(IPAddress.Loopback, IPAddress.IPv6Any, true);
         }
 
+        [ActiveIssue(6218, PlatformID.AnyUnix)]
         [Fact]
         public void BeginConnectV6IPAddressToDualHost_Success()
         {
@@ -412,18 +418,21 @@ namespace System.Net.Sockets.Tests
             });
         }
 
+        [ActiveIssue(6218, PlatformID.AnyUnix)]
         [Fact]
         public void BeginConnectV4IPEndPointToV4Host_Success()
         {
             DualModeBeginConnect_IPEndPointToHost_Helper(IPAddress.Loopback, IPAddress.Loopback, false);
         }
 
+        [ActiveIssue(6218, PlatformID.AnyUnix)]
         [Fact]
         public void BeginConnectV6IPEndPointToV6Host_Success()
         {
             DualModeBeginConnect_IPEndPointToHost_Helper(IPAddress.IPv6Loopback, IPAddress.IPv6Loopback, false);
         }
 
+        [ActiveIssue(6218, PlatformID.AnyUnix)]
         [Fact]
         public void BeginConnectV4IPEndPointToV6Host_Fails()
         {
@@ -433,6 +442,7 @@ namespace System.Net.Sockets.Tests
             });
         }
 
+        [ActiveIssue(6218, PlatformID.AnyUnix)]
         [Fact]
         public void BeginConnectV6IPEndPointToV4Host_Fails()
         {
@@ -442,12 +452,14 @@ namespace System.Net.Sockets.Tests
             });
         }
 
+        [ActiveIssue(6218, PlatformID.AnyUnix)]
         [Fact]
         public void BeginConnectV4IPEndPointToDualHost_Success()
         {
             DualModeBeginConnect_IPEndPointToHost_Helper(IPAddress.Loopback, IPAddress.IPv6Any, true);
         }
 
+        [ActiveIssue(6218, PlatformID.AnyUnix)]
         [Fact]
         public void BeginConnectV6IPEndPointToDualHost_Success()
         {
@@ -545,18 +557,21 @@ namespace System.Net.Sockets.Tests
             });
         }
 
+        [ActiveIssue(6218, PlatformID.AnyUnix)]
         [Fact]
         public void ConnectAsyncV4IPEndPointToV4Host_Success()
         {
             DualModeConnectAsync_IPEndPointToHost_Helper(IPAddress.Loopback, IPAddress.Loopback, false);
         }
 
+        [ActiveIssue(6218, PlatformID.AnyUnix)]
         [Fact]
         public void ConnectAsyncV6IPEndPointToV6Host_Success()
         {
             DualModeConnectAsync_IPEndPointToHost_Helper(IPAddress.IPv6Loopback, IPAddress.IPv6Loopback, false);
         }
 
+        [ActiveIssue(6218, PlatformID.AnyUnix)]
         [Fact]
         public void ConnectAsyncV4IPEndPointToV6Host_Fails()
         {
@@ -566,6 +581,7 @@ namespace System.Net.Sockets.Tests
             });
         }
 
+        [ActiveIssue(6218, PlatformID.AnyUnix)]
         [Fact]
         public void ConnectAsyncV6IPEndPointToV4Host_Fails()
         {
@@ -575,12 +591,14 @@ namespace System.Net.Sockets.Tests
             });
         }
 
+        [ActiveIssue(6218, PlatformID.AnyUnix)]
         [Fact]
         public void ConnectAsyncV4IPEndPointToDualHost_Success()
         {
             DualModeConnectAsync_IPEndPointToHost_Helper(IPAddress.Loopback, IPAddress.IPv6Any, true);
         }
 
+        [ActiveIssue(6218, PlatformID.AnyUnix)]
         [Fact]
         public void ConnectAsyncV6IPEndPointToDualHost_Success()
         {
@@ -1480,30 +1498,35 @@ namespace System.Net.Sockets.Tests
             }
         }
 
+        [ActiveIssue(6218, PlatformID.AnyUnix)]
         [Fact]
         public void BeginReceiveFromV4BoundToSpecificV4_Success()
         {
             BeginReceiveFrom_Helper(IPAddress.Loopback, IPAddress.Loopback);
         }
 
+        [ActiveIssue(6218, PlatformID.AnyUnix)]
         [Fact]
         public void BeginReceiveFromV4BoundToAnyV4_Success()
         {
             BeginReceiveFrom_Helper(IPAddress.Any, IPAddress.Loopback);
         }
 
+        [ActiveIssue(6218, PlatformID.AnyUnix)]
         [Fact]
         public void BeginReceiveFromV6BoundToSpecificV6_Success()
         {
             BeginReceiveFrom_Helper(IPAddress.IPv6Loopback, IPAddress.IPv6Loopback);
         }
 
+        [ActiveIssue(6218, PlatformID.AnyUnix)]
         [Fact]
         public void BeginReceiveFromV6BoundToAnyV6_Success()
         {
             BeginReceiveFrom_Helper(IPAddress.IPv6Any, IPAddress.IPv6Loopback);
         }
 
+        [ActiveIssue(6218, PlatformID.AnyUnix)]
         [Fact]
         public void BeginReceiveFromV6BoundToSpecificV4_NotReceived()
         {
@@ -1513,6 +1536,7 @@ namespace System.Net.Sockets.Tests
             });
         }
 
+        [ActiveIssue(6218, PlatformID.AnyUnix)]
         [Fact]
         [PlatformSpecific(~PlatformID.Linux)]
         public void BeginReceiveFromV4BoundToSpecificV6_NotReceived()
@@ -1530,6 +1554,7 @@ namespace System.Net.Sockets.Tests
         //       with the socket's address family fail. We've decided that this is
         //       an acceptable difference due to the extra state that would otherwise
         //       be necessary to emulate the Winsock behavior.
+        [ActiveIssue(6218, PlatformID.AnyUnix)]
         [Fact]
         [PlatformSpecific(PlatformID.Linux)]
         public void BeginReceiveFromV4BoundToSpecificV6_NotReceived_Linux()
@@ -1540,6 +1565,7 @@ namespace System.Net.Sockets.Tests
             });
         }
 
+        [ActiveIssue(6218, PlatformID.AnyUnix)]
         [Fact]
         public void BeginReceiveFromV6BoundToAnyV4_NotReceived()
         {
@@ -1549,6 +1575,7 @@ namespace System.Net.Sockets.Tests
             });
         }
 
+        [ActiveIssue(6218, PlatformID.AnyUnix)]
         [Fact]
         public void BeginReceiveFromV4BoundToAnyV6_Success()
         {
