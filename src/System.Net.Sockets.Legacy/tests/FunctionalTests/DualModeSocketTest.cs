@@ -940,30 +940,35 @@ namespace System.Net.Sockets.Tests
         #region Accept Async/Event
 
         [Fact]
+        [ActiveIssue(6218, PlatformID.AnyUnix)]
         public void AcceptAsyncV4BoundToSpecificV4_Success()
         {
             DualModeConnect_AcceptAsync_Helper(IPAddress.Loopback, IPAddress.Loopback);
         }
 
         [Fact]
+        [ActiveIssue(6218, PlatformID.AnyUnix)]
         public void AcceptAsyncV4BoundToAnyV4_Success()
         {
             DualModeConnect_AcceptAsync_Helper(IPAddress.Any, IPAddress.Loopback);
         }
 
         [Fact]
+        [ActiveIssue(6218, PlatformID.AnyUnix)]
         public void AcceptAsyncV6BoundToSpecificV6_Success()
         {
             DualModeConnect_AcceptAsync_Helper(IPAddress.IPv6Loopback, IPAddress.IPv6Loopback);
         }
 
         [Fact]
+        [ActiveIssue(6218, PlatformID.AnyUnix)]
         public void AcceptAsyncV6BoundToAnyV6_Success()
         {
             DualModeConnect_AcceptAsync_Helper(IPAddress.IPv6Any, IPAddress.IPv6Loopback);
         }
 
         [Fact]
+        [ActiveIssue(6218, PlatformID.AnyUnix)]
         public void AcceptAsyncV6BoundToSpecificV4_CantConnect()
         {
             Assert.Throws<SocketException>(() =>
@@ -973,6 +978,7 @@ namespace System.Net.Sockets.Tests
         }
 
         [Fact]
+        [ActiveIssue(6218, PlatformID.AnyUnix)]
         public void AcceptAsyncV4BoundToSpecificV6_CantConnect()
         {
             Assert.Throws<SocketException>(() =>
@@ -982,6 +988,7 @@ namespace System.Net.Sockets.Tests
         }
 
         [Fact]
+        [ActiveIssue(6218, PlatformID.AnyUnix)]
         public void AcceptAsyncV6BoundToAnyV4_CantConnect()
         {
             Assert.Throws<SocketException>(() =>
@@ -991,6 +998,7 @@ namespace System.Net.Sockets.Tests
         }
 
         [Fact]
+        [ActiveIssue(6218, PlatformID.AnyUnix)]
         public void AcceptAsyncV4BoundToAnyV6_Success()
         {
             DualModeConnect_AcceptAsync_Helper(IPAddress.IPv6Any, IPAddress.Loopback);
@@ -1158,18 +1166,21 @@ namespace System.Net.Sockets.Tests
         }
 
         [Fact]
+        [ActiveIssue(6218, PlatformID.AnyUnix)]
         public void BeginSendToV4IPEndPointToV4Host_Success()
         {
             DualModeBeginSendTo_EndPointToHost_Helper(IPAddress.Loopback, IPAddress.Loopback, false);
         }
 
         [Fact]
+        [ActiveIssue(6218, PlatformID.AnyUnix)]
         public void BeginSendToV6IPEndPointToV6Host_Success()
         {
             DualModeBeginSendTo_EndPointToHost_Helper(IPAddress.IPv6Loopback, IPAddress.IPv6Loopback, false);
         }
 
         [Fact]
+        [ActiveIssue(6218, PlatformID.AnyUnix)]
         public void BeginSendToV4IPEndPointToV6Host_NotReceived()
         {
             Assert.Throws<TimeoutException>(() =>
@@ -1179,6 +1190,7 @@ namespace System.Net.Sockets.Tests
         }
 
         [Fact]
+        [ActiveIssue(6218, PlatformID.AnyUnix)]
         public void BeginSendToV6IPEndPointToV4Host_NotReceived()
         {
             Assert.Throws<TimeoutException>(() =>
@@ -1188,12 +1200,14 @@ namespace System.Net.Sockets.Tests
         }
 
         [Fact]
+        [ActiveIssue(6218, PlatformID.AnyUnix)]
         public void BeginSendToV4IPEndPointToDualHost_Success()
         {
             DualModeBeginSendTo_EndPointToHost_Helper(IPAddress.Loopback, IPAddress.IPv6Any, true);
         }
 
         [Fact]
+        [ActiveIssue(6218, PlatformID.AnyUnix)]
         public void BeginSendToV6IPEndPointToDualHost_Success()
         {
             DualModeBeginSendTo_EndPointToHost_Helper(IPAddress.IPv6Loopback, IPAddress.IPv6Any, true);
@@ -1255,18 +1269,21 @@ namespace System.Net.Sockets.Tests
         }
 
         [Fact]
+        [ActiveIssue(6218, PlatformID.AnyUnix)]
         public void SendToAsyncV4IPEndPointToV4Host_Success()
         {
             DualModeSendToAsync_IPEndPointToHost_Helper(IPAddress.Loopback, IPAddress.Loopback, false);
         }
 
         [Fact]
+        [ActiveIssue(6218, PlatformID.AnyUnix)]
         public void SendToAsyncV6IPEndPointToV6Host_Success()
         {
             DualModeSendToAsync_IPEndPointToHost_Helper(IPAddress.IPv6Loopback, IPAddress.IPv6Loopback, false);
         }
 
         [Fact]
+        [ActiveIssue(6218, PlatformID.AnyUnix)]
         public void SendToAsyncV4IPEndPointToV6Host_NotReceived()
         {
             Assert.Throws<TimeoutException>(() =>
@@ -1276,6 +1293,7 @@ namespace System.Net.Sockets.Tests
         }
 
         [Fact]
+        [ActiveIssue(6218, PlatformID.AnyUnix)]
         public void SendToAsyncV6IPEndPointToV4Host_NotReceived()
         {
             Assert.Throws<TimeoutException>(() =>
@@ -1285,12 +1303,14 @@ namespace System.Net.Sockets.Tests
         }
 
         [Fact]
+        [ActiveIssue(6218, PlatformID.AnyUnix)]
         public void SendToAsyncV4IPEndPointToDualHost_Success()
         {
             DualModeSendToAsync_IPEndPointToHost_Helper(IPAddress.Loopback, IPAddress.IPv6Any, true);
         }
 
         [Fact]
+        [ActiveIssue(6218, PlatformID.AnyUnix)]
         public void SendToAsyncV6IPEndPointToDualHost_Success()
         {
             DualModeSendToAsync_IPEndPointToHost_Helper(IPAddress.IPv6Loopback, IPAddress.IPv6Any, true);
@@ -1984,6 +2004,7 @@ namespace System.Net.Sockets.Tests
 
         [Fact] // Base case
         [ActiveIssue(4004, PlatformID.OSX)]
+        [ActiveIssue(6218, PlatformID.AnyUnix)]
         public void BeginReceiveMessageFromV4BoundToSpecificMappedV4_Success()
         {
             BeginReceiveMessageFrom_Helper(IPAddress.Loopback.MapToIPv6(), IPAddress.Loopback);
@@ -1991,6 +2012,7 @@ namespace System.Net.Sockets.Tests
 
         [Fact] // Base case
         [ActiveIssue(4004, PlatformID.OSX)]
+        [ActiveIssue(6218, PlatformID.AnyUnix)]
         public void BeginReceiveMessageFromV4BoundToAnyMappedV4_Success()
         {
             BeginReceiveMessageFrom_Helper(IPAddress.Any.MapToIPv6(), IPAddress.Loopback);
@@ -1998,6 +2020,7 @@ namespace System.Net.Sockets.Tests
 
         [Fact]
         [ActiveIssue(4004, PlatformID.OSX)]
+        [ActiveIssue(6218, PlatformID.AnyUnix)]
         public void BeginReceiveMessageFromV4BoundToSpecificV4_Success()
         {
             BeginReceiveMessageFrom_Helper(IPAddress.Loopback, IPAddress.Loopback);
@@ -2005,6 +2028,7 @@ namespace System.Net.Sockets.Tests
 
         [Fact]
         [ActiveIssue(4004, PlatformID.OSX)]
+        [ActiveIssue(6218, PlatformID.AnyUnix)]
         public void BeginReceiveMessageFromV4BoundToAnyV4_Success()
         {
             BeginReceiveMessageFrom_Helper(IPAddress.Any, IPAddress.Loopback);
@@ -2012,6 +2036,7 @@ namespace System.Net.Sockets.Tests
 
         [Fact]
         [ActiveIssue(4004, PlatformID.OSX)]
+        [ActiveIssue(6218, PlatformID.AnyUnix)]
         public void BeginReceiveMessageFromV6BoundToSpecificV6_Success()
         {
             BeginReceiveMessageFrom_Helper(IPAddress.IPv6Loopback, IPAddress.IPv6Loopback);
@@ -2019,12 +2044,14 @@ namespace System.Net.Sockets.Tests
 
         [Fact]
         [ActiveIssue(4004, PlatformID.OSX)]
+        [ActiveIssue(6218, PlatformID.AnyUnix)]
         public void BeginReceiveMessageFromV6BoundToAnyV6_Success()
         {
             BeginReceiveMessageFrom_Helper(IPAddress.IPv6Any, IPAddress.IPv6Loopback);
         }
 
         [Fact]
+        [ActiveIssue(6218, PlatformID.AnyUnix)]
         public void BeginReceiveMessageFromV6BoundToSpecificV4_NotReceived()
         {
             Assert.Throws<TimeoutException>(() =>
@@ -2035,6 +2062,7 @@ namespace System.Net.Sockets.Tests
 
         [Fact]
         [PlatformSpecific(~PlatformID.Linux)]
+        [ActiveIssue(6218, PlatformID.AnyUnix)]
         public void BeginReceiveMessageFromV4BoundToSpecificV6_NotReceived()
         {
             Assert.Throws<TimeoutException>(() =>
@@ -2052,6 +2080,7 @@ namespace System.Net.Sockets.Tests
         //       be necessary to emulate the Winsock behavior.
         [Fact]
         [PlatformSpecific(PlatformID.Linux)]
+        [ActiveIssue(6218, PlatformID.AnyUnix)]
         public void BeginReceiveMessageFromV4BoundToSpecificV6_NotReceived_Linux()
         {
             Assert.Throws<ArgumentException>(() =>
@@ -2061,6 +2090,7 @@ namespace System.Net.Sockets.Tests
         }
 
         [Fact]
+        [ActiveIssue(6218, PlatformID.AnyUnix)]
         public void BeginReceiveMessageFromV6BoundToAnyV4_NotReceived()
         {
             Assert.Throws<TimeoutException>(() =>
@@ -2071,6 +2101,7 @@ namespace System.Net.Sockets.Tests
 
         [Fact]
         [ActiveIssue(4004, PlatformID.OSX)]
+        [ActiveIssue(6218, PlatformID.AnyUnix)]
         public void BeginReceiveMessageFromV4BoundToAnyV6_Success()
         {
             BeginReceiveMessageFrom_Helper(IPAddress.IPv6Any, IPAddress.Loopback);
@@ -2161,6 +2192,7 @@ namespace System.Net.Sockets.Tests
 
         [Fact] // Base case
         [ActiveIssue(4004, PlatformID.OSX)]
+        [ActiveIssue(6218, PlatformID.AnyUnix)]
         public void ReceiveMessageFromAsyncV4BoundToSpecificMappedV4_Success()
         {
             ReceiveMessageFromAsync_Helper(IPAddress.Loopback.MapToIPv6(), IPAddress.Loopback);
@@ -2168,6 +2200,7 @@ namespace System.Net.Sockets.Tests
 
         [Fact] // Base case
         [ActiveIssue(4004, PlatformID.OSX)]
+        [ActiveIssue(6218, PlatformID.AnyUnix)]
         public void ReceiveMessageFromAsyncV4BoundToAnyMappedV4_Success()
         {
             ReceiveMessageFromAsync_Helper(IPAddress.Any.MapToIPv6(), IPAddress.Loopback);
@@ -2175,6 +2208,7 @@ namespace System.Net.Sockets.Tests
 
         [Fact]
         [ActiveIssue(4004, PlatformID.OSX)]
+        [ActiveIssue(6218, PlatformID.AnyUnix)]
         public void ReceiveMessageFromAsyncV4BoundToSpecificV4_Success()
         {
             ReceiveMessageFromAsync_Helper(IPAddress.Loopback, IPAddress.Loopback);
@@ -2182,6 +2216,7 @@ namespace System.Net.Sockets.Tests
 
         [Fact]
         [ActiveIssue(4004, PlatformID.OSX)]
+        [ActiveIssue(6218, PlatformID.AnyUnix)]
         public void ReceiveMessageFromAsyncV4BoundToAnyV4_Success()
         {
             ReceiveMessageFromAsync_Helper(IPAddress.Any, IPAddress.Loopback);
@@ -2189,6 +2224,7 @@ namespace System.Net.Sockets.Tests
 
         [Fact]
         [ActiveIssue(4004, PlatformID.OSX)]
+        [ActiveIssue(6218, PlatformID.AnyUnix)]
         public void ReceiveMessageFromAsyncV6BoundToSpecificV6_Success()
         {
             ReceiveMessageFromAsync_Helper(IPAddress.IPv6Loopback, IPAddress.IPv6Loopback);
@@ -2196,12 +2232,14 @@ namespace System.Net.Sockets.Tests
 
         [Fact]
         [ActiveIssue(4004, PlatformID.OSX)]
+        [ActiveIssue(6218, PlatformID.AnyUnix)]
         public void ReceiveMessageFromAsyncV6BoundToAnyV6_Success()
         {
             ReceiveMessageFromAsync_Helper(IPAddress.IPv6Any, IPAddress.IPv6Loopback);
         }
 
         [Fact]
+        [ActiveIssue(6218, PlatformID.AnyUnix)]
         public void ReceiveMessageFromAsyncV6BoundToSpecificV4_NotReceived()
         {
             Assert.Throws<TimeoutException>(() =>
@@ -2212,6 +2250,7 @@ namespace System.Net.Sockets.Tests
 
         [Fact]
         [PlatformSpecific(~PlatformID.Linux)]
+        [ActiveIssue(6218, PlatformID.AnyUnix)]
         public void ReceiveMessageFromAsyncV4BoundToSpecificV6_NotReceived()
         {
             Assert.Throws<TimeoutException>(() =>
@@ -2238,6 +2277,7 @@ namespace System.Net.Sockets.Tests
         }
 
         [Fact]
+        [ActiveIssue(6218, PlatformID.AnyUnix)]
         public void ReceiveMessageFromAsyncV6BoundToAnyV4_NotReceived()
         {
             Assert.Throws<TimeoutException>(() =>
@@ -2248,6 +2288,7 @@ namespace System.Net.Sockets.Tests
 
         [Fact]
         [ActiveIssue(4004, PlatformID.OSX)]
+        [ActiveIssue(6218, PlatformID.AnyUnix)]
         public void ReceiveMessageFromAsyncV4BoundToAnyV6_Success()
         {
             ReceiveMessageFromAsync_Helper(IPAddress.IPv6Any, IPAddress.Loopback);
