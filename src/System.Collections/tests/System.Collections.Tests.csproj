@@ -34,6 +34,7 @@
       <OutputItemType>Content</OutputItemType>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Targets>Build;DebugSymbolsProjectOutputGroup</Targets>
+      <OSGroup>Windows_NT</OSGroup>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
