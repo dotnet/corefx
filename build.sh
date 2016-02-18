@@ -2,7 +2,7 @@
 
 usage()
 {
-    echo "Usage: $0 [managed] [native] [BuildArch] [BuildType] [clean] [verbose] [clangx.y] [platform]"
+    echo "Usage: $0 [managed] [native] [BuildArch] [BuildType] [clean] [cross] [verbose] [clangx.y] [platform]"
     echo "managed - optional argument to build the managed code"
     echo "native - optional argument to build the native code"
     echo "The following arguments affect native builds only:"
@@ -12,6 +12,8 @@ usage()
     echo "verbose - optional argument to enable verbose build output."
     echo "clangx.y - optional argument to build using clang version x.y."
     echo "platform can be: FreeBSD, Linux, NetBSD, OSX, Windows"
+    echo "cross - optional argument to signify cross compilation,"
+    echo "      - will use ROOTFS_DIR environment variable if set."
 
     exit 1
 }
@@ -99,7 +101,7 @@ prepare_native_build()
 build_managed_corefx()
 {
     __buildproj=$__scriptpath/build.proj
-    __buildlog=$__scriptpath/msbuild.log
+    __buildlog=$__scriptpath/msbuild.$__BuildArch.log
     __binclashlog=$__scriptpath/binclash.log
     __binclashloggerdll=$__scriptpath/Tools/Microsoft.DotNet.Build.Tasks.dll
 
@@ -121,8 +123,8 @@ build_native_corefx()
     cd "$__IntermediatesDir"
 
     # Regenerate the CMake solution
-    echo "Invoking cmake with arguments: \"$__nativeroot\" $__CMakeArgs"
-    "$__nativeroot/gen-buildsys-clang.sh" "$__nativeroot" $__ClangMajorVersion $__ClangMinorVersion $__CMakeArgs
+    echo "Invoking cmake with arguments: \"$__ProjectRoot\" $__BuildType"
+    "$__ProjectRoot/src/Native/gen-buildsys-clang.sh" "$__ProjectRoot" $__ClangMajorVersion $__ClangMinorVersion $__BuildArch $__BuildType
 
     # Check that the makefiles were created.
 
@@ -157,7 +159,7 @@ build_native_corefx()
 }
 
 __scriptpath=$(cd "$(dirname "$0")"; pwd -P)
-__nativeroot=$__scriptpath/src/Native
+__ProjectRoot=$__scriptpath
 __packageroot=$__scriptpath/packages
 __sourceroot=$__scriptpath/src
 __nugetpath=$__packageroot/NuGet.exe
@@ -245,7 +247,6 @@ case $OSName in
 esac
 __BuildOS=$__HostOS
 __BuildType=Debug
-__CMakeArgs=DEBUG
 
 case $__HostOS in
     FreeBSD)
@@ -268,6 +269,7 @@ __CleanBuild=false
 __VerboseBuild=false
 __ClangMajorVersion=3
 __ClangMinorVersion=5
+__CrossBuild=0
 
 for i in "$@"
     do
@@ -304,7 +306,6 @@ for i in "$@"
             ;;
         release)
             __BuildType=Release
-            __CMakeArgs=RELEASE
             ;;
         clean)
             __CleanBuild=1
@@ -348,6 +349,9 @@ for i in "$@"
             __BuildOS=Windows_NT
             __TestNugetRuntimeId=win7-x64
             ;;
+        cross)
+            __CrossBuild=1
+            ;;
         *)
           __UnprocessedBuildArgs="$__UnprocessedBuildArgs $i"
     esac
@@ -362,9 +366,17 @@ fi
 
 # Disable the native build when targeting Windows.
 
-if [ "$__BuildOS" != "$__HostOS" ]; then
+if [ "$__BuildOS" != "$__HostOS" ] && [ $__CrossBuild == 0 ]; then
     echo "Warning: cross compiling native components is not yet supported"
     __buildnative=false
+fi
+
+# Configure environment if we are doing a cross compile.
+if [ $__CrossBuild == 1 ]; then
+    export CROSSCOMPILE=1
+    if ! [[ -n "$ROOTFS_DIR" ]]; then
+        export ROOTFS_DIR="$__ProjectRoot/cross/rootfs/$__BuildArch"
+    fi
 fi
 
 # Set the remaining variables based upon the determined build configuration
