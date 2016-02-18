@@ -39,23 +39,14 @@ static char gss_mech_value[] = "\x2b\x06\x01\x05\x05\x02"; // Binary representat
 
 static uint32_t NetSecurityNative_HandleError(uint32_t majorStatus,
                                               gss_buffer_t gssBuffer,
-                                              struct PAL_GssBuffer *targetBuffer)
+                                              struct PAL_GssBuffer* targetBuffer)
 {
     assert(targetBuffer != nullptr);
     assert(gssBuffer != nullptr);
-    if (GSS_ERROR(majorStatus))
-    {
-        assert (gssBuffer->value == nullptr);
-        targetBuffer->length = 0;
-        targetBuffer->data = nullptr;
-    }
-    else
-    {
-        assert(gssBuffer->value != nullptr || gssBuffer->length == 0);
-        targetBuffer->length = gssBuffer->length;
-        targetBuffer->data = static_cast<uint8_t*>(gssBuffer->value);
-    }
+    assert(gssBuffer->value == nullptr || gssBuffer->length > 0);
 
+    targetBuffer->length = gssBuffer->length;
+    targetBuffer->data = static_cast<uint8_t*>(gssBuffer->value);
     return majorStatus;
 }
 
