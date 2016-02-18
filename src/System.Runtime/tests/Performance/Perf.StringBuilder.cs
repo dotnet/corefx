@@ -3,61 +3,74 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Text;
-using Xunit;
+
 using Microsoft.Xunit.Performance;
+using Xunit;
 
 namespace System.Runtime.Tests
 {
-    public class Perf_StringBuilder
+    public static class Perf_StringBuilder
     {
         [Benchmark]
-        public void ctor()
+        public static void Ctor()
         {
             StringBuilder builder;
             foreach (var iteration in Benchmark.Iterations)
+            {
                 using (iteration.StartMeasurement())
+                {
                     for (int i = 0; i < 10000; i++)
                     {
                         builder = new StringBuilder(); builder = new StringBuilder(); builder = new StringBuilder();
                         builder = new StringBuilder(); builder = new StringBuilder(); builder = new StringBuilder();
                         builder = new StringBuilder(); builder = new StringBuilder(); builder = new StringBuilder();
                     }
+                }
+            }
         }
 
         [Benchmark]
         [InlineData(100)]
         [InlineData(1000)]
-        public void ctor_string(int length)
+        public static void Ctor_String(int length)
         {
-            PerfUtils utils = new PerfUtils();
+            var utils = new PerfUtils();
             string input = utils.CreateString(length);
             StringBuilder builder;
             foreach (var iteration in Benchmark.Iterations)
+            {
                 using (iteration.StartMeasurement())
+                {
                     for (int i = 0; i < 10000; i++)
                     {
                         builder = new StringBuilder(input); builder = new StringBuilder(input); builder = new StringBuilder(input);
                         builder = new StringBuilder(input); builder = new StringBuilder(input); builder = new StringBuilder(input);
                         builder = new StringBuilder(input); builder = new StringBuilder(input); builder = new StringBuilder(input);
                     }
+                }
+            }
         }
 
         [Benchmark]
         [InlineData(0)]
         [InlineData(200)]
-        public void Append(int length)
+        public static void Append(int length)
         {
-            PerfUtils utils = new PerfUtils();
+            var utils = new PerfUtils();
             foreach (var iteration in Benchmark.Iterations)
             {
                 // Setup - Create a string of the specified length
                 string builtString = utils.CreateString(length);
-                StringBuilder empty = new StringBuilder();
+                var builder = new StringBuilder();
 
                 // Actual perf testing
                 using (iteration.StartMeasurement())
+                {
                     for (int i = 0; i < 10000; i++)
-                        empty.Append(builtString); // Appends a string of length "length" to an increasingly large StringBuilder
+                    {
+                        builder.Append(builtString); // Appends a string of length "length" to an increasingly large StringBuilder
+                    }
+                }
             }
         }
     }

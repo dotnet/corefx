@@ -6,33 +6,41 @@ using Microsoft.Xunit.Performance;
 
 namespace System.Runtime.Tests
 {
-    public class Perf_Object
+    public static class Perf_Object
     {
         [Benchmark]
-        public void ctor()
+        public static void Ctor()
         {
             foreach (var iteration in Benchmark.Iterations)
+            {
                 using (iteration.StartMeasurement())
+                {
                     for (int i = 0; i < 10000; i++)
                     {
                         new object(); new object(); new object();
                         new object(); new object(); new object();
                         new object(); new object(); new object();
                     }
+                }
+            }
         }
 
         [Benchmark]
-        public void GetType_()
+        public static void GetType_Performance()
         {
-            object obj = new object();
+            var obj = new object();
             foreach (var iteration in Benchmark.Iterations)
+            {
                 using (iteration.StartMeasurement())
+                {
                     for (int i = 0; i < 10000; i++)
                     {
                         obj.GetType(); obj.GetType(); obj.GetType();
                         obj.GetType(); obj.GetType(); obj.GetType();
                         obj.GetType(); obj.GetType(); obj.GetType();
                     }
+                }
+            }
         }
     }
 }

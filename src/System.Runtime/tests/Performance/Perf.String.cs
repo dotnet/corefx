@@ -4,102 +4,133 @@
 
 using System.Text;
 using System.Collections.Generic;
-using Xunit;
+
 using Microsoft.Xunit.Performance;
+using Xunit;
 
 namespace System.Runtime.Tests
 {
-    public class Perf_String
+    public static class Perf_String
     {
-        public static IEnumerable<object[]> TestStringSizes()
+        public static IEnumerable<object[]> StringSizesTestData()
         {
             yield return new object[] { 10 };
             yield return new object[] { 100 };
             yield return new object[] { 1000 };
         }
 
-        [Benchmark]
-        [MemberData("TestStringSizes")]
-        public void GetChars(int size)
+        [Benchmark , MemberData("StringSizesTestData")]
+        public static void GetChars(int size)
         {
-            PerfUtils utils = new PerfUtils();
+            var utils = new PerfUtils();
             string testString = utils.CreateString(size);
+            {
+                foreach (var iteration in Benchmark.Iterations)
+                {
+                    using (iteration.StartMeasurement())
+                    {
+                        for (int i = 0; i < 10000; i++)
+                        {
+                            testString.ToCharArray(); testString.ToCharArray(); testString.ToCharArray();
+                            testString.ToCharArray(); testString.ToCharArray(); testString.ToCharArray();
+                            testString.ToCharArray(); testString.ToCharArray(); testString.ToCharArray();
+                        }
+                    }
+                }
+            }
+        }
+
+        [Benchmark, MemberData("StringSizesTestData")]
+        public static void Conact_String_String(int size)
+        {
+            var utils = new PerfUtils();
+            string s1 = utils.CreateString(size);
+            string s2 = utils.CreateString(size);
             foreach (var iteration in Benchmark.Iterations)
+            {
                 using (iteration.StartMeasurement())
+                {
                     for (int i = 0; i < 10000; i++)
                     {
-                        testString.ToCharArray(); testString.ToCharArray(); testString.ToCharArray();
-                        testString.ToCharArray(); testString.ToCharArray(); testString.ToCharArray();
-                        testString.ToCharArray(); testString.ToCharArray(); testString.ToCharArray();
+                        string.Concat(s1, s2);
                     }
+                }
+            }
         }
 
-        [Benchmark]
-        [MemberData("TestStringSizes")]
-        public void Concat_str_str(int size)
+        [Benchmark, MemberData("StringSizesTestData")]
+        public static void Concat_String_String_String(int size)
         {
-            PerfUtils utils = new PerfUtils();
-            string testString1 = utils.CreateString(size);
-            string testString2 = utils.CreateString(size);
+            var utils = new PerfUtils();
+            string s1 = utils.CreateString(size);
+            string s2 = utils.CreateString(size);
+            string s3 = utils.CreateString(size);
             foreach (var iteration in Benchmark.Iterations)
+            {
                 using (iteration.StartMeasurement())
+                {
                     for (int i = 0; i < 10000; i++)
-                        string.Concat(testString1, testString2);
+                    {
+                        string.Concat(s1, s2, s3);
+                    }
+                }
+            }
         }
 
-        [Benchmark]
-        [MemberData("TestStringSizes")]
-        public void Concat_str_str_str(int size)
+        [Benchmark , MemberData("StringSizesTestData")]
+        public static void Concat_String_String_String_String(int size)
         {
-            PerfUtils utils = new PerfUtils();
-            string testString1 = utils.CreateString(size);
-            string testString2 = utils.CreateString(size);
-            string testString3 = utils.CreateString(size);
+            var utils = new PerfUtils();
+            string s1 = utils.CreateString(size);
+            string s2 = utils.CreateString(size);
+            string s3 = utils.CreateString(size);
+            string s4 = utils.CreateString(size);
             foreach (var iteration in Benchmark.Iterations)
+            {
                 using (iteration.StartMeasurement())
+                {
                     for (int i = 0; i < 10000; i++)
-                        string.Concat(testString1, testString2, testString3);
+                    {
+                        string.Concat(s1, s2, s3, s4);
+                    }
+                }
+            }
         }
 
-        [Benchmark]
-        [MemberData("TestStringSizes")]
-        public void Concat_str_str_str_str(int size)
+        [Benchmark, MemberData("StringSizesTestData")]
+        public static void Contains(int size)
         {
-            PerfUtils utils = new PerfUtils();
-            string testString1 = utils.CreateString(size);
-            string testString2 = utils.CreateString(size);
-            string testString3 = utils.CreateString(size);
-            string testString4 = utils.CreateString(size);
+            var utils = new PerfUtils();
+            string s = utils.CreateString(size);
+            string subString = s.Substring(s.Length / 2, s.Length / 4);
             foreach (var iteration in Benchmark.Iterations)
+            {
                 using (iteration.StartMeasurement())
+                {
                     for (int i = 0; i < 10000; i++)
-                        string.Concat(testString1, testString2, testString3, testString4);
+                    {
+                        s.Contains(subString);
+                    }
+                }
+            }
         }
 
-        [Benchmark]
-        [MemberData("TestStringSizes")]
-        public void Contains(int size)
+        [Benchmark, MemberData("StringSizesTestData")]
+        public static void Equals(int size)
         {
-            PerfUtils utils = new PerfUtils();
-            string testString = utils.CreateString(size);
-            string subString = testString.Substring(testString.Length / 2, testString.Length / 4);
+            var utils = new PerfUtils();
+            string s1 = utils.CreateString(size);
+            string s2 = new string(s1.ToCharArray());
             foreach (var iteration in Benchmark.Iterations)
+            {
                 using (iteration.StartMeasurement())
+                {
                     for (int i = 0; i < 10000; i++)
-                        testString.Contains(subString);
-        }
-
-        [Benchmark]
-        [MemberData("TestStringSizes")]
-        public void Equals(int size)
-        {
-            PerfUtils utils = new PerfUtils();
-            string testString1 = utils.CreateString(size);
-            string testString2 = new string(testString1.ToCharArray());
-            foreach (var iteration in Benchmark.Iterations)
-                using (iteration.StartMeasurement())
-                    for (int i = 0; i < 10000; i++)
-                        testString1.Equals(testString2);
+                    {
+                        s1.Equals(s2);
+                    }
+                }
+            }
         }
 
         [Benchmark]
@@ -108,174 +139,231 @@ namespace System.Runtime.Tests
         [InlineData(3)]
         [InlineData(10)]
         [InlineData(100)]
-        public void Format(int numberOfObjects)
+        public static void Format(int numberOfObjects)
         {
-            PerfUtils utils = new PerfUtils();
+            var utils = new PerfUtils();
             // Setup the format string and the list of objects to format
-            StringBuilder formatter = new StringBuilder();
-            List<string> objects = new List<string>();
+            var formatter = new StringBuilder();
+            var objects = new List<string>();
             for (int i = 0; i < numberOfObjects; i++)
             {
                 formatter.Append("%s, ");
                 objects.Add(utils.CreateString(10));
             }
             string format = formatter.ToString();
-            string[] objectArr = objects.ToArray();
+            string[] objectArray = objects.ToArray();
 
             // Perform the actual formatting
             foreach (var iteration in Benchmark.Iterations)
+            {
                 using (iteration.StartMeasurement())
+                {
                     for (int i = 0; i < 5000; i++)
-                        string.Format(format, objectArr);
+                    {
+                        string.Format(format, objectArray);
+                    }
+                }
+            }
         }
 
-        [Benchmark]
-        [MemberData("TestStringSizes")]
-        public void GetLength(int size)
+        [Benchmark, MemberData("StringSizesTestData")]
+        public static void GetLength(int size)
         {
-            PerfUtils utils = new PerfUtils();
+            var utils = new PerfUtils();
             int result;
-            string testString = utils.CreateString(size);
+            string s = utils.CreateString(size);
             foreach (var iteration in Benchmark.Iterations)
+            {
                 using (iteration.StartMeasurement())
+                {
                     for (int i = 0; i < 10000; i++)
                     {
-                        result = testString.Length; result = testString.Length; result = testString.Length;
-                        result = testString.Length; result = testString.Length; result = testString.Length;
-                        result = testString.Length; result = testString.Length; result = testString.Length;
+                        result = s.Length; result = s.Length; result = s.Length;
+                        result = s.Length; result = s.Length; result = s.Length;
+                        result = s.Length; result = s.Length; result = s.Length;
                     }
+                }
+            }
         }
 
-        [Benchmark]
-        [MemberData("TestStringSizes")]
-        public void op_Equality(int size)
+        [Benchmark, MemberData("StringSizesTestData")]
+        public static void Operator_Equality(int size)
         {
-            PerfUtils utils = new PerfUtils();
+            var utils = new PerfUtils();
             bool result;
-            string testString1 = utils.CreateString(size);
-            string testString2 = utils.CreateString(size);
+            string s1 = utils.CreateString(size);
+            string s2 = utils.CreateString(size);
             foreach (var iteration in Benchmark.Iterations)
+            {
                 using (iteration.StartMeasurement())
+                {
                     for (int i = 0; i < 10000; i++)
                     {
-                        result = testString1 == testString2; result = testString1 == testString2;
-                        result = testString1 == testString2; result = testString1 == testString2;
-                        result = testString1 == testString2; result = testString1 == testString2;
+                        result = s1 == s2; result = s1 == s2;
+                        result = s1 == s2; result = s1 == s2;
+                        result = s1 == s2; result = s1 == s2;
                     }
+                }
+            }
         }
 
-        [Benchmark]
-        [MemberData("TestStringSizes")]
-        public void Replace(int size)
+        [Benchmark, MemberData("StringSizesTestData")]
+        public static void Replace(int size)
         {
-            PerfUtils utils = new PerfUtils();
-            string testString = utils.CreateString(size);
-            string existingValue = testString.Substring(testString.Length / 2, 1);
+            var utils = new PerfUtils();
+            string s = utils.CreateString(size);
+            string existingValue = s.Substring(s.Length / 2, 1);
             foreach (var iteration in Benchmark.Iterations)
+            {
                 using (iteration.StartMeasurement())
+                {
                     for (int i = 0; i < 10000; i++)
-                        testString.Replace(existingValue, "1");
+                    {
+                        s.Replace(existingValue, "1");
+                    }
+                }
+            }
         }
 
-        [Benchmark]
-        [MemberData("TestStringSizes")]
-        public void Split(int size)
+        [Benchmark, MemberData("StringSizesTestData")]
+        public static void Split(int size)
         {
-            PerfUtils utils = new PerfUtils();
-            string testString = utils.CreateString(size);
-            string existingValue = testString.Substring(testString.Length / 2, 1);
+            var utils = new PerfUtils();
+            string s = utils.CreateString(size);
+            string existingValue = s.Substring(s.Length / 2, 1);
             foreach (var iteration in Benchmark.Iterations)
+            {
                 using (iteration.StartMeasurement())
+                {
                     for (int i = 0; i < 10000; i++)
-                        testString.Split(existingValue);
+                    {
+                        s.Split(existingValue);
+                    }
+                }
+            }
         }
 
-        [Benchmark]
-        [MemberData("TestStringSizes")]
-        public void StartsWith(int size)
+        [Benchmark, MemberData("StringSizesTestData")]
+        public static void StartsWith(int size)
         {
-            PerfUtils utils = new PerfUtils();
-            string testString = utils.CreateString(size);
-            string subString = testString.Substring(0, testString.Length / 4);
+            var utils = new PerfUtils();
+            string s = utils.CreateString(size);
+            string subString = s.Substring(0, s.Length / 4);
             foreach (var iteration in Benchmark.Iterations)
+            {
                 using (iteration.StartMeasurement())
+                {
                     for (int i = 0; i < 10000; i++)
-                        testString.StartsWith(subString);
+                    {
+                        s.StartsWith(subString);
+                    }
+                }
+            }
         }
 
-        [Benchmark]
-        [MemberData("TestStringSizes")]
-        public void Substring_int(int size)
+        [Benchmark, MemberData("StringSizesTestData")]
+        public static void Substring_Int(int size)
         {
-            PerfUtils utils = new PerfUtils();
+            var utils = new PerfUtils();
             int startIndex = size / 2;
-            string testString = utils.CreateString(size);
+            string s = utils.CreateString(size);
             foreach (var iteration in Benchmark.Iterations)
+            {
                 using (iteration.StartMeasurement())
+                {
                     for (int i = 0; i < 10000; i++)
-                        testString.Substring(startIndex);
+                    {
+                        s.Substring(startIndex);
+                    }
+                }
+            }
         }
 
-        [Benchmark]
-        [MemberData("TestStringSizes")]
-        public void Substring_int_int(int size)
+        [Benchmark, MemberData("StringSizesTestData")]
+        public static void Substring_Int_Int(int size)
         {
-            PerfUtils utils = new PerfUtils();
+            var utils = new PerfUtils();
             int startIndex = size / 2;
             int length = size / 4;
-            string testString = utils.CreateString(size);
+            string s = utils.CreateString(size);
             foreach (var iteration in Benchmark.Iterations)
+            {
                 using (iteration.StartMeasurement())
+                {
                     for (int i = 0; i < 10000; i++)
-                        testString.Substring(startIndex, length);
+                    {
+                        s.Substring(startIndex, length);
+                    }
+                }
+            }
         }
 
-        [Benchmark]
-        [MemberData("TestStringSizes")]
-        public void ToLower(int size)
+        [Benchmark, MemberData("StringSizesTestData")]
+        public static void ToLower(int size)
         {
-            PerfUtils utils = new PerfUtils();
-            string testString = utils.CreateString(size);
+            var utils = new PerfUtils();
+            string s = utils.CreateString(size);
             foreach (var iteration in Benchmark.Iterations)
+            {
                 using (iteration.StartMeasurement())
+                {
                     for (int i = 0; i < 10000; i++)
-                        testString.ToLower();
+                    {
+                        s.ToLower();
+                    }
+                }
+            }
         }
 
-        [Benchmark]
-        [MemberData("TestStringSizes")]
-        public void ToUpper(int size)
+        [Benchmark, MemberData("StringSizesTestData")]
+        public static void ToUpper(int size)
         {
-            PerfUtils utils = new PerfUtils();
-            string testString = utils.CreateString(size);
+            var utils = new PerfUtils();
+            string s = utils.CreateString(size);
             foreach (var iteration in Benchmark.Iterations)
+            {
                 using (iteration.StartMeasurement())
+                {
                     for (int i = 0; i < 10000; i++)
-                        testString.ToUpper();
+                    {
+                        s.ToUpper();
+                    }
+                }
+            }
         }
 
-        [Benchmark]
-        [MemberData("TestStringSizes")]
-        public void Trim_WithWhitespace(int size)
+        [Benchmark, MemberData("StringSizesTestData")]
+        public static void Trim_WithWhitespace(int size)
         {
-            PerfUtils utils = new PerfUtils();
-            string testString = "   " + utils.CreateString(size) + "   ";
+            var utils = new PerfUtils();
+            string s = "   " + utils.CreateString(size) + "   ";
             foreach (var iteration in Benchmark.Iterations)
+            {
                 using (iteration.StartMeasurement())
+                {
                     for (int i = 0; i < 10000; i++)
-                        testString.Trim();
+                    {
+                        s.Trim();
+                    }
+                }
+            }
         }
 
-        [Benchmark]
-        [MemberData("TestStringSizes")]
-        public void Trim_NothingToDo(int size)
+        [Benchmark, MemberData("StringSizesTestData")]
+        public static void Trim_NothingToDo(int size)
         {
-            PerfUtils utils = new PerfUtils();
-            string testString = utils.CreateString(size);
+            var utils = new PerfUtils();
+            string s = utils.CreateString(size);
             foreach (var iteration in Benchmark.Iterations)
+            {
                 using (iteration.StartMeasurement())
+                {
                     for (int i = 0; i < 10000; i++)
-                        testString.Trim();
+                    {
+                        s.Trim();
+                    }
+                }
+            }
         }
     }
 }

@@ -2,182 +2,341 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
+using System.Collections;
 using System.Collections.Generic;
 
 using Xunit;
 
-public static unsafe class ArraySegmentTests
+namespace System.Runtime.Tests
 {
-    [Fact]
-    public static void TestCtors()
+    public static class ArraySegmentTests
     {
-        int i;
-        int[] ia2;
-
-        int[] ia = { 7, 8, 9, 10, 11 };
-        ArraySegment<int> a;
-
-        a = new ArraySegment<int>(ia);
-        ia2 = a.Array;
-        Assert.True(Object.ReferenceEquals(ia2, ia));
-        i = a.Offset;
-        Assert.Equal(i, 0);
-        i = a.Count;
-        Assert.Equal(i, 5);
-
-        a = new ArraySegment<int>();
-        ia2 = a.Array;
-        Assert.Null(ia2);
-        i = a.Offset;
-        Assert.Equal(i, 0);
-        i = a.Count;
-        Assert.Equal(i, 0);
-    }
-
-    [Fact]
-    public static void TestBasics()
-    {
-        int[] ia = { 7, 8, 9, 10, 11 };
-        ArraySegment<int> a = new ArraySegment<int>(ia, 2, 3);
-        bool b;
-        int c;
-
-        int[] ia2 = a.Array;
-        Assert.True(Object.ReferenceEquals(ia, ia2));
-
-        c = a.Offset;
-        Assert.Equal(c, 2);
-
-        c = a.Count;
-        Assert.Equal(c, 3);
-
-        b = a.Equals(a);
-        Assert.True(b);
-
-        ArraySegment<int> a2 = new ArraySegment<int>(ia, 2, 3);
-        b = a.Equals(a2);
-        Assert.True(b);
-
-        int[] ia3 = (int[])(ia.Clone());
-        ArraySegment<int> a3 = new ArraySegment<int>(ia3, 2, 3);
-        b = a.Equals(a3);
-        Assert.False(b);
-
-        object o;
-        o = null;
-        b = a.Equals(null);
-        Assert.False(b);
-
-        o = a2;
-        b = a.Equals(o);
-        Assert.True(b);
-
-        int h1 = a.GetHashCode();
-        int h2 = a.GetHashCode();
-        int h3 = a2.GetHashCode();
-        Assert.Equal(h1, h2);
-        Assert.Equal(h1, h3);
-    }
-
-    [Fact]
-    public static void TestIList()
-    {
-        int[] ia = { 7, 8, 9, 10, 11, 12, 13 };
-        ArraySegment<int> a = new ArraySegment<int>(ia, 2, 3);
-        IList<int> il = a;
-        bool b;
-        int i;
-
-        b = il.IsReadOnly;
-        Assert.True(b);
-
-        i = il[1];
-        Assert.Equal(i, 10);
-
-        il[1] = 99;
-        Assert.Equal(ia[3], 99);
-
-        Assert.Throws<NotSupportedException>(() => il.Add(2));
-        Assert.Throws<NotSupportedException>(() => il.Clear());
-
-        b = il.Contains(11);
-        Assert.True(b);
-
-        b = il.Contains(8788);
-        Assert.False(b);
-
-        int[] dst = new int[10];
-        il.CopyTo(dst, 5);
-        Assert.Equal(dst[0], 0);
-        Assert.Equal(dst[1], 0);
-        Assert.Equal(dst[2], 0);
-        Assert.Equal(dst[3], 0);
-        Assert.Equal(dst[4], 0);
-        Assert.Equal(dst[5], 9);
-        Assert.Equal(dst[6], 99);
-        Assert.Equal(dst[7], 11);
-        Assert.Equal(dst[8], 0);
-        Assert.Equal(dst[9], 0);
-
-        Assert.Throws<NotSupportedException>(() => il.Remove(2));
-        Assert.Throws<NotSupportedException>(() => il.RemoveAt(2));
-
-        int idx;
-        idx = il.IndexOf(99);
-        Assert.Equal(idx, 1);
-
-        idx = il.IndexOf(99999);
-        Assert.Equal(idx, -1);
-
-        IEnumerator<int> e = il.GetEnumerator();
-        b = e.MoveNext();
-        Assert.True(b);
-        i = e.Current;
-        Assert.Equal(i, 9);
-        b = e.MoveNext();
-        Assert.True(b);
-        i = e.Current;
-        Assert.Equal(i, 99);
-        b = e.MoveNext();
-        Assert.True(b);
-        i = e.Current;
-        Assert.Equal(i, 11);
-        b = e.MoveNext();
-        Assert.False(b);
-    }
-
-    [Fact]
-    public static void TestCopyTo()
-    {
+        [Fact]
+        public static void TestCtor_Empty()
         {
-            string[] src;
-            IList<string> seg;
-
-            src = new string[] { "0", "1", "2", "3", "4" };
-            seg = new ArraySegment<string>(src, 1, 3);
-            seg.CopyTo(src, 2);
-            Assert.Equal(src, new string[] { "0", "1", "1", "2", "3" });
-
-            src = new string[] { "0", "1", "2", "3", "4" };
-            seg = new ArraySegment<string>(src, 1, 3);
-            seg.CopyTo(src, 0);
-            Assert.Equal(src, new string[] { "1", "2", "3", "3", "4" });
+            var seg = new ArraySegment<int>();
+            Assert.Null(seg.Array);
+            Assert.Equal(0, seg.Offset);
+            Assert.Equal(0, seg.Count);
         }
 
+        [Fact]
+        public static void TestCtor_Array()
         {
-            int[] src;
-            IList<int> seg;
+            var intArray = new int[] { 7, 8, 9, 10, 11 };
+            var seg = new ArraySegment<int>(intArray);
 
-            src = new int[] { 0, 1, 2, 3, 4 };
-            seg = new ArraySegment<int>(src, 1, 3);
-            seg.CopyTo(src, 2);
-            Assert.Equal(src, new int[] { 0, 1, 1, 2, 3 });
+            Assert.Same(intArray, seg.Array);
+            Assert.Equal(0, seg.Offset);
+            Assert.Equal(5, seg.Count);
+        }
 
-            src = new int[] { 0, 1, 2, 3, 4 };
-            seg = new ArraySegment<int>(src, 1, 3);
-            seg.CopyTo(src, 0);
-            Assert.Equal(src, new int[] { 1, 2, 3, 3, 4 });
+        [Fact]
+        public static void TestCtor_Array_Invalid()
+        {
+            Assert.Throws<ArgumentNullException>("array", () => new ArraySegment<int>(null)); // Array is null
+        }
+
+        [Fact]
+        public static void TestCtor_Array_Int_Int()
+        {
+            var intArray = new int[] { 7, 8, 9, 10, 11 };
+            var seg = new ArraySegment<int>(intArray, 2, 3);
+
+            Assert.Same(intArray, seg.Array);
+            Assert.Equal(2, seg.Offset);
+            Assert.Equal(3, seg.Count);
+        }
+
+        [Fact]
+        public static void TestCtor_Array_Int_Int_Invalid()
+        {
+            Assert.Throws<ArgumentNullException>("array", () => new ArraySegment<int>(null, 0, 0)); // Array is null
+
+            Assert.Throws<ArgumentOutOfRangeException>("offset", () => new ArraySegment<int>(new int[10], -1, 0)); // Offset < 0
+            Assert.Throws<ArgumentOutOfRangeException>("count", () => new ArraySegment<int>(new int[10], 0, -1)); // Count < 0
+            
+            Assert.Throws<ArgumentException>(null, () => new ArraySegment<int>(new int[10], 10, 1)); // Offset + count > array.Length
+            Assert.Throws<ArgumentException>(null, () => new ArraySegment<int>(new int[10], 9, 2)); // Offset + count > array.Length
+        }
+
+        public static IEnumerable<object[]> EqualsTestData()
+        {
+            var intArray1 = new int[] { 7, 8, 9, 10, 11, 12 };
+            var intArray2 = new int[] { 7, 8, 9, 10, 11, 12 };
+
+            yield return new object[] { new ArraySegment<int>(intArray1), new ArraySegment<int>(intArray1), true };
+            yield return new object[] { new ArraySegment<int>(intArray1), new ArraySegment<int>(intArray1, 0, intArray1.Length), true };
+
+            yield return new object[] { new ArraySegment<int>(intArray1, 2, 3), new ArraySegment<int>(intArray1, 2, 3), true };
+            yield return new object[] { new ArraySegment<int>(intArray1, 3, 3), new ArraySegment<int>(intArray1, 2, 3), false };
+            yield return new object[] { new ArraySegment<int>(intArray1, 2, 4), new ArraySegment<int>(intArray1, 2, 3), false };
+
+            yield return new object[] { new ArraySegment<int>(intArray1, 2, 4), new ArraySegment<int>(intArray2, 2, 3), false };
+
+            yield return new object[] { new ArraySegment<int>(intArray1), intArray1, false };
+            yield return new object[] { new ArraySegment<int>(intArray1), null, false };
+            yield return new object[] { new ArraySegment<int>(intArray1, 2, 4), null, false };
+        }
+
+        [Theory, MemberData("EqualsTestData")]
+        public static void TestEquals(ArraySegment<int> seg1, object obj, bool expected)
+        {
+            if (obj is ArraySegment<int>)
+            {
+                ArraySegment<int> seg2 = (ArraySegment<int>)obj;
+                Assert.Equal(expected, seg1.Equals(seg2));
+                Assert.Equal(expected, seg1 == seg2);
+                Assert.Equal(!expected, seg1 != seg2);
+
+                Assert.Equal(expected, seg1.GetHashCode().Equals(seg2.GetHashCode()));
+            }
+            Assert.Equal(expected, seg1.Equals(obj));
+        }
+        
+        [Fact]
+        public static void TestIList_GetSetItem()
+        {
+            var intArray = new int[] { 7, 8, 9, 10, 11, 12, 13 };
+            var seg = new ArraySegment<int>(intArray, 2, 3);
+            IList<int> iList = seg;
+
+            Assert.Equal(seg.Count, iList.Count);
+            for (int i = 0; i < iList.Count; i++)
+            {
+                Assert.Equal(intArray[i + seg.Offset], iList[i]);
+
+                iList[i] = 99;
+                Assert.Equal(99, iList[i]);
+                Assert.Equal(99, intArray[i + seg.Offset]);
+            }
+        }
+
+        [Fact]
+        public static void TestIList_GetSetItem_Invalid()
+        {
+            IList<int> iList = new ArraySegment<int>();
+            Assert.Throws<InvalidOperationException>(() => iList[0]); // Array is null
+            Assert.Throws<InvalidOperationException>(() => iList[0] = 0); // Array is null
+
+            var intArray = new int[] { 7, 8, 9, 10, 11, 12, 13 };
+            iList = new ArraySegment<int>(intArray, 2, 3);
+            Assert.Throws<ArgumentOutOfRangeException>("index", () => iList[-1]); // Index < 0
+            Assert.Throws<ArgumentOutOfRangeException>("index", () => iList[iList.Count]); // Index >= list.Count
+
+            Assert.Throws<ArgumentOutOfRangeException>("index", () => iList[-1] = 0); // Index < 0
+            Assert.Throws<ArgumentOutOfRangeException>("index", () => iList[iList.Count] = 0); // Index >= list.Count
+        }
+
+        [Fact]
+        public static void TestIReadOnlyList_GetItem()
+        {
+            var intArray = new int[] { 7, 8, 9, 10, 11, 12, 13 };
+            var seg = new ArraySegment<int>(intArray, 2, 3);
+            IReadOnlyList<int> iList = seg;
+            for (int i = 0; i < iList.Count; i++)
+            {
+                Assert.Equal(intArray[i + seg.Offset], iList[i]);
+            }
+        }
+
+        [Fact]
+        public static void TestIReadOnlyList_GetItem_Invalid()
+        {
+            IReadOnlyList<int> iList = new ArraySegment<int>();
+            Assert.Throws<InvalidOperationException>(() => iList[0]); // Array is null
+
+            var intArray = new int[] { 7, 8, 9, 10, 11, 12, 13 };
+            iList = new ArraySegment<int>(intArray, 2, 3);
+            Assert.Throws<ArgumentOutOfRangeException>("index", () => iList[-1]); // Index < 0
+            Assert.Throws<ArgumentOutOfRangeException>("index", () => iList[iList.Count]); // List >= seg.Count
+        }
+
+        [Fact]
+        public static void TestIList_IndexOf()
+        {
+            var intArray = new int[] { 7, 8, 9, 10, 11, 12, 13 };
+            var seg = new ArraySegment<int>(intArray, 2, 3);
+            IList<int> iList = seg;
+
+            for (int i = seg.Offset; i < seg.Count; i++)
+            {
+                Assert.Equal(i - seg.Offset, iList.IndexOf(intArray[i]));
+            }
+            Assert.Equal(-1, iList.IndexOf(9999)); // No such value
+            Assert.Equal(-1, iList.IndexOf(7)); // No such value in range
+        }
+
+        [Fact]
+        public static void TestIList_IndexOf_Invalid()
+        {
+            IList<int> iList = new ArraySegment<int>();
+            Assert.Throws<InvalidOperationException>(() => iList.IndexOf(0)); // Array is null
+        }
+
+        [Fact]
+        public static void TestIList_CantBeModified()
+        {
+            var intArray = new int[] { 7, 8, 9, 10, 11, 12, 13 };
+            var seg = new ArraySegment<int>(intArray, 2, 3);
+            IList<int> iList = seg;
+
+            Assert.True(iList.IsReadOnly);
+            Assert.Throws<NotSupportedException>(() => iList.Add(2));
+            Assert.Throws<NotSupportedException>(() => iList.Insert(0, 0));
+            Assert.Throws<NotSupportedException>(() => iList.Clear());
+            Assert.Throws<NotSupportedException>(() => iList.Remove(2));
+            Assert.Throws<NotSupportedException>(() => iList.RemoveAt(2));
+        }
+
+        [Fact]
+        public static void TestIList_Contains()
+        {
+            var intArray = new int[] { 7, 8, 9, 10, 11, 12, 13 };
+            var seg = new ArraySegment<int>(intArray, 2, 3);
+            IList<int> iList = seg;
+
+            for (int i = seg.Offset; i < seg.Count; i++)
+            {
+                Assert.True(iList.Contains(intArray[i]));
+            }
+            Assert.False(iList.Contains(999)); // No such value
+            Assert.False(iList.Contains(7)); // No such value in range
+        }
+
+        [Fact]
+        public static void TestIList_Contains_Invalid()
+        {
+            IList<int> iList = new ArraySegment<int>();
+            Assert.Throws<InvalidOperationException>(() => iList.Contains(0)); // Array is null
+        }
+
+        [Fact]
+        public static void TestIList_GetEnumerator()
+        {
+            var intArray = new int[] { 7, 8, 9, 10, 11, 12, 13 };
+            IList<int> iList = new ArraySegment<int>(intArray, 2, 3);
+
+            IEnumerator<int> enumerator = iList.GetEnumerator();
+            for (int i = 0; i < 2; i++)
+            {
+                int counter = 0;
+                while (enumerator.MoveNext())
+                {
+                    Assert.Equal(intArray[counter + 2], enumerator.Current);
+                    counter++;
+                }
+                Assert.Equal(iList.Count, counter);
+
+                enumerator.Reset();
+            }
+        }
+
+        [Fact]
+        public static void TestIList_GetEnumerator_Invalid()
+        {
+            var intArray = new int[] { 7, 8, 9, 10, 11, 12, 13 };
+            IList<int> iList = new ArraySegment<int>(intArray, 2, 3);
+            IEnumerator<int> enumerator = iList.GetEnumerator();
+
+            // Enumerator should throw when accessing Current before starting enumeration
+            Assert.Throws<InvalidOperationException>(() => enumerator.Current);
+            while (enumerator.MoveNext()) ;
+
+            // Enumerator should throw when accessing Current after finishing enumeration
+            Assert.False(enumerator.MoveNext());
+            Assert.Throws<InvalidOperationException>(() => enumerator.Current);
+
+            // Enumerator should throw when accessing Current after being reset
+            enumerator.Reset();
+            Assert.Throws<InvalidOperationException>(() => enumerator.Current);
+
+            iList = new ArraySegment<int>();
+            Assert.Throws<InvalidOperationException>(() => iList.GetEnumerator()); // Underlying array is null
+        }
+
+        [Fact]
+        public static void TestIEnumerable_GetEnumerator()
+        {
+            var intArray = new int[] { 7, 8, 9, 10, 11, 12, 13 };
+            var seg = new ArraySegment<int>(intArray, 2, 3);
+            IEnumerable iList = seg;
+
+            IEnumerator enumerator = iList.GetEnumerator();
+            for (int i = 0; i < 2; i++)
+            {
+                int counter = 0;
+                while (enumerator.MoveNext())
+                {
+                    Assert.Equal(intArray[counter + 2], enumerator.Current);
+                    counter++;
+                }
+                Assert.Equal(seg.Count, counter);
+
+                enumerator.Reset();
+            }
+        }
+
+        [Fact]
+        public static void TestIEnumerable_GetEnumerator_Invalid()
+        {
+            var intArray = new int[] { 7, 8, 9, 10, 11, 12, 13 };
+            IEnumerable enumerable = new ArraySegment<int>(intArray, 2, 3);
+            IEnumerator enumerator = enumerable.GetEnumerator();
+
+            // Enumerator should throw when accessing Current before starting enumeration
+            Assert.Throws<InvalidOperationException>(() => enumerator.Current);
+            while (enumerator.MoveNext()) ;
+
+            // Enumerator should throw when accessing Current after finishing enumeration
+            Assert.False(enumerator.MoveNext());
+            Assert.Throws<InvalidOperationException>(() => enumerator.Current);
+
+            // Enumerator should throw when accessing Current after being reset
+            enumerator.Reset();
+            Assert.Throws<InvalidOperationException>(() => enumerator.Current);
+
+            enumerable = new ArraySegment<int>();
+            Assert.Throws<InvalidOperationException>(() => enumerable.GetEnumerator()); // Underlying array is null
+        }
+
+        [Fact]
+        public static void TestIList_CopyTo()
+        {
+            var stringArray = new string[] { "0", "1", "2", "3", "4" };
+            IList<string> stringSeg = new ArraySegment<string>(stringArray, 1, 3);
+            stringSeg.CopyTo(stringArray, 2);
+            Assert.Equal(new string[] { "0", "1", "1", "2", "3" }, stringArray);
+
+            stringArray = new string[] { "0", "1", "2", "3", "4" };
+            stringSeg = new ArraySegment<string>(stringArray, 1, 3);
+            stringSeg.CopyTo(stringArray, 0);
+            Assert.Equal(new string[] { "1", "2", "3", "3", "4" }, stringArray);
+
+            var intArray = new int[] { 0, 1, 2, 3, 4 };
+            IList<int> intSeg = new ArraySegment<int>(intArray, 1, 3);
+            intSeg.CopyTo(intArray, 2);
+            Assert.Equal(new int[] { 0, 1, 1, 2, 3 }, intArray);
+
+            intArray = new int[] { 0, 1, 2, 3, 4 };
+            intSeg = new ArraySegment<int>(intArray, 1, 3);
+            intSeg.CopyTo(intArray, 0);
+            Assert.Equal(new int[] { 1, 2, 3, 3, 4 }, intArray);
+        }
+
+        [Fact]
+        public static void TestIList_CopyTo_Invalid()
+        {
+            IList<int> iList = new ArraySegment<int>();
+            Assert.Throws<InvalidOperationException>(() => iList.CopyTo(new int[7], 0)); // Array is null
+
+            var intArray = new int[] { 7, 8, 9, 10, 11, 12, 13 };
+            iList = new ArraySegment<int>(intArray, 2, 3);
+
+            Assert.Throws<ArgumentNullException>("dest", () => iList.CopyTo(null, 0)); // Destination array is null
+
+            Assert.Throws<ArgumentOutOfRangeException>("dstIndex", () => iList.CopyTo(new int[7], -1)); // Index < 0
+            Assert.Throws<ArgumentException>("", () => iList.CopyTo(new int[7], 8)); // Index > destinationArray.Length
         }
     }
 }

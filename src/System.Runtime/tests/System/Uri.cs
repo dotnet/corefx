@@ -2,860 +2,472 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
-
 using Xunit;
 
-public static unsafe class UriTests
+namespace System.Runtime.Tests
 {
-    [Fact]
-    public static void TestCtor_String()
+    public static class UriTests
     {
-        Uri uri = new Uri(@"http://foo/bar/baz#frag");
+        [Fact]
+        public static void TestCtor_String()
+        {
+            var uri = new Uri("http://foo/bar/baz#frag");
 
-        int i;
-        string s;
-        bool b;
-        UriHostNameType uriHostNameType;
-        string[] ss;
+            Assert.Equal("http://foo/bar/baz#frag", uri.OriginalString);
+            Assert.Equal("http://foo/bar/baz#frag", uri.AbsoluteUri);
+            Assert.Equal("http://foo/bar/baz#frag", uri.ToString());
 
-        s = uri.ToString();
-        Assert.Equal(s, @"http://foo/bar/baz#frag");
+            Assert.Equal("http", uri.Scheme);
 
-        s = uri.AbsolutePath;
-        Assert.Equal<string>(s, @"/bar/baz");
+            Assert.Equal("foo", uri.Authority);
+            Assert.Equal("foo", uri.Host);
+            Assert.Equal("foo", uri.DnsSafeHost);
+            Assert.Equal(UriHostNameType.Dns, uri.HostNameType);
 
-        s = uri.AbsoluteUri;
-        Assert.Equal<string>(s, @"http://foo/bar/baz#frag");
+            Assert.Equal(80, uri.Port);
 
-        s = uri.Authority;
-        Assert.Equal<string>(s, @"foo");
+            Assert.Equal("/bar/baz", uri.AbsolutePath);
+            Assert.Equal("/bar/baz", uri.LocalPath);
+            Assert.Equal("/bar/baz", uri.PathAndQuery);
 
-        s = uri.DnsSafeHost;
-        Assert.Equal<string>(s, @"foo");
+            Assert.Equal(new string[] { "/", "bar/", "baz" }, uri.Segments);
+            
+            Assert.Equal("#frag", uri.Fragment);
 
-        s = uri.Fragment;
-        Assert.Equal<string>(s, @"#frag");
+            Assert.Equal("", uri.Query);
+            Assert.Equal("", uri.UserInfo);
 
-        s = uri.Host;
-        Assert.Equal<string>(s, @"foo");
+            Assert.True(uri.IsAbsoluteUri);
+            Assert.True(uri.IsDefaultPort);
 
-        uriHostNameType = uri.HostNameType;
-        Assert.Equal<UriHostNameType>(uriHostNameType, UriHostNameType.Dns);
+            Assert.False(uri.IsFile);
+            Assert.False(uri.IsLoopback);
+            Assert.False(uri.IsUnc);
 
-        b = uri.IsAbsoluteUri;
-        Assert.True(b);
+            Assert.False(uri.UserEscaped);
+        }
 
-        b = uri.IsDefaultPort;
-        Assert.True(b);
+        [Fact]
+        public static void TestCtor_Uri_String()
+        {
+            var uri = new Uri(new Uri("http://www.contoso.com/"), @"catalog/shownew.htm?date=today");
 
-        b = uri.IsFile;
-        Assert.False(b);
+            Assert.Equal("http://www.contoso.com/catalog/shownew.htm?date=today", uri.OriginalString);
+            Assert.Equal("http://www.contoso.com/catalog/shownew.htm?date=today", uri.AbsoluteUri);
+            Assert.Equal("http://www.contoso.com/catalog/shownew.htm?date=today", uri.ToString());
 
-        b = uri.IsLoopback;
-        Assert.False(b);
+            Assert.Equal("http", uri.Scheme);
 
-        b = uri.IsUnc;
-        Assert.False(b);
+            Assert.Equal("www.contoso.com", uri.Authority);
+            Assert.Equal("www.contoso.com", uri.Host);
+            Assert.Equal("www.contoso.com", uri.DnsSafeHost);
+            Assert.Equal(UriHostNameType.Dns, uri.HostNameType);
 
-        s = uri.LocalPath;
-        Assert.Equal<string>(s, @"/bar/baz");
+            Assert.Equal(80, uri.Port);
 
-        s = uri.OriginalString;
-        Assert.Equal<string>(s, @"http://foo/bar/baz#frag");
+            Assert.Equal("/catalog/shownew.htm", uri.AbsolutePath);
+            Assert.Equal("/catalog/shownew.htm", uri.LocalPath);
+            Assert.Equal("/catalog/shownew.htm?date=today", uri.PathAndQuery);
 
-        s = uri.PathAndQuery;
-        Assert.Equal<string>(s, @"/bar/baz");
+            Assert.Equal(new string[] { "/", "catalog/", "shownew.htm" }, uri.Segments);
+            
+            Assert.Equal("", uri.Fragment);
 
-        i = uri.Port;
-        Assert.Equal<int>(i, 80);
+            Assert.Equal("?date=today", uri.Query);
+            Assert.Equal("", uri.UserInfo);
 
-        s = uri.Query;
-        Assert.Equal<string>(s, @"");
+            Assert.True(uri.IsAbsoluteUri);
+            Assert.True(uri.IsDefaultPort);
 
-        s = uri.Scheme;
-        Assert.Equal<string>(s, @"http");
+            Assert.False(uri.IsFile);
+            Assert.False(uri.IsLoopback);
+            Assert.False(uri.IsUnc);
 
-        ss = uri.Segments;
-        Assert.Equal<int>(ss.Length, 3);
-        Assert.Equal<string>(ss[0], @"/");
-        Assert.Equal<string>(ss[1], @"bar/");
-        Assert.Equal<string>(ss[2], @"baz");
+            Assert.False(uri.UserEscaped);
+        }
 
-        b = uri.UserEscaped;
-        Assert.False(b);
+        [Fact]
+        public static void TestCtor_String_UriKind()
+        {
+            var uri = new Uri("catalog/shownew.htm?date=today", UriKind.Relative);
 
-        s = uri.UserInfo;
-        Assert.Equal<string>(s, @"");
-    }
+            Assert.Equal("catalog/shownew.htm?date=today", uri.OriginalString);
+            Assert.Throws<InvalidOperationException>(() => uri.AbsoluteUri);
+            Assert.Equal("catalog/shownew.htm?date=today", uri.ToString());
 
-    [Fact]
-    public static void TestCtor_Uri_String()
-    {
-        Uri uri;
+            Assert.Throws<InvalidOperationException>(() => uri.Scheme);
 
-        uri = new Uri(@"http://www.contoso.com/");
-        uri = new Uri(uri, "catalog/shownew.htm?date=today");
+            Assert.Throws<InvalidOperationException>(() => uri.Authority);
+            Assert.Throws<InvalidOperationException>(() => uri.Host);
+            Assert.Throws<InvalidOperationException>(() => uri.DnsSafeHost);
+            Assert.Throws<InvalidOperationException>(() => uri.HostNameType);
 
-        int i;
-        string s;
-        bool b;
-        UriHostNameType uriHostNameType;
-        string[] ss;
+            Assert.Throws<InvalidOperationException>(() => uri.AbsolutePath);
+            Assert.Throws<InvalidOperationException>(() => uri.LocalPath);
+            Assert.Throws<InvalidOperationException>(() => uri.PathAndQuery);
 
-        s = uri.ToString();
-        Assert.Equal(s, @"http://www.contoso.com/catalog/shownew.htm?date=today");
+            Assert.Throws<InvalidOperationException>(() => uri.Segments);
 
-        s = uri.AbsolutePath;
-        Assert.Equal<string>(s, @"/catalog/shownew.htm");
+            Assert.Throws<InvalidOperationException>(() => uri.Fragment);
 
-        s = uri.AbsoluteUri;
-        Assert.Equal<string>(s, @"http://www.contoso.com/catalog/shownew.htm?date=today");
+            Assert.Throws<InvalidOperationException>(() => uri.Query);
+            Assert.Throws<InvalidOperationException>(() => uri.UserInfo);
+            
+            Assert.False(uri.IsAbsoluteUri);
+            Assert.Throws<InvalidOperationException>(() => uri.IsDefaultPort);
 
-        s = uri.Authority;
-        Assert.Equal<string>(s, @"www.contoso.com");
+            Assert.Throws<InvalidOperationException>(() => uri.IsFile);
+            Assert.Throws<InvalidOperationException>(() => uri.IsLoopback);
+            Assert.Throws<InvalidOperationException>(() => uri.IsUnc);
 
-        s = uri.DnsSafeHost;
-        Assert.Equal<string>(s, @"www.contoso.com");
+            Assert.False(uri.UserEscaped);
+        }
 
-        s = uri.Fragment;
-        Assert.Equal<string>(s, @"");
+        [Fact]
+        public static void TestCtor_Uri_Uri()
+        {
+            var absoluteUri = new Uri("http://www.contoso.com");
+            var relativeUri = new Uri("/catalog/shownew.htm?date=today", UriKind.Relative);
 
-        s = uri.Host;
-        Assert.Equal<string>(s, @"www.contoso.com");
+            var uri = new Uri(absoluteUri, relativeUri);
 
-        uriHostNameType = uri.HostNameType;
-        Assert.Equal<UriHostNameType>(uriHostNameType, UriHostNameType.Dns);
+            Assert.Equal("http://www.contoso.com/catalog/shownew.htm?date=today", uri.OriginalString);
+            Assert.Equal("http://www.contoso.com/catalog/shownew.htm?date=today", uri.AbsoluteUri);
+            Assert.Equal("http://www.contoso.com/catalog/shownew.htm?date=today", uri.ToString());
 
-        b = uri.IsAbsoluteUri;
-        Assert.True(b);
+            Assert.Equal("http", uri.Scheme);
 
-        b = uri.IsDefaultPort;
-        Assert.True(b);
+            Assert.Equal("www.contoso.com", uri.Authority);
+            Assert.Equal("www.contoso.com", uri.Host);
+            Assert.Equal("www.contoso.com", uri.DnsSafeHost);
+            Assert.Equal(UriHostNameType.Dns, uri.HostNameType);
 
-        b = uri.IsFile;
-        Assert.False(b);
+            Assert.Equal(80, uri.Port);
 
-        b = uri.IsLoopback;
-        Assert.False(b);
+            Assert.Equal("/catalog/shownew.htm", uri.AbsolutePath);
+            Assert.Equal("/catalog/shownew.htm", uri.LocalPath);
+            Assert.Equal("/catalog/shownew.htm?date=today", uri.PathAndQuery);
 
-        b = uri.IsUnc;
-        Assert.False(b);
+            Assert.Equal(new string[] { "/", "catalog/", "shownew.htm" }, uri.Segments);
 
-        s = uri.LocalPath;
-        Assert.Equal<string>(s, @"/catalog/shownew.htm");
+            Assert.Equal("", uri.Fragment);
 
-        s = uri.OriginalString;
-        Assert.Equal<string>(s, @"http://www.contoso.com/catalog/shownew.htm?date=today");
+            Assert.Equal("?date=today", uri.Query);
+            Assert.Equal("", uri.UserInfo);
 
-        s = uri.PathAndQuery;
-        Assert.Equal<string>(s, @"/catalog/shownew.htm?date=today");
+            Assert.True(uri.IsAbsoluteUri);
+            Assert.True(uri.IsDefaultPort);
 
-        i = uri.Port;
-        Assert.Equal<int>(i, 80);
+            Assert.False(uri.IsFile);
+            Assert.False(uri.IsLoopback);
+            Assert.False(uri.IsUnc);
 
-        s = uri.Query;
-        Assert.Equal<string>(s, @"?date=today");
+            Assert.False(uri.UserEscaped);
+        }
 
-        s = uri.Scheme;
-        Assert.Equal<string>(s, @"http");
+        [Fact]
+        public static void TestTryCreate_String_UriKind()
+        {
+            Uri uri;
+            Assert.True(Uri.TryCreate("http://www.contoso.com/catalog/shownew.htm?date=today", UriKind.Absolute, out uri));
 
-        ss = uri.Segments;
-        Assert.Equal<int>(ss.Length, 3);
-        Assert.Equal<string>(ss[0], @"/");
-        Assert.Equal<string>(ss[1], @"catalog/");
-        Assert.Equal<string>(ss[2], @"shownew.htm");
+            Assert.Equal("http://www.contoso.com/catalog/shownew.htm?date=today", uri.OriginalString);
+            Assert.Equal("http://www.contoso.com/catalog/shownew.htm?date=today", uri.AbsoluteUri);
+            Assert.Equal("http://www.contoso.com/catalog/shownew.htm?date=today", uri.ToString());
 
-        b = uri.UserEscaped;
-        Assert.False(b);
+            Assert.Equal("http", uri.Scheme);
 
-        s = uri.UserInfo;
-        Assert.Equal<string>(s, @"");
-    }
+            Assert.Equal("www.contoso.com", uri.Authority);
+            Assert.Equal("www.contoso.com", uri.Host);
+            Assert.Equal("www.contoso.com", uri.DnsSafeHost);
+            Assert.Equal(UriHostNameType.Dns, uri.HostNameType);
 
-    [Fact]
-    public static void TestCtor_String_UriKind()
-    {
-        Uri uri = new Uri("catalog/shownew.htm?date=today", UriKind.Relative);
+            Assert.Equal(80, uri.Port);
 
-        string s;
-        bool b;
+            Assert.Equal("/catalog/shownew.htm", uri.AbsolutePath);
+            Assert.Equal("/catalog/shownew.htm", uri.LocalPath);
+            Assert.Equal("/catalog/shownew.htm?date=today", uri.PathAndQuery);
 
-        s = uri.ToString();
-        Assert.Equal(s, @"catalog/shownew.htm?date=today");
+            Assert.Equal(new string[] { "/", "catalog/", "shownew.htm" }, uri.Segments);
 
-        Assert.Throws<System.InvalidOperationException>(() => { object o = uri.AbsolutePath; });
+            Assert.Equal("", uri.Fragment);
 
-        Assert.Throws<System.InvalidOperationException>(() => { object o = uri.AbsoluteUri; });
+            Assert.Equal("?date=today", uri.Query);
+            Assert.Equal("", uri.UserInfo);
 
-        Assert.Throws<System.InvalidOperationException>(() => { object o = uri.Authority; });
+            Assert.True(uri.IsAbsoluteUri);
+            Assert.True(uri.IsDefaultPort);
 
-        Assert.Throws<System.InvalidOperationException>(() => { object o = uri.DnsSafeHost; });
+            Assert.False(uri.IsFile);
+            Assert.False(uri.IsLoopback);
+            Assert.False(uri.IsUnc);
 
-        Assert.Throws<System.InvalidOperationException>(() => { object o = uri.Fragment; });
+            Assert.False(uri.UserEscaped);
+        }
 
-        Assert.Throws<System.InvalidOperationException>(() => { object o = uri.Host; });
+        [Fact]
+        public static void TestTryCreate_Uri_String()
+        {
+            Uri uri;
+            Assert.True(Uri.TryCreate(new Uri("http://www.contoso.com/"), @"catalog/shownew.htm?date=today", out uri));
 
-        Assert.Throws<System.InvalidOperationException>(() => { object o = uri.HostNameType; });
+            Assert.Equal("http://www.contoso.com/catalog/shownew.htm?date=today", uri.OriginalString);
+            Assert.Equal("http://www.contoso.com/catalog/shownew.htm?date=today", uri.AbsoluteUri);
+            Assert.Equal("http://www.contoso.com/catalog/shownew.htm?date=today", uri.ToString());
 
-        Assert.False(uri.IsAbsoluteUri);
+            Assert.Equal("http", uri.Scheme);
 
-        Assert.Throws<System.InvalidOperationException>(() => { object o = uri.IsDefaultPort; });
+            Assert.Equal("www.contoso.com", uri.Authority);
+            Assert.Equal("www.contoso.com", uri.Host);
+            Assert.Equal("www.contoso.com", uri.DnsSafeHost);
+            Assert.Equal(UriHostNameType.Dns, uri.HostNameType);
 
-        Assert.Throws<System.InvalidOperationException>(() => { object o = uri.IsFile; });
+            Assert.Equal(80, uri.Port);
 
-        Assert.Throws<System.InvalidOperationException>(() => { object o = uri.IsLoopback; });
+            Assert.Equal("/catalog/shownew.htm", uri.AbsolutePath);
+            Assert.Equal("/catalog/shownew.htm", uri.LocalPath);
+            Assert.Equal("/catalog/shownew.htm?date=today", uri.PathAndQuery);
 
-        Assert.Throws<System.InvalidOperationException>(() => { object o = uri.IsUnc; });
+            Assert.Equal(new string[] { "/", "catalog/", "shownew.htm" }, uri.Segments);
 
-        Assert.Throws<System.InvalidOperationException>(() => { object o = uri.LocalPath; });
+            Assert.Equal("", uri.Fragment);
 
-        s = uri.OriginalString;
-        Assert.Equal<string>(s, @"catalog/shownew.htm?date=today");
+            Assert.Equal("?date=today", uri.Query);
+            Assert.Equal("", uri.UserInfo);
 
-        Assert.Throws<System.InvalidOperationException>(() => { object o = uri.PathAndQuery; });
+            Assert.True(uri.IsAbsoluteUri);
+            Assert.True(uri.IsDefaultPort);
 
-        Assert.Throws<System.InvalidOperationException>(() => { object o = uri.Port; });
+            Assert.False(uri.IsFile);
+            Assert.False(uri.IsLoopback);
+            Assert.False(uri.IsUnc);
 
-        Assert.Throws<System.InvalidOperationException>(() => { object o = uri.Query; });
+            Assert.False(uri.UserEscaped);
+        }
 
-        Assert.Throws<System.InvalidOperationException>(() => { object o = uri.Scheme; });
+        [Fact]
+        public static void TestTryCreate_Uri_Uri()
+        {
+            var absoluteUri = new Uri("http://www.contoso.com");
+            var relativeUri = new Uri("/catalog/shownew.htm?date=today", UriKind.Relative);
 
-        Assert.Throws<System.InvalidOperationException>(() => { object o = uri.Segments; });
+            Uri uri;
+            Assert.True(Uri.TryCreate(absoluteUri, relativeUri, out uri));
 
-        b = uri.UserEscaped;
-        Assert.False(b);
+            Assert.Equal("http://www.contoso.com/catalog/shownew.htm?date=today", uri.OriginalString);
+            Assert.Equal("http://www.contoso.com/catalog/shownew.htm?date=today", uri.AbsoluteUri);
+            Assert.Equal("http://www.contoso.com/catalog/shownew.htm?date=today", uri.ToString());
 
-        Assert.Throws<System.InvalidOperationException>(() => { object o = uri.UserInfo; });
-    }
+            Assert.Equal("http", uri.Scheme);
 
-    [Fact]
-    public static void TestCtor_Uri_Uri()
-    {
-        Uri absoluteUri = new Uri("http://www.contoso.com/");
+            Assert.Equal("www.contoso.com", uri.Authority);
+            Assert.Equal("www.contoso.com", uri.Host);
+            Assert.Equal("www.contoso.com", uri.DnsSafeHost);
+            Assert.Equal(UriHostNameType.Dns, uri.HostNameType);
 
-        // Create a relative Uri from a string.  allowRelative = true to allow for 
-        // creating a relative Uri.
-        Uri relativeUri = new Uri("/catalog/shownew.htm?date=today", UriKind.Relative);
+            Assert.Equal(80, uri.Port);
 
-        // Create a new Uri from an absolute Uri and a relative Uri.
-        Uri uri = new Uri(absoluteUri, relativeUri);
+            Assert.Equal("/catalog/shownew.htm", uri.AbsolutePath);
+            Assert.Equal("/catalog/shownew.htm", uri.LocalPath);
+            Assert.Equal("/catalog/shownew.htm?date=today", uri.PathAndQuery);
 
-        int i;
-        string s;
-        bool b;
-        UriHostNameType uriHostNameType;
-        string[] ss;
+            Assert.Equal(new string[] { "/", "catalog/", "shownew.htm" }, uri.Segments);
 
-        s = uri.ToString();
-        Assert.Equal(s, @"http://www.contoso.com/catalog/shownew.htm?date=today");
+            Assert.Equal("", uri.Fragment);
 
-        s = uri.AbsolutePath;
-        Assert.Equal<string>(s, @"/catalog/shownew.htm");
+            Assert.Equal("?date=today", uri.Query);
+            Assert.Equal("", uri.UserInfo);
 
-        s = uri.AbsoluteUri;
-        Assert.Equal<string>(s, @"http://www.contoso.com/catalog/shownew.htm?date=today");
+            Assert.True(uri.IsAbsoluteUri);
+            Assert.True(uri.IsDefaultPort);
 
-        s = uri.Authority;
-        Assert.Equal<string>(s, @"www.contoso.com");
+            Assert.False(uri.IsFile);
+            Assert.False(uri.IsLoopback);
+            Assert.False(uri.IsUnc);
 
-        s = uri.DnsSafeHost;
-        Assert.Equal<string>(s, @"www.contoso.com");
+            Assert.False(uri.UserEscaped);
+        }
 
-        s = uri.Fragment;
-        Assert.Equal<string>(s, @"");
-
-        s = uri.Host;
-        Assert.Equal<string>(s, @"www.contoso.com");
-
-        uriHostNameType = uri.HostNameType;
-        Assert.Equal<UriHostNameType>(uriHostNameType, UriHostNameType.Dns);
-
-        b = uri.IsAbsoluteUri;
-        Assert.True(b);
-
-        b = uri.IsDefaultPort;
-        Assert.True(b);
-
-        b = uri.IsFile;
-        Assert.False(b);
-
-        b = uri.IsLoopback;
-        Assert.False(b);
-
-        b = uri.IsUnc;
-        Assert.False(b);
-
-        s = uri.LocalPath;
-        Assert.Equal<string>(s, @"/catalog/shownew.htm");
-
-        s = uri.OriginalString;
-        Assert.Equal<string>(s, @"http://www.contoso.com/catalog/shownew.htm?date=today");
-
-        s = uri.PathAndQuery;
-        Assert.Equal<string>(s, @"/catalog/shownew.htm?date=today");
-
-        i = uri.Port;
-        Assert.Equal<int>(i, 80);
-
-        s = uri.Query;
-        Assert.Equal<string>(s, @"?date=today");
-
-        s = uri.Scheme;
-        Assert.Equal<string>(s, @"http");
-
-        ss = uri.Segments;
-        Assert.Equal<int>(ss.Length, 3);
-        Assert.Equal<string>(ss[0], @"/");
-        Assert.Equal<string>(ss[1], @"catalog/");
-        Assert.Equal<string>(ss[2], @"shownew.htm");
-
-        b = uri.UserEscaped;
-        Assert.False(b);
-
-        s = uri.UserInfo;
-        Assert.Equal<string>(s, @"");
-    }
-
-    [Fact]
-    public static void TestTryCreate_String_UriKind()
-    {
-        Uri uri;
-        bool b = Uri.TryCreate("http://www.contoso.com/catalog/shownew.htm?date=today", UriKind.Absolute, out uri);
-        Assert.True(b);
-
-        int i;
-        string s;
-        UriHostNameType uriHostNameType;
-        string[] ss;
-
-        s = uri.ToString();
-        Assert.Equal(s, @"http://www.contoso.com/catalog/shownew.htm?date=today");
-
-        s = uri.AbsolutePath;
-        Assert.Equal<string>(s, @"/catalog/shownew.htm");
-
-        s = uri.AbsoluteUri;
-        Assert.Equal<string>(s, @"http://www.contoso.com/catalog/shownew.htm?date=today");
-
-        s = uri.Authority;
-        Assert.Equal<string>(s, @"www.contoso.com");
-
-        s = uri.DnsSafeHost;
-        Assert.Equal<string>(s, @"www.contoso.com");
-
-        s = uri.Fragment;
-        Assert.Equal<string>(s, @"");
-
-        s = uri.Host;
-        Assert.Equal<string>(s, @"www.contoso.com");
-
-        uriHostNameType = uri.HostNameType;
-        Assert.Equal<UriHostNameType>(uriHostNameType, UriHostNameType.Dns);
-
-        b = uri.IsAbsoluteUri;
-        Assert.True(b);
-
-        b = uri.IsDefaultPort;
-        Assert.True(b);
-
-        b = uri.IsFile;
-        Assert.False(b);
-
-        b = uri.IsLoopback;
-        Assert.False(b);
-
-        b = uri.IsUnc;
-        Assert.False(b);
-
-        s = uri.LocalPath;
-        Assert.Equal<string>(s, @"/catalog/shownew.htm");
-
-        s = uri.OriginalString;
-        Assert.Equal<string>(s, @"http://www.contoso.com/catalog/shownew.htm?date=today");
-
-        s = uri.PathAndQuery;
-        Assert.Equal<string>(s, @"/catalog/shownew.htm?date=today");
-
-        i = uri.Port;
-        Assert.Equal<int>(i, 80);
-
-        s = uri.Query;
-        Assert.Equal<string>(s, @"?date=today");
-
-        s = uri.Scheme;
-        Assert.Equal<string>(s, @"http");
-
-        ss = uri.Segments;
-        Assert.Equal<int>(ss.Length, 3);
-        Assert.Equal<string>(ss[0], @"/");
-        Assert.Equal<string>(ss[1], @"catalog/");
-        Assert.Equal<string>(ss[2], @"shownew.htm");
-
-        b = uri.UserEscaped;
-        Assert.False(b);
-
-        s = uri.UserInfo;
-        Assert.Equal<string>(s, @"");
-    }
-
-    [Fact]
-    public static void TestTryCreate_Uri_String()
-    {
-        Uri uri;
-        Uri baseUri = new Uri("http://www.contoso.com/", UriKind.Absolute);
-        bool b = Uri.TryCreate(baseUri, "catalog/shownew.htm?date=today", out uri);
-        Assert.True(b);
-
-        int i;
-        string s;
-        UriHostNameType uriHostNameType;
-        string[] ss;
-
-        s = uri.ToString();
-        Assert.Equal(s, @"http://www.contoso.com/catalog/shownew.htm?date=today");
-
-        s = uri.AbsolutePath;
-        Assert.Equal<string>(s, @"/catalog/shownew.htm");
-
-        s = uri.AbsoluteUri;
-        Assert.Equal<string>(s, @"http://www.contoso.com/catalog/shownew.htm?date=today");
-
-        s = uri.Authority;
-        Assert.Equal<string>(s, @"www.contoso.com");
-
-        s = uri.DnsSafeHost;
-        Assert.Equal<string>(s, @"www.contoso.com");
-
-        s = uri.Fragment;
-        Assert.Equal<string>(s, @"");
-
-        s = uri.Host;
-        Assert.Equal<string>(s, @"www.contoso.com");
-
-        uriHostNameType = uri.HostNameType;
-        Assert.Equal<UriHostNameType>(uriHostNameType, UriHostNameType.Dns);
-
-        b = uri.IsAbsoluteUri;
-        Assert.True(b);
-
-        b = uri.IsDefaultPort;
-        Assert.True(b);
-
-        b = uri.IsFile;
-        Assert.False(b);
-
-        b = uri.IsLoopback;
-        Assert.False(b);
-
-        b = uri.IsUnc;
-        Assert.False(b);
-
-        s = uri.LocalPath;
-        Assert.Equal<string>(s, @"/catalog/shownew.htm");
-
-        s = uri.OriginalString;
-        Assert.Equal<string>(s, @"http://www.contoso.com/catalog/shownew.htm?date=today");
-
-        s = uri.PathAndQuery;
-        Assert.Equal<string>(s, @"/catalog/shownew.htm?date=today");
-
-        i = uri.Port;
-        Assert.Equal<int>(i, 80);
-
-        s = uri.Query;
-        Assert.Equal<string>(s, @"?date=today");
-
-        s = uri.Scheme;
-        Assert.Equal<string>(s, @"http");
-
-        ss = uri.Segments;
-        Assert.Equal<int>(ss.Length, 3);
-        Assert.Equal<string>(ss[0], @"/");
-        Assert.Equal<string>(ss[1], @"catalog/");
-        Assert.Equal<string>(ss[2], @"shownew.htm");
-
-        b = uri.UserEscaped;
-        Assert.False(b);
-
-        s = uri.UserInfo;
-        Assert.Equal<string>(s, @"");
-    }
-
-    [Fact]
-    public static void TestTryCreate_Uri_Uri()
-    {
-        Uri uri;
-        Uri baseUri = new Uri("http://www.contoso.com/", UriKind.Absolute);
-        Uri relativeUri = new Uri("catalog/shownew.htm?date=today", UriKind.Relative);
-        bool b = Uri.TryCreate(baseUri, relativeUri, out uri);
-        Assert.True(b);
-
-        int i;
-        string s;
-        UriHostNameType uriHostNameType;
-        string[] ss;
-
-        s = uri.ToString();
-        Assert.Equal(s, @"http://www.contoso.com/catalog/shownew.htm?date=today");
-
-        s = uri.AbsolutePath;
-        Assert.Equal<string>(s, @"/catalog/shownew.htm");
-
-        s = uri.AbsoluteUri;
-        Assert.Equal<string>(s, @"http://www.contoso.com/catalog/shownew.htm?date=today");
-
-        s = uri.Authority;
-        Assert.Equal<string>(s, @"www.contoso.com");
-
-        s = uri.DnsSafeHost;
-        Assert.Equal<string>(s, @"www.contoso.com");
-
-        s = uri.Fragment;
-        Assert.Equal<string>(s, @"");
-
-        s = uri.Host;
-        Assert.Equal<string>(s, @"www.contoso.com");
-
-        uriHostNameType = uri.HostNameType;
-        Assert.Equal<UriHostNameType>(uriHostNameType, UriHostNameType.Dns);
-
-        b = uri.IsAbsoluteUri;
-        Assert.True(b);
-
-        b = uri.IsDefaultPort;
-        Assert.True(b);
-
-        b = uri.IsFile;
-        Assert.False(b);
-
-        b = uri.IsLoopback;
-        Assert.False(b);
-
-        b = uri.IsUnc;
-        Assert.False(b);
-
-        s = uri.LocalPath;
-        Assert.Equal<string>(s, @"/catalog/shownew.htm");
-
-        s = uri.OriginalString;
-        Assert.Equal<string>(s, @"http://www.contoso.com/catalog/shownew.htm?date=today");
-
-        s = uri.PathAndQuery;
-        Assert.Equal<string>(s, @"/catalog/shownew.htm?date=today");
-
-        i = uri.Port;
-        Assert.Equal<int>(i, 80);
-
-        s = uri.Query;
-        Assert.Equal<string>(s, @"?date=today");
-
-        s = uri.Scheme;
-        Assert.Equal<string>(s, @"http");
-
-        ss = uri.Segments;
-        Assert.Equal<int>(ss.Length, 3);
-        Assert.Equal<string>(ss[0], @"/");
-        Assert.Equal<string>(ss[1], @"catalog/");
-        Assert.Equal<string>(ss[2], @"shownew.htm");
-
-        b = uri.UserEscaped;
-        Assert.False(b);
-
-        s = uri.UserInfo;
-        Assert.Equal<string>(s, @"");
-    }
-
-    [Fact]
-    public static void TestMakeRelative()
-    {
-        // Create a base Uri.
-        Uri address1 = new Uri("http://www.contoso.com/");
-
-        // Create a new Uri from a string.
-        Uri address2 = new Uri("http://www.contoso.com/index.htm?date=today");
-
-        // Determine the relative Uri.  
-        Uri uri = address1.MakeRelativeUri(address2);
-
-        string s;
-        bool b;
-
-        s = uri.ToString();
-        Assert.Equal(s, @"index.htm?date=today");
-
-        Assert.Throws<System.InvalidOperationException>(() => { object o = uri.AbsolutePath; });
-
-        Assert.Throws<System.InvalidOperationException>(() => { object o = uri.AbsoluteUri; });
-
-        Assert.Throws<System.InvalidOperationException>(() => { object o = uri.Authority; });
-
-        Assert.Throws<System.InvalidOperationException>(() => { object o = uri.DnsSafeHost; });
-
-        Assert.Throws<System.InvalidOperationException>(() => { object o = uri.Fragment; });
-
-        Assert.Throws<System.InvalidOperationException>(() => { object o = uri.Host; });
-
-        Assert.Throws<System.InvalidOperationException>(() => { object o = uri.HostNameType; });
-
-        b = uri.IsAbsoluteUri;
-        Assert.False(b);
-
-        Assert.Throws<System.InvalidOperationException>(() => { object o = uri.IsDefaultPort; });
-
-        Assert.Throws<System.InvalidOperationException>(() => { object o = uri.IsFile; });
-
-        Assert.Throws<System.InvalidOperationException>(() => { object o = uri.IsLoopback; });
-
-        Assert.Throws<System.InvalidOperationException>(() => { object o = uri.IsUnc; });
-
-        Assert.Throws<System.InvalidOperationException>(() => { object o = uri.LocalPath; });
-
-        s = uri.OriginalString;
-        Assert.Equal<string>(s, @"index.htm?date=today");
-
-        Assert.Throws<System.InvalidOperationException>(() => { object o = uri.PathAndQuery; });
-
-        Assert.Throws<System.InvalidOperationException>(() => { object o = uri.Port; });
-
-        Assert.Throws<System.InvalidOperationException>(() => { object o = uri.Query; });
-
-        Assert.Throws<System.InvalidOperationException>(() => { object o = uri.Scheme; });
-
-        Assert.Throws<System.InvalidOperationException>(() => { object o = uri.Segments; });
-
-        b = uri.UserEscaped;
-        Assert.False(b);
-
-        Assert.Throws<System.InvalidOperationException>(() => { object o = uri.UserInfo; });
-    }
-
-    [Fact]
-    public static void TestCheckHostName()
-    {
-        UriHostNameType u;
-
-        u = Uri.CheckHostName("www.contoso.com");
-        Assert.Equal(u, UriHostNameType.Dns);
-        u = Uri.CheckHostName("1.2.3.4");
-        Assert.Equal(u, UriHostNameType.IPv4);
-        u = Uri.CheckHostName(null);
-        Assert.Equal(u, UriHostNameType.Unknown);
-        u = Uri.CheckHostName("!@*(@#&*#$&*#");
-        Assert.Equal(u, UriHostNameType.Unknown);
-    }
-
-    [Fact]
-    public static void TestCheckSchemeName()
-    {
-        bool b;
-
-        b = Uri.CheckSchemeName("http");
-        Assert.True(b);
-
-        b = Uri.CheckSchemeName(null);
-        Assert.False(b);
-
-        b = Uri.CheckSchemeName("!");
-        Assert.False(b);
-    }
-
-    [Fact]
-    public static void TestIsBaseOf()
-    {
-        bool b;
-        Uri uri, uri2;
-
-        uri = new Uri("http://host/path/path/file?query");
-
-        uri2 = new Uri(@"http://host/path/path/file/");
-        b = uri.IsBaseOf(uri2);
-        Assert.True(b);
-
-        uri2 = new Uri(@"http://host/path/path/#fragment");
-        b = uri.IsBaseOf(uri2);
-        Assert.True(b);
-
-        uri2 = new Uri("http://host/path/path/MoreDir/\"");
-        b = uri.IsBaseOf(uri2);
-        Assert.True(b);
-
-        uri2 = new Uri(@"http://host/path/path/OtherFile?Query");
-        b = uri.IsBaseOf(uri2);
-        Assert.True(b);
-
-        uri2 = new Uri(@"http://host/path/path/");
-        b = uri.IsBaseOf(uri2);
-        Assert.True(b);
-
-        uri2 = new Uri(@"http://host/path/path/file");
-        b = uri.IsBaseOf(uri2);
-        Assert.True(b);
-
-        uri2 = new Uri(@"http://host/path/path");
-        b = uri.IsBaseOf(uri2);
-        Assert.False(b);
-
-        uri2 = new Uri(@"http://host/path/path?query");
-        b = uri.IsBaseOf(uri2);
-        Assert.False(b);
-
-        uri2 = new Uri(@"http://host/path/path#Fragment");
-        b = uri.IsBaseOf(uri2);
-        Assert.False(b);
-
-        uri2 = new Uri(@"http://host/path/path2/");
-        b = uri.IsBaseOf(uri2);
-        Assert.False(b);
-
-        uri2 = new Uri(@"http://host/path/path2/MoreDir");
-        b = uri.IsBaseOf(uri2);
-        Assert.False(b);
-
-        uri2 = new Uri(@"http://host/path/File");
-        b = uri.IsBaseOf(uri2);
-        Assert.False(b);
-    }
-
-    [Fact]
-    public static void TestIsWellFormedOriginalString()
-    {
-        Uri uri;
-        bool b;
-
-        uri = new Uri("http://www.contoso.com/path?name");
-        b = uri.IsWellFormedOriginalString();
-        Assert.True(b);
-
-        uri = new Uri("http://www.contoso.com/path???/file name");
-        b = uri.IsWellFormedOriginalString();
-        Assert.False(b);
-
-        uri = new Uri(@"c:\\directory\filename");
-        b = uri.IsWellFormedOriginalString();
-        Assert.False(b);
-
-        uri = new Uri(@"file://c:/directory/filename");
-        b = uri.IsWellFormedOriginalString();
-        Assert.False(b);
-
-        uri = new Uri(@"http:\\host/path/file");
-        b = uri.IsWellFormedOriginalString();
-        Assert.False(b);
-    }
-
-    [Fact]
-    public static void TestIsWellFormedUriString()
-    {
-        bool b;
-
-        b = Uri.IsWellFormedUriString("http://www.contoso.com/path?name", UriKind.RelativeOrAbsolute);
-        Assert.True(b);
-
-        b = Uri.IsWellFormedUriString("http://www.contoso.com/path???/file name", UriKind.RelativeOrAbsolute);
-        Assert.False(b);
-
-        b = Uri.IsWellFormedUriString(@"c:\\directory\filename", UriKind.RelativeOrAbsolute);
-        Assert.False(b);
-
-        b = Uri.IsWellFormedUriString(@"file://c:/directory/filename", UriKind.RelativeOrAbsolute);
-        Assert.False(b);
-
-        b = Uri.IsWellFormedUriString(@"http:\\host/path/file", UriKind.RelativeOrAbsolute);
-        Assert.False(b);
-    }
-
-    [Fact]
-    public static void TestCompare()
-    {
-        Uri uri1 = new Uri("http://www.contoso.com/path?name#frag");
-        Uri uri2 = new Uri("http://www.contosooo.com/path?name#slag");
-        Uri uri2a = new Uri("http://www.contosooo.com/path?name#slag");
-
-        int i;
-
-        i = Uri.Compare(uri1, uri2, UriComponents.AbsoluteUri, UriFormat.UriEscaped, StringComparison.CurrentCulture);
-        Assert.Equal(i, -1);
-
-        i = Uri.Compare(uri1, uri2, UriComponents.Query, UriFormat.UriEscaped, StringComparison.CurrentCulture);
-        Assert.Equal(i, 0);
-
-        i = Uri.Compare(uri1, uri2, UriComponents.Query | UriComponents.Fragment, UriFormat.UriEscaped, StringComparison.CurrentCulture);
-        Assert.Equal(i, -1);
-
-        bool b;
-
-        b = uri1.Equals(uri2);
-        Assert.False(b);
-
-        b = uri1 == uri2;
-        Assert.False(b);
-
-        b = uri1 != uri2;
-        Assert.True(b);
-
-        b = uri2.Equals(uri2a);
-        Assert.True(b);
-
-        b = uri2 == uri2a;
-        Assert.True(b);
-
-        b = uri2 != uri2a;
-        Assert.False(b);
-        // Blocked: Globalization
-        /*
-        int h2 = uri2.GetHashCode();
-        int h2a = uri2a.GetHashCode();
-        Assert.AreEqual(h2, h2a);
-        */
-    }
-
-    [Fact]
-    public static void TestEscapeDataString()
-    {
-        string s;
-
-        s = Uri.EscapeDataString("Hello");
-        Assert.Equal(s, "Hello");
-
-        s = Uri.EscapeDataString(@"He\l/lo");
-        Assert.Equal(s, "He%5Cl%2Flo");
-    }
-
-    [Fact]
-    public static void TestUnescapeDataString()
-    {
-        string s;
-
-        s = Uri.UnescapeDataString("Hello");
-        Assert.Equal(s, "Hello");
-
-        s = Uri.UnescapeDataString("He%5Cl%2Flo");
-        Assert.Equal(s, @"He\l/lo");
-    }
-
-    [Fact]
-    public static void TestEscapeUriString()
-    {
-        string s;
-
-        s = Uri.EscapeUriString("Hello");
-        Assert.Equal(s, "Hello");
-
-        s = Uri.EscapeUriString(@"He\l/lo");
-        Assert.Equal(s, @"He%5Cl/lo");
-    }
-
-    [Fact]
-    public static void TestGetComponentParts()
-    {
-        Uri uri = new Uri("http://www.contoso.com/path?name#frag");
-        string s;
-
-        s = uri.GetComponents(UriComponents.Fragment, UriFormat.UriEscaped);
-        Assert.Equal(s, "frag");
-
-        s = uri.GetComponents(UriComponents.Host, UriFormat.UriEscaped);
-        Assert.Equal(s, "www.contoso.com");
+        [Fact]
+        public static void TestMakeRelative()
+        {
+            var uri1 = new Uri("http://www.contoso.com/");
+            var uri2 = new Uri("http://www.contoso.com/index.htm?date=today");
+            
+            Uri uri = uri1.MakeRelativeUri(uri2);
+
+            Assert.Equal("index.htm?date=today", uri.OriginalString);
+            Assert.Throws<InvalidOperationException>(() => uri.AbsoluteUri);
+            Assert.Equal("index.htm?date=today", uri.ToString());
+            
+            Assert.Throws<InvalidOperationException>(() => uri.Scheme);
+
+            Assert.Throws<InvalidOperationException>(() => uri.Authority);
+            Assert.Throws<InvalidOperationException>(() => uri.Host);
+            Assert.Throws<InvalidOperationException>(() => uri.DnsSafeHost);
+            Assert.Throws<InvalidOperationException>(() => uri.HostNameType);
+
+            Assert.Throws<InvalidOperationException>(() => uri.Port);
+
+            Assert.Throws<InvalidOperationException>(() => uri.AbsolutePath);
+            Assert.Throws<InvalidOperationException>(() => uri.LocalPath);
+            Assert.Throws<InvalidOperationException>(() => uri.PathAndQuery);
+
+            Assert.Throws<InvalidOperationException>(() => uri.Segments);
+
+            Assert.Throws<InvalidOperationException>(() => uri.Fragment);
+
+            Assert.Throws<InvalidOperationException>(() => uri.Query);
+            Assert.Throws<InvalidOperationException>(() => uri.UserInfo);
+
+            Assert.False(uri.IsAbsoluteUri);
+            Assert.Throws<InvalidOperationException>(() => uri.IsDefaultPort);
+
+            Assert.Throws<InvalidOperationException>(() => uri.IsFile);
+            Assert.Throws<InvalidOperationException>(() => uri.IsLoopback);
+            Assert.Throws<InvalidOperationException>(() => uri.IsUnc);
+
+            Assert.False(uri.UserEscaped);
+        }
+
+        [Theory]
+        [InlineData("www.contoso.com", UriHostNameType.Dns)]
+        [InlineData("1.2.3.4", UriHostNameType.IPv4)]
+        [InlineData(null, UriHostNameType.Unknown)]
+        [InlineData("", UriHostNameType.Unknown)]
+        [InlineData("!@*(@#&*#$&*#", UriHostNameType.Unknown)]
+        public static void TestCheckHostName(string name, UriHostNameType expected)
+        {
+            Assert.Equal(expected, Uri.CheckHostName(name));
+        }
+
+        [Theory]
+        [InlineData("http", true)]
+        [InlineData("https", true)]
+        [InlineData("file", true)]
+        [InlineData(null, false)]
+        [InlineData("", false)]
+        [InlineData("!", false)]
+        public static void TestCheckSchemeName(string schemeName, bool expected)
+        {
+            Assert.Equal(expected, Uri.CheckSchemeName(schemeName));
+        }
+
+        [Theory]
+        [InlineData("http://host/path/path/file?query", "http://host/path/path/file/", true)]
+        [InlineData("http://host/path/path/file?query", "http://host/path/path/#fragment", true)]
+        [InlineData("http://host/path/path/file?query", "http://host/path/path/MoreDir/\"", true)]
+        [InlineData("http://host/path/path/file?query", "http://host/path/path/OtherFile?Query", true)]
+        [InlineData("http://host/path/path/file?query", "http://host/path/path/", true)]
+        [InlineData("http://host/path/path/file?query", "http://host/path/path/file", true)]
+        [InlineData("http://host/path/path/file?query", "http://host/path/path", false)]
+        [InlineData("http://host/path/path/file?query", "http://host/path/path?query", false)]
+        [InlineData("http://host/path/path/file?query", "http://host/path/path#fragment", false)]
+        [InlineData("http://host/path/path/file?query", "http://host/path/path2", false)]
+        [InlineData("http://host/path/path/file?query", "http://host/path/path2/path3", false)]
+        [InlineData("http://host/path/path/file?query", "http://host/path/File", false)]
+        public static void TestIsBaseOf(string uriString1, string uriString2, bool expected)
+        {
+            var uri1 = new Uri(uriString1);
+            var uri2 = new Uri(uriString2);
+
+            Assert.Equal(expected, uri1.IsBaseOf(uri2));
+        }
+
+        [Theory]
+        [InlineData("http://www.contoso.com/path?name", true)]
+        [InlineData("http://www.contoso.com/path???/file name", false)]
+        [InlineData(@"c:\\directory\filename", false)]
+        [InlineData("file://C:/directory/filename", false)]
+        [InlineData(@"http:\\host/path/file", false)]
+        public static void TestIsWellFormedOriginalString(string uriString, bool expected)
+        {
+            var uri = new Uri(uriString);
+            Assert.Equal(expected, uri.IsWellFormedOriginalString());
+        }
+
+        [Theory]
+        [InlineData("http://www.contoso.com/path?name", UriKind.RelativeOrAbsolute, true)]
+        [InlineData("http://www.contoso.com/path???/file name", UriKind.RelativeOrAbsolute, false)]
+        [InlineData("c:\\directory\filename", UriKind.RelativeOrAbsolute, false)]
+        [InlineData(@"file://C:/directory/filename", UriKind.RelativeOrAbsolute, false)]
+        [InlineData("http:\\host/path/file", UriKind.RelativeOrAbsolute, false)]
+        public static void TestIsWellFormedUriString(string uriString, UriKind uriKind, bool expected)
+        {
+            Assert.Equal(expected, Uri.IsWellFormedUriString(uriString, uriKind));
+        }
+        
+        private static readonly Uri s_uri1 = new Uri("http://www.contoso.com/path?name#frag");
+        private static readonly Uri s_uri2 = new Uri("http://www.contosooo.com/path?name#slag");
+        private static readonly Uri s_uri2a = new Uri("http://www.contosooo.com/path?name#slag");
+
+        [Fact]
+        public static void TestCompare()
+        {
+            Assert.Equal(-1, Uri.Compare(s_uri1, s_uri2, UriComponents.AbsoluteUri, UriFormat.UriEscaped, StringComparison.CurrentCulture));
+            Assert.Equal(0, Uri.Compare(s_uri1, s_uri2, UriComponents.Query, UriFormat.UriEscaped, StringComparison.CurrentCulture));
+            Assert.Equal(-1, Uri.Compare(s_uri1, s_uri2, UriComponents.Query | UriComponents.Fragment, UriFormat.UriEscaped, StringComparison.CurrentCulture));
+        }
+
+        [Fact]
+        public static void TestEquals()
+        {
+            Assert.True(s_uri1.Equals(s_uri1));
+            Assert.True(s_uri1 == s_uri1);
+            Assert.False(s_uri1 != s_uri1);
+
+            Assert.False(s_uri1.Equals(s_uri2));
+            Assert.False(s_uri1 == s_uri2);
+            Assert.True(s_uri1 != s_uri2);
+
+            Assert.True(s_uri2.Equals(s_uri2a));
+            Assert.True(s_uri2 == s_uri2a);
+            Assert.False(s_uri2 != s_uri2a);
+
+            Assert.True(s_uri2a.Equals(s_uri2));
+            Assert.True(s_uri2a == s_uri2);
+            Assert.False(s_uri2a != s_uri2);
+        }
+
+        [Fact]
+        public static void TestGetHashCode()
+        {
+            Assert.NotEqual(s_uri1.GetHashCode(), s_uri2.GetHashCode());
+            Assert.Equal(s_uri2.GetHashCode(), s_uri2a.GetHashCode());
+            Assert.Equal(s_uri2.GetHashCode(), s_uri2a.GetHashCode());
+        }
+
+        [Theory]
+        [InlineData("Hello", "Hello")]
+        [InlineData(@"He\l/lo", @"He%5Cl%2Flo")]
+        public static void TestEscapeDataString(string stringToEscape, string expected)
+        {
+            Assert.Equal(expected, Uri.EscapeDataString(stringToEscape));
+        }
+
+        [Theory]
+        [InlineData("Hello", "Hello")]
+        [InlineData(@"He%5Cl/lo", @"He\l/lo")]
+        public static void TestUnescapeDataString(string stringToUnEscape, string expected)
+        {
+            Assert.Equal(expected, Uri.UnescapeDataString(stringToUnEscape));
+        }
+
+        [Theory]
+        [InlineData("Hello", "Hello")]
+        [InlineData(@"He\l/lo", @"He%5Cl/lo")]
+        public static void TestEscapeUriString(string stringToEscape, string expected)
+        {
+            Assert.Equal(expected, Uri.EscapeUriString(stringToEscape));
+        }
+
+        [Theory]
+        [InlineData("http://www.contoso.com/path?name#frag", UriComponents.Fragment, UriFormat.UriEscaped, "frag")]
+        [InlineData("http://www.contoso.com/path?name#frag", UriComponents.Host, UriFormat.UriEscaped, "www.contoso.com")]
+        public static void TestGetComponentParts(string uriString, UriComponents components, UriFormat format, string expected)
+        {
+            var uri = new Uri(uriString);
+            Assert.Equal(expected, uri.GetComponents(components, format));
+        }
     }
 }

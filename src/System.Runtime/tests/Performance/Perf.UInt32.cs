@@ -6,20 +6,24 @@ using Microsoft.Xunit.Performance;
 
 namespace System.Runtime.Tests
 {
-    public class Perf_UInt32
+    public static class Perf_UInt32
     {
         [Benchmark]
-        public void ToString_()
+        public static void ToString_Performance()
         {
-            uint testint = new uint();
+            var ui32 = new uint();
             foreach (var iteration in Benchmark.Iterations)
+            {
                 using (iteration.StartMeasurement())
+                {
                     for (int i = 0; i < 10000; i++)
                     {
-                        testint.ToString(); testint.ToString(); testint.ToString();
-                        testint.ToString(); testint.ToString(); testint.ToString();
-                        testint.ToString(); testint.ToString(); testint.ToString();
+                        ui32.ToString(); ui32.ToString(); ui32.ToString();
+                        ui32.ToString(); ui32.ToString(); ui32.ToString();
+                        ui32.ToString(); ui32.ToString(); ui32.ToString();
                     }
+                }
+            }
         }
     }
 }

@@ -6,33 +6,41 @@ using Microsoft.Xunit.Performance;
 
 namespace System.Runtime.Tests
 {
-    public class Perf_Boolean
+    public static class Perf_Boolean
     {
         [Benchmark]
-        public void Parse_str()
+        public static void Parse_String()
         {
             foreach (var iteration in Benchmark.Iterations)
+            {
                 using (iteration.StartMeasurement())
+                {
                     for (int i = 0; i < 10000; i++)
                     {
                         bool.Parse("True"); bool.Parse("True"); bool.Parse("True");
                         bool.Parse("True"); bool.Parse("True"); bool.Parse("True");
                         bool.Parse("True"); bool.Parse("True"); bool.Parse("True");
                     }
+                }
+            }
         }
 
         [Benchmark]
-        public void ToString_()
+        public static void ToString_Performance()
         {
-            bool boo = true;
+            bool b = true;
             foreach (var iteration in Benchmark.Iterations)
+            {
                 using (iteration.StartMeasurement())
+                {
                     for (int i = 0; i < 10000; i++)
                     {
-                        boo.ToString(); boo.ToString(); boo.ToString();
-                        boo.ToString(); boo.ToString(); boo.ToString();
-                        boo.ToString(); boo.ToString(); boo.ToString();
+                        b.ToString(); b.ToString(); b.ToString();
+                        b.ToString(); b.ToString(); b.ToString();
+                        b.ToString(); b.ToString(); b.ToString();
                     }
+                }
+            }
         }
     }
 }

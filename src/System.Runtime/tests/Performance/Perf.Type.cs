@@ -6,36 +6,44 @@ using Microsoft.Xunit.Performance;
 
 namespace System.Runtime.Tests
 {
-    public class Perf_Type
+    public static class Perf_Type
     {
         [Benchmark]
-        public void GetTypeFromHandle()
+        public static void GetTypeFromHandle()
         {
-            RuntimeTypeHandle type1 = typeof(int).TypeHandle;
+            RuntimeTypeHandle typeHandle = typeof(int).TypeHandle;
             foreach (var iteration in Benchmark.Iterations)
+            {
                 using (iteration.StartMeasurement())
+                {
                     for (int i = 0; i < 100000; i++)
                     {
-                        Type.GetTypeFromHandle(type1); Type.GetTypeFromHandle(type1); Type.GetTypeFromHandle(type1);
-                        Type.GetTypeFromHandle(type1); Type.GetTypeFromHandle(type1); Type.GetTypeFromHandle(type1);
-                        Type.GetTypeFromHandle(type1); Type.GetTypeFromHandle(type1); Type.GetTypeFromHandle(type1);
+                        Type.GetTypeFromHandle(typeHandle); Type.GetTypeFromHandle(typeHandle); Type.GetTypeFromHandle(typeHandle);
+                        Type.GetTypeFromHandle(typeHandle); Type.GetTypeFromHandle(typeHandle); Type.GetTypeFromHandle(typeHandle);
+                        Type.GetTypeFromHandle(typeHandle); Type.GetTypeFromHandle(typeHandle); Type.GetTypeFromHandle(typeHandle);
                     }
+                }
+            }
         }
 
         [Benchmark]
-        public void op_Equality()
+        public static void Operator_Equality()
         {
             bool result;
             Type type1 = typeof(int);
-            Type type2 = typeof(string);
+            Type tyupe2 = typeof(string);
             foreach (var iteration in Benchmark.Iterations)
+            {
                 using (iteration.StartMeasurement())
+                {
                     for (int i = 0; i < 100000; i++)
                     {
-                        result = type1 == type2; result = type1 == type2; result = type1 == type2;
-                        result = type1 == type2; result = type1 == type2; result = type1 == type2;
-                        result = type1 == type2; result = type1 == type2; result = type1 == type2;
+                        result = type1 == tyupe2; result = type1 == tyupe2; result = type1 == tyupe2;
+                        result = type1 == tyupe2; result = type1 == tyupe2; result = type1 == tyupe2;
+                        result = type1 == tyupe2; result = type1 == tyupe2; result = type1 == tyupe2;
                     }
+                }
+            }
         }
     }
 }
