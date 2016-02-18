@@ -57,17 +57,41 @@
               ItemName="ExpandedDnuRestoreDir" />
     </GatherDirectoriesToRestore>
 
-    <Exec Command="$(DnuRestoreCommand) &quot;%(ExpandedDnuRestoreDir.Identity)&quot;"
-          StandardOutputImportance="Low"
-          CustomErrorRegularExpression="(^Unable to locate .*)|(^Updating the invalid lock file with .*)"
-          ContinueOnError="ErrorAndContinue"
-          Condition="'$(SkipGatherRestoreDirs)' != 'true'" />
+    <PropertyGroup>
+      <PackageRestoreCommandWithDirs Condition="'$(SkipGatherRestoreDirs)' != 'true'">$(DnuRestoreCommand) &quot;%(ExpandedDnuRestoreDir.Identity)&quot;</PackageRestoreCommandWithDirs>
+      <PackageRestoreCommandWithDirs Condition="'$(SkipGatherRestoreDirs)' == 'true'">$(DnuRestoreCommand) @(DnuRestoreDir->'&quot;%(Identity)&quot;', ' ')</PackageRestoreCommandWithDirs>
+      
+      <RestoreErrorRegularExpression>(^Unable to locate .%2A)|(^Updating the invalid lock file with .%2A)</RestoreErrorRegularExpression>
+    </PropertyGroup>
 
-    <Exec Command="$(DnuRestoreCommand) @(DnuRestoreDir->'&quot;%(Identity)&quot;', ' ')"
+    <Exec Command="$(PackageRestoreCommandWithDirs)"
           StandardOutputImportance="Low"
-          CustomErrorRegularExpression="(^Unable to locate .*)|(^Updating the invalid lock file with .*)"
+          CustomErrorRegularExpression="$(RestoreErrorRegularExpression)"
+          ContinueOnError="WarnAndContinue">
+      <Output TaskParameter="ExitCode" PropertyName="RestoreErrorCode" />
+    </Exec>
+
+    <Message Importance="High"
+             Text="[$([System.DateTime]::Now.ToString('HH:mm:ss.ff'))] Encountered error during restore. Retry 1..."
+             Condition="'$(RestoreErrorCode)'!='0'" />
+
+    <Exec Command="$(PackageRestoreCommandWithDirs)"
+          StandardOutputImportance="Low"
+          CustomErrorRegularExpression="$(RestoreErrorRegularExpression)"
+          ContinueOnError="WarnAndContinue"
+          Condition="'$(RestoreErrorCode)'!='0'">
+      <Output TaskParameter="ExitCode" PropertyName="RestoreErrorCode" />
+    </Exec>
+
+    <Message Importance="High"
+             Text="[$([System.DateTime]::Now.ToString('HH:mm:ss.ff'))] Encountered error during restore. Final retry..."
+             Condition="'$(RestoreErrorCode)'!='0'" />
+
+    <Exec Command="$(PackageRestoreCommandWithDirs)"
+          StandardOutputImportance="Low"
+          CustomErrorRegularExpression="$(RestoreErrorRegularExpression)"
           ContinueOnError="ErrorAndContinue"
-          Condition="'$(SkipGatherRestoreDirs)' == 'true'" />
+          Condition="'$(RestoreErrorCode)'!='0'" />
 
     <Message Importance="High" Text="[$([System.DateTime]::Now.ToString('HH:mm:ss.ff'))] Restoring all packages...Done." />
   </Target>
