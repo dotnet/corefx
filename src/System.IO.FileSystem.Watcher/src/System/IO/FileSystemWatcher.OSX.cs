@@ -140,6 +140,9 @@ namespace System.IO
             // Calling RunLoopStop multiple times SegFaults so protect the call to it
             private bool _stopping;
 
+            // FileDescriptor to the root directory for FS locking
+            private SafeFileHandle _rootHandle;
+
             internal RunningInstance(
                 FileSystemWatcher watcher,
                 string directory,
@@ -234,6 +237,15 @@ namespace System.IO
                 {
                     bool started = Interop.EventStream.FSEventStreamStart(_eventStream);
 
+                    _rootHandle = Interop.Sys.Open(_fullDirectory, Interop.Sys.OpenFlags.O_RDONLY, 0);
+                    if (_rootHandle.IsInvalid)
+                    {
+                        throw new FileNotFoundException(SR.Format(SR.FSW_IOError, _fullDirectory));
+                    }
+
+                    // Grab a lock on the root directory to match Windows
+                    LockRootDirectory(_rootHandle, _fullDirectory);
+
                     // Notify the StartRaisingEvents call that we are initialized and about to start
                     // so that it can return and avoid a race-condition around multiple threads calling Stop and Start
                     runLoopStarted.Set();
@@ -245,6 +257,9 @@ namespace System.IO
 
                         // When we get here, we've requested to stop so cleanup the EventStream and unschedule from the RunLoop
                         Interop.EventStream.FSEventStreamStop(_eventStream);
+
+                        // Release the lock on the root directory
+                        UnlockRootDirectory(_rootHandle);
                     }
                     else
                     {

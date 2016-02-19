@@ -454,17 +454,27 @@ public class FileSystemWatcherTests
     {
         int maxUserInstances = int.Parse(File.ReadAllText("/proc/sys/fs/inotify/max_user_instances"));
         var watchers = new List<FileSystemWatcher>();
+        var directories = new List<string>();
 
         using (var dir = Utility.CreateTestDirectory())
         {
+            // We shouldn't catch I/O exception here since this is test setup
+            for (int i = 0; i <= maxUserInstances; i++)
+            {
+                string temp = System.IO.Path.Combine(dir.Path, i.ToString());
+                System.IO.Directory.CreateDirectory(temp);
+                directories.Add(temp);
+            }
+
             try
             {
                 Assert.Throws<IOException>(() =>
                 {
-                    // Create enough inotify instances to exceed the number of allowed watches
+                    // Create enough inotify instances to exceed the number of allowed watches. Don't use the
+                    // same directory since we lock the root folder
                     for (int i = 0; i <= maxUserInstances; i++)
                     {
-                        watchers.Add(new FileSystemWatcher(dir.Path) { EnableRaisingEvents = true });
+                        watchers.Add(new FileSystemWatcher(directories[i]) { EnableRaisingEvents = true });
                     }
                 });
             }
@@ -472,7 +482,9 @@ public class FileSystemWatcherTests
             {
                 foreach (FileSystemWatcher watcher in watchers)
                 {
+                    string testDir = watcher.Path;
                     watcher.Dispose();
+                    System.IO.Directory.Delete(testDir);
                 }
             }
         }

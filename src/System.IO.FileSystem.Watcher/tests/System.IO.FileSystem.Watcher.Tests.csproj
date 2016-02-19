@@ -10,6 +10,8 @@
     <ProjectGuid>{20411A66-C7A4-4941-8FA2-66308365FD22}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AssemblyName>System.IO.FileSystem.Watcher.Tests</AssemblyName>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <StringResourcesPath>../src/Resources/Strings.resx</StringResourcesPath>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\src\System.IO.FileSystem.Watcher.csproj">
@@ -37,6 +39,57 @@
     <Compile Include="FileSystemWatcher.unit.cs" />
     <Compile Include="RenamedEventArgs.unit.cs" />
     <Compile Include="XunitAssemblyAttributes.cs" />
+    <Compile Include="$(CommonPath)\System\IO\PathInternal.cs">
+       <Link>Common\System\IO\PathInternal.cs</Link>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetsWindows)'=='true'">
+    <Compile Include="$(CommonPath)\Interop\Windows\Interop.BOOL.cs">
+       <Link>Common\Interop\Windows\Interop.BOOL.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.CreateFile.cs">
+       <Link>Common\Interop\Windows\Interop.CreateFile.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.FileOperations.cs">
+       <Link>Common\Interop\Windows\Interop.FileOperations.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\Interop.Libraries.cs">
+       <Link>Common\Interop\Windows\Interop.Libraries.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.SECURITY_ATTRIBUTES.cs">
+       <Link>Common\Interop\Windows\Interop.SECURITY_ATTRIBUTES.cs</Link>
+    </Compile>
+     <Compile Include="$(CommonPath)\System\IO\PathInternal.Windows.cs">
+        <Link>Common\System\IO\PathInternal.Windows.cs</Link>
+     </Compile>
+     <Compile Include="FileSystemWatcher.LockTest.Windows.cs" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetsUnix)' == 'true'">
+     <Compile Include="$(CommonPath)\Interop\Unix\Interop.Errors.cs">
+        <Link>Common\Interop\Unix\Interop.Errors.cs</Link>
+     </Compile>
+     <Compile Include="$(CommonPath)\Interop\Unix\Interop.Libraries.cs">
+        <Link>Common\Interop\Unix\Interop.Libraries.cs</Link>
+     </Compile>
+     <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.Open.cs">
+        <Link>Common\Interop\Unix\Interop.Open.cs</Link>
+     </Compile>
+     <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.OpenFlags.cs">
+        <Link>Common\Interop\Unix\Interop.OpenFlags.cs</Link>
+     </Compile>
+     <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.PathConf.cs">
+        <Link>Common\Interop\Unix\Interop.PathConf.cs</Link>
+     </Compile>
+     <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.FLock.cs">
+        <Link>Common\Interop\Unix\Interop.FLock.cs</Link>
+     </Compile>
+     <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.Sync.cs">
+        <Link>Common\Interop\Unix\Interop.Sync.cs</Link>
+     </Compile>
+     <Compile Include="$(CommonPath)\System\IO\PathInternal.Unix.cs">
+        <Link>Common\System\IO\PathInternal.Unix.cs</Link>
+     </Compile>
+     <Compile Include="FileSystemWatcher.LockTest.Unix.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="project.json" />
