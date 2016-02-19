@@ -390,11 +390,10 @@ namespace System.Net.Sockets
         }
 
         private SafeCloseSocket _socket;
-        private GCHandle _handle;
         private OperationQueue<TransferOperation> _receiveQueue;
         private OperationQueue<SendOperation> _sendQueue;
         private OperationQueue<AcceptOrConnectOperation> _acceptOrConnectQueue;
-        private SocketAsyncEngine _engine;
+        private SocketAsyncEngine.Token _asyncEngineToken;
         private Interop.Sys.SocketEvents _registeredEvents;
         private bool _nonBlockingSet;
         private bool _connectFailed;
@@ -404,34 +403,26 @@ namespace System.Net.Sockets
         private object _closeLock = new object();
         private object _queueLock = new object();
 
-        public SocketAsyncContext(SafeCloseSocket socket, SocketAsyncEngine engine)
+        public SocketAsyncContext(SafeCloseSocket socket)
         {
             _socket = socket;
-            _engine = engine;
         }
 
         private void Register(Interop.Sys.SocketEvents events)
         {
             Debug.Assert(Monitor.IsEntered(_queueLock));
-            Debug.Assert(!_handle.IsAllocated || _registeredEvents != Interop.Sys.SocketEvents.None);
             Debug.Assert((_registeredEvents & events) == Interop.Sys.SocketEvents.None);
 
-            if (_registeredEvents == Interop.Sys.SocketEvents.None)
+            if (!_asyncEngineToken.IsAllocated)
             {
-                Debug.Assert(!_handle.IsAllocated);
-                _handle = GCHandle.Alloc(this, GCHandleType.Normal);
+                _asyncEngineToken = new SocketAsyncEngine.Token(this);
             }
 
             events |= _registeredEvents;
 
             Interop.Error errorCode;
-            if (!_engine.TryRegister(_socket, _registeredEvents, events, _handle, out errorCode))
+            if (!_asyncEngineToken.TryRegister(_socket, _registeredEvents, events, out errorCode))
             {
-                if (_registeredEvents == Interop.Sys.SocketEvents.None)
-                {
-                    _handle.Free();
-                }
-
                 // TODO: throw an appropiate exception
                 throw new Exception(string.Format("SocketAsyncContext.Register: {0}", errorCode));
             }
@@ -445,46 +436,16 @@ namespace System.Net.Sockets
             Debug.Assert((_registeredEvents & Interop.Sys.SocketEvents.Read) != Interop.Sys.SocketEvents.None);
 
             Interop.Sys.SocketEvents events = _registeredEvents & ~Interop.Sys.SocketEvents.Read;
-            if (events == Interop.Sys.SocketEvents.None)
-            {
-                Unregister();
-            }
-            else
-            {
-                Interop.Error errorCode;
-                bool unregistered = _engine.TryRegister(_socket, _registeredEvents, events, _handle, out errorCode);
-                if (unregistered)
-                {
-                    _registeredEvents = events;
-                }
-                else
-                {
-                    Debug.Fail(string.Format("UnregisterRead failed: {0}", errorCode));
-                }
-            }
-        }
-
-        private void Unregister()
-        {
-            Debug.Assert(Monitor.IsEntered(_queueLock));
-
-            if (_registeredEvents == Interop.Sys.SocketEvents.None)
-            {
-                Debug.Assert(!_handle.IsAllocated);
-                return;
-            }
 
             Interop.Error errorCode;
-            bool unregistered = _engine.TryRegister(_socket, _registeredEvents, Interop.Sys.SocketEvents.None, _handle, out errorCode);
-            _registeredEvents = (Interop.Sys.SocketEvents)(-1);
+            bool unregistered = _asyncEngineToken.TryRegister(_socket, _registeredEvents, events, out errorCode);
             if (unregistered)
             {
-                _registeredEvents = Interop.Sys.SocketEvents.None;
-                _handle.Free();
+                _registeredEvents = events;
             }
             else
             {
-                Debug.Fail(string.Format("Unregister failed: {0}", errorCode));
+                Debug.Fail(string.Format("UnregisterRead failed: {0}", errorCode));
             }
         }
 
@@ -504,7 +465,9 @@ namespace System.Net.Sockets
                 sendQueue = _sendQueue.Stop();
                 receiveQueue = _receiveQueue.Stop();
 
-                Unregister();
+                // Freeing the token will prevent any future event delivery.  This socket will be runregistered
+                // from the event port automatically by the OS when it's closed.
+                _asyncEngineToken.Free();
 
                 // TODO: assert that queues are all empty if _registeredEvents was Interop.Sys.SocketEvents.None?
             }
@@ -1363,21 +1326,6 @@ namespace System.Net.Sockets
 
             lock (_closeLock)
             {
-                if (_registeredEvents == (Interop.Sys.SocketEvents)(-1))
-                {
-                    // This can happen if a previous attempt at unregistration did not succeed.
-                    // Retry the unregistration.
-                    lock (_queueLock)
-                    {
-                        Debug.Assert(_acceptOrConnectQueue.IsStopped, "{Accept,Connect} queue should be stopped before retrying unregistration");
-                        Debug.Assert(_sendQueue.IsStopped, "Send queue should be stopped before retrying unregistration");
-                        Debug.Assert(_receiveQueue.IsStopped, "Receive queue should be stopped before retrying unregistration");
-
-                        Unregister();
-                        return;
-                    }
-                }
-
                 if ((events & Interop.Sys.SocketEvents.Error) != 0)
                 {
                     // Set the Read and Write flags as well; the processing for these events
