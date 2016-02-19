@@ -11,28 +11,28 @@ using Microsoft.Win32.SafeHandles;
 
 internal static partial class Interop
 {
-    internal static partial class NetSecurityNative
+    internal static partial class NetNtlmNative
     {
         // The following constant is used in calculation of NTOWF2
         // reference: https://msdn.microsoft.com/en-us/library/cc236700.aspx
         public const int MD5DigestLength = 16;
 
-        [DllImport(Interop.Libraries.NetSecurityNative, EntryPoint="NetSecurityNative_ReleaseNtlmBuffer")]
+        [DllImport(Interop.Libraries.NetNtlmNative, EntryPoint="NetNtlmNative_ReleaseNtlmBuffer")]
         internal static extern int ReleaseNtlmBuffer(IntPtr bufferPtr, UInt64 length);
 
-        [DllImport(Interop.Libraries.NetSecurityNative, EntryPoint="NetSecurityNative_HeimNtlmEncodeType1")]
+        [DllImport(Interop.Libraries.NetNtlmNative, EntryPoint="NetNtlmNative_HeimNtlmEncodeType1")]
         internal static extern int HeimNtlmEncodeType1(uint flags, ref NtlmBuffer buffer);
 
-        [DllImport(Interop.Libraries.NetSecurityNative, EntryPoint="NetSecurityNative_HeimNtlmDecodeType2")]
+        [DllImport(Interop.Libraries.NetNtlmNative, EntryPoint="NetNtlmNative_HeimNtlmDecodeType2")]
         internal static extern int HeimNtlmDecodeType2(byte[] data, int offset, int count, out SafeNtlmType2Handle type2Handle);
 
-        [DllImport(Interop.Libraries.NetSecurityNative, EntryPoint="NetSecurityNative_HeimNtlmFreeType2")]
+        [DllImport(Interop.Libraries.NetNtlmNative, EntryPoint="NetNtlmNative_HeimNtlmFreeType2")]
         internal static extern int HeimNtlmFreeType2(IntPtr type2Handle);
 
-        [DllImport(Interop.Libraries.NetSecurityNative, EntryPoint="NetSecurityNative_HeimNtlmNtKey", CharSet = CharSet.Ansi)]
+        [DllImport(Interop.Libraries.NetNtlmNative, EntryPoint="NetNtlmNative_HeimNtlmNtKey", CharSet = CharSet.Ansi)]
         internal static extern int HeimNtlmNtKey(string password, ref NtlmBuffer key);
 
-        [DllImport(Interop.Libraries.NetSecurityNative, EntryPoint="NetSecurityNative_HeimNtlmCalculateResponse", CharSet = CharSet.Ansi)]
+        [DllImport(Interop.Libraries.NetNtlmNative, EntryPoint="NetNtlmNative_HeimNtlmCalculateResponse", CharSet = CharSet.Ansi)]
         internal static extern int HeimNtlmCalculateResponse(
             bool isLM,
             ref NtlmBuffer key,
@@ -43,7 +43,7 @@ internal static partial class Interop
             int baseSessionKeyLen,
             ref NtlmBuffer answer);
 
-        [DllImport(Interop.Libraries.NetSecurityNative, EntryPoint="NetSecurityNative_CreateType3Message", CharSet = CharSet.Ansi)]
+        [DllImport(Interop.Libraries.NetNtlmNative, EntryPoint="NetNtlmNative_CreateType3Message", CharSet = CharSet.Ansi)]
         internal static extern int CreateType3Message(
             ref NtlmBuffer key,
             SafeNtlmType2Handle type2Handle,

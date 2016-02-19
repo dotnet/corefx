@@ -8,7 +8,7 @@ using System.Runtime.InteropServices;
 
 internal static partial class Interop
 {
-    internal static partial class NetSecurityNative
+    internal static partial class NetNtlmNative
     {
         internal sealed class HeimdalNtlmException : Exception
         {

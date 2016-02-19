@@ -47,7 +47,7 @@ internal static partial class Interop
                 const int SequenceNumberOffset = 12;
                 const int HMacDigestLength = 8;
 
-                byte[] output = new byte[Interop.NetSecurityNative.MD5DigestLength];
+                byte[] output = new byte[Interop.NetNtlmNative.MD5DigestLength];
                 MarshalUint32(output, 0, Version); // version
                 MarshalUint32(output, SequenceNumberOffset, _sequenceNumber);
                 byte[] hash;
@@ -137,11 +137,11 @@ internal static partial class Interop
 
         internal static byte[] CreateNegotiateMessage(uint flags)
         {
-            NetSecurityNative.NtlmBuffer buffer = default(NetSecurityNative.NtlmBuffer);
+            NetNtlmNative.NtlmBuffer buffer = default(NetNtlmNative.NtlmBuffer);
             try
             {
-                int status = NetSecurityNative.HeimNtlmEncodeType1(flags, ref buffer);
-                NetSecurityNative.HeimdalNtlmException.ThrowIfError(status);
+                int status = NetNtlmNative.HeimNtlmEncodeType1(flags, ref buffer);
+                NetNtlmNative.HeimdalNtlmException.ThrowIfError(status);
                 return buffer.ToByteArray();
             }
             finally

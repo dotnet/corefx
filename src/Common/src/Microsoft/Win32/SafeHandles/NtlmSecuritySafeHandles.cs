@@ -14,7 +14,7 @@ using System.Text;
 namespace Microsoft.Win32.SafeHandles
 {
     /// <summary>
-    /// Wrapper around a ntlm_type2*
+    /// Wrapper around a ntlm_type2 handle
     /// </summary>
     internal sealed class SafeNtlmType2Handle : SafeHandle
     {
@@ -25,7 +25,7 @@ namespace Microsoft.Win32.SafeHandles
 
         protected override bool ReleaseHandle()
         {
-            Interop.NetSecurityNative.HeimNtlmFreeType2(handle);
+            Interop.NetNtlmNative.HeimNtlmFreeType2(handle);
             SetHandle(IntPtr.Zero);
             return true;
         }

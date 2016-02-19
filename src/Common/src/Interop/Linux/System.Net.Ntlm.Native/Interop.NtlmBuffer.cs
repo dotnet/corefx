@@ -9,7 +9,7 @@ using Microsoft.Win32.SafeHandles;
 
 internal static partial class Interop
 {
-    internal static partial class NetSecurityNative
+    internal static partial class NetNtlmNative
     {
         [StructLayout(LayoutKind.Sequential)]
         internal unsafe struct NtlmBuffer : IDisposable
@@ -20,7 +20,7 @@ internal static partial class Interop
             internal int Copy(byte[] destination, int offset)
             {
                 Debug.Assert(destination != null, "target destination cannot be null");
-                Debug.Assert(offset >= 0 && offset <= destination.Length, "invalid offset " + offset);
+                Debug.Assert(offset >= 0 && offset <= destination.Length, "offset must be valid ");
 
                 if (data == IntPtr.Zero || length == 0)
                 {
@@ -31,7 +31,7 @@ internal static partial class Interop
                 int available = destination.Length - offset;  // amount of space in the given buffer
                 if (bufferLength > available)
                 {
-                    throw new NetSecurityNative.HeimdalNtlmException(SR.Format(SR.net_context_buffer_too_small, bufferLength, available));
+                    throw new NetNtlmNative.HeimdalNtlmException(SR.Format(SR.net_context_buffer_too_small, bufferLength, available));
                 }
 
                 Marshal.Copy(data, destination, offset, bufferLength);
@@ -55,7 +55,7 @@ internal static partial class Interop
             {
                 if (data != IntPtr.Zero)
                 {
-                    Interop.NetSecurityNative.ReleaseNtlmBuffer(data, length);
+                    Interop.NetNtlmNative.ReleaseNtlmBuffer(data, length);
                     data = IntPtr.Zero;
                 }
 
