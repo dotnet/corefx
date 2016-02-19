@@ -1,67 +1,55 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
+using System.Collections.Generic;
 using System.Diagnostics;
 
 namespace System.Net
 {
     internal static class SecurityStatusAdapterPal
     {
-        private struct SecurityStatusMapping
+        private static readonly BidirectionalDictionary<Interop.SecurityStatus, SecurityStatusPal> s_statusDictionary = new BidirectionalDictionary<Interop.SecurityStatus, SecurityStatusPal>(39)
         {
-            public readonly Interop.SecurityStatus Win32Status;
-            public readonly SecurityStatusPal SecurityStatus;
-
-            public SecurityStatusMapping(Interop.SecurityStatus win32Status, SecurityStatusPal securityStatus)
-            {
-                Win32Status = win32Status;
-                SecurityStatus = securityStatus;
-            }
-        }
-
-        private static readonly SecurityStatusMapping[] s_securityStatusMapping = new[]
-        {
-            new SecurityStatusMapping(Interop.SecurityStatus.AlgorithmMismatch, SecurityStatusPal.AlgorithmMismatch),
-            new SecurityStatusMapping(Interop.SecurityStatus.BadBinding, SecurityStatusPal.BadBinding),
-            new SecurityStatusMapping(Interop.SecurityStatus.BufferNotEnough, SecurityStatusPal.BufferNotEnough),
-            new SecurityStatusMapping(Interop.SecurityStatus.CannotInstall, SecurityStatusPal.CannotInstall),
-            new SecurityStatusMapping(Interop.SecurityStatus.CertExpired, SecurityStatusPal.CertExpired),
-            new SecurityStatusMapping(Interop.SecurityStatus.CertUnknown, SecurityStatusPal.CertUnknown),
-            new SecurityStatusMapping(Interop.SecurityStatus.CompAndContinue, SecurityStatusPal.CompAndContinue),
-            new SecurityStatusMapping(Interop.SecurityStatus.CompleteNeeded, SecurityStatusPal.CompleteNeeded),
-            new SecurityStatusMapping(Interop.SecurityStatus.ContextExpired, SecurityStatusPal.ContextExpired),
-            new SecurityStatusMapping(Interop.SecurityStatus.CredentialsNeeded, SecurityStatusPal.CredentialsNeeded),
-            new SecurityStatusMapping(Interop.SecurityStatus.ContinueNeeded, SecurityStatusPal.ContinueNeeded),
-            new SecurityStatusMapping(Interop.SecurityStatus.IllegalMessage, SecurityStatusPal.IllegalMessage),
-            new SecurityStatusMapping(Interop.SecurityStatus.CannotPack, SecurityStatusPal.CannotPack),
-            new SecurityStatusMapping(Interop.SecurityStatus.IncompleteCredentials, SecurityStatusPal.IncompleteCredentials),
-            new SecurityStatusMapping(Interop.SecurityStatus.IncompleteMessage, SecurityStatusPal.IncompleteMessage),
-            new SecurityStatusMapping(Interop.SecurityStatus.InternalError, SecurityStatusPal.InternalError),
-            new SecurityStatusMapping(Interop.SecurityStatus.InvalidHandle, SecurityStatusPal.InvalidHandle),
-            new SecurityStatusMapping(Interop.SecurityStatus.InvalidToken, SecurityStatusPal.InvalidToken),
-            new SecurityStatusMapping(Interop.SecurityStatus.LogonDenied, SecurityStatusPal.LogonDenied),
-            new SecurityStatusMapping(Interop.SecurityStatus.NoAuthenticatingAuthority, SecurityStatusPal.NoAuthenticatingAuthority),
-            new SecurityStatusMapping(Interop.SecurityStatus.NoImpersonation, SecurityStatusPal.NoImpersonation),
-            new SecurityStatusMapping(Interop.SecurityStatus.NoCredentials, SecurityStatusPal.NoCredentials),
-            new SecurityStatusMapping(Interop.SecurityStatus.NotOwner, SecurityStatusPal.NotOwner),
-            new SecurityStatusMapping(Interop.SecurityStatus.OK, SecurityStatusPal.OK),
-            new SecurityStatusMapping(Interop.SecurityStatus.OutOfMemory, SecurityStatusPal.OutOfMemory),
-            new SecurityStatusMapping(Interop.SecurityStatus.OutOfSequence, SecurityStatusPal.OutOfSequence),
-            new SecurityStatusMapping(Interop.SecurityStatus.PackageNotFound, SecurityStatusPal.PackageNotFound),
-            new SecurityStatusMapping(Interop.SecurityStatus.MessageAltered, SecurityStatusPal.MessageAltered),
-            new SecurityStatusMapping(Interop.SecurityStatus.NoCredentials, SecurityStatusPal.NoCredentials),
-            new SecurityStatusMapping(Interop.SecurityStatus.QopNotSupported, SecurityStatusPal.QopNotSupported),
-            new SecurityStatusMapping(Interop.SecurityStatus.Renegotiate, SecurityStatusPal.Renegotiate),
-            new SecurityStatusMapping(Interop.SecurityStatus.SecurityQosFailed, SecurityStatusPal.SecurityQosFailed),
-            new SecurityStatusMapping(Interop.SecurityStatus.SmartcardLogonRequired, SecurityStatusPal.SmartcardLogonRequired),
-            new SecurityStatusMapping(Interop.SecurityStatus.TargetUnknown, SecurityStatusPal.TargetUnknown),
-            new SecurityStatusMapping(Interop.SecurityStatus.TimeSkew, SecurityStatusPal.TimeSkew),
-            new SecurityStatusMapping(Interop.SecurityStatus.UnknownCredentials, SecurityStatusPal.UnknownCredentials),
-            new SecurityStatusMapping(Interop.SecurityStatus.UnsupportedPreauth, SecurityStatusPal.UnsupportedPreauth),
-            new SecurityStatusMapping(Interop.SecurityStatus.Unsupported, SecurityStatusPal.Unsupported),
-            new SecurityStatusMapping(Interop.SecurityStatus.UntrustedRoot, SecurityStatusPal.UntrustedRoot),
-            new SecurityStatusMapping(Interop.SecurityStatus.WrongPrincipal, SecurityStatusPal.WrongPrincipal),
-        };
+            { Interop.SecurityStatus.AlgorithmMismatch, SecurityStatusPal.AlgorithmMismatch },
+            { Interop.SecurityStatus.BadBinding, SecurityStatusPal.BadBinding },
+            { Interop.SecurityStatus.BufferNotEnough, SecurityStatusPal.BufferNotEnough },
+            { Interop.SecurityStatus.CannotInstall, SecurityStatusPal.CannotInstall },
+            { Interop.SecurityStatus.CertExpired, SecurityStatusPal.CertExpired },
+            { Interop.SecurityStatus.CertUnknown, SecurityStatusPal.CertUnknown },
+            { Interop.SecurityStatus.CompAndContinue, SecurityStatusPal.CompAndContinue },
+            { Interop.SecurityStatus.CompleteNeeded, SecurityStatusPal.CompleteNeeded },
+            { Interop.SecurityStatus.ContextExpired, SecurityStatusPal.ContextExpired },
+            { Interop.SecurityStatus.CredentialsNeeded, SecurityStatusPal.CredentialsNeeded },
+            { Interop.SecurityStatus.ContinueNeeded, SecurityStatusPal.ContinueNeeded },
+            { Interop.SecurityStatus.IllegalMessage, SecurityStatusPal.IllegalMessage },
+            { Interop.SecurityStatus.CannotPack, SecurityStatusPal.CannotPack },
+            { Interop.SecurityStatus.IncompleteCredentials, SecurityStatusPal.IncompleteCredentials },
+            { Interop.SecurityStatus.IncompleteMessage, SecurityStatusPal.IncompleteMessage },
+            { Interop.SecurityStatus.InternalError, SecurityStatusPal.InternalError },
+            { Interop.SecurityStatus.InvalidHandle, SecurityStatusPal.InvalidHandle },
+            { Interop.SecurityStatus.InvalidToken, SecurityStatusPal.InvalidToken },
+            { Interop.SecurityStatus.LogonDenied, SecurityStatusPal.LogonDenied },
+            { Interop.SecurityStatus.NoAuthenticatingAuthority, SecurityStatusPal.NoAuthenticatingAuthority },
+            { Interop.SecurityStatus.NoImpersonation, SecurityStatusPal.NoImpersonation },
+            { Interop.SecurityStatus.NoCredentials, SecurityStatusPal.NoCredentials },
+            { Interop.SecurityStatus.NotOwner, SecurityStatusPal.NotOwner },
+            { Interop.SecurityStatus.OK, SecurityStatusPal.OK },
+            { Interop.SecurityStatus.OutOfMemory, SecurityStatusPal.OutOfMemory },
+            { Interop.SecurityStatus.OutOfSequence, SecurityStatusPal.OutOfSequence },
+            { Interop.SecurityStatus.PackageNotFound, SecurityStatusPal.PackageNotFound },
+            { Interop.SecurityStatus.MessageAltered, SecurityStatusPal.MessageAltered },
+            { Interop.SecurityStatus.QopNotSupported, SecurityStatusPal.QopNotSupported },
+            { Interop.SecurityStatus.Renegotiate, SecurityStatusPal.Renegotiate },
+            { Interop.SecurityStatus.SecurityQosFailed, SecurityStatusPal.SecurityQosFailed },
+            { Interop.SecurityStatus.SmartcardLogonRequired, SecurityStatusPal.SmartcardLogonRequired },
+            { Interop.SecurityStatus.TargetUnknown, SecurityStatusPal.TargetUnknown },
+            { Interop.SecurityStatus.TimeSkew, SecurityStatusPal.TimeSkew },
+            { Interop.SecurityStatus.UnknownCredentials, SecurityStatusPal.UnknownCredentials },
+            { Interop.SecurityStatus.UnsupportedPreauth, SecurityStatusPal.UnsupportedPreauth },
+            { Interop.SecurityStatus.Unsupported, SecurityStatusPal.Unsupported },
+            { Interop.SecurityStatus.UntrustedRoot, SecurityStatusPal.UntrustedRoot },
+            { Interop.SecurityStatus.WrongPrincipal, SecurityStatusPal.WrongPrincipal }
+        }; 
 
         internal static SecurityStatusPal GetSecurityStatusPalFromNativeInt(int win32SecurityStatus)
         {
@@ -70,38 +58,24 @@ namespace System.Net
 
         internal static SecurityStatusPal GetSecurityStatusPalFromInterop(Interop.SecurityStatus win32SecurityStatus)
         {
-            foreach (SecurityStatusMapping mapping in s_securityStatusMapping)
+            SecurityStatusPal status;
+            if (!s_statusDictionary.TryGetForward(win32SecurityStatus, out status))
             {
-                if (win32SecurityStatus == mapping.Win32Status)
-                {
-                    return mapping.SecurityStatus;
-                }
+                Debug.Fail("Unknown Interop.SecurityStatus value: " + win32SecurityStatus);
+                throw new InternalException();
             }
-
-            //no match found for SecurityStatus value
-            Debug.Fail("Unknown Interop.SecurityStatus value: " + win32SecurityStatus);
-            throw new InternalException();
+            return status;
         }
 
         internal static Interop.SecurityStatus GetInteropFromSecurityStatusPal(SecurityStatusPal status)
         {
-            if (status == SecurityStatusPal.NotSet)
+            Interop.SecurityStatus interopStatus;
+            if (!s_statusDictionary.TryGetBackward(status, out interopStatus))
             {
-                Debug.Fail("SecurityStatus NotSet");
+                Debug.Fail("Unknown SecurityStatus value: " + status);
                 throw new InternalException();
             }
-
-            foreach (SecurityStatusMapping mapping in s_securityStatusMapping)
-            {
-                if (status == mapping.SecurityStatus)
-                {
-                    return mapping.Win32Status;
-                }
-            }
-
-            //no match found for status
-            Debug.Fail("Unknown SecurityStatus value: " + status);
-            throw new InternalException();
+            return interopStatus;
         }
     }
 }
