@@ -359,8 +359,9 @@ branchList.each { branchName ->
                 // Set PR trigger.
                 // Set of OS's that work currently. 
                 if (os in ['OSX', 'Ubuntu', 'OpenSUSE13.2', 'CentOS7.1']) {
-                    // TODO #6070: Temporarily disabled due to failing globalization tests on OpenSUSE.
-                    if (os != 'OpenSUSE13.2') {
+                    // TODO #6070: OpenSUSE temporarily disabled due to failing globalization tests on OpenSUSE.
+                    // TODO #6240: CentOS temporarily disabled due to FileNotFoundExceptions
+                    if (os != 'OpenSUSE13.2' && os != 'CentOS7.1') {
                         Utilities.addGithubPRTrigger(newFlowJob, "Innerloop ${os} ${configurationGroup} Build and Test")
                     }
                 }
