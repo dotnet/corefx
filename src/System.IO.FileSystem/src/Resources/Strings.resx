@@ -175,7 +175,7 @@
     <value>Empty path name is not legal.</value>
   </data>
   <data name="Argument_FileNotResized" xml:space="preserve">
-    <value>The file system was not able to change the size of the file.</value>
+    <value>The stream's length cannot be changed.</value>
   </data>
   <data name="Argument_InvalidAppendMode" xml:space="preserve">
     <value>Append access can be requested only in write-only mode.</value>
