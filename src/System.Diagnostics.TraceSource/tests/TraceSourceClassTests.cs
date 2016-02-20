@@ -116,6 +116,44 @@ namespace System.Diagnostics.TraceSourceTests
             trace.TraceEvent(messageLevel, 0);
             Assert.Equal(expected, listener.GetCallCount(Method.TraceEvent));
         }
+
+        [Fact]
+        public void NullSourceName()
+        {
+            Assert.Throws<ArgumentNullException>(() => new TraceSource(null));
+        }
+
+        [Theory]
+        [InlineData(SourceLevels.Off)]
+        [InlineData(SourceLevels.Critical)]
+        [InlineData(SourceLevels.Error)]
+        [InlineData(SourceLevels.Warning)]
+        [InlineData(SourceLevels.Information)]
+        [InlineData(SourceLevels.Verbose)]
+        [InlineData(SourceLevels.All)]
+        public void NullSourceName(SourceLevels level)
+        {
+            Assert.Throws<ArgumentNullException>(() => new TraceSource(null, level));
+        }
+
+        [Fact]
+        public void EmptySourceName()
+        {
+            Assert.Throws<ArgumentException>(() => new TraceSource(string.Empty));
+        }
+
+        [Theory]
+        [InlineData(SourceLevels.Off)]
+        [InlineData(SourceLevels.Critical)]
+        [InlineData(SourceLevels.Error)]
+        [InlineData(SourceLevels.Warning)]
+        [InlineData(SourceLevels.Information)]
+        [InlineData(SourceLevels.Verbose)]
+        [InlineData(SourceLevels.All)]
+        public void EmptySourceName(SourceLevels level)
+        {
+            Assert.Throws<ArgumentException>("name", () => new TraceSource(string.Empty, level));
+        }
     }
 
     public sealed class TraceSourceTests_Default : TraceSourceTestsBase
