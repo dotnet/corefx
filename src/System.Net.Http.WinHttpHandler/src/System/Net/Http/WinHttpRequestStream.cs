@@ -110,7 +110,7 @@ namespace System.Net.Http
 
             if (count > buffer.Length - offset)
             {
-                throw new ArgumentException(nameof(buffer));
+                throw new ArgumentException(SR.Argument_BufferNotLongEnough, nameof(buffer));
             }
 
             if (token.IsCancellationRequested)
