@@ -114,10 +114,14 @@ namespace System
             {
                 Extra = extraValue;
             }
-            catch (ArgumentException)
+            catch (Exception exception)
             {
-                // catch to re-throw with name of parameter actually used.
-                throw new ArgumentException(SR.Argument_ExtraNotValid, nameof(extraValue));
+                if (exception is OutOfMemoryException)
+                {
+                    throw;
+                }
+
+                throw new ArgumentException(nameof(extraValue));
             }
         }
 
