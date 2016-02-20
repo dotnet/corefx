@@ -114,14 +114,10 @@ namespace System
             {
                 Extra = extraValue;
             }
-            catch (Exception exception)
+            catch (ArgumentException)
             {
-                if (exception is OutOfMemoryException)
-                {
-                    throw;
-                }
-
-                throw new ArgumentException(nameof(extraValue));
+                // catch to re-throw with name of parameter actually used.
+                throw new ArgumentException(SR.Argument_ExtraNotValid, nameof(extraValue));
             }
         }
 
@@ -156,7 +152,7 @@ namespace System
                     }
                     else
                     {
-                        throw new ArgumentException(nameof(value));
+                        throw new ArgumentException(SR.Argument_ExtraNotValid, nameof(value));
                     }
                 }
                 else
@@ -307,7 +303,7 @@ namespace System
                 {
                     if (!Uri.CheckSchemeName(value))
                     {
-                        throw new ArgumentException(nameof(value));
+                        throw new ArgumentException(SR.net_uri_BadScheme, nameof(value));
                     }
                     value = value.ToLowerInvariant();
                 }

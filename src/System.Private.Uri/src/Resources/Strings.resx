@@ -258,4 +258,13 @@
   <data name="IO_PathTooLong" xml:space="preserve">
     <value>The specified file name or path is too long, or a component of the specified path is too long.</value>
   </data>
+  <data name="Argument_ExtraNotValid" xml:space="preserve">
+    <value>Extra portion of URI not valid</value>
+  </data>
+  <data name="Argument_InvalidUriPart" xml:space="preserve">
+    <value>Uri part is not is not valid.</value>
+  </data>
+  <data name="Argument_NotHexDigit" xml:space="preserve">
+    <value>Digit is not hex</value>
+  </data>
 </root>
