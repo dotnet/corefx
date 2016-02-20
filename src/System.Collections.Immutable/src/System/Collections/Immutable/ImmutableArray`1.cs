@@ -702,6 +702,12 @@ namespace System.Collections.Immutable
         public ImmutableArray<T> Replace(T oldValue, T newValue, IEqualityComparer<T> equalityComparer)
         {
             var self = this;
+            
+            if (equalityComparer.Equals(oldValue, newValue))
+            {
+                return self;
+            }
+            
             int index = self.IndexOf(oldValue, equalityComparer);
             if (index < 0)
             {
