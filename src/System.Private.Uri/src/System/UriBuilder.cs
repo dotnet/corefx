@@ -121,7 +121,7 @@ namespace System
                     throw;
                 }
 
-                throw new ArgumentException(nameof(extraValue));
+                throw new ArgumentException(SR.Argument_ExtraNotValid, nameof(extraValue));
             }
         }
 
