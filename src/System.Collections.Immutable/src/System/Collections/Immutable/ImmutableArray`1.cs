@@ -703,6 +703,11 @@ namespace System.Collections.Immutable
         {
             var self = this;
             
+            if (equalityComparer == null)
+            {
+                equalityComparer = EqualityComparer<T>.Default;
+            }
+            
             if (equalityComparer.Equals(oldValue, newValue))
             {
                 return self;
