@@ -40,9 +40,9 @@ namespace Windows.Foundation
         public Size(double width, double height)
         {
             if (width < 0)
-                throw new ArgumentException(SR.Argument_NeedNonNegNum, nameof(width));
+                throw new ArgumentOutOfRangeException(SR.ArgumentOutOfRange_NeedNonNegNum, nameof(width));
             if (height < 0)
-                throw new ArgumentException(SR.Argument_NeedNonNegNum, nameof(height));
+                throw new ArgumentOutOfRangeException(SR.ArgumentOutOfRange_NeedNonNegNum, nameof(height));
 
             _width = (float)width;
             _height = (float)height;

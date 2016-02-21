@@ -348,7 +348,4 @@
   <data name="UnauthorizedAccess_InternalBuffer" xml:space="preserve">
     <value>MemoryStream's internal buffer cannot be accessed.</value>
   </data>
-  <data name="Argument_NeedNonNegNum" xml:space="preserve">
-    <value>Non-negative number required.</value>
-  </data>
 </root>
