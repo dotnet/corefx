@@ -8,13 +8,13 @@ namespace System
         //The two enums below these lines are referred to indices (i.e., positions of the elements in the input collection).
         //For example: the inputs {1, 2, 2} are assumed to be 3 different items, defined by their indices (i.e., 0, 1 and 2).
         //That's why a permutation including the positions 0-1-2 (i.e., values 1-2-2) is assumed to not have repetitions.
-        public enum RepetitionsPermutation 
-        { 
+        public enum RepetitionsPermutation
+        {
             NoRepetitions,
-            AllRepetitions  
+            AllRepetitions
         };
-        public enum OrderPermutation 
-        { 
+        public enum OrderPermutation
+        {
             AnyOrderSamePermutation, //1-2-3 is assumed to be identical to: 1-3-2, 2-3-1, 3-2-1 and 3-1-2.
             OneOrderOnePermutation   //All the aforementioned permutations are assumed to be different.
         };
@@ -41,13 +41,13 @@ namespace System
 
         public static Dictionary<int, object[]> Permutations(object[] Items, int Size, RepetitionsPermutation Repetitions, OrderPermutation Order)
         {
-            return getPermutations(Items, Size, Repetitions, Order);
+            return GetPermutations(Items, Size, Repetitions, Order);
         }
 
-        private static Dictionary<int, object[]> getPermutations(object[] Items, int Size, RepetitionsPermutation Repetitions, OrderPermutation Order)
+        private static Dictionary<int, object[]> GetPermutations(object[] Items, int Size, RepetitionsPermutation Repetitions, OrderPermutation Order)
         {
             Dictionary<int, object[]> permutations = new Dictionary<int, object[]>();
-         
+
             if (Size < 2 || Size > Items.Length)
             {
                 for (int i0 = 0; i0 < Items.Length; i0++)
@@ -62,10 +62,10 @@ namespace System
             maxVal = Items.Length - 1; //Last position in the input collection.
             maxI = Size - 2; //Last position in the indices array.
 
-            for (int i = 0; i <= maxVal; i++) 
+            for (int i = 0; i <= maxVal; i++)
             {
                 mainI = i;
-                if (!resetIndices(-1)) break; //Reseting the values in the indices array.
+                if (!ResetIndices(-1)) break; //Reseting the values in the indices array.
 
                 while (true)
                 {
@@ -73,7 +73,7 @@ namespace System
                     permutations = AddPermutation(permutations, Items);
 
                     //Updating the values of the indices array.
-                    if (!nextPermutations()) break; 
+                    if (!NextPermutation()) break;
                 }
             }
 
@@ -84,52 +84,52 @@ namespace System
         {
             object[] curPermutation = new object[maxI + 2];
             curPermutation[0] = Items[mainI];
-            
+
             for (int i2 = 0; i2 < maxI + 1; i2++)
             {
                 curPermutation[i2 + 1] = Items[indices[i2]];
             }
-            permutations.Add(permutations.Count + 1, curPermutation); 
+            permutations.Add(permutations.Count + 1, curPermutation);
 
             return permutations;
         }
 
-        private static bool nextPermutations()
+        private static bool NextPermutation()
         {
             int newValI = -1;
             int curI = maxI; //Position in the indices array whose value will be changed. By default, the last position.
 
             //This loop increases the value (indices[curI]) and decreases the position (curI) until finding a valid new value.
-            while (newValI == -1 && curI >= 0) 
+            while (newValI == -1 && curI >= 0)
             {
                 if (indices[curI] == maxVal)
                 {
                     while (curI >= 0 && indices[curI] == maxVal)
                     {
-                        curI = curI - 1; 
+                        curI = curI - 1;
                     }
                 }
                 if (curI == -1) return false;
 
-                newValI = newValue(indices[curI], curI); 
+                newValI = NewValue(indices[curI], curI);
                 indices[curI] = (newValI == -1 ? maxVal : newValI);
             }
             if (newValI == -1) return false; //No more valid permutations are possible for the current mainI value.
 
             //Reseting the values of all the positions after curI.
-            resetIndices(curI + 1);
+            ResetIndices(curI + 1);
 
             return true;
         }
 
-        static int newValue(int valI, int curI)
+        static int NewValue(int valI, int curI)
         {
             valI = valI + 1;
 
             //Special rules to the basic +1 approach for situations where no repetitions are allowed or when the order of the elements matters.
             if (_Repetitions == RepetitionsPermutation.NoRepetitions || _Order == OrderPermutation.AnyOrderSamePermutation)
             {
-                while (valI <= maxVal && changeValue(valI, curI))
+                while (valI <= maxVal && ChangeValue(valI, curI))
                 {
                     valI = valI + 1;
                 }
@@ -138,7 +138,7 @@ namespace System
             return (valI > maxVal ? -1 : valI);
         }
 
-        static bool changeValue(int valI, int curI)
+        static bool ChangeValue(int valI, int curI)
         {
             if (_Order == OrderPermutation.AnyOrderSamePermutation)
             {
@@ -163,7 +163,7 @@ namespace System
         }
 
         //This function has to be called after each variation in the index array to reset the values of the positions after it.
-        static bool resetIndices(int startI) 
+        static bool ResetIndices(int startI)
         {
             int val = -1;
             if (startI == -1)
@@ -175,7 +175,7 @@ namespace System
             bool isOK = true;
             for (int i = startI; i <= maxI; i++)
             {
-                val = (_Repetitions == RepetitionsPermutation.AllRepetitions ? 0 : newValue(val, i)); 
+                val = (_Repetitions == RepetitionsPermutation.AllRepetitions ? 0 : NewValue(val, i));
                 if (val == -1)
                 {
                     indices[i] = maxVal;
