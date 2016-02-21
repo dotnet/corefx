@@ -355,6 +355,6 @@
     <value>Specified handle is not a TypeDefinitionHandle, TypeRefererenceHandle, or TypeSpecificationHandle.</value>
   </data>
   <data name="NotCodeViewEntry" xml:space="preserve">
-    <value>The Debug Directory was not a code view.</value>
+    <value>The Debug directory was not a code view.</value>
   </data>
 </root>
