@@ -1388,7 +1388,7 @@ namespace System
                     : ((int)digit - (int)'a'))
                     + 10);
             }
-            throw new ArgumentException(SR.Argument_NotHexDigit, nameof(digit));
+            throw new ArgumentOutOfRangeException(nameof(digit));
         }
 
         //
