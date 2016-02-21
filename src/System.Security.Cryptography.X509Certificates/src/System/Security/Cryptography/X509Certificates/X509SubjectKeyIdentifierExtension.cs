@@ -122,7 +122,7 @@ namespace System.Security.Cryptography.X509Certificates
                     return X509Pal.Instance.ComputeCapiSha1OfPublicKey(key);
 
                 default:
-                    throw new ArgumentException(SR.Arg_InvalidKeyIdentifierHashAlgorithm, nameof(algorithm));
+                    throw new ArgumentException(SR.Format(SR.Arg_EnumIllegalVal, algorithm), nameof(algorithm));
             }
         }
 
