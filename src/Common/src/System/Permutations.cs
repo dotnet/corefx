@@ -19,48 +19,48 @@ namespace System
             OneOrderOnePermutation   //All the aforementioned permutations are assumed to be different.
         };
 
-        private static RepetitionsPermutation _Repetitions;
-        private static OrderPermutation _Order;
+        private static RepetitionsPermutation _repetitions;
+        private static OrderPermutation _order;
         private static int mainI, maxVal, maxI;
         private static int[] indices; //Indices of all the items in the given permutation from the second position onwards.
 
-        public static Dictionary<int, object[]> Permutations(object[] Items, int Size)
+        public static Dictionary<int, object[]> Permutations(object[] items, int size)
         {
-            return Permutations(Items, Size, RepetitionsPermutation.NoRepetitions, OrderPermutation.AnyOrderSamePermutation);
+            return Permutations(items, size, RepetitionsPermutation.NoRepetitions, OrderPermutation.AnyOrderSamePermutation);
         }
 
-        public static Dictionary<int, object[]> Permutations(object[] Items, int Size, RepetitionsPermutation Repetitions)
+        public static Dictionary<int, object[]> Permutations(object[] items, int size, RepetitionsPermutation repetitions)
         {
-            return Permutations(Items, Size, Repetitions, OrderPermutation.AnyOrderSamePermutation);
+            return Permutations(items, size, repetitions, OrderPermutation.AnyOrderSamePermutation);
         }
 
-        public static Dictionary<int, object[]> Permutations(object[] Items, int Size, OrderPermutation Order)
+        public static Dictionary<int, object[]> Permutations(object[] items, int size, OrderPermutation order)
         {
-            return Permutations(Items, Size, RepetitionsPermutation.NoRepetitions, Order);
+            return Permutations(items, size, RepetitionsPermutation.NoRepetitions, order);
         }
 
-        public static Dictionary<int, object[]> Permutations(object[] Items, int Size, RepetitionsPermutation Repetitions, OrderPermutation Order)
+        public static Dictionary<int, object[]> Permutations(object[] items, int size, RepetitionsPermutation repetitions, OrderPermutation order)
         {
-            return GetPermutations(Items, Size, Repetitions, Order);
+            return GetPermutations(items, size, repetitions, order);
         }
 
-        private static Dictionary<int, object[]> GetPermutations(object[] Items, int Size, RepetitionsPermutation Repetitions, OrderPermutation Order)
+        private static Dictionary<int, object[]> GetPermutations(object[] items, int size, RepetitionsPermutation repetitions, OrderPermutation order)
         {
             Dictionary<int, object[]> permutations = new Dictionary<int, object[]>();
 
-            if (Size < 2 || Size > Items.Length)
+            if (size < 2 || size > items.Length)
             {
-                for (int i0 = 0; i0 < Items.Length; i0++)
+                for (int i0 = 0; i0 < items.Length; i0++)
                 {
-                    permutations.Add(i0, new object[] { Items[i0] });
+                    permutations.Add(i0, new object[] { items[i0] });
                 }
             }
 
-            _Repetitions = Repetitions;
-            _Order = Order;
+            _repetitions = repetitions;
+            _order = order;
 
-            maxVal = Items.Length - 1; //Last position in the input collection.
-            maxI = Size - 2; //Last position in the indices array.
+            maxVal = items.Length - 1; //Last position in the input collection.
+            maxI = size - 2; //Last position in the indices array.
 
             for (int i = 0; i <= maxVal; i++)
             {
@@ -70,7 +70,7 @@ namespace System
                 while (true)
                 {
                     //Storing the values of the last permutation (i.e., mainI + indices).
-                    permutations = AddPermutation(permutations, Items);
+                    permutations = AddPermutation(permutations, items);
 
                     //Updating the values of the indices array.
                     if (!NextPermutation()) break;
@@ -80,14 +80,14 @@ namespace System
             return permutations;
         }
 
-        private static Dictionary<int, object[]> AddPermutation(Dictionary<int, object[]> permutations, object[] Items)
+        private static Dictionary<int, object[]> AddPermutation(Dictionary<int, object[]> permutations, object[] items)
         {
             object[] curPermutation = new object[maxI + 2];
-            curPermutation[0] = Items[mainI];
+            curPermutation[0] = items[mainI];
 
             for (int i2 = 0; i2 < maxI + 1; i2++)
             {
-                curPermutation[i2 + 1] = Items[indices[i2]];
+                curPermutation[i2 + 1] = items[indices[i2]];
             }
             permutations.Add(permutations.Count + 1, curPermutation);
 
@@ -127,7 +127,7 @@ namespace System
             valI = valI + 1;
 
             //Special rules to the basic +1 approach for situations where no repetitions are allowed or when the order of the elements matters.
-            if (_Repetitions == RepetitionsPermutation.NoRepetitions || _Order == OrderPermutation.AnyOrderSamePermutation)
+            if (_repetitions == RepetitionsPermutation.NoRepetitions || _order == OrderPermutation.AnyOrderSamePermutation)
             {
                 while (valI <= maxVal && ChangeValue(valI, curI))
                 {
@@ -140,15 +140,15 @@ namespace System
 
         static bool ChangeValue(int valI, int curI)
         {
-            if (_Order == OrderPermutation.AnyOrderSamePermutation)
+            if (_order == OrderPermutation.AnyOrderSamePermutation)
             {
                 //The value at each position has to be greater (or equal, if repetitions are possible) than the one in the previous position.
                 //For example: there will be only one permutation with 1-2-3, because all the other alternatives (i.e., 1-3-2, 2-1-3, 2-3-1, 3-2-1, 3-1-2) break that rule. 
-                if (_Repetitions == RepetitionsPermutation.NoRepetitions && (valI > maxVal - (maxI - curI))) return true;
+                if (_repetitions == RepetitionsPermutation.NoRepetitions && (valI > maxVal - (maxI - curI))) return true;
                 if (valI < (curI == 0 ? mainI : indices[curI - 1])) return true;
             }
 
-            if (_Repetitions == RepetitionsPermutation.NoRepetitions)
+            if (_repetitions == RepetitionsPermutation.NoRepetitions)
             {
                 //Making sure that no other element of the permutation (i.e., mainI or any position in the indices array) has the same value than the current one.
                 if (valI == mainI) return true;
@@ -175,7 +175,7 @@ namespace System
             bool isOK = true;
             for (int i = startI; i <= maxI; i++)
             {
-                val = (_Repetitions == RepetitionsPermutation.AllRepetitions ? 0 : NewValue(val, i));
+                val = (_repetitions == RepetitionsPermutation.AllRepetitions ? 0 : NewValue(val, i));
                 if (val == -1)
                 {
                     indices[i] = maxVal;
@@ -183,7 +183,7 @@ namespace System
                 }
                 else
                 {
-                    if (_Order == OrderPermutation.AnyOrderSamePermutation)
+                    if (_order == OrderPermutation.AnyOrderSamePermutation)
                     {
                         int prevValI = (i == 0 ? mainI : indices[i - 1]);
                         if (val < prevValI) val = prevValI;
