@@ -261,7 +261,7 @@
   <data name="Argument_ExtraNotValid" xml:space="preserve">
     <value>Extra portion of URI not valid.</value>
   </data>
-  <data name="Argument_InvalidUriPart" xml:space="preserve">
-    <value>Uri part is not valid.</value>
+  <data name="Argument_InvalidUriSubcomponent" xml:space="preserve">
+    <value>The subcomponent, {0}, of this uri is not valid.</value>
   </data>
 </root>
