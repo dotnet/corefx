@@ -75,33 +75,6 @@ namespace System.Xml.Serialization
             }
         }
 
-        /// <include file='doc\XmlSerializationWriter.uex' path='docs/doc[@for="XmlSerializationWriter.Namespaces"]/*' />
-        /// <devdoc>
-        ///    <para>[To be supplied.]</para>
-        /// </devdoc>
-        protected IList XmlNamespaces
-        {
-            get
-            {
-                return _namespaces == null ? null : _namespaces.NamespaceList;
-            }
-            set
-            {
-                if (value == null)
-                {
-                    _namespaces = null;
-                }
-                else
-                {
-                    Array array = Array.CreateInstance(typeof(XmlQualifiedName), value.Count);
-                    value.CopyTo(array, 0);
-                    XmlQualifiedName[] qnames = (XmlQualifiedName[])array;
-                    
-                    _namespaces = new XmlSerializerNamespaces(qnames);
-                }
-            }
-        }
-
         /// <include file='doc\XmlSerializationWriter.uex' path='docs/doc[@for="XmlSerializationWriter.FromByteArrayBase64"]/*' />
         protected static byte[] FromByteArrayBase64(byte[] value)
         {
@@ -183,68 +156,6 @@ namespace System.Xml.Serialization
         protected void WriteXsiType(string name, string ns)
         {
             WriteAttribute("type", XmlSchema.InstanceNamespace, GetQualifiedName(name, ns));
-        }
-
-        private XmlQualifiedName GetPrimitiveTypeName(Type type)
-        {
-            return GetPrimitiveTypeName(type, true);
-        }
-
-        private XmlQualifiedName GetPrimitiveTypeName(Type type, bool throwIfUnknown)
-        {
-            XmlQualifiedName qname = GetPrimitiveTypeNameInternal(type);
-            if (throwIfUnknown && qname == null)
-                throw CreateUnknownTypeException(type);
-            return qname;
-        }
-
-        internal static XmlQualifiedName GetPrimitiveTypeNameInternal(Type type)
-        {
-            string typeName;
-            string typeNs = XmlSchema.Namespace;
-
-            switch (type.GetTypeCode())
-            {
-                case TypeCode.String: typeName = "string"; break;
-                case TypeCode.Int32: typeName = "int"; break;
-                case TypeCode.Boolean: typeName = "boolean"; break;
-                case TypeCode.Int16: typeName = "short"; break;
-                case TypeCode.Int64: typeName = "long"; break;
-                case TypeCode.Single: typeName = "float"; break;
-                case TypeCode.Double: typeName = "double"; break;
-                case TypeCode.Decimal: typeName = "decimal"; break;
-                case TypeCode.DateTime: typeName = "dateTime"; break;
-                case TypeCode.Byte: typeName = "unsignedByte"; break;
-                case TypeCode.SByte: typeName = "byte"; break;
-                case TypeCode.UInt16: typeName = "unsignedShort"; break;
-                case TypeCode.UInt32: typeName = "unsignedInt"; break;
-                case TypeCode.UInt64: typeName = "unsignedLong"; break;
-                case TypeCode.Char:
-                    typeName = "char";
-                    typeNs = UrtTypes.Namespace;
-                    break;
-                default:
-                    if (type == typeof(XmlQualifiedName)) typeName = "QName";
-                    else if (type == typeof(byte[])) typeName = "base64Binary";
-                    else if (type == typeof(Guid))
-                    {
-                        typeName = "guid";
-                        typeNs = UrtTypes.Namespace;
-                    }
-                    else if (type == typeof (TimeSpan))
-                    {
-                        typeName = "TimeSpan";
-                        typeNs = UrtTypes.Namespace;
-                    }
-                    else if (type == typeof (XmlNode[]))
-                    {
-                        typeName = Soap.UrType;
-                    }
-                    else
-                        return null;
-                    break;
-            }
-            return new XmlQualifiedName(typeName, typeNs);
         }
 
         /// <include file='doc\XmlSerializationWriter.uex' path='docs/doc[@for="XmlSerializationWriter.WriteTypedPrimitive"]/*' />
@@ -616,12 +527,6 @@ namespace System.Xml.Serialization
             WriteStartElement(name, ns, null, false);
             _w.WriteAttributeString("nil", XmlSchema.InstanceNamespace, "true");
             _w.WriteEndElement();
-        }
-
-        /// <include file='doc\XmlSerializationWriter.uex' path='docs/doc[@for="XmlSerializationWriter.WriteEmptyTag"]/*' />
-        protected void WriteEmptyTag(string name)
-        {
-            WriteEmptyTag(name, null);
         }
 
         /// <include file='doc\XmlSerializationWriter.uex' path='docs/doc[@for="XmlSerializationWriter.WriteEmptyTag1"]/*' />
