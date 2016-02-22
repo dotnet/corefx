@@ -606,7 +606,7 @@ namespace System.Net.Security
                         error = (error << 8) + message[i];
                     }
 
-                    NegotiateStreamPal.ThrowCredentialException(error);
+                    ThrowCredentialException(error);
                 }
 
                 throw new AuthenticationException(SR.net_auth_alert, null);
@@ -656,7 +656,7 @@ namespace System.Net.Security
         {
             _framer.WriteHeader.MessageId = FrameHeader.HandshakeErrId;
 
-            if (NegotiateStreamPal.IsLogonDeniedException(exception))
+            if (IsLogonDeniedException(exception))
             {
                 if (IsServer)
                 {
@@ -824,6 +824,30 @@ namespace System.Net.Security
             // SSPI seems to ignore this sequence number.
             ++_readSequenceNumber;
             return _context.Decrypt(buffer, offset, count, out newOffset, _readSequenceNumber);
+        }
+
+        internal static void ThrowCredentialException(long error)
+        {
+            Win32Exception e = new Win32Exception((int)error);
+
+            if (e.NativeErrorCode == (int)SecurityStatusPal.LogonDenied)
+            {
+                throw new InvalidCredentialException(SR.net_auth_bad_client_creds, e);
+            }
+
+            if (e.NativeErrorCode == NegoState.ERROR_TRUST_FAILURE)
+            {
+                throw new AuthenticationException(SR.net_auth_context_expectation_remote, e);
+            }
+
+            throw new AuthenticationException(SR.net_auth_alert, e);
+        }
+
+        internal static bool IsLogonDeniedException(Exception exception)
+        {
+            Win32Exception win32exception = exception as Win32Exception;
+
+            return (win32exception != null) && (win32exception.NativeErrorCode == (int)SecurityStatusPal.LogonDenied);
         }
     }
 }

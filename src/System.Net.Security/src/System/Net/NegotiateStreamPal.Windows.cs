@@ -219,30 +219,6 @@ namespace System.Net.Security
             }
         }
 
-        internal static void ThrowCredentialException(long error)
-        {
-            Win32Exception e = new Win32Exception((int)error);
-
-            if (e.NativeErrorCode == (int)Interop.SecurityStatus.LogonDenied)
-            {
-                throw new InvalidCredentialException(SR.net_auth_bad_client_creds, e);
-            }
-
-            if (e.NativeErrorCode == NegoState.ERROR_TRUST_FAILURE)
-            {
-                throw new AuthenticationException(SR.net_auth_context_expectation_remote, e);
-            }
-
-            throw new AuthenticationException(SR.net_auth_alert, e);
-        }
-
-        internal static bool IsLogonDeniedException(Exception exception)
-        {
-            Win32Exception win32exception = exception as Win32Exception;
-
-            return (win32exception != null) && (win32exception.NativeErrorCode == (int)Interop.SecurityStatus.LogonDenied);
-        }
-
         internal static Exception CreateExceptionFromError(SecurityStatusPal statusCode)
         {
             return new Win32Exception((int)SecurityStatusAdapterPal.GetInteropFromSecurityStatusPal(statusCode));

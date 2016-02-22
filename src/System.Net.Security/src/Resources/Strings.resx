@@ -432,4 +432,13 @@
   <data name="net_context_buffer_too_small" xml:space="preserve">
     <value>Insufficient buffer space. Required: {0} Actual: {1}.</value>
   </data>
+  <data name="net_nego_channel_binding_not_supported" xml:space="preserve">
+    <value>No support for channel binding on operating systems other than Windows</value>
+  </data>
+  <data name="net_nego_ntlm_not_supported" xml:space="preserve">
+    <value>NTLM is not supported</value>
+  </data>
+  <data name="net_nego_server_not_supported" xml:space="preserve">
+    <value>Server implementation is not supported</value>
+  </data>
 </root>
