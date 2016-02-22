@@ -789,12 +789,6 @@ namespace System.Xml.Serialization
             return node;
         }
 
-        /// <include file='doc\XmlSerializationReader.uex' path='docs/doc[@for="XmlSerializationReader.ToByteArrayBase64"]/*' />
-        protected static byte[] ToByteArrayBase64(string value)
-        {
-            return XmlCustomFormatter.ToByteArrayBase64(value);
-        }
-
         /// <include file='doc\XmlSerializationReader.uex' path='docs/doc[@for="XmlSerializationReader.ToByteArrayBase641"]/*' />
         protected byte[] ToByteArrayBase64(bool isNull)
         {
@@ -803,12 +797,6 @@ namespace System.Xml.Serialization
                 return null;
             }
             return ReadByteArray(true); //means use Base64
-        }
-
-        /// <include file='doc\XmlSerializationReader.uex' path='docs/doc[@for="XmlSerializationReader.ToByteArrayHex"]/*' />
-        protected static byte[] ToByteArrayHex(string value)
-        {
-            return XmlCustomFormatter.ToByteArrayHex(value);
         }
 
         /// <include file='doc\XmlSerializationReader.uex' path='docs/doc[@for="XmlSerializationReader.ToByteArrayHex1"]/*' />
@@ -820,10 +808,6 @@ namespace System.Xml.Serialization
             }
             return ReadByteArray(false); //means use BinHex
         }
-
-
-
-
 
         /// <include file='doc\XmlSerializationReader.uex' path='docs/doc[@for="XmlSerializationReader.ToDateTime"]/*' />
         protected static DateTime ToDateTime(string value)

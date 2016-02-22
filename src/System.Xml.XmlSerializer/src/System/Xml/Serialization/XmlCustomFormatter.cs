@@ -235,21 +235,6 @@ namespace System.Xml.Serialization
             return XmlConvert.DecodeName(CollapseWhitespace(value));
         }
 
-        internal static byte[] ToByteArrayBase64(string value)
-        {
-            if (value == null) return null;
-            value = value.Trim();
-            if (value.Length == 0)
-                return Array.Empty<byte>();
-            return Convert.FromBase64String(value);
-        }
-        internal static byte[] ToByteArrayHex(string value)
-        {
-            if (value == null) return null;
-            value = value.Trim();
-            return ExtensionMethods.FromBinHexString(value, true);
-        }
-
         internal static long ToEnum(string val, IDictionary vals, string typeName, bool validate)
         {
             long value = 0;
