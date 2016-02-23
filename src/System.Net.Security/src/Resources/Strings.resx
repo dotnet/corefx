@@ -441,4 +441,7 @@
   <data name="net_nego_server_not_supported" xml:space="preserve">
     <value>Server implementation is not supported</value>
   </data>
+  <data name="net_generic_ntlm_operation_failed" xml:space="preserve">
+    <value>NTLM  operation failed with status: {0})</value>
+  </data>
 </root>
