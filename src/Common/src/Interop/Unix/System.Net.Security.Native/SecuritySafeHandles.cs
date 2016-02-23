@@ -10,9 +10,33 @@ using Microsoft.Win32.SafeHandles;
 
 namespace System.Net.Security
 {
-    internal sealed class SafeFreeNegoCredentials : SafeFreeCredentials
+    internal sealed partial class SafeFreeNegoCredentials : SafeFreeCredentials
     {
         private SafeGssCredHandle _credential;
+        private bool _isdefault;
+        private readonly string _username;
+        private readonly string _domain;
+        private bool _isNtlm;
+
+        public bool IsDefault
+        {
+            get { return _isdefault; }
+        }
+
+        public string UserName
+        {
+            get { return _username; }
+        }
+
+        public string Domain
+        {
+            get { return _domain; }
+        }
+
+        public bool IsNtlm
+        {
+            get { return _isNtlm; }
+        }
 
         public SafeGssCredHandle GssCredential
         {
@@ -39,10 +63,11 @@ namespace System.Net.Security
         }
     }
 
-    internal sealed class SafeDeleteNegoContext : SafeDeleteContext
+    internal sealed partial class SafeDeleteNegoContext : SafeDeleteContext
     {
         private SafeGssNameHandle _targetName;
         private SafeGssContextHandle _context;
+        private bool _isNtlm;
 
         public SafeGssNameHandle TargetName
         {
@@ -52,6 +77,11 @@ namespace System.Net.Security
         public SafeGssContextHandle GssContext
         {
             get { return _context; }
+        }
+
+        public bool IsNtlm
+        {
+            get { return _isNtlm; }
         }
 
         public SafeDeleteNegoContext(SafeFreeNegoCredentials credential, string targetName)
@@ -69,10 +99,11 @@ namespace System.Net.Security
             }
         }
 
-        public void SetGssContext(SafeGssContextHandle context)
+        public void SetGssContext(SafeGssContextHandle context, bool isNtlm)
         {
             Debug.Assert(!context.IsInvalid, "Invalid context passed to SafeDeleteNegoContext");
             _context = context;
+            _isNtlm = isNtlm;
         }
 
         protected override void Dispose(bool disposing)
