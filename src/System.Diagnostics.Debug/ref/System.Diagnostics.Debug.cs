@@ -62,6 +62,7 @@ namespace System.Diagnostics
         public static bool IsAttached { get { return default(bool); } }
         public static void Break() { }
         public static bool Launch() { return default(bool); }
+        public static void NotifyOfCrossThreadDependency() { }
     }
     [System.AttributeUsageAttribute((System.AttributeTargets)(384), AllowMultiple = false)]
     public sealed partial class DebuggerBrowsableAttribute : System.Attribute
