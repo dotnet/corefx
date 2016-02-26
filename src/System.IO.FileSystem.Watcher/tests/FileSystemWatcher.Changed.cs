@@ -4,6 +4,7 @@
 
 using System;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Threading;
 using Xunit;
 
@@ -161,6 +162,12 @@ public class ChangedTests
         {
             string filePath = Path.Combine(dir3.Path, "testfile.txt");
             File.WriteAllBytes(filePath, new byte[4096]);
+
+            // We did a lot of I/O so sync to avoid race conditions with the non-Windows FSWs
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                Interop.Sys.Sync();
+            }
 
             // Attach the FSW to the existing structure
             AutoResetEvent eventOccurred = Utility.WatchForEvents(watcher, WatcherChangeTypes.Changed);

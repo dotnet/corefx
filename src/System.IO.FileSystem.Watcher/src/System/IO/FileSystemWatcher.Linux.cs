@@ -70,6 +70,9 @@ namespace System.IO
                 _cancellation = cancellation;
                 _enabled = true;
 
+                // Match Windows and lock the root directory
+                LockRootDirectory(handle, _directory);
+
                 // Start the runner
                 runner.Start();
             }
@@ -77,7 +80,8 @@ namespace System.IO
             {
                 // If we fail to actually start the watching even though we've opened the 
                 // inotify handle, close the inotify handle proactively rather than waiting for it 
-                // to be finalized.
+                // to be finalized; also, release the lock on the root directory.
+                UnlockRootDirectory(handle);
                 handle.Dispose();
                 throw;
             }
