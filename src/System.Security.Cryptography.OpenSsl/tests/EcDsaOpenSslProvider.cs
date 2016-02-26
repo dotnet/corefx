@@ -15,6 +15,44 @@ namespace System.Security.Cryptography.EcDsa.Tests
         {
             return new ECDsaOpenSsl(keySize);
         }
+
+        public ECDsa Create(ECCurve curve)
+        {
+            return new ECDsaOpenSsl(curve);
+        }
+
+        public bool IsCurveValid(Oid oid)
+        {
+            return NativeOidValueExists(oid.Value) ||
+                NativeOidFriendlyNameExists(oid.FriendlyName);
+        }
+
+        public bool ExplicitCurvesSupported
+        {
+            get
+            {
+                return true;
+            }
+        }
+
+        private static bool NativeOidValueExists(string oidValue)
+        {
+            if (string.IsNullOrEmpty(oidValue))
+                return false;
+
+            IntPtr friendlyNamePtr = IntPtr.Zero;
+            int result = Interop.Crypto.LookupFriendlyNameByOid(oidValue, ref friendlyNamePtr);
+            return (result == 1);
+        }
+
+        private static bool NativeOidFriendlyNameExists(string oidFriendlyName)
+        {
+            if (string.IsNullOrEmpty(oidFriendlyName))
+                return false;
+
+            IntPtr sharedObject = Interop.Crypto.GetObjectDefinitionByName(oidFriendlyName);
+            return (sharedObject != IntPtr.Zero);
+        }
     }
 
     public partial class ECDsaFactory

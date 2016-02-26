@@ -2,9 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using Microsoft.Win32.SafeHandles;
-
 using Internal.Cryptography;
+using Microsoft.Win32.SafeHandles;
 
 using ErrorCode = Interop.NCrypt.ErrorCode;
 using NCRYPT_UI_POLICY = Interop.NCrypt.NCRYPT_UI_POLICY;
@@ -48,7 +47,16 @@ namespace System.Security.Cryptography
 
             errorCode = Interop.NCrypt.NCryptFinalizeKey(keyHandle, 0);
             if (errorCode != ErrorCode.ERROR_SUCCESS)
-                throw errorCode.ToCryptographicException();
+            {
+                Exception e = errorCode.ToCryptographicException();
+                if (CngKey.IsECNamedCurve(algorithm.Algorithm) && 
+                    (errorCode == ErrorCode.NTE_INVALID_PARAMETER || errorCode == ErrorCode.NTE_NOT_SUPPORTED))
+                {
+                    // Curve is not supported
+                    throw new PlatformNotSupportedException(SR.Cryptography_CurveNotSupported, e);
+                }
+                throw e;
+            }
 
             CngKey key = new CngKey(providerHandle, keyHandle);
 
@@ -118,7 +126,7 @@ namespace System.Security.Cryptography
         {
             unsafe
             {
-                fixed (char* pinnedCreationTitle = uiPolicy.CreationTitle, 
+                fixed (char* pinnedCreationTitle = uiPolicy.CreationTitle,
                              pinnedFriendlyName = uiPolicy.FriendlyName,
                              pinnedDescription = uiPolicy.Description)
                 {
@@ -151,4 +159,3 @@ namespace System.Security.Cryptography
         }
     }
 }
-
