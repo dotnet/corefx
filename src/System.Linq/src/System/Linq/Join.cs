@@ -70,28 +70,20 @@ namespace System.Linq
 
         private static IEnumerable<TResult> JoinIterator<TOuter, TInner, TKey, TResult>(IEnumerable<TOuter> outer, IEnumerable<TInner> inner, Func<TOuter, TKey> outerKeySelector, Func<TInner, TKey> innerKeySelector, Func<TOuter, TInner, TResult> resultSelector, IEqualityComparer<TKey> comparer)
         {
-            using (IEnumerator<TOuter> e = outer.GetEnumerator())
+            Lookup<TKey, TInner> lookup = Lookup<TKey, TInner>.CreateForJoin(inner, innerKeySelector, comparer);
+            if (lookup.Count != 0)
             {
-                if (e.MoveNext())
+                foreach (TOuter item in outer)
                 {
-                    Lookup<TKey, TInner> lookup = Lookup<TKey, TInner>.CreateForJoin(inner, innerKeySelector, comparer);
-                    if (lookup.Count != 0)
+                    Grouping<TKey, TInner> g = lookup.GetGrouping(outerKeySelector(item), false);
+                    if (g != null)
                     {
-                        do
+                        int count = g._count;
+                        TInner[] elements = g._elements;
+                        for (int i = 0; i != count; ++i)
                         {
-                            TOuter item = e.Current;
-                            Grouping<TKey, TInner> g = lookup.GetGrouping(outerKeySelector(item), create: false);
-                            if (g != null)
-                            {
-                                int count = g._count;
-                                TInner[] elements = g._elements;
-                                for (int i = 0; i != count; ++i)
-                                {
-                                    yield return resultSelector(item, elements[i]);
-                                }
-                            }
+                            yield return resultSelector(item, elements[i]);
                         }
-                        while (e.MoveNext());
                     }
                 }
             }

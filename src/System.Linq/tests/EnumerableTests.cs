@@ -4,8 +4,7 @@
 
 using System.Collections;
 using System.Collections.Generic;
-using Xunit;
-using Xunit.Extensions;
+using System.Text;
 
 namespace System.Linq.Tests
 {
@@ -116,6 +115,58 @@ namespace System.Linq.Tests
                 foreach (char c in obj)
                     hash ^= (int)c;
                 return hash;
+            }
+        }
+
+        protected class StringBuildingEnumerator : IEnumerable<int>, IEnumerator<int>
+        {
+            private StringBuilder _builder;
+            private char _curChar;
+            private int _count;
+
+            public StringBuildingEnumerator(StringBuilder builder, char startChar)
+            {
+                _builder = builder;
+                _curChar = startChar;
+            }
+
+            public IEnumerator<int> GetEnumerator()
+            {
+                return this;
+            }
+
+            IEnumerator IEnumerable.GetEnumerator()
+            {
+                return this;
+            }
+
+            public bool MoveNext()
+            {
+                if (_count == 10)
+                    return false;
+
+                ++_count;
+                _builder.Append(_curChar);
+                _curChar = (char)(_curChar + 1);
+                return true;
+            }
+
+            public int Current
+            {
+                get { return 0; }
+            }
+
+            object IEnumerator.Current
+            {
+                get { return 0; }
+            }
+
+            public void Reset()
+            {
+            }
+
+            public void Dispose()
+            {
             }
         }
 

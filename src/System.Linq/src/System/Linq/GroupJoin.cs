@@ -70,18 +70,10 @@ namespace System.Linq
 
         private static IEnumerable<TResult> GroupJoinIterator<TOuter, TInner, TKey, TResult>(IEnumerable<TOuter> outer, IEnumerable<TInner> inner, Func<TOuter, TKey> outerKeySelector, Func<TInner, TKey> innerKeySelector, Func<TOuter, IEnumerable<TInner>, TResult> resultSelector, IEqualityComparer<TKey> comparer)
         {
-            using (IEnumerator<TOuter> e = outer.GetEnumerator())
+            Lookup<TKey, TInner> lookup = Lookup<TKey, TInner>.CreateForJoin(inner, innerKeySelector, comparer);
+            foreach (TOuter item in outer)
             {
-                if (e.MoveNext())
-                {
-                    Lookup<TKey, TInner> lookup = Lookup<TKey, TInner>.CreateForJoin(inner, innerKeySelector, comparer);
-                    do
-                    {
-                        TOuter item = e.Current;
-                        yield return resultSelector(item, lookup[outerKeySelector(item)]);
-                    }
-                    while (e.MoveNext());
-                }
+                yield return resultSelector(item, lookup[outerKeySelector(item)]);
             }
         }
     }
