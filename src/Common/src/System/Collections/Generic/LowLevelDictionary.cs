@@ -258,7 +258,10 @@ namespace System.Collections.Generic
             }
         }
         
-        private static readonly IEqualityComparer<TKey> DefaultComparer = typeof(IEquatable<TKey>).IsAssignableFrom(typeof(TKey)) ? (IEqualityComparer<TKey>)new DefaultComparerForIEquatable() : new DefaultComparerForNotIEquatable();
+        private static readonly IEqualityComparer<TKey> DefaultComparer = 
+            typeof(IEquatable<TKey>).GetTypeInfo().IsAssignableFrom(typeof(TKey)) ? 
+            (IEqualityComparer<TKey>)new DefaultComparerForIEquatable() : 
+            new DefaultComparerForNotIEquatable();
 
         protected sealed class LowLevelDictEnumerator : IEnumerator<KeyValuePair<TKey, TValue>>
         {
