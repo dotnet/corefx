@@ -26,12 +26,12 @@ namespace System.Collections.Generic
         private const int DefaultSize = 17;
 
         public LowLevelDictionary()
-            : this(DefaultSize, new DefaultComparer<TKey>())
+            : this(DefaultSize, DefaultComparer)
         {
         }
 
         public LowLevelDictionary(int capacity)
-            : this(capacity, new DefaultComparer<TKey>())
+            : this(capacity, DefaultComparer)
         {
         }
 
@@ -229,24 +229,36 @@ namespace System.Collections.Generic
         private int _version;
         private IEqualityComparer<TKey> _comparer;
 
-        // This comparator is used if no comparator is supplied. It emulates the behavior of EqualityComparer<T>.Default.
-        private sealed class DefaultComparer<T> : IEqualityComparer<T>
+        // This comparator is used if no comparator is supplied. It emulates the behavior of EqualityComparer<T>.Default
+        // when T implements IEquatable<T>.
+        private sealed class DefaultComparerForIEquatable : IEqualityComparer<TKey>
         {
-            public bool Equals(T x, T y)
+            public bool Equals(TKey x, TKey y)
             {
-                if (x == null)
-                    return y == null;
-                IEquatable<T> iequatable = x as IEquatable<T>;
-                if (iequatable != null)
-                    return iequatable.Equals(y);
-                return ((object)x).Equals(y);
+                return x == null ? y == null : ((IEquatable<TKey>)x).Equals(y);
             }
 
-            public int GetHashCode(T obj)
+            public int GetHashCode(TKey obj)
             {
-                return ((object)obj).GetHashCode();
+                return obj.GetHashCode();
             }
         }
+        // This comparator is used if no comparator is supplied. It emulates the behavior of EqualityComparer<T>.Default
+        // when T does not implement IEquatable<T>.
+        private sealed class DefaultComparerForNotIEquatable : IEqualityComparer<TKey>
+        {
+            public bool Equals(TKey x, TKey y)
+            {
+                return x == null ? y == null : x.Equals(y);
+            }
+
+            public int GetHashCode(TKey obj)
+            {
+                return obj.GetHashCode();
+            }
+        }
+        
+        private static readonly IEqualityComparer<TKey> DefaultComparer = typeof(IEquatable<TKey>).IsAssignableFrom(typeof(TKey)) ? (IEqualityComparer<TKey>)new DefaultComparerForIEquatable() : new DefaultComparerForNotIEquatable();
 
         protected sealed class LowLevelDictEnumerator : IEnumerator<KeyValuePair<TKey, TValue>>
         {
