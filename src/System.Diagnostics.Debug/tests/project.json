@@ -3,7 +3,7 @@
     "Microsoft.NETCore.Platforms": "1.0.1-rc3-23829",
     "Microsoft.TargetingPack.Private.CoreCLR": "1.0.0-rc3-23829",
     "xunit": "2.1.0",
-    "xunit.netcore.extensions": "1.0.0-prerelease-00123"
+    "xunit.netcore.extensions": "1.0.0-prerelease-00169"
   },
   "frameworks": {
     "dnxcore50": {

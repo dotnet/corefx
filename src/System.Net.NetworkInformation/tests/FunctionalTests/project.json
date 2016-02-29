@@ -4,7 +4,7 @@
     "System.Net.Primitives": "4.0.10",
     "Microsoft.Win32.Primitives": "4.0.1-rc3-23829",
     "xunit": "2.1.0",
-    "xunit.netcore.extensions": "1.0.0-prerelease-00123"
+    "xunit.netcore.extensions": "1.0.0-prerelease-00169"
   },
   "frameworks": {
     "dnxcore50": {
