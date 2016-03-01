@@ -356,6 +356,9 @@ namespace System.Net
         {
             if (value == null)
                 return null;
+            
+            if (!NeedsUrlEncoding(value))
+                return value;
 
             byte[] bytes = Encoding.UTF8.GetBytes(value);
             byte[] encodedBytes = UrlEncode(bytes, 0, bytes.Length, alwaysCreateNewReturnValue: false);
@@ -595,6 +598,16 @@ namespace System.Net
                 {
                     return true;
                 }
+            }
+            return false;
+        }
+        
+        private static bool NeedsUrlDecoding(string s)
+        {
+            for (int i = 0; i < s.Length; i++)
+            {
+                if (!IsUrlSafeChar(s[i]))
+                    return true;
             }
             return false;
         }
