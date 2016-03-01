@@ -358,13 +358,13 @@ namespace System.Net
                 return null;
 
             byte[] bytes = Encoding.UTF8.GetBytes(value);
-            byte[] encodedBytes = UrlEncode(bytes, 0, bytes.Length, false /* alwaysCreateNewReturnValue */);
+            byte[] encodedBytes = UrlEncode(bytes, 0, bytes.Length, alwaysCreateNewReturnValue: false);
             return Encoding.UTF8.GetString(encodedBytes, 0, encodedBytes.Length);
         }
 
         public static byte[] UrlEncodeToBytes(byte[] value, int offset, int count)
         {
-            return UrlEncode(value, offset, count, true /* alwaysCreateNewReturnValue */);
+            return UrlEncode(value, offset, count, alwaysCreateNewReturnValue: true);
         }
 
         #endregion
