@@ -419,8 +419,9 @@ namespace System.Net
             }
             finally
             {
-                // We don't use `using` since UrlDecoder is a struct
-                // and we want to avoid a boxing conversion
+                // We don't use `using` since UrlDecoder doesn't
+                // implement IDisposable (since we want to avoid
+                // accidental boxing b/c it's a value type)
                 helper.Dispose();
             }
         }
