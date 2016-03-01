@@ -385,6 +385,9 @@ namespace System.Net
                 return null;
             }
 
+            if (!NeedsUrlDecoding(value))
+                return value;
+            
             int count = value.Length;
             UrlDecoder helper = new UrlDecoder(count, encoding);
 
@@ -475,9 +478,6 @@ namespace System.Net
         [SuppressMessage("Microsoft.Design", "CA1055:UriReturnValuesShouldNotBeStrings", Justification = "Already shipped public API; code moved here as part of API consolidation")]
         public static string UrlDecode(string encodedValue)
         {
-            if (!NeedsUrlDecoding(encodedValue))
-                return encodedValue;
-            
             return UrlDecodeInternal(encodedValue, Encoding.UTF8);
         }
 
