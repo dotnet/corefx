@@ -475,6 +475,9 @@ namespace System.Net
         [SuppressMessage("Microsoft.Design", "CA1055:UriReturnValuesShouldNotBeStrings", Justification = "Already shipped public API; code moved here as part of API consolidation")]
         public static string UrlDecode(string encodedValue)
         {
+            if (!NeedsUrlDecoding(encodedValue))
+                return encodedValue;
+            
             return UrlDecodeInternal(encodedValue, Encoding.UTF8);
         }
 
@@ -607,6 +610,21 @@ namespace System.Net
             for (int i = 0; i < s.Length; i++)
             {
                 if (!IsUrlSafeChar(s[i]))
+                    return true;
+            }
+            return false;
+        }
+        
+        private static bool NeedsUrlDecoding(string s)
+        {
+            for (int i = 0; i < s.Length; i++)
+            {
+                char c = s[i];
+                if (c == '+') // space
+                    return true;
+                if (c == '%' && i < s.Length - 2) // things like %20 are transformed into space
+                    return true;
+                if ((c & 0xFF80) == 0) // 7 bit Unicode
                     return true;
             }
             return false;
