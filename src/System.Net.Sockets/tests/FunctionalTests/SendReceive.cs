@@ -393,12 +393,14 @@ namespace System.Net.Sockets.Tests
             SendToRecvFromAsync_Datagram_UDP(IPAddress.Loopback, IPAddress.Loopback);
         }
 
+        [ActiveIssue(5750, PlatformID.OSX)]
         [Fact]
         public void SendRecvAsync_Multiple_Stream_TCP_IPv6()
         {
             SendRecvAsync_Stream_TCP(IPAddress.IPv6Loopback, useMultipleBuffers: true);
         }
 
+        [ActiveIssue(5750, PlatformID.OSX)]
         [Fact]
         public void SendRecvAsync_Single_Stream_TCP_IPv6()
         {
@@ -411,12 +413,14 @@ namespace System.Net.Sockets.Tests
             SendRecvAsync_TcpListener_TcpClient(IPAddress.IPv6Loopback);
         }
 
+        [ActiveIssue(5750, PlatformID.OSX)]
         [Fact]
         public void SendRecvAsync_Multiple_Stream_TCP_IPv4()
         {
             SendRecvAsync_Stream_TCP(IPAddress.Loopback, useMultipleBuffers: true);
         }
 
+        [ActiveIssue(5750, PlatformID.OSX)]
         [Fact]
         public void SendRecvAsync_Single_Stream_TCP_IPv4()
         {

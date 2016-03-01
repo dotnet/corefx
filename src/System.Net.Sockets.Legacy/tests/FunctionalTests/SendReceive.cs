@@ -540,6 +540,7 @@ namespace System.Net.Sockets.Tests
             SendRecv_Stream_TCP(IPAddress.IPv6Loopback, useMultipleBuffers: true);
         }
 
+        [ActiveIssue(5750, PlatformID.OSX)]
         [Fact]
         public void SendRecvAPM_Multiple_Stream_TCP_IPv6()
         {
@@ -552,6 +553,7 @@ namespace System.Net.Sockets.Tests
             SendRecv_Stream_TCP(IPAddress.IPv6Loopback, useMultipleBuffers: false);
         }
 
+        [ActiveIssue(5750, PlatformID.OSX)]
         [Fact]
         public void SendRecvAPM_Single_Stream_TCP_IPv6()
         {
@@ -564,6 +566,7 @@ namespace System.Net.Sockets.Tests
             SendRecv_Stream_TCP(IPAddress.Loopback, useMultipleBuffers: true);
         }
 
+        [ActiveIssue(5750, PlatformID.OSX)]
         [Fact]
         public void SendRecvAPM_Multiple_Stream_TCP_IPv4()
         {
@@ -576,6 +579,7 @@ namespace System.Net.Sockets.Tests
             SendRecv_Stream_TCP(IPAddress.Loopback, useMultipleBuffers: false);
         }
 
+        [ActiveIssue(5750, PlatformID.OSX)]
         [Fact]
         public void SendRecvAPM_Single_Stream_TCP_IPv4()
         {
