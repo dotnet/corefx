@@ -2,8 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Diagnostics.CodeAnalysis;
-
 namespace System.Net.Sockets
 {
     public struct UdpReceiveResult : IEquatable<UdpReceiveResult>
@@ -15,12 +13,12 @@ namespace System.Net.Sockets
         {
             if (buffer == null)
             {
-                throw new ArgumentNullException("buffer");
+                throw new ArgumentNullException(nameof(buffer));
             }
 
             if (remoteEndPoint == null)
             {
-                throw new ArgumentNullException("remoteEndPoint");
+                throw new ArgumentNullException(nameof(remoteEndPoint));
             }
 
             _buffer = buffer;

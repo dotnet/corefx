@@ -8,12 +8,19 @@ namespace System.Runtime.InteropServices
 {
     public static partial class RuntimeInformation
     {
-        private static string s_osDescription = null;
+        private static readonly object s_osLock = new object();
+        private static readonly object s_processLock = new object();
         private static readonly bool s_is64BitProcess = IntPtr.Size == 8;
-        private static object s_osLock = new object();
-        private static object s_processLock = new object();
-        private static Architecture? s_osArch = null;
-        private static Architecture? s_processArch = null;
+        private static string s_osPlatformName;
+        private static string s_osDescription;
+        private static Architecture? s_osArch;
+        private static Architecture? s_processArch;
+
+        public static bool IsOSPlatform(OSPlatform osPlatform)
+        {
+            string name = s_osPlatformName ?? (s_osPlatformName = Interop.Sys.GetUnixName());
+            return osPlatform.Equals(name);
+        }
 
         public static string OSDescription
         {
@@ -36,7 +43,7 @@ namespace System.Runtime.InteropServices
                 {
                     if (null == s_osArch)
                     {
-                        Interop.Sys.ProcessorArchitecture arch = (Interop.Sys.ProcessorArchitecture)Interop.Sys.GetUnixArchitecture();
+                        Interop.Sys.ProcessorArchitecture arch = (Interop.Sys.ProcessorArchitecture)Interop.Sys.GetOSArchitecture();
                         switch (arch)
                         {
                             case Interop.Sys.ProcessorArchitecture.ARM:
@@ -49,6 +56,10 @@ namespace System.Runtime.InteropServices
 
                             case Interop.Sys.ProcessorArchitecture.x86:
                                 s_osArch = Architecture.X86;
+                                break;
+
+                            case Interop.Sys.ProcessorArchitecture.ARM64:
+                                s_osArch = Architecture.Arm64;
                                 break;
                         }
                     }
@@ -67,17 +78,24 @@ namespace System.Runtime.InteropServices
                 {
                     if (null == s_processArch)
                     {
-                        if (Architecture.Arm == OSArchitecture)
+                        Interop.Sys.ProcessorArchitecture arch = (Interop.Sys.ProcessorArchitecture)Interop.Sys.GetProcessArchitecture();
+                        switch (arch)
                         {
-                            s_processArch = Architecture.Arm;
-                        }
-                        else if (s_is64BitProcess)
-                        {
-                            s_processArch = Architecture.X64;
-                        }
-                        else
-                        {
-                            s_processArch = Architecture.X86;
+                            case Interop.Sys.ProcessorArchitecture.ARM:
+                                s_processArch = Architecture.Arm;
+                                break;
+
+                            case Interop.Sys.ProcessorArchitecture.x64:
+                                s_processArch = Architecture.X64;
+                                break;
+
+                            case Interop.Sys.ProcessorArchitecture.x86:
+                                s_processArch = Architecture.X86;
+                                break;
+
+                            case Interop.Sys.ProcessorArchitecture.ARM64:
+                                s_processArch = Architecture.Arm64;
+                                break;
                         }
                     }
                 }

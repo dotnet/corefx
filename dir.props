@@ -52,7 +52,14 @@
     <ToolsDir Condition="'$(ToolsDir)'==''">$(ProjectDir)Tools/</ToolsDir>
     <DotnetCliPath Condition="'$(DotnetCliPath)'==''">$(ToolRuntimePath)dotnetcli/bin/</DotnetCliPath>
     <BuildToolsTaskDir Condition="'$(BuildToolsTargets45)' == 'true'">$(ToolsDir)net45/</BuildToolsTaskDir>
+    <UseRoslynCompilers Condition="'$(UseRoslynCompilers)'=='' and '$(OSEnvironment)'!='Windows_NT'">false</UseRoslynCompilers>
   </PropertyGroup>
+
+  <!-- Use Roslyn Compilers to build -->
+  <PropertyGroup Condition="'$(UseRoslynCompilers)'!='false'">
+    <UseSharedCompilation>true</UseSharedCompilation>
+  </PropertyGroup>
+  <Import Project="$(ToolRuntimePath)/net45/roslyn/build/Microsoft.Net.Compilers.props" Condition="'$(UseRoslynCompilers)'!='false'" />
 
   <!-- Import packaging props -->
   <Import Project="$(MSBuildThisFileDirectory)Packaging.props"/>
@@ -73,8 +80,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ValidationPattern Include="^(?i)((System\..%2A)|(Microsoft\.CSharp)|(Microsoft\.NETCore.%2A)|(Microsoft\.TargetingPack\.Private\.(CoreCLR|NETNative))|(Microsoft\.Win32\..%2A)|(Microsoft\.VisualBasic))(?&lt;!TestData)$">
-      <ExpectedPrerelease>rc3-23816</ExpectedPrerelease>
+    <ValidationPattern Include="^(?i)((System\..%2A)|(NETStandard\.Library)|(Microsoft\.CSharp)|(Microsoft\.NETCore.%2A)|(Microsoft\.TargetingPack\.Private\.(CoreCLR|NETNative))|(Microsoft\.Win32\..%2A)|(Microsoft\.VisualBasic))(?&lt;!TestData)$">
+      <ExpectedPrerelease>rc3-23829</ExpectedPrerelease>
     </ValidationPattern>
     <ValidationPattern Include="^(?i)Microsoft\.TargetingPack\.(NetFramework.%2A|Private\.WinRT)$">
       <ExpectedVersion>1.0.1</ExpectedVersion>
@@ -92,8 +99,6 @@
     <!-- Need to escape double forward slash (%2F) or MSBuild will normalize to one slash on Unix. -->
 
     <DnuSourceList Include="https:%2F%2Fdotnet.myget.org/F/dotnet-core/api/v3/index.json" />
-    <DnuSourceList Include="https:%2F%2Fdotnet.myget.org/F/dotnet-corefxtestdata/api/v3/index.json" />
-    <DnuSourceList Include="https:%2F%2Fdotnet.myget.org/F/dotnet-buildtools/api/v3/index.json" />
     <DnuSourceList Include="https:%2F%2Fwww.nuget.org/api/v2/" />
   </ItemGroup>
 
@@ -101,17 +106,6 @@
   <ItemGroup>
     <DnuRestoreDir Include="$(MSBuildThisFileDirectory)/src" />
     <DnuRestoreDir Include="$(MSBuildThisFileDirectory)/pkg" />
-  </ItemGroup>
-  
-  <ItemGroup Condition="'$(SkipGatherRestoreDirs)' == 'true'">
-    <!-- workaround to address issue where DNX won't recurse directories under a project.json
-         https://github.com/aspnet/dnx/commit/0dda8bf86863364cc20421f1af7494f1b2a3256f -->
-    <DnuRestoreDir Include="$(MSBuildThisFileDirectory)/pkg/**/project.json" />
-    <DnuRestoreDir Include="$(MSBuildThisFileDirectory)/src/*/src/**/project.json" />
-    <DnuRestoreDir Include="$(MSBuildThisFileDirectory)/src/*/ref/*/project.json" />
-    <DnuRestoreDir Include="$(MSBuildThisFileDirectory)/src/*/tests/*/project.json" />
-    <DnuRestoreDir Include="$(MSBuildThisFileDirectory)/src/*/*/netcore50aot/project.json" />
-    <DnuRestoreDir Include="$(MSBuildThisFileDirectory)/src/Common/tests/**/project.json" />
   </ItemGroup>
 
   <PropertyGroup>
@@ -129,7 +123,7 @@
     <DnuRestoreCommand Condition="'$(ParallelRestore)'=='true'">$(DnuRestoreCommand) --parallel</DnuRestoreCommand>
     <DnuRestoreCommand>$(DnuRestoreCommand) --packages "$(PackagesDir.TrimEnd('/\'.ToCharArray()))" $(DnuRestoreSource)</DnuRestoreCommand>
     <DnuRestoreCommand Condition="'$(LockDependencies)' == 'true'">$(DnuRestoreCommand) --lock</DnuRestoreCommand>
-    <DnuRestoreCommand Condition="'$(NuGetConfigPath)'!=''">$(DnuRestoreCommand) --configFile $(NuGetConfigPath)</DnuRestoreCommand>
+    <DnuRestoreCommand Condition="'$(NuGetConfigPath)'!=''">$(DnuRestoreCommand) --configfile $(NuGetConfigPath)</DnuRestoreCommand>
   </PropertyGroup>
 
   <!-- Create a collection of all project.json files for dependency updates. -->
@@ -375,11 +369,6 @@
   <PropertyGroup>
     <WarningLevel>4</WarningLevel>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-  </PropertyGroup>
-
-  <!-- Temporary until build/CI system is upgraded to C# 6: disable C# 6 features -->
-  <PropertyGroup Condition="'$(MSBuildProjectExtension)' == '.csproj' OR '$(Language)' == 'C#'">
-    <LangVersion>5</LangVersion>
   </PropertyGroup>
 
   <!-- Set up some common paths -->

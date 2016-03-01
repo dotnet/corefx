@@ -54,7 +54,7 @@ namespace System.Text.Encodings.Web
         {
             if (filter == null)
             {
-                throw new ArgumentNullException("filter");
+                throw new ArgumentNullException(nameof(filter));
             }
 
             _allowedCharacters = filter.GetAllowedCharacters();
@@ -94,7 +94,7 @@ namespace System.Text.Encodings.Web
 
         public override int MaxOutputCharactersPerInputCharacter
         {
-            get { return 8; } // "&#xFFFF;" is the longest encoded form 
+            get { return 9; } // "&#xFFFFF;" is the longest encoded form
         }
 
         static readonly char[] s_quote = "&quot;".ToCharArray();
@@ -106,7 +106,7 @@ namespace System.Text.Encodings.Web
         {
             if (buffer == null)
             {
-                throw new ArgumentNullException("buffer");
+                throw new ArgumentNullException(nameof(buffer));
             }
 
             if (!WillEncode(unicodeScalar)) { return TryWriteScalarAsChar(unicodeScalar, buffer, bufferLength, out numberOfCharactersWritten); }

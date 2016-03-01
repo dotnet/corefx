@@ -44,7 +44,6 @@ namespace System
             get { return GetConsoleEncoding(); }
         }
 
-        private static readonly object s_stdInReaderSyncObject = new object();
         private static SyncTextReader s_stdInReader;
         private const int DefaultBufferSize = 255;
 
@@ -60,7 +59,7 @@ namespace System
                         () => SyncTextReader.GetSynchronizedTextReader(
                             new StdInStreamReader(
                                 stream: OpenStandardInput(),
-                                encoding: InputEncoding,
+                                encoding: new ConsoleEncoding(Console.InputEncoding), // This ensures no prefix is written to the stream.
                                 bufferSize: DefaultBufferSize)));
             }
         }
@@ -76,7 +75,7 @@ namespace System
                     StreamReader.Null :
                     new StreamReader(
                         stream: inputStream,
-                        encoding: ConsolePal.InputEncoding,
+                        encoding: new ConsoleEncoding(Console.InputEncoding), // This ensures no prefix is written to the stream.
                         detectEncodingFromByteOrderMarks: false,
                         bufferSize: DefaultConsoleBufferSize,
                         leaveOpen: true)
@@ -311,9 +310,7 @@ namespace System
                 return;
 
             // Get the cursor position request format string.
-            string cpr = TerminalFormatStrings.Instance.CursorPositionRequest;
-            if (string.IsNullOrEmpty(cpr))
-                return;
+            Debug.Assert(!string.IsNullOrEmpty(TerminalFormatStrings.CursorPositionReport));
 
             // Synchronize with all other stdin readers.  We need to do this in case multiple threads are
             // trying to read/write concurrently, and to minimize the chances of resulting conflicts.
@@ -322,8 +319,8 @@ namespace System
             // one thread's get_CursorLeft/Top from providing input to the other's Console.Read*.
             lock (StdInReader) 
             {
-                // Write out the cursor position request.
-                WriteStdoutAnsiString(cpr);
+                // Write out the cursor position report request.
+                WriteStdoutAnsiString(TerminalFormatStrings.CursorPositionReport);
 
                 // Read the response.  There's a race condition here if the user is typing,
                 // or if other threads are accessing the console; there's relatively little
@@ -449,9 +446,19 @@ namespace System
         private static Encoding GetConsoleEncoding()
         {
             Encoding enc = EncodingHelper.GetEncodingFromCharset();
-            return enc != null ? (Encoding)
-                new ConsoleEncoding(enc) :
-                new UTF8Encoding(encoderShouldEmitUTF8Identifier: false);
+            return enc ?? new UTF8Encoding(encoderShouldEmitUTF8Identifier: false);
+        }
+
+        public static void SetConsoleInputEncoding(Encoding enc)
+        {
+            // No-op.
+            // There is no good way to set the terminal console encoding.
+        }
+
+        public static void SetConsoleOutputEncoding(Encoding enc)
+        {
+            // No-op.
+            // There is no good way to set the terminal console encoding.
         }
 
         /// <summary>
@@ -569,6 +576,20 @@ namespace System
         {
             int unprocessedCharCount = endIndex - startIndex;
 
+            // First process special control character codes.  These override anything from terminfo.
+            if (unprocessedCharCount > 0)
+            {
+                // Is this an erase / backspace?
+                char c = givenChars[startIndex];
+                if (c != 0 && c == s_veraseCharacter)
+                {
+                    key = new ConsoleKeyInfo(c, ConsoleKey.Backspace, shift: false, alt: false, control: false);
+                    keyLength = 1;
+                    return true;
+                }
+            }
+
+            // Then process terminfo mappings.
             int minRange = TerminalFormatStrings.Instance.MinKeyFormatLength;
             if (unprocessedCharCount >= minRange)
             {
@@ -587,6 +608,7 @@ namespace System
                 }
             }
 
+            // Otherwise, not a known special console key.
             key = default(ConsoleKeyInfo);
             keyLength = 0;
             return false;
@@ -594,6 +616,9 @@ namespace System
 
         /// <summary>Whether keypad_xmit has already been written out to the terminal.</summary>
         private static volatile bool s_initialized;
+
+        /// <summary>Special control character code used to represent an erase (backspace).</summary>
+        private static byte s_veraseCharacter;
 
         /// <summary>Ensures that the console has been initialized for reading.</summary>
         private static void EnsureInitialized()
@@ -613,6 +638,12 @@ namespace System
                 {
                     // Ensure the console is configured appropriately
                     Interop.Sys.InitializeConsole();
+
+                    // Load special control character codes used for input processing
+                    var controlCharacterNames = new[] { Interop.Sys.ControlCharacterNames.VERASE };
+                    var controlCharacterValues = new byte[controlCharacterNames.Length];
+                    Interop.Sys.GetControlCharacters(controlCharacterNames, controlCharacterValues, controlCharacterNames.Length);
+                    s_veraseCharacter = controlCharacterValues[0];
 
                     // Make sure it's in application mode
                     if (!Console.IsOutputRedirected)
@@ -658,14 +689,15 @@ namespace System
             public readonly string CursorAddress;
             /// <summary>The format string to use to move the cursor to the left.</summary>
             public readonly string CursorLeft;
-            /// <summary>The format string for "user string 7", interpreted to be a cursor position request.</summary>
+            /// <summary>The ANSI-compatible string for the Cursor Position report request.</summary>
             /// <remarks>
-            /// This should be <see cref="KnownCursorPositionRequest"/>, but we use the format string as a way to 
-            /// guess whether the terminal will actually support the request/response protocol.
+            /// This should really be in user string 7 in the terminfo file, but some terminfo databases
+            /// are missing it.  As this is defined to be supported by any ANSI-compatible terminal,
+            /// we assume it's available; doing so means CursorTop/Left will work even if the terminfo database
+            /// doesn't contain it (as appears to be the case with e.g. screen and tmux on Ubuntu), at the risk
+            /// of outputting the sequence on some terminal that's not compatible.
             /// </remarks>
-            public readonly string CursorPositionRequest;
-            /// <summary>Well-known CPR format.</summary>
-            private const string KnownCursorPositionRequest = "\x1B[6n";
+            public const string CursorPositionReport = "\x1B[6n";
             /// <summary>
             /// The dictionary of keystring to ConsoleKeyInfo.
             /// Only some members of the ConsoleKeyInfo are used; in particular, the actual char is ignored.
@@ -698,9 +730,9 @@ namespace System
 
                 Title = GetTitle(db);
 
-                CursorPositionRequest = db.GetString(TermInfo.WellKnownStrings.CursorPositionRequest) == KnownCursorPositionRequest ?
-                    KnownCursorPositionRequest :
-                    string.Empty;
+                Debug.WriteLineIf(db.GetString(TermInfo.WellKnownStrings.CursorPositionReport) != CursorPositionReport,
+                    "Getting the cursor position will only work if the terminal supports the CPR sequence," +
+                    "but the terminfo database does not contain an entry for it.");
 
                 int maxColors = db.GetNumber(TermInfo.WellKnownNumbers.MaxColors);
                 MaxColors = // normalize to either the full range of all ANSI colors, just the dark ones, or none

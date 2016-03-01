@@ -234,10 +234,10 @@ namespace System.Net.Http
 
             public override Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
             {
-                if (buffer == null) throw new ArgumentNullException("buffer");
-                if (offset < 0) throw new ArgumentOutOfRangeException("offset");
-                if (count < 0) throw new ArgumentOutOfRangeException("count");
-                if (offset > buffer.Length - count) throw new ArgumentException("buffer");
+                if (buffer == null) throw new ArgumentNullException(nameof(buffer));
+                if (offset < 0) throw new ArgumentOutOfRangeException(nameof(offset));
+                if (count < 0) throw new ArgumentOutOfRangeException(nameof(count));
+                if (offset > buffer.Length - count) throw new ArgumentException(SR.net_http_buffer_insufficient_length, nameof(buffer));
                 CheckDisposed();
 
                 EventSourceTrace("Buffer: {0}, Offset: {1}, Count: {2}", buffer.Length, offset, count);
@@ -268,7 +268,7 @@ namespace System.Net.Http
                         OperationCanceledException oce = _completed as OperationCanceledException;
                         return (oce != null && oce.CancellationToken.IsCancellationRequested) ?
                             Task.FromCanceled<int>(oce.CancellationToken) :
-                            Task.FromException<int>(_completed);
+                            Task.FromException<int>(MapToReadWriteIOException(_completed, isRead: true));
                     }
 
                     // Quick check for if no data was actually requested.  We do this after the check
@@ -380,7 +380,7 @@ namespace System.Net.Http
                             }
                             else
                             {
-                                _pendingReadRequest.TrySetException(_completed);
+                                _pendingReadRequest.TrySetException(MapToReadWriteIOException(_completed, isRead: true));
                             }
                         }
 

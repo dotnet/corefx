@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <PropertyGroup>
@@ -9,19 +9,8 @@
     <IsPartialFacadeAssembly Condition="'$(TargetGroup)'!='netcore50'">true</IsPartialFacadeAssembly>
     <!-- The following line needs to be removed once we have a targeting pack for 4.6.2 -->
     <TargetingPackNugetPackageId Condition="'$(TargetGroup)'=='net462'">Microsoft.TargetingPack.NETFramework.v4.6</TargetingPackNugetPackageId>
+    <PackageTargetFramework Condition="'$(PackageTargetFramework)' == ''">netstandard1.5</PackageTargetFramework>
   </PropertyGroup>
-  <ItemGroup Condition="'$(PackageTargetFramework)' == ''">
-    <!-- Remove when resolving https://github.com/dotnet/corefx/issues/5471 
-         And replace with property 
-         <PackageTargetFramework >dotnet5.6</PackageTargetFramework>
-    -->
-    <PackageDestination Include="lib/dotnet5.6">
-      <TargetFramework>dotnet5.6</TargetFramework>
-    </PackageDestination>
-    <PackageDestination Include="lib/dnxcore50">
-      <TargetFramework>dnxcore50</TargetFramework>
-    </PackageDestination>
-  </ItemGroup>
   <!-- Default configurations to help VS understand the options -->
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'" />
@@ -32,6 +21,7 @@
 
   <ItemGroup Condition="'$(TargetGroup)'=='netcore50'">
     <TargetingPackReference Include="Windows" />
+    <ProjectReference Include="$(SourceDir)/mscorlib.WinRT-Facade/mscorlib.WinRT-Facade.csproj" />
     <Compile Include="System\AppContext.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(IsPartialFacadeAssembly)'=='true'">

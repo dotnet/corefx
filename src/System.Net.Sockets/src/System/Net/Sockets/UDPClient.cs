@@ -2,9 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Threading;
 using System.Threading.Tasks;
-using System.Diagnostics.CodeAnalysis;
 
 namespace System.Net.Sockets
 {
@@ -31,7 +29,7 @@ namespace System.Net.Sockets
             // Validate the address family.
             if (family != AddressFamily.InterNetwork && family != AddressFamily.InterNetworkV6)
             {
-                throw new ArgumentException(SR.Format(SR.net_protocol_invalid_family, "UDP"), "family");
+                throw new ArgumentException(SR.Format(SR.net_protocol_invalid_family, "UDP"), nameof(family));
             }
 
             _family = family;
@@ -56,13 +54,13 @@ namespace System.Net.Sockets
             // Validate input parameters.
             if (!TcpValidationHelpers.ValidatePortNumber(port))
             {
-                throw new ArgumentOutOfRangeException("port");
+                throw new ArgumentOutOfRangeException(nameof(port));
             }
 
             // Validate the address family.
             if (family != AddressFamily.InterNetwork && family != AddressFamily.InterNetworkV6)
             {
-                throw new ArgumentException(SR.net_protocol_invalid_family, "family");
+                throw new ArgumentException(SR.net_protocol_invalid_family, nameof(family));
             }
 
             IPEndPoint localEP;
@@ -89,7 +87,7 @@ namespace System.Net.Sockets
             // Validate input parameters.
             if (localEP == null)
             {
-                throw new ArgumentNullException("localEP");
+                throw new ArgumentNullException(nameof(localEP));
             }
             
             // IPv6 Changes: Set the AddressFamily of this object before
@@ -265,12 +263,12 @@ namespace System.Net.Sockets
             }
             if (datagram == null)
             {
-                throw new ArgumentNullException("datagram");
+                throw new ArgumentNullException(nameof(datagram));
             }
 
             if (bytes > datagram.Length || bytes < 0)
             {
-                throw new ArgumentOutOfRangeException("bytes");
+                throw new ArgumentOutOfRangeException(nameof(bytes));
             }
 
             if (_active && endPoint != null)
@@ -309,7 +307,7 @@ namespace System.Net.Sockets
 
                 if (addresses.Length == 0 || i == addresses.Length)
                 {
-                    throw new ArgumentException(SR.net_invalidAddressList, "hostname");
+                    throw new ArgumentException(SR.net_invalidAddressList, nameof(hostname));
                 }
 
                 CheckForBroadcast(addresses[i]);
@@ -408,14 +406,14 @@ namespace System.Net.Sockets
 
             if (multicastAddr == null)
             {
-                throw new ArgumentNullException("multicastAddr");
+                throw new ArgumentNullException(nameof(multicastAddr));
             }
 
             // IPv6 Changes: we need to create the correct MulticastOption and
             //               must also check for address family compatibility.
             if (multicastAddr.AddressFamily != _family)
             {
-                throw new ArgumentException(SR.Format(SR.net_protocol_invalid_multicast_family, "UDP"), "multicastAddr");
+                throw new ArgumentException(SR.Format(SR.net_protocol_invalid_multicast_family, "UDP"), nameof(multicastAddr));
             }
 
             if (_family == AddressFamily.InterNetwork)
@@ -470,12 +468,12 @@ namespace System.Net.Sockets
 
             if (multicastAddr == null)
             {
-                throw new ArgumentNullException("multicastAddr");
+                throw new ArgumentNullException(nameof(multicastAddr));
             }
 
             if (ifindex < 0)
             {
-                throw new ArgumentException(SR.net_value_cannot_be_negative, "ifindex");
+                throw new ArgumentException(SR.net_value_cannot_be_negative, nameof(ifindex));
             }
 
             // Ensure that this is an IPv6 client, otherwise throw WinSock 
@@ -503,11 +501,11 @@ namespace System.Net.Sockets
             }
             if (multicastAddr == null)
             {
-                throw new ArgumentNullException("multicastAddr");
+                throw new ArgumentNullException(nameof(multicastAddr));
             }
             if (!RangeValidationHelpers.ValidateRange(timeToLive, 0, 255))
             {
-                throw new ArgumentOutOfRangeException("timeToLive");
+                throw new ArgumentOutOfRangeException(nameof(timeToLive));
             }
 
             // Join the Multicast Group.
@@ -530,14 +528,14 @@ namespace System.Net.Sockets
             }
             if (multicastAddr == null)
             {
-                throw new ArgumentNullException("multicastAddr");
+                throw new ArgumentNullException(nameof(multicastAddr));
             }
 
             // IPv6 Changes: we need to create the correct MulticastOption and
             //               must also check for address family compatibility.
             if (multicastAddr.AddressFamily != _family)
             {
-                throw new ArgumentException(SR.Format(SR.net_protocol_invalid_multicast_family, "UDP"), "multicastAddr");
+                throw new ArgumentException(SR.Format(SR.net_protocol_invalid_multicast_family, "UDP"), nameof(multicastAddr));
             }
 
             if (_family == AddressFamily.InterNetwork)
@@ -571,12 +569,12 @@ namespace System.Net.Sockets
 
             if (multicastAddr == null)
             {
-                throw new ArgumentNullException("multicastAddr");
+                throw new ArgumentNullException(nameof(multicastAddr));
             }
 
             if (ifindex < 0)
             {
-                throw new ArgumentException(SR.net_value_cannot_be_negative, "ifindex");
+                throw new ArgumentException(SR.net_value_cannot_be_negative, nameof(ifindex));
             }
 
             // Ensure that this is an IPv6 client, otherwise throw WinSock 

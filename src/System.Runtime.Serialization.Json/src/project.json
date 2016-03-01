@@ -2,12 +2,16 @@
   "frameworks": {
     "dnxcore50": {
       "dependencies": {
-        "Microsoft.TargetingPack.Private.CoreCLR": "1.0.0-rc3-23816"
+        "Microsoft.NETCore.Platforms": "1.0.1-rc3-23829",
+        "System.Runtime": "4.0.20",
+        "System.Reflection": "4.0.10",
+        "System.Reflection.TypeExtensions": "4.0.0",
+        "System.Xml.XmlDocument": "4.0.0"
       }
     },
     "netcore50": {
       "dependencies": {
-        "Microsoft.TargetingPack.Private.CoreCLR": "1.0.0-rc3-23816"
+        "Microsoft.TargetingPack.Private.CoreCLR": "1.0.0-rc3-23829"
       }
     },
     "net46": {

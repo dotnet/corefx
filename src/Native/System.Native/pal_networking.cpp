@@ -7,6 +7,7 @@
 #include "pal_utilities.h"
 
 #include <stdlib.h>
+#include <pthread.h>
 #include <arpa/inet.h>
 #include <assert.h>
 #if HAVE_EPOLL
@@ -165,9 +166,12 @@ static void ConvertByteArrayToIn6Addr(in6_addr& addr, const uint8_t* buffer, int
 #if HAVE_IN6_U
     assert(bufferLength == ARRAY_SIZE(addr.__in6_u.__u6_addr8));
     memcpy(addr.__in6_u.__u6_addr8, buffer, UnsignedCast(bufferLength));
-#else
+#elif HAVE_U6_ADDR
     assert(bufferLength == ARRAY_SIZE(addr.__u6_addr.__u6_addr8));
     memcpy(addr.__u6_addr.__u6_addr8, buffer, UnsignedCast(bufferLength));
+#else
+    assert(bufferLength == ARRAY_SIZE(addr.s6_addr));
+    memcpy(addr.s6_addr, buffer, UnsignedCast(bufferLength));
 #endif
 }
 
@@ -176,9 +180,12 @@ static void ConvertIn6AddrToByteArray(uint8_t* buffer, int32_t bufferLength, con
 #if HAVE_IN6_U
     assert(bufferLength == ARRAY_SIZE(addr.__in6_u.__u6_addr8));
     memcpy(buffer, addr.__in6_u.__u6_addr8, UnsignedCast(bufferLength));
-#else
+#elif HAVE_U6_ADDR
     assert(bufferLength == ARRAY_SIZE(addr.__u6_addr.__u6_addr8));
     memcpy(buffer, addr.__u6_addr.__u6_addr8, UnsignedCast(bufferLength));
+#else
+    assert(bufferLength == ARRAY_SIZE(addr.s6_addr));
+    memcpy(buffer, addr.s6_addr, UnsignedCast(bufferLength));
 #endif
 }
 
@@ -428,6 +435,109 @@ static void ConvertHostEntPlatformToPal(HostEntry& hostEntry, hostent& entry)
     }
 }
 
+#if !HAVE_THREAD_SAFE_GETHOSTBYNAME_AND_GETHOSTBYADDR
+#if !HAVE_GETHOSTBYNAME_R
+static int copy_hostent(struct hostent* from, struct hostent* to,
+                        char* buffer, size_t buflen)
+{
+    // FIXME: the implementation done for this function in https://github.com/dotnet/corefx/commit/6a99b74
+    //        requires testing when managed assemblies are built and tested on NetBSD. Until that time,
+    //        return an error code.
+    (void)from;   // unused arg
+    (void)to;     // unused arg
+    (void)buffer; // unused arg
+    (void)buflen; // unused arg
+    return ENOSYS;
+}
+
+/*
+Note: we're assuming that all access to these functions are going through these shims on the platforms, which do not provide
+      thread-safe functions to get host name or address. If that is not the case (which is very likely) race condition is
+      possible, for instance; if other libs (such as libcurl) call gethostby[name/addr] simultaneously.
+*/
+static pthread_mutex_t lock_hostbyx_mutex = PTHREAD_MUTEX_INITIALIZER;
+
+static int gethostbyname_r(char const* hostname, struct hostent* result,
+                           char* buffer, size_t buflen, hostent** entry, int* error)
+{
+    assert(hostname != nullptr);
+    assert(result != nullptr);
+    assert(buffer != nullptr);
+    assert(entry != nullptr);
+    assert(error != nullptr);
+
+    if (hostname == nullptr || entry == nullptr || error == nullptr || buffer == nullptr || result == nullptr)
+    {
+        if (error != nullptr)
+        {
+            *error = PAL_BAD_ARG;
+        }
+
+        return PAL_BAD_ARG;
+    }
+
+    pthread_mutex_lock(&lock_hostbyx_mutex);
+
+    *entry = gethostbyname(hostname);
+    if ((!(*entry)) || ((*entry)->h_addrtype != AF_INET) || ((*entry)->h_length != 4))
+    {
+        *error = h_errno;
+        *entry = nullptr;
+    }
+    else
+    {
+        h_errno = copy_hostent(*entry, result, buffer, buflen);
+        *entry = (h_errno == 0) ? result : nullptr;
+    }
+
+    pthread_mutex_unlock(&lock_hostbyx_mutex);
+
+    return h_errno;
+}
+
+static int gethostbyaddr_r(const uint8_t* addr, const socklen_t len, int type, struct hostent* result,
+                           char* buffer, size_t buflen, hostent** entry, int* error)
+{
+    assert(addr != nullptr);
+    assert(result != nullptr);
+    assert(buffer != nullptr);
+    assert(entry != nullptr);
+    assert(error != nullptr);
+
+    if (addr == nullptr || entry == nullptr || buffer == nullptr || result == nullptr)
+    {
+        if (error != nullptr)
+        {
+            *error = PAL_BAD_ARG;
+        }
+
+        return PAL_BAD_ARG;
+    }
+
+    pthread_mutex_lock(&lock_hostbyx_mutex);
+
+    *entry = gethostbyaddr(reinterpret_cast<const char*>(addr), static_cast<unsigned int>(len), type);
+    if ((!(*entry)) || ((*entry)->h_addrtype != AF_INET) || ((*entry)->h_length != 4))
+    {
+        *error = h_errno;
+        *entry = nullptr;
+    }
+    else
+    {
+        h_errno = copy_hostent(*entry, result, buffer, buflen);
+        *entry = (h_errno == 0) ? result : nullptr;
+    }
+
+    pthread_mutex_unlock(&lock_hostbyx_mutex);
+
+    return h_errno;
+}
+#undef HAVE_GETHOSTBYNAME_R
+#undef HAVE_GETHOSTBYADDR_R
+#define HAVE_GETHOSTBYNAME_R 1
+#define HAVE_GETHOSTBYADDR_R 1
+#endif /* !HAVE_GETHOSTBYNAME_R */
+
 #if HAVE_GETHOSTBYNAME_R
 static int GetHostByNameHelper(const uint8_t* hostname, hostent** entry)
 {
@@ -468,7 +578,8 @@ static int GetHostByNameHelper(const uint8_t* hostname, hostent** entry)
         }
     }
 }
-#endif
+#endif /* HAVE_GETHOSTBYNAME_R */
+#endif /* !HAVE_THREAD_SAFE_GETHOSTBYNAME_AND_GETHOSTBYADDR */
 
 extern "C" int32_t SystemNative_GetHostByName(const uint8_t* hostname, HostEntry* entry)
 {
@@ -498,7 +609,7 @@ extern "C" int32_t SystemNative_GetHostByName(const uint8_t* hostname, HostEntry
     return PAL_SUCCESS;
 }
 
-#if HAVE_GETHOSTBYADDR_R
+#if !HAVE_THREAD_SAFE_GETHOSTBYNAME_AND_GETHOSTBYADDR && HAVE_GETHOSTBYADDR_R
 static int GetHostByAddrHelper(const uint8_t* addr, const socklen_t addrLen, int type, hostent** entry)
 {
     assert(addr != nullptr);
@@ -538,7 +649,7 @@ static int GetHostByAddrHelper(const uint8_t* addr, const socklen_t addrLen, int
         }
     }
 }
-#endif
+#endif /* !HAVE_THREAD_SAFE_GETHOSTBYNAME_AND_GETHOSTBYADDR && HAVE_GETHOSTBYADDR_R */
 
 extern "C" int32_t SystemNative_GetHostByAddress(const IPAddress* address, HostEntry* entry)
 {
@@ -1167,6 +1278,22 @@ static int32_t GetIPv6PacketInformation(cmsghdr* controlMessage, IPPacketInforma
     return 1;
 }
 
+cmsghdr* GET_CMSG_NXTHDR(msghdr* mhdr, cmsghdr* cmsg)
+{
+#ifndef __GLIBC__
+// Tracking issue: #6312
+// In musl-libc, CMSG_NXTHDR typecasts char* to cmsghdr* which causes
+// clang to throw cast-align warning. This is to suppress the warning
+// inline.
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wcast-align"
+#endif
+    return CMSG_NXTHDR(mhdr, cmsg);
+#ifndef __GLIBC__
+#pragma clang diagnostic pop
+#endif
+}
+
 extern "C" int32_t
 SystemNative_TryGetIPPacketInformation(MessageHeader* messageHeader, int32_t isIPv4, IPPacketInformation* packetInfo)
 {
@@ -1182,7 +1309,7 @@ SystemNative_TryGetIPPacketInformation(MessageHeader* messageHeader, int32_t isI
     if (isIPv4 != 0)
     {
         for (; controlMessage != nullptr && controlMessage->cmsg_len > 0;
-             controlMessage = CMSG_NXTHDR(&header, controlMessage))
+             controlMessage = GET_CMSG_NXTHDR(&header, controlMessage))
         {
             if (controlMessage->cmsg_level == IPPROTO_IP && controlMessage->cmsg_type == IP_PKTINFO)
             {
@@ -1193,7 +1320,7 @@ SystemNative_TryGetIPPacketInformation(MessageHeader* messageHeader, int32_t isI
     else
     {
         for (; controlMessage != nullptr && controlMessage->cmsg_len > 0;
-             controlMessage = CMSG_NXTHDR(&header, controlMessage))
+             controlMessage = GET_CMSG_NXTHDR(&header, controlMessage))
         {
             if (controlMessage->cmsg_level == IPPROTO_IPV6 && controlMessage->cmsg_type == IPV6_PKTINFO)
             {
@@ -2265,7 +2392,7 @@ static void ConvertEventEPollToSocketAsync(SocketEvent* sae, epoll_event* epoll)
     uint32_t events = epoll->events;
     if ((events & EPOLLHUP) != 0)
     {
-        events = (events & ~EPOLLHUP) | EPOLLIN | EPOLLOUT;
+        events = (events & static_cast<uint32_t>(~EPOLLHUP)) | EPOLLIN | EPOLLOUT;
     }
 
     *sae = {.Data = reinterpret_cast<uintptr_t>(epoll->data.ptr), .Events = GetSocketEvents(events)};

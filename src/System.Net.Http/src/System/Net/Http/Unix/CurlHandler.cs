@@ -2,11 +2,12 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Collections.Generic;
 
 using CURLAUTH = Interop.Http.CURLAUTH;
 using CURLcode = Interop.Http.CURLcode;
@@ -59,6 +60,8 @@ namespace System.Net.Http
         private readonly static bool s_supportsAutomaticDecompression;
         private readonly static bool s_supportsSSL;
         private readonly static bool s_supportsHttp2Multiplexing;
+
+        private readonly static DiagnosticListener s_diagnosticListener = new DiagnosticListener(HttpHandlerLoggingStrings.DiagnosticListenerName);
 
         private readonly MultiAgent _agent = new MultiAgent();
         private volatile bool _anyOperationStarted;
@@ -269,7 +272,7 @@ namespace System.Net.Http
                 if (value <= 0)
                 {
                     throw new ArgumentOutOfRangeException(
-                        "value",
+nameof(value),
                         value,
                         SR.Format(SR.net_http_value_must_be_greater_than, 0));
                 }
@@ -306,7 +309,7 @@ namespace System.Net.Http
         {
             if (request == null)
             {
-                throw new ArgumentNullException("request", SR.net_http_handler_norequest);
+                throw new ArgumentNullException(nameof(request), SR.net_http_handler_norequest);
             }
 
             if (request.RequestUri.Scheme == UriSchemeHttps)
@@ -330,6 +333,8 @@ namespace System.Net.Http
             {
                 throw new InvalidOperationException(SR.net_http_invalid_cookiecontainer);
             }
+
+            Guid loggingRequestId = s_diagnosticListener.LogHttpRequest(request);
 
             CheckDisposed();
             SetOperationStarted();
@@ -361,6 +366,9 @@ namespace System.Net.Http
                 easy.FailRequest(exc);
                 easy.Cleanup(); // no active processing remains, so we can cleanup
             }
+
+            s_diagnosticListener.LogHttpResponse(easy.Task, loggingRequestId);
+
             return easy.Task;
         }
 
@@ -536,7 +544,8 @@ namespace System.Net.Http
 
         private static void ThrowIfCURLMError(CURLMcode error)
         {
-            if (error != CURLMcode.CURLM_OK)
+            if (error != CURLMcode.CURLM_OK && // success
+                error != CURLMcode.CURLM_CALL_MULTI_PERFORM) // success + a hint to try curl_multi_perform again
             {
                 string msg = CurlException.GetCurlErrorString((int)error, true);
                 EventSourceTrace(msg);
@@ -618,28 +627,16 @@ namespace System.Net.Http
                 message);
         }
 
-        private static Exception CreateHttpRequestException(Exception inner = null)
+        private static HttpRequestException CreateHttpRequestException(Exception inner)
         {
             return new HttpRequestException(SR.net_http_client_execution_error, inner);
         }
 
-        private static bool TryParseStatusLine(HttpResponseMessage response, string responseHeader, EasyRequest state)
+        private static IOException MapToReadWriteIOException(Exception error, bool isRead)
         {
-            if (!responseHeader.StartsWith(CurlResponseParseUtils.HttpPrefix, StringComparison.OrdinalIgnoreCase))
-            {
-                return false;
-            }
-
-            // Clear the header if status line is recieved again. This signifies that there are multiple response headers (like in redirection).
-            response.Headers.Clear();
-            response.Content.Headers.Clear();
-
-            CurlResponseParseUtils.ReadStatusLine(response, responseHeader);
-            state._isRedirect = state._handler.AutomaticRedirection &&
-                         (response.StatusCode == HttpStatusCode.Redirect ||
-                         response.StatusCode == HttpStatusCode.RedirectKeepVerb ||
-                         response.StatusCode == HttpStatusCode.RedirectMethod) ;
-            return true;
+            return new IOException(
+                isRead ? SR.net_http_io_read : SR.net_http_io_write,
+                error is HttpRequestException && error.InnerException != null ? error.InnerException : error);
         }
 
         private static void HandleRedirectLocationHeader(EasyRequest state, string locationValue)

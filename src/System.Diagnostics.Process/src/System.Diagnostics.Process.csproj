@@ -13,10 +13,12 @@
     <AssemblyVersion Condition="'$(TargetGroup)'!='net46'">4.1.0.0</AssemblyVersion>
     <AssemblyVersion Condition="'$(TargetGroup)'=='net46'">4.0.0.0</AssemblyVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <PackageTargetFramework Condition="'$(TargetGroup)'==''">dotnet5.5</PackageTargetFramework>
-    <UsePackageTargetRuntimeDefaults>true</UsePackageTargetRuntimeDefaults>
+    <PackageTargetFramework Condition="'$(TargetGroup)'==''">netstandard1.4</PackageTargetFramework>
+    <PackageTargetRuntime Condition="'$(TargetsWindows)' == 'true' and '$(TargetGroup)' == ''">win7</PackageTargetRuntime>
+    <PackageTargetRuntime Condition="'$(TargetsLinux)' == 'true' and '$(TargetGroup)' == ''">linux</PackageTargetRuntime>
+    <PackageTargetRuntime Condition="'$(TargetsOSX)' == 'true' and '$(TargetGroup)' == ''">osx.10.10</PackageTargetRuntime>
     <IsPartialFacadeAssembly Condition="'$(TargetGroup)'=='net46' OR '$(TargetGroup)'=='net461'">true</IsPartialFacadeAssembly>
-    <NuGetTargetMoniker Condition="'$(TargetGroup)' == ''">.NETPlatform,Version=v5.5</NuGetTargetMoniker>
+    <NuGetTargetMoniker Condition="'$(TargetGroup)' == ''">.NETStandard,Version=v1.4</NuGetTargetMoniker>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(TargetsFreeBSD)' == 'true' OR '$(TargetsUnknownUnix)' == 'true' ">
     <!-- Suppress unused field warnings when using PlatformNotSupportedException stubs -->
@@ -212,7 +214,7 @@
     <Compile Include="$(CommonPath)\System\Text\ConsoleEncoding.cs">
       <Link>Common\System\Text\ConsoleEncoding.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\System\Text\EncodingHelper.Windows.cs">
+    <Compile Include="$(CommonPath)\System\Text\EncodingHelper.cs">
       <Link>Common\System\Text\EncodingHelper.cs</Link>
     </Compile>
     <Compile Include="Microsoft\Win32\SafeHandles\SafeProcessHandle.Windows.cs" />

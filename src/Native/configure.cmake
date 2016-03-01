@@ -7,9 +7,19 @@ include(CheckStructHasMember)
 include(CheckSymbolExists)
 include(CheckTypeSize)
 
-#CMake does not include /usr/local/include into the include search path
-#thus add it manually. This is required on FreeBSD.
-include_directories(SYSTEM /usr/local/include)
+if (CMAKE_SYSTEM_NAME STREQUAL Linux)
+    set(PAL_UNIX_NAME \"LINUX\")
+elseif (CMAKE_SYSTEM_NAME STREQUAL Darwin)
+    set(PAL_UNIX_NAME \"OSX\")
+elseif (CMAKE_SYSTEM_NAME STREQUAL FreeBSD)
+    set(PAL_UNIX_NAME \"FREEBSD\")
+    include_directories(SYSTEM /usr/local/include)
+elseif (CMAKE_SYSTEM_NAME STREQUAL NetBSD)
+    set(PAL_UNIX_NAME \"NETBSD\")
+    include_directories(SYSTEM /usr/pkg/include)
+else ()
+    message(FATAL_ERROR "Unknown platform.  Cannot define PAL_UNIX_NAME, used by RuntimeInformation.")
+endif ()
 
 # in_pktinfo: Find whether this struct exists
 check_include_files(
@@ -23,6 +33,7 @@ else ()
 endif ()
 
 set(CMAKE_EXTRA_INCLUDE_FILES ${SOCKET_INCLUDES})
+
 check_type_size(
     "struct in_pktinfo"
     HAVE_IN_PKTINFO
@@ -32,6 +43,7 @@ check_type_size(
     "struct ip_mreqn"
     HAVE_IP_MREQN
     BUILTIN_TYPES_ONLY)
+
 set(CMAKE_EXTRA_INCLUDE_FILES) # reset CMAKE_EXTRA_INCLUDE_FILES
 # /in_pktinfo
 
@@ -144,6 +156,12 @@ check_struct_has_member(
     "netdb.h"
     HAVE_IN6_U)
 
+check_struct_has_member(
+    "struct in6_addr"
+    __u6_addr
+    "netdb.h"
+    HAVE_U6_ADDR)
+
 check_cxx_source_compiles(
     "
     #include <string.h>
@@ -177,6 +195,17 @@ check_struct_has_member(
     "sys/select.h"
     HAVE_PRIVATE_FDS_BITS)
 
+check_cxx_source_compiles(
+    "
+    #include <sys/sendfile.h>
+    int main() { int i = sendfile(0, 0, 0, 0); }
+    "
+    HAVE_SENDFILE)
+
+check_function_exists(
+    fcopyfile
+    HAVE_FCOPYFILE)
+
 check_function_exists(
     epoll_create1
     HAVE_EPOLL)
@@ -185,13 +214,45 @@ check_function_exists(
     kqueue
     HAVE_KQUEUE)
 
-check_function_exists(
-    gethostbyname_r
-    HAVE_GETHOSTBYNAME_R)
+check_cxx_source_compiles(
+     "
+     #include <sys/types.h>
+     #include <netdb.h>
 
-check_function_exists(
-    gethostbyaddr_r
-    HAVE_GETHOSTBYADDR_R)
+     int main()
+     {
+         const void* addr;
+         socklen_t len;
+         int type;
+         struct hostent* result;
+         char* buffer;
+         size_t buflen;
+         struct hostent** entry;
+         int* error;
+         gethostbyaddr_r(addr,  len, type, result, buffer, buflen, entry, error);
+         return 0;
+     }
+     "
+     HAVE_GETHOSTBYADDR_R)
+
+check_cxx_source_compiles(
+     "
+     #include <sys/types.h>
+     #include <netdb.h>
+
+     int main()
+     {
+         const char* hostname;
+         struct hostent* result;
+         char* buffer;
+         size_t buflen;
+         struct hostent** entry;
+         int* error;
+         gethostbyname_r(hostname, result, buffer, buflen, entry, error);
+         return 0;
+     }
+     "
+     HAVE_GETHOSTBYNAME_R)
 
 set(HAVE_SUPPORT_FOR_DUAL_MODE_IPV4_PACKET_INFO 0)
 set(HAVE_THREAD_SAFE_GETHOSTBYNAME_AND_GETHOSTBYADDR 0)
@@ -297,6 +358,10 @@ check_cxx_source_compiles(
 )
 
 check_include_files(
+    sys/sysctl.h
+    HAVE_SYS_SYSCTL_H)
+
+check_include_files(
     linux/rtnetlink.h
     HAVE_LINUX_RTNETLINK_H)
 
@@ -352,11 +417,6 @@ check_cxx_source_compiles(
     int main() { int i = CURLPIPE_MULTIPLEX; }
     "
     HAVE_CURLPIPE_MULTIPLEX)
-
-check_symbol_exists(
-    OPEN_MAX
-    "sys/syslimits.h"
-    HAVE_OPEN_MAX)
 
 set (CMAKE_REQUIRED_LIBRARIES)
 

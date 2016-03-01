@@ -2,9 +2,10 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
 using System.IO;
+using System.Net.Sockets;
 using System.Net.Test.Common;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -87,6 +88,53 @@ namespace System.Net.Http.Functional.Tests
                 // Verify that the task completes successfully or is canceled.
                 Assert.True(((IAsyncResult)task).AsyncWaitHandle.WaitOne(new TimeSpan(0, 0, 3)));
                 Assert.True(task.Status == TaskStatus.RanToCompletion || task.Status == TaskStatus.Canceled);
+            }
+        }
+
+        [Theory]
+        [InlineData(LoopbackServer.TransferType.ContentLength, LoopbackServer.TransferError.ContentLengthTooLarge)]
+        [InlineData(LoopbackServer.TransferType.Chunked, LoopbackServer.TransferError.MissingChunkTerminator)]
+        [InlineData(LoopbackServer.TransferType.Chunked, LoopbackServer.TransferError.ChunkSizeTooLarge)]
+        public async Task ReadAsStreamAsync_InvalidServerResponse_ThrowsIOException(
+            LoopbackServer.TransferType transferType,
+            LoopbackServer.TransferError transferError)
+        {
+            IPEndPoint serverEndPoint;
+            Task serverTask = LoopbackServer.StartServer(transferType, transferError, out serverEndPoint);
+
+            await Assert.ThrowsAsync<IOException>(() => ReadAsStreamHelper(serverEndPoint));
+
+            await serverTask;
+        }
+
+        [Theory]
+        [InlineData(LoopbackServer.TransferType.None, LoopbackServer.TransferError.None)]
+        [InlineData(LoopbackServer.TransferType.ContentLength, LoopbackServer.TransferError.None)]
+        [InlineData(LoopbackServer.TransferType.Chunked, LoopbackServer.TransferError.None)]
+        public async Task ReadAsStreamAsync_ValidServerResponse_Success(
+            LoopbackServer.TransferType transferType,
+            LoopbackServer.TransferError transferError)
+        {
+            IPEndPoint serverEndPoint;
+            Task serverTask = LoopbackServer.StartServer(transferType, transferError, out serverEndPoint);
+
+            await ReadAsStreamHelper(serverEndPoint);
+
+            await serverTask;
+        }
+
+        private async Task ReadAsStreamHelper(IPEndPoint serverEndPoint)
+        {
+            using (var client = new HttpClient())
+            {
+                using (var response = await client.GetAsync(
+                    new Uri($"http://{serverEndPoint.Address}:{(serverEndPoint).Port}/"),
+                    HttpCompletionOption.ResponseHeadersRead))
+                using (var stream = await response.Content.ReadAsStreamAsync())
+                {
+                    var buffer = new byte[1];
+                    while (await stream.ReadAsync(buffer, 0, 1) > 0) ;
+                }
             }
         }
 

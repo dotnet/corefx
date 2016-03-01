@@ -7,8 +7,6 @@ def project = GithubProject
 // The input branch name (e.g. master)
 def branch = GithubBranchName
 
-// TODO: Can we add a C++ style #error if addGithubPRTrigger is used???
-
 // Globals
 
 // Map of os -> osGroup.
@@ -19,19 +17,28 @@ def osGroupMap = ['Ubuntu':'Linux',
                   'Windows_NT':'Windows_NT',
                   'FreeBSD':'FreeBSD',
                   'CentOS7.1': 'Linux',
-                  'OpenSUSE13.2': 'Linux']
-                  
-// List of short names for OSs (used in job names)
-def osShortName = ['Windows 10': 'win10', 'Windows 7' : 'win7', 'Windows_NT' : 'windows_nt', 'Ubuntu' : 'ubuntu', 'OSX' : 'osx']
-                  
+                  'OpenSUSE13.2': 'Linux',
+                  'RHEL7.2': 'Linux']
 // Map of os -> nuget runtime
 def targetNugetRuntimeMap = ['OSX' : 'osx.10.10-x64',
                              'Ubuntu' : 'ubuntu.14.04-x64',
                              'Ubuntu15.10' : 'ubuntu.14.04-x64',
                              'Debian8.2' : 'ubuntu.14.04-x64',
                              'FreeBSD' : 'ubuntu.14.04-x64',
-                             'CentOS7.1' : 'ubuntu.14.04-x64',
-                             'OpenSUSE13.2' : 'ubuntu.14.04-x64']
+                             'CentOS7.1' : 'centos.7-x64',
+                             'OpenSUSE13.2' : 'ubuntu.14.04-x64',
+                             'RHEL7.2': 'rhel.7-x64']
+
+def osShortName = ['Windows 10': 'win10',
+                   'Windows 7' : 'win7',
+                   'Windows_NT' : 'windows_nt',
+                   'Ubuntu14.04' : 'ubuntu14.04',
+                   'OSX' : 'osx',
+                   'Windows Nano' : 'winnano',
+                   'Ubuntu15.10' : 'ubuntu15.10',
+                   'CentOS7.1' : 'centos7.1',
+                   'OpenSUSE13.2' : 'opensuse13.2',
+                   'RHEL7.2' : 'rhel7.2']
 
 // **************************
 // Define code coverage build
@@ -89,41 +96,130 @@ def targetNugetRuntimeMap = ['OSX' : 'osx.10.10-x64',
 }
 
 // **************************
-// Define outerloop windows testing.  Run locally on each machine.
+// Define outerloop windows Nano testing.  Run locally on each machine.
 // **************************
-
 [true, false].each { isPR ->
-    ['Windows 10', 'Windows 7', 'Windows_NT', 'Ubuntu', 'OSX'].each { os ->
+    ['Windows Nano'].each { os ->
         ['Debug', 'Release'].each { configurationGroup ->
 
+            def isPR = (branchName == 'pr')  
             def newJobName = "outerloop_${osShortName[os]}_${configurationGroup.toLowerCase()}"
+            
+			def newBuildJobName = "${osShortName[os]}_${configurationGroup.toLowerCase()}_bld"
 
-            def newJob
-            if (os != 'Ubuntu' && os != 'OSX') {
-                newJob = job(Utilities.getFullJobName(project, newJobName, isPR)) {
-                    steps {
-                        batchFile("call \"C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat\" x86 && Build.cmd /p:ConfigurationGroup=${configurationGroup} /p:WithCategories=\"InnerLoop;OuterLoop\" /p:TestWithLocalLibraries=true")
-                    }
-                }
-            } else {
-                newJob = job(Utilities.getFullJobName(project, newJobName, isPR)) {
-                    // Jobs run as a service in unix, which means that HOME variable is not set, and it is required for restoring packages
-                    // so we set it first, and then call build.sh
-                    steps {
-                        shell("HOME=\$WORKSPACE/tempHome ./build.sh /p:ConfigurationGroup=${configurationGroup} /p:WithCategories=\"\\\"InnerLoop;OuterLoop\\\"\" /p:TestWithLocalLibraries=true")
-                    }
-                }
+			def newBuildJob = job(Utilities.getFullJobName(project, newBuildJobName, isPR)) {
+        		steps {
+            		batchFile("call \"C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat\" x86 && build.cmd /p:ConfigurationGroup=${configurationGroup} /p:SkipTests=true")
+            		// Package up the results.
+            		batchFile("C:\\Packer\\Packer.exe .\\bin\\build.pack .\\bin")
+        		}
+			}
+
+            // Set the affinity.  All of these run on Windows currently.
+            Utilities.setMachineAffinity(newBuildJob, 'Windows_NT', 'latest-or-auto')
+            // Set up standard options.
+            Utilities.standardJobSetup(newBuildJob, project, isPR, "*/${branch}")
+            // Archive the results
+            Utilities.addArchival(newBuildJob, "bin/build.pack,run-test.cmd,bin/osGroup.AnyCPU.${configurationGroup}/**,bin/ref/**,bin/packages/**,msbuild.log")
+            
+            def fullCoreFXBuildJobName = Utilities.getFolderName(project) + '/' + newBuildJob.name
+            def newTestJobName =  "${osShortName[os]}_${configurationGroup.toLowerCase()}_tst"
+            def newTestJob = job(Utilities.getFullJobName(project, newTestJobName, isPR)) {
+            	steps {
+            		// The tests/corefx components
+	                copyArtifacts(fullCoreFXBuildJobName) {
+	                    includePatterns('bin/build.pack')
+	                    includePatterns('run-test.cmd')
+	                    buildSelector {
+	                        buildNumber('\${COREFX_BUILD}')
+	                    }
+	                }
+
+	                // Unpack the build data
+	                batchFile("C:\\Packer\\UnPacker.exe .\\bin\\build.pack .\\bin")
+	                // Run the tests
+	                batchFile("run-test.cmd .\\bin\\tests\\Windows_NT.AnyCPU.${configurationGroup}")
+            	}
+
+            	parameters {
+            		stringParam('COREFX_BUILD', '', 'Build number to use for copying binaries for nano server bld.')
+            	}
             }
 
-            // Set the affinity.  OS name matches the machine affinity.
+            // Set the affinity.  All of these run on Windows Nano currently.
+            Utilities.setMachineAffinity(newTestJob, os)
+            // Set up standard options.
+            Utilities.addStandardOptions(newTestJob, isPR)
+
+            def fullCoreFXTestJobName = Utilities.getFolderName(project) + '/' + newTestJob.name
+            def newJob = buildFlowJob(Utilities.getFullJobName(project, newJobName, isPR)) {
+                buildFlow("""
+                    b = build(params, '${fullCoreFXBuildJobName}')
+                    build(params +
+                    [COREFX_BUILD: b.build.number], '${fullCoreFXTestJobName}')
+                    """)
+            }
+
+            // Set the machine affinity.
             Utilities.setMachineAffinity(newJob, os)
             // Set up standard options.
             Utilities.standardJobSetup(newJob, project, isPR, "*/${branch}")
             // Add the unit test results
             Utilities.addXUnitDotNETResults(newJob, 'bin/tests/**/testResults.xml')
 
+            // Set up appropriate triggers.  PR on demand, otherwise nightly
+            if (isPR) {
+                // Set PR trigger.
+                // TODO: More elaborate regex trigger?
+                Utilities.addGithubPRTriggerForBranch(newJob, branch, "OuterLoop ${os} ${configurationGroup}", "(?i).*test\\W+outerloop\\W+${os}\\W+${configurationGroup}.*")
+            }
+            else {
+                // Set a periodic trigger
+                Utilities.addPeriodicTrigger(newJob, '@daily')
+            }
+        }
+    }
+}
+
+// **************************
+// Define outerloop testing.  Run locally on each machine.
+// **************************
+def linuxOSes = ['Ubuntu15.10', 'CentOS7.1', 'OpenSUSE13.2', 'RHEL7.2', 'Ubuntu14.04']
+[true, false].each { isPR ->
+    ['Windows 10', 'Windows 7', 'Windows_NT', 'Ubuntu14.04', 'OSX', 'Ubuntu15.10', 'CentOS7.1', 'OpenSUSE13.2', 'RHEL7.2'].each { os ->
+        ['Debug', 'Release'].each { configurationGroup ->
+
+            def newJobName = "outerloop_${osShortName[os]}_${configurationGroup.toLowerCase()}"
+
+            def newJob = job(Utilities.getFullJobName(project, newJobName, isPR)) {
+                steps {
+                    if (os == 'Windows 10' || os == 'Windows 7' || os == 'Windows_NT') {
+                        batchFile("call \"C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat\" x86 && Build.cmd /p:ConfigurationGroup=${configurationGroup} /p:WithCategories=\"InnerLoop;OuterLoop\" /p:TestWithLocalLibraries=true")
+                    }
+                    else if (os == 'OSX') {
+                        shell("HOME=\$WORKSPACE/tempHome ./build.sh /p:ConfigurationGroup=${configurationGroup} /p:WithCategories=\"\\\"InnerLoop;OuterLoop\\\"\" /p:TestWithLocalLibraries=true")
+                    }
+                    else {
+                        shell("sudo HOME=\$WORKSPACE/tempHome ./build.sh /p:ConfigurationGroup=${configurationGroup} /p:WithCategories=\"\\\"InnerLoop;OuterLoop\\\"\" /p:TestWithLocalLibraries=true")    
+                    }
+                }
+            }
+
+            // Set the affinity.  OS name matches the machine affinity.
+            if (linuxOSes.contains(os)) {
+                Utilities.setMachineAffinity(newJob, os, "outer-latest-or-auto")    
+            }
+            else {
+                Utilities.setMachineAffinity(newJob, os, 'latest-or-auto')
+            }
+
+            // Set up standard options.
+            Utilities.standardJobSetup(newJob, project, isPR, "*/${branch}")
+            // Add the unit test results
+            Utilities.addXUnitDotNETResults(newJob, 'bin/tests/**/testResults.xml')
+
             // Unix runs take more than 2 hours to run, so we set the timeout to be longer.
-            if (os == 'Ubuntu' || os == 'OSX') {
+            if (linuxOSes.contains(os) || os == 'OSX') {
                 Utilities.setJobTimeout(newJob, 240)
             }
 
@@ -131,7 +227,7 @@ def targetNugetRuntimeMap = ['OSX' : 'osx.10.10-x64',
             if (isPR) {
                 // Set PR trigger.
                 // TODO: More elaborate regex trigger?
-                Utilities.addGithubPRTriggerForBranch(newJob, branch, "OuterLoop ${os} ${configurationGroup}", "(?i).*test\\W+outerloop.*")
+                Utilities.addGithubPRTriggerForBranch(newJob, branch, "OuterLoop ${os} ${configurationGroup}", "(?i).*test\\W+outerloop\\W+${os}\\W+${configurationGroup}.*")
             }
             else {
                 // Set a periodic trigger
@@ -173,7 +269,7 @@ def targetNugetRuntimeMap = ['OSX' : 'osx.10.10-x64',
 // and then a build for the test of corefx on the target platform.  Then we link them with a build
 // flow job.
 
-def innerLoopNonWindowsOSs = ['Ubuntu', 'Ubuntu15.10', 'Debian8.2', 'OSX', 'FreeBSD', 'CentOS7.1', 'OpenSUSE13.2']
+def innerLoopNonWindowsOSs = ['Ubuntu', 'Ubuntu15.10', 'Debian8.2', 'OSX', 'FreeBSD', 'CentOS7.1', 'OpenSUSE13.2', 'RHEL7.2']
 [true, false].each { isPR ->
     ['Debug', 'Release'].each { configurationGroup ->
         innerLoopNonWindowsOSs.each { os ->
@@ -214,15 +310,16 @@ def innerLoopNonWindowsOSs = ['Ubuntu', 'Ubuntu15.10', 'Debian8.2', 'OSX', 'Free
             }
 
             // Set the affinity.  All of these run on Windows currently.
-            Utilities.setMachineAffinity(newBuildJob, 'Windows_NT')
+            Utilities.setMachineAffinity(newBuildJob, 'Windows_NT', 'latest-or-auto')
             // Set up standard options.
             Utilities.standardJobSetup(newBuildJob, project, isPR, "*/${branch}")
             // Archive the results
             Utilities.addArchival(newBuildJob, "bin/build.pack,bin/osGroup.AnyCPU.${configurationGroup}/**,bin/ref/**,bin/packages/**,msbuild.log")
 
+            // Use Server GC for Ubuntu/OSX Debug PR build & test
             def serverGCString = ''
                      
-            if (os == 'Ubuntu' && configurationGroup == 'Debug' && isPR){
+            if ((os == 'Ubuntu' || os == 'OSX') && configurationGroup == 'Release' && isPR){
                 serverGCString = '--useServerGC'
             }
             
@@ -383,7 +480,7 @@ def supportedFullCyclePlatforms = ['Windows_NT']
             // Set up triggers
             if (isPR) {
                 // Set PR trigger.
-                Utilities.addGithubPRTriggerBranch(newJob, branch, "Innerloop ${osGroup} ${configurationGroup} Build and Test")
+                Utilities.addGithubPRTriggerForBranch(newJob, branch, "Innerloop ${osGroup} ${configurationGroup} Build and Test")
             }
             else {
                 // Set a push trigger
