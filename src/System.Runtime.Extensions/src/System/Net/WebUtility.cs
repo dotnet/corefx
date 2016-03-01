@@ -602,7 +602,7 @@ namespace System.Net
             return false;
         }
         
-        private static bool NeedsUrlDecoding(string s)
+        private static bool NeedsUrlEncoding(string s)
         {
             for (int i = 0; i < s.Length; i++)
             {
