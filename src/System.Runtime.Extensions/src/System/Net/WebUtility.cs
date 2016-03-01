@@ -283,9 +283,6 @@ namespace System.Net
 
         #region UrlEncode implementation
 
-        // *** Source: alm/tfs_core/Framework/Common/UriUtility/HttpUtility.cs
-        // This specific code was copied from above ASP.NET codebase.
-
         private static byte[] UrlEncode(byte[] bytes, int offset, int count, bool alwaysCreateNewReturnValue)
         {
             byte[] encoded = UrlEncode(bytes, offset, count);
@@ -371,10 +368,6 @@ namespace System.Net
         #endregion
 
         #region UrlDecode implementation
-
-        // *** Source: alm/tfs_core/Framework/Common/UriUtility/HttpUtility.cs
-        // This specific code was copied from above ASP.NET codebase.
-        // Changes done - Removed the logic to handle %Uxxxx as it is not standards compliant.
 
         private static string UrlDecodeInternal(string value, Encoding encoding)
         {
@@ -612,9 +605,6 @@ namespace System.Net
         #endregion
 
         #region UrlDecoder nested struct
-
-        // *** Source: alm/tfs_core/Framework/Common/UriUtility/HttpUtility.cs
-        // This specific code was copied from above ASP.NET codebase.
 
         // Internal struct to facilitate URL decoding -- keeps char buffer and byte buffer, allows appending of either chars or bytes
         private struct UrlDecoder
