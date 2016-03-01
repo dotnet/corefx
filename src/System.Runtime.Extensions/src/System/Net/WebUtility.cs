@@ -601,13 +601,13 @@ namespace System.Net
 
         #endregion
 
-        #region UrlDecoder nested class
+        #region UrlDecoder nested struct
 
         // *** Source: alm/tfs_core/Framework/Common/UriUtility/HttpUtility.cs
         // This specific code was copied from above ASP.NET codebase.
 
-        // Internal class to facilitate URL decoding -- keeps char buffer and byte buffer, allows appending of either chars or bytes
-        private class UrlDecoder
+        // Internal struct to facilitate URL decoding -- keeps char buffer and byte buffer, allows appending of either chars or bytes
+        private struct UrlDecoder
         {
             private int _bufferSize;
 
