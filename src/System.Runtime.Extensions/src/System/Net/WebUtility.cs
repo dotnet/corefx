@@ -670,9 +670,20 @@ namespace System.Net
 
             internal void Dispose()
             {
-                ArrayPool<char>.Shared.Return(_charBuffer);
-                if (_byteBuffer != null)
-                    ArrayPool<byte>.Shared.Return(_byteBuffer);
+                var charBuffer = _charBuffer;
+                var byteBuffer = _byteBuffer;
+                
+                if (charBuffer != null)
+                {
+                    ArrayPool<char>.Shared.Return(charBuffer);
+                    _charBuffer = null;
+                }
+                
+                if (byteBuffer != null)
+                {
+                    ArrayPool<byte>.Shared.Return(byteBuffer);
+                    _byteBuffer = null;
+                }
             }
         }
 
