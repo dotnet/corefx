@@ -355,8 +355,8 @@ namespace System.Net
         [SuppressMessage("Microsoft.Design", "CA1055:UriReturnValuesShouldNotBeStrings", Justification = "Already shipped public API; code moved here as part of API consolidation")]
         public static string UrlEncode(string value)
         {
-            if (value == null)
-                return null;
+            if (string.IsNullOrEmpty(value))
+                return value;
 
             byte[] bytes = Encoding.UTF8.GetBytes(value);
             byte[] encodedBytes = UrlEncode(bytes, 0, bytes.Length, false /* alwaysCreateNewReturnValue */);
@@ -378,9 +378,9 @@ namespace System.Net
 
         private static string UrlDecodeInternal(string value, Encoding encoding)
         {
-            if (value == null)
+            if (string.IsNullOrEmpty(value))
             {
-                return null;
+                return value;
             }
 
             int count = value.Length;
