@@ -624,8 +624,6 @@ namespace System.Net
                     return true;
                 if (c == '%' && i < s.Length - 2) // things like %20 are transformed into space
                     return true;
-                if ((c & 0xFF80) == 0) // 7 bit Unicode
-                    return true;
             }
             return false;
         }
