@@ -41,6 +41,7 @@ usage()
     echo "    --restrict-proj <regex>           Run test projects that match regex"
     echo "                                      default: .* (all projects)"
     echo "    --useServerGC                     Enable Server GC for this test run"
+    echo "    --IgnoreForCI                     Passes the IgnoreForCI category trait to the xunit runner to let the tests know they're in CI"
     echo
     echo "Runtime Code Coverage options:"
     echo "    --coreclr-coverage                Optional argument to get coreclr code coverage reports"
@@ -131,6 +132,7 @@ copy_test_overlay()
 
 
 # $1 is the name of the test project
+# $2 is a T/F value for whether to pass IgnoreForCI to the xunit runner
 runtest()
 {
   testProject=$1
@@ -184,9 +186,17 @@ runtest()
 
   echo
   echo "Running tests in $dirName"
-  echo "./corerun xunit.console.netcore.exe $testDllName -xml testResults.xml -notrait category=failing -notrait category=OuterLoop -notrait category=$xunitOSCategory" -notrait Benchmark=true
-  echo
-  ./corerun xunit.console.netcore.exe $testDllName -xml testResults.xml -notrait category=failing -notrait category=OuterLoop -notrait category=$xunitOSCategory -notrait Benchmark=true
+  if [ $2 -ne 0 ]
+  then
+    echo "./corerun xunit.console.netcore.exe $testDllName -xml testResults.xml -notrait category=failing -notrait category=OuterLoop -notrait category=$xunitOSCategory -notrait Benchmark=true -notrait Category=IgnoreForCI"
+    echo
+    ./corerun xunit.console.netcore.exe $testDllName -xml testResults.xml -notrait category=failing -notrait category=OuterLoop -notrait category=$xunitOSCategory -notrait Benchmark=true -notrait Category=IgnoreForCI
+  else
+    echo "./corerun xunit.console.netcore.exe $testDllName -xml testResults.xml -notrait category=failing -notrait category=OuterLoop -notrait category=$xunitOSCategory" -notrait Benchmark=true
+    echo
+    ./corerun xunit.console.netcore.exe $testDllName -xml testResults.xml -notrait category=failing -notrait category=OuterLoop -notrait category=$xunitOSCategory -notrait Benchmark=true
+  fi
+
   exitCode=$?
 
   if [ $exitCode -ne 0 ]
@@ -252,6 +262,7 @@ coreclr_code_coverage()
 # Parse arguments
 
 ((serverGC = 0))
+((IgnoreForCI = 0))
 
 while [[ $# > 0 ]]
 do
@@ -292,6 +303,9 @@ do
         ;;
         --useServerGC)
         ((serverGC = 1))
+        ;;
+        --IgnoreForCI)
+        ((IgnoreForCI = 1))
         ;;
         *)
         ;;
@@ -365,7 +379,7 @@ fi
 TestProjects=($(find . -regex ".*/src/.*/tests/.*\.Tests\.csproj"))
 for file in ${TestProjects[@]}
 do
-  runtest $file &
+  runtest $file $IgnoreForCI &
   pids="$pids $!"
   numberOfProcesses=$(($numberOfProcesses+1))
   if [ "$numberOfProcesses" -ge $maxProcesses ]; then

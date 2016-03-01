@@ -54,7 +54,7 @@ branchList.each { branchName ->
     def isPR = (branchName == 'pr') 
     def newJob = job(getJobName(Utilities.getFullJobName(project, 'code_coverage_windows', isPR), branchName)) {
         steps {
-            batchFile('call "C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\Common7\\Tools\\VsDevCmd.bat" && build.cmd /p:Coverage=true')
+            batchFile('call "C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\Common7\\Tools\\VsDevCmd.bat" && build.cmd /p:Coverage=true /p:WithoutCategories=\"IgnoreForCI\"')
         }
     }
     
@@ -114,15 +114,15 @@ branchList.each { branchName ->
             def isPR = (branchName == 'pr')  
             def newJobName = "outerloop_${osShortName[os]}_${configurationGroup.toLowerCase()}"
             
-			def newBuildJobName = "${osShortName[os]}_${configurationGroup.toLowerCase()}_bld"
+            def newBuildJobName = "${osShortName[os]}_${configurationGroup.toLowerCase()}_bld"
 
-			def newBuildJob = job(getJobName(Utilities.getFullJobName(project, newBuildJobName, isPR), branchName)) {
-        		steps {
-            		batchFile("call \"C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat\" x86 && build.cmd /p:ConfigurationGroup=${configurationGroup} /p:SkipTests=true")
-            		// Package up the results.
-            		batchFile("C:\\Packer\\Packer.exe .\\bin\\build.pack .\\bin")
-        		}
-			}
+            def newBuildJob = job(getJobName(Utilities.getFullJobName(project, newBuildJobName, isPR), branchName)) {
+                steps {
+                    batchFile("call \"C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat\" x86 && build.cmd /p:ConfigurationGroup=${configurationGroup} /p:SkipTests=true")
+                    // Package up the results.
+                    batchFile("C:\\Packer\\Packer.exe .\\bin\\build.pack .\\bin")
+                }
+            }
 
             // Set the affinity.  All of these run on Windows currently.
             Utilities.setMachineAffinity(newBuildJob, 'Windows_NT', 'latest-or-auto')
@@ -134,25 +134,25 @@ branchList.each { branchName ->
             def fullCoreFXBuildJobName = Utilities.getFolderName(project) + '/' + newBuildJob.name
             def newTestJobName =  "${osShortName[os]}_${configurationGroup.toLowerCase()}_tst"
             def newTestJob = job(getJobName(Utilities.getFullJobName(project, newTestJobName, isPR), branchName)) {
-            	steps {
-            		// The tests/corefx components
-	                copyArtifacts(fullCoreFXBuildJobName) {
-	                    includePatterns('bin/build.pack')
+                steps {
+                    // The tests/corefx components
+                    copyArtifacts(fullCoreFXBuildJobName) {
+                        includePatterns('bin/build.pack')
                             includePatterns('run-test.cmd')
-	                    buildSelector {
-	                        buildNumber('\${COREFX_BUILD}')
-	                    }
-	                }
+                        buildSelector {
+                            buildNumber('\${COREFX_BUILD}')
+                        }
+                    }
 
-	                // Unpack the build data
-	                batchFile("C:\\Packer\\UnPacker.exe .\\bin\\build.pack .\\bin")
-	                // Run the tests
-	                batchFile("run-test.cmd .\\bin\\tests\\Windows_NT.AnyCPU.${configurationGroup}")
-            	}
+                    // Unpack the build data
+                    batchFile("C:\\Packer\\UnPacker.exe .\\bin\\build.pack .\\bin")
+                    // Run the tests
+                    batchFile("run-test.cmd .\\bin\\tests\\Windows_NT.AnyCPU.${configurationGroup}")
+                }
 
-            	parameters {
-            		stringParam('COREFX_BUILD', '', 'Build number to use for copying binaries for nano server bld.')
-            	}
+                parameters {
+                    stringParam('COREFX_BUILD', '', 'Build number to use for copying binaries for nano server bld.')
+                }
             }
 
             // Set the affinity.  All of these run on Windows Nano currently.
@@ -191,7 +191,7 @@ branchList.each { branchName ->
 }
 
 // **************************
-// Define outerloop windows testing.  Run locally on each machine.
+// Define outerloop testing.  Run locally on each machine.
 // **************************
 branchList.each { branchName ->
     ['Windows 10', 'Windows 7', 'Windows_NT', 'Ubuntu14.04', 'OSX'].each { os ->
@@ -203,13 +203,13 @@ branchList.each { branchName ->
             def newJob = job(getJobName(Utilities.getFullJobName(project, newJobName, isPR), branchName)) {
                 steps {
                     if (os != 'Ubuntu14.04' && os != 'OSX') {
-                        batchFile("call \"C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat\" x86 && Build.cmd /p:ConfigurationGroup=${configurationGroup} /p:WithCategories=\"InnerLoop;OuterLoop\" /p:TestWithLocalLibraries=true")
+                        batchFile("call \"C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat\" x86 && Build.cmd /p:ConfigurationGroup=${configurationGroup} /p:WithCategories=\"InnerLoop;OuterLoop\" /p:TestWithLocalLibraries=true /p:WithoutCategories=\"IgnoreForCI\"")
                     }
                     else if (os != 'Ubuntu14.04') {
-                        shell("HOME=\$WORKSPACE/tempHome ./build.sh /p:ConfigurationGroup=${configurationGroup} /p:WithCategories=\"\\\"InnerLoop;OuterLoop\\\"\" /p:TestWithLocalLibraries=true")
+                        shell("HOME=\$WORKSPACE/tempHome ./build.sh /p:ConfigurationGroup=${configurationGroup} /p:WithCategories=\"\\\"InnerLoop;OuterLoop\\\"\" /p:TestWithLocalLibraries=true /p:WithoutCategories=\"IgnoreForCI\"")
                     }
                     else {
-                        shell("sudo HOME=\$WORKSPACE/tempHome ./build.sh /p:ConfigurationGroup=${configurationGroup} /p:WithCategories=\"\\\"InnerLoop;OuterLoop\\\"\" /p:TestWithLocalLibraries=true")    
+                        shell("sudo HOME=\$WORKSPACE/tempHome ./build.sh /p:ConfigurationGroup=${configurationGroup} /p:WithCategories=\"\\\"InnerLoop;OuterLoop\\\"\" /p:TestWithLocalLibraries=true /p:WithoutCategories=\"IgnoreForCI\"")    
                     }
                 }
             }
@@ -272,6 +272,10 @@ branchList.each { branchName ->
         Utilities.addPeriodicTrigger(newJob, '@daily')
     }
 }
+
+// **************************
+// Define innerloop Unix testing
+// **************************
 
 // Here are the OS's that needs separate builds and tests.
 // We create a build for the native compilation, a build for the build of corefx itself (on Windows)
@@ -390,6 +394,7 @@ branchList.each { branchName ->
                         --corefx-tests \${WORKSPACE}/bin/tests/${osGroup}.AnyCPU.${configurationGroup} \\
                         --coreclr-bins \${WORKSPACE}/bin/Product/${osGroup}.x64.Release/ \\
                         --mscorlib-bins \${WORKSPACE}/bin/Product/${osGroup}.x64.Release/ \\
+                        --IgnoreForCI \\
                         ${serverGCString}
                     """)
                 }
@@ -461,6 +466,10 @@ branchList.each { branchName ->
     }
 }
 
+// **************************
+// Define innerloop Windows_NT testing
+// **************************
+
 // Generate the build and test versions for Windows_NT.  When full build/run is supported on a platform, those platforms
 // could be removed from above and then added in below.
 def supportedFullCyclePlatforms = ['Windows_NT']
@@ -473,7 +482,7 @@ branchList.each { branchName ->
 
             def newJob = job(getJobName(Utilities.getFullJobName(project, newJobName, isPR), branchName)) {
                 steps {
-                    batchFile("call \"C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat\" x86 && build.cmd /p:ConfigurationGroup=${configurationGroup} /p:OSGroup=${osGroup}")
+                    batchFile("call \"C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat\" x86 && build.cmd /p:ConfigurationGroup=${configurationGroup} /p:OSGroup=${osGroup} /p:WithoutCategories=\"IgnoreForCI\"")
                     batchFile("C:\\Packer\\Packer.exe .\\bin\\build.pack .\\bin")
                 }
             }
