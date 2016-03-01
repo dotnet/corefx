@@ -5,6 +5,7 @@
 // Don't entity encode high chars (160 to 256)
 #define ENTITY_ENCODE_HIGH_ASCII_CHARS
 
+using System.Buffers;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
@@ -385,41 +386,50 @@ namespace System.Net
             int count = value.Length;
             UrlDecoder helper = new UrlDecoder(count, encoding);
 
-            // go through the string's chars collapsing %XX and
-            // appending each char as char, with exception of %XX constructs
-            // that are appended as bytes
-
-            for (int pos = 0; pos < count; pos++)
+            try
             {
-                char ch = value[pos];
+                // go through the string's chars collapsing %XX and
+                // appending each char as char, with exception of %XX constructs
+                // that are appended as bytes
 
-                if (ch == '+')
+                for (int pos = 0; pos < count; pos++)
                 {
-                    ch = ' ';
-                }
-                else if (ch == '%' && pos < count - 2)
-                {
-                    int h1 = HexToInt(value[pos + 1]);
-                    int h2 = HexToInt(value[pos + 2]);
+                    char ch = value[pos];
 
-                    if (h1 >= 0 && h2 >= 0)
-                    {     // valid 2 hex chars
-                        byte b = (byte)((h1 << 4) | h2);
-                        pos += 2;
-
-                        // don't add as char
-                        helper.AddByte(b);
-                        continue;
+                    if (ch == '+')
+                    {
+                        ch = ' ';
                     }
+                    else if (ch == '%' && pos < count - 2)
+                    {
+                        int h1 = HexToInt(value[pos + 1]);
+                        int h2 = HexToInt(value[pos + 2]);
+
+                        if (h1 >= 0 && h2 >= 0)
+                        {     // valid 2 hex chars
+                            byte b = (byte)((h1 << 4) | h2);
+                            pos += 2;
+
+                            // don't add as char
+                            helper.AddByte(b);
+                            continue;
+                        }
+                    }
+
+                    if ((ch & 0xFF80) == 0)
+                        helper.AddByte((byte)ch); // 7 bit have to go as bytes because of Unicode
+                    else
+                        helper.AddChar(ch);
                 }
 
-                if ((ch & 0xFF80) == 0)
-                    helper.AddByte((byte)ch); // 7 bit have to go as bytes because of Unicode
-                else
-                    helper.AddChar(ch);
+                return helper.GetString();
             }
-
-            return helper.GetString();
+            finally
+            {
+                // We don't use `using` since UrlDecoder is a struct
+                // and we want to avoid a boxing conversion
+                helper.Dispose();
+            }
         }
 
         private static byte[] UrlDecodeInternal(byte[] bytes, int offset, int count)
@@ -636,8 +646,8 @@ namespace System.Net
                 _bufferSize = bufferSize;
                 _encoding = encoding;
 
-                _charBuffer = new char[bufferSize];
-                // byte buffer created on demand
+                _charBuffer = ArrayPool<char>.Shared.Rent(bufferSize);
+                // byte buffer pooled on demand
             }
 
             internal void AddChar(char ch)
@@ -651,7 +661,7 @@ namespace System.Net
             internal void AddByte(byte b)
             {
                 if (_byteBuffer == null)
-                    _byteBuffer = new byte[_bufferSize];
+                    _byteBuffer = ArrayPool<byte>.Shared.Rent(_bufferSize);
 
                 _byteBuffer[_numBytes++] = b;
             }
@@ -665,6 +675,13 @@ namespace System.Net
                     return new String(_charBuffer, 0, _numChars);
                 else
                     return String.Empty;
+            }
+
+            internal void Dispose()
+            {
+                ArrayPool<char>.Shared.Return(_charBuffer);
+                if (_byteBuffer != null)
+                    ArrayPool<byte>.Shared.Return(_byteBuffer);
             }
         }
 
