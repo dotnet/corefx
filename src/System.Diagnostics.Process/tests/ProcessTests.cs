@@ -602,7 +602,7 @@ namespace System.Diagnostics.Tests
         }
 
         [Theory, PlatformSpecific(PlatformID.Windows)]
-        [MemberData("GetTestProcess")]
+        [MemberData(nameof(GetTestProcess))]
         public void TestProcessOnRemoteMachineWindows(Process currentProcess, Process remoteProcess)
         {
             Assert.Equal(currentProcess.Id, remoteProcess.Id);
@@ -677,8 +677,7 @@ namespace System.Diagnostics.Tests
         {
             using (var handle = RemoteInvokeRaw((Func<string, string, string, int>)ConcatThreeArguments,
                 inputArguments,
-                start: true,
-                psi: new ProcessStartInfo { RedirectStandardOutput = true }))
+                new RemoteInvokeOptions { Start = true, StartInfo = new ProcessStartInfo { RedirectStandardOutput = true } }))
             {
                 Assert.Equal(expectedArgv, handle.Process.StandardOutput.ReadToEnd());
             }

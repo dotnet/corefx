@@ -2,76 +2,34 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections.Generic;
 using Xunit;
 
 namespace System.Globalization.Tests
 {
     public class DateTimeFormatInfoGetDayName
     {
-        // PosTest1: Call GetDayName on default invariant DateTimeFormatInfo instance
         [Fact]
-        public void PosTest1()
+        public static IEnumerable<object[]> GetDayName_TestData()
         {
-            DateTimeFormatInfo info = CultureInfo.InvariantCulture.DateTimeFormat;
-            string[] expected = new string[] {
-                "Sunday",
-                "Monday",
-                "Tuesday",
-                "Wednesday",
-                "Thursday",
-                "Friday",
-                "Saturday"
-            };
+            string[] englishDayNames = new string[] { "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday" };
+            yield return new object[] { DateTimeFormatInfo.InvariantInfo, englishDayNames };
+            yield return new object[] { new CultureInfo("en-US").DateTimeFormat, englishDayNames };
+            yield return new object[] { new DateTimeFormatInfo(), englishDayNames };
 
-            VerificationHelper(info, expected);
-        }
-
-        // Call GetDayName on en-us culture DateTimeFormatInfo instance
-        // Call GetDayName on fr-FR culture DateTimeFormatInfo instance
-        [Theory]
-        [InlineData("en-us")]
-        [InlineData("fr-FR")]
-        public void PosTest2(string localeName)
-        {
-            CultureInfo culture = new CultureInfo(localeName);
-            string[] expected = DateTimeFormatInfoData.GetDayNames(culture);
-
-            DateTimeFormatInfo info = culture.DateTimeFormat;
-            VerificationHelper(info, expected);
-        }
-
-        // PosTest4: Call GetDayName on DateTimeFormatInfo instance created from ctor
-        [Fact]
-        public void PosTest4()
-        {
-            DateTimeFormatInfo info = new DateTimeFormatInfo();
-            string[] expected = new string[] {
-                "Sunday",
-                "Monday",
-                "Tuesday",
-                "Wednesday",
-                "Thursday",
-                "Friday",
-                "Saturday"
-            };
-
-            VerificationHelper(info, expected);
-        }
-
-        // NegTest1: ArgumentOutOfRangeException should be thrown when dayofweek is not a valid System.DayOfWeek value
-        [Fact]
-        public void NegTest1()
-        {
-            DateTimeFormatInfo info = new DateTimeFormatInfo();
-            Assert.Throws<ArgumentOutOfRangeException>(() =>
+            // ActiveIssue(2103)
+            if (!PlatformDetection.IsUbuntu1510)
             {
-                info.GetAbbreviatedDayName((DayOfWeek)(-1));
-            });
+                yield return new object[] { new CultureInfo("fr-FR").DateTimeFormat, DateTimeFormatInfoData.FrFRDayNames() };
+            }
         }
 
-        private void VerificationHelper(DateTimeFormatInfo info, string[] expected)
+        [Theory]
+        [MemberData(nameof(GetDayName_TestData))]
+        public void GetDayName(DateTimeFormatInfo format, string[] expected)
         {
-            DayOfWeek[] values = new DayOfWeek[] {
+            DayOfWeek[] values = new DayOfWeek[]
+            {
                 DayOfWeek.Sunday,
                 DayOfWeek.Monday,
                 DayOfWeek.Tuesday,
@@ -83,9 +41,13 @@ namespace System.Globalization.Tests
 
             for (int i = 0; i < values.Length; ++i)
             {
-                string actual = info.GetDayName(values[i]);
-                Assert.Equal(expected[i], actual);
+                Assert.Equal(expected[i], format.GetDayName(values[i]));
             }
+        }
+
+        public void GetDayName_Invalid()
+        {
+            Assert.Throws<ArgumentOutOfRangeException>(() => new DateTimeFormatInfo().GetDayName((DayOfWeek)(-1))); // DayOfWeek is invalid
         }
     }
 }

@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -42,22 +41,18 @@ namespace System.Linq
 
         IPartition<TElement> Take(int count);
 
-        TElement ElementAt(int index);
+        TElement TryGetElementAt(int index, out bool found);
 
-        TElement ElementAtOrDefault(int index);
+        TElement TryGetFirst(out bool found);
 
-        TElement First();
-
-        TElement FirstOrDefault();
-
-        TElement Last();
-
-        TElement LastOrDefault();
+        TElement TryGetLast(out bool found);
     }
 
     internal sealed class EmptyPartition<TElement> : IPartition<TElement>, IEnumerator<TElement>
     {
-        public EmptyPartition()
+        public static readonly IPartition<TElement> Instance = new EmptyPartition<TElement>();
+
+        private EmptyPartition()
         {
         }
 
@@ -100,41 +95,29 @@ namespace System.Linq
 
         public IPartition<TElement> Skip(int count)
         {
-            return new EmptyPartition<TElement>();
+            return this;
         }
 
         public IPartition<TElement> Take(int count)
         {
-            return new EmptyPartition<TElement>();
+            return this;
         }
 
-        public TElement ElementAt(int index)
+        public TElement TryGetElementAt(int index, out bool found)
         {
-            throw Error.ArgumentOutOfRange("index");
-        }
-
-        public TElement ElementAtOrDefault(int index)
-        {
+            found = false;
             return default(TElement);
         }
 
-        public TElement First()
+        public TElement TryGetFirst(out bool found)
         {
-            throw Error.NoElements();
-        }
-
-        public TElement FirstOrDefault()
-        {
+            found = false;
             return default(TElement);
         }
 
-        public TElement Last()
+        public TElement TryGetLast(out bool found)
         {
-            throw Error.NoElements();
-        }
-
-        public TElement LastOrDefault()
-        {
+            found = false;
             return default(TElement);
         }
 
@@ -180,49 +163,39 @@ namespace System.Linq
         public IPartition<TElement> Skip(int count)
         {
             int minIndex = _minIndex + count;
-            return minIndex >= _maxIndex
-                ? (IPartition<TElement>)new EmptyPartition<TElement>()
-                : new OrderedPartition<TElement>(_source, minIndex, _maxIndex);
+            return minIndex >= _maxIndex ? EmptyPartition<TElement>.Instance : new OrderedPartition<TElement>(_source, minIndex, _maxIndex);
         }
 
         public IPartition<TElement> Take(int count)
         {
             int maxIndex = _minIndex + count - 1;
-            if ((uint)maxIndex >= (uint)_maxIndex) maxIndex = _maxIndex;
+            if ((uint)maxIndex >= (uint)_maxIndex)
+            {
+                return this;
+            }
+
             return new OrderedPartition<TElement>(_source, _minIndex, maxIndex);
         }
 
-        public TElement ElementAt(int index)
+        public TElement TryGetElementAt(int index, out bool found)
         {
-            if ((uint)index > (uint)_maxIndex - _minIndex) throw Error.ArgumentOutOfRange("index");
-            return _source.ElementAt(index + _minIndex);
+            if ((uint)index <= (uint)(_maxIndex - _minIndex))
+            {
+                return _source.TryGetElementAt(index + _minIndex, out found);
+            }
+
+            found = false;
+            return default(TElement);
         }
 
-        public TElement ElementAtOrDefault(int index)
+        public TElement TryGetFirst(out bool found)
         {
-            return (uint)index <= (uint)_maxIndex - _minIndex ? _source.ElementAtOrDefault(index + _minIndex) : default(TElement);
+            return _source.TryGetElementAt(_minIndex, out found);
         }
 
-        public TElement First()
+        public TElement TryGetLast(out bool found)
         {
-            TElement result;
-            if (!_source.TryGetElementAt(_minIndex, out result)) throw Error.NoElements();
-            return result;
-        }
-
-        public TElement FirstOrDefault()
-        {
-            return _source.ElementAtOrDefault(_minIndex);
-        }
-
-        public TElement Last()
-        {
-            return _source.Last(_minIndex, _maxIndex);
-        }
-
-        public TElement LastOrDefault()
-        {
-            return _source.LastOrDefault(_minIndex, _maxIndex);
+            return _source.TryGetLast(_minIndex, _maxIndex, out found);
         }
 
         public TElement[] ToArray()
@@ -268,63 +241,69 @@ namespace System.Linq
 
             public override bool MoveNext()
             {
-                if ((state == 1 & _index <= _maxIndex) && _index < _source.Count)
+                if ((_state == 1 & _index <= _maxIndex) && _index < _source.Count)
                 {
-                    current = _source[_index];
+                    _current = _source[_index];
                     ++_index;
                     return true;
                 }
+
                 Dispose();
                 return false;
+            }
+
+            public override IEnumerable<TResult> Select<TResult>(Func<TSource, TResult> selector)
+            {
+                return new SelectListPartitionIterator<TSource, TResult>(_source, selector, _minIndex, _maxIndex);
             }
 
             public IPartition<TSource> Skip(int count)
             {
                 int minIndex = _minIndex + count;
-                return minIndex >= _maxIndex
-                    ? (IPartition<TSource>)new EmptyPartition<TSource>()
-                    : new ListPartition<TSource>(_source, minIndex, _maxIndex);
+                return minIndex >= _maxIndex ? EmptyPartition<TSource>.Instance : new ListPartition<TSource>(_source, minIndex, _maxIndex);
             }
 
             public IPartition<TSource> Take(int count)
             {
                 int maxIndex = _minIndex + count - 1;
-                return new ListPartition<TSource>(_source, _minIndex, (uint)maxIndex >= (uint)_maxIndex ? _maxIndex : maxIndex);
+                return (uint)maxIndex >= (uint)_maxIndex ? this : new ListPartition<TSource>(_source, _minIndex, maxIndex);
             }
 
-            public TSource ElementAt(int index)
+            public TSource TryGetElementAt(int index, out bool found)
             {
-                if (((uint)index > (uint)_maxIndex - _minIndex) || (index >= _source.Count - _minIndex)) throw Error.ArgumentOutOfRange("index");
-                return _source[_minIndex + index];
+                if ((uint)index <= (uint)(_maxIndex - _minIndex) && index < _source.Count - _minIndex)
+                {
+                    found = true;
+                    return _source[_minIndex + index];
+                }
+
+                found = false;
+                return default(TSource);
             }
 
-            public TSource ElementAtOrDefault(int index)
+            public TSource TryGetFirst(out bool found)
             {
-                return ((uint)index > (uint)_maxIndex - _minIndex) || (index >= _source.Count - _minIndex) ? default(TSource) : _source[_minIndex + index];
+                if (_source.Count > _minIndex)
+                {
+                    found = true;
+                    return _source[_minIndex];
+                }
+
+                found = false;
+                return default(TSource);
             }
 
-            public TSource First()
-            {
-                if (_source.Count <= _minIndex) throw Error.NoElements();
-                return _source[_minIndex];
-            }
-
-            public TSource FirstOrDefault()
-            {
-                return _source.Count <= _minIndex ? default(TSource) : _source[_minIndex];
-            }
-
-            public TSource Last()
-            {
-                int lastIndex = _source.Count - 1;
-                if (lastIndex < _minIndex) throw Error.NoElements();
-                return _source[Math.Min(lastIndex, _maxIndex)];
-            }
-
-            public TSource LastOrDefault()
+            public TSource TryGetLast(out bool found)
             {
                 int lastIndex = _source.Count - 1;
-                return lastIndex < _minIndex ? default(TSource) : _source[Math.Min(lastIndex, _maxIndex)];
+                if (lastIndex >= _minIndex)
+                {
+                    found = true;
+                    return _source[Math.Min(lastIndex, _maxIndex)];
+                }
+
+                found = false;
+                return default(TSource);
             }
 
             private int Count
@@ -332,7 +311,11 @@ namespace System.Linq
                 get
                 {
                     int count = _source.Count;
-                    if (count <= _minIndex) return 0;
+                    if (count <= _minIndex)
+                    {
+                        return 0;
+                    }
+
                     return Math.Min(count - 1, _maxIndex) - _minIndex + 1;
                 }
             }
@@ -340,21 +323,35 @@ namespace System.Linq
             public TSource[] ToArray()
             {
                 int count = Count;
-                if (count == 0) return Array.Empty<TSource>();
+                if (count == 0)
+                {
+                    return Array.Empty<TSource>();
+                }
+
                 TSource[] array = new TSource[count];
                 for (int i = 0, curIdx = _minIndex; i != array.Length; ++i, ++curIdx)
+                {
                     array[i] = _source[curIdx];
+                }
+
                 return array;
             }
 
             public List<TSource> ToList()
             {
                 int count = Count;
-                if (count == 0) return new List<TSource>();
+                if (count == 0)
+                {
+                    return new List<TSource>();
+                }
+
                 List<TSource> list = new List<TSource>(count);
                 int end = _minIndex + count;
                 for (int i = _minIndex; i != end; ++i)
+                {
                     list.Add(_source[i]);
+                }
+
                 return list;
             }
 

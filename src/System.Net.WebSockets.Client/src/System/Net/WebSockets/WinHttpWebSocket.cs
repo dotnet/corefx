@@ -32,10 +32,6 @@ namespace System.Net.WebSockets
 
         private WinHttpWebSocketState _operation = new WinHttpWebSocketState();
 
-        // TODO (Issue 2505): temporary pinned buffer caches of 1 item. Will be replaced by PinnableBufferCache.
-        private GCHandle _cachedSendPinnedBuffer;
-        private GCHandle _cachedReceivePinnedBuffer;
-
         public WinHttpWebSocket()
         {
         }
@@ -299,16 +295,7 @@ namespace System.Net.WebSockets
             {
                 var bufferType = WebSocketMessageTypeAdapter.GetWinHttpMessageType(messageType, endOfMessage);
 
-                // TODO (Issue 2505): replace with PinnableBufferCache.
-                if (!_cachedSendPinnedBuffer.IsAllocated || _cachedSendPinnedBuffer.Target != buffer.Array)
-                {
-                    if (_cachedSendPinnedBuffer.IsAllocated)
-                    {
-                        _cachedSendPinnedBuffer.Free();
-                    }
-
-                    _cachedSendPinnedBuffer = GCHandle.Alloc(buffer.Array, GCHandleType.Pinned);
-                }
+                _operation.PinSendBuffer(buffer);
 
                 bool sendOperationAlreadyPending = false;
                 if (_operation.PendingWriteOperation == false)
@@ -367,16 +354,7 @@ namespace System.Net.WebSockets
 
             using (CancellationTokenRegistration ctr = ThrowOrRegisterCancellation(cancellationToken))
             {
-                // TODO (Issue 2505): replace with PinnableBufferCache.
-                if (!_cachedReceivePinnedBuffer.IsAllocated || _cachedReceivePinnedBuffer.Target != buffer.Array)
-                {
-                    if (_cachedReceivePinnedBuffer.IsAllocated)
-                    {
-                        _cachedReceivePinnedBuffer.Free();
-                    }
-
-                    _cachedReceivePinnedBuffer = GCHandle.Alloc(buffer.Array, GCHandleType.Pinned);
-                }
+                _operation.PinReceiveBuffer(buffer);
 
                 await InternalReceiveAsync(buffer).ConfigureAwait(false);
 
@@ -596,7 +574,7 @@ namespace System.Net.WebSockets
                 return;
             }
 
-            _subProtocol = GetResponseHeaderStringInfo(HeaderNameWebSocketProtocol);
+            _subProtocol = GetResponseHeader(HeaderNameWebSocketProtocol);
         }
 
         private void AddRequestHeaders(Uri uri, ClientWebSocketOptions options)
@@ -669,49 +647,74 @@ namespace System.Net.WebSockets
             return (HttpStatusCode)result;
         }
 
-        private string GetResponseHeaderStringInfo(string headerName)
+        private unsafe string GetResponseHeader(string headerName, char[] buffer = null)
         {
-            uint bytesNeeded = 0;
-            bool results = false;
+            const int StackLimit = 128;
 
-            // Call WinHttpQueryHeaders once to obtain the size of the buffer needed.  The size is returned in
-            // bytes but the API actually returns Unicode characters.
-            if (!Interop.WinHttp.WinHttpQueryHeaders(
-                _operation.RequestHandle,
-                Interop.WinHttp.WINHTTP_QUERY_CUSTOM,
-                headerName,
-                null,
-                ref bytesNeeded,
-                IntPtr.Zero))
+            Debug.Assert(buffer == null || (buffer != null && buffer.Length > StackLimit));
+
+            int bufferLength;
+
+            if (buffer == null)
             {
-                int lastError = Marshal.GetLastWin32Error();
-                if (lastError == Interop.WinHttp.ERROR_WINHTTP_HEADER_NOT_FOUND)
+                bufferLength = StackLimit;
+                char* pBuffer = stackalloc char[bufferLength];
+                if (QueryHeaders(headerName, pBuffer, ref bufferLength))
                 {
-                    return null;
+                    return new string(pBuffer, 0, bufferLength);
                 }
-
-                if (lastError != Interop.WinHttp.ERROR_INSUFFICIENT_BUFFER)
+            }
+            else
+            {
+                bufferLength = buffer.Length;
+                fixed (char* pBuffer = buffer)
                 {
-                    throw WinHttpException.CreateExceptionUsingError(lastError);
+                    if (QueryHeaders(headerName, pBuffer, ref bufferLength))
+                    {
+                        return new string(pBuffer, 0, bufferLength);
+                    }
                 }
             }
 
-            int charsNeeded = (int)bytesNeeded / sizeof(char);
-            var buffer = new StringBuilder(charsNeeded, charsNeeded);
+            int lastError = Marshal.GetLastWin32Error();
 
-            results = Interop.WinHttp.WinHttpQueryHeaders(
+            if (lastError == Interop.WinHttp.ERROR_WINHTTP_HEADER_NOT_FOUND)
+            {
+                return null;
+            }
+
+            if (lastError == Interop.WinHttp.ERROR_INSUFFICIENT_BUFFER)
+            {
+                buffer = new char[bufferLength];
+                return GetResponseHeader(headerName, buffer);
+            }
+
+            throw WinHttpException.CreateExceptionUsingError(lastError);
+        }
+
+        private unsafe bool QueryHeaders(string headerName, char* buffer, ref int bufferLength)
+        {
+            Debug.Assert(bufferLength >= 0, "bufferLength must not be negative.");
+
+            uint index = 0;
+
+            // Convert the char buffer length to the length in bytes.
+            uint bufferLengthInBytes = (uint)bufferLength * sizeof(char);
+
+            // The WinHttpQueryHeaders buffer length is in bytes,
+            // but the API actually returns Unicode characters.
+            bool result = Interop.WinHttp.WinHttpQueryHeaders(
                 _operation.RequestHandle,
                 Interop.WinHttp.WINHTTP_QUERY_CUSTOM,
                 headerName,
-                buffer,
-                ref bytesNeeded,
-                IntPtr.Zero);
-            if (!results)
-            {
-                WinHttpException.ThrowExceptionUsingLastError();
-            }
+                new IntPtr(buffer),
+                ref bufferLengthInBytes,
+                ref index);
 
-            return buffer.ToString();
+            // Convert the byte buffer length back to the length in chars.
+            bufferLength = (int)bufferLengthInBytes / sizeof(char);
+
+            return result;
         }
 
         public override void Dispose()
@@ -726,18 +729,6 @@ namespace System.Net.WebSockets
                     if (!_disposed)
                     {
                         _operation.Dispose();
-
-                        // TODO (Issue 2508): Pinned buffers must be released in the callback, when it is guaranteed no further
-                        // operations will be made to the send/receive buffers.
-                        if (_cachedReceivePinnedBuffer.IsAllocated)
-                        {
-                            _cachedReceivePinnedBuffer.Free();
-                        }
-
-                        if (_cachedSendPinnedBuffer.IsAllocated)
-                        {
-                            _cachedSendPinnedBuffer.Free();
-                        }
 
                         _disposed = true;
                     }

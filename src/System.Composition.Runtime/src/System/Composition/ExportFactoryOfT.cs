@@ -2,8 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
-
 namespace System.Composition
 {
     /// <summary>
@@ -22,7 +20,7 @@ namespace System.Composition
         {
             if (exportCreator == null)
             {
-                throw new ArgumentNullException("exportCreator");
+                throw new ArgumentNullException(nameof(exportCreator));
             }
 
             _exportLifetimeContextCreator = exportCreator;

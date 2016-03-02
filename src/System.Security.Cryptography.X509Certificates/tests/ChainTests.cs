@@ -128,7 +128,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
         }
 
         [Theory]
-        [MemberData("VerifyExpressionData")]
+        [MemberData(nameof(VerifyExpressionData))]
         public static void VerifyExpiration_LocalTime(DateTime verificationTime, bool shouldBeValid, DateTimeKind kind)
         {
             using (var microsoftDotCom = new X509Certificate2(TestData.MicrosoftDotComSslCertBytes))
@@ -214,6 +214,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 chain.ChainPolicy.CertificatePolicy.Add(new Oid("2.18.19"));
                 chain.ChainPolicy.VerificationFlags =
                     X509VerificationFlags.AllowUnknownCertificateAuthority;
+                chain.ChainPolicy.VerificationTime = cert.NotBefore.AddHours(2);
 
                 chain.ChainPolicy.RevocationMode = X509RevocationMode.NoCheck;
 

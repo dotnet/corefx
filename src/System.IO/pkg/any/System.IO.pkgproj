@@ -10,9 +10,10 @@
     <ProjectReference Include="..\..\src\System.IO.csproj" />
 
     <!-- AOT implementation comes from AOT package -->
-    <ExternalOnTargetFramework Include="netcore50">
-      <PackageTargetRuntime>aot</PackageTargetRuntime>
-    </ExternalOnTargetFramework>
+    <File Include="$(PlaceholderFile)">
+      <TargetPath>runtimes/aot/lib/netcore50</TargetPath>
+      <TargetFramework>aot</TargetFramework>
+    </File>
 
     <InboxOnTargetFramework Include="MonoAndroid10" />
     <InboxOnTargetFramework Include="MonoTouch10" />
@@ -22,6 +23,8 @@
     <InboxOnTargetFramework Include="wpa81" />
     <InboxOnTargetFramework Include="xamarinios10" />
     <InboxOnTargetFramework Include="xamarinmac20" />
+    <InboxOnTargetFramework Include="xamarintvos10" />
+    <InboxOnTargetFramework Include="xamarinwatchos10" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

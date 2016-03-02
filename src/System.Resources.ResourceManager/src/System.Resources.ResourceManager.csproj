@@ -8,6 +8,7 @@
     <IsPartialFacadeAssembly Condition="'$(TargetGroup)' != 'netcore50aot'">true</IsPartialFacadeAssembly>
     <ResourcesSourceOutputDirectory Condition="'$(TargetGroup)' != 'netcore50aot'">None</ResourcesSourceOutputDirectory>
     <SkipCommonResourcesIncludes Condition="'$(TargetGroup)'=='netcore50aot'">true</SkipCommonResourcesIncludes>
+    <PackageTargetFramework Condition="'$(PackageTargetFramework)' == ''">netstandard1.0</PackageTargetFramework> 
   </PropertyGroup>
 
   <!-- Help VS understand available configurations -->
@@ -42,6 +43,7 @@
       <Link>Common\System\SR.Core.cs</Link>
     </Compile>
     <TargetingPackReference Include="System.Private.CoreLib.WinRTInterop" />
+    <ProjectReference Include="$(SourceDir)/mscorlib.WinRT-Facade/mscorlib.WinRT-Facade.csproj" />
   </ItemGroup>
 
   <ItemGroup>

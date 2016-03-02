@@ -202,7 +202,7 @@ namespace System.Net.Http
                 SafeCurlMultiHandle multiHandle = Interop.Http.MultiCreate();
                 if (multiHandle.IsInvalid)
                 {
-                    throw CreateHttpRequestException();
+                    throw CreateHttpRequestException(new CurlException((int)CURLcode.CURLE_FAILED_INIT, isMulti: false));
                 }
 
                 // In support of HTTP/2, enable HTTP/2 connections to be multiplexed if possible.
@@ -238,7 +238,7 @@ namespace System.Net.Http
                 Debug.Assert(_activeOperations.Count == 0, "We shouldn't have any active operations when starting processing.");
                 _activeOperations.Clear();
 
-                bool endingSuccessfully = false;
+                Exception eventLoopError = null;
                 try
                 {
                     // Continue processing as long as there are any active operations
@@ -259,12 +259,13 @@ namespace System.Net.Http
                         // If we have no active operations, we're done.
                         if (_activeOperations.Count == 0)
                         {
-                            endingSuccessfully = true;
                             return;
                         }
 
                         // We have one or more active operations. Run any work that needs to be run.
-                        ThrowIfCURLMError(Interop.Http.MultiPerform(multiHandle));
+                        CURLMcode performResult;
+                        while ((performResult = Interop.Http.MultiPerform(multiHandle)) == CURLMcode.CURLM_CALL_MULTI_PERFORM);
+                        ThrowIfCURLMError(performResult);
 
                         // Complete and remove any requests that have finished being processed.
                         CURLMSG message;
@@ -320,6 +321,11 @@ namespace System.Net.Http
                         // curl_multi_wait/perform.
                     }
                 }
+                catch (Exception exc)
+                {
+                    eventLoopError = exc;
+                    throw;
+                }
                 finally
                 {
                     // If we got an unexpected exception, something very bad happened. We may have some 
@@ -327,7 +333,7 @@ namespace System.Net.Http
                     // such operations, failing them and releasing their resources.
                     if (_activeOperations.Count > 0)
                     {
-                        Debug.Assert(!endingSuccessfully, "We should only have remaining operations if we got an unexpected exception");
+                        Debug.Assert(eventLoopError != null, "We should only have remaining operations if we got an unexpected exception");
                         foreach (KeyValuePair<IntPtr, ActiveRequest> pair in _activeOperations)
                         {
                             ActiveRequest failingOperation = pair.Value;
@@ -336,7 +342,7 @@ namespace System.Net.Http
                             DeactivateActiveRequest(multiHandle, failingOperation.Easy, failingOperationGcHandle, failingOperation.CancellationRegistration);
 
                             // Complete the operation's task and clean up any of its resources
-                            failingOperation.Easy.FailRequest(CreateHttpRequestException());
+                            failingOperation.Easy.FailRequest(CreateHttpRequestException(eventLoopError));
                             failingOperation.Easy.Cleanup(); // no active processing remains, so cleanup
                         }
 
@@ -585,11 +591,15 @@ namespace System.Net.Http
 
             private static ulong CurlReceiveHeadersCallback(IntPtr buffer, ulong size, ulong nitems, IntPtr context)
             {
+                // The callback is invoked once per header; multi-line headers get merged into a single line.
+
                 size *= nitems;
                 if (size == 0)
                 {
                     return 0;
                 }
+
+                Debug.Assert(size <= Interop.Http.CURL_MAX_HTTP_HEADER);
 
                 EasyRequest easy;
                 if (TryGetEasyRequestFromContext(context, out easy))
@@ -597,17 +607,28 @@ namespace System.Net.Http
                     CurlHandler.EventSourceTrace("Size: {0}", size, easy: easy);
                     try
                     {
-                        // The callback is invoked once per header; multi-line headers get merged into a single line.
-                        string responseHeader = Marshal.PtrToStringAnsi(buffer).Trim();
                         HttpResponseMessage response = easy._responseMessage;
 
-                        if (!TryParseStatusLine(response, responseHeader, easy))
+                        CurlResponseHeaderReader reader = new CurlResponseHeaderReader(buffer, size);
+
+                        if (reader.ReadStatusLine(response))
                         {
-                            int index = 0;
-                            string headerName = CurlResponseParseUtils.ReadHeaderName(responseHeader, out index);
-                            if (headerName != null)
+                            // Clear the header if status line is received again. This signifies that there are multiple response headers (like in redirection).
+                            response.Headers.Clear();
+                            response.Content.Headers.Clear();
+
+                            easy._isRedirect = easy._handler.AutomaticRedirection &&
+                                         (response.StatusCode == HttpStatusCode.Redirect ||
+                                         response.StatusCode == HttpStatusCode.RedirectKeepVerb ||
+                                         response.StatusCode == HttpStatusCode.RedirectMethod);
+                        }
+                        else
+                        {
+                            string headerName;
+                            string headerValue;
+
+                            if (reader.ReadHeader(out headerName, out headerValue))
                             {
-                                string headerValue = responseHeader.Substring(index).Trim();
                                 if (!response.Headers.TryAddWithoutValidation(headerName, headerValue))
                                 {
                                     response.Content.Headers.TryAddWithoutValidation(headerName, headerValue);

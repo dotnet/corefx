@@ -194,7 +194,7 @@ namespace System.IO.MemoryMappedFiles.Tests
         /// </summary>
         [PlatformSpecific(PlatformID.AnyUnix)]
         [Theory]
-        [MemberData("CreateValidMapNames")]
+        [MemberData(nameof(CreateValidMapNames))]
         public void MapNamesNotSupported_Unix(string mapName)
         {
             const int Capacity = 4096;
@@ -279,7 +279,7 @@ namespace System.IO.MemoryMappedFiles.Tests
         /// and validating the creating maps each time they're created.
         /// </summary>
         [Theory]
-        [MemberData("MemberData_ValidArgumentCombinationsWithPath",
+        [MemberData(nameof(MemberData_ValidArgumentCombinationsWithPath),
             new FileMode[] { FileMode.Open, FileMode.OpenOrCreate },
             new string[] { null, "CreateUniqueMapName()" },
             new long[] { 1, 256, -1 /*pagesize*/, 10000 },
@@ -327,7 +327,7 @@ namespace System.IO.MemoryMappedFiles.Tests
         /// and validating the creating maps each time they're created.
         /// </summary>
         [Theory]
-        [MemberData("MemberData_ValidArgumentCombinationsWithPath",
+        [MemberData(nameof(MemberData_ValidArgumentCombinationsWithPath),
             new FileMode[] { FileMode.CreateNew },
             new string[] { null, "CreateUniqueMapName()" },
             new long[] { 1, 256, -1 /*pagesize*/, 10000 },
@@ -353,7 +353,7 @@ namespace System.IO.MemoryMappedFiles.Tests
         /// and validating the creating maps each time they're created.
         /// </summary>
         [Theory]
-        [MemberData("MemberData_ValidArgumentCombinationsWithPath",
+        [MemberData(nameof(MemberData_ValidArgumentCombinationsWithPath),
             new FileMode[] { FileMode.Create, FileMode.Truncate },
             new string[] { null, "CreateUniqueMapName()" },
             new long[] { 1, 256, -1 /*pagesize*/, 10000 },
@@ -438,7 +438,7 @@ namespace System.IO.MemoryMappedFiles.Tests
         /// Test various combinations of arguments to CreateFromFile that accepts a FileStream.
         /// </summary>
         [Theory]
-        [MemberData("MemberData_ValidArgumentCombinationsWithStream",
+        [MemberData(nameof(MemberData_ValidArgumentCombinationsWithStream),
             new string[] { null, "CreateUniqueMapName()" },
             new long[] { 1, 256, -1 /*pagesize*/, 10000 },
             new MemoryMappedFileAccess[] { MemoryMappedFileAccess.Read, MemoryMappedFileAccess.ReadWrite, MemoryMappedFileAccess.CopyOnWrite },
@@ -821,7 +821,16 @@ namespace System.IO.MemoryMappedFiles.Tests
         {
             using (FileStream fs = new FileStream(GetTestFilePath(), FileMode.CreateNew))
             {
-                Assert.Throws<IOException>(() => MemoryMappedFile.CreateFromFile(fs, null, long.MaxValue, MemoryMappedFileAccess.ReadWrite, HandleInheritability.None, true));
+                try
+                {
+                    long length = long.MaxValue;
+                    MemoryMappedFile.CreateFromFile(fs, null, length, MemoryMappedFileAccess.ReadWrite, HandleInheritability.None, true).Dispose();
+                    Assert.Equal(length, fs.Length); // if it didn't fail to create the file, the length should be what was requested.
+                }
+                catch (IOException)
+                {
+                    // Expected exception for too large a capacity
+                }
             }
         }
 
@@ -831,7 +840,7 @@ namespace System.IO.MemoryMappedFiles.Tests
         /// </summary>
         [PlatformSpecific(PlatformID.Windows)]
         [Theory]
-        [MemberData("CreateValidMapNames")]
+        [MemberData(nameof(CreateValidMapNames))]
         public void ReusingNames_Windows(string name)
         {
             const int Capacity = 4096;

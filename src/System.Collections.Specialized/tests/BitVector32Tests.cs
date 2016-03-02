@@ -300,7 +300,7 @@ namespace System.Collections.Specialized.Tests
         }
 
         [Theory]
-        [MemberData("Mask_SetUnset_Multiple_Data")]
+        [MemberData(nameof(Mask_SetUnset_Multiple_Data))]
         public static void Set_Mask_MultipleTest(int expected, int start, int[] maskPositions)
         {
             int mask = maskPositions.Sum(x => 1 << (x - 1));
@@ -322,7 +322,7 @@ namespace System.Collections.Specialized.Tests
         }
 
         [Theory]
-        [MemberData("Mask_SetUnset_Multiple_Data")]
+        [MemberData(nameof(Mask_SetUnset_Multiple_Data))]
         public static void Set_Mask_Multiple_UnsetTest(int start, int expected, int[] maskPositions)
         {
             int mask = maskPositions.Sum(x => 1 << (x - 1));
@@ -341,7 +341,7 @@ namespace System.Collections.Specialized.Tests
         }
 
         [Theory]
-        [MemberData("Section_Set_Data")]
+        [MemberData(nameof(Section_Set_Data))]
         public static void Set_SectionTest(int value, BitVector32.Section section)
         {
             BitVector32 empty = new BitVector32();
@@ -368,33 +368,21 @@ namespace System.Collections.Specialized.Tests
                 BitVector32 data = new BitVector32();
                 BitVector32.Section section = BitVector32.CreateSection(maximum);
 
-                // In debug mode, attempting to set a value to a section that is too large triggers an assert.
-                // There is no accompanying check in release mode, however, allowing invalid values to be set.
-#if DEBUG
-                Exception e = Assert.ThrowsAny<Exception>(() => data[section] = value);
-                Assert.Equal("DebugAssertException", e.GetType().Name);
-#else
                 data[section] = value;
                 Assert.Equal(maximum & value, data.Data);
                 Assert.NotEqual(value, data.Data);
                 Assert.Equal(maximum & value, data[section]);
                 Assert.NotEqual(value, data[section]);
-#endif
             }
             {
                 BitVector32 data = new BitVector32();
                 BitVector32.Section nested = BitVector32.CreateSection(maximum, BitVector32.CreateSection(short.MaxValue));
-#if DEBUG
 
-                Exception e = Assert.ThrowsAny<Exception>(() => data[nested] = value);
-                Assert.Equal("DebugAssertException", e.GetType().Name);
-#else
                 data[nested] = value;
                 Assert.Equal((maximum & value) << 15, data.Data);
                 Assert.NotEqual(value << 15, data.Data);
                 Assert.Equal(maximum & value, data[nested]);
                 Assert.NotEqual(value, data[nested]);
-#endif
             }
         }
 
@@ -418,7 +406,7 @@ namespace System.Collections.Specialized.Tests
         }
 
         [Theory]
-        [MemberData("Section_Create_Data")]
+        [MemberData(nameof(Section_Create_Data))]
         public static void CreateSectionTest(short maximum, short mask)
         {
             BitVector32.Section section = BitVector32.CreateSection(maximum);
@@ -427,7 +415,7 @@ namespace System.Collections.Specialized.Tests
         }
 
         [Theory]
-        [MemberData("Section_Create_Data")]
+        [MemberData(nameof(Section_Create_Data))]
         public static void CreateSection_NextTest(short maximum, short mask)
         {
             BitVector32.Section initial = BitVector32.CreateSection(short.MaxValue);
@@ -468,7 +456,7 @@ namespace System.Collections.Specialized.Tests
         }
 
         [Theory]
-        [MemberData("Section_Equal_Data")]
+        [MemberData(nameof(Section_Equal_Data))]
         public static void Section_EqualsTest(BitVector32.Section left, BitVector32.Section right)
         {
             Assert.True(left.Equals(left));
@@ -485,7 +473,7 @@ namespace System.Collections.Specialized.Tests
         }
 
         [Theory]
-        [MemberData("Section_Unequal_Data")]
+        [MemberData(nameof(Section_Unequal_Data))]
         public static void Section_Unequal_EqualsTest(BitVector32.Section left, BitVector32.Section right)
         {
             Assert.False(left.Equals(right));
@@ -501,7 +489,7 @@ namespace System.Collections.Specialized.Tests
         }
 
         [Theory]
-        [MemberData("Section_Equal_Data")]
+        [MemberData(nameof(Section_Equal_Data))]
         public static void Section_GetHashCodeTest(BitVector32.Section left, BitVector32.Section right)
         {
             Assert.Equal(left.GetHashCode(), left.GetHashCode());
