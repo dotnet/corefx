@@ -9,6 +9,7 @@ using System.Collections.Generic;
 
 namespace System.Xml
 {
+    /// <summary>Resolves, adds, and removes namespaces to a collection and provides scope management for these namespaces. </summary>
     public class XmlNamespaceManager : IXmlNamespaceResolver, IEnumerable
     {
         private struct NamespaceDeclaration
@@ -67,6 +68,8 @@ namespace System.Xml
             _scopeId = 1;
         }
 
+        /// <summary>Gets the <see cref="T:System.Xml.XmlNameTable" /> associated with this object.</summary>
+        /// <returns>The <see cref="T:System.Xml.XmlNameTable" /> used by this object.</returns>
         public virtual XmlNameTable NameTable
         {
             get
@@ -75,6 +78,8 @@ namespace System.Xml
             }
         }
 
+        /// <summary>Gets the namespace URI for the default namespace.</summary>
+        /// <returns>Returns the namespace URI for the default namespace, or String.Empty if there is no default namespace.</returns>
         public virtual string DefaultNamespace
         {
             get
@@ -84,11 +89,14 @@ namespace System.Xml
             }
         }
 
+        /// <summary>Pushes a namespace scope onto the stack.</summary>
         public virtual void PushScope()
         {
             _scopeId++;
         }
 
+        /// <summary>Pops a namespace scope off the stack.</summary>
+        /// <returns>true if there are namespace scopes left on the stack; false if there are no more namespaces to pop.</returns>
         public virtual bool PopScope()
         {
             int decl = _lastDecl;
@@ -110,6 +118,11 @@ namespace System.Xml
             return true;
         }
 
+        /// <summary>Adds the given namespace to the collection.</summary>
+        /// <param name="prefix">The prefix to associate with the namespace being added. Use String.Empty to add a default namespace.NoteIf the <see cref="T:System.Xml.XmlNamespaceManager" /> will be used for resolving namespaces in an XML Path Language (XPath) expression, a prefix must be specified. If an XPath expression does not include a prefix, it is assumed that the namespace Uniform Resource Identifier (URI) is the empty namespace. For more information about XPath expressions and the <see cref="T:System.Xml.XmlNamespaceManager" />, refer to the <see cref="M:System.Xml.XmlNode.SelectNodes(System.String)" /> and <see cref="M:System.Xml.XPath.XPathExpression.SetContext(System.Xml.XmlNamespaceManager)" /> methods.</param>
+        /// <param name="uri">The namespace to add. </param>
+        /// <exception cref="T:System.ArgumentException">The value for <paramref name="prefix" /> is "xml" or "xmlns". </exception>
+        /// <exception cref="T:System.ArgumentNullException">The value for <paramref name="prefix" /> or <paramref name="uri" /> is null. </exception>
         public virtual void AddNamespace(string prefix, string uri)
         {
             if (uri == null)
@@ -176,6 +189,10 @@ namespace System.Xml
             }
         }
 
+        /// <summary>Removes the given namespace for the given prefix.</summary>
+        /// <param name="prefix">The prefix for the namespace </param>
+        /// <param name="uri">The namespace to remove for the given prefix. The namespace removed is from the current namespace scope. Namespaces outside the current scope are ignored. </param>
+        /// <exception cref="T:System.ArgumentNullException">The value of <paramref name="prefix" /> or <paramref name="uri" /> is null. </exception>
         public virtual void RemoveNamespace(string prefix, string uri)
         {
             if (uri == null)
@@ -198,6 +215,8 @@ namespace System.Xml
             }
         }
 
+        /// <summary>Returns an enumerator to use to iterate through the namespaces in the <see cref="T:System.Xml.XmlNamespaceManager" />.</summary>
+        /// <returns>An <see cref="T:System.Collections.IEnumerator" /> containing the prefixes stored by the <see cref="T:System.Xml.XmlNamespaceManager" />.</returns>
         public virtual IEnumerator GetEnumerator()
         {
             Dictionary<string, string> prefixes = new Dictionary<string, string>(_lastDecl + 1);
@@ -259,6 +278,9 @@ namespace System.Xml
             return dict;
         }
 
+        /// <summary>Gets the namespace URI for the specified prefix.</summary>
+        /// <returns>Returns the namespace URI for <paramref name="prefix" /> or null if there is no mapped namespace. The returned string is atomized.For more information on atomized strings, see the <see cref="T:System.Xml.XmlNameTable" /> class.</returns>
+        /// <param name="prefix">The prefix whose namespace URI you want to resolve. To match the default namespace, pass String.Empty. </param>
         public virtual string LookupNamespace(string prefix)
         {
             int declIndex = LookupNamespaceDecl(prefix);
@@ -303,6 +325,9 @@ namespace System.Xml
             return -1;
         }
 
+        /// <summary>Finds the prefix declared for the given namespace URI.</summary>
+        /// <returns>The matching prefix. If there is no mapped prefix, the method returns String.Empty. If a null value is supplied, then null is returned.</returns>
+        /// <param name="uri">The namespace to resolve for the prefix. </param>
         public virtual string LookupPrefix(string uri)
         {
             // Don't assume that prefix is atomized
@@ -320,6 +345,9 @@ namespace System.Xml
             return null;
         }
 
+        /// <summary>Gets a value indicating whether the supplied prefix has a namespace defined for the current pushed scope.</summary>
+        /// <returns>true if there is a namespace defined; otherwise, false.</returns>
+        /// <param name="prefix">The prefix of the namespace you want to find. </param>
         public virtual bool HasNamespace(string prefix)
         {
             // Don't assume that prefix is atomized

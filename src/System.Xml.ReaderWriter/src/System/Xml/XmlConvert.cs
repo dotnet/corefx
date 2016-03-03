@@ -19,11 +19,16 @@ namespace System.Xml
     }
 
     // Options for serializing and deserializing DateTime
+    /// <summary>Specifies how to treat the time value when converting between string and <see cref="T:System.DateTime" />.</summary>
     public enum XmlDateTimeSerializationMode
     {
+        /// <summary>Treat as local time. If the <see cref="T:System.DateTime" /> object represents a Coordinated Universal Time (UTC), it is converted to the local time.</summary>
         Local,
+        /// <summary>Treat as a UTC. If the <see cref="T:System.DateTime" /> object represents a local time, it is converted to a UTC.</summary>
         Utc,
+        /// <summary>Treat as a local time if a <see cref="T:System.DateTime" /> is being converted to a string.</summary>
         Unspecified,
+        /// <summary>Time zone information should be preserved when converting.</summary>
         RoundtripKind,
     }
 
@@ -456,6 +461,9 @@ namespace System.Xml
 
         // Verification method for XML characters as defined in XML spec production [2] Char.
         // Throws XmlException if invalid character is found, otherwise returns the input string.
+        /// <summary>Returns the passed-in string if all the characters and surrogate pair characters in the string argument are valid XML characters, otherwise an XmlException is thrown with information on the first invalid character encountered. </summary>
+        /// <returns>Returns the passed-in string if all the characters and surrogate-pair characters in the string argument are valid XML characters, otherwise an XmlException is thrown with information on the first invalid character encountered.</returns>
+        /// <param name="content"><see cref="T:System.String" /> that contains characters to verify.</param>
         public static string VerifyXmlChars(string content)
         {
             if (content == null)
@@ -468,6 +476,9 @@ namespace System.Xml
 
         // Verification method for XML public ID characters as defined in XML spec production [13] PubidChar.
         // Throws XmlException if invalid character is found, otherwise returns the input string.
+        /// <summary>Returns the passed in string instance if all the characters in the string argument are valid public id characters.</summary>
+        /// <returns>Returns the passed-in string if all the characters in the argument are valid public id characters.</returns>
+        /// <param name="publicId"><see cref="T:System.String" /> that contains the id to validate.</param>
         public static string VerifyPublicId(string publicId)
         {
             if (publicId == null)
@@ -487,6 +498,9 @@ namespace System.Xml
 
         // Verification method for XML whitespace characters as defined in XML spec production [3] S.
         // Throws XmlException if invalid character is found, otherwise returns the input string.
+        /// <summary>Returns the passed-in string instance if all the characters in the string argument are valid whitespace characters. </summary>
+        /// <returns>Returns the passed-in string instance if all the characters in the string argument are valid whitespace characters, otherwise null.</returns>
+        /// <param name="content"><see cref="T:System.String" /> to verify.</param>
         public static string VerifyWhitespace(string content)
         {
             if (content == null)
@@ -720,12 +734,19 @@ namespace System.Xml
             return xsdDateTime.ToString();
         }
 
+        /// <summary>Converts the supplied <see cref="T:System.DateTimeOffset" /> to a <see cref="T:System.String" />.</summary>
+        /// <returns>A <see cref="T:System.String" /> representation of the supplied <see cref="T:System.DateTimeOffset" />.</returns>
+        /// <param name="value">The <see cref="T:System.DateTimeOffset" /> to be converted.</param>
         public static string ToString(DateTimeOffset value)
         {
             XsdDateTime xsdDateTime = new XsdDateTime(value);
             return xsdDateTime.ToString();
         }
 
+        /// <summary>Converts the supplied <see cref="T:System.DateTimeOffset" /> to a <see cref="T:System.String" /> in the specified format.</summary>
+        /// <returns>A <see cref="T:System.String" /> representation in the specified format of the supplied <see cref="T:System.DateTimeOffset" />.</returns>
+        /// <param name="value">The <see cref="T:System.DateTimeOffset" /> to be converted.</param>
+        /// <param name="format">The format to which <paramref name="s" /> is converted. The format parameter can be any subset of the W3C Recommendation for the XML dateTime type. (For more information see http://www.w3.org/TR/xmlschema-2/#dateTime.)</param>
         public static string ToString(DateTimeOffset value, string format)
         {
             return value.ToString(format, DateTimeFormatInfo.InvariantInfo);
@@ -960,6 +981,12 @@ namespace System.Xml
             return dt;
         }
 
+        /// <summary>Converts the supplied <see cref="T:System.String" /> to a <see cref="T:System.DateTimeOffset" /> equivalent.</summary>
+        /// <returns>The <see cref="T:System.DateTimeOffset" /> equivalent of the supplied string.</returns>
+        /// <param name="s">The string to convert.Note   The string must conform to a subset of the W3C Recommendation for the XML dateTime type. For more information see http://www.w3.org/TR/xmlschema-2/#dateTime.</param>
+        /// <exception cref="T:System.ArgumentNullException"><paramref name="s" /> is null. </exception>
+        /// <exception cref="T:System.ArgumentOutOfRangeException">The argument passed to this method is outside the range of allowable values. For information about allowable values, see <see cref="T:System.DateTimeOffset" />.</exception>
+        /// <exception cref="T:System.FormatException">The argument passed to this method does not conform to a subset of the W3C Recommendations for the XML dateTime type. For more information see http://www.w3.org/TR/xmlschema-2/#dateTime.</exception>
         public static DateTimeOffset ToDateTimeOffset(string s)
         {
             if (s == null)
@@ -971,6 +998,12 @@ namespace System.Xml
             return dateTimeOffset;
         }
 
+        /// <summary>Converts the supplied <see cref="T:System.String" /> to a <see cref="T:System.DateTimeOffset" /> equivalent.</summary>
+        /// <returns>The <see cref="T:System.DateTimeOffset" /> equivalent of the supplied string.</returns>
+        /// <param name="s">The string to convert.</param>
+        /// <param name="format">The format from which <paramref name="s" /> is converted. The format parameter can be any subset of the W3C Recommendation for the XML dateTime type. (For more information see http://www.w3.org/TR/xmlschema-2/#dateTime.) The string <paramref name="s" /> is validated against this format.</param>
+        /// <exception cref="T:System.ArgumentNullException"><paramref name="s" /> is null. </exception>
+        /// <exception cref="T:System.FormatException"><paramref name="s" /> or <paramref name="format" /> is an empty string or is not in the specified format.</exception>
         public static DateTimeOffset ToDateTimeOffset(string s, string format)
         {
             if (s == null)
@@ -980,6 +1013,10 @@ namespace System.Xml
             return DateTimeOffset.ParseExact(s, format, DateTimeFormatInfo.InvariantInfo, DateTimeStyles.AllowLeadingWhite | DateTimeStyles.AllowTrailingWhite);
         }
 
+        /// <summary>Converts the supplied <see cref="T:System.String" /> to a <see cref="T:System.DateTimeOffset" /> equivalent.</summary>
+        /// <returns>The <see cref="T:System.DateTimeOffset" /> equivalent of the supplied string.</returns>
+        /// <param name="s">The string to convert.</param>
+        /// <param name="formats">An array of formats from which <paramref name="s" /> can be converted. Each format in <paramref name="formats" /> can be any subset of the W3C Recommendation for the XML dateTime type. (For more information see http://www.w3.org/TR/xmlschema-2/#dateTime.) The string <paramref name="s" /> is validated against one of these formats.</param>
         public static DateTimeOffset ToDateTimeOffset(string s, string[] formats)
         {
             if (s == null)
@@ -1131,7 +1168,7 @@ namespace System.Xml
 
             int i = 0;
             int len = data.Length;
-            for (; ;)
+            for (;;)
             {
                 while (i < len && s_xmlCharType.IsCharData(data[i]))
                 {
@@ -1173,7 +1210,7 @@ namespace System.Xml
 
             int i = offset;
             int endPos = offset + len;
-            for (; ;)
+            for (;;)
             {
                 while (i < endPos && s_xmlCharType.IsCharData(data[i]))
                 {

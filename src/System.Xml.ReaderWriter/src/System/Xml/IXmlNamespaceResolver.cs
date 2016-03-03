@@ -10,6 +10,7 @@ namespace System.Xml
 {
     // Provides read-only access to a set of (prefix, namespace) mappings.  Each distinct prefix is mapped to exactly
     // one namespace, but multiple prefixes may be mapped to the same namespace (e.g. xmlns:foo="ns" xmlns:bar="ns").
+    /// <summary>Provides read-only access to a set of prefix and namespace mappings.</summary>
     public interface IXmlNamespaceResolver
     {
         // This pragma disables a warning that the return type is not CLS-compliant, but generics are part of CLS in Whidbey. 
@@ -23,6 +24,9 @@ namespace System.Xml
         // The "xml" prefix is always mapped to the "http://www.w3.org/XML/1998/namespace" namespace.
         // The "xmlns" prefix is always mapped to the "http://www.w3.org/2000/xmlns/" namespace.
         // If the default namespace has not been defined, then the "" prefix is mapped to "" (the empty namespace).
+        /// <summary>Gets the namespace URI mapped to the specified prefix.</summary>
+        /// <returns>The namespace URI that is mapped to the prefix; null if the prefix is not mapped to a namespace URI.</returns>
+        /// <param name="prefix">The prefix whose namespace URI you wish to find.</param>
         string LookupNamespace(string prefix);
 
         // Return a prefix which is mapped to the specified namespace.  Multiple prefixes can be mapped to the
@@ -31,6 +35,9 @@ namespace System.Xml
         // The "xml" prefix is always mapped to the "http://www.w3.org/XML/1998/namespace" namespace.
         // The "xmlns" prefix is always mapped to the "http://www.w3.org/2000/xmlns/" namespace.
         // If the default namespace has not been defined, then the "" prefix is mapped to "" (the empty namespace).
+        /// <summary>Gets the prefix that is mapped to the specified namespace URI.</summary>
+        /// <returns>The prefix that is mapped to the namespace URI; null if the namespace URI is not mapped to a prefix.</returns>
+        /// <param name="namespaceName">The namespace URI whose prefix you wish to find.</param>
         string LookupPrefix(string namespaceName);
     }
 }

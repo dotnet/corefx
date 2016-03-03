@@ -9,6 +9,7 @@ using System;
 namespace System.Xml
 {
     // Specifies the context that the XmLReader will use for xml fragment
+    /// <summary>Provides all the context information required by the <see cref="T:System.Xml.XmlReader" /> to parse an XML fragment.</summary>
     public class XmlParserContext
     {
         private XmlNameTable _nt = null;
@@ -77,6 +78,8 @@ namespace System.Xml
             _encoding = enc;
         }
 
+        /// <summary>Gets the <see cref="T:System.Xml.XmlNameTable" /> used to atomize strings. For more information on atomized strings, see <see cref="T:System.Xml.XmlNameTable" />.</summary>
+        /// <returns>The XmlNameTable.</returns>
         public XmlNameTable NameTable
         {
             get
@@ -89,6 +92,8 @@ namespace System.Xml
             }
         }
 
+        /// <summary>Gets or sets the <see cref="T:System.Xml.XmlNamespaceManager" />.</summary>
+        /// <returns>The XmlNamespaceManager.</returns>
         public XmlNamespaceManager NamespaceManager
         {
             get
@@ -101,6 +106,8 @@ namespace System.Xml
             }
         }
 
+        /// <summary>Gets or sets the name of the document type declaration.</summary>
+        /// <returns>The name of the document type declaration.</returns>
         public String DocTypeName
         {
             get
@@ -113,6 +120,8 @@ namespace System.Xml
             }
         }
 
+        /// <summary>Gets or sets the public identifier.</summary>
+        /// <returns>The public identifier.</returns>
         public String PublicId
         {
             get
@@ -125,6 +134,8 @@ namespace System.Xml
             }
         }
 
+        /// <summary>Gets or sets the system identifier.</summary>
+        /// <returns>The system identifier.</returns>
         public String SystemId
         {
             get
@@ -137,6 +148,8 @@ namespace System.Xml
             }
         }
 
+        /// <summary>Gets or sets the base URI.</summary>
+        /// <returns>The base URI to use to resolve the DTD file.</returns>
         public String BaseURI
         {
             get
@@ -149,6 +162,8 @@ namespace System.Xml
             }
         }
 
+        /// <summary>Gets or sets the internal DTD subset.</summary>
+        /// <returns>The internal DTD subset. For example, this property returns everything between the square brackets &lt;!DOCTYPE doc [...]&gt;.</returns>
         public String InternalSubset
         {
             get
@@ -161,6 +176,8 @@ namespace System.Xml
             }
         }
 
+        /// <summary>Gets or sets the current xml:lang scope.</summary>
+        /// <returns>The current xml:lang scope. If there is no xml:lang in scope, String.Empty is returned.</returns>
         public String XmlLang
         {
             get
@@ -173,6 +190,8 @@ namespace System.Xml
             }
         }
 
+        /// <summary>Gets or sets the current xml:space scope.</summary>
+        /// <returns>An <see cref="T:System.Xml.XmlSpace" /> value indicating the xml:space scope.</returns>
         public XmlSpace XmlSpace
         {
             get
@@ -185,6 +204,8 @@ namespace System.Xml
             }
         }
 
+        /// <summary>Gets or sets the encoding type.</summary>
+        /// <returns>An <see cref="T:System.Text.Encoding" /> object indicating the encoding type.</returns>
         public Encoding Encoding
         {
             get
