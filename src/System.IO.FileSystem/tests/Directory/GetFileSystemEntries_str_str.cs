@@ -312,7 +312,7 @@ namespace System.IO.Tests
         }
 
         [Fact]
-        [PlatformSpecific(PlatformID.Linux)]
+        [PlatformSpecific(PlatformID.Linux | PlatformID.NetBSD)]
         public void SearchPatternCaseSensitive()
         {
             DirectoryInfo testDir = Directory.CreateDirectory(GetTestFilePath());
