@@ -16,6 +16,7 @@ using BufferBuilder = System.Xml.BufferBuilder;
 namespace System.Xml
 {
     // Represents a reader that provides fast, non-cached forward only stream access to XML data. 
+    /// <summary>Represents a reader that provides fast, noncached, forward-only access to XML data.To browse the .NET Framework source code for this type, see the Reference Source.</summary>
     public abstract partial class XmlReader : IDisposable
     {
         static private uint s_isTextualNodeBitmap = 0x6018; // 00 0110 0000 0001 1000
@@ -88,6 +89,9 @@ namespace System.Xml
         internal const int AsyncBufferSize = 64 * 1024; //64KB
 
         // Settings
+        /// <summary>Gets the <see cref="T:System.Xml.XmlReaderSettings" /> object used to create this <see cref="T:System.Xml.XmlReader" /> instance.</summary>
+        /// <returns>The <see cref="T:System.Xml.XmlReaderSettings" /> object used to create this reader instance. If this reader was not created using the <see cref="Overload:System.Xml.XmlReader.Create" /> method, this property returns null.</returns>
+        /// <exception cref="T:System.InvalidOperationException">An <see cref="T:System.Xml.XmlReader" /> method was called before a previous asynchronous operation finished. In this case, <see cref="T:System.InvalidOperationException" /> is thrown with the message “An asynchronous operation is already in progress.”</exception>
         public virtual XmlReaderSettings Settings
         {
             get
@@ -98,9 +102,15 @@ namespace System.Xml
 
         // Node Properties
         // Get the type of the current node.
+        /// <summary>When overridden in a derived class, gets the type of the current node.</summary>
+        /// <returns>One of the enumeration values that specify the type of the current node.</returns>
+        /// <exception cref="T:System.InvalidOperationException">An <see cref="T:System.Xml.XmlReader" /> method was called before a previous asynchronous operation finished. In this case, <see cref="T:System.InvalidOperationException" /> is thrown with the message “An asynchronous operation is already in progress.”</exception>
         public abstract XmlNodeType NodeType { get; }
 
         // Gets the name of the current node, including the namespace prefix.
+        /// <summary>When overridden in a derived class, gets the qualified name of the current node.</summary>
+        /// <returns>The qualified name of the current node. For example, Name is bk:book for the element &lt;bk:book&gt;.The name returned is dependent on the <see cref="P:System.Xml.XmlReader.NodeType" /> of the node. The following node types return the listed values. All other node types return an empty string.Node type Name AttributeThe name of the attribute. DocumentTypeThe document type name. ElementThe tag name. EntityReferenceThe name of the entity referenced. ProcessingInstructionThe target of the processing instruction. XmlDeclarationThe literal string xml. </returns>
+        /// <exception cref="T:System.InvalidOperationException">An <see cref="T:System.Xml.XmlReader" /> method was called before a previous asynchronous operation finished. In this case, <see cref="T:System.InvalidOperationException" /> is thrown with the message “An asynchronous operation is already in progress.”</exception>
         public virtual string Name
         {
             get
@@ -117,15 +127,27 @@ namespace System.Xml
         }
 
         // Gets the name of the current node without the namespace prefix.
+        /// <summary>When overridden in a derived class, gets the local name of the current node.</summary>
+        /// <returns>The name of the current node with the prefix removed. For example, LocalName is book for the element &lt;bk:book&gt;.For node types that do not have a name (like Text, Comment, and so on), this property returns String.Empty.</returns>
+        /// <exception cref="T:System.InvalidOperationException">An <see cref="T:System.Xml.XmlReader" /> method was called before a previous asynchronous operation finished. In this case, <see cref="T:System.InvalidOperationException" /> is thrown with the message “An asynchronous operation is already in progress.”</exception>
         public abstract string LocalName { get; }
 
         // Gets the namespace URN (as defined in the W3C Namespace Specification) of the current namespace scope.
+        /// <summary>When overridden in a derived class, gets the namespace URI (as defined in the W3C Namespace specification) of the node on which the reader is positioned.</summary>
+        /// <returns>The namespace URI of the current node; otherwise an empty string.</returns>
+        /// <exception cref="T:System.InvalidOperationException">An <see cref="T:System.Xml.XmlReader" /> method was called before a previous asynchronous operation finished. In this case, <see cref="T:System.InvalidOperationException" /> is thrown with the message “An asynchronous operation is already in progress.”</exception>
         public abstract string NamespaceURI { get; }
 
         // Gets the namespace prefix associated with the current node.
+        /// <summary>When overridden in a derived class, gets the namespace prefix associated with the current node.</summary>
+        /// <returns>The namespace prefix associated with the current node.</returns>
+        /// <exception cref="T:System.InvalidOperationException">An <see cref="T:System.Xml.XmlReader" /> method was called before a previous asynchronous operation finished. In this case, <see cref="T:System.InvalidOperationException" /> is thrown with the message “An asynchronous operation is already in progress.”</exception>
         public abstract string Prefix { get; }
 
         // Gets a value indicating whether
+        /// <summary>When overridden in a derived class, gets a value indicating whether the current node can have a <see cref="P:System.Xml.XmlReader.Value" />.</summary>
+        /// <returns>true if the node on which the reader is currently positioned can have a Value; otherwise, false. If false, the node has a value of String.Empty.</returns>
+        /// <exception cref="T:System.InvalidOperationException">An <see cref="T:System.Xml.XmlReader" /> method was called before a previous asynchronous operation finished. In this case, <see cref="T:System.InvalidOperationException" /> is thrown with the message “An asynchronous operation is already in progress.”</exception>
         public virtual bool HasValue
         {
             get
@@ -135,19 +157,34 @@ namespace System.Xml
         }
 
         // Gets the text value of the current node.
+        /// <summary>When overridden in a derived class, gets the text value of the current node.</summary>
+        /// <returns>The value returned depends on the <see cref="P:System.Xml.XmlReader.NodeType" /> of the node. The following table lists node types that have a value to return. All other node types return String.Empty.Node type Value AttributeThe value of the attribute. CDATAThe content of the CDATA section. CommentThe content of the comment. DocumentTypeThe internal subset. ProcessingInstructionThe entire content, excluding the target. SignificantWhitespaceThe white space between markup in a mixed content model. TextThe content of the text node. WhitespaceThe white space between markup. XmlDeclarationThe content of the declaration. </returns>
+        /// <exception cref="T:System.InvalidOperationException">An <see cref="T:System.Xml.XmlReader" /> method was called before a previous asynchronous operation finished. In this case, <see cref="T:System.InvalidOperationException" /> is thrown with the message “An asynchronous operation is already in progress.”</exception>
         public abstract string Value { get; }
 
         // Gets the depth of the current node in the XML element stack.
+        /// <summary>When overridden in a derived class, gets the depth of the current node in the XML document.</summary>
+        /// <returns>The depth of the current node in the XML document.</returns>
+        /// <exception cref="T:System.InvalidOperationException">An <see cref="T:System.Xml.XmlReader" /> method was called before a previous asynchronous operation finished. In this case, <see cref="T:System.InvalidOperationException" /> is thrown with the message “An asynchronous operation is already in progress.”</exception>
         public abstract int Depth { get; }
 
         // Gets the base URI of the current node.
+        /// <summary>When overridden in a derived class, gets the base URI of the current node.</summary>
+        /// <returns>The base URI of the current node.</returns>
+        /// <exception cref="T:System.InvalidOperationException">An <see cref="T:System.Xml.XmlReader" /> method was called before a previous asynchronous operation finished. In this case, <see cref="T:System.InvalidOperationException" /> is thrown with the message “An asynchronous operation is already in progress.”</exception>
         public abstract string BaseURI { get; }
 
         // Gets a value indicating whether the current node is an empty element (for example, <MyElement/>).
+        /// <summary>When overridden in a derived class, gets a value indicating whether the current node is an empty element (for example, &lt;MyElement/&gt;).</summary>
+        /// <returns>true if the current node is an element (<see cref="P:System.Xml.XmlReader.NodeType" /> equals XmlNodeType.Element) that ends with /&gt;; otherwise, false.</returns>
+        /// <exception cref="T:System.InvalidOperationException">An <see cref="T:System.Xml.XmlReader" /> method was called before a previous asynchronous operation finished. In this case, <see cref="T:System.InvalidOperationException" /> is thrown with the message “An asynchronous operation is already in progress.”</exception>
         public abstract bool IsEmptyElement { get; }
 
         // Gets a value indicating whether the current node is an attribute that was generated from the default value defined
         // in the DTD or schema.
+        /// <summary>When overridden in a derived class, gets a value indicating whether the current node is an attribute that was generated from the default value defined in the DTD or schema.</summary>
+        /// <returns>true if the current node is an attribute whose value was generated from the default value defined in the DTD or schema; false if the attribute value was explicitly set.</returns>
+        /// <exception cref="T:System.InvalidOperationException">An <see cref="T:System.Xml.XmlReader" /> method was called before a previous asynchronous operation finished. In this case, <see cref="T:System.InvalidOperationException" /> is thrown with the message “An asynchronous operation is already in progress.”</exception>
         public virtual bool IsDefault
         {
             get
@@ -158,6 +195,9 @@ namespace System.Xml
 
 
         // Gets the current xml:space scope.
+        /// <summary>When overridden in a derived class, gets the current xml:space scope.</summary>
+        /// <returns>One of the <see cref="T:System.Xml.XmlSpace" /> values. If no xml:space scope exists, this property defaults to XmlSpace.None.</returns>
+        /// <exception cref="T:System.InvalidOperationException">An <see cref="T:System.Xml.XmlReader" /> method was called before a previous asynchronous operation finished. In this case, <see cref="T:System.InvalidOperationException" /> is thrown with the message “An asynchronous operation is already in progress.”</exception>
         public virtual XmlSpace XmlSpace
         {
             get
@@ -167,6 +207,9 @@ namespace System.Xml
         }
 
         // Gets the current xml:lang scope.
+        /// <summary>When overridden in a derived class, gets the current xml:lang scope.</summary>
+        /// <returns>The current xml:lang scope.</returns>
+        /// <exception cref="T:System.InvalidOperationException">An <see cref="T:System.Xml.XmlReader" /> method was called before a previous asynchronous operation finished. In this case, <see cref="T:System.InvalidOperationException" /> is thrown with the message “An asynchronous operation is already in progress.”</exception>
         public virtual string XmlLang
         {
             get
@@ -177,6 +220,9 @@ namespace System.Xml
 
 
         // returns the type of the current node
+        /// <summary>Gets The Common Language Runtime (CLR) type for the current node.</summary>
+        /// <returns>The CLR type that corresponds to the typed value of the node. The default is System.String.</returns>
+        /// <exception cref="T:System.InvalidOperationException">An <see cref="T:System.Xml.XmlReader" /> method was called before a previous asynchronous operation finished. In this case, <see cref="T:System.InvalidOperationException" /> is thrown with the message “An asynchronous operation is already in progress.”</exception>
         public virtual System.Type ValueType
         {
             get
@@ -187,6 +233,11 @@ namespace System.Xml
 
         // Concatenates values of textual nodes of the current content, ignoring comments and PIs, expanding entity references, 
         // and returns the content as the most appropriate type (by default as string). Stops at start tags and end tags.
+        /// <summary>Reads the text content at the current position as an <see cref="T:System.Object" />.</summary>
+        /// <returns>The text content as the most appropriate common language runtime (CLR) object.</returns>
+        /// <exception cref="T:System.InvalidCastException">The attempted cast is not valid.</exception>
+        /// <exception cref="T:System.FormatException">The string format is not valid.</exception>
+        /// <exception cref="T:System.InvalidOperationException">An <see cref="T:System.Xml.XmlReader" /> method was called before a previous asynchronous operation finished. In this case, <see cref="T:System.InvalidOperationException" /> is thrown with the message “An asynchronous operation is already in progress.”</exception>
         public virtual object ReadContentAsObject()
         {
             if (!CanReadContentAs())
@@ -198,6 +249,11 @@ namespace System.Xml
 
         // Concatenates values of textual nodes of the current content, ignoring comments and PIs, expanding entity references, 
         // and converts the content to a boolean. Stops at start tags and end tags.
+        /// <summary>Reads the text content at the current position as a Boolean.</summary>
+        /// <returns>The text content as a <see cref="T:System.Boolean" /> object.</returns>
+        /// <exception cref="T:System.InvalidCastException">The attempted cast is not valid.</exception>
+        /// <exception cref="T:System.FormatException">The string format is not valid.</exception>
+        /// <exception cref="T:System.InvalidOperationException">An <see cref="T:System.Xml.XmlReader" /> method was called before a previous asynchronous operation finished. In this case, <see cref="T:System.InvalidOperationException" /> is thrown with the message “An asynchronous operation is already in progress.”</exception>
         public virtual bool ReadContentAsBoolean()
         {
             if (!CanReadContentAs())
@@ -217,6 +273,9 @@ namespace System.Xml
 
         // Concatenates values of textual nodes of the current content, ignoring comments and PIs, expanding entity references, 
         // and converts the content to a DateTimeOffset. Stops at start tags and end tags.
+        /// <summary>Reads the text content at the current position as a <see cref="T:System.DateTimeOffset" /> object.</summary>
+        /// <returns>The text content as a <see cref="T:System.DateTimeOffset" /> object.</returns>
+        /// <exception cref="T:System.InvalidOperationException">An <see cref="T:System.Xml.XmlReader" /> method was called before a previous asynchronous operation finished. In this case, <see cref="T:System.InvalidOperationException" /> is thrown with the message “An asynchronous operation is already in progress.”</exception>
         public virtual DateTimeOffset ReadContentAsDateTimeOffset()
         {
             if (!CanReadContentAs())
@@ -235,6 +294,11 @@ namespace System.Xml
 
         // Concatenates values of textual nodes of the current content, ignoring comments and PIs, expanding entity references, 
         // and converts the content to a double. Stops at start tags and end tags.
+        /// <summary>Reads the text content at the current position as a double-precision floating-point number.</summary>
+        /// <returns>The text content as a double-precision floating-point number.</returns>
+        /// <exception cref="T:System.InvalidCastException">The attempted cast is not valid.</exception>
+        /// <exception cref="T:System.FormatException">The string format is not valid.</exception>
+        /// <exception cref="T:System.InvalidOperationException">An <see cref="T:System.Xml.XmlReader" /> method was called before a previous asynchronous operation finished. In this case, <see cref="T:System.InvalidOperationException" /> is thrown with the message “An asynchronous operation is already in progress.”</exception>
         public virtual double ReadContentAsDouble()
         {
             if (!CanReadContentAs())
@@ -253,6 +317,11 @@ namespace System.Xml
 
         // Concatenates values of textual nodes of the current content, ignoring comments and PIs, expanding entity references, 
         // and converts the content to a float. Stops at start tags and end tags.
+        /// <summary>Reads the text content at the current position as a single-precision floating point number.</summary>
+        /// <returns>The text content at the current position as a single-precision floating point number.</returns>
+        /// <exception cref="T:System.InvalidCastException">The attempted cast is not valid.</exception>
+        /// <exception cref="T:System.FormatException">The string format is not valid.</exception>
+        /// <exception cref="T:System.InvalidOperationException">An <see cref="T:System.Xml.XmlReader" /> method was called before a previous asynchronous operation finished. In this case, <see cref="T:System.InvalidOperationException" /> is thrown with the message “An asynchronous operation is already in progress.”</exception>
         public virtual float ReadContentAsFloat()
         {
             if (!CanReadContentAs())
@@ -271,6 +340,11 @@ namespace System.Xml
 
         // Concatenates values of textual nodes of the current content, ignoring comments and PIs, expanding entity references, 
         // and converts the content to a decimal. Stops at start tags and end tags.
+        /// <summary>Reads the text content at the current position as a <see cref="T:System.Decimal" /> object.</summary>
+        /// <returns>The text content at the current position as a <see cref="T:System.Decimal" /> object.</returns>
+        /// <exception cref="T:System.InvalidCastException">The attempted cast is not valid.</exception>
+        /// <exception cref="T:System.FormatException">The string format is not valid.</exception>
+        /// <exception cref="T:System.InvalidOperationException">An <see cref="T:System.Xml.XmlReader" /> method was called before a previous asynchronous operation finished. In this case, <see cref="T:System.InvalidOperationException" /> is thrown with the message “An asynchronous operation is already in progress.”</exception>
         public virtual decimal ReadContentAsDecimal()
         {
             if (!CanReadContentAs())
@@ -289,6 +363,11 @@ namespace System.Xml
 
         // Concatenates values of textual nodes of the current content, ignoring comments and PIs, expanding entity references, 
         // and converts the content to an int. Stops at start tags and end tags.
+        /// <summary>Reads the text content at the current position as a 32-bit signed integer.</summary>
+        /// <returns>The text content as a 32-bit signed integer.</returns>
+        /// <exception cref="T:System.InvalidCastException">The attempted cast is not valid.</exception>
+        /// <exception cref="T:System.FormatException">The string format is not valid.</exception>
+        /// <exception cref="T:System.InvalidOperationException">An <see cref="T:System.Xml.XmlReader" /> method was called before a previous asynchronous operation finished. In this case, <see cref="T:System.InvalidOperationException" /> is thrown with the message “An asynchronous operation is already in progress.”</exception>
         public virtual int ReadContentAsInt()
         {
             if (!CanReadContentAs())
@@ -307,6 +386,11 @@ namespace System.Xml
 
         // Concatenates values of textual nodes of the current content, ignoring comments and PIs, expanding entity references, 
         // and converts the content to a long. Stops at start tags and end tags.
+        /// <summary>Reads the text content at the current position as a 64-bit signed integer.</summary>
+        /// <returns>The text content as a 64-bit signed integer.</returns>
+        /// <exception cref="T:System.InvalidCastException">The attempted cast is not valid.</exception>
+        /// <exception cref="T:System.FormatException">The string format is not valid.</exception>
+        /// <exception cref="T:System.InvalidOperationException">An <see cref="T:System.Xml.XmlReader" /> method was called before a previous asynchronous operation finished. In this case, <see cref="T:System.InvalidOperationException" /> is thrown with the message “An asynchronous operation is already in progress.”</exception>
         public virtual long ReadContentAsLong()
         {
             if (!CanReadContentAs())
@@ -325,6 +409,11 @@ namespace System.Xml
 
         // Concatenates values of textual nodes of the current content, ignoring comments and PIs, expanding entity references, 
         // and returns the content as a string. Stops at start tags and end tags.
+        /// <summary>Reads the text content at the current position as a <see cref="T:System.String" /> object.</summary>
+        /// <returns>The text content as a <see cref="T:System.String" /> object.</returns>
+        /// <exception cref="T:System.InvalidCastException">The attempted cast is not valid.</exception>
+        /// <exception cref="T:System.FormatException">The string format is not valid.</exception>
+        /// <exception cref="T:System.InvalidOperationException">An <see cref="T:System.Xml.XmlReader" /> method was called before a previous asynchronous operation finished. In this case, <see cref="T:System.InvalidOperationException" /> is thrown with the message “An asynchronous operation is already in progress.”</exception>
         public virtual string ReadContentAsString()
         {
             if (!CanReadContentAs())
@@ -366,6 +455,12 @@ namespace System.Xml
         }
 
         // Returns the content of the current element as the most appropriate type. Moves to the node following the element's end tag.
+        /// <summary>Reads the current element and returns the contents as an <see cref="T:System.Object" />.</summary>
+        /// <returns>A boxed common language runtime (CLR) object of the most appropriate type. The <see cref="P:System.Xml.XmlReader.ValueType" /> property determines the appropriate CLR type. If the content is typed as a list type, this method returns an array of boxed objects of the appropriate type.</returns>
+        /// <exception cref="T:System.InvalidOperationException">The <see cref="T:System.Xml.XmlReader" /> is not positioned on an element.</exception>
+        /// <exception cref="T:System.Xml.XmlException">The current element contains child elements.-or-The element content cannot be converted to the requested type</exception>
+        /// <exception cref="T:System.ArgumentNullException">The method is called with null arguments.</exception>
+        /// <exception cref="T:System.InvalidOperationException">An <see cref="T:System.Xml.XmlReader" /> method was called before a previous asynchronous operation finished. In this case, <see cref="T:System.InvalidOperationException" /> is thrown with the message “An asynchronous operation is already in progress.”</exception>
         public virtual object ReadElementContentAsObject()
         {
             if (SetupReadElementContentAsXxx("ReadElementContentAsObject"))
@@ -378,6 +473,15 @@ namespace System.Xml
         }
 
         // Checks local name and namespace of the current element and returns its content as the most appropriate type. Moves to the node following the element's end tag.
+        /// <summary>Checks that the specified local name and namespace URI matches that of the current element, then reads the current element and returns the contents as an <see cref="T:System.Object" />.</summary>
+        /// <returns>A boxed common language runtime (CLR) object of the most appropriate type. The <see cref="P:System.Xml.XmlReader.ValueType" /> property determines the appropriate CLR type. If the content is typed as a list type, this method returns an array of boxed objects of the appropriate type.</returns>
+        /// <param name="localName">The local name of the element.</param>
+        /// <param name="namespaceURI">The namespace URI of the element.</param>
+        /// <exception cref="T:System.InvalidOperationException">The <see cref="T:System.Xml.XmlReader" /> is not positioned on an element.</exception>
+        /// <exception cref="T:System.Xml.XmlException">The current element contains child elements.-or-The element content cannot be converted to the requested type.</exception>
+        /// <exception cref="T:System.ArgumentNullException">The method is called with null arguments.</exception>
+        /// <exception cref="T:System.ArgumentException">The specified local name and namespace URI do not match that of the current element being read.</exception>
+        /// <exception cref="T:System.InvalidOperationException">An <see cref="T:System.Xml.XmlReader" /> method was called before a previous asynchronous operation finished. In this case, <see cref="T:System.InvalidOperationException" /> is thrown with the message “An asynchronous operation is already in progress.”</exception>
         public virtual object ReadElementContentAsObject(string localName, string namespaceURI)
         {
             CheckElement(localName, namespaceURI);
@@ -385,6 +489,12 @@ namespace System.Xml
         }
 
         // Returns the content of the current element as a boolean. Moves to the node following the element's end tag.
+        /// <summary>Reads the current element and returns the contents as a <see cref="T:System.Boolean" /> object.</summary>
+        /// <returns>The element content as a <see cref="T:System.Boolean" /> object.</returns>
+        /// <exception cref="T:System.InvalidOperationException">The <see cref="T:System.Xml.XmlReader" /> is not positioned on an element.</exception>
+        /// <exception cref="T:System.Xml.XmlException">The current element contains child elements.-or-The element content cannot be converted to a <see cref="T:System.Boolean" /> object.</exception>
+        /// <exception cref="T:System.ArgumentNullException">The method is called with null arguments.</exception>
+        /// <exception cref="T:System.InvalidOperationException">An <see cref="T:System.Xml.XmlReader" /> method was called before a previous asynchronous operation finished. In this case, <see cref="T:System.InvalidOperationException" /> is thrown with the message “An asynchronous operation is already in progress.”</exception>
         public virtual bool ReadElementContentAsBoolean()
         {
             if (SetupReadElementContentAsXxx("ReadElementContentAsBoolean"))
@@ -397,6 +507,15 @@ namespace System.Xml
         }
 
         // Checks local name and namespace of the current element and returns its content as a boolean. Moves to the node following the element's end tag.
+        /// <summary>Checks that the specified local name and namespace URI matches that of the current element, then reads the current element and returns the contents as a <see cref="T:System.Boolean" /> object.</summary>
+        /// <returns>The element content as a <see cref="T:System.Boolean" /> object.</returns>
+        /// <param name="localName">The local name of the element.</param>
+        /// <param name="namespaceURI">The namespace URI of the element.</param>
+        /// <exception cref="T:System.InvalidOperationException">The <see cref="T:System.Xml.XmlReader" /> is not positioned on an element.</exception>
+        /// <exception cref="T:System.Xml.XmlException">The current element contains child elements.-or-The element content cannot be converted to the requested type.</exception>
+        /// <exception cref="T:System.ArgumentNullException">The method is called with null arguments.</exception>
+        /// <exception cref="T:System.ArgumentException">The specified local name and namespace URI do not match that of the current element being read.</exception>
+        /// <exception cref="T:System.InvalidOperationException">An <see cref="T:System.Xml.XmlReader" /> method was called before a previous asynchronous operation finished. In this case, <see cref="T:System.InvalidOperationException" /> is thrown with the message “An asynchronous operation is already in progress.”</exception>
         public virtual bool ReadElementContentAsBoolean(string localName, string namespaceURI)
         {
             CheckElement(localName, namespaceURI);
@@ -405,6 +524,12 @@ namespace System.Xml
 
 
         // Returns the content of the current element as a double. Moves to the node following the element's end tag.
+        /// <summary>Reads the current element and returns the contents as a double-precision floating-point number.</summary>
+        /// <returns>The element content as a double-precision floating-point number.</returns>
+        /// <exception cref="T:System.InvalidOperationException">The <see cref="T:System.Xml.XmlReader" /> is not positioned on an element.</exception>
+        /// <exception cref="T:System.Xml.XmlException">The current element contains child elements.-or-The element content cannot be converted to a double-precision floating-point number.</exception>
+        /// <exception cref="T:System.ArgumentNullException">The method is called with null arguments.</exception>
+        /// <exception cref="T:System.InvalidOperationException">An <see cref="T:System.Xml.XmlReader" /> method was called before a previous asynchronous operation finished. In this case, <see cref="T:System.InvalidOperationException" /> is thrown with the message “An asynchronous operation is already in progress.”</exception>
         public virtual double ReadElementContentAsDouble()
         {
             if (SetupReadElementContentAsXxx("ReadElementContentAsDouble"))
@@ -418,6 +543,15 @@ namespace System.Xml
 
         // Checks local name and namespace of the current element and returns its content as a double. 
         // Moves to the node following the element's end tag.
+        /// <summary>Checks that the specified local name and namespace URI matches that of the current element, then reads the current element and returns the contents as a double-precision floating-point number.</summary>
+        /// <returns>The element content as a double-precision floating-point number.</returns>
+        /// <param name="localName">The local name of the element.</param>
+        /// <param name="namespaceURI">The namespace URI of the element.</param>
+        /// <exception cref="T:System.InvalidOperationException">The <see cref="T:System.Xml.XmlReader" /> is not positioned on an element.</exception>
+        /// <exception cref="T:System.Xml.XmlException">The current element contains child elements.-or-The element content cannot be converted to the requested type.</exception>
+        /// <exception cref="T:System.ArgumentNullException">The method is called with null arguments.</exception>
+        /// <exception cref="T:System.ArgumentException">The specified local name and namespace URI do not match that of the current element being read.</exception>
+        /// <exception cref="T:System.InvalidOperationException">An <see cref="T:System.Xml.XmlReader" /> method was called before a previous asynchronous operation finished. In this case, <see cref="T:System.InvalidOperationException" /> is thrown with the message “An asynchronous operation is already in progress.”</exception>
         public virtual double ReadElementContentAsDouble(string localName, string namespaceURI)
         {
             CheckElement(localName, namespaceURI);
@@ -425,6 +559,12 @@ namespace System.Xml
         }
 
         // Returns the content of the current element as a float. Moves to the node following the element's end tag.
+        /// <summary>Reads the current element and returns the contents as single-precision floating-point number.</summary>
+        /// <returns>The element content as a single-precision floating point number.</returns>
+        /// <exception cref="T:System.InvalidOperationException">The <see cref="T:System.Xml.XmlReader" /> is not positioned on an element.</exception>
+        /// <exception cref="T:System.Xml.XmlException">The current element contains child elements.-or-The element content cannot be converted to a single-precision floating-point number.</exception>
+        /// <exception cref="T:System.ArgumentNullException">The method is called with null arguments.</exception>
+        /// <exception cref="T:System.InvalidOperationException">An <see cref="T:System.Xml.XmlReader" /> method was called before a previous asynchronous operation finished. In this case, <see cref="T:System.InvalidOperationException" /> is thrown with the message “An asynchronous operation is already in progress.”</exception>
         public virtual float ReadElementContentAsFloat()
         {
             if (SetupReadElementContentAsXxx("ReadElementContentAsFloat"))
@@ -438,6 +578,15 @@ namespace System.Xml
 
         // Checks local name and namespace of the current element and returns its content as a float. 
         // Moves to the node following the element's end tag.
+        /// <summary>Checks that the specified local name and namespace URI matches that of the current element, then reads the current element and returns the contents as a single-precision floating-point number.</summary>
+        /// <returns>The element content as a single-precision floating point number.</returns>
+        /// <param name="localName">The local name of the element.</param>
+        /// <param name="namespaceURI">The namespace URI of the element.</param>
+        /// <exception cref="T:System.InvalidOperationException">The <see cref="T:System.Xml.XmlReader" /> is not positioned on an element.</exception>
+        /// <exception cref="T:System.Xml.XmlException">The current element contains child elements.-or-The element content cannot be converted to a single-precision floating-point number.</exception>
+        /// <exception cref="T:System.ArgumentNullException">The method is called with null arguments.</exception>
+        /// <exception cref="T:System.ArgumentException">The specified local name and namespace URI do not match that of the current element being read.</exception>
+        /// <exception cref="T:System.InvalidOperationException">An <see cref="T:System.Xml.XmlReader" /> method was called before a previous asynchronous operation finished. In this case, <see cref="T:System.InvalidOperationException" /> is thrown with the message “An asynchronous operation is already in progress.”</exception>
         public virtual float ReadElementContentAsFloat(string localName, string namespaceURI)
         {
             CheckElement(localName, namespaceURI);
@@ -445,6 +594,12 @@ namespace System.Xml
         }
 
         // Returns the content of the current element as a decimal. Moves to the node following the element's end tag.
+        /// <summary>Reads the current element and returns the contents as a <see cref="T:System.Decimal" /> object.</summary>
+        /// <returns>The element content as a <see cref="T:System.Decimal" /> object.</returns>
+        /// <exception cref="T:System.InvalidOperationException">The <see cref="T:System.Xml.XmlReader" /> is not positioned on an element.</exception>
+        /// <exception cref="T:System.Xml.XmlException">The current element contains child elements.-or-The element content cannot be converted to a <see cref="T:System.Decimal" />.</exception>
+        /// <exception cref="T:System.ArgumentNullException">The method is called with null arguments.</exception>
+        /// <exception cref="T:System.InvalidOperationException">An <see cref="T:System.Xml.XmlReader" /> method was called before a previous asynchronous operation finished. In this case, <see cref="T:System.InvalidOperationException" /> is thrown with the message “An asynchronous operation is already in progress.”</exception>
         public virtual decimal ReadElementContentAsDecimal()
         {
             if (SetupReadElementContentAsXxx("ReadElementContentAsDecimal"))
@@ -458,6 +613,15 @@ namespace System.Xml
 
         // Checks local name and namespace of the current element and returns its content as a decimal. 
         // Moves to the node following the element's end tag.
+        /// <summary>Checks that the specified local name and namespace URI matches that of the current element, then reads the current element and returns the contents as a <see cref="T:System.Decimal" /> object.</summary>
+        /// <returns>The element content as a <see cref="T:System.Decimal" /> object.</returns>
+        /// <param name="localName">The local name of the element.</param>
+        /// <param name="namespaceURI">The namespace URI of the element.</param>
+        /// <exception cref="T:System.InvalidOperationException">The <see cref="T:System.Xml.XmlReader" /> is not positioned on an element.</exception>
+        /// <exception cref="T:System.Xml.XmlException">The current element contains child elements.-or-The element content cannot be converted to a <see cref="T:System.Decimal" />.</exception>
+        /// <exception cref="T:System.ArgumentNullException">The method is called with null arguments.</exception>
+        /// <exception cref="T:System.ArgumentException">The specified local name and namespace URI do not match that of the current element being read.</exception>
+        /// <exception cref="T:System.InvalidOperationException">An <see cref="T:System.Xml.XmlReader" /> method was called before a previous asynchronous operation finished. In this case, <see cref="T:System.InvalidOperationException" /> is thrown with the message “An asynchronous operation is already in progress.”</exception>
         public virtual decimal ReadElementContentAsDecimal(string localName, string namespaceURI)
         {
             CheckElement(localName, namespaceURI);
@@ -465,6 +629,12 @@ namespace System.Xml
         }
 
         // Returns the content of the current element as an int. Moves to the node following the element's end tag.
+        /// <summary>Reads the current element and returns the contents as a 32-bit signed integer.</summary>
+        /// <returns>The element content as a 32-bit signed integer.</returns>
+        /// <exception cref="T:System.InvalidOperationException">The <see cref="T:System.Xml.XmlReader" /> is not positioned on an element.</exception>
+        /// <exception cref="T:System.Xml.XmlException">The current element contains child elements.-or-The element content cannot be converted to a 32-bit signed integer.</exception>
+        /// <exception cref="T:System.ArgumentNullException">The method is called with null arguments.</exception>
+        /// <exception cref="T:System.InvalidOperationException">An <see cref="T:System.Xml.XmlReader" /> method was called before a previous asynchronous operation finished. In this case, <see cref="T:System.InvalidOperationException" /> is thrown with the message “An asynchronous operation is already in progress.”</exception>
         public virtual int ReadElementContentAsInt()
         {
             if (SetupReadElementContentAsXxx("ReadElementContentAsInt"))
@@ -478,6 +648,15 @@ namespace System.Xml
 
         // Checks local name and namespace of the current element and returns its content as an int. 
         // Moves to the node following the element's end tag.
+        /// <summary>Checks that the specified local name and namespace URI matches that of the current element, then reads the current element and returns the contents as a 32-bit signed integer.</summary>
+        /// <returns>The element content as a 32-bit signed integer.</returns>
+        /// <param name="localName">The local name of the element.</param>
+        /// <param name="namespaceURI">The namespace URI of the element.</param>
+        /// <exception cref="T:System.InvalidOperationException">The <see cref="T:System.Xml.XmlReader" /> is not positioned on an element.</exception>
+        /// <exception cref="T:System.Xml.XmlException">The current element contains child elements.-or-The element content cannot be converted to a 32-bit signed integer.</exception>
+        /// <exception cref="T:System.ArgumentNullException">The method is called with null arguments.</exception>
+        /// <exception cref="T:System.ArgumentException">The specified local name and namespace URI do not match that of the current element being read.</exception>
+        /// <exception cref="T:System.InvalidOperationException">An <see cref="T:System.Xml.XmlReader" /> method was called before a previous asynchronous operation finished. In this case, <see cref="T:System.InvalidOperationException" /> is thrown with the message “An asynchronous operation is already in progress.”</exception>
         public virtual int ReadElementContentAsInt(string localName, string namespaceURI)
         {
             CheckElement(localName, namespaceURI);
@@ -485,6 +664,12 @@ namespace System.Xml
         }
 
         // Returns the content of the current element as a long. Moves to the node following the element's end tag.
+        /// <summary>Reads the current element and returns the contents as a 64-bit signed integer.</summary>
+        /// <returns>The element content as a 64-bit signed integer.</returns>
+        /// <exception cref="T:System.InvalidOperationException">The <see cref="T:System.Xml.XmlReader" /> is not positioned on an element.</exception>
+        /// <exception cref="T:System.Xml.XmlException">The current element contains child elements.-or-The element content cannot be converted to a 64-bit signed integer.</exception>
+        /// <exception cref="T:System.ArgumentNullException">The method is called with null arguments.</exception>
+        /// <exception cref="T:System.InvalidOperationException">An <see cref="T:System.Xml.XmlReader" /> method was called before a previous asynchronous operation finished. In this case, <see cref="T:System.InvalidOperationException" /> is thrown with the message “An asynchronous operation is already in progress.”</exception>
         public virtual long ReadElementContentAsLong()
         {
             if (SetupReadElementContentAsXxx("ReadElementContentAsLong"))
@@ -498,6 +683,15 @@ namespace System.Xml
 
         // Checks local name and namespace of the current element and returns its content as a long. 
         // Moves to the node following the element's end tag.
+        /// <summary>Checks that the specified local name and namespace URI matches that of the current element, then reads the current element and returns the contents as a 64-bit signed integer.</summary>
+        /// <returns>The element content as a 64-bit signed integer.</returns>
+        /// <param name="localName">The local name of the element.</param>
+        /// <param name="namespaceURI">The namespace URI of the element.</param>
+        /// <exception cref="T:System.InvalidOperationException">The <see cref="T:System.Xml.XmlReader" /> is not positioned on an element.</exception>
+        /// <exception cref="T:System.Xml.XmlException">The current element contains child elements.-or-The element content cannot be converted to a 64-bit signed integer.</exception>
+        /// <exception cref="T:System.ArgumentNullException">The method is called with null arguments.</exception>
+        /// <exception cref="T:System.ArgumentException">The specified local name and namespace URI do not match that of the current element being read.</exception>
+        /// <exception cref="T:System.InvalidOperationException">An <see cref="T:System.Xml.XmlReader" /> method was called before a previous asynchronous operation finished. In this case, <see cref="T:System.InvalidOperationException" /> is thrown with the message “An asynchronous operation is already in progress.”</exception>
         public virtual long ReadElementContentAsLong(string localName, string namespaceURI)
         {
             CheckElement(localName, namespaceURI);
@@ -505,6 +699,12 @@ namespace System.Xml
         }
 
         // Returns the content of the current element as a string. Moves to the node following the element's end tag.
+        /// <summary>Reads the current element and returns the contents as a <see cref="T:System.String" /> object.</summary>
+        /// <returns>The element content as a <see cref="T:System.String" /> object.</returns>
+        /// <exception cref="T:System.InvalidOperationException">The <see cref="T:System.Xml.XmlReader" /> is not positioned on an element.</exception>
+        /// <exception cref="T:System.Xml.XmlException">The current element contains child elements.-or-The element content cannot be converted to a <see cref="T:System.String" /> object.</exception>
+        /// <exception cref="T:System.ArgumentNullException">The method is called with null arguments.</exception>
+        /// <exception cref="T:System.InvalidOperationException">An <see cref="T:System.Xml.XmlReader" /> method was called before a previous asynchronous operation finished. In this case, <see cref="T:System.InvalidOperationException" /> is thrown with the message “An asynchronous operation is already in progress.”</exception>
         public virtual string ReadElementContentAsString()
         {
             if (SetupReadElementContentAsXxx("ReadElementContentAsString"))
@@ -518,6 +718,15 @@ namespace System.Xml
 
         // Checks local name and namespace of the current element and returns its content as a string. 
         // Moves to the node following the element's end tag.
+        /// <summary>Checks that the specified local name and namespace URI matches that of the current element, then reads the current element and returns the contents as a <see cref="T:System.String" /> object.</summary>
+        /// <returns>The element content as a <see cref="T:System.String" /> object.</returns>
+        /// <param name="localName">The local name of the element.</param>
+        /// <param name="namespaceURI">The namespace URI of the element.</param>
+        /// <exception cref="T:System.InvalidOperationException">The <see cref="T:System.Xml.XmlReader" /> is not positioned on an element.</exception>
+        /// <exception cref="T:System.Xml.XmlException">The current element contains child elements.-or-The element content cannot be converted to a <see cref="T:System.String" /> object.</exception>
+        /// <exception cref="T:System.ArgumentNullException">The method is called with null arguments.</exception>
+        /// <exception cref="T:System.ArgumentException">The specified local name and namespace URI do not match that of the current element being read.</exception>
+        /// <exception cref="T:System.InvalidOperationException">An <see cref="T:System.Xml.XmlReader" /> method was called before a previous asynchronous operation finished. In this case, <see cref="T:System.InvalidOperationException" /> is thrown with the message “An asynchronous operation is already in progress.”</exception>
         public virtual string ReadElementContentAsString(string localName, string namespaceURI)
         {
             CheckElement(localName, namespaceURI);
@@ -546,18 +755,41 @@ namespace System.Xml
 
         // Attribute Accessors
         // The number of attributes on the current node.
+        /// <summary>When overridden in a derived class, gets the number of attributes on the current node.</summary>
+        /// <returns>The number of attributes on the current node.</returns>
+        /// <exception cref="T:System.InvalidOperationException">An <see cref="T:System.Xml.XmlReader" /> method was called before a previous asynchronous operation finished. In this case, <see cref="T:System.InvalidOperationException" /> is thrown with the message “An asynchronous operation is already in progress.”</exception>
         public abstract int AttributeCount { get; }
 
         // Gets the value of the attribute with the specified Name
+        /// <summary>When overridden in a derived class, gets the value of the attribute with the specified <see cref="P:System.Xml.XmlReader.Name" />.</summary>
+        /// <returns>The value of the specified attribute. If the attribute is not found or the value is String.Empty, null is returned.</returns>
+        /// <param name="name">The qualified name of the attribute.</param>
+        /// <exception cref="T:System.ArgumentNullException"><paramref name="name" /> is null.</exception>
+        /// <exception cref="T:System.InvalidOperationException">An <see cref="T:System.Xml.XmlReader" /> method was called before a previous asynchronous operation finished. In this case, <see cref="T:System.InvalidOperationException" /> is thrown with the message “An asynchronous operation is already in progress.”</exception>
         public abstract string GetAttribute(string name);
 
         // Gets the value of the attribute with the LocalName and NamespaceURI
+        /// <summary>When overridden in a derived class, gets the value of the attribute with the specified <see cref="P:System.Xml.XmlReader.LocalName" /> and <see cref="P:System.Xml.XmlReader.NamespaceURI" />.</summary>
+        /// <returns>The value of the specified attribute. If the attribute is not found or the value is String.Empty, null is returned. This method does not move the reader.</returns>
+        /// <param name="name">The local name of the attribute.</param>
+        /// <param name="namespaceURI">The namespace URI of the attribute.</param>
+        /// <exception cref="T:System.ArgumentNullException"><paramref name="name" /> is null.</exception>
+        /// <exception cref="T:System.InvalidOperationException">An <see cref="T:System.Xml.XmlReader" /> method was called before a previous asynchronous operation finished. In this case, <see cref="T:System.InvalidOperationException" /> is thrown with the message “An asynchronous operation is already in progress.”</exception>
         public abstract string GetAttribute(string name, string namespaceURI);
 
         // Gets the value of the attribute with the specified index.
+        /// <summary>When overridden in a derived class, gets the value of the attribute with the specified index.</summary>
+        /// <returns>The value of the specified attribute. This method does not move the reader.</returns>
+        /// <param name="i">The index of the attribute. The index is zero-based. (The first attribute has index 0.)</param>
+        /// <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="i" /> is out of range. It must be non-negative and less than the size of the attribute collection.</exception>
+        /// <exception cref="T:System.InvalidOperationException">An <see cref="T:System.Xml.XmlReader" /> method was called before a previous asynchronous operation finished. In this case, <see cref="T:System.InvalidOperationException" /> is thrown with the message “An asynchronous operation is already in progress.”</exception>
         public abstract string GetAttribute(int i);
 
         // Gets the value of the attribute with the specified index.
+        /// <summary>When overridden in a derived class, gets the value of the attribute with the specified index.</summary>
+        /// <returns>The value of the specified attribute.</returns>
+        /// <param name="i">The index of the attribute.</param>
+        /// <exception cref="T:System.InvalidOperationException">An <see cref="T:System.Xml.XmlReader" /> method was called before a previous asynchronous operation finished. In this case, <see cref="T:System.InvalidOperationException" /> is thrown with the message “An asynchronous operation is already in progress.”</exception>
         public virtual string this[int i]
         {
             get
@@ -567,6 +799,10 @@ namespace System.Xml
         }
 
         // Gets the value of the attribute with the specified Name.
+        /// <summary>When overridden in a derived class, gets the value of the attribute with the specified <see cref="P:System.Xml.XmlReader.Name" />.</summary>
+        /// <returns>The value of the specified attribute. If the attribute is not found, null is returned.</returns>
+        /// <param name="name">The qualified name of the attribute.</param>
+        /// <exception cref="T:System.InvalidOperationException">An <see cref="T:System.Xml.XmlReader" /> method was called before a previous asynchronous operation finished. In this case, <see cref="T:System.InvalidOperationException" /> is thrown with the message “An asynchronous operation is already in progress.”</exception>
         public virtual string this[string name]
         {
             get
@@ -576,6 +812,11 @@ namespace System.Xml
         }
 
         // Gets the value of the attribute with the LocalName and NamespaceURI
+        /// <summary>When overridden in a derived class, gets the value of the attribute with the specified <see cref="P:System.Xml.XmlReader.LocalName" /> and <see cref="P:System.Xml.XmlReader.NamespaceURI" />.</summary>
+        /// <returns>The value of the specified attribute. If the attribute is not found, null is returned.</returns>
+        /// <param name="name">The local name of the attribute.</param>
+        /// <param name="namespaceURI">The namespace URI of the attribute.</param>
+        /// <exception cref="T:System.InvalidOperationException">An <see cref="T:System.Xml.XmlReader" /> method was called before a previous asynchronous operation finished. In this case, <see cref="T:System.InvalidOperationException" /> is thrown with the message “An asynchronous operation is already in progress.”</exception>
         public virtual string this[string name, string namespaceURI]
         {
             get
@@ -585,12 +826,27 @@ namespace System.Xml
         }
 
         // Moves to the attribute with the specified Name.
+        /// <summary>When overridden in a derived class, moves to the attribute with the specified <see cref="P:System.Xml.XmlReader.Name" />.</summary>
+        /// <returns>true if the attribute is found; otherwise, false. If false, the reader's position does not change.</returns>
+        /// <param name="name">The qualified name of the attribute.</param>
+        /// <exception cref="T:System.InvalidOperationException">An <see cref="T:System.Xml.XmlReader" /> method was called before a previous asynchronous operation finished. In this case, <see cref="T:System.InvalidOperationException" /> is thrown with the message “An asynchronous operation is already in progress.”</exception>
+        /// <exception cref="T:System.ArgumentException">The parameter is an empty string.</exception>
         public abstract bool MoveToAttribute(string name);
 
         // Moves to the attribute with the specified LocalName and NamespaceURI.
+        /// <summary>When overridden in a derived class, moves to the attribute with the specified <see cref="P:System.Xml.XmlReader.LocalName" /> and <see cref="P:System.Xml.XmlReader.NamespaceURI" />.</summary>
+        /// <returns>true if the attribute is found; otherwise, false. If false, the reader's position does not change.</returns>
+        /// <param name="name">The local name of the attribute.</param>
+        /// <param name="ns">The namespace URI of the attribute.</param>
+        /// <exception cref="T:System.InvalidOperationException">An <see cref="T:System.Xml.XmlReader" /> method was called before a previous asynchronous operation finished. In this case, <see cref="T:System.InvalidOperationException" /> is thrown with the message “An asynchronous operation is already in progress.”</exception>
+        /// <exception cref="T:System.ArgumentNullException">Both parameter values are null.</exception>
         public abstract bool MoveToAttribute(string name, string ns);
 
         // Moves to the attribute with the specified index.
+        /// <summary>When overridden in a derived class, moves to the attribute with the specified index.</summary>
+        /// <param name="i">The index of the attribute.</param>
+        /// <exception cref="T:System.InvalidOperationException">An <see cref="T:System.Xml.XmlReader" /> method was called before a previous asynchronous operation finished. In this case, <see cref="T:System.InvalidOperationException" /> is thrown with the message “An asynchronous operation is already in progress.”</exception>
+        /// <exception cref="T:System.ArgumentOutOfRangeException">The parameter has a negative value.</exception>
         public virtual void MoveToAttribute(int i)
         {
             if (i < 0 || i >= AttributeCount)
@@ -608,30 +864,54 @@ namespace System.Xml
         }
 
         // Moves to the first attribute of the current node.
+        /// <summary>When overridden in a derived class, moves to the first attribute.</summary>
+        /// <returns>true if an attribute exists (the reader moves to the first attribute); otherwise, false (the position of the reader does not change).</returns>
+        /// <exception cref="T:System.InvalidOperationException">An <see cref="T:System.Xml.XmlReader" /> method was called before a previous asynchronous operation finished. In this case, <see cref="T:System.InvalidOperationException" /> is thrown with the message “An asynchronous operation is already in progress.”</exception>
         public abstract bool MoveToFirstAttribute();
 
         // Moves to the next attribute.
+        /// <summary>When overridden in a derived class, moves to the next attribute.</summary>
+        /// <returns>true if there is a next attribute; false if there are no more attributes.</returns>
+        /// <exception cref="T:System.InvalidOperationException">An <see cref="T:System.Xml.XmlReader" /> method was called before a previous asynchronous operation finished. In this case, <see cref="T:System.InvalidOperationException" /> is thrown with the message “An asynchronous operation is already in progress.”</exception>
         public abstract bool MoveToNextAttribute();
 
         // Moves to the element that contains the current attribute node.
+        /// <summary>When overridden in a derived class, moves to the element that contains the current attribute node.</summary>
+        /// <returns>true if the reader is positioned on an attribute (the reader moves to the element that owns the attribute); false if the reader is not positioned on an attribute (the position of the reader does not change).</returns>
+        /// <exception cref="T:System.InvalidOperationException">An <see cref="T:System.Xml.XmlReader" /> method was called before a previous asynchronous operation finished. In this case, <see cref="T:System.InvalidOperationException" /> is thrown with the message “An asynchronous operation is already in progress.”</exception>
         public abstract bool MoveToElement();
 
         // Parses the attribute value into one or more Text and/or EntityReference node types.
 
+        /// <summary>When overridden in a derived class, parses the attribute value into one or more Text, EntityReference, or EndEntity nodes.</summary>
+        /// <returns>true if there are nodes to return.false if the reader is not positioned on an attribute node when the initial call is made or if all the attribute values have been read.An empty attribute, such as, misc="", returns true with a single node with a value of String.Empty.</returns>
+        /// <exception cref="T:System.InvalidOperationException">An <see cref="T:System.Xml.XmlReader" /> method was called before a previous asynchronous operation finished. In this case, <see cref="T:System.InvalidOperationException" /> is thrown with the message “An asynchronous operation is already in progress.”</exception>
         public abstract bool ReadAttributeValue();
 
         // Moving through the Stream
         // Reads the next node from the stream.
 
+        /// <summary>When overridden in a derived class, reads the next node from the stream.</summary>
+        /// <returns>true if the next node was read successfully; otherwise, false.</returns>
+        /// <exception cref="T:System.Xml.XmlException">An error occurred while parsing the XML.</exception>
+        /// <exception cref="T:System.InvalidOperationException">An <see cref="T:System.Xml.XmlReader" /> method was called before a previous asynchronous operation finished. In this case, <see cref="T:System.InvalidOperationException" /> is thrown with the message “An asynchronous operation is already in progress.”</exception>
         public abstract bool Read();
 
         // Returns true when the XmlReader is positioned at the end of the stream.
+        /// <summary>When overridden in a derived class, gets a value indicating whether the reader is positioned at the end of the stream.</summary>
+        /// <returns>true if the reader is positioned at the end of the stream; otherwise, false.</returns>
+        /// <exception cref="T:System.InvalidOperationException">An <see cref="T:System.Xml.XmlReader" /> method was called before a previous asynchronous operation finished. In this case, <see cref="T:System.InvalidOperationException" /> is thrown with the message “An asynchronous operation is already in progress.”</exception>
         public abstract bool EOF { get; }
 
         // Returns the read state of the XmlReader.
+        /// <summary>When overridden in a derived class, gets the state of the reader.</summary>
+        /// <returns>One of the enumeration values that specifies the state of the reader.</returns>
+        /// <exception cref="T:System.InvalidOperationException">An <see cref="T:System.Xml.XmlReader" /> method was called before a previous asynchronous operation finished. In this case, <see cref="T:System.InvalidOperationException" /> is thrown with the message “An asynchronous operation is already in progress.”</exception>
         public abstract ReadState ReadState { get; }
 
         // Skips to the end tag of the current element.
+        /// <summary>Skips the children of the current node.</summary>
+        /// <exception cref="T:System.InvalidOperationException">An <see cref="T:System.Xml.XmlReader" /> method was called before a previous asynchronous operation finished. In this case, <see cref="T:System.InvalidOperationException" /> is thrown with the message “An asynchronous operation is already in progress.”</exception>
         public virtual void Skip()
         {
             if (ReadState != ReadState.Interactive)
@@ -642,12 +922,22 @@ namespace System.Xml
         }
 
         // Gets the XmlNameTable associated with the XmlReader.
+        /// <summary>When overridden in a derived class, gets the <see cref="T:System.Xml.XmlNameTable" /> associated with this implementation.</summary>
+        /// <returns>The XmlNameTable enabling you to get the atomized version of a string within the node.</returns>
+        /// <exception cref="T:System.InvalidOperationException">An <see cref="T:System.Xml.XmlReader" /> method was called before a previous asynchronous operation finished. In this case, <see cref="T:System.InvalidOperationException" /> is thrown with the message “An asynchronous operation is already in progress.”</exception>
         public abstract XmlNameTable NameTable { get; }
 
         // Resolves a namespace prefix in the current element's scope.
+        /// <summary>When overridden in a derived class, resolves a namespace prefix in the current element's scope.</summary>
+        /// <returns>The namespace URI to which the prefix maps or null if no matching prefix is found.</returns>
+        /// <param name="prefix">The prefix whose namespace URI you want to resolve. To match the default namespace, pass an empty string. </param>
+        /// <exception cref="T:System.InvalidOperationException">An <see cref="T:System.Xml.XmlReader" /> method was called before a previous asynchronous operation finished. In this case, <see cref="T:System.InvalidOperationException" /> is thrown with the message “An asynchronous operation is already in progress.”</exception>
         public abstract string LookupNamespace(string prefix);
 
         // Returns true if the XmlReader can expand general entities.
+        /// <summary>Gets a value indicating whether this reader can parse and resolve entities.</summary>
+        /// <returns>true if the reader can parse and resolve entities; otherwise, false.</returns>
+        /// <exception cref="T:System.InvalidOperationException">An <see cref="T:System.Xml.XmlReader" /> method was called before a previous asynchronous operation finished. In this case, <see cref="T:System.InvalidOperationException" /> is thrown with the message “An asynchronous operation is already in progress.”</exception>
         public virtual bool CanResolveEntity
         {
             get
@@ -657,10 +947,16 @@ namespace System.Xml
         }
 
         // Resolves the entity reference for nodes of NodeType EntityReference.
+        /// <summary>When overridden in a derived class, resolves the entity reference for EntityReference nodes.</summary>
+        /// <exception cref="T:System.InvalidOperationException">The reader is not positioned on an EntityReference node; this implementation of the reader cannot resolve entities (<see cref="P:System.Xml.XmlReader.CanResolveEntity" /> returns false).</exception>
+        /// <exception cref="T:System.InvalidOperationException">An <see cref="T:System.Xml.XmlReader" /> method was called before a previous asynchronous operation finished. In this case, <see cref="T:System.InvalidOperationException" /> is thrown with the message “An asynchronous operation is already in progress.”</exception>
         public abstract void ResolveEntity();
 
         // Binary content access methods
         // Returns true if the reader supports call to ReadContentAsBase64, ReadElementContentAsBase64, ReadContentAsBinHex and ReadElementContentAsBinHex.
+        /// <summary>Gets a value indicating whether the <see cref="T:System.Xml.XmlReader" /> implements the binary content read methods.</summary>
+        /// <returns>true if the binary content read methods are implemented; otherwise false.</returns>
+        /// <exception cref="T:System.InvalidOperationException">An <see cref="T:System.Xml.XmlReader" /> method was called before a previous asynchronous operation finished. In this case, <see cref="T:System.InvalidOperationException" /> is thrown with the message “An asynchronous operation is already in progress.”</exception>
         public virtual bool CanReadBinaryContent
         {
             get
@@ -670,24 +966,68 @@ namespace System.Xml
         }
 
         // Returns decoded bytes of the current base64 text content. Call this methods until it returns 0 to get all the data.
+        /// <summary>Reads the content and returns the Base64 decoded binary bytes.</summary>
+        /// <returns>The number of bytes written to the buffer.</returns>
+        /// <param name="buffer">The buffer into which to copy the resulting text. This value cannot be null.</param>
+        /// <param name="index">The offset into the buffer where to start copying the result.</param>
+        /// <param name="count">The maximum number of bytes to copy into the buffer. The actual number of bytes copied is returned from this method.</param>
+        /// <exception cref="T:System.ArgumentNullException">The <paramref name="buffer" /> value is null.</exception>
+        /// <exception cref="T:System.InvalidOperationException"><see cref="M:System.Xml.XmlReader.ReadContentAsBase64(System.Byte[],System.Int32,System.Int32)" /> is not supported on the current node.</exception>
+        /// <exception cref="T:System.ArgumentOutOfRangeException">The index into the buffer or index + count is larger than the allocated buffer size.</exception>
+        /// <exception cref="T:System.NotSupportedException">The <see cref="T:System.Xml.XmlReader" /> implementation does not support this method.</exception>
+        /// <exception cref="T:System.InvalidOperationException">An <see cref="T:System.Xml.XmlReader" /> method was called before a previous asynchronous operation finished. In this case, <see cref="T:System.InvalidOperationException" /> is thrown with the message “An asynchronous operation is already in progress.”</exception>
         public virtual int ReadContentAsBase64(byte[] buffer, int index, int count)
         {
             throw new NotSupportedException(SR.Format(SR.Xml_ReadBinaryContentNotSupported, "ReadContentAsBase64"));
         }
 
         // Returns decoded bytes of the current base64 element content. Call this methods until it returns 0 to get all the data.
+        /// <summary>Reads the element and decodes the Base64 content.</summary>
+        /// <returns>The number of bytes written to the buffer.</returns>
+        /// <param name="buffer">The buffer into which to copy the resulting text. This value cannot be null.</param>
+        /// <param name="index">The offset into the buffer where to start copying the result.</param>
+        /// <param name="count">The maximum number of bytes to copy into the buffer. The actual number of bytes copied is returned from this method.</param>
+        /// <exception cref="T:System.ArgumentNullException">The <paramref name="buffer" /> value is null.</exception>
+        /// <exception cref="T:System.InvalidOperationException">The current node is not an element node.</exception>
+        /// <exception cref="T:System.ArgumentOutOfRangeException">The index into the buffer or index + count is larger than the allocated buffer size.</exception>
+        /// <exception cref="T:System.NotSupportedException">The <see cref="T:System.Xml.XmlReader" /> implementation does not support this method.</exception>
+        /// <exception cref="T:System.Xml.XmlException">The element contains mixed-content.</exception>
+        /// <exception cref="T:System.FormatException">The content cannot be converted to the requested type.</exception>
+        /// <exception cref="T:System.InvalidOperationException">An <see cref="T:System.Xml.XmlReader" /> method was called before a previous asynchronous operation finished. In this case, <see cref="T:System.InvalidOperationException" /> is thrown with the message “An asynchronous operation is already in progress.”</exception>
         public virtual int ReadElementContentAsBase64(byte[] buffer, int index, int count)
         {
             throw new NotSupportedException(SR.Format(SR.Xml_ReadBinaryContentNotSupported, "ReadElementContentAsBase64"));
         }
 
         // Returns decoded bytes of the current binhex text content. Call this methods until it returns 0 to get all the data.
+        /// <summary>Reads the content and returns the BinHex decoded binary bytes.</summary>
+        /// <returns>The number of bytes written to the buffer.</returns>
+        /// <param name="buffer">The buffer into which to copy the resulting text. This value cannot be null.</param>
+        /// <param name="index">The offset into the buffer where to start copying the result.</param>
+        /// <param name="count">The maximum number of bytes to copy into the buffer. The actual number of bytes copied is returned from this method.</param>
+        /// <exception cref="T:System.ArgumentNullException">The <paramref name="buffer" /> value is null.</exception>
+        /// <exception cref="T:System.InvalidOperationException"><see cref="M:System.Xml.XmlReader.ReadContentAsBinHex(System.Byte[],System.Int32,System.Int32)" /> is not supported on the current node.</exception>
+        /// <exception cref="T:System.ArgumentOutOfRangeException">The index into the buffer or index + count is larger than the allocated buffer size.</exception>
+        /// <exception cref="T:System.NotSupportedException">The <see cref="T:System.Xml.XmlReader" /> implementation does not support this method.</exception>
+        /// <exception cref="T:System.InvalidOperationException">An <see cref="T:System.Xml.XmlReader" /> method was called before a previous asynchronous operation finished. In this case, <see cref="T:System.InvalidOperationException" /> is thrown with the message “An asynchronous operation is already in progress.”</exception>
         public virtual int ReadContentAsBinHex(byte[] buffer, int index, int count)
         {
             throw new NotSupportedException(SR.Format(SR.Xml_ReadBinaryContentNotSupported, "ReadContentAsBinHex"));
         }
 
         // Returns decoded bytes of the current binhex element content. Call this methods until it returns 0 to get all the data.
+        /// <summary>Reads the element and decodes the BinHex content.</summary>
+        /// <returns>The number of bytes written to the buffer.</returns>
+        /// <param name="buffer">The buffer into which to copy the resulting text. This value cannot be null.</param>
+        /// <param name="index">The offset into the buffer where to start copying the result.</param>
+        /// <param name="count">The maximum number of bytes to copy into the buffer. The actual number of bytes copied is returned from this method.</param>
+        /// <exception cref="T:System.ArgumentNullException">The <paramref name="buffer" /> value is null.</exception>
+        /// <exception cref="T:System.InvalidOperationException">The current node is not an element node.</exception>
+        /// <exception cref="T:System.ArgumentOutOfRangeException">The index into the buffer or index + count is larger than the allocated buffer size.</exception>
+        /// <exception cref="T:System.NotSupportedException">The <see cref="T:System.Xml.XmlReader" /> implementation does not support this method.</exception>
+        /// <exception cref="T:System.Xml.XmlException">The element contains mixed-content.</exception>
+        /// <exception cref="T:System.FormatException">The content cannot be converted to the requested type.</exception>
+        /// <exception cref="T:System.InvalidOperationException">An <see cref="T:System.Xml.XmlReader" /> method was called before a previous asynchronous operation finished. In this case, <see cref="T:System.InvalidOperationException" /> is thrown with the message “An asynchronous operation is already in progress.”</exception>
         public virtual int ReadElementContentAsBinHex(byte[] buffer, int index, int count)
         {
             throw new NotSupportedException(SR.Format(SR.Xml_ReadBinaryContentNotSupported, "ReadElementContentAsBinHex"));
@@ -696,6 +1036,9 @@ namespace System.Xml
         // Text streaming methods
 
         // Returns true if the XmlReader supports calls to ReadValueChunk.
+        /// <summary>Gets a value indicating whether the <see cref="T:System.Xml.XmlReader" /> implements the <see cref="M:System.Xml.XmlReader.ReadValueChunk(System.Char[],System.Int32,System.Int32)" /> method.</summary>
+        /// <returns>true if the <see cref="T:System.Xml.XmlReader" /> implements the <see cref="M:System.Xml.XmlReader.ReadValueChunk(System.Char[],System.Int32,System.Int32)" /> method; otherwise false.</returns>
+        /// <exception cref="T:System.InvalidOperationException">An <see cref="T:System.Xml.XmlReader" /> method was called before a previous asynchronous operation finished. In this case, <see cref="T:System.InvalidOperationException" /> is thrown with the message “An asynchronous operation is already in progress.”</exception>
         public virtual bool CanReadValueChunk
         {
             get
@@ -706,6 +1049,17 @@ namespace System.Xml
 
         // Returns a chunk of the value of the current node. Call this method in a loop to get all the data. 
         // Use this method to get a streaming access to the value of the current node.
+        /// <summary>Reads large streams of text embedded in an XML document.</summary>
+        /// <returns>The number of characters read into the buffer. The value zero is returned when there is no more text content.</returns>
+        /// <param name="buffer">The array of characters that serves as the buffer to which the text contents are written. This value cannot be null.</param>
+        /// <param name="index">The offset within the buffer where the <see cref="T:System.Xml.XmlReader" /> can start to copy the results.</param>
+        /// <param name="count">The maximum number of characters to copy into the buffer. The actual number of characters copied is returned from this method.</param>
+        /// <exception cref="T:System.InvalidOperationException">The current node does not have a value (<see cref="P:System.Xml.XmlReader.HasValue" /> is false).</exception>
+        /// <exception cref="T:System.ArgumentNullException">The <paramref name="buffer" /> value is null.</exception>
+        /// <exception cref="T:System.ArgumentOutOfRangeException">The index into the buffer, or index + count is larger than the allocated buffer size.</exception>
+        /// <exception cref="T:System.NotSupportedException">The <see cref="T:System.Xml.XmlReader" /> implementation does not support this method.</exception>
+        /// <exception cref="T:System.Xml.XmlException">The XML data is not well-formed.</exception>
+        /// <exception cref="T:System.InvalidOperationException">An <see cref="T:System.Xml.XmlReader" /> method was called before a previous asynchronous operation finished. In this case, <see cref="T:System.InvalidOperationException" /> is thrown with the message “An asynchronous operation is already in progress.”</exception>
         public virtual int ReadValueChunk(char[] buffer, int index, int count)
         {
             throw new NotSupportedException(SR.Xml_ReadValueChunkNotSupported);
@@ -715,6 +1069,10 @@ namespace System.Xml
         // Checks whether the current node is a content (non-whitespace text, CDATA, Element, EndElement, EntityReference
         // or EndEntity) node. If the node is not a content node, then the method skips ahead to the next content node or 
         // end of file. Skips over nodes of type ProcessingInstruction, DocumentType, Comment, Whitespace and SignificantWhitespace.
+        /// <summary>Checks whether the current node is a content (non-white space text, CDATA, Element, EndElement, EntityReference, or EndEntity) node. If the node is not a content node, the reader skips ahead to the next content node or end of file. It skips over nodes of the following type: ProcessingInstruction, DocumentType, Comment, Whitespace, or SignificantWhitespace.</summary>
+        /// <returns>The <see cref="P:System.Xml.XmlReader.NodeType" /> of the current node found by the method or XmlNodeType.None if the reader has reached the end of the input stream.</returns>
+        /// <exception cref="T:System.Xml.XmlException">Incorrect XML encountered in the input stream.</exception>
+        /// <exception cref="T:System.InvalidOperationException">An <see cref="T:System.Xml.XmlReader" /> method was called before a previous asynchronous operation finished. In this case, <see cref="T:System.InvalidOperationException" /> is thrown with the message “An asynchronous operation is already in progress.”</exception>
         public virtual XmlNodeType MoveToContent()
         {
             do
@@ -737,6 +1095,9 @@ namespace System.Xml
         }
 
         // Checks that the current node is an element and advances the reader to the next node.
+        /// <summary>Checks that the current node is an element and advances the reader to the next node.</summary>
+        /// <exception cref="T:System.Xml.XmlException">Incorrect XML was encountered in the input stream.</exception>
+        /// <exception cref="T:System.InvalidOperationException">An <see cref="T:System.Xml.XmlReader" /> method was called before a previous asynchronous operation finished. In this case, <see cref="T:System.InvalidOperationException" /> is thrown with the message “An asynchronous operation is already in progress.”</exception>
         public virtual void ReadStartElement()
         {
             if (MoveToContent() != XmlNodeType.Element)
@@ -747,6 +1108,10 @@ namespace System.Xml
         }
 
         // Checks that the current content node is an element with the given Name and advances the reader to the next node.
+        /// <summary>Checks that the current content node is an element with the given <see cref="P:System.Xml.XmlReader.Name" /> and advances the reader to the next node.</summary>
+        /// <param name="name">The qualified name of the element.</param>
+        /// <exception cref="T:System.Xml.XmlException">Incorrect XML was encountered in the input stream. -or- The <see cref="P:System.Xml.XmlReader.Name" /> of the element does not match the given <paramref name="name" />.</exception>
+        /// <exception cref="T:System.InvalidOperationException">An <see cref="T:System.Xml.XmlReader" /> method was called before a previous asynchronous operation finished. In this case, <see cref="T:System.InvalidOperationException" /> is thrown with the message “An asynchronous operation is already in progress.”</exception>
         public virtual void ReadStartElement(string name)
         {
             if (MoveToContent() != XmlNodeType.Element)
@@ -765,6 +1130,11 @@ namespace System.Xml
 
         // Checks that the current content node is an element with the given LocalName and NamespaceURI
         // and advances the reader to the next node.
+        /// <summary>Checks that the current content node is an element with the given <see cref="P:System.Xml.XmlReader.LocalName" /> and <see cref="P:System.Xml.XmlReader.NamespaceURI" /> and advances the reader to the next node.</summary>
+        /// <param name="localname">The local name of the element.</param>
+        /// <param name="ns">The namespace URI of the element.</param>
+        /// <exception cref="T:System.Xml.XmlException">Incorrect XML was encountered in the input stream.-or-The <see cref="P:System.Xml.XmlReader.LocalName" /> and <see cref="P:System.Xml.XmlReader.NamespaceURI" /> properties of the element found do not match the given arguments.</exception>
+        /// <exception cref="T:System.InvalidOperationException">An <see cref="T:System.Xml.XmlReader" /> method was called before a previous asynchronous operation finished. In this case, <see cref="T:System.InvalidOperationException" /> is thrown with the message “An asynchronous operation is already in progress.”</exception>
         public virtual void ReadStartElement(string localname, string ns)
         {
             if (MoveToContent() != XmlNodeType.Element)
@@ -782,6 +1152,9 @@ namespace System.Xml
         }
 
         // Checks that the current content node is an end tag and advances the reader to the next node.
+        /// <summary>Checks that the current content node is an end tag and advances the reader to the next node.</summary>
+        /// <exception cref="T:System.Xml.XmlException">The current node is not an end tag or if incorrect XML is encountered in the input stream.</exception>
+        /// <exception cref="T:System.InvalidOperationException">An <see cref="T:System.Xml.XmlReader" /> method was called before a previous asynchronous operation finished. In this case, <see cref="T:System.InvalidOperationException" /> is thrown with the message “An asynchronous operation is already in progress.”</exception>
         public virtual void ReadEndElement()
         {
             if (MoveToContent() != XmlNodeType.EndElement)
@@ -792,6 +1165,10 @@ namespace System.Xml
         }
 
         // Calls MoveToContent and tests if the current content node is a start tag or empty element tag (XmlNodeType.Element).
+        /// <summary>Calls <see cref="M:System.Xml.XmlReader.MoveToContent" /> and tests if the current content node is a start tag or empty element tag.</summary>
+        /// <returns>true if <see cref="M:System.Xml.XmlReader.MoveToContent" /> finds a start tag or empty element tag; false if a node type other than XmlNodeType.Element was found.</returns>
+        /// <exception cref="T:System.Xml.XmlException">Incorrect XML is encountered in the input stream.</exception>
+        /// <exception cref="T:System.InvalidOperationException">An <see cref="T:System.Xml.XmlReader" /> method was called before a previous asynchronous operation finished. In this case, <see cref="T:System.InvalidOperationException" /> is thrown with the message “An asynchronous operation is already in progress.”</exception>
         public virtual bool IsStartElement()
         {
             return MoveToContent() == XmlNodeType.Element;
@@ -799,6 +1176,11 @@ namespace System.Xml
 
         // Calls MoveToContentand tests if the current content node is a start tag or empty element tag (XmlNodeType.Element) and if the
         // Name property of the element found matches the given argument.
+        /// <summary>Calls <see cref="M:System.Xml.XmlReader.MoveToContent" /> and tests if the current content node is a start tag or empty element tag and if the <see cref="P:System.Xml.XmlReader.Name" /> property of the element found matches the given argument.</summary>
+        /// <returns>true if the resulting node is an element and the Name property matches the specified string. false if a node type other than XmlNodeType.Element was found or if the element Name property does not match the specified string.</returns>
+        /// <param name="name">The string matched against the Name property of the element found.</param>
+        /// <exception cref="T:System.Xml.XmlException">Incorrect XML is encountered in the input stream.</exception>
+        /// <exception cref="T:System.InvalidOperationException">An <see cref="T:System.Xml.XmlReader" /> method was called before a previous asynchronous operation finished. In this case, <see cref="T:System.InvalidOperationException" /> is thrown with the message “An asynchronous operation is already in progress.”</exception>
         public virtual bool IsStartElement(string name)
         {
             return (MoveToContent() == XmlNodeType.Element) &&
@@ -807,6 +1189,12 @@ namespace System.Xml
 
         // Calls MoveToContent and tests if the current content node is a start tag or empty element tag (XmlNodeType.Element) and if
         // the LocalName and NamespaceURI properties of the element found match the given strings.
+        /// <summary>Calls <see cref="M:System.Xml.XmlReader.MoveToContent" /> and tests if the current content node is a start tag or empty element tag and if the <see cref="P:System.Xml.XmlReader.LocalName" /> and <see cref="P:System.Xml.XmlReader.NamespaceURI" /> properties of the element found match the given strings.</summary>
+        /// <returns>true if the resulting node is an element. false if a node type other than XmlNodeType.Element was found or if the LocalName and NamespaceURI properties of the element do not match the specified strings.</returns>
+        /// <param name="localname">The string to match against the LocalName property of the element found.</param>
+        /// <param name="ns">The string to match against the NamespaceURI property of the element found.</param>
+        /// <exception cref="T:System.Xml.XmlException">Incorrect XML is encountered in the input stream.</exception>
+        /// <exception cref="T:System.InvalidOperationException">An <see cref="T:System.Xml.XmlReader" /> method was called before a previous asynchronous operation finished. In this case, <see cref="T:System.InvalidOperationException" /> is thrown with the message “An asynchronous operation is already in progress.”</exception>
         public virtual bool IsStartElement(string localname, string ns)
         {
             return (MoveToContent() == XmlNodeType.Element) &&
@@ -814,6 +1202,11 @@ namespace System.Xml
         }
 
         // Reads to the following element with the given Name.
+        /// <summary>Reads until an element with the specified qualified name is found.</summary>
+        /// <returns>true if a matching element is found; otherwise false and the <see cref="T:System.Xml.XmlReader" /> is in an end of file state.</returns>
+        /// <param name="name">The qualified name of the element.</param>
+        /// <exception cref="T:System.InvalidOperationException">An <see cref="T:System.Xml.XmlReader" /> method was called before a previous asynchronous operation finished. In this case, <see cref="T:System.InvalidOperationException" /> is thrown with the message “An asynchronous operation is already in progress.”</exception>
+        /// <exception cref="T:System.ArgumentException">The parameter is an empty string.</exception>
         public virtual bool ReadToFollowing(string name)
         {
             if (name == null || name.Length == 0)
@@ -835,6 +1228,12 @@ namespace System.Xml
         }
 
         // Reads to the following element with the given LocalName and NamespaceURI.
+        /// <summary>Reads until an element with the specified local name and namespace URI is found.</summary>
+        /// <returns>true if a matching element is found; otherwise false and the <see cref="T:System.Xml.XmlReader" /> is in an end of file state.</returns>
+        /// <param name="localName">The local name of the element.</param>
+        /// <param name="namespaceURI">The namespace URI of the element.</param>
+        /// <exception cref="T:System.InvalidOperationException">An <see cref="T:System.Xml.XmlReader" /> method was called before a previous asynchronous operation finished. In this case, <see cref="T:System.InvalidOperationException" /> is thrown with the message “An asynchronous operation is already in progress.”</exception>
+        /// <exception cref="T:System.ArgumentNullException">Both parameter values are null.</exception>
         public virtual bool ReadToFollowing(string localName, string namespaceURI)
         {
             if (localName == null || localName.Length == 0)
@@ -862,6 +1261,11 @@ namespace System.Xml
         }
 
         // Reads to the first descendant of the current element with the given Name.
+        /// <summary>Advances the <see cref="T:System.Xml.XmlReader" /> to the next descendant element with the specified qualified name.</summary>
+        /// <returns>true if a matching descendant element is found; otherwise false. If a matching child element is not found, the <see cref="T:System.Xml.XmlReader" /> is positioned on the end tag (<see cref="P:System.Xml.XmlReader.NodeType" /> is XmlNodeType.EndElement) of the element.If the <see cref="T:System.Xml.XmlReader" /> is not positioned on an element when <see cref="M:System.Xml.XmlReader.ReadToDescendant(System.String)" /> was called, this method returns false and the position of the <see cref="T:System.Xml.XmlReader" /> is not changed.</returns>
+        /// <param name="name">The qualified name of the element you wish to move to.</param>
+        /// <exception cref="T:System.InvalidOperationException">An <see cref="T:System.Xml.XmlReader" /> method was called before a previous asynchronous operation finished. In this case, <see cref="T:System.InvalidOperationException" /> is thrown with the message “An asynchronous operation is already in progress.”</exception>
+        /// <exception cref="T:System.ArgumentException">The parameter is an empty string.</exception>
         public virtual bool ReadToDescendant(string name)
         {
             if (name == null || name.Length == 0)
@@ -904,6 +1308,12 @@ namespace System.Xml
         }
 
         // Reads to the first descendant of the current element with the given LocalName and NamespaceURI.
+        /// <summary>Advances the <see cref="T:System.Xml.XmlReader" /> to the next descendant element with the specified local name and namespace URI.</summary>
+        /// <returns>true if a matching descendant element is found; otherwise false. If a matching child element is not found, the <see cref="T:System.Xml.XmlReader" /> is positioned on the end tag (<see cref="P:System.Xml.XmlReader.NodeType" /> is XmlNodeType.EndElement) of the element.If the <see cref="T:System.Xml.XmlReader" /> is not positioned on an element when <see cref="M:System.Xml.XmlReader.ReadToDescendant(System.String,System.String)" /> was called, this method returns false and the position of the <see cref="T:System.Xml.XmlReader" /> is not changed.</returns>
+        /// <param name="localName">The local name of the element you wish to move to.</param>
+        /// <param name="namespaceURI">The namespace URI of the element you wish to move to.</param>
+        /// <exception cref="T:System.InvalidOperationException">An <see cref="T:System.Xml.XmlReader" /> method was called before a previous asynchronous operation finished. In this case, <see cref="T:System.InvalidOperationException" /> is thrown with the message “An asynchronous operation is already in progress.”</exception>
+        /// <exception cref="T:System.ArgumentNullException">Both parameter values are null.</exception>
         public virtual bool ReadToDescendant(string localName, string namespaceURI)
         {
             if (localName == null || localName.Length == 0)
@@ -951,6 +1361,11 @@ namespace System.Xml
         }
 
         // Reads to the next sibling of the current element with the given Name.
+        /// <summary>Advances the XmlReader to the next sibling element with the specified qualified name.</summary>
+        /// <returns>true if a matching sibling element is found; otherwise false. If a matching sibling element is not found, the XmlReader is positioned on the end tag (<see cref="P:System.Xml.XmlReader.NodeType" /> is XmlNodeType.EndElement) of the parent element.</returns>
+        /// <param name="name">The qualified name of the sibling element you wish to move to.</param>
+        /// <exception cref="T:System.InvalidOperationException">An <see cref="T:System.Xml.XmlReader" /> method was called before a previous asynchronous operation finished. In this case, <see cref="T:System.InvalidOperationException" /> is thrown with the message “An asynchronous operation is already in progress.”</exception>
+        /// <exception cref="T:System.ArgumentException">The parameter is an empty string.</exception>
         public virtual bool ReadToNextSibling(string name)
         {
             if (name == null || name.Length == 0)
@@ -979,6 +1394,12 @@ namespace System.Xml
         }
 
         // Reads to the next sibling of the current element with the given LocalName and NamespaceURI.
+        /// <summary>Advances the XmlReader to the next sibling element with the specified local name and namespace URI.</summary>
+        /// <returns>true if a matching sibling element is found; otherwise, false. If a matching sibling element is not found, the XmlReader is positioned on the end tag (<see cref="P:System.Xml.XmlReader.NodeType" /> is XmlNodeType.EndElement) of the parent element.</returns>
+        /// <param name="localName">The local name of the sibling element you wish to move to.</param>
+        /// <param name="namespaceURI">The namespace URI of the sibling element you wish to move to.</param>
+        /// <exception cref="T:System.InvalidOperationException">An <see cref="T:System.Xml.XmlReader" /> method was called before a previous asynchronous operation finished. In this case, <see cref="T:System.InvalidOperationException" /> is thrown with the message “An asynchronous operation is already in progress.”</exception>
+        /// <exception cref="T:System.ArgumentNullException">Both parameter values are null.</exception>
         public virtual bool ReadToNextSibling(string localName, string namespaceURI)
         {
             if (localName == null || localName.Length == 0)
@@ -1012,6 +1433,10 @@ namespace System.Xml
         }
 
         // Returns true if the given argument is a valid Name.
+        /// <summary>Returns a value indicating whether the string argument is a valid XML name.</summary>
+        /// <returns>true if the name is valid; otherwise, false.</returns>
+        /// <param name="str">The name to validate.</param>
+        /// <exception cref="T:System.ArgumentNullException">The <paramref name="str" /> value is null.</exception>
         public static bool IsName(string str)
         {
             if (str == null)
@@ -1022,6 +1447,10 @@ namespace System.Xml
         }
 
         // Returns true if the given argument is a valid NmToken.
+        /// <summary>Returns a value indicating whether or not the string argument is a valid XML name token.</summary>
+        /// <returns>true if it is a valid name token; otherwise false.</returns>
+        /// <param name="str">The name token to validate.</param>
+        /// <exception cref="T:System.ArgumentNullException">The <paramref name="str" /> value is null.</exception>
         public static bool IsNameToken(string str)
         {
             if (str == null)
@@ -1032,6 +1461,10 @@ namespace System.Xml
         }
 
         // Returns the inner content (including markup) of an element or attribute as a string.
+        /// <summary>When overridden in a derived class, reads all the content, including markup, as a string.</summary>
+        /// <returns>All the XML content, including markup, in the current node. If the current node has no children, an empty string is returned.If the current node is neither an element nor attribute, an empty string is returned.</returns>
+        /// <exception cref="T:System.Xml.XmlException">The XML was not well-formed, or an error occurred while parsing the XML.</exception>
+        /// <exception cref="T:System.InvalidOperationException">An <see cref="T:System.Xml.XmlReader" /> method was called before a previous asynchronous operation finished. In this case, <see cref="T:System.InvalidOperationException" /> is thrown with the message “An asynchronous operation is already in progress.”</exception>
         public virtual string ReadInnerXml()
         {
             if (ReadState != ReadState.Interactive)
@@ -1134,6 +1567,10 @@ namespace System.Xml
         }
 
         // Returns the current element and its descendants or an attribute as a string.
+        /// <summary>When overridden in a derived class, reads the content, including markup, representing this node and all its children.</summary>
+        /// <returns>If the reader is positioned on an element or an attribute node, this method returns all the XML content, including markup, of the current node and all its children; otherwise, it returns an empty string.</returns>
+        /// <exception cref="T:System.Xml.XmlException">The XML was not well-formed, or an error occurred while parsing the XML.</exception>
+        /// <exception cref="T:System.InvalidOperationException">An <see cref="T:System.Xml.XmlReader" /> method was called before a previous asynchronous operation finished. In this case, <see cref="T:System.InvalidOperationException" /> is thrown with the message “An asynchronous operation is already in progress.”</exception>
         public virtual string ReadOuterXml()
         {
             if (ReadState != ReadState.Interactive)
@@ -1182,6 +1619,10 @@ namespace System.Xml
 
 
         // Returns an XmlReader that will read only the current element and its descendants and then go to EOF state.
+        /// <summary>Returns a new XmlReader instance that can be used to read the current node, and all its descendants.</summary>
+        /// <returns>A new XML reader instance set to <see cref="F:System.Xml.ReadState.Initial" />. Calling the <see cref="M:System.Xml.XmlReader.Read" /> method positions the new reader on the node that was current before the call to the <see cref="M:System.Xml.XmlReader.ReadSubtree" /> method.</returns>
+        /// <exception cref="T:System.InvalidOperationException">The XML reader isn't positioned on an element when this method is called.</exception>
+        /// <exception cref="T:System.InvalidOperationException">An <see cref="T:System.Xml.XmlReader" /> method was called before a previous asynchronous operation finished. In this case, <see cref="T:System.InvalidOperationException" /> is thrown with the message “An asynchronous operation is already in progress.”</exception>
         public virtual XmlReader ReadSubtree()
         {
             if (NodeType != XmlNodeType.Element)
@@ -1192,6 +1633,9 @@ namespace System.Xml
         }
 
         // Returns true when the current node has any attributes.
+        /// <summary>Gets a value indicating whether the current node has any attributes.</summary>
+        /// <returns>true if the current node has attributes; otherwise, false.</returns>
+        /// <exception cref="T:System.InvalidOperationException">An <see cref="T:System.Xml.XmlReader" /> method was called before a previous asynchronous operation finished. In this case, <see cref="T:System.InvalidOperationException" /> is thrown with the message “An asynchronous operation is already in progress.”</exception>
         public virtual bool HasAttributes
         {
             get
@@ -1203,11 +1647,16 @@ namespace System.Xml
         //
         // IDisposable interface
         //
+        /// <summary>Releases all resources used by the current instance of the <see cref="T:System.Xml.XmlReader" /> class.</summary>
+        /// <exception cref="T:System.InvalidOperationException">An <see cref="T:System.Xml.XmlReader" /> method was called before a previous asynchronous operation finished. In this case, <see cref="T:System.InvalidOperationException" /> is thrown with the message “An asynchronous operation is already in progress.”</exception>
         public void Dispose()
         {
             Dispose(true);
         }
 
+        /// <summary>Releases the unmanaged resources used by the <see cref="T:System.Xml.XmlReader" /> and optionally releases the managed resources.</summary>
+        /// <param name="disposing">true to release both managed and unmanaged resources; false to release only unmanaged resources.</param>
+        /// <exception cref="T:System.InvalidOperationException">An <see cref="T:System.Xml.XmlReader" /> method was called before a previous asynchronous operation finished. In this case, <see cref="T:System.InvalidOperationException" /> is thrown with the message “An asynchronous operation is already in progress.”</exception>
         protected virtual void Dispose(bool disposing)
         {
         }
@@ -1504,6 +1953,13 @@ namespace System.Xml
         //
 
         // Creates an XmlReader for parsing XML from the given Uri.
+        /// <summary>Creates a new <see cref="T:System.Xml.XmlReader" /> instance with specified URI.</summary>
+        /// <returns>An object that is used to read the XML data in the stream.</returns>
+        /// <param name="inputUri">The URI for the file that contains the XML data. The <see cref="T:System.Xml.XmlUrlResolver" /> class is used to convert the path to a canonical data representation.</param>
+        /// <exception cref="T:System.ArgumentNullException">The <paramref name="inputUri" /> value is null.</exception>
+        /// <exception cref="T:System.Security.SecurityException">The <see cref="T:System.Xml.XmlReader" /> does not have sufficient permissions to access the location of the XML data.</exception>
+        /// <exception cref="T:System.IO.FileNotFoundException">The file identified by the URI does not exist.</exception>
+        /// <exception cref="T:System.UriFormatException">In the .NET for Windows Store apps or the Portable Class Library, catch the base class exception, <see cref="T:System.FormatException" />, instead.The URI format is not correct.</exception>
         public static XmlReader Create(string inputUri)
         {
             return XmlReader.Create(inputUri, (XmlReaderSettings)null, (XmlParserContext)null);
@@ -1526,6 +1982,11 @@ namespace System.Xml
         }
 
         // Creates an XmlReader according for parsing XML from the given stream.
+        /// <summary>Creates a new <see cref="T:System.Xml.XmlReader" /> instance using the specified stream with default settings.</summary>
+        /// <returns>An object that is used to read the XML data in the stream.</returns>
+        /// <param name="input">The stream that contains the XML data.The <see cref="T:System.Xml.XmlReader" /> scans the first bytes of the stream looking for a byte order mark or other sign of encoding. When encoding is determined, the encoding is used to continue reading the stream, and processing continues parsing the input as a stream of (Unicode) characters.</param>
+        /// <exception cref="T:System.ArgumentNullException">The <paramref name="input" /> value is null.</exception>
+        /// <exception cref="T:System.Security.SecurityException">The <see cref="T:System.Xml.XmlReader" /> does not have sufficient permissions to access the location of the XML data.</exception>
         public static XmlReader Create(Stream input)
         {
             return Create(input, (XmlReaderSettings)null, (string)string.Empty);
@@ -1558,6 +2019,10 @@ namespace System.Xml
         }
 
         // Creates an XmlReader according for parsing XML from the given TextReader.
+        /// <summary>Creates a new <see cref="T:System.Xml.XmlReader" /> instance by using the specified text reader.</summary>
+        /// <returns>An object that is used to read the XML data in the stream.</returns>
+        /// <param name="input">The text reader from which to read the XML data. A text reader returns a stream of Unicode characters, so the encoding specified in the XML declaration is not used by the XML reader to decode the data stream.</param>
+        /// <exception cref="T:System.ArgumentNullException">The <paramref name="input" /> value is null.</exception>
         public static XmlReader Create(TextReader input)
         {
             return Create(input, (XmlReaderSettings)null, (string)string.Empty);

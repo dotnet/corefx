@@ -27,21 +27,32 @@ namespace System.Xml
         private const int HResults_Xml = unchecked((int)0x80131940);
 
         //provided to meet the ECMA standards
+        /// <summary>Initializes a new instance of the XmlException class.</summary>
         public XmlException() : this(null)
         {
         }
 
         //provided to meet the ECMA standards
+        /// <summary>Initializes a new instance of the XmlException class with a specified error message.</summary>
+        /// <param name="message">The error description. </param>
         public XmlException(String message) : this(message, ((Exception)null), 0, 0)
         {
         }
 
         //provided to meet ECMA standards
+        /// <summary>Initializes a new instance of the XmlException class.</summary>
+        /// <param name="message">The description of the error condition. </param>
+        /// <param name="innerException">The <see cref="T:System.Exception" /> that threw the XmlException, if any. This value can be null. </param>
         public XmlException(String message, Exception innerException) : this(message, innerException, 0, 0)
         {
         }
 
         //provided to meet ECMA standards
+        /// <summary>Initializes a new instance of the XmlException class with the specified message, inner exception, line number, and line position.</summary>
+        /// <param name="message">The error description. </param>
+        /// <param name="innerException">The exception that is the cause of the current exception. This value can be null. </param>
+        /// <param name="lineNumber">The line number indicating where the error occurred. </param>
+        /// <param name="linePosition">The line position indicating where the error occurred. </param>
         public XmlException(String message, Exception innerException, int lineNumber, int linePosition) :
             this(message, innerException, lineNumber, linePosition, null)
         {
@@ -218,11 +229,15 @@ namespace System.Xml
             return aStringList;
         }
 
+        /// <summary>Gets the line number indicating where the error occurred.</summary>
+        /// <returns>The line number indicating where the error occurred.</returns>
         public int LineNumber
         {
             get { return _lineNumber; }
         }
 
+        /// <summary>Gets the line position indicating where the error occurred.</summary>
+        /// <returns>The line position indicating where the error occurred.</returns>
         public int LinePosition
         {
             get { return _linePosition; }

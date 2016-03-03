@@ -9,6 +9,7 @@ using System.Runtime.Versioning;
 namespace System.Xml
 {
     // XmlReaderSettings class specifies basic features of an XmlReader.
+    /// <summary>Specifies a set of features to support on the <see cref="T:System.Xml.XmlReader" /> object created by the <see cref="Overload:System.Xml.XmlReader.Create" /> method. </summary>
     public sealed class XmlReaderSettings
     {
         //
@@ -53,6 +54,7 @@ namespace System.Xml
         //
         // Constructor
         //
+        /// <summary>Initializes a new instance of the <see cref="T:System.Xml.XmlReaderSettings" /> class.</summary>
         public XmlReaderSettings()
         {
             Initialize();
@@ -62,6 +64,8 @@ namespace System.Xml
         // Properties
         //
 
+        /// <summary>Gets or sets whether asynchronous <see cref="T:System.Xml.XmlReader" /> methods can be used on a particular <see cref="T:System.Xml.XmlReader" /> instance.</summary>
+        /// <returns>true if asynchronous methods can be used; otherwise, false.</returns>
         public bool Async
         {
             get
@@ -76,6 +80,8 @@ namespace System.Xml
         }
 
         // Nametable
+        /// <summary>Gets or sets the <see cref="T:System.Xml.XmlNameTable" /> used for atomized string comparisons.</summary>
+        /// <returns>The <see cref="T:System.Xml.XmlNameTable" /> that stores all the atomized strings used by all <see cref="T:System.Xml.XmlReader" /> instances created using this <see cref="T:System.Xml.XmlReaderSettings" /> object.The default is null. The created <see cref="T:System.Xml.XmlReader" /> instance will use a new empty <see cref="T:System.Xml.NameTable" /> if this value is null.</returns>
         public XmlNameTable NameTable
         {
             get
@@ -97,6 +103,8 @@ namespace System.Xml
 
 
         // Text settings
+        /// <summary>Gets or sets line number offset of the <see cref="T:System.Xml.XmlReader" /> object.</summary>
+        /// <returns>The line number offset. The default is 0.</returns>
         public int LineNumberOffset
         {
             get
@@ -110,6 +118,8 @@ namespace System.Xml
             }
         }
 
+        /// <summary>Gets or sets line position offset of the <see cref="T:System.Xml.XmlReader" /> object.</summary>
+        /// <returns>The line position offset. The default is 0.</returns>
         public int LinePositionOffset
         {
             get
@@ -124,6 +134,8 @@ namespace System.Xml
         }
 
         // Conformance settings
+        /// <summary>Gets or sets the level of conformance which the <see cref="T:System.Xml.XmlReader" /> will comply.</summary>
+        /// <returns>One of the enumeration values that specifies the level of conformance that the XML reader will enforce. The default is <see cref="F:System.Xml.ConformanceLevel.Document" />.</returns>
         public ConformanceLevel ConformanceLevel
         {
             get
@@ -142,6 +154,8 @@ namespace System.Xml
             }
         }
 
+        /// <summary>Gets or sets a value indicating whether to do character checking.</summary>
+        /// <returns>true to do character checking; otherwise false. The default is true.NoteIf the <see cref="T:System.Xml.XmlReader" /> is processing text data, it always checks that the XML names and text content are valid, regardless of the property setting. Setting <see cref="P:System.Xml.XmlReaderSettings.CheckCharacters" /> to false turns off character checking for character entity references.</returns>
         public bool CheckCharacters
         {
             get
@@ -155,6 +169,8 @@ namespace System.Xml
             }
         }
 
+        /// <summary>Gets or sets a value indicating the maximum allowable number of characters in an XML document. A zero (0) value means no limits on the size of the XML document. A non-zero value specifies the maximum size, in characters.</summary>
+        /// <returns>The maximum allowable number of characters in an XML document. The default is 0.</returns>
         public long MaxCharactersInDocument
         {
             get
@@ -172,6 +188,8 @@ namespace System.Xml
             }
         }
 
+        /// <summary>Gets or sets a value indicating the maximum allowable number of characters in a document that result from expanding entities.</summary>
+        /// <returns>The maximum allowable number of characters from expanded entities. The default is 0.</returns>
         public long MaxCharactersFromEntities
         {
             get
@@ -190,6 +208,8 @@ namespace System.Xml
         }
 
         // Filtering settings
+        /// <summary>Gets or sets a value indicating whether to ignore insignificant white space.</summary>
+        /// <returns>true to ignore white space; otherwise false. The default is false.</returns>
         public bool IgnoreWhitespace
         {
             get
@@ -203,6 +223,8 @@ namespace System.Xml
             }
         }
 
+        /// <summary>Gets or sets a value indicating whether to ignore processing instructions.</summary>
+        /// <returns>true to ignore processing instructions; otherwise false. The default is false.</returns>
         public bool IgnoreProcessingInstructions
         {
             get
@@ -216,6 +238,8 @@ namespace System.Xml
             }
         }
 
+        /// <summary>Gets or sets a value indicating whether to ignore comments.</summary>
+        /// <returns>true to ignore comments; otherwise false. The default is false.</returns>
         public bool IgnoreComments
         {
             get
@@ -230,6 +254,8 @@ namespace System.Xml
         }
 
 
+        /// <summary>Gets or sets a value that determines the processing of DTDs.</summary>
+        /// <returns>One of the enumeration values that determines the processing of DTDs. The default is <see cref="F:System.Xml.DtdProcessing.Prohibit" />.</returns>
         public DtdProcessing DtdProcessing
         {
             get
@@ -248,6 +274,8 @@ namespace System.Xml
             }
         }
 
+        /// <summary>Gets or sets a value indicating whether the underlying stream or <see cref="T:System.IO.TextReader" /> should be closed when the reader is closed.</summary>
+        /// <returns>true to close the underlying stream or <see cref="T:System.IO.TextReader" /> when the reader is closed; otherwise false. The default is false.</returns>
         public bool CloseInput
         {
             get
@@ -265,12 +293,15 @@ namespace System.Xml
         //
         // Public methods
         //
+        /// <summary>Resets the members of the settings class to their default values.</summary>
         public void Reset()
         {
             CheckReadOnly("Reset");
             Initialize();
         }
 
+        /// <summary>Creates a copy of the <see cref="T:System.Xml.XmlReaderSettings" /> instance.</summary>
+        /// <returns>The cloned <see cref="T:System.Xml.XmlReaderSettings" /> object.</returns>
         public XmlReaderSettings Clone()
         {
             XmlReaderSettings clonedSettings = this.MemberwiseClone() as XmlReaderSettings;
