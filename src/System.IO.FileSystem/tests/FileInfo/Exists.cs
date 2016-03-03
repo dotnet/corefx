@@ -54,7 +54,7 @@ namespace System.IO.Tests
         }
 
         [Fact]
-        [PlatformSpecific(PlatformID.Linux | PlatformID.FreeBSD)] // testing case-Sensitivity
+        [PlatformSpecific(PlatformID.FreeBSD | PlatformID.Linux | PlatformID.NetBSD)] // testing case-Sensitivity
         public void CaseSensitivity()
         {
             string path = GetTestFilePath();
