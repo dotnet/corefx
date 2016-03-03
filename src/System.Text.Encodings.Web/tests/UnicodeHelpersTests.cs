@@ -2,18 +2,15 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Text.Encodings.Web;
 using System.Text.Unicode;
 using Xunit;
 
-namespace Microsoft.Framework.WebEncoders
+namespace System.Text.Encodings.Web.Tests
 {
     public unsafe class UnicodeHelpersTests
     {
@@ -92,11 +89,9 @@ namespace Microsoft.Framework.WebEncoders
                 {
                     continue; // no surrogates
                 }
-
-                // Arrange
+                
                 byte[] expectedUtf8Bytes = _utf8EncodingThrowOnInvalidBytes.GetBytes(Char.ConvertFromUtf32(i));
 
-                // Act
                 List<byte> actualUtf8Bytes = new List<byte>(4);
                 uint asUtf8 = (uint)UnicodeHelpers.GetUtf8RepresentationForScalarValue((uint)i);
                 do
@@ -104,7 +99,6 @@ namespace Microsoft.Framework.WebEncoders
                     actualUtf8Bytes.Add((byte)asUtf8);
                 } while ((asUtf8 >>= 8) != 0);
 
-                // Assert
                 Assert.Equal(expectedUtf8Bytes, actualUtf8Bytes);
             }
         }

@@ -2,13 +2,11 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using Microsoft.Framework.WebEncoders;
-using System;
 using System.IO;
-using Xunit;
 using System.Text.Unicode;
+using Xunit;
 
-namespace System.Text.Encodings.Web
+namespace System.Text.Encodings.Web.Tests
 {
     public class EncoderExtensionsTests
     {
@@ -21,14 +19,10 @@ namespace System.Text.Encodings.Web
         [Fact]
         public void HtmlEncode_PositiveTestCase()
         {
-            // Arrange
             HtmlEncoder encoder = HtmlEncoder.Create(UnicodeRanges.All);
             StringWriter writer = new StringWriter();
 
-            // Act
             encoder.Encode(writer, "Hello+there!");
-
-            // Assert
             Assert.Equal("Hello&#x2B;there!", writer.ToString());
         }
 
@@ -41,14 +35,10 @@ namespace System.Text.Encodings.Web
         [Fact]
         public void JavaScriptStringEncode_PositiveTestCase()
         {
-            // Arrange
             IJavaScriptStringEncoder encoder = new JavaScriptStringEncoder(UnicodeRanges.All);
             StringWriter writer = new StringWriter();
 
-            // Act
             encoder.JavaScriptStringEncode("Hello+there!", writer);
-
-            // Assert
             Assert.Equal(@"Hello\u002Bthere!", writer.ToString());
         }
 
@@ -61,14 +51,10 @@ namespace System.Text.Encodings.Web
         [Fact]
         public void UrlEncode_PositiveTestCase()
         {
-            // Arrange
             UrlEncoder encoder = UrlEncoder.Create(UnicodeRanges.All);
             StringWriter writer = new StringWriter();
-
-            // Act
+            
             encoder.Encode(writer, "Hello+there!");
-
-            // Assert
             Assert.Equal("Hello%2Bthere!", writer.ToString());
         }
     }

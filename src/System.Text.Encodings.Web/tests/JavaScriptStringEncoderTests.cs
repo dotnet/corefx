@@ -2,14 +2,12 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
 using System.Globalization;
 using System.IO;
-using System.Text.Encodings.Web;
 using System.Text.Unicode;
 using Xunit;
 
-namespace Microsoft.Framework.WebEncoders
+namespace System.Text.Encodings.Web.Tests
 {
     public class JavaScriptStringEncoderTests
     {
@@ -27,14 +25,11 @@ namespace Microsoft.Framework.WebEncoders
         [Fact]
         public void Ctor_WithTextEncoderSettings()
         {
-            // Arrange
             var filter = new TextEncoderSettings();
             filter.AllowCharacters('a', 'b');
             filter.AllowCharacters('\0', '&', '\uFFFF', 'd');
 
             JavaScriptStringEncoder encoder = new JavaScriptStringEncoder(filter);
-
-            // Act & assert
             Assert.Equal("a", encoder.JavaScriptStringEncode("a"));
             Assert.Equal("b", encoder.JavaScriptStringEncode("b"));
             Assert.Equal(@"\u0063", encoder.JavaScriptStringEncode("c"));
@@ -47,10 +42,8 @@ namespace Microsoft.Framework.WebEncoders
         [Fact]
         public void Ctor_WithUnicodeRanges()
         {
-            // Arrange
             JavaScriptStringEncoder encoder = new JavaScriptStringEncoder(UnicodeRanges.Latin1Supplement, UnicodeRanges.MiscellaneousSymbols);
-
-            // Act & assert
+            
             Assert.Equal(@"\u0061", encoder.JavaScriptStringEncode("a"));
             Assert.Equal("\u00E9", encoder.JavaScriptStringEncode("\u00E9" /* LATIN SMALL LETTER E WITH ACUTE */));
             Assert.Equal("\u2601", encoder.JavaScriptStringEncode("\u2601" /* CLOUD */));
@@ -59,10 +52,8 @@ namespace Microsoft.Framework.WebEncoders
         [Fact]
         public void Ctor_WithNoParameters_DefaultsToBasicLatin()
         {
-            // Arrange
             JavaScriptStringEncoder encoder = new JavaScriptStringEncoder();
-
-            // Act & assert
+            
             Assert.Equal("a", encoder.JavaScriptStringEncode("a"));
             Assert.Equal(@"\u00E9", encoder.JavaScriptStringEncode("\u00E9" /* LATIN SMALL LETTER E WITH ACUTE */));
             Assert.Equal(@"\u2601", encoder.JavaScriptStringEncode("\u2601" /* CLOUD */));
@@ -71,11 +62,9 @@ namespace Microsoft.Framework.WebEncoders
         [Fact]
         public void Default_EquivalentToBasicLatin()
         {
-            // Arrange
             JavaScriptStringEncoder controlEncoder = new JavaScriptStringEncoder(UnicodeRanges.BasicLatin);
             JavaScriptStringEncoder testEncoder = JavaScriptStringEncoder.Default;
-
-            // Act & assert
+            
             for (int i = 0; i <= Char.MaxValue; i++)
             {
                 if (!IsSurrogateCodePoint(i))
@@ -110,24 +99,18 @@ namespace Microsoft.Framework.WebEncoders
         [InlineData("\r", @"\r")]
         public void JavaScriptStringEncode_AllRangesAllowed_StillEncodesForbiddenChars_Simple(string input, string expected)
         {
-            // Arrange
             JavaScriptStringEncoder encoder = new JavaScriptStringEncoder(UnicodeRanges.All);
 
-            // Act
-            string retVal = encoder.JavaScriptStringEncode(input);
-
-            // Assert
-            Assert.Equal(expected, retVal);
+            Assert.Equal(expected, encoder.JavaScriptStringEncode(input));
         }
 
         [Fact]
         public void JavaScriptStringEncode_AllRangesAllowed_StillEncodesForbiddenChars_Extended()
         {
-            // Arrange
             JavaScriptStringEncoder encoder = new JavaScriptStringEncoder(UnicodeRanges.All);
 
-            // Act & assert - BMP chars
-            for (int i = 0; i <= 0xFFFF; i++)
+            // BMP chars
+            for (int i = 0; i <= char.MaxValue; i++)
             {
                 string input = new String((char)i, 1);
                 string expected;
@@ -179,12 +162,11 @@ namespace Microsoft.Framework.WebEncoders
                         }
                     }
                 }
-
-                string retVal = encoder.JavaScriptStringEncode(input);
-                Assert.Equal(expected, retVal);
+                
+                Assert.Equal(expected, retValencoder.JavaScriptStringEncode(input));
             }
 
-            // Act & assert - astral chars
+            // Astral chars
             for (int i = 0x10000; i <= 0x10FFFF; i++)
             {
                 string input = Char.ConvertFromUtf32(i);
@@ -197,48 +179,36 @@ namespace Microsoft.Framework.WebEncoders
         [Fact]
         public void JavaScriptStringEncode_BadSurrogates_ReturnsUnicodeReplacementChar()
         {
-            // Arrange
             JavaScriptStringEncoder encoder = new JavaScriptStringEncoder(UnicodeRanges.All); // allow all codepoints
 
             // "a<unpaired leading>b<unpaired trailing>c<trailing before leading>d<unpaired trailing><valid>e<high at end of string>"
             const string input = "a\uD800b\uDFFFc\uDFFF\uD800d\uDFFF\uD800\uDFFFe\uD800";
             const string expected = "a\uFFFDb\uFFFDc\uFFFD\uFFFDd\uFFFD\\uD800\\uDFFFe\uFFFD"; // 'D800' 'DFFF' was preserved since it's valid
 
-            // Act
-            string retVal = encoder.JavaScriptStringEncode(input);
-
-            // Assert
-            Assert.Equal(expected, retVal);
+            Assert.Equal(expected, encoder.JavaScriptStringEncode(input));
         }
 
         [Fact]
         public void JavaScriptStringEncode_EmptyStringInput_ReturnsEmptyString()
         {
-            // Arrange
             JavaScriptStringEncoder encoder = new JavaScriptStringEncoder();
-
-            // Act & assert
             Assert.Equal("", encoder.JavaScriptStringEncode(""));
         }
 
         [Fact]
         public void JavaScriptStringEncode_InputDoesNotRequireEncoding_ReturnsOriginalStringInstance()
         {
-            // Arrange
             JavaScriptStringEncoder encoder = new JavaScriptStringEncoder();
             string input = "Hello, there!";
-
-            // Act & assert
             Assert.Same(input, encoder.JavaScriptStringEncode(input));
         }
 
         [Fact]
         public void JavaScriptStringEncode_NullInput_Throws()
         {
-            // Arrange
             JavaScriptStringEncoder encoder = new JavaScriptStringEncoder();
 
-            Assert.Throws<ArgumentNullException>(() => { encoder.JavaScriptStringEncode(null); });
+            Assert.Throws<ArgumentNullException>(() => encoder.JavaScriptStringEncode(null));
         }
 
         [Fact]
@@ -268,28 +238,20 @@ namespace Microsoft.Framework.WebEncoders
         [Fact]
         public void JavaScriptStringEncode_CharArray()
         {
-            // Arrange
             JavaScriptStringEncoder encoder = new JavaScriptStringEncoder();
             var output = new StringWriter();
-
-            // Act
+            
             encoder.JavaScriptStringEncode("Hello+world!".ToCharArray(), 3, 5, output);
-
-            // Assert
             Assert.Equal(@"lo\u002Bwo", output.ToString());
         }
 
         [Fact]
         public void JavaScriptStringEncode_StringSubstring()
         {
-            // Arrange
             JavaScriptStringEncoder encoder = new JavaScriptStringEncoder();
             var output = new StringWriter();
-
-            // Act
+            
             encoder.JavaScriptStringEncode("Hello+world!", 3, 5, output);
-
-            // Assert
             Assert.Equal(@"lo\u002Bwo", output.ToString());
         }
 
@@ -302,15 +264,8 @@ namespace Microsoft.Framework.WebEncoders
             // against breaking out of HTML attributes by having the encoders
             // never emit the ' or " characters. This means that we want to
             // \u-escape these characters instead of using \' and \".
-
-            // Arrange
             JavaScriptStringEncoder encoder = new JavaScriptStringEncoder(UnicodeRanges.All);
-
-            // Act
-            string retVal = encoder.JavaScriptStringEncode(input);
-
-            // Assert
-            Assert.Equal(expected, retVal);
+            Assert.Equal(expected, encoder.JavaScriptStringEncode(input));
         }
 
         [Fact]
@@ -318,12 +273,9 @@ namespace Microsoft.Framework.WebEncoders
         {
             // Per the design document, we provide additional defense-in-depth
             // by never emitting HTML-sensitive characters unescaped.
-
-            // Arrange
             JavaScriptStringEncoder javaScriptStringEncoder = new JavaScriptStringEncoder(UnicodeRanges.All);
             HtmlEncoder htmlEncoder = new HtmlEncoder(UnicodeRanges.All);
-
-            // Act & assert
+            
             for (int i = 0; i <= 0x10FFFF; i++)
             {
                 if (IsSurrogateCodePoint(i))

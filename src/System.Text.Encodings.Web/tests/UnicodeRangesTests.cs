@@ -2,13 +2,11 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
 using System.Reflection;
-using System.Text.Encodings.Web;
 using System.Text.Unicode;
 using Xunit;
 
-namespace Microsoft.Framework.WebEncoders
+namespace System.Text.Encodings.Web.Tests
 {
     public class UnicodeRangesTests
     {
@@ -18,7 +16,7 @@ namespace Microsoft.Framework.WebEncoders
             UnicodeRange range = UnicodeRanges.None;
             Assert.NotNull(range);
 
-            // Test 1: the range should be empty
+            // The range should be empty
             Assert.Equal(0, range.FirstCodePoint);
             Assert.Equal(0, range.Length);
         }
@@ -198,7 +196,7 @@ namespace Microsoft.Framework.WebEncoders
             UnicodeRange range = (UnicodeRange)propInfo.GetValue(null);
             Assert.NotNull(range);
 
-            // Test 1: the range should span the range first..last
+            // The range should span the range first..last
             Assert.Equal(first, range.FirstCodePoint);
             Assert.Equal(last, range.FirstCodePoint + range.Length - 1);
         }
