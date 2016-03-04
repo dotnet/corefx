@@ -43,7 +43,6 @@ static uint32_t NetSecurityNative_HandleError(uint32_t majorStatus,
 {
     assert(targetBuffer != nullptr);
     assert(gssBuffer != nullptr);
-    assert(gssBuffer->value == nullptr || gssBuffer->length > 0);
 
     targetBuffer->length = gssBuffer->length;
     targetBuffer->data = static_cast<uint8_t*>(gssBuffer->value);
