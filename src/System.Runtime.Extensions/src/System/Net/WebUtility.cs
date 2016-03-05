@@ -356,15 +356,18 @@ namespace System.Net
         {
             if (value == null)
                 return null;
+            
+            if (!NeedsUrlEncoding(value))
+                return value;
 
             byte[] bytes = Encoding.UTF8.GetBytes(value);
-            byte[] encodedBytes = UrlEncode(bytes, 0, bytes.Length, false /* alwaysCreateNewReturnValue */);
+            byte[] encodedBytes = UrlEncode(bytes, 0, bytes.Length, alwaysCreateNewReturnValue: false);
             return Encoding.UTF8.GetString(encodedBytes, 0, encodedBytes.Length);
         }
 
         public static byte[] UrlEncodeToBytes(byte[] value, int offset, int count)
         {
-            return UrlEncode(value, offset, count, true /* alwaysCreateNewReturnValue */);
+            return UrlEncode(value, offset, count, alwaysCreateNewReturnValue: true);
         }
 
         #endregion
@@ -382,6 +385,9 @@ namespace System.Net
                 return null;
             }
 
+            if (!NeedsUrlDecoding(value))
+                return value;
+            
             int count = value.Length;
             UrlDecoder helper = new UrlDecoder(count, encoding);
 
@@ -595,6 +601,29 @@ namespace System.Net
                 {
                     return true;
                 }
+            }
+            return false;
+        }
+        
+        private static bool NeedsUrlEncoding(string s)
+        {
+            for (int i = 0; i < s.Length; i++)
+            {
+                if (!IsUrlSafeChar(s[i]))
+                    return true;
+            }
+            return false;
+        }
+        
+        private static bool NeedsUrlDecoding(string s)
+        {
+            for (int i = 0; i < s.Length; i++)
+            {
+                char c = s[i];
+                if (c == '+') // space
+                    return true;
+                if (c == '%' && i < s.Length - 2) // things like %20 are transformed into space
+                    return true;
             }
             return false;
         }
