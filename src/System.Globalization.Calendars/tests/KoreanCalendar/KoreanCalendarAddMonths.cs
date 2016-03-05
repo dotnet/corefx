@@ -64,54 +64,14 @@ namespace System.Globalization.CalendarsTests
         }
         #endregion
 
-        #region Negative Test Logic
-        // NegTest1:Invoke the method with min datetime
         [Fact]
-        public void NegTest1()
+        public void AddMonth_Invalid()
         {
-            System.Globalization.Calendar kC = new KoreanCalendar();
-            DateTime actualValue;
-            Assert.Throws<ArgumentOutOfRangeException>(() =>
-            {
-                actualValue = kC.AddMonths(new GregorianCalendar().ToDateTime(1, 1, 1, 0, 0, 0, 0), -1);
-            });
-        }
+            Assert.Throws<ArgumentOutOfRangeException>(() => new KoreanCalendar().AddMonths(DateTime.MaxValue, 1));
+            Assert.Throws<ArgumentOutOfRangeException>(() => new KoreanCalendar().AddMonths(DateTime.MinValue, -1));
 
-        // NegTest2:Invoke the method with max datetime
-        [Fact]
-        public void NegTest2()
-        {
-            System.Globalization.Calendar kC = new KoreanCalendar();
-            DateTime actualValue;
-            Assert.Throws<ArgumentOutOfRangeException>(() =>
-            {
-                actualValue = kC.AddMonths(new GregorianCalendar().ToDateTime(9999, 12, 31, 0, 0, 0, 0), 5);
-            });
+            Assert.Throws<ArgumentOutOfRangeException>(() => new KoreanCalendar().AddMonths(DateTime.MaxValue, -120000));
+            Assert.Throws<ArgumentOutOfRangeException>(() => new KoreanCalendar().AddMonths(DateTime.MinValue, 120000));
         }
-
-        // NegTest3:Invoke the method with Large months
-        [Fact]
-        public void NegTest3()
-        {
-            System.Globalization.Calendar kC = new KoreanCalendar();
-            DateTime actualValue;
-            Assert.Throws<ArgumentOutOfRangeException>(() =>
-            {
-                actualValue = kC.AddMonths(new GregorianCalendar().ToDateTime(9999, 12, 31, 0, 0, 0, 0), -120000);
-            });
-        }
-
-        // NegTest4:Invoke the method with Large months
-        [Fact]
-        public void NegTest4()
-        {
-            System.Globalization.Calendar kC = new KoreanCalendar();
-            DateTime actualValue;
-            Assert.Throws<ArgumentOutOfRangeException>(() =>
-            {
-                actualValue = kC.AddMonths(new GregorianCalendar().ToDateTime(1, 1, 1, 0, 0, 0, 0), 120000);
-            });
-        }
-        #endregion
     }
 }

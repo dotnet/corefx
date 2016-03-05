@@ -69,120 +69,18 @@ namespace System.Globalization.CalendarsTests
         }
         #endregion
 
-        #region Negative Test Logic
-        // NegTest1:Invoke the method with the year outside the lower supported range
         [Fact]
-        public void NegTest1()
+        public void GetDaysInYear_Invalid()
         {
-            System.Globalization.Calendar kC = new KoreanCalendar();
-            int year = _generator.GetInt16(-55) % 2334;
-            int era = kC.GetEra(new DateTime());
-            int actualValue;
-            Assert.Throws<ArgumentOutOfRangeException>(() =>
-            {
-                actualValue = kC.GetDaysInYear(1, era);
-            });
-        }
+            // Year is outside supported range
+            Assert.Throws<ArgumentOutOfRangeException>(() => new KoreanCalendar().GetDaysInYear(1, 1));
+            Assert.Throws<ArgumentOutOfRangeException>(() => new KoreanCalendar().GetDaysInYear(-1, 1));
+            Assert.Throws<ArgumentOutOfRangeException>(() => new KoreanCalendar().GetDaysInYear(2333, 1));
+            Assert.Throws<ArgumentOutOfRangeException>(() => new KoreanCalendar().GetDaysInYear(12333, 1));
 
-        // NegTest2:Invoke the method with negative years outside the lower supported range
-        [Fact]
-        public void NegTest2()
-        {
-            System.Globalization.Calendar kC = new KoreanCalendar();
-            int year = _generator.GetInt16(-55) % 2334;
-            int era = kC.GetEra(new DateTime());
-            int actualValue;
-            Assert.Throws<ArgumentOutOfRangeException>(() =>
-            {
-                actualValue = kC.GetDaysInYear(-1, era);
-            });
+            // Era is outside supported range
+            Assert.Throws<ArgumentOutOfRangeException>(() => new KoreanCalendar().GetDaysInYear(2334, -1));
+            Assert.Throws<ArgumentOutOfRangeException>(() => new KoreanCalendar().GetDaysInYear(2334, 2));
         }
-
-        // NegTest3:Invoke the method with years outside the lower supported range
-        [Fact]
-        public void NegTest3()
-        {
-            System.Globalization.Calendar kC = new KoreanCalendar();
-            int year = _generator.GetInt16(-55) % 2334;
-            int era = kC.GetEra(new DateTime());
-            int actualValue;
-            Assert.Throws<ArgumentOutOfRangeException>(() =>
-            {
-                actualValue = kC.GetDaysInYear(2333, era);
-            });
-        }
-
-        // NegTest4:Invoke the method with random years outside the lower supported range
-        [Fact]
-        public void NegTest4()
-        {
-            System.Globalization.Calendar kC = new KoreanCalendar();
-            int year = _generator.GetInt16(-55) % 2334;
-            int era = kC.GetEra(new DateTime());
-            int actualValue;
-            Assert.Throws<ArgumentOutOfRangeException>(() =>
-            {
-                actualValue = kC.GetDaysInYear(2333, era);
-            });
-        }
-
-        // NegTest5:Invoke the method with years outside the upper supported range
-        [Fact]
-        public void NegTest5()
-        {
-            System.Globalization.Calendar kC = new KoreanCalendar();
-            int year = _generator.GetInt16(-55) % 10000 + 12333;
-            int era = kC.GetEra(new DateTime());
-            int actualValue;
-            Assert.Throws<ArgumentOutOfRangeException>(() =>
-            {
-                actualValue = kC.GetDaysInYear(12333, era);
-            });
-        }
-
-        // NegTest6:Invoke the method with random years outside the upper supported range
-        [Fact]
-        public void NegTest6()
-        {
-            System.Globalization.Calendar kC = new KoreanCalendar();
-            int year = _generator.GetInt16(-55) % 10000 + 12333;
-            int era = kC.GetEra(new DateTime());
-            int actualValue;
-            Assert.Throws<ArgumentOutOfRangeException>(() =>
-            {
-                actualValue = kC.GetDaysInYear(year, era);
-            });
-        }
-
-        // NegTest7:Invoke the method with era outside the lower supported range
-        [Fact]
-        public void NegTest7()
-        {
-            System.Globalization.Calendar kC = new KoreanCalendar();
-            int year = _generator.GetInt16(-55) % 10000 + 2333;
-            int era = -1;
-            int actualValue;
-            Assert.Throws<ArgumentOutOfRangeException>(() =>
-            {
-                actualValue = kC.GetDaysInYear(year, era);
-            });
-        }
-
-        // NegTest8:Invoke the method with era outside the upper supported range
-        [Fact]
-        public void NegTest8()
-        {
-            System.Globalization.Calendar kC = new KoreanCalendar();
-            int year = _generator.GetInt16(-55) % 10000 + 2333;
-            // In order for an ArgumentOutOfRangeException to get thrown due to an era being outside the supported range, the era must
-            // be greater than 1 since 0 and 1 are supported eras
-            int era = 2;
-            int actualValue;
-            Assert.Throws<ArgumentOutOfRangeException>(() =>
-            {
-                actualValue = kC.GetDaysInYear(year, era);
-            });
-        }
-        #endregion
     }
 }
