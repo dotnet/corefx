@@ -49,22 +49,11 @@ namespace System.Collections
             {
                 IStructuralEquatable seObj = x as IStructuralEquatable;
 
-                if (seObj != null)
-                {
-                    return seObj.Equals(y, this);
-                }
-
-                if (y != null)
-                {
-                    return x.Equals(y);
-                }
-                else
-                {
-                    return false;
-                }
+                if (seObj != null) return seObj.Equals(y, this);
+                if (y == null) return false;
+                return x.Equals(y);
             }
-            if (y != null) return false;
-            return true;
+            return (y == null);
         }
 
         public int GetHashCode(Object obj)
@@ -73,12 +62,8 @@ namespace System.Collections
 
             IStructuralEquatable seObj = obj as IStructuralEquatable;
 
-            if (seObj != null)
-            {
-                return seObj.GetHashCode(this);
-            }
-
-            return obj.GetHashCode();
+            if (seObj == null) return obj.GetHashCode();
+            return seObj.GetHashCode(this);
         }
     }
 
@@ -91,12 +76,8 @@ namespace System.Collections
 
             IStructuralComparable scX = x as IStructuralComparable;
 
-            if (scX != null)
-            {
-                return scX.CompareTo(y, this);
-            }
-
-            return Comparer<Object>.Default.Compare(x, y);
+            if (scX == null) return Comparer<Object>.Default.Compare(x, y);
+            return scX.CompareTo(y, this);
         }
     }
 }
