@@ -69,66 +69,16 @@ namespace System.Globalization.CalendarsTests
         }
         #endregion
 
-        #region Negative Test Logic
-        // NegTest1:Invoke the method with CalendarWeekRule outside the lower supported range
         [Fact]
-        public void NegTest1()
+        public void GetWeekOfYear_Invalid()
         {
-            System.Globalization.Calendar kC = new KoreanCalendar();
-            Int64 ticks = _generator.GetInt64(-55) % DateTime.MaxValue.Ticks + 1;
-            DateTime dateTime = new DateTime(ticks);
-            dateTime = kC.ToDateTime(dateTime.Year + 2333, dateTime.Month, dateTime.Day, 0, 0, 0, 0);
-            int actualValue;
-            Assert.Throws<ArgumentOutOfRangeException>(() =>
-            {
-                actualValue = kC.GetWeekOfYear(dateTime, (CalendarWeekRule)(-1), new CultureInfo("ko-KR").DateTimeFormat.FirstDayOfWeek);
-            });
-        }
+            // WeekRule is outside supported range
+            Assert.Throws<ArgumentOutOfRangeException>(() => new KoreanCalendar().GetWeekOfYear(DateTime.Now, CalendarWeekRule.FirstDay - 1, DayOfWeek.Saturday));
+            Assert.Throws<ArgumentOutOfRangeException>(() => new KoreanCalendar().GetWeekOfYear(DateTime.Now, CalendarWeekRule.FirstFourDayWeek + 1, DayOfWeek.Saturday));
 
-        // NegTest2:Invoke the method with CalendarWeekRule outside the upper supported range
-        [Fact]
-        public void NegTest2()
-        {
-            System.Globalization.Calendar kC = new KoreanCalendar();
-            Int64 ticks = _generator.GetInt64(-55) % DateTime.MaxValue.Ticks + 1;
-            DateTime dateTime = new DateTime(ticks);
-            dateTime = kC.ToDateTime(dateTime.Year + 2333, dateTime.Month, dateTime.Day, 0, 0, 0, 0);
-            int actualValue;
-            Assert.Throws<ArgumentOutOfRangeException>(() =>
-            {
-                actualValue = kC.GetWeekOfYear(dateTime, (CalendarWeekRule)(3), new CultureInfo("ko-KR").DateTimeFormat.FirstDayOfWeek);
-            });
+            // FirstDayOfWeek is outside supported range
+            Assert.Throws<ArgumentOutOfRangeException>(() => new KoreanCalendar().GetWeekOfYear(DateTime.Now, CalendarWeekRule.FirstDay, DayOfWeek.Sunday - 1));
+            Assert.Throws<ArgumentOutOfRangeException>(() => new KoreanCalendar().GetWeekOfYear(DateTime.Now, CalendarWeekRule.FirstDay, DayOfWeek.Saturday + 1));
         }
-
-        // NegTest3:Invoke the method with CalendarWeekRule outside the upper supported range
-        [Fact]
-        public void NegTest3()
-        {
-            System.Globalization.Calendar kC = new KoreanCalendar();
-            Int64 ticks = _generator.GetInt64(-55) % DateTime.MaxValue.Ticks + 1;
-            DateTime dateTime = new DateTime(ticks);
-            dateTime = kC.ToDateTime(dateTime.Year + 2333, dateTime.Month, dateTime.Day, 0, 0, 0, 0);
-            int actualValue;
-            Assert.Throws<ArgumentOutOfRangeException>(() =>
-            {
-                actualValue = kC.GetWeekOfYear(dateTime, new CultureInfo("ko-KR").DateTimeFormat.CalendarWeekRule, (DayOfWeek)(-1));
-            });
-        }
-
-        // NegTest4:Invoke the method with CalendarWeekRule outside the upper supported range
-        [Fact]
-        public void NegTest4()
-        {
-            System.Globalization.Calendar kC = new KoreanCalendar();
-            Int64 ticks = _generator.GetInt64(-55) % DateTime.MaxValue.Ticks + 1;
-            DateTime dateTime = new DateTime(ticks);
-            dateTime = kC.ToDateTime(dateTime.Year + 2333, dateTime.Month, dateTime.Day, 0, 0, 0, 0);
-            int actualValue;
-            Assert.Throws<ArgumentOutOfRangeException>(() =>
-            {
-                actualValue = kC.GetWeekOfYear(dateTime, new CultureInfo("ko-KR").DateTimeFormat.CalendarWeekRule, (DayOfWeek)7);
-            });
-        }
-        #endregion
     }
 }

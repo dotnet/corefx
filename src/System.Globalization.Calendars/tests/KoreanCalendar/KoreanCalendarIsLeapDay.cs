@@ -83,168 +83,28 @@ namespace System.Globalization.CalendarsTests
         }
         #endregion
 
-        #region Negative Test Logic
-        // NegTest1:Invoke the method with the year outside the lower supported range
         [Fact]
-        public void NegTest1()
+        public void IsLeapDay_Invalid()
         {
-            System.Globalization.Calendar kC = new KoreanCalendar();
-            int year = 2333;
-            int month = _generator.GetInt16(-55) % 12 + 1;
-            int day = _generator.GetInt16(-55) % 28 + 1;
-            int era = 1;
-            bool actualValue;
-            Assert.Throws<ArgumentOutOfRangeException>(() =>
-            {
-                actualValue = kC.IsLeapDay(year, month, day, era);
-            });
-        }
+            // Year is outside supported range
+            Assert.Throws<ArgumentOutOfRangeException>(() => new KoreanCalendar().IsLeapDay(1, 10, 10, 1));
+            Assert.Throws<ArgumentOutOfRangeException>(() => new KoreanCalendar().IsLeapDay(-1, 10, 10, 1));
+            Assert.Throws<ArgumentOutOfRangeException>(() => new KoreanCalendar().IsLeapDay(2333, 10, 10, 1));
+            Assert.Throws<ArgumentOutOfRangeException>(() => new KoreanCalendar().IsLeapDay(12333, 10, 10, 1));
 
-        // NegTest2:Invoke the method with the year outside the lower supported range
-        [Fact]
-        public void NegTest2()
-        {
-            System.Globalization.Calendar kC = new KoreanCalendar();
-            int year = 0;
-            int month = _generator.GetInt16(-55) % 12 + 1;
-            int day = _generator.GetInt16(-55) % 28 + 1;
-            int era = 1;
-            bool actualValue;
-            Assert.Throws<ArgumentOutOfRangeException>(() =>
-            {
-                actualValue = kC.IsLeapDay(year, month, day, era);
-            });
-        }
+            // Month is outside supported range
+            Assert.Throws<ArgumentOutOfRangeException>(() => new KoreanCalendar().IsLeapDay(2334, -1, 10, 1));
+            Assert.Throws<ArgumentOutOfRangeException>(() => new KoreanCalendar().IsLeapDay(2334, 0, 10, 1));
+            Assert.Throws<ArgumentOutOfRangeException>(() => new KoreanCalendar().IsLeapDay(2334, 13, 10, 1));
 
-        // NegTest3:Invoke the method with the year outside the upper supported range
-        [Fact]
-        public void NegTest3()
-        {
-            System.Globalization.Calendar kC = new KoreanCalendar();
-            int year = 2333;
-            int month = _generator.GetInt16(-55) % 12 + 1;
-            int day = _generator.GetInt16(-55) % 28 + 1;
-            int era = 1;
-            bool actualValue;
-            Assert.Throws<ArgumentOutOfRangeException>(() =>
-            {
-                actualValue = kC.IsLeapDay(year, month, day, era);
-            });
-        }
+            // Day is outside supported range
+            Assert.Throws<ArgumentOutOfRangeException>(() => new KoreanCalendar().IsLeapDay(2334, 10, 10, -1));
+            Assert.Throws<ArgumentOutOfRangeException>(() => new KoreanCalendar().IsLeapDay(2334, 10, 0, 1));
+            Assert.Throws<ArgumentOutOfRangeException>(() => new KoreanCalendar().IsLeapDay(2334, 10, 10, 32));
 
-        // NegTest4:Invoke the method with the month outside the lower supported range
-        [Fact]
-        public void NegTest4()
-        {
-            System.Globalization.Calendar kC = new KoreanCalendar();
-            int year = _generator.GetInt16(-55) % 9999 + 2334;
-            int month = 0;
-            int day = _generator.GetInt16(-55) % 28 + 1;
-            int era = 1;
-            bool actualValue;
-            Assert.Throws<ArgumentOutOfRangeException>(() =>
-            {
-                actualValue = kC.IsLeapDay(year, month, day, era);
-            });
+            // Era is outside supported range
+            Assert.Throws<ArgumentOutOfRangeException>(() => new KoreanCalendar().IsLeapDay(2334, 10, 10, -1));
+            Assert.Throws<ArgumentOutOfRangeException>(() => new KoreanCalendar().IsLeapDay(2334, 10, 10, 2));
         }
-
-        // NegTest5:Invoke the method with the month outside the upper supported range
-        [Fact]
-        public void NegTest5()
-        {
-            System.Globalization.Calendar kC = new KoreanCalendar();
-            int year = _generator.GetInt16(-55) % 9999 + 2334;
-            int month = 13;
-            int day = _generator.GetInt16(-55) % 28 + 1;
-            int era = 1;
-            bool actualValue;
-            Assert.Throws<ArgumentOutOfRangeException>(() =>
-            {
-                actualValue = kC.IsLeapDay(year, month, day, era);
-            });
-        }
-
-        // NegTest6:Invoke the method with the day outside the lower supported range
-        [Fact]
-        public void NegTest6()
-        {
-            System.Globalization.Calendar kC = new KoreanCalendar();
-            int year = _generator.GetInt16(-55) % 9999 + 2334;
-            int month = _generator.GetInt16(-55) % 12 + 1;
-            int day = 0;
-            int era = 1;
-            bool actualValue;
-            Assert.Throws<ArgumentOutOfRangeException>(() =>
-            {
-                actualValue = kC.IsLeapDay(year, month, day, era);
-            });
-        }
-
-        // NegTest7:Invoke the method with the wrong leap day
-        [Fact]
-        public void NegTest7()
-        {
-            System.Globalization.Calendar kC = new KoreanCalendar();
-            int year = 4004;
-            int month = 2;
-            int day = 29;
-            int era = 1;
-            bool actualValue;
-            Assert.Throws<ArgumentOutOfRangeException>(() =>
-            {
-                actualValue = kC.IsLeapDay(year, month, day, era);
-            });
-        }
-
-        // NegTest8:Invoke the method with the day outside the upper supported range
-        [Fact]
-        public void NegTest8()
-        {
-            System.Globalization.Calendar kC = new KoreanCalendar();
-            int year = _generator.GetInt16(-55) % 9999 + 2334;
-            int month = _generator.GetInt16(-55) % 12 + 1;
-            int day = 32;
-            int era = 1;
-            bool actualValue;
-            Assert.Throws<ArgumentOutOfRangeException>(() =>
-            {
-                actualValue = kC.IsLeapDay(year, month, day, era);
-            });
-        }
-
-        // NegTest9:Invoke the method with the era outside the lower supported range
-        [Fact]
-        public void NegTest9()
-        {
-            System.Globalization.Calendar kC = new KoreanCalendar();
-            int year = _generator.GetInt16(-55) % 9999 + 2334;
-            int month = _generator.GetInt16(-55) % 12 + 1;
-            int day = _generator.GetInt16(-55) % 28 + 1;
-            // The KoreanEra is 1, however using an Era value of 0 defaults to "current era" for the calendar being used. In order to force
-            // the ArgumentOutOfRangeException the era must not be 0 or 1
-            int era = -1;
-            bool actualValue;
-            Assert.Throws<ArgumentOutOfRangeException>(() =>
-            {
-                actualValue = kC.IsLeapDay(year, month, day, era);
-            });
-        }
-
-        // NegTest10:Invoke the method with the era outside the upper supported range
-        [Fact]
-        public void NegTest10()
-        {
-            System.Globalization.Calendar kC = new KoreanCalendar();
-            int year = _generator.GetInt16(-55) % 9999 + 2334;
-            int month = _generator.GetInt16(-55) % 12 + 1;
-            int day = _generator.GetInt16(-55) % 28 + 1;
-            int era = 2;
-            bool actualValue;
-            Assert.Throws<ArgumentOutOfRangeException>(() =>
-            {
-                actualValue = kC.IsLeapDay(year, month, day, era);
-            });
-        }
-        #endregion
     }
 }

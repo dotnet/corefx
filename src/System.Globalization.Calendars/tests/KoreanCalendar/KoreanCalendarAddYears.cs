@@ -80,41 +80,12 @@ namespace System.Globalization.CalendarsTests
             Assert.Equal(kC.GetDayOfMonth(expectedValue), kC.GetDayOfMonth(actualValue));
         }
         #endregion
-
-        #region Negative Test Logic
-        // NegTest1:Invoke the method with the result outside the upper supported range
+        
         [Fact]
-        public void NegTest1()
+        public void AddYears_Invalid()
         {
-            int year = _generator.GetInt16(-55) % 9999 + 1;
-            int month = _generator.GetInt16(-55) % 12 + 1;
-            int day = _generator.GetInt16(-55) % 28 + 1;
-            DateTime dateTime = new GregorianCalendar().ToDateTime(year, month, day, 0, 0, 0, 0);
-            int yearAdd = 9999 - year + 2;
-            System.Globalization.Calendar kC = new KoreanCalendar();
-            DateTime actualValue;
-            Assert.Throws<ArgumentOutOfRangeException>(() =>
-            {
-                actualValue = kC.AddYears(new GregorianCalendar().ToDateTime(year, month, day, 0, 0, 0, 0), yearAdd);
-            });
+            Assert.Throws<ArgumentOutOfRangeException>(() => new KoreanCalendar().AddYears(DateTime.MaxValue, 1));
+            Assert.Throws<ArgumentOutOfRangeException>(() => new KoreanCalendar().AddYears(DateTime.MinValue, -1));
         }
-
-        // NegTest2:Invoke the method with the result outside the lower supported range
-        [Fact]
-        public void NegTest2()
-        {
-            int year = _generator.GetInt16(-55) % 9999 + 1;
-            int month = _generator.GetInt16(-55) % 12 + 1;
-            int day = _generator.GetInt16(-55) % 28 + 1;
-            DateTime dateTime = new GregorianCalendar().ToDateTime(year, month, day, 0, 0, 0, 0);
-            int yearAdd = year * (-1);
-            System.Globalization.Calendar kC = new KoreanCalendar();
-            DateTime actualValue;
-            Assert.Throws<ArgumentOutOfRangeException>(() =>
-            {
-                actualValue = kC.AddYears(new GregorianCalendar().ToDateTime(year, month, day, 0, 0, 0, 0), yearAdd);
-            });
-        }
-        #endregion
     }
 }
