@@ -75,6 +75,30 @@ namespace System.Xml.Serialization
             }
         }
 
+        /// <include file='doc\XmlSerializationWriter.uex' path='docs/doc[@for="XmlSerializationWriter.Namespaces"]/*' />
+        /// <devdoc>
+        ///    <para>[To be supplied.]</para>
+        /// </devdoc>
+        protected IList XmlNamespaces
+        {
+            get
+            {
+                return _namespaces == null ? null : _namespaces.NamespaceList;
+            }
+            set
+            {
+                if (value == null)
+                {
+                    _namespaces = null;
+                }
+                else
+                {
+                    XmlQualifiedName[] qnames = (XmlQualifiedName[])ArrayList.ToArray(value, typeof(XmlQualifiedName));
+                    _namespaces = new XmlSerializerNamespaces(qnames);
+                }
+            }
+        }
+
         /// <include file='doc\XmlSerializationWriter.uex' path='docs/doc[@for="XmlSerializationWriter.FromByteArrayBase64"]/*' />
         protected static byte[] FromByteArrayBase64(byte[] value)
         {
@@ -527,6 +551,12 @@ namespace System.Xml.Serialization
             WriteStartElement(name, ns, null, false);
             _w.WriteAttributeString("nil", XmlSchema.InstanceNamespace, "true");
             _w.WriteEndElement();
+        }
+
+        /// <include file='doc\XmlSerializationWriter.uex' path='docs/doc[@for="XmlSerializationWriter.WriteEmptyTag"]/*' />
+        protected void WriteEmptyTag(string name)
+        {
+            WriteEmptyTag(name, null);
         }
 
         /// <include file='doc\XmlSerializationWriter.uex' path='docs/doc[@for="XmlSerializationWriter.WriteEmptyTag1"]/*' />
