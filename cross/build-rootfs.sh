@@ -27,15 +27,12 @@ for i in "$@"
         arm)
         __BuildArch=arm
         __UbuntuArch=armhf
-        __UbuntuRepo="http://ports.ubuntu.com/"
-        __UbuntuPackages="build-essential libunwind8-dev gettext symlinks liblttng-ust-dev libicu-dev openssl libcurl4-openssl-dev zlib1g zlib1g-dev"
         __MachineTriple=arm-linux-gnueabihf
         ;;
         arm64)
         __BuildArch=arm64
         __UbuntuArch=arm64
         __UbuntuRepo="http://ports.ubuntu.com/"
-        __UbuntuPackages="build-essential libunwind8-dev gettext symlinks liblttng-ust-dev libicu-dev openssl libcurl4-openssl-dev zlib1g zlib1g-dev"
         __MachineTriple=aarch64-linux-gnu
         ;;
         *)
