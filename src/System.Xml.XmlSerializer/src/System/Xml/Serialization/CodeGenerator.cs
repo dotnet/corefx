@@ -1067,40 +1067,6 @@ namespace System.Xml.Serialization
         private OpCode GetLdelemOpCode(TypeCode typeCode)
         {
             return s_ldelemOpCodes[(int)typeCode];
-            //switch (typeCode)
-            //{
-            //case TypeCode.Object:
-            //case TypeCode.DBNull:
-            //    return OpCodes.Ldelem_Ref;// TypeCode.Object:
-            //case TypeCode.Boolean:
-            //    return OpCodes.Ldelem_I1;// TypeCode.Boolean:
-            //case TypeCode.Char:
-            //    return OpCodes.Ldelem_I2;// TypeCode.Char:
-            //case TypeCode.SByte:
-            //    return OpCodes.Ldelem_I1;// TypeCode.SByte:
-            //case TypeCode.Byte:
-            //    return OpCodes.Ldelem_U1;// TypeCode.Byte:
-            //case TypeCode.Int16:
-            //    return OpCodes.Ldelem_I2;// TypeCode.Int16:
-            //case TypeCode.UInt16:
-            //    return OpCodes.Ldelem_U2;// TypeCode.UInt16:
-            //case TypeCode.Int32:
-            //    return OpCodes.Ldelem_I4;// TypeCode.Int32:
-            //case TypeCode.UInt32:
-            //    return OpCodes.Ldelem_U4;// TypeCode.UInt32:
-            //case TypeCode.Int64:
-            //    return OpCodes.Ldelem_I8;// TypeCode.Int64:
-            //case TypeCode.UInt64:
-            //    return OpCodes.Ldelem_I8;// TypeCode.UInt64:
-            //case TypeCode.Single:
-            //    return OpCodes.Ldelem_R4;// TypeCode.Single:
-            //case TypeCode.Double:
-            //    return OpCodes.Ldelem_R8;// TypeCode.Double:
-            //case TypeCode.String:
-            //    return OpCodes.Ldelem_Ref;// TypeCode.String:
-            //default:
-            //    return OpCodes.Nop;
-            //}
         }
 
         internal void Ldelem(Type arrayElementType)

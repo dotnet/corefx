@@ -1645,6 +1645,35 @@ public static partial class XmlSerializerTests
         }
     }
 
+    [Fact]
+    public static void Xml_TypeWithOverridenPropertyWithGetterOrSetterOnly()
+    {
+        var obj = new TypeWithOverridenPropertyWithGetterOrSetterOnly()
+        {
+            StringProperty = "string value",
+            IntProperty = 123
+        };
+        var deserializedObj = SerializeAndDeserialize(obj,
+@"<TypeWithOverridenPropertyWithGetterOrSetterOnly xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:xsd=""http://www.w3.org/2001/XMLSchema"">
+	<StringProperty>string value</StringProperty>
+	<IntProperty>123</IntProperty>
+</TypeWithOverridenPropertyWithGetterOrSetterOnly>");
+        Assert.StrictEqual(obj.StringProperty, deserializedObj.StringProperty);
+        Assert.StrictEqual(obj.IntProperty, deserializedObj.IntProperty);
+    }
+
+    [Fact]
+    public static void Xml_CircularReference()
+    {
+        var objA = new CircularReferenceType() { StringProperty = "Value A" };
+        var objB = new CircularReferenceType() { StringProperty = "Value B", Object = objA };
+        objA.Object = objB;
+        Assert.Throws<InvalidOperationException>(() =>
+        {
+            var obj = SerializeAndDeserialize<CircularReferenceType>(objA, string.Empty);
+        });
+    }
+
     private static T SerializeAndDeserialize<T>(T value, string baseline, Func<XmlSerializer> serializerFactory = null,
         bool skipStringCompare = false, XmlSerializerNamespaces xns = null)
     {

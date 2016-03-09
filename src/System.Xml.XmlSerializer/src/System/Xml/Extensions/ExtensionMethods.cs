@@ -104,15 +104,6 @@ namespace System.Xml.Extensions
             return BinHexEncoder.Encode(inArray, 0, inArray.Length);
         }
 
-        internal static byte[] FromBinHexString(string s, bool allowOddCount)
-        {
-            if (s == null)
-            {
-                throw new ArgumentNullException(nameof(s));
-            }
-            return BinHexDecoder.Decode(s.ToCharArray(), allowOddCount);
-        }
-
         internal static Uri ToUri(string s)
         {
             if (s != null && s.Length > 0)

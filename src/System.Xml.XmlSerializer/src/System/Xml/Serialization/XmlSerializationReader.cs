@@ -821,10 +821,6 @@ namespace System.Xml.Serialization
             return ReadByteArray(false); //means use BinHex
         }
 
-
-
-
-
         /// <include file='doc\XmlSerializationReader.uex' path='docs/doc[@for="XmlSerializationReader.ToDateTime"]/*' />
         protected static DateTime ToDateTime(string value)
         {

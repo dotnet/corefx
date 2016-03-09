@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Diagnostics;
+
 namespace System.Xml
 {
     internal abstract class BinHexEncoder
@@ -11,23 +13,11 @@ namespace System.Xml
 
         internal static string Encode(byte[] inArray, int offsetIn, int count)
         {
-            if (null == inArray)
-            {
-                throw new ArgumentNullException(nameof(inArray));
-            }
-            if (0 > offsetIn)
-            {
-                throw new ArgumentOutOfRangeException(nameof(offsetIn));
-            }
-            if (0 > count)
-            {
-                throw new ArgumentOutOfRangeException(nameof(count));
-            }
-            if (count > inArray.Length - offsetIn)
-            {
-                throw new ArgumentOutOfRangeException(nameof(count));
-            }
-
+            Debug.Assert(null != inArray);
+            Debug.Assert(0 <= offsetIn);
+            Debug.Assert(0 <= count);
+            Debug.Assert(count <= inArray.Length - offsetIn);
+            
             char[] outArray = new char[2 * count];
             int lenOut = Encode(inArray, offsetIn, count, outArray);
             return new String(outArray, 0, lenOut);
