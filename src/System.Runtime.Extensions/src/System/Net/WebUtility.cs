@@ -284,42 +284,8 @@ namespace System.Net
 
         #region UrlEncode implementation
 
-        private static byte[] UrlEncode(byte[] bytes, int offset, int count, bool alwaysCreateNewReturnValue)
+        private static void UrlEncode(byte[] bytes, int offset, int count, byte[] output)
         {
-            byte[] encoded = UrlEncode(bytes, offset, count);
-
-            return (alwaysCreateNewReturnValue && (encoded != null) && (encoded == bytes))
-                ? (byte[])encoded.Clone()
-                : encoded;
-        }
-
-        private static byte[] UrlEncode(byte[] bytes, int offset, int count)
-        {
-            if (!ValidateUrlEncodingParameters(bytes, offset, count))
-            {
-                return null;
-            }
-
-            int cSpaces = 0;
-            int cUnsafe = 0;
-
-            // count them first
-            for (int i = 0; i < count; i++)
-            {
-                char ch = (char)bytes[offset + i];
-
-                if (ch == ' ')
-                    cSpaces++;
-                else if (!IsUrlSafeChar(ch))
-                    cUnsafe++;
-            }
-
-            // nothing to expand?
-            if (cSpaces == 0 && cUnsafe == 0)
-                return bytes;
-
-            // expand not 'safe' characters into %XX, spaces to +s
-            byte[] expandedBytes = new byte[count + cUnsafe * 2];
             int pos = 0;
 
             for (int i = 0; i < count; i++)
@@ -329,21 +295,19 @@ namespace System.Net
 
                 if (IsUrlSafeChar(ch))
                 {
-                    expandedBytes[pos++] = b;
+                    output[pos++] = b;
                 }
                 else if (ch == ' ')
                 {
-                    expandedBytes[pos++] = (byte)'+';
+                    output[pos++] = (byte)'+';
                 }
                 else
                 {
-                    expandedBytes[pos++] = (byte)'%';
-                    expandedBytes[pos++] = (byte)IntToHex((b >> 4) & 0xf);
-                    expandedBytes[pos++] = (byte)IntToHex(b & 0x0f);
+                    output[pos++] = (byte)'%';
+                    output[pos++] = (byte)IntToHex((b >> 4) & 0xf);
+                    output[pos++] = (byte)IntToHex(b & 0x0f);
                 }
             }
-
-            return expandedBytes;
         }
 
         #endregion
@@ -351,19 +315,82 @@ namespace System.Net
         #region UrlEncode public methods
 
         [SuppressMessage("Microsoft.Design", "CA1055:UriReturnValuesShouldNotBeStrings", Justification = "Already shipped public API; code moved here as part of API consolidation")]
-        public static string UrlEncode(string value)
+        public static unsafe string UrlEncode(string value)
         {
             if (string.IsNullOrEmpty(value))
+            {
                 return value;
+            }
+            
+            bool foundSpaces = false;
+            int unsafeCount = 0;
 
-            byte[] bytes = Encoding.UTF8.GetBytes(value);
-            byte[] encodedBytes = UrlEncode(bytes, 0, bytes.Length, false /* alwaysCreateNewReturnValue */);
-            return Encoding.UTF8.GetString(encodedBytes, 0, encodedBytes.Length);
+            // count them first
+            var encoding = Encoding.UTF8;
+            for (int i = 0; i < value.Length; i++)
+            {
+                char ch = value[i];
+
+                if (ch == ' ')
+                {
+                    foundSpaces = true;
+                }
+                else if (!IsUrlSafeChar(ch))
+                {
+                    if (ch < 128) // optimize for ASCII chars
+                    {
+                        unsafeCount++; // UTF-8 uses 1 byte for chars 0 to 127
+                    }
+                    else if (char.IsSurrogatePair(value, i)) // this method should handle the case where i is the last index
+                    {
+                        // surrogate code points are encoded differently separate than when alone, so we need to address that
+                        i++;
+                        unsafeCount += encoding.GetByteCount(&ch, 2);
+                    }
+                    else
+                    {
+                        unsafeCount += encoding.GetByteCount(&ch, 1);
+                    }
+                }
+            }
+
+            // nothing to expand?
+            if (!foundSpaces && unsafeCount == 0)
+            {
+                return value;
+            }
+            
+            byte[] bytes = encoding.GetBytes(value);
+            // expand not 'safe' characters into %XX, spaces to +s
+            byte[] encodedBytes = new byte[bytes.Length + unsafeCount * 2];
+            UrlEncode(bytes, 0, bytes.Length, encodedBytes);
+            return encoding.GetString(encodedBytes, 0, encodedBytes.Length);
         }
 
         public static byte[] UrlEncodeToBytes(byte[] value, int offset, int count)
         {
-            return UrlEncode(value, offset, count, true /* alwaysCreateNewReturnValue */);
+            if (!ValidateUrlEncodingParameters(value, offset, count))
+            {
+                return null;
+            }
+            
+            int unsafeCount = 0;
+
+            // count them first
+            for (int i = 0; i < count; i++)
+            {
+                char ch = (char)value[offset + i];
+
+                if (ch != ' ' && !IsUrlSafeChar(ch))
+                {
+                    unsafeCount++;
+                }
+            }
+
+            // expand not 'safe' characters into %XX, spaces to +s
+            byte[] encodedBytes = new byte[count + unsafeCount * 2];
+            UrlEncode(value, offset, count, encodedBytes);
+            return encodedBytes;
         }
 
         #endregion
