@@ -76,6 +76,58 @@ namespace Roslyn.Reflection.Metadata.Ecma335
         private struct StateMachineMethodRow { public uint MoveNextMethod; public uint KickoffMethod; }
         private struct CustomDebugInformationRow { public uint Parent; public GuidHandle Kind; public BlobHandle Value; }
 
+        // table row comparers:
+        private class ConstantRowComparer : IComparer<ConstantRow>
+        {
+            public static readonly ConstantRowComparer Default = new ConstantRowComparer();
+
+            public int Compare(ConstantRow x, ConstantRow y) =>
+                (int)x.Parent - (int)y.Parent;
+        }
+
+        private class CustomAttributeRowComparer : IComparer<CustomAttributeRow>
+        {
+            public static readonly CustomAttributeRowComparer Default = new CustomAttributeRowComparer();
+
+            public int Compare(CustomAttributeRow x, CustomAttributeRow y) =>
+                (int)x.Parent - (int)y.Parent;
+        }
+
+        private class FieldMarshalRowComparer : IComparer<FieldMarshalRow>
+        {
+            public static readonly FieldMarshalRowComparer Default = new FieldMarshalRowComparer();
+
+            public int Compare(FieldMarshalRow x, FieldMarshalRow y) =>
+                (int)x.Parent - (int)y.Parent;
+        }
+
+        private class DeclSecurityRowComparer : IComparer<DeclSecurityRow>
+        {
+            public static readonly DeclSecurityRowComparer Default = new DeclSecurityRowComparer();
+
+            public int Compare(DeclSecurityRow x, DeclSecurityRow y) =>
+                (int)x.Parent - (int)y.Parent;
+        }
+
+        private class MethodSemanticsRowComparer : IComparer<MethodSemanticsRow>
+        {
+            public static readonly MethodSemanticsRowComparer Default = new MethodSemanticsRowComparer();
+
+            public int Compare(MethodSemanticsRow x, MethodSemanticsRow y) =>
+                (int)x.Association - (int)y.Association;
+        }
+
+        private class CustomDebugInformationRowComparer : IComparer<CustomDebugInformationRow>
+        {
+            public static readonly CustomDebugInformationRowComparer Default = new CustomDebugInformationRowComparer();
+
+            public int Compare(CustomDebugInformationRow x, CustomDebugInformationRow y)
+            {
+                int result = (int)x.Parent - (int)y.Parent;
+                return (result != 0) ? result : MetadataTokens.GetHeapOffset(x.Kind) - MetadataTokens.GetHeapOffset(y.Kind);
+            }
+        }
+
         // type system tables:
         private readonly List<ModuleRow> _moduleTable = new List<ModuleRow>(1);
         private readonly List<AssemblyRow> _assemblyTable = new List<AssemblyRow>(1);
@@ -1292,7 +1344,7 @@ namespace Roslyn.Reflection.Metadata.Ecma335
         private void SerializeConstantTable(BlobBuilder writer, MetadataSizes metadataSizes)
         {
             // Note: we can sort the table at this point since no other table can reference its rows via RowId or CodedIndex (which would need updating otherwise).
-            var ordered = _constantTableNeedsSorting ? (IEnumerable<ConstantRow>)_constantTable.OrderBy((x, y) => (int)x.Parent - (int)y.Parent) : _constantTable;
+            var ordered = _constantTableNeedsSorting ? (IEnumerable<ConstantRow>)_constantTable.OrderBy(ConstantRowComparer.Default) : _constantTable;
 
             foreach (ConstantRow constant in ordered)
             {
@@ -1307,7 +1359,7 @@ namespace Roslyn.Reflection.Metadata.Ecma335
         {
             // Note: we can sort the table at this point since no other table can reference its rows via RowId or CodedIndex (which would need updating otherwise).
             // OrderBy performs a stable sort, so multiple attributes with the same parent will be sorted in the order they were added to the table.
-            var ordered = _customAttributeTableNeedsSorting ? (IEnumerable<CustomAttributeRow>)_customAttributeTable.OrderBy((x, y) => (int)x.Parent - (int)y.Parent) : _customAttributeTable;
+            var ordered = _customAttributeTableNeedsSorting ? (IEnumerable<CustomAttributeRow>)_customAttributeTable.OrderBy(CustomAttributeRowComparer.Default) : _customAttributeTable;
 
             foreach (CustomAttributeRow customAttribute in ordered)
             {
@@ -1320,7 +1372,7 @@ namespace Roslyn.Reflection.Metadata.Ecma335
         private void SerializeFieldMarshalTable(BlobBuilder writer, MetadataSizes metadataSizes)
         {
             // Note: we can sort the table at this point since no other table can reference its rows via RowId or CodedIndex (which would need updating otherwise).
-            var ordered = _fieldMarshalTableNeedsSorting ? (IEnumerable<FieldMarshalRow>)_fieldMarshalTable.OrderBy((x, y) => (int)x.Parent - (int)y.Parent) : _fieldMarshalTable;
+            var ordered = _fieldMarshalTableNeedsSorting ? (IEnumerable<FieldMarshalRow>)_fieldMarshalTable.OrderBy(FieldMarshalRowComparer.Default) : _fieldMarshalTable;
             
             foreach (FieldMarshalRow fieldMarshal in ordered)
             {
@@ -1333,7 +1385,7 @@ namespace Roslyn.Reflection.Metadata.Ecma335
         {
             // Note: we can sort the table at this point since no other table can reference its rows via RowId or CodedIndex (which would need updating otherwise).
             // OrderBy performs a stable sort, so multiple attributes with the same parent will be sorted in the order they were added to the table.
-            var ordered = _declSecurityTableNeedsSorting ? (IEnumerable<DeclSecurityRow>)_declSecurityTable.OrderBy((x, y) => (int)x.Parent - (int)y.Parent) : _declSecurityTable;
+            var ordered = _declSecurityTableNeedsSorting ? (IEnumerable<DeclSecurityRow>)_declSecurityTable.OrderBy(DeclSecurityRowComparer.Default) : _declSecurityTable;
             
             foreach (DeclSecurityRow declSecurity in ordered)
             {
@@ -1424,7 +1476,7 @@ namespace Roslyn.Reflection.Metadata.Ecma335
         {
             // Note: we can sort the table at this point since no other table can reference its rows via RowId or CodedIndex (which would need updating otherwise).
             // OrderBy performs a stable sort, so multiple attributes with the same parent will be sorted in the order they were added to the table.
-            var ordered = _methodSemanticsTableNeedsSorting ? (IEnumerable<MethodSemanticsRow>)_methodSemanticsTable.OrderBy((x, y) => (int)x.Association - (int)y.Association) : _methodSemanticsTable;
+            var ordered = _methodSemanticsTableNeedsSorting ? (IEnumerable<MethodSemanticsRow>)_methodSemanticsTable.OrderBy(MethodSemanticsRowComparer.Default) : _methodSemanticsTable;
             
             foreach (MethodSemanticsRow methodSemantic in ordered)
             {
@@ -1716,11 +1768,7 @@ namespace Roslyn.Reflection.Metadata.Ecma335
         {
             // Note: we can sort the table at this point since no other table can reference its rows via RowId or CodedIndex (which would need updating otherwise).
             // OrderBy performs a stable sort, so multiple attributes with the same parent and kind will be sorted in the order they were added to the table.
-            foreach (CustomDebugInformationRow row in _customDebugInformationTable.OrderBy((x, y) =>
-            {
-                int result = (int)x.Parent - (int)y.Parent;
-                return (result != 0) ? result : MetadataTokens.GetHeapOffset(x.Kind) - MetadataTokens.GetHeapOffset(y.Kind);
-            }))
+            foreach (CustomDebugInformationRow row in _customDebugInformationTable.OrderBy(CustomDebugInformationRowComparer.Default))
             {
                 writer.WriteReference(row.Parent, metadataSizes.HasCustomDebugInformationSize);
                 writer.WriteReference((uint)GetHeapOffset(row.Kind), metadataSizes.GuidIndexSize);
