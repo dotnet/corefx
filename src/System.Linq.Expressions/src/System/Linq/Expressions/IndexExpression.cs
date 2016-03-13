@@ -272,14 +272,13 @@ namespace System.Linq.Expressions
 
         private static PropertyInfo FindProperty(Type type, string propertyName, Expression[] arguments, BindingFlags flags)
         {
-            var props = type.GetProperties(flags).Where(x => x.Name.Equals(propertyName, StringComparison.CurrentCultureIgnoreCase)); ;
+            var props = type.GetProperties(flags).Where(x => x.Name.Equals(propertyName, StringComparison.CurrentCultureIgnoreCase));
             PropertyInfo[] members = props.ToArray();
-            if (members == null || members.Length == 0)
+            if (members.Length == 0)
                 return null;
 
             PropertyInfo pi;
-            var propertyInfos = members.Map(t => (PropertyInfo)t);
-            int count = FindBestProperty(propertyInfos, arguments, out pi);
+            int count = FindBestProperty(members, arguments, out pi);
 
             if (count == 0)
                 return null;
