@@ -40,6 +40,8 @@
     <Compile Include="Metadata\Decoding\OpaqueHandleTypeProvider.cs" />
     <Compile Include="Metadata\Decoding\SignatureDecoderTests.cs" />
     <Compile Include="Metadata\Ecma335\MetadataAggregatorTests.cs" />
+    <Compile Include="Metadata\Ecma335\MetadataBuilderTests.cs" />
+    <Compile Include="Metadata\Ecma335\MetadataSerializerTests.cs" />
     <Compile Include="Metadata\Ecma335\MetadataTokensTests.cs" />
     <Compile Include="Metadata\HandleComparerTests.cs" />
     <Compile Include="Metadata\HandleTests.cs" />
