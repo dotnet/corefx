@@ -472,12 +472,9 @@ namespace System.Linq.Expressions
                 if (parameterType.IsByRef) throw Error.AccessorsCannotHaveByRefArgs();
                 TypeUtils.ValidateType(parameterType);
 
-                if (!TypeUtils.AreReferenceAssignable(parameterType, arg.Type))
+                if (!TypeUtils.AreReferenceAssignable(parameterType, arg.Type) && !TryQuote(parameterType, ref arg))
                 {
-                    if (!TryQuote(parameterType, ref arg))
-                    {
-                        throw Error.ExpressionTypeDoesNotMatchMethodParameter(arg.Type, parameterType, method);
-                    }
+                    throw Error.ExpressionTypeDoesNotMatchMethodParameter(arg.Type, parameterType, method);
                 }
                 if (newArgs == null && arg != arguments[i])
                 {
