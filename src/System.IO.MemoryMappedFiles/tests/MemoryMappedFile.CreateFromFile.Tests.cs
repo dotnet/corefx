@@ -194,7 +194,7 @@ namespace System.IO.MemoryMappedFiles.Tests
         /// </summary>
         [PlatformSpecific(PlatformID.AnyUnix)]
         [Theory]
-        [MemberData("CreateValidMapNames")]
+        [MemberData(nameof(CreateValidMapNames))]
         public void MapNamesNotSupported_Unix(string mapName)
         {
             const int Capacity = 4096;
@@ -279,7 +279,7 @@ namespace System.IO.MemoryMappedFiles.Tests
         /// and validating the creating maps each time they're created.
         /// </summary>
         [Theory]
-        [MemberData("MemberData_ValidArgumentCombinationsWithPath",
+        [MemberData(nameof(MemberData_ValidArgumentCombinationsWithPath),
             new FileMode[] { FileMode.Open, FileMode.OpenOrCreate },
             new string[] { null, "CreateUniqueMapName()" },
             new long[] { 1, 256, -1 /*pagesize*/, 10000 },
@@ -327,7 +327,7 @@ namespace System.IO.MemoryMappedFiles.Tests
         /// and validating the creating maps each time they're created.
         /// </summary>
         [Theory]
-        [MemberData("MemberData_ValidArgumentCombinationsWithPath",
+        [MemberData(nameof(MemberData_ValidArgumentCombinationsWithPath),
             new FileMode[] { FileMode.CreateNew },
             new string[] { null, "CreateUniqueMapName()" },
             new long[] { 1, 256, -1 /*pagesize*/, 10000 },
@@ -353,7 +353,7 @@ namespace System.IO.MemoryMappedFiles.Tests
         /// and validating the creating maps each time they're created.
         /// </summary>
         [Theory]
-        [MemberData("MemberData_ValidArgumentCombinationsWithPath",
+        [MemberData(nameof(MemberData_ValidArgumentCombinationsWithPath),
             new FileMode[] { FileMode.Create, FileMode.Truncate },
             new string[] { null, "CreateUniqueMapName()" },
             new long[] { 1, 256, -1 /*pagesize*/, 10000 },
@@ -438,7 +438,7 @@ namespace System.IO.MemoryMappedFiles.Tests
         /// Test various combinations of arguments to CreateFromFile that accepts a FileStream.
         /// </summary>
         [Theory]
-        [MemberData("MemberData_ValidArgumentCombinationsWithStream",
+        [MemberData(nameof(MemberData_ValidArgumentCombinationsWithStream),
             new string[] { null, "CreateUniqueMapName()" },
             new long[] { 1, 256, -1 /*pagesize*/, 10000 },
             new MemoryMappedFileAccess[] { MemoryMappedFileAccess.Read, MemoryMappedFileAccess.ReadWrite, MemoryMappedFileAccess.CopyOnWrite },
@@ -575,10 +575,11 @@ namespace System.IO.MemoryMappedFiles.Tests
         }
 
         /// <summary>
-        /// Test exceptional behavior when trying to create a map for a file that's currently in use.
+        /// Test exceptional behavior when trying to create a map for a read-write file that's currently in use.
         /// </summary>
         [Fact]
-        public void FileInUse()
+        [PlatformSpecific(PlatformID.Windows)] // FileShare is limited on Unix, with None == exclusive, everything else == concurrent
+        public void FileInUse_CreateFromFile_FailsWithExistingReadWriteFile()
         {
             // Already opened with a FileStream
             using (TempFile file = new TempFile(GetTestFilePath(), 4096))
@@ -586,12 +587,51 @@ namespace System.IO.MemoryMappedFiles.Tests
             {
                 Assert.Throws<IOException>(() => MemoryMappedFile.CreateFromFile(file.Path));
             }
+        }
 
-            // Already opened with another map
+        /// <summary>
+        /// Test exceptional behavior when trying to create a map for a non-shared file that's currently in use.
+        /// </summary>
+        [Fact]
+        [PlatformSpecific(PlatformID.Windows)] // FileShare is limited on Unix, with None == exclusive, everything else == concurrent
+        public void FileInUse_CreateFromFile_FailsWithExistingReadWriteMap()
+        {
+            // Already opened with another read-write map
             using (TempFile file = new TempFile(GetTestFilePath(), 4096))
             using (MemoryMappedFile mmf = MemoryMappedFile.CreateFromFile(file.Path))
             {
                 Assert.Throws<IOException>(() => MemoryMappedFile.CreateFromFile(file.Path));
+            }
+        }
+
+        /// <summary>
+        /// Test exceptional behavior when trying to create a map for a non-shared file that's currently in use.
+        /// </summary>
+        [Fact]
+        public void FileInUse_CreateFromFile_FailsWithExistingNoShareFile()
+        {
+            // Already opened with a FileStream
+            using (TempFile file = new TempFile(GetTestFilePath(), 4096))
+            using (FileStream fs = File.Open(file.Path, FileMode.Open, FileAccess.ReadWrite, FileShare.None))
+            {
+                Assert.Throws<IOException>(() => MemoryMappedFile.CreateFromFile(file.Path));
+            }
+        }
+
+        /// <summary>
+        /// Test to validate we can create multiple concurrent read-only maps from the same file path.
+        /// </summary>
+        [Fact]
+        public void FileInUse_CreateFromFile_SucceedsWithReadOnly()
+        {
+            const int Capacity = 4096;
+            using (TempFile file = new TempFile(GetTestFilePath(), Capacity))
+            using (MemoryMappedFile mmf1 = MemoryMappedFile.CreateFromFile(file.Path, FileMode.Open, null, Capacity, MemoryMappedFileAccess.Read))
+            using (MemoryMappedFile mmf2 = MemoryMappedFile.CreateFromFile(file.Path, FileMode.Open, null, Capacity, MemoryMappedFileAccess.Read))
+            using (MemoryMappedViewAccessor acc1 = mmf1.CreateViewAccessor(0, Capacity, MemoryMappedFileAccess.Read))
+            using (MemoryMappedViewAccessor acc2 = mmf2.CreateViewAccessor(0, Capacity, MemoryMappedFileAccess.Read))
+            {
+                Assert.Equal(acc1.Capacity, acc2.Capacity);
             }
         }
 
@@ -781,7 +821,16 @@ namespace System.IO.MemoryMappedFiles.Tests
         {
             using (FileStream fs = new FileStream(GetTestFilePath(), FileMode.CreateNew))
             {
-                Assert.Throws<IOException>(() => MemoryMappedFile.CreateFromFile(fs, null, long.MaxValue, MemoryMappedFileAccess.ReadWrite, HandleInheritability.None, true));
+                try
+                {
+                    long length = long.MaxValue;
+                    MemoryMappedFile.CreateFromFile(fs, null, length, MemoryMappedFileAccess.ReadWrite, HandleInheritability.None, true).Dispose();
+                    Assert.Equal(length, fs.Length); // if it didn't fail to create the file, the length should be what was requested.
+                }
+                catch (IOException)
+                {
+                    // Expected exception for too large a capacity
+                }
             }
         }
 
@@ -791,7 +840,7 @@ namespace System.IO.MemoryMappedFiles.Tests
         /// </summary>
         [PlatformSpecific(PlatformID.Windows)]
         [Theory]
-        [MemberData("CreateValidMapNames")]
+        [MemberData(nameof(CreateValidMapNames))]
         public void ReusingNames_Windows(string name)
         {
             const int Capacity = 4096;

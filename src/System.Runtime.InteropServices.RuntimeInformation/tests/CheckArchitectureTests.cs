@@ -29,10 +29,17 @@ namespace System.Runtime.InteropServices.RuntimeInformationTests
                     Assert.Equal(Architecture.Arm, processArch);
                     break;
 
+                case Architecture.Arm64:
+                    Assert.Equal(IntPtr.Size == 4 ? Architecture.Arm : Architecture.Arm64, processArch);
+                    break;
+
                 default:
                     Assert.False(true, "Unexpected Architecture.");
                     break;
             }
+
+            Assert.Equal(osArch, RuntimeInformation.OSArchitecture);
+            Assert.Equal(processArch, RuntimeInformation.ProcessArchitecture);
         }
     }
 }

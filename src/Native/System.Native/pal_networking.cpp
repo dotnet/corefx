@@ -7,6 +7,7 @@
 #include "pal_utilities.h"
 
 #include <stdlib.h>
+#include <pthread.h>
 #include <arpa/inet.h>
 #include <assert.h>
 #if HAVE_EPOLL
@@ -28,6 +29,55 @@
 #endif
 #include <unistd.h>
 #include <vector>
+
+#if HAVE_KQUEUE
+#if KEVENT_HAS_VOID_UDATA
+void* GetKeventUdata(uintptr_t udata)
+{
+    return reinterpret_cast<void*>(udata);
+}
+uintptr_t GetSocketEventData(void* udata)
+{
+    return reinterpret_cast<uintptr_t>(udata);
+}
+#else
+intptr_t GetKeventUdata(uintptr_t udata)
+{
+    return static_cast<intptr_t>(udata);
+}
+uintptr_t GetSocketEventData(intptr_t udata)
+{
+    return static_cast<uintptr_t>(udata);
+}
+#endif
+#if KEVENT_REQUIRES_INT_PARAMS
+int GetKeventNchanges(int nchanges)
+{
+    return nchanges;
+}
+int16_t GetKeventFilter(int16_t filter)
+{
+    return filter;
+}
+uint16_t GetKeventFlags(uint16_t flags)
+{
+    return flags;
+}
+#else
+size_t GetKeventNchanges(int nchanges)
+{
+    return static_cast<size_t>(nchanges);
+}
+int16_t GetKeventFilter(uint32_t filter)
+{
+    return static_cast<int16_t>(filter);
+}
+uint16_t GetKeventFlags(uint32_t flags)
+{
+    return static_cast<uint16_t>(flags);
+}
+#endif
+#endif
 
 #if !HAVE_IN_PKTINFO
 // On platforms, such as FreeBSD, where in_pktinfo
@@ -116,9 +166,12 @@ static void ConvertByteArrayToIn6Addr(in6_addr& addr, const uint8_t* buffer, int
 #if HAVE_IN6_U
     assert(bufferLength == ARRAY_SIZE(addr.__in6_u.__u6_addr8));
     memcpy(addr.__in6_u.__u6_addr8, buffer, UnsignedCast(bufferLength));
-#else
+#elif HAVE_U6_ADDR
     assert(bufferLength == ARRAY_SIZE(addr.__u6_addr.__u6_addr8));
     memcpy(addr.__u6_addr.__u6_addr8, buffer, UnsignedCast(bufferLength));
+#else
+    assert(bufferLength == ARRAY_SIZE(addr.s6_addr));
+    memcpy(addr.s6_addr, buffer, UnsignedCast(bufferLength));
 #endif
 }
 
@@ -127,9 +180,12 @@ static void ConvertIn6AddrToByteArray(uint8_t* buffer, int32_t bufferLength, con
 #if HAVE_IN6_U
     assert(bufferLength == ARRAY_SIZE(addr.__in6_u.__u6_addr8));
     memcpy(buffer, addr.__in6_u.__u6_addr8, UnsignedCast(bufferLength));
-#else
+#elif HAVE_U6_ADDR
     assert(bufferLength == ARRAY_SIZE(addr.__u6_addr.__u6_addr8));
     memcpy(buffer, addr.__u6_addr.__u6_addr8, UnsignedCast(bufferLength));
+#else
+    assert(bufferLength == ARRAY_SIZE(addr.s6_addr));
+    memcpy(buffer, addr.s6_addr, UnsignedCast(bufferLength));
 #endif
 }
 
@@ -379,6 +435,109 @@ static void ConvertHostEntPlatformToPal(HostEntry& hostEntry, hostent& entry)
     }
 }
 
+#if !HAVE_THREAD_SAFE_GETHOSTBYNAME_AND_GETHOSTBYADDR
+#if !HAVE_GETHOSTBYNAME_R
+static int copy_hostent(struct hostent* from, struct hostent* to,
+                        char* buffer, size_t buflen)
+{
+    // FIXME: the implementation done for this function in https://github.com/dotnet/corefx/commit/6a99b74
+    //        requires testing when managed assemblies are built and tested on NetBSD. Until that time,
+    //        return an error code.
+    (void)from;   // unused arg
+    (void)to;     // unused arg
+    (void)buffer; // unused arg
+    (void)buflen; // unused arg
+    return ENOSYS;
+}
+
+/*
+Note: we're assuming that all access to these functions are going through these shims on the platforms, which do not provide
+      thread-safe functions to get host name or address. If that is not the case (which is very likely) race condition is
+      possible, for instance; if other libs (such as libcurl) call gethostby[name/addr] simultaneously.
+*/
+static pthread_mutex_t lock_hostbyx_mutex = PTHREAD_MUTEX_INITIALIZER;
+
+static int gethostbyname_r(char const* hostname, struct hostent* result,
+                           char* buffer, size_t buflen, hostent** entry, int* error)
+{
+    assert(hostname != nullptr);
+    assert(result != nullptr);
+    assert(buffer != nullptr);
+    assert(entry != nullptr);
+    assert(error != nullptr);
+
+    if (hostname == nullptr || entry == nullptr || error == nullptr || buffer == nullptr || result == nullptr)
+    {
+        if (error != nullptr)
+        {
+            *error = PAL_BAD_ARG;
+        }
+
+        return PAL_BAD_ARG;
+    }
+
+    pthread_mutex_lock(&lock_hostbyx_mutex);
+
+    *entry = gethostbyname(hostname);
+    if ((!(*entry)) || ((*entry)->h_addrtype != AF_INET) || ((*entry)->h_length != 4))
+    {
+        *error = h_errno;
+        *entry = nullptr;
+    }
+    else
+    {
+        h_errno = copy_hostent(*entry, result, buffer, buflen);
+        *entry = (h_errno == 0) ? result : nullptr;
+    }
+
+    pthread_mutex_unlock(&lock_hostbyx_mutex);
+
+    return h_errno;
+}
+
+static int gethostbyaddr_r(const uint8_t* addr, const socklen_t len, int type, struct hostent* result,
+                           char* buffer, size_t buflen, hostent** entry, int* error)
+{
+    assert(addr != nullptr);
+    assert(result != nullptr);
+    assert(buffer != nullptr);
+    assert(entry != nullptr);
+    assert(error != nullptr);
+
+    if (addr == nullptr || entry == nullptr || buffer == nullptr || result == nullptr)
+    {
+        if (error != nullptr)
+        {
+            *error = PAL_BAD_ARG;
+        }
+
+        return PAL_BAD_ARG;
+    }
+
+    pthread_mutex_lock(&lock_hostbyx_mutex);
+
+    *entry = gethostbyaddr(reinterpret_cast<const char*>(addr), static_cast<unsigned int>(len), type);
+    if ((!(*entry)) || ((*entry)->h_addrtype != AF_INET) || ((*entry)->h_length != 4))
+    {
+        *error = h_errno;
+        *entry = nullptr;
+    }
+    else
+    {
+        h_errno = copy_hostent(*entry, result, buffer, buflen);
+        *entry = (h_errno == 0) ? result : nullptr;
+    }
+
+    pthread_mutex_unlock(&lock_hostbyx_mutex);
+
+    return h_errno;
+}
+#undef HAVE_GETHOSTBYNAME_R
+#undef HAVE_GETHOSTBYADDR_R
+#define HAVE_GETHOSTBYNAME_R 1
+#define HAVE_GETHOSTBYADDR_R 1
+#endif /* !HAVE_GETHOSTBYNAME_R */
+
 #if HAVE_GETHOSTBYNAME_R
 static int GetHostByNameHelper(const uint8_t* hostname, hostent** entry)
 {
@@ -419,7 +578,8 @@ static int GetHostByNameHelper(const uint8_t* hostname, hostent** entry)
         }
     }
 }
-#endif
+#endif /* HAVE_GETHOSTBYNAME_R */
+#endif /* !HAVE_THREAD_SAFE_GETHOSTBYNAME_AND_GETHOSTBYADDR */
 
 extern "C" int32_t SystemNative_GetHostByName(const uint8_t* hostname, HostEntry* entry)
 {
@@ -449,7 +609,7 @@ extern "C" int32_t SystemNative_GetHostByName(const uint8_t* hostname, HostEntry
     return PAL_SUCCESS;
 }
 
-#if HAVE_GETHOSTBYADDR_R
+#if !HAVE_THREAD_SAFE_GETHOSTBYNAME_AND_GETHOSTBYADDR && HAVE_GETHOSTBYADDR_R
 static int GetHostByAddrHelper(const uint8_t* addr, const socklen_t addrLen, int type, hostent** entry)
 {
     assert(addr != nullptr);
@@ -489,7 +649,7 @@ static int GetHostByAddrHelper(const uint8_t* addr, const socklen_t addrLen, int
         }
     }
 }
-#endif
+#endif /* !HAVE_THREAD_SAFE_GETHOSTBYNAME_AND_GETHOSTBYADDR && HAVE_GETHOSTBYADDR_R */
 
 extern "C" int32_t SystemNative_GetHostByAddress(const IPAddress* address, HostEntry* entry)
 {
@@ -1118,6 +1278,22 @@ static int32_t GetIPv6PacketInformation(cmsghdr* controlMessage, IPPacketInforma
     return 1;
 }
 
+cmsghdr* GET_CMSG_NXTHDR(msghdr* mhdr, cmsghdr* cmsg)
+{
+#ifndef __GLIBC__
+// Tracking issue: #6312
+// In musl-libc, CMSG_NXTHDR typecasts char* to cmsghdr* which causes
+// clang to throw cast-align warning. This is to suppress the warning
+// inline.
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wcast-align"
+#endif
+    return CMSG_NXTHDR(mhdr, cmsg);
+#ifndef __GLIBC__
+#pragma clang diagnostic pop
+#endif
+}
+
 extern "C" int32_t
 SystemNative_TryGetIPPacketInformation(MessageHeader* messageHeader, int32_t isIPv4, IPPacketInformation* packetInfo)
 {
@@ -1133,7 +1309,7 @@ SystemNative_TryGetIPPacketInformation(MessageHeader* messageHeader, int32_t isI
     if (isIPv4 != 0)
     {
         for (; controlMessage != nullptr && controlMessage->cmsg_len > 0;
-             controlMessage = CMSG_NXTHDR(&header, controlMessage))
+             controlMessage = GET_CMSG_NXTHDR(&header, controlMessage))
         {
             if (controlMessage->cmsg_level == IPPROTO_IP && controlMessage->cmsg_type == IP_PKTINFO)
             {
@@ -1144,7 +1320,7 @@ SystemNative_TryGetIPPacketInformation(MessageHeader* messageHeader, int32_t isI
     else
     {
         for (; controlMessage != nullptr && controlMessage->cmsg_len > 0;
-             controlMessage = CMSG_NXTHDR(&header, controlMessage))
+             controlMessage = GET_CMSG_NXTHDR(&header, controlMessage))
         {
             if (controlMessage->cmsg_level == IPPROTO_IPV6 && controlMessage->cmsg_type == IPV6_PKTINFO)
             {
@@ -1166,6 +1342,10 @@ static bool GetMulticastOptionName(int32_t multicastOption, bool isIPv6, int& op
 
         case PAL_MULTICAST_DROP:
             optionName = isIPv6 ? IPV6_DROP_MEMBERSHIP : IP_DROP_MEMBERSHIP;
+            return true;
+
+        case PAL_MULTICAST_IF:
+            optionName = IP_MULTICAST_IF;
             return true;
 
         default:
@@ -1229,6 +1409,10 @@ extern "C" Error SystemNative_SetIPv4MulticastOption(int32_t socket, int32_t mul
 #else
     ip_mreq opt = {.imr_multiaddr = {.s_addr = option->MulticastAddress},
                    .imr_interface = {.s_addr = option->LocalAddress}};
+    if (option->InterfaceIndex != 0)
+    {
+        return PAL_ENOPROTOOPT;
+    }
 #endif
     int err = setsockopt(socket, IPPROTO_IP, optionName, &opt, sizeof(opt));
     return err == 0 ? PAL_SUCCESS : SystemNative_ConvertErrorPlatformToPal(errno);
@@ -1741,21 +1925,29 @@ static bool TryGetPlatformSocketOption(int32_t socketOptionName, int32_t socketO
 
                 // case PAL_SO_IP_DONTFRAGMENT:
 
+#ifdef IP_ADD_SOURCE_MEMBERSHIP
                 case PAL_SO_IP_ADD_SOURCE_MEMBERSHIP:
                     optName = IP_ADD_SOURCE_MEMBERSHIP;
                     return true;
+#endif
 
+#ifdef IP_DROP_SOURCE_MEMBERSHIP
                 case PAL_SO_IP_DROP_SOURCE_MEMBERSHIP:
                     optName = IP_DROP_SOURCE_MEMBERSHIP;
                     return true;
+#endif
 
+#ifdef IP_BLOCK_SOURCE
                 case PAL_SO_IP_BLOCK_SOURCE:
                     optName = IP_BLOCK_SOURCE;
                     return true;
+#endif
 
+#ifdef IP_UNBLOCK_SOURCE
                 case PAL_SO_IP_UNBLOCK_SOURCE:
                     optName = IP_UNBLOCK_SOURCE;
                     return true;
+#endif
 
                 case PAL_SO_IP_PKTINFO:
                     optName = IP_PKTINFO;
@@ -2208,7 +2400,7 @@ static void ConvertEventEPollToSocketAsync(SocketEvent* sae, epoll_event* epoll)
     uint32_t events = epoll->events;
     if ((events & EPOLLHUP) != 0)
     {
-        events = (events & ~EPOLLHUP) | EPOLLIN | EPOLLOUT;
+        events = (events & static_cast<uint32_t>(~EPOLLHUP)) | EPOLLIN | EPOLLOUT;
     }
 
     *sae = {.Data = reinterpret_cast<uintptr_t>(epoll->data.ptr), .Events = GetSocketEvents(events)};
@@ -2329,8 +2521,13 @@ static Error CloseSocketEventPortInner(int32_t port)
 static Error TryChangeSocketEventRegistrationInner(
     int32_t port, int32_t socket, SocketEvents currentEvents, SocketEvents newEvents, uintptr_t data)
 {
+#ifdef EV_RECEIPT
     const uint16_t AddFlags = EV_ADD | EV_CLEAR | EV_RECEIPT;
     const uint16_t RemoveFlags = EV_DELETE | EV_RECEIPT;
+#else
+    const uint16_t AddFlags = EV_ADD | EV_CLEAR;
+    const uint16_t RemoveFlags = EV_DELETE;
+#endif
 
     assert(currentEvents != newEvents);
 
@@ -2349,7 +2546,7 @@ static Error TryChangeSocketEventRegistrationInner(
                (newEvents & PAL_SA_READ) == 0 ? RemoveFlags : AddFlags,
                0,
                0,
-               reinterpret_cast<void*>(data));
+               GetKeventUdata(data));
     }
 
     if (writeChanged)
@@ -2360,11 +2557,11 @@ static Error TryChangeSocketEventRegistrationInner(
                (newEvents & PAL_SA_WRITE) == 0 ? RemoveFlags : AddFlags,
                0,
                0,
-               reinterpret_cast<void*>(data));
+               GetKeventUdata(data));
     }
 
     int err;
-    while (CheckInterrupted(err = kevent(port, events, i, nullptr, 0, nullptr)));
+    while (CheckInterrupted(err = kevent(port, events, GetKeventNchanges(i), nullptr, 0, nullptr)));
     return err == 0 ? PAL_SUCCESS : SystemNative_ConvertErrorPlatformToPal(errno);
 }
 
@@ -2376,7 +2573,7 @@ static Error WaitForSocketEventsInner(int32_t port, SocketEvent* buffer, int32_t
 
     auto* events = reinterpret_cast<struct kevent*>(buffer);
     int numEvents;
-    while (CheckInterrupted(numEvents = kevent(port, nullptr, 0, events, *count, nullptr)));
+    while (CheckInterrupted(numEvents = kevent(port, nullptr, 0, events, GetKeventNchanges(*count), nullptr)));
     if (numEvents == -1)
     {
         *count = -1;
@@ -2394,7 +2591,7 @@ static Error WaitForSocketEventsInner(int32_t port, SocketEvent* buffer, int32_t
     {
         // This copy is made deliberately to avoid overwriting data.
         struct kevent evt = events[i];
-        buffer[i] = {.Data = reinterpret_cast<uintptr_t>(evt.udata), .Events = GetSocketEvents(evt.filter, evt.flags)};
+        buffer[i] = {.Data = GetSocketEventData(evt.udata), .Events = GetSocketEvents(GetKeventFilter(evt.filter), GetKeventFlags(evt.flags))};
     }
 
     *count = numEvents;

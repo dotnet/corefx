@@ -110,9 +110,17 @@ namespace System.IO
                 _asyncState = new AsyncState();
             }
 
-            // Translate the arguments into arguments for an open call
+            // Translate the arguments into arguments for an open call.
             Interop.Sys.OpenFlags openFlags = PreOpenConfigurationFromOptions(mode, access, options); // FileShare currently ignored
-            Interop.Sys.Permissions openPermissions = Interop.Sys.Permissions.S_IRWXU; // creator has read/write/execute permissions; no permissions for anyone else
+
+            // If the file gets created a new, we'll select the permissions for it.  Most utilities by default use 666 (read and 
+            // write for all). However, on Windows it's possible to write out a file and then execute it.  To maintain that similarity, 
+            // we use 766, so that in addition the user has execute privileges. No matter what we choose, it'll be subject to the umask 
+            // applied by the system, such that the actual permissions will typically be less than what we select here.
+            const Interop.Sys.Permissions openPermissions =
+                Interop.Sys.Permissions.S_IRWXU |
+                Interop.Sys.Permissions.S_IRGRP | Interop.Sys.Permissions.S_IWGRP |
+                Interop.Sys.Permissions.S_IROTH | Interop.Sys.Permissions.S_IWOTH;
 
             // Open the file and store the safe handle. Subsequent code in this method expects the safe handle to be initialized.
             _fileHandle = SafeFileHandle.Open(path, openFlags, (int)openPermissions);
@@ -165,15 +173,15 @@ namespace System.IO
         {
             // Make sure the handle is open
             if (handle.IsInvalid)
-                throw new ArgumentException(SR.Arg_InvalidHandle, "handle");
+                throw new ArgumentException(SR.Arg_InvalidHandle, nameof(handle));
             if (handle.IsClosed)
                 throw new ObjectDisposedException(SR.ObjectDisposed_FileClosed);
             if (access < FileAccess.Read || access > FileAccess.ReadWrite)
-                throw new ArgumentOutOfRangeException("access", SR.ArgumentOutOfRange_Enum);
+                throw new ArgumentOutOfRangeException(nameof(access), SR.ArgumentOutOfRange_Enum);
             if (bufferSize <= 0)
-                throw new ArgumentOutOfRangeException("bufferSize", SR.ArgumentOutOfRange_NeedNonNegNum);
+                throw new ArgumentOutOfRangeException(nameof(bufferSize), SR.ArgumentOutOfRange_NeedNonNegNum);
             if (handle.IsAsync.HasValue && useAsyncIO != handle.IsAsync.Value)
-                throw new ArgumentException(SR.Arg_HandleNotAsync, "handle");
+                throw new ArgumentException(SR.Arg_HandleNotAsync, nameof(handle));
 
             _fileHandle = handle;
             _access = access;
@@ -379,7 +387,7 @@ namespace System.IO
             {
                 if (value < 0)
                 {
-                    throw new ArgumentOutOfRangeException("value", SR.ArgumentOutOfRange_NeedNonNegNum);
+                    throw new ArgumentOutOfRangeException(nameof(value), SR.ArgumentOutOfRange_NeedNonNegNum);
                 }
                 _parent.Seek(value, SeekOrigin.Begin);
             }
@@ -587,7 +595,7 @@ namespace System.IO
         {
             if (value < 0)
             {
-                throw new ArgumentOutOfRangeException("value", SR.ArgumentOutOfRange_NeedNonNegNum);
+                throw new ArgumentOutOfRangeException(nameof(value), SR.ArgumentOutOfRange_NeedNonNegNum);
             }
             if (_fileHandle.IsClosed)
             {
@@ -761,19 +769,6 @@ namespace System.IO
             }
             _filePosition += bytesRead;
             return bytesRead;
-        }
-
-        /// <summary>
-        /// Asynchronously reads the bytes from the current stream and writes them to another
-        /// stream, using a specified buffer size.
-        /// </summary>
-        /// <param name="destination">The stream to which the contents of the current stream will be copied.</param>
-        /// <param name="bufferSize">The size, in bytes, of the buffer. This value must be greater than zero.</param>
-        /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
-        /// <returns>A task that represents the asynchronous copy operation.</returns>
-        public override Task CopyToAsync(Stream destination, int bufferSize, CancellationToken cancellationToken)
-        {
-            return StreamHelpers.ArrayPoolCopyToAsync(this, destination, bufferSize, cancellationToken);
         }
 
         /// <summary>
@@ -1163,15 +1158,15 @@ namespace System.IO
         {
             if (array == null)
             {
-                throw new ArgumentNullException("array", SR.ArgumentNull_Buffer);
+                throw new ArgumentNullException(nameof(array), SR.ArgumentNull_Buffer);
             }
             if (offset < 0)
             {
-                throw new ArgumentOutOfRangeException("offset", SR.ArgumentOutOfRange_NeedNonNegNum);
+                throw new ArgumentOutOfRangeException(nameof(offset), SR.ArgumentOutOfRange_NeedNonNegNum);
             }
             if (count < 0)
             {
-                throw new ArgumentOutOfRangeException("count", SR.ArgumentOutOfRange_NeedNonNegNum);
+                throw new ArgumentOutOfRangeException(nameof(count), SR.ArgumentOutOfRange_NeedNonNegNum);
             }
             if (array.Length - offset < count)
             {
@@ -1194,7 +1189,7 @@ namespace System.IO
         {
             if (origin < SeekOrigin.Begin || origin > SeekOrigin.End)
             {
-                throw new ArgumentException(SR.Argument_InvalidSeekOrigin, "origin");
+                throw new ArgumentException(SR.Argument_InvalidSeekOrigin, nameof(origin));
             }
             if (_fileHandle.IsClosed)
             {

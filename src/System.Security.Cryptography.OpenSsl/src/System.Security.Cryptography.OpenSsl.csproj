@@ -11,10 +11,11 @@
     <AssemblyVersion>4.0.0.0</AssemblyVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <CLSCompliant>false</CLSCompliant>
-    <PackageTargetFramework>dotnet5.4</PackageTargetFramework>
-    <!-- Temporarily remove the RID from this package until we have a
-         cross platform API to use RSA https://github.com/dotnet/corefx/issues/2953 -->
-    <!-- PackageTargetRuntime>unix</PackageTargetRuntime -->
+    <PackageTargetFramework>netstandard1.4</PackageTargetFramework>
+    <NuGetTargetMoniker>.NETStandard,Version=v1.4</NuGetTargetMoniker>
+    <!-- Temporarily remove the RID from this package until we have a  
+         cross platform API to use RSA https://github.com/dotnet/corefx/issues/2953 -->  
+    <PackageTargetRuntime Condition="'$(TargetGroup)' == ''">unix</PackageTargetRuntime>  
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Linux_Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Linux_Release|AnyCPU'" />

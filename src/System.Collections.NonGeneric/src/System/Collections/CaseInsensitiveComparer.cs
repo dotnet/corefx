@@ -11,8 +11,6 @@
 **
 ============================================================*/
 
-using System;
-using System.Collections;
 using System.Globalization;
 using System.Diagnostics.Contracts;
 
@@ -32,7 +30,7 @@ namespace System.Collections
         {
             if (culture == null)
             {
-                throw new ArgumentNullException("culture");
+                throw new ArgumentNullException(nameof(culture));
             }
             Contract.EndContractBlock();
             _compareInfo = culture.CompareInfo;

@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition="'$(Configuration)'==''">Windows_Debug</Configuration>
@@ -9,7 +9,7 @@
     <AssemblyVersion>4.1.0.0</AssemblyVersion>
     <ProjectGuid>{43311AFB-D7C4-4E5A-B1DE-855407F90D1B}</ProjectGuid>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <PackageTargetFramework Condition="'$(TargetGroup)' == ''">dotnet5.4</PackageTargetFramework>
+    <PackageTargetFramework Condition="'$(TargetGroup)' == ''">netstandard1.3</PackageTargetFramework>
     <EnableWinRT Condition="'$(TargetGroup)' == 'netcore50'">true</EnableWinRT>
     <IsPartialFacadeAssembly Condition="'$(TargetGroup)' == 'net46'">true</IsPartialFacadeAssembly>
     <PackageTargetFramework Condition="'$(TargetsWindows)' == 'true' AND '$(EnableWinRT)' == 'true'">netcore50</PackageTargetFramework>
@@ -17,6 +17,11 @@
     <PackageTargetRuntime Condition=" '$(TargetsUnix)' == 'true'">unix</PackageTargetRuntime>
   </PropertyGroup>
 
+  <PropertyGroup Condition=" '$(TargetsWindows)' == 'true' AND '$(TargetGroup)' == ''">
+    <ProjectJson>win/project.json</ProjectJson>
+    <ProjectLockJson>win/project.lock.json</ProjectLockJson>
+  </PropertyGroup>
+  
   <PropertyGroup Condition="'$(EnableWinRT)' != 'true'">
     <DefineConstants>$(DefineConstants);FEATURE_CORECLR</DefineConstants>
   </PropertyGroup>
@@ -363,6 +368,9 @@
     <Compile Include="$(CommonPath)\System\Net\SocketProtocolSupportPal.Unix.cs">
       <Link>Common\System\Net\SocketProtocolSupportPal.Unix</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\System\Net\Sockets\SocketErrorPal.Unix.cs">
+      <Link>Common\System\Net\Sockets\SocketErrorPal.Unix</Link>
+    </Compile>
 
     <Compile Include="$(CommonPath)\Interop\Interop.CheckedAccess.cs" >
       <Link>Common\Interop\Interop.CheckedAccess.cs</Link>
@@ -460,6 +468,12 @@
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.SocketAddress.cs">
       <Link>Interop\Unix\System.Native\Interop.SocketAddress.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.Pipe.cs">
+      <Link>Interop\Unix\System.Native\Interop.Pipe.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.Write.cs">
+      <Link>Interop\Unix\System.Native\Interop.Write.cs</Link>
     </Compile>
   </ItemGroup>
 

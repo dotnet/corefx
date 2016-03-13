@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
 using System.Collections.ObjectModel;
 
 namespace System.Composition
@@ -31,7 +30,7 @@ namespace System.Composition
         /// <param name="sharingBoundaryNames">Boundaries implemented by the created ExportLifetimeContext{T}s.</param>
         public SharingBoundaryAttribute(params string[] sharingBoundaryNames)
         {
-            if (sharingBoundaryNames == null) throw new ArgumentNullException("boundaries");
+            if (sharingBoundaryNames == null) throw new ArgumentNullException(nameof(sharingBoundaryNames));
 
             _sharingBoundaryNames = sharingBoundaryNames;
         }

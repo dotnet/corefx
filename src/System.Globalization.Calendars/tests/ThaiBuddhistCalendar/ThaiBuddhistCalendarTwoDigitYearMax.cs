@@ -4,6 +4,7 @@
 
 using System;
 using System.Globalization;
+using System.Globalization.Tests;
 using Xunit;
 
 namespace System.Globalization.CalendarsTests
@@ -50,32 +51,6 @@ namespace System.Globalization.CalendarsTests
             int twoYearMax = 99;
             tbc.TwoDigitYearMax = twoYearMax;
             Assert.Equal(tbc.TwoDigitYearMax, twoYearMax);
-        }
-        #endregion
-
-        #region Negative Tests
-        // NegTest1: Set the TwoDigitYear max as greater than the year of  MaxSuportedDateTime
-        [Fact]
-        public void NegTest1()
-        {
-            System.Globalization.Calendar tbc = new ThaiBuddhistCalendar();
-            int year = 10000 + 543;
-            Assert.Throws<ArgumentOutOfRangeException>(() =>
-            {
-                tbc.TwoDigitYearMax = year;
-            });
-        }
-
-        // NegTest2: The year less than 99
-        [Fact]
-        public void NegTest2()
-        {
-            System.Globalization.Calendar tbc = new ThaiBuddhistCalendar();
-            int year = 98;
-            Assert.Throws<ArgumentOutOfRangeException>(() =>
-            {
-                tbc.TwoDigitYearMax = year;
-            });
         }
         #endregion
     }
