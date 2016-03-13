@@ -456,51 +456,45 @@ namespace System.Linq.Expressions
 
         private static void ValidateAccessorArgumentTypes(MethodInfo method, ParameterInfo[] indexes, ref ReadOnlyCollection<Expression> arguments)
         {
-            if (indexes.Length > 0)
+            if (indexes.Length != arguments.Count)
             {
-                if (indexes.Length != arguments.Count)
+                throw Error.IncorrectNumberOfMethodCallArguments(method);
+            }
+
+            Expression[] newArgs = null;
+            for (int i = 0; i < indexes.Length; i++)
+            {
+                Expression arg = arguments[i];
+                ParameterInfo pi = indexes[i];
+                RequiresCanRead(arg, nameof(arguments));
+
+                Type parameterType = pi.ParameterType;
+                if (parameterType.IsByRef) throw Error.AccessorsCannotHaveByRefArgs();
+                TypeUtils.ValidateType(parameterType);
+
+                if (!TypeUtils.AreReferenceAssignable(parameterType, arg.Type))
                 {
-                    throw Error.IncorrectNumberOfMethodCallArguments(method);
+                    if (!TryQuote(parameterType, ref arg))
+                    {
+                        throw Error.ExpressionTypeDoesNotMatchMethodParameter(arg.Type, parameterType, method);
+                    }
                 }
-                Expression[] newArgs = null;
-                for (int i = 0, n = indexes.Length; i < n; i++)
+                if (newArgs == null && arg != arguments[i])
                 {
-                    Expression arg = arguments[i];
-                    ParameterInfo pi = indexes[i];
-                    RequiresCanRead(arg, nameof(arguments));
-
-                    Type pType = pi.ParameterType;
-                    if (pType.IsByRef) throw Error.AccessorsCannotHaveByRefArgs();
-                    TypeUtils.ValidateType(pType);
-
-                    if (!TypeUtils.AreReferenceAssignable(pType, arg.Type))
+                    newArgs = new Expression[arguments.Count];
+                    for (int j = 0; j < i; j++)
                     {
-                        if (!TryQuote(pType, ref arg))
-                        {
-                            throw Error.ExpressionTypeDoesNotMatchMethodParameter(arg.Type, pType, method);
-                        }
-                    }
-                    if (newArgs == null && arg != arguments[i])
-                    {
-                        newArgs = new Expression[arguments.Count];
-                        for (int j = 0; j < i; j++)
-                        {
-                            newArgs[j] = arguments[j];
-                        }
-                    }
-                    if (newArgs != null)
-                    {
-                        newArgs[i] = arg;
+                        newArgs[j] = arguments[j];
                     }
                 }
                 if (newArgs != null)
                 {
-                    arguments = new TrueReadOnlyCollection<Expression>(newArgs);
+                    newArgs[i] = arg;
                 }
             }
-            else if (arguments.Count > 0)
+            if (newArgs != null)
             {
-                throw Error.IncorrectNumberOfMethodCallArguments(method);
+                arguments = new TrueReadOnlyCollection<Expression>(newArgs);
             }
         }
         #endregion
