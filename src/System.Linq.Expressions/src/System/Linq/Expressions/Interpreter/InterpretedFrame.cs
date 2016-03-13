@@ -157,7 +157,7 @@ namespace System.Linq.Expressions.Interpreter
 
         internal void SaveTraceToException(Exception exception)
         {
-            if (exception.Data[typeof(InterpretedFrameInfo)] == null)
+            if (!exception.Data.Contains(typeof(InterpretedFrameInfo)))
             {
                 exception.Data[typeof(InterpretedFrameInfo)] = GetStackTraceDebugInfo().ToArray();
             }
