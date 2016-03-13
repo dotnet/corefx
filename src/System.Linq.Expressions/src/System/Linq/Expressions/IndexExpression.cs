@@ -272,9 +272,9 @@ namespace System.Linq.Expressions
 
         private static PropertyInfo FindProperty(Type type, string propertyName, Expression[] arguments, BindingFlags flags)
         {
-            var props = type.GetProperties(flags).Where(x => x.Name.Equals(propertyName, StringComparison.CurrentCultureIgnoreCase));
-            PropertyInfo[] members = props.ToArray();
-            if (members.Length == 0)
+            var members = type.GetProperties(flags)
+                .Where(x => x.Name.Equals(propertyName, StringComparison.CurrentCultureIgnoreCase));
+            if (!members.Any())
                 return null;
 
             PropertyInfo pi;
