@@ -4,6 +4,7 @@
 
 using System;
 using System.Globalization;
+using System.Globalization.Tests;
 using Xunit;
 
 namespace System.Globalization.CalendarsTests
@@ -114,88 +115,7 @@ namespace System.Globalization.CalendarsTests
             VerificationHelper(dt, i);
         }
         #endregion
-
-        #region Negative tests
-        // NegTest1: The resulting DateTime is greater than the supported range
-        [Fact]
-        public void NegTest1()
-        {
-            System.Globalization.Calendar tbc = new ThaiBuddhistCalendar();
-            DateTime dt = tbc.MaxSupportedDateTime;
-            int addValue = _generator.GetInt32(-55);
-            Assert.Throws<ArgumentOutOfRangeException>(() =>
-            {
-                tbc.AddMonths(dt, addValue);
-            });
-        }
-
-        // NegTest2: The resulting DateTime is less than the supported range
-        [Fact]
-        public void NegTest2()
-        {
-            System.Globalization.Calendar tbc = new ThaiBuddhistCalendar();
-            DateTime dt = tbc.MinSupportedDateTime;
-            int addValue = _generator.GetInt32(-55);
-            addValue = -addValue;
-            Assert.Throws<ArgumentOutOfRangeException>(() =>
-            {
-                tbc.AddMonths(dt, addValue);
-            });
-        }
-
-        // NegTest3: the add months is less than -120000
-        [Fact]
-        public void NegTest3()
-        {
-            System.Globalization.Calendar tbc = new ThaiBuddhistCalendar();
-            Random rand = new Random(-55);
-            int year = rand.Next(tbc.GetYear(tbc.MinSupportedDateTime), tbc.GetYear(tbc.MaxSupportedDateTime));
-            int month = rand.Next(1, 12);
-            int day;
-            if (IsLeapYearThaiBuddhist(year))
-            {
-                day = rand.Next(1, _DAYS_PER_MONTHS_IN_LEAP_YEAR[month] + 1);
-            }
-            else
-            {
-                day = rand.Next(1, _DAYS_PER_MONTHS_IN_NO_LEAP_YEAR[month] + 1);
-            }
-
-            DateTime dt = tbc.ToDateTime(year, month, day, 0, 0, 0, 0);
-            int addValue = rand.Next(Int32.MinValue, -120000);
-            Assert.Throws<ArgumentOutOfRangeException>(() =>
-            {
-                tbc.AddMonths(dt, addValue);
-            });
-        }
-
-        // NegTest4: the add months is greater than 120000
-        [Fact]
-        public void NegTest4()
-        {
-            System.Globalization.Calendar tbc = new ThaiBuddhistCalendar();
-            Random rand = new Random(-55);
-            int year = rand.Next(tbc.GetYear(tbc.MinSupportedDateTime), tbc.GetYear(tbc.MaxSupportedDateTime));
-            int month = rand.Next(1, 12);
-            int day;
-            if (IsLeapYearThaiBuddhist(year))
-            {
-                day = rand.Next(1, _DAYS_PER_MONTHS_IN_LEAP_YEAR[month] + 1);
-            }
-            else
-            {
-                day = rand.Next(1, _DAYS_PER_MONTHS_IN_NO_LEAP_YEAR[month] + 1);
-            }
-
-            DateTime dt = tbc.ToDateTime(year, month, day, 0, 0, 0, 0);
-            int addValue = rand.Next(120000, Int32.MaxValue);
-            Assert.Throws<ArgumentOutOfRangeException>(() =>
-            {
-                tbc.AddMonths(dt, addValue);
-            });
-        }
-        #endregion
-
+        
         #region Helper Methods
         private bool IsLeapYearThaiBuddhist(int year)
         {

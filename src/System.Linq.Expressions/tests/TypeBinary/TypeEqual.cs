@@ -48,35 +48,35 @@ namespace System.Linq.Expressions.Tests
         }
 
         [Theory]
-        [MemberData("ExpressionAndTypeCombinations")]
+        [MemberData(nameof(ExpressionAndTypeCombinations))]
         public void TypePropertyMatches(Expression expression, Type type)
         {
             Assert.Equal(type, Expression.TypeEqual(expression, type).TypeOperand);
         }
 
         [Theory]
-        [MemberData("ExpressionAndTypeCombinations")]
+        [MemberData(nameof(ExpressionAndTypeCombinations))]
         public void TypeIsBoolean(Expression expression, Type type)
         {
             Assert.Equal(typeof(bool), Expression.TypeEqual(expression, type).Type);
         }
 
         [Theory]
-        [MemberData("ExpressionAndTypeCombinations")]
+        [MemberData(nameof(ExpressionAndTypeCombinations))]
         public void NodeType(Expression expression, Type type)
         {
             Assert.Equal(ExpressionType.TypeEqual, Expression.TypeEqual(expression, type).NodeType);
         }
 
         [Theory]
-        [MemberData("ExpressionAndTypeCombinations")]
+        [MemberData(nameof(ExpressionAndTypeCombinations))]
         public void ExpressionIsThatPassed(Expression expression, Type type)
         {
             Assert.Same(expression, Expression.TypeEqual(expression, type).Expression);
         }
 
         [Theory]
-        [MemberData("ExpressionAndTypeCombinations")]
+        [MemberData(nameof(ExpressionAndTypeCombinations))]
         public void ExpressionEvaluationCompiled(Expression expression, Type type)
         {
             bool expected;
@@ -97,7 +97,7 @@ namespace System.Linq.Expressions.Tests
         }
 
         [Theory]
-        [MemberData("ExpressionAndTypeCombinations")]
+        [MemberData(nameof(ExpressionAndTypeCombinations))]
         public void ExpressionEvaluationInterpretted(Expression expression, Type type)
         {
             bool expected;
@@ -118,7 +118,7 @@ namespace System.Linq.Expressions.Tests
         }
 
         [Theory]
-        [MemberData("ExpressionAndTypeCombinations")]
+        [MemberData(nameof(ExpressionAndTypeCombinations))]
         public void ExpressionEvaluationWithParameterCompiled(Expression expression, Type type)
         {
             if (expression.Type == typeof(void))
@@ -149,7 +149,7 @@ namespace System.Linq.Expressions.Tests
         }
 
         [Theory]
-        [MemberData("ExpressionAndTypeCombinations")]
+        [MemberData(nameof(ExpressionAndTypeCombinations))]
         public void ExpressionEvaluationWithParameterInterpretted(Expression expression, Type type)
         {
             if (expression.Type == typeof(void))
@@ -202,6 +202,44 @@ namespace System.Linq.Expressions.Tests
             TypeBinaryVisitCheckingVisitor visitor = new TypeBinaryVisitCheckingVisitor();
             visitor.Visit(expression);
             Assert.Same(expression, visitor.LastTypeBinaryVisited);
+        }
+
+        [Fact]
+        public void VariantDelegateArgumentCompiled()
+        {
+            Action<object> ao = x => { };
+            Action<string> a = x => { };
+            Action<string> b = ao;
+
+            var param = Expression.Parameter(typeof(Action<string>));
+
+            Func<Action<string>, bool> isActStr = Expression.Lambda<Func<Action<string>, bool>>(
+                Expression.TypeEqual(param, typeof(Action<string>)),
+                param
+            ).Compile(false);
+
+            Assert.False(isActStr(ao));
+            Assert.True(isActStr(a));
+            Assert.False(isActStr(b));
+        }
+
+        [Fact]
+        public void VariantDelegateArgumentInterpreted()
+        {
+            Action<object> ao = x => { };
+            Action<string> a = x => { };
+            Action<string> b = ao;
+
+            var param = Expression.Parameter(typeof(Action<string>));
+
+            Func<Action<string>, bool> isActStr = Expression.Lambda<Func<Action<string>, bool>>(
+                Expression.TypeEqual(param, typeof(Action<string>)),
+                param
+            ).Compile(true);
+
+            Assert.False(isActStr(ao));
+            Assert.True(isActStr(a));
+            Assert.False(isActStr(b));
         }
     }
 }

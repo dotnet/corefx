@@ -35,9 +35,9 @@ namespace System.Net.Security
                 SecurityContextTokenHandle token = null;
                 try
                 {
-                    SecurityStatusPal status;
+                    SecurityStatusPalErrorCode status;
                     SafeDeleteContext securityContext = context.GetContext(out status);
-                    if (status != SecurityStatusPal.OK)
+                    if (status != SecurityStatusPalErrorCode.OK)
                     {
                         throw new Win32Exception((int)SecurityStatusAdapterPal.GetInteropFromSecurityStatusPal(status));
                     }
@@ -150,7 +150,7 @@ namespace System.Net.Security
             }
         }
 
-        internal static SecurityStatusPal InitializeSecurityContext(
+        internal static SecurityStatusPalErrorCode InitializeSecurityContext(
             SafeFreeCredentials credentialsHandle,
             ref SafeDeleteContext securityContext,
             string spn,
@@ -175,7 +175,7 @@ namespace System.Net.Security
             return SecurityStatusAdapterPal.GetSecurityStatusPalFromInterop(winStatus);
         }
 
-        internal static SecurityStatusPal CompleteAuthToken(
+        internal static SecurityStatusPalErrorCode CompleteAuthToken(
             ref SafeDeleteContext securityContext,
             SecurityBuffer[] inSecurityBufferArray)
         {
@@ -186,7 +186,7 @@ namespace System.Net.Security
             return SecurityStatusAdapterPal.GetSecurityStatusPalFromInterop(winStatus);
         }
 
-        internal static SecurityStatusPal AcceptSecurityContext(
+        internal static SecurityStatusPalErrorCode AcceptSecurityContext(
             SafeFreeCredentials credentialsHandle,
             ref SafeDeleteContext securityContext,
             ContextFlagsPal requestedContextFlags,
@@ -219,7 +219,7 @@ namespace System.Net.Security
             }
         }
 
-        internal static Exception CreateExceptionFromError(SecurityStatusPal statusCode)
+        internal static Exception CreateExceptionFromError(SecurityStatusPalErrorCode statusCode)
         {
             return new Win32Exception((int)SecurityStatusAdapterPal.GetInteropFromSecurityStatusPal(statusCode));
         }

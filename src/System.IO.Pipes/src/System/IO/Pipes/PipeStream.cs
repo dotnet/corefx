@@ -34,11 +34,11 @@ namespace System.IO.Pipes
         {
             if (direction < PipeDirection.In || direction > PipeDirection.InOut)
             {
-                throw new ArgumentOutOfRangeException("direction", SR.ArgumentOutOfRange_DirectionModeInOutOrInOut);
+                throw new ArgumentOutOfRangeException(nameof(direction), SR.ArgumentOutOfRange_DirectionModeInOutOrInOut);
             }
             if (bufferSize < 0)
             {
-                throw new ArgumentOutOfRangeException("bufferSize", SR.ArgumentOutOfRange_NeedNonNegNum);
+                throw new ArgumentOutOfRangeException(nameof(bufferSize), SR.ArgumentOutOfRange_NeedNonNegNum);
             }
 
             Init(direction, PipeTransmissionMode.Byte, bufferSize);
@@ -48,15 +48,15 @@ namespace System.IO.Pipes
         {
             if (direction < PipeDirection.In || direction > PipeDirection.InOut)
             {
-                throw new ArgumentOutOfRangeException("direction", SR.ArgumentOutOfRange_DirectionModeInOutOrInOut);
+                throw new ArgumentOutOfRangeException(nameof(direction), SR.ArgumentOutOfRange_DirectionModeInOutOrInOut);
             }
             if (transmissionMode < PipeTransmissionMode.Byte || transmissionMode > PipeTransmissionMode.Message)
             {
-                throw new ArgumentOutOfRangeException("transmissionMode", SR.ArgumentOutOfRange_TransmissionModeByteOrMsg);
+                throw new ArgumentOutOfRangeException(nameof(transmissionMode), SR.ArgumentOutOfRange_TransmissionModeByteOrMsg);
             }
             if (outBufferSize < 0)
             {
-                throw new ArgumentOutOfRangeException("outBufferSize", SR.ArgumentOutOfRange_NeedNonNegNum);
+                throw new ArgumentOutOfRangeException(nameof(outBufferSize), SR.ArgumentOutOfRange_NeedNonNegNum);
             }
 
             Init(direction, transmissionMode, outBufferSize);
@@ -108,11 +108,6 @@ namespace System.IO.Pipes
             // track these separately; _isHandleExposed will get updated if accessed though the property
             _isHandleExposed = isExposed;
             _isFromExistingHandle = isExposed;
-        }
-
-        public override Task CopyToAsync(Stream destination, int bufferSize, CancellationToken cancellationToken)
-        {
-            return StreamHelpers.ArrayPoolCopyToAsync(this, destination, bufferSize, cancellationToken);
         }
 
         [SecurityCritical]
@@ -214,11 +209,11 @@ namespace System.IO.Pipes
         private void CheckReadWriteArgs(byte[] buffer, int offset, int count)
         {
             if (buffer == null)
-                throw new ArgumentNullException("buffer", SR.ArgumentNull_Buffer);
+                throw new ArgumentNullException(nameof(buffer), SR.ArgumentNull_Buffer);
             if (offset < 0)
-                throw new ArgumentOutOfRangeException("offset", SR.ArgumentOutOfRange_NeedNonNegNum);
+                throw new ArgumentOutOfRangeException(nameof(offset), SR.ArgumentOutOfRange_NeedNonNegNum);
             if (count < 0)
-                throw new ArgumentOutOfRangeException("count", SR.ArgumentOutOfRange_NeedNonNegNum);
+                throw new ArgumentOutOfRangeException(nameof(count), SR.ArgumentOutOfRange_NeedNonNegNum);
             if (buffer.Length - offset < count)
                 throw new ArgumentException(SR.Argument_InvalidOffLen);
         }

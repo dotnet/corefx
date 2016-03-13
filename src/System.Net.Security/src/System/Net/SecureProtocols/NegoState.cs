@@ -88,7 +88,7 @@ namespace System.Net.Security
                 // One of these must be set if EP is turned on
                 if (policy.CustomChannelBinding == null && policy.CustomServiceNames == null)
                 {
-                    throw new ArgumentException(SR.net_auth_must_specify_extended_protection_scheme, "policy");
+                    throw new ArgumentException(SR.net_auth_must_specify_extended_protection_scheme, nameof(policy));
                 }
 
                 _extendedProtectionPolicy = policy;
@@ -122,12 +122,12 @@ namespace System.Net.Security
 
             if (credential == null)
             {
-                throw new ArgumentNullException("credential");
+                throw new ArgumentNullException(nameof(credential));
             }
 
             if (servicePrincipalName == null)
             {
-                throw new ArgumentNullException("servicePrincipalName");
+                throw new ArgumentNullException(nameof(servicePrincipalName));
             }
 
             NegotiateStreamPal.ValidateImpersonationLevel(impersonationLevel);
@@ -777,14 +777,14 @@ namespace System.Net.Security
             }
         }
 
-        internal static bool IsError(SecurityStatusPal status)
+        internal static bool IsError(SecurityStatusPalErrorCode status)
         {
-            return ((int)status >= (int)SecurityStatusPal.OutOfMemory);
+            return ((int)status >= (int)SecurityStatusPalErrorCode.OutOfMemory);
         }
 
         private unsafe byte[] GetOutgoingBlob(byte[] incomingBlob, ref Exception e)
         {
-            SecurityStatusPal statusCode;
+            SecurityStatusPalErrorCode statusCode;
             byte[] message = _context.GetOutgoingBlob(incomingBlob, false, out statusCode);
 
             if (IsError(statusCode))
@@ -830,7 +830,7 @@ namespace System.Net.Security
         {
             Win32Exception e = new Win32Exception((int)error);
 
-            if (e.NativeErrorCode == (int)SecurityStatusPal.LogonDenied)
+            if (e.NativeErrorCode == (int)SecurityStatusPalErrorCode.LogonDenied)
             {
                 throw new InvalidCredentialException(SR.net_auth_bad_client_creds, e);
             }
@@ -847,7 +847,7 @@ namespace System.Net.Security
         {
             Win32Exception win32exception = exception as Win32Exception;
 
-            return (win32exception != null) && (win32exception.NativeErrorCode == (int)SecurityStatusPal.LogonDenied);
+            return (win32exception != null) && (win32exception.NativeErrorCode == (int)SecurityStatusPalErrorCode.LogonDenied);
         }
     }
 }

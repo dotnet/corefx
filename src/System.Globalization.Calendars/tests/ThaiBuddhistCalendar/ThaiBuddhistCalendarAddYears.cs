@@ -4,6 +4,7 @@
 
 using System;
 using System.Globalization;
+using System.Globalization.Tests;
 using Xunit;
 
 namespace System.Globalization.CalendarsTests
@@ -109,60 +110,6 @@ namespace System.Globalization.CalendarsTests
             DateTime dt = tbc.ToDateTime(year, month, day, 0, 0, 0, 0);
             int i = 0;
             VerificationHelper(dt, i);
-        }
-        #endregion
-
-        #region Negative tests
-        // NegTest1: The resulting DateTime is greater than the supported range
-        [Fact]
-        public void NegTest1()
-        {
-            System.Globalization.Calendar tbc = new ThaiBuddhistCalendar();
-            Random rand = new Random(-55);
-            int year = rand.Next(tbc.MinSupportedDateTime.Year + 543, tbc.MaxSupportedDateTime.Year + 543);
-            int month = rand.Next(1, 12);
-            int day;
-            if (IsLeapYear(year))
-            {
-                day = rand.Next(1, 30);
-            }
-            else
-            {
-                day = rand.Next(1, 29);
-            }
-
-            DateTime dt = tbc.ToDateTime(year, month, day, 0, 0, 0, 0);
-            int addValue = rand.Next((tbc.MaxSupportedDateTime.Year - year + 543), Int32.MaxValue);
-            Assert.Throws<ArgumentOutOfRangeException>(() =>
-            {
-                tbc.AddMonths(dt, addValue);
-            });
-        }
-
-        // NegTest2: The resulting DateTime is less than the supported range
-        [Fact]
-        public void NegTest2()
-        {
-            System.Globalization.Calendar tbc = new ThaiBuddhistCalendar();
-            Random rand = new Random(-55);
-            int year = rand.Next(tbc.MinSupportedDateTime.Year + 543, tbc.MaxSupportedDateTime.Year + 543);
-            int month = rand.Next(1, 12);
-            int day;
-            if (IsLeapYear(year))
-            {
-                day = rand.Next(1, 30);
-            }
-            else
-            {
-                day = rand.Next(1, 29);
-            }
-
-            DateTime dt = tbc.ToDateTime(year, month, day, 0, 0, 0, 0);
-            int addValue = rand.Next(Int32.MinValue, tbc.MinSupportedDateTime.Year - year + 543);
-            Assert.Throws<ArgumentOutOfRangeException>(() =>
-            {
-                tbc.AddMonths(dt, addValue);
-            });
         }
         #endregion
 

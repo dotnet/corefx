@@ -28,7 +28,7 @@ namespace System.Net
 
         public static Exception GetException(SecurityStatusPal status)
         {
-            int win32Code = (int)SecurityStatusAdapterPal.GetInteropFromSecurityStatusPal(status);
+            int win32Code = (int)SecurityStatusAdapterPal.GetInteropFromSecurityStatusPal(status.ErrorCode);
             return new Win32Exception(win32Code);
         }
 
@@ -53,7 +53,7 @@ namespace System.Net
                 outputBuffer,
                 ref unusedAttributes);
 
-            return SecurityStatusAdapterPal.GetSecurityStatusPalFromNativeInt(errorCode);
+            return new SecurityStatusPal(SecurityStatusAdapterPal.GetSecurityStatusPalFromNativeInt(errorCode));
         }
 
         public static SecurityStatusPal InitializeSecurityContext(ref SafeFreeCredentials credentialsHandle, ref SafeDeleteContext context, string targetName, SecurityBuffer inputBuffer, SecurityBuffer outputBuffer)
@@ -71,7 +71,7 @@ namespace System.Net
                 outputBuffer,
                 ref unusedAttributes);
 
-            return SecurityStatusAdapterPal.GetSecurityStatusPalFromNativeInt(errorCode);
+            return new SecurityStatusPal(SecurityStatusAdapterPal.GetSecurityStatusPalFromNativeInt(errorCode));
         }
 
         public static SecurityStatusPal InitializeSecurityContext(SafeFreeCredentials credentialsHandle, ref SafeDeleteContext context, string targetName, SecurityBuffer[] inputBuffers, SecurityBuffer outputBuffer)
@@ -89,7 +89,7 @@ namespace System.Net
                             outputBuffer,
                             ref unusedAttributes);
 
-            return SecurityStatusAdapterPal.GetSecurityStatusPalFromNativeInt(errorCode);
+            return new SecurityStatusPal(SecurityStatusAdapterPal.GetSecurityStatusPalFromNativeInt(errorCode));
         }
 
         public static SafeFreeCredentials AcquireCredentialsHandle(X509Certificate certificate, SslProtocols protocols, EncryptionPolicy policy, bool isServer)
@@ -152,7 +152,7 @@ namespace System.Net
                 resultSize = securityBuffer[0].size + securityBuffer[1].size + securityBuffer[2].size;
             }
 
-            return SecurityStatusAdapterPal.GetSecurityStatusPalFromNativeInt(errorCode);
+            return new SecurityStatusPal(SecurityStatusAdapterPal.GetSecurityStatusPalFromNativeInt(errorCode));
         }
 
         public static SecurityStatusPal DecryptMessage(SafeDeleteContext securityContext, byte[] buffer, ref int offset, ref int count)
@@ -184,7 +184,7 @@ namespace System.Net
                 }
             }
 
-            return SecurityStatusAdapterPal.GetSecurityStatusPalFromInterop(errorCode);
+            return new SecurityStatusPal(SecurityStatusAdapterPal.GetSecurityStatusPalFromInterop(errorCode));
         }
 
         public unsafe static SafeFreeContextBufferChannelBinding QueryContextChannelBinding(SafeDeleteContext securityContext, ChannelBindingKind attribute)
@@ -263,7 +263,7 @@ namespace System.Net
             }
             else
             {
-                throw new ArgumentException(SR.Format(SR.net_invalid_enum, "EncryptionPolicy"), "policy");
+                throw new ArgumentException(SR.Format(SR.net_invalid_enum, "EncryptionPolicy"), nameof(policy));
             }
 
             credential.version = version;

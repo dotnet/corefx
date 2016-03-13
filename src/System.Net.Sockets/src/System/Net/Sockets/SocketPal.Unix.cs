@@ -25,114 +25,14 @@ namespace System.Net.Sockets
 
         public static SocketError GetSocketErrorForErrorCode(Interop.Error errorCode)
         {
-            // NOTE: SocketError values with no direct mapping have been omitted for now.
-            //
-            //       These values are:
-            //       - SocketError.SocketNotSupported
-            //       - SocketError.OperationNotSupported
-            //       - SocketError.ProtocolFamilyNotSupported
-            //       - SocketError.NoBufferSpaceAvailable
-            //       - SocketError.HostDown
-            //       - SocketError.ProcessLimit
-            //
-            //        Although they are not present in this mapping, SocketError.IOPending and
-            //        SocketError.OperationAborted are returned directly methods on
-            //        SocketAsyncContext (these errors are only relevant for async I/O).
+            return SocketErrorPal.GetSocketErrorForNativeError(errorCode);
+        }
 
-            switch (errorCode)
+        public static void CheckDualModeReceiveSupport(Socket socket)
+        {
+            if (!SupportsDualModeIPv4PacketInfo && socket.AddressFamily == AddressFamily.InterNetworkV6 && socket.DualMode)
             {
-                case Interop.Error.SUCCESS:
-                    return SocketError.Success;
-
-                case Interop.Error.EINTR:
-                    return SocketError.Interrupted;
-
-                case Interop.Error.EACCES:
-                    return SocketError.AccessDenied;
-
-                case Interop.Error.EFAULT:
-                    return SocketError.Fault;
-
-                case Interop.Error.EBADF:
-                case Interop.Error.EINVAL:
-                    return SocketError.InvalidArgument;
-
-                case Interop.Error.EMFILE:
-                case Interop.Error.ENFILE:
-                    return SocketError.TooManyOpenSockets;
-
-                case Interop.Error.EAGAIN:
-                    return SocketError.WouldBlock;
-
-                case Interop.Error.EINPROGRESS:
-                    return SocketError.InProgress;
-
-                case Interop.Error.EALREADY:
-                    return SocketError.AlreadyInProgress;
-
-                case Interop.Error.ENOTSOCK:
-                    return SocketError.NotSocket;
-
-                case Interop.Error.EDESTADDRREQ:
-                    return SocketError.DestinationAddressRequired;
-
-                case Interop.Error.EMSGSIZE:
-                    return SocketError.MessageSize;
-
-                case Interop.Error.EPROTOTYPE:
-                    return SocketError.ProtocolType;
-
-                case Interop.Error.ENOPROTOOPT:
-                case Interop.Error.ENOTSUP:
-                    return SocketError.ProtocolOption;
-
-                case Interop.Error.EPROTONOSUPPORT:
-                    return SocketError.ProtocolNotSupported;
-
-                case Interop.Error.EAFNOSUPPORT:
-                    return SocketError.AddressFamilyNotSupported;
-
-                case Interop.Error.EADDRINUSE:
-                    return SocketError.AddressAlreadyInUse;
-
-                case Interop.Error.EADDRNOTAVAIL:
-                    return SocketError.AddressNotAvailable;
-
-                case Interop.Error.ENETDOWN:
-                    return SocketError.NetworkDown;
-
-                case Interop.Error.ENETUNREACH:
-                    return SocketError.NetworkUnreachable;
-
-                case Interop.Error.ENETRESET:
-                    return SocketError.NetworkReset;
-
-                case Interop.Error.ECONNABORTED:
-                    return SocketError.ConnectionAborted;
-
-                case Interop.Error.ECONNRESET:
-                    return SocketError.ConnectionReset;
-
-                case Interop.Error.EISCONN:
-                    return SocketError.IsConnected;
-
-                case Interop.Error.ENOTCONN:
-                    return SocketError.NotConnected;
-
-                case Interop.Error.ETIMEDOUT:
-                    return SocketError.TimedOut;
-
-                case Interop.Error.ECONNREFUSED:
-                    return SocketError.ConnectionRefused;
-
-                case Interop.Error.EHOSTUNREACH:
-                    return SocketError.HostUnreachable;
-
-                case Interop.Error.EPIPE:
-                    return SocketError.Shutdown;
-
-                default:
-                    return SocketError.SocketError;
+                throw new PlatformNotSupportedException(SR.net_sockets_dualmode_receivefrom_notsupported);
             }
         }
 
@@ -157,9 +57,9 @@ namespace System.Net.Sockets
             return SafeCloseSocket.CreateSocket(addressFamily, socketType, protocolType, out socket);
         }
 
-        private static unsafe int Receive(int fd, SocketFlags flags, int available, byte[] buffer, int offset, int count, byte[] socketAddress, ref int socketAddressLen, out SocketFlags receivedFlags, out Interop.Error errno)
+        private static unsafe int Receive(SafeCloseSocket socket, SocketFlags flags, byte[] buffer, int offset, int count, byte[] socketAddress, ref int socketAddressLen, out SocketFlags receivedFlags, out Interop.Error errno)
         {
-            Debug.Assert(socketAddress != null || socketAddressLen == 0);
+            Debug.Assert(socketAddress != null || socketAddressLen == 0, $"Unexpected values: socketAddress={socketAddress}, socketAddressLen={socketAddressLen}");
 
             long received;
 
@@ -184,7 +84,7 @@ namespace System.Net.Sockets
                     IOVectorCount = 1
                 };
 
-                errno = Interop.Sys.ReceiveMessage(fd, &messageHeader, flags, &received);
+                errno = Interop.Sys.ReceiveMessage(socket, &messageHeader, flags, &received);
                 receivedFlags = messageHeader.Flags;
                 sockAddrLen = messageHeader.SocketAddressLen;
             }
@@ -198,7 +98,7 @@ namespace System.Net.Sockets
             return checked((int)received);
         }
 
-        private static unsafe int Send(int fd, SocketFlags flags, byte[] buffer, ref int offset, ref int count, byte[] socketAddress, int socketAddressLen, out Interop.Error errno)
+        private static unsafe int Send(SafeCloseSocket socket, SocketFlags flags, byte[] buffer, ref int offset, ref int count, byte[] socketAddress, int socketAddressLen, out Interop.Error errno)
         {
             int sent;
 
@@ -224,7 +124,7 @@ namespace System.Net.Sockets
                 };
 
                 long bytesSent;
-                errno = Interop.Sys.SendMessage(fd, &messageHeader, flags, &bytesSent);
+                errno = Interop.Sys.SendMessage(socket, &messageHeader, flags, &bytesSent);
 
                 sent = checked((int)bytesSent);
             }
@@ -240,7 +140,7 @@ namespace System.Net.Sockets
             return sent;
         }
 
-        private static unsafe int Send(int fd, SocketFlags flags, IList<ArraySegment<byte>> buffers, ref int bufferIndex, ref int offset, byte[] socketAddress, int socketAddressLen, out Interop.Error errno)
+        private static unsafe int Send(SafeCloseSocket socket, SocketFlags flags, IList<ArraySegment<byte>> buffers, ref int bufferIndex, ref int offset, byte[] socketAddress, int socketAddressLen, out Interop.Error errno)
         {
             // Pin buffers and set up iovecs.
             int startIndex = bufferIndex, startOffset = offset;
@@ -262,7 +162,7 @@ namespace System.Net.Sockets
                 for (int i = 0; i < maxBuffers; i++, startOffset = 0)
                 {
                     ArraySegment<byte> buffer = buffers[startIndex + i];
-                    Debug.Assert(buffer.Offset + startOffset < buffer.Array.Length);
+                    Debug.Assert(buffer.Offset + startOffset < buffer.Array.Length, $"Unexpected values: Offset={buffer.Offset}, startOffset={startOffset}, Length={buffer.Array.Length}");
 
                     handles[i] = GCHandle.Alloc(buffer.Array, GCHandleType.Pinned);
                     iovecs[i].Base = &((byte*)handles[i].AddrOfPinnedObject())[buffer.Offset + startOffset];
@@ -283,7 +183,7 @@ namespace System.Net.Sockets
                     };
 
                     long bytesSent;
-                    errno = Interop.Sys.SendMessage(fd, &messageHeader, flags, &bytesSent);
+                    errno = Interop.Sys.SendMessage(socket, &messageHeader, flags, &bytesSent);
 
                     sent = checked((int)bytesSent);
                 }
@@ -324,8 +224,21 @@ namespace System.Net.Sockets
             return sent;
         }
 
-        private static unsafe int Receive(int fd, SocketFlags flags, int available, IList<ArraySegment<byte>> buffers, byte[] socketAddress, ref int socketAddressLen, out SocketFlags receivedFlags, out Interop.Error errno)
+        private static unsafe int Receive(SafeCloseSocket socket, SocketFlags flags, IList<ArraySegment<byte>> buffers, byte[] socketAddress, ref int socketAddressLen, out SocketFlags receivedFlags, out Interop.Error errno)
         {
+            int available;
+            errno = Interop.Sys.GetBytesAvailable(socket, &available);
+            if (errno != Interop.Error.SUCCESS)
+            {
+                receivedFlags = 0;
+                return -1;
+            }
+            if (available == 0)
+            {
+                // Always request at least one byte.
+                available = 1;
+            }
+
             // Pin buffers and set up iovecs.
             int maxBuffers = buffers.Count;
             var handles = new GCHandle[maxBuffers];
@@ -371,7 +284,7 @@ namespace System.Net.Sockets
                         IOVectorCount = iovCount
                     };
 
-                    errno = Interop.Sys.ReceiveMessage(fd, &messageHeader, flags, &received);
+                    errno = Interop.Sys.ReceiveMessage(socket, &messageHeader, flags, &received);
                     receivedFlags = messageHeader.Flags;
                     sockAddrLen = messageHeader.SocketAddressLen;
                 }
@@ -397,9 +310,9 @@ namespace System.Net.Sockets
             return checked((int)received);
         }
 
-        private static unsafe int ReceiveMessageFrom(int fd, SocketFlags flags, int available, byte[] buffer, int offset, int count, byte[] socketAddress, ref int socketAddressLen, bool isIPv4, bool isIPv6, out SocketFlags receivedFlags, out IPPacketInformation ipPacketInformation, out Interop.Error errno)
+        private static unsafe int ReceiveMessageFrom(SafeCloseSocket socket, SocketFlags flags, byte[] buffer, int offset, int count, byte[] socketAddress, ref int socketAddressLen, bool isIPv4, bool isIPv6, out SocketFlags receivedFlags, out IPPacketInformation ipPacketInformation, out Interop.Error errno)
         {
-            Debug.Assert(socketAddress != null);
+            Debug.Assert(socketAddress != null, "Expected non-null socketAddress");
 
             int cmsgBufferLen = Interop.Sys.GetControlMessageBufferSize(isIPv4, isIPv6);
             var cmsgBuffer = stackalloc byte[cmsgBufferLen];
@@ -428,7 +341,7 @@ namespace System.Net.Sockets
                     ControlBufferLen = cmsgBufferLen
                 };
 
-                errno = Interop.Sys.ReceiveMessage(fd, &messageHeader, flags, &received);
+                errno = Interop.Sys.ReceiveMessage(socket, &messageHeader, flags, &received);
                 receivedFlags = messageHeader.Flags;
                 sockAddrLen = messageHeader.SocketAddressLen;
             }
@@ -444,19 +357,29 @@ namespace System.Net.Sockets
             return checked((int)received);
         }
 
-        public static unsafe bool TryCompleteAccept(int fileDescriptor, byte[] socketAddress, ref int socketAddressLen, out int acceptedFd, out SocketError errorCode)
+        public static unsafe bool TryCompleteAccept(SafeCloseSocket socket, byte[] socketAddress, ref int socketAddressLen, out int acceptedFd, out SocketError errorCode)
         {
             int fd;
             Interop.Error errno;
             int sockAddrLen = socketAddressLen;
             fixed (byte* rawSocketAddress = socketAddress)
             {
-                errno = Interop.Sys.Accept(fileDescriptor, rawSocketAddress, &sockAddrLen, &fd);
+                try
+                {
+                    errno = Interop.Sys.Accept(socket, rawSocketAddress, &sockAddrLen, &fd);
+                }
+                catch (ObjectDisposedException)
+                {
+                    // The socket was closed, or is closing.
+                    errorCode = SocketError.OperationAborted;
+                    acceptedFd = -1;
+                    return true;
+                }
             }
 
             if (errno == Interop.Error.SUCCESS)
             {
-                Debug.Assert(fd != -1);
+                Debug.Assert(fd != -1, "Expected fd != -1");
 
                 socketAddressLen = sockAddrLen;
                 errorCode = SocketError.Success;
@@ -476,15 +399,15 @@ namespace System.Net.Sockets
             return false;
         }
 
-        public static unsafe bool TryStartConnect(int fileDescriptor, byte[] socketAddress, int socketAddressLen, out SocketError errorCode)
+        public static unsafe bool TryStartConnect(SafeCloseSocket socket, byte[] socketAddress, int socketAddressLen, out SocketError errorCode)
         {
-            Debug.Assert(socketAddress != null);
-            Debug.Assert(socketAddressLen > 0);
+            Debug.Assert(socketAddress != null, "Expected non-null socketAddress");
+            Debug.Assert(socketAddressLen > 0, $"Unexpected socketAddressLen: {socketAddressLen}");
 
             Interop.Error err;
             fixed (byte* rawSocketAddress = socketAddress)
             {
-                err = Interop.Sys.Connect(fileDescriptor, rawSocketAddress, socketAddressLen);
+                err = Interop.Sys.Connect(socket, rawSocketAddress, socketAddressLen);
             }
 
             if (err == Interop.Error.SUCCESS)
@@ -503,13 +426,24 @@ namespace System.Net.Sockets
             return false;
         }
 
-        public static unsafe bool TryCompleteConnect(int fileDescriptor, int socketAddressLen, out SocketError errorCode)
+        public static unsafe bool TryCompleteConnect(SafeCloseSocket socket, int socketAddressLen, out SocketError errorCode)
         {
             Interop.Error socketError;
-            Interop.Error err = Interop.Sys.GetSocketErrorOption(fileDescriptor, &socketError);
+            Interop.Error err;
+            try
+            {
+                err = Interop.Sys.GetSocketErrorOption(socket, &socketError);
+            }
+            catch (ObjectDisposedException)
+            {
+                // The socket was closed, or is closing.
+                errorCode = SocketError.OperationAborted;
+                return true;
+            }
+
             if (err != Interop.Error.SUCCESS)
             {
-                Debug.Assert(err == Interop.Error.EBADF);
+                Debug.Assert(err == Interop.Error.EBADF, $"Unexpected err: {err}");
                 errorCode = SocketError.SocketError;
                 return true;
             }
@@ -529,126 +463,130 @@ namespace System.Net.Sockets
             return true;
         }
 
-        public static bool TryCompleteReceiveFrom(int fileDescriptor, byte[] buffer, int offset, int count, SocketFlags flags, byte[] socketAddress, ref int socketAddressLen, out int bytesReceived, out SocketFlags receivedFlags, out SocketError errorCode)
+        public static bool TryCompleteReceiveFrom(SafeCloseSocket socket, byte[] buffer, int offset, int count, SocketFlags flags, byte[] socketAddress, ref int socketAddressLen, out int bytesReceived, out SocketFlags receivedFlags, out SocketError errorCode)
         {
-            return TryCompleteReceiveFrom(fileDescriptor, buffer, null, offset, count, flags, socketAddress, ref socketAddressLen, out bytesReceived, out receivedFlags, out errorCode);
+            return TryCompleteReceiveFrom(socket, buffer, null, offset, count, flags, socketAddress, ref socketAddressLen, out bytesReceived, out receivedFlags, out errorCode);
         }
 
-        public static bool TryCompleteReceiveFrom(int fileDescriptor, IList<ArraySegment<byte>> buffers, SocketFlags flags, byte[] socketAddress, ref int socketAddressLen, out int bytesReceived, out SocketFlags receivedFlags, out SocketError errorCode)
+        public static bool TryCompleteReceiveFrom(SafeCloseSocket socket, IList<ArraySegment<byte>> buffers, SocketFlags flags, byte[] socketAddress, ref int socketAddressLen, out int bytesReceived, out SocketFlags receivedFlags, out SocketError errorCode)
         {
-            return TryCompleteReceiveFrom(fileDescriptor, null, buffers, 0, 0, flags, socketAddress, ref socketAddressLen, out bytesReceived, out receivedFlags, out errorCode);
+            return TryCompleteReceiveFrom(socket, null, buffers, 0, 0, flags, socketAddress, ref socketAddressLen, out bytesReceived, out receivedFlags, out errorCode);
         }
 
-        public static unsafe bool TryCompleteReceiveFrom(int fileDescriptor, byte[] buffer, IList<ArraySegment<byte>> buffers, int offset, int count, SocketFlags flags, byte[] socketAddress, ref int socketAddressLen, out int bytesReceived, out SocketFlags receivedFlags, out SocketError errorCode)
+        public static unsafe bool TryCompleteReceiveFrom(SafeCloseSocket socket, byte[] buffer, IList<ArraySegment<byte>> buffers, int offset, int count, SocketFlags flags, byte[] socketAddress, ref int socketAddressLen, out int bytesReceived, out SocketFlags receivedFlags, out SocketError errorCode)
         {
-            int available;
-            Interop.Error errno = Interop.Sys.GetBytesAvailable(fileDescriptor, &available);
-            if (errno != Interop.Error.SUCCESS)
+            try
             {
+                Interop.Error errno;
+                int received;
+                if (buffer != null)
+                {
+                    received = Receive(socket, flags, buffer, offset, count, socketAddress, ref socketAddressLen, out receivedFlags, out errno);
+                }
+                else
+                {
+                    received = Receive(socket, flags, buffers, socketAddress, ref socketAddressLen, out receivedFlags, out errno);
+                }
+
+                if (received != -1)
+                {
+                    bytesReceived = received;
+                    errorCode = SocketError.Success;
+                    return true;
+                }
+
+                bytesReceived = 0;
+
+                if (errno != Interop.Error.EAGAIN && errno != Interop.Error.EWOULDBLOCK)
+                {
+                    errorCode = GetSocketErrorForErrorCode(errno);
+                    return true;
+                }
+
+                errorCode = SocketError.Success;
+                return false;
+            }
+            catch (ObjectDisposedException)
+            {
+                // The socket was closed, or is closing.
                 bytesReceived = 0;
                 receivedFlags = 0;
-                errorCode = GetSocketErrorForErrorCode(errno);
+                errorCode = SocketError.OperationAborted;
                 return true;
             }
-            if (available == 0)
-            {
-                // Always request at least one byte.
-                available = 1;
-            }
-
-            int received;
-            if (buffer != null)
-            {
-                received = Receive(fileDescriptor, flags, available, buffer, offset, count, socketAddress, ref socketAddressLen, out receivedFlags, out errno);
-            }
-            else
-            {
-                received = Receive(fileDescriptor, flags, available, buffers, socketAddress, ref socketAddressLen, out receivedFlags, out errno);
-            }
-
-            if (received != -1)
-            {
-                bytesReceived = received;
-                errorCode = SocketError.Success;
-                return true;
-            }
-
-            bytesReceived = 0;
-
-            if (errno != Interop.Error.EAGAIN && errno != Interop.Error.EWOULDBLOCK)
-            {
-                errorCode = GetSocketErrorForErrorCode(errno);
-                return true;
-            }
-
-            errorCode = SocketError.Success;
-            return false;
         }
 
-        public static unsafe bool TryCompleteReceiveMessageFrom(int fileDescriptor, byte[] buffer, int offset, int count, SocketFlags flags, byte[] socketAddress, ref int socketAddressLen, bool isIPv4, bool isIPv6, out int bytesReceived, out SocketFlags receivedFlags, out IPPacketInformation ipPacketInformation, out SocketError errorCode)
+        public static unsafe bool TryCompleteReceiveMessageFrom(SafeCloseSocket socket, byte[] buffer, int offset, int count, SocketFlags flags, byte[] socketAddress, ref int socketAddressLen, bool isIPv4, bool isIPv6, out int bytesReceived, out SocketFlags receivedFlags, out IPPacketInformation ipPacketInformation, out SocketError errorCode)
         {
-            int available;
-            Interop.Error errno = Interop.Sys.GetBytesAvailable(fileDescriptor, &available);
-            if (errno != Interop.Error.SUCCESS)
+            try
             {
+                Interop.Error errno;
+
+                int received = ReceiveMessageFrom(socket, flags, buffer, offset, count, socketAddress, ref socketAddressLen, isIPv4, isIPv6, out receivedFlags, out ipPacketInformation, out errno);
+
+                if (received != -1)
+                {
+                    bytesReceived = received;
+                    errorCode = SocketError.Success;
+                    return true;
+                }
+
+                bytesReceived = 0;
+
+                if (errno != Interop.Error.EAGAIN && errno != Interop.Error.EWOULDBLOCK)
+                {
+                    errorCode = GetSocketErrorForErrorCode(errno);
+                    return true;
+                }
+
+                errorCode = SocketError.Success;
+                return false;
+            }
+            catch (ObjectDisposedException)
+            {
+                // The socket was closed, or is closing.
                 bytesReceived = 0;
                 receivedFlags = 0;
                 ipPacketInformation = default(IPPacketInformation);
-                errorCode = GetSocketErrorForErrorCode(errno);
+                errorCode = SocketError.OperationAborted;
                 return true;
             }
-            if (available == 0)
-            {
-                // Always request at least one byte.
-                available = 1;
-            }
-
-            int received = ReceiveMessageFrom(fileDescriptor, flags, available, buffer, offset, count, socketAddress, ref socketAddressLen, isIPv4, isIPv6, out receivedFlags, out ipPacketInformation, out errno);
-
-            if (received != -1)
-            {
-                bytesReceived = received;
-                errorCode = SocketError.Success;
-                return true;
-            }
-
-            bytesReceived = 0;
-
-            if (errno != Interop.Error.EAGAIN && errno != Interop.Error.EWOULDBLOCK)
-            {
-                errorCode = GetSocketErrorForErrorCode(errno);
-                return true;
-            }
-
-            errorCode = SocketError.Success;
-            return false;
         }
 
-        public static bool TryCompleteSendTo(int fileDescriptor, byte[] buffer, ref int offset, ref int count, SocketFlags flags, byte[] socketAddress, int socketAddressLen, ref int bytesSent, out SocketError errorCode)
+        public static bool TryCompleteSendTo(SafeCloseSocket socket, byte[] buffer, ref int offset, ref int count, SocketFlags flags, byte[] socketAddress, int socketAddressLen, ref int bytesSent, out SocketError errorCode)
         {
             int bufferIndex = 0;
-            return TryCompleteSendTo(fileDescriptor, buffer, null, ref bufferIndex, ref offset, ref count, flags, socketAddress, socketAddressLen, ref bytesSent, out errorCode);
+            return TryCompleteSendTo(socket, buffer, null, ref bufferIndex, ref offset, ref count, flags, socketAddress, socketAddressLen, ref bytesSent, out errorCode);
         }
 
-        public static bool TryCompleteSendTo(int fileDescriptor, IList<ArraySegment<byte>> buffers, ref int bufferIndex, ref int offset, SocketFlags flags, byte[] socketAddress, int socketAddressLen, ref int bytesSent, out SocketError errorCode)
+        public static bool TryCompleteSendTo(SafeCloseSocket socket, IList<ArraySegment<byte>> buffers, ref int bufferIndex, ref int offset, SocketFlags flags, byte[] socketAddress, int socketAddressLen, ref int bytesSent, out SocketError errorCode)
         {
             int count = 0;
-            return TryCompleteSendTo(fileDescriptor, null, buffers, ref bufferIndex, ref offset, ref count, flags, socketAddress, socketAddressLen, ref bytesSent, out errorCode);
+            return TryCompleteSendTo(socket, null, buffers, ref bufferIndex, ref offset, ref count, flags, socketAddress, socketAddressLen, ref bytesSent, out errorCode);
         }
 
-        public static bool TryCompleteSendTo(int fileDescriptor, byte[] buffer, IList<ArraySegment<byte>> buffers, ref int bufferIndex, ref int offset, ref int count, SocketFlags flags, byte[] socketAddress, int socketAddressLen, ref int bytesSent, out SocketError errorCode)
+        public static bool TryCompleteSendTo(SafeCloseSocket socket, byte[] buffer, IList<ArraySegment<byte>> buffers, ref int bufferIndex, ref int offset, ref int count, SocketFlags flags, byte[] socketAddress, int socketAddressLen, ref int bytesSent, out SocketError errorCode)
         {
             for (;;)
             {
                 int sent;
                 Interop.Error errno;
-                if (buffer != null)
+                try
                 {
-                    sent = Send(fileDescriptor, flags, buffer, ref offset, ref count, socketAddress, socketAddressLen, out errno);
+                    if (buffer != null)
+                    {
+                        sent = Send(socket, flags, buffer, ref offset, ref count, socketAddress, socketAddressLen, out errno);
+                    }
+                    else
+                    {
+                        sent = Send(socket, flags, buffers, ref bufferIndex, ref offset, socketAddress, socketAddressLen, out errno);
+                    }
                 }
-                else
+                catch (ObjectDisposedException)
                 {
-                    sent = Send(fileDescriptor, flags, buffers, ref bufferIndex, ref offset, socketAddress, socketAddressLen, out errno);
+                    // The socket was closed, or is closing.
+                    errorCode = SocketError.OperationAborted;
+                    return true;
                 }
 
                 if (sent == -1)
@@ -689,7 +627,7 @@ namespace System.Net.Sockets
             int addrLen = nameLen;
             fixed (byte* rawBuffer = buffer)
             {
-                err = Interop.Sys.GetSockName(handle.FileDescriptor, rawBuffer, &addrLen);
+                err = Interop.Sys.GetSockName(handle, rawBuffer, &addrLen);
             }
 
             nameLen = addrLen;
@@ -699,7 +637,7 @@ namespace System.Net.Sockets
         public static unsafe SocketError GetAvailable(SafeCloseSocket handle, out int available)
         {
             int value = 0;
-            Interop.Error err = Interop.Sys.GetBytesAvailable(handle.FileDescriptor, &value);
+            Interop.Error err = Interop.Sys.GetBytesAvailable(handle, &value);
             available = value;
 
             return err == Interop.Error.SUCCESS ? SocketError.Success : GetSocketErrorForErrorCode(err);
@@ -711,7 +649,7 @@ namespace System.Net.Sockets
             int addrLen = nameLen;
             fixed (byte* rawBuffer = buffer)
             {
-                err = Interop.Sys.GetPeerName(handle.FileDescriptor, rawBuffer, &addrLen);
+                err = Interop.Sys.GetPeerName(handle, rawBuffer, &addrLen);
             }
 
             nameLen = addrLen;
@@ -723,7 +661,7 @@ namespace System.Net.Sockets
             Interop.Error err;
             fixed (byte* rawBuffer = buffer)
             {
-                err = Interop.Sys.Bind(handle.FileDescriptor, rawBuffer, nameLen);
+                err = Interop.Sys.Bind(handle, rawBuffer, nameLen);
             }
 
             return err == Interop.Error.SUCCESS ? SocketError.Success : GetSocketErrorForErrorCode(err);
@@ -731,7 +669,7 @@ namespace System.Net.Sockets
 
         public static SocketError Listen(SafeCloseSocket handle, int backlog)
         {
-            Interop.Error err = Interop.Sys.Listen(handle.FileDescriptor, backlog);
+            Interop.Error err = Interop.Sys.Listen(handle, backlog);
             return err == Interop.Error.SUCCESS ? SocketError.Success : GetSocketErrorForErrorCode(err);
         }
 
@@ -750,7 +688,7 @@ namespace System.Net.Sockets
             handle.AsyncContext.CheckForPriorConnectFailure();
 
             SocketError errorCode;
-            bool completed = TryStartConnect(handle.FileDescriptor, socketAddress, socketAddressLen, out errorCode);
+            bool completed = TryStartConnect(handle, socketAddress, socketAddressLen, out errorCode);
             if (completed)
             {
                 handle.AsyncContext.RegisterConnectResult(errorCode);
@@ -779,7 +717,7 @@ namespace System.Net.Sockets
             int bufferIndex = 0;
             int offset = 0;
             SocketError errorCode;
-            bool completed = TryCompleteSendTo(handle.FileDescriptor, bufferList, ref bufferIndex, ref offset, socketFlags, null, 0, ref bytesTransferred, out errorCode);
+            bool completed = TryCompleteSendTo(handle, bufferList, ref bufferIndex, ref offset, socketFlags, null, 0, ref bytesTransferred, out errorCode);
             return completed ? errorCode : SocketError.WouldBlock;
         }
 
@@ -792,7 +730,7 @@ namespace System.Net.Sockets
 
             bytesTransferred = 0;
             SocketError errorCode;
-            bool completed = TryCompleteSendTo(handle.FileDescriptor, buffer, ref offset, ref count, socketFlags, null, 0, ref bytesTransferred, out errorCode);
+            bool completed = TryCompleteSendTo(handle, buffer, ref offset, ref count, socketFlags, null, 0, ref bytesTransferred, out errorCode);
             return completed ? errorCode : SocketError.WouldBlock;
         }
 
@@ -805,7 +743,7 @@ namespace System.Net.Sockets
 
             bytesTransferred = 0;
             SocketError errorCode;
-            bool completed = TryCompleteSendTo(handle.FileDescriptor, buffer, ref offset, ref count, socketFlags, socketAddress, socketAddressLen, ref bytesTransferred, out errorCode);
+            bool completed = TryCompleteSendTo(handle, buffer, ref offset, ref count, socketFlags, socketAddress, socketAddressLen, ref bytesTransferred, out errorCode);
             return completed ? errorCode : SocketError.WouldBlock;
         }
 
@@ -819,7 +757,7 @@ namespace System.Net.Sockets
             else
             {
                 int socketAddressLen = 0;
-                if (!TryCompleteReceiveFrom(handle.FileDescriptor, buffers, socketFlags, null, ref socketAddressLen, out bytesTransferred, out socketFlags, out errorCode))
+                if (!TryCompleteReceiveFrom(handle, buffers, socketFlags, null, ref socketAddressLen, out bytesTransferred, out socketFlags, out errorCode))
                 {
                     errorCode = SocketError.WouldBlock;
                 }
@@ -837,7 +775,7 @@ namespace System.Net.Sockets
 
             int socketAddressLen = 0;
             SocketError errorCode;
-            bool completed = TryCompleteReceiveFrom(handle.FileDescriptor, buffer, offset, count, socketFlags, null, ref socketAddressLen, out bytesTransferred, out socketFlags, out errorCode);
+            bool completed = TryCompleteReceiveFrom(handle, buffer, offset, count, socketFlags, null, ref socketAddressLen, out bytesTransferred, out socketFlags, out errorCode);
             return completed ? errorCode : SocketError.WouldBlock;
         }
 
@@ -856,7 +794,7 @@ namespace System.Net.Sockets
             }
             else
             {
-                if (!TryCompleteReceiveMessageFrom(handle.FileDescriptor, buffer, offset, count, socketFlags, socketAddressBuffer, ref socketAddressLen, isIPv4, isIPv6, out bytesTransferred, out socketFlags, out ipPacketInformation, out errorCode))
+                if (!TryCompleteReceiveMessageFrom(handle, buffer, offset, count, socketFlags, socketAddressBuffer, ref socketAddressLen, isIPv4, isIPv6, out bytesTransferred, out socketFlags, out ipPacketInformation, out errorCode))
                 {
                     errorCode = SocketError.WouldBlock;
                 }
@@ -875,7 +813,7 @@ namespace System.Net.Sockets
             }
 
             SocketError errorCode;
-            bool completed = TryCompleteReceiveFrom(handle.FileDescriptor, buffer, offset, count, socketFlags, socketAddress, ref socketAddressLen, out bytesTransferred, out socketFlags, out errorCode);
+            bool completed = TryCompleteReceiveFrom(handle, buffer, offset, count, socketFlags, socketAddress, ref socketAddressLen, out bytesTransferred, out socketFlags, out errorCode);
             return completed ? errorCode : SocketError.WouldBlock;
         }
 
@@ -900,18 +838,38 @@ namespace System.Net.Sockets
                 if (optionName == SocketOptionName.ReceiveTimeout)
                 {
                     handle.ReceiveTimeout = optionValue == 0 ? -1 : optionValue;
-                    err = Interop.Sys.SetReceiveTimeout(handle.FileDescriptor, optionValue);
+                    err = Interop.Sys.SetReceiveTimeout(handle, optionValue);
                     return err == Interop.Error.SUCCESS ? SocketError.Success : GetSocketErrorForErrorCode(err);
                 }
                 else if (optionName == SocketOptionName.SendTimeout)
                 {
                     handle.SendTimeout = optionValue == 0 ? -1 : optionValue;
-                    err = Interop.Sys.SetSendTimeout(handle.FileDescriptor, optionValue);
+                    err = Interop.Sys.SetSendTimeout(handle, optionValue);
                     return err == Interop.Error.SUCCESS ? SocketError.Success : GetSocketErrorForErrorCode(err);
                 }
             }
+            else if (optionLevel == SocketOptionLevel.IP)
+            {
+                if (optionName == SocketOptionName.MulticastInterface)
+                {
+                    // if the value of the IP_MULTICAST_IF is an address in the 0.x.x.x block
+                    // the value is interpreted as an interface index
+                    int interfaceIndex = IPAddress.NetworkToHostOrder(optionValue);
+                    if ((interfaceIndex & 0xff000000) == 0)
+                    {
+                        var opt = new Interop.Sys.IPv4MulticastOption {
+                            MulticastAddress = 0,
+                            LocalAddress = 0,
+                            InterfaceIndex = interfaceIndex
+                        };
 
-            err = Interop.Sys.SetSockOpt(handle.FileDescriptor, optionLevel, optionName, (byte*)&optionValue, sizeof(int));
+                        err = Interop.Sys.SetIPv4MulticastOption(handle, Interop.Sys.MulticastOption.MULTICAST_IF, &opt);
+                        return err == Interop.Error.SUCCESS ? SocketError.Success : GetSocketErrorForErrorCode(err);
+                    }
+                }
+            }
+
+            err = Interop.Sys.SetSockOpt(handle, optionLevel, optionName, (byte*)&optionValue, sizeof(int));
             return err == Interop.Error.SUCCESS ? SocketError.Success : GetSocketErrorForErrorCode(err);
         }
 
@@ -920,13 +878,13 @@ namespace System.Net.Sockets
             Interop.Error err;
             if (optionValue == null || optionValue.Length == 0)
             {
-                err = Interop.Sys.SetSockOpt(handle.FileDescriptor, optionLevel, optionName, null, 0);
+                err = Interop.Sys.SetSockOpt(handle, optionLevel, optionName, null, 0);
             }
             else
             {
                 fixed (byte* pinnedValue = optionValue)
                 {
-                    err = Interop.Sys.SetSockOpt(handle.FileDescriptor, optionLevel, optionName, pinnedValue, optionValue.Length);
+                    err = Interop.Sys.SetSockOpt(handle, optionLevel, optionName, pinnedValue, optionValue.Length);
                 }
             }
 
@@ -935,25 +893,27 @@ namespace System.Net.Sockets
 
         public static unsafe SocketError SetMulticastOption(SafeCloseSocket handle, SocketOptionName optionName, MulticastOption optionValue)
         {
-            Debug.Assert(optionName == SocketOptionName.AddMembership || optionName == SocketOptionName.DropMembership);
+            Debug.Assert(optionName == SocketOptionName.AddMembership || optionName == SocketOptionName.DropMembership, $"Unexpected optionName: {optionName}");
 
             Interop.Sys.MulticastOption optName = optionName == SocketOptionName.AddMembership ?
                 Interop.Sys.MulticastOption.MULTICAST_ADD :
                 Interop.Sys.MulticastOption.MULTICAST_DROP;
 
+            IPAddress localAddress = optionValue.LocalAddress ?? IPAddress.Any;
+
             var opt = new Interop.Sys.IPv4MulticastOption {
                 MulticastAddress = unchecked((uint)optionValue.Group.GetAddress()),
-                LocalAddress = unchecked((uint)optionValue.LocalAddress.GetAddress()),
+                LocalAddress = unchecked((uint)localAddress.GetAddress()),
                 InterfaceIndex = optionValue.InterfaceIndex
             };
 
-            Interop.Error err = Interop.Sys.SetIPv4MulticastOption(handle.FileDescriptor, optName, &opt);
+            Interop.Error err = Interop.Sys.SetIPv4MulticastOption(handle, optName, &opt);
             return err == Interop.Error.SUCCESS ? SocketError.Success : GetSocketErrorForErrorCode(err);
         }
 
         public static unsafe SocketError SetIPv6MulticastOption(SafeCloseSocket handle, SocketOptionName optionName, IPv6MulticastOption optionValue)
         {
-            Debug.Assert(optionName == SocketOptionName.AddMembership || optionName == SocketOptionName.DropMembership);
+            Debug.Assert(optionName == SocketOptionName.AddMembership || optionName == SocketOptionName.DropMembership, $"Unexpected optionName={optionName}");
 
             Interop.Sys.MulticastOption optName = optionName == SocketOptionName.AddMembership ?
                 Interop.Sys.MulticastOption.MULTICAST_ADD :
@@ -964,7 +924,7 @@ namespace System.Net.Sockets
                 InterfaceIndex = (int)optionValue.InterfaceIndex
             };
 
-            Interop.Error err = Interop.Sys.SetIPv6MulticastOption(handle.FileDescriptor, optName, &opt);
+            Interop.Error err = Interop.Sys.SetIPv6MulticastOption(handle, optName, &opt);
             return err == Interop.Error.SUCCESS ? SocketError.Success : GetSocketErrorForErrorCode(err);
         }
 
@@ -975,7 +935,7 @@ namespace System.Net.Sockets
                 Seconds = optionValue.LingerTime
             };
 
-            Interop.Error err = Interop.Sys.SetLingerOption(handle.FileDescriptor, &opt);
+            Interop.Error err = Interop.Sys.SetLingerOption(handle, &opt);
             return err == Interop.Error.SUCCESS ? SocketError.Success : GetSocketErrorForErrorCode(err);
         }
 
@@ -1007,7 +967,7 @@ namespace System.Net.Sockets
 
             int value = 0;
             int optLen = sizeof(int);
-            Interop.Error err = Interop.Sys.GetSockOpt(handle.FileDescriptor, optionLevel, optionName, (byte*)&value, &optLen);
+            Interop.Error err = Interop.Sys.GetSockOpt(handle, optionLevel, optionName, (byte*)&value, &optLen);
 
             optionValue = value;
             return err == Interop.Error.SUCCESS ? SocketError.Success : GetSocketErrorForErrorCode(err);
@@ -1021,13 +981,13 @@ namespace System.Net.Sockets
             if (optionValue == null || optionValue.Length == 0)
             {
                 optLen = 0;
-                err = Interop.Sys.GetSockOpt(handle.FileDescriptor, optionLevel, optionName, null, &optLen);
+                err = Interop.Sys.GetSockOpt(handle, optionLevel, optionName, null, &optLen);
             }
             else
             {
                 fixed (byte* pinnedValue = optionValue)
                 {
-                    err = Interop.Sys.GetSockOpt(handle.FileDescriptor, optionLevel, optionName, pinnedValue, &optLen);
+                    err = Interop.Sys.GetSockOpt(handle, optionLevel, optionName, pinnedValue, &optLen);
                 }
             }
 
@@ -1042,14 +1002,14 @@ namespace System.Net.Sockets
 
         public static unsafe SocketError GetMulticastOption(SafeCloseSocket handle, SocketOptionName optionName, out MulticastOption optionValue)
         {
-            Debug.Assert(optionName == SocketOptionName.AddMembership || optionName == SocketOptionName.DropMembership);
+            Debug.Assert(optionName == SocketOptionName.AddMembership || optionName == SocketOptionName.DropMembership, $"Unexpected optionName={optionName}");
 
             Interop.Sys.MulticastOption optName = optionName == SocketOptionName.AddMembership ?
                 Interop.Sys.MulticastOption.MULTICAST_ADD :
                 Interop.Sys.MulticastOption.MULTICAST_DROP;
 
             Interop.Sys.IPv4MulticastOption opt;
-            Interop.Error err = Interop.Sys.GetIPv4MulticastOption(handle.FileDescriptor, optName, &opt);
+            Interop.Error err = Interop.Sys.GetIPv4MulticastOption(handle, optName, &opt);
             if (err != Interop.Error.SUCCESS)
             {
                 optionValue = default(MulticastOption);
@@ -1067,14 +1027,14 @@ namespace System.Net.Sockets
 
         public static unsafe SocketError GetIPv6MulticastOption(SafeCloseSocket handle, SocketOptionName optionName, out IPv6MulticastOption optionValue)
         {
-            Debug.Assert(optionName == SocketOptionName.AddMembership || optionName == SocketOptionName.DropMembership);
+            Debug.Assert(optionName == SocketOptionName.AddMembership || optionName == SocketOptionName.DropMembership, $"Unexpected optionName={optionName}");
 
             Interop.Sys.MulticastOption optName = optionName == SocketOptionName.AddMembership ?
                 Interop.Sys.MulticastOption.MULTICAST_ADD :
                 Interop.Sys.MulticastOption.MULTICAST_DROP;
 
             Interop.Sys.IPv6MulticastOption opt;
-            Interop.Error err = Interop.Sys.GetIPv6MulticastOption(handle.FileDescriptor, optName, &opt);
+            Interop.Error err = Interop.Sys.GetIPv6MulticastOption(handle, optName, &opt);
             if (err != Interop.Error.SUCCESS)
             {
                 optionValue = default(IPv6MulticastOption);
@@ -1088,7 +1048,7 @@ namespace System.Net.Sockets
         public static unsafe SocketError GetLingerOption(SafeCloseSocket handle, out LingerOption optionValue)
         {
             var opt = new Interop.Sys.LingerOption();
-            Interop.Error err = Interop.Sys.GetLingerOption(handle.FileDescriptor, &opt);
+            Interop.Error err = Interop.Sys.GetLingerOption(handle, &opt);
             if (err != Interop.Error.SUCCESS)
             {
                 optionValue = default(LingerOption);
@@ -1104,39 +1064,52 @@ namespace System.Net.Sockets
             uint* fdSet = stackalloc uint[Interop.Sys.FD_SETSIZE_UINTS];
             Interop.Sys.FD_ZERO(fdSet);
 
-            Interop.Sys.FD_SET(handle.FileDescriptor, fdSet);
-
-            int fdCount = 0;
-            uint* readFds = null;
-            uint* writeFds = null;
-            uint* errorFds = null;
-            switch (mode)
+            bool releaseHandle = false;
+            try
             {
-                case SelectMode.SelectRead:
-                    readFds = fdSet;
-                    fdCount = handle.FileDescriptor + 1;
-                    break;
+                handle.DangerousAddRef(ref releaseHandle);
+                int fd = (int)handle.DangerousGetHandle();
+                Interop.Sys.FD_SET(fd, fdSet);
 
-                case SelectMode.SelectWrite:
-                    writeFds = fdSet;
-                    fdCount = handle.FileDescriptor + 1;
-                    break;
+                int fdCount = 0;
+                uint* readFds = null;
+                uint* writeFds = null;
+                uint* errorFds = null;
+                switch (mode)
+                {
+                    case SelectMode.SelectRead:
+                        readFds = fdSet;
+                        fdCount = fd + 1;
+                        break;
 
-                case SelectMode.SelectError:
-                    errorFds = fdSet;
-                    fdCount = handle.FileDescriptor + 1;
-                    break;
+                    case SelectMode.SelectWrite:
+                        writeFds = fdSet;
+                        fdCount = fd + 1;
+                        break;
+
+                    case SelectMode.SelectError:
+                        errorFds = fdSet;
+                        fdCount = fd + 1;
+                        break;
+                }
+
+                int socketCount = 0;
+                Interop.Error err = Interop.Sys.Select(fdCount, readFds, writeFds, errorFds, microseconds, &socketCount);
+                if (err != Interop.Error.SUCCESS)
+                {
+                    status = false;
+                    return GetSocketErrorForErrorCode(err);
+                }
+
+                status = Interop.Sys.FD_ISSET(fd, fdSet);
             }
-
-            int socketCount = 0;
-            Interop.Error err = Interop.Sys.Select(fdCount, readFds, writeFds, errorFds, microseconds, &socketCount);
-            if (err != Interop.Error.SUCCESS)
+            finally
             {
-                status = false;
-                return GetSocketErrorForErrorCode(err);
+                if (releaseHandle)
+                {
+                    handle.DangerousRelease();
+                }
             }
-
-            status = Interop.Sys.FD_ISSET(handle.FileDescriptor, fdSet);
             return SocketError.Success;
         }
 
@@ -1202,7 +1175,7 @@ namespace System.Net.Sockets
 
         public static SocketError Shutdown(SafeCloseSocket handle, bool isConnected, bool isDisconnected, SocketShutdown how)
         {
-            Interop.Error err = Interop.Sys.Shutdown(handle.FileDescriptor, how);
+            Interop.Error err = Interop.Sys.Shutdown(handle, how);
             if (err == Interop.Error.SUCCESS)
             {
                 return SocketError.Success;
@@ -1270,7 +1243,7 @@ namespace System.Net.Sockets
 
         public static SocketError AcceptAsync(Socket socket, SafeCloseSocket handle, SafeCloseSocket acceptHandle, int receiveSize, int socketAddressSize, AcceptOverlappedAsyncResult asyncResult)
         {
-            Debug.Assert(acceptHandle == null);
+            Debug.Assert(acceptHandle == null, $"Unexpected acceptHandle: {acceptHandle}");
 
             byte[] socketAddressBuffer = new byte[socketAddressSize];
 

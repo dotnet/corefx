@@ -55,7 +55,7 @@ namespace System.Text.Encodings.Web
         {
             if (filter == null)
             {
-                throw new ArgumentNullException("filter");
+                throw new ArgumentNullException(nameof(filter));
             }
 
             _allowedCharacters = filter.GetAllowedCharacters();
@@ -73,6 +73,9 @@ namespace System.Text.Encodings.Web
 
             _allowedCharacters.ForbidCharacter('\\');
             _allowedCharacters.ForbidCharacter('/');
+            
+            // Forbid GRAVE ACCENT \u0060 character.
+            _allowedCharacters.ForbidCharacter('`'); 
         }
 
         public DefaultJavaScriptEncoder(params UnicodeRange[] allowedRanges) : this(new TextEncoderSettings(allowedRanges))
@@ -90,7 +93,7 @@ namespace System.Text.Encodings.Web
         {
             if (text == null)
             {
-                throw new ArgumentNullException("text");
+                throw new ArgumentNullException(nameof(text));
             }
             return _allowedCharacters.FindFirstCharacterToEncode(text, textLength);
         }
@@ -100,7 +103,7 @@ namespace System.Text.Encodings.Web
         // surrogate pairs in the output.
         public override int MaxOutputCharactersPerInputCharacter
         {
-            get { return 6; } // "\uFFFF" is the longest encoded form 
+            get { return 12; } // "\uFFFF\uFFFF" is the longest encoded form 
         }
 
         static readonly char[] s_b = new char[] { '\\', 'b' };
@@ -119,7 +122,7 @@ namespace System.Text.Encodings.Web
         {
             if (buffer == null)
             {
-                throw new ArgumentNullException("buffer");
+                throw new ArgumentNullException(nameof(buffer));
             }
             // ECMA-262 allows encoding U+000B as "\v", but ECMA-404 does not.
             // Both ECMA-262 and ECMA-404 allow encoding U+002F SOLIDUS as "\/".

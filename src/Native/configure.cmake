@@ -7,9 +7,18 @@ include(CheckStructHasMember)
 include(CheckSymbolExists)
 include(CheckTypeSize)
 
-#CMake does not include /usr/local/include into the include search path
-#thus add it manually. This is required on FreeBSD.
-include_directories(SYSTEM /usr/local/include)
+if (CMAKE_SYSTEM_NAME STREQUAL Linux)
+    set(PAL_UNIX_NAME \"LINUX\")
+elseif (CMAKE_SYSTEM_NAME STREQUAL Darwin)
+    set(PAL_UNIX_NAME \"OSX\")
+elseif (CMAKE_SYSTEM_NAME STREQUAL FreeBSD)
+    set(PAL_UNIX_NAME \"FREEBSD\")
+    include_directories(SYSTEM /usr/local/include)
+elseif (CMAKE_SYSTEM_NAME STREQUAL NetBSD)
+    set(PAL_UNIX_NAME \"NETBSD\")
+else ()
+    message(FATAL_ERROR "Unknown platform.  Cannot define PAL_UNIX_NAME, used by RuntimeInformation.")
+endif ()
 
 # in_pktinfo: Find whether this struct exists
 check_include_files(
@@ -23,6 +32,7 @@ else ()
 endif ()
 
 set(CMAKE_EXTRA_INCLUDE_FILES ${SOCKET_INCLUDES})
+
 check_type_size(
     "struct in_pktinfo"
     HAVE_IN_PKTINFO
@@ -32,6 +42,7 @@ check_type_size(
     "struct ip_mreqn"
     HAVE_IP_MREQN
     BUILTIN_TYPES_ONLY)
+
 set(CMAKE_EXTRA_INCLUDE_FILES) # reset CMAKE_EXTRA_INCLUDE_FILES
 # /in_pktinfo
 
@@ -144,12 +155,32 @@ check_struct_has_member(
     "netdb.h"
     HAVE_IN6_U)
 
+check_struct_has_member(
+    "struct in6_addr"
+    __u6_addr
+    "netdb.h"
+    HAVE_U6_ADDR)
+
 check_cxx_source_compiles(
     "
     #include <string.h>
     int main() { char* c = strerror_r(0, 0, 0); }
     "
     HAVE_GNU_STRERROR_R)
+
+check_cxx_source_compiles(
+    "
+    #include <sys/types.h>
+    #include <sys/event.h>
+    int main(void)
+    {
+        struct kevent event;
+        void* data;
+        EV_SET(&event, 0, EVFILT_READ, 0, 0, 0, data);
+        return 0;
+    }
+    "
+    KEVENT_HAS_VOID_UDATA)
 
 check_struct_has_member(
     "struct fd_set"
@@ -163,6 +194,17 @@ check_struct_has_member(
     "sys/select.h"
     HAVE_PRIVATE_FDS_BITS)
 
+check_cxx_source_compiles(
+    "
+    #include <sys/sendfile.h>
+    int main() { int i = sendfile(0, 0, 0, 0); }
+    "
+    HAVE_SENDFILE)
+
+check_function_exists(
+    fcopyfile
+    HAVE_FCOPYFILE)
+
 check_function_exists(
     epoll_create1
     HAVE_EPOLL)
@@ -171,13 +213,45 @@ check_function_exists(
     kqueue
     HAVE_KQUEUE)
 
-check_function_exists(
-    gethostbyname_r
-    HAVE_GETHOSTBYNAME_R)
+check_cxx_source_compiles(
+     "
+     #include <sys/types.h>
+     #include <netdb.h>
 
-check_function_exists(
-    gethostbyaddr_r
-    HAVE_GETHOSTBYADDR_R)
+     int main()
+     {
+         const void* addr;
+         socklen_t len;
+         int type;
+         struct hostent* result;
+         char* buffer;
+         size_t buflen;
+         struct hostent** entry;
+         int* error;
+         gethostbyaddr_r(addr,  len, type, result, buffer, buflen, entry, error);
+         return 0;
+     }
+     "
+     HAVE_GETHOSTBYADDR_R)
+
+check_cxx_source_compiles(
+     "
+     #include <sys/types.h>
+     #include <netdb.h>
+
+     int main()
+     {
+         const char* hostname;
+         struct hostent* result;
+         char* buffer;
+         size_t buflen;
+         struct hostent** entry;
+         int* error;
+         gethostbyname_r(hostname, result, buffer, buflen, entry, error);
+         return 0;
+     }
+     "
+     HAVE_GETHOSTBYNAME_R)
 
 set(HAVE_SUPPORT_FOR_DUAL_MODE_IPV4_PACKET_INFO 0)
 set(HAVE_THREAD_SAFE_GETHOSTBYNAME_AND_GETHOSTBYADDR 0)
@@ -236,9 +310,16 @@ check_cxx_source_runs(
 check_prototype_definition(
     getpriority
     "int getpriority(int which, int who)"
-    "0"
+    0
     "sys/resource.h"
     PRIORITY_REQUIRES_INT_WHO)
+
+check_prototype_definition(
+    kevent
+    "int kevent(int kg, const struct kevent* chagelist, int nchanges, struct kevent* eventlist, int nevents, const struct timespec* timeout)"
+    0
+    "sys/types.h;sys/event.h"
+    KEVENT_REQUIRES_INT_PARAMS)
 
 check_cxx_source_compiles(
     "
@@ -274,6 +355,10 @@ check_cxx_source_compiles(
     "
     HAVE_RT_MSGHDR
 )
+
+check_include_files(
+    sys/sysctl.h
+    HAVE_SYS_SYSCTL_H)
 
 check_include_files(
     linux/rtnetlink.h
@@ -332,11 +417,6 @@ check_cxx_source_compiles(
     "
     HAVE_CURLPIPE_MULTIPLEX)
 
-check_symbol_exists(
-    OPEN_MAX
-    "sys/syslimits.h"
-    HAVE_OPEN_MAX)
-
 check_include_files(
     GSS/GSS.h
     HAVE_GSSFW_HEADERS)
@@ -352,8 +432,6 @@ else ()
         "gssapi/gssapi.h"
         HAVE_GSS_SPNEGO_MECHANISM)
 endif ()
-
-
 
 set (CMAKE_REQUIRED_LIBRARIES)
 

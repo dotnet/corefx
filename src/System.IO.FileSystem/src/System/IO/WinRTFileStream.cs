@@ -197,11 +197,11 @@ namespace System.IO
 
             if (_innerStream.Length < value)
             {
-                throw new ArgumentOutOfRangeException("value", SR.ArgumentOutOfRange_FileLengthTooBig);
+                throw new ArgumentOutOfRangeException(nameof(value), SR.ArgumentOutOfRange_FileLengthTooBig);
             }
             else if (_innerStream.Length != value)
             {
-                throw new ArgumentException("value");
+                throw new ArgumentException(SR.Argument_FileNotResized, nameof(value));
             }
 
             // WinRT doesn't update the position when truncating a file

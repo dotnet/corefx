@@ -15,6 +15,14 @@ namespace System.Runtime.InteropServices.RuntimeInformationTests
         {
             string expected = string.Format(".NET Core {0}", typeof(object).GetTypeInfo().Assembly.GetName().Version);
             Assert.Equal(expected, RuntimeInformation.FrameworkDescription);
+            Assert.Same(RuntimeInformation.FrameworkDescription, RuntimeInformation.FrameworkDescription);
+        }
+
+        [Fact]
+        public void VerifyOSDescription()
+        {
+            Assert.NotNull(RuntimeInformation.OSDescription);
+            Assert.Same(RuntimeInformation.OSDescription, RuntimeInformation.OSDescription);
         }
 
         [Fact, PlatformSpecific(PlatformID.Windows)]
@@ -27,6 +35,12 @@ namespace System.Runtime.InteropServices.RuntimeInformationTests
         public void VerifyLinuxDebugName()
         {
             Assert.Contains("linux", RuntimeInformation.OSDescription, StringComparison.OrdinalIgnoreCase);
+        }
+
+        [Fact, PlatformSpecific(PlatformID.NetBSD)]
+        public void VerifyNetBSDDebugName()
+        {
+            Assert.Contains("netbsd", RuntimeInformation.OSDescription, StringComparison.OrdinalIgnoreCase);
         }
 
         [Fact, PlatformSpecific(PlatformID.OSX)]

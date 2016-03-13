@@ -94,7 +94,7 @@ namespace System.Net.Security
 
         }
 
-        internal static SecurityStatusPal InitializeSecurityContext(
+        internal static SecurityStatusPalErrorCode InitializeSecurityContext(
             SafeFreeCredentials credentialsHandle,
             ref SafeDeleteContext securityContext,
             string spn,
@@ -120,14 +120,14 @@ namespace System.Net.Security
                 ref contextFlags);
         }
 
-        internal static SecurityStatusPal CompleteAuthToken(
+        internal static SecurityStatusPalErrorCode CompleteAuthToken(
             ref SafeDeleteContext securityContext,
             SecurityBuffer[] inSecurityBufferArray)
         {
-            return SecurityStatusPal.OK;
+            return SecurityStatusPalErrorCode.OK;
         }
 
-        internal static SecurityStatusPal AcceptSecurityContext(
+        internal static SecurityStatusPalErrorCode AcceptSecurityContext(
             SafeFreeCredentials credentialsHandle,
             ref SafeDeleteContext securityContext,
             ContextFlagsPal requestedContextFlags,
@@ -148,7 +148,7 @@ namespace System.Net.Security
 
         }
 
-        internal static Exception CreateExceptionFromError(SecurityStatusPal statusCode)
+        internal static Exception CreateExceptionFromError(SecurityStatusPalErrorCode statusCode)
         {
             return new Win32Exception(NTE_FAIL);
         }
@@ -233,7 +233,7 @@ namespace System.Net.Security
             throw new PlatformNotSupportedException(SR.net_nego_ntlm_not_supported);
         }
 
-        private static SecurityStatusPal EstablishSecurityContext(
+        private static SecurityStatusPalErrorCode EstablishSecurityContext(
           SafeFreeNegoCredentials credential,
           ref SafeDeleteContext context,
           bool isNtlm,
@@ -278,7 +278,7 @@ namespace System.Net.Security
                 {
                     negoContext.SetGssContext(contextHandle);
                 }
-                return done ? SecurityStatusPal.CompleteNeeded : SecurityStatusPal.ContinueNeeded;
+                return done ? SecurityStatusPalErrorCode.CompleteNeeded : SecurityStatusPalErrorCode.ContinueNeeded;
             }
             catch(Exception ex)
             {
@@ -289,7 +289,7 @@ namespace System.Net.Security
                     GlobalLog.Print("Exception Caught. - " + ex);
                 }
 
-                return SecurityStatusPal.InternalError;
+                return SecurityStatusPalErrorCode.InternalError;
             }
         }
     }

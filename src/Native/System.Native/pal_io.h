@@ -5,6 +5,7 @@
 #pragma once
 
 #include "pal_types.h"
+#include <stdio.h>
 #include <dirent.h>
 
 /**
@@ -430,6 +431,13 @@ extern "C" int32_t SystemNative_MkDir(const char* path, int32_t mode);
 extern "C" int32_t SystemNative_ChMod(const char* path, int32_t mode);
 
 /**
+* Change permissions of a file. Implemented as a shim to fchmod(2).
+*
+* Returns 0 for success, -1 for failure. Sets errno for failure.
+*/
+extern "C" int32_t SystemNative_FChMod(intptr_t fd, int32_t mode);
+
+/**
  * Create a FIFO (named pipe). Implemented as a shim to mkfifo(3).
  *
  * Returns 0 for success, -1 for failure. Sets errno for failure.
@@ -589,6 +597,13 @@ extern "C" Error SystemNative_Poll(PollEvent* pollEvents, uint32_t eventCount, i
 extern "C" int32_t SystemNative_PosixFAdvise(intptr_t fd, int64_t offset, int64_t length, FileAdvice advice);
 
 /**
+* Reads a line from the provided stream.
+*
+* Returns the read line, or null if no line could be read.  The caller is responsible for freeing the malloc'd line.
+*/
+extern "C" char* SystemNative_GetLine(FILE* stream);
+
+/**
  * Reads the number of bytes specified into the provided buffer from the specified, opened file descriptor.
  *
  * Returns the number of bytes read on success; otherwise, -1 is returned an errno is set.
@@ -633,6 +648,13 @@ extern "C" void SystemNative_Sync();
 extern "C" int32_t SystemNative_Write(intptr_t fd, const void* buffer, int32_t bufferSize);
 
 /**
+ * Copies all data from the source file descriptor to the destination file descriptor.
+ *
+ * Returns 0 on success; otherwise, returns -1 and sets errno.
+ */
+extern "C" int32_t SystemNative_CopyFile(intptr_t sourceFd, intptr_t destinationFd);
+
+/**
 * Initializes a new inotify instance and returns a file
 * descriptor associated with a new inotify event queue.
 *
@@ -657,3 +679,10 @@ extern "C" int32_t SystemNative_INotifyAddWatch(intptr_t fd, const char* pathNam
 * Returns 0 on success, or -1 if an error occurred (in which case, errno is set appropriately).
 */
 extern "C" int32_t SystemNative_INotifyRemoveWatch(intptr_t fd, int32_t wd);
+
+/**
+* Expands all symbolic links and expands all paths to return an absolute path
+*
+* Returns the result absolute path on success or null on error with errno set appropriately.
+*/
+extern "C" char* SystemNative_RealPath(const char* path);

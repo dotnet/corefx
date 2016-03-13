@@ -4,6 +4,7 @@
 
 using System;
 using System.Globalization;
+using System.Globalization.Tests;
 using Xunit;
 
 namespace System.Globalization.CalendarsTests
@@ -101,69 +102,6 @@ namespace System.Globalization.CalendarsTests
             CultureInfo myCI = new CultureInfo("th-TH");
             int resultWeek = tbc.GetWeekOfYear(dt, myCI.DateTimeFormat.CalendarWeekRule, myCI.DateTimeFormat.FirstDayOfWeek);
             Assert.Equal(actualWeek, resultWeek);
-        }
-        #endregion
-
-        #region Negative Tests
-        // NegTest1: firstDayOfWeek is outside the range supported by the calendar
-        [Fact]
-        public void NegTest1()
-        {
-            System.Globalization.Calendar tbc = new ThaiBuddhistCalendar();
-            Random rand = new Random(-55);
-            int year = rand.Next(tbc.MinSupportedDateTime.Year, tbc.MaxSupportedDateTime.Year);
-            int month = rand.Next(1, 12);
-            int day;
-            if (IsLeapYear(year))
-            {
-                day = rand.Next(1, _DAYS_PER_MONTHS_IN_LEAP_YEAR[month] + 1);
-            }
-            else
-            {
-                day = rand.Next(1, _DAYS_PER_MONTHS_IN_NO_LEAP_YEAR[month] + 1);
-            }
-
-            DateTime dt = new DateTime(year, month, day);
-            CultureInfo myCI = new CultureInfo("th-TH");
-            Assert.Throws<ArgumentOutOfRangeException>(() =>
-            {
-                tbc.GetWeekOfYear(dt, myCI.DateTimeFormat.CalendarWeekRule, (DayOfWeek)7);
-            });
-
-            Assert.Throws<ArgumentOutOfRangeException>(() =>
-            {
-                tbc.GetWeekOfYear(dt, myCI.DateTimeFormat.CalendarWeekRule, (DayOfWeek)(-1));
-            });
-        }
-
-        // NegTest2: CalendarWeekRule is outside the range supported by the calendar
-        [Fact]
-        public void NegTest2()
-        {
-            System.Globalization.Calendar tbc = new ThaiBuddhistCalendar();
-            Random rand = new Random(-55);
-            int year = rand.Next(tbc.MinSupportedDateTime.Year, tbc.MaxSupportedDateTime.Year);
-            int month = rand.Next(1, 12);
-            int day;
-            if (IsLeapYear(year))
-            {
-                day = rand.Next(1, _DAYS_PER_MONTHS_IN_LEAP_YEAR[month] + 1);
-            }
-            else
-            {
-                day = rand.Next(1, _DAYS_PER_MONTHS_IN_NO_LEAP_YEAR[month] + 1);
-            }
-
-            DateTime dt = new DateTime(year, month, day);
-            CultureInfo myCI = new CultureInfo("th-TH");
-            Assert.Throws<ArgumentOutOfRangeException>(() =>
-            {
-                tbc.GetWeekOfYear(dt, (CalendarWeekRule)3, myCI.DateTimeFormat.FirstDayOfWeek);
-            });
-            Assert.Throws<ArgumentOutOfRangeException>(() =>
-            {
-                tbc.GetWeekOfYear(dt, (CalendarWeekRule)(-1), myCI.DateTimeFormat.FirstDayOfWeek);
-            });
         }
         #endregion
 
