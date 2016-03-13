@@ -290,14 +290,15 @@ namespace Roslyn.Reflection.Metadata.Ecma335
 
         public ImmutableArray<int> GetHeapSizes()
         {
-            var heapSizes = new int[MetadataTokens.HeapCount];
+            var builder = ImmutableArray.CreateBuilder<int>(MetadataTokens.HeapCount);
+            builder.Count = builder.Capacity;
 
-            heapSizes[(int)HeapIndex.UserString] = _userStringWriter.Count;
-            heapSizes[(int)HeapIndex.String] = _stringWriter.Count;
-            heapSizes[(int)HeapIndex.Blob] = _blobHeapSize;
-            heapSizes[(int)HeapIndex.Guid] = _guidWriter.Count;
+            builder[(int)HeapIndex.UserString] = _userStringWriter.Count;
+            builder[(int)HeapIndex.String] = _stringWriter.Count;
+            builder[(int)HeapIndex.Blob] = _blobHeapSize;
+            builder[(int)HeapIndex.Guid] = _guidWriter.Count;
 
-            return ImmutableArray.CreateRange(heapSizes);
+            return builder.MoveToImmutable();
         }
 
         /// <summary>

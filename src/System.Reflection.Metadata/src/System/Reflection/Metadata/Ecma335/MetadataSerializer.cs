@@ -79,7 +79,15 @@ namespace Roslyn.Reflection.Metadata.Ecma335
 #endif
     sealed class TypeSystemMetadataSerializer : MetadataSerializer
     {
-        private static readonly ImmutableArray<int> EmptyRowCounts = ImmutableArray.CreateRange(Enumerable.Repeat(0, MetadataTokens.TableCount));
+        private static readonly ImmutableArray<int> EmptyRowCounts = CreateEmptyRowCounts();
+
+        private static ImmutableArray<int> CreateEmptyRowCounts()
+        {
+            var builder = ImmutableArray.CreateBuilder<int>(MetadataTokens.TableCount);
+            builder.Count = builder.Capacity;
+            // Memory is already zeroed-out, no need to fill it here
+            return builder.MoveToImmutable();
+        }
 
         public TypeSystemMetadataSerializer(
             MetadataBuilder tables, 
