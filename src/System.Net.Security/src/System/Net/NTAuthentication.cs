@@ -57,7 +57,7 @@ namespace System.Net
             {
                 if (!(IsValidContext && IsCompleted))
                 {
-                    throw new Win32Exception((int)SecurityStatusPal.InvalidHandle);
+                    throw new Win32Exception((int)SecurityStatusPalErrorCode.InvalidHandle);
                 }
 
                 string name = NegotiateStreamPal.QueryContextAssociatedName(_securityContext);
@@ -267,9 +267,9 @@ namespace System.Net
             }
         }
 
-        internal SafeDeleteContext GetContext(out SecurityStatusPal status)
+        internal SafeDeleteContext GetContext(out SecurityStatusPalErrorCode status)
         {
-            status = SecurityStatusPal.OK;
+            status = SecurityStatusPalErrorCode.OK;
             if (!(IsCompleted && IsValidContext))
             {
                 if (GlobalLog.IsEnabled)
@@ -292,7 +292,7 @@ namespace System.Net
 
             if (!IsValidContext)
             {
-                status = SecurityStatusPal.InvalidHandle;
+                status = SecurityStatusPalErrorCode.InvalidHandle;
                 return null;
             }
 
@@ -308,7 +308,7 @@ namespace System.Net
         }
 
         // Accepts an incoming binary security blob and returns an outgoing binary security blob.
-        internal byte[] GetOutgoingBlob(byte[] incomingBlob, bool throwOnError, out SecurityStatusPal statusCode)
+        internal byte[] GetOutgoingBlob(byte[] incomingBlob, bool throwOnError, out SecurityStatusPalErrorCode statusCode)
         {
             if (GlobalLog.IsEnabled)
             {
@@ -355,7 +355,7 @@ namespace System.Net
                         GlobalLog.Print("NTAuthentication#" + LoggingHash.HashString(this) + "::GetOutgoingBlob() SSPIWrapper.InitializeSecurityContext() returns statusCode:0x" + ((int)statusCode).ToString("x8", NumberFormatInfo.InvariantInfo) + " (" + statusCode.ToString() + ")");
                     }
 
-                    if (statusCode == SecurityStatusPal.CompleteNeeded)
+                    if (statusCode == SecurityStatusPalErrorCode.CompleteNeeded)
                     {
                         var inSecurityBuffers = new SecurityBuffer[1];
                         inSecurityBuffers[0] = outSecurityBuffer;
@@ -429,10 +429,10 @@ namespace System.Net
             }
 
             // The return value will tell us correctly if the handshake is over or not
-            if (statusCode == SecurityStatusPal.OK)
+            if (statusCode == SecurityStatusPalErrorCode.OK)
             {
                 // Success.
-                if (statusCode != SecurityStatusPal.OK)
+                if (statusCode != SecurityStatusPalErrorCode.OK)
                 {
                     if (GlobalLog.IsEnabled)
                     {

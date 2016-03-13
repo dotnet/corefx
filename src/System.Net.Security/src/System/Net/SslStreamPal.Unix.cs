@@ -130,7 +130,7 @@ namespace System.Net
             try
             {
                 Interop.Ssl.SslErrorCode errorCode = Interop.Ssl.SslErrorCode.SSL_ERROR_NONE;
-                SafeSslHandle scHandle = securityContext.SslContext;
+                SafeSslHandle scHandle = ((SafeDeleteSslContext)securityContext).SslContext;
 
                 if (encrypt)
                 {
