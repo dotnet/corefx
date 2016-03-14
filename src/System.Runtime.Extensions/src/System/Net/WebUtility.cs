@@ -386,6 +386,14 @@ namespace System.Net
                     unsafeCount++;
                 }
             }
+            
+            if (unsafeCount == 0)
+            {
+                // nothing to encode, just make a copy of the array
+                byte[] result = new byte[count];
+                Array.Copy(value, offset, result, 0, count);
+                return result;
+            }
 
             // expand not 'safe' characters into %XX, spaces to +s
             byte[] encodedBytes = new byte[count + unsafeCount * 2];
