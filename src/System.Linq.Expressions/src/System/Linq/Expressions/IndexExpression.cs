@@ -274,8 +274,6 @@ namespace System.Linq.Expressions
         {
             var members = type.GetProperties(flags)
                 .Where(x => x.Name.Equals(propertyName, StringComparison.CurrentCultureIgnoreCase));
-            if (!members.Any())
-                return null;
 
             PropertyInfo pi;
             int count = FindBestProperty(members, arguments, out pi);
