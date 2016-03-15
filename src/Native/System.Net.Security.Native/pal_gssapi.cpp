@@ -35,6 +35,9 @@ static_assert(PAL_GSS_CONTINUE_NEEDED == GSS_S_CONTINUE_NEEDED, "");
 
 #if !HAVE_GSS_SPNEGO_MECHANISM
 static char gss_mech_value[] = "\x2b\x06\x01\x05\x05\x02"; // Binary representation of SPNEGO Oid (RFC 4178)
+static char gss_ntlm_mech_value[] = "\x2b\x06\x01\x04\x01\x82\x37\x02\x02\x0a"; // Binary representation of NTLM OID (https://msdn.microsoft.com/en-us/library/cc236636.aspx)
+static uint32_t gss_mech_length = 6;
+static uint32_t gss_mech_ntlm_length = 10;
 #endif
 
 static uint32_t NetSecurityNative_HandleError(uint32_t majorStatus,
@@ -131,9 +134,18 @@ extern "C" uint32_t NetSecurityNative_ImportPrincipalName(uint32_t* minorStatus,
     assert(minorStatus != nullptr);
     assert(inputName != nullptr);
     assert(outputName != nullptr);
+    gss_OID nameType;
 
+    if (strchr(inputName, '/') != nullptr)
+    {
+        nameType = const_cast<gss_OID>(GSS_KRB5_NT_PRINCIPAL_NAME);
+    }
+    else
+    {
+        nameType = const_cast<gss_OID>(GSS_C_NT_HOSTBASED_SERVICE);
+    }
+    
     GssBuffer inputNameBuffer{.length = inputNameLen, .value = inputName};
-    gss_OID nameType = const_cast<gss_OID>(GSS_KRB5_NT_PRINCIPAL_NAME);
     return gss_import_name(minorStatus, &inputNameBuffer, nameType, outputName);
 }
 
@@ -146,7 +158,8 @@ extern "C" uint32_t NetSecurityNative_InitSecContext(uint32_t* minorStatus,
                                                      uint8_t* inputBytes,
                                                      uint32_t inputLength,
                                                      struct PAL_GssBuffer* outBuffer,
-                                                     uint32_t* retFlags)
+                                                     uint32_t* retFlags,
+                                                     int32_t* isNtlmUsed)
 {
     assert(minorStatus != nullptr);
     assert(contextHandle != nullptr);
@@ -155,22 +168,42 @@ extern "C" uint32_t NetSecurityNative_InitSecContext(uint32_t* minorStatus,
     assert(contextHandle != nullptr);
     assert(outBuffer != nullptr);
     assert(retFlags != nullptr);
+    assert(isNtlmUsed != nullptr);
     assert(inputBytes != nullptr || inputLength == 0);
 
 // Note: claimantCredHandle can be null
 
 #if HAVE_GSS_SPNEGO_MECHANISM
-    gss_OID desiredMech = isNtlm ? GSS_NTLM_MECHANISM : GSS_SPNEGO_MECHANISM;
-#else
-    assert(!isNtlm && "NTLM is not supported by MIT libgssapi_krb5");
-    (void)isNtlm; // unused
+    gss_OID desiredMech;
+    if (isNtlm)
+    {
+        desiredMech = GSS_NTLM_MECHANISM;
+    }
+    else
+    {
+        desiredMech = GSS_SPNEGO_MECHANISM;
+    }
 
-    gss_OID_desc gss_mech_spnego_OID_desc = {.length = 6, .elements = static_cast<void*>(gss_mech_value)};
-    gss_OID desiredMech = &gss_mech_spnego_OID_desc;
+    gss_OID krbMech = GSS_KRB5_MECHANISM;
+#else
+    gss_OID_desc gss_mech_OID_desc;
+    if (isNtlm)
+    {
+        gss_mech_OID_desc = { .length = gss_mech_ntlm_length,.elements = static_cast<void*>(gss_ntlm_mech_value) };
+    }
+    else
+    {
+        gss_mech_OID_desc = { .length = gss_mech_length,.elements = static_cast<void*>(gss_mech_value) };
+    }
+    
+    gss_OID desiredMech = &gss_mech_OID_desc;
+    gss_OID krbMech = const_cast<gss_OID>(gss_mech_krb5);
 #endif
 
+    *isNtlmUsed = 1;
     GssBuffer inputToken{.length = UnsignedCast(inputLength), .value = inputBytes};
     GssBuffer gssBuffer{.length = 0, .value = nullptr};
+    gss_OID_desc *outmech;
 
     uint32_t majorStatus = gss_init_sec_context(minorStatus,
                                                 claimantCredHandle,
@@ -181,10 +214,16 @@ extern "C" uint32_t NetSecurityNative_InitSecContext(uint32_t* minorStatus,
                                                 0,
                                                 GSS_C_NO_CHANNEL_BINDINGS,
                                                 &inputToken,
-                                                nullptr,
+                                                &outmech,
                                                 &gssBuffer,
                                                 retFlags,
                                                 nullptr);
+
+    // Outmech can be null when gssntlmssp lib uses NTLM mechanism
+    if (outmech != nullptr && gss_oid_equal(outmech, krbMech)!= 0)
+    {
+        *isNtlmUsed = 0;
+    }
 
     return NetSecurityNative_HandleError(majorStatus, &gssBuffer, outBuffer);
 }
@@ -293,6 +332,7 @@ extern "C" uint32_t NetSecurityNative_Unwrap(uint32_t* minorStatus,
 }
 
 static uint32_t NetSecurityNative_AcquireCredWithPassword(uint32_t* minorStatus,
+                                                          int32_t isNtlm,
                                                           GssName* desiredName,
                                                           char* password,
                                                           uint32_t passwdLen,
@@ -300,13 +340,33 @@ static uint32_t NetSecurityNative_AcquireCredWithPassword(uint32_t* minorStatus,
                                                           GssCredId** outputCredHandle)
 {
     assert(minorStatus != nullptr);
+    assert(isNtlm == 1 || isNtlm == 0);
     assert(desiredName != nullptr);
     assert(password != nullptr);
     assert(outputCredHandle != nullptr);
 
+#if HAVE_GSS_SPNEGO_MECHANISM
+    (void)isNtlm; // unused
+    // Specifying GSS_SPNEGO_MECHANISM as a desiredMech on OSX fails. 
+    gss_OID_set desiredMech = GSS_C_NO_OID_SET;
+#else
+    gss_OID_desc gss_mech_OID_desc;
+    if (isNtlm)
+    {
+        gss_mech_OID_desc = { .length = gss_mech_ntlm_length,.elements = static_cast<void*>(gss_ntlm_mech_value) };
+    }
+    else
+    {
+        gss_mech_OID_desc = { .length = gss_mech_length,.elements = static_cast<void*>(gss_mech_value) };
+    }
+
+    gss_OID_set_desc gss_mech_OID_set_desc = { .count = 1,.elements = &gss_mech_OID_desc };
+    gss_OID_set desiredMech = &gss_mech_OID_set_desc;
+#endif
+
     GssBuffer passwordBuffer{.length = passwdLen, .value = password};
     uint32_t majorStatus = gss_acquire_cred_with_password(
-        minorStatus, desiredName, &passwordBuffer, 0, nullptr, credUsage, outputCredHandle, nullptr, nullptr);
+        minorStatus, desiredName, &passwordBuffer, 0, desiredMech, credUsage, outputCredHandle, nullptr, nullptr);
 
     // call gss_set_cred_option with GSS_KRB5_CRED_NO_CI_FLAGS_X to support Kerberos Sign Only option from *nix client against a windows server
 #if HAVE_GSS_KRB5_CRED_NO_CI_FLAGS_X
@@ -321,8 +381,8 @@ static uint32_t NetSecurityNative_AcquireCredWithPassword(uint32_t* minorStatus,
 }
 
 extern "C" uint32_t NetSecurityNative_InitiateCredWithPassword(
-    uint32_t* minorStatus, GssName* desiredName, char* password, uint32_t passwdLen, GssCredId** outputCredHandle)
+    uint32_t* minorStatus, int32_t isNtlm, GssName* desiredName, char* password, uint32_t passwdLen, GssCredId** outputCredHandle)
 {
     return NetSecurityNative_AcquireCredWithPassword(
-        minorStatus, desiredName, password, passwdLen, GSS_C_INITIATE, outputCredHandle);
+        minorStatus, isNtlm, desiredName, password, passwdLen, GSS_C_INITIATE, outputCredHandle);
 }

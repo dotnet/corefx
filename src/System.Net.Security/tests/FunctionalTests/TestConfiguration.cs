@@ -21,9 +21,13 @@ namespace System.Net.Security.Tests
         public const string Realm = "TEST.COREFX.NET";
         public const string KerberosUser = "krb_user";
         // TODO: using a hard-coded password, till issue #6329 is fixed
-        public const string Password = "password";
+        public const string Password = "krb_password";
         public const string HostTarget = "TESTHOST/testfqdn.test.corefx.net";
-        public const string HttpTarget = "TESTHTTP";
+        public const string HttpTarget = "TESTHTTP@localhost";
+        public const string Domain = "TEST";
+        public const string NtlmUser = "ntlm_user";
+        public const string NtlmPassword = "ntlm_password";
+        public const string NtlmUserFilePath = "/var/tmp/ntlm_user_file";
 
         public static X509Certificate2 GetServerCertificate()
         {
