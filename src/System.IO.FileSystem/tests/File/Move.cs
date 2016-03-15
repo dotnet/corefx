@@ -43,7 +43,7 @@ namespace System.IO.Tests
             Assert.Throws<FileNotFoundException>(() => Move(Path.Combine(TestDirectory, GetTestFileName(), GetTestFileName()), testFile.FullName));
         }
 
-        [Fact]
+        [Fact, ActiveIssue(6931)]
         public void PathWithIllegalCharacters()
         {
             FileInfo testFile = new FileInfo(GetTestFilePath());

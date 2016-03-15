@@ -67,7 +67,7 @@ namespace System.Reflection.Tests
         }
 
         // Negative Test 1
-        [Fact]
+        [Fact, ActiveIssue(6932)]
         public void NegTest1()
         {
             Type type = typeof(baseclass);
