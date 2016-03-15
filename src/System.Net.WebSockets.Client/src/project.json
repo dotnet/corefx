@@ -5,17 +5,17 @@
         "dotnet5.4"
       ],
       "dependencies": {
-        "Microsoft.NETCore.Platforms": "1.0.1-rc3-23910",
+        "Microsoft.NETCore.Platforms": "1.0.1-rc3-23915",
         "Microsoft.Win32.Primitives": "4.0.0",
         "System.Collections": "4.0.10",
         "System.Diagnostics.Tools": "4.0.0",
         "System.Diagnostics.Tracing": "4.0.20",
         "System.Net.Primitives": "4.0.10",
         "System.Net.WebHeaderCollection": "4.0.0",
-        "System.Net.WebSockets": "4.0.0-rc3-23910",
+        "System.Net.WebSockets": "4.0.0-rc3-23915",
         "System.Resources.ResourceManager": "4.0.0",
         "System.Runtime": "4.0.20",
-        "System.Security.Cryptography.X509Certificates": "4.1.0-rc3-23910",
+        "System.Security.Cryptography.X509Certificates": "4.1.0-rc3-23915",
         "System.Threading": "4.0.10",
         "System.Threading.Tasks": "4.0.10"
       }
