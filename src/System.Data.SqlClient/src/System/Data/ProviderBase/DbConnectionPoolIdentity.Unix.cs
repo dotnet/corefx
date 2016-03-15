@@ -14,7 +14,7 @@ namespace System.Data.ProviderBase
     {
         static internal DbConnectionPoolIdentity GetCurrent()
         {
-            throw new PlatformNotSupportedException();
+            return NoIdentity;
         }
     }
 }
