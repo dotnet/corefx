@@ -5,6 +5,9 @@ syntax: glob
 # Tool Runtime Dir
 [Tt]ools/
 
+# Generated props files
+BuildVersion.props
+
 # User-specific files
 *.suo
 *.user
