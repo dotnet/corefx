@@ -568,6 +568,11 @@ namespace CoreXml.Test.XLinq
                 {
                     this.AddChild(new TestVariation(writeValue_1) { Attribute = new VariationAttribute("WriteValue(boolean)") { Id = 1, Priority = 1 } });
                     this.AddChild(new TestVariation(writeValue_2) { Attribute = new VariationAttribute("WriteValue(DateTime)") { Id = 2, Priority = 1 } });
+                    this.AddChild(new TestVariation(writeValue_2) { Attribute = new VariationAttribute("WriteValue(DateTime)") { Id = 2, Priority = 1 } });
+                    this.AddChild(new TestVariation(writeValue_2_WithTime) { Attribute = new VariationAttribute("WriteValue(DateTime), with time") { Id = 2, Priority = 1 } });
+                    this.AddChild(new TestVariation(writeValue_2_Utc) { Attribute = new VariationAttribute("WriteValue(DateTime), UTC Timezone") { Id = 2, Priority = 1 } });
+                    this.AddChild(new TestVariation(writeValue_2_Unspecified) { Attribute = new VariationAttribute("WriteValue(DateTime), Unspecified Timezone") { Id = 2, Priority = 1 } });
+                    this.AddChild(new TestVariation(writeValue_2_local) { Attribute = new VariationAttribute("WriteValue(DateTime), Local Timezone") { Id = 2, Priority = 1 } });
                     this.AddChild(new TestVariation(writeValue_3) { Attribute = new VariationAttribute("WriteValue(decimal)") { Id = 3, Priority = 1 } });
                     this.AddChild(new TestVariation(writeValue_4) { Attribute = new VariationAttribute("WriteValue(double)") { Id = 4, Priority = 1 } });
                     this.AddChild(new TestVariation(writeValue_5) { Attribute = new VariationAttribute("WriteValue(int32)") { Id = 5, Priority = 1 } });
