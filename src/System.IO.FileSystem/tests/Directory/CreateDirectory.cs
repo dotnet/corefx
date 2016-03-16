@@ -32,7 +32,7 @@ namespace System.IO.Tests
             Assert.Throws<ArgumentException>(() => Create(string.Empty));
         }
 
-        [Fact]
+        [Fact, ActiveIssue(6931)]
         public void PathWithInvalidCharactersAsPath_ThrowsArgumentException()
         {
             var paths = IOInputs.GetPathsWithInvalidCharacters();
