@@ -3,6 +3,12 @@ Developer Guide
 
 This guide provides instructions (mostly as links) on how to build the repo and implement improvements. It will expand over time.
 
+Dev Workflow
+===============
+
+The [dev workflow] (../building/dev-workflow.md) describes the development process to follow when working in our repo. 
+It is divided into specific tasks that are fast, transparent and easy to understand.
+
 Building the repository
 =======================
 
