@@ -253,7 +253,7 @@ namespace System.Net.Security
             SafeDeleteNegoContext negoContext = (SafeDeleteNegoContext)context;
             try
             {
-                Interop.NetSecurityNative.GssFlags inputFlags = ContextFlagsAdapterPal.GetInteropFromContextFlagsPal(inFlags);
+                Interop.NetSecurityNative.GssFlags inputFlags = ContextFlagsAdapterPal.GetInteropFromContextFlagsPal(inFlags, isServer:false);
                 uint outputFlags;
                 SafeGssContextHandle contextHandle = negoContext.GssContext;
                 bool done = Interop.GssApi.EstablishSecurityContext(
@@ -270,7 +270,7 @@ namespace System.Net.Security
                 outputBuffer.size = outputBuffer.token.Length;
                 outputBuffer.offset = 0;
 
-                outFlags = ContextFlagsAdapterPal.GetContextFlagsPalFromInterop((Interop.NetSecurityNative.GssFlags)outputFlags);
+                outFlags = ContextFlagsAdapterPal.GetContextFlagsPalFromInterop((Interop.NetSecurityNative.GssFlags)outputFlags, isServer:false);
                 Debug.Assert(negoContext.GssContext == null || contextHandle == negoContext.GssContext);
                 
                 // Save the inner context handle for further calls to NetSecurity
