@@ -10,7 +10,7 @@
 
   <!-- These paths are not built in CoreFx, enable when fixing https://github.com/dotnet/corefx/issues/826 -->
   <ItemGroup>
-    <File Include="$(WinNativePath)sni.dll">
+    <File Include="$(WinNativePath)ProjectK\Runtime\sni.dll">
       <TargetFramework>win7-$(PackagePlatform)</TargetFramework>
       <TargetPath>runtimes/win7-$(PackagePlatform)/native</TargetPath>
     </File>
