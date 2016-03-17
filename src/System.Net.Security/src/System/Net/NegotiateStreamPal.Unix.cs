@@ -109,7 +109,7 @@ namespace System.Net.Security
                 throw new PlatformNotSupportedException(SR.net_nego_channel_binding_not_supported);
             }
 
-            return EstablishSecurityContext(
+            SecurityStatusPal status = EstablishSecurityContext(
                 (SafeFreeNegoCredentials)credentialsHandle,
                 ref securityContext,
                 false,
@@ -118,6 +118,18 @@ namespace System.Net.Security
                 ((inSecurityBufferArray != null && inSecurityBufferArray.Length != 0) ? inSecurityBufferArray[0] : null),
                 outSecurityBuffer,
                 ref contextFlags);
+
+            // Confidentiality flag should not be set if not requested
+            if (status == SecurityStatusPal.CompleteNeeded)
+            {
+                ContextFlagsPal mask = ContextFlagsPal.Confidentiality;
+                if ((requestedContextFlags & mask) != (contextFlags & mask))
+                {
+                    throw new PlatformNotSupportedException(SR.net_nego_protection_level_not_supported);
+                }
+            }
+
+            return status;
         }
 
         internal static SecurityStatusPal CompleteAuthToken(
