@@ -79,8 +79,13 @@
 
   <Target Name="GetFilesToPackage" DependsOnTargets="FilterProjects"
           Returns="@(FilesToPackage)">
+
+    <ItemGroup>
+      <_projectToPackage Include="@(Project)" Condition="'%(Project.ExcludeFromPackage)' != 'true'" />
+    </ItemGroup>
+
     <MSBuild Targets="GetFilesToPackage"
-             Projects="@(Project)"
+             Projects="@(_projectToPackage)"
              BuildInParallel="$(BuildInParallel)"
              Properties="$(ProjectProperties)"
              ContinueOnError="ErrorAndContinue" >
