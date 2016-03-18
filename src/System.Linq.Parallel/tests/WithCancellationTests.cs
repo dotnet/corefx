@@ -71,13 +71,13 @@ namespace System.Linq.Parallel.Tests
         // However, only the producers need to wake up on cancellation as the consumer
         // will wake up once all the producers have gone away (via AsynchronousOneToOneChannel.SetDone())
         //
-        // To specifically verify this test, check that the Async channels were blocked in TryEnqueChunk before Dispose() is called
+        // To specifically verify this test, it was checked that the Async channels were blocked in TryEnqueChunk before Dispose() was called
         //  -> this was verified manually, but is not simple to automate
         [Theory]
         [OuterLoop] // explicit timeouts / delays
         // Provide enough elements to ensure all the cores get >64K ints. Good up to 1000 cores
-        [MemberData(nameof(Sources.Ranges), new[] { 1024 * 16 }, MemberType = typeof(Sources))]
-        [MemberData(nameof(UnorderedSources.Ranges), new[] { 1024 * 16 }, MemberType = typeof(UnorderedSources))]
+        [MemberData(nameof(Sources.Ranges), new[] { 1024 * 64 * 1024 }, MemberType = typeof(Sources))]
+        [MemberData(nameof(UnorderedSources.Ranges), new[] { 1024 * 64 * 1024 }, MemberType = typeof(UnorderedSources))]
         public static void WithCancellation_DisposedEnumerator_ChannelCancellation_ProducerBlocked(Labeled<ParallelQuery<int>> labeled, int count)
         {
             ParallelQuery<int> query = labeled.Item;
