@@ -62,8 +62,7 @@ namespace System.Linq.Parallel.Tests
             cs.Cancel();
             Action canceler = () => { throw new OperationCanceledException(cs.Token); };
 
-            AggregateException ae = Assert.Throws<AggregateException>(() => query(new CancellationTokenSource().Token, canceler));
-            Assert.All(ae.InnerExceptions, e => Assert.IsType<OperationCanceledException>(e));
+            AssertThrowsWrapped<OperationCanceledException>(() => query(new CancellationTokenSource().Token, canceler));
         }
 
         public static void AssertAggregateNotCanceled(Action<CancellationToken, Action> query)
@@ -71,8 +70,7 @@ namespace System.Linq.Parallel.Tests
             CancellationToken token = new CancellationTokenSource().Token;
             Action canceler = () => { throw new OperationCanceledException(token); };
 
-            AggregateException ae = Assert.Throws<AggregateException>(() => query(token, canceler));
-            Assert.All(ae.InnerExceptions, e => Assert.IsType<OperationCanceledException>(e));
+            AssertThrowsWrapped<OperationCanceledException>(() => query(token, canceler));
         }
 
         public static void Enumerate<T>(this IEnumerable<T> e)
