@@ -64,6 +64,7 @@ namespace System.Net.Tests
         {
             // Recent change brings function inline with RFC 3986 to return hex-encoded chars in uppercase
             yield return new object[] { "/\\\"\tHello! \u2665?/\\\"\tWorld! \u2665?\u2665", "%2F%5C%22%09Hello!+%E2%99%A5%3F%2F%5C%22%09World!+%E2%99%A5%3F%E2%99%A5" };
+            yield return new object[] { "\uD800\uDFFF\uD800\uDFFF", "%F0%90%8F%BF%F0%90%8F%BF" }; // should handle surrogate chars
             yield return new object[] { "'", "%27" };
             yield return new object[] { null, null };
         }
@@ -79,6 +80,7 @@ namespace System.Net.Tests
         [InlineData("'")]
         [InlineData("http://www.microsoft.com")]
         [InlineData("/\\\"\tHello! \u2665?/\\\"\tWorld! \u2665?\u2665")]
+        [InlineData("\uD800\uDFFF\uD800\uDFFF")]
         public static void UrlEncodeDecode_Roundtrip(string value)
         {
             string encoded = WebUtility.UrlEncode(value);
@@ -130,6 +132,7 @@ namespace System.Net.Tests
         [InlineData("'")]
         [InlineData("http://www.microsoft.com")]
         [InlineData("/\\\"\tHello! \u2665?/\\\"\tWorld! \u2665?\u2665")]
+        [InlineData("\uD800\uDFFF\uD800\uDFFF")]
         public static void UrlEncodeDecodeToBytes_Roundtrip(string url)
         {
             byte[] input = System.Text.Encoding.UTF8.GetBytes(url);
