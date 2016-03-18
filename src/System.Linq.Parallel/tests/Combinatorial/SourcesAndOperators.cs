@@ -231,7 +231,7 @@ namespace System.Linq.Parallel.Tests
                 Labeled.Label<Func<Action, Operation>>("SkipWhile", cancel => (start, count, s) => s(start, count).SkipWhile(x => { cancel(); return true; })),
                 Labeled.Label<Func<Action, Operation>>("SkipWhile-Index", cancel => (start, count, s) => s(start, count).SkipWhile((x, index) => { cancel(); return true; })),
                 Labeled.Label<Func<Action, Operation>>("TakeWhile", cancel => (start, count, s) => s(start, count).TakeWhile(x => { cancel(); return true; })),
-                Labeled.Label<Func<Action, Operation>>("TakeWhile-Index", cancel => (start, count, s) => s(start, count).SkipWhile((x, index) => { cancel(); return true; })),
+                Labeled.Label<Func<Action, Operation>>("TakeWhile-Index", cancel => (start, count, s) => s(start, count).TakeWhile((x, index) => { cancel(); return true; })),
                 Labeled.Label<Func<Action, Operation>>("Where", cancel => (start, count, s) => s(start, count).Where(x => { cancel(); return true; })),
                 Labeled.Label<Func<Action, Operation>>("Where-Index", cancel => (start, count, s) => s(start, count).Where((x, index) => { cancel(); return true; })),
                     })
