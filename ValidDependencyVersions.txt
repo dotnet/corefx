@@ -1,0 +1,19 @@
+﻿# This file specifies all the valid dependency versions.
+# Its structure is as follows:
+# Any line that is not blank and does not start with '#' is interpreted as a variable to set
+# Each pair of lines is expected to be in the format 
+# [Name]_ValidationPattern=[Regular Expression]
+# [Name]_ExpectedPrerelease=[Value]  -or-  [Name]_ExpectedVersion=[Value]
+# The [Name] needs to match on the pair of lines.
+
+CoreFX_ValidationPattern=^(?i)((System\..*)|(NETStandard\.Library)|(Microsoft\.CSharp)|(Microsoft\.NETCore.*)|(Microsoft\.TargetingPack\.Private\.(CoreCLR|NETNative))|(Microsoft\.Win32\..*)|(Microsoft\.VisualBasic))(?<!TestData)$
+CoreFX_ExpectedPrerelease=rc3-23910
+
+TargetingPack_ValidationPattern=^(?i)Microsoft\.TargetingPack\.(NetFramework.*|Private.WinRT)$
+TargetingPack_ExpectedVersion=1.0.1
+
+XUnit_ValidationPattern=^(?i)xunit$
+XUnit_ExpectedVersion=2.1.0
+
+XUnitNetCoreExtensions_ValidationPattern=^(?i)xunit\.netcore\.extensions$
+XUnitNetCoreExtensions_ExpectedVersion=1.0.0-prerelease-00187

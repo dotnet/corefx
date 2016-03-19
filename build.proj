@@ -72,13 +72,13 @@
           Condition="'$(ValidatePackageVersions)'=='true' and '@(ProjectJsonFiles)'!=''">
     <ValidateProjectDependencyVersions ProjectJsons="@(ProjectJsonFiles)"
                                        ProhibitFloatingDependencies="$(ProhibitFloatingDependencies)"
-                                       ValidationPatterns="@(ValidationPattern)" />
+                                       ValidationPatternsFile="$(ValidationPatternsFile)" />
   </Target>
 
   <Target Name="UpdateInvalidPackageVersions">
     <ValidateProjectDependencyVersions ProjectJsons="@(ProjectJsonFiles)"
                                        ProhibitFloatingDependencies="$(ProhibitFloatingDependencies)"
-                                       ValidationPatterns="@(ValidationPattern)"
+                                       ValidationPatternsFile="$(ValidationPatternsFile)"
                                        UpdateInvalidDependencies="true" />
   </Target>
 
