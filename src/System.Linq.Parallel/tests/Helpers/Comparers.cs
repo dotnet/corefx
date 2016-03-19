@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
-using System.Threading;
 
 namespace System.Linq.Parallel.Tests
 {
@@ -55,9 +54,9 @@ namespace System.Linq.Parallel.Tests
         }
     }
 
-    internal class CancelingEqualityComparer<T> : IEqualityComparer<T>
+    internal sealed class CancelingEqualityComparer<T> : IEqualityComparer<T>
     {
-        private Action _canceler;
+        private readonly Action _canceler;
 
         public CancelingEqualityComparer(Action canceler)
         {
@@ -113,9 +112,9 @@ namespace System.Linq.Parallel.Tests
         }
     }
 
-    internal class CancelingComparer : IComparer<int>
+    internal sealed class CancelingComparer : IComparer<int>
     {
-        private Action _canceler;
+        private readonly Action _canceler;
 
         public CancelingComparer(Action canceler)
         {
