@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
+using System.Threading;
 using Xunit;
 
 namespace System.Linq.Parallel.Tests
@@ -90,7 +91,12 @@ namespace System.Linq.Parallel.Tests
         [MemberData(nameof(Sources.Ranges), new[] { 128 }, MemberType = typeof(Sources))]
         public static void GetEnumerator_OperationCanceledException(Labeled<ParallelQuery<int>> labeled, int count)
         {
-            Functions.AssertEventuallyCanceled((token, canceler) => { foreach (var i in labeled.Item.WithCancellation(token)) { canceler(); }; });
+            CancellationTokenSource source = new CancellationTokenSource();
+            int countdown = 4;
+            Action cancel = () => { if (Interlocked.Decrement(ref countdown) == 0) source.Cancel(); };
+
+            OperationCanceledException oce = Assert.Throws<OperationCanceledException>(() => { foreach (var i in labeled.Item.WithCancellation(source.Token)) cancel(); });
+            Assert.Equal(source.Token, oce.CancellationToken);
         }
 
         [Theory]
@@ -98,7 +104,7 @@ namespace System.Linq.Parallel.Tests
         [MemberData(nameof(Sources.Ranges), new[] { 1 }, MemberType = typeof(Sources))]
         public static void GetEnumerator_OperationCanceledException_PreCanceled(Labeled<ParallelQuery<int>> labeled, int count)
         {
-            Functions.AssertAlreadyCanceled(token => { foreach (var i in labeled.Item.WithCancellation(token)) { throw new ShouldNotBeInvokedException(); }; });
+            Assert.Throws<OperationCanceledException>(() => { foreach (var i in labeled.Item.WithCancellation(new CancellationToken(canceled: true))) { throw new ShouldNotBeInvokedException(); }; });
         }
 
         [Theory]

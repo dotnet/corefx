@@ -31,6 +31,7 @@
     <Compile Include="Combinatorial\ParallelQueryCombinationTests.cs" />
     <Compile Include="Combinatorial\SourcesAndOperators.cs" />
     <Compile Include="Combinatorial\UnorderedParallelQueryCombinationTests.cs" />
+    <Compile Include="Helpers\AssertThrows.cs" />
     <Compile Include="Helpers\Comparers.cs" />
     <Compile Include="Helpers\DeliberateTestException.cs" />
     <Compile Include="Helpers\Enumerables.cs" />

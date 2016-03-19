@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
-using System.Threading;
 using Xunit;
 
 namespace System.Linq.Parallel.Tests
@@ -35,42 +34,6 @@ namespace System.Linq.Parallel.Tests
         {
             AggregateException ae = Assert.Throws<AggregateException>(query);
             Assert.All(ae.InnerExceptions, e => Assert.IsType<T>(e));
-        }
-
-        public static void AssertAlreadyCanceled(Action<CancellationToken> query)
-        {
-            CancellationTokenSource cs = new CancellationTokenSource();
-            cs.Cancel();
-
-            OperationCanceledException oce = Assert.Throws<OperationCanceledException>(() => query(cs.Token));
-            Assert.Equal(cs.Token, oce.CancellationToken);
-        }
-
-        public static void AssertEventuallyCanceled(Action<CancellationToken, Action> query)
-        {
-            CancellationTokenSource cs = new CancellationTokenSource();
-            int countDown = 4;
-            Action canceler = () => { if (Interlocked.Decrement(ref countDown) == 0) cs.Cancel(); };
-
-            OperationCanceledException oce = Assert.Throws<OperationCanceledException>(() => query(cs.Token, canceler));
-            Assert.Equal(cs.Token, oce.CancellationToken);
-        }
-
-        public static void AssertAggregateAlternateCanceled(Action<CancellationToken, Action> query)
-        {
-            CancellationTokenSource cs = new CancellationTokenSource();
-            cs.Cancel();
-            Action canceler = () => { throw new OperationCanceledException(cs.Token); };
-
-            AssertThrowsWrapped<OperationCanceledException>(() => query(new CancellationTokenSource().Token, canceler));
-        }
-
-        public static void AssertAggregateNotCanceled(Action<CancellationToken, Action> query)
-        {
-            CancellationToken token = new CancellationTokenSource().Token;
-            Action canceler = () => { throw new OperationCanceledException(token); };
-
-            AssertThrowsWrapped<OperationCanceledException>(() => query(token, canceler));
         }
 
         public static void Enumerate<T>(this IEnumerable<T> e)

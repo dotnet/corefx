@@ -241,79 +241,76 @@ namespace System.Linq.Parallel.Tests
             Assert.Null(ParallelEnumerable.Empty<decimal?>().Average(x => x));
         }
 
-        [Theory]
-        [MemberData(nameof(UnorderedSources.Ranges), new[] { 128 }, MemberType = typeof(UnorderedSources))]
-        public static void Average_OperationCanceledException(Labeled<ParallelQuery<int>> labeled, int count)
+        [Fact]
+        public static void Average_OperationCanceledException()
         {
-            Functions.AssertEventuallyCanceled((token, canceler) => labeled.Item.WithCancellation(token).Average(x => { canceler(); return x; }));
-            Functions.AssertEventuallyCanceled((token, canceler) => labeled.Item.WithCancellation(token).Average(x => { canceler(); return (int?)x; }));
+            AssertThrows.EventuallyCanceled((source, canceler) => source.Average(x => { canceler(); return x; }));
+            AssertThrows.EventuallyCanceled((source, canceler) => source.Average(x => { canceler(); return (int?)x; }));
 
-            Functions.AssertEventuallyCanceled((token, canceler) => labeled.Item.WithCancellation(token).Average(x => { canceler(); return (long)x; }));
-            Functions.AssertEventuallyCanceled((token, canceler) => labeled.Item.WithCancellation(token).Average(x => { canceler(); return (long?)x; }));
+            AssertThrows.EventuallyCanceled((source, canceler) => source.Average(x => { canceler(); return (long)x; }));
+            AssertThrows.EventuallyCanceled((source, canceler) => source.Average(x => { canceler(); return (long?)x; }));
 
-            Functions.AssertEventuallyCanceled((token, canceler) => labeled.Item.WithCancellation(token).Average(x => { canceler(); return (float)x; }));
-            Functions.AssertEventuallyCanceled((token, canceler) => labeled.Item.WithCancellation(token).Average(x => { canceler(); return (float?)x; }));
+            AssertThrows.EventuallyCanceled((source, canceler) => source.Average(x => { canceler(); return (float)x; }));
+            AssertThrows.EventuallyCanceled((source, canceler) => source.Average(x => { canceler(); return (float?)x; }));
 
-            Functions.AssertEventuallyCanceled((token, canceler) => labeled.Item.WithCancellation(token).Average(x => { canceler(); return (double)x; }));
-            Functions.AssertEventuallyCanceled((token, canceler) => labeled.Item.WithCancellation(token).Average(x => { canceler(); return (double?)x; }));
+            AssertThrows.EventuallyCanceled((source, canceler) => source.Average(x => { canceler(); return (double)x; }));
+            AssertThrows.EventuallyCanceled((source, canceler) => source.Average(x => { canceler(); return (double?)x; }));
 
-            Functions.AssertEventuallyCanceled((token, canceler) => labeled.Item.WithCancellation(token).Average(x => { canceler(); return (decimal)x; }));
-            Functions.AssertEventuallyCanceled((token, canceler) => labeled.Item.WithCancellation(token).Average(x => { canceler(); return (decimal?)x; }));
+            AssertThrows.EventuallyCanceled((source, canceler) => source.Average(x => { canceler(); return (decimal)x; }));
+            AssertThrows.EventuallyCanceled((source, canceler) => source.Average(x => { canceler(); return (decimal?)x; }));
         }
 
-        [Theory]
-        [MemberData(nameof(UnorderedSources.Ranges), new[] { 128 }, MemberType = typeof(UnorderedSources))]
-        public static void Average_AggregateException_Wraps_OperationCanceledException(Labeled<ParallelQuery<int>> labeled, int count)
+        [Fact]
+        public static void Average_AggregateException_Wraps_OperationCanceledException()
         {
-            Functions.AssertAggregateAlternateCanceled((token, canceler) => labeled.Item.WithCancellation(token).Average(x => { canceler(); return x; }));
-            Functions.AssertAggregateAlternateCanceled((token, canceler) => labeled.Item.WithCancellation(token).Average(x => { canceler(); return (int?)x; }));
+            AssertThrows.OtherTokenCanceled((source, canceler) => source.Average(x => { canceler(); return x; }));
+            AssertThrows.OtherTokenCanceled((source, canceler) => source.Average(x => { canceler(); return (int?)x; }));
 
-            Functions.AssertAggregateAlternateCanceled((token, canceler) => labeled.Item.WithCancellation(token).Average(x => { canceler(); return (long)x; }));
-            Functions.AssertAggregateAlternateCanceled((token, canceler) => labeled.Item.WithCancellation(token).Average(x => { canceler(); return (long?)x; }));
+            AssertThrows.OtherTokenCanceled((source, canceler) => source.Average(x => { canceler(); return (long)x; }));
+            AssertThrows.OtherTokenCanceled((source, canceler) => source.Average(x => { canceler(); return (long?)x; }));
 
-            Functions.AssertAggregateAlternateCanceled((token, canceler) => labeled.Item.WithCancellation(token).Average(x => { canceler(); return (float)x; }));
-            Functions.AssertAggregateAlternateCanceled((token, canceler) => labeled.Item.WithCancellation(token).Average(x => { canceler(); return (float?)x; }));
+            AssertThrows.OtherTokenCanceled((source, canceler) => source.Average(x => { canceler(); return (float)x; }));
+            AssertThrows.OtherTokenCanceled((source, canceler) => source.Average(x => { canceler(); return (float?)x; }));
 
-            Functions.AssertAggregateAlternateCanceled((token, canceler) => labeled.Item.WithCancellation(token).Average(x => { canceler(); return (double)x; }));
-            Functions.AssertAggregateAlternateCanceled((token, canceler) => labeled.Item.WithCancellation(token).Average(x => { canceler(); return (double?)x; }));
+            AssertThrows.OtherTokenCanceled((source, canceler) => source.Average(x => { canceler(); return (double)x; }));
+            AssertThrows.OtherTokenCanceled((source, canceler) => source.Average(x => { canceler(); return (double?)x; }));
 
-            Functions.AssertAggregateAlternateCanceled((token, canceler) => labeled.Item.WithCancellation(token).Average(x => { canceler(); return (decimal)x; }));
-            Functions.AssertAggregateAlternateCanceled((token, canceler) => labeled.Item.WithCancellation(token).Average(x => { canceler(); return (decimal?)x; }));
+            AssertThrows.OtherTokenCanceled((source, canceler) => source.Average(x => { canceler(); return (decimal)x; }));
+            AssertThrows.OtherTokenCanceled((source, canceler) => source.Average(x => { canceler(); return (decimal?)x; }));
 
-            Functions.AssertAggregateNotCanceled((token, canceler) => labeled.Item.WithCancellation(token).Average(x => { canceler(); return x; }));
-            Functions.AssertAggregateNotCanceled((token, canceler) => labeled.Item.WithCancellation(token).Average(x => { canceler(); return (int?)x; }));
+            AssertThrows.SameTokenNotCanceled((source, canceler) => source.Average(x => { canceler(); return x; }));
+            AssertThrows.SameTokenNotCanceled((source, canceler) => source.Average(x => { canceler(); return (int?)x; }));
 
-            Functions.AssertAggregateNotCanceled((token, canceler) => labeled.Item.WithCancellation(token).Average(x => { canceler(); return (long)x; }));
-            Functions.AssertAggregateNotCanceled((token, canceler) => labeled.Item.WithCancellation(token).Average(x => { canceler(); return (long?)x; }));
+            AssertThrows.SameTokenNotCanceled((source, canceler) => source.Average(x => { canceler(); return (long)x; }));
+            AssertThrows.SameTokenNotCanceled((source, canceler) => source.Average(x => { canceler(); return (long?)x; }));
 
-            Functions.AssertAggregateNotCanceled((token, canceler) => labeled.Item.WithCancellation(token).Average(x => { canceler(); return (float)x; }));
-            Functions.AssertAggregateNotCanceled((token, canceler) => labeled.Item.WithCancellation(token).Average(x => { canceler(); return (float?)x; }));
+            AssertThrows.SameTokenNotCanceled((source, canceler) => source.Average(x => { canceler(); return (float)x; }));
+            AssertThrows.SameTokenNotCanceled((source, canceler) => source.Average(x => { canceler(); return (float?)x; }));
 
-            Functions.AssertAggregateNotCanceled((token, canceler) => labeled.Item.WithCancellation(token).Average(x => { canceler(); return (double)x; }));
-            Functions.AssertAggregateNotCanceled((token, canceler) => labeled.Item.WithCancellation(token).Average(x => { canceler(); return (double?)x; }));
+            AssertThrows.SameTokenNotCanceled((source, canceler) => source.Average(x => { canceler(); return (double)x; }));
+            AssertThrows.SameTokenNotCanceled((source, canceler) => source.Average(x => { canceler(); return (double?)x; }));
 
-            Functions.AssertAggregateNotCanceled((token, canceler) => labeled.Item.WithCancellation(token).Average(x => { canceler(); return (decimal)x; }));
-            Functions.AssertAggregateNotCanceled((token, canceler) => labeled.Item.WithCancellation(token).Average(x => { canceler(); return (decimal?)x; }));
+            AssertThrows.SameTokenNotCanceled((source, canceler) => source.Average(x => { canceler(); return (decimal)x; }));
+            AssertThrows.SameTokenNotCanceled((source, canceler) => source.Average(x => { canceler(); return (decimal?)x; }));
         }
 
-        [Theory]
-        [MemberData(nameof(UnorderedSources.Ranges), new[] { 1 }, MemberType = typeof(UnorderedSources))]
-        public static void Average_OperationCanceledException_PreCanceled(Labeled<ParallelQuery<int>> labeled, int count)
+        [Fact]
+        public static void Average_OperationCanceledException_PreCanceled()
         {
-            Functions.AssertAlreadyCanceled(token => labeled.Item.WithCancellation(token).Average(x => x));
-            Functions.AssertAlreadyCanceled(token => labeled.Item.WithCancellation(token).Average(x => (int?)x));
+            AssertThrows.AlreadyCanceled(source => source.Average(x => x));
+            AssertThrows.AlreadyCanceled(source => source.Average(x => (int?)x));
 
-            Functions.AssertAlreadyCanceled(token => labeled.Item.WithCancellation(token).Average(x => (long)x));
-            Functions.AssertAlreadyCanceled(token => labeled.Item.WithCancellation(token).Average(x => (long?)x));
+            AssertThrows.AlreadyCanceled(source => source.Average(x => (long)x));
+            AssertThrows.AlreadyCanceled(source => source.Average(x => (long?)x));
 
-            Functions.AssertAlreadyCanceled(token => labeled.Item.WithCancellation(token).Average(x => (float)x));
-            Functions.AssertAlreadyCanceled(token => labeled.Item.WithCancellation(token).Average(x => (float?)x));
+            AssertThrows.AlreadyCanceled(source => source.Average(x => (float)x));
+            AssertThrows.AlreadyCanceled(source => source.Average(x => (float?)x));
 
-            Functions.AssertAlreadyCanceled(token => labeled.Item.WithCancellation(token).Average(x => (double)x));
-            Functions.AssertAlreadyCanceled(token => labeled.Item.WithCancellation(token).Average(x => (double?)x));
+            AssertThrows.AlreadyCanceled(source => source.Average(x => (double)x));
+            AssertThrows.AlreadyCanceled(source => source.Average(x => (double?)x));
 
-            Functions.AssertAlreadyCanceled(token => labeled.Item.WithCancellation(token).Average(x => (decimal)x));
-            Functions.AssertAlreadyCanceled(token => labeled.Item.WithCancellation(token).Average(x => (decimal?)x));
+            AssertThrows.AlreadyCanceled(source => source.Average(x => (decimal)x));
+            AssertThrows.AlreadyCanceled(source => source.Average(x => (decimal?)x));
         }
 
         [Theory]

@@ -124,33 +124,30 @@ namespace System.Linq.Parallel.Tests
             LongCount_One(labeled, count, position);
         }
 
-        [Theory]
-        [MemberData(nameof(UnorderedSources.Ranges), new[] { 128 }, MemberType = typeof(UnorderedSources))]
-        public static void Count_OperationCanceledException(Labeled<ParallelQuery<int>> labeled, int count)
+        [Fact]
+        public static void Count_OperationCanceledException()
         {
-            Functions.AssertEventuallyCanceled((token, canceler) => labeled.Item.WithCancellation(token).Count(x => { canceler(); return true; }));
-            Functions.AssertEventuallyCanceled((token, canceler) => labeled.Item.WithCancellation(token).LongCount(x => { canceler(); return true; }));
+            AssertThrows.EventuallyCanceled((source, canceler) => source.Count(x => { canceler(); return true; }));
+            AssertThrows.EventuallyCanceled((source, canceler) => source.LongCount(x => { canceler(); return true; }));
         }
 
-        [Theory]
-        [MemberData(nameof(UnorderedSources.Ranges), new[] { 128 }, MemberType = typeof(UnorderedSources))]
-        public static void Count_AggregateException_Wraps_OperationCanceledException(Labeled<ParallelQuery<int>> labeled, int count)
+        [Fact]
+        public static void Count_AggregateException_Wraps_OperationCanceledException()
         {
-            Functions.AssertAggregateAlternateCanceled((token, canceler) => labeled.Item.WithCancellation(token).Count(x => { canceler(); return true; }));
-            Functions.AssertAggregateAlternateCanceled((token, canceler) => labeled.Item.WithCancellation(token).LongCount(x => { canceler(); return true; }));
-            Functions.AssertAggregateNotCanceled((token, canceler) => labeled.Item.WithCancellation(token).Count(x => { canceler(); return true; }));
-            Functions.AssertAggregateNotCanceled((token, canceler) => labeled.Item.WithCancellation(token).LongCount(x => { canceler(); return true; }));
+            AssertThrows.OtherTokenCanceled((source, canceler) => source.Count(x => { canceler(); return true; }));
+            AssertThrows.OtherTokenCanceled((source, canceler) => source.LongCount(x => { canceler(); return true; }));
+            AssertThrows.SameTokenNotCanceled((source, canceler) => source.Count(x => { canceler(); return true; }));
+            AssertThrows.SameTokenNotCanceled((source, canceler) => source.LongCount(x => { canceler(); return true; }));
         }
 
-        [Theory]
-        [MemberData(nameof(UnorderedSources.Ranges), new[] { 1 }, MemberType = typeof(UnorderedSources))]
-        public static void CountLongCount_OperationCanceledException_PreCanceled(Labeled<ParallelQuery<int>> labeled, int count)
+        [Fact]
+        public static void CountLongCount_OperationCanceledException_PreCanceled()
         {
-            Functions.AssertAlreadyCanceled(token => labeled.Item.WithCancellation(token).Count());
-            Functions.AssertAlreadyCanceled(token => labeled.Item.WithCancellation(token).Count(x => true));
+            AssertThrows.AlreadyCanceled(source => source.Count());
+            AssertThrows.AlreadyCanceled(source => source.Count(x => true));
 
-            Functions.AssertAlreadyCanceled(token => labeled.Item.WithCancellation(token).LongCount());
-            Functions.AssertAlreadyCanceled(token => labeled.Item.WithCancellation(token).LongCount(x => true));
+            AssertThrows.AlreadyCanceled(source => source.LongCount());
+            AssertThrows.AlreadyCanceled(source => source.LongCount(x => true));
         }
 
         [Theory]

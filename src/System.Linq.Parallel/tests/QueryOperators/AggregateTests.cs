@@ -292,41 +292,39 @@ namespace System.Linq.Parallel.Tests
             Assert.Equal(-1, ParallelEnumerable.Empty<int>().Aggregate(() => -1, (i, j) => i + j, (i, j) => i + j, i => i));
         }
 
-        [Theory]
-        [MemberData(nameof(UnorderedSources.Ranges), new[] { 128 }, MemberType = typeof(UnorderedSources))]
-        public static void Aggregate_OperationCanceledException(Labeled<ParallelQuery<int>> labeled, int count)
+        [Fact]
+        public static void Aggregate_OperationCanceledException()
         {
-            Functions.AssertEventuallyCanceled((token, canceler) => labeled.Item.WithCancellation(token).Aggregate((i, j) => { canceler(); return j; }));
-            Functions.AssertEventuallyCanceled((token, canceler) => labeled.Item.WithCancellation(token).Aggregate(0, (i, j) => { canceler(); return j; }));
-            Functions.AssertEventuallyCanceled((token, canceler) => labeled.Item.WithCancellation(token).Aggregate(0, (i, j) => { canceler(); return j; }, i => i));
-            Functions.AssertEventuallyCanceled((token, canceler) => labeled.Item.WithCancellation(token).Aggregate(0, (i, j) => { canceler(); return j; }, (i, j) => i, i => i));
-            Functions.AssertEventuallyCanceled((token, canceler) => labeled.Item.WithCancellation(token).Aggregate(() => 0, (i, j) => { canceler(); ; return j; }, (i, j) => i, i => i));
+            AssertThrows.EventuallyCanceled((source, canceler) => source.Aggregate((i, j) => { canceler(); return j; }));
+            AssertThrows.EventuallyCanceled((source, canceler) => source.Aggregate(0, (i, j) => { canceler(); return j; }));
+            AssertThrows.EventuallyCanceled((source, canceler) => source.Aggregate(0, (i, j) => { canceler(); return j; }, i => i));
+            AssertThrows.EventuallyCanceled((source, canceler) => source.Aggregate(0, (i, j) => { canceler(); return j; }, (i, j) => i, i => i));
+            AssertThrows.EventuallyCanceled((source, canceler) => source.Aggregate(() => 0, (i, j) => { canceler(); ; return j; }, (i, j) => i, i => i));
         }
 
-        [Theory]
-        [MemberData(nameof(UnorderedSources.Ranges), new[] { 128 }, MemberType = typeof(UnorderedSources))]
-        public static void Aggregate_AggregateException_Wraps_OperationCanceledException(Labeled<ParallelQuery<int>> labeled, int count)
+        [Fact]
+        public static void Aggregate_AggregateException_Wraps_OperationCanceledException()
         {
-            Functions.AssertAggregateAlternateCanceled((token, canceler) => labeled.Item.WithCancellation(token).Aggregate((i, j) => { canceler(); return j; }));
-            Functions.AssertAggregateAlternateCanceled((token, canceler) => labeled.Item.WithCancellation(token).Aggregate(0, (i, j) => { canceler(); return j; }));
-            Functions.AssertAggregateAlternateCanceled((token, canceler) => labeled.Item.WithCancellation(token).Aggregate(0, (i, j) => { canceler(); return j; }, i => i));
-            Functions.AssertAggregateAlternateCanceled((token, canceler) => labeled.Item.WithCancellation(token).Aggregate(0, (i, j) => { canceler(); return j; }, (i, j) => i, i => i));
-            Functions.AssertAggregateAlternateCanceled((token, canceler) => labeled.Item.WithCancellation(token).Aggregate(() => 0, (i, j) => { canceler(); ; return j; }, (i, j) => i, i => i));
-            Functions.AssertAggregateNotCanceled((token, canceler) => labeled.Item.WithCancellation(token).Aggregate((i, j) => { canceler(); return j; }));
-            Functions.AssertAggregateNotCanceled((token, canceler) => labeled.Item.WithCancellation(token).Aggregate(0, (i, j) => { canceler(); return j; }));
-            Functions.AssertAggregateNotCanceled((token, canceler) => labeled.Item.WithCancellation(token).Aggregate(0, (i, j) => { canceler(); return j; }, i => i));
-            Functions.AssertAggregateNotCanceled((token, canceler) => labeled.Item.WithCancellation(token).Aggregate(0, (i, j) => { canceler(); return j; }, (i, j) => i, i => i));
-            Functions.AssertAggregateNotCanceled((token, canceler) => labeled.Item.WithCancellation(token).Aggregate(() => 0, (i, j) => { canceler(); ; return j; }, (i, j) => i, i => i));
+            AssertThrows.OtherTokenCanceled((source, canceler) => source.Aggregate((i, j) => { canceler(); return j; }));
+            AssertThrows.OtherTokenCanceled((source, canceler) => source.Aggregate(0, (i, j) => { canceler(); return j; }));
+            AssertThrows.OtherTokenCanceled((source, canceler) => source.Aggregate(0, (i, j) => { canceler(); return j; }, i => i));
+            AssertThrows.OtherTokenCanceled((source, canceler) => source.Aggregate(0, (i, j) => { canceler(); return j; }, (i, j) => i, i => i));
+            AssertThrows.OtherTokenCanceled((source, canceler) => source.Aggregate(() => 0, (i, j) => { canceler(); ; return j; }, (i, j) => i, i => i));
+            AssertThrows.SameTokenNotCanceled((source, canceler) => source.Aggregate((i, j) => { canceler(); return j; }));
+            AssertThrows.SameTokenNotCanceled((source, canceler) => source.Aggregate(0, (i, j) => { canceler(); return j; }));
+            AssertThrows.SameTokenNotCanceled((source, canceler) => source.Aggregate(0, (i, j) => { canceler(); return j; }, i => i));
+            AssertThrows.SameTokenNotCanceled((source, canceler) => source.Aggregate(0, (i, j) => { canceler(); return j; }, (i, j) => i, i => i));
+            AssertThrows.SameTokenNotCanceled((source, canceler) => source.Aggregate(() => 0, (i, j) => { canceler(); ; return j; }, (i, j) => i, i => i));
         }
 
-        [Theory]
-        [MemberData(nameof(UnorderedSources.Ranges), new[] { 2 }, MemberType = typeof(UnorderedSources))]
-        public static void Aggregate_OperationCanceledException_PreCanceled(Labeled<ParallelQuery<int>> labeled, int count)
+        [Fact]
+        public static void Aggregate_OperationCanceledException_PreCanceled()
         {
-            Functions.AssertAlreadyCanceled(token => labeled.Item.WithCancellation(token).Aggregate((i, j) => i));
-            Functions.AssertAlreadyCanceled(token => labeled.Item.WithCancellation(token).Aggregate(0, (i, j) => i));
-            Functions.AssertAlreadyCanceled(token => labeled.Item.WithCancellation(token).Aggregate(0, (i, j) => i, i => i));
-            Functions.AssertAlreadyCanceled(token => labeled.Item.WithCancellation(token).Aggregate(0, (i, j) => i, (i, j) => i, i => i));
+            AssertThrows.AlreadyCanceled(source => source.Aggregate((i, j) => i));
+            AssertThrows.AlreadyCanceled(source => source.Aggregate(0, (i, j) => i));
+            AssertThrows.AlreadyCanceled(source => source.Aggregate(0, (i, j) => i, i => i));
+            AssertThrows.AlreadyCanceled(source => source.Aggregate(0, (i, j) => i, (i, j) => i, i => i));
+            AssertThrows.AlreadyCanceled(source => source.Aggregate(() => 0, (i, j) => i, (i, j) => i, i => i));
         }
 
         [Theory]

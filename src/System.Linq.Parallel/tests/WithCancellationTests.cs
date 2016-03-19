@@ -13,41 +13,37 @@ namespace System.Linq.Parallel.Tests
     // the tests here are only regarding basic API correctness and sanity checking.
     public static class WithCancellationTests
     {
-        [Theory]
-        [MemberData(nameof(Sources.Ranges), new[] { 16 }, MemberType = typeof(Sources))]
-        public static void WithCancellation_Multiple_NotCancelable(Labeled<ParallelQuery<int>> labeled, int count)
+        [Fact]
+        public static void WithCancellation_Multiple_NotCancelable()
         {
             // Multiple not-cancel-able tokens is not an error.
-            labeled.Item.WithCancellation(new CancellationToken()).WithCancellation(new CancellationToken());
+            ParallelEnumerable.Range(0, 1).WithCancellation(new CancellationToken()).WithCancellation(new CancellationToken());
             CancellationToken token = new CancellationToken();
-            labeled.Item.WithCancellation(token).WithCancellation(token);
+            ParallelEnumerable.Range(0, 1).WithCancellation(token).WithCancellation(token);
         }
 
-        [Theory]
-        [MemberData(nameof(Sources.Ranges), new[] { 16 }, MemberType = typeof(Sources))]
-        public static void WithCancellation_Multiple_CancelableToken(Labeled<ParallelQuery<int>> labeled, int count)
+        [Fact]
+        public static void WithCancellation_Multiple_CancelableToken()
         {
             CancellationToken token = new CancellationTokenSource().Token;
-            Assert.Throws<InvalidOperationException>(() => labeled.Item.WithCancellation(token).WithCancellation(token));
-            Assert.Throws<InvalidOperationException>(() => labeled.Item.WithCancellation(token).WithCancellation(new CancellationTokenSource().Token));
+            Assert.Throws<InvalidOperationException>(() => ParallelEnumerable.Range(0, 1).WithCancellation(token).WithCancellation(token));
+            Assert.Throws<InvalidOperationException>(() => ParallelEnumerable.Range(0, 1).WithCancellation(token).WithCancellation(new CancellationTokenSource().Token));
         }
 
-        [Theory]
-        [MemberData(nameof(Sources.Ranges), new[] { 16 }, MemberType = typeof(Sources))]
-        public static void WithCancellation_PreCanceled(Labeled<ParallelQuery<int>> labeled, int count)
+        [Fact]
+        public static void WithCancellation_PreCanceled()
         {
             // Anticipation is the query will cancel soon after starting.
             CancellationTokenSource source = new CancellationTokenSource();
             source.Cancel();
-            labeled.Item.WithCancellation(source.Token);
+            ParallelEnumerable.Range(0, 1).WithCancellation(source.Token);
         }
 
-        [Theory]
-        [MemberData(nameof(Sources.Ranges), new[] { 16 }, MemberType = typeof(Sources))]
-        public static void WithCancellation_NotCancelable(Labeled<ParallelQuery<int>> labeled, int count)
+        [Fact]
+        public static void WithCancellation_NotCancelable()
         {
-            labeled.Item.WithCancellation(new CancellationToken(true));
-            labeled.Item.WithCancellation(new CancellationToken(false));
+            ParallelEnumerable.Range(0, 1).WithCancellation(new CancellationToken(true));
+            ParallelEnumerable.Range(0, 1).WithCancellation(new CancellationToken(false));
         }
 
         [Theory]

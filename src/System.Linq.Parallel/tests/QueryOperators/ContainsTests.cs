@@ -74,27 +74,24 @@ namespace System.Linq.Parallel.Tests
             Contains_OneMatching(labeled, count, position);
         }
 
-        [Theory]
-        [MemberData(nameof(UnorderedSources.Ranges), new[] { 128 }, MemberType = typeof(UnorderedSources))]
-        public static void Contains_OperationCanceledException(Labeled<ParallelQuery<int>> labeled, int count)
+        [Fact]
+        public static void Contains_OperationCanceledException()
         {
-            Functions.AssertEventuallyCanceled((token, canceler) => labeled.Item.WithCancellation(token).Contains(-1, new CancelingEqualityComparer<int>(canceler)));
+            AssertThrows.EventuallyCanceled((source, canceler) => source.Contains(-1, new CancelingEqualityComparer<int>(canceler)));
         }
 
-        [Theory]
-        [MemberData(nameof(UnorderedSources.Ranges), new[] { 128 }, MemberType = typeof(UnorderedSources))]
-        public static void Contains_AggregateException_Wraps_OperationCanceledException(Labeled<ParallelQuery<int>> labeled, int count)
+        [Fact]
+        public static void Contains_AggregateException_Wraps_OperationCanceledException()
         {
-            Functions.AssertAggregateAlternateCanceled((token, canceler) => labeled.Item.WithCancellation(token).Contains(-1, new CancelingEqualityComparer<int>(canceler)));
-            Functions.AssertAggregateNotCanceled((token, canceler) => labeled.Item.WithCancellation(token).Contains(-1, new CancelingEqualityComparer<int>(canceler)));
+            AssertThrows.OtherTokenCanceled((source, canceler) => source.Contains(-1, new CancelingEqualityComparer<int>(canceler)));
+            AssertThrows.SameTokenNotCanceled((source, canceler) => source.Contains(-1, new CancelingEqualityComparer<int>(canceler)));
         }
 
-        [Theory]
-        [MemberData(nameof(UnorderedSources.Ranges), new[] { 1 }, MemberType = typeof(UnorderedSources))]
-        public static void Contains_OperationCanceledException_PreCanceled(Labeled<ParallelQuery<int>> labeled, int count)
+        [Fact]
+        public static void Contains_OperationCanceledException_PreCanceled()
         {
-            Functions.AssertAlreadyCanceled(token => labeled.Item.WithCancellation(token).Contains(0));
-            Functions.AssertAlreadyCanceled(token => labeled.Item.WithCancellation(token).Contains(0, EqualityComparer<int>.Default));
+            AssertThrows.AlreadyCanceled(source => source.Contains(0));
+            AssertThrows.AlreadyCanceled(source => source.Contains(0, EqualityComparer<int>.Default));
         }
 
         [Theory]

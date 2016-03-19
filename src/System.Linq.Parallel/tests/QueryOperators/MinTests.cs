@@ -312,81 +312,78 @@ namespace System.Linq.Parallel.Tests
             Assert.Throws<InvalidOperationException>(() => labeled.Item.Min(x => new NotComparable(x)));
         }
 
-        [Theory]
-        [MemberData(nameof(UnorderedSources.Ranges), new[] { 128 }, MemberType = typeof(UnorderedSources))]
-        public static void Min_OperationCanceledException(Labeled<ParallelQuery<int>> labeled, int count)
+        [Fact]
+        public static void Min_OperationCanceledException()
         {
-            Functions.AssertEventuallyCanceled((token, canceler) => labeled.Item.WithCancellation(token).Min(x => { canceler(); return x; }));
-            Functions.AssertEventuallyCanceled((token, canceler) => labeled.Item.WithCancellation(token).Min(x => { canceler(); return (int?)x; }));
+            AssertThrows.EventuallyCanceled((source, canceler) => source.Min(x => { canceler(); return x; }));
+            AssertThrows.EventuallyCanceled((source, canceler) => source.Min(x => { canceler(); return (int?)x; }));
 
-            Functions.AssertEventuallyCanceled((token, canceler) => labeled.Item.WithCancellation(token).Min(x => { canceler(); return (long)x; }));
-            Functions.AssertEventuallyCanceled((token, canceler) => labeled.Item.WithCancellation(token).Min(x => { canceler(); return (long?)x; }));
+            AssertThrows.EventuallyCanceled((source, canceler) => source.Min(x => { canceler(); return (long)x; }));
+            AssertThrows.EventuallyCanceled((source, canceler) => source.Min(x => { canceler(); return (long?)x; }));
 
-            Functions.AssertEventuallyCanceled((token, canceler) => labeled.Item.WithCancellation(token).Min(x => { canceler(); return (float)x; }));
-            Functions.AssertEventuallyCanceled((token, canceler) => labeled.Item.WithCancellation(token).Min(x => { canceler(); return (float?)x; }));
+            AssertThrows.EventuallyCanceled((source, canceler) => source.Min(x => { canceler(); return (float)x; }));
+            AssertThrows.EventuallyCanceled((source, canceler) => source.Min(x => { canceler(); return (float?)x; }));
 
-            Functions.AssertEventuallyCanceled((token, canceler) => labeled.Item.WithCancellation(token).Min(x => { canceler(); return (double)x; }));
-            Functions.AssertEventuallyCanceled((token, canceler) => labeled.Item.WithCancellation(token).Min(x => { canceler(); return (double?)x; }));
+            AssertThrows.EventuallyCanceled((source, canceler) => source.Min(x => { canceler(); return (double)x; }));
+            AssertThrows.EventuallyCanceled((source, canceler) => source.Min(x => { canceler(); return (double?)x; }));
 
-            Functions.AssertEventuallyCanceled((token, canceler) => labeled.Item.WithCancellation(token).Min(x => { canceler(); return (decimal)x; }));
-            Functions.AssertEventuallyCanceled((token, canceler) => labeled.Item.WithCancellation(token).Min(x => { canceler(); return (decimal?)x; }));
+            AssertThrows.EventuallyCanceled((source, canceler) => source.Min(x => { canceler(); return (decimal)x; }));
+            AssertThrows.EventuallyCanceled((source, canceler) => source.Min(x => { canceler(); return (decimal?)x; }));
         }
 
-        [Theory]
-        [MemberData(nameof(UnorderedSources.Ranges), new[] { 128 }, MemberType = typeof(UnorderedSources))]
-        public static void Min_AggregateException_Wraps_OperationCanceledException(Labeled<ParallelQuery<int>> labeled, int count)
+        [Fact]
+        public static void Min_AggregateException_Wraps_OperationCanceledException()
         {
-            Functions.AssertAggregateAlternateCanceled((token, canceler) => labeled.Item.WithCancellation(token).Min(x => { canceler(); return x; }));
-            Functions.AssertAggregateAlternateCanceled((token, canceler) => labeled.Item.WithCancellation(token).Min(x => { canceler(); return (int?)x; }));
+            AssertThrows.OtherTokenCanceled((source, canceler) => source.Min(x => { canceler(); return x; }));
+            AssertThrows.OtherTokenCanceled((source, canceler) => source.Min(x => { canceler(); return (int?)x; }));
 
-            Functions.AssertAggregateAlternateCanceled((token, canceler) => labeled.Item.WithCancellation(token).Min(x => { canceler(); return (long)x; }));
-            Functions.AssertAggregateAlternateCanceled((token, canceler) => labeled.Item.WithCancellation(token).Min(x => { canceler(); return (long?)x; }));
+            AssertThrows.OtherTokenCanceled((source, canceler) => source.Min(x => { canceler(); return (long)x; }));
+            AssertThrows.OtherTokenCanceled((source, canceler) => source.Min(x => { canceler(); return (long?)x; }));
 
-            Functions.AssertAggregateAlternateCanceled((token, canceler) => labeled.Item.WithCancellation(token).Min(x => { canceler(); return (float)x; }));
-            Functions.AssertAggregateAlternateCanceled((token, canceler) => labeled.Item.WithCancellation(token).Min(x => { canceler(); return (float?)x; }));
+            AssertThrows.OtherTokenCanceled((source, canceler) => source.Min(x => { canceler(); return (float)x; }));
+            AssertThrows.OtherTokenCanceled((source, canceler) => source.Min(x => { canceler(); return (float?)x; }));
 
-            Functions.AssertAggregateAlternateCanceled((token, canceler) => labeled.Item.WithCancellation(token).Min(x => { canceler(); return (double)x; }));
-            Functions.AssertAggregateAlternateCanceled((token, canceler) => labeled.Item.WithCancellation(token).Min(x => { canceler(); return (double?)x; }));
+            AssertThrows.OtherTokenCanceled((source, canceler) => source.Min(x => { canceler(); return (double)x; }));
+            AssertThrows.OtherTokenCanceled((source, canceler) => source.Min(x => { canceler(); return (double?)x; }));
 
-            Functions.AssertAggregateAlternateCanceled((token, canceler) => labeled.Item.WithCancellation(token).Min(x => { canceler(); return (decimal)x; }));
-            Functions.AssertAggregateAlternateCanceled((token, canceler) => labeled.Item.WithCancellation(token).Min(x => { canceler(); return (decimal?)x; }));
+            AssertThrows.OtherTokenCanceled((source, canceler) => source.Min(x => { canceler(); return (decimal)x; }));
+            AssertThrows.OtherTokenCanceled((source, canceler) => source.Min(x => { canceler(); return (decimal?)x; }));
 
-            Functions.AssertAggregateNotCanceled((token, canceler) => labeled.Item.WithCancellation(token).Min(x => { canceler(); return x; }));
-            Functions.AssertAggregateNotCanceled((token, canceler) => labeled.Item.WithCancellation(token).Min(x => { canceler(); return (int?)x; }));
+            AssertThrows.SameTokenNotCanceled((source, canceler) => source.Min(x => { canceler(); return x; }));
+            AssertThrows.SameTokenNotCanceled((source, canceler) => source.Min(x => { canceler(); return (int?)x; }));
 
-            Functions.AssertAggregateNotCanceled((token, canceler) => labeled.Item.WithCancellation(token).Min(x => { canceler(); return (long)x; }));
-            Functions.AssertAggregateNotCanceled((token, canceler) => labeled.Item.WithCancellation(token).Min(x => { canceler(); return (long?)x; }));
+            AssertThrows.SameTokenNotCanceled((source, canceler) => source.Min(x => { canceler(); return (long)x; }));
+            AssertThrows.SameTokenNotCanceled((source, canceler) => source.Min(x => { canceler(); return (long?)x; }));
 
-            Functions.AssertAggregateNotCanceled((token, canceler) => labeled.Item.WithCancellation(token).Min(x => { canceler(); return (float)x; }));
-            Functions.AssertAggregateNotCanceled((token, canceler) => labeled.Item.WithCancellation(token).Min(x => { canceler(); return (float?)x; }));
+            AssertThrows.SameTokenNotCanceled((source, canceler) => source.Min(x => { canceler(); return (float)x; }));
+            AssertThrows.SameTokenNotCanceled((source, canceler) => source.Min(x => { canceler(); return (float?)x; }));
 
-            Functions.AssertAggregateNotCanceled((token, canceler) => labeled.Item.WithCancellation(token).Min(x => { canceler(); return (double)x; }));
-            Functions.AssertAggregateNotCanceled((token, canceler) => labeled.Item.WithCancellation(token).Min(x => { canceler(); return (double?)x; }));
+            AssertThrows.SameTokenNotCanceled((source, canceler) => source.Min(x => { canceler(); return (double)x; }));
+            AssertThrows.SameTokenNotCanceled((source, canceler) => source.Min(x => { canceler(); return (double?)x; }));
 
-            Functions.AssertAggregateNotCanceled((token, canceler) => labeled.Item.WithCancellation(token).Min(x => { canceler(); return (decimal)x; }));
-            Functions.AssertAggregateNotCanceled((token, canceler) => labeled.Item.WithCancellation(token).Min(x => { canceler(); return (decimal?)x; }));
+            AssertThrows.SameTokenNotCanceled((source, canceler) => source.Min(x => { canceler(); return (decimal)x; }));
+            AssertThrows.SameTokenNotCanceled((source, canceler) => source.Min(x => { canceler(); return (decimal?)x; }));
         }
 
-        [Theory]
-        [MemberData(nameof(UnorderedSources.Ranges), new[] { 1 }, MemberType = typeof(UnorderedSources))]
-        public static void Min_OperationCanceledException_PreCanceled(Labeled<ParallelQuery<int>> labeled, int count)
+        [Fact]
+        public static void Min_OperationCanceledException_PreCanceled()
         {
-            Functions.AssertAlreadyCanceled(token => labeled.Item.WithCancellation(token).Min(x => x));
-            Functions.AssertAlreadyCanceled(token => labeled.Item.WithCancellation(token).Min(x => (int?)x));
+            AssertThrows.AlreadyCanceled(source => source.Min(x => x));
+            AssertThrows.AlreadyCanceled(source => source.Min(x => (int?)x));
 
-            Functions.AssertAlreadyCanceled(token => labeled.Item.WithCancellation(token).Min(x => (long)x));
-            Functions.AssertAlreadyCanceled(token => labeled.Item.WithCancellation(token).Min(x => (long?)x));
+            AssertThrows.AlreadyCanceled(source => source.Min(x => (long)x));
+            AssertThrows.AlreadyCanceled(source => source.Min(x => (long?)x));
 
-            Functions.AssertAlreadyCanceled(token => labeled.Item.WithCancellation(token).Min(x => (float)x));
-            Functions.AssertAlreadyCanceled(token => labeled.Item.WithCancellation(token).Min(x => (float?)x));
+            AssertThrows.AlreadyCanceled(source => source.Min(x => (float)x));
+            AssertThrows.AlreadyCanceled(source => source.Min(x => (float?)x));
 
-            Functions.AssertAlreadyCanceled(token => labeled.Item.WithCancellation(token).Min(x => (double)x));
-            Functions.AssertAlreadyCanceled(token => labeled.Item.WithCancellation(token).Min(x => (double?)x));
+            AssertThrows.AlreadyCanceled(source => source.Min(x => (double)x));
+            AssertThrows.AlreadyCanceled(source => source.Min(x => (double?)x));
 
-            Functions.AssertAlreadyCanceled(token => labeled.Item.WithCancellation(token).Min(x => (decimal)x));
-            Functions.AssertAlreadyCanceled(token => labeled.Item.WithCancellation(token).Min(x => (decimal?)x));
+            AssertThrows.AlreadyCanceled(source => source.Min(x => (decimal)x));
+            AssertThrows.AlreadyCanceled(source => source.Min(x => (decimal?)x));
 
-            Functions.AssertAlreadyCanceled(token => labeled.Item.WithCancellation(token).Min(x => new NotComparable(x)));
+            AssertThrows.AlreadyCanceled(source => source.Min(x => new NotComparable(x)));
         }
 
         [Theory]

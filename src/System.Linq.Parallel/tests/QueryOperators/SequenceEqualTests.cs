@@ -142,33 +142,30 @@ namespace System.Linq.Parallel.Tests
 #pragma warning restore 618
         }
 
-        [Theory]
-        [MemberData(nameof(SequenceEqualData), new[] { 128 })]
-        public static void SequenceEqual_OperationCanceledException(Labeled<ParallelQuery<int>> left, Labeled<ParallelQuery<int>> right, int count)
+        [Fact]
+        public static void SequenceEqual_OperationCanceledException()
         {
-            Functions.AssertEventuallyCanceled((token, canceler) => left.Item.WithCancellation(token).SequenceEqual(right.Item, new CancelingEqualityComparer<int>(canceler)));
-            Functions.AssertEventuallyCanceled((token, canceler) => left.Item.SequenceEqual(right.Item.WithCancellation(token), new CancelingEqualityComparer<int>(canceler)));
+            AssertThrows.EventuallyCanceled((source, canceler) => source.OrderBy(x => x).SequenceEqual(ParallelEnumerable.Range(0, 128).AsOrdered(), new CancelingEqualityComparer<int>(canceler)));
+            AssertThrows.EventuallyCanceled((source, canceler) => ParallelEnumerable.Range(0, 128).AsOrdered().SequenceEqual(source.OrderBy(x => x), new CancelingEqualityComparer<int>(canceler)));
         }
 
-        [Theory]
-        [MemberData(nameof(SequenceEqualData), new[] { 128 })]
-        public static void SequenceEqual_AggregateException_Wraps_OperationCanceledException(Labeled<ParallelQuery<int>> left, Labeled<ParallelQuery<int>> right, int count)
+        [Fact]
+        public static void SequenceEqual_AggregateException_Wraps_OperationCanceledException()
         {
-            AssertAggregateAlternateCanceled((token, canceler) => left.Item.WithCancellation(token).SequenceEqual(right.Item, new CancelingEqualityComparer<int>(canceler)));
-            AssertAggregateAlternateCanceled((token, canceler) => left.Item.SequenceEqual(right.Item.WithCancellation(token), new CancelingEqualityComparer<int>(canceler)));
-            AssertAggregateNotCanceled((token, canceler) => left.Item.WithCancellation(token).SequenceEqual(right.Item, new CancelingEqualityComparer<int>(canceler)));
-            AssertAggregateNotCanceled((token, canceler) => left.Item.SequenceEqual(right.Item.WithCancellation(token), new CancelingEqualityComparer<int>(canceler)));
+            AssertThrows.OtherTokenCanceled((source, canceler) => source.OrderBy(x => x).SequenceEqual(ParallelEnumerable.Range(0, 128).AsOrdered(), new CancelingEqualityComparer<int>(canceler)));
+            AssertThrows.OtherTokenCanceled((source, canceler) => ParallelEnumerable.Range(0, 128).AsOrdered().SequenceEqual(source.OrderBy(x => x), new CancelingEqualityComparer<int>(canceler)));
+            AssertThrows.SameTokenNotCanceled((source, canceler) => source.OrderBy(x => x).SequenceEqual(ParallelEnumerable.Range(0, 128).AsOrdered(), new CancelingEqualityComparer<int>(canceler)));
+            AssertThrows.SameTokenNotCanceled((source, canceler) => ParallelEnumerable.Range(0, 128).AsOrdered().SequenceEqual(source.OrderBy(x => x), new CancelingEqualityComparer<int>(canceler)));
         }
 
-        [Theory]
-        [MemberData(nameof(SequenceEqualData), new[] { 4 })]
-        public static void SequenceEqual_OperationCanceledException_PreCanceled(Labeled<ParallelQuery<int>> left, Labeled<ParallelQuery<int>> right, int count)
+        [Fact]
+        public static void SequenceEqual_OperationCanceledException_PreCanceled()
         {
-            Functions.AssertAlreadyCanceled(token => left.Item.WithCancellation(token).SequenceEqual(right.Item));
-            Functions.AssertAlreadyCanceled(token => left.Item.WithCancellation(token).SequenceEqual(right.Item, new ModularCongruenceComparer(1)));
+            AssertThrows.AlreadyCanceled(source => source.SequenceEqual(ParallelEnumerable.Range(0, 2)));
+            AssertThrows.AlreadyCanceled(source => source.SequenceEqual(ParallelEnumerable.Range(0, 2), new ModularCongruenceComparer(1)));
 
-            Functions.AssertAlreadyCanceled(token => left.Item.SequenceEqual(right.Item.WithCancellation(token)));
-            Functions.AssertAlreadyCanceled(token => left.Item.SequenceEqual(right.Item.WithCancellation(token), new ModularCongruenceComparer(1)));
+            AssertThrows.AlreadyCanceled(source => ParallelEnumerable.Range(0, 2).SequenceEqual(source));
+            AssertThrows.AlreadyCanceled(source => ParallelEnumerable.Range(0, 2).SequenceEqual(source, new ModularCongruenceComparer(1)));
         }
 
         [Theory]
@@ -269,26 +266,6 @@ namespace System.Linq.Parallel.Tests
 
         private class TestDisposeException : Exception
         {
-        }
-
-        // SequenceEqual doesn't double wrap if just the base sequence is in use.
-        private static void AssertAggregateAlternateCanceled(Action<CancellationToken, Action> query)
-        {
-            CancellationTokenSource cs = new CancellationTokenSource();
-            cs.Cancel();
-            Action canceler = () => { throw new OperationCanceledException(cs.Token); };
-
-            AggregateException ae = Assert.Throws<AggregateException>(() => query(new CancellationTokenSource().Token, canceler));
-            Assert.All(ae.InnerExceptions, e => Assert.IsType<OperationCanceledException>(e));
-        }
-
-        private static void AssertAggregateNotCanceled(Action<CancellationToken, Action> query)
-        {
-            CancellationToken token = new CancellationTokenSource().Token;
-            Action canceler = () => { throw new OperationCanceledException(token); };
-
-            AggregateException ae = Assert.Throws<AggregateException>(() => query(token, canceler));
-            Assert.All(ae.InnerExceptions, e => Assert.IsType<OperationCanceledException>(e));
         }
     }
 }

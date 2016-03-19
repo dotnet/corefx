@@ -28,26 +28,23 @@ namespace System.Linq.Parallel.Tests
             ForAll(labeled, count);
         }
 
-        [Theory]
-        [MemberData(nameof(UnorderedSources.Ranges), new[] { 128 }, MemberType = typeof(UnorderedSources))]
-        public static void ForAll_OperationCanceledException(Labeled<ParallelQuery<int>> labeled, int count)
+        [Fact]
+        public static void ForAll_OperationCanceledException()
         {
-            Functions.AssertEventuallyCanceled((token, canceler) => labeled.Item.WithCancellation(token).ForAll(x => canceler()));
+            AssertThrows.EventuallyCanceled((source, canceler) => source.ForAll(x => canceler()));
         }
 
-        [Theory]
-        [MemberData(nameof(UnorderedSources.Ranges), new[] { 128 }, MemberType = typeof(UnorderedSources))]
-        public static void ForAll_AggregateException_Wraps_OperationCanceledException(Labeled<ParallelQuery<int>> labeled, int count)
+        [Fact]
+        public static void ForAll_AggregateException_Wraps_OperationCanceledException()
         {
-            Functions.AssertAggregateAlternateCanceled((token, canceler) => labeled.Item.WithCancellation(token).ForAll(x => canceler()));
-            Functions.AssertAggregateNotCanceled((token, canceler) => labeled.Item.WithCancellation(token).ForAll(x => canceler()));
+            AssertThrows.OtherTokenCanceled((source, canceler) => source.ForAll(x => canceler()));
+            AssertThrows.SameTokenNotCanceled((source, canceler) => source.ForAll(x => canceler()));
         }
 
-        [Theory]
-        [MemberData(nameof(UnorderedSources.Ranges), new[] { 1 }, MemberType = typeof(UnorderedSources))]
-        public static void ForAll_OperationCanceledException_PreCanceled(Labeled<ParallelQuery<int>> labeled, int count)
+        [Fact]
+        public static void ForAll_OperationCanceledException_PreCanceled()
         {
-            Functions.AssertAlreadyCanceled(token => labeled.Item.WithCancellation(token).ForAll(x => { }));
+            AssertThrows.AlreadyCanceled(source => source.ForAll(x => { }));
         }
 
         [Theory]

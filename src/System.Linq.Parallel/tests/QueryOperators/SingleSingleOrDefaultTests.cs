@@ -165,34 +165,31 @@ namespace System.Linq.Parallel.Tests
             SingleOrDefault_OneMatch(labeled, count, element);
         }
 
-        [Theory]
-        [MemberData(nameof(UnorderedSources.Ranges), new[] { 128 }, MemberType = typeof(UnorderedSources))]
-        public static void Single_OperationCanceledException(Labeled<ParallelQuery<int>> labeled, int count)
+        [Fact]
+        public static void Single_OperationCanceledException()
         {
-            Functions.AssertEventuallyCanceled((token, canceler) => labeled.Item.WithCancellation(token).Single(x => { canceler(); return false; }));
-            Functions.AssertEventuallyCanceled((token, canceler) => labeled.Item.WithCancellation(token).SingleOrDefault(x => { canceler(); return false; }));
+            AssertThrows.EventuallyCanceled((source, canceler) => source.Single(x => { canceler(); return false; }));
+            AssertThrows.EventuallyCanceled((source, canceler) => source.SingleOrDefault(x => { canceler(); return false; }));
         }
 
-        [Theory]
-        [MemberData(nameof(UnorderedSources.Ranges), new[] { 128 }, MemberType = typeof(UnorderedSources))]
-        public static void Single_AggregateException_Wraps_OperationCanceledException(Labeled<ParallelQuery<int>> labeled, int count)
+        [Fact]
+        public static void Single_AggregateException_Wraps_OperationCanceledException()
         {
-            Functions.AssertAggregateAlternateCanceled((token, canceler) => labeled.Item.WithCancellation(token).Single(x => { canceler(); return false; }));
-            Functions.AssertAggregateAlternateCanceled((token, canceler) => labeled.Item.WithCancellation(token).SingleOrDefault(x => { canceler(); return false; }));
+            AssertThrows.OtherTokenCanceled((source, canceler) => source.Single(x => { canceler(); return false; }));
+            AssertThrows.OtherTokenCanceled((source, canceler) => source.SingleOrDefault(x => { canceler(); return false; }));
 
-            Functions.AssertAggregateNotCanceled((token, canceler) => labeled.Item.WithCancellation(token).Single(x => { canceler(); return false; }));
-            Functions.AssertAggregateNotCanceled((token, canceler) => labeled.Item.WithCancellation(token).SingleOrDefault(x => { canceler(); return false; }));
+            AssertThrows.SameTokenNotCanceled((source, canceler) => source.Single(x => { canceler(); return false; }));
+            AssertThrows.SameTokenNotCanceled((source, canceler) => source.SingleOrDefault(x => { canceler(); return false; }));
         }
 
-        [Theory]
-        [MemberData(nameof(UnorderedSources.Ranges), new[] { 1 }, MemberType = typeof(UnorderedSources))]
-        public static void Single_OperationCanceledException_PreCanceled(Labeled<ParallelQuery<int>> labeled, int count)
+        [Fact]
+        public static void Single_OperationCanceledException_PreCanceled()
         {
-            Functions.AssertAlreadyCanceled(token => labeled.Item.WithCancellation(token).Single());
-            Functions.AssertAlreadyCanceled(token => labeled.Item.WithCancellation(token).Single(x => true));
+            AssertThrows.AlreadyCanceled(source => source.Single());
+            AssertThrows.AlreadyCanceled(source => source.Single(x => true));
 
-            Functions.AssertAlreadyCanceled(token => labeled.Item.WithCancellation(token).SingleOrDefault());
-            Functions.AssertAlreadyCanceled(token => labeled.Item.WithCancellation(token).SingleOrDefault(x => true));
+            AssertThrows.AlreadyCanceled(source => source.SingleOrDefault());
+            AssertThrows.AlreadyCanceled(source => source.SingleOrDefault(x => true));
         }
 
         [Theory]

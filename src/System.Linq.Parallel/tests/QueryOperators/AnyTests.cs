@@ -110,27 +110,24 @@ namespace System.Linq.Parallel.Tests
             Assert.True(InfiniteEnumerable().AsParallel().Any(x => true));
         }
 
-        [Theory]
-        [MemberData(nameof(UnorderedSources.Ranges), new[] { 128 }, MemberType = typeof(UnorderedSources))]
-        public static void Any_OperationCanceledException(Labeled<ParallelQuery<int>> labeled, int count)
+        [Fact]
+        public static void Any_OperationCanceledException()
         {
-            Functions.AssertEventuallyCanceled((token, canceler) => labeled.Item.WithCancellation(token).Any(x => { canceler(); return false; }));
+            AssertThrows.EventuallyCanceled((source, canceler) => source.Any(x => { canceler(); return false; }));
         }
 
-        [Theory]
-        [MemberData(nameof(UnorderedSources.Ranges), new[] { 128 }, MemberType = typeof(UnorderedSources))]
-        public static void Any_AggregateException_Wraps_OperationCanceledException(Labeled<ParallelQuery<int>> labeled, int count)
+        [Fact]
+        public static void Any_AggregateException_Wraps_OperationCanceledException()
         {
-            Functions.AssertAggregateAlternateCanceled((token, canceler) => labeled.Item.WithCancellation(token).Any(x => { canceler(); return false; }));
-            Functions.AssertAggregateNotCanceled((token, canceler) => labeled.Item.WithCancellation(token).Any(x => { canceler(); return false; }));
+            AssertThrows.OtherTokenCanceled((source, canceler) => source.Any(x => { canceler(); return false; }));
+            AssertThrows.SameTokenNotCanceled((source, canceler) => source.Any(x => { canceler(); return false; }));
         }
 
-        [Theory]
-        [MemberData(nameof(UnorderedSources.Ranges), new[] { 1 }, MemberType = typeof(UnorderedSources))]
-        public static void Any_OperationCanceledException_PreCanceled(Labeled<ParallelQuery<int>> labeled, int count)
+        [Fact]
+        public static void Any_OperationCanceledException_PreCanceled()
         {
-            Functions.AssertAlreadyCanceled(token => labeled.Item.WithCancellation(token).Any());
-            Functions.AssertAlreadyCanceled(token => labeled.Item.WithCancellation(token).Any(x => true));
+            AssertThrows.AlreadyCanceled(source => source.Any());
+            AssertThrows.AlreadyCanceled(source => source.Any(x => true));
         }
 
         [Theory]
