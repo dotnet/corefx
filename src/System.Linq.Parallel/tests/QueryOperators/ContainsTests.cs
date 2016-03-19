@@ -11,67 +11,70 @@ namespace System.Linq.Parallel.Tests
     {
         public static IEnumerable<object[]> OnlyOneData(int[] counts)
         {
-            Func<int, IEnumerable<int>> positions = x => new[] { 0, x / 2, Math.Max(0, x - 1) }.Distinct();
-            foreach (object[] results in UnorderedSources.Ranges(counts.Cast<int>(), positions)) yield return results;
+            foreach (int count in counts)
+            {
+                foreach (int position in new[] { 0, count / 2, Math.Max(0, count - 1) }.Distinct())
+                {
+                    yield return new object[] { count, position };
+                }
+            }
         }
 
         //
         // Contains
         //
         [Theory]
-        [MemberData(nameof(UnorderedSources.Ranges), new[] { 0, 1, 2, 16 }, MemberType = typeof(UnorderedSources))]
-        [MemberData(nameof(Sources.Ranges), new[] { 0, 1, 2, 16 }, MemberType = typeof(Sources))]
-        public static void Contains_NoMatching(Labeled<ParallelQuery<int>> labeled, int count)
+        [InlineData(0)]
+        [InlineData(1)]
+        [InlineData(2)]
+        [InlineData(16)]
+        public static void Contains_NoMatching(int count)
         {
-            ParallelQuery<int> query = labeled.Item;
-            Assert.False(query.Contains(count));
-            Assert.False(query.Contains(count, null));
-            Assert.False(query.Contains(count, new ModularCongruenceComparer(count + 1)));
+            Assert.False(ParallelEnumerable.Range(0, count).Contains(count));
+            Assert.False(ParallelEnumerable.Range(0, count).Contains(count, null));
+            Assert.False(ParallelEnumerable.Range(0, count).Contains(count, new ModularCongruenceComparer(count + 1)));
         }
 
         [Theory]
         [OuterLoop]
-        [MemberData(nameof(UnorderedSources.Ranges), new[] { 1024 * 1024, 1024 * 1024 * 4 }, MemberType = typeof(UnorderedSources))]
-        [MemberData(nameof(Sources.Ranges), new[] { 1024 * 1024, 1024 * 1024 * 4 }, MemberType = typeof(Sources))]
-        public static void Contains_NoMatching_Longrunning(Labeled<ParallelQuery<int>> labeled, int count)
+        [InlineData(1024 * 1024)]
+        [InlineData(1024 * 1024 * 4)]
+        public static void Contains_NoMatching_Longrunning(int count)
         {
-            Contains_NoMatching(labeled, count);
+            Contains_NoMatching(count);
         }
 
         [Theory]
-        [MemberData(nameof(UnorderedSources.Ranges), new[] { 16 }, MemberType = typeof(UnorderedSources))]
-        [MemberData(nameof(Sources.Ranges), new[] { 16 }, MemberType = typeof(Sources))]
-        public static void Contains_MultipleMatching(Labeled<ParallelQuery<int>> labeled, int count)
+        [InlineData(16)]
+        public static void Contains_MultipleMatching(int count)
         {
-            ParallelQuery<int> query = labeled.Item;
-            Assert.True(query.Contains(count, new ModularCongruenceComparer(2)));
+            Assert.True(ParallelEnumerable.Range(0, count).Contains(count, new ModularCongruenceComparer(2)));
         }
 
         [Theory]
         [OuterLoop]
-        [MemberData(nameof(UnorderedSources.Ranges), new[] { 1024 * 1024, 1024 * 1024 * 4 }, MemberType = typeof(UnorderedSources))]
-        [MemberData(nameof(Sources.Ranges), new[] { 1024 * 1024, 1024 * 1024 * 4 }, MemberType = typeof(Sources))]
-        public static void Contains_MultipleMatching_Longrunning(Labeled<ParallelQuery<int>> labeled, int count)
+        [InlineData(1024 * 1024)]
+        [InlineData(1024 * 1024 * 4)]
+        public static void Contains_MultipleMatching_Longrunning(int count)
         {
-            Contains_MultipleMatching(labeled, count);
+            Contains_MultipleMatching(count);
         }
 
         [Theory]
         [MemberData(nameof(OnlyOneData), new[] { 2, 16 })]
-        public static void Contains_OneMatching(Labeled<ParallelQuery<int>> labeled, int count, int position)
+        public static void Contains_OneMatching(int count, int position)
         {
-            ParallelQuery<int> query = labeled.Item;
-            Assert.True(query.Contains(position));
-            Assert.True(query.Contains(position, null));
-            Assert.True(query.Contains(position, new ModularCongruenceComparer(count)));
+            Assert.True(ParallelEnumerable.Range(0, count).Contains(position));
+            Assert.True(ParallelEnumerable.Range(0, count).Contains(position, null));
+            Assert.True(ParallelEnumerable.Range(0, count).Contains(position, new ModularCongruenceComparer(count)));
         }
 
         [Theory]
         [OuterLoop]
         [MemberData(nameof(OnlyOneData), new[] { 1024 * 1024, 1024 * 1024 * 4 })]
-        public static void Contains_OneMatching_Longrunning(Labeled<ParallelQuery<int>> labeled, int count, int position)
+        public static void Contains_OneMatching_Longrunning(int count, int position)
         {
-            Contains_OneMatching(labeled, count, position);
+            Contains_OneMatching(count, position);
         }
 
         [Fact]
@@ -94,18 +97,17 @@ namespace System.Linq.Parallel.Tests
             AssertThrows.AlreadyCanceled(source => source.Contains(0, EqualityComparer<int>.Default));
         }
 
-        [Theory]
-        [MemberData(nameof(UnorderedSources.Ranges), new[] { 1 }, MemberType = typeof(UnorderedSources))]
-        public static void Contains_AggregateException(Labeled<ParallelQuery<int>> labeled, int count)
+        [Fact]
+        public static void Contains_AggregateException()
         {
-            Functions.AssertThrowsWrapped<DeliberateTestException>(() => labeled.Item.Contains(1, new FailingEqualityComparer<int>()));
+            AssertThrows.Wrapped<DeliberateTestException>(() => ParallelEnumerable.Range(0, 1).Contains(1, new FailingEqualityComparer<int>()));
         }
 
         [Fact]
         public static void Contains_ArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>(() => ((ParallelQuery<bool>)null).Contains(false));
-            Assert.Throws<ArgumentNullException>(() => ((ParallelQuery<bool>)null).Contains(false, EqualityComparer<bool>.Default));
+            Assert.Throws<ArgumentNullException>("source", () => ((ParallelQuery<bool>)null).Contains(false));
+            Assert.Throws<ArgumentNullException>("source", () => ((ParallelQuery<bool>)null).Contains(false, EqualityComparer<bool>.Default));
         }
     }
 }
