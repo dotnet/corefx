@@ -7,7 +7,7 @@
 # The [Name] needs to match on the pair of lines.
 
 CoreFX_ValidationPattern=^(?i)((System\..*)|(NETStandard\.Library)|(Microsoft\.CSharp)|(Microsoft\.NETCore.*)|(Microsoft\.TargetingPack\.Private\.(CoreCLR|NETNative))|(Microsoft\.Win32\..*)|(Microsoft\.VisualBasic))(?<!TestData)$
-CoreFX_ExpectedPrerelease=rc3-23910
+CoreFX_ExpectedPrerelease=rc2-23919
 
 TargetingPack_ValidationPattern=^(?i)Microsoft\.TargetingPack\.(NetFramework.*|Private.WinRT)$
 TargetingPack_ExpectedVersion=1.0.1
