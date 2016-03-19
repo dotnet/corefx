@@ -157,7 +157,7 @@ namespace System.Linq.Parallel.Tests
             IEnumerator<int> enumerator = query.GetEnumerator();
 
             enumerator.MoveNext();
-            if (delay) Task.Delay(1000).Wait();
+            if (delay) Task.Delay(10).Wait();
             enumerator.MoveNext();
             enumerator.Dispose();
 
