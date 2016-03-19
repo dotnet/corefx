@@ -167,8 +167,7 @@ namespace System.Collections.Generic
         {
             foreach (T item in collection)
             {
-                if (!this.Contains(item))
-                    Add(item);
+                AddIfNotPresent(item);
             }
         }
 
