@@ -3,6 +3,7 @@
 # Licensed under the MIT license. See LICENSE file in the project root for full license information.
 #
 
+# Updates the ValidDependencyVersions.txt file with the latest CoreFX build number
 function UpdateValidDependencyVersionsFile
 {
     # TODO: change to rc3 and get this from a variable
@@ -19,11 +20,13 @@ function UpdateValidDependencyVersionsFile
     [IO.File]::WriteAllText($ValidDependencyVersionsPath, $ValidDependencyVersionsText, [Text.Encoding]::UTF8)
 }
 
+# Updates all the project.json files with out of date version numbers
 function RunUpdatePackageDependencyVersions
 {
     cmd /c $PSScriptRoot\build.cmd /t:UpdateInvalidPackageVersions | Out-Null
 }
 
+# Creates a Pull Request for the updated version numbers
 function CreatePullRequest
 {
     git add .
@@ -39,7 +42,7 @@ function CreatePullRequest
 
     Write-Host "git push https://$RemoteUrl $RefSpec"
     # pipe this to null so the password secret isn't in the logs
-    git push "https://$UserName\:$env:GITHUB_PASSWORD@$RemoteUrl" $RefSpec | Out-Null
+    git push "https://$($UserName):$env:GITHUB_PASSWORD@$RemoteUrl" $RefSpec 2>null | Out-Null
 
     $CreatePRBody = @"
     {
