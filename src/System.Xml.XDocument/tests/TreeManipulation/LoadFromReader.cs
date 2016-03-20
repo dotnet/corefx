@@ -177,7 +177,7 @@ namespace XLinqTests
             ReadFrom(xml);
         }
 
-        //XElement: non-wellformed xml
+        //XElement: non-well-formed xml
         //[Variation(Priority = 2, Desc = "Read XElement with nwf empty", Params = new object[] { "" })]
         //[Variation(Priority = 2, Desc = "Read XElement with nwf tab", Params = new object[] { "\t" })]
         //[Variation(Priority = 2, Desc = "Read XElement with nwf EOL", Params = new object[] { "\n" })]
@@ -267,7 +267,7 @@ namespace XLinqTests
             }
         }
 
-        //XDocument: non-wellformed xml
+        //XDocument: non-well-formed xml
         //[Variation(Priority = 2, Desc = "Read XDocument with nwf empty", Params = new object[] { "" })]
         //[Variation(Priority = 2, Desc = "Read XDocument with nwf empty", Params = new object[] { "\t" })]
         //[Variation(Priority = 2, Desc = "Read XDocument with nwf empty", Params = new object[] { "\n" })]

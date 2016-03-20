@@ -35,7 +35,7 @@ namespace XLinqTests
             AddChild(new TestVariation(OnXElement) { Attribute = new VariationAttribute("Remove attribute (from multiple attribs)") { Params = new object[] { "<A y='y' a1='original' x='x'></A>", "a1", null }, Priority = 0 } });
             AddChild(new TestVariation(OnXElement) { Attribute = new VariationAttribute("Remove attribute (from multiple attribs, namespace)") { Params = new object[] { "<A a1='original' p:a1='o' xmlns:p='A' ></A>", "{A}a1", null }, Priority = 1 } });
             AddChild(new TestVariation(OnXElement) { Attribute = new VariationAttribute("Remove attribute (from multiple attribs, content)") { Params = new object[] { "<A x='t' a1='original' y='r'>trt</A>", "a1", null }, Priority = 1 } });
-            AddChild(new TestVariation(OnXElement) { Attribute = new VariationAttribute("Remove attribute (nonexisting)") { Params = new object[] { "<A x='t' a1='original' y='r'>trt</A>", "nonex", null }, Priority = 1 } });
+            AddChild(new TestVariation(OnXElement) { Attribute = new VariationAttribute("Remove attribute (non-existing)") { Params = new object[] { "<A x='t' a1='original' y='r'>trt</A>", "nonex", null }, Priority = 1 } });
             AddChild(new TestVariation(OnXElement) { Attribute = new VariationAttribute("Add attribute (empty elem, namespaces)") { Params = new object[] { "<A a1='a1' b='b'/>", "{ns}a1", "ns_a1" }, Priority = 0 } });
             AddChild(new TestVariation(OnXElement) { Attribute = new VariationAttribute("Add attribute (empty elem I., no attrs)") { Params = new object[] { "<A></A>", "a1", "a1" }, Priority = 1 } });
             AddChild(new TestVariation(OnXElement) { Attribute = new VariationAttribute("Add attribute (empty elem II., no attrs)") { Params = new object[] { "<A/>", "a1", "a1" }, Priority = 0 } });
@@ -58,7 +58,7 @@ namespace XLinqTests
         //[Variation(Priority = 0, Desc = "Remove attribute (from multiple attribs)", Params = new object[] { "<A y='y' a1='original' x='x'></A>", "a1", null })]
         //[Variation(Priority = 1, Desc = "Remove attribute (from multiple attribs, namespace)", Params = new object[] { "<A a1='original' p:a1='o' xmlns:p='A' ></A>", "{A}a1", null })]
         //[Variation(Priority = 1, Desc = "Remove attribute (from multiple attribs, content)", Params = new object[] { "<A x='t' a1='original' y='r'>trt</A>", "a1", null })]
-        //[Variation(Priority = 1, Desc = "Remove attribute (nonexisting)", Params = new object[] { "<A x='t' a1='original' y='r'>trt</A>", "nonex", null })]
+        //[Variation(Priority = 1, Desc = "Remove attribute (non-existing)", Params = new object[] { "<A x='t' a1='original' y='r'>trt</A>", "nonex", null })]
 
         public void OnXElement()
         {

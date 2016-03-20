@@ -19,7 +19,7 @@ namespace System.Xml.Tests
         [Fact]
         public static void ReadElementContentAsDateTime10()
         {
-            var reader = Utils.CreateFragmentReader("<Root>  20<?a?>02-1<![CDATA[2]]>-3<!-- Comment inbetween-->0  </Root>");
+            var reader = Utils.CreateFragmentReader("<Root>  20<?a?>02-1<![CDATA[2]]>-3<!-- Comment in-between-->0  </Root>");
             reader.PositionOnElement("Root");
             Assert.Equal(new DateTime(2002, 12, 30, 0, 0, 0), (DateTime)reader.ReadElementContentAs(typeof(DateTime), null));
         }

@@ -133,7 +133,7 @@ namespace System.Xml.Serialization
             if (methodName == null) throw new InvalidOperationException(SR.Format(SR.XmlInternalErrorMethod, mapping.TypeDesc.Name));
 #endif
 
-            // For enum, its write method (eg. Write1_Gender) could be called multiple times
+            // For enum, its write method (e.g. Write1_Gender) could be called multiple times
             // prior to its declaration.
             MethodBuilder methodBuilder = EnsureMethodBuilder(typeBuilder,
                     methodName,
@@ -748,7 +748,7 @@ namespace System.Xml.Serialization
 
 #if DEBUG
                 // use exception in the place of Debug.Assert to avoid throwing asserts from a server process such as aspnet_ewp.exe
-                if (methodName == null) throw new InvalidOperationException("deriaved from " + mapping.TypeDesc.FullName + ", " + SR.Format(SR.XmlInternalErrorMethod, derived.TypeDesc.Name));
+                if (methodName == null) throw new InvalidOperationException("derived from " + mapping.TypeDesc.FullName + ", " + SR.Format(SR.XmlInternalErrorMethod, derived.TypeDesc.Name));
 #endif
 
                 List<Type> argTypes = new List<Type>();
@@ -1204,7 +1204,7 @@ namespace System.Xml.Serialization
 
                 if (memberTypeDesc.IsEnumerable)
                 {
-                    throw Globals.NotSupported("CDF15337, DDB176069: Also fail in whidbey IEnumerable member with XmlAttributeAttribute");
+                    throw Globals.NotSupported("CDF15337, DDB176069: Also fail in Whidbey IEnumerable member with XmlAttributeAttribute");
                 }
                 else
                 {
@@ -1279,7 +1279,7 @@ namespace System.Xml.Serialization
                     WriteAttribute(new SourceInfo(aiVar, aiVar, null, null, ilg), attribute, parent);
                 }
                 if (memberTypeDesc.IsEnumerable)
-                    throw Globals.NotSupported("CDF15337, DDB176069: Also fail in whidbey IEnumerable member with XmlAttributeAttribute");
+                    throw Globals.NotSupported("CDF15337, DDB176069: Also fail in Whidbey IEnumerable member with XmlAttributeAttribute");
                 else
                     ilg.EndFor();
                 if (attribute.IsList)
@@ -2540,7 +2540,7 @@ namespace System.Xml.Serialization
         {
             Debug.Assert(typeName == arrayTypeDesc.CSharpName || typeName == arrayTypeDesc.CSharpName + "[]");
             Type localType = (typeName == arrayTypeDesc.CSharpName) ? arrayTypeDesc.Type : arrayTypeDesc.Type.MakeArrayType();
-            // This may need reused varialble to get code compat?
+            // This may need reused variable to get code compat?
             LocalBuilder local = initValue.ILG.DeclareOrGetLocal(localType, variableName);
             if (initValue != null)
             {

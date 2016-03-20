@@ -22,7 +22,7 @@ namespace System.Threading.Tasks
     /// be prohibitive.
     /// </para>
     /// <para>
-    /// There are tradeoffs to using a <see cref="ValueTask{TResult}"/> instead of a <see cref="Task{TResult}"/>.
+    /// There are trade-offs to using a <see cref="ValueTask{TResult}"/> instead of a <see cref="Task{TResult}"/>.
     /// For example, while a <see cref="ValueTask{TResult}"/> can help avoid an allocation in the case where the 
     /// successful result is available synchronously, it also contains two fields whereas a <see cref="Task{TResult}"/>
     /// as a reference type is a single field.  This means that a method call ends up returning two fields worth of

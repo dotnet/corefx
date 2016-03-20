@@ -184,7 +184,7 @@ namespace CoreXml.Test.XLinq
                     }
                     else
                     {
-                        TestLog.WriteLine("No mach in actual values");
+                        TestLog.WriteLine("No match in actual values");
                         return false;
                     }
                 }

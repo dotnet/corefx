@@ -38,7 +38,7 @@ namespace System.Xml.Tests
         [Fact]
         public static void ReadElementContentAsDouble12()
         {
-            var reader = Utils.CreateFragmentReader("<Root> <?a?>0<![CDATA[0]]>0<!-- Comment inbetween-->1</Root>");
+            var reader = Utils.CreateFragmentReader("<Root> <?a?>0<![CDATA[0]]>0<!-- Comment in-between-->1</Root>");
             reader.PositionOnElement("Root");
             Assert.Equal(1d, reader.ReadElementContentAs(typeof(Double), null));
         }

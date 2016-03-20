@@ -11,7 +11,7 @@ namespace System.Xml.Tests
         [Fact]
         public static void ReadContentAsFloat1()
         {
-            var reader = Utils.CreateFragmentReader("<Root> -0<!-- Comment inbetween-->05.145<?a?><![CDATA[6]]> </Root>");
+            var reader = Utils.CreateFragmentReader("<Root> -0<!-- Comment in-between-->05.145<?a?><![CDATA[6]]> </Root>");
             reader.PositionOnElement("Root");
             reader.Read();
             Assert.Equal(-5.1456F, reader.ReadContentAsFloat());

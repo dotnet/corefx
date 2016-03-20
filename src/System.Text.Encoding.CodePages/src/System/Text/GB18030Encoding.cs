@@ -183,11 +183,11 @@ namespace System.Text
                 }
             }
 
-            // unicodeCount should've wrapped back to 0
+            // unicodeCount should have wrapped back to 0
             Debug.Assert(unicodeCount == 0,
                 "[GB18030Encoding.LoadManagedCodePage] Expected unicodeCount to wrap around to 0 as all chars were processed");
 
-            // We should've read in GBLast4ByteCode 4 byte sequences
+            // We should have read in GBLast4ByteCode 4 byte sequences
             Debug.Assert(count4Byte == GBLast4ByteCode + 1,
                 "[GB18030Encoding.LoadManagedCodePage] Expected 0x99FB to be last 4 byte offset, found 0x" + count4Byte.ToString("X4", CultureInfo.InvariantCulture));
         }
@@ -303,7 +303,7 @@ namespace System.Text
                 }
                 else if (Char.IsLowSurrogate(ch))
                 {
-                    // Low surrogates should've been found already
+                    // Low surrogates should have been found already
                     if (!buffer.Fallback(ch))
                         break;
                 }

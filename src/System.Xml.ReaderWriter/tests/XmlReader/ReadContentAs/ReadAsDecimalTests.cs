@@ -20,7 +20,7 @@ namespace System.Xml.Tests
         [Fact]
         public static void ReadContentAsDecimal10()
         {
-            var reader = Utils.CreateFragmentReader("<Root>  00<!-- Comment inbetween-->01<?a?></Root>");
+            var reader = Utils.CreateFragmentReader("<Root>  00<!-- Comment in-between-->01<?a?></Root>");
             reader.PositionOnElement("Root");
             reader.Read();
             Assert.Equal(1m, reader.ReadContentAs(typeof(Decimal), null));

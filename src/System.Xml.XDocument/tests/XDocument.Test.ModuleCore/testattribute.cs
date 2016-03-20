@@ -34,7 +34,7 @@ namespace Microsoft.Test.ModuleCore
         protected string pfilter;
         protected string pversion;
 
-        //Allows Inhertiance (ie: object to determine if ever been set)
+        //Allows Inheritance (ie: object to determine if ever been set)
         protected int? ppriority;       //Allows Inhertiance
         protected string ppurpose;      //Allows Inhertiance
         protected bool? pimplemented;   //Allows Inhertiance

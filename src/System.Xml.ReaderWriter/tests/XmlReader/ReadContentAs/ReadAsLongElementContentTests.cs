@@ -29,7 +29,7 @@ namespace System.Xml.Tests
         [Fact]
         public static void ReadElementContentAsLong11()
         {
-            var reader = Utils.CreateFragmentReader("<Root>  <![CDATA[0]]>0<?a?>0<!-- Comment inbetween-->1<!-- Comment inbetween--></Root>");
+            var reader = Utils.CreateFragmentReader("<Root>  <![CDATA[0]]>0<?a?>0<!-- Comment in-between-->1<!-- Comment inbetween--></Root>");
             reader.PositionOnElement("Root");
             Assert.Equal(1L, reader.ReadElementContentAs(typeof(long), null));
         }

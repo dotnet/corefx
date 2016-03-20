@@ -20,7 +20,7 @@ namespace XDocumentTests.SDMSample
             Assert.Throws<ArgumentNullException>(() => new XAttribute(null, value));
             Assert.Throws<ArgumentNullException>(() => new XAttribute("foo", null));
 
-            // Codepaths for special-casing xmlns namespace
+            // Code paths for special-casing xmlns namespace
             XName name = XName.Get("xmlns", string.Empty);
             XAttribute att1 = new XAttribute(name, value);
             Assert.Equal("xmlns", att1.Name.ToString());

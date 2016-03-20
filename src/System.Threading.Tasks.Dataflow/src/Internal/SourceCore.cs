@@ -197,7 +197,7 @@ namespace System.Threading.Tasks.Dataflow.Internal
 
                     _nextMessageReservedFor = null;
                     _targetRegistry.Remove(target, onlyIfReachedMaxMessages: true);
-                    _enableOffering = true; // reenable offering if it was disabled
+                    _enableOffering = true; // re-enable offering if it was disabled
                     _nextMessageId.Value++;
                     CompleteBlockIfPossible();
                     OfferAsyncIfNecessary(isReplacementReplica: false, outgoingLockKnownAcquired: true);
@@ -299,7 +299,7 @@ namespace System.Threading.Tasks.Dataflow.Internal
                         {
                             _nextMessageId.Value++;
 
-                            // Now that the next message has changed, reenable offering if it was disabled
+                            // Now that the next message has changed, re-enable offering if it was disabled
                             _enableOffering = true;
 
                             // If removing this item was the last thing this block will ever do, complete it,
@@ -352,7 +352,7 @@ namespace System.Threading.Tasks.Dataflow.Internal
                             // Increment the next ID. Any new value is good.
                             _nextMessageId.Value++;
 
-                            // Now that the next message has changed, reenable offering if it was disabled
+                            // Now that the next message has changed, re-enable offering if it was disabled
                             _enableOffering = true;
 
                             // Now that the block is empty, check to see whether we should complete.
@@ -455,7 +455,7 @@ namespace System.Threading.Tasks.Dataflow.Internal
             }
         }
 
-        /// <summary>Adds an individual exceptionto this source.</summary>
+        /// <summary>Adds an individual exception to this source.</summary>
         /// <param name="exception">The exception to add</param>
         internal void AddException(Exception exception)
         {
@@ -611,7 +611,7 @@ namespace System.Threading.Tasks.Dataflow.Internal
                 }
             }
 
-            // If a message got accepted, consume it and reenable offering.
+            // If a message got accepted, consume it and re-enable offering.
             if (messageWasAccepted)
             {
                 lock (ValueLock)
@@ -630,7 +630,7 @@ namespace System.Threading.Tasks.Dataflow.Internal
                     _nextMessageId.Value++;
 
                     // The message was accepted, so there's now going to be a new next message.
-                    // If offering had been disabled, reenable it.
+                    // If offering had been disabled, re-enable it.
                     _enableOffering = true;
 
                     // Now that a message has been removed, we need to complete if possible or

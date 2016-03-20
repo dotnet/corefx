@@ -483,9 +483,9 @@ namespace System.Xml.Serialization
             AddNonXsdPrimitive(typeof(char), "char", UrtTypes.Namespace, "Char", new XmlQualifiedName("unsignedShort", XmlSchema.Namespace), null, TypeFlags.CanBeAttributeValue | TypeFlags.CanBeElementValue | TypeFlags.HasCustomFormatter | TypeFlags.IgnoreDefault);
             AddNonXsdPrimitive(typeof(TimeSpan), "TimeSpan", UrtTypes.Namespace, "TimeSpan", new XmlQualifiedName("string", XmlSchema.Namespace), null, TypeFlags.CanBeAttributeValue | TypeFlags.CanBeElementValue | TypeFlags.XmlEncodingNotRequired | TypeFlags.IgnoreDefault);
 
-            // Unsuppoted types that we map to string, if in the future we decide 
+            // Unsupported types that we map to string, if in the future we decide 
             // to add support for them we would need to create custom formatters for them
-            // normalizedString is the only one unsuported type that suppose to preserve whitesapce
+            // normalizedString is the only one unsupported type that suppose to preserve whitespace
             AddPrimitive(typeof(string), "normalizedString", "String", TypeFlags.AmbiguousDataType | TypeFlags.CanBeAttributeValue | TypeFlags.CanBeElementValue | TypeFlags.CanBeTextValue | TypeFlags.Reference | TypeFlags.HasDefaultConstructor);
             for (int i = 0; i < s_unsupportedTypes.Length; i++)
             {
@@ -788,7 +788,7 @@ namespace System.Xml.Serialization
                     kind = TypeKind.Enumerable;
 
                     // GetEnumeratorElementType checks for the security attributes on the GetEnumerator(), Add() methods and Current property, 
-                    // we need to check the MoveNext() and ctor methods for the security attribues
+                    // we need to check the MoveNext() and ctor methods for the security attributes
                     flags |= GetConstructorFlags(type, ref exception);
                 }
             }
@@ -978,13 +978,13 @@ namespace System.Xml.Serialization
             }
 
             // The scenario here is that user has one base class A and one derived class B and wants to serialize/deserialize an object of B.
-            // There's one virtual property defined in A and overrided by B. Without the replacing logic below, the code generated will always
+            // There's one virtual property defined in A and overridden by B. Without the replacing logic below, the code generated will always
             // try to access the property defined in A, rather than B.
             // The logic here is to:
             // 1) Check current members inside memberInfos dictionary and figure out whether there's any override or new properties defined in the derived class.
             //    If so, replace the one on the base class with the one on the derived class.
             // 2) Do the same thing for the memberMapping array. Note that we need to create a new copy of MemberMapping object since the old one could still be referenced
-            //    by the StructMapping of the baseclass, so updating it directly could lead to other issues.
+            //    by the StructMapping of the base class, so updating it directly could lead to other issues.
             Dictionary<string, MemberInfo> replaceList = null;
             MemberInfo replacedInfo = null;
             foreach (KeyValuePair<string, MemberInfo> pair in memberInfos)

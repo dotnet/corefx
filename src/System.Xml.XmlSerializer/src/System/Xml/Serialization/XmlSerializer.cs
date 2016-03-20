@@ -373,7 +373,7 @@ namespace System.Xml.Serialization
             XmlReaderSettings settings = new XmlReaderSettings();
             // WhitespaceHandling.Significant means that you only want events for *significant* whitespace 
             // resulting from elements marked with xml:space="preserve". All other whitespace 
-            // (ie. XmlNodeType.Whitespace), deemed as insignificant for the XML infoset, is not 
+            // (i.e. XmlNodeType.Whitespace), deemed as insignificant for the XML infoset, is not 
             // reported by the reader. This mode corresponds to XmlReaderSettings.IgnoreWhitespace = true. 
             settings.IgnoreWhitespace = true;
             settings.DtdProcessing = (DtdProcessing)2; /* DtdProcessing.Parse */
@@ -394,7 +394,7 @@ namespace System.Xml.Serialization
             XmlReaderSettings settings = new XmlReaderSettings();
             // WhitespaceHandling.Significant means that you only want events for *significant* whitespace 
             // resulting from elements marked with xml:space="preserve". All other whitespace 
-            // (ie. XmlNodeType.Whitespace), deemed as insignificant for the XML infoset, is not 
+            // (i.e. XmlNodeType.Whitespace), deemed as insignificant for the XML infoset, is not 
             // reported by the reader. This mode corresponds to XmlReaderSettings.IgnoreWhitespace = true. 
             settings.IgnoreWhitespace = true;
             settings.DtdProcessing = (DtdProcessing)2; /* DtdProcessing.Parse */

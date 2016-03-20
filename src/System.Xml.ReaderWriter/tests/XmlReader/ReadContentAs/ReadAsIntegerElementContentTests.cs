@@ -19,7 +19,7 @@ namespace System.Xml.Tests
         [Fact]
         public static void ReadElementContentAsInt10()
         {
-            var reader = Utils.CreateFragmentReader("<Root>-4<!-- Comment inbetween-->4</Root>");
+            var reader = Utils.CreateFragmentReader("<Root>-4<!-- Comment in-between-->4</Root>");
             reader.PositionOnElement("Root");
             Assert.Equal(-44, reader.ReadElementContentAsInt());
         }

@@ -2163,7 +2163,7 @@ namespace System.Xml.Tests
             return TEST_PASS;
         }
 
-        [Variation("Whitespaces between XmlDecl attributes")]
+        [Variation("Whitespace between XmlDecl attributes")]
         public int TAXmlDecl_12()
         {
             if (IsXmlNodeReader() || IsXmlNodeReaderDataDoc() || IsXPathNavigatorReader() || IsBinaryReader())

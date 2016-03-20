@@ -1530,7 +1530,7 @@ namespace System.Xml
                 {
                     return ParseDocumentContentAsync_ReadData(needMoreChars);
                 }
-                // something else -> root level whitespaces
+                // something else -> root level whitespace
                 else
                 {
                     if (_fragmentType == XmlNodeType.Document)
@@ -2160,7 +2160,7 @@ namespace System.Xml
                     return ThrowTagMismatchAsync(startTagNode);
                 }
 
-                // eat whitespaces
+                // eat whitespace
                 if (chars[pos] != '>')
                 {
                     char tmpCh;
@@ -2269,7 +2269,7 @@ namespace System.Xml
 
             for (; ;)
             {
-                // eat whitespaces
+                // eat whitespace
                 int lineNoDelta = 0;
                 char tmpch0;
 

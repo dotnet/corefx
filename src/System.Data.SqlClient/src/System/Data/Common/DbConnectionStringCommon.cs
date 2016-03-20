@@ -169,7 +169,7 @@ namespace System.Data.Common
                     return result;
                 }
 
-                // try again after remove leading & trailing whitespaces.
+                // try again after remove leading & trailing whitespace.
                 sValue = sValue.Trim();
                 if (TryConvertToApplicationIntent(sValue, out result))
                 {

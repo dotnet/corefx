@@ -281,7 +281,7 @@ namespace CoreXml.Test.XLinq
                     this.AddChild(new TestVariation(elemNamespace_10) { Attribute = new VariationAttribute("Create nested element without prefix but with namespace of parent element with a defined prefix") { Id = 10, Priority = 2 } });
                     this.AddChild(new TestVariation(elemNamespace_11) { Attribute = new VariationAttribute("Create different prefix for element and attribute that have same namespace") { Id = 11, Priority = 2 } });
                     this.AddChild(new TestVariation(elemNamespace_12) { Attribute = new VariationAttribute("Create same prefix for element and attribute that have same namespace") { Id = 12, Priority = 2 } });
-                    this.AddChild(new TestVariation(elemNamespace_13) { Attribute = new VariationAttribute("Try to re-define NS prefix on attribute which is aleady defined on an element") { Id = 13, Priority = 2 } });
+                    this.AddChild(new TestVariation(elemNamespace_13) { Attribute = new VariationAttribute("Try to re-define NS prefix on attribute which is already defined on an element") { Id = 13, Priority = 2 } });
                     this.AddChild(new TestVariation(elemNamespace_14) { Attribute = new VariationAttribute("Namespace string contains surrogates, reuse at different levels") { Id = 14, Priority = 1 } });
                     this.AddChild(new TestVariation(elemNamespace_15) { Attribute = new VariationAttribute("Namespace containing entities, use at multiple levels") { Id = 15, Priority = 1 } });
                     this.AddChild(new TestVariation(elemNamespace_16) { Attribute = new VariationAttribute("Verify it resets default namespace when redefined earlier in the stack") { Id = 16, Priority = 1 } });
@@ -538,7 +538,7 @@ namespace CoreXml.Test.XLinq
                     this.AddChild(new TestVariation(writeString_9) { Attribute = new VariationAttribute("WriteString for value greater than x1F") { Id = 9, Priority = 1 } });
                     this.AddChild(new TestVariation(writeString_11) { Attribute = new VariationAttribute("WriteString with CR, LF, CR LF inside attribute value") { Id = 11, Priority = 1 } });
                     this.AddChild(new TestVariation(writeString_12) { Attribute = new VariationAttribute("Call WriteString for LF inside attribute") { Id = 12, Priority = 1 } });
-                    this.AddChild(new TestVariation(writeString_13) { Attribute = new VariationAttribute("Surrogate charaters in text nodes, range limits") { Id = 13, Priority = 1 } });
+                    this.AddChild(new TestVariation(writeString_13) { Attribute = new VariationAttribute("Surrogate characters in text nodes, range limits") { Id = 13, Priority = 1 } });
                     this.AddChild(new TestVariation(writeString_14) { Attribute = new VariationAttribute("High surrogate on last position") { Id = 14, Priority = 1 } });
                     this.AddChild(new TestVariation(writeString_15) { Attribute = new VariationAttribute("Low surrogate on first position") { Id = 15, Priority = 1 } });
                     this.AddChild(new TestVariation(writeString_16) { Attribute = new VariationAttribute("Swap low-high surrogates") { Id = 16, Priority = 1 } });
@@ -577,10 +577,10 @@ namespace CoreXml.Test.XLinq
                     this.AddChild(new TestVariation(writeValue_9) { Attribute = new VariationAttribute("WriteValue(DateTimeOffset)") { Id = 9, Priority = 1 } });
                     this.AddChild(new TestVariation(writeValue_11) { Attribute = new VariationAttribute("Write multiple atomic values inside element") { Id = 11, Priority = 1 } });
                     this.AddChild(new TestVariation(writeValue_12) { Attribute = new VariationAttribute("Write multiple atomic values inside attribute") { Id = 12, Priority = 1 } });
-                    this.AddChild(new TestVariation(writeValue_13) { Attribute = new VariationAttribute("Write multiple atomic values inside element, seperate by WriteWhitespace(' ')") { Id = 13, Priority = 1 } });
-                    this.AddChild(new TestVariation(writeValue_14) { Attribute = new VariationAttribute("Write multiple atomic values inside element, seperate by WriteString(' ')") { Id = 14, Priority = 1 } });
-                    this.AddChild(new TestVariation(writeValue_15) { Attribute = new VariationAttribute("Write multiple atomic values inside attribute, seperate by WriteWhitespace(' ')") { Id = 15, Priority = 1 } });
-                    this.AddChild(new TestVariation(writeValue_16) { Attribute = new VariationAttribute("Write multiple atomic values inside attribute, seperate by WriteString(' ')") { Id = 16, Priority = 1 } });
+                    this.AddChild(new TestVariation(writeValue_13) { Attribute = new VariationAttribute("Write multiple atomic values inside element, separate by WriteWhitespace(' ')") { Id = 13, Priority = 1 } });
+                    this.AddChild(new TestVariation(writeValue_14) { Attribute = new VariationAttribute("Write multiple atomic values inside element, separate by WriteString(' ')") { Id = 14, Priority = 1 } });
+                    this.AddChild(new TestVariation(writeValue_15) { Attribute = new VariationAttribute("Write multiple atomic values inside attribute, separate by WriteWhitespace(' ')") { Id = 15, Priority = 1 } });
+                    this.AddChild(new TestVariation(writeValue_16) { Attribute = new VariationAttribute("Write multiple atomic values inside attribute, separate by WriteString(' ')") { Id = 16, Priority = 1 } });
                     this.AddChild(new TestVariation(writeValue_17) { Attribute = new VariationAttribute("WriteValue(long)") { Id = 17, Priority = 1 } });
                 }
             }
@@ -616,7 +616,7 @@ namespace CoreXml.Test.XLinq
                     this.AddChild(new TestVariation(xmlSpace_6) { Attribute = new VariationAttribute("Verify XmlSpace - outside defined scope") { Id = 6, Priority = 1 } });
                     this.AddChild(new TestVariation(xmlSpace_7) { Attribute = new VariationAttribute("Verify XmlSpace with invalid space value") { Id = 7, Priority = 0 } });
                     this.AddChild(new TestVariation(xmlSpace_8) { Attribute = new VariationAttribute("Duplicate xml:space attr should error") { Id = 8, Priority = 1 } });
-                    this.AddChild(new TestVariation(xmlSpace_9) { Attribute = new VariationAttribute("Veify XmlSpace value when received through WriteString") { Id = 9, Priority = 1 } });
+                    this.AddChild(new TestVariation(xmlSpace_9) { Attribute = new VariationAttribute("Verify XmlSpace value when received through WriteString") { Id = 9, Priority = 1 } });
                 }
             }
             public partial class TCXmlLangWriter : BridgeHelpers
@@ -629,8 +629,8 @@ namespace CoreXml.Test.XLinq
                     this.AddChild(new TestVariation(XmlLang_2) { Attribute = new VariationAttribute("Verify that default value of XmlLang is NULL") { Id = 2, Priority = 1 } });
                     this.AddChild(new TestVariation(XmlLang_3) { Attribute = new VariationAttribute("Verify XmlLang scope inside nested elements (both PROLOG and EPILOG)") { Id = 3, Priority = 1 } });
                     this.AddChild(new TestVariation(XmlLang_4) { Attribute = new VariationAttribute("Duplicate xml:lang attr should error") { Id = 4, Priority = 1 } });
-                    this.AddChild(new TestVariation(XmlLang_5) { Attribute = new VariationAttribute("Veify XmlLang value when received through WriteAttributes") { Id = 5, Priority = 1 } });
-                    this.AddChild(new TestVariation(XmlLang_6) { Attribute = new VariationAttribute("Veify XmlLang value when received through WriteString") { Id = 6 } });
+                    this.AddChild(new TestVariation(XmlLang_5) { Attribute = new VariationAttribute("Verify XmlLang value when received through WriteAttributes") { Id = 5, Priority = 1 } });
+                    this.AddChild(new TestVariation(XmlLang_6) { Attribute = new VariationAttribute("Verify XmlLang value when received through WriteString") { Id = 6 } });
                     this.AddChild(new TestVariation(XmlLang_7) { Attribute = new VariationAttribute("Should not check XmlLang value") { Id = 7, Priority = 2 } });
                     this.AddChild(new TestVariation(XmlLang_8) { Attribute = new VariationAttribute("More XmlLang with valid sequence") { Id = 8, Priority = 1 } });
                 }
@@ -818,7 +818,7 @@ namespace CoreXml.Test.XLinq
                     this.AddChild(new TestVariation(EOF_Handling_16) { Attribute = new VariationAttribute("NewLine handling between attributes when NewLineOnAttributes=true; Replace, '\\r'") { Params = new object[] { NewLineHandling.Replace, "\r" }, Id = 60, Priority = 2 } });
                     this.AddChild(new TestVariation(EOF_Handling_16) { Attribute = new VariationAttribute("NewLine handling between attributes when NewLineOnAttributes=true; Entitize, '\\r'") { Params = new object[] { NewLineHandling.Entitize, "\r" }, Id = 59, Priority = 2 } });
                     this.AddChild(new TestVariation(EOF_Handling_16) { Attribute = new VariationAttribute("NewLine handling between attributes when NewLineOnAttributes=true; Entitize, '\\r\\n'") { Params = new object[] { NewLineHandling.Entitize, "\r\n" }, Id = 56, Priority = 1 } });
-                    this.AddChild(new TestVariation(EOF_Handling_16) { Attribute = new VariationAttribute("NewLine handling betwwen attributes when NewLineOnAttributes=true; Replace, '\\r\\n'") { Params = new object[] { NewLineHandling.Replace, "\r\n" }, Id = 57, Priority = 1 } });
+                    this.AddChild(new TestVariation(EOF_Handling_16) { Attribute = new VariationAttribute("NewLine handling between attributes when NewLineOnAttributes=true; Replace, '\\r\\n'") { Params = new object[] { NewLineHandling.Replace, "\r\n" }, Id = 57, Priority = 1 } });
                 }
             }
             public partial class XObjectBuilderTest : BridgeHelpers
@@ -907,7 +907,7 @@ namespace CoreXml.Test.XLinq
                     this.AddChild(new TestVariation(testFromTheRootNodeSimple) { Attribute = new VariationAttribute("Not used NS declarations") { Params = new object[] { "<A xmlns='nsp' xmlns:u='not-used'><p:B xmlns:p='nsp'><C xmlns:u='not-used' xmlns='nsp' /></p:B></A>" }, Priority = 2 } });
                     this.AddChild(new TestVariation(testFromTheRootNodeSimple) { Attribute = new VariationAttribute("SameNS, different prefix") { Params = new object[] { "<p:A xmlns:p='nsp'><B xmlns:q='nsp'><p:C xmlns:p='nsp'/></B></p:A>" }, Priority = 2 } });
                     this.AddChild(new TestVariation(testFromTheRootNodeSimple) { Attribute = new VariationAttribute("Default namespaces") { Params = new object[] { "<A xmlns='nsp'><p:B xmlns:p='nsp'><C xmlns='nsp' /></p:B></A>" }, Priority = 1 } });
-                    this.AddChild(new TestVariation(testFromTheRootNodeTricky) { Attribute = new VariationAttribute("Default ns parent autogenerated") { Priority = 1 } });
+                    this.AddChild(new TestVariation(testFromTheRootNodeTricky) { Attribute = new VariationAttribute("Default ns parent auto-generated") { Priority = 1 } });
                     this.AddChild(new TestVariation(testConflicts) { Attribute = new VariationAttribute("Conflicts: NS undeclaration, default NS") { Params = new object[] { "<A xmlns='nsp'><B xmlns=''><C xmlns='nsp'><D xmlns='nsp'/></C></B></A>", "<A xmlns='nsp'><B xmlns=''><C xmlns='nsp'><D/></C></B></A>" }, Priority = 2 } });
                     this.AddChild(new TestVariation(testConflicts) { Attribute = new VariationAttribute("Conflicts: NS redefinition") { Params = new object[] { "<p:A xmlns:p='nsp'><p:B xmlns:p='ns-other'><p:C xmlns:p='nsp'><D xmlns:p='nsp'/></p:C></p:B></p:A>", "<p:A xmlns:p='nsp'><p:B xmlns:p='ns-other'><p:C xmlns:p='nsp'><D/></p:C></p:B></p:A>" }, Priority = 2 } });
                     this.AddChild(new TestVariation(testConflicts) { Attribute = new VariationAttribute("Conflicts: NS redefinition, default NS") { Params = new object[] { "<A xmlns='nsp'><B xmlns='ns-other'><C xmlns='nsp'><D xmlns='nsp'/></C></B></A>", "<A xmlns='nsp'><B xmlns='ns-other'><C xmlns='nsp'><D/></C></B></A>" }, Priority = 2 } });
@@ -921,7 +921,7 @@ namespace CoreXml.Test.XLinq
                     this.AddChild(new TestVariation(testIntoOpenedWriter) { Attribute = new VariationAttribute("Write into used reader II.") { Params = new object[] { "<p1:A xmlns:p1='nsp'/>", "<p1:root xmlns:p1='nsp'><p1:A/></p1:root>" }, Priority = 2 } });
                     this.AddChild(new TestVariation(testIntoOpenedWriterDefaultNS) { Attribute = new VariationAttribute("Write into used reader I. (def. ns.)") { Params = new object[] { "<A xmlns='nsp'/>", "<root xmlns='nsp'><A/></root>" }, Priority = 0 } });
                     this.AddChild(new TestVariation(testIntoOpenedWriterDefaultNS) { Attribute = new VariationAttribute("Write into used reader II. (def. ns.)") { Params = new object[] { "<A xmlns='ns-other'><B xmlns='nsp'><C xmlns='nsp'/></B></A>", "<root xmlns='nsp'><A xmlns='ns-other'><B xmlns='nsp'><C/></B></A></root>" }, Priority = 2 } });
-                    this.AddChild(new TestVariation(testIntoOpenedWriterXlinqLookup1) { Attribute = new VariationAttribute("Write into used reader (Xlinq lookup + existing hint in the Writer; different prefix)") { Params = new object[] { "<p1:root xmlns:p1='nsp'><p2:B xmlns:p2='nsp'/></p1:root>" }, Priority = 2 } });
+                    this.AddChild(new TestVariation(testIntoOpenedWriterXlinqLookup1) { Attribute = new VariationAttribute("Write into used reader (Linq lookup + existing hint in the Writer; different prefix)") { Params = new object[] { "<p1:root xmlns:p1='nsp'><p2:B xmlns:p2='nsp'/></p1:root>" }, Priority = 2 } });
                     this.AddChild(new TestVariation(testIntoOpenedWriterXlinqLookup2) { Attribute = new VariationAttribute("Write into used reader (Xlinq lookup + existing hint in the Writer; same prefix)") { Params = new object[] { "<p1:root xmlns:p1='nsp'><p1:B /></p1:root>" }, Priority = 2 } });
                 }
             }
@@ -978,7 +978,7 @@ namespace CoreXml.Test.XLinq
                     this.AddChild(new TestVariation(testFromTheRootNodeSimple) { Attribute = new VariationAttribute("Default namespaces") { Params = new object[] { "<A xmlns='nsp'><p:B xmlns:p='nsp'><C xmlns='nsp' /></p:B></A>" }, Priority = 1 } });
                     this.AddChild(new TestVariation(testFromTheRootNodeSimple) { Attribute = new VariationAttribute("Not used NS declarations") { Params = new object[] { "<A xmlns='nsp' xmlns:u='not-used'><p:B xmlns:p='nsp'><C xmlns:u='not-used' xmlns='nsp' /></p:B></A>" }, Priority = 2 } });
                     this.AddChild(new TestVariation(testFromTheRootNodeSimple) { Attribute = new VariationAttribute("SameNS, different prefix") { Params = new object[] { "<p:A xmlns:p='nsp'><B xmlns:q='nsp'><p:C xmlns:p='nsp'/></B></p:A>" }, Priority = 2 } });
-                    this.AddChild(new TestVariation(testFromTheRootNodeTricky) { Attribute = new VariationAttribute("Default ns parent autogenerated") { Priority = 1 } });
+                    this.AddChild(new TestVariation(testFromTheRootNodeTricky) { Attribute = new VariationAttribute("Default ns parent auto-generated") { Priority = 1 } });
                     this.AddChild(new TestVariation(testFromChildNode1) { Attribute = new VariationAttribute("Not from root") { Priority = 1 } });
                     this.AddChild(new TestVariation(testFromChildNode2) { Attribute = new VariationAttribute("Not from root II.") { Priority = 1 } });
                     this.AddChild(new TestVariation(testFromChildNode3) { Attribute = new VariationAttribute("Not from root III.") { Priority = 2 } });

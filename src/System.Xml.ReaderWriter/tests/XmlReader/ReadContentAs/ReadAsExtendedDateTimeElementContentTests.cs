@@ -22,7 +22,7 @@ namespace System.Xml.Tests
             var reader = Utils.CreateFragmentReader(@"<doc>
     <item><foo></foo></item>
     <item><bar/></item>
-    <item><bar>99<!-- Comment inbetween-->99-1<![CDATA[2]]>-31T01:59:5<?a?>9.99<?a?>9999<![CDATA[4]]>9<?Zz?>-00<![CDATA[:]]>00</bar></item>
+    <item><bar>99<!-- Comment in-between-->99-1<![CDATA[2]]>-31T01:59:5<?a?>9.99<?a?>9999<![CDATA[4]]>9<?Zz?>-00<![CDATA[:]]>00</bar></item>
 </doc>");
             reader.PositionOnElementNonEmptyNoDoctype("bar");
             Assert.Equal(new DateTime(9999, 12, 31, 1, 59, 59).AddTicks(9999995).Add(TimeZoneInfo.Local.GetUtcOffset(new DateTime(9999, 12, 31))), reader.ReadElementContentAs(typeof(DateTime), null));

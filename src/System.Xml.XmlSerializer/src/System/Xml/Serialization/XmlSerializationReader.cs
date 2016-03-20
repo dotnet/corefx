@@ -1048,7 +1048,7 @@ namespace System.Xml.Serialization
         protected Exception CreateMissingIXmlSerializableType(string name, string ns, string clrType)
         {
             return new InvalidOperationException(SR.Format(SR.XmlSerializableMissingClrType, name, ns, typeof(XmlIncludeAttribute).Name, clrType));
-            //XmlSerializableMissingClrType= Type '{0}' from namespace '{1}' doesnot have corresponding IXmlSerializable type. Please consider adding {2} to '{3}'.
+            //XmlSerializableMissingClrType= Type '{0}' from namespace '{1}' does not have corresponding IXmlSerializable type. Please consider adding {2} to '{3}'.
         }
 
         /// <include file='doc\XmlSerializationReader.uex' path='docs/doc[@for="XmlSerializationReader.EnsureArrayIndex"]/*' />

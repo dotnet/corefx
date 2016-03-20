@@ -11,7 +11,7 @@ namespace System.Xml.Tests
         [Fact]
         public static void ReadContentAsByte1()
         {
-            var reader = Utils.CreateFragmentReader("<Root>  2<!-- Comment inbetween--><![CDATA[5]]>5<?a?>   </Root>");
+            var reader = Utils.CreateFragmentReader("<Root>  2<!-- Comment in-between--><![CDATA[5]]>5<?a?>   </Root>");
             reader.PositionOnElement("Root");
             reader.Read();
             Assert.Equal(Byte.MaxValue, reader.ReadContentAs(typeof(Byte), null));

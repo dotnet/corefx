@@ -57,7 +57,7 @@ namespace Microsoft.Test.ModuleCore
                 return;
             }
 
-            //Otheriwse add the value
+            //Otherwise add the value
             Add(key, value);
         }
 
