@@ -109,7 +109,7 @@ namespace System.Xml.Tests
                 return TEST_PASS;
             }
 
-            throw new CTestFailedException("ReadValue didnt throw expected exception");
+            throw new CTestFailedException("ReadValue didn't throw expected exception");
         }
 
         [Variation("ReadValue on Attribute", Pri = 0)]
@@ -735,7 +735,7 @@ namespace System.Xml.Tests
             return TEST_FAIL;
         }
 
-        [Variation("ReadValue with whitespaces")]
+        [Variation("ReadValue with whitespace")]
         public int TestTextReadValue25()
         {
             string strExpected = "somevalue";

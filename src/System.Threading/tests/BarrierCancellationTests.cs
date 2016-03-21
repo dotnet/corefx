@@ -66,7 +66,7 @@ namespace System.Threading.Tests
 
             Task.Run(() => cancellationTokenSource.Cancel());
 
-            //Test that backout occurred.
+            //Test that back-out occurred.
             Assert.Equal(numberParticipants, barrier.ParticipantsRemaining);
 
             // the token should not have any listeners.

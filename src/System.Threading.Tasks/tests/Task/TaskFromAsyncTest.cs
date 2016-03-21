@@ -84,7 +84,7 @@ namespace System.Threading.Tasks.Tests.FromAsync
                 //This should throw an exception
                 RunAPMTest();
 
-                //block until the expcetion is thrown
+                //block until the exception is thrown
                 ((IAsyncResult)_task).AsyncWaitHandle.WaitOne();  // avoid Wait() as we are using Exception property directly
 
                 AggregateException exp = _task.Exception;

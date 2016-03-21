@@ -388,7 +388,7 @@ namespace XPathTests.FunctionalTests
         }
 
         /// <summary>
-        /// Expression with intervening white spaces before nametest
+        /// Expression with intervening white spaces before name test
         /// /bookstore/child:: book
         /// </summary>
         [Fact]
@@ -1281,7 +1281,7 @@ namespace XPathTests.FunctionalTests
         }
 
         /// <summary>
-        /// Check if operator is scaned properly
+        /// Check if operator is scanned properly
         /// ""!=true()
         /// </summary>
         [Fact]

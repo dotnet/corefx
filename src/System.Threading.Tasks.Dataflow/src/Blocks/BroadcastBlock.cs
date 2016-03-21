@@ -408,7 +408,7 @@ namespace System.Threading.Tasks.Dataflow
                         if (exceptions != null)
                         {
                             // It is important to migrate these exceptions to the source part of the owning batch,
-                            // because that is the completion task that is publically exposed.
+                            // because that is the completion task that is publicly exposed.
                             thisBroadcastBlock._source.AddExceptions(exceptions);
                         }
 
@@ -1146,18 +1146,18 @@ namespace System.Threading.Tasks.Dataflow
                         // If this is not the message at the head of the queue, bail
                         if (messageHeader.Id != _nextMessageId) throw new InvalidOperationException(SR.InvalidOperation_MessageNotReservedByTarget);
 
-                        // Otherwise, release the reservation, and reoffer the message to all targets.
+                        // Otherwise, release the reservation, and re-offer the message to all targets.
                         _nextMessageReservedFor = null;
                         _enableOffering = true;
                         messageToReoffer = _currentMessage;
                         OfferAsyncIfNecessary();
                     }
 
-                    // We need to explicitly reoffer this message to the releaser,
+                    // We need to explicitly re-offer this message to the releaser,
                     // as otherwise if the target has join behavior it could end up waiting for an offer from
                     // this broadcast forever, even though data is in fact available.  We could only
                     // do this if _messages.Count == 0, as if it's > 0 the message will get overwritten
-                    // as part of the asynchronous offering, but for consistency we should always reoffer
+                    // as part of the asynchronous offering, but for consistency we should always re-offer
                     // the current message.
                     OfferMessageToTarget(messageHeader, messageToReoffer, target);
                 }
@@ -1176,7 +1176,7 @@ namespace System.Threading.Tasks.Dataflow
                 }
             }
 
-            /// <summary>Adds an individual exceptionto this source.</summary>
+            /// <summary>Adds an individual exception to this source.</summary>
             /// <param name="exception">The exception to add</param>
             internal void AddException(Exception exception)
             {

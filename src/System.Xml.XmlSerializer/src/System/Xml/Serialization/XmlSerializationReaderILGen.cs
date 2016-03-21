@@ -730,7 +730,7 @@ namespace System.Xml.Serialization
             {
                 string enumMethodName = ReferenceMapping(mapping);
                 if (enumMethodName == null) throw new InvalidOperationException(SR.Format(SR.XmlMissingMethodEnum, mapping.TypeDesc.Name));
-                // For enum, its read method (eg. Read1_Gender) could be called multiple times
+                // For enum, its read method (e.g. Read1_Gender) could be called multiple times
                 // prior to its declaration.
                 MethodBuilder methodBuilder = EnsureMethodBuilder(typeBuilder,
                     enumMethodName,

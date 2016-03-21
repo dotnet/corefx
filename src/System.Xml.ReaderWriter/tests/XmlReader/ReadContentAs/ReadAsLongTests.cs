@@ -11,7 +11,7 @@ namespace System.Xml.Tests
         [Fact]
         public static void ReadContentAsLong1()
         {
-            var reader = Utils.CreateFragmentReader("<Root>  <?a?>-0<!-- Comment inbetween-->0<![CDATA[5]]>  </Root>");
+            var reader = Utils.CreateFragmentReader("<Root>  <?a?>-0<!-- Comment in-between-->0<![CDATA[5]]>  </Root>");
             reader.PositionOnElement("Root");
             reader.Read();
             Assert.Equal(-5L, reader.ReadContentAsLong());

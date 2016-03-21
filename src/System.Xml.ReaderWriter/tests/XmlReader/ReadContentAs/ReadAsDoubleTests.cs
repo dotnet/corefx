@@ -11,7 +11,7 @@ namespace System.Xml.Tests
         [Fact]
         public static void ReadContentAsDouble1()
         {
-            var reader = Utils.CreateFragmentReader("<Root>  <!-- Comment inbetween-->44.<?a?>44  </Root>");
+            var reader = Utils.CreateFragmentReader("<Root>  <!-- Comment in-between-->44.<?a?>44  </Root>");
             reader.PositionOnElement("Root");
             reader.Read();
             Assert.Equal(44.44d, reader.ReadContentAsDouble());

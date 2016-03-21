@@ -48,18 +48,18 @@ namespace System.Xml.XPath.XDocument.Tests.XDocument
 
         private static bool AreComparableNodes(XPathNodeType a, XPathNodeType b)
         {
-            bool areBothTextOrWhitespaces = IsWhitespaceOrText(a) && IsWhitespaceOrText(b);
-            bool areBothNamespacesOrAttributes = IsNamespaceOrAttribute(a) && IsNamespaceOrAttribute(b);
+            bool areBothTextOrWhitespace = IsWhitespaceOrText(a) && IsWhitespaceOrText(b);
+            bool areBothNamespaceOrAttributes = IsNamespaceOrAttribute(a) && IsNamespaceOrAttribute(b);
 #if CHECK_ATTRIBUTE_ORDER
             areBothNamespacesOrAttributes = false
 #endif
 
-            return !areBothTextOrWhitespaces && !areBothNamespacesOrAttributes;
+            return !areBothTextOrWhitespace && !areBothNamespaceOrAttributes;
         }
 
         private static void CompareNodeTypes(XPathNodeType a, XPathNodeType b)
         {
-            // XPath.XDocument interprets whitespaces as XPathNodeType.Text
+            // XPath.XDocument interprets whitespace as XPathNodeType.Text
             // while other XPath navigators do it properly
             Assert.Equal(IsWhitespaceOrText(a), IsWhitespaceOrText(b));
             Assert.Equal(IsNamespaceOrAttribute(a), IsNamespaceOrAttribute(b));

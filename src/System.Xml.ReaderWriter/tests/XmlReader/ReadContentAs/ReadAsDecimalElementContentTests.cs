@@ -38,7 +38,7 @@ namespace System.Xml.Tests
         [Fact]
         public static void ReadElementContentAsDecimal12()
         {
-            var reader = Utils.CreateFragmentReader("<Root>  -0<?a?>0<!-- Comment inbetween-->5.<![CDATA[5]]> </Root>");
+            var reader = Utils.CreateFragmentReader("<Root>  -0<?a?>0<!-- Comment in-between-->5.<![CDATA[5]]> </Root>");
             reader.PositionOnElement("Root");
             Assert.Equal(-5.5m, reader.ReadElementContentAs(typeof(Decimal), null));
         }

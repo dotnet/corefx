@@ -11,7 +11,7 @@ namespace System.Xml.Tests
         [Fact]
         public static void ReadElementContentAsDateTimeOffset100()
         {
-            var reader = Utils.CreateFragmentReader("<Root><![CDATA[00]]>01-01-01<?a?>T00:00:0<!-- Comment inbetween-->0+00:00</Root>");
+            var reader = Utils.CreateFragmentReader("<Root><![CDATA[00]]>01-01-01<?a?>T00:00:0<!-- Comment in-between-->0+00:00</Root>");
             reader.PositionOnElement("Root");
             Assert.Equal(new DateTimeOffset(1, 1, 1, 0, 0, 0, TimeSpan.FromHours(0)).ToString(), reader.ReadElementContentAs(typeof(DateTimeOffset), null, "Root", "").ToString());
         }

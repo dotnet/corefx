@@ -38,7 +38,7 @@ namespace System.Xml.Tests
         [Fact]
         public static void ReadContentAsDateTimeOffset12()
         {
-            var reader = Utils.CreateFragmentReader("<Root>  2<?a?>00<!-- Comment inbetween-->0-02-29T23:59:5<?a?>9-13:<![CDATA[60]]>    </Root>");
+            var reader = Utils.CreateFragmentReader("<Root>  2<?a?>00<!-- Comment in-between-->0-02-29T23:59:5<?a?>9-13:<![CDATA[60]]>    </Root>");
             reader.PositionOnElement("Root");
             reader.Read();
             Assert.Equal(new DateTimeOffset(2000, 2, 29, 23, 59, 59, new TimeSpan(-14, 0, 0)), reader.ReadContentAsDateTimeOffset());

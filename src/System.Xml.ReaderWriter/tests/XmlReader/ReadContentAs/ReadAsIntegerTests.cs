@@ -20,7 +20,7 @@ namespace System.Xml.Tests
         [Fact]
         public static void ReadContentAsInt10()
         {
-            var reader = Utils.CreateFragmentReader("<Root> -<!-- Comment inbetween-->000<?a?>455 </Root>");
+            var reader = Utils.CreateFragmentReader("<Root> -<!-- Comment in-between-->000<?a?>455 </Root>");
             reader.PositionOnElement("Root");
             reader.Read();
             Assert.Equal(-455, reader.ReadContentAsInt());

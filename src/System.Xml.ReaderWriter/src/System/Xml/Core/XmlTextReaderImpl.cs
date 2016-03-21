@@ -110,7 +110,7 @@ namespace System.Xml
         //
         private readonly bool _useAsync;
 
-        #region Later Init Fileds
+        #region Later Init Fields
 
         //later init means in the construction stage, do not open filestream and do not read any data from Stream/TextReader
         //the purpose is to make the Create of XmlReader do not block on IO.
@@ -3090,7 +3090,7 @@ namespace System.Xml
                 {
                     goto ReadData;
                 }
-                // something else -> root level whitespaces
+                // something else -> root level whitespace
                 else
                 {
                     if (_fragmentType == XmlNodeType.Document)
@@ -3621,7 +3621,7 @@ namespace System.Xml
                     }
                 }
 
-                // eat whitespaces
+                // eat whitespace
                 if (chars[pos] != '>')
                 {
                     char tmpCh;
@@ -3718,7 +3718,7 @@ namespace System.Xml
 
             for (; ;)
             {
-                // eat whitespaces
+                // eat whitespace
                 int lineNoDelta = 0;
                 char tmpch0;
                 {

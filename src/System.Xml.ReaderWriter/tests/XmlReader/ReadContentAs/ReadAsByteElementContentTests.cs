@@ -29,7 +29,7 @@ namespace System.Xml.Tests
         [Fact]
         public static void ReadElementContentAsByte3()
         {
-            var reader = Utils.CreateFragmentReader("<Root> <![CDATA[0]]><?a?><!-- Comment inbetween--> </Root>");
+            var reader = Utils.CreateFragmentReader("<Root> <![CDATA[0]]><?a?><!-- Comment in-between--> </Root>");
             reader.PositionOnElement("Root");
             Assert.Equal(Byte.MinValue, reader.ReadElementContentAs(typeof(Byte), null));
         }

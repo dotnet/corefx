@@ -20,7 +20,7 @@ namespace System.Xml
         {
         }
 
-        // Overrides the baseclass implementation so that emptystring prefixes do
+        // Overrides the base class implementation so that empty-string prefixes do
         // do not fail if namespace is not specified.
         public override void WriteStartElement(string prefix, string localName, string ns)
         {
@@ -30,7 +30,7 @@ namespace System.Xml
             base.WriteStartElement(prefix, localName, ns);
         }
 
-        // Overrides the baseclass implementation so that emptystring prefixes do
+        // Overrides the base class implementation so that empty-string prefixes do
         // do not fail if namespace is not specified.
         public override void WriteStartAttribute(string prefix, string localName, string ns)
         {

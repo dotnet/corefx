@@ -11,7 +11,7 @@ namespace System.Xml.Tests
         [Fact]
         public static void ReadContentAsBoolean1()
         {
-            var reader = Utils.CreateFragmentReader("<Root> <?a?><!-- Comment inbetween--><![CDATA[0]]> </Root>");
+            var reader = Utils.CreateFragmentReader("<Root> <?a?><!-- Comment in-between--><![CDATA[0]]> </Root>");
             reader.PositionOnElement("Root");
             reader.Read();
             Assert.Equal(false, reader.ReadContentAsBoolean());

@@ -153,7 +153,7 @@ namespace System.Xml.Tests
 
             // for function TestTextReadValue25
             {
-                this.AddChild(new CVariation(TestTextReadValue25) { Attribute = new Variation("ReadValue with whitespaces") });
+                this.AddChild(new CVariation(TestTextReadValue25) { Attribute = new Variation("ReadValue with whitespace") });
             }
 
 

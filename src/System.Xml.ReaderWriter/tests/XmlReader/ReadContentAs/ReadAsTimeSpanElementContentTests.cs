@@ -19,7 +19,7 @@ namespace System.Xml.Tests
         [Fact]
         public static void ReadElementContentAsTimeSpan2()
         {
-            var reader = Utils.CreateFragmentReader("<Root>  P1067<!-- Comment inbetween-->51<![CDATA[9]]><![CDATA[9]]>DT2H48M5.4<?a?>775807S  </Root>");
+            var reader = Utils.CreateFragmentReader("<Root>  P1067<!-- Comment in-between-->51<![CDATA[9]]><![CDATA[9]]>DT2H48M5.4<?a?>775807S  </Root>");
             reader.PositionOnElement("Root");
             Assert.Equal("10675199.02:48:05.4775807", reader.ReadElementContentAs(typeof(TimeSpan), null).ToString());
         }

@@ -2222,7 +2222,7 @@ namespace System.Threading.Tasks.Tests
                 taskStartMRE.WaitOne(); //make sure the task starts running before we cancel it
                 cts.Cancel();
 
-                // wait on the task to make sure the acknowledgement is fully processed
+                // wait on the task to make sure the acknowledgment is fully processed
                 try { t.Wait(); }
                 catch { }
 
@@ -2261,7 +2261,7 @@ namespace System.Threading.Tasks.Tests
                 }
             }
 
-            // Test that cancellation acknowledgement does not slip past WFCTC improperly
+            // Test that cancellation acknowledgment does not slip past WFCTC improperly
             {
                 CancellationTokenSource cts = new CancellationTokenSource();
                 bool innerStarted = false;
@@ -2518,7 +2518,7 @@ namespace System.Threading.Tasks.Tests
                     outerAggExp.InnerExceptions.Count != 1 ||
                     !(outerAggExp.InnerExceptions[0] is AggregateException))
                 {
-                    Assert.True(false, string.Format("RunTaskWaitTest:  > error: Wait on task with exceptional child threw an expception other than AggExp(AggExp(childsException))."));
+                    Assert.True(false, string.Format("RunTaskWaitTest:  > error: Wait on task with exceptional child threw an exception other than AggExp(AggExp(childsException))."));
                 }
 
                 innerAggExp = outerAggExp.InnerExceptions[0] as AggregateException;
@@ -2526,7 +2526,7 @@ namespace System.Threading.Tasks.Tests
                 if (innerAggExp.InnerExceptions.Count != 1 ||
                     innerAggExp.InnerExceptions[0].Message != exceptionMsg)
                 {
-                    Assert.True(false, string.Format("RunTaskWaitTest:  > error: Wait on task with exceptional child threw AggExp(AggExp(childsException)), but conatined wrong child exception."));
+                    Assert.True(false, string.Format("RunTaskWaitTest:  > error: Wait on task with exceptional child threw AggExp(AggExp(childsException)), but contained wrong child exception."));
                 }
             }
         }

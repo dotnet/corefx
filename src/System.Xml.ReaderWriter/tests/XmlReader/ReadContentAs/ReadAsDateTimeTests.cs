@@ -11,7 +11,7 @@ namespace System.Xml.Tests
         [Fact]
         public static void ReadContentAsDateTime1()
         {
-            var reader = Utils.CreateFragmentReader("<Root>0001-<![CDATA[01]]>-01T0<?a?>0:00:00<!-- Comment inbetween--></Root>");
+            var reader = Utils.CreateFragmentReader("<Root>0001-<![CDATA[01]]>-01T0<?a?>0:00:00<!-- Comment in-between--></Root>");
             reader.PositionOnElement("Root");
             reader.Read();
             Assert.Equal(new DateTime(1, 1, 1, 0, 0, 0), (DateTime)reader.ReadContentAs(typeof(DateTime), null));

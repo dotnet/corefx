@@ -29,7 +29,7 @@ namespace System.Xml.Tests
         [Fact]
         public static void ReadElementContentAsBoolean11()
         {
-            var reader = Utils.CreateFragmentReader("<Root> <?a?><!-- Comment inbetween--><![CDATA[0]]> </Root>");
+            var reader = Utils.CreateFragmentReader("<Root> <?a?><!-- Comment in-between--><![CDATA[0]]> </Root>");
             reader.PositionOnElement("Root");
             Assert.Equal(false, reader.ReadElementContentAs(typeof(bool), null));
         }

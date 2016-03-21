@@ -1738,7 +1738,7 @@ namespace System.Xml
         }
 
         // PushNamespaceExplicit is called when a namespace declaration is written out;
-        // It returns true if the namespace declaration should we written out, false if it should be omited (if OmitDuplicateNamespaceDeclarations is true)
+        // It returns true if the namespace declaration should we written out, false if it should be omitted (if OmitDuplicateNamespaceDeclarations is true)
         private bool PushNamespaceExplicit(string prefix, string ns)
         {
             bool writeItOut = true;

@@ -46,7 +46,7 @@ namespace Microsoft.Test.ModuleCore
         //Helpers
         protected override void DetermineChildren()
         {
-            //Delegate (add any nested testcases)
+            //Delegate (add any nested test cases)
             base.DetermineChildren();
 
             //Sort
