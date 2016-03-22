@@ -51,8 +51,8 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData(nameof(Sources.Ranges), new[] { 1024 * 16 }, MemberType = typeof(Sources))]
-        [MemberData(nameof(UnorderedSources.Ranges), new[] { 1024 * 16 }, MemberType = typeof(UnorderedSources))]
+        [MemberData(nameof(Sources.Ranges), new[] { 1024 }, MemberType = typeof(Sources))]
+        [MemberData(nameof(UnorderedSources.Ranges), new[] { 1024 }, MemberType = typeof(UnorderedSources))]
         public static void WithCancellation_DisposedEnumerator(Labeled<ParallelQuery<int>> labeled, int count)
         {
             // Disposing an enumerator should throw ODE and not OCE.
@@ -62,6 +62,19 @@ namespace System.Linq.Parallel.Tests
             DisposedEnumerator(query.WithMergeOptions(ParallelMergeOptions.AutoBuffered));
             DisposedEnumerator(query.WithMergeOptions(ParallelMergeOptions.FullyBuffered));
             DisposedEnumerator(query.WithMergeOptions(ParallelMergeOptions.NotBuffered));
+        }
+
+        /// <summary>
+        /// Run through all sources, ensuring 64k elements for each core (to saturate buffers in producers/consumers).
+        /// </summary>
+        /// Data returned is in the format of the underlying sources.
+        /// <returns>Rows of sourced data to check.</returns>
+        public static IEnumerable<object[]> ProducerBlocked_Data()
+        {
+            // Provide enough elements to ensure all the cores get >64K ints.
+            int elements = 64 * 1024 * Environment.ProcessorCount;
+            foreach (object[] data in Sources.Ranges(new[] { elements })) yield return data;
+            foreach (object[] data in UnorderedSources.Ranges(new[] { elements })) yield return data;
         }
 
         // [Regression Test]
@@ -75,9 +88,7 @@ namespace System.Linq.Parallel.Tests
         //  -> this was verified manually, but is not simple to automate
         [Theory]
         [OuterLoop] // explicit timeouts / delays
-        // Provide enough elements to ensure all the cores get >64K ints. Good up to 1000 cores
-        [MemberData(nameof(Sources.Ranges), new[] { 1024 * 64 * 1024 }, MemberType = typeof(Sources))]
-        [MemberData(nameof(UnorderedSources.Ranges), new[] { 1024 * 64 * 1024 }, MemberType = typeof(UnorderedSources))]
+        [MemberData(nameof(ProducerBlocked_Data))]
         public static void WithCancellation_DisposedEnumerator_ChannelCancellation_ProducerBlocked(Labeled<ParallelQuery<int>> labeled, int count)
         {
             ParallelQuery<int> query = labeled.Item;
