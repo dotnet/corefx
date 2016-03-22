@@ -2,27 +2,25 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
-using System.Globalization;
+using System.Collections.Generic;
 using Xunit;
 
 namespace System.Globalization.Tests
 {
     public class DateTimeFormatInfoSortableDateTimePattern
     {
-        // PosTest1: Call SortableDateTimePattern getter method should return correct value for InvariantInfo
-        [Fact]
-        public void TestGetter()
+        public static IEnumerable<object[]> SortableDateTimePattern_TestData()
         {
-            VerificationHelper(DateTimeFormatInfo.InvariantInfo, "yyyy'-'MM'-'dd'T'HH':'mm':'ss");
-            VerificationHelper(new CultureInfo("en-us").DateTimeFormat, "yyyy'-'MM'-'dd'T'HH':'mm':'ss");
-            VerificationHelper(new CultureInfo("ja-JP").DateTimeFormat, "yyyy'-'MM'-'dd'T'HH':'mm':'ss");
+            yield return new object[] { DateTimeFormatInfo.InvariantInfo };
+            yield return new object[] { new CultureInfo("en-US").DateTimeFormat };
+            yield return new object[] { new CultureInfo("ja-JP").DateTimeFormat };
         }
 
-        private void VerificationHelper(DateTimeFormatInfo info, string expected)
+        [Theory]
+        [MemberData(nameof(SortableDateTimePattern_TestData))]
+        public void SortableDateTimePattern(DateTimeFormatInfo format)
         {
-            string actual = info.SortableDateTimePattern;
-            Assert.Equal(expected, actual);
+            Assert.Equal("yyyy'-'MM'-'dd'T'HH':'mm':'ss", format.SortableDateTimePattern);
         }
     }
 }

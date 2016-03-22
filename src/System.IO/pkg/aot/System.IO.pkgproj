@@ -8,8 +8,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\System.IO.csproj">
+    <ProjectReference Include="..\..\src\redist\System.IO.depproj">
       <TargetGroup>netcore50aot</TargetGroup>
+    </ProjectReference>
+    <ProjectReference Include="..\..\src\System.IO.csproj">
+      <TargetGroup>netstandard13aot</TargetGroup>
     </ProjectReference>
   </ItemGroup>
 

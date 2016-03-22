@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using Xunit;
 using Microsoft.Xunit.Performance;
@@ -36,7 +37,7 @@ namespace System.IO.Compression.Tests
         /// Canterbury Corpus
         /// </summary>
         [Benchmark]
-        [MemberData("CanterburyCorpus")]
+        [MemberData(nameof(CanterburyCorpus))]
         public void Compress_Canterbury(int innerIterations, string fileName, CompressionLevel compressLevel)
         {
             byte[] bytes = File.ReadAllBytes(Path.Combine("GZTestData", "Canterbury", fileName));
@@ -70,7 +71,7 @@ namespace System.IO.Compression.Tests
         /// Canterbury Corpus
         /// </summary>
         [Benchmark]
-        [MemberData("CanterburyCorpus")]
+        [MemberData(nameof(CanterburyCorpus))]
         public void Decompress_Canterbury(int innerIterations, string fileName, CompressionLevel compressLevel)
         {
             string zipFilePath = Path.Combine("GZTestData", "Canterbury", "GZcompressed", fileName + ".gz");

@@ -57,7 +57,7 @@ namespace System.Net
             {
                 if (!(IsValidContext && IsCompleted))
                 {
-                    throw new Win32Exception((int)SecurityStatusPal.InvalidHandle);
+                    throw new Win32Exception((int)SecurityStatusPalErrorCode.InvalidHandle);
                 }
 
                 string name = NegotiateStreamPal.QueryContextAssociatedName(_securityContext);
@@ -269,7 +269,7 @@ namespace System.Net
 
         internal SafeDeleteContext GetContext(out SecurityStatusPal status)
         {
-            status = SecurityStatusPal.OK;
+            status = new SecurityStatusPal(SecurityStatusPalErrorCode.OK);
             if (!(IsCompleted && IsValidContext))
             {
                 if (GlobalLog.IsEnabled)
@@ -292,7 +292,7 @@ namespace System.Net
 
             if (!IsValidContext)
             {
-                status = SecurityStatusPal.InvalidHandle;
+                status = new SecurityStatusPal(SecurityStatusPalErrorCode.InvalidHandle);
                 return null;
             }
 
@@ -352,10 +352,10 @@ namespace System.Net
 
                     if (GlobalLog.IsEnabled)
                     {
-                        GlobalLog.Print("NTAuthentication#" + LoggingHash.HashString(this) + "::GetOutgoingBlob() SSPIWrapper.InitializeSecurityContext() returns statusCode:0x" + ((int)statusCode).ToString("x8", NumberFormatInfo.InvariantInfo) + " (" + statusCode.ToString() + ")");
+                        GlobalLog.Print("NTAuthentication#" + LoggingHash.HashString(this) + "::GetOutgoingBlob() SSPIWrapper.InitializeSecurityContext() returns statusCode:0x" + ((int)statusCode.ErrorCode).ToString("x8", NumberFormatInfo.InvariantInfo) + " (" + statusCode.ToString() + ")");
                     }
 
-                    if (statusCode == SecurityStatusPal.CompleteNeeded)
+                    if (statusCode.ErrorCode == SecurityStatusPalErrorCode.CompleteNeeded)
                     {
                         var inSecurityBuffers = new SecurityBuffer[1];
                         inSecurityBuffers[0] = outSecurityBuffer;
@@ -364,7 +364,7 @@ namespace System.Net
 
                         if (GlobalLog.IsEnabled)
                         {
-                            GlobalLog.Print("NTAuthentication#" + LoggingHash.HashString(this) + "::GetOutgoingDigestBlob() SSPIWrapper.CompleteAuthToken() returns statusCode:0x" + ((int)statusCode).ToString("x8", NumberFormatInfo.InvariantInfo) + " (" + statusCode.ToString() + ")");
+                            GlobalLog.Print("NTAuthentication#" + LoggingHash.HashString(this) + "::GetOutgoingDigestBlob() SSPIWrapper.CompleteAuthToken() returns statusCode:0x" + ((int)statusCode.ErrorCode).ToString("x8", NumberFormatInfo.InvariantInfo) + " (" + statusCode.ToString() + ")");
                         }
 
                         outSecurityBuffer.token = null;
@@ -383,7 +383,7 @@ namespace System.Net
 
                     if (GlobalLog.IsEnabled)
                     {
-                        GlobalLog.Print("NTAuthentication#" + LoggingHash.HashString(this) + "::GetOutgoingBlob() SSPIWrapper.AcceptSecurityContext() returns statusCode:0x" + ((int)statusCode).ToString("x8", NumberFormatInfo.InvariantInfo) + " (" + statusCode.ToString() + ")");
+                        GlobalLog.Print("NTAuthentication#" + LoggingHash.HashString(this) + "::GetOutgoingBlob() SSPIWrapper.AcceptSecurityContext() returns statusCode:0x" + ((int)statusCode.ErrorCode).ToString("x8", NumberFormatInfo.InvariantInfo) + " (" + statusCode.ToString() + ")");
                     }
                 }
             }
@@ -418,7 +418,7 @@ namespace System.Net
 
                 if (GlobalLog.IsEnabled)
                 {
-                    GlobalLog.Leave("NTAuthentication#" + LoggingHash.HashString(this) + "::GetOutgoingBlob", "null statusCode:0x" + ((int)statusCode).ToString("x8", NumberFormatInfo.InvariantInfo) + " (" + statusCode.ToString() + ")");
+                    GlobalLog.Leave("NTAuthentication#" + LoggingHash.HashString(this) + "::GetOutgoingBlob", "null statusCode:0x" + ((int)statusCode.ErrorCode).ToString("x8", NumberFormatInfo.InvariantInfo) + " (" + statusCode.ToString() + ")");
                 }
                 return null;
             }
@@ -429,25 +429,15 @@ namespace System.Net
             }
 
             // The return value will tell us correctly if the handshake is over or not
-            if (statusCode == SecurityStatusPal.OK)
+            if (statusCode.ErrorCode == SecurityStatusPalErrorCode.OK)
             {
                 // Success.
-                if (statusCode != SecurityStatusPal.OK)
-                {
-                    if (GlobalLog.IsEnabled)
-                    {
-                        GlobalLog.AssertFormat("NTAuthentication#{0}::GetOutgoingBlob()|statusCode:[0x{1:x8}] ({2}) m_SecurityContext#{3}::Handle:[{4}] [STATUS != OK]", LoggingHash.HashString(this), (int)statusCode, statusCode, LoggingHash.HashString(_securityContext), LoggingHash.ObjectToString(_securityContext));
-                    }
-
-                    Debug.Fail("NTAuthentication#" + LoggingHash.HashString(this) + "::GetOutgoingBlob()|statusCode:[0x" + ((int)statusCode).ToString("x8") + "] (" + statusCode + ") m_SecurityContext#" + LoggingHash.HashString(_securityContext) + "::Handle:[" + LoggingHash.ObjectToString(_securityContext) + "] [STATUS != OK]");
-                }
-
                 _isCompleted = true;
             }
             else if (GlobalLog.IsEnabled)
             {
                 // We need to continue.
-                GlobalLog.Print("NTAuthentication#" + LoggingHash.HashString(this) + "::GetOutgoingBlob() need continue statusCode:[0x" + ((int)statusCode).ToString("x8", NumberFormatInfo.InvariantInfo) + "] (" + statusCode.ToString() + ") m_SecurityContext#" + LoggingHash.HashString(_securityContext) + "::Handle:" + LoggingHash.ObjectToString(_securityContext) + "]");
+                GlobalLog.Print("NTAuthentication#" + LoggingHash.HashString(this) + "::GetOutgoingBlob() need continue statusCode:[0x" + ((int)statusCode.ErrorCode).ToString("x8", NumberFormatInfo.InvariantInfo) + "] (" + statusCode.ToString() + ") m_SecurityContext#" + LoggingHash.HashString(_securityContext) + "::Handle:" + LoggingHash.ObjectToString(_securityContext) + "]");
             }
 
             if (GlobalLog.IsEnabled)

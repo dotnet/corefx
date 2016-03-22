@@ -34,19 +34,17 @@ static_assert(PAL_GSS_COMPLETE == GSS_S_COMPLETE, "");
 static_assert(PAL_GSS_CONTINUE_NEEDED == GSS_S_CONTINUE_NEEDED, "");
 
 #if !HAVE_GSS_SPNEGO_MECHANISM
-static char gss_mech_value[] = "\x2b\x06\x01\x05\x05\x02"; // Binary representation of SPNEGO Oid (RFC 4178)
+static char gss_spnego_oid_value[] = "\x2b\x06\x01\x05\x05\x02"; // Binary representation of SPNEGO Oid (RFC 4178)
 #endif
 
-static uint32_t NetSecurityNative_HandleError(uint32_t majorStatus,
-                                              gss_buffer_t gssBuffer,
-                                              struct PAL_GssBuffer* targetBuffer)
+// transfers ownership of the underlying data from gssBuffer to PAL_GssBuffer
+static void NetSecurityNative_MoveBuffer(gss_buffer_t gssBuffer, struct PAL_GssBuffer* targetBuffer)
 {
-    assert(targetBuffer != nullptr);
     assert(gssBuffer != nullptr);
+    assert(targetBuffer != nullptr);
 
     targetBuffer->length = gssBuffer->length;
     targetBuffer->data = static_cast<uint8_t*>(gssBuffer->value);
-    return majorStatus;
 }
 
 static uint32_t NetSecurityNative_AcquireCredSpNego(uint32_t* minorStatus,
@@ -57,10 +55,11 @@ static uint32_t NetSecurityNative_AcquireCredSpNego(uint32_t* minorStatus,
     assert(minorStatus != nullptr);
     assert(desiredName != nullptr);
     assert(outputCredHandle != nullptr);
+
 #if HAVE_GSS_SPNEGO_MECHANISM
     gss_OID_set_desc gss_mech_spnego_OID_set_desc = {.count = 1, .elements = GSS_SPNEGO_MECHANISM};
 #else
-    gss_OID_desc gss_mech_spnego_OID_desc = {.length = 6, .elements = static_cast<void*>(gss_mech_value)};
+    gss_OID_desc gss_mech_spnego_OID_desc = {.length = 6, .elements = static_cast<void*>(gss_spnego_oid_value)};
     gss_OID_set_desc gss_mech_spnego_OID_set_desc = {.count = 1, .elements = &gss_mech_spnego_OID_desc};
 #endif
     return gss_acquire_cred(
@@ -81,29 +80,41 @@ extern "C" uint32_t NetSecurityNative_DeleteSecContext(uint32_t* minorStatus, Gs
     return gss_delete_sec_context(minorStatus, contextHandle, GSS_C_NO_BUFFER);
 }
 
-extern "C" uint32_t NetSecurityNative_DisplayStatus(uint32_t* minorStatus,
-                                                    uint32_t statusValue,
-                                                    int32_t isGssMechCode,
-                                                    struct PAL_GssBuffer* outBuffer)
+static uint32_t NetSecurityNative_DisplayStatus(uint32_t* minorStatus,
+                                                uint32_t statusValue,
+                                                int statusType,
+                                                struct PAL_GssBuffer* outBuffer)
 {
     assert(minorStatus != nullptr);
-    assert(isGssMechCode == 0 || isGssMechCode == 1);
     assert(outBuffer != nullptr);
 
-    int statusType = isGssMechCode ? GSS_C_MECH_CODE : GSS_C_GSS_CODE;
     uint32_t messageContext;
     GssBuffer gssBuffer{.length = 0, .value = nullptr};
     uint32_t majorStatus =
         gss_display_status(minorStatus, statusValue, statusType, GSS_C_NO_OID, &messageContext, &gssBuffer);
 
-    return NetSecurityNative_HandleError(majorStatus, &gssBuffer, outBuffer);
+    NetSecurityNative_MoveBuffer(&gssBuffer, outBuffer);
+    return majorStatus;
+}
+
+extern "C" uint32_t NetSecurityNative_DisplayMinorStatus(uint32_t* minorStatus,
+                                                         uint32_t statusValue,
+                                                         struct PAL_GssBuffer* outBuffer)
+{
+    return NetSecurityNative_DisplayStatus(minorStatus, statusValue, GSS_C_MECH_CODE, outBuffer);
+}
+
+extern "C" uint32_t NetSecurityNative_DisplayMajorStatus(uint32_t* minorStatus,
+                                                         uint32_t statusValue,
+                                                         struct PAL_GssBuffer* outBuffer)
+{
+    return NetSecurityNative_DisplayStatus(minorStatus, statusValue, GSS_C_GSS_CODE, outBuffer);
 }
 
 extern "C" uint32_t
 NetSecurityNative_ImportUserName(uint32_t* minorStatus, char* inputName, uint32_t inputNameLen, GssName** outputName)
 {
     assert(minorStatus != nullptr);
-    assert(outputName != nullptr);
     assert(inputName != nullptr);
     assert(outputName != nullptr);
 
@@ -141,10 +152,9 @@ extern "C" uint32_t NetSecurityNative_InitSecContext(uint32_t* minorStatus,
     assert(contextHandle != nullptr);
     assert(isNtlm == 0 || isNtlm == 1);
     assert(targetName != nullptr);
-    assert(contextHandle != nullptr);
+    assert(inputBytes != nullptr || inputLength == 0);
     assert(outBuffer != nullptr);
     assert(retFlags != nullptr);
-    assert(inputBytes != nullptr || inputLength == 0);
 
 // Note: claimantCredHandle can be null
 
@@ -154,11 +164,11 @@ extern "C" uint32_t NetSecurityNative_InitSecContext(uint32_t* minorStatus,
     assert(!isNtlm && "NTLM is not supported by MIT libgssapi_krb5");
     (void)isNtlm; // unused
 
-    gss_OID_desc gss_mech_spnego_OID_desc = {.length = 6, .elements = static_cast<void*>(gss_mech_value)};
+    gss_OID_desc gss_mech_spnego_OID_desc = {.length = 6, .elements = static_cast<void*>(gss_spnego_oid_value)};
     gss_OID desiredMech = &gss_mech_spnego_OID_desc;
 #endif
 
-    GssBuffer inputToken{.length = UnsignedCast(inputLength), .value = inputBytes};
+    GssBuffer inputToken{.length = inputLength, .value = inputBytes};
     GssBuffer gssBuffer{.length = 0, .value = nullptr};
 
     uint32_t majorStatus = gss_init_sec_context(minorStatus,
@@ -175,7 +185,8 @@ extern "C" uint32_t NetSecurityNative_InitSecContext(uint32_t* minorStatus,
                                                 retFlags,
                                                 nullptr);
 
-    return NetSecurityNative_HandleError(majorStatus, &gssBuffer, outBuffer);
+    NetSecurityNative_MoveBuffer(&gssBuffer, outBuffer);
+    return majorStatus;
 }
 
 extern "C" uint32_t NetSecurityNative_AcceptSecContext(uint32_t* minorStatus,
@@ -186,8 +197,8 @@ extern "C" uint32_t NetSecurityNative_AcceptSecContext(uint32_t* minorStatus,
 {
     assert(minorStatus != nullptr);
     assert(contextHandle != nullptr);
-    assert(outBuffer != nullptr);
     assert(inputBytes != nullptr || inputLength == 0);
+    assert(outBuffer != nullptr);
 
     GssBuffer inputToken{.length = UnsignedCast(inputLength), .value = inputBytes};
     GssBuffer gssBuffer{.length = 0, .value = nullptr};
@@ -204,7 +215,8 @@ extern "C" uint32_t NetSecurityNative_AcceptSecContext(uint32_t* minorStatus,
                                                   nullptr,
                                                   nullptr);
 
-    return NetSecurityNative_HandleError(majorStatus, &gssBuffer, outBuffer);
+    NetSecurityNative_MoveBuffer(&gssBuffer, outBuffer);
+    return majorStatus;
 }
 
 extern "C" uint32_t NetSecurityNative_ReleaseCred(uint32_t* minorStatus, GssCredId** credHandle)
@@ -248,15 +260,16 @@ extern "C" uint32_t NetSecurityNative_Wrap(uint32_t* minorStatus,
     assert(count >= 0);
     assert(outBuffer != nullptr);
     // count refers to the length of the input message. That is, number of bytes of inputBytes
-    // starting at offset
-    // that need to be wrapped.
+    // starting at offset that need to be wrapped.
 
     int confState;
     GssBuffer inputMessageBuffer{.length = UnsignedCast(count), .value = inputBytes + offset};
     GssBuffer gssBuffer;
     uint32_t majorStatus =
         gss_wrap(minorStatus, contextHandle, isEncrypt, GSS_C_QOP_DEFAULT, &inputMessageBuffer, &confState, &gssBuffer);
-    return NetSecurityNative_HandleError(majorStatus, &gssBuffer, outBuffer);
+
+    NetSecurityNative_MoveBuffer(&gssBuffer, outBuffer);
+    return majorStatus;
 }
 
 extern "C" uint32_t NetSecurityNative_Unwrap(uint32_t* minorStatus,
@@ -274,11 +287,12 @@ extern "C" uint32_t NetSecurityNative_Unwrap(uint32_t* minorStatus,
     assert(outBuffer != nullptr);
 
     // count refers to the length of the input message. That is, the number of bytes of inputBytes
-    // starting at offset  that need to be wrapped.
+    // starting at offset that need to be wrapped.
     GssBuffer inputMessageBuffer{.length = UnsignedCast(count), .value = inputBytes + offset};
     GssBuffer gssBuffer{.length = 0, .value = nullptr};
     uint32_t majorStatus = gss_unwrap(minorStatus, contextHandle, &inputMessageBuffer, &gssBuffer, nullptr, nullptr);
-    return NetSecurityNative_HandleError(majorStatus, &gssBuffer, outBuffer);
+    NetSecurityNative_MoveBuffer(&gssBuffer, outBuffer);
+    return majorStatus;
 }
 
 static uint32_t NetSecurityNative_AcquireCredWithPassword(uint32_t* minorStatus,

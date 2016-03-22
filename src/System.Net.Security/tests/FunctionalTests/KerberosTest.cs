@@ -12,6 +12,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 using Xunit;
+using Xunit.Abstractions;
 
 namespace System.Net.Security.Tests
 {
@@ -22,25 +23,38 @@ namespace System.Net.Security.Tests
         private const string SudoCommand = "sudo";
         private const string ScriptName = "setup-kdc.sh";
         private const string ScriptUninstallArgs = "--uninstall --yes";
-        private readonly bool _isKrbInstalled ;
+        private const string ScriptInstallArgs = "--password {0} --yes";
+        private const int InstalledButUnconfiguredExitCode = 2;
+        private readonly bool _isKrbPreInstalled ;
+        public readonly string password;
 
         public KDCSetup()
         {
-            _isKrbInstalled = File.Exists(Krb5ConfigFile);
-            if (!_isKrbInstalled)
+            _isKrbPreInstalled = File.Exists(Krb5ConfigFile) &&
+                File.ReadAllText(Krb5ConfigFile).Contains(TestConfiguration.Realm);
+            if (!_isKrbPreInstalled)
             {
-                int exitCode = RunSetupScript();
+                password = Guid.NewGuid().ToString("N");
+                int exitCode = RunSetupScript(string.Format(ScriptInstallArgs, password));
                 if (exitCode != 0)
                 {
-                    Dispose();
+                    if (exitCode != InstalledButUnconfiguredExitCode)
+                    {
+                        Dispose();
+                    }
+
                     Assert.True(false, "KDC setup failure");
                 }
+            }
+            else
+            {
+                password = TestConfiguration.DefaultPassword;
             }
         }
 
         public void Dispose()
         {
-            if (!_isKrbInstalled)
+            if (!_isKrbPreInstalled)
             {
                 RunSetupScript(ScriptUninstallArgs);
             }
@@ -48,23 +62,19 @@ namespace System.Net.Security.Tests
 
         // checks for avilability of Kerberos related infrastructure
         // on the host. Returns true available, false otherwise
-        public bool CheckAndInitializeKerberos()
+        public bool CheckAndClearCredentials(ITestOutputHelper output)
         {
-            if (_isKrbInstalled)
+            // Clear the credentials
+            var startInfo = new ProcessStartInfo(KDestroyCmd);
+            startInfo.UseShellExecute = true;
+            startInfo.CreateNoWindow = true;
+            startInfo.Arguments = "-A";
+            using (Process clearCreds = Process.Start(startInfo))
             {
-                // Clear the credentials
-                var startInfo = new ProcessStartInfo(KDestroyCmd);
-                startInfo.UseShellExecute = false;
-                startInfo.CreateNoWindow = true;
-                startInfo.Arguments = "-A";
-                using (Process clearCreds = Process.Start(startInfo))
-                {
-                    clearCreds.WaitForExit();
-                    return (clearCreds.ExitCode == 0);
-                }
+                clearCreds.WaitForExit();
+                output.WriteLine("kdestroy returned {0}", clearCreds.ExitCode);
+                return (clearCreds.ExitCode == 0);
             }
-
-            return false;
         }
 
         private static int RunSetupScript(string args = null)
@@ -83,17 +93,20 @@ namespace System.Net.Security.Tests
         }
     }
 
+    [PlatformSpecific(PlatformID.Linux)]
     public class KerberosTest : IDisposable, IClassFixture<KDCSetup>
     {
         private readonly byte[] _firstMessage = Encoding.UTF8.GetBytes("Sample First Message");
         private readonly byte[] _secondMessage = Encoding.UTF8.GetBytes("Sample Second Message");
         private readonly bool _isKrbAvailable; // tests are no-op if kerberos is not available on the host machine
         private readonly KDCSetup _fixture;
+        private readonly ITestOutputHelper _output;
 
-        public KerberosTest(KDCSetup fixture)
+        public KerberosTest(KDCSetup fixture, ITestOutputHelper output)
         {
             _fixture = fixture;
-            _isKrbAvailable = _fixture.CheckAndInitializeKerberos();
+            _output = output;
+            _isKrbAvailable = _fixture.CheckAndClearCredentials(_output);
         }
 
         [Fact, OuterLoop]
@@ -102,6 +115,7 @@ namespace System.Net.Security.Tests
         {
             if (!_isKrbAvailable)
             {
+                _output.WriteLine("skipping NegotiateStream_StreamToStream_KerberosAuthentication_Success");
                 return;
             }
 
@@ -117,7 +131,7 @@ namespace System.Net.Security.Tests
                 Task[] auth = new Task[2];
                 string user = string.Format("{0}@{1}", TestConfiguration.KerberosUser, TestConfiguration.Realm);
                 string target = string.Format("{0}@{1}", TestConfiguration.HostTarget, TestConfiguration.Realm);
-                NetworkCredential credential = new NetworkCredential(user, TestConfiguration.Password);
+                NetworkCredential credential = new NetworkCredential(user, _fixture.password);
                 auth[0] = client.AuthenticateAsClientAsync(credential, target);
                 auth[1] = server.AuthenticateAsServerAsync();
 
@@ -125,17 +139,17 @@ namespace System.Net.Security.Tests
                 Assert.True(finished, "Handshake completed in the allotted time");
 
                 // Expected Client property values:
-                Assert.True(client.IsAuthenticated, "client is now authenticated");
+                Assert.True(client.IsAuthenticated, "client.IsAuthenticated");
                 Assert.Equal(TokenImpersonationLevel.Identification, client.ImpersonationLevel);
-                Assert.True(client.IsEncrypted, "client is encrypted");
-                Assert.True(client.IsMutuallyAuthenticated, "client is mutually authenticated");
-                Assert.False(client.IsServer, "client is not server");
-                Assert.True(client.IsSigned, "client is signed");
-                Assert.False(client.LeaveInnerStreamOpen, "inner stream remains open");
+                Assert.True(client.IsEncrypted, "client.IsEncrypted");
+                Assert.True(client.IsMutuallyAuthenticated, "client.IsMutuallyAuthenticated");
+                Assert.False(client.IsServer, "client.IsServer");
+                Assert.True(client.IsSigned, "client.IsSigned");
+                Assert.False(client.LeaveInnerStreamOpen, "client.LeaveInnerStreamOpen");
 
                 IIdentity serverIdentity = client.RemoteIdentity;
                 Assert.Equal("Kerberos", serverIdentity.AuthenticationType);
-                Assert.True(serverIdentity.IsAuthenticated, "server identity is authenticated");
+                Assert.True(serverIdentity.IsAuthenticated, "serverIdentity.IsAuthenticated");
                 IdentityValidator.AssertHasName(serverIdentity, target);
             }
         }
@@ -146,6 +160,7 @@ namespace System.Net.Security.Tests
         {
             if (!_isKrbAvailable)
             {
+                _output.WriteLine("skipping NegotiateStream_StreamToStream_AuthToHttpTarget_Success");
                 return;
             }
 
@@ -161,7 +176,7 @@ namespace System.Net.Security.Tests
                 Task[] auth = new Task[2];
                 string user = string.Format("{0}@{1}", TestConfiguration.KerberosUser, TestConfiguration.Realm);
                 string target = string.Format("{0}@{1}",TestConfiguration.HttpTarget, TestConfiguration.Realm);
-                NetworkCredential credential = new NetworkCredential(user, TestConfiguration.Password);
+                NetworkCredential credential = new NetworkCredential(user, _fixture.password);
                 auth[0] = client.AuthenticateAsClientAsync(credential, target);
                 auth[1] = server.AuthenticateAsServerAsync();
 
@@ -169,17 +184,17 @@ namespace System.Net.Security.Tests
                 Assert.True(finished, "Handshake completed in the allotted time");
 
                 // Expected Client property values:
-                Assert.True(client.IsAuthenticated, "client is authenticated");
+                Assert.True(client.IsAuthenticated, "client.IsAuthenticated");
                 Assert.Equal(TokenImpersonationLevel.Identification, client.ImpersonationLevel);
-                Assert.True(client.IsEncrypted, "client is encrypted");
-                Assert.True(client.IsMutuallyAuthenticated, "mutually authentication is true");
-                Assert.False(client.IsServer, "client is not a server");
-                Assert.True(client.IsSigned, "clientStream is signed");
-                Assert.False(client.LeaveInnerStreamOpen, "Inner stream is open");
+                Assert.True(client.IsEncrypted, "client.IsEncrypted");
+                Assert.True(client.IsMutuallyAuthenticated, "client.IsMutuallyAuthenticated");
+                Assert.False(client.IsServer, "client.IsServer");
+                Assert.True(client.IsSigned, "client.IsSigned");
+                Assert.False(client.LeaveInnerStreamOpen, "client.LeaveInnerStream");
 
                 IIdentity serverIdentity = client.RemoteIdentity;
                 Assert.Equal("Kerberos", serverIdentity.AuthenticationType);
-                Assert.True(serverIdentity.IsAuthenticated, "remote identity of client is authenticated");
+                Assert.True(serverIdentity.IsAuthenticated, "serverIdentity.IsAuthenticated");
                 IdentityValidator.AssertHasName(serverIdentity, target);
             }
         }
@@ -190,6 +205,7 @@ namespace System.Net.Security.Tests
         {
             if (!_isKrbAvailable)
             {
+                _output.WriteLine("skipping NegotiateStream_StreamToStream_KerberosAuthWithoutRealm_Success");
                 return;
             }
 
@@ -203,7 +219,7 @@ namespace System.Net.Security.Tests
                 Assert.False(client.IsAuthenticated);
 
                 Task[] auth = new Task[2];
-                NetworkCredential credential = new NetworkCredential(TestConfiguration.KerberosUser, TestConfiguration.Password);
+                NetworkCredential credential = new NetworkCredential(TestConfiguration.KerberosUser, _fixture.password);
                 auth[0] = client.AuthenticateAsClientAsync(credential, TestConfiguration.HostTarget);
                 auth[1] = server.AuthenticateAsServerAsync();
 
@@ -211,17 +227,17 @@ namespace System.Net.Security.Tests
                 Assert.True(finished, "Handshake completed in the allotted time");
 
                 // Expected Client property values:
-                Assert.True(client.IsAuthenticated, "client is authenticated");
+                Assert.True(client.IsAuthenticated, "client.IsAuthenticated");
                 Assert.Equal(TokenImpersonationLevel.Identification, client.ImpersonationLevel);
-                Assert.True(client.IsEncrypted, "client stream is encrypted");
-                Assert.True(client.IsMutuallyAuthenticated, "mutual authentication is true");
-                Assert.False(client.IsServer, "client is not server");
-                Assert.True(client.IsSigned, "client stream is signed");
-                Assert.False(client.LeaveInnerStreamOpen, "inner stream is open");
+                Assert.True(client.IsEncrypted, "client.IsEncrypted");
+                Assert.True(client.IsMutuallyAuthenticated, "client.IsMutuallyAuthenticated");
+                Assert.False(client.IsServer, "client.IsServer");
+                Assert.True(client.IsSigned, "client.IsSigned");
+                Assert.False(client.LeaveInnerStreamOpen, "client.LeaveInnerStreamOpen");
 
                 IIdentity serverIdentity = client.RemoteIdentity;
                 Assert.Equal("Kerberos", serverIdentity.AuthenticationType);
-                Assert.True(serverIdentity.IsAuthenticated, "remote identity is authenticated");
+                Assert.True(serverIdentity.IsAuthenticated, "serverIdentity.IsAuthenticated");
                 IdentityValidator.AssertHasName(serverIdentity, TestConfiguration.HostTarget);
             }
         }
@@ -232,6 +248,7 @@ namespace System.Net.Security.Tests
         {
             if (!_isKrbAvailable)
             {
+                _output.WriteLine("skipping NegotiateStream_StreamToStream_KerberosAuthDefaultCredentials_Success");
                 return;
             }
 
@@ -248,7 +265,7 @@ namespace System.Net.Security.Tests
                 string user = string.Format("{0}@{1}", TestConfiguration.KerberosUser, TestConfiguration.Realm);
                 string target = string.Format("{0}@{1}", TestConfiguration.HostTarget, TestConfiguration.Realm);
                 // Seed the default Kerberos cache with the TGT
-                UnixGssFakeNegotiateStream.GetDefaultKerberosCredentials(user, TestConfiguration.Password);
+                UnixGssFakeNegotiateStream.GetDefaultKerberosCredentials(user, _fixture.password);
                 auth[0] = client.AuthenticateAsClientAsync(CredentialCache.DefaultNetworkCredentials, target);
                 auth[1] = server.AuthenticateAsServerAsync();
 
@@ -256,17 +273,17 @@ namespace System.Net.Security.Tests
                 Assert.True(finished, "Handshake completed in the allotted time");
 
                 // Expected Client property values:
-                Assert.True(client.IsAuthenticated, "client is now authenticated");
+                Assert.True(client.IsAuthenticated, "client.IsAuthenticated");
                 Assert.Equal(TokenImpersonationLevel.Identification, client.ImpersonationLevel);
-                Assert.True(client.IsEncrypted, "client stream is encrypted");
-                Assert.True(client.IsMutuallyAuthenticated, "mutual authentication is true");
-                Assert.False(client.IsServer, "client is not server");
-                Assert.True(client.IsSigned, "client stream is signed");
-                Assert.False(client.LeaveInnerStreamOpen, "inner stream is open");
+                Assert.True(client.IsEncrypted, "client.IsEncrypted");
+                Assert.True(client.IsMutuallyAuthenticated, "client.IsMutuallyAuthenticated");
+                Assert.False(client.IsServer, "client.IsServer");
+                Assert.True(client.IsSigned, "client.IsSigned");
+                Assert.False(client.LeaveInnerStreamOpen, "client.LeaveInnerStreamOpen");
 
                 IIdentity serverIdentity = client.RemoteIdentity;
                 Assert.Equal("Kerberos", serverIdentity.AuthenticationType);
-                Assert.True(serverIdentity.IsAuthenticated,"server identity is authenticated");
+                Assert.True(serverIdentity.IsAuthenticated,"serverIdentity.IsAuthenticated");
                 IdentityValidator.AssertHasName(serverIdentity, target);
             }
         }
@@ -277,6 +294,7 @@ namespace System.Net.Security.Tests
         {
             if (!_isKrbAvailable)
             {
+                _output.WriteLine("skipping NegotiateStream_EchoServer_ClientWriteRead_Successive_Sync_Success");
                 return;
             }
 
@@ -294,7 +312,7 @@ namespace System.Net.Security.Tests
                 Task[] auth = new Task[2];
                 string user = string.Format("{0}@{1}", TestConfiguration.KerberosUser, TestConfiguration.Realm);
                 string target = string.Format("{0}@{1}", TestConfiguration.HostTarget, TestConfiguration.Realm);
-                NetworkCredential credential = new NetworkCredential(user, TestConfiguration.Password);
+                NetworkCredential credential = new NetworkCredential(user, _fixture.password);
                 auth[0] = client.AuthenticateAsClientAsync(credential, target);
                 auth[1] = server.AuthenticateAsServerAsync();
                 bool finished = Task.WaitAll(auth, TestConfiguration.PassingTestTimeoutMilliseconds);
@@ -319,6 +337,7 @@ namespace System.Net.Security.Tests
         {
             if (!_isKrbAvailable)
             {
+                _output.WriteLine("skipping NegotiateStream_EchoServer_ClientWriteRead_Successive_Async_Success");
                 return;
             }
 
@@ -336,19 +355,19 @@ namespace System.Net.Security.Tests
                 Task[] auth = new Task[2];
                 string user = string.Format("{0}@{1}", TestConfiguration.KerberosUser, TestConfiguration.Realm);
                 string target = string.Format("{0}@{1}", TestConfiguration.HostTarget, TestConfiguration.Realm);
-                NetworkCredential credential = new NetworkCredential(user, TestConfiguration.Password);
+                NetworkCredential credential = new NetworkCredential(user, _fixture.password);
                 auth[0] = client.AuthenticateAsClientAsync(credential, target);
                 auth[1] = server.AuthenticateAsServerAsync();
                 bool finished = Task.WaitAll(auth, TestConfiguration.PassingTestTimeoutMilliseconds);
                 Assert.True(finished, "Handshake completed in the allotted time");
 
                 Task serverTask = server.PollMessageAsync(2);
-                Task[] msgTasks = new Task[5];
-                msgTasks[0] = client.WriteAsync(_firstMessage, 0, _firstMessage.Length);
-                msgTasks[1] = client.WriteAsync(_secondMessage, 0, _secondMessage.Length);
-                msgTasks[2] = client.ReadAsync(firstRecvBuffer, 0, firstRecvBuffer.Length);
-                msgTasks[3] = client.ReadAsync(secondRecvBuffer, 0, secondRecvBuffer.Length);
-                msgTasks[4] = serverTask;
+                Task[] msgTasks = new Task[3];
+                msgTasks[0] = client.WriteAsync(_firstMessage, 0, _firstMessage.Length).ContinueWith((t) =>
+                    client.WriteAsync(_secondMessage, 0, _secondMessage.Length));
+                msgTasks[1] =  client.ReadAsync(firstRecvBuffer, 0, firstRecvBuffer.Length).ContinueWith((t) =>
+                    client.ReadAsync(secondRecvBuffer, 0, secondRecvBuffer.Length));
+                msgTasks[2] = serverTask;
                 finished = Task.WaitAll(msgTasks, TestConfiguration.PassingTestTimeoutMilliseconds);
                 Assert.True(finished, "Messages sent and received in the allotted time");
                 Assert.True(_firstMessage.SequenceEqual(firstRecvBuffer), "The first message received is as expected");
@@ -362,6 +381,7 @@ namespace System.Net.Security.Tests
         {
             if (!_isKrbAvailable)
             {
+                _output.WriteLine("skipping NegotiateStream_StreamToStream_KerberosAuthDefaultCredentialsNoSeed_Failure");
                 return;
             }
 
@@ -384,6 +404,7 @@ namespace System.Net.Security.Tests
         {
             if (!_isKrbAvailable)
             {
+                _output.WriteLine("skipping NegotiateStream_StreamToStream_KerberosAuthInvalidUser_Failure");
                 return;
             }
 
@@ -396,7 +417,7 @@ namespace System.Net.Security.Tests
 
                 string user = string.Format("{0}@{1}", TestConfiguration.KerberosUser, TestConfiguration.Realm);
                 string target = string.Format("{0}@{1}", TestConfiguration.HostTarget, TestConfiguration.Realm);
-                NetworkCredential credential = new NetworkCredential(user.Substring(1), TestConfiguration.Password);
+                NetworkCredential credential = new NetworkCredential(user.Substring(1), _fixture.password);
                 Assert.Throws<AuthenticationException>(() =>
                 {
                     client.AuthenticateAsClientAsync(credential, target);
@@ -410,6 +431,7 @@ namespace System.Net.Security.Tests
         {
             if (!_isKrbAvailable)
             {
+                _output.WriteLine("skipping NegotiateStream_StreamToStream_KerberosAuthInvalidPassword_Failure");
                 return;
             }
 
@@ -422,7 +444,7 @@ namespace System.Net.Security.Tests
 
                 string user = string.Format("{0}@{1}", TestConfiguration.KerberosUser, TestConfiguration.Realm);
                 string target = string.Format("{0}@{1}", TestConfiguration.HostTarget, TestConfiguration.Realm);
-                NetworkCredential credential = new NetworkCredential(user, TestConfiguration.Password.Substring(1));
+                NetworkCredential credential = new NetworkCredential(user, _fixture.password.Substring(1));
                 Assert.Throws<AuthenticationException>(() =>
                 {
                     client.AuthenticateAsClientAsync(credential, target);
@@ -436,6 +458,7 @@ namespace System.Net.Security.Tests
         {
             if (!_isKrbAvailable)
             {
+                _output.WriteLine("skipping NegotiateStream_StreamToStream_KerberosAuthInvalidTarget_Failure");
                 return;
             }
 
@@ -448,7 +471,7 @@ namespace System.Net.Security.Tests
 
                 string user = string.Format("{0}@{1}", TestConfiguration.KerberosUser, TestConfiguration.Realm);
                 string target = string.Format("{0}@{1}", TestConfiguration.HostTarget, TestConfiguration.Realm);
-                NetworkCredential credential = new NetworkCredential(user, TestConfiguration.Password);
+                NetworkCredential credential = new NetworkCredential(user, _fixture.password);
                 Assert.ThrowsAsync<AuthenticationException>(() => client.AuthenticateAsClientAsync(credential, target.Substring(1)));
             }
         }
@@ -457,7 +480,7 @@ namespace System.Net.Security.Tests
         {
             try
             {
-                _fixture.CheckAndInitializeKerberos();
+                _fixture.CheckAndClearCredentials(_output);
             }
             catch
             {

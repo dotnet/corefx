@@ -2,9 +2,13 @@
   "dependencies": {
     "System.IO": "4.0.0",
     "System.Runtime": "4.0.0",
-    "System.Security.Cryptography.Primitives": "4.0.0-rc3-23808"
+    "System.Security.Cryptography.Primitives": "4.0.0-rc3-23918"
   },
   "frameworks": {
-    "dotnet5.4": {}
+    "netstandard1.3": {
+      "imports": [
+        "dotnet5.4"
+      ]
+    }
   }
 }

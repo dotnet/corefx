@@ -16,13 +16,19 @@
 #include <stdlib.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
+#include <sys/time.h>
 #include <sys/types.h>
 #include <sys/file.h>
 #include <sys/ioctl.h>
 #include <syslog.h>
 #include <termios.h>
 #include <unistd.h>
-
+#include <limits.h>
+#if HAVE_FCOPYFILE
+#include <copyfile.h>
+#elif HAVE_SENDFILE
+#include <sys/sendfile.h>
+#endif
 #if HAVE_INOTIFY
 #include <sys/inotify.h>
 #endif
@@ -64,6 +70,7 @@ static_assert(PAL_S_IFCHR == S_IFCHR, "");
 static_assert(PAL_S_IFDIR == S_IFDIR, "");
 static_assert(PAL_S_IFREG == S_IFREG, "");
 static_assert(PAL_S_IFLNK == S_IFLNK, "");
+static_assert(PAL_S_IFSOCK == S_IFSOCK, "");
 
 // Validate that our enum for inode types is the same as what is
 // declared by the dirent.h header on the local system.
@@ -96,6 +103,7 @@ static_assert(PAL_SEEK_END == SEEK_END, "");
 
 // Validate our PollFlags enum values are correct for the platform
 static_assert(PAL_POLLIN == POLLIN, "");
+static_assert(PAL_POLLPRI == POLLPRI, "");
 static_assert(PAL_POLLOUT == POLLOUT, "");
 static_assert(PAL_POLLERR == POLLERR, "");
 static_assert(PAL_POLLHUP == POLLHUP, "");
@@ -388,7 +396,7 @@ extern "C" int32_t SystemNative_Pipe(int32_t pipeFds[2], int32_t flags)
 #else
     // Otherwise, use pipe.
     while (CheckInterrupted(result = pipe(pipeFds)));
-    
+
     // Then, if O_CLOEXEC was specified, use fcntl to configure the file descriptors appropriately.
     if ((flags & O_CLOEXEC) != 0 && result == 0)
     {
@@ -488,10 +496,10 @@ extern "C" int32_t SystemNative_ChMod(const char* path, int32_t mode)
     return result;
 }
 
-extern "C" int32_t SystemNative_MkFifo(const char* path, int32_t mode)
+extern "C" int32_t SystemNative_FChMod(intptr_t fd, int32_t mode)
 {
     int32_t result;
-    while (CheckInterrupted(result = mkfifo(path, static_cast<mode_t>(mode))));
+    while (CheckInterrupted(result = fchmod(ToFileDescriptor(fd), static_cast<mode_t>(mode))));
     return result;
 }
 
@@ -827,6 +835,17 @@ extern "C" int32_t SystemNative_PosixFAdvise(intptr_t fd, int64_t offset, int64_
 #endif
 }
 
+extern "C" char* SystemNative_GetLine(FILE* stream)
+{
+    assert(stream != nullptr);
+
+    char* lineptr = nullptr;
+    size_t n = 0;
+    ssize_t length = getline(&lineptr, &n, stream);
+    
+    return length >= 0 ? lineptr : nullptr;
+}
+
 extern "C" int32_t SystemNative_Read(intptr_t fd, void* buffer, int32_t bufferSize)
 {
     assert(buffer != nullptr || bufferSize == 0);
@@ -898,6 +917,157 @@ extern "C" int32_t SystemNative_Write(intptr_t fd, const void* buffer, int32_t b
     return static_cast<int32_t>(count);
 }
 
+#if !HAVE_FCOPYFILE
+// Read all data from inFd and write it to outFd
+static int32_t CopyFile_ReadWrite(int inFd, int outFd)
+{
+    // Allocate a buffer
+    const int BufferLength = 80 * 1024 * sizeof(char);
+    char* buffer = reinterpret_cast<char*>(malloc(BufferLength));
+    if (buffer == nullptr)
+    {
+        return -1;
+    }
+
+    // Repeatedly read from the source and write to the destination
+    while (true)
+    {
+        // Read up to what will fit in our buffer.  We're done if we get back 0 bytes.
+        ssize_t bytesRead;
+        while (CheckInterrupted(bytesRead = read(inFd, buffer, BufferLength)));
+        if (bytesRead == -1)
+        {
+            int tmp = errno;
+            free(buffer);
+            errno = tmp;
+            return -1;
+        }
+        if (bytesRead == 0)
+        {
+            break;
+        }
+        assert(bytesRead > 0);
+
+        // Write what was read.
+        ssize_t offset = 0;
+        while (bytesRead > 0)
+        {
+            ssize_t bytesWritten;
+            while (CheckInterrupted(bytesWritten = write(outFd, buffer + offset, static_cast<size_t>(bytesRead))));
+            if (bytesWritten == -1)
+            {
+                int tmp = errno;
+                free(buffer);
+                errno = tmp;
+                return -1;
+            }
+            assert(bytesWritten >= 0);
+            bytesRead -= bytesWritten;
+            offset += bytesWritten;
+        }
+    }
+
+    free(buffer);
+    return 0;
+}
+#endif // !HAVE_FCOPYFILE
+
+extern "C" int32_t SystemNative_CopyFile(intptr_t sourceFd, intptr_t destinationFd)
+{
+    int inFd = ToFileDescriptor(sourceFd);
+    int outFd = ToFileDescriptor(destinationFd);
+
+#if HAVE_FCOPYFILE
+    // If fcopyfile is available (OS X), try to use it, as the whole copy
+    // can be performed in the kernel, without lots of unnecessary copying.
+    // Copy data and metadata.
+    return fcopyfile(inFd, outFd, nullptr, COPYFILE_ALL) == 0 ? 0 : -1;
+#else
+    // Get the stats on the source file.
+    int ret;
+    struct stat_ sourceStat;
+    bool copied = false;
+#if HAVE_SENDFILE
+    // If sendfile is available (Linux), try to use it, as the whole copy
+    // can be performed in the kernel, without lots of unnecessary copying.
+    while (CheckInterrupted(ret = fstat_(inFd, &sourceStat)));
+    if (ret != 0)
+    {
+        return -1;
+    }
+
+
+    // We use `auto' here to adapt the type of `size' depending on the running platform.
+    // On 32-bit, if you use 64-bit offsets, the last argument of `sendfile' will be a
+    // `size_t' a 32-bit integer while the `st_size' field of the stat structure will be off64_t.
+    // So `size' will have to be `uint64_t'. In all other cases, it will be `size_t'.
+    auto size = UnsignedCast(sourceStat.st_size);
+
+    // Note that per man page for large files, you have to iterate until the
+    // whole file is copied (Linux has a limit of 0x7ffff000 bytes copied).
+    while (size > 0)
+    {
+        ssize_t sent = sendfile(outFd, inFd, nullptr, (size >= SSIZE_MAX ? SSIZE_MAX : static_cast<size_t>(size)));
+        if (sent < 0)
+        {
+            if (errno != EINVAL && errno != ENOSYS)
+            {
+                return -1;
+            }
+            else
+            {
+                break;
+            }
+        }
+        else
+        {
+            assert(UnsignedCast(sent) <= size);
+            size -= UnsignedCast(sent);
+        }
+    }
+    if (size == 0)
+    {
+        copied = true;
+    }
+    // sendfile couldn't be used; fall back to a manual copy below. This could happen
+    // if we're on an old kernel, for example, where sendfile could only be used
+    // with sockets and not regular files.
+#endif // HAVE_SENDFILE
+
+    // Manually read all data from the source and write it to the destination.
+    if (!copied && CopyFile_ReadWrite(inFd, outFd) != 0)
+    {
+        return -1;
+    }
+
+    // Now that the data from the file has been copied, copy over metadata
+    // from the source file.  First copy the file times.
+    while (CheckInterrupted(ret = fstat_(inFd, &sourceStat)));
+    if (ret == 0)
+    {
+        struct timeval origTimes[2];
+        origTimes[0].tv_sec = sourceStat.st_atime;
+        origTimes[0].tv_usec = 0;
+        origTimes[1].tv_sec = sourceStat.st_mtime;
+        origTimes[1].tv_usec = 0;
+        while (CheckInterrupted(ret = futimes(outFd, origTimes)));
+    }
+    if (ret != 0)
+    {
+        return -1;
+    }
+
+    // Then copy permissions.
+    while (CheckInterrupted(ret = fchmod(outFd, sourceStat.st_mode & (S_IRWXU | S_IRWXG | S_IRWXO))));
+    if (ret != 0)
+    {
+        return -1;
+    }
+
+    return 0;
+#endif // HAVE_FCOPYFILE
+}
+
 extern "C" intptr_t SystemNative_INotifyInit()
 {
 #if HAVE_INOTIFY
@@ -934,4 +1104,10 @@ extern "C" int32_t SystemNative_INotifyRemoveWatch(intptr_t fd, int32_t wd)
     errno = ENOTSUP;
     return -1;
 #endif
+}
+
+extern "C" char* SystemNative_RealPath(const char* path)
+{
+    assert(path != nullptr);
+    return realpath(path, nullptr);
 }

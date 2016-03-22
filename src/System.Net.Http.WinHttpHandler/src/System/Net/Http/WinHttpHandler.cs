@@ -83,6 +83,7 @@ namespace System.Net.Http
         private volatile bool _disposed;
         private SafeWinHttpHandle _sessionHandle;
         private WinHttpAuthHelper _authHelper = new WinHttpAuthHelper();
+        private static readonly DiagnosticListener s_diagnosticListener = new DiagnosticListener(HttpHandlerLoggingStrings.DiagnosticListenerName);
 
         public WinHttpHandler()
         {
@@ -115,7 +116,7 @@ namespace System.Net.Http
                 if (value <= 0)
                 {
                     throw new ArgumentOutOfRangeException(
-                        "value",
+nameof(value),
                         value,
                         SR.Format(SR.net_http_value_must_be_greater_than, 0));
                 }
@@ -152,7 +153,7 @@ namespace System.Net.Http
                     && value != CookieUsePolicy.UseInternalCookieStoreOnly
                     && value != CookieUsePolicy.UseSpecifiedCookieContainer)
                 {
-                    throw new ArgumentOutOfRangeException("value");
+                    throw new ArgumentOutOfRangeException(nameof(value));
                 }
 
                 CheckDisposedOrStarted();
@@ -235,7 +236,7 @@ namespace System.Net.Http
                 if (value != ClientCertificateOption.Manual
                     && value != ClientCertificateOption.Automatic)
                 {
-                    throw new ArgumentOutOfRangeException("value");
+                    throw new ArgumentOutOfRangeException(nameof(value));
                 }
 
                 CheckDisposedOrStarted();
@@ -296,7 +297,7 @@ namespace System.Net.Http
                     value != WindowsProxyUsePolicy.UseWinInetProxy &&
                     value != WindowsProxyUsePolicy.UseCustomProxy)
                 {
-                    throw new ArgumentOutOfRangeException("value");
+                    throw new ArgumentOutOfRangeException(nameof(value));
                 }
 
                 CheckDisposedOrStarted();
@@ -346,7 +347,7 @@ namespace System.Net.Http
                     // In WinHTTP, setting this to 0 results in it being reset to 2.
                     // So, we'll only allow settings above 0.
                     throw new ArgumentOutOfRangeException(
-                        "value",
+nameof(value),
                         value,
                         SR.Format(SR.net_http_value_must_be_greater_than, 0));
                 }
@@ -367,7 +368,7 @@ namespace System.Net.Http
             {
                 if (value != Timeout.InfiniteTimeSpan && (value <= TimeSpan.Zero || value > s_maxTimeout))
                 {
-                    throw new ArgumentOutOfRangeException("value");
+                    throw new ArgumentOutOfRangeException(nameof(value));
                 }
 
                 CheckDisposedOrStarted();
@@ -386,7 +387,7 @@ namespace System.Net.Http
             {
                 if (value != Timeout.InfiniteTimeSpan && (value <= TimeSpan.Zero || value > s_maxTimeout))
                 {
-                    throw new ArgumentOutOfRangeException("value");
+                    throw new ArgumentOutOfRangeException(nameof(value));
                 }
 
                 CheckDisposedOrStarted();
@@ -405,7 +406,7 @@ namespace System.Net.Http
             {
                 if (value != Timeout.InfiniteTimeSpan && (value <= TimeSpan.Zero || value > s_maxTimeout))
                 {
-                    throw new ArgumentOutOfRangeException("value");
+                    throw new ArgumentOutOfRangeException(nameof(value));
                 }
 
                 CheckDisposedOrStarted();
@@ -424,7 +425,7 @@ namespace System.Net.Http
             {
                 if (value != Timeout.InfiniteTimeSpan && (value <= TimeSpan.Zero || value > s_maxTimeout))
                 {
-                    throw new ArgumentOutOfRangeException("value");
+                    throw new ArgumentOutOfRangeException(nameof(value));
                 }
 
                 CheckDisposedOrStarted();
@@ -444,7 +445,7 @@ namespace System.Net.Http
                 if (value <= 0)
                 {
                     throw new ArgumentOutOfRangeException(
-                        "value",
+nameof(value),
                         value,
                         SR.Format(SR.net_http_value_must_be_greater_than, 0));
                 }
@@ -466,7 +467,7 @@ namespace System.Net.Http
                 if (value <= 0)
                 {
                     throw new ArgumentOutOfRangeException(
-                        "value",
+nameof(value),
                         value,
                         SR.Format(SR.net_http_value_must_be_greater_than, 0));
                 }
@@ -504,7 +505,7 @@ namespace System.Net.Http
         {
             if (request == null)
             {
-                throw new ArgumentNullException("request", SR.net_http_handler_norequest);
+                throw new ArgumentNullException(nameof(request), SR.net_http_handler_norequest);
             }
 
             // Check for invalid combinations of properties.
@@ -525,6 +526,8 @@ namespace System.Net.Http
             }
 
             CheckDisposed();
+
+            Guid loggingRequestId = s_diagnosticListener.LogHttpRequest(request);
 
             SetOperationStarted();
 
@@ -549,7 +552,9 @@ namespace System.Net.Http
                 state,
                 CancellationToken.None,
                 TaskCreationOptions.DenyChildAttach,
-                TaskScheduler.Default);                
+                TaskScheduler.Default);
+
+            s_diagnosticListener.LogHttpResponse(tcs.Task, loggingRequestId);
 
             return tcs.Task;
         }
@@ -749,6 +754,7 @@ namespace System.Net.Http
             if (state.CancellationToken.IsCancellationRequested)
             {
                 state.Tcs.TrySetCanceled(state.CancellationToken);
+                state.ClearSendRequestState();
                 return;
             }
 
@@ -889,6 +895,8 @@ namespace System.Net.Http
             {
                 HandleAsyncException(state, savedException);
             }
+            
+            state.ClearSendRequestState();
         }
 
         private void SetSessionHandleOptions()
@@ -987,8 +995,10 @@ namespace System.Net.Http
                     }
                     else if (_proxyHelper != null && _proxyHelper.AutoSettingsUsed)
                     {
-                        updateProxySettings = true;
-                        _proxyHelper.GetProxyForUrl(_sessionHandle, uri, out proxyInfo);
+                        if (_proxyHelper.GetProxyForUrl(_sessionHandle, uri, out proxyInfo))
+                        {
+                            updateProxySettings = true;
+                        }
                     }
 
                     if (updateProxySettings)
@@ -1266,13 +1276,16 @@ namespace System.Net.Http
             SafeWinHttpHandle requestHandle,
             Interop.WinHttp.WINHTTP_STATUS_CALLBACK callback)
         {
-            // TODO: Issue #5036. Having the status callback use WINHTTP_CALLBACK_FLAG_ALL_NOTIFICATIONS
-            // isn't strictly necessary. However, some of the notification flags are required.
-            // This will be addressed this as part of WinHttpHandler performance improvements.
+            const uint notificationFlags =
+                Interop.WinHttp.WINHTTP_CALLBACK_FLAG_ALL_COMPLETIONS |
+                Interop.WinHttp.WINHTTP_CALLBACK_FLAG_HANDLES |
+                Interop.WinHttp.WINHTTP_CALLBACK_FLAG_REDIRECT |
+                Interop.WinHttp.WINHTTP_CALLBACK_FLAG_SEND_REQUEST;
+
             IntPtr oldCallback = Interop.WinHttp.WinHttpSetStatusCallback(
                 requestHandle,
                 callback,
-                Interop.WinHttp.WINHTTP_CALLBACK_FLAG_ALL_NOTIFICATIONS,
+                notificationFlags,
                 IntPtr.Zero);
 
             if (oldCallback == new IntPtr(Interop.WinHttp.WINHTTP_INVALID_STATUS_CALLBACK))

@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 
@@ -36,7 +37,7 @@ namespace System.Security.Cryptography
         public ECDsaOpenSsl(IntPtr handle)
         {
             if (handle == IntPtr.Zero)
-                throw new ArgumentException(SR.Cryptography_OpenInvalidHandle, "handle");
+                throw new ArgumentException(SR.Cryptography_OpenInvalidHandle, nameof(handle));
 
             SafeEcKeyHandle ecKeyHandle = SafeEcKeyHandle.DuplicateHandle(handle);
 
@@ -56,9 +57,9 @@ namespace System.Security.Cryptography
         public ECDsaOpenSsl(SafeEvpPKeyHandle pkeyHandle)
         {
             if (pkeyHandle == null)
-                throw new ArgumentNullException("pkeyHandle");
+                throw new ArgumentNullException(nameof(pkeyHandle));
             if (pkeyHandle.IsInvalid)
-                throw new ArgumentException(SR.Cryptography_OpenInvalidHandle, "pkeyHandle");
+                throw new ArgumentException(SR.Cryptography_OpenInvalidHandle, nameof(pkeyHandle));
 
             // If ecKey is valid it has already been up-ref'd, so we can just use this handle as-is.
             SafeEcKeyHandle ecKey = Interop.Crypto.EvpPkeyGetEcKey(pkeyHandle);
@@ -134,7 +135,7 @@ namespace System.Security.Cryptography
         public override byte[] SignHash(byte[] hash)
         {
             if (hash == null)
-                throw new ArgumentNullException("hash");
+                throw new ArgumentNullException(nameof(hash));
 
             SafeEcKeyHandle key = _key.Value;
             int signatureLength = Interop.Crypto.EcDsaSize(key);
@@ -150,9 +151,9 @@ namespace System.Security.Cryptography
         public override bool VerifyHash(byte[] hash, byte[] signature)
         {
             if (hash == null)
-                throw new ArgumentNullException("hash");
+                throw new ArgumentNullException(nameof(hash));
             if (signature == null)
-                throw new ArgumentNullException("signature");
+                throw new ArgumentNullException(nameof(signature));
 
             // The signature format for .NET is r.Concat(s). Each of r and s are of length BitsToBytes(KeySize), even
             // when they would have leading zeroes.  If it's the correct size, then we need to encode it from
@@ -340,12 +341,31 @@ namespace System.Security.Cryptography
         }
 
         private static readonly SupportedAlgorithm[] s_supportedAlgorithms =
-            new SupportedAlgorithm[]
+            RemoveAlgorithmsUnsupportedByOs(
+                new SupportedAlgorithm[]
+                {
+                    new SupportedAlgorithm(keySize: 224, nid: Interop.Crypto.NID_secp224r1),
+                    new SupportedAlgorithm(keySize: 256, nid: Interop.Crypto.NID_X9_62_prime256v1),
+                    new SupportedAlgorithm(keySize: 384, nid: Interop.Crypto.NID_secp384r1),
+                    new SupportedAlgorithm(keySize: 521, nid: Interop.Crypto.NID_secp521r1),
+                }
+            );
+
+        private static SupportedAlgorithm[] RemoveAlgorithmsUnsupportedByOs(SupportedAlgorithm[] supportedAlgorithms)
+        {
+            List<SupportedAlgorithm> filteredSupportedAlgorithms = new List<SupportedAlgorithm>(supportedAlgorithms.Length);
+            foreach (SupportedAlgorithm supportedAlgorithm in supportedAlgorithms)
             {
-                new SupportedAlgorithm(keySize: 224, nid: Interop.Crypto.NID_secp224r1),
-                new SupportedAlgorithm(keySize: 256, nid: Interop.Crypto.NID_X9_62_prime256v1),
-                new SupportedAlgorithm(keySize: 384, nid: Interop.Crypto.NID_secp384r1),
-                new SupportedAlgorithm(keySize: 521, nid: Interop.Crypto.NID_secp521r1),
-            };
+                int nid = supportedAlgorithm.Nid;
+                using (SafeEcKeyHandle key = Interop.Crypto.EcKeyCreateByCurveName(nid))
+                {
+                    if (key != null && !key.IsInvalid)
+                    {
+                        filteredSupportedAlgorithms.Add(supportedAlgorithm);
+                    }
+                }
+            }
+            return filteredSupportedAlgorithms.ToArray();
+        }
     }
 }

@@ -74,14 +74,14 @@ internal static partial class Interop
         {
             Debug.Assert((buffer != null) && (buffer.Length > 0), "Invalid input buffer passed to Encrypt");
             Debug.Assert((offset >= 0) && (offset < buffer.Length), "Invalid input offset passed to Encrypt");
-            Debug.Assert((count > 0) && (count <= (buffer.Length - offset)), "Invalid input count passed to Encrypt");
+            Debug.Assert((count >= 0) && (count <= (buffer.Length - offset)), "Invalid input count passed to Encrypt");
 
             Interop.NetSecurityNative.GssBuffer encryptedBuffer = default(Interop.NetSecurityNative.GssBuffer);
             try
             {
 
                 NetSecurityNative.Status minorStatus;
-                NetSecurityNative.Status status = NetSecurityNative.Wrap(out minorStatus, context, encrypt, buffer, offset, count, ref encryptedBuffer);
+                NetSecurityNative.Status status = NetSecurityNative.WrapBuffer(out minorStatus, context, encrypt, buffer, offset, count, ref encryptedBuffer);
                 if (status != NetSecurityNative.Status.GSS_S_COMPLETE)
                 {
                     throw new NetSecurityNative.GssApiException(status, minorStatus);
@@ -103,13 +103,13 @@ internal static partial class Interop
         {
             Debug.Assert((buffer != null) && (buffer.Length > 0), "Invalid input buffer passed to Decrypt");
             Debug.Assert((offset >= 0) && (offset <= buffer.Length), "Invalid input offset passed to Decrypt");
-            Debug.Assert((count > 0) && (count <= (buffer.Length - offset)), "Invalid input count passed to Decrypt");
+            Debug.Assert((count >= 0) && (count <= (buffer.Length - offset)), "Invalid input count passed to Decrypt");
 
             Interop.NetSecurityNative.GssBuffer decryptedBuffer = default(Interop.NetSecurityNative.GssBuffer);
             try
             {
                 NetSecurityNative.Status minorStatus;
-                NetSecurityNative.Status status = NetSecurityNative.Unwrap(out minorStatus, context, buffer, offset, count, ref decryptedBuffer);
+                NetSecurityNative.Status status = NetSecurityNative.UnwrapBuffer(out minorStatus, context, buffer, offset, count, ref decryptedBuffer);
                 if (status != NetSecurityNative.Status.GSS_S_COMPLETE)
                 {
                     throw new NetSecurityNative.GssApiException(status, minorStatus);

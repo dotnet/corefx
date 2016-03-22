@@ -19,7 +19,7 @@ namespace System.Collections.Generic
 
         public void Add(T1 item1, T2 item2)
         {
-            Debug.Assert(!_backward.ContainsKey(item2), " No added item1 should ever have existing item2");
+            Debug.Assert(!_backward.ContainsKey(item2), "No added item1 should ever have existing item2");
             _forward.Add(item1, item2);
             _backward.Add(item2, item1);
         }

@@ -26,9 +26,7 @@ namespace System.Net.Security
         {
             IIdentity result = null;
             string name = context.IsServer ? context.AssociatedName : context.Spn;
-            string protocol = NegotiationInfoClass.NTLM;
-
-            protocol = context.ProtocolName;
+            string protocol = context.ProtocolName;
 
             if (context.IsServer)
             {
@@ -37,7 +35,7 @@ namespace System.Net.Security
                 {
                     SecurityStatusPal status;
                     SafeDeleteContext securityContext = context.GetContext(out status);
-                    if (status != SecurityStatusPal.OK)
+                    if (status.ErrorCode != SecurityStatusPalErrorCode.OK)
                     {
                         throw new Win32Exception((int)SecurityStatusAdapterPal.GetInteropFromSecurityStatusPal(status));
                     }
@@ -54,7 +52,7 @@ namespace System.Net.Security
                     }
                     string authtype = context.ProtocolName;
 
-                    // TODO #5241: 
+                    // TODO #5241:
                     // The following call was also specifying WindowsAccountType.Normal, true.
                     // WindowsIdentity.IsAuthenticated is no longer supported in CoreFX.
                     result = new WindowsIdentity(token.DangerousGetHandle(), authtype);
@@ -86,11 +84,7 @@ namespace System.Net.Security
         internal static string QueryContextAuthenticationPackage(SafeDeleteContext securityContext)
         {
             var negotiationInfoClass = SSPIWrapper.QueryContextAttributes(GlobalSSPI.SSPIAuth, securityContext, Interop.SspiCli.ContextAttribute.NegotiationInfo) as NegotiationInfoClass;
-            if (negotiationInfoClass != null)
-            {
-                return negotiationInfoClass.AuthenticationPackage;
-            }
-            return null;
+            return negotiationInfoClass?.AuthenticationPackage;
         }
 
         internal static int QueryMaxTokenSize(string package)
@@ -111,41 +105,38 @@ namespace System.Net.Security
                 (isServer ? Interop.SspiCli.CredentialUse.Inbound : Interop.SspiCli.CredentialUse.Outbound));
         }
 
-        internal static SafeFreeCredentials AcquireCredentialsHandle(string package, bool isServer, NetworkCredential credential)
+        internal unsafe static SafeFreeCredentials AcquireCredentialsHandle(string package, bool isServer, NetworkCredential credential)
         {
-            unsafe
+            SafeSspiAuthDataHandle authData = null;
+            try
             {
-                SafeSspiAuthDataHandle authData = null;
-                try
+                Interop.SecurityStatus result = Interop.SspiCli.SspiEncodeStringsAsAuthIdentity(
+                    credential.UserName, credential.Domain,
+                    credential.Password, out authData);
+
+                if (result != Interop.SecurityStatus.OK)
                 {
-                    Interop.SecurityStatus result = Interop.SspiCli.SspiEncodeStringsAsAuthIdentity(
-                        credential.UserName, credential.Domain,
-                        credential.Password, out authData);
-
-                    if (result != Interop.SecurityStatus.OK)
+                    if (NetEventSource.Log.IsEnabled())
                     {
-                        if (NetEventSource.Log.IsEnabled())
-                        {
-                            NetEventSource.PrintError(
-                                NetEventSource.ComponentType.Security,
-                                SR.Format(
-                                    SR.net_log_operation_failed_with_error,
-                                    "SspiEncodeStringsAsAuthIdentity()",
-                                    String.Format(CultureInfo.CurrentCulture, "0x{0:X}", (int)result)));
-                        }
-
-                        throw new Win32Exception((int)result);
+                        NetEventSource.PrintError(
+                            NetEventSource.ComponentType.Security,
+                            SR.Format(
+                                SR.net_log_operation_failed_with_error,
+                                "SspiEncodeStringsAsAuthIdentity()",
+                                String.Format(CultureInfo.CurrentCulture, "0x{0:X}", (int)result)));
                     }
 
-                    return SSPIWrapper.AcquireCredentialsHandle(GlobalSSPI.SSPIAuth,
-                        package, (isServer ? Interop.SspiCli.CredentialUse.Inbound : Interop.SspiCli.CredentialUse.Outbound), ref authData);
+                    throw new Win32Exception((int)result);
                 }
-                finally
+
+                return SSPIWrapper.AcquireCredentialsHandle(GlobalSSPI.SSPIAuth,
+                    package, (isServer ? Interop.SspiCli.CredentialUse.Inbound : Interop.SspiCli.CredentialUse.Outbound), ref authData);
+            }
+            finally
+            {
+                if (authData != null)
                 {
-                    if (authData != null)
-                    {
-                        authData.Dispose();
-                    }
+                    authData.Dispose();
                 }
             }
         }
@@ -215,11 +206,11 @@ namespace System.Net.Security
                 impersonationLevel != TokenImpersonationLevel.Impersonation &&
                 impersonationLevel != TokenImpersonationLevel.Delegation)
             {
-                throw new ArgumentOutOfRangeException("impersonationLevel", impersonationLevel.ToString(), SR.net_auth_supported_impl_levels);
+                throw new ArgumentOutOfRangeException(nameof(impersonationLevel), impersonationLevel.ToString(), SR.net_auth_supported_impl_levels);
             }
         }
 
-        internal static Exception CreateExceptionFromError(SecurityStatusPal statusCode)
+        internal static Win32Exception CreateExceptionFromError(SecurityStatusPal statusCode)
         {
             return new Win32Exception((int)SecurityStatusAdapterPal.GetInteropFromSecurityStatusPal(statusCode));
         }
@@ -246,7 +237,7 @@ namespace System.Net.Security
 
                 if (count > maxCount || count < 0)
                 {
-                    throw new ArgumentOutOfRangeException("count", SR.Format(SR.net_io_out_range, maxCount));
+                    throw new ArgumentOutOfRangeException(nameof(count), SR.Format(SR.net_io_out_range, maxCount));
                 }
             }
             catch (Exception e)
@@ -350,7 +341,7 @@ namespace System.Net.Security
 
                 Debug.Fail("NTAuthentication#" + LoggingHash.HashString(securityContext) + "::Decrypt", "Argument 'offset' out of range.");
 
-                throw new ArgumentOutOfRangeException("offset");
+                throw new ArgumentOutOfRangeException(nameof(offset));
             }
 
             if (count < 0 || count > (buffer == null ? 0 : buffer.Length - offset))
@@ -362,7 +353,7 @@ namespace System.Net.Security
 
                 Debug.Fail("NTAuthentication#" + LoggingHash.HashString(securityContext) + "::Decrypt", "Argument 'count' out of range.");
 
-                throw new ArgumentOutOfRangeException("count");
+                throw new ArgumentOutOfRangeException(nameof(count));
             }
 
             if (isNtlm)
@@ -415,7 +406,7 @@ namespace System.Net.Security
             uint sequenceNumber)
         {
             const int ntlmSignatureLength = 16;
-            // For the most part the arguments are verified in Encrypt().
+            // For the most part the arguments are verified in Decrypt().
             if (count < ntlmSignatureLength)
             {
                 if (GlobalLog.IsEnabled)
@@ -425,7 +416,7 @@ namespace System.Net.Security
 
                 Debug.Fail("NTAuthentication#" + LoggingHash.HashString(securityContext) + "::DecryptNtlm", "Argument 'count' out of range.");
 
-                throw new ArgumentOutOfRangeException("count");
+                throw new ArgumentOutOfRangeException(nameof(count));
             }
 
             var securityBuffer = new SecurityBuffer[2];

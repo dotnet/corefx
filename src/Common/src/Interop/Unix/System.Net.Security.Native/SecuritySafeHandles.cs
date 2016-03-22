@@ -57,13 +57,13 @@ namespace System.Net.Security
         public SafeDeleteNegoContext(SafeFreeNegoCredentials credential, string targetName)
             : base(credential)
         {
+            Debug.Assert((null != credential), "Null credential in SafeDeleteNegoContext");
             try
             {
                 _targetName = SafeGssNameHandle.CreatePrincipal(targetName);
             }
             catch
             {
-                Debug.Assert((null != credential), "Null credential in SafeDeleteNegoContext");
                 Dispose();
                 throw;
             }
@@ -71,7 +71,7 @@ namespace System.Net.Security
 
         public void SetGssContext(SafeGssContextHandle context)
         {
-            Debug.Assert(!context.IsInvalid, "Invalid context passed to SafeDeleteNegoContext");
+            Debug.Assert(context != null && !context.IsInvalid, "Invalid context passed to SafeDeleteNegoContext");
             _context = context;
         }
 

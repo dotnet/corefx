@@ -5,32 +5,35 @@
   </PropertyGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{f9e9894e-2513-4085-9046-311ad49d8ae6}</ProjectGuid>
-    <OutputType>Library</OutputType>
+    <ProjectGuid>{F9E9894E-2513-4085-9046-311AD49D8AE6}</ProjectGuid>
     <AssemblyName>System.Security.Principal.Windows</AssemblyName>
     <AssemblyVersion>4.0.0.0</AssemblyVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <NuGetTargetFrameworkMoniker>DNXCore,Version=v5.0</NuGetTargetFrameworkMoniker>
+    <IsPartialFacadeAssembly Condition="'$(TargetGroup)' == 'net46'">true</IsPartialFacadeAssembly>
+    <ResourcesSourceOutputDirectory Condition="'$(TargetGroup)' == 'net46'">None</ResourcesSourceOutputDirectory>
+    <PackageTargetFramework Condition="'$(PackageTargetFramework)' == ''">netstandard1.3</PackageTargetFramework>
+    <PackageTargetRuntime Condition="'$(TargetGroup)' != 'net46' AND '$(TargetsWindows)' == 'true'">win</PackageTargetRuntime>
+    <PackageTargetRuntime Condition="'$(TargetsUnix)' == 'true'">unix</PackageTargetRuntime>
+    <GeneratePlatformNotSupportedAssembly Condition="'$(TargetsUnix)' == 'true'">true</GeneratePlatformNotSupportedAssembly>
+    <NuGetTargetMoniker Condition="'$(TargetGroup)' == ''">.NETStandard,Version=v1.3</NuGetTargetMoniker>
   </PropertyGroup>
   <!-- Default configurations to help VS understand the options -->
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Windows_Debug|AnyCPU' "/>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Windows_Release|AnyCPU' "/>
-  <ItemGroup>
-    <Compile Include="Microsoft\Win32\SafeHandles\SafeAccessTokenHandle.cs"/>
-    <Compile Include="Microsoft\Win32\SafeHandles\SafeTokenHandle.cs"/>
-    <Compile Include="Microsoft\Win32\SafeHandles\SafeSecurityHandles.cs"/>
-    <Compile Include="System\Security\Principal\IdentityNotMappedException.cs"/>
-    <Compile Include="System\Security\Principal\IdentityReference.cs"/>
-    <Compile Include="System\Security\Principal\IRCollection.cs"/>
-    <Compile Include="System\Security\Principal\NTAccount.cs"/>
-    <Compile Include="System\Security\Principal\SID.cs"/>
-    <Compile Include="System\Security\Principal\TokenAccessLevels.cs"/>
-    <Compile Include="System\Security\Principal\Win32.cs"/>
-    <Compile Include="System\Security\Principal\WindowsIdentity.cs"/>
-    <Compile Include="System\Security\Principal\WindowsPrincipal.cs"/>
-
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Windows_Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Windows_Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net46_Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net46_Release|AnyCPU'" />
+  <ItemGroup Condition="'$(TargetGroup)' != 'net46' AND '$(TargetsWindows)' == 'true'">
+    <Compile Include="Microsoft\Win32\SafeHandles\SafeAccessTokenHandle.cs" />
+    <Compile Include="Microsoft\Win32\SafeHandles\SafeSecurityHandles.cs" />
+    <Compile Include="System\Security\Principal\IdentityNotMappedException.cs" />
+    <Compile Include="System\Security\Principal\IdentityReference.cs" />
+    <Compile Include="System\Security\Principal\IRCollection.cs" />
+    <Compile Include="System\Security\Principal\NTAccount.cs" />
+    <Compile Include="System\Security\Principal\SID.cs" />
+    <Compile Include="System\Security\Principal\TokenAccessLevels.cs" />
+    <Compile Include="System\Security\Principal\Win32.cs" />
+    <Compile Include="System\Security\Principal\WindowsIdentity.cs" />
+    <Compile Include="System\Security\Principal\WindowsPrincipal.cs" />
     <Compile Include="$(CommonPath)\Interop\Windows\Interop.Libraries.cs">
       <Link>Common\Interop\Interop.Libraries.cs</Link>
     </Compile>
@@ -185,10 +188,11 @@
       <Link>Common\Microsoft\Win32\SafeHandlres\SafeLsaHandle.cs</Link>
     </Compile>
   </ItemGroup>
-
+  <ItemGroup Condition="'$(TargetGroup)' == 'net46'">
+    <TargetingPackReference Include="mscorlib" />
+  </ItemGroup>
   <ItemGroup>
     <None Include="project.json" />
   </ItemGroup>
-
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

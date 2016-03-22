@@ -14,54 +14,54 @@ internal static partial class Interop
         [StructLayout(LayoutKind.Sequential)]
         internal unsafe struct GssBuffer : IDisposable
         {
-            internal UInt64 length;
-            internal IntPtr data;
+            internal UInt64 _length;
+            internal IntPtr _data;
 
             internal int Copy(byte[] destination, int offset)
             {
                 Debug.Assert(destination != null, "target destination cannot be null");
-                Debug.Assert(offset >= 0 && offset < destination.Length, "invalid offset " + offset);
+                Debug.Assert((offset >= 0 && offset < destination.Length) || destination.Length == 0, "invalid offset " + offset);
 
-                if (data == IntPtr.Zero || length == 0)
+                if (_data == IntPtr.Zero || _length == 0)
                 {
                     return 0;
                 }
 
-                int bufferLength = Convert.ToInt32(length);
-                int available = destination.Length - offset;  // amount of space in the given buffer
-                if (bufferLength > available)
+                // Using Convert.ToInt32 to throw an exception in the unlikely event of too large value of _length
+                int sourceLength = Convert.ToInt32(_length);
+                int destinationAvailable = destination.Length - offset;  // amount of space in the given buffer
+                if (sourceLength > destinationAvailable)
                 {
-                    throw new NetSecurityNative.GssApiException(SR.Format(SR.net_context_buffer_too_small, bufferLength, available));
+                    throw new NetSecurityNative.GssApiException(SR.Format(SR.net_context_buffer_too_small, sourceLength, destinationAvailable));
                 }
 
-                Marshal.Copy(data, destination, offset, bufferLength);
-                return bufferLength;
+                Marshal.Copy(_data, destination, offset, sourceLength);
+                return sourceLength;
             }
 
             internal byte[] ToByteArray()
             {
-                if (data == IntPtr.Zero || length == 0)
+                if (_data == IntPtr.Zero || _length == 0)
                 {
                     return Array.Empty<byte>();
                 }
 
-                int bufferLength = Convert.ToInt32(length);
-                byte[] destination = new byte[bufferLength];
-                Marshal.Copy(data, destination, 0, bufferLength);
+                int destinationLength = Convert.ToInt32(_length);
+                byte[] destination = new byte[destinationLength];
+                Marshal.Copy(_data, destination, 0, destinationLength);
                 return destination;
             }
 
             public void Dispose()
             {
-                if (data != IntPtr.Zero)
+                if (_data != IntPtr.Zero)
                 {
-                    Interop.NetSecurityNative.ReleaseGssBuffer(data, length);
-                    data = IntPtr.Zero;
+                    Interop.NetSecurityNative.ReleaseGssBuffer(_data, _length);
+                    _data = IntPtr.Zero;
                 }
 
-                length = 0;
+                _length = 0;
             }
         }
     }
 }
-        

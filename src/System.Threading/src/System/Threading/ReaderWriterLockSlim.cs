@@ -220,7 +220,7 @@ namespace System.Threading
             {
                 long ltm = (long)timeout.TotalMilliseconds;
                 if (ltm < -1 || ltm > (long)Int32.MaxValue)
-                    throw new ArgumentOutOfRangeException("timeout");
+                    throw new ArgumentOutOfRangeException(nameof(timeout));
                 _total = (int)ltm;
                 if (_total != -1 && _total != 0)
                     _start = Environment.TickCount;
@@ -231,7 +231,7 @@ namespace System.Threading
             public TimeoutTracker(int millisecondsTimeout)
             {
                 if (millisecondsTimeout < -1)
-                    throw new ArgumentOutOfRangeException("millisecondsTimeout");
+                    throw new ArgumentOutOfRangeException(nameof(millisecondsTimeout));
                 _total = millisecondsTimeout;
                 if (_total != -1 && _total != 0)
                     _start = Environment.TickCount;
@@ -926,10 +926,10 @@ namespace System.Threading
 
                 if (!waitSuccessful)        // We may also be about to throw for some reason.  Exit myLock.
                 {
-                    if (isWriteWaiter && _numWriteWaiters == 0 && _numWriteUpgradeWaiters == 0 && !_fNoWaiters)
+                    if (isWriteWaiter)
                     {
-                        // Write waiters block read waiters from acquiring the lock. Since this was the last write waiter and
-                        // there is a read waiter, wake up the appropriate read waiters.
+                        // Write waiters block read waiters from acquiring the lock. Since this was the last write waiter, try
+                        // to wake up the appropriate read waiters.
                         ExitAndWakeUpAppropriateReadWaiters();
                     }
                     else
@@ -988,10 +988,7 @@ namespace System.Threading
             }
             else
             {
-                if (_numReadWaiters != 0 || _numUpgradeWaiters != 0)
-                    ExitAndWakeUpAppropriateReadWaiters();
-                else
-                    ExitMyLock();
+                ExitAndWakeUpAppropriateReadWaiters();
             }
         }
 
@@ -1000,10 +997,14 @@ namespace System.Threading
 #if DEBUG
             Debug.Assert(MyLockHeld);
 #endif
-            Debug.Assert(_numWriteWaiters == 0);
-            Debug.Assert(_numWriteUpgradeWaiters == 0);
+
+            if (_numWriteWaiters != 0 || _numWriteUpgradeWaiters != 0 || _fNoWaiters)
+            {
+                ExitMyLock();
+                return;
+            }
+
             Debug.Assert(_numReadWaiters != 0 || _numUpgradeWaiters != 0);
-            Debug.Assert(!_fNoWaiters);
 
             bool setReadEvent = _numReadWaiters != 0;
             bool setUpgradeEvent = _numUpgradeWaiters != 0 && _upgradeLockOwnerId == -1;

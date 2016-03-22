@@ -2,9 +2,17 @@
 <Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <ItemGroup>
-    <Project Include="System.Security.Cryptography.Cng.csproj" />
-    <Project Include="facade\System.Security.Cryptography.Cng.csproj">
+    <Project Include="System.Security.Cryptography.Cng.csproj">
+      <OSGroup>Windows_NT</OSGroup>
+    </Project>
+    <Project Include="System.Security.Cryptography.Cng.csproj">
+      <OSGroup>Unix</OSGroup>
+    </Project>
+    <Project Include="System.Security.Cryptography.Cng.csproj">
       <TargetGroup>net46</TargetGroup>
+    </Project>
+    <Project Include="System.Security.Cryptography.Cng.csproj">
+      <TargetGroup>net461</TargetGroup>
     </Project>
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.traversal.targets))\dir.traversal.targets" />

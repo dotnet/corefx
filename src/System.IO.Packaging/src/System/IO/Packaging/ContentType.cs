@@ -79,7 +79,7 @@ namespace System.IO.Packaging
         internal ContentType(string contentType)
         {
             if (contentType == null)
-                throw new ArgumentNullException("contentType");
+                throw new ArgumentNullException(nameof(contentType));
 
             if (contentType.Length == 0)
             {
@@ -359,7 +359,7 @@ namespace System.IO.Packaging
                 //Removing the leading ; from the string
                 parameterAndValue = parameterAndValue.Substring(1);
 
-                //okay to trim start as there can be spaces before the begining
+                //okay to trim start as there can be spaces before the beginning
                 //of the parameter name.
                 parameterAndValue = parameterAndValue.TrimStart(s_linearWhiteSpaceChars);
 

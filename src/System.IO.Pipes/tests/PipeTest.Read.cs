@@ -124,6 +124,7 @@ namespace System.IO.Pipes.Tests
                 PipeStream pipe = pair.readablePipe;
                 Assert.True(pipe.IsConnected);
                 Assert.False(pipe.CanWrite);
+                Assert.False(pipe.CanSeek);
 
                 Assert.Throws<NotSupportedException>(() => pipe.Write(new byte[5], 0, 5));
 
@@ -257,7 +258,7 @@ namespace System.IO.Pipes.Tests
                 Task.Run(() => { pair.writeablePipe.Write(sent, 0, sent.Length); });
                 Assert.Equal(sent.Length, pair.readablePipe.Read(received, 0, sent.Length));
                 Assert.Equal(sent, received);
-                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) // WaitForPipeDrain isn't supported on Unix
                     pair.writeablePipe.WaitForPipeDrain();
             }
         }
@@ -276,7 +277,7 @@ namespace System.IO.Pipes.Tests
         }
 
         [Theory]
-        [MemberData("AsyncReadWriteChain_MemberData")]
+        [MemberData(nameof(AsyncReadWriteChain_MemberData))]
         public async Task AsyncReadWriteChain_ReadWrite(int iterations, int writeBufferSize, int readBufferSize, bool cancelableToken)
         {
             var writeBuffer = new byte[writeBufferSize];

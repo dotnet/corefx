@@ -11,16 +11,7 @@ namespace System.Diagnostics
     /// (which can also write object), but is intended to log complex objects that can't be serialized.
     /// </summary>
     public abstract class DiagnosticSource
-    {
-#if false
-        /// <summary>
-        /// The NotificationSource that you should be writing to by default.  This is what
-        /// most of the class library does.   Data written here goes to DefaultListener
-        /// which dispatches to all its subscribers.  
-        /// </summary>
-        // public static DiagnosticSource DefaultSource { get { return DiagnosticListener.DefaultListener; } }
-#endif 
-
+    { 
         /// <summary>
         /// Write is a generic way of logging complex payloads.  Each notification
         /// is given a name, which identifies it as well as a object (typically an anonymous type)

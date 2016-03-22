@@ -9,7 +9,7 @@
     <AssemblyName>System.Globalization.Calendars.Tests</AssemblyName>
     <RootNamespace>System.Globalization.Calendars.Tests</RootNamespace>
   </PropertyGroup>
-   <!-- Default configurations to help VS understand the configurations -->
+  <!-- Default configurations to help VS understand the configurations -->
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
@@ -41,10 +41,9 @@
     <Compile Include="JapaneseCalendar\JapaneseCalendarMaxSupportedDateTime.cs" />
     <Compile Include="JapaneseCalendar\JapaneseCalendarMinSupportedDateTime.cs" />
     <Compile Include="JapaneseCalendar\JapaneseCalendarTwoDigitYearMax.cs" />
-    <Compile Include="KoreanCalendar\KoreanCalendarToDateTime.cs" />    
+    <Compile Include="KoreanCalendar\KoreanCalendarToDateTime.cs" />
     <Compile Include="KoreanCalendar\KoreanCalendarAddMonths.cs" />
     <Compile Include="KoreanCalendar\KoreanCalendarAddYears.cs" />
-    <Compile Include="KoreanCalendar\KoreanCalendarCtor.cs" />
     <Compile Include="KoreanCalendar\KoreanCalendarEras.cs" />
     <Compile Include="KoreanCalendar\KoreanCalendarGetDayOfMonth.cs" />
     <Compile Include="KoreanCalendar\KoreanCalendarGetDayOfWeek.cs" />
@@ -62,10 +61,11 @@
     <Compile Include="KoreanCalendar\KoreanCalendarMaxSupportedDateTime.cs" />
     <Compile Include="KoreanCalendar\KoreanCalendarMinSupportedDateTime.cs" />
     <Compile Include="KoreanCalendar\KoreanCalendarToFourDigitYear.cs" />
-    <Compile Include="KoreanCalendar\KoreanCalendarTwoDigitYearMax.cs" />    
+    <Compile Include="KoreanCalendar\KoreanCalendarTwoDigitYearMax.cs" />
     <Compile Include="Misc\MiscCalendars.cs" />
     <Compile Include="Misc\Calendars.cs" />
-    <Compile Include="PersianCalendar\PersianCalendarTest.cs" />    
+    <Compile Include="PersianCalendar\PersianCalendarTest.cs" />
+    <Compile Include="TaiwanCalendar\TaiwanCalendarUtilities.cs" />
     <Compile Include="TaiwanCalendar\TaiwanCalendarAddMonths.cs" />
     <Compile Include="TaiwanCalendar\TaiwanCalendarAddYears.cs" />
     <Compile Include="TaiwanCalendar\TaiwanCalendarDaysAndMonths.cs" />
@@ -94,7 +94,7 @@
     <Compile Include="ThaiBuddhistCalendar\ThaiBuddhistCalendarGetDayOfMonth.cs" />
     <Compile Include="ThaiBuddhistCalendar\ThaiBuddhistCalendarGetDayOfWeek.cs" />
     <Compile Include="ThaiBuddhistCalendar\ThaiBuddhistCalendarGetDayOfYear.cs" />
-    <Compile Include="ThaiBuddhistCalendar\ThaiBuddhistCalendarGetDaysInMonth.cs" />    
+    <Compile Include="ThaiBuddhistCalendar\ThaiBuddhistCalendarGetDaysInMonth.cs" />
     <Compile Include="ThaiBuddhistCalendar\ThaiBuddhistCalendarGetDaysInYear.cs" />
     <Compile Include="ThaiBuddhistCalendar\ThaiBuddhistCalendarGetEra.cs" />
     <Compile Include="ThaiBuddhistCalendar\ThaiBuddhistCalendarGetMonth.cs" />
@@ -102,18 +102,26 @@
     <Compile Include="ThaiBuddhistCalendar\ThaiBuddhistCalendarGetWeekOfYear.cs" />
     <Compile Include="ThaiBuddhistCalendar\ThaiBuddhistCalendarGetYear.cs" />
     <Compile Include="ThaiBuddhistCalendar\ThaiBuddhistCalendarIsLeapDay.cs" />
-    <Compile Include="ThaiBuddhistCalendar\ThaiBuddhistCalendarIsLeapMonth.cs" />    
+    <Compile Include="ThaiBuddhistCalendar\ThaiBuddhistCalendarIsLeapMonth.cs" />
     <Compile Include="ThaiBuddhistCalendar\ThaiBuddhistCalendarIsLeapYear.cs" />
     <Compile Include="ThaiBuddhistCalendar\ThaiBuddhistCalendarMaxSupportedDateTime.cs" />
     <Compile Include="ThaiBuddhistCalendar\ThaiBuddhistCalendarMinSupportedDateTime.cs" />
     <Compile Include="ThaiBuddhistCalendar\ThaiBuddhistCalendarToDateTime.cs" />
-    <Compile Include="ThaiBuddhistCalendar\ThaiBuddhistCalendarToDateTime2.cs" />
     <Compile Include="ThaiBuddhistCalendar\ThaiBuddhistCalendarToFourDigitYear.cs" />
     <Compile Include="ThaiBuddhistCalendar\ThaiBuddhistCalendarTwoDigitYearMax.cs" />
     <Compile Include="$(CommonTestPath)\System\RandomDataGenerator.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="project.json" />
+  </ItemGroup>
+  <ItemGroup>
+    <!-- Compile tests against the contract, but copy our local-built implementation for testing -->
+    <ProjectReference Include="..\src\System.Globalization.Calendars.csproj">
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <OutputItemType>Content</OutputItemType>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Targets>Build;DebugSymbolsProjectOutputGroup</Targets>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

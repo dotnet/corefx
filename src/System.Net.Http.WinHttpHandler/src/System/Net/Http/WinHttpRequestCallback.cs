@@ -149,7 +149,23 @@ namespace System.Net.Http
             Debug.Assert(state.TcsReadFromResponseStream != null, "TcsReadFromResponseStream is null");
             Debug.Assert(!state.TcsReadFromResponseStream.Task.IsCompleted, "TcsReadFromResponseStream.Task is completed");
             
-            state.TcsReadFromResponseStream.TrySetResult((int)bytesRead);
+            // If we read to the end of the stream and we're using 'Content-Length' semantics on the response body,
+            // then verify we read at least the number of bytes required.
+            if (bytesRead == 0
+                && state.ExpectedBytesToRead.HasValue
+                && state.CurrentBytesRead < state.ExpectedBytesToRead.Value)
+            {
+                state.TcsReadFromResponseStream.TrySetException(
+                    new IOException(string.Format(
+                        SR.net_http_io_read_incomplete,
+                        state.ExpectedBytesToRead.Value,
+                        state.CurrentBytesRead)));
+            }
+            else
+            {
+                state.CurrentBytesRead += (long)bytesRead;
+                state.TcsReadFromResponseStream.TrySetResult((int)bytesRead);
+            }
         }
 
         private static void OnRequestWriteComplete(WinHttpRequestState state)
@@ -212,6 +228,7 @@ namespace System.Net.Http
         private static void OnRequestSendingRequest(WinHttpRequestState state)
         {
             Debug.Assert(state != null, "OnRequestSendingRequest: state is null");
+            Debug.Assert(state.RequestHandle != null, "OnRequestSendingRequest: state.RequestHandle is null");
             
             if (state.RequestMessage.RequestUri.Scheme != UriScheme.Https)
             {
@@ -303,6 +320,7 @@ namespace System.Net.Http
                         // (which means we have no certs to send). For security reasons, we don't
                         // allow the certificate to be re-applied. But we need to tell WinHttp
                         // explicitly that we don't have any certificate to send.
+                        Debug.Assert(state.RequestHandle != null, "OnRequestError: state.RequestHandle is null");
                         WinHttpHandler.SetNoClientCertificate(state.RequestHandle);
                         state.RetryRequest = true;
                         state.TcsReceiveResponseHeaders.TrySetResult(false);

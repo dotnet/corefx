@@ -2,8 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
-
 namespace System.Composition
 {
     /// <summary>
@@ -26,7 +24,7 @@ namespace System.Composition
         /// </param>
         public PartMetadataAttribute(string name, object value)
         {
-            if (name == null) throw new ArgumentNullException("name");
+            if (name == null) throw new ArgumentNullException(nameof(name));
 
             Name = name;
             Value = value;

@@ -141,13 +141,13 @@ namespace System.Net.Security
         {
             if (asyncResult == null)
             {
-                throw new ArgumentNullException("asyncResult");
+                throw new ArgumentNullException(nameof(asyncResult));
             }
 
             BufferAsyncResult bufferResult = asyncResult as BufferAsyncResult;
             if (bufferResult == null)
             {
-                throw new ArgumentException(SR.Format(SR.net_io_async_result, asyncResult.GetType().FullName), "asyncResult");
+                throw new ArgumentException(SR.Format(SR.net_io_async_result, asyncResult.GetType().FullName), nameof(asyncResult));
             }
 
             if (Interlocked.Exchange(ref _nestedRead, 0) == 0)
@@ -183,13 +183,13 @@ namespace System.Net.Security
         {
             if (asyncResult == null)
             {
-                throw new ArgumentNullException("asyncResult");
+                throw new ArgumentNullException(nameof(asyncResult));
             }
 
             LazyAsyncResult lazyResult = asyncResult as LazyAsyncResult;
             if (lazyResult == null)
             {
-                throw new ArgumentException(SR.Format(SR.net_io_async_result, asyncResult.GetType().FullName), "asyncResult");
+                throw new ArgumentException(SR.Format(SR.net_io_async_result, asyncResult.GetType().FullName), nameof(asyncResult));
             }
 
             if (Interlocked.Exchange(ref _nestedWrite, 0) == 0)
@@ -300,22 +300,22 @@ namespace System.Net.Security
         {
             if (buffer == null)
             {
-                throw new ArgumentNullException("buffer");
+                throw new ArgumentNullException(nameof(buffer));
             }
 
             if (offset < 0)
             {
-                throw new ArgumentOutOfRangeException("offset");
+                throw new ArgumentOutOfRangeException(nameof(offset));
             }
 
             if (count < 0)
             {
-                throw new ArgumentOutOfRangeException("count");
+                throw new ArgumentOutOfRangeException(nameof(count));
             }
 
             if (count > buffer.Length - offset)
             {
-                throw new ArgumentOutOfRangeException("count", SR.net_offset_plus_count);
+                throw new ArgumentOutOfRangeException(nameof(count), SR.net_offset_plus_count);
             }
         }
 
@@ -403,11 +403,11 @@ namespace System.Net.Security
 
                     int chunkBytes = Math.Min(count, _sslState.MaxDataSize);
                     int encryptedBytes;
-                    SecurityStatusPal errorCode = _sslState.EncryptData(buffer, offset, chunkBytes, ref outBuffer, out encryptedBytes);
-                    if (errorCode != SecurityStatusPal.OK)
+                    SecurityStatusPal status = _sslState.EncryptData(buffer, offset, chunkBytes, ref outBuffer, out encryptedBytes);
+                    if (status.ErrorCode != SecurityStatusPalErrorCode.OK)
                     {
                         // Re-handshake status is not supported.
-                        ProtocolToken message = new ProtocolToken(null, errorCode);
+                        ProtocolToken message = new ProtocolToken(null, status);
                         throw new IOException(SR.net_io_encrypt, message.GetException());
                     }
 
@@ -657,9 +657,9 @@ namespace System.Net.Security
             // Decrypt into internal buffer, change "readBytes" to count now _Decrypted Bytes_.
             int data_offset = 0;
 
-            SecurityStatusPal errorCode = _sslState.DecryptData(InternalBuffer, ref data_offset, ref readBytes);
+            SecurityStatusPal status = _sslState.DecryptData(InternalBuffer, ref data_offset, ref readBytes);
 
-            if (errorCode != SecurityStatusPal.OK)
+            if (status.ErrorCode != SecurityStatusPalErrorCode.OK)
             {
                 byte[] extraBuffer = null;
                 if (readBytes != 0)
@@ -670,7 +670,7 @@ namespace System.Net.Security
 
                 // Reset internal buffer count.
                 SkipBytes(InternalBufferCount);
-                return ProcessReadErrorCode(errorCode, buffer, offset, count, asyncRequest, extraBuffer);
+                return ProcessReadErrorCode(status, buffer, offset, count, asyncRequest, extraBuffer);
             }
 
 
@@ -707,9 +707,9 @@ namespace System.Net.Security
         //
         // Only processing SEC_I_RENEGOTIATE.
         //
-        private int ProcessReadErrorCode(SecurityStatusPal errorCode, byte[] buffer, int offset, int count, AsyncProtocolRequest asyncRequest, byte[] extraBuffer)
+        private int ProcessReadErrorCode(SecurityStatusPal status, byte[] buffer, int offset, int count, AsyncProtocolRequest asyncRequest, byte[] extraBuffer)
         {
-            ProtocolToken message = new ProtocolToken(null, errorCode);
+            ProtocolToken message = new ProtocolToken(null, status);
 
             if (GlobalLog.IsEnabled)
             {

@@ -1742,6 +1742,20 @@ public static partial class DataContractSerializerTests
     }
 
     [Fact]
+    public static void DCS_ReadOnlyDictionary()
+    {
+        var dict = new Dictionary<string, int>();
+        dict["Foo"] = 1;
+        dict["Bar"] = 2;
+        ReadOnlyDictionary<string, int> value = new ReadOnlyDictionary<string, int>(dict);
+        var deserializedValue = SerializeAndDeserialize(value, @"<ReadOnlyDictionaryOfstringint xmlns=""http://schemas.datacontract.org/2004/07/System.Collections.ObjectModel"" xmlns:i=""http://www.w3.org/2001/XMLSchema-instance""><_dictionary xmlns:a=""http://schemas.microsoft.com/2003/10/Serialization/Arrays""><a:KeyValueOfstringint><a:Key>Foo</a:Key><a:Value>1</a:Value></a:KeyValueOfstringint><a:KeyValueOfstringint><a:Key>Bar</a:Key><a:Value>2</a:Value></a:KeyValueOfstringint></_dictionary></ReadOnlyDictionaryOfstringint>");
+
+        Assert.StrictEqual(value.Count, deserializedValue.Count);
+        Assert.StrictEqual(value["Foo"], deserializedValue["Foo"]);
+        Assert.StrictEqual(value["Bar"], deserializedValue["Bar"]);
+    }
+
+    [Fact]
     public static void DCS_KeyValuePair()
     {
         var value = new KeyValuePair<string, object>("FooKey", "FooValue");
@@ -1916,7 +1930,7 @@ public static partial class DataContractSerializerTests
     }
 
     [Theory]
-    [MemberData("XmlDictionaryReaderQuotasData")]
+    [MemberData(nameof(XmlDictionaryReaderQuotasData))]
     public static void DCS_XmlDictionaryQuotas(XmlDictionaryReaderQuotas quotas, bool shouldSucceed)
     {
         var input = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><TypeWithTypeWithIntAndStringPropertyProperty><ObjectProperty><SampleInt>10</SampleInt><SampleString>Sample string</SampleString></ObjectProperty></TypeWithTypeWithIntAndStringPropertyProperty>";
@@ -2007,14 +2021,6 @@ public static partial class DataContractSerializerTests
         {
             Assert.StrictEqual(expected.Elements[i].InnerText, actual.Elements[i].InnerText);
         }
-    }
-
-    [Fact]
-    public static void DCS_DifferentCollectionsOfSameTypeAsKnownTypes()
-    {
-        Assert.Throws<InvalidOperationException>(() => { 
-            (new DataContractSerializer(typeof(TypeWithKnownTypesOfCollectionsWithConflictingXmlName))).WriteObject(new MemoryStream(), new TypeWithKnownTypesOfCollectionsWithConflictingXmlName());
-        });
     }
 
     private static T SerializeAndDeserialize<T>(T value, string baseline, DataContractSerializerSettings settings = null, Func<DataContractSerializer> serializerFactory = null, bool skipStringCompare = false)

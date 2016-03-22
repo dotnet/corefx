@@ -389,7 +389,7 @@ namespace System.Threading.Tasks.Tests
 
                 // Allow for exception throwing to test our handling of that.
                 if (s == null)
-                    throw new ArgumentNullException("s");
+                    throw new ArgumentNullException(nameof(s));
 
                 Task t = Task.Factory.StartNew(delegate
                 {
@@ -439,7 +439,7 @@ namespace System.Threading.Tasks.Tests
 
                 // Allow for exception throwing to test our handling of that.
                 if (maxBytes == -1)
-                    throw new ArgumentException("maxBytes");
+                    throw new ArgumentException("Value was not valid", nameof(maxBytes));
 
                 Task t = Task.Factory.StartNew(delegate
                 {

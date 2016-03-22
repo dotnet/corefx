@@ -2,10 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
-using System.Diagnostics;
-using System.Diagnostics.Contracts;
-
 using Microsoft.Win32.SafeHandles;
 
 using Internal.Cryptography;
@@ -36,9 +32,9 @@ namespace System.Security.Cryptography
         public static CngKey Open(string keyName, CngProvider provider, CngKeyOpenOptions openOptions)
         {
             if (keyName == null)
-                throw new ArgumentNullException("keyName");
+                throw new ArgumentNullException(nameof(keyName));
             if (provider == null)
-                throw new ArgumentNullException("provider");
+                throw new ArgumentNullException(nameof(provider));
 
             SafeNCryptProviderHandle providerHandle = provider.OpenStorageProvider();
             SafeNCryptKeyHandle keyHandle;

@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Reflection.Metadata;
 using System.Reflection.Metadata.Ecma335;
 
 #if SRM
@@ -10,7 +11,7 @@ namespace System.Reflection.Metadata.Decoding
 namespace Roslyn.Reflection.Metadata.Decoding
 #endif
 {
-#if SRM && FUTURE
+#if SRM
     public
 #endif
     enum SignatureTypeHandleCode : byte
@@ -24,11 +25,11 @@ namespace Roslyn.Reflection.Metadata.Decoding
         /// <summary>
         /// The type definition or reference refers to a class.
         /// </summary>
-        Class = CorElementType.ELEMENT_TYPE_CLASS,
+        Class = 0x12, // TODO: CorElementType.ELEMENT_TYPE_CLASS,
 
         /// <summary>
         /// The type definition or reference refers to a value type.
         /// </summary>
-        ValueType = CorElementType.ELEMENT_TYPE_VALUETYPE,
+        ValueType = 0x11, // TODO: CorElementType.ELEMENT_TYPE_VALUETYPE,
     }
 }

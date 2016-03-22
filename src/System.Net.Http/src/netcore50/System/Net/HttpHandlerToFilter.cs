@@ -25,6 +25,8 @@ namespace System.Net.Http
 {
     internal class HttpHandlerToFilter : HttpMessageHandler
     {
+        private readonly static DiagnosticListener s_diagnosticListener = new DiagnosticListener(HttpHandlerLoggingStrings.DiagnosticListenerName);
+
         private readonly RTHttpBaseProtocolFilter _next;
         private int _filterMaxVersionSet;
 
@@ -32,7 +34,7 @@ namespace System.Net.Http
         {
             if (filter == null)
             {
-                throw new ArgumentNullException("filter");
+                throw new ArgumentNullException(nameof(filter));
             }
 
             _next = filter;
@@ -43,9 +45,11 @@ namespace System.Net.Http
         {
             if (request == null)
             {
-                throw new ArgumentNullException("request");
+                throw new ArgumentNullException(nameof(request));
             }
             cancel.ThrowIfCancellationRequested();
+
+            Guid loggingRequestId = s_diagnosticListener.LogHttpRequest(request);
 
             RTHttpRequestMessage rtRequest = await ConvertRequestAsync(request).ConfigureAwait(false);
             RTHttpResponseMessage rtResponse = await _next.SendRequestAsync(rtRequest).AsTask(cancel).ConfigureAwait(false);
@@ -55,6 +59,9 @@ namespace System.Net.Http
 
             HttpResponseMessage response = ConvertResponse(rtResponse);
             response.RequestMessage = request;
+
+            s_diagnosticListener.LogHttpResponse(response, loggingRequestId);
+
             return response;
         }
 
