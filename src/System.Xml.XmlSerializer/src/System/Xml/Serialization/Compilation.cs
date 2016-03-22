@@ -120,48 +120,64 @@ namespace System.Xml.Serialization
 
             ModuleBuilder moduleBuilder = CodeGenerator.CreateModuleBuilder(assemblyBuilder, assemblyName);
 
-            string writerClass = "XmlSerializationWriter" + suffix;
-            writerClass = classes.AddUnique(writerClass, writerClass);
-            XmlSerializationWriterILGen writerCodeGen = new XmlSerializationWriterILGen(scopes, "public", writerClass);
+            string writerName = "XmlSerializationWriter" + suffix;
+            writerName = classes.AddUnique(writerName, writerName);
+            XmlSerializationWriterILGen writerCodeGen = new XmlSerializationWriterILGen(scopes, "public", writerName);
             writerCodeGen.ModuleBuilder = moduleBuilder;
 
             writerCodeGen.GenerateBegin();
-            string[] writeMethodNames = new string[xmlMappings.Length];
-
+            var writeMethods = new MethodBuilder[xmlMappings.Length];
             for (int i = 0; i < xmlMappings.Length; i++)
             {
-                writeMethodNames[i] = writerCodeGen.GenerateElement(xmlMappings[i]);
+                writeMethods[i] = writerCodeGen.GenerateElement(xmlMappings[i]);
             }
-            Type writerType = writerCodeGen.GenerateEnd();
 
-            string readerClass = "XmlSerializationReader" + suffix;
-            readerClass = classes.AddUnique(readerClass, readerClass);
-            XmlSerializationReaderILGen readerCodeGen = new XmlSerializationReaderILGen(scopes, "public", readerClass);
+            ConstructorBuilder writerCtor;
+            TypeBuilder writerType = writerCodeGen.GenerateEnd(out writerCtor);
+
+            string readerName = "XmlSerializationReader" + suffix;
+            readerName = classes.AddUnique(readerName, readerName);
+            XmlSerializationReaderILGen readerCodeGen = new XmlSerializationReaderILGen(scopes, "public", readerName);
 
             readerCodeGen.ModuleBuilder = moduleBuilder;
-            readerCodeGen.CreatedTypes.Add(writerType.Name, writerType);
 
             readerCodeGen.GenerateBegin();
-            string[] readMethodNames = new string[xmlMappings.Length];
+            var readMethods = new MethodBuilder[xmlMappings.Length];
             for (int i = 0; i < xmlMappings.Length; i++)
             {
-                readMethodNames[i] = readerCodeGen.GenerateElement(xmlMappings[i]);
+                readMethods[i] = readerCodeGen.GenerateElement(xmlMappings[i]);
             }
-            readerCodeGen.GenerateEnd(readMethodNames, xmlMappings, types);
 
-            string baseSerializer = readerCodeGen.GenerateBaseSerializer("XmlSerializer1", readerClass, writerClass, classes);
-            Hashtable serializers = new Hashtable();
+            ConstructorBuilder readerCtor;
+            TypeBuilder readerType = readerCodeGen.GenerateEnd(out readerCtor);
+
+            ConstructorBuilder baseSerializerCtor;
+            TypeBuilder baseSerializerType = readerCodeGen.GenerateBaseSerializer("XmlSerializer1", readerCtor, writerCtor, classes, out baseSerializerCtor);
+            var serializerCtors = new Dictionary<string, ConstructorBuilder>();
             for (int i = 0; i < xmlMappings.Length; i++)
             {
-                if (serializers[xmlMappings[i].Key] == null)
+                string name = xmlMappings[i].Key;
+                if (!serializerCtors.ContainsKey(name))
                 {
-                    serializers[xmlMappings[i].Key] = readerCodeGen.GenerateTypedSerializer(readMethodNames[i], writeMethodNames[i], xmlMappings[i], classes, baseSerializer, readerClass, writerClass);
+                    ConstructorBuilder ctor;
+                    readerCodeGen.GenerateTypedSerializer(readMethods[i], writeMethods[i], xmlMappings[i], classes, baseSerializerType, baseSerializerCtor, readerType, writerType, out ctor);
+                    serializerCtors.Add(name, ctor);
                 }
             }
-            readerCodeGen.GenerateSerializerContract("XmlSerializerContract", xmlMappings, types, readerClass, readMethodNames, writerClass, writeMethodNames, serializers);
 
+            TypeBuilder contractType = readerCodeGen.GenerateSerializerContract(xmlMappings, types, readerCtor, readMethods, writerCtor, writeMethods, serializerCtors);
 
-            return writerType.GetTypeInfo().Assembly;
+            // create all emitted types:
+            readerType.CreateTypeInfo();
+            writerType.CreateTypeInfo();
+            baseSerializerType.CreateTypeInfo();
+
+            foreach (var ctor in serializerCtors.Values)
+            {
+                ((TypeBuilder)ctor.DeclaringType.GetTypeInfo()).CreateTypeInfo();
+            }
+
+            return contractType.CreateTypeInfo().Assembly;
         }
 #endif
 
@@ -176,7 +192,7 @@ namespace System.Xml.Serialization
             throw missingMethod;
         }
 
-        internal static Type GetTypeFromAssembly(Assembly assembly, string typeName)
+        internal static Type GetTypeFromAssembly(Reflection.Assembly assembly, string typeName)
         {
             typeName = GeneratedAssemblyNamespace + "." + typeName;
             Type type = assembly.GetType(typeName);
