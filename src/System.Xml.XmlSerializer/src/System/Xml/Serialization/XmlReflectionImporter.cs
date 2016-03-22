@@ -2,23 +2,19 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
+using System.Reflection;
+using System.Xml.Extensions;
+using System.Xml.Schema;
+// this[key] api throws KeyNotFoundException
+using Hashtable = System.Collections.InternalHashtable;
+using XmlSchema = System.ServiceModel.Dispatcher.XmlSchemaConstants;
+
 namespace System.Xml.Serialization
 {
-    using System.Reflection;
-    using System;
-    using System.Linq;
-    using System.Xml.Schema;
-    using System.Collections;
-    using System.ComponentModel;
-    using System.Globalization;
-    using System.CodeDom.Compiler;
-    using System.Threading;
-    using System.Diagnostics;
-    using System.Xml.Extensions;
-    using XmlSchema = System.ServiceModel.Dispatcher.XmlSchemaConstants;
-    // this[key] api throws KeyNotFoundException
-    using Hashtable = System.Collections.InternalHashtable;
-
     /// <include file='doc\XmlReflectionImporter.uex' path='docs/doc[@for="XmlReflectionImporter"]/*' />
     ///<internalonly/>
     /// <devdoc>
@@ -442,8 +438,8 @@ namespace System.Xml.Serialization
                             string xsdTypeName = valueTypeDesc.DataType == null ? valueTypeDesc.Name : valueTypeDesc.DataType.Name;
                             TypeMapping baseMapping = GetTypeMapping(xsdTypeName, ns, valueTypeDesc, _types, null);
                             if (baseMapping == null)
-                                baseMapping = ImportTypeMapping(_modelScope.GetTypeModel(model.TypeDesc.BaseTypeDesc.Type), ns, context, dataType, null, repeats, openModel, limiter);
-                            return CreateNullableMapping(baseMapping, model.TypeDesc.Type);
+                                baseMapping = ImportTypeMapping(_modelScope.GetTypeModel(model.TypeDesc.BaseTypeDesc.Type.SystemType), ns, context, dataType, null, repeats, openModel, limiter);
+                            return CreateNullableMapping(baseMapping, model.TypeDesc.Type.SystemType);
                         }
                         else
                         {
@@ -519,7 +515,7 @@ namespace System.Xml.Serialization
                     // new IXmlSerializable
                     XmlSchemaProviderAttribute provider = (XmlSchemaProviderAttribute)attrs[0];
                     MethodInfo method = GetMethodFromSchemaProvider(provider, type);
-                    serializableMapping = new SerializableMapping(method, provider.IsAny, ns);
+                    serializableMapping = new SerializableMapping(method.ToReference(), provider.IsAny, ns);
                     XmlQualifiedName qname = serializableMapping.XsiType;
                     if (qname != null && !qname.IsEmpty)
                     {
@@ -527,7 +523,7 @@ namespace System.Xml.Serialization
                         serializableMapping.Namespace = qname.Namespace;
                     }
                     serializableMapping.TypeDesc = typeDesc;
-                    serializableMapping.Type = type;
+                    serializableMapping.Type = type.ToReference();
                     IncludeTypes(type.GetTypeInfo());
                 }
                 else
@@ -535,7 +531,7 @@ namespace System.Xml.Serialization
                     // old IXmlSerializable
                     serializableMapping = new SerializableMapping();
                     serializableMapping.TypeDesc = typeDesc;
-                    serializableMapping.Type = type;
+                    serializableMapping.Type = type.ToReference();
                 }
                 mapping = serializableMapping;
             }
@@ -784,7 +780,7 @@ namespace System.Xml.Serialization
                     return false;
                 }
             }
-            ArrayList members = new ArrayList();
+            var members = new List<MemberMapping>();
             TextAccessor textAccesor = null;
             bool hasElements = false;
             bool isSequence = false;
@@ -842,7 +838,7 @@ namespace System.Xml.Serialization
                 Hashtable ids = new Hashtable();
                 for (int i = 0; i < members.Count; i++)
                 {
-                    MemberMapping member = (MemberMapping)members[i];
+                    MemberMapping member = members[i];
                     if (!member.IsParticle)
                         continue;
                     if (member.IsSequence)
@@ -858,9 +854,9 @@ namespace System.Xml.Serialization
                         throw new InvalidOperationException(SR.Format(SR.XmlSequenceInconsistent, "Order", member.Name));
                     }
                 }
-                members.Sort(new MemberMappingComparer());
+                members.Sort(MemberMappingComparer.Instance);
             }
-            mapping.Members = (MemberMapping[])members.ToArray(typeof(MemberMapping));
+            mapping.Members = members.ToArray();
             if (mapping.BaseMapping == null) mapping.BaseMapping = GetRootMapping();
             if (mapping.XmlnsMember != null && mapping.BaseMapping.HasXmlnsMember)
                 throw new InvalidOperationException(SR.Format(SR.XmlMultipleXmlns, model.Type.FullName));
@@ -1333,9 +1329,9 @@ namespace System.Xml.Serialization
             member.Name = model.Name;
             member.CheckShouldPersist = model.CheckShouldPersist;
             member.CheckSpecified = model.CheckSpecified;
-            member.MemberInfo = model.MemberInfo;
-            member.CheckSpecifiedMemberInfo = model.CheckSpecifiedMemberInfo;
-            member.CheckShouldPersistMethodInfo = model.CheckShouldPersistMethodInfo;
+            member.MemberInfo = model.MemberInfo.ToReference();
+            member.CheckSpecifiedMemberInfo = model.CheckSpecifiedMemberInfo.ToReference();
+            member.CheckShouldPersistMethodInfo = model.CheckShouldPersistMethodInfo.ToReference();
             member.ReadOnly = model.ReadOnly; // || !model.FieldTypeDesc.HasDefaultConstructor;
             Type choiceIdentifierType = null;
             if (a.XmlChoiceIdentifier != null)
@@ -1478,7 +1474,7 @@ namespace System.Xml.Serialization
             {
                 accessor.ChoiceIdentifier = new ChoiceIdentifierAccessor();
                 accessor.ChoiceIdentifier.MemberName = a.XmlChoiceIdentifier.MemberName;
-                accessor.ChoiceIdentifier.MemberInfo = a.XmlChoiceIdentifier.MemberInfo;
+                accessor.ChoiceIdentifier.MemberInfo = a.XmlChoiceIdentifier.MemberInfo.ToReference();
                 accessor.ChoiceIdentifier.Mapping = ImportTypeMapping(_modelScope.GetTypeModel(choiceIdentifierType), ns, ImportContext.Element, String.Empty, null, limiter);
                 CheckChoiceIdentifierMapping((EnumMapping)accessor.ChoiceIdentifier.Mapping);
             }

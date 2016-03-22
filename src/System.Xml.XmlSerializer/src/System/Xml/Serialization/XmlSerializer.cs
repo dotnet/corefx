@@ -2,26 +2,15 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections;
+using System.Globalization;
+using System.IO;
+using System.Reflection;
+using XmlDeserializationEvents = System.Object;
+using XmlSchema = System.ServiceModel.Dispatcher.XmlSchemaConstants;
 
 namespace System.Xml.Serialization
 {
-    using System.Reflection;
-    using System.Collections;
-    using System.IO;
-    using System.Xml.Schema;
-    using System;
-    using System.Text;
-    using System.Threading;
-    using System.Globalization;
-    using System.Security;
-    using System.Diagnostics;
-    using System.CodeDom.Compiler;
-    using System.Collections.Generic;
-    using Hashtable = System.Collections.IDictionary;
-    using XmlSchema = System.ServiceModel.Dispatcher.XmlSchemaConstants;
-    using XmlDeserializationEvents = System.Object;
-
-
     /// <include file='doc\XmlSerializer.uex' path='docs/doc[@for="XmlSerializerImplementation"]/*' />
     ///<internalonly/>
     /// <devdoc>
@@ -230,7 +219,7 @@ namespace System.Xml.Serialization
         {
             if (xmlMapping == null)
                 throw new ArgumentNullException(nameof(xmlMapping));
-            return new TempAssembly(new XmlMapping[] { xmlMapping }, new Type[] { type }, defaultNamespace, null, null);
+            return new TempAssembly(new XmlMapping[] { xmlMapping }, new[] { type }, defaultNamespace, null, null);
         }
 
 

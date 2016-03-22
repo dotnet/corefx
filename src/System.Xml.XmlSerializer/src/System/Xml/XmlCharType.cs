@@ -14,7 +14,6 @@
 
 #if XMLCHARTYPE_GEN_RESOURCE || XMLCHARTYPE_USE_RESOURCE
 using System.IO;
-using System.Reflection;
 #endif
 using System.Threading;
 using System.Diagnostics;

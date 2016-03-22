@@ -2,15 +2,13 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections;
+using System.Reflection;
+// this[key] api throws KeyNotFoundException
+using Hashtable = System.Collections.InternalHashtable;
+
 namespace System.Xml.Serialization
 {
-    using System;
-    using System.Reflection;
-    using System.Collections;
-    using System.Diagnostics;
-    // this[key] api throws KeyNotFoundException
-    using Hashtable = System.Collections.InternalHashtable;
-
     // These classes define the abstract serialization model, e.g. the rules for WHAT is serialized.  
     // The answer of HOW the values are serialized is answered by a particular reflection importer 
     // by looking for a particular set of custom attributes specific to the serialization format

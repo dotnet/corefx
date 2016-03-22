@@ -2,17 +2,15 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
 using System.Diagnostics;
 using System.Reflection;
-using System.Reflection.Emit;
 using System.Text.RegularExpressions;
-using System.Xml.Extensions;
-
 
 #if !NET_NATIVE
 namespace System.Xml.Serialization
 {
+    using Emit;
+
     internal class SourceInfo
     {
         //a[ia]
@@ -92,7 +90,7 @@ namespace System.Xml.Serialization
                     MethodInfo get_Item = varType.GetMethod(
                         "get_Item",
                         CodeGenerator.InstanceBindingFlags,
-                        new Type[] { typeof(Int32) }
+                        new[] { WellKnownTypes.Int32 }
                         );
                     Debug.Assert(get_Item != null);
                     ILG.Call(get_Item);
@@ -197,7 +195,7 @@ namespace System.Xml.Serialization
 
         private void ConvertNullableValue(Type nullableType, Type targetType)
         {
-            System.Diagnostics.Debug.Assert(targetType == nullableType || targetType.IsAssignableFrom(nullableType.GetGenericArguments()[0]));
+            Debug.Assert(targetType == nullableType || targetType.IsAssignableFrom(nullableType.GetGenericArguments()[0]));
             if (targetType != nullableType)
             {
                 MethodInfo Nullable_get_Value = nullableType.GetMethod(

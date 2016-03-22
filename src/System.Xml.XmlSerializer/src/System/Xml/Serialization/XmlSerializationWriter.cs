@@ -2,27 +2,15 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections;
+using System.Globalization;
+using System.Reflection;
+using System.Xml.Schema;
+using DictionaryEntry = System.Collections.Generic.KeyValuePair<object, object>;
+using XmlSchema = System.ServiceModel.Dispatcher.XmlSchemaConstants;
+
 namespace System.Xml.Serialization
 {
-    using System;
-    using System.IO;
-    using System.Collections;
-    using System.Reflection;
-    using System.Reflection.Emit;
-    using System.Xml.Schema;
-    using System.ComponentModel;
-    using System.Diagnostics;
-    using System.CodeDom.Compiler;
-    using System.Globalization;
-    using System.Text;
-    using System.Threading;
-    using System.Collections.Generic;
-    using System.Text.RegularExpressions;
-    using System.Xml.Extensions;
-    using Hashtable = System.Collections.Generic.Dictionary<object, object>;
-    using DictionaryEntry = System.Collections.Generic.KeyValuePair<object, object>;
-    using XmlSchema = System.ServiceModel.Dispatcher.XmlSchemaConstants;
-
     /// <include file='doc\XmlSerializationWriter.uex' path='docs/doc[@for="XmlSerializationWriter"]/*' />
     ///<internalonly/>
     public abstract class XmlSerializationWriter : XmlSerializationGeneratedCode

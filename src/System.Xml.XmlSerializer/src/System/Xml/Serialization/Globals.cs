@@ -6,7 +6,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.Security;
 using System.Reflection;
 
-
 namespace System.Xml.Serialization
 {
     internal static class Globals

@@ -2,30 +2,15 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System;
+using System.Collections;
+using System.Xml;
+using System.Xml.Extensions;
+using XmlDeserializationEvents = System.Object;
+using XmlSchema = System.ServiceModel.Dispatcher.XmlSchemaConstants;
+
 namespace System.Xml.Serialization
 {
-    using System.IO;
-    using System;
-    using System.Security;
-    using System.Collections;
-    using System.Reflection;
-    using System.Text;
-    using System.Xml;
-    using System.Xml.Schema;
-    using System.ComponentModel;
-    using System.Globalization;
-    using System.CodeDom.Compiler;
-    using System.Diagnostics;
-    using System.Threading;
-    using System.Collections.Generic;
-    using System.Reflection.Emit;
-    using System.Text.RegularExpressions;
-    using System.Xml.Extensions;
-    using Hashtable = System.Collections.Generic.Dictionary<object, object>;
-    using DictionaryEntry = System.Collections.Generic.KeyValuePair<object, object>;
-    using XmlSchema = System.ServiceModel.Dispatcher.XmlSchemaConstants;
-    using XmlDeserializationEvents = System.Object;
-
     /// <include file='doc\XmlSerializationReader.uex' path='docs/doc[@for="XmlSerializationReader"]/*' />
     ///<internalonly/>
     public abstract class XmlSerializationReader : XmlSerializationGeneratedCode
