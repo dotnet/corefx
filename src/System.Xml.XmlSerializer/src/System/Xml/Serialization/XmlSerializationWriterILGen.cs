@@ -7,16 +7,16 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
-using System.Reflection;
-using System.Reflection.Emit;
 using System.Text;
 using System.Xml.Schema;
 using System.Xml.Extensions;
-
+using System.Reflection;
 
 #if !NET_NATIVE
 namespace System.Xml.Serialization
 {
+    using Emit;
+
     internal class XmlSerializationWriterILGen : XmlSerializationILGen
     {
         internal XmlSerializationWriterILGen(TypeScope[] scopes, string access, string className)
@@ -30,7 +30,7 @@ namespace System.Xml.Serialization
                 ModuleBuilder,
                 ClassName,
                 TypeAttributes | TypeAttributes.BeforeFieldInit,
-                typeof(XmlSerializationWriter),
+                WellKnownTypes.XmlSerializationWriter,
                 Array.Empty<Type>());
 
             foreach (TypeScope scope in Scopes)
@@ -61,16 +61,15 @@ namespace System.Xml.Serialization
                 WriteEnumMethod((EnumMapping)mapping);
             }
         }
-        internal Type GenerateEnd()
+        internal TypeBuilder GenerateEnd(out ConstructorBuilder defaultCtor)
         {
             GenerateReferencedMethods();
             GenerateInitCallbacksMethod();
-            this.typeBuilder.DefineDefaultConstructor(
-                CodeGenerator.PublicMethodAttributes);
-            return this.typeBuilder.CreateTypeInfo().AsType();
+            defaultCtor = this.typeBuilder.DefineDefaultConstructor(CodeGenerator.PublicMethodAttributes);
+            return this.typeBuilder;
         }
 
-        internal string GenerateElement(XmlMapping xmlMapping)
+        internal MethodBuilder GenerateElement(XmlMapping xmlMapping)
         {
             if (!xmlMapping.IsWriteable)
                 return null;
@@ -87,7 +86,7 @@ namespace System.Xml.Serialization
         private void GenerateInitCallbacksMethod()
         {
             ilg = new CodeGenerator(this.typeBuilder);
-            ilg.BeginMethod(typeof(void), "InitCallbacks", Array.Empty<Type>(), Array.Empty<string>(),
+            ilg.BeginMethod(WellKnownTypes.Void, "InitCallbacks", Array.Empty<Type>(), Array.Empty<string>(),
                 CodeGenerator.ProtectedOverrideMethodAttributes);
             ilg.EndMethod();
         }
@@ -102,16 +101,16 @@ namespace System.Xml.Serialization
             List<Type> argTypes = new List<Type>();
             ilg.Ldarg(0);
             ilg.Ldstr(GetCSharpString(name));
-            argTypes.Add(typeof(string));
+            argTypes.Add(WellKnownTypes.String);
             if (ns != null)
             {
                 ilg.Ldstr(GetCSharpString(ns));
-                argTypes.Add(typeof(string));
+                argTypes.Add(WellKnownTypes.String);
             }
             source.Load(mapping.TypeDesc.Type);
             argTypes.Add(mapping.TypeDesc.Type);
 
-            MethodInfo XmlSerializationWriter_WriteXXX = typeof(XmlSerializationWriter).GetMethod(
+            MethodInfo XmlSerializationWriter_WriteXXX = WellKnownTypes.XmlSerializationWriter.GetMethod(
                  nullable ? ("WriteNullableQualifiedNameLiteral") : "WriteElementQualifiedName",
                  CodeGenerator.InstanceBindingFlags,
                  argTypes.ToArray()
@@ -138,12 +137,12 @@ namespace System.Xml.Serialization
             MethodBuilder methodBuilder = EnsureMethodBuilder(typeBuilder,
                     methodName,
                     CodeGenerator.PrivateMethodAttributes,
-                    typeof(string),
-                    new Type[] { mapping.TypeDesc.Type });
+                     WellKnownTypes.String,
+                    new[] { mapping.TypeDesc.Type });
             ilg.Ldarg(0);
             source.Load(mapping.TypeDesc.Type);
             ilg.Call(methodBuilder);
-            returnType = typeof(string);
+            returnType = WellKnownTypes.String;
         }
 
         private void WritePrimitiveValue(TypeDesc typeDesc, SourceInfo source, out Type returnType)
@@ -159,15 +158,15 @@ namespace System.Xml.Serialization
                 {
                     Type argType = typeDesc.Type;
                     // No ToString(Byte), compiler used ToString(Int16) instead.
-                    if (argType == typeof(Byte))
-                        argType = typeof(Int16);
+                    if (argType == WellKnownTypes.UInt8)
+                        argType = WellKnownTypes.Int16;
                     // No ToString(UInt16), compiler used ToString(Int32) instead.
-                    else if (argType == typeof(UInt16))
-                        argType = typeof(Int32);
-                    MethodInfo XmlConvert_ToString = typeof(XmlConvert).GetMethod(
+                    else if (argType == WellKnownTypes.UInt16)
+                        argType = WellKnownTypes.Int32;
+                    MethodInfo XmlConvert_ToString = WellKnownTypes.XmlConvert.GetMethod(
                         "ToString",
                         CodeGenerator.StaticBindingFlags,
-                        new Type[] { argType }
+                        new[] { argType }
                         );
                     source.Load(typeDesc.Type);
                     ilg.Call(XmlConvert_ToString);
@@ -182,10 +181,10 @@ namespace System.Xml.Serialization
                         bindingFlags = CodeGenerator.InstanceBindingFlags;
                         ilg.Ldarg(0);
                     }
-                    MethodInfo FromXXX = typeof(XmlSerializationWriter).GetMethod(
+                    MethodInfo FromXXX = WellKnownTypes.XmlSerializationWriter.GetMethod(
                            "From" + typeDesc.FormatterName,
                            bindingFlags,
-                           new Type[] { typeDesc.Type }
+                           new[] { typeDesc.Type }
                            );
                     source.Load(typeDesc.Type);
                     ilg.Call(FromXXX);
@@ -204,7 +203,7 @@ namespace System.Xml.Serialization
                 {
 #if DEBUG
                     // use exception in the place of Debug.Assert to avoid throwing asserts from a server process such as aspnet_ewp.exe
-                    if (defaultValue.GetType() != typeof(string)) throw new InvalidOperationException(SR.Format(SR.XmlInternalErrorDetails, name + " has invalid default type " + defaultValue.GetType().Name));
+                    if (!(defaultValue is string)) throw new InvalidOperationException(SR.Format(SR.XmlInternalErrorDetails, name + " has invalid default type " + defaultValue.GetType().Name));
 #endif
 
                     source.Load(mapping.TypeDesc.Type);
@@ -225,7 +224,7 @@ namespace System.Xml.Serialization
                     {
                         enumDefaultValue = (string)defaultValue;
                     }
-                    ilg.Ldc(Enum.Parse(mapping.TypeDesc.Type, enumDefaultValue, false));
+                    ilg.Ldc(Enum.Parse(mapping.TypeDesc.Type.SystemType, enumDefaultValue, false));
                     ilg.If(Cmp.NotEqualTo); // " != "
                 }
                 else
@@ -235,11 +234,11 @@ namespace System.Xml.Serialization
             }
             List<Type> argTypes = new List<Type>();
             ilg.Ldarg(0);
-            argTypes.Add(typeof(String));
+            argTypes.Add(WellKnownTypes.String);
             ilg.Ldstr(GetCSharpString(name));
             if (ns != null)
             {
-                argTypes.Add(typeof(String));
+                argTypes.Add(WellKnownTypes.String);
                 ilg.Ldstr(GetCSharpString(ns));
             }
             Type argType;
@@ -257,17 +256,17 @@ namespace System.Xml.Serialization
 
             if (writeXsiType)
             {
-                argTypes.Add(typeof(XmlQualifiedName));
-                ConstructorInfo XmlQualifiedName_ctor = typeof(XmlQualifiedName).GetConstructor(
+                argTypes.Add(WellKnownTypes.XmlQualifiedName);
+                ConstructorInfo XmlQualifiedName_ctor = WellKnownTypes.XmlQualifiedName.GetConstructor(
                     CodeGenerator.InstanceBindingFlags,
-                    new Type[] { typeof(String), typeof(String) }
+                    new[] { WellKnownTypes.String, WellKnownTypes.String }
                     );
                 ilg.Ldstr(GetCSharpString(mapping.TypeName));
                 ilg.Ldstr(GetCSharpString(mapping.Namespace));
                 ilg.New(XmlQualifiedName_ctor);
             }
 
-            MethodInfo XmlSerializationWriter_method = typeof(XmlSerializationWriter).GetMethod(
+            MethodInfo XmlSerializationWriter_method = WellKnownTypes.XmlSerializationWriter.GetMethod(
                    method,
                    CodeGenerator.InstanceBindingFlags,
                    argTypes.ToArray()
@@ -282,10 +281,10 @@ namespace System.Xml.Serialization
 
         private void WriteTag(string methodName, string name, string ns)
         {
-            MethodInfo XmlSerializationWriter_Method = typeof(XmlSerializationWriter).GetMethod(
+            MethodInfo XmlSerializationWriter_Method = WellKnownTypes.XmlSerializationWriter.GetMethod(
                 methodName,
                 CodeGenerator.InstanceBindingFlags,
-                new Type[] { typeof(String), typeof(String) }
+                new[] { WellKnownTypes.String, WellKnownTypes.String }
                 );
             ilg.Ldarg(0);
             ilg.Ldstr(GetCSharpString(name));
@@ -295,10 +294,10 @@ namespace System.Xml.Serialization
 
         private void WriteTag(string methodName, string name, string ns, bool writePrefixed)
         {
-            MethodInfo XmlSerializationWriter_Method = typeof(XmlSerializationWriter).GetMethod(
+            MethodInfo XmlSerializationWriter_Method = WellKnownTypes.XmlSerializationWriter.GetMethod(
                 methodName,
                 CodeGenerator.InstanceBindingFlags,
-                new Type[] { typeof(string), typeof(string), typeof(object), typeof(Boolean) }
+                new[] { WellKnownTypes.String, WellKnownTypes.String, WellKnownTypes.Object, WellKnownTypes.Boolean }
                 );
             ilg.Ldarg(0);
             ilg.Ldstr(GetCSharpString(name));
@@ -315,7 +314,7 @@ namespace System.Xml.Serialization
 
         private void WriteEndElement()
         {
-            MethodInfo XmlSerializationWriter_WriteEndElement = typeof(XmlSerializationWriter).GetMethod(
+            MethodInfo XmlSerializationWriter_WriteEndElement = WellKnownTypes.XmlSerializationWriter.GetMethod(
                 "WriteEndElement",
                 CodeGenerator.InstanceBindingFlags,
                 Array.Empty<Type>()
@@ -325,15 +324,15 @@ namespace System.Xml.Serialization
         }
         private void WriteEndElement(string source)
         {
-            MethodInfo XmlSerializationWriter_WriteEndElement = typeof(XmlSerializationWriter).GetMethod(
+            MethodInfo XmlSerializationWriter_WriteEndElement = WellKnownTypes.XmlSerializationWriter.GetMethod(
                 "WriteEndElement",
                 CodeGenerator.InstanceBindingFlags,
-                new Type[] { typeof(Object) }
+                new[] { WellKnownTypes.Object }
                 );
             object oVar = ilg.GetVariable(source);
             ilg.Ldarg(0);
             ilg.Load(oVar);
-            ilg.ConvertValue(ilg.GetVariableType(oVar), typeof(Object));
+            ilg.ConvertValue(ilg.GetVariableType(oVar), WellKnownTypes.Object);
             ilg.Call(XmlSerializationWriter_WriteEndElement);
         }
 
@@ -347,7 +346,7 @@ namespace System.Xml.Serialization
             WriteTag("WriteEmptyTag", name, ns);
         }
 
-        private string GenerateMembersElement(XmlMembersMapping xmlMembersMapping)
+        private MethodBuilder GenerateMembersElement(XmlMembersMapping xmlMembersMapping)
         {
             ElementAccessor element = xmlMembersMapping.Accessor;
             MembersMapping mapping = (MembersMapping)element.Mapping;
@@ -356,14 +355,14 @@ namespace System.Xml.Serialization
             string methodName = NextMethodName(element.Name);
             ilg = new CodeGenerator(this.typeBuilder);
             ilg.BeginMethod(
-                typeof(void),
+                WellKnownTypes.Void,
                 methodName,
-                new Type[] { typeof(object[]) },
+                new[] { WellKnownTypes.ObjectArray },
                 new string[] { "p" },
                 CodeGenerator.PublicMethodAttributes
                 );
 
-            MethodInfo XmlSerializationWriter_WriteStartDocument = typeof(XmlSerializationWriter).GetMethod(
+            MethodInfo XmlSerializationWriter_WriteStartDocument = WellKnownTypes.XmlSerializationWriter.GetMethod(
                 "WriteStartDocument",
                 CodeGenerator.InstanceBindingFlags,
                 Array.Empty<Type>()
@@ -371,7 +370,7 @@ namespace System.Xml.Serialization
             ilg.Ldarg(0);
             ilg.Call(XmlSerializationWriter_WriteStartDocument);
 
-            MethodInfo XmlSerializationWriter_TopLevelElement = typeof(XmlSerializationWriter).GetMethod(
+            MethodInfo XmlSerializationWriter_TopLevelElement = WellKnownTypes.XmlSerializationWriter.GetMethod(
                 "TopLevelElement",
                 CodeGenerator.InstanceBindingFlags,
                 Array.Empty<Type>()
@@ -382,7 +381,7 @@ namespace System.Xml.Serialization
             // in the top-level method add check for the parameters length, 
             // because visual basic does not have a concept of an <out> parameter it uses <ByRef> instead
             // so sometime we think that we have more parameters then supplied
-            LocalBuilder pLengthLoc = ilg.DeclareLocal(typeof(int), "pLength");
+            LocalBuilder pLengthLoc = ilg.DeclareLocal(WellKnownTypes.Int32, "pLength");
             ilg.Ldarg("p");
             ilg.Ldlen();
             ilg.Stloc(pLengthLoc);
@@ -395,7 +394,7 @@ namespace System.Xml.Serialization
                 if (xmlnsMember >= 0)
                 {
                     MemberMapping member = mapping.Members[xmlnsMember];
-                    string source = "((" + typeof(XmlSerializerNamespaces).FullName + ")p[" + xmlnsMember.ToString(CultureInfo.InvariantCulture) + "])";
+                    string source = "((" + WellKnownTypes.XmlSerializerNamespaces.FullName + ")p[" + xmlnsMember.ToString(CultureInfo.InvariantCulture) + "])";
 
                     ilg.Ldloc(pLengthLoc);
                     ilg.Ldc(xmlnsMember);
@@ -421,7 +420,7 @@ namespace System.Xml.Serialization
                             {
                                 if (mapping.Members[j].Name == memberNameSpecified)
                                 {
-                                    specifiedSource = new SourceInfo("((bool)p[" + j.ToString(CultureInfo.InvariantCulture) + "])", null, null, typeof(bool), ilg);
+                                    specifiedSource = new SourceInfo("((bool)p[" + j.ToString(CultureInfo.InvariantCulture) + "])", null, null, WellKnownTypes.Boolean, ilg);
                                     specifiedPosition = j;
                                     break;
                                 }
@@ -439,7 +438,7 @@ namespace System.Xml.Serialization
                             ilg.Ldloc(pLengthLoc);
                             ilg.Ldc(specifiedPosition);
                             ilg.Ble(labelTrue);
-                            specifiedSource.Load(typeof(bool));
+                            specifiedSource.Load(WellKnownTypes.Boolean);
                             ilg.Br_S(labelEnd);
                             ilg.MarkLabel(labelTrue);
                             ilg.Ldc(true);
@@ -477,7 +476,7 @@ namespace System.Xml.Serialization
                     {
                         if (mapping.Members[j].Name == memberNameSpecified)
                         {
-                            specifiedSource = new SourceInfo("((bool)p[" + j.ToString(CultureInfo.InvariantCulture) + "])", null, null, typeof(bool), ilg);
+                            specifiedSource = new SourceInfo("((bool)p[" + j.ToString(CultureInfo.InvariantCulture) + "])", null, null, WellKnownTypes.Boolean, ilg);
                             specifiedPosition = j;
                             break;
                         }
@@ -495,7 +494,7 @@ namespace System.Xml.Serialization
                     ilg.Ldloc(pLengthLoc);
                     ilg.Ldc(specifiedPosition);
                     ilg.Ble(labelTrue);
-                    specifiedSource.Load(typeof(bool));
+                    specifiedSource.Load(WellKnownTypes.Boolean);
                     ilg.Br_S(labelEnd);
                     ilg.MarkLabel(labelTrue);
                     ilg.Ldc(true);
@@ -538,25 +537,25 @@ namespace System.Xml.Serialization
             {
                 WriteEndElement();
             }
-            ilg.EndMethod();
-            return methodName;
+
+            return ilg.EndMethod();
         }
 
-        private string GenerateTypeElement(XmlTypeMapping xmlTypeMapping)
+        private MethodBuilder GenerateTypeElement(XmlTypeMapping xmlTypeMapping)
         {
             ElementAccessor element = xmlTypeMapping.Accessor;
             TypeMapping mapping = element.Mapping;
             string methodName = NextMethodName(element.Name);
             ilg = new CodeGenerator(this.typeBuilder);
             ilg.BeginMethod(
-                typeof(void),
+                WellKnownTypes.Void,
                 methodName,
-                new Type[] { typeof(object) },
+                new[] { WellKnownTypes.Object },
                 new string[] { "o" },
                 CodeGenerator.PublicMethodAttributes
                 );
 
-            MethodInfo XmlSerializationWriter_WriteStartDocument = typeof(XmlSerializationWriter).GetMethod(
+            MethodInfo XmlSerializationWriter_WriteStartDocument = WellKnownTypes.XmlSerializationWriter.GetMethod(
                 "WriteStartDocument",
                 CodeGenerator.InstanceBindingFlags,
                 Array.Empty<Type>()
@@ -576,7 +575,7 @@ namespace System.Xml.Serialization
 
             if (!mapping.TypeDesc.IsValueType && !mapping.TypeDesc.Type.GetTypeInfo().IsPrimitive)
             {
-                MethodInfo XmlSerializationWriter_TopLevelElement = typeof(XmlSerializationWriter).GetMethod(
+                MethodInfo XmlSerializationWriter_TopLevelElement = WellKnownTypes.XmlSerializationWriter.GetMethod(
                       "TopLevelElement",
                       CodeGenerator.InstanceBindingFlags,
                       Array.Empty<Type>()
@@ -585,10 +584,9 @@ namespace System.Xml.Serialization
                 ilg.Call(XmlSerializationWriter_TopLevelElement);
             }
 
-            WriteMember(new SourceInfo("o", "o", null, typeof(object), ilg), null, new ElementAccessor[] { element }, null, null, mapping.TypeDesc, true);
+            WriteMember(new SourceInfo("o", "o", null, WellKnownTypes.Object, ilg), null, new ElementAccessor[] { element }, null, null, mapping.TypeDesc, true);
 
-            ilg.EndMethod();
-            return methodName;
+            return ilg.EndMethod();
         }
 
         private string NextMethodName(string name)
@@ -605,12 +603,12 @@ namespace System.Xml.Serialization
             argNames.Add("v");
             ilg = new CodeGenerator(this.typeBuilder);
             ilg.BeginMethod(
-                typeof(string),
+                WellKnownTypes.String,
                 GetMethodBuilder(methodName),
                 argTypes.ToArray(),
                 argNames.ToArray(),
                 CodeGenerator.PrivateMethodAttributes);
-            LocalBuilder sLoc = ilg.DeclareLocal(typeof(string), "s");
+            LocalBuilder sLoc = ilg.DeclareLocal(WellKnownTypes.String, "s");
             ilg.Load(null);
             ilg.Stloc(sLoc);
             ConstantMapping[] constants = mapping.Constants;
@@ -633,7 +631,7 @@ namespace System.Xml.Serialization
                     {
                         Label caseLabel = ilg.DefineLabel();
                         ilg.Ldloc(localTmp);
-                        ilg.Ldc(Enum.ToObject(mapping.TypeDesc.Type, c.Value));
+                        ilg.Ldc(Enum.ToObject(mapping.TypeDesc.Type.SystemType, c.Value));
                         ilg.Beq(caseLabel);
                         caseLabels.Add(caseLabel);
                         retValues.Add(GetCSharpString(c.XmlName));
@@ -654,8 +652,8 @@ namespace System.Xml.Serialization
                     }
                     ilg.MarkLabel(defaultLabel);
                     RaCodeGen.ILGenForEnumLongValue(ilg, "v");
-                    LocalBuilder strArray = ilg.DeclareLocal(typeof(String[]), "strArray");
-                    ilg.NewArray(typeof(String), constants.Length);
+                    LocalBuilder strArray = ilg.DeclareLocal(WellKnownTypes.StringArray, "strArray");
+                    ilg.NewArray(WellKnownTypes.String, constants.Length);
                     ilg.Stloc(strArray);
                     for (int i = 0; i < constants.Length; i++)
                     {
@@ -663,11 +661,11 @@ namespace System.Xml.Serialization
                         ilg.Ldloc(strArray);
                         ilg.Ldc(i);
                         ilg.Ldstr(GetCSharpString(c.XmlName));
-                        ilg.Stelem(typeof(String));
+                        ilg.Stelem(WellKnownTypes.String);
                     }
                     ilg.Ldloc(strArray);
-                    LocalBuilder longArray = ilg.DeclareLocal(typeof(long[]), "longArray");
-                    ilg.NewArray(typeof(long), constants.Length);
+                    LocalBuilder longArray = ilg.DeclareLocal(WellKnownTypes.Int64Array, "longArray");
+                    ilg.NewArray(WellKnownTypes.Int64, constants.Length);
                     ilg.Stloc(longArray);
 
                     for (int i = 0; i < constants.Length; i++)
@@ -676,14 +674,14 @@ namespace System.Xml.Serialization
                         ilg.Ldloc(longArray);
                         ilg.Ldc(i);
                         ilg.Ldc(c.Value);
-                        ilg.Stelem(typeof(long));
+                        ilg.Stelem(WellKnownTypes.Int64);
                     }
                     ilg.Ldloc(longArray);
                     ilg.Ldstr(GetCSharpString(mapping.TypeDesc.FullName));
-                    MethodInfo XmlSerializationWriter_FromEnum = typeof(XmlSerializationWriter).GetMethod(
+                    MethodInfo XmlSerializationWriter_FromEnum = WellKnownTypes.XmlSerializationWriter.GetMethod(
                         "FromEnum",
                         CodeGenerator.StaticBindingFlags,
-                        new Type[] { typeof(Int64), typeof(String[]), typeof(Int64[]), typeof(String) }
+                        new[] { WellKnownTypes.Int64, WellKnownTypes.StringArray, WellKnownTypes.Int64Array, WellKnownTypes.String }
                         );
                     ilg.Call(XmlSerializationWriter_FromEnum);
                     ilg.Stloc(sLoc);
@@ -700,27 +698,27 @@ namespace System.Xml.Serialization
                         ilg.Stloc(sLoc);
                         ilg.Br(endSwitchLabel);
                     }
-                    MethodInfo CultureInfo_get_InvariantCulture = typeof(CultureInfo).GetMethod(
+                    MethodInfo CultureInfo_get_InvariantCulture = WellKnownTypes.CultureInfo.GetMethod(
                         "get_InvariantCulture",
                         CodeGenerator.StaticBindingFlags,
                         Array.Empty<Type>()
                         );
-                    MethodInfo Int64_ToString = typeof(Int64).GetMethod(
+                    MethodInfo Int64_ToString = WellKnownTypes.Int64.GetMethod(
                         "ToString",
                         CodeGenerator.InstanceBindingFlags,
-                        new Type[] { typeof(IFormatProvider) }
+                        new[] { WellKnownTypes.IFormatProvider }
                         );
-                    MethodInfo XmlSerializationWriter_CreateInvalidEnumValueException = typeof(XmlSerializationWriter).GetMethod(
+                    MethodInfo XmlSerializationWriter_CreateInvalidEnumValueException = WellKnownTypes.XmlSerializationWriter.GetMethod(
                         "CreateInvalidEnumValueException",
                         CodeGenerator.InstanceBindingFlags,
-                        new Type[] { typeof(object), typeof(string) }
+                        new[] { WellKnownTypes.Object, WellKnownTypes.String }
                         );
                     // Default body
                     ilg.MarkLabel(defaultLabel);
                     ilg.Ldarg(0);
                     ilg.Ldarg("v");
-                    ilg.ConvertValue(mapping.TypeDesc.Type, typeof(Int64));
-                    LocalBuilder numLoc = ilg.DeclareLocal(typeof(Int64), "num");
+                    ilg.ConvertValue(mapping.TypeDesc.Type, WellKnownTypes.Int64);
+                    LocalBuilder numLoc = ilg.DeclareLocal(WellKnownTypes.Int64, "num");
                     ilg.Stloc(numLoc);
                     // Invoke method on Value type need address
                     ilg.LdlocAddress(numLoc);
@@ -753,9 +751,9 @@ namespace System.Xml.Serialization
 
                 List<Type> argTypes = new List<Type>();
                 ilg.Ldarg(0);
-                argTypes.Add(typeof(string));
+                argTypes.Add(WellKnownTypes.String);
                 ilg.Ldarg("n");
-                argTypes.Add(typeof(string));
+                argTypes.Add(WellKnownTypes.String);
                 ilg.Ldarg("ns");
                 object oVar = ilg.GetVariable("o");
                 Type oType = ilg.GetVariableType(oVar);
@@ -764,15 +762,15 @@ namespace System.Xml.Serialization
                 argTypes.Add(derived.TypeDesc.Type);
                 if (derived.TypeDesc.IsNullable)
                 {
-                    argTypes.Add(typeof(Boolean));
+                    argTypes.Add(WellKnownTypes.Boolean);
                     ilg.Ldarg("isNullable");
                 }
-                argTypes.Add(typeof(Boolean));
+                argTypes.Add(WellKnownTypes.Boolean);
                 ilg.Ldc(true);
                 MethodInfo methodBuilder = EnsureMethodBuilder(typeBuilder,
                     methodName,
                     CodeGenerator.PrivateMethodAttributes,
-                    typeof(void),
+                    WellKnownTypes.Void,
                     argTypes.ToArray());
                 ilg.Call(methodBuilder);
                 ilg.GotoMethodEnd();
@@ -801,25 +799,25 @@ namespace System.Xml.Serialization
                         // use exception in the place of Debug.Assert to avoid throwing asserts from a server process such as aspnet_ewp.exe
                         if (methodName == null) throw new InvalidOperationException(SR.Format(SR.XmlInternalErrorMethod, mapping.TypeDesc.Name));
 #endif
-                        MethodInfo XmlSerializationWriter_get_Writer = typeof(XmlSerializationWriter).GetMethod(
+                        MethodInfo XmlSerializationWriter_get_Writer = WellKnownTypes.XmlSerializationWriter.GetMethod(
                             "get_Writer",
                             CodeGenerator.InstanceBindingFlags,
                             Array.Empty<Type>()
                             );
-                        MethodInfo XmlWriter_WriteStartElement = typeof(XmlWriter).GetMethod(
+                        MethodInfo XmlWriter_WriteStartElement = WellKnownTypes.XmlWriter.GetMethod(
                             "WriteStartElement",
                             CodeGenerator.InstanceBindingFlags,
-                            new Type[] { typeof(String), typeof(String) }
+                            new[] { WellKnownTypes.String, WellKnownTypes.String }
                             );
                         ilg.Ldarg(0);
                         ilg.Call(XmlSerializationWriter_get_Writer);
                         ilg.Ldarg("n");
                         ilg.Ldarg("ns");
                         ilg.Call(XmlWriter_WriteStartElement);
-                        MethodInfo XmlSerializationWriter_WriteXsiType = typeof(XmlSerializationWriter).GetMethod(
+                        MethodInfo XmlSerializationWriter_WriteXsiType = WellKnownTypes.XmlSerializationWriter.GetMethod(
                             "WriteXsiType",
                             CodeGenerator.InstanceBindingFlags,
-                            new Type[] { typeof(String), typeof(String) }
+                            new[] { WellKnownTypes.String, WellKnownTypes.String }
                             );
                         ilg.Ldarg(0);
                         ilg.Ldstr(GetCSharpString(mapping.TypeName));
@@ -828,13 +826,13 @@ namespace System.Xml.Serialization
                         MethodBuilder methodBuilder = EnsureMethodBuilder(typeBuilder,
                             methodName,
                             CodeGenerator.PrivateMethodAttributes,
-                            typeof(string),
-                            new Type[] { mapping.TypeDesc.Type }
+                            WellKnownTypes.String,
+                            new[] { mapping.TypeDesc.Type }
                         );
-                        MethodInfo XmlWriter_WriteString = typeof(XmlWriter).GetMethod(
+                        MethodInfo XmlWriter_WriteString = WellKnownTypes.XmlWriter.GetMethod(
                             "WriteString",
                             CodeGenerator.InstanceBindingFlags,
-                            new Type[] { typeof(String) }
+                            new[] { WellKnownTypes.String }
                             );
                         ilg.Ldarg(0);
                         ilg.Call(XmlSerializationWriter_get_Writer);
@@ -844,7 +842,7 @@ namespace System.Xml.Serialization
                         ilg.ConvertValue(ilg.GetVariableType(oVar), mapping.TypeDesc.Type);
                         ilg.Call(methodBuilder);
                         ilg.Call(XmlWriter_WriteString);
-                        MethodInfo XmlWriter_WriteEndElement = typeof(XmlWriter).GetMethod(
+                        MethodInfo XmlWriter_WriteEndElement = WellKnownTypes.XmlWriter.GetMethod(
                             "WriteEndElement",
                             CodeGenerator.InstanceBindingFlags,
                             Array.Empty<Type>()
@@ -867,25 +865,25 @@ namespace System.Xml.Serialization
                         ilg.AndIf();
                         ilg.EnterScope();
 
-                        MethodInfo XmlSerializationWriter_get_Writer = typeof(XmlSerializationWriter).GetMethod(
+                        MethodInfo XmlSerializationWriter_get_Writer = WellKnownTypes.XmlSerializationWriter.GetMethod(
                             "get_Writer",
                             CodeGenerator.InstanceBindingFlags,
                             Array.Empty<Type>()
                             );
-                        MethodInfo XmlWriter_WriteStartElement = typeof(XmlWriter).GetMethod(
+                        MethodInfo XmlWriter_WriteStartElement = WellKnownTypes.XmlWriter.GetMethod(
                             "WriteStartElement",
                             CodeGenerator.InstanceBindingFlags,
-                            new Type[] { typeof(String), typeof(String) }
+                            new[] { WellKnownTypes.String, WellKnownTypes.String }
                             );
                         ilg.Ldarg(0);
                         ilg.Call(XmlSerializationWriter_get_Writer);
                         ilg.Ldarg("n");
                         ilg.Ldarg("ns");
                         ilg.Call(XmlWriter_WriteStartElement);
-                        MethodInfo XmlSerializationWriter_WriteXsiType = typeof(XmlSerializationWriter).GetMethod(
+                        MethodInfo XmlSerializationWriter_WriteXsiType = WellKnownTypes.XmlSerializationWriter.GetMethod(
                             "WriteXsiType",
                             CodeGenerator.InstanceBindingFlags,
-                            new Type[] { typeof(String), typeof(String) }
+                            new[] { WellKnownTypes.String, WellKnownTypes.String }
                             );
                         ilg.Ldarg(0);
                         ilg.Ldstr(GetCSharpString(mapping.TypeName));
@@ -894,7 +892,7 @@ namespace System.Xml.Serialization
 
                         WriteMember(new SourceInfo("o", "o", null, null, ilg), null, mapping.ElementsSortedByDerivation, null, null, mapping.TypeDesc, true);
 
-                        MethodInfo XmlWriter_WriteEndElement = typeof(XmlWriter).GetMethod(
+                        MethodInfo XmlWriter_WriteEndElement = WellKnownTypes.XmlWriter.GetMethod(
                             "WriteEndElement",
                             CodeGenerator.InstanceBindingFlags,
                             Array.Empty<Type>()
@@ -916,20 +914,20 @@ namespace System.Xml.Serialization
             ilg = new CodeGenerator(this.typeBuilder);
             List<Type> argTypes = new List<Type>(5);
             List<string> argNames = new List<string>(5);
-            argTypes.Add(typeof(string));
+            argTypes.Add(WellKnownTypes.String);
             argNames.Add("n");
-            argTypes.Add(typeof(string));
+            argTypes.Add(WellKnownTypes.String);
             argNames.Add("ns");
             argTypes.Add(mapping.TypeDesc.Type);
             argNames.Add("o");
             if (mapping.TypeDesc.IsNullable)
             {
-                argTypes.Add(typeof(Boolean));
+                argTypes.Add(WellKnownTypes.Boolean);
                 argNames.Add("isNullable");
             }
-            argTypes.Add(typeof(Boolean));
+            argTypes.Add(WellKnownTypes.Boolean);
             argNames.Add("needType");
-            ilg.BeginMethod(typeof(void),
+            ilg.BeginMethod(WellKnownTypes.Void,
                 GetMethodBuilder(methodName),
                 argTypes.ToArray(),
                 argNames.ToArray(),
@@ -940,10 +938,10 @@ namespace System.Xml.Serialization
                 {
                     ilg.If(ilg.GetArg("isNullable"), Cmp.EqualTo, true);
                     {
-                        MethodInfo XmlSerializationWriter_WriteNullTagLiteral = typeof(XmlSerializationWriter).GetMethod(
+                        MethodInfo XmlSerializationWriter_WriteNullTagLiteral = WellKnownTypes.XmlSerializationWriter.GetMethod(
                                 "WriteNullTagLiteral",
                                 CodeGenerator.InstanceBindingFlags,
-                                new Type[] { typeof(String), typeof(String) }
+                                new[] { WellKnownTypes.String, WellKnownTypes.String }
                                 );
                         ilg.Ldarg(0);
                         ilg.Ldarg("n");
@@ -957,30 +955,30 @@ namespace System.Xml.Serialization
             }
             ilg.If(ilg.GetArg("needType"), Cmp.NotEqualTo, true); // if (!needType)
 
-            LocalBuilder tLoc = ilg.DeclareLocal(typeof(Type), "t");
-            MethodInfo Object_GetType = typeof(object).GetMethod(
+            LocalBuilder tLoc = ilg.DeclareLocal(WellKnownTypes.Type, "t");
+            MethodInfo Object_GetType = WellKnownTypes.Object.GetMethod(
                     "GetType",
                     CodeGenerator.InstanceBindingFlags,
                     Array.Empty<Type>()
                     );
             ArgBuilder oArg = ilg.GetArg("o");
             ilg.LdargAddress(oArg);
-            ilg.ConvertAddress(oArg.ArgType, typeof(object));
+            ilg.ConvertAddress(oArg.ArgType, WellKnownTypes.Object);
             ilg.Call(Object_GetType);
             ilg.Stloc(tLoc);
             WriteTypeCompare("t", mapping.TypeDesc.Type);
             // Bool on the stack from WriteTypeCompare.
-            ilg.If(); // if (t == typeof(...))
+            ilg.If(); // if (t == WellKnownTypes....)
             WriteDerivedTypes(mapping);
             if (mapping.TypeDesc.IsRoot)
                 WriteEnumAndArrayTypes();
             ilg.Else();
             if (mapping.TypeDesc.IsRoot)
             {
-                MethodInfo XmlSerializationWriter_WriteTypedPrimitive = typeof(XmlSerializationWriter).GetMethod(
+                MethodInfo XmlSerializationWriter_WriteTypedPrimitive = WellKnownTypes.XmlSerializationWriter.GetMethod(
                         "WriteTypedPrimitive",
                         CodeGenerator.InstanceBindingFlags,
-                        new Type[] { typeof(String), typeof(String), typeof(Object), typeof(Boolean) }
+                        new[] { WellKnownTypes.String, WellKnownTypes.String, WellKnownTypes.Object, WellKnownTypes.Boolean }
                         );
                 ilg.Ldarg(0);
                 ilg.Ldarg("n");
@@ -992,28 +990,28 @@ namespace System.Xml.Serialization
             }
             else
             {
-                MethodInfo XmlSerializationWriter_CreateUnknownTypeException = typeof(XmlSerializationWriter).GetMethod(
+                MethodInfo XmlSerializationWriter_CreateUnknownTypeException = WellKnownTypes.XmlSerializationWriter.GetMethod(
                     "CreateUnknownTypeException",
                     CodeGenerator.InstanceBindingFlags,
-                    new Type[] { typeof(Object) }
+                    new[] { WellKnownTypes.Object }
                     );
                 ilg.Ldarg(0);
                 ilg.Ldarg(oArg);
-                ilg.ConvertValue(oArg.ArgType, typeof(Object));
+                ilg.ConvertValue(oArg.ArgType, WellKnownTypes.Object);
                 ilg.Call(XmlSerializationWriter_CreateUnknownTypeException);
                 ilg.Throw();
             }
-            ilg.EndIf(); // if (t == typeof(...))
+            ilg.EndIf(); // if (t == WellKnownTypes....)
             ilg.EndIf(); // if (!needType)
 
             if (!mapping.TypeDesc.IsAbstract)
             {
-                if (mapping.TypeDesc.Type != null && typeof(XmlSchemaObject).IsAssignableFrom(mapping.TypeDesc.Type))
+                if (mapping.TypeDesc.Type != null && WellKnownTypes.XmlSchemaObject.IsAssignableFrom(mapping.TypeDesc.Type))
                 {
-                    MethodInfo XmlSerializationWriter_set_EscapeName = typeof(XmlSerializationWriter).GetMethod(
+                    MethodInfo XmlSerializationWriter_set_EscapeName = WellKnownTypes.XmlSerializationWriter.GetMethod(
                         "set_EscapeName",
                         CodeGenerator.InstanceBindingFlags,
-                        new Type[] { typeof(Boolean) }
+                        new[] { WellKnownTypes.Boolean }
                         );
                     ilg.Ldarg(0);
                     ilg.Ldc(false);
@@ -1021,7 +1019,7 @@ namespace System.Xml.Serialization
                 }
 
                 string xmlnsSource = null;
-                MemberMapping[] members = TypeScope.GetAllMembers(mapping, memberInfos);
+                MemberMapping[] members = mapping.GetAllMembers(memberInfos);
                 int xmlnsMember = FindXmlnsIndex(members);
                 if (xmlnsMember >= 0)
                 {
@@ -1035,7 +1033,7 @@ namespace System.Xml.Serialization
                 ilg.Ldarg("ns");
                 ArgBuilder argO = ilg.GetArg("o");
                 ilg.Ldarg(argO);
-                ilg.ConvertValue(argO.ArgType, typeof(Object));
+                ilg.ConvertValue(argO.ArgType, WellKnownTypes.Object);
                 ilg.Ldc(false);
                 if (xmlnsSource == null)
                     ilg.Load(null);
@@ -1045,20 +1043,20 @@ namespace System.Xml.Serialization
                     ILGenLoad(xmlnsSource);
                 }
 
-                MethodInfo XmlSerializationWriter_WriteStartElement = typeof(XmlSerializationWriter).GetMethod(
+                MethodInfo XmlSerializationWriter_WriteStartElement = WellKnownTypes.XmlSerializationWriter.GetMethod(
                         "WriteStartElement",
                         CodeGenerator.InstanceBindingFlags,
-                        new Type[] { typeof(String), typeof(String), typeof(Object), typeof(Boolean), typeof(XmlSerializerNamespaces) }
+                        new[] { WellKnownTypes.String, WellKnownTypes.String, WellKnownTypes.Object, WellKnownTypes.Boolean, WellKnownTypes.XmlSerializerNamespaces }
                         );
                 ilg.Call(XmlSerializationWriter_WriteStartElement);
                 if (!mapping.TypeDesc.IsRoot)
                 {
                     ilg.If(ilg.GetArg("needType"), Cmp.EqualTo, true);
                     {
-                        MethodInfo XmlSerializationWriter_WriteXsiType = typeof(XmlSerializationWriter).GetMethod(
+                        MethodInfo XmlSerializationWriter_WriteXsiType = WellKnownTypes.XmlSerializationWriter.GetMethod(
                                 "WriteXsiType",
                                 CodeGenerator.InstanceBindingFlags,
-                                new Type[] { typeof(String), typeof(String) }
+                                new[] { WellKnownTypes.String, WellKnownTypes.String }
                                 );
                         ilg.Ldarg(0);
                         ilg.Ldstr(GetCSharpString(mapping.TypeName));
@@ -1172,15 +1170,15 @@ namespace System.Xml.Serialization
                     if (CanOptimizeWriteListSequence(memberTypeDesc.ArrayElementTypeDesc))
                     {
                         string ns = attribute.Form == XmlSchemaForm.Qualified ? attribute.Namespace : String.Empty;
-                        MethodInfo XmlSerializationWriter_get_Writer = typeof(XmlSerializationWriter).GetMethod(
+                        MethodInfo XmlSerializationWriter_get_Writer = WellKnownTypes.XmlSerializationWriter.GetMethod(
                             "get_Writer",
                             CodeGenerator.InstanceBindingFlags,
                             Array.Empty<Type>()
                             );
-                        MethodInfo XmlWriter_WriteStartAttribute = typeof(XmlWriter).GetMethod(
+                        MethodInfo XmlWriter_WriteStartAttribute = WellKnownTypes.XmlWriter.GetMethod(
                             "WriteStartAttribute",
                             CodeGenerator.InstanceBindingFlags,
-                            new Type[] { typeof(String), typeof(String), typeof(String) }
+                            new[] { WellKnownTypes.String, WellKnownTypes.String, WellKnownTypes.String }
                             );
                         ilg.Ldarg(0);
                         ilg.Call(XmlSerializationWriter_get_Writer);
@@ -1191,8 +1189,8 @@ namespace System.Xml.Serialization
                     }
                     else
                     {
-                        LocalBuilder sbLoc = ilg.DeclareOrGetLocal(typeof(StringBuilder), "sb");
-                        ConstructorInfo StringBuilder_ctor = typeof(StringBuilder).GetConstructor(
+                        LocalBuilder sbLoc = ilg.DeclareOrGetLocal(WellKnownTypes.StringBuilder, "sb");
+                        ConstructorInfo StringBuilder_ctor = WellKnownTypes.StringBuilder.GetConstructor(
                             CodeGenerator.InstanceBindingFlags,
                             Array.Empty<Type>()
                             );
@@ -1208,7 +1206,7 @@ namespace System.Xml.Serialization
                 }
                 else
                 {
-                    LocalBuilder localI = ilg.DeclareOrGetLocal(typeof(Int32), iVar);
+                    LocalBuilder localI = ilg.DeclareOrGetLocal(WellKnownTypes.Int32, iVar);
                     ilg.For(localI, 0, ilg.GetLocal(aVar));
                     WriteLocalDecl(aiVar, RaCodeGen.GetStringForArrayMember(aVar, iVar, memberTypeDesc), arrayElementTypeDesc.Type);
                 }
@@ -1216,22 +1214,22 @@ namespace System.Xml.Serialization
                 {
                     string methodName;
                     Type methodType;
-                    Type argType = typeof(string);
+                    Type argType = WellKnownTypes.String;
                     // check to see if we can write values of the attribute sequentially
                     if (CanOptimizeWriteListSequence(memberTypeDesc.ArrayElementTypeDesc))
                     {
                         ilg.Ldloc(iVar);
                         ilg.Ldc(0);
                         ilg.If(Cmp.NotEqualTo);
-                        MethodInfo XmlSerializationWriter_get_Writer = typeof(XmlSerializationWriter).GetMethod(
+                        MethodInfo XmlSerializationWriter_get_Writer = WellKnownTypes.XmlSerializationWriter.GetMethod(
                             "get_Writer",
                             CodeGenerator.InstanceBindingFlags,
                             Array.Empty<Type>()
                             );
-                        MethodInfo XmlWriter_WriteString = typeof(XmlWriter).GetMethod(
+                        MethodInfo XmlWriter_WriteString = WellKnownTypes.XmlWriter.GetMethod(
                             "WriteString",
                             CodeGenerator.InstanceBindingFlags,
-                            new Type[] { typeof(String) }
+                            new[] { WellKnownTypes.String }
                             );
                         ilg.Ldarg(0);
                         ilg.Call(XmlSerializationWriter_get_Writer);
@@ -1240,14 +1238,14 @@ namespace System.Xml.Serialization
                         ilg.EndIf();
                         ilg.Ldarg(0);
                         methodName = "WriteValue";
-                        methodType = typeof(XmlSerializationWriter);
+                        methodType = WellKnownTypes.XmlSerializationWriter;
                     }
                     else
                     {
-                        MethodInfo StringBuilder_Append = typeof(StringBuilder).GetMethod(
+                        MethodInfo StringBuilder_Append = WellKnownTypes.StringBuilder.GetMethod(
                             "Append",
                             CodeGenerator.InstanceBindingFlags,
-                            new Type[] { typeof(string) }
+                            new[] { WellKnownTypes.String }
                             );
                         ilg.Ldloc(iVar);
                         ilg.Ldc(0);
@@ -1259,7 +1257,7 @@ namespace System.Xml.Serialization
                         ilg.EndIf();
                         ilg.Ldloc("sb");
                         methodName = "Append";
-                        methodType = typeof(StringBuilder);
+                        methodType = WellKnownTypes.StringBuilder;
                     }
                     if (attribute.Mapping is EnumMapping)
                         WriteEnumValue((EnumMapping)attribute.Mapping, new SourceInfo(aiVar, aiVar, null, arrayElementTypeDesc.Type, ilg), out argType);
@@ -1268,10 +1266,10 @@ namespace System.Xml.Serialization
                     MethodInfo method = methodType.GetMethod(
                         methodName,
                         CodeGenerator.InstanceBindingFlags,
-                        new Type[] { argType }
+                        new[] { argType }
                         );
                     ilg.Call(method);
-                    if (method.ReturnType != typeof(void))
+                    if (method.ReturnType != WellKnownTypes.Void)
                         ilg.Pop();
                 }
                 else
@@ -1287,12 +1285,12 @@ namespace System.Xml.Serialization
                     // check to see if we can write values of the attribute sequentially
                     if (CanOptimizeWriteListSequence(memberTypeDesc.ArrayElementTypeDesc))
                     {
-                        MethodInfo XmlSerializationWriter_get_Writer = typeof(XmlSerializationWriter).GetMethod(
+                        MethodInfo XmlSerializationWriter_get_Writer = WellKnownTypes.XmlSerializationWriter.GetMethod(
                             "get_Writer",
                             CodeGenerator.InstanceBindingFlags,
                             Array.Empty<Type>()
                             );
-                        MethodInfo XmlWriter_WriteEndAttribute = typeof(XmlWriter).GetMethod(
+                        MethodInfo XmlWriter_WriteEndAttribute = WellKnownTypes.XmlWriter.GetMethod(
                             "WriteEndAttribute",
                             CodeGenerator.InstanceBindingFlags,
                             Array.Empty<Type>()
@@ -1303,7 +1301,7 @@ namespace System.Xml.Serialization
                     }
                     else
                     {
-                        MethodInfo StringBuilder_get_Length = typeof(StringBuilder).GetMethod(
+                        MethodInfo StringBuilder_get_Length = WellKnownTypes.StringBuilder.GetMethod(
                             "get_Length",
                             CodeGenerator.InstanceBindingFlags,
                             Array.Empty<Type>()
@@ -1316,22 +1314,22 @@ namespace System.Xml.Serialization
                         List<Type> argTypes = new List<Type>();
                         ilg.Ldarg(0);
                         ilg.Ldstr(GetCSharpString(attribute.Name));
-                        argTypes.Add(typeof(string));
+                        argTypes.Add(WellKnownTypes.String);
                         string ns = attribute.Form == XmlSchemaForm.Qualified ? attribute.Namespace : String.Empty;
                         if (ns != null)
                         {
                             ilg.Ldstr(GetCSharpString(ns));
-                            argTypes.Add(typeof(string));
+                            argTypes.Add(WellKnownTypes.String);
                         }
-                        MethodInfo Object_ToString = typeof(Object).GetMethod(
+                        MethodInfo Object_ToString = WellKnownTypes.Object.GetMethod(
                             "ToString",
                             CodeGenerator.InstanceBindingFlags,
                             Array.Empty<Type>()
                             );
                         ilg.Ldloc("sb");
                         ilg.Call(Object_ToString);
-                        argTypes.Add(typeof(string));
-                        MethodInfo XmlSerializationWriter_WriteAttribute = typeof(XmlSerializationWriter).GetMethod(
+                        argTypes.Add(WellKnownTypes.String);
+                        MethodInfo XmlSerializationWriter_WriteAttribute = WellKnownTypes.XmlSerializationWriter.GetMethod(
                              "WriteAttribute",
                              CodeGenerator.InstanceBindingFlags,
                              argTypes.ToArray()
@@ -1360,15 +1358,15 @@ namespace System.Xml.Serialization
                 if (special.TypeDesc.Kind == TypeKind.Attribute || special.TypeDesc.CanBeAttributeValue)
                 {
                     System.Diagnostics.Debug.Assert(parent == "o" || parent == "p");
-                    MethodInfo XmlSerializationWriter_WriteXmlAttribute = typeof(XmlSerializationWriter).GetMethod(
+                    MethodInfo XmlSerializationWriter_WriteXmlAttribute = WellKnownTypes.XmlSerializationWriter.GetMethod(
                         "WriteXmlAttribute",
                         CodeGenerator.InstanceBindingFlags,
-                        new Type[] { typeof(XmlNode), typeof(Object) }
+                        new[] { WellKnownTypes.XmlNode, WellKnownTypes.Object }
                         );
                     ilg.Ldarg(0);
                     ilg.Ldloc(source.Source);
                     ilg.Ldarg(parent);
-                    ilg.ConvertValue(ilg.GetArg(parent).ArgType, typeof(Object));
+                    ilg.ConvertValue(ilg.GetArg(parent).ArgType, WellKnownTypes.Object);
                     ilg.Call(XmlSerializationWriter_WriteXmlAttribute);
                 }
                 else
@@ -1431,10 +1429,10 @@ namespace System.Xml.Serialization
                 ilg.Ldc(true);
                 ilg.MarkLabel(labelEnd);
                 ilg.If();
-                MethodInfo XmlSerializationWriter_CreateInvalidChoiceIdentifierValueException = typeof(XmlSerializationWriter).GetMethod(
+                MethodInfo XmlSerializationWriter_CreateInvalidChoiceIdentifierValueException = WellKnownTypes.XmlSerializationWriter.GetMethod(
                     "CreateInvalidChoiceIdentifierValueException",
                     CodeGenerator.InstanceBindingFlags,
-                    new Type[] { typeof(String), typeof(String) }
+                    new[] { WellKnownTypes.String, WellKnownTypes.String }
                     );
                 ilg.Ldarg(0);
                 ilg.Ldstr(GetCSharpString(choice.Mapping.TypeDesc.FullName));
@@ -1457,24 +1455,22 @@ namespace System.Xml.Serialization
 
             if (arrayTypeDesc.IsEnumerable)
             {
-                LocalBuilder eLoc = ilg.DeclareLocal(typeof(IEnumerator), "e");
+                LocalBuilder eLoc = ilg.DeclareLocal(WellKnownTypes.IEnumerator, "e");
                 ilg.LoadAddress(ilg.GetVariable(arrayName));
                 MethodInfo getEnumeratorMethod;
 
                 if (arrayTypeDesc.IsPrivateImplementation)
                 {
-                    Type typeIEnumerable = typeof(IEnumerable);
-
-                    getEnumeratorMethod = typeIEnumerable.GetMethod(
+                    getEnumeratorMethod = WellKnownTypes.IEnumerable.GetMethod(
                         "GetEnumerator",
                         CodeGenerator.InstanceBindingFlags,
                         Array.Empty<Type>());
 
-                    ilg.ConvertValue(arrayTypeDesc.Type, typeIEnumerable);
+                    ilg.ConvertValue(arrayTypeDesc.Type, WellKnownTypes.IEnumerable);
                 }
                 else if (arrayTypeDesc.IsGenericInterface)
                 {
-                    Type typeIEnumerable = typeof(IEnumerable<>).MakeGenericType(arrayElementTypeDesc.Type);
+                    Type typeIEnumerable = WellKnownTypes.IEnumerableOfT.MakeGenericType(arrayElementTypeDesc.Type);
 
                     getEnumeratorMethod = typeIEnumerable.GetMethod(
                         "GetEnumerator",
@@ -1490,7 +1486,7 @@ namespace System.Xml.Serialization
                         Array.Empty<Type>());
                 }
                 ilg.Call(getEnumeratorMethod);
-                ilg.ConvertValue(getEnumeratorMethod.ReturnType, typeof(IEnumerator));
+                ilg.ConvertValue(getEnumeratorMethod.ReturnType, WellKnownTypes.IEnumerator);
                 ilg.Stloc(eLoc);
 
                 ilg.Ldloc(eLoc);
@@ -1503,7 +1499,7 @@ namespace System.Xml.Serialization
                 WriteElements(new SourceInfo(arrayNamePlusI, null, null, arrayElementTypeDesc.Type, ilg), choiceName + "i", elements, text, choice, arrayNamePlusA, true, true);
 
                 ilg.WhileBeginCondition(); // while (e.MoveNext())
-                MethodInfo IEnumerator_MoveNext = typeof(IEnumerator).GetMethod(
+                MethodInfo IEnumerator_MoveNext = WellKnownTypes.IEnumerator.GetMethod(
                     "MoveNext",
                     CodeGenerator.InstanceBindingFlags,
                     Array.Empty<Type>());
@@ -1520,7 +1516,7 @@ namespace System.Xml.Serialization
                 string iPlusArrayName = "i" + (arrayName).Replace(arrayTypeDesc.Name, "");
                 string arrayNamePlusA = (arrayName).Replace(arrayTypeDesc.Name, "") + "a" + arrayElementTypeDesc.Name;
                 string arrayNamePlusI = (arrayName).Replace(arrayTypeDesc.Name, "") + "i" + arrayElementTypeDesc.Name;
-                LocalBuilder localI = ilg.DeclareOrGetLocal(typeof(Int32), iPlusArrayName);
+                LocalBuilder localI = ilg.DeclareOrGetLocal(WellKnownTypes.Int32, iPlusArrayName);
                 ilg.For(localI, 0, ilg.GetLocal(arrayName));
                 int count = elements.Length + (text == null ? 0 : 1);
                 if (count > 1)
@@ -1555,7 +1551,7 @@ namespace System.Xml.Serialization
                 bool doEndIf = false;
                 if (isNullable && choice == null)
                 {
-                    source.Load(typeof(object));
+                    source.Load(WellKnownTypes.Object);
                     ilg.Load(null);
                     ilg.If(Cmp.NotEqualTo);
                     doEndIf = true;
@@ -1594,7 +1590,7 @@ namespace System.Xml.Serialization
                             Label labelFalse = ilg.DefineLabel();
                             Label labelEnd = ilg.DefineLabel();
                             ilg.Brfalse(labelFalse);
-                            source.Load(typeof(object));
+                            source.Load(WellKnownTypes.Object);
                             ilg.Load(null);
                             ilg.Cne();
                             ilg.Br_S(labelEnd);
@@ -1640,16 +1636,14 @@ namespace System.Xml.Serialization
                     if (elements.Length - anyCount > 0) ilg.InitElseIf();
                     else ilg.InitIf();
 
-                    string fullTypeName = typeof(XmlElement).FullName;
-
-                    source.Load(typeof(object));
-                    ilg.IsInst(typeof(XmlElement));
+                    source.Load(WellKnownTypes.Object);
+                    ilg.IsInst(WellKnownTypes.XmlElement);
                     ilg.Load(null);
                     ilg.Cne();
                     ilg.AndIf();
 
-                    LocalBuilder elemLoc = ilg.DeclareLocal(typeof(XmlElement), "elem");
-                    source.Load(typeof(XmlElement));
+                    LocalBuilder elemLoc = ilg.DeclareLocal(WellKnownTypes.XmlElement, "elem");
+                    source.Load(WellKnownTypes.XmlElement);
                     ilg.Stloc(elemLoc);
 
                     int c = 0;
@@ -1673,7 +1667,7 @@ namespace System.Xml.Serialization
                             ilg.Bne(labelFalse);
                             if (isNullable && !element.IsNullable)
                             {
-                                source.Load(typeof(object));
+                                source.Load(WellKnownTypes.Object);
                                 ilg.Load(null);
                                 ilg.Cne();
                             }
@@ -1689,12 +1683,12 @@ namespace System.Xml.Serialization
                         }
                         labelFalse = ilg.DefineLabel();
                         labelEnd = ilg.DefineLabel();
-                        MethodInfo XmlNode_get_Name = typeof(XmlNode).GetMethod(
+                        MethodInfo XmlNode_get_Name = WellKnownTypes.XmlNode.GetMethod(
                             "get_Name",
                             CodeGenerator.InstanceBindingFlags,
                             Array.Empty<Type>()
                             );
-                        MethodInfo XmlNode_get_NamespaceURI = typeof(XmlNode).GetMethod(
+                        MethodInfo XmlNode_get_NamespaceURI = WellKnownTypes.XmlNode.GetMethod(
                             "get_NamespaceURI",
                             CodeGenerator.InstanceBindingFlags,
                             Array.Empty<Type>()
@@ -1702,10 +1696,10 @@ namespace System.Xml.Serialization
                         ilg.Ldloc(elemLoc);
                         ilg.Call(XmlNode_get_Name);
                         ilg.Ldstr(GetCSharpString(element.Name));
-                        MethodInfo String_op_Equality = typeof(string).GetMethod(
+                        MethodInfo String_op_Equality = WellKnownTypes.String.GetMethod(
                             "op_Equality",
                             CodeGenerator.StaticBindingFlags,
-                            new Type[] { typeof(string), typeof(string) }
+                            new[] { WellKnownTypes.String, WellKnownTypes.String }
                             );
                         ilg.Call(String_op_Equality);
                         ilg.Brfalse(labelFalse);
@@ -1725,10 +1719,10 @@ namespace System.Xml.Serialization
                         {
                             ilg.Else();
 
-                            MethodInfo XmlSerializationWriter_CreateChoiceIdentifierValueException = typeof(XmlSerializationWriter).GetMethod(
+                            MethodInfo XmlSerializationWriter_CreateChoiceIdentifierValueException = WellKnownTypes.XmlSerializationWriter.GetMethod(
                                 "CreateChoiceIdentifierValueException",
                                 CodeGenerator.InstanceBindingFlags,
-                                new Type[] { typeof(String), typeof(String), typeof(String), typeof(String) }
+                                new[] { WellKnownTypes.String, WellKnownTypes.String, WellKnownTypes.String, WellKnownTypes.String }
                                 );
                             ilg.Ldarg(0);
                             ilg.Ldstr(GetCSharpString(enumFullName));
@@ -1752,19 +1746,19 @@ namespace System.Xml.Serialization
                     }
                     else
                     {
-                        MethodInfo XmlSerializationWriter_CreateUnknownAnyElementException = typeof(XmlSerializationWriter).GetMethod(
+                        MethodInfo XmlSerializationWriter_CreateUnknownAnyElementException = WellKnownTypes.XmlSerializationWriter.GetMethod(
                             "CreateUnknownAnyElementException",
                             CodeGenerator.InstanceBindingFlags,
-                            new Type[] { typeof(String), typeof(String) }
+                            new[] { WellKnownTypes.String, WellKnownTypes.String }
                             );
                         ilg.Ldarg(0);
                         ilg.Ldloc(elemLoc);
-                        MethodInfo XmlNode_get_Name = typeof(XmlNode).GetMethod(
+                        MethodInfo XmlNode_get_Name = WellKnownTypes.XmlNode.GetMethod(
                             "get_Name",
                             CodeGenerator.InstanceBindingFlags,
                             Array.Empty<Type>()
                             );
-                        MethodInfo XmlNode_get_NamespaceURI = typeof(XmlNode).GetMethod(
+                        MethodInfo XmlNode_get_NamespaceURI = WellKnownTypes.XmlNode.GetMethod(
                             "get_NamespaceURI",
                             CodeGenerator.InstanceBindingFlags,
                             Array.Empty<Type>()
@@ -1811,12 +1805,12 @@ namespace System.Xml.Serialization
                         ilg.Else();
                     }
 
-                    MethodInfo XmlSerializationWriter_CreateUnknownTypeException = typeof(XmlSerializationWriter).GetMethod(
+                    MethodInfo XmlSerializationWriter_CreateUnknownTypeException = WellKnownTypes.XmlSerializationWriter.GetMethod(
                         "CreateUnknownTypeException",
                         CodeGenerator.InstanceBindingFlags,
-                        new Type[] { typeof(Object) });
+                        new[] { WellKnownTypes.Object });
                     ilg.Ldarg(0);
-                    source.Load(typeof(object));
+                    source.Load(WellKnownTypes.Object);
                     ilg.Call(XmlSerializationWriter_CreateUnknownTypeException);
                     ilg.Throw();
 
@@ -1843,10 +1837,10 @@ namespace System.Xml.Serialization
                 {
                     WritePrimitiveValue(mapping.TypeDesc, source, out argType);
                 }
-                MethodInfo XmlSerializationWriter_WriteValue = typeof(XmlSerializationWriter).GetMethod(
+                MethodInfo XmlSerializationWriter_WriteValue = WellKnownTypes.XmlSerializationWriter.GetMethod(
                     "WriteValue",
                     CodeGenerator.InstanceBindingFlags,
-                    new Type[] { argType }
+                    new[] { argType }
                     );
                 ilg.Call(XmlSerializationWriter_WriteValue);
             }
@@ -1859,9 +1853,9 @@ namespace System.Xml.Serialization
                         MethodInfo WriteTo = source.Type.GetMethod(
                             "WriteTo",
                             CodeGenerator.InstanceBindingFlags,
-                            new Type[] { typeof(XmlWriter) }
+                            new[] { WellKnownTypes.XmlWriter }
                             );
-                        MethodInfo XmlSerializationWriter_get_Writer = typeof(XmlSerializationWriter).GetMethod(
+                        MethodInfo XmlSerializationWriter_get_Writer = WellKnownTypes.XmlSerializationWriter.GetMethod(
                             "get_Writer",
                             CodeGenerator.InstanceBindingFlags,
                             Array.Empty<Type>()
@@ -1983,22 +1977,22 @@ namespace System.Xml.Serialization
                 List<Type> argTypes = new List<Type>();
                 ilg.Ldarg(0);
                 ilg.Ldstr(GetCSharpString(name));
-                argTypes.Add(typeof(string));
+                argTypes.Add(WellKnownTypes.String);
                 ilg.Ldstr(GetCSharpString(ns));
-                argTypes.Add(typeof(string));
+                argTypes.Add(WellKnownTypes.String);
                 source.Load(mapping.TypeDesc.Type);
                 argTypes.Add(mapping.TypeDesc.Type);
                 if (mapping.TypeDesc.IsNullable)
                 {
                     ilg.Ldc(element.IsNullable);
-                    argTypes.Add(typeof(Boolean));
+                    argTypes.Add(WellKnownTypes.Boolean);
                 }
                 ilg.Ldc(false);
-                argTypes.Add(typeof(Boolean));
+                argTypes.Add(WellKnownTypes.Boolean);
                 MethodBuilder methodBuilder = EnsureMethodBuilder(typeBuilder,
                     methodName,
                     CodeGenerator.PrivateMethodAttributes,
-                    typeof(void),
+                    WellKnownTypes.Void,
                     argTypes.ToArray());
                 ilg.Call(methodBuilder);
             }
@@ -2011,7 +2005,7 @@ namespace System.Xml.Serialization
 
                 if (element.Mapping is SerializableMapping)
                 {
-                    WriteElementCall("WriteSerializable", typeof(IXmlSerializable), source, name, ns, element.IsNullable, !element.Any);
+                    WriteElementCall("WriteSerializable", WellKnownTypes.IXmlSerializable, source, name, ns, element.IsNullable, !element.Any);
                 }
                 else
                 {
@@ -2019,7 +2013,7 @@ namespace System.Xml.Serialization
                     Label ifLabel1 = ilg.DefineLabel();
                     Label ifLabel2 = ilg.DefineLabel();
                     source.Load(null);
-                    ilg.IsInst(typeof(XmlNode));
+                    ilg.IsInst(WellKnownTypes.XmlNode);
                     ilg.Brtrue(ifLabel1);
                     source.Load(null);
                     ilg.Load(null);
@@ -2030,14 +2024,14 @@ namespace System.Xml.Serialization
                     ilg.MarkLabel(ifLabel2);
                     ilg.If();
 
-                    WriteElementCall("WriteElementLiteral", typeof(XmlNode), source, name, ns, element.IsNullable, element.Any);
+                    WriteElementCall("WriteElementLiteral", WellKnownTypes.XmlNode, source, name, ns, element.IsNullable, element.Any);
 
                     ilg.Else();
 
-                    MethodInfo XmlSerializationWriter_CreateInvalidAnyTypeException = typeof(XmlSerializationWriter).GetMethod(
+                    MethodInfo XmlSerializationWriter_CreateInvalidAnyTypeException = WellKnownTypes.XmlSerializationWriter.GetMethod(
                         "CreateInvalidAnyTypeException",
                         CodeGenerator.InstanceBindingFlags,
-                        new Type[] { typeof(Object) }
+                        new[] { WellKnownTypes.Object }
                         );
                     ilg.Ldarg(0);
                     source.Load(null);
@@ -2055,10 +2049,10 @@ namespace System.Xml.Serialization
 
         private void WriteElementCall(string func, Type cast, SourceInfo source, string name, string ns, bool isNullable, bool isAny)
         {
-            MethodInfo XmlSerializationWriter_func = typeof(XmlSerializationWriter).GetMethod(
+            MethodInfo XmlSerializationWriter_func = WellKnownTypes.XmlSerializationWriter.GetMethod(
                  func,
                  CodeGenerator.InstanceBindingFlags,
-                 new Type[] { cast, typeof(String), typeof(String), typeof(Boolean), typeof(Boolean) }
+                 new[] { cast, WellKnownTypes.String, WellKnownTypes.String, WellKnownTypes.Boolean, WellKnownTypes.Boolean }
                  );
             ilg.Ldarg(0);
             source.Load(cast);
@@ -2077,19 +2071,19 @@ namespace System.Xml.Serialization
                 Label labelEnd = ilg.DefineLabel();
                 Label labelFalse = ilg.DefineLabel();
                 Label labelTrue = ilg.DefineLabel();
-                source.Load(typeof(string));
+                source.Load(WellKnownTypes.String);
                 if (isNullable)
                     // check == null with false
                     ilg.Brfalse(labelTrue);
                 else
                     //check != null with false
                     ilg.Brfalse(labelFalse);
-                MethodInfo String_get_Length = typeof(string).GetMethod(
+                MethodInfo String_get_Length = WellKnownTypes.String.GetMethod(
                     "get_Length",
                     CodeGenerator.InstanceBindingFlags,
                     Array.Empty<Type>()
                     );
-                source.Load(typeof(string));
+                source.Load(WellKnownTypes.String);
                 ilg.Call(String_get_Length);
                 ilg.Ldc(0);
                 ilg.Cne();
@@ -2111,25 +2105,25 @@ namespace System.Xml.Serialization
             {
                 if (value == null)
                 {
-                    source.Load(typeof(object));
+                    source.Load(WellKnownTypes.Object);
                     ilg.Load(null);
                     ilg.Cne();
                 }
                 else if (value.GetType().GetTypeInfo().IsPrimitive)
                 {
                     source.Load(null);
-                    ilg.Ldc(Convert.ChangeType(value, source.Type, CultureInfo.InvariantCulture));
+                    ilg.Ldc(Convert.ChangeType(value, ((TypeReference)source.Type).SystemType, CultureInfo.InvariantCulture));
                     ilg.Cne();
                 }
                 else
                 {
-                    Type valueType = value.GetType();
+                    Type valueType = value.GetType().ToReference();
                     source.Load(valueType);
                     ilg.Ldc(value is string ? GetCSharpString((string)value) : value);
                     MethodInfo op_Inequality = valueType.GetMethod(
                                 "op_Inequality",
                                 CodeGenerator.StaticBindingFlags,
-                                new Type[] { valueType, valueType }
+                                new[] { valueType, valueType }
                                 );
                     if (op_Inequality != null)
                         ilg.Call(op_Inequality);
@@ -2144,7 +2138,7 @@ namespace System.Xml.Serialization
         {
             Label labelFalse = ilg.DefineLabel();
             Label labelEnd = ilg.DefineLabel();
-            source.Load(typeof(object));
+            source.Load(WellKnownTypes.Object);
             ilg.Load(null);
             ilg.Beq(labelFalse);
             WriteInstanceOf(source, typeDesc.Type);
@@ -2156,10 +2150,10 @@ namespace System.Xml.Serialization
             ilg.Ldc(false);
             ilg.MarkLabel(labelEnd);
             ilg.If();
-            MethodInfo XmlSerializationWriter_CreateMismatchChoiceException = typeof(XmlSerializationWriter).GetMethod(
+            MethodInfo XmlSerializationWriter_CreateMismatchChoiceException = WellKnownTypes.XmlSerializationWriter.GetMethod(
                 "CreateMismatchChoiceException",
                 CodeGenerator.InstanceBindingFlags,
-                new Type[] { typeof(String), typeof(String), typeof(String) }
+                new[] { WellKnownTypes.String, WellKnownTypes.String, WellKnownTypes.String }
                 );
             ilg.Ldarg(0);
             ilg.Ldstr(GetCSharpString(typeDesc.FullName));
@@ -2184,13 +2178,13 @@ namespace System.Xml.Serialization
 
         private void WriteNamespaces(string source)
         {
-            MethodInfo XmlSerializationWriter_WriteNamespaceDeclarations = typeof(XmlSerializationWriter).GetMethod(
+            MethodInfo XmlSerializationWriter_WriteNamespaceDeclarations = WellKnownTypes.XmlSerializationWriter.GetMethod(
                 "WriteNamespaceDeclarations",
                 CodeGenerator.InstanceBindingFlags,
-                new Type[] { typeof(XmlSerializerNamespaces) }
+                new[] { WellKnownTypes.XmlSerializerNamespaces }
                 );
             ilg.Ldarg(0);
-            ILGenLoad(source, typeof(XmlSerializerNamespaces));
+            ILGenLoad(source, WellKnownTypes.XmlSerializerNamespaces);
             ilg.Call(XmlSerializationWriter_WriteNamespaceDeclarations);
         }
 
@@ -2243,7 +2237,7 @@ namespace System.Xml.Serialization
                     if (xmlName == "##any:")
                     {
                         enumValue = choiceMapping.Constants[i].Name;
-                        eValue = Enum.ToObject(choiceMapping.TypeDesc.Type, choiceMapping.Constants[i].Value);
+                        eValue = Enum.ToObject(choiceMapping.TypeDesc.Type.SystemType, choiceMapping.Constants[i].Value);
                         break;
                     }
                     continue;
@@ -2257,7 +2251,7 @@ namespace System.Xml.Serialization
                     if ((element.Form == XmlSchemaForm.Unqualified && string.IsNullOrEmpty(choiceNs)) || element.Namespace == choiceNs)
                     {
                         enumValue = choiceMapping.Constants[i].Name;
-                        eValue = Enum.ToObject(choiceMapping.TypeDesc.Type, choiceMapping.Constants[i].Value);
+                        eValue = Enum.ToObject(choiceMapping.TypeDesc.Type.SystemType, choiceMapping.Constants[i].Value);
                         break;
                     }
                 }
@@ -2294,14 +2288,14 @@ namespace System.Xml.Serialization
         // Type             CodeIdentifier.EscapedKeywords(type.FullName)
         // Field            fieldName+":"+CodeIdentifier.EscapedKeywords(containingType.FullName>)
         // Property         propertyName+":"+CodeIdentifier.EscapedKeywords(containingType.FullName)
-        // ArrayAccessor    "0:"+CodeIdentifier.EscapedKeywords(typeof(Array).FullName)
-        // MyCollectionAccessor     "0:"+CodeIdentifier.EscapedKeywords(typeof(MyCollection).FullName)
+        // ArrayAccessor    "0:"+CodeIdentifier.EscapedKeywords(WellKnownTypes.Array.FullName)
+        // MyCollectionAccessor     "0:"+CodeIdentifier.EscapedKeywords(WellKnownTypes.MyCollection.FullName)
         // ----------------------------------------------------------------------------------
         internal ReflectionAwareILGen() { }
 
         internal void WriteReflectionInit(TypeScope scope)
         {
-            foreach (Type type in scope.Types)
+            foreach (System.Type type in scope.Types)
             {
                 TypeDesc typeDesc = scope.GetTypeDesc(type);
             }
@@ -2311,13 +2305,13 @@ namespace System.Xml.Serialization
         {
             ArgBuilder argV = ilg.GetArg(variable);
             ilg.Ldarg(argV);
-            ilg.ConvertValue(argV.ArgType, typeof(long));
+            ilg.ConvertValue(argV.ArgType, WellKnownTypes.Int64);
         }
 
         internal string GetStringForTypeof(string typeFullName)
         {
             {
-                return "typeof(" + typeFullName + ")";
+                return "WellKnownTypes." + typeFullName + "";
             }
         }
         internal string GetStringForMember(string obj, string memberName, TypeDesc typeDesc)
@@ -2333,7 +2327,7 @@ namespace System.Xml.Serialization
             return new SourceInfo(GetStringForMember(obj, member.Name, typeDesc), obj, memberInfo, member.TypeDesc.Type, ilg);
         }
 
-        internal void ILGenForEnumMember(CodeGenerator ilg, Type type, string memberName)
+        internal void ILGenForEnumMember(CodeGenerator ilg, System.Type type, string memberName)
         {
             ilg.Ldc(Enum.Parse(type, memberName, false));
         }
@@ -2347,7 +2341,7 @@ namespace System.Xml.Serialization
         {
             return obj + "." + memberName + "(";
         }
-        internal void ILGenForCreateInstance(CodeGenerator ilg, Type type, bool ctorInaccessible, bool cast)
+        internal void ILGenForCreateInstance(CodeGenerator ilg, TypeReference type, bool ctorInaccessible, bool cast)
         {
             if (!ctorInaccessible)
             {
@@ -2370,12 +2364,12 @@ namespace System.Xml.Serialization
             ILGenForCreateInstance(ilg, type, cast ? type : null, ctorInaccessible);
         }
 
-        internal void ILGenForCreateInstance(CodeGenerator ilg, Type type, Type cast, bool nonPublic)
+        internal void ILGenForCreateInstance(CodeGenerator ilg, TypeReference type, TypeReference cast, bool nonPublic)
         {
             // Special case DBNull
-            if (type == Globals.TypeOfDBNull)
+            if (type.SystemType == Globals.TypeOfDBNull)
             {
-                FieldInfo DBNull_Value = Globals.TypeOfDBNull.GetField("Value", CodeGenerator.StaticBindingFlags);
+                FieldInfo DBNull_Value = type.GetField("Value", CodeGenerator.StaticBindingFlags);
                 ilg.LoadMember(DBNull_Value);
                 return;
             }
@@ -2384,17 +2378,17 @@ namespace System.Xml.Serialization
             // codegen the same as 'internal XElement : this("default") { }'
             if (type.FullName == "System.Xml.Linq.XElement")
             {
-                Type xName = type.GetTypeInfo().Assembly.GetType("System.Xml.Linq.XName");
+                var xName = type.GetTypeInfo().Assembly.GetType("System.Xml.Linq.XName");
                 if (xName != null)
                 {
                     MethodInfo XName_op_Implicit = xName.GetMethod(
                         "op_Implicit",
                         CodeGenerator.StaticBindingFlags,
-                        new Type[] { typeof(String) }
+                        new[] { WellKnownTypes.String }
                         );
                     ConstructorInfo XElement_ctor = type.GetConstructor(
                         CodeGenerator.InstanceBindingFlags,
-                        new Type[] { xName }
+                        new[] { xName }
                         );
                     if (XName_op_Implicit != null && XElement_ctor != null)
                     {
@@ -2412,36 +2406,36 @@ namespace System.Xml.Serialization
             // TypeInfo typeInfo = type.GetTypeInfo();
             // typeInfo not declared explicitly
             ilg.Ldc(type);
-            MethodInfo getTypeInfoMehod = typeof(IntrospectionExtensions).GetMethod(
+            MethodInfo getTypeInfoMehod = WellKnownTypes.IntrospectionExtensions.GetMethod(
                   "GetTypeInfo",
                   CodeGenerator.StaticBindingFlags,
-                  new[] { typeof(Type) }
+                  new[] { WellKnownTypes.Type }
                   );
             ilg.Call(getTypeInfoMehod);
 
             // IEnumerator<ConstructorInfo> e = typeInfo.DeclaredConstructors.GetEnumerator();
-            LocalBuilder enumerator = ilg.DeclareLocal(typeof(IEnumerator<>).MakeGenericType(typeof(ConstructorInfo)), "e");
-            MethodInfo getDeclaredConstructors = typeof(TypeInfo).GetMethod("get_DeclaredConstructors");
-            MethodInfo getEnumerator = typeof(IEnumerable<>).MakeGenericType(typeof(ConstructorInfo)).GetMethod("GetEnumerator");
+            LocalBuilder enumerator = ilg.DeclareLocal(WellKnownTypes.IEnumeratorOfT.MakeGenericType(WellKnownTypes.ConstructorInfo), "e");
+            MethodInfo getDeclaredConstructors = WellKnownTypes.TypeInfo.GetMethod("get_DeclaredConstructors");
+            MethodInfo getEnumerator = WellKnownTypes.IEnumerableOfT.MakeGenericType(WellKnownTypes.ConstructorInfo).GetMethod("GetEnumerator");
             ilg.Call(getDeclaredConstructors);
             ilg.Call(getEnumerator);
             ilg.Stloc(enumerator);
 
             ilg.WhileBegin();
             // ConstructorInfo constructorInfo = e.Current();
-            MethodInfo enumeratorCurrent = typeof(IEnumerator).GetMethod("get_Current");
+            MethodInfo enumeratorCurrent = WellKnownTypes.IEnumerator.GetMethod("get_Current");
             ilg.Ldloc(enumerator);
             ilg.Call(enumeratorCurrent);
-            LocalBuilder constructorInfo = ilg.DeclareLocal(typeof(ConstructorInfo), "constructorInfo");
+            LocalBuilder constructorInfo = ilg.DeclareLocal(WellKnownTypes.ConstructorInfo, "constructorInfo");
             ilg.Stloc(constructorInfo);
 
             // if (!constructorInfo.IsStatic && constructorInfo.GetParameters.Length() == 0)
             ilg.Ldloc(constructorInfo);
-            MethodInfo constructorIsStatic = typeof(ConstructorInfo).GetMethod("get_IsStatic");
+            MethodInfo constructorIsStatic = WellKnownTypes.ConstructorInfo.GetMethod("get_IsStatic");
             ilg.Call(constructorIsStatic);
             ilg.Brtrue(labelEndIf);
             ilg.Ldloc(constructorInfo);
-            MethodInfo constructorGetParameters = typeof(ConstructorInfo).GetMethod("GetParameters");
+            MethodInfo constructorGetParameters = WellKnownTypes.ConstructorInfo.GetMethod("GetParameters");
             ilg.Call(constructorGetParameters);
             ilg.Ldlen();
             ilg.Ldc(0);
@@ -2449,7 +2443,7 @@ namespace System.Xml.Serialization
             ilg.Brtrue(labelEndIf);
 
             // constructorInfo.Invoke(null);
-            MethodInfo constructorInvoke = typeof(ConstructorInfo).GetMethod("Invoke", new Type[] { typeof(object[]) });
+            MethodInfo constructorInvoke = WellKnownTypes.ConstructorInfo.GetMethod("Invoke", new[] { WellKnownTypes.ObjectArray });
             ilg.Ldloc(constructorInfo);
             ilg.Load(null);
             ilg.Call(constructorInvoke);
@@ -2457,7 +2451,7 @@ namespace System.Xml.Serialization
 
             ilg.MarkLabel(labelEndIf);
             ilg.WhileBeginCondition(); // while (e.MoveNext())
-            MethodInfo IEnumeratorMoveNext = typeof(IEnumerator).GetMethod(
+            MethodInfo IEnumeratorMoveNext = WellKnownTypes.IEnumerator.GetMethod(
                 "MoveNext",
                 CodeGenerator.InstanceBindingFlags,
                 Array.Empty<Type>());
@@ -2466,10 +2460,10 @@ namespace System.Xml.Serialization
             ilg.WhileEndCondition();
             ilg.WhileEnd();
 
-            MethodInfo Activator_CreateInstance = typeof(Activator).GetMethod(
+            MethodInfo Activator_CreateInstance = WellKnownTypes.Activator.GetMethod(
                   "CreateInstance",
                   CodeGenerator.StaticBindingFlags,
-                  new Type[] { typeof(Type) }
+                  new[] { WellKnownTypes.Type }
                   );
             ilg.Ldc(type);
             ilg.Call(Activator_CreateInstance);
@@ -2519,7 +2513,7 @@ namespace System.Xml.Serialization
             }
         }
 
-        internal void WriteCreateInstance(string source, bool ctorInaccessible, Type type, CodeGenerator ilg)
+        internal void WriteCreateInstance(string source, bool ctorInaccessible, TypeReference type, CodeGenerator ilg)
         {
             LocalBuilder sLoc = ilg.DeclareOrGetLocal(type, source);
             ILGenForCreateInstance(ilg, type, ctorInaccessible, ctorInaccessible);
@@ -2528,7 +2522,7 @@ namespace System.Xml.Serialization
         internal void WriteInstanceOf(SourceInfo source, Type type, CodeGenerator ilg)
         {
             {
-                source.Load(typeof(object));
+                source.Load(WellKnownTypes.Object);
                 ilg.IsInst(type);
                 ilg.Load(null);
                 ilg.Cne();
@@ -2552,7 +2546,7 @@ namespace System.Xml.Serialization
         {
             Debug.Assert(type != null);
             Debug.Assert(ilg != null);
-            ilg.Ldloc(typeof(Type), variable);
+            ilg.Ldloc(WellKnownTypes.Type, variable);
             ilg.Ldc(type);
             ilg.Ceq();
         }
@@ -2561,7 +2555,7 @@ namespace System.Xml.Serialization
             {
                 Debug.Assert(arrayType != null);
                 Debug.Assert(ilg != null);
-                ilg.Ldloc(typeof(Type), variable);
+                ilg.Ldloc(WellKnownTypes.Type, variable);
                 ilg.Ldc(arrayType);
                 ilg.Ceq();
                 return;

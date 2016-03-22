@@ -2,27 +2,22 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections;
+using System.Collections.Generic;
+using System.Text.RegularExpressions;
+using System.Reflection;
 
 #if !NET_NATIVE
 namespace System.Xml.Serialization
 {
-    using System;
-    using System.Collections;
-    using System.Collections.Generic;
-    using System.Reflection;
-    using System.Reflection.Emit;
-    using System.Text.RegularExpressions;
-    using System.Xml.Extensions;
-    using Hashtable = System.Collections.Generic.Dictionary<object, object>;
-
+    using Emit;
+    using Linq;
     internal class XmlSerializationILGen
     {
         private int _nextMethodNumber = 0;
         private InternalHashtable _methodNames = new InternalHashtable();
         // Lookup name->created Method
         private Dictionary<string, MethodBuilderInfo> _methodBuilders = new Dictionary<string, MethodBuilderInfo>();
-        // Lookup name->created Type
-        internal Dictionary<string, Type> CreatedTypes = new Dictionary<string, Type>();
         // Lookup name->class Member
         internal Dictionary<string, MemberInfo> memberInfos = new Dictionary<string, MemberInfo>();
         private ReflectionAwareILGen _raCodeGen;
@@ -43,7 +38,7 @@ namespace System.Xml.Serialization
             _scopes = scopes;
             if (scopes.Length > 0)
             {
-                _stringTypeDesc = scopes[0].GetTypeDesc(typeof(string));
+                _stringTypeDesc = scopes[0].GetTypeDesc(typeof(String));
                 _qnameTypeDesc = scopes[0].GetTypeDesc(typeof(XmlQualifiedName));
             }
             _raCodeGen = new ReflectionAwareILGen();
@@ -150,18 +145,18 @@ namespace System.Xml.Serialization
         {
             FieldBuilder fieldBuilder = serializerContractTypeBuilder.DefineField(
                 privateName,
-                typeof(Hashtable),
+                WellKnownTypes.DictionaryObjectObject,
                 FieldAttributes.Private
                 );
             ilg = new CodeGenerator(serializerContractTypeBuilder);
             PropertyBuilder propertyBuilder = serializerContractTypeBuilder.DefineProperty(
                 publicName,
                 PropertyAttributes.None,
-                typeof(IDictionary),
-                null, null, null, null, null);
+                WellKnownTypes.IDictionary,
+                Array.Empty<Type>());
 
             ilg.BeginMethod(
-                typeof(IDictionary),
+                WellKnownTypes.IDictionary,
                 "get_" + publicName,
                 Array.Empty<Type>(),
                 Array.Empty<string>(),
@@ -174,11 +169,10 @@ namespace System.Xml.Serialization
             // this 'if' ends in GenerateHashtableGetEnd
             ilg.If(Cmp.EqualTo);
 
-            ConstructorInfo Hashtable_ctor = typeof(Hashtable).GetConstructor(
+            ConstructorInfo Hashtable_ctor = WellKnownTypes.DictionaryObjectObject.GetConstructor(
                 CodeGenerator.InstanceBindingFlags,
-                Array.Empty<Type>()
-                );
-            LocalBuilder _tmpLoc = ilg.DeclareLocal(typeof(Hashtable), "_tmp");
+                Array.Empty<Type>());
+            LocalBuilder _tmpLoc = ilg.DeclareLocal(WellKnownTypes.DictionaryObjectObject, "_tmp");
             ilg.New(Hashtable_ctor);
             ilg.Stloc(_tmpLoc);
 
@@ -193,7 +187,7 @@ namespace System.Xml.Serialization
             ilg.If(Cmp.EqualTo);
             {
                 ilg.Ldarg(0);
-                ilg.Ldloc(typeof(Hashtable), "_tmp");
+                ilg.Ldloc(WellKnownTypes.DictionaryObjectObject, "_tmp");
                 ilg.StoreMember(fieldBuilder);
             }
             ilg.EndIf();
@@ -206,23 +200,23 @@ namespace System.Xml.Serialization
 
             ilg.EndMethod();
         }
-        internal FieldBuilder GeneratePublicMethods(string privateName, string publicName, string[] methods, XmlMapping[] xmlMappings, TypeBuilder serializerContractTypeBuilder)
+        internal FieldBuilder GeneratePublicMethods(string privateName, string publicName, MethodBuilder[] methods, XmlMapping[] xmlMappings, TypeBuilder serializerContractTypeBuilder)
         {
             FieldBuilder fieldBuilder = GenerateHashtableGetBegin(privateName, publicName, serializerContractTypeBuilder);
             if (methods != null && methods.Length != 0 && xmlMappings != null && xmlMappings.Length == methods.Length)
             {
-                MethodInfo Hashtable_set_Item = typeof(Hashtable).GetMethod(
+                MethodInfo Hashtable_set_Item = WellKnownTypes.DictionaryObjectObject.GetMethod(
                     "set_Item",
                     CodeGenerator.InstanceBindingFlags,
-                    new Type[] { typeof(Object), typeof(Object) }
+                    new[] { WellKnownTypes.Object, WellKnownTypes.Object }
                     );
                 for (int i = 0; i < methods.Length; i++)
                 {
                     if (methods[i] == null)
                         continue;
-                    ilg.Ldloc(typeof(Hashtable), "_tmp");
+                    ilg.Ldloc(WellKnownTypes.DictionaryObjectObject, "_tmp");
                     ilg.Ldstr(GetCSharpString(xmlMappings[i].Key));
-                    ilg.Ldstr(GetCSharpString(methods[i]));
+                    ilg.Ldstr(GetCSharpString(methods[i].Name));
                     ilg.Call(Hashtable_set_Item);
                 }
             }
@@ -230,19 +224,19 @@ namespace System.Xml.Serialization
             return fieldBuilder;
         }
 
-        internal void GenerateSupportedTypes(Type[] types, TypeBuilder serializerContractTypeBuilder)
+        internal void GenerateSupportedTypes(System.Type[] types, TypeBuilder serializerContractTypeBuilder)
         {
             ilg = new CodeGenerator(serializerContractTypeBuilder);
             ilg.BeginMethod(
-                typeof(bool),
+                WellKnownTypes.Boolean,
                 "CanSerialize",
-                new Type[] { typeof(Type) },
+                new Type[] { WellKnownTypes.Type },
                 new string[] { "type" },
                 CodeGenerator.PublicOverrideMethodAttributes);
             InternalHashtable uniqueTypes = new InternalHashtable();
             for (int i = 0; i < types.Length; i++)
             {
-                Type type = types[i];
+                Type type = types[i].ToReference();
 
                 if (type == null)
                     continue;
@@ -268,7 +262,7 @@ namespace System.Xml.Serialization
             ilg.EndMethod();
         }
 
-        internal string GenerateBaseSerializer(string baseSerializer, string readerClass, string writerClass, CodeIdentifiers classes)
+        internal TypeBuilder GenerateBaseSerializer(string baseSerializer, ConstructorBuilder readerCtor, ConstructorBuilder writerCtor, CodeIdentifiers classes)
         {
             baseSerializer = CodeIdentifier.MakeValid(baseSerializer);
             baseSerializer = classes.AddUnique(baseSerializer, baseSerializer);
@@ -277,15 +271,11 @@ namespace System.Xml.Serialization
                 _moduleBuilder,
                 CodeIdentifier.GetCSharpName(baseSerializer),
                 TypeAttributes.Public | TypeAttributes.Abstract | TypeAttributes.BeforeFieldInit,
-                typeof(XmlSerializer),
+                WellKnownTypes.XmlSerializer,
                 Array.Empty<Type>());
 
-            ConstructorInfo readerCtor = CreatedTypes[readerClass].GetConstructor(
-               CodeGenerator.InstanceBindingFlags,
-               Array.Empty<Type>()
-               );
             ilg = new CodeGenerator(baseSerializerTypeBuilder);
-            ilg.BeginMethod(typeof(XmlSerializationReader),
+            ilg.BeginMethod(WellKnownTypes.XmlSerializationReader,
                 "CreateReader",
                 Array.Empty<Type>(),
                 Array.Empty<string>(),
@@ -293,11 +283,7 @@ namespace System.Xml.Serialization
             ilg.New(readerCtor);
             ilg.EndMethod();
 
-            ConstructorInfo writerCtor = CreatedTypes[writerClass].GetConstructor(
-               CodeGenerator.InstanceBindingFlags,
-               Array.Empty<Type>()
-               );
-            ilg.BeginMethod(typeof(XmlSerializationWriter),
+            ilg.BeginMethod(WellKnownTypes.XmlSerializationWriter,
                 "CreateWriter",
                 Array.Empty<Type>(),
                 Array.Empty<string>(),
@@ -307,13 +293,11 @@ namespace System.Xml.Serialization
 
             baseSerializerTypeBuilder.DefineDefaultConstructor(
                 MethodAttributes.Family | MethodAttributes.HideBySig | MethodAttributes.SpecialName | MethodAttributes.RTSpecialName);
-            Type baseSerializerType = baseSerializerTypeBuilder.CreateTypeInfo().AsType();
-            CreatedTypes.Add(baseSerializerType.Name, baseSerializerType);
 
-            return baseSerializer;
+            return baseSerializerTypeBuilder;
         }
 
-        internal string GenerateTypedSerializer(string readMethod, string writeMethod, XmlMapping mapping, CodeIdentifiers classes, string baseSerializer, string readerClass, string writerClass)
+        internal TypeBuilder GenerateTypedSerializer(MethodBuilder readMethod, MethodBuilder writeMethod, XmlMapping mapping, CodeIdentifiers classes, TypeBuilder baseSerializer, TypeBuilder readerClass, TypeBuilder writerClass, out ConstructorBuilder defaultCtor)
         {
             string serializerName = CodeIdentifier.MakeValid(Accessor.UnescapeName(mapping.Accessor.Mapping.TypeDesc.Name));
             serializerName = classes.AddUnique(serializerName + "Serializer", mapping);
@@ -322,15 +306,14 @@ namespace System.Xml.Serialization
                 _moduleBuilder,
                 CodeIdentifier.GetCSharpName(serializerName),
                 TypeAttributes.Public | TypeAttributes.Sealed | TypeAttributes.BeforeFieldInit,
-                CreatedTypes[baseSerializer],
-                Array.Empty<Type>()
-                );
+                baseSerializer,
+                Array.Empty<Type>());
 
             ilg = new CodeGenerator(typedSerializerTypeBuilder);
             ilg.BeginMethod(
-                typeof(Boolean),
+                WellKnownTypes.Boolean,
                 "CanDeserialize",
-                new Type[] { typeof(XmlReader) },
+                new Type[] { WellKnownTypes.XmlReader },
                 new string[] { "xmlReader" },
                 CodeGenerator.PublicOverrideMethodAttributes
             );
@@ -343,10 +326,10 @@ namespace System.Xml.Serialization
             }
             else
             {
-                MethodInfo XmlReader_IsStartElement = typeof(XmlReader).GetMethod(
+                MethodInfo XmlReader_IsStartElement = WellKnownTypes.XmlReader.GetMethod(
                      "IsStartElement",
                      CodeGenerator.InstanceBindingFlags,
-                     new Type[] { typeof(String), typeof(String) }
+                     new Type[] { WellKnownTypes.String, WellKnownTypes.String }
                      );
                 ilg.Ldarg(ilg.GetArg("xmlReader"));
                 ilg.Ldstr(GetCSharpString(mapping.Accessor.Name));
@@ -363,71 +346,58 @@ namespace System.Xml.Serialization
             {
                 ilg = new CodeGenerator(typedSerializerTypeBuilder);
                 ilg.BeginMethod(
-                    typeof(void),
+                    WellKnownTypes.Void,
                     "Serialize",
-                    new Type[] { typeof(object), typeof(XmlSerializationWriter) },
+                    new Type[] { WellKnownTypes.Object, WellKnownTypes.XmlSerializationWriter },
                     new string[] { "objectToSerialize", "writer" },
                     CodeGenerator.ProtectedOverrideMethodAttributes);
-                MethodInfo writerType_writeMethod = CreatedTypes[writerClass].GetMethod(
-                    writeMethod,
-                    CodeGenerator.InstanceBindingFlags,
-                    new Type[] { (mapping is XmlMembersMapping) ? typeof(object[]) : typeof(object) }
-                    );
+
                 ilg.Ldarg("writer");
-                ilg.Castclass(CreatedTypes[writerClass]);
+                ilg.Castclass(writerClass);
                 ilg.Ldarg("objectToSerialize");
                 if (mapping is XmlMembersMapping)
                 {
-                    ilg.ConvertValue(typeof(object), typeof(object[]));
+                    ilg.ConvertValue(WellKnownTypes.Object, WellKnownTypes.ObjectArray);
                 }
-                ilg.Call(writerType_writeMethod);
+                ilg.Call(writeMethod);
                 ilg.EndMethod();
             }
             if (readMethod != null)
             {
                 ilg = new CodeGenerator(typedSerializerTypeBuilder);
                 ilg.BeginMethod(
-                    typeof(object),
+                    WellKnownTypes.Object,
                     "Deserialize",
-                    new Type[] { typeof(XmlSerializationReader) },
+                    new Type[] { WellKnownTypes.XmlSerializationReader },
                     new string[] { "reader" },
                     CodeGenerator.ProtectedOverrideMethodAttributes);
-                MethodInfo readerType_readMethod = CreatedTypes[readerClass].GetMethod(
-                    readMethod,
-                    CodeGenerator.InstanceBindingFlags,
-                    Array.Empty<Type>()
-                    );
+
                 ilg.Ldarg("reader");
-                ilg.Castclass(CreatedTypes[readerClass]);
-                ilg.Call(readerType_readMethod);
+                ilg.Castclass(readerClass);
+                ilg.Call(readMethod);
                 ilg.EndMethod();
             }
-            typedSerializerTypeBuilder.DefineDefaultConstructor(CodeGenerator.PublicMethodAttributes);
-            Type typedSerializerType = typedSerializerTypeBuilder.CreateTypeInfo().AsType();
-            CreatedTypes.Add(typedSerializerType.Name, typedSerializerType);
 
-            return typedSerializerType.Name;
+            defaultCtor = typedSerializerTypeBuilder.DefineDefaultConstructor(CodeGenerator.PublicMethodAttributes);
+            return typedSerializerTypeBuilder;
         }
 
-        private FieldBuilder GenerateTypedSerializers(Hashtable serializers, TypeBuilder serializerContractTypeBuilder)
+        private FieldBuilder GenerateTypedSerializers(Dictionary<string, ConstructorBuilder> serializerCtors, TypeBuilder serializerContractTypeBuilder)
         {
             string privateName = "typedSerializers";
             FieldBuilder fieldBuilder = GenerateHashtableGetBegin(privateName, "TypedSerializers", serializerContractTypeBuilder);
-            MethodInfo Hashtable_Add = typeof(Hashtable).GetMethod(
+            MethodInfo Hashtable_Add = WellKnownTypes.DictionaryObjectObject.GetMethod(
                 "Add",
                 CodeGenerator.InstanceBindingFlags,
-                new Type[] { typeof(Object), typeof(Object) }
+                new Type[] { WellKnownTypes.Object, WellKnownTypes.Object }
                 );
 
-            foreach (string key in serializers.Keys)
+            // order for determinism:
+            foreach (var nameAndCtor in serializerCtors.OrderBy(e => e.Key))
             {
-                ConstructorInfo ctor = CreatedTypes[(string)serializers[key]].GetConstructor(
-                    CodeGenerator.InstanceBindingFlags,
-                    Array.Empty<Type>()
-                    );
-                ilg.Ldloc(typeof(Hashtable), "_tmp");
-                ilg.Ldstr(GetCSharpString(key));
-                ilg.New(ctor);
+                ilg.Ldloc(WellKnownTypes.DictionaryObjectObject, "_tmp");
+                ilg.Ldstr(GetCSharpString(nameAndCtor.Key));
+                ilg.New(nameAndCtor.Value);
                 ilg.Call(Hashtable_Add);
             }
             GenerateHashtableGetEnd(fieldBuilder);
@@ -435,13 +405,13 @@ namespace System.Xml.Serialization
         }
 
         //GenerateGetSerializer(serializers, xmlMappings);
-        private void GenerateGetSerializer(Hashtable serializers, XmlMapping[] xmlMappings, TypeBuilder serializerContractTypeBuilder)
+        private void GenerateGetSerializer(Dictionary<string, ConstructorBuilder> serializerCtors, XmlMapping[] xmlMappings, TypeBuilder serializerContractTypeBuilder)
         {
             ilg = new CodeGenerator(serializerContractTypeBuilder);
             ilg.BeginMethod(
-                typeof(XmlSerializer),
+                WellKnownTypes.XmlSerializer,
                 "GetSerializer",
-                new Type[] { typeof(Type) },
+                new Type[] { WellKnownTypes.Type },
                 new string[] { "type" },
                 CodeGenerator.PublicOverrideMethodAttributes);
 
@@ -461,11 +431,7 @@ namespace System.Xml.Serialization
                     ilg.Ldc(type);
                     ilg.If(Cmp.EqualTo);
                     {
-                        ConstructorInfo ctor = CreatedTypes[(string)serializers[xmlMappings[i].Key]].GetConstructor(
-                            CodeGenerator.InstanceBindingFlags,
-                            Array.Empty<Type>()
-                            );
-                        ilg.New(ctor);
+                        ilg.New(serializerCtors[xmlMappings[i].Key]);
                         ilg.Stloc(ilg.ReturnLocal);
                         ilg.Br(ilg.ReturnLabel);
                     }
@@ -480,13 +446,13 @@ namespace System.Xml.Serialization
             ilg.EndMethod();
         }
 
-        internal void GenerateSerializerContract(string className, XmlMapping[] xmlMappings, Type[] types, string readerType, string[] readMethods, string writerType, string[] writerMethods, Hashtable serializers)
+        internal void GenerateSerializerContract(XmlMapping[] xmlMappings, System.Type[] types, ConstructorBuilder readerCtor, MethodBuilder[] readMethods, ConstructorBuilder writerCtor, MethodBuilder[] writerMethods, Dictionary<string, ConstructorBuilder> serializerCtors)
         {
             TypeBuilder serializerContractTypeBuilder = CodeGenerator.CreateTypeBuilder(
                 _moduleBuilder,
                 "XmlSerializerContract",
                 TypeAttributes.Public | TypeAttributes.BeforeFieldInit,
-                typeof(XmlSerializerImplementation),
+                WellKnownTypes.XmlSerializerImplementation,
                 Array.Empty<Type>()
                 );
 
@@ -494,56 +460,48 @@ namespace System.Xml.Serialization
             PropertyBuilder propertyBuilder = serializerContractTypeBuilder.DefineProperty(
                 "Reader",
                 PropertyAttributes.None,
-                typeof(XmlSerializationReader),
-                null, null, null, null, null);
+                WellKnownTypes.XmlSerializationReader,
+                Array.Empty<Type>());
             ilg.BeginMethod(
-                typeof(XmlSerializationReader),
+                WellKnownTypes.XmlSerializationReader,
                 "get_Reader",
                 Array.Empty<Type>(),
                 Array.Empty<string>(),
                 CodeGenerator.PublicOverrideMethodAttributes | MethodAttributes.SpecialName);
             propertyBuilder.SetGetMethod(ilg.MethodBuilder);
-            ConstructorInfo ctor = CreatedTypes[readerType].GetConstructor(
-                CodeGenerator.InstanceBindingFlags,
-                Array.Empty<Type>()
-                );
-            ilg.New(ctor);
+            ilg.New(readerCtor);
             ilg.EndMethod();
 
             ilg = new CodeGenerator(serializerContractTypeBuilder);
             propertyBuilder = serializerContractTypeBuilder.DefineProperty(
                 "Writer",
                 PropertyAttributes.None,
-                typeof(XmlSerializationWriter),
-                null, null, null, null, null);
+                WellKnownTypes.XmlSerializationWriter,
+                Array.Empty<Type>());
             ilg.BeginMethod(
-                typeof(XmlSerializationWriter),
+                WellKnownTypes.XmlSerializationWriter,
                 "get_Writer",
                 Array.Empty<Type>(),
                 Array.Empty<string>(),
                 CodeGenerator.PublicOverrideMethodAttributes | MethodAttributes.SpecialName);
             propertyBuilder.SetGetMethod(ilg.MethodBuilder);
-            ctor = CreatedTypes[writerType].GetConstructor(
-                CodeGenerator.InstanceBindingFlags,
-                Array.Empty<Type>()
-                );
-            ilg.New(ctor);
+            ilg.New(writerCtor);
             ilg.EndMethod();
 
             FieldBuilder readMethodsField = GeneratePublicMethods("readMethods", "ReadMethods", readMethods, xmlMappings, serializerContractTypeBuilder);
             FieldBuilder writeMethodsField = GeneratePublicMethods("writeMethods", "WriteMethods", writerMethods, xmlMappings, serializerContractTypeBuilder);
-            FieldBuilder typedSerializersField = GenerateTypedSerializers(serializers, serializerContractTypeBuilder);
+            FieldBuilder typedSerializersField = GenerateTypedSerializers(serializerCtors, serializerContractTypeBuilder);
             GenerateSupportedTypes(types, serializerContractTypeBuilder);
-            GenerateGetSerializer(serializers, xmlMappings, serializerContractTypeBuilder);
+            GenerateGetSerializer(serializerCtors, xmlMappings, serializerContractTypeBuilder);
 
             // Default ctor
-            ConstructorInfo baseCtor = typeof(XmlSerializerImplementation).GetConstructor(
+            ConstructorInfo baseCtor = WellKnownTypes.XmlSerializerImplementation.GetConstructor(
                 CodeGenerator.InstanceBindingFlags,
                 Array.Empty<Type>()
                 );
             ilg = new CodeGenerator(serializerContractTypeBuilder);
             ilg.BeginMethod(
-                typeof(void),
+                WellKnownTypes.Void,
                 ".ctor",
                 Array.Empty<Type>(),
                 Array.Empty<string>(),
@@ -561,9 +519,6 @@ namespace System.Xml.Serialization
             ilg.Ldarg(0);
             ilg.Call(baseCtor);
             ilg.EndMethod();
-            // Instantiate type
-            Type serializerContractType = serializerContractTypeBuilder.CreateTypeInfo().AsType();
-            CreatedTypes.Add(serializerContractType.Name, serializerContractType);
         }
 
         internal static bool IsWildcard(SpecialMapping mapping)
