@@ -86,6 +86,22 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
+        [MemberData(nameof(UnorderedSources.Ranges), new[] { 128 }, MemberType = typeof(UnorderedSources))]
+        [MemberData(nameof(Sources.Ranges), new[] { 128 }, MemberType = typeof(Sources))]
+        public static void GetEnumerator_OperationCanceledException(Labeled<ParallelQuery<int>> labeled, int count)
+        {
+            Functions.AssertEventuallyCanceled((token, canceler) => { foreach (var i in labeled.Item.WithCancellation(token)) { canceler(); }; });
+        }
+
+        [Theory]
+        [MemberData(nameof(UnorderedSources.Ranges), new[] { 1 }, MemberType = typeof(UnorderedSources))]
+        [MemberData(nameof(Sources.Ranges), new[] { 1 }, MemberType = typeof(Sources))]
+        public static void GetEnumerator_OperationCanceledException_PreCanceled(Labeled<ParallelQuery<int>> labeled, int count)
+        {
+            Functions.AssertAlreadyCanceled(token => { foreach (var i in labeled.Item.WithCancellation(token)) { throw new ShouldNotBeInvokedException(); }; });
+        }
+
+        [Theory]
         [MemberData(nameof(UnorderedSources.Ranges), new[] { 1, 2, 16 }, MemberType = typeof(UnorderedSources))]
         public static void GetEnumerator_MoveNextAfterQueryOpeningFailsIsIllegal(Labeled<ParallelQuery<int>> labeled, int count)
         {

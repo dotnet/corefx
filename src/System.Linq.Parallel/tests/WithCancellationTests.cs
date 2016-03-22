@@ -118,38 +118,6 @@ namespace System.Linq.Parallel.Tests
             enumerator.Dispose();
         }
 
-        [Fact]
-        public static void DontDoWorkIfTokenAlreadyCanceled()
-        {
-            OperationCanceledException oce = null;
-
-            CancellationTokenSource cs = new CancellationTokenSource();
-            var query = Enumerable.Range(0, 100000000)
-            .Select(x =>
-            {
-                if (x > 0) // to avoid the "Error:unreachable code detected"
-                    throw new ArgumentException("User-delegate exception.");
-                return x;
-            })
-            .AsParallel()
-            .WithCancellation(cs.Token)
-            .Select(x => x);
-
-            cs.Cancel();
-            try
-            {
-                foreach (var item in query) //We expect an OperationCancelledException during the MoveNext
-                {
-                }
-            }
-            catch (OperationCanceledException ex)
-            {
-                oce = ex;
-            }
-
-            Assert.NotNull(oce);
-        }
-
         private static void DisposedEnumerator(ParallelQuery<int> query, bool delay = false)
         {
             query = query.WithCancellation(new CancellationTokenSource().Token).Select(x => x);
