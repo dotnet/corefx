@@ -4,16 +4,16 @@
   
   <PropertyGroup>
     <Version>1.0.1</Version>
-    <PackageTargetRuntime>debian.8.2-$(PackagePlatform)</PackageTargetRuntime>
+    <PackageTargetRuntime>debian.8-$(PackagePlatform)</PackageTargetRuntime>
     <!-- only build for x64 -->
     <PackagePlatforms>x64;</PackagePlatforms>
   </PropertyGroup>
 
   <ItemGroup>
-    <File Include="$(DebianNativePath)\System.Native.so">
+    <File Include="$(DebianNativePath)System.Native.so">
       <TargetPath>runtimes/$(PackageTargetRuntime)/native</TargetPath>
     </File>
-    <File Include="$(DebianNativePath)\System.Native.a">
+    <File Include="$(DebianNativePath)System.Native.a">
       <TargetPath>runtimes/$(PackageTargetRuntime)/native</TargetPath>
     </File>
   </ItemGroup>

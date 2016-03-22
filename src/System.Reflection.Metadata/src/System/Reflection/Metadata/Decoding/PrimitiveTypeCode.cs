@@ -2,16 +2,19 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Reflection.Metadata;
+
 #if SRM
 namespace System.Reflection.Metadata.Decoding
 #else
+
 namespace Roslyn.Reflection.Metadata.Decoding
 #endif
 {
     /// <summary>
     /// Represents a primitive type found in metadata signatures.
     /// </summary>
-#if SRM && FUTURE
+#if SRM
     public
 #endif
     enum PrimitiveTypeCode : byte

@@ -248,11 +248,6 @@ namespace System.Net.Security
             _credential = null;
             return true;
         }
-
-        public override string ToString()
-        {
-            return handle.ToString();
-        }
     }
 
     internal sealed class SafeDeleteSslContext : SafeDeleteContext
@@ -310,11 +305,6 @@ namespace System.Net.Security
             }
 
             base.Dispose(disposing);
-        }
-
-        public override string ToString()
-        {
-            return handle.ToString();
         }
     }
 

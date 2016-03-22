@@ -85,7 +85,7 @@ namespace System.Collections.Concurrent
         {
             if (collection == null)
             {
-                throw new ArgumentNullException("collection");
+                throw new ArgumentNullException(nameof(collection));
             }
 
             InitializeFromCollection(collection);
@@ -121,7 +121,7 @@ namespace System.Collections.Concurrent
             // Validate arguments.
             if (array == null)
             {
-                throw new ArgumentNullException("array");
+                throw new ArgumentNullException(nameof(array));
             }
 
             // We must be careful not to corrupt the array, so we will first accumulate an
@@ -403,7 +403,7 @@ namespace System.Collections.Concurrent
         {
             if (array == null)
             {
-                throw new ArgumentNullException("array");
+                throw new ArgumentNullException(nameof(array));
             }
 
             // We must be careful not to corrupt the array, so we will first accumulate an
@@ -747,7 +747,7 @@ namespace System.Collections.Concurrent
                 int newhigh = SEGMENT_SIZE; //initial value set to be over the boundary
 
                 //We need do Interlocked.Increment and value/state update in a finally block to ensure that they run
-                //without interuption. This is to prevent anything from happening between them, and another dequeue
+                //without interruption. This is to prevent anything from happening between them, and another dequeue
                 //thread maybe spinning forever to wait for _state[] to be true;
                 try
                 { }
@@ -892,7 +892,7 @@ namespace System.Collections.Concurrent
 
             /// <summary>
             /// return the logical position of the tail of the current segment      
-            /// Value range [-1, SEGMENT_SIZE-1]. When it's -1, it means this is a new segment and has no elemnet yet
+            /// Value range [-1, SEGMENT_SIZE-1]. When it's -1, it means this is a new segment and has no element yet
             /// </summary>
             internal int High
             {

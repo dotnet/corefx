@@ -2,10 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
-using System.Diagnostics;
-using System.Diagnostics.Contracts;
-
 using Microsoft.Win32.SafeHandles;
 
 using Internal.Cryptography;
@@ -31,11 +27,11 @@ namespace System.Security.Cryptography
         public static CngKey Import(byte[] keyBlob, CngKeyBlobFormat format, CngProvider provider)
         {
             if (keyBlob == null)
-                throw new ArgumentNullException("keyBlob");
+                throw new ArgumentNullException(nameof(keyBlob));
             if (format == null)
-                throw new ArgumentNullException("format");
+                throw new ArgumentNullException(nameof(format));
             if (provider == null)
-                throw new ArgumentNullException("provider");
+                throw new ArgumentNullException(nameof(provider));
 
             SafeNCryptProviderHandle providerHandle = provider.OpenStorageProvider();
             SafeNCryptKeyHandle keyHandle;

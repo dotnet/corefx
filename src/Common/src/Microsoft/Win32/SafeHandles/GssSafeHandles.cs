@@ -24,11 +24,7 @@ namespace Microsoft.Win32.SafeHandles
 
             if (status != Interop.NetSecurityNative.Status.GSS_S_COMPLETE)
             {
-                if (retHandle != null)
-                {
-                    retHandle.Dispose();
-                }
-
+                retHandle.Dispose();
                 throw new Interop.NetSecurityNative.GssApiException(status, minorStatus);
             }
 
@@ -45,11 +41,7 @@ namespace Microsoft.Win32.SafeHandles
 
             if (status != Interop.NetSecurityNative.Status.GSS_S_COMPLETE)
             {
-                if (retHandle != null)
-                {
-                    retHandle.Dispose();
-                }
-
+                retHandle.Dispose();
                 throw new Interop.NetSecurityNative.GssApiException(status, minorStatus);
             }
 
@@ -82,7 +74,7 @@ namespace Microsoft.Win32.SafeHandles
     {
         /// <summary>
         ///  returns the handle for the given credentials.
-        ///  The method returns null if the username is null or empty.
+        ///  The method returns an invalid handle if the username is null or empty.
         /// </summary>
         public static SafeGssCredHandle Create(string username, string password, string domain)
         {
@@ -107,11 +99,7 @@ namespace Microsoft.Win32.SafeHandles
 
                 if (status != Interop.NetSecurityNative.Status.GSS_S_COMPLETE)
                 {
-                    if (retHandle != null)
-                    {
-                        retHandle.Dispose();
-                    }
-
+                    retHandle.Dispose();
                     throw new Interop.NetSecurityNative.GssApiException(status, minorStatus);
                 }
             }

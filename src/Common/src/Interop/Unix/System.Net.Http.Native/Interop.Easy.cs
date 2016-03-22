@@ -90,6 +90,7 @@ internal static partial class Interop
         internal enum CURLoption
         {
             CURLOPT_INFILESIZE = CurlOptionLongBase + 14,
+            CURLOPT_SSLVERSION = CurlOptionLongBase + 32,
             CURLOPT_VERBOSE = CurlOptionLongBase + 41,
             CURLOPT_NOBODY = CurlOptionLongBase + 44,
             CURLOPT_UPLOAD = CurlOptionLongBase + 46,
@@ -136,6 +137,12 @@ internal static partial class Interop
             CURL_HTTP_VERSION_1_0 = 1,
             CURL_HTTP_VERSION_1_1 = 2,
             CURL_HTTP_VERSION_2_0 = 3,
+        };
+
+        // Enum for constants defined for CURL_SSLVERSION
+        internal enum CurlSslVersion
+        {
+            CURL_SSLVERSION_TLSv1 = 1, /* TLS 1.x */
         };
 
         // Enum for constants defined for the enum CURLINFO in curl.h
@@ -192,6 +199,8 @@ internal static partial class Interop
         internal const ulong CURL_READFUNC_ABORT = 0x10000000;
         internal const ulong CURL_READFUNC_PAUSE = 0x10000001;
         internal const ulong CURL_WRITEFUNC_PAUSE = 0x10000001;
+
+        internal const ulong CURL_MAX_HTTP_HEADER = 100 * 1024;
 
         internal sealed class SafeCurlHandle : SafeHandle
         {

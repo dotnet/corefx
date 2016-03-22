@@ -43,15 +43,15 @@ namespace System.Net
             new ContextFlagMapping(Interop.SspiCli.ContextFlags.SequenceDetect, ContextFlagsPal.SequenceDetect),
             new ContextFlagMapping(Interop.SspiCli.ContextFlags.UnverifiedTargetName, ContextFlagsPal.UnverifiedTargetName),
             new ContextFlagMapping(Interop.SspiCli.ContextFlags.UseSessionKey, ContextFlagsPal.UseSessionKey),
-            new ContextFlagMapping(Interop.SspiCli.ContextFlags.Zero, ContextFlagsPal.Zero),
+            new ContextFlagMapping(Interop.SspiCli.ContextFlags.Zero, ContextFlagsPal.None),
         };
 
         internal static ContextFlagsPal GetContextFlagsPalFromInterop(Interop.SspiCli.ContextFlags win32Flags)
         {
-            ContextFlagsPal flags = ContextFlagsPal.Zero;
+            ContextFlagsPal flags = ContextFlagsPal.None;
             foreach (ContextFlagMapping mapping in s_contextFlagMapping)
             {
-                if ((win32Flags & mapping.Win32Flag) != 0)
+                if ((win32Flags & mapping.Win32Flag) ==  mapping.Win32Flag)
                 {
                     flags |= mapping.ContextFlag;
                 }
@@ -65,7 +65,7 @@ namespace System.Net
             Interop.SspiCli.ContextFlags win32Flags = Interop.SspiCli.ContextFlags.Zero;
             foreach (ContextFlagMapping mapping in s_contextFlagMapping)
             {
-                if ((flags & mapping.ContextFlag) != 0)
+                if ((flags & mapping.ContextFlag) ==  mapping.ContextFlag)
                 {
                     win32Flags |= mapping.Win32Flag;
                 }

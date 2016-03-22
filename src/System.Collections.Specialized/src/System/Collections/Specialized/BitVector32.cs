@@ -65,7 +65,10 @@ namespace System.Collections.Specialized
             }
             set
             {
-                Debug.Assert((value & section.Mask) == value, "Value out of bounds on BitVector32 Section Set!");
+                // The code should really have originally validated "(value & section.Mask) == value" with 
+                // an exception (it instead validated it with a Debug.Assert, which does little good in a
+                // public method when in a Release build).  We don't include such a check now as it would
+                // likely break things and for little benefit.
 
                 value <<= section.Offset;
                 int offsetMask = (0xFFFF & (int)section.Mask) << section.Offset;
@@ -165,7 +168,7 @@ namespace System.Collections.Specialized
         {
             if (maxValue < 1)
             {
-                throw new ArgumentException(SR.Format(SR.Argument_InvalidValue, "maxValue", 1), "maxValue");
+                throw new ArgumentException(SR.Format(SR.Argument_InvalidValue, "maxValue", 1), nameof(maxValue));
             }
 
             short offset = (short)(priorOffset + CountBitsSet(priorMask));

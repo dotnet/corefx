@@ -9,7 +9,6 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{A55A2B9A-830F-4330-A0E7-02A9FB30ABD2}</ProjectGuid>
     <OutputType>Library</OutputType>
-    <UnsupportedPlatforms>OSX</UnsupportedPlatforms>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(TargetsUnix)' == 'true' ">
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -50,6 +49,9 @@
     <Compile Include="TransportContextTest.cs" />
     <!-- NegotiateStream Tests -->
     <Compile Include="NegotiateStreamStreamToStreamTest.cs" />
+
+    <Compile Include="ServiceNameCollectionTest.cs" />
+
     <!-- Common test files -->
     <Compile Include="$(CommonTestPath)\System\Net\HttpTestServers.cs">
       <Link>Common\System\Net\HttpTestServers.cs</Link>
@@ -101,6 +103,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="..\Scripts\kdc.conf.centos">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="..\Scripts\kdc.conf.opensuse">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <Compile Include="KerberosTest.cs" />

@@ -75,7 +75,7 @@ enum
 
 static void CloseIfOpen(int fd)
 {
-    // Ignoring errors from close is a deliberate choice and we musn't
+    // Ignoring errors from close is a deliberate choice and we mustn't
     // let close during cleanup on a failure path disturb errno.
     if (fd >= 0)
     {
@@ -234,6 +234,19 @@ done:
     }
 
     return success ? 0 : -1;
+}
+
+extern "C" FILE* SystemNative_POpen(const char* command, const char* type)
+{
+    assert(command != nullptr);
+    assert(type != nullptr);
+    return popen(command, type);
+}
+
+extern "C" int32_t SystemNative_PClose(FILE* stream)
+{
+    assert(stream != nullptr);
+    return pclose(stream);
 }
 
 // Each platform type has it's own RLIMIT values but the same name, so we need

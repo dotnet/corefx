@@ -26,7 +26,7 @@ namespace System
             Clear = 5,
             CursorAddress = 10,
             CursorLeft = 14,
-            CursorPositionRequest = 294,
+            CursorPositionReport = 294,
             OrigPairs = 297,
             OrigColors = 298,
             SetAnsiForeground = 359,
@@ -536,11 +536,11 @@ namespace System
             {
                 if (format == null)
                 {
-                    throw new ArgumentNullException("format");
+                    throw new ArgumentNullException(nameof(format));
                 }
                 if (args == null)
                 {
-                    throw new ArgumentNullException("args");
+                    throw new ArgumentNullException(nameof(args));
                 }
 
                 // Initialize the stack to use for processing.

@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
 using System.IO;
@@ -30,6 +31,7 @@ namespace System.Security.Cryptography
         private static readonly byte[] s_defaultExponent = { 0x01, 0x00, 0x01 };
 
         private Lazy<SafeRsaHandle> _key;
+        private bool _skipKeySizeCheck;
 
         public RSAOpenSsl()
             : this(2048)
@@ -51,9 +53,31 @@ namespace System.Security.Cryptography
                     return;
                 }
 
-                FreeKey();
+                // Set the KeySize first so that an invalid value doesn't throw away the key
                 base.KeySize = value;
+
+                FreeKey();
                 _key = new Lazy<SafeRsaHandle>(GenerateKey);
+            }
+        }
+
+        private void ForceSetKeySize(int newKeySize)
+        {
+            // In the event that a key was loaded via ImportParameters or an IntPtr/SafeHandle
+            // it could be outside of the bounds that we currently represent as "legal key sizes".
+            // Since that is our view into the underlying component it can be detatched from the
+            // component's understanding.  If it said it has opened a key, and this is the size, trust it.
+            _skipKeySizeCheck = true;
+
+            try
+            {
+                // Set base.KeySize directly, since we don't want to free the key
+                // (which we would do if the keysize changed on import)
+                base.KeySize = newKeySize;
+            }
+            finally
+            {
+                _skipKeySizeCheck = false;
             }
         }
 
@@ -61,6 +85,14 @@ namespace System.Security.Cryptography
         {
             get
             {
+                if (_skipKeySizeCheck)
+                {
+                    // When size limitations are in bypass, accept any positive integer.
+                    // Many of them may not make sense (like 1), but we're just assigning
+                    // the field to whatever value was provided by the native component.
+                    return new[] { new KeySizes(minSize: 1, maxSize: int.MaxValue, skipSize: 1) };
+                }
+
                 // OpenSSL seems to accept answers of all sizes.
                 // Choosing a non-multiple of 8 would make some calculations misalign
                 // (like assertions of (output.Length * 8) == KeySize).
@@ -76,9 +108,9 @@ namespace System.Security.Cryptography
         public override byte[] Decrypt(byte[] data, RSAEncryptionPadding padding)
         {
             if (data == null)
-                throw new ArgumentNullException("data");
+                throw new ArgumentNullException(nameof(data));
             if (padding == null)
-                throw new ArgumentNullException("padding");
+                throw new ArgumentNullException(nameof(padding));
 
             Interop.Crypto.RsaPadding rsaPadding = GetInteropPadding(padding);
             SafeRsaHandle key = _key.Value;
@@ -108,16 +140,16 @@ namespace System.Security.Cryptography
             }
 
             byte[] plainBytes = new byte[returnValue];
-            Array.Copy(buf, 0, plainBytes, 0, returnValue);
+            Buffer.BlockCopy(buf, 0, plainBytes, 0, returnValue);
             return plainBytes;
         }
 
         public override byte[] Encrypt(byte[] data, RSAEncryptionPadding padding)
         {
             if (data == null)
-                throw new ArgumentNullException("data");
+                throw new ArgumentNullException(nameof(data));
             if (padding == null)
-                throw new ArgumentNullException("padding");
+                throw new ArgumentNullException(nameof(padding));
 
             Interop.Crypto.RsaPadding rsaPadding = GetInteropPadding(padding);
             SafeRsaHandle key = _key.Value;
@@ -214,9 +246,9 @@ namespace System.Security.Cryptography
             FreeKey();
             _key = new Lazy<SafeRsaHandle>(() => key, LazyThreadSafetyMode.None);
 
-            // Set base.KeySize directly, since we don't want to free the key
-            // (which we would do if the keysize changed on import)
-            base.KeySize = BitsPerByte * Interop.Crypto.RsaSize(key);
+            // Use ForceSet instead of the property setter to ensure that LegalKeySizes doesn't interfere
+            // with the already loaded key.
+            ForceSetKeySize(BitsPerByte * Interop.Crypto.RsaSize(key));
         }
 
         protected override void Dispose(bool disposing)
@@ -352,11 +384,11 @@ namespace System.Security.Cryptography
         public override byte[] SignHash(byte[] hash, HashAlgorithmName hashAlgorithm, RSASignaturePadding padding)
         {
             if (hash == null)
-                throw new ArgumentNullException("hash");
+                throw new ArgumentNullException(nameof(hash));
             if (string.IsNullOrEmpty(hashAlgorithm.Name))
                 throw HashAlgorithmNameNullOrEmpty();
             if (padding == null)
-                throw new ArgumentNullException("padding");
+                throw new ArgumentNullException(nameof(padding));
             if (padding != RSASignaturePadding.Pkcs1)
                 throw PaddingModeNotSupported();
 
@@ -400,11 +432,11 @@ namespace System.Security.Cryptography
             RSASignaturePadding padding)
         {
             if (hash == null)
-                throw new ArgumentNullException("hash");
+                throw new ArgumentNullException(nameof(hash));
             if (string.IsNullOrEmpty(hashAlgorithm.Name))
                 throw HashAlgorithmNameNullOrEmpty();
             if (padding == null)
-                throw new ArgumentNullException("padding");
+                throw new ArgumentNullException(nameof(padding));
             if (padding != RSASignaturePadding.Pkcs1)
                 throw PaddingModeNotSupported();
 

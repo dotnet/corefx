@@ -173,6 +173,15 @@ namespace System.Linq.Tests
         }
 
         [Fact]
+        public void TakeCanOnlyBeOne()
+        {
+            Assert.Equal(new[] { 1 }, Enumerable.Repeat(1, 10).Take(1));
+            Assert.Equal(new[] { 1 }, Enumerable.Repeat(1, 10).Skip(1).Take(1));
+            Assert.Equal(new[] { 1 }, Enumerable.Repeat(1, 10).Take(3).Skip(2));
+            Assert.Equal(new[] { 1 }, Enumerable.Repeat(1, 10).Take(3).Take(1));
+        }
+
+        [Fact]
         public void SkipNone()
         {
             Assert.Equal(Enumerable.Repeat(12, 8), Enumerable.Repeat(12, 8).Skip(0));
@@ -224,6 +233,12 @@ namespace System.Linq.Tests
         public void ElementAtOrDefaultExcessive()
         {
             Assert.Equal(0, Enumerable.Repeat(3, 3).ElementAtOrDefault(100));
+        }
+
+        [Fact]
+        public void Count()
+        {
+            Assert.Equal(42, Enumerable.Repeat("Test", 42).Count());
         }
     }
 }

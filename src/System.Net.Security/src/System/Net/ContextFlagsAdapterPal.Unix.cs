@@ -34,10 +34,10 @@ namespace System.Net
 
         internal static ContextFlagsPal GetContextFlagsPalFromInterop(Interop.NetSecurityNative.GssFlags gssFlags)
         {
-            ContextFlagsPal flags = ContextFlagsPal.Zero;
+            ContextFlagsPal flags = ContextFlagsPal.None;
             foreach (ContextFlagMapping mapping in s_contextFlagMapping)
             {
-                if ((gssFlags & mapping.GssFlags) != 0)
+                if ((gssFlags & mapping.GssFlags) == mapping.GssFlags)
                 {
                     flags |= mapping.ContextFlag;
                 }
@@ -48,10 +48,10 @@ namespace System.Net
 
         internal static Interop.NetSecurityNative.GssFlags GetInteropFromContextFlagsPal(ContextFlagsPal flags)
         {
-            Interop.NetSecurityNative.GssFlags gssFlags = (Interop.NetSecurityNative.GssFlags)0;
+            Interop.NetSecurityNative.GssFlags gssFlags = 0;
             foreach (ContextFlagMapping mapping in s_contextFlagMapping)
             {
-                if ((flags & mapping.ContextFlag) != 0)
+                if ((flags & mapping.ContextFlag) == mapping.ContextFlag)
                 {
                     gssFlags |= mapping.GssFlags;
                 }

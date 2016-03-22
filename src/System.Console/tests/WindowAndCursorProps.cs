@@ -101,13 +101,6 @@ public class WindowAndCursorProps
     }
 
     [Fact]
-    [OuterLoop] // changes the title and we can't change it back automatically in the test
-    public static void Title_Set()
-    {
-        Console.Title = "Title set by unit test";
-    }
-
-    [Fact]
     [PlatformSpecific(PlatformID.Windows)]
     public static void Title()
     {

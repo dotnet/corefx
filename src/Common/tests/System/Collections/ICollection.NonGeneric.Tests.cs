@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIobject license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
 using System.Text;
@@ -63,7 +64,7 @@ namespace System.Collections.Tests
         #region Count
 
         [Theory]
-        [MemberData("ValidCollectionSizes")]
+        [MemberData(nameof(ValidCollectionSizes))]
         public void ICollection_NonGeneric_Count_Validity(int count)
         {
             ICollection collection = NonGenericICollectionFactory(count);
@@ -75,7 +76,7 @@ namespace System.Collections.Tests
         #region IsSynchronized
 
         [Theory]
-        [MemberData("ValidCollectionSizes")]
+        [MemberData(nameof(ValidCollectionSizes))]
         public void ICollection_NonGeneric_IsSynchronized(int count)
         {
             ICollection collection = NonGenericICollectionFactory(count);
@@ -87,7 +88,7 @@ namespace System.Collections.Tests
         #region SyncRoot
 
         [Theory]
-        [MemberData("ValidCollectionSizes")]
+        [MemberData(nameof(ValidCollectionSizes))]
         public void ICollection_NonGeneric_SyncRoot_NonNull(int count)
         {
             ICollection collection = NonGenericICollectionFactory(count);
@@ -95,7 +96,7 @@ namespace System.Collections.Tests
         }
 
         [Theory]
-        [MemberData("ValidCollectionSizes")]
+        [MemberData(nameof(ValidCollectionSizes))]
         public void ICollection_NonGeneric_SyncRootConsistent(int count)
         {
             ICollection collection = NonGenericICollectionFactory(count);
@@ -105,7 +106,7 @@ namespace System.Collections.Tests
         }
 
         [Theory]
-        [MemberData("ValidCollectionSizes")]
+        [MemberData(nameof(ValidCollectionSizes))]
         public void ICollection_NonGeneric_SyncRootUnique(int count)
         {
             ICollection collection1 = NonGenericICollectionFactory(count);
@@ -118,7 +119,7 @@ namespace System.Collections.Tests
         #region CopyTo
 
         [Theory]
-        [MemberData("ValidCollectionSizes")]
+        [MemberData(nameof(ValidCollectionSizes))]
         public void ICollection_NonGeneric_CopyTo_NullArray_ThrowsArgumentNullException(int count)
         {
             ICollection collection = NonGenericICollectionFactory(count);
@@ -126,7 +127,7 @@ namespace System.Collections.Tests
         }
 
         [Theory]
-        [MemberData("ValidCollectionSizes")]
+        [MemberData(nameof(ValidCollectionSizes))]
         public void ICollection_NonGeneric_CopyTo_TwoDimensionArray_ThrowsArgumentException(int count)
         {
             if (count > 0)
@@ -139,7 +140,7 @@ namespace System.Collections.Tests
         }
 
         [Theory]
-        [MemberData("ValidCollectionSizes")]
+        [MemberData(nameof(ValidCollectionSizes))]
         public void ICollection_NonGeneric_CopyTo_NonZeroLowerBound(int count)
         {
             ICollection collection = NonGenericICollectionFactory(count);
@@ -150,7 +151,7 @@ namespace System.Collections.Tests
         }
 
         [Theory]
-        [MemberData("ValidCollectionSizes")]
+        [MemberData(nameof(ValidCollectionSizes))]
         public virtual void ICollection_NonGeneric_CopyTo_ArrayOfIncorrectValueType(int count)
         {
             if (count > 0)
@@ -162,7 +163,7 @@ namespace System.Collections.Tests
         }
 
         [Theory]
-        [MemberData("ValidCollectionSizes")]
+        [MemberData(nameof(ValidCollectionSizes))]
         public void ICollection_NonGeneric_CopyTo_ArrayOfIncorrectReferenceType(int count)
         {
             if (count > 0)
@@ -174,7 +175,7 @@ namespace System.Collections.Tests
         }
 
         [Theory]
-        [MemberData("ValidCollectionSizes")]
+        [MemberData(nameof(ValidCollectionSizes))]
         public virtual void ICollection_NonGeneric_CopyTo_ArrayOfEnumType(int count)
         {
             Array enumArr = Enum.GetValues(typeof(EnumerableType));
@@ -189,7 +190,7 @@ namespace System.Collections.Tests
         }
 
         [Theory]
-        [MemberData("ValidCollectionSizes")]
+        [MemberData(nameof(ValidCollectionSizes))]
         public void ICollection_NonGeneric_CopyTo_NegativeIndex_ThrowsArgumentOutOfRangeException(int count)
         {
             ICollection collection = NonGenericICollectionFactory(count);
@@ -199,7 +200,7 @@ namespace System.Collections.Tests
         }
 
         [Theory]
-        [MemberData("ValidCollectionSizes")]
+        [MemberData(nameof(ValidCollectionSizes))]
         public void ICollection_NonGeneric_CopyTo_IndexEqualToArrayCount_ThrowsArgumentException(int count)
         {
             ICollection collection = NonGenericICollectionFactory(count);
@@ -211,7 +212,7 @@ namespace System.Collections.Tests
         }
 
         [Theory]
-        [MemberData("ValidCollectionSizes")]
+        [MemberData(nameof(ValidCollectionSizes))]
         public void ICollection_NonGeneric_CopyTo_IndexLargerThanArrayCount_ThrowsAnyArgumentException(int count)
         {
             ICollection collection = NonGenericICollectionFactory(count);
@@ -220,7 +221,7 @@ namespace System.Collections.Tests
         }
 
         [Theory]
-        [MemberData("ValidCollectionSizes")]
+        [MemberData(nameof(ValidCollectionSizes))]
         public void ICollection_NonGeneric_CopyTo_NotEnoughSpaceInOffsettedArray_ThrowsArgumentException(int count)
         {
             if (count > 0) // Want the T array to have at least 1 element
@@ -232,7 +233,7 @@ namespace System.Collections.Tests
         }
 
         [Theory]
-        [MemberData("ValidCollectionSizes")]
+        [MemberData(nameof(ValidCollectionSizes))]
         public void ICollection_NonGeneric_CopyTo_ExactlyEnoughSpaceInArray(int count)
         {
             ICollection collection = NonGenericICollectionFactory(count);
@@ -244,7 +245,7 @@ namespace System.Collections.Tests
         }
 
         [Theory]
-        [MemberData("ValidCollectionSizes")]
+        [MemberData(nameof(ValidCollectionSizes))]
         public void ICollection_NonGeneric_CopyTo_ArrayIsLargerThanCollection(int count)
         {
             ICollection collection = NonGenericICollectionFactory(count);

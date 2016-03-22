@@ -9,7 +9,7 @@ namespace System.Net
     [Flags]
     internal enum ContextFlagsPal
     {
-        Zero = 0,
+        None = 0,
         Delegate = 0x00000001,
         MutualAuth = 0x00000002,
         ReplayDetect = 0x00000004,

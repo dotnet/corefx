@@ -20,8 +20,6 @@ namespace System.Net.Security
     // It encapsulates security context and does the real work in authentication and
     // user data encryption with NEGO SSPI package.
     //
-    // This is part of the NegotiateStream PAL.
-    //
     internal static class NegotiateStreamPal
     {
         // value should match the Windows sspicli NTE_FAIL value
@@ -41,7 +39,7 @@ namespace System.Net.Security
 
         internal static string QueryContextAssociatedName(SafeDeleteContext securityContext)
         {
-            throw new PlatformNotSupportedException();
+            throw new PlatformNotSupportedException(SR.net_nego_server_not_supported);
         }
 
         internal static string QueryContextAuthenticationPackage(SafeDeleteContext securityContext)
@@ -57,7 +55,7 @@ namespace System.Net.Security
 
         internal static string QueryContextClientSpecifiedSpn(SafeDeleteContext securityContext)
         {
-            throw new PlatformNotSupportedException();
+            throw new PlatformNotSupportedException(SR.net_nego_server_not_supported);
         }
 
         internal static SafeFreeCredentials AcquireDefaultCredential(string package, bool isServer)
@@ -72,7 +70,6 @@ namespace System.Net.Security
                 throw new PlatformNotSupportedException(SR.net_nego_server_not_supported);
             }
 
-            SafeFreeCredentials outCredential;
             bool isNtlm = string.Equals(package, NegotiationInfoClass.NTLM);
 
             if (isNtlm)
@@ -80,18 +77,17 @@ namespace System.Net.Security
                 throw new PlatformNotSupportedException(SR.net_nego_ntlm_not_supported);
             }
 
-            if (string.IsNullOrEmpty(credential.UserName) || string.IsNullOrEmpty(credential.Password))
+            try
             {
-                // In client case, equivalent of default credentials is to use previous,
-                // cached Kerberos TGT to get service-specific ticket.
-                outCredential = new SafeFreeNegoCredentials(string.Empty, string.Empty, string.Empty);
+                // Note: In client case, equivalent of default credentials is to use previous, cached Kerberos TGT to get service-specific ticket.
+                return (string.IsNullOrEmpty(credential.UserName) || string.IsNullOrEmpty(credential.Password)) ?
+                    new SafeFreeNegoCredentials(string.Empty, string.Empty, string.Empty) :
+                    new SafeFreeNegoCredentials(credential.UserName, credential.Password, credential.Domain);
             }
-            else
+            catch(Exception ex)
             {
-                outCredential = new SafeFreeNegoCredentials(credential.UserName, credential.Password, credential.Domain);
+                throw new Win32Exception(NTE_FAIL, ex.Message);
             }
-            return outCredential;
-
         }
 
         internal static SecurityStatusPal InitializeSecurityContext(
@@ -103,8 +99,13 @@ namespace System.Net.Security
             SecurityBuffer outSecurityBuffer,
             ref ContextFlagsPal contextFlags)
         {
-            // TODO (Issue #3718): The second buffer can contain a channel binding which is not supported 
+            // TODO (Issue #3718): The second buffer can contain a channel binding which is not supported
             if ((null != inSecurityBufferArray) && (inSecurityBufferArray.Length > 1))
+            {
+                throw new PlatformNotSupportedException(SR.net_nego_channel_binding_not_supported);
+            }
+
+            if ((null != inSecurityBufferArray) && (inSecurityBufferArray.Length > 0) && (inSecurityBufferArray[0].type == SecurityBufferType.ChannelBindings))
             {
                 throw new PlatformNotSupportedException(SR.net_nego_channel_binding_not_supported);
             }
@@ -124,7 +125,7 @@ namespace System.Net.Security
             ref SafeDeleteContext securityContext,
             SecurityBuffer[] inSecurityBufferArray)
         {
-            return SecurityStatusPal.OK;
+            return new SecurityStatusPal(SecurityStatusPalErrorCode.OK);
         }
 
         internal static SecurityStatusPal AcceptSecurityContext(
@@ -135,22 +136,21 @@ namespace System.Net.Security
             SecurityBuffer outSecurityBuffer,
             ref ContextFlagsPal contextFlags)
         {
-            throw new PlatformNotSupportedException();
+            throw new PlatformNotSupportedException(SR.net_nego_server_not_supported);
         }
 
         internal static void ValidateImpersonationLevel(TokenImpersonationLevel impersonationLevel)
         {
             if (impersonationLevel != TokenImpersonationLevel.Identification)
             {
-                throw new ArgumentOutOfRangeException("impersonationLevel", impersonationLevel.ToString(),
+                throw new ArgumentOutOfRangeException(nameof(impersonationLevel), impersonationLevel.ToString(),
                     SR.net_auth_supported_impl_levels);
             }
-
         }
 
-        internal static Exception CreateExceptionFromError(SecurityStatusPal statusCode)
+        internal static Win32Exception CreateExceptionFromError(SecurityStatusPal statusCode)
         {
-            return new Win32Exception(NTE_FAIL);
+            return new Win32Exception(NTE_FAIL, statusCode.ToString());
         }
 
         internal static int Encrypt(
@@ -202,7 +202,7 @@ namespace System.Net.Security
 
                 Debug.Fail("NTAuthentication#" + LoggingHash.HashString(securityContext) + "::Decrypt", "Argument 'offset' out of range.");
 
-                throw new ArgumentOutOfRangeException("offset");
+                throw new ArgumentOutOfRangeException(nameof(offset));
             }
 
             if (count < 0 || count > (buffer == null ? 0 : buffer.Length - offset))
@@ -214,7 +214,7 @@ namespace System.Net.Security
 
                 Debug.Fail("NTAuthentication#" + LoggingHash.HashString(securityContext) + "::Decrypt", "Argument 'count' out of range.");
 
-                throw new ArgumentOutOfRangeException("count");
+                throw new ArgumentOutOfRangeException(nameof(count));
             }
 
             newOffset = offset;
@@ -257,28 +257,30 @@ namespace System.Net.Security
                 uint outputFlags;
                 SafeGssContextHandle contextHandle = negoContext.GssContext;
                 bool done = Interop.GssApi.EstablishSecurityContext(
-                                  ref contextHandle,
-                                  credential.GssCredential,
-                                  isNtlm,
-                                  negoContext.TargetName,
-                                  inputFlags,
-                                  ((inputBuffer != null) ? inputBuffer.token : null),
-                                  out outputBuffer.token,
-                                  out outputFlags);
+                   ref contextHandle,
+                   credential.GssCredential,
+                   isNtlm,
+                   negoContext.TargetName,
+                   inputFlags,
+                   inputBuffer?.token,
+                   out outputBuffer.token,
+                   out outputFlags);
 
                 Debug.Assert(outputBuffer.token != null, "Unexpected null buffer returned by GssApi");
                 outputBuffer.size = outputBuffer.token.Length;
                 outputBuffer.offset = 0;
 
                 outFlags = ContextFlagsAdapterPal.GetContextFlagsPalFromInterop((Interop.NetSecurityNative.GssFlags)outputFlags);
-                Debug.Assert(negoContext.GssContext == null || contextHandle == negoContext.GssContext);
-                
+
                 // Save the inner context handle for further calls to NetSecurity
+                Debug.Assert(negoContext.GssContext == null || contextHandle == negoContext.GssContext);
                 if (null == negoContext.GssContext)
                 {
                     negoContext.SetGssContext(contextHandle);
                 }
-                return done ? SecurityStatusPal.CompleteNeeded : SecurityStatusPal.ContinueNeeded;
+
+                SecurityStatusPalErrorCode errorCode = done ? SecurityStatusPalErrorCode.CompleteNeeded : SecurityStatusPalErrorCode.ContinueNeeded;
+                return new SecurityStatusPal(errorCode);
             }
             catch(Exception ex)
             {
@@ -289,7 +291,7 @@ namespace System.Net.Security
                     GlobalLog.Print("Exception Caught. - " + ex);
                 }
 
-                return SecurityStatusPal.InternalError;
+                return new SecurityStatusPal(SecurityStatusPalErrorCode.InternalError, ex);
             }
         }
     }

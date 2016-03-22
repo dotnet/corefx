@@ -125,12 +125,8 @@ namespace System.Net.Security.Tests
             try
             {
                 Interop.NetSecurityNative.Status minorStatus;
-                status = Interop.NetSecurityNative.Unwrap(out minorStatus,
-                                                          context,
-                                                          message,
-                                                          0,
-                                                          message.Length,
-                                                          ref unwrapped);
+                status = Interop.NetSecurityNative.UnwrapBuffer(out minorStatus,
+                    context, message, 0, message.Length, ref unwrapped);
                 if (status != Interop.NetSecurityNative.Status.GSS_S_COMPLETE)
                 {
                     throw new Interop.NetSecurityNative.GssApiException(status, minorStatus);
@@ -152,13 +148,8 @@ namespace System.Net.Security.Tests
             try
             {
                 Interop.NetSecurityNative.Status minorStatus;
-                status = Interop.NetSecurityNative.Wrap(out minorStatus,
-                                                        context,
-                                                        false,
-                                                        message,
-                                                        0,
-                                                        message.Length,
-                                                        ref wrapped);
+                status = Interop.NetSecurityNative.WrapBuffer(out minorStatus,
+                    context, false, message, 0, message.Length, ref wrapped);
                 if (status != Interop.NetSecurityNative.Status.GSS_S_COMPLETE)
                 {
                     throw new Interop.NetSecurityNative.GssApiException(status, minorStatus);

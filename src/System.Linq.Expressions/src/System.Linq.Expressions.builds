@@ -3,13 +3,21 @@
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <ItemGroup>
     <Project Include="System.Linq.Expressions.csproj" />
-    <Project Include="Facade\System.Linq.Expressions.csproj">
-      <TargetGroup>net46</TargetGroup>
-    </Project>
+    <!-- Net46 facade is currently inbox for 4.0
+    <Project Include="System.Linq.Expressions.csproj">
+       <TargetGroup>net46</TargetGroup>
+    </Project> -->
+    <!-- NETCore50 must redistribute binaries due to shared library
     <Project Include="System.Linq.Expressions.csproj">
       <TargetGroup>netcore50</TargetGroup>
     </Project>
     <Project Include="System.Linq.Expressions.csproj">
+      <TargetGroup>netcore50aot</TargetGroup>
+    </Project> -->
+    <Project Include="redist\System.Linq.Expressions.depproj">
+      <TargetGroup>netcore50</TargetGroup>
+    </Project>
+    <Project Include="redist\System.Linq.Expressions.depproj">
       <TargetGroup>netcore50aot</TargetGroup>
     </Project>
   </ItemGroup>

@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System;
+
 #if SRM
 namespace System.Reflection.Metadata.Decoding
 #else
@@ -9,7 +11,7 @@ namespace Roslyn.Reflection.Metadata.Decoding
 #endif
 {
     [Flags]
-#if SRM && FUTURE
+#if SRM
     public
 #endif
     enum SignatureDecoderOptions

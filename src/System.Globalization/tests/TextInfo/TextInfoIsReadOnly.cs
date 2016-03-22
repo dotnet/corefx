@@ -2,33 +2,27 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
-using System.Globalization;
+using System.Collections.Generic;
 using Xunit;
 
 namespace System.Globalization.Tests
 {
     public class TextInfoIsReadOnly
     {
-        // PosTest1: Verify the new TextInfo is not readOnly
-        [Fact]
-        public void TestEnUSTextInfo()
+        public static IEnumerable<object[]> IsReadOnly_TestData()
         {
-            CultureInfo ci = new CultureInfo("en-US");
-            TextInfo textInfoUS = ci.TextInfo;
-
-            Assert.False(textInfoUS.IsReadOnly);
+            yield return new object[] { CultureInfo.ReadOnly(new CultureInfo("en-US")).TextInfo, true };
+            yield return new object[] { CultureInfo.InvariantCulture.TextInfo, true };
+            yield return new object[] { new CultureInfo("").TextInfo, false };
+            yield return new object[] { new CultureInfo("en-US").TextInfo, false };
+            yield return new object[] { new CultureInfo("fr-FR").TextInfo, false };
         }
 
-        // PosTest2: Verify the fr-FR CultureInfo's TextInfo
-        [Fact]
-        public void TestFrFRTextInfo()
+        [Theory]
+        [MemberData(nameof(IsReadOnly_TestData))]
+        public void IsReadOnly(TextInfo textInfo, bool expected)
         {
-            CultureInfo ci = new CultureInfo("fr-FR");
-            TextInfo textInfoFrance = ci.TextInfo;
-
-            Assert.False(textInfoFrance.IsReadOnly);
+            Assert.Equal(expected, textInfo.IsReadOnly);
         }
     }
 }
-

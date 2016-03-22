@@ -26,13 +26,13 @@ namespace System.Security.Cryptography
         public RSAOpenSsl(IntPtr handle)
         {
             if (handle == IntPtr.Zero)
-                throw new ArgumentException(SR.Cryptography_OpenInvalidHandle, "handle");
+                throw new ArgumentException(SR.Cryptography_OpenInvalidHandle, nameof(handle));
 
             SafeRsaHandle rsaHandle = SafeRsaHandle.DuplicateHandle(handle);
 
-            // Set base.KeySize to avoid throwing an extra Lazy at the GC when
-            // using something other than the default keysize.
-            base.KeySize = BitsPerByte * Interop.Crypto.RsaSize(rsaHandle);
+            // Use ForceSet instead of the property setter to ensure that LegalKeySizes doesn't interfere
+            // with the already loaded key.
+            ForceSetKeySize(BitsPerByte * Interop.Crypto.RsaSize(rsaHandle));
             _key = new Lazy<SafeRsaHandle>(() => rsaHandle);
         }
 
@@ -49,9 +49,9 @@ namespace System.Security.Cryptography
         public RSAOpenSsl(SafeEvpPKeyHandle pkeyHandle)
         {
             if (pkeyHandle == null)
-                throw new ArgumentNullException("pkeyHandle");
+                throw new ArgumentNullException(nameof(pkeyHandle));
             if (pkeyHandle.IsInvalid)
-                throw new ArgumentException(SR.Cryptography_OpenInvalidHandle, "pkeyHandle");
+                throw new ArgumentException(SR.Cryptography_OpenInvalidHandle, nameof(pkeyHandle));
 
             // If rsa is valid it has already been up-ref'd, so we can just use this handle as-is.
             SafeRsaHandle rsa = Interop.Crypto.EvpPkeyGetRsa(pkeyHandle);
@@ -61,8 +61,9 @@ namespace System.Security.Cryptography
                 throw Interop.Crypto.CreateOpenSslCryptographicException();
             }
 
-            // Set base.KeySize rather than this.KeySize to avoid an unnecessary Lazy<> allocation.
-            base.KeySize = BitsPerByte * Interop.Crypto.RsaSize(rsa);
+            // Use ForceSet instead of the property setter to ensure that LegalKeySizes doesn't interfere
+            // with the already loaded key.
+            ForceSetKeySize(BitsPerByte * Interop.Crypto.RsaSize(rsa));
             _key = new Lazy<SafeRsaHandle>(() => rsa);
         }
 

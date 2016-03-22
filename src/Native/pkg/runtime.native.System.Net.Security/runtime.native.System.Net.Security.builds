@@ -6,7 +6,7 @@
     <Project Include="rhel\runtime.native.System.Net.Security.pkgproj">
       <!-- currently we build both "rhel" and "ubuntu" packages on Linux,
            but will only publish one of the packages based on what OS we
-           were actually building on.  
+           were actually building on.
            Remove this when fixing https://github.com/dotnet/corefx/issues/5190 -->
       <OSGroup>Linux</OSGroup>
       <Platform>amd64</Platform>

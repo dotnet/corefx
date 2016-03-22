@@ -17,8 +17,6 @@ internal static class IOInputs
 
     public static bool SupportsSettingCreationTime { get { return RuntimeInformation.IsOSPlatform(OSPlatform.Windows); } }
     public static bool SupportsGettingCreationTime { get { return RuntimeInformation.IsOSPlatform(OSPlatform.Windows) | RuntimeInformation.IsOSPlatform(OSPlatform.OSX); } }
-    public static bool CaseSensitive { get { return RuntimeInformation.IsOSPlatform(OSPlatform.Windows) | RuntimeInformation.IsOSPlatform(OSPlatform.OSX); } }
-    public static bool CaseInsensitive { get { return RuntimeInformation.IsOSPlatform(OSPlatform.Windows) | RuntimeInformation.IsOSPlatform(OSPlatform.OSX); } }
 
     // Max path length (minus trailing \0). Unix values vary system to system; just using really long values here likely to be more than on the average system.
     public static readonly int MaxPath = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? 259 : 10000;
@@ -182,9 +180,11 @@ internal static class IOInputs
             yield return "\0";
             yield return "middle\0path";
             yield return "trailing\0";
-            yield return @"\\?\";
-            yield return @"\\?\UNC\";
-            yield return @"\\?\UNC\LOCALHOST";
+
+            // TODO: #6931 Add these back in some fashion
+            //yield return @"\\?\";
+            //yield return @"\\?\UNC\";
+            //yield return @"\\?\UNC\LOCALHOST";
         }
         else
         {

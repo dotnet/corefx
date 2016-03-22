@@ -25,6 +25,7 @@
     <Compile Include="DualModeSocketTest.cs" />
     <Compile Include="IPPacketInformationTest.cs" />
     <Compile Include="NetworkStreamTest.cs" />
+    <Compile Include="SelectTest.cs" />
     <Compile Include="SendReceive.cs" />
     <Compile Include="TcpClientTest.cs" />
     <Compile Include="Shutdown.cs" />
@@ -54,9 +55,6 @@
     </Compile>
     <Compile Include="$(CommonTestPath)\System\Net\Sockets\SocketImplementationType.cs">
       <Link>SocketCommon\SocketImplementationType.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\System\Net\Sockets\UnixDomainSocketEndPoint.cs">
-      <Link>SocketCommon\System\Net\UnixDomainSocketEndPoint.cs</Link>
     </Compile>
 
     <!-- Common test files -->

@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -30,12 +30,12 @@ namespace System.Diagnostics.Tracing
         {
             if (name == null)
             {
-                throw new ArgumentNullException("name");
+                throw new ArgumentNullException(nameof(name));
             }
 
             if (eventSource == null)
             {
-                throw new ArgumentNullException("eventSource");
+                throw new ArgumentNullException(nameof(eventSource));
             }
 
             InitializeBuffer();
@@ -285,7 +285,7 @@ namespace System.Diagnostics.Tracing
             else if (eventSourceIndex >= EventCounterGroup.s_eventCounterGroups.Length)
             {
                 EventCounterGroup[] newEventCounterGroups = new EventCounterGroup[eventSourceIndex + 1];
-                Array.Copy(EventCounterGroup.s_eventCounterGroups, newEventCounterGroups, EventCounterGroup.s_eventCounterGroups.Length);
+                Array.Copy(EventCounterGroup.s_eventCounterGroups, 0, newEventCounterGroups, 0, EventCounterGroup.s_eventCounterGroups.Length);
                 EventCounterGroup.s_eventCounterGroups = newEventCounterGroups;
             }
         }

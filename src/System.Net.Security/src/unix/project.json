@@ -1,18 +1,33 @@
 {
   "dependencies": {
-    "Microsoft.NETCore.Platforms": "1.0.1-rc3-23808",
+    "Microsoft.NETCore.Platforms": "1.0.1-rc3-23918",
+    "Microsoft.Win32.Primitives": "4.0.0",
+    "System.Collections": "4.0.0",
+    "System.Collections.Concurrent": "4.0.0",
     "System.Diagnostics.Contracts": "4.0.0",
+    "System.Diagnostics.Debug": "4.0.10",
+    "System.Diagnostics.Tracing": "4.0.0",
+    "System.Globalization": "4.0.0",
     "System.Globalization.Extensions": "4.0.0",
     "System.Net.Primitives": "4.0.10",
-    "System.Security.Cryptography.OpenSsl": "4.0.0-rc3-23808",
-    "System.Security.Cryptography.X509Certificates": "4.0.0-rc3-23808",
+    "System.Resources.ResourceManager": "4.0.0",
+    "System.Runtime.Extensions": "4.0.10",
+    "System.Runtime.Handles": "4.0.0",
+    "System.Security.Cryptography.OpenSsl": "4.0.0-rc3-23918",
+    "System.Security.Cryptography.X509Certificates": "4.1.0-rc3-23918",
     "System.Security.Principal": "4.0.0",
-    "System.Security.Principal.Windows": "4.0.0-rc3-23808",
+    "System.Security.Principal.Windows": "4.0.0-rc3-23918",
+    "System.Text.Encoding": "4.0.10",
     "System.Threading": "4.0.10",
-    "System.Threading.ThreadPool": "4.0.10-rc3-23808"
+    "System.Threading.Tasks": "4.0.10",
+    "System.Threading.ThreadPool": "4.0.10-rc3-23918"
   },
   "frameworks": {
-    "dnxcore50": {}
+    "netstandard1.4": {
+      "imports": [
+        "dotnet5.5"
+      ]
+    }
   },
   "runtimes": {
     "ubuntu.14.04-x64": {},

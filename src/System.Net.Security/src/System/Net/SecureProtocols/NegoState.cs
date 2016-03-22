@@ -88,7 +88,7 @@ namespace System.Net.Security
                 // One of these must be set if EP is turned on
                 if (policy.CustomChannelBinding == null && policy.CustomServiceNames == null)
                 {
-                    throw new ArgumentException(SR.net_auth_must_specify_extended_protection_scheme, "policy");
+                    throw new ArgumentException(SR.net_auth_must_specify_extended_protection_scheme, nameof(policy));
                 }
 
                 _extendedProtectionPolicy = policy;
@@ -122,16 +122,15 @@ namespace System.Net.Security
 
             if (credential == null)
             {
-                throw new ArgumentNullException("credential");
+                throw new ArgumentNullException(nameof(credential));
             }
 
             if (servicePrincipalName == null)
             {
-                throw new ArgumentNullException("servicePrincipalName");
+                throw new ArgumentNullException(nameof(servicePrincipalName));
             }
 
             NegotiateStreamPal.ValidateImpersonationLevel(impersonationLevel);
-
             if (_context != null && IsServer != isServer)
             {
                 throw new InvalidOperationException(SR.net_auth_client_server);
@@ -202,7 +201,7 @@ namespace System.Net.Security
             {
                 _context = new NTAuthentication(isServer, package, credential, servicePrincipalName, flags, channelBinding);
             }
-            catch (Exception e)
+            catch (Win32Exception e)
             {
                 throw new AuthenticationException(SR.net_auth_SSPI, e);
             }
@@ -779,7 +778,7 @@ namespace System.Net.Security
 
         internal static bool IsError(SecurityStatusPal status)
         {
-            return ((int)status >= (int)SecurityStatusPal.OutOfMemory);
+            return ((int)status.ErrorCode >= (int)SecurityStatusPalErrorCode.OutOfMemory);
         }
 
         private unsafe byte[] GetOutgoingBlob(byte[] incomingBlob, ref Exception e)
@@ -792,7 +791,7 @@ namespace System.Net.Security
                 e = NegotiateStreamPal.CreateExceptionFromError(statusCode);
                 uint error = (uint)e.HResult;
 
-                message = new byte[8];  //sizeof(long)
+                message = new byte[sizeof(long)];
                 for (int i = message.Length - 1; i >= 0; --i)
                 {
                     message[i] = (byte)(error & 0xFF);
@@ -830,7 +829,7 @@ namespace System.Net.Security
         {
             Win32Exception e = new Win32Exception((int)error);
 
-            if (e.NativeErrorCode == (int)SecurityStatusPal.LogonDenied)
+            if (e.NativeErrorCode == (int)SecurityStatusPalErrorCode.LogonDenied)
             {
                 throw new InvalidCredentialException(SR.net_auth_bad_client_creds, e);
             }
@@ -847,7 +846,7 @@ namespace System.Net.Security
         {
             Win32Exception win32exception = exception as Win32Exception;
 
-            return (win32exception != null) && (win32exception.NativeErrorCode == (int)SecurityStatusPal.LogonDenied);
+            return (win32exception != null) && (win32exception.NativeErrorCode == (int)SecurityStatusPalErrorCode.LogonDenied);
         }
     }
 }
