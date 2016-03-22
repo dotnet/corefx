@@ -17,15 +17,6 @@
     <RoslynPackageName>Microsoft.Net.ToolsetCompilers</RoslynPackageName>
   </PropertyGroup>
 
-  <ItemGroup>
-    <AssemblyMetadata Include=".NETFrameworkAssembly">
-      <Value></Value>
-    </AssemblyMetadata>
-    <AssemblyMetadata Include="Serviceable">
-      <Value>True</Value>
-    </AssemblyMetadata>
-  </ItemGroup>
-
   <!--
     Switching to the .NET Core version of the BuildTools tasks seems to break numerous scenarios, such as VS intellisense and resource designer
     as well as runnning the build on mono. Until we can get these sorted out we will continue using the .NET 4.5 version of the tasks.
@@ -53,6 +44,14 @@
     <DotnetCliPath Condition="'$(DotnetCliPath)'==''">$(ToolRuntimePath)dotnetcli/bin/</DotnetCliPath>
     <BuildToolsTaskDir Condition="'$(BuildToolsTargets45)' == 'true'">$(ToolsDir)net45/</BuildToolsTaskDir>
     <UseRoslynCompilers Condition="'$(UseRoslynCompilers)'=='' and '$(OSEnvironment)'!='Windows_NT'">false</UseRoslynCompilers>
+  </PropertyGroup>
+  
+  <PropertyGroup>
+    <!-- temporarily increase assembly version of corefx impl of desktop inbox contracts to allow folks 
+         to move to the latest packages.  Remove once the full stack is on the latest packages
+         https://github.com/dotnet/corefx/issues/7114 -->
+    <AssemblyVersionTransition>true</AssemblyVersionTransition>
+    <GenFacadesArgs>-ignoreBuildAndRevisionMismatch</GenFacadesArgs>
   </PropertyGroup>
 
   <!-- Use Roslyn Compilers to build -->
