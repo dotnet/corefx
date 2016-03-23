@@ -27,7 +27,7 @@ Cleans the local workspace, for example removing files not in the repository.
 The sync task gets the latest source history and packages in order to eliminate all the network traffic when we build. This way we are able to hit the network only when we are intentional about doing it and then be able to build even in offline mode. 
 It is important to note that Sync gets the source history by doing `git fetch --all -p –v`.
 
-It does not update branches or merge in changes to local files, giving devs flexibility in managing their Git repos. Devs will need to manually update their local files and when ready run `sync /p` to restore the packages.
+It does not update branches or merge in changes to local files, giving devs flexibility in managing their Git repos. Devs will need to manually update their local files (e.g. by using Git commands or other Git tools) and when ready run `sync /p` to restore the packages.
 
 **Build product binaries**
 
