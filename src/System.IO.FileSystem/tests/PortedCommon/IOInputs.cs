@@ -181,10 +181,8 @@ internal static class IOInputs
             yield return "middle\0path";
             yield return "trailing\0";
 
-            // TODO: #6931 Add these back in some fashion
-            //yield return @"\\?\";
-            //yield return @"\\?\UNC\";
-            //yield return @"\\?\UNC\LOCALHOST";
+            // Device paths are no longer checked for invalid characters as there is no easily definable set
+            // of characters to check (for example, pipes allow most characters that are invalid for "normal" paths).
         }
         else
         {
