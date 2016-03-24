@@ -246,10 +246,6 @@ namespace System.IO.Tests
         [Fact]
         public static void GetInvalidPathChars()
         {
-            Assert.NotNull(Path.GetInvalidPathChars());
-            Assert.NotSame(Path.GetInvalidPathChars(), Path.GetInvalidPathChars());
-            Assert.Equal((IEnumerable<char>)Path.GetInvalidPathChars(), Path.GetInvalidPathChars());
-            Assert.True(Path.GetInvalidPathChars().Length > 0);
             Assert.All(Path.GetInvalidPathChars(), c =>
             {
                 string bad = c.ToString();
@@ -265,6 +261,32 @@ namespace System.IO.Tests
                 Assert.Throws<ArgumentException>(() => Path.GetFullPath(bad));
                 Assert.Throws<ArgumentException>(() => Path.GetPathRoot(bad));
                 Assert.Throws<ArgumentException>(() => Path.IsPathRooted(bad));
+            });
+        }
+
+        [PlatformSpecific(PlatformID.Windows)]
+        [Theory]
+        [InlineData(@"\\?\")]
+        [InlineData(@"\\.\")]
+        [InlineData(@"\??\")]
+        public static void DevicePathsDontThrowForInvalidChars_Windows(string prefix)
+        {
+            Assert.All(Path.GetInvalidPathChars(), c =>
+            {
+                // Shouldn't throw for device paths and "bad" chars
+                string bad = c.ToString();
+                Path.ChangeExtension(prefix + bad, "ok");
+                Path.Combine(prefix + bad, "ok");
+                Path.Combine(prefix + "ok", "ok", bad);
+                Path.Combine(prefix + "ok", "ok", bad, "ok");
+                Path.Combine(prefix + bad, bad, bad, bad, bad);
+                Path.GetDirectoryName(prefix + bad);
+                Path.GetExtension(prefix + bad);
+                Path.GetFileName(prefix + bad);
+                Path.GetFileNameWithoutExtension(prefix + bad);
+                Path.GetFullPath(prefix + bad);
+                Path.GetPathRoot(prefix + bad);
+                Path.IsPathRooted(prefix + bad);
             });
         }
 
