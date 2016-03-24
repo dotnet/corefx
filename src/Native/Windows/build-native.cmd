@@ -15,12 +15,15 @@ set CMAKE_BUILD_TYPE=Release
 :: Since the native build requires some configuration information before msbuild is called, we have to do some manual args parsing
 :: For consistency with building the managed components, args are taken in the msbuild style i.e. /p:
 if [%1] == [] goto :ToolsVersion
-if /i [%1] == [/p:ConfigurationGroup]    (
-    if /i [%2] == [Release] (set CMAKE_BUILD_TYPE=Release&&shift&&shift&goto Arg_Loop)
-    if /i [%2] == [Debug]   (set CMAKE_BUILD_TYPE=Debug&&shift&&shift&goto Arg_Loop)
-    echo Error: Invalid configuration args "%1 and %2"
-    exit /b 1
-)
+
+:: NOTE: CLRCompression currently does not work when built in the "Debug" configuration. See issue #7197.
+:: if /i [%1] == [/p:ConfigurationGroup]    (
+::     if /i [%2] == [Release] (set CMAKE_BUILD_TYPE=Release&&shift&&shift&goto Arg_Loop)
+::     if /i [%2] == [Debug]   (set CMAKE_BUILD_TYPE=Debug&&shift&&shift&goto Arg_Loop)
+::     echo Error: Invalid configuration args "%1 and %2"
+::     exit /b 1
+:: )
+
 if /i [%1] == [/p:Platform]    (
     if /i [%2] == [AnyCPU]  (set __BuildArch=AnyCPU&&set __VCBuildArch=x86_amd64&&shift&&shift&goto Arg_Loop)
     if /i [%2] == [x86]     (set __BuildArch=x86&&set __VCBuildArch=x86&&shift&&shift&goto Arg_Loop)
