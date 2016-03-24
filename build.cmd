@@ -12,19 +12,6 @@ set "__args=%*"
 if /i [%1] == [native] (set __buildSpec=native&&set "__args=%__args:~6%"&&shift&&goto Tools)
 if /i [%1] == [managed] (set __buildSpec=managed&&set "__args=%__args:~7%"&&shift&&goto Tools)
 
-:Tools
-:: Setup VS
-if not defined VisualStudioVersion (
-    if defined VS140COMNTOOLS (
-        call "%VS140COMNTOOLS%\VsDevCmd.bat"
-        goto :Build
-    )
-
-    echo Error: build.cmd requires Visual Studio 2015.
-    echo        Please see https://github.com/dotnet/corefx/blob/master/Documentation/project-docs/developer-guide.md for build instructions.
-    exit /b 1
-)
-
 :Build
 :: Restore the Tools directory
 call %~dp0init-tools.cmd

@@ -1,4 +1,17 @@
 @echo off
+
+:Tools
+:: Setup VS
+if not defined VisualStudioVersion (
+  if defined VS140COMNTOOLS (
+      call "%VS140COMNTOOLS%\VsDevCmd.bat"
+  ) else (
+      echo Error: We require Visual Studio 2015.
+      echo        Please see https://github.com/dotnet/corefx/blob/master/Documentation/project-docs/developer-guide.md for build instructions.
+      exit /b 1
+  )
+)
+
 setlocal
 
 REM Workaround https://github.com/dotnet/coreclr/issues/2153
