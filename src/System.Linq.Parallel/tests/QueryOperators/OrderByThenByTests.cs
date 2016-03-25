@@ -412,8 +412,8 @@ namespace System.Linq.Parallel.Tests
         public static void OrderBy_NotComparable(Labeled<ParallelQuery<int>> labeled, int count)
         {
             ParallelQuery<int> query = labeled.Item.OrderBy(x => new NotComparable(x));
-            Functions.AssertThrowsWrapped<ArgumentException>(() => { foreach (int i in query) ; });
-            Functions.AssertThrowsWrapped<ArgumentException>(() => query.ToList());
+            AssertThrows.Wrapped<ArgumentException>(() => { foreach (int i in query) ; });
+            AssertThrows.Wrapped<ArgumentException>(() => query.ToList());
         }
 
         [Theory]
@@ -449,8 +449,8 @@ namespace System.Linq.Parallel.Tests
         public static void OrderByDescending_NotComparable(Labeled<ParallelQuery<int>> labeled, int count)
         {
             ParallelQuery<int> query = labeled.Item.OrderByDescending(x => new NotComparable(x));
-            Functions.AssertThrowsWrapped<ArgumentException>(() => { foreach (int i in query) ; });
-            Functions.AssertThrowsWrapped<ArgumentException>(() => query.ToList());
+            AssertThrows.Wrapped<ArgumentException>(() => { foreach (int i in query) ; });
+            AssertThrows.Wrapped<ArgumentException>(() => query.ToList());
         }
 
         [Theory]
@@ -1115,8 +1115,8 @@ namespace System.Linq.Parallel.Tests
         public static void ThenBy_NotComparable(Labeled<ParallelQuery<int>> labeled, int count)
         {
             ParallelQuery<int> query = labeled.Item.OrderBy(x => 0).ThenBy(x => new NotComparable(x));
-            Functions.AssertThrowsWrapped<ArgumentException>(() => { foreach (int i in query) ; });
-            Functions.AssertThrowsWrapped<ArgumentException>(() => query.ToList());
+            AssertThrows.Wrapped<ArgumentException>(() => { foreach (int i in query) ; });
+            AssertThrows.Wrapped<ArgumentException>(() => query.ToList());
         }
 
         [Theory]
@@ -1152,8 +1152,8 @@ namespace System.Linq.Parallel.Tests
         public static void ThenByDescending_NotComparable(Labeled<ParallelQuery<int>> labeled, int count)
         {
             ParallelQuery<int> query = labeled.Item.OrderBy(x => 0).ThenByDescending(x => new NotComparable(x));
-            Functions.AssertThrowsWrapped<ArgumentException>(() => { foreach (int i in query) ; });
-            Functions.AssertThrowsWrapped<ArgumentException>(() => query.ToList());
+            AssertThrows.Wrapped<ArgumentException>(() => { foreach (int i in query) ; });
+            AssertThrows.Wrapped<ArgumentException>(() => query.ToList());
         }
 
         [Theory]

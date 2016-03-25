@@ -154,8 +154,8 @@ namespace System.Linq.Parallel.Tests
         [MemberData(nameof(UnorderedSources.Ranges), new[] { 1 }, MemberType = typeof(UnorderedSources))]
         public static void CountLongCount_AggregateException(Labeled<ParallelQuery<int>> labeled, int count)
         {
-            Functions.AssertThrowsWrapped<DeliberateTestException>(() => labeled.Item.Count(x => { throw new DeliberateTestException(); }));
-            Functions.AssertThrowsWrapped<DeliberateTestException>(() => labeled.Item.LongCount(x => { throw new DeliberateTestException(); }));
+            AssertThrows.Wrapped<DeliberateTestException>(() => labeled.Item.Count(x => { throw new DeliberateTestException(); }));
+            AssertThrows.Wrapped<DeliberateTestException>(() => labeled.Item.LongCount(x => { throw new DeliberateTestException(); }));
         }
 
         [Fact]

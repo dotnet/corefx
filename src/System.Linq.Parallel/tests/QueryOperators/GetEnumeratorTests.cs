@@ -117,7 +117,7 @@ namespace System.Linq.Parallel.Tests
             IEnumerator<int> enumerator = query.GetEnumerator();
 
             //moveNext will cause queryOpening to fail (no element generated)
-            Functions.AssertThrowsWrapped<DeliberateTestException>(() => enumerator.MoveNext());
+            AssertThrows.Wrapped<DeliberateTestException>(() => enumerator.MoveNext());
 
             //moveNext after queryOpening failed
             Assert.Throws<InvalidOperationException>(() => enumerator.MoveNext());

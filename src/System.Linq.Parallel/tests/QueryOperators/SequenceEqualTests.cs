@@ -172,7 +172,7 @@ namespace System.Linq.Parallel.Tests
         [MemberData(nameof(SequenceEqualData), new[] { 4 })]
         public static void SequenceEqual_AggregateException(Labeled<ParallelQuery<int>> left, Labeled<ParallelQuery<int>> right, int count)
         {
-            Functions.AssertThrowsWrapped<DeliberateTestException>(() => left.Item.SequenceEqual(right.Item, new FailingEqualityComparer<int>()));
+            AssertThrows.Wrapped<DeliberateTestException>(() => left.Item.SequenceEqual(right.Item, new FailingEqualityComparer<int>()));
         }
 
         [Fact]

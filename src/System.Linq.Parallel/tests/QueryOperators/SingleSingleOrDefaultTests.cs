@@ -209,8 +209,8 @@ namespace System.Linq.Parallel.Tests
         [MemberData(nameof(UnorderedSources.Ranges), new[] { 1 }, MemberType = typeof(UnorderedSources))]
         public static void Single_AggregateException(Labeled<ParallelQuery<int>> labeled, int count)
         {
-            Functions.AssertThrowsWrapped<DeliberateTestException>(() => labeled.Item.Single(x => { throw new DeliberateTestException(); }));
-            Functions.AssertThrowsWrapped<DeliberateTestException>(() => labeled.Item.SingleOrDefault(x => { throw new DeliberateTestException(); }));
+            AssertThrows.Wrapped<DeliberateTestException>(() => labeled.Item.Single(x => { throw new DeliberateTestException(); }));
+            AssertThrows.Wrapped<DeliberateTestException>(() => labeled.Item.SingleOrDefault(x => { throw new DeliberateTestException(); }));
         }
 
         [Fact]

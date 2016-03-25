@@ -416,29 +416,29 @@ namespace System.Linq.Parallel.Tests
         [MemberData(nameof(UnorderedSources.Ranges), new[] { 1 }, MemberType = typeof(UnorderedSources))]
         public static void Min_AggregateException(Labeled<ParallelQuery<int>> labeled, int count)
         {
-            Functions.AssertThrowsWrapped<DeliberateTestException>(() => labeled.Item.Min((Func<int, int>)(x => { throw new DeliberateTestException(); })));
-            Functions.AssertThrowsWrapped<DeliberateTestException>(() => labeled.Item.Min((Func<int, int?>)(x => { throw new DeliberateTestException(); })));
+            AssertThrows.Wrapped<DeliberateTestException>(() => labeled.Item.Min((Func<int, int>)(x => { throw new DeliberateTestException(); })));
+            AssertThrows.Wrapped<DeliberateTestException>(() => labeled.Item.Min((Func<int, int?>)(x => { throw new DeliberateTestException(); })));
 
-            Functions.AssertThrowsWrapped<DeliberateTestException>(() => labeled.Item.Min((Func<int, long>)(x => { throw new DeliberateTestException(); })));
-            Functions.AssertThrowsWrapped<DeliberateTestException>(() => labeled.Item.Min((Func<int, long?>)(x => { throw new DeliberateTestException(); })));
+            AssertThrows.Wrapped<DeliberateTestException>(() => labeled.Item.Min((Func<int, long>)(x => { throw new DeliberateTestException(); })));
+            AssertThrows.Wrapped<DeliberateTestException>(() => labeled.Item.Min((Func<int, long?>)(x => { throw new DeliberateTestException(); })));
 
-            Functions.AssertThrowsWrapped<DeliberateTestException>(() => labeled.Item.Min((Func<int, float>)(x => { throw new DeliberateTestException(); })));
-            Functions.AssertThrowsWrapped<DeliberateTestException>(() => labeled.Item.Min((Func<int, float?>)(x => { throw new DeliberateTestException(); })));
+            AssertThrows.Wrapped<DeliberateTestException>(() => labeled.Item.Min((Func<int, float>)(x => { throw new DeliberateTestException(); })));
+            AssertThrows.Wrapped<DeliberateTestException>(() => labeled.Item.Min((Func<int, float?>)(x => { throw new DeliberateTestException(); })));
 
-            Functions.AssertThrowsWrapped<DeliberateTestException>(() => labeled.Item.Min((Func<int, double>)(x => { throw new DeliberateTestException(); })));
-            Functions.AssertThrowsWrapped<DeliberateTestException>(() => labeled.Item.Min((Func<int, double?>)(x => { throw new DeliberateTestException(); })));
+            AssertThrows.Wrapped<DeliberateTestException>(() => labeled.Item.Min((Func<int, double>)(x => { throw new DeliberateTestException(); })));
+            AssertThrows.Wrapped<DeliberateTestException>(() => labeled.Item.Min((Func<int, double?>)(x => { throw new DeliberateTestException(); })));
 
-            Functions.AssertThrowsWrapped<DeliberateTestException>(() => labeled.Item.Min((Func<int, decimal>)(x => { throw new DeliberateTestException(); })));
-            Functions.AssertThrowsWrapped<DeliberateTestException>(() => labeled.Item.Min((Func<int, decimal?>)(x => { throw new DeliberateTestException(); })));
+            AssertThrows.Wrapped<DeliberateTestException>(() => labeled.Item.Min((Func<int, decimal>)(x => { throw new DeliberateTestException(); })));
+            AssertThrows.Wrapped<DeliberateTestException>(() => labeled.Item.Min((Func<int, decimal?>)(x => { throw new DeliberateTestException(); })));
 
-            Functions.AssertThrowsWrapped<DeliberateTestException>(() => labeled.Item.Min((Func<int, NotComparable>)(x => { throw new DeliberateTestException(); })));
+            AssertThrows.Wrapped<DeliberateTestException>(() => labeled.Item.Min((Func<int, NotComparable>)(x => { throw new DeliberateTestException(); })));
         }
 
         [Theory]
         [MemberData(nameof(UnorderedSources.Ranges), new[] { 2 }, MemberType = typeof(UnorderedSources))]
         public static void Min_AggregateException_NotComparable(Labeled<ParallelQuery<int>> labeled, int count)
         {
-            Functions.AssertThrowsWrapped<ArgumentException>(() => labeled.Item.Min(x => new NotComparable(x)));
+            AssertThrows.Wrapped<ArgumentException>(() => labeled.Item.Min(x => new NotComparable(x)));
         }
 
         [Fact]

@@ -60,10 +60,10 @@ namespace System.Linq.Parallel.Tests
         [MemberData(nameof(UnorderedSources.Ranges), new[] { 2 }, MemberType = typeof(UnorderedSources))]
         public static void Sum_Int_Overflow(Labeled<ParallelQuery<int>> labeled, int count)
         {
-            Functions.AssertThrowsWrapped<OverflowException>(() => labeled.Item.Select(x => x == 0 ? int.MaxValue : x).Sum());
-            Functions.AssertThrowsWrapped<OverflowException>(() => labeled.Item.Select(x => x == 0 ? int.MaxValue : (int?)x).Sum());
-            Functions.AssertThrowsWrapped<OverflowException>(() => labeled.Item.Sum(x => x == 0 ? int.MinValue : -x));
-            Functions.AssertThrowsWrapped<OverflowException>(() => labeled.Item.Sum(x => x == 0 ? int.MinValue : -(int?)x));
+            AssertThrows.Wrapped<OverflowException>(() => labeled.Item.Select(x => x == 0 ? int.MaxValue : x).Sum());
+            AssertThrows.Wrapped<OverflowException>(() => labeled.Item.Select(x => x == 0 ? int.MaxValue : (int?)x).Sum());
+            AssertThrows.Wrapped<OverflowException>(() => labeled.Item.Sum(x => x == 0 ? int.MinValue : -x));
+            AssertThrows.Wrapped<OverflowException>(() => labeled.Item.Sum(x => x == 0 ? int.MinValue : -(int?)x));
         }
 
         [Theory]
@@ -109,10 +109,10 @@ namespace System.Linq.Parallel.Tests
         [MemberData(nameof(UnorderedSources.Ranges), new[] { 2 }, MemberType = typeof(UnorderedSources))]
         public static void Sum_Long_Overflow(Labeled<ParallelQuery<int>> labeled, int count)
         {
-            Functions.AssertThrowsWrapped<OverflowException>(() => labeled.Item.Select(x => x == 0 ? long.MaxValue : x).Sum());
-            Functions.AssertThrowsWrapped<OverflowException>(() => labeled.Item.Select(x => x == 0 ? long.MaxValue : (long?)x).Sum());
-            Functions.AssertThrowsWrapped<OverflowException>(() => labeled.Item.Sum(x => x == 0 ? long.MinValue : -x));
-            Functions.AssertThrowsWrapped<OverflowException>(() => labeled.Item.Sum(x => x == 0 ? long.MinValue : -(long?)x));
+            AssertThrows.Wrapped<OverflowException>(() => labeled.Item.Select(x => x == 0 ? long.MaxValue : x).Sum());
+            AssertThrows.Wrapped<OverflowException>(() => labeled.Item.Select(x => x == 0 ? long.MaxValue : (long?)x).Sum());
+            AssertThrows.Wrapped<OverflowException>(() => labeled.Item.Sum(x => x == 0 ? long.MinValue : -x));
+            AssertThrows.Wrapped<OverflowException>(() => labeled.Item.Sum(x => x == 0 ? long.MinValue : -(long?)x));
         }
 
         [Theory]
@@ -309,10 +309,10 @@ namespace System.Linq.Parallel.Tests
         [MemberData(nameof(UnorderedSources.Ranges), new[] { 2 }, MemberType = typeof(UnorderedSources))]
         public static void Sum_Decimal_Overflow(Labeled<ParallelQuery<int>> labeled, int count)
         {
-            Functions.AssertThrowsWrapped<OverflowException>(() => labeled.Item.Select(x => x == 0 ? decimal.MaxValue : x).Sum());
-            Functions.AssertThrowsWrapped<OverflowException>(() => labeled.Item.Select(x => x == 0 ? decimal.MaxValue : (decimal?)x).Sum());
-            Functions.AssertThrowsWrapped<OverflowException>(() => labeled.Item.Sum(x => x == 0 ? decimal.MinValue : -x));
-            Functions.AssertThrowsWrapped<OverflowException>(() => labeled.Item.Sum(x => x == 0 ? decimal.MinValue : -(decimal?)x));
+            AssertThrows.Wrapped<OverflowException>(() => labeled.Item.Select(x => x == 0 ? decimal.MaxValue : x).Sum());
+            AssertThrows.Wrapped<OverflowException>(() => labeled.Item.Select(x => x == 0 ? decimal.MaxValue : (decimal?)x).Sum());
+            AssertThrows.Wrapped<OverflowException>(() => labeled.Item.Sum(x => x == 0 ? decimal.MinValue : -x));
+            AssertThrows.Wrapped<OverflowException>(() => labeled.Item.Sum(x => x == 0 ? decimal.MinValue : -(decimal?)x));
         }
 
         [Theory]
@@ -409,20 +409,20 @@ namespace System.Linq.Parallel.Tests
         [MemberData(nameof(UnorderedSources.Ranges), new[] { 2 }, MemberType = typeof(UnorderedSources))]
         public static void Sum_AggregateException(Labeled<ParallelQuery<int>> labeled, int count)
         {
-            Functions.AssertThrowsWrapped<DeliberateTestException>(() => labeled.Item.Sum((Func<int, int>)(x => { throw new DeliberateTestException(); })));
-            Functions.AssertThrowsWrapped<DeliberateTestException>(() => labeled.Item.Sum((Func<int, int?>)(x => { throw new DeliberateTestException(); })));
+            AssertThrows.Wrapped<DeliberateTestException>(() => labeled.Item.Sum((Func<int, int>)(x => { throw new DeliberateTestException(); })));
+            AssertThrows.Wrapped<DeliberateTestException>(() => labeled.Item.Sum((Func<int, int?>)(x => { throw new DeliberateTestException(); })));
 
-            Functions.AssertThrowsWrapped<DeliberateTestException>(() => labeled.Item.Sum((Func<int, long>)(x => { throw new DeliberateTestException(); })));
-            Functions.AssertThrowsWrapped<DeliberateTestException>(() => labeled.Item.Sum((Func<int, long?>)(x => { throw new DeliberateTestException(); })));
+            AssertThrows.Wrapped<DeliberateTestException>(() => labeled.Item.Sum((Func<int, long>)(x => { throw new DeliberateTestException(); })));
+            AssertThrows.Wrapped<DeliberateTestException>(() => labeled.Item.Sum((Func<int, long?>)(x => { throw new DeliberateTestException(); })));
 
-            Functions.AssertThrowsWrapped<DeliberateTestException>(() => labeled.Item.Sum((Func<int, float>)(x => { throw new DeliberateTestException(); })));
-            Functions.AssertThrowsWrapped<DeliberateTestException>(() => labeled.Item.Sum((Func<int, float?>)(x => { throw new DeliberateTestException(); })));
+            AssertThrows.Wrapped<DeliberateTestException>(() => labeled.Item.Sum((Func<int, float>)(x => { throw new DeliberateTestException(); })));
+            AssertThrows.Wrapped<DeliberateTestException>(() => labeled.Item.Sum((Func<int, float?>)(x => { throw new DeliberateTestException(); })));
 
-            Functions.AssertThrowsWrapped<DeliberateTestException>(() => labeled.Item.Sum((Func<int, double>)(x => { throw new DeliberateTestException(); })));
-            Functions.AssertThrowsWrapped<DeliberateTestException>(() => labeled.Item.Sum((Func<int, double?>)(x => { throw new DeliberateTestException(); })));
+            AssertThrows.Wrapped<DeliberateTestException>(() => labeled.Item.Sum((Func<int, double>)(x => { throw new DeliberateTestException(); })));
+            AssertThrows.Wrapped<DeliberateTestException>(() => labeled.Item.Sum((Func<int, double?>)(x => { throw new DeliberateTestException(); })));
 
-            Functions.AssertThrowsWrapped<DeliberateTestException>(() => labeled.Item.Sum((Func<int, decimal>)(x => { throw new DeliberateTestException(); })));
-            Functions.AssertThrowsWrapped<DeliberateTestException>(() => labeled.Item.Sum((Func<int, decimal?>)(x => { throw new DeliberateTestException(); })));
+            AssertThrows.Wrapped<DeliberateTestException>(() => labeled.Item.Sum((Func<int, decimal>)(x => { throw new DeliberateTestException(); })));
+            AssertThrows.Wrapped<DeliberateTestException>(() => labeled.Item.Sum((Func<int, decimal?>)(x => { throw new DeliberateTestException(); })));
         }
 
         [Fact]

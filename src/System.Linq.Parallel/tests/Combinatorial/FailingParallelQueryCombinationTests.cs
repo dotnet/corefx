@@ -14,11 +14,11 @@ namespace System.Linq.Parallel.Tests
         [MemberData(nameof(BinaryFailingOperators))]
         public static void Aggregate_AggregateException(LabeledOperation source, LabeledOperation operation)
         {
-            Functions.AssertThrowsWrapped<DeliberateTestException>(() => operation.Item(DefaultStart, DefaultSize, source.Item).Aggregate((x, y) => x));
-            Functions.AssertThrowsWrapped<DeliberateTestException>(() => operation.Item(DefaultStart, DefaultSize, source.Item).Aggregate(0, (x, y) => x + y));
-            Functions.AssertThrowsWrapped<DeliberateTestException>(() => operation.Item(DefaultStart, DefaultSize, source.Item).Aggregate(0, (x, y) => x + y, r => r));
-            Functions.AssertThrowsWrapped<DeliberateTestException>(() => operation.Item(DefaultStart, DefaultSize, source.Item).Aggregate(0, (a, x) => a + x, (l, r) => l + r, r => r));
-            Functions.AssertThrowsWrapped<DeliberateTestException>(() => operation.Item(DefaultStart, DefaultSize, source.Item).Aggregate(() => 0, (a, x) => a + x, (l, r) => l + r, r => r));
+            AssertThrows.Wrapped<DeliberateTestException>(() => operation.Item(DefaultStart, DefaultSize, source.Item).Aggregate((x, y) => x));
+            AssertThrows.Wrapped<DeliberateTestException>(() => operation.Item(DefaultStart, DefaultSize, source.Item).Aggregate(0, (x, y) => x + y));
+            AssertThrows.Wrapped<DeliberateTestException>(() => operation.Item(DefaultStart, DefaultSize, source.Item).Aggregate(0, (x, y) => x + y, r => r));
+            AssertThrows.Wrapped<DeliberateTestException>(() => operation.Item(DefaultStart, DefaultSize, source.Item).Aggregate(0, (a, x) => a + x, (l, r) => l + r, r => r));
+            AssertThrows.Wrapped<DeliberateTestException>(() => operation.Item(DefaultStart, DefaultSize, source.Item).Aggregate(() => 0, (a, x) => a + x, (l, r) => l + r, r => r));
         }
 
         [Theory]
@@ -26,7 +26,7 @@ namespace System.Linq.Parallel.Tests
         [MemberData(nameof(BinaryFailingOperators))]
         public static void All_AggregateException(LabeledOperation source, LabeledOperation operation)
         {
-            Functions.AssertThrowsWrapped<DeliberateTestException>(() => operation.Item(DefaultStart, DefaultSize, source.Item).All(x => true));
+            AssertThrows.Wrapped<DeliberateTestException>(() => operation.Item(DefaultStart, DefaultSize, source.Item).All(x => true));
         }
 
         [Theory]
@@ -34,7 +34,7 @@ namespace System.Linq.Parallel.Tests
         [MemberData(nameof(BinaryFailingOperators))]
         public static void Any_AggregateException(LabeledOperation source, LabeledOperation operation)
         {
-            Functions.AssertThrowsWrapped<DeliberateTestException>(() => operation.Item(DefaultStart, DefaultSize, source.Item).Any(x => false));
+            AssertThrows.Wrapped<DeliberateTestException>(() => operation.Item(DefaultStart, DefaultSize, source.Item).Any(x => false));
         }
 
         [Theory]
@@ -42,7 +42,7 @@ namespace System.Linq.Parallel.Tests
         [MemberData(nameof(BinaryFailingOperators))]
         public static void Average_AggregateException(LabeledOperation source, LabeledOperation operation)
         {
-            Functions.AssertThrowsWrapped<DeliberateTestException>(() => operation.Item(DefaultStart, DefaultSize, source.Item).Average());
+            AssertThrows.Wrapped<DeliberateTestException>(() => operation.Item(DefaultStart, DefaultSize, source.Item).Average());
         }
 
         [Theory]
@@ -50,7 +50,7 @@ namespace System.Linq.Parallel.Tests
         [MemberData(nameof(BinaryFailingOperators))]
         public static void Contains_AggregateException(LabeledOperation source, LabeledOperation operation)
         {
-            Functions.AssertThrowsWrapped<DeliberateTestException>(() => operation.Item(DefaultStart, DefaultSize, source.Item).Contains(DefaultStart + DefaultSize));
+            AssertThrows.Wrapped<DeliberateTestException>(() => operation.Item(DefaultStart, DefaultSize, source.Item).Contains(DefaultStart + DefaultSize));
         }
 
         [Theory]
@@ -58,8 +58,8 @@ namespace System.Linq.Parallel.Tests
         [MemberData(nameof(BinaryFailingOperators))]
         public static void Count_AggregateException(LabeledOperation source, LabeledOperation operation)
         {
-            Functions.AssertThrowsWrapped<DeliberateTestException>(() => operation.Item(DefaultStart, DefaultSize, source.Item).Count());
-            Functions.AssertThrowsWrapped<DeliberateTestException>(() => operation.Item(DefaultStart, DefaultSize, source.Item).Count(x => true));
+            AssertThrows.Wrapped<DeliberateTestException>(() => operation.Item(DefaultStart, DefaultSize, source.Item).Count());
+            AssertThrows.Wrapped<DeliberateTestException>(() => operation.Item(DefaultStart, DefaultSize, source.Item).Count(x => true));
         }
 
         [Theory]
@@ -68,7 +68,7 @@ namespace System.Linq.Parallel.Tests
         [MemberData(nameof(OrderFailingOperators))]
         public static void ElementAt_AggregateException(LabeledOperation source, LabeledOperation operation)
         {
-            Functions.AssertThrowsWrapped<DeliberateTestException>(() => operation.Item(DefaultStart, DefaultSize, source.Item).ElementAt(DefaultSize - 1));
+            AssertThrows.Wrapped<DeliberateTestException>(() => operation.Item(DefaultStart, DefaultSize, source.Item).ElementAt(DefaultSize - 1));
         }
 
         [Theory]
@@ -77,8 +77,8 @@ namespace System.Linq.Parallel.Tests
         [MemberData(nameof(OrderFailingOperators))]
         public static void ElementAtOrDefault_AggregateException(LabeledOperation source, LabeledOperation operation)
         {
-            Functions.AssertThrowsWrapped<DeliberateTestException>(() => operation.Item(DefaultStart, DefaultSize, source.Item).ElementAtOrDefault(DefaultSize - 1));
-            Functions.AssertThrowsWrapped<DeliberateTestException>(() => operation.Item(DefaultStart, DefaultSize, source.Item).ElementAtOrDefault(DefaultSize + 1));
+            AssertThrows.Wrapped<DeliberateTestException>(() => operation.Item(DefaultStart, DefaultSize, source.Item).ElementAtOrDefault(DefaultSize - 1));
+            AssertThrows.Wrapped<DeliberateTestException>(() => operation.Item(DefaultStart, DefaultSize, source.Item).ElementAtOrDefault(DefaultSize + 1));
         }
 
         [Theory]
@@ -103,10 +103,10 @@ namespace System.Linq.Parallel.Tests
             }
             else
             {
-                Functions.AssertThrowsWrapped<DeliberateTestException>(() => operation.Item(DefaultStart, DefaultSize, source.Item).First());
+                AssertThrows.Wrapped<DeliberateTestException>(() => operation.Item(DefaultStart, DefaultSize, source.Item).First());
             }
 
-            Functions.AssertThrowsWrapped<DeliberateTestException>(() => operation.Item(DefaultStart, DefaultSize, source.Item).First(x => false));
+            AssertThrows.Wrapped<DeliberateTestException>(() => operation.Item(DefaultStart, DefaultSize, source.Item).First(x => false));
         }
 
         [Theory]
@@ -123,10 +123,10 @@ namespace System.Linq.Parallel.Tests
             }
             else
             {
-                Functions.AssertThrowsWrapped<DeliberateTestException>(() => operation.Item(DefaultStart, DefaultSize, source.Item).FirstOrDefault());
+                AssertThrows.Wrapped<DeliberateTestException>(() => operation.Item(DefaultStart, DefaultSize, source.Item).FirstOrDefault());
             }
 
-            Functions.AssertThrowsWrapped<DeliberateTestException>(() => operation.Item(DefaultStart, DefaultSize, source.Item).FirstOrDefault(x => false));
+            AssertThrows.Wrapped<DeliberateTestException>(() => operation.Item(DefaultStart, DefaultSize, source.Item).FirstOrDefault(x => false));
         }
 
         [Theory]
@@ -134,7 +134,7 @@ namespace System.Linq.Parallel.Tests
         [MemberData(nameof(BinaryFailingOperators))]
         public static void ForAll_AggregateException(LabeledOperation source, LabeledOperation operation)
         {
-            Functions.AssertThrowsWrapped<DeliberateTestException>(() => operation.Item(DefaultStart, DefaultSize, source.Item).ForAll(x => { }));
+            AssertThrows.Wrapped<DeliberateTestException>(() => operation.Item(DefaultStart, DefaultSize, source.Item).ForAll(x => { }));
         }
 
         [Theory]
@@ -148,11 +148,11 @@ namespace System.Linq.Parallel.Tests
             // Union-Left needs to spin more than once rarely.
             if (operation.ToString().StartsWith("Concat") || operation.ToString().StartsWith("Union-Left:ParallelEnumerable"))
             {
-                Functions.AssertThrowsWrapped<DeliberateTestException>(() => { while (enumerator.MoveNext()) ; });
+                AssertThrows.Wrapped<DeliberateTestException>(() => { while (enumerator.MoveNext()) ; });
             }
             else
             {
-                Functions.AssertThrowsWrapped<DeliberateTestException>(() => enumerator.MoveNext());
+                AssertThrows.Wrapped<DeliberateTestException>(() => enumerator.MoveNext());
             }
 
             if (operation.ToString().StartsWith("OrderBy") || operation.ToString().StartsWith("ThenBy"))
@@ -179,8 +179,8 @@ namespace System.Linq.Parallel.Tests
         [MemberData(nameof(OrderFailingOperators))]
         public static void Last_AggregateException(LabeledOperation source, LabeledOperation operation)
         {
-            Functions.AssertThrowsWrapped<DeliberateTestException>(() => operation.Item(DefaultStart, DefaultSize, source.Item).Last());
-            Functions.AssertThrowsWrapped<DeliberateTestException>(() => operation.Item(DefaultStart, DefaultSize, source.Item).Last(x => true));
+            AssertThrows.Wrapped<DeliberateTestException>(() => operation.Item(DefaultStart, DefaultSize, source.Item).Last());
+            AssertThrows.Wrapped<DeliberateTestException>(() => operation.Item(DefaultStart, DefaultSize, source.Item).Last(x => true));
         }
 
         [Theory]
@@ -189,8 +189,8 @@ namespace System.Linq.Parallel.Tests
         [MemberData(nameof(OrderFailingOperators))]
         public static void LastOrDefault_AggregateException(LabeledOperation source, LabeledOperation operation)
         {
-            Functions.AssertThrowsWrapped<DeliberateTestException>(() => operation.Item(DefaultStart, DefaultSize, source.Item).LastOrDefault());
-            Functions.AssertThrowsWrapped<DeliberateTestException>(() => operation.Item(DefaultStart, DefaultSize, source.Item).LastOrDefault(x => true));
+            AssertThrows.Wrapped<DeliberateTestException>(() => operation.Item(DefaultStart, DefaultSize, source.Item).LastOrDefault());
+            AssertThrows.Wrapped<DeliberateTestException>(() => operation.Item(DefaultStart, DefaultSize, source.Item).LastOrDefault(x => true));
         }
 
         [Theory]
@@ -198,8 +198,8 @@ namespace System.Linq.Parallel.Tests
         [MemberData(nameof(BinaryFailingOperators))]
         public static void LongCount_AggregateException(LabeledOperation source, LabeledOperation operation)
         {
-            Functions.AssertThrowsWrapped<DeliberateTestException>(() => operation.Item(DefaultStart, DefaultSize, source.Item).LongCount());
-            Functions.AssertThrowsWrapped<DeliberateTestException>(() => operation.Item(DefaultStart, DefaultSize, source.Item).LongCount(x => true));
+            AssertThrows.Wrapped<DeliberateTestException>(() => operation.Item(DefaultStart, DefaultSize, source.Item).LongCount());
+            AssertThrows.Wrapped<DeliberateTestException>(() => operation.Item(DefaultStart, DefaultSize, source.Item).LongCount(x => true));
         }
 
         [Theory]
@@ -207,7 +207,7 @@ namespace System.Linq.Parallel.Tests
         [MemberData(nameof(BinaryFailingOperators))]
         public static void Max_AggregateException(LabeledOperation source, LabeledOperation operation)
         {
-            Functions.AssertThrowsWrapped<DeliberateTestException>(() => operation.Item(DefaultStart, DefaultSize, source.Item).Max());
+            AssertThrows.Wrapped<DeliberateTestException>(() => operation.Item(DefaultStart, DefaultSize, source.Item).Max());
         }
 
         [Theory]
@@ -215,7 +215,7 @@ namespace System.Linq.Parallel.Tests
         [MemberData(nameof(BinaryFailingOperators))]
         public static void Min_AggregateException(LabeledOperation source, LabeledOperation operation)
         {
-            Functions.AssertThrowsWrapped<DeliberateTestException>(() => operation.Item(DefaultStart, DefaultSize, source.Item).Min());
+            AssertThrows.Wrapped<DeliberateTestException>(() => operation.Item(DefaultStart, DefaultSize, source.Item).Min());
         }
 
         [Theory]
@@ -244,8 +244,8 @@ namespace System.Linq.Parallel.Tests
         [MemberData(nameof(BinaryFailingOperators))]
         public static void Single_AggregateException(LabeledOperation source, LabeledOperation operation)
         {
-            Functions.AssertThrowsWrapped<DeliberateTestException>(() => operation.Item(DefaultStart, 2, source.Item).Single());
-            Functions.AssertThrowsWrapped<DeliberateTestException>(() => operation.Item(DefaultStart, 2, source.Item).Single(x => true));
+            AssertThrows.Wrapped<DeliberateTestException>(() => operation.Item(DefaultStart, 2, source.Item).Single());
+            AssertThrows.Wrapped<DeliberateTestException>(() => operation.Item(DefaultStart, 2, source.Item).Single(x => true));
         }
 
         [Theory]
@@ -253,8 +253,8 @@ namespace System.Linq.Parallel.Tests
         [MemberData(nameof(BinaryFailingOperators))]
         public static void SingleOrDefault_AggregateException(LabeledOperation source, LabeledOperation operation)
         {
-            Functions.AssertThrowsWrapped<DeliberateTestException>(() => operation.Item(DefaultStart, 2, source.Item).SingleOrDefault());
-            Functions.AssertThrowsWrapped<DeliberateTestException>(() => operation.Item(DefaultStart, 2, source.Item).SingleOrDefault(x => true));
+            AssertThrows.Wrapped<DeliberateTestException>(() => operation.Item(DefaultStart, 2, source.Item).SingleOrDefault());
+            AssertThrows.Wrapped<DeliberateTestException>(() => operation.Item(DefaultStart, 2, source.Item).SingleOrDefault(x => true));
         }
 
         [Theory]
@@ -262,7 +262,7 @@ namespace System.Linq.Parallel.Tests
         [MemberData(nameof(BinaryFailingOperators))]
         public static void Sum_AggregateException(LabeledOperation source, LabeledOperation operation)
         {
-            Functions.AssertThrowsWrapped<DeliberateTestException>(() => operation.Item(DefaultStart, DefaultSize, source.Item).Sum());
+            AssertThrows.Wrapped<DeliberateTestException>(() => operation.Item(DefaultStart, DefaultSize, source.Item).Sum());
         }
 
         [Theory]
@@ -271,7 +271,7 @@ namespace System.Linq.Parallel.Tests
         [MemberData(nameof(OrderFailingOperators))]
         public static void ToArray_AggregateException(LabeledOperation source, LabeledOperation operation)
         {
-            Functions.AssertThrowsWrapped<DeliberateTestException>(() => operation.Item(DefaultStart, DefaultSize, source.Item).ToArray());
+            AssertThrows.Wrapped<DeliberateTestException>(() => operation.Item(DefaultStart, DefaultSize, source.Item).ToArray());
         }
 
         [Theory]
@@ -280,8 +280,8 @@ namespace System.Linq.Parallel.Tests
         [MemberData(nameof(OrderFailingOperators))]
         public static void ToDictionary_AggregateException(LabeledOperation source, LabeledOperation operation)
         {
-            Functions.AssertThrowsWrapped<DeliberateTestException>(() => operation.Item(DefaultStart, DefaultSize, source.Item).ToDictionary(x => x));
-            Functions.AssertThrowsWrapped<DeliberateTestException>(() => operation.Item(DefaultStart, DefaultSize, source.Item).ToDictionary(x => x, y => y));
+            AssertThrows.Wrapped<DeliberateTestException>(() => operation.Item(DefaultStart, DefaultSize, source.Item).ToDictionary(x => x));
+            AssertThrows.Wrapped<DeliberateTestException>(() => operation.Item(DefaultStart, DefaultSize, source.Item).ToDictionary(x => x, y => y));
         }
 
         [Theory]
@@ -290,7 +290,7 @@ namespace System.Linq.Parallel.Tests
         [MemberData(nameof(OrderFailingOperators))]
         public static void ToList_AggregateException(LabeledOperation source, LabeledOperation operation)
         {
-            Functions.AssertThrowsWrapped<DeliberateTestException>(() => operation.Item(DefaultStart, DefaultSize, source.Item).ToList());
+            AssertThrows.Wrapped<DeliberateTestException>(() => operation.Item(DefaultStart, DefaultSize, source.Item).ToList());
         }
 
         [Theory]
@@ -299,8 +299,8 @@ namespace System.Linq.Parallel.Tests
         [MemberData(nameof(OrderFailingOperators))]
         public static void ToLookup_AggregateException(LabeledOperation source, LabeledOperation operation)
         {
-            Functions.AssertThrowsWrapped<DeliberateTestException>(() => operation.Item(DefaultStart, DefaultSize, source.Item).ToLookup(x => x));
-            Functions.AssertThrowsWrapped<DeliberateTestException>(() => operation.Item(DefaultStart, DefaultSize, source.Item).ToLookup(x => x, y => y));
+            AssertThrows.Wrapped<DeliberateTestException>(() => operation.Item(DefaultStart, DefaultSize, source.Item).ToLookup(x => x));
+            AssertThrows.Wrapped<DeliberateTestException>(() => operation.Item(DefaultStart, DefaultSize, source.Item).ToLookup(x => x, y => y));
         }
     }
 }

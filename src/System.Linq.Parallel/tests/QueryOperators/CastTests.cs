@@ -103,8 +103,8 @@ namespace System.Linq.Parallel.Tests
         [MemberData(nameof(Sources.Ranges), new[] { 1, 2, 16 }, MemberType = typeof(Sources))]
         public static void Cast_InvalidCastException(Labeled<ParallelQuery<int>> labeled, int count)
         {
-            Functions.AssertThrowsWrapped<InvalidCastException>(() => labeled.Item.Cast<double>().ForAll(x => {; }));
-            Functions.AssertThrowsWrapped<InvalidCastException>(() => labeled.Item.Cast<double>().ToList());
+            AssertThrows.Wrapped<InvalidCastException>(() => labeled.Item.Cast<double>().ForAll(x => {; }));
+            AssertThrows.Wrapped<InvalidCastException>(() => labeled.Item.Cast<double>().ToList());
         }
 
         [Theory]
@@ -112,8 +112,8 @@ namespace System.Linq.Parallel.Tests
         [MemberData(nameof(Sources.Ranges), new[] { 1, 2, 16 }, MemberType = typeof(Sources))]
         public static void Cast_Assignable_InvalidCastException(Labeled<ParallelQuery<int>> labeled, int count)
         {
-            Functions.AssertThrowsWrapped<InvalidCastException>(() => labeled.Item.Select(x => (Int32)x).Cast<Castable>().ForAll(x => {; }));
-            Functions.AssertThrowsWrapped<InvalidCastException>(() => labeled.Item.Select(x => (Int32)x).Cast<Castable>().ToList());
+            AssertThrows.Wrapped<InvalidCastException>(() => labeled.Item.Select(x => (Int32)x).Cast<Castable>().ForAll(x => {; }));
+            AssertThrows.Wrapped<InvalidCastException>(() => labeled.Item.Select(x => (Int32)x).Cast<Castable>().ToList());
         }
 
         [Fact]
