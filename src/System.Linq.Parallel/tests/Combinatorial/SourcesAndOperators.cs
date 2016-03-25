@@ -94,36 +94,36 @@ namespace System.Linq.Parallel.Tests
             }
         }
 
-        private static IEnumerable<LabeledOperation> UnaryOperations()
+        public static IEnumerable<object[]> UnaryOperations()
         {
-            yield return Label("Cast", (start, count, source) => source(start, count).Cast<int>());
-            yield return Label("DefaultIfEmpty", (start, count, source) => source(start, count).DefaultIfEmpty());
-            yield return Label("Distinct", (start, count, source) => source(start * 2, count * 2).Select(x => x / 2).Distinct(new ModularCongruenceComparer(count)));
-            yield return Label("OfType", (start, count, source) => source(start, count).OfType<int>());
-            yield return Label("Reverse", (start, count, source) => source(start, count).Select(x => (start + count - 1) - (x - start)).Reverse());
+            yield return new object[] { Label("Cast", (start, count, source) => source(start, count).Cast<int>()) };
+            yield return new object[] { Label("DefaultIfEmpty", (start, count, source) => source(start, count).DefaultIfEmpty()) };
+            yield return new object[] { Label("Distinct", (start, count, source) => source(start * 2, count * 2).Select(x => x / 2).Distinct(new ModularCongruenceComparer(count))) };
+            yield return new object[] { Label("OfType", (start, count, source) => source(start, count).OfType<int>()) };
+            yield return new object[] { Label("Reverse", (start, count, source) => source(start, count).Select(x => (start + count - 1) - (x - start)).Reverse()) };
 
-            yield return Label("GroupBy", (start, count, source) => source(start, count * CountFactor).GroupBy(x => (x - start) % count, new ModularCongruenceComparer(count)).Select(g => g.Key + start));
-            yield return Label("GroupBy-ElementSelector", (start, count, source) => source(start, count * CountFactor).GroupBy(x => x % count, y => y + 1, new ModularCongruenceComparer(count)).Select(g => g.Min() - 1));
-            yield return Label("GroupBy-ResultSelector", (start, count, source) => source(start, count * CountFactor).GroupBy(x => (x - start) % count, (key, g) => key + start, new ModularCongruenceComparer(count)));
-            yield return Label("GroupBy-ElementSelector-ResultSelector", (start, count, source) => source(start, count * CountFactor).GroupBy(x => x % count, y => y + 1, (key, g) => g.Min() - 1, new ModularCongruenceComparer(count)));
+            yield return new object[] { Label("GroupBy", (start, count, source) => source(start, count * CountFactor).GroupBy(x => (x - start) % count, new ModularCongruenceComparer(count)).Select(g => g.Key + start)) };
+            yield return new object[] { Label("GroupBy-ElementSelector", (start, count, source) => source(start, count * CountFactor).GroupBy(x => x % count, y => y + 1, new ModularCongruenceComparer(count)).Select(g => g.Min() - 1)) };
+            yield return new object[] { Label("GroupBy-ResultSelector", (start, count, source) => source(start, count * CountFactor).GroupBy(x => (x - start) % count, (key, g) => key + start, new ModularCongruenceComparer(count))) };
+            yield return new object[] { Label("GroupBy-ElementSelector-ResultSelector", (start, count, source) => source(start, count * CountFactor).GroupBy(x => x % count, y => y + 1, (key, g) => g.Min() - 1, new ModularCongruenceComparer(count))) };
 
-            yield return Label("Select", (start, count, source) => source(start - count, count).Select(x => x + count));
-            yield return Label("Select-Index", (start, count, source) => source(start - count, count).Select((x, index) => x + count));
+            yield return new object[] { Label("Select", (start, count, source) => source(start - count, count).Select(x => x + count)) };
+            yield return new object[] { Label("Select-Index", (start, count, source) => source(start - count, count).Select((x, index) => x + count)) };
 
-            yield return Label("SelectMany", (start, count, source) => source(0, (count - 1) / CountFactor + 1).SelectMany(x => Enumerable.Range(start + x * CountFactor, Math.Min(CountFactor, count - x * CountFactor))));
-            yield return Label("SelectMany-Index", (start, count, source) => source(0, (count - 1) / CountFactor + 1).SelectMany((x, index) => Enumerable.Range(start + x * CountFactor, Math.Min(CountFactor, count - x * CountFactor))));
-            yield return Label("SelectMany-ResultSelector", (start, count, source) => source(0, (count - 1) / CountFactor + 1).SelectMany(x => Enumerable.Range(0, Math.Min(CountFactor, count - x * CountFactor)), (group, element) => start + group * CountFactor + element));
-            yield return Label("SelectMany-Index-ResultSelector", (start, count, source) => source(0, (count - 1) / CountFactor + 1).SelectMany((x, index) => Enumerable.Range(0, Math.Min(CountFactor, count - x * CountFactor)), (group, element) => start + group * CountFactor + element));
+            yield return new object[] { Label("SelectMany", (start, count, source) => source(0, (count - 1) / CountFactor + 1).SelectMany(x => Enumerable.Range(start + x * CountFactor, Math.Min(CountFactor, count - x * CountFactor)))) };
+            yield return new object[] { Label("SelectMany-Index", (start, count, source) => source(0, (count - 1) / CountFactor + 1).SelectMany((x, index) => Enumerable.Range(start + x * CountFactor, Math.Min(CountFactor, count - x * CountFactor)))) };
+            yield return new object[] { Label("SelectMany-ResultSelector", (start, count, source) => source(0, (count - 1) / CountFactor + 1).SelectMany(x => Enumerable.Range(0, Math.Min(CountFactor, count - x * CountFactor)), (group, element) => start + group * CountFactor + element)) };
+            yield return new object[] { Label("SelectMany-Index-ResultSelector", (start, count, source) => source(0, (count - 1) / CountFactor + 1).SelectMany((x, index) => Enumerable.Range(0, Math.Min(CountFactor, count - x * CountFactor)), (group, element) => start + group * CountFactor + element)) };
 
-            yield return Label("Where", (start, count, source) => source(start - count / 2, count * 2).Where(x => x >= start && x < start + count));
-            yield return Label("Where-Index", (start, count, source) => source(start - count / 2, count * 2).Where((x, index) => x >= start && x < start + count));
+            yield return new object[] { Label("Where", (start, count, source) => source(start - count / 2, count * 2).Where(x => x >= start && x < start + count)) };
+            yield return new object[] { Label("Where-Index", (start, count, source) => source(start - count / 2, count * 2).Where((x, index) => x >= start && x < start + count)) };
         }
 
         public static IEnumerable<object[]> UnaryUnorderedOperators()
         {
             foreach (LabeledOperation source in UnorderedRangeSources())
             {
-                foreach (LabeledOperation operation in UnaryOperations())
+                foreach (LabeledOperation operation in UnaryOperations().Select(i => i[0]))
                 {
                     yield return new object[] { source, operation };
                 }
@@ -158,7 +158,7 @@ namespace System.Linq.Parallel.Tests
             // Apply an ordered source to each operation
             foreach (LabeledOperation source in RangeSources())
             {
-                foreach (LabeledOperation operation in UnaryOperations())
+                foreach (LabeledOperation operation in UnaryOperations().Select(i => i[0]))
                 {
                     yield return new object[] { source, operation };
                 }
@@ -167,7 +167,7 @@ namespace System.Linq.Parallel.Tests
             // Apply ordering to the output of each operation
             foreach (LabeledOperation source in UnorderedRangeSources())
             {
-                foreach (LabeledOperation operation in UnaryOperations())
+                foreach (LabeledOperation operation in UnaryOperations().Select(i => i[0]))
                 {
                     foreach (LabeledOperation ordering in OrderOperators())
                     {
@@ -210,7 +210,7 @@ namespace System.Linq.Parallel.Tests
                 }
             }
 
-            foreach (LabeledOperation operation in UnaryOperations().Concat(SkipTakeOperations()))
+            foreach (LabeledOperation operation in UnaryOperations().Select(i => i[0]).Cast<LabeledOperation>().Concat(SkipTakeOperations()))
             {
                 yield return new object[] { Failing, operation };
             }
@@ -239,7 +239,7 @@ namespace System.Linq.Parallel.Tests
 
         private static IEnumerable<LabeledOperation> BinaryOperations(LabeledOperation otherSource)
         {
-            String label = otherSource.ToString();
+            string label = otherSource.ToString();
             Operation other = otherSource.Item;
 
             yield return Label("Concat-Right:" + label, (start, count, source) => source(start, count / 2).Concat(other(start + count / 2, count / 2 + count % 2)));
@@ -265,6 +265,35 @@ namespace System.Linq.Parallel.Tests
             // When both sources are unordered any element can be matched to any other, so a different check is required.
             yield return Label("Zip-Unordered-Right:" + label, (start, count, source) => source(0, count).Zip(other(start * 2, count), (x, y) => x + start));
             yield return Label("Zip-Unordered-Left:" + label, (start, count, source) => other(start * 2, count).Zip(source(0, count), (x, y) => y + start));
+        }
+
+        public static IEnumerable<object[]> BinaryOperations()
+        {
+            string label = "Default";
+
+            yield return new object[] { Label("Concat-Right:" + label, (start, count, source) => source(start, count / 2).Concat(DefaultSource(start + count / 2, count / 2 + count % 2))) };
+            yield return new object[] { Label("Concat-Left:" + label, (start, count, source) => DefaultSource(start, count / 2).Concat(source(start + count / 2, count / 2 + count % 2))) };
+
+            // Comparator needs to cover _source_ size, as which of two "equal" items is returned is undefined for unordered collections.
+            yield return new object[] { Label("Except-Right:" + label, (start, count, source) => source(start, count + count / 2).Except(DefaultSource(start + count, count), new ModularCongruenceComparer(count * 2))) };
+            yield return new object[] { Label("Except-Left:" + label, (start, count, source) => DefaultSource(start, count + count / 2).Except(source(start + count, count), new ModularCongruenceComparer(count * 2))) };
+
+            yield return new object[] { Label("GroupJoin-Right:" + label, (start, count, source) => source(start, count).GroupJoin(DefaultSource(start, count * CountFactor), x => x, y => y % count, (x, g) => g.Min(), new ModularCongruenceComparer(count))) };
+            yield return new object[] { Label("GroupJoin-Left:" + label, (start, count, source) => DefaultSource(start, count).GroupJoin(source(start, count * CountFactor), x => x, y => y % count, (x, g) => g.Min(), new ModularCongruenceComparer(count))) };
+
+            // Comparator needs to cover _source_ size, as which of two "equal" items is returned is undefined.
+            yield return new object[] { Label("Intersect-Right:" + label, (start, count, source) => source(start, count + count / 2).Intersect(DefaultSource(start - count / 2, count + count / 2), new ModularCongruenceComparer(count * 2))) };
+            yield return new object[] { Label("Intersect-Left:" + label, (start, count, source) => DefaultSource(start, count + count / 2).Intersect(source(start - count / 2, count + count / 2), new ModularCongruenceComparer(count * 2))) };
+
+            yield return new object[] { Label("Join-Right:" + label, (start, count, source) => source(0, count).Join(DefaultSource(start, count), x => x, y => y - start, (x, y) => x + start, new ModularCongruenceComparer(count))) };
+            yield return new object[] { Label("Join-Left:" + label, (start, count, source) => DefaultSource(0, count).Join(source(start, count), x => x, y => y - start, (x, y) => x + start, new ModularCongruenceComparer(count))) };
+
+            yield return new object[] { Label("Union-Right:" + label, (start, count, source) => source(start, count * 3 / 4).Union(DefaultSource(start + count / 2, count / 2 + count % 2), new ModularCongruenceComparer(count))) };
+            yield return new object[] { Label("Union-Left:" + label, (start, count, source) => DefaultSource(start, count * 3 / 4).Union(source(start + count / 2, count / 2 + count % 2), new ModularCongruenceComparer(count))) };
+
+            // When both sources are unordered any element can be matched to any DefaultSource, so a different check is required.
+            yield return new object[] { Label("Zip-Unordered-Right:" + label, (start, count, source) => source(0, count).Zip(DefaultSource(start * 2, count), (x, y) => x + start)) };
+            yield return new object[] { Label("Zip-Unordered-Left:" + label, (start, count, source) => DefaultSource(start * 2, count).Zip(source(0, count), (x, y) => y + start)) };
         }
 
         public static IEnumerable<object[]> BinaryUnorderedOperators()
@@ -364,6 +393,8 @@ namespace System.Linq.Parallel.Tests
         }
 
         #region operators
+
+        private static Operation DefaultSource = (start, count, ignore) => ParallelEnumerable.Range(start, count);
 
         private static LabeledOperation Failing = Label("ThrowOnFirstEnumeration", (start, count, source) => Enumerables<int>.ThrowOnEnumeration().AsParallel());
 

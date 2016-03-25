@@ -10,102 +10,102 @@ namespace System.Linq.Parallel.Tests
     public partial class ParallelQueryCombinationTests
     {
         [Theory]
-        [MemberData(nameof(UnaryOperators))]
-        [MemberData(nameof(BinaryOperators))]
-        public static void Aggregate(LabeledOperation source, LabeledOperation operation)
+        [MemberData(nameof(UnaryOperations))]
+        [MemberData(nameof(BinaryOperations))]
+        public static void Aggregate(LabeledOperation operation)
         {
             Assert.Equal(Functions.SumRange(DefaultStart, DefaultSize),
-                operation.Item(DefaultStart, DefaultSize, source.Item).Aggregate((x, y) => x + y));
+                operation.Item(DefaultStart, DefaultSize, DefaultSource).Aggregate((x, y) => x + y));
         }
 
         [Theory]
-        [MemberData(nameof(UnaryOperators))]
-        [MemberData(nameof(BinaryOperators))]
-        public static void Aggregate_Seed(LabeledOperation source, LabeledOperation operation)
+        [MemberData(nameof(UnaryOperations))]
+        [MemberData(nameof(BinaryOperations))]
+        public static void Aggregate_Seed(LabeledOperation operation)
         {
             Assert.Equal(Functions.SumRange(DefaultStart, DefaultSize),
-                operation.Item(DefaultStart, DefaultSize, source.Item).Aggregate(0, (x, y) => x + y));
+                operation.Item(DefaultStart, DefaultSize, DefaultSource).Aggregate(0, (x, y) => x + y));
         }
 
         [Theory]
-        [MemberData(nameof(UnaryOperators))]
-        [MemberData(nameof(BinaryOperators))]
-        public static void Aggregate_Result(LabeledOperation source, LabeledOperation operation)
+        [MemberData(nameof(UnaryOperations))]
+        [MemberData(nameof(BinaryOperations))]
+        public static void Aggregate_Result(LabeledOperation operation)
         {
             Assert.Equal(Functions.SumRange(DefaultStart, DefaultSize),
-                operation.Item(DefaultStart, DefaultSize, source.Item).Aggregate(0, (x, y) => x + y, r => r));
+                operation.Item(DefaultStart, DefaultSize, DefaultSource).Aggregate(0, (x, y) => x + y, r => r));
         }
 
         [Theory]
-        [MemberData(nameof(UnaryOperators))]
-        [MemberData(nameof(BinaryOperators))]
-        public static void Aggregate_Accumulator(LabeledOperation source, LabeledOperation operation)
+        [MemberData(nameof(UnaryOperations))]
+        [MemberData(nameof(BinaryOperations))]
+        public static void Aggregate_Accumulator(LabeledOperation operation)
         {
             Assert.Equal(Functions.SumRange(DefaultStart, DefaultSize),
-                operation.Item(DefaultStart, DefaultSize, source.Item).Aggregate(0, (a, x) => a + x, (l, r) => l + r, r => r));
+                operation.Item(DefaultStart, DefaultSize, DefaultSource).Aggregate(0, (a, x) => a + x, (l, r) => l + r, r => r));
         }
 
         [Theory]
-        [MemberData(nameof(UnaryOperators))]
-        [MemberData(nameof(BinaryOperators))]
-        public static void Aggregate_SeedFactory(LabeledOperation source, LabeledOperation operation)
+        [MemberData(nameof(UnaryOperations))]
+        [MemberData(nameof(BinaryOperations))]
+        public static void Aggregate_SeedFactory(LabeledOperation operation)
         {
             Assert.Equal(Functions.SumRange(DefaultStart, DefaultSize),
-                operation.Item(DefaultStart, DefaultSize, source.Item).Aggregate(() => 0, (a, x) => a + x, (l, r) => l + r, r => r));
+                operation.Item(DefaultStart, DefaultSize, DefaultSource).Aggregate(() => 0, (a, x) => a + x, (l, r) => l + r, r => r));
         }
 
         [Theory]
-        [MemberData(nameof(UnaryOperators))]
-        [MemberData(nameof(BinaryOperators))]
-        public static void All_False(LabeledOperation source, LabeledOperation operation)
+        [MemberData(nameof(UnaryOperations))]
+        [MemberData(nameof(BinaryOperations))]
+        public static void All_False(LabeledOperation operation)
         {
-            Assert.False(operation.Item(DefaultStart, DefaultSize, source.Item).All(x => false));
+            Assert.False(operation.Item(DefaultStart, DefaultSize, DefaultSource).All(x => false));
         }
 
         [Theory]
-        [MemberData(nameof(UnaryOperators))]
-        [MemberData(nameof(BinaryOperators))]
-        public static void All_True(LabeledOperation source, LabeledOperation operation)
+        [MemberData(nameof(UnaryOperations))]
+        [MemberData(nameof(BinaryOperations))]
+        public static void All_True(LabeledOperation operation)
         {
             IntegerRangeSet seen = new IntegerRangeSet(DefaultStart, DefaultSize);
-            Assert.True(operation.Item(DefaultStart, DefaultSize, source.Item).All(x => seen.Add(x)));
+            Assert.True(operation.Item(DefaultStart, DefaultSize, DefaultSource).All(x => seen.Add(x)));
             seen.AssertComplete();
         }
 
         [Theory]
-        [MemberData(nameof(UnaryOperators))]
-        [MemberData(nameof(BinaryOperators))]
-        public static void Any_False(LabeledOperation source, LabeledOperation operation)
+        [MemberData(nameof(UnaryOperations))]
+        [MemberData(nameof(BinaryOperations))]
+        public static void Any_False(LabeledOperation operation)
         {
             IntegerRangeSet seen = new IntegerRangeSet(DefaultStart, DefaultSize);
-            Assert.False(operation.Item(DefaultStart, DefaultSize, source.Item).Any(x => !seen.Add(x)));
+            Assert.False(operation.Item(DefaultStart, DefaultSize, DefaultSource).Any(x => !seen.Add(x)));
             seen.AssertComplete();
         }
 
         [Theory]
-        [MemberData(nameof(UnaryOperators))]
-        [MemberData(nameof(BinaryOperators))]
-        public static void Any_True(LabeledOperation source, LabeledOperation operation)
+        [MemberData(nameof(UnaryOperations))]
+        [MemberData(nameof(BinaryOperations))]
+        public static void Any_True(LabeledOperation operation)
         {
-            Assert.True(operation.Item(DefaultStart, DefaultSize, source.Item).Any(x => true));
+            Assert.True(operation.Item(DefaultStart, DefaultSize, DefaultSource).Any(x => true));
         }
 
         [Theory]
-        [MemberData(nameof(UnaryOperators))]
-        [MemberData(nameof(BinaryOperators))]
-        public static void Average(LabeledOperation source, LabeledOperation operation)
+        [MemberData(nameof(UnaryOperations))]
+        [MemberData(nameof(BinaryOperations))]
+        public static void Average(LabeledOperation operation)
         {
             Assert.Equal(Functions.SumRange(DefaultStart, DefaultSize) / (double)DefaultSize,
-                operation.Item(DefaultStart, DefaultSize, source.Item).Average());
+                operation.Item(DefaultStart, DefaultSize, DefaultSource).Average());
         }
 
         [Theory]
-        [MemberData(nameof(UnaryOperators))]
-        [MemberData(nameof(BinaryOperators))]
-        public static void Average_Nullable(LabeledOperation source, LabeledOperation operation)
+        [MemberData(nameof(UnaryOperations))]
+        [MemberData(nameof(BinaryOperations))]
+        public static void Average_Nullable(LabeledOperation operation)
         {
             Assert.Equal(Functions.SumRange(DefaultStart, DefaultSize) / (double?)DefaultSize,
-                operation.Item(DefaultStart, DefaultSize, source.Item).Average(x => (int?)x));
+                operation.Item(DefaultStart, DefaultSize, DefaultSource).Average(x => (int?)x));
         }
 
         [Theory]
@@ -161,43 +161,43 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData(nameof(UnaryOperators))]
-        [MemberData(nameof(BinaryOperators))]
-        public static void Contains_True(LabeledOperation source, LabeledOperation operation)
+        [MemberData(nameof(UnaryOperations))]
+        [MemberData(nameof(BinaryOperations))]
+        public static void Contains_True(LabeledOperation operation)
         {
-            Assert.True(operation.Item(DefaultStart, DefaultSize, source.Item).Contains(DefaultStart + DefaultSize / 2));
+            Assert.True(operation.Item(DefaultStart, DefaultSize, DefaultSource).Contains(DefaultStart + DefaultSize / 2));
         }
 
         [Theory]
-        [MemberData(nameof(UnaryOperators))]
-        [MemberData(nameof(BinaryOperators))]
-        public static void Contains_False(LabeledOperation source, LabeledOperation operation)
+        [MemberData(nameof(UnaryOperations))]
+        [MemberData(nameof(BinaryOperations))]
+        public static void Contains_False(LabeledOperation operation)
         {
-            Assert.False(operation.Item(DefaultStart, DefaultSize, source.Item).Contains(DefaultStart + DefaultSize));
+            Assert.False(operation.Item(DefaultStart, DefaultSize, DefaultSource).Contains(DefaultStart + DefaultSize));
         }
 
         [Theory]
-        [MemberData(nameof(UnaryOperators))]
-        [MemberData(nameof(BinaryOperators))]
-        public static void Count_Elements(LabeledOperation source, LabeledOperation operation)
+        [MemberData(nameof(UnaryOperations))]
+        [MemberData(nameof(BinaryOperations))]
+        public static void Count_Elements(LabeledOperation operation)
         {
-            Assert.Equal(DefaultSize, operation.Item(DefaultStart, DefaultSize, source.Item).Count());
+            Assert.Equal(DefaultSize, operation.Item(DefaultStart, DefaultSize, DefaultSource).Count());
         }
 
         [Theory]
-        [MemberData(nameof(UnaryOperators))]
-        [MemberData(nameof(BinaryOperators))]
-        public static void Count_Predicate_Some(LabeledOperation source, LabeledOperation operation)
+        [MemberData(nameof(UnaryOperations))]
+        [MemberData(nameof(BinaryOperations))]
+        public static void Count_Predicate_Some(LabeledOperation operation)
         {
-            Assert.Equal(DefaultSize / 2, operation.Item(DefaultStart, DefaultSize, source.Item).Count(x => x < DefaultStart + DefaultSize / 2));
+            Assert.Equal(DefaultSize / 2, operation.Item(DefaultStart, DefaultSize, DefaultSource).Count(x => x < DefaultStart + DefaultSize / 2));
         }
 
         [Theory]
-        [MemberData(nameof(UnaryOperators))]
-        [MemberData(nameof(BinaryOperators))]
-        public static void Count_Predicate_None(LabeledOperation source, LabeledOperation operation)
+        [MemberData(nameof(UnaryOperations))]
+        [MemberData(nameof(BinaryOperations))]
+        public static void Count_Predicate_None(LabeledOperation operation)
         {
-            Assert.Equal(0, operation.Item(DefaultStart, DefaultSize, source.Item).Count(x => x < DefaultStart));
+            Assert.Equal(0, operation.Item(DefaultStart, DefaultSize, DefaultSource).Count(x => x < DefaultStart));
         }
 
         [Theory]
@@ -577,59 +577,59 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData(nameof(UnaryOperators))]
-        [MemberData(nameof(BinaryOperators))]
-        public static void LongCount_Elements(LabeledOperation source, LabeledOperation operation)
+        [MemberData(nameof(UnaryOperations))]
+        [MemberData(nameof(BinaryOperations))]
+        public static void LongCount_Elements(LabeledOperation operation)
         {
-            Assert.Equal(DefaultSize, operation.Item(DefaultStart, DefaultSize, source.Item).LongCount());
+            Assert.Equal(DefaultSize, operation.Item(DefaultStart, DefaultSize, DefaultSource).LongCount());
         }
 
         [Theory]
-        [MemberData(nameof(UnaryOperators))]
-        [MemberData(nameof(BinaryOperators))]
-        public static void LongCount_Predicate_Some(LabeledOperation source, LabeledOperation operation)
+        [MemberData(nameof(UnaryOperations))]
+        [MemberData(nameof(BinaryOperations))]
+        public static void LongCount_Predicate_Some(LabeledOperation operation)
         {
-            Assert.Equal(DefaultSize / 2, operation.Item(DefaultStart, DefaultSize, source.Item).LongCount(x => x < DefaultStart + DefaultSize / 2));
+            Assert.Equal(DefaultSize / 2, operation.Item(DefaultStart, DefaultSize, DefaultSource).LongCount(x => x < DefaultStart + DefaultSize / 2));
         }
 
         [Theory]
-        [MemberData(nameof(UnaryOperators))]
-        [MemberData(nameof(BinaryOperators))]
-        public static void LongCount_Predicate_None(LabeledOperation source, LabeledOperation operation)
+        [MemberData(nameof(UnaryOperations))]
+        [MemberData(nameof(BinaryOperations))]
+        public static void LongCount_Predicate_None(LabeledOperation operation)
         {
-            Assert.Equal(0, operation.Item(DefaultStart, DefaultSize, source.Item).LongCount(x => x < DefaultStart));
+            Assert.Equal(0, operation.Item(DefaultStart, DefaultSize, DefaultSource).LongCount(x => x < DefaultStart));
         }
 
         [Theory]
-        [MemberData(nameof(UnaryOperators))]
-        [MemberData(nameof(BinaryOperators))]
-        public static void Max(LabeledOperation source, LabeledOperation operation)
+        [MemberData(nameof(UnaryOperations))]
+        [MemberData(nameof(BinaryOperations))]
+        public static void Max(LabeledOperation operation)
         {
-            Assert.Equal(DefaultStart + DefaultSize - 1, operation.Item(DefaultStart, DefaultSize, source.Item).Max());
+            Assert.Equal(DefaultStart + DefaultSize - 1, operation.Item(DefaultStart, DefaultSize, DefaultSource).Max());
         }
 
         [Theory]
-        [MemberData(nameof(UnaryOperators))]
-        [MemberData(nameof(BinaryOperators))]
-        public static void Max_Nullable(LabeledOperation source, LabeledOperation operation)
+        [MemberData(nameof(UnaryOperations))]
+        [MemberData(nameof(BinaryOperations))]
+        public static void Max_Nullable(LabeledOperation operation)
         {
-            Assert.Equal(DefaultStart + DefaultSize - 1, operation.Item(DefaultStart, DefaultSize, source.Item).Max(x => (int?)x));
+            Assert.Equal(DefaultStart + DefaultSize - 1, operation.Item(DefaultStart, DefaultSize, DefaultSource).Max(x => (int?)x));
         }
 
         [Theory]
-        [MemberData(nameof(UnaryOperators))]
-        [MemberData(nameof(BinaryOperators))]
-        public static void Min(LabeledOperation source, LabeledOperation operation)
+        [MemberData(nameof(UnaryOperations))]
+        [MemberData(nameof(BinaryOperations))]
+        public static void Min(LabeledOperation operation)
         {
-            Assert.Equal(DefaultStart, operation.Item(DefaultStart, DefaultSize, source.Item).Min());
+            Assert.Equal(DefaultStart, operation.Item(DefaultStart, DefaultSize, DefaultSource).Min());
         }
 
         [Theory]
-        [MemberData(nameof(UnaryOperators))]
-        [MemberData(nameof(BinaryOperators))]
-        public static void Min_Nullable(LabeledOperation source, LabeledOperation operation)
+        [MemberData(nameof(UnaryOperations))]
+        [MemberData(nameof(BinaryOperations))]
+        public static void Min_Nullable(LabeledOperation operation)
         {
-            Assert.Equal(DefaultStart, operation.Item(DefaultStart, DefaultSize, source.Item).Min(x => (int?)x));
+            Assert.Equal(DefaultStart, operation.Item(DefaultStart, DefaultSize, DefaultSource).Min(x => (int?)x));
         }
 
         [Theory]
@@ -961,30 +961,26 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData(nameof(UnaryOperators))]
-        [MemberData(nameof(BinaryOperators))]
-        [MemberData(nameof(UnaryUnorderedOperators))]
-        [MemberData(nameof(BinaryUnorderedOperators))]
-        public static void Single(LabeledOperation source, LabeledOperation operation)
+        [MemberData(nameof(UnaryOperations))]
+        [MemberData(nameof(BinaryOperations))]
+        public static void Single(LabeledOperation operation)
         {
-            Assert.Equal(DefaultStart, operation.Item(DefaultStart, 1, source.Item).Single());
-            Assert.Equal(DefaultStart + DefaultSize / 2, operation.Item(DefaultStart, DefaultSize, source.Item).Single(x => x == DefaultStart + DefaultSize / 2));
+            Assert.Equal(DefaultStart, operation.Item(DefaultStart, 1, DefaultSource).Single());
+            Assert.Equal(DefaultStart + DefaultSize / 2, operation.Item(DefaultStart, DefaultSize, DefaultSource).Single(x => x == DefaultStart + DefaultSize / 2));
         }
 
         [Theory]
-        [MemberData(nameof(UnaryOperators))]
-        [MemberData(nameof(BinaryOperators))]
-        [MemberData(nameof(UnaryUnorderedOperators))]
-        [MemberData(nameof(BinaryUnorderedOperators))]
-        public static void SingleOrDefault(LabeledOperation source, LabeledOperation operation)
+        [MemberData(nameof(UnaryOperations))]
+        [MemberData(nameof(BinaryOperations))]
+        public static void SingleOrDefault(LabeledOperation operation)
         {
-            Assert.Equal(DefaultStart, operation.Item(DefaultStart, 1, source.Item).SingleOrDefault());
-            Assert.Equal(DefaultStart + DefaultSize / 2, operation.Item(DefaultStart, DefaultSize, source.Item).SingleOrDefault(x => x == DefaultStart + DefaultSize / 2));
+            Assert.Equal(DefaultStart, operation.Item(DefaultStart, 1, DefaultSource).SingleOrDefault());
+            Assert.Equal(DefaultStart + DefaultSize / 2, operation.Item(DefaultStart, DefaultSize, DefaultSource).SingleOrDefault(x => x == DefaultStart + DefaultSize / 2));
 
             if (!operation.ToString().StartsWith("DefaultIfEmpty"))
             {
-                Assert.Equal(default(int), operation.Item(DefaultStart, 0, source.Item).SingleOrDefault());
-                Assert.Equal(default(int), operation.Item(DefaultStart, 0, source.Item).SingleOrDefault(x => x == DefaultStart + DefaultSize / 2));
+                Assert.Equal(default(int), operation.Item(DefaultStart, 0, DefaultSource).SingleOrDefault());
+                Assert.Equal(default(int), operation.Item(DefaultStart, 0, DefaultSource).SingleOrDefault(x => x == DefaultStart + DefaultSize / 2));
             }
         }
 
@@ -1058,23 +1054,19 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData(nameof(UnaryOperators))]
-        [MemberData(nameof(BinaryOperators))]
-        [MemberData(nameof(UnaryUnorderedOperators))]
-        [MemberData(nameof(BinaryUnorderedOperators))]
-        public static void Sum(LabeledOperation source, LabeledOperation operation)
+        [MemberData(nameof(UnaryOperations))]
+        [MemberData(nameof(BinaryOperations))]
+        public static void Sum(LabeledOperation operation)
         {
-            Assert.Equal(Functions.SumRange(DefaultStart, DefaultSize), operation.Item(DefaultStart, DefaultSize, source.Item).Sum());
+            Assert.Equal(Functions.SumRange(DefaultStart, DefaultSize), operation.Item(DefaultStart, DefaultSize, DefaultSource).Sum());
         }
 
         [Theory]
-        [MemberData(nameof(UnaryOperators))]
-        [MemberData(nameof(BinaryOperators))]
-        [MemberData(nameof(UnaryUnorderedOperators))]
-        [MemberData(nameof(BinaryUnorderedOperators))]
-        public static void Sum_Nullable(LabeledOperation source, LabeledOperation operation)
+        [MemberData(nameof(UnaryOperations))]
+        [MemberData(nameof(BinaryOperations))]
+        public static void Sum_Nullable(LabeledOperation operation)
         {
-            Assert.Equal(Functions.SumRange(DefaultStart, DefaultSize), operation.Item(DefaultStart, DefaultSize, source.Item).Sum(x => (int?)x));
+            Assert.Equal(Functions.SumRange(DefaultStart, DefaultSize), operation.Item(DefaultStart, DefaultSize, DefaultSource).Sum(x => (int?)x));
         }
 
         [Theory]
@@ -1265,14 +1257,12 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData(nameof(UnaryOperators))]
-        [MemberData(nameof(BinaryOperators))]
-        [MemberData(nameof(UnaryUnorderedOperators))]
-        [MemberData(nameof(BinaryUnorderedOperators))]
-        public static void ToDictionary(LabeledOperation source, LabeledOperation operation)
+        [MemberData(nameof(UnaryOperations))]
+        [MemberData(nameof(BinaryOperations))]
+        public static void ToDictionary(LabeledOperation operation)
         {
             IntegerRangeSet seen = new IntegerRangeSet(DefaultStart, DefaultSize);
-            Assert.All(operation.Item(DefaultStart, DefaultSize, source.Item).ToDictionary(x => x * 2),
+            Assert.All(operation.Item(DefaultStart, DefaultSize, DefaultSource).ToDictionary(x => x * 2),
                 p =>
                 {
                     seen.Add(p.Key / 2);
@@ -1282,14 +1272,12 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData(nameof(UnaryOperators))]
-        [MemberData(nameof(BinaryOperators))]
-        [MemberData(nameof(UnaryUnorderedOperators))]
-        [MemberData(nameof(BinaryUnorderedOperators))]
-        public static void ToDictionary_ElementSelector(LabeledOperation source, LabeledOperation operation)
+        [MemberData(nameof(UnaryOperations))]
+        [MemberData(nameof(BinaryOperations))]
+        public static void ToDictionary_ElementSelector(LabeledOperation operation)
         {
             IntegerRangeSet seen = new IntegerRangeSet(DefaultStart, DefaultSize);
-            Assert.All(operation.Item(DefaultStart, DefaultSize, source.Item).ToDictionary(x => x, y => y * 2),
+            Assert.All(operation.Item(DefaultStart, DefaultSize, DefaultSource).ToDictionary(x => x, y => y * 2),
                 p =>
                 {
                     seen.Add(p.Key);
