@@ -250,9 +250,8 @@ namespace System.Net.Tests
             Assert.Equal(input, WebUtility.UrlDecodeToBytes(encoded, 0, encoded.Length));
         }
         
-        // [Theory]
-        // [InlineData("FooBarQuux", 3, 7, "BarQuux")]
-        [ActiveIssue(6947)]
+        [Theory]
+        [InlineData("FooBarQuux", 3, 7, "BarQuux")]
         public static void UrlEncodeToBytes_ExcludeIrrelevantData(string value, int offset, int count, string expected)
         {
             byte[] input = Encoding.UTF8.GetBytes(value);
@@ -261,9 +260,8 @@ namespace System.Net.Tests
             Assert.Equal(expected, actual);
         }
 
-        // [Theory]
-        // [InlineData("FooBarQuux", 3, 7, "BarQuux")]
-        [ActiveIssue(6947)]
+        [Theory]
+        [InlineData("FooBarQuux", 3, 7, "BarQuux")]
         public static void UrlDecodeToBytes_ExcludeIrrelevantData(string value, int offset, int count, string expected)
         {
             byte[] input = Encoding.UTF8.GetBytes(value);
