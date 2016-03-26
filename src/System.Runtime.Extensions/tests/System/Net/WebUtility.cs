@@ -60,21 +60,21 @@ namespace System.Net.Tests
             yield return Tuple.Create("%F0%90%8F%BF", "\uD800\uDFFF"); // Surrogate pair
         }
 
+        [ActiveIssue(7166)]
         public static IEnumerable<Tuple<string, string>> UrlEncode_SharedTestData()
         {
             // Recent change brings function inline with RFC 3986 to return hex-encoded chars in uppercase
             yield return Tuple.Create("/\\\"\tHello! \u2665?/\\\"\tWorld! \u2665?\u2665", "%2F%5C%22%09Hello!+%E2%99%A5%3F%2F%5C%22%09World!+%E2%99%A5%3F%E2%99%A5");
             yield return Tuple.Create("'", "%27");
             yield return Tuple.Create("\uD800\uDFFF", "%F0%90%8F%BF"); // Surrogate pairs should be encoded as 4 bytes together
-
-            // Tests for stray surrogate chars (all should be encoded as U+FFFD)
-            // Relevant GitHub issue: dotnet/corefx#7036
-
-            // Commented out since xUnit is throwing an exception
-            // when trying to serialize the invalid chars to an XML file.
-            // Feel free to uncomment once that is fixed.
+            
+            // TODO: Uncomment this block out when dotnet/corefx#7166 is fixed.
 
             /*
+            
+            // Tests for stray surrogate chars (all should be encoded as U+FFFD)
+            // Relevant GitHub issue: dotnet/corefx#7036
+            
             yield return Tuple.Create("\uD800", "%EF%BF%BD"); // High surrogate
             yield return Tuple.Create("\uDC00", "%EF%BF%BD"); // Low surrogate
 
@@ -84,9 +84,11 @@ namespace System.Net.Tests
 
             yield return Tuple.Create("!\uDB00@", "!%EF%BF%BD%40"); // Non-surrogate + high + non-surrogate
             yield return Tuple.Create("#\uDD00$", "%23%EF%BF%BD%24"); // Non-surrogate + low + non-surrogate
+            
             */
         }
 
+        [ActiveIssue(7166)]
         public static IEnumerable<object[]> UrlEncodeDecode_Roundtrip_SharedTestData()
         {
             yield return new object[] { "'" };
@@ -96,8 +98,7 @@ namespace System.Net.Tests
 
             yield return new object[] { CharRange('\uE000', '\uF8FF') }; // BMP private use chars
             yield return new object[] { CharRange('\uFDD0', '\uFDEF') }; // Low BMP non-chars
-            // xUnit also seems to be having problems with 0xFFFE as well,
-            // so let's comment this out for now.
+            // TODO: Uncomment when dotnet/corefx#7166 is fixed.
             // yield return new object[] { "\uFFFE\uFFFF" }; // High BMP non-chars
 
             yield return new object[] { CharRange('\0', '\u001F') }; // C0 controls
